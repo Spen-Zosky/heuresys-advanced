@@ -1,7 +1,9 @@
 Sono Enzo Spenuso. Riprendo il progetto Heuresys Advanced HRMS/BPM Platform v5
-in `D:\heuresys-advanced\`. Sessione precedente: chiuso MVP-1 step 5.1.3 +
-tutti i 4 follow-up + step 5.1.4 (schemas → @heuresys/shared). 15/15 test verdi.
+in `D:\heuresys-advanced\`. Sessione precedente: chiuso 5.1.3 + 4 follow-up +
+5.1.4 (shared promotion) + 5.1.5 (tenants module). 23/23 test verdi.
 
+  d33bd28  feat(api): MVP-1 5.1.5 — tenants module (5 endpoints + 8 tests)
+  9eb3d5b  docs(handoff): close 5.1.4 + propose 5.1.5
   c219741  feat(shared): MVP-1 5.1.4 — promote auth schemas to @heuresys/shared
   2239c48  docs(handoff): update for 5.1.3 followups closure
   7450f77  docs(security): AUTH_SECURITY_PLAN.md errata — cookie path + login/refresh status
@@ -165,35 +167,35 @@ al codebase legacy heuresys-evo (sorgente brownfield):
 Vincoli: NON stampare valori segreti nel context/chat, solo uso operativo.
 NON committare path assoluti hardcoded a heuresys-advanced.
 
-=== PROSSIMO STEP CONCRETO: MVP-1 5.1.5 — FIRST BUSINESS MODULE ===
+=== PROSSIMO STEP CONCRETO: MVP-1 5.1.6 — USERS MODULE ===
 
-Stato post-5.1.4: pipeline auth + RBAC + tenant isolation + shared schemas è
-solida. Il prossimo step è il primo business CRUD module per validare l'
-intera architettura (route → service → repository → DB) su un dominio reale.
+Stato post-5.1.5: pipeline route→service→repository→DB validata end-to-end
+con scope filter cross-tenant. Pattern replicabile per ogni nuovo CRUD.
 
-Opzione A — `tenants` module (RACCOMANDATA — minimo accoppiamento):
-  GET    /v1/tenants                   — PLATFORM_ADMIN cross-tenant
-  GET    /v1/tenants/:id               — TENANT_ADMIN own + PLATFORM_ADMIN
-  POST   /v1/tenants                   — PLATFORM_ADMIN
-  PATCH  /v1/tenants/:id               — TENANT_ADMIN own + PLATFORM_ADMIN
-  DELETE /v1/tenants/:id               — PLATFORM_ADMIN
-  Deliverable: ~600 LOC (schemas in @heuresys/shared/schemas/tenants +
-  routes/service/repository in apps/api/src/modules/tenants). Esercita
-  fine il middleware tenantContext + scope filter cross-tenant.
-  Riferimento canonical: docs/api/API_IMPLEMENTATION_PLAN.md §6.2.
+Opzione A (NEXT NATURAL) — `users` module:
+  GET    /v1/users                     — list (PLATFORM/TENANT_ADMIN tutti
+                                          nel tenant; MANAGER team only)
+  GET    /v1/users/:id                 — own or scope-filtered
+  POST   /v1/users                     — PLATFORM/TENANT_ADMIN
+  PATCH  /v1/users/:id                 — admin or self (limited fields)
+  DELETE /v1/users/:id                 — PLATFORM/TENANT_ADMIN (soft-delete
+                                          via user_status=DEACTIVATED)
+  + role-grant subresources:
+  GET    /v1/users/:id/roles           — list grants
+  POST   /v1/users/:id/roles           — grant role (tenant-scoped)
+  DELETE /v1/users/:id/roles/:roleId   — revoke
+  Deliverable: ~900 LOC. Tocca sys.sys_users + sys.sys_user_auth_roles +
+  scope filter MANAGER (team via sys.sys_user_position_assignments +
+  sys.sys_positions.position_reports_to_position_id).
+  Riferimento: API_IMPLEMENTATION_PLAN.md §6 + AUTH_SECURITY_PLAN.md §6.
 
-Opzione B — `users` module (più complesso, tocca FK + role grants):
-  CRUD su sys.sys_users + management di sys.sys_user_auth_roles (assegnare/
-  revocare ruoli). Scope filters per MANAGER/USER. ~1000 LOC.
+Opzione B — `positions` module (più ampio, esempio full nel piano):
+  CRUD + sub-resources (skills, kpis, learning, career-paths). ~1400 LOC.
+  Riferimento: API_IMPLEMENTATION_PLAN.md §6.3.
 
-Opzione C — `positions` module (esempio full nel piano):
-  CRUD su sys.sys_positions + sub-resources (skills, kpis). Il modulo "core"
-  HRMS. ~1400 LOC con sub-resources.
+Opzione C — Skip a un altro dominio (visualizations / brownfield / ...).
 
-Raccomandazione: andare con A (tenants), 5.1.5. Dopo si può procedere con
-users (5.1.6) e positions (5.1.7) in modo additivo.
-
-Tempo stimato (opzione A): ~45-60 min.
+Tempo stimato (opzione A): ~75-90 min.
 
 === REGOLE DI LAVORO (sintesi cross-CLAUDE.md) ===
 

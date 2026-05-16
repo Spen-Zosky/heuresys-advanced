@@ -1,7 +1,12 @@
 Sono Enzo Spenuso. Riprendo il progetto Heuresys Advanced HRMS/BPM Platform v5
 in `D:\heuresys-advanced\`. La sessione precedente ha chiuso MVP-1 step 5.1.3
-(auth module) al 100%, A18 PASS, suite integration 11/11 verde.
+(auth module) al 100% + tutti i 4 follow-up. Suite integration 15/15 verde.
 
+  7450f77  docs(security): AUTH_SECURITY_PLAN.md errata — cookie path + login/refresh status
+  ffd3007  test(api): MVP-1 5.1.3 followup #3 — live pino redaction test (config-level)
+  0cb3aee  test(api): MVP-1 5.1.3 followup #2 — live rate-limit test (11 logins → 429)
+  eb67e63  feat(api): MVP-1 5.1.3 followup #1 — TENANT_ADMIN own-tenant scope on admin-revoke
+  3f5a03d  chore(api): MVP-1 5.1.3 acceptance verification + HANDOFF update
   5171a9c  test(api): MVP-1 5.1.3g — auth integration suite (11/11 PASS via app.inject)
   c757152  feat(db): MVP-1 5.1.3f — idempotent test-admin seed (PLATFORM_ADMIN)
   6cfa944  feat(api): MVP-1 5.1.3e — /v1/auth/* routes + per-route rate limits
@@ -10,10 +15,6 @@ in `D:\heuresys-advanced\`. La sessione precedente ha chiuso MVP-1 step 5.1.3
   a424d51  feat(api): MVP-1 5.1.3b — auth schemas + crypto/token helpers
   2e32b79  chore(api): typecheck hygiene — exclude db/scripts + auth.ts type collision fix
   5b6b141  feat(api): MVP-1 5.1.3a — RBAC cache loader (388 role×perm in-memory)
-  a2634f9  revert(handoff): re-enable HANDOFF.md tracking permanently
-  2f13f7e  docs(handoff): add HANDOFF.md resume prompt for MVP-1 5.1.3 session
-  3fc8bda  feat(api): MVP-1 step 5.1.1 — Fastify server + middleware + /healthz
-  fc22fef  chore(bootstrap): MVP-0 step 5.0.7 — RTL_BANK_REFERENCE seed (Faker 42)
   ...
 
 === PRIMING OBBLIGATORIO ===
@@ -56,7 +57,7 @@ API runtime:
   - JWT RS256 keys in .secrets/jwt_{private,public}.pem (gitignored)
   - COOKIE_SECRET 48-byte base64 in .env (gitignored)
   - RBAC cache: 8 roles + 388 mappings loaded at startup
-  - 7 endpoints /v1/auth/* live + 11/11 integration tests verde
+  - 7 endpoints /v1/auth/* live + 15/15 integration tests verde
   - Test admin seeded: admin@heuresys.com / Admin#PassW0rd! (PLATFORM_ADMIN)
 
 Tunnel SSH e processi background:
@@ -88,7 +89,7 @@ apps/api/test/auth.integration.test.ts (11 test) + helpers (build-test-app, setu
   POST /password-reset/complete     (token bound, 15min TTL, single-use)
   POST /admin/revoke-user/:userId   (requirePermission 'auth:revoke_user')
 
-AUTH §13 acceptance checklist:
+AUTH §13 acceptance checklist (post-follow-up):
   ✅ Login 200 + cookies + body
   ✅ Login wrong creds → 401 LOGIN_INVALID (anti-enumeration)
   ✅ Refresh rotation → new tokens differ
@@ -98,23 +99,26 @@ AUTH §13 acceptance checklist:
   ✅ CSRF block 403 su state-changing senza X-CSRF-Token
   ✅ Password reset request → 204 + mailer.sent populated
   ✅ Argon2id 64MiB/3/4 + needsRehash auto-rotation on login
-  ⚠️  Rate limit live (11 logins → 429): NOT runtime-tested (configurato a 10/IP/5min,
-      validato da config-inspection; runtime test bloccato a 5+min wait, deferred a follow-up)
-  ⚠️  Pino redaction runtime test: NOT runtime-tested (config corretta in app.ts,
-      validata da code review; runtime capture deferred a follow-up)
+  ✅ Rate limit live: 11/login attempts → 11° è 429 (followup #2)
+  ✅ Pino redaction live: LOG_REDACT_PATHS sentinel never leaks, [REDACTED]
+      appears su tutti i path documentati (followup #3)
   ⏭️  Tenant isolation (cross-tenant 404): non testabile finché non c'è il modulo positions
 
-Deviazioni dal piano:
-  - Login + Refresh ritornano 200 (non 204) con body. AUTH §13 lists 204 ma HTTP
-    proibisce body su 204; Fastify lo strip. AUTH_SECURITY_PLAN.md §13 da aggiornare
-    a 200 in micro-PR doc.
-  - Refresh cookie path = /v1/auth (non /auth come esempio AUTH §4.3). Stessa errata.
+Deviazioni dal piano (risolte da errata):
+  - Login + Refresh ritornano 200 con body (HTTP proibisce body su 204, Fastify
+    lo strip). AUTH_SECURITY_PLAN.md §13 aggiornato (commit 7450f77).
+  - Refresh cookie path = /v1/auth (commento esempio §4.3 corretto in 7450f77).
 
-Open items rimandati:
-  - TENANT_ADMIN own-tenant target check su admin-revoke (oggi solo permission check)
-  - Live rate-limit smoke test (richiede mock-clock o vi.useFakeTimers)
-  - Live pino redaction runtime test (richiede custom logger destination)
+Followup MVP-1 5.1.3 chiusi:
+  ✅ #1 — TENANT_ADMIN own-tenant target check su admin-revoke + 2 nuovi test
+  ✅ #2 — Live rate-limit test (11 → 429) in suite vitest
+  ✅ #3 — Live pino redaction test (5 log lines, ≥10 [REDACTED] matches)
+  ✅ #4 — AUTH_SECURITY_PLAN.md errata (cookie path + login status)
+
+Open items residui:
   - Cleanup di sys_auth_login_events accumulati dai test (volume basso, opzionale)
+  - Pgcrypto-based DB-side hash check su refresh tokens (oggi calcolato in TS,
+    accettabile per MVP)
 
 === CONFIGURAZIONE / VINCOLI INVARIANTI ===
 

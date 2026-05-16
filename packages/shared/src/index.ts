@@ -25,3 +25,6 @@ export * from "./schemas/training-initiatives.js";
 export * from "./schemas/assessment-methods.js";
 export * from "./schemas/assessments.js";
 export * from "./schemas/assessment-results.js";
+export * from "./schemas/learning-paths.js";
+export * from "./schemas/learning-path-steps.js";
+export * from "./schemas/learning-gaps.js";

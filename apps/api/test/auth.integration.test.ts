@@ -380,4 +380,32 @@ describe("/v1/auth/* integration", () => {
       }),
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
+
+  /* -------------------------------------------------- rate limit */
+
+  it("POST /login is rate-limited (11 attempts → 429)", async () => {
+    // Use a fresh app so the rate-limit store doesn't leak into other tests.
+    const local = await buildTestApp();
+    try {
+      const statuses: number[] = [];
+      for (let i = 0; i < 11; i++) {
+        const r = await local.app.inject({
+          method: "POST",
+          url: "/v1/auth/login",
+          payload: {
+            email: `nobody${i}@nowhere.test`,
+            password: "WhateverPass#9!",
+          },
+        });
+        statuses.push(r.statusCode);
+      }
+      const unauthorised = statuses.filter((s) => s === 401).length;
+      const throttled = statuses.filter((s) => s === 429).length;
+      expect(unauthorised).toBe(10);
+      expect(throttled).toBe(1);
+      expect(statuses[10]).toBe(429);
+    } finally {
+      await local.app.close();
+    }
+  });
 });

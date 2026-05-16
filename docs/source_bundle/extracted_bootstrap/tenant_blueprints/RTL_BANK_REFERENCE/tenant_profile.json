@@ -1,0 +1,49 @@
+{
+  "tenant_reference": "RTL_BANK_REFERENCE",
+  "enterprise_type": "Medium-sized regional retail bank",
+  "country": "IT",
+  "employee_count": 158,
+  "fte_count": 158,
+  "branch_count": 5,
+  "branch_employees": 25,
+  "employees_per_branch": 5,
+  "classification": {
+    "primary_activity_source": "ATECO",
+    "primary_ateco_version": "ATECO 2025",
+    "mapped_nace_version": "NACE Rev. 2.1",
+    "industry_code": "FIN",
+    "industry_name": "Finance",
+    "subindustry_code": "FIN_BANK_RETAIL_REGIONAL",
+    "subindustry_name": "Regional Retail Banking",
+    "size_class": "MEDIUM",
+    "regulatory_intensity": "HIGH",
+    "blueprint_family": "FIN_BANKING",
+    "blueprint_variant": "REGIONAL_RETAIL_BANK_MEDIUM",
+    "classification_status": "HUMAN_VALIDATED_REFERENCE_MODEL"
+  },
+  "scope": {
+    "in_scope": [
+      "Enterprise typing and blueprint selection",
+      "BPM process blueprinting",
+      "Organization design",
+      "Position management",
+      "Job architecture",
+      "ESCO occupation mapping",
+      "Skill taxonomy and position-skill requirements",
+      "KPI cascading and assessment methods",
+      "Position-based learning paths",
+      "Gap analysis and talent weighting",
+      "Career planning and succession",
+      "Compensation intelligence and reward input",
+      "AI-assisted workforce intelligence"
+    ],
+    "out_of_scope": [
+      "Core HR Administration",
+      "Payroll / Time & Attendance execution",
+      "Benefits / Welfare administration",
+      "Procurement / Vendor Governance",
+      "IAM / Badge / Device provisioning",
+      "Facilities / Workplace Services"
+    ]
+  }
+}

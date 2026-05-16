@@ -1,0 +1,740 @@
+{
+  "bundle_name": "Company_HRMS_BPM_AI_Coding_Agent_Bootstrap_Pack_v5",
+  "version": "5.0-brownfield-adaptation",
+  "created_at": "2026-05-15T14:23:41.844100",
+  "canonical_process_count": 23,
+  "description": "Complete AI coding agent bootstrap pack with generic Company HRMS/BPM framework, FIN_BANKING reference implementation, seed acquisition, visualization graph model, full-stack bootstrap and brownfield legacy DB adaptation module.",
+  "files": [
+    {
+      "path": "INDEX.md",
+      "sha256": "7cb317b8e882e3cad71cc91b9ca1bb7a023dfa0c4c8d284a86ad408d8fe34c69",
+      "size_bytes": 8960
+    },
+    {
+      "path": "ISTRUZIONI.md",
+      "sha256": "02b64e4adcee2a79cad832b0e08e2d05b16ea9ee75e98c1fe39c549261b65174",
+      "size_bytes": 1434
+    },
+    {
+      "path": "LOGICAL_DATA_MODEL_ADDENDUM.md",
+      "sha256": "e5ba304e547c42b6d4a5408f1f04871dae24587f84bf5dbe2876f115823bacdc",
+      "size_bytes": 1828
+    },
+    {
+      "path": "README.md",
+      "sha256": "3a8d23975e3cade7e99a64091db0071c529e8b37772b8a6e6df10ec9f517ffde",
+      "size_bytes": 5555
+    },
+    {
+      "path": "VALIDATION_RESULT.json",
+      "sha256": "2eeb4fd7aa6b34c30c31a7ae5e6a661a3eea8a6a44be2a00074823a9604e6289",
+      "size_bytes": 2206
+    },
+    {
+      "path": "VALIDATION_RESULT_v4.json",
+      "sha256": "21ff51989ae2ac64d544c090a193f4711959bba2168f250341fc91e5b17f16fd",
+      "size_bytes": 2366
+    },
+    {
+      "path": "bootstrap_agent/AI_CODING_AGENT_BOOTSTRAP_PROMPT.md",
+      "sha256": "849dbc95d37a0670f7285158669378fb451ad8f6eef3f589a21b0991298daf56",
+      "size_bytes": 6108
+    },
+    {
+      "path": "bootstrap_agent/AUTH_STACK_SPEC.md",
+      "sha256": "c86d2166628c32f1abbb91a4d18e7bbc1be09b9cfb07d75a12533526f6599008",
+      "size_bytes": 1699
+    },
+    {
+      "path": "bootstrap_agent/BACKEND_API_STACK_SPEC.md",
+      "sha256": "c9c11dd9613ac8f58b54b3b75709cf5a18246641cefcd5e14193a763c2822f8e",
+      "size_bytes": 1312
+    },
+    {
+      "path": "bootstrap_agent/DBMS_BOOTSTRAP_SPEC.md",
+      "sha256": "db5c168315d01e0d4acd92ab127e5dea024a896ef2f58add9c1eebcde395fa16",
+      "size_bytes": 6941
+    },
+    {
+      "path": "bootstrap_agent/FRONTEND_STACK_SPEC.md",
+      "sha256": "ab02df7d65762bd0c610aca2979d0a3cad5712c4ed309e1696b4334fff7631e5",
+      "size_bytes": 1491
+    },
+    {
+      "path": "bootstrap_agent/REPOSITORY_STRUCTURE.md",
+      "sha256": "96561720b9191f5e3302ba6ef53313c5cf121c7d2a3edcf51f325fdcf580207e",
+      "size_bytes": 1108
+    },
+    {
+      "path": "bootstrap_agent/SECURITY_AND_PRIVACY_BOUNDARIES.md",
+      "sha256": "ff7560bf9b8193f8395cb437e3f7699db661ee3da8f2677362cd0223a247918f",
+      "size_bytes": 1460
+    },
+    {
+      "path": "bootstrap_agent/TENANT_USER_PROFILE_MODEL.md",
+      "sha256": "5e57e36ef105d514905088ff721a815dcf299f0f60fb9bb90e481d913ab467b0",
+      "size_bytes": 2342
+    },
+    {
+      "path": "bootstrap_agent/UPDATED_MIGRATION_PLAN.md",
+      "sha256": "970d2ad9681b3114864026fe494a58c4ff52173b4daefe22f881b3e583192bcf",
+      "size_bytes": 2813
+    },
+    {
+      "path": "bootstrap_agent/checklists/ACCEPTANCE_TESTS.md",
+      "sha256": "e41869fd1f1c636cea9b601bf37a2a05f0c2d5e1fe92c368b90298880175c6bc",
+      "size_bytes": 2507
+    },
+    {
+      "path": "bootstrap_agent/contracts/OPENAPI_BOOTSTRAP_SPEC.yaml",
+      "sha256": "e16d23eabf3c708da0934824db9ef5c5871fa74d7069e07fc2dd8337d378350f",
+      "size_bytes": 3330
+    },
+    {
+      "path": "bootstrap_agent/scripts/create_repo_structure.ps1",
+      "sha256": "5799d52025051e9c71bd475d5b3f88b42dc23ed72917f1b8601ec9298ef5566e",
+      "size_bytes": 1329
+    },
+    {
+      "path": "bootstrap_agent/scripts/create_repo_structure.sh",
+      "sha256": "36d8713b0d3dfc79692159be98e64001fdbd3492c75625fc66dcc2a69f746bc0",
+      "size_bytes": 777
+    },
+    {
+      "path": "bootstrap_agent/specs/AUTH_POLICY_MATRIX.md",
+      "sha256": "57c13677c56a4331f0256d6523d0e19e501195ed9e353ede4b52e947337d5688",
+      "size_bytes": 1409
+    },
+    {
+      "path": "bootstrap_agent/specs/FRONTEND_ROUTE_MAP.md",
+      "sha256": "55a255a473f227c20111ee6d8e243ff9c99c986ade874ea08a43487b8309d1f4",
+      "size_bytes": 835
+    },
+    {
+      "path": "bootstrap_agent/specs/GRAPH_VISUALIZATION_MODEL_SPEC.md",
+      "sha256": "d000bb640bb223291f69c3455452e8df8ad0db522727ad75c13a626d733bcd3d",
+      "size_bytes": 1508
+    },
+    {
+      "path": "bootstrap_agent/specs/LEARNING_CATALOG_AND_GAP_CLOSURE_SPEC.md",
+      "sha256": "4f47f44bc771264c0d3603edc0089aadd978125402ae58c8b4c64d92b621c820",
+      "size_bytes": 1459
+    },
+    {
+      "path": "bootstrap_agent/templates/.env.example",
+      "sha256": "fb3c8372755626b80b2d02226b5e9759c7b7f8f4f9694d9f75dd75cb2090b123",
+      "size_bytes": 415
+    },
+    {
+      "path": "bootstrap_agent/templates/README_TEMPLATE.md",
+      "sha256": "135d81129646b77e1aea95107e6dfced3f9051531c88bd085dab9f3d25342e7b",
+      "size_bytes": 250
+    },
+    {
+      "path": "bootstrap_agent/templates/docker-compose.yml",
+      "sha256": "f49cbe98fd3fa6f28e9f72dbd83cbfe2027a274f7fa9b1cad6f69704e29bfbf2",
+      "size_bytes": 651
+    },
+    {
+      "path": "brownfield_adaptation/BROWNFIELD_ADAPTATION_MAP_TEMPLATE.md",
+      "sha256": "9dadc41b098ab679b83cdce5d34948d81aeaaf94675148c189a2d50ab857ee58",
+      "size_bytes": 1960
+    },
+    {
+      "path": "brownfield_adaptation/BROWNFIELD_AI_AGENT_TASK.md",
+      "sha256": "1ee4d32084aaffc3fa109a251e2181032c07c8527d95af72fd8e9bcffe7be7e5",
+      "size_bytes": 1238
+    },
+    {
+      "path": "brownfield_adaptation/BROWNFIELD_EXCLUSION_RULES.md",
+      "sha256": "670dddacc32fac1f0e792ec9771bbc49d07655c8d1e14da21d8b0151f199ae9e",
+      "size_bytes": 766
+    },
+    {
+      "path": "brownfield_adaptation/BROWNFIELD_IMPORT_PIPELINE_SPEC.md",
+      "sha256": "cfc62d19c53fc50d527bc48092ad92f0c5ab08351a29cdad8bdb58d67d39a859",
+      "size_bytes": 1356
+    },
+    {
+      "path": "brownfield_adaptation/BROWNFIELD_IMPORT_STRATEGY.md",
+      "sha256": "e8f490010420a903595244b591973d31bbbcb06258250324dc037fc1d7a39446",
+      "size_bytes": 1354
+    },
+    {
+      "path": "brownfield_adaptation/BROWNFIELD_IMPORT_WAVES.md",
+      "sha256": "fcd9ac41cb6d5b5228990ec9c9829a87c11e0516cab888c30453c80f42f7880c",
+      "size_bytes": 1055
+    },
+    {
+      "path": "brownfield_adaptation/BROWNFIELD_LINEAGE_MODEL.md",
+      "sha256": "b3bc960a10b8e52afcbd93b7f5fb1607784cffa792ea086e9519f10ab76d3de6",
+      "size_bytes": 753
+    },
+    {
+      "path": "brownfield_adaptation/BROWNFIELD_TABLE_CLASSIFICATION_RULES.md",
+      "sha256": "169b75caa93eb07d6e9f208f40ee243df78530389fb58a56d384004f286a9270",
+      "size_bytes": 1449
+    },
+    {
+      "path": "brownfield_adaptation/BROWNFIELD_VALIDATION_CHECKLIST.md",
+      "sha256": "d2bb59a02d3671e6a6cf5d812a31c8ae558358aa59d0014c0a46026776dadd68",
+      "size_bytes": 1068
+    },
+    {
+      "path": "brownfield_adaptation/schemas/brownfield_adaptation_row.schema.json",
+      "sha256": "7eb7d8dc82e5dc9fb4fffc69b38f1770761993a84c383ba2f9358475e3bdf9b8",
+      "size_bytes": 810
+    },
+    {
+      "path": "brownfield_adaptation/schemas/brownfield_candidate_record.schema.json",
+      "sha256": "5026a974939662b25bb5a37150d72e9b682f53e34af9dac40cde7b9fa1e5b964",
+      "size_bytes": 727
+    },
+    {
+      "path": "brownfield_adaptation/scripts/apply_approved_brownfield_import.py",
+      "sha256": "9a7955740318ed9a9f9fbe37de8c71140bd282fbf181e2656d0013bb51675bc7",
+      "size_bytes": 167
+    },
+    {
+      "path": "brownfield_adaptation/scripts/classify_brownfield_tables.py",
+      "sha256": "557fa6017660678eb9d7915a3a4a86e9b24d9da7ca7cb14fa1c4dff186378966",
+      "size_bytes": 1397
+    },
+    {
+      "path": "brownfield_adaptation/scripts/generate_adaptation_map.py",
+      "sha256": "402fede52b9c949549189ae9cb40de95d34ed0138e9be74508f3a12366403e3b",
+      "size_bytes": 1332
+    },
+    {
+      "path": "brownfield_adaptation/scripts/inspect_db_export.py",
+      "sha256": "f6e1c61923345c3a9f7eb588873a5aa22aeac2e35ea256c1d0e795c2797522a5",
+      "size_bytes": 894
+    },
+    {
+      "path": "brownfield_adaptation/scripts/stage_brownfield_candidates.py",
+      "sha256": "09f623fd75776605a292025d258e241c4cd64c8475eeead5dba32bd70700bcb8",
+      "size_bytes": 241
+    },
+    {
+      "path": "brownfield_adaptation/scripts/validate_brownfield_candidates.py",
+      "sha256": "5839f5fb99dc8dbcecf3346ef6345d365bf5ba71e9bdf26d041b1f9a07a7de11",
+      "size_bytes": 135
+    },
+    {
+      "path": "brownfield_adaptation/templates/brownfield_adaptation_map.csv",
+      "sha256": "085cce1b7121839f684bf1e3257b9d5beffdc25345c3f2dcae3132b9c3547a9f",
+      "size_bytes": 642
+    },
+    {
+      "path": "config/process_registry.json",
+      "sha256": "1a999351837c5654fb0806dbba4320c0813de0036ec3b270471353ea17d603d4",
+      "size_bytes": 5794
+    },
+    {
+      "path": "config/scope_matrix.json",
+      "sha256": "78355ee69f6ae9c16b4ef0c9129b57cd3646a3fd5aa5a068f24d40ea123f055e",
+      "size_bytes": 1193
+    },
+    {
+      "path": "db/migration_skeletons/000001_init_extensions.sql",
+      "sha256": "8d6ba96b61e93b2527e790b22562a3e3b582b44692d0d32c5165f1b5fca22eff",
+      "size_bytes": 439
+    },
+    {
+      "path": "db/migration_skeletons/000002_init_sys_schema.sql",
+      "sha256": "9876a8ff309373ded7c78b012ba0e2eaa3c34bf2eda70cf16420d9d78eddead2",
+      "size_bytes": 432
+    },
+    {
+      "path": "db/migration_skeletons/000003_tenancies.sql",
+      "sha256": "0e3adff30874f37d2bd8d440ccc40f114a4761d53a5651b45d75089ba7dadc06",
+      "size_bytes": 404
+    },
+    {
+      "path": "db/migration_skeletons/000004_users.sql",
+      "sha256": "f6dde2fcddfadbfe668efb91e7475c937427c59516148edf9fa3d1297916b6c0",
+      "size_bytes": 429
+    },
+    {
+      "path": "db/migration_skeletons/000005_auth_foundation.sql",
+      "sha256": "1234be4a1dedd4ec0b938d96c0f738797b5a2007e6a804bb2cd3661a434c1822",
+      "size_bytes": 454
+    },
+    {
+      "path": "db/migration_skeletons/000006_user_profiles_and_evidence.sql",
+      "sha256": "d1dbde35331dcc53fd3a57bb4b185baa9a5508bb6083b3ddd171602125f59c9b",
+      "size_bytes": 479
+    },
+    {
+      "path": "db/migration_skeletons/000007_enterprise_typing.sql",
+      "sha256": "3e8e35390e29e009e97302e2bc57266bc49d0663304684aa94e6cff1699e333d",
+      "size_bytes": 453
+    },
+    {
+      "path": "db/migration_skeletons/000008_blueprint_catalog.sql",
+      "sha256": "321e13a6a8641ed64c084e9b5c79b7e0a1f2b342c8030f197d59da98908aeb9d",
+      "size_bytes": 460
+    },
+    {
+      "path": "db/migration_skeletons/000009_organization_model.sql",
+      "sha256": "5d0ee73144ec911e25e3a240d477fcca1c989e41a29d93653ca474b77cd9c022",
+      "size_bytes": 446
+    },
+    {
+      "path": "db/migration_skeletons/000010_job_role_model.sql",
+      "sha256": "7f29acdebae9a474dadec28a13d56400803f13061236352849412552ee6ca7ea",
+      "size_bytes": 453
+    },
+    {
+      "path": "db/migration_skeletons/000011_position_model.sql",
+      "sha256": "692282051b7fee7dec27bd525a3b74214726326aa562cd75fb7044959925c219",
+      "size_bytes": 447
+    },
+    {
+      "path": "db/migration_skeletons/000012_user_position_assignments.sql",
+      "sha256": "153e10df08b26a1b1e4b74c229c6ade10aab8e9af66f4d4aa853399605914d37",
+      "size_bytes": 441
+    },
+    {
+      "path": "db/migration_skeletons/000013_skill_taxonomy_model.sql",
+      "sha256": "c582f04971d596eba9be263b60dfaee02f8e1fbbf55faa19352be2a46080e3f2",
+      "size_bytes": 430
+    },
+    {
+      "path": "db/migration_skeletons/000014_position_skill_requirements.sql",
+      "sha256": "2cdbab3c934682e661bd981525d7993785eda62b40334fa7d414f4a0d853a3b6",
+      "size_bytes": 440
+    },
+    {
+      "path": "db/migration_skeletons/000015_kpi_model.sql",
+      "sha256": "6e84f356e9d141a48b7ff983f5580a84a8fe5f6a046880ac5605d4d153f824c0",
+      "size_bytes": 440
+    },
+    {
+      "path": "db/migration_skeletons/000016_learning_model.sql",
+      "sha256": "1dc391d15c3b0079b245352484d270283f36f63f1df9fb0472538778614d4e8b",
+      "size_bytes": 460
+    },
+    {
+      "path": "db/migration_skeletons/000017_assessment_gap_model.sql",
+      "sha256": "f6d29f19a8474594cd8fa88caa2d012191898fca807ae9e6b69ad804cf3b2381",
+      "size_bytes": 459
+    },
+    {
+      "path": "db/migration_skeletons/000018_career_succession_model.sql",
+      "sha256": "57a6cc0a7c06d542ba78f53a5914d9cc8ebf7aaeacb0f8c7f8be7c750b6a5dac",
+      "size_bytes": 454
+    },
+    {
+      "path": "db/migration_skeletons/000019_compensation_intelligence_model.sql",
+      "sha256": "0a5a9cb75d53ffec2f99311dc2d9b783fe74d8d839e95993b4ec23da12b829da",
+      "size_bytes": 479
+    },
+    {
+      "path": "db/migration_skeletons/000020_seed_acquisition_staging.sql",
+      "sha256": "358d961bd3b1979224051966b676b0523b5d74ee4deb706688d984f8dff17622",
+      "size_bytes": 485
+    },
+    {
+      "path": "db/migration_skeletons/000021_seed_reference_bank.sql",
+      "sha256": "603264515403517c94cb18b77c08059b3a48b4fbd05288d2454fb5ecd95b8a53",
+      "size_bytes": 443
+    },
+    {
+      "path": "db/migration_skeletons/000022_visualization_graph_model.sql",
+      "sha256": "2c6c3e013eb16fe3dc607a50ba63756446723024eaa9fa4f4e58a9b38b367f84",
+      "size_bytes": 472
+    },
+    {
+      "path": "db/migration_skeletons/000023_validation_views_and_checks.sql",
+      "sha256": "33b715a2acc02657254d4f592f57d7225bdae0217b1bda4d63fdf860a3dc3e61",
+      "size_bytes": 436
+    },
+    {
+      "path": "db/migration_skeletons/000024_brownfield_import_staging.sql",
+      "sha256": "49bc4a2c1e390d2408af0f5af5f117068a30303baac32e7f63a2796ddbe904d3",
+      "size_bytes": 415
+    },
+    {
+      "path": "db/migration_skeletons/000025_brownfield_lineage_and_mapping.sql",
+      "sha256": "1706877a0a14f897d4b7e9c2c3bca21c8df39626bd8fc45881c03b88a8841528",
+      "size_bytes": 406
+    },
+    {
+      "path": "db/migration_skeletons/000026_brownfield_import_validation.sql",
+      "sha256": "a1a801912e2a05b4278e35072e05403a85c533461929e368fcd87f26b67e0e59",
+      "size_bytes": 407
+    },
+    {
+      "path": "db/seed_templates/kpi_catalog.csv",
+      "sha256": "e1668475c05372971441d3a37b10107cc09dda6e87280575c269b3ce504287f4",
+      "size_bytes": 79
+    },
+    {
+      "path": "db/seed_templates/learning_modules.csv",
+      "sha256": "dba011bef6797456440ce079452be47161d2117b962f6eced0a8ad5466be485a",
+      "size_bytes": 99
+    },
+    {
+      "path": "db/seed_templates/learning_path_steps.csv",
+      "sha256": "17e656c8aacc16242b13fec95f6c0d07fde6c53c9d6e1f3e784778aa17b5a24d",
+      "size_bytes": 84
+    },
+    {
+      "path": "db/seed_templates/learning_paths.csv",
+      "sha256": "2e97d098b0c827ddbb22bf392f6ff345b9493de20194329af47a93e0bc7b2edb",
+      "size_bytes": 98
+    },
+    {
+      "path": "db/seed_templates/organization_units.csv",
+      "sha256": "070477f4ca2a7e6fdfdc213b9d816b7578ff1d2c698d0b614caf812d684ddeff",
+      "size_bytes": 113
+    },
+    {
+      "path": "db/seed_templates/position_kpi_requirements.csv",
+      "sha256": "58d69508917f1562b37e45bede21f9ab727d6cd2791a8ed9ecbbccc515abd1c2",
+      "size_bytes": 87
+    },
+    {
+      "path": "db/seed_templates/position_skill_requirements.csv",
+      "sha256": "73eef4047ad3673ef75d54de07eb012f2ee1ee0dce0e192025c0a9184bda212d",
+      "size_bytes": 123
+    },
+    {
+      "path": "db/seed_templates/positions.csv",
+      "sha256": "b963fbca0246d1b5e4c631c1b505191d14d5020c984b56508035f82a629daba9",
+      "size_bytes": 170
+    },
+    {
+      "path": "db/seed_templates/skill_learning_mappings.csv",
+      "sha256": "917fe0d8431763a292020491229f252723f39519a186ab4f5f30dcf5e3372c4b",
+      "size_bytes": 123
+    },
+    {
+      "path": "db/seed_templates/skills.csv",
+      "sha256": "af7f4d8c0e5891c33abbdb3f530e99cfa3167fa5cadd924702e6388496ae97bf",
+      "size_bytes": 91
+    },
+    {
+      "path": "db/seed_templates/source_registry.csv",
+      "sha256": "144fcf602536face9631ba480f26193685d34760c41341a3657715f565d40ea7",
+      "size_bytes": 90
+    },
+    {
+      "path": "db/seed_templates/tenants.csv",
+      "sha256": "f8d944dc185a82a83ea0820208925ce578136d5bb309d9068706848e9abb949a",
+      "size_bytes": 155
+    },
+    {
+      "path": "db/seed_templates/training_initiatives.csv",
+      "sha256": "e9584347ca703c46bc15ed93ffb053ae4210851b92b758a2b0e111ac44a3e6b6",
+      "size_bytes": 107
+    },
+    {
+      "path": "db/seed_templates/user_position_assignments.csv",
+      "sha256": "dd6ff0e5efd06cf73e2309ada01c7fd79a51ff440781626d5657dbdcab58ba3a",
+      "size_bytes": 138
+    },
+    {
+      "path": "db/seed_templates/users.csv",
+      "sha256": "542a41d414bfe2546e38eb3be2d33ff248c910609badd7259c0dd1fc7e284dbf",
+      "size_bytes": 120
+    },
+    {
+      "path": "db/seed_templates/visualization_edges.csv",
+      "sha256": "e3a0ea2df4cfc5429612a18cbb627059e17af1b40bac6ec343ea401a1091e062",
+      "size_bytes": 88
+    },
+    {
+      "path": "db/seed_templates/visualization_graphs.csv",
+      "sha256": "e1275e540ff12407f99486b042a9158ed63a62f0641f5ae5a670d102c9b1c0fb",
+      "size_bytes": 78
+    },
+    {
+      "path": "db/seed_templates/visualization_nodes.csv",
+      "sha256": "e6ca98884b8cbec80378bbf71a6d16b7a0f2bb03fbe6ad2089056003d779952d",
+      "size_bytes": 116
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/00_Enterprise_Typing_and_Blueprint_Configuration.md",
+      "sha256": "bad6470f5215818f02e86e2a28210f003463a28762ef411fdfd9082550615635",
+      "size_bytes": 26516
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/01_Current_Accounts_Management.md",
+      "sha256": "a8f0f5646432b8c0740552a1a7fcc43b15a784cedcc96775f07d06ae2ae0bf7e",
+      "size_bytes": 10755
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/02_Payments_and_Transactions_Management.md",
+      "sha256": "50132200a59fe86c0eb38c1733cdcce477d2d62f72b1c6d2f5e72cf28f2772a4",
+      "size_bytes": 8595
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/03_Cash_Operations_Management.md",
+      "sha256": "0afb894b26748d787ca2b979368937617813981fd742ec86f2a0f6db6db6fc34",
+      "size_bytes": 8375
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/04_Deposit_Products_Management.md",
+      "sha256": "e777fbcc1d4047695f80787d222173ef7b4ea54f7f9ca0e14c73a898d36a725d",
+      "size_bytes": 7914
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/05_Lending_and_Credit_Management.md",
+      "sha256": "1bebe3beb18c5207e21f5bbe4ffee70cd90d7dcf96933fd0eefa2cbc751eaaf1",
+      "size_bytes": 11193
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/06_Customer_Relationship_Management.md",
+      "sha256": "fd10c7e917dca59afc1df0335abe9540b47c349222604b8f4774f8826b7bc442",
+      "size_bytes": 10786
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/07_Compliance_AML_and_Regulatory_Processes.md",
+      "sha256": "a36580f6067e4aced37dea26b1aab68437c17ae6a0cf4532ced9b08958615ad6",
+      "size_bytes": 10876
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/08_Risk_Management.md",
+      "sha256": "8eeb4db981bf9f9f74dbd4747dcf835a60117e43d4eb283bf7d9a8a5c0b37147",
+      "size_bytes": 10962
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/09_Treasury_and_Finance.md",
+      "sha256": "b8634826ff6f2b8e86ca0d7248050fcd633fac467092b9cbfc621dccf582ee10",
+      "size_bytes": 10742
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/10_Digital_Banking_and_Channels.md",
+      "sha256": "22332dc89c8e93cb02af3eb6999aa5877b3549873c926d280352d47ef4bafd2d",
+      "size_bytes": 10482
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/11_Sales_and_Commercial_Processes.md",
+      "sha256": "6c548141cb21cc38c91ab7501bc6e18db7de5b7f5e15eced25b5d652e2439428",
+      "size_bytes": 10525
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/12_Branch_Operations.md",
+      "sha256": "325507be901d47c1889222b65cfd7bff1b07e8b62f01d781425e9a38c80127c6",
+      "size_bytes": 10818
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/13_Legal_and_Litigation.md",
+      "sha256": "c50d03550bcafee8874d2514aa05da76bafae40c86c71e9ba0ab503bb6dac5b9",
+      "size_bytes": 10662
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/14_HR_and_Internal_Services.md",
+      "sha256": "3c56108def1567df7b3bd8382b4eefb3e838812a40e27606425aa4249ebd3064",
+      "size_bytes": 98169
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/15_IT_and_Banking_Technology_Operations.md",
+      "sha256": "19770e71dcb99bfbc581b9bb99a1f39a3e972d07a22d3626de6582134685396a",
+      "size_bytes": 11367
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/16_Business_Continuity_and_Security.md",
+      "sha256": "c38e76ff1eb14ff5f047642b5f9d54dcb2a6fa53bb7b221b54d7262d344edd90",
+      "size_bytes": 10984
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/17_AI_Augmented_Banking_Processes.md",
+      "sha256": "dcba611643a6e0b9db07ebd3bb4788c0039dd910edd9f794fe81a76d878b05ba",
+      "size_bytes": 11015
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/18_KPI_Library_Cascading_and_Assessment_Model.md",
+      "sha256": "d763009b01eacc186ac7d7ff75fe9b3453e26ca1f4b0d10739d89133f57c73c6",
+      "size_bytes": 8897
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/19_Position_Based_Learning_Path_Management.md",
+      "sha256": "12c918c6f898995bbbf2fe92de532eb4c8c5a81ea905b151d2cc9c2b90246155",
+      "size_bytes": 8187
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/20_Workforce_Intelligence_Gap_Analysis_and_Talent_Weighting.md",
+      "sha256": "fb73a31c97bbf41484ee6170b541a327a1be504ef5d4f6fa0c2bbe0ab8e97956",
+      "size_bytes": 7777
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/21_Career_Planning_Talent_Mobility_and_Succession.md",
+      "sha256": "2fec33c746455fe2f570ebb542aff295a3166020979ffffef904415ece5fa251",
+      "size_bytes": 5580
+    },
+    {
+      "path": "industry_blueprints/FIN_BANKING/processes/22_Compensation_Intelligence_and_Objective_Based_Reward_Input.md",
+      "sha256": "ca7a6e58382c23dd795d180380dbe8a60bcee352c483216fa6afe9fedf318b2c",
+      "size_bytes": 6756
+    },
+    {
+      "path": "schemas/position_intelligence_profile.schema.json",
+      "sha256": "5fedeeccc7e879e1768bfe8992a15d2eb672018f6bcc1e2dbbebac9a7ced9523",
+      "size_bytes": 1046
+    },
+    {
+      "path": "scripts/apply_bundle.ps1",
+      "sha256": "c0be73244f2f2defb9fc0c65f1a53841e3015d8a34fe775e0efc33ec08b9e0ed",
+      "size_bytes": 384
+    },
+    {
+      "path": "scripts/apply_bundle.py",
+      "sha256": "5259f92c4bbf36ca0f3f924b6a2c655a6d6a5b13ceb1eca837ae870b6a83c7e9",
+      "size_bytes": 3665
+    },
+    {
+      "path": "scripts/apply_bundle.sh",
+      "sha256": "cc63cf6857a5af01cf1b88445a2bd07541b2d1b396b82c6e71c131d9a9311338",
+      "size_bytes": 248
+    },
+    {
+      "path": "scripts/validate_bundle.py",
+      "sha256": "c7a1fd3a300869c253e3bf46524acda5a2693666fb777fe1dc3e33841ea9697c",
+      "size_bytes": 1093
+    },
+    {
+      "path": "seed_acquisition/IDEMPOTENT_SEEDING_RULES.md",
+      "sha256": "7beda22f532031180315c7c24dd48e33b971af1a224f1f88c287b53910f2ae35",
+      "size_bytes": 695
+    },
+    {
+      "path": "seed_acquisition/PROMPT_TEMPLATE_LIBRARY.md",
+      "sha256": "d0e5b2a784f5e4daf8298113cbbd883352b6deea3fe6cfe4c8a53bf315e41c5e",
+      "size_bytes": 378
+    },
+    {
+      "path": "seed_acquisition/SEED_ACQUISITION_ENGINE_SPEC.md",
+      "sha256": "72cc3891ec8b6a3c5b643312559069c3d763760b2745ba921ea26123f78fe9f4",
+      "size_bytes": 1676
+    },
+    {
+      "path": "seed_acquisition/SEED_COMPLETENESS_BACKLOG.md",
+      "sha256": "0e049226b8b6b38397ac648ac2bd7e2bd81e673968c9a1ee2179d9de8ca36bee",
+      "size_bytes": 681
+    },
+    {
+      "path": "seed_acquisition/SEED_STAGING_AND_APPROVAL_MODEL.md",
+      "sha256": "1c5a1b937a442d3ca952de72d7fd51136db7ddbe52ee02a55f67e094463aa21d",
+      "size_bytes": 625
+    },
+    {
+      "path": "seed_acquisition/SOURCE_OF_TRUTH_REGISTRY.md",
+      "sha256": "712dfcc2fc4adf46824b0c726c714313fd4c3dd1f733fbb6b2d711af5ceac3de",
+      "size_bytes": 1375
+    },
+    {
+      "path": "seed_acquisition/prompts/PROMPT_ATECO_NACE_RECONCILIATION.md",
+      "sha256": "85d1b5e0a2792255f25aee4357a5608829a86b6f8e7499460e780534b6498f9f",
+      "size_bytes": 735
+    },
+    {
+      "path": "seed_acquisition/prompts/PROMPT_BANKING_KPI_RESEARCH.md",
+      "sha256": "e453c9d9e6ec47760a3794d5e1f37b2499507d2e6b42cd00d3dc650242cfb836",
+      "size_bytes": 611
+    },
+    {
+      "path": "seed_acquisition/prompts/PROMPT_CAREER_PATH_RESEARCH.md",
+      "sha256": "088b7ee730612471d633a82144d583e1dc4965f8be7a50b5640a9565d344ecba",
+      "size_bytes": 358
+    },
+    {
+      "path": "seed_acquisition/prompts/PROMPT_COMPENSATION_RULE_RESEARCH.md",
+      "sha256": "bb7cb3433c2638726a29a07f3c81843811d5fc81c5a7162a0e360b591711132f",
+      "size_bytes": 348
+    },
+    {
+      "path": "seed_acquisition/prompts/PROMPT_ESCO_OCCUPATION_DISCOVERY.md",
+      "sha256": "bc1391efeda00ab1d5c971a93be9979662597f6a6e29ae9b272b05d25b4716b6",
+      "size_bytes": 563
+    },
+    {
+      "path": "seed_acquisition/prompts/PROMPT_ESCO_SKILL_EXTRACTION.md",
+      "sha256": "930ab76824e00e7e0b06cbc6170fc01532269b08c9f156440ea43e36dc9bdcc6",
+      "size_bytes": 467
+    },
+    {
+      "path": "seed_acquisition/prompts/PROMPT_LEARNING_CATALOG_RESEARCH.md",
+      "sha256": "b5fd70ad03063528d093ce604c882102123f3a4daa5e3db1baa50b4dd1a8bd58",
+      "size_bytes": 799
+    },
+    {
+      "path": "seed_acquisition/prompts/PROMPT_POSITION_JOB_DESCRIPTION_RESEARCH.md",
+      "sha256": "8881ed73e9a101d262239032a06093432175d32b649154f515d0db775e35183a",
+      "size_bytes": 344
+    },
+    {
+      "path": "seed_acquisition/schemas/seed_acquisition_run.schema.json",
+      "sha256": "a7bd08c977b510d1492c7047d6cbfb88c0d7c3dfc4c88397b19877b29d489eb1",
+      "size_bytes": 463
+    },
+    {
+      "path": "seed_acquisition/schemas/seed_candidate_record.schema.json",
+      "sha256": "0af25629567486a46c4a90357b523754ba89ce161f21caa602db74c8a9915044",
+      "size_bytes": 632
+    },
+    {
+      "path": "seed_acquisition/schemas/source_evidence.schema.json",
+      "sha256": "c28137e8b7a94715ae9b4424bc40cb53e0199d8ed91b3dcc3f5ed21b333bd3ba",
+      "size_bytes": 474
+    },
+    {
+      "path": "seed_acquisition/source_registry.seed.json",
+      "sha256": "e68cc10ff154c72cb7d97145eec26dde2f34fbf19c9a1efce033bb86974b501a",
+      "size_bytes": 11792
+    },
+    {
+      "path": "tenant_blueprints/RTL_BANK_REFERENCE/tenant_profile.json",
+      "sha256": "546fd60b18de3dadd33b42265755b14a476ceb02990eaa4750a7a96028cc4eeb",
+      "size_bytes": 1621
+    },
+    {
+      "path": "tenant_blueprints/RTL_BANK_REFERENCE/tenant_profile.yaml",
+      "sha256": "c16549f88b45d76b8e60249cb8f9956f6498e5b5b80efdffdeb406bc9ae9af44",
+      "size_bytes": 1388
+    },
+    {
+      "path": "universal_hrms_framework/U01_Position_Centric_HRMS_Architecture.md",
+      "sha256": "c2ba1ffc96828e6f4e9924619f77ce25a626b6782220b2ebb656292849c3151b",
+      "size_bytes": 1142
+    },
+    {
+      "path": "universal_hrms_framework/U02_Position_Intelligence_Profile.md",
+      "sha256": "19389819744da4ca3ee93a75124430b6f573e1a19008bb46ebbb510276206942",
+      "size_bytes": 631
+    },
+    {
+      "path": "universal_hrms_framework/U03_Skill_Taxonomy_Model.md",
+      "sha256": "d213ac00db2a1d27213648b388dc1812fc66c57fd6389efa93a6536df4bc9598",
+      "size_bytes": 732
+    },
+    {
+      "path": "universal_hrms_framework/U04_KPI_Cascading_and_Assessment_Model.md",
+      "sha256": "d763009b01eacc186ac7d7ff75fe9b3453e26ca1f4b0d10739d89133f57c73c6",
+      "size_bytes": 8897
+    },
+    {
+      "path": "universal_hrms_framework/U05_Position_Based_Learning_Path_Model.md",
+      "sha256": "12c918c6f898995bbbf2fe92de532eb4c8c5a81ea905b151d2cc9c2b90246155",
+      "size_bytes": 8187
+    },
+    {
+      "path": "universal_hrms_framework/U06_Workforce_Intelligence_Gap_Analysis.md",
+      "sha256": "fb73a31c97bbf41484ee6170b541a327a1be504ef5d4f6fa0c2bbe0ab8e97956",
+      "size_bytes": 7777
+    },
+    {
+      "path": "universal_hrms_framework/U07_Career_Talent_Succession_Model.md",
+      "sha256": "2fec33c746455fe2f570ebb542aff295a3166020979ffffef904415ece5fa251",
+      "size_bytes": 5580
+    },
+    {
+      "path": "universal_hrms_framework/U08_Compensation_Intelligence_Model.md",
+      "sha256": "ca7a6e58382c23dd795d180380dbe8a60bcee352c483216fa6afe9fedf318b2c",
+      "size_bytes": 6756
+    }
+  ],
+  "updated_at": "2026-05-15T18:12:08.273690"
+}

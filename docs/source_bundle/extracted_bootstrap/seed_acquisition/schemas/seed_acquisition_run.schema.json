@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Seed Acquisition Run",
+  "type": "object",
+  "required": [
+    "run_id",
+    "seed_domain",
+    "run_status"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "seed_domain": {
+      "type": "string"
+    },
+    "prompt_template": {
+      "type": "string"
+    },
+    "run_status": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    }
+  }
+}

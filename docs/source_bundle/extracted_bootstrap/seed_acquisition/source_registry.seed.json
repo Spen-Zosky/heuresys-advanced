@@ -1,0 +1,340 @@
+[
+  {
+    "source_code": "ISTAT_ATECO_2025",
+    "source_name": "ISTAT ATECO 2025",
+    "source_domain": "enterprise_classification",
+    "source_authority_tier": "TIER_1_OFFICIAL_PUBLIC_AUTHORITY",
+    "source_type": "official_classification",
+    "source_url": "https://www.istat.it/classificazione/ateco-2025/",
+    "source_owner": "ISTAT",
+    "country_scope": "IT",
+    "industry_scope": "ALL",
+    "access_method": "web_download_or_manual_import",
+    "source_format": "web_page_csv_xlsx_pdf",
+    "refresh_frequency": "on_version_change",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "ATECO code validation",
+      "enterprise typing",
+      "ATECO-first classification"
+    ],
+    "disallowed_usage": [
+      "occupation classification",
+      "skill classification"
+    ],
+    "validation_status": "APPROVED_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "EUROSTAT_NACE",
+    "source_name": "Eurostat NACE and correspondence tables",
+    "source_domain": "enterprise_classification",
+    "source_authority_tier": "TIER_1_OFFICIAL_EU_SOURCE",
+    "source_type": "official_classification",
+    "source_url": "https://ec.europa.eu/eurostat/web/nace/correspondence-tables",
+    "source_owner": "Eurostat",
+    "country_scope": "EU",
+    "industry_scope": "ALL",
+    "access_method": "web_download_or_manual_import",
+    "source_format": "web_page_xlsx_csv",
+    "refresh_frequency": "on_version_change",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "NACE mapping",
+      "ATECO-NACE reconciliation",
+      "crosswalk validation"
+    ],
+    "disallowed_usage": [
+      "skill inference without ESCO"
+    ],
+    "validation_status": "APPROVED_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "ESCO_API",
+    "source_name": "European Commission ESCO API",
+    "source_domain": "occupations_skills",
+    "source_authority_tier": "TIER_1_OFFICIAL_EU_SOURCE",
+    "source_type": "official_taxonomy_api",
+    "source_url": "https://esco.ec.europa.eu/en/use-esco/use-esco-services-api/esco-web-service-api",
+    "source_owner": "European Commission",
+    "country_scope": "EU",
+    "industry_scope": "ALL",
+    "access_method": "api",
+    "source_format": "json_hal",
+    "refresh_frequency": "scheduled_quarterly_or_on_release",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "occupation URI validation",
+      "skill URI validation",
+      "position-skill candidate enrichment"
+    ],
+    "disallowed_usage": [
+      "enterprise economic classification"
+    ],
+    "validation_status": "APPROVED_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "INAPP_ATLANTE",
+    "source_name": "INAPP Atlante del Lavoro e delle Qualificazioni",
+    "source_domain": "skills_qualifications",
+    "source_authority_tier": "TIER_1_OFFICIAL_PUBLIC_AUTHORITY",
+    "source_type": "institutional_qualification_framework",
+    "source_url": "https://www.inapp.gov.it/atlantelavoro/",
+    "source_owner": "INAPP",
+    "country_scope": "IT",
+    "industry_scope": "ALL",
+    "access_method": "web_manual_import",
+    "source_format": "web_page",
+    "refresh_frequency": "scheduled_semiannual",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "Italian qualification alignment",
+      "competence enrichment",
+      "learning outcome mapping"
+    ],
+    "disallowed_usage": [
+      "contractual grading as final decision"
+    ],
+    "validation_status": "APPROVED_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "CNEL_CCNL_ARCHIVE",
+    "source_name": "CNEL Archivio Contratti Collettivi",
+    "source_domain": "ccnl_contracts",
+    "source_authority_tier": "TIER_1_OFFICIAL_PUBLIC_AUTHORITY",
+    "source_type": "official_contract_repository",
+    "source_url": "https://www.cnel.it/Archivio-Contratti-Collettivi/Entra-nellarchivio",
+    "source_owner": "CNEL",
+    "country_scope": "IT",
+    "industry_scope": "ALL",
+    "access_method": "web_manual_import_open_data_where_available",
+    "source_format": "web_pdf_open_data",
+    "refresh_frequency": "scheduled_monthly",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "CCNL lookup",
+      "contract metadata",
+      "contractual framework reference"
+    ],
+    "disallowed_usage": [
+      "automatic legal/payroll final decisions"
+    ],
+    "validation_status": "APPROVED_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "ABI_CONTRATTI_NAZIONALI",
+    "source_name": "ABI Contratti Nazionali",
+    "source_domain": "banking_ccnl",
+    "source_authority_tier": "TIER_2_SECTORAL_INSTITUTION",
+    "source_type": "sectoral_contract_source",
+    "source_url": "https://www.abi.it/le-persone/i-contratti-nazionali/",
+    "source_owner": "ABI",
+    "country_scope": "IT",
+    "industry_scope": "FIN_BANKING",
+    "access_method": "web_manual_import",
+    "source_format": "web_pdf",
+    "refresh_frequency": "scheduled_quarterly_or_on_contract_renewal",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "banking CCNL context",
+      "indicative role-family framing",
+      "contract source evidence"
+    ],
+    "disallowed_usage": [
+      "automatic payroll grading",
+      "final legal classification"
+    ],
+    "validation_status": "APPROVED_CANDIDATE_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "BANCA_DITALIA_SUPERVISION",
+    "source_name": "Banca d'Italia Supervisory Regulations",
+    "source_domain": "banking_regulation_controls",
+    "source_authority_tier": "TIER_1_OFFICIAL_SUPERVISORY_AUTHORITY",
+    "source_type": "supervisory_source",
+    "source_url": "https://www.bancaditalia.it/compiti/vigilanza/normativa/",
+    "source_owner": "Banca d'Italia",
+    "country_scope": "IT",
+    "industry_scope": "FIN_BANKING",
+    "access_method": "web_manual_import",
+    "source_format": "web_pdf",
+    "refresh_frequency": "scheduled_quarterly",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "banking controls",
+      "risk/compliance process enrichment",
+      "control library candidate seeds"
+    ],
+    "disallowed_usage": [
+      "legal opinion replacement"
+    ],
+    "validation_status": "APPROVED_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "UIF_ITALIA",
+    "source_name": "Unità di Informazione Finanziaria per l'Italia",
+    "source_domain": "aml_controls",
+    "source_authority_tier": "TIER_1_OFFICIAL_SUPERVISORY_AUTHORITY",
+    "source_type": "financial_intelligence_unit",
+    "source_url": "https://uif.bancaditalia.it/",
+    "source_owner": "UIF",
+    "country_scope": "IT",
+    "industry_scope": "FIN_BANKING",
+    "access_method": "web_manual_import",
+    "source_format": "web_pdf",
+    "refresh_frequency": "scheduled_quarterly",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "AML process enrichment",
+      "suspicious transaction process logic",
+      "AML learning/control candidates"
+    ],
+    "disallowed_usage": [
+      "automatic regulatory compliance certification"
+    ],
+    "validation_status": "APPROVED_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "EBA",
+    "source_name": "European Banking Authority",
+    "source_domain": "banking_regulation_training",
+    "source_authority_tier": "TIER_1_OFFICIAL_EU_SOURCE",
+    "source_type": "eu_supervisory_authority",
+    "source_url": "https://www.eba.europa.eu/",
+    "source_owner": "European Banking Authority",
+    "country_scope": "EU",
+    "industry_scope": "FIN_BANKING",
+    "access_method": "web_manual_import",
+    "source_format": "web_pdf",
+    "refresh_frequency": "scheduled_quarterly",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "banking risk/control enrichment",
+      "credit process controls",
+      "supervisory training references"
+    ],
+    "disallowed_usage": [
+      "contractual grading"
+    ],
+    "validation_status": "APPROVED_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "DIGCOMP",
+    "source_name": "European Digital Competence Framework DigComp",
+    "source_domain": "digital_skills",
+    "source_authority_tier": "TIER_1_OFFICIAL_EU_SOURCE",
+    "source_type": "competence_framework",
+    "source_url": "https://joint-research-centre.ec.europa.eu/scientific-activities-z/education-and-training/digital-transformation-education/digital-competence-framework-citizens-digcomp_en",
+    "source_owner": "European Commission JRC",
+    "country_scope": "EU",
+    "industry_scope": "ALL",
+    "access_method": "web_manual_import",
+    "source_format": "web_pdf",
+    "refresh_frequency": "on_version_change",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "digital skill taxonomy enrichment",
+      "digital/data skill proficiency modeling"
+    ],
+    "disallowed_usage": [
+      "enterprise classification"
+    ],
+    "validation_status": "APPROVED_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "FBA",
+    "source_name": "Fondo Banche Assicurazioni",
+    "source_domain": "training_catalogues",
+    "source_authority_tier": "TIER_2_SECTORAL_INSTITUTION",
+    "source_type": "sector_training_fund",
+    "source_url": "https://www.fondofba.it/",
+    "source_owner": "FBA",
+    "country_scope": "IT",
+    "industry_scope": "FIN_BANKING_INSURANCE",
+    "access_method": "web_manual_import",
+    "source_format": "web_page_pdf",
+    "refresh_frequency": "scheduled_quarterly",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "training initiative candidates",
+      "banking/insurance professional repertory enrichment",
+      "learning catalogue candidates"
+    ],
+    "disallowed_usage": [
+      "official skill URI replacement"
+    ],
+    "validation_status": "APPROVED_CANDIDATE_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "ABIFORMAZIONE",
+    "source_name": "ABIFormazione",
+    "source_domain": "training_catalogues",
+    "source_authority_tier": "TIER_2_HIGH_REPUTATION_PROVIDER",
+    "source_type": "sector_training_provider",
+    "source_url": "https://www.abiformazione.it/",
+    "source_owner": "ABIFormazione",
+    "country_scope": "IT",
+    "industry_scope": "FIN_BANKING",
+    "access_method": "web_manual_import",
+    "source_format": "web_page_catalogue",
+    "refresh_frequency": "scheduled_quarterly",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "course catalogue candidates",
+      "learning path enrichment",
+      "banking training initiatives"
+    ],
+    "disallowed_usage": [
+      "final regulatory certification without validation"
+    ],
+    "validation_status": "APPROVED_CANDIDATE_SOURCE",
+    "is_active": true
+  },
+  {
+    "source_code": "ACN",
+    "source_name": "Agenzia per la Cybersicurezza Nazionale",
+    "source_domain": "cybersecurity_skills_controls",
+    "source_authority_tier": "TIER_1_OFFICIAL_PUBLIC_AUTHORITY",
+    "source_type": "national_cybersecurity_authority",
+    "source_url": "https://www.acn.gov.it/",
+    "source_owner": "ACN",
+    "country_scope": "IT",
+    "industry_scope": "ALL",
+    "access_method": "web_manual_import",
+    "source_format": "web_pdf",
+    "refresh_frequency": "scheduled_quarterly",
+    "citation_required": true,
+    "human_validation_required": true,
+    "allowed_usage": [
+      "cybersecurity skill/control enrichment",
+      "awareness/training candidates"
+    ],
+    "disallowed_usage": [
+      "enterprise classification"
+    ],
+    "validation_status": "APPROVED_SOURCE",
+    "is_active": true
+  }
+]

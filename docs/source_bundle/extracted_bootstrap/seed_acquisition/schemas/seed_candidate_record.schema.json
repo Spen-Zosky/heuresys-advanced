@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Seed Candidate Record",
+  "type": "object",
+  "required": [
+    "seed_natural_key",
+    "seed_domain",
+    "candidate_payload",
+    "validation_status"
+  ],
+  "properties": {
+    "seed_natural_key": {
+      "type": "string"
+    },
+    "seed_domain": {
+      "type": "string"
+    },
+    "source_code": {
+      "type": "string"
+    },
+    "source_uri": {
+      "type": "string"
+    },
+    "candidate_payload": {
+      "type": "object"
+    },
+    "confidence_score": {
+      "type": "number"
+    },
+    "validation_status": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+%% Heuresys Advanced — Bootstrap MVP Flow
+%% Source: docs/BOOTSTRAP_EXECUTION_PLAN.md §7
+%% To export to PNG/SVG: install mermaid-cli (`npm i -g @mermaid-js/mermaid-cli`) then:
+%%   mmdc -i qa_artifacts/diagrams/bootstrap_mvp_flow.mmd -o qa_artifacts/diagrams/bootstrap_mvp_flow.png -t default -b transparent -w 2000
+%%   mmdc -i qa_artifacts/diagrams/bootstrap_mvp_flow.mmd -o qa_artifacts/diagrams/bootstrap_mvp_flow.svg -t default -b transparent
+flowchart TD
+    A[Planning Approval Gate<br/>10 deliverables green] --> B[MVP-0: Repo + DB]
+    B --> B1[pnpm workspace init]
+    B1 --> B2[db/scripts: create_local_database]
+    B2 --> B3[Apply migrations 000001..000026]
+    B3 --> B4[Twice-run idempotency proof<br/>pg_dump diff empty]
+    B4 --> B5[Validation views 000023]
+    B5 --> B6[Seed RTL_BANK_REFERENCE<br/>158 synthetic Faker users]
+    B6 --> C[MVP-1: API Layer]
+    C --> C1[Fastify server + middleware chain]
+    C1 --> C2[Auth module: CSRF + JWT + refresh rotation]
+    C2 --> C3[22 modules + OpenAPI gap remediation]
+    C3 --> D[MVP-2a: Admin / Blueprint Console]
+    D --> D1[Next.js 15 shell + auth client + CSRF]
+    D1 --> D2[23 admin pages role-gated]
+    D2 --> D3[Visualization renderer<br/>React Flow + Mermaid fallback]
+    D3 --> D4[MVP-2b: Employee Self-Service Portal]
+    D4 --> D5[ESS layout shell + 13 me pages]
+    D5 --> D6[18 /v1/me/* endpoints<br/>hard-coded self-scope]
+    D6 --> E[Acceptance Tests Green<br/>23 acceptance tests passing]
+    E --> F[Post-MVP: Brownfield Waves<br/>270 demo employees, 4 tenants, no anonymization]
+    E --> G[Post-MVP: OCI migration<br/>ADR-0010 closure]
+    E --> H[Post-MVP: MFA enforcement]
+    E --> I[Post-MVP: rate limit per-tenant]
+
+    style A fill:#fef9c3,stroke:#854d0e,color:#000
+    style B fill:#dbeafe,stroke:#1e3a8a,color:#000
+    style C fill:#dbeafe,stroke:#1e3a8a,color:#000
+    style D fill:#dbeafe,stroke:#1e3a8a,color:#000
+    style D4 fill:#dcfce7,stroke:#14532d,color:#000
+    style E fill:#dcfce7,stroke:#14532d,color:#000
+    style F fill:#f3e8ff,stroke:#6b21a8,color:#000
+    style G fill:#f3e8ff,stroke:#6b21a8,color:#000
+    style H fill:#f3e8ff,stroke:#6b21a8,color:#000
+    style I fill:#f3e8ff,stroke:#6b21a8,color:#000

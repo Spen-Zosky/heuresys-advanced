@@ -1,0 +1,47 @@
+# Universal Skill Taxonomy Model
+
+## Controlled Vocabulary
+
+```yaml
+skill_category_primary:
+  - CORE_DOMAIN
+  - TECHNICAL_HARD
+  - SOFT_BEHAVIORAL
+  - MANAGERIAL_LEADERSHIP
+  - COMPLIANCE_REGULATORY
+  - DIGITAL_DATA
+  - RISK_CONTROL
+  - CUSTOMER_COMMERCIAL
+  - OPERATIONAL
+  - STRATEGIC_ANALYTICAL
+  - HR_ORGANIZATION
+
+skill_nature:
+  - CORE
+  - HARD
+  - SOFT
+  - LEADERSHIP
+  - REGULATORY
+  - DIGITAL
+  - ANALYTICAL
+  - ORGANIZATIONAL
+
+mandatory_level:
+  - REQUIRED
+  - PREFERRED
+  - DEVELOPMENTAL
+  - CERTIFICATION_LINKED
+  - OPTIONAL
+  - OUT_OF_SCOPE
+```
+
+## Industry Specialization
+
+`CORE_DOMAIN` is specialized per industry:
+
+- CORE_BANKING
+- CORE_MANUFACTURING
+- CORE_HEALTHCARE
+- CORE_RETAIL
+- CORE_LOGISTICS
+- CORE_SOFTWARE

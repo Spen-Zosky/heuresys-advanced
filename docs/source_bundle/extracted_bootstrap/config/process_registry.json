@@ -1,0 +1,144 @@
+{
+  "version": "2.1-idempotent",
+  "canonical_numbering": "00-22",
+  "processes": [
+    {
+      "sequence": 0,
+      "file": "00_Enterprise_Typing_and_Blueprint_Configuration.md",
+      "title": "Enterprise Typing and Blueprint Configuration",
+      "purpose": "Initial ATECO/NACE-based enterprise classification, semantic reconciliation, size/operating-model typing and blueprint selection."
+    },
+    {
+      "sequence": 1,
+      "file": "01_Current_Accounts_Management.md",
+      "title": "Current Accounts Management",
+      "purpose": "Lifecycle of current accounts: opening, maintenance, restrictions and closure."
+    },
+    {
+      "sequence": 2,
+      "file": "02_Payments_and_Transactions_Management.md",
+      "title": "Payments and Transactions Management",
+      "purpose": "Payments, transfers, cards, direct debits, settlement, exceptions and reconciliation."
+    },
+    {
+      "sequence": 3,
+      "file": "03_Cash_Operations_Management.md",
+      "title": "Cash Operations Management",
+      "purpose": "Branch cash, ATM cash, vault, transport, balancing and cash reconciliation."
+    },
+    {
+      "sequence": 4,
+      "file": "04_Deposit_Products_Management.md",
+      "title": "Deposit Products Management",
+      "purpose": "Savings, term deposits, certificates of deposit, interest and maturity handling."
+    },
+    {
+      "sequence": 5,
+      "file": "05_Lending_and_Credit_Management.md",
+      "title": "Lending and Credit Management",
+      "purpose": "Credit origination, assessment, approval, servicing, monitoring, collections and NPL."
+    },
+    {
+      "sequence": 6,
+      "file": "06_Customer_Relationship_Management.md",
+      "title": "Customer Relationship Management",
+      "purpose": "Customer lifecycle, service, engagement, complaints, retention and relationship management."
+    },
+    {
+      "sequence": 7,
+      "file": "07_Compliance_AML_and_Regulatory_Processes.md",
+      "title": "Compliance, AML and Regulatory Processes",
+      "purpose": "KYC, AML, sanctions, compliance testing, controls and regulatory reporting."
+    },
+    {
+      "sequence": 8,
+      "file": "08_Risk_Management.md",
+      "title": "Risk Management",
+      "purpose": "Credit, operational, liquidity, market and enterprise risk management."
+    },
+    {
+      "sequence": 9,
+      "file": "09_Treasury_and_Finance.md",
+      "title": "Treasury and Finance",
+      "purpose": "Treasury, accounting, financial control, ALM, closing and reporting."
+    },
+    {
+      "sequence": 10,
+      "file": "10_Digital_Banking_and_Channels.md",
+      "title": "Digital Banking and Channels",
+      "purpose": "Web, mobile, API, omnichannel banking and digital customer access."
+    },
+    {
+      "sequence": 11,
+      "file": "11_Sales_and_Commercial_Processes.md",
+      "title": "Sales and Commercial Processes",
+      "purpose": "Retail/SME commercial planning, campaigns, advisory, lead management and relationship development."
+    },
+    {
+      "sequence": 12,
+      "file": "12_Branch_Operations.md",
+      "title": "Branch Operations",
+      "purpose": "Daily branch operations, front office, service delivery, security and branch reconciliation."
+    },
+    {
+      "sequence": 13,
+      "file": "13_Legal_and_Litigation.md",
+      "title": "Legal and Litigation",
+      "purpose": "Legal advisory, contracts, disputes, litigation and legal governance."
+    },
+    {
+      "sequence": 14,
+      "file": "14_HR_and_Internal_Services.md",
+      "title": "People, Workforce and Internal Services Management",
+      "purpose": "Position-centric HRMS/workforce blueprint, scoped for the project perimeter."
+    },
+    {
+      "sequence": 15,
+      "file": "15_IT_and_Banking_Technology_Operations.md",
+      "title": "IT and Banking Technology Operations",
+      "purpose": "Core banking operations, ITSM, cybersecurity, IAM, data and integrations."
+    },
+    {
+      "sequence": 16,
+      "file": "16_Business_Continuity_and_Security.md",
+      "title": "Business Continuity and Security",
+      "purpose": "Operational resilience, disaster recovery, fraud prevention and physical/logical security."
+    },
+    {
+      "sequence": 17,
+      "file": "17_AI_Augmented_Banking_Processes.md",
+      "title": "AI-Augmented Banking Processes",
+      "purpose": "AI-enabled customer service, fraud, analytics, automation and banking intelligence."
+    },
+    {
+      "sequence": 18,
+      "file": "18_KPI_Library_Cascading_and_Assessment_Model.md",
+      "title": "KPI Library, Cascading and Assessment Model",
+      "purpose": "Process-to-unit-to-position KPI distribution, metrics, weights and assessment methods."
+    },
+    {
+      "sequence": 19,
+      "file": "19_Position_Based_Learning_Path_Management.md",
+      "title": "Position-Based Learning Path Management",
+      "purpose": "Learning paths inherited from positions and linked to skills, proficiency and certifications."
+    },
+    {
+      "sequence": 20,
+      "file": "20_Workforce_Intelligence_Gap_Analysis_and_Talent_Weighting.md",
+      "title": "Workforce Intelligence, Gap Analysis and Talent Weighting",
+      "purpose": "Position requirements vs person evidence, fit scores, gaps, readiness and talent weighting."
+    },
+    {
+      "sequence": 21,
+      "file": "21_Career_Planning_Talent_Mobility_and_Succession.md",
+      "title": "Career Planning, Talent Mobility and Succession",
+      "purpose": "Career paths, mobility, successor pools, critical role coverage and readiness levels."
+    },
+    {
+      "sequence": 22,
+      "file": "22_Compensation_Intelligence_and_Objective_Based_Reward_Input.md",
+      "title": "Compensation Intelligence and Objective-Based Reward Input",
+      "purpose": "Reward decision-support, objective valuation, gates and payroll/benefits handoff only."
+    }
+  ]
+}

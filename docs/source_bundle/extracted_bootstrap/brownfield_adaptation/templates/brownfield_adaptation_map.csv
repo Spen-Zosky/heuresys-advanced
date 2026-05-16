@@ -1,0 +1,5 @@
+source_table,source_domain,target_table,target_strategy,classification,scope_status,import_priority,notes
+public.tenants,tenant_foundation,sys.sys_tenancies,IMPORT_ADAPT,IMPORT,IN_SCOPE,1_LOW_RISK_CATALOGUES,Rename id to tenant_id; enrich with blueprint fields
+public.users,identity_auth,sys.sys_users + sys.sys_auth_*,SPLIT_TRANSFORM,TRANSFORM,PARTIALLY_IN_SCOPE,2_TENANT_OPERATING_MODEL,Separate identity from credentials
+public.esco_skills,skills,sys.sys_skills,IMPORT_ADAPT,IMPORT,IN_SCOPE,1_LOW_RISK_CATALOGUES,Preserve ESCO URI
+public.employees_payroll,payroll,,EXCLUDE,EXCLUDE,OUT_OF_SCOPE,EXCLUDED,Payroll execution out of scope

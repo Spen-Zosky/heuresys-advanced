@@ -1,0 +1,138 @@
+openapi: 3.1.0
+info:
+  title: Company HRMS/BPM Bootstrap API
+  version: 0.1.0
+  description: Initial API contract for tenant-aware, authenticated, position-centric HRMS/BPM platform.
+servers:
+  - url: http://localhost:8019
+paths:
+  /auth/login:
+    post:
+      summary: Login
+      responses:
+        "200":
+          description: Authenticated
+  /auth/logout:
+    post:
+      summary: Logout
+      responses:
+        "204":
+          description: Logged out
+  /auth/me:
+    get:
+      summary: Current authenticated user
+      responses:
+        "200":
+          description: Current user
+  /tenants:
+    get:
+      summary: List tenants
+      responses:
+        "200":
+          description: Tenant list
+    post:
+      summary: Create tenant
+      responses:
+        "201":
+          description: Tenant created
+  /tenants/{tenantId}:
+    get:
+      summary: Get tenant
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Tenant detail
+  /users:
+    get:
+      summary: List users
+      responses:
+        "200":
+          description: User list
+    post:
+      summary: Create user
+      responses:
+        "201":
+          description: User created
+  /positions:
+    get:
+      summary: List positions
+      responses:
+        "200":
+          description: Position list
+  /positions/{positionId}/intelligence-profile:
+    get:
+      summary: Get Position Intelligence Profile
+      parameters:
+        - name: positionId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Position intelligence profile
+  /visualizations:
+    get:
+      summary: List visualization graphs
+      responses:
+        "200":
+          description: Visualization graph list
+  /visualizations/{graphId}:
+    get:
+      summary: Get visualization graph
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Graph with nodes and edges
+  /visualizations/{graphId}/render:
+    get:
+      summary: Render visualization in target format
+      parameters:
+        - name: graphId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: target
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [react-flow, mermaid, d3, bpmn, generic-json]
+      responses:
+        "200":
+          description: Rendered graph payload
+  /seed-acquisition/runs:
+    post:
+      summary: Create seed acquisition run
+      responses:
+        "201":
+          description: Run created
+  /seed-acquisition/runs/{runId}/validate:
+    post:
+      summary: Validate seed acquisition run
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Validation result
+  /seed-acquisition/runs/{runId}/apply:
+    post:
+      summary: Apply approved seed run
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Seed applied

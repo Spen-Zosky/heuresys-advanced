@@ -1,0 +1,60 @@
+{
+  "scope_matrix": [
+    {
+      "module": "Enterprise Typing",
+      "status": "IN_SCOPE"
+    },
+    {
+      "module": "Banking BPM Blueprint",
+      "status": "IN_SCOPE"
+    },
+    {
+      "module": "Position-Centric HRMS",
+      "status": "IN_SCOPE"
+    },
+    {
+      "module": "Core HR Administration",
+      "status": "OUT_OF_SCOPE"
+    },
+    {
+      "module": "Payroll / Time & Attendance",
+      "status": "OUT_OF_SCOPE"
+    },
+    {
+      "module": "Benefits / Welfare Administration",
+      "status": "OUT_OF_SCOPE"
+    },
+    {
+      "module": "Procurement / Vendor Governance",
+      "status": "OUT_OF_SCOPE"
+    },
+    {
+      "module": "IAM / Badge / Device Provisioning",
+      "status": "OUT_OF_SCOPE"
+    },
+    {
+      "module": "KPI Cascading",
+      "status": "IN_SCOPE"
+    },
+    {
+      "module": "Learning Paths",
+      "status": "IN_SCOPE"
+    },
+    {
+      "module": "Career Planning",
+      "status": "IN_SCOPE"
+    },
+    {
+      "module": "Succession",
+      "status": "IN_SCOPE"
+    },
+    {
+      "module": "Compensation Intelligence",
+      "status": "IN_SCOPE"
+    },
+    {
+      "module": "Payroll Handoff",
+      "status": "PARTIALLY_IN_SCOPE"
+    }
+  ]
+}

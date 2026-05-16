@@ -1,0 +1,98 @@
+# =============================================================================
+# Heuresys Advanced — .gitignore
+# Heuresys Advanced HRMS/BPM Platform v5 Bootstrap
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Brownfield extraction & inspection artifacts (HARD REQUIREMENT)
+# -----------------------------------------------------------------------------
+# The original db-export.zip stays versioned as input material under
+# docs/source_bundle/brownfield/db-export.zip. The extracted working copy and
+# the inspection artifacts must NEVER be committed: they may contain (or
+# replicate) sensitive legacy data that the canonical architecture deliberately
+# excludes (PII, payroll, medical, attendance, raw SAP HR, etc.).
+docs/source_bundle/brownfield/extracted/
+docs/brownfield/_inspection_artifacts/
+
+# -----------------------------------------------------------------------------
+# Secrets / env files
+# -----------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+.env.production
+*.pem
+*.key
+!*.key.example
+
+# -----------------------------------------------------------------------------
+# Node / pnpm
+# -----------------------------------------------------------------------------
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# -----------------------------------------------------------------------------
+# Build outputs
+# -----------------------------------------------------------------------------
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# -----------------------------------------------------------------------------
+# Test / coverage
+# -----------------------------------------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+playwright-report/
+test-results/
+qa_artifacts/runs/
+
+# -----------------------------------------------------------------------------
+# Editor / OS
+# -----------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -----------------------------------------------------------------------------
+# Logs
+# -----------------------------------------------------------------------------
+*.log
+logs/
+
+# -----------------------------------------------------------------------------
+# Python (used only for brownfield inspection scripts)
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# -----------------------------------------------------------------------------
+# PostgreSQL local artifacts
+# -----------------------------------------------------------------------------
+*.dump
+*.backup
+pg_dump_snapshots/
+
+# -----------------------------------------------------------------------------
+# Optional Docker (not on canonical path — see ADR-0004)
+# -----------------------------------------------------------------------------
+# Docker is NOT part of the canonical runtime. If a contributor adds an
+# optional docker-compose.yml under docs/optional/docker/, that file is fine
+# to commit, but volumes/data must not be.
+docs/optional/docker/data/
+docs/optional/docker/.volumes/

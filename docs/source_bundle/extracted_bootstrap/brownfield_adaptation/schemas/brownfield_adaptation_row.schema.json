@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Brownfield Adaptation Row",
+  "type": "object",
+  "required": [
+    "source_table",
+    "target_strategy",
+    "classification",
+    "scope_status"
+  ],
+  "properties": {
+    "source_table": {
+      "type": "string"
+    },
+    "source_domain": {
+      "type": "string"
+    },
+    "target_table": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "target_strategy": {
+      "type": "string"
+    },
+    "classification": {
+      "type": "string",
+      "enum": [
+        "IMPORT",
+        "TRANSFORM",
+        "REFERENCE_ONLY",
+        "EXCLUDE"
+      ]
+    },
+    "scope_status": {
+      "type": "string"
+    },
+    "import_priority": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

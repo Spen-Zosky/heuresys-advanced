@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Position Intelligence Profile",
+  "type": "object",
+  "required": [
+    "position_code",
+    "position_title",
+    "org_unit",
+    "job_role",
+    "required_skills",
+    "kpis"
+  ],
+  "properties": {
+    "position_code": {
+      "type": "string"
+    },
+    "position_title": {
+      "type": "string"
+    },
+    "org_unit": {
+      "type": "string"
+    },
+    "branch_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "job_role": {
+      "type": "string"
+    },
+    "esco_occupation_uri": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "position_criticality": {
+      "type": "string"
+    },
+    "position_economic_weight": {
+      "type": "number"
+    },
+    "required_skills": {
+      "type": "array"
+    },
+    "learning_paths": {
+      "type": "array"
+    },
+    "kpis": {
+      "type": "array"
+    },
+    "assessment_methods": {
+      "type": "array"
+    },
+    "validation_status": {
+      "type": "string"
+    }
+  }
+}

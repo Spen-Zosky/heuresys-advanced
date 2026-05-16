@@ -31,12 +31,10 @@ set -a; source "$ENV_FILE"; set +a
 export PGPASSWORD="${POSTGRES_PASSWORD}"
 PSQL=(psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1)
 
-VIEWS=(
+# STRUCTURAL views — non-zero rows = SCHEMA/INVARIANT VIOLATION → exit 1.
+STRUCTURAL_VIEWS=(
   'sys.v_orphan_position_assignments'
   'sys.v_tenant_boundary_violations'
-  'sys.v_positions_without_job_role'
-  'sys.v_pip_completeness'
-  'sys.v_reward_gate_completeness'
   'sys.v_synthetic_user_flag_consistency'
   'sys.v_canonical_outside_sys'
   'sys.v_active_primary_assignment_per_user'
@@ -44,25 +42,56 @@ VIEWS=(
   'sys.v_inbox_resource_consistency'
 )
 
+# INFORMATIONAL views — non-zero rows = data-completeness gap (positions
+# without job_role assignment, positions missing PIP requirements, tenants
+# with activated blueprints missing gate seeds). These are progressively
+# closed as the platform is populated. They print WARN but do NOT fail.
+INFORMATIONAL_VIEWS=(
+  'sys.v_positions_without_job_role'
+  'sys.v_pip_completeness'
+  'sys.v_reward_gate_completeness'
+)
+
 fail=0
 skipped=0
-for v in "${VIEWS[@]}"; do
+total=$((${#STRUCTURAL_VIEWS[@]} + ${#INFORMATIONAL_VIEWS[@]}))
+
+echo "[validate] Structural views (zero rows required):"
+for v in "${STRUCTURAL_VIEWS[@]}"; do
   exists=$("${PSQL[@]}" -tAc "SELECT 1 FROM information_schema.views WHERE table_schema || '.' || table_name = '$v'" 2>/dev/null || echo "")
   if [[ -z "$exists" ]]; then
-    echo "SKIP: $v (view not yet created — migration 000023 not applied?)"
+    echo "  SKIP: $v (view not yet created)"
     skipped=$((skipped + 1))
     continue
   fi
   count=$("${PSQL[@]}" -tAc "SELECT count(*) FROM $v")
   if [[ "$count" -ne 0 ]]; then
-    echo "FAIL: $v returned $count rows"
+    echo "  FAIL: $v returned $count rows"
     fail=1
   else
-    echo "PASS: $v"
+    echo "  PASS: $v"
   fi
 done
-if [[ $fail -ne 0 ]]; then echo "[validate] one or more validation views returned rows." >&2; exit 1; fi
-if [[ $skipped -eq ${#VIEWS[@]} ]]; then
+
+echo ""
+echo "[validate] Informational views (data-completeness; warnings only):"
+for v in "${INFORMATIONAL_VIEWS[@]}"; do
+  exists=$("${PSQL[@]}" -tAc "SELECT 1 FROM information_schema.views WHERE table_schema || '.' || table_name = '$v'" 2>/dev/null || echo "")
+  if [[ -z "$exists" ]]; then
+    echo "  SKIP: $v"
+    skipped=$((skipped + 1))
+    continue
+  fi
+  count=$("${PSQL[@]}" -tAc "SELECT count(*) FROM $v")
+  if [[ "$count" -ne 0 ]]; then
+    echo "  WARN: $v has $count incomplete rows (informational — non-blocking)"
+  else
+    echo "  PASS: $v"
+  fi
+done
+
+if [[ $fail -ne 0 ]]; then echo "[validate] one or more STRUCTURAL validation views returned rows." >&2; exit 1; fi
+if [[ $skipped -eq $total ]]; then
   echo "[validate] all validation views skipped (migrations not yet applied). Done."
   exit 0
 fi

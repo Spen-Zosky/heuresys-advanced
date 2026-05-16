@@ -59,37 +59,60 @@ if (-not $PgDump) { Write-Warning "[validate] pg_dump.exe not found — twice-ru
 # -----------------------------------------------------------------------------
 # Step 1 — validation views
 # -----------------------------------------------------------------------------
-$views = @(
+$structuralViews = @(
     'sys.v_orphan_position_assignments',
     'sys.v_tenant_boundary_violations',
-    'sys.v_positions_without_job_role',
-    'sys.v_pip_completeness',
-    'sys.v_reward_gate_completeness',
     'sys.v_synthetic_user_flag_consistency',
     'sys.v_canonical_outside_sys',
     'sys.v_active_primary_assignment_per_user',
     'sys.v_visualization_node_in_canonical_node',
     'sys.v_inbox_resource_consistency'
 )
+$informationalViews = @(
+    'sys.v_positions_without_job_role',
+    'sys.v_pip_completeness',
+    'sys.v_reward_gate_completeness'
+)
 $fail = $false
 $skipped = 0
-foreach ($v in $views) {
+$totalViews = $structuralViews.Count + $informationalViews.Count
+
+Write-Host "[validate] Structural views (zero rows required):"
+foreach ($v in $structuralViews) {
     $exists = & $Psql -h $env:POSTGRES_HOST -p $env:POSTGRES_PORT -U $env:POSTGRES_USER -d $env:POSTGRES_DB -tAc "SELECT 1 FROM information_schema.views WHERE table_schema || '.' || table_name = '$v'" 2>$null
     if (-not $exists) {
-        Write-Host "SKIP: $v (view not yet created — migration 000023 not applied?)"
+        Write-Host "  SKIP: $v"
         $skipped++
         continue
     }
     $count = & $Psql -h $env:POSTGRES_HOST -p $env:POSTGRES_PORT -U $env:POSTGRES_USER -d $env:POSTGRES_DB -tAc "SELECT count(*) FROM $v"
     if ([int]$count -ne 0) {
-        Write-Host "FAIL: $v returned $count rows" -ForegroundColor Red
+        Write-Host "  FAIL: $v returned $count rows" -ForegroundColor Red
         $fail = $true
     } else {
-        Write-Host "PASS: $v" -ForegroundColor Green
+        Write-Host "  PASS: $v" -ForegroundColor Green
     }
 }
-if ($fail) { Write-Error "[validate] One or more validation views returned rows."; exit 1 }
-if ($skipped -eq $views.Count) {
+
+Write-Host ""
+Write-Host "[validate] Informational views (data-completeness; warnings only):"
+foreach ($v in $informationalViews) {
+    $exists = & $Psql -h $env:POSTGRES_HOST -p $env:POSTGRES_PORT -U $env:POSTGRES_USER -d $env:POSTGRES_DB -tAc "SELECT 1 FROM information_schema.views WHERE table_schema || '.' || table_name = '$v'" 2>$null
+    if (-not $exists) {
+        Write-Host "  SKIP: $v"
+        $skipped++
+        continue
+    }
+    $count = & $Psql -h $env:POSTGRES_HOST -p $env:POSTGRES_PORT -U $env:POSTGRES_USER -d $env:POSTGRES_DB -tAc "SELECT count(*) FROM $v"
+    if ([int]$count -ne 0) {
+        Write-Host "  WARN: $v has $count incomplete rows (informational — non-blocking)" -ForegroundColor Yellow
+    } else {
+        Write-Host "  PASS: $v" -ForegroundColor Green
+    }
+}
+
+if ($fail) { Write-Error "[validate] One or more STRUCTURAL validation views returned rows."; exit 1 }
+if ($skipped -eq $totalViews) {
     Write-Host "[validate] All validation views skipped (migrations not yet applied). Aborting twice-run too."
     exit 0
 }

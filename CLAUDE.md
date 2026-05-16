@@ -74,6 +74,35 @@ heuresys-advanced/
 
 **Workspace layout** (`pnpm-workspace.yaml`): `apps/*` + `packages/*`. Imports use `@heuresys/api`, `@heuresys/web`, `@heuresys/shared` with subpath exports like `@heuresys/shared/schemas/users`.
 
+## Design System — CENTRALIZZATO in `D:\ux-design-shared`
+
+All reusable UI/UX components live in **`D:\ux-design-shared\ui`** (`@heuresys/ui`) — a shared, deduplicated library extracted from `heuresys-evo`. This repo (and every future Heuresys consumer) accesses it via **symlink**, not via duplicated source. All UI dependencies (Radix, Tailwind 4, framer-motion, d3, echarts, three.js, ~80 libs total) live exclusively in `D:\ux-design-shared\ui` — **this repo installs nothing UI-related**.
+
+**Integration (verified working at commit `b720ada` of ux-design-shared)**:
+- Dep in root `package.json`: `"@heuresys/ui": "link:../ux-design-shared/ui"` (note: `link:` — NOT `file:` — and the path is **1 level up** from this repo root, not 3). Verified live symlink: `node_modules/@heuresys/ui` → `D:/ux-design-shared/ui`.
+- Initial setup of `ux-design-shared` (one-time per machine, already done): `git init`, then `cd D:/ux-design-shared && npm install --legacy-peer-deps` (Storybook 10 has a peer-dep clash with addon-a11y that requires the flag).
+- Import standard: `import { Button, Card, DataTable } from "@heuresys/ui"`.
+- Tailwind 4 in `apps/web`: when configured, `tailwind.config` must include `"./node_modules/@heuresys/ui/src/**/*.{ts,tsx}"` in `content` so utility classes from the linked library are picked up.
+- Next.js in `apps/web`: when scaffolded, set `transpilePackages: ["@heuresys/ui"]` in `next.config.js` so the bundler walks through the symlink.
+
+**Live-link semantics (do not get this wrong)**:
+- Modifications to **existing** file content in `D:\ux-design-shared\ui` → visible immediately to consumer (true symlink, inode-shared).
+- **New files / new components** added to `D:\ux-design-shared\ui` → also visible immediately (it's a directory-level symlink, so the symlinked view tracks the real directory contents in real time). No `pnpm install` needed for new component visibility — only when adding **new npm deps** to `@heuresys/ui` (then `npm install --legacy-peer-deps` inside `D:\ux-design-shared` to bring them in).
+- Verification command: `touch D:/ux-design-shared/ui/src/_TEST.txt && ls node_modules/@heuresys/ui/src/_TEST.txt` from this repo root should succeed without re-running `pnpm install`.
+
+**Rules** (non-negotiable):
+- **NEVER** create reusable UI components in `apps/web` or `packages/*`. Always add to `D:\ux-design-shared\ui\src\components\` and use from there.
+- **NEVER** add UI runtime deps (Radix, framer-motion, recharts, etc.) to any `package.json` in this repo. They belong to `@heuresys/ui` and are resolved through the symlink.
+- If a component is genuinely heuresys-advanced-specific (e.g., wires a tenant-aware widget to `@heuresys/shared` Zod schemas), it lives in `apps/web/src/components/` — and even then, prefer composing `@heuresys/ui` primitives rather than re-implementing them.
+- React peer: `@heuresys/ui` declares React via `peerDependencies`; `apps/web` is the one that installs the concrete React version. This avoids the "two Reacts" runtime crash.
+
+**Maintenance / evolution**:
+- Adding a new component: edit/add files under `D:\ux-design-shared\ui\src\components\` — appears in consumer instantly.
+- Adding a new npm dep to `@heuresys/ui`: edit `D:\ux-design-shared\ui\package.json`, run `npm install --legacy-peer-deps` in `D:\ux-design-shared` root, commit the lockfile inside that repo. No action needed in `heuresys-advanced`.
+- Versioning: `ux-design-shared` is its own git repo (initialized 2026-05-16, commit `b720ada`). Tag releases there when stable; consumers can pin to specific commits later by switching the `link:` to a `git+ssh://` or `git+https://` dep when the lib publishes elsewhere.
+- Storybook (51 components, 16 tiers): `cd D:\ux-design-shared && npm run storybook` → `http://localhost:6006`.
+- Re-validate symlink after a `pnpm install` accident or a Windows reboot: `readlink -f node_modules/@heuresys/ui` must return `/d/ux-design-shared/ui`. If it doesn't (e.g., pnpm resolved to a snapshot via `file:`), check that `package.json` says `link:` and the path is `../ux-design-shared/ui` (one level up from repo root).
+
 ### apps/api — the heart of MVP-1
 
 Entry split: `src/server.ts` is the network binding + env validation; `src/app.ts` exports `buildApp()` so tests (and any future embedded use) can boot an isolated Fastify instance without a port. The singleton pg pool lives in `src/db/client.ts` (`isDatabaseReady()` is the readiness probe used by `/readyz`). The `RoleCode` union and `COOKIES` constants live in `src/config/constants.ts` — import from there, don't redefine.

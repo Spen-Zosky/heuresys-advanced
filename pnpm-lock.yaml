@@ -6,7 +6,11 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    dependencies:
+      '@heuresys/ui':
+        specifier: link:../ux-design-shared/ui
+        version: link:../ux-design-shared/ui
 
   apps/api:
     dependencies:
@@ -36,7 +40,7 @@ importers:
         version: 16.4.7
       drizzle-orm:
         specifier: 0.36.4
-        version: 0.36.4(@types/pg@8.11.10)(pg@8.13.1)
+        version: 0.36.4(@opentelemetry/api@1.9.1)(@types/pg@8.11.10)(@types/react@19.2.14)(pg@8.13.1)(react@19.2.6)
       fastify:
         specifier: 4.28.1
         version: 4.28.1
@@ -704,6 +708,10 @@ packages:
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
     engines: {node: ^14.21.3 || >=16}
 
+  '@opentelemetry/api@1.9.1':
+    resolution: {integrity: sha512-gLyJlPHPZYdAk1JENA9LeHejZe1Ti77/pTeFm/nMXmQH/HFZlcS/O2XJB+L8fkbrNSqhdtlvjBVjxwUYanNH5Q==}
+    engines: {node: '>=8.0.0'}
+
   '@paralleldrive/cuid2@2.3.1':
     resolution: {integrity: sha512-XO7cAxhnTZl0Yggq6jOgjiOHhbgcO4NqFqwSmQpjK3b6TEE6Uj/jfSk6wzYyemh3+I0sHirKSetjQwn5cZktFw==}
 
@@ -857,6 +865,9 @@ packages:
   '@types/pg@8.11.10':
     resolution: {integrity: sha512-LczQUW4dbOQzsH2RQ5qoeJ6qJPdrcM/DcMLoqWQkMLMsq83J5lAX3LXjdkWdpscFy67JSOWDnh7Ny/sPFykmkg==}
 
+  '@types/react@19.2.14':
+    resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
+
   '@types/superagent@8.1.9':
     resolution: {integrity: sha512-pTVjI73witn+9ILmoJdajHGW2jkSaOzhiFYF1Rd3EQ94kymLqB9PjD9ISg7WaALC7+dCHT0FGe9T2LktLq/3GQ==}
 
@@ -984,6 +995,9 @@ packages:
 
   cookiejar@2.1.4:
     resolution: {integrity: sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==}
+
+  csstype@3.2.3:
+    resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -1473,6 +1487,10 @@ packages:
 
   quick-format-unescaped@4.0.4:
     resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
+
+  react@19.2.6:
+    resolution: {integrity: sha512-sfWGGfavi0xr8Pg0sVsyHMAOziVYKgPLNrS7ig+ivMNb3wbCBw3KxtflsGBAwD3gYQlE/AEZsTLgToRrSCjb0Q==}
+    engines: {node: '>=0.10.0'}
 
   real-require@0.2.0:
     resolution: {integrity: sha512-57frrGM/OCTLqLOAh0mhVA9VBMHd+9U7Zb2THMGdBUoZVOtGbJzjxsYGDJ3A9AYYCP4hn6y1TVbaOfzWtm5GFg==}
@@ -2043,6 +2061,9 @@ snapshots:
 
   '@noble/hashes@1.8.0': {}
 
+  '@opentelemetry/api@1.9.1':
+    optional: true
+
   '@paralleldrive/cuid2@2.3.1':
     dependencies:
       '@noble/hashes': 1.8.0
@@ -2143,6 +2164,11 @@ snapshots:
       '@types/node': 20.17.10
       pg-protocol: 1.13.0
       pg-types: 4.1.0
+
+  '@types/react@19.2.14':
+    dependencies:
+      csstype: 3.2.3
+    optional: true
 
   '@types/superagent@8.1.9':
     dependencies:
@@ -2281,6 +2307,9 @@ snapshots:
 
   cookiejar@2.1.4: {}
 
+  csstype@3.2.3:
+    optional: true
+
   debug@4.4.3:
     dependencies:
       ms: 2.1.3
@@ -2305,10 +2334,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.36.4(@types/pg@8.11.10)(pg@8.13.1):
+  drizzle-orm@0.36.4(@opentelemetry/api@1.9.1)(@types/pg@8.11.10)(@types/react@19.2.14)(pg@8.13.1)(react@19.2.6):
     optionalDependencies:
+      '@opentelemetry/api': 1.9.1
       '@types/pg': 8.11.10
+      '@types/react': 19.2.14
       pg: 8.13.1
+      react: 19.2.6
 
   dunder-proto@1.0.1:
     dependencies:
@@ -2774,6 +2806,9 @@ snapshots:
       side-channel: 1.1.0
 
   quick-format-unescaped@4.0.4: {}
+
+  react@19.2.6:
+    optional: true
 
   real-require@0.2.0: {}
 

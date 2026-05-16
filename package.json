@@ -26,5 +26,8 @@
     "openapi:generate": "pnpm --filter @heuresys/api run openapi:generate",
     "i18n:check": "pnpm --filter @heuresys/web run i18n:check"
   },
+  "dependencies": {
+    "@heuresys/ui": "link:../ux-design-shared/ui"
+  },
   "devDependencies": {}
 }

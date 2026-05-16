@@ -1,0 +1,21 @@
+{
+  "name": "@heuresys/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Heuresys Advanced — Fastify 4 API (23 modules, 148 endpoints, MVP-1 + ESS MVP-2b)",
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "openapi:generate": "tsx scripts/generate-openapi.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

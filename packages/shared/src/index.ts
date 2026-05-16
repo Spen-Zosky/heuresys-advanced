@@ -48,3 +48,8 @@ export * from "./schemas/activity-classification-mappings.js";
 export * from "./schemas/enterprise-size-bands.js";
 export * from "./schemas/operating-models.js";
 export * from "./schemas/enterprise-typing-profiles.js";
+export * from "./schemas/blueprint-families.js";
+export * from "./schemas/blueprint-variants.js";
+export * from "./schemas/blueprint-processes.js";
+export * from "./schemas/blueprint-activations.js";
+export * from "./schemas/blueprint-overrides.js";

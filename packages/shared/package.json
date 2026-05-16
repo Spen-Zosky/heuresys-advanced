@@ -182,6 +182,26 @@
     "./schemas/enterprise-typing-profiles": {
       "types": "./dist/schemas/enterprise-typing-profiles.d.ts",
       "default": "./src/schemas/enterprise-typing-profiles.ts"
+    },
+    "./schemas/blueprint-families": {
+      "types": "./dist/schemas/blueprint-families.d.ts",
+      "default": "./src/schemas/blueprint-families.ts"
+    },
+    "./schemas/blueprint-variants": {
+      "types": "./dist/schemas/blueprint-variants.d.ts",
+      "default": "./src/schemas/blueprint-variants.ts"
+    },
+    "./schemas/blueprint-processes": {
+      "types": "./dist/schemas/blueprint-processes.d.ts",
+      "default": "./src/schemas/blueprint-processes.ts"
+    },
+    "./schemas/blueprint-activations": {
+      "types": "./dist/schemas/blueprint-activations.d.ts",
+      "default": "./src/schemas/blueprint-activations.ts"
+    },
+    "./schemas/blueprint-overrides": {
+      "types": "./dist/schemas/blueprint-overrides.d.ts",
+      "default": "./src/schemas/blueprint-overrides.ts"
     }
   },
   "scripts": {

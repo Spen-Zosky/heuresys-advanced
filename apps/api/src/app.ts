@@ -69,6 +69,11 @@ import { activityMappingsRoutes } from "./modules/activity-classification-mappin
 import { enterpriseSizeBandsRoutes } from "./modules/enterprise-size-bands/routes.js";
 import { operatingModelsRoutes } from "./modules/operating-models/routes.js";
 import { enterpriseTypingProfilesRoutes } from "./modules/enterprise-typing-profiles/routes.js";
+import { blueprintFamiliesRoutes } from "./modules/blueprint-families/routes.js";
+import { blueprintVariantsRoutes } from "./modules/blueprint-variants/routes.js";
+import { blueprintProcessesRoutes } from "./modules/blueprint-processes/routes.js";
+import { blueprintActivationsRoutes } from "./modules/blueprint-activations/routes.js";
+import { blueprintOverridesRoutes } from "./modules/blueprint-overrides/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -227,6 +232,11 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(enterpriseSizeBandsRoutes, { prefix: "/v1/enterprise-size-bands" });
   await app.register(operatingModelsRoutes, { prefix: "/v1/operating-models" });
   await app.register(enterpriseTypingProfilesRoutes, { prefix: "/v1/enterprise-typing-profiles" });
+  await app.register(blueprintFamiliesRoutes, { prefix: "/v1/blueprint-families" });
+  await app.register(blueprintVariantsRoutes, { prefix: "/v1/blueprint-variants" });
+  await app.register(blueprintProcessesRoutes, { prefix: "/v1/blueprint-processes" });
+  await app.register(blueprintActivationsRoutes, { prefix: "/v1/blueprint-activations" });
+  await app.register(blueprintOverridesRoutes, { prefix: "/v1/blueprint-overrides" });
 
   return app;
 }

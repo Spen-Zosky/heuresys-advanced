@@ -42,6 +42,14 @@
     "./schemas/kpi-definitions": {
       "types": "./dist/schemas/kpi-definitions.d.ts",
       "default": "./src/schemas/kpi-definitions.ts"
+    },
+    "./schemas/job-families": {
+      "types": "./dist/schemas/job-families.d.ts",
+      "default": "./src/schemas/job-families.ts"
+    },
+    "./schemas/job-roles": {
+      "types": "./dist/schemas/job-roles.d.ts",
+      "default": "./src/schemas/job-roles.ts"
     }
   },
   "scripts": {

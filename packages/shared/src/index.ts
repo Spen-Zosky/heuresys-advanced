@@ -13,3 +13,5 @@ export * from "./schemas/positions.js";
 export * from "./schemas/organization-units.js";
 export * from "./schemas/skills.js";
 export * from "./schemas/kpi-definitions.js";
+export * from "./schemas/job-families.js";
+export * from "./schemas/job-roles.js";

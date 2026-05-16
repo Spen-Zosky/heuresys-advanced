@@ -28,7 +28,7 @@ Every ADR follows this structure:
 | [0007](adr/0007_frontend_next15_app_router.md) | Frontend framework | Accepted | **Next.js 15 App Router + React 19 + Tailwind 4 + shadcn/ui + TanStack Query + RHF + Zod** | 2026‑05‑16 |
 | [0008](adr/0008_position_intelligence_profile_as_view.md) | Position Intelligence Profile | Accepted | **Relational base + `VIEW`/`MATERIALIZED VIEW`**; JSONB only for hints | 2026‑05‑16 |
 | [0009](adr/0009_visualization_node_layouts_separate_table.md) | Visualization coordinates | Accepted | **Dedicated `sys.sys_visualization_node_layouts`** for per‑layout coords | 2026‑05‑16 |
-| [0010](adr/0010_postgresql_runtime_location.md) | PostgreSQL runtime location | Open | **Deferred** — keep 3 options open (A localhost / B OCI VM / C OCI Managed); switch via `.env` only | 2026‑05‑16 |
+| [0010](adr/0010_postgresql_runtime_location.md) | PostgreSQL runtime location | Accepted | **Option B** — PostgreSQL 16 native on OCI VM `oracle-vm-default` reached via SSH tunnel `ssh -L 5433:localhost:5432`; A and C documented as `.env` fallback blocks | 2026‑05‑16 |
 | [0011](adr/0011_ess_scope_inclusion.md) | Employee Self‑Service Portal inclusion | Accepted | **ESS in scope as MVP‑2b** (13 pages `/me/*` + 18 endpoints `/v1/me/*` + 19 `self`‑scope permissions + hard‑coded `userId = req.user.userId`); reverses the original out‑of‑scope decision | 2026‑05‑16 |
 
 ## Conventions

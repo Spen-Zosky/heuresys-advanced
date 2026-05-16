@@ -47,7 +47,7 @@ In parallelo dove possibile. Tempo di priming stimato: 15‑30 min lettura focal
 |---|-----------|--------------------|------------------|
 | **Q1** | Backend framework | **Fastify 4** (ADR‑0002 Accepted‑overridable) | adr/0002 |
 | **Q2** | DB access | **Drizzle ORM + raw SQL migrations** (ADR‑0003 Accepted‑overridable) | adr/0003 |
-| **Q4** | PostgreSQL runtime location | **A localhost** per MVP‑0/1, poi promote a **B OCI VM** in MVP‑2 | adr/0010 (Open) |
+| ~~Q4~~ | ~~PostgreSQL runtime location~~ | **Chiusa 2026‑05‑16 → ADR‑0010 = Option B (OCI VM `oracle-vm-default`, tunnel port 5433). Vedi RD‑25** | adr/0010 (Accepted) |
 | **Q6** | Faker seed per RTL_BANK_REFERENCE | **42** (deterministic) | MIGRATION_IMPLEMENTATION_PLAN §6 |
 | **Q7** | Brownfield wave order | **1 → 2 → 3 → 4** canonical | BROWNFIELD_IMPORT_PLAN §7.1 |
 | **Q8** | OpenAPI contract location | Copy in `apps/api/openapi.yaml` curated | API_IMPLEMENTATION_PLAN §7 |
@@ -145,7 +145,7 @@ Riferimento dettagliato: `docs/BOOTSTRAP_EXECUTION_PLAN.md` §5 MVP Roadmap.
 | 0007 | Next 15 App Router | Accepted |
 | 0008 | PIP = view, not blob | Accepted |
 | 0009 | sys_visualization_node_layouts separate | Accepted |
-| 0010 | PG runtime location (A/B/C) | **Open (Q4)** |
+| 0010 | PG runtime location — Option B (OCI VM, tunnel 5433) | Accepted |
 | 0011 | ESS in scope as MVP‑2b | Accepted |
 
 ADR aggiuntive previste (post‑MVP):
@@ -175,6 +175,26 @@ Lista completa in `docs/BOOTSTRAP_EXECUTION_PLAN.md` §9 + §9.1. Sintesi:
 - **RD‑18..22** Brownfield refresh PR mandatory, DGOV breakdown, exact wave counts, promotion process 16‑step, wave runner docs step 9.0
 - **RD‑23** Mermaid PNG/SVG generato
 - **RD‑24** Approvazione formale Section 19 unlocked
+
+---
+
+## Risorse esterne disponibili (autorizzate dall'utente)
+
+Per future sessioni Claude/AI: l'utente ha autorizzato accesso completo (inclusi env files, API keys, credenziali per siti web, CLI tools, DBMS e qualunque altra credenziale presente) a due location del codebase legacy **heuresys-evo** che sono la sorgente del brownfield import:
+
+| Sistema | Path | Note |
+|---|---|---|
+| Windows PC locale | `D:\evo.heuresys.com\` | codebase legacy + tutte le sub-directory |
+| OCI VM `oracle-vm-default` | `/home/ubuntu/heuresys-evo` | codebase live; eventuale runtime PostgreSQL brownfield |
+
+**Vincoli operativi**: non stampare segreti in chat/output, usarli solo operativamente. Mai committare path assoluti hardcoded in `heuresys-advanced` (usare `BROWNFIELD_IMPORT_PLAN.md` come canonical pointer). Le directory restano READ-ONLY se non c'è richiesta esplicita di modifica.
+
+**Quando usarle**:
+- Step 5.0.2: ispezione PG preesistente sulla VM (riuso vs nuovo install)
+- ADR-0010: topologia PG VM (porta, pg_hba.conf, DB esistenti)
+- Brownfield waves post-MVP: sorgente canonical per import → trasformazione
+- Credenziali: siti, CLI, DBMS, API key di terze parti
+- **MVP-2 UI riuso**: il brownfield contiene componenti, librerie e asset visivi estesi che l'utente ha autorizzato a riusare come **shared** in `apps/web` invece di ricostruire da zero. Strategie da valutare in MVP-2 entry (workspace `@heuresys/ui`, symlink, cherry-pick); recon component inventory è prerequisito a step 5.2.1. Open question: compatibilità React/Next 15/Tailwind 4 vs versioni legacy.
 
 ---
 

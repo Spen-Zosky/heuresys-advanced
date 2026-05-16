@@ -54,7 +54,7 @@ All architectural decisions are formalized as ADRs under `docs/architecture/adr/
 | [0007](architecture/adr/0007_frontend_next15_app_router.md) | Frontend framework | **Next.js 15 App Router + React 19 + Tailwind 4 + shadcn/ui + TanStack Query v5 + RHF + Zod** | Accepted |
 | [0008](architecture/adr/0008_position_intelligence_profile_as_view.md) | Position Intelligence Profile | **Relational base tables + `VIEW`/`MATERIALIZED VIEW`**; JSONB only for unstructured hints | Accepted |
 | [0009](architecture/adr/0009_visualization_node_layouts_separate_table.md) | Visualization coordinates | **Dedicated `sys.sys_visualization_node_layouts`** for per‑layout/version coordinates | Accepted |
-| [0010](architecture/adr/0010_postgresql_runtime_location.md) | PostgreSQL runtime location | **DEFERRED — keep 3 options open** (A localhost, B OCI VM, C OCI Managed); switch is `.env` only | Open |
+| [0010](architecture/adr/0010_postgresql_runtime_location.md) | PostgreSQL runtime location | **Option B — OCI VM `oracle-vm-default`** via SSH tunnel `-L 5433:localhost:5432`; A and C remain `.env` fallback blocks | Accepted |
 | [0011](architecture/adr/0011_ess_scope_inclusion.md) | Employee Self‑Service Portal inclusion | **ESS in scope as MVP‑2b** (13 pages + 18 `/v1/me/*` endpoints + 19 `self`‑scope permissions + hard‑coded `userId = req.user.userId`) | Accepted |
 
 > Decision Log table (chronological) sits at the foot of this file (§9).
@@ -322,7 +322,7 @@ References this plan’s §8 (master risk register). Key risks impacting executi
 | 2026‑05‑16 | 0007 | Frontend | Next 15 App Router + React 19 + Tailwind 4 + shadcn/ui | Accepted |
 | 2026‑05‑16 | 0008 | PIP design | Relational + View, not blob | Accepted |
 | 2026‑05‑16 | 0009 | Viz coordinates | Dedicated `sys_visualization_node_layouts` table | Accepted |
-| 2026‑05‑16 | 0010 | PostgreSQL runtime location | Deferred — keep 3 options open (localhost / OCI VM / OCI Managed) | Open |
+| 2026‑05‑16 | 0010 | PostgreSQL runtime location | Option B — OCI VM `oracle-vm-default` via SSH tunnel on port 5433 | Accepted |
 | 2026‑05‑16 | 0011 | Employee Self‑Service Portal inclusion | ESS in scope as MVP‑2b (reverses original out‑of‑scope) | Accepted |
 
 ### 9.1 Review Session Decisions (Review #1‑#11, 2026‑05‑16)
@@ -355,6 +355,7 @@ The deliverable review session produced additional binding decisions, recorded b
 | RD‑22 | Wave runner documentation | Step 9.0 added to `BROWNFIELD_IMPORT_PLAN.md` §9: per‑wave runner spec `docs/brownfield/wave_runners/wave_N_runner.md` to be written before runner implementation |
 | RD‑23 | Mermaid diagram artifact | Bootstrap MVP flow diagram exported as PNG (48 KB) + SVG (42 KB) under `qa_artifacts/diagrams/` |
 | **RD‑24** | **Formal approval gate** | **2026‑05‑16, end of Review session #1‑#11: Enzo Spenuso formally approves all 10 Section 18 deliverables + ADR‑0011 (ESS) + Mermaid artifact. Section 19 (heavy implementation: MVP‑0 repo scaffold + migrations + API + frontend) is hereby unlocked. Next session resumes from MVP‑0 step 5.0.1 (pnpm workspace init).** |
+| **RD‑25** | **ADR‑0010 closure** | **2026‑05‑16, opening of MVP‑0 implementation session: Enzo selects **Option B** — PostgreSQL 16 native on OCI VM `oracle-vm-default` reached via SSH local‑forward tunnel on port **5433** (`ssh -L 5433:localhost:5432 oracle-vm-default`). ADR‑0010 status moves from `Open` to `Accepted`. Options A (localhost) and C (OCI Managed) remain documented as commented fallback blocks in `.env.example`. Risk R13 (OCI ARM64 native deps) becomes active and must be verified at first `pnpm install`. |
 
 ---
 

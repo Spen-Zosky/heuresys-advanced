@@ -131,7 +131,7 @@ CREATE INDEX IF NOT EXISTS sys_vpc_user_period_idx
 
 CREATE TABLE IF NOT EXISTS sys.sys_reward_gate_catalog (
   reward_gate_catalog_id          uuid         PRIMARY KEY DEFAULT gen_random_uuid(),
-  reward_gate_catalog_blueprint_variant_id uuid REFERENCES sys.sys_blueprint_variants(blueprint_variant_id) ON DELETE CASCADE,
+  reward_gate_catalog_blueprint_variant_id uuid NOT NULL REFERENCES sys.sys_blueprint_variants(blueprint_variant_id) ON DELETE CASCADE,
   reward_gate_catalog_code        varchar(64)  NOT NULL,
   reward_gate_catalog_name        varchar(128) NOT NULL,
   reward_gate_catalog_description text,
@@ -141,8 +141,28 @@ CREATE TABLE IF NOT EXISTS sys.sys_reward_gate_catalog (
   updated_at                      timestamptz  NOT NULL DEFAULT now()
 );
 
+-- Idempotent ALTER for upgrades from prior versions that had nullable variant_id:
+--   if the column was created nullable and the table is empty, we can SET NOT NULL.
+DO $alter$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'sys' AND table_name = 'sys_reward_gate_catalog'
+      AND column_name = 'reward_gate_catalog_blueprint_variant_id'
+      AND is_nullable = 'YES'
+  ) THEN
+    ALTER TABLE sys.sys_reward_gate_catalog
+      ALTER COLUMN reward_gate_catalog_blueprint_variant_id SET NOT NULL;
+  END IF;
+END
+$alter$;
+
+-- Drop the previous COALESCE-based unique index (if it exists from an earlier
+-- apply with nullable variant_id) and recreate a plain unique index so that
+-- ON CONFLICT (variant_id, code) in 000021 matches correctly.
+DROP INDEX IF EXISTS sys.sys_reward_gate_catalog_variant_code_uq;
 CREATE UNIQUE INDEX IF NOT EXISTS sys_reward_gate_catalog_variant_code_uq
-  ON sys.sys_reward_gate_catalog (COALESCE(reward_gate_catalog_blueprint_variant_id, '00000000-0000-0000-0000-000000000000'::uuid), reward_gate_catalog_code);
+  ON sys.sys_reward_gate_catalog (reward_gate_catalog_blueprint_variant_id, reward_gate_catalog_code);
 
 CREATE TABLE IF NOT EXISTS sys.sys_reward_gates (
   reward_gate_id          uuid         PRIMARY KEY DEFAULT gen_random_uuid(),

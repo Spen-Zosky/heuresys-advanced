@@ -120,7 +120,11 @@ Write-Host "[validate] Capturing schema snapshot AFTER second migrate run..."
 & $PgDump -h $env:POSTGRES_HOST -p $env:POSTGRES_PORT -U $env:POSTGRES_USER -d $env:POSTGRES_DB --schema-only --no-owner --no-acl --schema=sys --schema=brownfield --schema=staging --schema=audit -f $snap2
 if ($LASTEXITCODE -ne 0) { Write-Error "pg_dump (after) failed."; exit 1 }
 
-$diff = Compare-Object (Get-Content $snap1) (Get-Content $snap2)
+# Filter session-specific `\restrict <random>` / `\unrestrict <random>` lines
+# (these change between pg_dump runs even when the schema is identical).
+$snap1Lines = Get-Content $snap1 | Where-Object { $_ -notmatch '^\\(restrict|unrestrict) ' }
+$snap2Lines = Get-Content $snap2 | Where-Object { $_ -notmatch '^\\(restrict|unrestrict) ' }
+$diff = Compare-Object $snap1Lines $snap2Lines
 if ($diff) {
     Write-Host ""
     Write-Host "FAIL: schema diverged on second migrate run." -ForegroundColor Red

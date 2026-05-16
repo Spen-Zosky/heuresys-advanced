@@ -93,12 +93,22 @@ bash "$(dirname "$0")/migrate.sh" "$ENV_FILE"
 echo "[validate] Capturing schema snapshot AFTER second migrate run..."
 pg_dump -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DB" --schema-only --no-owner --no-acl --schema=sys --schema=brownfield --schema=staging --schema=audit -f "$SNAP2"
 
-if diff -q "$SNAP1" "$SNAP2" >/dev/null 2>&1; then
+# pg_dump emits two session-specific `\restrict <random>` / `\unrestrict <random>`
+# pragma lines per session that differ between runs even when the schema is
+# identical. Filter them out before diffing to avoid false-positive failures.
+SNAP1_FILTERED="${SNAP1}.filtered"
+SNAP2_FILTERED="${SNAP2}.filtered"
+grep -vE '^\\(restrict|unrestrict) ' "$SNAP1" > "$SNAP1_FILTERED" || true
+grep -vE '^\\(restrict|unrestrict) ' "$SNAP2" > "$SNAP2_FILTERED" || true
+
+if diff -q "$SNAP1_FILTERED" "$SNAP2_FILTERED" >/dev/null 2>&1; then
   echo ""
   echo "OK: validation views all 0 rows; twice-run idempotency proven (empty schema diff)."
+  rm -f "$SNAP1_FILTERED" "$SNAP2_FILTERED"
 else
   echo ""
   echo "FAIL: schema diverged on second migrate run. Showing first 50 diff lines:"
-  diff "$SNAP1" "$SNAP2" | head -50
+  diff "$SNAP1_FILTERED" "$SNAP2_FILTERED" | head -50
+  rm -f "$SNAP1_FILTERED" "$SNAP2_FILTERED"
   exit 1
 fi

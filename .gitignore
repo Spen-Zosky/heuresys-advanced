@@ -54,6 +54,9 @@ coverage/
 playwright-report/
 test-results/
 qa_artifacts/runs/
+qa_artifacts/schema_snapshot_*.sql
+qa_artifacts/schema_snapshot_*.sql.filtered
+qa_artifacts/db_snapshots/
 
 # -----------------------------------------------------------------------------
 # Editor / OS

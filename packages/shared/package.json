@@ -114,6 +114,18 @@
     "./schemas/user-career-plans": {
       "types": "./dist/schemas/user-career-plans.d.ts",
       "default": "./src/schemas/user-career-plans.ts"
+    },
+    "./schemas/succession-pools": {
+      "types": "./dist/schemas/succession-pools.d.ts",
+      "default": "./src/schemas/succession-pools.ts"
+    },
+    "./schemas/successor-candidates": {
+      "types": "./dist/schemas/successor-candidates.d.ts",
+      "default": "./src/schemas/successor-candidates.ts"
+    },
+    "./schemas/successor-readiness": {
+      "types": "./dist/schemas/successor-readiness.d.ts",
+      "default": "./src/schemas/successor-readiness.ts"
     }
   },
   "scripts": {

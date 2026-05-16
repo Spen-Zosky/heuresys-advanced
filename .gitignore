@@ -60,6 +60,15 @@ qa_artifacts/schema_snapshot_*.sql.filtered
 qa_artifacts/db_snapshots/
 
 # -----------------------------------------------------------------------------
+# Session handoff (versioned baseline; future local edits ignored by gitignore
+# rule — note: gitignore only affects untracked files, so after this baseline
+# commit, edits to HANDOFF.md still show as modified. Use
+#   git update-index --skip-worktree HANDOFF.md
+# to make local edits invisible to git status, or just edit + amend / re-commit
+# when you produce the next handoff.)
+HANDOFF.md
+
+# -----------------------------------------------------------------------------
 # Editor / OS
 # -----------------------------------------------------------------------------
 .vscode/

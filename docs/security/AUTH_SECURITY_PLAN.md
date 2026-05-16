@@ -387,12 +387,15 @@ reply.setCookie('hrx_access', accessJwt, {
   maxAge: 60 * 15,   // 15 min
 });
 
-// Refresh token cookie (scoped to /auth/refresh + /auth/logout)
+// Refresh token cookie (scoped to /v1/auth/refresh + /v1/auth/logout).
+// Path MUST match the real route prefix declared in app.ts
+// (`await app.register(authRoutes, { prefix: "/v1/auth" })`), otherwise
+// the browser never returns the cookie to those endpoints.
 reply.setCookie('hrx_refresh', refreshTokenOpaque, {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax',
-  path: '/auth',
+  path: '/v1/auth',
   maxAge: 60 * 60 * 24 * 30,   // 30 days
 });
 
@@ -826,8 +829,8 @@ Audit log retention: indefinite (legal/compliance). Volume mitigation: partition
 
 - [ ] All 11 `sys.sys_auth_*` tables created idempotently in migration 000005.
 - [ ] 8 canonical roles seeded; ~100 permissions seeded (≈ 81 admin + 19 ESS `*:self`); role‑permission matrix from §6 + §6.1 applied.
-- [ ] `POST /auth/login` accepts `{email, password}`, returns 204 + sets `hrx_access` + `hrx_refresh` + `hrx_csrf` cookies, plus body `{user, roles, csrfToken}`.
-- [ ] `POST /auth/refresh` reads `hrx_refresh` cookie + `X-CSRF-Token` header; rotates; returns 204 + sets new cookies; or returns 401 on replay.
+- [ ] `POST /auth/login` accepts `{email, password}`, returns **200** + sets `hrx_access` + `hrx_refresh` + `hrx_csrf` cookies, plus body `{user, roles, csrfToken}`. *(Earlier drafts said 204; HTTP forbids a body on 204 and Fastify strips it, so login + refresh return 200 with body. Logout + password-reset endpoints remain 204 — they have no body.)*
+- [ ] `POST /auth/refresh` reads `hrx_refresh` cookie + `X-CSRF-Token` header; rotates; returns **200** + sets new cookies; or returns 401 on replay.
 - [ ] `POST /auth/logout` revokes family + clears cookies.
 - [ ] `GET /auth/me` returns the current user payload (no hash leaked).
 - [ ] CSRF middleware blocks state‑changing requests without `X-CSRF-Token`.

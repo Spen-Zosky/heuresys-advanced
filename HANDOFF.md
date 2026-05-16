@@ -1,7 +1,9 @@
 Sono Enzo Spenuso. Riprendo il progetto Heuresys Advanced HRMS/BPM Platform v5
-in `D:\heuresys-advanced\`. La sessione precedente ha chiuso MVP-1 step 5.1.3
-(auth module) al 100% + tutti i 4 follow-up. Suite integration 15/15 verde.
+in `D:\heuresys-advanced\`. Sessione precedente: chiuso MVP-1 step 5.1.3 +
+tutti i 4 follow-up + step 5.1.4 (schemas → @heuresys/shared). 15/15 test verdi.
 
+  c219741  feat(shared): MVP-1 5.1.4 — promote auth schemas to @heuresys/shared
+  2239c48  docs(handoff): update for 5.1.3 followups closure
   7450f77  docs(security): AUTH_SECURITY_PLAN.md errata — cookie path + login/refresh status
   ffd3007  test(api): MVP-1 5.1.3 followup #3 — live pino redaction test (config-level)
   0cb3aee  test(api): MVP-1 5.1.3 followup #2 — live rate-limit test (11 logins → 429)
@@ -163,34 +165,35 @@ al codebase legacy heuresys-evo (sorgente brownfield):
 Vincoli: NON stampare valori segreti nel context/chat, solo uso operativo.
 NON committare path assoluti hardcoded a heuresys-advanced.
 
-=== PROSSIMO STEP CONCRETO: MVP-1 5.1.4 — SHARED SCHEMAS PROMOTION ===
+=== PROSSIMO STEP CONCRETO: MVP-1 5.1.5 — FIRST BUSINESS MODULE ===
 
-Promuovere gli Zod schemas auth da apps/api/src/modules/auth/schema.ts a packages/shared/
-così il futuro frontend Next.js (MVP-2a) può importarli direttamente — single source of
-truth per request/response shapes.
+Stato post-5.1.4: pipeline auth + RBAC + tenant isolation + shared schemas è
+solida. Il prossimo step è il primo business CRUD module per validare l'
+intera architettura (route → service → repository → DB) su un dominio reale.
 
-Deliverable:
-  packages/shared/                     (workspace package, già scaffold MVP-0)
-    src/schemas/auth.ts                — re-export di LoginBodySchema, MeResponseSchema,
-                                         RoleCodeSchema, etc. con eventuale toJsonSchema()
-    package.json                       — dependency: zod
-    tsconfig.json                      — composite + declaration emit
-    index.ts                           — public exports
-  apps/api/src/modules/auth/schema.ts  — re-export da @heuresys/shared (no logic dup)
-  apps/api/package.json                — add "@heuresys/shared": "workspace:*"
+Opzione A — `tenants` module (RACCOMANDATA — minimo accoppiamento):
+  GET    /v1/tenants                   — PLATFORM_ADMIN cross-tenant
+  GET    /v1/tenants/:id               — TENANT_ADMIN own + PLATFORM_ADMIN
+  POST   /v1/tenants                   — PLATFORM_ADMIN
+  PATCH  /v1/tenants/:id               — TENANT_ADMIN own + PLATFORM_ADMIN
+  DELETE /v1/tenants/:id               — PLATFORM_ADMIN
+  Deliverable: ~600 LOC (schemas in @heuresys/shared/schemas/tenants +
+  routes/service/repository in apps/api/src/modules/tenants). Esercita
+  fine il middleware tenantContext + scope filter cross-tenant.
+  Riferimento canonical: docs/api/API_IMPLEMENTATION_PLAN.md §6.2.
 
-Acceptance:
-  - apps/api import da @heuresys/shared funziona senza ts-config breakage
-  - vitest test suite continua a passare 11/11
-  - Build di shared produce dist/ + .d.ts emit corretti
+Opzione B — `users` module (più complesso, tocca FK + role grants):
+  CRUD su sys.sys_users + management di sys.sys_user_auth_roles (assegnare/
+  revocare ruoli). Scope filters per MANAGER/USER. ~1000 LOC.
 
-Tempo stimato: 200-300 LOC + tsconfig wiring. ~30-45 min.
+Opzione C — `positions` module (esempio full nel piano):
+  CRUD su sys.sys_positions + sub-resources (skills, kpis). Il modulo "core"
+  HRMS. ~1400 LOC con sub-resources.
 
-Alternative se preferisci saltare 5.1.4 e andare diretto a un business module:
-  - 5.1.5 (tenants module): la più semplice. CRUD su sys.sys_tenancies + RBAC con
-    'tenant:read'/create/update/delete. Verifica fine il middleware tenantContext.
-  - 5.1.5 alt (users module): più complessa. CRUD su sys.sys_users + role-grant
-    management su sys.sys_user_auth_roles. Tocca FK + scope filters (• in matrix).
+Raccomandazione: andare con A (tenants), 5.1.5. Dopo si può procedere con
+users (5.1.6) e positions (5.1.7) in modo additivo.
+
+Tempo stimato (opzione A): ~45-60 min.
 
 === REGOLE DI LAVORO (sintesi cross-CLAUDE.md) ===
 

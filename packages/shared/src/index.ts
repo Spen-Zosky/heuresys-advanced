@@ -12,3 +12,4 @@ export * from "./schemas/users.js";
 export * from "./schemas/positions.js";
 export * from "./schemas/organization-units.js";
 export * from "./schemas/skills.js";
+export * from "./schemas/kpi-definitions.js";

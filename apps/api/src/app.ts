@@ -64,6 +64,11 @@ import { visualizationLayoutsRoutes } from "./modules/visualization-layouts/rout
 import { visualizationNodeLayoutsRoutes } from "./modules/visualization-node-layouts/routes.js";
 import { visualizationStylesRoutes } from "./modules/visualization-styles/routes.js";
 import { visualizationExportsRoutes } from "./modules/visualization-exports/routes.js";
+import { activityClassificationsRoutes } from "./modules/activity-classifications/routes.js";
+import { activityMappingsRoutes } from "./modules/activity-classification-mappings/routes.js";
+import { enterpriseSizeBandsRoutes } from "./modules/enterprise-size-bands/routes.js";
+import { operatingModelsRoutes } from "./modules/operating-models/routes.js";
+import { enterpriseTypingProfilesRoutes } from "./modules/enterprise-typing-profiles/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -217,6 +222,11 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(visualizationNodeLayoutsRoutes, { prefix: "/v1/visualization-node-layouts" });
   await app.register(visualizationStylesRoutes, { prefix: "/v1/visualization-styles" });
   await app.register(visualizationExportsRoutes, { prefix: "/v1/visualization-exports" });
+  await app.register(activityClassificationsRoutes, { prefix: "/v1/activity-classifications" });
+  await app.register(activityMappingsRoutes, { prefix: "/v1/activity-classification-mappings" });
+  await app.register(enterpriseSizeBandsRoutes, { prefix: "/v1/enterprise-size-bands" });
+  await app.register(operatingModelsRoutes, { prefix: "/v1/operating-models" });
+  await app.register(enterpriseTypingProfilesRoutes, { prefix: "/v1/enterprise-typing-profiles" });
 
   return app;
 }

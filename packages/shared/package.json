@@ -162,6 +162,26 @@
     "./schemas/visualization-exports": {
       "types": "./dist/schemas/visualization-exports.d.ts",
       "default": "./src/schemas/visualization-exports.ts"
+    },
+    "./schemas/activity-classifications": {
+      "types": "./dist/schemas/activity-classifications.d.ts",
+      "default": "./src/schemas/activity-classifications.ts"
+    },
+    "./schemas/activity-classification-mappings": {
+      "types": "./dist/schemas/activity-classification-mappings.d.ts",
+      "default": "./src/schemas/activity-classification-mappings.ts"
+    },
+    "./schemas/enterprise-size-bands": {
+      "types": "./dist/schemas/enterprise-size-bands.d.ts",
+      "default": "./src/schemas/enterprise-size-bands.ts"
+    },
+    "./schemas/operating-models": {
+      "types": "./dist/schemas/operating-models.d.ts",
+      "default": "./src/schemas/operating-models.ts"
+    },
+    "./schemas/enterprise-typing-profiles": {
+      "types": "./dist/schemas/enterprise-typing-profiles.d.ts",
+      "default": "./src/schemas/enterprise-typing-profiles.ts"
     }
   },
   "scripts": {

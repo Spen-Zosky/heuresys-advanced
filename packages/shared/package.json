@@ -234,6 +234,10 @@
     "./schemas/seed-approval-decisions": {
       "types": "./dist/schemas/seed-approval-decisions.d.ts",
       "default": "./src/schemas/seed-approval-decisions.ts"
+    },
+    "./schemas/me": {
+      "types": "./dist/schemas/me.d.ts",
+      "default": "./src/schemas/me.ts"
     }
   },
   "scripts": {

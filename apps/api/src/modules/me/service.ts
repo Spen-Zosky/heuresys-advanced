@@ -1,0 +1,92 @@
+/**
+ * apps/api/src/modules/me/service.ts
+ * All methods take the canonical userId from the route, which sources it
+ * from req.user.userId. No method accepts userId from user input.
+ */
+import { pool } from "../../db/client.js";
+import { NotFoundError, ForbiddenError } from "../../errors/index.js";
+import type {
+  MeProfile, UpdateMeProfileBody, CreateMeSelfAssessmentBody,
+  CreateMeEnrollmentBody, CreateMeCareerTargetBody,
+  MeInboxQuery, PatchMeInboxBody,
+} from "@heuresys/shared";
+import * as repo from "./repository.js";
+
+export interface SelfActor { userId: string; tenantId: string | null; roles: string[] }
+
+function requireTenant(a: SelfActor): string {
+  if (!a.tenantId) throw new ForbiddenError("Tenant context required");
+  return a.tenantId;
+}
+
+export const meService = {
+  async getProfile(actor: SelfActor): Promise<MeProfile> {
+    const p = await repo.loadProfile(pool, actor.userId, actor.roles);
+    if (!p) throw new NotFoundError("User");
+    return p;
+  },
+
+  async updateProfile(actor: SelfActor, patch: UpdateMeProfileBody): Promise<MeProfile> {
+    await repo.upsertProfile(pool, actor.userId, actor.tenantId, patch);
+    const p = await repo.loadProfile(pool, actor.userId, actor.roles);
+    if (!p) throw new NotFoundError("User");
+    return p;
+  },
+
+  async listPositions(actor: SelfActor) {
+    return repo.listMyPositions(pool, actor.userId);
+  },
+
+  async listSkills(actor: SelfActor) {
+    return repo.listMySkills(pool, actor.userId);
+  },
+
+  async submitSelfAssessment(actor: SelfActor, body: CreateMeSelfAssessmentBody) {
+    const tenantId = requireTenant(actor);
+    if (!(await repo.skillVisibleToTenant(pool, body.skillId, tenantId))) {
+      throw new NotFoundError("Skill");
+    }
+    return repo.insertSelfAssessment(pool, actor.userId, tenantId, body);
+  },
+
+  async listLearning(actor: SelfActor) {
+    return repo.listMyLearning(pool, actor.userId);
+  },
+
+  async enrollLearning(actor: SelfActor, body: CreateMeEnrollmentBody) {
+    const tenantId = requireTenant(actor);
+    return repo.insertEnrollment(pool, actor.userId, tenantId, body);
+  },
+
+  async listGaps(actor: SelfActor) {
+    return repo.listMyGaps(pool, actor.userId);
+  },
+
+  async listAssessments(actor: SelfActor) {
+    return repo.listMyAssessments(pool, actor.userId);
+  },
+
+  async listCareerTargets(actor: SelfActor) {
+    return repo.listMyCareerTargets(pool, actor.userId);
+  },
+
+  async addCareerTarget(actor: SelfActor, body: CreateMeCareerTargetBody) {
+    const tenantId = requireTenant(actor);
+    if (!(await repo.positionInTenant(pool, body.positionId, tenantId))) {
+      throw new NotFoundError("Position");
+    }
+    return repo.insertCareerTarget(pool, actor.userId, tenantId, body);
+  },
+
+  async listInbox(actor: SelfActor, query: MeInboxQuery) {
+    return repo.listInbox(pool, actor.userId, query);
+  },
+
+  async patchInbox(actor: SelfActor, notificationId: string, body: PatchMeInboxBody) {
+    const existing = await repo.findInboxNotification(pool, actor.userId, notificationId);
+    if (!existing) throw new NotFoundError("Notification");
+    const updated = await repo.patchInboxNotification(pool, actor.userId, notificationId, body);
+    if (!updated) throw new NotFoundError("Notification");
+    return updated;
+  },
+};

@@ -82,6 +82,7 @@ import { brownfieldTableMappingsRoutes } from "./modules/brownfield-table-mappin
 import { seedAcquisitionRunsRoutes } from "./modules/seed-acquisition-runs/routes.js";
 import { seedCandidateRecordsRoutes } from "./modules/seed-candidate-records/routes.js";
 import { seedApprovalDecisionsRoutes } from "./modules/seed-approval-decisions/routes.js";
+import { meRoutes } from "./modules/me/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -253,6 +254,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(seedAcquisitionRunsRoutes, { prefix: "/v1/seed-acquisition-runs" });
   await app.register(seedCandidateRecordsRoutes, { prefix: "/v1/seed-candidate-records" });
   await app.register(seedApprovalDecisionsRoutes, { prefix: "/v1/seed-approval-decisions" });
+  await app.register(meRoutes, { prefix: "/v1/me" });
 
   return app;
 }

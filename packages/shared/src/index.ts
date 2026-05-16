@@ -61,3 +61,4 @@ export * from "./schemas/brownfield-table-mappings.js";
 export * from "./schemas/seed-acquisition-runs.js";
 export * from "./schemas/seed-candidate-records.js";
 export * from "./schemas/seed-approval-decisions.js";
+export * from "./schemas/me.js";

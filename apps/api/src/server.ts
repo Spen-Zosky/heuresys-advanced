@@ -9,6 +9,7 @@
 import { buildApp } from "./app.js";
 import { env } from "./config/env.js";
 import { closePool } from "./db/client.js";
+import { loadRolePermissionCache } from "./modules/auth/cache-loader.js";
 
 async function start() {
   const app = await buildApp();
@@ -29,6 +30,11 @@ async function start() {
   process.on("SIGTERM", () => shutdown("SIGTERM"));
 
   try {
+    // Populate RBAC cache before opening the port: the first request must
+    // never hit requirePermission() with an unloaded cache.
+    const cacheStats = await loadRolePermissionCache();
+    app.log.info(cacheStats, "RBAC permission cache loaded");
+
     await app.listen({ host: env.HOST, port: env.PORT });
     app.log.info({ host: env.HOST, port: env.PORT, env: env.NODE_ENV }, "API listening");
   } catch (err) {

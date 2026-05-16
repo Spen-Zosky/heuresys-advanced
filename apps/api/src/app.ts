@@ -35,25 +35,29 @@ export interface BuildAppOptions {
   authMailer?: IMailer;
 }
 
+/**
+ * Single source of truth for the pino redact paths used by the API logger.
+ * Exported so the redaction test can build a parallel pino instance with
+ * the same config and verify it works at runtime.
+ */
+export const LOG_REDACT_PATHS = [
+  "req.headers.cookie",
+  "req.headers.authorization",
+  "req.body.password",
+  "req.body.newPassword",
+  "req.body.confirmPassword",
+  "res.body.token",
+  "res.body.refreshToken",
+  "*.password",
+  "*.hash",
+  "*.secret",
+] as const;
+
 export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       level: env.LOG_LEVEL,
-      redact: {
-        paths: [
-          "req.headers.cookie",
-          "req.headers.authorization",
-          "req.body.password",
-          "req.body.newPassword",
-          "req.body.confirmPassword",
-          "res.body.token",
-          "res.body.refreshToken",
-          "*.password",
-          "*.hash",
-          "*.secret",
-        ],
-        censor: "[REDACTED]",
-      },
+      redact: { paths: [...LOG_REDACT_PATHS], censor: "[REDACTED]" },
     },
     trustProxy: env.TRUST_PROXY,
     bodyLimit: 1024 * 1024, // 1 MB

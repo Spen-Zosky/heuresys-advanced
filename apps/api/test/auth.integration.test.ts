@@ -9,7 +9,10 @@
 
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";
 import { createHash } from "node:crypto";
+import { Writable } from "node:stream";
+import pino from "pino";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { LOG_REDACT_PATHS } from "../src/app.js";
 import { pool, closePool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
 import { createAuthService } from "../src/modules/auth/service.js";
@@ -407,5 +410,61 @@ describe("/v1/auth/* integration", () => {
     } finally {
       await local.app.close();
     }
+  });
+
+  /* -------------------------------------------------- pino redaction */
+
+  // Fastify does not log request bodies by default, so a full inject() flow
+  // can't surface the sentinel via the request logger. We instead validate
+  // the redaction *config* at runtime: a pino instance built with our
+  // LOG_REDACT_PATHS must redact every shape we declared.
+  it("LOG_REDACT_PATHS redact every documented body field", async () => {
+    const SENTINEL = "SekretPa$$w0rdInLog!";
+    const chunks: string[] = [];
+    const collector = new Writable({
+      write(chunk, _enc, done) {
+        chunks.push(chunk.toString());
+        done();
+      },
+    });
+
+    const logger = pino(
+      {
+        level: "info",
+        redact: { paths: [...LOG_REDACT_PATHS], censor: "[REDACTED]" },
+      },
+      collector,
+    );
+
+    // Each log line exercises one or more paths from LOG_REDACT_PATHS.
+    logger.info({ req: { body: { password: SENTINEL } } }, "login attempt");
+    logger.info(
+      { req: { body: { newPassword: SENTINEL, confirmPassword: SENTINEL } } },
+      "reset attempt",
+    );
+    logger.info(
+      { res: { body: { token: SENTINEL, refreshToken: SENTINEL } } },
+      "issued tokens",
+    );
+    logger.info(
+      { req: { headers: { cookie: SENTINEL, authorization: SENTINEL } } },
+      "incoming headers",
+    );
+    // Wildcard *.password / *.hash / *.secret — match at any depth.
+    logger.info({ inner: { password: SENTINEL, hash: SENTINEL, secret: SENTINEL } }, "wildcard");
+
+    await new Promise((resolve) => setTimeout(resolve, 30));
+
+    const joined = chunks.join("");
+    expect(joined.length).toBeGreaterThan(0);
+
+    // The sentinel must never appear anywhere in the output.
+    expect(joined.includes(SENTINEL)).toBe(false);
+
+    // Every named path we declared in LOG_REDACT_PATHS triggered redaction
+    // at least once → ≥10 [REDACTED] occurrences across the 5 lines above
+    // (1 + 2 + 2 + 2 + 3 = 10).
+    const redactedCount = (joined.match(/\[REDACTED\]/g) ?? []).length;
+    expect(redactedCount).toBeGreaterThanOrEqual(10);
   });
 });

@@ -1,8 +1,18 @@
 Sono Enzo Spenuso. Riprendo il progetto Heuresys Advanced HRMS/BPM Platform v5
-in `D:\heuresys-advanced\`. Sessione precedente: 11 business modules + auth +
-shared completati (5.1.3..5.1.12). 69/69 integration tests verdi.
+in `D:\heuresys-advanced\`. Sessione precedente (2026-05-16, lunga):
+30 business modules + auth + shared completati (5.1.3..5.1.17d).
+145/145 integration tests verdi. 150 endpoint live.
 
-  HEAD     feat(api): MVP-1 5.1.12 — learning-modules module (5 endpoints, 4 tests)
+  HEAD     feat(api): MVP-1 5.1.17d — position succession add-on (2 modules, 8 endpoints, 6 tests)
+  ac6ff7c  feat(api): MVP-1 5.1.17c — succession bundle (3 modules, 13 endpoints, 10 tests)
+  1c04420  feat(api): MVP-1 5.1.17b — user-career-plans module (5 endpoints, 4 tests)
+  df4e660  feat(api): MVP-1 5.1.17a — career-paths bundle (2 modules, 10 endpoints, 9 tests)
+  19da2f9  feat(api): MVP-1 5.1.16 — learning_paths bundle (3 modules, 15 endpoints, 12 tests)
+  094cffa  feat(api): MVP-1 5.1.15 — assessment bundle (3 modules, 8 endpoints, 11 tests)
+  60bad63  feat(api): MVP-1 5.1.14 — training-initiatives module (4 endpoints, 5 tests)
+  5f80105  feat(api): MVP-1 5.1.13 — skill taxonomy bundle (5 modules, 20 endpoints, 19 tests)
+  480ab68  chore: add CLAUDE.md for future Claude Code sessions
+  ec40a2f  feat(api): MVP-1 5.1.12 — learning-modules module (5 endpoints, 4 tests)
   baabbe8  feat(api): MVP-1 5.1.11 — job-families + job-roles bundle (9 endpoints, 5 tests)
   a774ea2  feat(api): MVP-1 5.1.10 — kpi-definitions module (5 endpoints, 5 tests)
   2ab2479  feat(api): MVP-1 5.1.9 — skills module (4 endpoints, global+tenant visibility, 5 tests)
@@ -70,7 +80,7 @@ API runtime:
   - JWT RS256 keys in .secrets/jwt_{private,public}.pem (gitignored)
   - COOKIE_SECRET 48-byte base64 in .env (gitignored)
   - RBAC cache: 8 roles + 388 mappings loaded at startup
-  - 67 endpoints live (7 auth + 58 business + 2 health) + 69/69 integration tests verde
+  - 150 endpoints live (7 auth + 141 business + 2 health) + 145/145 integration tests verdi
   - 5 test personas seeded (PLATFORM_ADMIN/TENANT_ADMIN/MANAGER/USER×2) +
     3 test positions con hierarchy (TEST_MGR_POS ← TEST_SUB_POS + TEST_OUTSIDER_POS)
   - Tutti i password: Admin#PassW0rd! (override via TEST_ADMIN_PASSWORD env)
@@ -220,8 +230,12 @@ Moduli ancora da fare in MVP-1 (priorità max-completezza):
   5.1.13  skill_categories + skill_families + skill_taxonomy (gerarchia skills)
   5.1.14  training_initiatives (richiede learning_modules — ora sbloccato)
   5.1.15  assessments + assessment_methods + assessment_results
-  5.1.16  learning_paths + learning_path_steps + learning_gaps
-  5.1.17  career_succession / sys_position_career_paths come modulo dedicato
+  5.1.16  learning_paths + learning_path_steps + learning_gaps   [DONE — 19da2f9]
+  5.1.17  career_succession / sys_position_career_paths           [DONE — a/b/c/d]
+    5.1.17a career-paths + career-path-steps                     [DONE — df4e660]
+    5.1.17b user-career-plans                                    [DONE — 1c04420]
+    5.1.17c succession-pools + successor-candidates + readiness  [DONE — ac6ff7c]
+    5.1.17d position-career-paths + position-succession-relevance [DONE — d12d444]
   5.1.18  visualizations + sys_visualization_node_layouts (ADR-0009, React Flow)
   5.1.19  enterprise_typing (governance plane)
   5.1.20  blueprints + blueprint_activation

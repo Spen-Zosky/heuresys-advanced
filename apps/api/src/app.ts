@@ -55,6 +55,8 @@ import { userCareerPlansRoutes } from "./modules/user-career-plans/routes.js";
 import { successionPoolsRoutes } from "./modules/succession-pools/routes.js";
 import { successorCandidatesRoutes } from "./modules/successor-candidates/routes.js";
 import { successorReadinessRoutes } from "./modules/successor-readiness/routes.js";
+import { positionCareerPathsRoutes } from "./modules/position-career-paths/routes.js";
+import { positionSuccessionRelevanceRoutes } from "./modules/position-succession-relevance/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -199,6 +201,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(successionPoolsRoutes, { prefix: "/v1/succession-pools" });
   await app.register(successorCandidatesRoutes, { prefix: "/v1/successor-candidates" });
   await app.register(successorReadinessRoutes, { prefix: "/v1/successor-readiness" });
+  await app.register(positionCareerPathsRoutes, { prefix: "/v1/position-career-paths" });
+  await app.register(positionSuccessionRelevanceRoutes, { prefix: "/v1/position-succession-relevance" });
 
   return app;
 }

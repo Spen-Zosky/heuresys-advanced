@@ -34,3 +34,5 @@ export * from "./schemas/user-career-plans.js";
 export * from "./schemas/succession-pools.js";
 export * from "./schemas/successor-candidates.js";
 export * from "./schemas/successor-readiness.js";
+export * from "./schemas/position-career-paths.js";
+export * from "./schemas/position-succession-relevance.js";

@@ -126,6 +126,14 @@
     "./schemas/successor-readiness": {
       "types": "./dist/schemas/successor-readiness.d.ts",
       "default": "./src/schemas/successor-readiness.ts"
+    },
+    "./schemas/position-career-paths": {
+      "types": "./dist/schemas/position-career-paths.d.ts",
+      "default": "./src/schemas/position-career-paths.ts"
+    },
+    "./schemas/position-succession-relevance": {
+      "types": "./dist/schemas/position-succession-relevance.d.ts",
+      "default": "./src/schemas/position-succession-relevance.ts"
     }
   },
   "scripts": {

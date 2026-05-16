@@ -25,6 +25,9 @@ importers:
       '@fastify/rate-limit':
         specifier: 9.1.0
         version: 9.1.0
+      '@heuresys/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       argon2:
         specifier: 0.41.1
         version: 0.41.1
@@ -83,7 +86,15 @@ importers:
 
   apps/web: {}
 
-  packages/shared: {}
+  packages/shared:
+    dependencies:
+      zod:
+        specifier: 3.25.76
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: 5.7.2
+        version: 5.7.2
 
 packages:
 

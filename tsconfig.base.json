@@ -22,12 +22,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "incremental": true,
-    "baseUrl": ".",
-    "paths": {
-      "@heuresys/shared": ["packages/shared/src/index.ts"],
-      "@heuresys/shared/*": ["packages/shared/src/*"]
-    }
+    "incremental": true
   },
   "exclude": ["node_modules", "dist", "build", ".next", "coverage"]
 }

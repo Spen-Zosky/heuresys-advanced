@@ -1,7 +1,13 @@
 /**
  * apps/api/src/config/constants.ts
- * Cookie names, header names, role codes — single source of truth.
+ * Cookie names, header names, token TTLs — server-only constants.
+ *
+ * RBAC role codes (ROLE_CODES / RoleCode / RoleCodeSchema) live in
+ * @heuresys/shared so the frontend can consume them too. We re-export them
+ * here for ergonomic in-API imports.
  */
+
+export { ROLE_CODES, type RoleCode, RoleCodeSchema } from "@heuresys/shared";
 
 export const COOKIES = {
   ACCESS:  "hrx_access",
@@ -13,18 +19,6 @@ export const HEADERS = {
   CSRF:       "x-csrf-token",
   REQUEST_ID: "x-request-id",
 } as const;
-
-export const ROLE_CODES = [
-  "PLATFORM_ADMIN",
-  "TENANT_ADMIN",
-  "BLUEPRINT_MANAGER",
-  "HRMS_MANAGER",
-  "PROCESS_OWNER",
-  "MANAGER",
-  "USER",
-  "READ_ONLY",
-] as const;
-export type RoleCode = (typeof ROLE_CODES)[number];
 
 export const ACCESS_JWT_TTL_SECONDS = 15 * 60;        // 15 minutes
 export const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days

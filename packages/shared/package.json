@@ -5,18 +5,32 @@
   "type": "module",
   "description": "Heuresys Advanced — shared Zod schemas + TypeScript types consumed by @heuresys/api and @heuresys/web",
   "main": "src/index.ts",
-  "types": "src/index.ts",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./schemas/*": "./src/schemas/*.ts",
-    "./types/*": "./src/types/*.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./src/index.ts"
+    },
+    "./schemas/auth": {
+      "types": "./dist/schemas/auth.d.ts",
+      "default": "./src/schemas/auth.ts"
+    },
+    "./schemas/role-codes": {
+      "types": "./dist/schemas/role-codes.d.ts",
+      "default": "./src/schemas/role-codes.ts"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepare": "tsc -p tsconfig.json",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2"
+  }
 }

@@ -74,6 +74,10 @@
     "./schemas/skill-proficiency-levels": {
       "types": "./dist/schemas/skill-proficiency-levels.d.ts",
       "default": "./src/schemas/skill-proficiency-levels.ts"
+    },
+    "./schemas/training-initiatives": {
+      "types": "./dist/schemas/training-initiatives.d.ts",
+      "default": "./src/schemas/training-initiatives.ts"
     }
   },
   "scripts": {

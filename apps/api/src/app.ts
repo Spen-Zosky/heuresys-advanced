@@ -42,6 +42,7 @@ import { skillCategoriesRoutes } from "./modules/skill-categories/routes.js";
 import { skillTaxonomyEdgesRoutes } from "./modules/skill-taxonomy-edges/routes.js";
 import { skillAliasesRoutes } from "./modules/skill-aliases/routes.js";
 import { skillProficiencyLevelsRoutes } from "./modules/skill-proficiency-levels/routes.js";
+import { trainingInitiativesRoutes } from "./modules/training-initiatives/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -173,6 +174,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(skillTaxonomyEdgesRoutes, { prefix: "/v1/skill-taxonomy-edges" });
   await app.register(skillAliasesRoutes, { prefix: "/v1/skill-aliases" });
   await app.register(skillProficiencyLevelsRoutes, { prefix: "/v1/skill-proficiency-levels" });
+  await app.register(trainingInitiativesRoutes, { prefix: "/v1/training-initiatives" });
 
   return app;
 }

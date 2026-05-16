@@ -21,3 +21,4 @@ export * from "./schemas/skill-categories.js";
 export * from "./schemas/skill-taxonomy-edges.js";
 export * from "./schemas/skill-aliases.js";
 export * from "./schemas/skill-proficiency-levels.js";
+export * from "./schemas/training-initiatives.js";

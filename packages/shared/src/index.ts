@@ -30,3 +30,4 @@ export * from "./schemas/learning-path-steps.js";
 export * from "./schemas/learning-gaps.js";
 export * from "./schemas/career-paths.js";
 export * from "./schemas/career-path-steps.js";
+export * from "./schemas/user-career-plans.js";

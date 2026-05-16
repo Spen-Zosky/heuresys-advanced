@@ -51,6 +51,7 @@ import { learningPathStepsRoutes } from "./modules/learning-path-steps/routes.js
 import { learningGapsRoutes } from "./modules/learning-gaps/routes.js";
 import { careerPathsRoutes } from "./modules/career-paths/routes.js";
 import { careerPathStepsRoutes } from "./modules/career-path-steps/routes.js";
+import { userCareerPlansRoutes } from "./modules/user-career-plans/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -191,6 +192,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(learningGapsRoutes, { prefix: "/v1/learning-gaps" });
   await app.register(careerPathsRoutes, { prefix: "/v1/career-paths" });
   await app.register(careerPathStepsRoutes, { prefix: "/v1/career-path-steps" });
+  await app.register(userCareerPlansRoutes, { prefix: "/v1/user-career-plans" });
 
   return app;
 }

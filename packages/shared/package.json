@@ -110,6 +110,10 @@
     "./schemas/career-path-steps": {
       "types": "./dist/schemas/career-path-steps.d.ts",
       "default": "./src/schemas/career-path-steps.ts"
+    },
+    "./schemas/user-career-plans": {
+      "types": "./dist/schemas/user-career-plans.d.ts",
+      "default": "./src/schemas/user-career-plans.ts"
     }
   },
   "scripts": {

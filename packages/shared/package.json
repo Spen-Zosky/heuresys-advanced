@@ -202,6 +202,14 @@
     "./schemas/blueprint-overrides": {
       "types": "./dist/schemas/blueprint-overrides.d.ts",
       "default": "./src/schemas/blueprint-overrides.ts"
+    },
+    "./schemas/process-kpi-templates": {
+      "types": "./dist/schemas/process-kpi-templates.d.ts",
+      "default": "./src/schemas/process-kpi-templates.ts"
+    },
+    "./schemas/organization-unit-kpi-templates": {
+      "types": "./dist/schemas/organization-unit-kpi-templates.d.ts",
+      "default": "./src/schemas/organization-unit-kpi-templates.ts"
     }
   },
   "scripts": {

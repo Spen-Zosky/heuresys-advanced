@@ -74,6 +74,8 @@ import { blueprintVariantsRoutes } from "./modules/blueprint-variants/routes.js"
 import { blueprintProcessesRoutes } from "./modules/blueprint-processes/routes.js";
 import { blueprintActivationsRoutes } from "./modules/blueprint-activations/routes.js";
 import { blueprintOverridesRoutes } from "./modules/blueprint-overrides/routes.js";
+import { processKpiTemplatesRoutes } from "./modules/process-kpi-templates/routes.js";
+import { organizationUnitKpiTemplatesRoutes } from "./modules/organization-unit-kpi-templates/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -237,6 +239,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(blueprintProcessesRoutes, { prefix: "/v1/blueprint-processes" });
   await app.register(blueprintActivationsRoutes, { prefix: "/v1/blueprint-activations" });
   await app.register(blueprintOverridesRoutes, { prefix: "/v1/blueprint-overrides" });
+  await app.register(processKpiTemplatesRoutes, { prefix: "/v1/process-kpi-templates" });
+  await app.register(organizationUnitKpiTemplatesRoutes, { prefix: "/v1/organization-unit-kpi-templates" });
 
   return app;
 }

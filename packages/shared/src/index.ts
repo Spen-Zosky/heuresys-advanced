@@ -53,3 +53,5 @@ export * from "./schemas/blueprint-variants.js";
 export * from "./schemas/blueprint-processes.js";
 export * from "./schemas/blueprint-activations.js";
 export * from "./schemas/blueprint-overrides.js";
+export * from "./schemas/process-kpi-templates.js";
+export * from "./schemas/organization-unit-kpi-templates.js";

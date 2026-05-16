@@ -1,9 +1,17 @@
 Sono Enzo Spenuso. Riprendo il progetto Heuresys Advanced HRMS/BPM Platform v5
 in `D:\heuresys-advanced\`. Sessione precedente (2026-05-16, lunga):
-30 business modules + auth + shared completati (5.1.3..5.1.17d).
-145/145 integration tests verdi. 150 endpoint live.
+55 business modules + auth + shared completati. MVP-1 5.1 CHIUSO
+(5.1.3..5.1.23 tutti shipped). 173/173 integration tests verdi.
+254 endpoint live. Prossima fase: MVP-2a web SPA e MVP-2b ESS /v1/me/*.
 
-  HEAD     feat(api): MVP-1 5.1.17d — position succession add-on (2 modules, 8 endpoints, 6 tests)
+  HEAD     feat(api): MVP-1 5.1.23 — seed_acquisition (3 modules, 10 endpoints, 5 tests)
+  5ea7a31  feat(api): MVP-1 5.1.22 — brownfield_adaptation viewer (3 modules, 9 endpoints, 5 tests)
+  432a503  feat(api): MVP-1 5.1.21 — bpm_processes (2 modules, 8 endpoints, 3 tests)
+  e90a667  feat(api): MVP-1 5.1.20 — blueprint catalog + activation (5 modules, 23 endpoints, 6 tests)
+  409b266  feat(api): MVP-1 5.1.19 — enterprise_typing (5 modules, 22 endpoints, 5 tests)
+  40a16c0  feat(api): MVP-1 5.1.18 — visualization pipeline (7 modules, 32 endpoints, 4 tests)
+  3a53e4e  docs(handoff): close 5.1.15 + 5.1.16 + 5.1.17 (a..d) — 30 modules, 150 endpoints
+  d12d444  feat(api): MVP-1 5.1.17d — position succession add-on (2 modules, 8 endpoints, 6 tests)
   ac6ff7c  feat(api): MVP-1 5.1.17c — succession bundle (3 modules, 13 endpoints, 10 tests)
   1c04420  feat(api): MVP-1 5.1.17b — user-career-plans module (5 endpoints, 4 tests)
   df4e660  feat(api): MVP-1 5.1.17a — career-paths bundle (2 modules, 10 endpoints, 9 tests)
@@ -80,7 +88,7 @@ API runtime:
   - JWT RS256 keys in .secrets/jwt_{private,public}.pem (gitignored)
   - COOKIE_SECRET 48-byte base64 in .env (gitignored)
   - RBAC cache: 8 roles + 388 mappings loaded at startup
-  - 150 endpoints live (7 auth + 141 business + 2 health) + 145/145 integration tests verdi
+  - 254 endpoints live (7 auth + 245 business + 2 health) + 173/173 integration tests verdi
   - 5 test personas seeded (PLATFORM_ADMIN/TENANT_ADMIN/MANAGER/USER×2) +
     3 test positions con hierarchy (TEST_MGR_POS ← TEST_SUB_POS + TEST_OUTSIDER_POS)
   - Tutti i password: Admin#PassW0rd! (override via TEST_ADMIN_PASSWORD env)
@@ -236,6 +244,12 @@ Moduli ancora da fare in MVP-1 (priorità max-completezza):
     5.1.17b user-career-plans                                    [DONE — 1c04420]
     5.1.17c succession-pools + successor-candidates + readiness  [DONE — ac6ff7c]
     5.1.17d position-career-paths + position-succession-relevance [DONE — d12d444]
+  5.1.18  visualizations (7 tables: graphs/nodes/edges/layouts/...)  [DONE — 40a16c0]
+  5.1.19  enterprise_typing (5 tables: ATECO/NACE/sizes/...)         [DONE — 409b266]
+  5.1.20  blueprints (5 tables: families/variants/processes/...)     [DONE — e90a667]
+  5.1.21  bpm_processes (process_kpi_templates + ou_kpi_templates)   [DONE — 432a503]
+  5.1.22  brownfield_adaptation viewer (3 modules)                   [DONE — 5ea7a31]
+  5.1.23  seed_acquisition (3 modules: runs/candidates/decisions)    [DONE — 2f79b6d]
   5.1.18  visualizations + sys_visualization_node_layouts (ADR-0009, React Flow)
   5.1.19  enterprise_typing (governance plane)
   5.1.20  blueprints + blueprint_activation

@@ -1,7 +1,9 @@
 Sono Enzo Spenuso. Riprendo il progetto Heuresys Advanced HRMS/BPM Platform v5
-in `D:\heuresys-advanced\`. Sessione precedente: 8 business modules + auth +
-shared completati (5.1.3..5.1.10). 60/60 integration tests verdi.
+in `D:\heuresys-advanced\`. Sessione precedente: 11 business modules + auth +
+shared completati (5.1.3..5.1.12). 69/69 integration tests verdi.
 
+  HEAD     feat(api): MVP-1 5.1.12 — learning-modules module (5 endpoints, 4 tests)
+  baabbe8  feat(api): MVP-1 5.1.11 — job-families + job-roles bundle (9 endpoints, 5 tests)
   a774ea2  feat(api): MVP-1 5.1.10 — kpi-definitions module (5 endpoints, 5 tests)
   2ab2479  feat(api): MVP-1 5.1.9 — skills module (4 endpoints, global+tenant visibility, 5 tests)
   f52ca03  feat(api): MVP-1 5.1.8 — organization-units module (5 endpoints, 4 tests)
@@ -68,7 +70,7 @@ API runtime:
   - JWT RS256 keys in .secrets/jwt_{private,public}.pem (gitignored)
   - COOKIE_SECRET 48-byte base64 in .env (gitignored)
   - RBAC cache: 8 roles + 388 mappings loaded at startup
-  - 53 endpoints live (7 auth + 44 business + 2 health) + 60/60 integration tests verde
+  - 67 endpoints live (7 auth + 58 business + 2 health) + 69/69 integration tests verde
   - 5 test personas seeded (PLATFORM_ADMIN/TENANT_ADMIN/MANAGER/USER×2) +
     3 test positions con hierarchy (TEST_MGR_POS ← TEST_SUB_POS + TEST_OUTSIDER_POS)
   - Tutti i password: Admin#PassW0rd! (override via TEST_ADMIN_PASSWORD env)
@@ -176,17 +178,20 @@ al codebase legacy heuresys-evo (sorgente brownfield):
 Vincoli: NON stampare valori segreti nel context/chat, solo uso operativo.
 NON committare path assoluti hardcoded a heuresys-advanced.
 
-=== MODULI BUSINESS LIVE (8/22 in MVP-1) ===
+=== MODULI BUSINESS LIVE (11/22 in MVP-1) ===
 
-  /v1/auth/*               7 endpoints  — login/refresh/logout/me/reset/admin-revoke
-  /v1/tenants/*            5 endpoints  — CRUD on sys.sys_tenancies
-  /v1/users/*              8 endpoints  — CRUD + role grants; 4-tier scope (PLATFORM/TENANT/MANAGER team/USER self)
-  /v1/positions/*         10 endpoints  — CRUD + PIP view (ADR-0008) + skill sub-CRUD + KPI read
-  /v1/organization-units/* 5 endpoints  — tenant-scoped CRUD
-  /v1/skills/*             4 endpoints  — global+tenant visibility model
-  /v1/kpi-definitions/*    5 endpoints  — global+tenant visibility, full CRUD
+  /v1/auth/*                 7 endpoints  — login/refresh/logout/me/reset/admin-revoke
+  /v1/tenants/*              5 endpoints  — CRUD on sys.sys_tenancies
+  /v1/users/*                8 endpoints  — CRUD + role grants; 4-tier scope
+  /v1/positions/*           10 endpoints  — CRUD + PIP view + skill sub-CRUD + KPI read
+  /v1/organization-units/*   5 endpoints  — tenant-scoped CRUD
+  /v1/skills/*               4 endpoints  — global+tenant visibility
+  /v1/kpi-definitions/*      5 endpoints  — global+tenant visibility, full CRUD
+  /v1/job-families/*         5 endpoints  — platform-level, PLATFORM_ADMIN-only mutations
+  /v1/job-roles/*            4 endpoints  — platform-level, FK to job_families
+  /v1/learning-modules/*     5 endpoints  — global+tenant visibility, full CRUD
 
-Totale: 44 endpoint business + 7 auth + healthz/readyz = 53 endpoints live.
+Totale: 58 endpoint business + 7 auth + 2 health = 67 endpoints live.
 
 Test fixtures (db/scripts/seed-test-admin.ts):
   admin@heuresys.com                 PLATFORM_ADMIN
@@ -196,7 +201,8 @@ Test fixtures (db/scripts/seed-test-admin.ts):
   outsider_test@rtl-bank.test        USER (incumbent TEST_OUTSIDER_POS, NOT in team)
 
 Shared schemas (packages/shared/): role-codes, auth, tenants, users, positions,
-organization-units, skills, kpi-definitions. Tutti con subpath exports.
+organization-units, skills, kpi-definitions, job-families, job-roles,
+learning-modules. Tutti con subpath exports.
 
 === PROSSIMO STEP CONCRETO: MVP-1 5.1.11+ — MODULI BUSINESS RIMANENTI ===
 
@@ -209,32 +215,28 @@ Pattern stabilito (replica per ogni nuovo modulo):
   6. apps/api/test/<module>.integration.test.ts (4-8 test per modulo)
   7. pnpm test → verde + commit atomico
 
-Moduli ancora da fare (priorità per max-completezza MVP-1):
+Moduli ancora da fare in MVP-1 (priorità max-completezza):
 
-  Opzione A (più completa, raccomandata) — bundle reference data:
-    5.1.11  job_roles      (richiede prima un mini-seed di sys_job_families,
-                            actualmente vuoto)
-    5.1.12  job_families   (CRUD globale, ~200 LOC)
-    5.1.13  skill_categories (idem skills, gerarchia categories+aliases+families)
-    5.1.14  learning_resources / training_initiatives (reference catalog)
-
-  Opzione B — domini complessi:
-    5.1.15  assessments    (gap analysis, evidence)
-    5.1.16  career_succession / career_paths
-    5.1.17  visualizations (React Flow graph nodes/edges + layouts per ADR-0009)
-    5.1.18  enterprise_typing + blueprints (governance plane)
-
-  Opzione C — brownfield wave (post-MVP-1 in roadmap):
-    5.1.19  brownfield_adaptation triggers/approvals
-    5.1.20  seed_acquisition triggers/approvals
+  5.1.13  skill_categories + skill_families + skill_taxonomy (gerarchia skills)
+  5.1.14  training_initiatives (richiede learning_modules — ora sbloccato)
+  5.1.15  assessments + assessment_methods + assessment_results
+  5.1.16  learning_paths + learning_path_steps + learning_gaps
+  5.1.17  career_succession / sys_position_career_paths come modulo dedicato
+  5.1.18  visualizations + sys_visualization_node_layouts (ADR-0009, React Flow)
+  5.1.19  enterprise_typing (governance plane)
+  5.1.20  blueprints + blueprint_activation
+  5.1.21  bpm_processes (workflow engine integration)
+  5.1.22  brownfield_adaptation triggers/approvals (post-MVP wave runs)
+  5.1.23  seed_acquisition triggers/approvals
 
   ESS module (MVP-2b):
-    5.1.21  /v1/me/* endpoints (18 endpoint per ADR-0011)
+    /v1/me/* endpoints (18 endpoint per ADR-0011 — separate module)
 
-Decisione per next session: ripartire con job_families+job_roles bundle (più
-piccolo, sblocca positions.job_role_id) o passare diretto a un dominio più
-ampio. Raccomandazione: bundle reference data per chiudere la base "lookup
-catalogues" prima dei domini complessi.
+Decisione per next session: continuare con skill taxonomy (5.1.13) +
+training_initiatives (5.1.14) come bundle, o passare a un dominio più
+ambizioso (assessments o visualizations). Raccomandazione max-completezza:
+chiudere la base "lookup catalogues" estesa (5.1.13+14) prima dei domini
+complessi che richiedono più decisioni architetturali.
 
 === REGOLE DI LAVORO (sintesi cross-CLAUDE.md) ===
 

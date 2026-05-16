@@ -1,10 +1,13 @@
 Sono Enzo Spenuso. Riprendo il progetto Heuresys Advanced HRMS/BPM Platform v5
 in `D:\heuresys-advanced\`. Sessione precedente (2026-05-16, lunga):
-55 business modules + auth + shared completati. MVP-1 5.1 CHIUSO
-(5.1.3..5.1.23 tutti shipped). 173/173 integration tests verdi.
-254 endpoint live. Prossima fase: MVP-2a web SPA e MVP-2b ESS /v1/me/*.
+56 business modules + auth + shared completati. **MVP-1 5.1 CHIUSO**
+(5.1.3..5.1.23 tutti shipped) + **MVP-2b ESS portal backend CHIUSO**
+(13 endpoint /v1/me/* con hard self-scope).
+**182/182 integration tests verdi. 267 endpoint live.**
+Prossima fase: **MVP-2a web SPA** (apps/web Next.js, ancora vuoto).
 
-  HEAD     feat(api): MVP-1 5.1.23 — seed_acquisition (3 modules, 10 endpoints, 5 tests)
+  HEAD     feat(api): MVP-2b — ESS /v1/me/* portal (1 module, 13 endpoints, 9 tests)
+  2f79b6d  feat(api): MVP-1 5.1.23 — seed_acquisition (3 modules, 10 endpoints, 5 tests)
   5ea7a31  feat(api): MVP-1 5.1.22 — brownfield_adaptation viewer (3 modules, 9 endpoints, 5 tests)
   432a503  feat(api): MVP-1 5.1.21 — bpm_processes (2 modules, 8 endpoints, 3 tests)
   e90a667  feat(api): MVP-1 5.1.20 — blueprint catalog + activation (5 modules, 23 endpoints, 6 tests)
@@ -88,7 +91,7 @@ API runtime:
   - JWT RS256 keys in .secrets/jwt_{private,public}.pem (gitignored)
   - COOKIE_SECRET 48-byte base64 in .env (gitignored)
   - RBAC cache: 8 roles + 388 mappings loaded at startup
-  - 254 endpoints live (7 auth + 245 business + 2 health) + 173/173 integration tests verdi
+  - 267 endpoints live (7 auth + 258 business + 13 ESS + 2 health) + 182/182 integration tests verdi
   - 5 test personas seeded (PLATFORM_ADMIN/TENANT_ADMIN/MANAGER/USER×2) +
     3 test positions con hierarchy (TEST_MGR_POS ← TEST_SUB_POS + TEST_OUTSIDER_POS)
   - Tutti i password: Admin#PassW0rd! (override via TEST_ADMIN_PASSWORD env)

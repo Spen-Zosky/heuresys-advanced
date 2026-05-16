@@ -27,6 +27,7 @@ import { tenantContextPlugin } from "./middleware/tenantContext.js";
 import { csrfPlugin } from "./middleware/csrf.js";
 import { isDatabaseReady } from "./db/client.js";
 import { COOKIES } from "./config/constants.js";
+import { authRoutes } from "./modules/auth/routes.js";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -132,8 +133,8 @@ export async function buildApp(): Promise<FastifyInstance> {
     };
   });
 
-  // 13. Module routes — added incrementally in MVP-1 step 5.1.3 onwards.
-  // For 5.1.1 the server is intentionally bare beyond health endpoints.
+  // 13. Module routes
+  await app.register(authRoutes, { prefix: "/v1/auth" });
 
   return app;
 }

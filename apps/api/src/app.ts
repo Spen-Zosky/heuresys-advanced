@@ -76,6 +76,9 @@ import { blueprintActivationsRoutes } from "./modules/blueprint-activations/rout
 import { blueprintOverridesRoutes } from "./modules/blueprint-overrides/routes.js";
 import { processKpiTemplatesRoutes } from "./modules/process-kpi-templates/routes.js";
 import { organizationUnitKpiTemplatesRoutes } from "./modules/organization-unit-kpi-templates/routes.js";
+import { brownfieldSourceExportsRoutes } from "./modules/brownfield-source-exports/routes.js";
+import { brownfieldImportRunsRoutes } from "./modules/brownfield-import-runs/routes.js";
+import { brownfieldTableMappingsRoutes } from "./modules/brownfield-table-mappings/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -241,6 +244,9 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(blueprintOverridesRoutes, { prefix: "/v1/blueprint-overrides" });
   await app.register(processKpiTemplatesRoutes, { prefix: "/v1/process-kpi-templates" });
   await app.register(organizationUnitKpiTemplatesRoutes, { prefix: "/v1/organization-unit-kpi-templates" });
+  await app.register(brownfieldSourceExportsRoutes, { prefix: "/v1/brownfield-source-exports" });
+  await app.register(brownfieldImportRunsRoutes, { prefix: "/v1/brownfield-import-runs" });
+  await app.register(brownfieldTableMappingsRoutes, { prefix: "/v1/brownfield-table-mappings" });
 
   return app;
 }

@@ -210,6 +210,18 @@
     "./schemas/organization-unit-kpi-templates": {
       "types": "./dist/schemas/organization-unit-kpi-templates.d.ts",
       "default": "./src/schemas/organization-unit-kpi-templates.ts"
+    },
+    "./schemas/brownfield-source-exports": {
+      "types": "./dist/schemas/brownfield-source-exports.d.ts",
+      "default": "./src/schemas/brownfield-source-exports.ts"
+    },
+    "./schemas/brownfield-import-runs": {
+      "types": "./dist/schemas/brownfield-import-runs.d.ts",
+      "default": "./src/schemas/brownfield-import-runs.ts"
+    },
+    "./schemas/brownfield-table-mappings": {
+      "types": "./dist/schemas/brownfield-table-mappings.d.ts",
+      "default": "./src/schemas/brownfield-table-mappings.ts"
     }
   },
   "scripts": {

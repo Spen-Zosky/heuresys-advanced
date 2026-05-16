@@ -55,3 +55,6 @@ export * from "./schemas/blueprint-activations.js";
 export * from "./schemas/blueprint-overrides.js";
 export * from "./schemas/process-kpi-templates.js";
 export * from "./schemas/organization-unit-kpi-templates.js";
+export * from "./schemas/brownfield-source-exports.js";
+export * from "./schemas/brownfield-import-runs.js";
+export * from "./schemas/brownfield-table-mappings.js";

@@ -1,0 +1,45 @@
+/**
+ * packages/shared/src/schemas/assessment-results.ts
+ * Immutable results (one row per dimension scored). API: list/get/create.
+ */
+
+import { z } from "zod";
+
+export const AssessmentResultSchema = z.object({
+  assessmentResultId: z.string().uuid(),
+  assessmentId: z.string().uuid(),
+  tenantId: z.string().uuid(),
+  dimension: z.string(),
+  score: z.number().nullable(),
+  narrative: z.string().nullable(),
+  assessorUserId: z.string().uuid().nullable(),
+  recordedAt: z.string().datetime(),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string().datetime(),
+});
+export type AssessmentResult = z.infer<typeof AssessmentResultSchema>;
+
+export const AssessmentResultListQuerySchema = z.object({
+  assessmentId: z.string().uuid().optional(),
+  dimension: z.string().min(1).max(128).optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
+  offset: z.coerce.number().int().min(0).optional().default(0),
+});
+export type AssessmentResultListQuery = z.infer<typeof AssessmentResultListQuerySchema>;
+
+export const AssessmentResultListResponseSchema = z.object({
+  items: z.array(AssessmentResultSchema),
+  total: z.number().int().min(0),
+});
+
+export const CreateAssessmentResultBodySchema = z.object({
+  assessmentId: z.string().uuid(),
+  dimension: z.string().min(1).max(128),
+  score: z.number().min(0).max(100).nullable().optional(),
+  narrative: z.string().max(8192).nullable().optional(),
+  assessorUserId: z.string().uuid().nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional().default({}),
+});
+export type CreateAssessmentResultBody = z.infer<typeof CreateAssessmentResultBodySchema>;
+
+export const AssessmentResultIdParamSchema = z.object({ id: z.string().uuid() });

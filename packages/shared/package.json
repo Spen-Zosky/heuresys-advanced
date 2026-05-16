@@ -78,6 +78,18 @@
     "./schemas/training-initiatives": {
       "types": "./dist/schemas/training-initiatives.d.ts",
       "default": "./src/schemas/training-initiatives.ts"
+    },
+    "./schemas/assessment-methods": {
+      "types": "./dist/schemas/assessment-methods.d.ts",
+      "default": "./src/schemas/assessment-methods.ts"
+    },
+    "./schemas/assessments": {
+      "types": "./dist/schemas/assessments.d.ts",
+      "default": "./src/schemas/assessments.ts"
+    },
+    "./schemas/assessment-results": {
+      "types": "./dist/schemas/assessment-results.d.ts",
+      "default": "./src/schemas/assessment-results.ts"
     }
   },
   "scripts": {

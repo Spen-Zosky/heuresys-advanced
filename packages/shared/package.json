@@ -30,6 +30,10 @@
     "./schemas/positions": {
       "types": "./dist/schemas/positions.d.ts",
       "default": "./src/schemas/positions.ts"
+    },
+    "./schemas/organization-units": {
+      "types": "./dist/schemas/organization-units.d.ts",
+      "default": "./src/schemas/organization-units.ts"
     }
   },
   "scripts": {

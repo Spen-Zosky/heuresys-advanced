@@ -30,6 +30,7 @@ import { COOKIES } from "./config/constants.js";
 import { authRoutes } from "./modules/auth/routes.js";
 import { tenantsRoutes } from "./modules/tenants/routes.js";
 import { usersRoutes } from "./modules/users/routes.js";
+import { positionsRoutes } from "./modules/positions/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -149,6 +150,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(authRoutes, { prefix: "/v1/auth", mailer: options.authMailer });
   await app.register(tenantsRoutes, { prefix: "/v1/tenants" });
   await app.register(usersRoutes, { prefix: "/v1/users" });
+  await app.register(positionsRoutes, { prefix: "/v1/positions" });
 
   return app;
 }

@@ -1,0 +1,174 @@
+/**
+ * apps/api/src/modules/positions/routes.ts
+ * 10 endpoints under /v1/positions: core CRUD + PIP read + skill sub-CRUD
+ * + KPI sub-resource read. RBAC + CSRF on mutations.
+ *
+ * Per API_IMPLEMENTATION_PLAN §6.3.
+ */
+
+import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import type { FastifyRequest } from "fastify";
+
+import {
+  PositionSchema,
+  PositionListQuerySchema,
+  PositionListResponseSchema,
+  CreatePositionBodySchema,
+  UpdatePositionBodySchema,
+  PositionIdParamSchema,
+  PositionIntelligenceProfileSchema,
+  PositionSkillRequirementSchema,
+  PositionSkillListResponseSchema,
+  AddPositionSkillBodySchema,
+  PositionSkillIdParamSchema,
+  PositionKpiListResponseSchema,
+  EmptyResponseSchema,
+} from "@heuresys/shared";
+import { positionsService, type ActorContext } from "./service.js";
+import { requirePermission } from "../../middleware/rbac.js";
+import { UnauthorizedError } from "../../errors/index.js";
+
+function actorFromReq(req: FastifyRequest): ActorContext {
+  if (!req.user) throw new UnauthorizedError("Authentication required");
+  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
+}
+
+export const positionsRoutes: FastifyPluginAsyncZod = async (app) => {
+  app.get(
+    "/",
+    {
+      preHandler: [requirePermission("position:read")],
+      schema: { querystring: PositionListQuerySchema, response: { 200: PositionListResponseSchema } },
+    },
+    async (req) => positionsService.list(actorFromReq(req), req.query),
+  );
+
+  app.get(
+    "/:id",
+    {
+      preHandler: [requirePermission("position:read")],
+      schema: { params: PositionIdParamSchema, response: { 200: PositionSchema } },
+    },
+    async (req) => positionsService.getById(actorFromReq(req), req.params.id),
+  );
+
+  app.post(
+    "/",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("position:create")],
+      schema: { body: CreatePositionBodySchema, response: { 201: PositionSchema } },
+    },
+    async (req, reply) => {
+      const created = await positionsService.create(actorFromReq(req), req.body);
+      reply.code(201).send(created);
+    },
+  );
+
+  app.patch(
+    "/:id",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("position:update")],
+      schema: {
+        params: PositionIdParamSchema,
+        body: UpdatePositionBodySchema,
+        response: { 200: PositionSchema },
+      },
+    },
+    async (req) =>
+      positionsService.update(actorFromReq(req), req.params.id, req.body),
+  );
+
+  app.delete(
+    "/:id",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("position:delete")],
+      schema: { params: PositionIdParamSchema, response: { 204: EmptyResponseSchema } },
+    },
+    async (req, reply) => {
+      await positionsService.softDelete(actorFromReq(req), req.params.id);
+      reply.code(204).send();
+    },
+  );
+
+  /* --- PIP (ADR-0008 view) ----------------------------------------- */
+  app.get(
+    "/:id/intelligence-profile",
+    {
+      preHandler: [requirePermission("position:read")],
+      schema: {
+        params: PositionIdParamSchema,
+        response: { 200: PositionIntelligenceProfileSchema },
+      },
+    },
+    async (req) => positionsService.getIntelligenceProfile(actorFromReq(req), req.params.id),
+  );
+
+  /* --- skills sub-resource ----------------------------------------- */
+  app.get(
+    "/:id/skills",
+    {
+      preHandler: [requirePermission("position:read")],
+      schema: {
+        params: PositionIdParamSchema,
+        response: { 200: PositionSkillListResponseSchema },
+      },
+    },
+    async (req) => ({
+      items: await positionsService.listSkills(actorFromReq(req), req.params.id),
+    }),
+  );
+
+  app.post(
+    "/:id/skills",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("position:update")],
+      schema: {
+        params: PositionIdParamSchema,
+        body: AddPositionSkillBodySchema,
+        response: { 201: PositionSkillRequirementSchema },
+      },
+    },
+    async (req, reply) => {
+      const created = await positionsService.addSkill(
+        actorFromReq(req),
+        req.params.id,
+        req.body,
+      );
+      reply.code(201).send(created);
+    },
+  );
+
+  app.delete(
+    "/:id/skills/:skillId",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("position:update")],
+      schema: {
+        params: PositionSkillIdParamSchema,
+        response: { 204: EmptyResponseSchema },
+      },
+    },
+    async (req, reply) => {
+      await positionsService.removeSkill(
+        actorFromReq(req),
+        req.params.id,
+        req.params.skillId,
+      );
+      reply.code(204).send();
+    },
+  );
+
+  /* --- KPI sub-resource (read-only MVP-1) -------------------------- */
+  app.get(
+    "/:id/kpis",
+    {
+      preHandler: [requirePermission("position:read")],
+      schema: {
+        params: PositionIdParamSchema,
+        response: { 200: PositionKpiListResponseSchema },
+      },
+    },
+    async (req) => ({
+      items: await positionsService.listKpis(actorFromReq(req), req.params.id),
+    }),
+  );
+};

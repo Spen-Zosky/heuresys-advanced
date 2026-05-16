@@ -26,6 +26,10 @@
     "./schemas/users": {
       "types": "./dist/schemas/users.d.ts",
       "default": "./src/schemas/users.ts"
+    },
+    "./schemas/positions": {
+      "types": "./dist/schemas/positions.d.ts",
+      "default": "./src/schemas/positions.ts"
     }
   },
   "scripts": {

@@ -372,6 +372,18 @@ async function main() {
       });
     }
 
+    // 5. Owner backfill — set TEST_MGR_POS owner = manager_test so the
+    //    "MANAGER can update own positions" scope test has a target.
+    const mgrUserRow = report.find((r) => r.email === "manager_test@rtl-bank.test");
+    if (mgrUserRow) {
+      await client.query(
+        `UPDATE sys.sys_positions
+            SET position_owner_user_id = $1, updated_at = now()
+          WHERE position_id = $2 AND (position_owner_user_id IS DISTINCT FROM $1)`,
+        [mgrUserRow.userId, mgrPos.positionId],
+      );
+    }
+
     await client.query("COMMIT");
 
     console.log("─".repeat(76));

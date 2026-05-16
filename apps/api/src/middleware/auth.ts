@@ -19,7 +19,6 @@ export interface AuthUser {
 
 declare module "fastify" {
   interface FastifyRequest {
-    user?: AuthUser;
     tenantId?: string;
   }
 }
@@ -36,7 +35,10 @@ declare module "@fastify/jwt" {
       iss?: string;
       aud?: string;
     };
-    user: AuthUser;
+    // Typed as nullable: our auth hook is non-enforcing, so req.user remains
+    // undefined for public routes and for requests with no/invalid token.
+    // RBAC middleware re-checks via `if (!req.user)`.
+    user: AuthUser | null;
   }
 }
 

@@ -222,6 +222,18 @@
     "./schemas/brownfield-table-mappings": {
       "types": "./dist/schemas/brownfield-table-mappings.d.ts",
       "default": "./src/schemas/brownfield-table-mappings.ts"
+    },
+    "./schemas/seed-acquisition-runs": {
+      "types": "./dist/schemas/seed-acquisition-runs.d.ts",
+      "default": "./src/schemas/seed-acquisition-runs.ts"
+    },
+    "./schemas/seed-candidate-records": {
+      "types": "./dist/schemas/seed-candidate-records.d.ts",
+      "default": "./src/schemas/seed-candidate-records.ts"
+    },
+    "./schemas/seed-approval-decisions": {
+      "types": "./dist/schemas/seed-approval-decisions.d.ts",
+      "default": "./src/schemas/seed-approval-decisions.ts"
     }
   },
   "scripts": {

@@ -1,0 +1,47 @@
+/**
+ * apps/api/src/modules/seed-acquisition-runs/routes.ts
+ */
+import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import type { FastifyRequest } from "fastify";
+import {
+  SeedAcquisitionRunSchema, SeedAcquisitionRunListQuerySchema,
+  SeedAcquisitionRunListResponseSchema, CreateSeedAcquisitionRunBodySchema,
+  UpdateSeedAcquisitionRunBodySchema, SeedAcquisitionRunIdParamSchema,
+} from "@heuresys/shared";
+import { seedAcquisitionRunsService, type ActorContext } from "./service.js";
+import { requirePermission } from "../../middleware/rbac.js";
+import { UnauthorizedError } from "../../errors/index.js";
+
+function actor(req: FastifyRequest): ActorContext {
+  if (!req.user) throw new UnauthorizedError("Authentication required");
+  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
+}
+
+export const seedAcquisitionRunsRoutes: FastifyPluginAsyncZod = async (app) => {
+  app.get("/", {
+    preHandler: [requirePermission("seed_acquisition:read")],
+    schema: { querystring: SeedAcquisitionRunListQuerySchema, response: { 200: SeedAcquisitionRunListResponseSchema } },
+  }, async (req) => seedAcquisitionRunsService.list(actor(req), req.query));
+  app.get("/:id", {
+    preHandler: [requirePermission("seed_acquisition:read")],
+    schema: { params: SeedAcquisitionRunIdParamSchema, response: { 200: SeedAcquisitionRunSchema } },
+  }, async (req) => seedAcquisitionRunsService.getById(actor(req), req.params.id));
+  app.post("/", {
+    preHandler: [app.verifyCsrf, requirePermission("seed_acquisition:trigger")],
+    schema: { body: CreateSeedAcquisitionRunBodySchema, response: { 201: SeedAcquisitionRunSchema } },
+  }, async (req, reply) => {
+    const r = await seedAcquisitionRunsService.trigger(actor(req), req.body);
+    reply.code(201).send(r);
+  });
+  app.patch("/:id", {
+    preHandler: [app.verifyCsrf, requirePermission("seed_acquisition:trigger")],
+    schema: { params: SeedAcquisitionRunIdParamSchema, body: UpdateSeedAcquisitionRunBodySchema, response: { 200: SeedAcquisitionRunSchema } },
+  }, async (req) => seedAcquisitionRunsService.update(actor(req), req.params.id, req.body));
+  app.delete("/:id", {
+    preHandler: [app.verifyCsrf, requirePermission("seed_acquisition:trigger")],
+    schema: { params: SeedAcquisitionRunIdParamSchema, response: { 204: { type: "null" } as const } },
+  }, async (req, reply) => {
+    await seedAcquisitionRunsService.delete(actor(req), req.params.id);
+    reply.code(204).send();
+  });
+};

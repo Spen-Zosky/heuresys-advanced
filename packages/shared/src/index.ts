@@ -15,3 +15,4 @@ export * from "./schemas/skills.js";
 export * from "./schemas/kpi-definitions.js";
 export * from "./schemas/job-families.js";
 export * from "./schemas/job-roles.js";
+export * from "./schemas/learning-modules.js";

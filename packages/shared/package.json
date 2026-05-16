@@ -50,6 +50,10 @@
     "./schemas/job-roles": {
       "types": "./dist/schemas/job-roles.d.ts",
       "default": "./src/schemas/job-roles.ts"
+    },
+    "./schemas/learning-modules": {
+      "types": "./dist/schemas/learning-modules.d.ts",
+      "default": "./src/schemas/learning-modules.ts"
     }
   },
   "scripts": {

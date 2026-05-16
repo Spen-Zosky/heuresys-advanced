@@ -36,6 +36,7 @@ import { skillsRoutes } from "./modules/skills/routes.js";
 import { kpiDefinitionsRoutes } from "./modules/kpi-definitions/routes.js";
 import { jobFamiliesRoutes } from "./modules/job-families/routes.js";
 import { jobRolesRoutes } from "./modules/job-roles/routes.js";
+import { learningModulesRoutes } from "./modules/learning-modules/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -161,6 +162,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(kpiDefinitionsRoutes, { prefix: "/v1/kpi-definitions" });
   await app.register(jobFamiliesRoutes, { prefix: "/v1/job-families" });
   await app.register(jobRolesRoutes, { prefix: "/v1/job-roles" });
+  await app.register(learningModulesRoutes, { prefix: "/v1/learning-modules" });
 
   return app;
 }

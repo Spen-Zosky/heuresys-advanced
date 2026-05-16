@@ -102,6 +102,14 @@
     "./schemas/learning-gaps": {
       "types": "./dist/schemas/learning-gaps.d.ts",
       "default": "./src/schemas/learning-gaps.ts"
+    },
+    "./schemas/career-paths": {
+      "types": "./dist/schemas/career-paths.d.ts",
+      "default": "./src/schemas/career-paths.ts"
+    },
+    "./schemas/career-path-steps": {
+      "types": "./dist/schemas/career-path-steps.d.ts",
+      "default": "./src/schemas/career-path-steps.ts"
     }
   },
   "scripts": {

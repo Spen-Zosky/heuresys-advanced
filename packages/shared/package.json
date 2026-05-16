@@ -18,6 +18,10 @@
     "./schemas/role-codes": {
       "types": "./dist/schemas/role-codes.d.ts",
       "default": "./src/schemas/role-codes.ts"
+    },
+    "./schemas/tenants": {
+      "types": "./dist/schemas/tenants.d.ts",
+      "default": "./src/schemas/tenants.ts"
     }
   },
   "scripts": {

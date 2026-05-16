@@ -28,6 +28,7 @@ import { csrfPlugin } from "./middleware/csrf.js";
 import { isDatabaseReady } from "./db/client.js";
 import { COOKIES } from "./config/constants.js";
 import { authRoutes } from "./modules/auth/routes.js";
+import { tenantsRoutes } from "./modules/tenants/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -145,6 +146,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   // 13. Module routes
   await app.register(authRoutes, { prefix: "/v1/auth", mailer: options.authMailer });
+  await app.register(tenantsRoutes, { prefix: "/v1/tenants" });
 
   return app;
 }

@@ -28,8 +28,14 @@ import { csrfPlugin } from "./middleware/csrf.js";
 import { isDatabaseReady } from "./db/client.js";
 import { COOKIES } from "./config/constants.js";
 import { authRoutes } from "./modules/auth/routes.js";
+import type { IMailer } from "./modules/auth/mailer.js";
 
-export async function buildApp(): Promise<FastifyInstance> {
+export interface BuildAppOptions {
+  /** Custom mailer for the auth module — tests inject InMemoryMailer. */
+  authMailer?: IMailer;
+}
+
+export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
       level: env.LOG_LEVEL,
@@ -134,7 +140,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   // 13. Module routes
-  await app.register(authRoutes, { prefix: "/v1/auth" });
+  await app.register(authRoutes, { prefix: "/v1/auth", mailer: options.authMailer });
 
   return app;
 }

@@ -8,3 +8,4 @@
 export * from "./schemas/role-codes.js";
 export * from "./schemas/auth.js";
 export * from "./schemas/tenants.js";
+export * from "./schemas/users.js";

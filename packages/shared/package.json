@@ -22,6 +22,10 @@
     "./schemas/tenants": {
       "types": "./dist/schemas/tenants.d.ts",
       "default": "./src/schemas/tenants.ts"
+    },
+    "./schemas/users": {
+      "types": "./dist/schemas/users.d.ts",
+      "default": "./src/schemas/users.ts"
     }
   },
   "scripts": {

@@ -1,7 +1,14 @@
 Sono Enzo Spenuso. Riprendo il progetto Heuresys Advanced HRMS/BPM Platform v5
-in `D:\heuresys-advanced\`. Sessione precedente: chiuso 5.1.3 + 4 follow-up +
-5.1.4 (shared promotion) + 5.1.5 (tenants module). 23/23 test verdi.
+in `D:\heuresys-advanced\`. Sessione precedente: 8 business modules + auth +
+shared completati (5.1.3..5.1.10). 60/60 integration tests verdi.
 
+  a774ea2  feat(api): MVP-1 5.1.10 — kpi-definitions module (5 endpoints, 5 tests)
+  2ab2479  feat(api): MVP-1 5.1.9 — skills module (4 endpoints, global+tenant visibility, 5 tests)
+  f52ca03  feat(api): MVP-1 5.1.8 — organization-units module (5 endpoints, 4 tests)
+  47f6530  chore(db): seed — backfill TEST_MGR_POS.position_owner_user_id = manager_test
+  e676d69  feat(api): MVP-1 5.1.7 — positions module + PIP view + skill/kpi sub-resources
+  288c051  feat(api): MVP-1 5.1.6 — users module (8 endpoints, 4-tier scope, 13 tests)
+  5d8b502  chore(db): MVP-1 5.1.6a — extend test fixtures (5 personas + position hierarchy)
   d33bd28  feat(api): MVP-1 5.1.5 — tenants module (5 endpoints + 8 tests)
   9eb3d5b  docs(handoff): close 5.1.4 + propose 5.1.5
   c219741  feat(shared): MVP-1 5.1.4 — promote auth schemas to @heuresys/shared
@@ -61,8 +68,10 @@ API runtime:
   - JWT RS256 keys in .secrets/jwt_{private,public}.pem (gitignored)
   - COOKIE_SECRET 48-byte base64 in .env (gitignored)
   - RBAC cache: 8 roles + 388 mappings loaded at startup
-  - 7 endpoints /v1/auth/* live + 15/15 integration tests verde
-  - Test admin seeded: admin@heuresys.com / Admin#PassW0rd! (PLATFORM_ADMIN)
+  - 53 endpoints live (7 auth + 44 business + 2 health) + 60/60 integration tests verde
+  - 5 test personas seeded (PLATFORM_ADMIN/TENANT_ADMIN/MANAGER/USER×2) +
+    3 test positions con hierarchy (TEST_MGR_POS ← TEST_SUB_POS + TEST_OUTSIDER_POS)
+  - Tutti i password: Admin#PassW0rd! (override via TEST_ADMIN_PASSWORD env)
 
 Tunnel SSH e processi background:
   - `ssh -fN -L 5433:localhost:5432 oracle-vm-default` (potrebbe essere chiuso dal logout)
@@ -167,35 +176,65 @@ al codebase legacy heuresys-evo (sorgente brownfield):
 Vincoli: NON stampare valori segreti nel context/chat, solo uso operativo.
 NON committare path assoluti hardcoded a heuresys-advanced.
 
-=== PROSSIMO STEP CONCRETO: MVP-1 5.1.6 — USERS MODULE ===
+=== MODULI BUSINESS LIVE (8/22 in MVP-1) ===
 
-Stato post-5.1.5: pipeline route→service→repository→DB validata end-to-end
-con scope filter cross-tenant. Pattern replicabile per ogni nuovo CRUD.
+  /v1/auth/*               7 endpoints  — login/refresh/logout/me/reset/admin-revoke
+  /v1/tenants/*            5 endpoints  — CRUD on sys.sys_tenancies
+  /v1/users/*              8 endpoints  — CRUD + role grants; 4-tier scope (PLATFORM/TENANT/MANAGER team/USER self)
+  /v1/positions/*         10 endpoints  — CRUD + PIP view (ADR-0008) + skill sub-CRUD + KPI read
+  /v1/organization-units/* 5 endpoints  — tenant-scoped CRUD
+  /v1/skills/*             4 endpoints  — global+tenant visibility model
+  /v1/kpi-definitions/*    5 endpoints  — global+tenant visibility, full CRUD
 
-Opzione A (NEXT NATURAL) — `users` module:
-  GET    /v1/users                     — list (PLATFORM/TENANT_ADMIN tutti
-                                          nel tenant; MANAGER team only)
-  GET    /v1/users/:id                 — own or scope-filtered
-  POST   /v1/users                     — PLATFORM/TENANT_ADMIN
-  PATCH  /v1/users/:id                 — admin or self (limited fields)
-  DELETE /v1/users/:id                 — PLATFORM/TENANT_ADMIN (soft-delete
-                                          via user_status=DEACTIVATED)
-  + role-grant subresources:
-  GET    /v1/users/:id/roles           — list grants
-  POST   /v1/users/:id/roles           — grant role (tenant-scoped)
-  DELETE /v1/users/:id/roles/:roleId   — revoke
-  Deliverable: ~900 LOC. Tocca sys.sys_users + sys.sys_user_auth_roles +
-  scope filter MANAGER (team via sys.sys_user_position_assignments +
-  sys.sys_positions.position_reports_to_position_id).
-  Riferimento: API_IMPLEMENTATION_PLAN.md §6 + AUTH_SECURITY_PLAN.md §6.
+Totale: 44 endpoint business + 7 auth + healthz/readyz = 53 endpoints live.
 
-Opzione B — `positions` module (più ampio, esempio full nel piano):
-  CRUD + sub-resources (skills, kpis, learning, career-paths). ~1400 LOC.
-  Riferimento: API_IMPLEMENTATION_PLAN.md §6.3.
+Test fixtures (db/scripts/seed-test-admin.ts):
+  admin@heuresys.com                 PLATFORM_ADMIN
+  tenant_admin_test@rtl-bank.test    TENANT_ADMIN RTL
+  manager_test@rtl-bank.test         MANAGER RTL (incumbent + owner TEST_MGR_POS)
+  employee_test@rtl-bank.test        USER (incumbent TEST_SUB_POS, team subordinate)
+  outsider_test@rtl-bank.test        USER (incumbent TEST_OUTSIDER_POS, NOT in team)
 
-Opzione C — Skip a un altro dominio (visualizations / brownfield / ...).
+Shared schemas (packages/shared/): role-codes, auth, tenants, users, positions,
+organization-units, skills, kpi-definitions. Tutti con subpath exports.
 
-Tempo stimato (opzione A): ~75-90 min.
+=== PROSSIMO STEP CONCRETO: MVP-1 5.1.11+ — MODULI BUSINESS RIMANENTI ===
+
+Pattern stabilito (replica per ogni nuovo modulo):
+  1. packages/shared/src/schemas/<module>.ts (+ subpath export in package.json)
+  2. apps/api/src/modules/<module>/repository.ts (raw SQL parametrizzato)
+  3. apps/api/src/modules/<module>/service.ts (ActorContext-based scope filter)
+  4. apps/api/src/modules/<module>/routes.ts (FastifyPluginAsyncZod + RBAC + CSRF)
+  5. Register in apps/api/src/app.ts
+  6. apps/api/test/<module>.integration.test.ts (4-8 test per modulo)
+  7. pnpm test → verde + commit atomico
+
+Moduli ancora da fare (priorità per max-completezza MVP-1):
+
+  Opzione A (più completa, raccomandata) — bundle reference data:
+    5.1.11  job_roles      (richiede prima un mini-seed di sys_job_families,
+                            actualmente vuoto)
+    5.1.12  job_families   (CRUD globale, ~200 LOC)
+    5.1.13  skill_categories (idem skills, gerarchia categories+aliases+families)
+    5.1.14  learning_resources / training_initiatives (reference catalog)
+
+  Opzione B — domini complessi:
+    5.1.15  assessments    (gap analysis, evidence)
+    5.1.16  career_succession / career_paths
+    5.1.17  visualizations (React Flow graph nodes/edges + layouts per ADR-0009)
+    5.1.18  enterprise_typing + blueprints (governance plane)
+
+  Opzione C — brownfield wave (post-MVP-1 in roadmap):
+    5.1.19  brownfield_adaptation triggers/approvals
+    5.1.20  seed_acquisition triggers/approvals
+
+  ESS module (MVP-2b):
+    5.1.21  /v1/me/* endpoints (18 endpoint per ADR-0011)
+
+Decisione per next session: ripartire con job_families+job_roles bundle (più
+piccolo, sblocca positions.job_role_id) o passare diretto a un dominio più
+ampio. Raccomandazione: bundle reference data per chiudere la base "lookup
+catalogues" prima dei domini complessi.
 
 === REGOLE DI LAVORO (sintesi cross-CLAUDE.md) ===
 

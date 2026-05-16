@@ -21,7 +21,8 @@
     "db:migrate:sh": "bash db/scripts/migrate.sh",
     "db:reset": "pwsh -File db/scripts/reset_local_database.ps1",
     "db:validate": "pwsh -File db/scripts/validate_database.ps1",
-    "db:seed": "pnpm --filter @heuresys/api exec tsx db/scripts/seed-reference-bank.ts",
+    "db:seed": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-reference-bank.ts",
+    "db:seed-test-admin": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-test-admin.ts",
     "openapi:generate": "pnpm --filter @heuresys/api run openapi:generate",
     "i18n:check": "pnpm --filter @heuresys/web run i18n:check"
   },

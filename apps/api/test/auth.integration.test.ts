@@ -12,6 +12,8 @@ import { createHash } from "node:crypto";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool, closePool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
+import { createAuthService } from "../src/modules/auth/service.js";
+import { InMemoryMailer } from "../src/modules/auth/mailer.js";
 
 function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
@@ -287,5 +289,95 @@ describe("/v1/auth/* integration", () => {
     });
     expect(r2.statusCode).toBe(204);
     expect(suiteApp.mailer.sent.length).toBe(beforeUnknown);
+  });
+
+  /* -------------------------------------------------- admin revoke */
+
+  it("POST /admin/revoke-user as PLATFORM_ADMIN returns 204 + writes REVOKED_BY_ADMIN audit", async () => {
+    // Pick any synthetic user from RTL_BANK as the target (no real auth impact).
+    const targetRow = await pool.query<{ user_id: string }>(
+      `SELECT user_id FROM sys.sys_users
+        WHERE user_is_synthetic = true ORDER BY user_id LIMIT 1`,
+    );
+    expect(targetRow.rows.length).toBe(1);
+    const targetUserId = targetRow.rows[0]!.user_id;
+
+    const beforeCount = Number(
+      (
+        await pool.query<{ c: string }>(
+          `SELECT count(*)::text AS c FROM sys.sys_auth_login_events
+            WHERE auth_login_event_user_id = $1
+              AND auth_login_event_type = 'REVOKED_BY_ADMIN'`,
+          [targetUserId],
+        )
+      ).rows[0]!.c,
+    );
+
+    const login = await performLogin(suiteApp);
+    const resp = await suiteApp.app.inject({
+      method: "POST",
+      url: `/v1/auth/admin/revoke-user/${targetUserId}`,
+      headers: {
+        cookie: cookieHeader(login.cookies),
+        "x-csrf-token": login.body.csrfToken,
+        "content-type": "application/json",
+      },
+      payload: {},
+    });
+    expect(resp.statusCode).toBe(204);
+
+    const afterCount = Number(
+      (
+        await pool.query<{ c: string }>(
+          `SELECT count(*)::text AS c FROM sys.sys_auth_login_events
+            WHERE auth_login_event_user_id = $1
+              AND auth_login_event_type = 'REVOKED_BY_ADMIN'`,
+          [targetUserId],
+        )
+      ).rows[0]!.c,
+    );
+    expect(afterCount).toBe(beforeCount + 1);
+  });
+
+  it("adminRevokeUser unit: TENANT_ADMIN cannot revoke a user outside its tenant", async () => {
+    // Use the seeded admin user as the cross-tenant target (anchored to
+    // RTL_BANK_REFERENCE tenant in sys_users).
+    const adminRow = await pool.query<{ user_id: string; user_tenant_id: string }>(
+      `SELECT user_id, user_tenant_id FROM sys.sys_users
+        WHERE user_email = $1 LIMIT 1`,
+      ["admin@heuresys.com"],
+    );
+    expect(adminRow.rows.length).toBe(1);
+    const target = adminRow.rows[0]!;
+    const fakeTenantId = "00000000-0000-0000-0000-000000000001";
+    expect(target.user_tenant_id).not.toBe(fakeTenantId);
+
+    const noopLogger = {
+      warn: () => {},
+      info: () => {},
+      debug: () => {},
+      error: () => {},
+      fatal: () => {},
+      trace: () => {},
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      child: () => noopLogger as any,
+      level: "silent",
+    };
+
+    const service = createAuthService({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      log: noopLogger as any,
+      mailer: new InMemoryMailer(),
+      jwtSign: async () => "noop.jwt.token",
+    });
+
+    await expect(
+      service.adminRevokeUser({
+        actorUserId: "00000000-0000-0000-0000-000000000099",
+        actorTenantId: fakeTenantId,
+        actorRoles: ["TENANT_ADMIN"],
+        targetUserId: target.user_id,
+      }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });

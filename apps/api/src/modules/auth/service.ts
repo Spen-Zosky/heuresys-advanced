@@ -15,7 +15,7 @@ import {
   REFRESH_TOKEN_TTL_SECONDS,
   type RoleCode,
 } from "../../config/constants.js";
-import { UnauthorizedError, NotFoundError } from "../../errors/index.js";
+import { UnauthorizedError, NotFoundError, ForbiddenError } from "../../errors/index.js";
 import { pool } from "../../db/client.js";
 
 import { hashPassword, verifyPassword } from "./password.js";
@@ -448,6 +448,21 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
 
     /* --- admin revoke user ------------------------------------------- */
     async adminRevokeUser(input) {
+      // AUTH §6 matrix: PLATFORM_ADMIN may revoke any user; TENANT_ADMIN
+      // may only revoke users in their own tenant. The route preHandler
+      // already gates by 'auth:revoke_user' permission — here we enforce
+      // the per-target tenant scope filter.
+      const isPlatform = input.actorRoles.includes("PLATFORM_ADMIN");
+      if (!isPlatform) {
+        if (input.actorTenantId === null) {
+          throw new ForbiddenError("Tenant context required to revoke users");
+        }
+        const target = await repo.findUserForMe(pool, input.targetUserId);
+        if (!target) throw new NotFoundError("User");
+        if (target.userTenantId !== input.actorTenantId) {
+          throw new ForbiddenError("Cannot revoke users outside your tenant");
+        }
+      }
       await repo.withTransaction(async (tx) => {
         await repo.revokeAllRefreshTokensForUser(tx, input.targetUserId, "REVOKED_BY_ADMIN");
         await repo.insertLoginEvent(tx, {

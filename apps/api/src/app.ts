@@ -57,6 +57,13 @@ import { successorCandidatesRoutes } from "./modules/successor-candidates/routes
 import { successorReadinessRoutes } from "./modules/successor-readiness/routes.js";
 import { positionCareerPathsRoutes } from "./modules/position-career-paths/routes.js";
 import { positionSuccessionRelevanceRoutes } from "./modules/position-succession-relevance/routes.js";
+import { visualizationGraphsRoutes } from "./modules/visualization-graphs/routes.js";
+import { visualizationNodesRoutes } from "./modules/visualization-nodes/routes.js";
+import { visualizationEdgesRoutes } from "./modules/visualization-edges/routes.js";
+import { visualizationLayoutsRoutes } from "./modules/visualization-layouts/routes.js";
+import { visualizationNodeLayoutsRoutes } from "./modules/visualization-node-layouts/routes.js";
+import { visualizationStylesRoutes } from "./modules/visualization-styles/routes.js";
+import { visualizationExportsRoutes } from "./modules/visualization-exports/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -203,6 +210,13 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(successorReadinessRoutes, { prefix: "/v1/successor-readiness" });
   await app.register(positionCareerPathsRoutes, { prefix: "/v1/position-career-paths" });
   await app.register(positionSuccessionRelevanceRoutes, { prefix: "/v1/position-succession-relevance" });
+  await app.register(visualizationGraphsRoutes, { prefix: "/v1/visualization-graphs" });
+  await app.register(visualizationNodesRoutes, { prefix: "/v1/visualization-nodes" });
+  await app.register(visualizationEdgesRoutes, { prefix: "/v1/visualization-edges" });
+  await app.register(visualizationLayoutsRoutes, { prefix: "/v1/visualization-layouts" });
+  await app.register(visualizationNodeLayoutsRoutes, { prefix: "/v1/visualization-node-layouts" });
+  await app.register(visualizationStylesRoutes, { prefix: "/v1/visualization-styles" });
+  await app.register(visualizationExportsRoutes, { prefix: "/v1/visualization-exports" });
 
   return app;
 }

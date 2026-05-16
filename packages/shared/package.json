@@ -134,6 +134,34 @@
     "./schemas/position-succession-relevance": {
       "types": "./dist/schemas/position-succession-relevance.d.ts",
       "default": "./src/schemas/position-succession-relevance.ts"
+    },
+    "./schemas/visualization-graphs": {
+      "types": "./dist/schemas/visualization-graphs.d.ts",
+      "default": "./src/schemas/visualization-graphs.ts"
+    },
+    "./schemas/visualization-nodes": {
+      "types": "./dist/schemas/visualization-nodes.d.ts",
+      "default": "./src/schemas/visualization-nodes.ts"
+    },
+    "./schemas/visualization-edges": {
+      "types": "./dist/schemas/visualization-edges.d.ts",
+      "default": "./src/schemas/visualization-edges.ts"
+    },
+    "./schemas/visualization-layouts": {
+      "types": "./dist/schemas/visualization-layouts.d.ts",
+      "default": "./src/schemas/visualization-layouts.ts"
+    },
+    "./schemas/visualization-node-layouts": {
+      "types": "./dist/schemas/visualization-node-layouts.d.ts",
+      "default": "./src/schemas/visualization-node-layouts.ts"
+    },
+    "./schemas/visualization-styles": {
+      "types": "./dist/schemas/visualization-styles.d.ts",
+      "default": "./src/schemas/visualization-styles.ts"
+    },
+    "./schemas/visualization-exports": {
+      "types": "./dist/schemas/visualization-exports.d.ts",
+      "default": "./src/schemas/visualization-exports.ts"
     }
   },
   "scripts": {

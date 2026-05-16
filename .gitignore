@@ -24,6 +24,7 @@ docs/brownfield/_inspection_artifacts/
 *.pem
 *.key
 !*.key.example
+.secrets/
 
 # -----------------------------------------------------------------------------
 # Node / pnpm

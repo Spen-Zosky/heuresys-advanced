@@ -54,6 +54,26 @@
     "./schemas/learning-modules": {
       "types": "./dist/schemas/learning-modules.d.ts",
       "default": "./src/schemas/learning-modules.ts"
+    },
+    "./schemas/skill-families": {
+      "types": "./dist/schemas/skill-families.d.ts",
+      "default": "./src/schemas/skill-families.ts"
+    },
+    "./schemas/skill-categories": {
+      "types": "./dist/schemas/skill-categories.d.ts",
+      "default": "./src/schemas/skill-categories.ts"
+    },
+    "./schemas/skill-taxonomy-edges": {
+      "types": "./dist/schemas/skill-taxonomy-edges.d.ts",
+      "default": "./src/schemas/skill-taxonomy-edges.ts"
+    },
+    "./schemas/skill-aliases": {
+      "types": "./dist/schemas/skill-aliases.d.ts",
+      "default": "./src/schemas/skill-aliases.ts"
+    },
+    "./schemas/skill-proficiency-levels": {
+      "types": "./dist/schemas/skill-proficiency-levels.d.ts",
+      "default": "./src/schemas/skill-proficiency-levels.ts"
     }
   },
   "scripts": {

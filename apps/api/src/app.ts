@@ -37,6 +37,11 @@ import { kpiDefinitionsRoutes } from "./modules/kpi-definitions/routes.js";
 import { jobFamiliesRoutes } from "./modules/job-families/routes.js";
 import { jobRolesRoutes } from "./modules/job-roles/routes.js";
 import { learningModulesRoutes } from "./modules/learning-modules/routes.js";
+import { skillFamiliesRoutes } from "./modules/skill-families/routes.js";
+import { skillCategoriesRoutes } from "./modules/skill-categories/routes.js";
+import { skillTaxonomyEdgesRoutes } from "./modules/skill-taxonomy-edges/routes.js";
+import { skillAliasesRoutes } from "./modules/skill-aliases/routes.js";
+import { skillProficiencyLevelsRoutes } from "./modules/skill-proficiency-levels/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -163,6 +168,11 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(jobFamiliesRoutes, { prefix: "/v1/job-families" });
   await app.register(jobRolesRoutes, { prefix: "/v1/job-roles" });
   await app.register(learningModulesRoutes, { prefix: "/v1/learning-modules" });
+  await app.register(skillFamiliesRoutes, { prefix: "/v1/skill-families" });
+  await app.register(skillCategoriesRoutes, { prefix: "/v1/skill-categories" });
+  await app.register(skillTaxonomyEdgesRoutes, { prefix: "/v1/skill-taxonomy-edges" });
+  await app.register(skillAliasesRoutes, { prefix: "/v1/skill-aliases" });
+  await app.register(skillProficiencyLevelsRoutes, { prefix: "/v1/skill-proficiency-levels" });
 
   return app;
 }

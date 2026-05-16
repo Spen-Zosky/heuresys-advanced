@@ -354,6 +354,7 @@ The deliverable review session produced additional binding decisions, recorded b
 | RD‑21 | Promotion process | Mandatory 16‑step process to promote any table from EXCLUDE/REFERENCE_ONLY to IMPORT/TRANSFORM, covering CSV + 4 brownfield docs + TARGET_SCHEMA + MIGRATION_PLAN + new ADR + atomic PR |
 | RD‑22 | Wave runner documentation | Step 9.0 added to `BROWNFIELD_IMPORT_PLAN.md` §9: per‑wave runner spec `docs/brownfield/wave_runners/wave_N_runner.md` to be written before runner implementation |
 | RD‑23 | Mermaid diagram artifact | Bootstrap MVP flow diagram exported as PNG (48 KB) + SVG (42 KB) under `qa_artifacts/diagrams/` |
+| **RD‑24** | **Formal approval gate** | **2026‑05‑16, end of Review session #1‑#11: Enzo Spenuso formally approves all 10 Section 18 deliverables + ADR‑0011 (ESS) + Mermaid artifact. Section 19 (heavy implementation: MVP‑0 repo scaffold + migrations + API + frontend) is hereby unlocked. Next session resumes from MVP‑0 step 5.0.1 (pnpm workspace init).** |
 
 ---
 

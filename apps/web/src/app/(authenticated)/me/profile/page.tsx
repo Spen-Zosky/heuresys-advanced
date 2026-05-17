@@ -1,0 +1,134 @@
+"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { apiFetch } from "../../../../lib/api/fetch";
+
+interface MeProfile {
+  userId: string;
+  email: string;
+  displayName: string | null;
+  tenantId: string | null;
+  locale: string | null;
+  timezone: string | null;
+  bio: string | null;
+  phone: string | null;
+  linkedinUri: string | null;
+}
+
+const ProfileFormSchema = z.object({
+  displayName: z.string().min(1).max(255),
+  locale: z.string().max(16).optional(),
+  timezone: z.string().max(64).optional(),
+  bio: z.string().max(4096).optional(),
+  phone: z.string().max(64).optional(),
+  linkedinUri: z.string().max(4096).optional(),
+});
+type ProfileFormValues = z.infer<typeof ProfileFormSchema>;
+
+export default function MeProfilePage() {
+  const qc = useQueryClient();
+  const profile = useQuery({
+    queryKey: ["me", "profile"],
+    queryFn: () => apiFetch<MeProfile>("/v1/me/profile"),
+  });
+
+  const update = useMutation({
+    mutationFn: (body: ProfileFormValues) =>
+      apiFetch<MeProfile>("/v1/me/profile", { method: "PATCH", body }),
+    onSuccess: (next) => qc.setQueryData(["me", "profile"], next),
+  });
+
+  const { register, handleSubmit, reset, formState: { isSubmitting, isDirty } } =
+    useForm<ProfileFormValues>({
+      resolver: zodResolver(ProfileFormSchema),
+      values: profile.data
+        ? {
+            displayName: profile.data.displayName ?? "",
+            locale: profile.data.locale ?? "",
+            timezone: profile.data.timezone ?? "",
+            bio: profile.data.bio ?? "",
+            phone: profile.data.phone ?? "",
+            linkedinUri: profile.data.linkedinUri ?? "",
+          }
+        : undefined,
+    });
+
+  const onSubmit = handleSubmit(async (vals) => {
+    await update.mutateAsync(vals);
+    reset(vals);
+  });
+
+  return (
+    <main data-testid="me-profile-page" className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+      <header>
+        <h1 className="text-2xl font-semibold" data-testid="me-profile-title">Profilo</h1>
+        <p className="text-sm opacity-70" data-testid="me-profile-email">
+          {profile.data?.email ?? "…"}
+        </p>
+      </header>
+
+      <Card>
+        <CardHeader><CardTitle>Anagrafica</CardTitle></CardHeader>
+        <CardContent>
+          {profile.isLoading ? (
+            <span className="opacity-60">Caricamento…</span>
+          ) : (
+            <form
+              onSubmit={(e) => { void onSubmit(e); }}
+              className="space-y-4"
+              data-testid="me-profile-form"
+            >
+              <div>
+                <label htmlFor="displayName" className="text-sm font-medium">Nome visualizzato</label>
+                <Input id="displayName" data-testid="profile-displayName" {...register("displayName")} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="locale" className="text-sm font-medium">Locale</label>
+                  <Input id="locale" data-testid="profile-locale" placeholder="it-IT" {...register("locale")} />
+                </div>
+                <div>
+                  <label htmlFor="timezone" className="text-sm font-medium">Timezone</label>
+                  <Input id="timezone" data-testid="profile-timezone" placeholder="Europe/Rome" {...register("timezone")} />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="phone" className="text-sm font-medium">Telefono</label>
+                <Input id="phone" data-testid="profile-phone" {...register("phone")} />
+              </div>
+              <div>
+                <label htmlFor="linkedinUri" className="text-sm font-medium">LinkedIn URL</label>
+                <Input id="linkedinUri" data-testid="profile-linkedinUri" {...register("linkedinUri")} />
+              </div>
+              <div>
+                <label htmlFor="bio" className="text-sm font-medium">Bio</label>
+                <Input id="bio" data-testid="profile-bio" {...register("bio")} />
+              </div>
+
+              {update.isSuccess && (
+                <p className="text-sm text-green-700" data-testid="profile-saved">Salvato.</p>
+              )}
+              {update.isError && (
+                <p className="text-sm text-red-600" data-testid="profile-error">
+                  Errore durante il salvataggio.
+                </p>
+              )}
+
+              <Button
+                type="submit"
+                data-testid="profile-submit"
+                disabled={isSubmitting || update.isPending || !isDirty}
+              >
+                {update.isPending ? "Salvataggio…" : "Salva modifiche"}
+              </Button>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+    </main>
+  );
+}

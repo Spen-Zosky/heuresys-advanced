@@ -1,6 +1,7 @@
 # Accessibility tail items (MVP-2a → MVP-3)
 
-> **Status**: MVP-2a/2b acceptance #7 chiusa — **0 violazioni `critical` su 35 rotte × 3 persona group**.
+> **Status**: MVP-2a/2b acceptance #7 chiusa — **0 violazioni `critical` su 35 rotte × 3 persona group** (WCAG 2.0/2.1 A/AA baseline).
+> Tappa G (post-MVP-2 hardening) ha esteso il ruleset a **WCAG 2.2 A/AA** + integrato la checklist manuale del bundle (`docs/a11y-manual-checklist.md`).
 > Le rimanenti violazioni (severity `serious` / `moderate` / `minor`) raccolte da `axe-core` durante l'audit di chiusura sono documentate qui come tail items per MVP-3.
 
 ---
@@ -9,7 +10,8 @@
 
 - **Spec**: `apps/web/tests/e2e/a11y.spec.ts`
 - **Engine**: `axe-core` via `@axe-core/playwright` 4.11.x (+ `axe-playwright` 2.2.x)
-- **Ruleset attivi**: `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`
+- **Ruleset attivi**: `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, **`wcag22a`, `wcag22aa`** (estesi in Tappa G)
+- **Manual checklist**: `docs/a11y-manual-checklist.md` (14 voci dal bundle + 5 voci WCAG 2.2 AA specifiche)
 - **Coverage**:
   - `platformAdmin` (4 rotte): `/dashboard`, `/tenants`, `/admin/roles`, `/users`
   - `tenantAdmin` (17 rotte): tutto il set admin TENANT — `/dashboard`, `/users`, `/positions`, `/blueprints`, `/skills`, `/kpis`, `/learning`, `/gaps`, `/career-succession`, `/compensation-intelligence`, `/organization`, `/processes`, `/seed-acquisition/runs`, `/brownfield-adaptation`, `/visualizations`, `/learning/training-initiatives`, `/organization/org-chart`

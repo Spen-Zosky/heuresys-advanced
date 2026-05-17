@@ -81,7 +81,18 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
   });
 
   const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    // WCAG 2.0 A/AA + 2.1 A/AA + 2.2 A/AA (Tappa G — extended ruleset).
+    // The 2.2 additions cover: focus-not-obscured, focus-appearance (AAA),
+    // target-size minimum (AA), dragging-movements, consistent-help,
+    // redundant-entry, accessible-authentication.
+    .withTags([
+      "wcag2a",
+      "wcag2aa",
+      "wcag21a",
+      "wcag21aa",
+      "wcag22a",
+      "wcag22aa",
+    ])
     .analyze();
 
   const bySeverity = {

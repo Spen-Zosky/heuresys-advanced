@@ -182,3 +182,26 @@ When a new requirement seems to conflict with these, **stop and ask** rather tha
 - **Never `git push`** without an explicit ask from the user. Local commits on `main` are pre-authorized for this project (see `memory/feedback_full_autonomy.md`); pushes are not.
 - **Update `HANDOFF.md`** at the end of any session that ships modules or changes live state — it's the cross-session handoff doc.
 - The repo runs on Windows. PowerShell 5.1 quirks apply (absolute exe paths, no `-ArgumentList @()` with string arrays, `cmd.exe` not on PATH). Most automation has `.sh` siblings for SSH-into-VM use.
+
+## MVP-2a / MVP-2b frontend — LIVE DATA E2E ONLY (non-negotiable)
+
+When the next session opens MVP-2a (admin web SPA) and MVP-2b frontend (13 ESS pages), the **canonical entry point** is `NEXT_SESSION_MVP_2A.md` at the repo root. Read that file in full before any code action — it contains the doctrine, the audit-first / TDD ordering, the page-by-page loop, and the literal session prompt.
+
+**Non-negotiable rules** locked in by that doctrine (also enforced here so future sessions inherit them):
+
+- **No mock data, no demo fixtures, no placeholder hard-codes** in any page. Every cell, chart, table, form is fed by a real `/v1/*` call hitting the OCI VM PostgreSQL via the live pool. The only "empty data" allowed is a real empty-state UI when the live API returns an empty list.
+- **No stubbed endpoints, no Next.js routes that return static JSON, no TanStack Query with hard-coded `initialData`/`placeholderData`.**
+- **No page commit without a Playwright E2E test green** that performs a real login (`admin@heuresys.com` / `Admin#PassW0rd!` or the appropriate seeded persona), navigates, and asserts on data that came from the seed (`RTL_BANK_REFERENCE` + 5 test personas). Mutations must call the real endpoint and verify state via re-fetch.
+- **API-first ordering** — never build UI before the endpoint exists, is typed in `@heuresys/shared`, and is covered by a green integration test in `apps/api/test/`. If a page needs an endpoint that doesn't exist, open a mini API milestone (e.g. `5.1.24 — dashboard aggregators`) and ship the endpoint + tests first, atomic commit.
+- **Complete wiring at every level before a page is "done"**: shared Zod schema → API repository/service/route → integration test → frontend types reused from `@heuresys/shared` → TanStack Query hook → component composed from `@heuresys/ui` primitives → Playwright E2E green. If any layer is missing, the page is not done.
+- **Correction + retest cycle is mandatory**: any regression in TypeScript, vitest API suite, Playwright, or i18n parity blocks the merge of the current page. No "TODO: fix later" comments shipped to production code.
+- **No UI primitive duplication** — every reusable component lives in `D:\ux-design-shared\ui` (linked via `link:` protocol). Page-specific composition stays in `apps/web/src/components/` but only as composition of `@heuresys/ui` primitives plus tenant/RBAC-aware wrappers from `@heuresys/shared`.
+
+**First-action checklist for the MVP-2a session** (also in `NEXT_SESSION_MVP_2A.md` §1):
+1. Pre-flight: tunnel SSH 5433 up, `readlink -f node_modules/@heuresys/ui` → `/d/ux-design-shared/ui`, `pnpm test` in `apps/api` = 182/182 green.
+2. Phase 0 — API gap audit → produce `docs/api/MVP_2A_API_GAP_AUDIT.md` covering 27 admin routes + 13 ESS routes vs the 267 existing endpoints.
+3. Only after every audit row is ✅, scaffold `apps/web` (Next.js 15 + TanStack + Hook Form + i18next; no Radix/Tailwind here — they live in `@heuresys/ui`).
+4. Implement `/login` as pilot, lock in the auth client + CSRF + Playwright pattern.
+5. Page-by-page loop per `NEXT_SESSION_MVP_2A.md` §4.1.
+
+If the next session attempts to deviate from this doctrine (e.g. proposes "let me stub this endpoint with a JSON for now"), refuse and point back to `NEXT_SESSION_MVP_2A.md` §0.

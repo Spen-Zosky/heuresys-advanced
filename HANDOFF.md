@@ -1,10 +1,27 @@
+## ⚠️ ENTRY POINT AUTORITATIVO — leggi PRIMA di qualunque azione
+
+Per la prossima sessione (MVP-2a admin SPA + MVP-2b frontend ESS) il
+documento canonico è: **`NEXT_SESSION_MVP_2A.md`** (al root del repo).
+
+Contiene: direttiva non-negoziabile (LIVE DATA E2E, zero mock/demo/
+placeholder), Phase 0 API gap audit, Phase 1 scaffold + auth client,
+Phase 2 page-by-page loop (Playwright E2E live-data), criteri di
+accettazione, e il **prompt letterale** da incollare a inizio sessione
+(sezione 7 del documento).
+
+Le regole sono mirrorate anche in `CLAUDE.md` (sezione "MVP-2a / MVP-2b
+frontend — LIVE DATA E2E ONLY") per inheritance automatica.
+
+---
+
 Sono Enzo Spenuso. Riprendo il progetto Heuresys Advanced HRMS/BPM Platform v5
 in `D:\heuresys-advanced\`. Sessione precedente (2026-05-16, lunga):
 56 business modules + auth + shared completati. **MVP-1 5.1 CHIUSO**
 (5.1.3..5.1.23 tutti shipped) + **MVP-2b ESS portal backend CHIUSO**
 (13 endpoint /v1/me/* con hard self-scope).
 **182/182 integration tests verdi. 267 endpoint live.**
-Prossima fase: **MVP-2a web SPA** (apps/web Next.js, ancora vuoto).
+Prossima fase: **MVP-2a web SPA** (apps/web Next.js, ancora vuoto) —
+**procedura, vincoli e prompt letterale in `NEXT_SESSION_MVP_2A.md`**.
 
   HEAD     feat(api): MVP-2b — ESS /v1/me/* portal (1 module, 13 endpoints, 9 tests)
   2f79b6d  feat(api): MVP-1 5.1.23 — seed_acquisition (3 modules, 10 endpoints, 5 tests)

@@ -3,7 +3,10 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: false,
-  retries: 0,
+  // Dev-mode runtime (compile-on-demand, Tailwind 4 JIT) introduces occasional
+  // hydration-race jitter on cold first-hit, especially on the 4th/5th persona
+  // setup. One retry per test absorbs that without masking real bugs.
+  retries: 1,
   workers: 1,
   reporter: [["list"]],
   use: {

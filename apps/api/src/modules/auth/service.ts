@@ -110,6 +110,15 @@ export interface AuthService {
   requestPasswordReset(input: PasswordResetRequestInput): Promise<void>;
   completePasswordReset(input: PasswordResetCompleteInput): Promise<void>;
   adminRevokeUser(input: AdminRevokeInput): Promise<void>;
+  listRolePermissions(): Promise<{
+    items: Array<{
+      roleCode: string;
+      permissionCode: string;
+      permissionResource: string;
+      permissionAction: string;
+    }>;
+    total: number;
+  }>;
 }
 
 export function createAuthService(deps: AuthServiceDeps): AuthService {
@@ -474,6 +483,12 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
           details: { actorUserId: input.actorUserId },
         });
       });
+    },
+
+    /* --- role-permission matrix (read-only) -------------------------- */
+    async listRolePermissions() {
+      const items = await repo.listRolePermissions(pool);
+      return { items, total: items.length };
     },
   };
 }

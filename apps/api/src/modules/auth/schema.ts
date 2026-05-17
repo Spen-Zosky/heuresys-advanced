@@ -17,6 +17,7 @@ export {
   EmptyResponseSchema,
   ErrorEnvelopeSchema,
   RoleCodeSchema,
+  RolePermissionsResponseSchema,
   type LoginBody,
   type LoginResponse,
   type MeResponse,

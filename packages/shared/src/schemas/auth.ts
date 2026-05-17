@@ -93,3 +93,19 @@ export const ErrorEnvelopeSchema = z.object({
     details: z.unknown().optional(),
   }),
 });
+
+/* --- Role × Permission read-only matrix (MVP-2a) ------------------------ */
+
+export const RolePermissionItemSchema = z.object({
+  roleCode: z.string(),
+  permissionCode: z.string(),
+  permissionResource: z.string(),
+  permissionAction: z.string(),
+});
+export type RolePermissionItem = z.infer<typeof RolePermissionItemSchema>;
+
+export const RolePermissionsResponseSchema = z.object({
+  items: z.array(RolePermissionItemSchema),
+  total: z.number().int().min(0),
+});
+export type RolePermissionsResponse = z.infer<typeof RolePermissionsResponseSchema>;

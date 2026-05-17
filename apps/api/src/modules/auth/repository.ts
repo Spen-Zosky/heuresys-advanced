@@ -505,3 +505,36 @@ export async function withTransaction<T>(
     client.release();
   }
 }
+
+/* --- Role × Permission matrix (read-only, MVP-2a /admin/roles) -------- */
+
+export async function listRolePermissions(
+  q: DbConnector,
+): Promise<Array<{
+  roleCode: string;
+  permissionCode: string;
+  permissionResource: string;
+  permissionAction: string;
+}>> {
+  const res = await q.query<{
+    role_code: string;
+    permission_code: string;
+    permission_resource: string;
+    permission_action: string;
+  }>(
+    `SELECT r.auth_role_code        AS role_code,
+            p.auth_permission_code  AS permission_code,
+            p.auth_permission_resource AS permission_resource,
+            p.auth_permission_action   AS permission_action
+       FROM sys.sys_auth_role_permissions rp
+       JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
+       JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+      ORDER BY r.auth_role_code, p.auth_permission_code`,
+  );
+  return res.rows.map((row) => ({
+    roleCode: row.role_code,
+    permissionCode: row.permission_code,
+    permissionResource: row.permission_resource,
+    permissionAction: row.permission_action,
+  }));
+}

@@ -21,6 +21,7 @@ import {
   PasswordResetCompleteBodySchema,
   RevokeUserParamsSchema,
   EmptyResponseSchema,
+  RolePermissionsResponseSchema,
 } from "./schema.js";
 import { createAuthService, type AuthService } from "./service.js";
 import { ConsoleMailer, type IMailer } from "./mailer.js";
@@ -211,6 +212,25 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         targetUserId: req.params.userId,
       });
       reply.code(204).send();
+    },
+  );
+
+  /* --- GET /role-permissions (read-only matrix for /admin/roles UI) --- */
+  // Returns the full role × permission seed matrix. PLATFORM_ADMIN-only
+  // (gated by the same perm used for admin-revoke). Pure read of the seed
+  // tables; no mutations exposed in MVP-2a — full role CRUD lands in MVP-3.
+  app.get(
+    "/role-permissions",
+    {
+      preHandler: [requirePermission("auth:revoke_user")],
+      schema: {
+        response: {
+          200: RolePermissionsResponseSchema,
+        },
+      },
+    },
+    async () => {
+      return service.listRolePermissions();
     },
   );
 };

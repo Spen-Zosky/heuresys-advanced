@@ -4,6 +4,7 @@
  * PUT-style upsert (idempotent on positionId).
  */
 
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 
@@ -41,9 +42,9 @@ export const positionSuccessionRelevanceRoutes: FastifyPluginAsyncZod = async (a
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("career_succession:update")],
-    schema: { params: PositionSuccessionRelevanceIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: PositionSuccessionRelevanceIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await positionSuccessionRelevanceService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

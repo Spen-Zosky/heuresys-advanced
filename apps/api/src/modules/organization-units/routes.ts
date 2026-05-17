@@ -53,6 +53,6 @@ export const organizationUnitsRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: OrganizationUnitIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await organizationUnitsService.softDelete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send({});
   });
 };

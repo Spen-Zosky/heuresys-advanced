@@ -50,6 +50,6 @@ export const skillCategoriesRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: SkillCategoryIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillCategoriesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send({});
   });
 };

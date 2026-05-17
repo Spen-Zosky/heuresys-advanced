@@ -50,6 +50,6 @@ export const skillAliasesRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: SkillAliasIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillAliasesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send({});
   });
 };

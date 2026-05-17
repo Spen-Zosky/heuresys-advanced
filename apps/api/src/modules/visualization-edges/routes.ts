@@ -2,6 +2,7 @@
  * apps/api/src/modules/visualization-edges/routes.ts
  * 4 endpoints: list/get/create/delete (no update — immutable).
  */
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
@@ -35,9 +36,9 @@ export const visualizationEdgesRoutes: FastifyPluginAsyncZod = async (app) => {
   });
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("visualization:update_layout")],
-    schema: { params: VizEdgeIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: VizEdgeIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await visualizationEdgesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

@@ -4,6 +4,7 @@
  * Permissions: career_succession:read/create/update (DELETE reuses :update).
  */
 
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 
@@ -50,9 +51,9 @@ export const userCareerPlansRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("career_succession:update")],
-    schema: { params: UserCareerPlanIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: UserCareerPlanIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await userCareerPlansService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

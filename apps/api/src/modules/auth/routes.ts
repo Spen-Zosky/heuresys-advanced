@@ -132,7 +132,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         userAgent: getUa(req),
       });
       clearAuthCookies(reply);
-      reply.code(204).send();
+      reply.code(204).send({});
     },
   );
 
@@ -166,7 +166,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         email: req.body.email,
         ip: req.ip ?? null,
       });
-      reply.code(204).send();
+      reply.code(204).send({});
     },
   );
 
@@ -186,7 +186,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         newPassword: req.body.newPassword,
         ip: req.ip ?? null,
       });
-      reply.code(204).send();
+      reply.code(204).send({});
     },
   );
 
@@ -213,7 +213,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         actorRoles: req.user.roles,
         targetUserId: req.params.userId,
       });
-      reply.code(204).send();
+      reply.code(204).send({});
     },
   );
 

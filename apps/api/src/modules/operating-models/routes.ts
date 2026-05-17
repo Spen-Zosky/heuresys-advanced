@@ -1,6 +1,7 @@
 /**
  * apps/api/src/modules/operating-models/routes.ts
  */
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
@@ -31,9 +32,9 @@ export const operatingModelsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => operatingModelsService.upsert(actor(req), req.body));
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:update")],
-    schema: { params: OperatingModelIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: OperatingModelIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await operatingModelsService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

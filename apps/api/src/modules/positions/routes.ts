@@ -86,7 +86,7 @@ export const positionsRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (req, reply) => {
       await positionsService.softDelete(actorFromReq(req), req.params.id);
-      reply.code(204).send();
+      reply.code(204).send({});
     },
   );
 
@@ -153,7 +153,7 @@ export const positionsRoutes: FastifyPluginAsyncZod = async (app) => {
         req.params.id,
         req.params.skillId,
       );
-      reply.code(204).send();
+      reply.code(204).send({});
     },
   );
 

@@ -101,7 +101,7 @@ export const tenantsRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (req, reply) => {
       await tenantsService.archive(actorFromReq(req), req.params.id);
-      reply.code(204).send();
+      reply.code(204).send({});
     },
   );
 };

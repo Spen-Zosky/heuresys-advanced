@@ -1,6 +1,7 @@
 /**
  * apps/api/src/modules/visualization-nodes/routes.ts
  */
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
@@ -38,9 +39,9 @@ export const visualizationNodesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => visualizationNodesService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("visualization:update_layout")],
-    schema: { params: VizNodeIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: VizNodeIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await visualizationNodesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

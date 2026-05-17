@@ -1,6 +1,7 @@
 /**
  * apps/api/src/modules/organization-unit-kpi-templates/routes.ts
  */
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
@@ -32,9 +33,9 @@ export const organizationUnitKpiTemplatesRoutes: FastifyPluginAsyncZod = async (
   }, async (req) => organizationUnitKpiTemplatesService.upsert(actor(req), req.body));
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("bpm_process:update")],
-    schema: { params: OrganizationUnitKpiTemplateIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: OrganizationUnitKpiTemplateIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await organizationUnitKpiTemplatesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

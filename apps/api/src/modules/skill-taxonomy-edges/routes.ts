@@ -45,6 +45,6 @@ export const skillTaxonomyEdgesRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: SkillTaxonomyEdgeIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillTaxonomyEdgesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send({});
   });
 };

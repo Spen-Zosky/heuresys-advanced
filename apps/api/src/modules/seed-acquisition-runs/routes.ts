@@ -1,6 +1,7 @@
 /**
  * apps/api/src/modules/seed-acquisition-runs/routes.ts
  */
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
@@ -39,9 +40,9 @@ export const seedAcquisitionRunsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => seedAcquisitionRunsService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("seed_acquisition:trigger")],
-    schema: { params: SeedAcquisitionRunIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: SeedAcquisitionRunIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await seedAcquisitionRunsService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

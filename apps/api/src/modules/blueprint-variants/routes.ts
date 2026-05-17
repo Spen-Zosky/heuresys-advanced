@@ -1,6 +1,7 @@
 /**
  * apps/api/src/modules/blueprint-variants/routes.ts
  */
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
@@ -38,9 +39,9 @@ export const blueprintVariantsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => blueprintVariantsService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("blueprint:override")],
-    schema: { params: BlueprintVariantIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: BlueprintVariantIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await blueprintVariantsService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

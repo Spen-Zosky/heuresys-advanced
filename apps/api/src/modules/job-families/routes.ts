@@ -55,6 +55,6 @@ export const jobFamiliesRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: JobFamilyIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await jobFamiliesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send({});
   });
 };

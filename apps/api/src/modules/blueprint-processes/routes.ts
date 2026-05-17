@@ -1,6 +1,7 @@
 /**
  * apps/api/src/modules/blueprint-processes/routes.ts
  */
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
@@ -38,9 +39,9 @@ export const blueprintProcessesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => blueprintProcessesService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("blueprint:override")],
-    schema: { params: BlueprintProcessIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: BlueprintProcessIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await blueprintProcessesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

@@ -1,6 +1,7 @@
 /**
  * apps/api/src/modules/activity-classifications/routes.ts
  */
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
@@ -39,9 +40,9 @@ export const activityClassificationsRoutes: FastifyPluginAsyncZod = async (app) 
   }, async (req) => activityClassificationsService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:update")],
-    schema: { params: ActivityClassificationIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: ActivityClassificationIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await activityClassificationsService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

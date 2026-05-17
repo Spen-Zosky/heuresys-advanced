@@ -5,6 +5,7 @@
  * gap_analysis:update for PATCH and DELETE (no gap_analysis:delete in seed).
  */
 
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 
@@ -51,9 +52,9 @@ export const learningGapsRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("gap_analysis:update")],
-    schema: { params: LearningGapIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: LearningGapIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await learningGapsService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

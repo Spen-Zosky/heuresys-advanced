@@ -2,6 +2,7 @@
  * apps/api/src/modules/visualization-styles/routes.ts
  * 4 endpoints — no PATCH (immutable per row; delete + re-create to change).
  */
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
@@ -35,9 +36,9 @@ export const visualizationStylesRoutes: FastifyPluginAsyncZod = async (app) => {
   });
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("visualization:update_layout")],
-    schema: { params: VizStyleIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: VizStyleIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await visualizationStylesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

@@ -99,7 +99,7 @@ export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
     },
     async (req, reply) => {
       await usersService.deactivate(actorFromReq(req), req.params.id);
-      reply.code(204).send();
+      reply.code(204).send({});
     },
   );
 
@@ -156,7 +156,7 @@ export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
         req.params.id,
         req.params.grantId,
       );
-      reply.code(204).send();
+      reply.code(204).send({});
     },
   );
 };

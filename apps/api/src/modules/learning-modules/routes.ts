@@ -52,6 +52,6 @@ export const learningModulesRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: LearningModuleIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await learningModulesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send({});
   });
 };

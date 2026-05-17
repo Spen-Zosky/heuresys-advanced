@@ -2,6 +2,7 @@
  * apps/api/src/modules/visualization-graphs/routes.ts
  * 5 endpoints under /v1/visualization-graphs.
  */
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
@@ -43,9 +44,9 @@ export const visualizationGraphsRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("visualization:update_layout")],
-    schema: { params: VizGraphIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: VizGraphIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await visualizationGraphsService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

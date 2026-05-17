@@ -4,6 +4,7 @@
  * Permissions: learning:read/create/update/delete.
  */
 
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 
@@ -50,9 +51,9 @@ export const learningPathStepsRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("learning:delete")],
-    schema: { params: LearningPathStepIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: LearningPathStepIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await learningPathStepsService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

@@ -3,6 +3,7 @@
  * 5 endpoints under /v1/successor-candidates.
  */
 
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 
@@ -49,9 +50,9 @@ export const successorCandidatesRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("career_succession:update")],
-    schema: { params: SuccessorCandidateIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: SuccessorCandidateIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await successorCandidatesService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

@@ -5,6 +5,7 @@
  * learning:update for PATCH, learning:delete for DELETE.
  */
 
+import { z } from "zod";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 
@@ -51,9 +52,9 @@ export const learningPathsRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.delete("/:id", {
     preHandler: [app.verifyCsrf, requirePermission("learning:delete")],
-    schema: { params: LearningPathIdParamSchema, response: { 204: { type: "null" } as const } },
+    schema: { params: LearningPathIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await learningPathsService.delete(actor(req), req.params.id);
-    reply.code(204).send();
+    reply.code(204).send(null);
   });
 };

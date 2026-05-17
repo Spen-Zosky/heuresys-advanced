@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -17,9 +17,14 @@ const LoginFormSchema = z.object({
 });
 type LoginFormValues = z.infer<typeof LoginFormSchema>;
 
-function LoginForm() {
+function readNextParam(): string | null {
+  if (typeof window === "undefined") return null;
+  const next = new URLSearchParams(window.location.search).get("next");
+  return next && next.startsWith("/") ? next : null;
+}
+
+export default function LoginPage() {
   const router = useRouter();
-  const params = useSearchParams();
   const { t } = useTranslation();
   const login = useLogin();
   const [formError, setFormError] = useState<string | null>(null);
@@ -41,8 +46,7 @@ function LoginForm() {
     setFormError(null);
     try {
       const res = await login.mutateAsync(values);
-      const next = params.get("next");
-      const dest = next && next.startsWith("/") ? next : landingForRoles(res.roles);
+      const dest = readNextParam() ?? landingForRoles(res.roles);
       router.replace(dest);
     } catch (e) {
       if (isApiError(e)) {
@@ -137,13 +141,5 @@ function LoginForm() {
         </CardContent>
       </Card>
     </main>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={null}>
-      <LoginForm />
-    </Suspense>
   );
 }

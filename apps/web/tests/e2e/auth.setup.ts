@@ -14,12 +14,24 @@
 import { test as setup } from "@playwright/test";
 import { fillLoginForm, PERSONAS } from "./fixtures";
 
-const TARGET_PERSONAS = ["platformAdmin", "tenantAdmin", "employee"] as const;
+const TARGET_PERSONAS = [
+  "platformAdmin",
+  "tenantAdmin",
+  "manager",
+  "employee",
+  "outsider",
+] as const;
 
 for (const key of TARGET_PERSONAS) {
   const persona = PERSONAS[key];
   setup(`authenticate as ${key}`, async ({ page }) => {
     await page.goto("/login");
+    // Wait for hydration: the React submit handler must be bound before we click,
+    // otherwise the native form GET submission fires and leaks credentials into
+    // the URL. waitForLoadState("networkidle") gives Next.js time to load chunks
+    // and React time to attach event handlers.
+    await page.waitForLoadState("networkidle");
+    await page.getByTestId("login-submit").waitFor({ state: "visible" });
     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
     await page.getByTestId("login-submit").click();
     await page.waitForURL(`**${persona.expectedLandingPath}`);

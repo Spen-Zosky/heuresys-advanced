@@ -62,7 +62,10 @@ export function useLogin() {
       return res;
     },
     onSuccess: async (res) => {
-      qc.setQueryData(AUTH_ME_QUERY_KEY, res.user);
+      // The login response splits `user` (profile fields) from `roles`. The
+      // /v1/auth/me endpoint returns them merged — mirror that shape so the
+      // layout's hasAdminRole check sees the roles immediately, no refetch.
+      qc.setQueryData(AUTH_ME_QUERY_KEY, { ...res.user, roles: res.roles });
     },
   });
 }

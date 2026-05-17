@@ -115,36 +115,39 @@ export async function listMyPositions(q: DbConnector, userId: string): Promise<{
   isPrimary: boolean; status: string; startDate: string | null; endDate: string | null;
 }>; total: number; }> {
   const res = await q.query<{
-    user_position_assignment_id: string; position_id: string;
-    position_code: string; position_title: string;
-    user_position_assignment_is_primary: boolean;
+    user_position_assignment_id: string;
+    user_position_assignment_position_id: string;
+    position_code: string;
+    position_title: string;
+    is_primary: boolean;
     user_position_assignment_status: string;
-    user_position_assignment_effective_from: Date | null;
-    user_position_assignment_effective_to: Date | null;
+    user_position_assignment_start_date: Date | null;
+    user_position_assignment_end_date: Date | null;
   }>(
-    `SELECT a.user_position_assignment_id, a.position_id,
+    `SELECT a.user_position_assignment_id,
+            a.user_position_assignment_position_id,
             p.position_code, p.position_title,
-            a.user_position_assignment_is_primary,
+            (a.user_position_assignment_kind = 'PRIMARY') AS is_primary,
             a.user_position_assignment_status,
-            a.user_position_assignment_effective_from,
-            a.user_position_assignment_effective_to
+            a.user_position_assignment_start_date,
+            a.user_position_assignment_end_date
        FROM sys.sys_user_position_assignments a
-       JOIN sys.sys_positions p ON p.position_id = a.position_id
+       JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
       WHERE a.user_position_assignment_user_id = $1
-      ORDER BY a.user_position_assignment_is_primary DESC, a.user_position_assignment_effective_from DESC NULLS LAST`,
+      ORDER BY is_primary DESC, a.user_position_assignment_start_date DESC NULLS LAST`,
     [userId],
   );
   const items = res.rows.map((r) => ({
     userPositionAssignmentId: r.user_position_assignment_id,
-    positionId: r.position_id,
+    positionId: r.user_position_assignment_position_id,
     positionCode: r.position_code,
     positionTitle: r.position_title,
-    isPrimary: r.user_position_assignment_is_primary,
+    isPrimary: r.is_primary,
     status: r.user_position_assignment_status,
-    startDate: r.user_position_assignment_effective_from
-      ? r.user_position_assignment_effective_from.toISOString().slice(0, 10) : null,
-    endDate: r.user_position_assignment_effective_to
-      ? r.user_position_assignment_effective_to.toISOString().slice(0, 10) : null,
+    startDate: r.user_position_assignment_start_date
+      ? r.user_position_assignment_start_date.toISOString().slice(0, 10) : null,
+    endDate: r.user_position_assignment_end_date
+      ? r.user_position_assignment_end_date.toISOString().slice(0, 10) : null,
   }));
   return { items, total: items.length };
 }

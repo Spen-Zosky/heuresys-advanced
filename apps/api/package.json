@@ -27,7 +27,7 @@
     "@fastify/rate-limit": "9.1.0",
     "argon2": "0.41.1",
     "dotenv": "16.4.7",
-    "drizzle-orm": "0.36.4",
+    "drizzle-orm": "0.45.2",
     "fastify": "4.28.1",
     "fastify-plugin": "4.5.1",
     "fastify-type-provider-zod": "2.0.0",
@@ -44,6 +44,6 @@
     "supertest": "7.0.0",
     "tsx": "4.19.2",
     "typescript": "5.7.2",
-    "vitest": "2.1.8"
+    "vitest": "2.1.9"
   }
 }

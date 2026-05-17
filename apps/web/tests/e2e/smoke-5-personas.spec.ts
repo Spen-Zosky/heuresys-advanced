@@ -16,9 +16,10 @@ import { test, expect, type Page } from "@playwright/test";
 import { storageStateFor, type PersonaKey } from "./fixtures";
 
 // Dev-mode runtime (Next.js compile-on-demand, Tailwind 4 JIT, no warm cache)
-// occasionally exceeds the 30s navigationTimeout on first hit of a route.
-// Allow one retry per test — the warmup pays for itself on the second run.
-test.describe.configure({ retries: 1 });
+// can spike past the 30s default test timeout when the smoke walks through
+// 3-4 cold routes in a row. Allow one retry per test (the second run hits
+// warm chunks) and bump per-test timeout to 90s.
+test.describe.configure({ retries: 1, timeout: 90_000 });
 
 type Persona = {
   key: PersonaKey;

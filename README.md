@@ -18,7 +18,7 @@ Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 4 API on Po
 | Integration tests | **203 / 203** | vitest, single-thread, real DB via SSH tunnel |
 | Web routes shipped | **42** | 28 admin + 14 ESS (`/me/*`) |
 | Playwright E2E specs | **12** | live-data, storageState-backed, ≥50 assertions |
-| Design system components | **51** | linked via pnpm `link:` from sibling repo `ux-design-shared` |
+| Design system components | **51** | linked via pnpm `link:` from sibling repo `ux-design-shared` · live Storybook: **[spen-zosky.github.io/ux-design-shared](https://spen-zosky.github.io/ux-design-shared/)** |
 
 ---
 
@@ -220,6 +220,7 @@ For details on what's next, see `HANDOFF.md` (live state) and `NEXT_SESSION_MVP_
 
 - **Code**: https://github.com/Spen-Zosky/heuresys-advanced (public)
 - **Design system**: https://github.com/Spen-Zosky/ux-design-shared (public, consumed via pnpm `link:`)
+- **Design system Storybook (live)**: https://spen-zosky.github.io/ux-design-shared/ — 51 components, 122 stories, auto-deployed on every push to `main`
 - **License**: UNLICENSED (private project, contact the author before reuse)
 - **Author**: Enzo Spenuso
 

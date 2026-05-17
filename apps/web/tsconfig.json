@@ -22,5 +22,12 @@
     "src/**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", ".next", "dist", "tests"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    "dist",
+    "tests",
+    "../../node_modules/@heuresys/ui/**",
+    "../../../ux-design-shared/ui/**"
+  ]
 }

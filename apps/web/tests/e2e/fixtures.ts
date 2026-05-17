@@ -1,0 +1,48 @@
+/**
+ * apps/web/tests/e2e/fixtures.ts
+ *
+ * Shared Playwright helpers + seeded persona credentials.
+ * Personas come from db/scripts/seed-test-admin.ts.
+ */
+
+import type { Page } from "@playwright/test";
+
+export const TEST_PASSWORD = "Admin#PassW0rd!";
+
+export const PERSONAS = {
+  platformAdmin: {
+    email: "admin@heuresys.com",
+    expectedLandingPath: "/dashboard",
+  },
+  tenantAdmin: {
+    email: "tenant_admin_test@rtl-bank.test",
+    expectedLandingPath: "/dashboard",
+  },
+  manager: {
+    email: "manager_test@rtl-bank.test",
+    expectedLandingPath: "/dashboard",
+  },
+  employee: {
+    email: "employee_test@rtl-bank.test",
+    expectedLandingPath: "/me",
+  },
+  outsider: {
+    email: "outsider_test@rtl-bank.test",
+    expectedLandingPath: "/me",
+  },
+} as const satisfies Record<string, { email: string; expectedLandingPath: string }>;
+
+export type PersonaKey = keyof typeof PERSONAS;
+
+export async function fillLoginForm(page: Page, email: string, password: string) {
+  await page.getByTestId("login-email").fill(email);
+  await page.getByTestId("login-password").fill(password);
+}
+
+export async function loginAs(page: Page, persona: PersonaKey) {
+  const { email, expectedLandingPath } = PERSONAS[persona];
+  await page.goto("/login");
+  await fillLoginForm(page, email, TEST_PASSWORD);
+  await page.getByTestId("login-submit").click();
+  await page.waitForURL(`**${expectedLandingPath}`);
+}

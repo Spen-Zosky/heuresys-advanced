@@ -15,6 +15,10 @@
       "types": "./dist/schemas/auth.d.ts",
       "default": "./src/schemas/auth.ts"
     },
+    "./schemas/mfa": {
+      "types": "./dist/schemas/mfa.d.ts",
+      "default": "./src/schemas/mfa.ts"
+    },
     "./schemas/role-codes": {
       "types": "./dist/schemas/role-codes.d.ts",
       "default": "./src/schemas/role-codes.ts"

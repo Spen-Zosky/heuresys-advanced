@@ -28,6 +28,7 @@ import { csrfPlugin } from "./middleware/csrf.js";
 import { isDatabaseReady } from "./db/client.js";
 import { COOKIES } from "./config/constants.js";
 import { authRoutes } from "./modules/auth/routes.js";
+import { mfaRoutes } from "./modules/auth/mfa-routes.js";
 import { tenantsRoutes } from "./modules/tenants/routes.js";
 import { usersRoutes } from "./modules/users/routes.js";
 import { positionsRoutes } from "./modules/positions/routes.js";
@@ -202,6 +203,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   // 13. Module routes
   await app.register(authRoutes, { prefix: "/v1/auth", mailer: options.authMailer });
+  await app.register(mfaRoutes, { prefix: "/v1/auth/mfa" });
   await app.register(tenantsRoutes, { prefix: "/v1/tenants" });
   await app.register(usersRoutes, { prefix: "/v1/users" });
   await app.register(positionsRoutes, { prefix: "/v1/positions" });

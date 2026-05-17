@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -v \".tsx\\\\|.ts$\")",
+      "Bash(npm install *)",
+      "Bash(pnpm install *)"
+    ]
+  }
+}

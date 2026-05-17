@@ -238,6 +238,10 @@
     "./schemas/me": {
       "types": "./dist/schemas/me.d.ts",
       "default": "./src/schemas/me.ts"
+    },
+    "./schemas/compensation": {
+      "types": "./dist/schemas/compensation.d.ts",
+      "default": "./src/schemas/compensation.ts"
     }
   },
   "scripts": {

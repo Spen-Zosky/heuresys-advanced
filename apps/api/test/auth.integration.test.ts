@@ -17,6 +17,7 @@ import { pool, closePool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
 import { createAuthService } from "../src/modules/auth/service.js";
 import { InMemoryMailer } from "../src/modules/auth/mailer.js";
+import { sharedEmailRateLimiter } from "../src/modules/auth/email-rate-limit.js";
 
 function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
@@ -59,6 +60,9 @@ describe("/v1/auth/* integration", () => {
   afterEach(async () => {
     // We can keep a single app for the whole suite — each request is
     // isolated and rate-limit counters are per-instance.
+    // The per-email rate limiter is a module singleton, so we reset it
+    // between tests to keep them order-independent.
+    sharedEmailRateLimiter.reset();
   });
 
   afterAll(async () => {
@@ -342,6 +346,93 @@ describe("/v1/auth/* integration", () => {
     expect(afterCount).toBe(beforeCount + 1);
   });
 
+  /* -------------------------------------------------- admin list sessions (Tappa E) */
+
+  it("GET /admin/users/:userId/sessions as PLATFORM_ADMIN returns active families", async () => {
+    // Fresh local app: the suiteApp per-IP rate limit on /login is at risk of
+    // exhaustion by this point in the suite, and a fresh app keeps this test
+    // deterministic.
+    const local = await buildTestApp();
+    try {
+      const adminLogin = await performLogin(local);
+      expect(adminLogin.status).toBe(200);
+      const adminUserId = adminLogin.body.user.userId;
+
+      const resp = await local.app.inject({
+        method: "GET",
+        url: `/v1/auth/admin/users/${adminUserId}/sessions`,
+        headers: { cookie: cookieHeader(adminLogin.cookies) },
+      });
+      expect(resp.statusCode).toBe(200);
+
+    const body = resp.json() as {
+      items: Array<{
+        familyId: string;
+        tenantId: string;
+        firstIssuedAt: string;
+        lastIssuedAt: string;
+        expiresAt: string;
+        ip: string | null;
+        userAgent: string | null;
+      }>;
+      total: number;
+    };
+      expect(body.total).toBeGreaterThanOrEqual(1);
+      expect(body.items.length).toBe(body.total);
+      expect(body.items[0]!.familyId).toMatch(/^[0-9a-f-]{36}$/i);
+      expect(body.items[0]!.tenantId).toMatch(/^[0-9a-f-]{36}$/i);
+      // ISO 8601 datetime
+      expect(body.items[0]!.firstIssuedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    } finally {
+      await local.app.close();
+    }
+  });
+
+  it("GET /admin/users/:userId/sessions without auth returns 401", async () => {
+    const targetRow = await pool.query<{ user_id: string }>(
+      `SELECT user_id FROM sys.sys_users LIMIT 1`,
+    );
+    const targetUserId = targetRow.rows[0]!.user_id;
+
+    const resp = await suiteApp.app.inject({
+      method: "GET",
+      url: `/v1/auth/admin/users/${targetUserId}/sessions`,
+    });
+    expect(resp.statusCode).toBe(401);
+  });
+
+  it("adminListSessions unit: TENANT_ADMIN cannot list sessions outside own tenant", async () => {
+    const mailer = new InMemoryMailer();
+    const service = createAuthService({
+      jwtSign: () => Promise.resolve("dummy"),
+      mailer,
+      log: suiteApp.app.log,
+    });
+
+    // Pick a target user from a different tenant than the actor.
+    const target = await pool.query<{ user_id: string; user_tenant_id: string }>(
+      `SELECT user_id, user_tenant_id FROM sys.sys_users
+        WHERE user_tenant_id IS NOT NULL
+        ORDER BY user_id LIMIT 1`,
+    );
+    expect(target.rows.length).toBe(1);
+    const targetUserId = target.rows[0]!.user_id;
+    const targetTenantId = target.rows[0]!.user_tenant_id;
+
+    // Other-tenant TENANT_ADMIN actor (any UUID not equal to targetTenantId).
+    const otherTenant = "00000000-0000-0000-0000-000000000999";
+    expect(otherTenant).not.toBe(targetTenantId);
+
+    await expect(
+      service.adminListSessions({
+        actorUserId: "00000000-0000-0000-0000-000000000001",
+        actorTenantId: otherTenant,
+        actorRoles: ["TENANT_ADMIN"],
+        targetUserId,
+      }),
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
   it("adminRevokeUser unit: TENANT_ADMIN cannot revoke a user outside its tenant", async () => {
     // Use the seeded admin user as the cross-tenant target (anchored to
     // RTL_BANK_REFERENCE tenant in sys_users).
@@ -385,6 +476,69 @@ describe("/v1/auth/* integration", () => {
   });
 
   /* -------------------------------------------------- rate limit */
+
+  it("POST /login per-email rate limit: 6th failed attempt on same email → 429 with Retry-After", async () => {
+    // MVP-3 Tappa E: defense vs credential-stuffing — even from a single IP
+    // a single email can be brute-forced; per-email limit caps it at 5
+    // failures / 5 min regardless of source.
+    sharedEmailRateLimiter.reset();
+    const local = await buildTestApp();
+    try {
+      const target = "victim@nowhere.test";
+      const statuses: number[] = [];
+      for (let i = 0; i < 6; i++) {
+        const r = await local.app.inject({
+          method: "POST",
+          url: "/v1/auth/login",
+          payload: { email: target, password: "WrongPass#9!" },
+        });
+        statuses.push(r.statusCode);
+        if (i === 5) {
+          // 6th attempt must be 429 + body with code LOGIN_TOO_MANY_ATTEMPTS_FOR_EMAIL
+          expect(r.statusCode).toBe(429);
+          const body = r.json() as { error: { code: string; message: string } };
+          expect(body.error.code).toBe("LOGIN_TOO_MANY_ATTEMPTS_FOR_EMAIL");
+          expect(r.headers["retry-after"]).toBeTruthy();
+        }
+      }
+      // First 5 should be 401 (LOGIN_INVALID — unknown email)
+      expect(statuses.slice(0, 5).every((s) => s === 401)).toBe(true);
+      expect(statuses[5]).toBe(429);
+    } finally {
+      await local.app.close();
+      sharedEmailRateLimiter.reset();
+    }
+  });
+
+  it("POST /login per-email rate limit resets on successful login", async () => {
+    sharedEmailRateLimiter.reset();
+    // Fresh local app to isolate from the suiteApp per-IP rate-limit counter.
+    const local = await buildTestApp();
+    try {
+      // 3 failures then 1 success → counter cleared → another failure must
+      // get 401 (not 429), proving the per-email lock was lifted by the
+      // successful login.
+      for (let i = 0; i < 3; i++) {
+        const r = await local.app.inject({
+          method: "POST",
+          url: "/v1/auth/login",
+          payload: { email: ADMIN_EMAIL, password: "WrongPass#9!" },
+        });
+        expect(r.statusCode).toBe(401);
+      }
+      const ok = await performLogin(local);
+      expect(ok.status).toBe(200);
+      const fail = await local.app.inject({
+        method: "POST",
+        url: "/v1/auth/login",
+        payload: { email: ADMIN_EMAIL, password: "WrongPass#9!" },
+      });
+      expect(fail.statusCode).toBe(401);
+    } finally {
+      await local.app.close();
+      sharedEmailRateLimiter.reset();
+    }
+  });
 
   it("POST /login is rate-limited (11 attempts → 429)", async () => {
     // Use a fresh app so the rate-limit store doesn't leak into other tests.

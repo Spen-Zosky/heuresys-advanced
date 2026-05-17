@@ -109,3 +109,27 @@ export const RolePermissionsResponseSchema = z.object({
   total: z.number().int().min(0),
 });
 export type RolePermissionsResponse = z.infer<typeof RolePermissionsResponseSchema>;
+
+/* --- Active session listing (MVP-3 Tappa E admin endpoint) -------------- */
+
+export const ActiveSessionSchema = z.object({
+  familyId: z.string().uuid(),
+  tenantId: z.string().uuid(),
+  firstIssuedAt: z.string().datetime(),
+  lastIssuedAt: z.string().datetime(),
+  expiresAt: z.string().datetime(),
+  ip: z.string().nullable(),
+  userAgent: z.string().nullable(),
+});
+export type ActiveSession = z.infer<typeof ActiveSessionSchema>;
+
+export const ListActiveSessionsParamsSchema = z.object({
+  userId: z.string().uuid(),
+});
+export type ListActiveSessionsParams = z.infer<typeof ListActiveSessionsParamsSchema>;
+
+export const ListActiveSessionsResponseSchema = z.object({
+  items: z.array(ActiveSessionSchema),
+  total: z.number().int().min(0),
+});
+export type ListActiveSessionsResponse = z.infer<typeof ListActiveSessionsResponseSchema>;

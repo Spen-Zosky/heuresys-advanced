@@ -19,6 +19,7 @@ import {
   TenantBoundaryViolation,
   RefreshReplayDetected,
   CsrfFailedError,
+  TooManyRequestsError,
 } from "../errors/index.js";
 
 export async function errorHandler(
@@ -71,6 +72,13 @@ export async function errorHandler(
   }
   if (err instanceof RefreshReplayDetected) {
     reply.code(401).send({ error: { code: err.code, message: err.message } });
+    return;
+  }
+  if (err instanceof TooManyRequestsError) {
+    if (err.retryAfterSeconds !== undefined) {
+      reply.header("Retry-After", String(err.retryAfterSeconds));
+    }
+    reply.code(429).send({ error: { code: err.code, message: err.message } });
     return;
   }
   if (err instanceof ApiError) {

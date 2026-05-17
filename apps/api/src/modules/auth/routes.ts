@@ -22,6 +22,8 @@ import {
   RevokeUserParamsSchema,
   EmptyResponseSchema,
   RolePermissionsResponseSchema,
+  ListActiveSessionsParamsSchema,
+  ListActiveSessionsResponseSchema,
 } from "./schema.js";
 import { createAuthService, type AuthService } from "./service.js";
 import { ConsoleMailer, type IMailer } from "./mailer.js";
@@ -212,6 +214,33 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         targetUserId: req.params.userId,
       });
       reply.code(204).send();
+    },
+  );
+
+  /* --- GET /admin/users/:userId/sessions (MVP-3 Tappa E) ------------- */
+  // Lists active refresh-token families (≈ sessions) for a target user.
+  // Strict subset of the admin-revoke capability, so it reuses the
+  // 'auth:revoke_user' permission. TENANT_ADMIN scoped to own tenant in the
+  // service layer (see service.adminListSessions).
+  app.get(
+    "/admin/users/:userId/sessions",
+    {
+      preHandler: [requirePermission("auth:revoke_user")],
+      schema: {
+        params: ListActiveSessionsParamsSchema,
+        response: { 200: ListActiveSessionsResponseSchema },
+      },
+    },
+    async (req) => {
+      if (!req.user) {
+        throw new UnauthorizedError("Authentication required");
+      }
+      return service.adminListSessions({
+        actorUserId: req.user.userId,
+        actorTenantId: req.user.tenantId,
+        actorRoles: req.user.roles,
+        targetUserId: req.params.userId,
+      });
     },
   );
 

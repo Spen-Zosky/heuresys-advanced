@@ -22,15 +22,6 @@ export interface ScopeFilter {
   isPlatformScope: boolean;
 }
 
-function tenantClause(scope: ScopeFilter, paramOffset: number): { sql: string; params: unknown[] } {
-  const params: unknown[] = [];
-  if (scope.tenantId) {
-    params.push(scope.tenantId);
-    return { sql: `$${paramOffset}`, params };
-  }
-  return { sql: "NULL", params };
-}
-
 export async function getDashboardCounters(
   q: DbConnector,
   scope: ScopeFilter,

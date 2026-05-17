@@ -22,6 +22,10 @@ import { hashPassword, verifyPassword } from "./password.js";
 import { generateOpaqueToken, sha256Hex } from "./tokens.js";
 import type { IMailer } from "./mailer.js";
 import * as repo from "./repository.js";
+import {
+  type EmailRateLimiter,
+  sharedEmailRateLimiter,
+} from "./email-rate-limit.js";
 
 /* === Public types ======================================================== */
 
@@ -75,6 +79,26 @@ export interface AdminRevokeInput {
   targetUserId: string;
 }
 
+export interface AdminListSessionsInput {
+  actorUserId: string;
+  actorTenantId: string | null;
+  actorRoles: RoleCode[];
+  targetUserId: string;
+}
+
+export interface AdminListSessionsOutput {
+  items: Array<{
+    familyId: string;
+    tenantId: string;
+    firstIssuedAt: string;
+    lastIssuedAt: string;
+    expiresAt: string;
+    ip: string | null;
+    userAgent: string | null;
+  }>;
+  total: number;
+}
+
 /* === Dependencies ======================================================== */
 
 export interface AuthServiceDeps {
@@ -93,6 +117,11 @@ export interface AuthServiceDeps {
   resetBaseUrl?: string;
   /** Overridable for tests. */
   now?: () => Date;
+  /**
+   * Per-email rate limiter for /login. Defaults to the module-singleton; tests
+   * can pass their own to isolate state (each integration test seeds its own).
+   */
+  emailRateLimiter?: EmailRateLimiter;
 }
 
 /* === Service factory ===================================================== */
@@ -110,6 +139,7 @@ export interface AuthService {
   requestPasswordReset(input: PasswordResetRequestInput): Promise<void>;
   completePasswordReset(input: PasswordResetCompleteInput): Promise<void>;
   adminRevokeUser(input: AdminRevokeInput): Promise<void>;
+  adminListSessions(input: AdminListSessionsInput): Promise<AdminListSessionsOutput>;
   listRolePermissions(): Promise<{
     items: Array<{
       roleCode: string;
@@ -124,6 +154,7 @@ export interface AuthService {
 export function createAuthService(deps: AuthServiceDeps): AuthService {
   const now = deps.now ?? (() => new Date());
   const resetBaseUrl = deps.resetBaseUrl ?? env.ADMIN_ORIGIN;
+  const emailRateLimiter = deps.emailRateLimiter ?? sharedEmailRateLimiter;
 
   async function issueLoginBundle(args: {
     userId: string;
@@ -178,6 +209,11 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   return {
     /* --- login -------------------------------------------------------- */
     async login(input) {
+      // 0. Per-email rate limit (defense vs credential stuffing across IPs).
+      //    Throws TooManyRequestsError → 429 with Retry-After. The /login
+      //    route also has a per-IP rate limit (10/5min, see routes.ts).
+      emailRateLimiter.check(input.email);
+
       // 1. Lookup candidate(s). Generic 401 for 0 or >1 to avoid enumeration
       //    of email existence or multi-tenant collision.
       const candidates = await repo.findLoginCandidatesByEmail(
@@ -186,6 +222,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       );
 
       if (candidates.length === 0) {
+        emailRateLimiter.recordFailure(input.email);
         await repo.insertLoginEvent(pool, {
           userId: null,
           tenantId: null,
@@ -197,6 +234,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         throw new UnauthorizedError("Invalid email or password", "LOGIN_INVALID");
       }
       if (candidates.length > 1) {
+        emailRateLimiter.recordFailure(input.email);
         deps.log.warn(
           { email: input.email, matches: candidates.length },
           "Login email matched multiple tenants — rejecting as ambiguous",
@@ -213,6 +251,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       );
 
       if (!ok) {
+        emailRateLimiter.recordFailure(input.email);
         await repo.insertLoginEvent(pool, {
           userId: candidate.userId,
           tenantId: candidate.userTenantId,
@@ -222,6 +261,9 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         });
         throw new UnauthorizedError("Invalid email or password", "LOGIN_INVALID");
       }
+
+      // Successful credential verification → reset the per-email counter.
+      emailRateLimiter.recordSuccess(input.email);
 
       // 3. Rehash transparently if Argon2 params have evolved.
       if (needsRehash) {
@@ -483,6 +525,40 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
           details: { actorUserId: input.actorUserId },
         });
       });
+    },
+
+    /* --- admin list sessions (MVP-3 Tappa E) ------------------------- */
+    async adminListSessions(input) {
+      // Same tenant-scope policy as adminRevokeUser: PLATFORM_ADMIN sees every
+      // user's sessions; TENANT_ADMIN only own-tenant users. Route preHandler
+      // already gates by 'auth:revoke_user' permission (reusing the perm —
+      // see AUTH_SECURITY_PLAN §6 matrix; viewing sessions is a strict subset
+      // of being able to revoke them, so no new permission code is needed).
+      const isPlatform = input.actorRoles.includes("PLATFORM_ADMIN");
+      if (!isPlatform) {
+        if (input.actorTenantId === null) {
+          throw new ForbiddenError("Tenant context required to list sessions");
+        }
+        const target = await repo.findUserForMe(pool, input.targetUserId);
+        if (!target) throw new NotFoundError("User");
+        if (target.userTenantId !== input.actorTenantId) {
+          throw new ForbiddenError("Cannot list sessions outside your tenant");
+        }
+      }
+      const rows = await repo.listActiveRefreshTokenFamiliesForUser(
+        pool,
+        input.targetUserId,
+      );
+      const items = rows.map((r) => ({
+        familyId: r.familyId,
+        tenantId: r.tenantId,
+        firstIssuedAt: r.firstIssuedAt.toISOString(),
+        lastIssuedAt: r.lastIssuedAt.toISOString(),
+        expiresAt: r.expiresAt.toISOString(),
+        ip: r.ip,
+        userAgent: r.userAgent,
+      }));
+      return { items, total: items.length };
     },
 
     /* --- role-permission matrix (read-only) -------------------------- */

@@ -506,6 +506,75 @@ export async function withTransaction<T>(
   }
 }
 
+/* --- Active session listing (MVP-3 Tappa E admin endpoint) ------------ */
+
+export interface ActiveSessionRow {
+  familyId: string;
+  tenantId: string;
+  firstIssuedAt: Date;
+  lastIssuedAt: Date;
+  expiresAt: Date;
+  ip: string | null;
+  userAgent: string | null;
+}
+
+/**
+ * Lists the active refresh-token families (≈ "sessions") for a user.
+ *
+ * A family represents one continuous login chain (initial login + subsequent
+ * rotations). The active set is defined as: at least one token in the family
+ * is not used, not revoked, and not expired. We expose the family-level
+ * aggregate, not the individual rotation rows, since the rotated token is the
+ * implementation detail of the rotation chain.
+ */
+export async function listActiveRefreshTokenFamiliesForUser(
+  q: DbConnector,
+  userId: string,
+): Promise<ActiveSessionRow[]> {
+  const { rows } = await q.query<{
+    family_id: string;
+    tenant_id: string;
+    first_issued_at: Date;
+    last_issued_at: Date;
+    expires_at: Date;
+    ip: string | null;
+    user_agent: string | null;
+  }>(
+    `SELECT
+        auth_refresh_token_family_id   AS family_id,
+        MAX(auth_refresh_token_tenant_id::text)::uuid AS tenant_id,
+        MIN(auth_refresh_token_issued_at)  AS first_issued_at,
+        MAX(auth_refresh_token_issued_at)  AS last_issued_at,
+        MAX(auth_refresh_token_expires_at) AS expires_at,
+        (ARRAY_AGG(auth_refresh_token_ip
+                    ORDER BY auth_refresh_token_issued_at DESC))[1]::text AS ip,
+        (ARRAY_AGG(auth_refresh_token_user_agent
+                    ORDER BY auth_refresh_token_issued_at DESC))[1] AS user_agent
+       FROM sys.sys_auth_refresh_tokens
+      WHERE auth_refresh_token_user_id = $1
+        AND auth_refresh_token_family_id IN (
+          SELECT auth_refresh_token_family_id
+            FROM sys.sys_auth_refresh_tokens
+           WHERE auth_refresh_token_user_id = $1
+             AND auth_refresh_token_used_at    IS NULL
+             AND auth_refresh_token_revoked_at IS NULL
+             AND auth_refresh_token_expires_at > now()
+        )
+      GROUP BY auth_refresh_token_family_id
+      ORDER BY MAX(auth_refresh_token_issued_at) DESC`,
+    [userId],
+  );
+  return rows.map((r) => ({
+    familyId: r.family_id,
+    tenantId: r.tenant_id,
+    firstIssuedAt: r.first_issued_at,
+    lastIssuedAt: r.last_issued_at,
+    expiresAt: r.expires_at,
+    ip: r.ip,
+    userAgent: r.user_agent,
+  }));
+}
+
 /* --- Role × Permission matrix (read-only, MVP-2a /admin/roles) -------- */
 
 export async function listRolePermissions(

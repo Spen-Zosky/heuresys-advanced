@@ -58,3 +58,9 @@ export class CsrfFailedError extends ApiError {
     super("CSRF_FAIL", message);
   }
 }
+
+export class TooManyRequestsError extends ApiError {
+  constructor(message = "Too many requests", code = "TOO_MANY_REQUESTS", public retryAfterSeconds?: number) {
+    super(code, message);
+  }
+}

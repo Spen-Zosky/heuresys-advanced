@@ -89,7 +89,7 @@ Il curriculum viene rilasciato in **7 batch progressivi**. Ogni batch è un comm
 | **1** | Fondamenta + stato | `README.md` · `00-glossario.md` · `01-fondamenti/*` · `07-nostri-repo/01-stato-corrente.md` | ✅ disponibile |
 | **2** | Collaborazione | `02-collaborazione/*` (5 file) | ✅ disponibile |
 | **3** | Automazione | `03-automazione/*` (4 file) | ✅ disponibile |
-| **4** | Publishing | `04-publishing/*` (4 file) | 🚧 in arrivo |
+| **4** | Publishing | `04-publishing/*` (4 file) | ✅ disponibile |
 | **5** | Security | `05-security/*` (5 file) | 🚧 in arrivo |
 | **6** | Tooling | `06-tooling/*` (3 file) | 🚧 in arrivo |
 | **7** | Repo-specific + roadmap | `07-nostri-repo/{02,03,04}.md` · `08-roadmap.md` | 🚧 in arrivo |

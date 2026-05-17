@@ -10,6 +10,7 @@ import type {
   MeSkillEvidenceSchema, CreateMeSelfAssessmentBody,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
+  MeKpiTarget, MeCertification, CreateMeCertificationBody, MeDocument,
 } from "@heuresys/shared";
 import type { z } from "zod";
 
@@ -486,4 +487,195 @@ export async function patchInboxNotification(
     [body.status, notificationId, userId],
   );
   return res.rows[0] ? toNotif(res.rows[0]) : null;
+}
+
+/* --- kpis (ESS-8) ---------------------------------------------------- */
+
+export async function listMyKpis(
+  q: DbConnector,
+  userId: string,
+): Promise<{ items: MeKpiTarget[]; total: number }> {
+  const r = await q.query<{
+    position_kpi_requirement_id: string;
+    position_id: string;
+    kpi_definition_id: string;
+    kpi_code: string;
+    kpi_name: string;
+    kpi_unit: string | null;
+    kpi_polarity: string;
+    target_template: Record<string, unknown>;
+    weight: string;
+    latest_measured_value: string | null;
+    latest_target_value: string | null;
+    latest_recorded_at: Date | null;
+  }>(
+    `SELECT
+       pkr.position_kpi_requirement_id,
+       pkr.position_id,
+       pkr.kpi_definition_id,
+       k.kpi_definition_code      AS kpi_code,
+       k.kpi_definition_name      AS kpi_name,
+       k.kpi_definition_unit      AS kpi_unit,
+       k.kpi_definition_polarity  AS kpi_polarity,
+       pkr.target_template,
+       pkr.weight::text,
+       ev.user_kpi_evidence_measured_value::text AS latest_measured_value,
+       ev.user_kpi_evidence_target_value::text   AS latest_target_value,
+       ev.user_kpi_evidence_recorded_at          AS latest_recorded_at
+     FROM sys.sys_user_position_assignments a
+     JOIN sys.sys_position_kpi_requirements pkr
+       ON pkr.position_id = a.user_position_assignment_position_id
+     JOIN sys.sys_kpi_definitions k
+       ON k.kpi_definition_id = pkr.kpi_definition_id
+     LEFT JOIN LATERAL (
+       SELECT * FROM sys.sys_user_kpi_evidence e
+        WHERE e.user_kpi_evidence_user_id = $1
+          AND e.user_kpi_evidence_kpi_id  = pkr.kpi_definition_id
+        ORDER BY e.user_kpi_evidence_recorded_at DESC
+        LIMIT 1
+     ) ev ON true
+     WHERE a.user_position_assignment_user_id = $1
+       AND a.user_position_assignment_status  = 'ACTIVE'
+       AND a.user_position_assignment_kind    = 'PRIMARY'
+     ORDER BY k.kpi_definition_name`,
+    [userId],
+  );
+  const items: MeKpiTarget[] = r.rows.map((row) => ({
+    positionKpiRequirementId: row.position_kpi_requirement_id,
+    positionId: row.position_id,
+    kpiDefinitionId: row.kpi_definition_id,
+    kpiCode: row.kpi_code,
+    kpiName: row.kpi_name,
+    unit: row.kpi_unit,
+    polarity: row.kpi_polarity,
+    targetTemplate: row.target_template,
+    weight: row.weight,
+    latestMeasuredValue: row.latest_measured_value,
+    latestTargetValue: row.latest_target_value,
+    latestRecordedAt: row.latest_recorded_at ? row.latest_recorded_at.toISOString() : null,
+  }));
+  return { items, total: items.length };
+}
+
+/* --- certifications (ESS-11) ----------------------------------------- */
+
+interface CertRow {
+  user_certification_id: string;
+  user_certification_name: string;
+  user_certification_issuer: string;
+  user_certification_issued_date: Date | null;
+  user_certification_expires_date: Date | null;
+  user_certification_credential_id: string | null;
+  user_certification_document_uri: string | null;
+  user_certification_metadata: Record<string, unknown>;
+  created_at: Date;
+  updated_at: Date;
+}
+
+function toCert(r: CertRow): MeCertification {
+  return {
+    userCertificationId: r.user_certification_id,
+    name: r.user_certification_name,
+    issuer: r.user_certification_issuer,
+    issuedDate: r.user_certification_issued_date ? r.user_certification_issued_date.toISOString().slice(0, 10) : null,
+    expiresDate: r.user_certification_expires_date ? r.user_certification_expires_date.toISOString().slice(0, 10) : null,
+    credentialId: r.user_certification_credential_id,
+    documentUri: r.user_certification_document_uri,
+    metadata: r.user_certification_metadata,
+    createdAt: r.created_at.toISOString(),
+    updatedAt: r.updated_at.toISOString(),
+  };
+}
+
+const CERT_COLS = `user_certification_id, user_certification_name, user_certification_issuer,
+  user_certification_issued_date, user_certification_expires_date, user_certification_credential_id,
+  user_certification_document_uri, user_certification_metadata, created_at, updated_at`;
+
+export async function listMyCertifications(
+  q: DbConnector,
+  userId: string,
+): Promise<{ items: MeCertification[]; total: number }> {
+  const r = await q.query<CertRow>(
+    `SELECT ${CERT_COLS} FROM sys.sys_user_certifications
+      WHERE user_certification_user_id = $1
+      ORDER BY user_certification_issued_date DESC NULLS LAST, user_certification_name`,
+    [userId],
+  );
+  const items = r.rows.map(toCert);
+  return { items, total: items.length };
+}
+
+export async function insertMyCertification(
+  q: DbConnector,
+  userId: string,
+  tenantId: string,
+  body: CreateMeCertificationBody,
+): Promise<MeCertification> {
+  const r = await q.query<CertRow>(
+    `INSERT INTO sys.sys_user_certifications (
+       user_certification_user_id, user_certification_tenant_id,
+       user_certification_name, user_certification_issuer,
+       user_certification_issued_date, user_certification_expires_date,
+       user_certification_credential_id, user_certification_document_uri,
+       user_certification_metadata, created_by, updated_by
+     ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $1, $1)
+     RETURNING ${CERT_COLS}`,
+    [
+      userId,
+      tenantId,
+      body.name,
+      body.issuer,
+      body.issuedDate ?? null,
+      body.expiresDate ?? null,
+      body.credentialId ?? null,
+      body.documentUri ?? null,
+      JSON.stringify(body.metadata ?? {}),
+    ],
+  );
+  return toCert(r.rows[0]!);
+}
+
+/* --- documents (ESS-12) ---------------------------------------------- */
+
+interface DocRow {
+  user_document_id: string;
+  user_document_kind: string;
+  user_document_title: string;
+  user_document_uri: string;
+  user_document_mime_type: string | null;
+  user_document_size_bytes: string | null;
+  user_document_metadata: Record<string, unknown>;
+  created_at: Date;
+  updated_at: Date;
+}
+
+function toDoc(r: DocRow): MeDocument {
+  return {
+    userDocumentId: r.user_document_id,
+    kind: r.user_document_kind as MeDocument["kind"],
+    title: r.user_document_title,
+    uri: r.user_document_uri,
+    mimeType: r.user_document_mime_type,
+    sizeBytes: r.user_document_size_bytes !== null ? Number(r.user_document_size_bytes) : null,
+    metadata: r.user_document_metadata,
+    createdAt: r.created_at.toISOString(),
+    updatedAt: r.updated_at.toISOString(),
+  };
+}
+
+export async function listMyDocuments(
+  q: DbConnector,
+  userId: string,
+): Promise<{ items: MeDocument[]; total: number }> {
+  const r = await q.query<DocRow>(
+    `SELECT user_document_id, user_document_kind, user_document_title, user_document_uri,
+            user_document_mime_type, user_document_size_bytes::text AS user_document_size_bytes,
+            user_document_metadata, created_at, updated_at
+       FROM sys.sys_user_documents
+      WHERE user_document_user_id = $1
+      ORDER BY created_at DESC`,
+    [userId],
+  );
+  const items = r.rows.map(toDoc);
+  return { items, total: items.length };
 }

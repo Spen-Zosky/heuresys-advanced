@@ -183,3 +183,87 @@ export const PatchMeInboxBodySchema = z.object({
 export type PatchMeInboxBody = z.infer<typeof PatchMeInboxBodySchema>;
 
 export const NotificationIdParamSchema = z.object({ notificationId: z.string().uuid() });
+
+/* --- kpis (ESS-8) ---------------------------------------------------- */
+
+export const MeKpiTargetSchema = z.object({
+  positionKpiRequirementId: z.string().uuid(),
+  positionId: z.string().uuid(),
+  kpiDefinitionId: z.string().uuid(),
+  kpiCode: z.string(),
+  kpiName: z.string(),
+  unit: z.string().nullable(),
+  polarity: z.string(),
+  targetTemplate: z.record(z.string(), z.unknown()),
+  weight: z.string(),
+  latestMeasuredValue: z.string().nullable(),
+  latestTargetValue: z.string().nullable(),
+  latestRecordedAt: z.string().datetime().nullable(),
+});
+export type MeKpiTarget = z.infer<typeof MeKpiTargetSchema>;
+
+export const MeKpisResponseSchema = z.object({
+  items: z.array(MeKpiTargetSchema),
+  total: z.number().int().min(0),
+});
+
+/* --- certifications (ESS-11) ----------------------------------------- */
+
+export const MeCertificationSchema = z.object({
+  userCertificationId: z.string().uuid(),
+  name: z.string(),
+  issuer: z.string(),
+  issuedDate: z.string().nullable(),
+  expiresDate: z.string().nullable(),
+  credentialId: z.string().nullable(),
+  documentUri: z.string().nullable(),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type MeCertification = z.infer<typeof MeCertificationSchema>;
+
+export const MeCertificationsResponseSchema = z.object({
+  items: z.array(MeCertificationSchema),
+  total: z.number().int().min(0),
+});
+
+export const CreateMeCertificationBodySchema = z.object({
+  name: z.string().min(1).max(255),
+  issuer: z.string().min(1).max(255),
+  issuedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  expiresDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  credentialId: z.string().max(255).nullable().optional(),
+  documentUri: z.string().max(4096).nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional().default({}),
+});
+export type CreateMeCertificationBody = z.infer<typeof CreateMeCertificationBodySchema>;
+
+/* --- documents (ESS-12) ---------------------------------------------- */
+
+export const ME_DOCUMENT_KINDS = [
+  "CV",
+  "CERTIFICATE",
+  "CONTRACT_REFERENCE",
+  "TRAINING_RECORD",
+  "EVIDENCE_PROOF",
+  "OTHER",
+] as const;
+
+export const MeDocumentSchema = z.object({
+  userDocumentId: z.string().uuid(),
+  kind: z.enum(ME_DOCUMENT_KINDS),
+  title: z.string(),
+  uri: z.string(),
+  mimeType: z.string().nullable(),
+  sizeBytes: z.number().nullable(),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type MeDocument = z.infer<typeof MeDocumentSchema>;
+
+export const MeDocumentsResponseSchema = z.object({
+  items: z.array(MeDocumentSchema),
+  total: z.number().int().min(0),
+});

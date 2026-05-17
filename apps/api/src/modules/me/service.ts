@@ -9,6 +9,7 @@ import type {
   MeProfile, UpdateMeProfileBody, CreateMeSelfAssessmentBody,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
+  CreateMeCertificationBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
@@ -88,5 +89,22 @@ export const meService = {
     const updated = await repo.patchInboxNotification(pool, actor.userId, notificationId, body);
     if (!updated) throw new NotFoundError("Notification");
     return updated;
+  },
+
+  async listKpis(actor: SelfActor) {
+    return repo.listMyKpis(pool, actor.userId);
+  },
+
+  async listCertifications(actor: SelfActor) {
+    return repo.listMyCertifications(pool, actor.userId);
+  },
+
+  async addCertification(actor: SelfActor, body: CreateMeCertificationBody) {
+    const tenantId = requireTenant(actor);
+    return repo.insertMyCertification(pool, actor.userId, tenantId, body);
+  },
+
+  async listDocuments(actor: SelfActor) {
+    return repo.listMyDocuments(pool, actor.userId);
   },
 };

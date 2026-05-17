@@ -20,6 +20,9 @@ import {
   MeCareerResponseSchema, MeCareerTargetSchema, CreateMeCareerTargetBodySchema,
   MeInboxResponseSchema, MeInboxNotificationSchema, MeInboxQuerySchema,
   PatchMeInboxBodySchema, NotificationIdParamSchema,
+  MeKpisResponseSchema,
+  MeCertificationsResponseSchema, MeCertificationSchema, CreateMeCertificationBodySchema,
+  MeDocumentsResponseSchema,
 } from "@heuresys/shared";
 import { meService, type SelfActor } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -104,4 +107,27 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, requirePermission("notification:mark_read:self")],
     schema: { params: NotificationIdParamSchema, body: PatchMeInboxBodySchema, response: { 200: MeInboxNotificationSchema } },
   }, async (req) => meService.patchInbox(selfActor(req), req.params.notificationId, req.body));
+
+  app.get("/kpis", {
+    preHandler: [requirePermission("kpi:read:self")],
+    schema: { response: { 200: MeKpisResponseSchema } },
+  }, async (req) => meService.listKpis(selfActor(req)));
+
+  app.get("/certifications", {
+    preHandler: [requirePermission("certification:read:self")],
+    schema: { response: { 200: MeCertificationsResponseSchema } },
+  }, async (req) => meService.listCertifications(selfActor(req)));
+
+  app.post("/certifications", {
+    preHandler: [app.verifyCsrf, requirePermission("certification:upload:self")],
+    schema: { body: CreateMeCertificationBodySchema, response: { 201: MeCertificationSchema } },
+  }, async (req, reply) => {
+    const c = await meService.addCertification(selfActor(req), req.body);
+    reply.code(201).send(c);
+  });
+
+  app.get("/documents", {
+    preHandler: [requirePermission("document:read:self")],
+    schema: { response: { 200: MeDocumentsResponseSchema } },
+  }, async (req) => meService.listDocuments(selfActor(req)));
 };

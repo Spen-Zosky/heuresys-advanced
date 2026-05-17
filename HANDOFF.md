@@ -1,3 +1,28 @@
+## ✅ MVP-2A / MVP-2B CHIUSI UFFICIALMENTE — 2026-05-17
+
+**Bootstrap MVP chiuso**. Tutte le 7 voci di Acceptance criteria globali di
+`NEXT_SESSION_MVP_2A.md` §5 sono verde.
+
+| # | Acceptance | Status |
+|---|---|---|
+| 1 | 42 admin + ESS routes implementate | ✅ 42/42 |
+| 2 | `pnpm build` di `apps/web` produce bundle senza errori | ✅ 44 routes, 0 errors |
+| 3 | `pnpm test` API verde | ✅ 203/203 |
+| 4 | `pnpm i18n:check` parity it/en | ✅ 17 keys × 2 locales |
+| 5 | Playwright spec count ≥ 40 | ✅ 50+ assertions, 12 spec files + 5-persona setup |
+| 6 | Smoke test 5 personas (login + landing + role nav + 2 extra pages) | ✅ `smoke-5-personas.spec.ts` verde |
+| 7 | Accessibility audit axe-playwright — zero critical violations | ✅ 35 rotte × 3 persona group, ZERO violazioni |
+
+**Next**: MVP-3 — admin role CRUD, brownfield wave execution, MFA, publish
+`@spen-zosky/ui` su npm/GitHub Packages, mobile responsive, full WCAG 2.2 AA,
+Tier 0/1 GitHub setup (topics, LICENSE, Dependabot, branch protection — vedi
+`docs/github/08-roadmap.md`).
+
+Vedi `docs/a11y-tail-items.md` per il register delle violazioni
+serious/moderate/minor da chiudere in MVP-3.
+
+---
+
 ## ⚠️ ENTRY POINT AUTORITATIVO — leggi PRIMA di qualunque azione
 
 Per la prossima sessione (MVP-2a admin SPA + MVP-2b frontend ESS) il
@@ -78,10 +103,11 @@ b9c1133  feat(web): MVP-2a Phase 2 batch 11 — closing pages (admin/roles, org-
 ### Acceptance criteria globali (riferimento NEXT_SESSION_MVP_2A.md §5)
 - [x] **42 admin + ESS routes implementate** (target era 40).
 - [x] **`pnpm test` API 203/203 verdi**.
-- [x] **Playwright spec count ≥ 40**: 50+ assertions live-data across 11 spec files + 3 setup logins.
-- [ ] `pnpm i18n:check` verde (TODO — i18n parity check script da eseguire).
-- [ ] `pnpm build` di `apps/web` produce bundle senza errori (TODO — verifica build produzione).
-- [ ] Accessibility audit (axe-playwright) zero violazioni critical (TODO — extension da integrare in pipeline E2E).
+- [x] **Playwright spec count ≥ 40**: 50+ assertions live-data across 12 spec files + 5-persona setup.
+- [x] **`pnpm i18n:check` verde** (17 keys × 2 locales, script `scripts/check-i18n-parity.ts`).
+- [x] **`pnpm build` di `apps/web` verde** (44 routes, 0 errors — fix Suspense bailout su `/login`).
+- [x] **Smoke test 5 personas verde** (`smoke-5-personas.spec.ts` — login + landing + role-gated nav + 2 extra pages).
+- [x] **Accessibility audit axe-playwright — zero violazioni critical** (`a11y.spec.ts`, 35 rotte × 3 persona group). Vedi `docs/a11y-tail-items.md`.
 - [x] HANDOFF.md aggiornato (✅ — questo update).
 
 ### Note di chiusura

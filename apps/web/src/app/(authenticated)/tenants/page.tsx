@@ -1,16 +1,19 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { apiFetch } from "../../../lib/api/fetch";
 
 interface Tenant {
   tenantId: string;
-  code: string;
-  name: string;
-  industryCode: string | null;
-  status: string;
-  isReference: boolean;
+  tenantCode: string;
+  tenantName: string;
+  tenantLegalName: string | null;
+  tenantCountryCode: string | null;
+  tenantIndustryCode: string | null;
+  tenantSizeBand: string | null;
+  tenantStatus: string;
 }
 
 export default function TenantsListPage() {
@@ -45,19 +48,23 @@ export default function TenantsListPage() {
                 <tr className="text-left border-b">
                   <th className="px-4 py-2">Codice</th>
                   <th className="px-4 py-2">Nome</th>
-                  <th className="px-4 py-2">Industry</th>
+                  <th className="px-4 py-2">Country</th>
+                  <th className="px-4 py-2">Size</th>
                   <th className="px-4 py-2">Stato</th>
-                  <th className="px-4 py-2">Reference</th>
                 </tr>
               </thead>
               <tbody>
                 {tenants.data!.items.map((t) => (
                   <tr key={t.tenantId} className="border-b last:border-b-0" data-testid="tenants-row">
-                    <td className="px-4 py-2 font-mono text-xs">{t.code}</td>
-                    <td className="px-4 py-2">{t.name}</td>
-                    <td className="px-4 py-2 text-xs">{t.industryCode ?? "—"}</td>
-                    <td className="px-4 py-2 text-xs uppercase opacity-70">{t.status}</td>
-                    <td className="px-4 py-2 text-xs">{t.isReference ? "sì" : "no"}</td>
+                    <td className="px-4 py-2 font-mono text-xs">{t.tenantCode}</td>
+                    <td className="px-4 py-2">
+                      <Link href={`/tenants/${t.tenantId}`} className="underline" data-testid="tenant-link">
+                        {t.tenantName}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2 text-xs">{t.tenantCountryCode ?? "—"}</td>
+                    <td className="px-4 py-2 text-xs">{t.tenantSizeBand ?? "—"}</td>
+                    <td className="px-4 py-2 text-xs uppercase opacity-70">{t.tenantStatus}</td>
                   </tr>
                 ))}
               </tbody>

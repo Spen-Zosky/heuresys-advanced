@@ -1,8 +1,21 @@
 # Wave 1 Execution Runbook
 
-> **Status (2026-05-17, MVP-3 Tappa D partial)**: pre-flight check scripted, end-to-end execution planned but not yet performed. This runbook is the canonical scheduling artifact for the dedicated Wave 1 execution session.
+> **Status (2026-05-17, MVP-3 Tappa D)**: pre-flight scripts hardened against actual schema; ADR-0012 pre-step identified and documented; executor scaffolding (state machine + per-domain ETL templates) remains a dedicated session.
 
 The actual data-transformation lift is documented in `docs/brownfield/BROWNFIELD_IMPORT_PLAN.md` §3 (Wave 1 — Low-Risk Catalogs). This runbook is the operational checklist for the **execution session** itself.
+
+## ⚠️ ADR-0012 required BEFORE executing Wave 1
+
+The current `brownfield.table_mappings` schema (migration `000025`) does **not** have a `wave` column. The wave attribute lives on `brownfield.import_runs.import_run_wave` (`smallint`, CHECK 1..4), so the mapping ↔ wave link is currently only implicit through `table_mapping_run_id` referencing the run.
+
+Two viable options for ADR-0012:
+
+| Option | Cost | Trade-off |
+|---|---|---|
+| **A** Add `table_mapping_wave smallint` column + backfill (migration 000029) | low — schema migration | Strict 1-to-1 wave assignment, clean SQL queries, validated by CHECK constraint |
+| **B** Store wave assignment under `table_mapping_metadata.wave` JSONB key | zero migration | Flexible (multi-wave possible), no schema change, but no DB-level validation; queries need jsonb extract |
+
+**Decision** (TBD by Enzo): pick A or B, write ADR-0012, then backfill the 93 Wave-1 source-table mappings before executing the wave. The pre-flight scripts (`db/scripts/brownfield-wave-1-preflight.{sh,ps1}`) currently filter by `approval_status='APPROVED' AND classification IN ('IMPORT','TRANSFORM')` and DO NOT filter by wave — once ADR-0012 is decided, the scripts get a 1-line filter addition.
 
 ## Pre-execution gate (required green)
 

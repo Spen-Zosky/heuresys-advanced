@@ -3,7 +3,8 @@
 # MVP-3 Tappa D — Pre-flight validation for Brownfield Wave 1 execution
 # (Windows PowerShell twin of brownfield-wave-1-preflight.sh).
 #
-# See the .sh twin for full doc. Both scripts are idempotent and read-only.
+# See the .sh twin for full doc (schema reality, ADR pre-step, exit codes).
+# Both scripts are read-only and idempotent.
 
 [CmdletBinding()]
 param(
@@ -33,56 +34,64 @@ Write-Host ""
 Write-Host "[1/6] Connectivity"
 try {
     Invoke-PsqlScalar "SELECT 1" | Out-Null
-    Write-Host "  + DB reachable"
+    Write-Host "  OK: DB reachable"
 } catch {
-    Write-Host "  X FAIL: cannot reach the database via DatabaseUrl"
+    Write-Host "  FAIL: cannot reach the database via DatabaseUrl"
     exit 1
 }
 Write-Host ""
 
-# 2. brownfield schema
+# 2. brownfield schema + expected tables
 Write-Host "[2/6] Brownfield schema presence"
-$schemaCount = [int](Invoke-PsqlScalar "SELECT count(*) FROM information_schema.schemata WHERE schema_name = 'brownfield'")
-if ($schemaCount -ne 1) {
-    Write-Host "  X FAIL: 'brownfield' schema not present"
+$bfTablesPresent = [int](Invoke-PsqlScalar @"
+SELECT count(*) FROM information_schema.tables
+ WHERE table_schema = 'brownfield'
+   AND table_name IN ('source_exports','source_tables','table_mappings',
+                      'import_runs','import_validation_results')
+"@)
+if ($bfTablesPresent -lt 5) {
+    Write-Host "  FAIL: expected 5 brownfield tables, found $bfTablesPresent"
     exit 1
 }
-Write-Host "  + brownfield schema present"
+Write-Host "  OK: 5/5 expected brownfield tables present"
 Write-Host ""
 
-# 3. table_mappings wave 1
-Write-Host "[3/6] Wave-1 adaptation map coverage"
-$approved = [int](Invoke-PsqlScalar "SELECT count(*) FROM brownfield.table_mappings WHERE table_mapping_wave = 1 AND table_mapping_status = 'APPROVED'")
-$total = [int](Invoke-PsqlScalar "SELECT count(*) FROM brownfield.table_mappings WHERE table_mapping_wave = 1")
-Write-Host "  wave=1 total mappings:    $total"
-Write-Host "  wave=1 APPROVED mappings: $approved"
+# 3. Approved mappings (no wave filter — see file header)
+Write-Host "[3/6] Adaptation map coverage (APPROVED + IMPORT/TRANSFORM)"
+$approved = [int](Invoke-PsqlScalar @"
+SELECT count(*) FROM brownfield.table_mappings
+ WHERE table_mapping_approval_status = 'APPROVED'
+   AND table_mapping_classification IN ('IMPORT','TRANSFORM')
+"@)
+$total = [int](Invoke-PsqlScalar "SELECT count(*) FROM brownfield.table_mappings")
+Write-Host "  total mappings:                   $total"
+Write-Host "  APPROVED + IMPORT/TRANSFORM:      $approved"
 if ($approved -lt 1) {
-    Write-Host "  X FAIL: no APPROVED wave-1 mappings"
-    exit 1
+    Write-Host "  WARN: no APPROVED IMPORT/TRANSFORM mappings — Wave 1 has nothing to execute"
+    Write-Host "        (this is OK pre-bootstrap; populate brownfield.table_mappings first)"
 }
-Write-Host "  + At least one approved mapping"
 Write-Host ""
 
 # 4. source_tables registration
 Write-Host "[4/6] Source tables registration"
 $unreg = [int](Invoke-PsqlScalar @"
 SELECT count(*) FROM brownfield.table_mappings tm
- WHERE tm.table_mapping_wave = 1
-   AND tm.table_mapping_status = 'APPROVED'
+ WHERE tm.table_mapping_approval_status = 'APPROVED'
+   AND tm.table_mapping_classification IN ('IMPORT','TRANSFORM')
    AND NOT EXISTS (
      SELECT 1 FROM brownfield.source_tables st
       WHERE st.source_table_id = tm.table_mapping_source_table_id
    )
 "@)
-Write-Host "  approved mappings without source_tables row: $unreg"
+Write-Host "  approved mappings without a source_tables row: $unreg"
 if ($unreg -gt 0) {
-    Write-Host "  X FAIL: $unreg approved mappings reference unknown source tables"
+    Write-Host "  FAIL: $unreg approved mappings reference unknown source tables"
     exit 1
 }
-Write-Host "  + All approved mappings have a registered source table"
+Write-Host "  OK"
 Write-Host ""
 
-# 5. canonical target schemas
+# 5. canonical target tables
 Write-Host "[5/6] Canonical target tables (sys.sys_*)"
 $wave1Targets = @(
     "sys_skills", "sys_skill_families", "sys_skill_categories",
@@ -100,31 +109,33 @@ foreach ($t in $wave1Targets) {
     if ($exists -ne 1) { $missing += $t }
 }
 if ($missing.Count -gt 0) {
-    Write-Host "  X FAIL: missing target tables: $($missing -join ', ')"
+    Write-Host "  FAIL: missing target tables: $($missing -join ', ')"
     exit 1
 }
-Write-Host "  + All $($wave1Targets.Count) canonical targets present"
+Write-Host "  OK: all $($wave1Targets.Count) canonical targets present"
 Write-Host ""
 
-# 6. Source row counts (sample)
-Write-Host "[6/6] Source row counts (wave-1 sample, top 10 by row count)"
+# 6. Source row estimates (sample)
+Write-Host "[6/6] Source row estimates (top 10 by estimate)"
 & psql $DatabaseUrl -c @"
   SELECT
-    tm.table_mapping_source_schema  AS schema,
-    tm.table_mapping_source_table   AS source_table,
-    tm.table_mapping_target_table   AS target_table,
-    COALESCE(tm.table_mapping_confidence_score::text, 'n/a') AS conf,
-    st.source_table_row_count       AS source_rows
+    st.source_table_schema         AS schema,
+    st.source_table_name           AS source_table,
+    tm.table_mapping_target_table  AS target_table,
+    tm.table_mapping_classification AS class,
+    st.source_table_row_estimate   AS source_rows_estimate
    FROM brownfield.table_mappings tm
    JOIN brownfield.source_tables st
      ON st.source_table_id = tm.table_mapping_source_table_id
-   WHERE tm.table_mapping_wave = 1
-     AND tm.table_mapping_status = 'APPROVED'
-   ORDER BY st.source_table_row_count DESC NULLS LAST
+   WHERE tm.table_mapping_approval_status = 'APPROVED'
+     AND tm.table_mapping_classification IN ('IMPORT','TRANSFORM')
+   ORDER BY st.source_table_row_estimate DESC NULLS LAST
    LIMIT 10;
 "@
 Write-Host ""
 
 Write-Host "=== Pre-flight PASSED ==="
-Write-Host "Wave 1 may be scheduled. Run the actual import via the wave-1"
-Write-Host "execution runbook (docs/brownfield/WAVE_1_EXECUTION_RUNBOOK.md)."
+Write-Host "Schema is wave-ready. Before scheduling Wave 1:"
+Write-Host "  1. Decide wave-assignment ADR (column vs metadata) — see WAVE_1_EXECUTION_RUNBOOK.md"
+Write-Host "  2. Backfill brownfield.table_mappings.metadata.wave = 1 for the 93 Wave-1 source tables"
+Write-Host "  3. Then trigger via POST /v1/brownfield/import-runs with body {wave: 1, ...}"

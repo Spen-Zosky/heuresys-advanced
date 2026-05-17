@@ -13,6 +13,30 @@
     "test:e2e": "playwright test",
     "i18n:check": "tsx scripts/check-i18n-parity.ts"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "next": "15.1.6",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "@tanstack/react-query": "5.62.16",
+    "@tanstack/react-query-devtools": "5.62.16",
+    "react-hook-form": "7.55.0",
+    "@hookform/resolvers": "5.2.2",
+    "zod": "3.25.76",
+    "i18next": "23.16.8",
+    "react-i18next": "15.4.0",
+    "@heuresys/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.10",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "typescript": "5.7.2",
+    "tailwindcss": "4.0.0",
+    "@tailwindcss/postcss": "4.0.0",
+    "postcss": "8.4.49",
+    "autoprefixer": "10.4.20",
+    "vitest": "2.1.8",
+    "@playwright/test": "1.49.1",
+    "tsx": "4.19.2"
+  }
 }

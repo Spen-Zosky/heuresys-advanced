@@ -1,0 +1,29 @@
+{
+  "common": {
+    "loading": "Caricamento…",
+    "error": "Si è verificato un errore",
+    "retry": "Riprova",
+    "cancel": "Annulla",
+    "save": "Salva",
+    "submit": "Invia"
+  },
+  "auth": {
+    "login": {
+      "title": "Accedi a Heuresys",
+      "subtitle": "Console di amministrazione e portale dipendente",
+      "emailLabel": "Email",
+      "emailPlaceholder": "nome@azienda.it",
+      "passwordLabel": "Password",
+      "submit": "Accedi",
+      "submitting": "Accesso in corso…",
+      "errors": {
+        "invalid": "Email o password non valide",
+        "rateLimited": "Troppi tentativi. Riprova tra qualche minuto.",
+        "network": "Impossibile contattare il server"
+      }
+    },
+    "logout": {
+      "title": "Esci"
+    }
+  }
+}

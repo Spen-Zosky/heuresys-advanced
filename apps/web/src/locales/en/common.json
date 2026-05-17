@@ -1,0 +1,29 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "submit": "Submit"
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in to Heuresys",
+      "subtitle": "Admin console and employee self-service portal",
+      "emailLabel": "Email",
+      "emailPlaceholder": "name@company.com",
+      "passwordLabel": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "errors": {
+        "invalid": "Invalid email or password",
+        "rateLimited": "Too many attempts. Try again in a few minutes.",
+        "network": "Unable to reach the server"
+      }
+    },
+    "logout": {
+      "title": "Sign out"
+    }
+  }
+}

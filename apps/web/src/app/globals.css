@@ -1,0 +1,25 @@
+/* apps/web/src/app/globals.css
+ *
+ * Re-exports the Heuresys design system base CSS (tokens + Tailwind 4
+ * primitives) and adds the content sources for the App Router itself.
+ *
+ * The design-system globals.css already imports "tailwindcss" and declares
+ * the @theme tokens, so we simply re-import it here.
+ */
+
+@import "@heuresys/ui/styles";
+
+/*
+ * Web-app content sources (Tailwind 4 detects these at build via the @source
+ * directive — kept here so the symlinked @heuresys/ui content + apps/web
+ * pages/components are both scanned).
+ */
+@source "../**/*.{ts,tsx,js,jsx,mdx}";
+@source "../../node_modules/@heuresys/ui/src/**/*.{ts,tsx}";
+
+html,
+body {
+  background-color: oklch(0.99 0.005 250);
+  color: oklch(0.15 0.02 250);
+  min-height: 100%;
+}

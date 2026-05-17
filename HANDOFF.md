@@ -14,6 +14,102 @@ frontend — LIVE DATA E2E ONLY") per inheritance automatica.
 
 ---
 
+## 🚀 MVP-2A IN-FLIGHT — sessione del 2026-05-17 (6:51 GMT+2)
+
+**Stato finale sessione MVP-2a kickoff** (commit `8866ede` su `main`):
+
+### Backend — Phase 0 + 1.5 chiusa
+- **276 endpoint live** (267 → +9 nuovi):
+  - 4 `/v1/compensation/*` (profiles, reward-gates, recommendations, handoff-records)
+  - 1 `/v1/dashboard/widgets` (role-gated aggregator)
+  - 4 `/v1/me/*` aggiuntivi (`/me/kpis`, `/me/certifications` GET+POST, `/me/documents`)
+- **203/203 integration tests verdi** (+21 nuovi: 7 compensation + 5 dashboard + 9 me-ess-extensions).
+- **+1 migration**: `000028_dashboard_permission_seed.sql` (perm `dashboard:view` × 6 ruoli admin).
+- **Bug fix scoperto**: `apps/api/src/modules/me/repository.ts::listMyPositions()` usava nomi di colonna sbagliati → ora corretti (`user_position_assignment_position_id`, `_kind='PRIMARY'`, `_start_date`, `_end_date`).
+- **0 nuove migrazioni dati**: tutte le tabelle compensation, user_certifications, user_documents, user_kpi_evidence esistevano già (migrations 000019 + 000027).
+
+### Frontend — Phase 1 + Phase 2 parziale
+- **`apps/web/` produttivo** (era skeleton vuoto):
+  - Stack: Next 15.1 + React 19.2 + Tailwind 4.3 + TanStack Query v5 + react-hook-form 7.55 + Zod 3.25 + react-i18next 15 + Playwright 1.49.
+  - Auth client primitives: `lib/api/{fetch,csrf-store,session,auth,errors,landing}` + middleware redirect a `/login`.
+  - Shell autenticato: `(authenticated)/layout.tsx` con role-gated nav (admin/USER).
+  - Design system: `@heuresys/ui` consumed via pnpm `link:` (51 componenti, sym­link live).
+- **20/40 pagine live** con E2E Playwright verdi (29 spec):
+  - **Admin** (8): `/login`, `/dashboard`, `/users`, `/users/[userId]`, `/positions`, `/positions/[positionId]`, `/skills`, `/kpis`, `/learning`, `/tenants`.
+  - **ESS `/me/*`** (11): `/me` (landing), `/me/profile` (PATCH form), `/me/positions`, `/me/skills`, `/me/learning`, `/me/gaps`, `/me/kpis`, `/me/career`, `/me/certifications`, `/me/documents`, `/me/inbox`.
+- **Playwright storageState pattern**: `tests/e2e/auth.setup.ts` logga 3 personas una volta e persiste i cookie in `tests/.auth/<persona>.json`, evitando il rate limit di `/v1/auth/login` (10 attempts / 5 min per IP).
+- **Live-data doctrine intact**: zero mock, zero fixture inline, zero stub. Ogni page calls a real `/v1/*` endpoint contro l'OCI VM PostgreSQL via tunnel 5433.
+
+### Documenti aggiunti / aggiornati
+- `docs/api/MVP_2A_API_GAP_AUDIT.md` (Phase 0 deliverable, 27 admin + 13 ESS routes auditate).
+- `apps/web/.env.example`, `playwright.config.ts`, `next.config.js`, `tsconfig.json`, `postcss.config.mjs`, `tailwindcss@4.3.0` setup.
+- `CLAUDE.md` aggiornato precedente (doctrine MVP-2a già locked).
+
+### Commit della sessione (ordine cronologico)
+```
+33cf996  docs(api): MVP-2a Phase 0 — API gap audit (40 routes, 5 gaps confirmed)
+7308224  feat(api): MVP-2a 1.5.1 — compensation-intelligence module (4 endpoints, 7 tests)
+24505e0  feat(api): MVP-2a 1.5.2 — dashboard widgets aggregator (1 endpoint role-gated, 5 tests)
+73f80e0  feat(api): MVP-2a 1.5.3-5 — ESS me/kpis + me/certifications + me/documents (4 endpoints, 9 tests)
+7abb674  feat(web): MVP-2a Phase 1.A — Next.js 15 scaffold + i18n + design system wiring
+c38050d  feat(web): MVP-2a Phase 1.B — auth client primitives (fetchApi + CSRF + session)
+e0cc749  feat(web): MVP-2a Phase 1.C — /login pilot + Playwright auth E2E green (4/4)
+a262781  feat(web): MVP-2a Phase 2 batch 1 — authenticated shell + /me + /dashboard (E2E 7/7)
+410340f  feat(web): MVP-2a Phase 2 batch 2 — /users + /positions list+detail (E2E 12/12)
+63b320c  feat(web): MVP-2a Phase 2 batch 3 — 10 ESS pages live /me/* (E2E 10/10)
+8866ede  feat(web): MVP-2a Phase 2 batch 4 — admin catalogues /skills /kpis /learning /tenants (E2E 4/4)
+```
+
+### Rimanente per MVP-2a chiusura (20 routes)
+
+Pagine admin che NON sono ancora state implementate (tutti gli endpoint backend
+ESISTONO già — sono solo da wirare al frontend con lo stesso pattern usato per
+le 20 già live):
+
+| Slot | Route | Endpoint backend live |
+|---|---|---|
+| P29 | `/tenants/[id]` (tabs) | `GET /v1/tenants/:id`, composizione altre |
+| P30 | `/tenants/[id]/enterprise-typing` (wizard) | `GET /v1/enterprise-typing-profiles`, `GET /v1/activity-classifications`, `GET /v1/operating-models`, `POST /v1/enterprise-typing-profiles` |
+| P31 | `/blueprints` | `GET /v1/blueprint-families`, `GET /v1/blueprint-variants` |
+| P32 | `/blueprints/[variantId]` (tabs) | `GET /v1/blueprint-variants/:id`, `GET /v1/blueprint-processes?variantId=`, `GET /v1/blueprint-activations?variantId=` |
+| P33 | `/processes` (BPM) | `GET /v1/blueprint-processes` |
+| P34 | `/organization` | `GET /v1/organization-units` |
+| P35 | `/organization/org-chart` | `GET /v1/visualization-graphs?graphKind=ORG_CHART`, `+nodes/edges/layouts` |
+| P36 | `/positions/[id]/skills` (sub-CRUD) | `GET/POST/PATCH/DELETE /v1/positions/:id/skills` |
+| P37 | `/positions/[id]/kpis` (sub-CRUD) | `GET/POST/PATCH/DELETE /v1/positions/:id/kpis` |
+| P38 | `/positions/[id]/learning` | (compose `learning-paths` + `learning-gaps` filtered by position) |
+| P39 | `/learning/training-initiatives` (schedule) | `GET/POST /v1/training-initiatives` |
+| P40 | `/gaps` (admin aggregator) | `GET /v1/learning-gaps` + composizione skill/KPI gap client-side |
+| P41 | `/career-succession` | `GET /v1/career-paths`, `/v1/career-path-steps`, `/v1/succession-pools`, `/v1/successor-candidates`, `/v1/successor-readiness`, `/v1/position-career-paths`, `/v1/position-succession-relevance` |
+| P42 | `/compensation-intelligence` | `GET /v1/compensation/profiles/:positionId`, `/v1/compensation/reward-gates`, `POST /v1/compensation/recommendations`, `POST /v1/compensation/handoff-records` |
+| P43 | `/visualizations` | `GET /v1/visualization-graphs?tenantId=` |
+| P44 | `/visualizations/[graphId]` | `GET /v1/visualization-graphs/:id`, `+nodes/edges/layouts/exports`, `POST /v1/visualization-node-layouts` |
+| P45 | `/seed-acquisition/runs` | `GET/POST /v1/seed-acquisition-runs`, `GET /v1/seed-candidate-records?runId=`, `GET /v1/seed-approval-decisions` |
+| P46 | `/brownfield-adaptation` (tabs) | `GET /v1/brownfield-source-exports`, `GET/POST /v1/brownfield-import-runs`, `GET/POST /v1/brownfield-table-mappings` |
+| P47 | `/admin/roles` (read-only matrix MVP-2a) | nessun endpoint CRUD: lettura statica da `sys.sys_auth_role_permissions` o via shared schema |
+| P48 | `/me/skills/self-assessment` (form) | `POST /v1/me/skills/self-assessments` |
+| P49 | `/me/learning/catalogue` (browse + enroll) | `GET /v1/learning-modules`, `GET /v1/learning-paths`, `POST /v1/me/learning/enrollments` |
+| P50 | `/me/career/target` (form) | `POST /v1/me/career/target-positions` |
+
+**Pattern di completamento** (replicare per ogni pagina rimanente):
+1. Creare `apps/web/src/app/(authenticated)/<route>/page.tsx` come client component.
+2. Hook TanStack Query su endpoint live (vedere esistenti per template).
+3. Rendering con primitive `@heuresys/ui` (Card, Input, Button, table HTML).
+4. Aggiungere assertion E2E in `tests/e2e/<category>.spec.ts` usando `storageState` per la persona giusta.
+5. Verificare `pnpm exec playwright test` 100% verde.
+6. Commit atomico `feat(web): MVP-2a Phase 2 batch N — <route> (E2E green N/N)`.
+
+### Acceptance criteria globali (riferimento NEXT_SESSION_MVP_2A.md §5)
+- [ ] 40 admin + ESS routes implementate (oggi: **20/40**).
+- [ ] Playwright spec count ≥ 40 (oggi: **29** spec inclusi setup).
+- [ ] `pnpm i18n:check` verde (parity it/en al 100%).
+- [ ] `pnpm test` API ≥ 200 (oggi: **203/203** ✅).
+- [ ] `pnpm build` di `apps/web` produce bundle senza errori (TODO: verificare in chiusura).
+- [ ] Accessibility audit (axe-playwright) zero violazioni critical (TODO).
+- [ ] HANDOFF.md aggiornato (✅ — questo update).
+
+---
+
 Sono Enzo Spenuso. Riprendo il progetto Heuresys Advanced HRMS/BPM Platform v5
 in `D:\heuresys-advanced\`. Sessione precedente (2026-05-16, lunga):
 56 business modules + auth + shared completati. **MVP-1 5.1 CHIUSO**

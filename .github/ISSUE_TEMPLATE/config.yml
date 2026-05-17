@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Spen-Zosky/heuresys-advanced/blob/main/.github/SECURITY.md
+    about: Do not use the issue tracker for security reports. See SECURITY.md.
+  - name: Repository discussions (off)
+    url: https://github.com/Spen-Zosky/heuresys-advanced/issues
+    about: Discussions are disabled. Open an issue with the appropriate template.

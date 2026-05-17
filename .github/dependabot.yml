@@ -1,0 +1,53 @@
+# Dependabot configuration for Heuresys Advanced
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Tier 1 baseline:
+#   - Weekly checks for npm (root + workspaces) and GitHub Actions
+#   - Group minor + patch updates per ecosystem to reduce PR noise
+#   - Manual review required for major bumps (each in its own PR)
+
+version: 2
+updates:
+  # Root pnpm monorepo: catches all workspaces (apps/* + packages/*)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Rome"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "area/deps"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+  # GitHub Actions workflows (when added)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Rome"
+    open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "dependencies"
+      - "area/ci"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"

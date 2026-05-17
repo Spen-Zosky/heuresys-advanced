@@ -1,0 +1,61 @@
+name: Feature request
+description: Suggest a new capability or enhancement for Heuresys Advanced
+title: "[feat] "
+labels: ["type/feature", "needs/triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your suggestion. Note that this is a proprietary project
+        in active MVP development. Feature requests are evaluated against
+        the current MVP roadmap and may be deferred.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "api (apps/api)"
+        - "web (apps/web)"
+        - "shared (packages/shared)"
+        - "design system (@heuresys/ui)"
+        - "documentation"
+        - "tooling / DX"
+        - "other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What user need or business value does this address?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would this work from a user / API / UI perspective?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you weighed and why you discarded them.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Suggested priority
+      options:
+        - "must-have for next MVP"
+        - "nice-to-have within next MVP"
+        - "post-MVP"
+    validations:
+      required: false

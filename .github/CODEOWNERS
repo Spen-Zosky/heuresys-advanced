@@ -1,0 +1,7 @@
+# Heuresys Advanced — CODEOWNERS
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Solo maintainer del repo. Ogni PR richiede review automatica del code owner
+# (effetto reale solo se la branch protection è attiva con "Require code owner review").
+
+* @Spen-Zosky

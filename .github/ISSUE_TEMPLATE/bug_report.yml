@@ -1,0 +1,76 @@
+name: Bug report
+description: Report a defect in Heuresys Advanced
+title: "[bug] "
+labels: ["type/bug", "needs/triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please fill in the fields below as completely as possible.
+        For **security vulnerabilities**, do NOT use this form — see SECURITY.md.
+
+  - type: input
+    id: version
+    attributes:
+      label: Commit / tag
+      description: Output of `git rev-parse HEAD` or the tag you are on.
+      placeholder: "e.g. 78519c1 or v0.2.0-mvp2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "api (apps/api)"
+        - "web (apps/web)"
+        - "shared (packages/shared)"
+        - "db migrations / scripts"
+        - "design system (@heuresys/ui)"
+        - "infra / SSH tunnel / OCI VM"
+        - "tests (vitest / playwright)"
+        - "other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Minimal, deterministic reproduction. Include commands, request payloads, persona used.
+      placeholder: |
+        1. `pnpm dev` on api + web
+        2. Login as `tenant_admin_test@rtl-bank.test` / `Admin#PassW0rd!`
+        3. Navigate to `/positions`
+        4. Click ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include error messages, console output, screenshots if useful.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, Node version (`node -v`), pnpm version.
+      placeholder: |
+        - OS: Windows 11 / macOS 15.7 / Ubuntu 24.04
+        - Node: 22.x
+        - pnpm: 9.x
+        - Browser: Chrome 132 / Firefox / Safari
+    validations:
+      required: false

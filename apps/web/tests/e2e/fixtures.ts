@@ -5,9 +5,19 @@
  * Personas come from db/scripts/seed-test-admin.ts.
  */
 
+import path from "node:path";
 import type { Page } from "@playwright/test";
 
 export const TEST_PASSWORD = "Admin#PassW0rd!";
+
+/**
+ * Resolves the persisted Playwright storageState file produced by
+ * tests/e2e/auth.setup.ts. Use as `storageState: storageStateFor("employee")`
+ * inside a test.use(...) block.
+ */
+export function storageStateFor(persona: PersonaKey): string {
+  return path.join("tests", ".auth", `${persona}.json`);
+}
 
 export const PERSONAS = {
   platformAdmin: {

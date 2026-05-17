@@ -242,6 +242,10 @@
     "./schemas/compensation": {
       "types": "./dist/schemas/compensation.d.ts",
       "default": "./src/schemas/compensation.ts"
+    },
+    "./schemas/dashboard": {
+      "types": "./dist/schemas/dashboard.d.ts",
+      "default": "./src/schemas/dashboard.ts"
     }
   },
   "scripts": {

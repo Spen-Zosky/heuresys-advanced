@@ -84,6 +84,7 @@ import { seedCandidateRecordsRoutes } from "./modules/seed-candidate-records/rou
 import { seedApprovalDecisionsRoutes } from "./modules/seed-approval-decisions/routes.js";
 import { meRoutes } from "./modules/me/routes.js";
 import { compensationRoutes } from "./modules/compensation/routes.js";
+import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -257,6 +258,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(seedApprovalDecisionsRoutes, { prefix: "/v1/seed-approval-decisions" });
   await app.register(meRoutes, { prefix: "/v1/me" });
   await app.register(compensationRoutes, { prefix: "/v1/compensation" });
+  await app.register(dashboardRoutes, { prefix: "/v1/dashboard" });
 
   return app;
 }

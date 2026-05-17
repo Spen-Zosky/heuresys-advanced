@@ -1,3 +1,49 @@
+## 🚀 MVP-3 IN CORSO — sessione del 2026-05-17 (sera)
+
+Dopo la chiusura ufficiale MVP-2a/2b (`v0.2.0-mvp2`), sessione MVP-3
+estesa che copre:
+
+### Lavoro completato e pushato (HEAD aggiornato dopo questa sessione)
+
+| Tappa | Commit | Output |
+|---|---|---|
+| Brand identity bundle import | `78519c1` | 63 file da `ux-design/heuresys_uxix_brand_identity_bundle_v1/` portati nel repo |
+| **Tappa A** GitHub Tier 0-1 | `9840242` | LICENSE proprietario + Dependabot config + CODEOWNERS + SECURITY.md + issue/PR templates + ruleset main (no-delete + no-force-push) + secret scanning + push protection + Dependabot security updates ENABLED |
+| **Tappa G** WCAG 2.2 AA | `661f191` | axe ruleset esteso `wcag22a,wcag22aa`; `docs/a11y-manual-checklist.md` con 14 voci bundle + 5 WCAG 2.2 AA |
+| **Tappa E** Auth hardening | `ef30b2d` | Per-email rate limit (5 fail/5min, HTTP 429 + Retry-After); `GET /v1/auth/admin/users/:userId/sessions` con TENANT_ADMIN scope check; +5 integration tests (vitest 203 → 208) |
+| **Tappa C** ESS mutations | `ab10b41` | `/me/certifications` upload form bound + `/me/inbox` polling 30s + unread badge; Playwright E2E live-data verde |
+| **Tappa D parziale** Brownfield Wave 1 | `269787b` | `db/scripts/brownfield-wave-1-preflight.{sh,ps1}` + `docs/brownfield/WAVE_1_EXECUTION_RUNBOOK.md` |
+| Triage Fase 1 | `6fab0dc` | next 15.1.6 → 15.5.16, drizzle 0.36 → 0.45, vitest 2.1.9, playwright 1.55.1, postcss 8.5.10 (chiude 53 alerts) |
+| Triage Fase 2 | `2eb6cbf` | fastify 4.28 → 5.8 + tutti `@fastify/*` + fastify-type-provider-zod 4 + fast-jwt 6 via `@fastify/jwt` 10; 29 routes refactor (`{type:"null"}` → `z.null()`, `.send()` → `.send({})` o `.send(null)` con schema appropriata) |
+
+### Stato Dependabot
+- **72 → 5 alerts** (-93% in due fasi)
+- **0 critical**, **0 low**, 2 high (next Middleware bypass — attende 15.6+), 3 medium (postcss/vite/esbuild dev-chain only)
+
+### Acceptance MVP-3 progresso
+
+| # | Item | Status | Note |
+|---|---|---|---|
+| A | GitHub Tier 0-1 | ✅ | Topics, LICENSE, Dependabot, ruleset, security features tutti attivi |
+| B | Renderer grafici React Flow / Mermaid | ⏸️ DEFERRED | Gated brand identity (palette + typography decisions) |
+| C | ESS mutations hardening | ✅ | Upload form + polling implementati, E2E verde |
+| D | Brownfield Wave 1 execution | 🟡 PARTIAL | Preflight + runbook ✅; executor module skeleton + ETL pipeline in questa sessione (continua) |
+| E | MFA + auth hardening | 🟡 PARTIAL | Per-email + admin sessions ✅; TOTP backend in questa sessione (UI gated brand) |
+| F | `@spen-zosky/ui` npm publish | ⏸️ DEFERRED | Forte sinergia con brand identity (token + logo + icon system) |
+| G | WCAG 2.2 AA full audit | ✅ | Ruleset esteso, checklist manuale incorporata |
+| — | Security triage | ✅ | -93% alerts, 0 critical su default branch |
+
+### Bloccato da brand identity
+
+3 tappe attendono brand identity v1 prima di poter procedere:
+- **B** (renderer grafici): coerenza palette + dark/light
+- **F** (npm publish): package deve già contenere tokens + logo + icon system del bundle
+- **E UI** (MFA enroll QR + verify form su `/login`): `/login` è page-type mandatory del bundle
+
+Brand identity v1 = ~50-65h × 4 sessioni (vedi `~/.claude/plans/functional-wondering-kitten.md` per training synthesis + sequenza Phase 1-7). Richiede **Product Owner** (Enzo) per ogni palette/typo/logo decision.
+
+---
+
 ## ✅ MVP-2A / MVP-2B CHIUSI UFFICIALMENTE — 2026-05-17
 
 **Bootstrap MVP chiuso**. Tutte le 7 voci di Acceptance criteria globali di

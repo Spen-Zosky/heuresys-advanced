@@ -13,6 +13,8 @@ estesa che copre:
 | **Tappa E** Auth hardening | `ef30b2d` | Per-email rate limit (5 fail/5min, HTTP 429 + Retry-After); `GET /v1/auth/admin/users/:userId/sessions` con TENANT_ADMIN scope check; +5 integration tests (vitest 203 → 208) |
 | **Tappa C** ESS mutations | `ab10b41` | `/me/certifications` upload form bound + `/me/inbox` polling 30s + unread badge; Playwright E2E live-data verde |
 | **Tappa D parziale** Brownfield Wave 1 | `269787b` | `db/scripts/brownfield-wave-1-preflight.{sh,ps1}` + `docs/brownfield/WAVE_1_EXECUTION_RUNBOOK.md` |
+| **Tappa D — ADR-0012 + 000029** | `850acf3` `c02777f` | ADR-0012 (wave column su table_mappings, opzione A); migration 000029; preflight wave-aware; cleanup login_events 4320 rows |
+| **Tappa D — Wave 1 framework completo** | `d23e518` `297ea85` | Migration 000030 (17 staging.wave1_*); seed registry (93 source_tables + 1164 source_columns + 94 table_mappings + 1177 column_mappings, 100% coverage); script `extract-wave1-legacy.sh` (regenerator 356 MB via SSH); modulo `apps/api/src/modules/brownfield-wave-executor` (state machine 6-state + 5 endpoint REST + 4 smoke test verdi); shared schemas + Zod contract + subpath export. **Full vitest 218/219 verde (1 gated)**. Bug fix laterale: `BROWNFIELD_SOURCE_EXPORT_STATUS_VALUES` allineato al CHECK del DB (`INGESTED`/`CORRUPTED`) |
 | Triage Fase 1 | `6fab0dc` | next 15.1.6 → 15.5.16, drizzle 0.36 → 0.45, vitest 2.1.9, playwright 1.55.1, postcss 8.5.10 (chiude 53 alerts) |
 | Triage Fase 2 | `2eb6cbf` | fastify 4.28 → 5.8 + tutti `@fastify/*` + fastify-type-provider-zod 4 + fast-jwt 6 via `@fastify/jwt` 10; 29 routes refactor (`{type:"null"}` → `z.null()`, `.send()` → `.send({})` o `.send(null)` con schema appropriata) |
 
@@ -27,7 +29,7 @@ estesa che copre:
 | A | GitHub Tier 0-1 | ✅ | Topics, LICENSE, Dependabot, ruleset, security features tutti attivi |
 | B | Renderer grafici React Flow / Mermaid | ⏸️ DEFERRED | Gated brand identity (palette + typography decisions) |
 | C | ESS mutations hardening | ✅ | Upload form + polling implementati, E2E verde |
-| D | Brownfield Wave 1 execution | 🟡 PARTIAL | Preflight + runbook ✅; executor module skeleton + ETL pipeline in questa sessione (continua) |
+| D | Brownfield Wave 1 execution | 🟡 PARTIAL | Framework completo ✅ (registry mapping 93+1164+94+1177 row, modulo executor, 5 endpoint, staging 17 tables, legacy data 356MB via script); execution end-to-end full 47k row ha known issue residuo su NK fallback per i 5 target con FK dipendenze topologiche (`sys_skill_taxonomy_edges`, `sys_skill_aliases`, `sys_skill_learning_mappings`, `sys_activity_classification_mappings`, `sys_user_certifications`) — richiede sort topologico + LOOKUP_FK resolver in sessione dedicata |
 | E | MFA + auth hardening | 🟡 PARTIAL | Per-email + admin sessions ✅; TOTP backend in questa sessione (UI gated brand) |
 | F | `@spen-zosky/ui` npm publish | ⏸️ DEFERRED | Forte sinergia con brand identity (token + logo + icon system) |
 | G | WCAG 2.2 AA full audit | ✅ | Ruleset esteso, checklist manuale incorporata |

@@ -1,26 +1,21 @@
 # Wave 1 Execution Runbook
 
-> **Status (2026-05-17, MVP-3 Tappa D)**: pre-flight scripts hardened against actual schema; ADR-0012 pre-step identified and documented; executor scaffolding (state machine + per-domain ETL templates) remains a dedicated session.
+> **Status (2026-05-18, MVP-3 Tappa D)**: pre-flight scripts hardened against actual schema; ADR-0012 **closed** (option A — dedicated `table_mapping_wave` column, migration `000029`); executor scaffolding (state machine + per-domain ETL templates) remains a dedicated session.
 
 The actual data-transformation lift is documented in `docs/brownfield/BROWNFIELD_IMPORT_PLAN.md` §3 (Wave 1 — Low-Risk Catalogs). This runbook is the operational checklist for the **execution session** itself.
 
-## ⚠️ ADR-0012 required BEFORE executing Wave 1
+## ✅ ADR-0012 closed (option A — column-based wave assignment)
 
-The current `brownfield.table_mappings` schema (migration `000025`) does **not** have a `wave` column. The wave attribute lives on `brownfield.import_runs.import_run_wave` (`smallint`, CHECK 1..4), so the mapping ↔ wave link is currently only implicit through `table_mapping_run_id` referencing the run.
+`brownfield.table_mappings` carries the wave attribute as a dedicated column `table_mapping_wave smallint` with `CHECK (NULL OR 1..4)` and secondary index on assigned rows. This is symmetric with `brownfield.import_runs.import_run_wave` (migration `000024`). See `docs/architecture/adr/0012_brownfield_table_mapping_wave_column.md`.
 
-Two viable options for ADR-0012:
+Migration `000029_brownfield_table_mapping_wave.sql` ships the column **and** an idempotent Wave 1 backfill UPDATE keyed off `source_table_schema IN ('ESKAP','SKILGRO','INDOOR','ITLAB','PROGOV','OPOURSKA','H2R')`. The UPDATE is a no-op on an empty `brownfield.table_mappings` (current bootstrap state) and self-restricts to rows where `wave IS NULL`, so it can be re-run safely after mapping population without overriding manual assignments.
 
-| Option | Cost | Trade-off |
-|---|---|---|
-| **A** Add `table_mapping_wave smallint` column + backfill (migration 000029) | low — schema migration | Strict 1-to-1 wave assignment, clean SQL queries, validated by CHECK constraint |
-| **B** Store wave assignment under `table_mapping_metadata.wave` JSONB key | zero migration | Flexible (multi-wave possible), no schema change, but no DB-level validation; queries need jsonb extract |
-
-**Decision** (TBD by Enzo): pick A or B, write ADR-0012, then backfill the 93 Wave-1 source-table mappings before executing the wave. The pre-flight scripts (`db/scripts/brownfield-wave-1-preflight.{sh,ps1}`) currently filter by `approval_status='APPROVED' AND classification IN ('IMPORT','TRANSFORM')` and DO NOT filter by wave — once ADR-0012 is decided, the scripts get a 1-line filter addition.
+The pre-flight scripts (`db/scripts/brownfield-wave-1-preflight.{sh,ps1}`) now scope every check to `table_mapping_wave = 1 AND approval_status = 'APPROVED' AND classification IN ('IMPORT','TRANSFORM')`.
 
 ## Pre-execution gate (required green)
 
 1. SSH tunnel `localhost:5433 → OCI VM:5432` up.
-2. `pnpm test` API 208/208 green (current baseline).
+2. `pnpm test` API 214/214 green (current baseline post-MFA backend).
 3. `pnpm exec playwright test` smoke + a11y green.
 4. Sufficient WAL space on OCI VM PostgreSQL (~20 GB free, since Wave 1 expects ~3-5 GB of import data plus index churn).
 5. **Pre-flight check passes**:
@@ -49,8 +44,8 @@ Two viable options for ADR-0012:
 2. **Stage** — for every APPROVED mapping, the import pipeline:
    - Drops + recreates `staging.<tableset>` (idempotent).
    - Bulk-inserts source rows mapped 1:1 to the canonical column shape.
-3. **Validate** — `brownfield.import_validation_results` is populated with PASSED/FAIL per source row. Pass criteria for Wave 1: NOT NULL on natural keys, FK resolution, regex shape on critical fields, confidence ≥ 0.9.
-4. **Approve** — Wave 1 allows auto-approve when validation 100% PASSED (recorded with `approver = 'AUTO'` in `brownfield.import_approval_decisions`).
+3. **Validate** — `audit.import_validation_results` is populated with PASSED/FAIL per source row (schema lives under `audit`, not `brownfield`). Pass criteria for Wave 1: NOT NULL on natural keys, FK resolution, regex shape on critical fields, confidence ≥ 0.9.
+4. **Approve** — Wave 1 allows auto-approve when validation 100% PASSED (recorded with `approver = 'AUTO'` in `audit.import_approval_decisions`).
 5. **Upsert into canonical** — idempotent INSERT … ON CONFLICT (natural key) DO UPDATE SET … (evolving columns only).
 6. **Lineage** — every canonical row gets a `sys.sys_source_lineage_records` entry tied to `import_run_id`.
 7. **Audit** — `audit.import_events` accumulates the full event stream of the run.
@@ -72,22 +67,27 @@ See `docs/brownfield/BROWNFIELD_IMPORT_PLAN.md` §3.1. Summary (≈93 source tab
 ## Acceptance criteria (per §3.4)
 
 ```sql
--- 1. All wave 1 source tables present with status=APPROVED
+-- 1. All wave 1 mappings present with approval_status=APPROVED
 SELECT count(*) FROM brownfield.table_mappings
- WHERE table_mapping_wave = 1 AND table_mapping_status = 'APPROVED';
+ WHERE table_mapping_wave = 1
+   AND table_mapping_approval_status = 'APPROVED'
+   AND table_mapping_classification IN ('IMPORT','TRANSFORM');
 
 -- 2. All validation results PASSED
-SELECT count(*) FROM brownfield.import_validation_results
+SELECT count(*) FROM audit.import_validation_results
  WHERE import_validation_result_run_id IN (
    SELECT import_run_id FROM brownfield.import_runs WHERE import_run_wave = 1
  ) AND import_validation_result_status != 'PASSED';
 -- → must return 0
 
--- 3. Every canonical row has lineage
-SELECT count(*) FROM sys.sys_skills
+-- 3. Every canonical row has lineage (lineage points at the row via
+--    source_lineage_target_table_name + source_lineage_target_record_id;
+--    repeat per Wave-1 target table)
+SELECT count(*) FROM sys.sys_skills s
  WHERE NOT EXISTS (
-   SELECT 1 FROM sys.sys_source_lineage_records
-    WHERE source_lineage_record_canonical_id = sys_skills.skill_id
+   SELECT 1 FROM sys.sys_source_lineage_records lr
+    WHERE lr.source_lineage_target_table_name = 'sys_skills'
+      AND lr.source_lineage_target_record_id = s.skill_id
  );
 -- → must return 0 for every Wave-1 target with lineage tracking
 

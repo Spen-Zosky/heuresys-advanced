@@ -37,18 +37,18 @@ const ROUTES: ShowcaseRoute[] = [
     status: "scaffold",
     decisionId: "UXIX-0007",
   },
-  { href: "/showcase/header", title: "Header", blurb: "Composition variants for the persistent top region.", status: "pending", decisionId: "UXIX-0002" },
-  { href: "/showcase/sidebar", title: "Sidebar", blurb: "Tree groups open/closed, badges, active route, collapsed icon-only.", status: "pending", decisionId: "UXIX-0004" },
-  { href: "/showcase/footer", title: "Footer", blurb: "Copyright + Heuresys.com link + 4 social icon variants.", status: "pending", decisionId: "UXIX-0003" },
-  { href: "/showcase/icons", title: "Icons", blurb: "Lucide outline library + StatusIcon semantic tones.", status: "pending", decisionId: "UXIX-0008" },
-  { href: "/showcase/page-types", title: "Page types", blurb: "Dashboard, module ±tabs, login, primary initial, public landing.", status: "pending", decisionId: null },
-  { href: "/showcase/dashboard-cards", title: "Dashboard cards", blurb: "KPI cards, sparkline cards, data cards variants.", status: "pending", decisionId: null },
-  { href: "/showcase/forms", title: "Forms", blurb: "Form controls + validation states.", status: "pending", decisionId: null },
-  { href: "/showcase/tables", title: "Tables", blurb: "Density, sort, filter, pagination variants.", status: "pending", decisionId: null },
-  { href: "/showcase/charts", title: "Charts", blurb: "Data viz showcases — bar, line, donut, heatmap on Heuresys domain.", status: "pending", decisionId: null },
-  { href: "/showcase/landing-page", title: "Landing page", blurb: "Full prototype of the public marketing landing.", status: "pending", decisionId: null },
-  { href: "/showcase/login-page", title: "Login page", blurb: "Full prototype of the authentication entry.", status: "pending", decisionId: null },
-  { href: "/showcase/primary-initial-page", title: "Primary initial page", blurb: "Authenticated landing, distinct from role-specific dashboards.", status: "pending", decisionId: null },
+  { href: "/showcase/header", title: "Header", blurb: "Composition variants for the persistent top region.", status: "scaffold", decisionId: "UXIX-0002" },
+  { href: "/showcase/sidebar", title: "Sidebar", blurb: "Tree groups open/closed, badges, active route, collapsed icon-only.", status: "scaffold", decisionId: "UXIX-0004" },
+  { href: "/showcase/footer", title: "Footer", blurb: "Copyright + Heuresys.com link + 4 social icon variants.", status: "scaffold", decisionId: "UXIX-0003" },
+  { href: "/showcase/icons", title: "Icons", blurb: "Lucide outline library + StatusIcon semantic tones.", status: "scaffold", decisionId: "UXIX-0008" },
+  { href: "/showcase/page-types", title: "Page types", blurb: "Dashboard, module ±tabs, login, primary initial, public landing.", status: "scaffold", decisionId: null },
+  { href: "/showcase/dashboard-cards", title: "Dashboard cards", blurb: "KPI cards, sparkline cards, data cards variants.", status: "scaffold", decisionId: null },
+  { href: "/showcase/forms", title: "Forms", blurb: "Form controls + validation states.", status: "scaffold", decisionId: null },
+  { href: "/showcase/tables", title: "Tables", blurb: "Density, sort, filter, pagination variants.", status: "scaffold", decisionId: null },
+  { href: "/showcase/charts", title: "Charts", blurb: "Data viz showcases — bar, line, donut, heatmap on Heuresys domain.", status: "scaffold", decisionId: null },
+  { href: "/showcase/landing-page", title: "Landing page", blurb: "Full prototype of the public marketing landing.", status: "scaffold", decisionId: null },
+  { href: "/showcase/login-page", title: "Login page", blurb: "Full prototype of the authentication entry.", status: "scaffold", decisionId: null },
+  { href: "/showcase/primary-initial-page", title: "Primary initial page", blurb: "Authenticated landing, distinct from role-specific dashboards.", status: "scaffold", decisionId: null },
 ];
 
 const STATUS_LABEL: Record<ShowcaseRoute["status"], string> = {
@@ -78,7 +78,7 @@ export default function ShowcaseIndexPage() {
           (cross-consumer governance, separate git repo).
         </p>
         <p className="text-xs uppercase tracking-wider text-neutral-500">
-          {scaffolded} / {total} scaffolded · Session 1 in progress
+          {scaffolded} / {total} scaffolded · all routes live for review
         </p>
       </section>
 

@@ -1,7 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 const ACCESS_COOKIE = "hrx_access";
-const PUBLIC_PATHS = ["/login", "/_next", "/api"];
+// `/showcase` is gated independently in apps/web/src/app/showcase/layout.tsx
+// (env flag + non-production check). It must be public at the middleware level
+// so Product Owner brand review does not require a login.
+const PUBLIC_PATHS = ["/login", "/_next", "/api", "/showcase"];
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));

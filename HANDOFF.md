@@ -29,7 +29,7 @@ estesa che copre:
 | A | GitHub Tier 0-1 | ✅ | Topics, LICENSE, Dependabot, ruleset, security features tutti attivi |
 | B | Renderer grafici React Flow / Mermaid | ⏸️ DEFERRED | Gated brand identity (palette + typography decisions) |
 | C | ESS mutations hardening | ✅ | Upload form + polling implementati, E2E verde |
-| D | Brownfield Wave 1 execution | 🟡 PARTIAL | Framework completo + pipeline reaches state=COMPLETE ✅ (registry mapping 93+1164+94+1177 row, modulo executor, 5 endpoint, staging 17 tables, legacy data 356MB via script, validation set-based 0 fail su 47k row); residuo: `LOOKUP_FK` resolver in `transforms.ts` (oggi `{skip:true}`) — necessario per popolare FK NK target tables (`sys_skill_taxonomy_edges`, `sys_skill_aliases`, `sys_skill_learning_mappings`, `sys_blueprint_process_registry`, `sys_compensation_bands`…). Stima: 30-60 min implementazione |
+| D | Brownfield Wave 1 execution | ✅ | Framework completo + pipeline end-to-end VERDE (registry 93+1164+94+1177 row, modulo executor, 5 endpoint, staging 17 tables, legacy data 356MB via script, validation set-based, LOOKUP_FK resolver con pre-loaded cache, topological sort 17 target, required-col fallback). Integration test gated `BROWNFIELD_RUN_REAL_WAVE1=1 WAVE1_DEBUG_LIMIT=5` passa con `totalUpserted > 0`, lineage scritti, `state=COMPLETE`. Full execution senza DEBUG_LIMIT non ancora eseguita su DB live (one-shot manuale ~5-10 min). 218/219 vitest |
 | E | MFA + auth hardening | 🟡 PARTIAL | Per-email + admin sessions ✅; TOTP backend in questa sessione (UI gated brand) |
 | F | `@spen-zosky/ui` npm publish | ⏸️ DEFERRED | Forte sinergia con brand identity (token + logo + icon system) |
 | G | WCAG 2.2 AA full audit | ✅ | Ruleset esteso, checklist manuale incorporata |

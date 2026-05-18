@@ -14,6 +14,12 @@
 docs/source_bundle/brownfield/extracted/
 docs/brownfield/_inspection_artifacts/
 
+# Wave 1 legacy data dumps (~356 MB, regenerable via
+# db/scripts/extract-wave1-legacy.sh against oracle-vm-default).
+# We keep the regenerator committed; the dump payload is reproducible
+# from the live legacy DB on demand.
+db/seeds/brownfield/wave1/legacy_data/
+
 # -----------------------------------------------------------------------------
 # Secrets / env files
 # -----------------------------------------------------------------------------

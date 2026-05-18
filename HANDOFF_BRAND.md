@@ -94,6 +94,38 @@ These were intentionally not executed in this lane (no install, no dev server, n
 
 ---
 
+## Verification status — Session 1 close (post-Option 2 migration)
+
+| Step | Result | Detail |
+|---|---|---|
+| `pnpm install --frozen-lockfile` in brand worktree | ✅ 43s | 287 packages resolved + reused from warm CAS; `+ @heuresys/ui 0.0.0 <- ..\ux-design-shared\ui` |
+| Worktree junction bridge | ✅ created | `D:\heuresys-advanced\.claude\worktrees\ux-design-shared` → `D:\ux-design-shared` (Windows directory junction, no admin) |
+| Symlink chain resolves | ✅ | `node_modules/@heuresys/ui` → junction → `D:\ux-design-shared\ui` |
+| `pnpm typecheck` in `apps/web` | ✅ 60s, 0 errors | `@heuresys/ui/brand/candidates` subpath resolves cleanly |
+| `pnpm dev` + playwright smoke | ⏳ deferred | Next session: launch dev server, run `showcase-smoke.spec.ts` |
+
+## Worktree-specific gotcha — `link:` path resolution
+
+Discovered 2026-05-18 during Session 1 install: the root `package.json` declares `"@heuresys/ui": "link:../ux-design-shared/ui"`. The `link:` protocol resolves relative to the `package.json` location, **NOT** the workspace root, so:
+
+- **Main checkout** at `D:\heuresys-advanced\` → `..\ux-design-shared\ui` = `D:\ux-design-shared\ui` ✅
+- **Brand worktree** at `D:\heuresys-advanced\.claude\worktrees\brand-identity-v1\` → `..\ux-design-shared\ui` = `D:\heuresys-advanced\.claude\worktrees\ux-design-shared\ui` ❌ (does not exist)
+
+`pnpm install` happily creates a broken symlink to the non-existent path; TypeScript and Next.js then fail with module resolution errors that *look* like a subpath-export problem but aren't.
+
+**Fix** (one-time per worktrees parent directory, persists across worktree create/destroy cycles):
+
+```powershell
+# From any PowerShell prompt — no admin required (Windows directory junction)
+New-Item -ItemType Junction `
+  -Path  "D:\heuresys-advanced\.claude\worktrees\ux-design-shared" `
+  -Target "D:\ux-design-shared"
+```
+
+After the junction exists, `link:../ux-design-shared/ui` resolves to the bridge → the real `D:\ux-design-shared\ui`. Same pattern would apply to any future worktree under `.claude\worktrees\` that consumes `@heuresys/ui`.
+
+**Mac/Linux equivalent**: `ln -s /d/ux-design-shared /d/heuresys-advanced/.claude/worktrees/ux-design-shared` (symlink, no special privileges).
+
 ## Next session — entry point
 
 ### Open the lane
@@ -106,21 +138,23 @@ git log --oneline -8 --grep "(brand):"      # brand-prefixed commits in order
 # Sister repo:
 git -C D:/ux-design-shared status -sb       # clean on main
 git -C D:/ux-design-shared log --oneline -3 # the migration commit appears here
+
+# Verify the junction is still present (PowerShell):
+Get-Item D:\heuresys-advanced\.claude\worktrees\ux-design-shared | Select FullName, LinkType, Target
 ```
 
-### Phase 1 verification (must pass before any new work)
+### Phase 1 verification — already passed
+
+`pnpm install` + `pnpm typecheck` completed clean at Session 1 close (see status table above). No need to re-run unless `node_modules` was wiped, the lockfile changed, or the junction was deleted.
+
+### Remaining verification before Session 2 design work
 
 ```bash
-cd D:/heuresys-advanced/.claude/worktrees/brand-identity-v1
-pnpm install --frozen-lockfile              # 10-30s with warm CAS — restores node_modules + @heuresys/ui symlink
-cd apps/web
-pnpm typecheck                              # expect 0 errors (validates @heuresys/ui/brand/candidates resolution)
+cd D:/heuresys-advanced/.claude/worktrees/brand-identity-v1/apps/web
 NEXT_PUBLIC_ENABLE_SHOWCASE=1 pnpm dev      # serves /showcase at :3000
 # In another shell:
 pnpm exec playwright test showcase-smoke.spec.ts
 ```
-
-If any step fails, fix in this lane with a `fix(brand):` commit (no cross-area work permitted by charter §1–§2). The most likely failure is Next.js + TS resolution of `@heuresys/ui/brand/candidates` — if so, options: (a) add a `paths` mapping in tsconfig, (b) add a Next.js Webpack alias, (c) restructure to import from main `@heuresys/ui` index.
 
 ### Recommended Session 2 deliverables (Phase 2 close + Phase 3 partial)
 

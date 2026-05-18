@@ -36,39 +36,39 @@ export default function PrimaryInitialPageShowcase() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">Showcase</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">Showcase</p>
         <h1 className="text-3xl font-semibold tracking-tight">Primary authenticated initial page</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Per ADR-0011 ESS, this is the post-login landing — distinct from role-specific dashboards
           (executive / manager / employee). Welcome strip, personal quick KPIs, quick actions, recent
           team activity. Bundle page type per <code>docs/12_page_types_to_design.md</code>.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--muted-foreground)]">
           <Link href="/showcase" className="underline">back to index</Link>
         </p>
       </header>
 
-      <section className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
+      <section className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
         <div className="flex items-center gap-5 bg-blue-50 px-8 py-7">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--card)] shadow-sm">
             <LogoCandidateASymbol className="h-10 w-10 text-blue-700" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wider text-neutral-500">Buongiorno · martedì 19 maggio 2026</p>
+            <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">Buongiorno · martedì 19 maggio 2026</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight">Bentornato, Enzo.</h2>
-            <p className="mt-1 text-sm text-neutral-700">
+            <p className="mt-1 text-sm text-[var(--card-foreground)]">
               Hai <strong>3 task aperti</strong> e <strong>1 approvazione</strong> in attesa. Il tuo
               tenant <code>RTL_BANK_REFERENCE</code> è stato sincronizzato 14 min fa.
             </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-px bg-neutral-200 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-px bg-[var(--muted)] lg:grid-cols-4">
           {QUICK_KPIS.map((k) => (
-            <div key={k.label} className="bg-white p-5">
-              <p className="text-[11px] uppercase tracking-wider text-neutral-500">{k.label}</p>
+            <div key={k.label} className="bg-[var(--card)] p-5">
+              <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">{k.label}</p>
               <p className={`mt-1 text-3xl font-semibold tabular-nums ${
-                k.color === "red" ? "text-red-700" : k.color === "amber" ? "text-amber-700" : k.color === "blue" ? "text-blue-700" : "text-neutral-900"
+                k.color === "red" ? "text-red-700" : k.color === "amber" ? "text-amber-700" : k.color === "blue" ? "text-blue-700" : "text-[var(--card-foreground)]"
               }`}>{k.value}</p>
             </div>
           ))}
@@ -80,10 +80,10 @@ export default function PrimaryInitialPageShowcase() {
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
           {QUICK_ACTIONS.map((a) => (
             <li key={a.title}>
-              <button className="w-full rounded-xl border border-neutral-200 bg-white p-5 text-left transition hover:border-blue-400 hover:shadow">
+              <button className="w-full hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 text-left transition hover:border-blue-400 hover:shadow">
                 <span aria-hidden className="text-2xl">{a.icon}</span>
                 <p className="mt-2 text-sm font-semibold tracking-tight">{a.title}</p>
-                <p className="mt-1 text-xs text-neutral-600">{a.desc}</p>
+                <p className="mt-1 text-xs text-[var(--muted-foreground)]">{a.desc}</p>
               </button>
             </li>
           ))}
@@ -91,23 +91,23 @@ export default function PrimaryInitialPageShowcase() {
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
-        <div className="rounded-xl border border-neutral-200 bg-white p-5">
+        <div className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold tracking-tight">Team activity</h2>
             <a href="#" className="text-xs text-blue-700 hover:underline">View all →</a>
           </div>
-          <ul className="divide-y divide-neutral-100">
+          <ul className="divide-y divide-[var(--border)]">
             {ACTIVITY.map((a, i) => (
               <li key={i} className="flex items-start gap-3 py-3 text-sm">
-                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-xs font-semibold text-neutral-700">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--muted)] text-xs font-semibold text-[var(--card-foreground)]">
                   {a.who.split(" ").map((w) => w[0]).join("").slice(0, 2)}
                 </span>
                 <span className="flex-1">
-                  <span className="font-medium text-neutral-900">{a.who}</span>{" "}
-                  <span className="text-neutral-700">{a.action}</span>
-                  <span className="block text-[11px] text-neutral-500">{a.when}</span>
+                  <span className="font-medium text-[var(--card-foreground)]">{a.who}</span>{" "}
+                  <span className="text-[var(--card-foreground)]">{a.action}</span>
+                  <span className="block text-[11px] text-[var(--muted-foreground)]">{a.when}</span>
                 </span>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${TAG_CLASS[a.tag] ?? "bg-neutral-100 text-neutral-700"}`}>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${TAG_CLASS[a.tag] ?? "bg-[var(--muted)] text-[var(--card-foreground)]"}`}>
                   {a.tag}
                 </span>
               </li>
@@ -115,14 +115,14 @@ export default function PrimaryInitialPageShowcase() {
           </ul>
         </div>
 
-        <aside className="rounded-xl border border-neutral-200 bg-white p-5">
+        <aside className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
           <h2 className="text-base font-semibold tracking-tight">Heuresys today</h2>
           <ul className="mt-3 space-y-2 text-sm">
-            <li className="flex justify-between"><span className="text-neutral-700">Tenant</span><span className="font-mono text-xs">RTL_BANK_REFERENCE</span></li>
-            <li className="flex justify-between"><span className="text-neutral-700">Active positions</span><span className="tabular-nums">1,284</span></li>
-            <li className="flex justify-between"><span className="text-neutral-700">Skill gaps</span><span className="tabular-nums">342</span></li>
-            <li className="flex justify-between"><span className="text-neutral-700">Learning YTD</span><span className="tabular-nums">5,917</span></li>
-            <li className="flex justify-between"><span className="text-neutral-700">Last refresh</span><span className="text-xs text-neutral-500">14:02</span></li>
+            <li className="flex justify-between"><span className="text-[var(--card-foreground)]">Tenant</span><span className="font-mono text-xs">RTL_BANK_REFERENCE</span></li>
+            <li className="flex justify-between"><span className="text-[var(--card-foreground)]">Active positions</span><span className="tabular-nums">1,284</span></li>
+            <li className="flex justify-between"><span className="text-[var(--card-foreground)]">Skill gaps</span><span className="tabular-nums">342</span></li>
+            <li className="flex justify-between"><span className="text-[var(--card-foreground)]">Learning YTD</span><span className="tabular-nums">5,917</span></li>
+            <li className="flex justify-between"><span className="text-[var(--card-foreground)]">Last refresh</span><span className="text-xs text-[var(--muted-foreground)]">14:02</span></li>
           </ul>
           <p className="mt-4 rounded-lg bg-blue-50 p-3 text-xs text-blue-900">
             Distinto da <code>/dashboard</code> role-specific: questa è la <em>primary initial page</em>,

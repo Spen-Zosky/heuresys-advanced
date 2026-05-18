@@ -60,8 +60,8 @@ const CANDIDATES: Typography[] = [TYPOGRAPHY_A, TYPOGRAPHY_B];
 
 function ScaleRow({ step, family }: { step: ScaleStep; family: string }) {
   return (
-    <li className="flex items-baseline gap-4 border-t border-neutral-100 py-3 first:border-t-0">
-      <div className="w-24 shrink-0 text-xs text-neutral-500">
+    <li className="flex items-baseline gap-4 border-t border-[var(--border)] py-3 first:border-t-0">
+      <div className="w-24 shrink-0 text-xs text-[var(--muted-foreground)]">
         <p className="font-medium">{step.role}</p>
         <p className="font-mono">{step.px}px / {step.weight}</p>
       </div>
@@ -82,25 +82,25 @@ function ScaleRow({ step, family }: { step: ScaleStep; family: string }) {
 
 function TypographyCard({ t }: { t: Typography }) {
   return (
-    <article className="rounded-xl border border-neutral-200 bg-white p-5">
+    <article className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
       <header className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
             Candidate {t.id}
           </p>
           <h3 className="mt-0.5 text-lg font-semibold tracking-tight">{t.name}</h3>
-          <p className="mt-0.5 text-xs font-mono text-neutral-500">{t.stack}</p>
+          <p className="mt-0.5 text-xs font-mono text-[var(--muted-foreground)]">{t.stack}</p>
         </div>
       </header>
-      <p className="mb-4 text-sm text-neutral-600">{t.thesis}</p>
-      <ul className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+      <p className="mb-4 text-sm text-[var(--muted-foreground)]">{t.thesis}</p>
+      <ul className="rounded-lg border border-[var(--border)] bg-[var(--muted)] p-3">
         {t.scale.map((s) => (
           <ScaleRow key={s.token} step={s} family={t.family} />
         ))}
       </ul>
-      <div className="mt-4 rounded-lg border border-neutral-200 p-4">
+      <div className="mt-4 rounded-lg border border-[var(--border)] p-4">
         <p
-          className="text-[11px] uppercase tracking-wider text-neutral-500"
+          className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]"
           style={{ fontFamily: t.family }}
         >
           KPI sample
@@ -112,7 +112,7 @@ function TypographyCard({ t }: { t: Typography }) {
           1,284
         </p>
         <p
-          className="mt-0.5 text-xs text-neutral-600"
+          className="mt-0.5 text-xs text-[var(--muted-foreground)]"
           style={{ fontFamily: t.family }}
         >
           +12 this week · 78% capacity
@@ -126,13 +126,13 @@ export default function TypographyShowcasePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">UXIX-0006 · Proposed</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">UXIX-0006 · Proposed</p>
         <h1 className="text-3xl font-semibold tracking-tight">Brand typography</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Typeface and modular scale candidates. Product Owner picks; the chosen candidate becomes the
           authoritative scale in <code>D:\ux-design-shared\ui\src\styles\tokens.css</code>.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--muted-foreground)]">
           Note · web fonts are not yet wired into the document head — the cards below fall back to
           system stacks if the family is not installed locally.{" "}
           <Link href="/showcase" className="underline">back to index</Link>
@@ -148,9 +148,9 @@ export default function TypographyShowcasePage() {
         </div>
       </section>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-5">
+      <section className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5">
         <h2 className="text-base font-semibold tracking-tight">Scale rationale</h2>
-        <p className="mt-2 text-sm text-neutral-700">
+        <p className="mt-2 text-sm text-[var(--card-foreground)]">
           A 6-step modular scale (Display / H1 / H2 / H3 / Body / Caption) is sufficient for an HRMS
           dashboard. Adding a 7th step risks pollution of the type system without payoff. Both
           candidates align on the same step boundaries (48 / 32 / 24 / 18 / 14 / 12) so the decision is

@@ -43,24 +43,24 @@ export default function IconsShowcasePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">UXIX-0008 · Accepted</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">UXIX-0008 · Accepted</p>
         <h1 className="text-3xl font-semibold tracking-tight">Icons — outline + semantic tones</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Lucide React outline style (1.75 stroke, currentColor). <code>StatusIcon</code> component
           maps a discriminated tone to semantic token. Navigation icons stay neutral; status icons
           take semantic color. Per bundle <code>docs/10_graphic_assets_and_icon_system.md</code>.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--muted-foreground)]">
           <Link href="/showcase" className="underline">back to index</Link>
         </p>
       </header>
 
       <section className="space-y-3">
         <h2 className="text-base font-semibold tracking-tight">StatusIcon tones × icon set</h2>
-        <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+        <div className="overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--card)]">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b bg-neutral-50 text-left text-xs uppercase tracking-wider text-neutral-500">
+              <tr className="border-b bg-[var(--muted)] text-left text-xs uppercase tracking-wider text-[var(--muted-foreground)]">
                 <th className="px-3 py-2">Tone</th>
                 <th className="px-3 py-2">Use</th>
                 {STATUS_ICONS.map((i) => (
@@ -76,9 +76,9 @@ export default function IconsShowcasePage() {
                       <span className="inline-block h-3 w-3 rounded-full" style={{ background: t.color }} />
                       <span className="text-sm font-medium">{t.label}</span>
                     </span>
-                    <p className="mt-0.5 font-mono text-[10px] text-neutral-500">{t.tone}</p>
+                    <p className="mt-0.5 font-mono text-[10px] text-[var(--muted-foreground)]">{t.tone}</p>
                   </td>
-                  <td className="px-3 py-3 text-xs text-neutral-600">{t.example}</td>
+                  <td className="px-3 py-3 text-xs text-[var(--muted-foreground)]">{t.example}</td>
                   {STATUS_ICONS.map((i) => (
                     <td key={i.name} className="px-3 py-3 text-center">
                       <span className="inline-flex"><IconSvg d={i.path} color={t.color} /></span>
@@ -95,17 +95,17 @@ export default function IconsShowcasePage() {
         <h2 className="text-base font-semibold tracking-tight">Navigation icon set — neutral</h2>
         <div className="grid grid-cols-3 gap-3 md:grid-cols-6">
           {NAV_ICONS.map((i) => (
-            <div key={i.name} className="flex flex-col items-center gap-2 rounded-lg border border-neutral-200 bg-white p-4">
+            <div key={i.name} className="flex flex-col items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] p-4">
               <IconSvg d={i.path} color="#475569" size={24} />
-              <span className="text-xs text-neutral-700">{i.name}</span>
+              <span className="text-xs text-[var(--card-foreground)]">{i.name}</span>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-5">
+      <section className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5">
         <h2 className="text-base font-semibold tracking-tight">Decision rule</h2>
-        <ul className="mt-2 space-y-1 text-sm text-neutral-700">
+        <ul className="mt-2 space-y-1 text-sm text-[var(--card-foreground)]">
           <li>Navigation icons → always <code>neutral</code></li>
           <li>Action icons → neutral, unless destructive (danger) or primary CTA (info)</li>
           <li>Status icons → semantic color, never decorative</li>

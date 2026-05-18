@@ -60,7 +60,7 @@ const STATUS_LABEL: Record<ShowcaseRoute["status"], string> = {
 const STATUS_CHIP_CLASS: Record<ShowcaseRoute["status"], string> = {
   live: "bg-emerald-100 text-emerald-900 border-emerald-200",
   scaffold: "bg-amber-100 text-amber-900 border-amber-200",
-  pending: "bg-neutral-100 text-neutral-700 border-neutral-200",
+  pending: "bg-[var(--muted)] text-[var(--card-foreground)] border-[var(--border)]",
 };
 
 export default function ShowcaseIndexPage() {
@@ -71,13 +71,13 @@ export default function ShowcaseIndexPage() {
     <div className="space-y-8">
       <section className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Brand identity showcase</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Candidates and prototypes for the Heuresys brand identity v1. Use this index to navigate to each
           subject area. Decisions are tracked in{" "}
-          <code className="rounded bg-neutral-200 px-1.5 py-0.5 text-xs">D:\ux-design-shared\governance\DECISION_REGISTER.md</code>{" "}
+          <code className="rounded bg-[var(--muted)] px-1.5 py-0.5 text-xs">D:\ux-design-shared\governance\DECISION_REGISTER.md</code>{" "}
           (cross-consumer governance, separate git repo).
         </p>
-        <p className="text-xs uppercase tracking-wider text-neutral-500">
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">
           {scaffolded} / {total} scaffolded · all routes live for review
         </p>
       </section>
@@ -93,14 +93,14 @@ export default function ShowcaseIndexPage() {
               <li key={r.href}>
                 <Card
                   {...(cardProps as { href: string })}
-                  className={`block rounded-xl border border-neutral-200 bg-white p-5 transition ${
-                    interactive ? "hover:border-neutral-400 hover:shadow-sm" : "opacity-60"
+                  className={`block hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 transition ${
+                    interactive ? "hover:border-[var(--palette-1)] hover:shadow-sm" : "opacity-60"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h3 className="text-base font-semibold tracking-tight">{r.title}</h3>
-                      <p className="mt-1 text-sm text-neutral-600">{r.blurb}</p>
+                      <p className="mt-1 text-sm text-[var(--muted-foreground)]">{r.blurb}</p>
                     </div>
                     <span
                       className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${STATUS_CHIP_CLASS[r.status]}`}
@@ -109,8 +109,8 @@ export default function ShowcaseIndexPage() {
                     </span>
                   </div>
                   {r.decisionId ? (
-                    <p className="mt-3 text-xs text-neutral-500">
-                      Tied to <code className="rounded bg-neutral-100 px-1 py-0.5">{r.decisionId}</code>
+                    <p className="mt-3 text-xs text-[var(--muted-foreground)]">
+                      Tied to <code className="rounded bg-[var(--muted)] px-1 py-0.5">{r.decisionId}</code>
                     </p>
                   ) : null}
                 </Card>

@@ -24,10 +24,10 @@ const STATUS_CLASS: Record<string, string> = {
 function Table({ density }: { density: "compact" | "regular" | "relaxed" }) {
   const pad = density === "compact" ? "px-2 py-1" : density === "regular" ? "px-3 py-2" : "px-4 py-3";
   return (
-    <div className="overflow-hidden rounded-lg border border-neutral-200 bg-white">
+    <div className="overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--card)]">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b bg-neutral-50 text-left text-[11px] uppercase tracking-wider text-neutral-500">
+          <tr className="border-b bg-[var(--muted)] text-left text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">
             <th className={pad}>Code <span aria-hidden>↕</span></th>
             <th className={pad}>Title <span aria-hidden className="text-blue-600">↓</span></th>
             <th className={pad}>Dept</th>
@@ -40,12 +40,12 @@ function Table({ density }: { density: "compact" | "regular" | "relaxed" }) {
         </thead>
         <tbody className="divide-y">
           {POSITIONS.map((p) => (
-            <tr key={p.code} className="hover:bg-neutral-50">
-              <td className={`${pad} font-mono text-xs text-neutral-600`}>{p.code}</td>
-              <td className={`${pad} font-medium text-neutral-900`}>{p.title}</td>
-              <td className={`${pad} text-neutral-700`}>{p.dept}</td>
-              <td className={`${pad} text-neutral-700`}>{p.level}</td>
-              <td className={`${pad} text-neutral-700`}>{p.incumbent}</td>
+            <tr key={p.code} className="hover:bg-[var(--muted)]">
+              <td className={`${pad} font-mono text-xs text-[var(--muted-foreground)]`}>{p.code}</td>
+              <td className={`${pad} font-medium text-[var(--card-foreground)]`}>{p.title}</td>
+              <td className={`${pad} text-[var(--card-foreground)]`}>{p.dept}</td>
+              <td className={`${pad} text-[var(--card-foreground)]`}>{p.level}</td>
+              <td className={`${pad} text-[var(--card-foreground)]`}>{p.incumbent}</td>
               <td className={`${pad} text-right tabular-nums`}>{p.coverage > 0 ? `${p.coverage}%` : "—"}</td>
               <td className={`${pad} text-right tabular-nums`}>{p.gaps || "—"}</td>
               <td className={pad}>
@@ -63,13 +63,13 @@ export default function TablesShowcasePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">Showcase</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">Showcase</p>
         <h1 className="text-3xl font-semibold tracking-tight">Tables — density, sort, filter, pagination</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Positions catalogue with realistic Heuresys content (RTL_BANK_REFERENCE tenant). Demonstrates
           density variants, sort indicators, filter chips, status pills, tabular numerics.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--muted-foreground)]">
           <Link href="/showcase" className="underline">back to index</Link>
         </p>
       </header>
@@ -78,24 +78,24 @@ export default function TablesShowcasePage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-base font-semibold tracking-tight">Regular density</h2>
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-neutral-500">Filters:</span>
+            <span className="text-[var(--muted-foreground)]">Filters:</span>
             <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-blue-900">Status: Open · ×</span>
-            <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2 py-0.5 text-neutral-700">Dept: Risk Mgmt · ×</span>
-            <span className="rounded-full border border-neutral-200 bg-neutral-100 px-2 py-0.5 text-neutral-700">Level: L4+ · ×</span>
-            <button className="rounded border border-neutral-300 px-2 py-0.5 text-neutral-600 hover:bg-neutral-100">+ Add filter</button>
+            <span className="rounded-full border border-[var(--border)] bg-[var(--muted)] px-2 py-0.5 text-[var(--card-foreground)]">Dept: Risk Mgmt · ×</span>
+            <span className="rounded-full border border-[var(--border)] bg-[var(--muted)] px-2 py-0.5 text-[var(--card-foreground)]">Level: L4+ · ×</span>
+            <button className="rounded border border-[var(--border)] px-2 py-0.5 text-[var(--muted-foreground)] hover:bg-[var(--muted)]">+ Add filter</button>
           </div>
         </div>
         <Table density="regular" />
-        <div className="flex items-center justify-between text-xs text-neutral-600">
+        <div className="flex items-center justify-between text-xs text-[var(--muted-foreground)]">
           <span>Showing 1–10 of 1,284 positions</span>
           <div className="flex items-center gap-1">
-            <button className="rounded border border-neutral-300 px-2 py-1 text-neutral-600">‹ Prev</button>
+            <button className="rounded border border-[var(--border)] px-2 py-1 text-[var(--muted-foreground)]">‹ Prev</button>
             <button className="rounded border border-blue-500 bg-blue-50 px-2 py-1 text-blue-900">1</button>
-            <button className="rounded border border-neutral-300 px-2 py-1">2</button>
-            <button className="rounded border border-neutral-300 px-2 py-1">3</button>
-            <span className="text-neutral-400">…</span>
-            <button className="rounded border border-neutral-300 px-2 py-1">129</button>
-            <button className="rounded border border-neutral-300 px-2 py-1">Next ›</button>
+            <button className="rounded border border-[var(--border)] px-2 py-1">2</button>
+            <button className="rounded border border-[var(--border)] px-2 py-1">3</button>
+            <span className="text-[var(--muted-foreground)]">…</span>
+            <button className="rounded border border-[var(--border)] px-2 py-1">129</button>
+            <button className="rounded border border-[var(--border)] px-2 py-1">Next ›</button>
           </div>
         </div>
       </section>

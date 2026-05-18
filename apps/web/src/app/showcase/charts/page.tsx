@@ -158,35 +158,35 @@ export default function ChartsShowcasePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">Showcase</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">Showcase</p>
         <h1 className="text-3xl font-semibold tracking-tight">Charts — Heuresys workforce intelligence</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Native inline SVG charts on real domain data. Bundle-deferred B-tier renderers (React Flow,
           Mermaid) follow once the palette is Accepted. All visuals inherit color from the
           eventual tokens.css.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--muted-foreground)]">
           <Link href="/showcase" className="underline">back to index</Link>
         </p>
       </header>
 
       <section className="space-y-3">
         <h2 className="text-base font-semibold tracking-tight">Skills coverage heatmap — by department</h2>
-        <div className="rounded-xl border border-neutral-200 bg-white p-5"><Heatmap /></div>
+        <div className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5"><Heatmap /></div>
       </section>
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-neutral-200 bg-white p-5">
+        <div className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
           <h3 className="mb-2 text-sm font-semibold tracking-tight">Learning completions — trend YTD</h3>
           <LineChart />
         </div>
-        <div className="rounded-xl border border-neutral-200 bg-white p-5">
+        <div className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
           <h3 className="mb-2 text-sm font-semibold tracking-tight">Position fill rate — by department</h3>
           <BarChart />
         </div>
       </section>
 
-      <section className="rounded-xl border border-neutral-200 bg-white p-5">
+      <section className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
         <h3 className="mb-2 text-sm font-semibold tracking-tight">Skill gap distribution</h3>
         <Donut />
       </section>

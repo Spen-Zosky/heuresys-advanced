@@ -66,14 +66,14 @@ export default function HeaderShowcasePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">UXIX-0002 · Proposed</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">UXIX-0002 · Proposed</p>
         <h1 className="text-3xl font-semibold tracking-tight">Header composition</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Persistent 64px header. Left cluster: hamburger (sidebar launcher) + Heuresys logo (full
           variant) + optional breadcrumb. Right cluster: language switcher (IT/EN), palette 4-box,
           theme toggle, user menu with avatar. Per bundle <code>docs/06_header_specification.md</code>.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--muted-foreground)]">
           <Link href="/showcase" className="underline">back to index</Link>
         </p>
       </header>
@@ -90,9 +90,9 @@ export default function HeaderShowcasePage() {
         <HeaderMock variant="with-breadcrumb" theme="dark" />
       </section>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-5">
+      <section className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5">
         <h2 className="text-base font-semibold tracking-tight">Contract</h2>
-        <ul className="mt-2 space-y-1 text-sm text-neutral-700">
+        <ul className="mt-2 space-y-1 text-sm text-[var(--card-foreground)]">
           <li>Fixed 64px height; never resizes across sidebar collapse</li>
           <li>Left cluster identifies the product; right cluster controls personal state</li>
           <li>Palette + theme switchers are at most 1 click away</li>

@@ -3,10 +3,10 @@ import Link from "next/link";
 export const metadata = { title: "Showcase / Dashboard cards — Heuresys" };
 
 function SimpleKpiCard({ label, value, delta, tone }: { label: string; value: string; delta: string; tone: "positive" | "negative" | "neutral" }) {
-  const toneClass = tone === "positive" ? "text-emerald-700" : tone === "negative" ? "text-red-700" : "text-neutral-600";
+  const toneClass = tone === "positive" ? "text-emerald-700" : tone === "negative" ? "text-red-700" : "text-[var(--muted-foreground)]";
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-5">
-      <p className="text-[11px] uppercase tracking-wider text-neutral-500">{label}</p>
+    <div className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+      <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">{label}</p>
       <p className="mt-1 text-3xl font-semibold tracking-tight tabular-nums">{value}</p>
       <p className={`mt-1 text-xs ${toneClass}`}>{delta}</p>
     </div>
@@ -22,10 +22,10 @@ function SparklineCard({ label, value, delta, points }: { label: string; value: 
   const step = w / (points.length - 1);
   const path = points.map((p, i) => `${i === 0 ? "M" : "L"}${i * step},${h - ((p - min) / range) * h}`).join(" ");
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-5">
+    <div className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[11px] uppercase tracking-wider text-neutral-500">{label}</p>
+          <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">{label}</p>
           <p className="mt-1 text-3xl font-semibold tracking-tight tabular-nums">{value}</p>
           <p className="mt-1 text-xs text-emerald-700">{delta}</p>
         </div>
@@ -39,16 +39,16 @@ function SparklineCard({ label, value, delta, points }: { label: string; value: 
 
 function ProgressCard({ label, value, target, pct }: { label: string; value: string; target: string; pct: number }) {
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-5">
-      <p className="text-[11px] uppercase tracking-wider text-neutral-500">{label}</p>
+    <div className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+      <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">{label}</p>
       <div className="mt-1 flex items-baseline justify-between">
         <p className="text-3xl font-semibold tracking-tight tabular-nums">{value}</p>
-        <p className="text-xs text-neutral-500">of {target}</p>
+        <p className="text-xs text-[var(--muted-foreground)]">of {target}</p>
       </div>
-      <div className="mt-3 h-2 rounded-full bg-neutral-200">
+      <div className="mt-3 h-2 rounded-full bg-[var(--muted)]">
         <div className="h-2 rounded-full bg-blue-600" style={{ width: `${pct}%` }} />
       </div>
-      <p className="mt-1 text-xs text-neutral-600">{pct}% capacity</p>
+      <p className="mt-1 text-xs text-[var(--muted-foreground)]">{pct}% capacity</p>
     </div>
   );
 }
@@ -62,12 +62,12 @@ function MultiStatCard() {
   const total = segments.reduce((a, b) => a + b.value, 0);
   let acc = 0;
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-5">
+    <div className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
       <div className="flex items-baseline justify-between">
-        <p className="text-[11px] uppercase tracking-wider text-neutral-500">Skill records by source</p>
-        <p className="text-xs text-neutral-500 tabular-nums">{total} total</p>
+        <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">Skill records by source</p>
+        <p className="text-xs text-[var(--muted-foreground)] tabular-nums">{total} total</p>
       </div>
-      <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-neutral-200">
+      <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-[var(--muted)]">
         {segments.map((s) => {
           const w = (s.value / total) * 100;
           acc += w;
@@ -81,7 +81,7 @@ function MultiStatCard() {
               <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: s.color }} />
               {s.label}
             </span>
-            <span className="tabular-nums text-neutral-600">{s.value}</span>
+            <span className="tabular-nums text-[var(--muted-foreground)]">{s.value}</span>
           </li>
         ))}
       </ul>
@@ -97,14 +97,14 @@ function ActivityCard() {
     { t: "12:55", text: "Position 'Senior Risk Analyst' opened", tag: "Workforce" },
   ];
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white p-5">
-      <p className="text-[11px] uppercase tracking-wider text-neutral-500">Recent activity</p>
-      <ul className="mt-3 divide-y divide-neutral-100">
+    <div className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
+      <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">Recent activity</p>
+      <ul className="mt-3 divide-y divide-[var(--border)]">
         {items.map((it, i) => (
           <li key={i} className="flex items-start gap-3 py-2 text-sm">
-            <span className="w-12 shrink-0 font-mono text-xs text-neutral-500">{it.t}</span>
-            <span className="flex-1 text-neutral-800">{it.text}</span>
-            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-[10px] font-medium text-neutral-700">{it.tag}</span>
+            <span className="w-12 shrink-0 font-mono text-xs text-[var(--muted-foreground)]">{it.t}</span>
+            <span className="flex-1 text-[var(--card-foreground)]">{it.text}</span>
+            <span className="rounded-full bg-[var(--muted)] px-2 py-0.5 text-[10px] font-medium text-[var(--card-foreground)]">{it.tag}</span>
           </li>
         ))}
       </ul>
@@ -116,13 +116,13 @@ export default function DashboardCardsShowcasePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">Showcase</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">Showcase</p>
         <h1 className="text-3xl font-semibold tracking-tight">Dashboard cards</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           KPI + data card variants on realistic Heuresys workforce content. Card surfaces, radius and
           shadow inherit from <code>tokens.css</code>; values use <code>font-variant-numeric: tabular-nums</code> for KPI alignment.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--muted-foreground)]">
           <Link href="/showcase" className="underline">back to index</Link>
         </p>
       </header>

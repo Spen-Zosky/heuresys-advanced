@@ -25,8 +25,8 @@ const FEATURES = [
 export default function LandingPageShowcase() {
   return (
     <div className="-mx-6 -my-10">
-      <div className="border-b border-neutral-200 bg-white px-6 py-3">
-        <Link href="/showcase" className="text-xs text-neutral-500 underline">← back to showcase index</Link>
+      <div className="border-b border-[var(--border)] bg-[var(--card)] px-6 py-3">
+        <Link href="/showcase" className="text-xs text-[var(--muted-foreground)] underline">← back to showcase index</Link>
       </div>
 
       <div className="bg-neutral-900 text-white">
@@ -40,7 +40,7 @@ export default function LandingPageShowcase() {
           </ul>
           <div className="flex items-center gap-3 text-sm">
             <a href="/login" className="text-neutral-300 hover:text-white">Log in</a>
-            <a href="/showcase" className="rounded-full bg-white px-4 py-1.5 font-medium text-neutral-900">Request demo</a>
+            <a href="/showcase" className="rounded-full bg-[var(--card)] px-4 py-1.5 font-medium text-[var(--card-foreground)]">Request demo</a>
           </div>
         </nav>
 
@@ -60,7 +60,7 @@ export default function LandingPageShowcase() {
               <a href="#demo" className="rounded-full bg-blue-600 px-6 py-3 font-medium hover:bg-blue-700">Request demo</a>
               <a href="#docs" className="rounded-full border border-neutral-700 px-6 py-3 font-medium text-neutral-200 hover:bg-neutral-800">Read the docs</a>
             </div>
-            <div className="mt-8 flex items-center gap-6 text-xs text-neutral-400">
+            <div className="mt-8 flex items-center gap-6 text-xs text-[var(--muted-foreground)]">
               <span>★ 4.8 / 5 — design partners</span>
               <span aria-hidden>·</span>
               <span>23 tenants live</span>
@@ -76,24 +76,24 @@ export default function LandingPageShowcase() {
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-lg bg-neutral-900 p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-neutral-500">Active positions</p>
+                  <p className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">Active positions</p>
                   <p className="mt-1 text-3xl font-semibold tabular-nums text-white">1,284</p>
                   <p className="text-xs text-emerald-400">+12 this week</p>
                 </div>
                 <div className="rounded-lg bg-neutral-900 p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-neutral-500">Skill gaps</p>
+                  <p className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">Skill gaps</p>
                   <p className="mt-1 text-3xl font-semibold tabular-nums text-white">342</p>
                   <p className="text-xs text-emerald-400">−18 vs last month</p>
                 </div>
                 <div className="rounded-lg bg-neutral-900 p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-neutral-500">Learning YTD</p>
+                  <p className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">Learning YTD</p>
                   <p className="mt-1 text-3xl font-semibold tabular-nums text-white">5,917</p>
                   <p className="text-xs text-blue-400">78% of plan</p>
                 </div>
                 <div className="rounded-lg bg-neutral-900 p-3">
-                  <p className="text-[10px] uppercase tracking-wider text-neutral-500">Tenants live</p>
+                  <p className="text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">Tenants live</p>
                   <p className="mt-1 text-3xl font-semibold tabular-nums text-white">23</p>
-                  <p className="text-xs text-neutral-400">+1 this quarter</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">+1 this quarter</p>
                 </div>
               </div>
             </div>
@@ -101,20 +101,20 @@ export default function LandingPageShowcase() {
         </section>
       </div>
 
-      <section className="bg-white">
+      <section className="bg-[var(--card)]">
         <div className="mx-auto max-w-6xl px-6 py-20">
           <p className="text-sm font-semibold uppercase tracking-wider text-blue-600">Why teams pick Heuresys</p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight">A workforce graph that survives reality.</h2>
-          <p className="mt-3 max-w-2xl text-neutral-600">
+          <p className="mt-3 max-w-2xl text-[var(--muted-foreground)]">
             Most HRMS treat employees as the root entity. Heuresys treats <em>positions</em> as the
             root. Reorgs, hiring rounds, succession plans and tenant onboarding stop breaking your
             data model.
           </p>
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2">
             {FEATURES.map((f) => (
-              <article key={f.title} className="rounded-xl border border-neutral-200 bg-neutral-50 p-6">
+              <article key={f.title} className="rounded-xl border border-[var(--border)] bg-[var(--muted)] p-6">
                 <h3 className="text-lg font-semibold tracking-tight">{f.title}</h3>
-                <p className="mt-2 text-sm text-neutral-700">{f.blurb}</p>
+                <p className="mt-2 text-sm text-[var(--card-foreground)]">{f.blurb}</p>
               </article>
             ))}
           </div>
@@ -127,12 +127,12 @@ export default function LandingPageShowcase() {
             <h2 className="text-3xl font-semibold tracking-tight">Ready to see Heuresys on your org?</h2>
             <p className="mt-2 text-blue-100">30-min walkthrough on your seed data. EU-only. No sales call.</p>
           </div>
-          <a href="#" className="rounded-full bg-white px-6 py-3 font-semibold text-blue-700 hover:bg-blue-50">Request demo</a>
+          <a href="#" className="rounded-full bg-[var(--card)] px-6 py-3 font-semibold text-blue-700 hover:bg-blue-50">Request demo</a>
         </div>
       </section>
 
-      <footer className="border-t border-neutral-200 bg-neutral-50">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-6 text-xs text-neutral-600 md:flex-row">
+      <footer className="border-t border-[var(--border)] bg-[var(--muted)]">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-6 py-6 text-xs text-[var(--muted-foreground)] md:flex-row">
           <span>© 2026 Heuresys S.r.l. · heuresys.com</span>
           <span className="flex gap-3">
             <a aria-label="LinkedIn" href="#">in</a>

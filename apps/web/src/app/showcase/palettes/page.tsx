@@ -145,23 +145,23 @@ const PALETTES: Palette[] = [
 function SwatchGroup({ title, items }: { title: string; items: Swatch[] }) {
   return (
     <div>
-      <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+      <h4 className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
         {title}
       </h4>
       <ul className="grid grid-cols-2 gap-2">
         {items.map((s) => (
           <li
             key={s.token}
-            className="flex items-center gap-2 rounded border border-neutral-200 bg-white p-1.5"
+            className="flex items-center gap-2 rounded border border-[var(--border)] bg-[var(--card)] p-1.5"
           >
             <span
               aria-hidden
-              className="inline-block h-8 w-8 shrink-0 rounded border border-neutral-300"
+              className="inline-block h-8 w-8 shrink-0 rounded border border-[var(--border)]"
               style={{ backgroundColor: s.hex }}
             />
             <div className="min-w-0">
-              <p className="truncate text-xs font-medium text-neutral-900">{s.role}</p>
-              <p className="truncate text-[10px] font-mono text-neutral-500">{s.hex}</p>
+              <p className="truncate text-xs font-medium text-[var(--card-foreground)]">{s.role}</p>
+              <p className="truncate text-[10px] font-mono text-[var(--muted-foreground)]">{s.hex}</p>
             </div>
           </li>
         ))}
@@ -172,16 +172,16 @@ function SwatchGroup({ title, items }: { title: string; items: Swatch[] }) {
 
 function PaletteCard({ p }: { p: Palette }) {
   return (
-    <article className="rounded-xl border border-neutral-200 bg-white p-5">
+    <article className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
       <header className="mb-4 flex items-start justify-between gap-3">
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
             Candidate {p.id}
           </p>
           <h3 className="mt-0.5 text-lg font-semibold tracking-tight">{p.name}</h3>
         </div>
       </header>
-      <p className="mb-4 text-sm text-neutral-600">{p.thesis}</p>
+      <p className="mb-4 text-sm text-[var(--muted-foreground)]">{p.thesis}</p>
       <div className="space-y-4">
         <SwatchGroup title="Surface" items={p.surface} />
         <SwatchGroup title="Brand palette (4-box)" items={p.accent} />
@@ -189,7 +189,7 @@ function PaletteCard({ p }: { p: Palette }) {
       </div>
       <div
         aria-label={`Preview ${p.id}`}
-        className="mt-5 rounded-lg border border-neutral-200 p-4"
+        className="mt-5 rounded-lg border border-[var(--border)] p-4"
         style={{
           backgroundColor: p.surface[0]?.hex,
           color: p.surface[1]?.hex,
@@ -223,15 +223,15 @@ export default function PalettesShowcasePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">UXIX-0005 · Proposed · 5 candidates</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">UXIX-0005 · Proposed · 5 candidates</p>
         <h1 className="text-3xl font-semibold tracking-tight">Brand primary palette</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Five palette candidates on identical UI fixtures. Each row has the same data so the only
           variable is color. Product Owner picks; the chosen candidate is captured in{" "}
           <code>D:\ux-design-shared\governance\ADR-0005-brand-primary-palette.md</code> and propagated
           to <code>D:\ux-design-shared\ui\src\styles\tokens.css</code>.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--muted-foreground)]">
           <Link href="/showcase" className="underline">back to index</Link>
         </p>
       </header>
@@ -257,9 +257,9 @@ export default function PalettesShowcasePage() {
         </p>
       </section>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-5">
+      <section className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5">
         <h2 className="text-base font-semibold tracking-tight">How to decide</h2>
-        <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-neutral-700">
+        <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-[var(--card-foreground)]">
           <li>View the 5 cards side-by-side. Surface + Primary action button is the fastest filter — does the brand mood read right?</li>
           <li>Verify contrast on the primary CTA against WCAG AA (4.5:1 minimum for text).</li>
           <li>Test on the Workforce KPI preview — does the value typography retain authority?</li>

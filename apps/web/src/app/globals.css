@@ -1,15 +1,92 @@
 /* apps/web/src/app/globals.css
  *
  * Re-exports the Heuresys design system base CSS (tokens + Tailwind 4
- * primitives). The design-system globals.css already runs
- * `@import "tailwindcss"` and declares `@theme` tokens.
+ * primitives) and seeds initial palette CSS variables so the showcase
+ * renders correctly on first paint (before PaletteProvider hydration).
+ *
+ * The variables are overwritten at runtime by PaletteProvider
+ * (apps/web/src/lib/theme/PaletteProvider.tsx) based on the user's
+ * stored palette + theme choice. Brand decision tie: UXIX-0005.
  */
 
 @import "@heuresys/ui/styles";
 
+:root {
+  /* Surface — Blue Primary, light mode (default) */
+  --background: #FAFBFD;
+  --foreground: #0F1828;
+  --card: #FFFFFF;
+  --card-foreground: #0F1828;
+  --muted: #F1F4F9;
+  --muted-foreground: #475569;
+  --border: #E2E6EE;
+  /* Brand 4-box */
+  --palette-1: #2563EB;
+  --palette-2: #06B6D4;
+  --palette-3: #7C3AED;
+  --palette-4: #F59E0B;
+  /* Semantic */
+  --color-icon-info: #2563EB;
+  --color-icon-success: #16A34A;
+  --color-icon-warning: #F59E0B;
+  --color-icon-danger: #DC2626;
+  /* Logo body + accent (legacy Y-accent treatment, UXIX-0007 candidate D) */
+  --logo-body: #3B82F6;
+  --logo-accent: #A855F7;
+  /* Mode marker for CSS to react */
+  --theme-mode: "light";
+}
+
 html,
 body {
-  background-color: oklch(0.99 0.005 250);
-  color: oklch(0.15 0.02 250);
+  background-color: var(--background);
+  color: var(--foreground);
   min-height: 100%;
+  transition: background-color 240ms ease, color 240ms ease;
+}
+
+/* Reduce motion if the user prefers it (WCAG 2.1) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Showcase-local micro-animations (UXIX-0011 forbids gradients but allows
+   solid-color transitions, opacity fades and transforms). */
+@keyframes hx-card-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hx-card-enter {
+  animation: hx-card-enter 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hx-stagger > * { animation-fill-mode: both; }
+.hx-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.hx-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.hx-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.hx-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.hx-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.hx-stagger > *:nth-child(6) { animation-delay: 300ms; }
+.hx-stagger > *:nth-child(7) { animation-delay: 360ms; }
+.hx-stagger > *:nth-child(8) { animation-delay: 420ms; }
+
+.hx-logo {
+  transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hx-logo:hover { transform: scale(1.03); }
+
+/* Hover lift used on cards. */
+.hx-card-hover {
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+.hx-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }

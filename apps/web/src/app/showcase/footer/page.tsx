@@ -45,15 +45,15 @@ export default function FooterShowcasePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">UXIX-0003 · Proposed</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">UXIX-0003 · Proposed</p>
         <h1 className="text-3xl font-semibold tracking-tight">Footer composition</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Persistent 44px footer. Left: copyright + clickable <code>heuresys.com</code> link + dynamic
           chips (environment, version, tenant, last data refresh). Right: 4 social icons (LinkedIn /
           GitHub / X / Facebook) icon-only with <code>aria-label</code>, <code>target="_blank"</code>,{" "}
           <code>rel="noopener noreferrer"</code>. Per bundle <code>docs/08_footer_specification.md</code>.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--muted-foreground)]">
           <Link href="/showcase" className="underline">back to index</Link>
         </p>
       </header>
@@ -68,17 +68,17 @@ export default function FooterShowcasePage() {
         <FooterMock theme="dark" />
       </section>
 
-      <section className="rounded-lg border border-neutral-200 bg-white p-5">
+      <section className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5">
         <h2 className="text-base font-semibold tracking-tight">Dynamic chip taxonomy</h2>
         <table className="mt-3 w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-xs uppercase tracking-wider text-neutral-500">
+            <tr className="border-b text-left text-xs uppercase tracking-wider text-[var(--muted-foreground)]">
               <th className="pb-2">Chip</th>
               <th className="pb-2">Source</th>
               <th className="pb-2">Refresh</th>
             </tr>
           </thead>
-          <tbody className="divide-y text-neutral-700">
+          <tbody className="divide-y text-[var(--card-foreground)]">
             <tr><td className="py-2 font-mono text-xs">dev / staging / prod</td><td>NODE_ENV / Vercel env</td><td>build-time</td></tr>
             <tr><td className="py-2 font-mono text-xs">v0.3.0-brand-v1</td><td>package.json + git tag</td><td>build-time</td></tr>
             <tr><td className="py-2 font-mono text-xs">tenant: RTL_BANK_REFERENCE</td><td>useTenantContext()</td><td>on tenant switch</td></tr>

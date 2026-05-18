@@ -29,19 +29,19 @@ const SIDEBAR_GROUPS = [
 
 function ShellDemo({ collapsed }: { collapsed: boolean }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-neutral-300 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-sm">
       <div
         className="grid h-[480px]"
         style={{
           gridTemplateRows: "64px 1fr 44px",
         }}
       >
-        <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4">
+        <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--muted)] px-4">
           <div className="flex items-center gap-3">
-            <span aria-hidden className="inline-flex h-7 w-7 items-center justify-center rounded border border-neutral-300 text-xs">≡</span>
+            <span aria-hidden className="inline-flex h-7 w-7 items-center justify-center rounded border border-[var(--border)] text-xs">≡</span>
             <span className="font-semibold tracking-tight">Heuresys</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-neutral-600">
+          <div className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
             <span>IT / EN</span>
             <span aria-hidden>·</span>
             <span>palette</span>
@@ -55,12 +55,12 @@ function ShellDemo({ collapsed }: { collapsed: boolean }) {
           className="grid min-h-0"
           style={{ gridTemplateColumns: collapsed ? "72px 1fr" : "280px 1fr" }}
         >
-          <aside className="min-h-0 overflow-y-auto border-r border-neutral-200 bg-neutral-50">
+          <aside className="min-h-0 overflow-y-auto border-r border-[var(--border)] bg-[var(--muted)]">
             <nav aria-label={`Sidebar ${collapsed ? "collapsed" : "expanded"}`} className="p-2">
               {SIDEBAR_GROUPS.map((g) => (
                 <div key={g.label} className="mb-3">
                   {!collapsed ? (
-                    <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+                    <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
                       {g.label}
                     </p>
                   ) : null}
@@ -68,12 +68,12 @@ function ShellDemo({ collapsed }: { collapsed: boolean }) {
                     {g.items.map((it) => (
                       <li
                         key={it}
-                        className={`flex items-center gap-2 rounded px-2 py-1.5 text-sm text-neutral-700 hover:bg-neutral-200 ${
+                        className={`flex items-center gap-2 rounded px-2 py-1.5 text-sm text-[var(--card-foreground)] hover:bg-[var(--muted)] ${
                           collapsed ? "justify-center" : ""
                         }`}
                         title={collapsed ? it : undefined}
                       >
-                        <span aria-hidden className="inline-block h-4 w-4 rounded bg-neutral-300" />
+                        <span aria-hidden className="inline-block h-4 w-4 rounded bg-[var(--border)]" />
                         {!collapsed ? <span className="truncate">{it}</span> : null}
                       </li>
                     ))}
@@ -86,21 +86,21 @@ function ShellDemo({ collapsed }: { collapsed: boolean }) {
             <h3 className="mb-4 text-lg font-semibold tracking-tight">Workforce dashboard</h3>
             <div className="grid grid-cols-2 gap-3">
               {KPI_FIXTURES.map((k) => (
-                <div key={k.label} className="rounded-lg border border-neutral-200 bg-white p-3">
-                  <p className="text-[11px] uppercase tracking-wider text-neutral-500">{k.label}</p>
+                <div key={k.label} className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3">
+                  <p className="text-[11px] uppercase tracking-wider text-[var(--muted-foreground)]">{k.label}</p>
                   <p className="mt-1 text-2xl font-semibold tracking-tight">{k.value}</p>
-                  <p className="mt-0.5 text-xs text-neutral-600">{k.delta}</p>
+                  <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">{k.delta}</p>
                 </div>
               ))}
             </div>
             <div className="mt-5 space-y-2">
               {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="h-10 rounded bg-neutral-100" />
+                <div key={i} className="h-10 rounded bg-[var(--muted)]" />
               ))}
             </div>
           </main>
         </div>
-        <div className="flex items-center justify-between border-t border-neutral-200 bg-neutral-50 px-4 text-xs text-neutral-600">
+        <div className="flex items-center justify-between border-t border-[var(--border)] bg-[var(--muted)] px-4 text-xs text-[var(--muted-foreground)]">
           <span>© 2026 Heuresys · heuresys.com</span>
           <span className="flex items-center gap-2">
             <span aria-hidden>in</span>
@@ -118,15 +118,15 @@ export default function ShellShowcasePage() {
   return (
     <div className="space-y-8">
       <header className="space-y-2">
-        <p className="text-xs uppercase tracking-wider text-neutral-500">UXIX-0001 · Accepted</p>
+        <p className="text-xs uppercase tracking-wider text-[var(--muted-foreground)]">UXIX-0001 · Accepted</p>
         <h1 className="text-3xl font-semibold tracking-tight">Shell architecture</h1>
-        <p className="max-w-2xl text-sm text-neutral-600">
+        <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Fixed-viewport shell with persistent Header (64px) and Footer (44px), body grid switching between{" "}
           <code>[280px_1fr]</code> (expanded) and <code>[72px_1fr]</code> (collapsed). Header and Footer
           remain immutable across the collapse transition. Sidebar and Main scroll independently within
           the space between Header and Footer.
         </p>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--muted-foreground)]">
           Source of truth:{" "}
           <code>ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/01_dashboard_shell_architecture.md</code>{" "}
           ·{" "}
@@ -148,9 +148,9 @@ export default function ShellShowcasePage() {
         <ShellDemo collapsed={true} />
       </section>
 
-      <section aria-labelledby="contract" className="space-y-2 rounded-lg border border-neutral-200 bg-white p-5">
+      <section aria-labelledby="contract" className="space-y-2 rounded-lg border border-[var(--border)] bg-[var(--card)] p-5">
         <h2 id="contract" className="text-base font-semibold tracking-tight">Contract checklist</h2>
-        <ul className="space-y-1 text-sm text-neutral-700">
+        <ul className="space-y-1 text-sm text-[var(--card-foreground)]">
           <li>✓ Header height fixed at 64px across collapse states</li>
           <li>✓ Footer height fixed at 44px across collapse states</li>
           <li>✓ Body grid columns switch between 280px+1fr and 72px+1fr</li>

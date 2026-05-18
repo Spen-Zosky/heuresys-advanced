@@ -74,7 +74,8 @@ export default function ShowcaseIndexPage() {
         <p className="max-w-2xl text-sm text-neutral-600">
           Candidates and prototypes for the Heuresys brand identity v1. Use this index to navigate to each
           subject area. Decisions are tracked in{" "}
-          <code className="rounded bg-neutral-200 px-1.5 py-0.5 text-xs">docs/design-decisions/DECISION_REGISTER.md</code>.
+          <code className="rounded bg-neutral-200 px-1.5 py-0.5 text-xs">D:\ux-design-shared\governance\DECISION_REGISTER.md</code>{" "}
+          (cross-consumer governance, separate git repo).
         </p>
         <p className="text-xs uppercase tracking-wider text-neutral-500">
           {scaffolded} / {total} scaffolded · Session 1 in progress

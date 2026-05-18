@@ -156,8 +156,8 @@ export default function PalettesShowcasePage() {
         <h1 className="text-3xl font-semibold tracking-tight">Brand primary palette</h1>
         <p className="max-w-2xl text-sm text-neutral-600">
           Two palette candidates on identical UI fixtures. Product Owner picks; the chosen candidate is
-          captured in <code>ADR-0005-brand-primary-palette.md</code> and propagated to{" "}
-          <code>D:\ux-design-shared\ui\src\styles\tokens.css</code>.
+          captured in <code>D:\ux-design-shared\governance\ADR-0005-brand-primary-palette.md</code>{" "}
+          and propagated to <code>D:\ux-design-shared\ui\src\styles\tokens.css</code>.
         </p>
         <p className="text-xs text-neutral-500">
           <Link href="/showcase" className="underline">back to index</Link>

@@ -36,7 +36,7 @@ export default function ShowcaseLayout({ children }: { children: ReactNode }) {
       <footer className="border-t border-neutral-200 bg-white">
         <div className="mx-auto max-w-6xl px-6 py-4 text-xs text-neutral-500">
           Showcase routes are gated by <code>NEXT_PUBLIC_ENABLE_SHOWCASE=1</code> in production builds.
-          Decision register: <code>docs/design-decisions/DECISION_REGISTER.md</code>.
+          Decision register: <code>D:\ux-design-shared\governance\DECISION_REGISTER.md</code>.
         </div>
       </footer>
     </div>

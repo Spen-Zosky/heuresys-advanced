@@ -224,6 +224,7 @@ export interface TableMappingRow {
   target_table: string;
   natural_key_pattern: string | null;
   metadata: Record<string, unknown>;
+  source_table_metadata: Record<string, unknown>;
 }
 
 export async function getWave1Mappings(q: DbConnector): Promise<TableMappingRow[]> {
@@ -236,7 +237,8 @@ export async function getWave1Mappings(q: DbConnector): Promise<TableMappingRow[
             tm.table_mapping_target_schema AS target_schema,
             tm.table_mapping_target_table  AS target_table,
             tm.table_mapping_metadata->>'natural_key_pattern' AS natural_key_pattern,
-            tm.table_mapping_metadata      AS metadata
+            tm.table_mapping_metadata      AS metadata,
+            st.source_table_metadata       AS source_table_metadata
        FROM brownfield.table_mappings tm
        JOIN brownfield.source_tables st
          ON st.source_table_id = tm.table_mapping_source_table_id

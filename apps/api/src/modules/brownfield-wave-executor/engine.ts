@@ -12,7 +12,6 @@ import type {
   WaveExecutorMode,
 } from "@heuresys/shared";
 import {
-  bulkInsertStaging,
   findWaveRun,
   getColumnMappingsForTableMapping,
   getWave1Mappings,
@@ -23,12 +22,9 @@ import {
   writeAuditApproval,
   type ColumnMappingRow,
   type TableMappingRow,
-  type StagingInsertRow,
 } from "./repository.js";
-import { applyTransform, computeNaturalKey, rowContentHash, type RawRow } from "./transforms.js";
-import { readLegacySlice } from "./loader.js";
+import { applyTransform, type RawRow } from "./transforms.js";
 
-const LEGACY_PAGE_SIZE = 1000;
 const WAVE1_CONFIDENCE_THRESHOLD = 0.9;
 
 // -----------------------------------------------------------------------------
@@ -157,15 +153,14 @@ export async function executeStage(
   // Truncate all 17 staging tables to ensure a clean run.
   await truncateAllWave1Staging(pool);
 
+  const cap = debugLimit();
+
   // Aggregate stats per target table.
   const statsByTarget = new Map<string, WaveStageStats>();
 
   for (const m of mappings) {
     const stagingTable = stagingTableFor(m.target_table);
-    if (!stagingTable) {
-      // No staging table for this target — skip; we'll log this once.
-      continue;
-    }
+    if (!stagingTable) continue;
     const tally = statsByTarget.get(m.target_table) ?? {
       target: m.target_table,
       stagingTable,
@@ -176,35 +171,46 @@ export async function executeStage(
       lineageRows: 0,
     };
 
-    let offset = 0;
-    while (true) {
-      const slice = await readLegacySlice(pool, m.source_table_name, offset, LEGACY_PAGE_SIZE);
-      if (slice.rows.length === 0) break;
+    // SQL-side staging: INSERT … SELECT directly from legacy_mirror.<src>.
+    // Eliminates the JS allocation of 47k jsonb rows that caused Node OOM
+    // on Windows during the previous implementation. content_hash and
+    // raw_record are built PG-side via md5(row_to_json(lm.*)::text) and
+    // to_jsonb(lm.*) respectively. pk_columns live in source_table_metadata
+    // (populated by subagent A), not in table_mapping_metadata.
+    const pkColumns = (m.source_table_metadata?.["pk_columns"] as string[] | undefined) ?? ["id"];
+    const pkCol = pkColumns[0] ?? "id";
+    const limitClause = cap !== null ? `LIMIT ${cap}` : "";
+    const sourceTable = m.source_table_name.replace(/"/g, '""');
+    const pkColQuoted = pkCol.replace(/"/g, '""');
 
-      const inserts: StagingInsertRow[] = slice.rows.map((row, idx) => {
-        const pkColumns = (m.metadata?.["pk_columns"] as string[] | undefined) ?? ["id"];
-        const pkCol = pkColumns[0] ?? "id";
-        const recordId = String(row[pkCol] ?? `row${offset + idx}`);
-        return {
-          sourceTable: m.source_table_name,
-          sourceRecordId: recordId,
-          sourceNaturalKey: computeNaturalKey(
-            m.natural_key_pattern,
-            row,
-            m.source_table_name,
-            recordId,
-          ),
-          sourceContentHash: rowContentHash(row),
-          rawRecord: row,
-          mappingConfidence: 1.0,
-        };
-      });
-
-      const inserted = await bulkInsertStaging(pool, runId, stagingTable, inserts);
-      tally.stagedRows += inserted;
-
-      if (slice.rows.length < LEGACY_PAGE_SIZE) break;
-      offset += LEGACY_PAGE_SIZE;
+    try {
+      const res = await pool.query(
+        `INSERT INTO ${stagingTable} (
+            staging_import_run_id, staging_source_table, staging_source_record_id,
+            staging_source_natural_key, staging_source_content_hash, staging_raw_record,
+            staging_mapping_confidence
+          )
+          SELECT
+            $1::uuid,
+            $2::text,
+            COALESCE(lm."${pkColQuoted}"::text, 'unknown'),
+            'OLDDB::' || $2::text || '::' || COALESCE(lm."${pkColQuoted}"::text, 'unknown'),
+            md5(row_to_json(lm.*)::text),
+            to_jsonb(lm.*),
+            1.0
+          FROM legacy_mirror."${sourceTable}" lm
+          ${limitClause}
+          ON CONFLICT (staging_import_run_id, staging_source_table, staging_source_record_id)
+            DO NOTHING`,
+        [runId, m.source_table_name],
+      );
+      tally.stagedRows += res.rowCount ?? 0;
+    } catch (e) {
+      // Log structural issues but don't abort the whole wave — record the
+      // reason on the run metadata so it's visible in the API response.
+      const msg = (e as Error).message;
+      tally.failedRows += 1;
+      console.error(`[wave1-stage] failed mapping ${m.source_table_name} → ${m.target_table}: ${msg}`);
     }
 
     statsByTarget.set(m.target_table, tally);

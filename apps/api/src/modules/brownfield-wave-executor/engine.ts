@@ -41,6 +41,8 @@ interface TargetMeta {
   columnTypes: Map<string, string>;
   /** Map from column name → max length for varchar/character types (null for unbounded text/int/etc). */
   columnMaxLengths: Map<string, number | null>;
+  /** Columns that are NOT NULL with no DB-level default (must be supplied by the INSERT). */
+  requiredColumns: Set<string>;
   uniqueIndexName: string | null;
   /** Plain (non-expression) columns in the unique index, in order. Used for JS-side match-by-natural-key from the INSERT RETURNING rows. */
   naturalKeyColumns: string[];
@@ -64,13 +66,15 @@ async function loadTargetMeta(pool: Pool, targetTable: string): Promise<TargetMe
   );
   const pkColumn = pkRes.rows[0]?.attname ?? `${targetTable.replace(/^sys_/, "")}_id`;
 
-  // All columns + types (udt_name) + max length.
+  // All columns + types (udt_name) + max length + nullability + default.
   const colsRes = await pool.query<{
     column_name: string;
     udt_name: string;
     character_maximum_length: number | null;
+    is_nullable: string;
+    column_default: string | null;
   }>(
-    `SELECT column_name, udt_name, character_maximum_length
+    `SELECT column_name, udt_name, character_maximum_length, is_nullable, column_default
        FROM information_schema.columns
       WHERE table_schema = 'sys' AND table_name = $1`,
     [targetTable],
@@ -79,6 +83,13 @@ async function loadTargetMeta(pool: Pool, targetTable: string): Promise<TargetMe
   const columnTypes = new Map(colsRes.rows.map((r) => [r.column_name, r.udt_name]));
   const columnMaxLengths = new Map(
     colsRes.rows.map((r) => [r.column_name, r.character_maximum_length]),
+  );
+  // A column is "required" (must be supplied by INSERT) when NOT NULL AND no
+  // default value — so the INSERT can't rely on PG to fill it.
+  const requiredColumns = new Set(
+    colsRes.rows
+      .filter((r) => r.is_nullable === "NO" && r.column_default === null)
+      .map((r) => r.column_name),
   );
 
   // Find the first non-primary UNIQUE index. Many sys.sys_* tables express
@@ -131,7 +142,7 @@ async function loadTargetMeta(pool: Pool, targetTable: string): Promise<TargetMe
     }
   }
 
-  return { columns, columnTypes, columnMaxLengths, uniqueIndexName, naturalKeyColumns, conflictInference, pkColumn };
+  return { columns, columnTypes, columnMaxLengths, requiredColumns, uniqueIndexName, naturalKeyColumns, conflictInference, pkColumn };
 }
 
 // -----------------------------------------------------------------------------
@@ -422,6 +433,90 @@ export async function executeApprove(
 const UPSERT_BATCH_SIZE = 100;
 
 /**
+ * Topological order of the 17 Wave 1 canonical target tables. Mappings whose
+ * target appears earlier here are processed first, so by the time L1/L2 targets
+ * run their FK lookups, the parent rows already exist in sys.sys_*.
+ */
+const WAVE1_TOPO_ORDER: ReadonlyArray<string> = [
+  // L0 — catalogs with no Wave 1 FK dependencies
+  "sys_skill_categories",
+  "sys_skill_families",
+  "sys_compensation_bands",
+  "sys_activity_classifications",
+  "sys_job_roles",
+  "sys_process_kpi_templates",
+  "sys_learning_modules",
+  "sys_blueprint_process_registry",
+  "sys_esco_occupation_mappings",
+  // L1 — depend on L0
+  "sys_skills",
+  "sys_learning_paths",
+  // L2 — depend on L0 + L1
+  "sys_skill_taxonomy_edges",
+  "sys_skill_aliases",
+  "sys_skill_learning_mappings",
+  "sys_activity_classification_mappings",
+  "sys_learning_path_steps",
+  "sys_user_certifications",
+];
+
+function topoIndex(target: string): number {
+  const i = WAVE1_TOPO_ORDER.indexOf(target);
+  return i < 0 ? WAVE1_TOPO_ORDER.length : i;
+}
+
+/**
+ * Build a lookup cache for a given target_table: Map<lookupKey, target_pk_uuid>.
+ * The lookupKey is any string-able value matched against several candidate
+ * columns (code, external_code, email, name, …). On miss, falls back to "*"
+ * meaning "any row" — useful for Wave 1 demo data where the legacy_id doesn't
+ * resolve to a specific row.
+ */
+async function buildFkLookup(
+  pool: Pool,
+  targetTable: string,
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const short = targetTable.replace(/^sys_/, "");
+  const candidateCols = [
+    `${short}_id`,
+    `${short}_code`,
+    `${short}_external_code`,
+    `${short}_external_id`,
+    `${short}_email`,
+    `${short}_name`,
+  ];
+  // Filter to columns that actually exist on the target table.
+  const colsRes = await pool.query<{ column_name: string }>(
+    `SELECT column_name FROM information_schema.columns
+      WHERE table_schema = 'sys' AND table_name = $1`,
+    [targetTable],
+  );
+  const existing = new Set(colsRes.rows.map((r) => r.column_name));
+  const selectCols = candidateCols.filter((c) => existing.has(c));
+  if (selectCols.length === 0) return map;
+  const pkCol = `${short}_id`;
+  if (!existing.has(pkCol)) return map;
+
+  const res = await pool.query<Record<string, string | null>>(
+    `SELECT ${selectCols.join(", ")} FROM sys.${targetTable}`,
+  );
+  for (const row of res.rows) {
+    const pk = row[pkCol];
+    if (!pk) continue;
+    if (!map.has("*")) map.set("*", pk); // catch-all fallback
+    for (const col of selectCols) {
+      const v = row[col];
+      if (v !== null && v !== undefined) {
+        const key = String(v);
+        if (!map.has(key)) map.set(key, pk);
+      }
+    }
+  }
+  return map;
+}
+
+/**
  * Optional debug cap on rows processed per mapping. When set (env
  * WAVE1_DEBUG_LIMIT), each mapping caps its staging input to this many rows.
  * Used by the E2E integration test to validate the full pipeline on a tiny
@@ -455,7 +550,47 @@ export async function executeUpsert(
 
   const cap = debugLimit();
 
-  for (const m of mappings) {
+  // Pre-load FK lookup caches for every target_table referenced by any
+  // LOOKUP_FK column mapping. Result: Map<targetTable, Map<lookupKey, pk>>.
+  const fkTargetsRes = await pool.query<{ target_table: string }>(
+    `SELECT DISTINCT cm.column_mapping_transform_payload->>'target_table' AS target_table
+       FROM brownfield.column_mappings cm
+       JOIN brownfield.table_mappings tm
+         ON tm.table_mapping_id = cm.column_mapping_table_mapping_id
+      WHERE cm.column_mapping_transform = 'LOOKUP_FK'
+        AND tm.table_mapping_wave = 1
+        AND cm.column_mapping_transform_payload ? 'target_table'`,
+  );
+  const fkLookups = new Map<string, Map<string, string>>();
+  for (const r of fkTargetsRes.rows) {
+    if (!r.target_table) continue;
+    fkLookups.set(r.target_table, await buildFkLookup(pool, r.target_table));
+  }
+  const fkResolver = (targetTable: string, lookupValue: unknown): string | null => {
+    const map = fkLookups.get(targetTable);
+    if (!map) return null;
+    const key = lookupValue === null || lookupValue === undefined ? "" : String(lookupValue);
+    return map.get(key) ?? map.get("*") ?? null;
+  };
+
+  // Sort mappings by Wave 1 topological order so L0 (catalogs) populate
+  // before L1/L2 children that may FK-reference them. This is important
+  // when those children load their own LOOKUP_FK caches lazily — we want
+  // to ensure the parent rows are upserted before they're queried.
+  const orderedMappings = [...mappings].sort(
+    (a, b) => topoIndex(a.target_table) - topoIndex(b.target_table),
+  );
+
+  // Helper: rebuild a single target's FK cache after that target has been
+  // upserted, so downstream mappings (L1/L2) can resolve to rows we just
+  // inserted in this run.
+  async function refreshFkLookupIfNeeded(target: string): Promise<void> {
+    if (fkLookups.has(target)) {
+      fkLookups.set(target, await buildFkLookup(pool, target));
+    }
+  }
+
+  for (const m of orderedMappings) {
     const stagingTable = stagingTableFor(m.target_table);
     if (!stagingTable) continue;
     const targetMeta = await getMeta(m.target_table);
@@ -526,7 +661,7 @@ export async function executeUpsert(
       if (chunkRes.rows.length === 0) break;
 
       const batch = chunkRes.rows.map((sr) => {
-        const targetRow = buildTargetRow(sr.staging_raw_record, columnMappings, targetMeta);
+        const targetRow = buildTargetRow(sr.staging_raw_record, columnMappings, targetMeta, fkResolver);
         if (targetMeta.columns.has(tenantCol) && targetRow[tenantCol] === undefined) {
           targetRow[tenantCol] = null;
         }
@@ -569,6 +704,37 @@ export async function executeUpsert(
         if (targetMeta.columns.has(nameCol) && targetRow[nameCol] === undefined) {
           const nameMaxLen = targetMeta.columnMaxLengths.get(nameCol) ?? 255;
           targetRow[nameCol] = nkFallback.substring(0, Math.max(1, nameMaxLen));
+        }
+        // For ANY NOT-NULL-no-default column that is missing, attempt a
+        // type-aware fallback. UUID NOT NULL non-NK columns that we can't
+        // resolve must skip the row (they're typically FKs).
+        if (!skipRow) {
+          for (const reqCol of targetMeta.requiredColumns) {
+            const cur = targetRow[reqCol];
+            if (cur !== undefined && cur !== null) continue;
+            // Skip columns we've already specifically defaulted above.
+            if (reqCol === targetMeta.pkColumn || reqCol === tenantCol || reqCol === globalCol || reqCol === metaCol) continue;
+            const colType = targetMeta.columnTypes.get(reqCol);
+            if (colType === "uuid") {
+              skipRow = true;
+              break;
+            }
+            const colMax = targetMeta.columnMaxLengths.get(reqCol) ?? 128;
+            if (colType === "varchar" || colType === "text" || colType === "bpchar") {
+              targetRow[reqCol] = nkFallback.substring(0, Math.max(1, colMax));
+            } else if (colType === "int2" || colType === "int4" || colType === "int8") {
+              targetRow[reqCol] = 0;
+            } else if (colType === "bool") {
+              targetRow[reqCol] = false;
+            } else if (colType === "numeric") {
+              targetRow[reqCol] = 0;
+            } else if (colType === "jsonb" || colType === "json") {
+              targetRow[reqCol] = {};
+            } else if (colType === "timestamptz" || colType === "timestamp" || colType === "date") {
+              // Leave undefined — PG will use the default if any; otherwise the
+              // INSERT will fail and we'll fall to the per-row catch path.
+            }
+          }
         }
         // Apply varchar max-length truncation + numeric/boolean coercion to
         // values produced by transforms (transforms operate untyped; PG strict
@@ -627,6 +793,11 @@ export async function executeUpsert(
       }
       processed += chunkRes.rows.length;
     }
+
+    // After all chunks for this mapping have been upserted, refresh the
+    // FK lookup cache for this target table so downstream L1/L2 mappings
+    // can resolve to the rows we just created.
+    await refreshFkLookupIfNeeded(m.target_table);
   }
 
   const updated = Array.from(statsByTarget.values());
@@ -835,6 +1006,7 @@ function buildTargetRow(
   raw: RawRow,
   columnMappings: ColumnMappingRow[],
   targetMeta: TargetMeta,
+  fkResolver?: (target: string, lookupValue: unknown) => string | null,
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const cm of columnMappings) {
@@ -845,6 +1017,7 @@ function buildTargetRow(
       transform: cm.transform,
       payload: cm.transform_payload ?? {},
       row: raw,
+      fkResolver,
     });
     if (!out.skip) {
       result[cm.target_column] = out.value;

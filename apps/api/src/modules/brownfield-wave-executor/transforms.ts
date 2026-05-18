@@ -39,6 +39,8 @@ export interface TransformInput {
   transform: string | null;
   payload: TransformPayload;
   row: RawRow;
+  /** Resolver for LOOKUP_FK: given target_table + lookup_value → target pk uuid or null. */
+  fkResolver?: (targetTable: string, lookupValue: unknown) => string | null;
 }
 
 export interface TransformOutput {
@@ -125,10 +127,15 @@ export function applyTransform(input: TransformInput): TransformOutput {
       return { skip: false, value: raw };
     case "SYNTHETIC_FLAG":
       return { skip: false, value: true };
-    case "LOOKUP_FK":
-      // Engine resolves FKs in a separate pass (see service.ts). Skip here;
-      // the value will be patched in post-transform.
-      return { skip: true, value: null };
+    case "LOOKUP_FK": {
+      const targetTable = typeof payload.target_table === "string" ? payload.target_table : null;
+      if (!targetTable || !input.fkResolver) {
+        return { skip: true, value: null };
+      }
+      const resolved = input.fkResolver(targetTable, raw);
+      // null → row will likely be skipped at INSERT due to NOT NULL on the FK col.
+      return { skip: false, value: resolved };
+    }
     case "SKIP":
       return { skip: true, value: null };
     default:

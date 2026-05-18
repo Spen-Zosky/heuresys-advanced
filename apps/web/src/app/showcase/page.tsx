@@ -30,6 +30,13 @@ const ROUTES: ShowcaseRoute[] = [
     status: "scaffold",
     decisionId: "UXIX-0006",
   },
+  {
+    href: "/showcase/logo",
+    title: "Logo",
+    blurb: "Three logo candidates (hex node / H ladder / constellation) at full + symbol + collapsed sidebar scales, light + dark surfaces.",
+    status: "scaffold",
+    decisionId: "UXIX-0007",
+  },
   { href: "/showcase/header", title: "Header", blurb: "Composition variants for the persistent top region.", status: "pending", decisionId: "UXIX-0002" },
   { href: "/showcase/sidebar", title: "Sidebar", blurb: "Tree groups open/closed, badges, active route, collapsed icon-only.", status: "pending", decisionId: "UXIX-0004" },
   { href: "/showcase/footer", title: "Footer", blurb: "Copyright + Heuresys.com link + 4 social icon variants.", status: "pending", decisionId: "UXIX-0003" },

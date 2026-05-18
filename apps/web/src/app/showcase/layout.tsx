@@ -26,6 +26,7 @@ export default function ShowcaseLayout({ children }: { children: ReactNode }) {
             <Link href="/showcase/shell" className="hover:underline">Shell</Link>
             <Link href="/showcase/palettes" className="hover:underline">Palettes</Link>
             <Link href="/showcase/typography" className="hover:underline">Typography</Link>
+            <Link href="/showcase/logo" className="hover:underline">Logo</Link>
             <span aria-hidden className="text-neutral-300">|</span>
             <span className="text-neutral-500">v1 · in review</span>
           </nav>

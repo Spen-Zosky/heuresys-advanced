@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Heuresys candidate C — triangle constellation mark">
+  <title>Heuresys candidate C — triangle constellation mark</title>
+  <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="2" opacity="0.4"/>
+  <circle cx="24" cy="12" r="4" fill="currentColor"/>
+  <circle cx="13" cy="32" r="4" fill="currentColor"/>
+  <circle cx="35" cy="32" r="4" fill="currentColor"/>
+  <line x1="24" y1="12" x2="13" y2="32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <line x1="24" y1="12" x2="35" y2="32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="32" x2="35" y2="32" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>

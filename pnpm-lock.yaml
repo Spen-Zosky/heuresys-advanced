@@ -56,6 +56,9 @@ importers:
       pg:
         specifier: 8.13.1
         version: 8.13.1
+      pg-format:
+        specifier: ^1.0.4
+        version: 1.0.4
       zod:
         specifier: 3.25.76
         version: 3.25.76
@@ -69,6 +72,9 @@ importers:
       '@types/pg':
         specifier: 8.11.10
         version: 8.11.10
+      '@types/pg-format':
+        specifier: ^1.0.5
+        version: 1.0.5
       '@types/supertest':
         specifier: 6.0.2
         version: 6.0.2
@@ -1290,6 +1296,9 @@ packages:
   '@types/node@20.17.10':
     resolution: {integrity: sha512-/jrvh5h6NXhEauFFexRin69nA0uHJ5gwk4iDivp/DeoEua3uwCUto6PC86IpRITBOs4+6i2I56K5x5b6WYGXHA==}
 
+  '@types/pg-format@1.0.5':
+    resolution: {integrity: sha512-i+oEEJEC+1I3XAhgqtVp45Faj8MBbV0Aoq4rHsHD7avgLjyDkaWKObd514g0Q/DOUkdxU0P4CQ0iq2KR4SoJcw==}
+
   '@types/pg@8.11.10':
     resolution: {integrity: sha512-LczQUW4dbOQzsH2RQ5qoeJ6qJPdrcM/DcMLoqWQkMLMsq83J5lAX3LXjdkWdpscFy67JSOWDnh7Ny/sPFykmkg==}
 
@@ -1981,6 +1990,10 @@ packages:
 
   pg-connection-string@2.12.0:
     resolution: {integrity: sha512-U7qg+bpswf3Cs5xLzRqbXbQl85ng0mfSV/J0nnA31MCLgvEaAo7CIhmeyrmJpOr7o+zm0rXK+hNnT5l9RHkCkQ==}
+
+  pg-format@1.0.4:
+    resolution: {integrity: sha512-YyKEF78pEA6wwTAqOUaHIN/rWpfzzIuMh9KdAhc3rSLQ/7zkRFcCgYBAEGatDstLyZw4g0s9SNICmaTGnBVeyw==}
+    engines: {node: '>=4.0'}
 
   pg-int8@1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
@@ -3108,6 +3121,8 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
+  '@types/pg-format@1.0.5': {}
+
   '@types/pg@8.11.10':
     dependencies:
       '@types/node': 20.17.10
@@ -3794,6 +3809,8 @@ snapshots:
     optional: true
 
   pg-connection-string@2.12.0: {}
+
+  pg-format@1.0.4: {}
 
   pg-int8@1.0.1: {}
 

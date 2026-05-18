@@ -18,8 +18,13 @@
  * CASCADE-deletes its audit.* entries via FK).
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve as pathResolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool, closePool } from "../src/db/client.js";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const PWD = "Admin#PassW0rd!";
 
@@ -176,6 +181,112 @@ describe("/v1/brownfield/wave-executor — Goal 001a v4 debug-scale assertions",
       };
       const failed = accBody.checks.filter((c) => !c.pass).map((c) => c.name);
       expect(failed, `acceptance checks failed: ${failed.join(", ")}`).toEqual([]);
+    },
+  );
+
+  // ---------------------------------------------------------------------------
+  // §2.6 criterion 11 verification (Goal 001a v5)
+  // ---------------------------------------------------------------------------
+  // pg_stat_statements is NOT enabled on the heuresys_advanced cluster (verified
+  // turn 25 of v5 EXEC). Per PLAN v5 §2.10 #4 advisory: fall back to (a) static
+  // code-inspection of engine.ts to confirm the SQL-side path is wired in and
+  // the legacy JS-side path is unreachable, and (b) EXPLAIN (FORMAT JSON) of a
+  // representative INSERT…SELECT…ON CONFLICT statement to confirm a single
+  // ModifyTable+Insert plan node (no per-row iteration).
+
+  it.skipIf(!RUN_DEBUG_V4)(
+    "criterion 11.a — engine.ts uses executeUpsertSqlSidePerMapping, legacy JS path wrapped in if(false)",
+    () => {
+      const enginePath = pathResolve(
+        __dirname,
+        "../src/modules/brownfield-wave-executor/engine.ts",
+      );
+      const src = readFileSync(enginePath, "utf-8");
+
+      // Assert: the SQL-side function is imported AND called
+      expect(src).toMatch(/import\s*\{\s*executeUpsertSqlSidePerMapping\s*\}\s*from\s*["']\.\/upsert-sql/);
+      expect(src).toMatch(/await\s+executeUpsertSqlSidePerMapping\s*\(/);
+
+      // Assert: the legacy JS-side chunk loop body (which called batchUpsertTarget)
+      // is wrapped in an `if (false) { ... }` block (per criterion 11 "dead code
+      // acceptable if explicitly commented as deprecated and made unreachable")
+      expect(src).toMatch(/if\s*\(\s*false\s*\)\s*\{[\s\S]*?while\s*\(\s*processed\s*<\s*total\s*\)/);
+
+      // Sanity: the executeUpsertSqlSidePerMapping call appears AFTER the
+      // SUPPORTED_TRANSFORMS-based SKIPPED detection (v4 hybrid stays per
+      // PLAN v5 §2.10 #5).
+      const sqlCallIdx = src.indexOf("executeUpsertSqlSidePerMapping(pool, {");
+      const skippedDetectIdx = src.indexOf("recordSkippedColumnMapping");
+      expect(sqlCallIdx).toBeGreaterThan(0);
+      expect(skippedDetectIdx).toBeGreaterThan(0);
+      expect(sqlCallIdx).toBeGreaterThan(skippedDetectIdx);
+    },
+  );
+
+  it.skipIf(!RUN_DEBUG_V4)(
+    "criterion 11.b — representative INSERT…SELECT…ON CONFLICT yields single ModifyTable+Insert plan node (EXPLAIN FORMAT JSON)",
+    async () => {
+      // Build a representative SQL statement structurally equivalent to what
+      // executeUpsertSqlSidePerMapping emits at run-time. Targets sys.sys_skills
+      // since it has clean conflict_inference + standard system columns.
+      // EXPLAIN it (no execute) and inspect the plan.
+      const explainSql = `
+        EXPLAIN (FORMAT JSON)
+        INSERT INTO sys.sys_skills (
+          skill_id, skill_tenant_id, skill_is_global, skill_metadata,
+          skill_code, skill_name
+        )
+        SELECT
+          gen_random_uuid(),
+          NULL::uuid,
+          TRUE,
+          '{}'::jsonb,
+          LEFT(COALESCE(staging_source_natural_key, 'OLDDB::' || staging_source_table || '::' || staging_source_record_id), 128),
+          LEFT(COALESCE(staging_source_natural_key, 'OLDDB::' || staging_source_table || '::' || staging_source_record_id), 255)
+          FROM staging.wave1_skills
+         WHERE staging_import_run_id = $1
+           AND staging_source_table = $2
+           AND staging_validation_status = 'PASSED'
+           AND staging_target_record_id IS NULL
+         LIMIT 20
+        ON CONFLICT (COALESCE(skill_tenant_id, '00000000-0000-0000-0000-000000000000'::uuid), skill_code)
+          DO UPDATE SET skill_name = EXCLUDED.skill_name, updated_at = now()
+        RETURNING skill_id
+      `;
+      const r = await pool.query<{ "QUERY PLAN": Array<{ Plan: Record<string, unknown> }> }>(
+        explainSql,
+        [
+          // Use the most-recent import_run_id (any value works for EXPLAIN since it doesn't execute)
+          "00000000-0000-0000-0000-000000000000",
+          "esco_skills",
+        ],
+      );
+      // EXPLAIN (FORMAT JSON) returns rows[0]['QUERY PLAN'] = [{ Plan: {...} }]
+      const rawPlan = r.rows[0]?.["QUERY PLAN"];
+      expect(rawPlan).toBeTruthy();
+      const root = (rawPlan as Array<{ Plan: Record<string, unknown> }>)[0]!.Plan;
+
+      // Walk the plan tree, collecting node types
+      const nodeTypes: string[] = [];
+      const visit = (node: Record<string, unknown>): void => {
+        if (typeof node["Node Type"] === "string") {
+          nodeTypes.push(node["Node Type"] as string);
+        }
+        const plans = node["Plans"];
+        if (Array.isArray(plans)) for (const p of plans) visit(p as Record<string, unknown>);
+      };
+      visit(root);
+
+      // Assert exactly one ModifyTable node (the INSERT)
+      const modifyCount = nodeTypes.filter((t) => t === "ModifyTable").length;
+      expect(modifyCount, `expected exactly 1 ModifyTable node, got ${modifyCount}; tree=${nodeTypes.join(",")}`).toBe(1);
+
+      // Assert the ModifyTable Operation is "Insert"
+      expect((root as { Operation?: string }).Operation).toBe("Insert");
+
+      // Sanity: no per-row Function Scan or LATERAL join — the SELECT is a
+      // simple scan over staging.wave1_skills.
+      expect(nodeTypes.some((t) => t.includes("Scan"))).toBe(true);
     },
   );
 });

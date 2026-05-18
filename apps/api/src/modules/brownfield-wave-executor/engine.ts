@@ -25,6 +25,7 @@ import {
 } from "./repository.js";
 import { applyTransform, type RawRow } from "./transforms.js";
 import { SUPPORTED_TRANSFORMS } from "./transform-compiler.js";
+import { executeUpsertSqlSidePerMapping } from "./upsert-sql.js";
 
 const WAVE1_CONFIDENCE_THRESHOLD = 0.9;
 
@@ -567,6 +568,11 @@ export async function executeUpsert(
     if (fkLookups.has(targetTable)) return;
     fkLookups.set(targetTable, await buildFkLookup(pool, targetTable));
   }
+  // [v5 criterion 11] FK cache helpers are referenced only by deprecated dead
+  // code in the if(false) block below; emit a no-op reference so TS noUnusedLocals
+  // doesn't flag the declaration. Scheduled for removal in Goal 001b along with
+  // the rest of the JS-side per-row path.
+  void ensureFkLookupLoaded;
   const fkResolver = (targetTable: string, lookupValue: unknown): string | null => {
     const map = fkLookups.get(targetTable);
     if (!map) return null;
@@ -666,51 +672,75 @@ export async function executeUpsert(
       }
     }
 
-    // Lazy-load FK caches: only load tables referenced by THIS mapping's
-    // LOOKUP_FK column mappings. Avoids upfront load of all FK target tables.
-    const fkTargetsForMapping = new Set<string>();
-    for (const cm of columnMappings) {
-      if (cm.transform === "LOOKUP_FK") {
-        const tt = cm.transform_payload?.["target_table"];
-        if (typeof tt === "string") fkTargetsForMapping.add(tt);
-      }
-    }
-    for (const ft of fkTargetsForMapping) {
-      await ensureFkLookupLoaded(ft);
-    }
+    // [DEPRECATED in Goal 001a v5 — replaced by executeUpsertSqlSidePerMapping
+    //  in upsert-sql.ts. The lazy FK-cache loading + chunk loop below was the
+    //  v4 JS-side per-row implementation for mechanical column mappings. The
+    //  v5 SQL-side path uses correlated subqueries for LOOKUP_FK (no JS cache
+    //  needed) and a single INSERT INTO sys.<target> ... SELECT ... ON CONFLICT
+    //  DO UPDATE per mapping (no chunk loop needed). Kept as commented dead
+    //  code per PLAN v5 §2.6 criterion 11 acceptance; scheduled for removal
+    //  in Goal 001b after the JSON_EXTRACT / LINEAGE_SOURCE_NK refactor.]
+    //
+    //   const fkTargetsForMapping = new Set<string>();
+    //   for (const cm of columnMappings) {
+    //     if (cm.transform === "LOOKUP_FK") {
+    //       const tt = cm.transform_payload?.["target_table"];
+    //       if (typeof tt === "string") fkTargetsForMapping.add(tt);
+    //     }
+    //   }
+    //   for (const ft of fkTargetsForMapping) {
+    //     await ensureFkLookupLoaded(ft);
+    //   }
+    //
+    //   const cntRes = await pool.query<{ n: string }>(
+    //     `SELECT count(*)::text AS n FROM ${stagingTable} WHERE ...`,
+    //     [runId, m.source_table_name],
+    //   );
+    //   const totalReady = Number(cntRes.rows[0]?.n ?? 0);
+    //   const total = cap !== null ? Math.min(totalReady, cap) : totalReady;
+    //   if (total === 0) continue;
+    //   if (mode === "DRY_RUN") { tally.upsertedRows += total; continue; }
+    //   while (processed < total) { /* JS-side chunk loop with buildTargetRow,
+    //     batchUpsertTarget, batchWriteLineage, batchMarkStagingUpserted */ }
 
-    // Count rows for this mapping (no payload load).
-    const cntRes = await pool.query<{ n: string }>(
-      `SELECT count(*)::text AS n FROM ${stagingTable}
-        WHERE staging_import_run_id = $1
-          AND staging_source_table  = $2
-          AND staging_validation_status = 'PASSED'
-          AND staging_target_record_id IS NULL`,
-      [runId, m.source_table_name],
-    );
-    const totalReady = Number(cntRes.rows[0]?.n ?? 0);
-    const total = cap !== null ? Math.min(totalReady, cap) : totalReady;
-    if (total === 0) continue;
-
+    // [v5 criterion 11] SQL-side UPSERT path for mechanical mappings.
+    // ≤ 1 INSERT INTO sys.<target> per (mapping × run). SELECT-list from
+    // transform-compiler. WHERE skip filter handles UUID NK + required-UUID
+    // edge cases that the JS-side path handled via per-row skipRow flag.
     const tally = statsByTarget.get(m.target_table)!;
-
-    if (mode === "DRY_RUN") {
-      tally.upsertedRows += total;
-      continue;
+    const sqlResult = await executeUpsertSqlSidePerMapping(pool, {
+      runId,
+      tenantId,
+      mapping: m,
+      columnMappings, // mechanical-only (pre-filtered above via SUPPORTED_TRANSFORMS)
+      targetMeta,
+      stagingTable,
+      mode,
+      cap,
+    });
+    tally.upsertedRows += sqlResult.upsertedRows;
+    tally.lineageRows += sqlResult.lineageRows;
+    if (sqlResult.skipped && sqlResult.skipReason) {
+      console.error(
+        `[wave1-upsert-sql] mapping ${m.table_mapping_id} (source=${m.source_table_name}, target=${m.target_table}) SKIPPED: ${sqlResult.skipReason}`,
+      );
     }
-
-    // Paginated streaming: load one chunk's worth of staging rows at a time
-    // → prepare → upsert → lineage → mark, then loop. Keeps heap small even
-    // with 100k+ staging rows containing pgvector embeddings.
-    const short = m.target_table.replace(/^sys_/, "");
-    const tenantCol = `${short}_tenant_id`;
-    const globalCol = `${short}_is_global`;
-    const metaCol = `${short}_metadata`;
-
-    let processed = 0;
-    const chunkSize = cap !== null
-      ? Math.min(UPSERT_BATCH_SIZE, total)
-      : UPSERT_BATCH_SIZE;
+    // End [v5 criterion 11]. The original JS-side path below stays as
+    // commented dead code, but the `while (processed < total)` loop is now
+    // unreachable: the new function call returns and the outer `for (const m
+    // of orderedMappings)` loop iterates to the next mapping. To avoid
+    // compile errors from the orphan `while` block we wrap it in `if (false)`.
+    // Scheduled for removal in Goal 001b.
+    if (false) {
+      let processed = 0;
+      const total = 0;
+      const chunkSize = cap !== null
+        ? Math.min(UPSERT_BATCH_SIZE, total)
+        : UPSERT_BATCH_SIZE;
+      const short = m.target_table.replace(/^sys_/, "");
+      const tenantCol = `${short}_tenant_id`;
+      const globalCol = `${short}_is_global`;
+      const metaCol = `${short}_metadata`;
     while (processed < total) {
       // Use staging_target_record_id IS NULL as the cursor — each iteration
       // marks rows as upserted (target_record_id set), so the next LIMIT
@@ -858,7 +888,7 @@ export async function executeUpsert(
           targetTable: m.target_table,
           upserted,
         });
-        await batchMarkStagingUpserted(pool, stagingTable, upserted);
+        await batchMarkStagingUpserted(pool, stagingTable!, upserted);
         tally.lineageRows += upserted.length;
         // Append newly-upserted rows to the FK cache (if loaded) so L1/L2
         // children mappings can resolve to them without a re-query.
@@ -877,9 +907,10 @@ export async function executeUpsert(
       }
       processed += chunkRes.rows.length;
     }
+    } // end of if (false) — JS-side per-row UPSERT chunk loop is dead code in v5 criterion 11
 
-    // FK cache is updated incrementally per batch via appendUpsertedToFkCache
-    // — no full reload needed.
+    // [DEPRECATED] FK cache is updated incrementally per batch via appendUpsertedToFkCache
+    // — no full reload needed. (JS-side path; not used by v5 SQL-side path.)
   }
 
   const updated = Array.from(statsByTarget.values());

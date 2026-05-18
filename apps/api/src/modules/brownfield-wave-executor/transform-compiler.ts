@@ -1,0 +1,336 @@
+/**
+ * apps/api/src/modules/brownfield-wave-executor/transform-compiler.ts
+ *
+ * Pure SQL-fragment compiler for `brownfield.column_mappings`. Converts a single
+ * column-mapping row (transform_code + payload + source SQL expression) into a
+ * PG SQL fragment safe for interpolation into an INSERT … SELECT statement.
+ *
+ * Goal 001a v4 scope: supports the 12 mechanical transform codes that appear
+ * with count > 0 in `brownfield.column_mappings`. The 2 non-mechanical codes
+ * (JSON_EXTRACT, LINEAGE_SOURCE_NK) and the 8 vocabulary entries in
+ * transforms.ts that have 0 mappings (CAST_UUID, CAST_DATE, DEFAULT_IF_NULL,
+ * HASH_SHA256, CONTENT_HASH, NATURAL_KEY, CONCAT, REGEX_EXTRACT,
+ * SYNTHETIC_FLAG) throw `UnsupportedTransformError`, which the engine catches
+ * and records as `SKIPPED_UNSUPPORTED_TRANSFORM_V1` in
+ * `audit.import_validation_results` (per PLAN v4 §2.4).
+ *
+ * SQL-injection safety boundary:
+ *   - All payload identifiers (target_table, lookup_col, return_col) are
+ *     escaped via pg-format `%I`.
+ *   - All payload literal values (CONSTANT.value) are escaped via pg-format
+ *     `%L`.
+ *   - `srcExpr` is caller-constructed (engine.ts) and is the trust boundary:
+ *     it must be safely-constructed (e.g., via quote_ident on staging column
+ *     names) before being passed in. The compiler interpolates it directly
+ *     into SQL fragments — passing user-controlled strings here is a security
+ *     bug at the caller.
+ *   - CONSTANT.value also passes through a denylist of timestamp-aware and
+ *     non-deterministic tokens (per idempotency requirement, PLAN v4 §2.8 R8).
+ */
+import format from "pg-format";
+
+// ---------------------------------------------------------------------------
+// Errors
+// ---------------------------------------------------------------------------
+
+export class UnsupportedTransformError extends Error {
+  constructor(
+    public readonly transformCode: string,
+    public readonly mappingId?: string,
+  ) {
+    super(
+      `Transform "${transformCode}" is not supported in Goal 001a` +
+        (mappingId ? ` (mapping_id=${mappingId})` : ""),
+    );
+    this.name = "UnsupportedTransformError";
+  }
+}
+
+export class InvalidConstantPayloadError extends Error {
+  constructor(
+    public readonly value: unknown,
+    public readonly reason: string,
+    public readonly mappingId?: string,
+  ) {
+    super(
+      `Invalid CONSTANT payload value: ${reason}` +
+        (mappingId ? ` (mapping_id=${mappingId})` : ""),
+    );
+    this.name = "InvalidConstantPayloadError";
+  }
+}
+
+export class InvalidLookupFkPayloadError extends Error {
+  constructor(
+    public readonly reason: string,
+    public readonly mappingId?: string,
+  ) {
+    super(
+      `Invalid LOOKUP_FK payload: ${reason}` +
+        (mappingId ? ` (mapping_id=${mappingId})` : ""),
+    );
+    this.name = "InvalidLookupFkPayloadError";
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export interface ColumnMappingInput {
+  /**
+   * Transform code from `brownfield.column_mappings.column_mapping_transform`.
+   * `null` is treated as `DIRECT_COPY` (passthrough).
+   */
+  transformCode: string | null;
+
+  /**
+   * The `transform_payload` JSONB from `brownfield.column_mappings`. May be
+   * `{}` for transforms that don't need configuration.
+   */
+  payload: Record<string, unknown>;
+
+  /**
+   * Pre-constructed SQL expression for the source value. The caller
+   * (engine.ts) is responsible for safe construction — typically via
+   * `quote_ident` on the staging column name, or a jsonb-path extract like
+   * `(staging_raw_record->>'col_name')`. The compiler interpolates this
+   * verbatim into SQL fragments. DO NOT pass user-controlled strings here.
+   */
+  srcExpr: string;
+
+  /**
+   * Target column name in the destination `sys.*` table. Used for error
+   * messages and result tagging only; not interpolated into the SQL fragment
+   * by this compiler (caller wires it into the INSERT column list).
+   */
+  targetColumn: string;
+
+  /**
+   * Optional `brownfield.column_mappings.column_mapping_id` for error context.
+   */
+  mappingId?: string;
+}
+
+export interface SqlFragment {
+  /** The SQL expression to use in the SELECT list of an INSERT … SELECT. */
+  sql: string;
+}
+
+export interface CompileResult {
+  /**
+   * The compiled SQL fragment, or `null` if this column should be omitted
+   * from the SELECT list (SKIP transform).
+   */
+  fragment: SqlFragment | null;
+  /** Pass-through of `input.targetColumn` for caller convenience. */
+  targetColumn: string;
+}
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+/**
+ * Map from `CAST_*` transform code to the PG type to cast to. The whitelist
+ * prevents injection via arbitrary type names.
+ */
+const CAST_TYPE_BY_CODE: Record<string, string> = {
+  CAST_TIMESTAMPTZ: "TIMESTAMPTZ",
+  CAST_INT: "INTEGER",
+  CAST_VARCHAR: "VARCHAR",
+  CAST_BOOLEAN: "BOOLEAN",
+  CAST_NUMERIC: "NUMERIC",
+};
+
+/**
+ * Tokens forbidden in `CONSTANT.value` to maintain run-to-run idempotency
+ * (PLAN v4 §2.8 R8). Any of these substrings (case-insensitive) in the
+ * trimmed value rejects compilation.
+ */
+const FORBIDDEN_CONSTANT_TOKENS: readonly string[] = [
+  "now(",
+  "current_timestamp",
+  "current_date",
+  "current_time",
+  "localtimestamp",
+  "localtime",
+  "clock_timestamp(",
+  "statement_timestamp(",
+  "transaction_timestamp(",
+  "timeofday(",
+  "random()",
+  "gen_random_uuid(",
+  "nextval(",
+  "currval(",
+  "lastval(",
+  "setval(",
+];
+
+/**
+ * Transform codes supported by 001a's compiler — the 12 mechanical codes
+ * from PLAN v4 §1 (plus `null` treated as DIRECT_COPY). Any other code
+ * raises `UnsupportedTransformError`.
+ */
+export const SUPPORTED_TRANSFORMS: ReadonlySet<string | null> = new Set<string | null>([
+  null,
+  "DIRECT_COPY",
+  "CAST_TIMESTAMPTZ",
+  "CAST_INT",
+  "CAST_VARCHAR",
+  "CAST_BOOLEAN",
+  "CAST_NUMERIC",
+  "TRIM",
+  "UPPERCASE",
+  "LOWERCASE",
+  "CONSTANT",
+  "SKIP",
+  "LOOKUP_FK",
+]);
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function assertConstantPayloadValue(v: unknown, mappingId?: string): void {
+  if (v === null || v === undefined) return;
+  const t = typeof v;
+  if (t === "number" || t === "boolean") return;
+  if (t === "string") {
+    const lower = (v as string).trim().toLowerCase();
+    for (const tok of FORBIDDEN_CONSTANT_TOKENS) {
+      if (lower.includes(tok)) {
+        throw new InvalidConstantPayloadError(
+          v,
+          `value contains forbidden token "${tok}" (non-deterministic / time-aware)`,
+          mappingId,
+        );
+      }
+    }
+    return;
+  }
+  if (Array.isArray(v) || (t === "object" && v !== null)) {
+    // JSON literal — `pg-format` `%L` will JSON-stringify and quote safely.
+    return;
+  }
+  throw new InvalidConstantPayloadError(v, `unsupported value type "${t}"`, mappingId);
+}
+
+function assertSrcExpr(srcExpr: string, mappingId?: string): void {
+  if (typeof srcExpr !== "string" || srcExpr.length === 0) {
+    throw new Error(
+      `compileTransform: srcExpr must be a non-empty string` +
+        (mappingId ? ` (mapping_id=${mappingId})` : ""),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
+/**
+ * Compile one column mapping into a SQL fragment.
+ *
+ * @throws UnsupportedTransformError if the transform code is not in
+ *         {@link SUPPORTED_TRANSFORMS}.
+ * @throws InvalidConstantPayloadError if a CONSTANT transform's payload
+ *         contains a forbidden token or unsupported value type.
+ * @throws InvalidLookupFkPayloadError if a LOOKUP_FK transform's payload
+ *         is missing required fields.
+ */
+export function compileTransform(input: ColumnMappingInput): CompileResult {
+  const { transformCode, payload, srcExpr, targetColumn, mappingId } = input;
+
+  assertSrcExpr(srcExpr, mappingId);
+
+  if (!SUPPORTED_TRANSFORMS.has(transformCode)) {
+    throw new UnsupportedTransformError(
+      transformCode ?? "<null-not-routed>",
+      mappingId,
+    );
+  }
+
+  switch (transformCode) {
+    case null:
+    case "DIRECT_COPY":
+      return { fragment: { sql: srcExpr }, targetColumn };
+
+    case "TRIM":
+      return { fragment: { sql: `TRIM(${srcExpr})` }, targetColumn };
+
+    case "UPPERCASE":
+      return { fragment: { sql: `UPPER(${srcExpr})` }, targetColumn };
+
+    case "LOWERCASE":
+      return { fragment: { sql: `LOWER(${srcExpr})` }, targetColumn };
+
+    case "CAST_TIMESTAMPTZ":
+    case "CAST_INT":
+    case "CAST_VARCHAR":
+    case "CAST_BOOLEAN":
+    case "CAST_NUMERIC": {
+      const pgType = CAST_TYPE_BY_CODE[transformCode];
+      // pgType is from internal whitelist, no injection risk
+      return { fragment: { sql: `CAST(${srcExpr} AS ${pgType})` }, targetColumn };
+    }
+
+    case "CONSTANT": {
+      const v = payload?.value;
+      assertConstantPayloadValue(v, mappingId);
+      // %L safely quotes string / number / boolean / null / json
+      const literalSql = format("%L", v ?? null);
+      return { fragment: { sql: literalSql }, targetColumn };
+    }
+
+    case "SKIP":
+      return { fragment: null, targetColumn };
+
+    case "LOOKUP_FK": {
+      const targetTable = payload?.target_table;
+      if (typeof targetTable !== "string" || targetTable.length === 0) {
+        throw new InvalidLookupFkPayloadError(
+          `payload.target_table missing or not a non-empty string`,
+          mappingId,
+        );
+      }
+      const short = targetTable.replace(/^sys_/, "");
+      const returnCol =
+        typeof payload?.return_col === "string" && (payload.return_col as string).length > 0
+          ? (payload.return_col as string)
+          : `${short}_id`;
+      const lookupColPrimary =
+        typeof payload?.lookup_col === "string" && (payload.lookup_col as string).length > 0
+          ? (payload.lookup_col as string)
+          : `${short}_external_id`;
+      // Secondary lookup candidate. The engine's JS-side buildFkLookup
+      // (transforms.ts) tries multiple columns from a candidate list;
+      // here we emit a 2-candidate OR. If a candidate column does not
+      // exist on the target schema, the runtime UPSERT will fail for
+      // that mapping and be caught by the engine's SAVEPOINT mechanism
+      // (logged in audit.import_validation_results as a data-quality
+      // failure rather than crashing the whole wave).
+      const lookupColSecondary =
+        typeof payload?.lookup_col_secondary === "string" &&
+        (payload.lookup_col_secondary as string).length > 0
+          ? (payload.lookup_col_secondary as string)
+          : `${short}_code`;
+      // pg-format %I escapes identifiers; %s interpolates already-safe srcExpr.
+      const sql = format(
+        "(SELECT %I FROM sys.%I WHERE %I = (%s) OR %I = (%s) LIMIT 1)",
+        returnCol,
+        targetTable,
+        lookupColPrimary,
+        srcExpr,
+        lookupColSecondary,
+        srcExpr,
+      );
+      return { fragment: { sql }, targetColumn };
+    }
+
+    default:
+      // Unreachable: SUPPORTED_TRANSFORMS check above blocks any other value.
+      // Re-throw for exhaustive typing.
+      throw new UnsupportedTransformError(transformCode, mappingId);
+  }
+}

@@ -227,6 +227,10 @@
       "types": "./dist/schemas/brownfield-table-mappings.d.ts",
       "default": "./src/schemas/brownfield-table-mappings.ts"
     },
+    "./schemas/brownfield-wave-executor": {
+      "types": "./dist/schemas/brownfield-wave-executor.d.ts",
+      "default": "./src/schemas/brownfield-wave-executor.ts"
+    },
     "./schemas/seed-acquisition-runs": {
       "types": "./dist/schemas/seed-acquisition-runs.d.ts",
       "default": "./src/schemas/seed-acquisition-runs.ts"

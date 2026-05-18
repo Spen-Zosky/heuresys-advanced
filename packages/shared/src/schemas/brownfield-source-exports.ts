@@ -5,7 +5,7 @@
 import { z } from "zod";
 
 export const BROWNFIELD_SOURCE_EXPORT_STATUS_VALUES = [
-  "AVAILABLE", "ARCHIVED", "FAILED", "QUARANTINED",
+  "AVAILABLE", "INGESTED", "ARCHIVED", "CORRUPTED",
 ] as const;
 export const BrownfieldSourceExportStatusSchema = z.enum(BROWNFIELD_SOURCE_EXPORT_STATUS_VALUES);
 export type BrownfieldSourceExportStatus = z.infer<typeof BrownfieldSourceExportStatusSchema>;

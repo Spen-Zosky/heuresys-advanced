@@ -80,6 +80,7 @@ import { organizationUnitKpiTemplatesRoutes } from "./modules/organization-unit-
 import { brownfieldSourceExportsRoutes } from "./modules/brownfield-source-exports/routes.js";
 import { brownfieldImportRunsRoutes } from "./modules/brownfield-import-runs/routes.js";
 import { brownfieldTableMappingsRoutes } from "./modules/brownfield-table-mappings/routes.js";
+import { brownfieldWaveExecutorRoutes } from "./modules/brownfield-wave-executor/routes.js";
 import { seedAcquisitionRunsRoutes } from "./modules/seed-acquisition-runs/routes.js";
 import { seedCandidateRecordsRoutes } from "./modules/seed-candidate-records/routes.js";
 import { seedApprovalDecisionsRoutes } from "./modules/seed-approval-decisions/routes.js";
@@ -255,6 +256,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(brownfieldSourceExportsRoutes, { prefix: "/v1/brownfield-source-exports" });
   await app.register(brownfieldImportRunsRoutes, { prefix: "/v1/brownfield-import-runs" });
   await app.register(brownfieldTableMappingsRoutes, { prefix: "/v1/brownfield-table-mappings" });
+  await app.register(brownfieldWaveExecutorRoutes, { prefix: "/v1/brownfield/wave-executor" });
   await app.register(seedAcquisitionRunsRoutes, { prefix: "/v1/seed-acquisition-runs" });
   await app.register(seedCandidateRecordsRoutes, { prefix: "/v1/seed-candidate-records" });
   await app.register(seedApprovalDecisionsRoutes, { prefix: "/v1/seed-approval-decisions" });

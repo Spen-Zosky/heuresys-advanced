@@ -59,6 +59,7 @@ export * from "./schemas/organization-unit-kpi-templates.js";
 export * from "./schemas/brownfield-source-exports.js";
 export * from "./schemas/brownfield-import-runs.js";
 export * from "./schemas/brownfield-table-mappings.js";
+export * from "./schemas/brownfield-wave-executor.js";
 export * from "./schemas/seed-acquisition-runs.js";
 export * from "./schemas/seed-candidate-records.js";
 export * from "./schemas/seed-approval-decisions.js";

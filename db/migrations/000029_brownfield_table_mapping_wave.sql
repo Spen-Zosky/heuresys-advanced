@@ -21,7 +21,10 @@
 --   - On a DB that has the 93 Wave 1 mappings loaded, this assigns wave=1 to
 --     every APPROVED + IMPORT/TRANSFORM mapping whose source table belongs to
 --     the 7 Wave 1 source domains (ESKAP, SKILGRO, INDOOR, ITLAB, PROGOV,
---     OPOURSKA, H2R — per BROWNFIELD_IMPORT_PLAN.md §3.1).
+--     OPOURSKA, H2R — per BROWNFIELD_IMPORT_PLAN.md §3.1). The domain
+--     classification lives on `brownfield.source_tables.source_table_domain`
+--     (varchar(64)); `source_table_schema` holds the legacy PG schema name
+--     (always 'public' for heuresys_platform) — they are NOT the same column.
 -- =============================================================================
 
 -- 1. Column
@@ -44,6 +47,8 @@ CREATE INDEX IF NOT EXISTS brownfield_table_mappings_wave_idx
   WHERE table_mapping_wave IS NOT NULL;
 
 -- 4. Wave 1 backfill (no-op when brownfield.table_mappings is empty)
+--    Filter on source_table_domain (lexicon classification, varchar(64))
+--    NOT on source_table_schema (legacy PG schema, always 'public').
 --    Source domain list per docs/brownfield/BROWNFIELD_IMPORT_PLAN.md §3.1.
 --    Only touches rows where wave IS NULL → idempotent across reruns.
 UPDATE brownfield.table_mappings tm
@@ -53,7 +58,7 @@ UPDATE brownfield.table_mappings tm
    AND tm.table_mapping_wave IS NULL
    AND tm.table_mapping_approval_status = 'APPROVED'
    AND tm.table_mapping_classification IN ('IMPORT', 'TRANSFORM')
-   AND st.source_table_schema IN (
+   AND st.source_table_domain IN (
      'ESKAP',
      'SKILGRO',
      'INDOOR',

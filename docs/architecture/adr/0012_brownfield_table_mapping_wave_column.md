@@ -34,7 +34,7 @@ Add a dedicated column `table_mapping_wave smallint` to `brownfield.table_mappin
 
 Migration: `db/migrations/000029_brownfield_table_mapping_wave.sql` (idempotent, additive only).
 
-Backfill: a wave‑1 backfill UPDATE is included in the migration, gated on `source_table_schema IN (<Wave 1 domains>)`. It is a no‑op when `brownfield.table_mappings` is empty (current state of the DB; the mapping population is a prerequisite of the executor session, not of this ADR).
+Backfill: a wave‑1 backfill UPDATE is included in the migration, gated on `source_table_domain IN (<Wave 1 domains>)` (the lexicon classification on `brownfield.source_tables`, NOT the SQL schema column which always holds `'public'` for the legacy `heuresys_platform`). It is a no‑op when `brownfield.table_mappings` is empty (current state of the DB; the mapping population is a prerequisite of the executor session, not of this ADR).
 
 ## Alternatives Considered
 

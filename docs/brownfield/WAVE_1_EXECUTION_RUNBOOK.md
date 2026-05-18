@@ -8,7 +8,7 @@ The actual data-transformation lift is documented in `docs/brownfield/BROWNFIELD
 
 `brownfield.table_mappings` carries the wave attribute as a dedicated column `table_mapping_wave smallint` with `CHECK (NULL OR 1..4)` and secondary index on assigned rows. This is symmetric with `brownfield.import_runs.import_run_wave` (migration `000024`). See `docs/architecture/adr/0012_brownfield_table_mapping_wave_column.md`.
 
-Migration `000029_brownfield_table_mapping_wave.sql` ships the column **and** an idempotent Wave 1 backfill UPDATE keyed off `source_table_schema IN ('ESKAP','SKILGRO','INDOOR','ITLAB','PROGOV','OPOURSKA','H2R')`. The UPDATE is a no-op on an empty `brownfield.table_mappings` (current bootstrap state) and self-restricts to rows where `wave IS NULL`, so it can be re-run safely after mapping population without overriding manual assignments.
+Migration `000029_brownfield_table_mapping_wave.sql` ships the column **and** an idempotent Wave 1 backfill UPDATE keyed off `source_table_domain IN ('ESKAP','SKILGRO','INDOOR','ITLAB','PROGOV','OPOURSKA','H2R')`. The lexicon domain lives on `brownfield.source_tables.source_table_domain` (varchar(64)); the separate `source_table_schema` column holds the legacy PostgreSQL schema name (always `'public'` for `heuresys_platform`). The UPDATE is a no-op on an empty `brownfield.table_mappings` (current bootstrap state) and self-restricts to rows where `wave IS NULL`, so it can be re-run safely after mapping population without overriding manual assignments.
 
 The pre-flight scripts (`db/scripts/brownfield-wave-1-preflight.{sh,ps1}`) now scope every check to `table_mapping_wave = 1 AND approval_status = 'APPROVED' AND classification IN ('IMPORT','TRANSFORM')`.
 

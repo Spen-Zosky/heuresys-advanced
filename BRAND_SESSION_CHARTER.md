@@ -91,13 +91,15 @@ End-of-session ritual:
 
 ---
 
-## Live state
+## Live state (Session 1 close, 2026-05-18)
 
 | Field | Value |
 |---|---|
-| Worktree HEAD | `42a7401` (initial — will roll forward as deliverables land) |
-| Last commit (brand lane) | — (this is the genesis commit) |
-| Open ADRs | 0 |
-| Accepted ADRs | 0 |
-| Showcase routes live | 0 / 14 |
-| Phase | 1 (Foundation) |
+| Worktree HEAD | `bda6479` (rolled forward through 6 commits this session) |
+| Brand-lane commits | `120f67b` charter · `391fd0f` register+ADR-0001 · `53c992f` showcase scaffold · `ed8f63e` logo candidates · `bda6479` smoke spec |
+| Open ADRs (Proposed) | 6 — UXIX-0002, 0003, 0004, 0005, 0006, 0007 |
+| Accepted ADRs | 4 — UXIX-0001 (shell), 0008 (icons), 0009 (registries), 0010 (a11y gates). Only UXIX-0001 has an ADR file; 0008/0009/0010 are register-only pending ADR drafts. |
+| Showcase routes scaffolded | 5 / 16 — index, shell, palettes, typography, logo |
+| Showcase routes pending | 11 — header, sidebar, footer, icons, page-types, dashboard-cards, forms, tables, charts, landing-page, login-page, primary-initial-page |
+| Phase | 1 (Foundation) ✅ + 2 (Brand assets candidates) ✅ partial — palette/typography/logo candidates live; tokens.css extension deferred until Acceptance |
+| Verification | Deferred — typecheck + playwright not executed in this lane (no `pnpm install` yet) |

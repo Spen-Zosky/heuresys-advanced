@@ -430,7 +430,7 @@ export async function executeApprove(
 // UPSERT: transform + INSERT into sys.sys_* + write lineage
 // -----------------------------------------------------------------------------
 
-const UPSERT_BATCH_SIZE = 100;
+const UPSERT_BATCH_SIZE = 50;
 
 /**
  * Topological order of the 17 Wave 1 canonical target tables. Mappings whose
@@ -550,21 +550,15 @@ export async function executeUpsert(
 
   const cap = debugLimit();
 
-  // Pre-load FK lookup caches for every target_table referenced by any
-  // LOOKUP_FK column mapping. Result: Map<targetTable, Map<lookupKey, pk>>.
-  const fkTargetsRes = await pool.query<{ target_table: string }>(
-    `SELECT DISTINCT cm.column_mapping_transform_payload->>'target_table' AS target_table
-       FROM brownfield.column_mappings cm
-       JOIN brownfield.table_mappings tm
-         ON tm.table_mapping_id = cm.column_mapping_table_mapping_id
-      WHERE cm.column_mapping_transform = 'LOOKUP_FK'
-        AND tm.table_mapping_wave = 1
-        AND cm.column_mapping_transform_payload ? 'target_table'`,
-  );
+  // FK lookup caches are LAZY-loaded on first reference (when a mapping has
+  // a LOOKUP_FK column pointing at the target). After each mapping's upsert
+  // phase, newly-inserted rows are APPENDED to the cache directly from the
+  // RETURNING result rather than being re-queried — keeps Node heap small
+  // even on full wave 1 (47k rows × 1177 column mappings).
   const fkLookups = new Map<string, Map<string, string>>();
-  for (const r of fkTargetsRes.rows) {
-    if (!r.target_table) continue;
-    fkLookups.set(r.target_table, await buildFkLookup(pool, r.target_table));
+  async function ensureFkLookupLoaded(targetTable: string): Promise<void> {
+    if (fkLookups.has(targetTable)) return;
+    fkLookups.set(targetTable, await buildFkLookup(pool, targetTable));
   }
   const fkResolver = (targetTable: string, lookupValue: unknown): string | null => {
     const map = fkLookups.get(targetTable);
@@ -574,19 +568,21 @@ export async function executeUpsert(
   };
 
   // Sort mappings by Wave 1 topological order so L0 (catalogs) populate
-  // before L1/L2 children that may FK-reference them. This is important
-  // when those children load their own LOOKUP_FK caches lazily — we want
-  // to ensure the parent rows are upserted before they're queried.
+  // before L1/L2 children that may FK-reference them.
   const orderedMappings = [...mappings].sort(
     (a, b) => topoIndex(a.target_table) - topoIndex(b.target_table),
   );
 
-  // Helper: rebuild a single target's FK cache after that target has been
-  // upserted, so downstream mappings (L1/L2) can resolve to rows we just
-  // inserted in this run.
-  async function refreshFkLookupIfNeeded(target: string): Promise<void> {
-    if (fkLookups.has(target)) {
-      fkLookups.set(target, await buildFkLookup(pool, target));
+  // After each batch's upsert returns, append the newly-resolved (key → pk)
+  // pairs to the FK cache for this target table so subsequent L1/L2 mappings
+  // can resolve to them without a re-query.
+  function appendUpsertedToFkCache(target: string, upserted: UpsertedRow[]): void {
+    const cache = fkLookups.get(target);
+    if (!cache) return;
+    for (const u of upserted) {
+      if (u.sourceNaturalKey) cache.set(u.sourceNaturalKey, u.targetId);
+      if (u.sourceRecordId) cache.set(u.sourceRecordId, u.targetId);
+      if (!cache.has("*")) cache.set("*", u.targetId);
     }
   }
 
@@ -597,6 +593,19 @@ export async function executeUpsert(
     if (targetMeta.columns.size === 0) continue;
 
     const columnMappings = await getColumnMappingsForTableMapping(pool, m.table_mapping_id);
+
+    // Lazy-load FK caches: only load tables referenced by THIS mapping's
+    // LOOKUP_FK column mappings. Avoids upfront load of all FK target tables.
+    const fkTargetsForMapping = new Set<string>();
+    for (const cm of columnMappings) {
+      if (cm.transform === "LOOKUP_FK") {
+        const tt = cm.transform_payload?.["target_table"];
+        if (typeof tt === "string") fkTargetsForMapping.add(tt);
+      }
+    }
+    for (const ft of fkTargetsForMapping) {
+      await ensureFkLookupLoaded(ft);
+    }
 
     // Count rows for this mapping (no payload load).
     const cntRes = await pool.query<{ n: string }>(
@@ -779,6 +788,9 @@ export async function executeUpsert(
         });
         await batchMarkStagingUpserted(pool, stagingTable, upserted);
         tally.lineageRows += upserted.length;
+        // Append newly-upserted rows to the FK cache (if loaded) so L1/L2
+        // children mappings can resolve to them without a re-query.
+        appendUpsertedToFkCache(m.target_table, upserted);
       } else {
         // Fail-safe: rows that couldn't be matched stay PASSED-but-unupserted.
         // Mark them as SKIPPED to break the loop and avoid infinite iteration.
@@ -794,10 +806,8 @@ export async function executeUpsert(
       processed += chunkRes.rows.length;
     }
 
-    // After all chunks for this mapping have been upserted, refresh the
-    // FK lookup cache for this target table so downstream L1/L2 mappings
-    // can resolve to the rows we just created.
-    await refreshFkLookupIfNeeded(m.target_table);
+    // FK cache is updated incrementally per batch via appendUpsertedToFkCache
+    // — no full reload needed.
   }
 
   const updated = Array.from(statsByTarget.values());
@@ -974,6 +984,8 @@ async function batchWriteLineage(
           source_lineage_source_content_hash = EXCLUDED.source_lineage_source_content_hash,
           source_lineage_mapping_confidence  = EXCLUDED.source_lineage_mapping_confidence,
           source_lineage_target_record_id    = EXCLUDED.source_lineage_target_record_id,
+          source_lineage_import_run_id       = EXCLUDED.source_lineage_import_run_id,
+          source_lineage_table_mapping_id    = EXCLUDED.source_lineage_table_mapping_id,
           source_lineage_validation_status   = 'VALID'`,
     params,
   );

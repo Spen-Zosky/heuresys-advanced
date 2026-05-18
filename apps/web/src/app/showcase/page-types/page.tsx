@@ -96,7 +96,7 @@ const PAGE_TYPES: PageType[] = [
     description: "Marketing surface. Hero + features + CTA + footer. Brand-led, no shell.",
     sketch: () => (
       <div className="space-y-1.5">
-        <div className="h-6 rounded bg-gradient-to-r from-blue-600 to-purple-600" />
+        <div className="h-6 rounded bg-blue-600" />
         <div className="grid grid-cols-3 gap-1">
           <div className="h-8 rounded bg-neutral-100" />
           <div className="h-8 rounded bg-neutral-100" />

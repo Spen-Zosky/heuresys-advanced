@@ -19,7 +19,7 @@ const ROUTES: ShowcaseRoute[] = [
   {
     href: "/showcase/palettes",
     title: "Palettes",
-    blurb: "Primary brand palette candidates A and B, side-by-side on identical UI fixtures.",
+    blurb: "Five palette candidates side-by-side: Blue Primary, Studio Slate, Choco & Coffee, Cognac & Oatmeal, Onyx & Champagne. No gradients (UXIX-0011 locked).",
     status: "scaffold",
     decisionId: "UXIX-0005",
   },

@@ -49,7 +49,7 @@ export default function PrimaryInitialPageShowcase() {
       </header>
 
       <section className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
-        <div className="flex items-center gap-5 bg-gradient-to-r from-blue-50 to-purple-50 px-8 py-7">
+        <div className="flex items-center gap-5 bg-blue-50 px-8 py-7">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm">
             <LogoCandidateASymbol className="h-10 w-10 text-blue-700" />
           </div>

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "brand-web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@heuresys/web", "dev"],
+      "port": 3000
+    }
+  ]
+}

@@ -70,7 +70,7 @@ export default function LoginPageShowcase() {
           </div>
         </section>
 
-        <aside className="relative hidden flex-col justify-between bg-gradient-to-br from-blue-900 via-blue-700 to-purple-700 px-10 py-12 text-white lg:flex">
+        <aside className="relative hidden flex-col justify-between bg-blue-900 px-10 py-12 text-white lg:flex">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-blue-200">Workforce intelligence</p>
             <h2 className="mt-3 max-w-md text-3xl font-semibold leading-tight tracking-tight">

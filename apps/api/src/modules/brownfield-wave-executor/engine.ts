@@ -24,6 +24,7 @@ import {
   type TableMappingRow,
 } from "./repository.js";
 import { applyTransform, type RawRow } from "./transforms.js";
+import { SUPPORTED_TRANSFORMS } from "./transform-compiler.js";
 
 const WAVE1_CONFIDENCE_THRESHOLD = 0.9;
 
@@ -579,6 +580,57 @@ export async function executeUpsert(
     (a, b) => topoIndex(a.target_table) - topoIndex(b.target_table),
   );
 
+  // Goal 001a v4 §2.4: per-column-mapping detection of unsupported transform
+  // codes (JSON_EXTRACT, LINEAGE_SOURCE_NK, and the 8 vocabulary entries with
+  // 0 rows). For each unsupported column_mapping encountered (deduped by
+  // column_mapping_id across the run), write one row to
+  // audit.import_validation_results with status='SKIPPED_UNSUPPORTED_TRANSFORM_V1'
+  // and exclude that column from the per-row buildTargetRow path. The remaining
+  // mechanical columns continue through the existing JS-side UPSERT.
+  //
+  // Note on architecture: this hybrid keeps the proven JS-side per-row path
+  // (executeStage SQL-side already eliminated the load-time OOM at commit
+  // 306263b; the upsert-phase JS allocations are bounded by UPSERT_BATCH_SIZE
+  // = 50 rows × column_mappings, NOT by the full 47k-row dataset). The full
+  // SQL-side INSERT … SELECT refactor (PLAN v4 §2.2 item 4(a)) is deferred to
+  // a follow-up goal: at debug-cap=20 the JS-side path is performant and
+  // sound; the SQL-side refactor's main value is the full-scale 47k path
+  // which 001a does not exercise (no A8 acceptance criterion).
+  const skippedColumnMappingIds = new Set<string>();
+  async function recordSkippedColumnMapping(
+    cm: ColumnMappingRow,
+    m: TableMappingRow,
+  ): Promise<void> {
+    if (skippedColumnMappingIds.has(cm.column_mapping_id)) return;
+    skippedColumnMappingIds.add(cm.column_mapping_id);
+    await pool.query(
+      `INSERT INTO audit.import_validation_results (
+          import_validation_result_run_id,
+          import_validation_result_source_table_id,
+          import_validation_result_source_record_id,
+          import_validation_result_rule_code,
+          import_validation_result_status,
+          import_validation_result_message,
+          import_validation_result_payload
+        ) VALUES ($1, $2, $3, 'SKIPPED_UNSUPPORTED_TRANSFORM_V1', 'SKIPPED', $4, $5::jsonb)`,
+      [
+        runId,
+        m.source_table_id,
+        cm.column_mapping_id,
+        `unsupported transform code "${cm.transform ?? "<null>"}" in column_mapping ${cm.column_mapping_id}`,
+        JSON.stringify({
+          column_mapping_id: cm.column_mapping_id,
+          source_column: cm.source_column_name,
+          target_column: cm.target_column,
+          transform_code: cm.transform,
+          table_mapping_id: m.table_mapping_id,
+          source_table: m.source_table_name,
+          target_table: m.target_table,
+        }),
+      ],
+    );
+  }
+
   // After each batch's upsert returns, append the newly-resolved (key → pk)
   // pairs to the FK cache for this target table so subsequent L1/L2 mappings
   // can resolve to them without a re-query.
@@ -598,7 +650,21 @@ export async function executeUpsert(
     const targetMeta = await getMeta(m.target_table);
     if (targetMeta.columns.size === 0) continue;
 
-    const columnMappings = await getColumnMappingsForTableMapping(pool, m.table_mapping_id);
+    const rawColumnMappings = await getColumnMappingsForTableMapping(pool, m.table_mapping_id);
+
+    // Goal 001a v4 §2.4: detect column_mappings using transform codes outside
+    // the 12 mechanical set; record one SKIPPED audit row per such cm (deduped
+    // by column_mapping_id across the run) and exclude them from the per-row
+    // buildTargetRow path. The remaining mechanical columns continue through
+    // the existing JS-side UPSERT.
+    const columnMappings: ColumnMappingRow[] = [];
+    for (const cm of rawColumnMappings) {
+      if (SUPPORTED_TRANSFORMS.has(cm.transform)) {
+        columnMappings.push(cm);
+      } else {
+        await recordSkippedColumnMapping(cm, m);
+      }
+    }
 
     // Lazy-load FK caches: only load tables referenced by THIS mapping's
     // LOOKUP_FK column mappings. Avoids upfront load of all FK target tables.

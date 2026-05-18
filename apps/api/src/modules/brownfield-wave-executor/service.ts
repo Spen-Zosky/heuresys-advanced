@@ -27,6 +27,7 @@ import {
 } from "./engine.js";
 import { ensureLegacyMirrorDDL, loadLegacyMirrorData } from "./loader.js";
 import { isTerminal } from "./state.js";
+import { logRunEvent } from "./run-logger.js";
 
 export interface ActorContext {
   userId: string;
@@ -55,12 +56,19 @@ export const brownfieldWaveExecutorService = {
     }
     const mode = body.mode ?? (body.dryRun ? "DRY_RUN" : "EXECUTE");
     const run = await createWaveRun(pool, body.wave, mode, actor.userId);
+    await logRunEvent(pool, {
+      runId: run.runId,
+      level: "INFO",
+      message: "RUN_CREATED",
+      payload: { wave: body.wave, mode, initiated_by: actor.userId },
+    });
 
     // Synchronous orchestration. For long-running waves we accept the
     // request blocking until COMPLETE/FAILED. Tests inject for this.
     try {
       // STAGING phase: ensure legacy_mirror is present + ingested, then stage rows.
       await updateWaveState(pool, run.runId, "STAGING");
+      await logRunEvent(pool, { runId: run.runId, level: "INFO", message: "STATE_STAGING" });
       await ensureLegacyMirrorDDL(pool);
       const legacyCount = await countLegacyMirrorRows(pool);
       if (legacyCount === 0) {
@@ -69,24 +77,69 @@ export const brownfieldWaveExecutorService = {
       }
       const mappings = await loadMappings(pool);
       const stageStats = await executeStage(pool, run.runId, mappings);
+      await logRunEvent(pool, {
+        runId: run.runId,
+        level: "INFO",
+        message: "STAGE_COMPLETE",
+        payload: {
+          mappings: mappings.length,
+          staged_rows_total: stageStats.reduce((s, x) => s + x.stagedRows, 0),
+        },
+      });
 
       // VALIDATING
       await updateWaveState(pool, run.runId, "VALIDATING");
+      await logRunEvent(pool, { runId: run.runId, level: "INFO", message: "STATE_VALIDATING" });
       const validateStats = await executeValidate(pool, run.runId, mappings, stageStats);
+      await logRunEvent(pool, {
+        runId: run.runId,
+        level: "INFO",
+        message: "VALIDATE_COMPLETE",
+        payload: {
+          validated_rows_total: validateStats.reduce((s, x) => s + x.validatedRows, 0),
+          failed_rows_total: validateStats.reduce((s, x) => s + x.failedRows, 0),
+        },
+      });
 
       // APPROVED
       await updateWaveState(pool, run.runId, "APPROVED");
-      await executeApprove(pool, run.runId, mappings, actor.userId);
+      await logRunEvent(pool, { runId: run.runId, level: "INFO", message: "STATE_APPROVED" });
+      const approvalCounts = await executeApprove(pool, run.runId, mappings, actor.userId);
+      await logRunEvent(pool, {
+        runId: run.runId,
+        level: "INFO",
+        message: "APPROVE_COMPLETE",
+        payload: approvalCounts,
+      });
 
       // UPSERTING
       await updateWaveState(pool, run.runId, "UPSERTING");
-      await executeUpsert(pool, run.runId, mappings, validateStats, mode);
+      await logRunEvent(pool, { runId: run.runId, level: "INFO", message: "STATE_UPSERTING" });
+      const upsertStats = await executeUpsert(pool, run.runId, mappings, validateStats, mode);
+      await logRunEvent(pool, {
+        runId: run.runId,
+        level: "INFO",
+        message: "UPSERT_COMPLETE",
+        payload: {
+          upserted_rows_total: upsertStats.reduce((s, x) => s + x.upsertedRows, 0),
+          lineage_rows_total: upsertStats.reduce((s, x) => s + x.lineageRows, 0),
+        },
+      });
 
       // COMPLETE
       await updateWaveState(pool, run.runId, "COMPLETE");
+      await logRunEvent(pool, { runId: run.runId, level: "INFO", message: "STATE_COMPLETE" });
     } catch (e) {
       const msg = (e as Error).message;
+      const errorClass = (e as Error).name ?? "Error";
+      const stackHead = ((e as Error).stack ?? "").split("\n").slice(0, 3).join("\n");
       await updateWaveState(pool, run.runId, "FAILED", msg).catch(() => {});
+      await logRunEvent(pool, {
+        runId: run.runId,
+        level: "ERROR",
+        message: "STATE_FAILED",
+        payload: { error_class: errorClass, message: msg, stack_head: stackHead },
+      }).catch(() => {});
       throw e;
     }
     const final = await findWaveRun(pool, run.runId);

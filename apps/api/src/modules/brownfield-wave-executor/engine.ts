@@ -39,6 +39,8 @@ interface TargetMeta {
   columns: Set<string>;
   /** Map from column name → PG udt_name (e.g. 'uuid', 'varchar', 'int4', 'jsonb'). */
   columnTypes: Map<string, string>;
+  /** Map from column name → max length for varchar/character types (null for unbounded text/int/etc). */
+  columnMaxLengths: Map<string, number | null>;
   uniqueIndexName: string | null;
   /** Plain (non-expression) columns in the unique index, in order. Used for JS-side match-by-natural-key from the INSERT RETURNING rows. */
   naturalKeyColumns: string[];
@@ -62,14 +64,22 @@ async function loadTargetMeta(pool: Pool, targetTable: string): Promise<TargetMe
   );
   const pkColumn = pkRes.rows[0]?.attname ?? `${targetTable.replace(/^sys_/, "")}_id`;
 
-  // All columns + types (udt_name).
-  const colsRes = await pool.query<{ column_name: string; udt_name: string }>(
-    `SELECT column_name, udt_name FROM information_schema.columns
+  // All columns + types (udt_name) + max length.
+  const colsRes = await pool.query<{
+    column_name: string;
+    udt_name: string;
+    character_maximum_length: number | null;
+  }>(
+    `SELECT column_name, udt_name, character_maximum_length
+       FROM information_schema.columns
       WHERE table_schema = 'sys' AND table_name = $1`,
     [targetTable],
   );
   const columns = new Set(colsRes.rows.map((r) => r.column_name));
   const columnTypes = new Map(colsRes.rows.map((r) => [r.column_name, r.udt_name]));
+  const columnMaxLengths = new Map(
+    colsRes.rows.map((r) => [r.column_name, r.character_maximum_length]),
+  );
 
   // Find the first non-primary UNIQUE index. Many sys.sys_* tables express
   // the natural key as a UNIQUE INDEX with expressions (e.g.
@@ -121,7 +131,7 @@ async function loadTargetMeta(pool: Pool, targetTable: string): Promise<TargetMe
     }
   }
 
-  return { columns, columnTypes, uniqueIndexName, naturalKeyColumns, conflictInference, pkColumn };
+  return { columns, columnTypes, columnMaxLengths, uniqueIndexName, naturalKeyColumns, conflictInference, pkColumn };
 }
 
 // -----------------------------------------------------------------------------
@@ -411,6 +421,19 @@ export async function executeApprove(
 
 const UPSERT_BATCH_SIZE = 100;
 
+/**
+ * Optional debug cap on rows processed per mapping. When set (env
+ * WAVE1_DEBUG_LIMIT), each mapping caps its staging input to this many rows.
+ * Used by the E2E integration test to validate the full pipeline on a tiny
+ * sample without waiting on 47k-row workloads.
+ */
+function debugLimit(): number | null {
+  const v = process.env.WAVE1_DEBUG_LIMIT;
+  if (!v) return null;
+  const n = Number.parseInt(v, 10);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 export async function executeUpsert(
   pool: Pool,
   runId: string,
@@ -430,6 +453,8 @@ export async function executeUpsert(
     return m;
   }
 
+  const cap = debugLimit();
+
   for (const m of mappings) {
     const stagingTable = stagingTableFor(m.target_table);
     if (!stagingTable) continue;
@@ -447,7 +472,8 @@ export async function executeUpsert(
           AND staging_target_record_id IS NULL`,
       [runId, m.source_table_name],
     );
-    const total = Number(cntRes.rows[0]?.n ?? 0);
+    const totalReady = Number(cntRes.rows[0]?.n ?? 0);
+    const total = cap !== null ? Math.min(totalReady, cap) : totalReady;
     if (total === 0) continue;
 
     const tally = statsByTarget.get(m.target_table)!;
@@ -466,6 +492,9 @@ export async function executeUpsert(
     const metaCol = `${short}_metadata`;
 
     let processed = 0;
+    const chunkSize = cap !== null
+      ? Math.min(UPSERT_BATCH_SIZE, total)
+      : UPSERT_BATCH_SIZE;
     while (processed < total) {
       // Use staging_target_record_id IS NULL as the cursor — each iteration
       // marks rows as upserted (target_record_id set), so the next LIMIT
@@ -492,7 +521,7 @@ export async function executeUpsert(
             AND staging_target_record_id IS NULL
           ORDER BY staging_row_id
           LIMIT $3`,
-        [runId, m.source_table_name, UPSERT_BATCH_SIZE],
+        [runId, m.source_table_name, chunkSize],
       );
       if (chunkRes.rows.length === 0) break;
 
@@ -526,7 +555,8 @@ export async function executeUpsert(
               skipRow = true;
               break;
             } else {
-              targetRow[nkCol] = nkFallback.substring(0, 128);
+              const maxLen = targetMeta.columnMaxLengths.get(nkCol) ?? 128;
+              targetRow[nkCol] = nkFallback.substring(0, Math.max(1, maxLen));
             }
           } else if (colType === "uuid" && typeof cur === "string" && !UUID_RE.test(cur)) {
             // Existing value isn't a valid uuid → would crash the INSERT.
@@ -537,7 +567,34 @@ export async function executeUpsert(
         // Ensure required "_name" col (frequent NOT NULL on sys.sys_*) has a value.
         const nameCol = `${m.target_table.replace(/^sys_/, "")}_name`;
         if (targetMeta.columns.has(nameCol) && targetRow[nameCol] === undefined) {
-          targetRow[nameCol] = nkFallback.substring(0, 255);
+          const nameMaxLen = targetMeta.columnMaxLengths.get(nameCol) ?? 255;
+          targetRow[nameCol] = nkFallback.substring(0, Math.max(1, nameMaxLen));
+        }
+        // Apply varchar max-length truncation + numeric/boolean coercion to
+        // values produced by transforms (transforms operate untyped; PG strict
+        // typing rejects "12.00" for an int4 column or arbitrary text for a
+        // varchar(32)).
+        for (const [col, val] of Object.entries(targetRow)) {
+          if (val === null || val === undefined) continue;
+          const colType = targetMeta.columnTypes.get(col);
+          if (typeof val === "string") {
+            const maxLen = targetMeta.columnMaxLengths.get(col);
+            if (typeof maxLen === "number" && maxLen > 0 && val.length > maxLen) {
+              targetRow[col] = val.substring(0, maxLen);
+            }
+            if (colType === "int2" || colType === "int4" || colType === "int8") {
+              const n = Number.parseFloat(val);
+              targetRow[col] = Number.isFinite(n) ? Math.trunc(n) : null;
+            } else if (colType === "numeric") {
+              const n = Number.parseFloat(val);
+              targetRow[col] = Number.isFinite(n) ? n : null;
+            } else if (colType === "bool") {
+              const lo = val.trim().toLowerCase();
+              targetRow[col] = lo === "true" || lo === "t" || lo === "1" || lo === "yes";
+            }
+          } else if (typeof val === "number" && (colType === "int2" || colType === "int4" || colType === "int8")) {
+            targetRow[col] = Math.trunc(val);
+          }
         }
         return { staging: sr, targetRow, skipRow };
       }).filter((b) => !b.skipRow)

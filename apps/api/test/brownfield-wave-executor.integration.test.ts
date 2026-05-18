@@ -104,7 +104,11 @@ describe("/v1/brownfield/wave-executor", () => {
     expect([400, 422]).toContain(r.statusCode);
   });
 
-  it.skipIf(!REAL_EXECUTE)("PLATFORM_ADMIN triggers a real EXECUTE wave 1", { timeout: 1_800_000 }, async () => {
+  it.skipIf(!REAL_EXECUTE)("PLATFORM_ADMIN triggers a real EXECUTE wave 1 (debug-capped)", { timeout: 1_800_000 }, async () => {
+    // Cap each mapping to 5 rows so the E2E test stays under 30s. Set
+    // WAVE1_DEBUG_LIMIT explicitly in env if not already set; the engine
+    // reads it inside the request handler.
+    if (!process.env.WAVE1_DEBUG_LIMIT) process.env.WAVE1_DEBUG_LIMIT = "5";
     const r = await suite.app.inject({
       method: "POST", url: "/v1/brownfield/wave-executor/runs",
       headers: {

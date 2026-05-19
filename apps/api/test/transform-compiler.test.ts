@@ -152,7 +152,7 @@ describe("compileTransform — CONSTANT idempotency rejection (R8)", () => {
 });
 
 describe("compileTransform — LOOKUP_FK (Goal 002 Item C: match_on payload)", () => {
-  it("plain column match_on=legacy_tenant_id → WHERE legacy_tenant_id, return_col depluralized to tenancy_id", () => {
+  it("plain column match_on=legacy_tenant_id → WHERE legacy_tenant_id, return_col=tenant_id via PK_OVERRIDES", () => {
     const r = compileTransform(
       baseInput("LOOKUP_FK", { target_table: "sys_tenancies", match_on: "legacy_tenant_id" }),
     );
@@ -160,9 +160,10 @@ describe("compileTransform — LOOKUP_FK (Goal 002 Item C: match_on payload)", (
     const sql = r.fragment!.sql;
     expect(sql).toContain("sys_tenancies");
     expect(sql).toContain("legacy_tenant_id");
-    // Depluralization fix: sys_tenancies → tenancy_id (not tenancies_id)
-    expect(sql).toContain("tenancy_id");
+    // PK_OVERRIDES (hotfix 497ff90): sys_tenancies → tenant_id (actual PK), not depluralized tenancy_id
+    expect(sql).toContain("tenant_id");
     expect(sql).not.toContain("tenancies_id");
+    expect(sql).not.toContain("tenancy_id");
     expect(sql).toContain(`= (${SRC})`);
     expect(sql).toContain("LIMIT 1");
     // No multi-OR clause anymore — secondary convention removed (PLAN §2.2 Item C)

@@ -152,16 +152,17 @@ describe("compileTransform — CONSTANT idempotency rejection (R8)", () => {
 });
 
 describe("compileTransform — LOOKUP_FK (Goal 002 Item C: match_on payload)", () => {
-  it("plain column match_on=legacy_tenant_id → WHERE legacy_tenant_id = (src)", () => {
+  it("plain column match_on=legacy_tenant_id → WHERE legacy_tenant_id, return_col depluralized to tenancy_id", () => {
     const r = compileTransform(
       baseInput("LOOKUP_FK", { target_table: "sys_tenancies", match_on: "legacy_tenant_id" }),
     );
     expect(r.fragment).not.toBeNull();
     const sql = r.fragment!.sql;
-    // pg-format %I leaves safe identifiers unquoted; assertions use bare names
     expect(sql).toContain("sys_tenancies");
     expect(sql).toContain("legacy_tenant_id");
-    expect(sql).toContain("tenancies_id");
+    // Depluralization fix: sys_tenancies → tenancy_id (not tenancies_id)
+    expect(sql).toContain("tenancy_id");
+    expect(sql).not.toContain("tenancies_id");
     expect(sql).toContain(`= (${SRC})`);
     expect(sql).toContain("LIMIT 1");
     // No multi-OR clause anymore — secondary convention removed (PLAN §2.2 Item C)

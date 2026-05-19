@@ -369,10 +369,23 @@ export function compileTransform(input: ColumnMappingInput): CompileResult {
       const matchCol = matched[1]!;
       const matchKey = matched[2]; // undefined for plain-column form
       const short = targetTable.replace(/^sys_/, "");
+      // Depluralize the table-name short form to derive the conventional PK:
+      //   sys_tenancies   → tenancy_id   (was tenancies_id, did not exist)
+      //   sys_skills      → skill_id     ✓ (simple "s" plural)
+      //   sys_users       → user_id      ✓
+      //   sys_learning_modules → learning_module_id ✓
+      //   sys_blueprint_process_registry → blueprint_process_registry_id ✓ (no plural)
+      // Bug uncovered post-Goal-002 Item C activation of the 49 LOOKUP_FK
+      // mappings (was latent in Goal 001a because the codes were SKIPPED).
+      const singular = short.endsWith("ies")
+        ? short.slice(0, -3) + "y"
+        : short.endsWith("s") && !short.endsWith("ss")
+          ? short.slice(0, -1)
+          : short;
       const returnCol =
         typeof payload?.return_col === "string" && (payload.return_col as string).length > 0
           ? (payload.return_col as string)
-          : `${short}_id`;
+          : `${singular}_id`;
       if (!/^[a-z_][a-z0-9_]*$/.test(returnCol)) {
         throw new InvalidLookupFkPayloadError(
           `payload.return_col "${returnCol}" must be a plain column name ` +

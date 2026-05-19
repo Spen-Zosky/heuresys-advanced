@@ -1,0 +1,85 @@
+name: Deploy brand showcase to GitHub Pages
+
+# Triggers:
+# - push to main when showcase-related sources change
+# - manual via workflow_dispatch
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/src/app/showcase/**"
+      - "apps/web/src/lib/theme/**"
+      - "apps/web/src/app/globals.css"
+      - "apps/showcase/**"
+      - "scripts/sync-showcase.sh"
+      - ".github/workflows/showcase.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: showcase-pages
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Two repos must sit side-by-side because the root package.json declares
+      # `"@heuresys/ui": "link:../ux-design-shared/ui"` — pnpm resolves that
+      # relative to the package.json on disk, so the sister repo must exist
+      # at `<workspace>/../ux-design-shared/ui` once both are checked out.
+      - name: Checkout heuresys-advanced
+        uses: actions/checkout@v4
+        with:
+          path: heuresys-advanced
+          fetch-depth: 1
+
+      - name: Checkout ux-design-shared (sister repo, for @heuresys/ui)
+        uses: actions/checkout@v4
+        with:
+          repository: Spen-Zosky/ux-design-shared
+          path: ux-design-shared
+          ref: main
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+          cache-dependency-path: heuresys-advanced/pnpm-lock.yaml
+
+      - name: Install
+        working-directory: heuresys-advanced
+        run: pnpm install --frozen-lockfile
+
+      - name: Build static showcase
+        working-directory: heuresys-advanced
+        run: pnpm --filter @heuresys/showcase build:static
+
+      - name: Verify output
+        run: |
+          ls heuresys-advanced/apps/showcase/out
+          test -f heuresys-advanced/apps/showcase/out/showcase/index.html
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./heuresys-advanced/apps/showcase/out
+          publish_branch: gh-pages
+          force_orphan: true
+          commit_message: |
+            chore(pages): deploy brand showcase
+
+            Source: ${{ github.sha }}
+            Workflow: ${{ github.workflow }}
+            Run: ${{ github.run_id }}

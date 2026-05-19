@@ -1,0 +1,80 @@
+/* apps/showcase/src/app/globals.css
+ *
+ * Mirrors apps/web/src/app/globals.css. CSS-var defaults for Blue Primary
+ * (light) so first paint is correct before PaletteProvider hydrates.
+ * Defines hx-* motion classes used throughout the showcase.
+ *
+ * IMPORTANT: this file is a mirror, not a junction. Any change to the apps/web
+ * counterpart must be reflected here. The sync-showcase.sh script does NOT
+ * copy this file (it sources `@heuresys/ui/styles` which lives in the shared
+ * library, so we keep this thin and stable).
+ */
+
+@import "@heuresys/ui/styles";
+
+:root {
+  --background: #FAFBFD;
+  --foreground: #0F1828;
+  --card: #FFFFFF;
+  --card-foreground: #0F1828;
+  --muted: #F1F4F9;
+  --muted-foreground: #475569;
+  --border: #E2E6EE;
+  --palette-1: #2563EB;
+  --palette-2: #06B6D4;
+  --palette-3: #7C3AED;
+  --palette-4: #F59E0B;
+  --color-icon-info: #2563EB;
+  --color-icon-success: #16A34A;
+  --color-icon-warning: #F59E0B;
+  --color-icon-danger: #DC2626;
+  --logo-body: #3B82F6;
+  --logo-accent: #A855F7;
+  --theme-mode: "light";
+}
+
+html,
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  min-height: 100%;
+  transition: background-color 240ms ease, color 240ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes hx-card-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hx-card-enter { animation: hx-card-enter 320ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.hx-stagger > * { animation-fill-mode: both; }
+.hx-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.hx-stagger > *:nth-child(2) { animation-delay: 60ms; }
+.hx-stagger > *:nth-child(3) { animation-delay: 120ms; }
+.hx-stagger > *:nth-child(4) { animation-delay: 180ms; }
+.hx-stagger > *:nth-child(5) { animation-delay: 240ms; }
+.hx-stagger > *:nth-child(6) { animation-delay: 300ms; }
+.hx-stagger > *:nth-child(7) { animation-delay: 360ms; }
+.hx-stagger > *:nth-child(8) { animation-delay: 420ms; }
+
+.hx-logo { transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1); }
+.hx-logo:hover { transform: scale(1.03); }
+
+.hx-card-hover {
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+.hx-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}

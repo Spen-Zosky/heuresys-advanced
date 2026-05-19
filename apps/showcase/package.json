@@ -1,0 +1,29 @@
+{
+  "name": "@heuresys/showcase",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Heuresys brand identity v1 — static showcase site (GitHub Pages deploy of apps/web /showcase routes)",
+  "scripts": {
+    "sync": "bash ../../scripts/sync-showcase.sh",
+    "build": "bash ../../scripts/sync-showcase.sh && next build",
+    "build:static": "bash ../../scripts/sync-showcase.sh && cross-env STATIC_EXPORT=1 next build",
+    "start": "next start -p 3010",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@heuresys/ui": "link:../../../ux-design-shared/ui",
+    "next": "15.5.16",
+    "react": "19.2.5",
+    "react-dom": "19.2.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.0",
+    "@types/node": "20.17.10",
+    "cross-env": "7.0.3",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "postcss": "8.5.10",
+    "tailwindcss": "4.3.0",
+    "typescript": "5.7.2"
+  }
+}

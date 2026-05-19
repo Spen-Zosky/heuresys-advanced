@@ -24,10 +24,30 @@
     "db:seed": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-reference-bank.ts",
     "db:seed-test-admin": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-test-admin.ts",
     "openapi:generate": "pnpm --filter @heuresys/api run openapi:generate",
-    "i18n:check": "pnpm --filter @heuresys/web run i18n:check"
+    "i18n:check": "pnpm --filter @heuresys/web run i18n:check",
+    "cowork:status": "node scripts/cowork-exchange/status.mjs",
+    "cowork:validate": "node scripts/cowork-exchange/validate-naming.mjs",
+    "cowork:validate:strict": "node scripts/cowork-exchange/validate-naming.mjs --strict",
+    "cowork:new-goal": "node scripts/cowork-exchange/new-goal.mjs",
+    "cowork:install-hooks": "node scripts/cowork-exchange/install-hooks.mjs",
+    "cowork:session-start": "node scripts/cowork-exchange/session-start.mjs",
+    "cowork:session-end": "node scripts/cowork-exchange/session-end.mjs",
+    "cowork:inbox": "node scripts/cowork-exchange/inbox.mjs",
+    "cowork:inbox:rebuild": "node scripts/cowork-exchange/inbox.mjs --rebuild-index",
+    "cowork:notify": "node scripts/cowork-exchange/notify.mjs",
+    "cowork:acquire-lock": "node scripts/cowork-exchange/locks.mjs acquire",
+    "cowork:release-lock": "node scripts/cowork-exchange/locks.mjs release",
+    "cowork:check-locks": "node scripts/cowork-exchange/locks.mjs check",
+    "cowork:apply-pending": "node scripts/cowork-exchange/apply-pending.mjs"
   },
   "dependencies": {
     "@heuresys/ui": "link:../ux-design-shared/ui"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "pnpm": {
+    "overrides": {
+      "vite": "^6.4.2",
+      "postcss": "^8.5.10"
+    }
+  }
 }

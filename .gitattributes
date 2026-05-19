@@ -1,0 +1,77 @@
+# =============================================================================
+# .gitattributes — Heuresys Advanced
+# -----------------------------------------------------------------------------
+# Codified by cowork_code_exchange/README.md v2.2 §-0 R4.
+# Goal: prevent EOL drift between Cowork sandbox (Linux 9p mount, LF native)
+# and CLI Windows working tree (Notepad++/IDE may save CRLF).
+# Normalization happens at commit time so the repository remains LF-canonical
+# while Windows tools can edit comfortably.
+# =============================================================================
+
+# Default: auto-detect text vs binary, normalize text to LF in repo
+* text=auto eol=lf
+
+# Cowork exchange channel — strict LF (Cowork sandbox writes LF; CLI must commit LF)
+cowork_code_exchange/** text eol=lf
+scripts/cowork-exchange/** text eol=lf
+
+# DB migrations — strict LF (cross-platform shell + sh + psql consumption)
+db/migrations/** text eol=lf
+db/scripts/*.sh text eol=lf
+db/scripts/*.sql text eol=lf
+
+# Source code — LF (Node/TS/JSX/etc. tooling expects LF)
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Markdown / docs — LF
+*.md text eol=lf
+*.markdown text eol=lf
+*.txt text eol=lf
+
+# PowerShell — CRLF (Windows-native consumption, encoding-sensitive)
+*.ps1 text eol=crlf
+*.psd1 text eol=crlf
+*.psm1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary artefacts — never normalize
+*.dump binary
+*.pem binary
+*.key binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.xz binary
+*.dll binary
+*.exe binary
+
+# Lock files — text but never modify on checkout (CRLF roundtrip would invalidate hashes)
+pnpm-lock.yaml text eol=lf -text
+package-lock.json text eol=lf -text
+
+# Git diff hints for special files
+*.md diff=markdown
+*.ts diff=typescript
+*.tsx diff=typescript
+*.sql diff=sql
+
+# Export rules: paths excluded from git archive (release tarballs)
+.gitattributes export-ignore
+.gitignore export-ignore
+.github/ export-ignore
+cowork_code_exchange/ export-ignore

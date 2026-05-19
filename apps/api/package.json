@@ -43,10 +43,11 @@
     "@types/pg-format": "^1.0.5",
     "@types/supertest": "6.0.2",
     "drizzle-kit": "0.28.1",
-    "pino": "9",
+    "pino": "^9.14.0",
     "supertest": "7.0.0",
     "tsx": "4.19.2",
     "typescript": "5.7.2",
-    "vitest": "2.1.9"
+    "vite": "6.4.2",
+    "vitest": "4.1.6"
   }
 }

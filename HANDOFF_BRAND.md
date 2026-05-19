@@ -1,299 +1,207 @@
 # Brand Identity v1 — Lane handoff
 
-**heuresys-advanced worktree**: `D:\heuresys-advanced\.claude\worktrees\brand-identity-v1`
-**heuresys-advanced branch**: `claude/brand-identity-v1` off `main`
-**ux-design-shared repo**: `D:\ux-design-shared\` on `main` (separate git repo)
-**Session 2 closed**: 2026-05-19. Neither repo pushed (push requires Enzo's explicit ack per `feedback_full_autonomy.md`).
+**Repo**: `D:\heuresys-advanced` on `main`
+**HEAD at handoff**: `c3ae629`
+**Sister repo**: `D:\ux-design-shared\` on `main` HEAD `3b3192f`
+**Status**: collapse done — single-repo single-branch, plus GitHub Pages static-export pipeline configured. **Neither repo pushed yet.**
 
 ---
 
-## Architecture state
+## Architecture — collapsed
 
-Brand identity v1 runs under **Option 2 split**:
-- Governance (register + ADR) + reusable assets (raw SVG + React wrappers) + design tokens live in `D:\ux-design-shared\`
-- Showcase consumer + lane meta-docs live in the heuresys-advanced brand worktree
+After Session 2 the dual-repo + worktree + junction setup was deemed too
+complex by the user. Phase 1 merged `claude/brand-identity-v1` → `main`
+(merge commit `12ba5af`), removed the brand worktree + branch + junction.
+Phase 2 added `apps/showcase` as a static-export workspace + GHA workflow
+for GitHub Pages deploy.
 
 ```
-D:\ux-design-shared\                                  (separate git repo)
-├── governance/
-│   ├── DECISION_REGISTER.md              live, cross-consumer
-│   └── ADR-0001-shell-architecture-confirm.md
+D:\heuresys-advanced\               (single-repo, on main)
+├── .github/workflows/
+│   └── showcase.yml                 GHA: on push to main, builds apps/showcase
+│                                    and deploys to gh-pages branch
+├── apps/
+│   ├── api/                          Fastify backend (untouched, brownfield lane)
+│   ├── web/                          Next.js app — CANONICAL source of brand work
+│   │   └── src/app/showcase/         17 routes (5 chrome + 12 candidates/library)
+│   │   └── src/lib/theme/            PaletteProvider + 5 palettes × light/dark + switchers
+│   └── showcase/                     NEW static-export workspace
+│       ├── package.json              minimal: next + react + @heuresys/ui + cross-env
+│       ├── next.config.js            STATIC_EXPORT=1 → output: "export",
+│       │                              basePath: /heuresys-advanced
+│       ├── src/app/
+│       │   ├── layout.tsx            HTML shell
+│       │   ├── globals.css           CSS-var defaults + motion classes
+│       │   ├── page.tsx              redirect to /showcase
+│       │   ├── showcase/             ← synced from apps/web by sync-showcase.sh
+│       │   └── lib/theme/            ← synced from apps/web
+│       └── .gitignore                ignores synced + .next + out
+├── scripts/
+│   └── sync-showcase.sh              copies apps/web/{showcase,theme} → apps/showcase/
+└── BRAND_SESSION_CHARTER.md, HANDOFF_BRAND.md   lane meta-docs (in main now)
+
+D:\ux-design-shared\                 (separate git repo on main)
+├── governance/                       DECISION_REGISTER.md + ADR-NNNN-*.md
 └── ui/
-    ├── package.json                      exports: ./brand/candidates, ./assets/brand/*
+    ├── package.json                  exports: ./brand/candidates, ./assets/brand/*
     └── src/
         ├── assets/brand/
         │   ├── candidates/UXIX-0007-logo/    A/B/C/D × {symbol,full} + README
-        │   └── legacy/                        6 evo.heuresys.com SVGs imported 2026-05-19
+        │   └── legacy/                        6 evo.heuresys.com SVGs imported
         ├── components/brand/
         │   └── candidates/                    LogoCandidate{A,B,C,D}.tsx + index
-        └── styles/                            tokens.css (palette/typography pending Acceptance)
-
-D:\heuresys-advanced\.claude\worktrees\brand-identity-v1\
-├── BRAND_SESSION_CHARTER.md
-├── HANDOFF_BRAND.md                      this file
-└── apps/web/
-    ├── public/                            (no brand-candidates mirror — served via @heuresys/ui)
-    ├── src/
-    │   ├── app/
-    │   │   ├── globals.css                CSS-var defaults + motion keyframes + reduce-motion guard
-    │   │   └── showcase/                   17 routes, all dynamic-theme aware
-    │   ├── lib/
-    │   │   └── theme/                      palettes.ts + PaletteProvider + PaletteSwitcher + ThemeToggle
-    │   └── middleware.ts                   /showcase added to PUBLIC_PATHS
-    └── tests/e2e/showcase-smoke.spec.ts    Playwright spec (file only, exec deferred)
+        └── styles/                            tokens.css (palette/typography pending)
 ```
 
-## Cross-worktree bridge (one-time setup, persistent)
+The `@heuresys/ui` package in `D:\ux-design-shared` is referenced from the
+root `package.json` via `"@heuresys/ui": "link:../ux-design-shared/ui"`,
+which resolves to `D:\ux-design-shared\ui` (the two repos live side-by-side
+on `D:\`). pnpm install creates a symlink `node_modules/@heuresys/ui` →
+`D:\ux-design-shared\ui` for the workspace.
 
-The `link:../ux-design-shared/ui` protocol in root `package.json` resolves relative to package.json location, so nested worktrees would resolve to a non-existent path. A Windows directory junction bridges this:
-
-```
-D:\heuresys-advanced\.claude\worktrees\ux-design-shared  →  D:\ux-design-shared
-```
-
-Verified intact at handoff via `Get-Item ... | LinkType: Junction`. If lost (e.g. worktrees folder wiped), recreate:
-
-```powershell
-New-Item -ItemType Junction `
-  -Path  "D:\heuresys-advanced\.claude\worktrees\ux-design-shared" `
-  -Target "D:\ux-design-shared"
-```
+The GHA workflow handles the same on Ubuntu by checking out both repos as
+sibling directories before pnpm install. **Requirement**: `ux-design-shared`
+repo must be publicly readable OR the workflow must use a PAT — see the
+push checklist below.
 
 ---
 
-## Sessions shipped
-
-### Session 1 (2026-05-18) — 9 commits on brand lane + 2 commits on ux-design-shared
-
-`120f67b` charter
-`391fd0f` decision register + ADR-0001 (Accepted)
-`53c992f` showcase scaffold (index + shell + palettes + typography)
-`ed8f63e` UXIX-0007 logo candidates A/B/C + /showcase/logo
-`bda6479` showcase-smoke Playwright spec (file only)
-`08ffc4d` Session 1 handoff
-`78d2503` Option 2 migration outbound
-`9029880` junction documentation
-`53a983d` middleware fix → /showcase public
-
-ux-design-shared: `a683939` governance + UXIX-0007 inbound · `1d6ce79` Exo 2 stack + UXIX-0011/0012
-
-### Session 2 (2026-05-19) — 3 commits on brand lane + 2 commits on ux-design-shared
-
-`11c393f` complete showcase scaffold (12 new routes, 16/16 live)
-`f6998a7` 5-palette + UXIX-0011 no-gradient rule + 3 gradient removals
-`68c0cc2` dynamic theme + palette system + CSS-var bulk refactor + motion + Candidate D wired
-
-ux-design-shared: `3b3192f` legacy SVG archive + Candidate D Y-accent
-
-### Current HEADs at handoff
-
-| Repo | HEAD | Branch |
-|------|------|--------|
-| heuresys-advanced brand lane | `68c0cc2` | `claude/brand-identity-v1` |
-| ux-design-shared | `3b3192f` | `main` (ahead origin/main by 3 commits) |
-
-Neither repo pushed.
-
----
-
-## Decisions snapshot
+## Decisions snapshot (unchanged by collapse)
 
 | ID | Title | Status | Notes |
 |----|-------|--------|-------|
-| UXIX-0001 | Dashboard shell architecture | **Accepted** | ADR file written |
-| UXIX-0002 | Header mandatory composition | Proposed | 2 variants in /showcase/header |
-| UXIX-0003 | Footer composition | Proposed | light + dark in /showcase/footer |
-| UXIX-0004 | Sidebar collapse + tree state | Proposed | expanded + collapsed in /showcase/sidebar |
-| UXIX-0005 | Brand primary palette | Proposed | **5 candidates** A=Blue Primary / B=Studio Slate / C=Choco & Coffee / D=Cognac & Oatmeal / E=Onyx & Champagne |
-| UXIX-0006 | Brand typography | Proposed | 2 candidates A=Exo 2 / B=Inter+Plex Mono |
-| UXIX-0007 | Heuresys logo system | Proposed | **4 candidates** A=Hex node / B=H ladder / C=Constellation / D=Y-accent (legacy port) |
-| UXIX-0008 | Status icon mapping | Accepted | ADR pending |
-| UXIX-0009 | Module + page registries | Accepted | ADR pending |
-| UXIX-0010 | A11y + quality gates | Accepted | ADR pending |
-| UXIX-0011 | No-gradient rule | **Accepted** | ADR pending; rule banner in /showcase/palettes |
-| UXIX-0012 | Logo wordmark font stack (Exo 2) | **Accepted** | ADR pending |
-
-## Showcase routes
-
-**16 / 16 scaffolded · all routes live**. All routes dynamic-theme aware (consume CSS vars driven by `PaletteProvider`):
-
-Chrome decisions with candidates: `/showcase/shell` · `/header` · `/sidebar` · `/footer`
-Brand decisions with candidates: `/showcase/palettes` · `/typography` · `/logo`
-Visual library: `/showcase/icons` · `/dashboard-cards` · `/forms` · `/tables` · `/charts`
-Page-type prototypes: `/showcase/page-types` · `/landing-page` · `/login-page` · `/primary-initial-page`
-
-## Dynamic theme + palette system (live verified)
-
-- 5 palettes × 2 modes (light/dark) typed in `apps/web/src/lib/theme/palettes.ts`
-- `PaletteProvider` reads/writes localStorage (`heuresys.brand.palette`, `heuresys.brand.theme`)
-- `<PaletteSwitcher />` (5 swatches) + `<ThemeToggle />` (sun/moon pill) in `/showcase` nav
-- `applyPalette(id, mode)` writes ~18 CSS custom properties on `:root` + toggles `.dark` class on `<html>`
-- 17 showcase pages bulk-refactored to consume CSS vars (Tailwind `bg-[var(--card)]` etc.)
-- Smooth 240ms transitions on `html, body` color properties
-
-Verified via DOM eval at Session 2 close:
-```
-default        → palette=blue,  mode=light, --bg=#FAFBFD, --p1=#2563EB
-click swatch 3 → palette=choco, mode=light, --bg=#FAF6F1, --p1=#3E2723
-click theme    → palette=choco, mode=dark,  --bg=#1F1410, --fg=#E5DBD0, .dark class added
-```
-
-## Motion (CSS-first, framer-motion deferred per restraint ethos)
-
-| Class | Effect |
-|-------|--------|
-| `hx-card-enter` | fade + translateY(8→0) in 320ms cubic-bezier(0.16, 1, 0.3, 1) |
-| `hx-card-hover` | translateY(-2px) + shadow on hover, 200ms |
-| `hx-stagger > *:nth-child(N)` | stagger entrance 60ms × N (up to 8 children) |
-| `hx-logo` | scale(1.03) on hover, 280ms ease-out |
-| PaletteSwitcher swatch | hover scale 1.10 + ring on active |
-| ThemeToggle knob | translateX 200ms between 2px / 22px |
-
-`@media (prefers-reduced-motion: reduce)` global guard caps all animations/transitions to 0.01ms.
+| UXIX-0001 | Shell architecture | **Accepted** | ADR file at `D:\ux-design-shared\governance\` |
+| UXIX-0002 | Header composition | Proposed | candidates in `/showcase/header` |
+| UXIX-0003 | Footer composition | Proposed | `/showcase/footer` |
+| UXIX-0004 | Sidebar collapse + tree state | Proposed | `/showcase/sidebar` |
+| UXIX-0005 | Brand primary palette | Proposed | **5 candidates** A=Blue / B=Slate / C=Choco / D=Cognac / E=Onyx in `/showcase/palettes` |
+| UXIX-0006 | Brand typography | Proposed | A=Exo 2 / B=Inter |
+| UXIX-0007 | Logo system | Proposed | **4 candidates** A=Hex / B=H-ladder / C=Constellation / D=Y-accent (legacy) |
+| UXIX-0008..0010 | Icons / registries / a11y | Accepted | ADRs pending |
+| UXIX-0011 | No-gradient rule | **Accepted** | ADR pending |
+| UXIX-0012 | Logo wordmark Exo 2 | **Accepted** | ADR pending |
 
 ---
 
-## Resume protocol — fresh session
+## Push + GitHub Pages setup — 5 steps once
 
-### Step 0 — orient
-
-Open Claude Code (or any shell) and run:
-
-```bash
-# Confirm both repos are intact and HEADs match this handoff
-git -C D:/heuresys-advanced/.claude/worktrees/brand-identity-v1 log --oneline -5
-# Expected top: 68c0cc2 feat(brand): dynamic theme + palette system, CSS-var refactor, motion, Candidate D wired
-
-git -C D:/ux-design-shared log --oneline -3
-# Expected top: 3b3192f feat(brand): UXIX-0007 Candidate D (Y-accent legacy port) + legacy SVG archive
-
-# Confirm junction bridge intact
-powershell -Command "Get-Item D:\heuresys-advanced\.claude\worktrees\ux-design-shared | Select LinkType, Target"
-# Expected: LinkType=Junction, Target=D:\ux-design-shared
-```
-
-If junction is gone (e.g. worktree folder rebuilt):
+### Step 1 — push ux-design-shared (sister repo, must be reachable by GHA)
 
 ```powershell
-New-Item -ItemType Junction `
-  -Path  "D:\heuresys-advanced\.claude\worktrees\ux-design-shared" `
-  -Target "D:\ux-design-shared"
-```
-
-### Step 1 — start dev server
-
-Two options.
-
-**Option A** — via Claude Code's `Claude_Preview` MCP (recommended if you're in Claude Code):
-
-`.claude/launch.json` is already configured at `D:\heuresys-advanced\.claude\worktrees\musing-wing-802781\.claude\launch.json` with:
-
-```json
-{
-  "configurations": [{
-    "name": "brand-web",
-    "runtimeExecutable": "pnpm",
-    "runtimeArgs": ["--dir", "D:/heuresys-advanced/.claude/worktrees/brand-identity-v1/apps/web", "exec", "next", "dev"],
-    "autoPort": true
-  }]
-}
-```
-
-Ask Claude to `preview_start("brand-web")`. It picks a free port (autoPort) since `:3000` is held by a stale Next.js process from 2026-05-17 (PID 19736 — not killed; can be terminated manually if you want `:3000` back).
-
-**Option B** — direct pnpm:
-
-```bash
-cd D:/heuresys-advanced/.claude/worktrees/brand-identity-v1/apps/web
-pnpm dev
-# defaults to :3000 if free, otherwise -p <other>
-# Or override the hardcoded port in package.json by overriding script args:
-#   pnpm exec next dev -p 3001
-```
-
-Either way the showcase is gated by `NEXT_PUBLIC_ENABLE_SHOWCASE=1` OR `NODE_ENV !== "production"`. `pnpm dev` sets NODE_ENV=development automatically, so no env tweak needed.
-
-### Step 2 — interact in your browser
-
-Open the URL printed by the dev server. Visit `/showcase` (no auth needed — middleware allows the path public).
-
-The header has:
-- 5-swatch `PaletteSwitcher` → click to switch palette (Blue / Slate / Choco / Cognac / Onyx)
-- Sun/moon `ThemeToggle` → click to toggle light / dark
-
-Both persist in localStorage. Every showcase page reacts.
-
-### Step 3 — make a decision in chat
-
-In Claude, say e.g.:
-
-- *"Scelgo Cognac & Oatmeal per UXIX-0005, in modalità light"* — Claude will mark `Accepted` in `D:\ux-design-shared\governance\DECISION_REGISTER.md`, write `ADR-0005-brand-primary-palette.md`, promote the chosen palette into `D:\ux-design-shared\ui\src\styles\tokens.css`, and commit both repos.
-- *"Per UXIX-0007 scelgo Candidate D (Y-accent legacy port)"* — promote D's React + raw SVG from `candidates/` to canonical `ui/src/components/brand/HeuresysLogo.tsx` + `ui/src/assets/brand/logo/`. Non-chosen candidates stay in `candidates/` per Register Rule 1.
-- *"Modifica Cognac & Oatmeal: rendi il primary leggermente più scuro per migliorare il contrast WCAG"* — Claude iterates the candidate in place, you re-verify in browser, then accept.
-
-### Step 4 — verify automatically
-
-Before marking any decision `Accepted`, run the smoke test:
-
-```bash
-cd D:/heuresys-advanced/.claude/worktrees/brand-identity-v1/apps/web
-pnpm exec playwright test showcase-smoke.spec.ts
-```
-
-(Must pass: zero critical a11y violations on the 5 scaffolded routes + console error free.)
-
-### Step 5 — push when ready
-
-Neither repo has been pushed. When the brand v1 work is mature (e.g. after picking palette/typography/logo), push explicitly:
-
-```bash
-# heuresys-advanced
-git -C D:/heuresys-advanced/.claude/worktrees/brand-identity-v1 push -u origin claude/brand-identity-v1
-
-# ux-design-shared (separate repo, own remote)
 git -C D:/ux-design-shared push origin main
 ```
 
-If the brand lane should be merged back to `main` of heuresys-advanced, open a PR from `claude/brand-identity-v1` once green.
+The GHA workflow checks out this repo at runtime to resolve `@heuresys/ui`.
+Visibility must be either:
+- **Public** (no token needed; GITHUB_TOKEN works out of the box), OR
+- **Private** + you create a Personal Access Token with `repo` scope and
+  store it as a repo secret `UX_DESIGN_SHARED_TOKEN`, then add `token:
+  ${{ secrets.UX_DESIGN_SHARED_TOKEN }}` to the relevant checkout step in
+  `.github/workflows/showcase.yml`.
+
+Check current visibility:
+```powershell
+gh repo view Spen-Zosky/ux-design-shared --json visibility
+```
+
+If `private` and you don't want a PAT, make it public:
+```powershell
+gh repo edit Spen-Zosky/ux-design-shared --visibility public --accept-visibility-change-consequences
+```
+
+### Step 2 — push heuresys-advanced main
+
+```powershell
+git -C D:/heuresys-advanced push origin main
+```
+
+This pushes 14 commits (13 brand + 1 showcase pipeline). Triggers the GHA
+workflow because `apps/showcase/**` is in the path-filter.
+
+### Step 3 — enable GitHub Pages source
+
+Once the workflow runs the first time (~2-3 min), it creates the `gh-pages`
+branch. Then:
+
+1. Go to https://github.com/Spen-Zosky/heuresys-advanced/settings/pages
+2. **Source**: "Deploy from a branch"
+3. **Branch**: `gh-pages` / `/ (root)`
+4. Save
+
+### Step 4 — verify the URL
+
+After 2-3 more minutes, the showcase is live at:
+
+```
+https://spen-zosky.github.io/heuresys-advanced/showcase
+```
+
+Open in Chrome. The 5-swatch palette switcher + sun/moon theme toggle
+work via client-side localStorage (no server needed). All 16 showcase
+routes accessible.
+
+### Step 5 — verify the workflow
+
+Future pushes to main that touch `apps/web/src/app/showcase/**`,
+`apps/web/src/lib/theme/**`, `apps/showcase/**`, `scripts/sync-showcase.sh`,
+or the workflow itself will auto-redeploy. Check runs at:
+
+```
+https://github.com/Spen-Zosky/heuresys-advanced/actions/workflows/showcase.yml
+```
 
 ---
 
-## What's still open
+## Working on brand from now on
 
-Decisions awaiting Product Owner pick (in priority order):
+```powershell
+cd D:\heuresys-advanced
+```
 
-1. **UXIX-0005 Palette** — 5 candidates live; visible in browser via the header switcher.
-2. **UXIX-0006 Typography** — 2 candidates in `/showcase/typography` (Exo 2 vs Inter+Plex Mono). Note: Exo 2 webfont not loaded yet (no `@font-face` / `next/font`); pages currently render via fallback. Loading the webfont is a Session-3 follow-on once UXIX-0006 is `Accepted`.
-3. **UXIX-0007 Logo** — 4 candidates in `/showcase/logo`. Candidate D (Y-accent legacy port) adapts to active palette via `--logo-body` + `--logo-accent` CSS vars set by `PaletteProvider`.
-4. **UXIX-0002 / 0003 / 0004** — header / footer / sidebar variants. Lower priority — these inherit the palette/typography choices, so wait until 0005/0006 lock in.
+That's it. No worktree, no junction, no `-C` flag. You're on `main`. All
+brand work lives in `apps/web/src/app/showcase/` and `apps/web/src/lib/theme/`.
 
-ADRs `pending` (Accepted register rows that lack ADR files):
-UXIX-0008 (icons), 0009 (registries), 0010 (a11y), 0011 (no-gradient), 0012 (logo font).
+To iterate locally (fast dev cycle):
 
-Other deferred items:
-- Promote `tokens.css` from defaults in `globals.css` to the canonical `D:\ux-design-shared\ui\src\styles\tokens.css` once UXIX-0005 / 0006 are Accepted.
-- Promote chosen logo from `candidates/` to `ui/src/components/brand/HeuresysLogo.tsx` + canonical SVG slots, and generate derivative variants (horizontal/monochrome/light/dark) + favicon set.
-- Port shell components (DashboardShell/Header/Sidebar/Footer/TopTabs) from bundle `code_examples/` into `D:\ux-design-shared\ui\src\components\dashboard\` so they're consumable by `apps/web` (Session 3, Phase 3 of bundle backlog).
-- Wire `apps/web/src/app/(authenticated)/layout.tsx` to use the new `<DashboardShell />` from `@heuresys/ui` once available.
-- Webfont loading for Exo 2 in `apps/web` via `next/font` (Session 3).
+```powershell
+cd apps\web
+pnpm dev
+# open http://localhost:3000/showcase
+```
+
+To preview the static export locally (what GH Pages will serve):
+
+```powershell
+pnpm --filter @heuresys/showcase build:static
+npx serve apps\showcase\out  # or any static file server on apps/showcase/out/
+```
+
+To make a decision: in chat, say e.g. *"Per UXIX-0005 scelgo Cognac &
+Oatmeal"*. Claude marks Accepted in `D:\ux-design-shared\governance\
+DECISION_REGISTER.md`, writes the corresponding ADR, propagates tokens.css,
+commits both repos.
 
 ---
 
-## Sealed boundaries — unchanged
+## Open items / next session priorities
 
-This lane does NOT touch:
-- `apps/api/**` (heuresys-advanced backend)
+1. **UXIX-0005 palette pick** — 5 candidates ready
+2. **UXIX-0006 typography pick** — 2 candidates ready
+3. **UXIX-0007 logo pick** — 4 candidates including legacy Y-accent port
+4. **Token promotion** — chosen palette/typography into `D:\ux-design-shared\ui\src\styles\tokens.css`
+5. **ADR-0008..0012 drafts** — 5 Accepted register rows still need their ADR files
+6. **Logo promotion** — chosen candidate from `candidates/` to canonical `HeuresysLogo`/`HeuresysMark` + favicon set
+7. **Exo 2 webfont** — wire via `next/font` (currently falls back to system-ui)
+8. **Shell components port** — DashboardShell/Header/Sidebar/Footer/TopTabs from bundle `code_examples/` into `@heuresys/ui`
+
+---
+
+## Sealed boundaries
+
+This work does NOT touch:
+- `apps/api/**` (brownfield lane territory)
 - `db/migrations/**`, `db/seeds/**`, `db/scripts/**`
 - `packages/shared/src/schemas/**` (business)
-- `apps/web/src/app/(authenticated)/**` (live MVP-2a pages — touched only via the showcase mirror at `/showcase/primary-initial-page`)
-- `apps/web/src/app/login/**` (existing login — touched only via `/showcase/login-page` prototype)
-- `ui/src/components/*` outside `brand/` in `@heuresys/ui` (existing 51 primitives intact)
-
-This lane DOES touch (per Option 2 architecture, not a violation):
-- `D:\ux-design-shared\governance\` (decision register + ADRs)
-- `D:\ux-design-shared\ui\src\assets\brand\` (raw SVG: candidates + legacy archive)
-- `D:\ux-design-shared\ui\src\components\brand\` (React wrappers)
-- `D:\ux-design-shared\ui\package.json` (subpath exports for `./brand/candidates` + `./assets/brand/*`)
-- heuresys-advanced `apps/web/src/app/showcase/` (NEW routes), `apps/web/src/lib/theme/` (NEW), `apps/web/src/app/globals.css`, `apps/web/src/middleware.ts` (one-line `/showcase` public-path add)
-
-Any need to break a seal → flag explicitly in the next handoff.
+- `apps/web/src/app/(authenticated)/**` (live MVP-2a pages)
+- `apps/web/src/app/login/**` (existing login)
+- 51 primitives in `@heuresys/ui/src/components/` outside `brand/`

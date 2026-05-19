@@ -66,13 +66,71 @@ describe("applyTypeCoerceWrap — Goal 002 Item E regression (existing types)", 
   });
 });
 
-describe("applyTypeCoerceWrap — negative / no-op cases", () => {
-  it("non-passthrough transform (CAST_INT) returns frag unchanged", () => {
-    expect(applyTypeCoerceWrap(FRAG, "int2", "CAST_INT")).toBe(FRAG);
+describe("applyTypeCoerceWrap — Goal 003 Item B CAST_* compat-target wrap", () => {
+  it("CAST_INT + int2 (smallint) → outer CAST AS SMALLINT (was the blocker case from Goal 002 REPORT §3.5)", () => {
+    expect(applyTypeCoerceWrap(FRAG, "int2", "CAST_INT")).toBe(
+      `CAST(${FRAG} AS SMALLINT)`,
+    );
   });
 
-  it("non-passthrough transform (JSON_EXTRACT) returns frag unchanged", () => {
+  it("CAST_INT + int8 (bigint) → outer CAST AS BIGINT", () => {
+    expect(applyTypeCoerceWrap(FRAG, "int8", "CAST_INT")).toBe(
+      `CAST(${FRAG} AS BIGINT)`,
+    );
+  });
+
+  it("CAST_INT + int4 (integer, same type) → outer CAST AS INTEGER (redundant but harmless)", () => {
+    expect(applyTypeCoerceWrap(FRAG, "int4", "CAST_INT")).toBe(
+      `CAST(${FRAG} AS INTEGER)`,
+    );
+  });
+
+  it("CAST_NUMERIC + numeric target → outer CAST AS NUMERIC", () => {
+    expect(applyTypeCoerceWrap(FRAG, "numeric", "CAST_NUMERIC")).toBe(
+      `CAST(${FRAG} AS NUMERIC)`,
+    );
+  });
+
+  it("CAST_BOOLEAN + bool target → outer CAST AS BOOLEAN", () => {
+    expect(applyTypeCoerceWrap(FRAG, "bool", "CAST_BOOLEAN")).toBe(
+      `CAST(${FRAG} AS BOOLEAN)`,
+    );
+  });
+
+  it("CAST_TIMESTAMPTZ + timestamptz target → outer CAST AS TIMESTAMPTZ", () => {
+    expect(applyTypeCoerceWrap(FRAG, "timestamptz", "CAST_TIMESTAMPTZ")).toBe(
+      `CAST(${FRAG} AS TIMESTAMPTZ)`,
+    );
+  });
+
+  it("CAST_TIMESTAMPTZ + timestamp target (downgrade) → outer CAST AS TIMESTAMP", () => {
+    expect(applyTypeCoerceWrap(FRAG, "timestamp", "CAST_TIMESTAMPTZ")).toBe(
+      `CAST(${FRAG} AS TIMESTAMP)`,
+    );
+  });
+});
+
+describe("applyTypeCoerceWrap — Goal 003 Item B negative cases (NO wrap)", () => {
+  it("CAST_INT + numeric target (incompatible per compat map) → returns frag unchanged", () => {
+    expect(applyTypeCoerceWrap(FRAG, "numeric", "CAST_INT")).toBe(FRAG);
+  });
+
+  it("CAST_INT + bool target (incompatible) → returns frag unchanged", () => {
+    expect(applyTypeCoerceWrap(FRAG, "bool", "CAST_INT")).toBe(FRAG);
+  });
+
+  it("CAST_VARCHAR + any (compat map empty — varchar handled by truncation wrapper, not here) → returns frag unchanged", () => {
+    expect(applyTypeCoerceWrap(FRAG, "varchar", "CAST_VARCHAR")).toBe(FRAG);
+  });
+});
+
+describe("applyTypeCoerceWrap — negative / no-op cases (preserved from Item K)", () => {
+  it("non-CAST transform (JSON_EXTRACT) returns frag unchanged", () => {
     expect(applyTypeCoerceWrap(FRAG, "jsonb", "JSON_EXTRACT")).toBe(FRAG);
+  });
+
+  it("non-CAST transform (LOOKUP_FK) returns frag unchanged", () => {
+    expect(applyTypeCoerceWrap(FRAG, "int4", "LOOKUP_FK")).toBe(FRAG);
   });
 
   it("unknown colType returns frag unchanged (e.g., uuid intentionally excluded)", () => {

@@ -64,25 +64,59 @@ const TYPE_CAST_MAP: Record<string, string> = {
 };
 
 /**
+ * Goal 003 Item B: CAST_* transforms whose inner cast target is compatible
+ * with a wider set of PG basic types. The compiler emits an inner CAST to
+ * the default type for each code (e.g., CAST_INT → INTEGER); when the actual
+ * target column type differs, applyTypeCoerceWrap adds an outer CAST so the
+ * value lands in target-type directly without relying on implicit coercion
+ * (which can fail at INSERT time for narrow target types like smallint).
+ *
+ * Map: transform code → set of target colType values for which an outer
+ * CAST to TYPE_CAST_MAP[colType] should be emitted. Outside this set, the
+ * compiler-emitted inner cast is left untouched (passthrough behavior).
+ */
+const CAST_COMPATIBLE_TARGETS: Record<string, ReadonlySet<string>> = {
+  CAST_INT:         new Set(["int2", "int4", "int8"]),
+  CAST_NUMERIC:     new Set(["numeric"]),
+  CAST_BOOLEAN:     new Set(["bool"]),
+  CAST_TIMESTAMPTZ: new Set(["timestamptz", "timestamp"]),
+  CAST_VARCHAR:     new Set([]),  // varchar handled by truncation wrapper, not here
+};
+
+/**
  * Wraps `frag` with `CAST(... AS <pgType>)` when:
- *   - transform is passthrough (null, DIRECT_COPY, TRIM); AND
- *   - colType is in TYPE_CAST_MAP whitelist
+ *   - transform is passthrough (null, DIRECT_COPY, TRIM) AND colType is in TYPE_CAST_MAP; OR
+ *   - transform is CAST_* AND colType is in CAST_COMPATIBLE_TARGETS[transform]
+ *     (Goal 003 Item B: re-cast compiler-emitted inner cast into target type
+ *      so e.g. CAST_INT + smallint target → CAST(CAST(... AS INTEGER) AS SMALLINT)
+ *      instead of relying on implicit int→smallint coercion at INSERT time).
+ *
  * Otherwise returns frag unchanged.
  *
- * Exported for unit testing (no integration test exists for this branch at
- * Goal 002 v1 closure; Goal 003 Item K adds dedicated coverage).
+ * Exported for unit testing.
  */
 export function applyTypeCoerceWrap(
   frag: string,
   colType: string | undefined,
   transform: string | null,
 ): string {
-  const isPassthrough =
-    transform === null || transform === "DIRECT_COPY" || transform === "TRIM";
-  if (!isPassthrough || !colType) return frag;
+  if (!colType) return frag;
   const pgType = TYPE_CAST_MAP[colType];
   if (!pgType) return frag;
-  return `CAST(${frag} AS ${pgType})`;
+
+  // Path 1: passthrough transforms (Goal 002 Item E behavior, preserved)
+  const isPassthrough =
+    transform === null || transform === "DIRECT_COPY" || transform === "TRIM";
+  if (isPassthrough) {
+    return `CAST(${frag} AS ${pgType})`;
+  }
+
+  // Path 2: CAST_* transforms with compatible target type (Goal 003 Item B)
+  if (transform && CAST_COMPATIBLE_TARGETS[transform]?.has(colType)) {
+    return `CAST(${frag} AS ${pgType})`;
+  }
+
+  return frag;
 }
 
 /**

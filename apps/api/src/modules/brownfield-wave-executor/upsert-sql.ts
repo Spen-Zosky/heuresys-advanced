@@ -37,6 +37,55 @@ import type {
 } from "./repository.js";
 
 /**
+ * Goal 002 Item E + Goal 003 Item K: type-coerce auto-wrap for DIRECT_COPY/TRIM
+ * into non-text targets. PG implicit text→numeric/date coercion works for
+ * well-formed values but raises on malformed (caught by upsert try/catch
+ * → audit `insert_failed:`). UUID intentionally excluded — UUID NK rows are
+ * pre-filtered by the WHERE skip filter in buildUpsertSql.
+ *
+ * Goal 003 Item K extensions (interval, time, timetz, bytea) complete the
+ * PG basic-type whitelist per Goal 002 REPORT §6 item 5 follow-up.
+ */
+const TYPE_CAST_MAP: Record<string, string> = {
+  int2: "SMALLINT",
+  int4: "INTEGER",
+  int8: "BIGINT",
+  numeric: "NUMERIC",
+  bool: "BOOLEAN",
+  date: "DATE",
+  timestamptz: "TIMESTAMPTZ",
+  timestamp: "TIMESTAMP",
+  jsonb: "JSONB",
+  json: "JSON",
+  interval: "INTERVAL",
+  time: "TIME",
+  timetz: "TIMETZ",
+  bytea: "BYTEA",
+};
+
+/**
+ * Wraps `frag` with `CAST(... AS <pgType>)` when:
+ *   - transform is passthrough (null, DIRECT_COPY, TRIM); AND
+ *   - colType is in TYPE_CAST_MAP whitelist
+ * Otherwise returns frag unchanged.
+ *
+ * Exported for unit testing (no integration test exists for this branch at
+ * Goal 002 v1 closure; Goal 003 Item K adds dedicated coverage).
+ */
+export function applyTypeCoerceWrap(
+  frag: string,
+  colType: string | undefined,
+  transform: string | null,
+): string {
+  const isPassthrough =
+    transform === null || transform === "DIRECT_COPY" || transform === "TRIM";
+  if (!isPassthrough || !colType) return frag;
+  const pgType = TYPE_CAST_MAP[colType];
+  if (!pgType) return frag;
+  return `CAST(${frag} AS ${pgType})`;
+}
+
+/**
  * Target metadata structure mirrors engine.ts::TargetMeta. Re-declared here to
  * keep upsert-sql.ts free of a back-import on engine.ts (which is the consumer).
  */
@@ -151,31 +200,7 @@ export async function executeUpsertSqlSidePerMapping(
     ) {
       frag = `LEFT(${frag}, ${maxLen})`;
     } else {
-      // Goal 002 Item E: type-coerce auto-wrap for DIRECT_COPY/TRIM into
-      // non-text targets. PG implicit text→numeric/date coercion works for
-      // well-formed values but raises on malformed (caught by upsert try/catch
-      // → audit `insert_failed:`). UUID intentionally excluded — UUID NK rows
-      // are pre-filtered by the WHERE skip filter (lines 238-269).
-      const isPassthrough =
-        cm.transform === null || cm.transform === "DIRECT_COPY" || cm.transform === "TRIM";
-      if (isPassthrough && colType) {
-        const TYPE_CAST_MAP: Record<string, string> = {
-          int2: "SMALLINT",
-          int4: "INTEGER",
-          int8: "BIGINT",
-          numeric: "NUMERIC",
-          bool: "BOOLEAN",
-          date: "DATE",
-          timestamptz: "TIMESTAMPTZ",
-          timestamp: "TIMESTAMP",
-          jsonb: "JSONB",
-          json: "JSON",
-        };
-        const pgType = TYPE_CAST_MAP[colType];
-        if (pgType) {
-          frag = `CAST(${frag} AS ${pgType})`;
-        }
-      }
+      frag = applyTypeCoerceWrap(frag, colType, cm.transform);
     }
 
     // Avoid duplicate columns (if same target col has multiple cms, keep first)

@@ -152,22 +152,42 @@ describe("compileTransform — CONSTANT idempotency rejection (R8)", () => {
 });
 
 describe("compileTransform — LOOKUP_FK (Goal 002 Item C: match_on payload)", () => {
-  it("plain column match_on=legacy_tenant_id → WHERE legacy_tenant_id, return_col=tenant_id via PK_OVERRIDES", () => {
+  it("Goal 003 Item A fallback: (sys_tenancies, legacy_tenant_id) → JOIN brownfield.tenant_id_mappings", () => {
+    // Goal 003 EXEC step 0.8 evidence: 0/2 tenant_metadata have 'legacy_id'
+    // key → primary jsonb-convention path is dead-code in Goal 003.
+    // Active path emits JOIN through brownfield.tenant_id_mappings
+    // (mig 000033 Part 1) returning canonical_tenant_id by legacy_id lookup.
     const r = compileTransform(
       baseInput("LOOKUP_FK", { target_table: "sys_tenancies", match_on: "legacy_tenant_id" }),
     );
     expect(r.fragment).not.toBeNull();
     const sql = r.fragment!.sql;
-    expect(sql).toContain("sys_tenancies");
-    expect(sql).toContain("legacy_tenant_id");
-    // PK_OVERRIDES (hotfix 497ff90): sys_tenancies → tenant_id (actual PK), not depluralized tenancy_id
-    expect(sql).toContain("tenant_id");
-    expect(sql).not.toContain("tenancies_id");
-    expect(sql).not.toContain("tenancy_id");
+    expect(sql).toContain("brownfield.tenant_id_mappings");
+    expect(sql).toContain("canonical_tenant_id");
+    expect(sql).toContain("m.legacy_id");
     expect(sql).toContain(`= (${SRC})`);
     expect(sql).toContain("LIMIT 1");
-    // No multi-OR clause anymore — secondary convention removed (PLAN §2.2 Item C)
+    // Fallback bypasses the sys.sys_tenancies + tenant_id PK-OVERRIDES path
+    expect(sql).not.toContain("sys.sys_tenancies");
     expect(sql).not.toContain(" OR ");
+  });
+
+  it("Goal 003 Item A fallback: (sys_users, legacy_user_id) → JOIN sys.sys_users.user_email (ignores srcExpr)", () => {
+    // Goal 003 EXEC step 0.9 evidence: 0/163 user_metadata have 'legacy_id'.
+    // Fallback path looks up sys_users by user_email read directly from
+    // staging_raw_record (NOT srcExpr — Obs-1 in APPROVAL 003).
+    const r = compileTransform(
+      baseInput("LOOKUP_FK", { target_table: "sys_users", match_on: "legacy_user_id" }),
+    );
+    expect(r.fragment).not.toBeNull();
+    const sql = r.fragment!.sql;
+    expect(sql).toContain("sys.sys_users");
+    expect(sql).toContain("user_email");
+    expect(sql).toContain("staging_raw_record->>'user_email'");
+    expect(sql).toContain("SELECT user_id");
+    expect(sql).toContain("LIMIT 1");
+    // srcExpr (legacy_user_id) intentionally NOT in fragment — user_email is hardcoded
+    expect(sql).not.toContain(SRC);
   });
 
   it("expression form with quoted key: match_on=metadata->>'legacy_id' → escaped %L", () => {
@@ -267,6 +287,73 @@ describe("compileTransform — LOOKUP_FK (Goal 002 Item C: match_on payload)", (
     expect(() =>
       compileTransform(baseInput("LOOKUP_FK", { target_table: "", match_on: "x" })),
     ).toThrow(InvalidLookupFkPayloadError);
+  });
+});
+
+describe("compileTransform — LOOKUP_FK Goal 003 Item A adversarial fixtures (C2 ≥5)", () => {
+  it("ADV-A1: quote-injection in match_on for sys_tenancies fallback pair → rejected", () => {
+    expect(() =>
+      compileTransform(
+        baseInput("LOOKUP_FK", {
+          target_table: "sys_tenancies",
+          match_on: "legacy_tenant_id'; DROP TABLE sys_tenancies--",
+        }),
+      ),
+    ).toThrow(InvalidLookupFkPayloadError);
+  });
+
+  it("ADV-A2: semicolon injection in match_on for sys_users fallback pair → rejected", () => {
+    expect(() =>
+      compileTransform(
+        baseInput("LOOKUP_FK", {
+          target_table: "sys_users",
+          match_on: "legacy_user_id; SELECT 1--",
+        }),
+      ),
+    ).toThrow(InvalidLookupFkPayloadError);
+  });
+
+  it("ADV-A3: uppercase variant LEGACY_TENANT_ID does NOT trigger fallback (regex rejects uppercase)", () => {
+    expect(() =>
+      compileTransform(
+        baseInput("LOOKUP_FK", {
+          target_table: "sys_tenancies",
+          match_on: "LEGACY_TENANT_ID",
+        }),
+      ),
+    ).toThrow(InvalidLookupFkPayloadError);
+  });
+
+  it("ADV-A4: legacy_<X>_id form for non-fallback target (sys_skills) → falls through to regex plain-column path, NOT fallback", () => {
+    // (sys_skills, legacy_skill_id) is form (c) in validate function but NOT
+    // a scope-locked fallback pair → falls through to existing regex → emits
+    // standard literal-column SQL referencing sys_skills.legacy_skill_id
+    // (which won't exist at runtime, but compile-time emission is per spec).
+    const r = compileTransform(
+      baseInput("LOOKUP_FK", { target_table: "sys_skills", match_on: "legacy_skill_id" }),
+    );
+    const sql = r.fragment!.sql;
+    expect(sql).toContain("sys.sys_skills");
+    expect(sql).toContain("legacy_skill_id");
+    // NOT the fallback path:
+    expect(sql).not.toContain("brownfield.tenant_id_mappings");
+    expect(sql).not.toContain("canonical_tenant_id");
+    expect(sql).not.toContain("staging_raw_record->>'user_email'");
+  });
+
+  it("ADV-A5: cross-target fallback-leak prevention — (sys_users, legacy_tenant_id) does NOT use sys_tenancies fallback", () => {
+    // The (target_table, match_on) match must be exact-string for fallback
+    // to engage. Mixing target+match across fallback pairs falls through
+    // to the standard regex path (emits literal-column SQL).
+    const r = compileTransform(
+      baseInput("LOOKUP_FK", { target_table: "sys_users", match_on: "legacy_tenant_id" }),
+    );
+    const sql = r.fragment!.sql;
+    expect(sql).toContain("sys.sys_users");
+    expect(sql).toContain("legacy_tenant_id");
+    // NOT either fallback path:
+    expect(sql).not.toContain("brownfield.tenant_id_mappings");
+    expect(sql).not.toContain("staging_raw_record->>'user_email'");
   });
 });
 

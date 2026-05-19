@@ -335,14 +335,23 @@ export function compileTransform(input: ColumnMappingInput): CompileResult {
     }
 
     case "LOOKUP_FK": {
-      // Goal 002 Item C: read payload.match_on from the registry instead of
-      // inventing column names via target_table convention. Accepted forms
-      // (real-data observed in Goal 002 EXEC step 0 R2 pre-check):
-      //   - plain column:    "legacy_tenant_id"                     (33/49)
-      //   - jsonb extract:   "metadata->>legacy_id" (NO quotes)     (16/49)
-      // PLAN §2.4.1 regex amended to also accept the quoted variant
-      // "metadata->>'legacy_id'" for forward compatibility; quotes auto-added
-      // during compile so SQL emission is uniform.
+      // Goal 002 Item C + Goal 003 Item A: read payload.match_on from registry.
+      // Accepted forms after Goal 003:
+      //   - plain column:                 "legacy_tenant_id" → fallback (Goal 003)
+      //                                   or any existing sys.<target>.<col>     (Goal 002)
+      //   - jsonb extract:                "metadata->>legacy_id" (NO quotes)     (16/49)
+      //                                   "metadata->>'legacy_id'" quoted form    (Goal 002)
+      //   - Goal 003 Item A FALLBACK-ONLY pairs (Cowork-approved scope-lock):
+      //       (sys_tenancies, legacy_tenant_id) → JOIN brownfield.tenant_id_mappings
+      //       (sys_users,     legacy_user_id)   → JOIN sys.sys_users.user_email
+      //
+      // Goal 003 EXEC step 0.8/0.9 evidence: 0/2 tenant_metadata + 0/163
+      // user_metadata have 'legacy_id' key → primary jsonb-convention path
+      // (target.<X>_metadata->>'legacy_id') would be dead-code in Goal 003.
+      // Re-introduction deferred to Goal 004+ when *_metadata.legacy_id
+      // population evidence is available; the DB-level validator function
+      // brownfield.validate_lookup_fk_payload() (CP2, mig 000033) already
+      // accepts the primary path at registry-INSERT time.
       const targetTable = payload?.target_table;
       if (typeof targetTable !== "string" || targetTable.length === 0) {
         throw new InvalidLookupFkPayloadError(
@@ -357,6 +366,32 @@ export function compileTransform(input: ColumnMappingInput): CompileResult {
           mappingId,
         );
       }
+
+      // Goal 003 Item A — FALLBACK-ONLY pair (sys_tenancies, legacy_tenant_id)
+      // Emits JOIN through brownfield.tenant_id_mappings (mig 000033 Part 1).
+      // Source col is the legacy UUID (typically `legacy_tenant_id` in
+      // staging_raw_record); srcExpr already wraps the ->> extract.
+      if (targetTable === "sys_tenancies" && matchOn === "legacy_tenant_id") {
+        const sql = format(
+          "(SELECT m.canonical_tenant_id FROM brownfield.tenant_id_mappings m WHERE m.legacy_id = (%s) LIMIT 1)",
+          srcExpr,
+        );
+        return { fragment: { sql }, targetColumn };
+      }
+
+      // Goal 003 Item A — FALLBACK-ONLY pair (sys_users, legacy_user_id)
+      // Source legacy_mirror tables carry user_email per Wave 1 convention;
+      // we look up by email instead of by legacy ID (cm.source_column_name is
+      // legacy_user_id but we deliberately ignore srcExpr and read user_email
+      // directly from staging_raw_record). If user_email is NULL/absent, the
+      // SELECT returns NULL → upstream maps row to audit-skip (LOOKUP_FK_FALLBACK_UNRESOLVABLE),
+      // counted as documented source-empty exception per C4 / Obs-1 (APPROVAL 003).
+      if (targetTable === "sys_users" && matchOn === "legacy_user_id") {
+        const sql =
+          "(SELECT user_id FROM sys.sys_users WHERE user_email = (staging_raw_record->>'user_email') LIMIT 1)";
+        return { fragment: { sql }, targetColumn };
+      }
+
       const matchOnRegex = /^([a-z_][a-z0-9_]*)(?:->>'?([a-z_][a-z0-9_]*)'?)?$/;
       const matched = matchOnRegex.exec(matchOn);
       if (!matched) {

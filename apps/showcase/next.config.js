@@ -12,7 +12,13 @@ module.exports = {
   eslint: { ignoreDuringBuilds: true },
   basePath: BASE_PATH,
   // Expose to the runtime so consumer code can build links with the right prefix.
-  env: { NEXT_PUBLIC_BASE_PATH: BASE_PATH },
+  // NEXT_PUBLIC_ENABLE_SHOWCASE is hardcoded to "1" here: apps/showcase exists
+  // EXCLUSIVELY for the brand showcase deploy, so the `notFound()` guard in
+  // apps/web/src/app/showcase/layout.tsx must never trigger here.
+  env: {
+    NEXT_PUBLIC_BASE_PATH: BASE_PATH,
+    NEXT_PUBLIC_ENABLE_SHOWCASE: "1",
+  },
   ...(isStaticExport && {
     output: "export",
     trailingSlash: true,

@@ -140,7 +140,7 @@ export async function executeUpsertSqlSidePerMapping(
 
     if (compiled.fragment === null) continue; // SKIP transform
 
-    // Apply varchar truncation wrapper
+    // Apply varchar truncation wrapper or type-coerce auto-wrap
     let frag = compiled.fragment.sql;
     const colType = targetMeta.columnTypes.get(cm.target_column);
     const maxLen = targetMeta.columnMaxLengths.get(cm.target_column);
@@ -150,6 +150,30 @@ export async function executeUpsertSqlSidePerMapping(
       maxLen > 0
     ) {
       frag = `LEFT(${frag}, ${maxLen})`;
+    } else {
+      // Goal 002 Item E: type-coerce auto-wrap for DIRECT_COPY/TRIM into
+      // non-text targets. PG implicit text→numeric/date coercion works for
+      // well-formed values but raises on malformed (caught by upsert try/catch
+      // → audit `insert_failed:`). UUID intentionally excluded — UUID NK rows
+      // are pre-filtered by the WHERE skip filter (lines 238-269).
+      const isPassthrough =
+        cm.transform === null || cm.transform === "DIRECT_COPY" || cm.transform === "TRIM";
+      if (isPassthrough && colType) {
+        const TYPE_CAST_MAP: Record<string, string> = {
+          int2: "SMALLINT",
+          int4: "INTEGER",
+          int8: "BIGINT",
+          numeric: "NUMERIC",
+          bool: "BOOLEAN",
+          date: "DATE",
+          timestamptz: "TIMESTAMPTZ",
+          timestamp: "TIMESTAMP",
+        };
+        const pgType = TYPE_CAST_MAP[colType];
+        if (pgType) {
+          frag = `CAST(${frag} AS ${pgType})`;
+        }
+      }
     }
 
     // Avoid duplicate columns (if same target col has multiple cms, keep first)

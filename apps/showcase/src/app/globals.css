@@ -12,6 +12,19 @@
 
 @import "@heuresys/ui/styles";
 
+/*
+ * Tailwind 4 honors .gitignore for content discovery. The src/app/showcase/
+ * and src/lib/ directories are gitignored here because they're generated at
+ * build time by scripts/sync-showcase.sh from apps/web (canonical source).
+ * Without these @source overrides, Tailwind would NOT scan those files,
+ * leaving every utility class they use (bg-*, text-*, grid, rounded, …)
+ * out of the emitted CSS bundle — visible symptom is a 5 KB CSS with only
+ * preflight + custom classes, and a completely unstyled showcase in the
+ * browser. Force scan via explicit sources:
+ */
+@source "./showcase/**/*.{ts,tsx}";
+@source "../lib/**/*.{ts,tsx}";
+
 :root {
   --background: #FAFBFD;
   --foreground: #0F1828;

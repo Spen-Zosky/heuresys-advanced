@@ -60,7 +60,6 @@ function MultiStatCard() {
     { label: "Pending", value: 113, color: "#94A3B8" },
   ];
   const total = segments.reduce((a, b) => a + b.value, 0);
-  let acc = 0;
   return (
     <div className="hx-card-hover rounded-xl border border-[var(--border)] bg-[var(--card)] p-5">
       <div className="flex items-baseline justify-between">
@@ -70,7 +69,6 @@ function MultiStatCard() {
       <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-[var(--muted)]">
         {segments.map((s) => {
           const w = (s.value / total) * 100;
-          acc += w;
           return <div key={s.label} style={{ width: `${w}%`, background: s.color }} />;
         })}
       </div>

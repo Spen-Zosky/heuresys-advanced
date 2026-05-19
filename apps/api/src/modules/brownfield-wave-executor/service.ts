@@ -173,7 +173,7 @@ export const brownfieldWaveExecutorService = {
   },
 };
 
-async function countLegacyMirrorRows(pool: ReturnType<typeof getPool>): Promise<number> {
+async function countLegacyMirrorRows(pool: typeof import("../../db/client.js").pool): Promise<number> {
   // Probe on esco_occupations (ESKAP, ~3k rows): a stable, always-included
   // Wave 1 source table whose presence indicates the dumps have been loaded.
   // We don't probe esco_skills because it's not in the canonical 88-table
@@ -191,7 +191,3 @@ async function countLegacyMirrorRows(pool: ReturnType<typeof getPool>): Promise<
   return Number(cntRes.rows[0]?.n ?? 0);
 }
 
-// Lightweight type indirection to avoid pulling pg types into the public surface.
-function getPool() {
-  return pool;
-}

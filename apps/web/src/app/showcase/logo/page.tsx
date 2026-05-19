@@ -157,7 +157,7 @@ export default function LogoShowcasePage() {
       <section className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-5">
         <h2 className="text-base font-semibold tracking-tight">After Acceptance</h2>
         <p className="mt-2 text-sm text-[var(--card-foreground)]">
-          The chosen candidate's components get promoted from{" "}
+          The chosen candidate&apos;s components get promoted from{" "}
           <code>@heuresys/ui/brand/candidates</code> to <code>@heuresys/ui/brand</code> as canonical
           <code> HeuresysLogo / HeuresysMark</code>, and the raw SVG sources move from{" "}
           <code>src/assets/brand/candidates/UXIX-0007-logo/</code> to{" "}

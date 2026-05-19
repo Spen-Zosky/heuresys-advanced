@@ -60,7 +60,7 @@ export const dashboardService = {
     const isTeamScope = scopeKind === "TEAM" && !isPlatform;
 
     let teamPositionIds: string[] = [];
-    let scopeTenantId: string | null = isPlatform ? null : actor.tenantId;
+    const scopeTenantId: string | null = isPlatform ? null : actor.tenantId;
 
     if (isTeamScope) {
       // MANAGER: scope to own-team via positions where owner = self.

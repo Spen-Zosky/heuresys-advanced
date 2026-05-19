@@ -43,7 +43,14 @@
   "dependencies": {
     "@heuresys/ui": "link:../ux-design-shared/ui"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "9.39.4",
+    "eslint": "9.39.4",
+    "eslint-config-next": "15.5.18",
+    "globals": "17.6.0",
+    "typescript-eslint": "8.59.4"
+  },
   "pnpm": {
     "overrides": {
       "vite": "^6.4.2",

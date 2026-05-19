@@ -125,7 +125,7 @@ export default function MeCareerTargetPage() {
 
             {create.isError && (
               <p className="text-sm text-red-600" data-testid="career-target-error">
-                Errore durante l'invio.
+                Errore durante l&apos;invio.
               </p>
             )}
             {create.isSuccess && (

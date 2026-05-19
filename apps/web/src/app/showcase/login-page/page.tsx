@@ -62,7 +62,7 @@ export default function LoginPageShowcase() {
 
             <p className="mt-6 text-center text-xs text-[var(--muted-foreground)]">
               Hai problemi di accesso?{" "}
-              <a href="#" className="text-blue-700 hover:underline">Contatta l'amministratore del tuo tenant</a>.
+              <a href="#" className="text-blue-700 hover:underline">Contatta l&apos;amministratore del tuo tenant</a>.
             </p>
             <p className="mt-2 text-center text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
               v0.3.0-brand-v1 · TLS 1.3 · Tenant: auto-detect

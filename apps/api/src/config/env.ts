@@ -36,7 +36,7 @@ function readKeyMaterial(envVar: string, defaultPath: string): string {
   }
   throw new Error(
     `${envVar} is missing and ${filePath} does not exist. ` +
-      `Generate keys via: node -e \"...generateKeyPairSync...\" or set the env var explicitly.`,
+      `Generate keys via: node -e "...generateKeyPairSync..." or set the env var explicitly.`,
   );
 }
 

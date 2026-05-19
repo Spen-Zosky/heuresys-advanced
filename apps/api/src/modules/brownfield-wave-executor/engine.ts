@@ -731,6 +731,7 @@ export async function executeUpsert(
     // of orderedMappings)` loop iterates to the next mapping. To avoid
     // compile errors from the orphan `while` block we wrap it in `if (false)`.
     // Scheduled for removal in Goal 001b.
+    // eslint-disable-next-line no-constant-condition
     if (false) {
       let processed = 0;
       const total = 0;

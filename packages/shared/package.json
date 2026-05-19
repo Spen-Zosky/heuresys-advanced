@@ -259,7 +259,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "tsc -p tsconfig.json",
-    "lint": "eslint src --ext .ts",
+    "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },

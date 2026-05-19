@@ -50,8 +50,8 @@ export default function FooterShowcasePage() {
         <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
           Persistent 44px footer. Left: copyright + clickable <code>heuresys.com</code> link + dynamic
           chips (environment, version, tenant, last data refresh). Right: 4 social icons (LinkedIn /
-          GitHub / X / Facebook) icon-only with <code>aria-label</code>, <code>target="_blank"</code>,{" "}
-          <code>rel="noopener noreferrer"</code>. Per bundle <code>docs/08_footer_specification.md</code>.
+          GitHub / X / Facebook) icon-only with <code>aria-label</code>, <code>target=&quot;_blank&quot;</code>,{" "}
+          <code>rel=&quot;noopener noreferrer&quot;</code>. Per bundle <code>docs/08_footer_specification.md</code>.
         </p>
         <p className="text-xs text-[var(--muted-foreground)]">
           <Link href="/showcase" className="underline">back to index</Link>

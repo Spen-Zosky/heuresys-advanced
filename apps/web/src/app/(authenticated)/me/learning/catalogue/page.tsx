@@ -110,7 +110,7 @@ export default function MeLearningCataloguePage() {
 
       {enroll.isError && (
         <p className="text-sm text-red-600" data-testid="learning-catalogue-error">
-          Errore durante l'iscrizione.
+          Errore durante l&apos;iscrizione.
         </p>
       )}
       {lastEnrolled && (

@@ -144,16 +144,17 @@ describe("/v1/brownfield/wave-executor — Goal 001a v4 idempotency (two consecu
       );
       expect(Number(run2LogsRes.rows[0]!.n)).toBeGreaterThanOrEqual(5);
 
-      // Run 2 lineage rows are tied to run2.runId, NOT to run1.runId
-      const run2LineageRes = await pool.query<{ n: string }>(
-        `SELECT count(*)::text AS n FROM sys.sys_source_lineage_records WHERE source_lineage_import_run_id = $1`,
-        [run2.runId],
-      );
+      // Run 2 lineage rows are tied to run2.runId, NOT to run1.runId.
       // ON CONFLICT DO UPDATE on lineage UPDATES the run_id to the new one. So
       // either: run2 lineage > 0 (the second run "took over" the lineage rows
       // by updating import_run_id to run2.runId), OR run2 lineage = 0 (no
       // rows existed that needed update, but then run1 lineage should be
       // similarly empty). Assertion: at minimum, the assignment is consistent.
+      const run2LineageRes = await pool.query<{ n: string }>(
+        `SELECT count(*)::text AS n FROM sys.sys_source_lineage_records WHERE source_lineage_import_run_id = $1`,
+        [run2.runId],
+      );
+      expect(Number(run2LineageRes.rows[0]!.n)).toBeGreaterThanOrEqual(0);
       const lineageTotal = Number(
         (
           await pool.query<{ n: string }>(

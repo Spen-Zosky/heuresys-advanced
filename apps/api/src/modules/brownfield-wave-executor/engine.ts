@@ -637,6 +637,46 @@ export async function executeUpsert(
     );
   }
 
+  // Goal 002 Item F: LINEAGE_SOURCE_NK mappings are intentionally absorbed by
+  // the lineage write path (upsert-sql.ts:391-446 + repository.writeLineage).
+  // Audit them with a distinct rule_code so REPORT-style "skipped" counts
+  // remain honest. Dedupe by column_mapping_id (parallel to skipped).
+  const handledViaLineageIds = new Set<string>();
+  async function recordHandledViaLineage(
+    cm: ColumnMappingRow,
+    m: TableMappingRow,
+  ): Promise<void> {
+    if (handledViaLineageIds.has(cm.column_mapping_id)) return;
+    handledViaLineageIds.add(cm.column_mapping_id);
+    await pool.query(
+      `INSERT INTO audit.import_validation_results (
+          import_validation_result_run_id,
+          import_validation_result_source_table_id,
+          import_validation_result_source_record_id,
+          import_validation_result_rule_code,
+          import_validation_result_status,
+          import_validation_result_message,
+          import_validation_result_payload
+        ) VALUES ($1, $2, $3, 'HANDLED_VIA_LINEAGE_WRITE_V1', 'SKIPPED', $4, $5::jsonb)`,
+      [
+        runId,
+        m.source_table_id,
+        cm.column_mapping_id,
+        `LINEAGE_SOURCE_NK mapping ${cm.column_mapping_id} absorbed by lineage write path (no target_table write)`,
+        JSON.stringify({
+          column_mapping_id: cm.column_mapping_id,
+          source_column: cm.source_column_name,
+          target_column: cm.target_column,
+          transform_code: cm.transform,
+          table_mapping_id: m.table_mapping_id,
+          source_table: m.source_table_name,
+          target_table: m.target_table,
+          payload_note: (cm.transform_payload as Record<string, unknown> | null)?.["note"] ?? null,
+        }),
+      ],
+    );
+  }
+
   // After each batch's upsert returns, append the newly-resolved (key → pk)
   // pairs to the FK cache for this target table so subsequent L1/L2 mappings
   // can resolve to them without a re-query.
@@ -665,6 +705,13 @@ export async function executeUpsert(
     // the existing JS-side UPSERT.
     const columnMappings: ColumnMappingRow[] = [];
     for (const cm of rawColumnMappings) {
+      // Goal 002 Item F: LINEAGE_SOURCE_NK is "supported" by the compiler
+      // (returns fragment=null) but its real handling is the separate lineage
+      // write path. Emit distinct audit row and skip from upsert path.
+      if (cm.transform === "LINEAGE_SOURCE_NK") {
+        await recordHandledViaLineage(cm, m);
+        continue;
+      }
       if (SUPPORTED_TRANSFORMS.has(cm.transform)) {
         columnMappings.push(cm);
       } else {

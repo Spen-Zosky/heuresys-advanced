@@ -73,6 +73,19 @@ export class InvalidLookupFkPayloadError extends Error {
   }
 }
 
+export class InvalidJsonExtractPayloadError extends Error {
+  constructor(
+    public readonly reason: string,
+    public readonly mappingId?: string,
+  ) {
+    super(
+      `Invalid JSON_EXTRACT payload: ${reason}` +
+        (mappingId ? ` (mapping_id=${mappingId})` : ""),
+    );
+    this.name = "InvalidJsonExtractPayloadError";
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -186,6 +199,8 @@ export const SUPPORTED_TRANSFORMS: ReadonlySet<string | null> = new Set<string |
   "CONSTANT",
   "SKIP",
   "LOOKUP_FK",
+  "JSON_EXTRACT",
+  "LINEAGE_SOURCE_NK",
 ]);
 
 // ---------------------------------------------------------------------------
@@ -285,6 +300,39 @@ export function compileTransform(input: ColumnMappingInput): CompileResult {
 
     case "SKIP":
       return { fragment: null, targetColumn };
+
+    case "LINEAGE_SOURCE_NK":
+      // Goal 002 Item B: legacy PK is captured by the lineage write path
+      // (upsert-sql.ts lineage JOIN populates source_lineage_source_record_id
+      // via staging_source_record_id). The compiler emits no fragment;
+      // engine.ts pre-filter records audit row HANDLED_VIA_LINEAGE_WRITE_V1.
+      return { fragment: null, targetColumn };
+
+    case "JSON_EXTRACT": {
+      // Goal 002 Item A: extract a jsonb subtree from the raw record by
+      // traversing `payload.path` ($.<seg1>.<seg2>...) via the PG `->`
+      // operator chain. Each segment escaped via pg-format %L for SQL-injection
+      // safety. Path semantics match JS-side transforms.ts:109-124 (depth>=1,
+      // bracket-notation segments treated as literal keys returning NULL).
+      const path = payload?.path;
+      if (typeof path !== "string") {
+        throw new InvalidJsonExtractPayloadError(
+          `payload.path missing or not a string`,
+          mappingId,
+        );
+      }
+      const stripped = path.replace(/^\$\.?/, "");
+      const segments = stripped.split(".").filter((s) => s.length > 0);
+      if (segments.length === 0) {
+        // Empty path or only "$" prefix: NULL::jsonb fallback per PLAN §2.4.2.
+        return { fragment: { sql: "NULL::jsonb" }, targetColumn };
+      }
+      let chain = `(${srcExpr})`;
+      for (const seg of segments) {
+        chain = `${chain} -> ${format("%L", seg)}`;
+      }
+      return { fragment: { sql: `(${chain})` }, targetColumn };
+    }
 
     case "LOOKUP_FK": {
       const targetTable = payload?.target_table;

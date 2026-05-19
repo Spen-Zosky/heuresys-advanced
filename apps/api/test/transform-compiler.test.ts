@@ -213,8 +213,7 @@ describe("compileTransform — LOOKUP_FK", () => {
 
 describe("compileTransform — UnsupportedTransformError", () => {
   const unsupported = [
-    "JSON_EXTRACT",       // 001b scope
-    "LINEAGE_SOURCE_NK",  // 001b scope
+    // JSON_EXTRACT + LINEAGE_SOURCE_NK promoted to supported in Goal 002 (Items A/B)
     "CAST_UUID",          // 0 mappings (vocabulary only)
     "CAST_DATE",          // 0 mappings
     "DEFAULT_IF_NULL",    // 0 mappings
@@ -334,8 +333,8 @@ describe("compileTransform — SQL injection adversarial (A14)", () => {
 });
 
 describe("compileTransform — SUPPORTED_TRANSFORMS export", () => {
-  it("contains exactly 13 entries (12 mechanical + null)", () => {
-    expect(SUPPORTED_TRANSFORMS.size).toBe(13);
+  it("contains exactly 15 entries (12 mechanical + LOOKUP_FK + JSON_EXTRACT + LINEAGE_SOURCE_NK + null)", () => {
+    expect(SUPPORTED_TRANSFORMS.size).toBe(15);
     expect(SUPPORTED_TRANSFORMS.has(null)).toBe(true);
     for (const code of [
       "DIRECT_COPY",
@@ -350,13 +349,90 @@ describe("compileTransform — SUPPORTED_TRANSFORMS export", () => {
       "CONSTANT",
       "SKIP",
       "LOOKUP_FK",
+      "JSON_EXTRACT",
+      "LINEAGE_SOURCE_NK",
     ]) {
       expect(SUPPORTED_TRANSFORMS.has(code)).toBe(true);
     }
   });
+});
 
-  it("does NOT contain JSON_EXTRACT or LINEAGE_SOURCE_NK (001b scope)", () => {
-    expect(SUPPORTED_TRANSFORMS.has("JSON_EXTRACT")).toBe(false);
-    expect(SUPPORTED_TRANSFORMS.has("LINEAGE_SOURCE_NK")).toBe(false);
+// ---------------------------------------------------------------------------
+// Goal 002 Item A — JSON_EXTRACT compile fragment
+// ---------------------------------------------------------------------------
+
+describe("compileTransform — JSON_EXTRACT (Goal 002 Item A)", () => {
+  it("happy path: $.legacy.tenant_id → ((src) -> 'legacy' -> 'tenant_id')", async () => {
+    const { InvalidJsonExtractPayloadError: _ignore } = await import(
+      "../src/modules/brownfield-wave-executor/transform-compiler.js"
+    );
+    void _ignore;
+    const r = compileTransform(baseInput("JSON_EXTRACT", { path: "$.legacy.tenant_id" }));
+    expect(r.fragment?.sql).toBe(`((${SRC}) -> 'legacy' -> 'tenant_id')`);
+    expect(r.targetColumn).toBe("target_col");
+  });
+
+  it("depth 1: $.legacy → ((src) -> 'legacy')", () => {
+    const r = compileTransform(baseInput("JSON_EXTRACT", { path: "$.legacy" }));
+    expect(r.fragment?.sql).toBe(`((${SRC}) -> 'legacy')`);
+  });
+
+  it("bracket outlier $.phases[].order → literal jsonb key chain", () => {
+    const r = compileTransform(baseInput("JSON_EXTRACT", { path: "$.phases[].order" }));
+    expect(r.fragment?.sql).toBe(`((${SRC}) -> 'phases[]' -> 'order')`);
+  });
+
+  it("adversarial quote-injection: $.legacy.foo';DROP TABLE-- → escaped %L", () => {
+    const r = compileTransform(
+      baseInput("JSON_EXTRACT", { path: "$.legacy.foo';DROP TABLE--" }),
+    );
+    // pg-format %L doubles the embedded single quote
+    expect(r.fragment?.sql).toBe(`((${SRC}) -> 'legacy' -> 'foo'';DROP TABLE--')`);
+  });
+
+  it("adversarial SQL keyword: $.legacy.SELECT → literal jsonb key 'SELECT'", () => {
+    const r = compileTransform(baseInput("JSON_EXTRACT", { path: "$.legacy.SELECT" }));
+    expect(r.fragment?.sql).toBe(`((${SRC}) -> 'legacy' -> 'SELECT')`);
+  });
+
+  it("adversarial dollar-quoting: $.legacy.$$evil$$ → literal jsonb key", () => {
+    const r = compileTransform(baseInput("JSON_EXTRACT", { path: "$.legacy.$$evil$$" }));
+    expect(r.fragment?.sql).toBe(`((${SRC}) -> 'legacy' -> '$$evil$$')`);
+  });
+
+  it("empty path string → NULL::jsonb fallback (no throw)", () => {
+    const r = compileTransform(baseInput("JSON_EXTRACT", { path: "" }));
+    expect(r.fragment?.sql).toBe("NULL::jsonb");
+  });
+
+  it("missing path key → InvalidJsonExtractPayloadError", async () => {
+    const { InvalidJsonExtractPayloadError } = await import(
+      "../src/modules/brownfield-wave-executor/transform-compiler.js"
+    );
+    expect(() => compileTransform(baseInput("JSON_EXTRACT", {}))).toThrowError(
+      InvalidJsonExtractPayloadError,
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Goal 002 Item B — LINEAGE_SOURCE_NK compile fragment
+// ---------------------------------------------------------------------------
+
+describe("compileTransform — LINEAGE_SOURCE_NK (Goal 002 Item B)", () => {
+  it("returns fragment=null (handled by lineage write path)", () => {
+    const r = compileTransform(baseInput("LINEAGE_SOURCE_NK", { note: "legacy PK on lineage row" }));
+    expect(r.fragment).toBeNull();
+  });
+
+  it("preserves targetColumn for caller routing", () => {
+    const r = compileTransform(
+      baseInput("LINEAGE_SOURCE_NK", { note: "x" }, { targetColumn: "skill_id" }),
+    );
+    expect(r.targetColumn).toBe("skill_id");
+  });
+
+  it("SUPPORTED_TRANSFORMS contains LINEAGE_SOURCE_NK", () => {
+    expect(SUPPORTED_TRANSFORMS.has("LINEAGE_SOURCE_NK")).toBe(true);
   });
 });

@@ -115,8 +115,10 @@ export async function executeUpsertSqlSidePerMapping(
 
   const colEntries: ColEntry[] = [];
 
-  // 1. Compiled fragments from mechanical column_mappings
+  // 1. Compiled fragments from mechanical column_mappings.
+  // JSON_EXTRACT cms are handled separately below (Goal 002 Item D aggregation).
   for (const cm of columnMappings) {
+    if (cm.transform === "JSON_EXTRACT") continue; // handled by JE aggregation step
     if (!targetMeta.columns.has(cm.target_column)) continue;
     let compiled;
     try {
@@ -154,6 +156,66 @@ export async function executeUpsertSqlSidePerMapping(
     if (!colEntries.some((e) => e.targetCol === cm.target_column)) {
       colEntries.push({ targetCol: cm.target_column, sql: frag });
     }
+  }
+
+  // 1b. Goal 002 Item D: JSON_EXTRACT aggregation per target_column.
+  // GROUP all JSON_EXTRACT cms by target_column; emit one jsonb_build_object
+  // SELECT entry per (target_column) group with keys derived from
+  // lastSegment(payload.path) after stripping `$.legacy.` (or `$.`).
+  // Mixed-transform guard: skip group if target_column already has an entry
+  // from the mechanical loop above. Type guard: skip group if target is not jsonb.
+  const jsonExtractGroups = new Map<string, ColumnMappingRow[]>();
+  for (const cm of columnMappings) {
+    if (cm.transform !== "JSON_EXTRACT") continue;
+    if (!targetMeta.columns.has(cm.target_column)) continue;
+    if (!jsonExtractGroups.has(cm.target_column)) {
+      jsonExtractGroups.set(cm.target_column, []);
+    }
+    jsonExtractGroups.get(cm.target_column)!.push(cm);
+  }
+
+  function jsonExtractKey(path: string): string {
+    const stripped = path.replace(/^\$\.legacy\./, "").replace(/^\$\./, "");
+    const segs = stripped.split(".").filter((s) => s.length > 0);
+    return segs[segs.length - 1] ?? stripped;
+  }
+
+  for (const [targetCol, cms] of jsonExtractGroups) {
+    if (targetMeta.columnTypes.get(targetCol) !== "jsonb") {
+      // §2.5.3 type guard: JE into non-jsonb target → skip silently
+      // (engine-side validation would catch this earlier in well-formed registries)
+      continue;
+    }
+    if (colEntries.some((e) => e.targetCol === targetCol)) {
+      // §2.5.3 mixed-transform guard: a non-JE mapping already populates this
+      // target_column → ambiguous semantics → skip JE group, keep mechanical entry
+      continue;
+    }
+    const pairs: string[] = [];
+    for (const cm of cms) {
+      const path = (cm.transform_payload as Record<string, unknown> | null)?.["path"];
+      if (typeof path !== "string") continue;
+      const key = jsonExtractKey(path);
+      let compiled;
+      try {
+        compiled = compileTransform({
+          transformCode: "JSON_EXTRACT",
+          payload: cm.transform_payload ?? {},
+          srcExpr: "staging_raw_record", // raw jsonb root, NOT ->>%L
+          targetColumn: cm.target_column,
+          mappingId: cm.column_mapping_id,
+        });
+      } catch {
+        continue; // malformed payload, skip this cm
+      }
+      if (compiled.fragment === null) continue;
+      pairs.push(`${format("%L", key)}, ${compiled.fragment.sql}`);
+    }
+    if (pairs.length === 0) continue;
+    colEntries.push({
+      targetCol,
+      sql: `jsonb_build_object(${pairs.join(", ")})`,
+    });
   }
 
   // 2. NK col fallback for missing non-UUID NK cols

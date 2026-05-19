@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@heuresys/ui": "link:../../../ux-design-shared/ui",
-    "next": "15.5.16",
+    "next": "15.5.18",
     "react": "19.2.5",
     "react-dom": "19.2.5"
   },

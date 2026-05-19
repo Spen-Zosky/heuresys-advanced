@@ -168,6 +168,8 @@ export async function executeUpsertSqlSidePerMapping(
           date: "DATE",
           timestamptz: "TIMESTAMPTZ",
           timestamp: "TIMESTAMP",
+          jsonb: "JSONB",
+          json: "JSON",
         };
         const pgType = TYPE_CAST_MAP[colType];
         if (pgType) {

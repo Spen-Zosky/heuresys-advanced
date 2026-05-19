@@ -382,10 +382,18 @@ export function compileTransform(input: ColumnMappingInput): CompileResult {
         : short.endsWith("s") && !short.endsWith("ss")
           ? short.slice(0, -1)
           : short;
+      // PK overrides for tables whose PK name doesn't follow the depluralized
+      // <short>_id convention. Verified via pg_constraint scan EXEC step 8:
+      //   sys_tenancies                  → tenant_id      (NOT tenancy_id)
+      //   sys_blueprint_process_registry → blueprint_process_id (drops "registry")
+      const PK_OVERRIDES: Record<string, string> = {
+        sys_tenancies: "tenant_id",
+        sys_blueprint_process_registry: "blueprint_process_id",
+      };
       const returnCol =
         typeof payload?.return_col === "string" && (payload.return_col as string).length > 0
           ? (payload.return_col as string)
-          : `${singular}_id`;
+          : (PK_OVERRIDES[targetTable] ?? `${singular}_id`);
       if (!/^[a-z_][a-z0-9_]*$/.test(returnCol)) {
         throw new InvalidLookupFkPayloadError(
           `payload.return_col "${returnCol}" must be a plain column name ` +

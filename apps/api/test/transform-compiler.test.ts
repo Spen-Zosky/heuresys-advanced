@@ -190,7 +190,11 @@ describe("compileTransform — LOOKUP_FK (Goal 002 Item C: match_on payload)", (
     expect(sql).not.toContain(SRC);
   });
 
-  it("expression form with quoted key: match_on=metadata->>'legacy_id' → escaped %L", () => {
+  it("Goal 003 Item F P1: form (b) <X>_metadata->>'legacy_id' (quoted) → lineage-records JOIN", () => {
+    // EXEC §F diagnostic 2026-05-19T22:07Z proved sys.*_metadata.legacy_id
+    // is never populated → original form (b) emission resolves NULL →
+    // silent WHERE-skip-filter exclusion. P1 fix: redirect to lineage-records
+    // JOIN which deterministically maps legacy source_record_id → target row PK.
     const r = compileTransform(
       baseInput("LOOKUP_FK", {
         target_table: "sys_learning_modules",
@@ -198,22 +202,45 @@ describe("compileTransform — LOOKUP_FK (Goal 002 Item C: match_on payload)", (
       }),
     );
     const sql = r.fragment!.sql;
-    expect(sql).toContain("learning_module_metadata->>'legacy_id'");
-    expect(sql).toContain("sys_learning_modules");
+    expect(sql).toContain("sys.sys_source_lineage_records");
+    expect(sql).toContain("source_lineage_target_record_id");
+    expect(sql).toContain("source_lineage_source_record_id");
+    expect(sql).toContain("source_lineage_target_table_name");
+    expect(sql).toContain("'sys_learning_modules'");
+    expect(sql).toContain(`= (${SRC})`);
+    expect(sql).toContain("LIMIT 1");
+    // The new SQL does NOT reference the (broken) metadata->>legacy_id path
+    expect(sql).not.toContain("learning_module_metadata");
   });
 
-  it("expression form WITHOUT quoted key (real-data form): match_on=metadata->>legacy_id → auto-quoted", () => {
-    // R2 amendment: real payloads in brownfield.column_mappings have NO quotes
-    // around the jsonb key (e.g. "learning_module_metadata->>legacy_id").
-    // Compiler auto-quotes the key during SQL emission for uniformity.
+  it("Goal 003 Item F P1: form (b) without quotes (real-data form) → same lineage-records JOIN", () => {
+    // R2 amendment legacy: real payloads have NO quotes around jsonb key.
+    // Both quoted and unquoted variants are intercepted by P1.
     const r = compileTransform(
       baseInput("LOOKUP_FK", {
-        target_table: "sys_learning_modules",
-        match_on: "learning_module_metadata->>legacy_id",
+        target_table: "sys_skills",
+        match_on: "skill_metadata->>legacy_id",
       }),
     );
     const sql = r.fragment!.sql;
-    expect(sql).toContain("learning_module_metadata->>'legacy_id'");
+    expect(sql).toContain("sys.sys_source_lineage_records");
+    expect(sql).toContain("'sys_skills'");
+    expect(sql).not.toContain("skill_metadata");
+  });
+
+  it("Goal 003 Item F P1: form (b) with NON-'legacy_id' key bypasses P1 → standard form (b)", () => {
+    // Scope-lock: only matchKey === 'legacy_id' redirects to lineage JOIN.
+    // Other matchKey values (e.g. 'external_code') keep standard emission.
+    const r = compileTransform(
+      baseInput("LOOKUP_FK", {
+        target_table: "sys_skills",
+        match_on: "skill_metadata->>'external_code'",
+      }),
+    );
+    const sql = r.fragment!.sql;
+    expect(sql).toContain("skill_metadata->>'external_code'");
+    expect(sql).toContain("sys_skills");
+    expect(sql).not.toContain("sys.sys_source_lineage_records");
   });
 
   it("explicit return_col override (plain column form)", () => {

@@ -403,6 +403,35 @@ export function compileTransform(input: ColumnMappingInput): CompileResult {
       }
       const matchCol = matched[1]!;
       const matchKey = matched[2]; // undefined for plain-column form
+
+      // Goal 003 Item F P1 — form (b) <X>_metadata->>'legacy_id' rewrites as
+      // a deterministic JOIN through sys.sys_source_lineage_records.
+      //
+      // EXEC §F diagnostic 2026-05-19T22:07Z proved that sys.*_metadata jsonb
+      // columns NEVER contain 'legacy_id' key (0/6037 sys_skills + 0/4488
+      // sys_learning_modules + 0/3227 sys_learning_paths verified). The
+      // original form (b) emission `WHERE <X>_metadata->>'legacy_id' = src`
+      // therefore resolves to NULL, triggering upsert-sql WHERE skip filter
+      // (silent skip with no audit class).
+      //
+      // The canonical "legacy_record_id → target sys.* row PK" mapping lives
+      // in sys.sys_source_lineage_records (populated by every successful
+      // brownfield upsert). The lineage UNIQUE constraint on
+      // (source_system, source_table, source_record_id, target_table_name)
+      // guarantees a deterministic 1-row lookup.
+      //
+      // Scope-lock to matchKey === 'legacy_id' per Goal 003 Item F P1
+      // (Cowork CHECKPOINT 2026-05-19T22:30Z). Future jsonb keys (e.g.
+      // 'external_code') are out-of-scope and follow standard form (b)
+      // emission.
+      if (matchKey === "legacy_id") {
+        const sql = format(
+          "(SELECT slr.source_lineage_target_record_id FROM sys.sys_source_lineage_records slr WHERE slr.source_lineage_source_record_id = (%s) AND slr.source_lineage_target_table_name = %L LIMIT 1)",
+          srcExpr,
+          targetTable,
+        );
+        return { fragment: { sql }, targetColumn };
+      }
       const short = targetTable.replace(/^sys_/, "");
       // Depluralize the table-name short form to derive the conventional PK:
       //   sys_tenancies   → tenancy_id   (was tenancies_id, did not exist)

@@ -335,6 +335,14 @@ export function compileTransform(input: ColumnMappingInput): CompileResult {
     }
 
     case "LOOKUP_FK": {
+      // Goal 002 Item C: read payload.match_on from the registry instead of
+      // inventing column names via target_table convention. Accepted forms
+      // (real-data observed in Goal 002 EXEC step 0 R2 pre-check):
+      //   - plain column:    "legacy_tenant_id"                     (33/49)
+      //   - jsonb extract:   "metadata->>legacy_id" (NO quotes)     (16/49)
+      // PLAN §2.4.1 regex amended to also accept the quoted variant
+      // "metadata->>'legacy_id'" for forward compatibility; quotes auto-added
+      // during compile so SQL emission is uniform.
       const targetTable = payload?.target_table;
       if (typeof targetTable !== "string" || targetTable.length === 0) {
         throw new InvalidLookupFkPayloadError(
@@ -342,36 +350,46 @@ export function compileTransform(input: ColumnMappingInput): CompileResult {
           mappingId,
         );
       }
+      const matchOn = payload?.match_on;
+      if (typeof matchOn !== "string" || matchOn.length === 0) {
+        throw new InvalidLookupFkPayloadError(
+          `payload.match_on missing or not a non-empty string`,
+          mappingId,
+        );
+      }
+      const matchOnRegex = /^([a-z_][a-z0-9_]*)(?:->>'?([a-z_][a-z0-9_]*)'?)?$/;
+      const matched = matchOnRegex.exec(matchOn);
+      if (!matched) {
+        throw new InvalidLookupFkPayloadError(
+          `payload.match_on "${matchOn}" does not match accepted forms ` +
+            `(plain column or single-step jsonb extract)`,
+          mappingId,
+        );
+      }
+      const matchCol = matched[1]!;
+      const matchKey = matched[2]; // undefined for plain-column form
       const short = targetTable.replace(/^sys_/, "");
       const returnCol =
         typeof payload?.return_col === "string" && (payload.return_col as string).length > 0
           ? (payload.return_col as string)
           : `${short}_id`;
-      const lookupColPrimary =
-        typeof payload?.lookup_col === "string" && (payload.lookup_col as string).length > 0
-          ? (payload.lookup_col as string)
-          : `${short}_external_id`;
-      // Secondary lookup candidate. The engine's JS-side buildFkLookup
-      // (transforms.ts) tries multiple columns from a candidate list;
-      // here we emit a 2-candidate OR. If a candidate column does not
-      // exist on the target schema, the runtime UPSERT will fail for
-      // that mapping and be caught by the engine's SAVEPOINT mechanism
-      // (logged in audit.import_validation_results as a data-quality
-      // failure rather than crashing the whole wave).
-      const lookupColSecondary =
-        typeof payload?.lookup_col_secondary === "string" &&
-        (payload.lookup_col_secondary as string).length > 0
-          ? (payload.lookup_col_secondary as string)
-          : `${short}_code`;
-      // pg-format %I escapes identifiers; %s interpolates already-safe srcExpr.
+      if (!/^[a-z_][a-z0-9_]*$/.test(returnCol)) {
+        throw new InvalidLookupFkPayloadError(
+          `payload.return_col "${returnCol}" must be a plain column name ` +
+            `(PK columns are always plain)`,
+          mappingId,
+        );
+      }
+      // pg-format: %I escapes identifiers, %L escapes literals,
+      // %s interpolates already-safe srcExpr.
+      const whereClause = matchKey
+        ? format("%I->>%L = (%s)", matchCol, matchKey, srcExpr)
+        : format("%I = (%s)", matchCol, srcExpr);
       const sql = format(
-        "(SELECT %I FROM sys.%I WHERE %I = (%s) OR %I = (%s) LIMIT 1)",
+        "(SELECT %I FROM sys.%I WHERE %s LIMIT 1)",
         returnCol,
         targetTable,
-        lookupColPrimary,
-        srcExpr,
-        lookupColSecondary,
-        srcExpr,
+        whereClause,
       );
       return { fragment: { sql }, targetColumn };
     }

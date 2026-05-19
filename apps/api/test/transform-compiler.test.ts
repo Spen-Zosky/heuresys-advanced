@@ -151,25 +151,54 @@ describe("compileTransform — CONSTANT idempotency rejection (R8)", () => {
   });
 });
 
-describe("compileTransform — LOOKUP_FK", () => {
-  it("default convention with target_table only", () => {
+describe("compileTransform — LOOKUP_FK (Goal 002 Item C: match_on payload)", () => {
+  it("plain column match_on=legacy_tenant_id → WHERE legacy_tenant_id = (src)", () => {
     const r = compileTransform(
-      baseInput("LOOKUP_FK", { target_table: "sys_users", match_on: "legacy_user_id" }),
+      baseInput("LOOKUP_FK", { target_table: "sys_tenancies", match_on: "legacy_tenant_id" }),
     );
     expect(r.fragment).not.toBeNull();
     const sql = r.fragment!.sql;
-    expect(sql).toContain("sys_users");
-    expect(sql).toContain("users_id");
-    expect(sql).toContain("users_external_id");
-    expect(sql).toContain("users_code");
+    // pg-format %I leaves safe identifiers unquoted; assertions use bare names
+    expect(sql).toContain("sys_tenancies");
+    expect(sql).toContain("legacy_tenant_id");
+    expect(sql).toContain("tenancies_id");
+    expect(sql).toContain(`= (${SRC})`);
     expect(sql).toContain("LIMIT 1");
+    // No multi-OR clause anymore — secondary convention removed (PLAN §2.2 Item C)
+    expect(sql).not.toContain(" OR ");
   });
 
-  it("explicit lookup_col + return_col override", () => {
+  it("expression form with quoted key: match_on=metadata->>'legacy_id' → escaped %L", () => {
+    const r = compileTransform(
+      baseInput("LOOKUP_FK", {
+        target_table: "sys_learning_modules",
+        match_on: "learning_module_metadata->>'legacy_id'",
+      }),
+    );
+    const sql = r.fragment!.sql;
+    expect(sql).toContain("learning_module_metadata->>'legacy_id'");
+    expect(sql).toContain("sys_learning_modules");
+  });
+
+  it("expression form WITHOUT quoted key (real-data form): match_on=metadata->>legacy_id → auto-quoted", () => {
+    // R2 amendment: real payloads in brownfield.column_mappings have NO quotes
+    // around the jsonb key (e.g. "learning_module_metadata->>legacy_id").
+    // Compiler auto-quotes the key during SQL emission for uniformity.
+    const r = compileTransform(
+      baseInput("LOOKUP_FK", {
+        target_table: "sys_learning_modules",
+        match_on: "learning_module_metadata->>legacy_id",
+      }),
+    );
+    const sql = r.fragment!.sql;
+    expect(sql).toContain("learning_module_metadata->>'legacy_id'");
+  });
+
+  it("explicit return_col override (plain column form)", () => {
     const r = compileTransform(
       baseInput("LOOKUP_FK", {
         target_table: "sys_skill_categories",
-        lookup_col: "skill_category_code",
+        match_on: "skill_category_code",
         return_col: "skill_category_id",
       }),
     );
@@ -179,35 +208,63 @@ describe("compileTransform — LOOKUP_FK", () => {
     expect(sql).toContain("sys_skill_categories");
   });
 
-  it("explicit lookup_col_secondary override", () => {
-    const r = compileTransform(
-      baseInput("LOOKUP_FK", {
-        target_table: "sys_users",
-        lookup_col: "user_email",
-        lookup_col_secondary: "user_external_id",
-      }),
-    );
-    const sql = r.fragment!.sql;
-    expect(sql).toContain("user_email");
-    expect(sql).toContain("user_external_id");
+  it("rejects missing match_on", () => {
+    expect(() =>
+      compileTransform(baseInput("LOOKUP_FK", { target_table: "sys_users" })),
+    ).toThrow(InvalidLookupFkPayloadError);
+  });
+
+  it("adversarial: match_on with quote-injection → InvalidLookupFkPayloadError", () => {
+    expect(() =>
+      compileTransform(
+        baseInput("LOOKUP_FK", {
+          target_table: "sys_users",
+          match_on: "legacy';DROP TABLE--",
+        }),
+      ),
+    ).toThrow(InvalidLookupFkPayloadError);
+  });
+
+  it("adversarial: match_on chained extract col->>'a'->>'b' → InvalidLookupFkPayloadError", () => {
+    expect(() =>
+      compileTransform(
+        baseInput("LOOKUP_FK", {
+          target_table: "sys_users",
+          match_on: "metadata->>'a'->>'b'",
+        }),
+      ),
+    ).toThrow(InvalidLookupFkPayloadError);
+  });
+
+  it("adversarial: match_on appended statement col->>'k';DROP-- → InvalidLookupFkPayloadError", () => {
+    expect(() =>
+      compileTransform(
+        baseInput("LOOKUP_FK", {
+          target_table: "sys_users",
+          match_on: "col->>'k';DROP--",
+        }),
+      ),
+    ).toThrow(InvalidLookupFkPayloadError);
   });
 
   it("rejects missing target_table", () => {
-    expect(() => compileTransform(baseInput("LOOKUP_FK", {}))).toThrow(
+    expect(() => compileTransform(baseInput("LOOKUP_FK", { match_on: "x" }))).toThrow(
       InvalidLookupFkPayloadError,
     );
   });
 
   it("rejects non-string target_table", () => {
     expect(() =>
-      compileTransform(baseInput("LOOKUP_FK", { target_table: 123 } as Record<string, unknown>)),
+      compileTransform(
+        baseInput("LOOKUP_FK", { target_table: 123, match_on: "x" } as Record<string, unknown>),
+      ),
     ).toThrow(InvalidLookupFkPayloadError);
   });
 
   it("rejects empty target_table", () => {
-    expect(() => compileTransform(baseInput("LOOKUP_FK", { target_table: "" }))).toThrow(
-      InvalidLookupFkPayloadError,
-    );
+    expect(() =>
+      compileTransform(baseInput("LOOKUP_FK", { target_table: "", match_on: "x" })),
+    ).toThrow(InvalidLookupFkPayloadError);
   });
 });
 
@@ -278,25 +335,31 @@ describe("compileTransform — SQL injection adversarial (A14)", () => {
     expect(r.fragment!.sql).toMatch(/^'.+'$/);
   });
 
-  it("LOOKUP_FK target_table injection — quoted inert via %I", () => {
+  it("LOOKUP_FK target_table injection — rejected via return_col plain-name validation (Goal 002 Item C)", () => {
+    // Defense-in-depth: malformed target_table cascades to a malformed default
+    // return_col (`<short>_id`) which the plain-column whitelist regex rejects.
+    // Throwing at compile time is preferable to emitting %I-quoted-but-still-
+    // semantically-wrong SQL that PG would reject at runtime.
     const payload = {
       target_table: "sys; DROP TABLE sys_skills; --",
       match_on: "legacy_id",
     };
-    const r = compileTransform(baseInput("LOOKUP_FK", payload));
-    expect(r.fragment).not.toBeNull();
-    expect(emittedSqlIsSafe(r.fragment!.sql)).toBe(true);
+    expect(() => compileTransform(baseInput("LOOKUP_FK", payload))).toThrow(
+      InvalidLookupFkPayloadError,
+    );
   });
 
-  it("LOOKUP_FK lookup_col injection — quoted inert via %I", () => {
+  it("LOOKUP_FK return_col injection attempt — rejected at compile time", () => {
+    // Explicit return_col with injection payload must be rejected by the
+    // plain-name regex (PK columns are always plain identifiers).
     const payload = {
       target_table: "sys_users",
-      lookup_col: "user_external_id\"; DROP TABLE sys_users; --",
       match_on: "legacy_id",
+      return_col: "user_id\"; DROP TABLE sys_users; --",
     };
-    const r = compileTransform(baseInput("LOOKUP_FK", payload));
-    expect(r.fragment).not.toBeNull();
-    expect(emittedSqlIsSafe(r.fragment!.sql)).toBe(true);
+    expect(() => compileTransform(baseInput("LOOKUP_FK", payload))).toThrow(
+      InvalidLookupFkPayloadError,
+    );
   });
 
   it("CONSTANT idempotency violation: now() — rejected at compile time", () => {

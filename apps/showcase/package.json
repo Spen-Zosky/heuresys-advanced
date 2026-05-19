@@ -13,8 +13,8 @@
   "dependencies": {
     "@heuresys/ui": "link:../../../ux-design-shared/ui",
     "next": "15.5.18",
-    "react": "19.2.5",
-    "react-dom": "19.2.5"
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.0",
@@ -22,7 +22,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "cross-env": "7.0.3",
-    "postcss": "^8.5.10",
+    "postcss": "^8.5.14",
     "tailwindcss": "4.3.0",
     "typescript": "5.7.2"
   }

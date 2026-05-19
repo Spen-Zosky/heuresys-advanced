@@ -57,7 +57,18 @@ jobs:
           cache: pnpm
           cache-dependency-path: heuresys-advanced/pnpm-lock.yaml
 
-      - name: Install
+      # ux-design-shared uses npm (its package-lock.json is committed) and its
+      # @heuresys/ui package re-exports React components from
+      # `ui/src/components/brand/candidates/Logo*.tsx`. Those files import
+      # `react` types — which need to resolve through ux-design-shared/ui's
+      # own node_modules during Next.js's transpilePackages typecheck step.
+      # Locally this works because the user ran `npm install` in
+      # ux-design-shared once at setup; in CI we replay it.
+      - name: Install ux-design-shared deps (for @types/react resolution)
+        working-directory: ux-design-shared
+        run: npm install --legacy-peer-deps --ignore-scripts --prefer-offline --no-audit --no-fund
+
+      - name: Install heuresys-advanced
         working-directory: heuresys-advanced
         run: pnpm install --frozen-lockfile
 

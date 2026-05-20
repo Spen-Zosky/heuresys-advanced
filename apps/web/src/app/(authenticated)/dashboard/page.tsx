@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { KPIStrip, type KpiCardData } from "@heuresys/ui";
 import { apiFetch } from "../../../lib/api/fetch";
 
 interface DashboardWidgets {
@@ -58,61 +58,29 @@ export default function DashboardPage() {
         </p>
       </header>
 
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="dashboard-counters">
-        {w.counters.tenants !== null && (
-          <Card>
-            <CardHeader><CardTitle>Tenants</CardTitle></CardHeader>
-            <CardContent>
-              <p className="text-3xl font-semibold" data-testid="counter-tenants">{w.counters.tenants}</p>
-            </CardContent>
-          </Card>
-        )}
-        <Card>
-          <CardHeader><CardTitle>Utenti</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold" data-testid="counter-users">{w.counters.users}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Posizioni</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold" data-testid="counter-positions">{w.counters.positions}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Org Units</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold" data-testid="counter-ous">{w.counters.organizationUnits}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Learning Paths</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold" data-testid="counter-learning">{w.counters.learningPaths}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader><CardTitle>Learning Gaps</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-3xl font-semibold" data-testid="counter-gaps">{w.counters.learningGaps}</p>
-          </CardContent>
-        </Card>
-        {w.counters.blueprints !== null && (
-          <Card>
-            <CardHeader><CardTitle>Blueprints</CardTitle></CardHeader>
-            <CardContent>
-              <p className="text-3xl font-semibold" data-testid="counter-blueprints">{w.counters.blueprints}</p>
-            </CardContent>
-          </Card>
-        )}
-        {w.counters.pendingRecommendations !== null && (
-          <Card>
-            <CardHeader><CardTitle>Reward proposte</CardTitle></CardHeader>
-            <CardContent>
-              <p className="text-3xl font-semibold" data-testid="counter-recommendations">{w.counters.pendingRecommendations}</p>
-            </CardContent>
-          </Card>
-        )}
+      <section data-testid="dashboard-counters">
+        <KPIStrip items={[
+          ...(w.counters.tenants !== null ? [{
+            label: "Tenants",
+            value: <span data-testid="counter-tenants">{w.counters.tenants}</span>,
+            iconTone: "palette-1" as const,
+          } satisfies KpiCardData] : []),
+          { label: "Utenti", value: <span data-testid="counter-users">{w.counters.users}</span>, iconTone: "palette-2" },
+          { label: "Posizioni", value: <span data-testid="counter-positions">{w.counters.positions}</span>, iconTone: "palette-1" },
+          { label: "Org Units", value: <span data-testid="counter-ous">{w.counters.organizationUnits}</span>, iconTone: "palette-3" },
+          { label: "Learning Paths", value: <span data-testid="counter-learning">{w.counters.learningPaths}</span>, iconTone: "palette-4" },
+          { label: "Learning Gaps", value: <span data-testid="counter-gaps">{w.counters.learningGaps}</span>, iconTone: "warning" },
+          ...(w.counters.blueprints !== null ? [{
+            label: "Blueprints",
+            value: <span data-testid="counter-blueprints">{w.counters.blueprints}</span>,
+            iconTone: "palette-2" as const,
+          } satisfies KpiCardData] : []),
+          ...(w.counters.pendingRecommendations !== null ? [{
+            label: "Reward proposte",
+            value: <span data-testid="counter-recommendations">{w.counters.pendingRecommendations}</span>,
+            iconTone: "info" as const,
+          } satisfies KpiCardData] : []),
+        ]} />
       </section>
 
       <section data-testid="dashboard-deadlines">

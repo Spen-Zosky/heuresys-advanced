@@ -10,6 +10,7 @@
  */
 
 @import "@heuresys/ui/styles";
+/* Universal hover affordance is included in @heuresys/ui globals.css */
 
 :root {
   /* Surface — Blue Primary, light mode (default) */

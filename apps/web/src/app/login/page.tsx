@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, HeuresysWordmark, Input } from "@heuresys/ui";
 import { useLogin } from "../../lib/api/auth";
 import { isApiError } from "../../lib/api/errors";
 import { landingForRoles } from "../../lib/landing";
@@ -70,8 +70,11 @@ export default function LoginPage() {
     >
       <Card className="w-full max-w-md shadow-sm">
         <CardHeader>
-          <CardTitle data-testid="login-title">{t("auth.login.title")}</CardTitle>
-          <p className="text-sm opacity-70 mt-1">{t("auth.login.subtitle")}</p>
+          <div className="mb-4 flex items-center justify-center">
+            <HeuresysWordmark variant="brand" size="hero" as="h1" aria-label="Heuresys" />
+          </div>
+          <CardTitle data-testid="login-title" className="text-center">{t("auth.login.title")}</CardTitle>
+          <p className="text-sm opacity-70 mt-1 text-center">{t("auth.login.subtitle")}</p>
         </CardHeader>
         <CardContent>
           <form

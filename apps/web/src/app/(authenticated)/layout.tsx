@@ -3,10 +3,12 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button } from "@heuresys/ui";
+import { Button, HeuresysWordmark } from "@heuresys/ui";
 import { useCurrentUser, useLogout } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { landingForRoles } from "../../lib/landing";
+import { PaletteSwitcher } from "../../lib/theme/PaletteSwitcher";
+import { ThemeToggle } from "../../lib/theme/ThemeToggle";
 
 const ADMIN_ROLES = new Set([
   "PLATFORM_ADMIN",
@@ -53,11 +55,11 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b bg-white">
+      <header className="border-b border-[var(--border)] bg-[var(--background)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--background)]/75">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href={landing} className="font-semibold" data-testid="app-brand">
-              Heuresys
+            <Link href={landing} className="flex items-center" data-testid="app-brand" aria-label="Heuresys — home">
+              <HeuresysWordmark variant="brand" size="md" />
             </Link>
             <nav className="flex items-center gap-4 text-sm" data-testid="app-nav">
               {hasAdminRole && (
@@ -71,6 +73,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm">
+            <PaletteSwitcher />
+            <ThemeToggle />
             <span data-testid="app-user-email" className="opacity-70">{user.email}</span>
             <Button
               variant="outline"

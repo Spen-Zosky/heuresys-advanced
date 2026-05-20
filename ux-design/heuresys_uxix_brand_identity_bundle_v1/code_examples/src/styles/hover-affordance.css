@@ -1,0 +1,205 @@
+/* ============================================================
+   Heuresys universal hover affordance — single canonical sheet
+   ============================================================
+   Source: ux-design/prototypes/superuser-system-health.html
+   Doctrine: docs/13_best_practices_for_modern_saas_ui.md +
+             docs/09_design_system_and_tokens.md
+   Mirror at @heuresys/ui/src/styles/hover-affordance.css.
+
+   Every hoverable surface reacts to the cursor with at least
+   two cues (border-color + glow/scale/marker). Cross-hair on
+   tables eliminates pointer ambiguity in data-dense interfaces.
+   ============================================================ */
+
+/* ---------- Cards (every <article> with a border) ---------- */
+article {
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+  transform-origin: center;
+}
+article:hover {
+  border-color: hsl(var(--primary) / 0.85) !important;
+  box-shadow:
+    0 0 0 1px hsl(var(--primary) / 0.35),
+    0 6px 18px hsl(var(--primary) / 0.12),
+    var(--shadow-card, 0 1px 2px hsl(220 20% 10% / 0.06));
+  transform: scale(1.012);
+  cursor: pointer;
+  z-index: 1;
+  position: relative;
+}
+
+/* ---------- Alert banner ---------- */
+[role="alert"] {
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+[role="alert"]:hover {
+  border-color: hsl(var(--primary) / 0.85) !important;
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.3);
+}
+
+/* ---------- Table rows (every tbody row) ---------- */
+tbody tr {
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+tbody tr:hover {
+  background: hsl(var(--accent) / 0.9) !important;
+  box-shadow:
+    inset 4px 0 0 hsl(var(--primary)),
+    inset 0 1px 0 hsl(var(--primary) / 0.4),
+    inset 0 -1px 0 hsl(var(--primary) / 0.4);
+  cursor: pointer;
+}
+/* Sticky cells (frozen first column) need explicit row-hover override
+   because their own bg-card / bg-muted occludes the tr background. */
+tbody tr:hover > td.sticky,
+tbody tr:hover > td[class*="sticky"] {
+  background-color: hsl(var(--accent) / 0.9) !important;
+}
+
+/* ---------- Log stream lines ---------- */
+.log-line {
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+.log-line:hover {
+  background: hsl(var(--accent) / 0.9) !important;
+  box-shadow:
+    inset 4px 0 0 hsl(var(--info)),
+    inset 0 1px 0 hsl(var(--info) / 0.4),
+    inset 0 -1px 0 hsl(var(--info) / 0.4);
+  cursor: pointer;
+}
+
+/* ---------- Feed items: audit feed + incident timeline ---------- */
+ul[class*="divide-y"] > li,
+ol[class*="space-y"] > li {
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+ul[class*="divide-y"] > li:hover {
+  background: hsl(var(--accent) / 0.75);
+  box-shadow:
+    inset 4px 0 0 hsl(var(--primary)),
+    inset 0 1px 0 hsl(var(--primary) / 0.35),
+    inset 0 -1px 0 hsl(var(--primary) / 0.35);
+  cursor: pointer;
+}
+ol[class*="space-y"] > li:hover {
+  box-shadow:
+    inset 4px 0 0 hsl(var(--primary)),
+    inset 0 1px 0 hsl(var(--primary) / 0.35),
+    inset 0 -1px 0 hsl(var(--primary) / 0.35);
+  cursor: pointer;
+}
+
+/* ---------- Sidebar nav links ---------- */
+.nav-link {
+  border: 1px solid transparent;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+.nav-link:hover {
+  border-color: hsl(var(--primary) / 0.4);
+}
+
+/* ============================================================
+   Table cross-hair — JS toggles col-cross, cell-cross,
+   col-hover-header on mouseenter/leave of th and td.
+   Helper: lib/table-cursor.ts → attachCrossHair(table).
+   ============================================================ */
+table {
+  position: relative;
+}
+tbody td.col-cross {
+  background-color: hsl(var(--primary) / 0.08) !important;
+  transition: background-color 100ms ease;
+}
+tbody tr.row-cross > td {
+  background-color: hsl(var(--primary) / 0.06) !important;
+}
+tbody td.cell-cross {
+  background-color: hsl(var(--primary) / 0.18) !important;
+  box-shadow: inset 0 0 0 1.5px hsl(var(--primary) / 0.7);
+  position: relative;
+  z-index: 2;
+}
+thead th.col-hover-header {
+  background-color: hsl(var(--primary) / 0.15) !important;
+  color: hsl(var(--primary));
+  box-shadow: inset 0 -2px 0 hsl(var(--primary));
+}
+/* Sticky cells also need !important to beat their inline bg-card / bg-muted */
+tbody td.sticky.col-cross,
+tbody td[class*="sticky"].col-cross {
+  background-color: hsl(var(--primary) / 0.08) !important;
+}
+tbody td.sticky.cell-cross,
+tbody td[class*="sticky"].cell-cross {
+  background-color: hsl(var(--primary) / 0.18) !important;
+}
+thead th.sticky.col-hover-header,
+thead th[class*="sticky"].col-hover-header {
+  background-color: hsl(var(--primary) / 0.15) !important;
+}
+
+/* ============================================================
+   Sidebar collapsed state — body[data-sidebar="collapsed"]
+   ============================================================ */
+body[data-sidebar="collapsed"] [data-shell="grid"] {
+  grid-template-columns: 72px 1fr !important;
+}
+body[data-sidebar="collapsed"] aside .sidebar-section-label,
+body[data-sidebar="collapsed"] aside .sidebar-group-toggle,
+body[data-sidebar="collapsed"] aside .sidebar-subtree,
+body[data-sidebar="collapsed"] aside .sidebar-footer-card,
+body[data-sidebar="collapsed"] aside .nav-label,
+body[data-sidebar="collapsed"] aside .nav-aux {
+  display: none !important;
+}
+body[data-sidebar="collapsed"] aside .nav-link {
+  justify-content: center;
+}
+body[data-sidebar="collapsed"] .sidebar-icon-collapse { display: none; }
+body[data-sidebar="collapsed"] .sidebar-icon-expand   { display: block; }
+
+/* ============================================================
+   Sidebar group expand/collapse — aria-expanded driven
+   ============================================================ */
+.sidebar-group-toggle[aria-expanded="false"] + .sidebar-group-content {
+  display: none;
+}
+[data-group-chevron] {
+  transition: transform 200ms ease;
+}
+.sidebar-group-toggle[aria-expanded="false"] [data-group-chevron] {
+  transform: rotate(-90deg);
+}
+
+/* ============================================================
+   Palette dropdown chevron rotation
+   ============================================================ */
+#js-palette-trigger[aria-expanded="true"] [data-palette-chevron] {
+  transform: rotate(180deg);
+}
+
+/* ============================================================
+   prefers-reduced-motion — kill all transitions + transforms
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  article,
+  [role="alert"],
+  tbody tr,
+  .log-line,
+  ul[class*="divide-y"] > li,
+  ol[class*="space-y"] > li,
+  .nav-link,
+  [data-group-chevron],
+  [data-palette-chevron],
+  [data-shell="grid"] {
+    transition: none !important;
+    transform: none !important;
+  }
+}

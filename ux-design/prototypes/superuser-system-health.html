@@ -1,0 +1,2459 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heuresys — System Health & Observability (SUPERUSER)</title>
+  <meta name="description" content="Platform admin observability dashboard for Heuresys Advanced — cross-tenant health, RBAC cache state, audit feed, live log stream." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Exo 2"', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            background: 'hsl(var(--background))',
+            foreground: 'hsl(var(--foreground))',
+            card: 'hsl(var(--card))',
+            'card-foreground': 'hsl(var(--card-foreground))',
+            border: 'hsl(var(--border))',
+            accent: 'hsl(var(--accent))',
+            primary: 'hsl(var(--primary))',
+            muted: 'hsl(var(--muted))',
+            'muted-foreground': 'hsl(var(--muted-foreground))',
+            sidebar: 'hsl(var(--sidebar))',
+            'sidebar-foreground': 'hsl(var(--sidebar-foreground))',
+            'palette-1': 'hsl(var(--palette-1))',
+            'palette-2': 'hsl(var(--palette-2))',
+            'palette-3': 'hsl(var(--palette-3))',
+            'palette-4': 'hsl(var(--palette-4))',
+            success: 'hsl(var(--success))',
+            warning: 'hsl(var(--warning))',
+            danger: 'hsl(var(--danger))',
+            info: 'hsl(var(--info))',
+          },
+          borderRadius: {
+            card: '1rem',
+            control: '0.5rem',
+          },
+          boxShadow: {
+            card: '0 1px 2px hsl(220 50% 2% / 0.4), 0 8px 24px hsl(220 50% 2% / 0.25)',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root {
+      --font-sans: 'Exo 2', Inter, ui-sans-serif, system-ui, sans-serif;
+
+      /* Brand color scales — derived from logo anchors (see docs/09 + 10) */
+      /* Anchor at -500 = exact logo color, never used directly for text on body bg */
+      --brand-blue-50:  221 83% 96%;
+      --brand-blue-100: 221 83% 92%;
+      --brand-blue-200: 221 83% 84%;
+      --brand-blue-300: 221 83% 73%;
+      --brand-blue-400: 221 83% 62%;
+      --brand-blue-500: 221 83% 53%; /* LOGO EXACT — brand anchor */
+      --brand-blue-600: 221 83% 46%;
+      --brand-blue-700: 221 83% 38%;
+      --brand-blue-800: 221 83% 30%;
+      --brand-blue-900: 221 83% 22%;
+      --brand-blue-950: 221 83% 14%;
+      --brand-purple-50:  271 91% 96%;
+      --brand-purple-100: 271 91% 92%;
+      --brand-purple-200: 271 91% 86%;
+      --brand-purple-300: 271 91% 77%;
+      --brand-purple-400: 271 91% 70%;
+      --brand-purple-500: 271 91% 65%; /* LOGO EXACT — brand anchor */
+      --brand-purple-600: 271 91% 55%;
+      --brand-purple-700: 271 91% 45%;
+      --brand-purple-800: 271 91% 36%;
+      --brand-purple-900: 271 91% 28%;
+      --brand-purple-950: 271 91% 18%;
+
+      --background: 0 0% 100%;
+      --foreground: 224 28% 12%;
+      --card: 0 0% 100%;
+      --card-foreground: 224 28% 12%;
+      --border: 220 14% 90%;
+      --accent: 220 16% 96%;
+      /* Primary action — derived from brand-blue-700 for WCAG AAA on white */
+      --primary: var(--brand-blue-700);
+      --muted: 220 14% 96%;
+      --muted-foreground: 220 9% 46%;
+      --sidebar: 0 0% 100%;
+      --sidebar-foreground: 224 28% 12%;
+      --palette-1: 222 72% 44%;
+      --palette-2: 188 74% 38%;
+      --palette-3: 262 60% 55%;
+      --palette-4: 38 92% 50%;
+      --success: 145 63% 35%;
+      --warning: 38 92% 44%;
+      --danger: 0 72% 50%;
+      --info: 210 90% 45%;
+    }
+    .dark {
+      --background: 224 28% 7%;
+      --foreground: 220 24% 96%;
+      --card: 224 24% 10%;
+      --card-foreground: 220 24% 96%;
+      --border: 224 18% 18%;
+      /* Bumped from 14% → 22% for visible hover contrast against bg 7% */
+      --accent: 224 18% 22%;
+      /* Primary action — derived from brand-blue-400 for WCAG AA on dark bg */
+      --primary: var(--brand-blue-400);
+      --muted: 224 18% 12%;
+      --muted-foreground: 220 12% 68%;
+      --sidebar: 224 28% 6%;
+      --sidebar-foreground: 220 24% 96%;
+      --palette-1: 215 90% 62%;
+      --palette-2: 188 74% 55%;
+      --palette-3: 262 70% 70%;
+      --palette-4: 38 95% 62%;
+      --success: 145 70% 55%;
+      --warning: 38 95% 62%;
+      --danger: 0 82% 68%;
+      --info: 210 95% 65%;
+    }
+
+    html { font-family: var(--font-sans); }
+    body { font-variant-numeric: tabular-nums; }
+
+    /* tabular numerics for data density */
+    .num { font-feature-settings: 'tnum' 1, 'cv03' 1; }
+
+    /* custom scrollbar — quiet, premium */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: hsl(var(--border));
+      border-radius: 6px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.4); }
+
+    /* focus ring system-wide */
+    :focus-visible {
+      outline: 2px solid hsl(var(--primary));
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+
+    /* pulse for live indicators — respects reduced motion */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+    /* sparkline shimmer — subtle */
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    .shimmer-bar {
+      position: relative;
+      overflow: hidden;
+    }
+    .shimmer-bar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.08), transparent);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .pulse-dot,
+      .shimmer-bar::after {
+        animation: none !important;
+      }
+    }
+
+    /* log stream line entry */
+    .log-line {
+      font-family: var(--font-sans);
+      font-size: 12px;
+    }
+    .log-line .ts { color: hsl(var(--muted-foreground)); }
+    .log-line .lvl-info { color: hsl(var(--info)); }
+    .log-line .lvl-warn { color: hsl(var(--warning)); }
+    .log-line .lvl-error { color: hsl(var(--danger)); }
+    .log-line .lvl-debug { color: hsl(var(--muted-foreground)); }
+    .log-line .lvl-trace { color: hsl(var(--palette-3)); }
+
+    /* ---------- Sidebar collapsed state ---------- */
+    body[data-sidebar="collapsed"] [data-shell="grid"] {
+      grid-template-columns: 72px 1fr !important;
+    }
+    body[data-sidebar="collapsed"] aside .sidebar-section-label,
+    body[data-sidebar="collapsed"] aside .sidebar-group-toggle,
+    body[data-sidebar="collapsed"] aside .sidebar-subtree,
+    body[data-sidebar="collapsed"] aside .sidebar-footer-card,
+    body[data-sidebar="collapsed"] aside .nav-label,
+    body[data-sidebar="collapsed"] aside .nav-aux {
+      display: none !important;
+    }
+    body[data-sidebar="collapsed"] aside .nav-link {
+      justify-content: center;
+    }
+    body[data-sidebar="collapsed"] .sidebar-icon-collapse { display: none; }
+    body[data-sidebar="collapsed"] .sidebar-icon-expand   { display: block; }
+
+    /* ---------- Sidebar group expand/collapse ---------- */
+    .sidebar-group-toggle[aria-expanded="false"] + .sidebar-group-content {
+      display: none;
+    }
+    [data-group-chevron] {
+      transition: transform 200ms ease;
+    }
+    .sidebar-group-toggle[aria-expanded="false"] [data-group-chevron] {
+      transform: rotate(-90deg);
+    }
+
+    /* ---------- Palette dropdown chevron rotation ---------- */
+    #js-palette-trigger[aria-expanded="true"] [data-palette-chevron] {
+      transform: rotate(180deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [data-group-chevron],
+      [data-palette-chevron],
+      [data-shell="grid"] {
+        transition: none !important;
+      }
+    }
+
+    /* ============================================================
+       Universal hover affordance — every interactive surface
+       reacts to the cursor with a primary-tinted border/marker.
+       No layout shift (border-color swap or box-shadow inset).
+       ============================================================ */
+
+    /* Cards (every <article> with a border) — strong border + outer glow ring + magnifier scale */
+    article {
+      transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+      transform-origin: center;
+      will-change: transform;
+    }
+    article:hover {
+      border-color: hsl(var(--primary) / 0.85) !important;
+      box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), 0 6px 18px hsl(var(--primary) / 0.12), var(--shadow-card, 0 1px 2px hsl(220 20% 10% / 0.06));
+      transform: scale(1.012);
+      cursor: pointer;
+      z-index: 1;
+      position: relative;
+    }
+
+    /* Alert banner */
+    [role="alert"] {
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+    [role="alert"]:hover {
+      border-color: hsl(var(--primary) / 0.85) !important;
+      box-shadow: 0 0 0 1px hsl(var(--primary) / 0.3);
+    }
+
+    /* Table rows (every <tbody> row) — bold left marker + accent bg + bright primary outline ring */
+    tbody tr {
+      transition: background-color 150ms ease, box-shadow 150ms ease;
+    }
+    tbody tr:hover {
+      background: hsl(var(--accent) / 0.9) !important;
+      box-shadow:
+        inset 4px 0 0 hsl(var(--primary)),
+        inset 0 1px 0 hsl(var(--primary) / 0.4),
+        inset 0 -1px 0 hsl(var(--primary) / 0.4);
+      cursor: pointer;
+    }
+    /* Sticky cells (frozen first column in RBAC matrix etc.) carry their own bg-card
+       to occlude horizontal scroll. Override on row hover so the cross-hair row marker
+       reaches the first column too. */
+    tbody tr:hover > td.sticky,
+    tbody tr:hover > td[class*="sticky"] {
+      background: hsl(var(--accent) / 0.9) !important;
+    }
+
+    /* Log stream lines — info-colored bar + bg lift */
+    .log-line {
+      transition: background-color 150ms ease, box-shadow 150ms ease;
+    }
+    .log-line:hover {
+      background: hsl(var(--accent) / 0.9) !important;
+      box-shadow:
+        inset 4px 0 0 hsl(var(--info)),
+        inset 0 1px 0 hsl(var(--info) / 0.4),
+        inset 0 -1px 0 hsl(var(--info) / 0.4);
+      cursor: pointer;
+    }
+
+    /* Feed items: audit feed (ul divide-y), incident timeline (ol space-y) */
+    ul[class*="divide-y"] > li,
+    ol[class*="space-y"] > li {
+      transition: background-color 150ms ease, box-shadow 150ms ease;
+    }
+    ul[class*="divide-y"] > li:hover {
+      background: hsl(var(--accent) / 0.75);
+      box-shadow:
+        inset 4px 0 0 hsl(var(--primary)),
+        inset 0 1px 0 hsl(var(--primary) / 0.35),
+        inset 0 -1px 0 hsl(var(--primary) / 0.35);
+      cursor: pointer;
+    }
+    ol[class*="space-y"] > li:hover {
+      box-shadow:
+        inset 4px 0 0 hsl(var(--primary)),
+        inset 0 1px 0 hsl(var(--primary) / 0.35),
+        inset 0 -1px 0 hsl(var(--primary) / 0.35);
+      cursor: pointer;
+    }
+
+    /* KPI strip cards already covered by article:hover above.
+       RBAC matrix rows + SQL slow query rows already covered by tbody tr:hover.
+       Sidebar nav-link border highlight handled via Tailwind hover:border-foreground/30 (already set on some, broaden below). */
+    .nav-link {
+      border: 1px solid transparent;
+      transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+    }
+    .nav-link:hover {
+      border-color: hsl(var(--primary) / 0.4);
+    }
+
+    /* ============================================================
+       Table cross-hair — column + row + cell intersection lookup
+       JS toggles classes col-cross, row-cross, cell-cross,
+       col-hover-header on mouseenter/leave of th and td.
+       ============================================================ */
+    table {
+      position: relative;
+    }
+    tbody td.col-cross {
+      background-color: hsl(var(--primary) / 0.08) !important;
+      transition: background-color 100ms ease;
+    }
+    tbody tr.row-cross > td {
+      background-color: hsl(var(--primary) / 0.06) !important;
+    }
+    tbody td.cell-cross {
+      background-color: hsl(var(--primary) / 0.18) !important;
+      box-shadow: inset 0 0 0 1.5px hsl(var(--primary) / 0.7);
+      position: relative;
+      z-index: 2;
+    }
+    thead th.col-hover-header {
+      background-color: hsl(var(--primary) / 0.15) !important;
+      color: hsl(var(--primary));
+      box-shadow: inset 0 -2px 0 hsl(var(--primary));
+    }
+    /* Sticky cells also need !important to beat their inline-set bg-card / bg-muted */
+    tbody td.sticky.col-cross,
+    tbody td[class*="sticky"].col-cross {
+      background-color: hsl(var(--primary) / 0.08) !important;
+    }
+    tbody td.sticky.cell-cross,
+    tbody td[class*="sticky"].cell-cross {
+      background-color: hsl(var(--primary) / 0.18) !important;
+    }
+    thead th.sticky.col-hover-header,
+    thead th[class*="sticky"].col-hover-header {
+      background-color: hsl(var(--primary) / 0.15) !important;
+    }
+    /* When a th is hovered, also tint the column body cells */
+    thead th.col-hover-header ~ th { transition: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      article,
+      [role="alert"],
+      tbody tr,
+      .log-line,
+      ul[class*="divide-y"] > li,
+      ol[class*="space-y"] > li,
+      .nav-link {
+        transition: none !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="h-screen overflow-hidden bg-background text-foreground antialiased">
+  <div class="grid h-screen grid-rows-[64px_1fr_44px]">
+
+    <!-- ============== HEADER ============== -->
+    <header
+      class="z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/75"
+      role="banner"
+    >
+      <div class="flex min-w-0 items-center gap-3">
+        <button
+          type="button"
+          aria-label="Apri menu contesto globale"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-control border border-border text-muted-foreground transition hover:bg-accent hover:text-foreground hover:border-foreground/30"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+
+        <a href="#" aria-label="Heuresys advanced — pagina iniziale autenticata" class="flex items-center gap-2.5">
+          <!-- Heuresys default brand wordmark · Exo 2 700 · two-color (blue + accent "y" purple) -->
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="22 6 136 24" class="h-6 w-auto select-none" role="img" aria-label="Heuresys" preserveAspectRatio="xMidYMid meet">
+            <defs>
+              <style>
+                .heuresys-wordmark { font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; font-weight: 700; font-size: 26.6667px; line-height: 0; letter-spacing: -0.5px; }
+                .heuresys-wordmark-primary { fill: hsl(221 83% 53%); }
+                .heuresys-wordmark-accent  { fill: #a855f7; }
+              </style>
+            </defs>
+            <text x="90" y="24" text-anchor="middle" class="heuresys-wordmark">
+              <tspan class="heuresys-wordmark-primary">heures</tspan><tspan class="heuresys-wordmark-accent">y</tspan><tspan class="heuresys-wordmark-primary">s</tspan>
+            </text>
+          </svg>
+          <span class="rounded-md border border-border bg-card px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">advanced</span>
+        </a>
+
+        <span class="text-muted-foreground/40">/</span>
+
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>Platform</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+          <span class="font-medium text-foreground">System Health</span>
+        </nav>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Command palette trigger -->
+        <button
+          type="button"
+          aria-label="Apri command palette"
+          class="hidden md:inline-flex h-9 items-center gap-2 rounded-control border border-border bg-card px-3 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground hover:border-foreground/30"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Cerca tenant, log, audit…</span>
+          <kbd class="ml-2 rounded border border-border bg-background px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">⌘ K</kbd>
+        </button>
+
+        <!-- Language switch -->
+        <button
+          type="button"
+          aria-label="Cambia lingua tra italiano e inglese"
+          class="inline-flex h-9 items-center gap-2 rounded-control border border-border px-3 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground hover:border-foreground/30"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span class="font-medium">IT</span>
+        </button>
+
+        <!-- Palette switcher (dropdown menu) -->
+        <div class="relative" data-palette-menu-root>
+          <button
+            id="js-palette-trigger"
+            type="button"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls="js-palette-menu"
+            aria-label="Cambia palette accent (apri menu)"
+            class="inline-flex h-9 items-center gap-1.5 rounded-control border border-border px-2 transition hover:bg-accent hover:border-foreground/30"
+          >
+            <span class="flex gap-0.5">
+              <span class="h-4 w-4 rounded-sm bg-palette-1"></span>
+              <span class="h-4 w-4 rounded-sm bg-palette-2"></span>
+              <span class="h-4 w-4 rounded-sm bg-palette-3"></span>
+              <span class="h-4 w-4 rounded-sm bg-palette-4"></span>
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-muted-foreground transition-transform" data-palette-chevron viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+
+          <div
+            id="js-palette-menu"
+            role="listbox"
+            aria-label="Palette disponibili"
+            hidden
+            class="absolute right-0 top-full z-50 mt-1.5 w-64 overflow-hidden rounded-card border border-border bg-card shadow-card"
+          >
+            <div class="border-b border-border bg-muted/30 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Accent palette</div>
+            <ul class="py-1">
+              <li>
+                <button role="option" type="button" data-palette-idx="0" aria-selected="true"
+                        class="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-accent">
+                  <span class="flex gap-0.5 shrink-0">
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(222 80% 50%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(188 75% 45%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(262 65% 60%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(38 90% 55%)"></span>
+                  </span>
+                  <span class="min-w-0 flex-1 text-xs font-medium text-foreground">Default <span class="text-muted-foreground">· balanced</span></span>
+                  <svg class="h-3.5 w-3.5 shrink-0 text-primary" data-palette-check viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+              </li>
+              <li>
+                <button role="option" type="button" data-palette-idx="1" aria-selected="false"
+                        class="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-accent">
+                  <span class="flex gap-0.5 shrink-0">
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(178 75% 42%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(195 85% 48%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(215 85% 55%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(245 78% 60%)"></span>
+                  </span>
+                  <span class="min-w-0 flex-1 text-xs font-medium text-foreground">Cool ocean</span>
+                  <svg class="hidden h-3.5 w-3.5 shrink-0 text-primary" data-palette-check viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+              </li>
+              <li>
+                <button role="option" type="button" data-palette-idx="2" aria-selected="false"
+                        class="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-accent">
+                  <span class="flex gap-0.5 shrink-0">
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(0 80% 55%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(22 92% 55%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(38 90% 55%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(52 92% 60%)"></span>
+                  </span>
+                  <span class="min-w-0 flex-1 text-xs font-medium text-foreground">Warm sunset</span>
+                  <svg class="hidden h-3.5 w-3.5 shrink-0 text-primary" data-palette-check viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+              </li>
+              <li>
+                <button role="option" type="button" data-palette-idx="3" aria-selected="false"
+                        class="flex w-full items-center gap-3 px-3 py-2.5 text-left transition hover:bg-accent">
+                  <span class="flex gap-0.5 shrink-0">
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(221 83% 35%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(221 75% 48%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(221 65% 60%)"></span>
+                    <span class="h-4 w-4 rounded-sm" style="background:hsl(221 55% 72%)"></span>
+                  </span>
+                  <span class="min-w-0 flex-1 text-xs font-medium text-foreground">Brand mono <span class="text-muted-foreground">· brand-blue</span></span>
+                  <svg class="hidden h-3.5 w-3.5 shrink-0 text-primary" data-palette-check viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Theme toggle -->
+        <button
+          id="js-theme-toggle"
+          type="button"
+          aria-label="Alterna tema chiaro/scuro"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-control border border-border text-muted-foreground transition hover:bg-accent hover:text-foreground hover:border-foreground/30"
+        >
+          <!-- Sun: visible only in light theme -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <!-- Moon: visible only in dark theme -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="hidden h-4 w-4 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+
+        <!-- User identity card -->
+        <div class="ml-1 flex items-center gap-2 rounded-control border border-border bg-card px-2 py-1.5">
+          <span class="relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-palette-3/20 text-xs font-semibold text-palette-3">ES</span>
+          <div class="hidden flex-col leading-tight sm:flex">
+            <span class="text-xs font-medium text-foreground">enzo.spenuso</span>
+            <span class="font-mono text-[10px] uppercase tracking-wider text-warning">SUPERUSER</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============== MAIN GRID ============== -->
+    <div data-shell="grid" style="grid-template-columns: 260px 1fr !important;" class="grid min-h-0">
+
+      <!-- ============== SIDEBAR ============== -->
+      <aside
+        class="min-h-0 overflow-hidden border-r border-border bg-sidebar text-sidebar-foreground"
+        aria-label="Navigazione principale"
+      >
+        <div class="flex h-full min-h-0 flex-col">
+          <div class="flex h-11 shrink-0 items-center justify-between border-b border-border px-3">
+            <span class="sidebar-section-label text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Navigation</span>
+            <button
+              id="js-sidebar-toggle"
+              type="button"
+              aria-label="Comprimi/espandi sidebar"
+              aria-pressed="false"
+              class="inline-flex h-8 w-8 items-center justify-center rounded-control text-muted-foreground transition hover:bg-accent hover:text-foreground hover:border-foreground/30"
+            >
+              <!-- Collapse icon (visible when expanded) -->
+              <svg class="sidebar-icon-collapse h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><polyline points="14 9 11 12 14 15"/></svg>
+              <!-- Expand icon (visible when collapsed) -->
+              <svg class="sidebar-icon-expand hidden h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><polyline points="11 9 14 12 11 15"/></svg>
+            </button>
+          </div>
+
+          <nav class="min-h-0 flex-1 overflow-y-auto px-2 py-3">
+
+            <!-- Group: Platform -->
+            <div class="sidebar-group mb-3" data-group="platform">
+              <button type="button" data-group-toggle="platform" aria-expanded="true"
+                      class="sidebar-group-toggle flex w-full items-center justify-between gap-2 rounded-control px-2 py-1 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70 transition hover:text-foreground">
+                <span>Platform</span>
+                <svg data-group-chevron class="h-3 w-3 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <ul class="sidebar-group-content mt-0.5 space-y-0.5">
+                <li>
+                  <a href="#" aria-current="page" class="nav-link flex items-center justify-between gap-2 rounded-control bg-accent px-2 py-2 text-sm font-medium text-foreground">
+                    <span class="flex min-w-0 items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                      <span class="nav-label truncate">System Health</span>
+                    </span>
+                    <span class="nav-aux inline-flex h-1.5 w-1.5 rounded-full bg-success pulse-dot" aria-hidden="true"></span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" class="nav-link flex items-center justify-between gap-2 rounded-control px-2 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                    <span class="flex min-w-0 items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                      <span class="nav-label truncate">Tenant Fleet</span>
+                    </span>
+                    <span class="nav-aux font-mono text-[10px] text-muted-foreground">4</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" class="nav-link flex items-center justify-between gap-2 rounded-control px-2 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                    <span class="flex min-w-0 items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                      <span class="nav-label truncate">Live Logs</span>
+                    </span>
+                    <span class="nav-aux inline-flex h-1.5 w-1.5 rounded-full bg-info pulse-dot" aria-hidden="true"></span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" class="nav-link flex items-center justify-between gap-2 rounded-control px-2 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                    <span class="flex min-w-0 items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12l2 2 4-4"/><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c.83 0 1.64.12 2.41.33"/><path d="M22 4L12 14"/></svg>
+                      <span class="nav-label truncate">Audit Feed</span>
+                    </span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Group: Database -->
+            <div class="sidebar-group mb-3" data-group="database">
+              <button type="button" data-group-toggle="database" aria-expanded="true"
+                      class="sidebar-group-toggle flex w-full items-center justify-between gap-2 rounded-control px-2 py-1 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70 transition hover:text-foreground">
+                <span class="flex items-baseline gap-1.5">
+                  <span>Database</span>
+                  <span class="font-mono text-[9px] normal-case tracking-normal text-muted-foreground/60">pg 16</span>
+                </span>
+                <svg data-group-chevron class="h-3 w-3 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <ul class="sidebar-group-content mt-0.5 space-y-0.5">
+                <li>
+                  <a href="#" class="nav-link flex items-center justify-between gap-2 rounded-control border border-palette-2/30 bg-palette-2/5 px-2 py-2 text-sm font-medium text-foreground transition hover:bg-palette-2/10 hover:border-palette-2/50">
+                    <span class="flex min-w-0 items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-palette-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                      <span class="nav-label truncate">DB Supervisor</span>
+                    </span>
+                    <span class="nav-aux inline-flex items-center gap-0.5 rounded-sm bg-palette-2/15 px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-palette-2" title="Apre pagina con tabs dedicate per ogni oggetto DBMS">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="4"/><rect x="3" y="10" width="18" height="4"/><rect x="3" y="16" width="18" height="4"/></svg>
+                      tabs
+                    </span>
+                  </a>
+                  <!-- Preview of DB Supervisor tabs (the dedicated page) -->
+                  <ul class="sidebar-subtree mt-1 ml-3 space-y-0.5 border-l border-border/60 pl-2.5">
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Schemas</span><span class="num font-mono text-[10px] text-muted-foreground/70">5</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Tables</span><span class="num font-mono text-[10px] text-muted-foreground/70">576</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Views &amp; MViews</span><span class="num font-mono text-[10px] text-muted-foreground/70">42</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Indexes</span><span class="num font-mono text-[10px] text-muted-foreground/70">1 284</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Functions &amp; Proc.</span><span class="num font-mono text-[10px] text-muted-foreground/70">118</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Triggers</span><span class="num font-mono text-[10px] text-muted-foreground/70">63</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Sequences</span><span class="num font-mono text-[10px] text-muted-foreground/70">189</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Constraints &amp; FKs</span><span class="num font-mono text-[10px] text-muted-foreground/70">950</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Roles &amp; Grants</span><span class="num font-mono text-[10px] text-muted-foreground/70">14</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Extensions</span><span class="num font-mono text-[10px] text-muted-foreground/70">9</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Connection Pools</span><span class="num font-mono text-[10px] text-muted-foreground/70">3</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Backups &amp; PITR</span><span class="num font-mono text-[10px] text-muted-foreground/70">14d</span></a></li>
+                    <li><a href="#" class="flex items-center justify-between gap-2 rounded-control px-2 py-1 text-[12px] text-muted-foreground transition hover:bg-accent hover:text-foreground"><span>Vacuum &amp; Bloat</span><span class="num font-mono text-[10px] text-muted-foreground/70">ok</span></a></li>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Group: Administration -->
+            <div class="sidebar-group mb-3" data-group="administration">
+              <button type="button" data-group-toggle="administration" aria-expanded="true"
+                      class="sidebar-group-toggle flex w-full items-center justify-between gap-2 rounded-control px-2 py-1 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70 transition hover:text-foreground">
+                <span>Administration</span>
+                <svg data-group-chevron class="h-3 w-3 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <ul class="sidebar-group-content mt-0.5 space-y-0.5">
+                <li>
+                  <a href="#" class="nav-link flex items-center gap-2 rounded-control px-2 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span class="nav-label truncate">Platform Users</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" class="nav-link flex items-center gap-2 rounded-control px-2 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span class="nav-label truncate">RBAC Mappings</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" class="nav-link flex items-center gap-2 rounded-control px-2 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                    <span class="nav-label truncate">Migrations</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" class="nav-link flex items-center gap-2 rounded-control px-2 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span class="nav-label truncate">Configuration</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Group: Diagnostics -->
+            <div class="sidebar-group" data-group="diagnostics">
+              <button type="button" data-group-toggle="diagnostics" aria-expanded="true"
+                      class="sidebar-group-toggle flex w-full items-center justify-between gap-2 rounded-control px-2 py-1 text-left text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/70 transition hover:text-foreground">
+                <span>Diagnostics</span>
+                <svg data-group-chevron class="h-3 w-3 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <ul class="sidebar-group-content mt-0.5 space-y-0.5">
+                <li>
+                  <a href="#" class="nav-link flex items-center justify-between gap-2 rounded-control px-2 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                    <span class="flex min-w-0 items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                      <span class="nav-label truncate">Incidents</span>
+                    </span>
+                    <span class="nav-aux rounded-full bg-warning/15 px-1.5 py-0.5 font-mono text-[10px] font-medium text-warning">2</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#" class="nav-link flex items-center gap-2 rounded-control px-2 py-2 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    <span class="nav-label truncate">SQL Console</span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+
+          <!-- Sidebar footer: build info -->
+          <div class="sidebar-footer-card shrink-0 border-t border-border p-3">
+            <div class="rounded-control border border-border bg-card p-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Build</span>
+                <span class="inline-flex h-1.5 w-1.5 rounded-full bg-success" aria-hidden="true"></span>
+              </div>
+              <div class="mt-1 font-mono text-[11px] text-foreground">v5.0.0-mvp3</div>
+              <div class="font-mono text-[10px] text-muted-foreground">f065ef2 · 19 May 16:30</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ============== MAIN CONTENT ============== -->
+      <main class="min-h-0 overflow-y-auto" role="main" aria-labelledby="page-title">
+        <div class="mx-auto max-w-[1600px] space-y-5 p-6">
+
+          <!-- ============== ALERT BANNER ============== -->
+          <div role="alert" aria-live="polite" class="flex items-start gap-3 rounded-card border-l-4 border-l-warning border-y border-r border-y-warning/30 border-r-warning/30 bg-warning/5 px-4 py-3 shadow-card">
+            <span class="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warning/15 text-warning">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </span>
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <span class="text-sm font-semibold text-foreground">1 active incident · GENESIS_DEMO</span>
+                <span class="rounded-full bg-warning/15 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-warning">P2 · degraded</span>
+                <span class="text-xs text-muted-foreground">slow query rate <span class="font-mono text-warning">+340%</span> · pool util <span class="font-mono">78%</span> · error rate <span class="font-mono">4.1%</span></span>
+              </div>
+              <div class="mt-1 flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+                <span>started 16:35 · 8m ago</span>
+                <span class="opacity-50">·</span>
+                <span class="text-warning">auto-escalation to P1 in 4m if not acknowledged</span>
+                <span class="opacity-50">·</span>
+                <span>oncall: enzo.spenuso</span>
+              </div>
+            </div>
+            <div class="flex shrink-0 items-center gap-2">
+              <button type="button" class="inline-flex h-8 items-center gap-1.5 rounded-control border border-warning/40 bg-warning/10 px-3 text-xs font-medium text-warning transition hover:bg-warning/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Acknowledge
+              </button>
+              <button type="button" class="inline-flex h-8 items-center gap-1.5 rounded-control border border-border bg-card px-3 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                View incident →
+              </button>
+              <button type="button" aria-label="Chiudi banner" class="inline-flex h-8 w-8 items-center justify-center rounded-control text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Page header -->
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h1 id="page-title" class="text-2xl font-semibold tracking-tight text-foreground">System Health &amp; Observability</h1>
+                <span class="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                  <span class="inline-flex h-1.5 w-1.5 rounded-full bg-success pulse-dot" aria-hidden="true"></span>
+                  All systems operational
+                </span>
+              </div>
+              <p class="mt-1 text-sm text-muted-foreground">
+                Cross-tenant platform observability — Fastify API, PostgreSQL 16 pool, RBAC cache state, audit chain.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <div class="inline-flex items-center rounded-control border border-border bg-card p-0.5">
+                <button class="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:text-foreground">15m</button>
+                <button class="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:text-foreground">1h</button>
+                <button class="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-foreground">24h</button>
+                <button class="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:text-foreground">7d</button>
+                <button class="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:text-foreground">30d</button>
+              </div>
+
+              <button type="button" class="inline-flex h-9 items-center gap-2 rounded-control border border-border bg-card px-3 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground hover:border-foreground/30" aria-label="Aggiorna dati">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                Aggiorna
+              </button>
+
+              <button type="button" class="inline-flex h-9 items-center gap-2 rounded-control bg-primary px-3 text-sm font-medium text-background transition hover:bg-primary/90">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export report
+              </button>
+            </div>
+          </div>
+
+          <!-- ============== KPI STRIP ============== -->
+          <section aria-label="Indicatori principali" class="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+
+            <!-- KPI 1: API uptime -->
+            <article class="rounded-card border border-border bg-card p-4 shadow-card">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">API uptime · 24h</div>
+                  <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="num text-2xl font-semibold text-foreground">99.97</span>
+                    <span class="text-sm text-muted-foreground">%</span>
+                  </div>
+                </div>
+                <span class="inline-flex h-7 w-7 items-center justify-center rounded-control bg-success/10 text-success">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
+              </div>
+              <!-- inline mini-sparkline (SVG) -->
+              <svg viewBox="0 0 120 28" class="mt-3 h-7 w-full" aria-hidden="true" preserveAspectRatio="none">
+                <polyline points="0,18 10,16 20,14 30,16 40,12 50,10 60,8 70,10 80,6 90,7 100,5 110,8 120,6" fill="none" stroke="hsl(var(--success))" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="0,18 10,16 20,14 30,16 40,12 50,10 60,8 70,10 80,6 90,7 100,5 110,8 120,6 120,28 0,28" fill="hsl(var(--success) / 0.12)" stroke="none"/>
+              </svg>
+              <div class="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                <span>2 incidents</span>
+                <span class="text-success">▲ 0.04%</span>
+              </div>
+            </article>
+
+            <!-- KPI 2: DB pool -->
+            <article class="rounded-card border border-border bg-card p-4 shadow-card">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">DB pool · pg 16</div>
+                  <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="num text-2xl font-semibold text-foreground">18</span>
+                    <span class="text-sm text-muted-foreground">/ 50 conn</span>
+                  </div>
+                </div>
+                <span class="inline-flex h-7 w-7 items-center justify-center rounded-control bg-palette-2/15 text-palette-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                </span>
+              </div>
+              <div class="mt-3">
+                <div class="flex h-1.5 overflow-hidden rounded-full bg-border">
+                  <div class="bg-palette-2" style="width: 36%"></div>
+                </div>
+                <div class="mt-2 flex justify-between text-[11px] text-muted-foreground">
+                  <span class="num">idle 8 · active 10</span>
+                  <span class="num">peak 32</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- KPI 3: RBAC cache -->
+            <article class="rounded-card border border-border bg-card p-4 shadow-card">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">RBAC cache</div>
+                  <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="num text-2xl font-semibold text-foreground">388</span>
+                    <span class="text-sm text-muted-foreground">mappings</span>
+                  </div>
+                </div>
+                <span class="inline-flex h-7 w-7 items-center justify-center rounded-control bg-palette-3/15 text-palette-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+              </div>
+              <div class="mt-3 flex items-baseline justify-between text-[11px]">
+                <span class="text-muted-foreground">8 roles loaded</span>
+                <span class="font-mono text-success">LOADED</span>
+              </div>
+              <div class="mt-1 font-mono text-[10px] text-muted-foreground">last refresh · 14:38:12</div>
+            </article>
+
+            <!-- KPI 4: Active tenants -->
+            <article class="rounded-card border border-border bg-card p-4 shadow-card">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Active tenants</div>
+                  <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="num text-2xl font-semibold text-foreground">4</span>
+                    <span class="text-sm text-muted-foreground">/ 4</span>
+                  </div>
+                </div>
+                <span class="inline-flex h-7 w-7 items-center justify-center rounded-control bg-palette-1/15 text-palette-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/></svg>
+                </span>
+              </div>
+              <div class="mt-3 grid grid-cols-4 gap-1">
+                <div class="h-6 rounded-sm bg-success/40" title="RTL_BANK_REFERENCE"></div>
+                <div class="h-6 rounded-sm bg-warning/40" title="GENESIS_DEMO"></div>
+                <div class="h-6 rounded-sm bg-success/40" title="ACME_CORP"></div>
+                <div class="h-6 rounded-sm bg-success/40" title="HEURESYS_INTERNAL"></div>
+              </div>
+              <div class="mt-2 flex justify-between text-[11px] text-muted-foreground">
+                <span>270 users</span>
+                <span class="text-warning">1 warn</span>
+              </div>
+            </article>
+
+            <!-- KPI 5: Auth integrity -->
+            <article class="rounded-card border border-border bg-card p-4 shadow-card">
+              <div class="flex items-start justify-between">
+                <div>
+                  <div class="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Auth integrity</div>
+                  <div class="mt-2 flex items-baseline gap-1.5">
+                    <span class="num text-2xl font-semibold text-foreground">0</span>
+                    <span class="text-sm text-muted-foreground">replay</span>
+                  </div>
+                </div>
+                <span class="inline-flex h-7 w-7 items-center justify-center rounded-control bg-success/10 text-success">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </span>
+              </div>
+              <div class="mt-3 grid grid-cols-3 gap-2 text-[11px]">
+                <div>
+                  <div class="text-muted-foreground">Login</div>
+                  <div class="num font-medium text-foreground">142</div>
+                </div>
+                <div>
+                  <div class="text-muted-foreground">Failed</div>
+                  <div class="num font-medium text-warning">3</div>
+                </div>
+                <div>
+                  <div class="text-muted-foreground">Rotation</div>
+                  <div class="num font-medium text-foreground">87</div>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <!-- ============== TENANT FLEET (priority view) ============== -->
+          <section aria-label="Tenant fleet operativo">
+            <article class="overflow-hidden rounded-card border border-border bg-card shadow-card">
+              <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
+                <div>
+                  <h2 class="text-sm font-semibold text-foreground">Tenant fleet</h2>
+                  <p class="mt-0.5 text-xs text-muted-foreground">Cross-tenant operational status — schema metrics, brownfield import state, last activity</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="search" placeholder="Filter tenant…" aria-label="Filtra tenant per nome o codice" class="h-9 rounded-control border border-border bg-background pl-8 pr-3 text-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none" />
+                  </div>
+                  <button type="button" class="inline-flex h-9 items-center gap-2 rounded-control border border-border px-3 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground hover:border-foreground/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    Filters
+                  </button>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b border-border bg-muted/30 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                      <th class="px-5 py-2.5">Tenant</th>
+                      <th class="px-3 py-2.5">Status</th>
+                      <th class="px-3 py-2.5 text-right">Users</th>
+                      <th class="px-3 py-2.5 text-right">Tables</th>
+                      <th class="px-3 py-2.5 text-right">Errors · 1h</th>
+                      <th class="px-3 py-2.5">Last activity</th>
+                      <th class="px-3 py-2.5">Pool util.</th>
+                      <th class="px-5 py-2.5"></th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-border">
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="px-5 py-3">
+                        <div class="flex items-center gap-3">
+                          <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-palette-1/15 font-mono text-xs font-semibold text-palette-1">RB</span>
+                          <div>
+                            <div class="font-medium text-foreground">RTL_BANK_REFERENCE</div>
+                            <div class="font-mono text-[10px] text-muted-foreground">tenant_id · 01HQF7…NB3K</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-3 py-3">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                          <span class="h-1.5 w-1.5 rounded-full bg-success"></span>
+                          Healthy
+                        </span>
+                      </td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-foreground">158</td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-foreground">576</td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-muted-foreground">0</td>
+                      <td class="px-3 py-3">
+                        <span class="font-mono text-[11px] text-muted-foreground">2m ago</span>
+                      </td>
+                      <td class="px-3 py-3">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-20 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-success" style="width: 42%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-muted-foreground">42%</span>
+                        </div>
+                      </td>
+                      <td class="px-5 py-3 text-right">
+                        <button type="button" aria-label="Apri dettaglio tenant" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="px-5 py-3">
+                        <div class="flex items-center gap-3">
+                          <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-warning/15 font-mono text-xs font-semibold text-warning">GD</span>
+                          <div>
+                            <div class="font-medium text-foreground">GENESIS_DEMO</div>
+                            <div class="font-mono text-[10px] text-muted-foreground">tenant_id · 01HRT2…X8M9</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-3 py-3">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-2 py-0.5 text-xs font-medium text-warning">
+                          <span class="h-1.5 w-1.5 rounded-full bg-warning"></span>
+                          Degraded
+                        </span>
+                      </td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-foreground">62</td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-foreground">412</td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-warning">17</td>
+                      <td class="px-3 py-3">
+                        <span class="font-mono text-[11px] text-muted-foreground">8m ago</span>
+                      </td>
+                      <td class="px-3 py-3">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-20 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-warning" style="width: 78%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-muted-foreground">78%</span>
+                        </div>
+                      </td>
+                      <td class="px-5 py-3 text-right">
+                        <button type="button" aria-label="Apri dettaglio tenant" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="px-5 py-3">
+                        <div class="flex items-center gap-3">
+                          <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-palette-2/15 font-mono text-xs font-semibold text-palette-2">AC</span>
+                          <div>
+                            <div class="font-medium text-foreground">ACME_CORP</div>
+                            <div class="font-mono text-[10px] text-muted-foreground">tenant_id · 01HVK9…P2L0</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-3 py-3">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                          <span class="h-1.5 w-1.5 rounded-full bg-success"></span>
+                          Healthy
+                        </span>
+                      </td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-foreground">47</td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-foreground">340</td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-muted-foreground">2</td>
+                      <td class="px-3 py-3">
+                        <span class="font-mono text-[11px] text-muted-foreground">14m ago</span>
+                      </td>
+                      <td class="px-3 py-3">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-20 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-success" style="width: 28%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-muted-foreground">28%</span>
+                        </div>
+                      </td>
+                      <td class="px-5 py-3 text-right">
+                        <button type="button" aria-label="Apri dettaglio tenant" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="px-5 py-3">
+                        <div class="flex items-center gap-3">
+                          <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-palette-3/15 font-mono text-xs font-semibold text-palette-3">HI</span>
+                          <div>
+                            <div class="font-medium text-foreground">HEURESYS_INTERNAL</div>
+                            <div class="font-mono text-[10px] text-muted-foreground">tenant_id · 01HXJ4…WQ7C</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="px-3 py-3">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                          <span class="h-1.5 w-1.5 rounded-full bg-success"></span>
+                          Healthy
+                        </span>
+                      </td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-foreground">3</td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-foreground">28</td>
+                      <td class="num px-3 py-3 text-right tabular-nums text-muted-foreground">0</td>
+                      <td class="px-3 py-3">
+                        <span class="font-mono text-[11px] text-muted-foreground">1m ago</span>
+                      </td>
+                      <td class="px-3 py-3">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-20 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-palette-1" style="width: 8%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-muted-foreground">8%</span>
+                        </div>
+                      </td>
+                      <td class="px-5 py-3 text-right">
+                        <button type="button" aria-label="Apri dettaglio tenant" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <!-- ============== ERROR RATE + INCIDENT TIMELINE ============== -->
+          <section class="grid gap-3 lg:grid-cols-5" aria-label="Error rate breakdown e incident timeline">
+
+            <!-- Error rate breakdown -->
+            <article class="rounded-card border border-border bg-card p-5 shadow-card lg:col-span-3">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 class="text-sm font-semibold text-foreground">Error rate breakdown</h2>
+                  <p class="mt-0.5 text-xs text-muted-foreground">HTTP status mix + top erroring endpoints · last 1h</p>
+                </div>
+                <div class="flex items-baseline gap-3 text-right">
+                  <div>
+                    <div class="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">overall</div>
+                    <div class="num text-xl font-semibold text-foreground">2.4<span class="text-sm text-muted-foreground">%</span></div>
+                  </div>
+                  <div class="rounded-control bg-warning/10 px-2 py-1 font-mono text-[10px] font-medium text-warning">▲ 1.8%</div>
+                </div>
+              </div>
+
+              <!-- Stacked bar: status code distribution -->
+              <div class="mt-4">
+                <div class="flex items-baseline justify-between text-[11px] text-muted-foreground">
+                  <span>Status distribution · 38 421 req</span>
+                  <span class="font-mono">96.7% / 0.9% / 2.4%</span>
+                </div>
+                <div class="mt-1.5 flex h-2 overflow-hidden rounded-full bg-border">
+                  <div class="bg-success" style="width: 96.7%" title="2xx · 37152"></div>
+                  <div class="bg-info" style="width: 0.9%" title="3xx · 346"></div>
+                  <div class="bg-warning" style="width: 1.6%" title="4xx · 615"></div>
+                  <div class="bg-danger" style="width: 0.8%" title="5xx · 308"></div>
+                </div>
+                <div class="mt-2 grid grid-cols-4 gap-2 text-[11px]">
+                  <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-sm bg-success"></span><span class="text-muted-foreground">2xx</span><span class="num ml-auto font-mono text-foreground">37 152</span></div>
+                  <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-sm bg-info"></span><span class="text-muted-foreground">3xx</span><span class="num ml-auto font-mono text-foreground">346</span></div>
+                  <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-sm bg-warning"></span><span class="text-muted-foreground">4xx</span><span class="num ml-auto font-mono text-foreground">615</span></div>
+                  <div class="flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-sm bg-danger"></span><span class="text-muted-foreground">5xx</span><span class="num ml-auto font-mono text-foreground">308</span></div>
+                </div>
+              </div>
+
+              <!-- Top erroring endpoints -->
+              <div class="mt-5 border-t border-border pt-4">
+                <div class="mb-3 flex items-baseline justify-between">
+                  <h3 class="text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Top erroring endpoints</h3>
+                  <a href="#" class="text-[11px] font-medium text-primary hover:underline">view all →</a>
+                </div>
+                <ul class="space-y-2.5 text-sm">
+                  <li class="grid grid-cols-[1fr_auto_80px_auto] items-center gap-3">
+                    <div class="min-w-0">
+                      <span class="font-mono text-xs text-foreground"><span class="text-warning">POST</span> /v1/positions</span>
+                      <span class="ml-2 font-mono text-[10px] text-muted-foreground">tenant=GENESIS_DEMO</span>
+                    </div>
+                    <span class="rounded-sm bg-danger/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-danger">5xx · 89</span>
+                    <svg viewBox="0 0 80 14" class="h-3.5 w-full" aria-hidden="true" preserveAspectRatio="none"><polyline points="0,12 10,11 20,10 30,8 40,7 50,5 60,4 70,3 80,2" fill="none" stroke="hsl(var(--danger))" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                    <span class="num text-right font-mono text-[10px] text-danger">▲ 412%</span>
+                  </li>
+                  <li class="grid grid-cols-[1fr_auto_80px_auto] items-center gap-3">
+                    <div class="min-w-0">
+                      <span class="font-mono text-xs text-foreground"><span class="text-info">GET</span> /v1/skills/matrix</span>
+                      <span class="ml-2 font-mono text-[10px] text-muted-foreground">tenant=GENESIS_DEMO</span>
+                    </div>
+                    <span class="rounded-sm bg-danger/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-danger">5xx · 47</span>
+                    <svg viewBox="0 0 80 14" class="h-3.5 w-full" aria-hidden="true" preserveAspectRatio="none"><polyline points="0,10 10,11 20,9 30,8 40,9 50,7 60,5 70,4 80,3" fill="none" stroke="hsl(var(--danger))" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                    <span class="num text-right font-mono text-[10px] text-danger">▲ 168%</span>
+                  </li>
+                  <li class="grid grid-cols-[1fr_auto_80px_auto] items-center gap-3">
+                    <div class="min-w-0">
+                      <span class="font-mono text-xs text-foreground"><span class="text-warning">POST</span> /v1/auth/refresh</span>
+                      <span class="ml-2 font-mono text-[10px] text-muted-foreground">all tenants</span>
+                    </div>
+                    <span class="rounded-sm bg-warning/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-warning">401 · 34</span>
+                    <svg viewBox="0 0 80 14" class="h-3.5 w-full" aria-hidden="true" preserveAspectRatio="none"><polyline points="0,7 10,8 20,7 30,8 40,7 50,8 60,7 70,8 80,7" fill="none" stroke="hsl(var(--warning))" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                    <span class="num text-right font-mono text-[10px] text-muted-foreground">— 3%</span>
+                  </li>
+                  <li class="grid grid-cols-[1fr_auto_80px_auto] items-center gap-3">
+                    <div class="min-w-0">
+                      <span class="font-mono text-xs text-foreground"><span class="text-warning">POST</span> /v1/auth/login</span>
+                      <span class="ml-2 font-mono text-[10px] text-muted-foreground">tenant=RTL_BANK</span>
+                    </div>
+                    <span class="rounded-sm bg-warning/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-warning">401 · 12</span>
+                    <svg viewBox="0 0 80 14" class="h-3.5 w-full" aria-hidden="true" preserveAspectRatio="none"><polyline points="0,9 10,10 20,9 30,11 40,10 50,9 60,10 70,9 80,10" fill="none" stroke="hsl(var(--warning))" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                    <span class="num text-right font-mono text-[10px] text-muted-foreground">+ 8%</span>
+                  </li>
+                  <li class="grid grid-cols-[1fr_auto_80px_auto] items-center gap-3">
+                    <div class="min-w-0">
+                      <span class="font-mono text-xs text-foreground"><span class="text-info">GET</span> /v1/me/profile</span>
+                      <span class="ml-2 font-mono text-[10px] text-muted-foreground">tenant=ACME_CORP</span>
+                    </div>
+                    <span class="rounded-sm bg-warning/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-warning">403 · 6</span>
+                    <svg viewBox="0 0 80 14" class="h-3.5 w-full" aria-hidden="true" preserveAspectRatio="none"><polyline points="0,11 10,11 20,12 30,11 40,12 50,11 60,12 70,11 80,12" fill="none" stroke="hsl(var(--warning))" stroke-width="1.4" stroke-linejoin="round"/></svg>
+                    <span class="num text-right font-mono text-[10px] text-success">▼ 12%</span>
+                  </li>
+                </ul>
+              </div>
+            </article>
+
+            <!-- Incident timeline -->
+            <article class="rounded-card border border-border bg-card p-5 shadow-card lg:col-span-2">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h2 class="text-sm font-semibold text-foreground">Incident timeline</h2>
+                  <p class="mt-0.5 text-xs text-muted-foreground">Last 24h · severity tracked</p>
+                </div>
+                <div class="flex gap-1 text-[11px]">
+                  <span class="inline-flex items-center gap-1 rounded-full bg-danger/15 px-2 py-0.5 font-mono font-medium text-danger">P1·0</span>
+                  <span class="inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 font-mono font-medium text-warning">P2·1</span>
+                  <span class="inline-flex items-center gap-1 rounded-full bg-info/15 px-2 py-0.5 font-mono font-medium text-info">P3·3</span>
+                </div>
+              </div>
+
+              <ol class="relative mt-5 space-y-4 border-l border-border pl-5">
+
+                <li class="relative">
+                  <span class="absolute -left-[27px] mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-warning ring-4 ring-warning/20">
+                    <span class="h-1.5 w-1.5 rounded-full bg-card pulse-dot"></span>
+                  </span>
+                  <div class="flex items-baseline justify-between gap-2">
+                    <span class="text-sm font-semibold text-foreground">GENESIS_DEMO degraded</span>
+                    <span class="rounded-sm bg-warning/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-warning">P2 · ACTIVE</span>
+                  </div>
+                  <p class="mt-0.5 text-xs text-muted-foreground">Slow query rate +340% on /v1/positions · pool util 78% sustained</p>
+                  <div class="mt-1 font-mono text-[10px] text-muted-foreground">16:35 · 8m ago · acks 0/3</div>
+                </li>
+
+                <li class="relative">
+                  <span class="absolute -left-[27px] mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-info ring-4 ring-info/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  <div class="flex items-baseline justify-between gap-2">
+                    <span class="text-sm font-medium text-foreground">RBAC cache rebuild</span>
+                    <span class="rounded-sm bg-success/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-success">RESOLVED</span>
+                  </div>
+                  <p class="mt-0.5 text-xs text-muted-foreground">388 mappings reloaded · 121ms · automatic on role update</p>
+                  <div class="mt-1 font-mono text-[10px] text-muted-foreground">14:38 · 2h ago · duration 121ms</div>
+                </li>
+
+                <li class="relative">
+                  <span class="absolute -left-[27px] mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-info ring-4 ring-info/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  <div class="flex items-baseline justify-between gap-2">
+                    <span class="text-sm font-medium text-foreground">Migration 000031 applied</span>
+                    <span class="rounded-sm bg-success/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-success">RESOLVED</span>
+                  </div>
+                  <p class="mt-0.5 text-xs text-muted-foreground">add_uq_sys_user_certifications · 42ms · idempotent</p>
+                  <div class="mt-1 font-mono text-[10px] text-muted-foreground">11:14 · 5h ago · downtime 0s</div>
+                </li>
+
+                <li class="relative">
+                  <span class="absolute -left-[27px] mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-info ring-4 ring-info/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5 text-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                  </span>
+                  <div class="flex items-baseline justify-between gap-2">
+                    <span class="text-sm font-medium text-foreground">Pool exhaustion (transient)</span>
+                    <span class="rounded-sm bg-success/15 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-success">RESOLVED</span>
+                  </div>
+                  <p class="mt-0.5 text-xs text-muted-foreground">DB pool reached 47/50 for 90s during brownfield Wave 1 import</p>
+                  <div class="mt-1 font-mono text-[10px] text-muted-foreground">04:33 · 12h ago · self-healed</div>
+                </li>
+
+              </ol>
+
+              <div class="mt-4 border-t border-border pt-3 text-center">
+                <a href="#" class="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">view full incident log →</a>
+              </div>
+            </article>
+          </section>
+
+          <!-- ============== CHARTS ROW ============== -->
+          <section aria-label="Performance e attività" class="grid gap-3 lg:grid-cols-3">
+
+            <!-- Latency chart -->
+            <article class="rounded-card border border-border bg-card p-5 shadow-card lg:col-span-2">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h2 class="text-sm font-semibold text-foreground">Request latency · all /v1/* endpoints</h2>
+                  <p class="mt-0.5 text-xs text-muted-foreground">p50 · p95 · p99 latency, last 24h, sampled every 5 min</p>
+                </div>
+                <div class="flex items-center gap-3 text-xs">
+                  <span class="inline-flex items-center gap-1.5">
+                    <span class="h-2 w-2 rounded-full bg-palette-2"></span>
+                    <span class="text-muted-foreground">p50</span>
+                    <span class="num font-medium text-foreground">38ms</span>
+                  </span>
+                  <span class="inline-flex items-center gap-1.5">
+                    <span class="h-2 w-2 rounded-full bg-palette-1"></span>
+                    <span class="text-muted-foreground">p95</span>
+                    <span class="num font-medium text-foreground">112ms</span>
+                  </span>
+                  <span class="inline-flex items-center gap-1.5">
+                    <span class="h-2 w-2 rounded-full bg-warning"></span>
+                    <span class="text-muted-foreground">p99</span>
+                    <span class="num font-medium text-foreground">284ms</span>
+                  </span>
+                </div>
+              </div>
+
+              <div class="mt-4 shimmer-bar">
+                <svg viewBox="0 0 600 160" class="h-40 w-full" aria-hidden="true" preserveAspectRatio="none">
+                  <!-- grid -->
+                  <g stroke="hsl(var(--border))" stroke-width="0.5" opacity="0.6">
+                    <line x1="0" y1="40" x2="600" y2="40"/>
+                    <line x1="0" y1="80" x2="600" y2="80"/>
+                    <line x1="0" y1="120" x2="600" y2="120"/>
+                  </g>
+                  <!-- p99 area -->
+                  <polyline
+                    points="0,90 30,82 60,88 90,76 120,70 150,78 180,60 210,58 240,64 270,56 300,48 330,52 360,46 390,42 420,38 450,44 480,32 510,28 540,30 570,26 600,30"
+                    fill="none" stroke="hsl(var(--warning))" stroke-width="1.5" stroke-linejoin="round" />
+                  <!-- p95 -->
+                  <polyline
+                    points="0,116 30,112 60,118 90,108 120,104 150,110 180,98 210,96 240,102 270,94 300,86 330,90 360,84 390,82 420,80 450,84 480,76 510,72 540,74 570,70 600,72"
+                    fill="none" stroke="hsl(var(--palette-1))" stroke-width="1.5" stroke-linejoin="round" />
+                  <!-- p50 -->
+                  <polyline
+                    points="0,140 30,138 60,142 90,134 120,132 150,136 180,130 210,128 240,132 270,126 300,122 330,124 360,120 390,118 420,116 450,118 480,114 510,112 540,114 570,110 600,112"
+                    fill="none" stroke="hsl(var(--palette-2))" stroke-width="1.5" stroke-linejoin="round" />
+                  <!-- p50 fill -->
+                  <polyline
+                    points="0,140 30,138 60,142 90,134 120,132 150,136 180,130 210,128 240,132 270,126 300,122 330,124 360,120 390,118 420,116 450,118 480,114 510,112 540,114 570,110 600,112 600,160 0,160"
+                    fill="hsl(var(--palette-2) / 0.10)" stroke="none" />
+                </svg>
+              </div>
+
+              <div class="mt-2 grid grid-cols-6 gap-1 font-mono text-[10px] text-muted-foreground">
+                <span>00:00</span><span>04:00</span><span>08:00</span><span>12:00</span><span>16:00</span><span class="text-right">now</span>
+              </div>
+            </article>
+
+            <!-- Active sessions by role -->
+            <article class="rounded-card border border-border bg-card p-5 shadow-card">
+              <div>
+                <h2 class="text-sm font-semibold text-foreground">Active sessions · by role</h2>
+                <p class="mt-0.5 text-xs text-muted-foreground">RS256 JWT, 15min TTL, sliding</p>
+              </div>
+
+              <ul class="mt-4 space-y-3 text-sm">
+                <li>
+                  <div class="flex items-center justify-between">
+                    <span class="inline-flex items-center gap-2 text-foreground">
+                      <span class="h-2 w-2 rounded-full bg-warning"></span>
+                      PLATFORM_ADMIN
+                    </span>
+                    <span class="num font-medium tabular-nums">1</span>
+                  </div>
+                  <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-border">
+                    <div class="h-full bg-warning" style="width: 5%"></div>
+                  </div>
+                </li>
+                <li>
+                  <div class="flex items-center justify-between">
+                    <span class="inline-flex items-center gap-2 text-foreground">
+                      <span class="h-2 w-2 rounded-full bg-palette-3"></span>
+                      TENANT_ADMIN
+                    </span>
+                    <span class="num font-medium tabular-nums">7</span>
+                  </div>
+                  <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-border">
+                    <div class="h-full bg-palette-3" style="width: 32%"></div>
+                  </div>
+                </li>
+                <li>
+                  <div class="flex items-center justify-between">
+                    <span class="inline-flex items-center gap-2 text-foreground">
+                      <span class="h-2 w-2 rounded-full bg-palette-1"></span>
+                      HRMS_MANAGER
+                    </span>
+                    <span class="num font-medium tabular-nums">12</span>
+                  </div>
+                  <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-border">
+                    <div class="h-full bg-palette-1" style="width: 55%"></div>
+                  </div>
+                </li>
+                <li>
+                  <div class="flex items-center justify-between">
+                    <span class="inline-flex items-center gap-2 text-foreground">
+                      <span class="h-2 w-2 rounded-full bg-palette-2"></span>
+                      MANAGER
+                    </span>
+                    <span class="num font-medium tabular-nums">23</span>
+                  </div>
+                  <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-border">
+                    <div class="h-full bg-palette-2" style="width: 85%"></div>
+                  </div>
+                </li>
+                <li>
+                  <div class="flex items-center justify-between">
+                    <span class="inline-flex items-center gap-2 text-foreground">
+                      <span class="h-2 w-2 rounded-full bg-muted-foreground"></span>
+                      USER
+                    </span>
+                    <span class="num font-medium tabular-nums">48</span>
+                  </div>
+                  <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-border">
+                    <div class="h-full bg-muted-foreground" style="width: 100%"></div>
+                  </div>
+                </li>
+                <li>
+                  <div class="flex items-center justify-between">
+                    <span class="inline-flex items-center gap-2 text-muted-foreground">
+                      <span class="h-2 w-2 rounded-full bg-muted-foreground/40"></span>
+                      READ_ONLY
+                    </span>
+                    <span class="num font-medium tabular-nums text-muted-foreground">3</span>
+                  </div>
+                  <div class="mt-1 h-1.5 overflow-hidden rounded-full bg-border">
+                    <div class="h-full bg-muted-foreground/40" style="width: 12%"></div>
+                  </div>
+                </li>
+              </ul>
+
+              <div class="mt-4 border-t border-border pt-3 text-[11px] text-muted-foreground">
+                Total active sessions · <span class="num font-medium text-foreground">94</span>
+              </div>
+            </article>
+          </section>
+
+          <!-- ============== SQL SLOW QUERY TOP-10 ============== -->
+          <section aria-label="SQL slow queries top 10">
+            <article class="overflow-hidden rounded-card border border-border bg-card shadow-card">
+              <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <span class="inline-flex h-8 w-8 items-center justify-center rounded-control bg-palette-3/15 text-palette-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </span>
+                  <div>
+                    <h2 class="text-sm font-semibold text-foreground">SQL slow query · top 10</h2>
+                    <p class="mt-0.5 text-xs text-muted-foreground">pg_stat_statements · threshold p95 > 100ms · last 24h · ranked by total time</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" class="inline-flex h-9 items-center gap-2 rounded-control border border-border px-3 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground hover:border-foreground/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    Reset stats
+                  </button>
+                  <button type="button" class="inline-flex h-9 items-center gap-2 rounded-control bg-palette-3/10 px-3 text-xs font-medium text-palette-3 transition hover:bg-palette-3/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    Open EXPLAIN
+                  </button>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b border-border bg-muted/30 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                      <th class="w-10 px-3 py-2.5 text-right">#</th>
+                      <th class="px-3 py-2.5">Query</th>
+                      <th class="px-3 py-2.5">Tenant</th>
+                      <th class="px-3 py-2.5 text-right">Calls</th>
+                      <th class="px-3 py-2.5 text-right">p95</th>
+                      <th class="px-3 py-2.5 text-right">Mean</th>
+                      <th class="px-3 py-2.5">Total time</th>
+                      <th class="px-3 py-2.5">Last seen</th>
+                      <th class="w-12 px-3 py-2.5"></th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-border">
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="num px-3 py-2.5 text-right font-mono text-[10px] text-muted-foreground">01</td>
+                      <td class="px-3 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground"><span class="text-palette-3">SELECT</span> p.*, c.* <span class="text-palette-3">FROM</span> sys_positions p <span class="text-palette-3">LEFT JOIN</span> sys_competencies …</div>
+                        <div class="mt-0.5 font-mono text-[10px] text-muted-foreground">positions.list · joined skills + competencies</div>
+                      </td>
+                      <td class="px-3 py-2.5">
+                        <span class="inline-flex items-center gap-1.5 rounded-md bg-warning/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-warning">GENESIS_DEMO</span>
+                      </td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums text-foreground">847</td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums">
+                        <span class="font-mono font-medium text-danger">1 240 ms</span>
+                      </td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums font-mono text-muted-foreground">682 ms</td>
+                      <td class="px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-danger" style="width: 100%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-foreground">9.6 min</span>
+                        </div>
+                      </td>
+                      <td class="px-3 py-2.5 font-mono text-[11px] text-muted-foreground">3s ago</td>
+                      <td class="px-3 py-2.5 text-right">
+                        <button type="button" aria-label="EXPLAIN plan" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="num px-3 py-2.5 text-right font-mono text-[10px] text-muted-foreground">02</td>
+                      <td class="px-3 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground"><span class="text-palette-3">SELECT</span> sm.* <span class="text-palette-3">FROM</span> sys_skill_matrix sm <span class="text-palette-3">WHERE</span> sm.tenant_id = $1 <span class="text-palette-3">AND</span> …</div>
+                        <div class="mt-0.5 font-mono text-[10px] text-muted-foreground">skills.matrix.get · missing composite index on (tenant_id, role_id)</div>
+                      </td>
+                      <td class="px-3 py-2.5">
+                        <span class="inline-flex items-center gap-1.5 rounded-md bg-warning/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-warning">GENESIS_DEMO</span>
+                      </td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums text-foreground">312</td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums"><span class="font-mono font-medium text-warning">680 ms</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums font-mono text-muted-foreground">421 ms</td>
+                      <td class="px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-warning" style="width: 38%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-foreground">2.2 min</span>
+                        </div>
+                      </td>
+                      <td class="px-3 py-2.5 font-mono text-[11px] text-muted-foreground">12s ago</td>
+                      <td class="px-3 py-2.5 text-right">
+                        <button type="button" aria-label="EXPLAIN plan" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="num px-3 py-2.5 text-right font-mono text-[10px] text-muted-foreground">03</td>
+                      <td class="px-3 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground"><span class="text-palette-3">SELECT</span> * <span class="text-palette-3">FROM</span> sys_position_intelligence_profile <span class="text-palette-3">WHERE</span> position_id = ANY($1)</div>
+                        <div class="mt-0.5 font-mono text-[10px] text-muted-foreground">pip.batch · materialized view refresh pending</div>
+                      </td>
+                      <td class="px-3 py-2.5">
+                        <span class="inline-flex items-center gap-1.5 rounded-md bg-palette-1/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-palette-1">RTL_BANK</span>
+                      </td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums text-foreground">1 248</td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums"><span class="font-mono font-medium text-warning">412 ms</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums font-mono text-muted-foreground">198 ms</td>
+                      <td class="px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-warning" style="width: 36%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-foreground">4.1 min</span>
+                        </div>
+                      </td>
+                      <td class="px-3 py-2.5 font-mono text-[11px] text-muted-foreground">1s ago</td>
+                      <td class="px-3 py-2.5 text-right">
+                        <button type="button" aria-label="EXPLAIN plan" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="num px-3 py-2.5 text-right font-mono text-[10px] text-muted-foreground">04</td>
+                      <td class="px-3 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground"><span class="text-palette-3">SELECT</span> u.*, ur.role_code <span class="text-palette-3">FROM</span> sys_users u <span class="text-palette-3">JOIN</span> sys_user_roles ur …</div>
+                        <div class="mt-0.5 font-mono text-[10px] text-muted-foreground">users.list.withRoles · n+1 candidate, batch hint missed</div>
+                      </td>
+                      <td class="px-3 py-2.5"><span class="font-mono text-[10px] text-muted-foreground">all</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums text-foreground">5 124</td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums"><span class="font-mono font-medium text-warning">284 ms</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums font-mono text-muted-foreground">112 ms</td>
+                      <td class="px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-warning" style="width: 28%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-foreground">9.6 min</span>
+                        </div>
+                      </td>
+                      <td class="px-3 py-2.5 font-mono text-[11px] text-muted-foreground">2s ago</td>
+                      <td class="px-3 py-2.5 text-right">
+                        <button type="button" aria-label="EXPLAIN plan" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="num px-3 py-2.5 text-right font-mono text-[10px] text-muted-foreground">05</td>
+                      <td class="px-3 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground"><span class="text-palette-3">INSERT INTO</span> audit_log (event, payload, actor_id, …) <span class="text-palette-3">VALUES</span> …</div>
+                        <div class="mt-0.5 font-mono text-[10px] text-muted-foreground">audit.write · trigger fan-out on 3 dependent indexes</div>
+                      </td>
+                      <td class="px-3 py-2.5"><span class="font-mono text-[10px] text-muted-foreground">all</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums text-foreground">12 480</td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums"><span class="font-mono font-medium text-foreground">186 ms</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums font-mono text-muted-foreground">42 ms</td>
+                      <td class="px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-palette-2" style="width: 88%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-foreground">8.7 min</span>
+                        </div>
+                      </td>
+                      <td class="px-3 py-2.5 font-mono text-[11px] text-muted-foreground">just now</td>
+                      <td class="px-3 py-2.5 text-right">
+                        <button type="button" aria-label="EXPLAIN plan" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="num px-3 py-2.5 text-right font-mono text-[10px] text-muted-foreground">06</td>
+                      <td class="px-3 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground"><span class="text-palette-3">SELECT</span> COUNT(*) <span class="text-palette-3">FROM</span> sys_audit_role_permissions <span class="text-palette-3">WHERE</span> …</div>
+                        <div class="mt-0.5 font-mono text-[10px] text-muted-foreground">rbac.cache.load · full scan, 388 mappings</div>
+                      </td>
+                      <td class="px-3 py-2.5"><span class="font-mono text-[10px] text-muted-foreground">platform</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums text-foreground">8</td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums"><span class="font-mono font-medium text-foreground">142 ms</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums font-mono text-muted-foreground">121 ms</td>
+                      <td class="px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-palette-2" style="width: 4%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-foreground">1.0 s</span>
+                        </div>
+                      </td>
+                      <td class="px-3 py-2.5 font-mono text-[11px] text-muted-foreground">8m ago</td>
+                      <td class="px-3 py-2.5 text-right">
+                        <button type="button" aria-label="EXPLAIN plan" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="num px-3 py-2.5 text-right font-mono text-[10px] text-muted-foreground">07</td>
+                      <td class="px-3 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground"><span class="text-palette-3">REFRESH MATERIALIZED VIEW CONCURRENTLY</span> mv_position_intelligence_profile</div>
+                        <div class="mt-0.5 font-mono text-[10px] text-muted-foreground">pip.refresh.scheduled · runs hourly</div>
+                      </td>
+                      <td class="px-3 py-2.5"><span class="font-mono text-[10px] text-muted-foreground">cron</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums text-foreground">24</td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums"><span class="font-mono font-medium text-foreground">128 ms</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums font-mono text-muted-foreground">102 ms</td>
+                      <td class="px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-palette-2" style="width: 3%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-foreground">2.4 s</span>
+                        </div>
+                      </td>
+                      <td class="px-3 py-2.5 font-mono text-[11px] text-muted-foreground">42m ago</td>
+                      <td class="px-3 py-2.5 text-right">
+                        <button type="button" aria-label="EXPLAIN plan" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="num px-3 py-2.5 text-right font-mono text-[10px] text-muted-foreground">08</td>
+                      <td class="px-3 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground"><span class="text-palette-3">SELECT</span> e.*, p.title <span class="text-palette-3">FROM</span> sys_employees e <span class="text-palette-3">JOIN</span> sys_positions p <span class="text-palette-3">ON</span> e.position_id …</div>
+                        <div class="mt-0.5 font-mono text-[10px] text-muted-foreground">employees.list.withPosition · partial index recommendation</div>
+                      </td>
+                      <td class="px-3 py-2.5">
+                        <span class="inline-flex items-center gap-1.5 rounded-md bg-palette-1/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-palette-1">RTL_BANK</span>
+                      </td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums text-foreground">2 168</td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums"><span class="font-mono font-medium text-foreground">118 ms</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums font-mono text-muted-foreground">68 ms</td>
+                      <td class="px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-palette-2" style="width: 24%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-foreground">2.5 min</span>
+                        </div>
+                      </td>
+                      <td class="px-3 py-2.5 font-mono text-[11px] text-muted-foreground">4s ago</td>
+                      <td class="px-3 py-2.5 text-right">
+                        <button type="button" aria-label="EXPLAIN plan" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="num px-3 py-2.5 text-right font-mono text-[10px] text-muted-foreground">09</td>
+                      <td class="px-3 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground"><span class="text-palette-3">UPDATE</span> sys_auth_refresh_tokens <span class="text-palette-3">SET</span> revoked_at = now() <span class="text-palette-3">WHERE</span> family_id = $1</div>
+                        <div class="mt-0.5 font-mono text-[10px] text-muted-foreground">auth.refresh.rotate · family bulk revoke</div>
+                      </td>
+                      <td class="px-3 py-2.5"><span class="font-mono text-[10px] text-muted-foreground">all</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums text-foreground">87</td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums"><span class="font-mono font-medium text-foreground">114 ms</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums font-mono text-muted-foreground">38 ms</td>
+                      <td class="px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-palette-2" style="width: 6%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-foreground">3.3 s</span>
+                        </div>
+                      </td>
+                      <td class="px-3 py-2.5 font-mono text-[11px] text-muted-foreground">37s ago</td>
+                      <td class="px-3 py-2.5 text-right">
+                        <button type="button" aria-label="EXPLAIN plan" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="num px-3 py-2.5 text-right font-mono text-[10px] text-muted-foreground">10</td>
+                      <td class="px-3 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground"><span class="text-palette-3">SELECT</span> COUNT(*), tenant_id <span class="text-palette-3">FROM</span> sys_audit_log <span class="text-palette-3">GROUP BY</span> tenant_id</div>
+                        <div class="mt-0.5 font-mono text-[10px] text-muted-foreground">audit.aggregate · dashboard counter (this page)</div>
+                      </td>
+                      <td class="px-3 py-2.5"><span class="font-mono text-[10px] text-muted-foreground">all</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums text-foreground">1 440</td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums"><span class="font-mono font-medium text-foreground">104 ms</span></td>
+                      <td class="num px-3 py-2.5 text-right tabular-nums font-mono text-muted-foreground">52 ms</td>
+                      <td class="px-3 py-2.5">
+                        <div class="flex items-center gap-2">
+                          <div class="h-1.5 w-24 overflow-hidden rounded-full bg-border">
+                            <div class="h-full bg-palette-2" style="width: 18%"></div>
+                          </div>
+                          <span class="num font-mono text-[10px] text-foreground">1.2 min</span>
+                        </div>
+                      </td>
+                      <td class="px-3 py-2.5 font-mono text-[11px] text-muted-foreground">1s ago</td>
+                      <td class="px-3 py-2.5 text-right">
+                        <button type="button" aria-label="EXPLAIN plan" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="flex items-center justify-between border-t border-border px-5 py-2.5 text-[10px] text-muted-foreground">
+                <span class="font-mono">showing 10 / 247 tracked queries</span>
+                <span class="font-mono">total time captured · 23 min · sample since 04:30:00</span>
+              </div>
+            </article>
+          </section>
+
+          <!-- ============== RBAC PERMISSIONS MATRIX ============== -->
+          <section aria-label="RBAC permissions matrix">
+            <article class="overflow-hidden rounded-card border border-border bg-card shadow-card">
+              <div class="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <span class="inline-flex h-8 w-8 items-center justify-center rounded-control bg-palette-1/15 text-palette-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  </span>
+                  <div>
+                    <h2 class="text-sm font-semibold text-foreground">RBAC permissions matrix</h2>
+                    <p class="mt-0.5 text-xs text-muted-foreground">8 roles × 388 mappings · cached in memory · last reload 14:38:12</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-2 text-[11px]">
+                    <span class="inline-flex items-center gap-1"><span class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span><span class="text-muted-foreground">granted</span></span>
+                    <span class="inline-flex items-center gap-1"><span class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-warning/20 text-warning font-mono text-[9px] font-bold">◐</span><span class="text-muted-foreground">scoped</span></span>
+                    <span class="inline-flex items-center gap-1"><span class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span><span class="text-muted-foreground">denied</span></span>
+                  </div>
+                  <button type="button" class="inline-flex h-9 items-center gap-2 rounded-control border border-border px-3 text-xs font-medium text-muted-foreground transition hover:bg-accent hover:text-foreground hover:border-foreground/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Export CSV
+                  </button>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b border-border bg-muted/30 text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                      <th class="sticky left-0 bg-muted/30 px-5 py-3 text-left">Permission</th>
+                      <th class="px-2 py-3 text-center"><span class="block text-warning">PLATFORM<br/>ADMIN</span></th>
+                      <th class="px-2 py-3 text-center"><span class="block text-palette-3">TENANT<br/>ADMIN</span></th>
+                      <th class="px-2 py-3 text-center"><span class="block text-palette-1">BLUEPRINT<br/>MANAGER</span></th>
+                      <th class="px-2 py-3 text-center"><span class="block text-palette-1">HRMS<br/>MANAGER</span></th>
+                      <th class="px-2 py-3 text-center"><span class="block text-palette-2">PROCESS<br/>OWNER</span></th>
+                      <th class="px-2 py-3 text-center"><span class="block text-palette-2">MANAGER</span></th>
+                      <th class="px-2 py-3 text-center"><span class="block text-muted-foreground">USER</span></th>
+                      <th class="px-2 py-3 text-center"><span class="block text-muted-foreground/70">READ<br/>ONLY</span></th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-border">
+                    <!-- Row helper: ✓=success badge, ◐=warning badge (scoped), ·=muted (denied) -->
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="sticky left-0 bg-card px-5 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground">users:read</div>
+                        <div class="font-mono text-[10px] text-muted-foreground">read user profiles + roles</div>
+                      </td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="tenant scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="reports-of-mine scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="self scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="sticky left-0 bg-card px-5 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground">users:write</div>
+                        <div class="font-mono text-[10px] text-muted-foreground">create / update / disable users</div>
+                      </td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="tenant scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="tenant scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="sticky left-0 bg-card px-5 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground">positions:read</div>
+                        <div class="font-mono text-[10px] text-muted-foreground">position catalogue + PIP views</div>
+                      </td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="own position"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="sticky left-0 bg-card px-5 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground">positions:write</div>
+                        <div class="font-mono text-[10px] text-muted-foreground">create / edit positions + requirements</div>
+                      </td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="tenant scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="tenant scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="sticky left-0 bg-card px-5 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground">skills:write</div>
+                        <div class="font-mono text-[10px] text-muted-foreground">skill catalogue + certifications</div>
+                      </td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="tenant scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="reports-of-mine scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="self scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="sticky left-0 bg-card px-5 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground">performance:read</div>
+                        <div class="font-mono text-[10px] text-muted-foreground">performance reviews + KPIs</div>
+                      </td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="process scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="reports-of-mine scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="self scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="sticky left-0 bg-card px-5 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground">rbac:write</div>
+                        <div class="font-mono text-[10px] text-muted-foreground">manage role-permission mappings</div>
+                      </td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="tenant scope only, no PLATFORM_*"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="sticky left-0 bg-card px-5 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground">audit:read</div>
+                        <div class="font-mono text-[10px] text-muted-foreground">audit log access (immutable)</div>
+                      </td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="tenant scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-warning/20 text-warning" title="tenant scope"><span class="font-mono text-[10px] font-bold">◐</span></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                    </tr>
+
+                    <tr class="transition hover:bg-accent/40">
+                      <td class="sticky left-0 bg-card px-5 py-2.5">
+                        <div class="font-mono text-[12px] text-foreground">system:admin</div>
+                        <div class="font-mono text-[10px] text-muted-foreground">migrations, DB ops, tenant lifecycle</div>
+                      </td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-success/20 text-success"><svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                      <td class="px-2 py-2.5"><span class="mx-auto flex h-5 w-5 items-center justify-center rounded-sm bg-muted text-muted-foreground/60">·</span></td>
+                    </tr>
+
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="flex items-center justify-between border-t border-border px-5 py-2.5 text-[10px] text-muted-foreground">
+                <span class="font-mono">showing 9 / 47 permission codes</span>
+                <a href="#" class="font-medium text-primary hover:underline">view full matrix →</a>
+              </div>
+            </article>
+          </section>
+
+          <!-- ============== LOG STREAM + AUDIT FEED ============== -->
+          <section class="grid gap-3 lg:grid-cols-5">
+
+            <!-- Live log stream -->
+            <article class="rounded-card border border-border bg-card shadow-card lg:col-span-3">
+              <div class="flex items-center justify-between border-b border-border px-5 py-3">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-1.5 w-1.5 rounded-full bg-info pulse-dot" aria-hidden="true"></span>
+                  <h2 class="text-sm font-semibold text-foreground">Live log stream</h2>
+                  <span class="rounded-full border border-border bg-muted px-2 py-0.5 font-mono text-[10px] text-muted-foreground">fastify · pino</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button type="button" class="rounded-control px-2 py-1 text-[11px] font-medium text-muted-foreground hover:bg-accent hover:text-foreground">all</button>
+                  <button type="button" class="rounded-control bg-accent px-2 py-1 text-[11px] font-medium text-foreground">info</button>
+                  <button type="button" class="rounded-control px-2 py-1 text-[11px] font-medium text-warning hover:bg-accent">warn</button>
+                  <button type="button" class="rounded-control px-2 py-1 text-[11px] font-medium text-danger hover:bg-accent">error</button>
+                  <button type="button" aria-label="Pausa stream" class="ml-1 inline-flex h-7 w-7 items-center justify-center rounded-control text-muted-foreground hover:bg-accent hover:text-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <ol class="max-h-[420px] divide-y divide-border/60 overflow-y-auto" aria-live="polite">
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:43:09.421</span>
+                  <span class="lvl-info shrink-0 font-mono font-semibold">INFO </span>
+                  <span class="shrink-0 rounded-sm bg-palette-1/15 px-1.5 font-mono text-[10px] text-palette-1">auth</span>
+                  <span class="text-foreground">request completed <span class="text-muted-foreground">method=POST url=/v1/auth/login statusCode=200 responseTime=82.4ms reqId=req-92a4f</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:43:08.117</span>
+                  <span class="lvl-info shrink-0 font-mono font-semibold">INFO </span>
+                  <span class="shrink-0 rounded-sm bg-palette-2/15 px-1.5 font-mono text-[10px] text-palette-2">rbac</span>
+                  <span class="text-foreground">permission granted <span class="text-muted-foreground">user=manager_test@rtl-bank.test perm=positions:read tenant=01HQF7…NB3K</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:43:06.998</span>
+                  <span class="lvl-warn shrink-0 font-mono font-semibold">WARN </span>
+                  <span class="shrink-0 rounded-sm bg-palette-3/15 px-1.5 font-mono text-[10px] text-palette-3">db</span>
+                  <span class="text-foreground">slow query detected <span class="text-muted-foreground">query=positions.list duration=412ms threshold=300ms tenant=GENESIS_DEMO</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:43:04.612</span>
+                  <span class="lvl-info shrink-0 font-mono font-semibold">INFO </span>
+                  <span class="shrink-0 rounded-sm bg-palette-1/15 px-1.5 font-mono text-[10px] text-palette-1">auth</span>
+                  <span class="text-foreground">refresh token rotated <span class="text-muted-foreground">family=fam-7c2 user=admin@heuresys.com prev=tk-aa3 next=tk-bf1</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:43:01.245</span>
+                  <span class="lvl-info shrink-0 font-mono font-semibold">INFO </span>
+                  <span class="shrink-0 rounded-sm bg-warning/15 px-1.5 font-mono text-[10px] text-warning">csrf</span>
+                  <span class="text-foreground">token verified <span class="text-muted-foreground">method=PATCH url=/v1/users/01HRT2 origin=rtl-bank.app</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:42:58.901</span>
+                  <span class="lvl-warn shrink-0 font-mono font-semibold">WARN </span>
+                  <span class="shrink-0 rounded-sm bg-palette-1/15 px-1.5 font-mono text-[10px] text-palette-1">auth</span>
+                  <span class="text-foreground">login attempt with unknown email <span class="text-muted-foreground">email=guest@unknown.net ip=185.220.x.x ua=curl/8.4.0</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:42:55.014</span>
+                  <span class="lvl-info shrink-0 font-mono font-semibold">INFO </span>
+                  <span class="shrink-0 rounded-sm bg-palette-2/15 px-1.5 font-mono text-[10px] text-palette-2">db</span>
+                  <span class="text-foreground">pool stats <span class="text-muted-foreground">total=50 idle=8 active=10 waiting=0 tenant_filter=enabled</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:42:52.760</span>
+                  <span class="lvl-info shrink-0 font-mono font-semibold">INFO </span>
+                  <span class="shrink-0 rounded-sm bg-success/15 px-1.5 font-mono text-[10px] text-success">migr</span>
+                  <span class="text-foreground">migration applied <span class="text-muted-foreground">file=000031_add_uq_sys_user_certifications.sql duration=42ms</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:42:49.388</span>
+                  <span class="lvl-error shrink-0 font-mono font-semibold">ERROR</span>
+                  <span class="shrink-0 rounded-sm bg-palette-1/15 px-1.5 font-mono text-[10px] text-palette-1">auth</span>
+                  <span class="text-foreground">login failed · invalid credentials <span class="text-muted-foreground">email=outsider_test@rtl-bank.test attempts=3/5 ip=80.225.82.207</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:42:46.103</span>
+                  <span class="lvl-info shrink-0 font-mono font-semibold">INFO </span>
+                  <span class="shrink-0 rounded-sm bg-palette-2/15 px-1.5 font-mono text-[10px] text-palette-2">rbac</span>
+                  <span class="text-foreground">cache loaded <span class="text-muted-foreground">rolesLoaded=8 mappingsLoaded=388 elapsed=121ms</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:42:42.522</span>
+                  <span class="lvl-debug shrink-0 font-mono font-semibold">DEBUG</span>
+                  <span class="shrink-0 rounded-sm bg-muted px-1.5 font-mono text-[10px] text-muted-foreground">tenant</span>
+                  <span class="text-foreground">context resolved <span class="text-muted-foreground">tenant_id=01HQF7…NB3K from=jwt-claim source=httpOnlyCookie</span></span>
+                </li>
+                <li class="log-line flex items-start gap-3 px-5 py-2 hover:bg-accent/30">
+                  <span class="ts shrink-0 whitespace-nowrap font-mono">16:42:39.847</span>
+                  <span class="lvl-info shrink-0 font-mono font-semibold">INFO </span>
+                  <span class="shrink-0 rounded-sm bg-palette-1/15 px-1.5 font-mono text-[10px] text-palette-1">srv</span>
+                  <span class="text-foreground">listening <span class="text-muted-foreground">port=3001 address=0.0.0.0 node=v20.18.0</span></span>
+                </li>
+              </ol>
+
+              <div class="flex items-center justify-between border-t border-border px-5 py-2.5 font-mono text-[10px] text-muted-foreground">
+                <span>tailing · 12 / 38421 lines · last 15m</span>
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="h-1.5 w-1.5 rounded-full bg-success pulse-dot"></span>
+                  connected
+                </span>
+              </div>
+            </article>
+
+            <!-- Audit feed -->
+            <article class="rounded-card border border-border bg-card shadow-card lg:col-span-2">
+              <div class="flex items-center justify-between border-b border-border px-5 py-3">
+                <div>
+                  <h2 class="text-sm font-semibold text-foreground">Audit feed</h2>
+                  <p class="mt-0.5 text-xs text-muted-foreground">RBAC changes · auth events · migrations · last 24h</p>
+                </div>
+                <button type="button" class="text-xs font-medium text-primary transition hover:underline">view all →</button>
+              </div>
+
+              <ul class="max-h-[420px] divide-y divide-border/60 overflow-y-auto">
+                <li class="px-5 py-3 hover:bg-accent/30">
+                  <div class="flex items-start gap-3">
+                    <span class="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-warning/15 text-warning">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </span>
+                    <div class="min-w-0">
+                      <div class="text-sm text-foreground"><span class="font-medium">SUPERUSER promotion</span></div>
+                      <div class="mt-0.5 text-xs text-muted-foreground">enzo.spenuso → PLATFORM_ADMIN role granted</div>
+                      <div class="mt-1 flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+                        <span>16:38:22</span> · <span>tenant=PLATFORM</span> · <span>actor=system</span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+
+                <li class="px-5 py-3 hover:bg-accent/30">
+                  <div class="flex items-start gap-3">
+                    <span class="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                    </span>
+                    <div class="min-w-0">
+                      <div class="text-sm text-foreground"><span class="font-medium">Migration applied</span></div>
+                      <div class="mt-0.5 text-xs text-muted-foreground">000031_add_uq_sys_user_certifications.sql</div>
+                      <div class="mt-1 flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+                        <span>16:42:52</span> · <span>duration=42ms</span> · <span>idempotent</span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+
+                <li class="px-5 py-3 hover:bg-accent/30">
+                  <div class="flex items-start gap-3">
+                    <span class="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-palette-3/15 text-palette-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </span>
+                    <div class="min-w-0">
+                      <div class="text-sm text-foreground"><span class="font-medium">RBAC mapping updated</span></div>
+                      <div class="mt-0.5 text-xs text-muted-foreground">HRMS_MANAGER + skills:write · 3 mappings affected</div>
+                      <div class="mt-1 flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+                        <span>16:31:09</span> · <span>tenant=RTL_BANK</span> · <span>actor=admin@heuresys.com</span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+
+                <li class="px-5 py-3 hover:bg-accent/30">
+                  <div class="flex items-start gap-3">
+                    <span class="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-info/15 text-info">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    </span>
+                    <div class="min-w-0">
+                      <div class="text-sm text-foreground"><span class="font-medium">Brownfield import completed</span></div>
+                      <div class="mt-0.5 text-xs text-muted-foreground">Wave 1 closure · 446 lineage rows documented · 15 target tables seeded</div>
+                      <div class="mt-1 flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+                        <span>16:33:07</span> · <span>run=g003_K</span> · <span>tenant=RTL_BANK</span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+
+                <li class="px-5 py-3 hover:bg-accent/30">
+                  <div class="flex items-start gap-3">
+                    <span class="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-danger/15 text-danger">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </span>
+                    <div class="min-w-0">
+                      <div class="text-sm text-foreground"><span class="font-medium">Failed login burst</span></div>
+                      <div class="mt-0.5 text-xs text-muted-foreground">3 attempts on outsider_test@rtl-bank.test · throttle engaged</div>
+                      <div class="mt-1 flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+                        <span>16:42:49</span> · <span>ip=80.225.82.207</span> · <span>throttle=60s</span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+
+                <li class="px-5 py-3 hover:bg-accent/30">
+                  <div class="flex items-start gap-3">
+                    <span class="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-palette-2/15 text-palette-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                    </span>
+                    <div class="min-w-0">
+                      <div class="text-sm text-foreground"><span class="font-medium">User created</span></div>
+                      <div class="mt-0.5 text-xs text-muted-foreground">paola.bertoni@rtl-bank.test · role=USER · 1 position assigned</div>
+                      <div class="mt-1 flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
+                        <span>15:58:14</span> · <span>tenant=RTL_BANK</span> · <span>actor=manager_test</span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </article>
+          </section>
+
+          <div class="h-2"></div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ============== FOOTER ============== -->
+    <!--
+      Footer rule (universal — see docs/08_footer_specification.md):
+        LEFT (fixed):  © year · heuresys.com link · 5 social icons (LinkedIn, GitHub, Discord, Facebook, X)
+        RIGHT:         context-specific (SUPERUSER build/runtime metrics in this prototype)
+      All social hrefs are PLACEHOLDER (#) — real URLs defined in a later session.
+    -->
+    <footer
+      class="z-30 flex h-11 items-center justify-between border-t border-border bg-background px-4 text-xs text-muted-foreground"
+      role="contentinfo"
+    >
+      <!-- LEFT — fixed composition, every Heuresys surface -->
+      <div class="flex items-center gap-3">
+        <span class="tabular-nums">© 2026</span>
+        <span aria-hidden="true" class="text-border">·</span>
+        <a
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open Heuresys public website (heuresys.com)"
+          class="font-medium text-muted-foreground transition hover:text-foreground hover:underline"
+        >heuresys.com</a>
+        <span aria-hidden="true" class="text-border">·</span>
+        <div class="flex items-center gap-0.5">
+          <!-- LinkedIn -->
+          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Open Heuresys on LinkedIn" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+          <!-- GitHub -->
+          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Open Heuresys on GitHub" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+            </svg>
+          </a>
+          <!-- Discord -->
+          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Join Heuresys on Discord" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M19.27 5.33A16.5 16.5 0 0 0 15 4l-.5 1.05a14.5 14.5 0 0 0-5 0L9 4a16.5 16.5 0 0 0-4.27 1.33C2.13 9.21 1.6 13.04 1.92 16.81c1.86 1.4 3.66 2.24 5.42 2.79c.4-.55.77-1.13 1.07-1.73a10.5 10.5 0 0 1-1.65-.78c.14-.1.27-.2.4-.3a11.6 11.6 0 0 0 9.55 0c.13.1.26.2.4.3c-.53.31-1.08.57-1.65.79c.3.6.66 1.18 1.07 1.73c1.77-.55 3.57-1.4 5.43-2.79c.32-3.77-.21-7.6-2.81-11.48z"/>
+              <circle cx="8.5" cy="13" r="1.5"/>
+              <circle cx="15.5" cy="13" r="1.5"/>
+            </svg>
+          </a>
+          <!-- Facebook -->
+          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Open Heuresys on Facebook" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+            </svg>
+          </a>
+          <!-- X (Twitter) -->
+          <a href="#" target="_blank" rel="noopener noreferrer" aria-label="Open Heuresys on X (Twitter)" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M18.244 2H21.5l-7.11 8.13L22.75 22h-6.54l-5.12-6.69L5.23 22H1.97l7.6-8.69L1.55 2h6.7l4.63 6.12L18.244 2Zm-1.14 17.91h1.8L7.27 3.98H5.34l11.764 15.93Z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- RIGHT — SUPERUSER context-specific (build + runtime + DB + tunnel + clock) -->
+      <div class="hidden items-center gap-3 font-mono text-[10px] md:flex">
+        <span>v5.0.0-mvp3</span>
+        <span aria-hidden="true" class="text-border">·</span>
+        <span>build f065ef2</span>
+        <span aria-hidden="true" class="text-border">·</span>
+        <span>OCI VM eu-milan-1</span>
+        <span aria-hidden="true" class="text-border">·</span>
+        <span>pg 16 · pool 18/50</span>
+        <span aria-hidden="true" class="text-border">·</span>
+        <span class="inline-flex items-center gap-1.5">
+          <span class="h-1.5 w-1.5 rounded-full bg-success pulse-dot"></span>
+          tunnel 5433
+        </span>
+        <span aria-hidden="true" class="text-border">·</span>
+        <span>19 May · 16:43 CET</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const html = document.documentElement;
+      const body = document.body;
+      const STORAGE_THEME = 'heuresys-theme';
+      const STORAGE_PALETTE = 'heuresys-palette';
+      const STORAGE_SIDEBAR = 'heuresys-sidebar';
+      const STORAGE_GROUPS = 'heuresys-sidebar-groups';
+
+      // 4 categorical palette presets — HSL "H S% L%" (no hsl() wrapper, Tailwind config wraps)
+      const palettes = [
+        { name: 'Default (balanced)', vars: ['222 80% 50%', '188 75% 45%', '262 65% 60%', '38 90% 55%']  },
+        { name: 'Cool ocean',         vars: ['178 75% 42%', '195 85% 48%', '215 85% 55%', '245 78% 60%']  },
+        { name: 'Warm sunset',        vars: ['0 80% 55%',   '22 92% 55%',  '38 90% 55%',  '52 92% 60%']   },
+        { name: 'Brand mono',         vars: ['221 83% 35%', '221 75% 48%', '221 65% 60%', '221 55% 72%']  }
+      ];
+
+      // ============== THEME TOGGLE ==============
+      const savedTheme = localStorage.getItem(STORAGE_THEME);
+      if (savedTheme === 'light') html.classList.remove('dark');
+      else if (savedTheme === 'dark') html.classList.add('dark');
+
+      const themeBtn = document.getElementById('js-theme-toggle');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          const isDark = html.classList.toggle('dark');
+          localStorage.setItem(STORAGE_THEME, isDark ? 'dark' : 'light');
+        });
+      }
+
+      // ============== PALETTE DROPDOWN ==============
+      function applyPalette(idx) {
+        const p = palettes[idx];
+        if (!p) return;
+        p.vars.forEach((value, i) => html.style.setProperty('--palette-' + (i + 1), value));
+      }
+
+      let paletteIdx = parseInt(localStorage.getItem(STORAGE_PALETTE) || '0', 10);
+      if (!Number.isFinite(paletteIdx) || paletteIdx < 0 || paletteIdx >= palettes.length) paletteIdx = 0;
+
+      const paletteTrigger = document.getElementById('js-palette-trigger');
+      const paletteMenu = document.getElementById('js-palette-menu');
+      const paletteOptions = paletteMenu ? paletteMenu.querySelectorAll('[data-palette-idx]') : [];
+
+      function updatePaletteSelection() {
+        paletteOptions.forEach((opt) => {
+          const i = parseInt(opt.getAttribute('data-palette-idx'), 10);
+          const selected = i === paletteIdx;
+          opt.setAttribute('aria-selected', selected ? 'true' : 'false');
+          const check = opt.querySelector('[data-palette-check]');
+          if (check) check.classList.toggle('hidden', !selected);
+        });
+      }
+
+      function openPaletteMenu() {
+        if (!paletteMenu || !paletteTrigger) return;
+        paletteMenu.hidden = false;
+        paletteTrigger.setAttribute('aria-expanded', 'true');
+      }
+      function closePaletteMenu() {
+        if (!paletteMenu || !paletteTrigger) return;
+        paletteMenu.hidden = true;
+        paletteTrigger.setAttribute('aria-expanded', 'false');
+      }
+
+      applyPalette(paletteIdx);
+      updatePaletteSelection();
+
+      if (paletteTrigger && paletteMenu) {
+        paletteTrigger.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (paletteMenu.hidden) openPaletteMenu();
+          else closePaletteMenu();
+        });
+
+        paletteOptions.forEach((opt) => {
+          opt.addEventListener('click', () => {
+            const i = parseInt(opt.getAttribute('data-palette-idx'), 10);
+            if (!Number.isFinite(i)) return;
+            paletteIdx = i;
+            applyPalette(paletteIdx);
+            updatePaletteSelection();
+            localStorage.setItem(STORAGE_PALETTE, String(paletteIdx));
+            closePaletteMenu();
+          });
+        });
+
+        document.addEventListener('click', (e) => {
+          if (paletteMenu.hidden) return;
+          if (!paletteMenu.contains(e.target) && !paletteTrigger.contains(e.target)) {
+            closePaletteMenu();
+          }
+        });
+
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && !paletteMenu.hidden) closePaletteMenu();
+        });
+      }
+
+      // ============== SIDEBAR COLLAPSE ==============
+      const shellGrid = document.querySelector('[data-shell="grid"]');
+      function applySidebarState(collapsed) {
+        if (collapsed) {
+          body.setAttribute('data-sidebar', 'collapsed');
+          if (shellGrid) shellGrid.style.setProperty('grid-template-columns', '72px 1fr', 'important');
+        } else {
+          body.removeAttribute('data-sidebar');
+          if (shellGrid) shellGrid.style.setProperty('grid-template-columns', '260px 1fr', 'important');
+        }
+      }
+
+      const savedSidebar = localStorage.getItem(STORAGE_SIDEBAR);
+      applySidebarState(savedSidebar === 'collapsed');
+
+      const sidebarBtn = document.getElementById('js-sidebar-toggle');
+      if (sidebarBtn) {
+        sidebarBtn.addEventListener('click', () => {
+          const isCollapsed = body.getAttribute('data-sidebar') === 'collapsed';
+          applySidebarState(!isCollapsed);
+          localStorage.setItem(STORAGE_SIDEBAR, !isCollapsed ? 'collapsed' : 'expanded');
+          sidebarBtn.setAttribute('aria-pressed', String(!isCollapsed));
+        });
+      }
+
+      // ============== SIDEBAR GROUP TOGGLES ==============
+      const groupState = JSON.parse(localStorage.getItem(STORAGE_GROUPS) || '{}');
+      const groupToggles = document.querySelectorAll('[data-group-toggle]');
+
+      groupToggles.forEach((btn) => {
+        const groupId = btn.getAttribute('data-group-toggle');
+        if (groupState[groupId] === false) btn.setAttribute('aria-expanded', 'false');
+
+        btn.addEventListener('click', () => {
+          const expanded = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+          groupState[groupId] = !expanded;
+          localStorage.setItem(STORAGE_GROUPS, JSON.stringify(groupState));
+        });
+      });
+
+      // ============== TABLE CROSS-HAIR + COLUMN HIGHLIGHT ==============
+      // On hover: th → highlight whole column. td → highlight column + cell.
+      // Row is already handled by tbody tr:hover CSS rule.
+      document.querySelectorAll('table').forEach((table) => {
+        const headerCells = table.querySelectorAll('thead th');
+        const bodyRows = table.querySelectorAll('tbody tr');
+
+        function clearTableCross() {
+          table.querySelectorAll('.col-cross').forEach((el) => el.classList.remove('col-cross'));
+          table.querySelectorAll('.cell-cross').forEach((el) => el.classList.remove('cell-cross'));
+          table.querySelectorAll('.col-hover-header').forEach((el) => el.classList.remove('col-hover-header'));
+        }
+
+        // Header hover → tint entire column
+        headerCells.forEach((th, colIdx) => {
+          th.addEventListener('mouseenter', () => {
+            clearTableCross();
+            th.classList.add('col-hover-header');
+            bodyRows.forEach((row) => {
+              const cell = row.children[colIdx];
+              if (cell) cell.classList.add('col-cross');
+            });
+          });
+          th.addEventListener('mouseleave', clearTableCross);
+        });
+
+        // Body cell hover → cross-hair (column tint + cell intersection)
+        bodyRows.forEach((row) => {
+          [...row.children].forEach((td, colIdx) => {
+            td.addEventListener('mouseenter', () => {
+              clearTableCross();
+              // Highlight whole column
+              const header = headerCells[colIdx];
+              if (header) header.classList.add('col-hover-header');
+              bodyRows.forEach((r) => {
+                const c = r.children[colIdx];
+                if (c) c.classList.add('col-cross');
+              });
+              // Enhance the hovered cell as intersection
+              td.classList.add('cell-cross');
+            });
+            td.addEventListener('mouseleave', clearTableCross);
+          });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

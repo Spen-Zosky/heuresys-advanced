@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="22 6 136 24" role="img" aria-label="Heuresys" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .heuresys-wordmark {
+        font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        font-weight: 700;
+        font-size: 26.6667px;
+        line-height: 0;
+        letter-spacing: -0.5px;  /* L16 letter-spacing naturale */
+      }
+      .heuresys-wordmark-primary { fill: hsl(221, 83%, 53%); }
+      .heuresys-wordmark-accent  {
+        fill: #a855f7;
+        /* L25: same weight as body (no gap). Color is the only differentiator. */
+      }
+    </style>
+  </defs>
+  <text x="90" y="24" text-anchor="middle" class="heuresys-wordmark">
+    <tspan class="heuresys-wordmark-primary">heures</tspan><tspan class="heuresys-wordmark-accent">y</tspan><tspan class="heuresys-wordmark-primary">s</tspan>
+  </text>
+</svg>

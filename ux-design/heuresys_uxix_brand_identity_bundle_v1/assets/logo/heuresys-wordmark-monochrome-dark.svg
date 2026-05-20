@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="22 6 136 24" role="img" aria-label="Heuresys" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .heuresys-wordmark-mono {
+        font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        font-weight: 700;
+        font-size: 26.6667px;
+        line-height: 0;
+        letter-spacing: -1.17px;
+        fill: #ffffff;
+      }
+    </style>
+  </defs>
+  <text x="90" y="24" text-anchor="middle" class="heuresys-wordmark-mono">heuresys</text>
+</svg>

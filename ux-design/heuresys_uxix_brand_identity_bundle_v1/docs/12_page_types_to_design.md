@@ -114,6 +114,61 @@ Must showcase:
 - Semantic icon colors.
 - Carefully controlled "wow" graphics.
 
+## 9. System Health / Admin Dashboard
+
+A dedicated **observability page type** for SUPERUSER / PLATFORM_ADMIN role. Aggregates cross-tenant operational signals.
+
+Must include the following macro-areas (see `docs/16_system_health_admin_dashboard_patterns.md` for per-widget specs):
+
+```text
+1. Alert banner (top, dismissible, severity-coded)
+2. Page header with status pill + time range selector + refresh + export
+3. KPI strip (5 cards: API uptime / DB pool / RBAC cache / Active tenants / Auth integrity)
+4. Tenant fleet table (cross-tenant operational status)
+5. Error rate breakdown + Incident timeline (2-col grid)
+6. Charts row (latency p50/p95/p99 + active sessions by role)
+7. SQL slow query top-10 (data-dense, cross-hair on)
+8. RBAC permissions matrix (sticky first column, tri-state cells, cross-hair on)
+9. Live log stream + Audit feed (2-col grid)
+```
+
+Sub-page entries in the sidebar:
+
+```text
+Platform
+├── System Health          (this page)
+├── Tenant Fleet           (drill-down)
+├── Live Logs              (full-screen log view)
+└── Audit Feed             (full-screen audit view)
+
+Database
+└── DB Supervisor          (multi-tab page — Schemas/Tables/Views/Indexes/…)
+
+Administration
+├── Platform Users
+├── RBAC Mappings
+├── Migrations
+└── Configuration
+
+Diagnostics
+├── Incidents
+└── SQL Console
+```
+
+## 10. Data visualization patterns (cross-cutting)
+
+These patterns recur across multiple page types (executive dashboard, system health, tenant detail, analytics):
+
+- **KPI cards with sparkline** — single big number + tiny inline SVG sparkline + footer delta (`▲ 0.04%` style).
+- **Stacked status bar** — single horizontal bar split by status code or category, with legend rows below.
+- **Vertical timeline with ring dots** — incident timeline / event log style; dots colored by severity.
+- **Log streaming** — `<ol>` of `.log-line` rows, monospace timestamp + level badge + source pill + message; tailing footer; filter pills.
+- **Permission matrix** — sticky first column + cells with tri-state icons (`granted` ✓ / `scoped` ◐ / `denied` ·).
+- **Mini progress bar** — inline `<div>` width-percentage bar (pool util, completeness, coverage).
+- **Inline charts in cards** — line charts (latency), bar segments (sessions by role), stacked bars (status mix). Recharts in production; inline SVG in HTML prototype.
+
+All of the above are documented with markup + token references in `docs/16_system_health_admin_dashboard_patterns.md` and implemented in `@heuresys/ui/dashboard/*`.
+
 ## Rule
 
 All page types must inherit the same design tokens, typography, palette, icon system and component language.

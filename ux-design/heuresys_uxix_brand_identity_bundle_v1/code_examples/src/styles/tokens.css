@@ -1,20 +1,59 @@
+/* ============================================================
+   Heuresys design tokens — UX/IX v1
+   ============================================================
+   - Brand anchors (logo blue + logo purple) drive derived scales.
+   - --primary is NOT mapped 1:1 to the logo blue (accessibility).
+   - See docs/09_design_system_and_tokens.md for the rationale.
+   ============================================================ */
+
 :root {
   --font-sans: "Exo 2", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
+  /* ---------- Brand color scales (derived from logo) ---------- */
+  /* Brand blue — anchor at -500 (logo wordmark "heures" + "s") */
+  --brand-blue-50:  221 83% 96%;
+  --brand-blue-100: 221 83% 92%;
+  --brand-blue-200: 221 83% 84%;
+  --brand-blue-300: 221 83% 73%;
+  --brand-blue-400: 221 83% 62%;
+  --brand-blue-500: 221 83% 53%; /* LOGO EXACT — brand anchor — do not change */
+  --brand-blue-600: 221 83% 46%;
+  --brand-blue-700: 221 83% 38%;
+  --brand-blue-800: 221 83% 30%;
+  --brand-blue-900: 221 83% 22%;
+  --brand-blue-950: 221 83% 14%;
+
+  /* Brand purple — anchor at -500 (logo wordmark accent "y") */
+  --brand-purple-50:  271 91% 96%;
+  --brand-purple-100: 271 91% 92%;
+  --brand-purple-200: 271 91% 86%;
+  --brand-purple-300: 271 91% 77%;
+  --brand-purple-400: 271 91% 70%;
+  --brand-purple-500: 271 91% 65%; /* LOGO EXACT — brand anchor — do not change */
+  --brand-purple-600: 271 91% 55%;
+  --brand-purple-700: 271 91% 45%;
+  --brand-purple-800: 271 91% 36%;
+  --brand-purple-900: 271 91% 28%;
+  --brand-purple-950: 271 91% 18%;
+
+  /* ---------- Surface + semantic tokens (light theme) ---------- */
   --background: 0 0% 100%;
   --foreground: 224 28% 12%;
   --card: 0 0% 100%;
   --card-foreground: 224 28% 12%;
   --border: 220 14% 90%;
   --accent: 220 16% 96%;
-  --primary: 222 72% 44%;
+  /* Primary action color — derived from brand-blue-700 for WCAG AAA contrast on white */
+  --primary: var(--brand-blue-700);
   --muted-foreground: 220 9% 46%;
 
+  /* Categorical accent palette — independent of brand-blue/purple scales */
   --palette-1: hsl(222 72% 44%);
   --palette-2: hsl(188 74% 38%);
   --palette-3: hsl(262 60% 55%);
   --palette-4: hsl(38 92% 50%);
 
+  /* Semantic icon colors */
   --color-icon-default: hsl(220 9% 46%);
   --color-icon-info: hsl(210 90% 45%);
   --color-icon-success: hsl(145 63% 35%);
@@ -34,7 +73,8 @@
   --card-foreground: 220 24% 96%;
   --border: 224 18% 18%;
   --accent: 224 18% 14%;
-  --primary: 215 90% 62%;
+  /* Primary action color — derived from brand-blue-400 for WCAG AA contrast on dark bg */
+  --primary: var(--brand-blue-400);
   --muted-foreground: 220 12% 68%;
 
   --color-icon-default: hsl(220 12% 68%);

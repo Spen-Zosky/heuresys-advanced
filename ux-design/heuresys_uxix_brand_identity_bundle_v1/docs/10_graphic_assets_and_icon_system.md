@@ -15,27 +15,61 @@ Brand Assets
 
 ## Logo system
 
-The logo should exist in controlled variants:
+### Default brand logo — non-negotiable
+
+The **canonical, default Heuresys logo** is the **two-color wordmark** `heuresys-wordmark.svg`:
+
+- Font family: **Exo 2** (weight 700)
+- Letter-spacing: `-0.5px`
+- Color split (two-color identity):
+  - Primary blue `hsl(221, 83%, 53%)` → letters `heures` and `s`
+  - Accent purple `#a855f7` → middle letter `y`
+- The single colored `y` is the **brand differentiator** — never change its color, position, or weight relative to the rest of the wordmark.
+- The `y` letter alone (`heuresys-mark.svg`) is the **symbol mark**, used for favicons, collapsed sidebar, and loading screens.
+
+**This default applies to every surface unless explicitly overridden:**
 
 ```text
-logo/
-├── heuresys-logo-full.svg
-├── heuresys-logo-symbol.svg
-├── heuresys-logo-horizontal.svg
-├── heuresys-logo-monochrome.svg
-├── heuresys-logo-light.svg
-└── heuresys-logo-dark.svg
+Default surfaces (use heuresys-wordmark.svg):
+- Dashboard header (light + dark theme)
+- Login page
+- Landing pages
+- Marketing material
+- ESS portal header
+- Authenticated initial page
+- Embedded reports (web view)
+- Storybook / showcase
 ```
 
-Usage:
+The two-color wordmark is **theme-agnostic** — the primary blue and accent purple both retain WCAG-acceptable contrast on both light (`#ffffff`) and dark (`hsl(224 28% 7%)`) backgrounds, so a single canonical asset serves both themes.
+
+Monochrome variants are **only** used when the default cannot render correctly (single-color print, fax, faxed PDF, etc.) — they are **fallbacks**, not alternatives.
+
+### Variant inventory
 
 ```text
-Full logo          → login page, landing page, documentation
-Symbol logo        → collapsed sidebar, favicon base, loading screen
-Horizontal logo    → dashboard header
-Monochrome logo    → footer, print, PDF reports, governance documents
-Light logo         → dark backgrounds
-Dark logo          → light backgrounds
+assets/logo/
+├── heuresys-wordmark.svg                        ← DEFAULT (two-color, Exo 2 700)
+├── heuresys-mark.svg                            ← symbol (purple "y" only, 32×32)
+├── heuresys-wordmark-monochrome-dark.svg        ← single-color white, fallback for dark backgrounds
+└── heuresys-wordmark-monochrome-light.svg       ← single-color blue, fallback for monochrome print
+```
+
+Usage matrix:
+
+```text
+heuresys-wordmark.svg                    → DEFAULT for every UI surface
+heuresys-mark.svg                        → favicon, collapsed sidebar, app icon, loading spinner center
+heuresys-wordmark-monochrome-dark.svg    → fallback only: dark bg where rendering forces single color
+heuresys-wordmark-monochrome-light.svg   → fallback only: light bg in monochrome print / PDF / fax
+```
+
+Selection rule:
+
+```text
+if (surface_supports_full_color) → heuresys-wordmark.svg          (always)
+elif (background_is_dark)        → heuresys-wordmark-monochrome-dark.svg
+else                             → heuresys-wordmark-monochrome-light.svg
 ```
 
 Primary format:
@@ -44,7 +78,7 @@ Primary format:
 SVG
 ```
 
-SVG is scalable, lightweight, sharp on all screens and can inherit colors through CSS.
+SVG is scalable, lightweight, sharp on all screens and embeds its color identity via a scoped `<style>` block — so it survives copy-paste, theme switches, and CSS resets without depending on `currentColor`.
 
 ## Favicon and app icons
 

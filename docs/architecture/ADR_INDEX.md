@@ -31,6 +31,7 @@ Every ADR follows this structure:
 | [0010](adr/0010_postgresql_runtime_location.md) | PostgreSQL runtime location | Accepted | **Option B** — PostgreSQL 16 native on OCI VM `oracle-vm-default` reached via SSH tunnel `ssh -L 5433:localhost:5432`; A and C documented as `.env` fallback blocks | 2026‑05‑16 |
 | [0011](adr/0011_ess_scope_inclusion.md) | Employee Self‑Service Portal inclusion | Accepted | **ESS in scope as MVP‑2b** (13 pages `/me/*` + 18 endpoints `/v1/me/*` + 19 `self`‑scope permissions + hard‑coded `userId = req.user.userId`); reverses the original out‑of‑scope decision | 2026‑05‑16 |
 | [0012](adr/0012_brownfield_table_mapping_wave_column.md) | Brownfield wave assignment storage | Accepted | **Dedicated `table_mapping_wave smallint` column** on `brownfield.table_mappings` with CHECK 1..4 + secondary index; symmetric with `import_runs.import_run_wave` | 2026‑05‑18 |
+| [0013](adr/0013_showcase_sot_policy.md) | Showcase SoT policy | Accepted | **4‑level hierarchy** (`@heuresys/ui` → `apps/web` → `apps/showcase` mirror → GH Pages) + 3 rules: no‑edit zone on sync‑copied paths, portability invariant, deps surface alignment | 2026‑05‑20 |
 
 ## Conventions
 

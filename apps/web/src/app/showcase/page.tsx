@@ -10,6 +10,13 @@ type ShowcaseRoute = {
 
 const ROUTES: ShowcaseRoute[] = [
   {
+    href: "/showcase/system-health",
+    title: "System Health (SUPERUSER) — CANONICAL",
+    blurb: "Full reference dashboard demonstrating ALL 20 promoted brand patterns: shell + header + sidebar + footer + alert banner + KPI strip + tenant fleet + error breakdown + incident timeline + SQL slow query + RBAC matrix + log stream + audit feed. Universal hover affordance, cross-hair tables, magnifier hint, palette dropdown, theme toggle, sidebar collapse + group toggles. See docs/16_system_health_admin_dashboard_patterns.md.",
+    status: "live",
+    decisionId: "UXIX-2026-05-20",
+  },
+  {
     href: "/showcase/shell",
     title: "Shell",
     blurb: "Fixed-viewport shell, expanded vs collapsed sidebar, independent scroll, Header+Footer immutability.",

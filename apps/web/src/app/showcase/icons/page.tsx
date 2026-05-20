@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { StatusIcon, type StatusTone } from "@heuresys/ui";
 import {
@@ -14,7 +16,9 @@ import {
   XCircle,
 } from "lucide-react";
 
-export const metadata = { title: "Showcase / Icons — Heuresys" };
+// metadata export is not allowed in client components; the title is set by
+// the parent showcase layout. Keeping the constant inline as documentation:
+// page-title = "Showcase / Icons — Heuresys"
 
 type ToneRow = {
   tone: StatusTone;

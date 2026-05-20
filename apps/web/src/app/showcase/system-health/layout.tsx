@@ -15,9 +15,10 @@ import type { ReactNode } from "react";
  * with a high z-index — this visually covers the parent chrome.
  *
  * Note: the showcase chrome is still rendered in the DOM behind this fixed
- * layer. This is acceptable because (a) `<PaletteProvider>` from the parent
- * remains active (palette CSS variables still drive the system-health page),
- * (b) the user perceives a fullscreen takeover identical to a "real" page.
+ * layer. This is acceptable because (a) the global `<ThemeProvider>` from the
+ * root layout's AppProviders remains active (CSS variables still drive the
+ * system-health page), (b) the user perceives a fullscreen takeover identical
+ * to a "real" page.
  */
 export default function SystemHealthLayout({ children }: { children: ReactNode }) {
   return (

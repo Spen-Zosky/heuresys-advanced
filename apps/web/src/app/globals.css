@@ -1,12 +1,15 @@
 /* apps/web/src/app/globals.css
  *
  * Re-exports the Heuresys design system base CSS (tokens + Tailwind 4
- * primitives) and seeds initial palette CSS variables so the showcase
- * renders correctly on first paint (before PaletteProvider hydration).
+ * primitives). Initial palette + theme CSS variables are seeded by the
+ * `@heuresys/ui` design system stylesheet at first paint. Runtime overrides:
+ * - `--palette-1..4` HSL values are applied to `<html>` inline by
+ *   `PaletteDropdown` from `@heuresys/ui` (localStorage `heuresys-palette`).
+ * - `html.dark` class is toggled by `ThemeProvider` + boot script in
+ *   `apps/web/src/app/layout.tsx` (localStorage `heuresys-theme`).
  *
- * The variables are overwritten at runtime by PaletteProvider
- * (apps/web/src/lib/theme/PaletteProvider.tsx) based on the user's
- * stored palette + theme choice. Brand decision tie: UXIX-0005.
+ * The legacy 5-candidate `PaletteProvider` was retired in Tier 2 cleanup
+ * (commit f.).
  */
 
 @import "@heuresys/ui/styles";

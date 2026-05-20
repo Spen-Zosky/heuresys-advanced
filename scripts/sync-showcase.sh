@@ -23,9 +23,12 @@ echo "sync-showcase: copying apps/web/src/app/showcase -> apps/showcase/src/app/
 mkdir -p "$SHOWCASE/app/showcase"
 cp -r "$WEB/app/showcase/." "$SHOWCASE/app/showcase/"
 
-echo "sync-showcase: copying apps/web/src/lib/theme -> apps/showcase/src/lib/theme"
-mkdir -p "$SHOWCASE/lib/theme"
-cp -r "$WEB/lib/theme/." "$SHOWCASE/lib/theme/"
+# apps/web/src/lib is intentionally NOT synced. Showcase pages must remain
+# portable — only deps allowed are @heuresys/ui + react + lucide-react (per
+# ADR-0013 R2 portability invariant). The legacy lib/theme bundle was retired
+# in Tier 2 cleanup; palette + theme now live in @heuresys/ui (PaletteDropdown
+# + ThemeProvider + ThemeToggle). If a showcase page needs business logic
+# (apps/web/src/lib/api, i18n, ...), promote that logic to @heuresys/ui first.
 
 # Components used by showcase pages (e.g. SystemHealthDashboard.tsx is shared
 # between /showcase/system-health and the authenticated /system-health route).

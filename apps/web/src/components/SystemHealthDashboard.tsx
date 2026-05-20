@@ -34,6 +34,9 @@ import {
   SQLSlowQueryTable,
   TenantFleetTable,
 } from "@heuresys/ui";
+import {
+  Activity, Layers, ScrollText, ShieldCheck, Users, Lock, Database, Settings, AlertCircle, Code2,
+} from "lucide-react";
 
 export function SystemHealthDashboard() {
   return (
@@ -78,10 +81,10 @@ export function SystemHealthDashboard() {
               id: "platform",
               label: "Platform",
               items: [
-                { id: "health", label: "System Health", href: "#", active: true, aux: <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success pulse-dot" /> },
-                { id: "tenants", label: "Tenant Fleet", href: "#", aux: <span className="font-mono text-[10px] text-muted-foreground">4</span> },
-                { id: "logs", label: "Live Logs", href: "#", aux: <span className="inline-flex h-1.5 w-1.5 rounded-full bg-info pulse-dot" /> },
-                { id: "audit", label: "Audit Feed", href: "#" },
+                { id: "health", label: "System Health", href: "#", active: true, icon: <Activity className="h-4 w-4 shrink-0 text-primary" />, aux: <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success pulse-dot" /> },
+                { id: "tenants", label: "Tenant Fleet", href: "#", icon: <Layers className="h-4 w-4 shrink-0" />, aux: <span className="font-mono text-[10px] text-muted-foreground">4</span> },
+                { id: "logs", label: "Live Logs", href: "#", icon: <ScrollText className="h-4 w-4 shrink-0" />, aux: <span className="inline-flex h-1.5 w-1.5 rounded-full bg-info pulse-dot" /> },
+                { id: "audit", label: "Audit Feed", href: "#", icon: <ShieldCheck className="h-4 w-4 shrink-0" /> },
               ],
             },
             { id: "database",
@@ -97,18 +100,18 @@ export function SystemHealthDashboard() {
               id: "administration",
               label: "Administration",
               items: [
-                { id: "users", label: "Platform Users", href: "#" },
-                { id: "rbac", label: "RBAC Mappings", href: "#" },
-                { id: "migrations", label: "Migrations", href: "#" },
-                { id: "config", label: "Configuration", href: "#" },
+                { id: "users", label: "Platform Users", href: "#", icon: <Users className="h-4 w-4 shrink-0" /> },
+                { id: "rbac", label: "RBAC Mappings", href: "#", icon: <Lock className="h-4 w-4 shrink-0" /> },
+                { id: "migrations", label: "Migrations", href: "#", icon: <Database className="h-4 w-4 shrink-0" /> },
+                { id: "config", label: "Configuration", href: "#", icon: <Settings className="h-4 w-4 shrink-0" /> },
               ],
             },
             {
               id: "diagnostics",
               label: "Diagnostics",
               items: [
-                { id: "incidents", label: "Incidents", href: "#", aux: <span className="rounded-full bg-warning/15 px-1.5 py-0.5 font-mono text-[10px] font-medium text-warning">2</span> },
-                { id: "sql", label: "SQL Console", href: "#" },
+                { id: "incidents", label: "Incidents", href: "#", icon: <AlertCircle className="h-4 w-4 shrink-0" />, aux: <span className="rounded-full bg-warning/15 px-1.5 py-0.5 font-mono text-[10px] font-medium text-warning">2</span> },
+                { id: "sql", label: "SQL Console", href: "#", icon: <Code2 className="h-4 w-4 shrink-0" /> },
               ],
             },
           ]}

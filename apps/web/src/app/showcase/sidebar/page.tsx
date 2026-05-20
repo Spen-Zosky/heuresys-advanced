@@ -73,7 +73,7 @@ const SIDEBAR_GROUPS = [
         label: "Gaps",
         href: "#",
         icon: <AlertCircle className={ICON_CLS} />,
-        aux: <span className="rounded-full bg-danger/15 px-1.5 py-0.5 font-mono text-[10px] font-medium text-danger">342</span>,
+        aux: <span className="rounded-full bg-destructive/15 px-1.5 py-0.5 font-mono text-[10px] font-medium text-destructive">342</span>,
       },
       { id: "comp", label: "Compensation intelligence", href: "#", icon: <Layers className={ICON_CLS} /> },
       {
@@ -198,7 +198,7 @@ export default function SidebarShowcasePage() {
             <tr>
               <td className="py-2">Danger chip</td>
               <td>Hard attention (critical gaps)</td>
-              <td><span className="rounded-full bg-danger/15 px-1.5 py-0.5 font-mono text-[10px] font-medium text-danger">342</span></td>
+              <td><span className="rounded-full bg-destructive/15 px-1.5 py-0.5 font-mono text-[10px] font-medium text-destructive">342</span></td>
             </tr>
             <tr>
               <td className="py-2">Volume hint</td>

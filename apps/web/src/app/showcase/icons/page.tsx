@@ -40,7 +40,7 @@ const TONE_SWATCH_CLASS: Record<StatusTone, string> = {
   info: "bg-info",
   success: "bg-success",
   warning: "bg-warning",
-  danger: "bg-danger",
+  danger: "bg-destructive",
   disabled: "bg-muted-foreground/40",
 };
 

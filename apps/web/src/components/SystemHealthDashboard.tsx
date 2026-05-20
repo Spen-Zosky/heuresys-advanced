@@ -175,6 +175,42 @@ export function SystemHealthDashboard() {
               Cross-tenant platform observability — Fastify API, PostgreSQL 16 pool, RBAC cache state, audit chain.
             </p>
           </div>
+
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center rounded-control border border-border bg-card p-0.5">
+              <button className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:text-foreground">15m</button>
+              <button className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:text-foreground">1h</button>
+              <button className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-foreground">24h</button>
+              <button className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:text-foreground">7d</button>
+              <button className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:text-foreground">30d</button>
+            </div>
+
+            <button
+              type="button"
+              aria-label="Aggiorna dati"
+              className="inline-flex h-9 items-center gap-2 rounded-control border border-border bg-card px-3 text-sm text-muted-foreground transition hover:bg-accent hover:text-foreground hover:border-foreground/30"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="23 4 23 10 17 10" />
+                <polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </svg>
+              Aggiorna
+            </button>
+
+            <button
+              type="button"
+              className="inline-flex h-9 items-center gap-2 rounded-control bg-primary px-3 text-sm font-medium text-background transition hover:opacity-90"
+              style={{ color: 'var(--background)' }}
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Export report
+            </button>
+          </div>
         </div>
 
         <KPIStrip items={[

@@ -9,7 +9,9 @@ on:
     paths:
       - "apps/web/src/app/showcase/**"
       - "apps/web/src/lib/theme/**"
+      - "apps/web/src/components/**"
       - "apps/web/src/app/globals.css"
+      - "apps/web/src/app/layout.tsx"
       - "apps/showcase/**"
       - "scripts/sync-showcase.sh"
       - ".github/workflows/showcase.yml"

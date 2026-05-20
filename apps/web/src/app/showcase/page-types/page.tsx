@@ -20,7 +20,7 @@ const PAGE_TYPES: PageType[] = [
       <div className="space-y-1.5">
         <div className="h-3 w-1/2 rounded bg-[var(--muted)]" />
         <div className="grid grid-cols-4 gap-1.5">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="h-8 rounded bg-blue-100" />)}
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-8 rounded bg-primary/20" />)}
         </div>
         <div className="grid grid-cols-2 gap-1.5">
           <div className="h-12 rounded bg-[var(--muted)]" />
@@ -38,7 +38,7 @@ const PAGE_TYPES: PageType[] = [
       <div className="space-y-1.5">
         <div className="h-3 w-2/3 rounded bg-[var(--muted)]" />
         <div className="flex gap-1">
-          <div className="h-4 w-12 rounded bg-blue-500" />
+          <div className="h-4 w-12 rounded bg-primary" />
           <div className="h-4 w-12 rounded bg-[var(--muted)]" />
           <div className="h-4 w-12 rounded bg-[var(--muted)]" />
         </div>
@@ -66,10 +66,10 @@ const PAGE_TYPES: PageType[] = [
     sketch: () => (
       <div className="flex h-full items-center justify-center">
         <div className="w-2/3 space-y-1.5 rounded border border-[var(--border)] bg-[var(--card)] p-2">
-          <div className="mx-auto h-3 w-12 rounded bg-blue-500" />
+          <div className="mx-auto h-3 w-12 rounded bg-primary" />
           <div className="h-2 rounded bg-[var(--muted)]" />
           <div className="h-2 rounded bg-[var(--muted)]" />
-          <div className="h-3 rounded bg-blue-500" />
+          <div className="h-3 rounded bg-primary" />
         </div>
       </div>
     ),
@@ -83,7 +83,7 @@ const PAGE_TYPES: PageType[] = [
       <div className="space-y-1.5">
         <div className="h-3 w-2/3 rounded bg-[var(--muted)]" />
         <div className="grid grid-cols-4 gap-1.5">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="h-10 rounded bg-blue-100" />)}
+          {[1, 2, 3, 4].map((i) => <div key={i} className="h-10 rounded bg-primary/20" />)}
         </div>
         <div className="h-12 rounded bg-[var(--muted)]" />
       </div>
@@ -96,13 +96,13 @@ const PAGE_TYPES: PageType[] = [
     description: "Marketing surface. Hero + features + CTA + footer. Brand-led, no shell.",
     sketch: () => (
       <div className="space-y-1.5">
-        <div className="h-6 rounded bg-blue-600" />
+        <div className="h-6 rounded bg-primary" />
         <div className="grid grid-cols-3 gap-1">
           <div className="h-8 rounded bg-[var(--muted)]" />
           <div className="h-8 rounded bg-[var(--muted)]" />
           <div className="h-8 rounded bg-[var(--muted)]" />
         </div>
-        <div className="mx-auto h-3 w-1/3 rounded bg-blue-500" />
+        <div className="mx-auto h-3 w-1/3 rounded bg-primary" />
       </div>
     ),
   },
@@ -115,7 +115,7 @@ const PAGE_TYPES: PageType[] = [
       <div className="space-y-1.5">
         <div className="flex justify-between">
           <div className="h-3 w-1/3 rounded bg-[var(--muted)]" />
-          <div className="h-3 w-1/4 rounded bg-blue-500" />
+          <div className="h-3 w-1/4 rounded bg-primary" />
         </div>
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="grid grid-cols-5 gap-1">
@@ -139,7 +139,7 @@ const PAGE_TYPES: PageType[] = [
           <div className="h-4 rounded bg-[var(--muted)]" />
           <div className="h-4 rounded bg-[var(--muted)]" />
         </div>
-        <div className="ml-auto h-3 w-1/4 rounded bg-blue-500" />
+        <div className="ml-auto h-3 w-1/4 rounded bg-primary" />
       </div>
     ),
   },

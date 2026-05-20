@@ -1,8 +1,28 @@
 import Link from "next/link";
+import { Exo_2, Inter } from "next/font/google";
 
 export const metadata = {
   title: "Showcase / Typography — Heuresys",
 };
+
+/**
+ * Live webfont wire-up (next/font/google self-hosts the font binaries at
+ * build time — no FOUT, no third-party requests at render time). The
+ * candidate cards consume `exo2.style.fontFamily` and `inter.style.fontFamily`
+ * instead of the bare string `"Exo 2"` / `"Inter"`, so previews show the real
+ * typeface rendered with proper weights instead of system-stack fallbacks.
+ */
+const exo2 = Exo_2({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
 
 type ScaleStep = {
   token: string;
@@ -25,7 +45,7 @@ type Typography = {
 const TYPOGRAPHY_A: Typography = {
   id: "A",
   name: "Exo 2 (current)",
-  family: "Exo 2",
+  family: exo2.style.fontFamily,
   stack: "'Exo 2', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
   thesis:
     "Geometric humanist sans with restrained character — already in use as default in tokens.css. Strong KPI numerals (oldstyle off), supportive at body sizes, ascender clarity intact at 12px.",
@@ -42,7 +62,7 @@ const TYPOGRAPHY_A: Typography = {
 const TYPOGRAPHY_B: Typography = {
   id: "B",
   name: "Inter + IBM Plex Mono (alternative)",
-  family: "Inter",
+  family: inter.style.fontFamily,
   stack: "'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
   thesis:
     "Modern grotesque. Inter is the de-facto SaaS sans (Linear, Vercel, Stripe). Pair with IBM Plex Mono for tabular numerics in KPI cards and code snippets. Slightly more neutral than Exo 2, leans editorial.",
@@ -133,8 +153,9 @@ export default function TypographyShowcasePage() {
           authoritative scale in <code>D:\ux-design-shared\ui\src\styles\tokens.css</code>.
         </p>
         <p className="text-xs text-[var(--muted-foreground)]">
-          Note · web fonts are not yet wired into the document head — the cards below fall back to
-          system stacks if the family is not installed locally.{" "}
+          Web fonts wired via <code>next/font/google</code> — Exo 2 and Inter are self-hosted at
+          build time, no FOUT, no third-party request at render. The cards render with the actual
+          typeface, not a system-stack fallback.{" "}
           <Link href="/showcase" className="underline">back to index</Link>
         </p>
       </header>

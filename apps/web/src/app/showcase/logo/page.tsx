@@ -95,9 +95,9 @@ function LogoCard({ c }: { c: LogoCandidate }) {
 
         <div className="rounded-lg border border-[var(--border)] p-4">
           <p className="mb-3 text-[10px] font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
-            Full · dark surface (currentColor inverts)
+            Full · inverse-contrast surface (currentColor adapts)
           </p>
-          <div className="flex items-center justify-center rounded bg-neutral-900 py-4 text-white">
+          <div className="flex items-center justify-center rounded bg-foreground py-4 text-background">
             <Full className="hx-logo h-12 w-auto" />
           </div>
         </div>

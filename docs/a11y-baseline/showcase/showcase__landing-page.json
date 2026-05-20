@@ -1,0 +1,79 @@
+{
+  "route": "/showcase/landing-page",
+  "summary": "critical=0 serious=2 moderate=0 minor=0",
+  "timestamp": "2026-05-20T19:19:13.811Z",
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": 5,
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+      "targets": [
+        {
+          "target": [
+            ".gap-10 > div:nth-child(1) > .tracking-wider.uppercase.text-primary"
+          ],
+          "html": "<p class=\"text-sm font-semibold uppercase tracking-wider text-primary\">Heuresys · v0.3</p>"
+        },
+        {
+          "target": [
+            "h1 > .text-primary"
+          ],
+          "html": "<span class=\"text-primary\">position-first.</span>"
+        },
+        {
+          "target": [
+            ".bg-background\\/10.p-3.rounded-card:nth-child(1) > .text-success.text-xs"
+          ],
+          "html": "<p class=\"text-xs text-success\">+12 this week</p>"
+        },
+        {
+          "target": [
+            ".bg-background\\/10.p-3.rounded-card:nth-child(2) > .text-success.text-xs"
+          ],
+          "html": "<p class=\"text-xs text-success\">−18 vs last month</p>"
+        },
+        {
+          "target": [
+            ".text-primary.text-xs"
+          ],
+          "html": "<p class=\"text-xs text-primary\">78% of plan</p>"
+        }
+      ]
+    },
+    {
+      "id": "target-size",
+      "impact": "serious",
+      "nodes": 4,
+      "help": "All touch targets must be 24px large, or leave sufficient space",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/target-size?application=playwright",
+      "targets": [
+        {
+          "target": [
+            "a[aria-label=\"LinkedIn\"]"
+          ],
+          "html": "<a aria-label=\"LinkedIn\" href=\"#\">in</a>"
+        },
+        {
+          "target": [
+            "a[aria-label=\"GitHub\"]"
+          ],
+          "html": "<a aria-label=\"GitHub\" href=\"#\">gh</a>"
+        },
+        {
+          "target": [
+            "a[aria-label=\"X\"]"
+          ],
+          "html": "<a aria-label=\"X\" href=\"#\">x</a>"
+        },
+        {
+          "target": [
+            "a[aria-label=\"Facebook\"]"
+          ],
+          "html": "<a aria-label=\"Facebook\" href=\"#\">fb</a>"
+        }
+      ]
+    }
+  ]
+}

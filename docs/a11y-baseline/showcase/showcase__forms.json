@@ -1,0 +1,28 @@
+{
+  "route": "/showcase/forms",
+  "summary": "critical=0 serious=1 moderate=0 minor=0",
+  "timestamp": "2026-05-20T19:18:18.846Z",
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": 2,
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+      "targets": [
+        {
+          "target": [
+            ".space-y-1\\.5:nth-child(5) > .text-\\[11px\\].text-destructive"
+          ],
+          "html": "<p class=\"text-[11px] text-destructive\">Enter a fully-qualified URL (https://…).</p>"
+        },
+        {
+          "target": [
+            ".space-y-1\\.5:nth-child(3) > .text-\\[11px\\].text-destructive"
+          ],
+          "html": "<p class=\"text-[11px] text-destructive\">Must be unique across the tenant.</p>"
+        }
+      ]
+    }
+  ]
+}

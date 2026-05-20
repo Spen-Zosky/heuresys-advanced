@@ -1,0 +1,46 @@
+{
+  "route": "/showcase/shell",
+  "summary": "critical=0 serious=1 moderate=0 minor=0",
+  "timestamp": "2026-05-20T19:14:43.920Z",
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": 5,
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+      "targets": [
+        {
+          "target": [
+            ".bg-info\\/20"
+          ],
+          "html": "<span class=\"relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-info/20 text-xs font-semibold text-info\">ES</span>"
+        },
+        {
+          "target": [
+            ".text-info.font-mono.tracking-wider"
+          ],
+          "html": "<span class=\"font-mono text-[10px] uppercase tracking-wider text-info\">USER</span>"
+        },
+        {
+          "target": [
+            "button[data-group-toggle=\"workforce\"] > span"
+          ],
+          "html": "<span>Workforce</span>"
+        },
+        {
+          "target": [
+            "button[data-group-toggle=\"operations\"] > span"
+          ],
+          "html": "<span>Operations</span>"
+        },
+        {
+          "target": [
+            "button[data-group-toggle=\"intelligence\"] > span"
+          ],
+          "html": "<span>Intelligence</span>"
+        }
+      ]
+    }
+  ]
+}

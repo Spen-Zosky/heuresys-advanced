@@ -1,0 +1,103 @@
+{
+  "route": "/showcase/system-health",
+  "summary": "critical=0 serious=2 moderate=0 minor=0",
+  "timestamp": "2026-05-20T19:14:19.370Z",
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": 11,
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+      "targets": [
+        {
+          "target": [
+            "button[data-group-toggle=\"platform\"] > span"
+          ],
+          "html": "<span>Platform</span>"
+        },
+        {
+          "target": [
+            "span > .items-baseline.gap-1\\.5.flex > span:nth-child(1)"
+          ],
+          "html": "<span>Database</span>"
+        },
+        {
+          "target": [
+            ".normal-case"
+          ],
+          "html": "<span class=\"font-mono text-[9px] normal-case tracking-normal text-muted-foreground/60\">pg 16</span>"
+        },
+        {
+          "target": [
+            "li:nth-child(2) > .py-1.text-\\[12px\\][href=\"#\"] > .text-muted-foreground\\/70.num.text-\\[10px\\]"
+          ],
+          "html": "<span class=\"num font-mono text-[10px] text-muted-foreground/70\">576</span>"
+        },
+        {
+          "target": [
+            "li:nth-child(3) > .py-1.text-\\[12px\\][href=\"#\"] > .text-muted-foreground\\/70.num.text-\\[10px\\]"
+          ],
+          "html": "<span class=\"num font-mono text-[10px] text-muted-foreground/70\">42</span>"
+        },
+        {
+          "target": [
+            "li:nth-child(4) > .py-1.text-\\[12px\\][href=\"#\"] > .text-muted-foreground\\/70.num.text-\\[10px\\]"
+          ],
+          "html": "<span class=\"num font-mono text-[10px] text-muted-foreground/70\">1 284</span>"
+        },
+        {
+          "target": [
+            "li:nth-child(5) > .py-1.text-\\[12px\\][href=\"#\"] > .text-muted-foreground\\/70.num.text-\\[10px\\]"
+          ],
+          "html": "<span class=\"num font-mono text-[10px] text-muted-foreground/70\">118</span>"
+        },
+        {
+          "target": [
+            "li:nth-child(6) > .py-1.text-\\[12px\\][href=\"#\"] > .text-muted-foreground\\/70.num.text-\\[10px\\]"
+          ],
+          "html": "<span class=\"num font-mono text-[10px] text-muted-foreground/70\">63</span>"
+        },
+        {
+          "target": [
+            "li:nth-child(7) > .py-1.text-\\[12px\\][href=\"#\"] > .text-muted-foreground\\/70.num.text-\\[10px\\]"
+          ],
+          "html": "<span class=\"num font-mono text-[10px] text-muted-foreground/70\">189</span>"
+        },
+        {
+          "target": [
+            "li:nth-child(8) > .py-1.text-\\[12px\\][href=\"#\"] > .text-muted-foreground\\/70.num.text-\\[10px\\]"
+          ],
+          "html": "<span class=\"num font-mono text-[10px] text-muted-foreground/70\">950</span>"
+        },
+        {
+          "target": [
+            "li:nth-child(9) > .py-1.text-\\[12px\\][href=\"#\"] > .text-muted-foreground\\/70.num.text-\\[10px\\]"
+          ],
+          "html": "<span class=\"num font-mono text-[10px] text-muted-foreground/70\">14</span>"
+        }
+      ]
+    },
+    {
+      "id": "scrollable-region-focusable",
+      "impact": "serious",
+      "nodes": 2,
+      "help": "Scrollable region must have keyboard access",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/scrollable-region-focusable?application=playwright",
+      "targets": [
+        {
+          "target": [
+            ".lg\\:col-span-3 > ol"
+          ],
+          "html": "<ol class=\"max-h-[420px] divide-y divide-border/60 overflow-y-auto\" aria-live=\"polite\">"
+        },
+        {
+          "target": [
+            ".lg\\:col-span-2 > .max-h-\\[420px\\].divide-border\\/60.overflow-y-auto"
+          ],
+          "html": "<ul class=\"max-h-[420px] divide-y divide-border/60 overflow-y-auto\">"
+        }
+      ]
+    }
+  ]
+}

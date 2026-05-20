@@ -106,8 +106,8 @@ export default function FormsShowcasePage() {
           </FieldGroup>
 
           <FieldGroup>
-            <Label>Submitted by</Label>
-            <input value="Mario Rossi · mario.rossi@rtl-bank.test" disabled className="w-full cursor-not-allowed rounded border border-[var(--border)] bg-[var(--muted)] px-3 py-2 text-sm text-[var(--muted-foreground)]" />
+            <Label htmlFor="submitted-by">Submitted by</Label>
+            <input id="submitted-by" value="Mario Rossi · mario.rossi@rtl-bank.test" disabled className="w-full cursor-not-allowed rounded border border-[var(--border)] bg-[var(--muted)] px-3 py-2 text-sm text-[var(--muted-foreground)]" readOnly />
           </FieldGroup>
 
           <div className="md:col-span-2 mt-2 flex items-center justify-between border-t border-[var(--border)] pt-4">
@@ -124,21 +124,21 @@ export default function FormsShowcasePage() {
         <h2 className="text-base font-semibold tracking-tight">Input states</h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <FieldGroup>
-            <Label>Default</Label>
-            <input className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" placeholder="Type here" />
+            <Label htmlFor="state-default">Default</Label>
+            <input id="state-default" className="w-full rounded border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm" placeholder="Type here" />
           </FieldGroup>
           <FieldGroup>
-            <Label>Focus</Label>
-            <input className="w-full rounded border border-primary bg-[var(--card)] px-3 py-2 text-sm shadow ring-2 ring-primary/20" placeholder="Type here" />
+            <Label htmlFor="state-focus">Focus</Label>
+            <input id="state-focus" className="w-full rounded border border-primary bg-[var(--card)] px-3 py-2 text-sm shadow ring-2 ring-primary/20" placeholder="Type here" />
           </FieldGroup>
           <FieldGroup>
-            <Label>Error</Label>
-            <input className="w-full rounded border border-destructive bg-destructive/10 px-3 py-2 text-sm" defaultValue="invalid" />
+            <Label htmlFor="state-error">Error</Label>
+            <input id="state-error" className="w-full rounded border border-destructive bg-destructive/10 px-3 py-2 text-sm" defaultValue="invalid" />
             <ErrorText>Must be unique across the tenant.</ErrorText>
           </FieldGroup>
           <FieldGroup>
-            <Label>Disabled</Label>
-            <input disabled className="w-full cursor-not-allowed rounded border border-[var(--border)] bg-[var(--muted)] px-3 py-2 text-sm text-[var(--muted-foreground)]" defaultValue="read-only" />
+            <Label htmlFor="state-disabled">Disabled</Label>
+            <input id="state-disabled" disabled className="w-full cursor-not-allowed rounded border border-[var(--border)] bg-[var(--muted)] px-3 py-2 text-sm text-[var(--muted-foreground)]" defaultValue="read-only" />
           </FieldGroup>
         </div>
       </section>

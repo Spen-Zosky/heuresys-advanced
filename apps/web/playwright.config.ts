@@ -24,9 +24,19 @@ export default defineConfig({
     },
     {
       name: "chromium",
+      // Match all *.spec.ts EXCEPT showcase-a11y which runs anonymously
+      // (showcase routes are gated by NEXT_PUBLIC_ENABLE_SHOWCASE=1, not auth).
       testMatch: /.*\.spec\.ts/,
+      testIgnore: /showcase-a11y\.spec\.ts/,
       use: { ...devices["Desktop Chrome"] },
       dependencies: ["setup"],
+    },
+    {
+      // Anonymous browser for showcase routes (no DB, no auth, no tunnel).
+      // Used by Tier 7 a11y audit pass (axe-core WCAG 2.2 AA, zero-critical).
+      name: "chromium-anonymous",
+      testMatch: /showcase-a11y\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
   webServer: [

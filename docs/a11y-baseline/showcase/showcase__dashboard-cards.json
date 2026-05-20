@@ -1,0 +1,22 @@
+{
+  "route": "/showcase/dashboard-cards",
+  "summary": "critical=0 serious=1 moderate=0 minor=0",
+  "timestamp": "2026-05-20T19:17:58.910Z",
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": 1,
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+      "targets": [
+        {
+          "target": [
+            ".text-destructive"
+          ],
+          "html": "<span class=\"text-destructive\">▲ 22%</span>"
+        }
+      ]
+    }
+  ]
+}

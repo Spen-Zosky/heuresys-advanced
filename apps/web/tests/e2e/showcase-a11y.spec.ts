@@ -105,6 +105,7 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
           nodes: v.nodes.length,
           help: v.help,
           helpUrl: v.helpUrl,
+          targets: v.nodes.map((n) => ({ target: n.target, html: n.html.slice(0, 240) })),
         })),
       },
       null,
@@ -130,6 +131,12 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
 test.describe("a11y showcase (anonymous)", () => {
   for (const route of SHOWCASE_ROUTES) {
     test(`${route} has no critical a11y violations`, async ({ page }, testInfo) => {
+      // System-health is the canonical reference page (1.55 MB bundle, deep
+      // DOM with KPIStrip + AuditFeed + RBACMatrix + SQLSlowQueryTable etc).
+      // Cold dev-mode compile + axe deep scan can exceed the default 30s.
+      if (route === "/showcase/system-health") {
+        testInfo.setTimeout(90_000);
+      }
       await runAxeOnRoute(page, route, testInfo);
     });
   }

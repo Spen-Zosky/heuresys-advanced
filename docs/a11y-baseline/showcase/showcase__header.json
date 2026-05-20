@@ -1,0 +1,40 @@
+{
+  "route": "/showcase/header",
+  "summary": "critical=0 serious=1 moderate=0 minor=0",
+  "timestamp": "2026-05-20T19:15:05.000Z",
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": 4,
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+      "targets": [
+        {
+          "target": [
+            "section[aria-labelledby=\"standard\"] > .rounded-xl.shadow-sm.overflow-hidden > .z-30.h-16.bg-background\\/95 > .gap-2 > .ml-1.py-1\\.5.px-2 > .bg-info\\/20.h-7.w-7"
+          ],
+          "html": "<span class=\"relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-info/20 text-xs font-semibold text-info\">ES</span>"
+        },
+        {
+          "target": [
+            "section[aria-labelledby=\"standard\"] > .rounded-xl.shadow-sm.overflow-hidden > .z-30.h-16.bg-background\\/95 > .gap-2 > .ml-1.py-1\\.5.px-2 > .flex-col.leading-tight.sm\\:flex > .text-info.font-mono.tracking-wider"
+          ],
+          "html": "<span class=\"font-mono text-[10px] uppercase tracking-wider text-info\">USER</span>"
+        },
+        {
+          "target": [
+            "section[aria-labelledby=\"with-breadcrumb\"] > .rounded-xl.shadow-sm.overflow-hidden > .z-30.h-16.bg-background\\/95 > .gap-2 > .ml-1.py-1\\.5.px-2 > .bg-info\\/20.h-7.w-7"
+          ],
+          "html": "<span class=\"relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-info/20 text-xs font-semibold text-info\">ES</span>"
+        },
+        {
+          "target": [
+            "section[aria-labelledby=\"with-breadcrumb\"] > .rounded-xl.shadow-sm.overflow-hidden > .z-30.h-16.bg-background\\/95 > .gap-2 > .ml-1.py-1\\.5.px-2 > .flex-col.leading-tight.sm\\:flex > .text-info.font-mono.tracking-wider"
+          ],
+          "html": "<span class=\"font-mono text-[10px] uppercase tracking-wider text-info\">USER</span>"
+        }
+      ]
+    }
+  ]
+}

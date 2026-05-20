@@ -1,0 +1,52 @@
+{
+  "route": "/showcase/primary-initial-page",
+  "summary": "critical=0 serious=1 moderate=0 minor=0",
+  "timestamp": "2026-05-20T19:19:49.559Z",
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": 6,
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+      "targets": [
+        {
+          "target": [
+            ".bg-info\\/20"
+          ],
+          "html": "<span class=\"relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-info/20 text-xs font-semibold text-info\">ES</span>"
+        },
+        {
+          "target": [
+            ".text-info.tracking-wider.font-mono"
+          ],
+          "html": "<span class=\"font-mono text-[10px] uppercase tracking-wider text-info\">USER</span>"
+        },
+        {
+          "target": [
+            "button[data-group-toggle=\"me\"] > span"
+          ],
+          "html": "<span>Me</span>"
+        },
+        {
+          "target": [
+            "button[data-group-toggle=\"team\"] > span"
+          ],
+          "html": "<span>Team</span>"
+        },
+        {
+          "target": [
+            ".items-start.py-3.gap-3:nth-child(1) > .bg-info\\/10.text-info.py-0\\.5"
+          ],
+          "html": "<span class=\"rounded-full px-2 py-0.5 text-[10px] font-medium bg-info/10 text-info\">Learning</span>"
+        },
+        {
+          "target": [
+            "td:nth-child(1) > .bg-info\\/10.text-info.py-0\\.5"
+          ],
+          "html": "<span class=\"rounded-full px-2 py-0.5 text-[10px] font-medium bg-info/10 text-info\">Learning</span>"
+        }
+      ]
+    }
+  ]
+}

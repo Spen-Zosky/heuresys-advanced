@@ -1,0 +1,58 @@
+{
+  "route": "/showcase/login-page",
+  "summary": "critical=0 serious=1 moderate=0 minor=0",
+  "timestamp": "2026-05-20T19:19:30.486Z",
+  "violations": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "nodes": 7,
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "helpUrl": "https://dequeuniversity.com/rules/axe/4.11/color-contrast?application=playwright",
+      "targets": [
+        {
+          "target": [
+            "aside > div:nth-child(1) > .opacity-70.tracking-wider.uppercase"
+          ],
+          "html": "<p class=\"text-sm font-semibold uppercase tracking-wider opacity-70\">Workforce intelligence</p>"
+        },
+        {
+          "target": [
+            ".bg-background\\/10.p-4.backdrop-blur:nth-child(1) > .text-\\[10px\\].opacity-70.tracking-wider"
+          ],
+          "html": "<p class=\"text-[10px] uppercase tracking-wider opacity-70\">Positions</p>"
+        },
+        {
+          "target": [
+            ".bg-background\\/10.p-4.backdrop-blur:nth-child(2) > .text-\\[10px\\].opacity-70.tracking-wider"
+          ],
+          "html": "<p class=\"text-[10px] uppercase tracking-wider opacity-70\">Skills tracked</p>"
+        },
+        {
+          "target": [
+            ".bg-background\\/10.p-4.backdrop-blur:nth-child(3) > .text-\\[10px\\].opacity-70.tracking-wider"
+          ],
+          "html": "<p class=\"text-[10px] uppercase tracking-wider opacity-70\">Tenants</p>"
+        },
+        {
+          "target": [
+            ".bg-background\\/10.p-4.backdrop-blur:nth-child(4) > .text-\\[10px\\].opacity-70.tracking-wider"
+          ],
+          "html": "<p class=\"text-[10px] uppercase tracking-wider opacity-70\">EU residency</p>"
+        },
+        {
+          "target": [
+            ".mt-12.opacity-70.text-xs"
+          ],
+          "html": "<p class=\"mt-12 text-xs opacity-70\">© 2026 Heuresys S.r.l. ·<!-- --> <a class=\"underline\" href=\"https://heuresys.com\">heuresys.com</a></p>"
+        },
+        {
+          "target": [
+            "a[href$=\"heuresys.com\"]"
+          ],
+          "html": "<a class=\"underline\" href=\"https://heuresys.com\">heuresys.com</a>"
+        }
+      ]
+    }
+  ]
+}

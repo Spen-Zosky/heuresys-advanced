@@ -475,6 +475,96 @@ export async function executeUpsertSqlSidePerMapping(
     return { upsertedRows: Number(countRes.rows[0]!.n), lineageRows: 0, skipped: false };
   }
 
+  // CW-B17 patch — emit audit for WHERE-skipped rows BEFORE main INSERT.
+  // Identifies staging rows that satisfy validation_status='PASSED' but FAIL skipFilters.
+  // Closes the silent-skip forensic blind spot (Goal 003 W1 retry: 24552/41285 = 59% lost).
+  if (mode === "EXECUTE" && skipFilters.length > 0) {
+    // Identify exclusion reason per row: NK uuid issue OR required uuid NULL.
+    const skipReasonCases: string[] = [];
+    for (const nkCol of targetMeta.naturalKeyColumns) {
+      const colType = targetMeta.columnTypes.get(nkCol);
+      if (colType !== "uuid") continue;
+      if (nkCol.endsWith("_tenant_id")) continue;
+      const entry = colEntries.find((e) => e.targetCol === nkCol);
+      if (!entry) {
+        skipReasonCases.push(`WHEN TRUE THEN ${format("%L", "nk_missing_" + nkCol)}`);
+        continue;
+      }
+      skipReasonCases.push(
+        `WHEN (${entry.sql}) IS NULL THEN ${format("%L", "nk_null_" + nkCol)}`,
+        `WHEN NOT ((${entry.sql})::text ~* ${UUID_REGEX_PG}) THEN ${format("%L", "nk_invalid_uuid_" + nkCol)}`,
+      );
+    }
+    for (const reqCol of targetMeta.requiredColumns) {
+      const colType = targetMeta.columnTypes.get(reqCol);
+      if (colType !== "uuid") continue;
+      if (
+        reqCol === targetMeta.pkColumn ||
+        reqCol === tenantCol ||
+        reqCol === globalCol ||
+        reqCol === metaCol ||
+        reqCol === nameCol
+      )
+        continue;
+      if (targetMeta.naturalKeyColumns.includes(reqCol)) continue;
+      const entry = colEntries.find((e) => e.targetCol === reqCol);
+      if (!entry) {
+        skipReasonCases.push(`WHEN TRUE THEN ${format("%L", "required_missing_" + reqCol)}`);
+        continue;
+      }
+      skipReasonCases.push(
+        `WHEN (${entry.sql}) IS NULL THEN ${format("%L", "required_null_" + reqCol)}`,
+      );
+    }
+
+    if (skipReasonCases.length > 0) {
+      const auditSkipSql = `
+        INSERT INTO audit.import_validation_results (
+          import_validation_result_run_id,
+          import_validation_result_source_table_id,
+          import_validation_result_source_record_id,
+          import_validation_result_rule_code,
+          import_validation_result_status,
+          import_validation_result_message,
+          import_validation_result_payload
+        )
+        SELECT
+          $1::uuid,
+          $3::uuid,
+          staging_source_record_id,
+          'WHERE_SKIP_FILTER_EXCLUDED_V1',
+          'SKIPPED',
+          'Staging row validation_status=PASSED but excluded by WHERE skip filter (NK uuid NULL/invalid or required uuid NULL)',
+          jsonb_build_object(
+            'target_table', $4::text,
+            'table_mapping_id', $5::uuid,
+            'exclusion_reason', CASE ${skipReasonCases.join(" ")} ELSE 'unknown' END,
+            'staging_row_id', staging_row_id
+          )
+        FROM ${qStagingTable}
+        WHERE staging_import_run_id = $1
+          AND staging_source_table = $2
+          AND staging_validation_status = 'PASSED'
+          AND staging_target_record_id IS NULL
+          AND NOT (${skipFilters.join(" AND ")})
+      `;
+      try {
+        await pool.query(auditSkipSql, [
+          runId,
+          mapping.source_table_name,
+          mapping.source_table_id,
+          mapping.target_table,
+          mapping.table_mapping_id,
+        ]);
+      } catch (e) {
+        console.error(
+          `[sql-side-upsert] CW-B17 audit emission failed for mapping ${mapping.table_mapping_id}: ${(e as Error).message}`,
+        );
+        // Continue — audit emission failure should NOT block import
+      }
+    }
+  }
+
   // 6. INSERT INTO sys.<target> ... SELECT ... ON CONFLICT ... RETURNING <pk>
   const insertSql = `
     INSERT INTO ${qTargetTable} (${colsList})

@@ -21,6 +21,17 @@ export default function ShowcaseLayout({ children }: { children: ReactNode }) {
       className="min-h-screen bg-background text-foreground"
       style={{ transition: "background-color 240ms ease, color 240ms ease" }}
     >
+      {/* Skip-link for keyboard users: hidden until focused, then becomes a
+         visible primary-colored button anchored to the top-left of the
+         viewport. Target id="main" is the next sibling. Pattern follows
+         WCAG 2.4.1 Bypass Blocks. */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:inline-flex focus:items-center focus:rounded-control focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-semibold focus:text-background focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-background"
+      >
+        Salta al contenuto principale
+      </a>
+
       <header
         className="border-b border-border bg-card"
         style={{ transition: "background-color 240ms ease, border-color 240ms ease" }}
@@ -40,7 +51,7 @@ export default function ShowcaseLayout({ children }: { children: ReactNode }) {
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>
+      <main id="main" className="mx-auto max-w-6xl px-6 py-10">{children}</main>
       <footer
         className="border-t border-border bg-card"
         style={{ transition: "background-color 240ms ease, border-color 240ms ease" }}

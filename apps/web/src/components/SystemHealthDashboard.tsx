@@ -61,7 +61,15 @@ export function SystemHealthDashboard() {
                 { id: "audit", label: "Audit Feed", href: "#" },
               ],
             },
-            { id: "database", label: "Database", customContent: <DBSupervisorSidebar /> },
+            { id: "database",
+              label: (
+                <span className="flex items-baseline gap-1.5">
+                  <span>Database</span>
+                  <span className="font-mono text-[9px] normal-case tracking-normal text-muted-foreground/60">pg 16</span>
+                </span>
+              ),
+              customContent: <DBSupervisorSidebar />
+            },
             {
               id: "administration",
               label: "Administration",

@@ -8,9 +8,25 @@ export const metadata: Metadata = {
   description: "HRMS / BPM platform — admin console + employee self-service",
 };
 
+/**
+ * Brand default rules (apply project-wide):
+ *   - Tema di default = dark  → <html class="dark"> at first paint (no FOUC)
+ *   - Palette di default = balanced (idx 0) → applied by PaletteDropdown on
+ *     first load when no `heuresys-palette` value is in localStorage.
+ *   - Logo SEMPRE quello → HeuresysWordmark uses hardcoded canonical colors
+ *     (see ux-design-shared/ui/src/components/wordmark.tsx).
+ *
+ * Hydration script reads localStorage `heuresys-theme` to honor user override
+ * (light/dark) but defaults to "dark" on first visit.
+ */
+const themeBootScript = `(function(){try{var t=localStorage.getItem('heuresys-theme');var d=t?t==='dark':true;var c=document.documentElement.classList;d?c.add('dark'):c.remove('dark');}catch(e){document.documentElement.classList.add('dark');}})();`;
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="it" suppressHydrationWarning>
+    <html lang="it" className="dark" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+      </head>
       <body>
         <AppProviders>{children}</AppProviders>
       </body>

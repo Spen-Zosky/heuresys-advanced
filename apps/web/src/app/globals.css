@@ -53,15 +53,20 @@
 }
 
 :root {
-  /* Surface — Blue Primary, light mode (default) */
+  /* Surface — Blue Primary, light mode (default).
+     Light-mode accent is intentionally darker than the prior #EEF2F8 so the
+     selection / row-hover state has enough delta against --background (#FAFBFD)
+     for cross-hair / hover affordance to be visibly distinguishable. Same
+     reasoning for --border darkness — see brand default rule on light theme
+     selection visibility. */
   --background: #FAFBFD;
   --foreground: #0F1828;
   --card: #FFFFFF;
   --card-foreground: #0F1828;
-  --muted: #F1F4F9;
+  --muted: #E8ECF3;
   --muted-foreground: #475569;
-  --border: #E2E6EE;
-  --accent: #EEF2F8;
+  --border: #D6DCE7;
+  --accent: #D9E1EF;
   --primary: #2563EB;
   --sidebar: #FFFFFF;
   --sidebar-foreground: #0F1828;
@@ -87,22 +92,25 @@
 }
 
 .dark {
-  /* Dark mode token overrides — match the prototype/canonical references */
-  --background: #0D1017;
-  --foreground: #F2F4F8;
-  --card: #131720;
-  --card-foreground: #F2F4F8;
-  --muted: #1A1F2B;
-  --muted-foreground: #9CA3AF;
-  --border: #232936;
-  --accent: #2E3342;
-  --primary: #5E9DF5;
-  --sidebar: #0B0E15;
-  --sidebar-foreground: #F2F4F8;
-  --palette-1: #5E9DF5;
-  --palette-2: #34D3DC;
-  --palette-3: #B07BFA;
-  --palette-4: #F8BD55;
+  /* Dark mode token overrides — match the prototype/canonical references.
+     !important is required to beat the inline `<html style="…">` injection
+     performed by `PaletteProvider` (which sets light-mode values when no
+     palette decision has been activated for the surface). */
+  --background: #0D1017 !important;
+  --foreground: #F2F4F8 !important;
+  --card: #131720 !important;
+  --card-foreground: #F2F4F8 !important;
+  --muted: #1A1F2B !important;
+  --muted-foreground: #9CA3AF !important;
+  --border: #232936 !important;
+  --accent: #2E3342 !important;
+  --primary: #5E9DF5 !important;
+  --sidebar: #0B0E15 !important;
+  --sidebar-foreground: #F2F4F8 !important;
+  --palette-1: #5E9DF5 !important;
+  --palette-2: #34D3DC !important;
+  --palette-3: #B07BFA !important;
+  --palette-4: #F8BD55 !important;
 }
 
 html,

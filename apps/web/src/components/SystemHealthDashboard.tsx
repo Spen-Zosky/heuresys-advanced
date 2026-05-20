@@ -46,6 +46,29 @@ export function SystemHealthDashboard() {
           ]}
           user={{ initials: "ES", username: "enzo.spenuso", role: "SUPERUSER", roleTone: "warning" }}
           language="IT"
+          logo={
+            /* Canonical Heuresys wordmark: Exo 2 700 · "heures" + "s" hsl(221 83% 53%) blue,
+               middle "y" #a855f7 purple. Source: ux-design/prototypes/superuser-system-health.html. */
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="22 6 136 24" className="h-6 w-auto select-none" role="img" aria-label="Heuresys" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <style>{`
+                  .heuresys-wordmark { font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; font-weight: 700; font-size: 26.6667px; line-height: 0; letter-spacing: -0.5px; }
+                  .heuresys-wordmark-primary { fill: hsl(221 83% 53%); }
+                  .heuresys-wordmark-accent  { fill: #a855f7; }
+                `}</style>
+              </defs>
+              <text x="90" y="24" textAnchor="middle" className="heuresys-wordmark">
+                <tspan className="heuresys-wordmark-primary">heures</tspan>
+                <tspan className="heuresys-wordmark-accent">y</tspan>
+                <tspan className="heuresys-wordmark-primary">s</tspan>
+              </text>
+            </svg>
+          }
+          logoBadge={
+            <span className="rounded-md border border-border bg-card px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+              advanced
+            </span>
+          }
         />
       }
       sidebar={

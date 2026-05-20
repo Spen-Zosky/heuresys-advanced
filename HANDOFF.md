@@ -1,3 +1,55 @@
+## 🎯 2026-05-20 — SUPERUSER prototype patterns ratificati come BRAND DEFAULT
+
+Sessione multi-fase autonoma che promuove i 20 pattern del prototype canonico
+`ux-design/prototypes/superuser-system-health.html` (1900+ righe) a default
+ufficiale del brand design Heuresys. Outcome: source-of-truth chain consolidata
+da prototype → bundle → @heuresys/ui → apps/web + apps/showcase.
+
+### Commit chain (questa sessione)
+
+| # | Hash | Scope | Outcome |
+|---|---|---|---|
+| 1 | `145d4d6` | `feat(brand)` | Bundle: 5 docs estesi (06/07/09/12/13) + 1 nuovo (16 system_health) + governance INTERACTION_REGISTER_TEMPLATE + 13 nuovi code_examples + 3 patch shell + 2 styles/lib + prototype HTML committed (38 file, +5497 -213) |
+| 2 | `8224abd` (ux-design-shared, local) | `feat(ui)` | @heuresys/ui: 14 nuovi component dashboard + HeuresysMark + styles/hover-affordance.css + lib/table-cursor.ts + 21 index.ts exports (22 file, +2284, NO push) |
+| 3 | `cba8120` (ux-design-shared, local) | `fix(ui)` | typecheck fix: rows[0] guard, unused ReactNode import, RbacRole dedupe→DashboardRbacRole (3 file) |
+| 4 | `12e1035` | `feat(web)` | apps/web layout authenticated → HeuresysWordmark variant=brand + PaletteSwitcher + ThemeToggle nell'header; login → HeuresysWordmark hero; dashboard → KPIStrip per i counter (preserva tutti i data-testid E2E) (4 file, +39 -63) |
+| 5 | `fd8079e` | `feat(showcase)` | apps/web/src/app/showcase/system-health/page.tsx (NEW, 321 righe) — full React port del prototype, demo TUTTI 20 pattern in un solo render. Auto-prelevato da apps/showcase via sync-showcase.sh al next build |
+
+### Cosa è ora "default brand"
+
+- **Logo**: `<HeuresysWordmark variant="brand" size="...">` (Exo 2 700, "y" viola)
+- **Mark**: `<HeuresysMark>` per favicon/collapsed-sidebar
+- **Shell**: `<DashboardShell>` (grid 64/1fr/44, sidebar collapsibile via body[data-sidebar])
+- **Header**: `<DashboardHeader>` (logo, breadcrumb, ⌘K, lang, palette dropdown, theme toggle, user card)
+- **Sidebar**: `<DashboardSidebar>` (group toggles aria-expanded, footer card, DB Supervisor variant)
+- **Footer**: `<DashboardFooter>` (© year + heuresys.com + 5 social LinkedIn/GitHub/Discord/Facebook/X + right slot context)
+- **Hover affordance**: CSS globale auto-applicato su article/[role=alert]/tbody tr/.log-line/feed items (border --primary alpha 0.85 + glow ring + scale 1.012 magnifier)
+- **Cross-hair tables**: JS helper `attachCrossHair()` + 3 prebuilt tables (TenantFleet, SqlSlowQuery, RBAC con sticky col + tri-state)
+- **Palette dropdown**: 4 preset (Default balanced, Cool ocean, Warm sunset, Brand mono), persist localStorage
+- **Theme toggle**: sun/moon, html.dark, persist localStorage
+- **Widget observability**: 14 component pronti (KPIStrip, LogStream, AuditFeed, IncidentTimeline, ErrorRateBreakdown, AlertBanner, DBSupervisorSidebar, …)
+
+### Doctrine per nuovo lavoro (MVP-2 e oltre)
+
+> Ogni nuova page dashboard DEVE usare `<DashboardShell>` + `<DashboardHeader>` +
+> `<DashboardSidebar>` + `<DashboardFooter>` da `@heuresys/ui/dashboard/*`.
+> Deviazioni richiedono ADR. Canonical reference: showcase `/showcase/system-health`.
+> Specs per-widget: `ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/16_system_health_admin_dashboard_patterns.md`.
+
+### Cosa NON è stato toccato (intenzionalmente)
+
+- Le 40+ page authenticated di apps/web (saranno migrate naturalmente quando il
+  contenuto MVP-2 viene scritto — bastano i nuovi import path).
+- Le 5 showcase page esistenti (shell, header, sidebar, footer, palettes) —
+  rappresentano decision-in-progress UXIX-0001..0005; system-health page è già
+  sufficiente come live demo.
+- `apps/web/src/lib/theme/PaletteProvider.tsx` (sistema 5-candidates UXIX-0005) —
+  preservato perché decisione in corso.
+- `D:\ux-design-shared` non è stato pushato (richiesta esplicita di approvazione
+  per ogni push verso il repo separato).
+
+---
+
 ## 🚀 MVP-3 IN CORSO — sessione del 2026-05-17 (sera)
 
 Dopo la chiusura ufficiale MVP-2a/2b (`v0.2.0-mvp2`), sessione MVP-3

@@ -1,44 +1,46 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-19 15:16 GMT+2
-**Branch**: `main` — synced con `origin/main`
-**Last commit**: `afbbc98` docs(cowork): Goal 002 EXEC log + REPORT + STATE finalize — PARTIAL closure
+**Updated**: 2026-05-20 02:30 GMT+2
+**Branch**: `main` — 8 commit ahead of `origin/main` (push parte di questa handoff)
+**Last commit**: `127e1a7` feat(api): MVP-3 Tappa D — LOOKUP_FK form (b) lineage-records JOIN (Goal 003 Item F P1)
 
 ## Last session brief
 
-Sessione lunga (S900 → S?): security triage Fase 3 (4 Dependabot alerts closed), eslint stack wired da zero (commit 26254d6, baseline 0 errori), poi Goal 002 EXEC end-to-end. 10 commit Goal 002 + REPORT + REVIEW (Cowork). Goal 002 CLOSED-PARTIAL (13/15 acceptance). 30 alerts Dependabot tutti fixed.
+Goal 003 v3 EXEC partial: Items K/C/D+M/A/B/F-P1 SHIPPED (7 commit). Item F 1st Wave 1 retry COMPLETED ma C4/C5 FAIL (9/15 silent skip). 5 diagnostic sub-investigations hanno surfaced 5 INFEASIBLE targets per Goal 004 (CW-B18/19/20 systemic constraints registry design). HALT awaiting Cowork Z-decision (Z1 raccomandato).
 
 ## Top priorities (next session)
 
-1. **Goal 003 DISCOVERY** — LOOKUP_FK match_on payload semantic resolution (PRIMARY blocker A10/A11 da Goal 002). Cowork-side. Vedi `cowork_code_exchange/_05_REVIEW_002_*.md` §4 + nuova rule `U-2026-05-19-01`. Estimate Goal 003: <10 turn una volta semantica chiara. ~2-3 turn DISCOVERY + PROMPT.
-2. **Cowork inbox rebuild** — INDEX.md ferma a 02:57Z, non riflette REVIEW 002 + closure. `pnpm cowork:inbox --rebuild-index`. ~1 turn.
-3. **MVP-3 Tappa D status** — 🟡 partial-closure (architettura COMPLETE, data-flow partial pending Goal 003). Resta in attesa di Goal 003.
+1. **Goal 003 closure HALT_STATE** — leggere ultima notification `cli/pending/*` per Cowork Z-decision (Z1/Z2/Z3/Z4 su 5 INFEASIBLE targets). Se Z1: lancia Wave 1 retry P1-only (~30min wall-clock) + verify C4/C5 narrowed (≥10/15) + Item L REPORT 003 + STATE finalize atomic commit. **Effort: ~4-5 turn**. Vedi `cowork_code_exchange/_03_EXEC_003_CLASSB_UQ_BLOCK_Item_F.md` per opzioni complete.
+2. **Cowork inbox CLI pending**: 1 message non letta (PROMPT amended v3) + ack pending. Mark read prima di EXEC. ~0.5 turn.
+3. **Push commits** se non già fatto in handoff. 8 commit Goal 003 ahead di origin/main.
 
-## Open questions
+## Open questions (next session)
 
-- **Goal 002 untracked artefacts** in `cowork_code_exchange/` (`_02_PLAN_002`, `_02b_APPROVAL_002` etc.) — restano untracked intenzionalmente per "NIENTE altro" constraint S894, o committarli ora con goal closed?
-- **Rule U-2026-05-19-01** proposed by Cowork REVIEW §6.2 — creare `RULE_UPDATES.md` o aggiungere a CLAUDE.md cowork section?
-- **Brand identity v1** gating MVP-3 B/E-UI/F — pivot vs continuare Goal 003?
+- **Z-decision**: Z1 (P1-only retry, 5 INFEASIBLE accept) vs Z2 (UQ-relax migration, scope expand) vs Z3 (synthetic source_columns aliases). Cowork deve scegliere.
+- **C5 final bar**: era ≥12/15 in v3, narrowed a ≥11 in E1, ora proposta ≥10/15 (Z1). Cowork verbal lock vs PROMPT v3.1?
+- **Untracked Cowork artefacts** in `cowork_code_exchange/` (DISCOVERY/PROMPT/PLAN/APPROVAL/EXEC files Goal 001+002+003) — committarli ora con handoff o lasciare untracked?
 
-## Stack snapshot (only deltas)
+## Stack snapshot (deltas vs S922)
 
-- API: 11/22 modules + brownfield-wave-executor con JSON_EXTRACT + LINEAGE_SOURCE_NK + LOOKUP_FK match_on (con caveat semantic) + type-coerce auto-wrap.
-- Tests: 289 passed (+13 vs 276 baseline), 5 skipped, 0 failed. Gated debug-scale-v4 (3/3) + idempotency (1/1) verdi.
-- Eslint stack: eslint 9.39.4 + typescript-eslint 8.59.4 + eslint-config-next 15.5.18 + `eslint.config.mjs` flat config (root). 0 errori baseline.
-- Deps: vitest 4.1.6, vite 6.4.2, next 15.5.18, esbuild 0.25.12 (all post-security-upgrade).
-- Full-scale Wave 1 runner: `scripts/run-wave1-fullscale.mjs`. 3 run COMPLETE ~110s wall-clock (5× sotto target 600s).
-- Audit trail PERSISTED su live DB (no cleanup) — 3 runId in `brownfield.import_runs` + ~377 lineage rows + 81 HANDLED_VIA_LINEAGE_WRITE_V1.
+- API: 11/22 modules + brownfield-wave-executor con Goal 003 fixes shipped (Item A LOOKUP_FK fallback-only sys_tenancies/sys_users + Item B CAST_* compat-target + Item K TYPE_CAST_MAP+orphan-audit + Item F P1 form (b) → lineage JOIN).
+- Tests: **318 passed | 5 skipped | 0 failed** (+29 vs 289 baseline: +13 Item K + +6 Item A + +10 Item B). 72/72 transform-compiler + 23/23 upsert-sql-type-coerce.
+- DB migrations applied: **000032** (mig 385, CHECK relax) + **000033** (mig 386, tenant_id_mappings + validate_lookup_fk_payload trigger). 5 INFEASIBLE targets documented Goal 004 prerequisite-dependent.
+- Wave 1 retry runId `08d3bc9f-...` COMPLETED 48min: 6 baseline + sys_activity_classifications 3276 + sys_skills 5753 upserted (160 lineage gap) + sys_learning_modules 4395 upsert/0 lineage + sys_learning_paths 3157 upsert/65 lineage. 9 silent-skip targets need P1 retry or registry redesign.
 
 ## Verification (next session pre-flight)
 
 ```bash
 ssh -fN -L 5433:localhost:5432 oracle-vm-default
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "\dt sys.sys_auth*"
-cd apps/api && pnpm test    # expected 289 passed | 5 skipped | 0 failed
-cd apps/api && pnpm typecheck && pnpm lint   # expected PASS + 0 errors
-git status                                    # expected: synced + cowork_code_exchange/ untracked artifacts
+PGPASSWORD=heuresys psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "\dt sys.sys_auth*"
+cd D:/heuresys-advanced && pnpm --filter @heuresys/api test    # expected 318 passed | 5 skipped | 0 failed
+cd D:/heuresys-advanced/apps/api && pnpm typecheck && pnpm lint
+git log --oneline -10                                          # expect 8 Goal 003 commits including 127e1a7
+ls cowork_code_exchange/.inbox/cli/pending/                    # expect Z-directive when arrives
 ```
 
-## Untracked artifacts (left intentionally)
+## Resume protocol
 
-`cowork_code_exchange/` Goal 002 artefacts (`_02_PLAN_002`, `_02b_APPROVAL_002`, `_03_EXEC_002`, `_04_REPORT_002`, `_05_REVIEW_002`) sono tracked. Resta untracked: `_02_PLAN_001_*` archive copies, `.cowork-pending-commits/`, `.inbox/cli/pending/*`, `baselines/`, `_templates/`. Decisione open question #1 sopra.
+1. Read `cowork_code_exchange/_00_STATE_003.md` (HALT context + 5 INFEASIBLE + Z-options + commits + bias catalog candidates)
+2. Read `cowork_code_exchange/_03_EXEC_003_brownfield-seeding-complete.md` §F (Wave 1 retry journey 22 turn consumed, budget 18 residui)
+3. Check `cowork_code_exchange/.inbox/cli/pending/` for Cowork Z-decision message
+4. Proceed per Z-directive: ship retry (Z1) or migration (Z2) or aliases (Z3); poi Item L REPORT 003 + STATE finalize per CP7 atomic commit

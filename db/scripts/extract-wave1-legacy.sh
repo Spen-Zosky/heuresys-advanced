@@ -104,7 +104,7 @@ PROGOV=(process_kpis process_phases)
 dump_remote PROGOV "$OUT_DIR/wave1_progov.sql" "${PROGOV[@]}"
 
 echo "[6/7] OPOURSKA"
-OPOURSKA=(job_template_skills job_templates)
+OPOURSKA=(job_template_skills job_templates job_families)
 dump_remote OPOURSKA "$OUT_DIR/wave1_opourska.sql" "${OPOURSKA[@]}"
 
 echo "[7/7] H2R"

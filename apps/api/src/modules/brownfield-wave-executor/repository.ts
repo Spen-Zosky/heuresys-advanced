@@ -291,14 +291,14 @@ export async function getColumnMappingsForTableMapping(
 export function stagingTableFor(target: string): string | null {
   // Strip 'sys_' prefix if present
   const short = target.startsWith("sys_") ? target.slice(4) : target;
-  // The 17 explicit Wave 1 staging tables defined in migration 000030.
+  // The 18 explicit Wave 1 staging tables (17 from migration 000030 + 1 from 000034).
   const known = new Set([
     "skills", "skill_families", "skill_categories", "skill_taxonomy_edges",
     "skill_aliases", "learning_modules", "learning_paths", "learning_path_steps",
     "skill_learning_mappings", "user_certifications", "esco_occupation_mappings",
     "activity_classifications", "activity_classification_mappings",
     "compensation_bands", "process_kpi_templates", "blueprint_process_registry",
-    "job_roles",
+    "job_roles", "job_families",
   ]);
   return known.has(short) ? `staging.wave1_${short}` : null;
 }
@@ -312,7 +312,7 @@ export async function truncateAllWave1Staging(q: DbConnector): Promise<void> {
     "wave1_esco_occupation_mappings", "wave1_activity_classifications",
     "wave1_activity_classification_mappings", "wave1_compensation_bands",
     "wave1_process_kpi_templates", "wave1_blueprint_process_registry",
-    "wave1_job_roles",
+    "wave1_job_roles", "wave1_job_families",
   ];
   // Single TRUNCATE for atomicity. RESTART IDENTITY is irrelevant (uuid PK).
   await q.query(`TRUNCATE ${targets.map((t) => `staging.${t}`).join(", ")} CASCADE`);

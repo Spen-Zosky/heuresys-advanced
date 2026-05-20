@@ -1,49 +1,46 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-20 17:40 GMT+2
-**Branch**: `main` — clean, synced con `origin/main` (push completato)
-**Last commit**: `c2226a4` ci(showcase): include apps/web/src/components/** + layout.tsx in trigger paths
+**Updated**: 2026-05-20 21:50 GMT+2
+**Branch**: `main` — 1 commit ahead (`b3321ef` deferred refinements doc, not yet pushed by this handoff)
+**Last tag**: `v0.4.0-brand-v1` (both heuresys-advanced + ux-design-shared)
 
 ## Last session brief
 
-SUPERUSER prototype patterns promossi a brand default. 15 commit heuresys-advanced + 6 commit ux-design-shared (prima push, upstream set). GitHub Pages deploy LIVE: https://spen-zosky.github.io/heuresys-advanced/showcase/system-health/ — canonical dashboard con tutti i 20 pattern, tema dark default, logo wordmark hardcoded.
+S925: Brand identity v1 + v1.1 patch shipped end-to-end. Tier 1/2/3 rebuild dei 17 showcase non-canonical pages → DashboardShell + token-driven. ADR-0013 SoT policy. 3 UXIX aesthetic decisions Accepted (A Blue Primary + A Exo 2 + D Y-accent). Tier 7 a11y audit (18/18 axe runtime zero-critical). Tag `v0.4.0-brand-v1` pushed entrambi repo. v1.1 patch: skip-link, favicon set 7 sizes, social kit OG/Twitter/LinkedIn, UXIX-0002/0003/0004 ratified, axe runtime CI. ~16 commit heuresys-advanced + ~6 commit ux-design-shared.
 
 ## Top priorities (next session)
 
-1. **Goal 003 closure HALT_STATE** (ereditata da S923, NOT toccata in questa sessione) — leggere `cowork_code_exchange/.inbox/cli/pending/` per Cowork Z-decision (Z1/Z2/Z3 su 5 INFEASIBLE targets). Se Z1: Wave 1 retry P1-only + Item L REPORT 003 + STATE finalize atomic commit. **Effort ~4-5 turn**. Vedi `cowork_code_exchange/_00_STATE_003.md` + `_03_EXEC_003_CLASSB_UQ_BLOCK_Item_F.md`.
-2. **Showcase altre pages rebuild a brand-default standard** — le 5 page (shell/header/footer/sidebar/palettes) + 11 altre showcase scaffolds restano in stato "skeleton" UXIX-0001..0005. La canonical `/showcase/system-health` è il reference. Effort ~15 page × 1-2h cad = 15-30h (multi-session). Doctrine: ogni nuova page DEVE usare DashboardShell + DashboardHeader + DashboardSidebar + DashboardFooter da `@heuresys/ui/dashboard/*`.
-3. **PaletteProvider 5-candidate apps/web cleanup** — sistema legacy UXIX-0005 ancora attivo, inietta inline su html, in conflitto col PaletteDropdown brand default (4-preset balanced). Dopo decisione UXIX-0005 ratificata, dismantle PaletteProvider e usare SOLO PaletteDropdown. Effort ~2-3h.
+1. **Goal 003 SDBI strategic pivot** — ancora SUSPENDED da S923 (NOT toccato in S924+S925). Z-decisions superate dal pivot Enzo 2026-05-20T01:30. Vedi `cowork_code_exchange/_00_SESSION_HANDOFF_2026-05-20.md` + `_00_STATE_003.md`. Effort: aprire sessione strategica SDBI (Semantic-Driven Brownfield Import) — discutere Q2/Q3/Q4, decidere fate dei 8 commit Goal 003 non-pushati, emit DISCOVERY 004 SDBI. **NON spingere comunque i commit Goal 003 senza decisione strategica.**
+2. **v1.1 deferred refinements** — 22 items cataloged in `docs/BRAND_V1_DEFERRED_REFINEMENTS.md` (5 famiglie: SK social kit, FV favicon follow-ups, A11Y residuals, SC showcase chrome, GV ADR shells). Totale ~6h batched. Priorità raccomandata: A11Y-1+2 first (clears dominant axe serious in ~20min), poi GV-1..5 (governance completeness ~1h), poi pick-and-choose.
+3. **Nuovo filone**: MVP-3 tappa B graph renderers (React Flow `/visualizations/[id]` + Mermaid KPI/process cascade) ora sbloccata da UXIX-0005 Accepted. Vedi memory `feedback_brand_before_graph_renderers` — la condizione "brand identity definita" è ora soddisfatta.
 
 ## Open questions (next session)
 
-- **Z-decision Goal 003** (Z1/Z2/Z3) ancora pending da S923 — non ho touched in questa sessione.
-- **PaletteProvider 5-candidate**: smontare o tenere parallel? Conflitto con default balanced del nuovo dropdown.
-- **Untracked Cowork artefacts** in `cowork_code_exchange/` (DISCOVERY/PROMPT/PLAN/APPROVAL/EXEC files Goal 001+002+003) — committarli o lasciare untracked? Stesso stato di S923.
+- **Push del commit `b3321ef`** (deferred refinements doc) — l'handoff stesso lo include nel push S925, ma se vuoi review prima fai stash.
+- **8 commit Goal 003 non-pushati** ancora pending: push o reset dopo SDBI decision?
+- **Tag annotation push**: ricorda che `v0.4.0-brand-v1` è stato pushato. Se vuoi creare release notes su GitHub Releases (gh release create), action manuale post-tag.
 
-## Stack snapshot (deltas vs S923)
+## Stack snapshot (deltas vs S924)
 
-- **Brand bundle**: 5 docs estesi (06/07/09/12/13) + 16 nuovo + governance INTERACTION_REGISTER_TEMPLATE + 13 nuovi code_examples + hover-affordance.css + table-cursor.ts. 4 SVG logo ufficiali in assets/logo/.
-- **`@heuresys/ui` (D:/ux-design-shared)**: PRIMA PUSH ad origin/main. 14 nuovi dashboard components + HeuresysMark + hover-affordance.css (color-mix-based per supportare hex/HSL) + table-cursor.ts. wordmark.tsx con BRAND_BLUE + BRAND_PURPLE hardcoded (regola "logo sempre quello").
-- **apps/web**: layout authenticated con HeuresysWordmark. Login con wordmark hero. Dashboard con KPIStrip. globals.css `@source` Tailwind v4 + `@theme inline` mapping + dark+light tokens shifted (--accent #EEF2F8 → #D9E1EF per contrast). Root layout default `<html class="dark">` + boot inline script. NEW `src/components/SystemHealthDashboard.tsx` (canonical port del prototype, inline SVG icons no lucide dep). NEW route `/system-health` PLATFORM_ADMIN-gated + `/showcase/system-health` con fullscreen layout takeover.
-- **apps/showcase**: sync-showcase.sh include `src/components/**`. Workflow paths estesi a `apps/web/src/components/**` + `apps/web/src/app/layout.tsx`.
-- **GitHub Pages**: deploy LIVE @ https://spen-zosky.github.io/heuresys-advanced/showcase/system-health/ (HTTP 200, 131KB, smoke-check 12/12 keywords presenti).
+- **Tag**: `v0.4.0-brand-v1` (entrambi i repo, post-Tier-7 + v1.1 patch).
+- **`@heuresys/ui`**: +4 primitives promoted (`HeuresysLogoBadge`, `TimeRangeSelector`, `PageActions`, `StatusIcon` con danger→destructive fix); 9 nuovi ADR governance file (ADR-0002/0003/0004/0005/0006/0007); 7 favicon PNG + 3 social PNG asset (`src/assets/brand/logo/*`, `src/assets/brand/social/*`).
+- **apps/web**: 17 showcase pages rebuilt token-driven; legacy `src/lib/theme/` retired (4 file rimossi, PaletteProvider→ThemeProvider unificato); skip-link WCAG 2.4.1; lucide-react direct dep; next/font/google Exo 2 + Inter wired in `/showcase/typography`; 2 script generation (`apps/web/scripts/generate-{favicons,social-kit}.mjs`); `tests/e2e/showcase-a11y.spec.ts` runtime axe-core (18/18 zero-critical).
+- **apps/showcase**: `Providers` wrapper (ThemeProvider unified); class="dark" + boot script matching apps/web; sync-showcase.sh dropped lib/theme copy.
+- **Audit + governance docs**: `docs/SHOWCASE_AUDIT_2026-05-20.md`, `docs/A11Y_AUDIT_TIER7_2026-05-20.md`, `docs/BRAND_V1_DEFERRED_REFINEMENTS.md`, `docs/a11y-baseline/showcase/*.json` (18 baseline JSONs). ADR-0013 in `docs/architecture/adr/`.
 
 ## Verification (next session pre-flight)
 
 ```bash
-ssh -fN -L 5433:localhost:5432 oracle-vm-default
-PGPASSWORD=heuresys psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "SELECT 1"
-cd D:/heuresys-advanced && pnpm --filter @heuresys/api test         # expected 318 passed | 5 skipped (no regression)
-cd D:/heuresys-advanced && pnpm --filter @heuresys/web typecheck    # expected green
+ssh -fN -L 5433:localhost:5432 oracle-vm-default                # tunnel up
+cd D:/heuresys-advanced && pnpm --filter @heuresys/web typecheck # expect green
 cd D:/heuresys-advanced && pnpm --filter @heuresys/showcase typecheck
-git log --oneline -5                                                # last c2226a4
-curl -sI https://spen-zosky.github.io/heuresys-advanced/showcase/system-health/   # HTTP 200
+git -C D:/heuresys-advanced log --oneline -5
+git -C D:/ux-design-shared log --oneline -3
+curl -sI https://spen-zosky.github.io/heuresys-advanced/showcase/system-health/   # 200
 ```
 
 ## Resume protocol
 
-1. Read `cowork_code_exchange/_00_STATE_003.md` se priority #1 (Goal 003 closure) attiva
-2. Check `cowork_code_exchange/.inbox/cli/pending/` per Cowork Z-decision message
-3. Apri https://spen-zosky.github.io/heuresys-advanced/showcase/system-health/ per visual reference brand default
-4. Read `ux-design/heuresys_uxix_brand_identity_bundle_v1/docs/16_system_health_admin_dashboard_patterns.md` per per-widget specs
-5. Doctrine: ogni nuova page dashboard USA `@heuresys/ui/dashboard/*` primitives
+1. Read this STATE + `docs/BRAND_V1_DEFERRED_REFINEMENTS.md` se priorità #2 attiva.
+2. Per priorità #1 (Goal 003 SDBI) leggi `cowork_code_exchange/_00_SESSION_HANDOFF_2026-05-20.md` PRIMA di toccare.
+3. Per priorità #3 (graph renderers) consulta `feedback_brand_before_graph_renderers` memory + le 2 route target (`/visualizations/[id]`, `/organization/org-chart`).

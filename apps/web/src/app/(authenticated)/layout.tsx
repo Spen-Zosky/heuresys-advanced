@@ -7,8 +7,6 @@ import { Button, HeuresysWordmark } from "@heuresys/ui";
 import { useCurrentUser, useLogout } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { landingForRoles } from "../../lib/landing";
-import { PaletteSwitcher } from "../../lib/theme/PaletteSwitcher";
-import { ThemeToggle } from "../../lib/theme/ThemeToggle";
 
 const ADMIN_ROLES = new Set([
   "PLATFORM_ADMIN",
@@ -73,8 +71,6 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
             </nav>
           </div>
           <div className="flex items-center gap-3 text-sm">
-            <PaletteSwitcher />
-            <ThemeToggle />
             <span data-testid="app-user-email" className="opacity-70">{user.email}</span>
             <Button
               variant="outline"

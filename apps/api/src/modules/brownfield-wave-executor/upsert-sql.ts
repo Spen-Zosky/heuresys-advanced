@@ -171,6 +171,41 @@ interface ColEntry {
   sql: string;
 }
 
+/**
+ * CW-B22 — emits an index-aligned JOIN predicate for a single NK column.
+ *
+ * `IS NOT DISTINCT FROM` is not supported by btree operator classes, so the
+ * planner falls back to nested-loop seqscan even when a UQ index covers the
+ * NK columns (observed 17min stall on sys_activity_classifications staging
+ * mark, REPORT X1 §5 CW-B22).
+ *
+ * The WHERE skip filter in this module (§5, lines 384-416) already excludes
+ * rows where a non-tenant NK column would be NULL, so for those columns we
+ * can safely use plain `=` and gain index scan.
+ *
+ * The only NK column that legitimately tolerates NULL is `<short>_tenant_id`
+ * (line 312-313 explicitly assigns NULL::uuid for global rows, and line 389
+ * of the skip filter exempts `_tenant_id` NK cols from the NOT NULL check).
+ * For these we emit COALESCE(both sides, sentinel) which matches the indexed
+ * expression used in sys_*_tenant_code_uq indexes (verified consistent across
+ * 7 migrations: '00000000-0000-0000-0000-000000000000'::uuid project-wide).
+ */
+const TENANT_NULL_SENTINEL_UUID =
+  "'00000000-0000-0000-0000-000000000000'::uuid";
+
+function buildNkJoinPredicate(
+  nkCol: string,
+  nkAliasCol: string,
+  colType: string | undefined,
+): string {
+  const tCol = format("t.%I", nkCol);
+  const sCol = format("s.%I", nkAliasCol);
+  if (colType === "uuid" && nkCol.endsWith("_tenant_id")) {
+    return `(COALESCE(${tCol}, ${TENANT_NULL_SENTINEL_UUID}) = COALESCE(${sCol}, ${TENANT_NULL_SENTINEL_UUID}))`;
+  }
+  return `(${tCol} = ${sCol})`;
+}
+
 export async function executeUpsertSqlSidePerMapping(
   pool: Pool,
   args: ExecuteSqlSideArgs,
@@ -605,9 +640,12 @@ export async function executeUpsertSqlSidePerMapping(
     if (!targetMeta.columns.has(nkCol)) continue;
     const entry = colEntries.find((e) => e.targetCol === nkCol);
     if (!entry) continue;
-    nkMatchPairs.push(
-      `(t.${format("%I", nkCol)} IS NOT DISTINCT FROM s.${format("%I", `__nk_${nkCol}`)})`,
-    );
+    // CW-B22 — use buildNkJoinPredicate for btree-friendly equality.
+    // For _tenant_id NK col emit COALESCE(both sides, sentinel) matching the
+    // UQ index expression. For all other NK cols, plain `=` (rows with NULL
+    // NK are pre-filtered by WHERE skip filter, lines 384-416).
+    const colType = targetMeta.columnTypes.get(nkCol);
+    nkMatchPairs.push(buildNkJoinPredicate(nkCol, `__nk_${nkCol}`, colType));
   }
 
   if (nkMatchPairs.length === 0) {

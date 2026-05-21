@@ -512,8 +512,8 @@ describe("compileTransform — SQL injection adversarial (A14)", () => {
 });
 
 describe("compileTransform — SUPPORTED_TRANSFORMS export", () => {
-  it("contains exactly 15 entries (12 mechanical + LOOKUP_FK + JSON_EXTRACT + LINEAGE_SOURCE_NK + null)", () => {
-    expect(SUPPORTED_TRANSFORMS.size).toBe(15);
+  it("contains exactly 16 entries (12 mechanical + LOOKUP_FK + JSON_EXTRACT + LINEAGE_SOURCE_NK + CAST_ENUM + null)", () => {
+    expect(SUPPORTED_TRANSFORMS.size).toBe(16);
     expect(SUPPORTED_TRANSFORMS.has(null)).toBe(true);
     for (const code of [
       "DIRECT_COPY",
@@ -530,6 +530,7 @@ describe("compileTransform — SUPPORTED_TRANSFORMS export", () => {
       "LOOKUP_FK",
       "JSON_EXTRACT",
       "LINEAGE_SOURCE_NK",
+      "CAST_ENUM",
     ]) {
       expect(SUPPORTED_TRANSFORMS.has(code)).toBe(true);
     }

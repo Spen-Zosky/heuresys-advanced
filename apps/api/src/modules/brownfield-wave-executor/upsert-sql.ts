@@ -611,13 +611,42 @@ export async function executeUpsertSqlSidePerMapping(
   }
 
   // 6. INSERT INTO sys.<target> ... SELECT ... ON CONFLICT ... RETURNING <pk>
+  // CW-B31 dedup (sym pattern CW-B24 lineage write X2): pre-filter duplicate
+  // conflict-key rows BEFORE main INSERT. When source has rows sharing the
+  // target UQ key (e.g. job_templates 140 rows with PROTO-X-Y job_code
+  // duplicates × 4 cross-tenant), PG raises "ON CONFLICT DO UPDATE command
+  // cannot affect row a second time" → engine try/catch absorbs → 0 upserted.
+  //
+  // Key technicality: `conflictInference` lists target column names (e.g.
+  // "job_role_code" or "scheme, code"). The staging table does NOT have those
+  // columns — the conflict key value is produced by colEntries[i].sql
+  // expressions (e.g. `TRIM(staging_raw_record->>'job_code')`). So DISTINCT ON
+  // must operate on the EXPRESSIONS that produce the target conflict columns,
+  // not on the target column names themselves.
+  const conflictKeyCols = conflictInference.split(",").map((s) => s.trim());
+  const conflictKeyExprs = conflictKeyCols
+    .map((ck) => {
+      const entry = colEntries.find((e) => e.targetCol === ck);
+      return entry ? entry.sql : ck;
+    })
+    .join(", ");
   const insertSql = `
+    WITH staging_filtered AS (
+      SELECT *
+        FROM ${qStagingTable}
+       WHERE ${baseWhere.join(" AND ")}
+       ${limitClause}
+    ),
+    staging_deduped AS (
+      SELECT DISTINCT ON (${conflictKeyExprs}) *
+        FROM staging_filtered
+       ORDER BY ${conflictKeyExprs},
+                staging_mapping_confidence DESC NULLS LAST,
+                staging_row_id ASC
+    )
     INSERT INTO ${qTargetTable} (${colsList})
     SELECT ${selectList}
-      FROM ${qStagingTable}
-     WHERE ${baseWhere.join(" AND ")}
-     ORDER BY staging_row_id
-     ${limitClause}
+      FROM staging_deduped
     ON CONFLICT (${conflictInference}) ${setClause}
     RETURNING ${qPkCol}
   `;

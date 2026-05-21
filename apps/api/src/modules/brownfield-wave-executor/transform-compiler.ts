@@ -193,6 +193,7 @@ export const SUPPORTED_TRANSFORMS: ReadonlySet<string | null> = new Set<string |
   "CAST_VARCHAR",
   "CAST_BOOLEAN",
   "CAST_NUMERIC",
+  "CAST_ENUM",
   "TRIM",
   "UPPERCASE",
   "LOWERCASE",
@@ -288,6 +289,43 @@ export function compileTransform(input: ColumnMappingInput): CompileResult {
       const pgType = CAST_TYPE_BY_CODE[transformCode];
       // pgType is from internal whitelist, no injection risk
       return { fragment: { sql: `CAST(${srcExpr} AS ${pgType})` }, targetColumn };
+    }
+
+    case "CAST_ENUM": {
+      // CW-B32 fix — value-map transform for integer→enum conversions where
+      // source has integer codes and target has varchar CHECK enum.
+      // Payload: { value_map: { "1": "ENTRY", "2": "JUNIOR", ... }, default: null|string }
+      // Emits: CASE <srcExpr> WHEN '1' THEN 'ENTRY' WHEN '2' THEN 'JUNIOR' ... ELSE NULL END
+      // Text-text comparison: jsonb ->> returns text, value_map keys are text. No ::integer
+      // cast needed (would fail on NULL or non-numeric values).
+      const valueMap = payload?.["value_map"];
+      if (!valueMap || typeof valueMap !== "object" || Array.isArray(valueMap)) {
+        throw new Error(
+          `CAST_ENUM mapping ${mappingId} missing required 'value_map' payload object`,
+        );
+      }
+      const defaultValue = payload?.["default"];
+      const defaultSql =
+        defaultValue === null || defaultValue === undefined
+          ? "NULL"
+          : format("%L", String(defaultValue));
+      const whenClauses: string[] = [];
+      for (const [k, v] of Object.entries(valueMap as Record<string, unknown>)) {
+        whenClauses.push(
+          `WHEN ${format("%L", k)} THEN ${format("%L", String(v))}`,
+        );
+      }
+      if (whenClauses.length === 0) {
+        throw new Error(
+          `CAST_ENUM mapping ${mappingId} has empty 'value_map'`,
+        );
+      }
+      return {
+        fragment: {
+          sql: `CASE ${srcExpr} ${whenClauses.join(" ")} ELSE ${defaultSql} END`,
+        },
+        targetColumn,
+      };
     }
 
     case "CONSTANT": {

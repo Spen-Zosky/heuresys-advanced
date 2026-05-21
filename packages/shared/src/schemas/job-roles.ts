@@ -18,7 +18,9 @@ export const JobRoleSenioritySchema = z.enum(JOB_ROLE_SENIORITY_VALUES);
 
 export const JobRoleSchema = z.object({
   jobRoleId: z.string().uuid(),
-  jobFamilyId: z.string().uuid(),
+  // ADR-0015: nullable for legacy-imported job_roles lacking canonical family
+  // (CW-B26 Semantic FK Phantom). Migration 000038 made the DB column nullable.
+  jobFamilyId: z.string().uuid().nullable(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
@@ -44,7 +46,9 @@ export const JobRoleListResponseSchema = z.object({
 });
 
 export const CreateJobRoleBodySchema = z.object({
-  jobFamilyId: z.string().uuid(),
+  // ADR-0015: nullable + optional. Clients can omit OR pass null when family
+  // is unknown (legacy import semantic per CW-B26).
+  jobFamilyId: z.string().uuid().nullable().optional(),
   code: z.string().min(1).max(64),
   name: z.string().min(1).max(255),
   description: z.string().max(2048).nullable().optional(),

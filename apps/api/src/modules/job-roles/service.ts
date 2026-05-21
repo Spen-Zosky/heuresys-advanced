@@ -34,7 +34,8 @@ export const jobRolesService = {
   },
 
   async create(actor: ActorContext, body: CreateJobRoleBody): Promise<JobRole> {
-    if (!(await repo.jobFamilyExists(pool, body.jobFamilyId))) {
+    // ADR-0015: jobFamilyId is now optional+nullable. Only check FK if provided.
+    if (body.jobFamilyId && !(await repo.jobFamilyExists(pool, body.jobFamilyId))) {
       throw new NotFoundError("JobFamily");
     }
     const dup = await repo.findJobRoleByCode(pool, body.code);

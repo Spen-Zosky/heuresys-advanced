@@ -16,7 +16,8 @@ export type DbConnector = Pool | PoolClient;
 
 interface Row {
   job_role_id: string;
-  job_role_family_id: string;
+  // ADR-0015: nullable for legacy-imported job_roles lacking canonical family (CW-B26).
+  job_role_family_id: string | null;
   job_role_code: string;
   job_role_name: string;
   job_role_description: string | null;
@@ -112,7 +113,8 @@ export async function insertJobRole(
       ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7)
       RETURNING ${COLS}`,
     [
-      body.jobFamilyId,
+      // ADR-0015: body.jobFamilyId is now nullable+optional; null when family unknown.
+      body.jobFamilyId ?? null,
       body.code,
       body.name,
       body.description ?? null,

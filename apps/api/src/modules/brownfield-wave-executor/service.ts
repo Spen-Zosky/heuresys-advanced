@@ -18,6 +18,7 @@ import {
   updateWaveState,
 } from "./repository.js";
 import {
+  analyzeWave1Staging,
   executeApprove,
   executeStage,
   executeUpsert,
@@ -84,6 +85,22 @@ export const brownfieldWaveExecutorService = {
         payload: {
           mappings: mappings.length,
           staged_rows_total: stageStats.reduce((s, x) => s + x.stagedRows, 0),
+        },
+      });
+
+      // CW-B23 — ANALYZE staging tables to refresh pg_class.reltuples before
+      // VALIDATE/UPSERT issue complex JOINs. Cost ~1-2s for 17 tables.
+      // Benefit: avoids minutes-long stalls due to stale cardinality estimates
+      // (REPORT X1 observed 17-min stall on wave1_activity_classifications).
+      const analyzeT0 = Date.now();
+      await analyzeWave1Staging(pool, stageStats);
+      await logRunEvent(pool, {
+        runId: run.runId,
+        level: "INFO",
+        message: "STAGE_ANALYZE_COMPLETE",
+        payload: {
+          tables_analyzed: stageStats.filter((s) => s.stagedRows > 0).length,
+          elapsed_ms: Date.now() - analyzeT0,
         },
       });
 

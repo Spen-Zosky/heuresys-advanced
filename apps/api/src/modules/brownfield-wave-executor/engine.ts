@@ -224,6 +224,47 @@ export async function executeStage(
 }
 
 // -----------------------------------------------------------------------------
+// CW-B23 — ANALYZE staging tables post-populate
+// -----------------------------------------------------------------------------
+
+/**
+ * After STAGE phase populates staging tables with 10k-20k rows via mass
+ * INSERT … SELECT, pg_class.reltuples is stale (still reflects the
+ * post-TRUNCATE value of 0). Subsequent phases (VALIDATE/UPSERT) issue
+ * complex JOINs against staging tables; bad cardinality estimates can yield
+ * nested-loop plans where hash-join would be 100x faster.
+ *
+ * Cost: ~20-100ms per 20k-row table × 17 staging tables ≈ 1-2s total.
+ * Benefit: avoids minutes-long stalls in UPSERT phase (REPORT X1 observed
+ * 17 min on wave1_activity_classifications step 9 — root cause was a
+ * combination of CW-B22 missing index AND CW-B23 stale stats).
+ *
+ * Only ANALYZEs the staging tables actually populated by this run (filtered
+ * via the stats argument), to avoid wasting work on empty members of the
+ * canonical 18-table set.
+ */
+export async function analyzeWave1Staging(
+  pool: Pool,
+  stats: WaveStageStats[],
+): Promise<void> {
+  const tablesToAnalyze = stats
+    .filter((s) => s.stagedRows > 0)
+    .map((s) => s.stagingTable);
+
+  if (tablesToAnalyze.length === 0) return;
+
+  for (const t of tablesToAnalyze) {
+    try {
+      await pool.query(`ANALYZE ${t}`);
+    } catch (e) {
+      console.error(
+        `[wave1-analyze] ANALYZE ${t} failed: ${(e as Error).message}`,
+      );
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
 // VALIDATE: apply Wave 1 rules to staging rows
 // -----------------------------------------------------------------------------
 

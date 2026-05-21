@@ -39,6 +39,8 @@ interface TargetMeta {
   columnTypes: Map<string, string>;
   /** Map from column name → max length for varchar/character types (null for unbounded text/int/etc). */
   columnMaxLengths: Map<string, number | null>;
+  /** Map from column name → DB-level is_nullable boolean (CW-B34). Consumed by the WHERE skip filter in upsert-sql.ts to allow NULL for legitimately nullable NK UUID cols (ADR-0015/0016 pattern). */
+  columnNullable: Map<string, boolean>;
   /** Columns that are NOT NULL with no DB-level default (must be supplied by the INSERT). */
   requiredColumns: Set<string>;
   uniqueIndexName: string | null;
@@ -81,6 +83,12 @@ async function loadTargetMeta(pool: Pool, targetTable: string): Promise<TargetMe
   const columnTypes = new Map(colsRes.rows.map((r) => [r.column_name, r.udt_name]));
   const columnMaxLengths = new Map(
     colsRes.rows.map((r) => [r.column_name, r.character_maximum_length]),
+  );
+  // CW-B34: capture DB-level nullability so the WHERE skip filter in upsert-sql.ts
+  // can allow NULL for legitimately nullable NK UUID cols (ADR-0015/0016 pattern)
+  // instead of relying on the naming-convention escape hatch (`endsWith('_tenant_id')`).
+  const columnNullable = new Map(
+    colsRes.rows.map((r) => [r.column_name, r.is_nullable === "YES"]),
   );
   // A column is "required" (must be supplied by INSERT) when NOT NULL AND no
   // default value — so the INSERT can't rely on PG to fill it.
@@ -140,7 +148,7 @@ async function loadTargetMeta(pool: Pool, targetTable: string): Promise<TargetMe
     }
   }
 
-  return { columns, columnTypes, columnMaxLengths, requiredColumns, uniqueIndexName, naturalKeyColumns, conflictInference, pkColumn };
+  return { columns, columnTypes, columnMaxLengths, columnNullable, requiredColumns, uniqueIndexName, naturalKeyColumns, conflictInference, pkColumn };
 }
 
 // -----------------------------------------------------------------------------

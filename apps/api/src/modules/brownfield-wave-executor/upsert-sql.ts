@@ -127,6 +127,8 @@ export interface TargetMeta {
   columns: Set<string>;
   columnTypes: Map<string, string>;
   columnMaxLengths: Map<string, number | null>;
+  /** CW-B34: DB-level is_nullable map. WHERE skip filter consults this to allow NULL for legitimately nullable NK UUID cols (ADR-0015/0016 pattern). */
+  columnNullable: Map<string, boolean>;
   requiredColumns: Set<string>;
   uniqueIndexName: string | null;
   naturalKeyColumns: string[];
@@ -193,14 +195,20 @@ interface ColEntry {
 const TENANT_NULL_SENTINEL_UUID =
   "'00000000-0000-0000-0000-000000000000'::uuid";
 
-function buildNkJoinPredicate(
+export function buildNkJoinPredicate(
   nkCol: string,
   nkAliasCol: string,
   colType: string | undefined,
+  isNullable: boolean,
 ): string {
   const tCol = format("t.%I", nkCol);
   const sCol = format("s.%I", nkAliasCol);
-  if (colType === "uuid" && nkCol.endsWith("_tenant_id")) {
+  // CW-B22 (tenant_id) + CW-B34 (generic nullable NK UUID): both lean on COALESCE
+  // with a sentinel to make NULL = NULL match in the JOIN-back. Without this,
+  // plain `t.col = s.__nk_col` returns FALSE for NULL on either side, and the
+  // lineage JOIN produces 0 rows for ADR-0015/0016 nullable-FK target tables
+  // even when the INSERT successfully wrote them.
+  if (colType === "uuid" && (nkCol.endsWith("_tenant_id") || isNullable)) {
     return `(COALESCE(${tCol}, ${TENANT_NULL_SENTINEL_UUID}) = COALESCE(${sCol}, ${TENANT_NULL_SENTINEL_UUID}))`;
   }
   return `(${tCol} = ${sCol})`;
@@ -426,15 +434,42 @@ export async function executeUpsertSqlSidePerMapping(
     };
   }
 
-  // 5. WHERE skip filter
+  // 5. WHERE skip filter (CW-B34: respect columnNullable for UUID NK cols).
+  //
+  // ADR-0015/0016 introduced legitimately nullable NK UUID columns
+  // (sys_job_roles.job_role_family_id, sys_esco_occupation_mappings.esco_occupation_mapping_job_role_id).
+  // Pre-patch, the filter excluded any staging row whose NK UUID col would be
+  // NULL pre-INSERT (REPORT X5.A §2.B.6: 7645/7645 ESCO rows excluded as
+  // `nk_missing_esco_occupation_mapping_job_role_id`). The fix: when the DB
+  // column is nullable, skip the `IS NOT NULL` + UUID regex check AND inject
+  // an explicit `NULL::uuid` in colEntries when no column_mapping is present
+  // (so DISTINCT ON / ON CONFLICT inference can still reference the column).
+  // Naming-convention escape `endsWith('_tenant_id')` retained for backward
+  // compat — it's a CW-B22 sentinel-coalesce pattern that's orthogonal to
+  // DB nullability and stays in place to avoid behavior drift on tenant cols.
+  // Required-cols loop below is unchanged: by definition requiredColumns is
+  // built from `is_nullable === 'NO'` (engine.ts:88-93), so columnNullable is
+  // always false there — no branch needed.
   const skipFilters: string[] = [];
   for (const nkCol of targetMeta.naturalKeyColumns) {
     const colType = targetMeta.columnTypes.get(nkCol);
     if (colType !== "uuid") continue;
-    if (nkCol.endsWith("_tenant_id")) continue; // _tenant_id NK is allowed NULL
+    if (nkCol.endsWith("_tenant_id")) continue; // _tenant_id NK is allowed NULL (CW-B22)
+    const isNullable = targetMeta.columnNullable.get(nkCol) === true;
     const entry = colEntries.find((e) => e.targetCol === nkCol);
     if (!entry) {
+      if (isNullable) {
+        // CW-B34: inject explicit NULL so INSERT colsList/selectList stay aligned
+        // and conflict inference / DISTINCT ON have the column to reference.
+        colEntries.push({ targetCol: nkCol, sql: "NULL::uuid" });
+        continue;
+      }
       skipFilters.push("FALSE");
+      continue;
+    }
+    if (isNullable) {
+      // CW-B34: nullable NK UUID col with compiled fragment — NULL is acceptable,
+      // skip presence/regex check (PG UQ tolerates NULL ≠ NULL semantics).
       continue;
     }
     skipFilters.push(`(${entry.sql}) IS NOT NULL`);
@@ -679,12 +714,16 @@ export async function executeUpsertSqlSidePerMapping(
     if (!targetMeta.columns.has(nkCol)) continue;
     const entry = colEntries.find((e) => e.targetCol === nkCol);
     if (!entry) continue;
-    // CW-B22 — use buildNkJoinPredicate for btree-friendly equality.
+    // CW-B22 + CW-B34 — use buildNkJoinPredicate for btree-friendly equality.
     // For _tenant_id NK col emit COALESCE(both sides, sentinel) matching the
-    // UQ index expression. For all other NK cols, plain `=` (rows with NULL
-    // NK are pre-filtered by WHERE skip filter, lines 384-416).
+    // UQ index expression. For other UUID NK cols that are DB-nullable
+    // (ADR-0015/0016), apply the same COALESCE pattern so NULL=NULL matches
+    // in the JOIN-back (otherwise lineage_rows=0 even when INSERT succeeds).
+    // For non-nullable NK cols, plain `=` (rows with NULL NK are pre-filtered
+    // by WHERE skip filter §5).
     const colType = targetMeta.columnTypes.get(nkCol);
-    nkMatchPairs.push(buildNkJoinPredicate(nkCol, `__nk_${nkCol}`, colType));
+    const isNullable = targetMeta.columnNullable.get(nkCol) === true;
+    nkMatchPairs.push(buildNkJoinPredicate(nkCol, `__nk_${nkCol}`, colType, isNullable));
   }
 
   if (nkMatchPairs.length === 0) {

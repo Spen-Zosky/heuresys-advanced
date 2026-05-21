@@ -1,9 +1,9 @@
 # ADR-0016 — `sys_esco_occupation_mappings.job_role_id` nullable FK
 
-**Status**: PROPOSED (awaiting CLI X5 codebase audit + Enzo confirmation)
+**Status**: ACCEPTED (2026-05-21 X6.A) — DB migration + engine companion fix (CW-B34) both landed. Acceptance criteria §7 all met: `sys_esco_occupation_mappings` populated 7645 rows (target ≥3000, 154% over), `sys_job_roles` preserved at 202 (no regression), 0 audit rows with `nk_missing_esco_occupation_mapping_job_role_id`. See §10 + §11 for X6.A delta.
 **Date**: 2026-05-21
-**Author**: Cowork batch C5.2
-**Related**: ADR-0015 (sys_job_roles.family_id nullable — mirror pattern)
+**Author**: Cowork batch C5.2 + amended C6.2 (CW-B34 surfacing)
+**Related**: ADR-0015 (sys_job_roles.family_id nullable — mirror pattern) + CW-B34 patch spec (`cowork_reserved/batch_c6/cw_b34_engine_patch/CW_B34_PATCH_SPEC.md`)
 **Triggered by**: REPORT X4.A §1.A.2 — sys_esco_occupation_mappings cascade re-try halt; pre-flight CW-B26 verification confirmed 0/5 sample resolve (esco varchar codes vs UUID lineage)
 
 ---
@@ -200,10 +200,48 @@ ALTER TABLE sys.sys_esco_occupation_mappings
 
 ## §10 — Status
 
-**PROPOSED** — awaiting CLI X5 §A.2 codebase audit + Enzo confirmation.
+**ACCEPTED** (2026-05-21 X6.A):
 
-If audit clean (0 hits or trivial companion edits) → migration apply + Wave 1 retry → ACCEPTED.
+X5.A delta (2026-05-21):
+- DB layer: migration 000041 applied ✅ — `esco_occupation_mapping_job_role_id` is_nullable = YES
+- Codebase audit: 0 hits in business code ✅ — no companion Zod/Row edits needed
+- Wave 1 retry post-migration: `sys_esco_occupation_mappings` = 0 ❌ — engine WHERE skip filter excluded all 7645 staged rows with `nk_missing_esco_occupation_mapping_job_role_id`
+
+X6.A delta (2026-05-21, CW-B34 engine patch shipped):
+- Engine `TargetMeta.columnNullable` map added (engine.ts) ✅ — populated from `information_schema.columns.is_nullable`
+- `upsert-sql.ts` WHERE skip filter §5 nullable-aware ✅ — skips `IS NOT NULL` + UUID regex for nullable NK UUID cols, injects `NULL::uuid` colEntry when no column_mapping present
+- `buildNkJoinPredicate` extended ✅ — COALESCE-sentinel pattern for generic nullable UUID NK cols (mirror CW-B22 tenant_id pattern), so lineage JOIN-back doesn't silently emit 0 lineage rows when both sides are NULL
+- Wave 1 retry post-patch: `sys_esco_occupation_mappings` = 7645 ✅ (target ≥3000, 154% over) ; `sys_job_roles` = 202 ✅ (preserved) ; 0 audit rows with `nk_missing_esco_occupation_mapping_job_role_id`
+- Tests: 4/4 unit/integration pass (3 unit on `buildNkJoinPredicate` + 1 integration on `executeUpsertSqlSidePerMapping` via mock Pool) ; full suite 326/333 (2 pre-existing failures unrelated to CW-B34)
+
+## §11 — CW-B34 surfacing + engine companion fix (X5.A → X6)
+
+REPORT X5.A §2.B.6 surfaced **CW-B34 Nullable FK vs NK UQ Semantic Divergence**:
+
+Making a DB column nullable is INSUFFICIENT to unblock upsert when the column is part of a NK UQ index. The engine `upsert-sql.ts:431-442` WHERE skip filter treats UUID NK columns as required-present regardless of DB nullability. Result: all 7645 ESCO staged rows excluded pre-INSERT.
+
+**Root cause**: engine layer uses naming-convention escape (`endsWith('_tenant_id')`) for NULL allowance — doesn't consult DB `is_nullable` metadata.
+
+**Fix locked** (Cowork batch C6, Enzo-approved Option A):
+- Extend `TargetMeta` interface with `columnNullable: Map<string, boolean>` populated from `information_schema.columns.is_nullable`
+- Modify WHERE skip filter to skip `IS NOT NULL` + UUID regex check when column is nullable
+- Inject explicit `NULL::uuid` in colEntries when no column_mapping populates a nullable NK col
+
+**Spec**: `cowork_reserved/batch_c6/cw_b34_engine_patch/CW_B34_PATCH_SPEC.md` (full Dry-run EXPLAIN ✅, unit tests, acceptance criteria).
+
+**Generalization**: post-patch, ANY future nullable NK UUID col (via new ADR ALTER COLUMN DROP NOT NULL) automatically inherits NULL-allowance without engine code change. Pattern aligns with CW-B22 tenant_id helper but generalized via DB metadata introspection.
+
+**Future-flexible**: all 11 macro-aree SDBI candidates with nullable-FK targets (sys_position_skill_requirements, sys_competency_assessments, ecc.) benefit automatically.
+
+## §12 — Lesson learned: "Nullable FK ADR = DB+engine 2-step pattern"
+
+Future ADRs in this family MUST bundle:
+1. DB-layer spec (migration ALTER COLUMN DROP NOT NULL)
+2. Codebase audit (Zod/Row companion edits)
+3. **Engine-layer spec or verification** (NK UQ filter awareness, dedup CW-B31 pattern check, sentinel UUID needs)
+
+Cowork pattern memo §9 updated with CW-B34 anti-pattern + new vincente "ADR DB+Engine 2-step bundling" (batch C6.3).
 
 ---
 
-*End ADR-0016*
+*End ADR-0016 — amended C6.2 with CW-B34 engine companion fix reference*

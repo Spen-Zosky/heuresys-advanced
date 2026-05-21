@@ -662,7 +662,19 @@ export async function executeUpsertSqlSidePerMapping(
     })
     .join(", ");
 
-  // 8. Lineage write: 1 INSERT via JOIN
+  // 8. Lineage write: 1 INSERT via JOIN.
+  // CW-B24 — DISTINCT ON the UQ tuple (source_record_id is the only
+  // varying component; source_system/source_table/target_table_name are
+  // all constants in this statement). Guards against:
+  //  (a) Compound-PK source tables where pkColumns[0] alone may collide
+  //      across multiple legacy rows (engine.ts:182-183 uses only the
+  //      first PK column).
+  //  (b) JOIN expansion when an NK column is NULL on src and target has
+  //      multiple matching rows (the varchar/text NK case escapes the
+  //      WHERE skip filter at lines 384-416, which only filters uuid NK).
+  // ORDER BY staging_mapping_confidence DESC, staging_row_id picks the
+  // most-confident match deterministically; ties broken by stable
+  // staging_row_id ordering.
   const lineageSql = `
     WITH src AS (
       SELECT staging_row_id,
@@ -675,6 +687,31 @@ export async function executeUpsertSqlSidePerMapping(
         FROM ${qStagingTable}
        WHERE ${baseWhere.join(" AND ")}
        ${limitClause}
+    ),
+    joined AS (
+      SELECT
+        s.staging_row_id,
+        s.staging_source_table,
+        s.staging_source_record_id,
+        s.staging_source_natural_key,
+        s.staging_source_content_hash,
+        s.staging_mapping_confidence,
+        t.${qPkCol} AS target_pk
+      FROM src s
+      JOIN ${qTargetTable} t ON (${nkMatchPairs.join(" AND ")})
+    ),
+    deduped AS (
+      SELECT DISTINCT ON (staging_source_record_id)
+        staging_source_table,
+        staging_source_record_id,
+        staging_source_natural_key,
+        staging_source_content_hash,
+        staging_mapping_confidence,
+        target_pk
+      FROM joined
+      ORDER BY staging_source_record_id,
+               staging_mapping_confidence DESC,
+               staging_row_id ASC
     )
     INSERT INTO sys.sys_source_lineage_records (
         source_lineage_tenant_id,
@@ -693,18 +730,17 @@ export async function executeUpsertSqlSidePerMapping(
     SELECT
       $3::uuid,
       'heuresys_platform',
-      s.staging_source_table,
-      s.staging_source_record_id,
-      s.staging_source_natural_key,
-      s.staging_source_content_hash,
+      staging_source_table,
+      staging_source_record_id,
+      staging_source_natural_key,
+      staging_source_content_hash,
       $1::uuid,
       $4::uuid,
       $5::text,
-      t.${qPkCol},
-      s.staging_mapping_confidence::numeric,
+      target_pk,
+      staging_mapping_confidence::numeric,
       'VALID'
-    FROM src s
-    JOIN ${qTargetTable} t ON (${nkMatchPairs.join(" AND ")})
+    FROM deduped
     ON CONFLICT (
         source_lineage_source_system,
         source_lineage_source_table,

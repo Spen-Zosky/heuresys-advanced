@@ -240,7 +240,17 @@ export async function executeUpsertSqlSidePerMapping(
     if (!targetMeta.columns.has(cm.target_column)) continue;
     let compiled;
     try {
-      const srcExpr = format("(staging_raw_record->>%L)", cm.source_column_name);
+      // CW-B22-α (batch X2 Block B R-01 mitigation): synthetic source_column
+      // aliases (e.g. 'esco_occupation_code__fk_family_alias') must read from
+      // the real underlying column in staging_raw_record. The cascade-fix
+      // authoring pattern (cowork_reserved/batch_c2/cascade_fixes/) stores
+      // the real column name in transform_payload.aliased_from when present.
+      const aliasedFrom = (cm.transform_payload as Record<string, unknown> | null)?.[
+        "aliased_from"
+      ];
+      const effectiveSourceCol =
+        typeof aliasedFrom === "string" ? aliasedFrom : cm.source_column_name;
+      const srcExpr = format("(staging_raw_record->>%L)", effectiveSourceCol);
       compiled = compileTransform({
         transformCode: cm.transform,
         payload: cm.transform_payload ?? {},

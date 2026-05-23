@@ -87,12 +87,13 @@ CLI X5.B aveva inizialmente nominato i suoi 5 candidate come "CW-B35/B36/B37 + 2
 | **50** | Brownfield-seeding source-target classification mismatch (heuristic auto-classifier assigned `sys_skills` as IMPORT target for `competency_review_ratings`+`ontology_feedback` — semantic ratings/feedback != skills) | CLI X11 §6 CW-B50 | reclass 2 mappings IMPORT → REFERENCE_ONLY with metadata residual; correct target (sys_assessment_results 2-stage SDBI) deferred to dedicated batch C13 | REPORT 015 §3 + §6 |
 | **51** | PROMPT spec uses constraint-incompatible status literal (`REFERENCE_ONLY` not in `chk_validation_status` ANY of PENDING/PASSED/FAILED/SKIPPED) — Cowork cross-paste from `table_mappings.classification` vocabulary into `staging.*.validation_status` vocabulary | CLI X11 §6 CW-B51 | mitigated CLI inline (used SKIPPED + detailed `staging_validation_errors`); suggest pattern memo §19 note "staging vs registry classification vocabulary" | REPORT 015 §4 + §6 + §7.1 |
 | **52** | PROMPT spec staleness against live execution state — Cowork-side internal model frozen at v1.0 snapshot, doesn't pre-flight `git ls-tree HEAD` before authoring scope. Symptom: PROMPT prescribes work already done (e.g. PROMPT 016 "Phase 0 API gap audit" against HEAD where MVP-2a 41/40 pages already shipped) | CLI X12 §8 CW-B52 | mitigated CLI inline (audit doc refreshed v1.0 → v2.0 post-execution validation; PROMPT bypassed for execution, produced state-validation deliverable instead); suggest pattern memo §20 update + project memory refresh discipline | REPORT 016 §8 + §9 + audit §0 + §J.4 |
+| **53** | Acceptance criterion ambiguity — natural-language target "≥40 Playwright spec" can be read as (strict) "40 separate `.spec.ts` files" or (functional) "40 executable `test()` calls". Both readings appeared inside the same document chain (NEXT_SESSION_MVP_2A.md §5 + REPORT 016 §J.1 + PROMPT 017 §4). Pre-flight regex count `^test(\|^  test(` also surfaced a CW-B52 sub-pattern: indent-sensitive regex undercounts by ~40% when source uses `test.describe(...)`+ nested `test(...)`. | CLI X13 §6 CW-B53 | mitigated CLI inline (adopted functional reading documented in `qa_artifacts/x13_e2e_coverage_matrix.md §6`); preventive: PROMPT authoring should disambiguate measurement units up-front + use robust regex `^\s*test\(` (no col-0 anchor); pattern memo §20 candidate. | REPORT 017 §6 + matrix §6 |
 
 ---
 
 ## §3 — Next available
 
-**Next available**: `CW-B53`
+**Next available**: `CW-B54`
 
 When emitting, increment this counter atomically + add entry to §2.
 
@@ -118,8 +119,8 @@ When emitting, increment this counter atomically + add entry to §2.
 
 ## §5 — Total tally
 
-- **Total catalogati**: 52 bias (CW-B17 → CW-B52)
-- **Mitigated**: 33 (+CW-B49 X10 engine patch, +CW-B51 X11 inline SKIPPED, +CW-B52 X12 inline audit-refresh)
+- **Total catalogati**: 53 bias (CW-B17 → CW-B53)
+- **Mitigated**: 34 (+CW-B49 X10 engine patch, +CW-B51 X11 inline SKIPPED, +CW-B52 X12 inline audit-refresh, +CW-B53 X13 inline functional-reading adoption)
 - **Reflexive (pattern memo only)**: 6 (B25, B30, B40, B42, B44, B47)
 - **Standardized**: 2 (B29 migration convention, cross-OS pipeline B28)
 - **Documented + partial mitigation**: 1 (B50 X11 reclass — correct target authoring deferred to C13)

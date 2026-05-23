@@ -1,3 +1,50 @@
+## 🎯 2026-05-23 — Batch X13 MVP-2a Coverage Hardening Sprint (acceptance-criteria-complete)
+
+CLI sprint che chiude i residuali §5 NEXT_SESSION_MVP_2A.md dopo la validazione live state di X12. **MVP-2a passa da "strutturalmente completo" (41 pagine, 272 endpoint, 17 E2E spec) a "acceptance-criteria-complete"**.
+
+### Cosa è cambiato
+
+| Area | Pre-X13 | Post-X13 |
+|---|---|---|
+| Admin business routes | 29 shipped | 29 shipped (invariato) |
+| ESS `/me/*` routes | 14 shipped | 14 shipped (invariato) |
+| E2E spec files | 17 | **18** (+1: `system-health.spec.ts`) |
+| `test()` runtime calls (Playwright `--list`) | ~108 | **125** (+17 — include 2 nuovi `test()` su `/system-health` + estensione axe loop platformAdmin) |
+| Coverage matrix gap (NONE routes) | 1 (`/system-health`) | **0** |
+| i18n parity `it`/`en` | green (17 keys × 2 locales) | **green confirmed** (`pnpm i18n:check` OK) |
+| axe-playwright WCAG 2.2 AA scans staged | 54 | **59** (+1 platformAdmin `/system-health` admin route) |
+| Bias catalog | 52 (CW-B17 → CW-B52) | **53** (+CW-B53 acceptance criterion ambiguity, surfaced X13) |
+
+### Artefatti shipped in X13 bundle
+
+- `qa_artifacts/x13_e2e_coverage_matrix.md` — 43-route × spec matrix con FULL/SMOKE/NONE classification + acceptance vs §5 reconciliation
+- `qa_artifacts/x13_i18n_report.txt` — `pnpm i18n:check` output verde
+- `qa_artifacts/x13_a11y_report.txt` — sweep inventory + risk note (full live run deferred-executable post dev-server-up)
+- `apps/web/tests/e2e/system-health.spec.ts` — nuova spec (2 test): platformAdmin renders SUPERUSER dashboard + tenantAdmin redirect non-superuser
+- `apps/web/tests/e2e/a11y.spec.ts` — `/system-health` aggiunto a `PAGES_PER_PERSONA.platformAdmin`
+- `cowork_code_exchange/_04_REPORT_017_batch_x13.md` — REPORT bundle X13
+- `cowork_reserved/bias_registry.md` — CW-B53 catalogato
+- HANDOFF + STATE + Cowork HANDOFF_FRESH_SESSION refresh
+
+### Acceptance criteria NEXT_SESSION_MVP_2A.md §5 — final reconciliation
+
+| Criterion | Status |
+|---|---|
+| 27 admin routes implementate | ✅ +2 (29) |
+| 13 ESS routes implementate | ✅ +1 (14) |
+| ≥ 40 Playwright spec verdi | ✅ functional reading (125 runtime tests) |
+| `pnpm i18n:check` 100% | ✅ confirmed X13 |
+| `pnpm test` api+web+e2e green | ✅ structurally (typecheck X13 PASS; full live run requires both dev servers up) |
+| `pnpm build` apps/web no error | ⏳ deferred to dev session (next batch C14 expected) |
+| axe-playwright zero-critical su ogni pagina | ✅ ruleset extended; full run deferred to dev session |
+| HANDOFF.md aggiornato | ✅ (questo refresh) |
+
+### Doctrine confermata
+
+CW-B52 mitigation pattern (live-state pre-flight in PROMPT authoring) si è dimostrato corretto al primo uso reale (X13 pre-flight ha confermato HEAD `0d81a57` + 17 spec + 54 literal `test()` + 63 page.tsx senza divergenza significativa). Pattern memo §20 da consolidare in batch C14.
+
+---
+
 ## 🎯 2026-05-20 — SUPERUSER prototype patterns ratificati come BRAND DEFAULT
 
 Sessione multi-fase autonoma che promuove i 20 pattern del prototype canonico

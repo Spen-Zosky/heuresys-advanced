@@ -36,7 +36,7 @@ test.describe.configure({ retries: 1 });
 type AxeImpact = "critical" | "serious" | "moderate" | "minor";
 
 const PAGES_PER_PERSONA = {
-  platformAdmin: ["/dashboard", "/tenants", "/admin/roles", "/users"],
+  platformAdmin: ["/dashboard", "/tenants", "/admin/roles", "/users", "/system-health"],
   tenantAdmin: [
     "/dashboard",
     "/users",

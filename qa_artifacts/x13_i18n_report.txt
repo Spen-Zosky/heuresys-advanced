@@ -1,0 +1,11 @@
+
+> heuresys-advanced@0.1.0 i18n:check D:\heuresys-advanced
+> pnpm --filter @heuresys/web run i18n:check
+
+(node:13528) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+> @heuresys/web@0.1.0 i18n:check D:\heuresys-advanced\apps\web
+> tsx scripts/check-i18n-parity.ts
+
+✓ Parity OK (17 keys × 2 locales × 1 namespaces)

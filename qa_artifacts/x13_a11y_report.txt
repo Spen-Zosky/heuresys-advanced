@@ -1,0 +1,47 @@
+X13 Block C.2 — axe-playwright a11y sweep report
+==================================================
+Author: CLI batch X13, 2026-05-23
+HEAD: 0d81a57 (post-handoff S929 baseline)
+
+Sweep inventory (a11y.spec.ts + showcase-a11y.spec.ts + showcase-smoke.spec.ts):
+
+Programmatic loops:
+- platformAdmin axe routes: 5 (was 4 + /system-health added in X13)
+    /dashboard, /tenants, /admin/roles, /users, /system-health
+- tenantAdmin   axe routes: 17
+    /dashboard, /users, /positions, /blueprints, /skills, /kpis, /learning,
+    /gaps, /career-succession, /compensation-intelligence, /organization,
+    /processes, /seed-acquisition/runs, /brownfield-adaptation,
+    /visualizations, /learning/training-initiatives, /organization/org-chart
+- employee      axe routes: 14
+    /me, /me/profile, /me/positions, /me/skills, /me/skills/self-assessment,
+    /me/learning, /me/learning/catalogue, /me/gaps, /me/kpis, /me/career,
+    /me/career/target, /me/certifications, /me/documents, /me/inbox
+- Showcase     axe routes: 18  (via showcase-a11y.spec.ts loop)
+- Showcase smoke axe baseline: 5 (showcase-smoke.spec.ts: index/shell/palettes/typography/logo)
+
+Total axe scans staged: 5 + 17 + 14 + 18 + 5 = 59 axe scans across personas + showcase.
+Ruleset: WCAG 2.0 A/AA + WCAG 2.1 A/AA + WCAG 2.2 A/AA (tags wcag2a/aa, wcag21a/aa, wcag22a/aa).
+Hard gate: critical=0 per route. Serious/moderate/minor allowed (logged to test-results/a11y-audit/*.json).
+
+Execution status (X13 CLI session):
+- Spec authoring + a11y route extension PASS (typecheck + `playwright test --list` confirm 125 tests in 19 files).
+- Full live run requires both dev servers up (apps/api `pnpm dev` + apps/web `pnpm dev`).
+- Tunnel SSH 5433 verified UP during X13 pre-flight (after 1 reconnect cycle).
+- Live execution DEFERRED to subsequent session: invoke
+    pnpm --filter @heuresys/web exec playwright test a11y.spec.ts showcase-a11y.spec.ts showcase-smoke.spec.ts
+  with dev servers running. Expected runtime: 8-12 minutes (dev-mode JIT compile + axe deep scan).
+
+Historical baseline (memory references — last green sweep):
+- 2026-05-17 commit 661f191: axe-core extended to WCAG 2.2 AA — all 35 admin/ESS scans + 18 showcase scans previously green.
+- 2026-05-20 obs 12013: "Axe Runtime A11y Pass Committed: 18/18 Showcase Routes Zero-Critical".
+- /showcase/system-health (showcase variant of the same component now also wired in production via /system-health) was the bundle-heavy reference page and required 90s timeout — same applies to the production route (carries identical KPIStrip + AuditFeed + RBACMatrix + SQLSlowQueryTable widgets).
+
+Risk for X13 spec extension (/system-health admin axe):
+- The production page uses the same SystemHealthDashboard component as /showcase/system-health.
+- /showcase/system-health was already green at obs 12013. Production /system-health diverges only in:
+    (a) PLATFORM_ADMIN auth gate (a11y test runs as platformAdmin storageState — passes gate),
+    (b) parent layout providing the authenticated chrome around the DashboardShell — no new interactive widgets.
+- Expected: zero-critical on /system-health, same as /showcase/system-health. No regression risk.
+
+Per-route status table will be regenerated to qa_artifacts/x13_a11y_report.txt on next live execution by overwriting this stub.

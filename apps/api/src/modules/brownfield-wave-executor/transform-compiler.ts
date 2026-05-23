@@ -200,6 +200,7 @@ export const SUPPORTED_TRANSFORMS: ReadonlySet<string | null> = new Set<string |
   "CONSTANT",
   "SKIP",
   "LOOKUP_FK",
+  "LOOKUP_FK_2HOP",
   "JSON_EXTRACT",
   "LINEAGE_SOURCE_NK",
 ]);
@@ -513,6 +514,83 @@ export function compileTransform(input: ColumnMappingInput): CompileResult {
         returnCol,
         targetTable,
         whereClause,
+      );
+      return { fragment: { sql }, targetColumn };
+    }
+
+    case "LOOKUP_FK_2HOP": {
+      // ADR-0017 (Cowork C9.2, SR_X9) — 2-hop FK resolution via a legacy_mirror
+      // intermediate table. Source carries a varchar URI/code matching
+      // legacy_mirror.<table>.<match_col>; its PK then resolves to the target
+      // sys.* row via sys.sys_source_lineage_records.
+      //
+      // Payload schema:
+      //   {
+      //     target_table: "sys_skills",
+      //     match_on: "esco_skill_uri",
+      //     lookup_2hop: {
+      //       intermediate_schema: "legacy_mirror",
+      //       intermediate_table: "esco_skills",
+      //       intermediate_match_col: "uri",
+      //       intermediate_pk_col: "id"
+      //     }
+      //   }
+      //
+      // DB-side validator brownfield.validate_lookup_fk_2hop_payload (mig 000043)
+      // enforces field presence at registry INSERT time.
+      const targetTable = payload?.target_table;
+      if (typeof targetTable !== "string" || targetTable.length === 0) {
+        throw new InvalidLookupFkPayloadError(
+          `LOOKUP_FK_2HOP payload.target_table missing or not a non-empty string`,
+          mappingId,
+        );
+      }
+      const matchOn = payload?.match_on;
+      if (typeof matchOn !== "string" || matchOn.length === 0) {
+        throw new InvalidLookupFkPayloadError(
+          `LOOKUP_FK_2HOP payload.match_on missing or not a non-empty string`,
+          mappingId,
+        );
+      }
+      const lookup2hop = payload?.lookup_2hop as
+        | Record<string, unknown>
+        | undefined;
+      if (!lookup2hop || typeof lookup2hop !== "object" || Array.isArray(lookup2hop)) {
+        throw new InvalidLookupFkPayloadError(
+          `LOOKUP_FK_2HOP payload.lookup_2hop missing or not an object`,
+          mappingId,
+        );
+      }
+      const intermediate_schema = lookup2hop["intermediate_schema"];
+      const intermediate_table = lookup2hop["intermediate_table"];
+      const intermediate_match_col = lookup2hop["intermediate_match_col"];
+      const intermediate_pk_col = lookup2hop["intermediate_pk_col"];
+      for (const [k, v] of [
+        ["intermediate_schema", intermediate_schema],
+        ["intermediate_table", intermediate_table],
+        ["intermediate_match_col", intermediate_match_col],
+        ["intermediate_pk_col", intermediate_pk_col],
+      ] as const) {
+        if (typeof v !== "string" || v.length === 0) {
+          throw new InvalidLookupFkPayloadError(
+            `LOOKUP_FK_2HOP lookup_2hop.${k} missing or not a non-empty string`,
+            mappingId,
+          );
+        }
+      }
+      const sql = format(
+        "(SELECT slr.source_lineage_target_record_id " +
+          "FROM %I.%I lm " +
+          "JOIN sys.sys_source_lineage_records slr " +
+          "  ON slr.source_lineage_source_record_id LIKE '%%' || lm.%I::text " +
+          "WHERE lm.%I = (%s) " +
+          "  AND slr.source_lineage_target_table_name = %L LIMIT 1)",
+        intermediate_schema as string,
+        intermediate_table as string,
+        intermediate_pk_col as string,
+        intermediate_match_col as string,
+        srcExpr,
+        targetTable,
       );
       return { fragment: { sql }, targetColumn };
     }

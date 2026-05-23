@@ -1,0 +1,68 @@
+X14 Block C — axe-playwright a11y live sweep — RESULT REPORT
+==============================================================
+Date: 2026-05-24 GMT+2
+Run: pnpm exec playwright test (full suite, 125 tests, 1.0h elapsed)
+
+ADMIN/ESS routes (33/36 scans executed, 3 deferred per page.goto TimeoutError):
+---
+admin__roles — critical=0 serious=1 moderate=0 minor=0
+blueprints — critical=0 serious=1 moderate=0 minor=0
+brownfield-adaptation — critical=0 serious=2 moderate=0 minor=0
+career-succession — critical=0 serious=1 moderate=0 minor=0
+compensation-intelligence — critical=0 serious=1 moderate=0 minor=0
+dashboard — critical=0 serious=1 moderate=0 minor=0
+gaps — critical=0 serious=1 moderate=0 minor=0
+kpis — critical=0 serious=1 moderate=0 minor=0
+learning — critical=0 serious=1 moderate=0 minor=0
+learning__training-initiatives — critical=0 serious=0 moderate=0 minor=0
+me — critical=0 serious=1 moderate=0 minor=0
+me__career — critical=0 serious=1 moderate=0 minor=0
+me__career__target — critical=0 serious=1 moderate=0 minor=0
+me__certifications — critical=0 serious=1 moderate=0 minor=0
+me__documents — critical=0 serious=1 moderate=0 minor=0
+me__gaps — critical=0 serious=1 moderate=0 minor=0
+me__inbox — critical=0 serious=1 moderate=0 minor=0
+me__kpis — critical=0 serious=1 moderate=0 minor=0
+me__learning — critical=0 serious=1 moderate=0 minor=0
+me__learning__catalogue — critical=0 serious=1 moderate=0 minor=0
+me__positions — critical=0 serious=1 moderate=0 minor=0
+me__skills — critical=0 serious=1 moderate=0 minor=0
+me__skills__self-assessment — critical=0 serious=1 moderate=0 minor=0
+organization — critical=0 serious=1 moderate=0 minor=0
+organization__org-chart — critical=0 serious=1 moderate=0 minor=0
+positions — critical=0 serious=1 moderate=0 minor=0
+processes — critical=0 serious=1 moderate=0 minor=0
+seed-acquisition__runs — critical=0 serious=1 moderate=0 minor=0
+skills — critical=0 serious=1 moderate=0 minor=0
+system-health — critical=0 serious=2 moderate=0 minor=0
+tenants — critical=0 serious=1 moderate=0 minor=0
+users — critical=0 serious=1 moderate=0 minor=0
+visualizations — critical=0 serious=1 moderate=0 minor=0
+
+SHOWCASE routes (18/18 scans executed):
+---
+showcase — critical=0 serious=0 moderate=0 minor=0
+showcase__charts — critical=0 serious=0 moderate=0 minor=0
+showcase__dashboard-cards — critical=0 serious=1 moderate=0 minor=0
+showcase__footer — critical=0 serious=0 moderate=0 minor=0
+showcase__forms — critical=0 serious=1 moderate=0 minor=0
+showcase__header — critical=0 serious=1 moderate=0 minor=0
+showcase__icons — critical=0 serious=0 moderate=0 minor=0
+showcase__landing-page — critical=0 serious=2 moderate=0 minor=0
+showcase__login-page — critical=0 serious=1 moderate=0 minor=0
+showcase__logo — critical=0 serious=0 moderate=0 minor=0
+showcase__page-types — critical=0 serious=0 moderate=0 minor=0
+showcase__palettes — critical=0 serious=0 moderate=0 minor=0
+showcase__primary-initial-page — critical=0 serious=1 moderate=0 minor=0
+showcase__shell — critical=0 serious=1 moderate=0 minor=0
+showcase__sidebar — critical=0 serious=1 moderate=0 minor=0
+showcase__system-health — critical=0 serious=2 moderate=0 minor=0
+showcase__tables — critical=0 serious=1 moderate=0 minor=0
+showcase__typography — critical=0 serious=0 moderate=0 minor=0
+
+VERDICT:
+- Total axe scans recorded: 51 (33 admin/ESS + 18 showcase)
+- Critical violations: 0 (ZERO across all 51 scans)
+- Serious violations: present on color-contrast / target-size subset — allowed per a11y.spec.ts hard gate (critical only)
+- Routes with axe scan DEFERRED (page.goto TimeoutError, no axe data): 3 (a11y as employee /me/profile + 2 others recovered on retry — see x14_playwright_full.txt)
+- Hard gate critical=0: SATISFIED on executed scans, INCONCLUSIVE on 3 deferred (dev-mode JIT timeout, no axe regression evidence)

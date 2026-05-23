@@ -1,10 +1,35 @@
 # MVP-2a API Gap Audit
 
-> **Status**: Draft v1.0 — Phase 0 deliverable for MVP-2a frontend session.
-> **Base commit**: `66b84f2` (MVP-2a doctrine locked) — backend HEAD `732e08b` (MVP-2b ESS closed, 267 endpoints, 182/182 tests green).
-> **Scope**: 40 frontend routes (27 admin + 13 ESS) vs 267 live `/v1/*` endpoints across 56 modules.
-> **Audit date**: 2026-05-17.
-> **Successor**: gap-fill commits Phase 1.5.1..1.5.5 (compensation + dashboard + me/kpis + me/certifications + me/documents).
+> **Status v2.0 (refreshed)**: Phase 0 post-execution validation — X12 batch C12 (CLI 2026-05-23).
+> **Status v1.0 (original)**: Draft Phase 0 deliverable for MVP-2a frontend session (2026-05-17).
+> **Base commit v2.0**: `996d0d9` (X11 hardening shipped) — backend 272 endpoints across 59 modules, 50 integration test files, 42 migrations applied.
+> **Base commit v1.0**: `66b84f2` (doctrine locked) — backend HEAD `732e08b` (MVP-2b ESS closed, 267 endpoints, 182/182 tests green).
+> **Scope**: 40 frontend routes (27 admin + 13 ESS) vs `/v1/*` endpoints.
+
+## §0 — v2.0 post-execution summary (live state 2026-05-23T19:00Z)
+
+**CW-B52 bias surfaced**: PROMPT 016 X12 (`_01_PROMPT_016_batch_x12.md`) was authored against a stale mental model. Phase 0 (this doc) + Phase 1.5 (gap-fill backend) + Phase 1 (apps/web scaffold + auth) + Phase 2 (page-by-page) are ALL effectively shipped at HEAD. PROMPT 016's premise ("kickoff MVP-2a Phase 0 audit") is invalidated by live state. See §J below for residual-work refresh.
+
+### Quick diff: v1.0 projections vs v2.0 measurements
+
+| Metric | v1.0 (projected) | v2.0 (measured at `996d0d9`) | Delta |
+|---|---:|---:|---:|
+| `/v1/*` endpoint registrations | 267 → 276 (after gap-fill) | **272** | -4 vs v1.0 final |
+| API modules | 56 → 57 (after dashboard/compensation) | **59** | +2 vs v1.0 final |
+| API integration test files | 182 single-file → 202 (after gap-fill) | **50 test files** (per-file count, not assertions) | (different unit) |
+| `packages/shared` schema files | not tracked in v1.0 | **61** | (baseline new metric) |
+| Migrations | 27 → 28 (after `000028_dashboard_permission_seed`) | **42** | +14 cumulative since v1.0 (X3-X11 SDBI) |
+| `apps/web` pages (page.tsx) | 0 (scaffold pending) | **63** (41 MVP-2a/ESS + 17 showcase + 5 other) | +63 |
+| `apps/web` E2E spec files | 0 (pending) | **17** | +17 |
+| GAP-1 dashboard | ❌ pending | ✅ closed (`apps/api/src/modules/dashboard/`) | shipped |
+| GAP-2 compensation | ❌ pending | ✅ closed (`apps/api/src/modules/compensation/`) | shipped |
+| GAP-3 `/v1/me/kpis` | ❌ pending | ✅ closed (`apps/api/src/modules/me/routes.ts`) | shipped |
+| GAP-4 `/v1/me/certifications` | ❌ pending | ✅ closed (me/routes.ts: GET+POST) | shipped |
+| GAP-5 `/v1/me/documents` | ❌ pending | ✅ closed (me/routes.ts: GET) | shipped |
+
+**Conclusion v2.0**: all 5 gaps identified in v1.0 are CLOSED in live state. MVP-2a is effectively complete at the page level (28 admin + 13 ESS = 41 routes shipped vs original 27+13=40 target).
+
+---
 
 ---
 
@@ -230,4 +255,50 @@ Lasciati fuori dal gap-fill perché non bloccanti per le 40 route, da rivedere i
 
 ---
 
-**End of audit. Phase 1.5 gap-fill commits authorized to start.**
+## J. v2.0 — Residual work refresh (post-execution audit, X12 / 2026-05-23)
+
+After validating the live state at `HEAD=996d0d9`, the original v1.0 gap list is fully closed. The genuine residual work surfaces in three buckets:
+
+### J.1 — E2E coverage shortfall
+
+NEXT_SESSION_MVP_2A.md §5 globally requires "Per ogni route esiste un Playwright spec verde, totale ≥ 40 spec". Live state:
+
+| Metric | Required | Actual | Gap |
+|---|---:|---:|---:|
+| MVP-2a + ESS routes shipped | 40 | 41 | +1 (over-delivered) |
+| Playwright E2E spec files | 40+ individual specs | **17 grouped spec files** | structurally different |
+
+The 17 specs in `apps/web/tests/e2e/` are **bundled by domain** (e.g. `admin-lists.spec.ts`, `me-pages.spec.ts`), each covering multiple routes. Need precise per-route assertion count to validate ≥40-coverage acceptance criterion. Action: enumerate the `test()` calls inside the 17 specs and emit a route-coverage matrix.
+
+### J.2 — Endpoint count reconciliation
+
+v1.0 projected `267 → 276 (+9)` post-Phase 1.5. v2.0 measures **272**. Possible reasons for -4 delta:
+- v1.0 counted both `routes.ts` registrations AND embedded sub-routes; v2.0 only counts top-level `app.get/post/...` calls
+- Some projected endpoints were merged into composite handlers
+- Some routes use `fastify.route()` syntax (not counted by current grep)
+
+Action: re-run endpoint count with broader regex including `fastify.route(`, `.register(`, dynamic route plugins.
+
+### J.3 — HANDOFF.md staleness
+
+`HANDOFF.md` last section still references "MVP-1 step 5.1.4" — predates X3-X11 SDBI work + the MVP-2a frontend execution captured in v2.0 above. Action: defer to a chore commit refreshing HANDOFF.md to reflect HEAD `996d0d9` state.
+
+### J.4 — Engine bias catalog: CW-B52
+
+New bias: **PROMPT spec staleness against live execution state**. Cowork-side spec authoring relied on a mental model frozen at v1.0 (2026-05-17) state, unaware MVP-2a Phase 0..2 had already shipped. Symptom: PROMPT 016 prescribed work already done. Mitigation: Cowork batch C13 must pre-flight live state (`git ls-tree HEAD <area>`, count pages/endpoints/tests) before authoring scope.
+
+---
+
+## K. v2.0 — Recommendation for Cowork batch C13
+
+Given MVP-2a is structurally complete, three viable C13 directions:
+
+1. **C13 = Coverage hardening sprint**: enumerate 17 E2E specs → per-route assertions matrix → identify under-covered routes → add specs to hit ≥40 coverage. ~2-3h CLI work, clean acceptance.
+2. **C13 = MVP-2c / MVP-3 kickoff**: per project memory `project_mvp3_session_state.md`, MVP-3 tasks A/G/C/security already done; D/E partial; B/F/E-UI gated by brand identity v1 (per `feedback_brand_before_graph_renderers.md`). Brand identity bundle v1 is now in `ux-design/heuresys_uxix_brand_identity_bundle_v1/` (per project memory). C13 could re-open B/F/E-UI.
+3. **C13 = i18n + a11y full sweep**: ensure `pnpm i18n:check` is green across all 41 pages + axe-playwright zero-critical across all routes (NEXT_SESSION_MVP_2A.md §5 acceptance). ~2-3h CLI, complete quality gate.
+
+**Recommended**: C13 = Option 1 (Coverage hardening) — direct continuation of MVP-2a quality gate, no scope ambiguity, full ROI per hour.
+
+---
+
+**End of audit v2.0.** v1.0 sections A-H preserved for historical reference; §0 + §J + §K are the authoritative post-execution validation.

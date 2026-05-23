@@ -268,6 +268,7 @@ Prima di chiudere MVP-2a:
 - [ ] Per ogni route esiste un Playwright spec verde, totale ≥ 40 spec
 - [ ] `pnpm i18n:check` verde (parity it/en al 100%)
 - [ ] `pnpm test` totale: API ≥ 182 verdi + Web ≥ 40 E2E verdi + Web unit (se presenti)
+  - **E2E run cadence** (CW-B54 mitigation, X15 evidence): la suite acceptance va eseguita contro `pnpm start` (warm production build), NON `pnpm dev` (JIT compile + 4-worker contention → ~45 timing fail su 125 test, 1.0h vs 5.3m). Dev mode acceptable solo per debugging single-spec con `--workers=1`. Per showcase tests servono `NEXT_PUBLIC_ENABLE_SHOWCASE=1` burn-at-build OR `NODE_ENV !== "production"`.
 - [ ] `pnpm build` di `apps/web` produce un bundle senza errori
 - [ ] Smoke test manuale: `pnpm dev` da `apps/web` + `pnpm dev` da `apps/api` → login via browser come ciascuna delle 5 test personas + verifica che la landing redirect rispetti `FRONTEND_IMPLEMENTATION_PLAN.md` §11.2
 - [ ] Accessibility audit: ogni pagina passa `axe-playwright` (zero violazioni critical)

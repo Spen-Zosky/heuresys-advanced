@@ -1,0 +1,651 @@
+
+Running 125 tests using 1 worker
+
+  ✓    1 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as platformAdmin (3.7s)
+  ✓    2 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as tenantAdmin (3.6s)
+  ✓    3 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as manager (2.4s)
+  ✓    4 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as employee (1.9s)
+  ✓    5 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as outsider (1.8s)
+  ✓    6 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase has no critical a11y violations (2.3s)
+  ✓    7 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/system-health has no critical a11y violations (1.9s)
+  ✓    8 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/shell has no critical a11y violations (1.8s)
+  ✓    9 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/header has no critical a11y violations (1.8s)
+  ✓   10 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/footer has no critical a11y violations (1.9s)
+  ✓   11 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/sidebar has no critical a11y violations (1.8s)
+  ✓   12 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/palettes has no critical a11y violations (1.9s)
+  ✓   13 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/typography has no critical a11y violations (1.8s)
+  ✓   14 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/logo has no critical a11y violations (1.9s)
+  ✓   15 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/icons has no critical a11y violations (1.8s)
+  ✓   16 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/page-types has no critical a11y violations (1.8s)
+  ✓   17 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/dashboard-cards has no critical a11y violations (1.8s)
+  ✓   18 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/forms has no critical a11y violations (1.8s)
+  ✓   19 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/tables has no critical a11y violations (1.8s)
+  ✓   20 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/charts has no critical a11y violations (1.8s)
+  ✓   21 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/landing-page has no critical a11y violations (1.8s)
+  ✓   22 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/login-page has no critical a11y violations (1.9s)
+  ✓   23 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/primary-initial-page has no critical a11y violations (1.8s)
+  ✓   24 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as platformAdmin › /dashboard has no critical a11y violations (2.2s)
+  ✓   25 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as platformAdmin › /tenants has no critical a11y violations (2.1s)
+  ✓   26 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as platformAdmin › /admin/roles has no critical a11y violations (2.1s)
+  ✓   27 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as platformAdmin › /users has no critical a11y violations (2.3s)
+  ✓   28 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as platformAdmin › /system-health has no critical a11y violations (3.8s)
+  ✓   29 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /dashboard has no critical a11y violations (1.9s)
+  ✓   30 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /users has no critical a11y violations (2.0s)
+  ✓   31 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /positions has no critical a11y violations (2.2s)
+  ✓   32 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /blueprints has no critical a11y violations (2.0s)
+  ✓   33 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /skills has no critical a11y violations (2.0s)
+  ✓   34 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /kpis has no critical a11y violations (2.1s)
+  ✓   35 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /learning has no critical a11y violations (2.1s)
+  ✓   36 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /gaps has no critical a11y violations (2.1s)
+  ✓   37 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /career-succession has no critical a11y violations (2.0s)
+  ✓   38 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /compensation-intelligence has no critical a11y violations (2.0s)
+  ✓   39 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /organization has no critical a11y violations (2.0s)
+  ✓   40 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /processes has no critical a11y violations (2.0s)
+  ✓   41 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /seed-acquisition/runs has no critical a11y violations (2.0s)
+  ✓   42 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /brownfield-adaptation has no critical a11y violations (2.3s)
+  ✓   43 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /visualizations has no critical a11y violations (2.0s)
+  ✓   44 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /learning/training-initiatives has no critical a11y violations (2.0s)
+  ✓   45 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /organization/org-chart has no critical a11y violations (2.0s)
+  ✓   46 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me has no critical a11y violations (2.3s)
+  ✓   47 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/profile has no critical a11y violations (1.9s)
+  ✓   48 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/positions has no critical a11y violations (2.0s)
+  ✓   49 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/skills has no critical a11y violations (1.8s)
+  ✓   50 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/skills/self-assessment has no critical a11y violations (2.2s)
+  ✓   51 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/learning has no critical a11y violations (2.0s)
+  ✓   52 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/learning/catalogue has no critical a11y violations (2.1s)
+  ✓   53 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/gaps has no critical a11y violations (1.9s)
+  ✓   54 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/kpis has no critical a11y violations (1.9s)
+  ✓   55 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/career has no critical a11y violations (2.2s)
+  ✓   56 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/career/target has no critical a11y violations (2.1s)
+  ✓   57 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/certifications has no critical a11y violations (2.1s)
+  ✓   58 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/documents has no critical a11y violations (2.0s)
+  ✓   59 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/inbox has no critical a11y violations (1.9s)
+  ✓   60 [chromium] › tests\e2e\admin-catalogues.spec.ts:16:9 › MVP-2a admin catalogues — live data › as tenantAdmin › /skills shows catalogue with rows (1.7s)
+  ✓   61 [chromium] › tests\e2e\admin-catalogues.spec.ts:22:9 › MVP-2a admin catalogues — live data › as tenantAdmin › /kpis shows KPI definitions (1.5s)
+  ✓   62 [chromium] › tests\e2e\admin-catalogues.spec.ts:28:9 › MVP-2a admin catalogues — live data › as tenantAdmin › /learning shows learning modules catalogue (1.6s)
+  ✓   63 [chromium] › tests\e2e\admin-catalogues.spec.ts:38:9 › MVP-2a admin catalogues — live data › as platformAdmin › /tenants shows the tenant registry (1.5s)
+  ✓   64 [chromium] › tests\e2e\admin-lists.spec.ts:15:7 › MVP-2a admin lists — live data › /users lists tenant users with real count > 0 and clickable detail (2.0s)
+  ✓   65 [chromium] › tests\e2e\admin-lists.spec.ts:34:7 › MVP-2a admin lists — live data › /positions lists tenant positions and clickable PIP detail (1.9s)
+  ✓   66 [chromium] › tests\e2e\admin-org-bpm.spec.ts:14:7 › MVP-2a admin org + bpm — live data › /organization shows the OU registry (1.7s)
+  ✓   67 [chromium] › tests\e2e\admin-org-bpm.spec.ts:21:7 › MVP-2a admin org + bpm — live data › /blueprints lists variants with family info (1.9s)
+  ✓   68 [chromium] › tests\e2e\admin-org-bpm.spec.ts:28:7 › MVP-2a admin org + bpm — live data › /processes lists blueprint-anchored BPM processes (1.5s)
+  ✓   69 [chromium] › tests\e2e\admin-org-bpm.spec.ts:35:7 › MVP-2a admin org + bpm — live data › /learning/training-initiatives lists scheduled sessions (1.6s)
+  ✓   70 [chromium] › tests\e2e\admin-pipelines.spec.ts:15:7 › MVP-2a pipelines — live data › /seed-acquisition/runs renders run list (empty state OK) (1.5s)
+  ✘   71 [chromium] › tests\e2e\admin-pipelines.spec.ts:21:7 › MVP-2a pipelines — live data › /brownfield-adaptation switches across 3 tabs (11.7s)
+  ✓   72 [chromium] › tests\e2e\admin-pipelines.spec.ts:21:7 › MVP-2a pipelines — live data › /brownfield-adaptation switches across 3 tabs (retry #1) (2.0s)
+  ✓   73 [chromium] › tests\e2e\admin-pipelines.spec.ts:33:7 › MVP-2a pipelines — live data › /gaps shows severity summary and full list (1.7s)
+  ✓   74 [chromium] › tests\e2e\admin-tabs.spec.ts:17:9 › MVP-2a admin tabbed pages — live data › as platformAdmin › /tenants/[id] renders overview tab and switches to typing (2.0s)
+  ✓   75 [chromium] › tests\e2e\admin-tabs.spec.ts:40:9 › MVP-2a admin tabbed pages — live data › as platformAdmin › /tenants/[id]/enterprise-typing wizard renders all 4 selects (2.4s)
+  ✓   76 [chromium] › tests\e2e\admin-tabs.spec.ts:60:9 › MVP-2a admin tabbed pages — live data › as tenantAdmin › /blueprints/[variantId] shows processes tab → activations tab (2.0s)
+  ✓   77 [chromium] › tests\e2e\auth.spec.ts:18:7 › MVP-2a /login pilot — live data › PLATFORM_ADMIN login lands on /dashboard, sets HttpOnly access cookie (1.8s)
+  ✓   78 [chromium] › tests\e2e\auth.spec.ts:48:7 › MVP-2a /login pilot — live data › USER (employee_test) login lands on /me (1.8s)
+  ✓   79 [chromium] › tests\e2e\auth.spec.ts:55:7 › MVP-2a /login pilot — live data › wrong password shows error message, stays on /login (1.6s)
+  ✓   80 [chromium] › tests\e2e\auth.spec.ts:71:7 › MVP-2a /login pilot — live data › middleware redirects /dashboard without session to /login?next=/dashboard (1.4s)
+  ✓   81 [chromium] › tests\e2e\closing-pages.spec.ts:15:9 › MVP-2a closing pages — live data › as platformAdmin › /admin/roles renders the role × permission matrix from live API (1.7s)
+  ✓   82 [chromium] › tests\e2e\closing-pages.spec.ts:32:9 › MVP-2a closing pages — live data › as tenantAdmin › /organization/org-chart renders empty state (no ORG_CHART seeded) (1.8s)
+  ✓   83 [chromium] › tests\e2e\closing-pages.spec.ts:42:9 › MVP-2a closing pages — live data › as employee › /me/skills/self-assessment renders form with selects (1.7s)
+  ✓   84 [chromium] › tests\e2e\closing-pages.spec.ts:51:9 › MVP-2a closing pages — live data › as employee › /me/learning/catalogue renders the path catalogue with filter (1.9s)
+  ✓   85 [chromium] › tests\e2e\closing-pages.spec.ts:58:9 › MVP-2a closing pages — live data › as employee › /me/career/target renders position picker form (1.7s)
+  ✓   86 [chromium] › tests\e2e\complex-domains.spec.ts:15:7 › MVP-2a complex domains — live data › /career-succession switches across 3 tabs (1.6s)
+  ✓   87 [chromium] › tests\e2e\complex-domains.spec.ts:27:7 › MVP-2a complex domains — live data › /compensation-intelligence shows 6 status counters (1.6s)
+  ✓   88 [chromium] › tests\e2e\ess-certifications-upload.spec.ts:20:7 › ESS certifications upload form — live data › can add a new certification and see it in the list (2.2s)
+  ✓   89 [chromium] › tests\e2e\ess-certifications-upload.spec.ts:51:7 › ESS certifications upload form — live data › rejects invalid documentUri client-side without hitting the API (3.1s)
+  ✓   90 [chromium] › tests\e2e\landing-pages.spec.ts:16:9 › MVP-2a landing pages — live data › as employee (pure USER) › /me renders with role + greeting + cards + pure-USER nav (1.8s)
+  ✓   91 [chromium] › tests\e2e\landing-pages.spec.ts:39:9 › MVP-2a landing pages — live data › as tenantAdmin › /dashboard shows TENANT scope, counters, and admin nav (1.8s)
+  ✓   92 [chromium] › tests\e2e\landing-pages.spec.ts:59:9 › MVP-2a landing pages — live data › as platformAdmin › /dashboard shows PLATFORM scope + tenants counter (1.6s)
+  ✓   93 [chromium] › tests\e2e\me-pages.spec.ts:16:7 › MVP-2a ESS pages — live data › /me/profile loads + saves a no-op PATCH (2.1s)
+  ✓   94 [chromium] › tests\e2e\me-pages.spec.ts:41:7 › MVP-2a ESS pages — live data › /me/positions shows TEST_SUB_POS primary assignment (1.6s)
+  ✓   95 [chromium] › tests\e2e\me-pages.spec.ts:50:7 › MVP-2a ESS pages — live data › /me/skills renders (empty state OK if no evidence yet) (1.5s)
+  ✓   96 [chromium] › tests\e2e\me-pages.spec.ts:56:7 › MVP-2a ESS pages — live data › /me/learning renders (empty or with rows) (1.5s)
+  ✓   97 [chromium] › tests\e2e\me-pages.spec.ts:62:7 › MVP-2a ESS pages — live data › /me/gaps renders (1.7s)
+  ✓   98 [chromium] › tests\e2e\me-pages.spec.ts:68:7 › MVP-2a ESS pages — live data › /me/kpis renders (1.6s)
+  ✓   99 [chromium] › tests\e2e\me-pages.spec.ts:74:7 › MVP-2a ESS pages — live data › /me/career renders (1.7s)
+  ✓  100 [chromium] › tests\e2e\me-pages.spec.ts:80:7 › MVP-2a ESS pages — live data › /me/certifications renders (1.6s)
+  ✓  101 [chromium] › tests\e2e\me-pages.spec.ts:86:7 › MVP-2a ESS pages — live data › /me/documents renders (live-list, may be empty) (1.6s)
+  ✓  102 [chromium] › tests\e2e\me-pages.spec.ts:92:7 › MVP-2a ESS pages — live data › /me/inbox renders (1.6s)
+  ✓  103 [chromium] › tests\e2e\position-sub.spec.ts:23:7 › MVP-2a position sub-resources — live data › /positions/[id]/skills renders requirements list (empty state OK) (2.9s)
+  ✓  104 [chromium] › tests\e2e\position-sub.spec.ts:31:7 › MVP-2a position sub-resources — live data › /positions/[id]/kpis renders requirements list (empty state OK) (2.6s)
+  ✓  105 [chromium] › tests\e2e\position-sub.spec.ts:38:7 › MVP-2a position sub-resources — live data › /positions/[id]/learning composes gaps for the position (2.3s)
+  ✘  106 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase › renders without console errors (index) (1.3s)
+  ✘  107 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase › renders without console errors (index) (retry #1) (1.7s)
+  ✓  108 [chromium] › tests\e2e\showcase-smoke.spec.ts:75:9 › Showcase route /showcase › a11y axe-core baseline (index) (2.3s)
+  ✘  109 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/shell › renders without console errors (shell) (1.3s)
+  ✘  110 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/shell › renders without console errors (shell) (retry #1) (1.7s)
+  ✓  111 [chromium] › tests\e2e\showcase-smoke.spec.ts:75:9 › Showcase route /showcase/shell › a11y axe-core baseline (shell) (2.5s)
+  ✘  112 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/palettes › renders without console errors (palettes) (1.3s)
+  ✘  113 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/palettes › renders without console errors (palettes) (retry #1) (1.8s)
+  ✓  114 [chromium] › tests\e2e\showcase-smoke.spec.ts:75:9 › Showcase route /showcase/palettes › a11y axe-core baseline (palettes) (2.2s)
+  ✘  115 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/typography › renders without console errors (typography) (1.3s)
+  ✘  116 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/typography › renders without console errors (typography) (retry #1) (1.9s)
+  ✓  117 [chromium] › tests\e2e\showcase-smoke.spec.ts:75:9 › Showcase route /showcase/typography › a11y axe-core baseline (typography) (2.2s)
+  ✘  118 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/logo › renders without console errors (logo) (1.3s)
+  ✘  119 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/logo › renders without console errors (logo) (retry #1) (1.6s)
+  ✓  120 [chromium] › tests\e2e\showcase-smoke.spec.ts:75:9 › Showcase route /showcase/logo › a11y axe-core baseline (logo) (2.3s)
+  ✘  121 [chromium] › tests\e2e\showcase-smoke.spec.ts:92:7 › Shell route contract (UXIX-0001) › expanded sidebar demo: header=64px, footer=44px, two demo shells visible (5.5s)
+  ✘  122 [chromium] › tests\e2e\showcase-smoke.spec.ts:92:7 › Shell route contract (UXIX-0001) › expanded sidebar demo: header=64px, footer=44px, two demo shells visible (retry #1) (5.8s)
+  ✘  123 [chromium] › tests\e2e\showcase-smoke.spec.ts:108:7 › Decision Register linkage › index lists scaffold + pending routes with their UXIX-NNNN ids (5.8s)
+  ✘  124 [chromium] › tests\e2e\showcase-smoke.spec.ts:108:7 › Decision Register linkage › index lists scaffold + pending routes with their UXIX-NNNN ids (retry #1) (5.9s)
+  ✓  125 [chromium] › tests\e2e\smoke-5-personas.spec.ts:76:9 › smoke platformAdmin › landing on /dashboard + nav + 2 extra pages (2.8s)
+  ✓  126 [chromium] › tests\e2e\smoke-5-personas.spec.ts:76:9 › smoke tenantAdmin › landing on /dashboard + nav + 2 extra pages (2.1s)
+  ✓  127 [chromium] › tests\e2e\smoke-5-personas.spec.ts:76:9 › smoke manager › landing on /dashboard + nav + 2 extra pages (2.2s)
+  ✓  128 [chromium] › tests\e2e\smoke-5-personas.spec.ts:76:9 › smoke employee › landing on /me + nav + 2 extra pages (2.1s)
+  ✓  129 [chromium] › tests\e2e\smoke-5-personas.spec.ts:76:9 › smoke outsider › landing on /me + nav + 2 extra pages (2.1s)
+  ✓  130 [chromium] › tests\e2e\system-health.spec.ts:26:9 › MVP-2a /system-health — live data + role gate › as platformAdmin › /system-health renders the SUPERUSER dashboard (1.9s)
+  ✓  131 [chromium] › tests\e2e\system-health.spec.ts:49:9 › MVP-2a /system-health — live data + role gate › as tenantAdmin (non-PLATFORM_ADMIN) › /system-health redirects non-superuser away (1.4s)
+  ✓  132 [chromium] › tests\e2e\visualizations.spec.ts:15:7 › MVP-2a visualizations — live data › /visualizations browser renders (empty state OK) (1.6s)
+  ✓  133 [chromium] › tests\e2e\visualizations.spec.ts:21:7 › MVP-2a visualizations — live data › /visualizations/[graphId] handles 404 for non-existent graph (1.6s)
+
+
+  1) [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase › renders without console errors (index) 
+
+    Error: bad status on /showcase
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m400[39m
+    Received:   [31m404[39m
+
+      57 |       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      58 |       expect(response, `no response for ${route.path}`).not.toBeNull();
+    > 59 |       expect(response!.status(), `bad status on ${route.path}`).toBeLessThan(400);
+         |                                                                 ^
+      60 |
+      61 |       // Showcase pages share a layout header announcing the section.
+      62 |       await expect(page.getByText("Heuresys / Brand Identity Showcase")).toBeVisible();
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:59:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-1d8da-thout-console-errors-index--chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Showcase-ro-1d8da-thout-console-errors-index--chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-1d8da-thout-console-errors-index--chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Showcase-ro-1d8da-thout-console-errors-index--chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: bad status on /showcase
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m400[39m
+    Received:   [31m404[39m
+
+      57 |       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      58 |       expect(response, `no response for ${route.path}`).not.toBeNull();
+    > 59 |       expect(response!.status(), `bad status on ${route.path}`).toBeLessThan(400);
+         |                                                                 ^
+      60 |
+      61 |       // Showcase pages share a layout header announcing the section.
+      62 |       await expect(page.getByText("Heuresys / Brand Identity Showcase")).toBeVisible();
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:59:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-1d8da-thout-console-errors-index--chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Showcase-ro-1d8da-thout-console-errors-index--chromium-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-1d8da-thout-console-errors-index--chromium-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Showcase-ro-1d8da-thout-console-errors-index--chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/shell › renders without console errors (shell) 
+
+    Error: bad status on /showcase/shell
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m400[39m
+    Received:   [31m404[39m
+
+      57 |       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      58 |       expect(response, `no response for ${route.path}`).not.toBeNull();
+    > 59 |       expect(response!.status(), `bad status on ${route.path}`).toBeLessThan(400);
+         |                                                                 ^
+      60 |
+      61 |       // Showcase pages share a layout header announcing the section.
+      62 |       await expect(page.getByText("Heuresys / Brand Identity Showcase")).toBeVisible();
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:59:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-c7a56-thout-console-errors-shell--chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Showcase-ro-c7a56-thout-console-errors-shell--chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-c7a56-thout-console-errors-shell--chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Showcase-ro-c7a56-thout-console-errors-shell--chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: bad status on /showcase/shell
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m400[39m
+    Received:   [31m404[39m
+
+      57 |       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      58 |       expect(response, `no response for ${route.path}`).not.toBeNull();
+    > 59 |       expect(response!.status(), `bad status on ${route.path}`).toBeLessThan(400);
+         |                                                                 ^
+      60 |
+      61 |       // Showcase pages share a layout header announcing the section.
+      62 |       await expect(page.getByText("Heuresys / Brand Identity Showcase")).toBeVisible();
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:59:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-c7a56-thout-console-errors-shell--chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Showcase-ro-c7a56-thout-console-errors-shell--chromium-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-c7a56-thout-console-errors-shell--chromium-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Showcase-ro-c7a56-thout-console-errors-shell--chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/palettes › renders without console errors (palettes) 
+
+    Error: bad status on /showcase/palettes
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m400[39m
+    Received:   [31m404[39m
+
+      57 |       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      58 |       expect(response, `no response for ${route.path}`).not.toBeNull();
+    > 59 |       expect(response!.status(), `bad status on ${route.path}`).toBeLessThan(400);
+         |                                                                 ^
+      60 |
+      61 |       // Showcase pages share a layout header announcing the section.
+      62 |       await expect(page.getByText("Heuresys / Brand Identity Showcase")).toBeVisible();
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:59:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-2da2a-ut-console-errors-palettes--chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Showcase-ro-2da2a-ut-console-errors-palettes--chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-2da2a-ut-console-errors-palettes--chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Showcase-ro-2da2a-ut-console-errors-palettes--chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: bad status on /showcase/palettes
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m400[39m
+    Received:   [31m404[39m
+
+      57 |       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      58 |       expect(response, `no response for ${route.path}`).not.toBeNull();
+    > 59 |       expect(response!.status(), `bad status on ${route.path}`).toBeLessThan(400);
+         |                                                                 ^
+      60 |
+      61 |       // Showcase pages share a layout header announcing the section.
+      62 |       await expect(page.getByText("Heuresys / Brand Identity Showcase")).toBeVisible();
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:59:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-2da2a-ut-console-errors-palettes--chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Showcase-ro-2da2a-ut-console-errors-palettes--chromium-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-2da2a-ut-console-errors-palettes--chromium-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Showcase-ro-2da2a-ut-console-errors-palettes--chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/typography › renders without console errors (typography) 
+
+    Error: bad status on /showcase/typography
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m400[39m
+    Received:   [31m404[39m
+
+      57 |       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      58 |       expect(response, `no response for ${route.path}`).not.toBeNull();
+    > 59 |       expect(response!.status(), `bad status on ${route.path}`).toBeLessThan(400);
+         |                                                                 ^
+      60 |
+      61 |       // Showcase pages share a layout header announcing the section.
+      62 |       await expect(page.getByText("Heuresys / Brand Identity Showcase")).toBeVisible();
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:59:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-d19fb--console-errors-typography--chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Showcase-ro-d19fb--console-errors-typography--chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-d19fb--console-errors-typography--chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Showcase-ro-d19fb--console-errors-typography--chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: bad status on /showcase/typography
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m400[39m
+    Received:   [31m404[39m
+
+      57 |       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      58 |       expect(response, `no response for ${route.path}`).not.toBeNull();
+    > 59 |       expect(response!.status(), `bad status on ${route.path}`).toBeLessThan(400);
+         |                                                                 ^
+      60 |
+      61 |       // Showcase pages share a layout header announcing the section.
+      62 |       await expect(page.getByText("Heuresys / Brand Identity Showcase")).toBeVisible();
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:59:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-d19fb--console-errors-typography--chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Showcase-ro-d19fb--console-errors-typography--chromium-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-d19fb--console-errors-typography--chromium-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Showcase-ro-d19fb--console-errors-typography--chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/logo › renders without console errors (logo) 
+
+    Error: bad status on /showcase/logo
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m400[39m
+    Received:   [31m404[39m
+
+      57 |       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      58 |       expect(response, `no response for ${route.path}`).not.toBeNull();
+    > 59 |       expect(response!.status(), `bad status on ${route.path}`).toBeLessThan(400);
+         |                                                                 ^
+      60 |
+      61 |       // Showcase pages share a layout header announcing the section.
+      62 |       await expect(page.getByText("Heuresys / Brand Identity Showcase")).toBeVisible();
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:59:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-9c22d-ithout-console-errors-logo--chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Showcase-ro-9c22d-ithout-console-errors-logo--chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-9c22d-ithout-console-errors-logo--chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Showcase-ro-9c22d-ithout-console-errors-logo--chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: bad status on /showcase/logo
+
+    [2mexpect([22m[31mreceived[39m[2m).[22mtoBeLessThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: < [32m400[39m
+    Received:   [31m404[39m
+
+      57 |       const response = await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      58 |       expect(response, `no response for ${route.path}`).not.toBeNull();
+    > 59 |       expect(response!.status(), `bad status on ${route.path}`).toBeLessThan(400);
+         |                                                                 ^
+      60 |
+      61 |       // Showcase pages share a layout header announcing the section.
+      62 |       await expect(page.getByText("Heuresys / Brand Identity Showcase")).toBeVisible();
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:59:65
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-9c22d-ithout-console-errors-logo--chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Showcase-ro-9c22d-ithout-console-errors-logo--chromium-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Showcase-ro-9c22d-ithout-console-errors-logo--chromium-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Showcase-ro-9c22d-ithout-console-errors-logo--chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [chromium] › tests\e2e\showcase-smoke.spec.ts:92:7 › Shell route contract (UXIX-0001) › expanded sidebar demo: header=64px, footer=44px, two demo shells visible 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByRole('heading', { name: 'Expanded sidebar (280px)' })
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: 'Expanded sidebar (280px)' })[22m
+
+
+      94 |
+      95 |     // Both demo shells (expanded + collapsed) must render.
+    > 96 |     await expect(page.getByRole("heading", { name: "Expanded sidebar (280px)" })).toBeVisible();
+         |                                                                                   ^
+      97 |     await expect(page.getByRole("heading", { name: "Collapsed sidebar (72px)" })).toBeVisible();
+      98 |
+      99 |     // The KPI fixtures should be present, demonstrating realistic Heuresys
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:96:83
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Shell-route-557b1-4px-two-demo-shells-visible-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Shell-route-557b1-4px-two-demo-shells-visible-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Shell-route-557b1-4px-two-demo-shells-visible-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Shell-route-557b1-4px-two-demo-shells-visible-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByRole('heading', { name: 'Expanded sidebar (280px)' })
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: 'Expanded sidebar (280px)' })[22m
+
+
+      94 |
+      95 |     // Both demo shells (expanded + collapsed) must render.
+    > 96 |     await expect(page.getByRole("heading", { name: "Expanded sidebar (280px)" })).toBeVisible();
+         |                                                                                   ^
+      97 |     await expect(page.getByRole("heading", { name: "Collapsed sidebar (72px)" })).toBeVisible();
+      98 |
+      99 |     // The KPI fixtures should be present, demonstrating realistic Heuresys
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:96:83
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Shell-route-557b1-4px-two-demo-shells-visible-chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Shell-route-557b1-4px-two-demo-shells-visible-chromium-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Shell-route-557b1-4px-two-demo-shells-visible-chromium-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Shell-route-557b1-4px-two-demo-shells-visible-chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) [chromium] › tests\e2e\showcase-smoke.spec.ts:108:7 › Decision Register linkage › index lists scaffold + pending routes with their UXIX-NNNN ids 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByText('UXIX-0001').first()
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('UXIX-0001').first()[22m
+
+
+      110 |     // At least the 5 scaffolded routes must surface their Decision Register tie.
+      111 |     for (const id of ["UXIX-0001", "UXIX-0005", "UXIX-0006", "UXIX-0007"]) {
+    > 112 |       await expect(page.getByText(id, { exact: false }).first()).toBeVisible();
+          |                                                                  ^
+      113 |     }
+      114 |   });
+      115 | });
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:112:66
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Decision-Re-452e7-es-with-their-UXIX-NNNN-ids-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Decision-Re-452e7-es-with-their-UXIX-NNNN-ids-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Decision-Re-452e7-es-with-their-UXIX-NNNN-ids-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Decision-Re-452e7-es-with-their-UXIX-NNNN-ids-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByText('UXIX-0001').first()
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('UXIX-0001').first()[22m
+
+
+      110 |     // At least the 5 scaffolded routes must surface their Decision Register tie.
+      111 |     for (const id of ["UXIX-0001", "UXIX-0005", "UXIX-0006", "UXIX-0007"]) {
+    > 112 |       await expect(page.getByText(id, { exact: false }).first()).toBeVisible();
+          |                                                                  ^
+      113 |     }
+      114 |   });
+      115 | });
+        at D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts:112:66
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Decision-Re-452e7-es-with-their-UXIX-NNNN-ids-chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\showcase-smoke-Decision-Re-452e7-es-with-their-UXIX-NNNN-ids-chromium-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\showcase-smoke-Decision-Re-452e7-es-with-their-UXIX-NNNN-ids-chromium-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\showcase-smoke-Decision-Re-452e7-es-with-their-UXIX-NNNN-ids-chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [chromium] › tests\e2e\admin-pipelines.spec.ts:21:7 › MVP-2a pipelines — live data › /brownfield-adaptation switches across 3 tabs 
+
+    TimeoutError: locator.click: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for getByTestId('brownfield-tab-mapping')[22m
+    [2m    - locator resolved to <button type="button" class="px-3 py-2 opacity-60" data-testid="brownfield-tab-mapping">Mapping</button>[22m
+    [2m  - attempting click action[22m
+    [2m    - waiting for element to be visible, enabled and stable[22m
+    [2m  - element was detached from the DOM, retrying[22m
+
+
+      24 |     await expect(page.getByTestId("brownfield-content-inventory")).toBeVisible();
+      25 |
+    > 26 |     await page.getByTestId("brownfield-tab-mapping").click();
+         |                                                      ^
+      27 |     await expect(page.getByTestId("brownfield-content-mapping")).toBeVisible();
+      28 |
+      29 |     await page.getByTestId("brownfield-tab-runs").click();
+        at D:\heuresys-advanced\apps\web\tests\e2e\admin-pipelines.spec.ts:26:54
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\admin-pipelines-MVP-2a-pip-09fa3-tion-switches-across-3-tabs-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\admin-pipelines-MVP-2a-pip-09fa3-tion-switches-across-3-tabs-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\admin-pipelines-MVP-2a-pip-09fa3-tion-switches-across-3-tabs-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\admin-pipelines-MVP-2a-pip-09fa3-tion-switches-across-3-tabs-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7 failed
+    [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase › renders without console errors (index) 
+    [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/shell › renders without console errors (shell) 
+    [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/palettes › renders without console errors (palettes) 
+    [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/typography › renders without console errors (typography) 
+    [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/logo › renders without console errors (logo) 
+    [chromium] › tests\e2e\showcase-smoke.spec.ts:92:7 › Shell route contract (UXIX-0001) › expanded sidebar demo: header=64px, footer=44px, two demo shells visible 
+    [chromium] › tests\e2e\showcase-smoke.spec.ts:108:7 › Decision Register linkage › index lists scaffold + pending routes with their UXIX-NNNN ids 
+  1 flaky
+    [chromium] › tests\e2e\admin-pipelines.spec.ts:21:7 › MVP-2a pipelines — live data › /brownfield-adaptation switches across 3 tabs 
+  117 passed (5.3m)

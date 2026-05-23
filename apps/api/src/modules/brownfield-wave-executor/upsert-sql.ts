@@ -168,7 +168,12 @@ export interface ExecuteSqlSideResult {
  */
 const UUID_REGEX_PG = "'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'";
 
-interface ColEntry {
+/**
+ * One compiled target-column mapping: the destination column name plus the
+ * staging-time SQL expression that produces its value. Exported for unit
+ * testing the CW-B49 conflict-inference helper.
+ */
+export interface ColEntry {
   targetCol: string;
   sql: string;
 }
@@ -194,6 +199,44 @@ interface ColEntry {
  */
 const TENANT_NULL_SENTINEL_UUID =
   "'00000000-0000-0000-0000-000000000000'::uuid";
+
+/**
+ * CW-B49 fix (X10, 2026-05-23) — substitute target column references in a
+ * `conflictInference` string with their parenthesized staging expressions.
+ *
+ * The previous implementation `conflictInference.split(",")` was a naive
+ * tokenizer that broke any UQ index expression containing internal commas
+ * (e.g. `COALESCE(learning_path_tenant_id, '00000000-...'::uuid),
+ * learning_path_code`), producing partial tokens that did not match any
+ * `colEntries[i].targetCol`, so the emitted DISTINCT ON SQL referenced raw
+ * target column names that don't exist in the staging table → silent INSERT
+ * failure → 0 upserted (CW-B49 root cause).
+ *
+ * The replacement strategy is paren-depth-agnostic: walk the colEntries and
+ * substitute each `targetCol` token (matched as a whole word via `\b`) with
+ * the parenthesized `entry.sql`. This preserves any wrapping expression
+ * (COALESCE, lower(), CAST) intact while correctly substituting the bare
+ * column identifiers that the engine knows how to translate to staging-time
+ * SQL fragments. Word-boundary regex prevents partial matches (e.g. `code`
+ * within `learning_path_code`). Regex-special characters in `targetCol` are
+ * escaped (defensive — PG identifiers normally don't contain them).
+ *
+ * Exported for unit testing.
+ */
+export function replaceTargetColsInConflictInference(
+  conflictInference: string,
+  colEntries: ReadonlyArray<ColEntry>,
+): string {
+  let out = conflictInference;
+  for (const entry of colEntries) {
+    const re = new RegExp(
+      `\\b${entry.targetCol.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`,
+      "g",
+    );
+    out = out.replace(re, `(${entry.sql})`);
+  }
+  return out;
+}
 
 export function buildNkJoinPredicate(
   nkCol: string,
@@ -658,13 +701,13 @@ export async function executeUpsertSqlSidePerMapping(
   // expressions (e.g. `TRIM(staging_raw_record->>'job_code')`). So DISTINCT ON
   // must operate on the EXPRESSIONS that produce the target conflict columns,
   // not on the target column names themselves.
-  const conflictKeyCols = conflictInference.split(",").map((s) => s.trim());
-  const conflictKeyExprs = conflictKeyCols
-    .map((ck) => {
-      const entry = colEntries.find((e) => e.targetCol === ck);
-      return entry ? entry.sql : ck;
-    })
-    .join(", ");
+  // CW-B49 fix (X10, 2026-05-23) — see replaceTargetColsInConflictInference
+  // doc above for full rationale. Prior naive split(",") broke conflict
+  // inference strings containing COALESCE(...) for nullable-NK UQ indexes.
+  const conflictKeyExprs = replaceTargetColsInConflictInference(
+    conflictInference,
+    colEntries,
+  );
   const insertSql = `
     WITH staging_filtered AS (
       SELECT *

@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { Card, CardContent, CardHeader, CardTitle, MermaidDiagram } from "@heuresys/ui";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { isApiError } from "../../../../lib/api/errors";
 
@@ -68,6 +68,30 @@ export default function VisualizationDetailPage() {
     );
   }
   const g = graph.data!;
+  const nodeMap = new Map<string, GraphNode>(
+    (nodes.data?.items ?? []).map((n) => [n.visualizationNodeId, n]),
+  );
+  const safe = (s: string) => s.replace(/[^a-zA-Z0-9]/g, "_");
+  const sanitizeLabel = (s: string) => s.replace(/["\n\r]/g, " ").slice(0, 60);
+  const mermaidSource =
+    nodes.data && edges.data && nodes.data.items.length > 0
+      ? [
+          "flowchart LR",
+          ...nodes.data.items.slice(0, 50).map((n) => {
+            const id = "N_" + safe(n.visualizationNodeId);
+            const label = sanitizeLabel(n.label ?? n.nodeKey);
+            return `  ${id}["${label}"]`;
+          }),
+          ...edges.data.items
+            .slice(0, 200)
+            .filter((e) => nodeMap.has(e.fromNodeId) && nodeMap.has(e.toNodeId))
+            .map(
+              (e) =>
+                `  N_${safe(e.fromNodeId)} --> N_${safe(e.toNodeId)}`,
+            ),
+        ].join("\n")
+      : null;
+
   return (
     <main data-testid="visualization-detail-page" className="max-w-6xl mx-auto px-6 py-8 space-y-6">
       <header>
@@ -78,6 +102,21 @@ export default function VisualizationDetailPage() {
         <p className="text-sm opacity-70 font-mono" data-testid="visualization-code">{g.code}</p>
         <p className="text-xs uppercase opacity-70 mt-1">{g.graphKind}</p>
       </header>
+
+      {mermaidSource ? (
+        <Card data-testid="visualization-renderer-card">
+          <CardHeader>
+            <CardTitle>Diagramma</CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto" data-testid="visualization-renderer">
+            <MermaidDiagram
+              source={mermaidSource}
+              ariaLabel={`Diagramma del grafo ${g.name}`}
+              className="min-w-full"
+            />
+          </CardContent>
+        </Card>
+      ) : null}
 
       <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card data-testid="visualization-nodes-card">
@@ -130,7 +169,7 @@ export default function VisualizationDetailPage() {
       </section>
 
       <p className="text-xs opacity-60">
-        Renderer React Flow / Mermaid posticipato a una iterazione successiva — qui sono visibili la lista nodi e edge live dalla DB.
+        Renderer Mermaid attivato (max 50 nodi · 200 edge). Liste nodi/edge complete sopra (max 20 + 20 visibili).
       </p>
     </main>
   );

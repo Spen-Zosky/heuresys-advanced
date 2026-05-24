@@ -1,0 +1,97 @@
+(node:13748) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+> @heuresys/web@0.1.0 build D:\heuresys-advanced\apps\web
+> next build
+
+   ▲ Next.js 15.5.18
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 49s
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/57) ...
+   Generating static pages (14/57) 
+   Generating static pages (28/57) 
+   Generating static pages (42/57) 
+ ✓ Generating static pages (57/57)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                   Size  First Load JS
+┌ ○ /                                        137 B         104 kB
+├ ○ /_not-found                              999 B         105 kB
+├ ○ /admin/roles                           2.41 kB        2.12 MB
+├ ○ /blueprints                             2.2 kB        2.13 MB
+├ ƒ /blueprints/[variantId]                2.69 kB        2.13 MB
+├ ○ /brownfield-adaptation                 2.57 kB        2.12 MB
+├ ○ /career-succession                     2.48 kB        2.12 MB
+├ ○ /compensation-intelligence             2.47 kB        2.12 MB
+├ ○ /dashboard                             2.39 kB        2.12 MB
+├ ○ /gaps                                  2.35 kB        2.12 MB
+├ ○ /kpis                                   2.1 kB        2.12 MB
+├ ○ /learning                              2.09 kB        2.12 MB
+├ ○ /learning/training-initiatives         2.14 kB        2.12 MB
+├ ○ /login                                 2.95 kB        2.15 MB
+├ ○ /me                                    2.23 kB        2.12 MB
+├ ○ /me/career                             2.09 kB        2.12 MB
+├ ○ /me/career/target                      2.82 kB        2.15 MB
+├ ○ /me/certifications                     3.21 kB        2.15 MB
+├ ○ /me/documents                          2.03 kB        2.12 MB
+├ ○ /me/gaps                               2.12 kB        2.12 MB
+├ ○ /me/inbox                              2.25 kB        2.12 MB
+├ ○ /me/kpis                               2.15 kB        2.12 MB
+├ ○ /me/learning                           2.13 kB        2.12 MB
+├ ○ /me/learning/catalogue                 4.13 kB        2.13 MB
+├ ○ /me/positions                          2.13 kB        2.12 MB
+├ ○ /me/profile                            2.61 kB        2.15 MB
+├ ○ /me/skills                             2.13 kB        2.12 MB
+├ ○ /me/skills/self-assessment              2.9 kB        2.15 MB
+├ ○ /organization                          2.12 kB        2.12 MB
+├ ○ /organization/org-chart                2.55 kB        2.13 MB
+├ ○ /positions                             2.16 kB        2.13 MB
+├ ƒ /positions/[positionId]                2.39 kB        2.13 MB
+├ ƒ /positions/[positionId]/kpis           2.23 kB        2.13 MB
+├ ƒ /positions/[positionId]/learning       2.31 kB        2.13 MB
+├ ƒ /positions/[positionId]/skills         2.23 kB        2.13 MB
+├ ○ /processes                             2.07 kB        2.12 MB
+├ ○ /seed-acquisition/runs                 2.18 kB        2.12 MB
+├ ○ /showcase                                183 B         107 kB
+├ ○ /showcase/charts                         183 B         107 kB
+├ ○ /showcase/dashboard-cards              1.26 kB        1.81 MB
+├ ○ /showcase/footer                         541 B        1.81 MB
+├ ○ /showcase/forms                          183 B         107 kB
+├ ○ /showcase/header                         541 B        1.81 MB
+├ ○ /showcase/icons                        3.85 kB        2.12 MB
+├ ○ /showcase/landing-page                   541 B        1.81 MB
+├ ○ /showcase/login-page                     541 B        1.81 MB
+├ ○ /showcase/logo                           183 B         107 kB
+├ ○ /showcase/page-types                     183 B         107 kB
+├ ○ /showcase/palettes                       183 B         107 kB
+├ ○ /showcase/primary-initial-page         1.26 kB        1.81 MB
+├ ○ /showcase/shell                          541 B        1.81 MB
+├ ○ /showcase/sidebar                      1.26 kB        1.81 MB
+├ ○ /showcase/system-health                2.05 kB        2.12 MB
+├ ○ /showcase/tables                         541 B        1.81 MB
+├ ○ /showcase/typography                     292 B         107 kB
+├ ○ /skills                                2.04 kB        2.12 MB
+├ ○ /system-health                         5.69 kB        2.13 MB
+├ ○ /tenants                               2.17 kB        2.13 MB
+├ ƒ /tenants/[tenantId]                    2.84 kB        2.13 MB
+├ ƒ /tenants/[tenantId]/enterprise-typing  2.88 kB        2.15 MB
+├ ○ /users                                 2.14 kB        2.13 MB
+├ ƒ /users/[userId]                        2.31 kB        2.13 MB
+├ ○ /visualizations                         2.1 kB        2.12 MB
+└ ƒ /visualizations/[graphId]              2.59 kB        2.13 MB
++ First Load JS shared by all               104 kB
+  ├ chunks/4670216d-ab8ef4eb7bc31488.js    54.2 kB
+  ├ chunks/7227-d052ed6f06ae7fe8.js        46.6 kB
+  └ other shared chunks (total)            2.87 kB
+
+
+ƒ Middleware                               32.3 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

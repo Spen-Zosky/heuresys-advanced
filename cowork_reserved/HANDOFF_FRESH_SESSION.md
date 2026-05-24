@@ -10,8 +10,8 @@
 
 - **Progetto**: heuresys-advanced (D:\heuresys-advanced) — HRMS/BPM platform
 - **Fase**: **MVP-2a CERTIFICATO + tag pushed** + **MVP-3 6/6 Tappe shipped** post-X18 (Tappa F pragmatic close Path B+C). `@heuresys/ui@0.1.1` PUBLISHED su npm registry pubblico (0.1.0 deprecated). apps/web admin core (40+ routes) builds OK con versioned dep. **KNOWN ISSUE deferred**: /showcase routes (apps/web/src/_disabled_showcase_X18) + apps/showcase static deploy hit Next.js 15 RSC bundle-threshold defect (`d.createContext is not a function` / `Class extends value undefined`) — emergent, NON single-component (12 bisect iter HALT-022-06 inconclusive). Proper fix deferred: Path A git bisect ux-design-shared commits / Path F split @heuresys/ui / Path E Next 16 upgrade.
-- **Ultimo HEAD pushato**: NESSUNO post-X18 (8+ commit C18.x + X18 final commit locale, NO push — attesa Enzo authorization). ux-design-shared HEAD `dfa2e81` (0.1.1) anch'esso locale no-push.
-- **Tag**: `v0.2.1-mvp2a-final` su origin (X16). `v0.3.1-mvp3-final` annotato LOCALE (X18 final, NO push). GitHub release v0.2.1 LIVE: https://github.com/Spen-Zosky/heuresys-advanced/releases/tag/v0.2.1-mvp2a-final
+- **Ultimo HEAD pushato**: `da8e9c9` (post-X18 housekeeping cleanup, pushed 2026-05-24T~22Z). Catena X18 completa su origin: `da8e9c9` (inbox cleanup) ← `230afb0` (release notes) ← `754fe35` (Block E MVP-3 Tappa F) ← cascade 022.x amendment. ux-design-shared HEAD `dfa2e81` (0.1.1 publish-ready) pushato anche su origin.
+- **Tag**: `v0.2.1-mvp2a-final` (X16) + `v0.3.1-mvp3-final` (X18, target `754fe35`, SHA `a4dc2c3c`) **entrambi su origin**. GitHub releases LIVE: https://github.com/Spen-Zosky/heuresys-advanced/releases/tag/v0.2.1-mvp2a-final + https://github.com/Spen-Zosky/heuresys-advanced/releases/tag/v0.3.1-mvp3-final (published 2026-05-24T23:54:28Z, name "MVP-3 final", notes da `qa_artifacts/x18_mvp3_release_notes_v0.3.1.md`).
 - **PROMPT in flight**: nessuno. PROMPT 022 cascade (022 → 022.1 → 022.2 → 022.3 → 022.4 → 022.5) all closed via REPORT 022 RESUMED-X18.5. Tappa F shipped pragmatic.
 - **npm registry state**: `@heuresys/ui` org `@heuresys` (owner spen-zosky). 0.1.0 DEPRECATED, 0.1.1 latest. GAT bypass-2fa configured in `~/.npmrc` (R11: never log token value).
 - **Loop CLI**: FERMO (cron disattivato S929, manual poll only)
@@ -37,9 +37,11 @@ Nuova sessione Cowork: **leggi questo file + i file di §3, poi chiedi all'utent
 
 | # | Path | Righe | Perché |
 |---|---|---:|---|
-| 1 | `cowork_code_exchange/_04_REPORT_021_batch_x17.md` | ~210 | Last REPORT — X17 D+B combo + CW-B52 recurrence detection + C18 options |
-| 2 | `cowork_reserved/bias_registry.md` | ~140 | SoT 54 bias (CW-B17→B54), next CW-B55 |
-| 3 | `cowork_code_exchange/_00_DRAFT_PROMPT_021_batch_x17_tappa_f.md` | ~215 | Solo se scelta è B (Tappa F npm publish) — bozza CLI con 4 decisioni da risolvere |
+| 1 | `cowork_code_exchange/_04_REPORT_022_batch_x18.md` | ~134 | Last REPORT — X18 Tappa F saga (pre-halt sections, cascade documented in PROMPT 022.x amendment files) |
+| 2 | `cowork_reserved/bias_registry.md` | ~150 | SoT 58 bias (CW-B17→B59), CW-B57 withdrawn, CW-B59 deferred-architectural, next CW-B60 |
+| 3 | `qa_artifacts/x18_mvp3_release_notes_v0.3.1.md` | ~103 | MVP-3 final release notes (overview X18 saga + bias + DEFER-F deferral plan + next session candidates) |
+
+**Solo se scelta è DEFER-F**: leggi anche `cowork_code_exchange/_01_PROMPT_022.4_batch_x18_amendment.md` (bisect procedure CLI executed) + `qa_artifacts/x18_4_bisect_iter_*.txt` (12 iter empirical evidence Next 15 RSC bundle threshold).
 
 **NON leggere** subito (consultare on-demand):
 - `cowork_reserved/COWORK_CLI_PROMPT_PATTERN.md` (pattern memo — solo se serve scrivere PROMPT nuovo)

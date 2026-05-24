@@ -71,6 +71,7 @@ const PAGES_PER_PERSONA = {
     "/me/certifications",
     "/me/documents",
     "/me/inbox",
+    "/me/security",
   ],
 } as const satisfies Record<string, readonly string[]>;
 

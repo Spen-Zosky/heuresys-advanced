@@ -1,0 +1,300 @@
+
+Running 125 tests using 1 worker
+
+  ✓    1 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as platformAdmin (4.1s)
+  ✓    2 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as tenantAdmin (3.1s)
+  ✓    3 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as manager (2.3s)
+  ✓    4 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as employee (2.0s)
+  ✓    5 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as outsider (1.9s)
+  ✓    6 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase has no critical a11y violations (2.7s)
+  ✓    7 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/system-health has no critical a11y violations (4.4s)
+  ✓    8 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/shell has no critical a11y violations (2.9s)
+  ✓    9 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/header has no critical a11y violations (2.7s)
+  ✓   10 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/footer has no critical a11y violations (3.4s)
+  ✓   11 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/sidebar has no critical a11y violations (3.0s)
+  ✓   12 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/palettes has no critical a11y violations (3.2s)
+  ✓   13 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/typography has no critical a11y violations (2.8s)
+  ✓   14 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/logo has no critical a11y violations (2.8s)
+  ✓   15 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/icons has no critical a11y violations (2.4s)
+  ✓   16 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/page-types has no critical a11y violations (2.3s)
+  ✓   17 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/dashboard-cards has no critical a11y violations (2.5s)
+  ✓   18 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/forms has no critical a11y violations (2.4s)
+  ✓   19 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/tables has no critical a11y violations (2.9s)
+  ✓   20 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/charts has no critical a11y violations (2.3s)
+  ✓   21 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/landing-page has no critical a11y violations (2.2s)
+  ✓   22 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/login-page has no critical a11y violations (2.3s)
+  ✓   23 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/primary-initial-page has no critical a11y violations (2.7s)
+  ✓   24 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as platformAdmin › /dashboard has no critical a11y violations (2.3s)
+  ✓   25 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as platformAdmin › /tenants has no critical a11y violations (2.1s)
+  ✓   26 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as platformAdmin › /admin/roles has no critical a11y violations (3.8s)
+  ✓   27 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as platformAdmin › /users has no critical a11y violations (2.1s)
+  ✓   28 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as platformAdmin › /system-health has no critical a11y violations (4.0s)
+  ✓   29 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /dashboard has no critical a11y violations (1.9s)
+  ✓   30 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /users has no critical a11y violations (2.0s)
+  ✓   31 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /positions has no critical a11y violations (2.2s)
+  ✓   32 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /blueprints has no critical a11y violations (2.1s)
+  ✓   33 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /skills has no critical a11y violations (2.2s)
+  ✓   34 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /kpis has no critical a11y violations (2.1s)
+  ✓   35 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /learning has no critical a11y violations (2.1s)
+  ✓   36 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /gaps has no critical a11y violations (2.1s)
+  ✓   37 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /career-succession has no critical a11y violations (2.0s)
+  ✓   38 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /compensation-intelligence has no critical a11y violations (2.1s)
+  ✓   39 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /organization has no critical a11y violations (2.0s)
+  ✓   40 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /processes has no critical a11y violations (2.1s)
+  ✓   41 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /seed-acquisition/runs has no critical a11y violations (2.2s)
+  ✓   42 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /brownfield-adaptation has no critical a11y violations (2.3s)
+  ✓   43 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /visualizations has no critical a11y violations (1.9s)
+  ✓   44 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /learning/training-initiatives has no critical a11y violations (2.2s)
+  ✓   45 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as tenantAdmin › /organization/org-chart has no critical a11y violations (2.2s)
+  ✓   46 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me has no critical a11y violations (1.9s)
+  ✓   47 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/profile has no critical a11y violations (2.1s)
+  ✓   48 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/positions has no critical a11y violations (2.1s)
+  ✓   49 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/skills has no critical a11y violations (2.0s)
+  ✓   50 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/skills/self-assessment has no critical a11y violations (2.1s)
+  ✓   51 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/learning has no critical a11y violations (1.9s)
+  ✓   52 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/learning/catalogue has no critical a11y violations (2.1s)
+  ✓   53 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/gaps has no critical a11y violations (1.9s)
+  ✓   54 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/kpis has no critical a11y violations (2.0s)
+  ✓   55 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/career has no critical a11y violations (2.0s)
+  ✓   56 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/career/target has no critical a11y violations (2.0s)
+  ✓   57 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/certifications has no critical a11y violations (2.0s)
+  ✓   58 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/documents has no critical a11y violations (2.0s)
+  ✓   59 [chromium] › tests\e2e\a11y.spec.ts:159:11 › a11y as employee › /me/inbox has no critical a11y violations (1.9s)
+  ✓   60 [chromium] › tests\e2e\admin-catalogues.spec.ts:16:9 › MVP-2a admin catalogues — live data › as tenantAdmin › /skills shows catalogue with rows (1.8s)
+  ✓   61 [chromium] › tests\e2e\admin-catalogues.spec.ts:22:9 › MVP-2a admin catalogues — live data › as tenantAdmin › /kpis shows KPI definitions (1.7s)
+  ✓   62 [chromium] › tests\e2e\admin-catalogues.spec.ts:28:9 › MVP-2a admin catalogues — live data › as tenantAdmin › /learning shows learning modules catalogue (1.7s)
+  ✓   63 [chromium] › tests\e2e\admin-catalogues.spec.ts:38:9 › MVP-2a admin catalogues — live data › as platformAdmin › /tenants shows the tenant registry (1.5s)
+  ✓   64 [chromium] › tests\e2e\admin-lists.spec.ts:15:7 › MVP-2a admin lists — live data › /users lists tenant users with real count > 0 and clickable detail (2.0s)
+  ✓   65 [chromium] › tests\e2e\admin-lists.spec.ts:34:7 › MVP-2a admin lists — live data › /positions lists tenant positions and clickable PIP detail (2.0s)
+  ✓   66 [chromium] › tests\e2e\admin-org-bpm.spec.ts:14:7 › MVP-2a admin org + bpm — live data › /organization shows the OU registry (1.6s)
+  ✓   67 [chromium] › tests\e2e\admin-org-bpm.spec.ts:21:7 › MVP-2a admin org + bpm — live data › /blueprints lists variants with family info (1.7s)
+  ✓   68 [chromium] › tests\e2e\admin-org-bpm.spec.ts:28:7 › MVP-2a admin org + bpm — live data › /processes lists blueprint-anchored BPM processes (1.7s)
+  ✓   69 [chromium] › tests\e2e\admin-org-bpm.spec.ts:35:7 › MVP-2a admin org + bpm — live data › /learning/training-initiatives lists scheduled sessions (1.6s)
+  ✓   70 [chromium] › tests\e2e\admin-pipelines.spec.ts:15:7 › MVP-2a pipelines — live data › /seed-acquisition/runs renders run list (empty state OK) (1.7s)
+  ✘   71 [chromium] › tests\e2e\admin-pipelines.spec.ts:21:7 › MVP-2a pipelines — live data › /brownfield-adaptation switches across 3 tabs (6.3s)
+  ✓   72 [chromium] › tests\e2e\admin-pipelines.spec.ts:21:7 › MVP-2a pipelines — live data › /brownfield-adaptation switches across 3 tabs (retry #1) (2.3s)
+  ✓   73 [chromium] › tests\e2e\admin-pipelines.spec.ts:33:7 › MVP-2a pipelines — live data › /gaps shows severity summary and full list (1.8s)
+  ✓   74 [chromium] › tests\e2e\admin-tabs.spec.ts:17:9 › MVP-2a admin tabbed pages — live data › as platformAdmin › /tenants/[id] renders overview tab and switches to typing (2.2s)
+  ✓   75 [chromium] › tests\e2e\admin-tabs.spec.ts:40:9 › MVP-2a admin tabbed pages — live data › as platformAdmin › /tenants/[id]/enterprise-typing wizard renders all 4 selects (2.8s)
+  ✓   76 [chromium] › tests\e2e\admin-tabs.spec.ts:60:9 › MVP-2a admin tabbed pages — live data › as tenantAdmin › /blueprints/[variantId] shows processes tab → activations tab (1.9s)
+  ✘   77 [chromium] › tests\e2e\auth.spec.ts:18:7 › MVP-2a /login pilot — live data › PLATFORM_ADMIN login lands on /dashboard, sets HttpOnly access cookie (1.5s)
+  ✘   78 [chromium] › tests\e2e\auth.spec.ts:18:7 › MVP-2a /login pilot — live data › PLATFORM_ADMIN login lands on /dashboard, sets HttpOnly access cookie (retry #1) (2.0s)
+  ✘   79 [chromium] › tests\e2e\auth.spec.ts:48:7 › MVP-2a /login pilot — live data › USER (employee_test) login lands on /me (30.1s)
+  ✘   80 [chromium] › tests\e2e\auth.spec.ts:48:7 › MVP-2a /login pilot — live data › USER (employee_test) login lands on /me (retry #1) (30.2s)
+  ✓   81 [chromium] › tests\e2e\auth.spec.ts:55:7 › MVP-2a /login pilot — live data › wrong password shows error message, stays on /login (2.2s)
+  ✓   82 [chromium] › tests\e2e\auth.spec.ts:71:7 › MVP-2a /login pilot — live data › middleware redirects /dashboard without session to /login?next=/dashboard (1.2s)
+  ✓   83 [chromium] › tests\e2e\closing-pages.spec.ts:15:9 › MVP-2a closing pages — live data › as platformAdmin › /admin/roles renders the role × permission matrix from live API (1.7s)
+  ✓   84 [chromium] › tests\e2e\closing-pages.spec.ts:32:9 › MVP-2a closing pages — live data › as tenantAdmin › /organization/org-chart renders empty state (no ORG_CHART seeded) (1.6s)
+  ✓   85 [chromium] › tests\e2e\closing-pages.spec.ts:42:9 › MVP-2a closing pages — live data › as employee › /me/skills/self-assessment renders form with selects (1.7s)
+  ✓   86 [chromium] › tests\e2e\closing-pages.spec.ts:51:9 › MVP-2a closing pages — live data › as employee › /me/learning/catalogue renders the path catalogue with filter (1.6s)
+  ✓   87 [chromium] › tests\e2e\closing-pages.spec.ts:58:9 › MVP-2a closing pages — live data › as employee › /me/career/target renders position picker form (1.8s)
+  ✓   88 [chromium] › tests\e2e\complex-domains.spec.ts:15:7 › MVP-2a complex domains — live data › /career-succession switches across 3 tabs (1.8s)
+  ✓   89 [chromium] › tests\e2e\complex-domains.spec.ts:27:7 › MVP-2a complex domains — live data › /compensation-intelligence shows 6 status counters (1.9s)
+  ✓   90 [chromium] › tests\e2e\ess-certifications-upload.spec.ts:20:7 › ESS certifications upload form — live data › can add a new certification and see it in the list (2.0s)
+  ✓   91 [chromium] › tests\e2e\ess-certifications-upload.spec.ts:51:7 › ESS certifications upload form — live data › rejects invalid documentUri client-side without hitting the API (2.9s)
+  ✓   92 [chromium] › tests\e2e\landing-pages.spec.ts:16:9 › MVP-2a landing pages — live data › as employee (pure USER) › /me renders with role + greeting + cards + pure-USER nav (1.8s)
+  ✓   93 [chromium] › tests\e2e\landing-pages.spec.ts:39:9 › MVP-2a landing pages — live data › as tenantAdmin › /dashboard shows TENANT scope, counters, and admin nav (2.0s)
+  ✓   94 [chromium] › tests\e2e\landing-pages.spec.ts:59:9 › MVP-2a landing pages — live data › as platformAdmin › /dashboard shows PLATFORM scope + tenants counter (1.6s)
+  ✓   95 [chromium] › tests\e2e\me-pages.spec.ts:16:7 › MVP-2a ESS pages — live data › /me/profile loads + saves a no-op PATCH (2.1s)
+  ✓   96 [chromium] › tests\e2e\me-pages.spec.ts:41:7 › MVP-2a ESS pages — live data › /me/positions shows TEST_SUB_POS primary assignment (1.6s)
+  ✓   97 [chromium] › tests\e2e\me-pages.spec.ts:50:7 › MVP-2a ESS pages — live data › /me/skills renders (empty state OK if no evidence yet) (1.5s)
+  ✓   98 [chromium] › tests\e2e\me-pages.spec.ts:56:7 › MVP-2a ESS pages — live data › /me/learning renders (empty or with rows) (1.8s)
+  ✓   99 [chromium] › tests\e2e\me-pages.spec.ts:62:7 › MVP-2a ESS pages — live data › /me/gaps renders (1.8s)
+  ✓  100 [chromium] › tests\e2e\me-pages.spec.ts:68:7 › MVP-2a ESS pages — live data › /me/kpis renders (1.8s)
+  ✓  101 [chromium] › tests\e2e\me-pages.spec.ts:74:7 › MVP-2a ESS pages — live data › /me/career renders (1.6s)
+  ✓  102 [chromium] › tests\e2e\me-pages.spec.ts:80:7 › MVP-2a ESS pages — live data › /me/certifications renders (1.6s)
+  ✓  103 [chromium] › tests\e2e\me-pages.spec.ts:86:7 › MVP-2a ESS pages — live data › /me/documents renders (live-list, may be empty) (1.6s)
+  ✓  104 [chromium] › tests\e2e\me-pages.spec.ts:92:7 › MVP-2a ESS pages — live data › /me/inbox renders (1.7s)
+  ✓  105 [chromium] › tests\e2e\position-sub.spec.ts:23:7 › MVP-2a position sub-resources — live data › /positions/[id]/skills renders requirements list (empty state OK) (2.6s)
+  ✓  106 [chromium] › tests\e2e\position-sub.spec.ts:31:7 › MVP-2a position sub-resources — live data › /positions/[id]/kpis renders requirements list (empty state OK) (2.4s)
+  ✓  107 [chromium] › tests\e2e\position-sub.spec.ts:38:7 › MVP-2a position sub-resources — live data › /positions/[id]/learning composes gaps for the position (2.5s)
+  ✓  108 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase › renders without console errors (index) (1.3s)
+  ✓  109 [chromium] › tests\e2e\showcase-smoke.spec.ts:75:9 › Showcase route /showcase › a11y axe-core baseline (index) (2.2s)
+  ✓  110 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/shell › renders without console errors (shell) (1.7s)
+  ✓  111 [chromium] › tests\e2e\showcase-smoke.spec.ts:75:9 › Showcase route /showcase/shell › a11y axe-core baseline (shell) (2.4s)
+  ✓  112 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/palettes › renders without console errors (palettes) (1.6s)
+  ✓  113 [chromium] › tests\e2e\showcase-smoke.spec.ts:75:9 › Showcase route /showcase/palettes › a11y axe-core baseline (palettes) (2.7s)
+  ✓  114 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/typography › renders without console errors (typography) (1.5s)
+  ✓  115 [chromium] › tests\e2e\showcase-smoke.spec.ts:75:9 › Showcase route /showcase/typography › a11y axe-core baseline (typography) (2.1s)
+  ✓  116 [chromium] › tests\e2e\showcase-smoke.spec.ts:48:9 › Showcase route /showcase/logo › renders without console errors (logo) (1.8s)
+  ✓  117 [chromium] › tests\e2e\showcase-smoke.spec.ts:75:9 › Showcase route /showcase/logo › a11y axe-core baseline (logo) (2.6s)
+  ✓  118 [chromium] › tests\e2e\showcase-smoke.spec.ts:92:7 › Shell route contract (UXIX-0001) › shell architecture page renders live dashboard demo with KPI fixtures (1.5s)
+  ✓  119 [chromium] › tests\e2e\showcase-smoke.spec.ts:108:7 › Decision Register linkage › index lists scaffold + pending routes with their UXIX-NNNN ids (1.3s)
+  ✓  120 [chromium] › tests\e2e\smoke-5-personas.spec.ts:76:9 › smoke platformAdmin › landing on /dashboard + nav + 2 extra pages (2.0s)
+  ✓  121 [chromium] › tests\e2e\smoke-5-personas.spec.ts:76:9 › smoke tenantAdmin › landing on /dashboard + nav + 2 extra pages (2.5s)
+  ✓  122 [chromium] › tests\e2e\smoke-5-personas.spec.ts:76:9 › smoke manager › landing on /dashboard + nav + 2 extra pages (2.3s)
+  ✓  123 [chromium] › tests\e2e\smoke-5-personas.spec.ts:76:9 › smoke employee › landing on /me + nav + 2 extra pages (2.2s)
+  ✓  124 [chromium] › tests\e2e\smoke-5-personas.spec.ts:76:9 › smoke outsider › landing on /me + nav + 2 extra pages (2.3s)
+  ✓  125 [chromium] › tests\e2e\system-health.spec.ts:26:9 › MVP-2a /system-health — live data + role gate › as platformAdmin › /system-health renders the SUPERUSER dashboard (2.1s)
+  ✓  126 [chromium] › tests\e2e\system-health.spec.ts:49:9 › MVP-2a /system-health — live data + role gate › as tenantAdmin (non-PLATFORM_ADMIN) › /system-health redirects non-superuser away (1.4s)
+  ✓  127 [chromium] › tests\e2e\visualizations.spec.ts:15:7 › MVP-2a visualizations — live data › /visualizations browser renders (empty state OK) (1.7s)
+  ✓  128 [chromium] › tests\e2e\visualizations.spec.ts:21:7 › MVP-2a visualizations — live data › /visualizations/[graphId] handles 404 for non-existent graph (1.8s)
+
+
+  1) [chromium] › tests\e2e\auth.spec.ts:18:7 › MVP-2a /login pilot — live data › PLATFORM_ADMIN login lands on /dashboard, sets HttpOnly access cookie 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m429[39m
+
+      29 |     ]);
+      30 |
+    > 31 |     expect(loginResp.status()).toBe(200);
+         |                                ^
+      32 |     const body = await loginResp.json();
+      33 |     expect(body.user.email).toBe(PERSONAS.platformAdmin.email);
+      34 |     expect(typeof body.csrfToken).toBe("string");
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.spec.ts:31:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth-MVP-2a-login-pilot-—--1313c-sets-HttpOnly-access-cookie-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth-MVP-2a-login-pilot-—--1313c-sets-HttpOnly-access-cookie-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth-MVP-2a-login-pilot-—--1313c-sets-HttpOnly-access-cookie-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth-MVP-2a-login-pilot-—--1313c-sets-HttpOnly-access-cookie-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32m200[39m
+    Received: [31m429[39m
+
+      29 |     ]);
+      30 |
+    > 31 |     expect(loginResp.status()).toBe(200);
+         |                                ^
+      32 |     const body = await loginResp.json();
+      33 |     expect(body.user.email).toBe(PERSONAS.platformAdmin.email);
+      34 |     expect(typeof body.csrfToken).toBe("string");
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.spec.ts:31:32
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth-MVP-2a-login-pilot-—--1313c-sets-HttpOnly-access-cookie-chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth-MVP-2a-login-pilot-—--1313c-sets-HttpOnly-access-cookie-chromium-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth-MVP-2a-login-pilot-—--1313c-sets-HttpOnly-access-cookie-chromium-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth-MVP-2a-login-pilot-—--1313c-sets-HttpOnly-access-cookie-chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests\e2e\auth.spec.ts:48:7 › MVP-2a /login pilot — live data › USER (employee_test) login lands on /me 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/me" until "load"
+    ============================================================
+
+      50 |     await fillLoginForm(page, PERSONAS.employee.email, TEST_PASSWORD);
+      51 |     await page.getByTestId("login-submit").click();
+    > 52 |     await page.waitForURL("**/me");
+         |                ^
+      53 |   });
+      54 |
+      55 |   test("wrong password shows error message, stays on /login", async ({ page }) => {
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.spec.ts:52:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth-MVP-2a-login-pilot-—--766c2-oyee-test-login-lands-on-me-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth-MVP-2a-login-pilot-—--766c2-oyee-test-login-lands-on-me-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth-MVP-2a-login-pilot-—--766c2-oyee-test-login-lands-on-me-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth-MVP-2a-login-pilot-—--766c2-oyee-test-login-lands-on-me-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/me" until "load"
+    ============================================================
+
+      50 |     await fillLoginForm(page, PERSONAS.employee.email, TEST_PASSWORD);
+      51 |     await page.getByTestId("login-submit").click();
+    > 52 |     await page.waitForURL("**/me");
+         |                ^
+      53 |   });
+      54 |
+      55 |   test("wrong password shows error message, stays on /login", async ({ page }) => {
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.spec.ts:52:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth-MVP-2a-login-pilot-—--766c2-oyee-test-login-lands-on-me-chromium-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth-MVP-2a-login-pilot-—--766c2-oyee-test-login-lands-on-me-chromium-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth-MVP-2a-login-pilot-—--766c2-oyee-test-login-lands-on-me-chromium-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth-MVP-2a-login-pilot-—--766c2-oyee-test-login-lands-on-me-chromium-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium] › tests\e2e\admin-pipelines.spec.ts:21:7 › MVP-2a pipelines — live data › /brownfield-adaptation switches across 3 tabs 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  getByTestId('brownfield-page')
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  5000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByTestId('brownfield-page')[22m
+
+
+      21 |   test("/brownfield-adaptation switches across 3 tabs", async ({ page }) => {
+      22 |     await page.goto("/brownfield-adaptation");
+    > 23 |     await expect(page.getByTestId("brownfield-page")).toBeVisible();
+         |                                                       ^
+      24 |     await expect(page.getByTestId("brownfield-content-inventory")).toBeVisible();
+      25 |
+      26 |     await page.getByTestId("brownfield-tab-mapping").click();
+        at D:\heuresys-advanced\apps\web\tests\e2e\admin-pipelines.spec.ts:23:55
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\admin-pipelines-MVP-2a-pip-09fa3-tion-switches-across-3-tabs-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\admin-pipelines-MVP-2a-pip-09fa3-tion-switches-across-3-tabs-chromium\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\admin-pipelines-MVP-2a-pip-09fa3-tion-switches-across-3-tabs-chromium\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\admin-pipelines-MVP-2a-pip-09fa3-tion-switches-across-3-tabs-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium] › tests\e2e\auth.spec.ts:18:7 › MVP-2a /login pilot — live data › PLATFORM_ADMIN login lands on /dashboard, sets HttpOnly access cookie 
+    [chromium] › tests\e2e\auth.spec.ts:48:7 › MVP-2a /login pilot — live data › USER (employee_test) login lands on /me 
+  1 flaky
+    [chromium] › tests\e2e\admin-pipelines.spec.ts:21:7 › MVP-2a pipelines — live data › /brownfield-adaptation switches across 3 tabs 
+  122 passed (5.8m)

@@ -89,12 +89,12 @@ for (const route of SHOWCASE_ROUTES) {
 }
 
 test.describe("Shell route contract (UXIX-0001)", () => {
-  test("expanded sidebar demo: header=64px, footer=44px, two demo shells visible", async ({ page }) => {
+  test("shell architecture page renders live dashboard demo with KPI fixtures", async ({ page }) => {
     await page.goto("/showcase/shell", { waitUntil: "domcontentloaded" });
 
-    // Both demo shells (expanded + collapsed) must render.
-    await expect(page.getByRole("heading", { name: "Expanded sidebar (280px)" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Collapsed sidebar (72px)" })).toBeVisible();
+    // Page header + live demo section render.
+    await expect(page.getByRole("heading", { name: "Shell architecture" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Workforce dashboard" })).toBeVisible();
 
     // The KPI fixtures should be present, demonstrating realistic Heuresys
     // content (no placeholder boxes per SHOWCASE_GENERATION_PROMPT).

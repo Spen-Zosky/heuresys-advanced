@@ -11,7 +11,7 @@
 - **Progetto**: heuresys-advanced (D:\heuresys-advanced) — HRMS/BPM platform
 - **Fase**: **MVP-2a CERTIFICATO + tag pushed** + **MVP-3 5/6 Tappe shipped** post-X17. Playwright 124/125 (99.2%) X16 baseline + 1 shell contract fix isolated PASS (X16b). Tag `v0.2.1-mvp2a-final` su origin remote (pushed X16 sequence). MVP-3 chain post-tag: X16b shell fix + Tappa B Mermaid + Tappa E-UI TOTP enrollment all shipped/pushed.
 - **Ultimo HEAD pushato**: post-X17 commit (vedi `git log --oneline -1`)
-- **Tag pushato**: `v0.2.1-mvp2a-final` annotated, target `75baf54` (X16). Release notes file `qa_artifacts/x17_release_notes_v0.2.1.md` shipped X17. **GitHub release create P1 deferred** (gh CLI not authenticated) — manual command for Enzo: `gh release create v0.2.1-mvp2a-final --notes-file qa_artifacts/x17_release_notes_v0.2.1.md --title "MVP-2a final certification"`.
+- **Tag pushato**: `v0.2.1-mvp2a-final` annotated, target `75baf54` (X16). Release notes file `qa_artifacts/x17_release_notes_v0.2.1.md` shipped X17. **GitHub release LIVE**: https://github.com/Spen-Zosky/heuresys-advanced/releases/tag/v0.2.1-mvp2a-final (P1 X17 chiuso 2026-05-24 sessione C18, gh auth via PAT fine-grained `Contents: Read and write`).
 - **PROMPT in flight**: nessuno. PROMPT 021 X17 closed (REPORT 021). DRAFT PROMPT 022 (Tappa F npm publish, ~145 lines) ready in `cowork_code_exchange/_00_DRAFT_PROMPT_021_batch_x17_tappa_f.md` — needs 4 Enzo decisions before promotion.
 - **Loop CLI**: FERMO (cron disattivato S929, manual poll only)
 - **Cowork scheduled task**: `cowork-watchdog-poll-inbox` cron disattivato (decisione utente S929)
@@ -19,16 +19,16 @@
 
 ## §2 — Decisione attesa (C18) — per Enzo al risveglio
 
-Post-X17, MVP-2a closed + MVP-3 5/6 Tappe shipped (A/B/C/D/E backend+UI/G), solo Tappa F pending. Per REPORT 021 §7, 4 direzioni valide.
+Post-X17, MVP-2a closed + MVP-3 5/6 Tappe shipped (A/B/C/D/E backend+UI/G), solo Tappa F pending. Opzione A C18 **COMPLETATA 2026-05-24** (release live). 3 direzioni residue valide.
 
 | # | Opzione | Effort | Rationale |
 |---|---|---|---|
-| **A** | **Enzo: complete `gh release create v0.2.1-mvp2a-final`** | ~5 min manual | Close P1 deferred X17 (gh CLI auth + create release page) |
-| **B** | **MVP-3 Tappa F — @heuresys/ui npm publish** | 2-3h | DRAFT PROMPT 022 ready (`_00_DRAFT_PROMPT_021_batch_x17_tappa_f.md`), needs 4 decision answers (naming / build target / version / migration). Closes last MVP-3 tappa not shipped |
+| ~~A~~ | ~~**Enzo: complete `gh release create v0.2.1-mvp2a-final`**~~ | ~~~5 min manual~~ | ✅ **DONE 2026-05-24** — release page live, P1 X17 chiuso |
+| **B** | **MVP-3 Tappa F — @heuresys/ui npm publish** | 2-3h | DRAFT PROMPT 022 ready (`_00_DRAFT_PROMPT_021_batch_x17_tappa_f.md`), needs 4 decision answers (naming / build target / version / migration). Closes last MVP-3 tappa not shipped — **selected sessione C18, decisioni in corso di risoluzione** |
 | **C** | **Brownfield Wave 1 full-47k SQL-side upsert** | 2-3h | Tappa D known issue residual, dedicated session per memoria `project-mvp3-session-state` |
 | **D** | **MFA login-gating** | 2-3h | Compose `mfaService.beginLoginChallenge` into auth.service.login() + `/login` UI 2-step. Completes Tappa E full scope (frontend enroll shipped X17 Tappa E-UI a0d4545) |
 
-**Recommended**: A (~5 min Enzo) → then B (CLI batch X18 with PROMPT 022 formalized). C/D possono interleave per priority.
+**Next session entry-point**: se PROMPT 022 (Tappa F) è stato formalizzato e shipped, leggi REPORT del batch X18 + aggiorna §1. Se invece le 4 decisioni B non sono ancora risolte, riprendi da DRAFT PROMPT 022 + risposte parziali archiviate in §sessioni.
 
 Nuova sessione Cowork: **leggi questo file + i 3 file di §3, poi chiedi all'utente A/B/C/D**. NON procedere autonomamente.
 

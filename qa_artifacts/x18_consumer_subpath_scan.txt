@@ -1,0 +1,4 @@
+/d/heuresys-advanced/apps/showcase/src/app/globals.css:13:@import "@heuresys/ui/styles";
+/d/heuresys-advanced/apps/showcase/src/app/showcase/logo/page.tsx:12:} from "@heuresys/ui/brand/candidates";
+/d/heuresys-advanced/apps/web/src/app/globals.css:15:@import "@heuresys/ui/styles";
+/d/heuresys-advanced/apps/web/src/app/showcase/logo/page.tsx:12:} from "@heuresys/ui/brand/candidates";

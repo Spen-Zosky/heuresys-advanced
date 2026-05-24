@@ -1,0 +1,28 @@
+
+> @heuresys/web@0.1.0 build D:\heuresys-advanced\apps\web
+> next build
+
+   ▲ Next.js 15.5.18
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 75s
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+[Error: Failed to collect configuration for /showcase/icons] {
+  [cause]: TypeError: Class extends value undefined is not a constructor or null
+      at cE (D:\heuresys-advanced\apps\web\.next\server\chunks\3025.js:257:75333)
+      at <unknown> (D:\heuresys-advanced\apps\web\.next\server\chunks\3025.js:257:1202779)
+      at 89144 (D:\heuresys-advanced\apps\web\.next\server\chunks\3025.js:257:1206056)
+      at c (D:\heuresys-advanced\apps\web\.next\server\webpack-runtime.js:1:143)
+      at 96444 (D:\heuresys-advanced\apps\web\.next\server\chunks\5793.js:1:6640)
+      at c (D:\heuresys-advanced\apps\web\.next\server\webpack-runtime.js:1:143)
+}
+
+> Build error occurred
+[Error: Failed to collect page data for /showcase/icons] {
+  type: 'Error'
+}
+D:\heuresys-advanced\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @heuresys/web@0.1.0 build: `next build`
+Exit status 1

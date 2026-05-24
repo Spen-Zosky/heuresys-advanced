@@ -3,6 +3,17 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { PaletteDropdown, ThemeToggle } from "@heuresys/ui";
 
+// X18 MVP-3 Tappa F pragmatic close (Path B). Versioned @heuresys/ui@0.1.1
+// triggers a Next.js 15 RSC bundle-threshold defect during static page-data
+// collection for /showcase/* ("d.createContext is not a function" / "Class
+// extends value undefined"). Emergent at bundle complexity (4+ dashboard
+// observability widgets), NOT a single component — 12 bisect iterations
+// (HALT-022-06) could not isolate a culprit. force-dynamic skips the static
+// collection that trips the defect. Proper fix (git bisect ux-design-shared /
+// split @heuresys/ui / Next 16 upgrade) deferred to a dedicated session.
+// See CW-B58/B59 + HALT-022-06 in cowork_code_exchange/_04_REPORT_022_batch_x18.md.
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Heuresys — Brand Identity Showcase",
   description: "Design candidates and shell prototypes for brand identity v1 review.",

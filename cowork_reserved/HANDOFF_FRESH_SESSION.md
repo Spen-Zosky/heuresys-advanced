@@ -1,6 +1,6 @@
 # HANDOFF — Fresh Cowork Session Bootstrap
 
-**Updated**: 2026-05-24 post-X17 close (MVP-2a CERTIFIED + MVP-3 5/6 Tappe shipped)
+**Updated**: 2026-05-24 post-X18 close (MVP-2a CERTIFIED + MVP-3 6/6 Tappe shipped — Tappa F pragmatic close Path B+C)
 **Purpose**: bootstrap minimale per una nuova sessione Cowork dopo che la precedente ha saturato il context.
 **Reuse pattern**: aggiornare prima di chiudere ogni sessione lunga; nuova sessione legge SOLO questo file + i 2-3 file critici elencati sotto.
 
@@ -9,28 +9,29 @@
 ## §1 — Stato attuale (snapshot)
 
 - **Progetto**: heuresys-advanced (D:\heuresys-advanced) — HRMS/BPM platform
-- **Fase**: **MVP-2a CERTIFICATO + tag pushed** + **MVP-3 5/6 Tappe shipped** post-X17. Playwright 124/125 (99.2%) X16 baseline + 1 shell contract fix isolated PASS (X16b). Tag `v0.2.1-mvp2a-final` su origin remote (pushed X16 sequence). MVP-3 chain post-tag: X16b shell fix + Tappa B Mermaid + Tappa E-UI TOTP enrollment all shipped/pushed.
-- **Ultimo HEAD pushato**: post-X17 commit (vedi `git log --oneline -1`)
-- **Tag pushato**: `v0.2.1-mvp2a-final` annotated, target `75baf54` (X16). Release notes file `qa_artifacts/x17_release_notes_v0.2.1.md` shipped X17. **GitHub release LIVE**: https://github.com/Spen-Zosky/heuresys-advanced/releases/tag/v0.2.1-mvp2a-final (P1 X17 chiuso 2026-05-24 sessione C18, gh auth via PAT fine-grained `Contents: Read and write`).
-- **PROMPT in flight**: nessuno. PROMPT 021 X17 closed (REPORT 021). DRAFT PROMPT 022 (Tappa F npm publish, ~145 lines) ready in `cowork_code_exchange/_00_DRAFT_PROMPT_021_batch_x17_tappa_f.md` — needs 4 Enzo decisions before promotion.
+- **Fase**: **MVP-2a CERTIFICATO + tag pushed** + **MVP-3 6/6 Tappe shipped** post-X18 (Tappa F pragmatic close Path B+C). `@heuresys/ui@0.1.1` PUBLISHED su npm registry pubblico (0.1.0 deprecated). apps/web admin core (40+ routes) builds OK con versioned dep. **KNOWN ISSUE deferred**: /showcase routes (apps/web/src/_disabled_showcase_X18) + apps/showcase static deploy hit Next.js 15 RSC bundle-threshold defect (`d.createContext is not a function` / `Class extends value undefined`) — emergent, NON single-component (12 bisect iter HALT-022-06 inconclusive). Proper fix deferred: Path A git bisect ux-design-shared commits / Path F split @heuresys/ui / Path E Next 16 upgrade.
+- **Ultimo HEAD pushato**: NESSUNO post-X18 (8+ commit C18.x + X18 final commit locale, NO push — attesa Enzo authorization). ux-design-shared HEAD `dfa2e81` (0.1.1) anch'esso locale no-push.
+- **Tag**: `v0.2.1-mvp2a-final` su origin (X16). `v0.3.1-mvp3-final` annotato LOCALE (X18 final, NO push). GitHub release v0.2.1 LIVE: https://github.com/Spen-Zosky/heuresys-advanced/releases/tag/v0.2.1-mvp2a-final
+- **PROMPT in flight**: nessuno. PROMPT 022 cascade (022 → 022.1 → 022.2 → 022.3 → 022.4 → 022.5) all closed via REPORT 022 RESUMED-X18.5. Tappa F shipped pragmatic.
+- **npm registry state**: `@heuresys/ui` org `@heuresys` (owner spen-zosky). 0.1.0 DEPRECATED, 0.1.1 latest. GAT bypass-2fa configured in `~/.npmrc` (R11: never log token value).
 - **Loop CLI**: FERMO (cron disattivato S929, manual poll only)
-- **Cowork scheduled task**: `cowork-watchdog-poll-inbox` cron disattivato (decisione utente S929)
-- **REPORT history**: 017 (X13 hardening) · 018 (X14 dev mode) · 019 (X15 E2E vs prod) · 020 (X16 final certification) · **021 (X17 D+B combo, CW-B52 recurrence)**
+- **REPORT history**: 017 (X13) · 018 (X14) · 019 (X15) · 020 (X16) · 021 (X17) · **022 (X18 Tappa F npm publish — 5 amendment cascade + 6 halt + 12 bisect iter, pragmatic close Path B+C)**
 
 ## §2 — Decisione attesa (C18) — per Enzo al risveglio
 
-Post-X17, MVP-2a closed + MVP-3 5/6 Tappe shipped (A/B/C/D/E backend+UI/G), solo Tappa F pending. Opzione A C18 **COMPLETATA 2026-05-24** (release live). 3 direzioni residue valide.
+Post-X18, MVP-2a closed + MVP-3 6/6 Tappe shipped (A/B/C/D/E backend+UI/F-pragmatic/G). Tappa F **COMPLETATA pragmatic** 2026-05-24 (npm publish 0.1.1 + admin versioned migration). 3 direzioni residue + 1 deferred-fix.
 
 | # | Opzione | Effort | Rationale |
 |---|---|---|---|
-| ~~A~~ | ~~**Enzo: complete `gh release create v0.2.1-mvp2a-final`**~~ | ~~~5 min manual~~ | ✅ **DONE 2026-05-24** — release page live, P1 X17 chiuso |
-| **B** | **MVP-3 Tappa F — @heuresys/ui npm publish** | 2-3h | DRAFT PROMPT 022 ready (`_00_DRAFT_PROMPT_021_batch_x17_tappa_f.md`), needs 4 decision answers (naming / build target / version / migration). Closes last MVP-3 tappa not shipped — **selected sessione C18, decisioni in corso di risoluzione** |
-| **C** | **Brownfield Wave 1 full-47k SQL-side upsert** | 2-3h | Tappa D known issue residual, dedicated session per memoria `project-mvp3-session-state` |
-| **D** | **MFA login-gating** | 2-3h | Compose `mfaService.beginLoginChallenge` into auth.service.login() + `/login` UI 2-step. Completes Tappa E full scope (frontend enroll shipped X17 Tappa E-UI a0d4545) |
+| ~~A~~ | ~~gh release v0.2.1~~ | — | ✅ DONE C18 |
+| ~~B~~ | ~~Tappa F npm publish~~ | — | ✅ **DONE X18 pragmatic** — 0.1.1 published, admin versioned, /showcase deferred |
+| **DEFER-F** | **Fix /showcase RSC bundle-threshold defect** (re-enable apps/web/src/_disabled_showcase_X18 + apps/showcase static deploy) | 2-3h dedicated | Path A git bisect ux-design-shared (X16-era → dfa2e81) per isolare commit culprit / Path F split @heuresys/ui in subpackages / Path E Next 16 upgrade. Restore: `mv src/_disabled_showcase_X18 src/app/showcase` + rm tsconfig exclude. Vedi HALT-022-06 + CW-B59 |
+| **C** | **Brownfield Wave 1 full-47k SQL-side upsert** | 2-3h | Tappa D known issue residual |
+| **D** | **MFA login-gating** | 2-3h | Compose `mfaService.beginLoginChallenge` into auth.service.login() + `/login` UI 2-step |
 
-**Next session entry-point**: se PROMPT 022 (Tappa F) è stato formalizzato e shipped, leggi REPORT del batch X18 + aggiorna §1. Se invece le 4 decisioni B non sono ancora risolte, riprendi da DRAFT PROMPT 022 + risposte parziali archiviate in §sessioni.
+**Next session entry-point**: leggi REPORT 022 RESUMED-X18.5 (full X18 saga + deferral plan) + bias_registry CW-B55/B56/B58/B59. Push X18 commits + tag richiede Enzo authorization (NON pushato).
 
-Nuova sessione Cowork: **leggi questo file + i 3 file di §3, poi chiedi all'utente A/B/C/D**. NON procedere autonomamente.
+Nuova sessione Cowork: **leggi questo file + i file di §3, poi chiedi all'utente DEFER-F/C/D**. NON procedere autonomamente.
 
 ## §3 — File da leggere SUBITO (priorità ordinata)
 
@@ -60,12 +61,13 @@ Nuova sessione Cowork: **leggi questo file + i 3 file di §3, poi chiedi all'ute
 - **17 transform codes** (DIRECT_COPY · CAST_TIMESTAMPTZ · CAST_VARCHAR · CAST_ENUM · TRIM · LINEAGE_SOURCE_NK · JSON_EXTRACT · LOOKUP_FK · LOOKUP_FK_2HOP · +8)
 - **18 ADR accepted** (0014 SDBI · 0015/0016 nullable FK · 0017 LOOKUP_FK_2HOP · 0018 COALESCE-UQ)
 - **Migrations applied**: 42 (last X13)
-- **Bias**: 54 catalogati (CW-B17→B54), 35 mitigated, next CW-B55. **CW-B52 recurrence in X12/X13/X17** — pattern strutturale al cycle Cowork-side ↔ CLI autonomous flow; structural mitigation = HANDOFF refresh obligatorio per ogni CLI batch (lesson appresa X14-X16, applied X17)
-- **Test suite**: 336/342 vitest (apps/api); web typecheck PASS; **Playwright 124/125 (99.2%) in 5.1m vs prod build** (X16) + shell contract X16b isolated PASS
+- **Bias**: 58 catalogati (CW-B17→B59 inclusi gap), 39 mitigated, **CW-B57 WITHDRAWN** (dual-package misdiagnosis — tsup auto-externalize deps by default), **CW-B59 deferred-proper-fix** (bisect methodology contamination + Next 15 RSC bundle threshold). X18 bias: CW-B55 (subpath consumer scan, C18.1) · CW-B56 (publish 2FA + org pre-flight, C18.2) · CW-B58 (outExtension/misdiagnosis-via-assumption, triple-reinforced) · CW-B59 (bisect contamination + RSC threshold). **CW-B58 lesson finale: empirical test matrix > narrative diagnosis** — applicata da CLI in self-check, NON Cowork-side (5 amendment cascade su hypothesis sbagliate).
+- **Test suite**: 336/342 vitest (apps/api); **apps/web admin typecheck + build PASS con versioned @heuresys/ui@0.1.1 (40+ routes, X18 Path C)**; Playwright 124/125 X16 baseline. X18 Playwright auth.setup env-blocked (API :3001 + SSH tunnel :5433 non attivi in sessione CLI; build pass = primary gate).
 - **DB live**: sys.* 60/134 populated (45%), legacy_mirror 116 tables, brownfield.table_mappings IMPORT + 14 REFERENCE_ONLY
-- **MVP-2a state**: 41 routes (28 admin + 13 ESS, +1 admin `/system-health`), 272 endpoints, 50 API integration tests, 19 spec files (18 spec + mfa-enroll.spec.ts) / ~58 literal `test()` / 127+ runtime via `--list`, i18n parity 100% it/en, axe ruleset extended (+1 employee `/me/security`), sys_users 433 NO REGRESSION
-- **MVP-3 state**: A ✅ · B ✅ (Mermaid renderer in `/visualizations/[graphId]` via `@heuresys/ui`) · C ✅ · D ✅ (47k known issue residual) · E backend ✅ + UI ✅ (`/me/security` TOTP enrollment shipped X17 commit `a0d4545`; login-gating composing pending) · F ⏳ (DRAFT PROMPT 022 ready) · G ✅
-- **Showcase env-gate**: `NEXT_PUBLIC_ENABLE_SHOWCASE=1` burn-in CONFIRMED via runtime HTTP smoke (canonical test; findstr inadequate per pattern memo §22 candidate)
+- **MVP-2a state**: 40+ routes admin core (28 admin + 13 ESS + `/system-health`), 272 endpoints, 50 API integration tests, i18n parity 100% it/en, sys_users 433 NO REGRESSION
+- **MVP-3 state**: A ✅ · B ✅ · C ✅ · D ✅ (47k residual) · E backend+UI ✅ · **F ✅ pragmatic (npm publish 0.1.1 + admin versioned; /showcase deferred DEFER-F)** · G ✅
+- **@heuresys/ui npm**: published 0.1.1 (0.1.0 deprecated), org @heuresys owner spen-zosky, tsup dual ESM+CJS (.mjs/.cjs/.d.ts/.d.cts), exports 4 entries (`.` + 3 subpath preserved), tsup auto-externalizes ~85 deps by default (external list in config harmless-redundant). dist committed in ux-design-shared (no CI). **KNOWN ISSUE**: versioned dep breaks /showcase static page-data collection (Next 15 RSC bundle-threshold) — admin routes UNAFFECTED.
+- **X18 deferred restore**: `mv apps/web/src/_disabled_showcase_X18 apps/web/src/app/showcase` + rm `src/_disabled_showcase_X18` from apps/web/tsconfig.json exclude, in DEFER-F session post root-cause fix.
 
 ## §6 — Lessons (apply going forward)
 

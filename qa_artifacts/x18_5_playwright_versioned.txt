@@ -1,0 +1,364 @@
+
+Running 128 tests using 1 worker
+
+  ✘    1 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as platformAdmin (30.4s)
+  ✘    2 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as platformAdmin (retry #1) (30.2s)
+  ✘    3 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as tenantAdmin (30.2s)
+  ✘    4 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as tenantAdmin (retry #1) (30.2s)
+  ✘    5 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as manager (30.2s)
+  ✘    6 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as manager (retry #1) (30.1s)
+  ✘    7 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as employee (30.2s)
+  ✘    8 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as employee (retry #1) (30.2s)
+  ✘    9 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as outsider (30.2s)
+  ✘   10 [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as outsider (retry #1) (30.2s)
+  ✓   11 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase has no critical a11y violations (2.1s)
+  ✓   12 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/system-health has no critical a11y violations (1.6s)
+  ✓   13 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/shell has no critical a11y violations (1.7s)
+  ✓   14 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/header has no critical a11y violations (1.7s)
+  ✓   15 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/footer has no critical a11y violations (1.6s)
+  ✓   16 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/sidebar has no critical a11y violations (1.6s)
+  ✓   17 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/palettes has no critical a11y violations (1.6s)
+  ✓   18 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/typography has no critical a11y violations (1.7s)
+  ✓   19 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/logo has no critical a11y violations (1.6s)
+  ✓   20 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/icons has no critical a11y violations (1.7s)
+  ✓   21 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/page-types has no critical a11y violations (1.7s)
+  ✓   22 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/dashboard-cards has no critical a11y violations (1.6s)
+  ✓   23 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/forms has no critical a11y violations (1.7s)
+  ✓   24 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/tables has no critical a11y violations (1.7s)
+  ✓   25 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/charts has no critical a11y violations (1.7s)
+  ✓   26 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/landing-page has no critical a11y violations (1.7s)
+  ✓   27 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/login-page has no critical a11y violations (1.8s)
+  ✓   28 [chromium-anonymous] › tests\e2e\showcase-a11y.spec.ts:133:9 › a11y showcase (anonymous) › /showcase/primary-initial-page has no critical a11y violations (1.7s)
+
+
+  1) [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as platformAdmin ────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      36 |     await page.getByTestId("login-submit").click();
+    > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
+         |                ^
+      38 |     await page.context().storageState({ path: `tests/.auth/${key}.json` });
+      39 |   });
+      40 | }
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts:37:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-platformAdmin-setup\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth.setup.ts-authenticate-as-platformAdmin-setup\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-platformAdmin-setup\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth.setup.ts-authenticate-as-platformAdmin-setup\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      36 |     await page.getByTestId("login-submit").click();
+    > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
+         |                ^
+      38 |     await page.context().storageState({ path: `tests/.auth/${key}.json` });
+      39 |   });
+      40 | }
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts:37:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-platformAdmin-setup-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth.setup.ts-authenticate-as-platformAdmin-setup-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-platformAdmin-setup-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth.setup.ts-authenticate-as-platformAdmin-setup-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as tenantAdmin ──────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      36 |     await page.getByTestId("login-submit").click();
+    > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
+         |                ^
+      38 |     await page.context().storageState({ path: `tests/.auth/${key}.json` });
+      39 |   });
+      40 | }
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts:37:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-tenantAdmin-setup\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth.setup.ts-authenticate-as-tenantAdmin-setup\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-tenantAdmin-setup\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth.setup.ts-authenticate-as-tenantAdmin-setup\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      36 |     await page.getByTestId("login-submit").click();
+    > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
+         |                ^
+      38 |     await page.context().storageState({ path: `tests/.auth/${key}.json` });
+      39 |   });
+      40 | }
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts:37:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-tenantAdmin-setup-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth.setup.ts-authenticate-as-tenantAdmin-setup-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-tenantAdmin-setup-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth.setup.ts-authenticate-as-tenantAdmin-setup-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as manager ──────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      36 |     await page.getByTestId("login-submit").click();
+    > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
+         |                ^
+      38 |     await page.context().storageState({ path: `tests/.auth/${key}.json` });
+      39 |   });
+      40 | }
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts:37:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-manager-setup\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth.setup.ts-authenticate-as-manager-setup\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-manager-setup\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth.setup.ts-authenticate-as-manager-setup\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/dashboard" until "load"
+    ============================================================
+
+      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      36 |     await page.getByTestId("login-submit").click();
+    > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
+         |                ^
+      38 |     await page.context().storageState({ path: `tests/.auth/${key}.json` });
+      39 |   });
+      40 | }
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts:37:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-manager-setup-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth.setup.ts-authenticate-as-manager-setup-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-manager-setup-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth.setup.ts-authenticate-as-manager-setup-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as employee ─────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/me" until "load"
+    ============================================================
+
+      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      36 |     await page.getByTestId("login-submit").click();
+    > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
+         |                ^
+      38 |     await page.context().storageState({ path: `tests/.auth/${key}.json` });
+      39 |   });
+      40 | }
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts:37:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-employee-setup\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth.setup.ts-authenticate-as-employee-setup\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-employee-setup\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth.setup.ts-authenticate-as-employee-setup\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/me" until "load"
+    ============================================================
+
+      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      36 |     await page.getByTestId("login-submit").click();
+    > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
+         |                ^
+      38 |     await page.context().storageState({ path: `tests/.auth/${key}.json` });
+      39 |   });
+      40 | }
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts:37:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-employee-setup-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth.setup.ts-authenticate-as-employee-setup-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-employee-setup-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth.setup.ts-authenticate-as-employee-setup-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as outsider ─────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/me" until "load"
+    ============================================================
+
+      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      36 |     await page.getByTestId("login-submit").click();
+    > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
+         |                ^
+      38 |     await page.context().storageState({ path: `tests/.auth/${key}.json` });
+      39 |   });
+      40 | }
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts:37:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-outsider-setup\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth.setup.ts-authenticate-as-outsider-setup\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-outsider-setup\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth.setup.ts-authenticate-as-outsider-setup\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Retry #1 ───────────────────────────────────────────────────────────────────────────────────────
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForURL: Test timeout of 30000ms exceeded.
+    =========================== logs ===========================
+    waiting for navigation to "**/me" until "load"
+    ============================================================
+
+      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      36 |     await page.getByTestId("login-submit").click();
+    > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
+         |                ^
+      38 |     await page.context().storageState({ path: `tests/.auth/${key}.json` });
+      39 |   });
+      40 | }
+        at D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts:37:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-outsider-setup-retry1\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\auth.setup.ts-authenticate-as-outsider-setup-retry1\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\auth.setup.ts-authenticate-as-outsider-setup-retry1\trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results\auth.setup.ts-authenticate-as-outsider-setup-retry1\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5 failed
+    [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as platformAdmin ─────────────────────────
+    [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as tenantAdmin ───────────────────────────
+    [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as manager ───────────────────────────────
+    [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as employee ──────────────────────────────
+    [setup] › tests\e2e\auth.setup.ts:27:8 › authenticate as outsider ──────────────────────────────
+  105 did not run
+  18 passed (5.9m)
+undefined
+D:\heuresys-advanced\apps\web:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command "playwright" not found

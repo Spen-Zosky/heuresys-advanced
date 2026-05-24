@@ -1,0 +1,55 @@
+Scope: all 5 workspace projects
+(node:14828) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+dependencies:
++ @heuresys/ui 0.1.0
+
+devDependencies:
++ @eslint/eslintrc 3.3.5
++ @eslint/js 9.39.4
++ eslint 9.39.4
++ eslint-config-next 15.5.18
++ globals 17.6.0
++ typescript-eslint 8.59.4
+
+packages/shared prepare$ tsc -p tsconfig.json
+packages/shared prepare: Done
+Done in 6.7s
+(node:20712) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ WARN  `node_modules` is present. Lockfile only installation will make it out-of-date
+Progress: resolved 1, reused 0, downloaded 0, added 0
+apps/showcase                            |  WARN  deprecated @heuresys/ui@0.1.0
+apps/api                                 |  WARN  deprecated supertest@7.0.0
+Progress: resolved 18, reused 0, downloaded 0, added 0
+apps/api                                 |  WARN  deprecated @faker-js/faker@9.3.0
+Progress: resolved 31, reused 0, downloaded 0, added 0
+Progress: resolved 52, reused 0, downloaded 0, added 0
+Progress: resolved 56, reused 0, downloaded 0, added 0
+Progress: resolved 96, reused 0, downloaded 0, added 0
+Progress: resolved 144, reused 0, downloaded 0, added 0
+Progress: resolved 188, reused 0, downloaded 0, added 0
+Progress: resolved 208, reused 0, downloaded 0, added 0
+Progress: resolved 259, reused 0, downloaded 0, added 0
+Progress: resolved 332, reused 0, downloaded 0, added 0
+Progress: resolved 390, reused 0, downloaded 0, added 0
+Progress: resolved 448, reused 0, downloaded 0, added 0
+Progress: resolved 506, reused 0, downloaded 0, added 0
+Progress: resolved 577, reused 0, downloaded 0, added 0
+Progress: resolved 622, reused 0, downloaded 0, added 0
+Progress: resolved 662, reused 0, downloaded 0, added 0
+Progress: resolved 766, reused 0, downloaded 0, added 0
+Progress: resolved 845, reused 0, downloaded 0, added 0
+Progress: resolved 938, reused 0, downloaded 0, added 0
+Progress: resolved 1029, reused 0, downloaded 0, added 0
+Progress: resolved 1120, reused 0, downloaded 0, added 0
+Progress: resolved 1188, reused 0, downloaded 0, added 0
+ WARN  11 deprecated subdependencies found: @esbuild-kit/core-utils@3.3.2, @esbuild-kit/esm-loader@2.6.5, @types/cytoscape@3.31.0, @types/react-grid-layout@2.1.0, fstream@1.0.12, glob@7.2.3, inflight@1.0.6, lodash.isequal@4.5.0, rimraf@2.7.1, superagent@9.0.2, uuid@8.3.2
+Progress: resolved 1194, reused 0, downloaded 0, added 0, done
+
+Packages: +1
++
+Done in 28.4s

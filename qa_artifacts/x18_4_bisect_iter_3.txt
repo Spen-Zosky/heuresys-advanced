@@ -1,0 +1,24 @@
+
+> @heuresys/web@0.1.0 build D:\heuresys-advanced\apps\web
+> next build
+
+   ▲ Next.js 15.5.18
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 28.4s
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+[Error: Failed to collect configuration for /showcase] {
+  [cause]: TypeError: d.createContext is not a function
+      at 24981 (D:\heuresys-advanced\apps\web\.next\server\chunks\3741.js:63:9785)
+      at c (D:\heuresys-advanced\apps\web\.next\server\webpack-runtime.js:1:128)
+      at 96444 (D:\heuresys-advanced\apps\web\.next\server\app\showcase\page.js:2:9650)
+      at c (D:\heuresys-advanced\apps\web\.next\server\webpack-runtime.js:1:128)
+}
+
+> Build error occurred
+[Error: Failed to collect page data for /showcase] { type: 'Error' }
+D:\heuresys-advanced\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @heuresys/web@0.1.0 build: `next build`
+Exit status 1

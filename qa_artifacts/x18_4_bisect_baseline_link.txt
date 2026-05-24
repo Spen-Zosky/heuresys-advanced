@@ -1,0 +1,61 @@
+(node:14368) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+> @heuresys/web@0.1.0 build D:\heuresys-advanced\apps\web
+> next build
+
+   ▲ Next.js 15.5.18
+
+   Creating an optimized production build ...
+Failed to compile.
+
+../../../ux-design-shared/ui/dist/index.mjs
+Error:   [31mx[0m You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m
+
+   ,-[[36;1;4mD:\ux-design-shared\ui\dist\index.mjs[0m:2:1]
+ [2m1[0m | import * as React53 from 'react';
+ [2m2[0m | import { useState, useMemo, useRef, useEffect } from 'react';
+   : [35;1m         ^^^^^^^^[0m
+ [2m3[0m | import { Slot } from '@radix-ui/react-slot';
+ [2m4[0m | import { cva } from 'class-variance-authority';
+ [2m5[0m | import { clsx } from 'clsx';
+   `----
+  [31mx[0m You're importing a component that needs `useRef`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m
+
+   ,-[[36;1;4mD:\ux-design-shared\ui\dist\index.mjs[0m:2:1]
+ [2m1[0m | import * as React53 from 'react';
+ [2m2[0m | import { useState, useMemo, useRef, useEffect } from 'react';
+   : [35;1m                            ^^^^^^[0m
+ [2m3[0m | import { Slot } from '@radix-ui/react-slot';
+ [2m4[0m | import { cva } from 'class-variance-authority';
+ [2m5[0m | import { clsx } from 'clsx';
+   `----
+  [31mx[0m You're importing a component that needs `useEffect`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+  [31m|[0m
+  [31m|[0m  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+  [31m|[0m
+
+   ,-[[36;1;4mD:\ux-design-shared\ui\dist\index.mjs[0m:2:1]
+ [2m1[0m | import * as React53 from 'react';
+ [2m2[0m | import { useState, useMemo, useRef, useEffect } from 'react';
+   : [35;1m                                    ^^^^^^^^^[0m
+ [2m3[0m | import { Slot } from '@radix-ui/react-slot';
+ [2m4[0m | import { cva } from 'class-variance-authority';
+ [2m5[0m | import { clsx } from 'clsx';
+   `----
+
+Import trace for requested module:
+../../../ux-design-shared/ui/dist/index.mjs
+./src/app/showcase/layout.tsx
+
+
+> Build failed because of webpack errors
+D:\heuresys-advanced\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @heuresys/web@0.1.0 build: `next build`
+Exit status 1

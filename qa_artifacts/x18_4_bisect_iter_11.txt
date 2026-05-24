@@ -1,0 +1,42 @@
+
+> @heuresys/web@0.1.0 build D:\heuresys-advanced\apps\web
+> next build
+
+   ▲ Next.js 15.5.18
+
+   Creating an optimized production build ...
+ ⚠ Compiled with warnings in 15.4s
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'TenantFleetTable' is not exported from '@heuresys/ui' (imported as 'TenantFleetTable').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+ ⚠ Compiled with warnings in 7.1s
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'TenantFleetTable' is not exported from '@heuresys/ui' (imported as 'TenantFleetTable').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+ ✓ Compiled successfully in 23.0s
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/SystemHealthDashboard.tsx:38:3
+Type error: Module '"@heuresys/ui"' has no exported member 'TenantFleetTable'.
+
+[0m [90m 36 |[39m   [33mRBACMatrix[39m[33m,[39m
+ [90m 37 |[39m   [33mSQLSlowQueryTable[39m[33m,[39m
+[31m[1m>[22m[39m[90m 38 |[39m   [33mTenantFleetTable[39m[33m,[39m
+ [90m    |[39m   [31m[1m^[22m[39m
+ [90m 39 |[39m   [33mTimeRangeSelector[39m[33m,[39m
+ [90m 40 |[39m } [36mfrom[39m [32m"@heuresys/ui"[39m[33m;[39m
+ [90m 41 |[39m [36mimport[39m {[0m
+Next.js build worker exited with code: 1 and signal: null
+D:\heuresys-advanced\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @heuresys/web@0.1.0 build: `next build`
+Exit status 1

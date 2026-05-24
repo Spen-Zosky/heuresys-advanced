@@ -41,7 +41,7 @@
     "cowork:apply-pending": "node scripts/cowork-exchange/apply-pending.mjs"
   },
   "dependencies": {
-    "@heuresys/ui": "link:../ux-design-shared/ui"
+    "@heuresys/ui": "^0.1.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",

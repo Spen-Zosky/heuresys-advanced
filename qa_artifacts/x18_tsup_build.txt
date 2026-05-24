@@ -1,0 +1,20 @@
+
+> @heuresys/ui@0.1.0 build
+> tsup
+
+[34mCLI[39m Building entry: src/index.ts
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.5.1
+[34mCLI[39m Using tsup config: D:\ux-design-shared\ui\tsup.config.ts
+[34mCLI[39m Target: es2022
+[34mCLI[39m Cleaning output folder
+[34mESM[39m Build start
+[34mCJS[39m Build start
+[34mDTS[39m Build start
+[32mESM[39m [1mdist\index.mjs [22m[32m350.87 KB[39m
+[32mESM[39m ⚡️ Build success in 2246ms
+[32mCJS[39m [1mdist\index.cjs [22m[32m379.04 KB[39m
+[32mCJS[39m ⚡️ Build success in 2842ms
+[32mDTS[39m ⚡️ Build success in 14060ms
+[32mDTS[39m [1mdist\index.d.ts  [22m[32m98.19 KB[39m
+[32mDTS[39m [1mdist\index.d.cts [22m[32m98.19 KB[39m

@@ -1,0 +1,210 @@
+
+> @heuresys/web@0.1.0 build D:\heuresys-advanced\apps\web
+> next build
+
+   ▲ Next.js 15.5.18
+
+   Creating an optimized production build ...
+ ⚠ Compiled with warnings in 23.0s
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'DashboardShell' is not exported from '@heuresys/ui' (imported as 'DashboardShell').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'DashboardSidebar' is not exported from '@heuresys/ui' (imported as 'DashboardSidebar').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'DBSupervisorSidebar' is not exported from '@heuresys/ui' (imported as 'DBSupervisorSidebar').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'AlertBanner' is not exported from '@heuresys/ui' (imported as 'AlertBanner').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'TimeRangeSelector' is not exported from '@heuresys/ui' (imported as 'TimeRangeSelector').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'PageActions' is not exported from '@heuresys/ui' (imported as 'PageActions').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'TenantFleetTable' is not exported from '@heuresys/ui' (imported as 'TenantFleetTable').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'ErrorRateBreakdown' is not exported from '@heuresys/ui' (imported as 'ErrorRateBreakdown').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'IncidentTimeline' is not exported from '@heuresys/ui' (imported as 'IncidentTimeline').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'SQLSlowQueryTable' is not exported from '@heuresys/ui' (imported as 'SQLSlowQueryTable').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'RBACMatrix' is not exported from '@heuresys/ui' (imported as 'RBACMatrix').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'LogStream' is not exported from '@heuresys/ui' (imported as 'LogStream').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/app/showcase/primary-initial-page/page.tsx
+Attempted import error: 'DashboardShell' is not exported from '@heuresys/ui' (imported as 'DashboardShell').
+
+Import trace for requested module:
+./src/app/showcase/primary-initial-page/page.tsx
+
+./src/app/showcase/primary-initial-page/page.tsx
+Attempted import error: 'DashboardSidebar' is not exported from '@heuresys/ui' (imported as 'DashboardSidebar').
+
+Import trace for requested module:
+./src/app/showcase/primary-initial-page/page.tsx
+
+./src/app/showcase/shell/page.tsx
+Attempted import error: 'DashboardShell' is not exported from '@heuresys/ui' (imported as 'DashboardShell').
+
+Import trace for requested module:
+./src/app/showcase/shell/page.tsx
+
+./src/app/showcase/shell/page.tsx
+Attempted import error: 'DashboardSidebar' is not exported from '@heuresys/ui' (imported as 'DashboardSidebar').
+
+Import trace for requested module:
+./src/app/showcase/shell/page.tsx
+
+./src/app/showcase/sidebar/page.tsx
+Attempted import error: 'DashboardShell' is not exported from '@heuresys/ui' (imported as 'DashboardShell').
+
+Import trace for requested module:
+./src/app/showcase/sidebar/page.tsx
+
+./src/app/showcase/sidebar/page.tsx
+Attempted import error: 'DashboardSidebar' is not exported from '@heuresys/ui' (imported as 'DashboardSidebar').
+
+Import trace for requested module:
+./src/app/showcase/sidebar/page.tsx
+
+ ⚠ Compiled with warnings in 11.7s
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'DashboardShell' is not exported from '@heuresys/ui' (imported as 'DashboardShell').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'DashboardSidebar' is not exported from '@heuresys/ui' (imported as 'DashboardSidebar').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'DBSupervisorSidebar' is not exported from '@heuresys/ui' (imported as 'DBSupervisorSidebar').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'AlertBanner' is not exported from '@heuresys/ui' (imported as 'AlertBanner').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'TimeRangeSelector' is not exported from '@heuresys/ui' (imported as 'TimeRangeSelector').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'PageActions' is not exported from '@heuresys/ui' (imported as 'PageActions').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'TenantFleetTable' is not exported from '@heuresys/ui' (imported as 'TenantFleetTable').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'ErrorRateBreakdown' is not exported from '@heuresys/ui' (imported as 'ErrorRateBreakdown').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'IncidentTimeline' is not exported from '@heuresys/ui' (imported as 'IncidentTimeline').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'SQLSlowQueryTable' is not exported from '@heuresys/ui' (imported as 'SQLSlowQueryTable').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'RBACMatrix' is not exported from '@heuresys/ui' (imported as 'RBACMatrix').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+./src/components/SystemHealthDashboard.tsx
+Attempted import error: 'LogStream' is not exported from '@heuresys/ui' (imported as 'LogStream').
+
+Import trace for requested module:
+./src/components/SystemHealthDashboard.tsx
+
+ ✓ Compiled successfully in 35.2s
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/showcase/primary-initial-page/page.tsx:5:3
+Type error: Module '"@heuresys/ui"' has no exported member 'DashboardShell'.
+
+[0m [90m 3 |[39m   [33mDashboardFooter[39m[33m,[39m
+ [90m 4 |[39m   [33mDashboardHeader[39m[33m,[39m
+[31m[1m>[22m[39m[90m 5 |[39m   [33mDashboardShell[39m[33m,[39m
+ [90m   |[39m   [31m[1m^[22m[39m
+ [90m 6 |[39m   [33mDashboardSidebar[39m[33m,[39m
+ [90m 7 |[39m   [33mHeuresysLogoBadge[39m[33m,[39m
+ [90m 8 |[39m   [33mHeuresysMark[39m[33m,[39m[0m
+Next.js build worker exited with code: 1 and signal: null
+D:\heuresys-advanced\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @heuresys/web@0.1.0 build: `next build`
+Exit status 1

@@ -1,0 +1,55 @@
+npm notice
+npm notice 📦  @heuresys/ui@0.1.1
+npm notice Tarball Contents
+npm notice 825B README.md
+npm notice 388.1kB dist/index.cjs
+npm notice 100.8kB dist/index.d.cts
+npm notice 100.8kB dist/index.d.ts
+npm notice 359.3kB dist/index.mjs
+npm notice 5.2kB package.json
+npm notice 818B src/assets/brand/candidates/UXIX-0007-logo/heuresys-logo-A-full.svg
+npm notice 597B src/assets/brand/candidates/UXIX-0007-logo/heuresys-logo-A-symbol.svg
+npm notice 1.0kB src/assets/brand/candidates/UXIX-0007-logo/heuresys-logo-B-full.svg
+npm notice 816B src/assets/brand/candidates/UXIX-0007-logo/heuresys-logo-B-symbol.svg
+npm notice 1.0kB src/assets/brand/candidates/UXIX-0007-logo/heuresys-logo-C-full.svg
+npm notice 789B src/assets/brand/candidates/UXIX-0007-logo/heuresys-logo-C-symbol.svg
+npm notice 495B src/assets/brand/candidates/UXIX-0007-logo/heuresys-logo-D-full.svg
+npm notice 392B src/assets/brand/candidates/UXIX-0007-logo/heuresys-logo-D-symbol.svg
+npm notice 2.1kB src/assets/brand/candidates/UXIX-0007-logo/README.md
+npm notice 646B src/assets/brand/legacy/favicon.svg
+npm notice 534B src/assets/brand/legacy/heuresys-mark.svg
+npm notice 548B src/assets/brand/legacy/heuresys-wordmark-monochrome-dark.svg
+npm notice 560B src/assets/brand/legacy/heuresys-wordmark-monochrome-light.svg
+npm notice 915B src/assets/brand/legacy/heuresys-wordmark.svg
+npm notice 2.0kB src/assets/brand/legacy/og-image-template.svg
+npm notice 2.3kB src/assets/brand/legacy/README.md
+npm notice 391B src/assets/brand/logo/heuresys-mark-16.png
+npm notice 783B src/assets/brand/logo/heuresys-mark-32.png
+npm notice 1.1kB src/assets/brand/logo/heuresys-mark-48.png
+npm notice 1.4kB src/assets/brand/logo/heuresys-mark-64.png
+npm notice 3.6kB src/assets/brand/logo/heuresys-mark-180.png
+npm notice 3.9kB src/assets/brand/logo/heuresys-mark-192.png
+npm notice 10.6kB src/assets/brand/logo/heuresys-mark-512.png
+npm notice 35.7kB src/assets/brand/social/linkedin-banner-1200x627.png
+npm notice 35.7kB src/assets/brand/social/og-image-1200x630.png
+npm notice 35.7kB src/assets/brand/social/twitter-card-1200x628.png
+npm notice 136B src/components/brand/candidates/index.ts
+npm notice 2.6kB src/components/brand/candidates/LogoCandidateA.tsx
+npm notice 2.7kB src/components/brand/candidates/LogoCandidateB.tsx
+npm notice 2.7kB src/components/brand/candidates/LogoCandidateC.tsx
+npm notice 2.6kB src/components/brand/candidates/LogoCandidateD.tsx
+npm notice 649B src/styles/globals.css
+npm notice 9.5kB src/styles/hover-affordance.css
+npm notice 3.6kB src/styles/tokens.css
+npm notice Tarball Details
+npm notice name: @heuresys/ui
+npm notice version: 0.1.1
+npm notice filename: heuresys-ui-0.1.1.tgz
+npm notice package size: 326.6 kB
+npm notice unpacked size: 1.1 MB
+npm notice shasum: 06a12c95ae8cc4cd28637ce3de75d52fd976d3ae
+npm notice integrity: sha512-jC7W3yA1U15JY[...]6TxlAilEJ3NKA==
+npm notice total files: 40
+npm notice
+npm notice Publishing to https://registry.npmjs.org/ with tag latest and public access (dry-run)
++ @heuresys/ui@0.1.1

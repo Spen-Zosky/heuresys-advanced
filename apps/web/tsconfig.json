@@ -27,6 +27,7 @@
     ".next",
     "dist",
     "tests",
+    "src/_disabled_showcase_X18",
     "../../node_modules/@heuresys/ui/**",
     "../../../ux-design-shared/ui/**"
   ]

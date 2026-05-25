@@ -17,34 +17,33 @@
 - **Loop CLI**: FERMO (cron disattivato S929, manual poll only)
 - **REPORT history**: 017 (X13) · 018 (X14) · 019 (X15) · 020 (X16) · 021 (X17) · **022 (X18 Tappa F npm publish — 5 amendment cascade + 6 halt + 12 bisect iter, pragmatic close Path B+C)** · **026 (X19.A Dependabot CVE — uuid bump)**
 
-> **C19 sequenza autonoma 3-batch in corso (X19.A → X19 → X20)** — start 2026-05-25T00:16:50Z, time-box 4h, NO push autonomi.
+> **C19 sequenza autonoma 3-batch (X19.A → X19 → X20)** — start 2026-05-25T00:16:50Z, time-box 4h, NO push autonomi.
 > - ✅ **X19.A DONE** (commit `b01c331`): uuid CVE-2026-41907 fixed via scoped override `exceljs>uuid >=11.1.1` → uuid@14.0.0 single version (8.3.2 eliminato). qs già fixato c304b02. typecheck API+web PASS, vitest API 336 (=baseline, 1 fail skills pre-esistente non-uuid), web build PASS.
-> - ⚠️ **X19 HALT P1** (run `6f531559` COMPLETED clean, acceptance NON met): primo full Wave-1 re-run **post-CW-B49** (47min, 34509 upserted, 0 failed, sys_users=433 ✅) ma **0 nuove tabelle** (59/134 pre=post). 6 IMPORT target residui strutturali: (A) 3 approved+validated → 0 upserted silenzioso (engine filter oltre CW-B49: skill_categories/activity_classification_mappings/process_kpi_templates); (B) 3 senza staging source (blueprint_overrides/position_learning_requirements/position_skill_requirements). Premessa PROMPT "≥75/134" empiricamente refutata (CW-B58) — solo 19 distinct IMPORT target esistono in Wave 1. **CW-B60 claimed**. Halt notify `cowork/pending/...__023__halt_engine_residual_6_targets.md`.
-> - ⛔ **X20 NON eseguito** (no-cascade: previous batch halted). Sequenza C19 fermata a X19. Await Cowork: (1) accept-residual+procedi X20, (2) forensic engine, (3) scope batch. **X21 (DEFER-F HIGH-RISK) resta fuori scope autonomo in ogni caso.**
+> - ✅ **X19 ACCEPT-AS-RESIDUAL** (commit `e13eb73` + Cowork C19.1 decision 2026-05-25): run `6f531559` COMPLETED clean (47min, 34509 upserted, 0 failed, sys_users=433 ✅). MVP-3 Tappa D status FINAL: **13/19 IMPORT closed (68%)**, 6 residual classified per CW-B60 in 2 categorie: **(A) Engine silent-filter** (3 target: skill_categories/activity_classification_mappings/process_kpi_templates → 0 upserted silenzioso + 0 log, oltre CW-B49) deferred a forensic session dedicata; **(B) Scope gap** (3 target: blueprint_overrides/position_learning_requirements/position_skill_requirements → nessun staging.wave1_* source) deferred a Wave 2 / computed views ADR. Acceptance `≥75/134` mia spec era IRRAGGIUNGIBILE (solo 19 distinct IMPORT target Wave-1, max teorico 62/134) — CW-B52 staleness Cowork acknowledged. Tappa D closure pragmatic 13/19.
+> - 🚀 **X20 TRIGGERED** (sequenza ripresa dopo Cowork C19.1 accept-residual decision). Tunnel 5433 + API :3001 preserved UP per ottimizzazione (CLI heads-up). X21 (DEFER-F HIGH-RISK) resta fuori scope sequenza autonoma.
 
-## §2 — Decisione attesa (C19) — 4 PROMPT FORMALIZZATI ready-to-trigger
+## §2 — Decisione attesa (C19) — sequenza in corso + 2 next-session candidates
 
-Post-C18 close (X18 pushato + release LIVE), Enzo decision "voglio tutto e subito". Cowork C19 ha PRODOTTO tutto il materiale: pattern memo §20 update (CW-B58/B59 consolidate cross-batch lessons) + 4 PROMPT formali (Brownfield + MFA + DEFER-F + Dependabot). CLI esegue sequenzialmente, NON parallelo (scope conflict prevention).
+Sequenza C19 status (aggiornata 2026-05-25 post C19.1 accept-residual decision):
 
-| # | PROMPT | Goal | Effort | Risk | Path |
-|---|---|---|---|---|---|
-| 1 | `_01_PROMPT_026_batch_x19a_dependabot_cve.md` | X19.A Dependabot CVE quick win (uuid 11.1.1 + qs 6.15.2) | ~30-60 min | LOW (deps bump + verify) | scope minimo, no architettura |
-| 2 | `_01_PROMPT_023_batch_x19_brownfield_wave1.md` | X19 Brownfield Wave 1 full-47k SQL upsert (Tappa D residual) | ~2-3h | LOW-MEDIUM (DB writes, isolato) | scope SQL-side, zero conflict |
-| 3 | `_01_PROMPT_024_batch_x20_mfa_login_gating.md` | X20 MFA login-gating (Tappa E full scope) | ~2-3h | MEDIUM (auth flow critical) | API + UI 2-step, isolato |
-| 4 | `_01_PROMPT_025_batch_x21_defer_f_showcase_fix.md` | X21 DEFER-F /showcase Next 15 RSC fix | ~3-4h | HIGH (architettural, già 5 amendment cascade X18) | Path A bisect commits → Path F split package fallback |
+| # | Batch | Stato | Note |
+|---|---|---|---|
+| 1 | X19.A Dependabot CVE | ✅ DONE `b01c331` | uuid scoped override, qs già done c304b02 |
+| 2 | X19 Brownfield Wave 1 | ✅ DONE `e13eb73` accept-as-residual | Tappa D 13/19 IMPORT, 6 residual CW-B60 deferred A/B |
+| 3 | X20 MFA login-gating | 🚀 TRIGGERED (questa sessione) | Tappa E full scope close |
+| 4 | X21 DEFER-F /showcase | ⏳ FUORI sequenza autonoma — gestito separato | HIGH-RISK, Cowork attiva richiesta |
 
-**Ordine raccomandato sequenza CLI** (uno alla volta, fra batch ricorda di verificare HEAD allineato + push opportunistico):
+**Next-session candidates** (post-C19, NON in scope MVP-3):
 
-1. **X19.A Dependabot first** — chiude security gap immediato, low risk, 30-60 min. Quick win prima dei batch più lunghi.
-2. **X19 Brownfield second** — chiude residual MVP-3 Tappa D, isolato, ROI alta.
-3. **X20 MFA third** — chiude MVP-3 Tappa E full scope, isolato da Brownfield.
-4. **X21 DEFER-F last** — più rischioso, HIGH-effort architettural. Last per non bloccare le altre se ricade. Time-box CW-B59 applicato (max 8 iter bisect OR 90 min, poi escalate).
+| ID | Scope | Origin | Effort |
+|---|---|---|---|
+| **CW-B60-A** | **Forensic engine silent-filter** | X19 residual cat (A) — 3 target AUTO_APPROVED + 0 upserted silenzioso + 0 log. Deep-dive `executeUpsert` filter logic oltre CW-B49 + aggiungere observability (log WARNING per silent-skip) + unit tests | ~2-3h dedicated |
+| **CW-B60-B** | **Wave 2 / computed views scope ADR** | X19 residual cat (B) — 3 target senza staging.wave1_* source (blueprint_overrides + position_learning_requirements + position_skill_requirements). Definire fonte: derived/computed views OR Wave 2 import scope formalmente | ~2-3h ADR + impl |
+| **DEFER-F** | /showcase Next 15 RSC bundle threshold | PROMPT 025 pronto, Path A bisect + Path F split fallback | ~3-4h CLI (Cowork attiva) |
+| **PRE-EXIST** | skills.integration.test:131 createdSkillIds list visibility | X19.A flagged side-find, NON correlato uuid | ~30-60 min |
+| **DEPENDABOT-77** | Eventuali ulteriori vuln post-X19.A | GitHub Dependabot ongoing | ~30 min |
 
-Tra ogni batch: verifica `git log` per assicurarsi che il batch precedente sia committed + push opportunistic (se vuoi che Cowork sessione futura veda lo stato). Watchdog OFF, manual trigger.
-
-**Trigger CLI per ciascun batch** (sostituisci `<NN>` con goal id, sostituisci `<XSN>` con batch slug, vedi inbox trigger nella prossima sessione Cowork o emit qui):
-
-Cowork C19 ha emesso 4 inbox notify `prompt_ready` in `cli/pending/` per i 4 PROMPT — CLI li consuma in ordine al manual run.
+**Decision authority Enzo** per ognuno. Pattern memo C19 PM consolidation rimane ongoing task (§20 già updated questo batch).
 
 ## §3 — File da leggere SUBITO (priorità ordinata)
 

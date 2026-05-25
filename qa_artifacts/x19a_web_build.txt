@@ -1,0 +1,78 @@
+
+> @heuresys/web@0.1.0 build D:\heuresys-advanced\apps\web
+> next build
+
+   ▲ Next.js 15.5.18
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 75s
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/40) ...
+   Generating static pages (10/40) 
+   Generating static pages (20/40) 
+   Generating static pages (30/40) 
+ ✓ Generating static pages (40/40)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                   Size  First Load JS
+┌ ○ /                                        133 B         104 kB
+├ ○ /_not-found                              999 B         105 kB
+├ ○ /admin/roles                           2.38 kB        1.66 MB
+├ ○ /blueprints                            2.17 kB        1.66 MB
+├ ƒ /blueprints/[variantId]                2.66 kB        1.66 MB
+├ ○ /brownfield-adaptation                 2.54 kB        1.66 MB
+├ ○ /career-succession                     2.45 kB        1.66 MB
+├ ○ /compensation-intelligence             2.44 kB        1.66 MB
+├ ○ /dashboard                             2.36 kB        1.66 MB
+├ ○ /gaps                                  2.32 kB        1.66 MB
+├ ○ /kpis                                  2.07 kB        1.66 MB
+├ ○ /learning                              2.07 kB        1.66 MB
+├ ○ /learning/training-initiatives         2.12 kB        1.66 MB
+├ ○ /login                                 2.93 kB        1.68 MB
+├ ○ /me                                    2.21 kB        1.66 MB
+├ ○ /me/career                             2.07 kB        1.66 MB
+├ ○ /me/career/target                      2.79 kB        1.68 MB
+├ ○ /me/certifications                     3.19 kB        1.68 MB
+├ ○ /me/documents                             2 kB        1.66 MB
+├ ○ /me/gaps                                2.1 kB        1.66 MB
+├ ○ /me/inbox                              2.23 kB        1.66 MB
+├ ○ /me/kpis                               2.12 kB        1.66 MB
+├ ○ /me/learning                            2.1 kB        1.66 MB
+├ ○ /me/learning/catalogue                 4.11 kB        1.66 MB
+├ ○ /me/positions                           2.1 kB        1.66 MB
+├ ○ /me/profile                            2.58 kB        1.68 MB
+├ ○ /me/security                           9.36 kB        1.69 MB
+├ ○ /me/skills                              2.1 kB        1.66 MB
+├ ○ /me/skills/self-assessment             2.87 kB        1.68 MB
+├ ○ /organization                          2.09 kB        1.66 MB
+├ ○ /organization/org-chart                2.52 kB        1.66 MB
+├ ○ /positions                             2.13 kB        1.66 MB
+├ ƒ /positions/[positionId]                2.37 kB        1.66 MB
+├ ƒ /positions/[positionId]/kpis            2.2 kB        1.66 MB
+├ ƒ /positions/[positionId]/learning       2.28 kB        1.66 MB
+├ ƒ /positions/[positionId]/skills         2.21 kB        1.66 MB
+├ ○ /processes                             2.05 kB        1.66 MB
+├ ○ /seed-acquisition/runs                 2.15 kB        1.66 MB
+├ ○ /skills                                2.01 kB        1.66 MB
+├ ○ /system-health                         10.3 kB        1.66 MB
+├ ○ /tenants                               2.15 kB        1.66 MB
+├ ƒ /tenants/[tenantId]                    2.81 kB        1.66 MB
+├ ƒ /tenants/[tenantId]/enterprise-typing  2.85 kB        1.68 MB
+├ ○ /users                                 2.12 kB        1.66 MB
+├ ƒ /users/[userId]                        2.28 kB        1.66 MB
+├ ○ /visualizations                        2.07 kB        1.66 MB
+└ ƒ /visualizations/[graphId]              2.85 kB        1.66 MB
++ First Load JS shared by all               104 kB
+  ├ chunks/4670216d-ab8ef4eb7bc31488.js    54.2 kB
+  ├ chunks/7227-d052ed6f06ae7fe8.js        46.6 kB
+  └ other shared chunks (total)            2.88 kB
+
+
+ƒ Middleware                               32.3 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

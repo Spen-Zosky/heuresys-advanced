@@ -15,7 +15,10 @@
 - **PROMPT in flight**: nessuno. PROMPT 022 cascade (022 → 022.1 → 022.2 → 022.3 → 022.4 → 022.5) all closed via REPORT 022 RESUMED-X18.5. Tappa F shipped pragmatic.
 - **npm registry state**: `@heuresys/ui` org `@heuresys` (owner spen-zosky). 0.1.0 DEPRECATED, 0.1.1 latest. GAT bypass-2fa configured in `~/.npmrc` (R11: never log token value).
 - **Loop CLI**: FERMO (cron disattivato S929, manual poll only)
-- **REPORT history**: 017 (X13) · 018 (X14) · 019 (X15) · 020 (X16) · 021 (X17) · **022 (X18 Tappa F npm publish — 5 amendment cascade + 6 halt + 12 bisect iter, pragmatic close Path B+C)**
+- **REPORT history**: 017 (X13) · 018 (X14) · 019 (X15) · 020 (X16) · 021 (X17) · **022 (X18 Tappa F npm publish — 5 amendment cascade + 6 halt + 12 bisect iter, pragmatic close Path B+C)** · **026 (X19.A Dependabot CVE — uuid bump)**
+
+> **C19 sequenza autonoma 3-batch in corso (X19.A → X19 → X20)** — start 2026-05-25T00:16:50Z, time-box 4h, NO push autonomi.
+> - ✅ **X19.A DONE** (commit pending): uuid CVE-2026-41907 fixed via scoped override `exceljs>uuid >=11.1.1` → uuid@14.0.0 single version (8.3.2 eliminato). qs già fixato c304b02. typecheck API+web PASS, vitest API 336 (=baseline, 1 fail skills pre-esistente non-uuid), web build PASS. **HALT mandatory dopo X20 — NON procedere a X21 (DEFER-F HIGH-RISK)**.
 
 ## §2 — Decisione attesa (C19) — 4 PROMPT FORMALIZZATI ready-to-trigger
 

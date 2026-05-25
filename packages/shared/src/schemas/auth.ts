@@ -31,10 +31,24 @@ export const PasswordPolicy = z
 export const LoginBodySchema = z.object({
   email: z.string().email().max(254),
   password: z.string().min(1).max(128),
+  /**
+   * MFA second-step fields (MVP-3 Tappa E). When the first step returns
+   * `status: "mfa_required"`, the client re-POSTs /login with the same
+   * email+password plus the `challengeToken` it received and the `mfaCode`
+   * (6-digit TOTP) from the authenticator app.
+   */
+  challengeToken: z.string().min(1).max(512).optional(),
+  mfaCode: z.string().min(1).max(16).optional(),
 });
 export type LoginBody = z.infer<typeof LoginBodySchema>;
 
+/**
+ * Successful login (no MFA, or MFA second-step verified). `status` is the
+ * discriminator vs the MFA-required arm. The pre-MFA fields
+ * (user/roles/csrfToken) are preserved for backward compatibility.
+ */
 export const LoginResponseSchema = z.object({
+  status: z.literal("success"),
   user: z.object({
     userId: z.string().uuid(),
     email: z.string().email(),
@@ -43,6 +57,25 @@ export const LoginResponseSchema = z.object({
   csrfToken: z.string().min(1),
 });
 export type LoginResponse = z.infer<typeof LoginResponseSchema>;
+
+/**
+ * First-step response when the account has a verified MFA factor: no tokens
+ * are issued; the client must complete the challenge. `challengeToken` is an
+ * opaque, single-use, short-TTL handle into the server-side challenge store.
+ */
+export const LoginMfaRequiredResponseSchema = z.object({
+  status: z.literal("mfa_required"),
+  challengeToken: z.string().min(1),
+  availableKinds: z.array(z.string()),
+});
+export type LoginMfaRequiredResponse = z.infer<typeof LoginMfaRequiredResponseSchema>;
+
+/** /login 200 body union — success bundle OR MFA-required challenge. */
+export const LoginResultResponseSchema = z.discriminatedUnion("status", [
+  LoginResponseSchema,
+  LoginMfaRequiredResponseSchema,
+]);
+export type LoginResultResponse = z.infer<typeof LoginResultResponseSchema>;
 
 /* --- /auth/me ------------------------------------------------------------ */
 

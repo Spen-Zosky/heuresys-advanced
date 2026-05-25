@@ -20,6 +20,14 @@
         "invalid": "Invalid email or password",
         "rateLimited": "Too many attempts. Try again in a few minutes.",
         "network": "Unable to reach the server"
+      },
+      "mfa": {
+        "title": "Two-factor authentication",
+        "prompt": "Enter the code from your authenticator",
+        "codeLabel": "Verification code",
+        "submit": "Verify",
+        "invalid": "Invalid or expired MFA code",
+        "expired": "MFA challenge expired, enter a new code"
       }
     },
     "logout": {

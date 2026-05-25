@@ -16,6 +16,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import {
   LoginBodySchema,
   LoginResponseSchema,
+  LoginResultResponseSchema,
   MeResponseSchema,
   PasswordResetRequestBodySchema,
   PasswordResetCompleteBodySchema,
@@ -65,7 +66,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
     {
       schema: {
         body: LoginBodySchema,
-        response: { 200: LoginResponseSchema },
+        response: { 200: LoginResultResponseSchema },
       },
       config: { rateLimit: { max: 10, timeWindow: 5 * 60 * 1000 } },
     },
@@ -73,16 +74,31 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
       const result = await service.login({
         email: req.body.email,
         password: req.body.password,
+        challengeToken: req.body.challengeToken,
+        mfaCode: req.body.mfaCode,
         ip: req.ip ?? null,
         userAgent: getUa(req),
       });
+      if (result.status === "mfa_required") {
+        // First step: no cookies issued; client must complete the challenge.
+        return {
+          status: "mfa_required" as const,
+          challengeToken: result.challengeToken,
+          availableKinds: result.availableKinds,
+        };
+      }
       setAuthCookies(reply, {
         accessJwt: result.accessJwt,
         refreshToken: result.refreshToken,
         csrfToken: result.csrfToken,
         secure: secureCookies,
       });
-      return { user: result.user, roles: result.roles, csrfToken: result.csrfToken };
+      return {
+        status: "success" as const,
+        user: result.user,
+        roles: result.roles,
+        csrfToken: result.csrfToken,
+      };
     },
   );
 
@@ -112,7 +128,12 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         csrfToken: result.csrfToken,
         secure: secureCookies,
       });
-      return { user: result.user, roles: result.roles, csrfToken: result.csrfToken };
+      return {
+        status: "success" as const,
+        user: result.user,
+        roles: result.roles,
+        csrfToken: result.csrfToken,
+      };
     },
   );
 

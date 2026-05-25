@@ -20,7 +20,8 @@
 > **C19 sequenza autonoma 3-batch (X19.A → X19 → X20)** — start 2026-05-25T00:16:50Z, time-box 4h, NO push autonomi.
 > - ✅ **X19.A DONE** (commit `b01c331`): uuid CVE-2026-41907 fixed via scoped override `exceljs>uuid >=11.1.1` → uuid@14.0.0 single version (8.3.2 eliminato). qs già fixato c304b02. typecheck API+web PASS, vitest API 336 (=baseline, 1 fail skills pre-esistente non-uuid), web build PASS.
 > - ✅ **X19 ACCEPT-AS-RESIDUAL** (commit `e13eb73` + Cowork C19.1 decision 2026-05-25): run `6f531559` COMPLETED clean (47min, 34509 upserted, 0 failed, sys_users=433 ✅). MVP-3 Tappa D status FINAL: **13/19 IMPORT closed (68%)**, 6 residual classified per CW-B60 in 2 categorie: **(A) Engine silent-filter** (3 target: skill_categories/activity_classification_mappings/process_kpi_templates → 0 upserted silenzioso + 0 log, oltre CW-B49) deferred a forensic session dedicata; **(B) Scope gap** (3 target: blueprint_overrides/position_learning_requirements/position_skill_requirements → nessun staging.wave1_* source) deferred a Wave 2 / computed views ADR. Acceptance `≥75/134` mia spec era IRRAGGIUNGIBILE (solo 19 distinct IMPORT target Wave-1, max teorico 62/134) — CW-B52 staleness Cowork acknowledged. Tappa D closure pragmatic 13/19.
-> - 🚀 **X20 TRIGGERED** (sequenza ripresa dopo Cowork C19.1 accept-residual decision). Tunnel 5433 + API :3001 preserved UP per ottimizzazione (CLI heads-up). X21 (DEFER-F HIGH-RISK) resta fuori scope sequenza autonoma.
+> - ✅ **X20 DONE** (MVP-3 Tappa E full closed): `mfaService.beginLoginChallenge` composto in `auth.service.login()` + `/login` UI 2-step (TOTP RFC 6238). LoginResponse → discriminated union `status: success|mfa_required`. 5 nuovi integration test (real TOTP) + Playwright `login-mfa` 2/2 (prod build) + web build PASS + vitest API 341 passed (0 regression, stesso 1 fail skills:131 pre-esistente). Codici: MFA_CODE_REQUIRED/MFA_INVALID/MFA_TOTP_INVALID. MFA factors DB = 0 post-cleanup. NO push. X21 (DEFER-F HIGH-RISK) resta fuori scope autonomo.
+> - 🏁 **Sequenza C19 CONCLUSA** (X19.A ✅ + X19 ✅ accept-residual + X20 ✅). Background da terminare: tunnel 5433 + API :3001 + web :3000.
 
 ## §2 — Decisione attesa (C19) — sequenza in corso + 2 next-session candidates
 
@@ -30,7 +31,7 @@ Sequenza C19 status (aggiornata 2026-05-25 post C19.1 accept-residual decision):
 |---|---|---|---|
 | 1 | X19.A Dependabot CVE | ✅ DONE `b01c331` | uuid scoped override, qs già done c304b02 |
 | 2 | X19 Brownfield Wave 1 | ✅ DONE `e13eb73` accept-as-residual | Tappa D 13/19 IMPORT, 6 residual CW-B60 deferred A/B |
-| 3 | X20 MFA login-gating | 🚀 TRIGGERED (questa sessione) | Tappa E full scope close |
+| 3 | X20 MFA login-gating | ✅ DONE (REPORT 024) | Tappa E full closed — login 2-step TOTP, 5 vitest + Playwright 2/2 |
 | 4 | X21 DEFER-F /showcase | ⏳ FUORI sequenza autonoma — gestito separato | HIGH-RISK, Cowork attiva richiesta |
 
 **Next-session candidates** (post-C19, NON in scope MVP-3):

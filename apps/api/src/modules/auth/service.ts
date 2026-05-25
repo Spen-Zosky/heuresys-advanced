@@ -26,6 +26,7 @@ import {
   type EmailRateLimiter,
   sharedEmailRateLimiter,
 } from "./email-rate-limit.js";
+import { type MfaService, sharedMfaService } from "./mfa-service.js";
 
 /* === Public types ======================================================== */
 
@@ -34,9 +35,14 @@ export interface LoginInput {
   password: string;
   ip: string | null;
   userAgent: string | null;
+  /** MFA second-step: opaque challenge handle from the first-step response. */
+  challengeToken?: string | undefined;
+  /** MFA second-step: 6-digit TOTP code. */
+  mfaCode?: string | undefined;
 }
 
 export interface LoginSuccess {
+  status: "success";
   accessJwt: string;
   refreshToken: string;
   csrfToken: string;
@@ -44,6 +50,18 @@ export interface LoginSuccess {
   roles: RoleCode[];
   jwtTenantId: string | null;
 }
+
+/**
+ * First-step result when the account has a verified MFA factor. No tokens are
+ * issued; the caller must re-submit /login with `challengeToken` + `mfaCode`.
+ */
+export interface LoginMfaRequired {
+  status: "mfa_required";
+  challengeToken: string;
+  availableKinds: string[];
+}
+
+export type LoginResult = LoginSuccess | LoginMfaRequired;
 
 export interface RefreshInput {
   refreshToken: string;
@@ -122,12 +140,18 @@ export interface AuthServiceDeps {
    * can pass their own to isolate state (each integration test seeds its own).
    */
   emailRateLimiter?: EmailRateLimiter;
+  /**
+   * MFA service used to gate login. Defaults to the module singleton
+   * (`sharedMfaService`); tests can inject a service bound to an isolated
+   * in-memory challenge store.
+   */
+  mfaService?: MfaService;
 }
 
 /* === Service factory ===================================================== */
 
 export interface AuthService {
-  login(input: LoginInput): Promise<LoginSuccess>;
+  login(input: LoginInput): Promise<LoginResult>;
   refresh(input: RefreshInput): Promise<RefreshSuccess>;
   logout(input: LogoutInput): Promise<void>;
   getMe(userId: string): Promise<{
@@ -155,6 +179,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   const now = deps.now ?? (() => new Date());
   const resetBaseUrl = deps.resetBaseUrl ?? env.ADMIN_ORIGIN;
   const emailRateLimiter = deps.emailRateLimiter ?? sharedEmailRateLimiter;
+  const mfaService = deps.mfaService ?? sharedMfaService;
 
   async function issueLoginBundle(args: {
     userId: string;
@@ -197,6 +222,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     const csrfToken = generateOpaqueToken();
 
     return {
+      status: "success",
       accessJwt,
       refreshToken,
       csrfToken,
@@ -275,6 +301,36 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
             hash: newHash,
           });
         });
+      }
+
+      // 3b. MFA gate (MVP-3 Tappa E). Composed AFTER password verification so
+      //     the second factor only applies to otherwise-valid credentials.
+      //     - First step (no challengeToken): if the account has a verified
+      //       MFA factor, return `mfa_required` WITHOUT issuing tokens.
+      //     - Second step (challengeToken + mfaCode): verify the TOTP challenge
+      //       (single-use, short-TTL) before falling through to token issuance.
+      //     Accounts with no verified factor skip the gate entirely.
+      if (input.challengeToken) {
+        if (!input.mfaCode) {
+          throw new UnauthorizedError("MFA code required", "MFA_CODE_REQUIRED");
+        }
+        const verified = await mfaService.verifyLoginChallenge({
+          challengeToken: input.challengeToken,
+          code: input.mfaCode,
+        });
+        if (verified.userId !== candidate.userId) {
+          // Challenge token resolved to a different identity → reject.
+          throw new UnauthorizedError("Invalid MFA challenge", "MFA_INVALID");
+        }
+      } else {
+        const challenge = await mfaService.beginLoginChallenge(candidate.userId);
+        if (challenge) {
+          return {
+            status: "mfa_required",
+            challengeToken: challenge.challengeToken,
+            availableKinds: challenge.availableKinds,
+          };
+        }
       }
 
       // 4. Resolve roles + issue tokens.

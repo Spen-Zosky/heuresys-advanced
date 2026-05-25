@@ -24,15 +24,29 @@ export interface AuthMeUser {
   roles: string[];
 }
 
-export interface LoginResponse {
+export interface LoginSuccessResponse {
+  status: "success";
   user: AuthMeUser;
   roles: string[];
   csrfToken: string;
 }
 
+export interface LoginMfaRequiredResponse {
+  status: "mfa_required";
+  challengeToken: string;
+  availableKinds: string[];
+}
+
+/** /login 200 body — success bundle OR MFA-required challenge (MVP-3 Tappa E). */
+export type LoginResult = LoginSuccessResponse | LoginMfaRequiredResponse;
+
 export interface LoginBody {
   email: string;
   password: string;
+  /** MFA second-step handle returned by a prior `mfa_required` response. */
+  challengeToken?: string;
+  /** MFA second-step 6-digit TOTP code. */
+  mfaCode?: string;
 }
 
 export const AUTH_ME_QUERY_KEY = ["auth", "me"] as const;
@@ -54,14 +68,18 @@ export function useLogin() {
   return useMutation({
     mutationKey: ["auth", "login"],
     mutationFn: async (body: LoginBody) => {
-      const res = await apiFetch<LoginResponse>("/v1/auth/login", {
+      const res = await apiFetch<LoginResult>("/v1/auth/login", {
         method: "POST",
         body,
       });
-      csrfStore.set(res.csrfToken);
+      // MFA-required: no tokens issued yet — caller drives the second step.
+      if (res.status === "success") {
+        csrfStore.set(res.csrfToken);
+      }
       return res;
     },
     onSuccess: async (res) => {
+      if (res.status !== "success") return;
       // The login response splits `user` (profile fields) from `roles`. The
       // /v1/auth/me endpoint returns them merged — mirror that shape so the
       // layout's hasAdminRole check sees the roles immediately, no refetch.

@@ -20,6 +20,14 @@
         "invalid": "Email o password non valide",
         "rateLimited": "Troppi tentativi. Riprova tra qualche minuto.",
         "network": "Impossibile contattare il server"
+      },
+      "mfa": {
+        "title": "Autenticazione a due fattori",
+        "prompt": "Inserisci il codice dal tuo authenticator",
+        "codeLabel": "Codice di verifica",
+        "submit": "Verifica",
+        "invalid": "Codice MFA non valido o scaduto",
+        "expired": "La sfida MFA è scaduta, inserisci un nuovo codice"
       }
     },
     "logout": {

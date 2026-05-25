@@ -1,0 +1,7 @@
+
+Running 2 tests using 1 worker
+
+  ✓  1 [chromium] › tests\e2e\login-mfa.spec.ts:85:7 › MVP-3 Tappa E /login — MFA login-gating › no-MFA persona logs in directly (regression, no MFA prompt) (3.2s)
+  ✓  2 [chromium] › tests\e2e\login-mfa.spec.ts:92:7 › MVP-3 Tappa E /login — MFA login-gating › MFA persona: step 1 -> mfa_required UI, invalid code errors, valid code succeeds (5.3s)
+
+  2 passed (11.4s)

@@ -17,21 +17,29 @@
 - **Loop CLI**: FERMO (cron disattivato S929, manual poll only)
 - **REPORT history**: 017 (X13) · 018 (X14) · 019 (X15) · 020 (X16) · 021 (X17) · **022 (X18 Tappa F npm publish — 5 amendment cascade + 6 halt + 12 bisect iter, pragmatic close Path B+C)**
 
-## §2 — Decisione attesa (C18) — per Enzo al risveglio
+## §2 — Decisione attesa (C19) — 4 PROMPT FORMALIZZATI ready-to-trigger
 
-Post-X18, MVP-2a closed + MVP-3 6/6 Tappe shipped (A/B/C/D/E backend+UI/F-pragmatic/G). Tappa F **COMPLETATA pragmatic** 2026-05-24 (npm publish 0.1.1 + admin versioned migration). 3 direzioni residue + 1 deferred-fix.
+Post-C18 close (X18 pushato + release LIVE), Enzo decision "voglio tutto e subito". Cowork C19 ha PRODOTTO tutto il materiale: pattern memo §20 update (CW-B58/B59 consolidate cross-batch lessons) + 4 PROMPT formali (Brownfield + MFA + DEFER-F + Dependabot). CLI esegue sequenzialmente, NON parallelo (scope conflict prevention).
 
-| # | Opzione | Effort | Rationale |
-|---|---|---|---|
-| ~~A~~ | ~~gh release v0.2.1~~ | — | ✅ DONE C18 |
-| ~~B~~ | ~~Tappa F npm publish~~ | — | ✅ **DONE X18 pragmatic** — 0.1.1 published, admin versioned, /showcase deferred |
-| **DEFER-F** | **Fix /showcase RSC bundle-threshold defect** (re-enable apps/web/src/_disabled_showcase_X18 + apps/showcase static deploy) | 2-3h dedicated | Path A git bisect ux-design-shared (X16-era → dfa2e81) per isolare commit culprit / Path F split @heuresys/ui in subpackages / Path E Next 16 upgrade. Restore: `mv src/_disabled_showcase_X18 src/app/showcase` + rm tsconfig exclude. Vedi HALT-022-06 + CW-B59 |
-| **C** | **Brownfield Wave 1 full-47k SQL-side upsert** | 2-3h | Tappa D known issue residual |
-| **D** | **MFA login-gating** | 2-3h | Compose `mfaService.beginLoginChallenge` into auth.service.login() + `/login` UI 2-step |
+| # | PROMPT | Goal | Effort | Risk | Path |
+|---|---|---|---|---|---|
+| 1 | `_01_PROMPT_026_batch_x19a_dependabot_cve.md` | X19.A Dependabot CVE quick win (uuid 11.1.1 + qs 6.15.2) | ~30-60 min | LOW (deps bump + verify) | scope minimo, no architettura |
+| 2 | `_01_PROMPT_023_batch_x19_brownfield_wave1.md` | X19 Brownfield Wave 1 full-47k SQL upsert (Tappa D residual) | ~2-3h | LOW-MEDIUM (DB writes, isolato) | scope SQL-side, zero conflict |
+| 3 | `_01_PROMPT_024_batch_x20_mfa_login_gating.md` | X20 MFA login-gating (Tappa E full scope) | ~2-3h | MEDIUM (auth flow critical) | API + UI 2-step, isolato |
+| 4 | `_01_PROMPT_025_batch_x21_defer_f_showcase_fix.md` | X21 DEFER-F /showcase Next 15 RSC fix | ~3-4h | HIGH (architettural, già 5 amendment cascade X18) | Path A bisect commits → Path F split package fallback |
 
-**Next session entry-point**: leggi REPORT 022 RESUMED-X18.5 (full X18 saga + deferral plan) + bias_registry CW-B55/B56/B58/B59. Push X18 commits + tag richiede Enzo authorization (NON pushato).
+**Ordine raccomandato sequenza CLI** (uno alla volta, fra batch ricorda di verificare HEAD allineato + push opportunistico):
 
-Nuova sessione Cowork: **leggi questo file + i file di §3, poi chiedi all'utente DEFER-F/C/D**. NON procedere autonomamente.
+1. **X19.A Dependabot first** — chiude security gap immediato, low risk, 30-60 min. Quick win prima dei batch più lunghi.
+2. **X19 Brownfield second** — chiude residual MVP-3 Tappa D, isolato, ROI alta.
+3. **X20 MFA third** — chiude MVP-3 Tappa E full scope, isolato da Brownfield.
+4. **X21 DEFER-F last** — più rischioso, HIGH-effort architettural. Last per non bloccare le altre se ricade. Time-box CW-B59 applicato (max 8 iter bisect OR 90 min, poi escalate).
+
+Tra ogni batch: verifica `git log` per assicurarsi che il batch precedente sia committed + push opportunistic (se vuoi che Cowork sessione futura veda lo stato). Watchdog OFF, manual trigger.
+
+**Trigger CLI per ciascun batch** (sostituisci `<NN>` con goal id, sostituisci `<XSN>` con batch slug, vedi inbox trigger nella prossima sessione Cowork o emit qui):
+
+Cowork C19 ha emesso 4 inbox notify `prompt_ready` in `cli/pending/` per i 4 PROMPT — CLI li consuma in ordine al manual run.
 
 ## §3 — File da leggere SUBITO (priorità ordinata)
 

@@ -18,7 +18,9 @@
 - **REPORT history**: 017 (X13) · 018 (X14) · 019 (X15) · 020 (X16) · 021 (X17) · **022 (X18 Tappa F npm publish — 5 amendment cascade + 6 halt + 12 bisect iter, pragmatic close Path B+C)** · **026 (X19.A Dependabot CVE — uuid bump)**
 
 > **C19 sequenza autonoma 3-batch in corso (X19.A → X19 → X20)** — start 2026-05-25T00:16:50Z, time-box 4h, NO push autonomi.
-> - ✅ **X19.A DONE** (commit pending): uuid CVE-2026-41907 fixed via scoped override `exceljs>uuid >=11.1.1` → uuid@14.0.0 single version (8.3.2 eliminato). qs già fixato c304b02. typecheck API+web PASS, vitest API 336 (=baseline, 1 fail skills pre-esistente non-uuid), web build PASS. **HALT mandatory dopo X20 — NON procedere a X21 (DEFER-F HIGH-RISK)**.
+> - ✅ **X19.A DONE** (commit `b01c331`): uuid CVE-2026-41907 fixed via scoped override `exceljs>uuid >=11.1.1` → uuid@14.0.0 single version (8.3.2 eliminato). qs già fixato c304b02. typecheck API+web PASS, vitest API 336 (=baseline, 1 fail skills pre-esistente non-uuid), web build PASS.
+> - ⚠️ **X19 HALT P1** (run `6f531559` COMPLETED clean, acceptance NON met): primo full Wave-1 re-run **post-CW-B49** (47min, 34509 upserted, 0 failed, sys_users=433 ✅) ma **0 nuove tabelle** (59/134 pre=post). 6 IMPORT target residui strutturali: (A) 3 approved+validated → 0 upserted silenzioso (engine filter oltre CW-B49: skill_categories/activity_classification_mappings/process_kpi_templates); (B) 3 senza staging source (blueprint_overrides/position_learning_requirements/position_skill_requirements). Premessa PROMPT "≥75/134" empiricamente refutata (CW-B58) — solo 19 distinct IMPORT target esistono in Wave 1. **CW-B60 claimed**. Halt notify `cowork/pending/...__023__halt_engine_residual_6_targets.md`.
+> - ⛔ **X20 NON eseguito** (no-cascade: previous batch halted). Sequenza C19 fermata a X19. Await Cowork: (1) accept-residual+procedi X20, (2) forensic engine, (3) scope batch. **X21 (DEFER-F HIGH-RISK) resta fuori scope autonomo in ogni caso.**
 
 ## §2 — Decisione attesa (C19) — 4 PROMPT FORMALIZZATI ready-to-trigger
 

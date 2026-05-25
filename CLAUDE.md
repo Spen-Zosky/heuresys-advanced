@@ -74,34 +74,42 @@ heuresys-advanced/
 
 **Workspace layout** (`pnpm-workspace.yaml`): `apps/*` + `packages/*`. Imports use `@heuresys/api`, `@heuresys/web`, `@heuresys/shared` with subpath exports like `@heuresys/shared/schemas/users`.
 
-## Design System — CENTRALIZZATO in `D:\ux-design-shared`
+## Design System — `@heuresys/ui` (npm-published, post-migrazione X18)
 
-All reusable UI/UX components live in **`D:\ux-design-shared\ui`** (`@heuresys/ui`) — a shared, deduplicated library extracted from `heuresys-evo`. This repo (and every future Heuresys consumer) accesses it via **symlink**, not via duplicated source. All UI dependencies (Radix, Tailwind 4, framer-motion, d3, echarts, three.js, ~80 libs total) live exclusively in `D:\ux-design-shared\ui` — **this repo installs nothing UI-related**.
+All reusable UI/UX components live in **`@heuresys/ui`**, una libreria condivisa derivata da `ux-design-shared` (originariamente extracted from `heuresys-evo`). Dal 2026-05 (migrazione X18) la lib è **pubblicata come pacchetto npm versionato**, non più consumata via `link:` symlink locale. La dep è risolta da pnpm contro il registry e installata in `node_modules/@heuresys/ui` come dipendenza normale (pnpm crea un symlink interno alla cache `.pnpm/`, ma è meccanica pnpm — non un live-link a una working copy).
 
-**Integration (verified working at commit `b720ada` of ux-design-shared)**:
-- Dep in root `package.json`: `"@heuresys/ui": "link:../ux-design-shared/ui"` (note: `link:` — NOT `file:` — and the path is **1 level up** from this repo root, not 3). Verified live symlink: `node_modules/@heuresys/ui` → `D:/ux-design-shared/ui`.
-- Initial setup of `ux-design-shared` (one-time per machine, already done): `git init`, then `cd D:/ux-design-shared && npm install --legacy-peer-deps` (Storybook 10 has a peer-dep clash with addon-a11y that requires the flag).
-- Import standard: `import { Button, Card, DataTable } from "@heuresys/ui"`.
-- Tailwind 4 in `apps/web`: when configured, `tailwind.config` must include `"./node_modules/@heuresys/ui/src/**/*.{ts,tsx}"` in `content` so utility classes from the linked library are picked up.
-- Next.js in `apps/web`: when scaffolded, set `transpilePackages: ["@heuresys/ui"]` in `next.config.js` so the bundler walks through the symlink.
+**Stato attuale verificato (HEAD `ad7d5c0`, S932)**:
+- Dep in `package.json` (root e `apps/showcase/package.json`): `"@heuresys/ui": "^0.1.1"`. **NON è più `link:../ux-design-shared/ui`.**
+- `node_modules/@heuresys/ui` è un symlink pnpm verso `node_modules/.pnpm/@heuresys+ui@<ver>/node_modules/@heuresys/ui` — è la normale risoluzione pnpm, immutabile a runtime.
+- Le UI runtime deps (Radix, Tailwind 4, framer-motion, d3, echarts, three.js, ecc.) sono dichiarate dentro `@heuresys/ui` e tirate dentro come transitive deps quando si fa `pnpm install`. Questo repo non le installa direttamente.
+- Import standard invariato: `import { Button, Card, DataTable } from "@heuresys/ui"`.
+- Tailwind 4 in `apps/web` / `apps/showcase`: `tailwind.config` deve includere `"./node_modules/@heuresys/ui/dist/**/*.{js,mjs}"` (o equivalente path al build output della lib) nel `content` array per raccogliere le utility classes usate dai componenti pubblicati.
+- Next.js in `apps/web` / `apps/showcase`: `transpilePackages: ["@heuresys/ui"]` in `next.config.js` se la lib espone ESM/TSX non pre-transpilato; verificare il `package.json` di `@heuresys/ui@0.1.1` per il vero `exports` map.
 
-**Live-link semantics (do not get this wrong)**:
-- Modifications to **existing** file content in `D:\ux-design-shared\ui` → visible immediately to consumer (true symlink, inode-shared).
-- **New files / new components** added to `D:\ux-design-shared\ui` → also visible immediately (it's a directory-level symlink, so the symlinked view tracks the real directory contents in real time). No `pnpm install` needed for new component visibility — only when adding **new npm deps** to `@heuresys/ui` (then `npm install --legacy-peer-deps` inside `D:\ux-design-shared` to bring them in).
-- Verification command: `touch D:/ux-design-shared/ui/src/_TEST.txt && ls node_modules/@heuresys/ui/src/_TEST.txt` from this repo root should succeed without re-running `pnpm install`.
+**Workflow per modificare componenti UI (post-X18)**:
+- Le modifiche al codice di `@heuresys/ui` **NON sono live** in questo repo: bisogna versionare, pubblicare una nuova versione della lib, poi bumpare la dep qui (`pnpm update @heuresys/ui` o cambiando `^0.1.1` → versione target) e rifare `pnpm install`.
+- Per dev rapido di un componente nuovo o modifica esistente, il flusso consigliato è: lavorare nel repo `ux-design-shared` con Storybook (`npm run storybook` → `http://localhost:6006`), validare, tagliare release npm, poi consumare qui.
+- In emergenza (debug rapido di un componente già in prod) è possibile temporaneamente reintrodurre `link:` o `pnpm.overrides` puntando a una working copy locale, MA è un detour — va ripristinato a versione npm prima del commit.
 
-**Rules** (non-negotiable):
-- **NEVER** create reusable UI components in `apps/web` or `packages/*`. Always add to `D:\ux-design-shared\ui\src\components\` and use from there.
-- **NEVER** add UI runtime deps (Radix, framer-motion, recharts, etc.) to any `package.json` in this repo. They belong to `@heuresys/ui` and are resolved through the symlink.
-- If a component is genuinely heuresys-advanced-specific (e.g., wires a tenant-aware widget to `@heuresys/shared` Zod schemas), it lives in `apps/web/src/components/` — and even then, prefer composing `@heuresys/ui` primitives rather than re-implementing them.
-- React peer: `@heuresys/ui` declares React via `peerDependencies`; `apps/web` is the one that installs the concrete React version. This avoids the "two Reacts" runtime crash.
+**Rules** (non-negotiable, invariati nello spirito):
+- **NEVER** create reusable UI components in `apps/web`, `apps/showcase` o `packages/*` di questo repo. Vanno nel repo `ux-design-shared` (sorgente di `@heuresys/ui`).
+- **NEVER** aggiungere UI runtime deps (Radix, framer-motion, recharts, ecc.) ai `package.json` di questo repo. Appartengono a `@heuresys/ui` e arrivano come transitive deps.
+- Se un componente è genuinamente heuresys-advanced-specific (es. tenant-aware widget che usa schemi Zod da `@heuresys/shared`), vive in `apps/web/src/components/` o `apps/showcase/src/components/` — e anche in quel caso, prefer composing primitives di `@heuresys/ui` invece di reimplementarle.
+- React peer: `@heuresys/ui` dichiara React via `peerDependencies`; `apps/web` / `apps/showcase` installano la versione concreta di React (oggi 19.2.5). Evita il crash "due React istanze".
 
 **Maintenance / evolution**:
-- Adding a new component: edit/add files under `D:\ux-design-shared\ui\src\components\` — appears in consumer instantly.
-- Adding a new npm dep to `@heuresys/ui`: edit `D:\ux-design-shared\ui\package.json`, run `npm install --legacy-peer-deps` in `D:\ux-design-shared` root, commit the lockfile inside that repo. No action needed in `heuresys-advanced`.
-- Versioning: `ux-design-shared` is its own git repo (initialized 2026-05-16, commit `b720ada`). Tag releases there when stable; consumers can pin to specific commits later by switching the `link:` to a `git+ssh://` or `git+https://` dep when the lib publishes elsewhere.
-- Storybook (51 components, 16 tiers): `cd D:\ux-design-shared && npm run storybook` → `http://localhost:6006`.
-- Re-validate symlink after a `pnpm install` accident or a Windows reboot: `readlink -f node_modules/@heuresys/ui` must return `/d/ux-design-shared/ui`. If it doesn't (e.g., pnpm resolved to a snapshot via `file:`), check that `package.json` says `link:` and the path is `../ux-design-shared/ui` (one level up from repo root).
+- Bump versione: `pnpm update @heuresys/ui` (segue il range `^0.1.1`) oppure pinning esplicito a una versione specifica nel `package.json`.
+- Aggiungere un nuovo componente o nuova dep: lavoro nel repo `ux-design-shared` → release npm → bump qui.
+- Storybook: `cd D:\ux-design-shared && npm run storybook` → `http://localhost:6006` (51 componenti, 16 tier — count storico, verificare allo state corrente del repo).
+- Re-validation post-`pnpm install`: il check storico `readlink -f node_modules/@heuresys/ui → /d/ux-design-shared/ui` è **obsoleto** (era valido pre-X18). Oggi `readlink -f node_modules/@heuresys/ui` ritorna un path dentro `node_modules/.pnpm/@heuresys+ui@<ver>/node_modules/@heuresys/ui` — è il pattern pnpm standard.
+
+**Apps che consumano `@heuresys/ui`** (allo stato corrente):
+- `apps/web` — admin SPA + ESS portal (Next.js 15, codebase MVP-2a/2b in costruzione).
+- `apps/showcase` — Heuresys brand identity v1, static site GitHub Pages (Next.js 15 static export). Aggiunto post-CLAUDE.md originale.
+
+**Note migrazione X18** (storico, leggibile dai commit):
+- Prima della migrazione X18 (2026-05), `@heuresys/ui` era consumato via `link:../ux-design-shared/ui` (live symlink). La sezione precedente di questo file descriveva quella configurazione.
+- Il switch a npm-published è stato fatto per (i) eliminare la dipendenza dalla working copy locale per dev su altre macchine (Mac/VM), (ii) garantire reproducibilità (lockfile pinning), (iii) supportare deploy CI/CD senza accesso al filesystem dello sviluppatore.
 
 ### apps/api — the heart of MVP-1
 
@@ -195,10 +203,10 @@ When the next session opens MVP-2a (admin web SPA) and MVP-2b frontend (13 ESS p
 - **API-first ordering** — never build UI before the endpoint exists, is typed in `@heuresys/shared`, and is covered by a green integration test in `apps/api/test/`. If a page needs an endpoint that doesn't exist, open a mini API milestone (e.g. `5.1.24 — dashboard aggregators`) and ship the endpoint + tests first, atomic commit.
 - **Complete wiring at every level before a page is "done"**: shared Zod schema → API repository/service/route → integration test → frontend types reused from `@heuresys/shared` → TanStack Query hook → component composed from `@heuresys/ui` primitives → Playwright E2E green. If any layer is missing, the page is not done.
 - **Correction + retest cycle is mandatory**: any regression in TypeScript, vitest API suite, Playwright, or i18n parity blocks the merge of the current page. No "TODO: fix later" comments shipped to production code.
-- **No UI primitive duplication** — every reusable component lives in `D:\ux-design-shared\ui` (linked via `link:` protocol). Page-specific composition stays in `apps/web/src/components/` but only as composition of `@heuresys/ui` primitives plus tenant/RBAC-aware wrappers from `@heuresys/shared`.
+- **No UI primitive duplication** — every reusable component lives nel repo sorgente `ux-design-shared` ed è consumato via `@heuresys/ui` npm-published (post-X18, vedi sezione Design System). Page-specific composition stays in `apps/web/src/components/` but only as composition of `@heuresys/ui` primitives plus tenant/RBAC-aware wrappers from `@heuresys/shared`.
 
 **First-action checklist for the MVP-2a session** (also in `NEXT_SESSION_MVP_2A.md` §1):
-1. Pre-flight: tunnel SSH 5433 up, `readlink -f node_modules/@heuresys/ui` → `/d/ux-design-shared/ui`, `pnpm test` in `apps/api` = 182/182 green.
+1. Pre-flight: tunnel SSH 5433 up; `pnpm ls @heuresys/ui` riporta una versione valida (post-X18: dep npm-published, non più `link:`); `pnpm test` in `apps/api` green (count aggiornato — vedere HANDOFF.md per il baseline corrente, l'originale 182/182 è obsoleto).
 2. Phase 0 — API gap audit → produce `docs/api/MVP_2A_API_GAP_AUDIT.md` covering 27 admin routes + 13 ESS routes vs the 267 existing endpoints.
 3. Only after every audit row is ✅, scaffold `apps/web` (Next.js 15 + TanStack + Hook Form + i18next; no Radix/Tailwind here — they live in `@heuresys/ui`).
 4. Implement `/login` as pilot, lock in the auth client + CSRF + Playwright pattern.

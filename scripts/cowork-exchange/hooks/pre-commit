@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# =============================================================================
+# .git/hooks/pre-commit
+# installed by scripts/cowork-exchange/install-hooks.mjs
+# -----------------------------------------------------------------------------
+# Auto-sanitization layer per cowork_code_exchange/README.md v2.2 §-0 R5:
+#   1. Strip null bytes from staged cowork_code_exchange/ + scripts/cowork-exchange/ files
+#      (workaround for Cowork Write tool padding bug)
+#   2. Renormalize EOL per .gitattributes (R4)
+#   3. Cleanup orphan activity locks (expected_idle_at < now - 15min)
+#   4. Run validate-naming.mjs (R8 inbox-aware)
+# Mode: warn-only by default. Set COWORK_EXCHANGE_STRICT=1 to fail on validator errors.
+# =============================================================================
+
+set -e
+
+REPO_ROOT=$(git rev-parse --show-toplevel)
+EXCHANGE_DIR="$REPO_ROOT/cowork_code_exchange"
+SCRIPTS_DIR="$REPO_ROOT/scripts/cowork-exchange"
+
+# ------- 1. Strip null bytes from staged exchange/scripts files -------
+staged_files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '^(cowork_code_exchange|scripts/cowork-exchange)/' || true)
+if [ -n "$staged_files" ]; then
+  while IFS= read -r f; do
+    [ -f "$f" ] || continue
+    if grep -q $'\x00' "$f" 2>/dev/null; then
+      echo "[pre-commit] stripping null bytes from: $f"
+      tr -d '\0' < "$f" > "$f.tmp" && mv "$f.tmp" "$f"
+      git add "$f"
+    fi
+  done <<< "$staged_files"
+fi
+
+# ------- 2. Renormalize EOL per .gitattributes -------
+if [ -f "$REPO_ROOT/.gitattributes" ]; then
+  # Renormalize only files we've already touched in 1.; full renormalize is too aggressive
+  if [ -n "$staged_files" ]; then
+    while IFS= read -r f; do
+      [ -f "$f" ] || continue
+      git add --renormalize -- "$f" 2>/dev/null || true
+    done <<< "$staged_files"
+  fi
+fi
+
+# ------- 3. Cleanup orphan activity locks -------
+NOW_TS=$(date -u +%s)
+GRACE_SEC=900   # 15 min
+for lock_path in "$EXCHANGE_DIR/.cowork-active.lock" "$EXCHANGE_DIR/.cli-active.lock"; do
+  [ -f "$lock_path" ] || continue
+  # Parse expected_idle_at via grep+sed (YAML-naive but sufficient)
+  exp_iso=$(grep -E '^expected_idle_at:' "$lock_path" 2>/dev/null | sed -E 's/^expected_idle_at:[[:space:]]*//; s/[[:space:]]*$//' || true)
+  if [ -n "$exp_iso" ]; then
+    exp_ts=$(date -u -d "$exp_iso" +%s 2>/dev/null || echo "0")
+    if [ "$exp_ts" -gt 0 ] && [ "$exp_ts" -lt "$((NOW_TS - GRACE_SEC))" ]; then
+      echo "[pre-commit] removing orphan lock: $(basename "$lock_path") (expired $((NOW_TS - exp_ts))s ago)"
+      rm -f "$lock_path" || true
+    fi
+  fi
+done
+
+# ------- 4. Run validate-naming.mjs (R8 inbox-aware) -------
+# Only run if any file under cowork_code_exchange/ is staged or we deleted a lock
+exchange_staged=$(git diff --cached --name-only | grep -c '^cowork_code_exchange/' || true)
+if [ "$exchange_staged" -gt 0 ] || [ -n "$staged_files" ]; then
+  if command -v node >/dev/null 2>&1; then
+    VALIDATOR="$SCRIPTS_DIR/validate-naming.mjs"
+    if [ -f "$VALIDATOR" ]; then
+      echo "[pre-commit] validating cowork_code_exchange/ ..."
+      if [ "${COWORK_EXCHANGE_STRICT:-0}" = "1" ]; then
+        node "$VALIDATOR" --strict
+      else
+        node "$VALIDATOR"
+      fi
+    else
+      echo "[pre-commit] validator not found at $VALIDATOR (skipping)"
+    fi
+  else
+    echo "[pre-commit] node not in PATH (skipping validator)"
+  fi
+fi
+
+exit 0

@@ -1,0 +1,64 @@
+name: Build (web)
+
+# S935 phase F — CI gate #5: Next.js 15 production build for apps/web.
+# Catches Next/React peer-dep drift early (relevant post-S935 phase C
+# pnpm.overrides additions for react/react-dom).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/shared/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/build-web.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/shared/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: build-web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-web:
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Build @heuresys/shared (consumer of api+web)
+        run: pnpm --filter @heuresys/shared run build || true  # shared may not have build script
+
+      - name: Build apps/web
+        env:
+          # Build-time public env vars (no secrets).
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: pnpm --filter @heuresys/web build
+
+      - name: Verify .next output
+        run: |
+          test -d apps/web/.next || { echo "build output missing"; exit 1; }
+          test -f apps/web/.next/build-manifest.json || { echo "build manifest missing"; exit 1; }

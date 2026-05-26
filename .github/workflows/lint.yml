@@ -1,0 +1,58 @@
+name: Lint (all workspaces)
+
+# S935 phase F — CI gate #2: ESLint flat config 9.x across all workspaces.
+# Post-CODE-NEW-2 fix (S933 pre-flight) apps/web is 0 errors; we enforce that.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - "cowork_reserved/**"
+      - "cowork_code_exchange/**"
+      - ".handoff/**"
+      - "qa_artifacts/**"
+      - "sessioni/**"
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Lint — @heuresys/shared
+        run: pnpm --filter @heuresys/shared run lint
+
+      - name: Lint — @heuresys/api
+        run: pnpm --filter @heuresys/api run lint
+
+      - name: Lint — @heuresys/web
+        run: pnpm --filter @heuresys/web run lint
+
+      - name: Lint — @heuresys/showcase
+        run: pnpm --filter @heuresys/showcase run lint

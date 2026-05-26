@@ -1,0 +1,68 @@
+name: Typecheck (all workspaces)
+
+# S935 phase F — CI gate #1: TypeScript strict-mode pass for all 3 workspaces
+# (api, web, showcase, shared). Runs on the OCI VM self-hosted runner because
+# the pnpm node_modules graph is symlink-heavy (~3GB) and re-install on a
+# fresh GitHub-hosted runner per push would take 3-5min; on the persistent
+# self-hosted runner with pnpm cache warm, this completes in <30s.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - "cowork_reserved/**"
+      - "cowork_code_exchange/**"
+      - ".handoff/**"
+      - "qa_artifacts/**"
+      - "sessioni/**"
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: typecheck-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      # Note: on self-hosted runner, node 22.x is preinstalled via systemd unit
+      # config (see docs/ci/self-hosted-runners-setup.md §3). actions/setup-node
+      # is used only to enable pnpm store caching path resolution.
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Typecheck — @heuresys/shared
+        run: pnpm --filter @heuresys/shared run typecheck
+
+      - name: Typecheck — @heuresys/api (src)
+        run: pnpm --filter @heuresys/api run typecheck
+
+      - name: Typecheck — @heuresys/api (tests, separate tsconfig)
+        run: pnpm --filter @heuresys/api run typecheck:test
+
+      - name: Typecheck — @heuresys/web
+        run: pnpm --filter @heuresys/web run typecheck
+
+      - name: Typecheck — @heuresys/showcase
+        run: pnpm --filter @heuresys/showcase run typecheck
+        continue-on-error: false

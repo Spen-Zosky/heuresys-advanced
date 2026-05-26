@@ -1,0 +1,79 @@
+name: Test (api integration)
+
+# S935 phase F — CI gate #4: 41 integration tests via vitest on apps/api,
+# hitting the live OCI PostgreSQL (localhost:5432 from the runner's POV,
+# since the OCI VM is the runner host itself — no SSH tunnel needed in CI).
+#
+# The DB credentials come from runner-level env vars (set in systemd unit
+# EnvironmentFile=/etc/heuresys-runner.env per docs/ci/self-hosted-runners-setup.md §4).
+# Never expose secrets in workflow YAML (R11).
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "*.md"
+      - "cowork_reserved/**"
+      - "cowork_code_exchange/**"
+      - ".handoff/**"
+      - "qa_artifacts/**"
+      - "sessioni/**"
+      - "apps/web/**"
+      - "apps/showcase/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/api/**"
+      - "packages/shared/**"
+      - "db/**"
+  workflow_dispatch: {}
+
+concurrency:
+  group: test-integration-${{ github.ref }}
+  cancel-in-progress: false  # do NOT cancel running test suites mid-flight
+
+jobs:
+  test-integration:
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 15
+    env:
+      # POSTGRES_* + JWT_PRIVATE_KEY/JWT_PUBLIC_KEY + COOKIE_SECRET +
+      # MFA_ENCRYPTION_KEY come from runner EnvironmentFile, not workflow.
+      NODE_ENV: test
+      LOG_LEVEL: warn
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Verify DB connectivity
+        run: |
+          psql -h localhost -p 5432 -U $POSTGRES_USER -d $POSTGRES_DATABASE -c "SELECT 1" || \
+            { echo "DB connectivity failed"; exit 1; }
+
+      - name: Run vitest integration suite
+        working-directory: apps/api
+        run: pnpm exec vitest run --reporter=verbose --no-coverage
+
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitest-failures-${{ github.run_id }}
+          path: apps/api/.vitest-cache/
+          retention-days: 7

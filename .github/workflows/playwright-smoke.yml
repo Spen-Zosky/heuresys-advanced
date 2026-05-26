@@ -1,0 +1,104 @@
+name: Playwright smoke (web E2E)
+
+# S935 phase F — CI gate #6: Playwright E2E smoke suite on apps/web.
+# Requires: API dev server running on :3001 + web dev server on :3000 +
+# DB seeded with test admin + 5 personas. The self-hosted runner boots these
+# via the smoke-setup script (see docs/ci/self-hosted-runners-setup.md §5).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "apps/api/**"
+      - "packages/shared/**"
+      - "playwright.config.ts"
+      - "tests/**"
+      - ".github/workflows/playwright-smoke.yml"
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: playwright-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  playwright-smoke:
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 30
+    env:
+      NODE_ENV: test
+      LOG_LEVEL: warn
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @heuresys/web exec playwright install --with-deps chromium
+
+      - name: Verify test admin + personas seeded
+        run: |
+          psql -h localhost -p 5432 -U $POSTGRES_USER -d $POSTGRES_DATABASE \
+            -c "SELECT email FROM sys.sys_users WHERE email IN ('admin@heuresys.com','tenant_admin_test@rtl-bank.test','manager_test@rtl-bank.test','employee_test@rtl-bank.test','outsider_test@rtl-bank.test')" \
+            -tA | sort > /tmp/seeded.txt
+          test $(wc -l < /tmp/seeded.txt) -eq 5 || \
+            { echo "test personas not seeded — run pnpm db:seed-test-admin first"; exit 1; }
+
+      - name: Boot API server (background)
+        working-directory: apps/api
+        run: |
+          pnpm dev &
+          API_PID=$!
+          echo "API_PID=$API_PID" >> $GITHUB_ENV
+          # wait for /readyz
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3001/readyz > /dev/null && break
+            sleep 1
+          done
+
+      - name: Boot web server (background)
+        working-directory: apps/web
+        run: |
+          pnpm build
+          pnpm start &
+          WEB_PID=$!
+          echo "WEB_PID=$WEB_PID" >> $GITHUB_ENV
+          # wait for / responding
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3000 > /dev/null && break
+            sleep 1
+          done
+
+      - name: Run Playwright smoke suite
+        working-directory: apps/web
+        run: pnpm exec playwright test --grep "@smoke" --reporter=list,html
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: apps/web/playwright-report/
+          retention-days: 7
+
+      - name: Cleanup background processes
+        if: always()
+        run: |
+          [ -n "$API_PID" ] && kill $API_PID 2>/dev/null || true
+          [ -n "$WEB_PID" ] && kill $WEB_PID 2>/dev/null || true

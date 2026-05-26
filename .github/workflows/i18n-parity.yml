@@ -1,0 +1,48 @@
+name: i18n parity (it/en)
+
+# S935 phase F — CI gate #3: i18n parity check for apps/web.
+# Verifies it.json and en.json have the same keys (no orphan translations,
+# no missing translations). Fast (<5s), runs on every push.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/src/i18n/**"
+      - "apps/web/scripts/check-i18n-parity.ts"
+      - ".github/workflows/i18n-parity.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/web/src/i18n/**"
+  workflow_dispatch: {}
+
+concurrency:
+  group: i18n-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  i18n-parity:
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Check i18n parity
+        run: pnpm i18n:check

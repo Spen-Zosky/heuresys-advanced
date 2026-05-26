@@ -1,8 +1,25 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-26 GMT+2 (P1 housekeeping + Pre-flight Phase 0+1 in flight, Cowork autonomy strict mode)
-**Branch**: `main` — synced `6d5541a` (post Phase 0 commit, all pushed). ux-design-shared `dfa2e81`.
-**Last tag**: `v0.3.2-mvp3-full` (`d17ee0a`) — Tappa E MFA full + Tappa D pragmatic + 2 CVE
+**Updated**: 2026-05-26 GMT+2 (P1 housekeeping + Pre-flight Phase 0-3 partial CLOSED — Cowork autonomy strict mode)
+**Branch**: `main` — synced `649ac7a` (post Phase 3 commit, all pushed). ux-design-shared `dfa2e81`.
+**Last tag**: `v0.3.3-preflight-partial` (TBD post-Phase-8-commit) — pre-flight Phase 0-3 closed, Phase 4-7 deferred
+**Previous tag**: `v0.3.2-mvp3-full` (`d17ee0a`) — Tappa E MFA full + Tappa D pragmatic + 2 CVE
+
+## Pre-flight 2026-05-26 status
+
+| Phase | Status | Commit |
+|---|---|---|
+| Phase 0 baseline | ✅ DONE | `6d5541a` |
+| Phase 1 DOC base (11 items) | ✅ DONE | `40a0838` |
+| Phase 2 DOC high-effort (MVP-4 ROADMAP + Wave runners + Q1-Q8 + API refresh) | ✅ DONE | `8608b12` |
+| Phase 3 CODE base (CODE-1 logger + CODE-4 dep + CODE-NEW-2 lint 37→0) | ⚠️ PARTIAL (3/7 items, 4 deferred) | `649ac7a` |
+| Phase 4 CODE-6 queries.ts 47 routes | ⏸️ DEFERRED | — |
+| Phase 5 SEC base (Dependabot + qs + branch protection) | ⏸️ DEFERRED | — |
+| Phase 6 SEC CI workflows + dual self-hosted runners | ⏸️ DEFERRED | — |
+| Phase 7 QA gate finale (skills:131 + chunked test) | ⏸️ DEFERRED | — |
+| Phase 8 Closure | ⏳ in flight (questo commit) | TBD |
+
+Full outcome + rationale in `sessioni/session_2026-05-26_preflight/PREFLIGHT_REPORT.md`.
 
 ## Last session brief
 

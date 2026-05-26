@@ -4,12 +4,18 @@ param(
 )
 
 # bisect-cw-b59-createctx.ps1
-# Heuresys Advanced — S935 Path A revised bisect for CW-B59 /showcase build failure.
+# Heuresys Advanced — Path A revised v2 bisect for CW-B59 /showcase build failure.
+#
+# v1 (S935): looked only for "createContext is not a function".
+# v2 (S937 CK-4 2026-05-26): expanded regex to also match
+#     "Class extends value undefined is not a constructor or null" — the new
+#     failure surfaced AFTER S936-1 Path G React pnpm.overrides eliminated
+#     the createContext error. See qa_artifacts/s936_outcome_summary.md §1.
 #
 # Replaces the X18.4 iter scripts (which only checked exit code) with a
-# message-grep bisect: looks for "createContext is not a function" in the
+# message-grep bisect: looks for known CW-B59 failure signatures in the
 # Next.js build stderr. Converges to the first commit that introduced the
-# React peer-dep mismatch or missing 'use client' directive.
+# React peer-dep mismatch, missing 'use client', or CJS/ESM interop drift.
 #
 # Pre-requisites:
 #   1. /showcase routes must be restored (apps/web/src/app/showcase/ exists).
@@ -49,9 +55,10 @@ while ($true) {
     $buildOutput = (& pnpm --filter '@heuresys/web' build 2>&1) | Out-String
     $buildOutput | Out-File -FilePath $iterLog -Encoding utf8
 
-    # Classify result
-    if ($buildOutput -match "createContext is not a function") {
-        Write-Host "  BAD: createContext error reproduced" -ForegroundColor Red
+    # Classify result — v2 regex covers both CW-B59 signatures
+    if ($buildOutput -match "createContext is not a function|Class extends value undefined is not a constructor") {
+        $marker = if ($buildOutput -match "Class extends value undefined") { "Class-extends-undefined" } else { "createContext-undefined" }
+        Write-Host "  BAD: $marker error reproduced" -ForegroundColor Red
         $result = & git bisect bad
     } elseif ($buildOutput -match "(?ms)Compiled successfully|Generating static pages") {
         Write-Host "  GOOD: build clean" -ForegroundColor Green

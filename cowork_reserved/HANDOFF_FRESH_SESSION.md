@@ -1,11 +1,52 @@
 # HANDOFF — Fresh Cowork Session Bootstrap
 
-**Updated**: 2026-05-26 CLOSURE (S934 chiusa — CW-B60-A engine silent-skip observability fix SHIPPED to working tree; commit + push pending via `cowork_reserved/ship-cw-b60-a.ps1` Windows host)
-**Last Cowork session ID**: **S934** (CHIUSA con fix shipped + 3 unit test verde + bias_registry CW-B61 + ship script; commit pending Windows host)
-**Last HEAD pushed**: `787236c` (S933 final docs closure deliverable, sync origin/main 0/0 pre-S934). S934 commit ship-time TBD via `ship-cw-b60-a.ps1`.
-**Last tag pushed**: `v0.3.3-preflight-partial` (`1cd1f83`, annotated, post Phase 3 partial S933)
-**Purpose**: bootstrap minimale per la prossima sessione Cowork post-S934.
+**Updated**: 2026-05-26 CLOSURE (S935 chiusa — full B→C→E→F→D autonomy sequence shipped to working tree; commit + push via `cowork_reserved/auto-ship/run-all-s935.ps1` Windows host)
+**Last Cowork session ID**: **S935** (CHIUSA: A=S934 + B/C/E/F/D + Z closure; tag finale `v0.4.0-mvp4-ready` post-Z)
+**Last HEAD pushed**: `787236c` (S933 final docs handoff; pre-S934). Post-S935 ship-time HEAD via `run-all-s935.ps1` master script (commits 7 atomic + 2 annotated tags).
+**Last tag pushed**: `v0.3.3-preflight-partial` (`1cd1f83`, S933). Post-S935: `v0.3.4-p0-closed` (post-C) + `v0.4.0-mvp4-ready` (final).
+**Purpose**: bootstrap minimale per la prossima sessione Cowork post-S935.
 **Reuse pattern**: aggiornare prima di chiudere ogni sessione lunga; nuova sessione legge SOLO questo file + i 2-3 file critici elencati sotto.
+
+---
+
+## §0ter — Sessione S935 chiusa (2026-05-26) — outcome sintetico
+
+**Direttiva utente**: autonomia non-presidiata. Sequenza raccomandata B→C→E→F→D (A già S934-shipped). Tag intermedio `v0.3.4-p0-closed` post-C; tag finale `v0.4.0-mvp4-ready` post-F.
+
+### Cosa è stato shipped in S935
+
+| Fase | Deliverable | File |
+|---|---|---|
+| **B** CW-B60-B Wave-2 ADR | ADR-0020 reclassify 3 application-level targets IMPORT→REFERENCE_ONLY; migration 000044 idempotente | docs/architecture/adr/0020_*.md, ADR_INDEX, db/migrations/000044, MVP_4_ROADMAP §2.1 |
+| **C** DEFER-F CW-B59 reframe | Iter 12 empirical evidence → vera root cause `d.createContext`. 3-path strategy: G React overrides (10min), A revised message-grep bisect, F split fallback | docs/cw-b59-true-root-cause-2026-05-26.md, package.json pnpm.overrides, scripts/restore-showcase-routes.ps1, scripts/bisect-cw-b59-createctx.ps1 |
+| **E** SEC base | Branch protection canonical doc + Dependabot 4-bucket triage doc + MFA_ENCRYPTION_KEY validation .min(32) + soft-warn production | docs/github/branch-protection.md, docs/github/dependabot-triage-2026-05-26.md, apps/api/src/config/env.ts |
+| **F** CI workflows + OCI VM runner | 6 workflow YAML (typecheck/lint/i18n/test-integration/build-web/playwright-smoke) on [self-hosted, oci-vm] + setup docs + R11 EnvironmentFile pattern | .github/workflows/*.yml (×6), docs/ci/self-hosted-runners-setup.md, docs/ci/workflows-overview.md |
+| **D** Residual cleanup | CODE-2 (api dead scripts) + CODE-3 (Tailwind portable @source) + CODE-7 (web dead vitest test) inline. CODE-5/CODE-10 deferred docs. CODE-6 explicitly out-of-scope | apps/api/package.json, apps/web/package.json, apps/web/src/app/globals.css, package.json root, docs/preflight-residual-todo.md |
+| **Z** Closure | bias_registry consolidation (CW-B60-A→MITIGATED via CW-B61, CW-B60-B→MITIGATED via ADR-0020, CW-B59 reframed) + HANDOFF refresh + STATE drift fix + S935 session report + master ship script | bias_registry.md, HANDOFF_FRESH_SESSION.md, .handoff/STATE.md, sessioni/session_2026-05-26_s935/S935_SESSION_REPORT.md, cowork_reserved/auto-ship/run-all-s935.ps1 |
+
+### Phase status sessione
+
+- ✅ B/C/E/F/D + Closure all shipped to working tree
+- ⏳ Commit + push pending — ship via `cowork_reserved/auto-ship/run-all-s935.ps1` Windows host
+- ⏸️ Live re-runs (Path G build, CI workflow first run, runner registration) deferred to S936 first-acts
+
+### Ship instructions (Windows host)
+
+```powershell
+cd D:\heuresys-advanced
+powershell -ExecutionPolicy Bypass -File cowork_reserved/auto-ship/run-all-s935.ps1
+```
+
+Lo script ship in autopilot: cleanup leftover + 7 commit atomic (A+B+C+E+F+D+Z) + 2 annotated tag (`v0.3.4-p0-closed` post-C, `v0.4.0-mvp4-ready` post-Z) + push origin main --follow-tags. Halt automatico al primo errore di verify. Resume con `-FromPhase <X>` dopo halt; `-SkipVerify` se hai già verificato; `-NoPush` per commit+tag senza push.
+
+### Next session candidates post-S935 (S936)
+
+1. **S936 first-act**: live verify S935 shipped + CI workflow primo run. ~1h.
+2. **S936-C-followup**: Path G build attempt — restore-showcase-routes.ps1 + pnpm --filter @heuresys/web build. Se OK → close CW-B59. ~30min.
+3. **S936-runner-registration**: setup OCI VM runner per `docs/ci/self-hosted-runners-setup.md` §3. ~1-2h.
+4. **MVP-4 stream selection**: pick da `docs/MVP_4_ROADMAP.md` (9 streams parallelizable).
+
+---
 
 ---
 

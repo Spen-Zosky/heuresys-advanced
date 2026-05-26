@@ -1,9 +1,34 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-26 GMT+2 (S934 in flight — CW-B60-A engine silent-skip observability fix; READY for ship dalla Windows host)
-**Branch**: `main` — HEAD `787236c` pre-S934-commit (lavoro commit-pending: ship via `cowork_reserved/ship-cw-b60-a.ps1`). ux-design-shared `dfa2e81`.
-**Last tag**: `v0.3.3-preflight-partial` (`1cd1f83`) — pre-flight Phase 0-3 closed, Phase 4-7 deferred
-**Previous tag**: `v0.3.2-mvp3-full` (`d17ee0a`) — Tappa E MFA full + Tappa D pragmatic + 2 CVE
+**Updated**: 2026-05-26 GMT+2 (S935 chiusa — B/C/E/F/D + Z all shipped to working tree; READY for ship dalla Windows host via master script)
+**Branch**: `main` — HEAD `787236c` pre-S935-commit. Post-ship-time HEAD via `cowork_reserved/auto-ship/run-all-s935.ps1`. ux-design-shared `dfa2e81`.
+**Last tag pushed**: `v0.3.3-preflight-partial` (`1cd1f83`) — pre-flight Phase 0-3 (S933).
+**Tag pending S935**: `v0.3.4-p0-closed` (post-C, 3 P0 closed) + `v0.4.0-mvp4-ready` (post-Z, MVP-4 ready).
+**Previous tag**: `v0.3.2-mvp3-full` (`d17ee0a`) — Tappa E MFA full + Tappa D pragmatic + 2 CVE.
+
+## Sessione S935 (2026-05-26) — CLOSED, ship pending Windows host
+
+**Status**: ✅ B/C/E/F/D + Z all shipped to working tree. ⏳ commit+push pending via `cowork_reserved/auto-ship/run-all-s935.ps1` (sandbox limitation Cowork mount).
+
+**Outcome highlights**:
+- **B (CW-B60-B)**: ADR-0020 reclassify 3 application-level targets IMPORT→REFERENCE_ONLY, migration 000044 idempotente. CW-B60-B MITIGATED.
+- **C (DEFER-F / CW-B59)**: empirical re-read x18_4 iter 12 → vera root cause `d.createContext` (NOT RSC bundle threshold). 3-path strategy G/A/F + scripts shipped. CW-B59 reframed partial-mitigation.
+- **E (SEC)**: branch protection + Dependabot triage docs + MFA env validation.
+- **F (CI)**: 6 workflow YAML self-hosted OCI VM + setup docs.
+- **D (residual)**: CODE-2/3/7 inline fixed; CODE-5 auto-coordinated; CODE-10 deferred docs; CODE-6 explicit out-of-scope.
+- **Z (closure)**: bias_registry consolidation (60 catalogued / 42 mitigated), HANDOFF §0ter S935 outcome, session report, master ship script.
+
+**Ship**:
+```powershell
+cd D:\heuresys-advanced
+powershell -ExecutionPolicy Bypass -File cowork_reserved/auto-ship/run-all-s935.ps1
+```
+
+Tag finale post-ship: `v0.4.0-mvp4-ready`.
+
+---
+
+## Sessione S934 (2026-05-26) — CW-B60-A engine silent-skip observability fix
 
 ## Sessione S934 (2026-05-26) — CW-B60-A engine silent-skip observability fix
 

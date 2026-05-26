@@ -60,11 +60,34 @@ const EnvSchema = z.object({
   COOKIE_SECRET: z.string().min(32),
   ADMIN_ORIGIN: z.string().url().default("http://localhost:3000"),
 
-  // Optional MFA (post-MVP)
-  MFA_ENCRYPTION_KEY: z.string().optional(),
+  // MFA encryption key (S935 SEC base — required in production, optional in dev).
+  // Format: base64-encoded 32-byte random string. Generate with:
+  //   openssl rand -base64 32
+  // Required when NODE_ENV=production OR MFA feature is enabled at any tenant
+  // (mfa-service throws MFA_ENCRYPTION_KEY_MISSING at boot if absent and used).
+  MFA_ENCRYPTION_KEY: z
+    .string()
+    .min(32, "MFA_ENCRYPTION_KEY must be at least 32 bytes (base64 of 24 raw bytes)")
+    .optional(),
 });
 
 const parsed = EnvSchema.parse(process.env);
+
+// S935 SEC base — soft-fail warning at boot when MFA key is absent in production.
+// We don't hard-fail (back-compat with envs that don't have MFA enabled yet),
+// but we make the gap loud rather than silent (mirror CW-B61 observability
+// doctrine: every absence has a trace).
+if (parsed.NODE_ENV === "production" && !parsed.MFA_ENCRYPTION_KEY) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    JSON.stringify({
+      level: "warn",
+      phase: "env-validation",
+      sub_phase: "mfa-key-check",
+      msg: "MFA_ENCRYPTION_KEY is not set in production environment. MFA features will throw MFA_ENCRYPTION_KEY_MISSING at runtime when invoked. Set the env var (openssl rand -base64 32) or disable MFA per tenant.",
+    }),
+  );
+}
 
 // Load JWT key material AFTER zod validation so the error messages above
 // don't get masked by a key-material error.

@@ -1,9 +1,9 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-26 GMT+2 (S935 chiusa — B/C/E/F/D + Z all shipped to working tree; READY for ship dalla Windows host via master script)
-**Branch**: `main` — HEAD `787236c` pre-S935-commit. Post-ship-time HEAD via `cowork_reserved/auto-ship/run-all-s935.ps1`. ux-design-shared `dfa2e81`.
-**Last tag pushed**: `v0.3.3-preflight-partial` (`1cd1f83`) — pre-flight Phase 0-3 (S933).
-**Tag pending S935**: `v0.3.4-p0-closed` (post-C, 3 P0 closed) + `v0.4.0-mvp4-ready` (post-Z, MVP-4 ready).
+**Updated**: 2026-05-26 17:47 GMT+2 (S937 priming created — housekeeping closure plan + MVP-4 stream selection ready)
+**Branch**: `main` — HEAD `9fa3e57` (post-S936-6 R23 cross-layer). Origin sync 0/0. ux-design-shared `dfa2e81`.
+**Last tags pushed**: `v0.3.4-p0-closed` (post-S935-C) + **`v0.4.0-mvp4-ready`** (post-S935-Z) — entrambi su origin verified.
+**Next session entry-point**: `sessioni/session_2026-05-26_s937_housekeeping/NEXT_SESSION_START.md` (12464B, piano + todo S937-1..8 + MVP-4 stream selection).
 **Previous tag**: `v0.3.2-mvp3-full` (`d17ee0a`) — Tappa E MFA full + Tappa D pragmatic + 2 CVE.
 
 ## Sessione S935 (2026-05-26) — CLOSED, ship pending Windows host

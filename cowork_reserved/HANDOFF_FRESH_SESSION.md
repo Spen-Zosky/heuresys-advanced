@@ -1,8 +1,23 @@
 # HANDOFF — Fresh Cowork Session Bootstrap
 
-**Updated**: 2026-05-24 post-X18 close (MVP-2a CERTIFIED + MVP-3 6/6 Tappe shipped — Tappa F pragmatic close Path B+C)
+**Updated**: 2026-05-26 post-P1 housekeeping + Pre-flight Phase 0/1 in corso (Cowork autonomy strict mode)
+**Last Cowork session ID**: S933 (post-tag v0.3.2-mvp3-full, post-P1 commits 1-9, Phase 0 baseline, Phase 1 DOC base in flight)
+**Last HEAD pushed**: `6d5541a` (post Phase 0 commit, sync origin/main 0/0)
 **Purpose**: bootstrap minimale per una nuova sessione Cowork dopo che la precedente ha saturato il context.
 **Reuse pattern**: aggiornare prima di chiudere ogni sessione lunga; nuova sessione legge SOLO questo file + i 2-3 file critici elencati sotto.
+
+---
+
+## §0 — Pre-flight 2026-05-26 sessione attiva (delta vs §1)
+
+**Direttiva utente 2026-05-26**: Cowork procede in **autonomia piena** per chiudere debiti tecnici pre-MVP-4 (vedi `sessioni/session_2026-05-26_forensic-state-of-the-art/PREFLIGHT_PLAN_2026-05-26.md`). 9 phases sequenziali con gates G0-G8 + commit/push per fase.
+
+Stato delta:
+- ✅ Phase 0 baseline capture (typecheck PASS shared/api/web/showcase; lint OK 3/4 workspaces, web 37 errors carry-Phase-3; i18n parity OK 23 keys; pnpm test deferred Gate G7; vitest.config Vitest 4 migration fix shipped)
+- ⏳ Phase 1 DOC base in flight (DOC-1 ADR_INDEX refresh + DOC-2 ADR-0017 written + DOC-3 README rewrite + DOC-8 package.json desc + DOC-9 env.example MFA_KEY label done)
+- Phase 2-8 pending
+
+Vedi `sessioni/.../preflight_baselines/F0_BASELINE_SUMMARY.md` per baselines + decisioni autonome.
 
 ---
 
@@ -101,7 +116,10 @@ Sequenza C19 status (aggiornata 2026-05-25 post C19.1 accept-residual decision):
 ```bash
 ssh -fN -L 5433:localhost:5432 oracle-vm-default
 psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "SELECT NOW()"
-readlink -f D:/heuresys-advanced/node_modules/@heuresys/ui  # deve dare /d/ux-design-shared/ui
+# Post-X18 (2026-05-24): @heuresys/ui è npm-published ^0.1.1, NON più link: symlink.
+# Verify install con: pnpm ls @heuresys/ui  →  deve mostrare 0.1.1 risolto da registry.
+# Il vecchio check 'readlink → /d/ux-design-shared/ui' è OBSOLETO post-X18.
+pnpm ls @heuresys/ui                                                # deve dare versione concreta (es. 0.1.1)
 ```
 
 ## §8 — Output: prima risposta nuova sessione

@@ -1,3 +1,45 @@
+## 🎯 2026-05-26 — Cowork session S933: P1 housekeeping + Pre-flight Phase 0+1 (autonomy strict)
+
+Cowork session post-tag `v0.3.2-mvp3-full` che apre con un audit forensic comprehensive del progetto e poi procede a:
+
+### Lavoro completato (HEAD aggiornato)
+
+| Tappa | Commit | Output |
+|---|---|---|
+| Bootstrap turn 1 ACK + forensic audit | — | Lettura ancillari root + 7 subagent paralleli esplorazione (docs/cowork_code_exchange/cowork_reserved/api/web/db/config) → `sessioni/.../FORENSIC_STATE_OF_ART_2026-05-26.md` (~7000 parole, archive completo stato dell'arte + debiti tecnici + roadmap) |
+| **P1 housekeeping** (9 commit, push range `ad7d5c0..08a0d11`) | `e61c042` `99ee8b0` `961cc2f` `da5f55b` `dea9012` `84bb132` `15cafac` `9b3703c` `08a0d11` | CLAUDE.md trailing fix · Goal 003 formal closure retroattiva (REPORT 003 + REVIEW 003 + STATE_003 CLOSED_PENDING_STRATEGIC_PIVOT) · REVIEW 004/005 per X1/X2 pending da 2026-05-20/21 · cowork_code_exchange complete archive (Goal 001/002/003 + batch X1-X8 + templates + baselines + handoff) · cowork-exchange scripts toolchain · cowork_reserved KB forensic F0-F12 + 12 batch_cN + bias_registry · ADR-0018 COALESCE-UQ · SystemHealthDashboard showcase · .gitignore worktree + cowork transient · sessioni/forensic doc |
+| Cleanup tecnico | (parte P1) | Lock orphan + manifest pending-commits applied + worktree `musing-wing-802781` prunable + branch `claude/musing-wing-802781` rimossi · INDEX.md inbox rebuilt · inbox X1/X2 pending → read |
+| **Pre-flight Phase 0** (commit `6d5541a`) | `6d5541a` | Baseline capture (G0 PASS con 2 riserve documentate): tunnel SSH 5433 UP · pnpm install OK · typecheck PASS shared/api/web/showcase · lint OK 3/4 (web FAIL 37 errors carry Phase 3) · i18n parity OK 23 keys · pnpm test deferred Gate G7 (chunked strategy MCP timeout) · vitest.config Vitest 4 migration fix (`poolOptions` → `fileParallelism + maxWorkers/minWorkers`) · PREFLIGHT_PLAN_2026-05-26.md (9 phases roadmap) |
+| **Pre-flight Phase 1 DOC base** (in flight) | TBD | DOC-1 ADR_INDEX refresh add 0014-0018 (5 entries) · DOC-2 ADR-0017 LOOKUP_FK_2HOP scrittura retroattiva (188 LOC) · DOC-3 README.md rewrite post-X18 (272 endpoints + 47 routes + `@heuresys/ui` npm + MVP-3 closed + 18 ADR) · DOC-5 HANDOFF_FRESH_SESSION readlink obsoleto fix · DOC-8 apps/api/package.json description (Fastify 5, 58 moduli, 272 endpoint) · DOC-9 .env.example MFA_ENCRYPTION_KEY REQUIRED label · DOC-13/14/15 STATE.md drift fix (positions 55 non 158, column_mappings 1271 non 1177, staging 18 non 17, migration 42) |
+
+### Pre-flight plan (9 phases, autonomy strict mode)
+
+Direttiva utente 2026-05-26: Cowork procede in **autonomia piena** per chiudere debiti tecnici pre-MVP-4. Plan operativo in `sessioni/session_2026-05-26_forensic-state-of-the-art/PREFLIGHT_PLAN_2026-05-26.md`.
+
+| Phase | Effort | Status |
+|---|---:|---|
+| 0 Pre-flight check | 0.5-1h | ✅ DONE (G0 PASS) |
+| 1 DOC base (DOC-1..15) | 6-8h | ⏳ in flight |
+| 2 DOC high-effort (MVP-4 ROADMAP + Wave runner docs + DOC-10/11) | 7-10h | pending |
+| 3 CODE base (CODE-1..5,7,10 + lint web 37 errors fix) | 5-8h | pending |
+| 4 CODE-6 queries.ts refactor 47 routes | 10-15h | pending |
+| 5 SEC base (Dependabot 12 PR triage + qs + branch protection docs) | 4-6h | pending |
+| 6 SEC CI workflows + dual self-hosted runners (OCI VM + Windows) | 8-12h | pending |
+| 7 QA gate finale (skills:131 fix + full pnpm test green) | 3-5h | pending |
+| 8 Closure (tag v0.3.3-preflight-clean + handoff + forensic refresh) | 1-2h | pending |
+
+### Drift documentale risolti in P1+Phase 1
+
+- ADR_INDEX.md fermo a 0013 → aligned a 0018 (5 entries aggiunte) ✅
+- ADR-0017 LOOKUP_FK_2HOP mancante come file → scritto retroattivamente (referenced da migration 000043 + ADR-0014 §8 + ADR-0018 §8) ✅
+- README.md root post-X18 obsoleto (link: vs npm-published, count 51 components vs 14+ widgets) → rewrite completo ✅
+- HANDOFF_FRESH_SESSION readlink obsoleto (`/d/ux-design-shared/ui`) → updato a `pnpm ls @heuresys/ui` ✅
+- apps/api/package.json description "Fastify 4, 23 modules" → "Fastify 5, 58 moduli, 272 endpoint + MFA TOTP" ✅
+- .env.example MFA_ENCRYPTION_KEY label "post-MVP" → REQUIRED (post Tappa E MVP-3 v0.3.2) ✅
+- STATE.md drift positions 158 (era users) → 55 (correct); column_mappings 1177 → 1271; staging 17 → 18 ✅
+
+---
+
 ## 🎯 2026-05-23 — Batch X13 MVP-2a Coverage Hardening Sprint (acceptance-criteria-complete)
 
 CLI sprint che chiude i residuali §5 NEXT_SESSION_MVP_2A.md dopo la validazione live state di X12. **MVP-2a passa da "strutturalmente completo" (41 pagine, 272 endpoint, 17 E2E spec) a "acceptance-criteria-complete"**.

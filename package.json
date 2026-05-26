@@ -23,7 +23,6 @@
     "db:validate": "pwsh -File db/scripts/validate_database.ps1",
     "db:seed": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-reference-bank.ts",
     "db:seed-test-admin": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-test-admin.ts",
-    "openapi:generate": "pnpm --filter @heuresys/api run openapi:generate",
     "i18n:check": "pnpm --filter @heuresys/web run i18n:check",
     "cowork:status": "node scripts/cowork-exchange/status.mjs",
     "cowork:validate": "node scripts/cowork-exchange/validate-naming.mjs",
@@ -57,7 +56,11 @@
       "postcss": "^8.5.10",
       "esbuild": "^0.25.0",
       "qs": ">=6.15.2",
-      "exceljs>uuid": ">=11.1.1"
+      "exceljs>uuid": ">=11.1.1",
+      "react": "19.2.5",
+      "react-dom": "19.2.5",
+      "@types/react": "19.2.14",
+      "@types/react-dom": "19.2.3"
     }
   }
 }

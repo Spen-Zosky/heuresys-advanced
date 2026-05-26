@@ -1,3 +1,39 @@
+## 🎯 2026-05-26 — Cowork sessione S937 (housekeeping closure — partial + R23/iii eccezione SSH)
+
+Sessione successiva a S936, target: chiudere carry-over CK-1..7 + MVP-4 stream selection CK-8. Autonomy ereditata + R23 enforcement pieno.
+
+**HEAD post-S937**: `b55ffe8` (CK-4 script v2 commit, locale, push deferred a closure).
+**Outcome**: 2/8 task closed (CK-4 script v2 + CK-5 prefs verify), 1/8 partial (CK-1 config audited + helper ready, passphrase entry pending — eccezione R23/iii), 3/8 blocked-by-CK-1 (CK-2 runner registration, CK-3 CW-B60-A live, CK-6 CI smoke), 1/8 pending closure (CK-7), 1/8 pending decision (CK-8 MVP-4).
+
+### Task outcome detail
+
+| Task | Status | Commit/file | Note |
+|---|---|---|---|
+| CK-1 SSH agent persistent | **PARTIAL — config OK, passphrase pending** | `C:\Users\enzospenuso\Claude Desktop\scripts\s937-ck1-load-ssh-key.ps1` (helper) | Service ssh-agent Auto+Running ✓; ~/.ssh/config `Host *` ha `AddKeysToAgent yes` + `IdentitiesOnly yes` ✓; chiave `oci_recovery_ed25519` ben configurata. 3 tentativi automation MCP (Start-Process powershell -WindowStyle Normal, cmd /K, helper .ps1) falliti: finestre interattive si chiudono prima del passphrase prompt o restano invisibili a Enzo. Eccezione R23/iii: passphrase interattiva non bypass-able via MCP redirected stdio. Enzo deve lanciare manualmente lo script da una shell aperta a mano. |
+| CK-2 OCI VM runner registration | **BLOCKED-BY-CK-1** | (pending) | Pre-requisito SSH agent loaded. Procedura `docs/ci/self-hosted-runners-setup.md` §3. Token GitHub one-time, Settings → Actions → Runners → New self-hosted runner. |
+| CK-3 CW-B60-A live re-run | **BLOCKED-BY-CK-1** | (pending) | Pre-requisito SSH tunnel 5433 up. Smallest target `sys_skill_categories` (32 staging rows). Acceptance: ≥1 audit row con `rule_code='SILENT_UPSERT_ZERO_ROWS_V1'` in `audit.import_validation_results`. |
+| CK-4 CW-B59 bisect v2 | **DONE (script shipped, execution deferred)** | commit `b55ffe8` | `scripts/bisect-cw-b59-createctx.ps1` v2 con regex BAD classifier estesa a `createContext is not a function|Class extends value undefined is not a constructor` per coprire la failure post-Path G (S936-1). Bisect execution (10-15 iter × 5-10min cad) ideale per delegation CLI via cowork_code_exchange PROMPT 027 in sessione dedicata. Path F (split @heuresys/ui) fallback. |
+| CK-5 User prefs clean | **DONE (verified clean)** | (no commit code) | Claude in Chrome JS injection lettura textarea `conversation-preferences`: length 9192 char (vs file canonico 9236, diff 44 = newline normalization), version "Cowork user preferences v5" ✓, R23 count=1, MANDATORY_BOOTSTRAP count=2 (1 heading + 1 cross-ref OK), MANDATORY_TOOL_PRELOAD count=2 (1 heading + 1 cross-ref OK). NO duplicati spuri. |
+| CK-6 CI primo run smoke | **BLOCKED-BY-CK-2** | (pending) | Post runner registration. No-op commit + `gh run list --limit 6` + `gh run watch`. |
+| CK-7 Closure + tag v0.4.1 | **PARTIAL** | HANDOFF +sezione S937 + (questo append) | Tag deferred: rinominato target a `v0.4.0a-s937-partial-checkpoint` per evitare incoerenza "housekeeping-closed" con 4 task blocked. Tag `v0.4.1-housekeeping-closed` reservato a sessione successiva post-CK-1/2/3/6 complete. |
+| CK-8 MVP-4 stream | **PENDING USER DECISION** | (Cowork AskUserQuestion) | Candidates: 2.4 SDBI Phase 2 / 2.7 Mobile+WCAG / 2.5 MFA multi-kind / 2.1 Wave 2. Decision authority Enzo. |
+
+### Istruzioni esecutive CK-1 (per Enzo, da fare appena disponibile)
+
+```powershell
+# Aprire una NUOVA finestra PowerShell o Windows Terminal (a mano, NOT da Cowork)
+# Quindi lanciare:
+& 'C:\Users\enzospenuso\Claude Desktop\scripts\s937-ck1-load-ssh-key.ps1'
+# Digitare la passphrase quando appare il prompt
+# Verifica finale (stessa finestra):
+ssh-add -l
+ssh -o BatchMode=yes oracle-vm-default 'echo OK && hostname && date -u'
+```
+
+Una volta che `ssh-add -l` mostra la chiave ED25519, CK-2/CK-3/CK-6 sono unlocked. Cowork può riprenderli in autonomia dalla prossima sessione (lascia 5 min agent state propagation cross-session se serve).
+
+---
+
 ## 🎯 2026-05-26 — Cowork sessioni S934 + S935 + S936 (autonomy strict, post-P0 closure)
 
 Sequenza 3 sessioni Cowork in cascade post-S933 pre-flight partial. Tag finale: **`v0.4.0-mvp4-ready`** (post-S935 Z closure, 9 commit total da `b27eccc` a `9fa3e57`).

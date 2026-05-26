@@ -1,10 +1,21 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-26 17:47 GMT+2 (S937 priming created — housekeeping closure plan + MVP-4 stream selection ready)
-**Branch**: `main` — HEAD `9fa3e57` (post-S936-6 R23 cross-layer). Origin sync 0/0. ux-design-shared `dfa2e81`.
+**Updated**: 2026-05-26 18:30 GMT+2 (S937 partial closure — CK-4 script v2 + CK-5 verified; CK-1/2/3/6 pending Enzo SSH passphrase entry).
+**Branch**: `main` — HEAD locale `b55ffe8` (CK-4 v2 script). Origin sync 1/0 ahead (push deferred a closure post-CK-1). ux-design-shared `dfa2e81`.
 **Last tags pushed**: `v0.3.4-p0-closed` (post-S935-C) + **`v0.4.0-mvp4-ready`** (post-S935-Z) — entrambi su origin verified.
-**Next session entry-point**: `sessioni/session_2026-05-26_s937_housekeeping/NEXT_SESSION_START.md` (12464B, piano + todo S937-1..8 + MVP-4 stream selection).
+**Target tag pending**: `v0.4.0a-s937-partial-checkpoint` (post-CK-4 + CK-5 + HANDOFF/STATE refresh, prima del push S937 closure). `v0.4.1-housekeeping-closed` reservato a S938+ post-CK-1/2/3/6 complete.
+**Next session entry-point S938**: TBD post-S937 commit; current state visible in HANDOFF.md §S937 + bias_registry + `sessioni/session_2026-05-26_s937_housekeeping/NEXT_SESSION_START.md`.
 **Previous tag**: `v0.3.2-mvp3-full` (`d17ee0a`) — Tappa E MFA full + Tappa D pragmatic + 2 CVE.
+
+## Sessione S937 (2026-05-26) — Housekeeping closure PARTIAL + R23/iii eccezione SSH
+
+**Status**: 2/8 DONE (CK-4 script v2 commit `b55ffe8`, CK-5 prefs verified). 1/8 PARTIAL (CK-1 config audited + helper script ready, passphrase entry pending). 3/8 BLOCKED-BY-CK-1 (CK-2 runner, CK-3 CW-B60-A live, CK-6 CI smoke). 1/8 PARTIAL closure (CK-7 = questo file + HANDOFF). 1/8 PENDING decision (CK-8 MVP-4 stream).
+
+**Eccezione R23/iii**: passphrase OCI key `oci_recovery_ed25519` non bypass-able via MCP redirected stdio. 3 tentativi automation (Start-Process powershell -WindowStyle Normal + cmd /K + helper .ps1) tutti falliti — finestre si chiudono prima del prompt o restano invisibili. Helper script salvato in `C:\Users\enzospenuso\Claude Desktop\scripts\s937-ck1-load-ssh-key.ps1` per Enzo manual launch da shell aperta a mano.
+
+Vedi HANDOFF.md §S937 per detail + istruzioni esecutive CK-1.
+
+---
 
 ## Sessione S935 (2026-05-26) — CLOSED, ship pending Windows host
 

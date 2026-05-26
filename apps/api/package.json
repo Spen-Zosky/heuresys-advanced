@@ -11,11 +11,9 @@
     "start": "node dist/server.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:integration": "vitest run --config vitest.integration.config.ts",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
-    "openapi:generate": "tsx scripts/generate-openapi.ts",
     "seed:reference-bank": "tsx ../../db/scripts/seed-reference-bank.ts"
   },
   "dependencies": {

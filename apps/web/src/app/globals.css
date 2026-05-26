@@ -16,10 +16,16 @@
 /* Universal hover affordance is included in @heuresys/ui globals.css */
 
 /* Tailwind v4 source scanning — pickup utility classes used inside the
-   @heuresys/ui package. We point at the real path (sibling repo D:/ux-design-shared)
-   instead of the symlink in node_modules so Tailwind's source-resolver doesn't
-   bail out on link traversal. */
-@source "../../../../../ux-design-shared/ui/src/**/*.{ts,tsx}";
+   @heuresys/ui package.
+   S935 phase D (CODE-3 portability fix, 2026-05-26): post-X18 (2026-05),
+   @heuresys/ui is npm-published and resolved via pnpm into
+   node_modules/@heuresys/ui/dist/. We scan the dist build output (js/mjs)
+   instead of the sibling-repo source path (../../../../../ux-design-shared/ui/src/),
+   so the configuration is portable across machines (CI runners, Mac, Windows)
+   without depending on a working-copy of ux-design-shared on disk.
+   The dist output is tsup-compiled; class strings are preserved verbatim in
+   those files so Tailwind's source-resolver picks them up. */
+@source "../../node_modules/@heuresys/ui/dist/**/*.{js,mjs}";
 
 /* ============================================================
    Tailwind v4 @theme inline — map CSS custom properties to the

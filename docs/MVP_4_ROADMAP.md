@@ -77,9 +77,16 @@ Ogni stream è auto-contenuto: scope / effort min-max in focused-weeks / depende
 **Effort**: **1.5 — 3.0 focused-weeks** (37-75h). Range ampio: dipende dalla data-quality discovery (validation failures attesi su FK resolution dell'operating model). Wave 1 ha richiesto 13/19 targets via 5 iterazioni; Wave 2 ha più cross-table FK ⇒ stima maggiore.
 
 **Dependencies**:
-- P0-2 (CW-B60-A engine silent-filter) closure — engine deve essere observable.
-- P0-3 (CW-B60-B Wave 2 scope ADR) closure — ambiguità `IMPORT` vs `COMPUTED` su 3 target chiusa.
+- P0-2 (CW-B60-A engine silent-filter) closure ✅ S934 — engine ora observable (CW-B61 SILENT_UPSERT_ZERO_ROWS_V1 audit + WARN structured).
+- P0-3 (CW-B60-B Wave 2 scope ADR) closure ✅ S935 — ADR-0020 reclassifica 3 application-level targets a REFERENCE_ONLY (migration 000044). Wave 2 IMPORT scope ora include SOLO operating-model targets eligible.
 - Wave 1 stable baseline (esistente, 1271 mappings).
+
+**Out of scope (ADR-0020, S935)**: i seguenti 3 sys tables sono **NON in Wave 2 scope** (né in alcuna Wave futura) — sono application-level operational data popolati da user UI in MVP-4 features:
+- `sys_blueprint_overrides` (popolato da blueprint activation UI)
+- `sys_position_skill_requirements` (popolato da position editor UI in MVP-4 feature HR-skill-matrix)
+- `sys_position_learning_requirements` (popolato da training-requirements editor UI)
+
+Le legacy sources storicamente proposte come provenance (`benchmark_configs`, `esco_occupations`, `onet_occupation_*`, `holidays`, ecc.) restano documentate in `brownfield.table_mappings` come `REFERENCE_ONLY` per lineage trail, ma non vengono importate.
 
 **Acceptance criteria**:
 1. ≥ 85% dei ~94 source tables Wave 2 con `import_run_state = COMPLETE` (consistente con pragmatismo Wave 1).
@@ -87,6 +94,7 @@ Ogni stream è auto-contenuto: scope / effort min-max in focused-weeks / depende
 3. `sys.v_tenant_boundary_violations` returns 0 (no cross-tenant FK leak).
 4. Twice-run idempotency proof verde (re-execute Wave 2 → 0 nuove rows, 0 errori, 0 audit delta su non-evolving fields).
 5. Runner doc `wave_2_runner.md` chiusa con `executed-at: <timestamp>` + acceptance log linked.
+6. Zero audit rows `rule_code='SILENT_UPSERT_ZERO_ROWS_V1'` (CW-B61 contract): se compaiono, indica nuova mapping con setClauses empty o duplicate-conflict — investigate prima di chiudere.
 
 **Risks specifici** (vedi §4 R-MVP4-01..05): operating model ha cascade FK chains (tenant→branch→org_unit→position) — un FK resolution failure può cascadare. Mitigation: pre-flight script (analogo a `brownfield-wave-1-preflight.{ps1,sh}`) deve esistere PRIMA di trigger run.
 

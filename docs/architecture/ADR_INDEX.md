@@ -37,6 +37,7 @@ Every ADR follows this structure:
 | [0016](adr/0016_sys_esco_occupation_mappings_nullable_job_role_fk.md) | `sys_esco_occupation_mappings.job_role_id` nullable FK | Accepted | **DROP NOT NULL** + engine companion fix CW-B34 (TargetMeta.columnNullable map) per upsert 7645 ESCO rows; mig 000041 + X6.A engine patch | 2026‑05‑21 |
 | [0017](adr/0017_lookup_fk_2hop_transform.md) | `LOOKUP_FK_2HOP` transform extension | Accepted | **Engine extension** + migration 000043 validator dispatch (LOOKUP_FK vs LOOKUP_FK_2HOP) per resolver 2-hop (varchar URI → legacy_mirror.x.id → sys.* via lineage); unlock 1381 rows X9 Block A | 2026‑05‑23 |
 | [0018](adr/0018_coalesce_uq_class_of_bug.md) | COALESCE-UQ class-of-bug fix | Accepted | **Helper `replaceTargetColsInConflictInference`** parenthesis-depth-aware preserva COALESCE wrappers in ON CONFLICT inference; enumera 10 sys.* tables affette dalla class-of-bug CW-B49 (split-on-COALESCE su `upsert-sql.ts:661`) | 2026‑05‑23 |
+| [0020](adr/0020_wave2_scope_application_level_targets.md) | Wave-2 scope: application-level targets | Accepted | **Reclassify 3 targets `IMPORT`→`REFERENCE_ONLY`** (sys_blueprint_overrides, sys_position_skill_requirements, sys_position_learning_requirements) — application-level operational data with `created_by` FK + tenant-scoped activation deps, NOT eligible for brownfield import in any Wave. Closes CW-B60-B forensic gap. Migration 000044 idempotent. | 2026‑05‑26 |
 
 ## Conventions
 

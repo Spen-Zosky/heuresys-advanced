@@ -1,11 +1,83 @@
 # HANDOFF — Fresh Cowork Session Bootstrap
 
-**Updated**: 2026-05-26 CLOSURE (S933 chiusa — Pre-flight Phase 0-3 partial + tag v0.3.3-preflight-partial pushed)
-**Last Cowork session ID**: **S933** (CHIUSA con 13 commit + 1 tag pushed)
-**Last HEAD pushed**: `1cd1f83` (Phase 8 closure deliverable, sync origin/main 0/0)
-**Last tag pushed**: `v0.3.3-preflight-partial` (annotated, post Phase 3 partial)
-**Purpose**: bootstrap minimale per la prossima sessione Cowork post-pre-flight.
+**Updated**: 2026-05-26 CLOSURE (S934 chiusa — CW-B60-A engine silent-skip observability fix SHIPPED to working tree; commit + push pending via `cowork_reserved/ship-cw-b60-a.ps1` Windows host)
+**Last Cowork session ID**: **S934** (CHIUSA con fix shipped + 3 unit test verde + bias_registry CW-B61 + ship script; commit pending Windows host)
+**Last HEAD pushed**: `787236c` (S933 final docs closure deliverable, sync origin/main 0/0 pre-S934). S934 commit ship-time TBD via `ship-cw-b60-a.ps1`.
+**Last tag pushed**: `v0.3.3-preflight-partial` (`1cd1f83`, annotated, post Phase 3 partial S933)
+**Purpose**: bootstrap minimale per la prossima sessione Cowork post-S934.
 **Reuse pattern**: aggiornare prima di chiudere ogni sessione lunga; nuova sessione legge SOLO questo file + i 2-3 file critici elencati sotto.
+
+---
+
+## §0bis — Sessione S934 chiusa (2026-05-26) — outcome sintetico
+
+**Direttiva utente**: ereditata S933 autonomia piena. Target: chiudere P0-2 CW-B60-A forensic engine silent-filter.
+
+### Cosa è stato shipped in S934
+
+| File | Tipo | Effetto |
+|---|---|---|
+| `apps/api/src/modules/brownfield-wave-executor/audit-rule-codes.ts` | MODIFIED (+33 lines) | Nuova constante `SILENT_UPSERT_ZERO_ROWS_V1` + JSDoc payload contract |
+| `apps/api/src/modules/brownfield-wave-executor/upsert-sql.ts` | MODIFIED (+110 lines @ 763-875) | Probe SELECT count (staging input) + `logger.warn` structured (10 fields) + audit INSERT `SILENT_UPSERT_ZERO_ROWS_V1` status='SKIPPED' emessi BEFORE silent return. Back-compat: result shape unchanged |
+| `apps/api/test/upsert-sql-cw-b60-a-silent-skip.test.ts` | NEW | 3 unit test TDD (T1 silent-skip emette audit; T2 happy-path stays quiet; T3 DRY_RUN no side-effect). Verde 3/3 via standalone esbuild driver in Cowork sandbox |
+| `cowork_reserved/bias_registry.md` | MODIFIED | CW-B61 entry + CW-B60-A reclassified MITIGATED via CW-B61 + tally 60 catalogued / 41 mitigated + Next available CW-B62 |
+| `.handoff/STATE.md` | MODIFIED | S934 sezione outcome + ship instructions |
+| `cowork_reserved/HANDOFF_FRESH_SESSION.md` | MODIFIED (questo file) | §0bis outcome + §1.5 P0 status updates |
+| `cowork_reserved/ship-cw-b60-a.ps1` | NEW | PowerShell ship script con pre-commit verify (typecheck + lint + vitest) + commit atomico + push origin main |
+
+### Root cause CW-B60-A (forensic deliverable)
+
+Silent skip path: `upsert-sql.ts:763-765` (post-CW-B49). `if (upsertedCount === 0) return { upsertedRows:0, skipped:false }`. Con `skipped:false`, engine.ts:840 logger.error branch `if (sqlResult.skipped && sqlResult.skipReason)` saltato → nessun log pino. CW-B17 audit (`WHERE_SKIP_FILTER_EXCLUDED_V1`) copre solo per-row exclusions da `skipFilters`, NON il main-INSERT rowCount=0.
+
+**Trigger comune ai 3 target affetti** (sys_skill_categories / sys_activity_classification_mappings / sys_process_kpi_templates): tutti senza `_tenant_id` NK (no CW-B49 COALESCE-sentinel UQ pattern). column_mappings coprono solo NK cols → `setClauses=[]` → `ON CONFLICT DO NOTHING` → rowCount=0 sui duplicati / re-run.
+
+### Phase status sessione
+
+- ✅ Bootstrap (turn 1 ACK + drift detection)
+- ✅ Localizzare engine code (engine.ts + upsert-sql.ts + audit-rule-codes.ts mapped)
+- ✅ Analizzare config 3 target (schema introspection migrations 7/13/15)
+- ✅ Root cause identificato (path #7 silent return, post-CW-B49)
+- ✅ Unit test TDD scritto (3 test cases sandbox-compatible)
+- ✅ Fix engine shipped (+ probe + WARN + audit)
+- ✅ Verify: 3/3 PASS via standalone driver + TS syntax pulito
+- ⏸️ Live re-run Wave-1 (DEFERRED S935: richiede tunnel + DB live)
+- ✅ Bias registry CW-B61
+- ⏳ Commit + push (PENDING: sandbox lock — utente esegue `cowork_reserved/ship-cw-b60-a.ps1`)
+
+### Ship instructions (Windows host)
+
+```powershell
+cd D:\heuresys-advanced
+powershell -ExecutionPolicy Bypass -File cowork_reserved/ship-cw-b60-a.ps1
+# Lo script: pulisce _tmp_3_* + .git/index.lock leftover, gira pre-commit verify
+# (typecheck + lint + vitest cw-b60-a), commit atomico, push origin main.
+# Opt -SkipVerify per saltare la verifica se già fatta manualmente.
+```
+
+### Razionale closure pending-push (R10 + R14)
+
+Sandbox Cowork ha 2 limit hard: (a) pnpm node_modules symlinks Windows non risolvibili dal mount Linux → `pnpm typecheck` e `pnpm lint` full workspace impossibili lato Cowork; (b) `.git/index.lock` leftover post-`git status` non rimovibile da sandbox (Operation not permitted). Pertanto commit + push lifting necessariamente al Windows host. Il fix è verificato logico-sintatticamente + funzionalmente (3/3 test verde via standalone esbuild driver).
+
+### Audit metodologico finale (R14 anti-bias)
+
+Grep sistematico per `if (...) continue;` + `return.*skipped` in `engine.ts` + `upsert-sql.ts` mostra 2 silent path residui in engine.ts che NON sono coperti dal fix S934 ma NON sono root cause CW-B60-A:
+
+- `engine.ts:764` `if (!stagingTable) continue;` — silent skip se `stagingTableFor(target)` ritorna null. Non si attiva per i 3 target affetti (tutti hanno staging.wave1_*).
+- `engine.ts:766` `if (targetMeta.columns.size === 0) continue;` — silent skip se la target table sys non esiste. Non si attiva per i 3 target affetti (sys tables presenti nelle migration 7/13/15).
+
+Questi 2 sono **candidate minor observability improvement** (S935+ low priority): aggiungere `logger.warn` strutturato BEFORE i 2 `continue` per coprire i casi (a) target_table senza staging mapping nello whitelist (B-scope: i 3 target CW-B60-B non hanno staging — l'engine non emette nessun log oggi), (b) target_table sys mancante (errori catastrofici schema). NOT BLOCKING per close S934.
+
+### Invarianti rispettate
+
+- I3/I4 schema discipline: no `usr_*`/`br_*` additions ✓
+- I5 no RLS: no RLS changes ✓
+- I7 auth separato `sys.sys_auth_*`: no auth changes ✓
+- I13 PG native no docker: no infra changes ✓
+- RD-08 no PG ENUM: no CREATE TYPE / ALTER TYPE aggiunti (rule_code è varchar constant) ✓
+- R11 secret hygiene: nessun secret committed ✓
+- R12 git safety: ship script no `--force`, no `--no-verify`; preferito new commit ✓
+
+---
 
 ---
 
@@ -69,9 +141,10 @@ Vedi `sessioni/session_2026-05-26_preflight/PREFLIGHT_REPORT.md` §8 per raccoma
 
 | ID | Scope | Effort | Risk | Razionale priorità |
 |---|---|---|---|---|
-| **P0-2 CW-B60-A** | Forensic engine silent-filter (3 target AUTO_APPROVED + 0 upserted senza log) | ~2-3h | MED | **CONSIGLIATO PRIMO**: beneficia del logger structured CODE-1 appena shipped per diagnostic. Pure investigation + observability + unit tests. |
-| **P0-3 CW-B60-B** | Wave 2 / computed views scope ADR (3 target IMPORT senza staging source) | ~2-3h | MED | Indipendente da P0-2. MVP_4_ROADMAP §2.1 fornisce già contesto Wave 2. |
+| ~~P0-2 CW-B60-A~~ | ~~Forensic engine silent-filter~~ | — | — | ✅ **CHIUSO S934** — observability fix shipped (audit `SILENT_UPSERT_ZERO_ROWS_V1` + WARN + 3 unit test). Live re-run validation DEFERRED a S935 (richiede tunnel SSH). Vedi §0bis. |
+| **P0-3 CW-B60-B** | Wave 2 / computed views scope ADR (3 target IMPORT senza staging source) | ~2-3h | MED | Indipendente da CW-B60-A. MVP_4_ROADMAP §2.1 fornisce già contesto Wave 2. Adesso top-prio dopo S934 ship. |
 | **P0-1 DEFER-F** | /showcase Next 15 RSC bundle-threshold proper fix (PROMPT 025 pending dal 2026-05-25) | ~2-3h+ | HIGH | HIGH-RISK ma isolato (admin routes UNAFFECTED). Path A bisect / F split / E Next 16. |
+| **S935 first-act** | Ship S934 lavoro pending (gira `ship-cw-b60-a.ps1` Windows host) + live re-run validation 1 dei 3 target con tunnel attivo + verifica `audit.import_validation_results` ha rows con `rule_code='SILENT_UPSERT_ZERO_ROWS_V1'` | ~30-60min | LOW | Pre-requisito per ogni P0 successivo. |
 | pre-flight residual | CODE-2/3/5/7/10 + i18n discovery | ~5-8h | LOW | Cleanup workshop dedicato — non bloccante. |
 | sec-dependabot | Dependabot 12 PR triage + qs + branch protection docs | ~4-6h | LOW | Risk hardening — non urgente ma value alto. |
 | ci-runners | Dual self-hosted runners OCI VM + Windows + workflow yaml | ~8-12h | MED | Effort grande; richiede SSH setup + token mgmt. |

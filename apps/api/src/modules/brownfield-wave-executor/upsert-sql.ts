@@ -761,6 +761,116 @@ export async function executeUpsertSqlSidePerMapping(
   }
 
   if (upsertedCount === 0) {
+    // CW-B60-A (S934 2026-05-26) — emit one audit row + structured WARN log
+    // before returning so the silent-skip path is observable in forensic
+    // queries. Pre-fix, `return { skipped:false, upsertedRows:0 }` left no
+    // trace in pino logs (engine.ts:840 branch is `if (skipped && skipReason)`)
+    // and no row in audit.import_validation_results (CW-B17 audit only covers
+    // staging rows excluded by skipFilters, not main-INSERT rowCount=0).
+    //
+    // Affected Wave-1 targets observed in run 6f561559 (X19 C19.1 accept-
+    // as-residual): sys_skill_categories, sys_activity_classification_mappings,
+    // sys_process_kpi_templates. Common pattern: UQ index lacks `_tenant_id`
+    // NK, column_mappings cover only NK cols → setClauses empty →
+    // ON CONFLICT DO NOTHING → rowCount=0 on duplicate / re-run inputs.
+    const setClauseMode: "DO_UPDATE" | "DO_NOTHING" =
+      setClauses.length > 0 ? "DO_UPDATE" : "DO_NOTHING";
+
+    // Probe diagnostic: count staging rows that reached the INSERT (passed
+    // validation AND not yet upserted). Single SELECT; failure is non-fatal
+    // and falls back to -1 in the payload.
+    let stagingRowsInput = -1;
+    try {
+      const countRes = await pool.query<{ n: string }>(
+        `SELECT count(*)::text AS n
+           FROM ${qStagingTable}
+          WHERE staging_import_run_id = $1
+            AND staging_source_table  = $2
+            AND staging_validation_status = 'PASSED'
+            AND staging_target_record_id IS NULL`,
+        [runId, mapping.source_table_name],
+      );
+      stagingRowsInput = Number(countRes.rows[0]?.n ?? -1);
+    } catch (e) {
+      logger.warn(
+        {
+          phase: "sql-side-upsert",
+          sub_phase: "cw-b60-a-probe",
+          table_mapping_id: mapping.table_mapping_id,
+          err: (e as Error).message,
+        },
+        `CW-B60-A staging probe count failed for mapping ${mapping.table_mapping_id}: ${(e as Error).message}`,
+      );
+    }
+
+    // Structured WARN log — visible in pino tail at LOG_LEVEL=warn or below.
+    logger.warn(
+      {
+        phase: "sql-side-upsert",
+        sub_phase: "cw-b60-a-silent-skip",
+        table_mapping_id: mapping.table_mapping_id,
+        source_table: mapping.source_table_name,
+        target_table: mapping.target_table,
+        conflict_inference: conflictInference,
+        natural_key_columns: targetMeta.naturalKeyColumns,
+        col_entries_count: colEntries.length,
+        set_clause_mode: setClauseMode,
+        skip_filters_count: skipFilters.length,
+        staging_rows_input: stagingRowsInput,
+      },
+      `CW-B60-A silent-skip: mapping ${mapping.table_mapping_id} (${mapping.source_table_name}->${mapping.target_table}) INSERT returned rowCount=0; set_clause_mode=${setClauseMode}, staging_rows_input=${stagingRowsInput}`,
+    );
+
+    // Audit row — single event-level row per (run × mapping). Status=SKIPPED
+    // aligns with CW-B17 / SKIPPED_UNSUPPORTED_TRANSFORM_V1 / HANDLED_VIA_LINEAGE_WRITE_V1
+    // semantics. source_record_id reuses the table_mapping_id as the logical
+    // "event subject" (audit row is event-level, not staging-row-level).
+    // Failure of the audit emit is non-fatal (mirror CW-B17 pattern at line 690).
+    try {
+      await pool.query(
+        `INSERT INTO audit.import_validation_results (
+            import_validation_result_run_id,
+            import_validation_result_source_table_id,
+            import_validation_result_source_record_id,
+            import_validation_result_rule_code,
+            import_validation_result_status,
+            import_validation_result_message,
+            import_validation_result_payload
+          ) VALUES ($1::uuid, $2::uuid, $3, 'SILENT_UPSERT_ZERO_ROWS_V1', 'SKIPPED', $4::text, $5::jsonb)`,
+        [
+          runId,
+          mapping.source_table_id,
+          mapping.table_mapping_id,
+          `Main INSERT returned rowCount=0 for mapping ${mapping.table_mapping_id} (${mapping.source_table_name} -> ${mapping.target_table}); set_clause_mode=${setClauseMode}; staging_rows_input=${stagingRowsInput}`,
+          JSON.stringify({
+            target_table: mapping.target_table,
+            source_table: mapping.source_table_name,
+            source_table_id: mapping.source_table_id,
+            table_mapping_id: mapping.table_mapping_id,
+            conflict_inference: conflictInference,
+            natural_key_columns: targetMeta.naturalKeyColumns,
+            col_entries_count: colEntries.length,
+            set_clause_mode: setClauseMode,
+            skip_filters_count: skipFilters.length,
+            staging_rows_input: stagingRowsInput,
+            hint:
+              "INSERT returned 0 rows; check WHERE_SKIP_FILTER_EXCLUDED_V1 audit rows for same run+source for per-row skip detail, or examine target FK constraints / duplicate inputs / DO_NOTHING + existing rows in target",
+          }),
+        ],
+      );
+    } catch (e) {
+      logger.error(
+        {
+          phase: "sql-side-upsert",
+          sub_phase: "cw-b60-a-audit",
+          table_mapping_id: mapping.table_mapping_id,
+          err: (e as Error).message,
+        },
+        `CW-B60-A audit emission failed for mapping ${mapping.table_mapping_id}: ${(e as Error).message}`,
+      );
+      // Continue — audit emission failure should NOT mask the original silent return
+    }
+
     return { upsertedRows: 0, lineageRows: 0, skipped: false };
   }
 

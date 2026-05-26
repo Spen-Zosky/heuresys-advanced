@@ -1,9 +1,39 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-26 GMT+2 (P1 housekeeping + Pre-flight Phase 0-3 partial CLOSED — Cowork autonomy strict mode)
-**Branch**: `main` — synced `649ac7a` (post Phase 3 commit, all pushed). ux-design-shared `dfa2e81`.
-**Last tag**: `v0.3.3-preflight-partial` (TBD post-Phase-8-commit) — pre-flight Phase 0-3 closed, Phase 4-7 deferred
+**Updated**: 2026-05-26 GMT+2 (S934 in flight — CW-B60-A engine silent-skip observability fix; READY for ship dalla Windows host)
+**Branch**: `main` — HEAD `787236c` pre-S934-commit (lavoro commit-pending: ship via `cowork_reserved/ship-cw-b60-a.ps1`). ux-design-shared `dfa2e81`.
+**Last tag**: `v0.3.3-preflight-partial` (`1cd1f83`) — pre-flight Phase 0-3 closed, Phase 4-7 deferred
 **Previous tag**: `v0.3.2-mvp3-full` (`d17ee0a`) — Tappa E MFA full + Tappa D pragmatic + 2 CVE
+
+## Sessione S934 (2026-05-26) — CW-B60-A engine silent-skip observability fix
+
+**Status**: ✅ FIX SHIPPED to working tree (commit + push pending; sandbox limitation pnpm symlinks Windows mount + `.git/index.lock` non rimovibile lato Cowork → ship via `cowork_reserved/ship-cw-b60-a.ps1`).
+
+**Cosa**: Osservability gap nel path `upsert-sql.ts:763-765` (post-CW-B49). Quando `executeUpsertSqlSidePerMapping` ritornava `{ upsertedRows:0, skipped:false }` su `pool.query(insertSql).rowCount === 0`, NESSUN log pino e NESSUNA audit row venivano emessi. Triggered per i 3 target CW-B60-A (sys_skill_categories / sys_activity_classification_mappings / sys_process_kpi_templates — tutti senza `_tenant_id` NK → `setClauses=[]` → `ON CONFLICT DO NOTHING` → rowCount=0 sui duplicati / re-run).
+
+**Fix shipped** (4 files):
+- `apps/api/src/modules/brownfield-wave-executor/audit-rule-codes.ts` — nuovo `SILENT_UPSERT_ZERO_ROWS_V1`.
+- `apps/api/src/modules/brownfield-wave-executor/upsert-sql.ts:763-875` — probe SELECT count (staging input) + `logger.warn` structured (10 fields: phase, sub_phase, table_mapping_id, source_table, target_table, conflict_inference, natural_key_columns, col_entries_count, set_clause_mode, skip_filters_count, staging_rows_input) + audit INSERT `SILENT_UPSERT_ZERO_ROWS_V1` status='SKIPPED' emessi BEFORE silent return. Result shape unchanged (back-compat: `{ upsertedRows:0, lineageRows:0, skipped:false }`).
+- `apps/api/test/upsert-sql-cw-b60-a-silent-skip.test.ts` — 3 unit test TDD (T1 silent-skip emette audit, T2 happy-path stays quiet, T3 DRY_RUN no side-effect). Verde 3/3 via standalone esbuild driver in Cowork sandbox.
+- `cowork_reserved/bias_registry.md` — CW-B61 entry + CW-B60-A reclassified to MITIGATED + tally 60 catalogued / 41 mitigated + Next available → CW-B62.
+
+**Verify pre-push (Windows host, tunnel SSH 5433 attivo)**:
+```powershell
+cd D:\heuresys-advanced\apps\api
+pnpm typecheck                                                            # exit 0 expected
+pnpm lint                                                                 # exit 0 expected
+pnpm exec vitest run upsert-sql-cw-b60-a-silent-skip.test.ts              # 3/3 pass expected
+```
+
+**Ship** (Windows host):
+```powershell
+cd D:\heuresys-advanced
+powershell -ExecutionPolicy Bypass -File cowork_reserved/ship-cw-b60-a.ps1
+```
+
+(Script cleans up `_tmp_3_*` pnpm leftover, removes stale `.git/index.lock`, stages 4 files, commits atomic, pushes origin main.)
+
+**Effort effettivo**: ~2h sessione Cowork (forensic engine investigation + TDD fix + observability + audit).
 
 ## Pre-flight 2026-05-26 status
 

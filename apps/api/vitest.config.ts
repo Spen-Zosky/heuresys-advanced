@@ -15,8 +15,12 @@ export default defineConfig({
     hookTimeout: 30_000,
     // Integration tests share a single DB pool — serial avoids
     // refresh-rotation race conditions across tests.
+    // Vitest 4 migration (2026-05-26): poolOptions removed; use top-level
+    // fileParallelism + single worker to keep single-thread semantics.
     pool: "threads",
-    poolOptions: { threads: { singleThread: true } },
+    fileParallelism: false,
+    maxWorkers: 1,
+    minWorkers: 1,
     setupFiles: ["./test/helpers/setup.ts"],
   },
 });

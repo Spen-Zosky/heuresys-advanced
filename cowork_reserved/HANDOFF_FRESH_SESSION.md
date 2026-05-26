@@ -1,23 +1,48 @@
 # HANDOFF — Fresh Cowork Session Bootstrap
 
-**Updated**: 2026-05-26 post-P1 housekeeping + Pre-flight Phase 0/1 in corso (Cowork autonomy strict mode)
-**Last Cowork session ID**: S933 (post-tag v0.3.2-mvp3-full, post-P1 commits 1-9, Phase 0 baseline, Phase 1 DOC base in flight)
-**Last HEAD pushed**: `6d5541a` (post Phase 0 commit, sync origin/main 0/0)
-**Purpose**: bootstrap minimale per una nuova sessione Cowork dopo che la precedente ha saturato il context.
+**Updated**: 2026-05-26 CLOSURE (S933 chiusa — Pre-flight Phase 0-3 partial + tag v0.3.3-preflight-partial pushed)
+**Last Cowork session ID**: **S933** (CHIUSA con 13 commit + 1 tag pushed)
+**Last HEAD pushed**: `1cd1f83` (Phase 8 closure deliverable, sync origin/main 0/0)
+**Last tag pushed**: `v0.3.3-preflight-partial` (annotated, post Phase 3 partial)
+**Purpose**: bootstrap minimale per la prossima sessione Cowork post-pre-flight.
 **Reuse pattern**: aggiornare prima di chiudere ogni sessione lunga; nuova sessione legge SOLO questo file + i 2-3 file critici elencati sotto.
 
 ---
 
-## §0 — Pre-flight 2026-05-26 sessione attiva (delta vs §1)
+## §0 — Sessione S933 chiusa (2026-05-26) — outcome sintetico
 
-**Direttiva utente 2026-05-26**: Cowork procede in **autonomia piena** per chiudere debiti tecnici pre-MVP-4 (vedi `sessioni/session_2026-05-26_forensic-state-of-the-art/PREFLIGHT_PLAN_2026-05-26.md`). 9 phases sequenziali con gates G0-G8 + commit/push per fase.
+**Direttiva utente 2026-05-26**: Cowork ha proceduto in **autonomia piena** per chiudere debiti tecnici pre-MVP-4. Plan operativo 9 phases in `sessioni/session_2026-05-26_forensic-state-of-the-art/PREFLIGHT_PLAN_2026-05-26.md`. Outcome finale in `sessioni/session_2026-05-26_preflight/PREFLIGHT_REPORT.md`.
 
-Stato delta:
-- ✅ Phase 0 baseline capture (typecheck PASS shared/api/web/showcase; lint OK 3/4 workspaces, web 37 errors carry-Phase-3; i18n parity OK 23 keys; pnpm test deferred Gate G7; vitest.config Vitest 4 migration fix shipped)
-- ⏳ Phase 1 DOC base in flight (DOC-1 ADR_INDEX refresh + DOC-2 ADR-0017 written + DOC-3 README rewrite + DOC-8 package.json desc + DOC-9 env.example MFA_KEY label done)
-- Phase 2-8 pending
+### Cosa è stato shipped in S933
 
-Vedi `sessioni/.../preflight_baselines/F0_BASELINE_SUMMARY.md` per baselines + decisioni autonome.
+| Block | Commit range | Highlight |
+|---|---|---|
+| Forensic audit (turn 1) | — | `sessioni/.../FORENSIC_STATE_OF_ART_2026-05-26.md` (~7000 parole, audit comprehensive via 7 subagent paralleli) |
+| **P1 housekeeping** (9 commit) | `ad7d5c0..08a0d11` | Goal 003 formal closure retroattiva (REPORT 003 + REVIEW 003 + STATE_003 CLOSED_PENDING_STRATEGIC_PIVOT) · REVIEW 004/005 retroactive · cowork_code_exchange complete archive · cowork_reserved KB · ADR-0018 · cleanup lock+manifest+worktree musing-wing-802781 prunable · .gitignore cowork transient |
+| **Pre-flight Phase 0-3 partial + 8** (5 commit) | `6d5541a..1cd1f83` | vitest.config Vitest 4 migration · ADR_INDEX refresh + ADR-0017 retroactive · README rewrite post-X18 · STATE drift fix (positions 55 / cols 1271 / staging 18 / mig 42) · MVP_4_ROADMAP.md (571 righe) · 3 wave runner docs (1593 righe) · Q1-Q8 RESOLVED · API plan refresh 23/148→58/272 · CODE-1 6 console.error → pino logger structured · CODE-4 @heuresys/ui dep · **lint apps/web 37→0 errors** |
+| Closure | tag `v0.3.3-preflight-partial` | annotato + pushed |
+
+### Phase status
+
+- ✅ Phase 0 baseline (G0 PASS, 2 riserve)
+- ✅ Phase 1 DOC base (11 items)
+- ✅ Phase 2 DOC high-effort (MVP-4 ROADMAP + Wave 2/3/4 runners + DOC-10/11)
+- ⚠️ Phase 3 CODE base PARTIAL (3/7 items shipped, 4 deferred: CODE-2/3/5/7/10)
+- ⏸️ Phase 4 CODE-6 queries.ts 47 routes refactor (DEFERRED)
+- ⏸️ Phase 5 SEC base (Dependabot 12 PR + qs + branch protection) (DEFERRED)
+- ⏸️ Phase 6 SEC CI workflows + dual self-hosted runners (DEFERRED)
+- ⏸️ Phase 7 QA gate finale (skills:131 + chunked test) (DEFERRED)
+- ✅ Phase 8 Closure (PREFLIGHT_REPORT delivered + tag pushed)
+
+### Razionale closure partial (R14 anti-bias + R9 token hygiene)
+
+Plan originale 45-67h > capacity context tipica singola sessione Cowork. Phase 4 (47 routes refactor) + Phase 6 (CI self-hosted runners setup) richiederebbero 50-100 MCP calls cumulative = saturazione context. Decisione autonoma: chiudere a Phase 3 con honest tag `-preflight-partial` (non `-clean`) + handoff strutturato per N sessioni dedicate.
+
+### Nuovi bias rilevati pre-flight (da catalogare in `bias_registry.md` come CW-B61/62/63 prossima sessione)
+
+- **CW-NEW-PF-01**: Plan overestimate vs context capacity → split in N sessioni dall'inizio
+- **CW-NEW-PF-02**: PowerShell MCP timeout 30s vs vitest test full 3-8min → chunked test strategy
+- **CW-NEW-PF-03**: ESLint flat config 9.x deprecata `/* eslint-env node */` → usare `/* global ... */`
 
 ---
 
@@ -38,7 +63,21 @@ Vedi `sessioni/.../preflight_baselines/F0_BASELINE_SUMMARY.md` per baselines + d
 > - ✅ **X20 DONE** (MVP-3 Tappa E full closed): `mfaService.beginLoginChallenge` composto in `auth.service.login()` + `/login` UI 2-step (TOTP RFC 6238). LoginResponse → discriminated union `status: success|mfa_required`. 5 nuovi integration test (real TOTP) + Playwright `login-mfa` 2/2 (prod build) + web build PASS + vitest API 341 passed (0 regression, stesso 1 fail skills:131 pre-esistente). Codici: MFA_CODE_REQUIRED/MFA_INVALID/MFA_TOTP_INVALID. MFA factors DB = 0 post-cleanup. NO push. X21 (DEFER-F HIGH-RISK) resta fuori scope autonomo.
 > - 🏁 **Sequenza C19 CONCLUSA** (X19.A ✅ + X19 ✅ accept-residual + X20 ✅). Background da terminare: tunnel 5433 + API :3001 + web :3000.
 
-## §2 — Decisione attesa (C19) — sequenza in corso + 2 next-session candidates
+## §1.5 — Next-session candidates post-S933 (priorità da utente)
+
+Vedi `sessioni/session_2026-05-26_preflight/PREFLIGHT_REPORT.md` §8 per raccomandazioni dettagliate. Sintesi opzioni N+1:
+
+| ID | Scope | Effort | Risk | Razionale priorità |
+|---|---|---|---|---|
+| **P0-2 CW-B60-A** | Forensic engine silent-filter (3 target AUTO_APPROVED + 0 upserted senza log) | ~2-3h | MED | **CONSIGLIATO PRIMO**: beneficia del logger structured CODE-1 appena shipped per diagnostic. Pure investigation + observability + unit tests. |
+| **P0-3 CW-B60-B** | Wave 2 / computed views scope ADR (3 target IMPORT senza staging source) | ~2-3h | MED | Indipendente da P0-2. MVP_4_ROADMAP §2.1 fornisce già contesto Wave 2. |
+| **P0-1 DEFER-F** | /showcase Next 15 RSC bundle-threshold proper fix (PROMPT 025 pending dal 2026-05-25) | ~2-3h+ | HIGH | HIGH-RISK ma isolato (admin routes UNAFFECTED). Path A bisect / F split / E Next 16. |
+| pre-flight residual | CODE-2/3/5/7/10 + i18n discovery | ~5-8h | LOW | Cleanup workshop dedicato — non bloccante. |
+| sec-dependabot | Dependabot 12 PR triage + qs + branch protection docs | ~4-6h | LOW | Risk hardening — non urgente ma value alto. |
+| ci-runners | Dual self-hosted runners OCI VM + Windows + workflow yaml | ~8-12h | MED | Effort grande; richiede SSH setup + token mgmt. |
+| qa-validation | skills:131 fix + chunked test + count divergenze | ~3-5h | LOW | Da fare DOPO i 3 P0 per validare regression. |
+
+## §2 — Decisione attesa (post-S933) — formato originale C19 mantenuto per compatibilità
 
 Sequenza C19 status (aggiornata 2026-05-25 post C19.1 accept-residual decision):
 

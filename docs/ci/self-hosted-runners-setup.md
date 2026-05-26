@@ -170,7 +170,7 @@ source /etc/heuresys-runner.env
 
 EXPECTED_COUNT=5
 ACTUAL=$(psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POSTGRES_DATABASE" \
-  -tA -c "SELECT count(*) FROM sys.sys_users WHERE email IN ('admin@heuresys.com','tenant_admin_test@rtl-bank.test','manager_test@rtl-bank.test','employee_test@rtl-bank.test','outsider_test@rtl-bank.test')")
+  -tA -c "SELECT count(*) FROM sys.sys_users WHERE user_email IN ('admin@heuresys.com','tenant_admin_test@rtl-bank.test','manager_test@rtl-bank.test','employee_test@rtl-bank.test','outsider_test@rtl-bank.test')")
 
 if [ "$ACTUAL" -lt "$EXPECTED_COUNT" ]; then
   echo "Re-seeding test personas..."

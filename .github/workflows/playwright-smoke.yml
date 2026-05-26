@@ -55,7 +55,7 @@ jobs:
       - name: Verify test admin + personas seeded
         run: |
           psql -h localhost -p 5432 -U $POSTGRES_USER -d $POSTGRES_DATABASE \
-            -c "SELECT email FROM sys.sys_users WHERE email IN ('admin@heuresys.com','tenant_admin_test@rtl-bank.test','manager_test@rtl-bank.test','employee_test@rtl-bank.test','outsider_test@rtl-bank.test')" \
+            -c "SELECT user_email FROM sys.sys_users WHERE user_email IN ('admin@heuresys.com','tenant_admin_test@rtl-bank.test','manager_test@rtl-bank.test','employee_test@rtl-bank.test','outsider_test@rtl-bank.test')" \
             -tA | sort > /tmp/seeded.txt
           test $(wc -l < /tmp/seeded.txt) -eq 5 || \
             { echo "test personas not seeded — run pnpm db:seed-test-admin first"; exit 1; }

@@ -1,0 +1,29 @@
+=== table sizes ===
+relname|total|reltuples
+sys_position_skill_requirements|64 kB|0
+sys_skill_taxonomy_edges|64 kB|0
+sys_skills|312 kB|52
+(3 rows)
+=== indexes for top-3 ===
+tablename|indexname|indexdef
+sys_position_skill_requirements|sys_position_skill_requirements_pkey|CREATE UNIQUE INDEX sys_position_skill_requirements_pkey ON sys.sys_position_skill_requirements USING btree (position_skill_requirement_id)
+sys_position_skill_requirements|sys_psr_position_skill_uq|CREATE UNIQUE INDEX sys_psr_position_skill_uq ON sys.sys_position_skill_requirements USING btree (position_id, skill_id)
+sys_position_skill_requirements|sys_psr_skill_idx|CREATE INDEX sys_psr_skill_idx ON sys.sys_position_skill_requirements USING btree (skill_id)
+sys_skill_taxonomy_edges|sys_skill_taxonomy_edges_pair_kind_uq|CREATE UNIQUE INDEX sys_skill_taxonomy_edges_pair_kind_uq ON sys.sys_skill_taxonomy_edges USING btree (skill_taxonomy_edge_parent_id, skill_taxonomy_edge_child_id, skill_taxonomy_edge_kind)
+sys_skill_taxonomy_edges|sys_skill_taxonomy_edges_pkey|CREATE UNIQUE INDEX sys_skill_taxonomy_edges_pkey ON sys.sys_skill_taxonomy_edges USING btree (skill_taxonomy_edge_id)
+sys_skills|sys_skills_category_idx|CREATE INDEX sys_skills_category_idx ON sys.sys_skills USING btree (skill_category_id)
+sys_skills|sys_skills_esco_uri_idx|CREATE INDEX sys_skills_esco_uri_idx ON sys.sys_skills USING btree (skill_esco_uri) WHERE (skill_esco_uri IS NOT NULL)
+sys_skills|sys_skills_name_trgm_idx|CREATE INDEX sys_skills_name_trgm_idx ON sys.sys_skills USING gin (skill_name gin_trgm_ops)
+sys_skills|sys_skills_pkey|CREATE UNIQUE INDEX sys_skills_pkey ON sys.sys_skills USING btree (skill_id)
+sys_skills|sys_skills_tenant_code_uq|CREATE UNIQUE INDEX sys_skills_tenant_code_uq ON sys.sys_skills USING btree (COALESCE(skill_tenant_id, '00000000-0000-0000-0000-000000000000'::uuid), skill_code)
+(10 rows)
+=== unique + primary constraints (relevant for ON CONFLICT) ===
+tbl|conname|contype|def
+sys.sys_position_skill_requirements|sys_position_skill_requirements_pkey|p|PRIMARY KEY (position_skill_requirement_id)
+sys.sys_skills|sys_skills_pkey|p|PRIMARY KEY (skill_id)
+sys.sys_skill_taxonomy_edges|sys_skill_taxonomy_edges_pkey|p|PRIMARY KEY (skill_taxonomy_edge_id)
+(3 rows)
+=== B2 wall-clock control ===
+metric|value|note
+B2_20cap_wall_clock_sec|318|gated test internal timing per vitest output
+(1 row)

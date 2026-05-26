@@ -1,0 +1,29 @@
+=== audit.import_run_logs ===
+count
+0
+(1 row)
+import_run_log_id|import_run_log_run_id|import_run_log_level|import_run_log_message|import_run_log_payload|created_at
+(0 rows)
+=== audit.import_validation_results ===
+count
+0
+(1 row)
+import_validation_result_id|import_validation_result_run_id|import_validation_result_source_table_id|import_validation_result_source_record_id|import_validation_result_rule_code|import_validation_result_status|import_validation_result_message|import_validation_result_payload|created_at
+(0 rows)
+=== audit.import_approval_decisions ===
+count
+0
+(1 row)
+import_approval_decision_id|import_approval_decision_run_id|import_approval_decision_table_mapping_id|import_approval_decision_approver_user_id|import_approval_decision_status|import_approval_decision_rationale|import_approval_decision_decided_at|created_at
+(0 rows)
+=== sys_source_lineage_records distribution ===
+source_lineage_import_run_id|n
+|52
+(1 row)
+null_run|with_run|total
+52|0|52
+(1 row)
+=== source_lineage_import_run_id FK behavior probe ===
+conname|confdeltype
+sys_source_lineage_records_source_lineage_import_run_id_fkey|n
+(1 row)

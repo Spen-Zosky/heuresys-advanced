@@ -1,0 +1,63 @@
+---
+goal_id: 001
+plan_file: _02_PLAN_001_audit_upsert_refactor.md
+plan_version: v5
+plan_sha256: e093ad8227755e5817f6c4cc29086c93ae38cc6139b40ab52af52b1b41cb3db7
+approved_by: Cowork Desktop (claude.ai Desktop on Windows, Claude Opus 4.7)
+approved_at: 2026-05-19T00:35:00+02:00
+turn_budget_approved: 40
+escalation_at_turn: 38
+amendments_accepted:
+  - "v5 closure-gap fix: acceptance criterion 11 (SQL-side `executeUpsert` refactor for 12 mechanical transforms) is now explicitly verifiable. Previous v4 had step §2.2 item 4(a) without matching acceptance criterion — silently optimizable. Goal 001a v4 hybrid would have shipped Problem 1 unresolved."
+  - "Path B confirmed: stuck import_run 67d51a90-… transitioned to FAILED with structured failure_reason='STALE: pre-refactor in-memory state'. 52 legacy NULL lineage rows retained as documented pre-history."
+  - "Telemetry fallback: pg_stat_statements NOT installed on cluster, EXPLAIN (FORMAT JSON) substituted for criterion 11.d sub-criterion. Architectural assertion confirms single ModifyTable+Insert plan node."
+revisions_required: []
+predecessor_artefacts:
+  - _02_PLAN_001_v3-bis.md (sha256:5aa42fa7674dd9258f3ce9c3cfd59d0330890e7c932c356580ef718adad0bf0e — archive)
+  - _02_PLAN_001_v4.md (sha256:2d15860d7b08d7cf94e8eefc8d9e85598ea5336f41d0e98cf0555ce719adf8fb — archive)
+  - _02b_APPROVAL_001.md (signs v3-bis — superseded by this file)
+supersedes: _02b_APPROVAL_001.md
+retrofit_note: |
+  This APPROVAL closes O3 from `_00_SESSION_HANDOFF_2026-05-18.md`. The original APPROVAL
+  (`_02b_APPROVAL_001.md`) signed v3-bis (sha 5aa42fa7…) and became stale after PLAN was
+  revised to v5 (sha e093ad82…) during Goal 001a closure. The validator
+  (`scripts/cowork-exchange/validate-naming.mjs`) flagged this drift. This file
+  retroactively records the supervisor's approval of v5 as the final canonical PLAN
+  under which EXEC 001a turns 23-30 were authorized.
+---
+
+# Approval — Goal 001 PLAN v5 (retrofit, post-closure)
+
+**Decision:** ✅ APPROVED — Goal 001a closure under v5 acceptance criteria (11/11 met per `_05_REVIEW_001a_audit_upsert_refactor.md`).
+
+**PLAN reference (sha256-signed):** `_02_PLAN_001_audit_upsert_refactor.md` v5 @ sha256 `e093ad8227755e5817f6c4cc29086c93ae38cc6139b40ab52af52b1b41cb3db7`
+
+**Budget:** 40 turns cap (cumulative v4+v5: 30 actual, 0 variance from estimate). Escalation gate at turn 38 was not triggered. Buffer 9-10 turns unused.
+
+## Why a retrofit APPROVAL exists
+
+Goal 001a was closed via REVIEW before this APPROVAL file existed. The original `_02b_APPROVAL_001.md` (initial bundle, 2026-05-18T16:27 GMT+2) signed PLAN v3-bis sha `5aa42fa7…`. PLAN was subsequently revised to v4 (sha `2d15860d…`, archived) and v5 (sha `e093ad82…`, canonical). The supervisor's approval of v4 and v5 was given **in chat only**, not persisted as APPROVAL artefacts. Goal 001a's EXEC 001a turns 23-30 (criterion 11 delivery) operated under that in-chat v5 approval.
+
+Per protocol v2.1 (codified post-001a-closure in `README.md` §"What changed from v2.0 → v2.1"), every PLAN version requires a persistent APPROVAL artefact signed against its sha256. This file closes that retroactive gap.
+
+## Amendments accepted retroactively (v3-bis → v4 → v5)
+
+1. **v4 — post-evidence scope correction**: CLI's evidence gate E1-E5 (turn 8 of v3-bis EXEC) revealed that 2 of 3 originally-claimed audit gaps were false. v4 tightened scope to the one genuine gap (`audit.import_run_logs`) plus mandated SQL-side UPSERT refactor as a step. Approved retroactively per `_02_PLAN_001_v4.md` §-1.
+
+2. **v5 — closure-gap fix**: PLAN v4 §2.2 item 4(a) mandated SQL-side refactor as a step but §2.6 acceptance criteria (1-10) did not verify it. CLI delivered a v4-compliant hybrid in `_04_REPORT_001a_interim.md` while transparently flagging the scope deferral in §6.1. Supervisor chose Option B (reject closure, require SQL-side refactor as 001a continuation). v5 added explicit criterion 11. Approved retroactively per `_02_PLAN_001_audit_upsert_refactor.md` §-1.
+
+3. **Telemetry fallback**: pg_stat_statements NOT installed on `oracle-vm-default` cluster (confirmed in DISCOVERY 002 §8). v5 §2.10 #4 contingency invoked: EXPLAIN (FORMAT JSON) architectural assertion substituted for statement-count telemetry. wave1-debug-scale-v4 test asserts single ModifyTable+Insert plan node per representative INSERT…SELECT.
+
+## Notes for executor (CLI)
+
+This APPROVAL is for record-keeping. Goal 001a is CLOSED per REVIEW. No EXEC action required.
+
+The validator should now report `Goal 001 APPROVAL sha256 matches PLAN file _02_PLAN_001_audit_upsert_refactor.md ✓` after re-run.
+
+## Revocation
+
+This approval is bound to PLAN sha `e093ad82…`. If PLAN is ever revised post-001a-closure (e.g. for a hypothetical 001c continuation), a new APPROVAL would be required. Currently no such revision is planned — Goal 001b (scope per REVIEW §6.2 + DISCOVERY 002) is a fresh `<NNN=002>` cycle, not a continuation of 001.
+
+---
+
+*Generated by Cowork Desktop as v2.1-protocol retrofit per `_00_SESSION_HANDOFF_2026-05-18.md` O3. Persistent gate. Supersedes `_02b_APPROVAL_001.md`.*

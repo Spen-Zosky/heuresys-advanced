@@ -1,0 +1,31 @@
+=== brownfield.import_runs post ===
+import_run_id|import_run_wave|import_run_classification_scope|import_run_status|import_run_started_at|import_run_finished_at|duration_sec
+67d51a90-7ad9-44e2-860d-0d2e0e945af8|1|DEMO|RUNNING|2026-05-16 21:19:42.976248+00||153135.284961
+(1 row)
+=== latest run_id (likely the B2 run) ===
+import_run_id
+67d51a90-7ad9-44e2-860d-0d2e0e945af8
+(1 row)
+=== audit.* delta ===
+?column?|count
+logs|0
+validation|0
+approval|0
+(3 rows)
+=== lineage post ===
+total|null_run|with_run
+52|52|0
+(1 row)
+source_lineage_import_run_id|count
+|52
+(1 row)
+=== sys core delta ===
+t|count
+sys_skills|52
+sys_blueprint_process_registry|23
+sys_skill_taxonomy_edges|0
+sys_skill_categories|0
+sys_skill_families|0
+sys_learning_modules|1
+sys_user_certifications|1
+(7 rows)

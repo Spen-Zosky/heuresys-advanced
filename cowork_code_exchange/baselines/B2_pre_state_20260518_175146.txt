@@ -1,0 +1,31 @@
+=== brownfield.import_runs pre ===
+n|last_started
+1|2026-05-16 21:19:42.976248+00
+(1 row)
+import_run_id|import_run_status|import_run_started_at
+67d51a90-7ad9-44e2-860d-0d2e0e945af8|RUNNING|2026-05-16 21:19:42.976248+00
+(1 row)
+=== audit.* pre ===
+?column?|count
+logs|0
+validation|0
+approval|0
+(3 rows)
+=== lineage pre ===
+total|null_run|with_run
+52|52|0
+(1 row)
+=== sys core pre ===
+t|count
+sys_skills|52
+sys_blueprint_process_registry|23
+sys_skill_taxonomy_edges|0
+sys_skill_categories|0
+sys_skill_families|0
+sys_learning_modules|1
+sys_user_certifications|1
+(7 rows)
+=== now() server ===
+pre_run_utc
+2026-05-18 15:51:45.526354
+(1 row)

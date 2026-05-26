@@ -1,0 +1,58 @@
+=== import_runs ===
+count|statuses|ids
+1|{RUNNING}|{67d51a90-7ad9-44e2-860d-0d2e0e945af8}
+(1 row)
+=== audit.* counts ===
+t|count
+import_run_logs|0
+import_validation_results|0
+import_approval_decisions|0
+(3 rows)
+=== lineage distribution ===
+source_lineage_import_run_id|count
+|52
+(1 row)
+=== sys core counts ===
+t|count
+sys_skills|52
+sys_blueprint_process_registry|23
+sys_user_certifications|1
+sys_source_lineage_records|52
+(4 rows)
+=== transform vocabulary (PLAN B3 verification) ===
+column_mapping_transform|count
+JSON_EXTRACT|759
+CAST_TIMESTAMPTZ|130
+LINEAGE_SOURCE_NK|93
+TRIM|86
+LOOKUP_FK|49
+SKIP|39
+DIRECT_COPY|11
+UPPERCASE|3
+CAST_INT|2
+CAST_VARCHAR|1
+CAST_BOOLEAN|1
+CAST_NUMERIC|1
+LOWERCASE|1
+CONSTANT|1
+(14 rows)
+=== staging.wave1_* est ===
+relname|reltuples
+wave1_activity_classification_mappings|-1
+wave1_activity_classifications|0
+wave1_blueprint_process_registry|0
+wave1_compensation_bands|0
+wave1_esco_occupation_mappings|0
+wave1_job_roles|0
+wave1_learning_modules|0
+wave1_learning_path_steps|0
+wave1_learning_paths|0
+wave1_process_kpi_templates|0
+wave1_skill_aliases|0
+wave1_skill_categories|-1
+wave1_skill_families|0
+wave1_skill_learning_mappings|0
+wave1_skill_taxonomy_edges|0
+wave1_skills|0
+wave1_user_certifications|0
+(17 rows)

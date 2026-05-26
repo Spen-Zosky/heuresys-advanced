@@ -1,0 +1,64 @@
+---
+goal_id: 003
+plan_file: _02_PLAN_003_brownfield-seeding-complete.md
+plan_version: v2
+plan_sha256: ecd21b78e378eb2264b8134f700ca650528f8d40ed387aa39f8a2d020929dab8
+prompt_version: v2
+prompt_sha256: 59a1fe63a381499328dca200c02f561745512c02e7e9090fa394e8c20d8f0902
+approved_by: Cowork Desktop (claude.ai Desktop, Claude Opus 4.7)
+approved_at: 2026-05-19T16:25:00+02:00
+turn_budget_approved: 40
+escalation_at_turn: 35
+amendments_accepted: []
+revisions_required: []
+notifications_acknowledged:
+  - "Obs-1 (sys_users fallback via user_email when jsonb convention not applicable) — ACCEPTED as documented; R6 mitigation valid; LOOKUP_FK_FALLBACK_UNRESOLVABLE audit class coherent with C4 source-empty exception"
+counter_proposals_accepted:
+  - "CP-v2-1 (migration 000033 file structure with 2 Parts) — ACCEPTED as default; matches 000024/000026 precedents; zero scope impact"
+predecessor_artefacts:
+  - _01_PROMPT_003_brownfield-seeding-complete.md v2 (sha:59a1fe63a381499328dca200c02f561745512c02e7e9090fa394e8c20d8f0902)
+  - _01_PROMPT_003_v1.md (sha:dfa5eee66b5011edae24a39d680a8d6c81147c9c5074e291819572e64afb8de3 — archive)
+  - _02_PLAN_003_v1.md (sha:bf0d9e128503ac6a3da17c684391188cfba19a26a29bee9486e2e5276245454c — archive, superseded by v2 per scope-narrowing pivot)
+  - _00_DISCOVERY_003_brownfield-seeding-complete.md
+---
+
+# Approval — Goal 003 PLAN v2
+
+**Decision:** ✅ APPROVED — proceed with EXEC.
+
+**PLAN reference (sha256-signed):** `_02_PLAN_003_brownfield-seeding-complete.md` v2 @ sha256 `ecd21b78e378eb2264b8134f700ca650528f8d40ed387aa39f8a2d020929dab8`
+
+**Budget:** 40 turns cap, escalation at turn 35. CLI honest estimate is 25 turns (range 23-30) with 15-turn buffer — comfortable.
+
+## Verification performed before approving
+
+1. **G11 cross-check matrix §2.11 independently verified**: 8 Items × 14 criteria, bidirectional, no orphans. Every Item maps to ≥1 criterion; every criterion is covered by ≥1 Item.
+2. **§2.7 honest budget assessment confirmed**: 25/40 with 15-turn buffer is well within the PROMPT v2 §8.6 target of "≤32 turns with buffer 5-8". Goal 003 v2 comes in 7 turns under target with 7-turn extra buffer. No budget debate required.
+3. **§2.10 advisories minimal as expected**: A1/A2/A4 + CP2/CP6/CP7 pre-decisions from PROMPT v2 §4-§5 honored; A3/A5/A6/A7/A8/A9 + CP1/CP3/CP4/CP5 correctly NOT re-surfaced (deferred to Goal 004). Only 1 notification (Obs-1) which is documented edge case, not a deferral or scope reduction.
+4. **§2.13 anti-pattern guard compliance verified**: all 6 boxes checked (no scope reduction, no partial closure, no Wave-2/3/4 work, no Goal 004 references, all 14 criteria mapped, halt+escalate only pause primitive).
+5. **v1 archive preserved**: `_02_PLAN_003_v1.md` retained with sha `bf0d9e12…` as historical evidence of the original monolithic scope.
+
+## Notifications acknowledged
+
+**Obs-1 (sys_users fallback path)**: ACCEPTED as documented. The fallback chain (jsonb convention → deterministic email lookup → audit + skip with `LOOKUP_FK_FALLBACK_UNRESOLVABLE`) is coherent with C4 "documented source-empty exception" criterion. R6 in §2.8 properly mitigates the NULL-email edge case. No scope adjustment required.
+
+## Counter-proposals accepted
+
+**CP-v2-1 (migration 000033 file structure 2 Parts)**: ACCEPTED as default. The 2-Part structure (Part 1: tenant_id_mappings table + RTL seed; Part 2: validate_lookup_fk_payload function + trigger) matches existing precedents in 000024 + 000026. Zero scope impact, improved maintenance ergonomics for future operators inspecting the migration source.
+
+## Notes for executor
+
+- Proceed directly with EXEC step 0 (baseline + Item K hygiene per §2.1, measurements 0.1-0.13). All step-0 measurements are gate-protected per L8.
+- If step 0.8 (U1 tenant_metadata sample) shows `tenant_metadata` jsonb does NOT contain `legacy_id` key → Item A primary convention path FAILS; fallback to deterministic via `brownfield.tenant_id_mappings` (Item D Part 1). This is the design — proceed.
+- If step 0.9 (U2 user_metadata sample) reveals different shape for sys_users than for sys_tenancies, the Item A compiler emits the divergent convention via the LOOKUP_FK_CONVENTION_AUTO_DETECT compile-time branch (per §2.2 Item A intended-change point 3).
+- Wave 1 retry (Item F) hard timeout 15min per R5 mitigation. If wall-clock approaches 12min without state=COMPLETE, halt+escalate.
+- §2.5.3 per-wave threshold not applicable (single wave = Wave 1).
+- Anti-pattern guard remains active throughout EXEC: any temptation to "defer to Goal 004" for a Wave-1-specific issue is REJECTED at PLAN-acceptance-time. Wave 1 is closed in Goal 003 or escalated to Cowork, never deferred.
+
+## Revocation
+
+Approval bound to PLAN sha `ecd21b78…`. If PLAN revised post-approval (e.g., a v3 in response to step 0 finding), fresh APPROVAL required with new sha256. EXEC verifies sha256 match at step 0 (covered implicitly by §2.1 measurements).
+
+---
+
+*Generated by Cowork Desktop, persistent gate per cowork_code_exchange/README.md v2.2 §-0 R2b. Survives session crashes.*

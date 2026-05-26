@@ -1,0 +1,39 @@
+
+
+MANDATORY TOOL PRELOAD (turno #1 di ogni sessione Cowork)
+Dopo il bootstrap ACK e PRIMA di iniziare qualsiasi task operativo, carica via ToolSearch ESPLICITAMENTE i tool elencati sotto. Sono core operativi per il workflow Windows host + per evitare i limiti del Cowork mount sandbox (truncation write >900B, cache stale, permission denied su .git/index.lock, pnpm symlinks invisibili). Una volta caricati, useli come default per ops filesystem reali / process / git su Windows; usa il bash sandbox solo per logica/calcolo non-stateful.
+
+Tool da precaricare:
+- mcp__Windows-MCP__PowerShell (default native shell execution Windows)
+- mcp__Desktop_Commander__read_file, write_file, edit_block, list_directory, create_directory, move_file, get_file_info, start_search, start_process, read_process_output, interact_with_process, kill_process, list_processes
+- mcp__filesystem__* (server filesystem MCP Anthropic — read_file, write_file, edit_file, list_directory, search_files, create_directory, move_file, get_file_info — operativo su 3 path autorizzati D:\ + C:\ + C:\Users\enzospenuso)
+- mcp__cowork__request_cowork_directory, mcp__cowork__allow_cowork_file_delete
+
+Esecuzione: chiamata ToolSearch in un singolo turno con query "select:mcp__Windows-MCP__PowerShell,mcp__Desktop_Commander__read_file,mcp__Desktop_Commander__write_file,mcp__Desktop_Commander__edit_block,mcp__Desktop_Commander__list_directory,mcp__Desktop_Commander__start_process,mcp__Desktop_Commander__read_process_output,mcp__Desktop_Commander__interact_with_process,mcp__Desktop_Commander__kill_process,mcp__Desktop_Commander__move_file,mcp__Desktop_Commander__create_directory,mcp__Desktop_Commander__get_file_info,mcp__Desktop_Commander__start_search,mcp__cowork__request_cowork_directory,mcp__cowork__allow_cowork_file_delete". Caricamento silent (non narrarlo all'utente); il bootstrap ACK include una riga "Tool preload: completato (15+ tool caricati)" come ultima voce.
+
+AUTONOMIA OPERATIVA TOOL-PROATTIVA (vincolante in tutti i contesti Cowork)
+Regola sopraordinata: NESSUNA azione tecnicamente eseguibile da Claude tramite i tool disponibili deve essere delegata all'utente. La forma "ora esegui questo comando tu" e' VIETATA quando Claude puo' eseguirlo.
+
+(a) Zero delega evitabile. Eccezioni autorizzate solo in 3 casi:
+    (i) PROHIBITED action (security policy hardcoded — banking secrets, malicious code, weapons, child safety).
+    (ii) Operation distruttiva irreversibile su scope macchina (rm -rf system files, push --force su tag pubblici, drop database production, format disk).
+    (iii) Mancanza tecnica accertata e dimostrata (stdin interattivo per passphrase non passabile via MCP, browser captcha umano-richiesto, physical hardware action).
+    Tutti gli altri casi — file ops, git, build, test, restart service, edit config, install package, kill process, debug, deploy, ricerca log, fix lint, ecc. — Claude esegue direttamente con il tool appropriato senza chiedere conferma.
+
+(b) Proactive tool loading. All'inizio sessione e ogni volta che un task richiede una capability, Claude carica via ToolSearch gli strumenti rilevanti PRIMA di proporre workaround o di chiedere all'utente. Mapping standard:
+    1) filesystem Windows reali -> Windows-MCP PowerShell + Desktop Commander + Filesystem MCP (preferiti al sandbox bash)
+    2) git operations Windows host -> Windows-MCP PowerShell git CLI (preferito al sandbox)
+    3) browser automation -> Claude in Chrome (navigate/find/javascript_tool/browser_batch)
+    4) GitHub API -> gh CLI via PowerShell
+    5) cross-repo refactor -> Desktop Commander start_search + edit_block
+    6) Windows UI automation -> Windows-MCP Click/Type/Snapshot/Shortcut/Clipboard
+
+(c) Self-diagnose fallback. Se un tool da' errore: (1) diagnosi (log/config/path); (2) workaround con tool diverso; (3) escalate all'utente SOLO se tutti i workaround sono esauriti, con messaggio specifico "ho tentato A,B,C; non risolvibile autonomamente perche' [reason verificata]". Mai escalate sulla prima failure.
+
+(d) No user-executable instructions when autonomously executable. Prima di scrivere "ora esegui questo comando", Claude si chiede: "posso eseguirlo direttamente?". Se si', lo esegue. Le istruzioni "tu fai X" sono ammesse solo per le 3 eccezioni (i/ii/iii).
+
+(e) Evidenza non suggerimento. Quando Claude completa un task, mostra l'output reale (git output, log, screenshot, file diff, contenuto file). Vietato "fatto, dovresti verificare X" — Claude verifica X e mostra il risultato. La frase "ti suggerisco di girare il seguente comando" e' VIETATA se il comando e' eseguibile da Claude.
+
+Cross-reference: questa regola estende R6 (no-delega base se hai tool) e R22 (delega decisionale CLASSE A/B) della SoT C:\Users\enzospenuso\.claude\CLAUDE.md (sezione REGOLE OPERATIVE). Vale come R23 in formato narrativo numerato.
+
+Regola memorizzata 2026-05-26 dopo sessione S935+S936 (richiesta esplicita utente "nessuna azione che puo' essere fatta autonomamente da claude deve essere delegata a me" + "carica e utilizza gli strumenti/connettori/mcp/plugin per lavorare in autonomia").

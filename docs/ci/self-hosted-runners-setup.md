@@ -49,9 +49,12 @@ sudo apt-get install -y \
 ## §3 — Register the runner
 
 ```bash
-# 1. On GitHub: Settings → Actions → Runners → New self-hosted runner
-#    Select Linux ARM64. Copy the token shown (one-time use, expires in 1h).
-#    Reference: https://github.com/Spen-Zosky/heuresys-advanced/settings/actions/runners/new
+# 1. Get a registration token. Two options:
+#    (a) GitHub UI: Settings → Actions → Runners → New self-hosted runner (Linux ARM64).
+#        https://github.com/Spen-Zosky/heuresys-advanced/settings/actions/runners/new
+#    (b) Fully autonomous via gh CLI (PAT needs repo Administration write) — no UI step:
+#        TOKEN=$(gh api -X POST repos/Spen-Zosky/heuresys-advanced/actions/runners/registration-token --jq .token)
+#        Tokens are one-time use and expire in ~1h. Pass via stdin, never echo (R10).
 
 # 2. On OCI VM, download the runner package (latest at time of writing: 2.319.1)
 cd /opt/heuresys-runner
@@ -80,42 +83,74 @@ sudo ./svc.sh status    # expected: active (running)
 
 The runner needs DB credentials + JWT key paths + cookie secret WITHOUT exposing them in workflow YAML (R11 secret hygiene).
 
+**CRITICAL — systemd EnvironmentFile escaping gotcha (verified S937):** systemd
+applies shell-style backslash unescaping to EnvironmentFile values. A literal
+`\n` (backslash + n) is collapsed to `n` — it does **not** become a newline. So
+a PEM written with single-`\n` escapes arrives at the app with its newlines
+destroyed → `@fastify/jwt` boots with `FAST_JWT_INVALID_KEY` / "PEM section not
+found for: PRIVATE KEY" and **every** integration suite fails in `beforeAll`.
+Fix: write the PEM with **double** backslashes (`\\n`). systemd unescapes
+`\\n` → `\n` (literal), and `env.ts`'s `readKeyMaterial` then converts `\n` →
+real newline (it keys off the value containing `BEGIN`/`END`). Do **not** base64
+the keys — `env.ts` expects a PEM block, not base64.
+
+Note the var names the code actually reads: `env.ts` uses **`POSTGRES_DB`**, while
+the workflow's `psql` connectivity step uses `POSTGRES_DATABASE` + `PGPASSWORD`.
+Set all three. Non-DB secrets (`COOKIE_SECRET`, `MFA_ENCRYPTION_KEY`, the JWT
+keypair) do **not** need to match the dev host — the CI suite logs in against the
+real Argon2id hashes in the DB and signs/verifies JWTs within one app instance,
+so a freshly generated keypair is fine and avoids transferring dev secrets (R10).
+
 ```bash
-# 1. Create the EnvironmentFile (mode 600, ubuntu-owned)
-sudo bash -c 'cat > /etc/heuresys-runner.env << EOF
+# 1. Build the EnvironmentFile ON the VM. Generate the JWT keypair + cookie/MFA
+#    secrets here; transfer ONLY the real DB password from the dev host's .env
+#    (piped via stdin, never echoed — R10). $PW below = that password.
+TMP=$(mktemp -d)
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$TMP/priv.pem" 2>/dev/null
+openssl rsa -in "$TMP/priv.pem" -pubout -out "$TMP/pub.pem" 2>/dev/null
+# Escape newlines as DOUBLE backslash (chr(92)*2 + 'n') for systemd:
+ESC='import sys;print(open(sys.argv[1]).read().replace(chr(10),chr(92)+chr(92)+chr(110)),end="")'
+PRIV=$(python3 -c "$ESC" "$TMP/priv.pem"); PUB=$(python3 -c "$ESC" "$TMP/pub.pem")
+COOKIE=$(openssl rand -base64 48 | tr -d '\n'); MFA=$(openssl rand -base64 32 | tr -d '\n')
+sudo bash -c "umask 077; cat > /etc/heuresys-runner.env" << EOF
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
+POSTGRES_DB=heuresys_advanced
 POSTGRES_DATABASE=heuresys_advanced
 POSTGRES_USER=heuresys
-POSTGRES_PASSWORD=<copy from D:\heuresys-advanced\.env on dev host>
+POSTGRES_PASSWORD=$PW
+PGPASSWORD=$PW
 POSTGRES_SCHEMA=sys
 POSTGRES_SSL=disable
-
-COOKIE_SECRET=<copy from D:\heuresys-advanced\.env>
+COOKIE_SECRET=$COOKIE
 ADMIN_ORIGIN=http://localhost:3000
-NODE_ENV=test
-
-JWT_PRIVATE_KEY=<base64 of .secrets/jwt_private.pem>
-JWT_PUBLIC_KEY=<base64 of .secrets/jwt_public.pem>
-
-MFA_ENCRYPTION_KEY=<openssl rand -base64 32>
-
+MFA_ENCRYPTION_KEY=$MFA
+JWT_PRIVATE_KEY=$PRIV
+JWT_PUBLIC_KEY=$PUB
 LOG_LEVEL=warn
+NODE_ENV=test
 NEXT_TELEMETRY_DISABLED=1
-EOF'
-sudo chmod 600 /etc/heuresys-runner.env
-sudo chown root:root /etc/heuresys-runner.env
+EOF
+sudo chmod 600 /etc/heuresys-runner.env && sudo chown root:root /etc/heuresys-runner.env
+rm -rf "$TMP"
 
-# 2. Modify the runner systemd unit to load this file
-sudo systemctl edit actions.runner.Spen-Zosky-heuresys-advanced.oracle-vm-default-runner.service
+# 2. Verify the keys survive systemd's unescaping BEFORE trusting the runner:
+sudo systemd-run --wait --collect --quiet \
+  --property=EnvironmentFile=/etc/heuresys-runner.env \
+  /bin/bash -c 'printf "%s" "$JWT_PRIVATE_KEY" > /tmp/jp.r'
+sudo chmod 644 /tmp/jp.r
+node -e 'const fs=require("fs"),c=require("crypto");let v=fs.readFileSync("/tmp/jp.r","utf8");v=v.split(String.fromCharCode(92)+"n").join(String.fromCharCode(10));c.createPrivateKey(v);console.log("JWT key OK")'
+sudo rm -f /tmp/jp.r
 
-# Add the following in the editor that opens:
-# [Service]
-# EnvironmentFile=/etc/heuresys-runner.env
-
-# 3. Reload + restart
+# 3. Attach the EnvironmentFile via a systemd drop-in (non-interactive — avoids
+#    the editor that `systemctl edit` opens), then reload + restart.
+UNIT=actions.runner.Spen-Zosky-heuresys-advanced.oracle-vm-default-runner.service
+sudo mkdir -p "/etc/systemd/system/${UNIT}.d"
+printf '[Service]\nEnvironmentFile=/etc/heuresys-runner.env\n' \
+  | sudo tee "/etc/systemd/system/${UNIT}.d/override.conf" >/dev/null
 sudo systemctl daemon-reload
-sudo systemctl restart actions.runner.Spen-Zosky-heuresys-advanced.oracle-vm-default-runner.service
+sudo systemctl restart "$UNIT"
+sudo systemctl is-active "$UNIT"    # expected: active
 ```
 
 **R11 note**: never commit `/etc/heuresys-runner.env` to any repo. Keep a sealed backup on the dev host alongside `.secrets/`.

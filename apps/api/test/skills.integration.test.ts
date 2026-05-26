@@ -120,8 +120,14 @@ describe("/v1/skills/* integration", () => {
   });
 
   it("LIST as USER includes both global + own-tenant skills", async () => {
+    // Scope by SUITE_PREFIX via the `search` filter (ILIKE on code/name) so the
+    // assertion is robust against table growth: sys.sys_skills holds tens of
+    // thousands of rows post brownfield Wave-1 import, far beyond any single
+    // page, so a bare `?limit=200` would not contain this suite's freshly
+    // created skills. The visibility intent (USER sees global + own-tenant) is
+    // unchanged — we still assert every createdSkillId is returned.
     const r = await suite.app.inject({
-      method: "GET", url: "/v1/skills?limit=200",
+      method: "GET", url: `/v1/skills?limit=200&search=${SUITE_PREFIX}`,
       headers: { cookie: ch(employeeS.cookies) },
     });
     expect(r.statusCode).toBe(200);

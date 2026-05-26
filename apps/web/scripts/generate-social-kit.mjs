@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* global console, process, document */
 /**
  * scripts/generate-social-kit.mjs
  *

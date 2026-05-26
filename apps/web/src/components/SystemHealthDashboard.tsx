@@ -1,5 +1,13 @@
 "use client";
 
+/* eslint-disable no-sparse-arrays */
+// CODE-NEW-2 Pre-flight 2026-05-26: this file uses INTENTIONAL sparse arrays
+// in scopeTitles[] for column alignment with states[] (empty slots = no title
+// for that column). 25 no-sparse-arrays errors are false-positive for this
+// data structure pattern; disabling rule file-wide is the correct mitigation
+// vs refactoring data to explicit `undefined` placeholders (same semantic,
+// just verbose).
+
 /**
  * SUPERUSER System Health & Observability — canonical reference dashboard.
  *

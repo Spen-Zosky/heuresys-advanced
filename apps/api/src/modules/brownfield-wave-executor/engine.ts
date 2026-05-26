@@ -5,8 +5,19 @@
  * data-driven from brownfield.table_mappings + brownfield.column_mappings.
  * The 7 per-domain ETLs are NOT hardcoded functions; they are configurations
  * (column mappings) and the engine iterates them generically.
+ *
+ * Logging: module-level pino child logger (CODE-1 Pre-flight 2026-05-26).
+ * Functions don't receive Fastify req/app, but pino structured log is
+ * canonical for backend ops parity with `app.log` (same JSON shape, same
+ * redaction config, same level filter via LOG_LEVEL env var).
  */
 import type { Pool } from "pg";
+import { pino } from "pino";
+
+const logger = pino({
+  name: "wave-executor",
+  level: process.env.LOG_LEVEL ?? "info",
+});
 import type {
   WaveStageStats,
   WaveExecutorMode,
@@ -220,7 +231,15 @@ export async function executeStage(
       // reason on the run metadata so it's visible in the API response.
       const msg = (e as Error).message;
       tally.failedRows += 1;
-      console.error(`[wave1-stage] failed mapping ${m.source_table_name} → ${m.target_table}: ${msg}`);
+      logger.error(
+        {
+          phase: "wave1-stage",
+          source_table: m.source_table_name,
+          target_table: m.target_table,
+          err: msg,
+        },
+        `failed mapping ${m.source_table_name} → ${m.target_table}: ${msg}`,
+      );
     }
 
     statsByTarget.set(m.target_table, tally);
@@ -265,8 +284,9 @@ export async function analyzeWave1Staging(
     try {
       await pool.query(`ANALYZE ${t}`);
     } catch (e) {
-      console.error(
-        `[wave1-analyze] ANALYZE ${t} failed: ${(e as Error).message}`,
+      logger.error(
+        { phase: "wave1-analyze", staging_table: t, err: (e as Error).message },
+        `ANALYZE ${t} failed: ${(e as Error).message}`,
       );
     }
   }
@@ -817,8 +837,15 @@ export async function executeUpsert(
     tally.upsertedRows += sqlResult.upsertedRows;
     tally.lineageRows += sqlResult.lineageRows;
     if (sqlResult.skipped && sqlResult.skipReason) {
-      console.error(
-        `[wave1-upsert-sql] mapping ${m.table_mapping_id} (source=${m.source_table_name}, target=${m.target_table}) SKIPPED: ${sqlResult.skipReason}`,
+      logger.error(
+        {
+          phase: "wave1-upsert-sql",
+          table_mapping_id: m.table_mapping_id,
+          source_table: m.source_table_name,
+          target_table: m.target_table,
+          skip_reason: sqlResult.skipReason,
+        },
+        `mapping ${m.table_mapping_id} (source=${m.source_table_name}, target=${m.target_table}) SKIPPED: ${sqlResult.skipReason}`,
       );
     }
     // End [v5 criterion 11]. The original JS-side path below stays as

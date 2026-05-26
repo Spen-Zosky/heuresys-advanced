@@ -26,11 +26,19 @@
  */
 import format from "pg-format";
 import type { Pool } from "pg";
+import { pino } from "pino";
 import type { WaveExecutorMode } from "@heuresys/shared";
 import {
   compileTransform,
   UnsupportedTransformError,
 } from "./transform-compiler.js";
+
+// CODE-1 Pre-flight 2026-05-26: structured pino logger replaces console.error.
+// Same shape as Fastify app.log (canonical for log redaction + ops parity).
+const logger = pino({
+  name: "wave-executor-upsert",
+  level: process.env.LOG_LEVEL ?? "info",
+});
 import type {
   ColumnMappingRow,
   TableMappingRow,
@@ -680,8 +688,14 @@ export async function executeUpsertSqlSidePerMapping(
           mapping.table_mapping_id,
         ]);
       } catch (e) {
-        console.error(
-          `[sql-side-upsert] CW-B17 audit emission failed for mapping ${mapping.table_mapping_id}: ${(e as Error).message}`,
+        logger.error(
+          {
+            phase: "sql-side-upsert",
+            sub_phase: "cw-b17-audit",
+            table_mapping_id: mapping.table_mapping_id,
+            err: (e as Error).message,
+          },
+          `CW-B17 audit emission failed for mapping ${mapping.table_mapping_id}: ${(e as Error).message}`,
         );
         // Continue — audit emission failure should NOT block import
       }
@@ -889,8 +903,14 @@ export async function executeUpsertSqlSidePerMapping(
     lineageCount = lineageRes.rowCount ?? 0;
   } catch (e) {
     // Log + continue — lineage failure shouldn't poison the run
-    console.error(
-      `[sql-side-upsert] lineage write failed for mapping ${mapping.table_mapping_id}: ${(e as Error).message}`,
+    logger.error(
+      {
+        phase: "sql-side-upsert",
+        sub_phase: "lineage-write",
+        table_mapping_id: mapping.table_mapping_id,
+        err: (e as Error).message,
+      },
+      `lineage write failed for mapping ${mapping.table_mapping_id}: ${(e as Error).message}`,
     );
   }
 
@@ -914,8 +934,14 @@ export async function executeUpsertSqlSidePerMapping(
   try {
     await pool.query(stagingMarkSql, [runId, mapping.source_table_name]);
   } catch (e) {
-    console.error(
-      `[sql-side-upsert] staging mark failed for mapping ${mapping.table_mapping_id}: ${(e as Error).message}`,
+    logger.error(
+      {
+        phase: "sql-side-upsert",
+        sub_phase: "staging-mark",
+        table_mapping_id: mapping.table_mapping_id,
+        err: (e as Error).message,
+      },
+      `staging mark failed for mapping ${mapping.table_mapping_id}: ${(e as Error).message}`,
     );
   }
 

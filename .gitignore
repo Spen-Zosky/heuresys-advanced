@@ -106,3 +106,19 @@ pg_dump_snapshots/
 # to commit, but volumes/data must not be.
 docs/optional/docker/data/
 docs/optional/docker/.volumes/
+
+# -----------------------------------------------------------------------------
+# Claude / Cowork transient artifacts
+# -----------------------------------------------------------------------------
+# Git worktrees created locally for parallel branches (e.g. brand-identity-v1
+# via .claude/worktrees/musing-wing-NNN). These are checkout copies, not source
+# of truth — they regenerate via `git worktree add`.
+.claude/worktrees/
+
+# Cowork protocol transient files: lock acquired during active sessions,
+# pending-commits manifest auto-cleaned post-apply, inbox INDEX auto-generated
+# via `pnpm cowork:inbox:rebuild`. None of these are SoT — they regenerate.
+cowork_code_exchange/.cowork-active.lock
+cowork_code_exchange/.cowork-pending-commits.json
+cowork_code_exchange/.cowork-pending-commits/
+cowork_code_exchange/.inbox/INDEX.md

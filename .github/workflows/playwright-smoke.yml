@@ -87,7 +87,12 @@ jobs:
 
       - name: Run Playwright smoke suite
         working-directory: apps/web
-        run: pnpm exec playwright test --grep "@smoke" --reporter=list,html
+        # The canonical smoke is the 5-persona spec (login + role-gated nav +
+        # 2 extra pages per persona). There is no `@smoke` title tag in the
+        # suite — the prior `--grep "@smoke"` matched zero tests → "No tests
+        # found" → exit 1. Target the file directly; the `setup` project
+        # (auth.setup.ts → storageState) still runs as a project dependency.
+        run: pnpm exec playwright test smoke-5-personas.spec.ts --reporter=list,html
 
       - name: Upload Playwright report on failure
         if: failure()

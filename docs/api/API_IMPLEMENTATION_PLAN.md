@@ -1,9 +1,27 @@
 # API Implementation Plan
-## Heuresys Advanced — Fastify Backend (22 modules)
+## Heuresys Advanced — Fastify 5 Backend (58 modules, 272 endpoints)
 
-> **Status:** Planning deliverable #10 of 10.
+> **Status:** Planning deliverable #10 of 10. **Refreshed 2026-05-26 (Pre-flight Phase 1 DOC-11)** — original plan documented 23 functional modules / 148 endpoints; live state post-MVP-3 (tag `v0.3.2-mvp3-full`) is **58 modules / 272 endpoints + 2 health** (vedi `apps/api/src/modules/` filesystem + verified-by audit live `cowork_reserved/02a_ADV_SYS.md`).
 > **Sources:** `BACKEND_API_STACK_SPEC.md`, `OPENAPI_BOOTSTRAP_SPEC.yaml`, `AUTH_STACK_SPEC.md`, `LEARNING_CATALOG_AND_GAP_CLOSURE_SPEC.md`, `GRAPH_VISUALIZATION_MODEL_SPEC.md`, ADR‑0002, ADR‑0003.
-> **Scope:** the Fastify API server (`apps/api/`) for MVP‑1 + MVP‑2b. **23 functional modules** (22 main + `me` for ESS). Every endpoint tenant‑aware; ESS endpoints additionally `self`‑scope hard‑enforced. PostgreSQL native via Drizzle ORM. No Docker on canonical path; runtime per ADR‑0010.
+> **Scope:** the Fastify 5 API server (`apps/api/`) for MVP‑1 + MVP‑2b + MVP-3. **58 functional modules** (post-Goal 005-013 expansion: 11 visualization sub-modules invece di 1 / 5 brownfield invece di 1 / 5 blueprint sub-modules invece di 1 / 3 seed-acquisition / 3 enterprise-typing + nuovo brownfield-wave-executor con state machine 8 stati + nuovi mfa sub-routes + compensation + dashboard). Every endpoint tenant‑aware; ESS endpoints (`me/` 17 endpoints) hard self-scope; MFA gating al login (Tappa E MVP-3 X20). PostgreSQL 16 native via raw parametrized SQL on `pg` (Drizzle solo come pool wrapper). No Docker on canonical path; runtime ADR‑0010 Option B (OCI VM tunnel 5433, RD-25).
+
+### Refresh delta MVP-3 (vs original plan)
+
+| Aspect | Original plan | Live state 2026-05-26 |
+|---|---|---|
+| Modules count | 23 (22 main + me) | **58** (espanso 6 streams) |
+| Endpoint count | ≈148 (130 main + 18 ESS) | **272** business + 2 health |
+| Fastify version | 4.x | 5.8.5 (post-triage fase 2 MVP-3) |
+| Auth | JWT + refresh + CSRF | + MFA TOTP RFC 6238 login-gating full (Tappa E) |
+| Brownfield | `brownfield-adaptation` (1 module, 4 endpoints) | + `brownfield-wave-executor` (1 module + state machine **8 stati**: PENDING/STAGING/VALIDATING/APPROVED/UPSERTING/COMPLETE/FAILED/CANCELLED) + 4 viewer sub-modules |
+| Visualizations | 1 module | 7 sub-modules (graphs/nodes/edges/layouts/node-layouts/styles/exports) |
+| Blueprint | 1 module | 5 sub-modules (families/variants/processes/activations/overrides) |
+| Skill taxonomy | 1 module | 6 sub-modules (skills + families/categories/aliases/edges/proficiency-levels) |
+| Compensation | (out of scope original) | 1 module 4 endpoints (decision support) |
+| Dashboard | (not planned) | 1 role-gated aggregator endpoint |
+| Test suite | 30+ planned | **341 PASS / 1 FAIL (skills:131) / 5 SKIP** (vitest single-thread, real DB tunnel) |
+
+Per inventario aggiornato moduli + endpoint vedere `sessioni/session_2026-05-26_forensic-state-of-the-art/FORENSIC_STATE_OF_ART_2026-05-26.md` §1.3 + `cowork_reserved/02a_ADV_SYS.md`.
 
 ---
 
@@ -377,7 +395,7 @@ Note: `TenantBoundaryViolation` is surfaced as a 404 to prevent enumeration; log
 
 ---
 
-## 5. Module Roster (22 modules)
+## 5. Module Roster (originally 22 modules; **expanded to 58 in MVP-1/3** — vedi refresh delta in intro)
 
 Each module's responsibilities:
 
@@ -407,7 +425,7 @@ Each module's responsibilities:
 | `brownfield-adaptation` | `GET /inventory`, `GET /table-mappings`, `PATCH /table-mappings/:id`, `POST /runs`, `GET /runs`, `POST /runs/:id/approve`, `POST /runs/:id/apply` | Brownfield import | `brownfield_adaptation:*` |
 | **`me` (ESS)** | **`GET /me/profile`, `PATCH /me/profile`, `GET /me/positions`, `GET /me/skills`, `POST /me/skills/self-assessments`, `GET /me/learning`, `POST /me/learning/enrollments`, `GET /me/kpis`, `GET /me/gaps`, `GET /me/career`, `POST /me/career/target-positions`, `GET /me/assessments`, `GET /me/certifications`, `POST /me/certifications`, `GET /me/documents`, `POST /me/documents`, `GET /me/inbox`, `PATCH /me/inbox/:id`** | **Employee Self‑Service Portal (MVP‑2b)** — every endpoint hard‑coded to `userId = req.user.userId`; URL never accepts a userId param | **`*:read:self`, `*:update:self`, `*:self_assess`, `*:enroll:self`, `*:request_target:self`, `*:upload:self`, `notification:mark_read:self`** (see `AUTH_SECURITY_PLAN.md` §6.1) |
 
-Total endpoints: ≈ 148 (130 main + 18 ESS).
+Total endpoints (original plan): ≈ 148 (130 main + 18 ESS). **Live state 2026-05-26**: **272 business + 2 health** (cfr. refresh delta in intro + `cowork_reserved/02a_ADV_SYS.md`).
 
 ---
 

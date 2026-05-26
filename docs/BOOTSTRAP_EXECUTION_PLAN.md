@@ -359,18 +359,22 @@ The deliverable review session produced additional binding decisions, recorded b
 
 ---
 
-## 10. Open Questions for User Review
+## 10. Open Questions for User Review — **ALL RESOLVED post-RD-24 (2026-05-16) + post-MVP-3 (2026-05-25)**
 
-| # | Question | Default if not answered | Where it lands |
-|---|----------|--------------------------|----------------|
-| Q1 | Confirm Fastify over Express? | Fastify | ADR‑0002 |
-| Q2 | Confirm Drizzle over node‑postgres? | Drizzle | ADR‑0003 |
-| Q3 | DB name: `heuresys_advanced` or rename to `heuresys_advanced` (matches repo)? | `heuresys_advanced` (consistency with v5 spec) | ADR‑0011 (TBD if renamed) |
-| Q4 | Final runtime location (ADR‑0010): A localhost / B OCI VM / C OCI Managed? | A localhost for MVP‑0/1; revisit at MVP‑2 | ADR‑0010 closure |
-| Q5 | OCI VM PostgreSQL install path: SSH tunnel from Windows or expose 5432 via security list? | SSH tunnel (`ssh -L 5432:localhost:5432 oracle-vm-default`) | ADR‑0010 |
-| Q6 | Synthetic data generator: deterministic Faker seed (per branch / per role) or AI‑generated names? | Deterministic Faker | `MIGRATION_IMPLEMENTATION_PLAN.md` |
-| Q7 | Brownfield wave order: as recommended (1→2→3→4) or different? | As recommended | `BROWNFIELD_IMPORT_PLAN.md` |
-| Q8 | OpenAPI contract location: keep `docs/source_bundle/.../OPENAPI_BOOTSTRAP_SPEC.yaml` + delta, or copy to `apps/api/openapi.yaml` and curate there? | Copy to `apps/api/openapi.yaml` (single source for runtime contract) | `API_IMPLEMENTATION_PLAN.md` |
+> **Status update 2026-05-26 (Pre-flight Phase 1 DOC-10)**: tutte le Q1-Q8 originali sono state risolte durante MVP-0..3. Tabella aggiornata per archive storico.
+
+| # | Question | Resolution | ADR/RD ref |
+|---|----------|------------|------------|
+| Q1 | Confirm Fastify over Express? | ✅ **RESOLVED 2026-05-16**: Fastify 4 confirmed → Fastify 5 post-triage fase 2 (MVP-3) | ADR‑0002 Accepted |
+| Q2 | Confirm Drizzle over node‑postgres? | ✅ **RESOLVED 2026-05-16**: Drizzle ORM as pool wrapper only; raw parametrized SQL on `pg` for query execution | ADR‑0003 Accepted |
+| Q3 | DB name | ✅ **RESOLVED RD-01**: `heuresys_advanced` / role `heuresys` confirmed | RD-01 |
+| Q4 | Final runtime location ADR‑0010 | ✅ **RESOLVED RD-25 (2026-05-16)**: **Option B** — OCI VM `oracle-vm-default` via SSH tunnel `5433→5432`. Option A/C documentati come `.env.example` fallback blocks. Option C future revisit pianificato in MVP-4 stream 2.8 (vedi `docs/MVP_4_ROADMAP.md`) | ADR‑0010 Accepted (RD-25) |
+| Q5 | OCI VM PostgreSQL access | ✅ **RESOLVED RD-25**: SSH tunnel pattern shipped + funzionante; `ssh -fN -L 5433:localhost:5432 oracle-vm-default` come canonical command | ADR‑0010 |
+| Q6 | Synthetic data generator | ✅ **RESOLVED**: Deterministic Faker `SEED=42` confermato + shipped in `db/scripts/seed-reference-bank.ts`. 158 users sintetici + 55 positions generate ripetibilmente | `MIGRATION_IMPLEMENTATION_PLAN.md` + `db/scripts/` |
+| Q7 | Brownfield wave order | ✅ **RESOLVED**: Wave 1 → Wave 2-4 confermato. Wave 1 shipped MVP-3 Tappa D pragmatic 13/19 IMPORT (CW-B60 residual). Wave 2/3/4 docs runner scritte in MVP-4 stream 2.1/2.2/2.3 (vedi `docs/brownfield/wave_runners/`) | `BROWNFIELD_IMPORT_PLAN.md` + `wave_runners/` |
+| Q8 | OpenAPI contract location | ⚠️ **PARTIALLY RESOLVED**: decision confirmed (`apps/api/openapi.yaml`), MA file non ancora generato — `openapi:generate` script in package.json punta a `scripts/generate-openapi.ts` non esistente. **Pending implementation** in Pre-flight Phase 3 CODE-2 (cleanup o riscrittura generator) | `API_IMPLEMENTATION_PLAN.md` §13 |
+
+**Section 19 (heavy implementation) unlocked**: 2026-05-16 (RD-24 approval). Tutte le 10 deliverables planning approved.
 
 ---
 

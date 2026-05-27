@@ -92,20 +92,21 @@ def main(argv):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Heuresys Advanced &middot; Knowledge Graph</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {{
     --background:#FAFBFD; --foreground:#0F1828; --card:#FFFFFF; --muted:#F1F4F9;
     --muted-foreground:#475569; --border:#E2E6EE; --primary:#2563EB; --logo:#3B82F6;
     --accent-purple:#A855F7; --radius:14px;
-    --font:"Inter",system-ui,-apple-system,Segoe UI,sans-serif;
+    --font:"Exo 2",Inter,system-ui,-apple-system,Segoe UI,sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   }}
   * {{ box-sizing:border-box; }}
   body {{ margin:0; background:var(--background); color:var(--foreground); font-family:var(--font); }}
   header {{ padding:40px 40px 28px; border-bottom:1px solid var(--border); background:var(--card); }}
-  .wordmark {{ font-size:26px; font-weight:700; letter-spacing:-.02em; }}
+  .wordmark {{ font-size:27px; font-weight:700; letter-spacing:-.5px; color:var(--logo); }}
   .wordmark .y {{ color:var(--accent-purple); }}
-  .wordmark .adv {{ color:var(--muted-foreground); font-weight:500; }}
+  .wordmark .adv {{ color:var(--muted-foreground); font-weight:500; letter-spacing:-.01em; margin-left:6px; }}
   .tag {{ display:inline-block; margin-left:10px; font-size:11px; font-weight:600; color:var(--primary);
           background:hsl(221 83% 53% / .08); border:1px solid hsl(221 83% 53% / .18);
           padding:2px 9px; border-radius:999px; vertical-align:middle; }}
@@ -132,11 +133,11 @@ def main(argv):
   .btn.primary:hover {{ filter:brightness(1.06); }}
   .btn.ghost {{ background:transparent; color:var(--muted-foreground); }}
   footer {{ max-width:1180px; margin:0 auto; padding:0 40px 40px; color:var(--muted-foreground); font-size:12px; }}
-  footer code {{ background:var(--muted); padding:1px 6px; border-radius:5px; font-size:11.5px; }}
+  footer code {{ background:var(--muted); padding:1px 6px; border-radius:5px; font-size:11px; font-family:var(--mono); }}
 </style></head>
 <body>
   <header>
-    <div class="wordmark">heuresys<span class="y">.</span><span class="adv">advanced</span><span class="tag">Knowledge Graph</span></div>
+    <div class="wordmark">heures<span class="y">y</span>s<span class="adv">advanced</span><span class="tag">Knowledge Graph</span></div>
     <div class="sub">Mappa del dominio via graphify (AST + community detection) &middot; {len(graphs)} grafi &middot; sorgenti lette in-place, zero copie &middot; aggiornato {ts}</div>
   </header>
   <main>

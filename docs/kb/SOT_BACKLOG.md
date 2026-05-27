@@ -17,7 +17,7 @@
 | **B-21** (#5) | 🔴 APERTO | `fastify-type-provider-zod 4.0.2` | accoppiato a zod4; compiler/transform breaking 4→6 |
 | **B-22** (#6) | ✅ **FATTO** 2026-05-28 | `react-i18next 15.4.0→17.0.8` + `i18next 23.16.8→26.3.0` (peer richiedeva i18next≥26.2). Uso basilare (init+Provider+useTranslation), 0 plural keys → smooth. typecheck+i18n parity+build web verdi. | chiude PR #6 |
 | **B-23** (#1 next) | ⚪ **STALE/CHIUSO** | nessuna PR `next` aperta; `next@15.5.18` | **rimuovere dal backlog** |
-| **B-24** | 🟢 **quasi fatto** | `checkout/setup-node/action-setup` già **@v6** (#14/#15 chiuse); resta solo `peaceiris/actions-gh-pages@v3` in showcase.yml | solo **PR #16** gh-pages 3→4 |
+| **B-24** | ✅ **FATTO** 2026-05-28 | `peaceiris/actions-gh-pages@v3→@v4` in showcase.yml; v4 = solo Node16→20 (verificato changelog), tutti gli input usati (github_token/publish_dir/publish_branch/force_orphan/commit_message) compatibili. YAML validato. | chiude PR #16; deploy gira al push |
 | **B-25 / D-09** | ✅ **FATTO** 2026-05-28 | condition `if: !contains(...labels...'defer-major')` aggiunta ai 6 workflow `pull_request`; push a main non impattato; YAML validato | — |
 | **B-30** | 🟢 aperto (infra) | solo OCI VM runner | backup runner Windows |
 | **B-31** | 🟡 aperto (infra) | — | ssh-agent persistence cross-session |
@@ -51,7 +51,7 @@
 | **B-21** | #5 | fastify-type-provider-zod 4→6 | alto | Accoppiato a zod4 (B-20) — valutare insieme. |
 | ~~**B-22**~~ | #6 | ~~react-i18next 15→17~~ | medio | ✅ **FATTO 2026-05-28**: +i18next 23→26 (peer). 3 file consumatori, uso basilare, 0 plural keys. typecheck+parity+build web verdi. |
 | **B-23** | #1 | next (major) | alto | conflicting + CVE-hold; verificare impatto RSC/showcase (CW-B59 area). |
-| **B-24** | #14/#15/#16 | setup-node 6 / action-setup 6 / gh-pages 4 | basso | CI actions; test su workflow showcase + self-hosted. |
+| ~~**B-24**~~ | #14/#15/#16 | setup-node 6 / action-setup 6 / gh-pages 4 | basso | ✅ **FATTO 2026-05-28**: #14/#15 già chiuse; gh-pages 3→4 applicato in showcase.yml (v4 = Node16→20 only, input compatibili). Chiude #16. |
 | ~~**B-25**~~ | — | ~~**Churn defer-major**~~ | basso | ✅ **FATTO 2026-05-28**: condition `if: !contains(github.event.pull_request.labels.*.name, 'defer-major')` sui 6 workflow `pull_request`. Le PR defer-major non triggerano più CI sul runner singolo; push a main intatto. |
 | ~~**B-26**~~ | #78 | ~~`tmp` <0.2.6 path-traversal~~ | — | ✅ **RISOLTO S939** (`6aa0b79`): transitivo via exceljs → pnpm override `exceljs>tmp >=0.2.6` → 0.2.7. NON era un major deferito. |
 

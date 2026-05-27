@@ -34,13 +34,13 @@ jobs:
       # relative to the package.json on disk, so the sister repo must exist
       # at `<workspace>/../ux-design-shared/ui` once both are checked out.
       - name: Checkout heuresys-advanced
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: heuresys-advanced
           fetch-depth: 1
 
       - name: Checkout ux-design-shared (sister repo, for @heuresys/ui)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: Spen-Zosky/ux-design-shared
           path: ux-design-shared
@@ -48,12 +48,12 @@ jobs:
           fetch-depth: 1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 9.15.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           # 22, not 20: a transitive dep (camera-controls@3.1.2 via three.js in
           # @heuresys/ui) requires Node >=22, so `pnpm install --frozen-lockfile`

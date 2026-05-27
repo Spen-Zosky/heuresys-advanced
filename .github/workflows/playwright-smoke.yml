@@ -81,8 +81,10 @@ jobs:
         run: |
           pnpm build
           # :3000 is Grafana (docker-proxy) on this runner host → use :3100.
-          # setsid so the server survives into the Playwright step.
-          setsid bash -c 'PORT=3100 pnpm start > /tmp/web.log 2>&1' &
+          # Invoke `next start` directly: the package `start` script hardcodes
+          # `-p 3000`, which ignores PORT and collides with Grafana. setsid so
+          # the server survives into the Playwright step.
+          setsid bash -c 'pnpm exec next start -p 3100 > /tmp/web.log 2>&1' &
           for i in $(seq 1 90); do
             curl -sf http://localhost:3100 > /dev/null && { echo "web up"; break; }
             sleep 1

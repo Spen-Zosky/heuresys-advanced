@@ -1,18 +1,15 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { PaletteDropdown, ThemeToggle } from "@heuresys/ui";
+import { PaletteDropdown, ThemeToggle } from "@/app/showcase/_ui-client";
 
-// X18 MVP-3 Tappa F pragmatic close (Path B). Versioned @heuresys/ui@0.1.1
-// triggers a Next.js 15 RSC bundle-threshold defect during static page-data
-// collection for /showcase/* ("d.createContext is not a function" / "Class
-// extends value undefined"). Emergent at bundle complexity (4+ dashboard
-// observability widgets), NOT a single component — 12 bisect iterations
-// (HALT-022-06) could not isolate a culprit. force-dynamic skips the static
-// collection that trips the defect. Proper fix (git bisect ux-design-shared /
-// split @heuresys/ui / Next 16 upgrade) deferred to a dedicated session.
-// See CW-B58/B59 + HALT-022-06 in cowork_code_exchange/_04_REPORT_022_batch_x18.md.
-export const dynamic = "force-dynamic";
+// CW-B59 fix: the @heuresys/ui barrel eagerly evaluates heavy class-based libs
+// (three / echarts / d3 / recharts) which crash server-side page-data collection
+// with "Class extends value undefined". The showcase UI primitives are now
+// imported from ./_ui-client (next/dynamic + ssr:false), so the barrel is never
+// evaluated during the server build. The previous `export const dynamic =
+// "force-dynamic"` workaround is removed: it didn't fix the import-time crash and
+// is incompatible with apps/showcase's `output: export` static build.
 
 export const metadata = {
   title: "Heuresys — Brand Identity Showcase",

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AuditFeed, KPIStrip } from "@heuresys/ui";
+import { AuditFeed, KPIStrip } from "@/app/showcase/_ui-client";
 import { BookOpen, Briefcase, Database, Layers } from "lucide-react";
 
 export const metadata = { title: "Showcase / Dashboard cards — Heuresys" };

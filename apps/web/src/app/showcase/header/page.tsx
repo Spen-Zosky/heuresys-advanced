@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DashboardHeader, HeuresysLogoBadge, HeuresysWordmark } from "@heuresys/ui";
+import { DashboardHeader, HeuresysLogoBadge, HeuresysWordmark } from "@/app/showcase/_ui-client";
 
 export const metadata = { title: "Showcase / Header — Heuresys" };
 

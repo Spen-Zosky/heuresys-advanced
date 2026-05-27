@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { StatusIcon, type StatusTone } from "@heuresys/ui";
+import { StatusIcon } from "@/app/showcase/_ui-client";
+import type { StatusTone } from "@heuresys/ui";
 import {
   AlertTriangle,
   BarChart3,

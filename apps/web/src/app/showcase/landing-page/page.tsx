@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { HeuresysMark, HeuresysWordmark } from "@heuresys/ui";
+import { HeuresysMark, HeuresysWordmark } from "@/app/showcase/_ui-client";
 
 export const metadata = { title: "Showcase / Landing page — Heuresys" };
 

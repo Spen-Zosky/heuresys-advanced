@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DataTableWithCrossHair } from "@heuresys/ui";
+import { DataTableWithCrossHair } from "@/app/showcase/_ui-client";
 
 export const metadata = { title: "Showcase / Tables — Heuresys" };
 

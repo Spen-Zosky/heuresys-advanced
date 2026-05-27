@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DashboardFooter } from "@heuresys/ui";
+import { DashboardFooter } from "@/app/showcase/_ui-client";
 
 export const metadata = { title: "Showcase / Footer — Heuresys" };
 

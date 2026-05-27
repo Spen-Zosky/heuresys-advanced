@@ -7,7 +7,7 @@ import {
   HeuresysLogoBadge,
   HeuresysMark,
   HeuresysWordmark,
-} from "@heuresys/ui";
+} from "@/app/showcase/_ui-client";
 import { BookOpen, Briefcase, Layers, Users } from "lucide-react";
 
 export const metadata = { title: "Showcase / Primary initial page — Heuresys" };

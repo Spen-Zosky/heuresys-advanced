@@ -6,7 +6,7 @@ import {
   DashboardSidebar,
   HeuresysLogoBadge,
   HeuresysWordmark,
-} from "@heuresys/ui";
+} from "@/app/showcase/_ui-client";
 import {
   AlertCircle,
   BookOpen,

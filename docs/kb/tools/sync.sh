@@ -30,6 +30,7 @@ log "[sync] 1/4 indice percorsi…";        python "$TOOLS/build_index.py" >/dev
 log "[sync] 2/4 manifest prosa (wiki)…";   python "$TOOLS/build_linked_manifest.py" >/dev/null
 log "[sync] 3/4 mirror symlink (graph)…";  python "$TOOLS/build_graph_mirror.py" >/dev/null
 log "[sync] 4/4 graphify update (AST)…";   graphify update "$MIRROR" 2>&1 | tail -1
+log "[sync] hub viz…";                      python "$TOOLS/build_graph_hub.py" >/dev/null
 
 if [ "$GRAPH_ONLY" -eq 0 ]; then
   echo "[sync] delta wiki (prosa da ri-ingerire — lavoro LLM, non automatico):"

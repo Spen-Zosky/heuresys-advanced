@@ -26,6 +26,7 @@ Log '[sync] 1/4 indice percorsi...';       python "$TOOLS\build_index.py" | Out-
 Log '[sync] 2/4 manifest prosa (wiki)...';  python "$TOOLS\build_linked_manifest.py" | Out-Null
 Log '[sync] 3/4 mirror symlink (graph)...'; python "$TOOLS\build_graph_mirror.py" | Out-Null
 Log '[sync] 4/4 graphify update (AST)...';  & $graphify update $MIRROR 2>&1 | Select-Object -Last 1
+Log '[sync] hub viz...';                     python "$TOOLS\build_graph_hub.py" | Out-Null
 
 if (-not $GraphOnly) {
   Write-Host '[sync] delta wiki (prosa da ri-ingerire - lavoro LLM, non automatico):'

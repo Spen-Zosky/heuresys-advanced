@@ -50,6 +50,7 @@
 **Artefatti generati (tutti FUORI dal repo, per tenerlo pulito):**
 - Wiki: `C:\Users\enzospenuso\wiki-space\heuresys-advanced-wiki\` (28 pagine ingerite: 24 sources ADR+SoT, 2 concepts, 2 entities — modo linked, zero copie).
 - Knowledge graph: `C:\Users\enzospenuso\wiki-space\heuresys-advanced-graph\src-mirror\graphify-out\graph.json` (8543 nodi, 10074 edge, 797 community; mirror di 864 symlink dall'indice).
+- **Hub viz** (pagina padre): `C:\Users\enzospenuso\wiki-space\heuresys-advanced-graph\index.html` — elenca tutte le visualizzazioni (dominio full force-directed + albero D3 + sottografi apps/api·web·showcase·packages·db) con link per aprirle. Generata da `docs/kb/tools/build_graph_hub.py` (auto-rigenerata da `sync`). Sottografi creati con `graphify update "<mirror>/<sub>"`; viz full forzata con `GRAPHIFY_VIZ_NODE_LIMIT=12000 graphify cluster-only "<mirror>"`.
 
 **Query LLM-Wiki**: `cd C:\Users\enzospenuso\wiki-factory && claude` → "start wiki session heuresys-advanced-wiki" → query/lint/ingest.
 

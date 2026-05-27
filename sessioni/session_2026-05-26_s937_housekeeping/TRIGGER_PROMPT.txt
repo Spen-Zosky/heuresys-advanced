@@ -1,0 +1,55 @@
+Sono Enzo. Apro fresh session S937 per chiudere housekeeping post-S935+S936 + iniziare MVP-4.
+
+CONTESTO IMMEDIATO:
+* HEAD `859a92d`, sync origin/main 0/0, working tree clean (2 file *.bak.* untracked accettabili).
+* Tag corrente: `v0.4.0-mvp4-ready` (post-S935-Z).
+* Bias registry: 60 catalogued / 42 mitigated / next CW-B62.
+* User preferences v5 paste manuale fatto S936-6 (da verificare in CK-5).
+* R23 AUTONOMIA OPERATIVA in vigore: zero delega evitabile + proactive tool loading + self-diagnose fallback + no user-executable when autonomous + evidence not suggestion.
+
+LETTURE OBBLIGATORIE PRE-TASK (in ordine, prima di qualsiasi azione):
+1. `sessioni/session_2026-05-26_s937_housekeeping/NEXT_SESSION_START.md` — piano + todo S937-1..8 + 6 carry-over CK + MVP-4 streams + blockers (entry-point completo).
+2. `cowork_reserved/HANDOFF_FRESH_SESSION.md` §0bis (S934) + §0ter (S935) — state recente.
+3. `qa_artifacts/s936_outcome_summary.md` — 6 follow-up S936 detail (SSH passphrase blocker, Path G partial, ecc.).
+4. `cowork_reserved/bias_registry.md` §60-61 — CW-B60/B61 status + CW-B59 partial-mitigation.
+
+BOOTSTRAP MANDATORY (turno #1 ACK come da user_preferences v5):
+* Letto CLAUDE.md global iniettato: numero regole = N (segnalare se N < 23 → snapshot vecchia).
+* Letto CLAUDE.md di progetto: D:\heuresys-advanced\CLAUDE.md (post-S936-6 ha sezione "Autonomia operativa cross-tool").
+* File ancillari verificati esistenti.
+* CW1 outputs mirroring: workspace D:\heuresys-advanced montato.
+* CW2 cowork_code_exchange: presente in progetto.
+* Drift visibili: segnalare se >0.
+* Tool preload completato: chiamata ToolSearch singolo turno con query "select:mcp__Windows-MCP__PowerShell,mcp__Desktop_Commander__read_file,write_file,edit_block,list_directory,start_process,read_process_output,interact_with_process,kill_process,move_file,create_directory,get_file_info,start_search,mcp__cowork__request_cowork_directory,allow_cowork_file_delete" + riportare "Tool preload: completato (15+ tool caricati)".
+
+OBIETTIVO SESSIONE:
+1. Chiudere housekeeping carry-over S935+S936 (~5-8h, sequenza CK-1 → CK-7).
+2. Tag `v0.4.1-housekeeping-closed` post-CK-7.
+3. Proporre opzioni MVP-4 stream + attendere decisione utente (CK-8 / S937-8).
+
+SEQUENZA RACCOMANDATA (priorità ordinata):
+* CK-1 [P0] SSH agent persistent setup Windows (registry HKCU OpenSSH Agent + ssh-add startup) — sblocca CK-2/CK-3. ~30-45min.
+* CK-2 [P0] OCI VM runner registration via SSH (`docs/ci/self-hosted-runners-setup.md` §3, 9 step). ~1-2h.
+* CK-3 [P1] CW-B60-A live re-run validation (Wave-1 sample target sys_skill_categories + verify audit `SILENT_UPSERT_ZERO_ROWS_V1` count > 0). ~30min.
+* CK-4 [P1] CW-B59 Path A revised v2 bisect (regex `Class extends|createContext`); fallback Path F split @heuresys/ui se inconclusive dopo 60-90min (R14 time-box). 1-2h o 4-6h.
+* CK-5 [P2] Verify Layer 1 user_preferences clean via Claude in Chrome (length ~9236, no MANDATORY duplicates regex). ~10min.
+* CK-6 [P2] CI primo run smoke post-runner registration (no-op commit + `gh run watch`). ~30min + fix flaky se serve.
+* CK-7 [P0 closure] Update HANDOFF/STATE/bias_registry CW-B62 entries se servono + tag `v0.4.1-housekeeping-closed`. ~30min.
+* CK-8 [P0 next] MVP-4 stream selection via AskUserQuestion (candidates 2.4 SDBI Phase 2 / 2.7 Mobile+WCAG / 2.5 MFA multi-kind / 2.1 Wave 2). Decision utente.
+
+VINCOLI:
+* Autonomia piena ereditata da S935+S936 + R23. Push autonomi AUTORIZZATI per questa sessione (eredita).
+* No --force / --no-verify (R12 git safety).
+* Mantieni invarianti I1-I14 (in particolare I5 no RLS, RD-08 no PG ENUM).
+* Tool preferiti: Windows-MCP PowerShell + Desktop Commander + Filesystem MCP (post-S936-5 fix con allowed_dirs D:\, C:\, C:\Users\enzospenuso). Sandbox bash solo per logica/calcolo non-stateful.
+* Anti-bias R14: time-box 60-90min per task investigation; se inconclusive cambiare approccio.
+* Aggiorna bias_registry come CW-B62+ se emergono nuove osservabili.
+
+DELIVERABLE ATTESI:
+1. CK-1..6 closed (con evidence: gh run list output verde, audit count >0, build green, prefs clean).
+2. CK-7 commit + tag pushed: HEAD post-S937 con tag `v0.4.1-housekeeping-closed` su origin.
+3. CK-8 MVP-4 stream avviato con primo PROMPT/PLAN se delegato a CLI, oppure prima task atomica diretta Cowork.
+4. Sessione closure: `sessioni/session_2026-05-26_s937_housekeeping/S937_SESSION_REPORT.md` con outcome per CK + R14 audit + invarianti check + next session candidates.
+5. HANDOFF_FRESH_SESSION.md §0quater appended con S937 outcome.
+
+PROCEDI con bootstrap ACK + letture obbligatorie + S937-1 CK-1 in autopilot fino a CK-8 (MVP-4 stream selection è l'unica decisione che richiede AskUserQuestion).

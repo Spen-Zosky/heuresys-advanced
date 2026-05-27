@@ -27,7 +27,7 @@
 | **B-43** (CW-B41) | 🟡 aperto | `db/scripts/_lib/cross_os_pipeline.sh` presente | library update (COPY drop su Win Git Bash) |
 | Dependabot **alerts** | ✅ 0 aperti | `gh api .../dependabot/alerts` | — |
 
-**Sintesi per la fresh session**: realmente da fare = **B-01** (P0 doc drift), **B-10** (SDBI, intatto), **B-20+B-21** (zod4 accoppiato), **B-22** (i18next), **B-24→solo #16** (gh-pages), **B-25** (skip defer-major), **B-31/B-43** (infra/lib), **B-42** (target authoring), **B-04/D-04** (root cleanup). **Chiusi/stale**: B-03/D-08 (fatto), B-23 (stale), B-26 (risolto), D-12 (risolto). **Da chiarire**: B-02 (vault esterno), B-40 (source-side), B-41 (Phase 4).
+**Sintesi per la fresh session**: realmente da fare = **B-01** (P0 doc drift), **B-10** (SDBI, intatto), **B-20+B-21** (zod4 accoppiato), **B-22** (i18next), **B-24→solo #16** (gh-pages), **B-25** (skip defer-major), **B-31/B-43** (infra/lib), **B-42** (target authoring). **Chiusi/stale**: B-01/D-01 (fatto 2026-05-28), B-03/D-08 (fatto), B-23 (stale), B-26 (risolto), D-12 (risolto), **D-04 root cleanup (fatto 2026-05-28)**. **Da chiarire**: B-02 (vault esterno), B-40 (source-side), B-41 (Phase 4).
 
 ## P0 — Consolidamento immediato (questa fase, prima di nuovo sviluppo)
 

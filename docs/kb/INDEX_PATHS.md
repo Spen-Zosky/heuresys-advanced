@@ -789,14 +789,14 @@
 
 ### doc-canonical
 
-- `D:\heuresys-advanced\BRAND_SESSION_CHARTER.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\BRAND_SESSION_CHARTER.md` · *archive* · git-tracked
 - `D:\heuresys-advanced\CLAUDE.md` · *live* · git-tracked
-- `D:\heuresys-advanced\GOAL_B_REPORT_2026-05-18.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\GOAL_B_REPORT_2026-05-18.md` · *archive* · git-tracked
 - `D:\heuresys-advanced\HANDOFF.md` · *live* · git-tracked
-- `D:\heuresys-advanced\HANDOFF_BRAND.md` · *live* · git-tracked
-- `D:\heuresys-advanced\MIGRATION_STATUS_2026-05-18.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\HANDOFF_BRAND.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\docs\archive\MIGRATION_STATUS_2026-05-18.md` · *archive* · git-tracked
 - `D:\heuresys-advanced\NEXT_SESSION_MVP_2A.md` · *live* · git-tracked
-- `D:\heuresys-advanced\NEXT_SESSION_MVP_CLOSURE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md` · *archive* · git-tracked
 - `D:\heuresys-advanced\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\START_HERE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\A11Y_AUDIT_TIER7_2026-05-20.md` · *live* · git-tracked

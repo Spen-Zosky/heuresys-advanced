@@ -1,0 +1,1488 @@
+# INDEX_PATHS — Indice percorsi dominio heuresys-advanced
+
+**Generato**: 2026-05-27T14:57:00Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **1358**
+
+> SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
+
+## Conteggi per categoria
+
+| Categoria | File |
+|---|---|
+| ADR | 20 |
+| api-core | 12 |
+| api-module | 194 |
+| ci | 14 |
+| claude-config | 2 |
+| config | 33 |
+| cowork-archive | 14 |
+| cowork-exchange | 203 |
+| cowork-reserved | 119 |
+| cowork-snapshot | 8 |
+| db-migration | 44 |
+| db-script | 18 |
+| db-seed | 22 |
+| doc-canonical | 252 |
+| handoff-state | 1 |
+| qa-artifact | 55 |
+| script | 6 |
+| session | 12 |
+| shared-pkg | 4 |
+| shared-schema | 61 |
+| showcase-source | 11 |
+| test | 79 |
+| ux-design-archive | 80 |
+| web-source | 94 |
+| **TOTALE** | **1358** |
+
+## Conteggi per status
+
+| Status | File |
+|---|---|
+| archive | 447 |
+| external-archive | 50 |
+| live | 861 |
+
+## File per categoria
+
+
+### ADR
+
+- `D:\heuresys-advanced\docs\architecture\adr\.keep` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0001_monorepo_tool_pnpm.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0002_backend_framework_fastify.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0003_db_access_drizzle_plus_raw_sql.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0004_no_docker_native_postgresql.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0005_password_hashing_argon2id.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0006_auth_strategy_jwt_plus_httponly_cookie.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0007_frontend_next15_app_router.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0008_position_intelligence_profile_as_view.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0009_visualization_node_layouts_separate_table.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0010_postgresql_runtime_location.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0011_ess_scope_inclusion.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0012_brownfield_table_mapping_wave_column.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0013_showcase_sot_policy.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0014_sdbi_semantic_driven_brownfield_import.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0015_sys_job_roles_nullable_family_fk.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0016_sys_esco_occupation_mappings_nullable_job_role_fk.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0017_lookup_fk_2hop_transform.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0018_coalesce_uq_class_of_bug.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0020_wave2_scope_application_level_targets.md` · *live* · git-tracked
+
+### api-core
+
+- `D:\heuresys-advanced\apps\api\src\app.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\config\constants.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\config\env.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\db\client.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\errors\index.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\middleware\auth.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\middleware\csrf.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\middleware\errorHandler.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\middleware\rbac.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\middleware\requestId.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\middleware\tenantContext.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\server.ts` · *live* · git-tracked
+
+### api-module
+
+- `D:\heuresys-advanced\apps\api\src\modules\activity-classification-mappings\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\activity-classification-mappings\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\activity-classification-mappings\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\activity-classifications\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\activity-classifications\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\activity-classifications\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\assessment-methods\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\assessment-methods\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\assessment-methods\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\assessment-results\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\assessment-results\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\assessment-results\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\assessments\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\assessments\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\assessments\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\cache-loader.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\email-rate-limit.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\mailer.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\mfa-repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\mfa-routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\mfa-service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\password.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\schema.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\auth\tokens.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-activations\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-activations\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-activations\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-families\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-families\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-families\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-overrides\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-overrides\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-overrides\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-processes\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-processes\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-processes\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-variants\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-variants\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\blueprint-variants\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-import-runs\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-import-runs\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-import-runs\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-source-exports\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-source-exports\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-source-exports\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-table-mappings\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-table-mappings\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-table-mappings\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\audit-rule-codes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\engine.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\loader.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\run-logger.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\state.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\transform-compiler.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\transforms.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\upsert-sql.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\career-path-steps\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\career-path-steps\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\career-path-steps\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\career-paths\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\career-paths\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\career-paths\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\compensation\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\compensation\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\compensation\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\dashboard\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\dashboard\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\dashboard\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\enterprise-size-bands\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\enterprise-size-bands\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\enterprise-size-bands\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\enterprise-typing-profiles\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\enterprise-typing-profiles\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\enterprise-typing-profiles\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\job-families\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\job-families\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\job-families\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\job-roles\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\job-roles\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\job-roles\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\kpi-definitions\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\kpi-definitions\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\kpi-definitions\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-gaps\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-gaps\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-gaps\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-modules\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-modules\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-modules\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-path-steps\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-path-steps\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-path-steps\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-paths\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-paths\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\learning-paths\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\me\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\me\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\me\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\operating-models\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\operating-models\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\operating-models\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\organization-unit-kpi-templates\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\organization-unit-kpi-templates\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\organization-unit-kpi-templates\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\organization-units\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\organization-units\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\organization-units\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\position-career-paths\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\position-career-paths\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\position-career-paths\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\position-succession-relevance\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\position-succession-relevance\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\position-succession-relevance\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\positions\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\positions\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\positions\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\process-kpi-templates\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\process-kpi-templates\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\process-kpi-templates\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\seed-acquisition-runs\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\seed-acquisition-runs\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\seed-acquisition-runs\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\seed-approval-decisions\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\seed-approval-decisions\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\seed-approval-decisions\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\seed-candidate-records\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\seed-candidate-records\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\seed-candidate-records\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-aliases\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-aliases\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-aliases\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-categories\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-categories\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-categories\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-families\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-families\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-families\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-proficiency-levels\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-proficiency-levels\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-proficiency-levels\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-taxonomy-edges\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-taxonomy-edges\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skill-taxonomy-edges\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skills\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skills\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\skills\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\succession-pools\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\succession-pools\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\succession-pools\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\successor-candidates\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\successor-candidates\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\successor-candidates\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\successor-readiness\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\successor-readiness\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\successor-readiness\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\tenants\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\tenants\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\tenants\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\training-initiatives\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\training-initiatives\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\training-initiatives\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\user-career-plans\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\user-career-plans\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\user-career-plans\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\users\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\users\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\users\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-edges\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-edges\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-edges\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-exports\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-exports\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-exports\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-graphs\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-graphs\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-graphs\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-layouts\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-layouts\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-layouts\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-node-layouts\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-node-layouts\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-node-layouts\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-nodes\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-nodes\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-nodes\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-styles\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-styles\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\visualization-styles\service.ts` · *live* · git-tracked
+
+### ci
+
+- `D:\heuresys-advanced\.github\CODEOWNERS` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\ISSUE_TEMPLATE\bug_report.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\ISSUE_TEMPLATE\config.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\ISSUE_TEMPLATE\feature_request.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\PULL_REQUEST_TEMPLATE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\SECURITY.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\dependabot.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\workflows\build-web.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\workflows\i18n-parity.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\workflows\lint.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\workflows\playwright-smoke.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\workflows\showcase.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\workflows\test-integration.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\workflows\typecheck.yml` · *live* · git-tracked
+
+### claude-config
+
+- `D:\heuresys-advanced\.claude\launch.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\settings.local.json` · *live* · git-tracked
+
+### config
+
+- `D:\heuresys-advanced\.env.example` · *live* · git-tracked
+- `D:\heuresys-advanced\.gitattributes` · *live* · git-tracked
+- `D:\heuresys-advanced\.gitignore` · *live* · git-tracked
+- `D:\heuresys-advanced\.npmrc` · *live* · git-tracked
+- `D:\heuresys-advanced\.nvmrc` · *live* · git-tracked
+- `D:\heuresys-advanced\LICENSE` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\package.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\tsconfig.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\tsconfig.test.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\vitest.config.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\eslint.config.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\package.json` · *live* · git-tracked
+- `D:\heuresys-advanced\pnpm-lock.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\pnpm-workspace.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\bisect-cw-b59-createctx.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\apply-pending.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\finalize-session-2026-05-19.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\hooks\pre-commit` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\inbox.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\install-hooks.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\locks.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\new-goal.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\notify.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\session-end.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\session-start.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\status.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\cowork-exchange\validate-naming.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\generate_wave1_column_mappings.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\generate_wave1_seeds.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\restore-showcase-routes.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\run-wave1-fullscale.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\sync-showcase.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\tsconfig.base.json` · *live* · git-tracked
+
+### cowork-archive
+
+- `C:\Users\enzospenuso\Claude Desktop\heuresys-advanced\sessioni\session_2026-05-26_s937_housekeeping\HANDOVER_CLI.md` · *external-archive* · claude-desktop:heuresys-advanced
+- `C:\Users\enzospenuso\Claude Desktop\outputs\HANDOVER_CLI_2026-05-26_post_S937.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\MIGRATION_STATUS_2026-05-18.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\README.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_SKILL_UPDATE_MEMO.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\cowork-user-preferences-v4.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\_apply_fixes_20260420_164125.txt` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\_pending_check_20260420_162800.txt` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\forensic-audit-claude-ecosystem_2026-04-22.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\scheda-tecnica-v1.1-2026-04-22.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\user_preferences_cowork_2026-04-20.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\verifica-pc-windows_2026-04-20.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\patch-claude-settings.ps1` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\patch-claude-settings.sh` · *external-archive* · claude-desktop:outputs
+
+### cowork-exchange
+
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\pending\.gitkeep` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\pending\2026-05-25T00-07-39Z__025__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\.gitkeep` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-18T23-10-02Z__002__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-19T02-57-15Z__002__approval_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-19T13-09-31Z__002__review_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-19T13-28-26Z__003__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-19T14-02-10Z__003__plan_amendment_requested.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-19T14-14-49Z__003__approval_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-19T23-15-00Z__003__prompt_amended.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-19T23-25-00Z__003__exec_directive_E1.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-21T03-45-00Z__007__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-21T11-39-00Z__008__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-21T12-50-00Z__008__exec_directive_cw_b34.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-21T13-55-00Z__011__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-21T17-30-00Z__012__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-21T20-40-00Z__013__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-23T15-00-00Z__014__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-23T17-45-00Z__015__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-23T19-00-00Z__016__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-24T14-26-07Z__022__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-24T14-58-00Z__022__prompt_amended.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-24T16-45-02Z__022__prompt_amended.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-24T17-08-26Z__022__prompt_amended.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-24T17-50-02Z__022__prompt_amended.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-24T20-45-22Z__022__prompt_amended.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-25T00-07-36Z__026__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-25T00-07-37Z__023__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-25T00-07-38Z__024__prompt_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cli\read\2026-05-25T02-37-27Z__024__prompt_amended.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\pending\.gitkeep` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\.gitkeep` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-18T23-15-33Z__002__pending_applied.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T13-10-27Z__000__session_handoff.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T13-49-26Z__003__plan_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T14-11-02Z__003__plan_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T14-54-21Z__003__exec_progress.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T15-00-40Z__003__exec_progress.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T15-16-22Z__003__exec_progress.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T18-49-10Z__003__exec_progress.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T22-07-59Z__003__exec_progress.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T22-17-12Z__003__exec_progress.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T22-29-41Z__003__exec_progress.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-19T23-09-26Z__003__exec_progress.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-20T00-05-26Z__003__exec_progress.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-20T22-14-12Z__004__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-21T01-53-26Z__005__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-21T02-43-43Z__006__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-21T04-53-05Z__007__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-21T12-19-00Z__008_halt_adr_0016_unexpected_fail.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-21T12-24-57Z__008__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-21T13-11-49Z__009__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-21T14-04-34Z__010__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-21T16-44-41Z__011__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-21T19-20-05Z__012__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-23T14-19-00Z__013__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-23T16-16-00Z__014__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-23T18-21-38Z__015__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-23T19-04-31Z__016__report_ready.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-24T14-35-08Z__022__halt_npm_not_logged_in.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-24T14-43-30Z__022__halt_exports_map_subpath_gap.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-24T15-50-39Z__022__halt_publish_2fa_required.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-24T16-32-00Z__022__halt_dual_package_hazard.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-24T17-05-00Z__022__halt_cw_b57_misdiagnosis.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-24T17-25-00Z__022__halt_persistent_build_fail.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-24T18-32-00Z__022__halt_bisect_inconclusive.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\.inbox\cowork\read\2026-05-25T01-44-28Z__023__halt_engine_residual_6_targets.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\GOAL_B_REPORT_2026-05-18.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\MIGRATION_STATUS_2026-05-18.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\README.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_00_ARCHIVE_READONLY_NOTICE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_00_DISCOVERY_002_json-extract-lineage-fullscale.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_00_DISCOVERY_003_brownfield-seeding-complete.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_00_HANDOVER_CLI_2026-05-26_post_S937.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_00_SESSION_HANDOFF_2026-05-18.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_00_SESSION_HANDOFF_2026-05-19.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_00_SESSION_HANDOFF_2026-05-20.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_00_STATE_001.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_00_STATE_002.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_00_STATE_003.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_001_audit_upsert_refactor.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_002_json-extract-lineage-fullscale.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_003_brownfield-seeding-complete.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_003_v1.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_003_v2.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_004_batch_x1.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_005_batch_x2.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_006_batch_x3.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_007_batch_x4.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_008_batch_x5.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_011_batch_x7.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_012_batch_x8.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_013_batch_x9.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_014_batch_x10.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_015_batch_x11.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_016_batch_x12.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_017_batch_x13.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_018_batch_x14.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_019_batch_x15.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_020_batch_x16.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_021_batch_x17.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_022.1_batch_x18_amendment.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_022.2_batch_x18_amendment.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_022.3_batch_x18_amendment.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_022.4_batch_x18_amendment.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_022.5_batch_x18_amendment.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_022_batch_x18.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_023_batch_x19_brownfield_wave1.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_024_batch_x20_mfa_login_gating.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_025_batch_x21_defer_f_showcase_fix.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_026_batch_x19a_dependabot_cve.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_01_PROMPT_027_s937_ck8_sdbi_phase2_kickoff.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_02_PLAN_001_audit_upsert_refactor.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_02_PLAN_001_v3-bis.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_02_PLAN_001_v4.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_02_PLAN_002_json-extract-lineage-fullscale.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_02_PLAN_003_brownfield-seeding-complete.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_02_PLAN_003_v1.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_02b_APPROVAL_001.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_02b_APPROVAL_001_v5.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_02b_APPROVAL_002.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_02b_APPROVAL_003.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_03_EXEC_001_audit_upsert_refactor.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_03_EXEC_001a_audit_upsert_refactor.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_03_EXEC_002_json-extract-lineage-fullscale.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_03_EXEC_003_CLASSB_FINDINGS_Item_F.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_03_EXEC_003_CLASSB_SEMANTIC_FAIL_Item_F.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_03_EXEC_003_CLASSB_SUBDISCOVERY_Item_F.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_03_EXEC_003_CLASSB_UQ_BLOCK_Item_F.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_03_EXEC_003_DIAGNOSTIC_REPORT_Item_F.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_03_EXEC_003_brownfield-seeding-complete.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_001a_audit_upsert_refactor.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_001a_interim.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_002_json-extract-lineage-fullscale.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_003_brownfield-seeding-complete.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_004_batch_x1.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_005_batch_x2.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_006_batch_x3.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_007_batch_x4.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_008_batch_x5.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_009_batch_x6a.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_010_batch_x5b.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_011_batch_x7.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_012_batch_x8.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_013_batch_x9.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_014_batch_x10.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_015_batch_x11.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_016_batch_x12.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_017_batch_x13.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_018_batch_x14.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_019_batch_x15.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_020_batch_x16.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_021_batch_x17.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_022_batch_x18.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_023_batch_x19.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_024_batch_x20.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_04_REPORT_026_batch_x19a.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_05_REVIEW_001a_audit_upsert_refactor.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_05_REVIEW_002_json-extract-lineage-fullscale.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_05_REVIEW_003_brownfield-seeding-complete.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_05_REVIEW_004_batch_x1.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_05_REVIEW_005_batch_x2.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_99_DB_INVENTORY_2026-05-20.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_99_archive_DRAFT_PROMPT_022_tappa_f.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_SKILL_UPDATE_MEMO.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_templates\_00_DISCOVERY.template.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_templates\_00_STATE.template.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_templates\_01_PROMPT.template.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_templates\_02_PLAN.template.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_templates\_02b_APPROVAL.template.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_templates\_03_EXEC.events.jsonl.template` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_templates\_03_EXEC.template.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_templates\_04_REPORT.template.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\_templates\_05_REVIEW.template.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\baselines\001-db-state-20260518_1710.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\baselines\001-source-shas-20260518_1710.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\baselines\B2_post_state_20260518_175146.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\baselines\B2_post_state_20260518_175404.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\baselines\B2_pre_state_20260518_175146.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\baselines\B2_v4_post_state_20260518_185032.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\baselines\B2_v4_pre_state_20260518_185032.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\baselines\B4_audit_lineage_state_20260518_180107.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\baselines\B6_explain_baseline_20260518_180301.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\baselines\INDEX.md` · *archive* · git-tracked
+- `C:\Users\enzospenuso\Claude Desktop\outputs\GOAL_B_REPORT_2026-05-18.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_00_DISCOVERY_002_json-extract-lineage-fullscale.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_00_SESSION_HANDOFF_2026-05-18.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_00_STATE_001.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_00_STATE_002.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_01_PROMPT_001_audit_upsert_refactor.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_01_PROMPT_002_json-extract-lineage-fullscale.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_02_PLAN_001_audit_upsert_refactor.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_02_PLAN_001_v3-bis.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_02_PLAN_001_v4.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_02b_APPROVAL_001.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_02b_APPROVAL_001_v5.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_03_EXEC_001_audit_upsert_refactor.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_03_EXEC_001a_audit_upsert_refactor.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_04_REPORT_001a_audit_upsert_refactor.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_04_REPORT_001a_interim.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\_05_REVIEW_001a_audit_upsert_refactor.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\SESSION_REPORT_S2-unification_2026-04-20.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\SESSION_REPORT_verifica-pc-windows_2026-04-20.md` · *external-archive* · claude-desktop:outputs
+
+### cowork-reserved
+
+- `D:\heuresys-advanced\cowork_reserved\00_README_KB.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\01_DB_PLATFORM_INVENTORY.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\02a_ADV_SYS.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\02b_ADV_LEGACY_MIRROR.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\02c_ADV_STAGING.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\02d_ADV_BROWNFIELD.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\02e_ADV_AUDIT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\02f_ADV_PUBLIC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\04_MIGRATIONS_TIMELINE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\05_EXTRACT_SCRIPTS_FORENSIC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\06_BROWNFIELD_REGISTRY_DEEP_DIVE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\07_TRANSFORM_COMPILER_ANALYSIS.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\08_AUDIT_TRAIL_ANALYSIS.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\09_LEXICON_DOMAINS_MAPPING.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\10_GAPS_ANALYSIS.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\11_STRATEGIC_REFORMULATION.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\12_TODO_LIST_GRANULARE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\COWORK_CLI_PROMPT_PATTERN.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\HANDOFF_FRESH_SESSION.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\MANDATORY_TOOL_PRELOAD_block_to_append.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\PREFERENCES_BLOCK_to_paste.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\PREFERENCES_v5_FINAL.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\_ARCHIVE_READONLY.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\auto-ship\run-all-s935.ps1` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\C1_4_MIRROR_GAP_fix_report.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\P5_heuresys_test_decision.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\00_SUMMARY.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_blueprint_overrides.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_esco_occupation_mappings.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_job_families.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_job_roles.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_learning_path_steps.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_position_learning_requirements.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_position_skill_requirements.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_process_kpi_templates.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_skill_aliases.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_skill_categories.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_skill_learning_mappings.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\class_b_diagnostics\sys_skill_taxonomy_edges.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\cw_b17_patches\CW_B17_PATCH_SPEC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\00_README_GOALS_PILOT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\01_SOURCE_DISCOVERY.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\02_TARGET_SCHEMA_PROPOSAL.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\04_PHASE3_TEMP_SDBI_DDL.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\05_PHASE5_CONSOLIDATION_PLAN.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\mapping_cards\goal_alignments_sys_goal_alignments.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\mapping_cards\goal_check_ins_sys_goal_check_ins.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\mapping_cards\goal_comments_sys_goal_comments.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\mapping_cards\goal_milestones_sys_goal_milestones.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\mapping_cards\goal_templates_sys_goal_templates.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\mapping_cards\goal_updates_sys_goal_updates.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\mapping_cards\goals_sys_goals.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\mapping_cards\key_results_sys_okr_key_results.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\mapping_cards\okr_check_ins_AND_okr_checkins_sys_okr_check_ins.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\mapping_cards\okrs_sys_okrs.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\migrations\000034_temp_sdbi_schema.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\migrations\000035_sys_goals_okrs_scaffold.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\migrations\000036_temp_sdbi_schema.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c1\goals_pilot\migrations\000037_sys_goals_okrs_scaffold.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c10\forensic_cw_b49\01_CW_B49_ROOT_CAUSE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c10\loop_watchdog\01_LOOP_WATCHDOG_PROMPT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c12\01_STRATEGIC_ANALYSIS.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c2\cascade_fixes\00_README_CASCADE_FIXES.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c2\cascade_fixes\01_sys_job_roles_mapping_fix.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c2\cascade_fixes\02_sys_esco_occupation_mappings_fix.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c2\cascade_fixes\03_sys_skill_categories_fix.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c2\cascade_fixes\04_sys_skill_taxonomy_edges_fix.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c2\engine_patches\00_README_ENGINE_PATCHES.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c2\engine_patches\CW_B22_PATCH_SPEC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c2\engine_patches\CW_B23_PATCH_SPEC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c2\engine_patches\CW_B24_PATCH_SPEC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\cascade_redesign\01_sys_job_roles_REDESIGN.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\lineage_completion\complete_goals_lineage.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\schema_migrations\000039_audit_source_table_id_nullable.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\schema_migrations\extract_users_employees_legacy.sh` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\00_MASTER_INDEX.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\01_PerformanceReviews.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\02_RecruitingHiring.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\03_OnboardingPreboarding.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\04_SurveysEngagementWellbeing.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\05_TimeLeaveAttendance.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\06_FeedbackSystems.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\07_Mentorship.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\08_PredictionsML.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\09_CompensationExt.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\10_DocumentsSignatures.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c3\sdbi_scale\11_TalentPoolExt.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\cross_os_fixes\README.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\esco_cascade\02_sys_esco_occupation_mappings_RETRY.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\investigations\01_job_templates_failure_root_cause.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\sys_users_sdbi\00_README_SYS_USERS_SDBI.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\sys_users_sdbi\01_SOURCE_ANALYSIS.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\sys_users_sdbi\02_MAPPING_STRATEGY.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\sys_users_sdbi\03_PHASE3_TEMP_SDBI_DDL.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\sys_users_sdbi\04_PHASE5_CONSOLIDATION_PLAN.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\time_leave_pilot\00_README_TIME_LEAVE_PILOT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\time_leave_pilot\01_SOURCE_DISCOVERY.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\time_leave_pilot\02_TARGET_SCHEMA_PROPOSAL.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\time_leave_pilot\03_PHASE3_TEMP_SDBI_DDL.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\time_leave_pilot\04_PHASE5_CONSOLIDATION_PLAN.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\time_leave_pilot\mapping_cards\employee_attendance__sys_attendance.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\time_leave_pilot\mapping_cards\employee_overtime__sys_overtime.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\time_leave_pilot\mapping_cards\employee_time_off_balances__sys_time_off_balances.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c4\time_leave_pilot\migrations\000040_sys_time_leave_scaffold.sql` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c5\enum_fix\CW_B32_PATCH_SPEC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c5\x4b_retrigger\README.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c5\xos_lib\README.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c5\xos_lib\cross_os_pipeline.sh` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c6\cw_b34_engine_patch\CW_B34_PATCH_SPEC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c7\forensic_cw_b35\01_CW_B35_FORENSIC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c7\forensic_cw_b36\01_CW_B36_FORENSIC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c7\forensic_cw_b37\01_CW_B37_FORENSIC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c8\cw_b38_generalization\01_CW_B38_GENERALIZATION_SPEC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c8\cw_b39_forensic\01_CW_B39_FORENSIC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c9\adr_0017_lookup_fk_2hop\01_ADR_0017_SPEC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c9\cw_b35_phase_bc\01_FORENSIC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\batch_c9\sys_learning_modules_forensic\01_FORENSIC.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\bias_registry.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_reserved\ship-cw-b60-a.ps1` · *archive* · git-tracked
+
+### cowork-snapshot
+
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\staging-P0-2026-04-22\CLAUDE.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\staging-P0-2026-04-22\MEMORY-original.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\staging-P0-2026-04-22\MEMORY.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\staging-P0-2026-04-22\SR_017_history_2026-04-21.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\staging-P0-2026-04-22\feedback_archive_pre_2026-04-22.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\staging-P0-2026-04-22\feedback_original_backup_snapshot.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\staging-P0-2026-04-22\feedback_self_improvement_system_slim.md` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\depot\staging-P0-2026-04-22\runtime-snapshot-2026-04-22.md` · *external-archive* · claude-desktop:outputs
+
+### db-migration
+
+- `D:\heuresys-advanced\db\migrations\.gitkeep` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000001_init_extensions.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000002_init_sys_schema.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000003_tenancies.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000004_users.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000005_auth_foundation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000006_user_profiles_and_evidence.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000007_enterprise_typing.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000008_blueprint_catalog.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000009_organization_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000010_job_role_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000011_position_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000012_user_position_assignments.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000013_skill_taxonomy_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000014_position_skill_requirements.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000015_kpi_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000016_learning_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000017_assessment_gap_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000018_career_succession_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000019_compensation_intelligence_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000020_seed_acquisition_staging.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000021_seed_reference_bank.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000022_visualization_graph_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000023_validation_views_and_checks.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000024_brownfield_import_staging.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000025_brownfield_lineage_and_mapping.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000026_brownfield_import_validation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000027_ess_inbox_and_audit.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000028_dashboard_permission_seed.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000029_brownfield_table_mapping_wave.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000030_brownfield_wave1_staging.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000031_add_uq_sys_user_certifications.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000032_sys_activity_classifications_check_relax.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000033_brownfield_tenant_id_mappings_and_validate_lookup_fk.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000034_add_wave1_job_families_staging.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000036_temp_sdbi_schema.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000037_sys_goals_okrs_scaffold.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000038_sys_job_roles_family_nullable.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000039_audit_source_table_id_nullable.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000040_sys_time_leave_scaffold.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000041_sys_esco_occupation_mappings_job_role_nullable.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000042_sys_esco_occupation_mappings_uq_nulls_not_distinct.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000043_lookup_fk_2hop_validator.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000044_cw_b60_b_reclassify_application_level_targets.sql` · *live* · git-tracked
+
+### db-script
+
+- `D:\heuresys-advanced\db\scripts\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\_lib\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\_lib\cross_os_pipeline.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\brownfield-wave-1-preflight.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\brownfield-wave-1-preflight.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\create_local_database.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\create_local_database.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\extract-wave1-legacy.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\extract_users_employees_legacy.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\migrate.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\migrate.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\reset_local_database.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\reset_local_database.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\seed-reference-bank.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\seed-test-admin.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\setup_oci_vm_database.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\validate_database.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\validate_database.sh` · *live* · git-tracked
+
+### db-seed
+
+- `D:\heuresys-advanced\db\seeds\.gitkeep` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\sdbi\goals_pilot\01_temp_sdbi_ddl.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\sdbi\goals_pilot\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\sdbi\goals_pilot\03_phase5_consolidation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave1\00_source_export.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave1\01_source_tables.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave1\02_source_columns.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave1\03_table_mappings.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave1\04_column_mappings.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave1\04_column_mappings_report.md` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave1\05_job_families_registry.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cascade_fixes\01_sys_job_roles_mapping_fix.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cascade_fixes\02_sys_esco_occupation_mappings_fix.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cascade_fixes\03_sys_skill_categories_fix.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cascade_fixes\04_sys_skill_taxonomy_edges_fix.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b32_fix\01_org_level_to_cast_enum.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b35_fix\01_skill_taxonomy_edges_lookup_fks.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b35_fix\02_skill_taxonomy_edge_kind_mappings.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b36_fix\01_skill_categories_reclassify.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b37_fix\01_skill_learning_reclassify.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\cw_b39_fix\01_learning_path_steps_reclassify.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\brownfield\wave2\x9_block_bcd.sql` · *live* · git-tracked
+
+### doc-canonical
+
+- `D:\heuresys-advanced\BRAND_SESSION_CHARTER.md` · *live* · git-tracked
+- `D:\heuresys-advanced\CLAUDE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\GOAL_B_REPORT_2026-05-18.md` · *live* · git-tracked
+- `D:\heuresys-advanced\HANDOFF.md` · *live* · git-tracked
+- `D:\heuresys-advanced\HANDOFF_BRAND.md` · *live* · git-tracked
+- `D:\heuresys-advanced\MIGRATION_STATUS_2026-05-18.md` · *live* · git-tracked
+- `D:\heuresys-advanced\NEXT_SESSION_MVP_2A.md` · *live* · git-tracked
+- `D:\heuresys-advanced\NEXT_SESSION_MVP_CLOSURE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\START_HERE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\A11Y_AUDIT_TIER7_2026-05-20.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\BOOTSTRAP_EXECUTION_PLAN.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\BRAND_V1_DEFERRED_REFINEMENTS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\MVP_4_ROADMAP.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\SHOWCASE_AUDIT_2026-05-20.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__charts.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__dashboard-cards.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__footer.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__forms.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__header.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__icons.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__landing-page.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__login-page.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__logo.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__page-types.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__palettes.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__primary-initial-page.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__shell.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__sidebar.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__system-health.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__tables.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-baseline\showcase\showcase__typography.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-manual-checklist.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\a11y-tail-items.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\api\.keep` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\api\API_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\api\MVP_2A_API_GAP_AUDIT.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\.keep` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\ADR_INDEX.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\brownfield\.keep` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\brownfield\BROWNFIELD_ADAPTATION_MAP.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\brownfield\BROWNFIELD_EXCLUSION_REPORT.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\brownfield\BROWNFIELD_IMPORT_PLAN.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\brownfield\BROWNFIELD_TABLE_CLASSIFICATION_REPORT.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\brownfield\WAVE_1_EXECUTION_RUNBOOK.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\brownfield\wave_runners\wave_2_runner.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\brownfield\wave_runners\wave_3_runner.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\brownfield\wave_runners\wave_4_runner.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\ci\self-hosted-runners-setup.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\ci\workflows-overview.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\cw-b59-true-root-cause-2026-05-26.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\db\.keep` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\db\MIGRATION_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\db\TARGET_SCHEMA_DESIGN.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\frontend\.keep` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\frontend\FRONTEND_IMPLEMENTATION_PLAN.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\00-glossario.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\01-fondamenti\01-cosa-e-github.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\01-fondamenti\02-account-e-repo.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\01-fondamenti\03-git-flow.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\01-fondamenti\04-readme-e-markdown.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\02-collaborazione\01-issues.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\02-collaborazione\02-branches.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\02-collaborazione\03-pull-requests.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\02-collaborazione\04-projects.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\02-collaborazione\05-discussions.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\03-automazione\01-actions-fondamenti.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\03-automazione\02-actions-ricette.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\03-automazione\03-secrets-e-variabili.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\03-automazione\04-workflow-storybook.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\04-publishing\01-pages-fondamenti.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\04-publishing\02-pages-il-nostro-caso.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\04-publishing\03-releases-e-tags.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\04-publishing\04-packages.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\05-security\01-secret-hygiene.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\05-security\02-dependabot.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\05-security\03-code-scanning.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\05-security\04-signed-commits.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\05-security\05-branch-protection.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\06-tooling\01-gh-cli.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\06-tooling\02-web-ui-tour.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\06-tooling\03-integrazioni.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\07-nostri-repo\01-stato-corrente.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\07-nostri-repo\02-heuresys-advanced.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\07-nostri-repo\03-ux-design-shared.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\07-nostri-repo\04-interazioni-tra-repo.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\08-roadmap.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\branch-protection.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\github\dependabot-triage-2026-05-26.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\COWORK_ARCHIVE_NOTE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\DEBT_REGISTER.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\INDEX_PATHS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\SOT_BACKLOG.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\SOT_STATE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\index_paths.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\build_index.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\preflight-residual-todo.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\security\.keep` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\security\AUTH_SECURITY_PLAN.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\Company_HRMS_BPM_AI_Coding_Agent_Bootstrap_Pack_v5.zip` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\brownfield\db-export.zip` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\INDEX.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\ISTRUZIONI.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\LOGICAL_DATA_MODEL_ADDENDUM.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\VALIDATION_RESULT.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\VALIDATION_RESULT_v4.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\VALIDATION_RESULT_v5.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\AI_CODING_AGENT_BOOTSTRAP_PROMPT.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\AUTH_STACK_SPEC.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\BACKEND_API_STACK_SPEC.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\DBMS_BOOTSTRAP_SPEC.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\FRONTEND_STACK_SPEC.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\REPOSITORY_STRUCTURE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\SECURITY_AND_PRIVACY_BOUNDARIES.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\TENANT_USER_PROFILE_MODEL.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\UPDATED_MIGRATION_PLAN.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\checklists\ACCEPTANCE_TESTS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\contracts\OPENAPI_BOOTSTRAP_SPEC.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\scripts\create_repo_structure.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\scripts\create_repo_structure.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\specs\AUTH_POLICY_MATRIX.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\specs\FRONTEND_ROUTE_MAP.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\specs\GRAPH_VISUALIZATION_MODEL_SPEC.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\specs\LEARNING_CATALOG_AND_GAP_CLOSURE_SPEC.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\templates\.env.example` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\templates\README_TEMPLATE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\bootstrap_agent\templates\docker-compose.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\BROWNFIELD_ADAPTATION_MAP_TEMPLATE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\BROWNFIELD_AI_AGENT_TASK.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\BROWNFIELD_EXCLUSION_RULES.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\BROWNFIELD_IMPORT_PIPELINE_SPEC.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\BROWNFIELD_IMPORT_STRATEGY.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\BROWNFIELD_IMPORT_WAVES.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\BROWNFIELD_LINEAGE_MODEL.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\BROWNFIELD_TABLE_CLASSIFICATION_RULES.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\BROWNFIELD_VALIDATION_CHECKLIST.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\schemas\brownfield_adaptation_row.schema.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\schemas\brownfield_candidate_record.schema.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\scripts\apply_approved_brownfield_import.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\scripts\classify_brownfield_tables.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\scripts\generate_adaptation_map.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\scripts\inspect_db_export.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\scripts\stage_brownfield_candidates.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\scripts\validate_brownfield_candidates.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\brownfield_adaptation\templates\brownfield_adaptation_map.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\config\process_registry.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\config\scope_matrix.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000001_init_extensions.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000002_init_sys_schema.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000003_tenancies.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000004_users.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000005_auth_foundation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000006_user_profiles_and_evidence.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000007_enterprise_typing.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000008_blueprint_catalog.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000009_organization_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000010_job_role_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000011_position_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000012_user_position_assignments.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000013_skill_taxonomy_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000014_position_skill_requirements.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000015_kpi_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000016_learning_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000017_assessment_gap_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000018_career_succession_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000019_compensation_intelligence_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000020_seed_acquisition_staging.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000021_seed_reference_bank.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000022_visualization_graph_model.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000023_validation_views_and_checks.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000024_brownfield_import_staging.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000025_brownfield_lineage_and_mapping.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000026_brownfield_import_validation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\kpi_catalog.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\learning_modules.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\learning_path_steps.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\learning_paths.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\organization_units.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\position_kpi_requirements.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\position_skill_requirements.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\positions.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\skill_learning_mappings.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\skills.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\source_registry.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\tenants.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\training_initiatives.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\user_position_assignments.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\users.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\visualization_edges.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\visualization_graphs.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\visualization_nodes.csv` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\00_Enterprise_Typing_and_Blueprint_Configuration.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\01_Current_Accounts_Management.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\02_Payments_and_Transactions_Management.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\03_Cash_Operations_Management.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\04_Deposit_Products_Management.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\05_Lending_and_Credit_Management.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\06_Customer_Relationship_Management.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\07_Compliance_AML_and_Regulatory_Processes.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\08_Risk_Management.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\09_Treasury_and_Finance.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\10_Digital_Banking_and_Channels.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\11_Sales_and_Commercial_Processes.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\12_Branch_Operations.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\13_Legal_and_Litigation.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\14_HR_and_Internal_Services.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\15_IT_and_Banking_Technology_Operations.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\16_Business_Continuity_and_Security.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\17_AI_Augmented_Banking_Processes.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\18_KPI_Library_Cascading_and_Assessment_Model.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\19_Position_Based_Learning_Path_Management.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\20_Workforce_Intelligence_Gap_Analysis_and_Talent_Weighting.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\21_Career_Planning_Talent_Mobility_and_Succession.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\industry_blueprints\FIN_BANKING\processes\22_Compensation_Intelligence_and_Objective_Based_Reward_Input.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\manifest.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\schemas\position_intelligence_profile.schema.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\scripts\apply_bundle.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\scripts\apply_bundle.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\scripts\apply_bundle.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\scripts\validate_bundle.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\IDEMPOTENT_SEEDING_RULES.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\PROMPT_TEMPLATE_LIBRARY.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\SEED_ACQUISITION_ENGINE_SPEC.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\SEED_COMPLETENESS_BACKLOG.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\SEED_STAGING_AND_APPROVAL_MODEL.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\SOURCE_OF_TRUTH_REGISTRY.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\prompts\PROMPT_ATECO_NACE_RECONCILIATION.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\prompts\PROMPT_BANKING_KPI_RESEARCH.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\prompts\PROMPT_CAREER_PATH_RESEARCH.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\prompts\PROMPT_COMPENSATION_RULE_RESEARCH.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\prompts\PROMPT_ESCO_OCCUPATION_DISCOVERY.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\prompts\PROMPT_ESCO_SKILL_EXTRACTION.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\prompts\PROMPT_LEARNING_CATALOG_RESEARCH.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\prompts\PROMPT_POSITION_JOB_DESCRIPTION_RESEARCH.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\schemas\seed_acquisition_run.schema.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\schemas\seed_candidate_record.schema.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\schemas\source_evidence.schema.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\seed_acquisition\source_registry.seed.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\tenant_blueprints\RTL_BANK_REFERENCE\tenant_profile.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\tenant_blueprints\RTL_BANK_REFERENCE\tenant_profile.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U01_Position_Centric_HRMS_Architecture.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U02_Position_Intelligence_Profile.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U03_Skill_Taxonomy_Model.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U04_KPI_Cascading_and_Assessment_Model.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U05_Position_Based_Learning_Path_Model.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U06_Workforce_Intelligence_Gap_Analysis.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U07_Career_Talent_Succession_Model.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U08_Compensation_Intelligence_Model.md` · *live* · git-tracked
+- `D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md` · *live* · git-tracked
+
+### handoff-state
+
+- `D:\heuresys-advanced\.handoff\STATE.md` · *live* · git-tracked
+
+### qa-artifact
+
+- `C:\Users\enzospenuso\Claude Desktop\outputs\baselines\001-db-state-20260518_1710.txt` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\baselines\001-source-shas-20260518_1710.txt` · *external-archive* · claude-desktop:outputs
+- `C:\Users\enzospenuso\Claude Desktop\outputs\baselines\B1_pnpm_test_20260518_173829.log` · *external-archive* · claude-desktop:outputs
+- `D:\heuresys-advanced\qa_artifacts\diagrams\bootstrap_mvp_flow.mmd` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\diagrams\bootstrap_mvp_flow.png` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\diagrams\bootstrap_mvp_flow.svg` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\mvp3_full_release_notes_v0.3.2.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\s936_outcome_summary.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\s936_pathG_build_202605261618.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\s936_pathG_test_outcome.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x13_a11y_report.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x13_e2e_coverage_matrix.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x13_i18n_report.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x14_a11y_live.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x14_playwright_full.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x14_web_build.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x15_playwright_prod.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x15_web_build.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x16_playwright_prod_full.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x16_web_build.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x16b_playwright_prod_125.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x17_release_notes_v0.2.1.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_2_pnpm_install.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_2_publish.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_2_publish_dryrun.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_2_tsup_build.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_2_web_build.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_2_web_build_link_revert.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_2_web_build_no_transpile.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_baseline_link.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_1.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_10.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_11.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_12.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_2.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_3.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_4.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_5.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_6.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_7.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_8.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_4_bisect_iter_9.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_5_playwright_versioned.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_5_web_build_path_B.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_5_web_build_path_C.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_consumer_subpath_scan.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_mvp3_release_notes_v0.3.1.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_publish_dryrun.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_tsup_build.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x18_web_build.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x19_brownfield_wave1_run.json` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x19a_vitest_api.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x19a_web_build.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x20_playwright.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\x20_web_build.txt` · *archive* · git-tracked
+
+### script
+
+- `C:\Users\enzospenuso\Claude Desktop\scripts\deploy-bootstrap-remote.ps1` · *external-archive* · claude-desktop:scripts
+- `C:\Users\enzospenuso\Claude Desktop\scripts\find-oci-cli.ps1` · *external-archive* · claude-desktop:scripts
+- `C:\Users\enzospenuso\Claude Desktop\scripts\s937-ck1-load-ssh-key.ps1` · *external-archive* · claude-desktop:scripts
+- `C:\Users\enzospenuso\Claude Desktop\scripts\session-bootstrap.ps1` · *external-archive* · claude-desktop:scripts
+- `C:\Users\enzospenuso\Claude Desktop\scripts\session-bootstrap.sh` · *external-archive* · claude-desktop:scripts
+- `C:\Users\enzospenuso\Claude Desktop\scripts\test-oci-ssh.bat` · *external-archive* · claude-desktop:scripts
+
+### session
+
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_forensic-state-of-the-art\FORENSIC_STATE_OF_ART_2026-05-26.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_forensic-state-of-the-art\PREFLIGHT_PLAN_2026-05-26.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_forensic-state-of-the-art\preflight_baselines\F0_3d_pnpm_test_api_v2.log.err` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_forensic-state-of-the-art\preflight_baselines\F0_3d_pnpm_test_pid.txt` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_forensic-state-of-the-art\preflight_baselines\F0_BASELINE_SUMMARY.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_preflight\NEXT_SESSION_START.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_preflight\PREFLIGHT_REPORT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_s935\S935_SESSION_REPORT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_s937_housekeeping\HANDOVER_CLI.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_s937_housekeeping\NEXT_SESSION_START.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_s937_housekeeping\S937_SESSION_REPORT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\sessioni\session_2026-05-26_s937_housekeeping\TRIGGER_PROMPT.txt` · *archive* · git-tracked
+
+### shared-pkg
+
+- `D:\heuresys-advanced\packages\shared\.gitkeep` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\package.json` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\index.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\tsconfig.json` · *live* · git-tracked
+
+### shared-schema
+
+- `D:\heuresys-advanced\packages\shared\src\schemas\activity-classification-mappings.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\activity-classifications.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\assessment-methods.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\assessment-results.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\assessments.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\auth.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\blueprint-activations.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\blueprint-families.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\blueprint-overrides.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\blueprint-processes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\blueprint-variants.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\brownfield-import-runs.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\brownfield-source-exports.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\brownfield-table-mappings.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\brownfield-wave-executor.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\career-path-steps.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\career-paths.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\compensation.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\dashboard.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\enterprise-size-bands.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\enterprise-typing-profiles.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\job-families.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\job-roles.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\kpi-definitions.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\learning-gaps.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\learning-modules.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\learning-path-steps.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\learning-paths.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\me.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\mfa.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\operating-models.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\organization-unit-kpi-templates.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\organization-units.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\position-career-paths.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\position-succession-relevance.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\positions.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\process-kpi-templates.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\role-codes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\seed-acquisition-runs.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\seed-approval-decisions.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\seed-candidate-records.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\skill-aliases.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\skill-categories.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\skill-families.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\skill-proficiency-levels.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\skill-taxonomy-edges.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\skills.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\succession-pools.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\successor-candidates.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\successor-readiness.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\tenants.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\training-initiatives.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\user-career-plans.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\users.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\visualization-edges.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\visualization-exports.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\visualization-graphs.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\visualization-layouts.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\visualization-node-layouts.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\visualization-nodes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\visualization-styles.ts` · *live* · git-tracked
+
+### showcase-source
+
+- `D:\heuresys-advanced\apps\showcase\.gitignore` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\next-env.d.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\next.config.js` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\package.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\postcss.config.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\src\app\globals.css` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\src\app\layout.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\src\app\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\src\app\providers.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\src\components\SystemHealthDashboard.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\tsconfig.json` · *live* · git-tracked
+
+### test
+
+- `D:\heuresys-advanced\apps\api\test\assessment-methods.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\assessment-results.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\assessments.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\auth-mfa.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\auth.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\blueprints.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\bpm-kpi-templates.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\brownfield-wave-executor.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\brownfield.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\career-path-steps.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\career-paths.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\compensation.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\dashboard.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\enterprise-typing.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\helpers\build-test-app.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\helpers\setup.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\job-families-and-roles.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\kpi-definitions.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\learning-gaps.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\learning-modules.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\learning-path-steps.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\learning-paths.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\me-ess-extensions.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\me.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\mfa.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\organization-units.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\position-career-paths.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\position-succession-relevance.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\positions.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\run-logger.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\seed-acquisition.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\skill-aliases.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\skill-categories.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\skill-families.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\skill-proficiency-levels.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\skill-taxonomy-edges.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\skills.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\succession-pools.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\successor-candidates.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\successor-readiness.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\tenants.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\training-initiatives.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\transform-compiler.cast-enum.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\transform-compiler.lookup-fk-2hop.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\transform-compiler.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b34-nullable-nk.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b60-a-silent-skip.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\upsert-sql-type-coerce.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\upsert-sql.cw-b49-coalesce-conflict.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\user-career-plans.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\users.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\visualizations.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\wave1-debug-scale-v4.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\wave1-idempotency.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\a11y.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\admin-catalogues.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\admin-lists.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\admin-org-bpm.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\admin-pipelines.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\admin-tabs.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\auth.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\closing-pages.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\complex-domains.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\ess-certifications-upload.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\fixtures.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\landing-pages.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\login-mfa.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\me-pages.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\mfa-enroll.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\position-sub.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\showcase-a11y.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\smoke-5-personas.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\system-health.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\visualizations.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\tests\api\.gitkeep` · *live* · git-tracked
+- `D:\heuresys-advanced\tests\db\.gitkeep` · *live* · git-tracked
+- `D:\heuresys-advanced\tests\e2e\.gitkeep` · *live* · git-tracked
+
+### ux-design-archive
+
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\ISTRUZIONI.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\MANIFEST.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\README.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\assets\README.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\assets\favicon\favicon-source-placeholder.svg` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\assets\icons\custom\README.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\assets\logo\heuresys-mark.svg` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\assets\logo\heuresys-wordmark-monochrome-dark.svg` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\assets\logo\heuresys-wordmark-monochrome-light.svg` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\assets\logo\heuresys-wordmark.svg` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\app\dashboard\executive\page.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\app\dashboard\layout.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\app\dashboard\positions\catalogue\page.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\app\dashboard\positions\layout.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\app\dashboard\positions\skills\page.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\brand\HeuresysComLogo.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\brand\HeuresysLogo.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\AuditFeed.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\DBSupervisorSidebar.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\DashboardShell.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\ErrorRateBreakdown.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\Footer.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\GroupToggle.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\Header.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\IncidentTimeline.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\KPIStrip.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\LogStream.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\PaletteDropdown.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\RBACMatrix.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\SQLSlowQueryTable.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\Sidebar.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\TenantFleetTable.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\dashboard\TopTabs.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\ui\AlertBanner.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\ui\DataTableWithCrossHair.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\components\ui\StatusIcon.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\lib\table-cursor.ts` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\modules\positions\positions.module.ts` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\modules\positions\positions.tabs.ts` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\modules\positions\views\PositionCatalogueView.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\modules\positions\views\PositionSkillsView.tsx` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\navigation\dashboard-modules.registry.ts` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\navigation\dashboard-pages.registry.ts` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\styles\hover-affordance.css` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\code_examples\src\styles\tokens.css` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\00_context_and_scope.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\01_dashboard_shell_architecture.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\02_dom_breadcrumb_and_rendering_model.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\03_navigation_model_sidebar_tabs_routes.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\04_autonomous_module_page_contract.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\05_dynamic_shell_context.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\06_header_specification.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\07_sidebar_specification.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\08_footer_specification.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\09_design_system_and_tokens.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\10_graphic_assets_and_icon_system.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\11_showcase_and_decision_workflow.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\12_page_types_to_design.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\13_best_practices_for_modern_saas_ui.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\14_accessibility_responsiveness_quality.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\15_implementation_backlog.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\docs\16_system_health_admin_dashboard_patterns.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\governance\ACCEPTANCE_CRITERIA.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\governance\ACCESSIBILITY_CHECKLIST.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\governance\INTERACTION_REGISTER_TEMPLATE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\governance\QUALITY_GATES.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\governance\VISUAL_QA_CHECKLIST.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\prompts\CODING_AGENT_MASTER_PROMPT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\prompts\DESIGN_DECISION_CAPTURE_PROMPT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\prompts\SHOWCASE_GENERATION_PROMPT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\showcase\SHOWCASE_REQUIREMENTS.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\showcase\showcase-routes.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\templates\ADR_TEMPLATE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\templates\ASSET_REGISTER_TEMPLATE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\templates\DECISION_REGISTER.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\templates\MODULE_MANIFEST_TEMPLATE.ts` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\templates\PAGE_DESIGN_BRIEF_TEMPLATE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\templates\PALETTE_DECISION_TEMPLATE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\heuresys_uxix_brand_identity_bundle_v1\templates\SHOWCASE_REVIEW_TEMPLATE.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\ux-design\prototypes\superuser-system-health.html` · *archive* · git-tracked
+
+### web-source
+
+- `D:\heuresys-advanced\apps\web\.env.example` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\.gitignore` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\.gitkeep` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\next-env.d.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\next.config.js` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\package.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\playwright.config.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\postcss.config.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\scripts\check-i18n-parity.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\scripts\generate-favicons.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\scripts\generate-social-kit.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\admin\roles\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\blueprints\[variantId]\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\blueprints\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\brownfield-adaptation\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\career-succession\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\compensation-intelligence\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\dashboard\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\gaps\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\kpis\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\layout.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\learning\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\learning\training-initiatives\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\career\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\career\target\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\certifications\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\documents\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\gaps\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\inbox\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\kpis\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\learning\catalogue\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\learning\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\positions\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\profile\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\security\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\skills\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\skills\self-assessment\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\organization\org-chart\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\organization\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\[positionId]\kpis\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\[positionId]\learning\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\[positionId]\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\[positionId]\skills\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\processes\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\seed-acquisition\runs\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\skills\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\system-health\layout.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\system-health\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\tenants\[tenantId]\enterprise-typing\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\tenants\[tenantId]\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\tenants\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\users\[userId]\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\users\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\visualizations\[graphId]\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\visualizations\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\globals.css` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\layout.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\login\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\_ui-client.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\charts\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\dashboard-cards\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\footer\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\forms\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\header\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\icons\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\landing-page\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\layout.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\login-page\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\logo\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\page-types\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\palettes\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\primary-initial-page\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\shell\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\sidebar\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\system-health\layout.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\system-health\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\tables\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\showcase\typography\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\components\SystemHealthDashboard.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\lib\api\auth.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\lib\api\csrf-store.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\lib\api\errors.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\lib\api\fetch.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\lib\i18n.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\lib\landing.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\locales\en\common.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\locales\it\common.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\middleware.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\providers\AppProviders.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tsconfig.json` · *live* · git-tracked
+
+## Appendice — esclusioni esplicite (aree condivise Claude Desktop, NON dominio)
+
+| Pattern | Motivo |
+|---|---|
+| `scripts\convert_*.py / nose_convert_all.py` | converter PPTX->MD generici / progetto NOSE |
+| `scripts\diag-mac-mount.ps1, fix-smb-access.ps1` | diagnostica SMB/mac infra generica |
+| `scripts\Monitor-*.ps1, Start-ResourceMonitor.ps1, MONITOR-CONFIG.md, monitor-logs\\audit.log` | monitoraggio risorse globale (non heuresys-specific) |
+| `scripts\_apply_fixes.ps1, _pending_check.ps1` | utility generiche cross-project |
+| `outputs\depot\enzospenuso-landing.html` | landing page personale, non dominio |
+
+> Repo: esclusioni gestite da `.gitignore` (node_modules, .next, dist, *.tsbuildinfo, .env, .secrets, *.pem, qa_artifacts/runs/, docs/source_bundle/brownfield/extracted/, docs/brownfield/_inspection_artifacts/ — PII legacy mai indicizzata/letta).

@@ -19,9 +19,15 @@ rm -rf "$SHOWCASE/app/showcase"
 rm -rf "$SHOWCASE/lib"
 rm -rf "$SHOWCASE/components"
 
-echo "sync-showcase: copying apps/web/src/app/showcase -> apps/showcase/src/app/showcase"
+# /showcase lives at app/showcase when enabled, or _disabled_showcase_X18 while
+# the CW-B59 in-app SSR issue keeps it out of apps/web's server build. apps/showcase
+# is a static export (output: export) — a different build path that renders these
+# pages fine either way — so source from whichever location exists.
+SHOWCASE_SRC="$WEB/app/showcase"
+[ -d "$SHOWCASE_SRC" ] || SHOWCASE_SRC="$WEB/_disabled_showcase_X18"
+echo "sync-showcase: copying $SHOWCASE_SRC -> $SHOWCASE/app/showcase"
 mkdir -p "$SHOWCASE/app/showcase"
-cp -r "$WEB/app/showcase/." "$SHOWCASE/app/showcase/"
+cp -r "$SHOWCASE_SRC/." "$SHOWCASE/app/showcase/"
 
 # apps/web/src/lib is intentionally NOT synced. Showcase pages must remain
 # portable — only deps allowed are @heuresys/ui + react + lucide-react (per

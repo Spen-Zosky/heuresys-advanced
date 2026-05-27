@@ -51,7 +51,13 @@ export default tseslint.config(
     },
   },
 
-  ...compat.extends("next/core-web-vitals", "next/typescript").map((cfg) => ({
+  // Only next/core-web-vitals here: `next/typescript` also registers the
+  // @typescript-eslint plugin, which collides with the global
+  // `...tseslint.configs.recommended` above under eslint 9.39 + typescript-eslint
+  // 8.60 ("Cannot redefine plugin @typescript-eslint"). tseslint.configs.recommended
+  // already provides TS linting for apps/web; next/core-web-vitals adds the
+  // Next/React/a11y rules.
+  ...compat.extends("next/core-web-vitals").map((cfg) => ({
     ...cfg,
     files: ["apps/web/**/*.{ts,tsx,js,jsx}"],
   })),

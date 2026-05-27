@@ -124,6 +124,10 @@ POSTGRES_SCHEMA=sys
 POSTGRES_SSL=disable
 COOKIE_SECRET=$COOKIE
 ADMIN_ORIGIN=http://localhost:3000
+# NEXT_PUBLIC_* are baked into the apps/web bundle at `pnpm build` time, so the
+# playwright-smoke workflow's web build needs this in the runner env or the SPA
+# calls the wrong API origin → login never redirects → auth.setup times out.
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/v1
 MFA_ENCRYPTION_KEY=$MFA
 JWT_PRIVATE_KEY=$PRIV
 JWT_PUBLIC_KEY=$PUB

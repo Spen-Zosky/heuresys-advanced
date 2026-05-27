@@ -30,6 +30,9 @@ jobs:
     env:
       NODE_ENV: test
       LOG_LEVEL: warn
+      # OCI VM runner already runs Grafana on :3000 (docker-proxy). Run the web
+      # app on :3100 to avoid the collision; playwright.config reads this.
+      PLAYWRIGHT_WEB_PORT: "3100"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -76,12 +79,12 @@ jobs:
         working-directory: apps/web
         run: |
           pnpm build
-          pnpm start &
+          PORT=3100 pnpm start &
           WEB_PID=$!
           echo "WEB_PID=$WEB_PID" >> $GITHUB_ENV
-          # wait for / responding
+          # wait for / responding on the collision-free port (3000 = Grafana on this host)
           for i in $(seq 1 60); do
-            curl -sf http://localhost:3000 > /dev/null && break
+            curl -sf http://localhost:3100 > /dev/null && break
             sleep 1
           done
 

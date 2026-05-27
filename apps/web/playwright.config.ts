@@ -1,5 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Web server port is overridable so CI can avoid host port collisions. The OCI
+// VM self-hosted runner already runs Grafana on :3000 (docker-proxy), so the
+// playwright-smoke workflow sets PLAYWRIGHT_WEB_PORT=3100. Locally it defaults
+// to 3000. baseURL follows the same override.
+const WEB_PORT = process.env.PLAYWRIGHT_WEB_PORT ?? "3000";
+const WEB_BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${WEB_PORT}`;
+
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: false,
@@ -10,7 +17,7 @@ export default defineConfig({
   workers: 1,
   reporter: [["list"]],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: WEB_BASE_URL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
     actionTimeout: 10_000,
@@ -41,8 +48,8 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "pnpm dev",
-      url: "http://localhost:3000",
+      command: `pnpm dev --port ${WEB_PORT}`,
+      url: WEB_BASE_URL,
       reuseExistingServer: true,
       timeout: 60_000,
     },

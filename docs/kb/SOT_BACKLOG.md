@@ -1,7 +1,33 @@
 # SOT_BACKLOG — Azioni da riprendere (CLI-owned)
 
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `SOT_STATE.md`.
-> **Aggiornato**: 2026-05-27 (S939).
+> **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
+
+## ✅ Verifica stato 2026-05-27 (evidence-based, pre-resolution)
+
+> Accertamento reale di ogni item aperto (grep/read/DB/gh), per ripartire informati. Nessun fix applicato qui (solo D-12 migrate.sh chain + 000044 reclass eseguiti come task isolato approvato, vedi DEBT_REGISTER).
+
+| Item | Stato verificato | Evidenza | Scope residuo reale |
+|---|---|---|---|
+| **B-01 / D-01** | 🔴 APERTO (confermato) | CLAUDE.md dichiara "MVP-1, 11/22 moduli, 69/69 test @64c2a27"; reale: **60** `app.register /v1`, **64** `page.tsx`, **52** test file | aggiornare sez. stato CLAUDE.md + README → MVP-4 (~30-45min) |
+| **B-02** | 🟢 quasi fatto | `docs/kb/tools/sync.sh` + `graphify-out/` presenti | verificare vault wiki esterno `heuresys-advanced-wiki` |
+| **B-03 / D-08** | ✅ FATTO | `docs/kb/COWORK_ARCHIVE_NOTE.md` + SoT docs/kb completa (SOT_STATE/BACKLOG/DEBT_REGISTER/INDEX_PATHS/COWORK_INBOX/integrations/tools) | — |
+| **B-10** | 🟡 APERTO (intatto) | ADR-0014 **PROPOSED**; `000036_temp_sdbi_schema.sql` presente; **source HR assente da legacy_mirror, platform 0-row** → i dati esistono nel dump `heuresys_platform_0507` (VM `/home/ubuntu/heuresys-evo/backups/local/`, ~367MB i primi maggio) | piano CLI-owned; per dati: restore dump→mirror legacy_mirror→SDBI; legato zod4 |
+| **B-20** (#3) | 🔴 APERTO | `zod 3.25.76`; ~101 file, heavy `.datetime()`/`z.record()`/`z.coerce` | upgrade alto rischio, accoppiato B-21 |
+| **B-21** (#5) | 🔴 APERTO | `fastify-type-provider-zod 4.0.2` | accoppiato a zod4; compiler/transform breaking 4→6 |
+| **B-22** (#6) | 🟡 APERTO | `react-i18next 15.4.0` | medio, standalone; verificare i18n parity |
+| **B-23** (#1 next) | ⚪ **STALE/CHIUSO** | nessuna PR `next` aperta; `next@15.5.18` | **rimuovere dal backlog** |
+| **B-24** | 🟢 **quasi fatto** | `checkout/setup-node/action-setup` già **@v6** (#14/#15 chiuse); resta solo `peaceiris/actions-gh-pages@v3` in showcase.yml | solo **PR #16** gh-pages 3→4 |
+| **B-25 / D-09** | 🟡 parziale | `paths-ignore`/`paths` presenti nei 7 workflow; solo 4 PR Dependabot aperte (#3,#5,#6,#16) | valutare condition `skip defer-major` |
+| **B-30** | 🟢 aperto (infra) | solo OCI VM runner | backup runner Windows |
+| **B-31** | 🟡 aperto (infra) | — | ssh-agent persistence cross-session |
+| **B-40** (CW-B39) | ⚪ **rivalutato** | `sys.sys_learning_path_steps` **VUOTA (0 righe)**; le 688 righe null `learning_path_step_path_id` erano source/staging-side | forensic source-side solo se si persegue |
+| **B-41** (CW-B45) | deferito | — | SDBI Phase 4 |
+| **B-42** (CW-B50) | 🟢 **reclass FATTO** | 3 target = REFERENCE_ONLY (via 000044/D-12, 2026-05-27) | resta solo "correct target authoring" (deferito) |
+| **B-43** (CW-B41) | 🟡 aperto | `db/scripts/_lib/cross_os_pipeline.sh` presente | library update (COPY drop su Win Git Bash) |
+| Dependabot **alerts** | ✅ 0 aperti | `gh api .../dependabot/alerts` | — |
+
+**Sintesi per la fresh session**: realmente da fare = **B-01** (P0 doc drift), **B-10** (SDBI, intatto), **B-20+B-21** (zod4 accoppiato), **B-22** (i18next), **B-24→solo #16** (gh-pages), **B-25** (skip defer-major), **B-31/B-43** (infra/lib), **B-42** (target authoring), **B-04/D-04** (root cleanup). **Chiusi/stale**: B-03/D-08 (fatto), B-23 (stale), B-26 (risolto), D-12 (risolto). **Da chiarire**: B-02 (vault esterno), B-40 (source-side), B-41 (Phase 4).
 
 ## P0 — Consolidamento immediato (questa fase, prima di nuovo sviluppo)
 

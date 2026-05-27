@@ -214,13 +214,22 @@ xos_restore_legacy_mirror() {
   xos_ensure_schema "${schema}"
 
   # Step 1: DDL
+  # CW-B41 fix: dump to a tempfile, then `psql -f` (never pipe pg_dump → psql).
+  # Piping drops COPY sync on Windows Git Bash (`invalid command \N`): psql reads
+  # stdin as commands, `COPY ... FROM stdin` switches mode, but the multi-line TSV
+  # is buffered differently under MSYS than on Linux/Mac. File-based is robust on
+  # Git Bash + Mac + Linux.
   xos_log "restore_legacy_mirror: applying schema for [${tables}]"
   if [[ "${_XOS_DRY_RUN}" -eq 1 ]]; then
     xos_log "DRY-RUN: skip schema apply"
   else
-    xos_dump_schema --tables "${tables}" --target-schema "${schema}" \
-      | psql "${_XOS_LOCAL_DB_URL}" -v ON_ERROR_STOP=1 \
-      || xos_die "schema restore failed"
+    local _ddl_file
+    _ddl_file="$(mktemp "${TMPDIR:-/tmp}/xos_ddl.XXXXXX")"
+    xos_dump_schema --tables "${tables}" --target-schema "${schema}" > "${_ddl_file}" \
+      || { rm -f "${_ddl_file}"; xos_die "schema dump failed"; }
+    psql "${_XOS_LOCAL_DB_URL}" -v ON_ERROR_STOP=1 -f "${_ddl_file}" \
+      || { rm -f "${_ddl_file}"; xos_die "schema restore failed"; }
+    rm -f "${_ddl_file}"
   fi
 
   # Step 2: optional truncate (rerun scenario)
@@ -240,13 +249,19 @@ xos_restore_legacy_mirror() {
   fi
 
   # Step 3: DATA
+  # CW-B41 fix: dump to a tempfile, then `psql -f` (see Step 1 rationale — piping
+  # the COPY data stream into psql drops sync on Windows Git Bash).
   xos_log "restore_legacy_mirror: applying data for [${tables}]"
   if [[ "${_XOS_DRY_RUN}" -eq 1 ]]; then
     xos_log "DRY-RUN: skip data apply"
   else
-    xos_dump_data --tables "${tables}" --target-schema "${schema}" \
-      | psql "${_XOS_LOCAL_DB_URL}" -v ON_ERROR_STOP=1 \
-      || xos_die "data restore failed"
+    local _data_file
+    _data_file="$(mktemp "${TMPDIR:-/tmp}/xos_data.XXXXXX")"
+    xos_dump_data --tables "${tables}" --target-schema "${schema}" > "${_data_file}" \
+      || { rm -f "${_data_file}"; xos_die "data dump failed"; }
+    psql "${_XOS_LOCAL_DB_URL}" -v ON_ERROR_STOP=1 -f "${_data_file}" \
+      || { rm -f "${_data_file}"; xos_die "data restore failed"; }
+    rm -f "${_data_file}"
   fi
 
   # Step 4: row count verification

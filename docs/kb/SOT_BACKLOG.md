@@ -24,7 +24,7 @@
 | **B-40** (CW-B39) | ⚪ **rivalutato** | `sys.sys_learning_path_steps` **VUOTA (0 righe)**; le 688 righe null `learning_path_step_path_id` erano source/staging-side | forensic source-side solo se si persegue |
 | **B-41** (CW-B45) | deferito | — | SDBI Phase 4 |
 | **B-42** (CW-B50) | 🟢 **reclass FATTO** | 3 target = REFERENCE_ONLY (via 000044/D-12, 2026-05-27) | resta solo "correct target authoring" (deferito) |
-| **B-43** (CW-B41) | 🟡 aperto | `db/scripts/_lib/cross_os_pipeline.sh` presente | library update (COPY drop su Win Git Bash) |
+| **B-43** (CW-B41) | ✅ **FATTO** 2026-05-28 (validazione funzionale gated a B-10) | `xos_restore_legacy_mirror` ora dump→tempfile→`psql -f` (no pipe) nei 2 step DDL+DATA; applica il workaround validato REPORT 010 §5.a. bash -n + smoke + mktemp cross-OS OK | run reale gated a B-10 (lib non esercitata da script attivi) |
 | Dependabot **alerts** | ✅ 0 aperti | `gh api .../dependabot/alerts` | — |
 
 **Sintesi per la fresh session**: realmente da fare = **B-01** (P0 doc drift), **B-10** (SDBI, intatto), **B-20+B-21** (zod4 accoppiato), **B-22** (i18next), **B-24→solo #16** (gh-pages), **B-31/B-43** (infra/lib), **B-42** (target authoring). **Chiusi/stale**: B-01/D-01 (fatto 2026-05-28), B-03/D-08 (fatto), B-23 (stale), B-26 (risolto), D-12 (risolto), **D-04 root cleanup + B-25/D-09 defer-major CI skip (fatti 2026-05-28)**. **Da chiarire**: B-02 (vault esterno), B-40 (source-side), B-41 (Phase 4).
@@ -69,7 +69,7 @@
 | **B-40** | CW-B39 | nk_missing learning_path_step path_id 688 rows — pending forensic | Valutare in SDBI Phase 2/Wave 2. |
 | **B-41** | CW-B45 | source-vs-target CHECK delta — pending engine improvement | SDBI Phase 4. |
 | **B-42** | CW-B50 | reclass IMPORT→REFERENCE_ONLY; correct target authoring deferred | Batch dedicato (era C13). |
-| **B-43** | CW-B41 | xos_lib piped psql COPY drops sync su Win Git Bash — library update | `db/scripts/_lib/cross_os_pipeline.sh`. |
+| ~~**B-43**~~ | CW-B41 | ✅ **FATTO 2026-05-28**: xos_lib ora file-based (dump→tempfile→`psql -f`), no pipe. bash -n+smoke+mktemp cross-OS OK. Validazione funzionale gated a B-10 (lib non ancora esercitata). | `db/scripts/_lib/cross_os_pipeline.sh`. |
 
 ## Candidati MVP-4 futuri (da MVP_4_ROADMAP.md — decisione Enzo)
 

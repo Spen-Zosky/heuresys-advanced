@@ -198,8 +198,8 @@ def main():
     yml.append(f"  generated_at: \"{ts}\"")
     yml.append(f"  total_files: {len(entries)}")
     yml.append("  roots:")
-    yml.append(f"    repo: \"{REPO}\"")
-    yml.append(f"    claude_desktop: \"{CD}\"")
+    yml.append(f"    repo: '{REPO}'")
+    yml.append(f"    claude_desktop: '{CD}'")
     yml.append("  category_counts:")
     for k in sorted(cat_counts):
         yml.append(f"    {k}: {cat_counts[k]}")
@@ -208,10 +208,12 @@ def main():
         yml.append(f"    {k}: {status_counts[k]}")
     yml.append("files:")
     for abspath, root, rel, cat, st, prov in entries:
-        p = abspath.replace("\\", "\\\\")
-        yml.append(f"  - path: \"{p}\"")
+        # single-quoted YAML scalars: backslashes are literal, only ' needs doubling
+        p = abspath.replace("'", "''")
+        r = rel.replace("'", "''")
+        yml.append(f"  - path: '{p}'")
         yml.append(f"    root: {root}")
-        yml.append(f"    rel: \"{rel}\"")
+        yml.append(f"    rel: '{r}'")
         yml.append(f"    category: {cat}")
         yml.append(f"    status: {st}")
         yml.append(f"    provenance: {prov}")

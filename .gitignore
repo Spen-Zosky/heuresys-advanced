@@ -122,3 +122,8 @@ cowork_code_exchange/.cowork-active.lock
 cowork_code_exchange/.cowork-pending-commits.json
 cowork_code_exchange/.cowork-pending-commits/
 cowork_code_exchange/.inbox/INDEX.md
+
+# graphify knowledge-graph outputs (generated, external graph lives in wiki-space)
+graphify-out/
+.graphify_root
+.graphify_python

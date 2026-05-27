@@ -1,6 +1,6 @@
 # ADR-0014 — SDBI: Semantic-Driven Brownfield Import (complement to ETL brownfield)
 
-**Status**: PROPOSED (awaiting Enzo final approval post Opt3 selection)
+**Status**: ACCEPTED (Enzo sign-off 2026-05-27 — Phase 2 pilots Goals/OKRs + Time/Leave validated live; stream 2.4 scaling opened)
 **Date**: 2026-05-20
 **Authors**: Cowork Claude (architect supervisor)
 **Decision authority**: Enzo Spenuso
@@ -316,9 +316,16 @@ Phase mapping al TODO master (`cowork_reserved/12_TODO_LIST_GRANULARE.md`):
 
 ## §7 — Status
 
-**PROPOSED** — awaiting Enzo final approval after reading this ADR + accompanying batch_c1 deliverables.
+**ACCEPTED** — Enzo sign-off 2026-05-27.
 
-Next action: Enzo conferma ADR + procediamo a Phase 2 (Goals/OKRs pilot authoring — C1.8).
+Acceptance evidence (§5 criteria):
+1. ✅ Phase 2 pilot Goals/OKRs LIVE in `sys.*` (~5.9k rows, 10 tables) via SDBI workflow — commit `bddf987`.
+2. ✅ Phase 2 pilot Time/Leave LIVE via SDBI workflow — commit `5735556`.
+3. ✅ Phase 5 consolidation diff procedure validated on both pilots (`db/seeds/brownfield/sdbi/goals_pilot/03_phase5_consolidation.sql`).
+4. ✅ Bias mitigations §3.8 enforced via mapping_card checklist (13 cards authored).
+5. ⏳ Documentation runbook (`docs/sdbi/RUNBOOK.md`) published with this stream (MVP-4 2.4.3).
+
+Stream 2.4 scaling now open: 8 macro-aree TRUE GAP (PerformanceReviews pilot first). NB: source data availability per macro-area must be verified at Phase 1 (some `heuresys_platform.public` HR transactional tables are schema-only / 0 rows — verified 2026-05-27).
 
 ## §8 — References
 

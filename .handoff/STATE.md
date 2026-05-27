@@ -1,44 +1,34 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-27 (S938 CLI — S937 housekeeping CLOSED + 3 tail chiusi).
-**Branch**: `main` — HEAD `c2f95ad` (synced origin). Tutti i workflow CI verdi su HEAD.
-**Last tag**: `v0.4.1-housekeeping-closed` (@ `01340ae`). Prev: `v0.4.0-mvp4-ready`.
+**Updated**: 2026-05-27 (S939 — CLI takeover + KB integrations + security cleanup).
+**Branch**: `main` — HEAD `f0ce2a1` (synced origin). CI verde. **0 alert Dependabot**.
+**Last tag**: `v0.4.1-housekeeping-closed` (@ `01340ae`).
 
 ## Last session brief
 
-S937 housekeeping CLOSED via CLI (SSH blocker caduto): CK-2 runner OCI VM registrato+online, CK-3 CW-B60-A live (observability ok), CK-6 tutti e 6 i workflow self-hosted verdi, CK-7 tag v0.4.1. Poi chiusura 3 tail: Dependabot (7 major deferiti `defer-major`, #17 gruppo merged + fix regressione lint eslint 9.39), Tail-2 drift = non-issue, **CW-B59/DEFER-F RESOLVED** (fix `ssr:false` in `apps/web/src/app/showcase/_ui-client.tsx` → /showcase riabilitato; showcase deploy verde dal primo dal 20/05). Dettaglio in HANDOFF.md §2026-05-27 (×2).
+S939: il **CLI ha ripreso il controllo diretto** (no Cowork). Creata **SoT CLI-owned in `docs/kb/`** (INDEX_PATHS 1358 file + SOT_STATE/SOT_BACKLOG/DEBT_REGISTER/COWORK_INBOX); archivio Cowork congelato read-only; **Cowork forzato ad adottare la SoT** (preferences v5.1 textarea claude.ai + redirect + freeze markers). **Integrati graphify** (knowledge graph, 8543 nodi, hub viz brand-aligned in `wiki-space`) **+ LLM-wiki** (vault `heuresys-advanced-wiki`, modo `linked` no-copie, 63 doc prosa ingeriti; skill estesa v1.3 in wiki-factory). **Security**: alert #78 `tmp` fixed (override 0.2.7); 3 CI-action → v6 (Node 24 ready); chiuse Dependabot #1/#14/#15.
 
-## Top priorities (next session)
+## Top priorities (next session — FRESH)
 
-1. **MVP-4 stream 2.4 SDBI Phase 2** (~6-10h kickoff) — entry point `cowork_code_exchange/_01_PROMPT_027_s937_ck8_sdbi_phase2_kickoff.md` (deciso da Enzo S937). Full context `cowork_code_exchange/_00_HANDOVER_CLI_2026-05-26_post_S937.md`.
-2. **Dependabot 7 major deferiti** — audit breaking-changes per merge (zod4 legato a stream 2.4, fastify-type-provider-zod6, react-i18next17, next, 3 CI-action). Triage doc `docs/github/dependabot-triage-2026-05-26.md`.
+1. **MVP-4 stream 2.4 — SDBI Phase 2** (~6-10h) — entry `cowork_code_exchange/_01_PROMPT_027_*` (riformulare come piano CLI-owned diretto). Migration base `000036_temp_sdbi_schema.sql`. **Porta con sé il blocco zod4** (Dependabot #3 + #5 accoppiati): valutare se fare l'upgrade zod 3→4 + fastify-type-provider-zod 4→6 dentro questo milestone o prima. Vedi `docs/kb/SOT_BACKLOG.md` B-10/B-20.
+2. (minori) Dependabot residui: #6 react-i18next 15→17 (medio, standalone), #16 gh-pages 3→4 (basso).
 
 ## Open questions
 
-- PR Dependabot deferite auto-rebasano → ri-triggerano CI ad ogni move di main (churn runner singolo). Candidata: condition `skip defer-major` nei 6 workflow.
-- Backup runner Windows (DEFERRED da S935-F) — solo OCI VM runner attivo oggi.
+- zod4 (#3+#5): upgrade dentro stream 2.4 o mini-milestone separato prima? (scope ampio: 61 schemi + provider; rischio alto, test coprono).
 
 ## Stack snapshot
 
-- **HEAD**: `c2f95ad`. **Tag**: `v0.4.1-housekeeping-closed`.
-- **CI**: 6 workflow self-hosted su OCI VM runner (`oracle-vm-default-runner` online) — typecheck/lint/test-integration/build-web/playwright/i18n tutti verdi + showcase deploy (GitHub Pages) verde. EnvironmentFile `/etc/heuresys-runner.env` (JWT `\\n` double-escape, ADMIN_ORIGIN/web :3100 vs Grafana :3000, NEXT_PUBLIC_API_BASE_URL).
-- **Bias**: 62 catalogued (CW-B17→B63, B57 withdrawn), CW-B59 RESOLVED, deferred-fix 0. Next CW-B64.
-- **Deps**: post #17 → eslint 9.39.4, typescript-eslint 8.60. `@heuresys/ui ^0.1.1` npm. ux-design-shared `dfa2e81`.
-- **/showcase**: riabilitato (apps/web `app/showcase` via `_ui-client` ssr:false; `_disabled_showcase_X18` rimosso).
+- **HEAD**: `f0ce2a1`. CI 4-core + showcase verdi su v6 actions. tmp 0.2.7. next 15.5.18.
+- **SoT viva**: `docs/kb/` (CLI-owned). Leggere SOT_STATE.md per primo (CLAUDE.md/README ancora stale a MVP-1 — debito D-01).
+- **KB interrogabili** (fuori repo, in `wiki-space`): wiki `heuresys-advanced-wiki` (63 src, modo linked) + graph hub `heuresys-advanced-graph/index.html`. Re-sync: `docs/kb/tools/sync.sh`.
+- **Cowork**: read-only sulla SoT; propone solo via `docs/kb/COWORK_INBOX.md`; unico committer = CLI.
 
 ## Verification (next session)
 
 ```bash
-ssh -o BatchMode=yes oracle-vm-default 'echo OK'   # key in agent? else load manually
+ssh -o BatchMode=yes oracle-vm-default 'echo OK'   # key in agent?
 nc -z localhost 5433 && echo tunnel-up             # else: ssh -fN -L 5433:localhost:5432 oracle-vm-default
 git log origin/main..HEAD --oneline                # empty = synced
-pnpm install -r && pnpm --filter @heuresys/web build   # exit 0
-gh run list --limit 6                              # main CI green
+gh run list --limit 6                              # CI green · gh api .../dependabot/alerts?state=open -> 0
 ```
-
-## Note operative
-
-- Tunnel SSH 5433 attivo solo da Windows namespace (bash WSL2 = Connection refused, atteso).
-- OCI VM runner host ha Grafana su :3000 → web E2E gira su :3100 (playwright.config `PLAYWRIGHT_WEB_PORT`).
-- systemd EnvironmentFile fa shell-unescape: PEM/segreti multi-char con backslash vanno `\\` raddoppiati.
-- Git push autonomi: nuova sessione riparte da default "ask".

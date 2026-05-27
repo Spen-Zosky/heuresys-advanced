@@ -10,7 +10,7 @@
 | Item | Stato verificato | Evidenza | Scope residuo reale |
 |---|---|---|---|
 | **B-01 / D-01** | ✅ **FATTO** 2026-05-28 | CLAUDE.md §"What this is"+architecture+migrations allineati a MVP-4 (Fastify 5, ~58 moduli, web shipped, 43 mig, +showcase, puntatore SoT viva); README header→state S940 + 43 mig. README NON era a MVP-1 (solo CLAUDE.md). | — |
-| **B-02** | 🟢 quasi fatto | `docs/kb/tools/sync.sh` + `graphify-out/` presenti | verificare vault wiki esterno `heuresys-advanced-wiki` |
+| **B-02** | 🟢 verificato 2026-05-28 (resta decisione Enzo) | `docs/kb/tools/` (10 file: build_index/graph_hub/graph_mirror/linked_manifest + sync.sh/.ps1 + hooks) + `graphify-out/` presenti. **Repo GitHub `Spen-Zosky/heuresys-advanced-wiki` NON esiste** (gh: could not resolve) | il "vault esterno" è in `wiki-space` (vault Obsidian locale, path fuori repo); conferma manuale o creazione repo = decisione Enzo |
 | **B-03 / D-08** | ✅ FATTO | `docs/kb/COWORK_ARCHIVE_NOTE.md` + SoT docs/kb completa (SOT_STATE/BACKLOG/DEBT_REGISTER/INDEX_PATHS/COWORK_INBOX/integrations/tools) | — |
 | **B-10** | 🟡 APERTO (intatto) | ADR-0014 **PROPOSED**; `000036_temp_sdbi_schema.sql` presente; **source HR assente da legacy_mirror, platform 0-row** → i dati esistono nel dump `heuresys_platform_0507` (VM `/home/ubuntu/heuresys-evo/backups/local/`, ~367MB i primi maggio) | piano CLI-owned; per dati: restore dump→mirror legacy_mirror→SDBI; legato zod4 |
 | **B-20** (#3) | 🔴 APERTO | `zod 3.25.76`; ~101 file, heavy `.datetime()`/`z.record()`/`z.coerce` | upgrade alto rischio, accoppiato B-21 |

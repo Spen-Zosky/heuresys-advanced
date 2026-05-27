@@ -1,3 +1,33 @@
+## 🎯 2026-05-27 — Claude Code CLI continuation S937 — housekeeping CLOSED
+
+Sessione CLI (Claude Code) successiva all'handover di Cowork (`cowork_code_exchange/_00_HANDOVER_CLI_2026-05-26_post_S937.md`). Cowork aveva chiuso S937 in **partial** con CK-1..6 bloccati dal blocker SSH passphrase (R23/iii). All'avvio di questa sessione la chiave OCI `oci_recovery_ed25519` risultava **già caricata in ssh-agent** + tunnel 5433 up → blocker caduto → CK-2/3/6 sbloccati e completati in autonomia.
+
+**HEAD post-closure**: `01340ae`. **Tag**: `v0.4.1-housekeeping-closed`.
+
+### Esito CK (continuation)
+
+| Task | Esito | Evidenza |
+|---|---|---|
+| CK-1 SSH agent | ✅ RESOLVED | `ssh-add -l` mostra `oci-vm` ED25519; tunnel 5433 up; `ssh oracle-vm-default` OK |
+| CK-2 OCI VM runner | ✅ DONE | runner `oracle-vm-default-runner` online (labels self-hosted,oci-vm,Linux,ARM64); systemd service active + EnvironmentFile drop-in; token via `gh api` (zero UI). Procedura: `docs/ci/self-hosted-runners-setup.md` §3-4 (corretta con i bug trovati). |
+| CK-3 CW-B60-A live | ✅ DONE (documentato) | wave re-run HTTP 201; observability CW-B61 confermata live (skip loggati level-50, zero silent drop). Audit-row `SILENT_UPSERT_ZERO_ROWS_V1` NON riproducibile a stato attuale (3 target vuoti + mapping falliscono insert per schema-drift = path `insert_failed` loggato, diverso). Unit test 3/3 autorevole. **Finding**: brownfield registry column-drift (candidato refresh dedicato). |
+| CK-6 CI smoke | ✅ DONE | **Tutti e 6 i workflow self-hosted verdi** su `01340ae`: typecheck, lint, test-integration (42 suite, DB+JWT+RBAC), build-web, playwright-smoke (5 personas), i18n-parity. |
+| skills:131 | ✅ FIXED | era residual pre-esistente: 20.048 skill > `limit=200` → scope via filtro `search=SUITE_PREFIX`. Verde local 5/5 + CI. Commit `9fff8e9`. |
+
+### 8 bug CI di primo-run fixati (workflow S935-F mai eseguiti prima)
+
+EnvironmentFile/env: (1) systemd EnvironmentFile fa unescaping shell → JWT PEM `\n` collassava a `n` → `FAST_JWT_INVALID_KEY` (fix: doppio backslash `\\n`); (2) `POSTGRES_DB` vs `POSTGRES_DATABASE`+`PGPASSWORD`; (3) `NEXT_PUBLIC_API_BASE_URL` build-time mancante; (4) `ADMIN_ORIGIN` CORS. Workflow/test: (5) seed-check `email`→`user_email`; (6) `--grep "@smoke"` (tag inesistente)→file `smoke-5-personas.spec.ts`; (7) **collisione porta :3000 = Grafana (docker-proxy) sul runner host** → web E2E su :3100; (8) server backgrounded killati tra step → `setsid` persistence + `next start -p` diretto (script hardcoda `-p 3000`).
+
+Commit closure CK-6: `9fff8e9 → 01340ae` (6 commit fix). Doc `docs/ci/self-hosted-runners-setup.md` §3-4 aggiornato con il contratto verificato.
+
+### Note coordinamento
+
+- Sessione Cowork S937 parallela (commit autoredati Enzo Spenuso senza co-author): partial closure + tag `v0.4.0a-s937-partial-checkpoint` @ `0c53fdf` + handover CLI @ `1cab49b` + PROMPT 027 CK-8 @ `418e9b3`. Idle dal commit 19:18. Questa sessione CLI è additiva, fast-forward puliti.
+- **CK-8** già deciso da Enzo (2026-05-26 18:37): MVP-4 stream **2.4 SDBI Phase 2**, `cowork_code_exchange/_01_PROMPT_027_s937_ck8_sdbi_phase2_kickoff.md` pronto. Esecuzione PROMPT 027 = prossima sessione.
+- **Tail non-blocking**: Dependabot PR CI (alcuni run rossi, triage separato `docs/github/dependabot-triage-2026-05-26.md`); brownfield registry column-drift; DEFER-F /showcase (CW-B59).
+
+---
+
 ## 🎯 2026-05-26 — Cowork sessione S937 (housekeeping closure — partial + R23/iii eccezione SSH)
 
 Sessione successiva a S936, target: chiudere carry-over CK-1..7 + MVP-4 stream selection CK-8. Autonomy ereditata + R23 enforcement pieno.

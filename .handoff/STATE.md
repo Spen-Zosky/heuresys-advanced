@@ -1,10 +1,10 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-26 18:30 GMT+2 (S937 partial closure — CK-4 script v2 + CK-5 verified; CK-1/2/3/6 pending Enzo SSH passphrase entry).
-**Branch**: `main` — HEAD locale `b55ffe8` (CK-4 v2 script). Origin sync 1/0 ahead (push deferred a closure post-CK-1). ux-design-shared `dfa2e81`.
-**Last tags pushed**: `v0.3.4-p0-closed` (post-S935-C) + **`v0.4.0-mvp4-ready`** (post-S935-Z) — entrambi su origin verified.
-**Target tag pending**: `v0.4.0a-s937-partial-checkpoint` (post-CK-4 + CK-5 + HANDOFF/STATE refresh, prima del push S937 closure). `v0.4.1-housekeeping-closed` reservato a S938+ post-CK-1/2/3/6 complete.
-**Next session entry-point S938**: TBD post-S937 commit; current state visible in HANDOFF.md §S937 + bias_registry + `sessioni/session_2026-05-26_s937_housekeeping/NEXT_SESSION_START.md`.
+**Updated**: 2026-05-27 (S937 housekeeping CLOSED via Claude Code CLI continuation — CK-1..6 complete, all 6 CI workflows green on OCI VM runner).
+**Branch**: `main` — HEAD `01340ae` (synced origin). ux-design-shared `dfa2e81`.
+**Last tags pushed**: `v0.4.0-mvp4-ready` (post-S935-Z) + `v0.4.0a-s937-partial-checkpoint` (Cowork S937 partial @ `0c53fdf`) + **`v0.4.1-housekeeping-closed`** (CLI continuation @ `01340ae`).
+**S937 housekeeping**: ✅ CLOSED. CK-1 SSH resolved, CK-2 runner online, CK-3 CW-B60-A live (observability confirmed), CK-4/5 done (Cowork), CK-6 all 6 self-hosted workflows green, CK-7 this closure. CK-8 MVP-4 stream 2.4 SDBI Phase 2 decided (PROMPT 027 ready).
+**Next session entry-point**: execute `cowork_code_exchange/_01_PROMPT_027_s937_ck8_sdbi_phase2_kickoff.md` (MVP-4 2.4 SDBI Phase 2). Full CLI continuation detail in HANDOFF.md §2026-05-27 + `cowork_code_exchange/_00_HANDOVER_CLI_2026-05-26_post_S937.md`.
 **Previous tag**: `v0.3.2-mvp3-full` (`d17ee0a`) — Tappa E MFA full + Tappa D pragmatic + 2 CVE.
 
 ## Sessione S937 (2026-05-26) — Housekeeping closure PARTIAL + R23/iii eccezione SSH

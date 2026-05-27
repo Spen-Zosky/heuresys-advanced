@@ -26,11 +26,24 @@ CREATE TABLE IF NOT EXISTS sys.sys_activity_classifications (
   updated_at                          timestamptz  NOT NULL DEFAULT now()
 );
 
-ALTER TABLE sys.sys_activity_classifications
-  DROP CONSTRAINT IF EXISTS sys_activity_classifications_scheme_check;
-ALTER TABLE sys.sys_activity_classifications
-  ADD CONSTRAINT sys_activity_classifications_scheme_check
-  CHECK (activity_classification_scheme IN ('ATECO_2025', 'NACE_REV_2_1', 'ATECO_2007', 'NACE_REV_2'));
+-- Bootstrap baseline whitelist, GUARDED so a re-run does NOT clobber the relaxed
+-- constraint set by migration 000032 (ATECO/NACE base versions loaded at runtime
+-- by the brownfield wave). On a fresh DB the constraint is absent here and the
+-- table is empty, so the strict 4-value baseline applies; 000032 later relaxes it.
+-- Rationale: the previous unconditional DROP+ADD broke twice-run idempotency once
+-- ATECO/NACE rows existed — a full re-run re-asserted the strict CHECK and failed
+-- with "violated by some row" before reaching 000032. (R3 idempotency fix 2026-05-27.)
+DO $scheme_check$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname  = 'sys_activity_classifications_scheme_check'
+      AND conrelid = 'sys.sys_activity_classifications'::regclass
+  ) THEN
+    ALTER TABLE sys.sys_activity_classifications
+      ADD CONSTRAINT sys_activity_classifications_scheme_check
+      CHECK (activity_classification_scheme IN ('ATECO_2025', 'NACE_REV_2_1', 'ATECO_2007', 'NACE_REV_2'));
+  END IF;
+END $scheme_check$;
 
 CREATE UNIQUE INDEX IF NOT EXISTS sys_activity_classifications_scheme_code_uq
   ON sys.sys_activity_classifications (activity_classification_scheme, activity_classification_code);

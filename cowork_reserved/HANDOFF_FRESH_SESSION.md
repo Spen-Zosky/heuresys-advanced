@@ -1,4 +1,13 @@
-# HANDOFF — Fresh Cowork Session Bootstrap
+> # ⛔➡️ REDIRECT (dal 2026-05-27, S939) — questo file NON è più la SoT
+> Il Claude Code CLI ha ripreso il **controllo diretto** di heuresys-advanced. La **SoT di stato viva**
+> è ora **`D:\heuresys-advanced\docs\kb\`**. A inizio sessione leggi PRIMA, nell'ordine:
+> 1. `docs/kb/SOT_STATE.md` · 2. `docs/kb/SOT_BACKLOG.md` · 3. `docs/kb/DEBT_REGISTER.md`
+> Per proporre cambiamenti: append a `docs/kb/COWORK_INBOX.md` (il CLI riconcilia/committa). Niente nuovi cicli PROMPT/PLAN/EXEC.
+> Il contenuto sotto è **archivio storico S935** (NON stato corrente). Dettaglio: `docs/kb/COWORK_ARCHIVE_NOTE.md`.
+
+---
+
+# HANDOFF — Fresh Cowork Session Bootstrap (ARCHIVIO STORICO — vedi redirect sopra)
 
 **Updated**: 2026-05-26 CLOSURE (S935 chiusa — full B→C→E→F→D autonomy sequence shipped to working tree; commit + push via `cowork_reserved/auto-ship/run-all-s935.ps1` Windows host)
 **Last Cowork session ID**: **S935** (CHIUSA: A=S934 + B/C/E/F/D + Z closure; tag finale `v0.4.0-mvp4-ready` post-Z)

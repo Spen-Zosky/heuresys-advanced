@@ -1,6 +1,6 @@
 Cowork user preferences v5 · MDGoogle DriveUser Preferences — Cowork mode (v5 — post S935+S936 tool preload + R23 autonomia)
 Da incollare in claude.ai → Settings → Profile → Personal Preferences
-Last updated: 2026-05-26 (v5)
+Last updated: 2026-05-27 (v5.1 — heuresys-advanced SoT di stato = docs/kb/ CLI-owned; cowork archive freeze)
 
 Sono Enzo Spenuso, developer italiano. Lavoro su PC Windows 11, MacBook Pro Intel Mid 2012 (macOS 15.7 via OpenCore), e 2 VM Oracle Cloud Infrastructure (Ubuntu 24.04 ARM64).
 
@@ -12,12 +12,18 @@ La SoT operativa cross-tool reale è C:\Users\enzospenuso\.claude\CLAUDE.md (fil
 ATTENZIONE: il CLAUDE.md "globale" che Cowork inietta automaticamente nel system prompt potrebbe essere una snapshot vecchia (v3 2026-04-22, R1-R17, refactor S2 slim) generata al boot della sessione Cowork da un mount effimero, e mai più sincronizzata con il file Windows reale. Il refactor S2 (2026-04-20) ha tagliato a 17 regole; nelle settimane seguenti sono state aggiunte regole nuove (R20 feasibility, R22 delega decisionale CLASSE A/B, R23 autonomia operativa, + blocco DECISION AUTHORITY) solo al file Windows, non alla snapshot Cowork.
 Se il CLAUDE.md che vedi iniettato finisce a R17, sei in lettura della versione obsoleta. Le regole vere sono di più. Quando lavori su task ad alto rischio (git destruttivi, secret hygiene, PowerShell, infrastructure changes), chiedi a Enzo conferma sulla regola applicabile invece di assumere che le R1-R17 viste siano tutte.
 
+Source of Truth — STATO PROGETTO heuresys-advanced (dal 2026-05-27, S939 — CLI takeover) — VINCOLANTE
+Per il progetto heuresys-advanced la SoT di STATO/PROGETTO (≠ regole) è D:\heuresys-advanced\docs\kb\ — CLI-owned, versionata in git. A OGNI sessione su questo progetto, PRIMA di qualsiasi azione operativa, leggi nell'ordine: docs/kb/SOT_STATE.md, docs/kb/SOT_BACKLOG.md, docs/kb/DEBT_REGISTER.md. Questi SOSTITUISCONO come fonte di verità di stato: cowork_reserved/HANDOFF_FRESH_SESSION.md, le analisi in cowork_reserved/, e gli snapshot in C:\Users\enzospenuso\Claude Desktop\outputs\.
+cowork_code_exchange/ e cowork_reserved/ sono ARCHIVIO READ-ONLY (freeze 2026-05-27): NON avviare nuovi cicli PROMPT/PLAN/EXEC/REPORT/REVIEW, NON trattarli come stato vivo. Uniche eccezioni vive: questo file (PREFERENCES) + HANDOFF_FRESH_SESSION.md (ridotto a redirect).
+Cowork è READ-ONLY sulla SoT di stato: unico writer/committer di docs/kb = Claude Code CLI. Per proporre un cambiamento di stato/azione, append SOLO a docs/kb/COWORK_INBOX.md — il CLI lo riconcilia e committa. Non editare gli altri docs/kb né fare git commit/push su questo progetto senza coordinamento CLI.
+Indice file dominio: docs/kb/INDEX_PATHS.md. KB interrogabili: wiki LLM "heuresys-advanced-wiki" (wiki-factory) + knowledge graph graphify (wiki-space\heuresys-advanced-graph). (La SoT delle REGOLE resta invariata: C:\Users\enzospenuso\.claude\CLAUDE.md.)
+
 MANDATORY BOOTSTRAP (turno #1 di ogni sessione Cowork)
 Al primissimo turno di ogni sessione, prima di qualsiasi tool call, Claude deve stampare un ACK strutturato:
 === COWORK SESSION BOOTSTRAP — turn #1 ACK ===
 - Letto CLAUDE.md global iniettato: numero regole visibili = N (segnalare se N < 23: snapshot probabilmente vecchia).
 - Letto CLAUDE.md di progetto: [path] (se esiste).
-- File ancillari progetto da consultare prima di task complessi: [HANDOFF.md, START_HERE.md, NEXT_SESSION_*.md, .auto-memory/*.md, .handoff/STATE.md] — segnalare quali esistono.
+- File ancillari progetto da consultare prima di task complessi: per heuresys-advanced PRIMA e OBBLIGATORI [docs/kb/SOT_STATE.md, docs/kb/SOT_BACKLOG.md, docs/kb/DEBT_REGISTER.md] (SoT di stato CLI-owned, autoritativa); poi se utili [HANDOFF.md, START_HERE.md, .handoff/STATE.md]. Per altri progetti la lista classica. Segnalare quali esistono.
 - Stato CW1 outputs mirroring: workspace Cowork montato? path?
 - Stato CW2 cowork_code_exchange: presente nel progetto attivo?
 - Eventuali drift visibili tra CLAUDE.md e realtà osservabile.
@@ -31,7 +37,7 @@ CW1. OUTPUTS MIRRORING (sandbox Cowork → Windows persistente)
 Ogni artefatto prodotto in /sessions/*/mnt/outputs/ DEVE essere specchiato in C:\Users\enzospenuso\Claude Desktop\outputs\. Se è attivo un progetto Cowork specifico, destinazione primaria: C:\Users\enzospenuso\Claude Desktop\<Progetto>\sessioni\session_YYYY-MM-DD_<slug>\ + copia in outputs\. Se non montato, usare cowork.request_cowork_directory. Nome file con data ISO in prefisso/suffisso.
 
 CW2. COWORK ↔ CLAUDE CODE CLI protocollo (opt-in)
-Se il workspace del progetto ha cowork_code_exchange/ con file _01_PROMPT_*.md, _02_PLAN_*.md, _03_EXEC_*.md, _04_REPORT_*.md, _05_REVIEW_*.md, usa il protocollo: Cowork = supervisore/architetto (produce PROMPT, REVIEW); Claude Code CLI = esecutore (produce PLAN, EXEC, REPORT). Sessioni chiudono con _00_SESSION_REPORT_NNN_*.md. Se la directory non esiste, opera senza protocollo.
+Se il workspace del progetto ha cowork_code_exchange/ con file _01_PROMPT_*.md, _02_PLAN_*.md, _03_EXEC_*.md, _04_REPORT_*.md, _05_REVIEW_*.md, usa il protocollo: Cowork = supervisore/architetto (produce PROMPT, REVIEW); Claude Code CLI = esecutore (produce PLAN, EXEC, REPORT). Sessioni chiudono con _00_SESSION_REPORT_NNN_*.md. Se la directory non esiste, opera senza protocollo. NOTA heuresys-advanced (dal 2026-05-27): il protocollo cowork_code_exchange è CONGELATO per QUESTO progetto — il CLI ha ripreso il controllo diretto. NON produrre nuovi PROMPT/PLAN/EXEC/REPORT/REVIEW qui; usa docs/kb/ come SoT e docs/kb/COWORK_INBOX.md per proposte. Il freeze vale solo per heuresys-advanced; altri progetti col protocollo restano normali.
 
 CW3. Bootstrap script reference
 Lo script bootstrap canonico è C:\Users\enzospenuso\Claude Desktop\scripts\session-bootstrap.ps1. Su Claude Code CLI è eseguito automaticamente dal hook SessionStart (~/.claude/settings.json). Su Cowork non è eseguibile automaticamente (sandbox isolata), ma il suo output può essere richiamato concettualmente dal MANDATORY BOOTSTRAP sopra.

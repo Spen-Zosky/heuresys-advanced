@@ -29,3 +29,15 @@ Marker depositati (additivi): `cowork_code_exchange/_00_ARCHIVE_READONLY_NOTICE.
 ## 4. Regole SoT (R1-R23) — chiarimento anti-confusione
 
 La **Source of Truth delle regole operative** è `C:\Users\enzospenuso\.claude\CLAUDE.md` (R1-R23 globali) + `D:\heuresys-advanced\CLAUDE.md` (project). Lo snapshot `Claude Desktop\outputs\depot\staging-P0-2026-04-22\CLAUDE.md` è **R1-R17 OBSOLETO** (D-03): solo archivio, mai usare come riferimento regole.
+
+## 5. Adozione forzata della SoT da parte di Cowork (S939)
+
+Cowork (Claude Desktop) non legge `CLAUDE.md` di progetto né scopre `docs/kb/` da solo: carica solo ciò che la sua **preferences-textarea** (`PREFERENCES_v5_FINAL.txt` → claude.ai) impone al bootstrap. Per forzarne l'adozione, 3 livelli:
+
+1. **Preferences (forcing-function primario)** — `PREFERENCES_v5_FINAL.txt` v5.1 + textarea claude.ai: nuova sezione "Source of Truth — STATO PROGETTO" + lista bootstrap con `docs/kb/SOT_STATE.md` obbligatorio-primo + nota freeze CW2. Caricato a ogni sessione.
+2. **Redirect onboarding** — `cowork_reserved/HANDOFF_FRESH_SESSION.md` ridotto a banner-redirect verso `docs/kb/`.
+3. **Freeze markers** — `_ARCHIVE_READONLY*` nelle dir d'archivio.
+
+**Eccezione "live bridge" al freeze**: NON sono congelati (devono restare aggiornabili perché ENFORCANO la nuova SoT): `cowork_reserved/PREFERENCES_v5_FINAL.txt`, `cowork_reserved/HANDOFF_FRESH_SESSION.md` (redirect), `docs/kb/COWORK_INBOX.md`.
+
+**Interazione (single-writer)**: Cowork legge `docs/kb/` come autoritativo; **unico writer/committer = CLI**. Cowork propone cambiamenti **solo** appendendo a `docs/kb/COWORK_INBOX.md`; il CLI riconcilia, applica e committa. Questo impedisce drift e "Cowork che va per conto suo".

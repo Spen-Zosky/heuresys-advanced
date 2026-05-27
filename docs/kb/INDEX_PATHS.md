@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-05-27T15:10:10Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **1358**
+**Generato**: 2026-05-27T15:35:29Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **1361**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -21,7 +21,7 @@
 | db-migration | 44 |
 | db-script | 18 |
 | db-seed | 22 |
-| doc-canonical | 252 |
+| doc-canonical | 255 |
 | handoff-state | 1 |
 | qa-artifact | 55 |
 | script | 6 |
@@ -32,7 +32,7 @@
 | test | 79 |
 | ux-design-archive | 80 |
 | web-source | 94 |
-| **TOTALE** | **1358** |
+| **TOTALE** | **1361** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 447 |
 | external-archive | 50 |
-| live | 861 |
+| live | 864 |
 
 ## File per categoria
 
@@ -886,7 +886,10 @@
 - `D:\heuresys-advanced\docs\kb\SOT_BACKLOG.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\SOT_STATE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\index_paths.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\integrations\INTEGRATIONS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\build_graph_mirror.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_index.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\build_linked_manifest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\preflight-residual-todo.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\security\.keep` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\security\AUTH_SECURITY_PLAN.md` · *live* · git-tracked

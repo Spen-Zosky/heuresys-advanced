@@ -1,41 +1,43 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-27 (S940 — SDBI Phase 2: infra + chain remediation + **4 macro-aree DATA pilot**).
-**Branch**: `main` — HEAD **pushed**. **CI** verde. **0 alert Dependabot.** Tunnel 5433 up. Test API 345/5/0. **migrate.sh verde+idempotent (48 mig).**
+**Updated**: 2026-05-27 (S940 — SDBI Phase 2: infra + chain remediation + **6 macro-aree DATA pilot, 9561 righe**).
+**Branch**: `main` — HEAD **pushed**. **CI** verde. **0 alert Dependabot.** Tunnel 5433 up. Test API 345/5/0. **migrate.sh verde+idempotent (50 mig).**
 
 ## Last session brief
 
-S940 — MVP-4 stream 2.4 SDBI Phase 2 aperto e portato a **4 macro-aree con dati reali** (+ infra + risanamento catena migration).
-- **Infra**: ADR-0014 ACCEPTED; mig 000045 (lineage SDBI cols); 8 audit rule_codes; RUNBOOK; chain remediation (fix 000007 idempotency, ownership reassign, 000044 col fix → migrate.sh verde+idempotent).
-- **Recovery dati**: la live `heuresys_platform` era svuotata; dati completi nel dump `heuresys_platform_0507` → restore in DB scratch `heuresys_platform_0507` sulla VM (source per tutte le macro-aree).
-- **4 DATA pilot end-to-end** (mig 000046-049, card *-MAP-01, seed `db/seeds/brownfield/sdbi/<area>/0{1,2,3}.sql`):
+S940 — MVP-4 stream 2.4 SDBI Phase 2: da apertura a **6 macro-aree HRMS importate con dati reali**.
+- **Infra**: ADR-0014 ACCEPTED; mig 000045 (lineage SDBI cols); 8 audit rule_codes; RUNBOOK; chain remediation (fix 000007 idempotency, ownership reassign postgres→heuresys, 000044 col fix → migrate.sh verde+idempotent).
+- **Recovery dati**: live `heuresys_platform` svuotata; dati completi nel dump `heuresys_platform_0507` → restore in DB scratch `heuresys_platform_0507` sulla VM.
+- **6 DATA pilot end-to-end** (pattern: restore→mirror legacy_mirror→temp_sdbi Phase3→consolidation sys.* Phase5 FK via natural_key→lineage SDBI-tagged + audit COMPLETE):
 
-| macro-area | mig | sys.* tables | righe |
-|---|---|---|---|
-| PerformanceReviews (2.4.7) | 000046 | 8 | 1251 |
-| Mentorship (2.4.8) | 000047 | 4 | 521 |
-| Feedback (2.4.9) | 000048 | 4 | 1689 |
-| Surveys/Engagement (2.4.10) | 000049 | 4 | 5635 |
-| **TOT** | | **20** | **9096** |
+| macro-area | mig | card | sys.* | righe |
+|---|---|---|---|---|
+| PerformanceReviews (2.4.7) | 000046 | PERFREV-MAP-01 | 8 | 1251 |
+| Mentorship (2.4.8) | 000047 | MENTORSHIP-MAP-01 | 4 | 521 |
+| Feedback (2.4.9) | 000048 | FEEDBACK-MAP-01 | 4 | 1689 |
+| Surveys/Engagement (2.4.10) | 000049 | SURVEYS-MAP-01 | 4 | 5635 |
+| Succession/TalentPool (2.4.11) | 000050 | SUCCESSION-MAP-01 | 5 | 194 |
+| Compensation (2.4.12) | 000051 | COMPENSATION-MAP-01 | 3 | 271 |
+| **TOT** | | | **28** | **9561** |
 
-Pattern per ciascuna: restore→mirror in legacy_mirror→temp_sdbi (Phase 3)→consolidation sys.* (Phase 5, FK via natural_key)→lineage SDBI-tagged + audit COMPLETE. User FK NULL+metadata (no employee→sys_users bridge). Cross-cluster FK risolte dove possibile (cf→sys_goals, fb/surveys intra-cluster). Esclusioni oneste documentate (4 orphan feedback_responses; review_cycle_id NULL nel source feedback_360).
+Esclusioni oneste documentate nelle card (4 orphan feedback_responses; 14 orphan succession_candidates; feedback_360.review_cycle_id NULL nel source). User FK sempre NULL + legacy ids in metadata (manca employee→sys_users bridge). embeddings (vector) sempre skip.
 
 ## Top priorities (next session)
 
-1. **Macro-aree restanti** (dati nel dump 0507/scratch, pattern 2.4.x rodato): Succession/TalentPool (succession_candidates 100, succession_plans, talent_pools, talent_pool_members), Compensation (bonus_plans 10, salary_bands, salary_band_assignments, revenue_equity), PredictionsML (performance_predictions/trends — verificare righe nel dump). Sub-tabelle reference rinviate (questionnaires/questions/templates/categories).
-2. **TODO(CHECK)** migration 000050: aggiungere value-CHECK ai categorici (valori ora noti dai dati) per 000046-049. Es. review_type{ANNUAL,MID_YEAR}, status, cycle_type, ecc.
-3. **employee→sys_users bridge**: per risolvere gli user FK oggi NULL (employee_id legacy → sys_users) — vale per tutte le macro-aree.
-4. (opz) Phase 6 cleanup temp_sdbi.* + audit SDBI_TEMP_CLEANUP_V1. (minori) Dependabot #6/#16; zod4.
+1. **`employee→sys_users` bridge**: risolvere gli user FK oggi NULL (mentor/mentee, reviewer, employee, created_by, ecc.) in TUTTE le 6 macro-aree + Goals/OKRs. È il singolo miglioramento più impattante. Serve mappa legacy employee_id/user_id → `sys_users.user_id`.
+2. **TODO(CHECK)** migration 000052: value-CHECK ai categorici (valori ora noti dai dati reali) per 000046-051.
+3. **Macro-aree rimanenti**: PredictionsML (performance_predictions/trends — verificare righe nel dump 0507), Recruiting/Onboarding (OUT-of-scope I8, marker only). Sub-tabelle reference rinviate (questionnaires/questions/templates/categories di feedback+surveys).
+4. (opz) Phase 6 cleanup temp_sdbi.* + audit SDBI_TEMP_CLEANUP_V1. (minori) Dependabot #6/#16; zod4 pre-Phase3-API.
 
 ## Riproducibilità data-setup (runtime, non in migration files)
 
-- DB scratch `heuresys_platform_0507` sulla VM = source completo. Mirror per area: `create table public._mir_$t as select <cols≠USER-DEFINED> ...` nel scratch → `pg_dump | sed public._mir_$t→legacy_mirror.$t | psql heuresys_advanced` → `ALTER TABLE legacy_mirror.$t OWNER TO heuresys` (le tabelle create da postgres NON sono leggibili da heuresys). Poi `psql -f 0{1,2,3}.sql`.
-- NB: `POSTGRES_SUPERUSER_PASSWORD` vuota in `.env` → op superuser via SSH peer-auth VM. `pg_restore` dei dump come utente `ubuntu` (postgres non attraversa /home/ubuntu); pg_restore 16 richiede `-f` o `-d`.
+- DB scratch `heuresys_platform_0507` sulla VM = source completo (drop quando non serve). Mirror per area: `create table public._mir_$t as select <cols≠USER-DEFINED> from public.$t` (nel scratch) → `pg_dump -t public._mir_$t | sed 's/public\._mir_$t/legacy_mirror.$t/g' | psql heuresys_advanced` → `ALTER TABLE legacy_mirror.$t OWNER TO heuresys` (le tabelle create da postgres NON sono leggibili da heuresys!). Poi `psql -f 0{1,2,3}.sql`.
+- NB: `POSTGRES_SUPERUSER_PASSWORD` vuota in `.env` → op superuser via SSH peer-auth VM (`sudo -u postgres`). Leggere dump come `ubuntu`; `pg_restore` 16 richiede `-f`/`-d`. NON usare obfuscation chr() nei comandi (il mirror critical_roles fallì silenziosamente così).
 
 ## Stack snapshot
 
-- **Migration max**: 000049. Chain re-runnable+idempotent (48 mig OK×2).
-- SDBI: ADR-0014 ACCEPTED; 4 macro-aree dati (9096 righe, 20 sys.* tables) + Goals/OKRs 5939 + Time/Leave (pilot precedenti).
+- **Migration max**: 000051. Chain re-runnable+idempotent (50 mig OK×2).
+- SDBI: ADR-0014 ACCEPTED; **6 macro-aree dati (9561 righe, 28 sys.* tables)** + Goals/OKRs 5939 + Time/Leave (pilot precedenti).
 - SoT viva: `docs/kb/`. KB: wiki + graph hub in `wiki-space`.
 
 ## Verification (next session)
@@ -43,6 +45,7 @@ Pattern per ciascuna: restore→mirror in legacy_mirror→temp_sdbi (Phase 3)→
 ```bash
 ssh -o BatchMode=yes oracle-vm-default 'echo OK'; nc -z localhost 5433 || ssh -fN -L 5433:localhost:5432 oracle-vm-default
 git log origin/main..HEAD --oneline
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "select source_lineage_sdbi_mapping_card_id, count(*) from sys.sys_source_lineage_records where source_lineage_sdbi_mapping_card_id like '%-MAP-01' group by 1"
-bash db/scripts/migrate.sh   # OK: 48 migrations applied
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "select source_lineage_sdbi_mapping_card_id, count(*) from sys.sys_source_lineage_records where source_lineage_sdbi_mapping_card_id like '%-MAP-01' group by 1 order by 1"  # 6 rows, tot 9561
+bash db/scripts/migrate.sh   # OK: 50 migrations applied
+cd apps/api && pnpm exec vitest run   # 345 pass / 5 skip
 ```

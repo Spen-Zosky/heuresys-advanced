@@ -23,7 +23,8 @@ EXCLUDE_SUBSTRINGS = [
     os.path.normcase("docs\\source_bundle\\"),
     os.path.normcase("docs\\brownfield\\_inspection"),
     os.path.normcase("graphify-out"),
-    os.path.normcase("docs\\kb\\tools\\"),  # tooling, not prose
+    os.path.normcase("docs\\kb\\tools\\"),   # tooling, not prose
+    os.path.normcase("docs\\github\\"),      # corso GitHub generico, non dominio heuresys (resta in indice+graphify)
 ]
 
 

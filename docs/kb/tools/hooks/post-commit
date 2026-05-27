@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# heuresys-advanced KB auto-sync (graph-only, background, non-blocking).
+# Installato da docs/kb/tools/install-hooks.sh. Mantiene il knowledge graph graphify
+# allineato a ogni commit; l'ingestion wiki (LLM) NON è automatica (resta manuale).
+REPO="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+[ -f "$REPO/docs/kb/tools/sync.sh" ] || exit 0
+nohup bash "$REPO/docs/kb/tools/sync.sh" --graph-only --quiet \
+  >> "$REPO/docs/kb/tools/.sync.log" 2>&1 &
+exit 0

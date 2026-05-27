@@ -66,5 +66,11 @@ graphify path "rbac.ts" "auth/service.ts" --graph "$G"
 2. `python docs/kb/tools/build_linked_manifest.py` (rigenera subset prosa) → poi wiki "ingest" (delta via `compute_delta_linked.py`, solo nuovi/modificati per idempotenza SHA)
 3. `python docs/kb/tools/build_graph_mirror.py && graphify update <mirror>` (AST incrementale)
 
-**Ingestion wiki residua**: 95 sorgenti prosa totali nel manifest linked; 24 ingerite in S939 (ADR + SoT). Le restanti ~71 (planning/brownfield/api/security/ci docs) si ingeriscono on-demand in sessioni successive via batch subagent (machinery provata).
+**Ingestion wiki**: ✅ **completa** — **63/63 sorgenti prosa di dominio ingerite** (19 ADR + 44 doc-canonical: SoT, planning, brownfield, api, db, ci, security, frontend, vm). Escluso il corso GitHub generico `docs/github/**` (34 file, non-dominio — resta in indice + graphify). Delta wiki = 0 (allineato all'HEAD).
+
+### Sync & automazione (R15)
+- **`docs/kb/tools/sync.{sh,ps1}`**: re-allinea tutto all'HEAD — rigenera indice + manifest prosa + mirror symlink + `graphify update` (AST, cheap) + report delta wiki. `--graph-only` salta il report wiki.
+- **`docs/kb/tools/reconstruct_linked_manifest.py`**: ricostruisce `manifest.yaml` del vault dalle pagine (frontmatter `source_path`), idempotente, no-race con ingestion parallela.
+- **Hook git opt-in**: `docs/kb/tools/install-hooks.sh` installa `post-commit`/`post-merge` che lanciano `sync.sh --graph-only` in background → il **knowledge graph resta allineato a ogni commit**. L'ingestion wiki (LLM) resta manuale (`compute_delta_linked` segnala i delta). Disinstalla: `install-hooks.sh --uninstall`.
+- **Path frontmatter**: i `source_path` nelle pagine wiki usano **forward-slash** (validi YAML + compatibili Windows/Read) per evitare l'ambiguità di escape dei backslash.
 

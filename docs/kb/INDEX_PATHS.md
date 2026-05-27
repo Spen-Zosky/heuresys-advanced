@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-05-27T15:35:29Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **1361**
+**Generato**: 2026-05-27T16:05:26Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **1362**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -21,7 +21,7 @@
 | db-migration | 44 |
 | db-script | 18 |
 | db-seed | 22 |
-| doc-canonical | 255 |
+| doc-canonical | 256 |
 | handoff-state | 1 |
 | qa-artifact | 55 |
 | script | 6 |
@@ -32,7 +32,7 @@
 | test | 79 |
 | ux-design-archive | 80 |
 | web-source | 94 |
-| **TOTALE** | **1361** |
+| **TOTALE** | **1362** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 447 |
 | external-archive | 50 |
-| live | 864 |
+| live | 865 |
 
 ## File per categoria
 
@@ -881,6 +881,7 @@
 - `D:\heuresys-advanced\docs\github\branch-protection.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\github\dependabot-triage-2026-05-26.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\COWORK_ARCHIVE_NOTE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\COWORK_INBOX.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\DEBT_REGISTER.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\INDEX_PATHS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\SOT_BACKLOG.md` · *live* · git-tracked

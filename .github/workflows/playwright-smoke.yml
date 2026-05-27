@@ -66,27 +66,28 @@ jobs:
       - name: Boot API server (background)
         working-directory: apps/api
         run: |
-          pnpm dev &
-          API_PID=$!
-          echo "API_PID=$API_PID" >> $GITHUB_ENV
-          # wait for /readyz
-          for i in $(seq 1 60); do
-            curl -sf http://localhost:3001/readyz > /dev/null && break
+          # setsid detaches into a new session so the server survives this
+          # step's shell exit (a bare `&` child gets SIGHUP'd between steps →
+          # the next step finds nothing listening).
+          setsid bash -c 'pnpm dev > /tmp/api.log 2>&1' &
+          for i in $(seq 1 90); do
+            curl -sf http://localhost:3001/readyz > /dev/null && { echo "API up"; break; }
             sleep 1
           done
+          curl -sf http://localhost:3001/readyz > /dev/null || { echo "API failed to start"; tail -50 /tmp/api.log; exit 1; }
 
       - name: Boot web server (background)
         working-directory: apps/web
         run: |
           pnpm build
-          PORT=3100 pnpm start &
-          WEB_PID=$!
-          echo "WEB_PID=$WEB_PID" >> $GITHUB_ENV
-          # wait for / responding on the collision-free port (3000 = Grafana on this host)
-          for i in $(seq 1 60); do
-            curl -sf http://localhost:3100 > /dev/null && break
+          # :3000 is Grafana (docker-proxy) on this runner host → use :3100.
+          # setsid so the server survives into the Playwright step.
+          setsid bash -c 'PORT=3100 pnpm start > /tmp/web.log 2>&1' &
+          for i in $(seq 1 90); do
+            curl -sf http://localhost:3100 > /dev/null && { echo "web up"; break; }
             sleep 1
           done
+          curl -sf http://localhost:3100 > /dev/null || { echo "web failed to start"; tail -50 /tmp/web.log; exit 1; }
 
       - name: Run Playwright smoke suite
         working-directory: apps/web

@@ -51,7 +51,7 @@ export default defineConfig({
       command: `pnpm dev --port ${WEB_PORT}`,
       url: WEB_BASE_URL,
       reuseExistingServer: true,
-      timeout: 60_000,
+      timeout: 120_000,
     },
   ],
 });

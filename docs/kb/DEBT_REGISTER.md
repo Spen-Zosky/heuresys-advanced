@@ -5,7 +5,7 @@
 
 | ID | Sev | Debito | Evidenza | Remediation | Stato |
 |---|---|---|---|---|---|
-| **D-01** | 🔴 alta | **Doc drift `CLAUDE.md` + `README.md`**: descrivono stato MVP-1 ("11/22 moduli + auth", "web ancora vuoto", "MVP-1 = API build-out", "69/69 test @64c2a27"). Realtà: ~58 moduli + auth, web MVP-2a/2b shipped, MVP-3 done, MVP-4 in corso, 334 test case. | `CLAUDE.md` §"What this is"; `app.ts:206-265` (60 register); 64 `page.tsx` | Aggiornare le sezioni di stato di `CLAUDE.md` + `README.md` puntando a `docs/kb/SOT_STATE.md` come SoT viva. Le parti invarianti/design-system/security restano valide. | **in scope** → `SOT_BACKLOG.md` B-01 |
+| **D-01** | 🔴 alta | **Doc drift `CLAUDE.md` + `README.md`**: descrivono stato MVP-1 ("11/22 moduli + auth", "web ancora vuoto", "MVP-1 = API build-out", "69/69 test @64c2a27"). Realtà: ~58 moduli + auth, web MVP-2a/2b shipped, MVP-3 done, MVP-4 in corso, 334 test case. | `CLAUDE.md` §"What this is"; `app.ts:206-265` (60 register); 64 `page.tsx` | Aggiornare le sezioni di stato di `CLAUDE.md` + `README.md` puntando a `docs/kb/SOT_STATE.md` come SoT viva. Le parti invarianti/design-system/security restano valide. | **RISOLTO** 2026-05-28: `CLAUDE.md` §"What this is" + architecture diagram + migrations count allineati a MVP-4 (Fastify 5, ~58 moduli, web shipped, 43 mig, +showcase); puntatore a `docs/kb/SOT_STATE.md`/`SOT_BACKLOG.md`/`DEBT_REGISTER.md`. `README.md` già a MVP-3 → header refresh a state S940 + counts (43 mig). NB: il README NON era fermo a MVP-1 (lo era solo CLAUDE.md). |
 | **D-02** | 🟡 media | **Duplicati cross-location**: `GOAL_B_REPORT_2026-05-18.md` e `MIGRATION_STATUS_2026-05-18.md` esistono sia in repo root sia in `Claude Desktop\outputs\`; `HANDOVER_CLI` esiste in **3 copie** (repo `cowork_code_exchange/`, `outputs/`, `Claude Desktop\heuresys-advanced\sessioni\...`). SHA identici. | recon agent + `find` | Canonicalizzare: la copia repo è SoT; le copie Claude Desktop diventano archivio read-only (marker, no delete — vedi `COWORK_ARCHIVE_NOTE.md`). Niente duplicazione in ingestion (Plan 2 legge l'indice una sola volta per path). | **gestito** in P1-9 + Plan 2 |
 | **D-03** | 🟡 media | **Snapshot CLAUDE.md obsoleto** `outputs\depot\staging-P0-2026-04-22\CLAUDE.md` = regole R1-R17 (vs SoT viva R1-R23). Rischio: una sessione lo scambia per la SoT. | recon agent | Marcare esplicitamente come snapshot storico nell'indice (status `external-archive`) + nota in `COWORK_ARCHIVE_NOTE.md`. SoT regole = `C:\Users\enzospenuso\.claude\CLAUDE.md`. | **gestito** (indice + archive note) |
 | **D-04** | 🟢 bassa | **Root repo cluttered** da doc di milestone chiuse: `GOAL_B_REPORT`, `MIGRATION_STATUS`, `BRAND_SESSION_CHARTER`, `HANDOFF_BRAND`, `NEXT_SESSION_MVP_2A`, `NEXT_SESSION_MVP_CLOSURE`. | `git ls-files` root | Candidati a `docs/archive/` (NON ora — alcuni ancora referenziati, es. NEXT_SESSION_MVP_2A è dottrina E2E live). Spostamento deferito post-doc-drift fix, con grep delle reference prima. | **registrato**, deferito |
@@ -21,8 +21,8 @@
 ## Sintesi scope
 
 - **Trattati in questa sessione (S939)**: D-02, D-03, D-08, D-10, D-11 (via indice + SoT + archive note); D-06, D-07 (chiariti).
-- **Risolti**: D-12 (migrate.sh idempotency chain repair, 2026-05-27).
-- **In backlog operativo**: D-01 (B-01, P0), D-09 (B-25).
+- **Risolti**: D-12 (migrate.sh idempotency chain repair, 2026-05-27); **D-01** (doc-drift CLAUDE.md+README → MVP-4, 2026-05-28).
+- **In backlog operativo**: D-09 (B-25).
 - **Deferiti con registrazione**: D-04 (spostamento root docs, post grep reference), D-05 (monitor).
 
 > Nessun debito scartato. Ogni riga ha owner (CLI) e remediation. R3: il codebase va lasciato in stato migliore.

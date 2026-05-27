@@ -9,7 +9,7 @@
 
 | Item | Stato verificato | Evidenza | Scope residuo reale |
 |---|---|---|---|
-| **B-01 / D-01** | 🔴 APERTO (confermato) | CLAUDE.md dichiara "MVP-1, 11/22 moduli, 69/69 test @64c2a27"; reale: **60** `app.register /v1`, **64** `page.tsx`, **52** test file | aggiornare sez. stato CLAUDE.md + README → MVP-4 (~30-45min) |
+| **B-01 / D-01** | ✅ **FATTO** 2026-05-28 | CLAUDE.md §"What this is"+architecture+migrations allineati a MVP-4 (Fastify 5, ~58 moduli, web shipped, 43 mig, +showcase, puntatore SoT viva); README header→state S940 + 43 mig. README NON era a MVP-1 (solo CLAUDE.md). | — |
 | **B-02** | 🟢 quasi fatto | `docs/kb/tools/sync.sh` + `graphify-out/` presenti | verificare vault wiki esterno `heuresys-advanced-wiki` |
 | **B-03 / D-08** | ✅ FATTO | `docs/kb/COWORK_ARCHIVE_NOTE.md` + SoT docs/kb completa (SOT_STATE/BACKLOG/DEBT_REGISTER/INDEX_PATHS/COWORK_INBOX/integrations/tools) | — |
 | **B-10** | 🟡 APERTO (intatto) | ADR-0014 **PROPOSED**; `000036_temp_sdbi_schema.sql` presente; **source HR assente da legacy_mirror, platform 0-row** → i dati esistono nel dump `heuresys_platform_0507` (VM `/home/ubuntu/heuresys-evo/backups/local/`, ~367MB i primi maggio) | piano CLI-owned; per dati: restore dump→mirror legacy_mirror→SDBI; legato zod4 |

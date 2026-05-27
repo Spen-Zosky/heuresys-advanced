@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**Heuresys Advanced HRMS/BPM Platform v5** — pnpm monorepo bootstrapped 2026-05-16. Backend-heavy: Fastify 4 API on top of PostgreSQL 16 with a Zod-typed contract layer shared with a Next.js 15 admin SPA + ESS portal (still empty as of MVP-1).
+**Heuresys Advanced HRMS/BPM Platform v5** — pnpm monorepo bootstrapped 2026-05-16. Backend-heavy: Fastify 5 API on top of PostgreSQL 16 with a Zod-typed contract layer shared with a Next.js 15 admin SPA + ESS portal (both shipped — MVP-2a/2b).
 
-The project is mid-execution: MVP-0 (bootstrap, DB, migrations, seed) is done; **MVP-1** is the API build-out (11/22 business modules + auth shipped, 69/69 integration tests green at commit `64c2a27`). Next milestones are tracked in `HANDOFF.md` and `docs/BOOTSTRAP_EXECUTION_PLAN.md` §5. **Read `START_HERE.md` and `HANDOFF.md` first** — they contain live state and the priming checklist (8 canonical docs).
+The project is well past its initial build-out: **MVP-0/1/2a/2b/3 are closed and MVP-4 is in progress**. The API ships ~58 business modules + auth (~272 live `/v1/*` endpoints, 52 integration test files hitting the real DB through the SSH tunnel); the Next.js web app ships the admin SPA (MVP-2a) and ESS portal (MVP-2b); a static brand showcase is deployed to GitHub Pages. **The live source of truth for project state is `docs/kb/SOT_STATE.md`** (CLI-owned) — open backlog in `docs/kb/SOT_BACKLOG.md`, technical debts in `docs/kb/DEBT_REGISTER.md`. Historical session narrative is in `HANDOFF.md`; architectural decisions in `docs/architecture/adr/`. The invariants, module pattern, security model, and Design System sections below remain authoritative.
 
 ## Canonical commands
 
@@ -59,12 +59,13 @@ The `.env` file is **gitignored** but real; `.env.example` has three runtime blo
 ```
 heuresys-advanced/
 ├── apps/
-│   ├── api/      Fastify 4 + Zod + Argon2id + RS256 JWT — 11 business modules shipped (MVP-1)
-│   └── web/      Next.js 15 App Router (scaffolded, no code yet — MVP-2)
+│   ├── api/       Fastify 5 + Zod + Argon2id + RS256 JWT — ~58 business modules + auth shipped (MVP-1→4)
+│   ├── web/       Next.js 15 App Router — admin SPA + ESS portal shipped (MVP-2a/2b)
+│   └── showcase/  Next.js 15 static export — brand identity site, GitHub Pages deploy
 ├── packages/
 │   └── shared/   @heuresys/shared — Zod schemas + TS types, subpath exports per module
 ├── db/
-│   ├── migrations/  27 idempotent SQL files (000001..000027)
+│   ├── migrations/  43 idempotent SQL files (000001..000044, 000035 gap cosmetic)
 │   ├── seeds/       CSV + INSERT for RTL_BANK_REFERENCE tenant
 │   └── scripts/     PS1 + SH twins: create/migrate/reset/validate/seed
 ├── docs/         CANONICAL planning + ADR + brownfield (8 priming docs — read on session start)
@@ -173,7 +174,7 @@ When a new requirement seems to conflict with these, **stop and ask** rather tha
 
 ## Database migrations
 
-27 numbered SQL files in `db/migrations/000001_*.sql..000027_*.sql`. Every migration is **idempotent** — `CREATE TABLE IF NOT EXISTS`, `INSERT … ON CONFLICT DO NOTHING`, etc. — and running the full set twice produces an empty `pg_dump` diff (proven and recorded). When adding a new migration, follow the existing pattern: next sequential number, single descriptive file, idempotent body, no destructive ops.
+43 numbered SQL files in `db/migrations/000001_*.sql..000044_*.sql` (the `000035` gap is cosmetic and documented). Every migration is **idempotent** — `CREATE TABLE IF NOT EXISTS`, `INSERT … ON CONFLICT DO NOTHING`, etc. — and running the full set twice produces an empty `pg_dump` diff (proven and recorded). When adding a new migration, follow the existing pattern: next sequential number, single descriptive file, idempotent body, no destructive ops.
 
 ## What NOT to touch
 

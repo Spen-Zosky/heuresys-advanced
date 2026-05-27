@@ -2,8 +2,9 @@
 
 Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on PostgreSQL 16, Next.js 15 admin SPA + ESS portal, shared Zod contracts. Multi-tenant via API middleware (no Postgres RLS), 8 roles × 101 permissions × 388 mappings seeded.
 
-> **Status — 2026-05-26 (HEAD `6d5541a` on `main`, tag `v0.3.2-mvp3-full`)**
-> MVP-1 + MVP-2a + MVP-2b + MVP-3 **closed**. 272 live API endpoints · 341+ vitest tests · 47 web routes live · 61 Playwright E2E tests on live OCI VM data · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 13/19 IMPORT pragmatic + 6 residual CW-B60.
+> **Status — 2026-05-28 (HEAD `e744a8a` on `main`, tag `v0.4.1-housekeeping-closed`)**
+> MVP-1 + MVP-2a + MVP-2b + MVP-3 **closed**; **MVP-4 in progress**. 272 live API endpoints · 341+ vitest tests · 47 web routes live · 61 Playwright E2E tests on live OCI VM data · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 13/19 IMPORT pragmatic + 6 residual CW-B60 · `migrate.sh` re-runnable end-to-end (43 migrations, idempotent ×2).
+> **Live state SoT**: `docs/kb/SOT_STATE.md` (CLI-owned) · backlog `docs/kb/SOT_BACKLOG.md` · debts `docs/kb/DEBT_REGISTER.md`. The headline numbers below are the MVP-3 closure snapshot; `SOT_STATE.md` carries the running counts.
 
 ---
 
@@ -14,7 +15,7 @@ Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on Po
 | API endpoints | **272** business + 2 health | 14 auth+mfa · 17 me ESS · 236 business · 2 health · 1 dashboard aggregator · 4 compensation |
 | API modules | **58** | Fastify 5 routes registered under `/v1/*` |
 | Shared Zod schemas | **427** in 59 subpath exports | `@heuresys/shared` workspace package |
-| DB tables | **~110** in `sys.*` + 12 views + 18 staging.wave1_* + 7 brownfield aux + 4 audit aux | 42 idempotent migrations |
+| DB tables | **~110** in `sys.*` + 12 views + 18 staging.wave1_* + 7 brownfield aux + 4 audit aux | 43 idempotent migrations |
 | Integration tests | **341 PASS / 1 FAIL** (skills:131 pre-existente known issue) **/ 5 SKIP** | vitest single-thread, real DB via SSH tunnel |
 | Web routes shipped | **47** | 30 admin + 14 ESS + 1 login + 1 system-health + 1 root router |
 | Playwright E2E tests | **61** in 20 spec | live-data, storageState-backed, 5 personas |
@@ -82,7 +83,7 @@ heuresys-advanced/
 │   └── shared/                         @heuresys/shared — 59 subpath exports, 427 Zod schemas
 │
 ├── db/
-│   ├── migrations/                     42 idempotent SQL files (000001..000043, gap 000035 cosmetico)
+│   ├── migrations/                     43 idempotent SQL files (000001..000044, gap 000035 cosmetico)
 │   ├── seeds/                          RTL_BANK_REFERENCE (158 users + 55 positions + brownfield wave1 registry + SDBI Goals/OKRs)
 │   └── scripts/                        .ps1 + .sh twins (create / migrate / reset / validate / brownfield-wave-1-preflight)
 │

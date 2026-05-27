@@ -55,7 +55,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # 22, not 20: a transitive dep (camera-controls@3.1.2 via three.js in
+          # @heuresys/ui) requires Node >=22, so `pnpm install --frozen-lockfile`
+          # fails with ERR_PNPM_UNSUPPORTED_ENGINE on 20. Matches the 6 self-hosted
+          # workflows. (Broke 2026-05-24 when the dep bumped its engines field.)
+          node-version: "22"
           cache: pnpm
           cache-dependency-path: heuresys-advanced/pnpm-lock.yaml
 

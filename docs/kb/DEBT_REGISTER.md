@@ -1,7 +1,7 @@
 # DEBT_REGISTER — Debiti / incoerenze rilevati (CLI-owned)
 
 > Tutti i debiti, drift e incoerenze emersi nella ricognizione forense S939 (4-root). Per ognuno: severità, evidenza, remediation, stato. **Tutti in scope** (R3 cross-project: il codebase va lasciato migliore). Quelli operativi sono linkati al `SOT_BACKLOG.md`.
-> **Aggiornato**: 2026-05-27 (S939).
+> **Aggiornato**: 2026-05-27 (S939; + D-12 migrate.sh idempotency repair).
 
 | ID | Sev | Debito | Evidenza | Remediation | Stato |
 |---|---|---|---|---|---|
@@ -16,10 +16,12 @@
 | **D-09** | 🟢 bassa | **Dependabot churn**: 7 PR `defer-major` auto-rebasano → CI re-trigger ad ogni move di main (runner singolo). | HANDOFF.md tail; recon | Condition `skip defer-major` o paths-filter nei 6 workflow. | **registrato** → `SOT_BACKLOG.md` B-25 |
 | **D-10** | 🟡 media | **Policy numerazione bias post-Cowork**: il protocollo claim CW-B<N> era anti-race Cowork↔CLI. Ora che il CLI è solo, serve regola chiara per non rompere la continuità storica. | bias_registry §1 | Il CLI continua la numerazione da **CW-B64** scrivendo direttamente in una sezione "post-Cowork" di `docs/kb/` (o estendendo bias_registry come archivio append-only). Documentato in `COWORK_ARCHIVE_NOTE.md`. | **gestito** (archive note) |
 | **D-11** | 🟢 bassa | **Overlap script Claude Desktop ↔ repo**: `Claude Desktop\scripts` (bootstrap/OCI/SSH) parzialmente sovrapposto a `repo/scripts/` e `db/scripts/`; converter generici/nose/SMB non-dominio mescolati. | recon agent | Già separati nell'indice (solo 6 file heuresys inclusi; esclusi elencati in `INDEX_PATHS.md` appendice). Nessuna azione fisica. | **gestito** (indice) |
+| **D-12** | 🟡 media | **`migrate.sh` non ri-eseguibile end-to-end** (invariante "twice-run idempotent" rotto su 3 punti, pre-esistenti): **(a) 000007** ri-asseriva incondizionatamente il CHECK stretto `scheme_check` (4 valori) clobberando il relax di 000032 → fallimento "violated by some row" sui dati ATECO/NACE; **(b) 000033** ownership di `brownfield.tenant_id_mappings` + funzioni `validate_lookup_fk_payload*` = `postgres` (create manualmente da superuser), `heuresys` non può ALTER → "must be owner"; **(c) 000044** referenziava colonna inesistente `table_mapping_kind` (reale: `table_mapping_classification`) → la migration non era MAI stata applicata (i 3 target application-level restavano IMPORT). | `bash db/scripts/migrate.sh` (fail sequenziale a 000007→000033→000044); `pg_get_userbyid(relowner)`; `grep table_mapping_kind` | (a) guard `ADD CONSTRAINT` solo-se-assente; (b) `ALTER OWNER ... TO heuresys` (live, peer-auth VM; su fresh DB heuresys crea e possiede → nessun fix-file); (c) colonna → `table_mapping_classification` (esegue l'intento ADR-0020: 12 righe IMPORT→REFERENCE_ONLY). | **RISOLTO** 2026-05-27 (commit `9e67d42`); verificato `migrate.sh` OK end-to-end ×2 (43 migration, 0 errori, idempotente) |
 
 ## Sintesi scope
 
 - **Trattati in questa sessione (S939)**: D-02, D-03, D-08, D-10, D-11 (via indice + SoT + archive note); D-06, D-07 (chiariti).
+- **Risolti**: D-12 (migrate.sh idempotency chain repair, 2026-05-27).
 - **In backlog operativo**: D-01 (B-01, P0), D-09 (B-25).
 - **Deferiti con registrazione**: D-04 (spostamento root docs, post grep reference), D-05 (monitor).
 

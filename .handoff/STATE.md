@@ -1,7 +1,8 @@
 # heuresys-advanced — STATE
 
 **Updated**: 2026-05-27 (S939 — CLI takeover + KB integrations + security cleanup).
-**Branch**: `main` — HEAD `f0ce2a1` (synced origin). CI verde. **0 alert Dependabot**.
+**Branch**: `main` — HEAD `9e67d42` (synced origin). CI verde. **0 alert Dependabot**.
+**Hygiene fix 2026-05-27** (commit `9e67d42`): `migrate.sh` reso ri-eseguibile end-to-end + idempotent — risolti 3 punti di rottura pre-esistenti della chain (000007 guard CHECK, 000033 ownership→heuresys, 000044 colonna `table_mapping_classification`). Dettaglio in `docs/kb/DEBT_REGISTER.md` D-12.
 **Last tag**: `v0.4.1-housekeeping-closed` (@ `01340ae`).
 
 ## Last session brief

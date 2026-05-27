@@ -1,3 +1,23 @@
+## 🎯 2026-05-27 — CLI post-S937 tail closure (Dependabot + CW-B59 + showcase deploy)
+
+Dopo la closure housekeeping, chiusura dei 3 tail non-blocking + un bonus emerso.
+
+**HEAD**: `7f6e174`. Tutti i workflow CI verdi su HEAD (build-web, showcase deploy, playwright, typecheck, lint).
+
+| Tail | Esito |
+|---|---|
+| **Dependabot triage** | 7 PR major deferite (`defer-major` label + commento): #3 zod4, #5 fastify-type-provider-zod6, #6 react-i18next17, #14 setup-node6, #15 action-setup6, #16 gh-pages4, #1 next (conflicting+CVE-hold). #17 (gruppo 20 minor/patch) **auto-merged** (`1ea6f74`). |
+| **Regressione lint da #17** | Bump eslint 9.39.4 + typescript-eslint 8.60 → `Cannot redefine plugin @typescript-eslint` (next/typescript + tseslint.configs.recommended doppia registrazione) → main Lint rosso. **Fixato** `a8bcec1` (drop `next/typescript`; tseslint copre apps/web). Lezione: auto-merge gruppo 20-deps troppo aggressivo. |
+| **Tail-2 brownfield drift** | **NON-ISSUE** (ipotesi CK-3 corretta da evidenza): `brownfield.column_mappings` 0-drift reale (sentinel `__SKIP__`), colonne target esistono, full Wave-1 storico COMPLETED. Nessuna azione registry. |
+| **Bonus: showcase deploy** | Rotto dal 2026-05-24. Cause concatenate fixate: (1) `node-version` 20→22 (`camera-controls`≥22, `df5ac97`); (2) `sync-showcase.sh` source path stale post-DEFER-F → fallback `_disabled_showcase_X18` (`a8bcec1`); (3) CW-B59 nel static export. **Deploy GitHub Pages verde** (primo dal 2026-05-20). |
+| **Tail-3 CW-B59 / DEFER-F** | **RESOLVED** (`7f6e174`) via fix app-side `ssr:false` (scelto su Path F split). Root cause: `@heuresys/ui` single-barrel valuta eager le lib class-based pesanti (three/echarts/d3/recharts) → SSR/static page-data collection crasha `Class extends value undefined`. Fix: `apps/web/src/app/showcase/_ui-client.tsx` ri-esporta i componenti via `next/dynamic({ssr:false})` → barrel mai valutato in SSR build. /showcase riabilitato in apps/web + apps/showcase static. Niente cross-repo, niente npm publish. bias_registry CW-B59 → RESOLVED, deferred-fix count 0. |
+
+**Catena commit tail**: `9fff8e9` → `212fd81` → `ebbb73a` → `722971a`(web :3100 vs Grafana) → `efe8d25`(setsid) → `01340ae`(next start -p) → `1ea6f74`(#17) → `a8bcec1`(lint+sync) → `df5ac97`(showcase node22) → `7f6e174`(CW-B59 ssr:false).
+
+**Tail residui minori non-blocking**: le PR Dependabot deferite auto-rebasano e ri-triggerano CI ad ogni move di main (churn runner; candidata condition `skip defer-major` nei workflow); i 7 major deferiti attendono audit breaking-changes (triage doc).
+
+---
+
 ## 🎯 2026-05-27 — Claude Code CLI continuation S937 — housekeeping CLOSED
 
 Sessione CLI (Claude Code) successiva all'handover di Cowork (`cowork_code_exchange/_00_HANDOVER_CLI_2026-05-26_post_S937.md`). Cowork aveva chiuso S937 in **partial** con CK-1..6 bloccati dal blocker SSH passphrase (R23/iii). All'avvio di questa sessione la chiave OCI `oci_recovery_ed25519` risultava **già caricata in ssh-agent** + tunnel 5433 up → blocker caduto → CK-2/3/6 sbloccati e completati in autonomia.

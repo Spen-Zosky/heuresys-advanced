@@ -80,7 +80,7 @@ importers:
         version: 5.1.0
       fastify-type-provider-zod:
         specifier: 4.0.2
-        version: 4.0.2(fastify@5.8.5)(zod@3.25.76)
+        version: 4.0.2(fastify@5.8.5)(zod@4.4.3)
       otpauth:
         specifier: ^9.5.1
         version: 9.5.1
@@ -91,8 +91,8 @@ importers:
         specifier: ^1.0.4
         version: 1.0.4
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.4.3
+        version: 4.4.3
     devDependencies:
       '@faker-js/faker':
         specifier: 9.3.0
@@ -216,8 +216,8 @@ importers:
         specifier: 17.0.8
         version: 17.0.8(i18next@26.3.0(typescript@5.7.2))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.7.2)
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.4.3
+        version: 4.4.3
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.11.3
@@ -265,8 +265,8 @@ importers:
   packages/shared:
     dependencies:
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: 4.4.3
+        version: 4.4.3
     devDependencies:
       typescript:
         specifier: 5.7.2
@@ -5719,6 +5719,9 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+
   zrender@6.1.0:
     resolution: {integrity: sha512-oEGMDB6pOP2S6OwRR4PdVv610zrjnA3Bh+JnSG12fYJlBKjtNAoEb5fSUoCOOINlH96I2fU38/A2UpRKs67xYQ==}
 
@@ -10168,12 +10171,12 @@ snapshots:
 
   fastify-plugin@5.1.0: {}
 
-  fastify-type-provider-zod@4.0.2(fastify@5.8.5)(zod@3.25.76):
+  fastify-type-provider-zod@4.0.2(fastify@5.8.5)(zod@4.4.3):
     dependencies:
       '@fastify/error': 4.2.0
       fastify: 5.8.5
-      zod: 3.25.76
-      zod-to-json-schema: 3.25.2(zod@3.25.76)
+      zod: 4.4.3
+      zod-to-json-schema: 3.25.2(zod@4.4.3)
 
   fastify@5.8.5:
     dependencies:
@@ -13110,11 +13113,13 @@ snapshots:
       compress-commons: 4.1.2
       readable-stream: 3.6.2
 
-  zod-to-json-schema@3.25.2(zod@3.25.76):
+  zod-to-json-schema@3.25.2(zod@4.4.3):
     dependencies:
-      zod: 3.25.76
+      zod: 4.4.3
 
   zod@3.25.76: {}
+
+  zod@4.4.3: {}
 
   zrender@6.1.0:
     dependencies:

@@ -44,7 +44,7 @@ jobs:
       # config (see docs/ci/self-hosted-runners-setup.md §3). actions/setup-node
       # is used only to enable pnpm store caching path resolution.
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
 

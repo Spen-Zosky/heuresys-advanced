@@ -24,8 +24,8 @@ Esclusioni oneste documentate nelle card (4 orphan feedback_responses; 14 orphan
 
 ## Top priorities (next session)
 
-1. **`employee→sys_users` bridge**: risolvere gli user FK oggi NULL (mentor/mentee, reviewer, employee, created_by, ecc.) in TUTTE le 6 macro-aree + Goals/OKRs. È il singolo miglioramento più impattante. Serve mappa legacy employee_id/user_id → `sys_users.user_id`.
-2. **TODO(CHECK)** migration 000052: value-CHECK ai categorici (valori ora noti dai dati reali) per 000046-051.
+1. ~~employee→sys_users bridge~~ **INFATTIBILE coi dati attuali (verificato S940)**: le tabelle dipendenti legacy (`employees_core/hr/pii/payroll`) NON esistono nel dump 0507; i `sys_users` (433) sono persona di reference seedate (domini rtl-bank.org/smartfood.org/econova.org) con 0 lineage e metadata vuoto → nessuna chiave di join verso gli `employee_id` legacy. I user FK restano NULL + legacy id in metadata (unico trattamento corretto). Sbloccabile solo se in futuro si seeda un bridge esplicito legacy-employee→sys_users.
+2. ~~TODO(CHECK) 000052~~ **FATTO S940** (mig 000052, 29 value-CHECK derivati dai dati per le 6 aree; `review_potential_rating` escluso perché misto numerico+label).
 3. **Macro-aree rimanenti**: PredictionsML (performance_predictions/trends — verificare righe nel dump 0507), Recruiting/Onboarding (OUT-of-scope I8, marker only). Sub-tabelle reference rinviate (questionnaires/questions/templates/categories di feedback+surveys).
 4. (opz) Phase 6 cleanup temp_sdbi.* + audit SDBI_TEMP_CLEANUP_V1. (minori) Dependabot #6/#16; zod4 pre-Phase3-API.
 

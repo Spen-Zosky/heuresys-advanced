@@ -45,12 +45,12 @@ BEGIN
      'sys_position_skill_requirements',
      'sys_position_learning_requirements'
    )
-     AND table_mapping_classification = 'IMPORT';
+     AND table_mapping_kind = 'IMPORT';
 
   RAISE NOTICE '000044: pre-update IMPORT mappings for 3 application-level targets: %', v_count_pre;
 
   UPDATE brownfield.table_mappings
-     SET table_mapping_classification = 'REFERENCE_ONLY',
+     SET table_mapping_kind = 'REFERENCE_ONLY',
          table_mapping_rationale = COALESCE(table_mapping_rationale, '')
            || ' [ADR-0020 2026-05-26: reclassified IMPORT->REFERENCE_ONLY; target is application-level operational data, not eligible for brownfield import. See docs/architecture/adr/0020_wave2_scope_application_level_targets.md]'
    WHERE table_mapping_target_table IN (
@@ -58,7 +58,7 @@ BEGIN
      'sys_position_skill_requirements',
      'sys_position_learning_requirements'
    )
-     AND table_mapping_classification = 'IMPORT';
+     AND table_mapping_kind = 'IMPORT';
 
   SELECT count(*) INTO v_count_post
     FROM brownfield.table_mappings
@@ -67,7 +67,7 @@ BEGIN
      'sys_position_skill_requirements',
      'sys_position_learning_requirements'
    )
-     AND table_mapping_classification = 'IMPORT';
+     AND table_mapping_kind = 'IMPORT';
 
   RAISE NOTICE '000044: post-update IMPORT mappings for 3 application-level targets: % (expected 0)', v_count_post;
 

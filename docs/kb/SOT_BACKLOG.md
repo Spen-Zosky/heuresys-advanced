@@ -15,7 +15,7 @@
 | **B-10** | 🟡 APERTO (intatto) | ADR-0014 **PROPOSED**; `000036_temp_sdbi_schema.sql` presente; **source HR assente da legacy_mirror, platform 0-row** → i dati esistono nel dump `heuresys_platform_0507` (VM `/home/ubuntu/heuresys-evo/backups/local/`, ~367MB i primi maggio) | piano CLI-owned; per dati: restore dump→mirror legacy_mirror→SDBI; legato zod4 |
 | **B-20** (#3) | 🔴 APERTO | `zod 3.25.76`; ~101 file, heavy `.datetime()`/`z.record()`/`z.coerce` | upgrade alto rischio, accoppiato B-21 |
 | **B-21** (#5) | 🔴 APERTO | `fastify-type-provider-zod 4.0.2` | accoppiato a zod4; compiler/transform breaking 4→6 |
-| **B-22** (#6) | 🟡 APERTO | `react-i18next 15.4.0` | medio, standalone; verificare i18n parity |
+| **B-22** (#6) | ✅ **FATTO** 2026-05-28 | `react-i18next 15.4.0→17.0.8` + `i18next 23.16.8→26.3.0` (peer richiedeva i18next≥26.2). Uso basilare (init+Provider+useTranslation), 0 plural keys → smooth. typecheck+i18n parity+build web verdi. | chiude PR #6 |
 | **B-23** (#1 next) | ⚪ **STALE/CHIUSO** | nessuna PR `next` aperta; `next@15.5.18` | **rimuovere dal backlog** |
 | **B-24** | 🟢 **quasi fatto** | `checkout/setup-node/action-setup` già **@v6** (#14/#15 chiuse); resta solo `peaceiris/actions-gh-pages@v3` in showcase.yml | solo **PR #16** gh-pages 3→4 |
 | **B-25 / D-09** | ✅ **FATTO** 2026-05-28 | condition `if: !contains(...labels...'defer-major')` aggiunta ai 6 workflow `pull_request`; push a main non impattato; YAML validato | — |
@@ -49,7 +49,7 @@
 |---|---|---|---|---|
 | **B-20** | #3 | zod 3→4 | alto | Legato a stream 2.4; tutta la contract layer (`packages/shared` + fastify-type-provider-zod). Audit + migration dedicata. |
 | **B-21** | #5 | fastify-type-provider-zod 4→6 | alto | Accoppiato a zod4 (B-20) — valutare insieme. |
-| **B-22** | #6 | react-i18next 15→17 | medio | apps/web i18n; verificare parity check. |
+| ~~**B-22**~~ | #6 | ~~react-i18next 15→17~~ | medio | ✅ **FATTO 2026-05-28**: +i18next 23→26 (peer). 3 file consumatori, uso basilare, 0 plural keys. typecheck+parity+build web verdi. |
 | **B-23** | #1 | next (major) | alto | conflicting + CVE-hold; verificare impatto RSC/showcase (CW-B59 area). |
 | **B-24** | #14/#15/#16 | setup-node 6 / action-setup 6 / gh-pages 4 | basso | CI actions; test su workflow showcase + self-hosted. |
 | ~~**B-25**~~ | — | ~~**Churn defer-major**~~ | basso | ✅ **FATTO 2026-05-28**: condition `if: !contains(github.event.pull_request.labels.*.name, 'defer-major')` sui 6 workflow `pull_request`. Le PR defer-major non triggerano più CI sul runner singolo; push a main intatto. |

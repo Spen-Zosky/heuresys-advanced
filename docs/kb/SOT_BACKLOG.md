@@ -27,6 +27,7 @@
 | **B-23** | #1 | next (major) | alto | conflicting + CVE-hold; verificare impatto RSC/showcase (CW-B59 area). |
 | **B-24** | #14/#15/#16 | setup-node 6 / action-setup 6 / gh-pages 4 | basso | CI actions; test su workflow showcase + self-hosted. |
 | **B-25** | — | **Churn defer-major** | basso | Le 7 PR `defer-major` auto-rebasano e ri-triggerano CI ad ogni move di main → candidata condition `skip defer-major`/paths nei 6 workflow. |
+| ~~**B-26**~~ | #78 | ~~`tmp` <0.2.6 path-traversal~~ | — | ✅ **RISOLTO S939** (`6aa0b79`): transitivo via exceljs → pnpm override `exceljs>tmp >=0.2.6` → 0.2.7. NON era un major deferito. |
 
 ## P3 — Infra / robustezza
 

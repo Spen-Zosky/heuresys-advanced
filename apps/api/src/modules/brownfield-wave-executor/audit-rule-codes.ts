@@ -47,6 +47,28 @@ export const AUDIT_RULE_CODES = {
   //   staging_rows_input: number    (count probe; -1 on failure)
   //   hint: string                  (forensic next-step suggestion)
   SILENT_UPSERT_ZERO_ROWS_V1: "SILENT_UPSERT_ZERO_ROWS_V1",
+
+  // SDBI family (ADR-0014 §3.5 — Semantic-Driven Brownfield Import).
+  // Emitted by the SDBI workflow (Phase 2 mapping_card review → Phase 6 cleanup)
+  // into audit.import_validation_results. Confidence thresholds per ADR §3.3
+  // (HIGH >=0.85, MEDIUM 0.60-0.85, LOW <0.60). Audit status in the comment is
+  // the import_validation_result_status the consolidator writes for each code.
+  /** Mapping_card auto-approved, confidence >= 0.85 (status PASSED). */
+  SDBI_CONFIDENCE_HIGH_AUTO_APPROVED: "SDBI_CONFIDENCE_HIGH_AUTO_APPROVED",
+  /** Mapping_card requires human review, confidence 0.60-0.85 (status WARNING). */
+  SDBI_CONFIDENCE_MEDIUM_NEEDS_REVIEW: "SDBI_CONFIDENCE_MEDIUM_NEEDS_REVIEW",
+  /** Workflow halted for AI clarification, confidence < 0.60 (status WARNING). */
+  SDBI_CONFIDENCE_LOW_HALT_ASKED: "SDBI_CONFIDENCE_LOW_HALT_ASKED",
+  /** Human approved the mapping_card (status PASSED). */
+  SDBI_HUMAN_APPROVED: "SDBI_HUMAN_APPROVED",
+  /** Human rejected the mapping_card (status FAILED). */
+  SDBI_HUMAN_REJECTED: "SDBI_HUMAN_REJECTED",
+  /** Human corrected and re-approved the mapping_card (status PASSED). */
+  SDBI_HUMAN_CORRECTED: "SDBI_HUMAN_CORRECTED",
+  /** Phase 5 consolidation completed successfully (status PASSED). */
+  SDBI_CONSOLIDATION_COMPLETE_V1: "SDBI_CONSOLIDATION_COMPLETE_V1",
+  /** Phase 6 temp_sdbi cleanup done (status PASSED). */
+  SDBI_TEMP_CLEANUP_V1: "SDBI_TEMP_CLEANUP_V1",
 } as const;
 
 export type AuditRuleCode = (typeof AUDIT_RULE_CODES)[keyof typeof AUDIT_RULE_CODES];

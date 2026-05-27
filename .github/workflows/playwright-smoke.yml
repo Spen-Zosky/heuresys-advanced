@@ -25,6 +25,8 @@ concurrency:
 
 jobs:
   playwright-smoke:
+    # Skip on Dependabot defer-major PRs: they auto-rebase and would churn the single self-hosted runner. Push events have no PR labels → always run. See DEBT_REGISTER D-09.
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
     runs-on: [self-hosted, oci-vm]
     timeout-minutes: 30
     env:

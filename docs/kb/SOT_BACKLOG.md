@@ -18,7 +18,7 @@
 | **B-22** (#6) | 🟡 APERTO | `react-i18next 15.4.0` | medio, standalone; verificare i18n parity |
 | **B-23** (#1 next) | ⚪ **STALE/CHIUSO** | nessuna PR `next` aperta; `next@15.5.18` | **rimuovere dal backlog** |
 | **B-24** | 🟢 **quasi fatto** | `checkout/setup-node/action-setup` già **@v6** (#14/#15 chiuse); resta solo `peaceiris/actions-gh-pages@v3` in showcase.yml | solo **PR #16** gh-pages 3→4 |
-| **B-25 / D-09** | 🟡 parziale | `paths-ignore`/`paths` presenti nei 7 workflow; solo 4 PR Dependabot aperte (#3,#5,#6,#16) | valutare condition `skip defer-major` |
+| **B-25 / D-09** | ✅ **FATTO** 2026-05-28 | condition `if: !contains(...labels...'defer-major')` aggiunta ai 6 workflow `pull_request`; push a main non impattato; YAML validato | — |
 | **B-30** | 🟢 aperto (infra) | solo OCI VM runner | backup runner Windows |
 | **B-31** | 🟡 aperto (infra) | — | ssh-agent persistence cross-session |
 | **B-40** (CW-B39) | ⚪ **rivalutato** | `sys.sys_learning_path_steps` **VUOTA (0 righe)**; le 688 righe null `learning_path_step_path_id` erano source/staging-side | forensic source-side solo se si persegue |
@@ -27,7 +27,7 @@
 | **B-43** (CW-B41) | 🟡 aperto | `db/scripts/_lib/cross_os_pipeline.sh` presente | library update (COPY drop su Win Git Bash) |
 | Dependabot **alerts** | ✅ 0 aperti | `gh api .../dependabot/alerts` | — |
 
-**Sintesi per la fresh session**: realmente da fare = **B-01** (P0 doc drift), **B-10** (SDBI, intatto), **B-20+B-21** (zod4 accoppiato), **B-22** (i18next), **B-24→solo #16** (gh-pages), **B-25** (skip defer-major), **B-31/B-43** (infra/lib), **B-42** (target authoring). **Chiusi/stale**: B-01/D-01 (fatto 2026-05-28), B-03/D-08 (fatto), B-23 (stale), B-26 (risolto), D-12 (risolto), **D-04 root cleanup (fatto 2026-05-28)**. **Da chiarire**: B-02 (vault esterno), B-40 (source-side), B-41 (Phase 4).
+**Sintesi per la fresh session**: realmente da fare = **B-01** (P0 doc drift), **B-10** (SDBI, intatto), **B-20+B-21** (zod4 accoppiato), **B-22** (i18next), **B-24→solo #16** (gh-pages), **B-31/B-43** (infra/lib), **B-42** (target authoring). **Chiusi/stale**: B-01/D-01 (fatto 2026-05-28), B-03/D-08 (fatto), B-23 (stale), B-26 (risolto), D-12 (risolto), **D-04 root cleanup + B-25/D-09 defer-major CI skip (fatti 2026-05-28)**. **Da chiarire**: B-02 (vault esterno), B-40 (source-side), B-41 (Phase 4).
 
 ## P0 — Consolidamento immediato (questa fase, prima di nuovo sviluppo)
 
@@ -52,7 +52,7 @@
 | **B-22** | #6 | react-i18next 15→17 | medio | apps/web i18n; verificare parity check. |
 | **B-23** | #1 | next (major) | alto | conflicting + CVE-hold; verificare impatto RSC/showcase (CW-B59 area). |
 | **B-24** | #14/#15/#16 | setup-node 6 / action-setup 6 / gh-pages 4 | basso | CI actions; test su workflow showcase + self-hosted. |
-| **B-25** | — | **Churn defer-major** | basso | Le 7 PR `defer-major` auto-rebasano e ri-triggerano CI ad ogni move di main → candidata condition `skip defer-major`/paths nei 6 workflow. |
+| ~~**B-25**~~ | — | ~~**Churn defer-major**~~ | basso | ✅ **FATTO 2026-05-28**: condition `if: !contains(github.event.pull_request.labels.*.name, 'defer-major')` sui 6 workflow `pull_request`. Le PR defer-major non triggerano più CI sul runner singolo; push a main intatto. |
 | ~~**B-26**~~ | #78 | ~~`tmp` <0.2.6 path-traversal~~ | — | ✅ **RISOLTO S939** (`6aa0b79`): transitivo via exceljs → pnpm override `exceljs>tmp >=0.2.6` → 0.2.7. NON era un major deferito. |
 
 ## P3 — Infra / robustezza

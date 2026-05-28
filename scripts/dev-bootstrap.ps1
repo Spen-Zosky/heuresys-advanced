@@ -84,7 +84,10 @@ Set-Content -Path $envPath -Value $c -Encoding utf8
 # 4. ensure SSH tunnel localhost:DbPort -> VM:5432 (idempotent)
 Log "tunnel: localhost:$DbPort -> ${SshHost}:5432"
 if (Test-NetConnection localhost -Port $DbPort -InformationLevel Quiet) {
-  Write-Host "  already up"
+  Write-Host "  port $DbPort already in use - assuming it is the tunnel to ${SshHost}:5432."
+  Write-Host "  NOTE: only the port is checked, not where it points. If the API later reports"
+  Write-Host "  'database ... does not exist', another process holds :$DbPort - re-run with"
+  Write-Host "  -DbPort <free port> (e.g. pwsh -File scripts\dev-bootstrap.ps1 -DbPort 5434)."
 } else {
   # Windows OpenSSH has no reliable -f; background via Start-Process instead.
   Start-Process ssh -ArgumentList @("-N","-L","${DbPort}:localhost:5432",$SshHost) -WindowStyle Hidden

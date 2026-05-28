@@ -62,6 +62,12 @@ DB is reached over an SSH tunnel `localhost:5433 → oracle-vm-default:5432`.
 No local DB, no persistent service. The script never overwrites local git work
 (`pull --ff-only`, skipped if the tree is dirty or ahead).
 
+**Port collision**: if `:5433` is already held by another process (e.g. Docker
+Desktop on macOS publishes a local Postgres on `:5433`), the script reuses it
+and the API then fails with `database "heuresys_advanced" does not exist`. Use a
+free tunnel port: `DB_PORT=5434 bash scripts/dev-bootstrap.sh` (Unix) /
+`-DbPort 5434` (Windows).
+
 ## Windows — dev, on-demand (PowerShell)
 
 ```powershell

@@ -111,7 +111,11 @@ sed_i "s|^PORT=.*|PORT=$API_PORT|" "$REPO_DIR/.env"
 log "tunnel: localhost:$DB_PORT -> $SSH_HOST:5432"
 tunnel_up() { (exec 3<>"/dev/tcp/localhost/$DB_PORT") 2>/dev/null; }
 if tunnel_up; then
-  echo "  already up"
+  echo "  port $DB_PORT already in use — assuming it is the tunnel to $SSH_HOST:5432."
+  echo "  NOTE: this only checks the port is open, not where it points. If the API"
+  echo "  later reports 'database ... does not exist', another process (e.g. Docker"
+  echo "  publishes :5433 on macOS) holds :$DB_PORT — re-run with DB_PORT=<free port>"
+  echo "  (e.g. DB_PORT=5434 bash scripts/dev-bootstrap.sh)."
 else
   ssh -o ConnectTimeout=15 -fN -L "$DB_PORT:localhost:5432" "$SSH_HOST" 2>/dev/null || true
   sleep 2

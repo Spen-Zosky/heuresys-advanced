@@ -30,7 +30,7 @@ export async function errorHandler(
   // Zod validation errors from fastify-type-provider-zod
   if (err instanceof ZodError) {
     reply.code(400).send({
-      error: { code: "VALIDATION_ERROR", message: "Invalid input", details: err.errors },
+      error: { code: "VALIDATION_ERROR", message: "Invalid input", details: err.issues },
     });
     return;
   }

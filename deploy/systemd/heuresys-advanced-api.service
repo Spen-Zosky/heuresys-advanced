@@ -1,0 +1,27 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh.
+# Do NOT install this file directly; run the bootstrap script instead.
+[Unit]
+Description=Heuresys Advanced — API (Fastify + Zod, dev mode tsx watch)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@/apps/api
+# PATH points at the nvm-managed Node (>=22, required by @heuresys/ui ->
+# camera-controls). The exact bin dir is resolved at install time.
+Environment=PATH=@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
+Environment=NODE_ENV=development
+# API port + DB connection come from the repo-root .env (PORT, POSTGRES_*).
+# pnpm is the corepack shim in the nvm Node bin dir (no system pnpm assumed).
+ExecStart=@@NODE_BIN@@/pnpm dev
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

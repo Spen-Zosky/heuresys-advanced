@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+#
+# scripts/vm-bootstrap.sh — idempotent bootstrap for running heuresys-advanced
+# on a Linux host (Ubuntu/Debian, arm64 OR amd64) as persistent systemd
+# dev-mode services.
+#
+# Architecture-agnostic: nvm fetches the right Node build, and the committed
+# pnpm-lock.yaml carries every platform variant of the native deps (esbuild,
+# @next/swc, rollup, lightningcss, sharp — both linux-x64 and linux-arm64), so
+# `pnpm install --frozen-lockfile` resolves correctly on either CPU.
+#
+# Safe to re-run. It ensures prerequisites (git/curl/build tools, nvm, pnpm via
+# corepack), clones/updates the repo, pins Node, installs deps, normalises the
+# two VM-specific .env values, renders + installs the systemd unit templates,
+# and (re)starts the services.
+#
+# Secrets (.env, .secrets/*.pem) are NEVER in git. Transfer them out-of-band
+# (scp from the dev machine) before the first run; this script only verifies
+# they exist and fixes the VM-local DB port + API port.
+#
+# Overridable via env:
+#   REPO_DIR REPO_URL BRANCH NODE_MAJOR PUBLIC_HOST API_PORT WEB_PORT DB_PORT
+set -euo pipefail
+
+REPO_DIR="${REPO_DIR:-/home/ubuntu/heuresys-advanced}"
+REPO_URL="${REPO_URL:-https://github.com/Spen-Zosky/heuresys-advanced.git}"
+BRANCH="${BRANCH:-main}"
+NODE_MAJOR="${NODE_MAJOR:-22}"
+PUBLIC_HOST="${PUBLIC_HOST:-80.225.82.207}"
+API_PORT="${API_PORT:-8013}"
+WEB_PORT="${WEB_PORT:-3013}"
+DB_PORT="${DB_PORT:-5432}"   # native PostgreSQL on the host (no SSH tunnel here)
+NVM_VERSION="${NVM_VERSION:-v0.40.1}"
+
+log() { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
+
+# 0. Prerequisites (idempotent: only acts on what's missing) ----------------
+log "prerequisites: git, curl, build tools, nvm, corepack"
+need=()
+command -v git     >/dev/null 2>&1 || need+=(git)
+command -v curl    >/dev/null 2>&1 || need+=(curl)
+command -v gcc     >/dev/null 2>&1 || need+=(build-essential)   # argon2 native fallback
+command -v python3 >/dev/null 2>&1 || need+=(python3)
+if [ "${#need[@]}" -gt 0 ]; then
+  if command -v apt-get >/dev/null 2>&1; then
+    echo "  installing: ${need[*]}"
+    sudo apt-get update -qq
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "${need[@]}"
+  else
+    echo "  missing (${need[*]}) and apt-get not found — install them and re-run." >&2
+    exit 1
+  fi
+fi
+
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+  echo "  installing nvm $NVM_VERSION"
+  curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" | bash
+fi
+# shellcheck disable=SC1091
+. "$NVM_DIR/nvm.sh"
+
+# 1. Clone or update (idempotent) ------------------------------------------
+log "repo: clone or update -> $REPO_DIR @ $BRANCH"
+if [ -d "$REPO_DIR/.git" ]; then
+  git -C "$REPO_DIR" fetch origin --quiet
+  git -C "$REPO_DIR" checkout "$BRANCH" --quiet
+  git -C "$REPO_DIR" reset --hard "origin/$BRANCH"
+else
+  rmdir "$REPO_DIR" 2>/dev/null || true   # remove an empty placeholder dir, if present
+  git clone --quiet "$REPO_URL" "$REPO_DIR"
+fi
+git -C "$REPO_DIR" log --oneline -1
+
+# 2. Secrets must already be present (out-of-band; never committed) ---------
+log "secrets: verify .env + .secrets/*.pem"
+miss=0
+for f in .env .secrets/jwt_private.pem .secrets/jwt_public.pem; do
+  [ -f "$REPO_DIR/$f" ] || { echo "  MISSING: $REPO_DIR/$f"; miss=1; }
+done
+if [ "$miss" = 1 ]; then
+  cat >&2 <<MSG
+  Secrets not present. From the dev machine, e.g.:
+    scp .env        ${REPO_DIR##*/}-host:$REPO_DIR/.env
+    scp -r .secrets ${REPO_DIR##*/}-host:$REPO_DIR/
+  then re-run this script.
+MSG
+  exit 1
+fi
+chmod 700 "$REPO_DIR/.secrets"
+chmod 600 "$REPO_DIR/.env" "$REPO_DIR/.secrets/"*.pem
+
+# 3. Normalise the two host-specific .env values (idempotent) --------------
+log "env: POSTGRES_PORT -> $DB_PORT, PORT -> $API_PORT (host-local)"
+sed -i -E "s|^POSTGRES_PORT=.*|POSTGRES_PORT=$DB_PORT|" "$REPO_DIR/.env"
+sed -i -E "s|^PORT=.*|PORT=$API_PORT|" "$REPO_DIR/.env"
+
+# 4. Node via nvm + pnpm via corepack (both arch-agnostic) -----------------
+log "node: nvm install/use $NODE_MAJOR; pnpm via corepack"
+nvm install "$NODE_MAJOR" >/dev/null
+nvm use "$NODE_MAJOR" >/dev/null
+node --version
+NODE_BIN="$(dirname "$(nvm which "$NODE_MAJOR")")"
+corepack enable >/dev/null 2>&1 || true   # puts the pnpm shim in $NODE_BIN
+
+# 5. Install dependencies (reproducible, cross-platform lockfile) ----------
+log "deps: pnpm install --frozen-lockfile"
+cd "$REPO_DIR"
+"$NODE_BIN/pnpm" --version       # pin via package.json packageManager (corepack)
+"$NODE_BIN/pnpm" install --frozen-lockfile
+
+# 6. Render + install systemd unit templates, then (re)start (idempotent) --
+log "systemd: render templates + install + restart"
+tmp="$(mktemp -d)"
+for svc in api web; do
+  sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" \
+      -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
+      -e "s#@@PUBLIC_HOST@@#$PUBLIC_HOST#g" \
+      -e "s#@@API_PORT@@#$API_PORT#g" \
+      -e "s#@@WEB_PORT@@#$WEB_PORT#g" \
+      "$REPO_DIR/deploy/systemd/heuresys-advanced-$svc.service" \
+      > "$tmp/heuresys-advanced-$svc.service"
+  sudo install -m 644 -o root -g root "$tmp/heuresys-advanced-$svc.service" \
+      "/etc/systemd/system/heuresys-advanced-$svc.service"
+done
+rm -rf "$tmp"
+sudo systemctl daemon-reload
+sudo systemctl enable heuresys-advanced-api.service heuresys-advanced-web.service >/dev/null
+sudo systemctl restart heuresys-advanced-api.service
+sleep 5
+sudo systemctl restart heuresys-advanced-web.service
+
+# 7. Verify ----------------------------------------------------------------
+log "verify"
+sleep 8
+systemctl is-active heuresys-advanced-api heuresys-advanced-web || true
+if curl -fsS -m 5 "http://localhost:$API_PORT/healthz" >/dev/null; then
+  echo "  api /healthz OK"
+else
+  echo "  api /healthz FAILED — check: journalctl -u heuresys-advanced-api -n 50" >&2
+fi
+echo
+echo "Done. API http://$PUBLIC_HOST:$API_PORT  |  Web http://$PUBLIC_HOST:$WEB_PORT"
+echo "Logs: journalctl -u heuresys-advanced-api -f   (or -web)"

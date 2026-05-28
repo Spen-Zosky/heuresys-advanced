@@ -1,0 +1,29 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh.
+# Do NOT install this file directly; run the bootstrap script instead.
+[Unit]
+Description=Heuresys Advanced — Web (Next.js dev)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target heuresys-advanced-api.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@/apps/web
+Environment=PATH=@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
+Environment=NODE_ENV=development
+# Same-origin proxy: browser hits /api/* on the web origin, Next proxies it
+# server-side to the API so HttpOnly/SameSite cookies + CSRF keep working.
+Environment=NEXT_PUBLIC_API_PROXY_BASE_URL=http://localhost:@@API_PORT@@
+Environment=NEXT_PUBLIC_API_BASE_URL=http://@@PUBLIC_HOST@@:@@API_PORT@@/v1
+# The package.json dev script hardcodes -p 3000; override port + bind-all here.
+# pnpm is the corepack shim in the nvm Node bin dir (no system pnpm assumed).
+ExecStart=@@NODE_BIN@@/pnpm exec next dev -p @@WEB_PORT@@ -H 0.0.0.0
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

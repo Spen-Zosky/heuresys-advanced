@@ -57,8 +57,12 @@ if [ ! -s "$NVM_DIR/nvm.sh" ]; then
   echo "  installing nvm $NVM_VERSION"
   curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" | bash
 fi
+# nvm.sh is NOT safe under `set -e`/`set -u`/`pipefail` (it runs commands that
+# return non-zero by design, e.g. nvm_ls_current). Relax strict mode around it.
+set +euo pipefail
 # shellcheck disable=SC1091
 . "$NVM_DIR/nvm.sh"
+set -euo pipefail
 
 # 1. Clone or update (idempotent) ------------------------------------------
 log "repo: clone or update -> $REPO_DIR @ $BRANCH"
@@ -97,10 +101,13 @@ sed -i -E "s|^PORT=.*|PORT=$API_PORT|" "$REPO_DIR/.env"
 
 # 4. Node via nvm + pnpm via corepack (both arch-agnostic) -----------------
 log "node: nvm install/use $NODE_MAJOR; pnpm via corepack"
+set +e   # nvm commands return non-zero internally; don't let `set -e` abort
 nvm install "$NODE_MAJOR" >/dev/null
 nvm use "$NODE_MAJOR" >/dev/null
-node --version
 NODE_BIN="$(dirname "$(nvm which "$NODE_MAJOR")")"
+set -e
+[ -n "$NODE_BIN" ] && [ -x "$NODE_BIN/node" ] || { echo "nvm Node $NODE_MAJOR not resolved" >&2; exit 1; }
+node --version
 corepack enable >/dev/null 2>&1 || true   # puts the pnpm shim in $NODE_BIN
 
 # 5. Install dependencies (reproducible, cross-platform lockfile) ----------

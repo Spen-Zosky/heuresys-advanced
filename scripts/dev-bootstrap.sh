@@ -56,13 +56,18 @@ if [ ! -s "$NVM_DIR/nvm.sh" ]; then
   log "install nvm $NVM_VERSION"
   curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" | bash
 fi
+log "node $NODE_MAJOR via nvm + corepack pnpm"
+# nvm.sh + nvm commands return non-zero internally (e.g. nvm_ls_current); they
+# are NOT safe under `set -e`/`set -u`/`pipefail`. Relax around them.
+set +euo pipefail
 # shellcheck disable=SC1091
 . "$NVM_DIR/nvm.sh"
-log "node $NODE_MAJOR via nvm + corepack pnpm"
 nvm install "$NODE_MAJOR" >/dev/null
 nvm use "$NODE_MAJOR" >/dev/null
-node --version
 NODE_BIN="$(dirname "$(nvm which "$NODE_MAJOR")")"
+set -euo pipefail
+[ -n "$NODE_BIN" ] && [ -x "$NODE_BIN/node" ] || { echo "nvm Node $NODE_MAJOR not resolved" >&2; exit 1; }
+node --version
 corepack enable >/dev/null 2>&1 || true
 PNPM="$NODE_BIN/pnpm"
 

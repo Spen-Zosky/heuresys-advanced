@@ -1,20 +1,19 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-28 (S943 — toolkit bootstrap cross-OS COMPLETO, Mac T1 verificato).
-**Branch**: `main` — HEAD `b13e64e` (push in corso) synced origin. CI verde. **0 alert Dependabot**.
+**Updated**: 2026-05-28 (S944 — ADR-0021 tunnel hands-off; handoff completato in S945 dopo interruzione API a fine S944).
+**Branch**: `main` — HEAD `ec1e277`, push in corso. CI verde. **0 alert Dependabot**.
 **Last tag**: `v0.4.1-housekeeping-closed` (@ `01340ae`).
 
 ## Last session brief
 
-- **zod 4 + ftpz 6 (B-20/B-21) landed** (`17fad36`): root cause = `packages/shared` su zod-3. CI verde, PR Dependabot #3/#5 chiuse.
-- **heuresys-advanced gira LIVE sulla VM** (pubblico `:8013` API / `:3013` web, systemd dev-mode, Node 22 nvm, DB locale :5432) accanto a evo.
-- **B-44 toolkit bootstrap idempotente cross-OS COMPLETO**: `scripts/{vm-bootstrap.sh, dev-bootstrap.sh, dev-bootstrap.ps1, sync-gitignored-to-vm.sh}` + `deploy/`. **Matrice verificata live: Linux-arm64 ✅ · Windows ✅ · Mac/Darwin ✅** (amd64 by-construction). 3 bug cross-platform fixati: filtro `--filter` single→double quote; nvm non-safe sotto `set -euo`; tunnel "already up" ingannato da listener estraneo (Docker su :5433 sul Mac).
+- **ADR-0021 hands-off DB tunnel landed** (`ec1e277`): tunnel SSH `localhost:5433 → oracle-vm-default:5432` (unico path al PostgreSQL live, ADR-0010) ora si rialza da solo cross-reboot, senza passphrase, senza step manuali. Chiave service-account ristretta (no shell, `permitopen=127.0.0.1:5432` + forced command), scheduled task At-Logon, hook `session-boot.ps1`. **B-31/CW-B62 chiusi.**
+- Bug risolti in corsa: `permitopen` `localhost` vs `127.0.0.1` su OpenSSH 9.6; append `authorized_keys` bloccato da flag immutabile VM; `ssh-keygen` passphrase vuota su PowerShell 5.1.
+- **Nota**: S944 troncata da `API Error 400` (thinking blocks) prima della chiusura → push + handoff completati a inizio S945.
 
 ## Top priorities (next session)
 
 1. **B-10 SDBI Phase 2** (~6-10h, sbloccato da zod4; dati brownfield già mirrorati sulla VM via `sync-gitignored-to-vm.sh`). Definire scope per-area (stack completo Zod+repo+service+routes+test per area).
-2. ~~B-31 ADR ssh-agent persistence~~ **CHIUSO 2026-05-28 via ADR-0021** — tunnel DB `:5433` hands-off cross-reboot (service-account key ristretta no-passphrase + scheduled task + hook session-boot). B-40/41/42 deferiti.
-3. (Opzionale) Teardown stack evo sulla VM → libera 8012/3012 + riduce esposizione pubblica.
+2. (Opzionale) Teardown stack evo sulla VM → libera 8012/3012 + riduce esposizione pubblica.
 
 ## Open questions
 
@@ -23,10 +22,10 @@
 
 ## Stack snapshot
 
-- HEAD `b13e64e` = origin. CI 6 workflow verdi + showcase deploy.
+- HEAD `ec1e277` = origin (post-push). CI 6 workflow verdi + showcase deploy.
 - Versioni: zod 4.4.3 · ftpz 6.1.0 · react-i18next 17 · i18next 26 · next 15.5.18 · Node 22 (VM nvm).
-- **Deploy**: `scripts/` + `deploy/README.md`. **Mac dev**: usare `DB_PORT=5434` (Docker tiene :5433). `@heuresys/ui` da **npm registry** (`ux-design-shared` NON serve per operare; solo per sviluppo UI lib).
-- **SoT viva**: `docs/kb/`. Worktree zod4 rimosso.
+- **Deploy**: `scripts/` + `deploy/README.md`. **Tunnel DB Windows**: hands-off cross-reboot (ADR-0021); scheduled task `HeuresysTunnel5433` + hook `session-boot.ps1`. **Mac dev**: `DB_PORT=5434` (Docker tiene :5433). `@heuresys/ui` da **npm registry**.
+- **SoT viva**: `docs/kb/`.
 
 ## Verification (next session)
 

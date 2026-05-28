@@ -28,7 +28,7 @@ Monorepo pnpm HRMS/BPM **maturo e oltre MVP-3**: API Fastify 5 con **~58 moduli 
 ## 2. Stack (versioni verified)
 
 - **Root**: pnpm 9.15.0 (pinato), Node ≥20.11, ESLint 9.39.4 flat, typescript-eslint 8.59.4, eslint-config-next 15.5.18. `pnpm.overrides`: react/react-dom **19.2.5** (Path G pinning), @types/react 19.2.14, vite ^6.4.2, postcss ^8.5.10, esbuild ^0.25.0, qs ≥6.15.2.
-- **apps/api**: fastify 5.8.5, @fastify/{cookie 11,cors 11.2,helmet 13,jwt 10,rate-limit 10.3}, fastify-type-provider-zod 4.0.2, zod 3.25.76, pg 8.13.1, drizzle-orm 0.45.2 (solo pool wrapper; query business = raw SQL parametrizzato), argon2 0.41.1, otpauth ^9.5.1, pino ^9.14, vitest 4.1.6 (singleThread), tsx 4.19.2, typescript 5.7.2, supertest 7.
+- **apps/api**: fastify 5.8.5, @fastify/{cookie 11,cors 11.2,helmet 13,jwt 10,rate-limit 10.3}, fastify-type-provider-zod 6.1.0, zod 4.4.3, pg 8.13.1, drizzle-orm 0.45.2 (solo pool wrapper; query business = raw SQL parametrizzato), argon2 0.41.1, otpauth ^9.5.1, pino ^9.14, vitest 4.1.6 (singleThread), tsx 4.19.2, typescript 5.7.2, supertest 7.
 - **apps/web**: next 15.5.18, react/react-dom 19.2.5, @heuresys/ui ^0.1.1 (npm, NON link:), @heuresys/shared workspace:*, @tanstack/react-query 5.62.16, react-hook-form 7.55, i18next 23.16.8 + react-i18next 15.4, tailwindcss 4.3.0, @playwright/test 1.55.1 + axe.
 - **apps/showcase**: Next 15 static export → GitHub Pages, consuma `@heuresys/ui`.
 - **TS invarianti** (`tsconfig.base.json`): `strict`, `noUncheckedIndexedAccess` (narrow `T|undefined` mandatory), `noUnusedLocals/Parameters` (unused → prefix `_`), `exactOptionalPropertyTypes:false` (intenzionale).

@@ -13,8 +13,9 @@
 | **B-02** | 🟢 verificato 2026-05-28 (resta decisione Enzo) | `docs/kb/tools/` (10 file: build_index/graph_hub/graph_mirror/linked_manifest + sync.sh/.ps1 + hooks) + `graphify-out/` presenti. **Repo GitHub `Spen-Zosky/heuresys-advanced-wiki` NON esiste** (gh: could not resolve) | il "vault esterno" è in `wiki-space` (vault Obsidian locale, path fuori repo); conferma manuale o creazione repo = decisione Enzo |
 | **B-03 / D-08** | ✅ FATTO | `docs/kb/COWORK_ARCHIVE_NOTE.md` + SoT docs/kb completa (SOT_STATE/BACKLOG/DEBT_REGISTER/INDEX_PATHS/COWORK_INBOX/integrations/tools) | — |
 | **B-10** | 🟡 APERTO (intatto) | ADR-0014 **PROPOSED**; `000036_temp_sdbi_schema.sql` presente; **source HR assente da legacy_mirror, platform 0-row** → i dati esistono nel dump `heuresys_platform_0507` (VM `/home/ubuntu/heuresys-evo/backups/local/`, ~367MB i primi maggio) | piano CLI-owned; per dati: restore dump→mirror legacy_mirror→SDBI; legato zod4 |
-| **B-20** (#3) | 🟡 PIANO+SPIKE FATTI (esecuzione aperta) | spike `feat/zod4-ftpz6`: zod4 hard-breaking (z.record) **assente** (già 2-arg); resto deprecato-funzionante. Solo 1 errore zod-puro: `ZodError.errors`→`.issues`. Piano: `docs/superpowers/plans/2026-05-28-zod4-ftpz6-migration.md` | esecuzione = ripartire dal worktree |
-| **B-21** (#5) | 🟡 PIANO+SPIKE FATTI (esecuzione aperta) | **causa-radice misurata**: ftpz6 non infersce più `req.body/params/query` (301/302 tc errors, 1 sola causa, non 61 fix). Accoppiato zod4. Piano+spike pronti | risolvere wiring ftpz6/zod4 (task dedicato centrale) |
+| **B-20** (#3) | ✅ **FATTO** 2026-05-28 | causa-radice delle 301/302 tc errors: `packages/shared` era rimasto zod **3.25.76** (lo spike aveva bumpato solo api/web) → gli schema erano istanze zod-3, che non fanno match `$ZodType` di `zod/v4/core` richiesto da ftpz6. Fix: bump `packages/shared` zod→**4.4.3** + `ZodError.errors`→`.issues` (errorHandler.ts:33). zod4 `z.uuid()` RFC-strict → 1 fix literal test mfa (404 boundary). Verifica: typecheck src+test 0, suite **345 pass / 5 skip / 0 fail**, web typecheck+build+i18n+Playwright verdi. Merged ff-only su main `17fad36`. | chiude PR #3 (defer-major superato) |
+| **B-21** (#5) | ✅ **FATTO** 2026-05-28 | `fastify-type-provider-zod 4.0.2→6.1.0`. La "inference rotta" misurata nello spike era **conseguenza di B-20** (shared zod-3), non un break strutturale ftpz: **0** fix per-route sui 61 route file, **0** cambi error-structure (solo `.issues`), `app.ts` wiring invariato (`withTypeProvider<ZodTypeProvider>` + i 2 compiler). Peers ftpz6 (`@fastify/swagger` 9.7, `openapi-types` 12.1.3) già transitivi. Verifica completa verde (vedi B-20). | chiude PR #5 |
+| **B-20b** | 🟢 **deferito** (hygiene, non correttezza) | deprecation sweep zod4 lasciato fuori scope per scelta del piano (Phase 3): `z.string().email()`→`z.email()` (8), `{message}`→`{error}` (3), `.strict()/.passthrough()`→`z.strictObject/looseObject` (2), `.datetime()`→`z.iso.datetime()` (145, alta churn / zero beneficio). Tutti compilano e girano su zod4. | sweep meccanico opzionale post-MVP-4 |
 | **B-22** (#6) | ✅ **FATTO** 2026-05-28 | `react-i18next 15.4.0→17.0.8` + `i18next 23.16.8→26.3.0` (peer richiedeva i18next≥26.2). Uso basilare (init+Provider+useTranslation), 0 plural keys → smooth. typecheck+i18n parity+build web verdi. | chiude PR #6 |
 | **B-23** (#1 next) | ⚪ **STALE/CHIUSO** | nessuna PR `next` aperta; `next@15.5.18` | **rimuovere dal backlog** |
 | **B-24** | ✅ **FATTO** 2026-05-28 | `peaceiris/actions-gh-pages@v3→@v4` in showcase.yml; v4 = solo Node16→20 (verificato changelog), tutti gli input usati (github_token/publish_dir/publish_branch/force_orphan/commit_message) compatibili. YAML validato. | chiude PR #16; deploy gira al push |
@@ -27,7 +28,7 @@
 | **B-43** (CW-B41) | ✅ **FATTO** 2026-05-28 (validazione funzionale gated a B-10) | `xos_restore_legacy_mirror` ora dump→tempfile→`psql -f` (no pipe) nei 2 step DDL+DATA; applica il workaround validato REPORT 010 §5.a. bash -n + smoke + mktemp cross-OS OK | run reale gated a B-10 (lib non esercitata da script attivi) |
 | Dependabot **alerts** | ✅ 0 aperti | `gh api .../dependabot/alerts` | — |
 
-**Sintesi per la fresh session**: realmente da fare = **B-01** (P0 doc drift), **B-10** (SDBI, intatto), **B-20+B-21** (zod4 accoppiato), **B-22** (i18next), **B-24→solo #16** (gh-pages), **B-31/B-43** (infra/lib), **B-42** (target authoring). **Chiusi/stale**: B-01/D-01 (fatto 2026-05-28), B-03/D-08 (fatto), B-23 (stale), B-26 (risolto), D-12 (risolto), **D-04 root cleanup + B-25/D-09 defer-major CI skip (fatti 2026-05-28)**. **Da chiarire**: B-02 (vault esterno), B-40 (source-side), B-41 (Phase 4).
+**Sintesi per la fresh session**: realmente da fare = **B-10** (SDBI, intatto — ora **sbloccato da zod4**), **B-31** (infra ssh-agent), **B-42** (target authoring). **Chiusi/stale**: B-01/D-01 (fatto 2026-05-28), B-03/D-08 (fatto), **B-20+B-21 zod4+ftpz6 (fatti 2026-05-28, merged `17fad36`)**, B-22 (i18next), B-23 (stale), B-24→#16 (gh-pages), B-25/D-09 (defer-major CI skip), B-26 (risolto), B-43 (xos_lib), D-04 (root cleanup), D-12 (risolto). **Deferiti**: B-20b (deprecation sweep zod4), B-41 (Phase 4). **Da chiarire**: B-02 (vault esterno), B-40 (source-side).
 
 ## P0 — Consolidamento immediato (questa fase, prima di nuovo sviluppo)
 
@@ -41,14 +42,14 @@
 
 | ID | Azione | Effort | Entry point |
 |---|---|---|---|
-| **B-10** | **MVP-4 stream 2.4 — SDBI Phase 2** (Semantic-Driven Brownfield Import, kickoff) | ~6-10h | `cowork_code_exchange/_01_PROMPT_027_s937_ck8_sdbi_phase2_kickoff.md` (archivio); contesto `_00_HANDOVER_CLI_2026-05-26_post_S937.md`. Migration base `000036_temp_sdbi_schema.sql`. **NB**: legato a zod4 (B-20). Riformulare il PROMPT 027 come piano CLI-owned diretto (non più protocollo Cowork). |
+| **B-10** | **MVP-4 stream 2.4 — SDBI Phase 2** (Semantic-Driven Brownfield Import, kickoff) | ~6-10h | `cowork_code_exchange/_01_PROMPT_027_s937_ck8_sdbi_phase2_kickoff.md` (archivio); contesto `_00_HANDOVER_CLI_2026-05-26_post_S937.md`. Migration base `000036_temp_sdbi_schema.sql`. **NB**: era legato a zod4 (B-20) → **ora sbloccato** (B-20 fatto 2026-05-28). Riformulare il PROMPT 027 come piano CLI-owned diretto (non più protocollo Cowork). |
 
 ## P2 — Dependabot / dipendenze (audit breaking-changes)
 
 | ID | PR | Pacchetto | Rischio | Note |
 |---|---|---|---|---|
-| **B-20** | #3 | zod 3→4 | alto | Legato a stream 2.4; tutta la contract layer (`packages/shared` + fastify-type-provider-zod). Audit + migration dedicata. |
-| **B-21** | #5 | fastify-type-provider-zod 4→6 | alto | Accoppiato a zod4 (B-20) — valutare insieme. |
+| ~~**B-20**~~ | #3 | ~~zod 3→4~~ | alto | ✅ **FATTO 2026-05-28** (merged `17fad36`): bump `packages/shared`+api+web → zod 4.4.3. Causa-radice = shared rimasto su zod-3. Verifica completa verde. |
+| ~~**B-21**~~ | #5 | ~~fastify-type-provider-zod 4→6~~ | alto | ✅ **FATTO 2026-05-28**: ftpz 4.0.2→6.1.0, accoppiato a B-20. 0 fix per-route, solo `ZodError.errors`→`.issues`. |
 | ~~**B-22**~~ | #6 | ~~react-i18next 15→17~~ | medio | ✅ **FATTO 2026-05-28**: +i18next 23→26 (peer). 3 file consumatori, uso basilare, 0 plural keys. typecheck+parity+build web verdi. |
 | **B-23** | #1 | next (major) | alto | conflicting + CVE-hold; verificare impatto RSC/showcase (CW-B59 area). |
 | ~~**B-24**~~ | #14/#15/#16 | setup-node 6 / action-setup 6 / gh-pages 4 | basso | ✅ **FATTO 2026-05-28**: #14/#15 già chiuse; gh-pages 3→4 applicato in showcase.yml (v4 = Node16→20 only, input compatibili). Chiude #16. |

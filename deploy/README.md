@@ -18,6 +18,26 @@ scp .env        <host>:<repo>/.env
 scp -r .secrets <host>:<repo>/
 ```
 
+## Gitignored data → VM (`sync-gitignored-to-vm.sh`)
+
+`git clone` brings only tracked files. Gitignored **data/artifacts** (brownfield
+seeds + extracts, `graphify-out/`, qa snapshots, logs, the gitignored showcase
+src, `.secrets/`, …) never reach the VM otherwise. From a source workstation
+that has them:
+
+```bash
+bash scripts/sync-gitignored-to-vm.sh            # -> oracle-vm-default:/home/ubuntu/heuresys-advanced
+SSH_HOST=… DEST_DIR=… bash scripts/sync-gitignored-to-vm.sh
+```
+
+One-shot, re-runnable (additive overwrite via tar-over-ssh; never deletes
+VM-side files). It mirrors everything gitignored **except** the regenerable /
+platform-specific objects — `node_modules`, `dist`, `.next`, `out`,
+`test-results`, `*.tsbuildinfo` (regenerated per-platform by the bootstrap;
+copying the PC's would break the VM's native binaries) — and `.env` (the
+bootstrap owns it; the PC's tunnel `.env` would clobber the VM's local-DB
+config). Run it *while the PC is alive* — it can't read a dead PC.
+
 ## Linux server (OCI VM / any amd64 Linux) — public, systemd
 
 ```bash

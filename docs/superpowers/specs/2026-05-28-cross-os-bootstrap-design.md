@@ -118,8 +118,13 @@ keeps `dev-bootstrap.sh` correct on both Linux and macOS.
 
 Every step is a converge-to-desired-state operation, not an append:
 
-- **clone**: `reset --hard origin/<branch>` → clean tree at remote HEAD; gitignored
-  `.env`/`.secrets/` untouched.
+- **clone**: role-specific.
+  - *Server* (`vm-bootstrap.sh`): `reset --hard origin/<branch>` → clean tree at
+    remote HEAD (ephemeral deployment, no local work to protect).
+  - *Workstation* (`dev-bootstrap.*`): clone if absent; if present, `git pull
+    --ff-only` only when the tree is clean — if there are local commits or
+    uncommitted changes, **skip the git update with a warning** (never destroy a
+    dev's work). gitignored `.env`/`.secrets/` untouched in both cases.
 - **prereqs**: install only what `command -v` / `Get-Command` reports missing.
 - **Node**: `nvm install`/manager install is a no-op when the version exists.
 - **`.env`**: anchored `sed`/`-replace` sets canonical values; re-applying is a no-op.

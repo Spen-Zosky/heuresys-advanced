@@ -28,11 +28,11 @@
     "drizzle-orm": "0.45.2",
     "fastify": "5.8.5",
     "fastify-plugin": "5.1.0",
-    "fastify-type-provider-zod": "4.0.2",
+    "fastify-type-provider-zod": "6.1.0",
     "otpauth": "^9.5.1",
     "pg": "8.21.0",
     "pg-format": "^1.0.4",
-    "zod": "3.25.76"
+    "zod": "4.4.3"
   },
   "devDependencies": {
     "@faker-js/faker": "9.3.0",

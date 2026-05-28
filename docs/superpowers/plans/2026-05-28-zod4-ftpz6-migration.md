@@ -37,6 +37,30 @@
 
 ---
 
+## Spike results (2026-05-28 — measured in worktree `feat/zod4-ftpz6`)
+
+Bumped `apps/api` to `zod@4.4.3` + `fastify-type-provider-zod@6.1.0` and `apps/web` to `zod@4.4.3`. `pnpm install` clean: ftpz 6 pulls new peers `@fastify/swagger@9.7.0` + `openapi-types@12.1.3` (already present transitively, **no unmet peer**). zod resolved to 4.4.3 for our packages (a transitive zod 3.25.76 remains for some dep — harmless).
+
+**`pnpm --filter @heuresys/api typecheck` → 302 errors**, in just **two root causes**:
+
+| TS code | Count | Root cause | Fix locality |
+|---|---|---|---|
+| TS18046 (`req.body/params/query is 'unknown'`) | 156 | **ftpz 6 no longer infers handler request types** from Zod route schemas with our `FastifyPluginAsyncZod` + `app.get(path, { schema }, handler)` pattern | **central** (one wiring/typing fix should clear all) — needs the correct ftpz-6 setup, NOT 61 per-route edits |
+| TS2345 (`'unknown' not assignable`) | 145 | same root cause — the `unknown` `req.*` is then passed to service/repo calls | resolves with the above |
+| TS2339 (`ZodError.errors` missing) | 1 | zod 4 renamed `ZodError.errors` → `ZodError.issues` (`errorHandler.ts:33`) | **1-line fix** |
+
+**Verdict vs my pre-spike hypotheses (honesty per B58):**
+- R1 (ftpz error-response-structure) — **partially right**: the only concrete hit is `ZodError.errors`→`.issues` (1 error), not a broad error-shape break. errorHandler's `instanceof ZodError` still type-checks.
+- R2 (`z.coerce` input `unknown`) — **wrong as a standalone**: there are *zero* isolated z.coerce errors; the `unknown` everywhere comes from the type-provider inference failure, not coercion.
+- R-NEW (**unforeseen, dominant**): ftpz 6 + zod 4 breaks request-type inference end-to-end. **This is the actual B-21 work.** 301/302 errors are this single cause.
+- Runtime impact unknown yet: vitest runs via `tsx` (no typecheck gate), so the 52 tests *may* still pass at runtime — but **CI `typecheck` is red**, which blocks merge regardless. Runtime test run deferred (decision-gate STOP).
+
+**Revised plan delta:** Phase 1 is no longer "fix error response structure". It becomes **"restore ftpz-6 request-type inference"** — a focused investigation of the correct ftpz-6 wiring (does v6 need a different `withTypeProvider` setup / a `ZodTypeProvider` re-export / explicit generics on `FastifyPluginAsyncZod`?). Likely a small central change in `app.ts` and/or the route plugin typing, then the 301 errors clear in bulk. Phase 2 shrinks to the 1-line `.issues` fix. Effort is **moderate and concentrated** (1 root cause), not the 162-file sweep the raw counts suggested — but it does require getting the ftpz-6/zod-4 typing contract right, so it is a focused dedicated task, **not** a blind mechanical edit.
+
+**Worktree state:** the bumps are committed on branch `feat/zod4-ftpz6` (WIP, not pushed) so the next session resumes from the measured baseline. To resume: `cd ../heuresys-advanced-zod4` and investigate ftpz-6 request typing.
+
+---
+
 ## File map (what each touched file is responsible for)
 
 | File | Responsibility | Expected change |

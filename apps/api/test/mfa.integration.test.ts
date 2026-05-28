@@ -219,10 +219,12 @@ describe("/v1/auth/mfa/* integration", () => {
     });
     expect(del.statusCode).toBe(204);
 
-    // Cross-user: a different (random uuid) factorId returns 404
+    // Cross-user: a different (valid v4 uuid, non-existent) factorId returns 404.
+    // NB: must be a version-valid UUID — zod 4's z.uuid() is RFC-strict and
+    // rejects non-versioned UUIDs (e.g. all-zero version nibble) with a 400.
     const cross = await suiteApp.app.inject({
       method: "DELETE",
-      url: `/v1/auth/mfa/factors/00000000-0000-0000-0000-000000000123`,
+      url: `/v1/auth/mfa/factors/00000000-0000-4000-8000-000000000123`,
       headers: {
         cookie: cookieHeader(bundle.cookies),
         "x-csrf-token": bundle.csrf,

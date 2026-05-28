@@ -10,11 +10,11 @@
     "pnpm": ">=9.0.0"
   },
   "scripts": {
-    "dev": "pnpm -r --parallel --filter='@heuresys/*' run dev",
-    "build": "pnpm -r --filter='@heuresys/*' run build",
-    "test": "pnpm -r --filter='@heuresys/*' run test",
-    "lint": "pnpm -r --filter='@heuresys/*' run lint",
-    "typecheck": "pnpm -r --filter='@heuresys/*' run typecheck",
+    "dev": "pnpm -r --parallel --filter=\"@heuresys/*\" run dev",
+    "build": "pnpm -r --filter=\"@heuresys/*\" run build",
+    "test": "pnpm -r --filter=\"@heuresys/*\" run test",
+    "lint": "pnpm -r --filter=\"@heuresys/*\" run lint",
+    "typecheck": "pnpm -r --filter=\"@heuresys/*\" run typecheck",
     "db:create": "pwsh -File db/scripts/create_local_database.ps1",
     "db:create:sh": "bash db/scripts/create_local_database.sh",
     "db:migrate": "pwsh -File db/scripts/migrate.ps1",

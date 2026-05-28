@@ -30,7 +30,6 @@ All run from repo root unless noted. Use the project's pnpm package manager (pin
 | DB validate (7 views) | `pnpm db:validate` |
 | Seed RTL bank | `pnpm db:seed` |
 | Seed test admin/personas | `pnpm db:seed-test-admin` |
-| OpenAPI spec generate | `pnpm openapi:generate` (writes `apps/api/openapi.yaml`) |
 | i18n parity check (web) | `pnpm i18n:check` |
 | Typecheck test files separately | `cd apps/api && pnpm typecheck:test` (uses `tsconfig.test.json`) |
 

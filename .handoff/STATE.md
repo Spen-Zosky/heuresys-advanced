@@ -1,32 +1,32 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-28 (S942 — zod4+ftpz6 landed; advanced live sulla VM; toolkit bootstrap cross-OS B-44).
-**Branch**: `main` — HEAD `945398b` synced origin (0/0). CI verde. **0 alert Dependabot**.
+**Updated**: 2026-05-28 (S943 — toolkit bootstrap cross-OS COMPLETO, Mac T1 verificato).
+**Branch**: `main` — HEAD `b13e64e` (push in corso) synced origin. CI verde. **0 alert Dependabot**.
 **Last tag**: `v0.4.1-housekeeping-closed` (@ `01340ae`).
 
 ## Last session brief
 
-- **B-20/B-21 zod4+ftpz6 ESEGUITO e merged** (`17fad36`): causa-radice = `packages/shared` rimasto su zod-3 (lo spike aveva bumpato solo api/web) → ftpz6 non inferiva i tipi. Fix = bump shared→4.4.3 + `ZodError.errors`→`.issues` + 1 fix test (zod4 `z.uuid()` RFC-strict). 302→0 tc error, suite 345/5/0, CI verde. PR Dependabot #3/#5 chiuse.
-- **heuresys-advanced gira LIVE sulla VM** (pubblico `:8013` API / `:3013` web, systemd dev-mode, Node 22 via nvm, DB locale :5432) **accanto** allo stack evo legacy.
-- **B-44 toolkit bootstrap idempotente cross-OS**: `scripts/{vm-bootstrap.sh, dev-bootstrap.sh, dev-bootstrap.ps1, sync-gitignored-to-vm.sh}` + `deploy/`. Verificati live VM-arm64 + Windows. 2 bug cross-platform fixati (filtro `--filter` single→double quote; nvm non-safe sotto `set -euo`).
+- **zod 4 + ftpz 6 (B-20/B-21) landed** (`17fad36`): root cause = `packages/shared` su zod-3. CI verde, PR Dependabot #3/#5 chiuse.
+- **heuresys-advanced gira LIVE sulla VM** (pubblico `:8013` API / `:3013` web, systemd dev-mode, Node 22 nvm, DB locale :5432) accanto a evo.
+- **B-44 toolkit bootstrap idempotente cross-OS COMPLETO**: `scripts/{vm-bootstrap.sh, dev-bootstrap.sh, dev-bootstrap.ps1, sync-gitignored-to-vm.sh}` + `deploy/`. **Matrice verificata live: Linux-arm64 ✅ · Windows ✅ · Mac/Darwin ✅** (amd64 by-construction). 3 bug cross-platform fixati: filtro `--filter` single→double quote; nvm non-safe sotto `set -euo`; tunnel "already up" ingannato da listener estraneo (Docker su :5433 sul Mac).
 
 ## Top priorities (next session)
 
-1. **Verifica live Mac** di `dev-bootstrap.sh` (path Darwin brew/BSD-sed) — Mac era spento. Eseguire via `mac-local` quando online. Riconciliare IP Mac CLAUDE.md (`.4` vs `.7`). (~30min)
-2. **B-10 SDBI Phase 2** (~6-10h, sbloccato da zod4; dati brownfield ora già mirrorati sulla VM via `sync-gitignored-to-vm.sh`). Definire scope per-area.
-3. **B-31** ADR ssh-agent persistence (decisione security). B-40/41/42 deferiti.
+1. **B-10 SDBI Phase 2** (~6-10h, sbloccato da zod4; dati brownfield già mirrorati sulla VM via `sync-gitignored-to-vm.sh`). Definire scope per-area (stack completo Zod+repo+service+routes+test per area).
+2. **B-31** ADR ssh-agent persistence (decisione security). B-40/41/42 deferiti.
+3. (Opzionale) Teardown stack evo sulla VM → libera 8012/3012 + riduce esposizione pubblica.
 
 ## Open questions
 
-- **Teardown stack evo sulla VM** per liberare 8012/3012 + ridurre l'esposizione pubblica (grafana/prometheus/pg-exporter raggiungibili da Internet via Docker-ufw bypass): fase deliberata backup+decommission, non ancora pianificata.
-- B-10 SDBI: una macro-area è "fatta" solo con stack completo (Zod+repo+service+routes+test) — scope per-area da definire.
+- **Teardown evo sulla VM**: fase deliberata backup+decommission (3 systemd `/home/ubuntu/heuresys-evo/services/*` + 9-container compose `/home/ubuntu/heuresys.com.evo/infra`, DB docker :5433). Non pianificata.
+- Esposizione pubblica VM: grafana/prometheus/pg-exporter raggiungibili da Internet (Docker bypassa ufw) — sanare col teardown evo.
 
 ## Stack snapshot
 
-- HEAD `945398b` = origin. CI 6 workflow verdi + showcase deploy.
-- Versioni: **zod 4.4.3 · ftpz 6.1.0** (merged) · react-i18next 17.0.8 · i18next 26.3.0 · next 15.5.18 · Node 22 (VM via nvm).
-- **Deploy**: `scripts/` + `deploy/README.md` — vedi B-44. Worktree zod4 rimosso (ff-merged).
-- **SoT viva**: `docs/kb/` (SOT_STATE/SOT_BACKLOG/DEBT_REGISTER).
+- HEAD `b13e64e` = origin. CI 6 workflow verdi + showcase deploy.
+- Versioni: zod 4.4.3 · ftpz 6.1.0 · react-i18next 17 · i18next 26 · next 15.5.18 · Node 22 (VM nvm).
+- **Deploy**: `scripts/` + `deploy/README.md`. **Mac dev**: usare `DB_PORT=5434` (Docker tiene :5433). `@heuresys/ui` da **npm registry** (`ux-design-shared` NON serve per operare; solo per sviluppo UI lib).
+- **SoT viva**: `docs/kb/`. Worktree zod4 rimosso.
 
 ## Verification (next session)
 

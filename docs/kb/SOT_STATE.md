@@ -65,6 +65,7 @@ Monorepo pnpm HRMS/BPM **maturo e oltre MVP-3**: API Fastify 5 con **~58 moduli 
 - **6 workflow self-hosted** su OCI VM runner `oracle-vm-default-runner` (online): typecheck, lint, test-integration (DB+JWT+RBAC), build-web, playwright-smoke (5 personas, web :3100 vs Grafana :3000), i18n-parity. **+1 showcase deploy** (GitHub Pages, ubuntu-hosted). **Tutti verdi** su ultimo commit di codice `7f6e174` (i commit docs-only S938 `c2f95ad`/`9cd906e` sono paths-ignored → nessun re-run, atteso).
 - Runner systemd EnvironmentFile `/etc/heuresys-runner.env` (JWT PEM `\\n` double-escape; ADMIN_ORIGIN; NEXT_PUBLIC_API_BASE_URL). Setup: `docs/ci/self-hosted-runners-setup.md`.
 - **Host topology**: Windows primario (`DESKTOP-KH728P2`, PS 5.1, Git Bash, `C:\Git\cmd\git.exe`); Mac secondario (`mac-local` 192.168.1.4); OCI VM `oracle-vm-default` 80.225.82.207 (runtime+CI). Chiavi SSH in `C:\Users\enzospenuso\.ssh\` (`oci_recovery_ed25519` passphrase-protected, mac_local, github).
+- **Deploy/bootstrap (B-44, 2026-05-28)**: idempotent per-OS scripts in `scripts/` + `deploy/`. `vm-bootstrap.sh` = Linux server (systemd units `heuresys-advanced-{api,web}`, public **:8013/:3013**, Node 22 via nvm, DB local :5432). `dev-bootstrap.sh` (Mac/Linux-desktop) + `dev-bootstrap.ps1` (Windows) = workstation, on-demand `pnpm dev` (:3001/:3000) against the VM DB via tunnel :5433. See `deploy/README.md`. heuresys-advanced **also runs live on the VM** (8013/3013) alongside legacy evo.
 
 ## 8. Prerequisiti autonomia unattended (checklist boot CLI)
 

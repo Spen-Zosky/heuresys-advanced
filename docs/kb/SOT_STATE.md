@@ -71,7 +71,7 @@ Monorepo pnpm HRMS/BPM **maturo e oltre MVP-3**: API Fastify 5 con **~58 moduli 
 
 ```bash
 ssh -o BatchMode=yes oracle-vm-default 'echo OK'   # key in agent? altrimenti load manuale (CW-B62)
-nc -z localhost 5433 && echo tunnel-up             # altrimenti: ssh -fN -L 5433:localhost:5432 oracle-vm-default
+nc -z localhost 5433 && echo tunnel-up             # auto cross-reboot via task HeuresysTunnel5433 (ADR-0021); fallback hook session-boot.ps1
 git -C D:/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
 pnpm install -r && pnpm --filter @heuresys/web build          # exit 0
 gh run list --limit 6                              # main CI verde
@@ -79,7 +79,7 @@ gh run list --limit 6                              # main CI verde
 
 - **Stato S939 boot**: tunnel 5433 UP ✓, SSH `oracle-vm-default` OK ✓ (key in agent), working tree pulito ✓, CI verde ✓.
 - **Push policy**: commit locali su `main` pre-autorizzati (project rule). **Push solo su ok esplicito di Enzo**; l'autorizzazione vale per la sessione fino a revoca, nuova sessione riparte da "ask".
-- **SSH passphrase automation gap** (CW-B62): non automatizzabile via MCP/stdio; se l'agent non ha la chiave → helper `C:\Users\enzospenuso\Claude Desktop\scripts\s937-ck1-load-ssh-key.ps1` lanciato da Enzo a mano.
+- **SSH tunnel hands-off** (ADR-0021, chiude CW-B62 / B-31): tunnel `:5433` automatico cross-reboot via scheduled task At-Logon `HeuresysTunnel5433` + hook di sessione fallback `scripts/session-boot.ps1`, su service-account key no-passphrase ristretta (`heuresys_tunnel_ed25519`, `permitopen="127.0.0.1:5432"` + forced command, no shell). Setup one-shot idempotente: `scripts/setup-tunnel-automation.ps1`. La chiave admin passphrase-protected resta per il solo accesso interattivo (helper `s937-ck1-load-ssh-key.ps1`).
 
 ## 9. Invarianti non negoziabili (override "common patterns")
 

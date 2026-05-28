@@ -13,7 +13,7 @@
 ## Top priorities (next session)
 
 1. **B-10 SDBI Phase 2** (~6-10h, sbloccato da zod4; dati brownfield già mirrorati sulla VM via `sync-gitignored-to-vm.sh`). Definire scope per-area (stack completo Zod+repo+service+routes+test per area).
-2. **B-31** ADR ssh-agent persistence (decisione security). B-40/41/42 deferiti.
+2. ~~B-31 ADR ssh-agent persistence~~ **CHIUSO 2026-05-28 via ADR-0021** — tunnel DB `:5433` hands-off cross-reboot (service-account key ristretta no-passphrase + scheduled task + hook session-boot). B-40/41/42 deferiti.
 3. (Opzionale) Teardown stack evo sulla VM → libera 8012/3012 + riduce esposizione pubblica.
 
 ## Open questions
@@ -32,7 +32,7 @@
 
 ```bash
 ssh -o BatchMode=yes oracle-vm-default 'echo OK'
-nc -z localhost 5433 || ssh -fN -L 5433:localhost:5432 oracle-vm-default
+nc -z localhost 5433 || powershell Start-ScheduledTask HeuresysTunnel5433   # tunnel auto cross-reboot (ADR-0021); hook session-boot.ps1 lo copre comunque
 git log origin/main..HEAD --oneline   # empty = synced
 curl -s http://80.225.82.207:8013/healthz   # advanced live on VM
 gh run list --limit 4                 # CI green

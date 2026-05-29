@@ -1,38 +1,37 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-28 (S944 — ADR-0021 tunnel hands-off; handoff completato in S945 dopo interruzione API a fine S944).
-**Branch**: `main` — HEAD `ec1e277`, push in corso. CI verde. **0 alert Dependabot**.
-**Last tag**: `v0.4.1-housekeeping-closed` (@ `01340ae`).
+**Updated**: 2026-05-29 (S947 — brand-fidelity migration Phase 0→3 shipped).
+**Branch**: `main` — HEAD `ae69699` = origin (pushed). **Last tag**: `v0.4.1-housekeeping-closed`.
+**CI**: ⚠ deploy Pages/showcase ✅; Playwright/test/build/lint ❌/⏸ — **runner OCI VM offline (OOM)**, non codice. Re-run pendente.
 
 ## Last session brief
 
-- **ADR-0021 hands-off DB tunnel landed** (`ec1e277`): tunnel SSH `localhost:5433 → oracle-vm-default:5432` (unico path al PostgreSQL live, ADR-0010) ora si rialza da solo cross-reboot, senza passphrase, senza step manuali. Chiave service-account ristretta (no shell, `permitopen=127.0.0.1:5432` + forced command), scheduled task At-Logon, hook `session-boot.ps1`. **B-31/CW-B62 chiusi.**
-- Bug risolti in corsa: `permitopen` `localhost` vs `127.0.0.1` su OpenSSH 9.6; append `authorized_keys` bloccato da flag immutabile VM; `ssh-keygen` passphrase vuota su PowerShell 5.1.
-- **Nota**: S944 troncata da `API Error 400` (thinking blocks) prima della chiusura → push + handoff completati a inizio S945.
+- **Brand-fidelity migration Phase 0→3**: 29 pagine reali `(authenticated)/*` portate a fedeltà canonica `@heuresys/ui` per tipologia (1 dashboard API-first + 19 liste + 9 detail). Nuovi componenti condivisi: `components/{data-table-panel(DataTablePanel+EntityTable),status-pill,detail-panel(FieldGrid)}`; contract in `docs/architecture/brand-component-contract.md`. 6 commit (`0f74a0e`→`ae69699`), tutti verdi in **build di produzione** (typecheck+build+~70 Playwright+60 a11y+6 API).
+- Foundation A: anomalia `/me`-light era **dev-only** (cold-compile), no bug prod. Regression guard `tests/e2e/theme-propagation.spec.ts`.
+- **F7 cleanup ROLLBACKato**: `apps/web/src/app/showcase` è la SORGENTE di `apps/showcase` (via `sync-showcase.sh`), NON ridondante → rimuoverlo rompe deploy Pages. F7 vero = refactor (vedi memoria).
 
 ## Top priorities (next session)
 
-1. **B-10 SDBI Phase 2** (~6-10h, sbloccato da zod4; dati brownfield già mirrorati sulla VM via `sync-gitignored-to-vm.sh`). Definire scope per-area (stack completo Zod+repo+service+routes+test per area).
-2. (Opzionale) Teardown stack evo sulla VM → libera 8012/3012 + riduce esposizione pubblica.
+1. **Re-run CI** (~5min): `gh run rerun` dei 4 workflow self-hosted quando il runner OCI VM è di nuovo online (auto-recovery OOM o riavvio console OCI). Verificare verde.
+2. **Brand-fidelity F4-F6** (~6-10h): F4 charts (compensation/visualizations/career/org-chart → EChartsCard/gauges — ⚠ verificare `next build` per CW-B59 con echarts/three); F5 ESS `/me/*` (~10 pagine); F6 admin (`/admin/roles`→RbacMatrix). Pattern+componenti già pronti.
+3. **F7-refactor** (richiede ok Enzo): spostare sorgente showcase in apps/showcase + aggiornare sync-showcase.sh/showcase.yml/middleware.
 
 ## Open questions
 
-- **Teardown evo sulla VM**: fase deliberata backup+decommission (3 systemd `/home/ubuntu/heuresys-evo/services/*` + 9-container compose `/home/ubuntu/heuresys.com.evo/infra`, DB docker :5433). Non pianificata.
-- Esposizione pubblica VM: grafana/prometheus/pg-exporter raggiungibili da Internet (Docker bypassa ufw) — sanare col teardown evo.
+- **Runner CI infra**: ARM free-tier sottodimensionato per Playwright/Chromium (causa OOM S947). Spostare playwright-smoke su ubuntu-hosted, o +swap/+limiti sul runner?
+- B-10 SDBI Phase 2 (~6-10h, sbloccato da zod4) ancora aperto — priorità vs brand-fidelity F4-F6.
 
 ## Stack snapshot
 
-- HEAD `ec1e277` = origin (post-push). CI 6 workflow verdi + showcase deploy.
-- Versioni: zod 4.4.3 · ftpz 6.1.0 · react-i18next 17 · i18next 26 · next 15.5.18 · Node 22 (VM nvm).
-- **Deploy**: `scripts/` + `deploy/README.md`. **Tunnel DB Windows**: hands-off cross-reboot (ADR-0021); scheduled task `HeuresysTunnel5433` + hook `session-boot.ps1`. **Mac dev**: `DB_PORT=5434` (Docker tiene :5433). `@heuresys/ui` da **npm registry**.
-- **SoT viva**: `docs/kb/`.
+- HEAD `ae69699` = origin. `@heuresys/ui` ^0.1.1 (npm). next 15.5.18 · zod 4.4.3 · Node 22 (VM).
+- **Web dev locale prod-verify**: `pnpm --filter @heuresys/web build` + `next start -p 3000` (API :3001); E2E SEMPRE in prod build (mai `next dev` — falsi negativi). Riavvio :3000 su Windows: `Stop-Process` su PID porta (TaskStop lascia il child Node → EADDRINUSE).
+- **Tunnel DB**: hands-off cross-reboot (ADR-0021). **SoT viva**: `docs/kb/` + memoria `project-brand-fidelity-migration`.
 
 ## Verification (next session)
 
 ```bash
-ssh -o BatchMode=yes oracle-vm-default 'echo OK'
-nc -z localhost 5433 || powershell Start-ScheduledTask HeuresysTunnel5433   # tunnel auto cross-reboot (ADR-0021); hook session-boot.ps1 lo copre comunque
-git log origin/main..HEAD --oneline   # empty = synced
-curl -s http://80.225.82.207:8013/healthz   # advanced live on VM
-gh run list --limit 4                 # CI green
+ssh -o BatchMode=yes oracle-vm-default 'echo OK'   # se timeout: VM ancora in OOM da S947
+nc -z localhost 5433                                # tunnel (ADR-0021)
+git log origin/main..HEAD --oneline                 # empty = synced
+gh run list --limit 6                               # se rosso runner-offline: gh run rerun <id>
 ```

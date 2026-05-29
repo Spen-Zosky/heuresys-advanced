@@ -41,6 +41,24 @@ export const SuccessorCandidateListResponseSchema = z.object({
   total: z.number().int().min(0),
 });
 
+// Readiness distribution (aggregate for the career-succession pipeline chart — F4).
+// `readinessLevel` is a free string; candidates with no level are bucketed as "UNASSESSED".
+export const SuccessorReadinessDistributionItemSchema = z.object({
+  readinessLevel: z.string(),
+  count: z.number().int().min(0),
+});
+export type SuccessorReadinessDistributionItem = z.infer<
+  typeof SuccessorReadinessDistributionItemSchema
+>;
+
+export const SuccessorReadinessDistributionResponseSchema = z.object({
+  items: z.array(SuccessorReadinessDistributionItemSchema),
+  total: z.number().int().min(0),
+});
+export type SuccessorReadinessDistributionResponse = z.infer<
+  typeof SuccessorReadinessDistributionResponseSchema
+>;
+
 export const CreateSuccessorCandidateBodySchema = z.object({
   poolId: z.string().uuid(),
   userId: z.string().uuid(),

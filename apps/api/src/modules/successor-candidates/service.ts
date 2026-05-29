@@ -12,6 +12,7 @@ import type {
   SuccessorCandidateListQuery,
   CreateSuccessorCandidateBody,
   UpdateSuccessorCandidateBody,
+  SuccessorReadinessDistributionResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findPoolById } from "../succession-pools/repository.js";
@@ -34,6 +35,11 @@ export const successorCandidatesService = {
   async list(actor: ActorContext, query: SuccessorCandidateListQuery) {
     const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
     return repo.listCandidates(pool, { tenantId, query });
+  },
+
+  async readinessDistribution(actor: ActorContext): Promise<SuccessorReadinessDistributionResponse> {
+    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+    return repo.getReadinessDistribution(pool, tenantId);
   },
 
   async getById(actor: ActorContext, id: string): Promise<SuccessorCandidate> {

@@ -105,4 +105,18 @@ describe("/v1/successor-candidates integration", () => {
     expect(r.statusCode).toBe(409);
     expect((r.json() as { error: { code: string } }).error.code).toBe("SUCCESSION_POOL_HAS_CANDIDATES");
   });
+
+  it("GET /readiness-distribution as TENANT_ADMIN → 200 with seeded READY_6_MONTHS bucket", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/successor-candidates/readiness-distribution`,
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as { total: number; items: Array<{ readinessLevel: string; count: number }> };
+    expect(body.total).toBeGreaterThanOrEqual(1);
+    const ready = body.items.find((i) => i.readinessLevel === "READY_6_MONTHS");
+    expect(ready).toBeDefined();
+    expect(ready!.count).toBeGreaterThanOrEqual(1);
+    expect(body.items.reduce((s, i) => s + i.count, 0)).toBe(body.total);
+  });
 });

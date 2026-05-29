@@ -87,6 +87,34 @@ export async function listCandidates(
   return { items: res.rows.map(toCand), total };
 }
 
+/**
+ * Candidate counts grouped by readiness level (null → 'UNASSESSED'), tenant-scoped.
+ * Feeds the career-succession pipeline chart (F4).
+ */
+export async function getReadinessDistribution(
+  q: DbConnector,
+  tenantId: string | undefined,
+): Promise<{ items: { readinessLevel: string; count: number }[]; total: number }> {
+  const params: unknown[] = [];
+  let whereClause = "";
+  if (tenantId) {
+    params.push(tenantId);
+    whereClause = `WHERE successor_candidate_tenant_id = $1`;
+  }
+  const res = await q.query<{ readiness_level: string; count: string }>(
+    `SELECT COALESCE(successor_candidate_readiness_level, 'UNASSESSED') AS readiness_level,
+            count(*)::text AS count
+       FROM sys.sys_successor_candidates
+       ${whereClause}
+       GROUP BY COALESCE(successor_candidate_readiness_level, 'UNASSESSED')
+       ORDER BY count(*) DESC, readiness_level`,
+    params,
+  );
+  const items = res.rows.map((r) => ({ readinessLevel: r.readiness_level, count: Number(r.count) }));
+  const total = items.reduce((sum, i) => sum + i.count, 0);
+  return { items, total };
+}
+
 export async function findCandidateById(q: DbConnector, id: string): Promise<SuccessorCandidate | null> {
   const res = await q.query<Row>(
     `SELECT ${COLS} FROM sys.sys_successor_candidates WHERE successor_candidate_id = $1`, [id],

@@ -6,6 +6,7 @@ import { PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
+import { EChartsCard } from "../_charts-client";
 
 interface CareerPath {
   careerPathId: string;
@@ -28,6 +29,10 @@ interface SuccessorCandidate {
   userId: string;
   readinessLevel: string | null;
   status: string;
+}
+interface ReadinessDistItem {
+  readinessLevel: string;
+  count: number;
 }
 
 type Tab = "paths" | "pools" | "candidates";
@@ -72,6 +77,40 @@ export default function CareerSuccessionPage() {
     queryFn: () => apiFetch<{ items: SuccessorCandidate[]; total: number }>("/v1/successor-candidates?limit=200"),
     enabled: tab === "candidates",
   });
+  // Readiness pipeline — server-side GROUP BY aggregate (API-first, F4).
+  const readinessDist = useQuery({
+    queryKey: ["successor-candidates", "readiness-distribution"],
+    queryFn: () =>
+      apiFetch<{ items: ReadinessDistItem[]; total: number }>(
+        "/v1/successor-candidates/readiness-distribution",
+      ),
+    enabled: tab === "candidates",
+  });
+
+  const readinessOption = {
+    tooltip: { trigger: "axis" as const, axisPointer: { type: "shadow" as const } },
+    grid: { left: 8, right: 16, top: 16, bottom: 8, containLabel: true },
+    xAxis: {
+      type: "category" as const,
+      data: (readinessDist.data?.items ?? []).map((i) => i.readinessLevel.replace(/_/g, " ")),
+      axisLabel: { color: "#94a3b8", fontSize: 11, interval: 0, rotate: 20 },
+      axisLine: { lineStyle: { color: "#334155" } },
+    },
+    yAxis: {
+      type: "value" as const,
+      minInterval: 1,
+      axisLabel: { color: "#94a3b8", fontSize: 11 },
+      splitLine: { lineStyle: { color: "#1e293b" } },
+    },
+    series: [
+      {
+        type: "bar" as const,
+        data: (readinessDist.data?.items ?? []).map((i) => i.count),
+        itemStyle: { color: "#6366f1", borderRadius: [4, 4, 0, 0] as [number, number, number, number] },
+        barMaxWidth: 48,
+      },
+    ],
+  };
 
   return (
     <main data-testid="career-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
@@ -122,7 +161,24 @@ export default function CareerSuccessionPage() {
         </div>
       )}
       {tab === "candidates" && (
-        <div data-testid="career-content-candidates">
+        <div data-testid="career-content-candidates" className="space-y-4">
+          <div
+            data-testid="career-readiness-chart"
+            className="rounded-card border border-border bg-card p-4 shadow-card"
+          >
+            <h2 className="mb-2 text-sm font-medium text-foreground">Pipeline readiness</h2>
+            {readinessDist.data && readinessDist.data.total > 0 ? (
+              <EChartsCard
+                option={readinessOption}
+                height={240}
+                ariaLabel="Distribuzione candidati per livello di readiness"
+              />
+            ) : (
+              <p className="py-10 text-center text-xs text-muted-foreground">
+                {readinessDist.isLoading ? "Caricamento…" : "Nessun candidato da rappresentare."}
+              </p>
+            )}
+          </div>
           <EntityTable<SuccessorCandidate>
             isLoading={candidates.isLoading}
             isError={candidates.isError}

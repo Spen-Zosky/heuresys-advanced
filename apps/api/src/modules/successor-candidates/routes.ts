@@ -11,6 +11,7 @@ import {
   SuccessorCandidateSchema,
   SuccessorCandidateListQuerySchema,
   SuccessorCandidateListResponseSchema,
+  SuccessorReadinessDistributionResponseSchema,
   CreateSuccessorCandidateBodySchema,
   UpdateSuccessorCandidateBodySchema,
   SuccessorCandidateIdParamSchema,
@@ -29,6 +30,11 @@ export const successorCandidatesRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("career_succession:read")],
     schema: { querystring: SuccessorCandidateListQuerySchema, response: { 200: SuccessorCandidateListResponseSchema } },
   }, async (req) => successorCandidatesService.list(actor(req), req.query));
+
+  app.get("/readiness-distribution", {
+    preHandler: [requirePermission("career_succession:read")],
+    schema: { response: { 200: SuccessorReadinessDistributionResponseSchema } },
+  }, async (req) => successorCandidatesService.readinessDistribution(actor(req)));
 
   app.get("/:id", {
     preHandler: [requirePermission("career_succession:read")],

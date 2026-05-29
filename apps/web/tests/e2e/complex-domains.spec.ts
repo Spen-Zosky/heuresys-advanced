@@ -22,6 +22,8 @@ test.describe("MVP-2a complex domains — live data", () => {
 
     await page.getByTestId("career-tab-candidates").click();
     await expect(page.getByTestId("career-content-candidates")).toBeVisible();
+    // F4: readiness pipeline chart (echarts bar via ssr:false boundary)
+    await expect(page.getByTestId("career-readiness-chart")).toBeVisible();
   });
 
   test("/compensation-intelligence shows 6 status counters", async ({ page }) => {

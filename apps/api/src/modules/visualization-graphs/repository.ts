@@ -48,6 +48,23 @@ export async function listGraphs(
   return { items: res.rows.map(toGraph), total: Number(tr.rows[0]?.total ?? 0) };
 }
 
+/** Graph counts grouped by type, tenant-scoped. Feeds the visualizations summary chart (F4). */
+export async function getTypeDistribution(
+  q: DbConnector, tenantId: string | undefined,
+): Promise<{ items: { type: string; count: number }[]; total: number }> {
+  const params: unknown[] = [];
+  let w = "";
+  if (tenantId) { params.push(tenantId); w = `WHERE graph_tenant_id = $1`; }
+  const res = await q.query<{ type: string; count: string }>(
+    `SELECT graph_type AS type, count(*)::text AS count
+       FROM sys.sys_visualization_graphs ${w}
+       GROUP BY graph_type ORDER BY count(*) DESC, graph_type`,
+    params,
+  );
+  const items = res.rows.map((r) => ({ type: r.type, count: Number(r.count) }));
+  return { items, total: items.reduce((sum, i) => sum + i.count, 0) };
+}
+
 export async function findGraphById(q: DbConnector, id: string): Promise<VizGraph | null> {
   const res = await q.query<Row>(`SELECT ${COLS} FROM sys.sys_visualization_graphs WHERE graph_id = $1`, [id]);
   return res.rows[0] ? toGraph(res.rows[0]) : null;

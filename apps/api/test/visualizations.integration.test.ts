@@ -172,4 +172,18 @@ describe("/v1/visualization-* end-to-end pipeline", () => {
     expect(r.x).toBe(150);
     expect(r.locked).toBe(false);
   });
+
+  it("GET /summary as TENANT_ADMIN → 200 with seeded ORG_CHART bucket", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/visualization-graphs/summary`,
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as { total: number; items: Array<{ type: string; count: number }> };
+    expect(body.total).toBeGreaterThanOrEqual(1);
+    const org = body.items.find((i) => i.type === "ORG_CHART");
+    expect(org).toBeDefined();
+    expect(org!.count).toBeGreaterThanOrEqual(1);
+    expect(body.items.reduce((s, i) => s + i.count, 0)).toBe(body.total);
+  });
 });

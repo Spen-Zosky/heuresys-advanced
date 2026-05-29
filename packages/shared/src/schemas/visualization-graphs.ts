@@ -40,6 +40,19 @@ export const VizGraphListResponseSchema = z.object({
   items: z.array(VizGraphSchema), total: z.number().int().min(0),
 });
 
+// Graph-type distribution (aggregate for the visualizations summary chart — F4).
+export const VizGraphTypeDistributionItemSchema = z.object({
+  type: z.string(),
+  count: z.number().int().min(0),
+});
+export type VizGraphTypeDistributionItem = z.infer<typeof VizGraphTypeDistributionItemSchema>;
+
+export const VizGraphSummaryResponseSchema = z.object({
+  items: z.array(VizGraphTypeDistributionItemSchema),
+  total: z.number().int().min(0),
+});
+export type VizGraphSummaryResponse = z.infer<typeof VizGraphSummaryResponseSchema>;
+
 export const CreateVizGraphBodySchema = z.object({
   code: z.string().min(1).max(128),
   type: VizGraphTypeSchema,

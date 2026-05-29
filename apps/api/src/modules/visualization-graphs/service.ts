@@ -5,7 +5,7 @@
 import { pool } from "../../db/client.js";
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
 import type { RoleCode } from "../../config/constants.js";
-import type { VizGraph, VizGraphListQuery, CreateVizGraphBody, UpdateVizGraphBody } from "@heuresys/shared";
+import type { VizGraph, VizGraphListQuery, CreateVizGraphBody, UpdateVizGraphBody, VizGraphSummaryResponse } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
 export interface ActorContext { userId: string; tenantId: string | null; roles: RoleCode[] }
@@ -20,6 +20,10 @@ export const visualizationGraphsService = {
   async list(actor: ActorContext, query: VizGraphListQuery) {
     const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
     return repo.listGraphs(pool, { tenantId, query });
+  },
+  async typeSummary(actor: ActorContext): Promise<VizGraphSummaryResponse> {
+    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+    return repo.getTypeDistribution(pool, tenantId);
   },
   async getById(actor: ActorContext, id: string): Promise<VizGraph> {
     const t = await repo.findGraphById(pool, id);

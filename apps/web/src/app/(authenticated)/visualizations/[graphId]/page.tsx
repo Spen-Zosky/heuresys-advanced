@@ -8,25 +8,29 @@ import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { StatusPill } from "@/components/status-pill";
 
+// Fields match the real schemas (visualization-graphs/nodes/edges): graphId/type,
+// nodeId/sourceEntityType/label, edgeId/sourceNodeId/targetNodeId/type. The previous
+// stale interfaces (graphKind/nodeKind/fromNodeId/edgeKind) silently dropped every
+// edge from the Mermaid diagram (nodeMap.has(undefined) === false). Fixed in F4.3.
 interface Graph {
-  visualizationGraphId: string;
+  graphId: string;
   code: string;
   name: string;
-  graphKind: string;
+  type: string;
   description: string | null;
   metadata: Record<string, unknown>;
 }
 interface GraphNode {
-  visualizationNodeId: string;
-  nodeKey: string;
-  nodeKind: string;
-  label: string | null;
+  nodeId: string;
+  sourceEntityType: string;
+  label: string;
+  type: string | null;
 }
 interface GraphEdge {
-  visualizationEdgeId: string;
-  fromNodeId: string;
-  toNodeId: string;
-  edgeKind: string;
+  edgeId: string;
+  sourceNodeId: string;
+  targetNodeId: string;
+  type: string;
 }
 
 export default function VisualizationDetailPage() {
@@ -74,7 +78,7 @@ export default function VisualizationDetailPage() {
   }
   const g = graph.data!;
   const nodeMap = new Map<string, GraphNode>(
-    (nodes.data?.items ?? []).map((n) => [n.visualizationNodeId, n]),
+    (nodes.data?.items ?? []).map((n) => [n.nodeId, n]),
   );
   const safe = (s: string) => s.replace(/[^a-zA-Z0-9]/g, "_");
   const sanitizeLabel = (s: string) => s.replace(/["\n\r]/g, " ").slice(0, 60);
@@ -83,17 +87,14 @@ export default function VisualizationDetailPage() {
       ? [
           "flowchart LR",
           ...nodes.data.items.slice(0, 50).map((n) => {
-            const id = "N_" + safe(n.visualizationNodeId);
-            const label = sanitizeLabel(n.label ?? n.nodeKey);
+            const id = "N_" + safe(n.nodeId);
+            const label = sanitizeLabel(n.label);
             return `  ${id}["${label}"]`;
           }),
           ...edges.data.items
             .slice(0, 200)
-            .filter((e) => nodeMap.has(e.fromNodeId) && nodeMap.has(e.toNodeId))
-            .map(
-              (e) =>
-                `  N_${safe(e.fromNodeId)} --> N_${safe(e.toNodeId)}`,
-            ),
+            .filter((e) => nodeMap.has(e.sourceNodeId) && nodeMap.has(e.targetNodeId))
+            .map((e) => `  N_${safe(e.sourceNodeId)} --> N_${safe(e.targetNodeId)}`),
         ].join("\n")
       : null;
 
@@ -114,7 +115,7 @@ export default function VisualizationDetailPage() {
         badges={
           <>
             <span data-testid="visualization-code" className="font-mono text-sm text-muted-foreground">{g.code}</span>
-            <StatusPill tone="info">{g.graphKind}</StatusPill>
+            <StatusPill tone="info">{g.type}</StatusPill>
           </>
         }
       />
@@ -149,9 +150,9 @@ export default function VisualizationDetailPage() {
             ) : (
               <ul className="divide-y divide-border" data-testid="visualization-nodes-list">
                 {nodes.data!.items.slice(0, 20).map((n) => (
-                  <li key={n.visualizationNodeId} className="px-4 py-2 text-sm text-foreground" data-testid="visualization-node-item">
-                    <span className="font-mono text-xs text-muted-foreground">{n.nodeKind}</span>
-                    <span className="ml-2">{n.label ?? n.nodeKey}</span>
+                  <li key={n.nodeId} className="px-4 py-2 text-sm text-foreground" data-testid="visualization-node-item">
+                    <span className="font-mono text-xs text-muted-foreground">{n.sourceEntityType}</span>
+                    <span className="ml-2">{n.label}</span>
                   </li>
                 ))}
               </ul>
@@ -173,9 +174,9 @@ export default function VisualizationDetailPage() {
             ) : (
               <ul className="divide-y divide-border" data-testid="visualization-edges-list">
                 {edges.data!.items.slice(0, 20).map((e) => (
-                  <li key={e.visualizationEdgeId} className="px-4 py-2 font-mono text-xs text-foreground" data-testid="visualization-edge-item">
-                    {e.fromNodeId.slice(0, 6)} → {e.toNodeId.slice(0, 6)}
-                    <span className="ml-2 uppercase text-muted-foreground">{e.edgeKind}</span>
+                  <li key={e.edgeId} className="px-4 py-2 font-mono text-xs text-foreground" data-testid="visualization-edge-item">
+                    {e.sourceNodeId.slice(0, 6)} → {e.targetNodeId.slice(0, 6)}
+                    <span className="ml-2 uppercase text-muted-foreground">{e.type}</span>
                   </li>
                 ))}
               </ul>

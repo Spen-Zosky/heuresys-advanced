@@ -16,6 +16,8 @@ test.describe("MVP-2a visualizations — live data", () => {
     await page.goto("/visualizations");
     await expect(page.getByTestId("visualizations-page")).toBeVisible();
     await expect(page.getByTestId("visualizations-count")).toContainText(/\d+\s+grafici/);
+    // F4.3: graph-type distribution chart panel (renders empty-state when no graphs)
+    await expect(page.getByTestId("visualizations-type-chart")).toBeVisible();
   });
 
   test("/visualizations/[graphId] handles 404 for non-existent graph", async ({ page }) => {

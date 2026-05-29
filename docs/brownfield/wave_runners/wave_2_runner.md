@@ -156,7 +156,7 @@ Pattern: column_mappings sono hand-curated per quality, ma scaffolded da script 
 | INDOOR (blueprint) | 3 | 2 (blueprint_variants, blueprint_activations) | ~50 (blueprints + variants) |
 | GOKMER (KPI + goals) | ~37 | ~6 (kpi_definitions, metric_definitions, kpi_targets, process_kpi_templates, organization_unit_kpi_templates, assessment_results) | ~2k (definitions + targets + assessments) |
 | PROGOV (process governance) | ~11 | ~3 (position_learning_requirements, position_skill_requirements, position_kpi_requirements) | ~3k (requirements matrix) |
-| RBP (role-based perm sync) | 6 | ~2 (sys_users SYNTHETIC, sys_auth_role_permissions canonical 8 roles only) | ~158 (RTL synthetic users) + 388 mappings (canonical roles only) |
+| RBP (role-based perm sync) | 6 | ~2 (sys_users SYNTHETIC, sys_auth_role_permissions canonical 8 roles only) | ~158 (RTL synthetic users) + 394 mappings (canonical roles only) |
 | ITLAB (tenant CCNL link) | 2 | metadata JSONB extension on `sys_enterprise_typing_profiles.tenant_metadata` | inline |
 | PET (rbp scope) | 2 | extension on `sys_auth_permissions` (resource scope) | inline |
 | **TOTAL** | **~94** | **~31** | **~10-15k rows** |

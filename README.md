@@ -1,6 +1,6 @@
 # Heuresys Advanced — HRMS / BPM Platform v5
 
-Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on PostgreSQL 16, Next.js 15 admin SPA + ESS portal, shared Zod contracts. Multi-tenant via API middleware (no Postgres RLS), 8 roles × 101 permissions × 388 mappings seeded.
+Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on PostgreSQL 16, Next.js 15 admin SPA + ESS portal, shared Zod contracts. Multi-tenant via API middleware (no Postgres RLS), 8 roles × 99 permissions × 394 mappings seeded.
 
 > **Status — 2026-05-28 (HEAD `e744a8a` on `main`, tag `v0.4.1-housekeeping-closed`)**
 > MVP-1 + MVP-2a + MVP-2b + MVP-3 **closed**; **MVP-4 in progress**. 272 live API endpoints · 341+ vitest tests · 47 web routes live · 61 Playwright E2E tests on live OCI VM data · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 13/19 IMPORT pragmatic + 6 residual CW-B60 · `migrate.sh` re-runnable end-to-end (43 migrations, idempotent ×2).

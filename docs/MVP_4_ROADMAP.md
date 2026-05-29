@@ -31,7 +31,7 @@ MVP-4 is **not a single linear milestone** like MVP-0..3. It is a **portfolio of
 
 | Stratum | Stato verificato @ HEAD post-tag |
 |---|---|
-| Backend Fastify 5 + RBAC | 58 moduli / 272 endpoint business / 388 role×permission mappings / 8 ruoli / 341 test PASS (1 fail pre-esistente skills:131) |
+| Backend Fastify 5 + RBAC | 58 moduli / 272 endpoint business / 394 role×permission mappings / 8 ruoli / 341 test PASS (1 fail pre-esistente skills:131) |
 | Frontend Next.js 15 | 47 routes (1 root + 1 login + 30 admin + 14 ESS + 1 system-health) / 61 Playwright test / i18n it+en parity verde / live-data E2E doctrine 100% rispettata |
 | Database PostgreSQL 16 | 42 migration idempotente (gap 000035 cosmetic) / 41 sys.* tables / 5 schemi (sys/brownfield/audit/staging/temp_sdbi) / OCI VM tunnel 5433 (RD-25) |
 | Auth & MFA | Argon2id 64/3/4, JWT RS256 15min + refresh 30d single-use rotation, CSRF double-submit, TOTP full login-gating shipped Tappa E |

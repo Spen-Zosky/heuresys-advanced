@@ -1,8 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../lib/api/fetch";
+import { apiFetch } from "@/lib/api/fetch";
+import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { StatusPill } from "@/components/status-pill";
 
 interface KpiDef {
   kpiDefinitionId: string;
@@ -13,56 +14,49 @@ interface KpiDef {
   isGlobal: boolean;
 }
 
+interface KpiList {
+  items: KpiDef[];
+  total: number;
+}
+
+const COLUMNS: DataColumn<KpiDef>[] = [
+  { header: "Codice", cell: (k) => <span className="font-mono text-xs">{k.code}</span> },
+  { header: "Nome", cell: (k) => <span className="font-medium text-foreground">{k.name}</span> },
+  { header: "Unità", cell: (k) => <span className="text-xs text-muted-foreground">{k.unit ?? "—"}</span> },
+  { header: "Polarità", cell: (k) => <span className="text-xs text-muted-foreground">{k.polarity}</span> },
+  {
+    header: "Scope",
+    cell: (k) => (
+      <StatusPill tone={k.isGlobal ? "info" : "neutral"}>{k.isGlobal ? "global" : "tenant"}</StatusPill>
+    ),
+  },
+];
+
 export default function KpisCataloguePage() {
   const kpis = useQuery({
     queryKey: ["kpi-definitions", "list"],
-    queryFn: () => apiFetch<{ items: KpiDef[]; total: number }>("/v1/kpi-definitions?limit=200"),
+    queryFn: () => apiFetch<KpiList>("/v1/kpi-definitions?limit=200"),
   });
 
   return (
-    <main data-testid="kpis-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="kpis-title">Catalogo KPI</h1>
-        <p className="text-sm opacity-70" data-testid="kpis-count">
-          {kpis.data ? `${kpis.data.total} KPI definiti` : "Caricamento…"}
-        </p>
-      </header>
-
-      <Card>
-        <CardHeader><CardTitle>KPI</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {kpis.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : kpis.data && kpis.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="kpis-empty">Nessun KPI.</div>
-          ) : (
-            <table className="w-full text-sm" data-testid="kpis-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">Codice</th>
-                  <th className="px-4 py-2">Nome</th>
-                  <th className="px-4 py-2">Unità</th>
-                  <th className="px-4 py-2">Polarità</th>
-                  <th className="px-4 py-2">Scope</th>
-                </tr>
-              </thead>
-              <tbody>
-                {kpis.data!.items.map((k) => (
-                  <tr key={k.kpiDefinitionId} className="border-b last:border-b-0" data-testid="kpis-row">
-                    <td className="px-4 py-2 font-mono text-xs">{k.code}</td>
-                    <td className="px-4 py-2">{k.name}</td>
-                    <td className="px-4 py-2 text-xs">{k.unit ?? "—"}</td>
-                    <td className="px-4 py-2 text-xs">{k.polarity}</td>
-                    <td className="px-4 py-2 text-xs uppercase opacity-70">
-                      {k.isGlobal ? "global" : "tenant"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+    <DataTablePanel<KpiDef>
+      pageTestId="kpis-page"
+      titleTestId="kpis-title"
+      countTestId="kpis-count"
+      title="Catalogo KPI"
+      description="KPI definiti, con unità, polarità e scope."
+      count={kpis.data ? `${kpis.data.total} KPI definiti` : undefined}
+      isLoading={kpis.isLoading}
+      isError={kpis.isError}
+      errorMessage="Impossibile caricare i KPI."
+      rows={kpis.data?.items ?? []}
+      rowKey={(k) => k.kpiDefinitionId}
+      rowTestId="kpis-row"
+      columns={COLUMNS}
+      emptyTestId="kpis-empty"
+      emptyTitle="Nessun KPI"
+      emptyDescription="Non ci sono KPI definiti."
+      caption="Elenco KPI"
+    />
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../lib/api/fetch";
+import { apiFetch } from "@/lib/api/fetch";
+import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { StatusPill } from "@/components/status-pill";
 
 interface OrgUnit {
   organizationUnitId: string;
@@ -16,54 +17,50 @@ interface OrgUnit {
   isActive: boolean;
 }
 
+interface OrgUnitsList {
+  items: OrgUnit[];
+  total: number;
+}
+
+const COLUMNS: DataColumn<OrgUnit>[] = [
+  { header: "Codice", cell: (o) => <span className="font-mono text-xs">{o.code}</span> },
+  { header: "Nome", cell: (o) => <span className="font-medium text-foreground">{o.name}</span> },
+  { header: "Tipo", cell: (o) => <span className="text-xs uppercase text-muted-foreground">{o.type}</span> },
+  {
+    header: "Parent",
+    cell: (o) => <span className="font-mono text-xs text-muted-foreground">{o.parentId?.slice(0, 8) ?? "—"}</span>,
+  },
+  {
+    header: "Attiva",
+    cell: (o) => <StatusPill tone={o.isActive ? "success" : "neutral"}>{o.isActive ? "sì" : "no"}</StatusPill>,
+  },
+];
+
 export default function OrganizationPage() {
   const ous = useQuery({
     queryKey: ["organization-units", "list"],
-    queryFn: () => apiFetch<{ items: OrgUnit[]; total: number }>("/v1/organization-units?limit=200"),
+    queryFn: () => apiFetch<OrgUnitsList>("/v1/organization-units?limit=200"),
   });
 
   return (
-    <main data-testid="organization-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="organization-title">Organization Units</h1>
-        <p className="text-sm opacity-70" data-testid="organization-count">
-          {ous.data ? `${ous.data.total} unità` : "Caricamento…"}
-        </p>
-      </header>
-
-      <Card>
-        <CardHeader><CardTitle>Gerarchia</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {ous.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : ous.data && ous.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="organization-empty">Nessuna OU.</div>
-          ) : (
-            <table className="w-full text-sm" data-testid="organization-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">Codice</th>
-                  <th className="px-4 py-2">Nome</th>
-                  <th className="px-4 py-2">Tipo</th>
-                  <th className="px-4 py-2">Parent</th>
-                  <th className="px-4 py-2">Attiva</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ous.data!.items.map((o) => (
-                  <tr key={o.organizationUnitId} className="border-b last:border-b-0" data-testid="organization-row">
-                    <td className="px-4 py-2 font-mono text-xs">{o.code}</td>
-                    <td className="px-4 py-2">{o.name}</td>
-                    <td className="px-4 py-2 text-xs uppercase">{o.type}</td>
-                    <td className="px-4 py-2 font-mono text-xs">{o.parentId?.slice(0, 8) ?? "—"}</td>
-                    <td className="px-4 py-2 text-xs">{o.isActive ? "sì" : "no"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+    <DataTablePanel<OrgUnit>
+      pageTestId="organization-page"
+      titleTestId="organization-title"
+      countTestId="organization-count"
+      title="Organization Units"
+      description="Gerarchia delle unità organizzative del tenant."
+      count={ous.data ? `${ous.data.total} unità` : undefined}
+      isLoading={ous.isLoading}
+      isError={ous.isError}
+      errorMessage="Impossibile caricare le unità organizzative."
+      rows={ous.data?.items ?? []}
+      rowKey={(o) => o.organizationUnitId}
+      rowTestId="organization-row"
+      columns={COLUMNS}
+      emptyTestId="organization-empty"
+      emptyTitle="Nessuna OU"
+      emptyDescription="Non ci sono unità organizzative."
+      caption="Gerarchia organizzativa"
+    />
   );
 }

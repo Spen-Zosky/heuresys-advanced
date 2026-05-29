@@ -2,8 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../lib/api/fetch";
+import { apiFetch } from "@/lib/api/fetch";
+import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { StatusBadge } from "@/components/status-pill";
 
 interface VisualizationGraph {
   visualizationGraphId: string;
@@ -15,65 +16,54 @@ interface VisualizationGraph {
   createdAt: string;
 }
 
+interface VisualizationGraphsList {
+  items: VisualizationGraph[];
+  total: number;
+}
+
+const COLUMNS: DataColumn<VisualizationGraph>[] = [
+  { header: "Codice", cell: (g) => <span className="font-mono text-xs">{g.code}</span> },
+  {
+    header: "Nome",
+    cell: (g) => (
+      <Link
+        href={`/visualizations/${g.visualizationGraphId}`}
+        data-testid="visualization-link"
+        className="font-medium text-foreground underline-offset-2 hover:underline"
+      >
+        {g.name}
+      </Link>
+    ),
+  },
+  { header: "Tipo", cell: (g) => <span className="text-xs uppercase text-muted-foreground">{g.graphKind}</span> },
+  { header: "Stato", cell: (g) => <StatusBadge value={g.status} /> },
+];
+
 export default function VisualizationsPage() {
   const graphs = useQuery({
     queryKey: ["visualization-graphs"],
-    queryFn: () =>
-      apiFetch<{ items: VisualizationGraph[]; total: number }>(
-        "/v1/visualization-graphs?limit=200",
-      ),
+    queryFn: () => apiFetch<VisualizationGraphsList>("/v1/visualization-graphs?limit=200"),
   });
 
   return (
-    <main data-testid="visualizations-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="visualizations-title">Visualizations</h1>
-        <p className="text-sm opacity-70" data-testid="visualizations-count">
-          {graphs.data ? `${graphs.data.total} grafici` : "Caricamento…"}
-        </p>
-      </header>
-
-      <Card>
-        <CardHeader><CardTitle>Browser</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {graphs.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : graphs.data && graphs.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="visualizations-empty">
-              Nessun grafico registrato.
-            </div>
-          ) : (
-            <table className="w-full text-sm" data-testid="visualizations-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">Codice</th>
-                  <th className="px-4 py-2">Nome</th>
-                  <th className="px-4 py-2">Tipo</th>
-                  <th className="px-4 py-2">Stato</th>
-                </tr>
-              </thead>
-              <tbody>
-                {graphs.data!.items.map((g) => (
-                  <tr key={g.visualizationGraphId} className="border-b last:border-b-0" data-testid="visualizations-row">
-                    <td className="px-4 py-2 font-mono text-xs">{g.code}</td>
-                    <td className="px-4 py-2">
-                      <Link
-                        href={`/visualizations/${g.visualizationGraphId}`}
-                        className="underline"
-                        data-testid="visualization-link"
-                      >
-                        {g.name}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2 text-xs uppercase">{g.graphKind}</td>
-                    <td className="px-4 py-2 text-xs">{g.status}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+    <DataTablePanel<VisualizationGraph>
+      pageTestId="visualizations-page"
+      titleTestId="visualizations-title"
+      countTestId="visualizations-count"
+      title="Visualizations"
+      description="Grafici registrati con tipo e stato."
+      count={graphs.data ? `${graphs.data.total} grafici` : undefined}
+      isLoading={graphs.isLoading}
+      isError={graphs.isError}
+      errorMessage="Impossibile caricare i grafici."
+      rows={graphs.data?.items ?? []}
+      rowKey={(g) => g.visualizationGraphId}
+      rowTestId="visualizations-row"
+      columns={COLUMNS}
+      emptyTestId="visualizations-empty"
+      emptyTitle="Nessun grafico"
+      emptyDescription="Nessun grafico registrato."
+      caption="Browser grafici"
+    />
   );
 }

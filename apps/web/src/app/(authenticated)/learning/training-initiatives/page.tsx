@@ -1,8 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../../lib/api/fetch";
+import { apiFetch } from "@/lib/api/fetch";
+import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { StatusBadge } from "@/components/status-pill";
 
 interface TrainingInitiative {
   trainingInitiativeId: string;
@@ -17,56 +18,45 @@ interface TrainingInitiative {
   capacity: number | null;
 }
 
+interface TrainingInitiativesList {
+  items: TrainingInitiative[];
+  total: number;
+}
+
+const COLUMNS: DataColumn<TrainingInitiative>[] = [
+  { header: "Codice", cell: (t) => <span className="font-mono text-xs">{t.code}</span> },
+  { header: "Coorte", cell: (t) => <span className="text-xs text-muted-foreground">{t.cohortName ?? "—"}</span> },
+  { header: "Stato", cell: (t) => <StatusBadge value={t.status} /> },
+  { header: "Inizio", cell: (t) => <span className="text-xs text-muted-foreground">{t.startDate ?? "—"}</span> },
+  { header: "Fine", cell: (t) => <span className="text-xs text-muted-foreground">{t.endDate ?? "—"}</span> },
+  { header: "Posti", cell: (t) => <span className="text-xs text-muted-foreground">{t.capacity ?? "—"}</span> },
+];
+
 export default function TrainingInitiativesPage() {
   const inits = useQuery({
     queryKey: ["training-initiatives", "list"],
-    queryFn: () => apiFetch<{ items: TrainingInitiative[]; total: number }>("/v1/training-initiatives?limit=200"),
+    queryFn: () => apiFetch<TrainingInitiativesList>("/v1/training-initiatives?limit=200"),
   });
 
   return (
-    <main data-testid="training-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="training-title">Iniziative formative</h1>
-        <p className="text-sm opacity-70" data-testid="training-count">
-          {inits.data ? `${inits.data.total} pianificate` : "Caricamento…"}
-        </p>
-      </header>
-
-      <Card>
-        <CardHeader><CardTitle>Sessioni di erogazione</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {inits.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : inits.data && inits.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="training-empty">Nessuna iniziativa schedulata.</div>
-          ) : (
-            <table className="w-full text-sm" data-testid="training-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">Codice</th>
-                  <th className="px-4 py-2">Coorte</th>
-                  <th className="px-4 py-2">Stato</th>
-                  <th className="px-4 py-2">Inizio</th>
-                  <th className="px-4 py-2">Fine</th>
-                  <th className="px-4 py-2">Posti</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inits.data!.items.map((t) => (
-                  <tr key={t.trainingInitiativeId} className="border-b last:border-b-0" data-testid="training-row">
-                    <td className="px-4 py-2 font-mono text-xs">{t.code}</td>
-                    <td className="px-4 py-2 text-xs">{t.cohortName ?? "—"}</td>
-                    <td className="px-4 py-2 text-xs uppercase">{t.status}</td>
-                    <td className="px-4 py-2 text-xs">{t.startDate ?? "—"}</td>
-                    <td className="px-4 py-2 text-xs">{t.endDate ?? "—"}</td>
-                    <td className="px-4 py-2 text-xs">{t.capacity ?? "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+    <DataTablePanel<TrainingInitiative>
+      pageTestId="training-page"
+      titleTestId="training-title"
+      countTestId="training-count"
+      title="Iniziative formative"
+      description="Sessioni di erogazione pianificate."
+      count={inits.data ? `${inits.data.total} pianificate` : undefined}
+      isLoading={inits.isLoading}
+      isError={inits.isError}
+      errorMessage="Impossibile caricare le iniziative."
+      rows={inits.data?.items ?? []}
+      rowKey={(t) => t.trainingInitiativeId}
+      rowTestId="training-row"
+      columns={COLUMNS}
+      emptyTestId="training-empty"
+      emptyTitle="Nessuna iniziativa"
+      emptyDescription="Nessuna iniziativa schedulata."
+      caption="Sessioni di erogazione"
+    />
   );
 }

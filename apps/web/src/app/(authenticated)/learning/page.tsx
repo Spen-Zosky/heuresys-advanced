@@ -1,8 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../lib/api/fetch";
+import { apiFetch } from "@/lib/api/fetch";
+import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { StatusPill } from "@/components/status-pill";
 
 interface LearningModule {
   learningModuleId: string;
@@ -12,54 +13,51 @@ interface LearningModule {
   durationMinutes: number | null;
 }
 
+interface LearningModulesList {
+  items: LearningModule[];
+  total: number;
+}
+
+const COLUMNS: DataColumn<LearningModule>[] = [
+  { header: "Codice", cell: (m) => <span className="font-mono text-xs">{m.code}</span> },
+  { header: "Nome", cell: (m) => <span className="font-medium text-foreground">{m.name}</span> },
+  {
+    header: "Durata (min)",
+    cell: (m) => <span className="text-xs text-muted-foreground">{m.durationMinutes ?? "—"}</span>,
+  },
+  {
+    header: "Scope",
+    cell: (m) => (
+      <StatusPill tone={m.isGlobal ? "info" : "neutral"}>{m.isGlobal ? "global" : "tenant"}</StatusPill>
+    ),
+  },
+];
+
 export default function LearningCataloguePage() {
   const modules = useQuery({
     queryKey: ["learning-modules", "list"],
-    queryFn: () => apiFetch<{ items: LearningModule[]; total: number }>("/v1/learning-modules?limit=200"),
+    queryFn: () => apiFetch<LearningModulesList>("/v1/learning-modules?limit=200"),
   });
 
   return (
-    <main data-testid="learning-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="learning-title">Catalogo moduli</h1>
-        <p className="text-sm opacity-70" data-testid="learning-count">
-          {modules.data ? `${modules.data.total} moduli` : "Caricamento…"}
-        </p>
-      </header>
-
-      <Card>
-        <CardHeader><CardTitle>Moduli formativi</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {modules.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : modules.data && modules.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="learning-empty">Nessun modulo.</div>
-          ) : (
-            <table className="w-full text-sm" data-testid="learning-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">Codice</th>
-                  <th className="px-4 py-2">Nome</th>
-                  <th className="px-4 py-2">Durata (min)</th>
-                  <th className="px-4 py-2">Scope</th>
-                </tr>
-              </thead>
-              <tbody>
-                {modules.data!.items.map((m) => (
-                  <tr key={m.learningModuleId} className="border-b last:border-b-0" data-testid="learning-row">
-                    <td className="px-4 py-2 font-mono text-xs">{m.code}</td>
-                    <td className="px-4 py-2">{m.name}</td>
-                    <td className="px-4 py-2 text-xs">{m.durationMinutes ?? "—"}</td>
-                    <td className="px-4 py-2 text-xs uppercase opacity-70">
-                      {m.isGlobal ? "global" : "tenant"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+    <DataTablePanel<LearningModule>
+      pageTestId="learning-page"
+      titleTestId="learning-title"
+      countTestId="learning-count"
+      title="Catalogo moduli"
+      description="Moduli formativi disponibili, globali e di tenant."
+      count={modules.data ? `${modules.data.total} moduli` : undefined}
+      isLoading={modules.isLoading}
+      isError={modules.isError}
+      errorMessage="Impossibile caricare i moduli."
+      rows={modules.data?.items ?? []}
+      rowKey={(m) => m.learningModuleId}
+      rowTestId="learning-row"
+      columns={COLUMNS}
+      emptyTestId="learning-empty"
+      emptyTitle="Nessun modulo"
+      emptyDescription="Non ci sono moduli formativi."
+      caption="Elenco moduli formativi"
+    />
   );
 }

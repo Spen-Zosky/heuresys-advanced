@@ -7,7 +7,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
   VizGraphSchema, VizGraphListQuerySchema, VizGraphListResponseSchema,
-  VizGraphSummaryResponseSchema,
+  VizGraphSummaryResponseSchema, VizGraphRenderResponseSchema,
   CreateVizGraphBodySchema, UpdateVizGraphBodySchema, VizGraphIdParamSchema,
 } from "@heuresys/shared";
 import { visualizationGraphsService, type ActorContext } from "./service.js";
@@ -34,6 +34,11 @@ export const visualizationGraphsRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("visualization:read")],
     schema: { params: VizGraphIdParamSchema, response: { 200: VizGraphSchema } },
   }, async (req) => visualizationGraphsService.getById(actor(req), req.params.id));
+
+  app.get("/:id/render", {
+    preHandler: [requirePermission("visualization:read")],
+    schema: { params: VizGraphIdParamSchema, response: { 200: VizGraphRenderResponseSchema } },
+  }, async (req) => visualizationGraphsService.getRender(actor(req), req.params.id));
 
   app.post("/", {
     preHandler: [app.verifyCsrf, requirePermission("visualization:create")],

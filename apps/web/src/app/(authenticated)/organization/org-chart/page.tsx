@@ -5,39 +5,68 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
+import { EChartsCard } from "../../_charts-client";
 
-interface VisualizationGraph {
-  visualizationGraphId: string;
+// Real schema fields (graphId/type/isActive), not the stale visualizationGraphId/
+// graphKind this page used before F4.4. The list query also now filters by ?type=
+// (the previous ?graphKind= was silently ignored → it returned every graph).
+interface VizGraph {
+  graphId: string;
   name: string;
-  graphKind: string;
-  status: string;
+  type: string;
+  isActive: boolean;
 }
-interface GraphNode {
-  visualizationNodeId: string;
-  nodeKind: string;
-  label: string | null;
+interface RenderNode {
+  nodeId: string;
+  label: string;
+}
+interface RenderEdge {
+  sourceNodeId: string;
+  targetNodeId: string;
+}
+interface RenderPayload {
+  graph: { graphId: string; name: string };
+  nodes: RenderNode[];
+  edges: RenderEdge[];
 }
 
 export default function OrgChartPage() {
   const graphs = useQuery({
     queryKey: ["visualization-graphs", "ORG_CHART"],
     queryFn: () =>
-      apiFetch<{ items: VisualizationGraph[]; total: number }>(
-        "/v1/visualization-graphs?graphKind=ORG_CHART&limit=10",
+      apiFetch<{ items: VizGraph[]; total: number }>(
+        "/v1/visualization-graphs?type=ORG_CHART&limit=10",
       ),
   });
 
   const [activeGraphId, setActiveGraphId] = useState<string | null>(null);
-  const effectiveGraphId = activeGraphId ?? graphs.data?.items[0]?.visualizationGraphId ?? null;
+  const effectiveGraphId = activeGraphId ?? graphs.data?.items[0]?.graphId ?? null;
 
-  const nodes = useQuery({
-    queryKey: ["visualization-nodes", effectiveGraphId],
-    queryFn: () =>
-      apiFetch<{ items: GraphNode[]; total: number }>(
-        `/v1/visualization-nodes?graphId=${effectiveGraphId}&limit=500`,
-      ),
+  // Composite render payload (graph + nodes + edges) in one call (F4.4).
+  const render = useQuery({
+    queryKey: ["visualization-render", effectiveGraphId],
+    queryFn: () => apiFetch<RenderPayload>(`/v1/visualization-graphs/${effectiveGraphId}/render`),
     enabled: !!effectiveGraphId,
   });
+
+  const nodeCount = render.data?.nodes.length ?? 0;
+  const graphOption = {
+    tooltip: { trigger: "item" as const },
+    series: [
+      {
+        type: "graph" as const,
+        layout: "force" as const,
+        roam: true,
+        label: { show: false },
+        force: { repulsion: 60, edgeLength: 80, gravity: 0.08 },
+        data: (render.data?.nodes ?? []).map((n) => ({ id: n.nodeId, name: n.label })),
+        links: (render.data?.edges ?? []).map((e) => ({ source: e.sourceNodeId, target: e.targetNodeId })),
+        lineStyle: { color: "#6366f1", opacity: 0.6, curveness: 0.1 },
+        itemStyle: { color: "#6366f1" },
+        emphasis: { focus: "adjacency" as const },
+      },
+    ],
+  };
 
   return (
     <main data-testid="org-chart-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
@@ -60,14 +89,14 @@ export default function OrgChartPage() {
         }
       />
 
-      <section className="flex gap-2" data-testid="org-chart-picker">
+      <section className="flex flex-wrap gap-2" data-testid="org-chart-picker">
         {graphs.data?.items.map((g) => (
           <button
-            key={g.visualizationGraphId}
+            key={g.graphId}
             type="button"
-            onClick={() => setActiveGraphId(g.visualizationGraphId)}
+            onClick={() => setActiveGraphId(g.graphId)}
             className={`rounded-card border px-3 py-1 text-xs transition-colors ${
-              effectiveGraphId === g.visualizationGraphId
+              effectiveGraphId === g.graphId
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border text-muted-foreground hover:text-foreground"
             }`}
@@ -80,36 +109,34 @@ export default function OrgChartPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Nodi del grafo ({nodes.data?.total ?? "—"})</CardTitle>
+          <CardTitle>Organigramma ({render.data ? `${nodeCount} posizioni` : "—"})</CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           {!effectiveGraphId ? (
             <div className="p-6 text-sm text-muted-foreground" data-testid="org-chart-empty">
-              Nessun grafo ORG_CHART registrato per il tenant. Crearlo via
-              <code className="mx-1 font-mono">POST /v1/visualization-graphs</code>
-              con <code className="font-mono">graphKind=ORG_CHART</code>.
+              Nessun grafo ORG_CHART registrato per il tenant. Generarlo con
+              <code className="mx-1 font-mono">db/seeds/org_chart_rtl_demo.sql</code>.
             </div>
-          ) : nodes.isLoading ? (
+          ) : render.isLoading ? (
             <div className="p-6 text-sm text-muted-foreground">Caricamento…</div>
-          ) : nodes.data && nodes.data.items.length === 0 ? (
+          ) : nodeCount === 0 ? (
             <div className="p-6 text-sm text-muted-foreground" data-testid="org-chart-nodes-empty">
               Il grafo non ha nodi.
             </div>
           ) : (
-            <ul className="divide-y divide-border" data-testid="org-chart-nodes-list">
-              {nodes.data!.items.map((n) => (
-                <li key={n.visualizationNodeId} className="px-4 py-2 text-sm text-foreground" data-testid="org-chart-node-item">
-                  <span className="font-mono text-xs text-muted-foreground">{n.nodeKind}</span>
-                  <span className="ml-2">{n.label ?? n.visualizationNodeId.slice(0, 8)}</span>
-                </li>
-              ))}
-            </ul>
+            <div data-testid="org-chart-graph">
+              <EChartsCard
+                option={graphOption}
+                height={520}
+                ariaLabel="Organigramma interattivo delle posizioni"
+              />
+            </div>
           )}
         </CardContent>
       </Card>
 
       <p className="text-xs text-muted-foreground">
-        Renderer React Flow con layout Dagre/ELK è programmato in una iterazione successiva — qui mostriamo il payload live del grafo.
+        Grafo a forza interattivo (zoom/pan). I nodi sono le posizioni attive del tenant; gli archi le relazioni reports-to.
       </p>
     </main>
   );

@@ -2,6 +2,8 @@
  * packages/shared/src/schemas/visualization-graphs.ts
  */
 import { z } from "zod";
+import { VizNodeSchema } from "./visualization-nodes.js";
+import { VizEdgeSchema } from "./visualization-edges.js";
 
 export const VIZ_GRAPH_TYPE_VALUES = [
   "ORG_CHART", "PROCESS_FLOW", "CAREER_PATH", "LEARNING_PATH",
@@ -52,6 +54,15 @@ export const VizGraphSummaryResponseSchema = z.object({
   total: z.number().int().min(0),
 });
 export type VizGraphSummaryResponse = z.infer<typeof VizGraphSummaryResponseSchema>;
+
+// Composite render payload — graph + all its nodes + all its edges in one call
+// (org-chart renderer, F4.4). Avoids the 3 separate round-trips the pages did.
+export const VizGraphRenderResponseSchema = z.object({
+  graph: VizGraphSchema,
+  nodes: z.array(VizNodeSchema),
+  edges: z.array(VizEdgeSchema),
+});
+export type VizGraphRenderResponse = z.infer<typeof VizGraphRenderResponseSchema>;
 
 export const CreateVizGraphBodySchema = z.object({
   code: z.string().min(1).max(128),

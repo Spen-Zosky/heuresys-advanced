@@ -4,6 +4,7 @@
 import type { Pool, PoolClient } from "pg";
 import type {
   VizGraph, VizGraphType, VizGraphListQuery, CreateVizGraphBody, UpdateVizGraphBody,
+  VizNode, VizEdge, VizNodeSourceEntityType,
 } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
@@ -68,6 +69,52 @@ export async function getTypeDistribution(
 export async function findGraphById(q: DbConnector, id: string): Promise<VizGraph | null> {
   const res = await q.query<Row>(`SELECT ${COLS} FROM sys.sys_visualization_graphs WHERE graph_id = $1`, [id]);
   return res.rows[0] ? toGraph(res.rows[0]) : null;
+}
+
+interface NodeRow {
+  node_id: string; node_graph_id: string; node_source_entity_type: VizNodeSourceEntityType;
+  node_source_entity_id: string | null; node_label: string; node_type: string | null;
+  node_group_key: string | null; node_metadata: Record<string, unknown> | null;
+  created_at: Date; updated_at: Date;
+}
+interface EdgeRow {
+  edge_id: string; edge_graph_id: string; edge_source_node_id: string; edge_target_node_id: string;
+  edge_type: VizEdge["type"]; edge_weight: number | null;
+  edge_metadata: Record<string, unknown> | null; created_at: Date;
+}
+
+/** Full graph payload (graph + nodes + edges) for the org-chart renderer (F4.4). */
+export async function findGraphRender(
+  q: DbConnector, graphId: string,
+): Promise<{ graph: VizGraph; nodes: VizNode[]; edges: VizEdge[] } | null> {
+  const graph = await findGraphById(q, graphId);
+  if (!graph) return null;
+  const nodes = await q.query<NodeRow>(
+    `SELECT node_id, node_graph_id, node_source_entity_type, node_source_entity_id,
+            node_label, node_type, node_group_key, node_metadata, created_at, updated_at
+       FROM sys.sys_visualization_nodes WHERE node_graph_id = $1 ORDER BY node_label`,
+    [graphId],
+  );
+  const edges = await q.query<EdgeRow>(
+    `SELECT edge_id, edge_graph_id, edge_source_node_id, edge_target_node_id,
+            edge_type, edge_weight::float8 AS edge_weight, edge_metadata, created_at
+       FROM sys.sys_visualization_edges WHERE edge_graph_id = $1`,
+    [graphId],
+  );
+  return {
+    graph,
+    nodes: nodes.rows.map((r) => ({
+      nodeId: r.node_id, graphId: r.node_graph_id, sourceEntityType: r.node_source_entity_type,
+      sourceEntityId: r.node_source_entity_id, label: r.node_label, type: r.node_type,
+      groupKey: r.node_group_key, metadata: r.node_metadata ?? {},
+      createdAt: r.created_at.toISOString(), updatedAt: r.updated_at.toISOString(),
+    })),
+    edges: edges.rows.map((r) => ({
+      edgeId: r.edge_id, graphId: r.edge_graph_id, sourceNodeId: r.edge_source_node_id,
+      targetNodeId: r.edge_target_node_id, type: r.edge_type, weight: r.edge_weight,
+      metadata: r.edge_metadata ?? {}, createdAt: r.created_at.toISOString(),
+    })),
+  };
 }
 
 export async function findGraphByCodeVersion(

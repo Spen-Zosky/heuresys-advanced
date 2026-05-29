@@ -186,4 +186,16 @@ describe("/v1/visualization-* end-to-end pipeline", () => {
     expect(org!.count).toBeGreaterThanOrEqual(1);
     expect(body.items.reduce((s, i) => s + i.count, 0)).toBe(body.total);
   });
+
+  it("GET /:id/render returns the graph with its nodes and edges", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/visualization-graphs/${graphId}/render`,
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as { graph: { graphId: string }; nodes: unknown[]; edges: unknown[] };
+    expect(body.graph.graphId).toBe(graphId);
+    expect(body.nodes.length).toBeGreaterThanOrEqual(2);
+    expect(body.edges.length).toBeGreaterThanOrEqual(1);
+  });
 });

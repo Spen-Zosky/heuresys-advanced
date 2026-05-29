@@ -15,6 +15,7 @@ import type {
   CreateCompensationRecommendationBody,
   PayrollHandoffRecord,
   CreatePayrollHandoffRecordBody,
+  CompensationDistributionResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
@@ -53,6 +54,11 @@ export const compensationService = {
   ): Promise<{ items: RewardGate[]; total: number }> {
     const tenantId = isPlatform(actor) ? undefined : requireTenant(actor);
     return repo.listRewardGates(pool, { tenantId, query });
+  },
+
+  async getRewardGateDistribution(actor: ActorContext): Promise<CompensationDistributionResponse> {
+    const tenantId = isPlatform(actor) ? undefined : requireTenant(actor);
+    return repo.getRewardGateStatusDistribution(pool, tenantId);
   },
 
   async createRecommendation(

@@ -244,6 +244,40 @@ export async function listRewardGates(
   return { items: res.rows.map(toGate), total };
 }
 
+/**
+ * Reward-gate distribution by latest-result status (gates with no result are
+ * bucketed as 'PENDING'). Used by the compensation-intelligence chart (F4).
+ */
+export async function getRewardGateStatusDistribution(
+  q: DbConnector,
+  tenantId: string | undefined,
+): Promise<{ items: { status: string; count: number }[]; total: number }> {
+  const params: unknown[] = [];
+  let whereClause = "";
+  if (tenantId) {
+    params.push(tenantId);
+    whereClause = `WHERE g.reward_gate_tenant_id = $1`;
+  }
+  const res = await q.query<{ status: string; count: string }>(
+    `SELECT COALESCE(latest.reward_gate_result_status, 'PENDING') AS status,
+            count(*)::text AS count
+       FROM sys.sys_reward_gates g
+       LEFT JOIN LATERAL (
+         SELECT r.reward_gate_result_status
+           FROM sys.sys_reward_gate_results r
+          WHERE r.reward_gate_result_gate_id = g.reward_gate_id
+          ORDER BY r.reward_gate_result_recorded_at DESC LIMIT 1
+       ) latest ON true
+       ${whereClause}
+       GROUP BY COALESCE(latest.reward_gate_result_status, 'PENDING')
+       ORDER BY count(*) DESC, status`,
+    params,
+  );
+  const items = res.rows.map((r) => ({ status: r.status, count: Number(r.count) }));
+  const total = items.reduce((sum, i) => sum + i.count, 0);
+  return { items, total };
+}
+
 // -------------------------------------------------------------------
 // Compensation recommendations
 // -------------------------------------------------------------------

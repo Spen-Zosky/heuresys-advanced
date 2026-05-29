@@ -33,5 +33,8 @@ test.describe("MVP-2a complex domains — live data", () => {
     await expect(page.getByTestId("compensation-status-WARNING")).toBeVisible();
     await expect(page.getByTestId("compensation-status-BLOCKED")).toBeVisible();
     await expect(page.getByTestId("compensation-status-PENDING")).toBeVisible();
+
+    // F4: distribution donut (server-side GROUP BY aggregate, echarts via ssr:false boundary)
+    await expect(page.getByTestId("compensation-distribution-chart")).toBeVisible();
   });
 });

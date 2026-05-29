@@ -297,6 +297,30 @@ describe("/v1/compensation/* integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
+  it("GET /distribution as TENANT_ADMIN → 200 with PASSED bucket from seeded gate", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/compensation/distribution`,
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as { total: number; items: Array<{ status: string; count: number }> };
+    expect(body.total).toBeGreaterThanOrEqual(1);
+    const passed = body.items.find((i) => i.status === "PASSED");
+    expect(passed).toBeDefined();
+    expect(passed!.count).toBeGreaterThanOrEqual(1);
+    // total must equal the sum of bucket counts
+    expect(body.items.reduce((s, i) => s + i.count, 0)).toBe(body.total);
+  });
+
+  it("GET /distribution as USER → 403 PERMISSION_DENIED", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/compensation/distribution`,
+      headers: { cookie: ch(employeeS.cookies) },
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
+  });
+
   it("GET /profiles for non-existent position → 404", async () => {
     const r = await suite.app.inject({
       method: "GET", url: `/v1/compensation/profiles/${randomUUID()}`,

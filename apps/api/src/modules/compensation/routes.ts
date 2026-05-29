@@ -11,6 +11,7 @@ import {
   CompensationProfilePositionParamSchema,
   RewardGatesListQuerySchema,
   RewardGatesListResponseSchema,
+  CompensationDistributionResponseSchema,
   CompensationRecommendationSchema,
   CreateCompensationRecommendationBodySchema,
   PayrollHandoffRecordSchema,
@@ -35,6 +36,11 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: { querystring: RewardGatesListQuerySchema, response: { 200: RewardGatesListResponseSchema } },
   }, async (req) => compensationService.listRewardGates(actor(req), req.query));
+
+  app.get("/distribution", {
+    preHandler: [requirePermission("compensation_intelligence:read")],
+    schema: { response: { 200: CompensationDistributionResponseSchema } },
+  }, async (req) => compensationService.getRewardGateDistribution(actor(req)));
 
   app.post("/recommendations", {
     preHandler: [app.verifyCsrf, requirePermission("compensation_intelligence:update")],

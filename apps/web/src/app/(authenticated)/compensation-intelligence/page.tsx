@@ -5,6 +5,7 @@ import { Badge, DataTableWithCrossHair, EmptyState, KPIStrip, PageHeader, type K
 import { Inbox } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
+import { EChartsCard } from "../_charts-client";
 
 interface RewardGate {
   rewardGateId: string;
@@ -32,6 +33,21 @@ const STATUS_TONE: Record<(typeof STATUSES)[number], KpiCardData["iconTone"]> = 
   PENDING: "info",
 };
 
+// Explicit chart palette (echarts can't read CSS tokens) — kept in step with STATUS_TONE.
+const STATUS_COLOR: Record<string, string> = {
+  PASSED: "#10b981",
+  WARNING: "#f59e0b",
+  BLOCKED: "#ef4444",
+  ESCALATED: "#dc2626",
+  OVERRIDDEN_WITH_REASON: "#8b5cf6",
+  PENDING: "#3b82f6",
+};
+
+interface DistributionItem {
+  status: string;
+  count: number;
+}
+
 export default function CompensationIntelligencePage() {
   const gates = useQuery({
     queryKey: ["compensation", "reward-gates"],
@@ -51,6 +67,37 @@ export default function CompensationIntelligencePage() {
     iconTone: STATUS_TONE[s],
   }));
 
+  // Distribution chart — server-side GROUP BY aggregate (API-first, F4).
+  const dist = useQuery({
+    queryKey: ["compensation", "distribution"],
+    queryFn: () =>
+      apiFetch<{ items: DistributionItem[]; total: number }>("/v1/compensation/distribution"),
+  });
+
+  const chartOption = {
+    tooltip: { trigger: "item" as const, formatter: "{b}: {c} ({d}%)" },
+    legend: {
+      type: "scroll" as const,
+      bottom: 0,
+      textStyle: { color: "#94a3b8", fontSize: 11 },
+    },
+    series: [
+      {
+        name: "Reward gate",
+        type: "pie" as const,
+        radius: ["45%", "72%"],
+        avoidLabelOverlap: true,
+        itemStyle: { borderColor: "transparent", borderWidth: 2 },
+        label: { show: false },
+        data: (dist.data?.items ?? []).map((i) => ({
+          name: i.status.replace(/_/g, " "),
+          value: i.count,
+          itemStyle: { color: STATUS_COLOR[i.status] ?? "#64748b" },
+        })),
+      },
+    ],
+  };
+
   return (
     <main data-testid="compensation-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
       <PageHeader
@@ -64,8 +111,28 @@ export default function CompensationIntelligencePage() {
         }
       />
 
-      <section data-testid="compensation-summary">
+      <section
+        data-testid="compensation-summary"
+        className="grid gap-4 lg:grid-cols-[1fr_minmax(280px,360px)]"
+      >
         <KPIStrip items={statusItems} />
+        <div
+          data-testid="compensation-distribution-chart"
+          className="rounded-card border border-border bg-card p-4 shadow-card"
+        >
+          <h2 className="mb-2 text-sm font-medium text-foreground">Distribuzione stati</h2>
+          {dist.data && dist.data.total > 0 ? (
+            <EChartsCard
+              option={chartOption}
+              height={240}
+              ariaLabel="Distribuzione reward gate per stato di valutazione"
+            />
+          ) : (
+            <p className="py-12 text-center text-xs text-muted-foreground">
+              {dist.isLoading ? "Caricamento…" : "Nessun dato di distribuzione."}
+            </p>
+          )}
+        </div>
       </section>
 
       {gates.isLoading ? (

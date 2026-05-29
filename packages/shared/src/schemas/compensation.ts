@@ -103,6 +103,29 @@ export const RewardGatesListResponseSchema = z.object({
 });
 
 // -------------------------------------------------------------------
+// Reward-gate status distribution (aggregate for charts — F4)
+// -------------------------------------------------------------------
+
+/**
+ * One bucket of the reward-gate distribution. `status` is the latest result
+ * status of a gate, or "PENDING" for gates that have no result yet — so it is
+ * a free string, not the strict result-status enum.
+ */
+export const CompensationDistributionItemSchema = z.object({
+  status: z.string(),
+  count: z.number().int().min(0),
+});
+export type CompensationDistributionItem = z.infer<typeof CompensationDistributionItemSchema>;
+
+export const CompensationDistributionResponseSchema = z.object({
+  items: z.array(CompensationDistributionItemSchema),
+  total: z.number().int().min(0),
+});
+export type CompensationDistributionResponse = z.infer<
+  typeof CompensationDistributionResponseSchema
+>;
+
+// -------------------------------------------------------------------
 // Recommendations
 // -------------------------------------------------------------------
 

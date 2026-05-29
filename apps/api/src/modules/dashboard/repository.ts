@@ -9,6 +9,8 @@ import type {
   DashboardCounters,
   DashboardLearningDeadline,
   DashboardRecentActivity,
+  DashboardTrend,
+  DashboardTrendKey,
 } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
@@ -298,4 +300,78 @@ export async function findOwnedPositionIds(
     [ownerUserId],
   );
   return r.rows.map((x) => x.position_id);
+}
+
+/** Trend entities backed by a real creation/detection timestamp. */
+const TREND_ENTITIES: ReadonlyArray<{
+  key: DashboardTrendKey;
+  table: string;
+  tsColumn: string;
+  tenantColumn: string;
+  /** Additional row filter (columns prefixed with the `t` alias). */
+  extraWhere: string;
+}> = [
+  { key: "users", table: "sys.sys_users", tsColumn: "created_at", tenantColumn: "user_tenant_id", extraWhere: "" },
+  { key: "positions", table: "sys.sys_positions", tsColumn: "created_at", tenantColumn: "position_tenant_id", extraWhere: "AND t.position_is_active = true" },
+  { key: "organizationUnits", table: "sys.sys_organization_units", tsColumn: "created_at", tenantColumn: "organization_unit_tenant_id", extraWhere: "" },
+  { key: "learningPaths", table: "sys.sys_learning_paths", tsColumn: "created_at", tenantColumn: "learning_path_tenant_id", extraWhere: "" },
+  { key: "learningGaps", table: "sys.sys_learning_gaps", tsColumn: "learning_gap_detected_at", tenantColumn: "learning_gap_tenant_id", extraWhere: "" },
+];
+
+function trendDelta(current: number, previousWeek: number): {
+  deltaPct: number;
+  direction: DashboardTrend["direction"];
+} {
+  if (current === previousWeek) return { deltaPct: 0, direction: "flat" };
+  if (previousWeek === 0) return { deltaPct: current > 0 ? 100 : 0, direction: current > 0 ? "up" : "flat" };
+  const pct = ((current - previousWeek) / previousWeek) * 100;
+  return { deltaPct: Math.round(pct * 10) / 10, direction: current > previousWeek ? "up" : "down" };
+}
+
+/**
+ * Weekly cumulative count series per trend entity (oldest→newest), derived from
+ * real timestamps. PLATFORM = no tenant filter; TENANT = tenant-filtered. TEAM
+ * scope returns [] (no fabricated team-disaggregated history).
+ */
+export async function getDashboardTrends(
+  q: DbConnector,
+  scope: ScopeFilter,
+  weeks: number,
+): Promise<DashboardTrend[]> {
+  if (scope.teamPositionIds.length > 0) return [];
+
+  const out: DashboardTrend[] = [];
+  for (const e of TREND_ENTITIES) {
+    // $1 = number of weekly buckets; $2 = tenantId (only when tenant-scoped).
+    const params: unknown[] = [weeks];
+    let tenantClause = "";
+    if (scope.tenantId) {
+      params.push(scope.tenantId);
+      tenantClause = `AND t.${e.tenantColumn} = $${params.length}`;
+    }
+    const r = await q.query<{ c: number }>(
+      `WITH wk AS (
+         SELECT generate_series(
+           date_trunc('week', now()) - ($1::int - 1) * interval '1 week',
+           date_trunc('week', now()),
+           interval '1 week'
+         ) AS w
+       )
+       SELECT (
+         SELECT count(*) FROM ${e.table} t
+          WHERE t.${e.tsColumn} < wk.w + interval '1 week'
+            ${tenantClause}
+            ${e.extraWhere}
+       )::int AS c
+       FROM wk
+       ORDER BY wk.w`,
+      params,
+    );
+    const series = r.rows.map((row) => Number(row.c));
+    const current = series.length > 0 ? series[series.length - 1]! : 0;
+    const previousWeek = series.length >= 2 ? series[series.length - 2]! : current;
+    const { deltaPct, direction } = trendDelta(current, previousWeek);
+    out.push({ key: e.key, current, previousWeek, deltaPct, direction, series, weeks });
+  }
+  return out;
 }

@@ -47,6 +47,35 @@ export const DashboardRecentActivitySchema = z.object({
 });
 export type DashboardRecentActivity = z.infer<typeof DashboardRecentActivitySchema>;
 
+/**
+ * Per-counter trend — week-over-week delta + a weekly cumulative series for
+ * StatsCard sparklines. Derived from real `created_at` / `detected_at`
+ * timestamps (no fabricated data); a flat or all-zero series faithfully
+ * reflects batch-seeded or empty entities. `series` is empty for TEAM scope
+ * (MANAGER), where the team-disaggregated history is not yet computed.
+ */
+export const DashboardTrendKeySchema = z.enum([
+  "users",
+  "positions",
+  "organizationUnits",
+  "learningPaths",
+  "learningGaps",
+]);
+export type DashboardTrendKey = z.infer<typeof DashboardTrendKeySchema>;
+
+export const DashboardTrendSchema = z.object({
+  key: DashboardTrendKeySchema,
+  current: z.number().int().min(0),
+  previousWeek: z.number().int().min(0),
+  /** Signed week-over-week percent; 0 when not computable (no prior-week data). */
+  deltaPct: z.number(),
+  direction: z.enum(["up", "down", "flat"]),
+  /** Weekly cumulative counts, oldest→newest. Empty for TEAM scope. */
+  series: z.array(z.number().int().min(0)),
+  weeks: z.number().int().min(0),
+});
+export type DashboardTrend = z.infer<typeof DashboardTrendSchema>;
+
 export const DashboardWidgetsResponseSchema = z.object({
   role: z.string(),
   scope: z.object({
@@ -55,6 +84,7 @@ export const DashboardWidgetsResponseSchema = z.object({
     teamPositionIds: z.array(z.string().uuid()),
   }),
   counters: DashboardCountersSchema,
+  trends: z.array(DashboardTrendSchema),
   upcomingLearningDeadlines: z.array(DashboardLearningDeadlineSchema),
   recentActivity: z.array(DashboardRecentActivitySchema),
   generatedAt: z.string().datetime(),

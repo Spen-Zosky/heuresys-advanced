@@ -27,6 +27,9 @@ const TENANT_ROLES: RoleCode[] = [
 ];
 const TEAM_ROLES: RoleCode[] = ["MANAGER"];
 
+/** Number of weekly buckets in the StatsCard sparkline series. */
+const DASHBOARD_TREND_WEEKS = 8;
+
 function highestScope(actor: ActorContext): DashboardScopeKind {
   if (actor.roles.some((r) => PLATFORM_ROLES.includes(r))) return "PLATFORM";
   if (actor.roles.some((r) => TENANT_ROLES.includes(r))) return "TENANT";
@@ -75,8 +78,9 @@ export const dashboardService = {
       isPlatformScope: isPlatform,
     };
 
-    const [counters, upcomingLearningDeadlines, recentActivity] = await Promise.all([
+    const [counters, trends, upcomingLearningDeadlines, recentActivity] = await Promise.all([
       repo.getDashboardCounters(pool, scope),
+      repo.getDashboardTrends(pool, scope, DASHBOARD_TREND_WEEKS),
       repo.getUpcomingLearningDeadlines(pool, scope, 10),
       repo.getRecentActivity(pool, scope, 10),
     ]);
@@ -89,6 +93,7 @@ export const dashboardService = {
         teamPositionIds,
       },
       counters,
+      trends,
       upcomingLearningDeadlines,
       recentActivity,
       generatedAt: new Date().toISOString(),

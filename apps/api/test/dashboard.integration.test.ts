@@ -67,6 +67,37 @@ describe("GET /v1/dashboard/widgets integration", () => {
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
+  it("PLATFORM trends expose 8-week cumulative series for StatsCard sparklines", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/dashboard/widgets",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as {
+      counters: { users: number };
+      trends: Array<{
+        key: string; current: number; previousWeek: number;
+        deltaPct: number; direction: string; series: number[]; weeks: number;
+      }>;
+    };
+    expect(Array.isArray(body.trends)).toBe(true);
+    expect([...body.trends].map((t) => t.key).sort()).toEqual([
+      "learningGaps", "learningPaths", "organizationUnits", "positions", "users",
+    ]);
+    for (const t of body.trends) {
+      expect(t.weeks).toBe(8);
+      expect(t.series.length).toBe(8);
+      expect(["up", "down", "flat"]).toContain(t.direction);
+      // Cumulative count series must be non-decreasing and end at `current`.
+      for (let i = 1; i < t.series.length; i++) {
+        expect(t.series[i]!).toBeGreaterThanOrEqual(t.series[i - 1]!);
+      }
+      expect(t.series[t.series.length - 1]).toBe(t.current);
+    }
+    const usersTrend = body.trends.find((t) => t.key === "users")!;
+    expect(usersTrend.current).toBe(body.counters.users);
+  });
+
   it("TENANT_ADMIN sees TENANT scope filtered to own tenant", async () => {
     const r = await suite.app.inject({
       method: "GET", url: "/v1/dashboard/widgets",
@@ -97,6 +128,7 @@ describe("GET /v1/dashboard/widgets integration", () => {
       role: string;
       scope: { kind: string; teamPositionIds: string[] };
       counters: { users: number; positions: number };
+      trends: unknown[];
     };
     expect(body.role).toBe("MANAGER");
     expect(body.scope.kind).toBe("TEAM");
@@ -104,6 +136,8 @@ describe("GET /v1/dashboard/widgets integration", () => {
     expect(body.scope.teamPositionIds.length).toBeGreaterThanOrEqual(1);
     // positions count == owned positions count.
     expect(body.counters.positions).toBe(body.scope.teamPositionIds.length);
+    // TEAM scope returns no trends (no fabricated team-disaggregated history).
+    expect(body.trends).toEqual([]);
   });
 
   it("USER (employee) has no dashboard:view permission → 403", async () => {

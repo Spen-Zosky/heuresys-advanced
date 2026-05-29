@@ -50,7 +50,7 @@ Monorepo pnpm HRMS/BPM **maturo e oltre MVP-3**: API Fastify 5 con **~58 moduli 
 
 ## 5. Auth / Security
 
-- Argon2id 64MiB/3/4 (ADR-0005, auto-rehash). JWT RS256 15min HttpOnly+SameSite=Lax; refresh 30d single-use + replay detection (`401 REFRESH_REPLAY_DETECTED`); keys `.secrets/jwt_*.pem` gitignored. Login **200 con body** (no 204). CSRF double-submit opt-in. MFA TOTP (otpauth, AES-256-GCM `MFA_ENCRYPTION_KEY` ≥32). RBAC 8 ruoli × 388 mapping caricati a server start (`RBAC_NOT_LOADED` se pre-cache). Error classes typed in `src/errors/index.ts`. Logger redaction `LOG_REDACT_PATHS`.
+- Argon2id 64MiB/3/4 (ADR-0005, auto-rehash). JWT RS256 15min HttpOnly+SameSite=Lax; refresh 30d single-use + replay detection (`401 REFRESH_REPLAY_DETECTED`); keys `.secrets/jwt_*.pem` gitignored. Login **200 con body** (no 204). CSRF double-submit opt-in. MFA TOTP (otpauth, AES-256-GCM `MFA_ENCRYPTION_KEY` ≥32). RBAC 8 ruoli × 394 mapping caricati a server start (`RBAC_NOT_LOADED` se pre-cache). Error classes typed in `src/errors/index.ts`. Logger redaction `LOG_REDACT_PATHS`.
 - 8 ruoli: PLATFORM_ADMIN, TENANT_ADMIN, BLUEPRINT_MANAGER, HRMS_MANAGER, PROCESS_OWNER, MANAGER, USER, READ_ONLY.
 - Personas seed (`pnpm db:seed-test-admin`, pwd `Admin#PassW0rd!`): admin@heuresys.com (PLATFORM_ADMIN), tenant_admin_test/manager_test/employee_test/outsider_test @rtl-bank.test.
 

@@ -48,7 +48,7 @@ psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "\dt sys.sys_auth*
 
 # 3. (optional) API dev server — restart if process died
 cd apps/api && pnpm dev
-# Look for: "RBAC permission cache loaded rolesLoaded:8 mappingsLoaded:388"
+# Look for: "RBAC permission cache loaded rolesLoaded:8 mappingsLoaded:394"
 ```
 
 The `.env` file is **gitignored** but real; `.env.example` has three runtime blocks (A localhost / B OCI VM / C OCI Managed). **Option B (OCI VM, tunnel 5433) is the active runtime** (RD-25, ADR-0010). Do not commit `.env`, `.secrets/`, or `*.pem`.
@@ -124,7 +124,7 @@ Entry split: `src/server.ts` is the network binding + env validation; `src/app.t
 12. /healthz + /readyz  → 13. module routes (/v1/<module>)
 ```
 
-Auth is **non-enforcing at the plugin level**: `auth.ts` decodes the JWT cookie into `req.user` if present; per-route enforcement is done with `requirePermission('perm:code')` from `middleware/rbac.ts`. The RBAC permission map (388 role×permission mappings, 8 roles) is **loaded once at server start** from `sys.sys_auth_role_permissions` — `requirePermission` throws `RBAC_NOT_LOADED` if used before the cache is populated.
+Auth is **non-enforcing at the plugin level**: `auth.ts` decodes the JWT cookie into `req.user` if present; per-route enforcement is done with `requirePermission('perm:code')` from `middleware/rbac.ts`. The RBAC permission map (394 role×permission mappings, 8 roles) is **loaded once at server start** from `sys.sys_auth_role_permissions` — `requirePermission` throws `RBAC_NOT_LOADED` if used before the cache is populated.
 
 The server logger redacts secrets via the exported `LOG_REDACT_PATHS` constant in `app.ts` (cookies, Authorization, password fields, refresh tokens, `*.password`, `*.hash`, `*.secret`). Tests verify this is live.
 

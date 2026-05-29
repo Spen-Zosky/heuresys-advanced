@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../../lib/api/fetch";
+import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { apiFetch } from "@/lib/api/fetch";
 
 interface VisualizationGraph {
   visualizationGraphId: string;
@@ -40,16 +40,25 @@ export default function OrgChartPage() {
   });
 
   return (
-    <main data-testid="org-chart-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <Link href="/organization" className="underline text-sm" data-testid="org-chart-back">
-          ← Organization
-        </Link>
-        <h1 className="text-2xl font-semibold mt-2" data-testid="org-chart-title">Org chart</h1>
-        <p className="text-sm opacity-70" data-testid="org-chart-count">
-          {graphs.data ? `${graphs.data.total} grafici ORG_CHART disponibili` : "Caricamento…"}
-        </p>
-      </header>
+    <main data-testid="org-chart-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+      <PageHeader
+        data-testid="org-chart-title"
+        title="Org chart"
+        breadcrumbs={
+          <Link
+            href="/organization"
+            data-testid="org-chart-back"
+            className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            ← Organization
+          </Link>
+        }
+        badges={
+          <span data-testid="org-chart-count" className="text-sm text-muted-foreground">
+            {graphs.data ? `${graphs.data.total} grafici ORG_CHART disponibili` : "Caricamento…"}
+          </span>
+        }
+      />
 
       <section className="flex gap-2" data-testid="org-chart-picker">
         {graphs.data?.items.map((g) => (
@@ -57,8 +66,10 @@ export default function OrgChartPage() {
             key={g.visualizationGraphId}
             type="button"
             onClick={() => setActiveGraphId(g.visualizationGraphId)}
-            className={`px-3 py-1 text-xs border rounded ${
-              effectiveGraphId === g.visualizationGraphId ? "bg-black text-white" : ""
+            className={`rounded-card border px-3 py-1 text-xs transition-colors ${
+              effectiveGraphId === g.visualizationGraphId
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border text-muted-foreground hover:text-foreground"
             }`}
             data-testid="org-chart-picker-btn"
           >
@@ -73,22 +84,22 @@ export default function OrgChartPage() {
         </CardHeader>
         <CardContent className="p-0">
           {!effectiveGraphId ? (
-            <div className="p-6 opacity-60" data-testid="org-chart-empty">
+            <div className="p-6 text-sm text-muted-foreground" data-testid="org-chart-empty">
               Nessun grafo ORG_CHART registrato per il tenant. Crearlo via
-              <code className="font-mono mx-1">POST /v1/visualization-graphs</code>
+              <code className="mx-1 font-mono">POST /v1/visualization-graphs</code>
               con <code className="font-mono">graphKind=ORG_CHART</code>.
             </div>
           ) : nodes.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
+            <div className="p-6 text-sm text-muted-foreground">Caricamento…</div>
           ) : nodes.data && nodes.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="org-chart-nodes-empty">
+            <div className="p-6 text-sm text-muted-foreground" data-testid="org-chart-nodes-empty">
               Il grafo non ha nodi.
             </div>
           ) : (
-            <ul className="divide-y" data-testid="org-chart-nodes-list">
+            <ul className="divide-y divide-border" data-testid="org-chart-nodes-list">
               {nodes.data!.items.map((n) => (
-                <li key={n.visualizationNodeId} className="px-4 py-2 text-sm" data-testid="org-chart-node-item">
-                  <span className="font-mono text-xs opacity-70">{n.nodeKind}</span>
+                <li key={n.visualizationNodeId} className="px-4 py-2 text-sm text-foreground" data-testid="org-chart-node-item">
+                  <span className="font-mono text-xs text-muted-foreground">{n.nodeKind}</span>
                   <span className="ml-2">{n.label ?? n.visualizationNodeId.slice(0, 8)}</span>
                 </li>
               ))}
@@ -97,7 +108,7 @@ export default function OrgChartPage() {
         </CardContent>
       </Card>
 
-      <p className="text-xs opacity-60">
+      <p className="text-xs text-muted-foreground">
         Renderer React Flow con layout Dagre/ELK è programmato in una iterazione successiva — qui mostriamo il payload live del grafo.
       </p>
     </main>

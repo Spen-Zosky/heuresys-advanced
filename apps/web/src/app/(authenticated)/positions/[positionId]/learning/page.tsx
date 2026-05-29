@@ -3,8 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../../../lib/api/fetch";
+import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { apiFetch } from "@/lib/api/fetch";
+import { EntityTable } from "@/components/data-table-panel";
+import { StatusBadge } from "@/components/status-pill";
 
 interface LearningGap {
   learningGapId: string;
@@ -28,51 +30,48 @@ export default function PositionLearningPage() {
     enabled: !!positionId,
   });
 
+  const items = gaps.data?.items ?? [];
+
   return (
-    <main data-testid="position-learning-page" className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <Link href={`/positions/${positionId}`} className="underline text-sm" data-testid="position-learning-back">
-          ← Posizione
-        </Link>
-        <h1 className="text-2xl font-semibold mt-2" data-testid="position-learning-title">
-          Gap formativi della posizione
-        </h1>
-        <p className="text-sm opacity-70" data-testid="position-learning-count">
-          {gaps.data ? `${gaps.data.total} gap aperti` : "Caricamento…"}
-        </p>
-      </header>
+    <main data-testid="position-learning-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <PageHeader
+        data-testid="position-learning-title"
+        title="Gap formativi della posizione"
+        breadcrumbs={
+          <Link
+            href={`/positions/${positionId}`}
+            data-testid="position-learning-back"
+            className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            ← Posizione
+          </Link>
+        }
+        badges={
+          <span data-testid="position-learning-count" className="text-sm text-muted-foreground">
+            {gaps.data ? `${gaps.data.total} gap aperti` : "Caricamento…"}
+          </span>
+        }
+      />
 
       <Card>
         <CardHeader><CardTitle>Gap aperti</CardTitle></CardHeader>
         <CardContent className="p-0">
-          {gaps.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : gaps.data && gaps.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="position-learning-empty">
-              Nessun gap formativo associato a questa posizione.
-            </div>
-          ) : (
-            <table className="w-full text-sm" data-testid="position-learning-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">User</th>
-                  <th className="px-4 py-2">Skill</th>
-                  <th className="px-4 py-2">Severità</th>
-                  <th className="px-4 py-2">Rilevato</th>
-                </tr>
-              </thead>
-              <tbody>
-                {gaps.data!.items.map((g) => (
-                  <tr key={g.learningGapId} className="border-b last:border-b-0" data-testid="position-learning-row">
-                    <td className="px-4 py-2 font-mono text-xs">{g.userId.slice(0, 8)}</td>
-                    <td className="px-4 py-2 font-mono text-xs">{g.skillId?.slice(0, 8) ?? "—"}</td>
-                    <td className="px-4 py-2 text-xs uppercase">{g.severity}</td>
-                    <td className="px-4 py-2 text-xs">{g.detectedAt.slice(0, 10)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+          <EntityTable<LearningGap>
+            isLoading={gaps.isLoading}
+            isError={gaps.isError}
+            rows={items}
+            rowKey={(g) => g.learningGapId}
+            rowTestId="position-learning-row"
+            emptyTestId="position-learning-empty"
+            emptyTitle="Nessun gap formativo associato a questa posizione."
+            caption="Gap formativi aperti per la posizione"
+            columns={[
+              { header: "User", cell: (g) => <span className="font-mono text-xs">{g.userId.slice(0, 8)}</span> },
+              { header: "Skill", cell: (g) => <span className="font-mono text-xs">{g.skillId?.slice(0, 8) ?? "—"}</span> },
+              { header: "Severità", cell: (g) => <StatusBadge value={g.severity} /> },
+              { header: "Rilevato", cell: (g) => <span className="text-xs">{g.detectedAt.slice(0, 10)}</span> },
+            ]}
+          />
         </CardContent>
       </Card>
     </main>

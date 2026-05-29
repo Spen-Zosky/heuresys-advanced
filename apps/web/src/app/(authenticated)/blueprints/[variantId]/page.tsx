@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../../lib/api/fetch";
-import { isApiError } from "../../../../lib/api/errors";
+import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { apiFetch } from "@/lib/api/fetch";
+import { isApiError } from "@/lib/api/errors";
+import { EntityTable } from "@/components/data-table-panel";
+import { StatusBadge, StatusPill } from "@/components/status-pill";
 
 interface BlueprintVariant {
   blueprintVariantId: string;
@@ -31,6 +33,11 @@ interface BlueprintActivation {
 }
 
 type Tab = "processes" | "activations";
+
+const TABS: { key: Tab; label: string }[] = [
+  { key: "processes", label: "Processi" },
+  { key: "activations", label: "Attivazioni" },
+];
 
 export default function BlueprintVariantDetailPage() {
   const params = useParams<{ variantId: string }>();
@@ -60,14 +67,18 @@ export default function BlueprintVariantDetailPage() {
   });
 
   if (variant.isLoading) {
-    return <main className="max-w-5xl mx-auto px-6 py-8 opacity-60">Caricamento…</main>;
+    return (
+      <main className="mx-auto max-w-5xl px-6 py-8">
+        <span className="text-sm text-muted-foreground">Caricamento…</span>
+      </main>
+    );
   }
   if (variant.isError) {
     const status = isApiError(variant.error) ? variant.error.status : 0;
     return (
-      <main className="max-w-5xl mx-auto px-6 py-8" data-testid="blueprint-error">
-        <Link href="/blueprints" className="underline text-sm">← Blueprint</Link>
-        <p className="text-red-600 mt-4">
+      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="blueprint-error">
+        <Link href="/blueprints" className="text-sm underline">← Blueprint</Link>
+        <p className="mt-4 text-destructive">
           {status === 404 ? "Variante non trovata." : "Errore."}
         </p>
       </main>
@@ -75,23 +86,38 @@ export default function BlueprintVariantDetailPage() {
   }
   const v = variant.data!;
   return (
-    <main data-testid="blueprint-detail-page" className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <Link href="/blueprints" className="underline text-sm" data-testid="blueprint-back">← Blueprint</Link>
-        <h1 className="text-2xl font-semibold mt-2" data-testid="blueprint-name">{v.name}</h1>
-        <p className="text-sm opacity-70 font-mono" data-testid="blueprint-code">{v.code}</p>
-      </header>
-
-      <nav className="border-b flex gap-4 text-sm" data-testid="blueprint-tabs">
-        {(["processes", "activations"] as Tab[]).map((k) => (
-          <button
-            key={k}
-            type="button"
-            onClick={() => setTab(k)}
-            data-testid={`blueprint-tab-${k}`}
-            className={`px-3 py-2 ${tab === k ? "border-b-2 border-black font-medium" : "opacity-60"}`}
+    <main data-testid="blueprint-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <PageHeader
+        data-testid="blueprint-name"
+        title={v.name}
+        breadcrumbs={
+          <Link
+            href="/blueprints"
+            data-testid="blueprint-back"
+            className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
-            {k === "processes" ? "Processi" : "Attivazioni"}
+            ← Blueprint
+          </Link>
+        }
+        badges={
+          <span data-testid="blueprint-code" className="font-mono text-sm text-muted-foreground">{v.code}</span>
+        }
+      />
+
+      <nav className="flex gap-1 border-b border-border" data-testid="blueprint-tabs">
+        {TABS.map((tt) => (
+          <button
+            key={tt.key}
+            type="button"
+            onClick={() => setTab(tt.key)}
+            data-testid={`blueprint-tab-${tt.key}`}
+            className={`px-3 py-2 text-sm transition-colors ${
+              tab === tt.key
+                ? "border-b-2 border-primary font-medium text-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {tt.label}
           </button>
         ))}
       </nav>
@@ -100,32 +126,29 @@ export default function BlueprintVariantDetailPage() {
         <Card data-testid="blueprint-tab-content-processes">
           <CardHeader><CardTitle>Processi</CardTitle></CardHeader>
           <CardContent className="p-0">
-            {processes.isLoading ? (
-              <div className="p-6 opacity-60">Caricamento…</div>
-            ) : processes.data && processes.data.items.length === 0 ? (
-              <div className="p-6 opacity-60" data-testid="blueprint-processes-empty">Nessun processo.</div>
-            ) : (
-              <table className="w-full text-sm" data-testid="blueprint-processes-table">
-                <thead>
-                  <tr className="text-left border-b">
-                    <th className="px-4 py-2">#</th>
-                    <th className="px-4 py-2">Codice</th>
-                    <th className="px-4 py-2">Nome</th>
-                    <th className="px-4 py-2">Opzionale</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {processes.data!.items.map((p) => (
-                    <tr key={p.blueprintProcessId} className="border-b last:border-b-0" data-testid="blueprint-process-row">
-                      <td className="px-4 py-2 text-xs opacity-70">{p.ordinal}</td>
-                      <td className="px-4 py-2 font-mono text-xs">{p.code}</td>
-                      <td className="px-4 py-2">{p.name}</td>
-                      <td className="px-4 py-2 text-xs">{p.isOptional ? "sì" : "no"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            <EntityTable<BlueprintProcess>
+              isLoading={processes.isLoading}
+              isError={processes.isError}
+              rows={processes.data?.items ?? []}
+              rowKey={(p) => p.blueprintProcessId}
+              rowTestId="blueprint-process-row"
+              emptyTestId="blueprint-processes-empty"
+              emptyTitle="Nessun processo."
+              caption="Processi della variante blueprint"
+              columns={[
+                { header: "#", cell: (p) => <span className="text-xs text-muted-foreground">{p.ordinal}</span> },
+                { header: "Codice", cell: (p) => <span className="font-mono text-xs">{p.code}</span> },
+                { header: "Nome", cell: (p) => p.name },
+                {
+                  header: "Opzionale",
+                  cell: (p) => (
+                    <StatusPill tone={p.isOptional ? "info" : "neutral"}>
+                      {p.isOptional ? "sì" : "no"}
+                    </StatusPill>
+                  ),
+                },
+              ]}
+            />
           </CardContent>
         </Card>
       )}
@@ -134,32 +157,21 @@ export default function BlueprintVariantDetailPage() {
         <Card data-testid="blueprint-tab-content-activations">
           <CardHeader><CardTitle>Attivazioni per tenant</CardTitle></CardHeader>
           <CardContent className="p-0">
-            {activations.isLoading ? (
-              <div className="p-6 opacity-60">Caricamento…</div>
-            ) : activations.data && activations.data.items.length === 0 ? (
-              <div className="p-6 opacity-60" data-testid="blueprint-activations-empty">
-                Nessuna attivazione.
-              </div>
-            ) : (
-              <table className="w-full text-sm" data-testid="blueprint-activations-table">
-                <thead>
-                  <tr className="text-left border-b">
-                    <th className="px-4 py-2">Tenant ID</th>
-                    <th className="px-4 py-2">Stato</th>
-                    <th className="px-4 py-2">Attivata</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activations.data!.items.map((a) => (
-                    <tr key={a.blueprintActivationId} className="border-b last:border-b-0" data-testid="blueprint-activation-row">
-                      <td className="px-4 py-2 font-mono text-xs">{a.tenantId.slice(0, 8)}</td>
-                      <td className="px-4 py-2 text-xs uppercase">{a.status}</td>
-                      <td className="px-4 py-2 text-xs">{a.activatedAt ?? "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            <EntityTable<BlueprintActivation>
+              isLoading={activations.isLoading}
+              isError={activations.isError}
+              rows={activations.data?.items ?? []}
+              rowKey={(a) => a.blueprintActivationId}
+              rowTestId="blueprint-activation-row"
+              emptyTestId="blueprint-activations-empty"
+              emptyTitle="Nessuna attivazione."
+              caption="Attivazioni della variante per tenant"
+              columns={[
+                { header: "Tenant ID", cell: (a) => <span className="font-mono text-xs">{a.tenantId.slice(0, 8)}</span> },
+                { header: "Stato", cell: (a) => <StatusBadge value={a.status} /> },
+                { header: "Attivata", cell: (a) => <span className="text-xs">{a.activatedAt ?? "—"}</span> },
+              ]}
+            />
           </CardContent>
         </Card>
       )}

@@ -3,9 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, MermaidDiagram } from "@heuresys/ui";
-import { apiFetch } from "../../../../lib/api/fetch";
-import { isApiError } from "../../../../lib/api/errors";
+import { Card, CardContent, CardHeader, CardTitle, MermaidDiagram, PageHeader } from "@heuresys/ui";
+import { apiFetch } from "@/lib/api/fetch";
+import { isApiError } from "@/lib/api/errors";
+import { StatusPill } from "@/components/status-pill";
 
 interface Graph {
   visualizationGraphId: string;
@@ -54,14 +55,18 @@ export default function VisualizationDetailPage() {
   });
 
   if (graph.isLoading) {
-    return <main className="max-w-5xl mx-auto px-6 py-8 opacity-60">Caricamento…</main>;
+    return (
+      <main className="mx-auto max-w-5xl px-6 py-8">
+        <span className="text-sm text-muted-foreground">Caricamento…</span>
+      </main>
+    );
   }
   if (graph.isError) {
     const status = isApiError(graph.error) ? graph.error.status : 0;
     return (
-      <main className="max-w-5xl mx-auto px-6 py-8" data-testid="visualization-error">
-        <Link href="/visualizations" className="underline text-sm">← Visualizations</Link>
-        <p className="text-red-600 mt-4">
+      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="visualization-error">
+        <Link href="/visualizations" className="text-sm underline">← Visualizations</Link>
+        <p className="mt-4 text-destructive">
           {status === 404 ? "Grafico non trovato." : "Errore."}
         </p>
       </main>
@@ -93,15 +98,26 @@ export default function VisualizationDetailPage() {
       : null;
 
   return (
-    <main data-testid="visualization-detail-page" className="max-w-6xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <Link href="/visualizations" className="underline text-sm" data-testid="visualization-back">
-          ← Visualizations
-        </Link>
-        <h1 className="text-2xl font-semibold mt-2" data-testid="visualization-name">{g.name}</h1>
-        <p className="text-sm opacity-70 font-mono" data-testid="visualization-code">{g.code}</p>
-        <p className="text-xs uppercase opacity-70 mt-1">{g.graphKind}</p>
-      </header>
+    <main data-testid="visualization-detail-page" className="mx-auto max-w-6xl space-y-6 px-6 py-8">
+      <PageHeader
+        data-testid="visualization-name"
+        title={g.name}
+        breadcrumbs={
+          <Link
+            href="/visualizations"
+            data-testid="visualization-back"
+            className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+          >
+            ← Visualizations
+          </Link>
+        }
+        badges={
+          <>
+            <span data-testid="visualization-code" className="font-mono text-sm text-muted-foreground">{g.code}</span>
+            <StatusPill tone="info">{g.graphKind}</StatusPill>
+          </>
+        }
+      />
 
       {mermaidSource ? (
         <Card data-testid="visualization-renderer-card">
@@ -118,23 +134,23 @@ export default function VisualizationDetailPage() {
         </Card>
       ) : null}
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card data-testid="visualization-nodes-card">
           <CardHeader>
             <CardTitle>Nodi ({nodes.data?.total ?? "—"})</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {nodes.isLoading ? (
-              <div className="p-6 opacity-60">Caricamento…</div>
+              <div className="p-6 text-sm text-muted-foreground">Caricamento…</div>
             ) : nodes.data && nodes.data.items.length === 0 ? (
-              <div className="p-6 opacity-60" data-testid="visualization-nodes-empty">
+              <div className="p-6 text-sm text-muted-foreground" data-testid="visualization-nodes-empty">
                 Nessun nodo.
               </div>
             ) : (
-              <ul className="divide-y" data-testid="visualization-nodes-list">
+              <ul className="divide-y divide-border" data-testid="visualization-nodes-list">
                 {nodes.data!.items.slice(0, 20).map((n) => (
-                  <li key={n.visualizationNodeId} className="px-4 py-2 text-sm" data-testid="visualization-node-item">
-                    <span className="font-mono text-xs opacity-70">{n.nodeKind}</span>
+                  <li key={n.visualizationNodeId} className="px-4 py-2 text-sm text-foreground" data-testid="visualization-node-item">
+                    <span className="font-mono text-xs text-muted-foreground">{n.nodeKind}</span>
                     <span className="ml-2">{n.label ?? n.nodeKey}</span>
                   </li>
                 ))}
@@ -149,17 +165,17 @@ export default function VisualizationDetailPage() {
           </CardHeader>
           <CardContent className="p-0">
             {edges.isLoading ? (
-              <div className="p-6 opacity-60">Caricamento…</div>
+              <div className="p-6 text-sm text-muted-foreground">Caricamento…</div>
             ) : edges.data && edges.data.items.length === 0 ? (
-              <div className="p-6 opacity-60" data-testid="visualization-edges-empty">
+              <div className="p-6 text-sm text-muted-foreground" data-testid="visualization-edges-empty">
                 Nessun edge.
               </div>
             ) : (
-              <ul className="divide-y" data-testid="visualization-edges-list">
+              <ul className="divide-y divide-border" data-testid="visualization-edges-list">
                 {edges.data!.items.slice(0, 20).map((e) => (
-                  <li key={e.visualizationEdgeId} className="px-4 py-2 text-xs font-mono" data-testid="visualization-edge-item">
+                  <li key={e.visualizationEdgeId} className="px-4 py-2 font-mono text-xs text-foreground" data-testid="visualization-edge-item">
                     {e.fromNodeId.slice(0, 6)} → {e.toNodeId.slice(0, 6)}
-                    <span className="ml-2 uppercase opacity-70">{e.edgeKind}</span>
+                    <span className="ml-2 uppercase text-muted-foreground">{e.edgeKind}</span>
                   </li>
                 ))}
               </ul>
@@ -168,7 +184,7 @@ export default function VisualizationDetailPage() {
         </Card>
       </section>
 
-      <p className="text-xs opacity-60">
+      <p className="text-xs text-muted-foreground">
         Renderer Mermaid attivato (max 50 nodi · 200 edge). Liste nodi/edge complete sopra (max 20 + 20 visibili).
       </p>
     </main>

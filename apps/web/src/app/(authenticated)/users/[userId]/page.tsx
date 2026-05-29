@@ -3,9 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../../lib/api/fetch";
-import { isApiError } from "../../../../lib/api/errors";
+import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { apiFetch } from "@/lib/api/fetch";
+import { isApiError } from "@/lib/api/errors";
+import { FieldGrid } from "@/components/detail-panel";
+import { StatusBadge } from "@/components/status-pill";
 
 interface UserDetail {
   userId: string;
@@ -35,54 +37,55 @@ export default function UserDetailPage() {
 
   if (user.isLoading) {
     return (
-      <main className="max-w-5xl mx-auto px-6 py-8">
-        <span className="opacity-60">Caricamento…</span>
+      <main className="mx-auto max-w-5xl px-6 py-8">
+        <span className="text-sm text-muted-foreground">Caricamento…</span>
       </main>
     );
   }
   if (user.isError) {
     const code = isApiError(user.error) ? user.error.status : 0;
     return (
-      <main className="max-w-5xl mx-auto px-6 py-8" data-testid="user-error">
-        <Link href="/users" className="underline text-sm">← Utenti</Link>
-        <p className="text-red-600 mt-4">
-          {code === 404 ? "Utente non trovato." : "Errore di caricamento."}
-        </p>
+      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="user-error">
+        <Link href="/users" className="text-sm underline">← Utenti</Link>
+        <p className="mt-4 text-destructive">{code === 404 ? "Utente non trovato." : "Errore di caricamento."}</p>
       </main>
     );
   }
   const u = user.data!;
   return (
-    <main data-testid="user-detail-page" className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <Link href="/users" className="underline text-sm" data-testid="user-back">← Utenti</Link>
-        <h1 className="text-2xl font-semibold mt-2" data-testid="user-display-name">
-          {u.displayName ?? "(senza nome)"}
-        </h1>
-        <p className="text-sm opacity-70" data-testid="user-email-detail">{u.email}</p>
-      </header>
+    <main data-testid="user-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <PageHeader
+        data-testid="user-display-name"
+        title={u.displayName ?? "(senza nome)"}
+        breadcrumbs={
+          <Link href="/users" data-testid="user-back" className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
+            ← Utenti
+          </Link>
+        }
+        badges={
+          <>
+            <span data-testid="user-email-detail" className="text-sm text-muted-foreground">{u.email}</span>
+            <StatusBadge value={u.status} />
+          </>
+        }
+      />
 
       <Card>
         <CardHeader><CardTitle>Anagrafica</CardTitle></CardHeader>
         <CardContent>
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm" data-testid="user-fields">
-            <dt className="opacity-70">User ID</dt>
-            <dd className="font-mono text-xs" data-testid="field-userId">{u.userId}</dd>
-            <dt className="opacity-70">Tenant ID</dt>
-            <dd className="font-mono text-xs">{u.tenantId ?? "—"}</dd>
-            <dt className="opacity-70">Stato</dt>
-            <dd>{u.status}</dd>
-            <dt className="opacity-70">Tipo</dt>
-            <dd>{u.type}</dd>
-            <dt className="opacity-70">Locale</dt>
-            <dd>{u.locale ?? "—"}</dd>
-            <dt className="opacity-70">Timezone</dt>
-            <dd>{u.timezone ?? "—"}</dd>
-            <dt className="opacity-70">Synthetic</dt>
-            <dd>{u.isSynthetic ? "sì" : "no"}</dd>
-            <dt className="opacity-70">Creato</dt>
-            <dd className="text-xs">{u.createdAt}</dd>
-          </dl>
+          <FieldGrid
+            testId="user-fields"
+            fields={[
+              { label: "User ID", value: u.userId, mono: true, testId: "field-userId" },
+              { label: "Tenant ID", value: u.tenantId ?? "—", mono: true },
+              { label: "Stato", value: <StatusBadge value={u.status} /> },
+              { label: "Tipo", value: u.type },
+              { label: "Locale", value: u.locale ?? "—" },
+              { label: "Timezone", value: u.timezone ?? "—" },
+              { label: "Synthetic", value: u.isSynthetic ? "sì" : "no" },
+              { label: "Creato", value: u.createdAt },
+            ]}
+          />
         </CardContent>
       </Card>
     </main>

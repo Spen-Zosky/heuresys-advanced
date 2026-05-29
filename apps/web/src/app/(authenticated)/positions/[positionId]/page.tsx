@@ -3,9 +3,11 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../../lib/api/fetch";
-import { isApiError } from "../../../../lib/api/errors";
+import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { apiFetch } from "@/lib/api/fetch";
+import { isApiError } from "@/lib/api/errors";
+import { FieldGrid } from "@/components/detail-panel";
+import { StatusBadge, StatusPill } from "@/components/status-pill";
 
 interface PositionDetail {
   positionId: string;
@@ -37,56 +39,58 @@ export default function PositionDetailPage() {
 
   if (position.isLoading) {
     return (
-      <main className="max-w-5xl mx-auto px-6 py-8">
-        <span className="opacity-60">Caricamento…</span>
+      <main className="mx-auto max-w-5xl px-6 py-8">
+        <span className="text-sm text-muted-foreground">Caricamento…</span>
       </main>
     );
   }
   if (position.isError) {
     const code = isApiError(position.error) ? position.error.status : 0;
     return (
-      <main className="max-w-5xl mx-auto px-6 py-8" data-testid="position-error">
-        <Link href="/positions" className="underline text-sm">← Posizioni</Link>
-        <p className="text-red-600 mt-4">
-          {code === 404 ? "Posizione non trovata." : "Errore di caricamento."}
-        </p>
+      <main className="mx-auto max-w-5xl px-6 py-8" data-testid="position-error">
+        <Link href="/positions" className="text-sm underline">← Posizioni</Link>
+        <p className="mt-4 text-destructive">{code === 404 ? "Posizione non trovata." : "Errore di caricamento."}</p>
       </main>
     );
   }
   const p = position.data!;
   return (
-    <main data-testid="position-detail-page" className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <Link href="/positions" className="underline text-sm" data-testid="position-back">← Posizioni</Link>
-        <h1 className="text-2xl font-semibold mt-2" data-testid="position-title">{p.title}</h1>
-        <p className="text-sm opacity-70 font-mono" data-testid="position-code">{p.code}</p>
-      </header>
+    <main data-testid="position-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
+      <PageHeader
+        data-testid="position-title"
+        title={p.title}
+        breadcrumbs={
+          <Link href="/positions" data-testid="position-back" className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
+            ← Posizioni
+          </Link>
+        }
+        badges={
+          <>
+            <span data-testid="position-code" className="font-mono text-sm text-muted-foreground">{p.code}</span>
+            <StatusBadge value={p.criticality} />
+            <StatusPill tone={p.isActive ? "success" : "neutral"}>{p.isActive ? "Attiva" : "Inattiva"}</StatusPill>
+          </>
+        }
+      />
 
       <Card>
         <CardHeader><CardTitle>Position Intelligence Profile</CardTitle></CardHeader>
         <CardContent>
-          <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm" data-testid="position-fields">
-            <dt className="opacity-70">Position ID</dt>
-            <dd className="font-mono text-xs">{p.positionId}</dd>
-            <dt className="opacity-70">Tenant ID</dt>
-            <dd className="font-mono text-xs">{p.tenantId}</dd>
-            <dt className="opacity-70">Org Unit</dt>
-            <dd className="font-mono text-xs">{p.organizationUnitId ?? "—"}</dd>
-            <dt className="opacity-70">Job Role</dt>
-            <dd className="font-mono text-xs">{p.jobRoleId ?? "—"}</dd>
-            <dt className="opacity-70">Owner</dt>
-            <dd className="font-mono text-xs">{p.ownerUserId ?? "—"}</dd>
-            <dt className="opacity-70">Riferisce a</dt>
-            <dd className="font-mono text-xs">{p.reportsToPositionId ?? "—"}</dd>
-            <dt className="opacity-70">Criticità</dt>
-            <dd>{p.criticality ?? "—"}</dd>
-            <dt className="opacity-70">Peso economico</dt>
-            <dd>{p.economicWeight ?? "—"}</dd>
-            <dt className="opacity-70">Attiva</dt>
-            <dd>{p.isActive ? "sì" : "no"}</dd>
-            <dt className="opacity-70">In vigore dal</dt>
-            <dd>{p.effectiveFrom ?? "—"}</dd>
-          </dl>
+          <FieldGrid
+            testId="position-fields"
+            fields={[
+              { label: "Position ID", value: p.positionId, mono: true },
+              { label: "Tenant ID", value: p.tenantId, mono: true },
+              { label: "Org Unit", value: p.organizationUnitId ?? "—", mono: true },
+              { label: "Job Role", value: p.jobRoleId ?? "—", mono: true },
+              { label: "Owner", value: p.ownerUserId ?? "—", mono: true },
+              { label: "Riferisce a", value: p.reportsToPositionId ?? "—", mono: true },
+              { label: "Criticità", value: <StatusBadge value={p.criticality} /> },
+              { label: "Peso economico", value: p.economicWeight ?? "—" },
+              { label: "In vigore dal", value: p.effectiveFrom ?? "—" },
+              { label: "In vigore al", value: p.effectiveTo ?? "—" },
+            ]}
+          />
         </CardContent>
       </Card>
     </main>

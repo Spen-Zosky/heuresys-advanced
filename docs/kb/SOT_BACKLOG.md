@@ -61,7 +61,7 @@
 
 | ID | Azione | Note |
 |---|---|---|
-| **B-30** | Backup runner Windows | DEFERRED da S935-F; oggi solo OCI VM runner. Ridondanza CI. |
+| **B-30** | Backup runner Windows | ⚪ **WON'T-DO (su desktop) 2026-05-29** — analisi evidence-based: copre solo 4/6 gate (i 2 gate DB non possono girare comunque se la VM è giù, il DB è sulla VM); + rischio sicurezza alto (repo PUBBLICO → fork-PR code eseguibile sul PC primario). Non aumenta qualità funzionale/visuale MVP. Se mai si perseguisse: runner su VM/container **isolato**, non il desktop. |
 | **B-31** | ssh-agent persistence cross-session (CW-B62) | Eliminare il manual-launch passphrase: service-account key dedicata CI no-passphrase (richiede ADR per security trade-off) OR documentare flusso stabile. |
 
 ## P4 — Bias residui ereditati (da bias_registry.md, ora archive)

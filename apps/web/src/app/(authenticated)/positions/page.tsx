@@ -2,8 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { apiFetch } from "../../../lib/api/fetch";
+import { DataTablePanel, type DataColumn } from "../../../components/data-table-panel";
+import { StatusBadge, StatusPill } from "../../../components/status-pill";
 
 interface Position {
   positionId: string;
@@ -22,6 +23,25 @@ interface PositionsList {
   total: number;
 }
 
+const COLUMNS: DataColumn<Position>[] = [
+  { header: "Codice", cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
+  {
+    header: "Titolo",
+    cell: (p) => (
+      <Link href={`/positions/${p.positionId}`} data-testid="position-link" className="font-medium text-foreground underline-offset-2 hover:underline">
+        {p.title}
+      </Link>
+    ),
+  },
+  { header: "Criticità", cell: (p) => <StatusBadge value={p.criticality} /> },
+  {
+    header: "Attiva",
+    cell: (p) => (
+      <StatusPill tone={p.isActive ? "success" : "neutral"}>{p.isActive ? "Attiva" : "Inattiva"}</StatusPill>
+    ),
+  },
+];
+
 export default function PositionsListPage() {
   const positions = useQuery({
     queryKey: ["positions", "list"],
@@ -29,51 +49,25 @@ export default function PositionsListPage() {
   });
 
   return (
-    <main data-testid="positions-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="positions-title">Posizioni</h1>
-        <p className="text-sm opacity-70" data-testid="positions-count">
-          {positions.data ? `${positions.data.total} totali` : "Caricamento…"}
-        </p>
-      </header>
-
-      <Card>
-        <CardHeader><CardTitle>Elenco</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {positions.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : positions.isError ? (
-            <div className="p-6 text-red-600" data-testid="positions-error">Errore di caricamento.</div>
-          ) : positions.data && positions.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="positions-empty">Nessuna posizione.</div>
-          ) : (
-            <table className="w-full text-sm" data-testid="positions-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">Codice</th>
-                  <th className="px-4 py-2">Titolo</th>
-                  <th className="px-4 py-2">Criticità</th>
-                  <th className="px-4 py-2">Attiva</th>
-                </tr>
-              </thead>
-              <tbody>
-                {positions.data!.items.map((p) => (
-                  <tr key={p.positionId} className="border-b last:border-b-0" data-testid="positions-row">
-                    <td className="px-4 py-2 font-mono text-xs">{p.code}</td>
-                    <td className="px-4 py-2">
-                      <Link href={`/positions/${p.positionId}`} className="underline" data-testid="position-link">
-                        {p.title}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2 text-xs uppercase opacity-70">{p.criticality ?? "—"}</td>
-                    <td className="px-4 py-2 text-xs">{p.isActive ? "sì" : "no"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+    <DataTablePanel<Position>
+      pageTestId="positions-page"
+      titleTestId="positions-title"
+      countTestId="positions-count"
+      title="Posizioni"
+      description="Posizioni del tenant con criticità e stato."
+      count={positions.data ? `${positions.data.total} totali` : undefined}
+      isLoading={positions.isLoading}
+      isError={positions.isError}
+      errorTestId="positions-error"
+      errorMessage="Impossibile caricare le posizioni."
+      rows={positions.data?.items ?? []}
+      rowKey={(p) => p.positionId}
+      rowTestId="positions-row"
+      columns={COLUMNS}
+      emptyTestId="positions-empty"
+      emptyTitle="Nessuna posizione"
+      emptyDescription="Non ci sono posizioni nel tenant."
+      caption="Elenco posizioni"
+    />
   );
 }

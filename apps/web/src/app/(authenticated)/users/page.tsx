@@ -2,8 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { apiFetch } from "../../../lib/api/fetch";
+import { DataTablePanel, type DataColumn } from "../../../components/data-table-panel";
+import { StatusBadge } from "../../../components/status-pill";
 
 interface User {
   userId: string;
@@ -18,6 +19,20 @@ interface UsersList {
   total: number;
 }
 
+const COLUMNS: DataColumn<User>[] = [
+  {
+    header: "Nome",
+    cell: (u) => (
+      <Link href={`/users/${u.userId}`} data-testid="user-link" className="font-medium text-foreground underline-offset-2 hover:underline">
+        {u.displayName ?? "—"}
+      </Link>
+    ),
+  },
+  { header: "Email", cell: (u) => <span data-testid="user-email" className="text-muted-foreground">{u.email}</span> },
+  { header: "Stato", cell: (u) => <StatusBadge value={u.status} /> },
+  { header: "Tipo", cell: (u) => <span className="text-xs uppercase text-muted-foreground">{u.type}</span> },
+];
+
 export default function UsersListPage() {
   const users = useQuery({
     queryKey: ["users", "list"],
@@ -25,51 +40,25 @@ export default function UsersListPage() {
   });
 
   return (
-    <main data-testid="users-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="users-title">Utenti</h1>
-        <p className="text-sm opacity-70" data-testid="users-count">
-          {users.data ? `${users.data.total} totali` : "Caricamento…"}
-        </p>
-      </header>
-
-      <Card>
-        <CardHeader><CardTitle>Elenco</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {users.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : users.isError ? (
-            <div className="p-6 text-red-600" data-testid="users-error">Impossibile caricare gli utenti.</div>
-          ) : users.data && users.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="users-empty">Nessun utente nel tenant.</div>
-          ) : (
-            <table className="w-full text-sm" data-testid="users-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">Nome</th>
-                  <th className="px-4 py-2">Email</th>
-                  <th className="px-4 py-2">Stato</th>
-                  <th className="px-4 py-2">Tipo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.data!.items.map((u) => (
-                  <tr key={u.userId} className="border-b last:border-b-0" data-testid="users-row">
-                    <td className="px-4 py-2">
-                      <Link href={`/users/${u.userId}`} className="underline" data-testid="user-link">
-                        {u.displayName ?? "—"}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2" data-testid="user-email">{u.email}</td>
-                    <td className="px-4 py-2 text-xs uppercase opacity-70">{u.status}</td>
-                    <td className="px-4 py-2 text-xs uppercase opacity-70">{u.type}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+    <DataTablePanel<User>
+      pageTestId="users-page"
+      titleTestId="users-title"
+      countTestId="users-count"
+      title="Utenti"
+      description="Utenti del tenant con stato e tipo."
+      count={users.data ? `${users.data.total} totali` : undefined}
+      isLoading={users.isLoading}
+      isError={users.isError}
+      errorTestId="users-error"
+      errorMessage="Impossibile caricare gli utenti."
+      rows={users.data?.items ?? []}
+      rowKey={(u) => u.userId}
+      rowTestId="users-row"
+      columns={COLUMNS}
+      emptyTestId="users-empty"
+      emptyTitle="Nessun utente"
+      emptyDescription="Non ci sono utenti nel tenant."
+      caption="Elenco utenti"
+    />
   );
 }

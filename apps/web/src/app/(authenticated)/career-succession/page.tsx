@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../lib/api/fetch";
+import { PageHeader } from "@heuresys/ui";
+import { apiFetch } from "@/lib/api/fetch";
+import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { StatusBadge } from "@/components/status-pill";
 
 interface CareerPath {
   careerPathId: string;
@@ -29,6 +31,28 @@ interface SuccessorCandidate {
 }
 
 type Tab = "paths" | "pools" | "candidates";
+const TABS: ReadonlyArray<{ key: Tab; label: string }> = [
+  { key: "paths", label: "Career paths" },
+  { key: "pools", label: "Succession pools" },
+  { key: "candidates", label: "Candidati" },
+];
+
+const PATHS_COLS: DataColumn<CareerPath>[] = [
+  { header: "Codice", cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
+  { header: "Nome", cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
+  { header: "Difficoltà", cell: (p) => <StatusBadge value={p.difficulty} /> },
+];
+const POOLS_COLS: DataColumn<SuccessionPool>[] = [
+  { header: "Codice", cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
+  { header: "Nome", cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
+  { header: "Stato", cell: (p) => <StatusBadge value={p.status} /> },
+];
+const CANDIDATES_COLS: DataColumn<SuccessorCandidate>[] = [
+  { header: "User", cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.userId.slice(0, 8)}</span> },
+  { header: "Pool", cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.successionPoolId.slice(0, 8)}</span> },
+  { header: "Readiness", cell: (c) => <StatusBadge value={c.readinessLevel} /> },
+  { header: "Stato", cell: (c) => <StatusBadge value={c.status} /> },
+];
 
 export default function CareerSuccessionPage() {
   const [tab, setTab] = useState<Tab>("paths");
@@ -40,141 +64,77 @@ export default function CareerSuccessionPage() {
   });
   const pools = useQuery({
     queryKey: ["succession-pools"],
-    queryFn: () =>
-      apiFetch<{ items: SuccessionPool[]; total: number }>("/v1/succession-pools?limit=200"),
+    queryFn: () => apiFetch<{ items: SuccessionPool[]; total: number }>("/v1/succession-pools?limit=200"),
     enabled: tab === "pools",
   });
   const candidates = useQuery({
     queryKey: ["successor-candidates"],
-    queryFn: () =>
-      apiFetch<{ items: SuccessorCandidate[]; total: number }>(
-        "/v1/successor-candidates?limit=200",
-      ),
+    queryFn: () => apiFetch<{ items: SuccessorCandidate[]; total: number }>("/v1/successor-candidates?limit=200"),
     enabled: tab === "candidates",
   });
 
   return (
-    <main data-testid="career-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="career-title">Career & Succession</h1>
-      </header>
+    <main data-testid="career-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+      <PageHeader data-testid="career-title" title="Career & Succession" description="Percorsi di carriera, pool di successione e candidati." />
 
-      <nav className="border-b flex gap-4 text-sm" data-testid="career-tabs">
-        {(["paths", "pools", "candidates"] as Tab[]).map((k) => (
+      <nav className="flex gap-1 border-b border-border" data-testid="career-tabs">
+        {TABS.map((t) => (
           <button
-            key={k}
+            key={t.key}
             type="button"
-            onClick={() => setTab(k)}
-            data-testid={`career-tab-${k}`}
-            className={`px-3 py-2 ${tab === k ? "border-b-2 border-black font-medium" : "opacity-60"}`}
+            onClick={() => setTab(t.key)}
+            data-testid={`career-tab-${t.key}`}
+            className={`px-3 py-2 text-sm transition-colors ${tab === t.key ? "border-b-2 border-primary font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
-            {k === "paths" ? "Career paths" : k === "pools" ? "Succession pools" : "Candidati"}
+            {t.label}
           </button>
         ))}
       </nav>
 
       {tab === "paths" && (
-        <Card data-testid="career-content-paths">
-          <CardHeader><CardTitle>Career paths</CardTitle></CardHeader>
-          <CardContent className="p-0">
-            {paths.isLoading ? (
-              <div className="p-6 opacity-60">Caricamento…</div>
-            ) : paths.data && paths.data.items.length === 0 ? (
-              <div className="p-6 opacity-60" data-testid="career-paths-empty">
-                Nessun career path definito.
-              </div>
-            ) : (
-              <table className="w-full text-sm" data-testid="career-paths-table">
-                <thead>
-                  <tr className="text-left border-b">
-                    <th className="px-4 py-2">Codice</th>
-                    <th className="px-4 py-2">Nome</th>
-                    <th className="px-4 py-2">Difficoltà</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paths.data!.items.map((p) => (
-                    <tr key={p.careerPathId} className="border-b last:border-b-0" data-testid="career-paths-row">
-                      <td className="px-4 py-2 font-mono text-xs">{p.code}</td>
-                      <td className="px-4 py-2">{p.name}</td>
-                      <td className="px-4 py-2 text-xs">{p.difficulty ?? "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </CardContent>
-        </Card>
+        <div data-testid="career-content-paths">
+          <EntityTable<CareerPath>
+            isLoading={paths.isLoading}
+            isError={paths.isError}
+            rows={paths.data?.items ?? []}
+            rowKey={(p) => p.careerPathId}
+            rowTestId="career-paths-row"
+            columns={PATHS_COLS}
+            emptyTestId="career-paths-empty"
+            emptyTitle="Nessun career path definito"
+            caption="Career paths"
+          />
+        </div>
       )}
-
       {tab === "pools" && (
-        <Card data-testid="career-content-pools">
-          <CardHeader><CardTitle>Succession pools</CardTitle></CardHeader>
-          <CardContent className="p-0">
-            {pools.isLoading ? (
-              <div className="p-6 opacity-60">Caricamento…</div>
-            ) : pools.data && pools.data.items.length === 0 ? (
-              <div className="p-6 opacity-60" data-testid="career-pools-empty">
-                Nessuna pool registrata.
-              </div>
-            ) : (
-              <table className="w-full text-sm" data-testid="career-pools-table">
-                <thead>
-                  <tr className="text-left border-b">
-                    <th className="px-4 py-2">Codice</th>
-                    <th className="px-4 py-2">Nome</th>
-                    <th className="px-4 py-2">Stato</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pools.data!.items.map((p) => (
-                    <tr key={p.successionPoolId} className="border-b last:border-b-0" data-testid="career-pools-row">
-                      <td className="px-4 py-2 font-mono text-xs">{p.code}</td>
-                      <td className="px-4 py-2">{p.name}</td>
-                      <td className="px-4 py-2 text-xs uppercase">{p.status}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </CardContent>
-        </Card>
+        <div data-testid="career-content-pools">
+          <EntityTable<SuccessionPool>
+            isLoading={pools.isLoading}
+            isError={pools.isError}
+            rows={pools.data?.items ?? []}
+            rowKey={(p) => p.successionPoolId}
+            rowTestId="career-pools-row"
+            columns={POOLS_COLS}
+            emptyTestId="career-pools-empty"
+            emptyTitle="Nessuna pool registrata"
+            caption="Succession pools"
+          />
+        </div>
       )}
-
       {tab === "candidates" && (
-        <Card data-testid="career-content-candidates">
-          <CardHeader><CardTitle>Candidati alla succession</CardTitle></CardHeader>
-          <CardContent className="p-0">
-            {candidates.isLoading ? (
-              <div className="p-6 opacity-60">Caricamento…</div>
-            ) : candidates.data && candidates.data.items.length === 0 ? (
-              <div className="p-6 opacity-60" data-testid="career-candidates-empty">
-                Nessun candidato registrato.
-              </div>
-            ) : (
-              <table className="w-full text-sm" data-testid="career-candidates-table">
-                <thead>
-                  <tr className="text-left border-b">
-                    <th className="px-4 py-2">User</th>
-                    <th className="px-4 py-2">Pool</th>
-                    <th className="px-4 py-2">Readiness</th>
-                    <th className="px-4 py-2">Stato</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {candidates.data!.items.map((c) => (
-                    <tr key={c.successorCandidateId} className="border-b last:border-b-0" data-testid="career-candidates-row">
-                      <td className="px-4 py-2 font-mono text-xs">{c.userId.slice(0, 8)}</td>
-                      <td className="px-4 py-2 font-mono text-xs">{c.successionPoolId.slice(0, 8)}</td>
-                      <td className="px-4 py-2 text-xs uppercase">{c.readinessLevel ?? "—"}</td>
-                      <td className="px-4 py-2 text-xs uppercase">{c.status}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </CardContent>
-        </Card>
+        <div data-testid="career-content-candidates">
+          <EntityTable<SuccessorCandidate>
+            isLoading={candidates.isLoading}
+            isError={candidates.isError}
+            rows={candidates.data?.items ?? []}
+            rowKey={(c) => c.successorCandidateId}
+            rowTestId="career-candidates-row"
+            columns={CANDIDATES_COLS}
+            emptyTestId="career-candidates-empty"
+            emptyTitle="Nessun candidato registrato"
+            caption="Candidati alla succession"
+          />
+        </div>
       )}
     </main>
   );

@@ -2,8 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../lib/api/fetch";
+import { apiFetch } from "@/lib/api/fetch";
+import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 
 interface BlueprintVariant {
   blueprintVariantId: string;
@@ -18,6 +18,24 @@ interface BlueprintFamily {
   name: string;
   industryCode: string | null;
 }
+interface VariantRow extends BlueprintVariant {
+  famName: string | null;
+  industry: string | null;
+}
+
+const COLUMNS: DataColumn<VariantRow>[] = [
+  { header: "Codice", cell: (v) => <span className="font-mono text-xs text-muted-foreground">{v.code}</span> },
+  {
+    header: "Nome",
+    cell: (v) => (
+      <Link href={`/blueprints/${v.blueprintVariantId}`} data-testid="blueprint-link" className="font-medium text-foreground underline-offset-2 hover:underline">
+        {v.name}
+      </Link>
+    ),
+  },
+  { header: "Famiglia", cell: (v) => <span className="text-foreground">{v.famName ?? "—"}</span> },
+  { header: "Industry", cell: (v) => <span className="text-xs uppercase text-muted-foreground">{v.industry ?? "—"}</span> },
+];
 
 export default function BlueprintsPage() {
   const families = useQuery({
@@ -30,57 +48,31 @@ export default function BlueprintsPage() {
   });
   const familyById = new Map(families.data?.items.map((f) => [f.blueprintFamilyId, f]) ?? []);
 
-  return (
-    <main data-testid="blueprints-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="blueprints-title">Blueprint</h1>
-        <p className="text-sm opacity-70" data-testid="blueprints-count">
-          {variants.data ? `${variants.data.total} varianti` : "Caricamento…"}
-        </p>
-      </header>
+  const rows: VariantRow[] = (variants.data?.items ?? []).map((v) => {
+    const fam = familyById.get(v.familyId);
+    return { ...v, famName: fam?.name ?? null, industry: fam?.industryCode ?? null };
+  });
 
-      <Card>
-        <CardHeader><CardTitle>Varianti</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {variants.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : variants.data && variants.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="blueprints-empty">Nessuna variante.</div>
-          ) : (
-            <table className="w-full text-sm" data-testid="blueprints-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">Codice</th>
-                  <th className="px-4 py-2">Nome</th>
-                  <th className="px-4 py-2">Famiglia</th>
-                  <th className="px-4 py-2">Industry</th>
-                </tr>
-              </thead>
-              <tbody>
-                {variants.data!.items.map((v) => {
-                  const fam = familyById.get(v.familyId);
-                  return (
-                    <tr key={v.blueprintVariantId} className="border-b last:border-b-0" data-testid="blueprints-row">
-                      <td className="px-4 py-2 font-mono text-xs">{v.code}</td>
-                      <td className="px-4 py-2">
-                        <Link
-                          href={`/blueprints/${v.blueprintVariantId}`}
-                          className="underline"
-                          data-testid="blueprint-link"
-                        >
-                          {v.name}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-2 text-xs">{fam?.name ?? "—"}</td>
-                      <td className="px-4 py-2 text-xs">{fam?.industryCode ?? "—"}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
-    </main>
+  return (
+    <DataTablePanel<VariantRow>
+      pageTestId="blueprints-page"
+      titleTestId="blueprints-title"
+      countTestId="blueprints-count"
+      title="Blueprint"
+      description="Varianti di blueprint con famiglia e industry."
+      count={variants.data ? `${variants.data.total} varianti` : undefined}
+      isLoading={variants.isLoading || families.isLoading}
+      isError={variants.isError}
+      errorTestId="blueprints-error"
+      errorMessage="Impossibile caricare i blueprint."
+      rows={rows}
+      rowKey={(v) => v.blueprintVariantId}
+      rowTestId="blueprints-row"
+      columns={COLUMNS}
+      emptyTestId="blueprints-empty"
+      emptyTitle="Nessuna variante"
+      emptyDescription="Non ci sono varianti di blueprint."
+      caption="Varianti di blueprint"
+    />
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import { apiFetch } from "../../../lib/api/fetch";
+import { Badge, DataTableWithCrossHair, EmptyState, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { Inbox } from "lucide-react";
+import { apiFetch } from "@/lib/api/fetch";
+import { StatusBadge, StatusPill } from "@/components/status-pill";
 
 interface RewardGate {
   rewardGateId: string;
@@ -20,89 +22,94 @@ interface RewardGate {
   } | null;
 }
 
+const STATUSES = ["PASSED", "WARNING", "BLOCKED", "ESCALATED", "OVERRIDDEN_WITH_REASON", "PENDING"] as const;
+const STATUS_TONE: Record<(typeof STATUSES)[number], KpiCardData["iconTone"]> = {
+  PASSED: "success",
+  WARNING: "warning",
+  BLOCKED: "danger",
+  ESCALATED: "danger",
+  OVERRIDDEN_WITH_REASON: "palette-3",
+  PENDING: "info",
+};
+
 export default function CompensationIntelligencePage() {
   const gates = useQuery({
     queryKey: ["compensation", "reward-gates"],
-    queryFn: () =>
-      apiFetch<{ items: RewardGate[]; total: number }>(
-        "/v1/compensation/reward-gates?limit=200",
-      ),
+    queryFn: () => apiFetch<{ items: RewardGate[]; total: number }>("/v1/compensation/reward-gates?limit=200"),
   });
 
-  const counts = (gates.data?.items ?? []).reduce<Record<string, number>>((acc, g) => {
+  const items = gates.data?.items ?? [];
+  const counts = items.reduce<Record<string, number>>((acc, g) => {
     const k = g.latestResult?.status ?? "PENDING";
     acc[k] = (acc[k] ?? 0) + 1;
     return acc;
   }, {});
 
-  return (
-    <main data-testid="compensation-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="compensation-title">
-          Compensation intelligence
-        </h1>
-        <p className="text-sm opacity-70" data-testid="compensation-count">
-          {gates.data ? `${gates.data.total} reward gate registrati` : "Caricamento…"}
-        </p>
-      </header>
+  const statusItems: KpiCardData[] = STATUSES.map((s) => ({
+    label: s.replace(/_/g, " "),
+    value: <span data-testid={`compensation-status-${s}`}>{counts[s] ?? 0}</span>,
+    iconTone: STATUS_TONE[s],
+  }));
 
-      <section className="grid grid-cols-2 md:grid-cols-5 gap-4" data-testid="compensation-summary">
-        {(["PASSED", "WARNING", "BLOCKED", "ESCALATED", "OVERRIDDEN_WITH_REASON", "PENDING"] as const).map((s) => (
-          <Card key={s}>
-            <CardHeader><CardTitle className="text-sm">{s}</CardTitle></CardHeader>
-            <CardContent>
-              <p className="text-2xl font-semibold" data-testid={`compensation-status-${s}`}>
-                {counts[s] ?? 0}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+  return (
+    <main data-testid="compensation-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+      <PageHeader
+        data-testid="compensation-title"
+        title="Compensation intelligence"
+        description="Reward gate per stato di valutazione, sull'intero tenant."
+        badges={
+          <Badge variant="secondary" data-testid="compensation-count">
+            {gates.data ? `${gates.data.total} reward gate registrati` : "…"}
+          </Badge>
+        }
+      />
+
+      <section data-testid="compensation-summary">
+        <KPIStrip items={statusItems} />
       </section>
 
-      <Card>
-        <CardHeader><CardTitle>Reward gate</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {gates.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : gates.isError ? (
-            <div className="p-6 text-red-600" data-testid="compensation-error">
-              Accesso negato o errore.
-            </div>
-          ) : gates.data && gates.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="compensation-empty">
-              Nessun reward gate.
-            </div>
-          ) : (
-            <table className="w-full text-sm" data-testid="compensation-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">User</th>
-                  <th className="px-4 py-2">Gate</th>
-                  <th className="px-4 py-2">Periodo</th>
-                  <th className="px-4 py-2">Blocking</th>
-                  <th className="px-4 py-2">Stato</th>
+      {gates.isLoading ? (
+        <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">Caricamento…</div>
+      ) : gates.isError ? (
+        <div className="rounded-card border border-border bg-card p-6 text-sm text-destructive" data-testid="compensation-error">
+          Accesso negato o errore.
+        </div>
+      ) : items.length === 0 ? (
+        <EmptyState
+          data-testid="compensation-empty"
+          icon={<Inbox className="h-6 w-6" />}
+          title="Nessun reward gate"
+          description="Non ci sono reward gate registrati."
+        />
+      ) : (
+        <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
+          <DataTableWithCrossHair caption="Reward gate" className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
+                <th className="px-4 py-2">User</th>
+                <th className="px-4 py-2">Gate</th>
+                <th className="px-4 py-2">Periodo</th>
+                <th className="px-4 py-2">Blocking</th>
+                <th className="px-4 py-2">Stato</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {items.map((g) => (
+                <tr key={g.rewardGateId} data-testid="compensation-row" className="transition-colors hover:bg-muted/60">
+                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{g.userId?.slice(0, 8) ?? "—"}</td>
+                  <td className="px-4 py-2">
+                    <span className="font-mono text-xs">{g.catalogCode}</span>
+                    <span className="block text-xs text-muted-foreground">{g.catalogName}</span>
+                  </td>
+                  <td className="px-4 py-2 text-xs">{g.periodStart} → {g.periodEnd}</td>
+                  <td className="px-4 py-2"><StatusPill tone={g.isBlocking ? "warning" : "neutral"}>{g.isBlocking ? "Sì" : "No"}</StatusPill></td>
+                  <td className="px-4 py-2"><StatusBadge value={g.latestResult?.status ?? "PENDING"} /></td>
                 </tr>
-              </thead>
-              <tbody>
-                {gates.data!.items.map((g) => (
-                  <tr key={g.rewardGateId} className="border-b last:border-b-0" data-testid="compensation-row">
-                    <td className="px-4 py-2 font-mono text-xs">{g.userId?.slice(0, 8) ?? "—"}</td>
-                    <td className="px-4 py-2">
-                      <span className="font-mono text-xs">{g.catalogCode}</span>
-                      <span className="block opacity-70 text-xs">{g.catalogName}</span>
-                    </td>
-                    <td className="px-4 py-2 text-xs">{g.periodStart} → {g.periodEnd}</td>
-                    <td className="px-4 py-2 text-xs">{g.isBlocking ? "sì" : "no"}</td>
-                    <td className="px-4 py-2 text-xs uppercase">
-                      {g.latestResult?.status ?? "PENDING"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
+              ))}
+            </tbody>
+          </DataTableWithCrossHair>
+        </div>
+      )}
     </main>
   );
 }

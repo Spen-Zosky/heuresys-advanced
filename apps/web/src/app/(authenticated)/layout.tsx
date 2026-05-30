@@ -164,9 +164,16 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     },
   ];
 
-  const survivingAdmin: NavGroup[] = adminGroupDefs
-    .map((g) => ({ id: g.id, label: g.label, items: g.items.filter((i) => permSet.has(i.gate)).map((i) => i.node) }))
-    .filter((g) => g.items.length > 0);
+  // Hybrid gate: the admin section appears only for admin-class roles (hasAdminRole); WITHIN it each
+  // item is still per-permission filtered (mirrors the API requirePermission gate). A pure USER holds
+  // several *:read codes for ESS self-access (user/tenant/skill/learning/position/… :read), so
+  // per-permission gating ALONE would leak admin nav to employees — requiring an admin role first
+  // keeps the sidebar honest (pure USER → no admin section, no Dashboard).
+  const survivingAdmin: NavGroup[] = !hasAdminRole
+    ? []
+    : adminGroupDefs
+        .map((g) => ({ id: g.id, label: g.label, items: g.items.filter((i) => permSet.has(i.gate)).map((i) => i.node) }))
+        .filter((g) => g.items.length > 0);
   // "Dashboard" has no dedicated permission; surface it whenever the user has any admin reach.
   const overview: NavGroup[] = survivingAdmin.length > 0
     ? [{ id: "overview", label: "Overview", items: [item("dashboard", navLabel("nav-dashboard", "Dashboard"), "/dashboard", <LayoutDashboard className={ICON} />)] }]

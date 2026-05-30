@@ -2,7 +2,7 @@
 
 **Updated**: 2026-05-30 (S948 — brand-fidelity F4 charts **completo** + cleanup VM/swap).
 **Branch**: `main` — HEAD `804c3d0` = origin (pushed). **Last tag**: `v0.4.1-housekeeping-closed`.
-**CI**: `e09643b` (F4.1-F4.3) **tutti verdi incluso Playwright smoke** → swap 8G valida la mitigazione OOM. `804c3d0` (F4.4) in verifica al momento dell'handoff.
+**CI**: `e09643b` + `804c3d0` **tutti verdi (5/5 workflow ciascuno, Playwright incluso, 4m39s)** → swap 8G ha risolto l'OOM alla radice. F4 chiuso e validato in CI.
 
 ## Last session brief
 
@@ -17,10 +17,9 @@
 
 ## Top priorities (next session)
 
-1. **Verificare CI `804c3d0`** se non già confermata (`gh run list`); attesa verde come e09643b.
-2. **Brand-fidelity F5 ESS `/me/*`** (~10-14 pagine): pattern ESS branded (KPI, quick-actions, AuditFeed su /me/inbox, FormWizard). Pattern+boundary già pronti.
-3. **F6 admin**: `/admin/roles` già rende RbacMatrix (E2E closing-pages verde) — verificare fedeltà; `/system-health` conferma SystemHealthDashboard.
-4. **F7-refactor showcase** (richiede ok Enzo): spostare sorgente showcase in apps/showcase.
+1. **🔴 RTL TENANT REBUILD da dati legacy reali — PRIORITÀ #1.** SPEC completo: `docs/superpowers/specs/2026-05-30-rtl-tenant-rebuild.md`. Collassare il DB a **2 tenant** (`rtl-bank.org` reale + `heuresys.com`), agganciando gli user REALI a posizioni/org/assignment **importati dal legacy** (NON mapping sintetico), poi sanitizzare gli schemi. **Fonti scoperte** (workflow `wf_4445cc37-d22`): dump PostgreSQL freschi (mar-mag 2026) con FK chain intatta — il più ricco è **VM `/home/ubuntu/heuresys-evo/backups/local/heuresys_platform_20260507T030001Z.dump` (367MB) + DB Docker live `heuresys_evo_platform_db`** (270 empl/4 tenant, RTL 158); il più pulito **VM `/home/ubuntu/heuresys.com.evo` → `/home/ubuntu/backups/heuresys_platform_pre_esco_import_20260326…sql.gz`** (267 empl·47 org·20 jobs·100 assignments). Mapping legacy→v5 già pronto in `db/seeds/brownfield/wave1/04_column_mappings.sql`. **Phase 0 = pg_dump backup (rollback).** Vincoli: personas E2E `rtl-bank.test` + `admin@heuresys.com` intoccabili; DB condiviso; tabelle sensibili legacy senza tenant_id/RLS → estrarre con filtro esplicito.
+2. **Brand-fidelity F5 ESS `/me/*`** (~10-14 pagine): pattern ESS branded. (Dopo il rebuild — i dati ESS saranno reali.)
+3. **F6 admin** (`/admin/roles`→RbacMatrix già verde, verificare fedeltà) + **F7-refactor showcase** (ok Enzo).
 
 ## Open questions
 

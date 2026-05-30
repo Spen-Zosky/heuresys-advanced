@@ -42,20 +42,20 @@ describe("/v1/compensation/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "admin@heuresys.com");
-    tenantS = await login(suite, "tenant_admin_test@rtl-bank.test");
-    employeeS = await login(suite, "employee_test@rtl-bank.test");
+    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
 
     // Resolve tenant + position + user from the seed.
     const t = await pool.query<{ user_tenant_id: string; user_id: string }>(
       `SELECT user_tenant_id, user_id FROM sys.sys_users
-        WHERE lower(user_email) = lower('employee_test@rtl-bank.test') LIMIT 1`,
+        WHERE lower(user_email) = lower('tommaso.fiore@rtl-bank.org') LIMIT 1`,
     );
     testTenantId = t.rows[0]!.user_tenant_id;
     testEmployeeUserId = t.rows[0]!.user_id;
 
     const p = await pool.query<{ position_id: string }>(
       `SELECT position_id FROM sys.sys_positions
-        WHERE position_code = 'TEST_MGR_POS' AND position_tenant_id = $1 LIMIT 1`,
+        WHERE position_owner_user_id = (SELECT user_id FROM sys.sys_users WHERE lower(user_email) = 'paolo.caputo@rtl-bank.org') AND position_tenant_id = $1 LIMIT 1`,
       [testTenantId],
     );
     testPositionId = p.rows[0]!.position_id;

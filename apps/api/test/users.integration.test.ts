@@ -12,10 +12,10 @@ import { pool, closePool } from "../src/db/client.js";
 
 const PWD = "Admin#PassW0rd!";
 const PLATFORM_EMAIL = "admin@heuresys.com";
-const TENANT_ADMIN_EMAIL = "tenant_admin_test@rtl-bank.test";
-const MANAGER_EMAIL = "manager_test@rtl-bank.test";
-const EMPLOYEE_EMAIL = "employee_test@rtl-bank.test";
-const OUTSIDER_EMAIL = "outsider_test@rtl-bank.test";
+const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
+const MANAGER_EMAIL = "paolo.caputo@rtl-bank.org";
+const EMPLOYEE_EMAIL = "tommaso.fiore@rtl-bank.org";
+const OUTSIDER_EMAIL = "antonio.parisi@rtl-bank.org";
 
 const SUITE_PREFIX = `IT_USR_${randomUUID().slice(0, 8).toUpperCase()}`;
 
@@ -108,7 +108,7 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     expect(tenants.size).toBe(1);
   });
 
-  it("LIST: MANAGER sees only their team (employee + self = 2)", async () => {
+  it("LIST: MANAGER sees only their team (self + direct reports, tenant-scoped)", async () => {
     const r = await suite.app.inject({
       method: "GET",
       url: "/v1/users?limit=200",
@@ -116,11 +116,14 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { items: { userId: string; email: string }[]; total: number };
-    expect(body.total).toBe(2);
+    // paolo.caputo (manager persona) sees self + the incumbents of the positions he owns
+    // (his direct reports) — a small set, NOT the whole tenant (163+).
+    expect(body.total).toBeGreaterThanOrEqual(2);
+    expect(body.total).toBeLessThan(50);
     const emails = new Set(body.items.map((u) => u.email));
-    expect(emails.has(MANAGER_EMAIL)).toBe(true);
-    expect(emails.has(EMPLOYEE_EMAIL)).toBe(true);
-    expect(emails.has(OUTSIDER_EMAIL)).toBe(false);
+    expect(emails.has(MANAGER_EMAIL)).toBe(true); // self
+    expect(emails.has(EMPLOYEE_EMAIL)).toBe(true); // a direct report (tommaso.fiore)
+    expect(emails.has(OUTSIDER_EMAIL)).toBe(false); // different team (antonio, claudia's report)
   });
 
   it("LIST: USER sees only self", async () => {
@@ -270,7 +273,7 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     // Create a fresh disposable user as target. PLATFORM_ADMIN supplies
     // tenantId explicitly (their JWT carries tenant_id=null).
     const tenantRow = await pool.query<{ tenant_id: string }>(
-      `SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK_REFERENCE'`,
+      `SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'`,
     );
     const rtlTenantId = tenantRow.rows[0]!.tenant_id;
     const email = `${SUITE_PREFIX.toLowerCase()}_dx@rtl-bank.test`;

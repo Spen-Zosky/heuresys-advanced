@@ -38,9 +38,9 @@ const createdResultIds: string[] = [];
 describe("/v1/assessment-results integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "tenant_admin_test@rtl-bank.test");
-    managerS = await login(suite, "manager_test@rtl-bank.test");
-    outsiderS = await login(suite, "outsider_test@rtl-bank.test");
+    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    managerS = await login(suite, "paolo.caputo@rtl-bank.org");
+    outsiderS = await login(suite, "antonio.parisi@rtl-bank.org");
     const created = await suite.app.inject({
       method: "POST", url: "/v1/assessments",
       headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },

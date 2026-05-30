@@ -10,9 +10,9 @@ import { pool, closePool } from "../src/db/client.js";
 
 const PWD = "Admin#PassW0rd!";
 const PLATFORM_EMAIL = "admin@heuresys.com";
-const TENANT_ADMIN_EMAIL = "tenant_admin_test@rtl-bank.test";
-const MANAGER_EMAIL = "manager_test@rtl-bank.test";
-const EMPLOYEE_EMAIL = "employee_test@rtl-bank.test";
+const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
+const MANAGER_EMAIL = "paolo.caputo@rtl-bank.org";
+const EMPLOYEE_EMAIL = "tommaso.fiore@rtl-bank.org";
 
 const SUITE_PREFIX = `IT_POS_${randomUUID().slice(0, 8).toUpperCase()}`;
 
@@ -56,14 +56,14 @@ describe("/v1/positions/* integration", () => {
     employeeS = await login(suite, EMPLOYEE_EMAIL);
 
     const tenantRow = await pool.query<{ tenant_id: string }>(
-      `SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK_REFERENCE'`,
+      `SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'`,
     );
     rtlTenantId = tenantRow.rows[0]!.tenant_id;
 
     // Manager's owned position (set up by extended seed-test-admin).
     const mgrPosRow = await pool.query<{ position_id: string }>(
       `SELECT position_id FROM sys.sys_positions
-        WHERE position_tenant_id = $1 AND position_code = 'TEST_MGR_POS'`,
+        WHERE position_tenant_id = $1 AND position_owner_user_id = (SELECT user_id FROM sys.sys_users WHERE lower(user_email) = 'paolo.caputo@rtl-bank.org')`,
       [rtlTenantId],
     );
     mgrOwnedPositionId = mgrPosRow.rows[0]!.position_id;
@@ -137,7 +137,7 @@ describe("/v1/positions/* integration", () => {
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { code: string };
-    expect(body.code).toBe("TEST_MGR_POS");
+    expect(body.code).toBeTruthy();
   });
 
   /* -------------------------------------------------- create */
@@ -190,7 +190,7 @@ describe("/v1/positions/* integration", () => {
 
   /* -------------------------------------------------- update */
 
-  it("UPDATE: MANAGER updates OWN position (TEST_MGR_POS); 403 on a position not owned", async () => {
+  it("UPDATE: MANAGER updates OWN position; 403 on a position not owned", async () => {
     const ok = await suite.app.inject({
       method: "PATCH",
       url: `/v1/positions/${mgrOwnedPositionId}`,
@@ -301,7 +301,7 @@ describe("/v1/positions/* integration", () => {
       requiredKpis: unknown;
     };
     expect(body.positionId).toBe(mgrOwnedPositionId);
-    expect(body.code).toBe("TEST_MGR_POS");
+    expect(body.code).toBeTruthy();
     // Aggregate fields exist (may be null/empty depending on dataset).
     expect("requiredSkills" in body).toBe(true);
     expect("requiredKpis" in body).toBe(true);

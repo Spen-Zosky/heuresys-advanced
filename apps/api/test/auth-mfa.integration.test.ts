@@ -7,7 +7,7 @@
  *   step 2 (+ challengeToken + valid TOTP)      -> 200 { status: 'success' } + 3 cookies
  *
  * A throwaway verified TOTP factor is enrolled on a dedicated persona
- * (outsider_test@rtl-bank.test) in beforeAll and deleted in afterAll so the
+ * (antonio.parisi@rtl-bank.org) in beforeAll and deleted in afterAll so the
  * rest of the suite is unaffected. Does NOT closePool (shared across the
  * singleThread suite — owned by auth.integration.test.ts afterAll).
  */
@@ -19,7 +19,7 @@ import { COOKIES } from "../src/config/constants.js";
 import { sharedMfaService } from "../src/modules/auth/mfa-service.js";
 import * as mfaRepo from "../src/modules/auth/mfa-repository.js";
 
-const MFA_EMAIL = "outsider_test@rtl-bank.test";
+const MFA_EMAIL = "antonio.parisi@rtl-bank.org";
 const MFA_PASSWORD = "Admin#PassW0rd!";
 
 /** Generate the current 6-digit code from a base32 secret (matches mfa-service params). */

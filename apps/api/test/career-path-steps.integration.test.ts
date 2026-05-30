@@ -30,7 +30,7 @@ const createdPathIds: string[] = [];
 describe("/v1/career-path-steps integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "tenant_admin_test@rtl-bank.test");
+    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
 
     const pr = await suite.app.inject({
       method: "POST", url: "/v1/career-paths",

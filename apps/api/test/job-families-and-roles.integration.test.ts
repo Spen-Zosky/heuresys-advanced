@@ -32,8 +32,8 @@ describe("/v1/job-families + /v1/job-roles integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "admin@heuresys.com");
-    tenantS = await login(suite, "tenant_admin_test@rtl-bank.test");
-    employeeS = await login(suite, "employee_test@rtl-bank.test");
+    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });
 
   afterAll(async () => {
@@ -106,7 +106,7 @@ describe("/v1/job-families + /v1/job-roles integration", () => {
   });
 
   it("CREATE job-role as MANAGER → 403 (no job_role:create perm)", async () => {
-    const managerS = await login(suite, "manager_test@rtl-bank.test");
+    const managerS = await login(suite, "paolo.caputo@rtl-bank.org");
     const familyId = familyIds[0]!;
     const r = await suite.app.inject({
       method: "POST", url: "/v1/job-roles",

@@ -16,7 +16,7 @@ test.describe("MVP-2a ESS pages — live data", () => {
   test("/me/profile loads + saves a no-op PATCH", async ({ page }) => {
     await page.goto("/me/profile");
     await expect(page.getByTestId("me-profile-page")).toBeVisible();
-    await expect(page.getByTestId("me-profile-email")).toContainText("employee_test@rtl-bank.test");
+    await expect(page.getByTestId("me-profile-email")).toContainText("tommaso.fiore@rtl-bank.org");
     await expect(page.getByTestId("profile-displayName")).toBeVisible();
 
     // Trigger a mutation by touching the displayName field (toggle a suffix)

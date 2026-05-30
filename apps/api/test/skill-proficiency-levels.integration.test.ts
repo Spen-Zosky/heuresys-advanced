@@ -24,7 +24,7 @@ let userS: S;
 describe("/v1/skill-proficiency-levels/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    userS = await login(suite, "employee_test@rtl-bank.test");
+    userS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });
 
   afterAll(async () => {

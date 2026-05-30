@@ -27,7 +27,7 @@ describe("/v1/me/permissions", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     adminC = await login(suite, "admin@heuresys.com");
-    employeeC = await login(suite, "employee_test@rtl-bank.test");
+    employeeC = await login(suite, "tommaso.fiore@rtl-bank.org");
   });
   // Do NOT closePool here — the shared pool is owned by the wider suite.
   afterAll(async () => { await suite.app.close(); });

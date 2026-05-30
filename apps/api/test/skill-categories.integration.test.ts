@@ -30,7 +30,7 @@ describe("/v1/skill-categories/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "admin@heuresys.com");
-    tenantS = await login(suite, "tenant_admin_test@rtl-bank.test");
+    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
     const f = await suite.app.inject({
       method: "POST", url: "/v1/skill-families",
       headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },

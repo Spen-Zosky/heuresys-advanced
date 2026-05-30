@@ -36,8 +36,8 @@ const cleanups: Array<{ table: string; col: string; id: string }> = [];
 describe("/v1/me/* ESS endpoints", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    employeeS = await login(suite, "employee_test@rtl-bank.test");
-    outsiderS = await login(suite, "outsider_test@rtl-bank.test");
+    employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
+    outsiderS = await login(suite, "antonio.parisi@rtl-bank.org");
 
     const t = await pool.query<{ user_tenant_id: string }>(
       `SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1`, [employeeS.userId],
@@ -97,7 +97,7 @@ describe("/v1/me/* ESS endpoints", () => {
     expect(r.statusCode).toBe(200);
     const b = r.json() as { userId: string; email: string };
     expect(b.userId).toBe(employeeS.userId);
-    expect(b.email).toBe("employee_test@rtl-bank.test");
+    expect(b.email).toBe("tommaso.fiore@rtl-bank.org");
   });
 
   it("PATCH /v1/me/profile updates display_name + bio", async () => {

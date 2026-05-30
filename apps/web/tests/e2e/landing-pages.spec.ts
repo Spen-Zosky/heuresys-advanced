@@ -18,7 +18,7 @@ test.describe("MVP-2a landing pages — live data", () => {
       await expect(page).toHaveURL(/\/me$/);
 
       await expect(page.getByTestId("me-page")).toBeVisible();
-      await expect(page.getByTestId("me-email")).toContainText("employee_test@rtl-bank.test");
+      await expect(page.getByTestId("me-email")).toContainText("tommaso.fiore@rtl-bank.org");
       await expect(page.getByTestId("me-roles")).toContainText("USER");
       await expect(page.getByTestId("me-card-primary-position")).toBeVisible();
       await expect(page.getByTestId("me-card-learning")).toBeVisible();

@@ -37,9 +37,9 @@ let firstMethodId: string;
 describe("/v1/assessments integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "tenant_admin_test@rtl-bank.test");
-    managerS = await login(suite, "manager_test@rtl-bank.test");
-    outsiderS = await login(suite, "outsider_test@rtl-bank.test");
+    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    managerS = await login(suite, "paolo.caputo@rtl-bank.org");
+    outsiderS = await login(suite, "antonio.parisi@rtl-bank.org");
     const m = await pool.query<{ assessment_method_id: string }>(
       `SELECT assessment_method_id FROM sys.sys_assessment_methods ORDER BY assessment_method_code LIMIT 1`,
     );

@@ -29,7 +29,7 @@ describe("/v1/learning-modules/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "admin@heuresys.com");
-    tenantS = await login(suite, "tenant_admin_test@rtl-bank.test");
+    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
   });
 
   afterAll(async () => {

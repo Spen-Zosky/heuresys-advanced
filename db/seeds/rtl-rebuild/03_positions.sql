@@ -70,16 +70,30 @@ WHERE p.position_id = src.position_id
   AND src.legacy_manager_id IS NOT NULL
   AND mgr.position_id <> p.position_id;     -- no self-report
 
--- VERIFY (refinement passes, not yet authored): (a) cycle-detection on reports_to before trusting
---   the graph; (b) position_job_role_id via job-title -> sys_job_roles match + ESCO via
---   sys_esco_occupation_mappings; (c) owner_user_id = the manager position's incumbent (I1).
+-- 3) I1 ownership: a position is OWNED by the manager it reports to — i.e. the incumbent of its
+--    reports_to position. Owner != incumbent (I1). This makes each real manager own their team's
+--    positions, which drives the MANAGER TEAM-scope (dashboard widgets + position update authz).
+UPDATE sys.sys_positions p
+SET position_owner_user_id = mgr_inc.user_position_assignment_user_id, updated_at = now()
+FROM sys.sys_positions mgr_pos
+JOIN sys.sys_user_position_assignments mgr_inc
+     ON mgr_inc.user_position_assignment_position_id = mgr_pos.position_id
+    AND mgr_inc.user_position_assignment_kind = 'PRIMARY'
+    AND mgr_inc.user_position_assignment_status = 'ACTIVE'
+WHERE p.position_reports_to_position_id = mgr_pos.position_id
+  AND p.position_metadata ? 'legacy_employee_id'
+  AND p.position_owner_user_id IS DISTINCT FROM mgr_inc.user_position_assignment_user_id;
+
+-- VERIFY (further refinement, non-blocking): (a) cycle-detection on reports_to before trusting the
+--   graph; (b) position_job_role_id via job-title -> sys_job_roles + ESCO via sys_esco_occupation_mappings.
 
 DO $$
-DECLARE n int; ro int;
+DECLARE n int; ro int; ow int;
 BEGIN
   SELECT count(*) INTO n  FROM sys.sys_positions WHERE position_metadata ? 'legacy_employee_id';
   SELECT count(*) INTO ro FROM sys.sys_positions WHERE position_metadata ? 'legacy_employee_id' AND position_reports_to_position_id IS NOT NULL;
-  RAISE NOTICE 'Real positions created: % (expect ~162 = 158 rtl + 4 heuresys); with reports_to: %', n, ro;
+  SELECT count(*) INTO ow FROM sys.sys_positions WHERE position_metadata ? 'legacy_employee_id' AND position_owner_user_id IS NOT NULL;
+  RAISE NOTICE 'Real positions: % (expect ~162); with reports_to: %; owned-by-manager: %', n, ro, ow;
 END $$;
 
 COMMIT;

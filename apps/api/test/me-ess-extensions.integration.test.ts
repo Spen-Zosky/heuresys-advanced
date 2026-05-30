@@ -42,8 +42,8 @@ let insertedKpiEvidenceId: string | null = null;
 describe("/v1/me/{kpis,certifications,documents} ESS extensions", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    employeeS = await login(suite, "employee_test@rtl-bank.test");
-    outsiderS = await login(suite, "outsider_test@rtl-bank.test");
+    employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
+    outsiderS = await login(suite, "antonio.parisi@rtl-bank.org");
 
     const t = await pool.query<{ user_tenant_id: string }>(
       `SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1`,

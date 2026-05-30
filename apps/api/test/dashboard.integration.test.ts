@@ -29,9 +29,9 @@ describe("GET /v1/dashboard/widgets integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "admin@heuresys.com");
-    tenantS = await login(suite, "tenant_admin_test@rtl-bank.test");
-    managerS = await login(suite, "manager_test@rtl-bank.test");
-    employeeS = await login(suite, "employee_test@rtl-bank.test");
+    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    managerS = await login(suite, "paolo.caputo@rtl-bank.org");
+    employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });
 
   afterAll(async () => {
@@ -132,7 +132,7 @@ describe("GET /v1/dashboard/widgets integration", () => {
     };
     expect(body.role).toBe("MANAGER");
     expect(body.scope.kind).toBe("TEAM");
-    // manager_test owns TEST_MGR_POS (per seed-test-admin).
+    // paolo.caputo (manager persona) owns his team positions via the rebuild I1 ownership pass.
     expect(body.scope.teamPositionIds.length).toBeGreaterThanOrEqual(1);
     // positions count == owned positions count.
     expect(body.counters.positions).toBe(body.scope.teamPositionIds.length);

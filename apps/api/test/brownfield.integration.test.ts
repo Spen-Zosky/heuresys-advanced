@@ -50,7 +50,7 @@ describe("/v1/brownfield-* viewer", () => {
   });
 
   it("USER outsider lacks brownfield_adaptation:read → 403", async () => {
-    const outsider = await login(suite, "outsider_test@rtl-bank.test");
+    const outsider = await login(suite, "antonio.parisi@rtl-bank.org");
     const r = await suite.app.inject({
       method: "GET", url: "/v1/brownfield-source-exports",
       headers: { cookie: ch(outsider.cookies) },

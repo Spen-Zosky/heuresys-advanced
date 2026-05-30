@@ -69,7 +69,7 @@ describe("/v1/brownfield/wave-executor", () => {
   });
 
   it("USER outsider lacks brownfield_adaptation:read → 403 on list", async () => {
-    const outsider = await login(suite, "outsider_test@rtl-bank.test");
+    const outsider = await login(suite, "antonio.parisi@rtl-bank.org");
     const r = await suite.app.inject({
       method: "GET", url: "/v1/brownfield/wave-executor/runs",
       headers: { cookie: ch(outsider.cookies) },
@@ -78,7 +78,7 @@ describe("/v1/brownfield/wave-executor", () => {
   });
 
   it("USER lacks brownfield_adaptation:trigger → 403 on POST", async () => {
-    const outsider = await login(suite, "outsider_test@rtl-bank.test");
+    const outsider = await login(suite, "antonio.parisi@rtl-bank.org");
     const r = await suite.app.inject({
       method: "POST", url: "/v1/brownfield/wave-executor/runs",
       headers: {

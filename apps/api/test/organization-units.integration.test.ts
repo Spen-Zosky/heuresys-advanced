@@ -29,8 +29,8 @@ const createdIds: string[] = [];
 describe("/v1/organization-units/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "tenant_admin_test@rtl-bank.test");
-    employeeS = await login(suite, "employee_test@rtl-bank.test");
+    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });
 
   afterAll(async () => {

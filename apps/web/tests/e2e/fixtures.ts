@@ -25,19 +25,19 @@ export const PERSONAS = {
     expectedLandingPath: "/dashboard",
   },
   tenantAdmin: {
-    email: "tenant_admin_test@rtl-bank.test",
+    email: "federica.marchetti@rtl-bank.org",
     expectedLandingPath: "/dashboard",
   },
   manager: {
-    email: "manager_test@rtl-bank.test",
+    email: "paolo.caputo@rtl-bank.org",
     expectedLandingPath: "/dashboard",
   },
   employee: {
-    email: "employee_test@rtl-bank.test",
+    email: "tommaso.fiore@rtl-bank.org",
     expectedLandingPath: "/me",
   },
   outsider: {
-    email: "outsider_test@rtl-bank.test",
+    email: "antonio.parisi@rtl-bank.org",
     expectedLandingPath: "/me",
   },
 } as const satisfies Record<string, { email: string; expectedLandingPath: string }>;

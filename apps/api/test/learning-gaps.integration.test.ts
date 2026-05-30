@@ -29,8 +29,8 @@ const createdGapIds: string[] = [];
 describe("/v1/learning-gaps integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    tenantS = await login(suite, "tenant_admin_test@rtl-bank.test");
-    managerS = await login(suite, "manager_test@rtl-bank.test");
+    tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    managerS = await login(suite, "paolo.caputo@rtl-bank.org");
   });
 
   afterAll(async () => {

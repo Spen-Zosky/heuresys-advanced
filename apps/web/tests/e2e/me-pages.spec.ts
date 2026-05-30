@@ -3,8 +3,8 @@
  *
  * Live-data E2E for all 10 ESS pages under /me/* — each page calls a real
  * /v1/me/* endpoint and asserts the response renders. Uses storageState
- * for the employee_test persona (USER role, has primary position
- * TEST_SUB_POS in RTL_BANK tenant).
+ * for the employee persona (tommaso.fiore, USER role, primary assignment to a
+ * real POS-* position in RTL_BANK tenant — rebuilt from legacy).
  */
 
 import { test, expect } from "@playwright/test";
@@ -38,13 +38,14 @@ test.describe("MVP-2a ESS pages — live data", () => {
     expect(patchResp.status()).toBe(200);
   });
 
-  test("/me/positions shows TEST_SUB_POS primary assignment", async ({ page }) => {
+  test("/me/positions shows the employee's real primary assignment", async ({ page }) => {
     await page.goto("/me/positions");
     await expect(page.getByTestId("me-positions-page")).toBeVisible();
     await expect(page.getByTestId("me-positions-count")).toContainText(/\d+\s+assegnazioni/);
     const rows = page.getByTestId("me-position-row");
     await expect(rows.first()).toBeVisible();
-    await expect(rows.first()).toContainText("TEST_SUB_POS");
+    // Rebuilt real positions are coded POS-<pernr|id>; the synthetic TEST_SUB_POS no longer exists.
+    await expect(rows.first()).toContainText("POS-");
   });
 
   test("/me/skills renders (empty state OK if no evidence yet)", async ({ page }) => {

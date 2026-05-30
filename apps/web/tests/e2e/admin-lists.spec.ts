@@ -2,7 +2,7 @@
  * apps/web/tests/e2e/admin-lists.spec.ts
  *
  * Live-data E2E for /users, /users/[id], /positions, /positions/[id]
- * against the seeded RTL_BANK_REFERENCE tenant (158 personas + 158 positions).
+ * against the RTL_BANK tenant (158 real rtl-bank.org users + their positions).
  * Uses storageState (auth.setup.ts) to avoid /v1/auth/login rate limit.
  */
 

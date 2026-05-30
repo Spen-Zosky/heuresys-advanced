@@ -83,7 +83,7 @@ describe("/v1/users/* integration (4-tier scope)", () => {
 
   /* -------------------------------------------------- list scope tiers */
 
-  it("LIST: PLATFORM_ADMIN sees all users in DB (≥ 163 = synthetic seed + fixtures)", async () => {
+  it("LIST: PLATFORM_ADMIN sees all users in DB (161 real users post-collapse)", async () => {
     const r = await suite.app.inject({
       method: "GET",
       url: "/v1/users?limit=200",
@@ -91,7 +91,7 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { total: number };
-    expect(body.total).toBeGreaterThanOrEqual(163);
+    expect(body.total).toBeGreaterThanOrEqual(161);
   });
 
   it("LIST: TENANT_ADMIN sees only own-tenant users", async () => {
@@ -102,7 +102,7 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { items: { tenantId: string }[]; total: number };
-    expect(body.total).toBeGreaterThanOrEqual(163);
+    expect(body.total).toBeGreaterThanOrEqual(158); // RTL_BANK = 158 real rtl-bank.org users
     // All returned items must be in RTL tenant.
     const tenants = new Set(body.items.map((u) => u.tenantId));
     expect(tenants.size).toBe(1);

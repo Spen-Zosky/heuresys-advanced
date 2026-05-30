@@ -301,10 +301,14 @@ describe("/v1/auth/* integration", () => {
   /* -------------------------------------------------- admin revoke */
 
   it("POST /admin/revoke-user as PLATFORM_ADMIN returns 204 + writes REVOKED_BY_ADMIN audit", async () => {
-    // Pick any synthetic user from RTL_BANK as the target (no real auth impact).
+    // Pick a real non-persona RTL_BANK user as the target (synthetic users no longer exist post-rebuild).
     const targetRow = await pool.query<{ user_id: string }>(
       `SELECT user_id FROM sys.sys_users
-        WHERE user_is_synthetic = true ORDER BY user_id LIMIT 1`,
+        WHERE split_part(user_email, '@', 2) = 'rtl-bank.org'
+          AND lower(user_email) NOT IN (
+            'federica.marchetti@rtl-bank.org','paolo.caputo@rtl-bank.org',
+            'tommaso.fiore@rtl-bank.org','antonio.parisi@rtl-bank.org')
+        ORDER BY user_id LIMIT 1`,
     );
     expect(targetRow.rows.length).toBe(1);
     const targetUserId = targetRow.rows[0]!.user_id;

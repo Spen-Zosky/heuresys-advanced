@@ -123,7 +123,7 @@ describe("/v1/positions/* integration", () => {
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { total: number; items: { tenantId: string }[] };
-    expect(body.total).toBeGreaterThanOrEqual(161); // 158 synthetic + 3 test
+    expect(body.total).toBeGreaterThanOrEqual(158); // 158 real rtl positions (own tenant)
     const tenants = new Set(body.items.map((p) => p.tenantId));
     expect(tenants.size).toBe(1);
     expect([...tenants][0]).toBe(rtlTenantId);

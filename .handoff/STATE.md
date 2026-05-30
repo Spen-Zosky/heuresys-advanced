@@ -1,31 +1,31 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-30 (S949). **Branch**: `main` HEAD = handoff commit. **3 commit locali NON pushati** (`edbe078` SQL set, `dc49d9b` D4 code, + questo handoff) — push in attesa di ok esplicito. **CI**: ultima verde su `eb55058` (i commit S949 sono draft, non eseguiti contro il DB).
+**Updated**: 2026-05-30 (S950). **Branch**: `main` HEAD `2b898d2` = synced with origin. **CI 5/5 GREEN** on `bad989f` (test-integration + playwright-smoke, entrambi rossi a S949, ora verdi). Working tree: solo la proposta SuccessFactors uncommitted (vedi Open questions).
 
 ## Last session brief
 
-- **RTL tenant rebuild — Phase 0/1/2 (read-only, zero scritture DB).** Backup `pg_dump_snapshots/heuresys_advanced_pre-rtl-rebuild_eb55058_20260530.dump` (417MB) + provenance. Enumerazione live (6 scout) → **insight chiave: è match-and-wire, non re-import** (158 user reali già 100%-matchati via `user_external_code='LEGACY:'||users.id`; HR history + tassonomia ESCO già migrate). Proposta `docs/superpowers/specs/2026-05-30-rtl-tenant-rebuild-import-design.md` con **8 decisioni risolte** (§0). Snapshot canonico confermato = **live Docker `heuresys_evo_platform_db`**.
-- **SQL seed set draftato** (`edbe078`): `db/seeds/rtl-rebuild/` 00-10 + README, idempotenti, FK-safe, assert KEEP=161/DELETE=272. Solo `09` distruttivo (gated). NON eseguito.
-- **D4 RBAC→UI** (`dc49d9b`): endpoint `GET /v1/me/permissions` + sidebar per-permesso (`layout.tsx`). Typecheck verde + 3/3 test verdi (`me-permissions.integration.test.ts`).
+- **🟢 RTL TENANT REBUILD ESEGUITO + validato + pushato.** DB collassato a **161 utenti / 2 tenant** (RTL_BANK ex-`86ba7a65` + nuovo HEURESYS), org reale wired da legacy: 162 posizioni (157 owned-by-manager I1), 160 assignment, 26 OU, 3180 attendance IMPORT, comp/skills/certs/RBAC. Seed `db/seeds/rtl-rebuild/00..10` (corretti: 8 difetti B1-B8). **D6 corretto**: le righe SYSTEM attendance erano dati legacy REALI → rietichettate, non cancellate. `09` distruttivo eseguito single-tx (assert 161/272 ✓). Backup `…pre-09-collapse_a892b81…` + Phase-0.
+- **D3 persone → utenti reali**: tenantAdmin=federica.marchetti, manager=paolo.caputo, employee=tommaso.fiore (report di paolo), outsider=antonio.parisi; admin@heuresys.com invariato. `seed-test-admin.ts` refactored (auth persone reali). **40 file test API** + fixtures + CI playwright-smoke migrati. API **354/0**, prod E2E **138/0**.
+- **2 fix pre-esistenti** emersi dalla validazione: **D4 gate-semantics** risolto (hybrid gate `hasAdminRole` in `layout.tsx`, `b62b441`); **login rate-limit** env-tunable `AUTH_LOGIN_RATELIMIT_MAX` (default prod 10, `bad989f`). 7 commit pushati `3df1f6a..2b898d2`.
 
 ## Top priorities (next session)
 
-1. **🔴 RTL REBUILD — eseguire la WRITE** (sessione dedicata): backup fresco → `00`→`08` → `09` (gated, dry-run COUNT prima) → `10` → re-seed + test. Vedi README `db/seeds/rtl-rebuild/`. **Push dei 3 commit draft prima/dopo (chiedi a Enzo).**
-2. **Finire layer codice D4/D3**: re-wire personas E2E su utenti reali (`fixtures.ts`+`auth.setup.ts`, post-08) + aggiornare test E2E nav-visibility al nuovo gating.
-3. **Brand-fidelity F5 ESS / F6 admin / F7 showcase** (~6-8h) — dopo il rebuild (dati ESS reali).
+1. **Brand-fidelity F5 ESS / F6 admin / F7 showcase** (~6-8h) — ora sbloccato: l'ESS ha dati reali post-rebuild. Vedi `memory/project_brand_fidelity_migration.md`.
+2. **Decidere proposta SuccessFactors** (working tree, vedi Open questions) — adottare design + aprire item `SOT_BACKLOG.md`?
+3. **(opz.) Refinement posizioni**: job_role/ESCO sulle 162 posizioni reali + cycle-detection su reports_to + 2 posizioni con OU NULL (employee su OU legacy esclusi). 03 li ha deferiti.
 
 ## Open questions
 
-- **D4 gate-semantics** (finding S949): il ruolo USER ha 12 read non-self nel seed → gating per-`:read` espone a USER quasi tutta la sidebar admin. Decidere: tenere `:read` / gate più stretto su governance / fixare i grant seed. Tweak piccolo a `layout.tsx`.
+- **SuccessFactors connector** (uncommitted: `docs/integrations/successfactors_…md` + `docs/kb/COWORK_INBOX.md`): design riconciliato (pattern β brownfield-new-source + γ SDBI). 2 flag invariante da decidere: 🔴 I12 (PII reale vs brownfield no-PII) + ⚠️ I3/I4 (`staging.sf_*`). Adottare nel repo + backlog item?
 
 ## Stack snapshot
 
-- 3 commit S949 draft non pushati su `main` (origin = `eb55058`). Estrazione legacy: `db/seeds/rtl-rebuild/00_extract_legacy_subset.sh` (CSV in `extracted/`, gitignored). Connessione legacy read-only: `ssh oracle-vm-default bash <<'OUTER' docker exec -i heuresys_evo_platform_db sh -c '...psql...' <<'INNER' ... INNER OUTER`.
-- HEAD precedente `eb55058`. VM swap 8G. EChartsCard solo via `_charts-client`. E2E in prod build. Tunnel DB :5433 hands-off (ADR-0021).
+- DB: 161 utenti / 2 tenant ACTIVE (RTL_BANK + HEURESYS), org reale wired. origin/main `2b898d2`, CI verde.
+- Full local E2E: serve `AUTH_LOGIN_RATELIMIT_MAX=<alto>` (la suite supera il cap 10/5min). Prod-build E2E via `next build`+`next start` (dev-mode flaky su Windows first-compile). Tunnel :5433 hands-off (ADR-0021).
 
 ## Verification (next session)
 ```bash
-nc -z localhost 5433                                          # tunnel
-git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # 3 commit = draft non pushati
-gh run list --limit 6                                         # CI
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "select count(*) from sys.sys_users"  # 161
+git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
+gh run list --limit 6                                         # CI verde
 ```

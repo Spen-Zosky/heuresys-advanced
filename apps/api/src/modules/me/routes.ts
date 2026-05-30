@@ -23,9 +23,10 @@ import {
   MeKpisResponseSchema,
   MeCertificationsResponseSchema, MeCertificationSchema, CreateMeCertificationBodySchema,
   MeDocumentsResponseSchema,
+  MePermissionsResponseSchema,
 } from "@heuresys/shared";
 import { meService, type SelfActor } from "./service.js";
-import { requirePermission } from "../../middleware/rbac.js";
+import { requirePermission, userPermissionCodes } from "../../middleware/rbac.js";
 import { UnauthorizedError } from "../../errors/index.js";
 
 function selfActor(req: FastifyRequest): SelfActor {
@@ -34,6 +35,16 @@ function selfActor(req: FastifyRequest): SelfActor {
 }
 
 export const meRoutes: FastifyPluginAsyncZod = async (app) => {
+  // Caller's own RBAC permission codes — drives the web sidebar (mirrors the API requirePermission
+  // gate). Authenticated-only (reflects self); intentionally no requirePermission so every role can
+  // read its own grants.
+  app.get("/permissions", {
+    schema: { response: { 200: MePermissionsResponseSchema } },
+  }, async (req) => {
+    const actor = selfActor(req);
+    return { roles: actor.roles, permissions: userPermissionCodes({ roles: actor.roles }) };
+  });
+
   app.get("/profile", {
     preHandler: [requirePermission("user_profile:read:self")],
     schema: { response: { 200: MeProfileSchema } },

@@ -38,6 +38,14 @@ export const UpdateMeProfileBodySchema = z.object({
 });
 export type UpdateMeProfileBody = z.infer<typeof UpdateMeProfileBodySchema>;
 
+/* --- permissions (RBAC -> UI gating; reflects the caller's OWN grants) ---- */
+
+export const MePermissionsResponseSchema = z.object({
+  roles: z.array(z.string()),
+  permissions: z.array(z.string()),
+});
+export type MePermissionsResponse = z.infer<typeof MePermissionsResponseSchema>;
+
 /* --- positions -------------------------------------------------------- */
 
 export const MePositionAssignmentSchema = z.object({

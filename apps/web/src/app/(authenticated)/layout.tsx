@@ -34,7 +34,7 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { useCurrentUser, useLogout } from "../../lib/api/auth";
+import { useCurrentUser, useCurrentUserPermissions, useLogout } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 
 const ADMIN_ROLES = new Set([
@@ -58,8 +58,9 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const pathname = usePathname() ?? "";
   const me = useCurrentUser();
   const logout = useLogout();
+  const perms = useCurrentUserPermissions();
 
-  if (me.isLoading) {
+  if (me.isLoading || perms.isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <span data-testid="app-loading" className="text-sm opacity-60">Caricamento…</span>
@@ -109,58 +110,68 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     ],
   };
 
-  const adminGroups: NavGroup[] = [
-    {
-      id: "overview",
-      label: "Overview",
-      items: [
-        item("dashboard", navLabel("nav-dashboard", "Dashboard"), "/dashboard", <LayoutDashboard className={ICON} />),
-      ],
-    },
+  // Per-permission nav gating: each admin item declares the permission code that gates it,
+  // mirroring the API requirePermission gate. Items the user lacks are filtered out and empty
+  // groups dropped. The permission set comes from GET /v1/me/permissions (D4 RBAC->UI port).
+  const permSet = new Set(perms.data?.permissions ?? []);
+  type GatedItem = { gate: string; node: ReturnType<typeof item> };
+  const gItem = (id: string, label: ReactNode, href: string, icon: ReactNode, gate: string): GatedItem => ({
+    gate,
+    node: item(id, label, href, icon),
+  });
+
+  const adminGroupDefs: { id: string; label: string; items: GatedItem[] }[] = [
     {
       id: "workforce",
       label: "Workforce",
       items: [
-        item("positions", navLabel("nav-positions", "Posizioni"), "/positions", <Briefcase className={ICON} />),
-        item("skills", "Competenze", "/skills", <Layers className={ICON} />),
-        item("gaps", "Gap", "/gaps", <TriangleAlert className={ICON} />),
-        item("career-succession", "Carriera & successione", "/career-succession", <TrendingUp className={ICON} />),
-        item("learning", "Formazione", "/learning", <GraduationCap className={ICON} />),
+        gItem("positions", navLabel("nav-positions", "Posizioni"), "/positions", <Briefcase className={ICON} />, "position:read"),
+        gItem("skills", "Competenze", "/skills", <Layers className={ICON} />, "skill:read"),
+        gItem("gaps", "Gap", "/gaps", <TriangleAlert className={ICON} />, "gap_analysis:read"),
+        gItem("career-succession", "Carriera & successione", "/career-succession", <TrendingUp className={ICON} />, "career_succession:read"),
+        gItem("learning", "Formazione", "/learning", <GraduationCap className={ICON} />, "learning:read"),
       ],
     },
     {
       id: "operations",
       label: "Operations",
       items: [
-        item("blueprints", "Blueprint", "/blueprints", <FileText className={ICON} />),
-        item("processes", "Processi", "/processes", <GitBranch className={ICON} />),
-        item("brownfield", "Brownfield", "/brownfield-adaptation", <Database className={ICON} />),
-        item("seeds", "Seed acquisition", "/seed-acquisition/runs", <Sprout className={ICON} />),
+        gItem("blueprints", "Blueprint", "/blueprints", <FileText className={ICON} />, "blueprint:read"),
+        gItem("processes", "Processi", "/processes", <GitBranch className={ICON} />, "bpm_process:read"),
+        gItem("brownfield", "Brownfield", "/brownfield-adaptation", <Database className={ICON} />, "brownfield_adaptation:read"),
+        gItem("seeds", "Seed acquisition", "/seed-acquisition/runs", <Sprout className={ICON} />, "seed_acquisition:read"),
       ],
     },
     {
       id: "intelligence",
       label: "Intelligence",
       items: [
-        item("kpis", "KPI", "/kpis", <Gauge className={ICON} />),
-        item("comp", "Compensation", "/compensation-intelligence", <Coins className={ICON} />),
-        item("viz", "Visualizzazioni", "/visualizations", <Network className={ICON} />),
-        item("org", "Organizzazione", "/organization", <Building2 className={ICON} />),
+        gItem("kpis", "KPI", "/kpis", <Gauge className={ICON} />, "kpi:read"),
+        gItem("comp", "Compensation", "/compensation-intelligence", <Coins className={ICON} />, "compensation_intelligence:read"),
+        gItem("viz", "Visualizzazioni", "/visualizations", <Network className={ICON} />, "visualization:read"),
+        gItem("org", "Organizzazione", "/organization", <Building2 className={ICON} />, "organization_unit:read"),
       ],
     },
     {
       id: "governance",
       label: "Governance",
       items: [
-        item("tenants", "Tenant", "/tenants", <Building2 className={ICON} />),
-        item("users", navLabel("nav-users", "Utenti"), "/users", <Users className={ICON} />),
-        item("roles", "Ruoli", "/admin/roles", <ShieldCheck className={ICON} />),
-        item("system-health", "System health", "/system-health", <Activity className={ICON} />),
+        gItem("tenants", "Tenant", "/tenants", <Building2 className={ICON} />, "tenant:read"),
+        gItem("users", navLabel("nav-users", "Utenti"), "/users", <Users className={ICON} />, "user:read"),
+        gItem("roles", "Ruoli", "/admin/roles", <ShieldCheck className={ICON} />, "role:read"),
+        gItem("system-health", "System health", "/system-health", <Activity className={ICON} />, "tenant:read"),
       ],
     },
   ];
 
-  const groups: NavGroup[] = hasAdminRole ? [...adminGroups, meGroup] : [meGroup];
+  const survivingAdmin: NavGroup[] = adminGroupDefs
+    .map((g) => ({ id: g.id, label: g.label, items: g.items.filter((i) => permSet.has(i.gate)).map((i) => i.node) }))
+    .filter((g) => g.items.length > 0);
+  // "Dashboard" has no dedicated permission; surface it whenever the user has any admin reach.
+  const overview: NavGroup[] = survivingAdmin.length > 0
+    ? [{ id: "overview", label: "Overview", items: [item("dashboard", navLabel("nav-dashboard", "Dashboard"), "/dashboard", <LayoutDashboard className={ICON} />)] }]
+    : [];
+  const groups: NavGroup[] = [...overview, ...survivingAdmin, meGroup];
 
   const displayName = user.displayName?.trim() || user.email;
   const initials = (

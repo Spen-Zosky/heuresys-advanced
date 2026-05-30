@@ -37,6 +37,19 @@ export function userHasPermission(user: { roles: RoleCode[] }, permissionCode: s
   return false;
 }
 
+/**
+ * Flattened, de-duplicated, sorted set of permission codes the user holds across
+ * all their roles. Backs GET /v1/me/permissions, which drives per-item sidebar gating.
+ */
+export function userPermissionCodes(user: { roles: readonly string[] }): string[] {
+  const out = new Set<string>();
+  for (const role of user.roles) {
+    const perms = rolePermissionCache.get(role as RoleCode);
+    if (perms) for (const p of perms) out.add(p);
+  }
+  return Array.from(out).sort();
+}
+
 export function requirePermission(permissionCode: string): preHandlerAsyncHookHandler {
   return async (req: FastifyRequest, _reply: FastifyReply) => {
     if (!isRolePermissionCacheLoaded()) {

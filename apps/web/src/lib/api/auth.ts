@@ -63,6 +63,26 @@ export function useCurrentUser() {
   });
 }
 
+export interface MePermissions {
+  roles: string[];
+  permissions: string[];
+}
+
+export const ME_PERMISSIONS_QUERY_KEY = ["me", "permissions"] as const;
+
+/**
+ * The caller's own flattened RBAC permission codes (GET /v1/me/permissions).
+ * Drives per-item sidebar gating so the UI mirrors the API's requirePermission gate.
+ */
+export function useCurrentUserPermissions() {
+  return useQuery({
+    queryKey: ME_PERMISSIONS_QUERY_KEY,
+    queryFn: ({ signal }) => apiFetch<MePermissions>("/v1/me/permissions", { signal }),
+    staleTime: 60_000,
+    retry: 0,
+  });
+}
+
 export function useLogin() {
   const qc = useQueryClient();
   return useMutation({

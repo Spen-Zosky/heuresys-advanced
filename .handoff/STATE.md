@@ -1,31 +1,31 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-30 (S948). **Branch**: `main` HEAD `844a736` = origin. **CI**: 5/5 verde (F4 incl. Playwright; swap 8G ha risolto l'OOM).
+**Updated**: 2026-05-30 (S949). **Branch**: `main` HEAD = handoff commit. **3 commit locali NON pushati** (`edbe078` SQL set, `dc49d9b` D4 code, + questo handoff) — push in attesa di ok esplicito. **CI**: ultima verde su `eb55058` (i commit S949 sono draft, non eseguiti contro il DB).
 
 ## Last session brief
 
-- **Brand-fidelity F4 charts COMPLETO** (4 fasi pushate `f13f472`→`804c3d0`): compensation/career/visualizations/org-chart con EChartsCard via boundary `(authenticated)/_charts-client.tsx` (`ssr:false`, gate CW-B59 ok) + bugfix interfacce stale viz. API-first, E2E prod verde ogni fase.
-- **Cleanup VM** (~6G) + **swap 4→8G** → OOM CI risolto alla radice. VM+Mac allineati al codice.
-- **Analisi inquinamento DB tenant/user**: 433 user/1 tenant da fasi diverse; 2 dataset RTL incoerenti (rtl-bank.org REALE ma non-wired vs rtl-bank-reference SINTETICO wired). **Discovery legacy** (workflow `wf_4445cc37-d22`) ha trovato dump PostgreSQL freschi (mar-mag 2026) con FK chain reali.
+- **RTL tenant rebuild — Phase 0/1/2 (read-only, zero scritture DB).** Backup `pg_dump_snapshots/heuresys_advanced_pre-rtl-rebuild_eb55058_20260530.dump` (417MB) + provenance. Enumerazione live (6 scout) → **insight chiave: è match-and-wire, non re-import** (158 user reali già 100%-matchati via `user_external_code='LEGACY:'||users.id`; HR history + tassonomia ESCO già migrate). Proposta `docs/superpowers/specs/2026-05-30-rtl-tenant-rebuild-import-design.md` con **8 decisioni risolte** (§0). Snapshot canonico confermato = **live Docker `heuresys_evo_platform_db`**.
+- **SQL seed set draftato** (`edbe078`): `db/seeds/rtl-rebuild/` 00-10 + README, idempotenti, FK-safe, assert KEEP=161/DELETE=272. Solo `09` distruttivo (gated). NON eseguito.
+- **D4 RBAC→UI** (`dc49d9b`): endpoint `GET /v1/me/permissions` + sidebar per-permesso (`layout.tsx`). Typecheck verde + 3/3 test verdi (`me-permissions.integration.test.ts`).
 
 ## Top priorities (next session)
 
-1. **🔴 RTL TENANT REBUILD — #1.** SPEC completo: `docs/superpowers/specs/2026-05-30-rtl-tenant-rebuild.md`. Collassare a 2 tenant (rtl-bank.org reale + heuresys.com), wirare user reali a posizioni/org **importati dal legacy** (NON sintetico), ricablare personas E2E su utenti reali, portare logica RBAC→UI dal legacy, sanitizzare schemi. **Phase 0 = pg_dump backup.** Fonte ⭐ VM `/home/ubuntu/heuresys-evo` dump 7-mag (367MB, 270 empl/4 tenant) + DB Docker live. Memoria: `project-rtl-tenant-rebuild`.
-2. **Brand-fidelity F5 ESS `/me/*`** (~6-8h) + **F6 admin** + **F7-refactor showcase** (ok Enzo). Dopo il rebuild (dati ESS reali).
+1. **🔴 RTL REBUILD — eseguire la WRITE** (sessione dedicata): backup fresco → `00`→`08` → `09` (gated, dry-run COUNT prima) → `10` → re-seed + test. Vedi README `db/seeds/rtl-rebuild/`. **Push dei 3 commit draft prima/dopo (chiedi a Enzo).**
+2. **Finire layer codice D4/D3**: re-wire personas E2E su utenti reali (`fixtures.ts`+`auth.setup.ts`, post-08) + aggiornare test E2E nav-visibility al nuovo gating.
+3. **Brand-fidelity F5 ESS / F6 admin / F7 showcase** (~6-8h) — dopo il rebuild (dati ESS reali).
 
 ## Open questions
 
-- Snapshot legacy canonico: VM heuresys-evo 7-mag (freschissimo+ricco) vs heuresys.com.evo pre-ESCO (FK chain più pulita)? Confermare a inizio rebuild.
-- ~20 tabelle sensibili legacy senza tenant_id/RLS → estrazione RTL con filtro esplicito (no cross-tenant leak).
+- **D4 gate-semantics** (finding S949): il ruolo USER ha 12 read non-self nel seed → gating per-`:read` espone a USER quasi tutta la sidebar admin. Decidere: tenere `:read` / gate più stretto su governance / fixare i grant seed. Tweak piccolo a `layout.tsx`.
 
 ## Stack snapshot
 
-- HEAD `844a736`. VM **swap 8G**. EChartsCard SOLO via `_charts-client` (mai import diretto nelle pagine chart). E2E SEMPRE in prod build. Web dev prod-verify: `pnpm --filter @heuresys/web build` + `next start` (env `NEXT_PUBLIC_API_PROXY_BASE_URL=http://localhost:3001`); riavvio :3000 via `Stop-Process` PID.
-- Web app VM live: `http://80.225.82.207:3013` (login persona seed `Admin#PassW0rd!`). Tunnel DB :5433 hands-off (ADR-0021).
+- 3 commit S949 draft non pushati su `main` (origin = `eb55058`). Estrazione legacy: `db/seeds/rtl-rebuild/00_extract_legacy_subset.sh` (CSV in `extracted/`, gitignored). Connessione legacy read-only: `ssh oracle-vm-default bash <<'OUTER' docker exec -i heuresys_evo_platform_db sh -c '...psql...' <<'INNER' ... INNER OUTER`.
+- HEAD precedente `eb55058`. VM swap 8G. EChartsCard solo via `_charts-client`. E2E in prod build. Tunnel DB :5433 hands-off (ADR-0021).
 
 ## Verification (next session)
 ```bash
-nc -z localhost 5433                                  # tunnel
-git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
-gh run list --limit 6                                 # CI verde
+nc -z localhost 5433                                          # tunnel
+git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # 3 commit = draft non pushati
+gh run list --limit 6                                         # CI
 ```

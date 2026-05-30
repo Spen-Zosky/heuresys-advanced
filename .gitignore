@@ -20,6 +20,10 @@ docs/brownfield/_inspection_artifacts/
 # from the live legacy DB on demand.
 db/seeds/brownfield/wave1/legacy_data/
 
+# RTL tenant-rebuild legacy subset (regenerable via db/seeds/rtl-rebuild/00_extract_legacy_subset.sh).
+# Commit the regenerator + load SQL; the extracted CSV payload stays out of git.
+db/seeds/rtl-rebuild/extracted/
+
 # -----------------------------------------------------------------------------
 # Secrets / env files
 # -----------------------------------------------------------------------------

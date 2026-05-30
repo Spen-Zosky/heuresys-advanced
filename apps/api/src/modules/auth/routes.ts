@@ -68,7 +68,10 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         body: LoginBodySchema,
         response: { 200: LoginResultResponseSchema },
       },
-      config: { rateLimit: { max: 10, timeWindow: 5 * 60 * 1000 } },
+      // Login brute-force guard: prod-secure default 10/5min. Raise via
+      // AUTH_LOGIN_RATELIMIT_MAX for E2E suites, where auth.setup (5 personas) +
+      // login-mfa (direct logins, no storageState) would otherwise trip the 10 cap.
+      config: { rateLimit: { max: Number(process.env.AUTH_LOGIN_RATELIMIT_MAX) || 10, timeWindow: 5 * 60 * 1000 } },
     },
     async (req, reply) => {
       const result = await service.login({

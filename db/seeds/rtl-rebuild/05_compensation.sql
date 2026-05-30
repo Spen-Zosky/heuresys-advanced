@@ -26,9 +26,9 @@ TRUNCATE staging.rtl_salary_bands, staging.rtl_salary_band_assignments, staging.
 \copy staging.rtl_salary_band_assignments FROM 'extracted/salary_band_assignments.csv' WITH (FORMAT csv, HEADER true)
 \copy staging.rtl_employee_contracts      FROM 'extracted/employee_contracts.csv'      WITH (FORMAT csv, HEADER true)
 
-DROP TABLE IF EXISTS staging.rtl_tenant_map;
-CREATE TEMP TABLE staging.rtl_tenant_map (legacy_tenant uuid, v5_tenant uuid) ON COMMIT DROP;
-INSERT INTO staging.rtl_tenant_map VALUES
+DROP TABLE IF EXISTS rtl_tenant_map;
+CREATE TEMP TABLE rtl_tenant_map (legacy_tenant uuid, v5_tenant uuid) ON COMMIT DROP;
+INSERT INTO rtl_tenant_map VALUES
   ('0c54b84a-db6e-4da4-bc91-af5d480d524e', '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'),
   ('d5855519-3ed1-4427-865f-fe75f1e42c4c', (SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'HEURESYS'));
 
@@ -45,7 +45,7 @@ SELECT tm.v5_tenant, s.band_code, s.band_name,
          'job_family', NULLIF(s.job_family,''), 'currency', COALESCE(NULLIF(s.currency,''),'EUR'),
          'geo_region', NULLIF(s.geo_region,'')))
 FROM staging.rtl_salary_bands s
-JOIN staging.rtl_tenant_map tm ON tm.legacy_tenant = s.tenant_id::uuid
+JOIN rtl_tenant_map tm ON tm.legacy_tenant = s.tenant_id::uuid
 WHERE NOT EXISTS (
   SELECT 1 FROM sys.sys_compensation_bands b
   WHERE b.compensation_band_tenant_id = tm.v5_tenant
@@ -69,7 +69,7 @@ SELECT
     'current_salary', NULLIF(sba.current_salary,''),
     'compa_ratio',    NULLIF(sba.compa_ratio,'')))
 FROM staging.rtl_employee_contracts c
-JOIN staging.rtl_tenant_map tm ON tm.legacy_tenant = c.tenant_id::uuid
+JOIN rtl_tenant_map tm ON tm.legacy_tenant = c.tenant_id::uuid
 JOIN sys.sys_positions p ON p.position_metadata->>'legacy_employee_id' = c.employee_id
 LEFT JOIN staging.rtl_salary_band_assignments sba ON sba.employee_id = c.employee_id
 LEFT JOIN staging.rtl_salary_bands lb ON lb.id = sba.band_id

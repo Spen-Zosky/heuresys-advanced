@@ -23,9 +23,9 @@ TRUNCATE staging.rtl_employees;
 \copy staging.rtl_employees FROM 'extracted/employees.csv' WITH (FORMAT csv, HEADER true)
 
 -- legacy tenant -> v5 tenant (same crosswalk as 02)
-DROP TABLE IF EXISTS staging.rtl_tenant_map;
-CREATE TEMP TABLE staging.rtl_tenant_map (legacy_tenant uuid, v5_tenant uuid) ON COMMIT DROP;
-INSERT INTO staging.rtl_tenant_map VALUES
+DROP TABLE IF EXISTS rtl_tenant_map;
+CREATE TEMP TABLE rtl_tenant_map (legacy_tenant uuid, v5_tenant uuid) ON COMMIT DROP;
+INSERT INTO rtl_tenant_map VALUES
   ('0c54b84a-db6e-4da4-bc91-af5d480d524e', '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'),
   ('d5855519-3ed1-4427-865f-fe75f1e42c4c', (SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'HEURESYS'));
 
@@ -50,7 +50,7 @@ SELECT
     'legacy_org_unit_id',   NULLIF(e.org_unit_id,''),
     'legacy_manager_id',    NULLIF(e.manager_id,'')))
 FROM staging.rtl_employees e
-JOIN staging.rtl_tenant_map tm ON tm.legacy_tenant = e.tenant_id::uuid
+JOIN rtl_tenant_map tm ON tm.legacy_tenant = e.tenant_id::uuid
 LEFT JOIN sys.sys_organization_units ou
      ON ou.organization_unit_metadata->>'legacy_org_unit_id' = e.org_unit_id
     AND ou.organization_unit_tenant_id = tm.v5_tenant

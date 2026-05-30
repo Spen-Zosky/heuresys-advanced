@@ -2,7 +2,7 @@
 -- Idempotent. No legacy data needed. Run via psql.
 --
 -- Strategy (D2): REPURPOSE the existing synthetic reference tenancy 86ba7a65 as the real
--- rtl-bank.org customer (1-row UPDATE, zero FK churn for the 165 keep-users), then CREATE a
+-- rtl-bank.org customer (1-row UPDATE, zero FK churn for the 161 keep-users), then CREATE a
 -- fresh heuresys.com platform tenancy and re-point the 3 heuresys.com users.
 
 BEGIN;

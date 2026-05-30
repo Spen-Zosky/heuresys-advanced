@@ -33,12 +33,11 @@ BEGIN
   RAISE NOTICE 'Scope OK: delete=% keep=% total=%', del, keep, total;
 END $$;
 
--- 1) D6 Replace: drop the 2924 SYNTHETIC SYSTEM attendance rows of the KEPT real users
---    (07 already imported the real legacy attendance for them). Overtime/time-off are real -> kept.
-DELETE FROM sys.sys_attendance
-WHERE attendance_source = 'SYSTEM'
-  AND attendance_subject_user_id IN (
-    SELECT user_id FROM sys.sys_users WHERE split_part(user_email,'@',2) IN ('rtl-bank.org','heuresys.com'));
+-- 1) (REMOVED — corrected 2026-05-30) The kept real users' nov-dec'25 attendance is REAL legacy data
+--    (verified data-identical to the legacy source by natural_key), NOT synthetic. 07 relabels it
+--    SYSTEM->IMPORT. Deleting it here would destroy real history (anti-D6). The post-assertion below
+--    still requires global SYSTEM=0 — satisfied by 07's relabel (kept users) + the out-of-scope user
+--    deletion in step 2 (their attendance, incl. any SYSTEM, goes with them).
 
 -- 2) RESTRICT children of the DELETE users (must precede the user delete).
 DELETE FROM sys.sys_user_position_assignments WHERE user_position_assignment_user_id IN (SELECT user_id FROM del_users);
@@ -47,6 +46,7 @@ DELETE FROM sys.sys_overtime          WHERE overtime_subject_user_id   IN (SELEC
 DELETE FROM sys.sys_time_off_requests WHERE request_subject_user_id    IN (SELECT user_id FROM del_users);
 DELETE FROM sys.sys_time_off_balances WHERE balance_subject_user_id    IN (SELECT user_id FROM del_users);
 DELETE FROM sys.sys_goal_check_ins    WHERE check_in_subject_user_id   IN (SELECT user_id FROM del_users);
+DELETE FROM audit.user_self_service_actions WHERE action_user_id        IN (SELECT user_id FROM del_users);  -- B6: 7th RESTRICT child
 
 -- 3) Delete the users. CASCADE removes ~40 child tables (sys_auth_*, profiles, certifications, evidence,
 --    scores, etc.); ~150 created_by/updated_by audit refs are SET NULL by their FKs.

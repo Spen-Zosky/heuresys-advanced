@@ -43,15 +43,15 @@ TRUNCATE staging.rtl_users, staging.rtl_employee_skills, staging.rtl_employee_sk
 \copy staging.rtl_employee_certifications   FROM 'extracted/employee_certifications.csv'   WITH (FORMAT csv, HEADER true)
 
 -- legacy employee_id -> v5 user (id + tenant), via legacy users.id embedded in external_code
-DROP TABLE IF EXISTS staging.rtl_emp_user;
-CREATE TEMP TABLE staging.rtl_emp_user ON COMMIT DROP AS
+DROP TABLE IF EXISTS rtl_emp_user;
+CREATE TEMP TABLE rtl_emp_user ON COMMIT DROP AS
 SELECT ru.employee_id AS legacy_employee_id, u.user_id AS v5_user_id, u.user_tenant_id AS v5_tenant_id
 FROM staging.rtl_users ru
 JOIN sys.sys_users u ON u.user_external_code = 'LEGACY:' || ru.id;
 
-DROP TABLE IF EXISTS staging.rtl_tenant_map;
-CREATE TEMP TABLE staging.rtl_tenant_map (legacy_tenant uuid, v5_tenant uuid) ON COMMIT DROP;
-INSERT INTO staging.rtl_tenant_map VALUES
+DROP TABLE IF EXISTS rtl_tenant_map;
+CREATE TEMP TABLE rtl_tenant_map (legacy_tenant uuid, v5_tenant uuid) ON COMMIT DROP;
+INSERT INTO rtl_tenant_map VALUES
   ('0c54b84a-db6e-4da4-bc91-af5d480d524e', '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'),
   ('d5855519-3ed1-4427-865f-fe75f1e42c4c', (SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'HEURESYS'));
 
@@ -65,7 +65,7 @@ SELECT tm.v5_tenant, 'CUSTOM::' || s.code, COALESCE(NULLIF(s.name_en,''), NULLIF
        jsonb_strip_nulls(jsonb_build_object('legacy_custom_skill_id', s.id, 'base_esco_skill_id',
          NULLIF(s.base_esco_skill_id,''), 'skill_type', NULLIF(s.skill_type,''), 'name_it', NULLIF(s.name_it,'')))
 FROM staging.rtl_tenant_custom_skills s
-JOIN staging.rtl_tenant_map tm ON tm.legacy_tenant = s.tenant_id::uuid
+JOIN rtl_tenant_map tm ON tm.legacy_tenant = s.tenant_id::uuid
 WHERE NOT EXISTS (SELECT 1 FROM sys.sys_skills k WHERE k.skill_tenant_id = tm.v5_tenant AND k.skill_code = 'CUSTOM::' || s.code);
 
 -- 2) employee_skills -> sys_user_skill_evidence (skill resolved by esco uri)
@@ -77,12 +77,16 @@ SELECT eu.v5_user_id, eu.v5_tenant_id, k.skill_id,
   CASE COALESCE(NULLIF(s.proficiency_level,'')::int, 1)
     WHEN 1 THEN 'NOVICE' WHEN 2 THEN 'BASIC' WHEN 3 THEN 'COMPETENT'
     WHEN 4 THEN 'PROFICIENT' WHEN 5 THEN 'EXPERT' ELSE 'MASTER' END,
-  COALESCE(NULLIF(s.source,''), 'LEGACY_IMPORT'),
+  CASE lower(NULLIF(s.source,''))
+    WHEN 'self_declaration' THEN 'SELF_ASSESSMENT'
+    WHEN 'manager_override' THEN 'MANAGER_ASSESSMENT'
+    ELSE 'AI_INFERRED' END,                          -- map legacy source onto the v5 source CHECK
   NULLIF(s.confidence_score,'')::numeric,
-  jsonb_strip_nulls(jsonb_build_object('legacy_skill_id', s.id, 'years_experience', NULLIF(s.years_experience,''),
+  jsonb_strip_nulls(jsonb_build_object('legacy_skill_id', s.id, 'legacy_source', NULLIF(s.source,''),
+    'years_experience', NULLIF(s.years_experience,''),
     'is_primary', NULLIF(s.is_primary,''), 'proficiency_label', NULLIF(s.proficiency_label,'')))
 FROM staging.rtl_employee_skills s
-JOIN staging.rtl_emp_user eu ON eu.legacy_employee_id = s.employee_id
+JOIN rtl_emp_user eu ON eu.legacy_employee_id = s.employee_id
 JOIN sys.sys_skills k ON k.skill_esco_uri = s.esco_uri          -- esco crosswalk (905/905 resolvable)
 WHERE NULLIF(s.esco_uri,'') IS NOT NULL
   AND NOT EXISTS (SELECT 1 FROM sys.sys_user_skill_evidence x
@@ -102,22 +106,26 @@ SELECT eu.v5_user_id, eu.v5_tenant_id,
     'verification_status', NULLIF(ec.verification_status,''), 'validity_months', NULLIF(cat.validity_months,''),
     'is_internal', NULLIF(cat.is_internal,'')))
 FROM staging.rtl_employee_certifications ec
-JOIN staging.rtl_emp_user eu ON eu.legacy_employee_id = ec.employee_id
+JOIN rtl_emp_user eu ON eu.legacy_employee_id = ec.employee_id
 LEFT JOIN staging.rtl_certifications cat ON cat.id = ec.certification_id
 WHERE NOT EXISTS (SELECT 1 FROM sys.sys_user_certifications x
   WHERE x.user_certification_user_id = eu.v5_user_id
     AND x.user_certification_credential_id IS NOT DISTINCT FROM NULLIF(ec.credential_id,'')
-    AND x.user_certification_name = COALESCE(NULLIF(cat.name,''), NULLIF(cat.name_en,''), 'Certification'));
+    AND x.user_certification_name = COALESCE(NULLIF(cat.name,''), NULLIF(cat.name_en,''), 'Certification'))
+ON CONFLICT (user_certification_tenant_id, user_certification_user_id, user_certification_name,
+             user_certification_issuer, COALESCE(user_certification_issued_date, '0001-01-01'::date))
+  DO NOTHING;  -- B7: legacy dup (same name+issuer+date, diff credential_id); column-inference matches the unique INDEX
 
 -- 4) employee_skill_profiles (KSABA) -> one sys_assessments + 5 sys_assessment_results per profile
--- VERIFY: assessment_method_id nullable? assessment_kind/status CHECK values? (set NULL/'SKILL_PROFILE'/'COMPLETED')
+-- assessment_method_id is nullable (omitted). assessment_kind CHECK = {MANAGER,THREE_SIXTY,PEER,SELF,EXTERNAL}:
+-- KSABA self-competency profile -> 'SELF'; the real subtype is preserved in metadata.assessment_subtype.
 INSERT INTO sys.sys_assessments (assessment_tenant_id, assessment_subject_user_id, assessment_kind,
   assessment_status, assessment_metadata)
-SELECT eu.v5_tenant_id, eu.v5_user_id, 'SKILL_PROFILE', 'COMPLETED',
-  jsonb_build_object('legacy_profile_id', p.id, 'esco_uri', NULLIF(p.esco_uri,''),
+SELECT eu.v5_tenant_id, eu.v5_user_id, 'SELF', 'COMPLETED',
+  jsonb_build_object('legacy_profile_id', p.id, 'assessment_subtype', 'SKILL_PROFILE', 'esco_uri', NULLIF(p.esco_uri,''),
     'composite_score', NULLIF(p.composite_score,''), 'acquired_date', NULLIF(p.acquired_date,''))
 FROM staging.rtl_employee_skill_profiles p
-JOIN staging.rtl_emp_user eu ON eu.legacy_employee_id = p.employee_id
+JOIN rtl_emp_user eu ON eu.legacy_employee_id = p.employee_id
 WHERE NOT EXISTS (SELECT 1 FROM sys.sys_assessments a
   WHERE a.assessment_subject_user_id = eu.v5_user_id AND a.assessment_metadata->>'legacy_profile_id' = p.id);
 
@@ -129,19 +137,19 @@ JOIN staging.rtl_employee_skill_profiles p ON p.id = a.assessment_metadata->>'le
 CROSS JOIN LATERAL (VALUES
   ('KNOWLEDGE', p.knowledge_level), ('SKILL', p.skill_level), ('ABILITY', p.ability_level),
   ('BEHAVIOR', p.behavior_level), ('ATTITUDE', p.attitude_level)) AS d(dim, score)
-WHERE a.assessment_kind = 'SKILL_PROFILE' AND NULLIF(d.score,'') IS NOT NULL
+WHERE a.assessment_metadata ? 'legacy_profile_id' AND NULLIF(d.score,'') IS NOT NULL
   AND NOT EXISTS (SELECT 1 FROM sys.sys_assessment_results r
     WHERE r.assessment_result_assessment_id = a.assessment_id AND r.assessment_result_dimension = d.dim);
 
--- 5) employee_skill_assessments (gap) -> sys_assessments (kind SKILL_GAP) + OVERALL result
+-- 5) employee_skill_assessments (gap) -> sys_assessments (manager-assessed gap; subtype in metadata)
 INSERT INTO sys.sys_assessments (assessment_tenant_id, assessment_subject_user_id, assessment_kind,
   assessment_status, assessment_period_end, assessment_metadata)
-SELECT eu.v5_tenant_id, eu.v5_user_id, 'SKILL_GAP', 'COMPLETED', NULLIF(sa.assessment_date,'')::date,
-  jsonb_strip_nulls(jsonb_build_object('legacy_assessment_id', sa.id, 'skill_name', NULLIF(sa.skill_name,''),
+SELECT eu.v5_tenant_id, eu.v5_user_id, 'MANAGER', 'COMPLETED', NULLIF(sa.assessment_date,'')::date,
+  jsonb_strip_nulls(jsonb_build_object('legacy_assessment_id', sa.id, 'assessment_subtype', 'SKILL_GAP', 'skill_name', NULLIF(sa.skill_name,''),
     'esco_uri', NULLIF(sa.esco_skill_uri,''), 'assessed_level', NULLIF(sa.assessed_level,''),
     'required_level', NULLIF(sa.required_level,''), 'gap', NULLIF(sa.gap,''), 'method', NULLIF(sa.assessment_method,'')))
 FROM staging.rtl_employee_skill_assessments sa
-JOIN staging.rtl_emp_user eu ON eu.legacy_employee_id = sa.employee_id
+JOIN rtl_emp_user eu ON eu.legacy_employee_id = sa.employee_id
 WHERE NOT EXISTS (SELECT 1 FROM sys.sys_assessments a
   WHERE a.assessment_subject_user_id = eu.v5_user_id AND a.assessment_metadata->>'legacy_assessment_id' = sa.id);
 
@@ -151,8 +159,8 @@ BEGIN
   SELECT count(*) INTO cs FROM sys.sys_skills WHERE skill_code LIKE 'CUSTOM::%';
   SELECT count(*) INTO se FROM sys.sys_user_skill_evidence WHERE user_skill_evidence_metadata ? 'legacy_skill_id';
   SELECT count(*) INTO uc FROM sys.sys_user_certifications WHERE user_certification_metadata ? 'legacy_employee_certification_id';
-  SELECT count(*) INTO ap FROM sys.sys_assessments WHERE assessment_kind='SKILL_PROFILE';
-  SELECT count(*) INTO ag FROM sys.sys_assessments WHERE assessment_kind='SKILL_GAP';
+  SELECT count(*) INTO ap FROM sys.sys_assessments WHERE assessment_metadata ? 'legacy_profile_id';
+  SELECT count(*) INTO ag FROM sys.sys_assessments WHERE assessment_metadata ? 'legacy_assessment_id';
   RAISE NOTICE 'custom skills:% (~25) · skill evidence:% (~905) · certs:% (~729) · KSABA assessments:% (~312) · gap assessments:% (~299)', cs, se, uc, ap, ag;
 END $$;
 

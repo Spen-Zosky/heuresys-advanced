@@ -35,9 +35,9 @@ TRUNCATE staging.rtl_employees;
 \copy staging.rtl_employees FROM 'extracted/employees.csv' WITH (FORMAT csv, HEADER true)
 
 -- legacy tenant -> v5 tenant crosswalk
-DROP TABLE IF EXISTS staging.rtl_tenant_map;
-CREATE TEMP TABLE staging.rtl_tenant_map (legacy_tenant uuid, v5_tenant uuid) ON COMMIT DROP;  -- VERIFY: TEMP+schema-qualified ok in your psql; else plain temp name
-INSERT INTO staging.rtl_tenant_map VALUES
+DROP TABLE IF EXISTS rtl_tenant_map;
+CREATE TEMP TABLE rtl_tenant_map (legacy_tenant uuid, v5_tenant uuid) ON COMMIT DROP;
+INSERT INTO rtl_tenant_map VALUES
   ('0c54b84a-db6e-4da4-bc91-af5d480d524e', '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'),
   ('d5855519-3ed1-4427-865f-fe75f1e42c4c', (SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'HEURESYS'));
 
@@ -68,7 +68,7 @@ SELECT
     'color',              NULLIF(s.color,''),
     'icon',               NULLIF(s.icon,'')))
 FROM staging.rtl_org_units s
-JOIN staging.rtl_tenant_map tm ON tm.legacy_tenant = s.tenant_id::uuid
+JOIN rtl_tenant_map tm ON tm.legacy_tenant = s.tenant_id::uuid
 JOIN sys.sys_organization_unit_types t
      ON t.organization_unit_type_code = CASE lower(s.org_type)
           WHEN 'company'   THEN 'HEADQUARTERS'

@@ -42,6 +42,8 @@ Monorepo pnpm HRMS/BPM **maturo e oltre MVP-3**: API Fastify 5 con **~58 moduli 
 
 ## 4. Database (PostgreSQL 16 native — ADR-0004 NO Docker)
 
+> 🔄 **RTL tenant rebuild EXECUTED 2026-05-30 (S950)** — DB collassato a **161 utenti / 2 tenant ACTIVE** (RTL_BANK ex-`86ba7a65` + nuovo HEURESYS): 158 rtl-bank.org + 3 heuresys.com. Org reale wired: **162 posizioni** (157 owned-by-manager, I1), 160 assignment PRIMARY, 26 OU, 3180 attendance IMPORT, comp/skills/certs/RBAC importati. 272 utenti out-of-scope + scaffold sintetico (161 pos / 6 OU) eliminati (single-tx, assertito). Backup: `pg_dump_snapshots/…pre-09-collapse_a892b81…` + `…pre-rtl-rebuild_eb55058…`. **6 commit PUSHATI** su origin/main (`3df1f6a`/`a892b81`/`db3104b`/`b4f56a0`/`b62b441`/`bad989f`, HEAD `bad989f`); **CI 5/5 verde** (test-integration + playwright-smoke, entrambi rossi a S949, ora verdi). API 354/0, prod E2E 138/0. Inclusi 2 fix pre-esistenti emersi dalla validazione: D4 sidebar (hybrid gate `hasAdminRole`) + login rate-limit env-tunable. I conteggi pre-rebuild qui sotto sono SUPERATI. Dettaglio: `memory/project_rtl_tenant_rebuild.md`.
+
 - **Runtime**: ADR-0010 Option B — PG16 native su `oracle-vm-default`, raggiunto da Windows via tunnel `ssh -L 5433:localhost:5432 oracle-vm-default` (RD-25). Connection: localhost:5433, db `heuresys_advanced`, user `heuresys`, schema `sys`.
 - **43 migration** idempotenti `000001..000044` (**gap `000035` cosmetico**, documentato). Ultima `000044_cw_b60_b_reclassify_application_level_targets.sql` (ADR-0020). Contract: `pnpm db:migrate` ×2 → pg_dump diff vuoto.
 - **Schemi**: `sys` (~41 tabelle business, `sys.sys_<plural>` per I3/I4), `staging` (wave1_* 18 tabelle), `brownfield` (registry), `audit`, `temp_sdbi` (SDBI Phase 2, migration 000036).

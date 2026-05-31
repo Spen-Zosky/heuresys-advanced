@@ -101,6 +101,41 @@ export type ObservabilityAuditEvent = z.infer<
 >;
 
 /**
+ * In-process request-metrics rollup (last 24h) fed by the `onResponse`
+ * lifecycle hook. Pure in-memory probe — never persisted, resets on restart.
+ * The empty-traffic guard yields uptime 100 / all rates 0 (never NaN).
+ */
+export const ObservabilityRequestMetricsSchema = z.object({
+  /** 100 * (total - 5xx) / total over the last 24h; 100 with no traffic. */
+  uptime24hPct: z.number().min(0).max(100),
+  /** Total responses recorded in the trailing 24h window. */
+  totalRequests: z.number().int().min(0),
+  /** Response counts grouped by status class. */
+  byStatusClass: z.object({
+    xx2: z.number().int().min(0),
+    xx3: z.number().int().min(0),
+    xx4: z.number().int().min(0),
+    xx5: z.number().int().min(0),
+  }),
+  /** Percentage of in-window responses that were 5xx. */
+  errorRate5xxPct: z.number().min(0).max(100),
+  /** Percentage of in-window responses that were 4xx. */
+  clientErrorRate4xxPct: z.number().min(0).max(100),
+  /** Mean response duration (ms) across in-window responses. */
+  avgDurationMs: z.number().min(0),
+  /** Last (up to 20) non-2xx responses, oldest-first. */
+  recentErrors: z.array(
+    z.object({
+      route: z.string(),
+      status: z.number().int(),
+    }),
+  ),
+});
+export type ObservabilityRequestMetrics = z.infer<
+  typeof ObservabilityRequestMetricsSchema
+>;
+
+/**
  * Full platform-wide system-health snapshot. Every field is backed by live data
  * (in-process counters + read-only DB reads); there are no fabricated values.
  */
@@ -111,6 +146,7 @@ export const SystemHealthResponseSchema = z.object({
   authIntegrity: ObservabilityAuthIntegritySchema,
   schemaCounts: ObservabilitySchemaCountsSchema,
   auditFeed: z.array(ObservabilityAuditEventSchema),
+  requestMetrics: ObservabilityRequestMetricsSchema,
   generatedAt: z.string().datetime(),
 });
 export type SystemHealthResponse = z.infer<typeof SystemHealthResponseSchema>;

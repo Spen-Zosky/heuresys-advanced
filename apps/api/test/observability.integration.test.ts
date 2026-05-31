@@ -46,6 +46,13 @@ interface SystemHealthBody {
     resourceId: string | null; occurredAt: string; tenantCode: string;
     userDisplayName: string;
   }>;
+  requestMetrics: {
+    uptime24hPct: number; totalRequests: number;
+    byStatusClass: { xx2: number; xx3: number; xx4: number; xx5: number };
+    errorRate5xxPct: number; clientErrorRate4xxPct: number;
+    avgDurationMs: number;
+    recentErrors: Array<{ route: string; status: number }>;
+  };
   generatedAt: string;
 }
 
@@ -106,6 +113,26 @@ describe("GET /v1/observability/system-health integration", () => {
 
     // auditFeed is a real array (may be empty if the audit table has no rows).
     expect(Array.isArray(body.auditFeed)).toBe(true);
+
+    // requestMetrics — in-process counters fed by the onResponse hook. The
+    // login(s) in beforeAll + this GET itself have already been recorded, so
+    // totalRequests is >= 0 (typically >= 1).
+    expect(typeof body.requestMetrics).toBe("object");
+    expect(typeof body.requestMetrics.totalRequests).toBe("number");
+    expect(body.requestMetrics.totalRequests).toBeGreaterThanOrEqual(0);
+    expect(typeof body.requestMetrics.byStatusClass).toBe("object");
+    expect(typeof body.requestMetrics.byStatusClass.xx2).toBe("number");
+    expect(typeof body.requestMetrics.byStatusClass.xx3).toBe("number");
+    expect(typeof body.requestMetrics.byStatusClass.xx4).toBe("number");
+    expect(typeof body.requestMetrics.byStatusClass.xx5).toBe("number");
+    expect(body.requestMetrics.uptime24hPct).toBeGreaterThanOrEqual(0);
+    expect(body.requestMetrics.uptime24hPct).toBeLessThanOrEqual(100);
+    expect(body.requestMetrics.errorRate5xxPct).toBeGreaterThanOrEqual(0);
+    expect(body.requestMetrics.errorRate5xxPct).toBeLessThanOrEqual(100);
+    expect(body.requestMetrics.clientErrorRate4xxPct).toBeGreaterThanOrEqual(0);
+    expect(body.requestMetrics.clientErrorRate4xxPct).toBeLessThanOrEqual(100);
+    expect(typeof body.requestMetrics.avgDurationMs).toBe("number");
+    expect(Array.isArray(body.requestMetrics.recentErrors)).toBe(true);
 
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });

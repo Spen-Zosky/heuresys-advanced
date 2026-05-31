@@ -27,6 +27,7 @@ import { tenantContextPlugin } from "./middleware/tenantContext.js";
 import { csrfPlugin } from "./middleware/csrf.js";
 import { isDatabaseReady } from "./db/client.js";
 import { COOKIES } from "./config/constants.js";
+import { metricsStore } from "./modules/observability/metrics-store.js";
 import { authRoutes } from "./modules/auth/routes.js";
 import { mfaRoutes } from "./modules/auth/mfa-routes.js";
 import { tenantsRoutes } from "./modules/tenants/routes.js";
@@ -130,6 +131,22 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   // 2. Request id (so every subsequent log/error/response carries it)
   await app.register(requestIdPlugin);
+
+  // 2b. Request metrics — onResponse lifecycle hook feeding an in-memory store.
+  //     A lifecycle hook is independent of the 13-step plugin order (§3.2); it is
+  //     placed here so it wraps every subsequent route. Metrics must never break
+  //     the response, so the whole body is guarded.
+  app.addHook("onResponse", async (req, reply) => {
+    try {
+      metricsStore.record(
+        reply.statusCode,
+        reply.elapsedTime ?? 0,
+        (req.routeOptions && req.routeOptions.url) || req.url,
+      );
+    } catch {
+      /* metrics must never break the response */
+    }
+  });
 
   // 3. Security headers
   await app.register(helmet, {

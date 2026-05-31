@@ -11,6 +11,7 @@ import { rbacCacheStats } from "../../middleware/rbac.js";
 import type { RoleCode } from "../../config/constants.js";
 import type { SystemHealthResponse } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { metricsStore } from "./metrics-store.js";
 
 export interface ActorContext {
   userId: string;
@@ -35,6 +36,13 @@ export const observabilityService = {
     const poolTotal = pool.totalCount;
     const poolIdle = pool.idleCount;
     const poolWaiting = pool.waitingCount;
+
+    // Request-metrics rollup (last 24h) from the in-memory store fed by the
+    // onResponse hook. Pure in-process, never throws.
+    const metrics = metricsStore.aggregate(1440);
+    const recentErrors = metricsStore
+      .recentErrors()
+      .map((e) => ({ route: e.route, status: e.status }));
 
     // Read-only DB reads (parallelised).
     const [
@@ -71,6 +79,15 @@ export const observabilityService = {
       authIntegrity,
       schemaCounts,
       auditFeed,
+      requestMetrics: {
+        uptime24hPct: metrics.uptimePct,
+        totalRequests: metrics.totalRequests,
+        byStatusClass: metrics.byStatusClass,
+        errorRate5xxPct: metrics.errorRate5xxPct,
+        clientErrorRate4xxPct: metrics.clientErrorRate4xxPct,
+        avgDurationMs: metrics.avgDurationMs,
+        recentErrors,
+      },
       generatedAt: new Date().toISOString(),
     };
   },

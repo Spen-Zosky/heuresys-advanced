@@ -1,3 +1,17 @@
+## 🎯 2026-05-31 — S952/S953 — Forensic QA + design-system standardization + RBAC/perspectives architecture (SESSION CLOSED for fresh restart)
+
+Long live-E2E session. **Full plan + resume instructions: `docs/kb/RBAC_UIX_PERSPECTIVES_PLAN.md` (▶ RESUME section).**
+
+**Shipped (local commits on main, NOT pushed)** — heuresys-advanced: `88073e0` A1 StatusPill AA contrast · `cb1361d` Workflow-B sys.* enrichment candidate CSVs + ADR-0023 codebook (B-50 scaffolding) · `bf2713e` A2–A5 + A1-fix (table pagination, AA pills, code→label, ≤5 cols, org-chart button; Playwright green) · `e11317c` R1.1 observability `/v1/observability/system-health` real aggregates · `2346614` R1.2 in-memory request-metrics. **ux-design-shared** (separate repo, local): `4b84a32` token-standardize @heuresys/ui (38 defects→tokens, class-based `[.dark_&]:`, scrim `--color-overlay` token, ESLint theming guard, wordmark R3) — verified lint/typecheck/build/test green.
+
+**Forensic QA (origin)**: 24 pages × 2 themes, all `/v1` endpoints 200; report `qa_artifacts/runs/20260531_s952_A/_FINDINGS_REPORT.md`. Key live-doctrine find: `/system-health` was 100% MOCK → user greenlit a full observability build (R1.x done = aggregates+metrics; logs/incidents/slow-query = pending phases).
+
+**Architecture locked with Enzo** (build plan D1→V in the plan doc): default theme=dark + palette=balanced (already in code) · per-user prefs server-side (P1) · roles become auth-RBAC with `auth_role_category` (hierarchical/operational vs functional) + new roles (CEO/HR_MANAGER/TEAM_LEADER/TEAM_MEMBER) orthogonal to org position · **DB-driven `sys_ui_interfaces`** registry → **live sidebar** built from permissions × interfaces · **perspectives = PET (Process/Enterprise/Talent)** top axis with CASCADIA lexicon domains as sub-groups · empty perspectives = honest empty-state · RBAC seed = grant 3 holderless functional roles to **real** users (no fixtures) · **probable `sys_teams`/`sys_team_members`** for TEAM_LEADER/MEMBER.
+
+**🔴 Next session FIRST step = D2**: heuresys-advanced still consumes the OLD `@heuresys/ui@0.1.1`; the fix is committed only in ux-design-shared → consume via npm publish+bump (Enzo's auth) or temporary `link:` to validate. **R3 open** (pg-pool ECONNRESET resilience). Nothing pushed anywhere — all local.
+
+---
+
 ## 🎯 2026-05-27 — CLI post-S937 tail closure (Dependabot + CW-B59 + showcase deploy)
 
 Dopo la closure housekeeping, chiusura dei 3 tail non-blocking + un bonus emerso.

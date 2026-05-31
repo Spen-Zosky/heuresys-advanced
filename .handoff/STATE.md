@@ -1,27 +1,28 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-05-30 (S950). **Branch**: `main` HEAD `2b898d2` = synced with origin. **CI 5/5 GREEN** on `bad989f` (test-integration + playwright-smoke, entrambi rossi a S949, ora verdi). Working tree: solo la proposta SuccessFactors uncommitted (vedi Open questions).
+**Updated**: 2026-05-31 (S951). **Branch**: `main` HEAD `95de8f5` (+ questo handoff) = synced with origin. **CI 5/5 GREEN** (i commit S951 sono docs-only → paths-ignored, nessun re-run). Working tree pulito.
 
 ## Last session brief
 
-- **🟢 RTL TENANT REBUILD ESEGUITO + validato + pushato.** DB collassato a **161 utenti / 2 tenant** (RTL_BANK ex-`86ba7a65` + nuovo HEURESYS), org reale wired da legacy: 162 posizioni (157 owned-by-manager I1), 160 assignment, 26 OU, 3180 attendance IMPORT, comp/skills/certs/RBAC. Seed `db/seeds/rtl-rebuild/00..10` (corretti: 8 difetti B1-B8). **D6 corretto**: le righe SYSTEM attendance erano dati legacy REALI → rietichettate, non cancellate. `09` distruttivo eseguito single-tx (assert 161/272 ✓). Backup `…pre-09-collapse_a892b81…` + Phase-0.
-- **D3 persone → utenti reali**: tenantAdmin=federica.marchetti, manager=paolo.caputo, employee=tommaso.fiore (report di paolo), outsider=antonio.parisi; admin@heuresys.com invariato. `seed-test-admin.ts` refactored (auth persone reali). **40 file test API** + fixtures + CI playwright-smoke migrati. API **354/0**, prod E2E **138/0**.
-- **2 fix pre-esistenti** emersi dalla validazione: **D4 gate-semantics** risolto (hybrid gate `hasAdminRole` in `layout.tsx`, `b62b441`); **login rate-limit** env-tunable `AUTH_LOGIN_RATELIMIT_MAX` (default prod 10, `bad989f`). 7 commit pushati `3df1f6a..2b898d2`.
+- **🟢 DOTTRINA DATI formalizzata + verificata.** Workflow read-only 7-agent ha CONFERMATO empiricamente la visione di Enzo (advanced `sys.*` = autorità strutturale; legacy Docker `heuresys_evo_platform_db` = sorgente dati canonica no-PII; 97/97 mapping→`sys`, 69.450 lineage, 1225/1225 `pii_disposition=NONE`). 12 commit pushati `23f9bbf..95de8f5`.
+- **Nuovo [[ADR-0023]]** (data-source doctrine, ACCEPTED) + **ADR-0014 SDBI** promosso ACCEPTED. **I12** riformulato (enrichment-only → authoritative no-PII source); **I13/ADR-0004** nota source-vs-runtime (Docker legacy = sorgente, non runtime). **No-PII globale** (decisione Enzo) → blocco PII del doc SuccessFactors **RITIRATO**.
+- **Doc-drift fix**: personas reali post-S950 (CLAUDE.md), What-NOT-to-touch (hygiene non privacy), provenance header, BOOTSTRAP I12+I14. Self-correzione numero ADR 0022→0023 (0022 stale-reserved da `wave_3_runner.md`). 3 memory CLI aggiornate.
 
 ## Top priorities (next session)
 
-1. **Brand-fidelity F5 ESS / F6 admin / F7 showcase** (~6-8h) — ora sbloccato: l'ESS ha dati reali post-rebuild. Vedi `memory/project_brand_fidelity_migration.md`.
-2. **Decidere proposta SuccessFactors** (working tree, vedi Open questions) — adottare design + aprire item `SOT_BACKLOG.md`?
-3. **(opz.) Refinement posizioni**: job_role/ESCO sulle 162 posizioni reali + cycle-detection su reports_to + 2 posizioni con OU NULL (employee su OU legacy esclusi). 03 li ha deferiti.
+1. **Brand-fidelity F5 ESS / F6 admin / F7 showcase** (~6-8h) — sbloccato (ESS ha dati reali). Vedi `memory/project_brand_fidelity_migration.md`.
+2. **B-50 full reconciliation legacy→advanced** (oltre ~49%) — item aperto in `SOT_BACKLOG.md`, **esecuzione gated** (sessione lunga dedicata): ~69/134 tab `sys` vuote, 4-5 Wave-1 target a zero, 2 import_run orfani, no delta/watermark. Lega B-10 SDBI Phase 2.
+3. **(opz.) Refinement posizioni**: job_role/ESCO sulle 162 posizioni, cycle-detection `reports_to`, 2 posizioni OU NULL.
 
 ## Open questions
 
-- **SuccessFactors connector** (uncommitted: `docs/integrations/successfactors_…md` + `docs/kb/COWORK_INBOX.md`): design riconciliato (pattern β brownfield-new-source + γ SDBI). 2 flag invariante da decidere: 🔴 I12 (PII reale vs brownfield no-PII) + ⚠️ I3/I4 (`staging.sf_*`). Adottare nel repo + backlog item?
+- **SuccessFactors connector**: doc committato (`c363ef1`), flag PII risolto (no-PII globale ADR-0023); resta da decidere (a) adozione design come item MVP-4 + (b) ⚠️ I3/I4 naming `staging.sf_*`.
+- **`wave_3_runner.md` numerazione ADR stale** (0019-0023, già scavalcata da ADR reali) → marcare obsoleto in housekeeping (non urgente).
 
 ## Stack snapshot
 
-- DB: 161 utenti / 2 tenant ACTIVE (RTL_BANK + HEURESYS), org reale wired. origin/main `2b898d2`, CI verde.
-- Full local E2E: serve `AUTH_LOGIN_RATELIMIT_MAX=<alto>` (la suite supera il cap 10/5min). Prod-build E2E via `next build`+`next start` (dev-mode flaky su Windows first-compile). Tunnel :5433 hands-off (ADR-0021).
+- DB: 161 utenti / 2 tenant ACTIVE (RTL Bank + Heuresys System; Demo Bank Test ARCHIVED), org reale wired. origin/main `95de8f5`.
+- ADR su disco: 0001-0018, 0020, 0021, **0023** (0019/0022 gap; 0022 stale-reserved da wave_3). Full local E2E: `AUTH_LOGIN_RATELIMIT_MAX=<alto>`. Tunnel :5433 hands-off (ADR-0021).
 
 ## Verification (next session)
 ```bash

@@ -1,0 +1,24 @@
+compensation_band_code,compensation_band_name,compensation_band_min_eur,compensation_band_mid_eur,compensation_band_max_eur,compensation_band_is_global,ccnl_code,source_url
+CCNL_METMEC_2024_D1,Metalmeccanica Industria - Livello D1 (Ruoli Operativi),22355.71,24591.28,28062.83,false,CCNL_METMEC_2024,https://www.lexplain.it/tabelle-retributive-metalmeccanici-industria/
+CCNL_METMEC_2024_D2,Metalmeccanica Industria - Livello D2 (Ruoli Operativi),24790.87,27269.96,31114.02,false,CCNL_METMEC_2024,https://www.lexplain.it/tabelle-retributive-metalmeccanici-industria/
+CCNL_METMEC_2024_C1,Metalmeccanica Industria - Livello C1 (Ruoli Tecnico-Specifici),25326.34,27859.07,31788.13,false,CCNL_METMEC_2024,https://www.lexplain.it/tabelle-retributive-metalmeccanici-industria/
+CCNL_METMEC_2024_C2,Metalmeccanica Industria - Livello C2 (Ruoli Tecnico-Specifici),25861.94,28448.13,32477.79,false,CCNL_METMEC_2024,https://www.lexplain.it/tabelle-retributive-metalmeccanici-industria/
+CCNL_METMEC_2024_C3,Metalmeccanica Industria - Livello C3 (Ruoli Tecnico-Specifici),27697.28,30466.97,34784.50,false,CCNL_METMEC_2024,https://www.lexplain.it/tabelle-retributive-metalmeccanici-industria/
+CCNL_METMEC_2024_B1,Metalmeccanica Industria - Livello B1 (Ruoli Specialistici-Gestionali),29687.45,32656.20,37271.30,false,CCNL_METMEC_2024,https://www.lexplain.it/tabelle-retributive-metalmeccanici-industria/
+CCNL_METMEC_2024_B2,Metalmeccanica Industria - Livello B2 (Ruoli Specialistici-Gestionali),31849.87,35034.86,40000.46,false,CCNL_METMEC_2024,https://www.lexplain.it/tabelle-retributive-metalmeccanici-industria/
+CCNL_METMEC_2024_B3,Metalmeccanica Industria - Livello B3 (Ruoli Specialistici-Gestionali),35557.34,39113.07,44653.95,false,CCNL_METMEC_2024,https://www.lexplain.it/tabelle-retributive-metalmeccanici-industria/
+CCNL_METMEC_2024_A1,Metalmeccanica Industria - Livello A1 (Gestione Cambiamento e Innovazione),36409.23,42477.10,50000.00,false,CCNL_METMEC_2024,https://www.lexplain.it/tabelle-retributive-metalmeccanici-industria/
+CCNL_COMM_2024_VII,Commercio Terziario - Livello VII,10765.04,11841.54,13456.30,false,CCNL_COMM_2024,https://www.lexplain.it/tabelle-retributive-ccnl-commercio-2024-2027/
+CCNL_COMM_2024_VI,Commercio Terziario - Livello VI,12573.86,13831.25,15717.33,false,CCNL_COMM_2024,https://www.lexplain.it/tabelle-retributive-ccnl-commercio-2024-2027/
+CCNL_COMM_2024_V,Commercio Terziario - Livello V,14005.55,15406.11,17506.94,false,CCNL_COMM_2024,https://www.lexplain.it/tabelle-retributive-ccnl-commercio-2024-2027/
+CCNL_COMM_2024_IV,Commercio Terziario - Livello IV,15501.98,17052.18,19377.48,false,CCNL_COMM_2024,https://www.lexplain.it/tabelle-retributive-ccnl-commercio-2024-2027/
+CCNL_COMM_2024_III,Commercio Terziario - Livello III,17924.14,19716.55,22405.18,false,CCNL_COMM_2024,https://www.lexplain.it/tabelle-retributive-ccnl-commercio-2024-2027/
+CCNL_COMM_2024_II,Commercio Terziario - Livello II,20970.56,23067.62,26213.20,false,CCNL_COMM_2024,https://www.lexplain.it/tabelle-retributive-ccnl-commercio-2024-2027/
+CCNL_COMM_2024_I,Commercio Terziario - Livello I,24243.57,26667.93,30304.46,false,CCNL_COMM_2024,https://www.lexplain.it/tabelle-retributive-ccnl-commercio-2024-2027/
+CCNL_COMM_2024_Q,Commercio Terziario - Quadri,26912.86,29604.15,33641.08,false,CCNL_COMM_2024,https://www.lexplain.it/tabelle-retributive-ccnl-commercio-2024-2027/
+CCNL_CHIM_2024_F,Chimico-Farmaceutico Industria - Categoria F,21884.98,24073.48,27356.23,false,CCNL_CHIM_2024,https://www.lexplain.it/tabelle-retributive-chimici-farmaceutici-industria/
+CCNL_CHIM_2024_E,Chimico-Farmaceutico Industria - Categoria E,22332.31,24565.54,27915.39,false,CCNL_CHIM_2024,https://www.lexplain.it/tabelle-retributive-chimici-farmaceutici-industria/
+CCNL_CHIM_2024_D,Chimico-Farmaceutico Industria - Categoria D,24700.39,27170.43,30875.49,false,CCNL_CHIM_2024,https://www.lexplain.it/tabelle-retributive-chimici-farmaceutici-industria/
+CCNL_CHIM_2024_C,Chimico-Farmaceutico Industria - Categoria C,26692.25,29361.48,33365.31,false,CCNL_CHIM_2024,https://www.lexplain.it/tabelle-retributive-chimici-farmaceutici-industria/
+CCNL_CHIM_2024_B,Chimico-Farmaceutico Industria - Categoria B,29954.86,32950.35,37443.58,false,CCNL_CHIM_2024,https://www.lexplain.it/tabelle-retributive-chimici-farmaceutici-industria/
+CCNL_CHIM_2024_A,Chimico-Farmaceutico Industria - Categoria A,32454.76,35700.24,40568.45,false,CCNL_CHIM_2024,https://www.lexplain.it/tabelle-retributive-chimici-farmaceutici-industria/

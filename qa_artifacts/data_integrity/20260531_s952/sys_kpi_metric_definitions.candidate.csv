@@ -1,0 +1,42 @@
+parent_kpi_code,parent_kpi_name,code,name,unit,aggregation,source_url
+TIME_TO_FILL,Time to Fill,TTF_DAYS_OPEN_TOTAL,Total Days Roles Open,days,SUM,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+TIME_TO_FILL,Time to Fill,TTF_ROLES_FILLED_COUNT,Number of Roles Filled,count,COUNT,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+TIME_TO_FILL,Time to Fill,TTF_AVG_DAYS,Average Days to Fill,days,AVG,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+TIME_TO_HIRE,Time to Hire,TTH_DAYS_TO_ACCEPT,Days From Posting to Offer Acceptance,days,AVG,https://www.shrm.org/topics-tools/tools/toolkits/benchmarking-hr-metrics
+TIME_TO_HIRE,Time to Hire,TTH_CANDIDATES_HIRED,Candidates Hired in Period,count,COUNT,https://www.shrm.org/topics-tools/tools/toolkits/benchmarking-hr-metrics
+COST_PER_HIRE,Cost per Hire,CPH_EXTERNAL_COST,Total External Recruiting Cost,EUR,SUM,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+COST_PER_HIRE,Cost per Hire,CPH_INTERNAL_COST,Total Internal Recruiting Cost,EUR,SUM,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+COST_PER_HIRE,Cost per Hire,CPH_HIRES_COUNT,Number of Hires,count,COUNT,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+OFFER_ACCEPTANCE_RATE,Offer Acceptance Rate,OAR_OFFERS_ACCEPTED,Offers Accepted,count,COUNT,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+OFFER_ACCEPTANCE_RATE,Offer Acceptance Rate,OAR_OFFERS_EXTENDED,Offers Extended,count,COUNT,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+TURNOVER_RATE,Employee Turnover Rate,TOR_SEPARATIONS,Number of Separations,count,COUNT,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+TURNOVER_RATE,Employee Turnover Rate,TOR_AVG_HEADCOUNT,Average Headcount,count,AVG,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+VOLUNTARY_TURNOVER_RATE,Voluntary Turnover Rate,VTOR_VOLUNTARY_LEAVERS,Voluntary Leavers,count,COUNT,https://www.shrm.org/topics-tools/tools/toolkits/benchmarking-hr-metrics
+VOLUNTARY_TURNOVER_RATE,Voluntary Turnover Rate,VTOR_AVG_HEADCOUNT,Average Headcount,count,AVG,https://www.shrm.org/topics-tools/tools/toolkits/benchmarking-hr-metrics
+NEW_HIRE_TURNOVER_RATE,New Hire Turnover Rate,NHTR_LEAVERS_UNDER_1Y,Leavers Within First Year,count,COUNT,https://www.shrm.org/topics-tools/tools/toolkits/benchmarking-hr-metrics
+NEW_HIRE_TURNOVER_RATE,New Hire Turnover Rate,NHTR_TOTAL_SEPARATIONS,Total Separations in Period,count,COUNT,https://www.shrm.org/topics-tools/tools/toolkits/benchmarking-hr-metrics
+RETENTION_RATE,Employee Retention Rate,RR_REMAINED_EMPLOYED,Employees Remaining Entire Period,count,COUNT,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+RETENTION_RATE,Employee Retention Rate,RR_HEADCOUNT_START,Headcount at Period Start,count,COUNT,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+ABSENTEEISM_RATE,Absenteeism Rate,ABS_HOURS_ABSENT,Total Hours of Absence,hours,SUM,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+ABSENTEEISM_RATE,Absenteeism Rate,ABS_HOURS_AVAILABLE,Total Work Hours Available,hours,SUM,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+TRAINING_COMPLETION_RATE,Training Completion Rate,TCR_COMPLETED,Trainings Completed,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+TRAINING_COMPLETION_RATE,Training Completion Rate,TCR_ASSIGNED,Trainings Assigned,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+TRAINING_HOURS_PER_EMPLOYEE,Training Hours per Employee,THPE_TOTAL_HOURS,Total Training Hours Delivered,hours,SUM,https://www.bamboohr.com/blog/key-hr-metrics
+TRAINING_HOURS_PER_EMPLOYEE,Training Hours per Employee,THPE_EMPLOYEES_TRAINED,Employees Trained,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+TRAINING_COST_PER_EMPLOYEE,Training Cost per Employee,TCPE_TOTAL_SPEND,Total Training Spend,EUR,SUM,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+TRAINING_COST_PER_EMPLOYEE,Training Cost per Employee,TCPE_PARTICIPANTS,Training Participants,count,COUNT,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+REVENUE_PER_EMPLOYEE,Revenue per Employee,RPE_TOTAL_REVENUE,Total Revenue,EUR,SUM,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+REVENUE_PER_EMPLOYEE,Revenue per Employee,RPE_HEADCOUNT,Average Headcount,count,AVG,https://extensishr.com/resource/blogs/14-hr-metrics-and-how-to-calculate-them/
+EMPLOYEE_NPS,Employee Net Promoter Score,ENPS_PROMOTERS,Promoter Responses,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+EMPLOYEE_NPS,Employee Net Promoter Score,ENPS_DETRACTORS,Detractor Responses,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+EMPLOYEE_NPS,Employee Net Promoter Score,ENPS_TOTAL_RESPONSES,Total Survey Responses,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+INTERNAL_MOBILITY_RATE,Internal Mobility Rate,IMR_INTERNAL_MOVES,Internal Role Changes,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+INTERNAL_MOBILITY_RATE,Internal Mobility Rate,IMR_AVG_HEADCOUNT,Average Headcount,count,AVG,https://www.bamboohr.com/blog/key-hr-metrics
+SPAN_OF_CONTROL,Span of Control,SOC_DIRECT_REPORTS,Direct Reports,count,SUM,https://www.clearpointstrategy.com/blog/human-capital-kpis-scorecard-measures
+SPAN_OF_CONTROL,Span of Control,SOC_MANAGERS,Number of Managers,count,COUNT,https://www.clearpointstrategy.com/blog/human-capital-kpis-scorecard-measures
+HR_TO_EMPLOYEE_RATIO,HR to Employee Ratio,HER_HR_STAFF,HR Staff Count,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+HR_TO_EMPLOYEE_RATIO,HR to Employee Ratio,HER_TOTAL_EMPLOYEES,Total Employees,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+PERFORMANCE_REVIEW_COMPLETION,Performance Review Completion Rate,PRC_REVIEWS_COMPLETED,Reviews Completed,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+PERFORMANCE_REVIEW_COMPLETION,Performance Review Completion Rate,PRC_REVIEWS_DUE,Reviews Due,count,COUNT,https://www.bamboohr.com/blog/key-hr-metrics
+OVERTIME_RATE,Overtime Rate,OT_OVERTIME_HOURS,Overtime Hours,hours,SUM,https://www.clearpointstrategy.com/blog/human-capital-kpis-scorecard-measures
+OVERTIME_RATE,Overtime Rate,OT_REGULAR_HOURS,Regular Hours Worked,hours,SUM,https://www.clearpointstrategy.com/blog/human-capital-kpis-scorecard-measures

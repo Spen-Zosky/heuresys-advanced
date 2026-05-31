@@ -1,0 +1,37 @@
+industry_class_scheme,industry_class_code,industry_class_name,size_band_code,operating_model_code,regulatory_intensity,employee_count,revenue_eur,country_code,source_url
+NACE,K,Financial and insurance activities,L,B2B_SERVICES,EXTREME,640,180000000,IT,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,K,Financial and insurance activities,M,B2B_SERVICES,EXTREME,180,42000000,IT,https://en.wikipedia.org/wiki/Statistical_Classification_of_Economic_Activities_in_the_European_Community
+NACE,K,Financial and insurance activities,L,PUBLIC_SECTOR,EXTREME,420,95000000,DE,https://www.lisam.com/news/10-most-regulated-industries-in-the-us/
+NACE,C,Manufacturing,L,MANUFACTURING,HIGH,510,120000000,IT,https://www.quantgov.org/manufacturing-accumulation
+NACE,C,Manufacturing,M,MANUFACTURING,HIGH,140,30000000,DE,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,C,Manufacturing,S,MANUFACTURING,MEDIUM,38,8500000,FR,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,Q,Human health and social work activities,L,PUBLIC_SECTOR,EXTREME,720,68000000,IT,https://www.findlaw.com/legalblogs/small-business/regulation-nation-what-industries-are-most-carefully-overseen/
+NACE,Q,Human health and social work activities,M,B2B_SERVICES,HIGH,160,22000000,ES,https://www.lisam.com/news/10-most-regulated-industries-in-the-us/
+NACE,D,Electricity gas steam and air conditioning supply,L,PUBLIC_SECTOR,EXTREME,480,140000000,FR,https://www.quantgov.org/manufacturing-accumulation
+NACE,B,Mining and quarrying,M,MANUFACTURING,HIGH,210,55000000,PL,https://www.quantgov.org/manufacturing-accumulation
+NACE,H,Transportation and storage,L,B2B_SERVICES,HIGH,560,98000000,NL,https://www.lisam.com/news/10-most-regulated-industries-in-the-us/
+NACE,H,Transportation and storage,M,WHOLESALE,MEDIUM,175,40000000,IT,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,G,Wholesale and retail trade repair of motor vehicles,L,RETAIL,MEDIUM,640,210000000,IT,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,G,Wholesale and retail trade repair of motor vehicles,M,WHOLESALE,MEDIUM,150,46000000,DE,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,G,Wholesale and retail trade repair of motor vehicles,S,MIXED,LOW,42,9000000,FR,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,J,Information and communication,L,B2B_SERVICES,MEDIUM,380,72000000,IE,https://www.infobelpro.com/en/blog/nace-codes
+NACE,J,Information and communication,M,B2B_SERVICES,MEDIUM,120,28000000,IT,https://www.infobelpro.com/en/blog/nace-codes
+NACE,J,Information and communication,S,B2B_SERVICES,LOW,35,7800000,PT,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,M,Professional scientific and technical activities,M,B2B_SERVICES,LOW,95,18000000,IT,https://en.wikipedia.org/wiki/Statistical_Classification_of_Economic_Activities_in_the_European_Community
+NACE,M,Professional scientific and technical activities,S,B2B_SERVICES,LOW,28,5200000,FR,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,O,Public administration and defence compulsory social security,L,PUBLIC_SECTOR,HIGH,890,0,IT,https://www.findlaw.com/legalblogs/small-business/regulation-nation-what-industries-are-most-carefully-overseen/
+NACE,O,Public administration and defence compulsory social security,M,PUBLIC_SECTOR,HIGH,210,0,ES,https://www.findlaw.com/legalblogs/small-business/regulation-nation-what-industries-are-most-carefully-overseen/
+NACE,P,Education,L,PUBLIC_SECTOR,MEDIUM,520,0,IT,https://en.wikipedia.org/wiki/Statistical_Classification_of_Economic_Activities_in_the_European_Community
+NACE,P,Education,M,PUBLIC_SECTOR,MEDIUM,130,12000000,DE,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,F,Construction,L,MANUFACTURING,MEDIUM,460,88000000,IT,https://www.quantgov.org/manufacturing-accumulation
+NACE,F,Construction,M,MIXED,MEDIUM,165,34000000,PL,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,F,Construction,S,MIXED,LOW,40,9500000,FR,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,I,Accommodation and food service activities,M,RETAIL,LOW,140,19000000,ES,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,I,Accommodation and food service activities,S,RETAIL,LOW,33,4800000,IT,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,A,Agriculture forestry and fishing,M,MANUFACTURING,MEDIUM,110,21000000,IT,https://en.wikipedia.org/wiki/Statistical_Classification_of_Economic_Activities_in_the_European_Community
+NACE,A,Agriculture forestry and fishing,S,WHOLESALE,LOW,30,6200000,ES,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,E,Water supply sewerage waste management and remediation,L,PUBLIC_SECTOR,HIGH,440,76000000,DE,https://www.quantgov.org/manufacturing-accumulation
+NACE,E,Water supply sewerage waste management and remediation,M,PUBLIC_SECTOR,HIGH,155,33000000,IT,https://www.lisam.com/news/10-most-regulated-industries-in-the-us/
+NACE,N,Administrative and support service activities,M,B2B_SERVICES,LOW,120,17000000,IT,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en
+NACE,R,Arts entertainment and recreation,S,MIXED,LOW,29,4200000,FR,https://en.wikipedia.org/wiki/Statistical_Classification_of_Economic_Activities_in_the_European_Community
+NACE,L,Real estate activities,M,B2B_SERVICES,MEDIUM,85,24000000,IT,https://single-market-economy.ec.europa.eu/smes/sme-fundamentals/sme-definition_en

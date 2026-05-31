@@ -1,3 +1,21 @@
+## 🎯 2026-05-31 (cont.) — S953 D2/D3/A — @heuresys/ui token-contract consolidation + publish 0.1.2
+
+Continuation of S952/S953. Executed phases **D2 → D3 → A** of `docs/kb/RBAC_UIX_PERSPECTIVES_PLAN.md`.
+
+**D2 (validate via `link:`)** — consumed the D1 fix in apps/web via a temporary `pnpm.overrides @heuresys/ui: link:` + live browser audit (real login `admin@heuresys.com`, dashboard/blueprint-detail on :3005). **Main D1 fix confirmed**: dark tokens / Card / Button / Input correct, real RTL_BANK data rendered.
+
+**Discovery (token architecture)** — `tokens.css` (the OKLCH design-system holding `--color-overlay`) is **orphaned**: a `ThemeBuilderWizard` export artifact no runtime imports. The export `@heuresys/ui/styles`→`globals.css` declared only a minimal `@theme`; each consumer reinvents a partial/divergent token subset. Runtime audit found the **real** live bug: `text-muted-fg` rendered full-white (`-fg` vs `-foreground` naming split, 25 uses/dashboard); `bg-overlay` transparent + secondary/input/ring empty were latent (apps/web uses only 13 core components — no Dialog/Select).
+
+**D3 (token-contract gap-fill)** — `ux-design-shared d766b02`: the export `globals.css` now provides the semantic tokens no consumer declares (secondary/destructive/input/ring/overlay + `*-fg`) + `-fg`↔`-foreground` aliases; brand/surface stays per-consumer (avoids Tailwind v4 utility-rule conflict). Empirically verified the lib-side alias inherits each consumer's `-foreground` value.
+
+**A (publish)** — Enzo-authorized after a `--dry-run` check: `npm publish @heuresys/ui@0.1.2` (D1+D3, account spen-zosky). Consumed here: bumped dep `^0.1.1`→`^0.1.2` (root+web+showcase), removed link override, `pnpm install`, committed slim lockfile. **Validated from registry** (link removed): muted-fg `#9ca3af`, bg-overlay opaque, secondary/input/ring resolved, brand tokens unchanged.
+
+**Gotcha fixed (mine)** — ran `pnpm build` in `ux-design-shared/ui` (which is **npm**-managed) → pnpm 11 corepack pruned node_modules (dropped tsup) + wrote spurious pnpm-lock/workspace files. Corrected: removed them, `npm install` + `npm run build` (tsup) → fresh dist before publish.
+
+**Commits** — heuresys-advanced: `3dd3ee9` (doc) · `643e8ef` (deps 0.1.2). ux-design-shared (local): `4b84a32` D1 · `d766b02` D3 · `ecdb6ab` release-0.1.2. **npm `@heuresys/ui@0.1.2` published (latest).** heuresys-advanced clean, **8 commits unpushed**. **Servers**: `:3005` final 0.1.2 build (inspection); `:3000` stale pre-fix. **NEXT = R1** (roles). R3 still open (pg-pool ECONNRESET).
+
+---
+
 ## 🎯 2026-05-31 — S952/S953 — Forensic QA + design-system standardization + RBAC/perspectives architecture (SESSION CLOSED for fresh restart)
 
 Long live-E2E session. **Full plan + resume instructions: `docs/kb/RBAC_UIX_PERSPECTIVES_PLAN.md` (▶ RESUME section).**

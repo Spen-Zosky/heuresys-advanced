@@ -25,7 +25,7 @@ TEAM_LEADER/TEAM_MEMBER imply a **team** entity (a leader leads a *specific* tea
 | **D1** | design-system finalize: scrim→`--color-overlay` token, fix R3 wordmark tests, guard re-verify, commit | ux-design-shared | ✅ DONE — committed ux-design-shared `4b84a32` (local, not pushed) |
 | **D2** | consume here via `link:` (validate-only) — **main fix ✅** (Card/Button/Input/blueprint-detail dark OK, live evidence); scrim regression discovered → spun into D3 | both | ✅ validated (link, local, link still active pending publish) |
 | **D3** | token-contract consolidation in `@heuresys/ui`: export `globals.css` gap-fills the semantic tokens no consumer declares (overlay/secondary/destructive/input/ring + `*-fg`) + `-fg`↔`-foreground` aliases; brand/surface stays per-consumer (no utility-rule conflict) | ux-design-shared | ✅ DONE — committed `d766b02` (local); validated live apps/web dark (muted-fg→#9ca3af, overlay opaque, secondary/input/ring resolved, brand unchanged) |
-| **A (publish)** | `npm publish` @heuresys/ui 0.1.2 (D1+D3) → bump dep here → `pnpm install` → revert link override → commit lockfile | both | ⏳ **gated user npm auth** |
+| **A (publish)** | published `@heuresys/ui` **0.1.2** (D1+D3) → bumped dep (root+web+showcase) → removed link override → `pnpm install` → committed lockfile | both | ✅ DONE — npm `0.1.2` latest; heuresys-advanced `643e8ef`, ux-design-shared `ecdb6ab`; consumed-from-registry validated live (muted-fg/overlay/secondary OK) |
 | **R1** | migration `auth_role_category` + new roles + categorize 8 + seed; **probable** `sys_teams`/`sys_team_members` | advanced | ⏳ |
 | **R2** | assign 3 functional roles to real users + logins; live-verify 8 roles × routes × 2 themes (matrix) | advanced | ⏳ |
 | **U1** | migration `sys_ui_interfaces` + seed registry (every page → PET perspective + permission) + `GET /v1/me/interfaces` | advanced | ⏳ |
@@ -44,14 +44,16 @@ TEAM_LEADER/TEAM_MEMBER imply a **team** entity (a leader leads a *specific* tea
 
 **Evidence captured (D2/D3 validation, live :3005)**: main D1 fix works — login/dashboard/blueprint-detail render correct in dark, real RTL_BANK data, Card `#131720`/Button primary/Input all good. D2 surfaced a scrim regression (`--color-overlay` orphaned in `tokens.css`, a wizard artifact no runtime imports) + a wider gap: the lib never exported a canonical token set, each app reinvents a partial subset → `text-muted-fg` rendered full-white (25 uses/dashboard, `-fg`/`-foreground` naming split), `bg-overlay` transparent, secondary/input/ring empty. D3 fixed all via lib gap-fill + aliases (verified: muted-fg→`#9ca3af`, overlay opaque, brand tokens unchanged).
 
-**🟢 NEXT = phase A (publish) — gated on Enzo's npm auth**. To ship D1+D3 portably:
+**✅ Phase A (publish) DONE** — `@heuresys/ui@0.1.2` published to npm (D1+D3), consumed here from registry, validated live. Steps executed:
 1. `cd D:\ux-design-shared\ui` → bump `0.1.1`→`0.1.2` → `npm publish` (⚠ outward-facing → Enzo's npmjs auth; `! npm publish` or explicit yes).
 2. heuresys-advanced: bump `@heuresys/ui ^0.1.1`→`^0.1.2` in root + `apps/web` + `apps/showcase` package.json → **remove the temporary `pnpm.overrides @heuresys/ui: link:...`** → `pnpm install` → commit lockfile + the version bumps.
 3. Rebuild + smoke, then R1.
 
-**⚠ Working-tree mid-flight (heuresys-advanced)**: root `package.json` has a TEMPORARY `pnpm.overrides @heuresys/ui: link:../ux-design-shared/ui` + dirty `pnpm-lock.yaml` (from D2 `pnpm install`). MUST be reverted at publish (step 2). A web prod server runs on **:3005** serving the D3 build (kill when done; `:3000` still serves the old pre-fix build). NOTHING committed in heuresys-advanced for D2/D3 yet — the fixes live in ux-design-shared.
+**Working-tree CLEAN** (heuresys-advanced): link override removed, lockfile committed. Local commits ahead of origin: S952 (6) + `3dd3ee9` (doc) + `643e8ef` (deps) = **8 unpushed**. ux-design-shared: `4b84a32`+`d766b02`+`ecdb6ab` local (npm **0.1.2 published**, not pushed to git remote). **Servers**: `:3005` serves the final 0.1.2 build (for inspection; kill when done); `:3000` still serves the OLD pre-fix build (stale — restart with current `.next` to align, or kill).
 
-**Phase order**: ~~D2~~ ~~D3~~ → **A (publish)** → R1 → R2 → U1 → U2 → P1 → V (table above). All design decisions LOCKED (top of doc).
+**🟢 NEXT = R1** (roles): migration `auth_role_category` + new roles + categorize the 8 + seed; **probable** `sys_teams`/`sys_team_members` (see TEAMS note). Re-run the R1 grounding audit (below) → present taxonomy + real-user picks to Enzo before the migration.
+
+**Phase order**: ~~D2~~ ~~D3~~ ~~A~~ → **R1** → R2 → U1 → U2 → P1 → V (table above). All design decisions LOCKED (top of doc).
 
 **R1 grounding audit — re-run instantly** (read-only; outputs roles taxonomy + per-role permission sets + sys_teams design + real-user picks for the 3 holderless functional roles → present to Enzo before the migration):
 `Workflow({scriptPath: "C:\\Users\\enzospenuso\\.claude\\projects\\D--heuresys-advanced\\80a3c939-f5b8-4dff-bf80-3e26eca128df\\workflows\\scripts\\r1-roles-grounding-audit-wf_f5530f75-b66.js"})` (stopped mid-run at close).

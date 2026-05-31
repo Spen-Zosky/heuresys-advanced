@@ -24,17 +24,19 @@ interface VariantRow extends BlueprintVariant {
 }
 
 const COLUMNS: DataColumn<VariantRow>[] = [
-  { header: "Codice", cell: (v) => <span className="font-mono text-xs text-muted-foreground">{v.code}</span> },
   {
     header: "Nome",
     cell: (v) => (
-      <Link href={`/blueprints/${v.blueprintVariantId}`} data-testid="blueprint-link" className="font-medium text-foreground underline-offset-2 hover:underline">
-        {v.name}
-      </Link>
+      <div className="flex flex-col">
+        <Link href={`/blueprints/${v.blueprintVariantId}`} data-testid="blueprint-link" className="font-medium text-foreground underline-offset-2 hover:underline">
+          {v.name ? v.name : "ND"}
+        </Link>
+        {v.code ? <span className="font-mono text-xs text-muted-foreground">{v.code}</span> : null}
+      </div>
     ),
   },
-  { header: "Famiglia", cell: (v) => <span className="text-foreground">{v.famName ?? "—"}</span> },
-  { header: "Industry", cell: (v) => <span className="text-xs uppercase text-muted-foreground">{v.industry ?? "—"}</span> },
+  { header: "Famiglia", cell: (v) => <span className="text-foreground">{v.famName ?? "ND"}</span> },
+  { header: "Industry", cell: (v) => <span className="text-xs uppercase text-muted-foreground">{v.industry ?? "ND"}</span> },
 ];
 
 export default function BlueprintsPage() {

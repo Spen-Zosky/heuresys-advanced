@@ -23,17 +23,19 @@ interface TenantsList {
 }
 
 const COLUMNS: DataColumn<Tenant>[] = [
-  { header: "Codice", cell: (t) => <span className="font-mono text-xs">{t.tenantCode}</span> },
   {
     header: "Nome",
     cell: (t) => (
-      <Link
-        href={`/tenants/${t.tenantId}`}
-        data-testid="tenant-link"
-        className="font-medium text-foreground underline-offset-2 hover:underline"
-      >
-        {t.tenantName}
-      </Link>
+      <div className="flex flex-col">
+        <Link
+          href={`/tenants/${t.tenantId}`}
+          data-testid="tenant-link"
+          className="font-medium text-foreground underline-offset-2 hover:underline"
+        >
+          {t.tenantName ?? "ND"}
+        </Link>
+        <span className="font-mono text-xs text-muted-foreground">{t.tenantCode}</span>
+      </div>
     ),
   },
   {

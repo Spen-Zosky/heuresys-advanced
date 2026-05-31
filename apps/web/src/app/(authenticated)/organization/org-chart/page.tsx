@@ -97,8 +97,8 @@ export default function OrgChartPage() {
             onClick={() => setActiveGraphId(g.graphId)}
             className={`rounded-card border px-3 py-1 text-xs transition-colors ${
               effectiveGraphId === g.graphId
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border text-muted-foreground hover:text-foreground"
+                ? "border-transparent bg-primary text-white"
+                : "border-border bg-card text-foreground hover:bg-muted"
             }`}
             data-testid="org-chart-picker-btn"
           >

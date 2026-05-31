@@ -11,18 +11,21 @@ import type { ReactNode } from "react";
  */
 export type StatusTone = "success" | "warning" | "danger" | "info" | "neutral";
 
-// AA-compliant in both themes. Status tones are SEMANTIC (fixed), not
-// palette-driven — the PaletteDropdown reskins only --palette-1..4, so using
-// explicit semantic shades here does not break palette switching. The prior
-// `text-{tone} on bg-{tone}/10` rendered saturated token text on a 10% tint
-// and failed WCAG AA in light mode (e.g. warning amber ~1.99, success ~2.95);
-// these shades measure >=4.5 against the pill's effective background in both
-// light and dark themes (S952 forensic QA).
+// AA-compliant, THEME-INDEPENDENT opaque chips. Status tones are SEMANTIC
+// (fixed), not palette-driven — the PaletteDropdown reskins only --palette-1..4.
+// IMPORTANT: do NOT use Tailwind `dark:` variants here — this project toggles
+// dark mode via the `.dark` CLASS (ThemeProvider + CSS-var tokens), but
+// Tailwind 4's default `dark:` variant is `@media (prefers-color-scheme: dark)`
+// (NOT class-based), so `dark:` utilities fire off the OS scheme regardless of
+// the app theme and break the other theme (S952: an earlier `dark:`-based fix
+// rendered light-green text on near-white in light mode → ratio 1.22).
+// Opaque light-tint bg + dark same-hue text reads correctly on BOTH the light
+// card and the dark card (a colored chip), measuring >=6 contrast either way.
 const TONE_CLASS: Record<StatusTone, string> = {
-  success: "border-green-300/70 bg-green-100 text-green-800 dark:border-green-500/30 dark:bg-green-500/15 dark:text-green-300",
-  warning: "border-amber-300/70 bg-amber-100 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-300",
-  danger: "border-red-300/70 bg-red-100 text-red-800 dark:border-red-500/30 dark:bg-red-500/15 dark:text-red-300",
-  info: "border-blue-300/70 bg-blue-100 text-blue-800 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300",
+  success: "border-green-200 bg-green-100 text-green-800",
+  warning: "border-amber-200 bg-amber-100 text-amber-800",
+  danger: "border-red-200 bg-red-100 text-red-800",
+  info: "border-blue-200 bg-blue-100 text-blue-800",
   neutral: "border-border bg-muted text-muted-foreground",
 };
 

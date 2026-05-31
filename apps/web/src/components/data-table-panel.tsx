@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Badge, DataTableWithCrossHair, EmptyState, ErrorState, PageHeader } from "@heuresys/ui";
+import { useEffect, useState } from "react";
+import { Badge, Button, DataTableWithCrossHair, EmptyState, ErrorState, PageHeader } from "@heuresys/ui";
 import { Inbox } from "lucide-react";
 
 /**
@@ -39,14 +40,28 @@ export interface EntityTableProps<T> {
   emptyTitle?: string;
   emptyDescription?: string;
   caption?: string;
+  /** Client-side rows per page. Defaults to 25. Pagination UI shows only when rows.length exceeds this. */
+  pageSize?: number;
 }
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 export function EntityTable<T>(props: EntityTableProps<T>) {
   const {
     isLoading, isError, errorTestId, errorMessage,
     rows, rowKey, rowTestId, columns,
     emptyTestId, emptyTitle, emptyDescription, caption,
+    pageSize: pageSizeProp,
   } = props;
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(pageSizeProp ?? 25);
+
+  // Reset to the first page whenever the row set identity/length changes
+  // (e.g. a new fetch resolves or a filter shrinks the result set).
+  useEffect(() => {
+    setPageIndex(0);
+  }, [rows, rows.length]);
 
   if (isLoading) {
     return (
@@ -74,6 +89,16 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       />
     );
   }
+  const total = rows.length;
+  const showPagination = total > pageSize;
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const safePageIndex = Math.min(pageIndex, pageCount - 1);
+  const start = safePageIndex * pageSize;
+  const end = Math.min(start + pageSize, total);
+  const visibleRows = showPagination ? rows.slice(start, end) : rows;
+  const from = total === 0 ? 0 : start + 1;
+  const to = end;
+
   return (
     <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
       <DataTableWithCrossHair caption={caption} className="w-full border-collapse text-sm">
@@ -87,7 +112,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
-          {rows.map((row) => (
+          {visibleRows.map((row) => (
             <tr key={rowKey(row)} data-testid={rowTestId} className="transition-colors hover:bg-muted/60">
               {columns.map((c, i) => (
                 <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`}>
@@ -98,6 +123,53 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
           ))}
         </tbody>
       </DataTableWithCrossHair>
+      {showPagination ? (
+        <div
+          data-testid="table-pagination"
+          className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-card px-4 py-3 text-sm text-muted-foreground"
+        >
+          <span>
+            {from}–{to} di {total}
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              data-testid="pagination-prev"
+              disabled={safePageIndex <= 0}
+              onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+            >
+              Precedente
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              data-testid="pagination-next"
+              disabled={safePageIndex >= pageCount - 1}
+              onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
+            >
+              Successivo
+            </Button>
+            <select
+              aria-label="Righe per pagina"
+              className="rounded-control border border-border bg-card px-2 py-1 text-sm text-muted-foreground hover:bg-muted disabled:opacity-50"
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPageIndex(0);
+              }}
+            >
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <option key={size} value={size}>
+                  {size} / pagina
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

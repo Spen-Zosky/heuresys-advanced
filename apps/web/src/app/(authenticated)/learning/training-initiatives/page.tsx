@@ -24,8 +24,15 @@ interface TrainingInitiativesList {
 }
 
 const COLUMNS: DataColumn<TrainingInitiative>[] = [
-  { header: "Codice", cell: (t) => <span className="font-mono text-xs">{t.code}</span> },
-  { header: "Coorte", cell: (t) => <span className="text-xs text-muted-foreground">{t.cohortName ?? "—"}</span> },
+  {
+    header: "Coorte",
+    cell: (t) => (
+      <div className="flex flex-col">
+        <span className="text-sm font-medium text-foreground">{t.cohortName ?? "ND"}</span>
+        <span className="font-mono text-[11px] text-muted-foreground">{t.code}</span>
+      </div>
+    ),
+  },
   { header: "Stato", cell: (t) => <StatusBadge value={t.status} /> },
   { header: "Inizio", cell: (t) => <span className="text-xs text-muted-foreground">{t.startDate ?? "—"}</span> },
   { header: "Fine", cell: (t) => <span className="text-xs text-muted-foreground">{t.endDate ?? "—"}</span> },

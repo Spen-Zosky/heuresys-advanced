@@ -6,7 +6,7 @@
 
 ## 0. Snapshot in una riga
 
-Monorepo pnpm HRMS/BPM **maturo e oltre MVP-3**: API Fastify 5 con **~58 moduli business + auth (~272 endpoint live)**, web Next.js 15 con **MVP-2a (admin) + MVP-2b (ESS) shipped**, showcase brand v1 deployato, DB PostgreSQL 16 nativo su OCI VM, **6 workflow CI self-hosted + showcase deploy tutti verdi**. HEAD `9cd906e`, working tree pulito, tag `v0.4.1-housekeeping-closed`. **Prossimo**: MVP-4 stream 2.4 SDBI Phase 2.
+Monorepo pnpm HRMS/BPM **maturo e oltre MVP-3**: API Fastify 5 con **~58 moduli business + auth (~272 endpoint live)**, web Next.js 15 con **MVP-2a (admin) + MVP-2b (ESS) shipped**, showcase brand v1 deployato, DB PostgreSQL 16 nativo su OCI VM (**RTL tenant rebuild eseguito S950 → 161 utenti / 2 tenant**, vedi §4), **6 workflow CI self-hosted + showcase deploy tutti verdi (5/5)**. HEAD `c363ef1`, working tree pulito, tag `v0.4.1-housekeeping-closed`. **Prossimo**: brand-fidelity F5 ESS / F6 admin / F7 showcase (NEXT #1); decisione connettore SuccessFactors (proposta pending in `docs/integrations/`); position refinement opzionale (job_role/ESCO, cycle-detection OU).
 
 > ⚠️ **Doc drift critico**: il `CLAUDE.md` del repo (sezione "What this is") e il `README.md` descrivono ancora lo stato **MVP-1** ("11/22 moduli, web vuoto"). È **gravemente obsoleto**. Questo SOT_STATE è la verità; vedi `DEBT_REGISTER.md` D-01.
 
@@ -17,8 +17,8 @@ Monorepo pnpm HRMS/BPM **maturo e oltre MVP-3**: API Fastify 5 con **~58 moduli 
 | Repo Windows | `D:\heuresys-advanced` |
 | Repo OCI VM | `/home/ubuntu/heuresys-advanced` |
 | Remote | `https://github.com/Spen-Zosky/heuresys-advanced` (public) |
-| Branch / HEAD | `main` / `9cd906e` (= origin, 0/0 ahead-behind) |
-| Working tree | pulito (verificato S939) |
+| Branch / HEAD | `main` / `c363ef1` (ahead di origin `23f9bbf` di 2 commit docs-only S951, non pushati) |
+| Working tree | pulito (verificato S951) |
 | Tag corrente | `v0.4.1-housekeeping-closed` (@ `01340ae`) |
 | Tag (11 totali) | v0.2.0-mvp2 · v0.2.1-mvp2a-final · v0.3.0-mvp3 · v0.3.1-mvp3-final · v0.3.2-mvp3-full · v0.3.3-preflight-partial · v0.3.4-p0-closed · v0.4.0-brand-v1 · v0.4.0-mvp4-ready · v0.4.0a-s937-partial-checkpoint · v0.4.1-housekeeping-closed |
 | Pre-commit hook | `.git/hooks/pre-commit` warn-only → `scripts/cowork-exchange/validate-naming.mjs` su cowork_code_exchange |

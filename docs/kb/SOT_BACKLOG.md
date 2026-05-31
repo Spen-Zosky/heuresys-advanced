@@ -45,6 +45,19 @@
 |---|---|---|---|
 | **B-10** | **MVP-4 stream 2.4 — SDBI Phase 2** (Semantic-Driven Brownfield Import, kickoff) | ~6-10h | `cowork_code_exchange/_01_PROMPT_027_s937_ck8_sdbi_phase2_kickoff.md` (archivio); contesto `_00_HANDOVER_CLI_2026-05-26_post_S937.md`. Migration base `000036_temp_sdbi_schema.sql`. **NB**: era legato a zod4 (B-20) → **ora sbloccato** (B-20 fatto 2026-05-28). Riformulare il PROMPT 027 come piano CLI-owned diretto (non più protocollo Cowork). |
 
+### B-50 — Full reconciliation legacy→advanced (oltre ~49%) — umbrella ADR-0022
+
+Apertura item (S951). La dottrina data-source (**ADR-0022**) conferma che il legacy heuresys-evo è la sorgente dati **autoritativa** e advanced (`sys.*`) lo schema target strutturale; lo stato reale di popolamento è **~49%** (65/134 tabelle `sys` con righe; **69.450** lineage rows). Portare la conciliazione verso il completo è lavoro vero, **multi-sessione, da greenlight esplicito** (NON eseguito in S951). Breakdown verificato (query live 2026-05-31):
+
+| Sotto-item | Stato verificato | Aggancio |
+|---|---|---|
+| (a) ~69/134 tabelle `sys` a 0 righe | entità non ancora importate (Wave-2/3 non eseguite o senza sorgente legacy) | **B-10** (SDBI Phase 2), stream 2.1 Wave 2 |
+| (b) 4-5 Wave-1 IMPORT target a zero | `process_kpi_templates`, `learning_path_steps`, `skill_categories`, `activity_classification_mappings`, `skill_learning_mappings` — mapping presente, upsert 0-righe (sorgente vuota / transform non supportato / silent-skip) | **B-40** (CW-B39), **B-42** (CW-B50) |
+| (c) 2 import_run orfani | 1 FAILED + 1 RUNNING (su 21 COMPLETED) — chiudere/pulire | housekeeping engine brownfield |
+| (d) nessun delta/watermark | ogni run è full re-stage idempotente; manca HWM incrementale | design `brownfield.source_watermarks` (rif. doc SF §3.2 net-new) |
+
+**Effort**: multi-sessione (B-10 da solo ~6-10h). **Regola d'ingaggio**: esecuzione SOLO su greenlight esplicito di Enzo (scope-discipline cardinale, `memory/feedback_scope_discipline_no_cascade.md`). Questo item documenta lo scope; non autorizza un bulk-import autonomo.
+
 ## P2 — Dependabot / dipendenze (audit breaking-changes)
 
 | ID | PR | Pacchetto | Rischio | Note |

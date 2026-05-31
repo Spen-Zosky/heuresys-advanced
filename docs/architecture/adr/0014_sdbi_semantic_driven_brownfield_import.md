@@ -1,6 +1,6 @@
 # ADR-0014 — SDBI: Semantic-Driven Brownfield Import (complement to ETL brownfield)
 
-**Status**: PROPOSED (awaiting Enzo final approval post Opt3 selection)
+**Status**: ACCEPTED (2026-05-31, S951 — adopted by ADR-0022 as the schema-gap-extension mechanism for FUTURE sources whose entities have no `sys.*` target; NOT used for the existing legacy, which already has 100% table+column mapping coverage. Implementation = SDBI Phase 2 / backlog B-10, distinct from this status.)
 **Date**: 2026-05-20
 **Authors**: Cowork Claude (architect supervisor)
 **Decision authority**: Enzo Spenuso
@@ -316,9 +316,9 @@ Phase mapping al TODO master (`cowork_reserved/12_TODO_LIST_GRANULARE.md`):
 
 ## §7 — Status
 
-**PROPOSED** — awaiting Enzo final approval after reading this ADR + accompanying batch_c1 deliverables.
+**ACCEPTED** (2026-05-31, S951). Adopted by **ADR-0022** (data-source doctrine) as the sanctioned mechanism to **extend** the advanced `sys.*` schema when a FUTURE source carries entities with no existing target. **Scope**: SDBI is NOT used for the existing legacy `heuresys-evo` (full table+column mapping coverage already present, `advanced ⊇ legacy`); the legacy is handled by the deterministic brownfield wave pipeline (ADR-0012).
 
-Next action: Enzo conferma ADR + procediamo a Phase 2 (Goals/OKRs pilot authoring — C1.8).
+The status (design accepted) is distinct from the **implementation**, which remains open as **SOT_BACKLOG B-10 (SDBI Phase 2)** — Goals/OKRs pilot + scale. The §5 acceptance criteria below are the implementation gates for that Phase-2 work, not preconditions for the doctrine-level acceptance recorded here.
 
 ## §8 — References
 

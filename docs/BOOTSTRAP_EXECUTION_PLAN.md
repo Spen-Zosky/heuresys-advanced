@@ -35,7 +35,7 @@ The platform is **tenant‑aware**, **authenticated**, **position‑centric**, a
 | I11 | **Training completion ≠ skill mastery.** Completion is *evidence*. Mastery requires reassessment. | `LEARNING_CATALOG_AND_GAP_CLOSURE_SPEC.md` |
 | I12 | **Brownfield rule:** old DBMS (legacy heuresys-evo Docker) is the **authoritative no-PII data source**; v5 `sys.*` is the structural authority and wins on every conflict (ADR-0023); every brownfield‑sourced canonical record carries a `sys.sys_source_lineage_records` row. | `BROWNFIELD_IMPORT_STRATEGY.md` |
 | I13 | **Local runtime: PostgreSQL 16 installed natively. No Docker, no containers.** Hosting *location* is deferred per ADR‑0010: localhost / OCI VM / OCI Managed. DB name `heuresys_advanced`, role `heuresys`, schema `sys` invariant. | User policy + ADR‑0010 |
-| I14 | **Synthetic data flagged.** Reference tenant `RTL_BANK_REFERENCE` synthetic users carry `user_is_synthetic = true` and `user_type = SYNTHETIC_REFERENCE`. | `DBMS_BOOTSTRAP_SPEC.md` §365 |
+| I14 | **Synthetic-data flag = provenance discriminator (not a privacy gate, ADR-0023).** NB (post-S950 RTL rebuild): the original `RTL_BANK_REFERENCE` synthetic scaffold was replaced by **real legacy-wired users** (`user_is_synthetic = false`); the `user_is_synthetic` / `user_type = SYNTHETIC_REFERENCE` flag mechanism remains in the schema for any future synthetic reference records. | `DBMS_BOOTSTRAP_SPEC.md` §365 |
 
 ---
 

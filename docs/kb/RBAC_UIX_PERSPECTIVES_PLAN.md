@@ -26,7 +26,8 @@ TEAM_LEADER/TEAM_MEMBER imply a **team** entity (a leader leads a *specific* tea
 | **D2** | consume here via `link:` (validate-only) — **main fix ✅** (Card/Button/Input/blueprint-detail dark OK, live evidence); scrim regression discovered → spun into D3 | both | ✅ validated (link, local, link still active pending publish) |
 | **D3** | token-contract consolidation in `@heuresys/ui`: export `globals.css` gap-fills the semantic tokens no consumer declares (overlay/secondary/destructive/input/ring + `*-fg`) + `-fg`↔`-foreground` aliases; brand/surface stays per-consumer (no utility-rule conflict) | ux-design-shared | ✅ DONE — committed `d766b02` (local); validated live apps/web dark (muted-fg→#9ca3af, overlay opaque, secondary/input/ring resolved, brand unchanged) |
 | **A (publish)** | published `@heuresys/ui` **0.1.2** (D1+D3) → bumped dep (root+web+showcase) → removed link override → `pnpm install` → committed lockfile | both | ✅ DONE — npm `0.1.2` latest; heuresys-advanced `643e8ef`, ux-design-shared `ecdb6ab`; consumed-from-registry validated live (muted-fg/overlay/secondary OK) |
-| **R1** | migration `auth_role_category` + new roles + categorize 8 + seed; **probable** `sys_teams`/`sys_team_members` | advanced | ⏳ |
+| **R1a** | migration `auth_role_category` + CHECK + categorize 8 (6 functional / 2 hierarchical_operational) + **CEO** role (26 read/list perms) + `ROLE_CODES` allowlist | advanced | ✅ DONE — `8a733f8` (mig 000045); 9 roles, typecheck + vitest 359/0 green |
+| **R1b** | `sys_teams`/`sys_team_members` + TEAM_LEADER/TEAM_MEMBER roles + 3rd scope axis ("my team") in service layer | advanced | ⏳ (deferred — dedicated phase) |
 | **R2** | assign 3 functional roles to real users + logins; live-verify 8 roles × routes × 2 themes (matrix) | advanced | ⏳ |
 | **U1** | migration `sys_ui_interfaces` + seed registry (every page → PET perspective + permission) + `GET /v1/me/interfaces` | advanced | ⏳ |
 | **U2** | live sidebar from DB (permissions × interfaces grouped by perspective) + perspective switcher Process/Enterprise/Talent | advanced | ⏳ |
@@ -51,9 +52,9 @@ TEAM_LEADER/TEAM_MEMBER imply a **team** entity (a leader leads a *specific* tea
 
 **Working-tree CLEAN** (heuresys-advanced): link override removed, lockfile committed. Local commits ahead of origin: S952 (6) + `3dd3ee9` (doc) + `643e8ef` (deps) = **8 unpushed**. ux-design-shared: `4b84a32`+`d766b02`+`ecdb6ab` local (npm **0.1.2 published**, not pushed to git remote). **Servers**: `:3005` serves the final 0.1.2 build (for inspection; kill when done); `:3000` still serves the OLD pre-fix build (stale — restart with current `.next` to align, or kill).
 
-**🟢 NEXT = R1** (roles): migration `auth_role_category` + new roles + categorize the 8 + seed; **probable** `sys_teams`/`sys_team_members` (see TEAMS note). Re-run the R1 grounding audit (below) → present taxonomy + real-user picks to Enzo before the migration.
+**🟢 NEXT = R2** (assign the 3 holderless functional roles — BLUEPRINT_MANAGER, PROCESS_OWNER, READ_ONLY — to real RTL users: login-added, chosen by function where determinable, NO fixtures). **R1a DONE** (`8a733f8`, mig 000045): `auth_role_category` + categorize 8 + CEO (hierarchical_operational, 26 read perms). **R1b** (teams: `sys_teams`/`sys_team_members` + TEAM_LEADER/TEAM_MEMBER + 3rd scope axis) deferred to a dedicated phase. CEO is also holderless until assigned (fold into R2).
 
-**Phase order**: ~~D2~~ ~~D3~~ ~~A~~ → **R1** → R2 → U1 → U2 → P1 → V (table above). All design decisions LOCKED (top of doc).
+**Phase order**: ~~D2~~ ~~D3~~ ~~A~~ ~~R1a~~ → **R2** (+ R1b teams, deferred) → U1 → U2 → P1 → V (table above). All design decisions LOCKED (top of doc).
 
 **R1 grounding audit — re-run instantly** (read-only; outputs roles taxonomy + per-role permission sets + sys_teams design + real-user picks for the 3 holderless functional roles → present to Enzo before the migration):
 `Workflow({scriptPath: "C:\\Users\\enzospenuso\\.claude\\projects\\D--heuresys-advanced\\80a3c939-f5b8-4dff-bf80-3e26eca128df\\workflows\\scripts\\r1-roles-grounding-audit-wf_f5530f75-b66.js"})` (stopped mid-run at close).

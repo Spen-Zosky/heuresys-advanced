@@ -20,13 +20,37 @@ import type { RoleCode } from "../config/constants.js";
  */
 const rolePermissionCache = new Map<RoleCode, Set<string>>();
 
+/** ISO timestamp of the last `setRolePermissionCache` call; null until first load. */
+let cacheLoadedAt: string | null = null;
+
 export function setRolePermissionCache(map: Map<RoleCode, Set<string>>): void {
   rolePermissionCache.clear();
   for (const [role, perms] of map.entries()) rolePermissionCache.set(role, perms);
+  cacheLoadedAt = new Date().toISOString();
 }
 
 export function isRolePermissionCacheLoaded(): boolean {
   return rolePermissionCache.size > 0;
+}
+
+/**
+ * Runtime stats for the in-memory RBAC cache, consumed by the observability
+ * system-health snapshot. Derived synchronously from the live cache — no DB hit.
+ * `rolesLoaded` = number of role codes; `mappingsLoaded` = total role×permission
+ * entries (sum of each role's permission-set size); `loadedAt` = last load time.
+ */
+export function rbacCacheStats(): {
+  rolesLoaded: number;
+  mappingsLoaded: number;
+  loadedAt: string | null;
+} {
+  let mappingsLoaded = 0;
+  for (const perms of rolePermissionCache.values()) mappingsLoaded += perms.size;
+  return {
+    rolesLoaded: rolePermissionCache.size,
+    mappingsLoaded,
+    loadedAt: cacheLoadedAt,
+  };
 }
 
 export function userHasPermission(user: { roles: RoleCode[] }, permissionCode: string): boolean {

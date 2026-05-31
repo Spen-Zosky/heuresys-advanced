@@ -254,6 +254,10 @@
     "./schemas/dashboard": {
       "types": "./dist/schemas/dashboard.d.ts",
       "default": "./src/schemas/dashboard.ts"
+    },
+    "./schemas/observability": {
+      "types": "./dist/schemas/observability.d.ts",
+      "default": "./src/schemas/observability.ts"
     }
   },
   "scripts": {

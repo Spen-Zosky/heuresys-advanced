@@ -33,7 +33,7 @@ Two legacy Docker DBs exist; the **VM is the more up-to-date** → use it as sou
 | Phase | Action | Status |
 |---|---|---|
 | **P0** | `pg_dump` snapshot pre-remediation | ✅ DONE — `pg_dump_snapshots/pre-rtl-stabilization_69fdbfd_20260531_203326.dump` (416 MB) |
-| **P1** | Delete 2 extra tenants (`RTL_BANK_REFERENCE`, `DEMO_BANK_TEST`; both empty) → HEURESYS + RTL_BANK only | ⏳ |
+| **P1** | Delete 2 extra tenants (`RTL_BANK_REFERENCE`, `DEMO_BANK_TEST`; both empty) → HEURESYS + RTL_BANK only | ✅ DONE — deps all 0, `DELETE 2`, only HEURESYS + RTL_BANK remain (both ACTIVE) |
 | **P2** | Re-derive `position_title` + `position_job_role_id` for the 162 positions from the **legacy VM** (authoritative), matched via `user_external_code='LEGACY:'||legacy.id` + reports_to×OU; present mapping for validation before applying | ⏳ |
 | **P3** | Resolve readable `code` for skills from ESCO names (full catalog); fix job_role/comp_band/skill_family corrupt codes | ⏳ |
 | **P4** | Purge orphan learning catalog + seed minimal RTL learning (modules/paths + assignments) | ⏳ |
@@ -42,4 +42,4 @@ Two legacy Docker DBs exist; the **VM is the more up-to-date** → use it as sou
 | **P7** | Re-audit (0 footprint corruption, 2 tenants) + API 354 / E2E 138 / CI 5 → then unblock **R2** (role assignment with correct titles) | ⏳ |
 
 ## ▶ RESUME
-P0 done (backup 416 MB). Legacy VM source confirmed up-to-date. **NEXT = P1** (safe tenant delete) then **P2** (legacy schema exploration → position title/job_role mapping, present to Enzo before apply). Execution is multi-phase; each destructive phase needs backup + idempotent script + re-validation. R2 (roles) is blocked on P2 (correct titles). Cross-ref: `docs/kb/RBAC_UIX_PERSPECTIVES_PLAN.md` (R2), `memory/project_rtl_tenant_rebuild.md` (S950 rebuild), ADR-0023 (no-PII legacy source doctrine).
+P0+P1 done (backup 416 MB; 2 extra tenants deleted → HEURESYS + RTL_BANK only). Legacy VM source confirmed up-to-date. **NEXT = P2** (legacy schema exploration → position title/job_role mapping, present to Enzo before apply). Execution is multi-phase; each destructive phase needs backup + idempotent script + re-validation. R2 (roles) is blocked on P2 (correct titles). Cross-ref: `docs/kb/RBAC_UIX_PERSPECTIVES_PLAN.md` (R2), `memory/project_rtl_tenant_rebuild.md` (S950 rebuild), ADR-0023 (no-PII legacy source doctrine).

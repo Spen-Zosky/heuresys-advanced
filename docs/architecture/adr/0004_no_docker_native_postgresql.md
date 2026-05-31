@@ -39,6 +39,10 @@ Setup scripts (idempotent native bootstrap):
 
 Docker is permitted **only** as an optional, clearly‑labelled, non‑default reference under `docs/optional/docker/` if a contributor opts in. The canonical workflow never depends on it.
 
+### Source-vs-Runtime distinction (added 2026-05-31, S951 — see ADR-0022)
+
+This ADR prohibits Docker for the **advanced runtime / canonical execution path** (the live application database). It does **not** prohibit consulting an external, read-only legacy database that happens to run in Docker. The `heuresys-evo` legacy DB (container `heuresys_evo_platform_db`, db `heuresys_platform`) is a **data SOURCE** touched only during extract/import — the extract reads it, then the brownfield pipeline populates native `sys.*` on the OCI VM (ADR-0010). Its containerization introduces **no canonical runtime dependency on Docker** and does not violate this policy. See ADR-0022 (data-source doctrine).
+
 ## Alternatives Considered
 
 | Option | Pros | Cons | Why rejected |

@@ -85,7 +85,7 @@ gh run list --limit 6                              # main CI verde
 
 ## 9. Invarianti non negoziabili (override "common patterns")
 
-I1 Position-centric (owner ≠ incumbent) · I3/I4 schema `sys.sys_<plural>` (aux: staging/brownfield/audit) · **I5 tenant isolation = FK + middleware, MAI RLS** · I7 auth separato (`sys_auth_*`) · I9 PIP = VIEW (ADR-0008) · **I13 PostgreSQL 16 NATIVE, NO Docker** (ADR-0004; runtime only — legacy Docker = read-only source) · RD-08 categorical = `varchar+CHECK` (mai ENUM) · RD-09 `date` vs `timestamptz` · **I12 brownfield/legacy = authoritative no-PII data source** (ADR-0022; `sys.*` = structural authority, no-PII global) · ADR-0011 ESS = MVP-2b. Conflitto con nuovo requisito → **fermarsi e chiedere**.
+I1 Position-centric (owner ≠ incumbent) · I3/I4 schema `sys.sys_<plural>` (aux: staging/brownfield/audit) · **I5 tenant isolation = FK + middleware, MAI RLS** · I7 auth separato (`sys_auth_*`) · I9 PIP = VIEW (ADR-0008) · **I13 PostgreSQL 16 NATIVE, NO Docker** (ADR-0004; runtime only — legacy Docker = read-only source) · RD-08 categorical = `varchar+CHECK` (mai ENUM) · RD-09 `date` vs `timestamptz` · **I12 brownfield/legacy = authoritative no-PII data source** (ADR-0023; `sys.*` = structural authority, no-PII global) · ADR-0011 ESS = MVP-2b. Conflitto con nuovo requisito → **fermarsi e chiedere**.
 
 ## 10. Bias / lessons (assorbito da bias_registry.md)
 

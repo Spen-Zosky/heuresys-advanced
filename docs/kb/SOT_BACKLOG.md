@@ -45,9 +45,9 @@
 |---|---|---|---|
 | **B-10** | **MVP-4 stream 2.4 — SDBI Phase 2** (Semantic-Driven Brownfield Import, kickoff) | ~6-10h | `cowork_code_exchange/_01_PROMPT_027_s937_ck8_sdbi_phase2_kickoff.md` (archivio); contesto `_00_HANDOVER_CLI_2026-05-26_post_S937.md`. Migration base `000036_temp_sdbi_schema.sql`. **NB**: era legato a zod4 (B-20) → **ora sbloccato** (B-20 fatto 2026-05-28). Riformulare il PROMPT 027 come piano CLI-owned diretto (non più protocollo Cowork). |
 
-### B-50 — Full reconciliation legacy→advanced (oltre ~49%) — umbrella ADR-0022
+### B-50 — Full reconciliation legacy→advanced (oltre ~49%) — umbrella ADR-0023
 
-Apertura item (S951). La dottrina data-source (**ADR-0022**) conferma che il legacy heuresys-evo è la sorgente dati **autoritativa** e advanced (`sys.*`) lo schema target strutturale; lo stato reale di popolamento è **~49%** (65/134 tabelle `sys` con righe; **69.450** lineage rows). Portare la conciliazione verso il completo è lavoro vero, **multi-sessione, da greenlight esplicito** (NON eseguito in S951). Breakdown verificato (query live 2026-05-31):
+Apertura item (S951). La dottrina data-source (**ADR-0023**) conferma che il legacy heuresys-evo è la sorgente dati **autoritativa** e advanced (`sys.*`) lo schema target strutturale; lo stato reale di popolamento è **~49%** (65/134 tabelle `sys` con righe; **69.450** lineage rows). Portare la conciliazione verso il completo è lavoro vero, **multi-sessione, da greenlight esplicito** (NON eseguito in S951). Breakdown verificato (query live 2026-05-31):
 
 | Sotto-item | Stato verificato | Aggancio |
 |---|---|---|

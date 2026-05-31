@@ -31,8 +31,8 @@ Decisione architetturale evidence-based (verified-by: mig 000024/000025/000030/0
 Un flag invariante (regola §9 "fermarsi e chiedere"), da confermare prima di implementare:
 - ⚠️ **I3/I4**: buffer in `staging.sf_*`, non in schema `sf_*` nuovo.
 
-~~🔴 I12 PII/GDPR~~ **RITIRATO 2026-05-31 (ADR-0022)**: no-PII globale — il prodotto è un case-study sintetico e non ingerisce PII reale → nessun blocco PII per SF.
+~~🔴 I12 PII/GDPR~~ **RITIRATO 2026-05-31 (ADR-0023)**: no-PII globale — il prodotto è un case-study sintetico e non ingerisce PII reale → nessun blocco PII per SF.
 
 Proposta: se Enzo approva, CLI valuta (a) adozione del doc nel repo + (b) apertura item `SOT_BACKLOG.md` "Connettore HRIS esterno (SF/Workday/Zucchetti)" come candidato MVP-4 futuro. Nessuna migration creata/applicata (DDL nel doc è PROPOSED/DO-NOT-APPLY).
 
-stato: pending — [CLI S951: doc committato `c363ef1`; flag 🔴 I12 RITIRATO via ADR-0022 (no-PII globale); resta da decidere (b) adozione connettore come item MVP-4]
+stato: pending — [CLI S951: doc committato `c363ef1`; flag 🔴 I12 RITIRATO via ADR-0023 (no-PII globale); resta da decidere (b) adozione connettore come item MVP-4]

@@ -1,4 +1,4 @@
-# ADR-0022 — Data-Source Doctrine: advanced = structural authority, legacy = canonical no-PII source
+# ADR-0023 — Data-Source Doctrine: advanced = structural authority, legacy = canonical no-PII source
 
 **Status**: ACCEPTED
 **Date**: 2026-05-31
@@ -71,4 +71,4 @@ Confirming this doctrine **authorizes a direction, not a bulk-execution mandate*
 
 ---
 
-*End ADR-0022*
+*End ADR-0023*

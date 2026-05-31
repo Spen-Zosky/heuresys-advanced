@@ -1,6 +1,6 @@
 ---
 title: SuccessFactors → Heuresys — Design di integrazione RICONCILIATO
-status: EXPLORATORY / NOT-APPROVED — riconciliato con la SoT reale (docs/kb/SOT_STATE.md); PII/GDPR blocker RITIRATO 2026-05-31 (ADR-0022, no-PII globale)
+status: EXPLORATORY / NOT-APPROVED — riconciliato con la SoT reale (docs/kb/SOT_STATE.md); PII/GDPR blocker RITIRATO 2026-05-31 (ADR-0023, no-PII globale)
 date: 2026-05-30
 supersedes: il design "standalone" prodotto nella sessione web claude.ai (sf_raw/sf_stg/sf_sync + core.*), che era costruito alla cieca senza accesso a docs/kb
 authoritative_state: docs/kb/SOT_STATE.md · docs/kb/SOT_BACKLOG.md · ADR-0014 (SDBI)
@@ -29,7 +29,7 @@ Il design web proponeva tre schemi nuovi `sf_raw / sf_stg / sf_sync` e un target
 > [!warning] Un flag invariante da confermare (regola §9 "fermarsi e chiedere")
 > - **I3/I4 naming.** Il buffer va in `staging.sf_*` (schema `staging` ammesso), **non** in uno schema `sf_*` nuovo (vedi §8.1).
 >
-> **PII/GDPR — NON è un blocco** (aggiornato 2026-05-31, ADR-0022). La dottrina data-source stabilisce che questo prodotto è un **case-study sintetico** e **non ingerisce mai PII reale di clienti veri**: il no-PII è globale e incondizionato. Anche un eventuale connettore SF opererebbe su dati sintetici → nessun conflitto I12, nessuna governance PII/GDPR richiesta. Il vecchio framing "I12 = blocco perché SF live porta PII reale" è **ritirato** (vedi §8.2).
+> **PII/GDPR — NON è un blocco** (aggiornato 2026-05-31, ADR-0023). La dottrina data-source stabilisce che questo prodotto è un **case-study sintetico** e **non ingerisce mai PII reale di clienti veri**: il no-PII è globale e incondizionato. Anche un eventuale connettore SF opererebbe su dati sintetici → nessun conflitto I12, nessuna governance PII/GDPR richiesta. Il vecchio framing "I12 = blocco perché SF live porta PII reale" è **ritirato** (vedi §8.2).
 
 ---
 
@@ -98,7 +98,7 @@ SDBI (ADR-0014, **PROPOSED**): paradigma complementare AI-led per i casi *Tier D
 2. **`brownfield.source_watermarks`**: HWM per (`source_system`, `entity`) → ultimo `lastModifiedDateTime` per il delta incrementale.
 3. **`source_system='SUCCESSFACTORS'`** (+ eventuale scope nuovo su `import_runs`: oggi `import_run_wave` ha CHECK 1..4; usare `import_run_classification_scope`/metadata o estendere il CHECK).
 4. **Schemi `sys.*` proposti da SDBI** per i gap (es. `sys.sys_employment_records`), human-gated.
-5. ~~**Decisione di governance PII/GDPR** che solleva I12 per questa sorgente~~ — **non più net-new**: ADR-0022 (no-PII globale) ha sciolto il punto; nessuna governance PII richiesta per questa sorgente.
+5. ~~**Decisione di governance PII/GDPR** che solleva I12 per questa sorgente~~ — **non più net-new**: ADR-0023 (no-PII globale) ha sciolto il punto; nessuna governance PII richiesta per questa sorgente.
 
 **RIUSATO (machinery esistente):** registry `source_exports/tables/columns`, `table_mappings/column_mappings`, buffer `staging.*`, upsert engine + ON CONFLICT, `sys_source_lineage_records` (incl. `content_hash` + `source_system`), audit trail.
 
@@ -215,7 +215,7 @@ sequenceDiagram
 | **I1** position-centric | ✅ rispettato | incumbent in `user_position_assignments`, owner ≠ incumbent |
 | **I3/I4** schema `sys.sys_*` + aux `staging/brownfield/audit` | ⚠️ **flag** | buffer in `staging.sf_*`, **non** in `sf_*` nuovo (vedi §8.1) |
 | **I5** tenant isolation = FK + middleware, mai RLS | ✅ | risoluzione tenant via `brownfield.tenant_id_mappings`, come il brownfield esistente |
-| **I12** brownfield/legacy = authoritative no-PII source (ADR-0022) | ✅ | no-PII **globale**: prodotto case-study sintetico, nessun PII reale anche per SF → nessun conflitto (vedi §8.2) |
+| **I12** brownfield/legacy = authoritative no-PII source (ADR-0023) | ✅ | no-PII **globale**: prodotto case-study sintetico, nessun PII reale anche per SF → nessun conflitto (vedi §8.2) |
 | **I13** PostgreSQL 16 nativo, no Docker | ✅ | nessun impatto |
 | **RD-08/09** varchar+CHECK, date vs timestamptz | ✅ | da rispettare nei mapping (es. `EmpJob.startDate` → `date`) |
 | **ADR-0008** PIP = VIEW | ✅ | il PIP non è target d'import; resta vista |
@@ -223,8 +223,8 @@ sequenceDiagram
 ### §8.1 — Flag I3/I4 (naming)
 Buffer obbligatoriamente in schema `staging` (es. `staging.sf_per_person`, `staging.sf_emp_job`), generabili con lo stesso DO-block di `000030`. **Nessuno schema `sf_*`.** Decisione: ok adottare il pattern `staging.sf_<entity>`?
 
-### §8.2 — PII/GDPR — NON è un blocco (RITIRATO 2026-05-31, ADR-0022)
-Il framing originale trattava I12 come un conflitto perché un import SF *live* di un cliente reale porterebbe PII reale. **Questo blocco è ritirato.** La dottrina data-source (ADR-0022) stabilisce che heuresys-advanced è un **case-study sintetico by design** e **non ingerisce mai PII reale di clienti veri**: il no-PII è **globale e incondizionato** (verificato: tutte le `column_mappings` hanno `pii_disposition=NONE`). Un eventuale connettore SF opererebbe quindi su dati sintetici/dimostrativi, senza alcuna governance PII/GDPR né `column_mapping_pii_disposition` non-NONE. Se in futuro lo scopo del prodotto cambiasse (ingestion di PII reale di un cliente vero), **quello** richiederebbe un nuovo ADR di governance PII dedicato — ma non è il caso attuale e non è silenziosamente derogabile (vedi ADR-0022 §4).
+### §8.2 — PII/GDPR — NON è un blocco (RITIRATO 2026-05-31, ADR-0023)
+Il framing originale trattava I12 come un conflitto perché un import SF *live* di un cliente reale porterebbe PII reale. **Questo blocco è ritirato.** La dottrina data-source (ADR-0023) stabilisce che heuresys-advanced è un **case-study sintetico by design** e **non ingerisce mai PII reale di clienti veri**: il no-PII è **globale e incondizionato** (verificato: tutte le `column_mappings` hanno `pii_disposition=NONE`). Un eventuale connettore SF opererebbe quindi su dati sintetici/dimostrativi, senza alcuna governance PII/GDPR né `column_mapping_pii_disposition` non-NONE. Se in futuro lo scopo del prodotto cambiasse (ingestion di PII reale di un cliente vero), **quello** richiederebbe un nuovo ADR di governance PII dedicato — ma non è il caso attuale e non è silenziosamente derogabile (vedi ADR-0023 §4).
 
 ---
 
@@ -262,7 +262,7 @@ I nuovi schemi `sys.*` per i gap (es. `sys.sys_employment_records`) **non** sono
 
 ## §10 — Decisioni aperte per Enzo
 
-1. ~~**PII/GDPR (I12)** — bloccante~~ → **RISOLTO (ADR-0022)**: no-PII globale, il prodotto non ingerisce PII reale → nessun blocco, nessuna governance PII da definire (§8.2).
+1. ~~**PII/GDPR (I12)** — bloccante~~ → **RISOLTO (ADR-0023)**: no-PII globale, il prodotto non ingerisce PII reale → nessun blocco, nessuna governance PII da definire (§8.2).
 2. **Gap senza target** — EmpEmployment, anagrafica ricca, base salary: SDBI (nuovi schemi) o "fuori scope MVP"? (§A)
 3. **Scope entità** — quali entità EC servono davvero in Heuresys nel MVP del connettore? (dimensiona tutto il resto)
 4. **Naming staging** — confermare `staging.sf_<entity>` (§8.1).

@@ -1,0 +1,12 @@
+db_total_size|1304 MB
+sys_tables|134
+sys_views|11
+sys_populated|65
+sys_users|161
+active_tenants|3
+lineage_rows|69450
+import_runs|CANCELLED:1, COMPLETED:21, FAILED:1
+validation_results|1522455
+legacy_mirror_size|586 MB
+audit_size|528 MB
+staging_size|2104 kB

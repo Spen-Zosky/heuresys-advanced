@@ -265,7 +265,7 @@
     "prepare": "tsc -p tsconfig.json",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "node -e \"console.log('(@heuresys/shared has no unit tests; Zod schemas are exercised via the @heuresys/api integration suite)')\""
   },
   "dependencies": {
     "zod": "4.4.3"

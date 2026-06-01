@@ -147,16 +147,11 @@ describe("WS-3 CW-B60 tractable Wave-1 targets (sys_skill_categories + sys_activ
     expect(r.rows[0]?.is_nullable, "migration 000051 must have made the column nullable").toBe("YES");
   });
 
-  it("source artifact invariant: industry_ccnl_mapping dump exists on disk", async () => {
-    const { existsSync, readFileSync } = await import("node:fs");
-    const { resolveLegacyDataDir } = await import(
-      "../src/modules/brownfield-wave-executor/loader.js"
-    );
-    const path = await import("node:path");
-    const file = path.join(resolveLegacyDataDir(), "wave1_indoor_industry_ccnl_mapping.sql");
-    expect(existsSync(file), `expected WS-3 dump at ${file}`).toBe(true);
-    const sql = readFileSync(file, "utf8");
-    const inserts = (sql.match(/^INSERT INTO public\.industry_ccnl_mapping/gm) ?? []).length;
-    expect(inserts, "dump must carry the 14 industry_ccnl_mapping rows").toBe(14);
-  });
+  // NOTE: the WS-3 activity_classification_mappings investigation re-exported the
+  // legacy dump `wave1_indoor_industry_ccnl_mapping.sql`, but legacy_data/ is
+  // GITIGNORED (regenerable via 00_extract_legacy_subset.sh per the brownfield
+  // convention). A test asserting that local artifact exists is CI-hostile (it
+  // passes on the authoring box but fails on a fresh CI checkout), so it is
+  // intentionally NOT a test invariant. activity_classification_mappings stays
+  // BLOCKED on the FK-vs-mapping conflict (ADR-0025 §5.3) regardless of the dump.
 });

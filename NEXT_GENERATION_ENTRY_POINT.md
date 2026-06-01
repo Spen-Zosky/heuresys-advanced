@@ -205,6 +205,7 @@ Pre-req: tunnel `:5433` up, legacy source reachable, RBAC cache loaded.
 ## 8. Roadmap residuo (v1.x+)
 
 - **SuccessFactors / SAP connector** — design in `docs/integrations/`, PII resolved (ADR-0023). Entry-point: a dedicated `successfactors` brownfield source + `staging.sf_*` adaptation. Deferred by user (D-ROAD).
+- **WS-6 deferred (GA-scope-reduced, evidence-based — D-ROAD listed these "in-scope" but the scoping recommends deferral on risk/effort grounds):** 6e MFA multi-kind (SMS/push/passkey — each ~4-6h + crypto/security review; MED-HIGH auth attack-surface; unsafe to land untested in GA → v1.1); 6f mobile device-matrix a11y (showcase + business axe-core already green; iPhone/Android viewport matrix → v1.x); 6c observability-depth (log aggregation, incident tables, slow-query — core endpoint already live); 6g.2 brownfield "PLAN v4 §2.2" markers (speculative, no spec/impl → design note + defer); 6a MFA login-gating composition (token ready; gating waits on the brand `/login` UI).
 - **Any WS marked BLOCKED** during execution — listed here at WS-7 with root-cause + reproduction + next-step.
 - **Delta/watermark** (`brownfield.source_watermarks`) if WS-2 defers it.
 - **WS-3 blocker — `sys_activity_classification_mappings` FK redesign** (add to DEBT_REGISTER at WS-7): the table FK (`mig 000007`) ties `activity_class_mapping_target_id` → `sys_activity_classifications`, but the legacy industry→CCNL mapping resolves target to `sys_compensation_bands` (0 overlap). Needs a mapping/schema decision (re-point the mapping, or alter the shipped 000007 FK). Source dump (`industry_ccnl_mapping`, 14 rows) now loaded into legacy_mirror; mig 000052 fixed the CONSTANT value. Only the FK semantics block it.
@@ -235,7 +236,7 @@ Pre-req: tunnel `:5433` up, legacy source reachable, RBAC cache loaded.
 - [ ] **WS-2** Wave 2/3 — Wave-2 executor impl · mapping-cards · Wave 2 import · Wave 3 · coverage report
 - [ ] **WS-4** RBAC — P1 (sys_user_preferences) · R1b (teams + 3rd scope axis) · V (exhaustive E2E matrix)
 - [x] **WS-5** Test backfill — ✅ DONE: 27 module integration-test files (60/60 coverage) · full suite 80 files/550 tests green · fixed real bug (activity-classifications scheme enum 500). Commits below.
-- [ ] **WS-6** Loose-ends — TOTP · pg-pool · Observability ph2 · F7 showcase · MFA multi-kind · Mobile+WCAG · ADR-0015 · B-31 · markers
+- [~] **WS-6** Loose-ends — ✅ mostly DONE: 6b pg-pool (`32ed46b`) · 6g.1 ADR-0015 (`e942b06`) · 6a TOTP token (already complete) · 6c observability core (already live) · 6d showcase (already consolidated) · 6g.3 B-31 (ADR-0021). 🔻 Deferred→§8: 6e MFA multi-kind (GA security risk), 6f mobile-matrix, 6c-depth, 6g.2 markers.
 - [ ] **WS-7** Release — version bump · full green verify · finalize doc + SoT · push · CI green · auto-merge · tag `v1.0.0` · GitHub Release
 - [ ] **Excluded → roadmap:** SuccessFactors connector
 
@@ -300,8 +301,15 @@ Pre-flight: tunnel :5433 up, legacy source raggiungibile, RBAC cache loaded.
 - **DATA blocker:** `brownfield.table_mappings` has **0 Wave-2 rows** (only Wave-1: 71 IMPORT + 26 REFERENCE_ONLY). Wave-2 targets (sys_kpi_definitions, sys_organization_units, sys_position_kpi_requirements, operating-model catalog) need source-schema discovery + mapping-card authoring for sources **not yet loaded** → 1-2 weeks, HIGH ambiguity. Per the mapping-card rule (never guess), the full Wave-2 import is **source-discovery-gated**.
 - **WS-2 tractable scope for v1.0.0:** ship the code generalization (unblocks future Wave-2) + author ONLY deterministic Wave-2 mappings if any source is already loaded; document the speculative remainder as deferred. NOTE: this also unblocks `sys_kpi_definitions` (the cross-wave dep behind process_kpi_templates + sys_user_kpi_evidence) — but only once a KPI source is loaded.
 
-### WS-6 — Code loose-ends (incremental)
-- **6g ADR-0015** ✅ PROPOSED→ACCEPTED (commit `e942b06`): criteria met live (sys_job_roles=227≥140, nullable FK working, no integrity violation, consistent with ADR-0016). Established the nullable-brownfield-FK pattern WS-3 now reuses.
+### WS-6 — Code loose-ends — scoped (read-only) + 6b shipped; most already done
+Read-only scoping (`af1592ef`) found WS-6 is largely **already done**:
+- **6b pg-pool ECONNRESET** ✅ DONE (commit `32ed46b`): added the `pool.on('error')` idle-client handler (no listener = process crash on conn drop) + DB-free unit test 2/2. The one real code change in WS-6.
+- **6g.1 ADR-0015** ✅ ACCEPTED (commit `e942b06`): sys_job_roles=227≥140, nullable FK working, consistent with ADR-0016. Established the nullable-brownfield-FK pattern WS-3 reused.
+- **6a TOTP challenge-token** ✅ already complete (mfa-service/routes, 6/6 tests green); only login-gating defers to the brand-UI/APP track — token system shippable.
+- **6c Observability** ✅ core already live (real pool metrics + 24h request ring + DB reads + `GET /v1/observability/system-health`); only depth (log aggregation / incident tables / slow-query) is **deferred** (§8).
+- **6d F7 showcase** ✅ already consolidated (ADR-0013); GitHub-Pages deploy verified post-merge on `main`.
+- **6g.3 B-31 ssh-agent** ✅ documented + scripted (ADR-0021, ACCEPTED 2026-05-28).
+- **Deferred (documented, → §8 roadmap):** 6e MFA multi-kind (L effort, MED-HIGH auth-security risk — unsafe to land untested new auth kinds in GA), 6f mobile device-matrix a11y (showcase+business a11y already green; mobile viewport matrix deferred), 6g.2 brownfield "PLAN v4 §2.2" markers (speculative, no impl).
 
 ### WS-5 — 27-module integration-test backfill ✅ DONE
 - Authoring via 27-subagent Workflow (`wf_a72e205d-1a2`): 27/27 files, ~187 tests, 2 read-only modules (`brownfield-source-exports`, `seed-candidate-records`). First run: typecheck:test green, 21/27 files green / 6 test failures.

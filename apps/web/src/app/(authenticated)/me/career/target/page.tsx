@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { StatusPill } from "@/components/status-pill";
 import { apiFetch } from "../../../../../lib/api/fetch";
 
 interface Position {
@@ -56,15 +57,21 @@ export default function MeCareerTargetPage() {
   });
 
   return (
-    <main data-testid="career-target-page" className="max-w-3xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <Link href="/me/career" className="underline text-sm" data-testid="career-target-back">
+    <main data-testid="career-target-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+      <div className="space-y-3">
+        <Link
+          href="/me/career"
+          data-testid="career-target-back"
+          className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+        >
           ← La mia carriera
         </Link>
-        <h1 className="text-2xl font-semibold mt-2" data-testid="career-target-title">
-          Dichiara obiettivo di carriera
-        </h1>
-      </header>
+        <PageHeader
+          data-testid="career-target-title"
+          title="Dichiara obiettivo di carriera"
+          description="Seleziona la posizione che desideri raggiungere; la richiesta sarà revisionata dal tuo manager."
+        />
+      </div>
 
       <Card>
         <CardHeader><CardTitle>Nuova posizione target</CardTitle></CardHeader>
@@ -74,8 +81,8 @@ export default function MeCareerTargetPage() {
             className="space-y-4"
             data-testid="career-target-form"
           >
-            <div>
-              <label htmlFor="filter" className="text-sm font-medium">Cerca posizione</label>
+            <div className="space-y-1.5">
+              <label htmlFor="filter" className="text-sm font-medium text-foreground">Cerca posizione</label>
               <Input
                 id="filter"
                 data-testid="career-target-filter"
@@ -85,12 +92,12 @@ export default function MeCareerTargetPage() {
               />
             </div>
 
-            <div>
-              <label htmlFor="positionId" className="text-sm font-medium">Posizione</label>
+            <div className="space-y-1.5">
+              <label htmlFor="positionId" className="text-sm font-medium text-foreground">Posizione</label>
               <select
                 id="positionId"
                 data-testid="career-target-position"
-                className="w-full border rounded px-2 py-1 text-sm"
+                className="w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 {...register("positionId")}
               >
                 <option value="">— Seleziona —</option>
@@ -101,12 +108,12 @@ export default function MeCareerTargetPage() {
                 ))}
               </select>
               {errors.positionId && (
-                <p className="text-xs text-red-600 mt-1">Posizione richiesta.</p>
+                <p className="mt-1 text-xs text-danger">Posizione richiesta.</p>
               )}
             </div>
 
-            <div>
-              <label htmlFor="targetDate" className="text-sm font-medium">Data target (YYYY-MM-DD)</label>
+            <div className="space-y-1.5">
+              <label htmlFor="targetDate" className="text-sm font-medium text-foreground">Data target (YYYY-MM-DD)</label>
               <Input
                 id="targetDate"
                 data-testid="career-target-date"
@@ -114,23 +121,25 @@ export default function MeCareerTargetPage() {
                 {...register("targetDate")}
               />
               {errors.targetDate && (
-                <p className="text-xs text-red-600 mt-1">Formato data non valido.</p>
+                <p className="mt-1 text-xs text-danger">Formato data non valido.</p>
               )}
             </div>
 
-            <div>
-              <label htmlFor="notes" className="text-sm font-medium">Note</label>
+            <div className="space-y-1.5">
+              <label htmlFor="notes" className="text-sm font-medium text-foreground">Note</label>
               <Input id="notes" data-testid="career-target-notes" {...register("notes")} />
             </div>
 
             {create.isError && (
-              <p className="text-sm text-red-600" data-testid="career-target-error">
+              <p className="text-sm text-danger" data-testid="career-target-error">
                 Errore durante l&apos;invio.
               </p>
             )}
             {create.isSuccess && (
-              <p className="text-sm text-green-700" data-testid="career-target-success">
-                Obiettivo registrato. Sarà revisionato dal tuo manager.
+              <p data-testid="career-target-success">
+                <StatusPill tone="success">
+                  Obiettivo registrato. Sarà revisionato dal tuo manager.
+                </StatusPill>
               </p>
             )}
 

@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
-import { apiFetch } from "../../../../../lib/api/fetch";
+import { Badge, Button, Input, PageHeader } from "@heuresys/ui";
+import { apiFetch } from "@/lib/api/fetch";
+import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { StatusPill } from "@/components/status-pill";
 
 interface LearningPath {
   learningPathId: string;
@@ -43,81 +45,104 @@ export default function MeLearningCataloguePage() {
     return p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q);
   });
 
+  const columns: DataColumn<LearningPath>[] = [
+    {
+      header: "Percorso",
+      cell: (p) => (
+        <div>
+          <p className="font-medium text-foreground">{p.name}</p>
+          {p.description ? (
+            <p className="mt-0.5 text-xs text-muted-foreground">{p.description}</p>
+          ) : null}
+        </div>
+      ),
+    },
+    { header: "Codice", cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
+    {
+      header: "Tipo",
+      cell: (p) => (
+        <div className="flex flex-wrap gap-1">
+          <StatusPill tone={p.isMandatoryDefault ? "warning" : "neutral"}>
+            {p.isMandatoryDefault ? "OBBLIGATORIO" : "OPZIONALE"}
+          </StatusPill>
+          {p.isGlobal ? <StatusPill tone="info">GLOBALE</StatusPill> : null}
+        </div>
+      ),
+    },
+    {
+      header: "Azione",
+      align: "right",
+      cell: (p) => (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          data-testid="learning-catalogue-enroll"
+          disabled={enroll.isPending}
+          onClick={() => void enroll.mutate(p.learningPathId)}
+        >
+          {enroll.isPending ? "…" : "Iscriviti"}
+        </Button>
+      ),
+    },
+  ];
+
   return (
-    <main data-testid="learning-catalogue-page" className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <Link href="/me/learning" className="underline text-sm" data-testid="learning-catalogue-back">
-          ← I miei percorsi
-        </Link>
-        <h1 className="text-2xl font-semibold mt-2" data-testid="learning-catalogue-title">
-          Catalogo percorsi
-        </h1>
-        <p className="text-sm opacity-70" data-testid="learning-catalogue-count">
-          {paths.data ? `${paths.data.total} percorsi disponibili` : "Caricamento…"}
-        </p>
-      </header>
+    <main data-testid="learning-catalogue-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+      <Link
+        href="/me/learning"
+        className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        data-testid="learning-catalogue-back"
+      >
+        ← I miei percorsi
+      </Link>
 
-      <Card>
-        <CardHeader><CardTitle>Filtro</CardTitle></CardHeader>
-        <CardContent>
-          <Input
-            data-testid="learning-catalogue-filter"
-            placeholder="Cerca per nome o codice…"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-        </CardContent>
-      </Card>
+      <PageHeader
+        data-testid="learning-catalogue-title"
+        title="Catalogo percorsi"
+        description="Sfoglia i percorsi formativi disponibili e iscriviti."
+        badges={
+          <Badge variant="secondary" data-testid="learning-catalogue-count">
+            {paths.data ? `${paths.data.total} percorsi disponibili` : "Caricamento…"}
+          </Badge>
+        }
+      />
 
-      <Card>
-        <CardHeader><CardTitle>Percorsi</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {paths.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : filtered.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="learning-catalogue-empty">
-              Nessun percorso corrisponde al filtro.
-            </div>
-          ) : (
-            <ul className="divide-y" data-testid="learning-catalogue-list">
-              {filtered.slice(0, 50).map((p) => (
-                <li
-                  key={p.learningPathId}
-                  className="px-4 py-3 flex items-center justify-between gap-4"
-                  data-testid="learning-catalogue-row"
-                >
-                  <div>
-                    <p className="font-medium">{p.name}</p>
-                    <p className="text-xs font-mono opacity-70">{p.code}</p>
-                    {p.description && <p className="text-xs opacity-70 mt-1">{p.description}</p>}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    data-testid="learning-catalogue-enroll"
-                    disabled={enroll.isPending}
-                    onClick={() => void enroll.mutate(p.learningPathId)}
-                  >
-                    {enroll.isPending ? "…" : "Iscriviti"}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      <div className="max-w-md">
+        <Input
+          data-testid="learning-catalogue-filter"
+          placeholder="Cerca per nome o codice…"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        />
+      </div>
 
-      {enroll.isError && (
-        <p className="text-sm text-red-600" data-testid="learning-catalogue-error">
+      <div data-testid="learning-catalogue-list">
+        <EntityTable<LearningPath>
+          isLoading={paths.isLoading}
+          isError={paths.isError}
+          errorMessage="Impossibile caricare il catalogo."
+          rows={filtered}
+          rowKey={(p) => p.learningPathId}
+          rowTestId="learning-catalogue-row"
+          columns={columns}
+          emptyTestId="learning-catalogue-empty"
+          emptyTitle="Nessun percorso"
+          emptyDescription="Nessun percorso corrisponde al filtro."
+          caption="Catalogo percorsi formativi"
+        />
+      </div>
+
+      {enroll.isError ? (
+        <Badge variant="destructive" data-testid="learning-catalogue-error">
           Errore durante l&apos;iscrizione.
-        </p>
-      )}
-      {lastEnrolled && (
-        <p className="text-sm text-green-700" data-testid="learning-catalogue-enrolled">
+        </Badge>
+      ) : null}
+      {lastEnrolled ? (
+        <Badge variant="success" data-testid="learning-catalogue-enrolled">
           Iscrizione confermata per {lastEnrolled}.
-        </p>
-      )}
+        </Badge>
+      ) : null}
     </main>
   );
 }

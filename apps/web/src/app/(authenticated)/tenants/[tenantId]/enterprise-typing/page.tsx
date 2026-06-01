@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "../../../../../lib/api/fetch";
 
 interface BlueprintFamily { blueprintFamilyId: string; code: string; name: string; industryCode: string | null }
@@ -77,15 +77,21 @@ export default function EnterpriseTypingWizardPage() {
   const onSubmit = handleSubmit(async (vals) => { await create.mutateAsync(vals); });
 
   return (
-    <main data-testid="enterprise-typing-page" className="max-w-3xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <Link href={`/tenants/${tenantId}`} className="underline text-sm" data-testid="enterprise-typing-back">
-          ← Tenant
-        </Link>
-        <h1 className="text-2xl font-semibold mt-2" data-testid="enterprise-typing-title">
-          Enterprise Typing Wizard
-        </h1>
-      </header>
+    <main data-testid="enterprise-typing-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+      <PageHeader
+        data-testid="enterprise-typing-title"
+        title="Enterprise Typing Wizard"
+        description="Tipizza l'enterprise selezionando family, variante, operating model e size band."
+        breadcrumbs={
+          <Link
+            href={`/tenants/${tenantId}`}
+            className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            data-testid="enterprise-typing-back"
+          >
+            ← Tenant
+          </Link>
+        }
+      />
 
       <Card>
         <CardHeader><CardTitle>Profilo</CardTitle></CardHeader>
@@ -95,12 +101,12 @@ export default function EnterpriseTypingWizardPage() {
             className="space-y-4"
             data-testid="enterprise-typing-form"
           >
-            <div>
-              <label htmlFor="blueprintFamilyId" className="text-sm font-medium">Blueprint family</label>
+            <div className="space-y-1">
+              <label htmlFor="blueprintFamilyId" className="text-sm font-medium text-foreground">Blueprint family</label>
               <select
                 id="blueprintFamilyId"
                 data-testid="typing-family"
-                className="w-full border rounded px-2 py-1 text-sm"
+                className="w-full rounded-control border border-border bg-background px-2 py-1 text-sm text-foreground"
                 {...register("blueprintFamilyId", { onChange: (e) => setFamilyId(e.target.value) })}
               >
                 <option value="">— Seleziona —</option>
@@ -109,16 +115,16 @@ export default function EnterpriseTypingWizardPage() {
                 ))}
               </select>
               {errors.blueprintFamilyId && (
-                <p className="text-xs text-red-600 mt-1">Famiglia richiesta.</p>
+                <p className="mt-1 text-xs text-danger">Famiglia richiesta.</p>
               )}
             </div>
 
-            <div>
-              <label htmlFor="blueprintVariantId" className="text-sm font-medium">Variante</label>
+            <div className="space-y-1">
+              <label htmlFor="blueprintVariantId" className="text-sm font-medium text-foreground">Variante</label>
               <select
                 id="blueprintVariantId"
                 data-testid="typing-variant"
-                className="w-full border rounded px-2 py-1 text-sm"
+                className="w-full rounded-control border border-border bg-background px-2 py-1 text-sm text-foreground"
                 {...register("blueprintVariantId")}
               >
                 <option value="">— Seleziona —</option>
@@ -127,17 +133,17 @@ export default function EnterpriseTypingWizardPage() {
                 ))}
               </select>
               {errors.blueprintVariantId && (
-                <p className="text-xs text-red-600 mt-1">Variante richiesta.</p>
+                <p className="mt-1 text-xs text-danger">Variante richiesta.</p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="operatingModelId" className="text-sm font-medium">Operating model</label>
+              <div className="space-y-1">
+                <label htmlFor="operatingModelId" className="text-sm font-medium text-foreground">Operating model</label>
                 <select
                   id="operatingModelId"
                   data-testid="typing-model"
-                  className="w-full border rounded px-2 py-1 text-sm"
+                  className="w-full rounded-control border border-border bg-background px-2 py-1 text-sm text-foreground"
                   {...register("operatingModelId")}
                 >
                   <option value="">— Nessuno —</option>
@@ -146,12 +152,12 @@ export default function EnterpriseTypingWizardPage() {
                   ))}
                 </select>
               </div>
-              <div>
-                <label htmlFor="enterpriseSizeBandId" className="text-sm font-medium">Size band</label>
+              <div className="space-y-1">
+                <label htmlFor="enterpriseSizeBandId" className="text-sm font-medium text-foreground">Size band</label>
                 <select
                   id="enterpriseSizeBandId"
                   data-testid="typing-sizeband"
-                  className="w-full border rounded px-2 py-1 text-sm"
+                  className="w-full rounded-control border border-border bg-background px-2 py-1 text-sm text-foreground"
                   {...register("enterpriseSizeBandId")}
                 >
                   <option value="">— Nessuna —</option>
@@ -163,12 +169,12 @@ export default function EnterpriseTypingWizardPage() {
             </div>
 
             {create.isError && (
-              <p className="text-sm text-red-600" data-testid="typing-error">
+              <p className="text-sm text-danger" data-testid="typing-error">
                 Errore creazione profilo.
               </p>
             )}
             {create.isSuccess && (
-              <p className="text-sm text-green-700" data-testid="typing-success">
+              <p className="text-sm text-success" data-testid="typing-success">
                 Profilo creato.
               </p>
             )}

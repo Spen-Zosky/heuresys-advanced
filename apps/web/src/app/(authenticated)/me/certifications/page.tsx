@@ -5,8 +5,18 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
-import { apiFetch } from "../../../../lib/api/fetch";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  PageHeader,
+} from "@heuresys/ui";
+import { apiFetch } from "@/lib/api/fetch";
+import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 
 interface MeCertification {
   userCertificationId: string;
@@ -16,6 +26,11 @@ interface MeCertification {
   expiresDate: string | null;
   credentialId: string | null;
   documentUri: string | null;
+}
+
+interface MeCertificationsList {
+  items: MeCertification[];
+  total: number;
 }
 
 // Mirror of @heuresys/shared CreateMeCertificationBodySchema, kept inline for
@@ -55,13 +70,32 @@ function cleanPayload(v: CertificationFormValues): Record<string, unknown> {
   };
 }
 
+const COLUMNS: DataColumn<MeCertification>[] = [
+  { header: "Nome", cell: (c) => <span className="font-medium text-foreground">{c.name}</span> },
+  { header: "Ente", cell: (c) => <span className="text-muted-foreground">{c.issuer}</span> },
+  { header: "Rilasciato", cell: (c) => <span className="text-xs text-muted-foreground">{c.issuedDate ?? "—"}</span> },
+  { header: "Scadenza", cell: (c) => <span className="text-xs text-muted-foreground">{c.expiresDate ?? "—"}</span> },
+  {
+    header: "Credential ID",
+    cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.credentialId ?? "—"}</span>,
+  },
+];
+
+const EMPTY_FORM: CertificationFormValues = {
+  name: "",
+  issuer: "",
+  issuedDate: "",
+  expiresDate: "",
+  credentialId: "",
+  documentUri: "",
+};
+
 export default function MeCertificationsPage() {
   const qc = useQueryClient();
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
   const certs = useQuery({
     queryKey: ["me", "certifications"],
-    queryFn: () =>
-      apiFetch<{ items: MeCertification[]; total: number }>("/v1/me/certifications"),
+    queryFn: () => apiFetch<MeCertificationsList>("/v1/me/certifications"),
   });
 
   const add = useMutation({
@@ -86,39 +120,27 @@ export default function MeCertificationsPage() {
     formState: { errors, isSubmitting },
   } = useForm<CertificationFormValues>({
     resolver: zodResolver(CertificationFormSchema),
-    defaultValues: {
-      name: "",
-      issuer: "",
-      issuedDate: "",
-      expiresDate: "",
-      credentialId: "",
-      documentUri: "",
-    },
+    defaultValues: EMPTY_FORM,
   });
 
   const onSubmit = handleSubmit(async (vals) => {
     setFeedback(null);
     await add.mutateAsync(cleanPayload(vals));
-    reset({
-      name: "",
-      issuer: "",
-      issuedDate: "",
-      expiresDate: "",
-      credentialId: "",
-      documentUri: "",
-    });
+    reset(EMPTY_FORM);
   });
 
   return (
-    <main data-testid="me-certifications-page" className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="me-certifications-title">
-          Le mie certificazioni
-        </h1>
-        <p className="text-sm opacity-70" data-testid="me-certifications-count">
-          {certs.data ? `${certs.data.total} certificazioni` : "Caricamento…"}
-        </p>
-      </header>
+    <main data-testid="me-certifications-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+      <PageHeader
+        data-testid="me-certifications-title"
+        title="Le mie certificazioni"
+        description="Le tue certificazioni professionali registrate."
+        badges={
+          <Badge variant="secondary" data-testid="me-certifications-count">
+            {certs.data ? `${certs.data.total} certificazioni` : "Caricamento…"}
+          </Badge>
+        }
+      />
 
       <Card>
         <CardHeader>
@@ -130,11 +152,11 @@ export default function MeCertificationsPage() {
             onSubmit={(e) => {
               void onSubmit(e);
             }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-3"
+            className="grid grid-cols-1 gap-3 md:grid-cols-2"
             noValidate
           >
             <div>
-              <label htmlFor="cert-name" className="block text-sm font-medium mb-1">
+              <label htmlFor="cert-name" className="mb-1 block text-sm font-medium text-foreground">
                 Nome <span aria-hidden="true">*</span>
               </label>
               <Input
@@ -144,11 +166,11 @@ export default function MeCertificationsPage() {
                 {...register("name")}
               />
               {errors.name && (
-                <p className="text-xs text-red-600 mt-1">{errors.name.message}</p>
+                <p className="mt-1 text-xs text-danger">{errors.name.message}</p>
               )}
             </div>
             <div>
-              <label htmlFor="cert-issuer" className="block text-sm font-medium mb-1">
+              <label htmlFor="cert-issuer" className="mb-1 block text-sm font-medium text-foreground">
                 Ente <span aria-hidden="true">*</span>
               </label>
               <Input
@@ -158,11 +180,11 @@ export default function MeCertificationsPage() {
                 {...register("issuer")}
               />
               {errors.issuer && (
-                <p className="text-xs text-red-600 mt-1">{errors.issuer.message}</p>
+                <p className="mt-1 text-xs text-danger">{errors.issuer.message}</p>
               )}
             </div>
             <div>
-              <label htmlFor="cert-issued" className="block text-sm font-medium mb-1">
+              <label htmlFor="cert-issued" className="mb-1 block text-sm font-medium text-foreground">
                 Data rilascio
               </label>
               <Input
@@ -172,11 +194,11 @@ export default function MeCertificationsPage() {
                 {...register("issuedDate")}
               />
               {errors.issuedDate && (
-                <p className="text-xs text-red-600 mt-1">{errors.issuedDate.message}</p>
+                <p className="mt-1 text-xs text-danger">{errors.issuedDate.message}</p>
               )}
             </div>
             <div>
-              <label htmlFor="cert-expires" className="block text-sm font-medium mb-1">
+              <label htmlFor="cert-expires" className="mb-1 block text-sm font-medium text-foreground">
                 Scadenza
               </label>
               <Input
@@ -186,11 +208,11 @@ export default function MeCertificationsPage() {
                 {...register("expiresDate")}
               />
               {errors.expiresDate && (
-                <p className="text-xs text-red-600 mt-1">{errors.expiresDate.message}</p>
+                <p className="mt-1 text-xs text-danger">{errors.expiresDate.message}</p>
               )}
             </div>
             <div>
-              <label htmlFor="cert-credential" className="block text-sm font-medium mb-1">
+              <label htmlFor="cert-credential" className="mb-1 block text-sm font-medium text-foreground">
                 Credential ID
               </label>
               <Input
@@ -200,7 +222,7 @@ export default function MeCertificationsPage() {
               />
             </div>
             <div>
-              <label htmlFor="cert-doc-uri" className="block text-sm font-medium mb-1">
+              <label htmlFor="cert-doc-uri" className="mb-1 block text-sm font-medium text-foreground">
                 URL documento
               </label>
               <Input
@@ -212,11 +234,11 @@ export default function MeCertificationsPage() {
                 {...register("documentUri")}
               />
               {errors.documentUri && (
-                <p className="text-xs text-red-600 mt-1">{errors.documentUri.message}</p>
+                <p className="mt-1 text-xs text-danger">{errors.documentUri.message}</p>
               )}
             </div>
 
-            <div className="md:col-span-2 flex items-center gap-3">
+            <div className="flex items-center gap-3 md:col-span-2">
               <Button
                 type="submit"
                 data-testid="me-cert-submit"
@@ -226,13 +248,11 @@ export default function MeCertificationsPage() {
               </Button>
               {feedback && (
                 <p
-                  data-testid={
-                    feedback.kind === "ok" ? "me-cert-success" : "me-cert-error"
-                  }
+                  data-testid={feedback.kind === "ok" ? "me-cert-success" : "me-cert-error"}
                   className={
                     feedback.kind === "ok"
-                      ? "text-sm text-green-700"
-                      : "text-sm text-red-700"
+                      ? "text-sm font-medium text-success"
+                      : "text-sm font-medium text-danger"
                   }
                   role={feedback.kind === "err" ? "alert" : undefined}
                 >
@@ -244,41 +264,21 @@ export default function MeCertificationsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader><CardTitle>Elenco</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          {certs.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
-          ) : certs.data && certs.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="me-certifications-empty">
-              Nessuna certificazione caricata.
-            </div>
-          ) : (
-            <table className="w-full text-sm" data-testid="me-certifications-table">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="px-4 py-2">Nome</th>
-                  <th className="px-4 py-2">Ente</th>
-                  <th className="px-4 py-2">Rilasciato</th>
-                  <th className="px-4 py-2">Scadenza</th>
-                  <th className="px-4 py-2">Credential ID</th>
-                </tr>
-              </thead>
-              <tbody>
-                {certs.data!.items.map((c) => (
-                  <tr key={c.userCertificationId} className="border-b last:border-b-0" data-testid="me-certification-row">
-                    <td className="px-4 py-2">{c.name}</td>
-                    <td className="px-4 py-2">{c.issuer}</td>
-                    <td className="px-4 py-2 text-xs">{c.issuedDate ?? "—"}</td>
-                    <td className="px-4 py-2 text-xs">{c.expiresDate ?? "—"}</td>
-                    <td className="px-4 py-2 font-mono text-xs">{c.credentialId ?? "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </CardContent>
-      </Card>
+      <div data-testid="me-certifications-table">
+        <EntityTable<MeCertification>
+          isLoading={certs.isLoading}
+          isError={certs.isError}
+          errorMessage="Impossibile caricare le certificazioni."
+          rows={certs.data?.items ?? []}
+          rowKey={(c) => c.userCertificationId}
+          rowTestId="me-certification-row"
+          columns={COLUMNS}
+          emptyTestId="me-certifications-empty"
+          emptyTitle="Nessuna certificazione"
+          emptyDescription="Non hai ancora caricato certificazioni."
+          caption="Elenco certificazioni"
+        />
+      </div>
     </main>
   );
 }

@@ -2,7 +2,8 @@
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { Badge, Card, CardContent, ErrorState, PageHeader, Spinner } from "@heuresys/ui";
+import { Check } from "lucide-react";
 import { apiFetch } from "../../../../lib/api/fetch";
 
 interface RolePermItem {
@@ -36,54 +37,76 @@ export default function AdminRolesPage() {
     };
   }, [rp.data]);
 
+  const countLabel = rp.data
+    ? `${roles.length} ruoli · ${perms.length} permessi · ${rp.data.total} mapping`
+    : "Caricamento…";
+
   return (
     <main data-testid="admin-roles-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="admin-roles-title">
-          Ruoli × Permessi
-        </h1>
-        <p className="text-sm opacity-70" data-testid="admin-roles-count">
-          {rp.data
-            ? `${roles.length} ruoli, ${perms.length} permessi, ${rp.data.total} mapping`
-            : "Caricamento…"}
-        </p>
-        <p className="text-xs opacity-60 mt-1">
-          Matrice sola lettura — la modifica live di permessi e ruoli arriverà in MVP-3.
-        </p>
-      </header>
+      <PageHeader
+        title="Ruoli × Permessi"
+        description="Matrice sola lettura — la modifica live di permessi e ruoli arriverà in MVP-3."
+        badges={
+          <Badge variant="secondary" data-testid="admin-roles-count">
+            {countLabel}
+          </Badge>
+        }
+      />
 
       <Card>
-        <CardHeader><CardTitle>Matrice</CardTitle></CardHeader>
         <CardContent className="p-0 overflow-x-auto">
           {rp.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
+            <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
+              <Spinner /> Caricamento…
+            </div>
           ) : rp.isError ? (
-            <div className="p-6 text-red-600" data-testid="admin-roles-error">
-              Accesso negato (richiede PLATFORM_ADMIN).
+            <div className="p-6" data-testid="admin-roles-error">
+              <ErrorState
+                title="Accesso negato"
+                description="Questa matrice richiede il ruolo PLATFORM_ADMIN."
+                retry={() => void rp.refetch()}
+              />
             </div>
           ) : (
-            <table className="min-w-full text-xs" data-testid="admin-roles-table">
+            <table className="min-w-full border-collapse text-xs" data-testid="admin-roles-table">
               <thead>
-                <tr className="text-left border-b sticky top-0 bg-white">
-                  <th className="px-3 py-2 font-mono">permission \ role</th>
+                <tr className="sticky top-0 border-b border-border bg-card text-left text-muted-foreground">
+                  <th className="px-3 py-2 font-mono font-medium">permission \ role</th>
                   {roles.map((r) => (
-                    <th key={r} className="px-3 py-2" data-testid="admin-roles-role-col">{r}</th>
+                    <th
+                      key={r}
+                      className="px-3 py-2 text-center font-medium text-foreground"
+                      data-testid="admin-roles-role-col"
+                    >
+                      {r}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {perms.map((p) => (
-                  <tr key={p} className="border-b last:border-b-0 hover:bg-gray-50" data-testid="admin-roles-perm-row">
-                    <td className="px-3 py-1 font-mono whitespace-nowrap">{p}</td>
+                  <tr
+                    key={p}
+                    className="border-b border-border last:border-b-0 transition-colors hover:bg-muted/50"
+                    data-testid="admin-roles-perm-row"
+                  >
+                    <td className="px-3 py-1.5 font-mono whitespace-nowrap text-foreground">{p}</td>
                     {roles.map((r) => {
                       const has = matrix.get(r)?.has(p) ?? false;
                       return (
                         <td
                           key={r}
-                          className={`px-3 py-1 text-center ${has ? "" : "opacity-30"}`}
+                          className="px-3 py-1.5 text-center"
                           data-testid={`admin-roles-cell-${r}-${p}`}
                         >
-                          {has ? "✓" : "·"}
+                          {has ? (
+                            <Check
+                              className="mx-auto h-3.5 w-3.5 text-green-600"
+                              aria-label="granted"
+                            />
+                          ) : (
+                            <span className="text-muted-foreground/40" aria-label="denied">·</span>
+                          )}
                         </td>
                       );
                     })}

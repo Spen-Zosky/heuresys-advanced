@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import { StatusPill } from "@/components/status-pill";
 import { apiFetch } from "../../../../../lib/api/fetch";
 
 interface Skill {
@@ -61,15 +62,21 @@ export default function MeSelfAssessmentPage() {
   );
 
   return (
-    <main data-testid="self-assessment-page" className="max-w-3xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <Link href="/me/skills" className="underline text-sm" data-testid="self-assessment-back">
+    <main data-testid="self-assessment-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+      <div className="space-y-3">
+        <Link
+          href="/me/skills"
+          data-testid="self-assessment-back"
+          className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+        >
           ← Le mie skill
         </Link>
-        <h1 className="text-2xl font-semibold mt-2" data-testid="self-assessment-title">
-          Auto-valutazione skill
-        </h1>
-      </header>
+        <PageHeader
+          data-testid="self-assessment-title"
+          title="Auto-valutazione skill"
+          description="Dichiara il tuo livello di competenza su una skill; la valutazione sarà revisionata dal tuo manager."
+        />
+      </div>
 
       <Card>
         <CardHeader><CardTitle>Nuova dichiarazione</CardTitle></CardHeader>
@@ -79,8 +86,8 @@ export default function MeSelfAssessmentPage() {
             className="space-y-4"
             data-testid="self-assessment-form"
           >
-            <div>
-              <label htmlFor="filter" className="text-sm font-medium">Cerca skill</label>
+            <div className="space-y-1.5">
+              <label htmlFor="filter" className="text-sm font-medium text-foreground">Cerca skill</label>
               <Input
                 id="filter"
                 data-testid="self-assessment-filter"
@@ -90,12 +97,12 @@ export default function MeSelfAssessmentPage() {
               />
             </div>
 
-            <div>
-              <label htmlFor="skillId" className="text-sm font-medium">Skill</label>
+            <div className="space-y-1.5">
+              <label htmlFor="skillId" className="text-sm font-medium text-foreground">Skill</label>
               <select
                 id="skillId"
                 data-testid="self-assessment-skill"
-                className="w-full border rounded px-2 py-1 text-sm"
+                className="w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 {...register("skillId")}
               >
                 <option value="">— Seleziona —</option>
@@ -103,23 +110,25 @@ export default function MeSelfAssessmentPage() {
                   <option key={s.skillId} value={s.skillId}>{s.code} — {s.name}</option>
                 ))}
               </select>
-              {errors.skillId && <p className="text-xs text-red-600 mt-1">Skill richiesta.</p>}
+              {errors.skillId && (
+                <p className="mt-1 text-xs text-danger">Skill richiesta.</p>
+              )}
             </div>
 
-            <div>
-              <label htmlFor="declaredProficiency" className="text-sm font-medium">Livello</label>
+            <div className="space-y-1.5">
+              <label htmlFor="declaredProficiency" className="text-sm font-medium text-foreground">Livello</label>
               <select
                 id="declaredProficiency"
                 data-testid="self-assessment-proficiency"
-                className="w-full border rounded px-2 py-1 text-sm"
+                className="w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 {...register("declaredProficiency")}
               >
                 {PROFICIENCY_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>
 
-            <div>
-              <label htmlFor="score" className="text-sm font-medium">Punteggio (0-100, opzionale)</label>
+            <div className="space-y-1.5">
+              <label htmlFor="score" className="text-sm font-medium text-foreground">Punteggio (0-100, opzionale)</label>
               <Input
                 id="score"
                 type="text"
@@ -129,19 +138,19 @@ export default function MeSelfAssessmentPage() {
               />
             </div>
 
-            <div>
-              <label htmlFor="comment" className="text-sm font-medium">Commento</label>
+            <div className="space-y-1.5">
+              <label htmlFor="comment" className="text-sm font-medium text-foreground">Commento</label>
               <Input id="comment" data-testid="self-assessment-comment" {...register("comment")} />
             </div>
 
             {create.isError && (
-              <p className="text-sm text-red-600" data-testid="self-assessment-error">
+              <p className="text-sm text-danger" data-testid="self-assessment-error">
                 Errore durante l&apos;invio.
               </p>
             )}
             {create.isSuccess && (
-              <p className="text-sm text-green-700" data-testid="self-assessment-success">
-                Auto-valutazione registrata.
+              <p data-testid="self-assessment-success">
+                <StatusPill tone="success">Auto-valutazione registrata.</StatusPill>
               </p>
             )}
 

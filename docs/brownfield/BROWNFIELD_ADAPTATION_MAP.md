@@ -470,7 +470,8 @@ Below is a representative excerpt of the full adaptation map. The complete machi
 | `cross_entity_relations` | ESKAP | **IMPORT** | `sys.sys_skill_taxonomy_edges` | 1 | `CROSS_REL::<src>::<tgt>` | ESCO graph projection |
 | `ontology_source_mappings` | ESKAP | **IMPORT** | `sys.sys_skill_aliases` | 1 | `ONT_SRC::<source>::<concept>` | Multi-ontology mapping |
 | `tenants` | DGOV (root) | **TRANSFORM** | `sys.sys_tenancies` | 2 | `TENANT::<legacy_id>` then natural `tenant_code` | Filter active only; merge metadata; 4 tenant import |
-| `users` | RBP·DGOV | **TRANSFORM** | `sys.sys_users` + `sys.sys_auth_*` | 3 | `USER::<legacy_id>` + `(tenant, email)` | Demo data → direct import + `user_is_synthetic=true`; legacy hashes NOT imported (force reset) |
+| `employees` | RBP·DGOV | **TRANSFORM** | `sys.sys_users` (identity) + `sys.sys_user_*` | 3 | `LEGACY_EMP::<employees.id>` + `(tenant, email)` | **The person** (ADR-0024 employee-centric). Demo data, `user_is_synthetic=true`. Coverage driven by `employees`, not `users`. |
+| `users` | RBP·DGOV | **TRANSFORM** | `sys.sys_auth_*` (credentials only) | 3 | `LEGACY_USER::<users.id>` (auth shell) | **Auth shell only** (ADR-0024): `username`/`role`/`totp` → auth tables; `users.employee_id` = bridge to the employee; legacy hashes NOT imported (force reset). NOT a person source. |
 | `org_units` | OPOURSKA | **TRANSFORM** | `sys.sys_organization_units` | 2 | `ORG_UNIT::<tenant>::<code>` | Hierarchy rebuilt from `parent_id`; closure table for ancestor queries |
 | `company_sizes` | OPOURSKA | **TRANSFORM** | `sys.sys_enterprise_size_bands` | 2 | `SIZE_BAND::<code>` | Size catalog tenant-aware |
 | `blueprint_templates` | INDOOR | **TRANSFORM** | `sys.sys_blueprint_variants` | 2 | `BLUEPRINT_VARIANT::<family>::<code>` | Variant per industry family |

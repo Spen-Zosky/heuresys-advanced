@@ -55,8 +55,9 @@ Apertura item (S951). La dottrina data-source (**ADR-0023**) conferma che il leg
 | (b) 4-5 Wave-1 IMPORT target a zero | `process_kpi_templates`, `learning_path_steps`, `skill_categories`, `activity_classification_mappings`, `skill_learning_mappings` — mapping presente, upsert 0-righe (sorgente vuota / transform non supportato / silent-skip) | **B-40** (CW-B39), **B-42** (CW-B50) |
 | (c) 2 import_run orfani | 1 FAILED + 1 RUNNING (su 21 COMPLETED) — chiudere/pulire | housekeeping engine brownfield |
 | (d) nessun delta/watermark | ogni run è full re-stage idempotente; manca HWM incrementale | design `brownfield.source_watermarks` (rif. doc SF §3.2 net-new) |
+| (e) **ingestion era user-centric** (ADR-0024) | le metodiche key-avano su legacy `users.id`; corretto a **employee-centric** (`employees.id`). Fase 1 (doc) ✅ S954; Fase 2 (seed re-key) + Fase 3 (re-key live bare-metal, gated) in corso | **ADR-0024**, `EMPLOYEE_CENTRIC_MAPPING_DOCTRINE.md`, D-13 |
 
-**Effort**: multi-sessione (B-10 da solo ~6-10h). **Regola d'ingaggio**: esecuzione SOLO su greenlight esplicito di Enzo (scope-discipline cardinale, `memory/feedback_scope_discipline_no_cascade.md`). Questo item documenta lo scope; non autorizza un bulk-import autonomo.
+**Effort**: multi-sessione (B-10 da solo ~6-10h). **Regola d'ingaggio**: esecuzione SOLO su greenlight esplicito di Enzo (scope-discipline cardinale, `memory/feedback_scope_discipline_no_cascade.md`). Questo item documenta lo scope; non autorizza un bulk-import autonomo. **Nota S954**: la conciliazione futura DEVE seguire la doctrine employee-centric (ADR-0024) — `sys_user*` ⟸ legacy `employee*`, key `LEGACY_EMP::<employees.id>`, MAI `users.id`.
 
 ## P2 — Dependabot / dipendenze (audit breaking-changes)
 

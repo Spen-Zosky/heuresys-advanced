@@ -1,0 +1,12 @@
+## CLEAN MATCH (CRLF stripped) ##
+bm_rows=161  emp_rows=270
+--- ID match: bm(LEGACY:<id>) == employees.id ---
+match    = 0
+bm_only  = 161
+emp_only = 270
+--- EMAIL match: bm.user_email == employees.email ---
+match    = 157
+bm_only  = 4
+emp_only = 113
+--- consistency: do id-match and email-match agree? join on id, compare email ---
+id-joined rows=0, email_same=, email_diff=

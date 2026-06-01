@@ -1,0 +1,6 @@
+## FINAL LINKAGE CHAIN ##
+bm_legacy_ids=160  legacy_users_rows=274
+bm LEGACY:<id> == users.id  match = 160
+of matched bm users, how many users have employee_id set:
+awk: cmd. line:1: warning: escape sequence `\N' treated as plain `N'
+  resolved_users=160  with_employee_id=160

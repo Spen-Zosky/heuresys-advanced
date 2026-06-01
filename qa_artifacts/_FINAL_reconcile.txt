@@ -1,0 +1,12 @@
+## RECONCILE (clean) ##
+bm_distinct_emails=161
+emp_distinct_emails=0
+EMAIL_MATCH=0
+
+## bm emails by domain ##
+    158 rtl-bank.org
+      3 heuresys.com
+
+## MATCHED emails by domain ##
+
+## employees emails by domain ##

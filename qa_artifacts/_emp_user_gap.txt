@@ -1,0 +1,7 @@
+=== EMP_VS_USER_GAP rtl+heuresys subset ===
+employees_in_subset|162
+of_which_WITH_user|160
+of_which_WITHOUT_user (DROPPED by user-centric)|2
+=== GLOBAL all 4 tenants ===
+employees_total|270
+employees_without_user|2

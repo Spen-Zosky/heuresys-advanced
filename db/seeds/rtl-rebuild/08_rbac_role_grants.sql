@@ -9,14 +9,28 @@
 BEGIN;
 
 CREATE SCHEMA IF NOT EXISTS staging;
+-- EMPLOYEE-CENTRIC (ADR-0024 / I14, re-keyed S954): the person is driven by `employees` (email link
+-- to sys_users); `users` is read here ONLY as the auth shell that carries `role`, joined via
+-- users.employee_id = employees.id. An employee with no `users` row still gets a grant (default USER,
+-- ADR-0024 §2.3). Was: JOIN sys_users ON user_external_code='LEGACY:'||users.id (user-centric).
+CREATE TABLE IF NOT EXISTS staging.rtl_employees (
+  id text, tenant_id text, email text, personal_email text, first_name text, middle_name text,
+  last_name text, job_title text, department text, location text, position_id text, org_unit_id text,
+  manager_id text, pernr text, hire_date text, seniority_date text, is_active text, employment_status text,
+  phone_mobile text, phone_work text, address_street text, address_city text, address_postal_code text,
+  address_country text, iban text, swift_bic text, bank_name text, emergency_contact_name text,
+  emergency_contact_phone text, emergency_contact_relationship text, highest_education_level text,
+  highest_education_field text, highest_education_institution text, highest_education_year text);
 CREATE TABLE IF NOT EXISTS staging.rtl_users (id text, username text, role text, employee_id text, is_active text);
-TRUNCATE staging.rtl_users;
-\copy staging.rtl_users FROM 'extracted/users.csv' WITH (FORMAT csv, HEADER true)
+TRUNCATE staging.rtl_employees, staging.rtl_users;
+\copy staging.rtl_employees FROM 'extracted/employees.csv' WITH (FORMAT csv, HEADER true)
+\copy staging.rtl_users     FROM 'extracted/users.csv'     WITH (FORMAT csv, HEADER true)
 
 INSERT INTO sys.sys_user_auth_roles (user_auth_role_user_id, user_auth_role_role_id, user_auth_role_tenant_id, user_auth_role_granted_at)
 SELECT u.user_id, r.auth_role_id, u.user_tenant_id, now()
-FROM staging.rtl_users ru
-JOIN sys.sys_users u ON u.user_external_code = 'LEGACY:' || ru.id
+FROM staging.rtl_employees e
+JOIN sys.sys_users u ON lower(u.user_email) = lower(e.email)        -- employee-centric person link (ADR-0024)
+LEFT JOIN staging.rtl_users ru ON ru.employee_id = e.id            -- auth shell (role only); account-less -> NULL -> USER
 JOIN sys.sys_auth_roles r ON r.auth_role_code = CASE upper(NULLIF(ru.role,''))
      WHEN 'SUPERUSER'    THEN 'PLATFORM_ADMIN'
      WHEN 'TENANT_OWNER' THEN 'TENANT_ADMIN'

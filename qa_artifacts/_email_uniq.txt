@@ -1,0 +1,5 @@
+=== employee email uniqueness in rtl+heuresys subset (the seed scope) ===
+total_employees|162
+null_or_empty_email|0
+distinct_emails|162
+emails_with_dup (>1 emp same email)|0

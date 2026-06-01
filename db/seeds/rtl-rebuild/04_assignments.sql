@@ -1,9 +1,11 @@
--- 04_assignments.sql — wire each real user to their synthesized position (PRIMARY/ACTIVE).
+-- 04_assignments.sql — wire each real EMPLOYEE to their synthesized position (PRIMARY/ACTIVE).
 -- Idempotent. Run via psql AFTER 03. ADDITIVE.
 --
--- Crosswalk employee -> v5 user: legacy users.employee_id links the employee to a legacy auth
--- user; v5 sys_users.user_external_code = 'LEGACY:'||legacy users.id. Position: resolved via the
+-- EMPLOYEE-CENTRIC (ADR-0024 / I14, re-keyed S954 Phase 2): the person is the legacy `employees`
+-- row, resolved to its v5 user via EMAIL (`lower(sys_users.user_email) = lower(employees.email)`),
+-- NOT via `LEGACY:'||users.id` (the deprecated user-centric auth key). Position: resolved via the
 -- legacy_employee_id stored on sys_positions in 03. One PRIMARY assignment per user.
+-- `users.csv` is no longer needed here — the employee email is the canonical link.
 
 BEGIN;
 
@@ -17,13 +19,8 @@ CREATE TABLE IF NOT EXISTS staging.rtl_employees (
   emergency_contact_phone text, emergency_contact_relationship text, highest_education_level text,
   highest_education_field text, highest_education_institution text, highest_education_year text
 );
-CREATE TABLE IF NOT EXISTS staging.rtl_users (
-  id text, username text, role text, employee_id text, is_active text
-);
 TRUNCATE staging.rtl_employees;
-TRUNCATE staging.rtl_users;
 \copy staging.rtl_employees FROM 'extracted/employees.csv' WITH (FORMAT csv, HEADER true)
-\copy staging.rtl_users     FROM 'extracted/users.csv'     WITH (FORMAT csv, HEADER true)
 
 INSERT INTO sys.sys_user_position_assignments (
   user_position_assignment_tenant_id, user_position_assignment_user_id,
@@ -35,8 +32,7 @@ SELECT
   COALESCE(NULLIF(e.hire_date,'')::date, CURRENT_DATE), 'ACTIVE',
   jsonb_build_object('legacy_employee_id', e.id, 'source', 'rtl-rebuild')
 FROM staging.rtl_employees e
-JOIN staging.rtl_users ru ON ru.employee_id = e.id
-JOIN sys.sys_users u      ON u.user_external_code = 'LEGACY:' || ru.id
+JOIN sys.sys_users u      ON lower(u.user_email) = lower(e.email)   -- employee-centric: email link (ADR-0024)
 JOIN sys.sys_positions p  ON p.position_metadata->>'legacy_employee_id' = e.id
 WHERE NOT EXISTS (
   SELECT 1 FROM sys.sys_user_position_assignments a

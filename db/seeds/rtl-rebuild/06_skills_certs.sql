@@ -10,7 +10,18 @@
 BEGIN;
 
 CREATE SCHEMA IF NOT EXISTS staging;
-CREATE TABLE IF NOT EXISTS staging.rtl_users (id text, username text, role text, employee_id text, is_active text);
+-- EMPLOYEE-CENTRIC (ADR-0024 / I14, re-keyed S954): the person link is employees->email->sys_users,
+-- not LEGACY:'||users.id. staging.rtl_employees mirrors employees.csv (34 cols, \copy maps by position);
+-- only (id,email) are used below. users.csv is no longer needed here.
+CREATE TABLE IF NOT EXISTS staging.rtl_employees (
+  id text, tenant_id text, email text, personal_email text, first_name text, middle_name text,
+  last_name text, job_title text, department text, location text, position_id text, org_unit_id text,
+  manager_id text, pernr text, hire_date text, seniority_date text, is_active text, employment_status text,
+  phone_mobile text, phone_work text, address_street text, address_city text, address_postal_code text,
+  address_country text, iban text, swift_bic text, bank_name text, emergency_contact_name text,
+  emergency_contact_phone text, emergency_contact_relationship text, highest_education_level text,
+  highest_education_field text, highest_education_institution text, highest_education_year text
+);
 CREATE TABLE IF NOT EXISTS staging.rtl_employee_skills (
   id text, tenant_id text, employee_id text, esco_skill_id text, esco_uri text, custom_skill_name text,
   proficiency_level text, proficiency_label text, years_experience text, is_primary text, is_verified text,
@@ -31,10 +42,10 @@ CREATE TABLE IF NOT EXISTS staging.rtl_certifications (
 CREATE TABLE IF NOT EXISTS staging.rtl_employee_certifications (
   id text, employee_id text, certification_id text, credential_id text, issued_date text, expiry_date text,
   status text, verification_status text, credential_url text, document_url text);
-TRUNCATE staging.rtl_users, staging.rtl_employee_skills, staging.rtl_employee_skill_profiles,
+TRUNCATE staging.rtl_employees, staging.rtl_employee_skills, staging.rtl_employee_skill_profiles,
          staging.rtl_employee_skill_assessments, staging.rtl_tenant_custom_skills,
          staging.rtl_certifications, staging.rtl_employee_certifications;
-\copy staging.rtl_users                     FROM 'extracted/users.csv'                     WITH (FORMAT csv, HEADER true)
+\copy staging.rtl_employees                 FROM 'extracted/employees.csv'                 WITH (FORMAT csv, HEADER true)
 \copy staging.rtl_employee_skills           FROM 'extracted/employee_skills.csv'           WITH (FORMAT csv, HEADER true)
 \copy staging.rtl_employee_skill_profiles   FROM 'extracted/employee_skill_profiles.csv'   WITH (FORMAT csv, HEADER true)
 \copy staging.rtl_employee_skill_assessments FROM 'extracted/employee_skill_assessments.csv' WITH (FORMAT csv, HEADER true)
@@ -42,12 +53,13 @@ TRUNCATE staging.rtl_users, staging.rtl_employee_skills, staging.rtl_employee_sk
 \copy staging.rtl_certifications            FROM 'extracted/certifications.csv'            WITH (FORMAT csv, HEADER true)
 \copy staging.rtl_employee_certifications   FROM 'extracted/employee_certifications.csv'   WITH (FORMAT csv, HEADER true)
 
--- legacy employee_id -> v5 user (id + tenant), via legacy users.id embedded in external_code
+-- legacy employee_id -> v5 user (id + tenant), EMPLOYEE-CENTRIC via email (ADR-0024 / I14).
+-- Was: JOIN staging.rtl_users ON user_external_code='LEGACY:'||users.id (user-centric, deprecated).
 DROP TABLE IF EXISTS rtl_emp_user;
 CREATE TEMP TABLE rtl_emp_user ON COMMIT DROP AS
-SELECT ru.employee_id AS legacy_employee_id, u.user_id AS v5_user_id, u.user_tenant_id AS v5_tenant_id
-FROM staging.rtl_users ru
-JOIN sys.sys_users u ON u.user_external_code = 'LEGACY:' || ru.id;
+SELECT e.id AS legacy_employee_id, u.user_id AS v5_user_id, u.user_tenant_id AS v5_tenant_id
+FROM staging.rtl_employees e
+JOIN sys.sys_users u ON lower(u.user_email) = lower(e.email);
 
 DROP TABLE IF EXISTS rtl_tenant_map;
 CREATE TEMP TABLE rtl_tenant_map (legacy_tenant uuid, v5_tenant uuid) ON COMMIT DROP;

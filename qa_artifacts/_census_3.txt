@@ -1,0 +1,21 @@
+===7_IMPORT_RUNS_by_status===
+COMPLETED|21|2026-05-25
+RUNNING|1|2026-05-21
+FAILED|1|2026-05-16
+===8_LEGACY_MIRROR_top10_by_size===
+esco_skills|0|348 MB
+industry_classifications|0|78 MB
+esco_occupations|0|77 MB
+semantic_entity_index|0|50 MB
+esco_occupation_skills|0|12 MB
+job_template_skills|0|5088 kB
+employees_core|0|3496 kB
+courses|0|1656 kB
+skill_gap_analyses|0|1584 kB
+skill_adjacencies|0|1376 kB
+===9_LEGACY_MIRROR_total===
+115|0|589 MB
+===10_does_anything_in_sys_or_views_reference_legacy_mirror===
+0
+===11_audit_validation_results_bloat===
+0|0|546 MB||

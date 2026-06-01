@@ -1,0 +1,43 @@
+===3_STAGING_tables_rowcounts===
+rtl_employee_attendance|3218|744 kB
+rtl_employee_skills|905|328 kB
+rtl_employee_certifications|426|168 kB
+rtl_employee_skill_profiles|312|168 kB
+rtl_employee_skill_assessments|306|80 kB
+rtl_employees|162|168 kB
+rtl_users|161|32 kB
+rtl_employee_contracts|161|48 kB
+legacy_rtl_occupations|156|72 kB
+rtl_salary_band_assignments|156|40 kB
+rtl_org_units|40|24 kB
+rtl_certifications|36|16 kB
+rtl_tenant_custom_skills|25|24 kB
+rtl_salary_bands|12|16 kB
+wave1_skill_aliases|0|88 kB
+wave1_skills|0|240 kB
+wave1_learning_paths|0|152 kB
+wave1_compensation_bands|0|88 kB
+wave1_user_certifications|0|136 kB
+wave1_job_roles|0|88 kB
+wave1_learning_path_steps|0|40 kB
+wave1_skill_learning_mappings|0|40 kB
+wave1_activity_classifications|0|112 kB
+wave1_learning_modules|0|136 kB
+wave1_blueprint_process_registry|0|88 kB
+wave1_activity_classification_mappings|0|112 kB
+wave1_job_families|0|88 kB
+wave1_skill_categories|0|128 kB
+wave1_process_kpi_templates|0|128 kB
+wave1_skill_taxonomy_edges|0|120 kB
+wave1_esco_occupation_mappings|0|112 kB
+wave1_skill_families|0|88 kB
+===4_TEMP_SDBI_tables===
+_x5b_runid|0
+sys_users|0
+===5_AUDIT_tables_size===
+import_validation_results|0|546 MB
+import_approval_decisions|0|472 kB
+import_run_logs|223|168 kB
+user_self_service_actions|0|48 kB
+===6_BROWNFIELD_import_runs_cols===
+import_run_id, import_run_export_id, import_run_wave, import_run_classification_scope, import_run_started_at, import_run_finished_at, import_run_status, import_run_initiated_by, import_run_metadata, created_at

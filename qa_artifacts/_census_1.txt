@@ -1,0 +1,17 @@
+===1_SCHEMAS_AND_TABLE_COUNTS===
+sys|134|11|0
+legacy_mirror|115|0|0
+staging|32|0|0
+brownfield|7|0|0
+audit|4|0|0
+temp_sdbi|2|0|0
+pg_temp_3|0|0|0
+pg_toast_temp_3|0|0|0
+public|0|2|0
+===2_TOTAL_DB_SIZE_AND_PER_SCHEMA===
+legacy_mirror|589 MB
+audit|547 MB
+sys|167 MB
+staging|3912 kB
+brownfield|1520 kB
+temp_sdbi|280 kB

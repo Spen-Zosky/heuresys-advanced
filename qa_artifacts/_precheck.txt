@@ -1,0 +1,12 @@
+===A_import_run_status_CHECK_values===
+CHECK (((import_run_status)::text = ANY ((ARRAY['RUNNING'::character varying, 'COMPLETED'::character varying, 'FAILED'::character varying, 'CANCELLED'::character varying, 'AWAITING_APPROVAL'::character varying])::text[])))
+===A2_distinct_status_present===
+RUNNING|1
+FAILED|1
+COMPLETED|21
+===A3_orphan_run_details===
+67d51a90-7ad9-44e2-860d-0d2e0e945af8|FAILED|1|2026-05-16|2026-05-18 17:39:34.230035+00
+8d237e28-8165-4d62-9e93-fa0d487eb4dd|RUNNING|1|2026-05-21|
+===B_does_import_validation_results_FK_to_import_runs===
+import_validation_results_import_validation_result_run_id_fkey|FOREIGN KEY (import_validation_result_run_id) REFERENCES brownfield.import_runs(import_run_id) ON DELETE CASCADE
+import_validation_results_import_validation_result_source__fkey|FOREIGN KEY (import_validation_result_source_table_id) REFERENCES brownfield.source_tables(source_table_id) ON DELETE CASCADE

@@ -1,4 +1,4 @@
--- 000045_rekey_external_code_employee_centric.sql
+-- 000046_rekey_external_code_employee_centric.sql
 -- ADR-0024 / I14 — re-key sys_users.user_external_code from the deprecated user-centric
 -- 'LEGACY:'||legacy.users.id to the employee-centric 'LEGACY_EMP::'||legacy.employees.id.
 --
@@ -37,7 +37,7 @@ SET
                   || jsonb_build_object(
                        'legacy_auth_user_id', replace(u.user_external_code, 'LEGACY:', ''),
                        'rekey_source', 'ADR-0024',
-                       'rekey_migration', '000045'),
+                       'rekey_migration', '000046'),
   updated_at = now()
 FROM emp_resolution er
 WHERE er.user_id = u.user_id

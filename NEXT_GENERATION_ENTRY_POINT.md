@@ -234,7 +234,7 @@ Pre-req: tunnel `:5433` up, legacy source reachable, RBAC cache loaded.
 - [~] **WS-1** Employee-centric — ✅ DONE (commit `42e5c97`, adversarially verified): 1a permanent CI guard (4/4 green, locks ADR-0024/I14) · 3 satellites populated (profiles 157 + education 157 + assessment_evidence 1560 = **1874 rows**, zero fabrication, FK+tenant integrity, idempotent) · honest skips: professional_experiences (no legacy source), learning_evidence (out-of-tenant), kpi_evidence (cross-wave BLOCKED → WS-2).
 - [~] **WS-3** CW-B60 — ✅ PARTIAL (commit `14bb6ed`, verified): skill_categories 0→6 (nullable-FK mig 000051, ADR-0025) + bonus re-derivation gains (skills/learning↑) + Wave-1 regression green. 🔻 BLOCKED (documented): activity_classification_mappings (FK-vs-mapping redesign → backlog/§8) + process_kpi_templates (cross-wave → WS-2). Premise "single resolver bug, 3 targets" was wrong — heterogeneous causes.
 - [ ] **WS-2** Wave 2/3 — Wave-2 executor impl · mapping-cards · Wave 2 import · Wave 3 · coverage report
-- [ ] **WS-4** RBAC — P1 (sys_user_preferences) · R1b (teams + 3rd scope axis) · V (exhaustive E2E matrix)
+- [~] **WS-4** RBAC — ✅ **P1 DONE** (commit `0c58843`, adversarially APPROVED): sys_user_preferences (mig 000053) + me GET/PATCH + frontend PreferencesApplier + E2E, server-SoT theme+palette, 34/34 me suite green. 🔜 **R1b** (teams + 3rd scope axis) + **V** (E2E matrix, sample) remain → blueprint in §12/analysis transcript.
 - [x] **WS-5** Test backfill — ✅ DONE: 27 module integration-test files (60/60 coverage) · full suite 80 files/550 tests green · fixed real bug (activity-classifications scheme enum 500). Commits below.
 - [~] **WS-6** Loose-ends — ✅ mostly DONE: 6b pg-pool (`32ed46b`) · 6g.1 ADR-0015 (`e942b06`) · 6a TOTP token (already complete) · 6c observability core (already live) · 6d showcase (already consolidated) · 6g.3 B-31 (ADR-0021). 🔻 Deferred→§8: 6e MFA multi-kind (GA security risk), 6f mobile-matrix, 6c-depth, 6g.2 markers.
 - [ ] **WS-7** Release — version bump · full green verify · finalize doc + SoT · push · CI green · auto-merge · tag `v1.0.0` · GitHub Release
@@ -316,3 +316,34 @@ Read-only scoping (`af1592ef`) found WS-6 is largely **already done**:
 - Fix loop (`wf_dcab35ad-04a` + 2 direct): 4 RBAC-denial tests retargeted (read perms are universal → switched to write-route DELETE with valid CSRF → 403 FORBIDDEN; `requirePermission` throws default code `FORBIDDEN`); seed-acquisition + visualization-exports create-flows switched to TENANT_ADMIN (PLATFORM_ADMIN has `tenantId=null` → `TENANT_ID_REQUIRED`); blueprint-variants DELETE dropped its `content-type: application/json` (body-less DELETE + json content-type → 400 before RBAC).
 - **Real bug surfaced + fixed:** `GET /v1/activity-classifications` LIST 500'd on live data — the Zod `ActivityClassScheme` enum lacked `ATECO`/`NACE` (the unversioned codes used by 3276 real rows + the DB CHECK). Widened the enum to mirror the CHECK (RD-08); rebuilt shared `dist`.
 - **Verified:** full api suite **80 files / 550 tests passing** (5 skipped); 60/60 modules now have a dedicated integration test. Census §1 updated (55→82 test files).
+
+---
+
+## 13. RESUME POINT (checkpoint 2026-06-02)
+
+**A fresh session resumes here with full budget. Read §11 kickoff + this section + §10 todos + §12 record.**
+
+### State (all on branch `release/v1.0.0`, integration PR #24 → main)
+- **Pushed + CI-green (head `ba27119`):** WS-0, WS-5 (60/60 module tests), WS-1 (employee-centric satellites, 1a guard), WS-3 (partial — skill_categories 0→6 + re-derivation gains), WS-6g (ADR-0015), WS-6b (pg-pool). Full data-track CI 5/5 green.
+- **Committed locally, NOT yet pushed:** WS-4 **P1** (`0c58843`) — user preferences full-stack, adversarially APPROVED, 34/34 me suite green. **Next push will re-run CI on this.**
+- **Backups (D-SAFE) in `pg_dump_snapshots/`:** pre-v1.0.0 (`24a5bd7`), pre-ws3, pre-ws1, pre-ws4. Restorable via `pg_restore --clean`.
+- **Migrations:** through **000053** (next free = 000054). WS-1 used seed `db/seeds/rtl-rebuild/12_user_satellites.sql` (not a migration).
+- **Ledger nit (non-blocking):** 000051/000052/000053 were applied live via psql; run `pnpm db:migrate` once to record them in the migrations ledger (idempotent).
+
+### Remaining work (execution; all DB-serial → sequence, don't blind-parallelize)
+1. **WS-4 R1b** — `sys_teams` + `sys_team_members` + TEAM_LEADER/TEAM_MEMBER + 3rd "my-team" scope axis (FK+middleware, NEVER RLS). **Derive teams from the REAL org** (`sys_organization_units` + manager→report edges) — do NOT fabricate/ask. Blueprint: WS-4 analysis transcript (`a15fb43c`). NB the analysis said `dw.dw_organization_units` — the real table is **`sys.sys_organization_units`**.
+2. **WS-4 V** — exhaustive E2E matrix (roles × 2 themes × routes). **SAMPLE** it (key roles × routes × 2 themes) to fit the single self-hosted runner's CI budget; full ~540-scenario matrix would be flaky/slow.
+3. **WS-2** — Wave-2 executor **code generalization** (~2.5h, additive, Wave-1-safe): remove `wave!=1` guard (`service.ts:55-57`), parameterize `loadMappings`/`stagingTableFor`/`analyzeWaveStaging`/`ensureLegacyMirrorDDL` by wave. Blueprint in §12. **Data import is source-discovery-gated → ship code + document the deferred data** (don't author speculative Wave-2 mappings — mapping-card rule).
+4. **WS-7 RELEASE (barrier):** bump 4 workspaces (`root`+api+web+showcase+shared) → **1.0.0**; full green verify (§7); **regenerate the stale viz graph** (`sys.sys_visualization_nodes` 161 orphaned POSITION nodes — deferred from WS-0 → make `db:validate` green now that entities are re-derived); finalize this doc; secret-grep; push; `gh run watch` 7/7; **auto-merge PR #24 → main**; annotated tag `v1.0.0` + `gh release create v1.0.0`.
+
+### Carried-forward BLOCKERS (documented, → §8 roadmap)
+- `sys_activity_classification_mappings` — FK-vs-mapping redesign (touches shipped mig 000007; ADR-0025 §5.3).
+- `sys_kpi_definitions` empty (not a Wave-1 target) → blocks `process_kpi_templates` + `sys_user_kpi_evidence` → WS-2.
+- WS-6 deferred: 6e MFA multi-kind (GA security risk), 6f mobile-matrix, 6c observability-depth, 6g.2 markers, 6a MFA login-gating (waits on brand `/login` UI).
+
+### Hard-won lessons (apply on resume)
+- **Trust verified DB state + adversarial review, NEVER an agent's self-report** (a WS-1 implementer report was grossly inaccurate + falsely claimed a commit).
+- **Run the FULL suite before pushing** a data-track change (a WS-3 test asserted a gitignored file → green local, red CI).
+- **Every push to PR #24 re-runs the full CI** (pull_request triggers have no paths filter) — batch pushes; never push docs on top of code whose CI is mid-flight.
+- **Edit shared `src` → rebuild `dist`** (`pnpm --filter @heuresys/shared build`) — tsc reads `dist/*.d.ts`.
+- **Nullable-brownfield-FK** (ADR-0015/0016/0025) is the canonical fix for required-FK silent import skips.

@@ -25,6 +25,7 @@ import {
   MeDocumentsResponseSchema,
   MePermissionsResponseSchema,
   MeInterfacesResponseSchema,
+  UserPreferenceSchema, UpdateUserPreferenceBodySchema,
 } from "@heuresys/shared";
 import { meService, type SelfActor } from "./service.js";
 import { requirePermission, userPermissionCodes } from "../../middleware/rbac.js";
@@ -148,4 +149,16 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("document:read:self")],
     schema: { response: { 200: MeDocumentsResponseSchema } },
   }, async (req) => meService.listDocuments(selfActor(req)));
+
+  // UI preferences (WS-4 P1) — theme + palette, server source-of-truth. Self-scoped; GET returns
+  // the brand defaults if no row exists yet, PATCH upserts (CSRF-protected state change).
+  app.get("/preferences", {
+    preHandler: [requirePermission("me:preferences:read")],
+    schema: { response: { 200: UserPreferenceSchema } },
+  }, async (req) => meService.getPreferences(selfActor(req)));
+
+  app.patch("/preferences", {
+    preHandler: [app.verifyCsrf, requirePermission("me:preferences:update")],
+    schema: { body: UpdateUserPreferenceBodySchema, response: { 200: UserPreferenceSchema } },
+  }, async (req) => meService.updatePreferences(selfActor(req), req.body));
 };

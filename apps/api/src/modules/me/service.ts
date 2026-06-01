@@ -11,6 +11,7 @@ import type {
   MeInboxQuery, PatchMeInboxBody,
   CreateMeCertificationBody,
   MeInterfacesResponse,
+  UserPreference, UpdateUserPreferenceBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { userPermissionCodes } from "../../middleware/rbac.js";
@@ -151,5 +152,18 @@ export const meService = {
 
   async listDocuments(actor: SelfActor) {
     return repo.listMyDocuments(pool, actor.userId);
+  },
+
+  /** Caller's own UI preferences (WS-4 P1). Returns the brand defaults when no row exists yet —
+   *  the server is the source of truth, re-applied on every login. */
+  async getPreferences(actor: SelfActor): Promise<UserPreference> {
+    return repo.loadPreferences(pool, actor.userId);
+  },
+
+  /** Partial update of the caller's UI preferences (theme and/or palette). Tenant is taken from
+   *  the resolving actor (FK isolation, never from request input); null tenant is allowed (the
+   *  column is nullable for platform-scoped users). */
+  async updatePreferences(actor: SelfActor, patch: UpdateUserPreferenceBody): Promise<UserPreference> {
+    return repo.upsertPreferences(pool, actor.userId, actor.tenantId, patch);
   },
 };

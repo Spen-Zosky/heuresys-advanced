@@ -11,6 +11,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { UserPreference, UpdateUserPreferenceBody } from "@heuresys/shared";
 import { apiFetch } from "./fetch";
 import { csrfStore } from "./csrf-store";
 
@@ -113,6 +114,42 @@ export function useMyInterfaces() {
     queryFn: ({ signal }) => apiFetch<MyInterfaces>("/v1/me/interfaces", { signal }),
     staleTime: 60_000,
     retry: 0,
+  });
+}
+
+/* --- UI preferences (WS-4 P1) — server source-of-truth ---------------- */
+
+export type { UserPreference, UpdateUserPreferenceBody } from "@heuresys/shared";
+
+export const ME_PREFERENCES_QUERY_KEY = ["me", "preferences"] as const;
+
+/**
+ * The caller's stored UI preferences (GET /v1/me/preferences). Server is the source of truth:
+ * theme+palette are re-applied on every session (incl. a new device) by the layout's
+ * PreferencesApplier. The API returns the brand defaults (dark / balanced) when no row exists yet.
+ */
+export function useMyPreferences() {
+  return useQuery({
+    queryKey: ME_PREFERENCES_QUERY_KEY,
+    queryFn: ({ signal }) => apiFetch<UserPreference>("/v1/me/preferences", { signal }),
+    staleTime: 60_000,
+    retry: 0,
+  });
+}
+
+/**
+ * Persist a partial preference update (PATCH /v1/me/preferences). On success the server response
+ * (the full resolved preference) is written into the query cache so the applier re-runs immediately.
+ */
+export function useUpdateMyPreferences() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationKey: ["me", "preferences", "update"],
+    mutationFn: (body: UpdateUserPreferenceBody) =>
+      apiFetch<UserPreference>("/v1/me/preferences", { method: "PATCH", body }),
+    onSuccess: (pref) => {
+      qc.setQueryData(ME_PREFERENCES_QUERY_KEY, pref);
+    },
   });
 }
 

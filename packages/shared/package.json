@@ -247,6 +247,10 @@
       "types": "./dist/schemas/me.d.ts",
       "default": "./src/schemas/me.ts"
     },
+    "./schemas/me-preferences": {
+      "types": "./dist/schemas/me-preferences.d.ts",
+      "default": "./src/schemas/me-preferences.ts"
+    },
     "./schemas/compensation": {
       "types": "./dist/schemas/compensation.d.ts",
       "default": "./src/schemas/compensation.ts"

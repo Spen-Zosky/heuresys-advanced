@@ -23,6 +23,7 @@
     "db:validate": "pwsh -File db/scripts/validate_database.ps1",
     "db:seed": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-reference-bank.ts",
     "db:seed-test-admin": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-test-admin.ts",
+    "db:seed-r2": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-r2-personas.ts",
     "i18n:check": "pnpm --filter @heuresys/web run i18n:check",
     "cowork:status": "node scripts/cowork-exchange/status.mjs",
     "cowork:validate": "node scripts/cowork-exchange/validate-naming.mjs",

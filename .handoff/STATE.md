@@ -1,6 +1,6 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-01 (S955). **Branch**: `main`. **4 commit locali NON pushati** sopra `f7799ed` (S954): `9b06629` (B-51) · `ee062ed` (brand batch1) · `fa4f631` (brand batch2) · + handoff docs. **db:migrate ×2 verde** (47 migration), **API positions/roles/career 34/34**, **web E2E PROD 25+83 verde** (a11y+theme inclusi). Push in attesa di ok esplicito Enzo.
+**Updated**: 2026-06-01 (S955). **Branch**: `main`. Commit `f7799ed..1f2c212` (B-51 + brand F5/F6 + handoff) **PUSHATI, CI 5/5 verde**. **+ R2 commit nuovo locale** (role grants `000049` + seed) — push in attesa ok. **db:migrate ×2 verde** (49 migration), **API 34/34 + auth/rbac 28/28**, **web E2E PROD 108 verde**.
 
 ## Last session brief (S955 — 3 stream eseguiti in autonomia)
 
@@ -11,7 +11,7 @@
 
 ## Top priorities (next session)
 
-1. **R2 — RBAC perspectives** (`RBAC_UIX_PERSPECTIVES_PLAN.md`): ora **SBLOCCATO da B-51** (titoli/ruoli reali). Assegna i 3 functional role holderless + CEO ai veri utenti RTL per funzione.
+1. **R2 ✅ DONE (S955)** — 4 ruoli holderless (PROCESS_OWNER/BLUEPRINT_MANAGER/READ_ONLY/CEO) assegnati a veri utenti RTL per funzione + login, live-verificato (login 200 + JWT role, auth/rbac 28/28). **NEXT = U1** (`sys_ui_interfaces` registry + `GET /v1/me/interfaces`), poi U2/P1/V. Vedi `RBAC_UIX_PERSPECTIVES_PLAN.md`.
 2. **B-50(b) — silent-skip trio fix** (gated, ~40-60k, MED-HIGH risk): root-cause già pinpointed (LOOKUP_FK natural-key, vedi backlog). Leggere resolver `brownfield-wave-executor/{transform-compiler,transforms}.ts` + `validate_lookup_fk_dispatch()`, campionare mismatch, re-import gated dei 3 contro VM legacy, validare.
 3. **B-10 SDBI Phase 2 / B-50(a)** (multi-sessione, 75-125h, mapping-card design umano); **F7** showcase refactor (decisione Enzo).
 

@@ -1,6 +1,6 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-01 (S955). **Branch**: `main`. S955 commit `f7799ed..b5cde3f` (B-51 + brand F5/F6 + R2) **PUSHATI, CI verde**. **+ U1 commit nuovo locale** (ui-interfaces registry `000050`) — push in attesa ok. **db:migrate ×2 verde** (50 migration), **API auth/rbac 28/28 + me-interfaces 5/5**, **web E2E PROD 108 verde**.
+**Updated**: 2026-06-01 (S955). **Branch**: `main`. S955 commit `f7799ed..d282141` (B-51 + brand F5/F6 + R2 + U1) **PUSHATI, CI verde**. **+ U2 commit nuovo locale** (sidebar DB-driven) — push in attesa ok. **db:migrate ×2 verde** (50 migration), **API auth/rbac 28/28 + me-interfaces 5/5**, **web E2E PROD 76+108 verde**.
 
 ## Last session brief (S955 — 3 stream eseguiti in autonomia)
 
@@ -11,7 +11,7 @@
 
 ## Top priorities (next session)
 
-1. **R2 ✅ + U1 ✅ DONE (S955)**. R2: 4 ruoli holderless assegnati per funzione + login (auth/rbac 28/28). U1: `sys_ui_interfaces` (mig 000050, 23 interfacce) + `GET /v1/me/interfaces` registry sidebar DB-driven con hybrid gate (test 5/5, no-leak verificato). **NEXT = U2** (sidebar live che consuma `GET /v1/me/interfaces` + perspective switcher PET → sostituisce l'array nav hardcoded in `(authenticated)/layout.tsx`, swap behaviour-preserving), poi P1/V. Vedi `RBAC_UIX_PERSPECTIVES_PLAN.md`.
+1. **R2 ✅ + U1 ✅ + U2 ✅ DONE (S955)**. R2: 4 ruoli holderless per funzione + login. U1: `sys_ui_interfaces` (mig 000050) + `GET /v1/me/interfaces` (hybrid gate, test 5/5). U2: `(authenticated)/layout.tsx` sidebar DB-driven (hook `useMyInterfaces`, gating client-side rimosso → server-side) + filtro perspective PET (default "Tutte" behaviour-preserving); E2E 76/76 PROD. **NEXT = P1** (`sys_user_preferences` + `GET/PATCH /v1/me/preferences` + load/apply/persist theme+palette per `user_id`, locked decision 3c), poi V (matrice esaustiva). Vedi `RBAC_UIX_PERSPECTIVES_PLAN.md`.
 2. **B-50(b) — silent-skip trio fix** (gated, ~40-60k, MED-HIGH risk): root-cause già pinpointed (LOOKUP_FK natural-key, vedi backlog). Leggere resolver `brownfield-wave-executor/{transform-compiler,transforms}.ts` + `validate_lookup_fk_dispatch()`, campionare mismatch, re-import gated dei 3 contro VM legacy, validare.
 3. **B-10 SDBI Phase 2 / B-50(a)** (multi-sessione, 75-125h, mapping-card design umano); **F7** showcase refactor (decisione Enzo).
 

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Button,
@@ -34,21 +34,62 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { useCurrentUser, useCurrentUserPermissions, useLogout } from "../../lib/api/auth";
+import { useCurrentUser, useLogout, useMyInterfaces, type MyInterface } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
-
-const ADMIN_ROLES = new Set([
-  "PLATFORM_ADMIN",
-  "TENANT_ADMIN",
-  "BLUEPRINT_MANAGER",
-  "HRMS_MANAGER",
-  "PROCESS_OWNER",
-  "MANAGER",
-]);
 
 const ICON = "h-4 w-4 shrink-0";
 
-/** Wrap a nav label so the E2E suite can target it by test-id. */
+/** Registry icon name (sys_ui_interfaces.icon) → lucide node. */
+const ICON_MAP: Record<string, ReactNode> = {
+  Activity: <Activity className={ICON} />,
+  Briefcase: <Briefcase className={ICON} />,
+  Building2: <Building2 className={ICON} />,
+  Coins: <Coins className={ICON} />,
+  Database: <Database className={ICON} />,
+  FileText: <FileText className={ICON} />,
+  Gauge: <Gauge className={ICON} />,
+  GitBranch: <GitBranch className={ICON} />,
+  GraduationCap: <GraduationCap className={ICON} />,
+  Inbox: <Inbox className={ICON} />,
+  Layers: <Layers className={ICON} />,
+  LayoutDashboard: <LayoutDashboard className={ICON} />,
+  Network: <Network className={ICON} />,
+  ShieldCheck: <ShieldCheck className={ICON} />,
+  Sprout: <Sprout className={ICON} />,
+  TrendingUp: <TrendingUp className={ICON} />,
+  TriangleAlert: <TriangleAlert className={ICON} />,
+  User: <User className={ICON} />,
+  Users: <Users className={ICON} />,
+};
+
+/** sidebar_group code → display label. */
+const GROUP_LABELS: Record<string, string> = {
+  overview: "Overview",
+  me: "Me",
+  workforce: "Workforce",
+  operations: "Operations",
+  intelligence: "Intelligence",
+  governance: "Governance",
+};
+
+/** The 4 nav items the E2E suite targets by stable test-id. */
+const NAV_TESTID: Record<string, string> = {
+  dashboard: "nav-dashboard",
+  "me-home": "nav-me",
+  positions: "nav-positions",
+  users: "nav-users",
+};
+
+/** Perspective filter chips. "ALL" (default) keeps every perspective visible — behaviour-
+ *  preserving vs the old all-groups sidebar; the PET codes focus a single perspective. */
+const FILTERS = [
+  { code: "ALL", label: "Tutte" },
+  { code: "PROCESS", label: "Process" },
+  { code: "ENTERPRISE", label: "Enterprise" },
+  { code: "TALENT", label: "Talent" },
+] as const;
+type FilterCode = (typeof FILTERS)[number]["code"];
+
 function navLabel(testId: string, text: string) {
   return <span data-testid={testId}>{text}</span>;
 }
@@ -57,13 +98,14 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const me = useCurrentUser();
+  const ifaces = useMyInterfaces();
   const logout = useLogout();
-  const perms = useCurrentUserPermissions();
+  const [filter, setFilter] = useState<FilterCode>("ALL");
 
-  if (me.isLoading || perms.isLoading) {
+  if (me.isLoading || ifaces.isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <span data-testid="app-loading" className="text-sm opacity-60">Caricamento…</span>
+        <span data-testid="app-loading" className="text-sm text-muted-foreground">Caricamento…</span>
       </main>
     );
   }
@@ -74,7 +116,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     }
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <span data-testid="app-error" className="text-sm text-red-600">
+        <span data-testid="app-error" className="text-sm text-danger">
           {me.error instanceof Error ? me.error.message : "Errore sessione"}
         </span>
       </main>
@@ -86,100 +128,79 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     return null;
   }
 
-  const roles = user.roles ?? [];
-  const hasAdminRole = roles.some((r) => ADMIN_ROLES.has(r));
-
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
-  const item = (id: string, label: ReactNode, href: string, icon: ReactNode) => ({
-    id,
-    label,
-    href,
-    icon,
-    active: isActive(href),
-  });
 
-  const meGroup: NavGroup = {
-    id: "me",
-    label: "Me",
-    items: [
-      item("me-home", navLabel("nav-me", "My HR"), "/me", <User className={ICON} />),
-      item("me-skills", "Le mie competenze", "/me/skills", <Layers className={ICON} />),
-      item("me-learning", "Formazione", "/me/learning", <GraduationCap className={ICON} />),
-      item("me-career", "Carriera", "/me/career", <TrendingUp className={ICON} />),
-      item("me-inbox", "Inbox", "/me/inbox", <Inbox className={ICON} />),
-    ],
+  // Build the sidebar from the DB-driven registry (GET /v1/me/interfaces); server-side gating means
+  // we render exactly what is returned. Sub-groups (sidebar_group) become NavGroups, ordered by
+  // perspective then by the registry order. The filter focuses a single perspective when not "ALL".
+  const perspectives = ifaces.data?.perspectives ?? [];
+  const shown = filter === "ALL" ? perspectives : perspectives.filter((p) => p.code === filter);
+
+  const navGroups: NavGroup[] = [];
+  for (const persp of shown) {
+    const bySub = new Map<string, MyInterface[]>();
+    for (const i of persp.interfaces) {
+      const arr = bySub.get(i.sidebarGroup);
+      if (arr) arr.push(i);
+      else bySub.set(i.sidebarGroup, [i]);
+    }
+    for (const [sub, items] of bySub) {
+      navGroups.push({
+        id: `${persp.code}-${sub}`,
+        label: GROUP_LABELS[sub] ?? sub,
+        items: items.map((i) => {
+          const testId = NAV_TESTID[i.code];
+          return {
+            id: i.code,
+            label: testId ? navLabel(testId, i.label) : i.label,
+            href: i.route,
+            icon: ICON_MAP[i.icon ?? ""] ?? null,
+            active: isActive(i.route),
+          };
+        }),
+      });
+    }
+  }
+
+  const switcherGroup: NavGroup = {
+    id: "perspective-switch",
+    label: "Prospettiva",
+    customContent: (
+      <div data-testid="perspective-switcher" className="flex flex-wrap gap-1 px-3 py-2">
+        {FILTERS.map((f) => (
+          <Button
+            key={f.code}
+            type="button"
+            size="sm"
+            variant={filter === f.code ? "default" : "outline"}
+            data-testid={`perspective-${f.code.toLowerCase()}`}
+            onClick={() => setFilter(f.code)}
+          >
+            {f.label}
+          </Button>
+        ))}
+      </div>
+    ),
   };
 
-  // Per-permission nav gating: each admin item declares the permission code that gates it,
-  // mirroring the API requirePermission gate. Items the user lacks are filtered out and empty
-  // groups dropped. The permission set comes from GET /v1/me/permissions (D4 RBAC->UI port).
-  const permSet = new Set(perms.data?.permissions ?? []);
-  type GatedItem = { gate: string; node: ReturnType<typeof item> };
-  const gItem = (id: string, label: ReactNode, href: string, icon: ReactNode, gate: string): GatedItem => ({
-    gate,
-    node: item(id, label, href, icon),
-  });
+  const emptyGroup: NavGroup[] =
+    filter !== "ALL" && navGroups.length === 0
+      ? [{
+          id: "perspective-empty",
+          label: FILTERS.find((f) => f.code === filter)?.label ?? "",
+          customContent: (
+            <p data-testid="perspective-empty" className="px-3 py-2 text-xs text-muted-foreground">
+              Nessuna interfaccia in questa prospettiva.
+            </p>
+          ),
+        }]
+      : [];
 
-  const adminGroupDefs: { id: string; label: string; items: GatedItem[] }[] = [
-    {
-      id: "workforce",
-      label: "Workforce",
-      items: [
-        gItem("positions", navLabel("nav-positions", "Posizioni"), "/positions", <Briefcase className={ICON} />, "position:read"),
-        gItem("skills", "Competenze", "/skills", <Layers className={ICON} />, "skill:read"),
-        gItem("gaps", "Gap", "/gaps", <TriangleAlert className={ICON} />, "gap_analysis:read"),
-        gItem("career-succession", "Carriera & successione", "/career-succession", <TrendingUp className={ICON} />, "career_succession:read"),
-        gItem("learning", "Formazione", "/learning", <GraduationCap className={ICON} />, "learning:read"),
-      ],
-    },
-    {
-      id: "operations",
-      label: "Operations",
-      items: [
-        gItem("blueprints", "Blueprint", "/blueprints", <FileText className={ICON} />, "blueprint:read"),
-        gItem("processes", "Processi", "/processes", <GitBranch className={ICON} />, "bpm_process:read"),
-        gItem("brownfield", "Brownfield", "/brownfield-adaptation", <Database className={ICON} />, "brownfield_adaptation:read"),
-        gItem("seeds", "Seed acquisition", "/seed-acquisition/runs", <Sprout className={ICON} />, "seed_acquisition:read"),
-      ],
-    },
-    {
-      id: "intelligence",
-      label: "Intelligence",
-      items: [
-        gItem("kpis", "KPI", "/kpis", <Gauge className={ICON} />, "kpi:read"),
-        gItem("comp", "Compensation", "/compensation-intelligence", <Coins className={ICON} />, "compensation_intelligence:read"),
-        gItem("viz", "Visualizzazioni", "/visualizations", <Network className={ICON} />, "visualization:read"),
-        gItem("org", "Organizzazione", "/organization", <Building2 className={ICON} />, "organization_unit:read"),
-      ],
-    },
-    {
-      id: "governance",
-      label: "Governance",
-      items: [
-        gItem("tenants", "Tenant", "/tenants", <Building2 className={ICON} />, "tenant:read"),
-        gItem("users", navLabel("nav-users", "Utenti"), "/users", <Users className={ICON} />, "user:read"),
-        gItem("roles", "Ruoli", "/admin/roles", <ShieldCheck className={ICON} />, "role:read"),
-        gItem("system-health", "System health", "/system-health", <Activity className={ICON} />, "tenant:read"),
-      ],
-    },
-  ];
+  const groups: NavGroup[] = [switcherGroup, ...navGroups, ...emptyGroup];
 
-  // Hybrid gate: the admin section appears only for admin-class roles (hasAdminRole); WITHIN it each
-  // item is still per-permission filtered (mirrors the API requirePermission gate). A pure USER holds
-  // several *:read codes for ESS self-access (user/tenant/skill/learning/position/… :read), so
-  // per-permission gating ALONE would leak admin nav to employees — requiring an admin role first
-  // keeps the sidebar honest (pure USER → no admin section, no Dashboard).
-  const survivingAdmin: NavGroup[] = !hasAdminRole
-    ? []
-    : adminGroupDefs
-        .map((g) => ({ id: g.id, label: g.label, items: g.items.filter((i) => permSet.has(i.gate)).map((i) => i.node) }))
-        .filter((g) => g.items.length > 0);
-  // "Dashboard" has no dedicated permission; surface it whenever the user has any admin reach.
-  const overview: NavGroup[] = survivingAdmin.length > 0
-    ? [{ id: "overview", label: "Overview", items: [item("dashboard", navLabel("nav-dashboard", "Dashboard"), "/dashboard", <LayoutDashboard className={ICON} />)] }]
-    : [];
-  const groups: NavGroup[] = [...overview, ...survivingAdmin, meGroup];
-
+  const roles = user.roles ?? [];
+  const ADMIN_ROLES = new Set(["PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER"]);
+  const hasAdminRole = roles.some((r) => ADMIN_ROLES.has(r));
   const displayName = user.displayName?.trim() || user.email;
   const initials = (
     user.displayName?.trim()

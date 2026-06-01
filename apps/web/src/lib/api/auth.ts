@@ -83,6 +83,39 @@ export function useCurrentUserPermissions() {
   });
 }
 
+export interface MyInterface {
+  code: string;
+  label: string;
+  route: string;
+  icon: string | null;
+  sidebarGroup: string;
+  order: number;
+}
+export interface MyPerspective {
+  code: "PROCESS" | "ENTERPRISE" | "TALENT";
+  label: string;
+  interfaces: MyInterface[];
+}
+export interface MyInterfaces {
+  perspectives: MyPerspective[];
+}
+
+export const ME_INTERFACES_QUERY_KEY = ["me", "interfaces"] as const;
+
+/**
+ * The caller's DB-driven sidebar registry (GET /v1/me/interfaces), grouped by the 3 PET
+ * perspectives. Gating (per-permission + admin-class hybrid) is applied server-side, so the
+ * UI renders exactly what this returns — no client-side role/permission filtering needed.
+ */
+export function useMyInterfaces() {
+  return useQuery({
+    queryKey: ME_INTERFACES_QUERY_KEY,
+    queryFn: ({ signal }) => apiFetch<MyInterfaces>("/v1/me/interfaces", { signal }),
+    staleTime: 60_000,
+    retry: 0,
+  });
+}
+
 export function useLogin() {
   const qc = useQueryClient();
   return useMutation({

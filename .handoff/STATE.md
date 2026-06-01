@@ -1,33 +1,28 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-01 (S955). **Branch**: `main` HEAD `8db67b4` = synced origin, **CI verde** (7 commit S955). Working tree pulito. **50 migration** (`000001..000050`), db:migrate ×2 verde. Win + Mac + VM allineati a `8db67b4` (gitignored sincronizzati, esclusi i backup locali); **VM deployata + live** (dev-mode, API :8013 + web :3013, smoke-test verde incl. endpoint U1).
+**Updated**: 2026-06-02 (S956 — v1.0.0 consolidation, checkpoint 1). **Work is on branch `release/v1.0.0`** (HEAD `a20d633`, pushed, **PR #24 → main**, CI 5/5 green); `main` holds only the entry-point doc. **FRESH SESSION: `git checkout release/v1.0.0` and read `NEXT_GENERATION_ENTRY_POINT.md` §13 RESUME POINT — it is the authoritative resume record (state, blueprints, blockers, lessons).** 53 migrations (`000001..000053`).
 
-## Last session brief (S955 — 5 stream shipped, tutto pushato + CI verde)
+## Last session brief (S956 — v1.0.0 consolidation, 7 workstreams shipped + CI-green)
+- **WS-0** bootstrap (backup + baseline green + CI). **WS-5**: 60/60 module integration tests (550 green) + fixed a real prod bug (GET /v1/activity-classifications 500 — Zod enum missing ATECO/NACE). **WS-1**: employee-centric satellites (1874 rows: profiles/education/assessment_evidence) + permanent 1a doctrine guard. **WS-3** (partial): skill_categories 0→6 (nullable-FK mig 000051, ADR-0025) + re-derivation gains (skills 20073→21939, learning↑). **WS-6g**: ADR-0015 ACCEPTED. **WS-6b**: pg-pool ECONNRESET handler. **WS-4 P1**: user theme+palette prefs (server-SoT, mig 000053, full-stack + E2E).
+- All adversarially verified; all pushed; PR #24 CI green at each step.
 
-- **B-51** (`9b06629`, mig `000048`): 162 `position_title` re-derivati dalla professione reale legacy + 25 job_roles `RTL-ROLE-*` + `position_job_role_id` wired 162/162. Generatore `db/seeds/rtl-rebuild/11_rederive_b51_titles_roles.py`.
-- **Brand F5+F6** (`ee062ed`+`fa4f631`, 14 pagine): ESS 12 + admin 2 re-skinned (DataTablePanel/PageHeader/AuditFeed/StatsCard-static). Playwright 108 PROD.
-- **R2** (`b5cde3f`, mig `000049` + `pnpm db:seed-r2`): 4 ruoli holderless (PROCESS_OWNER/BLUEPRINT_MANAGER/READ_ONLY/CEO) assegnati a veri utenti RTL per funzione + login. auth/rbac 28/28.
-- **U1** (`d282141`, mig `000050`): `sys_ui_interfaces` registry (23) + `GET /v1/me/interfaces` (hybrid gate). test 5/5.
-- **U2** (`8db67b4`): `(authenticated)/layout.tsx` sidebar DB-driven (hook `useMyInterfaces`, gating → server-side) + filtro perspective PET. E2E 76/76 PROD.
+## Top priorities (next session — §13 has full detail + blueprints)
+1. **WS-4 R1b** teams (sys_teams/members + TEAM_LEADER/MEMBER + 3rd scope axis, derive from REAL `sys.sys_organization_units`) + **V** sampled E2E matrix. ~4-6h.
+2. **WS-2** Wave-2 executor code-gen (~2.5h, additive: remove wave!=1 guard + parameterize by wave); data import source-discovery-gated → defer documented.
+3. **WS-7 RELEASE**: bump 4 workspaces→1.0.0, regen stale viz-graph (db:validate), tag v1.0.0, gh release, auto-merge PR #24.
 
-## Top priorities (next session)
-
-1. **P1 — RBAC epic** (`RBAC_UIX_PERSPECTIVES_PLAN.md`): `sys_user_preferences` + `GET/PATCH /v1/me/preferences` + load/apply/persist theme+palette per `user_id` (locked decision 3c). Poi **V** (matrice esaustiva 8-ruoli×route×2-temi). ~3-5h.
-2. **B-50(b) — silent-skip trio fix** (gated, ~40-60k, MED-HIGH risk): root-cause pinpointed (LOOKUP_FK natural-key, CW-B60-A/B61). Resolver `brownfield-wave-executor/{transform-compiler,transforms}.ts` + `validate_lookup_fk_dispatch()`, campionare mismatch, re-import gated dei 3 vs VM legacy. Vedi `SOT_BACKLOG.md` B-50 §S955.
-3. **B-10 SDBI Phase 2 / B-50(a)** (75-125h, multi-sessione, mapping-card design umano); **F7** showcase refactor (decisione architetturale Enzo); **R1b** teams.
-
-## Open questions
-
-- SuccessFactors connector: adozione come item MVP-4 + naming `staging.sf_*` (I3/I4). Design committato, PII risolto (ADR-0023).
+## Open questions / blockers (documented §8/§13)
+- sys_activity_classification_mappings: FK-vs-mapping redesign (mig 000007). sys_kpi_definitions empty → blocks process_kpi + user_kpi_evidence (→ WS-2).
+- WS-6 deferred (GA-scope, risk/effort): 6e MFA multi-kind, 6f mobile-matrix, 6c obs-depth, 6g.2 markers.
 
 ## Stack snapshot
-
-- DB: 161 utenti / 2 tenant ACTIVE; **50 migration** `000001..000050`; 162 positions titolate+wired; job_roles 227; ui_interfaces 23. 719 MB.
-- RBAC epic: D1·D2·D3·A·R1a·R2·U1·U2 ✅ → next P1. Brand F5+F6 ✅ (F7 deferito).
+- DB: 161 users / 2 tenant; **53 migrations**; +1874 user_* satellite rows; sys_user_preferences live; skills 21939, learning_modules 7300.
+- Consolidation: WS-0/5/1/3(part)/6g/6b/4P1 ✅. Backups in pg_dump_snapshots/ (pre-v1.0.0/ws1/ws3/ws4).
+- Lessons (§13): trust verified DB+adversarial review over agent self-reports; run FULL suite before pushing; every PR push re-runs full CI; rebuild shared dist after src edits.
 
 ## Verification (next session)
 ```bash
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "select count(*) from sys.sys_ui_interfaces"  # 23
-git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
-gh run list --limit 6                                         # CI
+git -C /d/heuresys-advanced checkout release/v1.0.0 && git pull
+gh pr checks 24                                               # CI on the consolidation PR
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "select count(*) from sys.sys_user_preferences"
 ```

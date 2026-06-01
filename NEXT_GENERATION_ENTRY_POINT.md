@@ -227,7 +227,7 @@ Pre-req: tunnel `:5433` up, legacy source reachable, RBAC cache loaded.
 
 ## 10. Executive todo (workflow-structured)
 
-- [ ] **WS-0** Bootstrap — infra check · `release/v1.0.0` · baseline backup · baseline-green · branch CI green
+- [x] **WS-0** Bootstrap — ✅ DONE: infra verified · `release/v1.0.0` created · backup `pg_dump_snapshots/..._pre-v1.0.0-consolidation_24a5bd7_*.dump` (98MB, TOC 1396, restorable) · baseline green after 2 fixes (shared test no-op + env.ts lint) · PR #24 CI 5/5 green (typecheck/lint/test-integration/build-web/playwright-smoke). Commit `d6303a9`. Viz-graph db:validate fail deferred → WS-7.
 - [ ] **WS-1** Employee-centric — 1a gate + CI guard · 1b satellite population (`000051+`) · 1c additive re-derivation · coverage recorded
 - [ ] **WS-3** CW-B60 — TDD tests · LOOKUP_FK fix · re-import 3 targets · Wave-1 regression green
 - [ ] **WS-2** Wave 2/3 — Wave-2 executor impl · mapping-cards · Wave 2 import · Wave 3 · coverage report
@@ -256,3 +256,24 @@ quando ogni WS è 100%-verde-merged OPPURE rolled-back+BLOCKED-documentato.
 
 Pre-flight: tunnel :5433 up, legacy source raggiungibile, RBAC cache loaded.
 ```
+
+---
+
+## 12. Execution record (live — appended during WS-0→WS-7)
+
+> Authored by the execution session. Each WS gets an entry with outcome + evidence + any surgical decision taken. This is the running ledger the doc becomes at WS-7.
+
+### Orchestration decisions (governing this run)
+- **CI gate = integration PR.** All 7 workflows trigger on `push:[main]`; 6 also on `pull_request:[main]` (only `showcase.yml` is push-to-main-only). So `release/v1.0.0` gets continuous CI via long-lived **PR #24 → main**; merge at WS-7 on green. `showcase` deploys post-merge on main.
+- **Concurrency model.** Shared mutable DB (single OCI VM) + single-thread vitest + one git working tree are serial resources → **no blind parallel fan-out on DB-mutating work**. Workflow fan-out is reserved for disjoint *new-file* authoring / read-only analysis / web-only work; DB writes + full-suite runs are serialized. Live-DB work is paused while CI integration/playwright runs hit the same DB.
+- **pg_dump cadence.** Baseline taken at WS-0; a fresh `pg_dump -Fc` precedes every live-DB write batch (D-SAFE).
+
+### WS-0 — Bootstrap & Safety Harness ✅ DONE (commit `d6303a9`)
+- Pre-flight verified: tunnel `:5433`; advanced DB 161 users / 9 roles / 420 role-perms; legacy `heuresys_platform` reachable (270 employees / 274 users via VM ssh + same PG instance on `:5433`); next migration `000051`.
+- `release/v1.0.0` branched from `main@24a5bd7`. Backup `heuresys_advanced_pre-v1.0.0-consolidation_24a5bd7_20260601.dump` (98MB custom/gzip, TOC 1396, `pg_restore -l` clean) + provenance sidecar.
+- Two pre-existing reds diagnosed + fixed: (1) `packages/shared` `test` script was `vitest run` with no vitest/tests → root `pnpm test` red (CI gates apps/api only) → replaced with explicit no-op; (2) unused `eslint-disable no-console` in `apps/api/src/config/env.ts` → removed.
+- Local baseline green: typecheck / lint (0 warn) / i18n (23×2) / vitest (api 364 passed, 5 skipped). CI on PR #24: typecheck✅ lint✅ test-integration✅ build-web✅ playwright-smoke✅ (i18n skipped on path filter; showcase post-merge).
+- **Deferred (documented):** `sys.v_visualization_node_in_canonical_node` returns 161 orphaned POSITION nodes (single stale graph `325ecb42` from the S950 RTL rebuild; db:validate-only, **not** CI-gated). Regenerated at **WS-7** after WS-1/WS-2 re-derive entities (rebuilding now would be re-invalidated). Other 6 structural views PASS; `v_pip_completeness` WARN is non-blocking by design.
+
+### WS-5 — 27-module integration-test backfill (authoring done; verification in progress)
+- Authoring via 27-subagent Workflow (`wf_a72e205d-1a2`): **27/27 files written, 187 tests**, 2 read-only modules (`brownfield-source-exports`, `seed-candidate-records`). Verification (typecheck:test + vitest) + fix loop pending; not committed until green.

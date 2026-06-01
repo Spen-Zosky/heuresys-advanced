@@ -232,7 +232,7 @@ Pre-req: tunnel `:5433` up, legacy source reachable, RBAC cache loaded.
 - [ ] **WS-3** CW-B60 — TDD tests · LOOKUP_FK fix · re-import 3 targets · Wave-1 regression green
 - [ ] **WS-2** Wave 2/3 — Wave-2 executor impl · mapping-cards · Wave 2 import · Wave 3 · coverage report
 - [ ] **WS-4** RBAC — P1 (sys_user_preferences) · R1b (teams + 3rd scope axis) · V (exhaustive E2E matrix)
-- [ ] **WS-5** Test backfill — 27 module integration-test files · `pnpm test` 100% · census updated
+- [x] **WS-5** Test backfill — ✅ DONE: 27 module integration-test files (60/60 coverage) · full suite 80 files/550 tests green · fixed real bug (activity-classifications scheme enum 500). Commits below.
 - [ ] **WS-6** Loose-ends — TOTP · pg-pool · Observability ph2 · F7 showcase · MFA multi-kind · Mobile+WCAG · ADR-0015 · B-31 · markers
 - [ ] **WS-7** Release — version bump · full green verify · finalize doc + SoT · push · CI green · auto-merge · tag `v1.0.0` · GitHub Release
 - [ ] **Excluded → roadmap:** SuccessFactors connector
@@ -275,5 +275,8 @@ Pre-flight: tunnel :5433 up, legacy source raggiungibile, RBAC cache loaded.
 - Local baseline green: typecheck / lint (0 warn) / i18n (23×2) / vitest (api 364 passed, 5 skipped). CI on PR #24: typecheck✅ lint✅ test-integration✅ build-web✅ playwright-smoke✅ (i18n skipped on path filter; showcase post-merge).
 - **Deferred (documented):** `sys.v_visualization_node_in_canonical_node` returns 161 orphaned POSITION nodes (single stale graph `325ecb42` from the S950 RTL rebuild; db:validate-only, **not** CI-gated). Regenerated at **WS-7** after WS-1/WS-2 re-derive entities (rebuilding now would be re-invalidated). Other 6 structural views PASS; `v_pip_completeness` WARN is non-blocking by design.
 
-### WS-5 — 27-module integration-test backfill (authoring done; verification in progress)
-- Authoring via 27-subagent Workflow (`wf_a72e205d-1a2`): **27/27 files written, 187 tests**, 2 read-only modules (`brownfield-source-exports`, `seed-candidate-records`). Verification (typecheck:test + vitest) + fix loop pending; not committed until green.
+### WS-5 — 27-module integration-test backfill ✅ DONE
+- Authoring via 27-subagent Workflow (`wf_a72e205d-1a2`): 27/27 files, ~187 tests, 2 read-only modules (`brownfield-source-exports`, `seed-candidate-records`). First run: typecheck:test green, 21/27 files green / 6 test failures.
+- Fix loop (`wf_dcab35ad-04a` + 2 direct): 4 RBAC-denial tests retargeted (read perms are universal → switched to write-route DELETE with valid CSRF → 403 FORBIDDEN; `requirePermission` throws default code `FORBIDDEN`); seed-acquisition + visualization-exports create-flows switched to TENANT_ADMIN (PLATFORM_ADMIN has `tenantId=null` → `TENANT_ID_REQUIRED`); blueprint-variants DELETE dropped its `content-type: application/json` (body-less DELETE + json content-type → 400 before RBAC).
+- **Real bug surfaced + fixed:** `GET /v1/activity-classifications` LIST 500'd on live data — the Zod `ActivityClassScheme` enum lacked `ATECO`/`NACE` (the unversioned codes used by 3276 real rows + the DB CHECK). Widened the enum to mirror the CHECK (RD-08); rebuilt shared `dist`.
+- **Verified:** full api suite **80 files / 550 tests passing** (5 skipped); 60/60 modules now have a dedicated integration test. Census §1 updated (55→82 test files).

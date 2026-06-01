@@ -101,22 +101,17 @@ WHERE bf.blueprint_family_code = 'FIN_BANKING'
 ON CONFLICT (blueprint_variant_code) DO NOTHING;
 
 -- -----------------------------------------------------------------------------
--- 7. RTL_BANK_REFERENCE tenant
+-- 7. RTL_BANK_REFERENCE tenant — REMOVED 2026-06-01 (S954)
 -- -----------------------------------------------------------------------------
-INSERT INTO sys.sys_tenancies (tenant_code, tenant_name, tenant_legal_name, tenant_country_code, tenant_industry_code, tenant_size_band, tenant_status, tenant_metadata) VALUES
-  ('RTL_BANK_REFERENCE',
-   'Retail Bank Reference',
-   'RTL Bank Reference S.p.A. (synthetic)',
-   'IT',
-   'FIN_BANKING',
-   'M',
-   'ACTIVE',
-   jsonb_build_object(
-     'purpose', 'reference_tenant',
-     'is_synthetic', true,
-     'regulatory_intensity', 'HIGH',
-     'blueprint_variant_code', 'REGIONAL_RETAIL_BANK_MEDIUM'))
-ON CONFLICT (tenant_code) DO NOTHING;
+-- The RTL_BANK_REFERENCE reference-tenant template was an early-development
+-- scaffold. Product decision (Enzo, 2026-06-01): the case study is RTL Bank;
+-- the only accepted tenants are HEURESYS (system) + RTL_BANK (operational,
+-- S950 rebuild). The synthetic reference tenant is no longer part of the model.
+-- Its INSERT is removed here; migration 000047 deletes the row from already-seeded
+-- DBs. The FIN_BANKING blueprint + reward gates + 23 processes above (sections 6/8/9)
+-- are GLOBAL catalogs (not tenant-scoped) and remain — they are relevant to the real
+-- RTL_BANK (a bank). Only the tenant row is dropped.
+-- (was: INSERT INTO sys.sys_tenancies (...) 'RTL_BANK_REFERENCE' ... ON CONFLICT DO NOTHING)
 
 -- -----------------------------------------------------------------------------
 -- 8. Reward gate catalog — FIN_BANKING (7 gates per TARGET_SCHEMA §10)

@@ -62,20 +62,23 @@ COMMENT ON COLUMN brownfield.tenant_id_mappings.legacy_id IS
 COMMENT ON COLUMN brownfield.tenant_id_mappings.canonical_tenant_id IS
   'Canonical sys.sys_tenancies.tenant_id resolved via this mapping.';
 
--- Seed Wave 1 mappings: all 4 legacy tenant_ids → RTL_BANK_REFERENCE
--- (RTL_BANK_REFERENCE.tenant_id resolved at INSERT time via subquery —
---  safer than hardcoding UUID since downstream environments may differ).
+-- Seed tenant mappings — CASE-STUDY SCOPE (revised 2026-06-01, S954).
+-- Originally all 4 legacy tenants mapped to RTL_BANK_REFERENCE (early single-tenant
+-- scaffold). Product decision (Enzo): the case study is RTL Bank; accepted tenants are
+-- RTL_BANK + HEURESYS only. So map ONLY the two in-scope legacy tenants to their real
+-- canonical tenants, by tenant_code JOIN (robust — no fragile subquery that NULLs out if a
+-- tenant is absent). SmartFood (1d7bf448) and EcoNova (fb1e866c) are intentionally NOT
+-- mapped — they are out of scope.
+--   0c54b84a (legacy RTL Bank)        -> RTL_BANK
+--   d5855519 (legacy Heuresys System) -> HEURESYS
 INSERT INTO brownfield.tenant_id_mappings (legacy_id, canonical_tenant_id, notes)
-SELECT
-  v.legacy_id,
-  (SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code='RTL_BANK_REFERENCE'),
-  'Goal 003 Wave 1 seed: all legacy tenants point to RTL_BANK_REFERENCE in single-tenant scope. Goal 004 Wave 2 will reconcile to per-tenant canonical IDs once SmartFood/EcoNova/Heuresys System tenancies are created.'
+SELECT v.legacy_id, t.tenant_id,
+  'S954 case-study scope: in-scope legacy tenant mapped to its canonical tenant (RTL_BANK / HEURESYS). SmartFood/EcoNova excluded.'
 FROM (VALUES
-  ('0c54b84a-db6e-4da4-bc91-af5d480d524e'),
-  ('1d7bf448-ceac-4215-917d-45ff13678104'),
-  ('d5855519-3ed1-4427-865f-fe75f1e42c4c'),
-  ('fb1e866c-e90a-4e25-a146-f68d660a0be8')
-) AS v(legacy_id)
+  ('0c54b84a-db6e-4da4-bc91-af5d480d524e', 'RTL_BANK'),
+  ('d5855519-3ed1-4427-865f-fe75f1e42c4c', 'HEURESYS')
+) AS v(legacy_id, tenant_code)
+JOIN sys.sys_tenancies t ON t.tenant_code = v.tenant_code
 ON CONFLICT (legacy_id) DO NOTHING;
 
 -- =============================================================================

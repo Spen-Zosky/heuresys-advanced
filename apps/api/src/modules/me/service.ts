@@ -10,8 +10,22 @@ import type {
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
   CreateMeCertificationBody,
+  MeInterfacesResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { userPermissionCodes } from "../../middleware/rbac.js";
+
+/** Web layout's ADMIN_ROLES (hybrid gate): the admin sidebar section requires one of these roles
+ *  AND the per-item permission. Mirrors apps/web (authenticated)/layout.tsx so the DB-driven
+ *  sidebar does not leak admin nav to a pure USER (who holds several *:read codes for ESS). */
+const UI_ADMIN_ROLES = new Set([
+  "PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER",
+]);
+const UI_PERSPECTIVES = [
+  { code: "PROCESS" as const, label: "Process" },
+  { code: "ENTERPRISE" as const, label: "Enterprise" },
+  { code: "TALENT" as const, label: "Talent" },
+];
 
 export interface SelfActor { userId: string; tenantId: string | null; roles: string[] }
 
@@ -21,6 +35,37 @@ function requireTenant(a: SelfActor): string {
 }
 
 export const meService = {
+  /** Sidebar registry filtered to the caller (U1). ESS items are always visible; admin items
+   *  require an admin-class role AND the per-item permission. All 3 PET perspectives are always
+   *  returned (an empty one renders an honest empty-state in the UI). */
+  async getInterfaces(actor: SelfActor): Promise<MeInterfacesResponse> {
+    const permSet = new Set(userPermissionCodes({ roles: actor.roles }));
+    const hasAdminRole = actor.roles.some((r) => UI_ADMIN_ROLES.has(r));
+    const rows = await repo.loadActiveInterfaces(pool);
+    const visible = rows.filter((i) => {
+      if (!i.requiresAdmin) return true; // ESS / always-visible
+      if (!hasAdminRole) return false; // admin section gated to admin-class roles
+      if (i.requiredResource === null || i.requiredAction === null) return true; // e.g. dashboard
+      return permSet.has(`${i.requiredResource}:${i.requiredAction}`);
+    });
+    return {
+      perspectives: UI_PERSPECTIVES.map((p) => ({
+        code: p.code,
+        label: p.label,
+        interfaces: visible
+          .filter((i) => i.perspective === p.code)
+          .map((i) => ({
+            code: i.code,
+            label: i.label,
+            route: i.route,
+            icon: i.icon,
+            sidebarGroup: i.sidebarGroup,
+            order: i.order,
+          })),
+      })),
+    };
+  },
+
   async getProfile(actor: SelfActor): Promise<MeProfile> {
     const p = await repo.loadProfile(pool, actor.userId, actor.roles);
     if (!p) throw new NotFoundError("User");

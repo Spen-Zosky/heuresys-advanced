@@ -46,6 +46,34 @@ export const MePermissionsResponseSchema = z.object({
 });
 export type MePermissionsResponse = z.infer<typeof MePermissionsResponseSchema>;
 
+/* --- UI interfaces registry (U1) — DB-driven sidebar, PET perspectives --- */
+export const PerspectiveCodeSchema = z.enum(["PROCESS", "ENTERPRISE", "TALENT"]);
+export type PerspectiveCode = z.infer<typeof PerspectiveCodeSchema>;
+
+export const MeInterfaceSchema = z.object({
+  code: z.string(),
+  label: z.string(),
+  route: z.string(),
+  icon: z.string().nullable(),
+  sidebarGroup: z.string(),
+  order: z.number().int(),
+});
+export type MeInterface = z.infer<typeof MeInterfaceSchema>;
+
+export const MePerspectiveGroupSchema = z.object({
+  code: PerspectiveCodeSchema,
+  label: z.string(),
+  interfaces: z.array(MeInterfaceSchema),
+});
+export type MePerspectiveGroup = z.infer<typeof MePerspectiveGroupSchema>;
+
+/** GET /v1/me/interfaces — sidebar interfaces visible to the caller, grouped by the 3 PET
+ *  perspectives (all 3 always present, so an empty perspective renders an honest empty-state). */
+export const MeInterfacesResponseSchema = z.object({
+  perspectives: z.array(MePerspectiveGroupSchema),
+});
+export type MeInterfacesResponse = z.infer<typeof MeInterfacesResponseSchema>;
+
 /* --- positions -------------------------------------------------------- */
 
 export const MePositionAssignmentSchema = z.object({

@@ -24,6 +24,7 @@ import {
   MeCertificationsResponseSchema, MeCertificationSchema, CreateMeCertificationBodySchema,
   MeDocumentsResponseSchema,
   MePermissionsResponseSchema,
+  MeInterfacesResponseSchema,
 } from "@heuresys/shared";
 import { meService, type SelfActor } from "./service.js";
 import { requirePermission, userPermissionCodes } from "../../middleware/rbac.js";
@@ -44,6 +45,12 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     const actor = selfActor(req);
     return { roles: actor.roles, permissions: userPermissionCodes({ roles: actor.roles }) };
   });
+
+  // DB-driven sidebar registry (U1) — the interfaces the caller can see, grouped by PET
+  // perspective. Authenticated-only (reflects self), like /permissions; gating is in the service.
+  app.get("/interfaces", {
+    schema: { response: { 200: MeInterfacesResponseSchema } },
+  }, async (req) => meService.getInterfaces(selfActor(req)));
 
   app.get("/profile", {
     preHandler: [requirePermission("user_profile:read:self")],

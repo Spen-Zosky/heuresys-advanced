@@ -17,6 +17,42 @@ import type { z } from "zod";
 export type DbConnector = Pool | PoolClient;
 type SkillEvidence = z.infer<typeof MeSkillEvidenceSchema>;
 
+/* --- UI interfaces registry (U1) -------------------------------------- */
+
+export interface UiInterfaceRow {
+  code: string;
+  label: string;
+  route: string;
+  icon: string | null;
+  sidebarGroup: string;
+  perspective: string;
+  requiredResource: string | null;
+  requiredAction: string | null;
+  requiresAdmin: boolean;
+  order: number;
+}
+
+/** All active sidebar interfaces (the DB-driven registry). Visibility/gating is applied in the
+ *  service layer (per-permission + hasAdminRole), mirroring the web layout's hybrid gate. */
+export async function loadActiveInterfaces(q: DbConnector): Promise<UiInterfaceRow[]> {
+  const res = await q.query<UiInterfaceRow>(
+    `SELECT ui_interface_code              AS code,
+            ui_interface_label             AS label,
+            ui_interface_route             AS route,
+            ui_interface_icon              AS icon,
+            ui_interface_sidebar_group     AS "sidebarGroup",
+            ui_interface_perspective       AS perspective,
+            ui_interface_required_resource AS "requiredResource",
+            ui_interface_required_action   AS "requiredAction",
+            ui_interface_requires_admin    AS "requiresAdmin",
+            ui_interface_order             AS "order"
+       FROM sys.sys_ui_interfaces
+      WHERE ui_interface_is_active = true
+      ORDER BY ui_interface_order, ui_interface_code`,
+  );
+  return res.rows;
+}
+
 /* --- profile --------------------------------------------------------- */
 
 interface UserRow {

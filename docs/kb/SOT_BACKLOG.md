@@ -59,6 +59,17 @@ Apertura item (S951). La dottrina data-source (**ADR-0023**) conferma che il leg
 
 **Effort**: multi-sessione (B-10 da solo ~6-10h). **Regola d'ingaggio**: esecuzione SOLO su greenlight esplicito di Enzo (scope-discipline cardinale, `memory/feedback_scope_discipline_no_cascade.md`). Questo item documenta lo scope; non autorizza un bulk-import autonomo. **Nota S954**: la conciliazione futura DEVE seguire la doctrine employee-centric (ADR-0024) — `sys_user*` ⟸ legacy `employee*`, key `LEGACY_EMP::<employees.id>`, MAI `users.id`.
 
+### B-51 — Re-derive 162 RTL `position_title` + `position_job_role_id` (employee-centric, design from zero)
+
+Apertura item (S954). Il problema: le 162 posizioni RTL/Heuresys hanno `position_title` derivati dallo scaffold e `position_job_role_id` non wired — vanno ricavati dalla professione reale legacy. **La P2 precedente (RTL_STABILIZATION_PLAN §P2) è stata INVALIDATA ed eliminata** 2026-06-01: la sua indagine + il CSV proposta giravano sul `user_external_code` user-centric (`LEGACY:<users.id>`) **prima** del re-key ADR-0024; dopo la migration `000046` quel grafo di provenienza non esiste più → ogni mapping prodotto sotto quella lente è compromesso (igiene: cancellato, non riparato).
+
+**Da riprogettare da zero** sulla doctrine employee-centric (ADR-0024 / I14):
+- Persona = legacy `employees` (NON `users`); link a v5 via email (`employees.email = sys_users.user_email`) o key `LEGACY_EMP::<employees.id>`.
+- Sorgente professione: legacy ESCO occupation / `tenant_jobs` / hierarchy `reports_to` — **da ri-verificare ex-novo** sul DB post-re-key (i numeri di copertura della vecchia P2, es. "43/158 job assignments", non sono affidabili: erano misurati sul grafo sbagliato).
+- Output atteso: UPDATE idempotente `sys_positions.position_title` + creazione job_roles puliti + wire `position_job_role_id`, gated (backup + dry-run + re-test), come ogni fase distruttiva.
+
+**Blocca**: R2 (role assignment con titoli corretti, `RBAC_UIX_PERSPECTIVES_PLAN.md`). **Effort**: 1 sessione design + 1 esecuzione gated. **Regola d'ingaggio**: design evidence-based da zero (grep/query reali sul DB post-S954), SOLO su greenlight esplicito. Cross-ref: `RTL_STABILIZATION_PLAN.md §P2` (invalidata), ADR-0024, B-50(e).
+
 ## P2 — Dependabot / dipendenze (audit breaking-changes)
 
 | ID | PR | Pacchetto | Rischio | Note |

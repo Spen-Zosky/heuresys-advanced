@@ -34,28 +34,37 @@ Two legacy Docker DBs exist; the **VM is the more up-to-date** → use it as sou
 |---|---|---|
 | **P0** | `pg_dump` snapshot pre-remediation | ✅ DONE — `pg_dump_snapshots/pre-rtl-stabilization_69fdbfd_20260531_203326.dump` (416 MB) |
 | **P1** | Delete 2 extra tenants (`RTL_BANK_REFERENCE`, `DEMO_BANK_TEST`; both empty) → HEURESYS + RTL_BANK only | ✅ DONE — deps all 0, `DELETE 2`, only HEURESYS + RTL_BANK remain (both ACTIVE) |
-| **P2** | Re-derive `position_title` + `position_job_role_id` for the 162 positions from the **legacy VM** | ⏳ **proposal generated, AWAITING USER REVIEW of the CSV** (no DB write yet) |
+| **P2** | Re-derive `position_title` + `position_job_role_id` for the 162 positions from the **legacy VM** | ❌ **INVALIDATED 2026-06-01 (S954)** — proposal + investigation built on the pre-ADR-0024 user-centric `user_external_code`; CSV deleted. Re-opened clean as **SOT_BACKLOG B-51** (employee-centric). See note below. |
 | **P3** | Resolve readable `code` for skills from ESCO names (full catalog); fix job_role/comp_band/skill_family corrupt codes | ⏳ |
 | **P4** | Purge orphan learning catalog + seed minimal RTL learning (modules/paths + assignments) | ⏳ |
 | **P5** | Remove `"E2E Test Cert"` rows; fix user (display_name `IT_ME_`, email test, 1 orphan assignment) | ⏳ |
 | **P6** | Regenerate visualization (org graph) from corrected data | ⏳ |
 | **P7** | Re-audit (0 footprint corruption, 2 tenants) + API 354 / E2E 138 / CI 5 → then unblock **R2** (role assignment with correct titles) | ⏳ |
 
-## P2 exploration findings (S953, legacy VM)
-Legacy `heuresys_platform` is **multi-tenant** (RTL Bank 158 emp / SmartFood 82 / EcoNova 26 / Heuresys 4) — explains the mixed-industry job catalog. Key schema for RTL job derivation:
-- **`tenant_jobs`** (RTL: 8 rows) = the **clean job catalog**: `job_code`, `title_it`/`title_en`, `org_level`, `is_management`, `tenant_org_unit_id`, `esco_occupation_code`, salary band. RTL jobs: CEO(lvl1,mgmt), Bank manager(lvl3,mgmt), Bank teller / Compliance officer / Financial analyst / Investment advisor / Risk analyst / Securities dealer (lvl6).
-- **`employees`** (RTL 158) — match to advanced **via EMAIL** (`employees.email` = `sys_users.user_email`); NOT via `user_external_code` (the `LEGACY:<uuid>` id is NOT `employees.id`).
-- **`employee_job_assignments`** (`employee_id`→`tenant_job_id`, `is_current`): RTL coverage **only 43/158**; CEO & Bank manager have 0 holders. **`employee_occupations`** (156/158) maps to `esco_occupation_id` (different axis).
-- Hierarchy: `tenant_org_units` + `tenant_org_charts` (metadata only; node structure TBD).
+## P2 — ❌ INVALIDATED 2026-06-01 (S954)
 
-**Consequence**: the legacy is NOT a clean copy-source for all 162 position titles — its employee→job link is fragmented. P2 must **combine**: legacy clean job catalog (8 titles + org_level + is_management) + advanced clean hierarchy (reports_to 5-level + 26 OU) + per-incumbent legacy job (via email→tenant_job_assignment where present, fallback ESCO occupation / derive from level×OU). **Mapping strategy to be designed + validated with Enzo before apply.**
+The entire P2 investigation (S953 exploration + derivation method + the generated
+`p2_rtl_title_proposal.csv`) was conducted **before** the employee-centric correction
+(ADR-0024 / I14) and is therefore **compromised at the source**:
 
-## P2 derivation method (designed S953)
-**Source = legacy ESCO occupation** (the real profession), matched **via email** (`employees.email`=`sys_users.user_email`), NOT the mal-assigned `tenant_job`. RTL has 7 distinct ESCO occupations (with ISCO codes): direttore di banca (1346), analista finanziario (2413), consulente finanziario (2412), analista del rischio di credito (3312), operatore titoli (3311), esattore/esattrice (3352), addetto allo sportello bancario (4211).
-- Staging loaded: **`staging.legacy_rtl_occupations`** (156 rows: email, esco_label, isco_code, esco_code) — extracted from legacy via `\copy FROM STDIN` (Windows path mismatch: don't use `/tmp` file path with psql `\copy`, pipe to STDIN).
-- **Title rule**: a **manager-node** (has subordinates via reports_to) whose ESCO is NOT managerial (isco not LIKE '1%') → forced to `'direttore di banca/direttrice di banca'`; operatives → ESCO `preferred_label_it` **verbatim** (user choice: keep bilingual-gender form). 156/162 matched.
-- **6 special**: Platform Admin (Tenant Owner, Heuresys superuser, keep), Andrea Spenuso + POS-00000001 (Heuresys, separate), POS-00000003 Product&Dev (scaffold no-incumbent, delete), Giuseppe Ferri (RTL → direttore di banca), Maria Colombo (RTL HR → direttore RU).
-- **Proposal file**: `qa_artifacts/p2_rtl_title_proposal.csv` (162 rows old→new) — sent to Enzo.
+- The proposal's joins resolved incumbents through the **pre-re-key `user_external_code`**
+  (`LEGACY:<users.id>`, user-centric). After migration `000046` re-keyed those 160 labels to
+  `LEGACY_EMP::<employees.id>`, the provenance graph the derivation walked **no longer exists**.
+- The legacy was queried as the SoT while it was still being read user-centric — so any
+  email→occupation / level×OU mapping produced under that lens is suspect.
+
+**Action taken (S954, for hygiene + safety):** both proposal files
+(`qa_artifacts/p2_rtl_title_proposal.{csv,psv}`) **deleted** (csv via `git rm`, was on origin);
+this section's compromised detail (exploration findings, derivation method, resume) **removed**.
+
+**Lesson kept (do not re-derive):** the *problem* is still real — the 162 `position_title` /
+`position_job_role_id` need a correct, employee-centric derivation. It is re-opened **clean** as
+**SOT_BACKLOG B-51**, to be designed from scratch on the post-ADR-0024 graph (legacy `employees`
+as the person, key `LEGACY_EMP::<employees.id>`, email cross-check). P2 still blocks R2.
 
 ## ▶ RESUME
-P0+P1 done (backup 416 MB; HEURESYS + RTL_BANK only). Legacy VM source confirmed. **P2 proposal GENERATED — AWAITING USER REVIEW of `qa_artifacts/p2_rtl_title_proposal.csv` (NO DB write yet)**. Open question raised: root RTL (Federica) title = "direttore di banca" like division heads, or distinct "Direttore Generale"? **NEXT (after Enzo's corrections)**: write UPDATE migration/seed (`sys_positions.position_title` via staging email-join + special handling) + create the **7 clean job_roles** (from ESCO occupations) + wire `position_job_role_id` → re-test → P3 (skill codes) → P4-P7. P2 blocks R2. Execution is multi-phase; each destructive phase needs backup + idempotent script + re-validation. R2 (roles) is blocked on P2 (correct titles). Cross-ref: `docs/kb/RBAC_UIX_PERSPECTIVES_PLAN.md` (R2), `memory/project_rtl_tenant_rebuild.md` (S950 rebuild), ADR-0023 (no-PII legacy source doctrine).
+P0+P1 done (backup 416 MB; HEURESYS + RTL_BANK only). **P2 INVALIDATED + deleted (S954)** —
+re-opened as **B-51** (employee-centric, design from zero). **NEXT**: B-51 design when greenlit,
+then P3 (skill codes) → P4-P7. P2/B-51 blocks R2. Cross-ref: `docs/kb/RBAC_UIX_PERSPECTIVES_PLAN.md`
+(R2), `memory/project_rtl_tenant_rebuild.md` (S950), ADR-0024 (employee-centric ingestion),
+ADR-0023 (no-PII legacy source doctrine).

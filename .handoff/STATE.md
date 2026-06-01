@@ -1,6 +1,6 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-01 (S954). **Branch**: `main` HEAD `90a2b4d` (+ questo handoff) = synced con origin. Working tree pulito. **db:migrate ×2 verde** (46 migration), **API 359/0**.
+**Updated**: 2026-06-01 (S954). **Branch**: `main` HEAD `52aa2bb` = synced con origin. Working tree pulito. **db:migrate ×2 verde** (46 migration), **API 359/0**, **CI verde** (Test/Lint/Typecheck/pages su `42b4c80`; commit doc successivi paths-ignored).
 
 ## Last session brief
 
@@ -17,7 +17,7 @@
 ## Open questions
 
 - **SuccessFactors connector**: design committato, flag PII risolto (ADR-0023); resta decidere adozione come item MVP-4 + naming `staging.sf_*` (I3/I4).
-- **CI non verificata** questa sessione (i commit toccano DB/migration → potrebbero re-triggerare workflow); controllare `gh run list` a inizio prossima.
+- *(nessuna pendente lato CI — verificata verde su `42b4c80`)*
 
 ## Stack snapshot
 

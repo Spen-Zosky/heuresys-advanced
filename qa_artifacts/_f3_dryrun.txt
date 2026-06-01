@@ -1,0 +1,13 @@
+## PHASE 3 DRY-RUN — re-key map ##
+bm rows with LEGACY: prefix      = 160
+legacy user->emp bridge rows     = 272
+resolved (old user_id -> emp_id) = 160
+UNRESOLVED (no emp bridge)       = 0
+
+## new key collision check (must be 0 dup employee ids) ##
+dup_new_emp_ids = 0
+
+## sample transform (old -> new) ##
+LEGACY:00b91aa4-82aa-49fc-ba95-d6bdcd90f2fe  ->  LEGACY_EMP::adf224d3-da12-4eba-a016-f7dc1bcce48f   (noemi.bruno@rtl-bank.org)
+LEGACY:05f6ed6e-7a0c-4d29-9dfc-52adccde6917  ->  LEGACY_EMP::654d4ba2-6322-46f5-8a56-91057df6b8c9   (umberto.deluca@rtl-bank.org)
+LEGACY:07183418-b2fc-431a-9b62-d6cb5c09724a  ->  LEGACY_EMP::4f56440d-53e2-4121-89f9-6a9038aa9d1e   (helena.negri@rtl-bank.org)

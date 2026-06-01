@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "../../../../lib/api/fetch";
 
 interface MeProfile {
@@ -63,57 +63,61 @@ export default function MeProfilePage() {
   });
 
   return (
-    <main data-testid="me-profile-page" className="max-w-3xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="me-profile-title">Profilo</h1>
-        <p className="text-sm opacity-70" data-testid="me-profile-email">
-          {profile.data?.email ?? "…"}
-        </p>
-      </header>
+    <main data-testid="me-profile-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+      <PageHeader
+        data-testid="me-profile-title"
+        title="Profilo"
+        description="Gestisci i tuoi dati anagrafici e le preferenze di contatto."
+        badges={
+          <Badge variant="secondary" data-testid="me-profile-email">
+            {profile.data?.email ?? "…"}
+          </Badge>
+        }
+      />
 
       <Card>
         <CardHeader><CardTitle>Anagrafica</CardTitle></CardHeader>
         <CardContent>
           {profile.isLoading ? (
-            <span className="opacity-60">Caricamento…</span>
+            <span className="text-sm text-muted-foreground">Caricamento…</span>
           ) : (
             <form
               onSubmit={(e) => { void onSubmit(e); }}
               className="space-y-4"
               data-testid="me-profile-form"
             >
-              <div>
-                <label htmlFor="displayName" className="text-sm font-medium">Nome visualizzato</label>
+              <div className="space-y-1">
+                <label htmlFor="displayName" className="text-sm font-medium text-foreground">Nome visualizzato</label>
                 <Input id="displayName" data-testid="profile-displayName" {...register("displayName")} />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="locale" className="text-sm font-medium">Locale</label>
+                <div className="space-y-1">
+                  <label htmlFor="locale" className="text-sm font-medium text-foreground">Locale</label>
                   <Input id="locale" data-testid="profile-locale" placeholder="it-IT" {...register("locale")} />
                 </div>
-                <div>
-                  <label htmlFor="timezone" className="text-sm font-medium">Timezone</label>
+                <div className="space-y-1">
+                  <label htmlFor="timezone" className="text-sm font-medium text-foreground">Timezone</label>
                   <Input id="timezone" data-testid="profile-timezone" placeholder="Europe/Rome" {...register("timezone")} />
                 </div>
               </div>
-              <div>
-                <label htmlFor="phone" className="text-sm font-medium">Telefono</label>
+              <div className="space-y-1">
+                <label htmlFor="phone" className="text-sm font-medium text-foreground">Telefono</label>
                 <Input id="phone" data-testid="profile-phone" {...register("phone")} />
               </div>
-              <div>
-                <label htmlFor="linkedinUri" className="text-sm font-medium">LinkedIn URL</label>
+              <div className="space-y-1">
+                <label htmlFor="linkedinUri" className="text-sm font-medium text-foreground">LinkedIn URL</label>
                 <Input id="linkedinUri" data-testid="profile-linkedinUri" {...register("linkedinUri")} />
               </div>
-              <div>
-                <label htmlFor="bio" className="text-sm font-medium">Bio</label>
+              <div className="space-y-1">
+                <label htmlFor="bio" className="text-sm font-medium text-foreground">Bio</label>
                 <Input id="bio" data-testid="profile-bio" {...register("bio")} />
               </div>
 
               {update.isSuccess && (
-                <p className="text-sm text-green-700" data-testid="profile-saved">Salvato.</p>
+                <p className="text-sm text-success" data-testid="profile-saved">Salvato.</p>
               )}
               {update.isError && (
-                <p className="text-sm text-red-600" data-testid="profile-error">
+                <p className="text-sm text-danger" data-testid="profile-error">
                   Errore durante il salvataggio.
                 </p>
               )}

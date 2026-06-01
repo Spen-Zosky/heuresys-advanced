@@ -6,7 +6,16 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { QRCodeSVG } from "qrcode.react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  PageHeader,
+} from "@heuresys/ui";
 import {
   type EnrollMfaResponse,
   type ListMfaFactorsResponse,
@@ -98,24 +107,26 @@ export default function MeSecurityPage() {
   return (
     <main
       data-testid="me-security-page"
-      className="max-w-3xl mx-auto px-6 py-8 space-y-6"
+      className="mx-auto max-w-3xl space-y-6 px-6 py-8"
     >
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="me-security-title">
-          Sicurezza account
-        </h1>
-        <p className="text-sm opacity-70 mt-1">
-          Gestione fattori MFA per autenticazione a due fattori.
-        </p>
-      </header>
+      <PageHeader
+        data-testid="me-security-title"
+        title="Sicurezza account"
+        description="Gestione fattori MFA per autenticazione a due fattori."
+        badges={
+          <Badge variant="secondary" data-testid="me-security-factors-count">
+            {factors.data?.total ?? "—"} totali
+          </Badge>
+        }
+      />
 
       {feedback ? (
         <div
           data-testid={feedback.kind === "ok" ? "me-security-success" : "me-security-error"}
           className={
             feedback.kind === "ok"
-              ? "rounded border border-green-600/40 bg-green-50 px-4 py-2 text-sm text-green-900"
-              : "rounded border border-red-600/40 bg-red-50 px-4 py-2 text-sm text-red-900"
+              ? "rounded-card border border-success/40 bg-success/10 px-4 py-2 text-sm text-success"
+              : "rounded-card border border-danger/40 bg-danger/10 px-4 py-2 text-sm text-danger"
           }
         >
           {feedback.msg}
@@ -124,37 +135,35 @@ export default function MeSecurityPage() {
 
       <Card data-testid="me-security-factors-card">
         <CardHeader>
-          <CardTitle>
-            Fattori attivi{" "}
-            <span
-              data-testid="me-security-factors-count"
-              className="text-sm font-normal opacity-70 ml-2"
-            >
-              ({factors.data?.total ?? "—"} totali)
-            </span>
-          </CardTitle>
+          <CardTitle>Fattori attivi</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {factors.isLoading ? (
-            <div className="p-6 opacity-60">Caricamento…</div>
+            <div className="p-6 text-sm text-muted-foreground">Caricamento…</div>
           ) : factors.data && factors.data.items.length === 0 ? (
-            <div className="p-6 opacity-60" data-testid="me-security-factors-empty">
+            <div
+              className="p-6 text-sm text-muted-foreground"
+              data-testid="me-security-factors-empty"
+            >
               Nessun fattore configurato. Aggiungi un autenticatore TOTP per
               attivare la protezione a due fattori.
             </div>
           ) : (
-            <ul className="divide-y" data-testid="me-security-factors-list">
+            <ul className="divide-y divide-border" data-testid="me-security-factors-list">
               {factors.data!.items.map((f: MfaFactorListItem) => (
                 <li
                   key={f.factorId}
-                  className="px-4 py-3 flex items-center justify-between gap-3"
+                  className="flex items-center justify-between gap-3 px-4 py-3"
                   data-testid="me-security-factor-row"
                 >
                   <div className="text-sm">
-                    <div className="font-medium" data-testid="me-security-factor-kind">
+                    <div
+                      className="font-medium text-foreground"
+                      data-testid="me-security-factor-kind"
+                    >
                       {f.kind}
                     </div>
-                    <div className="text-xs opacity-70 font-mono">
+                    <div className="font-mono text-xs text-muted-foreground">
                       {f.verified ? "verificato" : "in attesa di verifica"} ·{" "}
                       creato {new Date(f.createdAt).toLocaleDateString()}
                     </div>
@@ -162,6 +171,7 @@ export default function MeSecurityPage() {
                   <Button
                     type="button"
                     variant="ghost"
+                    className="text-danger"
                     data-testid="me-security-factor-delete"
                     onClick={() => {
                       if (confirm(`Rimuovere il fattore ${f.kind}?`)) {
@@ -202,8 +212,8 @@ export default function MeSecurityPage() {
                   level="M"
                 />
               </div>
-              <div className="text-xs flex-1 space-y-2">
-                <p className="opacity-70">
+              <div className="flex-1 space-y-2 text-xs">
+                <p className="text-muted-foreground">
                   Se non puoi scansionare il QR, inserisci manualmente la chiave:
                 </p>
                 <code
@@ -232,7 +242,7 @@ export default function MeSecurityPage() {
                   className="mt-1"
                 />
                 {form.formState.errors.code ? (
-                  <span className="text-xs text-red-600">
+                  <span className="text-xs text-danger">
                     {form.formState.errors.code.message}
                   </span>
                 ) : null}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
+import { PageHeader, StatsCard } from "@heuresys/ui";
+import { Briefcase, GraduationCap, TriangleAlert } from "lucide-react";
 import { apiFetch } from "../../../lib/api/fetch";
 
 interface MeProfile {
@@ -33,6 +34,8 @@ interface MeGaps {
   total: number;
 }
 
+const ICON_CLS = "h-4 w-4";
+
 export default function MeLandingPage() {
   const profile = useQuery({
     queryKey: ["me", "profile"],
@@ -52,57 +55,86 @@ export default function MeLandingPage() {
   });
 
   const primary = positions.data?.items.find((p) => p.isPrimary);
+  const learningTotal = learning.data?.total ?? 0;
+  const gapsTotal = gaps.data?.total ?? 0;
 
   return (
-    <main data-testid="me-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold" data-testid="me-greeting">
+    <main data-testid="me-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+      <PageHeader
+        title="La mia area"
+        description="La tua panoramica personale: posizione, formazione e gap di sviluppo."
+      />
+
+      <header className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground" data-testid="me-greeting">
           Ciao, {profile.data?.displayName ?? profile.data?.email ?? "…"}
         </h1>
-        <p className="text-sm opacity-70" data-testid="me-email">
+        <p className="text-sm text-muted-foreground" data-testid="me-email">
           {profile.data?.email ?? ""}
         </p>
-        <p className="text-sm opacity-70" data-testid="me-roles">
+        <p className="text-sm text-muted-foreground" data-testid="me-roles">
           Ruoli: {profile.data?.roles.join(", ") ?? "—"}
         </p>
       </header>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card data-testid="me-card-primary-position">
-          <CardHeader><CardTitle>Posizione attuale</CardTitle></CardHeader>
-          <CardContent>
-            {positions.isLoading ? (
-              <span className="opacity-60">Caricamento…</span>
-            ) : primary ? (
-              <div>
-                <p className="font-medium" data-testid="me-primary-position-title">{primary.positionTitle}</p>
-                <p className="text-xs opacity-70">{primary.positionCode}</p>
-              </div>
-            ) : (
-              <span data-testid="me-no-primary" className="opacity-60">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div data-testid="me-card-primary-position">
+          {positions.isLoading ? (
+            <StatsCard
+              label="Posizione attuale"
+              value="…"
+              icon={<Briefcase className={`${ICON_CLS} text-palette-1`} />}
+            />
+          ) : primary ? (
+            <>
+              <StatsCard
+                label="Posizione attuale"
+                value={primary.positionTitle}
+                description={primary.positionCode}
+                icon={<Briefcase className={`${ICON_CLS} text-palette-1`} />}
+              />
+              <span data-testid="me-primary-position-title" className="sr-only">
+                {primary.positionTitle}
+              </span>
+            </>
+          ) : (
+            <>
+              <StatsCard
+                label="Posizione attuale"
+                value="—"
+                description="Nessuna posizione primaria attiva."
+                icon={<Briefcase className={`${ICON_CLS} text-palette-1`} />}
+              />
+              <span data-testid="me-no-primary" className="sr-only">
                 Nessuna posizione primaria attiva.
               </span>
-            )}
-          </CardContent>
-        </Card>
+            </>
+          )}
+        </div>
 
-        <Card data-testid="me-card-learning">
-          <CardHeader><CardTitle>Percorsi formativi</CardTitle></CardHeader>
-          <CardContent>
-            <p data-testid="me-learning-count">
-              {learning.data?.total ?? 0} assegnati
-            </p>
-          </CardContent>
-        </Card>
+        <div data-testid="me-card-learning">
+          <StatsCard
+            label="Percorsi formativi"
+            value={learningTotal}
+            unit="assegnati"
+            icon={<GraduationCap className={`${ICON_CLS} text-palette-4`} />}
+          />
+          <span data-testid="me-learning-count" className="sr-only">
+            {learningTotal} assegnati
+          </span>
+        </div>
 
-        <Card data-testid="me-card-gaps">
-          <CardHeader><CardTitle>Gap di sviluppo</CardTitle></CardHeader>
-          <CardContent>
-            <p data-testid="me-gaps-count">
-              {gaps.data?.total ?? 0} aperti
-            </p>
-          </CardContent>
-        </Card>
+        <div data-testid="me-card-gaps">
+          <StatsCard
+            label="Gap di sviluppo"
+            value={gapsTotal}
+            unit="aperti"
+            icon={<TriangleAlert className={`${ICON_CLS} text-warning`} />}
+          />
+          <span data-testid="me-gaps-count" className="sr-only">
+            {gapsTotal} aperti
+          </span>
+        </div>
       </section>
     </main>
   );

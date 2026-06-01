@@ -1,32 +1,29 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-01 (S954). **Branch**: `main` HEAD `52aa2bb` = synced con origin. Working tree pulito. **db:migrate ×2 verde** (46 migration), **API 359/0**, **CI verde** (Test/Lint/Typecheck/pages su `42b4c80`; commit doc successivi paths-ignored).
+**Updated**: 2026-06-01 (S955). **Branch**: `main`. **4 commit locali NON pushati** sopra `f7799ed` (S954): `9b06629` (B-51) · `ee062ed` (brand batch1) · `fa4f631` (brand batch2) · + handoff docs. **db:migrate ×2 verde** (47 migration), **API positions/roles/career 34/34**, **web E2E PROD 25+83 verde** (a11y+theme inclusi). Push in attesa di ok esplicito Enzo.
 
-## Last session brief
+## Last session brief (S955 — 3 stream eseguiti in autonomia)
 
-- **🟢 ADR-0024 employee-centric ingestion (3 fasi shipped).** Il legacy Docker è EMPLOYEE-centric (207 FK→`employees` vs 45→`users`); `sys_user*` ⟸ legacy `employee*`, `users`→solo `sys_auth_*`. Fase 1 doc (ADR-0024 + `EMPLOYEE_CENTRIC_MAPPING_DOCTRINE.md` + invariante **I14**), Fase 2 re-key 5 seed `rtl-rebuild` via email-join, Fase 3 migration `000046` (160 `LEGACY:`→`LEGACY_EMP::`, relabel puro 0-FK).
-- **🧹 Case-study scope enforced.** DB ridotto a **2 tenant ACTIVE** (RTL_BANK 158 + HEURESYS 3). Migration `000047`: DELETE `RTL_BANK_REFERENCE` (scaffold) + DROP `legacy_mirror` (586MB cache, conteneva SmartFood/EcoNova estranei) + purge mapping out-of-scope; `000021` §7 rimosso, `000033` re-scoped. **DB 1304→719 MB**. Blueprint FIN_BANKING (globale) preservato.
-- **❌ P2 RTL title proposal INVALIDATA+eliminata** (girava su `user_external_code` pre-re-key) → riaperta pulita come **B-51**.
+- **🟢 B-51 DONE** (`9b06629`, migration `000048`). Re-derivati 162 `position_title` dalla professione reale legacy (`employees.job_title`, join `position_metadata->>'legacy_employee_id'` 162/162 esatto), creati 25 job_roles `RTL-ROLE-*` (global, family/seniority NULL), wired `position_job_role_id` 162/162. Mappa baked come VALUES (CI-reproducibile, no `\copy`); generatore `db/seeds/rtl-rebuild/11_rederive_b51_titles_roles.py`. Idempotente (2° run 0 mutazioni), backup `pg_dump_snapshots/pre-b51-s955_*`. **Sblocca R2.**
+- **🟢 Brand-fidelity F5 + F6 DONE** (`ee062ed` + `fa4f631`, 14 pagine). F6 = admin/roles (token-table, RbacMatrix unfit) + enterprise-typing (brand-shell, FormWizard unfit). F5 = 12 ESS pages (DataTablePanel/EntityTable per le list, PageHeader+token per le form, me/ landing StatsCard static-value, inbox→AuditFeed, profile FieldGrid). Re-skin only (dati/testid intatti); zero `dark:`, token `text-danger/success` (no `text-destructive` raw). Verificato: typecheck + next build + Playwright **108 green** su build PROD.
+- **🟡 B-50 parziale**: eseguita la parte safe (docs/housekeeping). **(c)** 2 orphan run = terminali, 0 ref downstream → leave-as-is. **(b) riclassificato + root-cause pinpointed**: 3 silent-skip veri + 2 REFERENCE_ONLY by-design; root-cause = fallimento natural-key nel transform LOOKUP_FK (CW-B60-A/B61), NON sorgente/target vuoti. Fix = engine-internal, gated, MED-HIGH risk, zero test → **NON eseguito** (sessione dedicata). Dettaglio in `SOT_BACKLOG.md` B-50 §S955.
+- **⛔ F7 deferito**: NON è una migration — `apps/web/showcase` è il sorgente canonico già on-brand; spostarlo in `apps/showcase` è un refactor che rischia il Pages deploy → serve decisione architetturale.
 
 ## Top priorities (next session)
 
-1. **B-51 — re-derive 162 `position_title` + `position_job_role_id`** (employee-centric, design da zero sul DB post-S954). Blocca R2. Vedi `SOT_BACKLOG.md` B-51 + `RTL_STABILIZATION_PLAN.md §P2` (invalidata).
-2. **Brand-fidelity F5 ESS / F6 admin / F7 showcase** (~6-8h). Vedi `memory/project_brand_fidelity_migration.md`.
-3. **B-50 full reconciliation legacy→advanced** (~65/134 sys.* popolate), esecuzione gated, lega B-10 SDBI Phase 2.
-
-## Open questions
-
-- **SuccessFactors connector**: design committato, flag PII risolto (ADR-0023); resta decidere adozione come item MVP-4 + naming `staging.sf_*` (I3/I4).
-- *(nessuna pendente lato CI — verificata verde su `42b4c80`)*
+1. **R2 — RBAC perspectives** (`RBAC_UIX_PERSPECTIVES_PLAN.md`): ora **SBLOCCATO da B-51** (titoli/ruoli reali). Assegna i 3 functional role holderless + CEO ai veri utenti RTL per funzione.
+2. **B-50(b) — silent-skip trio fix** (gated, ~40-60k, MED-HIGH risk): root-cause già pinpointed (LOOKUP_FK natural-key, vedi backlog). Leggere resolver `brownfield-wave-executor/{transform-compiler,transforms}.ts` + `validate_lookup_fk_dispatch()`, campionare mismatch, re-import gated dei 3 contro VM legacy, validare.
+3. **B-10 SDBI Phase 2 / B-50(a)** (multi-sessione, 75-125h, mapping-card design umano); **F7** showcase refactor (decisione Enzo).
 
 ## Stack snapshot
 
-- DB: 161 utenti / **2 tenant ACTIVE** (RTL_BANK + HEURESYS); legacy_mirror+RTL_BANK_REFERENCE rimossi; **719 MB**; **46 migration** `000001..000047`. ANALYZE full-DB fatto (stime planner accurate).
-- ADR su disco: …0023, **0024** (employee-centric ingestion). Invarianti: +**I14**. Backup S954: `pg_dump_snapshots/pre-{rekey,cleanup,tenant-cleanup}-s954_*`.
+- DB: 161 utenti / 2 tenant ACTIVE (RTL_BANK 158 + HEURESYS 3); **47 migration** `000001..000048`; **162 positions** titolate+wired; **job_roles 227** (+25 RTL-ROLE). 719 MB.
+- Brand: 14/14 F5+F6 pagine migrate (ESS 12 + admin 2). F7 = no-op (già on-brand).
+- Server lasciati: nessuno (API :3001 + web prod :3000 killati a fine sessione).
 
 ## Verification (next session)
 ```bash
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "select count(*) from sys.sys_tenancies where tenant_status='ACTIVE'"  # 2
-git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
-gh run list --limit 6                                         # CI
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "select count(position_job_role_id) from sys.sys_positions"  # 162
+git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # 4 commit non pushati (S955)
+gh run list --limit 6                                         # CI (dopo push)
 ```

@@ -1,33 +1,32 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-02 (S957). **🎉 v1.0.0 GA RELEASED** — annotated tag **`v1.0.0`** @ `c7c985a` + public GitHub Release (latest). `release/v1.0.0` (PR #24) merged to `main` on CI green (`edaf399`); a post-merge **showcase-deploy fix** (`c7c985a`, sync-showcase prunes non-portable components — preferences-applier imported @heuresys/shared) made all 7 main workflows green. **55 migration** (`000001..000055`, gap 000035 cosmetico), db:migrate ×2 + **db:validate 7/7**. Full API suite **576 passed**; CI playwright-smoke 21 passed; showcase deploy ✅. Record autoritativo: **`NEXT_GENERATION_ENTRY_POINT.md`**.
+**Updated**: 2026-06-02 (S957). **🎉 v1.0.0 GA RELEASED** (tag `v1.0.0` @ `c7c985a` + public GitHub Release) **+ VM fully PRODUCTION.** main HEAD `2d17928`, synced, working tree clean. **55 migration** (`000001..000055`), db:migrate ×2 + **db:validate 7/7**. Full API suite **576 passed**; CI playwright-smoke 21. Record autoritativo: **`NEXT_GENERATION_ENTRY_POINT.md`**.
 
-## Last session brief (S957 — v1.0.0 consolidation: WS-4 R1b/V + WS-2 + WS-7)
+## Last session brief (S957)
 
-- **WS-4 R1b** (`e16d7f2`, mig `000054`+`000055`): `sys_teams`/`sys_team_members` + TEAM_LEADER/TEAM_MEMBER + team:* perms + **"my team" 3rd scope axis** in `teams/service.ts` (FK+middleware, NEVER RLS). 24 team / 176 membership derivati dal vero org (`sys_organization_units`+position→OU; seed `13_teams_from_org.sql`, no fixtures). `/v1/teams` + `/v1/me/team` + pagina `/me/team` + sidebar me-team + `pnpm db:seed-r1b`. Integration 11/11. `ROLE_CODES` += 2 ruoli (cache 11 ruoli / 461 map).
-- **WS-4 V** (`19be083`): `rbac-route-matrix.spec.ts` (5 ruoli × 3 route incl. /me/team) + `me-team.spec.ts` live; helper `gotoAuthenticated` (robust next-dev nav, no networkidle/load-on-route); auth.setup hydration hardened. CI playwright-smoke 21 passed.
-- **WS-2** (`9fdd986`): wave-executor reso wave-agnostic (getWaveMappings/stagingTableFor/truncateAllWaveStaging/ensureLegacyMirrorDDL/analyzeWaveStaging parametrizzati; guard `wave!=1` rimosso; wave=2 = no-op vuoto 201/COMPLETE). **Data import Wave-2 deferito** (source-discovery-gated).
-- **WS-7**: viz-graph rigenerato (org_chart seed tenant lookup `.test`→`tenant_code='RTL_BANK'`; RTL_ORG_CHART `325ecb42` 158 nodi/157 edge; orfani 161→0); ledger 000051-000055 registrato; bump 1.0.0 (root+4 workspace); CI 7/7 → merge → tag + release.
+**v1.0.0 consolidation (WS-0→WS-7, merged + released):**
+- **WS-4 R1b** (`e16d7f2`, mig 000054/055): `sys_teams`/`sys_team_members` + TEAM_LEADER/TEAM_MEMBER + **"my team" 3rd scope axis** (FK+middleware, never RLS); 24 team/176 membership dal vero org (seed 13, no fixtures); `/v1/teams` + `/v1/me/team` + pagina + sidebar. Integration 11/11.
+- **WS-4 V** (`19be083`): matrice E2E campionata + me-team spec; helper `gotoAuthenticated`; auth.setup hardened. **WS-2** (`9fdd986`): wave-executor wave-agnostic (guard rimosso; data import Wave-2 deferito, source-gated). **WS-7**: viz-graph rigenerato (orfani 161→0), bump 1.0.0, PR #24 merged, post-merge showcase-fix.
+
+**Post-release ops (VM = ambiente PROD, disciplina utente):**
+- VM + Mac allineati a v1.0.0; **@heuresys/ui 0.1.1→0.1.2** (fix look). VM **convertita a PRODUZIONE durevole**: web `next start` (commit `ad08951`), **API tsup bundle `node dist/server.js`** (`2d17928`). Template systemd + `vm-bootstrap.sh` + **`scripts/vm-deploy.sh`** tutti prod. Verificato: login 200, /readyz db ok, RBAC 11 ruoli, web /login 0.1s. Deploy futuro: `ssh oracle-vm-default 'cd ~/heuresys-advanced && bash scripts/vm-deploy.sh'`.
 
 ## Top priorities (next session — post v1.0.0)
 
-1. **Wave-2/3 data import** (source-discovery-gated): l'executor è pronto (WS-2 code); serve caricare una sorgente Wave-2 + authoring mapping-card (mapping-card rule: no speculazione). Sblocca anche `sys_kpi_definitions` → `process_kpi_templates`/`sys_user_kpi_evidence`.
-2. **WS-3 blocker** `sys_activity_classification_mappings` — redesign FK-vs-mapping (tocca mig 000007 shipped; ADR-0025 §5.3) → `DEBT_REGISTER`.
-3. **SuccessFactors connector** (escluso da v1.0.0 — D-ROAD; design `docs/integrations/`, PII risolto ADR-0023); **WS-6 deferred**: MFA multi-kind, mobile-matrix a11y, observability-depth, markers; **F7** showcase refactor (decisione architetturale Enzo).
+1. **Wave-2/3 data import** (source-discovery-gated): executor pronto (WS-2); serve sorgente Wave-2 + mapping-card (no speculazione). Sblocca `sys_kpi_definitions` → process_kpi/user_kpi_evidence.
+2. **WS-3 blocker** `sys_activity_classification_mappings` — redesign FK-vs-mapping (tocca mig 000007; ADR-0025 §5.3) → DEBT_REGISTER.
+3. **SuccessFactors connector** (escluso v1.0.0 — D-ROAD); **WS-6 deferred** (MFA multi-kind, mobile-matrix, observability-depth); **F7** showcase refactor.
 
 ## Open questions
-
-- SuccessFactors connector: adozione + naming `staging.sf_*` (I3/I4). Design committato, PII risolto (ADR-0023).
+- SuccessFactors connector: adozione + naming `staging.sf_*`. Design committato, PII risolto (ADR-0023).
 
 ## Stack snapshot
-
-- DB: 161 utenti / 2 tenant ACTIVE; **24 team / 176 membership** (org-derived); **55 migration** `000001..000055`; 162 positions titolate+wired; job_roles 227; ui_interfaces 24; RBAC **11 ruoli / 461 mapping**; viz-graph RTL_ORG_CHART 158 nodi/157 edge (0 orfani).
-- RBAC epic: D1·D2·D3·A·R1a·R2·U1·U2·P1·**R1b**·**V** ✅ COMPLETE. WS-0..WS-7 ✅ → v1.0.0 GA.
+- DB: 161 utenti / 2 tenant; **24 team / 176 membership**; **55 migration**; RBAC **11 ruoli / 461 map**; ui_interfaces 24; viz-graph 158 nodi/157 edge (0 orfani).
+- **VM PROD**: api `node dist/server.js` (tsup bundle) :8013 + web `next start` :3013, @heuresys/ui 0.1.2, Node 22 nvm. RBAC epic + WS-0..WS-7 ✅ → v1.0.0 GA.
 
 ## Verification (next session)
 ```bash
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "select count(*) from sys.sys_teams"  # 24
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
 git -C /d/heuresys-advanced tag -l v1.0.0                      # v1.0.0
-gh run list --limit 7                                         # CI 7/7
+ssh oracle-vm-default 'curl -s localhost:8013/readyz; systemctl is-active heuresys-advanced-{api,web}'
 ```

@@ -1,6 +1,6 @@
 {
   "name": "@heuresys/showcase",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Heuresys brand identity v1 — static showcase site (GitHub Pages deploy of apps/web /showcase routes)",
   "scripts": {

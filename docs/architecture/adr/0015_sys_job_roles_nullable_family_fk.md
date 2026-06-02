@@ -1,6 +1,6 @@
 # ADR-0015 — `sys_job_roles.job_role_family_id` nullable FK
 
-**Status**: PROPOSED (awaiting Enzo final confirmation post-X3 review)
+**Status**: ACCEPTED (2026-06-01, v1.0.0 WS-6g — criteria met: sys_job_roles=227≥140, cascade unblocked, no integrity violation; see §10)
 **Date**: 2026-05-21
 **Author**: Cowork Claude (batch C3.0)
 **Decision authority**: Enzo Spenuso
@@ -158,9 +158,11 @@ Or revert via fresh migration 000038-rollback.sql.
 
 ## §10 — Status
 
-**PROPOSED** — awaits CLI X3 execution + post-X3 verification.
-
-If post-X3 sys_job_roles ≥ 140 + downstream cascade unblocked + no integrity violations → ACCEPTED.
+**ACCEPTED** (2026-06-01, v1.0.0 consolidation WS-6g). Acceptance criteria all met (verified against the live DB via tunnel :5433):
+- `sys_job_roles` = **227** rows (criterion ≥ 140 — 162% over).
+- Downstream cascade unblocked: rows import with the FK nullable rather than being WHERE-skip-filtered (227/227 currently carry `job_role_family_id IS NULL`, which is exactly the brownfield-import outcome this nullable-FK decision authorizes — family enrichment deferred per §9.2).
+- No integrity violations: NULL `job_role_family_id` is the intended, allowed state; no FK constraint breach.
+- Consistent with the sibling **ADR-0016** (`sys_esco_occupation_mappings` nullable `job_role_id`), ACCEPTED 2026-05-21. The same nullable-brownfield-FK pattern is the canonical resolution for required-FK-induced silent import skips (cf. v1.0.0 WS-3 applying it to `sys_skill_categories.skill_category_family_id`).
 
 ---
 

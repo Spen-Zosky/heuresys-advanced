@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { useCurrentUser, useLogout, useMyInterfaces, type MyInterface } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
+import { PreferencesApplier } from "../../components/preferences-applier";
 
 const ICON = "h-4 w-4 shrink-0";
 
@@ -262,6 +263,9 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
         />
       }
     >
+      {/* WS-4 P1: apply the user's server-stored theme + palette (source of truth) once the
+          session is known. Renders nothing. */}
+      <PreferencesApplier />
       {children}
     </DashboardShell>
   );

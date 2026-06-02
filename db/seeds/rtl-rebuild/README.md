@@ -23,6 +23,24 @@
 - **No destructive op except `09`**: files `01`–`08` and `10` are purely additive (INSERT/UPDATE). All deletion is concentrated in `09_collapse_delete.sql` (the single gated destructive step).
 - Run with **psql** (the files use `\copy`), via the same runner as `db:migrate`.
 
+## WS-1 (1b) — `12_user_satellites.sql` (employee-centric satellite re-derivation)
+Populates the TRACTABLE empty `sys_user_*` satellites from the legacy `employees` source via the
+verified email crosswalk (ADR-0024 / I14). Idempotent (`ON CONFLICT DO NOTHING` / `WHERE NOT EXISTS`);
+twice-run = `INSERT 0 0`. Needs `extracted/employees.csv` + `extracted/employee_module_completions.csv`
+(the latter added to `00_extract_legacy_subset.sh`).
+
+| Satellite | Result | Source mapping |
+|---|---|---|
+| `sys_user_profiles` | **populated** (156) | `employees.phone_mobile`→phone (work fallback); emergency contact + address → `*_metadata` |
+| `sys_user_education_records` | **populated** (157) | `highest_education_level`→degree, `_institution`→institution, `_field`→field, `_year`→Jan-1 end_date |
+| `sys_user_assessment_evidence` | **populated** (1560) | deterministic projection of existing v5 `sys_assessment_results` JOIN `sys_assessments` (KSABA dimensions) |
+| `sys_user_learning_evidence` | **0 (honest)** | source = legacy `module_completions` (status=completed only); the 1 completed row in the subset belongs to `spen.zosky@gmail.com`, a legacy employee NOT carried into v5 → no crosswalk target. Seed is correct + future-proof (auto-populates if such a user appears). |
+| `sys_user_professional_experiences` | **SKIPPED** | NO clean legacy source — no prior-employment table; `employees` has no prior-experience columns; `career_*` are forward-looking aspiration data. All 3 required cols (employer/role_title/start_date) would be fabricated → skipped per MAPPING-CARD RULE. |
+| `sys_user_kpi_evidence` | **BLOCKED (cross-wave)** | FK target `sys_kpi_definitions` is EMPTY (WS-2 target); `kpi_id` (NOT NULL) cannot resolve → deferred to WS-2. |
+
+The doctrine is guarded permanently by `apps/api/test/employee-centric-doctrine.integration.test.ts` (1a):
+0 `LEGACY:%` person keys; well-formed distinct `LEGACY_EMP::%`; satellite FK + tenant integrity.
+
 ## Legacy source (read-only)
 Live Docker `heuresys_evo_platform_db` (db `heuresys_platform`) on OCI VM. Tenants: rtl-bank `0c54b84a-db6e-4da4-bc91-af5d480d524e` (158 emp / 32 OU), heuresys `d5855519-3ed1-4427-865f-fe75f1e42c4c` (4 emp / 8 OU). The extracted CSV payload lives in `extracted/` (**gitignored** — regenerable via `00_extract_legacy_subset.sh`, per the brownfield-wave1 convention).
 
@@ -40,6 +58,7 @@ Live Docker `heuresys_evo_platform_db` (db `heuresys_platform`) on OCI VM. Tenan
 | 08 | `08_rbac_role_grants.sql` (D4 data part) | no | DRAFT ✅ |
 | 09 | `09_collapse_delete.sql` (D8) | **YES — gated** | DRAFT ✅ |
 | 10 | `10_rebuild_derived.sql` | no | DRAFT ✅ |
+| 12 | `12_user_satellites.sql` (WS-1 1b) | no | APPLIED ✅ |
 
 Code (separate from this seed set): `GET /v1/me/permissions` (apps/api), nav-manifest + sidebar refactor (apps/web), persona re-wire (`tests/e2e/fixtures.ts` + `auth.setup.ts`).
 

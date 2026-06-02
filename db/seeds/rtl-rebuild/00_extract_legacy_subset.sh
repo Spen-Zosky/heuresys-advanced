@@ -86,6 +86,14 @@ xt employee_attendance <<SQL
 \copy (SELECT id,tenant_id,employee_id,attendance_date,clock_in,clock_out,break_start,break_end,hours_regular,hours_overtime,hours_night,hours_holiday,hours_total,status,source,is_validated FROM employee_attendance WHERE tenant_id IN ($TENANTS)) TO STDOUT WITH (FORMAT csv, HEADER true)
 SQL
 
+# --- learning evidence (WS-1 1b) — per-employee module completions ----------
+# module_completions has NO employee_id; it links through course_enrollments.enrollment_id.
+# Only the subset's enrollments are exported. mc.id resolves to v5 sys_learning_modules
+# via code OLDDB::module_completions::<id> (FK target for sys_user_learning_evidence).
+xt employee_module_completions <<SQL
+\copy (SELECT mc.id AS completion_id, ce.employee_id, mc.status, mc.score, mc.completed_at, mc.started_at, mc.time_spent_minutes, mc.attempts FROM module_completions mc JOIN course_enrollments ce ON ce.id = mc.enrollment_id WHERE ce.employee_id IN $EMP_SUB) TO STDOUT WITH (FORMAT csv, HEADER true)
+SQL
+
 # --- RBAC -> UI catalog (global, no tenant_id) ------------------------------
 xt rbp_roles            <<SQL
 \copy (SELECT id,code,name,hierarchy_level,inherits_from,default_dashboard_code,is_assignable FROM rbp_roles ORDER BY hierarchy_level) TO STDOUT WITH (FORMAT csv, HEADER true)

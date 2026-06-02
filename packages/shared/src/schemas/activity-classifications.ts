@@ -4,8 +4,12 @@
  */
 import { z } from "zod";
 
+// Must mirror the DB CHECK on sys.sys_activity_classifications.activity_classification_scheme
+// (RD-08: varchar+CHECK is the structural authority). The brownfield Wave-1 ingestion populates
+// the unversioned "ATECO"/"NACE" scheme codes (3276 rows); omitting them here caused the
+// GET /v1/activity-classifications LIST to 500 on response serialization (caught by WS-5).
 export const ACTIVITY_CLASS_SCHEME_VALUES = [
-  "ATECO_2025", "NACE_REV_2_1", "ATECO_2007", "NACE_REV_2",
+  "ATECO_2025", "NACE_REV_2_1", "ATECO_2007", "NACE_REV_2", "ATECO", "NACE",
 ] as const;
 export const ActivityClassSchemeSchema = z.enum(ACTIVITY_CLASS_SCHEME_VALUES);
 export type ActivityClassScheme = z.infer<typeof ActivityClassSchemeSchema>;

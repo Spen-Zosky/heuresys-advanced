@@ -1,6 +1,6 @@
 {
   "name": "@heuresys/shared",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Heuresys Advanced — shared Zod schemas + TypeScript types consumed by @heuresys/api and @heuresys/web",
@@ -38,6 +38,10 @@
     "./schemas/organization-units": {
       "types": "./dist/schemas/organization-units.d.ts",
       "default": "./src/schemas/organization-units.ts"
+    },
+    "./schemas/teams": {
+      "types": "./dist/schemas/teams.d.ts",
+      "default": "./src/schemas/teams.ts"
     },
     "./schemas/skills": {
       "types": "./dist/schemas/skills.d.ts",
@@ -247,6 +251,10 @@
       "types": "./dist/schemas/me.d.ts",
       "default": "./src/schemas/me.ts"
     },
+    "./schemas/me-preferences": {
+      "types": "./dist/schemas/me-preferences.d.ts",
+      "default": "./src/schemas/me-preferences.ts"
+    },
     "./schemas/compensation": {
       "types": "./dist/schemas/compensation.d.ts",
       "default": "./src/schemas/compensation.ts"
@@ -265,7 +273,7 @@
     "prepare": "tsc -p tsconfig.json",
     "lint": "eslint src",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "node -e \"console.log('(@heuresys/shared has no unit tests; Zod schemas are exercised via the @heuresys/api integration suite)')\""
   },
   "dependencies": {
     "zod": "4.4.3"

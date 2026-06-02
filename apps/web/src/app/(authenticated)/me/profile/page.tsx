@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "../../../../lib/api/fetch";
+import { useMyPreferences, useUpdateMyPreferences } from "../../../../lib/api/auth";
+import type { MeTheme, MePalette } from "@heuresys/shared";
 
 interface MeProfile {
   userId: string;
@@ -28,6 +30,81 @@ const ProfileFormSchema = z.object({
   linkedinUri: z.string().max(4096).optional(),
 });
 type ProfileFormValues = z.infer<typeof ProfileFormSchema>;
+
+const THEME_OPTIONS: { value: MeTheme; label: string }[] = [
+  { value: "dark", label: "Scuro" },
+  { value: "light", label: "Chiaro" },
+];
+const PALETTE_OPTIONS: { value: MePalette; label: string }[] = [
+  { value: "balanced", label: "Balanced" },
+  { value: "cool-ocean", label: "Cool ocean" },
+  { value: "warm-sunset", label: "Warm sunset" },
+  { value: "brand-mono", label: "Brand mono" },
+];
+
+/** WS-4 P1 — theme + palette controls. Server is the source of truth (PATCH /v1/me/preferences);
+ *  the layout's PreferencesApplier re-applies the saved choice on every session. */
+function AppearanceCard() {
+  const prefs = useMyPreferences();
+  const update = useUpdateMyPreferences();
+  const theme = prefs.data?.theme;
+  const palette = prefs.data?.palette;
+
+  return (
+    <Card>
+      <CardHeader><CardTitle>Aspetto</CardTitle></CardHeader>
+      <CardContent>
+        {prefs.isLoading ? (
+          <span className="text-sm text-muted-foreground">Caricamento…</span>
+        ) : (
+          <div className="space-y-4" data-testid="me-appearance">
+            <div className="space-y-1">
+              <span className="text-sm font-medium text-foreground">Tema</span>
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Tema">
+                {THEME_OPTIONS.map((o) => (
+                  <Button
+                    key={o.value}
+                    type="button"
+                    size="sm"
+                    variant={theme === o.value ? "default" : "outline"}
+                    data-testid={`pref-theme-${o.value}`}
+                    disabled={update.isPending}
+                    onClick={() => { void update.mutateAsync({ theme: o.value }); }}
+                  >
+                    {o.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-1">
+              <span className="text-sm font-medium text-foreground">Palette</span>
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Palette">
+                {PALETTE_OPTIONS.map((o) => (
+                  <Button
+                    key={o.value}
+                    type="button"
+                    size="sm"
+                    variant={palette === o.value ? "default" : "outline"}
+                    data-testid={`pref-palette-${o.value}`}
+                    disabled={update.isPending}
+                    onClick={() => { void update.mutateAsync({ palette: o.value }); }}
+                  >
+                    {o.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {update.isError && (
+              <p className="text-sm text-danger" data-testid="pref-error">
+                Errore durante il salvataggio.
+              </p>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function MeProfilePage() {
   const qc = useQueryClient();
@@ -133,6 +210,8 @@ export default function MeProfilePage() {
           )}
         </CardContent>
       </Card>
+
+      <AppearanceCard />
     </main>
   );
 }

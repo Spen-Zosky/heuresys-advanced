@@ -130,6 +130,7 @@ describe("executeUpsertSqlSidePerMapping — CW-B34 nullable NK UUID skip filter
 
     const mapping: TableMappingRow = {
       table_mapping_id: "00000000-0000-0000-0000-00000000aaaa",
+      wave: 1,
       source_table_id: "00000000-0000-0000-0000-00000000bbbb",
       source_table_schema: "legacy_mirror",
       source_table_name: "esco_occupations",

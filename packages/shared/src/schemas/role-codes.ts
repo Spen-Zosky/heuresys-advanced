@@ -18,6 +18,8 @@ export const ROLE_CODES = [
   "USER",
   "READ_ONLY",
   "CEO", // R1a — apex executive, hierarchical_operational (migration 000045)
+  "TEAM_LEADER", // R1b — leads a team derived from an org unit (migration 000054)
+  "TEAM_MEMBER", // R1b — belongs to a team derived from an org unit (migration 000054)
 ] as const;
 
 export type RoleCode = (typeof ROLE_CODES)[number];

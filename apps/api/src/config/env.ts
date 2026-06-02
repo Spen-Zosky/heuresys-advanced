@@ -78,7 +78,6 @@ const parsed = EnvSchema.parse(process.env);
 // but we make the gap loud rather than silent (mirror CW-B61 observability
 // doctrine: every absence has a trace).
 if (parsed.NODE_ENV === "production" && !parsed.MFA_ENCRYPTION_KEY) {
-  // eslint-disable-next-line no-console
   console.warn(
     JSON.stringify({
       level: "warn",

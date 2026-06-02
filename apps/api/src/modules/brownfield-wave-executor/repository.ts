@@ -216,6 +216,7 @@ export async function setWaveStats(
 
 export interface TableMappingRow {
   table_mapping_id: string;
+  wave: number;
   source_table_id: string;
   source_table_schema: string | null;
   source_table_name: string;
@@ -227,9 +228,16 @@ export interface TableMappingRow {
   source_table_metadata: Record<string, unknown>;
 }
 
-export async function getWave1Mappings(q: DbConnector): Promise<TableMappingRow[]> {
+/**
+ * Load the APPROVED IMPORT table-mappings for a given wave. Wave-agnostic: the wave is the only
+ * filter parameter (the engine is fully data-driven from brownfield.table_mappings). A wave with
+ * no mapping rows yields an empty list → the pipeline completes as a no-op (source-discovery-gated:
+ * Wave 2+ mappings are authored when their sources are loaded — see NEXT_GENERATION_ENTRY_POINT §13).
+ */
+export async function getWaveMappings(q: DbConnector, wave: number): Promise<TableMappingRow[]> {
   const res = await q.query<TableMappingRow>(
     `SELECT tm.table_mapping_id            AS table_mapping_id,
+            tm.table_mapping_wave          AS wave,
             st.source_table_id             AS source_table_id,
             st.source_table_schema         AS source_table_schema,
             st.source_table_name           AS source_table_name,
@@ -242,10 +250,11 @@ export async function getWave1Mappings(q: DbConnector): Promise<TableMappingRow[
        FROM brownfield.table_mappings tm
        JOIN brownfield.source_tables st
          ON st.source_table_id = tm.table_mapping_source_table_id
-      WHERE tm.table_mapping_wave = 1
+      WHERE tm.table_mapping_wave = $1
         AND tm.table_mapping_approval_status = 'APPROVED'
         AND tm.table_mapping_classification = 'IMPORT'
       ORDER BY st.source_table_domain, st.source_table_name`,
+    [wave],
   );
   return res.rows;
 }
@@ -282,40 +291,42 @@ export async function getColumnMappingsForTableMapping(
 // -----------------------------------------------------------------------------
 
 /**
- * Map canonical target → staging table name. The staging table name is
- * `staging.wave1_<target_short>` where target_short strips the `sys_` prefix.
- * E.g. `sys_skills` → `staging.wave1_skills`. Returns null for targets without
- * a dedicated staging table (those rare cases should be flagged at staging
- * time, not silently swallowed).
+ * Per-wave staging-table whitelist (target_short, with the `sys_` prefix stripped). The physical
+ * staging tables are created by migrations and named `staging.wave<N>_<short>`. Wave 1 = the 18
+ * tables from migrations 000030 (17) + 000034 (1). A wave with no whitelist entry has no staging
+ * tables yet (source-discovery-gated) → stagingTableFor returns null for every target, so the
+ * staging phase produces 0 rows for that wave (no throw — additive, Wave-1-safe).
  */
-export function stagingTableFor(target: string): string | null {
-  // Strip 'sys_' prefix if present
-  const short = target.startsWith("sys_") ? target.slice(4) : target;
-  // The 18 explicit Wave 1 staging tables (17 from migration 000030 + 1 from 000034).
-  const known = new Set([
+const WAVE_STAGING_TARGETS: Record<number, ReadonlySet<string>> = {
+  1: new Set([
     "skills", "skill_families", "skill_categories", "skill_taxonomy_edges",
     "skill_aliases", "learning_modules", "learning_paths", "learning_path_steps",
     "skill_learning_mappings", "user_certifications", "esco_occupation_mappings",
     "activity_classifications", "activity_classification_mappings",
     "compensation_bands", "process_kpi_templates", "blueprint_process_registry",
     "job_roles", "job_families",
-  ]);
-  return known.has(short) ? `staging.wave1_${short}` : null;
+  ]),
+};
+
+/**
+ * Map canonical target → staging table name `staging.wave<wave>_<target_short>` (target_short
+ * strips the `sys_` prefix). Returns null for targets without a dedicated staging table in that
+ * wave (rare Wave-1 cases are flagged at staging time, not silently swallowed; entire-wave-empty
+ * for not-yet-loaded waves).
+ */
+export function stagingTableFor(target: string, wave: number): string | null {
+  const short = target.startsWith("sys_") ? target.slice(4) : target;
+  const known = WAVE_STAGING_TARGETS[wave];
+  if (!known) return null;
+  return known.has(short) ? `staging.wave${wave}_${short}` : null;
 }
 
-export async function truncateAllWave1Staging(q: DbConnector): Promise<void> {
-  const targets = [
-    "wave1_skills", "wave1_skill_families", "wave1_skill_categories",
-    "wave1_skill_taxonomy_edges", "wave1_skill_aliases",
-    "wave1_learning_modules", "wave1_learning_paths", "wave1_learning_path_steps",
-    "wave1_skill_learning_mappings", "wave1_user_certifications",
-    "wave1_esco_occupation_mappings", "wave1_activity_classifications",
-    "wave1_activity_classification_mappings", "wave1_compensation_bands",
-    "wave1_process_kpi_templates", "wave1_blueprint_process_registry",
-    "wave1_job_roles", "wave1_job_families",
-  ];
+export async function truncateAllWaveStaging(q: DbConnector, wave: number): Promise<void> {
+  const known = WAVE_STAGING_TARGETS[wave];
+  if (!known || known.size === 0) return; // no staging tables for this wave yet
+  const targets = [...known].map((short) => `staging.wave${wave}_${short}`);
   // Single TRUNCATE for atomicity. RESTART IDENTITY is irrelevant (uuid PK).
-  await q.query(`TRUNCATE ${targets.map((t) => `staging.${t}`).join(", ")} CASCADE`);
+  await q.query(`TRUNCATE ${targets.join(", ")} CASCADE`);
 }
 
 export interface StagingInsertRow {

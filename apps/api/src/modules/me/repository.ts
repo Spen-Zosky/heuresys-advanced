@@ -11,7 +11,9 @@ import type {
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
   MeKpiTarget, MeCertification, CreateMeCertificationBody, MeDocument,
+  UserPreference, UpdateUserPreferenceBody,
 } from "@heuresys/shared";
+import { ME_PREFERENCE_DEFAULTS } from "@heuresys/shared";
 import type { z } from "zod";
 
 export type DbConnector = Pool | PoolClient;
@@ -717,4 +719,59 @@ export async function listMyDocuments(
   );
   const items = r.rows.map(toDoc);
   return { items, total: items.length };
+}
+
+/* --- preferences (WS-4 P1) ------------------------------------------- */
+
+interface PreferenceRow {
+  user_preference_theme: UserPreference["theme"];
+  user_preference_palette: UserPreference["palette"];
+}
+
+/** The caller's stored UI preferences, or the brand defaults when no row exists yet. */
+export async function loadPreferences(q: DbConnector, userId: string): Promise<UserPreference> {
+  const res = await q.query<PreferenceRow>(
+    `SELECT user_preference_theme, user_preference_palette
+       FROM sys.sys_user_preferences WHERE user_preference_user_id = $1`,
+    [userId],
+  );
+  const row = res.rows[0];
+  if (!row) {
+    return { theme: ME_PREFERENCE_DEFAULTS.theme, palette: ME_PREFERENCE_DEFAULTS.palette };
+  }
+  return { theme: row.user_preference_theme, palette: row.user_preference_palette };
+}
+
+/** Upsert the 1:1 preferences row. A field omitted from `patch` keeps its current stored value
+ *  (or the default if no row exists). Returns the resulting full preference. */
+export async function upsertPreferences(
+  q: DbConnector, userId: string, tenantId: string | null, patch: UpdateUserPreferenceBody,
+): Promise<UserPreference> {
+  // $3/$4 carry the raw patch (NULL when the field is omitted). On INSERT (no row yet) an omitted
+  // field falls back to the brand default ($5/$6); on UPDATE an omitted field keeps the stored value
+  // (the NULL EXCLUDED value is COALESCE'd against the existing column). This makes PATCH a true
+  // partial update — supplying only `theme` never resets `palette`, and vice-versa.
+  const res = await q.query<PreferenceRow>(
+    `INSERT INTO sys.sys_user_preferences (
+        user_preference_user_id, user_preference_tenant_id,
+        user_preference_theme, user_preference_palette, created_by, updated_by
+      ) VALUES ($1, $2, COALESCE($3, $5), COALESCE($4, $6), $1, $1)
+      ON CONFLICT (user_preference_user_id) DO UPDATE SET
+        user_preference_theme   = COALESCE($3, sys.sys_user_preferences.user_preference_theme),
+        user_preference_palette = COALESCE($4, sys.sys_user_preferences.user_preference_palette),
+        user_preference_tenant_id = COALESCE(sys.sys_user_preferences.user_preference_tenant_id, EXCLUDED.user_preference_tenant_id),
+        updated_at = now(),
+        updated_by = $1
+      RETURNING user_preference_theme, user_preference_palette`,
+    [
+      userId,
+      tenantId,
+      patch.theme ?? null,
+      patch.palette ?? null,
+      ME_PREFERENCE_DEFAULTS.theme,
+      ME_PREFERENCE_DEFAULTS.palette,
+    ],
+  );
+  const r = res.rows[0]!;
+  return { theme: r.user_preference_theme, palette: r.user_preference_palette };
 }

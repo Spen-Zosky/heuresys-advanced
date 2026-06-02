@@ -56,3 +56,15 @@ export async function loginAs(page: Page, persona: PersonaKey) {
   await page.getByTestId("login-submit").click();
   await page.waitForURL(`**${expectedLandingPath}`);
 }
+
+/**
+ * Robust navigation to an authenticated route. `next dev` compiles routes on first hit (cold
+ * compile can exceed the default 30s) and its HMR websocket keeps the network busy so
+ * `waitUntil:"load"` / `networkidle` are unreliable. Instead we wait for `domcontentloaded` with
+ * head-room, then for the always-present ESS "My HR" nav link (proves the authenticated shell
+ * actually rendered, not the /login redirect). Best-practice: wait for an element, not the network.
+ */
+export async function gotoAuthenticated(page: Page, route: string) {
+  await page.goto(route, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await page.getByTestId("nav-me").waitFor({ state: "visible", timeout: 45_000 });
+}

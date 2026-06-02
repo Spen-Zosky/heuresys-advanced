@@ -6,7 +6,7 @@
 
 ## 0. Snapshot in una riga
 
-Monorepo pnpm HRMS/BPM **maturo e oltre MVP-3**: API Fastify 5 con **~58 moduli business + auth (~272 endpoint live)**, web Next.js 15 con **MVP-2a (admin) + MVP-2b (ESS) shipped**, showcase brand v1 deployato, DB PostgreSQL 16 nativo su OCI VM (**161 utenti, 162 posizioni; 2 tenant ACTIVE — RTL_BANK 158 + HEURESYS 3 (case-study scope, S954); legacy_mirror+reference rimossi, 719 MB**, vedi §4), **6 workflow CI self-hosted + showcase deploy tutti verdi (5/5)**. HEAD `c363ef1`, working tree pulito, tag `v0.4.1-housekeeping-closed`. **Prossimo**: brand-fidelity **F5 ESS ✅ + F6 admin ✅ DONE (S955)** (14 pagine, E2E PROD verde a11y+theme inclusi); F7 showcase = refactor deferito (sorgente `apps/web/showcase` già on-brand, non una migration — sposta-in-`apps/showcase` rischia il Pages deploy, serve decisione architetturale); decisione connettore SuccessFactors (proposta pending in `docs/integrations/`); position refinement: **job_role wired (B-51 ✅ S955)**, ESCO enrichment + cycle-detection OU restano opzionali.
+Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **~60 moduli business + auth (+ `teams`)**, web Next.js 15 con **MVP-2a (admin) + MVP-2b (ESS) shipped + RBAC/UIX/Perspectives epic COMPLETE** (D1-D3·A·R1a·R2·U1·U2·P1·R1b·V), showcase brand v1 deployato, DB PostgreSQL 16 nativo su OCI VM (**161 utenti, 162 posizioni; 24 team / 176 membership org-derived; 2 tenant ACTIVE — RTL_BANK + HEURESYS; 55 migration `000001..000055`**, vedi §4), **CI 7/7 verde**. **🎉 v1.0.0 GA RELEASED** (S957): `release/v1.0.0` (PR #24) auto-merged a `main`, tag **`v1.0.0`** + public GitHub Release; working tree pulito. Record consolidato autoritativo: **`NEXT_GENERATION_ENTRY_POINT.md`**. **Prossimo (post-v1.0.0)**: Wave-2/3 data import (source-discovery-gated, executor code pronto WS-2); WS-3 blocker `activity_classification_mappings` (FK-vs-mapping redesign); connettore SuccessFactors (escluso D-ROAD, design `docs/integrations/`); WS-6 deferred (MFA multi-kind, mobile-matrix, observability-depth); F7 showcase refactor (decisione architetturale Enzo).
 
 > ⚠️ **Doc drift critico**: il `CLAUDE.md` del repo (sezione "What this is") e il `README.md` descrivono ancora lo stato **MVP-1** ("11/22 moduli, web vuoto"). È **gravemente obsoleto**. Questo SOT_STATE è la verità; vedi `DEBT_REGISTER.md` D-01.
 
@@ -17,9 +17,9 @@ Monorepo pnpm HRMS/BPM **maturo e oltre MVP-3**: API Fastify 5 con **~58 moduli 
 | Repo Windows | `D:\heuresys-advanced` |
 | Repo OCI VM | `/home/ubuntu/heuresys-advanced` |
 | Remote | `https://github.com/Spen-Zosky/heuresys-advanced` (public) |
-| Branch / HEAD | `main` / `c363ef1` (ahead di origin `23f9bbf` di 2 commit docs-only S951, non pushati) |
-| Working tree | pulito (verificato S951) |
-| Tag corrente | `v0.4.1-housekeeping-closed` (@ `01340ae`) |
+| Branch / HEAD | `main` (PR #24 `release/v1.0.0` auto-merged, S957) = synced origin |
+| Working tree | pulito (verificato S957) |
+| Tag corrente | **`v1.0.0`** (GA baseline, S957) — predecessori sotto |
 | Tag (11 totali) | v0.2.0-mvp2 · v0.2.1-mvp2a-final · v0.3.0-mvp3 · v0.3.1-mvp3-final · v0.3.2-mvp3-full · v0.3.3-preflight-partial · v0.3.4-p0-closed · v0.4.0-brand-v1 · v0.4.0-mvp4-ready · v0.4.0a-s937-partial-checkpoint · v0.4.1-housekeeping-closed |
 | Pre-commit hook | `.git/hooks/pre-commit` warn-only → `scripts/cowork-exchange/validate-naming.mjs` su cowork_code_exchange |
 | Sibling repo | `D:\ux-design-shared` (HEAD `dfa2e81`) = sorgente di `@heuresys/ui` (npm `^0.1.1`) |

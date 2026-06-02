@@ -125,6 +125,18 @@ A read-only FK match-rate triage (S958, live queries on both DBs) **falsifies th
 
 **Conclusion**: beyond `kpi_definitions`, cat(i) reconciliation is **NEEDS-DECISION**, not mechanical import. Proceeding requires modeling decisions (KPI catalog unification, canonical learning-catalog re-import, a job→position bridge) — each a scoped milestone with Enzo's semantic authority, NOT an autonomous 1:1 import (mapping-card rule / no-fabrication). The original cat(ii) "needs-decision" set is therefore larger than first measured; cat(i) "deterministic" was over-optimistic.
 
+### §7.1 — Execution update S958 (opt. A: KPI catalog unification — DONE)
+
+Enzo greenlit opt. A (unify the KPI catalog). Executed + validated (supervised VM run, backup `pre-kpi-unification`):
+- **`sys_kpi_definitions` 0→243** — the 4 legacy KPI levels unified (process 81 + job 45 + org_unit 100 + employee 17), each 1:1 from its definitional columns, all GLOBAL, polarity in-domain. Seeds `02_kpi_catalog_unification.sql`, idempotent.
+- **`sys_kpi_targets` 0→248** — employee-level targets, kpi-FK resolved (17 codes now present), user-FK via `LEGACY_EMP::` (138 RTL users / 9 KPIs used), tenant from the resolved sys_user. 164 source rows skipped = collapsed-out tenants (clean boundary). Seed `03_kpi_targets.sql`, idempotent.
+- **Verified**: integration tests 12/12, `db:validate` 7/7 structural PASS (incl. `v_tenant_boundary_violations`), both seeds idempotent (2nd run INSERT 0).
+
+**Still blocked after unification** (the kpi-FK now resolves, but the SECOND FK doesn't):
+- `sys_organization_unit_kpi_templates` — org_unit FK: legacy `org_unit_kpis` keys a design-layer template, sys imported the instance-layer org_units (no bridge). → needs an org-unit template↔instance decision.
+- `sys_position_kpi_requirements` — position FK: `job_kpis.job_template_id` has no key on `sys_positions` (job→position bridge absent). → needs the job→position bridge milestone.
+These two remain NEEDS-DECISION (second-FK blockers), independent of the KPI catalog.
+
 ## §6 — Decision points for Enzo
 
 1. **Run the KPI-cluster reconciliation now?** (§3, VM, ~30-60 min, idempotent, backup-guarded). Single highest-value unblock; LOW data-integrity risk (test coverage exists), but it is a production write batch → your go.

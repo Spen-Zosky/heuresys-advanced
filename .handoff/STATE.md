@@ -1,6 +1,6 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-02 (S957). **🎉 v1.0.0 GA RELEASED.** `release/v1.0.0` (PR #24) auto-merged to `main` on CI 7/7 green; annotated tag **`v1.0.0`** + public GitHub Release. Working tree pulito. **55 migration** (`000001..000055`, gap 000035 cosmetico), db:migrate ×2 verde + **db:validate 7/7**. Full API suite **576 passed**; CI playwright-smoke 21 passed. Record autoritativo consolidato: **`NEXT_GENERATION_ENTRY_POINT.md`**.
+**Updated**: 2026-06-02 (S957). **🎉 v1.0.0 GA RELEASED** — annotated tag **`v1.0.0`** @ `c7c985a` + public GitHub Release (latest). `release/v1.0.0` (PR #24) merged to `main` on CI green (`edaf399`); a post-merge **showcase-deploy fix** (`c7c985a`, sync-showcase prunes non-portable components — preferences-applier imported @heuresys/shared) made all 7 main workflows green. **55 migration** (`000001..000055`, gap 000035 cosmetico), db:migrate ×2 + **db:validate 7/7**. Full API suite **576 passed**; CI playwright-smoke 21 passed; showcase deploy ✅. Record autoritativo: **`NEXT_GENERATION_ENTRY_POINT.md`**.
 
 ## Last session brief (S957 — v1.0.0 consolidation: WS-4 R1b/V + WS-2 + WS-7)
 

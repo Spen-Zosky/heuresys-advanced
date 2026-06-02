@@ -39,6 +39,10 @@
       "types": "./dist/schemas/organization-units.d.ts",
       "default": "./src/schemas/organization-units.ts"
     },
+    "./schemas/teams": {
+      "types": "./dist/schemas/teams.d.ts",
+      "default": "./src/schemas/teams.ts"
+    },
     "./schemas/skills": {
       "types": "./dist/schemas/skills.d.ts",
       "default": "./src/schemas/skills.ts"

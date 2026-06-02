@@ -103,6 +103,28 @@ ssh oracle-vm-default 'sudo -u postgres pg_dump -d heuresys_platform --table=pub
 - Category (ii) derived-analytics targets — need human derivation-rule decisions.
 - Wave-2/3 watermark/delta design (`brownfield.source_watermarks`) — not designed; every run is full re-stage.
 
+## §7 — Triage S958 (measured): cat(i) is NOT mechanically importable beyond kpi_definitions
+
+A read-only FK match-rate triage (S958, live queries on both DBs) **falsifies the initial "cat(i) ~15-20 deterministic" estimate**. Only `sys_kpi_definitions` was genuinely CLEAN. Every other restant target fails on a required FK — forcing them would create silent-skips / FK-violations (the activity_classification_mappings failure mode).
+
+| Target ← source | Verdict | Decisive FK match-rate |
+|---|---|---|
+| `sys_kpi_definitions` ← `process_kpis` (81) | ✅ **DONE** (S958, `ae34588`) | 81/81 1:1, polarity value-map clean |
+| `sys_organization_unit_kpi_templates` ← `org_unit_kpis` (100) | SOURCE-BLOCKED ×2 | kpi 0/100 + org_unit 0/91 |
+| `sys_position_kpi_requirements` ← `job_kpis` (2000) | SOURCE-BLOCKED ×2 | kpi 0/45 + position 0/162 (no legacy job key on sys_positions) |
+| `sys_kpi_targets` ← `employee_kpi_targets` (412) | SOURCE-BLOCKED (kpi) | kpi 0/17 (user FK fine: 138/138 RTL) |
+| `sys_career_paths` ← `career_paths` (32) | SOURCE-BLOCKED | parent catalog empty (must import first) |
+| `sys_career_path_steps` ← `career_path_levels` (75) | SOURCE-BLOCKED | parent empty + job→position bridge absent |
+| `sys_learning_path_steps` ← `learning_path_courses` (124) | REFERENCE_ONLY confirmed | path 0/20, module 0/60 — correctly operational (ADR-0020), leave it |
+| `sys_user_learning_assignments` ← `*_enrollments` | FK-COMPLEX | user 100% RTL but path/module FK 0/18 & 0/117 |
+
+**Two structural walls (root causes):**
+- **Wall 1 — KPI catalog is single-source.** `sys_kpi_definitions` = only `process_kpis` (codes `BP-NNN-KPI-NN`). The 3 KPI-cluster sources use **disjoint** legacy namespaces (`KPI-NNNN` / `OPER-DIR-A` / `AML-ALERTS`); code overlap = 0, name overlap ≈ 0. → targets 1-3 need the missing KPI catalogs **ingested into `sys_kpi_definitions` first** (a catalog-unification decision: which sources are canonical, how to derive defs from instance-level rows like org_unit_kpis/employee_kpi_targets — NOT a 1:1 import).
+- **Wall 2 — learning catalog is event-sourced.** `sys_learning_paths/modules` were built from operational event rows (`OLDDB::<event>::<id>`), not the legacy `learning_paths`/`courses` catalog. → targets 6-7 reference the canonical catalog id which resolves 0. Re-importing the canonical learning catalog is its own milestone.
+- **Healthy axis**: the employee/user FK resolves 100% for the RTL subset (the unresolved fraction is exactly the collapsed-out SmartFood/EcoNova tenants — a clean, documentable boundary).
+
+**Conclusion**: beyond `kpi_definitions`, cat(i) reconciliation is **NEEDS-DECISION**, not mechanical import. Proceeding requires modeling decisions (KPI catalog unification, canonical learning-catalog re-import, a job→position bridge) — each a scoped milestone with Enzo's semantic authority, NOT an autonomous 1:1 import (mapping-card rule / no-fabrication). The original cat(ii) "needs-decision" set is therefore larger than first measured; cat(i) "deterministic" was over-optimistic.
+
 ## §6 — Decision points for Enzo
 
 1. **Run the KPI-cluster reconciliation now?** (§3, VM, ~30-60 min, idempotent, backup-guarded). Single highest-value unblock; LOW data-integrity risk (test coverage exists), but it is a production write batch → your go.

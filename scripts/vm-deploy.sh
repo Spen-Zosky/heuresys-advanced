@@ -25,10 +25,15 @@ RESTART_API="${RESTART_API:-1}"   # set 0 to skip restarting the API (web-only d
 log() { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
 
 # Node via nvm (the services run on this Node; argon2 native ABI must match).
+# nvm.sh is NOT safe under set -e/-u/pipefail (it runs commands that return
+# non-zero by design, e.g. nvm_ls_current) — relax strict mode around it.
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
-set +u; # shellcheck disable=SC1091
-. "$NVM_DIR/nvm.sh"; set -u
+set +euo pipefail
+# shellcheck disable=SC1091
+. "$NVM_DIR/nvm.sh"
+nvm use "$NODE_MAJOR" >/dev/null
 NODE_BIN="$(dirname "$(nvm which "$NODE_MAJOR")")"
+set -euo pipefail
 [ -x "$NODE_BIN/node" ] || { echo "nvm Node $NODE_MAJOR not resolved" >&2; exit 1; }
 export PATH="$NODE_BIN:$PATH"
 echo "node=$(node -v) pnpm=$(pnpm -v)"

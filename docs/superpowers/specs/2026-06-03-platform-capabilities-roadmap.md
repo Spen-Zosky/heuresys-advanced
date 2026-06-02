@@ -80,7 +80,7 @@ All 5 approved (Enzo, S958). Sequence (CLI-decided): **① BI → ② AI → ③
 
 | # | Capability | Design/spec | Plan | Implementation |
 |---|---|---|---|---|
-| ① | BI / analytics | — (next to design) | — | — |
+| ① | BI / analytics | ✅ `2026-06-03-bi-analytics-design.md` | pending Enzo review | — |
 | ② | AI semantic matching | ✅ `2026-06-03-ai-semantic-matching-design.md` | pending Enzo review | — |
 | ③ | data-mining | — | — | — |
 | ④ | CMS | — | — | — |

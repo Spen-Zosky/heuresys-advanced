@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Heuresys Advanced HRMS/BPM Platform v5** — pnpm monorepo bootstrapped 2026-05-16. Backend-heavy: Fastify 5 API on top of PostgreSQL 16 with a Zod-typed contract layer shared with a Next.js 15 admin SPA + ESS portal (both shipped — MVP-2a/2b).
 
-The project is well past its initial build-out: **MVP-0/1/2a/2b/3 are closed and MVP-4 is in progress**. The API ships ~58 business modules + auth (~272 live `/v1/*` endpoints, 52 integration test files hitting the real DB through the SSH tunnel); the Next.js web app ships the admin SPA (MVP-2a) and ESS portal (MVP-2b); a static brand showcase is deployed to GitHub Pages. **The live source of truth for project state is `docs/kb/SOT_STATE.md`** (CLI-owned) — open backlog in `docs/kb/SOT_BACKLOG.md`, technical debts in `docs/kb/DEBT_REGISTER.md`. Historical session narrative is in `HANDOFF.md`; architectural decisions in `docs/architecture/adr/`. The invariants, module pattern, security model, and Design System sections below remain authoritative.
+The project is at **`v1.0.0` GA baseline** (released S957, 2026-06-02): MVP-0→4 + the RBAC/UIX/Perspectives epic are closed. The API ships ~60 business modules + auth (~279 live `/v1/*` endpoints, 576 integration tests across ~82 files, **60/60 modules covered**, hitting the real DB through the SSH tunnel); the Next.js web app ships the admin SPA (MVP-2a) + ESS portal (MVP-2b) + teams "my team" scope axis; a static brand showcase is deployed to GitHub Pages. The VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`). **The live source of truth for project state is `docs/kb/SOT_STATE.md`** (CLI-owned) — open backlog in `docs/kb/SOT_BACKLOG.md`, technical debts in `docs/kb/DEBT_REGISTER.md`. Historical session narrative is in `HANDOFF.md`; architectural decisions in `docs/architecture/adr/`. The invariants, module pattern, security model, and Design System sections below remain authoritative.
 
 **Data provenance** (ADR-0023): the `sys.*` business tables are populated by a deterministic brownfield ingestion pipeline whose **authoritative data source** is the legacy `heuresys-evo` Docker DB (`heuresys_evo_platform_db` / db `heuresys_platform`) — synthetic case-study data, no real PII (I12). The advanced `sys.*` schema is the **structural authority** (the legacy adapts to it). The RTL_BANK reference tenant was rebuilt (S950) by matching+wiring real legacy records (161 users / 2 active tenants). See `docs/kb/SOT_STATE.md` §4.
 
@@ -60,13 +60,13 @@ The `.env` file is **gitignored** but real; `.env.example` has three runtime blo
 ```
 heuresys-advanced/
 ├── apps/
-│   ├── api/       Fastify 5 + Zod + Argon2id + RS256 JWT — ~58 business modules + auth shipped (MVP-1→4)
+│   ├── api/       Fastify 5 + Zod + Argon2id + RS256 JWT — ~60 business modules + auth shipped (MVP-1→4, v1.0.0)
 │   ├── web/       Next.js 15 App Router — admin SPA + ESS portal shipped (MVP-2a/2b)
 │   └── showcase/  Next.js 15 static export — brand identity site, GitHub Pages deploy
 ├── packages/
 │   └── shared/   @heuresys/shared — Zod schemas + TS types, subpath exports per module
 ├── db/
-│   ├── migrations/  43 idempotent SQL files (000001..000044, 000035 gap cosmetic)
+│   ├── migrations/  54 idempotent SQL files (000001..000055, 000035 gap cosmetic)
 │   ├── seeds/       CSV + INSERT for RTL_BANK_REFERENCE tenant
 │   └── scripts/     PS1 + SH twins: create/migrate/reset/validate/seed
 ├── docs/         CANONICAL planning + ADR + brownfield (8 priming docs — read on session start)
@@ -176,7 +176,7 @@ When a new requirement seems to conflict with these, **stop and ask** rather tha
 
 ## Database migrations
 
-43 numbered SQL files in `db/migrations/000001_*.sql..000044_*.sql` (the `000035` gap is cosmetic and documented). Every migration is **idempotent** — `CREATE TABLE IF NOT EXISTS`, `INSERT … ON CONFLICT DO NOTHING`, etc. — and running the full set twice produces an empty `pg_dump` diff (proven and recorded). When adding a new migration, follow the existing pattern: next sequential number, single descriptive file, idempotent body, no destructive ops.
+54 numbered SQL files in `db/migrations/000001_*.sql..000055_*.sql` (the `000035` gap is cosmetic and documented). Every migration is **idempotent** — `CREATE TABLE IF NOT EXISTS`, `INSERT … ON CONFLICT DO NOTHING`, etc. — and running the full set twice produces an empty `pg_dump` diff (proven and recorded). When adding a new migration, follow the existing pattern: next sequential number, single descriptive file, idempotent body, no destructive ops.
 
 ## What NOT to touch
 

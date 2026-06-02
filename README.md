@@ -2,8 +2,8 @@
 
 Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on PostgreSQL 16, Next.js 15 admin SPA + ESS portal, shared Zod contracts. Multi-tenant via API middleware (no Postgres RLS), 8 roles × 99 permissions × 394 mappings seeded.
 
-> **Status — 2026-05-28 (HEAD `e744a8a` on `main`, tag `v0.4.1-housekeeping-closed`)**
-> MVP-1 + MVP-2a + MVP-2b + MVP-3 **closed**; **MVP-4 in progress**. 272 live API endpoints · 341+ vitest tests · 47 web routes live · 61 Playwright E2E tests on live OCI VM data · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 13/19 IMPORT pragmatic + 6 residual CW-B60 · `migrate.sh` re-runnable end-to-end (43 migrations, idempotent ×2).
+> **Status — 2026-06-02 · `v1.0.0` GA (tag `v1.0.0` on `main`)**
+> MVP-1 → MVP-4 + RBAC/UIX/Perspectives epic **closed**; **v1.0.0 GA released**. ~279 live API endpoints · **576 vitest tests (60/60 modules covered)** · 65 web routes · 21 Playwright E2E specs on live OCI VM data · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 13/19 IMPORT · **54 migrations** (`000001..000055`, idempotent ×2, `db:validate` 7/7) · 161 users / 2 tenants / 24 teams. VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`).
 > **Live state SoT**: `docs/kb/SOT_STATE.md` (CLI-owned) · backlog `docs/kb/SOT_BACKLOG.md` · debts `docs/kb/DEBT_REGISTER.md`. The headline numbers below are the MVP-3 closure snapshot; `SOT_STATE.md` carries the running counts.
 
 ---
@@ -13,12 +13,12 @@ Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on Po
 | Layer | Count | Notes |
 |---|---|---|
 | API endpoints | **272** business + 2 health | 14 auth+mfa · 17 me ESS · 236 business · 2 health · 1 dashboard aggregator · 4 compensation |
-| API modules | **58** | Fastify 5 routes registered under `/v1/*` |
-| Shared Zod schemas | **427** in 59 subpath exports | `@heuresys/shared` workspace package |
-| DB tables | **~110** in `sys.*` + 12 views + 18 staging.wave1_* + 7 brownfield aux + 4 audit aux | 43 idempotent migrations |
-| Integration tests | **341 PASS / 1 FAIL** (skills:131 pre-existente known issue) **/ 5 SKIP** | vitest single-thread, real DB via SSH tunnel |
-| Web routes shipped | **47** | 30 admin + 14 ESS + 1 login + 1 system-health + 1 root router |
-| Playwright E2E tests | **61** in 20 spec | live-data, storageState-backed, 5 personas |
+| API modules | **60** | Fastify 5 routes registered under `/v1/*` |
+| Shared Zod schemas | **62 modules** in 62 subpath exports | `@heuresys/shared` workspace package |
+| DB tables | **~138** in `sys.*` + 11 views + 18 staging.wave1_* + 7 brownfield aux + 4 audit aux | 54 idempotent migrations (`000001..000055`) |
+| Integration tests | **576 PASS / 5 SKIP** (60/60 modules covered, WS-5 backfill) | vitest single-thread, real DB via SSH tunnel |
+| Web routes shipped | **65** | admin + 15 ESS `/me/*` + teams + login + system-health + root router |
+| Playwright E2E tests | **21 spec** | live-data, storageState-backed, 5 personas |
 | Design system components | **14+ dashboard widgets** + brand mark/wordmark + Shell/Header/Sidebar/Footer | `@heuresys/ui` npm-published `^0.1.1` (post-X18) · live Storybook: **[spen-zosky.github.io/ux-design-shared](https://spen-zosky.github.io/ux-design-shared/)** |
 | Showcase site | **19 routes** | Static Next.js 15 export, GitHub Pages deploy via `.github/workflows/showcase.yml` |
 

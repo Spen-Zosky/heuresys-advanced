@@ -91,7 +91,10 @@ describe("/v1/brownfield/wave-executor", () => {
     expect(r.statusCode).toBe(403);
   });
 
-  it("POST run with wave=2 → 400 WAVE_NOT_IMPLEMENTED", async () => {
+  it("POST run with wave=2 (no mappings yet) → 201, completes as an empty no-op (WS-2 wave-agnostic)", async () => {
+    // WS-2 removed the hard wave!=1 guard: the engine is data-driven from brownfield.table_mappings.
+    // Wave 2 has no mapping rows yet (source-discovery-gated), so a DRY_RUN run is accepted and
+    // completes with 0 staged/upserted rows — no WAVE_NOT_IMPLEMENTED, no Wave-1 side effects.
     const r = await suite.app.inject({
       method: "POST", url: "/v1/brownfield/wave-executor/runs",
       headers: {
@@ -101,7 +104,10 @@ describe("/v1/brownfield/wave-executor", () => {
       },
       payload: { wave: 2, mode: "DRY_RUN" },
     });
-    expect([400, 422]).toContain(r.statusCode);
+    expect(r.statusCode).toBe(201);
+    const run = r.json() as { wave: number; state: string };
+    expect(run.wave).toBe(2);
+    expect(run.state).toBe("COMPLETE");
   });
 
   it.skipIf(!REAL_EXECUTE)("PLATFORM_ADMIN triggers a real EXECUTE wave 1 (debug-capped)", { timeout: 1_800_000 }, async () => {

@@ -25,11 +25,11 @@ import type {
 import {
   findWaveRun,
   getColumnMappingsForTableMapping,
-  getWave1Mappings,
+  getWaveMappings,
   resolvePlatformTenantId,
   setWaveStats,
   stagingTableFor,
-  truncateAllWave1Staging,
+  truncateAllWaveStaging,
   writeAuditApproval,
   type ColumnMappingRow,
   type TableMappingRow,
@@ -170,9 +170,10 @@ export async function executeStage(
   pool: Pool,
   runId: string,
   mappings: TableMappingRow[],
+  wave: number,
 ): Promise<WaveStageStats[]> {
-  // Truncate all 17 staging tables to ensure a clean run.
-  await truncateAllWave1Staging(pool);
+  // Truncate this wave's staging tables to ensure a clean run.
+  await truncateAllWaveStaging(pool, wave);
 
   const cap = debugLimit();
 
@@ -180,7 +181,7 @@ export async function executeStage(
   const statsByTarget = new Map<string, WaveStageStats>();
 
   for (const m of mappings) {
-    const stagingTable = stagingTableFor(m.target_table);
+    const stagingTable = stagingTableFor(m.target_table, m.wave);
     if (!stagingTable) continue;
     const tally = statsByTarget.get(m.target_table) ?? {
       target: m.target_table,
@@ -270,7 +271,7 @@ export async function executeStage(
  * via the stats argument), to avoid wasting work on empty members of the
  * canonical 18-table set.
  */
-export async function analyzeWave1Staging(
+export async function analyzeWaveStaging(
   pool: Pool,
   stats: WaveStageStats[],
 ): Promise<void> {
@@ -324,7 +325,7 @@ export async function executeValidate(
   const statsByTarget = new Map(stats.map((s) => [s.target, { ...s }]));
 
   for (const m of mappings) {
-    const stagingTable = stagingTableFor(m.target_table);
+    const stagingTable = stagingTableFor(m.target_table, m.wave);
     if (!stagingTable) continue;
     const targetMeta = await getMeta(m.target_table);
     const tally = statsByTarget.get(m.target_table)!;
@@ -462,7 +463,7 @@ export async function executeApprove(
   let approved = 0;
   let rejected = 0;
   for (const m of mappings) {
-    const stagingTable = stagingTableFor(m.target_table);
+    const stagingTable = stagingTableFor(m.target_table, m.wave);
     if (!stagingTable) continue;
     const counts = await pool.query<{ total: string; failed: string }>(
       `SELECT count(*)::text AS total,
@@ -760,7 +761,7 @@ export async function executeUpsert(
   }
 
   for (const m of orderedMappings) {
-    const stagingTable = stagingTableFor(m.target_table);
+    const stagingTable = stagingTableFor(m.target_table, m.wave);
     if (!stagingTable) continue;
     const targetMeta = await getMeta(m.target_table);
     if (targetMeta.columns.size === 0) continue;
@@ -1327,20 +1328,22 @@ function serializeForPg(v: unknown): unknown {
 export async function runAcceptanceChecks(
   pool: Pool,
   runId: string,
+  wave: number,
 ): Promise<Array<{ name: string; query: string; expected: string; actual: string; pass: boolean }>> {
   const checks: Array<{ name: string; query: string; expected: string; actual: string; pass: boolean }> = [];
 
-  // 1. All wave 1 mappings APPROVED
+  // 1. All mappings for this wave APPROVED. The >=88 floor is a Wave-1 invariant (88 source
+  //    tables); other waves report this count informationally (their floor lands with their data).
   const q1 = `SELECT count(*)::text AS n FROM brownfield.table_mappings
-              WHERE table_mapping_wave = 1 AND table_mapping_approval_status = 'APPROVED'
+              WHERE table_mapping_wave = $1 AND table_mapping_approval_status = 'APPROVED'
                 AND table_mapping_classification = 'IMPORT'`;
-  const r1 = await pool.query<{ n: string }>(q1);
+  const r1 = await pool.query<{ n: string }>(q1, [wave]);
   checks.push({
-    name: "wave_1_mappings_approved",
+    name: `wave_${wave}_mappings_approved`,
     query: q1,
-    expected: ">= 88",
+    expected: wave === 1 ? ">= 88" : "informational",
     actual: r1.rows[0]!.n,
-    pass: Number(r1.rows[0]!.n) >= 88,
+    pass: wave === 1 ? Number(r1.rows[0]!.n) >= 88 : true,
   });
 
   // 2. No validation failures for this run
@@ -1375,8 +1378,8 @@ export async function runAcceptanceChecks(
 // Helpers exposed to service.ts
 // -----------------------------------------------------------------------------
 
-export async function loadMappings(pool: Pool): Promise<TableMappingRow[]> {
-  return getWave1Mappings(pool);
+export async function loadMappings(pool: Pool, wave: number): Promise<TableMappingRow[]> {
+  return getWaveMappings(pool, wave);
 }
 
 export async function refreshRun(pool: Pool, runId: string) {

@@ -18,7 +18,7 @@ import {
   updateWaveState,
 } from "./repository.js";
 import {
-  analyzeWave1Staging,
+  analyzeWaveStaging,
   executeApprove,
   executeStage,
   executeUpsert,
@@ -52,9 +52,10 @@ export const brownfieldWaveExecutorService = {
 
   async trigger(actor: ActorContext, body: TriggerWaveBody): Promise<WaveExecutorRun> {
     if (!isPlatform(actor)) throw new ForbiddenError("PLATFORM_ADMIN required");
-    if (body.wave !== 1) {
-      throw new ValidationError(`Wave ${body.wave} executor not implemented (Wave 1 only)`, "WAVE_NOT_IMPLEMENTED");
-    }
+    // Wave-agnostic (WS-2): the engine is data-driven from brownfield.table_mappings. Any wave with
+    // no mapping rows yields an empty, COMPLETE no-op run (Wave 2+ mappings are authored when their
+    // sources are loaded — source-discovery-gated, see NEXT_GENERATION_ENTRY_POINT §13). The Zod
+    // TriggerWaveBody schema already bounds `wave` to a positive integer.
     const mode = body.mode ?? (body.dryRun ? "DRY_RUN" : "EXECUTE");
     const run = await createWaveRun(pool, body.wave, mode, actor.userId);
     await logRunEvent(pool, {
@@ -70,14 +71,14 @@ export const brownfieldWaveExecutorService = {
       // STAGING phase: ensure legacy_mirror is present + ingested, then stage rows.
       await updateWaveState(pool, run.runId, "STAGING");
       await logRunEvent(pool, { runId: run.runId, level: "INFO", message: "STATE_STAGING" });
-      await ensureLegacyMirrorDDL(pool);
+      await ensureLegacyMirrorDDL(pool, body.wave);
       const legacyCount = await countLegacyMirrorRows(pool);
       if (legacyCount === 0) {
         // Need to import dumps the first time.
         await loadLegacyMirrorData(pool);
       }
-      const mappings = await loadMappings(pool);
-      const stageStats = await executeStage(pool, run.runId, mappings);
+      const mappings = await loadMappings(pool, body.wave);
+      const stageStats = await executeStage(pool, run.runId, mappings, body.wave);
       await logRunEvent(pool, {
         runId: run.runId,
         level: "INFO",
@@ -93,7 +94,7 @@ export const brownfieldWaveExecutorService = {
       // Benefit: avoids minutes-long stalls due to stale cardinality estimates
       // (REPORT X1 observed 17-min stall on wave1_activity_classifications).
       const analyzeT0 = Date.now();
-      await analyzeWave1Staging(pool, stageStats);
+      await analyzeWaveStaging(pool, stageStats);
       await logRunEvent(pool, {
         runId: run.runId,
         level: "INFO",
@@ -180,7 +181,7 @@ export const brownfieldWaveExecutorService = {
     if (!isPlatform(actor)) throw new ForbiddenError("PLATFORM_ADMIN required");
     const r = await findWaveRun(pool, runId);
     if (!r) throw new NotFoundError("WaveExecutorRun");
-    const checks = await runAcceptanceChecks(pool, runId);
+    const checks = await runAcceptanceChecks(pool, runId, r.wave);
     return {
       runId,
       wave: r.wave,

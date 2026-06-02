@@ -106,6 +106,7 @@ function skillCategoriesMeta(): TargetMeta {
 function skillCategoriesMapping(): TableMappingRow {
   return {
     table_mapping_id: "00000000-0000-0000-0000-00000060a001",
+    wave: 1,
     source_table_id: "00000000-0000-0000-0000-00000060a002",
     source_table_schema: "legacy_mirror",
     source_table_name: "skill_categories_legacy",

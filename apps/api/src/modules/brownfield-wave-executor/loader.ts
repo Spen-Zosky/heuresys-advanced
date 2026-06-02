@@ -46,16 +46,28 @@ export function resolveLegacyDataDir(): string {
  * permissive — the goal is to receive any INSERT from pg_dump without
  * constraint conflicts.
  */
-export async function ensureLegacyMirrorDDL(q: DbConnector): Promise<{ tables: number }> {
+/**
+ * Per-wave legacy source-domain whitelist. Wave 1 = the 7 domains whose tables back the Wave-1
+ * mappings. A wave with no entry has no source domains loaded yet (source-discovery-gated) →
+ * ensureLegacyMirrorDDL mirrors 0 tables for it (additive, Wave-1-safe).
+ */
+const WAVE_SOURCE_DOMAINS: Record<number, readonly string[]> = {
+  1: ["ESKAP", "SKILGRO", "INDOOR", "ITLAB", "PROGOV", "OPOURSKA", "H2R"],
+};
+
+export async function ensureLegacyMirrorDDL(q: DbConnector, wave: number): Promise<{ tables: number }> {
   await q.query(`CREATE SCHEMA IF NOT EXISTS legacy_mirror`);
+
+  const domains = WAVE_SOURCE_DOMAINS[wave] ?? [];
+  if (domains.length === 0) return { tables: 0 };
 
   // Pull source_tables + source_columns from brownfield.* (already populated by subagent A).
   const sourceTables = await q.query<{ source_table_id: string; source_table_name: string }>(
     `SELECT source_table_id, source_table_name
        FROM brownfield.source_tables
-      WHERE source_table_domain IN
-        ('ESKAP','SKILGRO','INDOOR','ITLAB','PROGOV','OPOURSKA','H2R')
+      WHERE source_table_domain = ANY($1::text[])
       ORDER BY source_table_name`,
+    [domains],
   );
 
   let created = 0;

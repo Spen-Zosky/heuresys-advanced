@@ -76,17 +76,28 @@ With §5.1+§5.2 applied, the INSERT then failed a **foreign key** constraint (`
 
 **IMPORTANT — gitignored artifact**: `db/seeds/brownfield/wave1/legacy_data/` is gitignored (`.gitignore:21`), consistent with all sibling dumps (large, reproducible from the brownfield pipeline). The new dump is therefore a **local-disk artifact**, not committed. For VM/CI reproducibility the same one-line `pg_dump` re-export must be run there (command recorded in the dump's header comment). This is flagged for human review.
 
+## §5.4 — RESOLVED 2026-06-02 (migration 000056 — reclassify, not redesign)
+
+The §5.3 blocker is closed by **reclassifying the mis-authored card IMPORT → REFERENCE_ONLY** (migration `000056_reclassify_activity_class_mapping_card.sql`, same pattern as ADR-0020 / mig 000044), rather than taking either §5.3 redesign option. Evidence-based rationale:
+
+- The legacy fact (`industry_ccnl_mapping`: industry-code → CCNL/labor-contract) is an **industry→compensation** mapping. It is **already modeled** by `sys_compensation_bands` (+ `sys_position_compensation_profiles`, 159 rows). It is NOT a classification↔classification crosswalk and has **no correct** target in `sys_activity_classification_mappings` (mig 000007 requires both source_id and target_id ∈ `sys_activity_classifications`).
+- "Re-point the card to a correct target" → no `industry→CCNL` mapping table exists to re-point to (the fact is already in compensation) → no clean destination.
+- "Alter the shipped 000007 FK to reference `sys_compensation_bands`" → **HIGH regression risk**: the `activity-classification-mappings` API service `acExists()`-checks BOTH source and target against `sys_activity_classifications`, asserted by `activity-classification-mappings.integration.test.ts`. Altering the FK breaks the shipped API contract.
+- **Chosen (reclassify)**: zero schema/API change; removes the permanent FK-violation import attempt + silent-skip noise; idempotent + **reversible** (`REFERENCE_ONLY → IMPORT` restores prior state). `sys_activity_classification_mappings` stays **EMPTY-BY-DESIGN** until a real ATECO↔NACE crosswalk source is authored (candidates: `occupation_industry_classifications` ≈4565, `industry_occupation_mapping` ≈15 — future work, not a regression).
+
+Verified post-000056: card classification = `REFERENCE_ONLY`, table count unchanged (0), twice-run idempotent (2nd run pre=0), `activity-classification-mappings` + `brownfield-wave-executor` integration tests green (10 passed / 1 skip). **Reversible decision, flagged for Enzo's review** (reclassify vs a future FK redesign if the table is to be populated from a genuine crosswalk).
+
 ## §6 — Downstream cascade impact
 
 - `sys_skill_categories` populates (the distinct legacy category codes, `family_id` NULL; verified 0 → 6 on the live source) → unblocks any downstream consumer keyed on skill categories.
-- `sys_activity_classification_mappings` remains 0 — BLOCKED by the §5.3 mapping-vs-schema FK conflict.
+- `sys_activity_classification_mappings` remains 0 **EMPTY-BY-DESIGN** — §5.3 FK conflict RESOLVED by reclassify (§5.4, mig 000056); the table awaits a genuine ATECO↔NACE crosswalk source, not a legacy import defect.
 
 ## §7 — Acceptance criteria
 
 1. Migration 000051 applies idempotently (twice-run `pg_dump` diff empty). ✓
 2. `information_schema.columns` shows `skill_category_family_id` `is_nullable = YES`. ✓
 3. Post Wave-1 run: `sys_skill_categories` count > 0. ✓ — 0 → 6 (distinct live category codes; see §10).
-4. Post Wave-1 run: `sys_activity_classification_mappings` count > 0. ✗ — remains 0, BLOCKED by a mapping-vs-schema FK conflict (see §5.2 + §5.3); the source-dump + 000052 fixes were necessary but not sufficient. Re-scoped to a follow-up decision.
+4. Post Wave-1 run: `sys_activity_classification_mappings` count > 0. ⚖️ RE-SCOPED — the §5.3 mapping-vs-schema FK conflict is **RESOLVED 2026-06-02 by reclassify** (§5.4, mig 000056): the mis-authored card → REFERENCE_ONLY, table stays EMPTY-BY-DESIGN (no correct legacy crosswalk source). "count > 0" is no longer the right criterion — the card was mis-targeted, not unpopulated.
 5. FK constraint to `sys_skill_families` intact (NULL allowed, non-existent uuid still rejected).
 6. No regression: the 13 already-populated Wave-1 targets do not decrease. ✓ (see §10)
 7. `sys_skill_families` (77 rows) preserved.

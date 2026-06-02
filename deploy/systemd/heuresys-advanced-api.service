@@ -1,7 +1,7 @@
 # Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh.
 # Do NOT install this file directly; run the bootstrap script instead.
 [Unit]
-Description=Heuresys Advanced — API (Fastify + Zod, dev mode tsx watch)
+Description=Heuresys Advanced — API (Fastify + Zod, prod / node dist bundle)
 Documentation=https://github.com/Spen-Zosky/heuresys-advanced
 After=network-online.target postgresql.service
 Wants=network-online.target
@@ -14,10 +14,14 @@ WorkingDirectory=@@REPO_DIR@@/apps/api
 # PATH points at the nvm-managed Node (>=22, required by @heuresys/ui ->
 # camera-controls). The exact bin dir is resolved at install time.
 Environment=PATH=@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
-Environment=NODE_ENV=development
+# PROD: run the pre-built bundle (dist/server.js, produced by `pnpm --filter @heuresys/api build`
+# = tsup) with plain node — no tsx, no watcher. bootstrap / vm-deploy.sh build it before start.
+Environment=NODE_ENV=production
 # API port + DB connection come from the repo-root .env (PORT, POSTGRES_*).
-# pnpm is the corepack shim in the nvm Node bin dir (no system pnpm assumed).
-ExecStart=@@NODE_BIN@@/pnpm dev
+# HEURESYS_REPO_ROOT lets the BUNDLED env.ts locate .env + .secrets/*.pem (the bundle sits at a
+# different depth than src/config/env.ts, so its import.meta.url-relative calc can't be used).
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
+ExecStart=@@NODE_BIN@@/node dist/server.js
 Restart=on-failure
 RestartSec=5
 TimeoutStopSec=15

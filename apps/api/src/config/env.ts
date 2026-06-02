@@ -17,7 +17,13 @@ import { z } from "zod";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const repoRoot = resolve(__dirname, "..", "..", "..", "..");
+// repoRoot normally derives from this file's location (apps/api/src/config → 4 levels up). When the
+// API is BUNDLED for production (the single dist/server.js sits at a different depth), that relative
+// calc is wrong, so allow an explicit override via HEURESYS_REPO_ROOT (set by the prod systemd
+// unit). Dev/test leave it unset → the cwd-independent import.meta.url calc is used, unchanged.
+const repoRoot = process.env.HEURESYS_REPO_ROOT
+  ? resolve(process.env.HEURESYS_REPO_ROOT)
+  : resolve(__dirname, "..", "..", "..", "..");
 const envPath = resolve(repoRoot, ".env");
 if (existsSync(envPath)) {
   dotenvConfig({ path: envPath });

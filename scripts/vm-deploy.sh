@@ -51,9 +51,11 @@ log "deps: pnpm install --frozen-lockfile"
 cd "$REPO_DIR"
 pnpm install --frozen-lockfile
 
-# 3. Production web build. NEXT_PUBLIC_* are inlined at BUILD time and MUST match
-#    the systemd unit's values — derived here from PUBLIC_HOST/API_PORT.
-log "build: production web (next build)"
+# 3. Production builds: API (tsup bundle → node dist/server.js) + web (next build).
+#    Web NEXT_PUBLIC_* are inlined at BUILD time and MUST match the systemd unit's
+#    values — derived here from PUBLIC_HOST/API_PORT.
+log "build: production api (tsup) + web (next build)"
+pnpm --filter @heuresys/api build
 NODE_ENV=production \
 NEXT_PUBLIC_API_PROXY_BASE_URL="http://localhost:$API_PORT" \
 NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \

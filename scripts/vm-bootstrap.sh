@@ -116,11 +116,13 @@ cd "$REPO_DIR"
 "$NODE_BIN/pnpm" --version       # pin via package.json packageManager (corepack)
 "$NODE_BIN/pnpm" install --frozen-lockfile
 
-# 5b. Production build of the web app (the VM is the PROD environment, not dev —
-#     see SOT). `next start` serves this pre-built output → instant pages, no
-#     on-demand compile. NEXT_PUBLIC_* are inlined HERE at build time (must match
-#     the systemd unit's values), derived from PUBLIC_HOST/API_PORT.
-log "build: production web (next build)"
+# 5b. Production builds (the VM is the PROD environment, not dev — see SOT).
+#     - API: tsup bundle (dist/server.js) → run with plain `node`, no tsx/watcher.
+#     - Web: `next build` → `next start` serves the pre-built output (instant pages).
+#     Web NEXT_PUBLIC_* are inlined HERE at build time (must match the systemd unit's
+#     values), derived from PUBLIC_HOST/API_PORT.
+log "build: production api (tsup) + web (next build)"
+"$NODE_BIN/pnpm" --filter @heuresys/api build
 NODE_ENV=production \
 NEXT_PUBLIC_API_PROXY_BASE_URL="http://localhost:$API_PORT" \
 NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \

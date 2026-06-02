@@ -68,4 +68,5 @@ export * from "./schemas/me.js";
 export * from "./schemas/me-preferences.js";
 export * from "./schemas/compensation.js";
 export * from "./schemas/dashboard.js";
+export * from "./schemas/analytics.js";
 export * from "./schemas/observability.js";

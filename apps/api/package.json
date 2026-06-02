@@ -1,6 +1,6 @@
 {
   "name": "@heuresys/api",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "description": "Heuresys Advanced — Fastify 5 API (58 modules, 272 endpoints, MVP-1 + ESS MVP-2b + MFA TOTP MVP-3 + brownfield-wave-executor state machine 8 stati)",

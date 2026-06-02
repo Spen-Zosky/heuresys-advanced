@@ -1,6 +1,6 @@
 {
   "name": "@heuresys/web",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Heuresys Advanced — Next.js 15 App Router admin console (MVP-2a) + Employee Self-Service Portal (MVP-2b), bilingual it/en",
   "scripts": {

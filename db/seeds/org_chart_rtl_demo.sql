@@ -16,12 +16,14 @@ DECLARE
   v_nodes  int;
   v_edges  int;
 BEGIN
-  SELECT user_tenant_id INTO v_tenant
-    FROM sys.sys_users
-   WHERE lower(user_email) = 'tenant_admin_test@rtl-bank.test'
+  -- Canonical tenant lookup by code (the old tenant_admin_test@rtl-bank.test account was deleted
+  -- in the S950 RTL rebuild — that stale email is why the org-chart graph went un-regenerated).
+  SELECT tenant_id INTO v_tenant
+    FROM sys.sys_tenancies
+   WHERE tenant_code = 'RTL_BANK'
    LIMIT 1;
   IF v_tenant IS NULL THEN
-    RAISE NOTICE 'org_chart_rtl_demo: RTL tenant not found — skipping';
+    RAISE NOTICE 'org_chart_rtl_demo: RTL_BANK tenant not found — skipping';
     RETURN;
   END IF;
 

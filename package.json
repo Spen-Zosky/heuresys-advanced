@@ -1,6 +1,6 @@
 {
   "name": "heuresys-advanced",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Heuresys Advanced HRMS/BPM Platform v5 — monorepo (Fastify API + Next.js 15 admin/ESS + shared schemas + DB migrations)",
   "license": "UNLICENSED",

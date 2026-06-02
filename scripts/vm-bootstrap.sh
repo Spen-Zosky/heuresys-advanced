@@ -116,6 +116,16 @@ cd "$REPO_DIR"
 "$NODE_BIN/pnpm" --version       # pin via package.json packageManager (corepack)
 "$NODE_BIN/pnpm" install --frozen-lockfile
 
+# 5b. Production build of the web app (the VM is the PROD environment, not dev —
+#     see SOT). `next start` serves this pre-built output → instant pages, no
+#     on-demand compile. NEXT_PUBLIC_* are inlined HERE at build time (must match
+#     the systemd unit's values), derived from PUBLIC_HOST/API_PORT.
+log "build: production web (next build)"
+NODE_ENV=production \
+NEXT_PUBLIC_API_PROXY_BASE_URL="http://localhost:$API_PORT" \
+NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \
+"$NODE_BIN/pnpm" --filter @heuresys/web build
+
 # 6. Render + install systemd unit templates, then (re)start (idempotent) --
 log "systemd: render templates + install + restart"
 tmp="$(mktemp -d)"

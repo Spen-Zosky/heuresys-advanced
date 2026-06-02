@@ -1,6 +1,6 @@
 # Platform Capabilities — Discovery & Roadmap (AI · Data-mining · Scraping · CMS · BI)
 
-> **Status**: DISCOVERY (S958, 2026-06-03). Decomposition of the 5 new capability directions Enzo raised, into independent sub-projects with evidence-based feasibility. **No code until a sub-project is brainstormed → spec'd → approved.** This is the "decompose first" step (5 independent subsystems, not one project). Each chosen sub-project then gets its own brainstorm → spec → plan → implementation cycle.
+> **Status**: **APPROVED PROGRAM** (Enzo, S958) — all 5 capabilities are in scope, sequence decided by CLI. Decomposition of the 5 capability directions into independent sub-projects with evidence-based feasibility. **No code until each sub-project is brainstormed → spec'd → approved → planned.** Execution model: **capability-by-capability in the sequence below**, each with its own `design → spec → Enzo gate → plan → implementation` cycle (the 5 sum to months of real work — not a single session). All included, none precluded. AI (②) already has a design spec: `2026-06-03-ai-semantic-matching-design.md`.
 > Asset evidence: live DB probe + 60-module map (S958). The platform is HRMS/BPM, position-centric, ~60 API modules, PG16, Fastify 5, Next 15, `@heuresys/ui`. Data is synthetic case-study, no real PII (ADR-0023) — so AI/mining/scraping carry no privacy gate here.
 
 ## How to read this
@@ -74,6 +74,16 @@ Each capability is sized on: **use-cases** (grounded in the real domain + data),
 
 **Rationale for #1 = BI**: it's the only one with the substrate already in place (dashboard/charts/graph/KPI), zero new infrastructure, low risk, and it cashes in the KPI reconciliation just completed. It also surfaces the data that makes ②/③ obviously valuable.
 
-## Next step
+## Execution status & next step
 
-Pick the first sub-project to brainstorm in depth (recommend **① BI**). That triggers the normal flow: clarifying questions (one at a time) → 2-3 design approaches → design → spec (`docs/superpowers/specs/`) → implementation plan. The other four stay queued here until you greenlight each.
+All 5 approved (Enzo, S958). Sequence (CLI-decided): **① BI → ② AI → ③ data-mining → ④ CMS → ⑤ scraping**. Implementation order leads with BI (substrate ready, lowest risk, cashes in the KPI cluster); design/spec can be authored in any order.
+
+| # | Capability | Design/spec | Plan | Implementation |
+|---|---|---|---|---|
+| ① | BI / analytics | — (next to design) | — | — |
+| ② | AI semantic matching | ✅ `2026-06-03-ai-semantic-matching-design.md` | pending Enzo review | — |
+| ③ | data-mining | — | — | — |
+| ④ | CMS | — | — | — |
+| ⑤ | scraping (official sources) | — | — | — |
+
+**Next**: Enzo reviews the AI spec; in parallel CLI designs ① BI (the implementation-lead). Each capability advances design → spec → review → plan → implement. The one external decision pending is the **Voyage API key** for AI's embedding substrate (see AI spec §4).

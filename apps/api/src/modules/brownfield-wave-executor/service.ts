@@ -68,16 +68,21 @@ export const brownfieldWaveExecutorService = {
     // Synchronous orchestration. For long-running waves we accept the
     // request blocking until COMPLETE/FAILED. Tests inject for this.
     try {
-      // STAGING phase: ensure legacy_mirror is present + ingested, then stage rows.
+      // STAGING phase: load this wave's mappings first; only touch legacy_mirror when there is
+      // actually source data to stage. A wave with no approved IMPORT mappings (e.g. Wave 2 before
+      // its sources are loaded — WS-2) is a valid no-op and must NOT require the legacy dumps
+      // (which are gitignored / absent in CI) — it just completes empty.
       await updateWaveState(pool, run.runId, "STAGING");
       await logRunEvent(pool, { runId: run.runId, level: "INFO", message: "STATE_STAGING" });
-      await ensureLegacyMirrorDDL(pool, body.wave);
-      const legacyCount = await countLegacyMirrorRows(pool);
-      if (legacyCount === 0) {
-        // Need to import dumps the first time.
-        await loadLegacyMirrorData(pool);
-      }
       const mappings = await loadMappings(pool, body.wave);
+      if (mappings.length > 0) {
+        await ensureLegacyMirrorDDL(pool, body.wave);
+        const legacyCount = await countLegacyMirrorRows(pool);
+        if (legacyCount === 0) {
+          // Need to import dumps the first time.
+          await loadLegacyMirrorData(pool);
+        }
+      }
       const stageStats = await executeStage(pool, run.runId, mappings, body.wave);
       await logRunEvent(pool, {
         runId: run.runId,

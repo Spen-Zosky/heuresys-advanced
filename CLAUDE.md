@@ -66,7 +66,7 @@ heuresys-advanced/
 ├── packages/
 │   └── shared/   @heuresys/shared — Zod schemas + TS types, subpath exports per module
 ├── db/
-│   ├── migrations/  54 idempotent SQL files (000001..000055, 000035 gap cosmetic)
+│   ├── migrations/  55 idempotent SQL files (000001..000056, 000035 gap cosmetic)
 │   ├── seeds/       CSV + INSERT for RTL_BANK_REFERENCE tenant
 │   └── scripts/     PS1 + SH twins: create/migrate/reset/validate/seed
 ├── docs/         CANONICAL planning + ADR + brownfield (8 priming docs — read on session start)
@@ -176,7 +176,7 @@ When a new requirement seems to conflict with these, **stop and ask** rather tha
 
 ## Database migrations
 
-54 numbered SQL files in `db/migrations/000001_*.sql..000055_*.sql` (the `000035` gap is cosmetic and documented). Every migration is **idempotent** — `CREATE TABLE IF NOT EXISTS`, `INSERT … ON CONFLICT DO NOTHING`, etc. — and running the full set twice produces an empty `pg_dump` diff (proven and recorded). When adding a new migration, follow the existing pattern: next sequential number, single descriptive file, idempotent body, no destructive ops.
+55 numbered SQL files in `db/migrations/000001_*.sql..000056_*.sql` (the `000035` gap is cosmetic and documented). Every migration is **idempotent** — `CREATE TABLE IF NOT EXISTS`, `INSERT … ON CONFLICT DO NOTHING`, etc. — and running the full set twice produces an empty `pg_dump` diff (proven and recorded). When adding a new migration, follow the existing pattern: next sequential number, single descriptive file, idempotent body, no destructive ops.
 
 ## What NOT to touch
 

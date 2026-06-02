@@ -3,7 +3,7 @@
 Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on PostgreSQL 16, Next.js 15 admin SPA + ESS portal, shared Zod contracts. Multi-tenant via API middleware (no Postgres RLS), 8 roles × 99 permissions × 394 mappings seeded.
 
 > **Status — 2026-06-02 · `v1.0.0` GA (tag `v1.0.0` on `main`)**
-> MVP-1 → MVP-4 + RBAC/UIX/Perspectives epic **closed**; **v1.0.0 GA released**. ~279 live API endpoints · **576 vitest tests (60/60 modules covered)** · 65 web routes · 21 Playwright E2E specs on live OCI VM data · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 13/19 IMPORT · **54 migrations** (`000001..000055`, idempotent ×2, `db:validate` 7/7) · 161 users / 2 tenants / 24 teams. VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`).
+> MVP-1 → MVP-4 + RBAC/UIX/Perspectives epic **closed**; **v1.0.0 GA released**. ~279 live API endpoints · **576 vitest tests (60/60 modules covered)** · 65 web routes · 21 Playwright E2E specs on live OCI VM data · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 13/19 IMPORT · **55 migrations** (`000001..000056`, idempotent ×2, `db:validate` 7/7) · 161 users / 2 tenants / 24 teams. VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`).
 > **Live state SoT**: `docs/kb/SOT_STATE.md` (CLI-owned) · backlog `docs/kb/SOT_BACKLOG.md` · debts `docs/kb/DEBT_REGISTER.md`. The headline numbers below are the MVP-3 closure snapshot; `SOT_STATE.md` carries the running counts.
 
 ---
@@ -15,7 +15,7 @@ Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on Po
 | API endpoints | **272** business + 2 health | 14 auth+mfa · 17 me ESS · 236 business · 2 health · 1 dashboard aggregator · 4 compensation |
 | API modules | **60** | Fastify 5 routes registered under `/v1/*` |
 | Shared Zod schemas | **62 modules** in 62 subpath exports | `@heuresys/shared` workspace package |
-| DB tables | **~138** in `sys.*` + 11 views + 18 staging.wave1_* + 7 brownfield aux + 4 audit aux | 54 idempotent migrations (`000001..000055`) |
+| DB tables | **~138** in `sys.*` + 11 views + 18 staging.wave1_* + 7 brownfield aux + 4 audit aux | 55 idempotent migrations (`000001..000056`) |
 | Integration tests | **576 PASS / 5 SKIP** (60/60 modules covered, WS-5 backfill) | vitest single-thread, real DB via SSH tunnel |
 | Web routes shipped | **65** | admin + 15 ESS `/me/*` + teams + login + system-health + root router |
 | Playwright E2E tests | **21 spec** | live-data, storageState-backed, 5 personas |

@@ -42,6 +42,17 @@ if [ -d "$WEB/components" ]; then
   echo "sync-showcase: copying apps/web/src/components -> apps/showcase/src/components"
   mkdir -p "$SHOWCASE/components"
   cp -r "$WEB/components/." "$SHOWCASE/components/"
+  # Portability invariant (ADR-0013 R2): the showcase may only depend on @heuresys/ui + react +
+  # lucide-react. Some apps/web components are app-specific wrappers that import non-portable
+  # modules (@heuresys/shared types, @/lib api/i18n) — e.g. preferences-applier.tsx. Those are
+  # NOT showcase primitives; prune them from the synced copy so `next build` (which typechecks the
+  # whole tree) doesn't choke on a module the showcase intentionally doesn't install.
+  find "$SHOWCASE/components" -type f \( -name '*.tsx' -o -name '*.ts' \) | while read -r f; do
+    if grep -qE "@heuresys/shared|@/lib/" "$f"; then
+      echo "sync-showcase: pruning non-portable component $(basename "$f")"
+      rm -f "$f"
+    fi
+  done
 fi
 
 echo "sync-showcase: done"

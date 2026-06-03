@@ -1,32 +1,33 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-02 (S957). **🎉 v1.0.0 GA RELEASED** (tag `v1.0.0` @ `c7c985a` + public GitHub Release) **+ VM fully PRODUCTION.** main HEAD `2d17928`, synced, working tree clean. **55 migration** (`000001..000055`), db:migrate ×2 + **db:validate 7/7**. Full API suite **576 passed**; CI playwright-smoke 21. Record autoritativo: **`NEXT_GENERATION_ENTRY_POINT.md`**.
+**Updated**: 2026-06-03 (S958). Baseline **v1.0.0 GA** + S958 backlog sweep & capabilities program. main HEAD `b892462`, synced, **11 commit S958 tutti CI-verdi**. **56 migration** (`000001..000057`), db:validate 7/7. Full API suite **582 pass / 6 skip**.
 
-## Last session brief (S957)
+## Last session brief (S958)
 
-**v1.0.0 consolidation (WS-0→WS-7, merged + released):**
-- **WS-4 R1b** (`e16d7f2`, mig 000054/055): `sys_teams`/`sys_team_members` + TEAM_LEADER/TEAM_MEMBER + **"my team" 3rd scope axis** (FK+middleware, never RLS); 24 team/176 membership dal vero org (seed 13, no fixtures); `/v1/teams` + `/v1/me/team` + pagina + sidebar. Integration 11/11.
-- **WS-4 V** (`19be083`): matrice E2E campionata + me-team spec; helper `gotoAuthenticated`; auth.setup hardened. **WS-2** (`9fdd986`): wave-executor wave-agnostic (guard rimosso; data import Wave-2 deferito, source-gated). **WS-7**: viz-graph rigenerato (orfani 161→0), bump 1.0.0, PR #24 merged, post-merge showcase-fix.
+Mandato "tutto il backlog escluso SuccessFactors" + remote-control. Shipped (11 commit):
+- **Doc-drift v1.0.0** allineato (SOT/README/CLAUDE/DEBT) · **WS-3 blocker** risolto: reclassify `activity_classification_mappings` card → REFERENCE_ONLY (mig 000056, ADR-0025 §5.4).
+- **Cluster KPI reconciled** (supervised VM run, backup): `sys_kpi_definitions` 0→**243** (catalogo 4 livelli: process/job/org_unit/employee, seed `db/seeds/reconciliation/01-02`) + `sys_kpi_targets` 0→**248** (seed 03). Triage misurato: resto data-reconciliation = NEEDS-DECISION (`docs/kb/DATA_RECONCILIATION_PLAN.md`).
+- **Programma capability** approvato (5: BI/AI/data-mining/CMS/scraping, `docs/superpowers/specs/2026-06-03-platform-capabilities-roadmap.md`). **① BI Fase 1 API shipped**: modulo `analytics` (`/v1/analytics/{workforce,kpi}`, mig 000057, 6/6 test). **② AI** design+spec pronti.
 
-**Post-release ops (VM = ambiente PROD, disciplina utente):**
-- VM + Mac allineati a v1.0.0; **@heuresys/ui 0.1.1→0.1.2** (fix look). VM **convertita a PRODUZIONE durevole**: web `next start` (commit `ad08951`), **API tsup bundle `node dist/server.js`** (`2d17928`). Template systemd + `vm-bootstrap.sh` + **`scripts/vm-deploy.sh`** tutti prod. Verificato: login 200, /readyz db ok, RBAC 11 ruoli, web /login 0.1s. Deploy futuro: `ssh oracle-vm-default 'cd ~/heuresys-advanced && bash scripts/vm-deploy.sh'`.
+## Top priorities (next session)
 
-## Top priorities (next session — post v1.0.0)
-
-1. **Wave-2/3 data import** (source-discovery-gated): executor pronto (WS-2); serve sorgente Wave-2 + mapping-card (no speculazione). Sblocca `sys_kpi_definitions` → process_kpi/user_kpi_evidence.
-2. **WS-3 blocker** `sys_activity_classification_mappings` — redesign FK-vs-mapping (tocca mig 000007; ADR-0025 §5.3) → DEBT_REGISTER.
-3. **SuccessFactors connector** (escluso v1.0.0 — D-ROAD); **WS-6 deferred** (MFA multi-kind, mobile-matrix, observability-depth); **F7** showcase refactor.
+1. **① BI Fase 1b — frontend** (~M): pagine `/analytics/{workforce,kpi}` + chart `@heuresys/ui` + hook TanStack + E2E Playwright. API già verde; piano base `docs/superpowers/plans/2026-06-03-bi-analytics-phase1.md` (estendere a P1b). +consigliato test analytics tenant-scoped.
+2. **② AI semantic-matching** (~L): piano + impl. Spec `docs/superpowers/specs/2026-06-03-ai-semantic-matching-design.md`. **Blocca su decisione Voyage API key** (o self-host pgvector).
+3. **Sequenza capability**: poi P2/P3 BI, ③ data-mining, ④ CMS, ⑤ scraping (fonti ufficiali). Tutte design→spec→ok→piano→impl.
 
 ## Open questions
-- SuccessFactors connector: adozione + naming `staging.sf_*`. Design committato, PII risolto (ADR-0023).
+
+- **Voyage API key** per gli embeddings AI, o self-host (sentence-transformers su VM)? → sblocca ② AI.
+- Data-reconciliation oltre KPI: i milestone org_unit-template-vs-instance + bridge job→position richiedono tua decisione di modellazione (plan §7).
 
 ## Stack snapshot
-- DB: 161 utenti / 2 tenant; **24 team / 176 membership**; **55 migration**; RBAC **11 ruoli / 461 map**; ui_interfaces 24; viz-graph 158 nodi/157 edge (0 orfani).
-- **VM PROD**: api `node dist/server.js` (tsup bundle) :8013 + web `next start` :3013, @heuresys/ui 0.1.2, Node 22 nvm. RBAC epic + WS-0..WS-7 ✅ → v1.0.0 GA.
+
+- API **61 moduli** (+`analytics`), **~281 endpoint**; **56 migration** (000057 `analytics:view`); DB: kpi_definitions **243** + kpi_targets **248** (+ 161 users / 162 pos / 2 tenant / 24 team).
+- VM PROD invariata (api tsup :8013 + web next start :3013). pgvector **NON** installato (serve per ② AI).
 
 ## Verification (next session)
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
-git -C /d/heuresys-advanced tag -l v1.0.0                      # v1.0.0
-ssh oracle-vm-default 'curl -s localhost:8013/readyz; systemctl is-active heuresys-advanced-{api,web}'
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "SELECT count(*) FROM sys.sys_kpi_definitions;"  # 243
+cd apps/api && pnpm exec vitest run test/analytics.integration.test.ts  # 6 pass
 ```

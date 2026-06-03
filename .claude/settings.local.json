@@ -8,7 +8,11 @@
       "Bash(git -C \"D:/heuresys-advanced\" log --oneline -10)",
       "Bash(git -C \"D:/heuresys-advanced\" tag --sort=-creatordate)",
       "Bash(git -C \"D:/heuresys-advanced\" status -b --short)",
-      "Bash(psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c \"SELECT COUNT\\(*\\) AS login_events FROM sys.sys_auth_login_events;\")"
+      "Bash(psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c \"SELECT COUNT\\(*\\) AS login_events FROM sys.sys_auth_login_events;\")",
+      "Bash(rm -rf test-results/*)",
+      "Bash(pnpm exec *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Read(//tmp/**)"
     ]
   }
 }

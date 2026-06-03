@@ -116,6 +116,13 @@ Apertura item (S954). Il problema: le 162 posizioni RTL/Heuresys hanno `position
 
 - stream 2.1 Brownfield Wave 2 · 2.5 MFA multi-kind · 2.7 Mobile + WCAG · visualization renderers (React Flow/Mermaid — gated brand, vedi memory `feedback_brand_before_graph_renderers`).
 
+### Programma capability nuove (approvato Enzo S958) — `docs/superpowers/specs/2026-06-03-platform-capabilities-roadmap.md`
+
+5 capability indipendenti, sequenza CLI-decisa, ciclo per ciascuna `design→spec→ok→piano→implementa` (multi-sessione). Stato:
+- **① BI / analytics** — design+spec+piano ✅; **P1 API shipped** (modulo `analytics`, `/v1/analytics/{workforce,kpi}`, mig 000057, 6/6 test, full suite 582✓). **Next: P1b frontend** (pagine `/analytics/*` + `@heuresys/ui` charts + E2E) poi P2 (skill-gap/attendance/comp) / P3 (org-network).
+- **② AI semantic-matching** — design+spec ✅ (`2026-06-03-ai-semantic-matching-design.md`); pending piano + **decisione Voyage API key**. Substrate pgvector (NON installato) + embeddings; sblocca anche position_skill_requirements (Fase 3).
+- **③ data-mining · ④ CMS · ⑤ scraping (fonti ufficiali)** — in coda, design quando la sequenza ci arriva.
+
 ---
 
 **Regola d'ingaggio CLI autonomo**: ogni azione P1+ parte da un mini-piano evidence-based (grep/read reali, non assunzioni) + atomic commit + test verde + aggiornamento di questo backlog e `SOT_STATE.md`. Nessun push senza ok Enzo. Conflitto con invarianti (§9 SOT_STATE) → fermarsi e chiedere.

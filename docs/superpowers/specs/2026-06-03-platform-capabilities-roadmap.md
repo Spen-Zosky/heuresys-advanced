@@ -80,7 +80,7 @@ All 5 approved (Enzo, S958). Sequence (CLI-decided): **① BI → ② AI → ③
 
 | # | Capability | Design/spec | Plan | Implementation |
 |---|---|---|---|---|
-| ① | BI / analytics | ✅ `2026-06-03-bi-analytics-design.md` (approved) | ✅ `2026-06-03-bi-analytics-phase1.md` | 🔨 implementing (P1 API) |
+| ① | BI / analytics | ✅ `2026-06-03-bi-analytics-design.md` (approved) | ✅ `2026-06-03-bi-analytics-phase1.md` | ✅ **P1 API done** (analytics module: workforce+kpi rollups, mig 000057, 6/6 tests, full suite 582✓); P1b frontend + P2/P3 next |
 | ② | AI semantic matching | ✅ `2026-06-03-ai-semantic-matching-design.md` | pending Enzo review | — |
 | ③ | data-mining | — | — | — |
 | ④ | CMS | — | — | — |

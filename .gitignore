@@ -132,3 +132,12 @@ graphify-out/
 .graphify_root
 .graphify_python
 docs/kb/tools/.sync.log
+
+# -----------------------------------------------------------------------------
+# Apify Actor run results archive (local-only durable copy)
+# -----------------------------------------------------------------------------
+# Convention in .apify/README.md: every Apify Actor run gets its results saved
+# under .apify/<YYYY-MM-DD>/. Kept out of git (per-machine local copy) — the
+# cloud dataset IDs + console URLs recorded in each .meta.json are the link back
+# to Apify while the unnamed datasets still exist.
+.apify/

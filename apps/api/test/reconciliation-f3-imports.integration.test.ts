@@ -43,12 +43,29 @@ describe('reconciliation F3 imports', () => {
     });
   });
 
-  it('the 2 imported F3 tables read POPULATED in the view', async () => {
+  describe('PARTIAL subset imports (closure)', () => {
+    it('career_path_steps 35, critical_positions 8, position_succession_relevance 9, user_learning_assignments 1990', async () => {
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_career_path_steps`)).toBe(35);
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_critical_positions`)).toBe(8);
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_position_succession_relevance`)).toBe(9);
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_user_learning_assignments`)).toBe(1990);
+    });
+    it('user_learning_assignments all resolve a real learning_path + valid status', async () => {
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_user_learning_assignments a
+          WHERE a.user_learning_assignment_path_id IS NULL
+             OR a.user_learning_assignment_status NOT IN ('ASSIGNED','IN_PROGRESS','COMPLETED','OVERDUE','WAIVED','CANCELLED')`,
+      )).toBe(0);
+    });
+  });
+
+  it('the 6 imported F3 tables read POPULATED in the view', async () => {
     const { rows } = await pool.query<{ n: number }>(
       `SELECT count(*)::int AS n FROM sys.v_reconciliation_status
-        WHERE table_name IN ('sys_position_career_paths','sys_position_learning_requirements')
+        WHERE table_name IN ('sys_position_career_paths','sys_position_learning_requirements',
+          'sys_career_path_steps','sys_critical_positions','sys_position_succession_relevance','sys_user_learning_assignments')
           AND resolved_status = 'POPULATED'`,
     );
-    expect(rows[0]?.n).toBe(2);
+    expect(rows[0]?.n).toBe(6);
   });
 });

@@ -80,12 +80,25 @@ describe('reconciliation F2 imports', () => {
     });
   });
 
-  it('the 4 imported bucket-A tables now read POPULATED in the view', async () => {
+  describe('gap_analysis_results (#4) — semantic import', () => {
+    it('imported 270 rows, kind=SKILL, all scored, payload carries the gap composition', async () => {
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_gap_analysis_results`)).toBe(270);
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_gap_analysis_results WHERE gap_analysis_result_kind <> 'SKILL'`,
+      )).toBe(0);
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_gap_analysis_results
+          WHERE NOT (gap_analysis_result_payload ? 'skill_gaps') OR gap_analysis_result_overall_score IS NULL`,
+      )).toBe(0);
+    });
+  });
+
+  it('all 5 imported bucket-A tables now read POPULATED in the view', async () => {
     const { rows } = await pool.query<{ n: number }>(
       `SELECT count(*)::int AS n FROM sys.v_reconciliation_status
-        WHERE table_name IN ('sys_career_paths','sys_user_career_plans','sys_user_documents','sys_bonus_pools')
+        WHERE table_name IN ('sys_career_paths','sys_user_career_plans','sys_user_documents','sys_bonus_pools','sys_gap_analysis_results')
           AND resolved_status = 'POPULATED'`,
     );
-    expect(rows[0]?.n).toBe(4);
+    expect(rows[0]?.n).toBe(5);
   });
 });

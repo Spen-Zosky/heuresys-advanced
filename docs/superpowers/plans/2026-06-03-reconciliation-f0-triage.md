@@ -29,6 +29,8 @@ Implements **F0** of `docs/superpowers/specs/2026-06-03-reconciliation-closure-d
 
 ## Classification criteria (authoritative — every subagent uses these verbatim)
 
+> **⛔ EMPLOYEE-CENTRIC DOCTRINE (I14 / ADR-0024) — HARD CONSTRAINT.** In the legacy DB the person/business entity is **`employees`** (270 rows, 207 FK), **NOT `users`** (auth shell, 45 FK; `users.employee_id → employees.id`). Therefore: every `sys.sys_users` and `sys_user_*` / person-centric target maps from legacy **`employees`** (+ its satellites), **never** from legacy `users`. The crosswalk key is **`user_external_code = 'LEGACY_EMP::' || employees.id`** (or email cross-check `employees.email = sys_users.user_email`), **never** `'LEGACY:' || users.id`. Legacy `users` is the source **only** for `sys_auth_*` (credentials), which are out of scope here (already populated/app-generated). When a `sys_user_*` table looks for its source, the driver is `employees`/its satellites — picking `users` as the driver is a classification ERROR that produces wrong buckets and would later drop credential-less persons. The `sys_users` ↔ legacy `users` name collision is a **false friend**.
+
 For each empty `sys.*` table, assign exactly one bucket:
 
 - **A — Import now**: a legacy `public` table exists *with rows* whose columns map ~1:1 to the target, AND every NOT-NULL / FK column of the target resolves with the data already present in `sys.*` (no missing bridge). Deterministic, no modeling needed.

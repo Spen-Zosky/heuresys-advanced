@@ -47,6 +47,38 @@ export const AUDIT_RULE_CODES = {
   //   staging_rows_input: number    (count probe; -1 on failure)
   //   hint: string                  (forensic next-step suggestion)
   SILENT_UPSERT_ZERO_ROWS_V1: "SILENT_UPSERT_ZERO_ROWS_V1",
+
+  // SDBI family (ADR-0014 §3.5 — Semantic-Driven Brownfield Import workflow).
+  // Closed by PROMPT 027 §4 / dossier §5 W4 Option-C infra items. The DB-side
+  // canonical dictionary of these codes lives in audit.import_validation_rule_codes
+  // (migration 000063_sdbi_infra.sql); these TS constants are the emit-time source
+  // of truth for the SDBI consolidation/cleanup passes. Status mapping (PASSED/
+  // WARNING/FAILED) is recorded in the dictionary table, not here.
+  //
+  // payload jsonb fields (SDBI rows), per ADR-0014 §3.4-§3.6:
+  //   sdbi_mapping_card_id: string   (also promoted to source_lineage_sdbi_mapping_card_id)
+  //   sdbi_confidence: number        ([0,1]; promoted to source_lineage_sdbi_confidence)
+  //   sdbi_ai_model_id: string       (promoted to source_lineage_sdbi_ai_model_id)
+  //   sdbi_human_approver: string    (promoted to source_lineage_sdbi_human_approver)
+  //   source_table: string
+  //   target_table: string
+
+  /** Mapping_card auto-approved (AI confidence >= 0.85). status=PASSED. */
+  SDBI_CONFIDENCE_HIGH_AUTO_APPROVED: "SDBI_CONFIDENCE_HIGH_AUTO_APPROVED",
+  /** Mapping_card requires human review (0.60 <= confidence < 0.85). status=WARNING. */
+  SDBI_CONFIDENCE_MEDIUM_NEEDS_REVIEW: "SDBI_CONFIDENCE_MEDIUM_NEEDS_REVIEW",
+  /** Workflow halted for AI clarification request (confidence < 0.60). status=WARNING. */
+  SDBI_CONFIDENCE_LOW_HALT_ASKED: "SDBI_CONFIDENCE_LOW_HALT_ASKED",
+  /** Human approved the mapping_card. status=PASSED. */
+  SDBI_HUMAN_APPROVED: "SDBI_HUMAN_APPROVED",
+  /** Human rejected the mapping_card. status=FAILED. */
+  SDBI_HUMAN_REJECTED: "SDBI_HUMAN_REJECTED",
+  /** Human corrected and re-approved the mapping_card. status=PASSED. */
+  SDBI_HUMAN_CORRECTED: "SDBI_HUMAN_CORRECTED",
+  /** Phase 5 consolidation completed (temp_sdbi -> sys.*). status=PASSED. */
+  SDBI_CONSOLIDATION_COMPLETE_V1: "SDBI_CONSOLIDATION_COMPLETE_V1",
+  /** Phase 6 temp_sdbi cleanup done (DROP TABLE temp_sdbi.*). status=PASSED. */
+  SDBI_TEMP_CLEANUP_V1: "SDBI_TEMP_CLEANUP_V1",
 } as const;
 
 export type AuditRuleCode = (typeof AUDIT_RULE_CODES)[keyof typeof AUDIT_RULE_CODES];

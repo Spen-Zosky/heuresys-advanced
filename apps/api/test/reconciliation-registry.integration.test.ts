@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { pool } from '../src/db/client';
+import { pool } from '../src/db/client.js';
 
 // F1 of the reconciliation-closure cycle. Asserts the registry + view shipped by
 // migration 000058 + seed 04_registry.sql. Hits the live DB via the tunnel (no mocks),
@@ -12,7 +12,7 @@ describe('reconciliation registry (F1)', () => {
       `SELECT reconciliation_registry_bucket AS b, count(*)::int AS n
          FROM sys.sys_reconciliation_registry GROUP BY 1`,
     );
-    const m = Object.fromEntries(rows.map((r) => [r.b, r.n]));
+    const m = Object.fromEntries(rows.map((r: { b: string; n: number }) => [r.b, r.n]));
     expect(m).toEqual({ A: 5, B: 16, C: 23, D: 21 });
   });
 

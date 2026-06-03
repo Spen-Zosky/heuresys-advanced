@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { pool } from '../src/db/client';
+import { pool } from '../src/db/client.js';
 
 // F2 of the reconciliation-closure cycle: bucket-A imports. One block per imported table.
 // Hits the live DB (no mocks). Verifies the imported state, not the seed mechanics

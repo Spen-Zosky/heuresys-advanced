@@ -1,4 +1,4 @@
-import { SystemHealthDashboard } from "../../../components/SystemHealthDashboard";
+import { SystemHealthDashboard } from "@/components/SystemHealthDashboard";
 
 /**
  * /showcase/system-health — brand showcase entry.

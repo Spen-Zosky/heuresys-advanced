@@ -119,7 +119,7 @@ const PAGE_TYPES: PageType[] = [
         </div>
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="grid grid-cols-5 gap-1">
-            {[1, 2, 3, 4, 5].map((j) => <div key={j} className="h-2 rounded bg-neutral-150" style={{ background: "#E5E7EB" }} />)}
+            {[1, 2, 3, 4, 5].map((j) => <div key={j} className="h-2 rounded" style={{ background: "#E5E7EB" }} />)}
           </div>
         ))}
       </div>

@@ -183,3 +183,129 @@ export async function getKpiAchievement(
     })),
   };
 }
+
+// --- Attendance / overtime (P2) ---------------------------------------------
+// Worked-hours rollups over sys.sys_attendance. Overtime = attendance_hours_overtime
+// (recorded worked overtime that already rolls into attendance_hours_total) — NOT
+// sys_overtime (a separate PENDING request/approval table, largely disjoint; summing
+// would double-count). Hours are fractional numeric → ::text cast then Number() in JS.
+
+export interface AttendanceHoursRow {
+  /** 'YYYY-MM' for monthly rows, OU name for by-OU rows. */
+  dimension: string;
+  regularHours: number;
+  overtimeHours: number;
+  totalHours: number;
+}
+
+export interface AttendanceTotals {
+  totalRegularHours: number;
+  totalOvertimeHours: number;
+  totalHours: number;
+  monthly: AttendanceHoursRow[];
+  byOrgUnit: AttendanceHoursRow[];
+}
+
+/**
+ * Scope clause for attendance rollups. The subject is at.attendance_subject_user_id.
+ *   PLATFORM → no filter.
+ *   TENANT   → attendance_tenant_id = $1.
+ *   TEAM     → TENANT + the subject user's PRIMARY/ACTIVE assignment position is one of
+ *              teamPositionIds, expressed as an EXISTS so it works whether or not the
+ *              outer query joins the assignment table (monthly has no join; by-OU does).
+ */
+function attendanceScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
+  if (scope.isPlatformScope) return { sql: "TRUE", params: [] };
+  const params: unknown[] = [scope.tenantId];
+  const clauses = [`at.attendance_tenant_id = $1`];
+  if (scope.teamPositionIds.length > 0) {
+    params.push(scope.teamPositionIds);
+    clauses.push(`EXISTS (
+      SELECT 1 FROM sys.sys_user_position_assignments tap
+       WHERE tap.user_position_assignment_user_id = at.attendance_subject_user_id
+         AND tap.user_position_assignment_kind = 'PRIMARY'
+         AND tap.user_position_assignment_status = 'ACTIVE'
+         AND tap.user_position_assignment_position_id = ANY($${params.length}::uuid[]))`);
+  }
+  return { sql: clauses.join(" AND "), params };
+}
+
+export async function getAttendanceTotals(
+  q: DbConnector,
+  scope: ScopeFilter,
+): Promise<AttendanceTotals> {
+  const sc = attendanceScopeClause(scope);
+
+  // Monthly time-series (no OU join needed for PLATFORM/TENANT; the TEAM filter
+  // attaches via the EXISTS subquery on attendance_subject_user_id).
+  const monthly = await q.query<{
+    dimension: string;
+    reg: string;
+    ot: string;
+    total: string;
+  }>(
+    `SELECT to_char(date_trunc('month', at.attendance_date), 'YYYY-MM') AS dimension,
+            round(sum(at.attendance_hours_regular), 2)::text AS reg,
+            round(sum(at.attendance_hours_overtime), 2)::text AS ot,
+            round(sum(at.attendance_hours_total), 2)::text AS total
+       FROM sys.sys_attendance at
+      WHERE ${sc.sql}
+      GROUP BY 1
+      ORDER BY 1`,
+    sc.params,
+  );
+
+  // By-OU rollup. The subject user → PRIMARY/ACTIVE assignment → position → OU chain
+  // mirrors PRIMARY_ASSIGNMENT_JOIN (1 primary active assignment per user → no fan-out).
+  const byOu = await q.query<{
+    dimension: string;
+    reg: string;
+    ot: string;
+    total: string;
+  }>(
+    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS dimension,
+            round(sum(at.attendance_hours_regular), 2)::text AS reg,
+            round(sum(at.attendance_hours_overtime), 2)::text AS ot,
+            round(sum(at.attendance_hours_total), 2)::text AS total
+       FROM sys.sys_attendance at
+       LEFT JOIN sys.sys_users u
+         ON u.user_id = at.attendance_subject_user_id
+       LEFT JOIN sys.sys_user_position_assignments a
+         ON a.user_position_assignment_user_id = u.user_id
+        AND a.user_position_assignment_kind = 'PRIMARY'
+        AND a.user_position_assignment_status = 'ACTIVE'
+       LEFT JOIN sys.sys_positions p
+         ON p.position_id = a.user_position_assignment_position_id
+       LEFT JOIN sys.sys_organization_units ou
+         ON ou.organization_unit_id = p.position_organization_unit_id
+      WHERE ${sc.sql}
+      GROUP BY 1
+      ORDER BY sum(at.attendance_hours_total) DESC`,
+    sc.params,
+  );
+
+  const totals = await q.query<{ reg: string; ot: string; total: string }>(
+    `SELECT round(sum(at.attendance_hours_regular), 2)::text AS reg,
+            round(sum(at.attendance_hours_overtime), 2)::text AS ot,
+            round(sum(at.attendance_hours_total), 2)::text AS total
+       FROM sys.sys_attendance at
+      WHERE ${sc.sql}`,
+    sc.params,
+  );
+
+  const mapRow = (r: { dimension: string; reg: string; ot: string; total: string }): AttendanceHoursRow => ({
+    dimension: r.dimension,
+    regularHours: Number(r.reg),
+    overtimeHours: Number(r.ot),
+    totalHours: Number(r.total),
+  });
+
+  const t = totals.rows[0];
+  return {
+    totalRegularHours: Number(t?.reg ?? 0),
+    totalOvertimeHours: Number(t?.ot ?? 0),
+    totalHours: Number(t?.total ?? 0),
+    monthly: monthly.rows.map(mapRow),
+    byOrgUnit: byOu.rows.map(mapRow),
+  };
+}

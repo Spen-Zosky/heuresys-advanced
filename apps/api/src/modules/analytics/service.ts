@@ -10,6 +10,7 @@ import type { RoleCode } from "../../config/constants.js";
 import type {
   WorkforceAnalyticsResponse,
   KpiAnalyticsResponse,
+  AttendanceAnalyticsResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
@@ -76,6 +77,27 @@ export const analyticsService = {
       totalTargets: k.totalTargets,
       distinctKpis: k.distinctKpis,
       byKpi: k.byKpi,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  async attendance(a: ActorContext): Promise<AttendanceAnalyticsResponse> {
+    const s = await buildScope(a);
+    const at = await repo.getAttendanceTotals(pool, s.filter);
+    return {
+      scope: { kind: s.kind, tenantId: s.tenantId },
+      totalRegularHours: at.totalRegularHours,
+      totalOvertimeHours: at.totalOvertimeHours,
+      totalHours: at.totalHours,
+      // Repo rows carry the bucket label as `dimension`; the monthly response
+      // field is `month` (the by-OU field stays `dimension`).
+      monthly: at.monthly.map((m) => ({
+        month: m.dimension,
+        regularHours: m.regularHours,
+        overtimeHours: m.overtimeHours,
+        totalHours: m.totalHours,
+      })),
+      byOrgUnit: at.byOrgUnit,
       generatedAt: new Date().toISOString(),
     };
   },

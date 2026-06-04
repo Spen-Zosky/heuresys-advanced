@@ -143,4 +143,79 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     });
     expect(r.statusCode).toBe(403);
   });
+
+  // --- Attendance (P2) — deterministic anchors pinned against the live seed
+  // (S961/S958): 3180 attendance rows, single tenant (RTL Bank). Overtime is
+  // sourced from attendance_hours_overtime (sys_overtime excluded by design).
+
+  interface AttendanceBody {
+    scope: { kind: string; tenantId: string | null };
+    totalRegularHours: number;
+    totalOvertimeHours: number;
+    totalHours: number;
+    monthly: Array<{ month: string; regularHours: number; overtimeHours: number; totalHours: number }>;
+    byOrgUnit: Array<{ dimension: string; regularHours: number; overtimeHours: number; totalHours: number }>;
+    generatedAt: string;
+  }
+
+  it("attendance: unauthenticated → 401", async () => {
+    const r = await suite.app.inject({ method: "GET", url: "/v1/analytics/attendance" });
+    expect(r.statusCode).toBe(401);
+  });
+
+  it("attendance: USER (employee) lacks analytics:view → 403", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/attendance",
+      headers: { cookie: ch(employeeS.cookies) },
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
+  });
+
+  it("attendance: PLATFORM_ADMIN sees full worked-hours rollup (deterministic seed anchors)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/attendance",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as AttendanceBody;
+    expect(body.scope.kind).toBe("PLATFORM");
+    expect(body.scope.tenantId).toBeNull();
+    // Grand totals (round to 2 dp, summed over the static 3180-row seed).
+    expect(body.totalRegularHours).toBeCloseTo(28347.3, 1);
+    expect(body.totalOvertimeHours).toBeCloseTo(3011.6, 1);
+    expect(body.totalHours).toBeCloseTo(31358.9, 1);
+    // 15 monthly buckets; the monthly totals reconcile to the grand total.
+    expect(body.monthly.length).toBe(15);
+    const monthlySum = body.monthly.reduce((acc, m) => acc + m.totalHours, 0);
+    expect(monthlySum).toBeCloseTo(body.totalHours, 0);
+    // Months come back chronological (YYYY-MM string order).
+    expect(body.monthly[0]?.month).toBe("2024-10");
+    expect(body.monthly[body.monthly.length - 1]?.month).toBe("2025-12");
+    // 22 OUs, every attendance row resolves to a real OU (no '(unassigned)').
+    expect(body.byOrgUnit.length).toBe(22);
+    expect(body.byOrgUnit.some((o) => o.dimension === "(unassigned)")).toBe(false);
+    // Top OU by total hours (byOrgUnit is total-desc ordered).
+    expect(body.byOrgUnit[0]?.dimension).toBe("Divisione Risk & Compliance");
+    expect(body.byOrgUnit[0]?.totalHours).toBeCloseTo(7120, 1);
+    expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
+  });
+
+  it("attendance: TENANT_ADMIN sees TENANT scope (RTL is the only attendance tenant → equals platform totals)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/attendance",
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as AttendanceBody;
+    expect(body.scope.kind).toBe("TENANT");
+    expect(body.scope.tenantId).not.toBeNull();
+    // All 3180 attendance rows belong to RTL Bank, so the RTL tenant scope
+    // returns the same totals as the platform aggregate.
+    expect(body.totalHours).toBeCloseTo(31358.9, 1);
+    expect(body.byOrgUnit.length).toBe(22);
+  });
 });

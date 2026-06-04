@@ -11,6 +11,7 @@ import type { FastifyRequest } from "fastify";
 import {
   WorkforceAnalyticsResponseSchema,
   KpiAnalyticsResponseSchema,
+  AttendanceAnalyticsResponseSchema,
 } from "@heuresys/shared";
 import { analyticsService, type ActorContext } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -38,5 +39,14 @@ export const analyticsRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: { response: { 200: KpiAnalyticsResponseSchema } },
     },
     async (req) => analyticsService.kpi(actor(req)),
+  );
+
+  app.get(
+    "/attendance",
+    {
+      preHandler: [requirePermission("analytics:view")],
+      schema: { response: { 200: AttendanceAnalyticsResponseSchema } },
+    },
+    async (req) => analyticsService.attendance(actor(req)),
   );
 };

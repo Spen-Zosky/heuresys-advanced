@@ -63,4 +63,45 @@ export declare const KpiAnalyticsResponseSchema: z.ZodObject<{
     generatedAt: z.ZodString;
 }, z.core.$strip>;
 export type KpiAnalyticsResponse = z.infer<typeof KpiAnalyticsResponseSchema>;
+export declare const AttendanceMonthlyRowSchema: z.ZodObject<{
+    month: z.ZodString;
+    regularHours: z.ZodNumber;
+    overtimeHours: z.ZodNumber;
+    totalHours: z.ZodNumber;
+}, z.core.$strip>;
+export type AttendanceMonthlyRow = z.infer<typeof AttendanceMonthlyRowSchema>;
+export declare const AttendanceByOrgUnitRowSchema: z.ZodObject<{
+    dimension: z.ZodString;
+    regularHours: z.ZodNumber;
+    overtimeHours: z.ZodNumber;
+    totalHours: z.ZodNumber;
+}, z.core.$strip>;
+export type AttendanceByOrgUnitRow = z.infer<typeof AttendanceByOrgUnitRowSchema>;
+export declare const AttendanceAnalyticsResponseSchema: z.ZodObject<{
+    scope: z.ZodObject<{
+        kind: z.ZodEnum<{
+            PLATFORM: "PLATFORM";
+            TENANT: "TENANT";
+            TEAM: "TEAM";
+        }>;
+        tenantId: z.ZodNullable<z.ZodString>;
+    }, z.core.$strip>;
+    totalRegularHours: z.ZodNumber;
+    totalOvertimeHours: z.ZodNumber;
+    totalHours: z.ZodNumber;
+    monthly: z.ZodArray<z.ZodObject<{
+        month: z.ZodString;
+        regularHours: z.ZodNumber;
+        overtimeHours: z.ZodNumber;
+        totalHours: z.ZodNumber;
+    }, z.core.$strip>>;
+    byOrgUnit: z.ZodArray<z.ZodObject<{
+        dimension: z.ZodString;
+        regularHours: z.ZodNumber;
+        overtimeHours: z.ZodNumber;
+        totalHours: z.ZodNumber;
+    }, z.core.$strip>>;
+    generatedAt: z.ZodString;
+}, z.core.$strip>;
+export type AttendanceAnalyticsResponse = z.infer<typeof AttendanceAnalyticsResponseSchema>;
 //# sourceMappingURL=analytics.d.ts.map

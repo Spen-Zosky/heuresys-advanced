@@ -41,3 +41,36 @@ export const KpiAnalyticsResponseSchema = z.object({
   generatedAt: z.string(),
 });
 export type KpiAnalyticsResponse = z.infer<typeof KpiAnalyticsResponseSchema>;
+
+// --- Attendance / overtime (P2) ---
+// Worked-hours analytics. Overtime is sourced from sys_attendance.attendance_hours_overtime
+// (the recorded worked overtime that rolls into attendance_hours_total) — NOT from
+// sys_overtime, which is a separate request/approval workflow table (PENDING rows,
+// largely disjoint dates/users) and would double-count if merged. Hours are fractional
+// (numeric), so fields are z.number() (not .int()).
+export const AttendanceMonthlyRowSchema = z.object({
+  month: z.string(), // 'YYYY-MM' (date_trunc('month', attendance_date))
+  regularHours: z.number(),
+  overtimeHours: z.number(),
+  totalHours: z.number(),
+});
+export type AttendanceMonthlyRow = z.infer<typeof AttendanceMonthlyRowSchema>;
+
+export const AttendanceByOrgUnitRowSchema = z.object({
+  dimension: z.string(), // organization_unit_name, COALESCE '(unassigned)'
+  regularHours: z.number(),
+  overtimeHours: z.number(),
+  totalHours: z.number(),
+});
+export type AttendanceByOrgUnitRow = z.infer<typeof AttendanceByOrgUnitRowSchema>;
+
+export const AttendanceAnalyticsResponseSchema = z.object({
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.string().uuid().nullable() }),
+  totalRegularHours: z.number(),
+  totalOvertimeHours: z.number(),
+  totalHours: z.number(),
+  monthly: z.array(AttendanceMonthlyRowSchema), // chronological
+  byOrgUnit: z.array(AttendanceByOrgUnitRowSchema), // total-hours desc
+  generatedAt: z.string(),
+});
+export type AttendanceAnalyticsResponse = z.infer<typeof AttendanceAnalyticsResponseSchema>;

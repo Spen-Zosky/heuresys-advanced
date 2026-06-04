@@ -22,16 +22,16 @@
 
 1. **i18n Fasi 2–5** (admin/blueprints/hr/ess + EN gate) — parallelizzabili per namespace.
 2. **② AI semantic-matching P1** (~L): backfill Voyage. **Gated su `VOYAGE_API_KEY` nel `.env` VM** (~$0.05).
-3. **next 16 micro-migrazione** (parziale #1) · **① BI P3** org-network · 6 proposte F7 · nginx conf in `deploy/`.
+3. **next 16 micro-migrazione** (parziale #1) · **① BI P3** org-network · 6 proposte F7.
 
 ## Open questions (ereditate)
 
 - **`VOYAGE_API_KEY`** nel `.env` VM → sblocca ② P1 (unico gate).
-- Versionare la config nginx `www.heuresys.com.conf` (oggi solo sulla VM) nel repo?
+- ~~Versionare la config nginx nel repo?~~ ✅ **FATTO S964** → `deploy/nginx/www.heuresys.com.conf` (mirror documentale).
 
 ## Stack snapshot
 
-- **PROD = `https://www.heuresys.com`** → nginx TLS Let's Encrypt → web `:3013` (proxa `/api`→`:8013`). `COOKIE_SECURE=true`, `ADMIN_ORIGIN=https://www.heuresys.com`. nginx conf **non versionata**. evo legacy = `evo.heuresys.com` (:3200). **Deploy = `scripts/vm-deploy.sh`** (non tocca nginx/.env; next 16 NON deployato).
+- **PROD = `https://www.heuresys.com`** → nginx TLS Let's Encrypt → web `:3013` (proxa `/api`→`:8013`). `COOKIE_SECURE=true`, `ADMIN_ORIGIN=https://www.heuresys.com`. nginx conf **versionata** in `deploy/nginx/www.heuresys.com.conf` (mirror documentale S964, non auto-deployata; live su VM). evo legacy = `evo.heuresys.com` (:3200). **Deploy = `scripts/vm-deploy.sh`** (non tocca nginx/.env; next 16 NON deployato).
 - migration **`000069`** (locale), ~284 endpoint, API suite **653/6**. i18n **3 namespace popolati** (common/shell/analytics); admin/blueprints/hr/ess scaffoldati vuoti. Reconciliation 112/147 POPULATED.
 - Dipendenze post-sweep: pino **10.3.1**, upload-artifact **v7**, react **19.2.7**, react-query **5.101**, i18next **26.3.1**, vitest **4.1.8**. DEFER: next **15.5.18**, typescript **5.7.2**, vite **6.4.2**.
 

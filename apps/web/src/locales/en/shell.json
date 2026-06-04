@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "groups": {
+      "overview": "Overview",
+      "me": "My area",
+      "workforce": "Workforce",
+      "operations": "Operations",
+      "intelligence": "Intelligence",
+      "governance": "Governance"
+    },
+    "perspective": {
+      "label": "Perspective",
+      "filters": {
+        "all": "All",
+        "process": "Process",
+        "enterprise": "Enterprise",
+        "talent": "Talent"
+      },
+      "empty": "No interface in this perspective."
+    }
+  },
+  "session": {
+    "error": "Session error"
+  },
+  "logout": "Sign out",
+  "language": {
+    "label": "Language",
+    "it": "Italian",
+    "en": "English"
+  }
+}

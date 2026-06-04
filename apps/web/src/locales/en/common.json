@@ -1,11 +1,39 @@
 {
-  "common": {
-    "loading": "Loading…",
-    "error": "An error occurred",
-    "retry": "Retry",
+  "loading": "Loading…",
+  "saving": "Saving…",
+  "retry": "Retry",
+  "error": {
+    "generic": "An error occurred",
+    "load": "Unable to load data.",
+    "loadHint": "Try again later or check your connection.",
+    "save": "Error while saving."
+  },
+  "actions": {
     "cancel": "Cancel",
     "save": "Save",
-    "submit": "Submit"
+    "submit": "Submit",
+    "back": "Back"
+  },
+  "value": {
+    "yes": "Yes",
+    "no": "No",
+    "none": "—",
+    "na": "N/A"
+  },
+  "table": {
+    "name": "Name",
+    "code": "Code",
+    "status": "Status"
+  },
+  "empty": {
+    "none": "No results"
+  },
+  "pagination": {
+    "prev": "Previous",
+    "next": "Next",
+    "rowsPerPage": "Rows per page",
+    "range": "{{from}}–{{to}} of {{total}}",
+    "perPage": "{{size}} / page"
   },
   "auth": {
     "login": {

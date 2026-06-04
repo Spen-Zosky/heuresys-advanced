@@ -1,11 +1,39 @@
 {
-  "common": {
-    "loading": "Caricamento…",
-    "error": "Si è verificato un errore",
-    "retry": "Riprova",
+  "loading": "Caricamento…",
+  "saving": "Salvataggio…",
+  "retry": "Riprova",
+  "error": {
+    "generic": "Si è verificato un errore",
+    "load": "Impossibile caricare i dati.",
+    "loadHint": "Riprova più tardi o verifica la connessione.",
+    "save": "Errore durante il salvataggio."
+  },
+  "actions": {
     "cancel": "Annulla",
     "save": "Salva",
-    "submit": "Invia"
+    "submit": "Invia",
+    "back": "Indietro"
+  },
+  "value": {
+    "yes": "Sì",
+    "no": "No",
+    "none": "—",
+    "na": "ND"
+  },
+  "table": {
+    "name": "Nome",
+    "code": "Codice",
+    "status": "Stato"
+  },
+  "empty": {
+    "none": "Nessun risultato"
+  },
+  "pagination": {
+    "prev": "Precedente",
+    "next": "Successivo",
+    "rowsPerPage": "Righe per pagina",
+    "range": "{{from}}–{{to}} di {{total}}",
+    "perPage": "{{size}} / pagina"
   },
   "auth": {
     "login": {

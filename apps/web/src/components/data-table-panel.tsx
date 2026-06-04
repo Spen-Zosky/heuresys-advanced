@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Badge, Button, DataTableWithCrossHair, EmptyState, ErrorState, PageHeader } from "@heuresys/ui";
 import { Inbox } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 /**
  * Canonical list-page composition (brand-component-contract.md: "Data table /
@@ -47,6 +48,7 @@ export interface EntityTableProps<T> {
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
 
 export function EntityTable<T>(props: EntityTableProps<T>) {
+  const { t } = useTranslation();
   const {
     isLoading, isError, errorTestId, errorMessage,
     rows, rowKey, rowTestId, columns,
@@ -66,7 +68,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
   if (isLoading) {
     return (
       <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">
-        Caricamento…
+        {t("loading")}
       </div>
     );
   }
@@ -74,8 +76,8 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
     return (
       <ErrorState
         data-testid={errorTestId}
-        title={errorMessage ?? "Impossibile caricare i dati."}
-        description="Riprova più tardi o verifica la connessione."
+        title={errorMessage ?? t("error.load")}
+        description={t("error.loadHint")}
       />
     );
   }
@@ -84,7 +86,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       <EmptyState
         data-testid={emptyTestId}
         icon={<Inbox className="h-6 w-6" />}
-        title={emptyTitle ?? "Nessun risultato"}
+        title={emptyTitle ?? t("empty.none")}
         {...(emptyDescription ? { description: emptyDescription } : {})}
       />
     );
@@ -128,9 +130,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
           data-testid="table-pagination"
           className="flex flex-wrap items-center justify-between gap-3 border-t border-border bg-card px-4 py-3 text-sm text-muted-foreground"
         >
-          <span>
-            {from}–{to} di {total}
-          </span>
+          <span>{t("pagination.range", { from, to, total })}</span>
           <div className="flex items-center gap-2">
             <Button
               type="button"
@@ -140,7 +140,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
               disabled={safePageIndex <= 0}
               onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
             >
-              Precedente
+              {t("pagination.prev")}
             </Button>
             <Button
               type="button"
@@ -150,10 +150,10 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
               disabled={safePageIndex >= pageCount - 1}
               onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
             >
-              Successivo
+              {t("pagination.next")}
             </Button>
             <select
-              aria-label="Righe per pagina"
+              aria-label={t("pagination.rowsPerPage")}
               className="rounded-control border border-border bg-card px-2 py-1 text-sm text-muted-foreground hover:bg-muted disabled:opacity-50"
               value={pageSize}
               onChange={(e) => {
@@ -163,7 +163,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
             >
               {PAGE_SIZE_OPTIONS.map((size) => (
                 <option key={size} value={size}>
-                  {size} / pagina
+                  {t("pagination.perPage", { size })}
                 </option>
               ))}
             </select>

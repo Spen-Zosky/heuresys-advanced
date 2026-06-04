@@ -34,9 +34,11 @@ import {
   User,
   Users,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useCurrentUser, useLogout, useMyInterfaces, type MyInterface } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { PreferencesApplier } from "../../components/preferences-applier";
+import { LanguageSwitcher } from "../../components/language-switcher";
 
 const ICON = "h-4 w-4 shrink-0";
 
@@ -63,16 +65,6 @@ const ICON_MAP: Record<string, ReactNode> = {
   Users: <Users className={ICON} />,
 };
 
-/** sidebar_group code → display label. */
-const GROUP_LABELS: Record<string, string> = {
-  overview: "Overview",
-  me: "Me",
-  workforce: "Workforce",
-  operations: "Operations",
-  intelligence: "Intelligence",
-  governance: "Governance",
-};
-
 /** The 4 nav items the E2E suite targets by stable test-id. */
 const NAV_TESTID: Record<string, string> = {
   dashboard: "nav-dashboard",
@@ -81,15 +73,11 @@ const NAV_TESTID: Record<string, string> = {
   users: "nav-users",
 };
 
-/** Perspective filter chips. "ALL" (default) keeps every perspective visible — behaviour-
- *  preserving vs the old all-groups sidebar; the PET codes focus a single perspective. */
-const FILTERS = [
-  { code: "ALL", label: "Tutte" },
-  { code: "PROCESS", label: "Process" },
-  { code: "ENTERPRISE", label: "Enterprise" },
-  { code: "TALENT", label: "Talent" },
-] as const;
-type FilterCode = (typeof FILTERS)[number]["code"];
+/** Perspective filter codes. "ALL" (default) keeps every perspective visible — behaviour-
+ *  preserving vs the old all-groups sidebar; the PET codes focus a single perspective.
+ *  Labels are i18n (shell:nav.perspective.filters.*). */
+const FILTERS = ["ALL", "PROCESS", "ENTERPRISE", "TALENT"] as const;
+type FilterCode = (typeof FILTERS)[number];
 
 function navLabel(testId: string, text: string) {
   return <span data-testid={testId}>{text}</span>;
@@ -97,6 +85,7 @@ function navLabel(testId: string, text: string) {
 
 export default function AuthenticatedLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
   const pathname = usePathname() ?? "";
   const me = useCurrentUser();
   const ifaces = useMyInterfaces();
@@ -106,7 +95,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   if (me.isLoading || ifaces.isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <span data-testid="app-loading" className="text-sm text-muted-foreground">Caricamento…</span>
+        <span data-testid="app-loading" className="text-sm text-muted-foreground">{t("loading")}</span>
       </main>
     );
   }
@@ -118,7 +107,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     return (
       <main className="min-h-screen flex items-center justify-center">
         <span data-testid="app-error" className="text-sm text-danger">
-          {me.error instanceof Error ? me.error.message : "Errore sessione"}
+          {me.error instanceof Error ? me.error.message : t("shell:session.error")}
         </span>
       </main>
     );
@@ -148,7 +137,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     for (const [sub, items] of bySub) {
       navGroups.push({
         id: `${persp.code}-${sub}`,
-        label: GROUP_LABELS[sub] ?? sub,
+        label: t(`shell:nav.groups.${sub}`, { defaultValue: sub }),
         items: items.map((i) => {
           const testId = NAV_TESTID[i.code];
           return {
@@ -165,19 +154,19 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
   const switcherGroup: NavGroup = {
     id: "perspective-switch",
-    label: "Prospettiva",
+    label: t("shell:nav.perspective.label"),
     customContent: (
       <div data-testid="perspective-switcher" className="flex flex-wrap gap-1 px-3 py-2">
-        {FILTERS.map((f) => (
+        {FILTERS.map((code) => (
           <Button
-            key={f.code}
+            key={code}
             type="button"
             size="sm"
-            variant={filter === f.code ? "default" : "outline"}
-            data-testid={`perspective-${f.code.toLowerCase()}`}
-            onClick={() => setFilter(f.code)}
+            variant={filter === code ? "default" : "outline"}
+            data-testid={`perspective-${code.toLowerCase()}`}
+            onClick={() => setFilter(code)}
           >
-            {f.label}
+            {t(`shell:nav.perspective.filters.${code.toLowerCase()}`)}
           </Button>
         ))}
       </div>
@@ -188,10 +177,10 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     filter !== "ALL" && navGroups.length === 0
       ? [{
           id: "perspective-empty",
-          label: FILTERS.find((f) => f.code === filter)?.label ?? "",
+          label: t(`shell:nav.perspective.filters.${filter.toLowerCase()}`),
           customContent: (
             <p data-testid="perspective-empty" className="px-3 py-2 text-xs text-muted-foreground">
-              Nessuna interfaccia in questa prospettiva.
+              {t("shell:nav.perspective.empty")}
             </p>
           ),
         }]
@@ -225,7 +214,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       header={
         <DashboardHeader
           user={identity}
-          language="IT"
+          language={i18n.language === "en" ? "EN" : "IT"}
           logo={<HeuresysWordmark variant="brand" size={24} />}
           logoBadge={<HeuresysLogoBadge>advanced</HeuresysLogoBadge>}
         />
@@ -238,6 +227,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               <p data-testid="app-user-email" className="truncate text-xs text-muted-foreground">
                 {user.email}
               </p>
+              <LanguageSwitcher />
               <Button
                 variant="outline"
                 size="sm"
@@ -245,7 +235,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
                 className="w-full"
                 onClick={handleLogout}
               >
-                Esci
+                {t("shell:logout")}
               </Button>
             </div>
           }

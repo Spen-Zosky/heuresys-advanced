@@ -1,1 +1,97 @@
-{}
+{
+  "error": "Impossibile caricare le analisi.",
+  "scope": "Ambito {{kind}}",
+  "empty": {
+    "title": "Nessun dato"
+  },
+  "workforce": {
+    "title": "Analisi Forza Lavoro",
+    "description": "Distribuzione dell'headcount per unità organizzativa e ruolo nel tuo ambito.",
+    "stats": {
+      "totalLabel": "Headcount totale",
+      "totalDesc": "Persone nel tuo ambito",
+      "ouLabel": "Unità organizzative",
+      "ouDesc": "OU con headcount",
+      "rolesLabel": "Ruoli",
+      "rolesDesc": "Ruoli distinti coperti"
+    },
+    "byOu": "Headcount per unità organizzativa",
+    "byRole": "Headcount per ruolo",
+    "roleEmptyTitle": "Nessun dato sui ruoli",
+    "roleEmptyDesc": "Non ci sono ruoli con headcount nel tuo ambito.",
+    "emptyDesc": "Non ci sono dati sulla forza lavoro nel tuo ambito al momento."
+  },
+  "kpi": {
+    "title": "Analisi KPI",
+    "description": "Raggiungimento medio dei target KPI nel tuo ambito.",
+    "stats": {
+      "targetsLabel": "Target totali",
+      "distinctLabel": "KPI distinti"
+    },
+    "gaugeLabel": "Raggiungimento medio",
+    "chartTitle": "Raggiungimento medio per KPI",
+    "series": "Raggiungimento medio %",
+    "nullNote": "{{count}} KPI senza valore consuntivo mostrati a 0% (n/d).",
+    "emptyDesc": "Non ci sono target KPI nel tuo ambito al momento."
+  },
+  "attendance": {
+    "title": "Analisi presenze",
+    "description": "Ore lavorate (ordinarie e straordinarie) per mese e unità organizzativa nel tuo ambito.",
+    "stats": {
+      "totalLabel": "Ore totali",
+      "totalDesc": "Ore lavorate, incl. straordinario",
+      "overtimeLabel": "Straordinario",
+      "overtimeDesc": "Ore di straordinario registrate",
+      "regularLabel": "Ore ordinarie",
+      "regularDesc": "Ore ordinarie registrate"
+    },
+    "monthlyTitle": "Ore per mese",
+    "monthlyAria": "Ore lavorate per mese",
+    "monthlyNote": "Asse verticale lineare in ore; eventuali picchi mensili (import massivi) restano in scala reale.",
+    "ouTitle": "Ore totali per unità organizzativa",
+    "seriesTotal": "Ore totali",
+    "seriesOvertime": "Straordinario",
+    "ouEmptyTitle": "Nessun dato per unità",
+    "ouEmptyDesc": "Non ci sono ore registrate per unità organizzativa nel tuo ambito.",
+    "emptyDesc": "Non ci sono presenze registrate nel tuo ambito al momento."
+  },
+  "compensation": {
+    "title": "Analisi retributiva",
+    "description": "Distribuzione delle bande retributive (€) per unità organizzativa ed equità delle posizioni nel tuo ambito.",
+    "stats": {
+      "profilesLabel": "Profili retributivi",
+      "profilesDesc": "Posizioni con banda assegnata",
+      "ouLabel": "Unità organizzative",
+      "ouDesc": "OU con profili retributivi",
+      "medianLabel": "Mediana banda"
+    },
+    "range": "Min €{{min}} · Max €{{max}}",
+    "rangeEmpty": "Nessuna banda nell'ambito",
+    "boxplotTitle": "Distribuzione bande retributive per unità (mid €)",
+    "boxplotAria": "Distribuzione bande retributive per unità organizzativa",
+    "scatterTitle": "Posizionamento: mid banda vs ampiezza banda",
+    "scatterAria": "Posizionamento retributivo: mid banda vs ampiezza banda",
+    "scatterNote": "Ogni punto è una posizione con banda; il colore indica l'unità organizzativa.",
+    "axisMid": "€ mid banda",
+    "axisSpread": "€ ampiezza banda",
+    "emptyDesc": "Non ci sono profili retributivi con banda nel tuo ambito al momento."
+  },
+  "skills": {
+    "title": "Copertura competenze",
+    "description": "Distribuzione delle evidenze di competenza dichiarate per unità organizzativa e livello di padronanza nel tuo ambito.",
+    "stats": {
+      "evidenceLabel": "Evidenze totali",
+      "evidenceDesc": "Competenze dichiarate",
+      "usersLabel": "Persone con evidenze",
+      "usersDesc": "Persone con almeno un'evidenza",
+      "ouLabel": "Unità organizzative",
+      "ouDesc": "OU coperte da evidenze"
+    },
+    "heatmapTitle": "Copertura per unità e livello di padronanza",
+    "heatmapAria": "Copertura competenze per unità organizzativa e livello di padronanza",
+    "heatmapNote": "Copertura delle evidenze dichiarate (non un gap competenze-vs-requisiti: i requisiti di competenza per posizione non sono ancora popolati).",
+    "proficiencyTitle": "Evidenze per livello di padronanza",
+    "seriesEvidence": "Evidenze",
+    "emptyDesc": "Non ci sono evidenze di competenza nel tuo ambito al momento."
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Badge, EChartsCard, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
 import { Building2, TrendingUp, Users } from "lucide-react";
 import type { WorkforceAnalyticsResponse, WorkforceByDimensionRow } from "@heuresys/shared";
@@ -71,6 +72,7 @@ function verticalBarOption(rows: WorkforceByDimensionRow[]) {
 }
 
 export default function WorkforceAnalyticsPage() {
+  const { t } = useTranslation("analytics");
   const q = useQuery({
     queryKey: ["analytics", "workforce"],
     queryFn: () => apiFetch<WorkforceAnalyticsResponse>("/v1/analytics/workforce"),
@@ -79,14 +81,14 @@ export default function WorkforceAnalyticsPage() {
   if (q.isLoading) {
     return (
       <main data-testid="analytics-workforce-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">Caricamento…</span>
+        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
       </main>
     );
   }
   if (q.isError) {
     return (
       <main data-testid="analytics-workforce-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">Impossibile caricare le analisi.</p>
+        <p className="text-sm text-danger">{t("error")}</p>
       </main>
     );
   }
@@ -98,11 +100,11 @@ export default function WorkforceAnalyticsPage() {
     <main data-testid="analytics-workforce-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader
         data-testid="analytics-workforce-title"
-        title="Analisi Forza Lavoro"
-        description="Distribuzione dell'headcount per unità organizzativa e ruolo nel tuo ambito."
+        title={t("workforce.title")}
+        description={t("workforce.description")}
         badges={
           <Badge variant="secondary" data-testid="analytics-workforce-scope">
-            Ambito {d.scope.kind}
+            {t("scope", { kind: d.scope.kind })}
           </Badge>
         }
       />
@@ -110,23 +112,23 @@ export default function WorkforceAnalyticsPage() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div data-testid="workforce-total">
           <StatsCard
-            label="Headcount totale"
+            label={t("workforce.stats.totalLabel")}
             value={d.totalHeadcount}
             icon={<Users className="h-4 w-4 text-palette-2" />}
-            description="Persone nel tuo ambito"
+            description={t("workforce.stats.totalDesc")}
           />
         </div>
         <StatsCard
-          label="Unità organizzative"
+          label={t("workforce.stats.ouLabel")}
           value={d.byOrgUnit.length}
           icon={<Building2 className="h-4 w-4 text-palette-1" />}
-          description="OU con headcount"
+          description={t("workforce.stats.ouDesc")}
         />
         <StatsCard
-          label="Ruoli"
+          label={t("workforce.stats.rolesLabel")}
           value={d.byJobRole.length}
           icon={<TrendingUp className="h-4 w-4 text-palette-3" />}
-          description="Ruoli distinti coperti"
+          description={t("workforce.stats.rolesDesc")}
         />
       </section>
 
@@ -134,35 +136,35 @@ export default function WorkforceAnalyticsPage() {
         <section className="grid gap-5 lg:grid-cols-2">
           <div className="space-y-3">
             <h2 className="text-base font-semibold tracking-tight text-foreground">
-              Headcount per unità organizzativa
+              {t("workforce.byOu")}
             </h2>
             <div data-testid="analytics-org-chart" className="rounded-card border border-border bg-card p-4">
               <EChartsCard
                 option={horizontalBarOption(d.byOrgUnit)}
                 height={Math.max(240, d.byOrgUnit.length * 34)}
-                ariaLabel="Headcount per unità organizzativa"
+                ariaLabel={t("workforce.byOu")}
               />
             </div>
           </div>
 
           <div className="space-y-3">
             <h2 className="text-base font-semibold tracking-tight text-foreground">
-              Headcount per ruolo
+              {t("workforce.byRole")}
             </h2>
             {d.byJobRole.length > 0 ? (
               <div data-testid="analytics-role-chart" className="rounded-card border border-border bg-card p-4">
                 <EChartsCard
                   option={verticalBarOption(d.byJobRole)}
                   height={320}
-                  ariaLabel="Headcount per ruolo"
+                  ariaLabel={t("workforce.byRole")}
                 />
               </div>
             ) : (
               <EmptyState
                 data-testid="analytics-role-empty"
                 icon={<TrendingUp className="h-6 w-6" />}
-                title="Nessun dato sui ruoli"
-                description="Non ci sono ruoli con headcount nel tuo ambito."
+                title={t("workforce.roleEmptyTitle")}
+                description={t("workforce.roleEmptyDesc")}
               />
             )}
           </div>
@@ -171,8 +173,8 @@ export default function WorkforceAnalyticsPage() {
         <EmptyState
           data-testid="analytics-workforce-empty"
           icon={<Users className="h-6 w-6" />}
-          title="Nessun dato"
-          description="Non ci sono dati sulla forza lavoro nel tuo ambito al momento."
+          title={t("empty.title")}
+          description={t("workforce.emptyDesc")}
         />
       )}
     </main>

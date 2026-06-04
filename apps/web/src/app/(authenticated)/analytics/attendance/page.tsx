@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Badge, EChartsCard, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
 import { Activity, Clock, TrendingUp } from "lucide-react";
 import type {
@@ -17,8 +18,9 @@ const COLOR_PALETTE_2 = "hsl(var(--palette-2))";
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
 const GRID_COLOR = "hsl(var(--border))";
 
-/** Monthly worked-hours time-series: total + overtime, with a soft area fill. */
-function monthlyLineOption(rows: AttendanceMonthlyRow[]) {
+/** Monthly worked-hours time-series: total + overtime, with a soft area fill.
+ *  Series legend labels are passed in already-translated (i18n is a render-time hook). */
+function monthlyLineOption(rows: AttendanceMonthlyRow[], labels: { total: string; overtime: string }) {
   return {
     grid: { left: 8, right: 16, top: 28, bottom: 8, containLabel: true },
     tooltip: { trigger: "axis" as const },
@@ -36,7 +38,7 @@ function monthlyLineOption(rows: AttendanceMonthlyRow[]) {
     },
     series: [
       {
-        name: "Ore totali",
+        name: labels.total,
         type: "line" as const,
         smooth: false,
         data: rows.map((r) => r.totalHours),
@@ -44,7 +46,7 @@ function monthlyLineOption(rows: AttendanceMonthlyRow[]) {
         areaStyle: { color: COLOR_PALETTE_1, opacity: 0.12 },
       },
       {
-        name: "Straordinario",
+        name: labels.overtime,
         type: "line" as const,
         smooth: false,
         data: rows.map((r) => r.overtimeHours),
@@ -84,6 +86,7 @@ function ouBarOption(rows: AttendanceByOrgUnitRow[]) {
 }
 
 export default function AttendanceAnalyticsPage() {
+  const { t } = useTranslation("analytics");
   const q = useQuery({
     queryKey: ["analytics", "attendance"],
     queryFn: () => apiFetch<AttendanceAnalyticsResponse>("/v1/analytics/attendance"),
@@ -92,14 +95,14 @@ export default function AttendanceAnalyticsPage() {
   if (q.isLoading) {
     return (
       <main data-testid="analytics-attendance-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">Caricamento…</span>
+        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
       </main>
     );
   }
   if (q.isError) {
     return (
       <main data-testid="analytics-attendance-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">Impossibile caricare le analisi.</p>
+        <p className="text-sm text-danger">{t("error")}</p>
       </main>
     );
   }
@@ -111,11 +114,11 @@ export default function AttendanceAnalyticsPage() {
     <main data-testid="analytics-attendance-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader
         data-testid="analytics-attendance-title"
-        title="Analisi presenze"
-        description="Ore lavorate (ordinarie e straordinarie) per mese e unità organizzativa nel tuo ambito."
+        title={t("attendance.title")}
+        description={t("attendance.description")}
         badges={
           <Badge variant="secondary" data-testid="analytics-attendance-scope">
-            Ambito {d.scope.kind}
+            {t("scope", { kind: d.scope.kind })}
           </Badge>
         }
       />
@@ -123,29 +126,29 @@ export default function AttendanceAnalyticsPage() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div data-testid="attendance-total-hours">
           <StatsCard
-            label="Ore totali"
+            label={t("attendance.stats.totalLabel")}
             value={Math.round(d.totalHours)}
             unit="h"
             icon={<Clock className="h-4 w-4 text-palette-1" />}
-            description="Ore lavorate, incl. straordinario"
+            description={t("attendance.stats.totalDesc")}
           />
         </div>
         <div data-testid="attendance-total-overtime">
           <StatsCard
-            label="Straordinario"
+            label={t("attendance.stats.overtimeLabel")}
             value={Math.round(d.totalOvertimeHours)}
             unit="h"
             icon={<TrendingUp className="h-4 w-4 text-palette-2" />}
-            description="Ore di straordinario registrate"
+            description={t("attendance.stats.overtimeDesc")}
           />
         </div>
         <div data-testid="attendance-total-regular">
           <StatsCard
-            label="Ore ordinarie"
+            label={t("attendance.stats.regularLabel")}
             value={Math.round(d.totalRegularHours)}
             unit="h"
             icon={<Activity className="h-4 w-4 text-palette-3" />}
-            description="Ore ordinarie registrate"
+            description={t("attendance.stats.regularDesc")}
           />
         </div>
       </section>
@@ -153,25 +156,28 @@ export default function AttendanceAnalyticsPage() {
       {hasData ? (
         <section className="space-y-8">
           <div className="space-y-3">
-            <h2 className="text-base font-semibold tracking-tight text-foreground">Ore per mese</h2>
+            <h2 className="text-base font-semibold tracking-tight text-foreground">{t("attendance.monthlyTitle")}</h2>
             <div
               data-testid="analytics-attendance-monthly-chart"
               className="rounded-card border border-border bg-card p-4"
             >
               <EChartsCard
-                option={monthlyLineOption(d.monthly)}
+                option={monthlyLineOption(d.monthly, {
+                  total: t("attendance.seriesTotal"),
+                  overtime: t("attendance.seriesOvertime"),
+                })}
                 height={320}
-                ariaLabel="Ore lavorate per mese"
+                ariaLabel={t("attendance.monthlyAria")}
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Asse verticale lineare in ore; eventuali picchi mensili (import massivi) restano in scala reale.
+              {t("attendance.monthlyNote")}
             </p>
           </div>
 
           <div className="space-y-3">
             <h2 className="text-base font-semibold tracking-tight text-foreground">
-              Ore totali per unità organizzativa
+              {t("attendance.ouTitle")}
             </h2>
             {d.byOrgUnit.length > 0 ? (
               <div
@@ -181,15 +187,15 @@ export default function AttendanceAnalyticsPage() {
                 <EChartsCard
                   option={ouBarOption(d.byOrgUnit)}
                   height={Math.max(280, d.byOrgUnit.length * 26)}
-                  ariaLabel="Ore totali per unità organizzativa"
+                  ariaLabel={t("attendance.ouTitle")}
                 />
               </div>
             ) : (
               <EmptyState
                 data-testid="analytics-attendance-ou-empty"
                 icon={<Clock className="h-6 w-6" />}
-                title="Nessun dato per unità"
-                description="Non ci sono ore registrate per unità organizzativa nel tuo ambito."
+                title={t("attendance.ouEmptyTitle")}
+                description={t("attendance.ouEmptyDesc")}
               />
             )}
           </div>
@@ -198,8 +204,8 @@ export default function AttendanceAnalyticsPage() {
         <EmptyState
           data-testid="analytics-attendance-empty"
           icon={<Clock className="h-6 w-6" />}
-          title="Nessun dato"
-          description="Non ci sono presenze registrate nel tuo ambito al momento."
+          title={t("empty.title")}
+          description={t("attendance.emptyDesc")}
         />
       )}
     </main>

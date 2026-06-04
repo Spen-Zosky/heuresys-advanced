@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   Badge,
   EChartsCard,
@@ -17,6 +18,7 @@ import { apiFetch } from "@/lib/api/fetch";
 const ICON_CLS = "h-4 w-4";
 
 export default function AnalyticsKpiPage() {
+  const { t } = useTranslation("analytics");
   const q = useQuery({
     queryKey: ["analytics", "kpi"],
     queryFn: () => apiFetch<KpiAnalyticsResponse>("/v1/analytics/kpi"),
@@ -25,14 +27,14 @@ export default function AnalyticsKpiPage() {
   if (q.isLoading) {
     return (
       <main data-testid="analytics-kpi-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">Caricamento…</span>
+        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
       </main>
     );
   }
   if (q.isError) {
     return (
       <main data-testid="analytics-kpi-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">Impossibile caricare le analisi.</p>
+        <p className="text-sm text-danger">{t("error")}</p>
       </main>
     );
   }
@@ -50,7 +52,7 @@ export default function AnalyticsKpiPage() {
   // (annotated by the "n/d" note below the chart), so the bar set stays complete.
   const barOption = echartsPresets.bar({
     x: d.byKpi.map((k) => k.kpiName),
-    series: [{ name: "Raggiungimento medio %", values: d.byKpi.map((k) => k.avgAchievementPct ?? 0) }],
+    series: [{ name: t("kpi.series"), values: d.byKpi.map((k) => k.avgAchievementPct ?? 0) }],
   });
 
   const nullCount = d.byKpi.length - scored.length;
@@ -58,11 +60,11 @@ export default function AnalyticsKpiPage() {
   return (
     <main data-testid="analytics-kpi-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader
-        title="Analisi KPI"
-        description="Raggiungimento medio dei target KPI nel tuo ambito."
+        title={t("kpi.title")}
+        description={t("kpi.description")}
         badges={
           <Badge variant="secondary" data-testid="analytics-kpi-scope">
-            Ambito {d.scope.kind}
+            {t("scope", { kind: d.scope.kind })}
           </Badge>
         }
       />
@@ -70,14 +72,14 @@ export default function AnalyticsKpiPage() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div data-testid="kpi-total-targets">
           <StatsCard
-            label="Target totali"
+            label={t("kpi.stats.targetsLabel")}
             value={d.totalTargets}
             icon={<Target className={`${ICON_CLS} text-palette-1`} />}
           />
         </div>
         <div data-testid="kpi-distinct-kpis">
           <StatsCard
-            label="KPI distinti"
+            label={t("kpi.stats.distinctLabel")}
             value={d.distinctKpis}
             icon={<Gauge className={`${ICON_CLS} text-palette-2`} />}
           />
@@ -90,7 +92,7 @@ export default function AnalyticsKpiPage() {
             value={overallAvg ?? 0}
             max={100}
             unit="%"
-            label="Raggiungimento medio"
+            label={t("kpi.gaugeLabel")}
             tone={overallTone}
           />
         </div>
@@ -98,23 +100,23 @@ export default function AnalyticsKpiPage() {
 
       <section className="space-y-3">
         <h2 className="text-base font-semibold tracking-tight text-foreground">
-          Raggiungimento medio per KPI
+          {t("kpi.chartTitle")}
         </h2>
         {d.byKpi.length === 0 ? (
           <EmptyState
             data-testid="analytics-kpi-empty"
             icon={<Gauge className="h-6 w-6" />}
-            title="Nessun dato"
-            description="Non ci sono target KPI nel tuo ambito al momento."
+            title={t("empty.title")}
+            description={t("kpi.emptyDesc")}
           />
         ) : (
           <>
             <div data-testid="analytics-kpi-chart">
-              <EChartsCard option={barOption} height={360} ariaLabel="Raggiungimento medio per KPI" />
+              <EChartsCard option={barOption} height={360} ariaLabel={t("kpi.chartTitle")} />
             </div>
             {nullCount > 0 ? (
               <p className="text-xs text-muted-foreground">
-                {nullCount} KPI senza valore consuntivo mostrati a 0% (n/d).
+                {t("kpi.nullNote", { count: nullCount })}
               </p>
             ) : null}
           </>

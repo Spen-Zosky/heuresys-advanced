@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Badge, EChartsCard, EmptyState, PageHeader, StatsCard, echartsPresets } from "@heuresys/ui";
 import { Building2, GraduationCap, Users } from "lucide-react";
 import type { SkillsCoverageAnalyticsResponse } from "@heuresys/shared";
@@ -55,6 +56,7 @@ function coverageHeatmapOption(d: SkillsCoverageAnalyticsResponse) {
 }
 
 export default function SkillsCoverageAnalyticsPage() {
+  const { t } = useTranslation("analytics");
   const q = useQuery({
     queryKey: ["analytics", "skills"],
     queryFn: () => apiFetch<SkillsCoverageAnalyticsResponse>("/v1/analytics/skills"),
@@ -63,14 +65,14 @@ export default function SkillsCoverageAnalyticsPage() {
   if (q.isLoading) {
     return (
       <main data-testid="analytics-skills-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">Caricamento…</span>
+        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
       </main>
     );
   }
   if (q.isError) {
     return (
       <main data-testid="analytics-skills-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">Impossibile caricare le analisi.</p>
+        <p className="text-sm text-danger">{t("error")}</p>
       </main>
     );
   }
@@ -81,7 +83,7 @@ export default function SkillsCoverageAnalyticsPage() {
     x: d.proficiencyLevels,
     series: [
       {
-        name: "Evidenze",
+        name: t("skills.seriesEvidence"),
         values: d.proficiencyLevels.map(
           (p) => d.byProficiency.find((b) => b.proficiency === p)?.evidenceCount ?? 0,
         ),
@@ -93,11 +95,11 @@ export default function SkillsCoverageAnalyticsPage() {
     <main data-testid="analytics-skills-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader
         data-testid="analytics-skills-title"
-        title="Copertura competenze"
-        description="Distribuzione delle evidenze di competenza dichiarate per unità organizzativa e livello di padronanza nel tuo ambito."
+        title={t("skills.title")}
+        description={t("skills.description")}
         badges={
           <Badge variant="secondary" data-testid="analytics-skills-scope">
-            Ambito {d.scope.kind}
+            {t("scope", { kind: d.scope.kind })}
           </Badge>
         }
       />
@@ -105,26 +107,26 @@ export default function SkillsCoverageAnalyticsPage() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div data-testid="skills-total-evidence">
           <StatsCard
-            label="Evidenze totali"
+            label={t("skills.stats.evidenceLabel")}
             value={d.totalEvidence}
             icon={<GraduationCap className="h-4 w-4 text-palette-1" />}
-            description="Competenze dichiarate"
+            description={t("skills.stats.evidenceDesc")}
           />
         </div>
         <div data-testid="skills-distinct-users">
           <StatsCard
-            label="Persone con evidenze"
+            label={t("skills.stats.usersLabel")}
             value={d.distinctUsers}
             icon={<Users className="h-4 w-4 text-palette-2" />}
-            description="Persone con almeno un'evidenza"
+            description={t("skills.stats.usersDesc")}
           />
         </div>
         <div data-testid="skills-distinct-ou">
           <StatsCard
-            label="Unità organizzative"
+            label={t("skills.stats.ouLabel")}
             value={d.distinctOrgUnits}
             icon={<Building2 className="h-4 w-4 text-palette-3" />}
-            description="OU coperte da evidenze"
+            description={t("skills.stats.ouDesc")}
           />
         </div>
       </section>
@@ -133,7 +135,7 @@ export default function SkillsCoverageAnalyticsPage() {
         <section className="space-y-8">
           <div className="space-y-3">
             <h2 className="text-base font-semibold tracking-tight text-foreground">
-              Copertura per unità e livello di padronanza
+              {t("skills.heatmapTitle")}
             </h2>
             <div
               data-testid="analytics-skills-heatmap"
@@ -142,18 +144,17 @@ export default function SkillsCoverageAnalyticsPage() {
               <EChartsCard
                 option={coverageHeatmapOption(d)}
                 height={Math.max(360, d.orgUnits.length * 26)}
-                ariaLabel="Copertura competenze per unità organizzativa e livello di padronanza"
+                ariaLabel={t("skills.heatmapAria")}
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Copertura delle evidenze dichiarate (non un gap competenze-vs-requisiti: i requisiti
-              di competenza per posizione non sono ancora popolati).
+              {t("skills.heatmapNote")}
             </p>
           </div>
 
           <div className="space-y-3">
             <h2 className="text-base font-semibold tracking-tight text-foreground">
-              Evidenze per livello di padronanza
+              {t("skills.proficiencyTitle")}
             </h2>
             <div
               data-testid="analytics-skills-proficiency-chart"
@@ -162,7 +163,7 @@ export default function SkillsCoverageAnalyticsPage() {
               <EChartsCard
                 option={proficiencyBarOption}
                 height={320}
-                ariaLabel="Evidenze per livello di padronanza"
+                ariaLabel={t("skills.proficiencyTitle")}
               />
             </div>
           </div>
@@ -171,8 +172,8 @@ export default function SkillsCoverageAnalyticsPage() {
         <EmptyState
           data-testid="analytics-skills-empty"
           icon={<GraduationCap className="h-6 w-6" />}
-          title="Nessun dato"
-          description="Non ci sono evidenze di competenza nel tuo ambito al momento."
+          title={t("empty.title")}
+          description={t("skills.emptyDesc")}
         />
       )}
     </main>

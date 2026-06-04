@@ -1,1 +1,97 @@
-{}
+{
+  "error": "Unable to load the analytics.",
+  "scope": "Scope {{kind}}",
+  "empty": {
+    "title": "No data"
+  },
+  "workforce": {
+    "title": "Workforce Analytics",
+    "description": "Headcount distribution by organizational unit and role within your scope.",
+    "stats": {
+      "totalLabel": "Total headcount",
+      "totalDesc": "People within your scope",
+      "ouLabel": "Organizational units",
+      "ouDesc": "OUs with headcount",
+      "rolesLabel": "Roles",
+      "rolesDesc": "Distinct roles covered"
+    },
+    "byOu": "Headcount by organizational unit",
+    "byRole": "Headcount by role",
+    "roleEmptyTitle": "No role data",
+    "roleEmptyDesc": "There are no roles with headcount within your scope.",
+    "emptyDesc": "There is no workforce data within your scope at the moment."
+  },
+  "kpi": {
+    "title": "KPI Analytics",
+    "description": "Average attainment of KPI targets within your scope.",
+    "stats": {
+      "targetsLabel": "Total targets",
+      "distinctLabel": "Distinct KPIs"
+    },
+    "gaugeLabel": "Average attainment",
+    "chartTitle": "Average attainment by KPI",
+    "series": "Average attainment %",
+    "nullNote": "{{count}} KPIs with no actual value shown at 0% (n/a).",
+    "emptyDesc": "There are no KPI targets within your scope at the moment."
+  },
+  "attendance": {
+    "title": "Attendance Analytics",
+    "description": "Worked hours (regular and overtime) by month and organizational unit within your scope.",
+    "stats": {
+      "totalLabel": "Total hours",
+      "totalDesc": "Worked hours, incl. overtime",
+      "overtimeLabel": "Overtime",
+      "overtimeDesc": "Overtime hours recorded",
+      "regularLabel": "Regular hours",
+      "regularDesc": "Regular hours recorded"
+    },
+    "monthlyTitle": "Hours by month",
+    "monthlyAria": "Worked hours by month",
+    "monthlyNote": "Linear vertical axis in hours; monthly spikes (bulk imports) stay at real scale.",
+    "ouTitle": "Total hours by organizational unit",
+    "seriesTotal": "Total hours",
+    "seriesOvertime": "Overtime",
+    "ouEmptyTitle": "No unit data",
+    "ouEmptyDesc": "There are no hours recorded by organizational unit within your scope.",
+    "emptyDesc": "There is no attendance recorded within your scope at the moment."
+  },
+  "compensation": {
+    "title": "Compensation Analytics",
+    "description": "Distribution of pay bands (€) by organizational unit and position equity within your scope.",
+    "stats": {
+      "profilesLabel": "Compensation profiles",
+      "profilesDesc": "Positions with an assigned band",
+      "ouLabel": "Organizational units",
+      "ouDesc": "OUs with compensation profiles",
+      "medianLabel": "Band median"
+    },
+    "range": "Min €{{min}} · Max €{{max}}",
+    "rangeEmpty": "No band within the scope",
+    "boxplotTitle": "Pay-band distribution by unit (mid €)",
+    "boxplotAria": "Pay-band distribution by organizational unit",
+    "scatterTitle": "Positioning: band mid vs band spread",
+    "scatterAria": "Compensation positioning: band mid vs band spread",
+    "scatterNote": "Each point is a position with a band; the color indicates the organizational unit.",
+    "axisMid": "€ band mid",
+    "axisSpread": "€ band spread",
+    "emptyDesc": "There are no compensation profiles with a band within your scope at the moment."
+  },
+  "skills": {
+    "title": "Skills Coverage",
+    "description": "Distribution of declared skill evidence by organizational unit and proficiency level within your scope.",
+    "stats": {
+      "evidenceLabel": "Total evidence",
+      "evidenceDesc": "Declared skills",
+      "usersLabel": "People with evidence",
+      "usersDesc": "People with at least one evidence",
+      "ouLabel": "Organizational units",
+      "ouDesc": "OUs covered by evidence"
+    },
+    "heatmapTitle": "Coverage by unit and proficiency level",
+    "heatmapAria": "Skills coverage by organizational unit and proficiency level",
+    "heatmapNote": "Coverage of declared evidence (not a skills-vs-requirements gap: the per-position skill requirements are not populated yet).",
+    "proficiencyTitle": "Evidence by proficiency level",
+    "seriesEvidence": "Evidence",
+    "emptyDesc": "There is no skill evidence within your scope at the moment."
+  }
+}

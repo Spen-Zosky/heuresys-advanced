@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Badge, EChartsCard, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
 import { Building2, Coins, Scale } from "lucide-react";
 import type {
@@ -17,10 +18,12 @@ const AXIS_COLOR = "hsl(var(--muted-foreground))";
 const GRID_COLOR = "hsl(var(--border))";
 const PALETTE = [1, 2, 3, 4, 5, 6].map((n) => `hsl(var(--palette-${n}))`);
 
+// €-amounts stay in the it-IT grouping format regardless of UI language (currency
+// follows the data region; locale-aware number formatting is a later enhancement).
 const EUR = new Intl.NumberFormat("it-IT");
 
 /** Horizontal boxplot: per-OU distribution of band mid_eur (pre-computed 5-number summary). */
-function bandingBoxplotOption(rows: CompensationBandingByOuRow[]) {
+function bandingBoxplotOption(rows: CompensationBandingByOuRow[], midAxisLabel: string) {
   const ous = rows.map((r) => r.ou);
   const boxData = rows.map((r) => [r.min, r.q1, r.median, r.q3, r.max]);
   return {
@@ -28,7 +31,7 @@ function bandingBoxplotOption(rows: CompensationBandingByOuRow[]) {
     tooltip: { trigger: "item" as const },
     xAxis: {
       type: "value" as const,
-      name: "€ mid banda",
+      name: midAxisLabel,
       axisLabel: { color: AXIS_COLOR },
       splitLine: { lineStyle: { color: GRID_COLOR } },
     },
@@ -49,7 +52,10 @@ function bandingBoxplotOption(rows: CompensationBandingByOuRow[]) {
 }
 
 /** Scatter: mid_eur (x) vs band spread max-min (y), one series per OU (color-coded). */
-function equityScatterOption(points: CompensationScatterPoint[]) {
+function equityScatterOption(
+  points: CompensationScatterPoint[],
+  axisLabels: { mid: string; spread: string },
+) {
   const byOu = new Map<string, CompensationScatterPoint[]>();
   for (const p of points) {
     const arr = byOu.get(p.ou) ?? [];
@@ -69,13 +75,13 @@ function equityScatterOption(points: CompensationScatterPoint[]) {
     legend: { type: "scroll" as const, textStyle: { color: AXIS_COLOR } },
     xAxis: {
       type: "value" as const,
-      name: "€ mid banda",
+      name: axisLabels.mid,
       axisLabel: { color: AXIS_COLOR },
       splitLine: { lineStyle: { color: GRID_COLOR } },
     },
     yAxis: {
       type: "value" as const,
-      name: "€ ampiezza banda",
+      name: axisLabels.spread,
       axisLabel: { color: AXIS_COLOR },
       splitLine: { lineStyle: { color: GRID_COLOR } },
     },
@@ -84,6 +90,7 @@ function equityScatterOption(points: CompensationScatterPoint[]) {
 }
 
 export default function CompensationAnalyticsPage() {
+  const { t } = useTranslation("analytics");
   const q = useQuery({
     queryKey: ["analytics", "compensation"],
     queryFn: () => apiFetch<CompensationAnalyticsResponse>("/v1/analytics/compensation"),
@@ -92,14 +99,14 @@ export default function CompensationAnalyticsPage() {
   if (q.isLoading) {
     return (
       <main data-testid="analytics-compensation-loading" className="mx-auto max-w-7xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">Caricamento…</span>
+        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
       </main>
     );
   }
   if (q.isError) {
     return (
       <main data-testid="analytics-compensation-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-danger">Impossibile caricare le analisi.</p>
+        <p className="text-sm text-danger">{t("error")}</p>
       </main>
     );
   }
@@ -108,18 +115,21 @@ export default function CompensationAnalyticsPage() {
   const hasData = d.bandingByOu.length > 0;
   const rangeDesc =
     d.overallMinMidEur !== null && d.overallMaxMidEur !== null
-      ? `Min €${EUR.format(d.overallMinMidEur)} · Max €${EUR.format(d.overallMaxMidEur)}`
-      : "Nessuna banda nell'ambito";
+      ? t("compensation.range", {
+          min: EUR.format(d.overallMinMidEur),
+          max: EUR.format(d.overallMaxMidEur),
+        })
+      : t("compensation.rangeEmpty");
 
   return (
     <main data-testid="analytics-compensation-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader
         data-testid="analytics-compensation-title"
-        title="Analisi retributiva"
-        description="Distribuzione delle bande retributive (€) per unità organizzativa ed equità delle posizioni nel tuo ambito."
+        title={t("compensation.title")}
+        description={t("compensation.description")}
         badges={
           <Badge variant="secondary" data-testid="analytics-compensation-scope">
-            Ambito {d.scope.kind}
+            {t("scope", { kind: d.scope.kind })}
           </Badge>
         }
       />
@@ -127,23 +137,23 @@ export default function CompensationAnalyticsPage() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div data-testid="compensation-total-profiles">
           <StatsCard
-            label="Profili retributivi"
+            label={t("compensation.stats.profilesLabel")}
             value={d.totalProfiles}
             icon={<Coins className="h-4 w-4 text-palette-1" />}
-            description="Posizioni con banda assegnata"
+            description={t("compensation.stats.profilesDesc")}
           />
         </div>
         <div data-testid="compensation-ou-count">
           <StatsCard
-            label="Unità organizzative"
+            label={t("compensation.stats.ouLabel")}
             value={d.ouCount}
             icon={<Building2 className="h-4 w-4 text-palette-2" />}
-            description="OU con profili retributivi"
+            description={t("compensation.stats.ouDesc")}
           />
         </div>
         <div data-testid="compensation-mid-range">
           <StatsCard
-            label="Mediana banda"
+            label={t("compensation.stats.medianLabel")}
             value={Math.round(d.overallMedianMidEur ?? 0)}
             unit="€"
             icon={<Scale className="h-4 w-4 text-palette-3" />}
@@ -156,36 +166,39 @@ export default function CompensationAnalyticsPage() {
         <section className="space-y-8">
           <div className="space-y-3">
             <h2 className="text-base font-semibold tracking-tight text-foreground">
-              Distribuzione bande retributive per unità (mid €)
+              {t("compensation.boxplotTitle")}
             </h2>
             <div
               data-testid="analytics-banding-boxplot"
               className="rounded-card border border-border bg-card p-4"
             >
               <EChartsCard
-                option={bandingBoxplotOption(d.bandingByOu)}
+                option={bandingBoxplotOption(d.bandingByOu, t("compensation.axisMid"))}
                 height={Math.max(300, d.bandingByOu.length * 30)}
-                ariaLabel="Distribuzione bande retributive per unità organizzativa"
+                ariaLabel={t("compensation.boxplotAria")}
               />
             </div>
           </div>
 
           <div className="space-y-3">
             <h2 className="text-base font-semibold tracking-tight text-foreground">
-              Posizionamento: mid banda vs ampiezza banda
+              {t("compensation.scatterTitle")}
             </h2>
             <div
               data-testid="analytics-equity-scatter"
               className="rounded-card border border-border bg-card p-4"
             >
               <EChartsCard
-                option={equityScatterOption(d.scatter)}
+                option={equityScatterOption(d.scatter, {
+                  mid: t("compensation.axisMid"),
+                  spread: t("compensation.axisSpread"),
+                })}
                 height={380}
-                ariaLabel="Posizionamento retributivo: mid banda vs ampiezza banda"
+                ariaLabel={t("compensation.scatterAria")}
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Ogni punto è una posizione con banda; il colore indica l&apos;unità organizzativa.
+              {t("compensation.scatterNote")}
             </p>
           </div>
         </section>
@@ -193,8 +206,8 @@ export default function CompensationAnalyticsPage() {
         <EmptyState
           data-testid="analytics-compensation-empty"
           icon={<Coins className="h-6 w-6" />}
-          title="Nessun dato"
-          description="Non ci sono profili retributivi con banda nel tuo ambito al momento."
+          title={t("empty.title")}
+          description={t("compensation.emptyDesc")}
         />
       )}
     </main>

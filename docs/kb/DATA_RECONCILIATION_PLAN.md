@@ -112,7 +112,7 @@ A read-only FK match-rate triage (S958, live queries on both DBs) **falsifies th
 | Target ← source | Verdict | Decisive FK match-rate |
 |---|---|---|
 | `sys_kpi_definitions` ← `process_kpis` (81) | ✅ **DONE** (S958, `ae34588`) | 81/81 1:1, polarity value-map clean |
-| `sys_organization_unit_kpi_templates` ← `org_unit_kpis` (100) | SOURCE-BLOCKED ×2 | kpi 0/100 + org_unit 0/91 |
+| `sys_organization_unit_kpi_templates` ← `org_unit_kpis` (100) | ✅ **DONE** (D4/W2 Option A, S961) | kpi 100/100 (S958.1 unification) + unit_template 100/100 (new template layer, mig `000064` + seed 40) |
 | `sys_position_kpi_requirements` ← `job_kpis` (2000) | SOURCE-BLOCKED ×2 | kpi 0/45 + position 0/162 (no legacy job key on sys_positions) |
 | `sys_kpi_targets` ← `employee_kpi_targets` (412) | SOURCE-BLOCKED (kpi) | kpi 0/17 (user FK fine: 138/138 RTL) |
 | `sys_career_paths` ← `career_paths` (32) | SOURCE-BLOCKED | parent catalog empty (must import first) |
@@ -135,9 +135,9 @@ Enzo greenlit opt. A (unify the KPI catalog). Executed + validated (supervised V
 - **Verified**: integration tests 12/12, `db:validate` 7/7 structural PASS (incl. `v_tenant_boundary_violations`), both seeds idempotent (2nd run INSERT 0).
 
 **Still blocked after unification** (the kpi-FK now resolves, but the SECOND FK doesn't):
-- `sys_organization_unit_kpi_templates` — org_unit FK: legacy `org_unit_kpis` keys a design-layer template, sys imported the instance-layer org_units (no bridge). → needs an org-unit template↔instance decision.
+- ~~`sys_organization_unit_kpi_templates` — org_unit FK: legacy `org_unit_kpis` keys a design-layer template, sys imported the instance-layer org_units (no bridge). → needs an org-unit template↔instance decision.~~ **RESOLVED (D4/W2 Option A, S961)**: the template↔instance decision was taken — a new tenant-less `sys.sys_organization_unit_templates` taxonomy (225 rows, mirrors `sys_blueprint_process_registry`) now hosts the legacy `org_unit_templates`; the KPI-template target FKs it via a nullable `unit_template_id` + XOR CHECK (migration `000064`, seed `40_org_unit_kpi_templates.sql`). Target = 100 rows POPULATED, `unit_template_id` + `kpi_id` resolve 100/100. See `docs/kb/D4_ORG_UNIT_TEMPLATE_DESIGN.md`.
 - `sys_position_kpi_requirements` — position FK: `job_kpis.job_template_id` has no key on `sys_positions` (job→position bridge absent). → needs the job→position bridge milestone.
-These two remain NEEDS-DECISION (second-FK blockers), independent of the KPI catalog.
+The position-kpi target remains NEEDS-DECISION (second-FK blocker), independent of the KPI catalog.
 
 ## §6 — Decision points for Enzo
 

@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import globals from "globals";
+import i18nextPlugin from "eslint-plugin-i18next";
 import { FlatCompat } from "@eslint/eslintrc";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -72,6 +73,20 @@ export default tseslint.config(
     },
     rules: {
       "@next/next/no-html-link-for-pages": "off",
+    },
+  },
+
+  // i18n guardrail (milestone Fase 0b) — block NEW hardcoded user-facing strings across the WHOLE
+  // app router, so the Italian-hardcoded debt cannot re-form anywhere. v6 default only flags plain
+  // text in JSX markup (NOT className/data-testid/units/etc.), so it targets exactly the renderable
+  // chrome. Severity is `warn` while the ~50 legacy pages are still being migrated (eslint runs with
+  // no --max-warnings, so CI stays green); flip to `error` once the warning count hits 0 at the end
+  // of the milestone — at that point the guardrail becomes hard-enforcing for every future page.
+  {
+    files: ["apps/web/src/app/**/*.{ts,tsx}"],
+    plugins: { i18next: i18nextPlugin },
+    rules: {
+      "i18next/no-literal-string": "warn",
     },
   }
 );

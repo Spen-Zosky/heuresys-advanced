@@ -2,6 +2,7 @@
  * apps/web/tests/e2e/me-preferences.spec.ts
  *
  * WS-4 P1 — per-user theme + palette preferences, SERVER source of truth.
+ * i18n Fase 0b — per-user UI locale (it/en), same server-source-of-truth contract.
  *
  * Live-data E2E: a real seeded employee logs in fresh (so the access cookie + csrf token are
  * current — avoids the storageState 15-min-access-token staleness that makes mutation specs flaky),
@@ -10,8 +11,8 @@
  * values come back from the server (GET /v1/me/preferences) and are re-applied by the layout's
  * PreferencesApplier — proving the server is the source of truth, not localStorage.
  *
- * Cleanup: resets the persona to the brand defaults (dark / balanced) at the end so the suite is
- * deterministic and leaves no residue across runs.
+ * Cleanup: resets the persona to the brand defaults (dark / balanced / it) at the end so the suite
+ * is deterministic and leaves no residue across runs.
  */
 
 import { test, expect, type Page } from "@playwright/test";
@@ -87,5 +88,48 @@ test.describe("ESS preferences — theme + palette server source-of-truth", () =
     await patchAndWait(page, "pref-palette-balanced");
     await expect(page.locator("html")).toHaveClass(/dark/);
     await expect.poll(() => bodyBackground(page)).toBe(DARK_BACKGROUND_RGB);
+  });
+});
+
+async function nextLocaleCookie(page: Page): Promise<string | undefined> {
+  const cookies = await page.context().cookies();
+  return cookies.find((c) => c.name === "NEXT_LOCALE")?.value;
+}
+
+test.describe("ESS preferences — UI locale server source-of-truth (i18n Fase 0b)", () => {
+  test("changing language persists server-side across a cookie+cache-cleared reload", async ({ page }) => {
+    await loginAs(page, "employee");
+    await openProfile(page);
+
+    // Default locale = IT (the language switcher lives in the authenticated shell).
+    await expect(page.getByTestId("language-it")).toHaveAttribute("aria-pressed", "true");
+
+    // Flip to EN via the real switcher — the click PATCHes /v1/me/preferences (locale) → DB.
+    await patchAndWait(page, "language-en");
+    await expect(page.getByTestId("language-en")).toHaveAttribute("aria-pressed", "true");
+    // setLocale also writes the NEXT_LOCALE cookie (same-device first-paint cache).
+    await expect.poll(() => nextLocaleCookie(page)).toBe("en");
+
+    // Server is the authoritative store: a direct read reflects the locale.
+    const apiResp = await page.request.get("/api/v1/me/preferences");
+    expect(apiResp.status()).toBe(200);
+    expect(await apiResp.json()).toMatchObject({ locale: "en" });
+
+    // Clear BOTH the NEXT_LOCALE cookie (only) and localStorage, then reload: the re-applied locale
+    // can ONLY come from the server (GET /v1/me/preferences → PreferencesApplier → setLocale, which
+    // rewrites the cookie to 'en'). The auth cookie is preserved so the session survives.
+    await page.context().clearCookies({ name: "NEXT_LOCALE" });
+    await page.evaluate(() => window.localStorage.clear());
+    await page.reload();
+    await page.waitForLoadState("networkidle");
+    await expect(page.getByTestId("me-appearance")).toBeVisible({ timeout: 20_000 });
+
+    // After reload the switcher shows EN again + the cookie was re-written from the server choice.
+    await expect(page.getByTestId("language-en")).toHaveAttribute("aria-pressed", "true");
+    await expect.poll(() => nextLocaleCookie(page)).toBe("en");
+
+    // Reset to the IT default so the suite is deterministic and leaves no residue.
+    await patchAndWait(page, "language-it");
+    await expect(page.getByTestId("language-it")).toHaveAttribute("aria-pressed", "true");
   });
 });

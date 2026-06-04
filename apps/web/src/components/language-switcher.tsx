@@ -4,17 +4,21 @@
  * apps/web/src/components/language-switcher.tsx
  *
  * Flips the active UI locale (IT/EN) via setLocale (i18next.changeLanguage + the
- * NEXT_LOCALE cookie). Client-only. The cookie makes the choice survive reloads;
- * cross-device persistence (sys_user_preferences) is wired in Fase 0b via
- * PreferencesApplier. Renders a small IT/EN toggle.
+ * NEXT_LOCALE cookie) AND persists it server-side (sys_user_preferences, i18n Fase 0b)
+ * so the choice follows the user cross-device. Client-only. The cookie covers same-device
+ * reloads; the PATCH covers a fresh device (re-applied on next login by PreferencesApplier).
+ * The server write is best-effort: if it fails (e.g. unauthenticated), the client locale
+ * still flips. Renders a small IT/EN toggle.
  */
 
 import { useTranslation } from "react-i18next";
 import { Button } from "@heuresys/ui";
 import { SUPPORTED_LOCALES, setLocale, type AppLocale } from "../lib/i18n";
+import { useUpdateMyPreferences } from "../lib/api/auth";
 
 export function LanguageSwitcher() {
   const { t, i18n } = useTranslation("shell");
+  const updatePrefs = useUpdateMyPreferences();
   const active = (SUPPORTED_LOCALES as readonly string[]).includes(i18n.language)
     ? (i18n.language as AppLocale)
     : "it";
@@ -35,7 +39,11 @@ export function LanguageSwitcher() {
           data-testid={`language-${loc}`}
           aria-pressed={active === loc}
           className="flex-1"
-          onClick={() => setLocale(loc)}
+          onClick={() => {
+            setLocale(loc);
+            // Persist cross-device (server = source of truth); best-effort, errors are non-fatal.
+            updatePrefs.mutate({ locale: loc });
+          }}
         >
           {loc.toUpperCase()}
         </Button>

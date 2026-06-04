@@ -1,10 +1,11 @@
 /**
  * apps/api/test/me-preferences.integration.test.ts
- * GET/PATCH /v1/me/preferences — per-user UI preferences (WS-4 P1), server = source of truth.
+ * GET/PATCH /v1/me/preferences — per-user UI preferences (WS-4 P1 theme+palette + i18n Fase 0b
+ * locale), server = source of truth.
  *
- * Asserts: default when no row (brand defaults dark/balanced), PATCH persists + survives a re-GET,
- * partial PATCH (theme-only never resets palette), self-scope (unauth GET 401), CSRF-missing PATCH
- * 403, and validation (invalid theme/palette → 400).
+ * Asserts: default when no row (brand defaults dark/balanced/it), PATCH persists + survives a re-GET,
+ * partial PATCH (theme-only never resets palette or locale; locale-only flips just the language),
+ * self-scope (unauth GET 401), CSRF-missing PATCH 403, and validation (invalid theme/palette/locale → 400).
  *
  * Persona = the seed-test-admin employee (tommaso.fiore), login-capable in CI. Hits the real DB
  * through the tunnel (no mocks). The persona's preference row is reset before/after so the suite is
@@ -54,30 +55,48 @@ describe("/v1/me/preferences (WS-4 P1)", () => {
     await closePool();
   });
 
-  it("GET returns the brand defaults when no row exists (dark / balanced)", async () => {
+  it("GET returns the brand defaults when no row exists (dark / balanced / it)", async () => {
     const r = await getPrefs(suite, employeeS);
     expect(r.statusCode).toBe(200);
-    expect(r.json()).toEqual({ theme: "dark", palette: "balanced" });
+    expect(r.json()).toEqual({ theme: "dark", palette: "balanced", locale: "it" });
   });
 
   it("PATCH persists theme+palette; a fresh GET reflects it (server source-of-truth)", async () => {
     const p = await patchPrefs(suite, employeeS, { theme: "light", palette: "cool-ocean" });
     expect(p.statusCode).toBe(200);
-    expect(p.json()).toEqual({ theme: "light", palette: "cool-ocean" });
+    // locale stays the default 'it' (no row existed, INSERT fills the brand default).
+    expect(p.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "it" });
 
     const r = await getPrefs(suite, employeeS);
     expect(r.statusCode).toBe(200);
-    expect(r.json()).toEqual({ theme: "light", palette: "cool-ocean" });
+    expect(r.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "it" });
   });
 
   it("partial PATCH (theme only) does NOT reset the stored palette", async () => {
     const p = await patchPrefs(suite, employeeS, { theme: "dark" });
     expect(p.statusCode).toBe(200);
-    // palette stays cool-ocean from the previous test
-    expect(p.json()).toEqual({ theme: "dark", palette: "cool-ocean" });
+    // palette stays cool-ocean + locale stays it from the previous test
+    expect(p.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "it" });
 
     const r = await getPrefs(suite, employeeS);
-    expect(r.json()).toEqual({ theme: "dark", palette: "cool-ocean" });
+    expect(r.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "it" });
+  });
+
+  it("PATCH persists locale (en); a fresh GET reflects it (i18n Fase 0b)", async () => {
+    const p = await patchPrefs(suite, employeeS, { locale: "en" });
+    expect(p.statusCode).toBe(200);
+    // only locale flips; theme+palette keep the prior stored values (partial update).
+    expect(p.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "en" });
+
+    const r = await getPrefs(suite, employeeS);
+    expect(r.json()).toEqual({ theme: "dark", palette: "cool-ocean", locale: "en" });
+  });
+
+  it("partial PATCH (theme only) does NOT reset the stored locale", async () => {
+    const p = await patchPrefs(suite, employeeS, { theme: "light" });
+    expect(p.statusCode).toBe(200);
+    // locale stays 'en' from the previous test
+    expect(p.json()).toEqual({ theme: "light", palette: "cool-ocean", locale: "en" });
   });
 
   it("unauthenticated GET → 401", async () => {
@@ -97,6 +116,11 @@ describe("/v1/me/preferences (WS-4 P1)", () => {
 
   it("PATCH with an invalid palette → 400 (Zod validation)", async () => {
     const p = await patchPrefs(suite, employeeS, { palette: "not-a-palette" });
+    expect(p.statusCode).toBe(400);
+  });
+
+  it("PATCH with an invalid locale → 400 (Zod validation)", async () => {
+    const p = await patchPrefs(suite, employeeS, { locale: "fr" });
     expect(p.statusCode).toBe(400);
   });
 

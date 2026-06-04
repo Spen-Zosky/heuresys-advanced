@@ -16,6 +16,7 @@ import { useEffect } from "react";
 import { useTheme, applyPalette, type PaletteIdx } from "@heuresys/ui";
 import type { MePalette } from "@heuresys/shared";
 import { useMyPreferences } from "../lib/api/auth";
+import { setLocale, i18n } from "../lib/i18n";
 
 /** localStorage cache keys read by @heuresys/ui (ThemeProvider + PaletteDropdown) at first paint. */
 const THEME_CACHE_KEY = "heuresys-theme";
@@ -34,6 +35,7 @@ export function PreferencesApplier() {
   const { setTheme } = useTheme();
   const theme = prefs.data?.theme;
   const palette = prefs.data?.palette;
+  const locale = prefs.data?.locale;
 
   useEffect(() => {
     if (!theme) return;
@@ -63,6 +65,15 @@ export function PreferencesApplier() {
       /* ignore */
     }
   }, [theme]);
+
+  // Locale (i18n Fase 0b): align the active UI language to the server choice on every session,
+  // including a fresh device where the NEXT_LOCALE cookie is absent (first-paint defaults to IT,
+  // then this re-applies the stored language). setLocale also rewrites the cookie so the next
+  // first-paint already honors it. Behavior-preserving for the common case (cookie == server).
+  useEffect(() => {
+    if (!locale) return;
+    if (i18n.language !== locale) setLocale(locale);
+  }, [locale]);
 
   return null;
 }

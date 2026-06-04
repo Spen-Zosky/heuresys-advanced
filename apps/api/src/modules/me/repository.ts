@@ -726,20 +726,29 @@ export async function listMyDocuments(
 interface PreferenceRow {
   user_preference_theme: UserPreference["theme"];
   user_preference_palette: UserPreference["palette"];
+  user_preference_locale: UserPreference["locale"];
 }
 
 /** The caller's stored UI preferences, or the brand defaults when no row exists yet. */
 export async function loadPreferences(q: DbConnector, userId: string): Promise<UserPreference> {
   const res = await q.query<PreferenceRow>(
-    `SELECT user_preference_theme, user_preference_palette
+    `SELECT user_preference_theme, user_preference_palette, user_preference_locale
        FROM sys.sys_user_preferences WHERE user_preference_user_id = $1`,
     [userId],
   );
   const row = res.rows[0];
   if (!row) {
-    return { theme: ME_PREFERENCE_DEFAULTS.theme, palette: ME_PREFERENCE_DEFAULTS.palette };
+    return {
+      theme: ME_PREFERENCE_DEFAULTS.theme,
+      palette: ME_PREFERENCE_DEFAULTS.palette,
+      locale: ME_PREFERENCE_DEFAULTS.locale,
+    };
   }
-  return { theme: row.user_preference_theme, palette: row.user_preference_palette };
+  return {
+    theme: row.user_preference_theme,
+    palette: row.user_preference_palette,
+    locale: row.user_preference_locale,
+  };
 }
 
 /** Upsert the 1:1 preferences row. A field omitted from `patch` keeps its current stored value
@@ -747,22 +756,23 @@ export async function loadPreferences(q: DbConnector, userId: string): Promise<U
 export async function upsertPreferences(
   q: DbConnector, userId: string, tenantId: string | null, patch: UpdateUserPreferenceBody,
 ): Promise<UserPreference> {
-  // $3/$4 carry the raw patch (NULL when the field is omitted). On INSERT (no row yet) an omitted
-  // field falls back to the brand default ($5/$6); on UPDATE an omitted field keeps the stored value
+  // $3/$4/$7 carry the raw patch (NULL when the field is omitted). On INSERT (no row yet) an omitted
+  // field falls back to the brand default ($5/$6/$8); on UPDATE an omitted field keeps the stored value
   // (the NULL EXCLUDED value is COALESCE'd against the existing column). This makes PATCH a true
-  // partial update — supplying only `theme` never resets `palette`, and vice-versa.
+  // partial update — supplying only `theme` never resets `palette`/`locale`, and vice-versa.
   const res = await q.query<PreferenceRow>(
     `INSERT INTO sys.sys_user_preferences (
         user_preference_user_id, user_preference_tenant_id,
-        user_preference_theme, user_preference_palette, created_by, updated_by
-      ) VALUES ($1, $2, COALESCE($3, $5), COALESCE($4, $6), $1, $1)
+        user_preference_theme, user_preference_palette, user_preference_locale, created_by, updated_by
+      ) VALUES ($1, $2, COALESCE($3, $5), COALESCE($4, $6), COALESCE($7, $8), $1, $1)
       ON CONFLICT (user_preference_user_id) DO UPDATE SET
         user_preference_theme   = COALESCE($3, sys.sys_user_preferences.user_preference_theme),
         user_preference_palette = COALESCE($4, sys.sys_user_preferences.user_preference_palette),
+        user_preference_locale  = COALESCE($7, sys.sys_user_preferences.user_preference_locale),
         user_preference_tenant_id = COALESCE(sys.sys_user_preferences.user_preference_tenant_id, EXCLUDED.user_preference_tenant_id),
         updated_at = now(),
         updated_by = $1
-      RETURNING user_preference_theme, user_preference_palette`,
+      RETURNING user_preference_theme, user_preference_palette, user_preference_locale`,
     [
       userId,
       tenantId,
@@ -770,8 +780,14 @@ export async function upsertPreferences(
       patch.palette ?? null,
       ME_PREFERENCE_DEFAULTS.theme,
       ME_PREFERENCE_DEFAULTS.palette,
+      patch.locale ?? null,
+      ME_PREFERENCE_DEFAULTS.locale,
     ],
   );
   const r = res.rows[0]!;
-  return { theme: r.user_preference_theme, palette: r.user_preference_palette };
+  return {
+    theme: r.user_preference_theme,
+    palette: r.user_preference_palette,
+    locale: r.user_preference_locale,
+  };
 }

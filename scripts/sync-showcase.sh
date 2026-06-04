@@ -44,11 +44,13 @@ if [ -d "$WEB/components" ]; then
   cp -r "$WEB/components/." "$SHOWCASE/components/"
   # Portability invariant (ADR-0013 R2): the showcase may only depend on @heuresys/ui + react +
   # lucide-react. Some apps/web components are app-specific wrappers that import non-portable
-  # modules (@heuresys/shared types, @/lib api/i18n) — e.g. preferences-applier.tsx. Those are
-  # NOT showcase primitives; prune them from the synced copy so `next build` (which typechecks the
-  # whole tree) doesn't choke on a module the showcase intentionally doesn't install.
+  # modules (@heuresys/shared types, @/lib api, react-i18next/i18next) — e.g. preferences-applier.tsx
+  # (@heuresys/shared) and the i18n-migrated data-table-panel.tsx / language-switcher.tsx
+  # (react-i18next). Those are NOT showcase primitives; prune them from the synced copy so
+  # `next build` (which typechecks the whole tree) doesn't choke on a module the showcase
+  # intentionally doesn't install.
   find "$SHOWCASE/components" -type f \( -name '*.tsx' -o -name '*.ts' \) | while read -r f; do
-    if grep -qE "@heuresys/shared|@/lib/" "$f"; then
+    if grep -qE "@heuresys/shared|@/lib/|i18next" "$f"; then
       echo "sync-showcase: pruning non-portable component $(basename "$f")"
       rm -f "$f"
     fi

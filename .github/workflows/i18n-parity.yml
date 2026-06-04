@@ -8,13 +8,13 @@ on:
   push:
     branches: [main]
     paths:
-      - "apps/web/src/i18n/**"
+      - "apps/web/src/locales/**"
       - "apps/web/scripts/check-i18n-parity.ts"
       - ".github/workflows/i18n-parity.yml"
   pull_request:
     branches: [main]
     paths:
-      - "apps/web/src/i18n/**"
+      - "apps/web/src/locales/**"
   workflow_dispatch: {}
 
 concurrency:

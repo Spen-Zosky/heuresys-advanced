@@ -309,3 +309,148 @@ export async function getAttendanceTotals(
     byOrgUnit: byOu.rows.map(mapRow),
   };
 }
+
+// --- Compensation equity (P2) -----------------------------------------------
+// Driving table is sys_position_compensation_profiles; the INNER JOIN to
+// sys_compensation_bands silently drops unbanded profiles (nothing to plot).
+// Scope is POSITION-centric (the band/OU dimension hangs off the position), so
+// the TEAM filter restricts p.position_id directly — NOT a subject-user join.
+
+export interface CompensationBandingByOuRow {
+  ou: string;
+  count: number;
+  min: number;
+  q1: number;
+  median: number;
+  q3: number;
+  max: number;
+}
+
+export interface CompensationScatterPoint {
+  ou: string;
+  positionTitle: string;
+  bandCode: string;
+  midEur: number;
+  spreadEur: number;
+}
+
+export interface CompensationEquity {
+  totalProfiles: number;
+  ouCount: number;
+  overallMinMidEur: number | null;
+  overallMaxMidEur: number | null;
+  overallMedianMidEur: number | null;
+  bandingByOu: CompensationBandingByOuRow[];
+  scatter: CompensationScatterPoint[];
+}
+
+function compensationScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
+  if (scope.isPlatformScope) return { sql: "TRUE", params: [] };
+  const params: unknown[] = [scope.tenantId];
+  const clauses = [`pcp.position_compensation_profile_tenant_id = $1`];
+  if (scope.teamPositionIds.length > 0) {
+    params.push(scope.teamPositionIds);
+    clauses.push(`p.position_id = ANY($${params.length}::uuid[])`);
+  }
+  return { sql: clauses.join(" AND "), params };
+}
+
+export async function getCompensationEquity(
+  q: DbConnector,
+  scope: ScopeFilter,
+): Promise<CompensationEquity> {
+  const sc = compensationScopeClause(scope);
+  const FROM = `
+       FROM sys.sys_position_compensation_profiles pcp
+       JOIN sys.sys_positions p ON p.position_id = pcp.position_id
+       JOIN sys.sys_compensation_bands b ON b.compensation_band_id = pcp.compensation_band_id
+       LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id
+      WHERE ${sc.sql}`;
+
+  // Boxplot 5-number summary of band mid_eur per OU. Ordered by median (numeric
+  // expression, not the ::text alias) desc, then count desc.
+  const banding = await q.query<{
+    ou: string;
+    n: string;
+    minv: string;
+    q1: string;
+    median: string;
+    q3: string;
+    maxv: string;
+  }>(
+    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS ou,
+            count(*)::text AS n,
+            min(b.compensation_band_mid_eur)::text AS minv,
+            percentile_cont(0.25) WITHIN GROUP (ORDER BY b.compensation_band_mid_eur)::text AS q1,
+            percentile_cont(0.5)  WITHIN GROUP (ORDER BY b.compensation_band_mid_eur)::text AS median,
+            percentile_cont(0.75) WITHIN GROUP (ORDER BY b.compensation_band_mid_eur)::text AS q3,
+            max(b.compensation_band_mid_eur)::text AS maxv
+       ${FROM}
+      GROUP BY 1
+      ORDER BY percentile_cont(0.5) WITHIN GROUP (ORDER BY b.compensation_band_mid_eur) DESC, count(*) DESC`,
+    sc.params,
+  );
+
+  // One scatter point per banded profile: mid_eur (x) vs spread max-min (y).
+  const scatter = await q.query<{
+    ou: string;
+    mid: string;
+    spread: string;
+    band_code: string;
+    position_title: string;
+  }>(
+    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS ou,
+            b.compensation_band_mid_eur::text AS mid,
+            (b.compensation_band_max_eur - b.compensation_band_min_eur)::text AS spread,
+            b.compensation_band_code AS band_code,
+            p.position_title AS position_title
+       ${FROM}
+      ORDER BY b.compensation_band_mid_eur DESC,
+               (b.compensation_band_max_eur - b.compensation_band_min_eur) DESC`,
+    sc.params,
+  );
+
+  const summary = await q.query<{
+    total: string;
+    oucount: string;
+    minmid: string | null;
+    maxmid: string | null;
+    medianmid: string | null;
+  }>(
+    `SELECT count(*)::text AS total,
+            count(DISTINCT COALESCE(ou.organization_unit_name, '(unassigned)'))::text AS oucount,
+            min(b.compensation_band_mid_eur)::text AS minmid,
+            max(b.compensation_band_mid_eur)::text AS maxmid,
+            (percentile_cont(0.5) WITHIN GROUP (ORDER BY b.compensation_band_mid_eur))::text AS medianmid
+       ${FROM}`,
+    sc.params,
+  );
+
+  const s = summary.rows[0];
+  const numOrNull = (v: string | null | undefined): number | null =>
+    v === null || v === undefined ? null : Number(v);
+
+  return {
+    totalProfiles: Number(s?.total ?? 0),
+    ouCount: Number(s?.oucount ?? 0),
+    overallMinMidEur: numOrNull(s?.minmid),
+    overallMaxMidEur: numOrNull(s?.maxmid),
+    overallMedianMidEur: numOrNull(s?.medianmid),
+    bandingByOu: banding.rows.map((r) => ({
+      ou: r.ou,
+      count: Number(r.n),
+      min: Number(r.minv),
+      q1: Number(r.q1),
+      median: Number(r.median),
+      q3: Number(r.q3),
+      max: Number(r.maxv),
+    })),
+    scatter: scatter.rows.map((r) => ({
+      ou: r.ou,
+      positionTitle: r.position_title,
+      bandCode: r.band_code,
+      midEur: Number(r.mid),
+      spreadEur: Number(r.spread),
+    })),
+  };
+}

@@ -74,3 +74,42 @@ export const AttendanceAnalyticsResponseSchema = z.object({
   generatedAt: z.string(),
 });
 export type AttendanceAnalyticsResponse = z.infer<typeof AttendanceAnalyticsResponseSchema>;
+
+// --- Compensation equity (P2) ---
+// Banding spread of compensation_band_mid_eur per OU (5-number boxplot summary) +
+// a per-position scatter of mid_eur (x) vs band spread max-min (y), colored by OU.
+// economic_weight is NULL across the seed, so band spread is the equity y-axis.
+// € values are integral but kept z.number() for headroom; nullable summary fields
+// are null only when the scope is empty.
+export const CompensationBandingByOuRowSchema = z.object({
+  ou: z.string(), // organization_unit_name or '(unassigned)'
+  count: z.number().int(), // banded profiles in this OU
+  min: z.number(),
+  q1: z.number(),
+  median: z.number(),
+  q3: z.number(),
+  max: z.number(),
+});
+export type CompensationBandingByOuRow = z.infer<typeof CompensationBandingByOuRowSchema>;
+
+export const CompensationScatterPointSchema = z.object({
+  ou: z.string(), // colored-by dimension
+  positionTitle: z.string(),
+  bandCode: z.string(),
+  midEur: z.number(), // x axis
+  spreadEur: z.number(), // y axis = max_eur - min_eur
+});
+export type CompensationScatterPoint = z.infer<typeof CompensationScatterPointSchema>;
+
+export const CompensationAnalyticsResponseSchema = z.object({
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.string().uuid().nullable() }),
+  totalProfiles: z.number().int(), // banded profiles in scope
+  ouCount: z.number().int(), // distinct OUs with banded profiles
+  overallMinMidEur: z.number().nullable(),
+  overallMaxMidEur: z.number().nullable(),
+  overallMedianMidEur: z.number().nullable(),
+  bandingByOu: z.array(CompensationBandingByOuRowSchema), // median-desc
+  scatter: z.array(CompensationScatterPointSchema), // mid-desc
+  generatedAt: z.string(),
+});
+export type CompensationAnalyticsResponse = z.infer<typeof CompensationAnalyticsResponseSchema>;

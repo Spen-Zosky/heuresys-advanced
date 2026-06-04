@@ -104,4 +104,55 @@ export declare const AttendanceAnalyticsResponseSchema: z.ZodObject<{
     generatedAt: z.ZodString;
 }, z.core.$strip>;
 export type AttendanceAnalyticsResponse = z.infer<typeof AttendanceAnalyticsResponseSchema>;
+export declare const CompensationBandingByOuRowSchema: z.ZodObject<{
+    ou: z.ZodString;
+    count: z.ZodNumber;
+    min: z.ZodNumber;
+    q1: z.ZodNumber;
+    median: z.ZodNumber;
+    q3: z.ZodNumber;
+    max: z.ZodNumber;
+}, z.core.$strip>;
+export type CompensationBandingByOuRow = z.infer<typeof CompensationBandingByOuRowSchema>;
+export declare const CompensationScatterPointSchema: z.ZodObject<{
+    ou: z.ZodString;
+    positionTitle: z.ZodString;
+    bandCode: z.ZodString;
+    midEur: z.ZodNumber;
+    spreadEur: z.ZodNumber;
+}, z.core.$strip>;
+export type CompensationScatterPoint = z.infer<typeof CompensationScatterPointSchema>;
+export declare const CompensationAnalyticsResponseSchema: z.ZodObject<{
+    scope: z.ZodObject<{
+        kind: z.ZodEnum<{
+            PLATFORM: "PLATFORM";
+            TENANT: "TENANT";
+            TEAM: "TEAM";
+        }>;
+        tenantId: z.ZodNullable<z.ZodString>;
+    }, z.core.$strip>;
+    totalProfiles: z.ZodNumber;
+    ouCount: z.ZodNumber;
+    overallMinMidEur: z.ZodNullable<z.ZodNumber>;
+    overallMaxMidEur: z.ZodNullable<z.ZodNumber>;
+    overallMedianMidEur: z.ZodNullable<z.ZodNumber>;
+    bandingByOu: z.ZodArray<z.ZodObject<{
+        ou: z.ZodString;
+        count: z.ZodNumber;
+        min: z.ZodNumber;
+        q1: z.ZodNumber;
+        median: z.ZodNumber;
+        q3: z.ZodNumber;
+        max: z.ZodNumber;
+    }, z.core.$strip>>;
+    scatter: z.ZodArray<z.ZodObject<{
+        ou: z.ZodString;
+        positionTitle: z.ZodString;
+        bandCode: z.ZodString;
+        midEur: z.ZodNumber;
+        spreadEur: z.ZodNumber;
+    }, z.core.$strip>>;
+    generatedAt: z.ZodString;
+}, z.core.$strip>;
+export type CompensationAnalyticsResponse = z.infer<typeof CompensationAnalyticsResponseSchema>;
 //# sourceMappingURL=analytics.d.ts.map

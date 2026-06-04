@@ -11,6 +11,7 @@ import type {
   WorkforceAnalyticsResponse,
   KpiAnalyticsResponse,
   AttendanceAnalyticsResponse,
+  CompensationAnalyticsResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
@@ -98,6 +99,22 @@ export const analyticsService = {
         totalHours: m.totalHours,
       })),
       byOrgUnit: at.byOrgUnit,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  async compensation(a: ActorContext): Promise<CompensationAnalyticsResponse> {
+    const s = await buildScope(a);
+    const c = await repo.getCompensationEquity(pool, s.filter);
+    return {
+      scope: { kind: s.kind, tenantId: s.tenantId },
+      totalProfiles: c.totalProfiles,
+      ouCount: c.ouCount,
+      overallMinMidEur: c.overallMinMidEur,
+      overallMaxMidEur: c.overallMaxMidEur,
+      overallMedianMidEur: c.overallMedianMidEur,
+      bandingByOu: c.bandingByOu,
+      scatter: c.scatter,
       generatedAt: new Date().toISOString(),
     };
   },

@@ -218,4 +218,72 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect(body.totalHours).toBeCloseTo(31358.9, 1);
     expect(body.byOrgUnit.length).toBe(22);
   });
+
+  // --- Compensation equity (P2) — deterministic anchors: 155 banded profiles
+  // across 21 OUs, mid €28k–80k, all in tenant RTL Bank (the other tenant's
+  // profiles are unbanded → dropped by the inner JOIN to compensation_bands).
+
+  interface CompensationBody {
+    scope: { kind: string; tenantId: string | null };
+    totalProfiles: number;
+    ouCount: number;
+    overallMinMidEur: number | null;
+    overallMaxMidEur: number | null;
+    overallMedianMidEur: number | null;
+    bandingByOu: Array<{ ou: string; count: number; min: number; q1: number; median: number; q3: number; max: number }>;
+    scatter: Array<{ ou: string; positionTitle: string; bandCode: string; midEur: number; spreadEur: number }>;
+    generatedAt: string;
+  }
+
+  it("compensation: USER (employee) lacks analytics:view → 403", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/compensation",
+      headers: { cookie: ch(employeeS.cookies) },
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
+  });
+
+  it("compensation: PLATFORM_ADMIN sees banded equity rollup (deterministic seed anchors)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/compensation",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as CompensationBody;
+    expect(body.scope.kind).toBe("PLATFORM");
+    expect(body.scope.tenantId).toBeNull();
+    expect(body.totalProfiles).toBe(155);
+    expect(body.ouCount).toBe(21);
+    expect(body.bandingByOu.length).toBe(21);
+    // One scatter point per banded profile.
+    expect(body.scatter.length).toBe(155);
+    expect(body.scatter.length).toBe(body.totalProfiles);
+    // Overall mid-€ range across all banded positions.
+    expect(body.overallMinMidEur).toBe(28000);
+    expect(body.overallMaxMidEur).toBe(80000);
+    // Largest OU cell (Risk & Compliance, 38 banded positions).
+    const rc = body.bandingByOu.find((b) => b.ou === "Divisione Risk & Compliance");
+    expect(rc?.count).toBe(38);
+    expect(rc?.min).toBe(34000);
+    expect(rc?.max).toBe(80000);
+    expect(rc?.median).toBeCloseTo(45000, 0);
+    expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
+  });
+
+  it("compensation: TENANT_ADMIN sees TENANT scope (RTL holds all banded profiles → equals platform)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/compensation",
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as CompensationBody;
+    expect(body.scope.kind).toBe("TENANT");
+    expect(body.scope.tenantId).not.toBeNull();
+    expect(body.totalProfiles).toBe(155);
+    expect(body.bandingByOu.length).toBe(21);
+  });
 });

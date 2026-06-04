@@ -12,6 +12,8 @@ import type {
   KpiAnalyticsResponse,
   AttendanceAnalyticsResponse,
   CompensationAnalyticsResponse,
+  SkillsCoverageAnalyticsResponse,
+  SkillsCoverageProficiency,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
@@ -115,6 +117,33 @@ export const analyticsService = {
       overallMedianMidEur: c.overallMedianMidEur,
       bandingByOu: c.bandingByOu,
       scatter: c.scatter,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  async skills(a: ActorContext): Promise<SkillsCoverageAnalyticsResponse> {
+    const s = await buildScope(a);
+    const sk = await repo.getSkillsCoverage(pool, s.filter);
+    // Repo carries proficiency as string; the live values are guaranteed to be in
+    // the enum (declared_proficiency CHECK) — narrow to the schema union here.
+    return {
+      scope: { kind: s.kind, tenantId: s.tenantId },
+      orgUnits: sk.orgUnits,
+      proficiencyLevels: sk.proficiencyLevels as SkillsCoverageProficiency[],
+      cells: sk.cells.map((c) => ({
+        orgUnit: c.orgUnit,
+        proficiency: c.proficiency as SkillsCoverageProficiency,
+        evidenceCount: c.evidenceCount,
+        distinctUsers: c.distinctUsers,
+      })),
+      byProficiency: sk.byProficiency.map((b) => ({
+        proficiency: b.proficiency as SkillsCoverageProficiency,
+        evidenceCount: b.evidenceCount,
+        distinctUsers: b.distinctUsers,
+      })),
+      totalEvidence: sk.totalEvidence,
+      distinctUsers: sk.distinctUsers,
+      distinctOrgUnits: sk.distinctOrgUnits,
       generatedAt: new Date().toISOString(),
     };
   },

@@ -113,3 +113,52 @@ export const CompensationAnalyticsResponseSchema = z.object({
   generatedAt: z.string(),
 });
 export type CompensationAnalyticsResponse = z.infer<typeof CompensationAnalyticsResponseSchema>;
+
+// --- Skills coverage (P2) ---
+// COVERAGE, not a held-vs-required gap: sys_position_skill_requirements is empty
+// (verified 0 rows), so a required-vs-held gap is not computable. The column axis is
+// declared_proficiency (NOVICE..MASTER) because the seed's skill→category link
+// (skill_category_id + metadata.primary_category) is 100% NULL, while proficiency
+// resolves on every one of the 902 evidences. A future seed populating
+// skill_category_id can add a second category heatmap without rework.
+export const SkillsCoverageProficiencySchema = z.enum([
+  "NOVICE",
+  "BASIC",
+  "COMPETENT",
+  "PROFICIENT",
+  "EXPERT",
+  "MASTER",
+]);
+export type SkillsCoverageProficiency = z.infer<typeof SkillsCoverageProficiencySchema>;
+
+// One heatmap cell: OU × proficiency → evidence count + distinct users.
+export const SkillsCoverageCellSchema = z.object({
+  orgUnit: z.string(), // OU name, or '(unassigned)' when no PRIMARY/ACTIVE assignment
+  proficiency: SkillsCoverageProficiencySchema,
+  evidenceCount: z.number().int(),
+  distinctUsers: z.number().int(),
+});
+export type SkillsCoverageCell = z.infer<typeof SkillsCoverageCellSchema>;
+
+// Per-proficiency column rollup — feeds the summary bar.
+export const SkillsCoverageByProficiencyRowSchema = z.object({
+  proficiency: SkillsCoverageProficiencySchema,
+  evidenceCount: z.number().int(),
+  distinctUsers: z.number().int(),
+});
+export type SkillsCoverageByProficiencyRow = z.infer<typeof SkillsCoverageByProficiencyRowSchema>;
+
+export const SkillsCoverageAnalyticsResponseSchema = z.object({
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.string().uuid().nullable() }),
+  // Axis labels for the heatmap (server-ordered): orgUnits = y (rows, evidence-desc),
+  // proficiencyLevels = x (cols, rank NOVICE→MASTER, only levels present in data).
+  orgUnits: z.array(z.string()),
+  proficiencyLevels: z.array(SkillsCoverageProficiencySchema),
+  cells: z.array(SkillsCoverageCellSchema),
+  byProficiency: z.array(SkillsCoverageByProficiencyRowSchema),
+  totalEvidence: z.number().int(),
+  distinctUsers: z.number().int(), // grand total (NOT the sum of per-proficiency buckets)
+  distinctOrgUnits: z.number().int(),
+  generatedAt: z.string(),
+});
+export type SkillsCoverageAnalyticsResponse = z.infer<typeof SkillsCoverageAnalyticsResponseSchema>;

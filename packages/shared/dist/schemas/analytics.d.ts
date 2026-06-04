@@ -155,4 +155,89 @@ export declare const CompensationAnalyticsResponseSchema: z.ZodObject<{
     generatedAt: z.ZodString;
 }, z.core.$strip>;
 export type CompensationAnalyticsResponse = z.infer<typeof CompensationAnalyticsResponseSchema>;
+export declare const SkillsCoverageProficiencySchema: z.ZodEnum<{
+    NOVICE: "NOVICE";
+    BASIC: "BASIC";
+    COMPETENT: "COMPETENT";
+    PROFICIENT: "PROFICIENT";
+    EXPERT: "EXPERT";
+    MASTER: "MASTER";
+}>;
+export type SkillsCoverageProficiency = z.infer<typeof SkillsCoverageProficiencySchema>;
+export declare const SkillsCoverageCellSchema: z.ZodObject<{
+    orgUnit: z.ZodString;
+    proficiency: z.ZodEnum<{
+        NOVICE: "NOVICE";
+        BASIC: "BASIC";
+        COMPETENT: "COMPETENT";
+        PROFICIENT: "PROFICIENT";
+        EXPERT: "EXPERT";
+        MASTER: "MASTER";
+    }>;
+    evidenceCount: z.ZodNumber;
+    distinctUsers: z.ZodNumber;
+}, z.core.$strip>;
+export type SkillsCoverageCell = z.infer<typeof SkillsCoverageCellSchema>;
+export declare const SkillsCoverageByProficiencyRowSchema: z.ZodObject<{
+    proficiency: z.ZodEnum<{
+        NOVICE: "NOVICE";
+        BASIC: "BASIC";
+        COMPETENT: "COMPETENT";
+        PROFICIENT: "PROFICIENT";
+        EXPERT: "EXPERT";
+        MASTER: "MASTER";
+    }>;
+    evidenceCount: z.ZodNumber;
+    distinctUsers: z.ZodNumber;
+}, z.core.$strip>;
+export type SkillsCoverageByProficiencyRow = z.infer<typeof SkillsCoverageByProficiencyRowSchema>;
+export declare const SkillsCoverageAnalyticsResponseSchema: z.ZodObject<{
+    scope: z.ZodObject<{
+        kind: z.ZodEnum<{
+            PLATFORM: "PLATFORM";
+            TENANT: "TENANT";
+            TEAM: "TEAM";
+        }>;
+        tenantId: z.ZodNullable<z.ZodString>;
+    }, z.core.$strip>;
+    orgUnits: z.ZodArray<z.ZodString>;
+    proficiencyLevels: z.ZodArray<z.ZodEnum<{
+        NOVICE: "NOVICE";
+        BASIC: "BASIC";
+        COMPETENT: "COMPETENT";
+        PROFICIENT: "PROFICIENT";
+        EXPERT: "EXPERT";
+        MASTER: "MASTER";
+    }>>;
+    cells: z.ZodArray<z.ZodObject<{
+        orgUnit: z.ZodString;
+        proficiency: z.ZodEnum<{
+            NOVICE: "NOVICE";
+            BASIC: "BASIC";
+            COMPETENT: "COMPETENT";
+            PROFICIENT: "PROFICIENT";
+            EXPERT: "EXPERT";
+            MASTER: "MASTER";
+        }>;
+        evidenceCount: z.ZodNumber;
+        distinctUsers: z.ZodNumber;
+    }, z.core.$strip>>;
+    byProficiency: z.ZodArray<z.ZodObject<{
+        proficiency: z.ZodEnum<{
+            NOVICE: "NOVICE";
+            BASIC: "BASIC";
+            COMPETENT: "COMPETENT";
+            PROFICIENT: "PROFICIENT";
+            EXPERT: "EXPERT";
+            MASTER: "MASTER";
+        }>;
+        evidenceCount: z.ZodNumber;
+        distinctUsers: z.ZodNumber;
+    }, z.core.$strip>>;
+    totalEvidence: z.ZodNumber;
+    distinctUsers: z.ZodNumber;
+    distinctOrgUnits: z.ZodNumber;
+    generatedAt: z.ZodString;
+}, z.core.$strip>;
+export type SkillsCoverageAnalyticsResponse = z.infer<typeof SkillsCoverageAnalyticsResponseSchema>;
 //# sourceMappingURL=analytics.d.ts.map

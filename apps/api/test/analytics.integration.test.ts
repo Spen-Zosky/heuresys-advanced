@@ -286,4 +286,85 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect(body.totalProfiles).toBe(155);
     expect(body.bandingByOu.length).toBe(21);
   });
+
+  // --- Skills coverage (P2) — deterministic anchors: 902 evidences, 156 users,
+  // 21 OUs, 47 OU×proficiency cells, 5 proficiency levels (MASTER absent). All
+  // single-tenant (RTL). This is COVERAGE, not a held-vs-required gap.
+
+  interface SkillsBody {
+    scope: { kind: string; tenantId: string | null };
+    orgUnits: string[];
+    proficiencyLevels: string[];
+    cells: Array<{ orgUnit: string; proficiency: string; evidenceCount: number; distinctUsers: number }>;
+    byProficiency: Array<{ proficiency: string; evidenceCount: number; distinctUsers: number }>;
+    totalEvidence: number;
+    distinctUsers: number;
+    distinctOrgUnits: number;
+    generatedAt: string;
+  }
+
+  it("skills: USER (employee) lacks analytics:view → 403", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/skills",
+      headers: { cookie: ch(employeeS.cookies) },
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
+  });
+
+  it("skills: PLATFORM_ADMIN sees coverage heatmap rollup (deterministic seed anchors)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/skills",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as SkillsBody;
+    expect(body.scope.kind).toBe("PLATFORM");
+    expect(body.scope.tenantId).toBeNull();
+    expect(body.totalEvidence).toBe(902);
+    expect(body.distinctUsers).toBe(156);
+    expect(body.distinctOrgUnits).toBe(21);
+    expect(body.orgUnits.length).toBe(21);
+    // 5 levels present, rank-ordered; MASTER absent in the seed.
+    expect(body.proficiencyLevels).toEqual(["NOVICE", "BASIC", "COMPETENT", "PROFICIENT", "EXPERT"]);
+    // 47 populated OU×proficiency cells, none falling through to '(unassigned)'.
+    expect(body.cells.length).toBe(47);
+    expect(body.cells.some((c) => c.orgUnit === "(unassigned)")).toBe(false);
+    // Per-proficiency column rollup.
+    const byp = (p: string) => body.byProficiency.find((b) => b.proficiency === p);
+    expect(byp("EXPERT")).toMatchObject({ evidenceCount: 691, distinctUsers: 147 });
+    expect(byp("PROFICIENT")).toMatchObject({ evidenceCount: 166, distinctUsers: 48 });
+    expect(byp("COMPETENT")).toMatchObject({ evidenceCount: 35, distinctUsers: 10 });
+    expect(byp("BASIC")).toMatchObject({ evidenceCount: 9, distinctUsers: 3 });
+    expect(byp("NOVICE")).toMatchObject({ evidenceCount: 1, distinctUsers: 1 });
+    // Column totals sum to the grand total of evidences.
+    const colSum = body.byProficiency.reduce((acc, b) => acc + b.evidenceCount, 0);
+    expect(colSum).toBe(902);
+    // distinctUsers is NON-additive: per-bucket user counts exceed the grand total
+    // (a user has evidence at multiple proficiency levels).
+    const bucketUserSum = body.byProficiency.reduce((acc, b) => acc + b.distinctUsers, 0);
+    expect(bucketUserSum).toBeGreaterThan(body.distinctUsers);
+    // Largest heatmap cell.
+    const maxCell = body.cells.find(
+      (c) => c.orgUnit === "Divisione Risk & Compliance" && c.proficiency === "EXPERT",
+    );
+    expect(maxCell).toMatchObject({ evidenceCount: 170, distinctUsers: 35 });
+    expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
+  });
+
+  it("skills: TENANT_ADMIN sees TENANT scope (all evidence is single-tenant RTL → equals platform)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/skills",
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as SkillsBody;
+    expect(body.scope.kind).toBe("TENANT");
+    expect(body.scope.tenantId).not.toBeNull();
+    expect(body.totalEvidence).toBe(902);
+    expect(body.distinctOrgUnits).toBe(21);
+  });
 });

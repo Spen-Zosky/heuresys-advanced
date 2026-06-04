@@ -454,3 +454,142 @@ export async function getCompensationEquity(
     })),
   };
 }
+
+// --- Skills coverage (P2) ----------------------------------------------------
+// COVERAGE (evidence distribution), NOT a held-vs-required gap: the requirements
+// table is empty. Column axis is declared_proficiency (skill→category is NULL in
+// the seed). Scope is PERSON-scoped via sys.sys_users — the v5 person record,
+// populated employee-centric per I14/ADR-0024. NB: "user" here means sys_users
+// (the person, ex-legacy `employees`), NOT the legacy auth `users` shell — this
+// is read-only analytics, not ingestion, so the I14 crosswalk doctrine does not
+// apply. Reuses userScopeClause (alias u = sys_users, a = PRIMARY/ACTIVE
+// assignment): TENANT filters u.user_tenant_id, TEAM filters
+// a.user_position_assignment_position_id — identical to the workforce rollup.
+
+const PROFICIENCY_RANK: Record<string, number> = {
+  NOVICE: 1,
+  BASIC: 2,
+  COMPETENT: 3,
+  PROFICIENT: 4,
+  EXPERT: 5,
+  MASTER: 6,
+};
+
+export interface SkillsCoverageCell {
+  orgUnit: string;
+  proficiency: string;
+  evidenceCount: number;
+  distinctUsers: number;
+}
+
+export interface SkillsCoverageByProficiencyRow {
+  proficiency: string;
+  evidenceCount: number;
+  distinctUsers: number;
+}
+
+export interface SkillsCoverage {
+  orgUnits: string[];
+  proficiencyLevels: string[];
+  cells: SkillsCoverageCell[];
+  byProficiency: SkillsCoverageByProficiencyRow[];
+  totalEvidence: number;
+  distinctUsers: number;
+  distinctOrgUnits: number;
+}
+
+// One primary/active assignment per user → no evidence-row fan-out from these joins.
+const SKILLS_FROM = `
+       FROM sys.sys_user_skill_evidence e
+       JOIN sys.sys_users u ON u.user_id = e.user_skill_evidence_user_id
+       LEFT JOIN sys.sys_user_position_assignments a
+         ON a.user_position_assignment_user_id = u.user_id
+        AND a.user_position_assignment_kind = 'PRIMARY'
+        AND a.user_position_assignment_status = 'ACTIVE'
+       LEFT JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+       LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id`;
+
+export async function getSkillsCoverage(
+  q: DbConnector,
+  scope: ScopeFilter,
+): Promise<SkillsCoverage> {
+  const sc = userScopeClause(scope);
+
+  const cells = await q.query<{
+    org_unit: string;
+    proficiency: string;
+    evidence_count: string;
+    distinct_users: string;
+  }>(
+    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS org_unit,
+            e.user_skill_evidence_declared_proficiency AS proficiency,
+            count(*)::text AS evidence_count,
+            count(DISTINCT u.user_id)::text AS distinct_users
+       ${SKILLS_FROM}
+      WHERE ${sc.sql}
+      GROUP BY 1, 2`,
+    sc.params,
+  );
+
+  const byProf = await q.query<{
+    proficiency: string;
+    evidence_count: string;
+    distinct_users: string;
+  }>(
+    `SELECT e.user_skill_evidence_declared_proficiency AS proficiency,
+            count(*)::text AS evidence_count,
+            count(DISTINCT u.user_id)::text AS distinct_users
+       ${SKILLS_FROM}
+      WHERE ${sc.sql}
+      GROUP BY 1`,
+    sc.params,
+  );
+
+  const totals = await q.query<{ total: string; users: string; ous: string }>(
+    `SELECT count(*)::text AS total,
+            count(DISTINCT u.user_id)::text AS users,
+            count(DISTINCT COALESCE(ou.organization_unit_name, '(unassigned)'))::text AS ous
+       ${SKILLS_FROM}
+      WHERE ${sc.sql}`,
+    sc.params,
+  );
+
+  const cellRows: SkillsCoverageCell[] = cells.rows.map((r) => ({
+    orgUnit: r.org_unit,
+    proficiency: r.proficiency,
+    evidenceCount: Number(r.evidence_count),
+    distinctUsers: Number(r.distinct_users),
+  }));
+
+  // Heatmap rows: OUs ordered by total evidence desc.
+  const ouEvidence = new Map<string, number>();
+  for (const c of cellRows) {
+    ouEvidence.set(c.orgUnit, (ouEvidence.get(c.orgUnit) ?? 0) + c.evidenceCount);
+  }
+  const orgUnits = [...ouEvidence.entries()].sort((x, y) => y[1] - x[1]).map(([ou]) => ou);
+
+  // Heatmap cols: proficiency levels present, ordered by rank (NOVICE→MASTER).
+  const profOrder = (level: string): number => PROFICIENCY_RANK[level] ?? 99;
+  const proficiencyLevels = [...new Set(cellRows.map((c) => c.proficiency))].sort(
+    (x, y) => profOrder(x) - profOrder(y),
+  );
+
+  const byProficiency: SkillsCoverageByProficiencyRow[] = byProf.rows
+    .map((r) => ({
+      proficiency: r.proficiency,
+      evidenceCount: Number(r.evidence_count),
+      distinctUsers: Number(r.distinct_users),
+    }))
+    .sort((x, y) => profOrder(x.proficiency) - profOrder(y.proficiency));
+
+  const t = totals.rows[0];
+  return {
+    orgUnits,
+    proficiencyLevels,
+    cells: cellRows,
+    byProficiency,
+    totalEvidence: Number(t?.total ?? 0),
+    distinctUsers: Number(t?.users ?? 0),
+    distinctOrgUnits: Number(t?.ous ?? 0),
+  };
+}

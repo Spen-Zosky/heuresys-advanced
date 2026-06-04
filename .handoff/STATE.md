@@ -1,34 +1,35 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-03 (S960). Baseline **v1.0.0 GA**. S960 = **ciclo reconciliation-closure COMPLETO** (B-50, incl. F4). main synced, **57 migration** (`000058`), API suite ~607 pass / 6 skip, CI verde.
+**Updated**: 2026-06-04 (S961). Baseline **v1.0.0 GA**. main synced, **64 migration** (`000065`), API suite ~646 pass / 6 skip, CI test-integration **verde**.
 
-## Last session brief (S960)
+## Last session brief (S961 — ultracode, multi-workflow, 14 commit)
 
-🏁 **Ciclo reconciliation-closure (B-50) COMPLETO** — spec + F0 + F1 + F2 + F3 + F3b + F4:
-- **F0** triage (workflow): 65 vuote → A5/B16/C23/D21. **F1** (mig `000058`): registry `sys.sys_reconciliation_registry` + vista **`sys.v_reconciliation_status`** (stato terminale live).
-- **Import: ~30 tabelle, ~9000 righe** (seed `db/seeds/reconciliation/05-35`, staging-COPY-pipe, employee-centric, idempotenti). F2 5 bucket-A + F3 6 muri-bridgeable + **F4 19 bucket-C** (re-misurati: i "derived" erano 22/23 con source reale — F0 li aveva mis-classificati senza misurarli).
-- **Pattern**: bridge employee-centric (`legacy_employee_id`/`LEGACY_EMP::`) funzionano; `job_templates` ESCO + `learning_modules` event-derived + parent-vuoti = dead-end. Dossier: `qa_artifacts/F0_*`, `F3_*`, `F3b_*`.
-- **Stato finale: 103/138 POPULATED, 0 UNCLASSIFIED**. I 35 residui = 18 NO_SOURCE (app-generated/scaffold) + 10 NEEDS_DECISION (dead-end misurati: job_kpis, talent_pools, pool/gate cascade, learning-module gap, ecc.) + 5 REFERENCE_ONLY + 1 EXCLUDE + 1 IMPORT. **Ogni tabella a stato terminale esplicito.**
+🚀 **Tutte le decisioni del dossier `docs/kb/RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md` eseguite:**
+- **① BI Fase 1b frontend** ✅ — pagine `/analytics/{workforce,kpi}` (live-data E2E verde) + nav mig `000059`.
+- **D5/W3** learning re-home (mig `000061`+seed 37-39): steps 124 · evidence 1434 · skill 635. **D4/W2** org-unit template Option A (mig `000064`+seed 40): 225 templates + KPI-templates 0→100 (dual-mode XOR FK) + **fix wiring response-schema** (`be06e61`).
+- **D6** SDBI: infra (mig `000063`: rule-code dict + 4 lineage cols + RUNBOOK + template) **+ Option-B** (mig `000065`: 4 tabelle PerfReviews/Feedback360 + `sys_nine_box_grid` VIEW, 1490 righe RTL).
+- **D7-P0** pgvector substrate (mig `000060`): extension installata + 4 embedding tables (vuote) + HNSW + `matching:read/admin`. **F7** showcase (2 fix + re-sync mirror).
+- **Reconciliation: POPULATED 103→112, 0 UNCLASSIFIED** (147 tabelle, ogni stato terminale).
 
 ## Top priorities (next session)
 
-1. **① BI Fase 1b frontend** (~M): pagine `/analytics/*` + chart `@heuresys/ui` + E2E. API verde. I dati reconciliation (scores/gap/succession/kpi) ora sono live → alimentano le analytics.
-2. **② AI semantic-matching** (~L): blocca su decisione Voyage API key / self-host pgvector.
-3. Sequenza capability: ③ data-mining, ④ CMS, ⑤ scraping (design→spec→ok→piano→impl).
+1. **② AI semantic-matching P1** (~L): backfill Voyage + 1ª match surface (person→ESCO occupation + skill→skill, voyage-3.5, USER-scope). **Gated su `VOYAGE_API_KEY` nel `.env`**. Substrate P0 già live. Piano: dossier §6.
+2. **① BI Fase 2/3** (~M): skill-gap/attendance/comp + org-network. API verde, P1b fatto.
+3. **6 proposte F7** (render-affecting, decisione Enzo): tokenize colori, extract DashboardShell, split SystemHealthDashboard, ecc. — vedi `docs/kb/D6/D4` design + commit `9020d15`.
 
 ## Open questions
 
-- **Voyage API key** per embeddings ② AI, o self-host (sentence-transformers su VM)?
-- I 35 residui reconciliation sono terminali by-design (no-source/dead-end misurati); riaprirli richiederebbe nuove sorgenti legacy o schema change — non backlog attivo.
+- **`VOYAGE_API_KEY`**: mettila nel `.env` per sbloccare ② P1 (l'unico gate residuo). Costo backfill ~$0.05.
+- Quali delle 6 proposte F7 applicare?
 
 ## Stack snapshot
 
-- API 61 moduli / ~281 endpoint; **57 migration**. Vista `sys.v_reconciliation_status` = stato reconciliation. **103/138 sys POPULATED**. ~31 seed in `db/seeds/reconciliation/`.
-- VM PROD invariata (api :8013 + web :3013). pgvector **NON** installato (serve per ② AI).
+- **64 migration** (`000065`). **pgvector INSTALLATO** (D7-P0) + 4 `sys_*_embeddings` (vuote, P1 le riempie). Reconciliation **112/147 POPULATED, 0 UNCLASSIFIED** (vista `sys.v_reconciliation_status`). ~40 seed `db/seeds/reconciliation/` + `db/seeds/brownfield/sdbi/perf_feedback/`.
+- Nuove tabelle: `sys_organization_unit_templates` (225) · `sys_performance_reviews`+3 SDBI · `sys_nine_box_grid` VIEW · `audit.import_validation_rule_codes`. VM PROD invariata (api :8013 + web :3013).
 
 ## Verification (next session)
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT resolved_status,count(*) FROM sys.v_reconciliation_status GROUP BY 1"  # POPULATED 103
-cd apps/api && pnpm exec vitest run test/reconciliation-f4-bucketc.integration.test.ts  # 3 pass
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT resolved_status,count(*) FROM sys.v_reconciliation_status GROUP BY 1"  # POPULATED 112, 0 UNCLASSIFIED
+cd apps/api && pnpm exec vitest run test/sdbi-perf-feedback test/reconciliation-org-unit-kpi-templates  # green
 ```

@@ -66,6 +66,17 @@ const EnvSchema = z.object({
   COOKIE_SECRET: z.string().min(32),
   ADMIN_ORIGIN: z.string().url().default("http://localhost:3000"),
 
+  // Cookie `Secure` flag for the auth cookies (access/refresh/csrf). When unset it
+  // defaults to (NODE_ENV === 'production') — Secure cookies require HTTPS, so a
+  // browser DROPS them over plain HTTP, breaking login. Set COOKIE_SECURE=false
+  // explicitly when serving production over HTTP without TLS (e.g. the OCI VM demo
+  // on http://<ip>:3013); set true once behind a TLS reverse proxy. Parsed as an
+  // explicit 'true'/'false' string (z.coerce.boolean would turn "false" into true).
+  COOKIE_SECURE: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true")),
+
   // MFA encryption key (S935 SEC base — required in production, optional in dev).
   // Format: base64-encoded 32-byte random string. Generate with:
   //   openssl rand -base64 32

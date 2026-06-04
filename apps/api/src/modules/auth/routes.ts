@@ -58,7 +58,10 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
       log: app.log,
     });
 
-  const secureCookies = env.NODE_ENV === "production";
+  // Secure cookies require HTTPS. COOKIE_SECURE overrides the NODE_ENV-based default
+  // so a production deploy served over plain HTTP (no TLS) can set it false and keep
+  // login working (the browser drops Secure cookies on HTTP). See config/env.ts.
+  const secureCookies = env.COOKIE_SECURE ?? env.NODE_ENV === "production";
 
   /* --- POST /login -------------------------------------------------- */
   app.post(

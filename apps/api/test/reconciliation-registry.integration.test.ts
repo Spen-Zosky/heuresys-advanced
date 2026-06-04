@@ -7,13 +7,18 @@ import { pool } from '../src/db/client.js';
 // suite (singleThread) so this file does NOT close it.
 
 describe('reconciliation registry (F1)', () => {
-  it('registry holds exactly 65 rows with the signed-off bucket split A5/B16/C23/D21', async () => {
+  it('registry holds exactly 74 rows with the signed-off bucket split A10/B16/C23/D25', async () => {
     const { rows } = await pool.query<{ b: string; n: number }>(
       `SELECT reconciliation_registry_bucket AS b, count(*)::int AS n
          FROM sys.sys_reconciliation_registry GROUP BY 1`,
     );
     const m = Object.fromEntries(rows.map((r: { b: string; n: number }) => [r.b, r.n]));
-    expect(m).toEqual({ A: 5, B: 16, C: 23, D: 21 });
+    // S960 baseline was 65 (A5/B16/C23/D21). S961 registered 9 new sys.* tables introduced
+    // after the F1 snapshot, each recorded to keep the registry 0-UNCLASSIFIED:
+    //   +4 bucket-D EXCLUDE — D7-P0 pgvector embedding tables (mig 000062)
+    //   +1 bucket-A IMPORT  — D4 sys_organization_unit_templates (mig 000064)
+    //   +4 bucket-A IMPORT  — D6 SDBI perf/feedback tables (mig 000065)
+    expect(m).toEqual({ A: 10, B: 16, C: 23, D: 25 });
   });
 
   it('the v_reconciliation_status view leaves zero UNCLASSIFIED tables', async () => {

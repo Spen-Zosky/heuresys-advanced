@@ -12,9 +12,10 @@ export type DbConnector = Pool | PoolClient;
 
 interface Row {
   organization_unit_kpi_template_id: string;
-  organization_unit_kpi_template_unit_id: string;
+  organization_unit_kpi_template_unit_id: string | null;
+  organization_unit_kpi_template_unit_template_id: string | null;
   organization_unit_kpi_template_kpi_id: string;
-  organization_unit_kpi_template_tenant_id: string;
+  organization_unit_kpi_template_tenant_id: string | null;
   organization_unit_kpi_template_weight: string;
   organization_unit_kpi_template_target: Record<string, unknown>;
   organization_unit_kpi_template_metadata: Record<string, unknown>;
@@ -22,6 +23,7 @@ interface Row {
 }
 
 const COLS = `organization_unit_kpi_template_id, organization_unit_kpi_template_unit_id,
+  organization_unit_kpi_template_unit_template_id,
   organization_unit_kpi_template_kpi_id, organization_unit_kpi_template_tenant_id,
   organization_unit_kpi_template_weight, organization_unit_kpi_template_target,
   organization_unit_kpi_template_metadata, created_at, updated_at`;
@@ -30,6 +32,7 @@ function toRow(r: Row): OrganizationUnitKpiTemplate {
   return {
     organizationUnitKpiTemplateId: r.organization_unit_kpi_template_id,
     unitId: r.organization_unit_kpi_template_unit_id,
+    unitTemplateId: r.organization_unit_kpi_template_unit_template_id,
     kpiId: r.organization_unit_kpi_template_kpi_id,
     tenantId: r.organization_unit_kpi_template_tenant_id,
     weight: Number(r.organization_unit_kpi_template_weight),

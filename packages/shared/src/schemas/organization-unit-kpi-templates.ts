@@ -6,9 +6,13 @@ import { z } from "zod";
 
 export const OrganizationUnitKpiTemplateSchema = z.object({
   organizationUnitKpiTemplateId: z.string().uuid(),
-  unitId: z.string().uuid(),
+  // Dual-mode (D4 C(i)): a row is keyed EITHER on a real org-unit INSTANCE (unitId + tenantId,
+  // tenant-scoped junction) OR on a global org-unit TEMPLATE (unitTemplateId, tenant-less blueprint)
+  // — enforced by the XOR CHECK. Hence unitId/tenantId are null on template-keyed rows.
+  unitId: z.string().uuid().nullable(),
+  unitTemplateId: z.string().uuid().nullable(),
   kpiId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  tenantId: z.string().uuid().nullable(),
   weight: z.number(),
   target: z.record(z.string(), z.unknown()),
   metadata: z.record(z.string(), z.unknown()),

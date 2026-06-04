@@ -20,9 +20,8 @@
 
 ## Top priorities (next session)
 
-1. **i18n Fasi 2–5** (admin/blueprints/hr/ess + EN gate) — parallelizzabili per namespace.
-2. **② AI semantic-matching P1** (~L): backfill Voyage. **Gated su `VOYAGE_API_KEY` nel `.env` VM** (~$0.05).
-3. **next 16 micro-migrazione** (parziale #1) · **① BI P3** org-network · 6 proposte F7.
+**▶ NEXT SESSION = MONOBLOCK (apri con `ultracode`)**: esegui il piano pronto **`docs/superpowers/plans/2026-06-05-i18n-monoblock-execution-plan.md`** (preparato S964). Chiude **i18n Fasi 2–5 + EN gate** (~45 pagine, fan-out 4 namespace admin/blueprints/hr/ess) → **milestone i18n CLOSED** + guardrail flip `warn`→`error`, poi bundle **next 16** (pre-validato verde) + **① BI P3** org-network + **F7** (6 proposte). Leggi il piano in full + il design spec, esegui §0→§7.
+- **🔒 NON in questa sessione (gated su esterni)**: **② AI P1** (`VOYAGE_API_KEY` nel `.env` VM — azione Enzo) · **typescript 6 / vite 8** (attendono upstream typescript-eslint/vitest). Si chiudono quando arriva la condizione, non per effort.
 
 ## Open questions (ereditate)
 

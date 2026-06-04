@@ -1,33 +1,43 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-04 (S963). Baseline **v1.0.0 GA**. main synced (`9ab5547`), migration `000068`. **PROD live su `https://www.heuresys.com` (TLS).** Mac + VM allineati e deployati.
+**Updated**: 2026-06-05 (S964). Baseline **v1.0.0 GA**. main synced (`d074be7`), migration `000069`. **PROD live su `https://www.heuresys.com` (TLS) — NON toccata da questa sessione** (il deploy è un'azione separata; next 16 NON è in prod).
 
-## Last session brief (S963 — ultracode; BI P2 + i18n Fase 0a + login-prod + TLS)
+## Last session brief (S964 — i18n Fase 0b + Fase 1 pilota + dependabot sweep)
 
-- **① BI Analytics P2** ✅ — 3 viste full-stack `/v1/analytics/{attendance,compensation,skills}` (nav mig `000066/067/068`, E2E live, **adversarial 3/3 PASS**). `e1b74df`/`73a69ca`/`8983788`.
-- **Milestone i18n** (IT default + EN) avviata: design `docs/superpowers/specs/2026-06-04-i18n-milestone-design.md` (~600 chiavi/50 pagine, RSC eliminato). **Fase 0a ✅** (`be5c1ab`): i18n 7-namespace client-only + switcher IT/EN + shell estratta. + `i18n-parity` gate fix (`src/i18n`→`src/locales`, `6573a17`) + `sync-showcase` prune react-i18next (`6a1897f`).
-- **Login prod fix** (`9ab5547`): cookie auth `Secure` scartati su HTTP → env **`COOKIE_SECURE`** (disaccoppiato da NODE_ENV).
-- **TLS production ✅**: nginx (già sulla VM) **ripuntato `www.heuresys.com`/`heuresys.com` da legacy evo (:3012) a heuresys-advanced (:3013)** via HTTPS Let's Encrypt (cert esistente, zero nuovo DNS). `COOKIE_SECURE=true`. Login HTTPS verificato (Chrome → dashboard). **evo legacy intatto su `evo.heuresys.com`** (:3200).
+- **i18n Fase 0b ✅** (`92b7773`, CI verde): `locale` in `sys_user_preferences` (mig **`000069`**, CHECK it|en default it) + `PATCH /v1/me/preferences` esteso + `PreferencesApplier` applica il locale ogni sessione (cross-device) + `LanguageSwitcher` persiste server-side (best-effort). Integration **11/11**, E2E me-preferences (locale server-SoT cross cookie+cache) verde.
+- **ESLint guardrail** (decisione Enzo): `i18next/no-literal-string` = **`warn` su TUTTO `apps/web/src/app/**`** (scope globale, non per-area). **876 warning = contatore debito**; → **flip a `error` a fine milestone quando scende a 0** (commento già in `eslint.config.mjs`).
+- **i18n Fase 1 ✅** (`1950817`, CI verde): 5 pagine analytics (workforce/kpi/attendance/compensation/skills) → namespace `analytics` (it **byte-identico** + en). i18n-parity **131×2×7**, analytics lint **28→0**, E2E **5/5** (behavior-preserving). ECharts builder ricevono stringhe già risolte (type-safe, niente threading di `TFunction`).
+- **Dependabot sweep**: **pino 9.14→10.3.1** (`0184da3`, suite API **653/6**) + **upload-artifact v4→v7** (`f2b76fc`, runner self-hosted **2.334.0** ≥ 2.327.1) applicati su main, PR #23/#18 chiuse. **#26 minor-and-patch group (11 update: react 19.2.7, react-query 5.101, i18next 26.3.1, vitest 4.1.8, …)** MERGED (`d074be7`), typecheck post-merge verde. **3 major DEFERITI** (label `defer-major`) → vedi sotto.
+
+## ⚠ PARZIALI / DA NON DIMENTICARE DI ULTIMARE
+
+1. **next 16 (PR #21) — PRE-VALIDATO VERDE, adozione deferita**: ho provato l'upgrade → build ✓ + typecheck ✓ + lint ✓ + **E2E dev 8/8 ✓** (login 5 personas/auth-cookie + analytics + me-preferences). NON adottato perché è una **micro-migrazione**, non un bump: (a) rimuovere la chiave `eslint` deprecata da `next.config.js`; (b) bump coordinato `eslint-config-next`→16; (c) **decisione `middleware`→`proxy`** (next 16 deprecata il file `middleware`, funziona ancora ma sparirà in next 17); (d) smoke **prod-mode** (`next start`) prima del deploy. ~1 commit dedicato. PR #21 in `defer-major`.
+2. **typescript 6 (PR #22) — DEFER**: `TS5101` (deprecation `baseUrl`→errore) su più tsconfig + `typescript-eslint` 8.60 supporta TS ≤5.9. Richiede `ignoreDeprecations`/refactor baseUrl + typescript-eslint TS6-ready. PR in `defer-major`.
+3. **vite 8 (PR #20) — DEFER**: peer `@vitest/mocker` richiede vite ^6 (vitest 4.1.x). Upgrade accoppiato vite+vitest. PR in `defer-major`.
+4. **i18n guardrail flip**: `no-literal-string` è `warn` → a fine milestone (debito 0) portare a `error` in `eslint.config.mjs`.
+5. **i18n number-format locale-aware**: `compensation/page.tsx` usa `Intl.NumberFormat("it-IT")` per il € anche in EN (scelta behavior-preserving). Enhancement: legarlo al locale attivo.
+6. **i18n Fasi 2–5 RIMANENTI** (il grosso della milestone): admin-org (13 pag), blueprints-data (8), hr-talent (8), ess-me (17) + **Final EN gate**. Namespace già scaffoldati (vuoti). Il pilota analytics è la blueprint. Design: `docs/superpowers/specs/2026-06-04-i18n-milestone-design.md`.
 
 ## Top priorities (next session)
 
-1. **i18n Fase 0b + Fase 1 pilota** (~M): locale in `sys_user_preferences` + `/v1/me/preferences` + `PreferencesApplier` + ESLint guardrail; poi pilota **analytics** (5 pagine).
-2. **② AI semantic-matching P1** (~L): backfill Voyage. **Gated su `VOYAGE_API_KEY` nel `.env`**.
-3. **① BI P3** (~M) org-network · **6 proposte F7** · *(minore)* versionare la nginx conf prod in `deploy/`.
+1. **i18n Fasi 2–5** (admin/blueprints/hr/ess + EN gate) — parallelizzabili per namespace.
+2. **② AI semantic-matching P1** (~L): backfill Voyage. **Gated su `VOYAGE_API_KEY` nel `.env` VM** (~$0.05).
+3. **next 16 micro-migrazione** (parziale #1) · **① BI P3** org-network · 6 proposte F7 · nginx conf in `deploy/`.
 
-## Open questions
+## Open questions (ereditate)
 
-- **`VOYAGE_API_KEY`** nel `.env` VM → sblocca ② P1 (unico gate). ~$0.05.
+- **`VOYAGE_API_KEY`** nel `.env` VM → sblocca ② P1 (unico gate).
 - Versionare la config nginx `www.heuresys.com.conf` (oggi solo sulla VM) nel repo?
 
 ## Stack snapshot
 
-- **PROD = `https://www.heuresys.com`** (+ `heuresys.com`) → nginx TLS Let's Encrypt → web `:3013` (proxa `/api`→`:8013` internamente). `COOKIE_SECURE=true`, `ADMIN_ORIGIN=https://www.heuresys.com`. nginx conf **non versionata** (`/etc/nginx/sites-enabled/www.heuresys.com.conf`; backup evo in `/home/ubuntu/*.bak-s962`). evo legacy = `evo.heuresys.com` (:3200). **Deploy = `scripts/vm-deploy.sh`** (non tocca nginx/.env). SSH ops: vedi memoria `reference_remote_ssh_deploy_ops`.
-- migration `000068`, ~284 endpoint, API suite 650/6. i18n 7 namespace (common/shell estratti). Reconciliation 112/147 POPULATED.
+- **PROD = `https://www.heuresys.com`** → nginx TLS Let's Encrypt → web `:3013` (proxa `/api`→`:8013`). `COOKIE_SECURE=true`, `ADMIN_ORIGIN=https://www.heuresys.com`. nginx conf **non versionata**. evo legacy = `evo.heuresys.com` (:3200). **Deploy = `scripts/vm-deploy.sh`** (non tocca nginx/.env; next 16 NON deployato).
+- migration **`000069`** (locale), ~284 endpoint, API suite **653/6**. i18n **3 namespace popolati** (common/shell/analytics); admin/blueprints/hr/ess scaffoldati vuoti. Reconciliation 112/147 POPULATED.
+- Dipendenze post-sweep: pino **10.3.1**, upload-artifact **v7**, react **19.2.7**, react-query **5.101**, i18next **26.3.1**, vitest **4.1.8**. DEFER: next **15.5.18**, typescript **5.7.2**, vite **6.4.2**.
 
 ## Verification (next session)
 ```bash
-git -C /d/heuresys-advanced log origin/main..HEAD --oneline      # vuoto = synced
-curl -s -o /dev/null -w "%{http_code}\n" https://www.heuresys.com/login   # 200
-cd apps/web && pnpm i18n:check                                    # parity 58 x2 x7 ns
+git -C /d/heuresys-advanced log origin/main..HEAD --oneline                 # vuoto = synced
+cd apps/web && pnpm i18n:check                                              # parity 131 x2 x7
+pnpm exec eslint "src/app/(authenticated)/analytics/**/*.tsx"               # 0 no-literal-string
 ```

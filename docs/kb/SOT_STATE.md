@@ -36,7 +36,7 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **~60 
 ## 3. API (apps/api) — heart MVP-1→4
 
 - **Plugin chain fisso 13-step** (non riordinare; vedi `docs/api/API_IMPLEMENTATION_PLAN.md` §3.2): zod compilers → requestId → helmet → cors → cookie → JWT RS256 → rate-limit → auth (decode-only) → CSRF (opt-in) → tenantContext → errorHandler → /healthz+/readyz → module routes.
-- **61 route module registrati** in `app.ts` (~58 business + auth/mfa/me/compensation/dashboard + **analytics** BI), **~281 endpoint live** (+`/v1/analytics/{workforce,kpi}` S958). Pattern modulo a 7 step (schema shared → repository raw SQL → service + ActorContext → routes con `requirePermission` + `verifyCsrf` → register → integration test → atomic commit). **Non deviare.**
+- **61 route module registrati** in `app.ts` (~58 business + auth/mfa/me/compensation/dashboard + **analytics** BI), **~284 endpoint live** (BI analytics: `/v1/analytics/{workforce,kpi}` S958 + `{attendance,compensation,skills}` **P2 S962**; migration nav `000066..000068`). Pattern modulo a 7 step (schema shared → repository raw SQL → service + ActorContext → routes con `requirePermission` + `verifyCsrf` → register → integration test → atomic commit). **Non deviare.**
 - **Test API**: **576 `it/test` case** in **~82 file** `apps/api/test/*.integration.test.ts` (hit DB live via tunnel, no mock); **60/60 moduli coperti** post WS-5 backfill (S957). CI suite verde 7/7.
 - **Shared**: `packages/shared` — 61 schema module Zod in `src/schemas/` + subpath exports.
 

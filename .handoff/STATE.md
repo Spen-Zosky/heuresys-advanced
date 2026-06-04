@@ -1,35 +1,33 @@
 # heuresys-advanced — STATE
 
-**Updated**: 2026-06-04 (S961). Baseline **v1.0.0 GA**. main synced, **64 migration** (`000065`), API suite ~646 pass / 6 skip, CI test-integration **verde**.
+**Updated**: 2026-06-04 (S962). Baseline **v1.0.0 GA**. main synced (`6a1897f`), **migration `000068`**, CI **6/6 verde** (incl. Playwright-smoke prod + i18n-parity riarmato).
 
-## Last session brief (S961 — ultracode, multi-workflow, 14 commit)
+## Last session brief (S962 — ultracode, multi-workflow, 8 commit)
 
-🚀 **Tutte le decisioni del dossier `docs/kb/RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md` eseguite:**
-- **① BI Fase 1b frontend** ✅ — pagine `/analytics/{workforce,kpi}` (live-data E2E verde) + nav mig `000059`.
-- **D5/W3** learning re-home (mig `000061`+seed 37-39): steps 124 · evidence 1434 · skill 635. **D4/W2** org-unit template Option A (mig `000064`+seed 40): 225 templates + KPI-templates 0→100 (dual-mode XOR FK) + **fix wiring response-schema** (`be06e61`).
-- **D6** SDBI: infra (mig `000063`: rule-code dict + 4 lineage cols + RUNBOOK + template) **+ Option-B** (mig `000065`: 4 tabelle PerfReviews/Feedback360 + `sys_nine_box_grid` VIEW, 1490 righe RTL).
-- **D7-P0** pgvector substrate (mig `000060`): extension installata + 4 embedding tables (vuote) + HNSW + `matching:read/admin`. **F7** showcase (2 fix + re-sync mirror).
-- **Reconciliation: POPULATED 103→112, 0 UNCLASSIFIED** (147 tabelle, ogni stato terminale).
+- **① BI Analytics P2** ✅ — 3 viste full-stack `/v1/analytics/{attendance,compensation,skills}` (schema→repo SQL scope-filtered→route `analytics:view`→integration test→page `@heuresys/ui` EChartsCard→nav mig `000066/067/068`→E2E live). **Verifica adversarial 3/3 PASS** (scope-isolation I5, employee-centric, SQL). Commit `e1b74df`/`73a69ca`/`8983788`.
+- **CI bug fix**: `i18n-parity` puntava a `src/i18n/**` (dir inesistente) → **gate cieco**; repointato a `src/locales/**` (`6573a17`), ora attivo+verde.
+- **Milestone i18n avviata** (IT default + EN): design spec `docs/superpowers/specs/2026-06-04-i18n-milestone-design.md`. Scope misurato (~600 chiavi/50 pagine, showcase escluso; **RSC eliminato**, E2E coupling basso). **Fase 0a ✅** (`be5c1ab`): i18n 7-namespace client-only + cookie locale + `LanguageSwitcher` IT/EN + shell estratta (`layout.tsx`+`data-table-panel.tsx`). + `sync-showcase` fix (prune react-i18next, `6a1897f`).
 
 ## Top priorities (next session)
 
-1. **② AI semantic-matching P1** (~L): backfill Voyage + 1ª match surface (person→ESCO occupation + skill→skill, voyage-3.5, USER-scope). **Gated su `VOYAGE_API_KEY` nel `.env`**. Substrate P0 già live. Piano: dossier §6.
-2. **① BI Fase 2/3** (~M): skill-gap/attendance/comp + org-network. API verde, P1b fatto.
-3. **6 proposte F7** (render-affecting, decisione Enzo): tokenize colori, extract DashboardShell, split SystemHealthDashboard, ecc. — vedi `docs/kb/D6/D4` design + commit `9020d15`.
+1. **i18n Fase 0b + Fase 1 pilota** (~M): locale in `sys_user_preferences` + `/v1/me/preferences` + `PreferencesApplier` + ESLint `no-literal-string` guardrail; poi pilota **analytics** (5 pagine, refactor echarts-option `t`). Design: spec sopra; piano 7-fasi.
+2. **② AI semantic-matching P1** (~L): backfill Voyage (person→ESCO occ + skill→skill, voyage-3.5, USER-scope). **Gated su `VOYAGE_API_KEY` nel `.env`**. Substrate pgvector già live.
+3. **① BI P3** (~M): org-network. **6 proposte F7** (render-affecting, decisione Enzo).
 
 ## Open questions
 
-- **`VOYAGE_API_KEY`**: mettila nel `.env` per sbloccare ② P1 (l'unico gate residuo). Costo backfill ~$0.05.
-- Quali delle 6 proposte F7 applicare?
+- **`VOYAGE_API_KEY`** nel `.env` → sblocca ② P1 (unico gate). Costo ~$0.05.
+- i18n: confermare default del design (plurali ICU sui count-badge, EN AI-assisted) — già locked salvo obiezione.
+- Quali 6 proposte F7 applicare?
 
 ## Stack snapshot
 
-- **64 migration** (`000065`). **pgvector INSTALLATO** (D7-P0) + 4 `sys_*_embeddings` (vuote, P1 le riempie). Reconciliation **112/147 POPULATED, 0 UNCLASSIFIED** (vista `sys.v_reconciliation_status`). ~40 seed `db/seeds/reconciliation/` + `db/seeds/brownfield/sdbi/perf_feedback/`.
-- Nuove tabelle: `sys_organization_unit_templates` (225) · `sys_performance_reviews`+3 SDBI · `sys_nine_box_grid` VIEW · `audit.import_validation_rule_codes`. VM PROD invariata (api :8013 + web :3013).
+- **migration `000068`** (`000066/067/068` = analytics-{attendance,compensation,skills} sidebar nav). **~284 endpoint** (+`/v1/analytics/{attendance,compensation,skills}`). API suite 650 pass / 6 skip.
+- **i18n**: 7 namespace (`common/shell/analytics/admin/blueprints/hr/ess`), client-only, switcher IT/EN cookie-persisted; `common`+`shell` estratti, `analytics`+4 aree = scaffold vuoti. Reconciliation invariato **112/147 POPULATED**.
 
 ## Verification (next session)
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT resolved_status,count(*) FROM sys.v_reconciliation_status GROUP BY 1"  # POPULATED 112, 0 UNCLASSIFIED
-cd apps/api && pnpm exec vitest run test/sdbi-perf-feedback test/reconciliation-org-unit-kpi-templates  # green
+cd apps/web && pnpm i18n:check                                 # parity 58 keys x2 x7 ns
+cd apps/api && pnpm exec vitest run test/analytics.integration  # 16 green (P1+P2)
 ```

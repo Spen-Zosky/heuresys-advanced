@@ -1,24 +1,20 @@
 import type { ReactNode } from "react";
 
 /**
- * Fullscreen takeover for the production /system-health page.
+ * Pass-through layout for the production /system-health page.
  *
- * The parent `(authenticated)/layout.tsx` provides a top-nav header + nav
- * links + logout button. For the SUPERUSER system-health observability page
- * we want a fullscreen DashboardShell experience instead, identical to the
- * canonical prototype.
+ * Until F7, this rendered a fullscreen `position:fixed inset-0 z-50` takeover so
+ * the mock `SystemHealthDashboard` could show its own DashboardShell chrome
+ * (header/sidebar/footer) instead of the authenticated chrome. After F7 the
+ * production route renders `SystemHealthLive` — a standard authenticated page
+ * (PageHeader + sections) composed from @heuresys/ui primitives — so it now
+ * lives inside the normal authenticated chrome (top nav + DB-driven sidebar),
+ * consistent with every other admin page. No takeover needed.
  *
- * Pattern: position:fixed inset-0 z-50 covers the authenticated chrome
- * visually while keeping it in the DOM (so auth context, providers, and
- * theme remain active).
- *
- * The same pattern is used for the brand showcase route at
- * `apps/web/src/app/showcase/system-health/layout.tsx`.
+ * The brand showcase route keeps its own takeover at
+ * `apps/web/src/app/showcase/system-health/layout.tsx` (the mock still uses
+ * DashboardShell there).
  */
 export default function SystemHealthAuthLayout({ children }: { children: ReactNode }) {
-  return (
-    <div className="fixed inset-0 z-50 overflow-auto bg-[var(--background)]">
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 }

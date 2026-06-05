@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { useCurrentUser } from "../../../lib/api/auth";
-import { SystemHealthDashboard } from "../../../components/SystemHealthDashboard";
+import { SystemHealthLive } from "../../../components/SystemHealthLive";
 
 /**
  * /system-health — production route, PLATFORM_ADMIN gated.
@@ -36,5 +36,5 @@ export default function SystemHealthPage() {
     return null;
   }
 
-  return <SystemHealthDashboard />;
+  return <SystemHealthLive />;
 }

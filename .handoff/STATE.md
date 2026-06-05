@@ -1,12 +1,12 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-05 (S966).
+**Updated**: 2026-06-05 (S967).
 
 > **Vista rapida** dello stato di lavoro (priorità · open questions). Lo **snapshot granulare del sistema** (versioni, DB/API/web/CI counts, architettura, migration) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Entrambe le viste (rapida + granulare) sono governate dalla skill `handoff` — **domini disgiunti, nessun numero duplicato qui**.
 
-## Last session brief (S966 — ultracode)
+## Last session brief (S967 — ultracode)
 
-**D-15 risolto end-to-end + deploy PROD.** D-15 NON era un problema upstream come diceva il DEBT: era un pnpm **stale virtual-store** (orphan `@types/react@19.2.14` lasciato dal flip override S965 *senza clean install*; il source `.tsx` di `@heuresys/ui/brand/candidates` cadeva sul hoist-root stale → "two unrelated types"). **Fix locale** (override `@types/react`→19.2.16 + clean install) + **hardening upstream**: `@heuresys/ui@0.1.3` dichiara `@types/react`/`-dom` come optional peerDep (**pubblicato su npm**, consumato `^0.1.3`). Pulito anche `tsconfig.tsbuildinfo` tracked in `ux-design-shared`. **Mac + VM allineati a `c4c6363`**, **deploy PROD eseguito** (`vm-deploy.sh`: build api+web verdi, web/login 200, `https://www.heuresys.com` live). CI 6/6 verde. (Numeri esatti → `docs/kb/SOT_STATE.md`.)
+**Manutenzione ambiente Claude Code — no-op sul repo** (working tree clean, HEAD invariato `9c44564`, SOT_STATE/backlog/debt non toccati). Diagnosticata la flakiness transiente del server MCP `claude-mem:mcp-search` (`-32000` "Failed to reconnect" al boot sessione): lo stack è sano (worker `bun` su `127.0.0.1:37777` con `mcpReady:true`, 21 tool esposti correttamente eseguendo lo spawn **identico** a quello dell'harness). Causa = race di spawn del bridge stdio al cold-start su Windows (non difetto di config) → workaround a costo zero **`/mcp` → Reconnect**. claude-mem già all'ultima (`13.4.0`, npm `latest`). Preparata esclusione Windows Defender della cache plugin come mitigazione (**pending, azione Enzo in PS admin**). Dettaglio durevole → memoria `reference_claude_mem_mcp_flakiness`.
 
 ## Top priorities (next session)
 

@@ -164,7 +164,7 @@ Sessione ultracode. **(1) Milestone i18n CHIUSA** (8 commit, dettaglio nella sez
 
 ## Candidati MVP-4 futuri (da MVP_4_ROADMAP.md — decisione Enzo)
 
-- stream 2.1 Brownfield Wave 2 · 2.5 MFA multi-kind · 2.7 Mobile + WCAG · visualization renderers (React Flow/Mermaid — gated brand, vedi memory `feedback_brand_before_graph_renderers`).
+- stream 2.1 Brownfield Wave 2 · 2.5 MFA multi-kind · 2.7 Mobile + WCAG. **Visualization renderers (tappa B) ✅ CHIUSO** (S968): subsystem renderer completo (Mermaid + ECharts force-graph + Cytoscape NetworkGraph; pagine org-chart/visualizations/org-network live), 9 `graph_type` a stato terminale, **brand-gate SOLLEVATO** (brand v1 shipped). Mappa: `docs/kb/VISUALIZATION_RENDERERS_CLOSURE.md`.
 
 ### Programma capability nuove (approvato Enzo S958) — `docs/superpowers/specs/2026-06-03-platform-capabilities-roadmap.md`
 

@@ -21,7 +21,7 @@ Lo snapshot §0 e i conteggi §1-§9 erano scritti a S957/S962. Questo blocco ri
 - **🌐 PROD live `https://www.heuresys.com`** (TLS, S962): nginx → web `:3013` → api `:8013`, `COOKIE_SECURE=true`, nginx conf versionata `deploy/nginx/` (S964). Deploy = `scripts/vm-deploy.sh`. **PROD NON aggiornata con S963-S965** (deploy step separato, a scelta Enzo).
 - **CI**: 6 workflow self-hosted (typecheck/lint/test-integration/build-web/playwright-smoke/i18n-parity) + showcase deploy. **6/6 verde** su `7c2f4ee` (S965). Playwright ora **~29 spec**.
 - **F7 showcase** (S965): tokenize colori già completo (0 raw); split `SystemHealthDashboard` + extract `DashboardShell` (lib-owned `@heuresys/ui`) segnalati → decisione Enzo.
-- **✅ Debito react override RICONCILIATO (S965)**: `pnpm.overrides` react/react-dom allineati **19.2.5→19.2.7** (peer-warning react = **0**, dedupe runtime OK, typecheck 4 ws verde). **D-15 RISOLTO (S966)**: `@types/react` override → **19.2.16**. La diagnosi "doppia istanza via lib pubblicata" era errata; root-cause reale = pnpm **stale virtual-store** dopo il flip override S965 *senza clean install* (orphan `19.2.14` + stale hoist-root). Fix locale (override 19.2.16 + clean install, commit `5c59295`): single instance, 0 warning, typecheck 4/4 + build web/showcase verdi. Hardening upstream (optional `@types/react` peerDep in `@heuresys/ui`) eseguito a parte. `@types/react-dom` 19.2.3 = latest corretta.
+- **✅ Debito react override RICONCILIATO (S965)**: `pnpm.overrides` react/react-dom allineati **19.2.5→19.2.7** (peer-warning react = **0**, dedupe runtime OK, typecheck 4 ws verde). **D-15 RISOLTO (S966)**: `@types/react` override → **19.2.16**. La diagnosi "doppia istanza via lib pubblicata" era errata; root-cause reale = pnpm **stale virtual-store** dopo il flip override S965 *senza clean install* (orphan `19.2.14` + stale hoist-root). Fix locale (override 19.2.16 + clean install, commit `5c59295`): single instance, 0 warning, typecheck 4/4 + build web/showcase verdi. Hardening upstream **pubblicato**: `@heuresys/ui@0.1.3` (optional `@types/react`/`-dom` peerDep, upstream `e63f3fe`) + consumer bumpato `^0.1.3` (commit `a4abb44`) — la lib ora forwarda il `@types/react` del consumer (subtree → 19.2.16), trappola stale eliminata alla radice. `@types/react-dom` 19.2.3 = latest corretta.
 
 ## 1. Git / release
 
@@ -35,14 +35,14 @@ Lo snapshot §0 e i conteggi §1-§9 erano scritti a S957/S962. Questo blocco ri
 | Tag corrente | **`v1.0.0`** (GA baseline, S957) — predecessori sotto |
 | Tag (11 totali) | v0.2.0-mvp2 · v0.2.1-mvp2a-final · v0.3.0-mvp3 · v0.3.1-mvp3-final · v0.3.2-mvp3-full · v0.3.3-preflight-partial · v0.3.4-p0-closed · v0.4.0-brand-v1 · v0.4.0-mvp4-ready · v0.4.0a-s937-partial-checkpoint · v0.4.1-housekeeping-closed |
 | Pre-commit hook | `.git/hooks/pre-commit` warn-only → `scripts/cowork-exchange/validate-naming.mjs` su cowork_code_exchange |
-| Sibling repo | `D:\ux-design-shared` (HEAD `dfa2e81`) = sorgente di `@heuresys/ui` (npm `^0.1.1`) |
+| Sibling repo | `D:\ux-design-shared` (HEAD `e63f3fe`, pushato) = sorgente di `@heuresys/ui` (npm `^0.1.3`) |
 | Legacy read-only | `D:\evo.heuresys.com` (Win) + `/home/ubuntu/heuresys-evo` (VM) — enrichment source, mai committare path assoluti |
 
 ## 2. Stack (versioni verified)
 
 - **Root**: pnpm 9.15.0 (pinato), Node ≥20.11, ESLint 9.39.4 flat, typescript-eslint 8.59.4, eslint-config-next 15.5.18. `pnpm.overrides`: react/react-dom **19.2.7** (S965 reconcile), @types/react **19.2.16** (S966), vite ^6.4.2, postcss ^8.5.10, esbuild ^0.25.0, qs ≥6.15.2.
 - **apps/api**: fastify 5.8.5, @fastify/{cookie 11,cors 11.2,helmet 13,jwt 10,rate-limit 10.3}, fastify-type-provider-zod 6.1.0, zod 4.4.3, pg 8.13.1, drizzle-orm 0.45.2 (solo pool wrapper; query business = raw SQL parametrizzato), argon2 0.41.1, otpauth ^9.5.1, **pino 10.3.1** (S964), **vitest 4.1.8** (singleThread), tsx 4.22.4, typescript 5.7.2, supertest 7.
-- **apps/web**: **next 15.5.19** (backport S965; next 16 = B stand-by §0-bis), **react/react-dom 19.2.7 + `@types/react` 19.2.16** (override riconciliati S965/S966, §0-bis), @heuresys/ui ^0.1.1 (npm, NON link:), @heuresys/shared workspace:*, @tanstack/react-query 5.101, react-hook-form 7.77, **i18next 26.3.1 + react-i18next 17**, tailwindcss 4.3.0, @playwright/test 1.55.1 + axe.
+- **apps/web**: **next 15.5.19** (backport S965; next 16 = B stand-by §0-bis), **react/react-dom 19.2.7 + `@types/react` 19.2.16** (override riconciliati S965/S966, §0-bis), @heuresys/ui ^0.1.3 (npm, NON link:; optional @types/react peerDep da 0.1.3), @heuresys/shared workspace:*, @tanstack/react-query 5.101, react-hook-form 7.77, **i18next 26.3.1 + react-i18next 17**, tailwindcss 4.3.0, @playwright/test 1.55.1 + axe.
 - **apps/showcase**: Next 15 static export → GitHub Pages, consuma `@heuresys/ui`.
 - **TS invarianti** (`tsconfig.base.json`): `strict`, `noUncheckedIndexedAccess` (narrow `T|undefined` mandatory), `noUnusedLocals/Parameters` (unused → prefix `_`), `exactOptionalPropertyTypes:false` (intenzionale).
 

@@ -21,7 +21,7 @@
 | **B-24** | ✅ **FATTO** 2026-05-28 | `peaceiris/actions-gh-pages@v3→@v4` in showcase.yml; v4 = solo Node16→20 (verificato changelog), tutti gli input usati (github_token/publish_dir/publish_branch/force_orphan/commit_message) compatibili. YAML validato. | chiude PR #16; deploy gira al push |
 | **B-25 / D-09** | ✅ **FATTO** 2026-05-28 | condition `if: !contains(...labels...'defer-major')` aggiunta ai 6 workflow `pull_request`; push a main non impattato; YAML validato | — |
 | **B-30** | 🟢 aperto (infra) | solo OCI VM runner | backup runner Windows |
-| **B-31** | 🟡 aperto (infra) | — | ssh-agent persistence cross-session |
+| **B-31** | ✅ **FATTO** — chiuso da ADR-0021 (`ec1e277`) | task At-Logon `HeuresysTunnel5433` State=Running + restricted no-passphrase key `heuresys_tunnel_ed25519` (`permitopen=127.0.0.1:5432` + forced command) + `session-boot.ps1` fallback; verificato live su host S968 (task Running, tunnel :5433 UP) | — |
 | **B-40** (CW-B39) | ⚪ **rivalutato** | `sys.sys_learning_path_steps` **VUOTA (0 righe)**; le 688 righe null `learning_path_step_path_id` erano source/staging-side | forensic source-side solo se si persegue |
 | **B-41** (CW-B45) | deferito | — | SDBI Phase 4 |
 | **B-42** (CW-B50) | 🟢 **reclass FATTO** | 3 target = REFERENCE_ONLY (via 000044/D-12, 2026-05-27) | resta solo "correct target authoring" (deferito) |
@@ -29,7 +29,7 @@
 | **B-44** | ✅ **FATTO** 2026-05-28 | cross-OS idempotent bootstrap: `scripts/vm-bootstrap.sh` (Linux server, systemd, public 8013/3013) + `scripts/dev-bootstrap.sh` (Mac/Linux-desktop) + `scripts/dev-bootstrap.ps1` (Windows) + `scripts/sync-gitignored-to-vm.sh` (mirror dati gitignorati non-rigenerabili PC→VM, tar-over-ssh, escl. node_modules/dist/.next/.env) + `deploy/README.md`; central VM DB via tunnel 5433. Spec/plan in `docs/superpowers/{specs,plans}/2026-05-28-cross-os-bootstrap*`. **Verificato live** su arm64 VM + Windows + **Mac Intel/Darwin 2026-05-29** (Node 22 v22.22.3 via nvm, pnpm 9.15.0, `--frozen-lockfile` ok, tunnel :5434→VM, `/readyz` DB ok, RBAC cache loaded, API listening :3001); amd64 by-construction (lockfile cross-platform). Side-fix: root scripts `--filter` single→double quote (Windows cmd) | ✅ Mac live-verify completato 2026-05-29 | 
 | Dependabot **alerts** | ✅ 0 aperti | `gh api .../dependabot/alerts` | — |
 
-**Sintesi per la fresh session**: realmente da fare = **B-10** (SDBI, intatto — ora **sbloccato da zod4**), **B-31** (infra ssh-agent), **B-42** (target authoring). **Chiusi/stale**: B-01/D-01 (fatto 2026-05-28), B-03/D-08 (fatto), **B-20+B-21 zod4+ftpz6 (fatti 2026-05-28, merged `17fad36`)**, B-22 (i18next), B-23 (stale), B-24→#16 (gh-pages), B-25/D-09 (defer-major CI skip), B-26 (risolto), B-43 (xos_lib), B-44 (cross-OS bootstrap, **Mac verify ✅ 2026-05-29**), D-04 (root cleanup), D-12 (risolto). **Deferiti**: B-20b (deprecation sweep zod4), B-41 (Phase 4). **Da chiarire**: B-40 (source-side). **B-02 RESOLVED 2026-05-29** (vault Obsidian locale, no repo esterno).
+**Sintesi per la fresh session**: realmente da fare = **B-10** (SDBI, intatto — ora **sbloccato da zod4**), **B-42** (target authoring). **B-31** ✅ FATTO (S968 — chiuso da ADR-0021 `ec1e277`, tunnel hands-off verificato live). **Chiusi/stale**: B-01/D-01 (fatto 2026-05-28), B-03/D-08 (fatto), **B-20+B-21 zod4+ftpz6 (fatti 2026-05-28, merged `17fad36`)**, B-22 (i18next), B-23 (stale), B-24→#16 (gh-pages), B-25/D-09 (defer-major CI skip), B-26 (risolto), B-43 (xos_lib), B-44 (cross-OS bootstrap, **Mac verify ✅ 2026-05-29**), D-04 (root cleanup), D-12 (risolto). **Deferiti**: B-20b (deprecation sweep zod4), B-41 (Phase 4). **Da chiarire**: B-40 (source-side). **B-02 RESOLVED 2026-05-29** (vault Obsidian locale, no repo esterno).
 
 ## P0 — Consolidamento immediato (questa fase, prima di nuovo sviluppo)
 
@@ -139,7 +139,7 @@ Sessione ultracode. **(1) Milestone i18n CHIUSA** (8 commit, dettaglio nella sez
 | ID | Azione | Note |
 |---|---|---|
 | **B-30** | Backup runner Windows | ⚪ **WON'T-DO (su desktop) 2026-05-29** — analisi evidence-based: copre solo 4/6 gate (i 2 gate DB non possono girare comunque se la VM è giù, il DB è sulla VM); + rischio sicurezza alto (repo PUBBLICO → fork-PR code eseguibile sul PC primario). Non aumenta qualità funzionale/visuale MVP. Se mai si perseguisse: runner su VM/container **isolato**, non il desktop. |
-| **B-31** | ssh-agent persistence cross-session (CW-B62) | Eliminare il manual-launch passphrase: service-account key dedicata CI no-passphrase (richiede ADR per security trade-off) OR documentare flusso stabile. |
+| ~~**B-31**~~ | ✅ **FATTO** (S968) — ssh-agent persistence cross-session (CW-B62) | Chiuso da **ADR-0021** (commit `ec1e277`): scheduled task At-Logon `HeuresysTunnel5433` (State=Running) + restricted no-passphrase key `heuresys_tunnel_ed25519` (`permitopen=127.0.0.1:5432` + forced command, no shell) + `session-boot.ps1` fallback. Verificato live su host: task Running, tunnel :5433 UP. `SOT_STATE.md` §8 già allineato; nessun residuo. |
 
 ## P4 — Bias residui ereditati (da bias_registry.md, ora archive)
 

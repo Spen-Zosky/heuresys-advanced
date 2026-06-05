@@ -11,21 +11,21 @@ export const BrownfieldImportStatusSchema = z.enum(BROWNFIELD_IMPORT_STATUS_VALU
 export type BrownfieldImportStatus = z.infer<typeof BrownfieldImportStatusSchema>;
 
 export const BrownfieldImportRunSchema = z.object({
-  importRunId: z.string().uuid(),
-  exportId: z.string().uuid().nullable(),
+  importRunId: z.uuid(),
+  exportId: z.uuid().nullable(),
   wave: z.number().int().nullable(),
   classificationScope: z.string().nullable(),
-  startedAt: z.string().datetime(),
-  finishedAt: z.string().datetime().nullable(),
+  startedAt: z.iso.datetime(),
+  finishedAt: z.iso.datetime().nullable(),
   status: BrownfieldImportStatusSchema,
-  initiatedBy: z.string().uuid().nullable(),
+  initiatedBy: z.uuid().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 export type BrownfieldImportRun = z.infer<typeof BrownfieldImportRunSchema>;
 
 export const BrownfieldImportRunListQuerySchema = z.object({
-  exportId: z.string().uuid().optional(),
+  exportId: z.uuid().optional(),
   status: BrownfieldImportStatusSchema.optional(),
   wave: z.coerce.number().int().min(0).max(32767).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
@@ -38,7 +38,7 @@ export const BrownfieldImportRunListResponseSchema = z.object({
 });
 
 export const CreateBrownfieldImportRunBodySchema = z.object({
-  exportId: z.string().uuid().nullable().optional(),
+  exportId: z.uuid().nullable().optional(),
   wave: z.number().int().min(0).max(32767).nullable().optional(),
   classificationScope: z.string().max(32).nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
@@ -51,4 +51,4 @@ export const UpdateBrownfieldImportRunBodySchema = z.object({
 });
 export type UpdateBrownfieldImportRunBody = z.infer<typeof UpdateBrownfieldImportRunBodySchema>;
 
-export const BrownfieldImportRunIdParamSchema = z.object({ id: z.string().uuid() });
+export const BrownfieldImportRunIdParamSchema = z.object({ id: z.uuid() });

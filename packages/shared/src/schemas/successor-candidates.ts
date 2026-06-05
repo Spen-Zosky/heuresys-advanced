@@ -15,21 +15,21 @@ export const SuccessorCandidateStatusSchema = z.enum(SUCCESSOR_CANDIDATE_STATUS_
 export type SuccessorCandidateStatus = z.infer<typeof SuccessorCandidateStatusSchema>;
 
 export const SuccessorCandidateSchema = z.object({
-  successorCandidateId: z.string().uuid(),
-  poolId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  userId: z.string().uuid(),
+  successorCandidateId: z.uuid(),
+  poolId: z.uuid(),
+  tenantId: z.uuid(),
+  userId: z.uuid(),
   status: SuccessorCandidateStatusSchema,
   readinessLevel: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type SuccessorCandidate = z.infer<typeof SuccessorCandidateSchema>;
 
 export const SuccessorCandidateListQuerySchema = z.object({
-  poolId: z.string().uuid().optional(),
-  userId: z.string().uuid().optional(),
+  poolId: z.uuid().optional(),
+  userId: z.uuid().optional(),
   status: SuccessorCandidateStatusSchema.optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -60,8 +60,8 @@ export type SuccessorReadinessDistributionResponse = z.infer<
 >;
 
 export const CreateSuccessorCandidateBodySchema = z.object({
-  poolId: z.string().uuid(),
-  userId: z.string().uuid(),
+  poolId: z.uuid(),
+  userId: z.uuid(),
   status: SuccessorCandidateStatusSchema.optional().default("CANDIDATE"),
   readinessLevel: z.string().max(32).nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
@@ -75,4 +75,4 @@ export const UpdateSuccessorCandidateBodySchema = z.object({
 });
 export type UpdateSuccessorCandidateBody = z.infer<typeof UpdateSuccessorCandidateBodySchema>;
 
-export const SuccessorCandidateIdParamSchema = z.object({ id: z.string().uuid() });
+export const SuccessorCandidateIdParamSchema = z.object({ id: z.uuid() });

@@ -27,23 +27,23 @@ export const DashboardCountersSchema = z.object({
 export type DashboardCounters = z.infer<typeof DashboardCountersSchema>;
 
 export const DashboardLearningDeadlineSchema = z.object({
-  learningGapId: z.string().uuid(),
-  userId: z.string().uuid(),
+  learningGapId: z.uuid(),
+  userId: z.uuid(),
   userDisplayName: z.string(),
-  positionId: z.string().uuid().nullable(),
+  positionId: z.uuid().nullable(),
   positionTitle: z.string().nullable(),
-  skillId: z.string().uuid().nullable(),
+  skillId: z.uuid().nullable(),
   skillName: z.string().nullable(),
   severity: z.string(),
-  detectedAt: z.string().datetime(),
+  detectedAt: z.iso.datetime(),
 });
 export type DashboardLearningDeadline = z.infer<typeof DashboardLearningDeadlineSchema>;
 
 export const DashboardRecentActivitySchema = z.object({
   kind: z.enum(["USER_CREATED", "POSITION_CREATED", "ASSIGNMENT_CHANGED"]),
-  occurredAt: z.string().datetime(),
+  occurredAt: z.iso.datetime(),
   summary: z.string(),
-  resourceId: z.string().uuid(),
+  resourceId: z.uuid(),
 });
 export type DashboardRecentActivity = z.infer<typeof DashboardRecentActivitySchema>;
 
@@ -80,13 +80,13 @@ export const DashboardWidgetsResponseSchema = z.object({
   role: z.string(),
   scope: z.object({
     kind: DashboardScopeKindSchema,
-    tenantId: z.string().uuid().nullable(),
-    teamPositionIds: z.array(z.string().uuid()),
+    tenantId: z.uuid().nullable(),
+    teamPositionIds: z.array(z.uuid()),
   }),
   counters: DashboardCountersSchema,
   trends: z.array(DashboardTrendSchema),
   upcomingLearningDeadlines: z.array(DashboardLearningDeadlineSchema),
   recentActivity: z.array(DashboardRecentActivitySchema),
-  generatedAt: z.string().datetime(),
+  generatedAt: z.iso.datetime(),
 });
 export type DashboardWidgetsResponse = z.infer<typeof DashboardWidgetsResponseSchema>;

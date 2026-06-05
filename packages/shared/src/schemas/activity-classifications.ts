@@ -15,7 +15,7 @@ export const ActivityClassSchemeSchema = z.enum(ACTIVITY_CLASS_SCHEME_VALUES);
 export type ActivityClassScheme = z.infer<typeof ActivityClassSchemeSchema>;
 
 export const ActivityClassificationSchema = z.object({
-  activityClassificationId: z.string().uuid(),
+  activityClassificationId: z.uuid(),
   scheme: ActivityClassSchemeSchema,
   code: z.string(),
   parentCode: z.string().nullable(),
@@ -23,8 +23,8 @@ export const ActivityClassificationSchema = z.object({
   description: z.string().nullable(),
   level: z.number().int().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type ActivityClassification = z.infer<typeof ActivityClassificationSchema>;
 
@@ -61,4 +61,4 @@ export const UpdateActivityClassificationBodySchema = z.object({
 });
 export type UpdateActivityClassificationBody = z.infer<typeof UpdateActivityClassificationBodySchema>;
 
-export const ActivityClassificationIdParamSchema = z.object({ id: z.string().uuid() });
+export const ActivityClassificationIdParamSchema = z.object({ id: z.uuid() });

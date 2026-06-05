@@ -64,7 +64,7 @@ const EnvSchema = z.object({
 
   // Auth
   COOKIE_SECRET: z.string().min(32),
-  ADMIN_ORIGIN: z.string().url().default("http://localhost:3000"),
+  ADMIN_ORIGIN: z.url().default("http://localhost:3000"),
 
   // Cookie `Secure` flag for the auth cookies (access/refresh/csrf). When unset it
   // defaults to (NODE_ENV === 'production') — Secure cookies require HTTPS, so a

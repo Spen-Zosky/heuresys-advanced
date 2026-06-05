@@ -30,9 +30,9 @@ export const UserTypeSchema = z.enum(USER_TYPE_VALUES);
 /* --- read shape -------------------------------------------------------- */
 
 export const UserSchema = z.object({
-  userId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  email: z.string().email(),
+  userId: z.uuid(),
+  tenantId: z.uuid(),
+  email: z.email(),
   displayName: z.string(),
   firstName: z.string().nullable(),
   lastName: z.string().nullable(),
@@ -43,22 +43,22 @@ export const UserSchema = z.object({
   locale: z.string().nullable(),
   timezone: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type User = z.infer<typeof UserSchema>;
 
 /* --- POST /v1/users ---------------------------------------------------- */
 
 export const CreateUserBodySchema = z.object({
-  email: z.string().email().max(254),
+  email: z.email().max(254),
   displayName: z.string().min(1).max(255),
   /**
    * Target tenant for the new user. Optional and only honored for PLATFORM_
    * ADMIN actors (cross-tenant create). For TENANT_ADMIN, the service forces
    * the actor's own tenantId regardless of what's sent here.
    */
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   firstName: z.string().max(128).nullable().optional(),
   lastName: z.string().max(128).nullable().optional(),
   externalCode: z.string().max(64).nullable().optional(),
@@ -73,7 +73,7 @@ export type CreateUserBody = z.infer<typeof CreateUserBodySchema>;
 /* --- PATCH /v1/users/:id ----------------------------------------------- */
 
 export const UpdateUserBodySchema = z.object({
-  email: z.string().email().max(254).optional(),
+  email: z.email().max(254).optional(),
   displayName: z.string().min(1).max(255).optional(),
   firstName: z.string().max(128).nullable().optional(),
   lastName: z.string().max(128).nullable().optional(),
@@ -119,18 +119,18 @@ export type UserListResponse = z.infer<typeof UserListResponseSchema>;
 /* --- :id param --------------------------------------------------------- */
 
 export const UserIdParamSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 export type UserIdParam = z.infer<typeof UserIdParamSchema>;
 
 /* --- role grants ------------------------------------------------------- */
 
 export const RoleGrantSchema = z.object({
-  grantId: z.string().uuid(),
+  grantId: z.uuid(),
   roleCode: RoleCodeSchema,
-  tenantId: z.string().uuid().nullable(),
-  grantedAt: z.string().datetime(),
-  grantedBy: z.string().uuid().nullable(),
+  tenantId: z.uuid().nullable(),
+  grantedAt: z.iso.datetime(),
+  grantedBy: z.uuid().nullable(),
 });
 export type RoleGrant = z.infer<typeof RoleGrantSchema>;
 
@@ -146,12 +146,12 @@ export const GrantRoleBodySchema = z.object({
    * For PLATFORM_ADMIN: optional — null grants platform-wide; otherwise
    * scopes to the supplied tenantId.
    */
-  tenantId: z.string().uuid().nullable().optional(),
+  tenantId: z.uuid().nullable().optional(),
 });
 export type GrantRoleBody = z.infer<typeof GrantRoleBodySchema>;
 
 export const GrantIdParamSchema = z.object({
-  id: z.string().uuid(),
-  grantId: z.string().uuid(),
+  id: z.uuid(),
+  grantId: z.uuid(),
 });
 export type GrantIdParam = z.infer<typeof GrantIdParamSchema>;

@@ -49,6 +49,6 @@ export const UpdateUserPreferenceBodySchema = z
     locale: MeLocaleSchema.optional(),
   })
   .refine((b) => b.theme !== undefined || b.palette !== undefined || b.locale !== undefined, {
-    message: "At least one of theme / palette / locale required",
+    error: "At least one of theme / palette / locale required",
   });
 export type UpdateUserPreferenceBody = z.infer<typeof UpdateUserPreferenceBodySchema>;

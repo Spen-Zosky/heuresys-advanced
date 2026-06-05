@@ -9,17 +9,17 @@
 import { z } from "zod";
 
 export const SkillAliasSchema = z.object({
-  aliasId: z.string().uuid(),
-  skillId: z.string().uuid(),
+  aliasId: z.uuid(),
+  skillId: z.uuid(),
   label: z.string(),
   locale: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 export type SkillAlias = z.infer<typeof SkillAliasSchema>;
 
 export const SkillAliasListQuerySchema = z.object({
-  skillId: z.string().uuid().optional(),
+  skillId: z.uuid().optional(),
   locale: z.string().min(1).max(16).optional(),
   search: z.string().min(1).max(255).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
@@ -33,7 +33,7 @@ export const SkillAliasListResponseSchema = z.object({
 });
 
 export const CreateSkillAliasBodySchema = z.object({
-  skillId: z.string().uuid(),
+  skillId: z.uuid(),
   label: z.string().min(1).max(255),
   locale: z.string().min(1).max(16).nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
@@ -47,4 +47,4 @@ export const UpdateSkillAliasBodySchema = z.object({
 });
 export type UpdateSkillAliasBody = z.infer<typeof UpdateSkillAliasBodySchema>;
 
-export const SkillAliasIdParamSchema = z.object({ id: z.string().uuid() });
+export const SkillAliasIdParamSchema = z.object({ id: z.uuid() });

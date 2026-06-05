@@ -6,16 +6,16 @@
 import { z } from "zod";
 
 export const LearningPathSchema = z.object({
-  learningPathId: z.string().uuid(),
-  tenantId: z.string().uuid().nullable(),
+  learningPathId: z.uuid(),
+  tenantId: z.uuid().nullable(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   targetOutcome: z.string().nullable(),
   isGlobal: z.boolean(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type LearningPath = z.infer<typeof LearningPathSchema>;
 
@@ -38,7 +38,7 @@ export const CreateLearningPathBodySchema = z.object({
   description: z.string().max(4096).nullable().optional(),
   targetOutcome: z.string().max(4096).nullable().optional(),
   isGlobal: z.boolean().optional().default(false),
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateLearningPathBody = z.infer<typeof CreateLearningPathBodySchema>;
@@ -51,4 +51,4 @@ export const UpdateLearningPathBodySchema = z.object({
 });
 export type UpdateLearningPathBody = z.infer<typeof UpdateLearningPathBodySchema>;
 
-export const LearningPathIdParamSchema = z.object({ id: z.string().uuid() });
+export const LearningPathIdParamSchema = z.object({ id: z.uuid() });

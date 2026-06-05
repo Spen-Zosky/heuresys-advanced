@@ -18,14 +18,14 @@ export const SkillProficiencyLevelCodeSchema = z.enum([
 export type SkillProficiencyLevelCode = z.infer<typeof SkillProficiencyLevelCodeSchema>;
 
 export const SkillProficiencyLevelSchema = z.object({
-  proficiencyLevelId: z.string().uuid(),
+  proficiencyLevelId: z.uuid(),
   code: SkillProficiencyLevelCodeSchema,
   name: z.string(),
   rank: z.number().int().min(1).max(6),
   description: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type SkillProficiencyLevel = z.infer<typeof SkillProficiencyLevelSchema>;
 

@@ -11,18 +11,18 @@ export const SeedApprovalStatusSchema = z.enum(SEED_APPROVAL_STATUS_VALUES);
 export type SeedApprovalStatus = z.infer<typeof SeedApprovalStatusSchema>;
 
 export const SeedApprovalDecisionSchema = z.object({
-  seedApprovalDecisionId: z.string().uuid(),
-  candidateId: z.string().uuid(),
-  approverUserId: z.string().uuid().nullable(),
+  seedApprovalDecisionId: z.uuid(),
+  candidateId: z.uuid(),
+  approverUserId: z.uuid().nullable(),
   status: SeedApprovalStatusSchema,
   rationale: z.string().nullable(),
-  decidedAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
+  decidedAt: z.iso.datetime(),
+  createdAt: z.iso.datetime(),
 });
 export type SeedApprovalDecision = z.infer<typeof SeedApprovalDecisionSchema>;
 
 export const SeedApprovalDecisionListQuerySchema = z.object({
-  candidateId: z.string().uuid().optional(),
+  candidateId: z.uuid().optional(),
   status: SeedApprovalStatusSchema.optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -34,10 +34,10 @@ export const SeedApprovalDecisionListResponseSchema = z.object({
 });
 
 export const CreateSeedApprovalDecisionBodySchema = z.object({
-  candidateId: z.string().uuid(),
+  candidateId: z.uuid(),
   status: SeedApprovalStatusSchema,
   rationale: z.string().max(8192).nullable().optional(),
 });
 export type CreateSeedApprovalDecisionBody = z.infer<typeof CreateSeedApprovalDecisionBodySchema>;
 
-export const SeedApprovalDecisionIdParamSchema = z.object({ id: z.string().uuid() });
+export const SeedApprovalDecisionIdParamSchema = z.object({ id: z.uuid() });

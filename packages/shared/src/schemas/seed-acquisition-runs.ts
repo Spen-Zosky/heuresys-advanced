@@ -11,17 +11,17 @@ export const SeedAcquisitionRunStatusSchema = z.enum(SEED_ACQUISITION_RUN_STATUS
 export type SeedAcquisitionRunStatus = z.infer<typeof SeedAcquisitionRunStatusSchema>;
 
 export const SeedAcquisitionRunSchema = z.object({
-  seedAcquisitionRunId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  seedAcquisitionRunId: z.uuid(),
+  tenantId: z.uuid(),
   code: z.string(),
   promptTemplate: z.string().nullable(),
   sourceRegistryPayload: z.array(z.unknown()),
-  startedAt: z.string().datetime(),
-  finishedAt: z.string().datetime().nullable(),
+  startedAt: z.iso.datetime(),
+  finishedAt: z.iso.datetime().nullable(),
   status: SeedAcquisitionRunStatusSchema,
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type SeedAcquisitionRun = z.infer<typeof SeedAcquisitionRunSchema>;
 
@@ -41,7 +41,7 @@ export const CreateSeedAcquisitionRunBodySchema = z.object({
   code: z.string().min(1).max(128),
   promptTemplate: z.string().max(16384).nullable().optional(),
   sourceRegistryPayload: z.array(z.unknown()).optional().default([]),
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateSeedAcquisitionRunBody = z.infer<typeof CreateSeedAcquisitionRunBodySchema>;
@@ -52,4 +52,4 @@ export const UpdateSeedAcquisitionRunBodySchema = z.object({
 });
 export type UpdateSeedAcquisitionRunBody = z.infer<typeof UpdateSeedAcquisitionRunBodySchema>;
 
-export const SeedAcquisitionRunIdParamSchema = z.object({ id: z.string().uuid() });
+export const SeedAcquisitionRunIdParamSchema = z.object({ id: z.uuid() });

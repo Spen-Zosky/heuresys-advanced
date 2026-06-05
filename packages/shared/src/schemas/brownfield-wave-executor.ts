@@ -50,14 +50,14 @@ export const WaveStageStatsSchema = z.object({
 export type WaveStageStats = z.infer<typeof WaveStageStatsSchema>;
 
 export const WaveExecutorRunSchema = z.object({
-  runId: z.string().uuid(),
+  runId: z.uuid(),
   wave: z.number().int().min(1).max(4),
   mode: WaveExecutorModeSchema,
   state: WaveExecutorStateSchema,
   startedAt: z.string(),
   finishedAt: z.string().nullable(),
   durationMs: z.number().int().nullable(),
-  initiatedBy: z.string().uuid().nullable(),
+  initiatedBy: z.uuid().nullable(),
   stats: z.array(WaveStageStatsSchema),
   totalStaged: z.number().int().min(0),
   totalUpserted: z.number().int().min(0),
@@ -81,7 +81,7 @@ export const WaveExecutorRunListResponseSchema = z.object({
 });
 export type WaveExecutorRunListResponse = z.infer<typeof WaveExecutorRunListResponseSchema>;
 
-export const WaveExecutorRunIdParamSchema = z.object({ runId: z.string().uuid() });
+export const WaveExecutorRunIdParamSchema = z.object({ runId: z.uuid() });
 export type WaveExecutorRunIdParam = z.infer<typeof WaveExecutorRunIdParamSchema>;
 
 // -----------------------------------------------------------------------------
@@ -98,7 +98,7 @@ export const AcceptanceCheckSchema = z.object({
 export type AcceptanceCheck = z.infer<typeof AcceptanceCheckSchema>;
 
 export const WaveAcceptanceReportSchema = z.object({
-  runId: z.string().uuid(),
+  runId: z.uuid(),
   wave: z.number().int().min(1).max(4),
   checks: z.array(AcceptanceCheckSchema),
   allPass: z.boolean(),

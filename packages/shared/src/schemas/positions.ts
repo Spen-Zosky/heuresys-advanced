@@ -27,14 +27,14 @@ export const RequirementCriticalitySchema = z.enum(REQUIREMENT_CRITICALITY_VALUE
 /* --- read shape -------------------------------------------------------- */
 
 export const PositionSchema = z.object({
-  positionId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  positionId: z.uuid(),
+  tenantId: z.uuid(),
   code: z.string(),
   title: z.string(),
-  organizationUnitId: z.string().uuid().nullable(),
-  jobRoleId: z.string().uuid().nullable(),
-  reportsToPositionId: z.string().uuid().nullable(),
-  ownerUserId: z.string().uuid().nullable(),
+  organizationUnitId: z.uuid().nullable(),
+  jobRoleId: z.uuid().nullable(),
+  reportsToPositionId: z.uuid().nullable(),
+  ownerUserId: z.uuid().nullable(),
   escoOccupationUri: z.string().nullable(),
   criticality: PositionCriticalitySchema.nullable(),
   economicWeight: z.number().min(0).max(1).nullable(),
@@ -43,8 +43,8 @@ export const PositionSchema = z.object({
   effectiveTo: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
   aiHints: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type Position = z.infer<typeof PositionSchema>;
 
@@ -53,9 +53,9 @@ export type Position = z.infer<typeof PositionSchema>;
 export const PositionListQuerySchema = z.object({
   isActive: z.coerce.boolean().optional(),
   criticality: PositionCriticalitySchema.optional(),
-  organizationUnitId: z.string().uuid().optional(),
-  jobRoleId: z.string().uuid().optional(),
-  ownerUserId: z.string().uuid().optional(),
+  organizationUnitId: z.uuid().optional(),
+  jobRoleId: z.uuid().optional(),
+  ownerUserId: z.uuid().optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
 });
@@ -72,11 +72,11 @@ export type PositionListResponse = z.infer<typeof PositionListResponseSchema>;
 export const CreatePositionBodySchema = z.object({
   code: z.string().min(1).max(64),
   title: z.string().min(1).max(255),
-  tenantId: z.string().uuid().optional(),
-  organizationUnitId: z.string().uuid().nullable().optional(),
-  jobRoleId: z.string().uuid().nullable().optional(),
-  reportsToPositionId: z.string().uuid().nullable().optional(),
-  ownerUserId: z.string().uuid().nullable().optional(),
+  tenantId: z.uuid().optional(),
+  organizationUnitId: z.uuid().nullable().optional(),
+  jobRoleId: z.uuid().nullable().optional(),
+  reportsToPositionId: z.uuid().nullable().optional(),
+  ownerUserId: z.uuid().nullable().optional(),
   escoOccupationUri: z.string().max(1024).nullable().optional(),
   criticality: PositionCriticalitySchema.nullable().optional(),
   economicWeight: z.number().min(0).max(1).nullable().optional(),
@@ -90,10 +90,10 @@ export type CreatePositionBody = z.infer<typeof CreatePositionBodySchema>;
 
 export const UpdatePositionBodySchema = z.object({
   title: z.string().min(1).max(255).optional(),
-  organizationUnitId: z.string().uuid().nullable().optional(),
-  jobRoleId: z.string().uuid().nullable().optional(),
-  reportsToPositionId: z.string().uuid().nullable().optional(),
-  ownerUserId: z.string().uuid().nullable().optional(),
+  organizationUnitId: z.uuid().nullable().optional(),
+  jobRoleId: z.uuid().nullable().optional(),
+  reportsToPositionId: z.uuid().nullable().optional(),
+  ownerUserId: z.uuid().nullable().optional(),
   escoOccupationUri: z.string().max(1024).nullable().optional(),
   criticality: PositionCriticalitySchema.nullable().optional(),
   economicWeight: z.number().min(0).max(1).nullable().optional(),
@@ -108,21 +108,21 @@ export type UpdatePositionBody = z.infer<typeof UpdatePositionBodySchema>;
 /* --- :id param + position id -------------------------------------------- */
 
 export const PositionIdParamSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 export type PositionIdParam = z.infer<typeof PositionIdParamSchema>;
 
 /* --- intelligence profile (PIP view) ------------------------------------ */
 
 export const PositionIntelligenceProfileSchema = z.object({
-  positionId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  positionId: z.uuid(),
+  tenantId: z.uuid(),
   code: z.string(),
   title: z.string(),
-  organizationUnitId: z.string().uuid().nullable(),
-  jobRoleId: z.string().uuid().nullable(),
-  ownerUserId: z.string().uuid().nullable(),
-  reportsToPositionId: z.string().uuid().nullable(),
+  organizationUnitId: z.uuid().nullable(),
+  jobRoleId: z.uuid().nullable(),
+  ownerUserId: z.uuid().nullable(),
+  reportsToPositionId: z.uuid().nullable(),
   escoOccupationUri: z.string().nullable(),
   criticality: PositionCriticalitySchema.nullable(),
   economicWeight: z.number().nullable(),
@@ -136,23 +136,23 @@ export const PositionIntelligenceProfileSchema = z.object({
   compensationProfile: z.unknown(),
   successionRelevance: z.unknown(),
   aiHints: z.record(z.string(), z.unknown()),
-  updatedAt: z.string().datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type PositionIntelligenceProfile = z.infer<typeof PositionIntelligenceProfileSchema>;
 
 /* --- skill sub-resource ------------------------------------------------- */
 
 export const PositionSkillRequirementSchema = z.object({
-  requirementId: z.string().uuid(),
-  positionId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  skillId: z.string().uuid(),
+  requirementId: z.uuid(),
+  positionId: z.uuid(),
+  tenantId: z.uuid(),
+  skillId: z.uuid(),
   requiredProficiency: SkillProficiencySchema,
   weight: z.number(),
   criticality: RequirementCriticalitySchema,
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type PositionSkillRequirement = z.infer<typeof PositionSkillRequirementSchema>;
 
@@ -162,7 +162,7 @@ export const PositionSkillListResponseSchema = z.object({
 export type PositionSkillListResponse = z.infer<typeof PositionSkillListResponseSchema>;
 
 export const AddPositionSkillBodySchema = z.object({
-  skillId: z.string().uuid(),
+  skillId: z.uuid(),
   requiredProficiency: SkillProficiencySchema,
   weight: z.number().min(0).max(10).optional().default(1),
   criticality: RequirementCriticalitySchema.optional().default("MEDIUM"),
@@ -171,22 +171,22 @@ export const AddPositionSkillBodySchema = z.object({
 export type AddPositionSkillBody = z.infer<typeof AddPositionSkillBodySchema>;
 
 export const PositionSkillIdParamSchema = z.object({
-  id: z.string().uuid(),
-  skillId: z.string().uuid(),
+  id: z.uuid(),
+  skillId: z.uuid(),
 });
 
 /* --- kpi sub-resource (read-only MVP-1) -------------------------------- */
 
 export const PositionKpiRequirementSchema = z.object({
-  requirementId: z.string().uuid(),
-  positionId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  kpiDefinitionId: z.string().uuid(),
+  requirementId: z.uuid(),
+  positionId: z.uuid(),
+  tenantId: z.uuid(),
+  kpiDefinitionId: z.uuid(),
   targetTemplate: z.record(z.string(), z.unknown()),
   weight: z.number(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type PositionKpiRequirement = z.infer<typeof PositionKpiRequirementSchema>;
 

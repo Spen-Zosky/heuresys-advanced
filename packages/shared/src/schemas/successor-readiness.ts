@@ -6,19 +6,19 @@
 import { z } from "zod";
 
 export const SuccessorReadinessSchema = z.object({
-  successorReadinessId: z.string().uuid(),
-  candidateId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  successorReadinessId: z.uuid(),
+  candidateId: z.uuid(),
+  tenantId: z.uuid(),
   score: z.number().nullable(),
   horizon: z.string().nullable(),
   payload: z.record(z.string(), z.unknown()),
-  assessedAt: z.string().datetime(),
-  createdAt: z.string().datetime(),
+  assessedAt: z.iso.datetime(),
+  createdAt: z.iso.datetime(),
 });
 export type SuccessorReadiness = z.infer<typeof SuccessorReadinessSchema>;
 
 export const SuccessorReadinessListQuerySchema = z.object({
-  candidateId: z.string().uuid().optional(),
+  candidateId: z.uuid().optional(),
   horizon: z.string().min(1).max(32).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -31,11 +31,11 @@ export const SuccessorReadinessListResponseSchema = z.object({
 });
 
 export const CreateSuccessorReadinessBodySchema = z.object({
-  candidateId: z.string().uuid(),
+  candidateId: z.uuid(),
   score: z.number().min(-100).max(100).nullable().optional(),
   horizon: z.string().max(32).nullable().optional(),
   payload: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateSuccessorReadinessBody = z.infer<typeof CreateSuccessorReadinessBodySchema>;
 
-export const SuccessorReadinessIdParamSchema = z.object({ id: z.string().uuid() });
+export const SuccessorReadinessIdParamSchema = z.object({ id: z.uuid() });

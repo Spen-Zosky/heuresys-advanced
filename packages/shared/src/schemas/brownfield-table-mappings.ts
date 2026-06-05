@@ -11,24 +11,24 @@ export const BrownfieldApprovalStatusSchema = z.enum(BROWNFIELD_APPROVAL_STATUS_
 export type BrownfieldApprovalStatus = z.infer<typeof BrownfieldApprovalStatusSchema>;
 
 export const BrownfieldTableMappingSchema = z.object({
-  tableMappingId: z.string().uuid(),
-  runId: z.string().uuid().nullable(),
-  sourceTableId: z.string().uuid(),
+  tableMappingId: z.uuid(),
+  runId: z.uuid().nullable(),
+  sourceTableId: z.uuid(),
   targetSchema: z.string(),
   targetTable: z.string(),
   classification: z.string(),
   approvalStatus: BrownfieldApprovalStatusSchema,
-  approvedBy: z.string().uuid().nullable(),
-  approvedAt: z.string().datetime().nullable(),
+  approvedBy: z.uuid().nullable(),
+  approvedAt: z.iso.datetime().nullable(),
   rationale: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 export type BrownfieldTableMapping = z.infer<typeof BrownfieldTableMappingSchema>;
 
 export const BrownfieldTableMappingListQuerySchema = z.object({
-  runId: z.string().uuid().optional(),
-  sourceTableId: z.string().uuid().optional(),
+  runId: z.uuid().optional(),
+  sourceTableId: z.uuid().optional(),
   approvalStatus: BrownfieldApprovalStatusSchema.optional(),
   targetSchema: z.string().min(1).max(64).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
@@ -46,4 +46,4 @@ export const ApproveBrownfieldTableMappingBodySchema = z.object({
 });
 export type ApproveBrownfieldTableMappingBody = z.infer<typeof ApproveBrownfieldTableMappingBodySchema>;
 
-export const BrownfieldTableMappingIdParamSchema = z.object({ id: z.string().uuid() });
+export const BrownfieldTableMappingIdParamSchema = z.object({ id: z.uuid() });

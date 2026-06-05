@@ -7,20 +7,20 @@
 import { z } from "zod";
 
 export const LearningPathStepSchema = z.object({
-  learningPathStepId: z.string().uuid(),
-  pathId: z.string().uuid(),
-  moduleId: z.string().uuid(),
+  learningPathStepId: z.uuid(),
+  pathId: z.uuid(),
+  moduleId: z.uuid(),
   ordinal: z.number().int().min(0).max(32767),
   isPrerequisiteFor: z.array(z.string()),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type LearningPathStep = z.infer<typeof LearningPathStepSchema>;
 
 export const LearningPathStepListQuerySchema = z.object({
-  pathId: z.string().uuid().optional(),
-  moduleId: z.string().uuid().optional(),
+  pathId: z.uuid().optional(),
+  moduleId: z.uuid().optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
 });
@@ -32,8 +32,8 @@ export const LearningPathStepListResponseSchema = z.object({
 });
 
 export const CreateLearningPathStepBodySchema = z.object({
-  pathId: z.string().uuid(),
-  moduleId: z.string().uuid(),
+  pathId: z.uuid(),
+  moduleId: z.uuid(),
   ordinal: z.number().int().min(0).max(32767),
   isPrerequisiteFor: z.array(z.string()).optional().default([]),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
@@ -41,11 +41,11 @@ export const CreateLearningPathStepBodySchema = z.object({
 export type CreateLearningPathStepBody = z.infer<typeof CreateLearningPathStepBodySchema>;
 
 export const UpdateLearningPathStepBodySchema = z.object({
-  moduleId: z.string().uuid().optional(),
+  moduleId: z.uuid().optional(),
   ordinal: z.number().int().min(0).max(32767).optional(),
   isPrerequisiteFor: z.array(z.string()).optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type UpdateLearningPathStepBody = z.infer<typeof UpdateLearningPathStepBodySchema>;
 
-export const LearningPathStepIdParamSchema = z.object({ id: z.string().uuid() });
+export const LearningPathStepIdParamSchema = z.object({ id: z.uuid() });

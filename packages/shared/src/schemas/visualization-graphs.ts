@@ -14,8 +14,8 @@ export const VizGraphTypeSchema = z.enum(VIZ_GRAPH_TYPE_VALUES);
 export type VizGraphType = z.infer<typeof VizGraphTypeSchema>;
 
 export const VizGraphSchema = z.object({
-  graphId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  graphId: z.uuid(),
+  tenantId: z.uuid(),
   code: z.string(),
   type: VizGraphTypeSchema,
   name: z.string(),
@@ -24,8 +24,8 @@ export const VizGraphSchema = z.object({
   version: z.number().int(),
   isActive: z.boolean(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type VizGraph = z.infer<typeof VizGraphSchema>;
 
@@ -71,7 +71,7 @@ export const CreateVizGraphBodySchema = z.object({
   description: z.string().max(4096).nullable().optional(),
   sourceQuery: z.string().max(16384).nullable().optional(),
   isActive: z.boolean().optional().default(true),
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateVizGraphBody = z.infer<typeof CreateVizGraphBodySchema>;
@@ -85,4 +85,4 @@ export const UpdateVizGraphBodySchema = z.object({
 });
 export type UpdateVizGraphBody = z.infer<typeof UpdateVizGraphBodySchema>;
 
-export const VizGraphIdParamSchema = z.object({ id: z.string().uuid() });
+export const VizGraphIdParamSchema = z.object({ id: z.uuid() });

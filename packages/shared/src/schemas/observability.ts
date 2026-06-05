@@ -32,7 +32,7 @@ export const ObservabilityRbacSchema = z.object({
   /** Sum of permission-code Set sizes across all roles. */
   mappingsLoaded: z.number().int().min(0),
   /** ISO timestamp of last cache population; null if never loaded. */
-  loadedAt: z.string().datetime().nullable(),
+  loadedAt: z.iso.datetime().nullable(),
 });
 export type ObservabilityRbac = z.infer<typeof ObservabilityRbacSchema>;
 
@@ -43,7 +43,7 @@ export const ObservabilityTenantFleetEntrySchema = z.object({
   status: z.string(),
   userCount: z.number().int().min(0),
   /** Last LOGIN_SUCCESS timestamp for the tenant; null when none. */
-  lastActivity: z.string().datetime().nullable(),
+  lastActivity: z.iso.datetime().nullable(),
 });
 export type ObservabilityTenantFleetEntry = z.infer<
   typeof ObservabilityTenantFleetEntrySchema
@@ -88,11 +88,11 @@ export type ObservabilitySchemaCounts = z.infer<
  * empty-state, never a placeholder).
  */
 export const ObservabilityAuditEventSchema = z.object({
-  actionId: z.string().uuid(),
+  actionId: z.uuid(),
   actionType: z.string(),
   resourceType: z.string().nullable(),
   resourceId: z.string().nullable(),
-  occurredAt: z.string().datetime(),
+  occurredAt: z.iso.datetime(),
   tenantCode: z.string(),
   userDisplayName: z.string(),
 });
@@ -147,6 +147,6 @@ export const SystemHealthResponseSchema = z.object({
   schemaCounts: ObservabilitySchemaCountsSchema,
   auditFeed: z.array(ObservabilityAuditEventSchema),
   requestMetrics: ObservabilityRequestMetricsSchema,
-  generatedAt: z.string().datetime(),
+  generatedAt: z.iso.datetime(),
 });
 export type SystemHealthResponse = z.infer<typeof SystemHealthResponseSchema>;

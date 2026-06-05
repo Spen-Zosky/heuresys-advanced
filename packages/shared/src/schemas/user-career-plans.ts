@@ -10,23 +10,23 @@ export const UserCareerPlanStatusSchema = z.enum(USER_CAREER_PLAN_STATUS_VALUES)
 export type UserCareerPlanStatus = z.infer<typeof UserCareerPlanStatusSchema>;
 
 export const UserCareerPlanSchema = z.object({
-  userCareerPlanId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  userId: z.string().uuid(),
-  pathId: z.string().uuid().nullable(),
-  targetPositionId: z.string().uuid().nullable(),
+  userCareerPlanId: z.uuid(),
+  tenantId: z.uuid(),
+  userId: z.uuid(),
+  pathId: z.uuid().nullable(),
+  targetPositionId: z.uuid().nullable(),
   horizonMonths: z.number().int().nullable(),
   status: UserCareerPlanStatusSchema,
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type UserCareerPlan = z.infer<typeof UserCareerPlanSchema>;
 
 export const UserCareerPlanListQuerySchema = z.object({
-  userId: z.string().uuid().optional(),
-  pathId: z.string().uuid().optional(),
-  targetPositionId: z.string().uuid().optional(),
+  userId: z.uuid().optional(),
+  pathId: z.uuid().optional(),
+  targetPositionId: z.uuid().optional(),
   status: UserCareerPlanStatusSchema.optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -39,23 +39,23 @@ export const UserCareerPlanListResponseSchema = z.object({
 });
 
 export const CreateUserCareerPlanBodySchema = z.object({
-  userId: z.string().uuid(),
-  pathId: z.string().uuid().nullable().optional(),
-  targetPositionId: z.string().uuid().nullable().optional(),
+  userId: z.uuid(),
+  pathId: z.uuid().nullable().optional(),
+  targetPositionId: z.uuid().nullable().optional(),
   horizonMonths: z.number().int().min(0).max(1200).nullable().optional(),
   status: UserCareerPlanStatusSchema.optional().default("ACTIVE"),
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateUserCareerPlanBody = z.infer<typeof CreateUserCareerPlanBodySchema>;
 
 export const UpdateUserCareerPlanBodySchema = z.object({
-  pathId: z.string().uuid().nullable().optional(),
-  targetPositionId: z.string().uuid().nullable().optional(),
+  pathId: z.uuid().nullable().optional(),
+  targetPositionId: z.uuid().nullable().optional(),
   horizonMonths: z.number().int().min(0).max(1200).nullable().optional(),
   status: UserCareerPlanStatusSchema.optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type UpdateUserCareerPlanBody = z.infer<typeof UpdateUserCareerPlanBodySchema>;
 
-export const UserCareerPlanIdParamSchema = z.object({ id: z.string().uuid() });
+export const UserCareerPlanIdParamSchema = z.object({ id: z.uuid() });

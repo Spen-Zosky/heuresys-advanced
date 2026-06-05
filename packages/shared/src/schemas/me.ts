@@ -8,9 +8,9 @@ import { z } from "zod";
 /* --- profile ---------------------------------------------------------- */
 
 export const MeProfileSchema = z.object({
-  userId: z.string().uuid(),
-  tenantId: z.string().uuid().nullable(),
-  email: z.string().email(),
+  userId: z.uuid(),
+  tenantId: z.uuid().nullable(),
+  email: z.email(),
   displayName: z.string().nullable(),
   locale: z.string().nullable(),
   timezone: z.string().nullable(),
@@ -21,8 +21,8 @@ export const MeProfileSchema = z.object({
   linkedinUri: z.string().nullable(),
   contactPrefs: z.record(z.string(), z.unknown()),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type MeProfile = z.infer<typeof MeProfileSchema>;
 
@@ -77,8 +77,8 @@ export type MeInterfacesResponse = z.infer<typeof MeInterfacesResponseSchema>;
 /* --- positions -------------------------------------------------------- */
 
 export const MePositionAssignmentSchema = z.object({
-  userPositionAssignmentId: z.string().uuid(),
-  positionId: z.string().uuid(),
+  userPositionAssignmentId: z.uuid(),
+  positionId: z.uuid(),
   positionCode: z.string(),
   positionTitle: z.string(),
   isPrimary: z.boolean(),
@@ -93,13 +93,13 @@ export const MePositionsResponseSchema = z.object({
 /* --- skills + self-assessment ---------------------------------------- */
 
 export const MeSkillEvidenceSchema = z.object({
-  userSkillEvidenceId: z.string().uuid(),
-  skillId: z.string().uuid(),
+  userSkillEvidenceId: z.uuid(),
+  skillId: z.uuid(),
   skillCode: z.string(),
   skillName: z.string(),
   declaredProficiency: z.string(),
   source: z.string(),
-  assessedAt: z.string().datetime(),
+  assessedAt: z.iso.datetime(),
   score: z.number().nullable(),
   comment: z.string().nullable(),
 });
@@ -108,7 +108,7 @@ export const MeSkillsResponseSchema = z.object({
 });
 
 export const CreateMeSelfAssessmentBodySchema = z.object({
-  skillId: z.string().uuid(),
+  skillId: z.uuid(),
   declaredProficiency: z.string().min(1).max(32),
   score: z.number().min(0).max(100).nullable().optional(),
   comment: z.string().max(4096).nullable().optional(),
@@ -118,10 +118,10 @@ export type CreateMeSelfAssessmentBody = z.infer<typeof CreateMeSelfAssessmentBo
 /* --- learning -------------------------------------------------------- */
 
 export const MeLearningAssignmentSchema = z.object({
-  userLearningAssignmentId: z.string().uuid(),
-  moduleId: z.string().uuid().nullable(),
-  initiativeId: z.string().uuid().nullable(),
-  pathId: z.string().uuid().nullable(),
+  userLearningAssignmentId: z.uuid(),
+  moduleId: z.uuid().nullable(),
+  initiativeId: z.uuid().nullable(),
+  pathId: z.uuid().nullable(),
   isMandatory: z.boolean(),
   status: z.string(),
   deadline: z.string().nullable(),
@@ -131,36 +131,36 @@ export const MeLearningResponseSchema = z.object({
 });
 
 export const CreateMeEnrollmentBodySchema = z.object({
-  moduleId: z.string().uuid().nullable().optional(),
-  pathId: z.string().uuid().nullable().optional(),
-  initiativeId: z.string().uuid().nullable().optional(),
+  moduleId: z.uuid().nullable().optional(),
+  pathId: z.uuid().nullable().optional(),
+  initiativeId: z.uuid().nullable().optional(),
 }).refine(
   (b) => b.moduleId || b.pathId || b.initiativeId,
-  { message: "At least one of moduleId / pathId / initiativeId required" },
+  { error: "At least one of moduleId / pathId / initiativeId required" },
 );
 export type CreateMeEnrollmentBody = z.infer<typeof CreateMeEnrollmentBodySchema>;
 
 /* --- gaps + assessments --------------------------------------------- */
 
 export const MeGapSchema = z.object({
-  learningGapId: z.string().uuid(),
-  skillId: z.string().uuid().nullable(),
-  positionId: z.string().uuid().nullable(),
+  learningGapId: z.uuid(),
+  skillId: z.uuid().nullable(),
+  positionId: z.uuid().nullable(),
   severity: z.string(),
   score: z.number().nullable(),
-  detectedAt: z.string().datetime(),
+  detectedAt: z.iso.datetime(),
 });
 export const MeGapsResponseSchema = z.object({
   items: z.array(MeGapSchema), total: z.number().int().min(0),
 });
 
 export const MeAssessmentSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   kind: z.string(),
   status: z.string(),
   periodStart: z.string().nullable(),
   periodEnd: z.string().nullable(),
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 export const MeAssessmentsResponseSchema = z.object({
   items: z.array(MeAssessmentSchema), total: z.number().int().min(0),
@@ -169,19 +169,19 @@ export const MeAssessmentsResponseSchema = z.object({
 /* --- career targets -------------------------------------------------- */
 
 export const MeCareerTargetSchema = z.object({
-  userTargetPositionId: z.string().uuid(),
-  positionId: z.string().uuid(),
+  userTargetPositionId: z.uuid(),
+  positionId: z.uuid(),
   horizon: z.string().nullable(),
   reviewStatus: z.string(),
   reviewNotes: z.string().nullable(),
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 export const MeCareerResponseSchema = z.object({
   items: z.array(MeCareerTargetSchema), total: z.number().int().min(0),
 });
 
 export const CreateMeCareerTargetBodySchema = z.object({
-  positionId: z.string().uuid(),
+  positionId: z.uuid(),
   horizon: z.string().max(32).nullable().optional(),
 });
 export type CreateMeCareerTargetBody = z.infer<typeof CreateMeCareerTargetBodySchema>;
@@ -189,18 +189,18 @@ export type CreateMeCareerTargetBody = z.infer<typeof CreateMeCareerTargetBodySc
 /* --- inbox ----------------------------------------------------------- */
 
 export const MeInboxNotificationSchema = z.object({
-  notificationId: z.string().uuid(),
+  notificationId: z.uuid(),
   type: z.string(),
   subject: z.string(),
   body: z.string().nullable(),
   actionUrl: z.string().nullable(),
   resourceType: z.string().nullable(),
-  resourceId: z.string().uuid().nullable(),
+  resourceId: z.uuid().nullable(),
   priority: z.string(),
   status: z.string(),
-  readAt: z.string().datetime().nullable(),
-  dismissedAt: z.string().datetime().nullable(),
-  createdAt: z.string().datetime(),
+  readAt: z.iso.datetime().nullable(),
+  dismissedAt: z.iso.datetime().nullable(),
+  createdAt: z.iso.datetime(),
 });
 export const MeInboxResponseSchema = z.object({
   items: z.array(MeInboxNotificationSchema), total: z.number().int().min(0),
@@ -218,14 +218,14 @@ export const PatchMeInboxBodySchema = z.object({
 });
 export type PatchMeInboxBody = z.infer<typeof PatchMeInboxBodySchema>;
 
-export const NotificationIdParamSchema = z.object({ notificationId: z.string().uuid() });
+export const NotificationIdParamSchema = z.object({ notificationId: z.uuid() });
 
 /* --- kpis (ESS-8) ---------------------------------------------------- */
 
 export const MeKpiTargetSchema = z.object({
-  positionKpiRequirementId: z.string().uuid(),
-  positionId: z.string().uuid(),
-  kpiDefinitionId: z.string().uuid(),
+  positionKpiRequirementId: z.uuid(),
+  positionId: z.uuid(),
+  kpiDefinitionId: z.uuid(),
   kpiCode: z.string(),
   kpiName: z.string(),
   unit: z.string().nullable(),
@@ -234,7 +234,7 @@ export const MeKpiTargetSchema = z.object({
   weight: z.string(),
   latestMeasuredValue: z.string().nullable(),
   latestTargetValue: z.string().nullable(),
-  latestRecordedAt: z.string().datetime().nullable(),
+  latestRecordedAt: z.iso.datetime().nullable(),
 });
 export type MeKpiTarget = z.infer<typeof MeKpiTargetSchema>;
 
@@ -246,7 +246,7 @@ export const MeKpisResponseSchema = z.object({
 /* --- certifications (ESS-11) ----------------------------------------- */
 
 export const MeCertificationSchema = z.object({
-  userCertificationId: z.string().uuid(),
+  userCertificationId: z.uuid(),
   name: z.string(),
   issuer: z.string(),
   issuedDate: z.string().nullable(),
@@ -254,8 +254,8 @@ export const MeCertificationSchema = z.object({
   credentialId: z.string().nullable(),
   documentUri: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type MeCertification = z.infer<typeof MeCertificationSchema>;
 
@@ -287,15 +287,15 @@ export const ME_DOCUMENT_KINDS = [
 ] as const;
 
 export const MeDocumentSchema = z.object({
-  userDocumentId: z.string().uuid(),
+  userDocumentId: z.uuid(),
   kind: z.enum(ME_DOCUMENT_KINDS),
   title: z.string(),
   uri: z.string(),
   mimeType: z.string().nullable(),
   sizeBytes: z.number().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type MeDocument = z.infer<typeof MeDocumentSchema>;
 

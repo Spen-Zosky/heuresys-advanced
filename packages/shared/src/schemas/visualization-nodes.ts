@@ -12,21 +12,21 @@ export const VizNodeSourceEntityTypeSchema = z.enum(VIZ_NODE_SOURCE_ENTITY_TYPE_
 export type VizNodeSourceEntityType = z.infer<typeof VizNodeSourceEntityTypeSchema>;
 
 export const VizNodeSchema = z.object({
-  nodeId: z.string().uuid(),
-  graphId: z.string().uuid(),
+  nodeId: z.uuid(),
+  graphId: z.uuid(),
   sourceEntityType: VizNodeSourceEntityTypeSchema,
-  sourceEntityId: z.string().uuid().nullable(),
+  sourceEntityId: z.uuid().nullable(),
   label: z.string(),
   type: z.string().nullable(),
   groupKey: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type VizNode = z.infer<typeof VizNodeSchema>;
 
 export const VizNodeListQuerySchema = z.object({
-  graphId: z.string().uuid().optional(),
+  graphId: z.uuid().optional(),
   sourceEntityType: VizNodeSourceEntityTypeSchema.optional(),
   groupKey: z.string().min(1).max(128).optional(),
   limit: z.coerce.number().int().min(1).max(500).optional().default(100),
@@ -39,9 +39,9 @@ export const VizNodeListResponseSchema = z.object({
 });
 
 export const CreateVizNodeBodySchema = z.object({
-  graphId: z.string().uuid(),
+  graphId: z.uuid(),
   sourceEntityType: VizNodeSourceEntityTypeSchema,
-  sourceEntityId: z.string().uuid().nullable().optional(),
+  sourceEntityId: z.uuid().nullable().optional(),
   label: z.string().min(1).max(255),
   type: z.string().max(64).nullable().optional(),
   groupKey: z.string().max(128).nullable().optional(),
@@ -57,4 +57,4 @@ export const UpdateVizNodeBodySchema = z.object({
 });
 export type UpdateVizNodeBody = z.infer<typeof UpdateVizNodeBodySchema>;
 
-export const VizNodeIdParamSchema = z.object({ id: z.string().uuid() });
+export const VizNodeIdParamSchema = z.object({ id: z.uuid() });

@@ -22,7 +22,7 @@ export declare const WorkforceAnalyticsResponseSchema: z.ZodObject<{
             TENANT: "TENANT";
             TEAM: "TEAM";
         }>;
-        tenantId: z.ZodNullable<z.ZodString>;
+        tenantId: z.ZodNullable<z.ZodUUID>;
     }, z.core.$strip>;
     totalHeadcount: z.ZodNumber;
     byOrgUnit: z.ZodArray<z.ZodObject<{
@@ -50,7 +50,7 @@ export declare const KpiAnalyticsResponseSchema: z.ZodObject<{
             TENANT: "TENANT";
             TEAM: "TEAM";
         }>;
-        tenantId: z.ZodNullable<z.ZodString>;
+        tenantId: z.ZodNullable<z.ZodUUID>;
     }, z.core.$strip>;
     totalTargets: z.ZodNumber;
     distinctKpis: z.ZodNumber;
@@ -84,7 +84,7 @@ export declare const AttendanceAnalyticsResponseSchema: z.ZodObject<{
             TENANT: "TENANT";
             TEAM: "TEAM";
         }>;
-        tenantId: z.ZodNullable<z.ZodString>;
+        tenantId: z.ZodNullable<z.ZodUUID>;
     }, z.core.$strip>;
     totalRegularHours: z.ZodNumber;
     totalOvertimeHours: z.ZodNumber;
@@ -129,7 +129,7 @@ export declare const CompensationAnalyticsResponseSchema: z.ZodObject<{
             TENANT: "TENANT";
             TEAM: "TEAM";
         }>;
-        tenantId: z.ZodNullable<z.ZodString>;
+        tenantId: z.ZodNullable<z.ZodUUID>;
     }, z.core.$strip>;
     totalProfiles: z.ZodNumber;
     ouCount: z.ZodNumber;
@@ -198,7 +198,7 @@ export declare const SkillsCoverageAnalyticsResponseSchema: z.ZodObject<{
             TENANT: "TENANT";
             TEAM: "TEAM";
         }>;
-        tenantId: z.ZodNullable<z.ZodString>;
+        tenantId: z.ZodNullable<z.ZodUUID>;
     }, z.core.$strip>;
     orgUnits: z.ZodArray<z.ZodString>;
     proficiencyLevels: z.ZodArray<z.ZodEnum<{
@@ -264,7 +264,7 @@ export declare const OrgNetworkAnalyticsResponseSchema: z.ZodObject<{
             TENANT: "TENANT";
             TEAM: "TEAM";
         }>;
-        tenantId: z.ZodNullable<z.ZodString>;
+        tenantId: z.ZodNullable<z.ZodUUID>;
     }, z.core.$strip>;
     totalPositions: z.ZodNumber;
     rootPositions: z.ZodNumber;

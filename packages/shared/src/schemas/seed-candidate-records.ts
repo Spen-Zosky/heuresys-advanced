@@ -11,21 +11,21 @@ export const SeedCandidateValidationStatusSchema = z.enum(SEED_CANDIDATE_VALIDAT
 export type SeedCandidateValidationStatus = z.infer<typeof SeedCandidateValidationStatusSchema>;
 
 export const SeedCandidateRecordSchema = z.object({
-  seedCandidateRecordId: z.string().uuid(),
-  runId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  seedCandidateRecordId: z.uuid(),
+  runId: z.uuid(),
+  tenantId: z.uuid(),
   domain: z.string(),
   naturalKey: z.string(),
   payload: z.record(z.string(), z.unknown()),
   validationStatus: SeedCandidateValidationStatusSchema,
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type SeedCandidateRecord = z.infer<typeof SeedCandidateRecordSchema>;
 
 export const SeedCandidateRecordListQuerySchema = z.object({
-  runId: z.string().uuid().optional(),
+  runId: z.uuid().optional(),
   domain: z.string().min(1).max(64).optional(),
   validationStatus: SeedCandidateValidationStatusSchema.optional(),
   search: z.string().min(1).max(255).optional(),
@@ -38,4 +38,4 @@ export const SeedCandidateRecordListResponseSchema = z.object({
   items: z.array(SeedCandidateRecordSchema), total: z.number().int().min(0),
 });
 
-export const SeedCandidateRecordIdParamSchema = z.object({ id: z.string().uuid() });
+export const SeedCandidateRecordIdParamSchema = z.object({ id: z.uuid() });

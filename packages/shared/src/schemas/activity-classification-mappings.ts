@@ -10,20 +10,20 @@ export const ActivityMappingKindSchema = z.enum(ACTIVITY_MAPPING_KIND_VALUES);
 export type ActivityMappingKind = z.infer<typeof ActivityMappingKindSchema>;
 
 export const ActivityClassificationMappingSchema = z.object({
-  activityClassMappingId: z.string().uuid(),
-  sourceId: z.string().uuid(),
-  targetId: z.string().uuid(),
+  activityClassMappingId: z.uuid(),
+  sourceId: z.uuid(),
+  targetId: z.uuid(),
   kind: ActivityMappingKindSchema,
   confidence: z.number(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type ActivityClassificationMapping = z.infer<typeof ActivityClassificationMappingSchema>;
 
 export const ActivityMappingListQuerySchema = z.object({
-  sourceId: z.string().uuid().optional(),
-  targetId: z.string().uuid().optional(),
+  sourceId: z.uuid().optional(),
+  targetId: z.uuid().optional(),
   kind: ActivityMappingKindSchema.optional(),
   limit: z.coerce.number().int().min(1).max(500).optional().default(100),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -35,12 +35,12 @@ export const ActivityMappingListResponseSchema = z.object({
 });
 
 export const CreateActivityMappingBodySchema = z.object({
-  sourceId: z.string().uuid(),
-  targetId: z.string().uuid(),
+  sourceId: z.uuid(),
+  targetId: z.uuid(),
   kind: ActivityMappingKindSchema.optional().default("EXACT"),
   confidence: z.number().min(0).max(1).optional().default(1.0),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateActivityMappingBody = z.infer<typeof CreateActivityMappingBodySchema>;
 
-export const ActivityMappingIdParamSchema = z.object({ id: z.string().uuid() });
+export const ActivityMappingIdParamSchema = z.object({ id: z.uuid() });

@@ -24,7 +24,7 @@ export const TenantSizeBandSchema = z.enum(TENANT_SIZE_BAND_VALUES);
 
 /** Canonical tenant read shape. */
 export const TenantSchema = z.object({
-  tenantId: z.string().uuid(),
+  tenantId: z.uuid(),
   tenantCode: z.string().min(1).max(64),
   tenantName: z.string().min(1).max(255),
   tenantLegalName: z.string().max(255).nullable(),
@@ -36,8 +36,8 @@ export const TenantSchema = z.object({
   tenantSizeBand: TenantSizeBandSchema.nullable(),
   tenantStatus: TenantStatusSchema,
   tenantMetadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type Tenant = z.infer<typeof TenantSchema>;
 
@@ -89,6 +89,6 @@ export type TenantListResponse = z.infer<typeof TenantListResponseSchema>;
 /* --- :id param ---------------------------------------------------------- */
 
 export const TenantIdParamSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 export type TenantIdParam = z.infer<typeof TenantIdParamSchema>;

@@ -24,14 +24,14 @@ export type MfaKind = z.infer<typeof MfaKindSchema>;
  * Body is intentionally empty for TOTP: the server generates the secret
  * and returns the otpauth URI for QR rendering by the client.
  */
-export const EnrollMfaBodySchema = z.object({}).strict();
+export const EnrollMfaBodySchema = z.strictObject({});
 export type EnrollMfaBody = z.infer<typeof EnrollMfaBodySchema>;
 
 export const EnrollMfaResponseSchema = z.object({
-  factorId: z.string().uuid(),
+  factorId: z.uuid(),
   kind: MfaKindSchema,
   /** otpauth://totp/Heuresys:user@host?secret=BASE32&issuer=Heuresys */
-  otpauthUri: z.string().url(),
+  otpauthUri: z.url(),
   /** Base32-encoded shared secret. The client should NOT persist it; it
       exists only to let the user manually key the code into an authenticator
       app when QR scanning is not possible. */
@@ -43,13 +43,13 @@ export type EnrollMfaResponse = z.infer<typeof EnrollMfaResponseSchema>;
 /* --- Verify setup ---------------------------------------------------- */
 
 export const VerifyMfaSetupBodySchema = z.object({
-  factorId: z.string().uuid(),
+  factorId: z.uuid(),
   code: z.string().regex(/^\d{6}$/, "Six-digit TOTP code required"),
 });
 export type VerifyMfaSetupBody = z.infer<typeof VerifyMfaSetupBodySchema>;
 
 export const VerifyMfaSetupResponseSchema = z.object({
-  factorId: z.string().uuid(),
+  factorId: z.uuid(),
   kind: MfaKindSchema,
   verified: z.literal(true),
 });
@@ -58,11 +58,11 @@ export type VerifyMfaSetupResponse = z.infer<typeof VerifyMfaSetupResponseSchema
 /* --- List factors ---------------------------------------------------- */
 
 export const MfaFactorListItemSchema = z.object({
-  factorId: z.string().uuid(),
+  factorId: z.uuid(),
   kind: MfaKindSchema,
   verified: z.boolean(),
-  createdAt: z.string().datetime(),
-  lastUsedAt: z.string().datetime().nullable(),
+  createdAt: z.iso.datetime(),
+  lastUsedAt: z.iso.datetime().nullable(),
 });
 export type MfaFactorListItem = z.infer<typeof MfaFactorListItemSchema>;
 
@@ -75,7 +75,7 @@ export type ListMfaFactorsResponse = z.infer<typeof ListMfaFactorsResponseSchema
 /* --- Delete factor --------------------------------------------------- */
 
 export const MfaFactorIdParamSchema = z.object({
-  factorId: z.string().uuid(),
+  factorId: z.uuid(),
 });
 export type MfaFactorIdParam = z.infer<typeof MfaFactorIdParamSchema>;
 

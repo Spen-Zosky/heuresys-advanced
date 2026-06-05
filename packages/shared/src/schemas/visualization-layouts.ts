@@ -11,19 +11,19 @@ export const VizLayoutEngineSchema = z.enum(VIZ_LAYOUT_ENGINE_VALUES);
 export type VizLayoutEngine = z.infer<typeof VizLayoutEngineSchema>;
 
 export const VizLayoutSchema = z.object({
-  layoutId: z.string().uuid(),
-  graphId: z.string().uuid(),
+  layoutId: z.uuid(),
+  graphId: z.uuid(),
   engine: VizLayoutEngineSchema,
   version: z.number().int(),
   isDefault: z.boolean(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type VizLayout = z.infer<typeof VizLayoutSchema>;
 
 export const VizLayoutListQuerySchema = z.object({
-  graphId: z.string().uuid().optional(),
+  graphId: z.uuid().optional(),
   engine: VizLayoutEngineSchema.optional(),
   isDefault: z.coerce.boolean().optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
@@ -36,7 +36,7 @@ export const VizLayoutListResponseSchema = z.object({
 });
 
 export const CreateVizLayoutBodySchema = z.object({
-  graphId: z.string().uuid(),
+  graphId: z.uuid(),
   engine: VizLayoutEngineSchema.optional().default("AUTO"),
   isDefault: z.boolean().optional().default(false),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
@@ -50,4 +50,4 @@ export const UpdateVizLayoutBodySchema = z.object({
 });
 export type UpdateVizLayoutBody = z.infer<typeof UpdateVizLayoutBodySchema>;
 
-export const VizLayoutIdParamSchema = z.object({ id: z.string().uuid() });
+export const VizLayoutIdParamSchema = z.object({ id: z.uuid() });

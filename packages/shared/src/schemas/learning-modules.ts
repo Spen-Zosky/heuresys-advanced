@@ -25,8 +25,8 @@ export const LEARNING_DELIVERY_VALUES = [
 export const LearningDeliverySchema = z.enum(LEARNING_DELIVERY_VALUES);
 
 export const LearningModuleSchema = z.object({
-  learningModuleId: z.string().uuid(),
-  tenantId: z.string().uuid().nullable(),
+  learningModuleId: z.uuid(),
+  tenantId: z.uuid().nullable(),
   code: z.string(),
   title: z.string(),
   description: z.string().nullable(),
@@ -35,8 +35,8 @@ export const LearningModuleSchema = z.object({
   durationMinutes: z.number().int().nullable(),
   isGlobal: z.boolean(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type LearningModule = z.infer<typeof LearningModuleSchema>;
 
@@ -63,7 +63,7 @@ export const CreateLearningModuleBodySchema = z.object({
   delivery: LearningDeliverySchema.optional().default("SELF_PACED"),
   durationMinutes: z.number().int().min(0).max(100000).nullable().optional(),
   isGlobal: z.boolean().optional().default(false),
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateLearningModuleBody = z.infer<typeof CreateLearningModuleBodySchema>;
@@ -78,4 +78,4 @@ export const UpdateLearningModuleBodySchema = z.object({
 });
 export type UpdateLearningModuleBody = z.infer<typeof UpdateLearningModuleBodySchema>;
 
-export const LearningModuleIdParamSchema = z.object({ id: z.string().uuid() });
+export const LearningModuleIdParamSchema = z.object({ id: z.uuid() });

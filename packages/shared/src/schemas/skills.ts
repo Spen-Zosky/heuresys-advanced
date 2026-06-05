@@ -11,23 +11,23 @@
 import { z } from "zod";
 
 export const SkillSchema = z.object({
-  skillId: z.string().uuid(),
-  tenantId: z.string().uuid().nullable(),
-  categoryId: z.string().uuid().nullable(),
+  skillId: z.uuid(),
+  tenantId: z.uuid().nullable(),
+  categoryId: z.uuid().nullable(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   escoUri: z.string().nullable(),
   isGlobal: z.boolean(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type Skill = z.infer<typeof SkillSchema>;
 
 export const SkillListQuerySchema = z.object({
   isGlobal: z.coerce.boolean().optional(),
-  categoryId: z.string().uuid().optional(),
+  categoryId: z.uuid().optional(),
   search: z.string().min(1).max(255).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -48,9 +48,9 @@ export const CreateSkillBodySchema = z.object({
    * may set this true; the service forces false for other actors.
    */
   isGlobal: z.boolean().optional().default(false),
-  categoryId: z.string().uuid().nullable().optional(),
+  categoryId: z.uuid().nullable().optional(),
   escoUri: z.string().max(1024).nullable().optional(),
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateSkillBody = z.infer<typeof CreateSkillBodySchema>;
@@ -58,10 +58,10 @@ export type CreateSkillBody = z.infer<typeof CreateSkillBodySchema>;
 export const UpdateSkillBodySchema = z.object({
   name: z.string().min(1).max(255).optional(),
   description: z.string().max(2048).nullable().optional(),
-  categoryId: z.string().uuid().nullable().optional(),
+  categoryId: z.uuid().nullable().optional(),
   escoUri: z.string().max(1024).nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type UpdateSkillBody = z.infer<typeof UpdateSkillBodySchema>;
 
-export const SkillIdParamSchema = z.object({ id: z.string().uuid() });
+export const SkillIdParamSchema = z.object({ id: z.uuid() });

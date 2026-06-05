@@ -7,13 +7,13 @@
 import { z } from "zod";
 
 export const JobFamilySchema = z.object({
-  jobFamilyId: z.string().uuid(),
+  jobFamilyId: z.uuid(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type JobFamily = z.infer<typeof JobFamilySchema>;
 
@@ -44,4 +44,4 @@ export const UpdateJobFamilyBodySchema = z.object({
 });
 export type UpdateJobFamilyBody = z.infer<typeof UpdateJobFamilyBodySchema>;
 
-export const JobFamilyIdParamSchema = z.object({ id: z.string().uuid() });
+export const JobFamilyIdParamSchema = z.object({ id: z.uuid() });

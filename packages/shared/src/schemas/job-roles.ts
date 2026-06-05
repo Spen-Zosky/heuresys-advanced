@@ -17,22 +17,22 @@ export const JOB_ROLE_SENIORITY_VALUES = [
 export const JobRoleSenioritySchema = z.enum(JOB_ROLE_SENIORITY_VALUES);
 
 export const JobRoleSchema = z.object({
-  jobRoleId: z.string().uuid(),
+  jobRoleId: z.uuid(),
   // ADR-0015: nullable for legacy-imported job_roles lacking canonical family
   // (CW-B26 Semantic FK Phantom). Migration 000038 made the DB column nullable.
-  jobFamilyId: z.string().uuid().nullable(),
+  jobFamilyId: z.uuid().nullable(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   seniorityLevel: JobRoleSenioritySchema.nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type JobRole = z.infer<typeof JobRoleSchema>;
 
 export const JobRoleListQuerySchema = z.object({
-  jobFamilyId: z.string().uuid().optional(),
+  jobFamilyId: z.uuid().optional(),
   seniorityLevel: JobRoleSenioritySchema.optional(),
   search: z.string().min(1).max(255).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
@@ -48,7 +48,7 @@ export const JobRoleListResponseSchema = z.object({
 export const CreateJobRoleBodySchema = z.object({
   // ADR-0015: nullable + optional. Clients can omit OR pass null when family
   // is unknown (legacy import semantic per CW-B26).
-  jobFamilyId: z.string().uuid().nullable().optional(),
+  jobFamilyId: z.uuid().nullable().optional(),
   code: z.string().min(1).max(64),
   name: z.string().min(1).max(255),
   description: z.string().max(2048).nullable().optional(),
@@ -58,7 +58,7 @@ export const CreateJobRoleBodySchema = z.object({
 export type CreateJobRoleBody = z.infer<typeof CreateJobRoleBodySchema>;
 
 export const UpdateJobRoleBodySchema = z.object({
-  jobFamilyId: z.string().uuid().optional(),
+  jobFamilyId: z.uuid().optional(),
   name: z.string().min(1).max(255).optional(),
   description: z.string().max(2048).nullable().optional(),
   seniorityLevel: JobRoleSenioritySchema.nullable().optional(),
@@ -66,4 +66,4 @@ export const UpdateJobRoleBodySchema = z.object({
 });
 export type UpdateJobRoleBody = z.infer<typeof UpdateJobRoleBodySchema>;
 
-export const JobRoleIdParamSchema = z.object({ id: z.string().uuid() });
+export const JobRoleIdParamSchema = z.object({ id: z.uuid() });

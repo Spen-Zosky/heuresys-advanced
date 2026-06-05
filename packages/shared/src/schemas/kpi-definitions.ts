@@ -10,8 +10,8 @@ export const KPI_POLARITY_VALUES = ["HIGHER_IS_BETTER", "LOWER_IS_BETTER", "TARG
 export const KpiPolaritySchema = z.enum(KPI_POLARITY_VALUES);
 
 export const KpiDefinitionSchema = z.object({
-  kpiDefinitionId: z.string().uuid(),
-  tenantId: z.string().uuid().nullable(),
+  kpiDefinitionId: z.uuid(),
+  tenantId: z.uuid().nullable(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
@@ -20,8 +20,8 @@ export const KpiDefinitionSchema = z.object({
   polarity: KpiPolaritySchema,
   isGlobal: z.boolean(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type KpiDefinition = z.infer<typeof KpiDefinitionSchema>;
 
@@ -47,7 +47,7 @@ export const CreateKpiDefinitionBodySchema = z.object({
   unit: z.string().max(64).nullable().optional(),
   polarity: KpiPolaritySchema.optional().default("HIGHER_IS_BETTER"),
   isGlobal: z.boolean().optional().default(false),
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateKpiDefinitionBody = z.infer<typeof CreateKpiDefinitionBodySchema>;
@@ -62,4 +62,4 @@ export const UpdateKpiDefinitionBodySchema = z.object({
 });
 export type UpdateKpiDefinitionBody = z.infer<typeof UpdateKpiDefinitionBodySchema>;
 
-export const KpiDefinitionIdParamSchema = z.object({ id: z.string().uuid() });
+export const KpiDefinitionIdParamSchema = z.object({ id: z.uuid() });

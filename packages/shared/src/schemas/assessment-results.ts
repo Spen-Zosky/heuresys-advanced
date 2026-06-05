@@ -6,21 +6,21 @@
 import { z } from "zod";
 
 export const AssessmentResultSchema = z.object({
-  assessmentResultId: z.string().uuid(),
-  assessmentId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  assessmentResultId: z.uuid(),
+  assessmentId: z.uuid(),
+  tenantId: z.uuid(),
   dimension: z.string(),
   score: z.number().nullable(),
   narrative: z.string().nullable(),
-  assessorUserId: z.string().uuid().nullable(),
-  recordedAt: z.string().datetime(),
+  assessorUserId: z.uuid().nullable(),
+  recordedAt: z.iso.datetime(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 export type AssessmentResult = z.infer<typeof AssessmentResultSchema>;
 
 export const AssessmentResultListQuerySchema = z.object({
-  assessmentId: z.string().uuid().optional(),
+  assessmentId: z.uuid().optional(),
   dimension: z.string().min(1).max(128).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -33,13 +33,13 @@ export const AssessmentResultListResponseSchema = z.object({
 });
 
 export const CreateAssessmentResultBodySchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.uuid(),
   dimension: z.string().min(1).max(128),
   score: z.number().min(0).max(100).nullable().optional(),
   narrative: z.string().max(8192).nullable().optional(),
-  assessorUserId: z.string().uuid().nullable().optional(),
+  assessorUserId: z.uuid().nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateAssessmentResultBody = z.infer<typeof CreateAssessmentResultBodySchema>;
 
-export const AssessmentResultIdParamSchema = z.object({ id: z.string().uuid() });
+export const AssessmentResultIdParamSchema = z.object({ id: z.uuid() });

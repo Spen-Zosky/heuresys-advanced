@@ -4,13 +4,13 @@
 import { z } from "zod";
 
 export const BlueprintFamilySchema = z.object({
-  blueprintFamilyId: z.string().uuid(),
+  blueprintFamilyId: z.uuid(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type BlueprintFamily = z.infer<typeof BlueprintFamilySchema>;
 
@@ -40,4 +40,4 @@ export const UpdateBlueprintFamilyBodySchema = z.object({
 });
 export type UpdateBlueprintFamilyBody = z.infer<typeof UpdateBlueprintFamilyBodySchema>;
 
-export const BlueprintFamilyIdParamSchema = z.object({ id: z.string().uuid() });
+export const BlueprintFamilyIdParamSchema = z.object({ id: z.uuid() });

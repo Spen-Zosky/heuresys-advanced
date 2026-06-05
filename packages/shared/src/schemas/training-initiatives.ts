@@ -19,25 +19,25 @@ export type TrainingInitiativeStatus = z.infer<typeof TrainingInitiativeStatusSc
 const DateOnlySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "expected YYYY-MM-DD");
 
 export const TrainingInitiativeSchema = z.object({
-  trainingInitiativeId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  moduleId: z.string().uuid(),
+  trainingInitiativeId: z.uuid(),
+  tenantId: z.uuid(),
+  moduleId: z.uuid(),
   code: z.string(),
   cohortName: z.string().nullable(),
   startDate: DateOnlySchema,
   endDate: DateOnlySchema.nullable(),
-  facilitatorUserId: z.string().uuid().nullable(),
+  facilitatorUserId: z.uuid().nullable(),
   status: TrainingInitiativeStatusSchema,
   capacity: z.number().int().nonnegative().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type TrainingInitiative = z.infer<typeof TrainingInitiativeSchema>;
 
 export const TrainingInitiativeListQuerySchema = z.object({
-  tenantId: z.string().uuid().optional(),
-  moduleId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
+  moduleId: z.uuid().optional(),
   status: TrainingInitiativeStatusSchema.optional(),
   search: z.string().min(1).max(255).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
@@ -51,16 +51,16 @@ export const TrainingInitiativeListResponseSchema = z.object({
 });
 
 export const CreateTrainingInitiativeBodySchema = z.object({
-  moduleId: z.string().uuid(),
+  moduleId: z.uuid(),
   code: z.string().min(1).max(128),
   cohortName: z.string().max(255).nullable().optional(),
   startDate: DateOnlySchema,
   endDate: DateOnlySchema.nullable().optional(),
-  facilitatorUserId: z.string().uuid().nullable().optional(),
+  facilitatorUserId: z.uuid().nullable().optional(),
   status: TrainingInitiativeStatusSchema.optional().default("PLANNED"),
   capacity: z.number().int().min(0).max(10000).nullable().optional(),
   /** PLATFORM_ADMIN may override; non-platform actors are pinned to own tenant. */
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateTrainingInitiativeBody = z.infer<typeof CreateTrainingInitiativeBodySchema>;
@@ -69,11 +69,11 @@ export const UpdateTrainingInitiativeBodySchema = z.object({
   cohortName: z.string().max(255).nullable().optional(),
   startDate: DateOnlySchema.optional(),
   endDate: DateOnlySchema.nullable().optional(),
-  facilitatorUserId: z.string().uuid().nullable().optional(),
+  facilitatorUserId: z.uuid().nullable().optional(),
   status: TrainingInitiativeStatusSchema.optional(),
   capacity: z.number().int().min(0).max(10000).nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type UpdateTrainingInitiativeBody = z.infer<typeof UpdateTrainingInitiativeBodySchema>;
 
-export const TrainingInitiativeIdParamSchema = z.object({ id: z.string().uuid() });
+export const TrainingInitiativeIdParamSchema = z.object({ id: z.uuid() });

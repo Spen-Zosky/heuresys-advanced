@@ -7,19 +7,19 @@
 import { z } from "zod";
 
 export const PositionCareerPathSchema = z.object({
-  positionCareerPathId: z.string().uuid(),
-  positionId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  careerPathId: z.string().uuid(),
+  positionCareerPathId: z.uuid(),
+  positionId: z.uuid(),
+  tenantId: z.uuid(),
+  careerPathId: z.uuid(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type PositionCareerPath = z.infer<typeof PositionCareerPathSchema>;
 
 export const PositionCareerPathListQuerySchema = z.object({
-  positionId: z.string().uuid().optional(),
-  careerPathId: z.string().uuid().optional(),
+  positionId: z.uuid().optional(),
+  careerPathId: z.uuid().optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
 });
@@ -31,10 +31,10 @@ export const PositionCareerPathListResponseSchema = z.object({
 });
 
 export const CreatePositionCareerPathBodySchema = z.object({
-  positionId: z.string().uuid(),
-  careerPathId: z.string().uuid(),
+  positionId: z.uuid(),
+  careerPathId: z.uuid(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreatePositionCareerPathBody = z.infer<typeof CreatePositionCareerPathBodySchema>;
 
-export const PositionCareerPathIdParamSchema = z.object({ id: z.string().uuid() });
+export const PositionCareerPathIdParamSchema = z.object({ id: z.uuid() });

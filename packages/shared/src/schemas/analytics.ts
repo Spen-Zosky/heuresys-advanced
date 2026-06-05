@@ -16,7 +16,7 @@ export const WorkforceByDimensionRowSchema = z.object({
 export type WorkforceByDimensionRow = z.infer<typeof WorkforceByDimensionRowSchema>;
 
 export const WorkforceAnalyticsResponseSchema = z.object({
-  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.string().uuid().nullable() }),
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
   totalHeadcount: z.number().int(),
   byOrgUnit: z.array(WorkforceByDimensionRowSchema),
   byJobRole: z.array(WorkforceByDimensionRowSchema),
@@ -34,7 +34,7 @@ export const KpiAchievementRowSchema = z.object({
 export type KpiAchievementRow = z.infer<typeof KpiAchievementRowSchema>;
 
 export const KpiAnalyticsResponseSchema = z.object({
-  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.string().uuid().nullable() }),
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
   totalTargets: z.number().int(),
   distinctKpis: z.number().int(),
   byKpi: z.array(KpiAchievementRowSchema),
@@ -65,7 +65,7 @@ export const AttendanceByOrgUnitRowSchema = z.object({
 export type AttendanceByOrgUnitRow = z.infer<typeof AttendanceByOrgUnitRowSchema>;
 
 export const AttendanceAnalyticsResponseSchema = z.object({
-  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.string().uuid().nullable() }),
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
   totalRegularHours: z.number(),
   totalOvertimeHours: z.number(),
   totalHours: z.number(),
@@ -102,7 +102,7 @@ export const CompensationScatterPointSchema = z.object({
 export type CompensationScatterPoint = z.infer<typeof CompensationScatterPointSchema>;
 
 export const CompensationAnalyticsResponseSchema = z.object({
-  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.string().uuid().nullable() }),
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
   totalProfiles: z.number().int(), // banded profiles in scope
   ouCount: z.number().int(), // distinct OUs with banded profiles
   overallMinMidEur: z.number().nullable(),
@@ -149,7 +149,7 @@ export const SkillsCoverageByProficiencyRowSchema = z.object({
 export type SkillsCoverageByProficiencyRow = z.infer<typeof SkillsCoverageByProficiencyRowSchema>;
 
 export const SkillsCoverageAnalyticsResponseSchema = z.object({
-  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.string().uuid().nullable() }),
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
   // Axis labels for the heatmap (server-ordered): orgUnits = y (rows, evidence-desc),
   // proficiencyLevels = x (cols, rank NOVICE→MASTER, only levels present in data).
   orgUnits: z.array(z.string()),
@@ -189,7 +189,7 @@ export const OrgNetworkReachRowSchema = z.object({
 export type OrgNetworkReachRow = z.infer<typeof OrgNetworkReachRowSchema>;
 
 export const OrgNetworkAnalyticsResponseSchema = z.object({
-  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.string().uuid().nullable() }),
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
   totalPositions: z.number().int(),
   rootPositions: z.number().int(), // no reports-to (or reports-to outside the scoped set)
   managersCount: z.number().int(), // positions with ≥1 direct report

@@ -6,21 +6,21 @@
 import { z } from "zod";
 
 export const BlueprintProcessSchema = z.object({
-  blueprintProcessId: z.string().uuid(),
-  variantId: z.string().uuid(),
+  blueprintProcessId: z.uuid(),
+  variantId: z.uuid(),
   code: z.string(),
   name: z.string(),
   ordinal: z.number().int(),
   description: z.string().nullable(),
   isOptional: z.boolean(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type BlueprintProcess = z.infer<typeof BlueprintProcessSchema>;
 
 export const BlueprintProcessListQuerySchema = z.object({
-  variantId: z.string().uuid().optional(),
+  variantId: z.uuid().optional(),
   isOptional: z.coerce.boolean().optional(),
   limit: z.coerce.number().int().min(1).max(500).optional().default(100),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -32,7 +32,7 @@ export const BlueprintProcessListResponseSchema = z.object({
 });
 
 export const CreateBlueprintProcessBodySchema = z.object({
-  variantId: z.string().uuid(),
+  variantId: z.uuid(),
   code: z.string().min(1).max(64),
   name: z.string().min(1).max(255),
   ordinal: z.number().int().min(0).max(32767),
@@ -51,4 +51,4 @@ export const UpdateBlueprintProcessBodySchema = z.object({
 });
 export type UpdateBlueprintProcessBody = z.infer<typeof UpdateBlueprintProcessBodySchema>;
 
-export const BlueprintProcessIdParamSchema = z.object({ id: z.string().uuid() });
+export const BlueprintProcessIdParamSchema = z.object({ id: z.uuid() });

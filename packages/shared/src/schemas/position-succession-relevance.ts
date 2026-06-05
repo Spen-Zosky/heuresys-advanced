@@ -17,14 +17,14 @@ export const ReadinessHorizonSchema = z.enum(READINESS_HORIZON_VALUES);
 export type ReadinessHorizon = z.infer<typeof ReadinessHorizonSchema>;
 
 export const PositionSuccessionRelevanceSchema = z.object({
-  positionSuccessionRelevanceId: z.string().uuid(),
-  positionId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  positionSuccessionRelevanceId: z.uuid(),
+  positionId: z.uuid(),
+  tenantId: z.uuid(),
   isCritical: z.boolean(),
   readinessHorizon: ReadinessHorizonSchema.nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type PositionSuccessionRelevance = z.infer<typeof PositionSuccessionRelevanceSchema>;
 
@@ -42,11 +42,11 @@ export const PositionSuccessionRelevanceListResponseSchema = z.object({
 });
 
 export const UpsertPositionSuccessionRelevanceBodySchema = z.object({
-  positionId: z.string().uuid(),
+  positionId: z.uuid(),
   isCritical: z.boolean().optional().default(false),
   readinessHorizon: ReadinessHorizonSchema.nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type UpsertPositionSuccessionRelevanceBody = z.infer<typeof UpsertPositionSuccessionRelevanceBodySchema>;
 
-export const PositionSuccessionRelevanceIdParamSchema = z.object({ id: z.string().uuid() });
+export const PositionSuccessionRelevanceIdParamSchema = z.object({ id: z.uuid() });

@@ -7,19 +7,19 @@
 import { z } from "zod";
 
 export const SkillCategorySchema = z.object({
-  skillCategoryId: z.string().uuid(),
-  familyId: z.string().uuid(),
+  skillCategoryId: z.uuid(),
+  familyId: z.uuid(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type SkillCategory = z.infer<typeof SkillCategorySchema>;
 
 export const SkillCategoryListQuerySchema = z.object({
-  familyId: z.string().uuid().optional(),
+  familyId: z.uuid().optional(),
   search: z.string().min(1).max(255).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -32,7 +32,7 @@ export const SkillCategoryListResponseSchema = z.object({
 });
 
 export const CreateSkillCategoryBodySchema = z.object({
-  familyId: z.string().uuid(),
+  familyId: z.uuid(),
   code: z.string().min(1).max(64),
   name: z.string().min(1).max(128),
   description: z.string().max(2048).nullable().optional(),
@@ -41,11 +41,11 @@ export const CreateSkillCategoryBodySchema = z.object({
 export type CreateSkillCategoryBody = z.infer<typeof CreateSkillCategoryBodySchema>;
 
 export const UpdateSkillCategoryBodySchema = z.object({
-  familyId: z.string().uuid().optional(),
+  familyId: z.uuid().optional(),
   name: z.string().min(1).max(128).optional(),
   description: z.string().max(2048).nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type UpdateSkillCategoryBody = z.infer<typeof UpdateSkillCategoryBodySchema>;
 
-export const SkillCategoryIdParamSchema = z.object({ id: z.string().uuid() });
+export const SkillCategoryIdParamSchema = z.object({ id: z.uuid() });

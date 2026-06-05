@@ -17,16 +17,16 @@ export const CareerPathKindSchema = z.enum(CAREER_PATH_KIND_VALUES);
 export type CareerPathKind = z.infer<typeof CareerPathKindSchema>;
 
 export const CareerPathSchema = z.object({
-  careerPathId: z.string().uuid(),
-  tenantId: z.string().uuid().nullable(),
+  careerPathId: z.uuid(),
+  tenantId: z.uuid().nullable(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   kind: CareerPathKindSchema,
   isGlobal: z.boolean(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type CareerPath = z.infer<typeof CareerPathSchema>;
 
@@ -50,7 +50,7 @@ export const CreateCareerPathBodySchema = z.object({
   description: z.string().max(4096).nullable().optional(),
   kind: CareerPathKindSchema.optional().default("VERTICAL"),
   isGlobal: z.boolean().optional().default(false),
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateCareerPathBody = z.infer<typeof CreateCareerPathBodySchema>;
@@ -63,4 +63,4 @@ export const UpdateCareerPathBodySchema = z.object({
 });
 export type UpdateCareerPathBody = z.infer<typeof UpdateCareerPathBodySchema>;
 
-export const CareerPathIdParamSchema = z.object({ id: z.string().uuid() });
+export const CareerPathIdParamSchema = z.object({ id: z.uuid() });

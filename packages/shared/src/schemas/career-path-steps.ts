@@ -7,23 +7,23 @@
 import { z } from "zod";
 
 export const CareerPathStepSchema = z.object({
-  careerPathStepId: z.string().uuid(),
-  pathId: z.string().uuid(),
+  careerPathStepId: z.uuid(),
+  pathId: z.uuid(),
   ordinal: z.number().int().min(0).max(32767),
-  originPositionId: z.string().uuid().nullable(),
-  targetPositionId: z.string().uuid().nullable(),
+  originPositionId: z.uuid().nullable(),
+  targetPositionId: z.uuid().nullable(),
   requiredProficiencyUplift: z.record(z.string(), z.unknown()),
   typicalDurationMonths: z.number().int().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type CareerPathStep = z.infer<typeof CareerPathStepSchema>;
 
 export const CareerPathStepListQuerySchema = z.object({
-  pathId: z.string().uuid().optional(),
-  originPositionId: z.string().uuid().optional(),
-  targetPositionId: z.string().uuid().optional(),
+  pathId: z.uuid().optional(),
+  originPositionId: z.uuid().optional(),
+  targetPositionId: z.uuid().optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
 });
@@ -35,10 +35,10 @@ export const CareerPathStepListResponseSchema = z.object({
 });
 
 export const CreateCareerPathStepBodySchema = z.object({
-  pathId: z.string().uuid(),
+  pathId: z.uuid(),
   ordinal: z.number().int().min(0).max(32767),
-  originPositionId: z.string().uuid().nullable().optional(),
-  targetPositionId: z.string().uuid().nullable().optional(),
+  originPositionId: z.uuid().nullable().optional(),
+  targetPositionId: z.uuid().nullable().optional(),
   requiredProficiencyUplift: z.record(z.string(), z.unknown()).optional().default({}),
   typicalDurationMonths: z.number().int().min(0).max(1200).nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
@@ -47,12 +47,12 @@ export type CreateCareerPathStepBody = z.infer<typeof CreateCareerPathStepBodySc
 
 export const UpdateCareerPathStepBodySchema = z.object({
   ordinal: z.number().int().min(0).max(32767).optional(),
-  originPositionId: z.string().uuid().nullable().optional(),
-  targetPositionId: z.string().uuid().nullable().optional(),
+  originPositionId: z.uuid().nullable().optional(),
+  targetPositionId: z.uuid().nullable().optional(),
   requiredProficiencyUplift: z.record(z.string(), z.unknown()).optional(),
   typicalDurationMonths: z.number().int().min(0).max(1200).nullable().optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 export type UpdateCareerPathStepBody = z.infer<typeof UpdateCareerPathStepBodySchema>;
 
-export const CareerPathStepIdParamSchema = z.object({ id: z.string().uuid() });
+export const CareerPathStepIdParamSchema = z.object({ id: z.uuid() });

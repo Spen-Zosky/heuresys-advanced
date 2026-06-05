@@ -4,13 +4,13 @@
 import { z } from "zod";
 
 export const OperatingModelSchema = z.object({
-  operatingModelId: z.string().uuid(),
+  operatingModelId: z.uuid(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type OperatingModel = z.infer<typeof OperatingModelSchema>;
 
@@ -26,4 +26,4 @@ export const UpsertOperatingModelBodySchema = z.object({
 });
 export type UpsertOperatingModelBody = z.infer<typeof UpsertOperatingModelBodySchema>;
 
-export const OperatingModelIdParamSchema = z.object({ id: z.string().uuid() });
+export const OperatingModelIdParamSchema = z.object({ id: z.uuid() });

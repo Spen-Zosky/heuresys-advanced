@@ -16,12 +16,12 @@ export const AssessmentMethodCodeSchema = z.enum([
 export type AssessmentMethodCode = z.infer<typeof AssessmentMethodCodeSchema>;
 
 export const AssessmentMethodSchema = z.object({
-  assessmentMethodId: z.string().uuid(),
+  assessmentMethodId: z.uuid(),
   code: AssessmentMethodCodeSchema,
   name: z.string(),
   description: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 export type AssessmentMethod = z.infer<typeof AssessmentMethodSchema>;
 

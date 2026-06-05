@@ -8,7 +8,7 @@ export const EnterpriseSizeBandCodeSchema = z.enum(ENTERPRISE_SIZE_BAND_CODE_VAL
 export type EnterpriseSizeBandCode = z.infer<typeof EnterpriseSizeBandCodeSchema>;
 
 export const EnterpriseSizeBandSchema = z.object({
-  enterpriseSizeBandId: z.string().uuid(),
+  enterpriseSizeBandId: z.uuid(),
   code: EnterpriseSizeBandCodeSchema,
   name: z.string(),
   minEmployees: z.number().int().nullable(),
@@ -17,8 +17,8 @@ export const EnterpriseSizeBandSchema = z.object({
   maxRevenueEur: z.number().nullable(),
   description: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type EnterpriseSizeBand = z.infer<typeof EnterpriseSizeBandSchema>;
 
@@ -38,4 +38,4 @@ export const UpsertEnterpriseSizeBandBodySchema = z.object({
 });
 export type UpsertEnterpriseSizeBandBody = z.infer<typeof UpsertEnterpriseSizeBandBodySchema>;
 
-export const EnterpriseSizeBandIdParamSchema = z.object({ id: z.string().uuid() });
+export const EnterpriseSizeBandIdParamSchema = z.object({ id: z.uuid() });

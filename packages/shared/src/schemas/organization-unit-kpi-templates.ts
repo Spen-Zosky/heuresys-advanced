@@ -5,25 +5,25 @@
 import { z } from "zod";
 
 export const OrganizationUnitKpiTemplateSchema = z.object({
-  organizationUnitKpiTemplateId: z.string().uuid(),
+  organizationUnitKpiTemplateId: z.uuid(),
   // Dual-mode (D4 C(i)): a row is keyed EITHER on a real org-unit INSTANCE (unitId + tenantId,
   // tenant-scoped junction) OR on a global org-unit TEMPLATE (unitTemplateId, tenant-less blueprint)
   // — enforced by the XOR CHECK. Hence unitId/tenantId are null on template-keyed rows.
-  unitId: z.string().uuid().nullable(),
-  unitTemplateId: z.string().uuid().nullable(),
-  kpiId: z.string().uuid(),
-  tenantId: z.string().uuid().nullable(),
+  unitId: z.uuid().nullable(),
+  unitTemplateId: z.uuid().nullable(),
+  kpiId: z.uuid(),
+  tenantId: z.uuid().nullable(),
   weight: z.number(),
   target: z.record(z.string(), z.unknown()),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type OrganizationUnitKpiTemplate = z.infer<typeof OrganizationUnitKpiTemplateSchema>;
 
 export const OrganizationUnitKpiTemplateListQuerySchema = z.object({
-  unitId: z.string().uuid().optional(),
-  kpiId: z.string().uuid().optional(),
+  unitId: z.uuid().optional(),
+  kpiId: z.uuid().optional(),
   limit: z.coerce.number().int().min(1).max(500).optional().default(100),
   offset: z.coerce.number().int().min(0).optional().default(0),
 });
@@ -34,12 +34,12 @@ export const OrganizationUnitKpiTemplateListResponseSchema = z.object({
 });
 
 export const UpsertOrganizationUnitKpiTemplateBodySchema = z.object({
-  unitId: z.string().uuid(),
-  kpiId: z.string().uuid(),
+  unitId: z.uuid(),
+  kpiId: z.uuid(),
   weight: z.number().min(0).max(1).optional().default(1.0),
   target: z.record(z.string(), z.unknown()).optional().default({}),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type UpsertOrganizationUnitKpiTemplateBody = z.infer<typeof UpsertOrganizationUnitKpiTemplateBodySchema>;
 
-export const OrganizationUnitKpiTemplateIdParamSchema = z.object({ id: z.string().uuid() });
+export const OrganizationUnitKpiTemplateIdParamSchema = z.object({ id: z.uuid() });

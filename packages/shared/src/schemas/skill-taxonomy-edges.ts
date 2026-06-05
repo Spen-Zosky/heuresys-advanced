@@ -11,18 +11,18 @@ export const SkillEdgeKindSchema = z.enum(["IS_A", "PART_OF", "RELATED", "PREREQ
 export type SkillEdgeKind = z.infer<typeof SkillEdgeKindSchema>;
 
 export const SkillTaxonomyEdgeSchema = z.object({
-  edgeId: z.string().uuid(),
-  parentSkillId: z.string().uuid(),
-  childSkillId: z.string().uuid(),
+  edgeId: z.uuid(),
+  parentSkillId: z.uuid(),
+  childSkillId: z.uuid(),
   kind: SkillEdgeKindSchema,
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 export type SkillTaxonomyEdge = z.infer<typeof SkillTaxonomyEdgeSchema>;
 
 export const SkillTaxonomyEdgeListQuerySchema = z.object({
-  parentSkillId: z.string().uuid().optional(),
-  childSkillId: z.string().uuid().optional(),
+  parentSkillId: z.uuid().optional(),
+  childSkillId: z.uuid().optional(),
   kind: SkillEdgeKindSchema.optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -35,11 +35,11 @@ export const SkillTaxonomyEdgeListResponseSchema = z.object({
 });
 
 export const CreateSkillTaxonomyEdgeBodySchema = z.object({
-  parentSkillId: z.string().uuid(),
-  childSkillId: z.string().uuid(),
+  parentSkillId: z.uuid(),
+  childSkillId: z.uuid(),
   kind: SkillEdgeKindSchema.optional().default("IS_A"),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateSkillTaxonomyEdgeBody = z.infer<typeof CreateSkillTaxonomyEdgeBodySchema>;
 
-export const SkillTaxonomyEdgeIdParamSchema = z.object({ id: z.string().uuid() });
+export const SkillTaxonomyEdgeIdParamSchema = z.object({ id: z.uuid() });

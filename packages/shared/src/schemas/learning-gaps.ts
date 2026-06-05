@@ -11,26 +11,26 @@ export const LearningGapSeveritySchema = z.enum(LEARNING_GAP_SEVERITY_VALUES);
 export type LearningGapSeverity = z.infer<typeof LearningGapSeveritySchema>;
 
 export const LearningGapSchema = z.object({
-  learningGapId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  userId: z.string().uuid(),
-  positionId: z.string().uuid().nullable(),
-  skillId: z.string().uuid().nullable(),
+  learningGapId: z.uuid(),
+  tenantId: z.uuid(),
+  userId: z.uuid(),
+  positionId: z.uuid().nullable(),
+  skillId: z.uuid().nullable(),
   requiredProficiency: z.string().nullable(),
   currentProficiency: z.string().nullable(),
   score: z.number().nullable(),
   severity: LearningGapSeveritySchema,
-  detectedAt: z.string().datetime(),
+  detectedAt: z.iso.datetime(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type LearningGap = z.infer<typeof LearningGapSchema>;
 
 export const LearningGapListQuerySchema = z.object({
-  userId: z.string().uuid().optional(),
-  positionId: z.string().uuid().optional(),
-  skillId: z.string().uuid().optional(),
+  userId: z.uuid().optional(),
+  positionId: z.uuid().optional(),
+  skillId: z.uuid().optional(),
   severity: LearningGapSeveritySchema.optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
@@ -43,15 +43,15 @@ export const LearningGapListResponseSchema = z.object({
 });
 
 export const CreateLearningGapBodySchema = z.object({
-  userId: z.string().uuid(),
-  positionId: z.string().uuid().nullable().optional(),
-  skillId: z.string().uuid().nullable().optional(),
+  userId: z.uuid(),
+  positionId: z.uuid().nullable().optional(),
+  skillId: z.uuid().nullable().optional(),
   requiredProficiency: z.string().max(32).nullable().optional(),
   currentProficiency: z.string().max(32).nullable().optional(),
   score: z.number().min(-100).max(100).nullable().optional(),
   severity: LearningGapSeveritySchema.optional().default("MEDIUM"),
   /** PLATFORM_ADMIN may override; non-platform actors pinned to own tenant. */
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateLearningGapBody = z.infer<typeof CreateLearningGapBodySchema>;
@@ -65,4 +65,4 @@ export const UpdateLearningGapBodySchema = z.object({
 });
 export type UpdateLearningGapBody = z.infer<typeof UpdateLearningGapBodySchema>;
 
-export const LearningGapIdParamSchema = z.object({ id: z.string().uuid() });
+export const LearningGapIdParamSchema = z.object({ id: z.uuid() });

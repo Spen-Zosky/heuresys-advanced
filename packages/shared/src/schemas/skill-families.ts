@@ -7,13 +7,13 @@
 import { z } from "zod";
 
 export const SkillFamilySchema = z.object({
-  skillFamilyId: z.string().uuid(),
+  skillFamilyId: z.uuid(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type SkillFamily = z.infer<typeof SkillFamilySchema>;
 
@@ -44,4 +44,4 @@ export const UpdateSkillFamilyBodySchema = z.object({
 });
 export type UpdateSkillFamilyBody = z.infer<typeof UpdateSkillFamilyBodySchema>;
 
-export const SkillFamilyIdParamSchema = z.object({ id: z.string().uuid() });
+export const SkillFamilyIdParamSchema = z.object({ id: z.uuid() });

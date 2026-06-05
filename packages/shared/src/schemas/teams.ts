@@ -15,22 +15,22 @@ export const TeamMemberRoleSchema = z.enum(TEAM_MEMBER_ROLES);
 export type TeamMemberRole = z.infer<typeof TeamMemberRoleSchema>;
 
 export const TeamSchema = z.object({
-  teamId: z.string().uuid(),
-  tenantId: z.string().uuid(),
+  teamId: z.uuid(),
+  tenantId: z.uuid(),
   code: z.string(),
   name: z.string(),
-  organizationUnitId: z.string().uuid().nullable(),
-  leadUserId: z.string().uuid().nullable(),
+  organizationUnitId: z.uuid().nullable(),
+  leadUserId: z.uuid().nullable(),
   isActive: z.boolean(),
   metadata: z.record(z.string(), z.unknown()),
   memberCount: z.number().int().min(0),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type Team = z.infer<typeof TeamSchema>;
 
 export const TeamMemberSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.uuid(),
   role: TeamMemberRoleSchema,
   email: z.string().nullable(),
   fullName: z.string().nullable(),
@@ -56,7 +56,7 @@ export const TeamListResponseSchema = z.object({
 });
 export type TeamListResponse = z.infer<typeof TeamListResponseSchema>;
 
-export const TeamIdParamSchema = z.object({ id: z.string().uuid() });
+export const TeamIdParamSchema = z.object({ id: z.uuid() });
 
 /** Response of GET /v1/me/team — the caller's own teams (lead + member), with members. */
 export const MyTeamsResponseSchema = z.object({

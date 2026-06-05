@@ -11,21 +11,21 @@ export const SuccessionPoolStatusSchema = z.enum(SUCCESSION_POOL_STATUS_VALUES);
 export type SuccessionPoolStatus = z.infer<typeof SuccessionPoolStatusSchema>;
 
 export const SuccessionPoolSchema = z.object({
-  successionPoolId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  positionId: z.string().uuid(),
+  successionPoolId: z.uuid(),
+  tenantId: z.uuid(),
+  positionId: z.uuid(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   status: SuccessionPoolStatusSchema,
   metadata: z.record(z.string(), z.unknown()),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 export type SuccessionPool = z.infer<typeof SuccessionPoolSchema>;
 
 export const SuccessionPoolListQuerySchema = z.object({
-  positionId: z.string().uuid().optional(),
+  positionId: z.uuid().optional(),
   status: SuccessionPoolStatusSchema.optional(),
   search: z.string().min(1).max(255).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
@@ -39,12 +39,12 @@ export const SuccessionPoolListResponseSchema = z.object({
 });
 
 export const CreateSuccessionPoolBodySchema = z.object({
-  positionId: z.string().uuid(),
+  positionId: z.uuid(),
   code: z.string().min(1).max(128),
   name: z.string().min(1).max(255),
   description: z.string().max(4096).nullable().optional(),
   status: SuccessionPoolStatusSchema.optional().default("ACTIVE"),
-  tenantId: z.string().uuid().optional(),
+  tenantId: z.uuid().optional(),
   metadata: z.record(z.string(), z.unknown()).optional().default({}),
 });
 export type CreateSuccessionPoolBody = z.infer<typeof CreateSuccessionPoolBodySchema>;
@@ -57,4 +57,4 @@ export const UpdateSuccessionPoolBodySchema = z.object({
 });
 export type UpdateSuccessionPoolBody = z.infer<typeof UpdateSuccessionPoolBodySchema>;
 
-export const SuccessionPoolIdParamSchema = z.object({ id: z.string().uuid() });
+export const SuccessionPoolIdParamSchema = z.object({ id: z.uuid() });

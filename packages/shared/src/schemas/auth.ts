@@ -23,13 +23,13 @@ export const PasswordPolicy = z
   .max(128, "Password must be at most 128 characters")
   .refine(
     (p) => /[A-Z]/.test(p) && /[a-z]/.test(p) && /[0-9]/.test(p) && /[^A-Za-z0-9]/.test(p),
-    { message: "Password must contain upper, lower, digit, and symbol" },
+    { error: "Password must contain upper, lower, digit, and symbol" },
   );
 
 /* --- Login --------------------------------------------------------------- */
 
 export const LoginBodySchema = z.object({
-  email: z.string().email().max(254),
+  email: z.email().max(254),
   password: z.string().min(1).max(128),
   /**
    * MFA second-step fields (MVP-3 Tappa E). When the first step returns
@@ -50,8 +50,8 @@ export type LoginBody = z.infer<typeof LoginBodySchema>;
 export const LoginResponseSchema = z.object({
   status: z.literal("success"),
   user: z.object({
-    userId: z.string().uuid(),
-    email: z.string().email(),
+    userId: z.uuid(),
+    email: z.email(),
   }),
   roles: z.array(RoleCodeSchema),
   csrfToken: z.string().min(1),
@@ -80,17 +80,17 @@ export type LoginResultResponse = z.infer<typeof LoginResultResponseSchema>;
 /* --- /auth/me ------------------------------------------------------------ */
 
 export const MeResponseSchema = z.object({
-  userId: z.string().uuid(),
-  email: z.string().email(),
+  userId: z.uuid(),
+  email: z.email(),
   roles: z.array(RoleCodeSchema),
-  tenantId: z.string().uuid().nullable(),
+  tenantId: z.uuid().nullable(),
 });
 export type MeResponse = z.infer<typeof MeResponseSchema>;
 
 /* --- Password reset ------------------------------------------------------ */
 
 export const PasswordResetRequestBodySchema = z.object({
-  email: z.string().email().max(254),
+  email: z.email().max(254),
 });
 export type PasswordResetRequestBody = z.infer<typeof PasswordResetRequestBodySchema>;
 
@@ -101,7 +101,7 @@ export const PasswordResetCompleteBodySchema = z
     confirmPassword: z.string(),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "newPassword and confirmPassword must match",
+    error: "newPassword and confirmPassword must match",
     path: ["confirmPassword"],
   });
 export type PasswordResetCompleteBody = z.infer<typeof PasswordResetCompleteBodySchema>;
@@ -109,13 +109,13 @@ export type PasswordResetCompleteBody = z.infer<typeof PasswordResetCompleteBody
 /* --- Admin revoke -------------------------------------------------------- */
 
 export const RevokeUserParamsSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.uuid(),
 });
 export type RevokeUserParams = z.infer<typeof RevokeUserParamsSchema>;
 
 /* --- Empty response (Fastify schema for 204) ----------------------------- */
 
-export const EmptyResponseSchema = z.object({}).strict();
+export const EmptyResponseSchema = z.strictObject({});
 
 /* --- Generic error envelope --------------------------------------------- */
 
@@ -146,18 +146,18 @@ export type RolePermissionsResponse = z.infer<typeof RolePermissionsResponseSche
 /* --- Active session listing (MVP-3 Tappa E admin endpoint) -------------- */
 
 export const ActiveSessionSchema = z.object({
-  familyId: z.string().uuid(),
-  tenantId: z.string().uuid(),
-  firstIssuedAt: z.string().datetime(),
-  lastIssuedAt: z.string().datetime(),
-  expiresAt: z.string().datetime(),
+  familyId: z.uuid(),
+  tenantId: z.uuid(),
+  firstIssuedAt: z.iso.datetime(),
+  lastIssuedAt: z.iso.datetime(),
+  expiresAt: z.iso.datetime(),
   ip: z.string().nullable(),
   userAgent: z.string().nullable(),
 });
 export type ActiveSession = z.infer<typeof ActiveSessionSchema>;
 
 export const ListActiveSessionsParamsSchema = z.object({
-  userId: z.string().uuid(),
+  userId: z.uuid(),
 });
 export type ListActiveSessionsParams = z.infer<typeof ListActiveSessionsParamsSchema>;
 

@@ -1,1 +1,110 @@
-{}
+{
+  "list": {
+    "title": "Blueprints",
+    "description": "Blueprint variants with family and industry.",
+    "count": "{{count}} variants",
+    "error": "Unable to load the blueprints.",
+    "emptyTitle": "No variants",
+    "emptyDescription": "There are no blueprint variants.",
+    "caption": "Blueprint variants",
+    "columns": {
+      "name": "Name",
+      "family": "Family",
+      "industry": "Industry"
+    }
+  },
+  "detail": {
+    "notFound": "Variant not found.",
+    "error": "Error.",
+    "back": "← Blueprints",
+    "tabs": {
+      "processes": "Processes",
+      "activations": "Activations"
+    },
+    "processesTitle": "Processes",
+    "activationsTitle": "Activations by tenant",
+    "processesEmpty": "No processes.",
+    "processesCaption": "Blueprint variant processes",
+    "activationsEmpty": "No activations.",
+    "activationsCaption": "Variant activations by tenant",
+    "yes": "yes",
+    "no": "no",
+    "processColumns": {
+      "ordinal": "#",
+      "code": "Code",
+      "name": "Name",
+      "optional": "Optional"
+    },
+    "activationColumns": {
+      "tenantId": "Tenant ID",
+      "status": "Status",
+      "activatedAt": "Activated"
+    }
+  },
+  "processes": {
+    "title": "BPM Processes",
+    "description": "Blueprint-anchored process catalog.",
+    "count": "{{count}} processes",
+    "error": "Unable to load the processes.",
+    "emptyTitle": "No processes",
+    "emptyDescription": "There are no processes.",
+    "caption": "Process catalog (blueprint-anchored)",
+    "yes": "yes",
+    "no": "no",
+    "columns": {
+      "ordinal": "#",
+      "code": "Code",
+      "name": "Name",
+      "optional": "Optional"
+    }
+  },
+  "brownfield": {
+    "title": "Brownfield adaptation",
+    "description": "Inventory, mapping and import runs of legacy data.",
+    "tabs": {
+      "inventory": "Inventory",
+      "mapping": "Mapping",
+      "runs": "Runs"
+    },
+    "inventoryEmpty": "No export recorded",
+    "inventoryCaption": "Source exports",
+    "mappingEmpty": "No mapping recorded",
+    "mappingCaption": "Table mappings",
+    "runsEmpty": "No runs",
+    "runsCaption": "Import runs",
+    "inventoryColumns": {
+      "system": "System",
+      "capturedAt": "Captured",
+      "rowCount": "Rows",
+      "status": "Status"
+    },
+    "mappingColumns": {
+      "sourceTable": "Source table",
+      "targetTable": "Target table",
+      "status": "Status"
+    },
+    "runsColumns": {
+      "run": "Run",
+      "wave": "Wave",
+      "scope": "Scope",
+      "status": "Status",
+      "startedAt": "Started"
+    }
+  },
+  "seedRuns": {
+    "title": "Seed acquisition — Runs",
+    "description": "Seed acquisition pipeline runs.",
+    "count": "{{count}} runs",
+    "error": "Unable to load the runs.",
+    "emptyTitle": "No runs",
+    "emptyDescription": "No acquisition run recorded.",
+    "caption": "Pipeline runs",
+    "columns": {
+      "runId": "Run ID",
+      "variant": "Variant",
+      "status": "Status",
+      "startedAt": "Started",
+      "finishedAt": "Finished"
+    }
+  }
+}

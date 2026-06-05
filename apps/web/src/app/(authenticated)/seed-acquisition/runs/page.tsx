@@ -1,6 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
@@ -21,53 +24,59 @@ interface SeedRunsList {
   total: number;
 }
 
-const COLUMNS: DataColumn<SeedRun>[] = [
-  {
-    header: "Run ID",
-    cell: (r) => <span className="font-mono text-xs">{r.seedAcquisitionRunId.slice(0, 8)}</span>,
-  },
-  {
-    header: "Variant",
-    cell: (r) => (
-      <span className="font-mono text-xs text-muted-foreground">{r.blueprintVariantId?.slice(0, 8) ?? "—"}</span>
-    ),
-  },
-  { header: "Stato", cell: (r) => <StatusBadge value={r.status} /> },
-  {
-    header: "Inizio",
-    cell: (r) => <span className="text-xs text-muted-foreground">{r.startedAt?.slice(0, 19) ?? "—"}</span>,
-  },
-  {
-    header: "Fine",
-    cell: (r) => <span className="text-xs text-muted-foreground">{r.finishedAt?.slice(0, 19) ?? "—"}</span>,
-  },
-];
+function buildColumns(t: TFunction): DataColumn<SeedRun>[] {
+  const none = t("common:value.none");
+  return [
+    {
+      header: t("seedRuns.columns.runId"),
+      cell: (r) => <span className="font-mono text-xs">{r.seedAcquisitionRunId.slice(0, 8)}</span>,
+    },
+    {
+      header: t("seedRuns.columns.variant"),
+      cell: (r) => (
+        <span className="font-mono text-xs text-muted-foreground">{r.blueprintVariantId?.slice(0, 8) ?? none}</span>
+      ),
+    },
+    { header: t("seedRuns.columns.status"), cell: (r) => <StatusBadge value={r.status} /> },
+    {
+      header: t("seedRuns.columns.startedAt"),
+      cell: (r) => <span className="text-xs text-muted-foreground">{r.startedAt?.slice(0, 19) ?? none}</span>,
+    },
+    {
+      header: t("seedRuns.columns.finishedAt"),
+      cell: (r) => <span className="text-xs text-muted-foreground">{r.finishedAt?.slice(0, 19) ?? none}</span>,
+    },
+  ];
+}
 
 export default function SeedRunsPage() {
+  const { t } = useTranslation("blueprints");
   const runs = useQuery({
     queryKey: ["seed-acquisition-runs", "list"],
     queryFn: () => apiFetch<SeedRunsList>("/v1/seed-acquisition-runs?limit=200"),
   });
+
+  const columns = useMemo(() => buildColumns(t), [t]);
 
   return (
     <DataTablePanel<SeedRun>
       pageTestId="seed-runs-page"
       titleTestId="seed-runs-title"
       countTestId="seed-runs-count"
-      title="Seed acquisition — Runs"
-      description="Run della pipeline di acquisizione seed."
-      count={runs.data ? `${runs.data.total} run` : undefined}
+      title={t("seedRuns.title")}
+      description={t("seedRuns.description")}
+      count={runs.data ? t("seedRuns.count", { count: runs.data.total }) : undefined}
       isLoading={runs.isLoading}
       isError={runs.isError}
-      errorMessage="Impossibile caricare i run."
+      errorMessage={t("seedRuns.error")}
       rows={runs.data?.items ?? []}
       rowKey={(r) => r.seedAcquisitionRunId}
       rowTestId="seed-runs-row"
-      columns={COLUMNS}
+      columns={columns}
       emptyTestId="seed-runs-empty"
-      emptyTitle="Nessun run"
-      emptyDescription="Nessun run di acquisizione registrato."
-      caption="Pipeline runs"
+      emptyTitle={t("seedRuns.emptyTitle")}
+      emptyDescription={t("seedRuns.emptyDescription")}
+      caption={t("seedRuns.caption")}
     />
   );
 }

@@ -1,6 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
@@ -20,41 +23,46 @@ interface BlueprintProcessesList {
   total: number;
 }
 
-const COLUMNS: DataColumn<BlueprintProcess>[] = [
-  { header: "#", cell: (p) => <span className="text-xs text-muted-foreground">{p.ordinal}</span> },
-  { header: "Codice", cell: (p) => <span className="font-mono text-xs">{p.code}</span> },
-  { header: "Nome", cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
-  {
-    header: "Opzionale",
-    cell: (p) => <StatusPill tone={p.isOptional ? "warning" : "neutral"}>{p.isOptional ? "sì" : "no"}</StatusPill>,
-  },
-];
+function buildColumns(t: TFunction): DataColumn<BlueprintProcess>[] {
+  return [
+    { header: t("processes.columns.ordinal"), cell: (p) => <span className="text-xs text-muted-foreground">{p.ordinal}</span> },
+    { header: t("processes.columns.code"), cell: (p) => <span className="font-mono text-xs">{p.code}</span> },
+    { header: t("processes.columns.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
+    {
+      header: t("processes.columns.optional"),
+      cell: (p) => <StatusPill tone={p.isOptional ? "warning" : "neutral"}>{p.isOptional ? t("processes.yes") : t("processes.no")}</StatusPill>,
+    },
+  ];
+}
 
 export default function ProcessesPage() {
+  const { t } = useTranslation("blueprints");
   const processes = useQuery({
     queryKey: ["blueprint-processes", "list"],
     queryFn: () => apiFetch<BlueprintProcessesList>("/v1/blueprint-processes?limit=200"),
   });
+
+  const columns = useMemo(() => buildColumns(t), [t]);
 
   return (
     <DataTablePanel<BlueprintProcess>
       pageTestId="processes-page"
       titleTestId="processes-title"
       countTestId="processes-count"
-      title="Processi BPM"
-      description="Catalogo processi blueprint-anchored."
-      count={processes.data ? `${processes.data.total} processi` : undefined}
+      title={t("processes.title")}
+      description={t("processes.description")}
+      count={processes.data ? t("processes.count", { count: processes.data.total }) : undefined}
       isLoading={processes.isLoading}
       isError={processes.isError}
-      errorMessage="Impossibile caricare i processi."
+      errorMessage={t("processes.error")}
       rows={processes.data?.items ?? []}
       rowKey={(p) => p.blueprintProcessId}
       rowTestId="processes-row"
-      columns={COLUMNS}
+      columns={columns}
       emptyTestId="processes-empty"
-      emptyTitle="Nessun processo"
-      emptyDescription="Non ci sono processi."
-      caption="Catalogo processi (blueprint-anchored)"
+      emptyTitle={t("processes.emptyTitle")}
+      emptyDescription={t("processes.emptyDescription")}
+      caption={t("processes.caption")}
     />
   );
 }

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -31,32 +33,37 @@ interface BrownfieldMapping {
 }
 
 type Tab = "inventory" | "mapping" | "runs";
-const TABS: ReadonlyArray<{ key: Tab; label: string }> = [
-  { key: "inventory", label: "Inventory" },
-  { key: "mapping", label: "Mapping" },
-  { key: "runs", label: "Runs" },
-];
+const TAB_KEYS: ReadonlyArray<Tab> = ["inventory", "mapping", "runs"];
 
-const INVENTORY_COLS: DataColumn<BrownfieldExport>[] = [
-  { header: "Sistema", cell: (e) => <span className="text-foreground">{e.sourceSystem}</span> },
-  { header: "Catturato", cell: (e) => <span className="text-xs text-muted-foreground">{e.capturedAt.slice(0, 19)}</span> },
-  { header: "Righe", align: "right", cell: (e) => <span className="text-xs">{e.rowCount ?? "—"}</span> },
-  { header: "Stato", cell: (e) => <StatusBadge value={e.status} /> },
-];
-const MAPPING_COLS: DataColumn<BrownfieldMapping>[] = [
-  { header: "Source table", cell: (m) => <span className="font-mono text-xs text-muted-foreground">{m.sourceTable}</span> },
-  { header: "Target table", cell: (m) => <span className="font-mono text-xs text-muted-foreground">{m.targetTable}</span> },
-  { header: "Stato", cell: (m) => <StatusBadge value={m.status} /> },
-];
-const RUNS_COLS: DataColumn<BrownfieldRun>[] = [
-  { header: "Run", cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.importRunId.slice(0, 8)}</span> },
-  { header: "Wave", cell: (r) => <span className="text-xs">{r.wave}</span> },
-  { header: "Scope", cell: (r) => <span className="text-xs">{r.classificationScope}</span> },
-  { header: "Stato", cell: (r) => <StatusBadge value={r.status} /> },
-  { header: "Inizio", cell: (r) => <span className="text-xs text-muted-foreground">{r.startedAt?.slice(0, 19) ?? "—"}</span> },
-];
+function buildInventoryCols(t: TFunction): DataColumn<BrownfieldExport>[] {
+  const none = t("common:value.none");
+  return [
+    { header: t("brownfield.inventoryColumns.system"), cell: (e) => <span className="text-foreground">{e.sourceSystem}</span> },
+    { header: t("brownfield.inventoryColumns.capturedAt"), cell: (e) => <span className="text-xs text-muted-foreground">{e.capturedAt.slice(0, 19)}</span> },
+    { header: t("brownfield.inventoryColumns.rowCount"), align: "right", cell: (e) => <span className="text-xs">{e.rowCount ?? none}</span> },
+    { header: t("brownfield.inventoryColumns.status"), cell: (e) => <StatusBadge value={e.status} /> },
+  ];
+}
+function buildMappingCols(t: TFunction): DataColumn<BrownfieldMapping>[] {
+  return [
+    { header: t("brownfield.mappingColumns.sourceTable"), cell: (m) => <span className="font-mono text-xs text-muted-foreground">{m.sourceTable}</span> },
+    { header: t("brownfield.mappingColumns.targetTable"), cell: (m) => <span className="font-mono text-xs text-muted-foreground">{m.targetTable}</span> },
+    { header: t("brownfield.mappingColumns.status"), cell: (m) => <StatusBadge value={m.status} /> },
+  ];
+}
+function buildRunsCols(t: TFunction): DataColumn<BrownfieldRun>[] {
+  const none = t("common:value.none");
+  return [
+    { header: t("brownfield.runsColumns.run"), cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.importRunId.slice(0, 8)}</span> },
+    { header: t("brownfield.runsColumns.wave"), cell: (r) => <span className="text-xs">{r.wave}</span> },
+    { header: t("brownfield.runsColumns.scope"), cell: (r) => <span className="text-xs">{r.classificationScope}</span> },
+    { header: t("brownfield.runsColumns.status"), cell: (r) => <StatusBadge value={r.status} /> },
+    { header: t("brownfield.runsColumns.startedAt"), cell: (r) => <span className="text-xs text-muted-foreground">{r.startedAt?.slice(0, 19) ?? none}</span> },
+  ];
+}
 
 export default function BrownfieldAdaptationPage() {
+  const { t } = useTranslation("blueprints");
   const [tab, setTab] = useState<Tab>("inventory");
   const exports = useQuery({
     queryKey: ["brownfield-source-exports"],
@@ -74,20 +81,24 @@ export default function BrownfieldAdaptationPage() {
     enabled: tab === "runs",
   });
 
+  const inventoryCols = useMemo(() => buildInventoryCols(t), [t]);
+  const mappingCols = useMemo(() => buildMappingCols(t), [t]);
+  const runsCols = useMemo(() => buildRunsCols(t), [t]);
+
   return (
     <main data-testid="brownfield-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
-      <PageHeader data-testid="brownfield-title" title="Brownfield adaptation" description="Inventario, mapping e run di import dei dati legacy." />
+      <PageHeader data-testid="brownfield-title" title={t("brownfield.title")} description={t("brownfield.description")} />
 
       <nav className="flex gap-1 border-b border-border" data-testid="brownfield-tabs">
-        {TABS.map((t) => (
+        {TAB_KEYS.map((key) => (
           <button
-            key={t.key}
+            key={key}
             type="button"
-            onClick={() => setTab(t.key)}
-            data-testid={`brownfield-tab-${t.key}`}
-            className={`px-3 py-2 text-sm transition-colors ${tab === t.key ? "border-b-2 border-primary font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setTab(key)}
+            data-testid={`brownfield-tab-${key}`}
+            className={`px-3 py-2 text-sm transition-colors ${tab === key ? "border-b-2 border-primary font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
-            {t.label}
+            {t(`brownfield.tabs.${key}`)}
           </button>
         ))}
       </nav>
@@ -100,10 +111,10 @@ export default function BrownfieldAdaptationPage() {
             rows={exports.data?.items ?? []}
             rowKey={(e) => e.brownfieldSourceExportId}
             rowTestId="brownfield-inventory-row"
-            columns={INVENTORY_COLS}
+            columns={inventoryCols}
             emptyTestId="brownfield-inventory-empty"
-            emptyTitle="Nessun export registrato"
-            caption="Source exports"
+            emptyTitle={t("brownfield.inventoryEmpty")}
+            caption={t("brownfield.inventoryCaption")}
           />
         </div>
       )}
@@ -115,10 +126,10 @@ export default function BrownfieldAdaptationPage() {
             rows={mappings.data?.items ?? []}
             rowKey={(m) => m.brownfieldTableMappingId}
             rowTestId="brownfield-mapping-row"
-            columns={MAPPING_COLS}
+            columns={mappingCols}
             emptyTestId="brownfield-mapping-empty"
-            emptyTitle="Nessuna mapping registrata"
-            caption="Table mappings"
+            emptyTitle={t("brownfield.mappingEmpty")}
+            caption={t("brownfield.mappingCaption")}
           />
         </div>
       )}
@@ -130,10 +141,10 @@ export default function BrownfieldAdaptationPage() {
             rows={runs.data?.items ?? []}
             rowKey={(r) => r.importRunId}
             rowTestId="brownfield-runs-row"
-            columns={RUNS_COLS}
+            columns={runsCols}
             emptyTestId="brownfield-runs-empty"
-            emptyTitle="Nessun run"
-            caption="Import runs"
+            emptyTitle={t("brownfield.runsEmpty")}
+            caption={t("brownfield.runsCaption")}
           />
         </div>
       )}

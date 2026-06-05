@@ -14,6 +14,7 @@ import {
   AttendanceAnalyticsResponseSchema,
   CompensationAnalyticsResponseSchema,
   SkillsCoverageAnalyticsResponseSchema,
+  OrgNetworkAnalyticsResponseSchema,
 } from "@heuresys/shared";
 import { analyticsService, type ActorContext } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -68,5 +69,14 @@ export const analyticsRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: { response: { 200: SkillsCoverageAnalyticsResponseSchema } },
     },
     async (req) => analyticsService.skills(actor(req)),
+  );
+
+  app.get(
+    "/org-network",
+    {
+      preHandler: [requirePermission("analytics:view")],
+      schema: { response: { 200: OrgNetworkAnalyticsResponseSchema } },
+    },
+    async (req) => analyticsService.orgNetwork(actor(req)),
   );
 };

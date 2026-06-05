@@ -240,4 +240,52 @@ export declare const SkillsCoverageAnalyticsResponseSchema: z.ZodObject<{
     generatedAt: z.ZodString;
 }, z.core.$strip>;
 export type SkillsCoverageAnalyticsResponse = z.infer<typeof SkillsCoverageAnalyticsResponseSchema>;
+export declare const OrgNetworkDepthRowSchema: z.ZodObject<{
+    depth: z.ZodNumber;
+    positionCount: z.ZodNumber;
+}, z.core.$strip>;
+export type OrgNetworkDepthRow = z.infer<typeof OrgNetworkDepthRowSchema>;
+export declare const OrgNetworkSpanRowSchema: z.ZodObject<{
+    positionTitle: z.ZodString;
+    orgUnit: z.ZodString;
+    directReports: z.ZodNumber;
+}, z.core.$strip>;
+export type OrgNetworkSpanRow = z.infer<typeof OrgNetworkSpanRowSchema>;
+export declare const OrgNetworkReachRowSchema: z.ZodObject<{
+    positionTitle: z.ZodString;
+    orgUnit: z.ZodString;
+    reach: z.ZodNumber;
+}, z.core.$strip>;
+export type OrgNetworkReachRow = z.infer<typeof OrgNetworkReachRowSchema>;
+export declare const OrgNetworkAnalyticsResponseSchema: z.ZodObject<{
+    scope: z.ZodObject<{
+        kind: z.ZodEnum<{
+            PLATFORM: "PLATFORM";
+            TENANT: "TENANT";
+            TEAM: "TEAM";
+        }>;
+        tenantId: z.ZodNullable<z.ZodString>;
+    }, z.core.$strip>;
+    totalPositions: z.ZodNumber;
+    rootPositions: z.ZodNumber;
+    managersCount: z.ZodNumber;
+    avgSpanOfControl: z.ZodNullable<z.ZodNumber>;
+    maxDepth: z.ZodNumber;
+    byDepth: z.ZodArray<z.ZodObject<{
+        depth: z.ZodNumber;
+        positionCount: z.ZodNumber;
+    }, z.core.$strip>>;
+    topSpan: z.ZodArray<z.ZodObject<{
+        positionTitle: z.ZodString;
+        orgUnit: z.ZodString;
+        directReports: z.ZodNumber;
+    }, z.core.$strip>>;
+    topReach: z.ZodArray<z.ZodObject<{
+        positionTitle: z.ZodString;
+        orgUnit: z.ZodString;
+        reach: z.ZodNumber;
+    }, z.core.$strip>>;
+    generatedAt: z.ZodString;
+}, z.core.$strip>;
+export type OrgNetworkAnalyticsResponse = z.infer<typeof OrgNetworkAnalyticsResponseSchema>;
 //# sourceMappingURL=analytics.d.ts.map

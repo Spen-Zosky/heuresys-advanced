@@ -14,6 +14,7 @@ import type {
   CompensationAnalyticsResponse,
   SkillsCoverageAnalyticsResponse,
   SkillsCoverageProficiency,
+  OrgNetworkAnalyticsResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
@@ -144,6 +145,23 @@ export const analyticsService = {
       totalEvidence: sk.totalEvidence,
       distinctUsers: sk.distinctUsers,
       distinctOrgUnits: sk.distinctOrgUnits,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  async orgNetwork(a: ActorContext): Promise<OrgNetworkAnalyticsResponse> {
+    const s = await buildScope(a);
+    const o = await repo.getOrgNetwork(pool, s.filter);
+    return {
+      scope: { kind: s.kind, tenantId: s.tenantId },
+      totalPositions: o.totalPositions,
+      rootPositions: o.rootPositions,
+      managersCount: o.managersCount,
+      avgSpanOfControl: o.avgSpanOfControl,
+      maxDepth: o.maxDepth,
+      byDepth: o.byDepth,
+      topSpan: o.topSpan,
+      topReach: o.topReach,
       generatedAt: new Date().toISOString(),
     };
   },

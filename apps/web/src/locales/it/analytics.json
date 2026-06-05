@@ -93,5 +93,33 @@
     "proficiencyTitle": "Evidenze per livello di padronanza",
     "seriesEvidence": "Evidenze",
     "emptyDesc": "Non ci sono evidenze di competenza nel tuo ambito al momento."
+  },
+  "orgNetwork": {
+    "title": "Rete organizzativa",
+    "description": "Metriche strutturali sul grafo gerarchico delle posizioni (span of control, profondità, raggio) nel tuo ambito.",
+    "stats": {
+      "positionsLabel": "Posizioni totali",
+      "positionsDesc": "Posizioni nel grafo organizzativo",
+      "rootsLabel": "Posizioni radice",
+      "rootsDesc": "Posizioni senza riporto gerarchico",
+      "managersLabel": "Responsabili",
+      "managersDesc": "Posizioni con almeno un riporto diretto",
+      "spanLabel": "Span medio",
+      "spanDesc": "Riporti diretti medi per responsabile",
+      "depthLabel": "Profondità massima",
+      "depthDesc": "Livelli gerarchici dal vertice"
+    },
+    "depthTitle": "Posizioni per livello gerarchico",
+    "depthAria": "Distribuzione delle posizioni per livello gerarchico",
+    "depthNote": "Il livello 0 corrisponde alle posizioni radice; ogni posizione ricade in un solo livello.",
+    "spanTitle": "Span of control (primi 15)",
+    "spanAria": "Posizioni con più riporti diretti",
+    "seriesDirectReports": "Riporti diretti",
+    "reachTitle": "Raggio organizzativo (primi 15)",
+    "reachAria": "Posizioni con più riporti transitivi",
+    "seriesReach": "Riporti transitivi",
+    "spanEmptyTitle": "Nessun responsabile",
+    "spanEmptyDesc": "Non ci sono posizioni con riporti diretti nel tuo ambito.",
+    "emptyDesc": "Non ci sono posizioni nel grafo organizzativo del tuo ambito al momento."
   }
 }

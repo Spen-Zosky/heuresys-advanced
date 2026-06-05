@@ -93,5 +93,33 @@
     "proficiencyTitle": "Evidence by proficiency level",
     "seriesEvidence": "Evidence",
     "emptyDesc": "There is no skill evidence within your scope at the moment."
+  },
+  "orgNetwork": {
+    "title": "Org Network",
+    "description": "Structural metrics over the position reports-to graph (span of control, depth, reach) within your scope.",
+    "stats": {
+      "positionsLabel": "Total positions",
+      "positionsDesc": "Positions in the org graph",
+      "rootsLabel": "Root positions",
+      "rootsDesc": "Positions with no reports-to",
+      "managersLabel": "Managers",
+      "managersDesc": "Positions with at least one direct report",
+      "spanLabel": "Avg span",
+      "spanDesc": "Average direct reports per manager",
+      "depthLabel": "Max depth",
+      "depthDesc": "Hierarchy levels from the top"
+    },
+    "depthTitle": "Positions by hierarchy level",
+    "depthAria": "Distribution of positions by hierarchy level",
+    "depthNote": "Level 0 holds the root positions; every position falls into a single level.",
+    "spanTitle": "Span of control (top 15)",
+    "spanAria": "Positions with the most direct reports",
+    "seriesDirectReports": "Direct reports",
+    "reachTitle": "Organizational reach (top 15)",
+    "reachAria": "Positions with the most transitive reports",
+    "seriesReach": "Transitive reports",
+    "spanEmptyTitle": "No managers",
+    "spanEmptyDesc": "There are no positions with direct reports within your scope.",
+    "emptyDesc": "There are no positions in the org graph within your scope at the moment."
   }
 }

@@ -593,3 +593,192 @@ export async function getSkillsCoverage(
     distinctOrgUnits: Number(t?.ous ?? 0),
   };
 }
+
+// --- Org-network metrics (P3) ------------------------------------------------
+// Structural metrics over the position reports-to graph. POSITION-centric scope
+// (mirrors compensationScopeClause on alias `p` = sys_positions): TENANT filters
+// p.position_tenant_id, TEAM additionally restricts p.position_id ∈ teamPositionIds.
+// The full org chart is the graph — is_active is NOT filtered (matches the 158-node
+// RTL_ORG_CHART). All recursive CTEs carry a depth/lvl guard (< 100) against cycles.
+// Numerics are ::text-cast in SQL then Number()'d here (file convention).
+
+export interface OrgNetworkDepthRow {
+  depth: number;
+  positionCount: number;
+}
+
+export interface OrgNetworkSpanRow {
+  positionTitle: string;
+  orgUnit: string;
+  directReports: number;
+}
+
+export interface OrgNetworkReachRow {
+  positionTitle: string;
+  orgUnit: string;
+  reach: number;
+}
+
+export interface OrgNetwork {
+  totalPositions: number;
+  rootPositions: number;
+  managersCount: number;
+  avgSpanOfControl: number | null;
+  maxDepth: number;
+  byDepth: OrgNetworkDepthRow[];
+  topSpan: OrgNetworkSpanRow[];
+  topReach: OrgNetworkReachRow[];
+}
+
+function orgNetworkScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
+  if (scope.isPlatformScope) return { sql: "TRUE", params: [] };
+  const params: unknown[] = [scope.tenantId];
+  const clauses = [`p.position_tenant_id = $1`];
+  if (scope.teamPositionIds.length > 0) {
+    params.push(scope.teamPositionIds);
+    clauses.push(`p.position_id = ANY($${params.length}::uuid[])`);
+  }
+  return { sql: clauses.join(" AND "), params };
+}
+
+export async function getOrgNetwork(
+  q: DbConnector,
+  scope: ScopeFilter,
+): Promise<OrgNetwork> {
+  const sc = orgNetworkScopeClause(scope);
+
+  // Shared `scoped` base CTE = the in-scope position set with its reports-to edge
+  // and resolved OU label. Reused by every query below so the scope WHERE is built once.
+  // WITH RECURSIVE is required because the depth/reach CTEs that extend this list
+  // self-reference; Postgres tolerates RECURSIVE on the non-recursive queries too.
+  const SCOPED = `
+    WITH RECURSIVE scoped AS (
+      SELECT p.position_id, p.position_title, p.position_reports_to_position_id AS reports_to,
+             COALESCE(ou.organization_unit_name, '(unassigned)') AS org_unit
+        FROM sys.sys_positions p
+        LEFT JOIN sys.sys_organization_units ou
+          ON ou.organization_unit_id = p.position_organization_unit_id
+       WHERE ${sc.sql}
+    )`;
+
+  // Totals: total positions + roots (no reports-to, or reports-to a position outside
+  // the scoped set — so a scoped subtree counts its in-scope top as a root).
+  const totals = await q.query<{ total: string; roots: string }>(
+    `${SCOPED}
+     SELECT count(*)::text AS total,
+            count(*) FILTER (
+              WHERE reports_to IS NULL
+                 OR reports_to NOT IN (SELECT position_id FROM scoped)
+            )::text AS roots
+       FROM scoped`,
+    sc.params,
+  );
+
+  // Managers count + avg span-of-control among managers (positions with ≥1 report).
+  const spanStats = await q.query<{ managers: string; avg_span: string | null }>(
+    `${SCOPED},
+     spans AS (
+       SELECT s.position_id,
+              (SELECT count(*) FROM scoped c WHERE c.reports_to = s.position_id) AS dr
+         FROM scoped s
+     )
+     SELECT count(*) FILTER (WHERE dr > 0)::text AS managers,
+            round(avg(dr) FILTER (WHERE dr > 0), 2)::text AS avg_span
+       FROM spans`,
+    sc.params,
+  );
+
+  // Top span-of-control: positions ranked by direct reports (correlated count; 158 rows).
+  const topSpan = await q.query<{
+    position_title: string;
+    org_unit: string;
+    direct_reports: string;
+  }>(
+    `${SCOPED}
+     SELECT s.position_title,
+            s.org_unit,
+            (SELECT count(*) FROM scoped c WHERE c.reports_to = s.position_id)::text AS direct_reports
+       FROM scoped s
+      ORDER BY (SELECT count(*) FROM scoped c WHERE c.reports_to = s.position_id) DESC,
+               s.position_title
+      LIMIT 15`,
+    sc.params,
+  );
+
+  // Hierarchy depth (recursive): anchor = scoped roots at depth 0; recurse children
+  // (child.reports_to = parent.position_id) depth+1, guarded at depth < 100.
+  const depth = await q.query<{ depth: string; position_count: string }>(
+    `${SCOPED},
+     tree AS (
+       SELECT s.position_id, 0 AS depth
+         FROM scoped s
+        WHERE s.reports_to IS NULL
+           OR s.reports_to NOT IN (SELECT position_id FROM scoped)
+       UNION ALL
+       SELECT s.position_id, t.depth + 1
+         FROM scoped s
+         JOIN tree t ON s.reports_to = t.position_id
+        WHERE t.depth < 100
+     )
+     SELECT depth::text AS depth, count(*)::text AS position_count
+       FROM tree
+      GROUP BY depth
+      ORDER BY depth`,
+    sc.params,
+  );
+
+  // Reach / centrality (recursive): for each ancestor, the set of nodes reachable
+  // downward (incl. self at lvl 0). reach = descendants count - 1 (excludes self).
+  // `descendants` name avoids the `desc` reserved word.
+  const reach = await q.query<{
+    position_title: string;
+    org_unit: string;
+    reach: string;
+  }>(
+    `${SCOPED},
+     descendants AS (
+       SELECT position_id AS ancestor, position_id AS node, 0 AS lvl
+         FROM scoped
+       UNION ALL
+       SELECT d.ancestor, s.position_id, d.lvl + 1
+         FROM scoped s
+         JOIN descendants d ON s.reports_to = d.node
+        WHERE d.lvl < 100
+     )
+     SELECT a.position_title,
+            a.org_unit,
+            (count(*) - 1)::text AS reach
+       FROM descendants d
+       JOIN scoped a ON a.position_id = d.ancestor
+      GROUP BY a.position_id, a.position_title, a.org_unit
+     HAVING (count(*) - 1) > 0
+      ORDER BY (count(*) - 1) DESC, a.position_title
+      LIMIT 15`,
+    sc.params,
+  );
+
+  const maxDepth = depth.rows.reduce((m, r) => Math.max(m, Number(r.depth)), 0);
+  const ss = spanStats.rows[0];
+
+  return {
+    totalPositions: Number(totals.rows[0]?.total ?? 0),
+    rootPositions: Number(totals.rows[0]?.roots ?? 0),
+    managersCount: Number(ss?.managers ?? 0),
+    avgSpanOfControl: ss?.avg_span == null ? null : Number(ss.avg_span),
+    maxDepth,
+    byDepth: depth.rows.map((r) => ({
+      depth: Number(r.depth),
+      positionCount: Number(r.position_count),
+    })),
+    topSpan: topSpan.rows.map((r) => ({
+      positionTitle: r.position_title,
+      orgUnit: r.org_unit,
+      directReports: Number(r.direct_reports),
+    })),
+    topReach: reach.rows.map((r) => ({
+      positionTitle: r.position_title,
+      orgUnit: r.org_unit,
+      reach: Number(r.reach),
+    })),
+  };
+}

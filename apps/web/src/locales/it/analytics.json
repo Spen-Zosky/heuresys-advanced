@@ -121,5 +121,48 @@
     "spanEmptyTitle": "Nessun responsabile",
     "spanEmptyDesc": "Non ci sono posizioni con riporti diretti nel tuo ambito.",
     "emptyDesc": "Non ci sono posizioni nel grafo organizzativo del tuo ambito al momento."
+  },
+  "overtime": {
+    "title": "Richieste di straordinario",
+    "description": "Ciclo di richiesta e approvazione dello straordinario per stato, tipo, mese e unità organizzativa nel tuo ambito.",
+    "stats": {
+      "requestsLabel": "Richieste totali",
+      "requestsDesc": "Richieste di straordinario nel tuo ambito",
+      "hoursLabel": "Ore richieste",
+      "hoursDesc": "Ore di straordinario richieste",
+      "compLabel": "Compenso totale",
+      "compDesc": "Compenso stimato delle richieste"
+    },
+    "statusTitle": "Richieste per stato",
+    "statusAria": "Distribuzione delle richieste di straordinario per stato",
+    "typeTitle": "Richieste per tipo",
+    "typeAria": "Distribuzione delle richieste di straordinario per tipo",
+    "monthlyTitle": "Ore richieste per mese",
+    "monthlyAria": "Ore di straordinario richieste per mese",
+    "monthlyNote": "Le richieste di straordinario sono distinte dalle ore di straordinario già lavorate (vedi Analisi presenze): le due fonti sono in larga parte disgiunte e non vanno sommate.",
+    "ouTitle": "Ore richieste per unità organizzativa",
+    "ouAria": "Ore di straordinario richieste per unità organizzativa",
+    "seriesRequests": "Richieste",
+    "seriesHours": "Ore",
+    "ouEmptyTitle": "Nessun dato per unità",
+    "ouEmptyDesc": "Non ci sono richieste di straordinario per unità organizzativa nel tuo ambito.",
+    "emptyDesc": "Non ci sono richieste di straordinario nel tuo ambito al momento.",
+    "status": {
+      "PENDING": "In attesa",
+      "APPROVED": "Approvata",
+      "REJECTED": "Respinta",
+      "EXPORTED": "Esportata",
+      "PAID": "Pagata",
+      "CANCELLED": "Annullata"
+    },
+    "types": {
+      "WEEKDAY": "Feriale",
+      "WEEKEND": "Weekend",
+      "NIGHT": "Notturno",
+      "HOLIDAY": "Festivo",
+      "EMERGENCY": "Emergenza",
+      "PROJECT": "Progetto",
+      "ON_CALL": "Reperibilità"
+    }
   }
 }

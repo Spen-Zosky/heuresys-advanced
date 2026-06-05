@@ -121,5 +121,48 @@
     "spanEmptyTitle": "No managers",
     "spanEmptyDesc": "There are no positions with direct reports within your scope.",
     "emptyDesc": "There are no positions in the org graph within your scope at the moment."
+  },
+  "overtime": {
+    "title": "Overtime Requests",
+    "description": "Overtime request and approval lifecycle by status, type, month and organizational unit within your scope.",
+    "stats": {
+      "requestsLabel": "Total requests",
+      "requestsDesc": "Overtime requests within your scope",
+      "hoursLabel": "Requested hours",
+      "hoursDesc": "Overtime hours requested",
+      "compLabel": "Total compensation",
+      "compDesc": "Estimated compensation of the requests"
+    },
+    "statusTitle": "Requests by status",
+    "statusAria": "Overtime requests distribution by status",
+    "typeTitle": "Requests by type",
+    "typeAria": "Overtime requests distribution by type",
+    "monthlyTitle": "Requested hours by month",
+    "monthlyAria": "Overtime hours requested by month",
+    "monthlyNote": "Overtime requests are distinct from already-worked overtime hours (see Attendance Analytics): the two sources are largely disjoint and must not be summed.",
+    "ouTitle": "Requested hours by organizational unit",
+    "ouAria": "Overtime hours requested by organizational unit",
+    "seriesRequests": "Requests",
+    "seriesHours": "Hours",
+    "ouEmptyTitle": "No unit data",
+    "ouEmptyDesc": "There are no overtime requests by organizational unit within your scope.",
+    "emptyDesc": "There are no overtime requests within your scope at the moment.",
+    "status": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "EXPORTED": "Exported",
+      "PAID": "Paid",
+      "CANCELLED": "Cancelled"
+    },
+    "types": {
+      "WEEKDAY": "Weekday",
+      "WEEKEND": "Weekend",
+      "NIGHT": "Night",
+      "HOLIDAY": "Holiday",
+      "EMERGENCY": "Emergency",
+      "PROJECT": "Project",
+      "ON_CALL": "On-call"
+    }
   }
 }

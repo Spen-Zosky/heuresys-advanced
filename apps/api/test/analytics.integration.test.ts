@@ -468,4 +468,99 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect(body.scope.tenantId).not.toBeNull();
     expect(body.totalPositions).toBeGreaterThan(0);
   });
+
+  // --- Overtime requests (P2 ext) — deterministic anchors pinned against the live
+  // seed: 221 overtime REQUESTS (distinct from attendance worked hours), 676.00 h,
+  // €34,267.09, all PENDING, all single-tenant RTL Bank. 4 types present (of 7), 4
+  // months, 22 OUs (every request resolves to a real OU).
+
+  interface OvertimeBody {
+    scope: { kind: string; tenantId: string | null };
+    totalRequests: number;
+    totalHours: number;
+    totalCompensationEur: number | null;
+    byStatus: Array<{ status: string; count: number; hours: number; compensationEur: number | null }>;
+    byType: Array<{ type: string; count: number; hours: number }>;
+    monthly: Array<{ month: string; count: number; hours: number }>;
+    byOrgUnit: Array<{ dimension: string; count: number; hours: number }>;
+    generatedAt: string;
+  }
+
+  it("overtime: unauthenticated → 401", async () => {
+    const r = await suite.app.inject({ method: "GET", url: "/v1/analytics/overtime" });
+    expect(r.statusCode).toBe(401);
+  });
+
+  it("overtime: USER (employee) lacks analytics:view → 403", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/overtime",
+      headers: { cookie: ch(employeeS.cookies) },
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
+  });
+
+  it("overtime: PLATFORM_ADMIN sees the request rollup (deterministic seed anchors)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/overtime",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as OvertimeBody;
+    expect(body.scope.kind).toBe("PLATFORM");
+    expect(body.scope.tenantId).toBeNull();
+    // Grand totals.
+    expect(body.totalRequests).toBe(221);
+    expect(body.totalHours).toBeCloseTo(676.0, 1);
+    expect(body.totalCompensationEur).toBeCloseTo(34267.09, 1);
+    // byStatus: every request is PENDING in the seed → single bucket reconciling to the total.
+    expect(body.byStatus.length).toBe(1);
+    expect(body.byStatus[0]?.status).toBe("PENDING");
+    expect(body.byStatus[0]?.count).toBe(221);
+    expect(body.byStatus[0]?.hours).toBeCloseTo(676.0, 1);
+    const statusCountSum = body.byStatus.reduce((acc, s) => acc + s.count, 0);
+    expect(statusCountSum).toBe(221);
+    // byType: 4 of the 7 CHECK types present; counts reconcile; count-desc ordered.
+    expect(body.byType.length).toBe(4);
+    const typeCountSum = body.byType.reduce((acc, t) => acc + t.count, 0);
+    expect(typeCountSum).toBe(221);
+    expect(body.byType[0]?.type).toBe("NIGHT");
+    expect(body.byType[0]?.count).toBe(62);
+    for (let i = 1; i < body.byType.length; i++) {
+      expect(body.byType[i]!.count).toBeLessThanOrEqual(body.byType[i - 1]!.count);
+    }
+    // monthly: 4 chronological buckets reconciling to the grand total.
+    expect(body.monthly.length).toBe(4);
+    expect(body.monthly[0]?.month).toBe("2025-09");
+    expect(body.monthly[body.monthly.length - 1]?.month).toBe("2025-12");
+    const monthlyHourSum = body.monthly.reduce((acc, m) => acc + m.hours, 0);
+    expect(monthlyHourSum).toBeCloseTo(676.0, 0);
+    const monthlyCountSum = body.monthly.reduce((acc, m) => acc + m.count, 0);
+    expect(monthlyCountSum).toBe(221);
+    // byOrgUnit: 22 OUs, every request resolves (no '(unassigned)'), hours-desc ordered.
+    expect(body.byOrgUnit.length).toBe(22);
+    expect(body.byOrgUnit.some((o) => o.dimension === "(unassigned)")).toBe(false);
+    expect(body.byOrgUnit[0]?.dimension).toBe("Divisione Risk & Compliance");
+    expect(body.byOrgUnit[0]?.hours).toBeCloseTo(162.8, 1);
+    const ouCountSum = body.byOrgUnit.reduce((acc, o) => acc + o.count, 0);
+    expect(ouCountSum).toBe(221);
+    expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
+  });
+
+  it("overtime: TENANT_ADMIN sees TENANT scope (RTL is the only overtime tenant → equals platform)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/overtime",
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as OvertimeBody;
+    expect(body.scope.kind).toBe("TENANT");
+    expect(body.scope.tenantId).not.toBeNull();
+    // All 221 overtime requests belong to RTL Bank → TENANT equals the platform aggregate.
+    expect(body.totalRequests).toBe(221);
+    expect(body.byOrgUnit.length).toBe(22);
+  });
 });

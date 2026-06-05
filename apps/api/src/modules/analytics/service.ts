@@ -15,6 +15,9 @@ import type {
   SkillsCoverageAnalyticsResponse,
   SkillsCoverageProficiency,
   OrgNetworkAnalyticsResponse,
+  OvertimeAnalyticsResponse,
+  OvertimeStatus,
+  OvertimeType,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
@@ -162,6 +165,41 @@ export const analyticsService = {
       byDepth: o.byDepth,
       topSpan: o.topSpan,
       topReach: o.topReach,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  async overtime(a: ActorContext): Promise<OvertimeAnalyticsResponse> {
+    const s = await buildScope(a);
+    const o = await repo.getOvertimeRollups(pool, s.filter);
+    // Repo carries status/type as string; the live values are guaranteed in the
+    // CHECK domains — narrow to the schema unions here (same pattern as skills).
+    return {
+      scope: { kind: s.kind, tenantId: s.tenantId },
+      totalRequests: o.totalRequests,
+      totalHours: o.totalHours,
+      totalCompensationEur: o.totalCompensationEur,
+      byStatus: o.byStatus.map((r) => ({
+        status: r.status as OvertimeStatus,
+        count: r.count,
+        hours: r.hours,
+        compensationEur: r.compensationEur,
+      })),
+      byType: o.byType.map((r) => ({
+        type: r.type as OvertimeType,
+        count: r.count,
+        hours: r.hours,
+      })),
+      monthly: o.monthly.map((m) => ({
+        month: m.dimension,
+        count: m.count,
+        hours: m.hours,
+      })),
+      byOrgUnit: o.byOrgUnit.map((r) => ({
+        dimension: r.dimension,
+        count: r.count,
+        hours: r.hours,
+      })),
       generatedAt: new Date().toISOString(),
     };
   },

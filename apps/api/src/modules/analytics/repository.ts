@@ -782,3 +782,162 @@ export async function getOrgNetwork(
     })),
   };
 }
+
+// --- Overtime requests (P2 ext) ----------------------------------------------
+// Request/approval lifecycle over sys.sys_overtime — NOT sys_attendance worked hours
+// (that's getAttendanceTotals; the two are disjoint and summing double-counts). Subject
+// is ot.overtime_subject_user_id; tenant is ot.overtime_tenant_id. Hours/comp are
+// fractional numeric → ::text cast then Number() in JS; compensation is nullable.
+// Scope mirrors attendanceScopeClause (subject-centric EXISTS for TEAM).
+
+export interface OvertimeByStatusRow {
+  status: string;
+  count: number;
+  hours: number;
+  compensationEur: number | null;
+}
+
+export interface OvertimeByTypeRow {
+  type: string;
+  count: number;
+  hours: number;
+}
+
+/** Shared shape for the monthly + by-OU rollups (count + hours per bucket). */
+export interface OvertimeDimensionRow {
+  dimension: string;
+  count: number;
+  hours: number;
+}
+
+export interface OvertimeRollups {
+  totalRequests: number;
+  totalHours: number;
+  totalCompensationEur: number | null;
+  byStatus: OvertimeByStatusRow[];
+  byType: OvertimeByTypeRow[];
+  monthly: OvertimeDimensionRow[];
+  byOrgUnit: OvertimeDimensionRow[];
+}
+
+function overtimeScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] } {
+  if (scope.isPlatformScope) return { sql: "TRUE", params: [] };
+  const params: unknown[] = [scope.tenantId];
+  const clauses = [`ot.overtime_tenant_id = $1`];
+  if (scope.teamPositionIds.length > 0) {
+    params.push(scope.teamPositionIds);
+    clauses.push(`EXISTS (
+      SELECT 1 FROM sys.sys_user_position_assignments tap
+       WHERE tap.user_position_assignment_user_id = ot.overtime_subject_user_id
+         AND tap.user_position_assignment_kind = 'PRIMARY'
+         AND tap.user_position_assignment_status = 'ACTIVE'
+         AND tap.user_position_assignment_position_id = ANY($${params.length}::uuid[]))`);
+  }
+  return { sql: clauses.join(" AND "), params };
+}
+
+export async function getOvertimeRollups(
+  q: DbConnector,
+  scope: ScopeFilter,
+): Promise<OvertimeRollups> {
+  const sc = overtimeScopeClause(scope);
+
+  const totals = await q.query<{ requests: string; hours: string; comp: string | null }>(
+    `SELECT count(*)::text AS requests,
+            COALESCE(round(sum(ot.overtime_hours), 2), 0)::text AS hours,
+            round(sum(ot.overtime_total_compensation), 2)::text AS comp
+       FROM sys.sys_overtime ot
+      WHERE ${sc.sql}`,
+    sc.params,
+  );
+
+  const byStatus = await q.query<{
+    status: string;
+    cnt: string;
+    hours: string;
+    comp: string | null;
+  }>(
+    `SELECT ot.overtime_status AS status,
+            count(*)::text AS cnt,
+            round(sum(ot.overtime_hours), 2)::text AS hours,
+            round(sum(ot.overtime_total_compensation), 2)::text AS comp
+       FROM sys.sys_overtime ot
+      WHERE ${sc.sql}
+      GROUP BY 1
+      ORDER BY count(*) DESC`,
+    sc.params,
+  );
+
+  const byType = await q.query<{ type: string; cnt: string; hours: string }>(
+    `SELECT ot.overtime_type AS type,
+            count(*)::text AS cnt,
+            round(sum(ot.overtime_hours), 2)::text AS hours
+       FROM sys.sys_overtime ot
+      WHERE ${sc.sql}
+      GROUP BY 1
+      ORDER BY count(*) DESC`,
+    sc.params,
+  );
+
+  const monthly = await q.query<{ dimension: string; cnt: string; hours: string }>(
+    `SELECT to_char(date_trunc('month', ot.overtime_date), 'YYYY-MM') AS dimension,
+            count(*)::text AS cnt,
+            round(sum(ot.overtime_hours), 2)::text AS hours
+       FROM sys.sys_overtime ot
+      WHERE ${sc.sql}
+      GROUP BY 1
+      ORDER BY 1`,
+    sc.params,
+  );
+
+  // Subject user → PRIMARY/ACTIVE assignment → position → OU (1 primary active per user → no fan-out).
+  const byOu = await q.query<{ dimension: string; cnt: string; hours: string }>(
+    `SELECT COALESCE(ou.organization_unit_name, '(unassigned)') AS dimension,
+            count(*)::text AS cnt,
+            round(sum(ot.overtime_hours), 2)::text AS hours
+       FROM sys.sys_overtime ot
+       LEFT JOIN sys.sys_user_position_assignments a
+         ON a.user_position_assignment_user_id = ot.overtime_subject_user_id
+        AND a.user_position_assignment_kind = 'PRIMARY'
+        AND a.user_position_assignment_status = 'ACTIVE'
+       LEFT JOIN sys.sys_positions p
+         ON p.position_id = a.user_position_assignment_position_id
+       LEFT JOIN sys.sys_organization_units ou
+         ON ou.organization_unit_id = p.position_organization_unit_id
+      WHERE ${sc.sql}
+      GROUP BY 1
+      ORDER BY sum(ot.overtime_hours) DESC`,
+    sc.params,
+  );
+
+  const numOrNull = (v: string | null | undefined): number | null =>
+    v === null || v === undefined ? null : Number(v);
+
+  const t = totals.rows[0];
+  return {
+    totalRequests: Number(t?.requests ?? 0),
+    totalHours: Number(t?.hours ?? 0),
+    totalCompensationEur: numOrNull(t?.comp),
+    byStatus: byStatus.rows.map((r) => ({
+      status: r.status,
+      count: Number(r.cnt),
+      hours: Number(r.hours),
+      compensationEur: numOrNull(r.comp),
+    })),
+    byType: byType.rows.map((r) => ({
+      type: r.type,
+      count: Number(r.cnt),
+      hours: Number(r.hours),
+    })),
+    monthly: monthly.rows.map((r) => ({
+      dimension: r.dimension,
+      count: Number(r.cnt),
+      hours: Number(r.hours),
+    })),
+    byOrgUnit: byOu.rows.map((r) => ({
+      dimension: r.dimension,
+      count: Number(r.cnt),
+      hours: Number(r.hours),
+    })),
+  };
+}

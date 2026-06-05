@@ -201,3 +201,74 @@ export const OrgNetworkAnalyticsResponseSchema = z.object({
   generatedAt: z.string(),
 });
 export type OrgNetworkAnalyticsResponse = z.infer<typeof OrgNetworkAnalyticsResponseSchema>;
+
+// --- Overtime requests (P2 ext) ---
+// Overtime REQUEST / approval lifecycle over sys_overtime — distinct from the worked
+// overtime HOURS already plotted in the attendance view (attendance_hours_overtime).
+// The two sources are largely disjoint (≈77% of overtime requests have no attendance
+// counterpart) and summing them would double-count; they are deliberately separate
+// surfaces. Subject = overtime_subject_user_id; tenant = overtime_tenant_id. status and
+// type are the live CHECK domains. Hours are fractional numeric; compensation is nullable
+// (overtime_total_compensation NULL until rated) so totals/rows allow null.
+export const OvertimeStatusSchema = z.enum([
+  "PENDING",
+  "APPROVED",
+  "REJECTED",
+  "EXPORTED",
+  "PAID",
+  "CANCELLED",
+]);
+export type OvertimeStatus = z.infer<typeof OvertimeStatusSchema>;
+
+export const OvertimeTypeSchema = z.enum([
+  "WEEKDAY",
+  "WEEKEND",
+  "NIGHT",
+  "HOLIDAY",
+  "EMERGENCY",
+  "PROJECT",
+  "ON_CALL",
+]);
+export type OvertimeType = z.infer<typeof OvertimeTypeSchema>;
+
+export const OvertimeByStatusRowSchema = z.object({
+  status: OvertimeStatusSchema,
+  count: z.number().int(),
+  hours: z.number(),
+  compensationEur: z.number().nullable(), // null when no rated comp in the bucket
+});
+export type OvertimeByStatusRow = z.infer<typeof OvertimeByStatusRowSchema>;
+
+export const OvertimeByTypeRowSchema = z.object({
+  type: OvertimeTypeSchema,
+  count: z.number().int(),
+  hours: z.number(),
+});
+export type OvertimeByTypeRow = z.infer<typeof OvertimeByTypeRowSchema>;
+
+export const OvertimeMonthlyRowSchema = z.object({
+  month: z.string(), // 'YYYY-MM' (date_trunc('month', overtime_date))
+  count: z.number().int(),
+  hours: z.number(),
+});
+export type OvertimeMonthlyRow = z.infer<typeof OvertimeMonthlyRowSchema>;
+
+export const OvertimeByOrgUnitRowSchema = z.object({
+  dimension: z.string(), // organization_unit_name, COALESCE '(unassigned)'
+  count: z.number().int(),
+  hours: z.number(),
+});
+export type OvertimeByOrgUnitRow = z.infer<typeof OvertimeByOrgUnitRowSchema>;
+
+export const OvertimeAnalyticsResponseSchema = z.object({
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
+  totalRequests: z.number().int(),
+  totalHours: z.number(),
+  totalCompensationEur: z.number().nullable(),
+  byStatus: z.array(OvertimeByStatusRowSchema), // count desc
+  byType: z.array(OvertimeByTypeRowSchema), // count desc
+  monthly: z.array(OvertimeMonthlyRowSchema), // chronological
+  byOrgUnit: z.array(OvertimeByOrgUnitRowSchema), // hours desc
+  generatedAt: z.string(),
+});
+export type OvertimeAnalyticsResponse = z.infer<typeof OvertimeAnalyticsResponseSchema>;

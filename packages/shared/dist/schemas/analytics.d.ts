@@ -288,4 +288,114 @@ export declare const OrgNetworkAnalyticsResponseSchema: z.ZodObject<{
     generatedAt: z.ZodString;
 }, z.core.$strip>;
 export type OrgNetworkAnalyticsResponse = z.infer<typeof OrgNetworkAnalyticsResponseSchema>;
+export declare const OvertimeStatusSchema: z.ZodEnum<{
+    PENDING: "PENDING";
+    APPROVED: "APPROVED";
+    REJECTED: "REJECTED";
+    EXPORTED: "EXPORTED";
+    PAID: "PAID";
+    CANCELLED: "CANCELLED";
+}>;
+export type OvertimeStatus = z.infer<typeof OvertimeStatusSchema>;
+export declare const OvertimeTypeSchema: z.ZodEnum<{
+    WEEKDAY: "WEEKDAY";
+    WEEKEND: "WEEKEND";
+    NIGHT: "NIGHT";
+    HOLIDAY: "HOLIDAY";
+    EMERGENCY: "EMERGENCY";
+    PROJECT: "PROJECT";
+    ON_CALL: "ON_CALL";
+}>;
+export type OvertimeType = z.infer<typeof OvertimeTypeSchema>;
+export declare const OvertimeByStatusRowSchema: z.ZodObject<{
+    status: z.ZodEnum<{
+        PENDING: "PENDING";
+        APPROVED: "APPROVED";
+        REJECTED: "REJECTED";
+        EXPORTED: "EXPORTED";
+        PAID: "PAID";
+        CANCELLED: "CANCELLED";
+    }>;
+    count: z.ZodNumber;
+    hours: z.ZodNumber;
+    compensationEur: z.ZodNullable<z.ZodNumber>;
+}, z.core.$strip>;
+export type OvertimeByStatusRow = z.infer<typeof OvertimeByStatusRowSchema>;
+export declare const OvertimeByTypeRowSchema: z.ZodObject<{
+    type: z.ZodEnum<{
+        WEEKDAY: "WEEKDAY";
+        WEEKEND: "WEEKEND";
+        NIGHT: "NIGHT";
+        HOLIDAY: "HOLIDAY";
+        EMERGENCY: "EMERGENCY";
+        PROJECT: "PROJECT";
+        ON_CALL: "ON_CALL";
+    }>;
+    count: z.ZodNumber;
+    hours: z.ZodNumber;
+}, z.core.$strip>;
+export type OvertimeByTypeRow = z.infer<typeof OvertimeByTypeRowSchema>;
+export declare const OvertimeMonthlyRowSchema: z.ZodObject<{
+    month: z.ZodString;
+    count: z.ZodNumber;
+    hours: z.ZodNumber;
+}, z.core.$strip>;
+export type OvertimeMonthlyRow = z.infer<typeof OvertimeMonthlyRowSchema>;
+export declare const OvertimeByOrgUnitRowSchema: z.ZodObject<{
+    dimension: z.ZodString;
+    count: z.ZodNumber;
+    hours: z.ZodNumber;
+}, z.core.$strip>;
+export type OvertimeByOrgUnitRow = z.infer<typeof OvertimeByOrgUnitRowSchema>;
+export declare const OvertimeAnalyticsResponseSchema: z.ZodObject<{
+    scope: z.ZodObject<{
+        kind: z.ZodEnum<{
+            PLATFORM: "PLATFORM";
+            TENANT: "TENANT";
+            TEAM: "TEAM";
+        }>;
+        tenantId: z.ZodNullable<z.ZodUUID>;
+    }, z.core.$strip>;
+    totalRequests: z.ZodNumber;
+    totalHours: z.ZodNumber;
+    totalCompensationEur: z.ZodNullable<z.ZodNumber>;
+    byStatus: z.ZodArray<z.ZodObject<{
+        status: z.ZodEnum<{
+            PENDING: "PENDING";
+            APPROVED: "APPROVED";
+            REJECTED: "REJECTED";
+            EXPORTED: "EXPORTED";
+            PAID: "PAID";
+            CANCELLED: "CANCELLED";
+        }>;
+        count: z.ZodNumber;
+        hours: z.ZodNumber;
+        compensationEur: z.ZodNullable<z.ZodNumber>;
+    }, z.core.$strip>>;
+    byType: z.ZodArray<z.ZodObject<{
+        type: z.ZodEnum<{
+            WEEKDAY: "WEEKDAY";
+            WEEKEND: "WEEKEND";
+            NIGHT: "NIGHT";
+            HOLIDAY: "HOLIDAY";
+            EMERGENCY: "EMERGENCY";
+            PROJECT: "PROJECT";
+            ON_CALL: "ON_CALL";
+        }>;
+        count: z.ZodNumber;
+        hours: z.ZodNumber;
+    }, z.core.$strip>>;
+    monthly: z.ZodArray<z.ZodObject<{
+        month: z.ZodString;
+        count: z.ZodNumber;
+        hours: z.ZodNumber;
+    }, z.core.$strip>>;
+    byOrgUnit: z.ZodArray<z.ZodObject<{
+        dimension: z.ZodString;
+        count: z.ZodNumber;
+        hours: z.ZodNumber;
+    }, z.core.$strip>>;
+    generatedAt: z.ZodString;
+}, z.core.$strip>;
+export type OvertimeAnalyticsResponse = z.infer<typeof OvertimeAnalyticsResponseSchema>;
 //# sourceMappingURL=analytics.d.ts.map

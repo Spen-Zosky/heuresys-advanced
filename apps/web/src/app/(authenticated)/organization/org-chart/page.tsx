@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
@@ -31,6 +32,7 @@ interface RenderPayload {
 }
 
 export default function OrgChartPage() {
+  const { t } = useTranslation("admin");
   const graphs = useQuery({
     queryKey: ["visualization-graphs", "ORG_CHART"],
     queryFn: () =>
@@ -72,19 +74,19 @@ export default function OrgChartPage() {
     <main data-testid="org-chart-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="org-chart-title"
-        title="Org chart"
+        title={t("orgChart.title")}
         breadcrumbs={
           <Link
             href="/organization"
             data-testid="org-chart-back"
             className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
-            ← Organization
+            {t("orgChart.back")}
           </Link>
         }
         badges={
           <span data-testid="org-chart-count" className="text-sm text-muted-foreground">
-            {graphs.data ? `${graphs.data.total} grafici ORG_CHART disponibili` : "Caricamento…"}
+            {graphs.data ? t("orgChart.count", { count: graphs.data.total }) : t("common:loading")}
           </span>
         }
       />
@@ -109,26 +111,26 @@ export default function OrgChartPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Organigramma ({render.data ? `${nodeCount} posizioni` : "—"})</CardTitle>
+          <CardTitle>{t("orgChart.cardTitle", { label: render.data ? t("orgChart.nodeCount", { count: nodeCount }) : t("orgChart.dash") })}</CardTitle>
         </CardHeader>
         <CardContent>
           {!effectiveGraphId ? (
             <div className="p-6 text-sm text-muted-foreground" data-testid="org-chart-empty">
-              Nessun grafo ORG_CHART registrato per il tenant. Generarlo con
-              <code className="mx-1 font-mono">db/seeds/org_chart_rtl_demo.sql</code>.
+              {t("orgChart.emptyPrefix")}
+              <code className="mx-1 font-mono">{t("orgChart.seedFile")}</code>.
             </div>
           ) : render.isLoading ? (
-            <div className="p-6 text-sm text-muted-foreground">Caricamento…</div>
+            <div className="p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
           ) : nodeCount === 0 ? (
             <div className="p-6 text-sm text-muted-foreground" data-testid="org-chart-nodes-empty">
-              Il grafo non ha nodi.
+              {t("orgChart.noNodes")}
             </div>
           ) : (
             <div data-testid="org-chart-graph">
               <EChartsCard
                 option={graphOption}
                 height={520}
-                ariaLabel="Organigramma interattivo delle posizioni"
+                ariaLabel={t("orgChart.graphAria")}
               />
             </div>
           )}
@@ -136,7 +138,7 @@ export default function OrgChartPage() {
       </Card>
 
       <p className="text-xs text-muted-foreground">
-        Grafo a forza interattivo (zoom/pan). I nodi sono le posizioni attive del tenant; gli archi le relazioni reports-to.
+        {t("orgChart.note")}
       </p>
     </main>
   );

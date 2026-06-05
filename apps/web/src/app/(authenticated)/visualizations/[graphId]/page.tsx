@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, MermaidDiagram, PageHeader } from "@heuresys/ui";
@@ -34,6 +35,7 @@ interface GraphEdge {
 }
 
 export default function VisualizationDetailPage() {
+  const { t } = useTranslation("admin");
   const params = useParams<{ graphId: string }>();
   const graphId = params.graphId;
   const graph = useQuery({
@@ -61,7 +63,7 @@ export default function VisualizationDetailPage() {
   if (graph.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">Caricamento…</span>
+        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
       </main>
     );
   }
@@ -69,9 +71,9 @@ export default function VisualizationDetailPage() {
     const status = isApiError(graph.error) ? graph.error.status : 0;
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="visualization-error">
-        <Link href="/visualizations" className="text-sm underline">← Visualizations</Link>
+        <Link href="/visualizations" className="text-sm underline">{t("visualizations.detail.back")}</Link>
         <p className="mt-4 text-destructive">
-          {status === 404 ? "Grafico non trovato." : "Errore."}
+          {status === 404 ? t("visualizations.detail.notFound") : t("visualizations.detail.loadError")}
         </p>
       </main>
     );
@@ -109,7 +111,7 @@ export default function VisualizationDetailPage() {
             data-testid="visualization-back"
             className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
-            ← Visualizations
+            {t("visualizations.detail.back")}
           </Link>
         }
         badges={
@@ -123,12 +125,12 @@ export default function VisualizationDetailPage() {
       {mermaidSource ? (
         <Card data-testid="visualization-renderer-card">
           <CardHeader>
-            <CardTitle>Diagramma</CardTitle>
+            <CardTitle>{t("visualizations.detail.diagramTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="overflow-x-auto" data-testid="visualization-renderer">
             <MermaidDiagram
               source={mermaidSource}
-              ariaLabel={`Diagramma del grafo ${g.name}`}
+              ariaLabel={t("visualizations.detail.diagramAria", { name: g.name })}
               className="min-w-full"
             />
           </CardContent>
@@ -138,14 +140,14 @@ export default function VisualizationDetailPage() {
       <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card data-testid="visualization-nodes-card">
           <CardHeader>
-            <CardTitle>Nodi ({nodes.data?.total ?? "—"})</CardTitle>
+            <CardTitle>{t("visualizations.detail.nodesTitle", { count: nodes.data?.total ?? t("visualizations.detail.dash") })}</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {nodes.isLoading ? (
-              <div className="p-6 text-sm text-muted-foreground">Caricamento…</div>
+              <div className="p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
             ) : nodes.data && nodes.data.items.length === 0 ? (
               <div className="p-6 text-sm text-muted-foreground" data-testid="visualization-nodes-empty">
-                Nessun nodo.
+                {t("visualizations.detail.nodesEmpty")}
               </div>
             ) : (
               <ul className="divide-y divide-border" data-testid="visualization-nodes-list">
@@ -162,20 +164,20 @@ export default function VisualizationDetailPage() {
 
         <Card data-testid="visualization-edges-card">
           <CardHeader>
-            <CardTitle>Edge ({edges.data?.total ?? "—"})</CardTitle>
+            <CardTitle>{t("visualizations.detail.edgesTitle", { count: edges.data?.total ?? t("visualizations.detail.dash") })}</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {edges.isLoading ? (
-              <div className="p-6 text-sm text-muted-foreground">Caricamento…</div>
+              <div className="p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
             ) : edges.data && edges.data.items.length === 0 ? (
               <div className="p-6 text-sm text-muted-foreground" data-testid="visualization-edges-empty">
-                Nessun edge.
+                {t("visualizations.detail.edgesEmpty")}
               </div>
             ) : (
               <ul className="divide-y divide-border" data-testid="visualization-edges-list">
                 {edges.data!.items.slice(0, 20).map((e) => (
                   <li key={e.edgeId} className="px-4 py-2 font-mono text-xs text-foreground" data-testid="visualization-edge-item">
-                    {e.sourceNodeId.slice(0, 6)} → {e.targetNodeId.slice(0, 6)}
+                    {e.sourceNodeId.slice(0, 6)}{t("visualizations.detail.edgeArrow")}{e.targetNodeId.slice(0, 6)}
                     <span className="ml-2 uppercase text-muted-foreground">{e.type}</span>
                   </li>
                 ))}
@@ -186,7 +188,7 @@ export default function VisualizationDetailPage() {
       </section>
 
       <p className="text-xs text-muted-foreground">
-        Renderer Mermaid attivato (max 50 nodi · 200 edge). Liste nodi/edge complete sopra (max 20 + 20 visibili).
+        {t("visualizations.detail.note")}
       </p>
     </main>
   );

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,6 +35,7 @@ const TypingFormSchema = z.object({
 type TypingFormValues = z.infer<typeof TypingFormSchema>;
 
 export default function EnterpriseTypingWizardPage() {
+  const { t } = useTranslation("admin");
   const params = useParams<{ tenantId: string }>();
   const tenantId = params.tenantId;
   const qc = useQueryClient();
@@ -80,21 +82,21 @@ export default function EnterpriseTypingWizardPage() {
     <main data-testid="enterprise-typing-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="enterprise-typing-title"
-        title="Enterprise Typing Wizard"
-        description="Tipizza l'enterprise selezionando family, variante, operating model e size band."
+        title={t("enterpriseTyping.title")}
+        description={t("enterpriseTyping.description")}
         breadcrumbs={
           <Link
             href={`/tenants/${tenantId}`}
             className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             data-testid="enterprise-typing-back"
           >
-            ← Tenant
+            {t("enterpriseTyping.back")}
           </Link>
         }
       />
 
       <Card>
-        <CardHeader><CardTitle>Profilo</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("enterpriseTyping.cardTitle")}</CardTitle></CardHeader>
         <CardContent>
           <form
             onSubmit={(e) => { void onSubmit(e); }}
@@ -102,65 +104,65 @@ export default function EnterpriseTypingWizardPage() {
             data-testid="enterprise-typing-form"
           >
             <div className="space-y-1">
-              <label htmlFor="blueprintFamilyId" className="text-sm font-medium text-foreground">Blueprint family</label>
+              <label htmlFor="blueprintFamilyId" className="text-sm font-medium text-foreground">{t("enterpriseTyping.familyLabel")}</label>
               <select
                 id="blueprintFamilyId"
                 data-testid="typing-family"
                 className="w-full rounded-control border border-border bg-background px-2 py-1 text-sm text-foreground"
                 {...register("blueprintFamilyId", { onChange: (e) => setFamilyId(e.target.value) })}
               >
-                <option value="">— Seleziona —</option>
+                <option value="">{t("enterpriseTyping.selectPlaceholder")}</option>
                 {families.data?.items.map((f) => (
                   <option key={f.blueprintFamilyId} value={f.blueprintFamilyId}>{f.name}</option>
                 ))}
               </select>
               {errors.blueprintFamilyId && (
-                <p className="mt-1 text-xs text-danger">Famiglia richiesta.</p>
+                <p className="mt-1 text-xs text-danger">{t("enterpriseTyping.familyRequired")}</p>
               )}
             </div>
 
             <div className="space-y-1">
-              <label htmlFor="blueprintVariantId" className="text-sm font-medium text-foreground">Variante</label>
+              <label htmlFor="blueprintVariantId" className="text-sm font-medium text-foreground">{t("enterpriseTyping.variantLabel")}</label>
               <select
                 id="blueprintVariantId"
                 data-testid="typing-variant"
                 className="w-full rounded-control border border-border bg-background px-2 py-1 text-sm text-foreground"
                 {...register("blueprintVariantId")}
               >
-                <option value="">— Seleziona —</option>
+                <option value="">{t("enterpriseTyping.selectPlaceholder")}</option>
                 {variantsForFamily.map((v) => (
                   <option key={v.blueprintVariantId} value={v.blueprintVariantId}>{v.name}</option>
                 ))}
               </select>
               {errors.blueprintVariantId && (
-                <p className="mt-1 text-xs text-danger">Variante richiesta.</p>
+                <p className="mt-1 text-xs text-danger">{t("enterpriseTyping.variantRequired")}</p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label htmlFor="operatingModelId" className="text-sm font-medium text-foreground">Operating model</label>
+                <label htmlFor="operatingModelId" className="text-sm font-medium text-foreground">{t("enterpriseTyping.modelLabel")}</label>
                 <select
                   id="operatingModelId"
                   data-testid="typing-model"
                   className="w-full rounded-control border border-border bg-background px-2 py-1 text-sm text-foreground"
                   {...register("operatingModelId")}
                 >
-                  <option value="">— Nessuno —</option>
+                  <option value="">{t("enterpriseTyping.nonePlaceholderMale")}</option>
                   {models.data?.items.map((m) => (
                     <option key={m.operatingModelId} value={m.operatingModelId}>{m.name}</option>
                   ))}
                 </select>
               </div>
               <div className="space-y-1">
-                <label htmlFor="enterpriseSizeBandId" className="text-sm font-medium text-foreground">Size band</label>
+                <label htmlFor="enterpriseSizeBandId" className="text-sm font-medium text-foreground">{t("enterpriseTyping.sizeBandLabel")}</label>
                 <select
                   id="enterpriseSizeBandId"
                   data-testid="typing-sizeband"
                   className="w-full rounded-control border border-border bg-background px-2 py-1 text-sm text-foreground"
                   {...register("enterpriseSizeBandId")}
                 >
-                  <option value="">— Nessuna —</option>
+                  <option value="">{t("enterpriseTyping.nonePlaceholderFemale")}</option>
                   {bands.data?.items.map((b) => (
                     <option key={b.enterpriseSizeBandId} value={b.enterpriseSizeBandId}>{b.name}</option>
                   ))}
@@ -170,12 +172,12 @@ export default function EnterpriseTypingWizardPage() {
 
             {create.isError && (
               <p className="text-sm text-danger" data-testid="typing-error">
-                Errore creazione profilo.
+                {t("enterpriseTyping.createError")}
               </p>
             )}
             {create.isSuccess && (
               <p className="text-sm text-success" data-testid="typing-success">
-                Profilo creato.
+                {t("enterpriseTyping.createSuccess")}
               </p>
             )}
 
@@ -184,7 +186,7 @@ export default function EnterpriseTypingWizardPage() {
               data-testid="typing-submit"
               disabled={isSubmitting || create.isPending}
             >
-              {create.isPending ? "Creazione…" : "Crea profilo"}
+              {create.isPending ? t("enterpriseTyping.submitting") : t("enterpriseTyping.submit")}
             </Button>
           </form>
         </CardContent>

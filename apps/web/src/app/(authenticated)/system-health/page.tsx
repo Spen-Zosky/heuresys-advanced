@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { useCurrentUser } from "../../../lib/api/auth";
 import { SystemHealthDashboard } from "../../../components/SystemHealthDashboard";
 
@@ -15,13 +16,14 @@ import { SystemHealthDashboard } from "../../../components/SystemHealthDashboard
  * the authenticated layout shows around the DashboardShell).
  */
 export default function SystemHealthPage() {
+  const { t } = useTranslation("admin");
   const router = useRouter();
   const me = useCurrentUser();
 
   if (me.isLoading) {
     return (
       <main className="flex h-screen items-center justify-center">
-        <span className="text-sm opacity-60">Caricamento…</span>
+        <span className="text-sm opacity-60">{t("common:loading")}</span>
       </main>
     );
   }

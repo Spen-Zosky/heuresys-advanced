@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Badge, Card, CardContent, ErrorState, PageHeader, Spinner } from "@heuresys/ui";
 import { Check } from "lucide-react";
 import { apiFetch } from "../../../../lib/api/fetch";
@@ -14,6 +15,7 @@ interface RolePermItem {
 }
 
 export default function AdminRolesPage() {
+  const { t } = useTranslation("admin");
   const rp = useQuery({
     queryKey: ["auth", "role-permissions"],
     queryFn: () => apiFetch<{ items: RolePermItem[]; total: number }>("/v1/auth/role-permissions"),
@@ -38,14 +40,14 @@ export default function AdminRolesPage() {
   }, [rp.data]);
 
   const countLabel = rp.data
-    ? `${roles.length} ruoli · ${perms.length} permessi · ${rp.data.total} mapping`
-    : "Caricamento…";
+    ? t("roles.count", { roles: roles.length, perms: perms.length, total: rp.data.total })
+    : t("common:loading");
 
   return (
     <main data-testid="admin-roles-page" className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <PageHeader
-        title="Ruoli × Permessi"
-        description="Matrice sola lettura — la modifica live di permessi e ruoli arriverà in MVP-3."
+        title={t("roles.title")}
+        description={t("roles.description")}
         badges={
           <Badge variant="secondary" data-testid="admin-roles-count">
             {countLabel}
@@ -57,13 +59,13 @@ export default function AdminRolesPage() {
         <CardContent className="p-0 overflow-x-auto">
           {rp.isLoading ? (
             <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
-              <Spinner /> Caricamento…
+              <Spinner /> {t("common:loading")}
             </div>
           ) : rp.isError ? (
             <div className="p-6" data-testid="admin-roles-error">
               <ErrorState
-                title="Accesso negato"
-                description="Questa matrice richiede il ruolo PLATFORM_ADMIN."
+                title={t("roles.accessDeniedTitle")}
+                description={t("roles.accessDeniedDesc")}
                 retry={() => void rp.refetch()}
               />
             </div>
@@ -71,7 +73,7 @@ export default function AdminRolesPage() {
             <table className="min-w-full border-collapse text-xs" data-testid="admin-roles-table">
               <thead>
                 <tr className="sticky top-0 border-b border-border bg-card text-left text-muted-foreground">
-                  <th className="px-3 py-2 font-mono font-medium">permission \ role</th>
+                  <th className="px-3 py-2 font-mono font-medium">{t("roles.headerCell")}</th>
                   {roles.map((r) => (
                     <th
                       key={r}
@@ -102,10 +104,10 @@ export default function AdminRolesPage() {
                           {has ? (
                             <Check
                               className="mx-auto h-3.5 w-3.5 text-green-600"
-                              aria-label="granted"
+                              aria-label={t("roles.granted")}
                             />
                           ) : (
-                            <span className="text-muted-foreground/40" aria-label="denied">·</span>
+                            <span className="text-muted-foreground/40" aria-label={t("roles.denied")}>·</span>
                           )}
                         </td>
                       );

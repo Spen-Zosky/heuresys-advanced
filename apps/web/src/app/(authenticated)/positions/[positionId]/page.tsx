@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
@@ -29,6 +30,7 @@ interface PositionDetail {
 }
 
 export default function PositionDetailPage() {
+  const { t } = useTranslation("admin");
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
   const position = useQuery({
@@ -40,7 +42,7 @@ export default function PositionDetailPage() {
   if (position.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">Caricamento…</span>
+        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
       </main>
     );
   }
@@ -48,8 +50,8 @@ export default function PositionDetailPage() {
     const code = isApiError(position.error) ? position.error.status : 0;
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="position-error">
-        <Link href="/positions" className="text-sm underline">← Posizioni</Link>
-        <p className="mt-4 text-destructive">{code === 404 ? "Posizione non trovata." : "Errore di caricamento."}</p>
+        <Link href="/positions" className="text-sm underline">{t("positions.detail.back")}</Link>
+        <p className="mt-4 text-destructive">{code === 404 ? t("positions.detail.notFound") : t("positions.detail.loadError")}</p>
       </main>
     );
   }
@@ -61,34 +63,34 @@ export default function PositionDetailPage() {
         title={p.title}
         breadcrumbs={
           <Link href="/positions" data-testid="position-back" className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline">
-            ← Posizioni
+            {t("positions.detail.back")}
           </Link>
         }
         badges={
           <>
             <span data-testid="position-code" className="font-mono text-sm text-muted-foreground">{p.code}</span>
             <StatusBadge value={p.criticality} />
-            <StatusPill tone={p.isActive ? "success" : "neutral"}>{p.isActive ? "Attiva" : "Inattiva"}</StatusPill>
+            <StatusPill tone={p.isActive ? "success" : "neutral"}>{p.isActive ? t("positions.detail.activeOn") : t("positions.detail.activeOff")}</StatusPill>
           </>
         }
       />
 
       <Card>
-        <CardHeader><CardTitle>Position Intelligence Profile</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("positions.detail.cardTitle")}</CardTitle></CardHeader>
         <CardContent>
           <FieldGrid
             testId="position-fields"
             fields={[
-              { label: "Position ID", value: p.positionId, mono: true },
-              { label: "Tenant ID", value: p.tenantId, mono: true },
-              { label: "Org Unit", value: p.organizationUnitId ?? "—", mono: true },
-              { label: "Job Role", value: p.jobRoleId ?? "—", mono: true },
-              { label: "Owner", value: p.ownerUserId ?? "—", mono: true },
-              { label: "Riferisce a", value: p.reportsToPositionId ?? "—", mono: true },
-              { label: "Criticità", value: <StatusBadge value={p.criticality} /> },
-              { label: "Peso economico", value: p.economicWeight ?? "—" },
-              { label: "In vigore dal", value: p.effectiveFrom ?? "—" },
-              { label: "In vigore al", value: p.effectiveTo ?? "—" },
+              { label: t("positions.detail.fields.positionId"), value: p.positionId, mono: true },
+              { label: t("positions.detail.fields.tenantId"), value: p.tenantId, mono: true },
+              { label: t("positions.detail.fields.orgUnit"), value: p.organizationUnitId ?? t("positions.detail.dash"), mono: true },
+              { label: t("positions.detail.fields.jobRole"), value: p.jobRoleId ?? t("positions.detail.dash"), mono: true },
+              { label: t("positions.detail.fields.owner"), value: p.ownerUserId ?? t("positions.detail.dash"), mono: true },
+              { label: t("positions.detail.fields.reportsTo"), value: p.reportsToPositionId ?? t("positions.detail.dash"), mono: true },
+              { label: t("positions.detail.fields.criticality"), value: <StatusBadge value={p.criticality} /> },
+              { label: t("positions.detail.fields.economicWeight"), value: p.economicWeight ?? t("positions.detail.dash") },
+              { label: t("positions.detail.fields.effectiveFrom"), value: p.effectiveFrom ?? t("positions.detail.dash") },
+              { label: t("positions.detail.fields.effectiveTo"), value: p.effectiveTo ?? t("positions.detail.dash") },
             ]}
           />
         </CardContent>

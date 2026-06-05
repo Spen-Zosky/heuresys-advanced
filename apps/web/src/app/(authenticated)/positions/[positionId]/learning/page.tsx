@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
@@ -17,6 +18,7 @@ interface LearningGap {
 }
 
 export default function PositionLearningPage() {
+  const { t } = useTranslation("admin");
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
   // No dedicated /positions/:id/learning endpoint — compose from
@@ -36,25 +38,25 @@ export default function PositionLearningPage() {
     <main data-testid="position-learning-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="position-learning-title"
-        title="Gap formativi della posizione"
+        title={t("positions.learning.title")}
         breadcrumbs={
           <Link
             href={`/positions/${positionId}`}
             data-testid="position-learning-back"
             className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
-            ← Posizione
+            {t("positions.learning.back")}
           </Link>
         }
         badges={
           <span data-testid="position-learning-count" className="text-sm text-muted-foreground">
-            {gaps.data ? `${gaps.data.total} gap aperti` : "Caricamento…"}
+            {gaps.data ? t("positions.learning.count", { count: gaps.data.total }) : t("common:loading")}
           </span>
         }
       />
 
       <Card>
-        <CardHeader><CardTitle>Gap aperti</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("positions.learning.cardTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
           <EntityTable<LearningGap>
             isLoading={gaps.isLoading}
@@ -63,13 +65,13 @@ export default function PositionLearningPage() {
             rowKey={(g) => g.learningGapId}
             rowTestId="position-learning-row"
             emptyTestId="position-learning-empty"
-            emptyTitle="Nessun gap formativo associato a questa posizione."
-            caption="Gap formativi aperti per la posizione"
+            emptyTitle={t("positions.learning.empty")}
+            caption={t("positions.learning.caption")}
             columns={[
-              { header: "User", cell: (g) => <span className="font-mono text-xs">{g.userId.slice(0, 8)}</span> },
-              { header: "Skill", cell: (g) => <span className="font-mono text-xs">{g.skillId?.slice(0, 8) ?? "—"}</span> },
-              { header: "Severità", cell: (g) => <StatusBadge value={g.severity} /> },
-              { header: "Rilevato", cell: (g) => <span className="text-xs">{g.detectedAt.slice(0, 10)}</span> },
+              { header: t("positions.learning.columns.user"), cell: (g) => <span className="font-mono text-xs">{g.userId.slice(0, 8)}</span> },
+              { header: t("positions.learning.columns.skill"), cell: (g) => <span className="font-mono text-xs">{g.skillId?.slice(0, 8) ?? t("positions.learning.dash")}</span> },
+              { header: t("positions.learning.columns.severity"), cell: (g) => <StatusBadge value={g.severity} /> },
+              { header: t("positions.learning.columns.detected"), cell: (g) => <span className="text-xs">{g.detectedAt.slice(0, 10)}</span> },
             ]}
           />
         </CardContent>

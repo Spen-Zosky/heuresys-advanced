@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
@@ -22,59 +24,63 @@ interface TenantsList {
   total: number;
 }
 
-const COLUMNS: DataColumn<Tenant>[] = [
-  {
-    header: "Nome",
-    cell: (t) => (
-      <div className="flex flex-col">
-        <Link
-          href={`/tenants/${t.tenantId}`}
-          data-testid="tenant-link"
-          className="font-medium text-foreground underline-offset-2 hover:underline"
-        >
-          {t.tenantName ?? "ND"}
-        </Link>
-        <span className="font-mono text-xs text-muted-foreground">{t.tenantCode}</span>
-      </div>
-    ),
-  },
-  {
-    header: "Country",
-    cell: (t) => <span className="text-xs text-muted-foreground">{t.tenantCountryCode ?? "—"}</span>,
-  },
-  {
-    header: "Size",
-    cell: (t) => <span className="text-xs text-muted-foreground">{t.tenantSizeBand ?? "—"}</span>,
-  },
-  { header: "Stato", cell: (t) => <StatusBadge value={t.tenantStatus} /> },
-];
-
 export default function TenantsListPage() {
+  const { t } = useTranslation("admin");
   const tenants = useQuery({
     queryKey: ["tenants", "list"],
     queryFn: () => apiFetch<TenantsList>("/v1/tenants?limit=200"),
   });
+
+  const columns = useMemo<DataColumn<Tenant>[]>(
+    () => [
+      {
+        header: t("tenants.columns.name"),
+        cell: (row) => (
+          <div className="flex flex-col">
+            <Link
+              href={`/tenants/${row.tenantId}`}
+              data-testid="tenant-link"
+              className="font-medium text-foreground underline-offset-2 hover:underline"
+            >
+              {row.tenantName ?? t("tenants.fallbackName")}
+            </Link>
+            <span className="font-mono text-xs text-muted-foreground">{row.tenantCode}</span>
+          </div>
+        ),
+      },
+      {
+        header: t("tenants.columns.country"),
+        cell: (row) => <span className="text-xs text-muted-foreground">{row.tenantCountryCode ?? t("tenants.dash")}</span>,
+      },
+      {
+        header: t("tenants.columns.size"),
+        cell: (row) => <span className="text-xs text-muted-foreground">{row.tenantSizeBand ?? t("tenants.dash")}</span>,
+      },
+      { header: t("tenants.columns.status"), cell: (row) => <StatusBadge value={row.tenantStatus} /> },
+    ],
+    [t],
+  );
 
   return (
     <DataTablePanel<Tenant>
       pageTestId="tenants-page"
       titleTestId="tenants-title"
       countTestId="tenants-count"
-      title="Tenant"
-      description="Registry dei tenant con codice, country e stato."
-      count={tenants.data ? `${tenants.data.total} totali` : undefined}
+      title={t("tenants.title")}
+      description={t("tenants.description")}
+      count={tenants.data ? t("tenants.count", { count: tenants.data.total }) : undefined}
       isLoading={tenants.isLoading}
       isError={tenants.isError}
       errorTestId="tenants-error"
-      errorMessage="Accesso negato o errore di caricamento."
+      errorMessage={t("tenants.errorMessage")}
       rows={tenants.data?.items ?? []}
-      rowKey={(t) => t.tenantId}
+      rowKey={(row) => row.tenantId}
       rowTestId="tenants-row"
-      columns={COLUMNS}
+      columns={columns}
       emptyTestId="tenants-empty"
-      emptyTitle="Nessun tenant"
-      emptyDescription="Non ci sono tenant registrati."
-      caption="Registry tenant"
+      emptyTitle={t("tenants.emptyTitle")}
+      emptyDescription={t("tenants.emptyDescription")}
+      caption={t("tenants.caption")}
     />
   );
 }

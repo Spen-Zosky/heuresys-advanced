@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
@@ -18,6 +19,7 @@ interface PositionSkillReq {
 }
 
 export default function PositionSkillsPage() {
+  const { t } = useTranslation("admin");
   const params = useParams<{ positionId: string }>();
   const positionId = params.positionId;
   const skills = useQuery({
@@ -32,25 +34,25 @@ export default function PositionSkillsPage() {
     <main data-testid="position-skills-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="position-skills-title"
-        title="Skill richieste"
+        title={t("positions.skills.title")}
         breadcrumbs={
           <Link
             href={`/positions/${positionId}`}
             data-testid="position-skills-back"
             className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
-            ← Posizione
+            {t("positions.skills.back")}
           </Link>
         }
         badges={
           <span data-testid="position-skills-count" className="text-sm text-muted-foreground">
-            {skills.data ? `${items.length} skill associate` : "Caricamento…"}
+            {skills.data ? t("positions.skills.count", { count: items.length }) : t("common:loading")}
           </span>
         }
       />
 
       <Card>
-        <CardHeader><CardTitle>Requisiti</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("positions.skills.cardTitle")}</CardTitle></CardHeader>
         <CardContent className="p-0">
           <EntityTable<PositionSkillReq>
             isLoading={skills.isLoading}
@@ -59,13 +61,13 @@ export default function PositionSkillsPage() {
             rowKey={(s) => s.positionSkillRequirementId}
             rowTestId="position-skill-row"
             emptyTestId="position-skills-empty"
-            emptyTitle="Nessuna skill richiesta dichiarata."
-            caption="Skill richieste dalla posizione"
+            emptyTitle={t("positions.skills.empty")}
+            caption={t("positions.skills.caption")}
             columns={[
-              { header: "Codice", cell: (s) => <span className="font-mono text-xs">{s.skillCode}</span> },
-              { header: "Skill", cell: (s) => s.skillName },
-              { header: "Proficiency", cell: (s) => <StatusBadge value={s.proficiency} /> },
-              { header: "Peso", cell: (s) => <span className="text-xs">{s.weight}</span> },
+              { header: t("positions.skills.columns.code"), cell: (s) => <span className="font-mono text-xs">{s.skillCode}</span> },
+              { header: t("positions.skills.columns.skill"), cell: (s) => s.skillName },
+              { header: t("positions.skills.columns.proficiency"), cell: (s) => <StatusBadge value={s.proficiency} /> },
+              { header: t("positions.skills.columns.weight"), cell: (s) => <span className="text-xs">{s.weight}</span> },
             ]}
           />
         </CardContent>

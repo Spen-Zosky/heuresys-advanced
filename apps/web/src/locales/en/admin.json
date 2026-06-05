@@ -1,1 +1,283 @@
-{}
+{
+  "users": {
+    "title": "Users",
+    "description": "Tenant users with status and type.",
+    "count": "{{count}} total",
+    "errorMessage": "Unable to load the users.",
+    "emptyTitle": "No users",
+    "emptyDescription": "There are no users in the tenant.",
+    "caption": "User list",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "status": "Status",
+      "type": "Type"
+    },
+    "noName": "—",
+    "detail": {
+      "back": "← Users",
+      "notFound": "User not found.",
+      "loadError": "Loading error.",
+      "unnamed": "(unnamed)",
+      "cardTitle": "Profile",
+      "fields": {
+        "userId": "User ID",
+        "tenantId": "Tenant ID",
+        "status": "Status",
+        "type": "Type",
+        "locale": "Locale",
+        "timezone": "Timezone",
+        "synthetic": "Synthetic",
+        "createdAt": "Created"
+      },
+      "syntheticYes": "yes",
+      "syntheticNo": "no",
+      "dash": "—"
+    }
+  },
+  "tenants": {
+    "title": "Tenants",
+    "description": "Tenant registry with code, country and status.",
+    "count": "{{count}} total",
+    "errorMessage": "Access denied or loading error.",
+    "emptyTitle": "No tenants",
+    "emptyDescription": "There are no registered tenants.",
+    "caption": "Tenant registry",
+    "columns": {
+      "name": "Name",
+      "country": "Country",
+      "size": "Size",
+      "status": "Status"
+    },
+    "fallbackName": "N/A",
+    "dash": "—",
+    "detail": {
+      "back": "← Tenants",
+      "notFound": "Tenant not found.",
+      "loadError": "Loading error.",
+      "tabs": {
+        "overview": "Overview",
+        "typing": "Enterprise Typing",
+        "users": "Users"
+      },
+      "overviewTitle": "Profile",
+      "typingTitle": "Enterprise Typing Profiles",
+      "usersTitle": "Users",
+      "fields": {
+        "legalName": "Legal name",
+        "country": "Country",
+        "industry": "Industry",
+        "sizeBand": "Size band",
+        "status": "Status",
+        "tenantId": "Tenant ID",
+        "createdAt": "Created"
+      },
+      "dash": "—",
+      "wizardLink": "Open Enterprise Typing wizard →",
+      "typingEmpty": "No typing profile registered.",
+      "usersHint": "The full user list is managed on its dedicated page.",
+      "usersLink": "Open /users →"
+    }
+  },
+  "enterpriseTyping": {
+    "title": "Enterprise Typing Wizard",
+    "description": "Type the enterprise by selecting family, variant, operating model and size band.",
+    "back": "← Tenant",
+    "cardTitle": "Profile",
+    "familyLabel": "Blueprint family",
+    "variantLabel": "Variant",
+    "modelLabel": "Operating model",
+    "sizeBandLabel": "Size band",
+    "selectPlaceholder": "— Select —",
+    "nonePlaceholderMale": "— None —",
+    "nonePlaceholderFemale": "— None —",
+    "familyRequired": "Family is required.",
+    "variantRequired": "Variant is required.",
+    "createError": "Profile creation error.",
+    "createSuccess": "Profile created.",
+    "submit": "Create profile",
+    "submitting": "Creating…"
+  },
+  "organization": {
+    "title": "Organization Units",
+    "description": "Hierarchy of the tenant's organizational units.",
+    "count": "{{count}} units",
+    "errorMessage": "Unable to load the organizational units.",
+    "emptyTitle": "No OU",
+    "emptyDescription": "There are no organizational units.",
+    "caption": "Organizational hierarchy",
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "parent": "Parent",
+      "active": "Active"
+    },
+    "dash": "—",
+    "activeYes": "yes",
+    "activeNo": "no"
+  },
+  "orgChart": {
+    "title": "Org chart",
+    "back": "← Organization",
+    "count": "{{count}} ORG_CHART graphs available",
+    "cardTitle": "Org chart ({{label}})",
+    "nodeCount": "{{count}} positions",
+    "dash": "—",
+    "emptyPrefix": "No ORG_CHART graph registered for the tenant. Generate it with",
+    "seedFile": "db/seeds/org_chart_rtl_demo.sql",
+    "noNodes": "The graph has no nodes.",
+    "graphAria": "Interactive org chart of positions",
+    "note": "Interactive force graph (zoom/pan). Nodes are the tenant's active positions; edges are the reports-to relationships."
+  },
+  "positions": {
+    "title": "Positions",
+    "description": "Tenant positions with criticality and status.",
+    "count": "{{count}} total",
+    "errorMessage": "Unable to load the positions.",
+    "emptyTitle": "No positions",
+    "emptyDescription": "There are no positions in the tenant.",
+    "caption": "Position list",
+    "columns": {
+      "code": "Code",
+      "title": "Title",
+      "criticality": "Criticality",
+      "active": "Active"
+    },
+    "activeOn": "Active",
+    "activeOff": "Inactive",
+    "detail": {
+      "back": "← Positions",
+      "notFound": "Position not found.",
+      "loadError": "Loading error.",
+      "activeOn": "Active",
+      "activeOff": "Inactive",
+      "cardTitle": "Position Intelligence Profile",
+      "fields": {
+        "positionId": "Position ID",
+        "tenantId": "Tenant ID",
+        "orgUnit": "Org Unit",
+        "jobRole": "Job Role",
+        "owner": "Owner",
+        "reportsTo": "Reports to",
+        "criticality": "Criticality",
+        "economicWeight": "Economic weight",
+        "effectiveFrom": "Effective from",
+        "effectiveTo": "Effective to"
+      },
+      "dash": "—"
+    },
+    "kpis": {
+      "title": "Required KPIs",
+      "back": "← Position",
+      "count": "{{count}} KPI linked",
+      "cardTitle": "Requirements",
+      "empty": "No required KPI declared.",
+      "caption": "KPIs required by the position",
+      "columns": {
+        "code": "Code",
+        "kpi": "KPI",
+        "weight": "Weight",
+        "template": "Template"
+      }
+    },
+    "learning": {
+      "title": "Position learning gaps",
+      "back": "← Position",
+      "count": "{{count}} gap open",
+      "cardTitle": "Open gaps",
+      "empty": "No learning gap linked to this position.",
+      "caption": "Open learning gaps for the position",
+      "columns": {
+        "user": "User",
+        "skill": "Skill",
+        "severity": "Severity",
+        "detected": "Detected"
+      },
+      "dash": "—"
+    },
+    "skills": {
+      "title": "Required skills",
+      "back": "← Position",
+      "count": "{{count}} skill linked",
+      "cardTitle": "Requirements",
+      "empty": "No required skill declared.",
+      "caption": "Skills required by the position",
+      "columns": {
+        "code": "Code",
+        "skill": "Skill",
+        "proficiency": "Proficiency",
+        "weight": "Weight"
+      }
+    }
+  },
+  "roles": {
+    "title": "Roles × Permissions",
+    "description": "Read-only matrix — live editing of permissions and roles is coming in MVP-3.",
+    "count": "{{roles}} roles · {{perms}} permissions · {{total}} mappings",
+    "accessDeniedTitle": "Access denied",
+    "accessDeniedDesc": "This matrix requires the PLATFORM_ADMIN role.",
+    "headerCell": "permission \\ role",
+    "granted": "granted",
+    "denied": "denied"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Cross-module overview of your operating scope.",
+    "error": "Unable to load the dashboard.",
+    "scope": "Scope {{kind}} · {{role}}",
+    "trendDesc": "vs previous week",
+    "counters": {
+      "users": "Users",
+      "positions": "Positions",
+      "organizationUnits": "Org Units",
+      "learningPaths": "Learning Paths",
+      "learningGaps": "Learning Gaps",
+      "tenants": "Tenants",
+      "blueprints": "Blueprints",
+      "recommendations": "Proposed rewards"
+    },
+    "gapsTitle": "Recent critical/high gaps",
+    "gapsEmptyTitle": "No critical gaps",
+    "gapsEmptyDesc": "There are no critical or high gaps open at the moment.",
+    "gapGeneral": "General",
+    "activityTitle": "Recent activity",
+    "activityEmptyTitle": "No recent activity",
+    "activityEmptyDesc": "Recent actions in your scope will appear here.",
+    "activitySubtitle": "Scope {{kind}}"
+  },
+  "visualizations": {
+    "title": "Visualizations",
+    "description": "Registered graphs with type and status.",
+    "count": "{{count}} graphs",
+    "countLoading": "…",
+    "errorMessage": "Unable to load the graphs.",
+    "emptyTitle": "No graphs",
+    "emptyDescription": "No graph registered.",
+    "caption": "Graph browser",
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "status": "Status"
+    },
+    "chartSeries": "Graphs",
+    "distributionTitle": "Distribution by type",
+    "chartAria": "Graph distribution by type",
+    "noData": "No data.",
+    "detail": {
+      "back": "← Visualizations",
+      "notFound": "Graph not found.",
+      "loadError": "Error.",
+      "diagramTitle": "Diagram",
+      "diagramAria": "Diagram of graph {{name}}",
+      "nodesTitle": "Nodes ({{count}})",
+      "edgesTitle": "Edges ({{count}})",
+      "dash": "—",
+      "nodesEmpty": "No nodes.",
+      "edgesEmpty": "No edges.",
+      "edgeArrow": " → ",
+      "note": "Mermaid renderer active (max 50 nodes · 200 edges). Full node/edge lists above (max 20 + 20 visible)."
+    }
+  }
+}

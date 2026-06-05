@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Badge, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
@@ -22,25 +24,28 @@ interface TypeDistItem {
   count: number;
 }
 
-const COLUMNS: DataColumn<VisualizationGraph>[] = [
-  { header: "Codice", cell: (g) => <span className="font-mono text-xs">{g.code}</span> },
-  {
-    header: "Nome",
-    cell: (g) => (
-      <Link
-        href={`/visualizations/${g.graphId}`}
-        data-testid="visualization-link"
-        className="font-medium text-foreground underline-offset-2 hover:underline"
-      >
-        {g.name}
-      </Link>
-    ),
-  },
-  { header: "Tipo", cell: (g) => <span className="text-xs uppercase text-muted-foreground">{g.type.replace(/_/g, " ")}</span> },
-  { header: "Stato", cell: (g) => <StatusBadge value={g.isActive ? "ACTIVE" : "INACTIVE"} /> },
-];
+/** Donut option: type distribution. The series name is passed in already
+ *  translated (i18n is a render-time hook), never resolved at module scope. */
+function typeChartOption(items: TypeDistItem[], labels: { series: string }) {
+  return {
+    tooltip: { trigger: "item" as const, formatter: "{b}: {c} ({d}%)" },
+    legend: { type: "scroll" as const, bottom: 0, textStyle: { color: "#94a3b8", fontSize: 11 } },
+    series: [
+      {
+        name: labels.series,
+        type: "pie" as const,
+        radius: ["45%", "72%"],
+        avoidLabelOverlap: true,
+        itemStyle: { borderColor: "transparent", borderWidth: 2 },
+        label: { show: false },
+        data: items.map((i) => ({ name: i.type.replace(/_/g, " "), value: i.count })),
+      },
+    ],
+  };
+}
 
 export default function VisualizationsPage() {
+  const { t } = useTranslation("admin");
   const graphs = useQuery({
     queryKey: ["visualization-graphs"],
     queryFn: () => apiFetch<{ items: VisualizationGraph[]; total: number }>("/v1/visualization-graphs?limit=200"),
@@ -51,31 +56,36 @@ export default function VisualizationsPage() {
     queryFn: () => apiFetch<{ items: TypeDistItem[]; total: number }>("/v1/visualization-graphs/summary"),
   });
 
-  const chartOption = {
-    tooltip: { trigger: "item" as const, formatter: "{b}: {c} ({d}%)" },
-    legend: { type: "scroll" as const, bottom: 0, textStyle: { color: "#94a3b8", fontSize: 11 } },
-    series: [
+  const columns = useMemo<DataColumn<VisualizationGraph>[]>(
+    () => [
+      { header: t("visualizations.columns.code"), cell: (g) => <span className="font-mono text-xs">{g.code}</span> },
       {
-        name: "Grafici",
-        type: "pie" as const,
-        radius: ["45%", "72%"],
-        avoidLabelOverlap: true,
-        itemStyle: { borderColor: "transparent", borderWidth: 2 },
-        label: { show: false },
-        data: (summary.data?.items ?? []).map((i) => ({ name: i.type.replace(/_/g, " "), value: i.count })),
+        header: t("visualizations.columns.name"),
+        cell: (g) => (
+          <Link
+            href={`/visualizations/${g.graphId}`}
+            data-testid="visualization-link"
+            className="font-medium text-foreground underline-offset-2 hover:underline"
+          >
+            {g.name}
+          </Link>
+        ),
       },
+      { header: t("visualizations.columns.type"), cell: (g) => <span className="text-xs uppercase text-muted-foreground">{g.type.replace(/_/g, " ")}</span> },
+      { header: t("visualizations.columns.status"), cell: (g) => <StatusBadge value={g.isActive ? "ACTIVE" : "INACTIVE"} /> },
     ],
-  };
+    [t],
+  );
 
   return (
     <main data-testid="visualizations-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="visualizations-title"
-        title="Visualizations"
-        description="Grafici registrati con tipo e stato."
+        title={t("visualizations.title")}
+        description={t("visualizations.description")}
         badges={
           <Badge variant="secondary" data-testid="visualizations-count">
-            {graphs.data ? `${graphs.data.total} grafici` : "…"}
+            {graphs.data ? t("visualizations.count", { count: graphs.data.total }) : t("visualizations.countLoading")}
           </Badge>
         }
       />
@@ -84,26 +94,26 @@ export default function VisualizationsPage() {
         <EntityTable<VisualizationGraph>
           isLoading={graphs.isLoading}
           isError={graphs.isError}
-          errorMessage="Impossibile caricare i grafici."
+          errorMessage={t("visualizations.errorMessage")}
           rows={graphs.data?.items ?? []}
           rowKey={(g) => g.graphId}
           rowTestId="visualizations-row"
-          columns={COLUMNS}
+          columns={columns}
           emptyTestId="visualizations-empty"
-          emptyTitle="Nessun grafico"
-          emptyDescription="Nessun grafico registrato."
-          caption="Browser grafici"
+          emptyTitle={t("visualizations.emptyTitle")}
+          emptyDescription={t("visualizations.emptyDescription")}
+          caption={t("visualizations.caption")}
         />
         <div
           data-testid="visualizations-type-chart"
           className="rounded-card border border-border bg-card p-4 shadow-card"
         >
-          <h2 className="mb-2 text-sm font-medium text-foreground">Distribuzione per tipo</h2>
+          <h2 className="mb-2 text-sm font-medium text-foreground">{t("visualizations.distributionTitle")}</h2>
           {summary.data && summary.data.total > 0 ? (
-            <EChartsCard option={chartOption} height={260} ariaLabel="Distribuzione grafici per tipo" />
+            <EChartsCard option={typeChartOption(summary.data.items, { series: t("visualizations.chartSeries") })} height={260} ariaLabel={t("visualizations.chartAria")} />
           ) : (
             <p className="py-12 text-center text-xs text-muted-foreground">
-              {summary.isLoading ? "Caricamento…" : "Nessun dato."}
+              {summary.isLoading ? t("common:loading") : t("visualizations.noData")}
             </p>
           )}
         </div>

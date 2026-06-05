@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
@@ -38,16 +39,20 @@ interface EnterpriseProfile {
 
 type Tab = "overview" | "typing" | "users";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "overview", label: "Overview" },
-  { key: "typing", label: "Enterprise Typing" },
-  { key: "users", label: "Utenti" },
-];
-
 export default function TenantDetailPage() {
+  const { t } = useTranslation("admin");
   const params = useParams<{ tenantId: string }>();
   const tenantId = params.tenantId;
   const [tab, setTab] = useState<Tab>("overview");
+
+  const tabs = useMemo<{ key: Tab; label: string }[]>(
+    () => [
+      { key: "overview", label: t("tenants.detail.tabs.overview") },
+      { key: "typing", label: t("tenants.detail.tabs.typing") },
+      { key: "users", label: t("tenants.detail.tabs.users") },
+    ],
+    [t],
+  );
 
   const tenant = useQuery({
     queryKey: ["tenants", tenantId],
@@ -67,7 +72,7 @@ export default function TenantDetailPage() {
   if (tenant.isLoading) {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <span className="text-sm text-muted-foreground">Caricamento…</span>
+        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
       </main>
     );
   }
@@ -75,38 +80,38 @@ export default function TenantDetailPage() {
     const status = isApiError(tenant.error) ? tenant.error.status : 0;
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="tenant-error">
-        <Link href="/tenants" className="text-sm underline">← Tenant</Link>
+        <Link href="/tenants" className="text-sm underline">{t("tenants.detail.back")}</Link>
         <p className="mt-4 text-destructive">
-          {status === 404 ? "Tenant non trovato." : "Errore di caricamento."}
+          {status === 404 ? t("tenants.detail.notFound") : t("tenants.detail.loadError")}
         </p>
       </main>
     );
   }
-  const t = tenant.data!;
+  const tn = tenant.data!;
   return (
     <main data-testid="tenant-detail-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="tenant-name"
-        title={t.tenantName}
+        title={tn.tenantName}
         breadcrumbs={
           <Link
             href="/tenants"
             data-testid="tenant-back"
             className="text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
           >
-            ← Tenant
+            {t("tenants.detail.back")}
           </Link>
         }
         badges={
           <>
-            <span data-testid="tenant-code" className="font-mono text-sm text-muted-foreground">{t.tenantCode}</span>
-            <StatusBadge value={t.tenantStatus} />
+            <span data-testid="tenant-code" className="font-mono text-sm text-muted-foreground">{tn.tenantCode}</span>
+            <StatusBadge value={tn.tenantStatus} />
           </>
         }
       />
 
       <nav className="flex gap-1 border-b border-border" data-testid="tenant-tabs">
-        {TABS.map((tt) => (
+        {tabs.map((tt) => (
           <button
             key={tt.key}
             type="button"
@@ -125,26 +130,26 @@ export default function TenantDetailPage() {
 
       {tab === "overview" && (
         <Card data-testid="tenant-tab-content-overview">
-          <CardHeader><CardTitle>Anagrafica</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("tenants.detail.overviewTitle")}</CardTitle></CardHeader>
           <CardContent>
             <FieldGrid
               fields={[
-                { label: "Legal name", value: t.tenantLegalName ?? "—", testId: "tenant-legal-name" },
-                { label: "Country", value: t.tenantCountryCode ?? "—" },
-                { label: "Industry", value: t.tenantIndustryCode ?? "—" },
-                { label: "Size band", value: t.tenantSizeBand ?? "—" },
-                { label: "Stato", value: <StatusBadge value={t.tenantStatus} /> },
-                { label: "Tenant ID", value: t.tenantId, mono: true },
-                { label: "Creato", value: t.createdAt, mono: true },
+                { label: t("tenants.detail.fields.legalName"), value: tn.tenantLegalName ?? t("tenants.detail.dash"), testId: "tenant-legal-name" },
+                { label: t("tenants.detail.fields.country"), value: tn.tenantCountryCode ?? t("tenants.detail.dash") },
+                { label: t("tenants.detail.fields.industry"), value: tn.tenantIndustryCode ?? t("tenants.detail.dash") },
+                { label: t("tenants.detail.fields.sizeBand"), value: tn.tenantSizeBand ?? t("tenants.detail.dash") },
+                { label: t("tenants.detail.fields.status"), value: <StatusBadge value={tn.tenantStatus} /> },
+                { label: t("tenants.detail.fields.tenantId"), value: tn.tenantId, mono: true },
+                { label: t("tenants.detail.fields.createdAt"), value: tn.createdAt, mono: true },
               ]}
             />
             <p className="mt-4">
               <Link
-                href={`/tenants/${t.tenantId}/enterprise-typing`}
+                href={`/tenants/${tn.tenantId}/enterprise-typing`}
                 className="text-sm text-foreground underline-offset-2 hover:underline"
                 data-testid="tenant-typing-wizard-link"
               >
-                Apri wizard Enterprise Typing →
+                {t("tenants.detail.wizardLink")}
               </Link>
             </p>
           </CardContent>
@@ -153,13 +158,13 @@ export default function TenantDetailPage() {
 
       {tab === "typing" && (
         <Card data-testid="tenant-tab-content-typing">
-          <CardHeader><CardTitle>Profili Enterprise Typing</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("tenants.detail.typingTitle")}</CardTitle></CardHeader>
           <CardContent>
             {typing.isLoading ? (
-              <span className="text-sm text-muted-foreground">Caricamento…</span>
+              <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
             ) : typing.data && typing.data.items.length === 0 ? (
               <p className="text-sm text-muted-foreground" data-testid="tenant-typing-empty">
-                Nessun profilo di tipizzazione registrato.
+                {t("tenants.detail.typingEmpty")}
               </p>
             ) : (
               <ul className="space-y-2 text-sm" data-testid="tenant-typing-list">
@@ -181,16 +186,16 @@ export default function TenantDetailPage() {
 
       {tab === "users" && (
         <Card data-testid="tenant-tab-content-users">
-          <CardHeader><CardTitle>Utenti</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("tenants.detail.usersTitle")}</CardTitle></CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              La lista utenti completa è gestita nella pagina dedicata.{" "}
+              {t("tenants.detail.usersHint")}{" "}
               <Link
                 href="/users"
                 className="text-foreground underline underline-offset-2"
                 data-testid="tenant-users-link"
               >
-                Apri /users →
+                {t("tenants.detail.usersLink")}
               </Link>
             </p>
           </CardContent>

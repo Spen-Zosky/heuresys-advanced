@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { apiFetch } from "../../../lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "../../../components/data-table-panel";
@@ -19,46 +21,50 @@ interface UsersList {
   total: number;
 }
 
-const COLUMNS: DataColumn<User>[] = [
-  {
-    header: "Nome",
-    cell: (u) => (
-      <Link href={`/users/${u.userId}`} data-testid="user-link" className="font-medium text-foreground underline-offset-2 hover:underline">
-        {u.displayName ?? "—"}
-      </Link>
-    ),
-  },
-  { header: "Email", cell: (u) => <span data-testid="user-email" className="text-muted-foreground">{u.email}</span> },
-  { header: "Stato", cell: (u) => <StatusBadge value={u.status} /> },
-  { header: "Tipo", cell: (u) => <span className="text-xs uppercase text-muted-foreground">{u.type}</span> },
-];
-
 export default function UsersListPage() {
+  const { t } = useTranslation("admin");
   const users = useQuery({
     queryKey: ["users", "list"],
     queryFn: () => apiFetch<UsersList>("/v1/users"),
   });
+
+  const columns = useMemo<DataColumn<User>[]>(
+    () => [
+      {
+        header: t("users.columns.name"),
+        cell: (u) => (
+          <Link href={`/users/${u.userId}`} data-testid="user-link" className="font-medium text-foreground underline-offset-2 hover:underline">
+            {u.displayName ?? t("users.noName")}
+          </Link>
+        ),
+      },
+      { header: t("users.columns.email"), cell: (u) => <span data-testid="user-email" className="text-muted-foreground">{u.email}</span> },
+      { header: t("users.columns.status"), cell: (u) => <StatusBadge value={u.status} /> },
+      { header: t("users.columns.type"), cell: (u) => <span className="text-xs uppercase text-muted-foreground">{u.type}</span> },
+    ],
+    [t],
+  );
 
   return (
     <DataTablePanel<User>
       pageTestId="users-page"
       titleTestId="users-title"
       countTestId="users-count"
-      title="Utenti"
-      description="Utenti del tenant con stato e tipo."
-      count={users.data ? `${users.data.total} totali` : undefined}
+      title={t("users.title")}
+      description={t("users.description")}
+      count={users.data ? t("users.count", { count: users.data.total }) : undefined}
       isLoading={users.isLoading}
       isError={users.isError}
       errorTestId="users-error"
-      errorMessage="Impossibile caricare gli utenti."
+      errorMessage={t("users.errorMessage")}
       rows={users.data?.items ?? []}
       rowKey={(u) => u.userId}
       rowTestId="users-row"
-      columns={COLUMNS}
+      columns={columns}
       emptyTestId="users-empty"
-      emptyTitle="Nessun utente"
-      emptyDescription="Non ci sono utenti nel tenant."
-      caption="Elenco utenti"
+      emptyTitle={t("users.emptyTitle")}
+      emptyDescription={t("users.emptyDescription")}
+      caption={t("users.caption")}
     />
   );
 }

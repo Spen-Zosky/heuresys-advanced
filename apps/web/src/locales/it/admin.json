@@ -1,1 +1,283 @@
-{}
+{
+  "users": {
+    "title": "Utenti",
+    "description": "Utenti del tenant con stato e tipo.",
+    "count": "{{count}} totali",
+    "errorMessage": "Impossibile caricare gli utenti.",
+    "emptyTitle": "Nessun utente",
+    "emptyDescription": "Non ci sono utenti nel tenant.",
+    "caption": "Elenco utenti",
+    "columns": {
+      "name": "Nome",
+      "email": "Email",
+      "status": "Stato",
+      "type": "Tipo"
+    },
+    "noName": "—",
+    "detail": {
+      "back": "← Utenti",
+      "notFound": "Utente non trovato.",
+      "loadError": "Errore di caricamento.",
+      "unnamed": "(senza nome)",
+      "cardTitle": "Anagrafica",
+      "fields": {
+        "userId": "User ID",
+        "tenantId": "Tenant ID",
+        "status": "Stato",
+        "type": "Tipo",
+        "locale": "Locale",
+        "timezone": "Timezone",
+        "synthetic": "Synthetic",
+        "createdAt": "Creato"
+      },
+      "syntheticYes": "sì",
+      "syntheticNo": "no",
+      "dash": "—"
+    }
+  },
+  "tenants": {
+    "title": "Tenant",
+    "description": "Registry dei tenant con codice, country e stato.",
+    "count": "{{count}} totali",
+    "errorMessage": "Accesso negato o errore di caricamento.",
+    "emptyTitle": "Nessun tenant",
+    "emptyDescription": "Non ci sono tenant registrati.",
+    "caption": "Registry tenant",
+    "columns": {
+      "name": "Nome",
+      "country": "Country",
+      "size": "Size",
+      "status": "Stato"
+    },
+    "fallbackName": "ND",
+    "dash": "—",
+    "detail": {
+      "back": "← Tenant",
+      "notFound": "Tenant non trovato.",
+      "loadError": "Errore di caricamento.",
+      "tabs": {
+        "overview": "Overview",
+        "typing": "Enterprise Typing",
+        "users": "Utenti"
+      },
+      "overviewTitle": "Anagrafica",
+      "typingTitle": "Profili Enterprise Typing",
+      "usersTitle": "Utenti",
+      "fields": {
+        "legalName": "Legal name",
+        "country": "Country",
+        "industry": "Industry",
+        "sizeBand": "Size band",
+        "status": "Stato",
+        "tenantId": "Tenant ID",
+        "createdAt": "Creato"
+      },
+      "dash": "—",
+      "wizardLink": "Apri wizard Enterprise Typing →",
+      "typingEmpty": "Nessun profilo di tipizzazione registrato.",
+      "usersHint": "La lista utenti completa è gestita nella pagina dedicata.",
+      "usersLink": "Apri /users →"
+    }
+  },
+  "enterpriseTyping": {
+    "title": "Enterprise Typing Wizard",
+    "description": "Tipizza l'enterprise selezionando family, variante, operating model e size band.",
+    "back": "← Tenant",
+    "cardTitle": "Profilo",
+    "familyLabel": "Blueprint family",
+    "variantLabel": "Variante",
+    "modelLabel": "Operating model",
+    "sizeBandLabel": "Size band",
+    "selectPlaceholder": "— Seleziona —",
+    "nonePlaceholderMale": "— Nessuno —",
+    "nonePlaceholderFemale": "— Nessuna —",
+    "familyRequired": "Famiglia richiesta.",
+    "variantRequired": "Variante richiesta.",
+    "createError": "Errore creazione profilo.",
+    "createSuccess": "Profilo creato.",
+    "submit": "Crea profilo",
+    "submitting": "Creazione…"
+  },
+  "organization": {
+    "title": "Organization Units",
+    "description": "Gerarchia delle unità organizzative del tenant.",
+    "count": "{{count}} unità",
+    "errorMessage": "Impossibile caricare le unità organizzative.",
+    "emptyTitle": "Nessuna OU",
+    "emptyDescription": "Non ci sono unità organizzative.",
+    "caption": "Gerarchia organizzativa",
+    "columns": {
+      "code": "Codice",
+      "name": "Nome",
+      "type": "Tipo",
+      "parent": "Parent",
+      "active": "Attiva"
+    },
+    "dash": "—",
+    "activeYes": "sì",
+    "activeNo": "no"
+  },
+  "orgChart": {
+    "title": "Org chart",
+    "back": "← Organization",
+    "count": "{{count}} grafici ORG_CHART disponibili",
+    "cardTitle": "Organigramma ({{label}})",
+    "nodeCount": "{{count}} posizioni",
+    "dash": "—",
+    "emptyPrefix": "Nessun grafo ORG_CHART registrato per il tenant. Generarlo con",
+    "seedFile": "db/seeds/org_chart_rtl_demo.sql",
+    "noNodes": "Il grafo non ha nodi.",
+    "graphAria": "Organigramma interattivo delle posizioni",
+    "note": "Grafo a forza interattivo (zoom/pan). I nodi sono le posizioni attive del tenant; gli archi le relazioni reports-to."
+  },
+  "positions": {
+    "title": "Posizioni",
+    "description": "Posizioni del tenant con criticità e stato.",
+    "count": "{{count}} totali",
+    "errorMessage": "Impossibile caricare le posizioni.",
+    "emptyTitle": "Nessuna posizione",
+    "emptyDescription": "Non ci sono posizioni nel tenant.",
+    "caption": "Elenco posizioni",
+    "columns": {
+      "code": "Codice",
+      "title": "Titolo",
+      "criticality": "Criticità",
+      "active": "Attiva"
+    },
+    "activeOn": "Attiva",
+    "activeOff": "Inattiva",
+    "detail": {
+      "back": "← Posizioni",
+      "notFound": "Posizione non trovata.",
+      "loadError": "Errore di caricamento.",
+      "activeOn": "Attiva",
+      "activeOff": "Inattiva",
+      "cardTitle": "Position Intelligence Profile",
+      "fields": {
+        "positionId": "Position ID",
+        "tenantId": "Tenant ID",
+        "orgUnit": "Org Unit",
+        "jobRole": "Job Role",
+        "owner": "Owner",
+        "reportsTo": "Riferisce a",
+        "criticality": "Criticità",
+        "economicWeight": "Peso economico",
+        "effectiveFrom": "In vigore dal",
+        "effectiveTo": "In vigore al"
+      },
+      "dash": "—"
+    },
+    "kpis": {
+      "title": "KPI richiesti",
+      "back": "← Posizione",
+      "count": "{{count}} KPI associati",
+      "cardTitle": "Requisiti",
+      "empty": "Nessun KPI richiesto dichiarato.",
+      "caption": "KPI richiesti dalla posizione",
+      "columns": {
+        "code": "Codice",
+        "kpi": "KPI",
+        "weight": "Peso",
+        "template": "Template"
+      }
+    },
+    "learning": {
+      "title": "Gap formativi della posizione",
+      "back": "← Posizione",
+      "count": "{{count}} gap aperti",
+      "cardTitle": "Gap aperti",
+      "empty": "Nessun gap formativo associato a questa posizione.",
+      "caption": "Gap formativi aperti per la posizione",
+      "columns": {
+        "user": "User",
+        "skill": "Skill",
+        "severity": "Severità",
+        "detected": "Rilevato"
+      },
+      "dash": "—"
+    },
+    "skills": {
+      "title": "Skill richieste",
+      "back": "← Posizione",
+      "count": "{{count}} skill associate",
+      "cardTitle": "Requisiti",
+      "empty": "Nessuna skill richiesta dichiarata.",
+      "caption": "Skill richieste dalla posizione",
+      "columns": {
+        "code": "Codice",
+        "skill": "Skill",
+        "proficiency": "Proficiency",
+        "weight": "Peso"
+      }
+    }
+  },
+  "roles": {
+    "title": "Ruoli × Permessi",
+    "description": "Matrice sola lettura — la modifica live di permessi e ruoli arriverà in MVP-3.",
+    "count": "{{roles}} ruoli · {{perms}} permessi · {{total}} mapping",
+    "accessDeniedTitle": "Accesso negato",
+    "accessDeniedDesc": "Questa matrice richiede il ruolo PLATFORM_ADMIN.",
+    "headerCell": "permission \\ role",
+    "granted": "granted",
+    "denied": "denied"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Panoramica cross-modulo del tuo ambito operativo.",
+    "error": "Impossibile caricare il dashboard.",
+    "scope": "Ambito {{kind}} · {{role}}",
+    "trendDesc": "vs settimana prec.",
+    "counters": {
+      "users": "Utenti",
+      "positions": "Posizioni",
+      "organizationUnits": "Org Units",
+      "learningPaths": "Learning Paths",
+      "learningGaps": "Learning Gaps",
+      "tenants": "Tenant",
+      "blueprints": "Blueprint",
+      "recommendations": "Reward proposte"
+    },
+    "gapsTitle": "Gap critici/alti recenti",
+    "gapsEmptyTitle": "Nessun gap critico",
+    "gapsEmptyDesc": "Non ci sono gap critici o alti aperti al momento.",
+    "gapGeneral": "Generale",
+    "activityTitle": "Attività recente",
+    "activityEmptyTitle": "Nessuna attività recente",
+    "activityEmptyDesc": "Le azioni recenti del tuo ambito appariranno qui.",
+    "activitySubtitle": "Ambito {{kind}}"
+  },
+  "visualizations": {
+    "title": "Visualizations",
+    "description": "Grafici registrati con tipo e stato.",
+    "count": "{{count}} grafici",
+    "countLoading": "…",
+    "errorMessage": "Impossibile caricare i grafici.",
+    "emptyTitle": "Nessun grafico",
+    "emptyDescription": "Nessun grafico registrato.",
+    "caption": "Browser grafici",
+    "columns": {
+      "code": "Codice",
+      "name": "Nome",
+      "type": "Tipo",
+      "status": "Stato"
+    },
+    "chartSeries": "Grafici",
+    "distributionTitle": "Distribuzione per tipo",
+    "chartAria": "Distribuzione grafici per tipo",
+    "noData": "Nessun dato.",
+    "detail": {
+      "back": "← Visualizations",
+      "notFound": "Grafico non trovato.",
+      "loadError": "Errore.",
+      "diagramTitle": "Diagramma",
+      "diagramAria": "Diagramma del grafo {{name}}",
+      "nodesTitle": "Nodi ({{count}})",
+      "edgesTitle": "Edge ({{count}})",
+      "dash": "—",
+      "nodesEmpty": "Nessun nodo.",
+      "edgesEmpty": "Nessun edge.",
+      "edgeArrow": " → ",
+      "note": "Renderer Mermaid attivato (max 50 nodi · 200 edge). Liste nodi/edge complete sopra (max 20 + 20 visibili)."
+    }
+  }
+}

@@ -9,7 +9,6 @@ const BASE_PATH = isStaticExport ? "/heuresys-advanced" : "";
 module.exports = {
   reactStrictMode: true,
   transpilePackages: ["@heuresys/ui"],
-  eslint: { ignoreDuringBuilds: true },
   basePath: BASE_PATH,
   // Expose to the runtime so consumer code can build links with the right prefix.
   // NEXT_PUBLIC_ENABLE_SHOWCASE is hardcoded to "1" here: apps/showcase exists

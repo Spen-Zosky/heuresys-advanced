@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,10 +41,6 @@ export default function LoginPage() {
     resolver: zodResolver(LoginFormSchema),
     defaultValues: { email: "", password: "" },
   });
-
-  useEffect(() => {
-    setFormError(null);
-  }, []);
 
   function redirectFor(roles: string[]) {
     const dest = readNextParam() ?? landingForRoles(roles);

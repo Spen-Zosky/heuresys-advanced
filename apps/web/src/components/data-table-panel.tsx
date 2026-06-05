@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Badge, Button, DataTableWithCrossHair, EmptyState, ErrorState, PageHeader } from "@heuresys/ui";
 import { Inbox } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -58,12 +58,16 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(pageSizeProp ?? 25);
+  const [trackedRows, setTrackedRows] = useState(rows);
 
-  // Reset to the first page whenever the row set identity/length changes
-  // (e.g. a new fetch resolves or a filter shrinks the result set).
-  useEffect(() => {
+  // Reset to the first page whenever the row set changes (a new fetch resolves or a
+  // filter shrinks the result set → new array reference). Adjust-state-during-render
+  // (the React-recommended pattern) instead of a setState-in-effect, which
+  // react-hooks/set-state-in-effect (eslint-config-next@16) flags.
+  if (trackedRows !== rows) {
+    setTrackedRows(rows);
     setPageIndex(0);
-  }, [rows, rows.length]);
+  }
 
   if (isLoading) {
     return (

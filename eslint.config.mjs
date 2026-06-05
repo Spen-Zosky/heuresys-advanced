@@ -2,12 +2,7 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import globals from "globals";
 import i18nextPlugin from "eslint-plugin-i18next";
-import { FlatCompat } from "@eslint/eslintrc";
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const compat = new FlatCompat({ baseDirectory: __dirname });
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 
 export default tseslint.config(
   {
@@ -52,20 +47,31 @@ export default tseslint.config(
     },
   },
 
-  // Only next/core-web-vitals here: `next/typescript` also registers the
-  // @typescript-eslint plugin, which collides with the global
-  // `...tseslint.configs.recommended` above under eslint 9.39 + typescript-eslint
-  // 8.60 ("Cannot redefine plugin @typescript-eslint"). tseslint.configs.recommended
-  // already provides TS linting for apps/web; next/core-web-vitals adds the
-  // Next/React/a11y rules.
-  ...compat.extends("next/core-web-vitals").map((cfg) => ({
-    ...cfg,
-    files: ["apps/web/**/*.{ts,tsx,js,jsx}"],
-  })),
+  // eslint-config-next@16 ships a flat-config ARRAY (Linter.Config[]), imported
+  // directly — FlatCompat no longer works against it (it JSON-stringifies the flat
+  // plugin objects → "Converting circular structure to JSON"). Two adaptations:
+  //  1. Exclude the bundled `next/typescript` entry: it registers the @typescript-eslint
+  //     plugin (collides "Cannot redefine plugin" with the global
+  //     tseslint.configs.recommended) AND re-sets the TS parser. We get both from the
+  //     global tseslint config instead.
+  //  2. Strip each entry's `languageOptions`: the base `next` entry sets the next/babel
+  //     parser, which would override the TS parser on .ts/.tsx and crash
+  //     @typescript-eslint/no-unused-vars (it walks a babel AST). We keep only next's
+  //     plugins/rules/settings (React/Next/a11y/import) and let the typescript-eslint
+  //     parser (set on the apps/web block below) handle parsing.
+  ...nextCoreWebVitals
+    .filter((cfg) => cfg.name !== "next/typescript")
+    .map(({ languageOptions: _next_lo, ...cfg }) => ({
+      ...cfg,
+      files: ["apps/web/**/*.{ts,tsx,js,jsx}"],
+    })),
 
   {
     files: ["apps/web/**/*.{ts,tsx}"],
     languageOptions: {
+      // Explicit TS parser: next@16's base config (whose languageOptions we strip
+      // above) used to provide a parser; the typescript-eslint rules need this one.
+      parser: tseslint.parser,
       globals: { ...globals.browser, ...globals.node },
     },
     settings: {

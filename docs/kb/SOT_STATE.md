@@ -23,7 +23,7 @@ Lo snapshot §0 e i conteggi §1-§9 erano scritti a S957/S962. Questo blocco ri
 - **🌐 PROD live `https://www.heuresys.com`** (TLS, S962): nginx → web `:3013` → api `:8013`, `COOKIE_SECURE=true`, nginx conf versionata `deploy/nginx/` (S964). Deploy = `scripts/vm-deploy.sh`. **PROD NON aggiornata con S963-S965** (deploy step separato, a scelta Enzo).
 - **CI**: 6 workflow self-hosted (typecheck/lint/test-integration/build-web/playwright-smoke/i18n-parity) + showcase deploy. **6/6 verde** su `7c2f4ee` (S965). Playwright ora **~29 spec**.
 - **F7 showcase** (S965): tokenize colori già completo (0 raw); split `SystemHealthDashboard` + extract `DashboardShell` (lib-owned `@heuresys/ui`) segnalati → decisione Enzo.
-- **⚠ Debito igiene aperto**: `pnpm.overrides` pinna react/react-dom **19.2.5** ma l'installato è **19.2.7** (minor-group S964) → peer-warning ricorrenti, non bloccanti. Da riconciliare (allineare override a 19.2.7 o rimuovere il pin Path-G).
+- **✅ Debito react override RICONCILIATO (S965)**: `pnpm.overrides` react/react-dom allineati **19.2.5→19.2.7** (peer-warning react = **0**, dedupe runtime OK, typecheck 4 ws verde). **Residuo minore noto**: `@types/react` resta `19.2.14` (le dep ne vogliono 19.2.16 → ~64 peer-warning **compile-time innocui**, typecheck verde); forzarlo a 19.2.16 ROMPE il typecheck showcase (doppia istanza `@types/react` via la `@heuresys/ui` pubblicata, "two different types") → la fix vera è **upstream in `ux-design-shared`** (allineare `@types/react` nella lib), non in questo repo. `@types/react-dom` 19.2.3 = latest corretta.
 
 ## 1. Git / release
 
@@ -44,7 +44,7 @@ Lo snapshot §0 e i conteggi §1-§9 erano scritti a S957/S962. Questo blocco ri
 
 - **Root**: pnpm 9.15.0 (pinato), Node ≥20.11, ESLint 9.39.4 flat, typescript-eslint 8.59.4, eslint-config-next 15.5.18. `pnpm.overrides`: react/react-dom **19.2.5** (Path G pinning), @types/react 19.2.14, vite ^6.4.2, postcss ^8.5.10, esbuild ^0.25.0, qs ≥6.15.2.
 - **apps/api**: fastify 5.8.5, @fastify/{cookie 11,cors 11.2,helmet 13,jwt 10,rate-limit 10.3}, fastify-type-provider-zod 6.1.0, zod 4.4.3, pg 8.13.1, drizzle-orm 0.45.2 (solo pool wrapper; query business = raw SQL parametrizzato), argon2 0.41.1, otpauth ^9.5.1, **pino 10.3.1** (S964), **vitest 4.1.8** (singleThread), tsx 4.22.4, typescript 5.7.2, supertest 7.
-- **apps/web**: **next 15.5.19** (backport S965; next 16 = B stand-by §0-bis), **react/react-dom 19.2.7** (S964 minor-group; ⚠ `pnpm.overrides` ancora pinna 19.2.5 → mismatch igiene §0-bis), @heuresys/ui ^0.1.1 (npm, NON link:), @heuresys/shared workspace:*, @tanstack/react-query 5.101, react-hook-form 7.77, **i18next 26.3.1 + react-i18next 17**, tailwindcss 4.3.0, @playwright/test 1.55.1 + axe.
+- **apps/web**: **next 15.5.19** (backport S965; next 16 = B stand-by §0-bis), **react/react-dom 19.2.7** (override riconciliato S965; `@types/react` 19.2.14 = residuo compile-time, §0-bis), @heuresys/ui ^0.1.1 (npm, NON link:), @heuresys/shared workspace:*, @tanstack/react-query 5.101, react-hook-form 7.77, **i18next 26.3.1 + react-i18next 17**, tailwindcss 4.3.0, @playwright/test 1.55.1 + axe.
 - **apps/showcase**: Next 15 static export → GitHub Pages, consuma `@heuresys/ui`.
 - **TS invarianti** (`tsconfig.base.json`): `strict`, `noUncheckedIndexedAccess` (narrow `T|undefined` mandatory), `noUnusedLocals/Parameters` (unused → prefix `_`), `exactOptionalPropertyTypes:false` (intenzionale).
 

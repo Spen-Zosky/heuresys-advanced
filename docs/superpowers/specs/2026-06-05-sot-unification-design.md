@@ -143,3 +143,33 @@ STATE.md carries NO numbers — only brief/priorities/open-questions/verificatio
 - **Revert**: de-archive `docs/archive/SOT_STATE.md` → `docs/kb/SOT_STATE.md` (active granular reference), strip the STORICO header + the §0-bis delta (fold its facts into the proper sections).
 - **Keep archived**: `HANDOFF.md` (narrative history), `NEXT_GENERATION_ENTRY_POINT.md` (v1.0.0 milestone record), `NEXT_SESSION_MVP_2A.md` (dead) — true history, not the granular state reference.
 - **Re-point**: CLAUDE.md/README describe BOTH views (rapid + granular, both handoff-governed); governance section lists both as state SoT, still "do not spawn new files beyond these".
+
+---
+
+## 12. Session-start protocol + complete handoff (v2.1, S965)
+
+The SoT is only useful if (a) the handoff writes **all** action sources and (b) the session start reads + aggregates them into **one exhaustive menu**. Two halves of the same loop, co-designed: the menu is exhaustive iff the handoff recorded everything.
+
+### 12.1 Session-start protocol — `## Session start` in CLAUDE.md (LLM-driven)
+
+After the infra hooks (tunnel/db/branch), before asking what to do, the LLM builds the action menu from all live sources so the user picks from a complete list (never from memory):
+
+1. Read: `.handoff/STATE.md` (priorities + open questions), `docs/kb/SOT_BACKLOG.md` (items ≠ `DONE`/`WON'T-DO`), `docs/kb/DEBT_REGISTER.md` (debts ≠ `RISOLTO`), `docs/kb/SOT_STATE.md` §roadmap/gated.
+2. Aggregate into ONE **priority-tiered** menu (**P1** high-impact/unblocking · **P2** quality/debt · **P3** roadmap/gated). Each row: `# · title · [source] · gating (⛔ reason if blocked) · effort (~Xh)`. Priority from existing markers (DEBT 🔴→P1 / 🟡→P2 / 🟢→P3; backlog P1-P3 sections; STATE top) + judgment on impact/unblocking.
+3. EXCLUDE definitively-concluded work (`DONE`/`FATTO`/`RISOLTO`/`WON'T-DO` + shipped MVPs). KEEP gated items, ⛔-marked with the blocker (visible but clearly not ready).
+4. Present the menu, then "Scegli #, aggrega (es. 1+4), o nuovo." The user may aggregate several items into one session.
+
+Why LLM-driven (not the PS hook): "affrontabile/aggregabile/gated" needs judgment; markdown parsing in PowerShell is fragile. The hooks stay infra-only.
+
+### 12.2 Complete handoff — skill v4
+
+The `handoff` skill, at close, writes ALL sources (not just STATE + SOT_STATE):
+
+- **STATE** (rapid) + **SOT_STATE** (granular, counts re-derived) — as v3.
+- **SOT_BACKLOG**: mark `DONE` items closed this session; add new items — **including interrupted flows / pendings**.
+- **DEBT_REGISTER**: mark `RISOLTO` debts closed; add new debts.
+- **Cardinal rule**: no pending / interrupted flow left only in conversation memory — it MUST be recorded in a source (backlog/debt/STATE) before close. This is what makes the start-menu exhaustive.
+
+### 12.3 The closed loop
+
+handoff writes structured → session-start reads + aggregates → user picks from a complete menu → no memory of pendings needed.

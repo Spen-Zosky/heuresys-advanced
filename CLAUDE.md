@@ -20,6 +20,17 @@ The project is at **`v1.0.0` GA baseline** (released S957, 2026-06-02): MVP-0→
 
 Historical records live in `docs/archive/` and are **not** SoT. When state changes, update the relevant SoT above — never spawn a new file. (Rationale: `docs/superpowers/specs/2026-06-05-sot-unification-design.md` §11.)
 
+## Session start (do this first, every session)
+
+After the infra hooks (tunnel/db/branch), **before** asking what to do or starting work, build the **action menu** from all live sources so the user picks from a complete list — never from memory:
+
+1. **Read** the action sources: `.handoff/STATE.md` (priorities + open questions), `docs/kb/SOT_BACKLOG.md` (items NOT `✅ DONE`/`✅ FATTO`/`⚪ WON'T-DO`), `docs/kb/DEBT_REGISTER.md` (debts NOT `RISOLTO`), `docs/kb/SOT_STATE.md` §"Prossimo"/roadmap + gated.
+2. **Aggregate** into ONE **priority-tiered** menu — **P1** high-impact/unblocking · **P2** quality/debt · **P3** roadmap/gated. Each row: `# · short title · [source] · gating (⛔ reason if blocked) · effort (~Xh)`. Derive priority from the existing markers (DEBT 🔴→P1 / 🟡→P2 / 🟢→P3; backlog P1-P3 sections; STATE top-priorities) plus judgment on impact/unblocking.
+3. **Exclude** definitively-concluded work (`DONE`/`FATTO`/`RISOLTO`/`WON'T-DO` + shipped MVPs). **Keep** gated items, `⛔`-marked with the blocker (visible but clearly not ready).
+4. **Present** the menu, then: *"Scegli #, aggrega (es. 1+4), o nuovo."* The user may aggregate several items into one session.
+
+Do NOT start work before presenting this menu and getting the user's choice — UNLESS the user's first message already names a specific task. Rationale + the writing side (handoff): `docs/superpowers/specs/2026-06-05-sot-unification-design.md` §12.
+
 ## Canonical commands
 
 All run from repo root unless noted. Use the project's pnpm package manager (pinned via `packageManager` in `package.json`).

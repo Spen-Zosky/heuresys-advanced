@@ -26,6 +26,17 @@ Lo snapshot §0 e i conteggi §1-§9 erano scritti a S957/S962. Questo blocco ri
 - **F7 showcase** (S965): tokenize colori già completo (0 raw); split `SystemHealthDashboard` + extract `DashboardShell` (lib-owned `@heuresys/ui`) segnalati → decisione Enzo.
 - **✅ Debito react override RICONCILIATO (S965)**: `pnpm.overrides` react/react-dom allineati **19.2.5→19.2.7** (peer-warning react = **0**, dedupe runtime OK, typecheck 4 ws verde). **D-15 RISOLTO (S966)**: `@types/react` override → **19.2.16**. La diagnosi "doppia istanza via lib pubblicata" era errata; root-cause reale = pnpm **stale virtual-store** dopo il flip override S965 *senza clean install* (orphan `19.2.14` + stale hoist-root). Fix locale (override 19.2.16 + clean install, commit `5c59295`): single instance, 0 warning, typecheck 4/4 + build web/showcase verdi. Hardening upstream **pubblicato**: `@heuresys/ui@0.1.3` (optional `@types/react`/`-dom` peerDep, upstream `e63f3fe`) + consumer bumpato `^0.1.3` (commit `a4abb44`) — la lib ora forwarda il `@types/react` del consumer (subtree → 19.2.16), trappola stale eliminata alla radice. `@types/react-dom` 19.2.3 = latest corretta.
 
+## 0-ter. Delta S966 → S968 (refresh 2026-06-05)
+
+Sessione ultracode di **chiusura terminale** (4 item del menu + dead-weight removal). Tutto pushato, `main` synced, CI verde.
+
+- **🧩 F7 — `/system-health` wire-to-live (mock eliminato)** (commit `29f27da`, CI 5/5 verde): la pagina produzione PLATFORM_ADMIN ora legge dati 100% live da `GET /v1/observability/system-health` (pool/RBAC/tenant-fleet/auth/schema/audit/request-metrics) + `GET /v1/auth/role-permissions` (RBAC matrix pivot granted/denied). Nuovi `apps/web/src/lib/api/observability.ts` (`useSystemHealth`/`useRolePermissions`) + `apps/web/src/components/SystemHealthLive.tsx`. 4 sezioni senza backend droppate (LogStream/SQLSlowQuery/IncidentTimeline+Alert/sparkline) con rationale documentata. Showcase mock (`SystemHealthDashboard.tsx`) invariato. `system-health/layout.tsx` → pass-through (chrome authenticated standard, niente takeover demo). E2E `system-health.spec.ts` ora asserisce su dati live (tenant reali; mock GENESIS_DEMO/ACME_CORP assenti; RBAC matrix live). Chiude la violazione live-data-doctrine di `/system-health` (obs 15317/15372).
+- **📊 Viz renderers (tappa B) → CHIUSO** (commit `0d09b0d` + `8d0231c`): subsystem già completo (Mermaid `visualizations/[id]` + ECharts force-graph `organization/org-chart` + ECharts bars `analytics/org-network` + lib Cytoscape `NetworkGraph`/`KGGraphCanvas`); 9 `graph_type` a stato terminale (bucket-map: ORG_CHART rendered+seeded · 6 renderer-ready/seed-deferred · SUCCESSION_MAP no-source · PIM ridondante), brand-gate SOLLEVATO. **`reactflow` dead-weight rimosso** dalla lib → **`@heuresys/ui@0.1.4`** (npm public, ux-design-shared `047d6b9`); consumer bumpati `^0.1.4`, lockfile rigenerato (`reactflow@` 0 entries). Mappa: `docs/kb/VISUALIZATION_RENDERERS_CLOSURE.md`.
+- **🗂️ SDBI Phase 2 (B-10) → CHIUSO-as-umbrella** (commit `7b0ef9e`): 5/8 macro-aree terminali (PerformanceReviews/Feedback360 via slice `000065`; Documents/Compensation-history/TalentPool assorbite o nel reconciliation registry); 3 reali (Surveys/Mentorship/PredictionsML, schema target mancante) scorporate in **B-10b** (deferred modeling stream P3, ~22-27h/3 sessioni). ADR-0014 footnote di implementazione. Mappa: `docs/kb/SDBI_PHASE2_CLOSURE.md`.
+- **🔧 B-31 ssh-agent → DONE** (commit `5032c1c`): era già realizzato da ADR-0021 (task `HeuresysTunnel5433` live, verificato), solo doc allineata in `SOT_BACKLOG.md` (era stale in 3 punti).
+- **Stack**: `@heuresys/ui` ^0.1.3 → **^0.1.4** (−reactflow). Sibling ux-design-shared HEAD `047d6b9`. DB/migration/API counts invariati (sessione no-DB).
+- **PROD**: **NON ancora ridistribuita** con F7 — il deploy VM è step separato (`scripts/vm-deploy.sh`); `/system-health` live è su `main` ma non in `heuresys.com`.
+
 ## 1. Git / release
 
 | Item | Valore |
@@ -38,14 +49,14 @@ Lo snapshot §0 e i conteggi §1-§9 erano scritti a S957/S962. Questo blocco ri
 | Tag corrente | **`v1.0.0`** (GA baseline, S957) — predecessori sotto |
 | Tag (11 totali) | v0.2.0-mvp2 · v0.2.1-mvp2a-final · v0.3.0-mvp3 · v0.3.1-mvp3-final · v0.3.2-mvp3-full · v0.3.3-preflight-partial · v0.3.4-p0-closed · v0.4.0-brand-v1 · v0.4.0-mvp4-ready · v0.4.0a-s937-partial-checkpoint · v0.4.1-housekeeping-closed |
 | Pre-commit hook | `.git/hooks/pre-commit` warn-only → `scripts/cowork-exchange/validate-naming.mjs` su cowork_code_exchange |
-| Sibling repo | `D:\ux-design-shared` (HEAD `e63f3fe`, pushato) = sorgente di `@heuresys/ui` (npm `^0.1.3`) |
+| Sibling repo | `D:\ux-design-shared` (HEAD `047d6b9`, pushato) = sorgente di `@heuresys/ui` (npm `^0.1.4`, −reactflow S968) |
 | Legacy read-only | `D:\evo.heuresys.com` (Win) + `/home/ubuntu/heuresys-evo` (VM) — enrichment source, mai committare path assoluti |
 
 ## 2. Stack (versioni verified)
 
 - **Root**: pnpm 9.15.0 (pinato), Node ≥20.11, ESLint 9.39.4 flat, typescript-eslint 8.59.4, eslint-config-next 15.5.18. `pnpm.overrides`: react/react-dom **19.2.7** (S965 reconcile), @types/react **19.2.16** (S966), vite ^6.4.2, postcss ^8.5.10, esbuild ^0.25.0, qs ≥6.15.2.
 - **apps/api**: fastify 5.8.5, @fastify/{cookie 11,cors 11.2,helmet 13,jwt 10,rate-limit 10.3}, fastify-type-provider-zod 6.1.0, zod 4.4.3, pg 8.13.1, drizzle-orm 0.45.2 (solo pool wrapper; query business = raw SQL parametrizzato), argon2 0.41.1, otpauth ^9.5.1, **pino 10.3.1** (S964), **vitest 4.1.8** (singleThread), tsx 4.22.4, typescript 5.7.2, supertest 7.
-- **apps/web**: **next 15.5.19** (backport S965; next 16 = B stand-by §0-bis), **react/react-dom 19.2.7 + `@types/react` 19.2.16** (override riconciliati S965/S966, §0-bis), @heuresys/ui ^0.1.3 (npm, NON link:; optional @types/react peerDep da 0.1.3), @heuresys/shared workspace:*, @tanstack/react-query 5.101, react-hook-form 7.77, **i18next 26.3.1 + react-i18next 17**, tailwindcss 4.3.0, @playwright/test 1.55.1 + axe.
+- **apps/web**: **next 15.5.19** (backport S965; next 16 = B stand-by §0-bis), **react/react-dom 19.2.7 + `@types/react` 19.2.16** (override riconciliati S965/S966, §0-bis), @heuresys/ui ^0.1.4 (npm, NON link:; optional @types/react peerDep; `reactflow` dead-weight rimosso in 0.1.4 — S968), @heuresys/shared workspace:*, @tanstack/react-query 5.101, react-hook-form 7.77, **i18next 26.3.1 + react-i18next 17**, tailwindcss 4.3.0, @playwright/test 1.55.1 + axe.
 - **apps/showcase**: Next 15 static export → GitHub Pages, consuma `@heuresys/ui`.
 - **TS invarianti** (`tsconfig.base.json`): `strict`, `noUncheckedIndexedAccess` (narrow `T|undefined` mandatory), `noUnusedLocals/Parameters` (unused → prefix `_`), `exactOptionalPropertyTypes:false` (intenzionale).
 
@@ -83,6 +94,7 @@ Lo snapshot §0 e i conteggi §1-§9 erano scritti a S957/S962. Questo blocco ri
 - Next 15 App Router + React 19 + Tailwind 4 + @heuresys/ui. **64 route `page.tsx`**: admin (~29) + ESS `/me/*` (~14, ADR-0011 MVP-2b) + system-health + auth + showcase. Tag MVP-2a `v0.2.1-mvp2a-final`.
 - **20 Playwright spec** E2E (login reale + assert su dati seed). Dottrina LIVE DATA E2E ONLY (vedi `NEXT_SESSION_MVP_2A.md`): no mock/fixture/placeholder; ogni cella da `/v1/*` reale; nessun page commit senza E2E verde.
 - **/showcase**: riabilitato (CW-B59 RESOLVED) via `apps/web/src/app/showcase/_ui-client.tsx` (`next/dynamic ssr:false`); deploy GitHub Pages verde.
+- **/system-health** (S968 F7): produzione PLATFORM_ADMIN ora **100% live** (`GET /v1/observability/system-health` + `/v1/auth/role-permissions`) via container `SystemHealthLive.tsx` + hook `lib/api/observability.ts`; mock confinato a `/showcase/system-health`. 4 sezioni senza backend droppate (rationale nel component header). E2E `system-health.spec.ts` live.
 
 ## 7. CI / Infrastructure
 

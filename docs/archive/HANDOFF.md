@@ -1,3 +1,5 @@
+> ⚠ **STORICO — non è una SoT.** Stato corrente vivo: `.handoff/STATE.md` · Backlog: `docs/kb/SOT_BACKLOG.md` · Debiti: `docs/kb/DEBT_REGISTER.md`. Archiviato S965 (2026-06-05); razionale: `docs/superpowers/specs/2026-06-05-sot-unification-design.md`.
+
 ## 🎯 2026-05-31 (cont.) — S953 D2/D3/A — @heuresys/ui token-contract consolidation + publish 0.1.2
 
 Continuation of S952/S953. Executed phases **D2 → D3 → A** of `docs/kb/RBAC_UIX_PERSPECTIVES_PLAN.md`.

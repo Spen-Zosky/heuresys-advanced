@@ -1,3 +1,5 @@
+> ⚠ **STORICO — non è una SoT.** Stato corrente vivo: `.handoff/STATE.md` · Backlog: `docs/kb/SOT_BACKLOG.md` · Debiti: `docs/kb/DEBT_REGISTER.md`. Archiviato S965 (2026-06-05); razionale: `docs/superpowers/specs/2026-06-05-sot-unification-design.md`.
+
 # NEXT_GENERATION_ENTRY_POINT — v1.0.0 Consolidation Baseline
 
 > **This is the canonical entry-point for the v1.0.0 consolidation session.** Read it in full before any code action.

@@ -6,9 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Heuresys Advanced HRMS/BPM Platform v5** — pnpm monorepo bootstrapped 2026-05-16. Backend-heavy: Fastify 5 API on top of PostgreSQL 16 with a Zod-typed contract layer shared with a Next.js 15 admin SPA + ESS portal (both shipped — MVP-2a/2b).
 
-The project is at **`v1.0.0` GA baseline** (released S957, 2026-06-02): MVP-0→4 + the RBAC/UIX/Perspectives epic are closed. The API ships ~60 business modules + auth (~279 live `/v1/*` endpoints, 576 integration tests across ~82 files, **60/60 modules covered**, hitting the real DB through the SSH tunnel); the Next.js web app ships the admin SPA (MVP-2a) + ESS portal (MVP-2b) + teams "my team" scope axis; a static brand showcase is deployed to GitHub Pages. The VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`). **The live source of truth for project state is `docs/kb/SOT_STATE.md`** (CLI-owned) — open backlog in `docs/kb/SOT_BACKLOG.md`, technical debts in `docs/kb/DEBT_REGISTER.md`. Historical session narrative is in `HANDOFF.md`; architectural decisions in `docs/architecture/adr/`. The invariants, module pattern, security model, and Design System sections below remain authoritative.
+The project is at **`v1.0.0` GA baseline** (released S957, 2026-06-02): MVP-0→4 + the RBAC/UIX/Perspectives epic are closed. The API ships ~60 business modules + auth (~279 live `/v1/*` endpoints, 576 integration tests across ~82 files, **60/60 modules covered**, hitting the real DB through the SSH tunnel); the Next.js web app ships the admin SPA (MVP-2a) + ESS portal (MVP-2b) + teams "my team" scope axis; a static brand showcase is deployed to GitHub Pages. The VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`). **The live source of truth for project state is `.handoff/STATE.md`** (the single state SoT, auto-maintained by the `handoff` skill each session) — open backlog in `docs/kb/SOT_BACKLOG.md`, technical debts in `docs/kb/DEBT_REGISTER.md`. Historical records (the former `SOT_STATE.md`, the narrative `HANDOFF.md`, the v1.0.0 entry-point record) are archived under `docs/archive/`; architectural decisions in `docs/architecture/adr/`. The invariants, module pattern, security model, and Design System sections below remain authoritative.
 
-**Data provenance** (ADR-0023): the `sys.*` business tables are populated by a deterministic brownfield ingestion pipeline whose **authoritative data source** is the legacy `heuresys-evo` Docker DB (`heuresys_evo_platform_db` / db `heuresys_platform`) — synthetic case-study data, no real PII (I12). The advanced `sys.*` schema is the **structural authority** (the legacy adapts to it). The RTL_BANK reference tenant was rebuilt (S950) by matching+wiring real legacy records (161 users / 2 active tenants). See `docs/kb/SOT_STATE.md` §4.
+**Data provenance** (ADR-0023): the `sys.*` business tables are populated by a deterministic brownfield ingestion pipeline whose **authoritative data source** is the legacy `heuresys-evo` Docker DB (`heuresys_evo_platform_db` / db `heuresys_platform`) — synthetic case-study data, no real PII (I12). The advanced `sys.*` schema is the **structural authority** (the legacy adapts to it). The RTL_BANK reference tenant was rebuilt (S950) by matching+wiring real legacy records (161 users / 2 active tenants). See `docs/archive/SOT_STATE.md` §4 (archived).
+
+## Source of Truth (single, per-domain — do not duplicate)
+
+- **Current state** → `.handoff/STATE.md` (the ONLY live state file; auto-maintained by the `handoff` skill each session). Do NOT create parallel state/handoff/entry-point files.
+- **Open backlog** → `docs/kb/SOT_BACKLOG.md`.
+- **Technical debts** → `docs/kb/DEBT_REGISTER.md`.
+- **Durable rules / architecture** → this file (`CLAUDE.md`).
+- **Path index** → `docs/kb/INDEX_PATHS.md`. Public overview → `README.md`.
+
+Historical records live in `docs/archive/` and are **not** SoT. When state changes, update the relevant SoT above — never spawn a new file. (Rationale + migration: `docs/superpowers/specs/2026-06-05-sot-unification-design.md`.)
 
 ## Canonical commands
 

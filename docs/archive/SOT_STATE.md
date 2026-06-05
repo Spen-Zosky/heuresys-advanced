@@ -1,3 +1,5 @@
+> ⚠ **STORICO — non è una SoT.** Stato corrente vivo: `.handoff/STATE.md` · Backlog: `docs/kb/SOT_BACKLOG.md` · Debiti: `docs/kb/DEBT_REGISTER.md`. Archiviato S965 (2026-06-05); razionale: `docs/superpowers/specs/2026-06-05-sot-unification-design.md`.
+
 # SOT_STATE — Stato reale heuresys-advanced (CLI-owned Source of Truth)
 
 > **Autorità**: questo è il documento di stato **CLI-owned** che il Claude Code CLI mantiene per operare in autonomia, senza dipendere dal protocollo Cowork. Consolida e riconcilia: ricognizione forense 4-root + handover Cowork S937 + `cowork_reserved/bias_registry.md` + segnali live (git/CI/DB).

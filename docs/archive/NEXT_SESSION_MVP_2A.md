@@ -1,3 +1,5 @@
+> ⚠ **STORICO — non è una SoT.** Stato corrente vivo: `.handoff/STATE.md` · Backlog: `docs/kb/SOT_BACKLOG.md` · Debiti: `docs/kb/DEBT_REGISTER.md`. Archiviato S965 (2026-06-05); razionale: `docs/superpowers/specs/2026-06-05-sot-unification-design.md`.
+
 # MVP-2a Admin Web SPA + ESS Frontend — Direttiva autoritativa per la sessione successiva
 
 > **Questo file è il punto di ingresso autoritativo della prossima sessione.** Sostituisce ogni prompt ad-hoc. Il documento contiene: direttiva non-negoziabile, fase di audit, ordine di esecuzione, criteri di accettazione e **il prompt letterale da incollare** all'apertura.

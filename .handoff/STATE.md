@@ -8,6 +8,8 @@
 - **BI ① P3 org-network ✅** (`7c2f4ee`): full-stack `GET /v1/analytics/org-network` (span-of-control / depth / reach via recursive CTE su `position_reports_to_position_id`, scope position-centric, mig `000070` nav order 39), schema+repo+service+route + integration **20/20** + page i18n + E2E live. Anchor PLATFORM: **162 pos / 3 root / 28 mgr / span 5.68 / depth 4** (sanity verificato indipendente via psql).
 - **F7**: 3 candidati valutati evidence-based → tokenize colori **GIÀ completo** (0 colori raw in app+components); split `SystemHealthDashboard` (344 righe demo fixture) + extract `DashboardShell` (lib-owned `@heuresys/ui`) **SEGNALATI** ("the rest", decisione Enzo).
 - **Push** (autorizzato sessione): 9 commit `5897409..7c2f4ee` su origin/main; **CI 6/6 verde** (typecheck/api-test/playwright-smoke/build/lint/i18n-parity). Secret-scan pre-push pulito.
+- **react override riconciliato ✅**: `pnpm.overrides` react/react-dom 19.2.5→**19.2.7** (0 peer-warning react, typecheck verde). Residuo minore `@types/react` (forzarlo rompe il typecheck via lib — fix upstream `ux-design-shared`).
+- **SoT unificata ✅** (S965, spec `docs/superpowers/specs/2026-06-05-sot-unification-design.md`): `.handoff/STATE.md` è l'**unica** SoT-stato; `SOT_STATE.md`/`HANDOFF.md`/`NEXT_GENERATION_ENTRY_POINT.md`/`NEXT_SESSION_MVP_2A.md` archiviati in `docs/archive/`; governance anti-deriva in `CLAUDE.md §Source of Truth` (non creare nuovi file di stato). Backlog→`SOT_BACKLOG.md`, debiti→`DEBT_REGISTER.md`.
 
 ## Top priorities (next session)
 

@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
@@ -21,45 +23,49 @@ interface MeGapsList {
   total: number;
 }
 
-const COLUMNS: DataColumn<MeGap>[] = [
-  { header: "Skill", cell: (g) => <span className="font-medium text-foreground">{g.skillName ?? "Generale"}</span> },
-  { header: "Severità", cell: (g) => <StatusBadge value={g.severity} /> },
-  {
-    header: "Richiesto",
-    cell: (g) => <span className="text-xs text-muted-foreground">{g.requiredProficiency ?? "—"}</span>,
-  },
-  {
-    header: "Attuale",
-    cell: (g) => <span className="text-xs text-muted-foreground">{g.currentProficiency ?? "—"}</span>,
-  },
-  { header: "Rilevato", cell: (g) => <span className="text-xs text-muted-foreground">{g.detectedAt.slice(0, 10)}</span> },
-];
-
 export default function MeGapsPage() {
+  const { t } = useTranslation("ess");
   const gaps = useQuery({
     queryKey: ["me", "gaps"],
     queryFn: () => apiFetch<MeGapsList>("/v1/me/gaps"),
   });
+
+  const columns = useMemo<DataColumn<MeGap>[]>(
+    () => [
+      { header: t("gaps.colSkill"), cell: (g) => <span className="font-medium text-foreground">{g.skillName ?? t("gaps.skillFallback")}</span> },
+      { header: t("gaps.colSeverity"), cell: (g) => <StatusBadge value={g.severity} /> },
+      {
+        header: t("gaps.colRequired"),
+        cell: (g) => <span className="text-xs text-muted-foreground">{g.requiredProficiency ?? "—"}</span>,
+      },
+      {
+        header: t("gaps.colCurrent"),
+        cell: (g) => <span className="text-xs text-muted-foreground">{g.currentProficiency ?? "—"}</span>,
+      },
+      { header: t("gaps.colDetected"), cell: (g) => <span className="text-xs text-muted-foreground">{g.detectedAt.slice(0, 10)}</span> },
+    ],
+    [t],
+  );
 
   return (
     <DataTablePanel<MeGap>
       pageTestId="me-gaps-page"
       titleTestId="me-gaps-title"
       countTestId="me-gaps-count"
-      title="I miei gap"
-      description="Gap di sviluppo aperti sulle tue skill."
-      count={gaps.data ? `${gaps.data.total} aperti` : undefined}
+      title={t("gaps.title")}
+      description={t("gaps.description")}
+      count={gaps.data ? t("gaps.count", { count: gaps.data.total }) : undefined}
       isLoading={gaps.isLoading}
       isError={gaps.isError}
-      errorMessage="Impossibile caricare i gap."
+      errorMessage={t("gaps.errorMessage")}
       rows={gaps.data?.items ?? []}
       rowKey={(g) => g.learningGapId}
       rowTestId="me-gap-row"
-      columns={COLUMNS}
+      columns={columns}
       emptyTestId="me-gaps-empty"
-      emptyTitle="Nessun gap aperto"
-      emptyDescription="Non hai gap di sviluppo aperti."
-      caption="Gap di sviluppo"
+      emptyTitle={t("gaps.emptyTitle")}
+      emptyDescription={t("gaps.emptyDesc")}
+      caption={t("gaps.caption")}
     />
   );
 }

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { Badge, Button, Input, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -18,6 +19,7 @@ interface LearningPath {
 }
 
 export default function MeLearningCataloguePage() {
+  const { t } = useTranslation("ess");
   const qc = useQueryClient();
   const [filter, setFilter] = useState("");
   const [lastEnrolled, setLastEnrolled] = useState<string | null>(null);
@@ -47,7 +49,7 @@ export default function MeLearningCataloguePage() {
 
   const columns: DataColumn<LearningPath>[] = [
     {
-      header: "Percorso",
+      header: t("catalogue.colPath"),
       cell: (p) => (
         <div>
           <p className="font-medium text-foreground">{p.name}</p>
@@ -57,20 +59,20 @@ export default function MeLearningCataloguePage() {
         </div>
       ),
     },
-    { header: "Codice", cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
+    { header: t("catalogue.colCode"), cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
     {
-      header: "Tipo",
+      header: t("catalogue.colType"),
       cell: (p) => (
         <div className="flex flex-wrap gap-1">
           <StatusPill tone={p.isMandatoryDefault ? "warning" : "neutral"}>
-            {p.isMandatoryDefault ? "OBBLIGATORIO" : "OPZIONALE"}
+            {p.isMandatoryDefault ? t("catalogue.mandatory") : t("catalogue.optional")}
           </StatusPill>
-          {p.isGlobal ? <StatusPill tone="info">GLOBALE</StatusPill> : null}
+          {p.isGlobal ? <StatusPill tone="info">{t("catalogue.global")}</StatusPill> : null}
         </div>
       ),
     },
     {
-      header: "Azione",
+      header: t("catalogue.colAction"),
       align: "right",
       cell: (p) => (
         <Button
@@ -81,7 +83,7 @@ export default function MeLearningCataloguePage() {
           disabled={enroll.isPending}
           onClick={() => void enroll.mutate(p.learningPathId)}
         >
-          {enroll.isPending ? "…" : "Iscriviti"}
+          {enroll.isPending ? t("catalogue.enrolling") : t("catalogue.enroll")}
         </Button>
       ),
     },
@@ -94,16 +96,16 @@ export default function MeLearningCataloguePage() {
         className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
         data-testid="learning-catalogue-back"
       >
-        ← I miei percorsi
+        {t("catalogue.back")}
       </Link>
 
       <PageHeader
         data-testid="learning-catalogue-title"
-        title="Catalogo percorsi"
-        description="Sfoglia i percorsi formativi disponibili e iscriviti."
+        title={t("catalogue.title")}
+        description={t("catalogue.description")}
         badges={
           <Badge variant="secondary" data-testid="learning-catalogue-count">
-            {paths.data ? `${paths.data.total} percorsi disponibili` : "Caricamento…"}
+            {paths.data ? t("catalogue.count", { count: paths.data.total }) : t("common:loading")}
           </Badge>
         }
       />
@@ -111,7 +113,7 @@ export default function MeLearningCataloguePage() {
       <div className="max-w-md">
         <Input
           data-testid="learning-catalogue-filter"
-          placeholder="Cerca per nome o codice…"
+          placeholder={t("catalogue.filterPlaceholder")}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         />
@@ -121,26 +123,26 @@ export default function MeLearningCataloguePage() {
         <EntityTable<LearningPath>
           isLoading={paths.isLoading}
           isError={paths.isError}
-          errorMessage="Impossibile caricare il catalogo."
+          errorMessage={t("catalogue.errorMessage")}
           rows={filtered}
           rowKey={(p) => p.learningPathId}
           rowTestId="learning-catalogue-row"
           columns={columns}
           emptyTestId="learning-catalogue-empty"
-          emptyTitle="Nessun percorso"
-          emptyDescription="Nessun percorso corrisponde al filtro."
-          caption="Catalogo percorsi formativi"
+          emptyTitle={t("catalogue.emptyTitle")}
+          emptyDescription={t("catalogue.emptyDesc")}
+          caption={t("catalogue.caption")}
         />
       </div>
 
       {enroll.isError ? (
         <Badge variant="destructive" data-testid="learning-catalogue-error">
-          Errore durante l&apos;iscrizione.
+          {t("catalogue.errorEnroll")}
         </Badge>
       ) : null}
       {lastEnrolled ? (
         <Badge variant="success" data-testid="learning-catalogue-enrolled">
-          Iscrizione confermata per {lastEnrolled}.
+          {t("catalogue.enrolledConfirm", { path: lastEnrolled })}
         </Badge>
       ) : null}
     </main>

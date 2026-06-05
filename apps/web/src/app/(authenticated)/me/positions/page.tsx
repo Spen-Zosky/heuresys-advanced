@@ -1,6 +1,8 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
@@ -21,45 +23,49 @@ interface MePositionsList {
   total: number;
 }
 
-const COLUMNS: DataColumn<MePositionAssignment>[] = [
-  { header: "Codice", cell: (p) => <span className="font-mono text-xs">{p.positionCode}</span> },
-  { header: "Titolo", cell: (p) => <span className="font-medium text-foreground">{p.positionTitle}</span> },
-  {
-    header: "Tipo",
-    cell: (p) => (
-      <StatusPill tone={p.isPrimary ? "info" : "neutral"}>{p.isPrimary ? "PRIMARY" : "ALT"}</StatusPill>
-    ),
-  },
-  { header: "Stato", cell: (p) => <StatusBadge value={p.status} /> },
-  { header: "Inizio", cell: (p) => <span className="text-xs text-muted-foreground">{p.startDate ?? "—"}</span> },
-  { header: "Fine", cell: (p) => <span className="text-xs text-muted-foreground">{p.endDate ?? "—"}</span> },
-];
-
 export default function MePositionsPage() {
+  const { t } = useTranslation("ess");
   const positions = useQuery({
     queryKey: ["me", "positions"],
     queryFn: () => apiFetch<MePositionsList>("/v1/me/positions"),
   });
+
+  const columns = useMemo<DataColumn<MePositionAssignment>[]>(
+    () => [
+      { header: t("positions.colCode"), cell: (p) => <span className="font-mono text-xs">{p.positionCode}</span> },
+      { header: t("positions.colTitle"), cell: (p) => <span className="font-medium text-foreground">{p.positionTitle}</span> },
+      {
+        header: t("positions.colType"),
+        cell: (p) => (
+          <StatusPill tone={p.isPrimary ? "info" : "neutral"}>{p.isPrimary ? t("positions.primary") : t("positions.alt")}</StatusPill>
+        ),
+      },
+      { header: t("positions.colStatus"), cell: (p) => <StatusBadge value={p.status} /> },
+      { header: t("positions.colStart"), cell: (p) => <span className="text-xs text-muted-foreground">{p.startDate ?? "—"}</span> },
+      { header: t("positions.colEnd"), cell: (p) => <span className="text-xs text-muted-foreground">{p.endDate ?? "—"}</span> },
+    ],
+    [t],
+  );
 
   return (
     <DataTablePanel<MePositionAssignment>
       pageTestId="me-positions-page"
       titleTestId="me-positions-title"
       countTestId="me-positions-count"
-      title="Le mie posizioni"
-      description="Storico delle tue assegnazioni di posizione."
-      count={positions.data ? `${positions.data.total} assegnazioni` : undefined}
+      title={t("positions.title")}
+      description={t("positions.description")}
+      count={positions.data ? t("positions.count", { count: positions.data.total }) : undefined}
       isLoading={positions.isLoading}
       isError={positions.isError}
-      errorMessage="Impossibile caricare le posizioni."
+      errorMessage={t("positions.errorMessage")}
       rows={positions.data?.items ?? []}
       rowKey={(p) => p.userPositionAssignmentId}
       rowTestId="me-position-row"
-      columns={COLUMNS}
+      columns={columns}
       emptyTestId="me-positions-empty"
-      emptyTitle="Nessuna assegnazione"
-      emptyDescription="Non hai assegnazioni di posizione."
-      caption="Storico assegnazioni"
+      emptyTitle={t("positions.emptyTitle")}
+      emptyDescription={t("positions.emptyDesc")}
+      caption={t("positions.caption")}
     />
   );
 }

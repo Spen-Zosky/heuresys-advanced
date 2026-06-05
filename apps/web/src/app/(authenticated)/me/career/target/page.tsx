@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
 import { StatusPill } from "@/components/status-pill";
 import { apiFetch } from "../../../../../lib/api/fetch";
@@ -24,6 +25,7 @@ const CareerTargetSchema = z.object({
 type CareerTargetValues = z.infer<typeof CareerTargetSchema>;
 
 export default function MeCareerTargetPage() {
+  const { t } = useTranslation("ess");
   const qc = useQueryClient();
   const [filter, setFilter] = useState("");
 
@@ -64,17 +66,17 @@ export default function MeCareerTargetPage() {
           data-testid="career-target-back"
           className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
         >
-          ← La mia carriera
+          {t("careerTarget.back")}
         </Link>
         <PageHeader
           data-testid="career-target-title"
-          title="Dichiara obiettivo di carriera"
-          description="Seleziona la posizione che desideri raggiungere; la richiesta sarà revisionata dal tuo manager."
+          title={t("careerTarget.title")}
+          description={t("careerTarget.description")}
         />
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Nuova posizione target</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("careerTarget.cardTitle")}</CardTitle></CardHeader>
         <CardContent>
           <form
             onSubmit={(e) => { void onSubmit(e); }}
@@ -82,25 +84,25 @@ export default function MeCareerTargetPage() {
             data-testid="career-target-form"
           >
             <div className="space-y-1.5">
-              <label htmlFor="filter" className="text-sm font-medium text-foreground">Cerca posizione</label>
+              <label htmlFor="filter" className="text-sm font-medium text-foreground">{t("careerTarget.filterLabel")}</label>
               <Input
                 id="filter"
                 data-testid="career-target-filter"
-                placeholder="Digita per filtrare…"
+                placeholder={t("careerTarget.filterPlaceholder")}
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="positionId" className="text-sm font-medium text-foreground">Posizione</label>
+              <label htmlFor="positionId" className="text-sm font-medium text-foreground">{t("careerTarget.positionLabel")}</label>
               <select
                 id="positionId"
                 data-testid="career-target-position"
                 className="w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 {...register("positionId")}
               >
-                <option value="">— Seleziona —</option>
+                <option value="">{t("careerTarget.selectPlaceholder")}</option>
                 {filtered.slice(0, 50).map((p) => (
                   <option key={p.positionId} value={p.positionId}>
                     {p.code} — {p.title}
@@ -108,37 +110,37 @@ export default function MeCareerTargetPage() {
                 ))}
               </select>
               {errors.positionId && (
-                <p className="mt-1 text-xs text-danger">Posizione richiesta.</p>
+                <p className="mt-1 text-xs text-danger">{t("careerTarget.positionRequired")}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="targetDate" className="text-sm font-medium text-foreground">Data target (YYYY-MM-DD)</label>
+              <label htmlFor="targetDate" className="text-sm font-medium text-foreground">{t("careerTarget.dateLabel")}</label>
               <Input
                 id="targetDate"
                 data-testid="career-target-date"
-                placeholder="es. 2027-12-31"
+                placeholder={t("careerTarget.datePlaceholder")}
                 {...register("targetDate")}
               />
               {errors.targetDate && (
-                <p className="mt-1 text-xs text-danger">Formato data non valido.</p>
+                <p className="mt-1 text-xs text-danger">{t("careerTarget.dateInvalid")}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="notes" className="text-sm font-medium text-foreground">Note</label>
+              <label htmlFor="notes" className="text-sm font-medium text-foreground">{t("careerTarget.notesLabel")}</label>
               <Input id="notes" data-testid="career-target-notes" {...register("notes")} />
             </div>
 
             {create.isError && (
               <p className="text-sm text-danger" data-testid="career-target-error">
-                Errore durante l&apos;invio.
+                {t("careerTarget.errorSubmit")}
               </p>
             )}
             {create.isSuccess && (
               <p data-testid="career-target-success">
                 <StatusPill tone="success">
-                  Obiettivo registrato. Sarà revisionato dal tuo manager.
+                  {t("careerTarget.success")}
                 </StatusPill>
               </p>
             )}
@@ -148,7 +150,7 @@ export default function MeCareerTargetPage() {
               data-testid="career-target-submit"
               disabled={isSubmitting || create.isPending}
             >
-              {create.isPending ? "Invio…" : "Invia richiesta"}
+              {create.isPending ? t("careerTarget.submitting") : t("careerTarget.submit")}
             </Button>
           </form>
         </CardContent>

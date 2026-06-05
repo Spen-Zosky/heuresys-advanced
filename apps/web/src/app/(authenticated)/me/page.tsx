@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { PageHeader, StatsCard } from "@heuresys/ui";
 import { Briefcase, GraduationCap, TriangleAlert } from "lucide-react";
 import { apiFetch } from "../../../lib/api/fetch";
@@ -37,6 +38,7 @@ interface MeGaps {
 const ICON_CLS = "h-4 w-4";
 
 export default function MeLandingPage() {
+  const { t } = useTranslation("ess");
   const profile = useQuery({
     queryKey: ["me", "profile"],
     queryFn: () => apiFetch<MeProfile>("/v1/me/profile"),
@@ -61,19 +63,19 @@ export default function MeLandingPage() {
   return (
     <main data-testid="me-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
       <PageHeader
-        title="La mia area"
-        description="La tua panoramica personale: posizione, formazione e gap di sviluppo."
+        title={t("landing.title")}
+        description={t("landing.description")}
       />
 
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground" data-testid="me-greeting">
-          Ciao, {profile.data?.displayName ?? profile.data?.email ?? "…"}
+          {t("landing.greeting", { name: profile.data?.displayName ?? profile.data?.email ?? "…" })}
         </h1>
         <p className="text-sm text-muted-foreground" data-testid="me-email">
           {profile.data?.email ?? ""}
         </p>
         <p className="text-sm text-muted-foreground" data-testid="me-roles">
-          Ruoli: {profile.data?.roles.join(", ") ?? "—"}
+          {t("landing.rolesLabel", { roles: profile.data?.roles.join(", ") ?? "—" })}
         </p>
       </header>
 
@@ -81,14 +83,14 @@ export default function MeLandingPage() {
         <div data-testid="me-card-primary-position">
           {positions.isLoading ? (
             <StatsCard
-              label="Posizione attuale"
+              label={t("landing.primaryPositionLabel")}
               value="…"
               icon={<Briefcase className={`${ICON_CLS} text-palette-1`} />}
             />
           ) : primary ? (
             <>
               <StatsCard
-                label="Posizione attuale"
+                label={t("landing.primaryPositionLabel")}
                 value={primary.positionTitle}
                 description={primary.positionCode}
                 icon={<Briefcase className={`${ICON_CLS} text-palette-1`} />}
@@ -100,13 +102,13 @@ export default function MeLandingPage() {
           ) : (
             <>
               <StatsCard
-                label="Posizione attuale"
+                label={t("landing.primaryPositionLabel")}
                 value="—"
-                description="Nessuna posizione primaria attiva."
+                description={t("landing.noPrimaryDesc")}
                 icon={<Briefcase className={`${ICON_CLS} text-palette-1`} />}
               />
               <span data-testid="me-no-primary" className="sr-only">
-                Nessuna posizione primaria attiva.
+                {t("landing.noPrimaryDesc")}
               </span>
             </>
           )}
@@ -114,25 +116,25 @@ export default function MeLandingPage() {
 
         <div data-testid="me-card-learning">
           <StatsCard
-            label="Percorsi formativi"
+            label={t("landing.learningLabel")}
             value={learningTotal}
-            unit="assegnati"
+            unit={t("landing.learningUnit")}
             icon={<GraduationCap className={`${ICON_CLS} text-palette-4`} />}
           />
           <span data-testid="me-learning-count" className="sr-only">
-            {learningTotal} assegnati
+            {t("landing.learningCount", { count: learningTotal })}
           </span>
         </div>
 
         <div data-testid="me-card-gaps">
           <StatsCard
-            label="Gap di sviluppo"
+            label={t("landing.gapsLabel")}
             value={gapsTotal}
-            unit="aperti"
+            unit={t("landing.gapsUnit")}
             icon={<TriangleAlert className={`${ICON_CLS} text-warning`} />}
           />
           <span data-testid="me-gaps-count" className="sr-only">
-            {gapsTotal} aperti
+            {t("landing.gapsCount", { count: gapsTotal })}
           </span>
         </div>
       </section>

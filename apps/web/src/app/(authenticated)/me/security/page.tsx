@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Badge,
@@ -24,14 +25,16 @@ import {
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 
-const VerifyCodeFormSchema = z.object({
-  code: z
-    .string()
-    .regex(/^\d{6}$/, "Codice TOTP di 6 cifre richiesto"),
-});
-type VerifyCodeFormValues = z.infer<typeof VerifyCodeFormSchema>;
+type SecI18n = (key: string) => string;
+function buildVerifyCodeSchema(t: SecI18n) {
+  return z.object({
+    code: z.string().regex(/^\d{6}$/, t("security.codeRequired")),
+  });
+}
+type VerifyCodeFormValues = z.infer<ReturnType<typeof buildVerifyCodeSchema>>;
 
 export default function MeSecurityPage() {
+  const { t } = useTranslation("ess");
   const qc = useQueryClient();
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
   const [pendingFactor, setPendingFactor] = useState<EnrollMfaResponse | null>(null);
@@ -55,7 +58,7 @@ export default function MeSecurityPage() {
     onError: (err) => {
       setFeedback({
         kind: "err",
-        msg: err instanceof Error ? err.message : "Errore inatteso",
+        msg: err instanceof Error ? err.message : t("security.errorUnexpected"),
       });
     },
   });
@@ -69,12 +72,12 @@ export default function MeSecurityPage() {
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
       setPendingFactor(null);
-      setFeedback({ kind: "ok", msg: "Fattore TOTP verificato e attivo." });
+      setFeedback({ kind: "ok", msg: t("security.verifiedActive") });
     },
     onError: (err) => {
       setFeedback({
         kind: "err",
-        msg: err instanceof Error ? err.message : "Codice non valido",
+        msg: err instanceof Error ? err.message : t("security.errorInvalidCode"),
       });
     },
   });
@@ -84,18 +87,19 @@ export default function MeSecurityPage() {
       apiFetch<void>(`/v1/auth/mfa/factors/${factorId}`, { method: "DELETE" }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
-      setFeedback({ kind: "ok", msg: "Fattore rimosso." });
+      setFeedback({ kind: "ok", msg: t("security.factorRemoved") });
     },
     onError: (err) => {
       setFeedback({
         kind: "err",
-        msg: err instanceof Error ? err.message : "Errore rimozione",
+        msg: err instanceof Error ? err.message : t("security.errorRemove"),
       });
     },
   });
 
+  const verifyCodeSchema = useMemo(() => buildVerifyCodeSchema(t), [t]);
   const form = useForm<VerifyCodeFormValues>({
-    resolver: zodResolver(VerifyCodeFormSchema),
+    resolver: zodResolver(verifyCodeSchema),
     defaultValues: { code: "" },
   });
 
@@ -111,11 +115,11 @@ export default function MeSecurityPage() {
     >
       <PageHeader
         data-testid="me-security-title"
-        title="Sicurezza account"
-        description="Gestione fattori MFA per autenticazione a due fattori."
+        title={t("security.title")}
+        description={t("security.description")}
         badges={
           <Badge variant="secondary" data-testid="me-security-factors-count">
-            {factors.data?.total ?? "—"} totali
+            {t("security.count", { count: factors.data?.total ?? "—" })}
           </Badge>
         }
       />
@@ -135,18 +139,17 @@ export default function MeSecurityPage() {
 
       <Card data-testid="me-security-factors-card">
         <CardHeader>
-          <CardTitle>Fattori attivi</CardTitle>
+          <CardTitle>{t("security.factorsCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {factors.isLoading ? (
-            <div className="p-6 text-sm text-muted-foreground">Caricamento…</div>
+            <div className="p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
           ) : factors.data && factors.data.items.length === 0 ? (
             <div
               className="p-6 text-sm text-muted-foreground"
               data-testid="me-security-factors-empty"
             >
-              Nessun fattore configurato. Aggiungi un autenticatore TOTP per
-              attivare la protezione a due fattori.
+              {t("security.factorsEmpty")}
             </div>
           ) : (
             <ul className="divide-y divide-border" data-testid="me-security-factors-list">
@@ -164,8 +167,8 @@ export default function MeSecurityPage() {
                       {f.kind}
                     </div>
                     <div className="font-mono text-xs text-muted-foreground">
-                      {f.verified ? "verificato" : "in attesa di verifica"} ·{" "}
-                      creato {new Date(f.createdAt).toLocaleDateString()}
+                      {f.verified ? t("security.verified") : t("security.pendingVerification")} ·{" "}
+                      {t("security.createdAt", { date: new Date(f.createdAt).toLocaleDateString() })}
                     </div>
                   </div>
                   <Button
@@ -174,12 +177,12 @@ export default function MeSecurityPage() {
                     className="text-danger"
                     data-testid="me-security-factor-delete"
                     onClick={() => {
-                      if (confirm(`Rimuovere il fattore ${f.kind}?`)) {
+                      if (confirm(t("security.removeConfirm", { kind: f.kind }))) {
                         remove.mutate(f.factorId);
                       }
                     }}
                   >
-                    Rimuovi
+                    {t("security.remove")}
                   </Button>
                 </li>
               ))}
@@ -191,13 +194,11 @@ export default function MeSecurityPage() {
       {pendingFactor ? (
         <Card data-testid="me-security-enroll-pending-card">
           <CardHeader>
-            <CardTitle>Verifica TOTP in corso</CardTitle>
+            <CardTitle>{t("security.pendingCardTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm">
-              Scansiona il QR con la tua app di autenticazione (Google
-              Authenticator, Authy, 1Password, ecc.) e inserisci il codice di
-              6 cifre per completare la registrazione.
+              {t("security.pendingInstruction")}
             </p>
 
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
@@ -214,7 +215,7 @@ export default function MeSecurityPage() {
               </div>
               <div className="flex-1 space-y-2 text-xs">
                 <p className="text-muted-foreground">
-                  Se non puoi scansionare il QR, inserisci manualmente la chiave:
+                  {t("security.manualKeyHint")}
                 </p>
                 <code
                   data-testid="me-security-enroll-secret"
@@ -231,12 +232,12 @@ export default function MeSecurityPage() {
               data-testid="me-security-verify-form"
             >
               <label className="block text-sm">
-                <span>Codice TOTP</span>
+                <span>{t("security.totpCodeLabel")}</span>
                 <Input
                   {...form.register("code")}
                   inputMode="numeric"
                   maxLength={6}
-                  placeholder="123456"
+                  placeholder={t("security.totpCodePlaceholder")}
                   data-testid="me-security-verify-code"
                   autoComplete="one-time-code"
                   className="mt-1"
@@ -253,7 +254,7 @@ export default function MeSecurityPage() {
                   data-testid="me-security-verify-submit"
                   disabled={verify.isPending}
                 >
-                  {verify.isPending ? "Verifico…" : "Verifica e attiva"}
+                  {verify.isPending ? t("security.verifying") : t("security.verifySubmit")}
                 </Button>
                 <Button
                   type="button"
@@ -264,7 +265,7 @@ export default function MeSecurityPage() {
                     form.reset();
                   }}
                 >
-                  Annulla
+                  {t("security.cancel")}
                 </Button>
               </div>
             </form>
@@ -278,7 +279,7 @@ export default function MeSecurityPage() {
             onClick={() => enroll.mutate()}
             disabled={enroll.isPending}
           >
-            {enroll.isPending ? "Generazione…" : "Aggiungi autenticatore TOTP"}
+            {enroll.isPending ? t("security.enrolling") : t("security.enrollButton")}
           </Button>
         </div>
       )}

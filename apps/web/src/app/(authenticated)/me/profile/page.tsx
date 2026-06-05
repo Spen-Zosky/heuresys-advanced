@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { useMyPreferences, useUpdateMyPreferences } from "../../../../lib/api/auth";
@@ -31,20 +32,21 @@ const ProfileFormSchema = z.object({
 });
 type ProfileFormValues = z.infer<typeof ProfileFormSchema>;
 
-const THEME_OPTIONS: { value: MeTheme; label: string }[] = [
-  { value: "dark", label: "Scuro" },
-  { value: "light", label: "Chiaro" },
+const THEME_OPTIONS: { value: MeTheme; labelKey: string }[] = [
+  { value: "dark", labelKey: "profile.theme.dark" },
+  { value: "light", labelKey: "profile.theme.light" },
 ];
-const PALETTE_OPTIONS: { value: MePalette; label: string }[] = [
-  { value: "balanced", label: "Balanced" },
-  { value: "cool-ocean", label: "Cool ocean" },
-  { value: "warm-sunset", label: "Warm sunset" },
-  { value: "brand-mono", label: "Brand mono" },
+const PALETTE_OPTIONS: { value: MePalette; labelKey: string }[] = [
+  { value: "balanced", labelKey: "profile.palette.balanced" },
+  { value: "cool-ocean", labelKey: "profile.palette.coolOcean" },
+  { value: "warm-sunset", labelKey: "profile.palette.warmSunset" },
+  { value: "brand-mono", labelKey: "profile.palette.brandMono" },
 ];
 
 /** WS-4 P1 — theme + palette controls. Server is the source of truth (PATCH /v1/me/preferences);
  *  the layout's PreferencesApplier re-applies the saved choice on every session. */
 function AppearanceCard() {
+  const { t } = useTranslation("ess");
   const prefs = useMyPreferences();
   const update = useUpdateMyPreferences();
   const theme = prefs.data?.theme;
@@ -52,15 +54,15 @@ function AppearanceCard() {
 
   return (
     <Card>
-      <CardHeader><CardTitle>Aspetto</CardTitle></CardHeader>
+      <CardHeader><CardTitle>{t("profile.appearanceTitle")}</CardTitle></CardHeader>
       <CardContent>
         {prefs.isLoading ? (
-          <span className="text-sm text-muted-foreground">Caricamento…</span>
+          <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
         ) : (
           <div className="space-y-4" data-testid="me-appearance">
             <div className="space-y-1">
-              <span className="text-sm font-medium text-foreground">Tema</span>
-              <div className="flex flex-wrap gap-2" role="group" aria-label="Tema">
+              <span className="text-sm font-medium text-foreground">{t("profile.themeLabel")}</span>
+              <div className="flex flex-wrap gap-2" role="group" aria-label={t("profile.themeLabel")}>
                 {THEME_OPTIONS.map((o) => (
                   <Button
                     key={o.value}
@@ -71,14 +73,14 @@ function AppearanceCard() {
                     disabled={update.isPending}
                     onClick={() => { void update.mutateAsync({ theme: o.value }); }}
                   >
-                    {o.label}
+                    {t(o.labelKey)}
                   </Button>
                 ))}
               </div>
             </div>
             <div className="space-y-1">
-              <span className="text-sm font-medium text-foreground">Palette</span>
-              <div className="flex flex-wrap gap-2" role="group" aria-label="Palette">
+              <span className="text-sm font-medium text-foreground">{t("profile.paletteLabel")}</span>
+              <div className="flex flex-wrap gap-2" role="group" aria-label={t("profile.paletteLabel")}>
                 {PALETTE_OPTIONS.map((o) => (
                   <Button
                     key={o.value}
@@ -89,14 +91,14 @@ function AppearanceCard() {
                     disabled={update.isPending}
                     onClick={() => { void update.mutateAsync({ palette: o.value }); }}
                   >
-                    {o.label}
+                    {t(o.labelKey)}
                   </Button>
                 ))}
               </div>
             </div>
             {update.isError && (
               <p className="text-sm text-danger" data-testid="pref-error">
-                Errore durante il salvataggio.
+                {t("profile.errorSave")}
               </p>
             )}
           </div>
@@ -107,6 +109,7 @@ function AppearanceCard() {
 }
 
 export default function MeProfilePage() {
+  const { t } = useTranslation("ess");
   const qc = useQueryClient();
   const profile = useQuery({
     queryKey: ["me", "profile"],
@@ -143,8 +146,8 @@ export default function MeProfilePage() {
     <main data-testid="me-profile-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="me-profile-title"
-        title="Profilo"
-        description="Gestisci i tuoi dati anagrafici e le preferenze di contatto."
+        title={t("profile.title")}
+        description={t("profile.description")}
         badges={
           <Badge variant="secondary" data-testid="me-profile-email">
             {profile.data?.email ?? "…"}
@@ -153,10 +156,10 @@ export default function MeProfilePage() {
       />
 
       <Card>
-        <CardHeader><CardTitle>Anagrafica</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("profile.anagraficaTitle")}</CardTitle></CardHeader>
         <CardContent>
           {profile.isLoading ? (
-            <span className="text-sm text-muted-foreground">Caricamento…</span>
+            <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
           ) : (
             <form
               onSubmit={(e) => { void onSubmit(e); }}
@@ -164,38 +167,38 @@ export default function MeProfilePage() {
               data-testid="me-profile-form"
             >
               <div className="space-y-1">
-                <label htmlFor="displayName" className="text-sm font-medium text-foreground">Nome visualizzato</label>
+                <label htmlFor="displayName" className="text-sm font-medium text-foreground">{t("profile.displayNameLabel")}</label>
                 <Input id="displayName" data-testid="profile-displayName" {...register("displayName")} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label htmlFor="locale" className="text-sm font-medium text-foreground">Locale</label>
+                  <label htmlFor="locale" className="text-sm font-medium text-foreground">{t("profile.localeLabel")}</label>
                   <Input id="locale" data-testid="profile-locale" placeholder="it-IT" {...register("locale")} />
                 </div>
                 <div className="space-y-1">
-                  <label htmlFor="timezone" className="text-sm font-medium text-foreground">Timezone</label>
+                  <label htmlFor="timezone" className="text-sm font-medium text-foreground">{t("profile.timezoneLabel")}</label>
                   <Input id="timezone" data-testid="profile-timezone" placeholder="Europe/Rome" {...register("timezone")} />
                 </div>
               </div>
               <div className="space-y-1">
-                <label htmlFor="phone" className="text-sm font-medium text-foreground">Telefono</label>
+                <label htmlFor="phone" className="text-sm font-medium text-foreground">{t("profile.phoneLabel")}</label>
                 <Input id="phone" data-testid="profile-phone" {...register("phone")} />
               </div>
               <div className="space-y-1">
-                <label htmlFor="linkedinUri" className="text-sm font-medium text-foreground">LinkedIn URL</label>
+                <label htmlFor="linkedinUri" className="text-sm font-medium text-foreground">{t("profile.linkedinLabel")}</label>
                 <Input id="linkedinUri" data-testid="profile-linkedinUri" {...register("linkedinUri")} />
               </div>
               <div className="space-y-1">
-                <label htmlFor="bio" className="text-sm font-medium text-foreground">Bio</label>
+                <label htmlFor="bio" className="text-sm font-medium text-foreground">{t("profile.bioLabel")}</label>
                 <Input id="bio" data-testid="profile-bio" {...register("bio")} />
               </div>
 
               {update.isSuccess && (
-                <p className="text-sm text-success" data-testid="profile-saved">Salvato.</p>
+                <p className="text-sm text-success" data-testid="profile-saved">{t("profile.saved")}</p>
               )}
               {update.isError && (
                 <p className="text-sm text-danger" data-testid="profile-error">
-                  Errore durante il salvataggio.
+                  {t("profile.errorSave")}
                 </p>
               )}
 
@@ -204,7 +207,7 @@ export default function MeProfilePage() {
                 data-testid="profile-submit"
                 disabled={isSubmitting || update.isPending || !isDirty}
               >
-                {update.isPending ? "Salvataggio…" : "Salva modifiche"}
+                {update.isPending ? t("profile.submitting") : t("profile.submit")}
               </Button>
             </form>
           )}

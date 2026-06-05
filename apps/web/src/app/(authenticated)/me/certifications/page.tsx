@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import {
   Badge,
   Button,
@@ -36,28 +37,33 @@ interface MeCertificationsList {
 // Mirror of @heuresys/shared CreateMeCertificationBodySchema, kept inline for
 // ergonomic form binding with react-hook-form + Zod. Server is the canonical
 // validator; this client schema only blocks obvious mis-input pre-flight.
-const CertificationFormSchema = z.object({
-  name: z.string().min(1, "Required").max(255),
-  issuer: z.string().min(1, "Required").max(255),
-  issuedDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "ISO date YYYY-MM-DD")
-    .optional()
-    .or(z.literal("")),
-  expiresDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "ISO date YYYY-MM-DD")
-    .optional()
-    .or(z.literal("")),
-  credentialId: z.string().max(255).optional().or(z.literal("")),
-  documentUri: z
-    .string()
-    .max(4096)
-    .url("Must be a valid URL (file upload UI lands in MVP-3.5)")
-    .optional()
-    .or(z.literal("")),
-});
-type CertificationFormValues = z.infer<typeof CertificationFormSchema>;
+// The validation messages are i18n-resolved, so the schema is built inside the
+// component via the factory below; the form-values type is derived from it.
+type CertI18n = (key: string) => string;
+function buildCertificationSchema(t: CertI18n) {
+  return z.object({
+    name: z.string().min(1, t("certifications.validation.required")).max(255),
+    issuer: z.string().min(1, t("certifications.validation.required")).max(255),
+    issuedDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, t("certifications.validation.isoDate"))
+      .optional()
+      .or(z.literal("")),
+    expiresDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, t("certifications.validation.isoDate"))
+      .optional()
+      .or(z.literal("")),
+    credentialId: z.string().max(255).optional().or(z.literal("")),
+    documentUri: z
+      .string()
+      .max(4096)
+      .url(t("certifications.validation.url"))
+      .optional()
+      .or(z.literal("")),
+  });
+}
+type CertificationFormValues = z.infer<ReturnType<typeof buildCertificationSchema>>;
 
 function cleanPayload(v: CertificationFormValues): Record<string, unknown> {
   return {
@@ -70,16 +76,18 @@ function cleanPayload(v: CertificationFormValues): Record<string, unknown> {
   };
 }
 
-const COLUMNS: DataColumn<MeCertification>[] = [
-  { header: "Nome", cell: (c) => <span className="font-medium text-foreground">{c.name}</span> },
-  { header: "Ente", cell: (c) => <span className="text-muted-foreground">{c.issuer}</span> },
-  { header: "Rilasciato", cell: (c) => <span className="text-xs text-muted-foreground">{c.issuedDate ?? "—"}</span> },
-  { header: "Scadenza", cell: (c) => <span className="text-xs text-muted-foreground">{c.expiresDate ?? "—"}</span> },
-  {
-    header: "Credential ID",
-    cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.credentialId ?? "—"}</span>,
-  },
-];
+function buildColumns(t: CertI18n): DataColumn<MeCertification>[] {
+  return [
+    { header: t("certifications.colName"), cell: (c) => <span className="font-medium text-foreground">{c.name}</span> },
+    { header: t("certifications.colIssuer"), cell: (c) => <span className="text-muted-foreground">{c.issuer}</span> },
+    { header: t("certifications.colIssued"), cell: (c) => <span className="text-xs text-muted-foreground">{c.issuedDate ?? "—"}</span> },
+    { header: t("certifications.colExpires"), cell: (c) => <span className="text-xs text-muted-foreground">{c.expiresDate ?? "—"}</span> },
+    {
+      header: t("certifications.colCredential"),
+      cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.credentialId ?? "—"}</span>,
+    },
+  ];
+}
 
 const EMPTY_FORM: CertificationFormValues = {
   name: "",
@@ -91,8 +99,11 @@ const EMPTY_FORM: CertificationFormValues = {
 };
 
 export default function MeCertificationsPage() {
+  const { t } = useTranslation("ess");
   const qc = useQueryClient();
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
+  const schema = useMemo(() => buildCertificationSchema(t), [t]);
+  const columns = useMemo(() => buildColumns(t), [t]);
   const certs = useQuery({
     queryKey: ["me", "certifications"],
     queryFn: () => apiFetch<MeCertificationsList>("/v1/me/certifications"),
@@ -103,12 +114,12 @@ export default function MeCertificationsPage() {
       apiFetch<MeCertification>("/v1/me/certifications", { method: "POST", body }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ["me", "certifications"] });
-      setFeedback({ kind: "ok", msg: "Certificazione aggiunta." });
+      setFeedback({ kind: "ok", msg: t("certifications.successMsg") });
     },
     onError: (err) => {
       setFeedback({
         kind: "err",
-        msg: err instanceof Error ? err.message : "Errore inatteso",
+        msg: err instanceof Error ? err.message : t("certifications.errorUnexpected"),
       });
     },
   });
@@ -119,7 +130,7 @@ export default function MeCertificationsPage() {
     reset,
     formState: { errors, isSubmitting },
   } = useForm<CertificationFormValues>({
-    resolver: zodResolver(CertificationFormSchema),
+    resolver: zodResolver(schema),
     defaultValues: EMPTY_FORM,
   });
 
@@ -133,18 +144,18 @@ export default function MeCertificationsPage() {
     <main data-testid="me-certifications-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="me-certifications-title"
-        title="Le mie certificazioni"
-        description="Le tue certificazioni professionali registrate."
+        title={t("certifications.title")}
+        description={t("certifications.description")}
         badges={
           <Badge variant="secondary" data-testid="me-certifications-count">
-            {certs.data ? `${certs.data.total} certificazioni` : "Caricamento…"}
+            {certs.data ? t("certifications.count", { count: certs.data.total }) : t("common:loading")}
           </Badge>
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Aggiungi certificazione</CardTitle>
+          <CardTitle>{t("certifications.addCardTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form
@@ -157,7 +168,7 @@ export default function MeCertificationsPage() {
           >
             <div>
               <label htmlFor="cert-name" className="mb-1 block text-sm font-medium text-foreground">
-                Nome <span aria-hidden="true">*</span>
+                {t("certifications.nameLabel")} <span aria-hidden="true">*</span>
               </label>
               <Input
                 id="cert-name"
@@ -171,7 +182,7 @@ export default function MeCertificationsPage() {
             </div>
             <div>
               <label htmlFor="cert-issuer" className="mb-1 block text-sm font-medium text-foreground">
-                Ente <span aria-hidden="true">*</span>
+                {t("certifications.issuerLabel")} <span aria-hidden="true">*</span>
               </label>
               <Input
                 id="cert-issuer"
@@ -185,7 +196,7 @@ export default function MeCertificationsPage() {
             </div>
             <div>
               <label htmlFor="cert-issued" className="mb-1 block text-sm font-medium text-foreground">
-                Data rilascio
+                {t("certifications.issuedLabel")}
               </label>
               <Input
                 id="cert-issued"
@@ -199,7 +210,7 @@ export default function MeCertificationsPage() {
             </div>
             <div>
               <label htmlFor="cert-expires" className="mb-1 block text-sm font-medium text-foreground">
-                Scadenza
+                {t("certifications.expiresLabel")}
               </label>
               <Input
                 id="cert-expires"
@@ -213,7 +224,7 @@ export default function MeCertificationsPage() {
             </div>
             <div>
               <label htmlFor="cert-credential" className="mb-1 block text-sm font-medium text-foreground">
-                Credential ID
+                {t("certifications.credentialLabel")}
               </label>
               <Input
                 id="cert-credential"
@@ -223,12 +234,12 @@ export default function MeCertificationsPage() {
             </div>
             <div>
               <label htmlFor="cert-doc-uri" className="mb-1 block text-sm font-medium text-foreground">
-                URL documento
+                {t("certifications.docUriLabel")}
               </label>
               <Input
                 id="cert-doc-uri"
                 type="url"
-                placeholder="https://…"
+                placeholder={t("certifications.docUriPlaceholder")}
                 data-testid="me-cert-doc-uri"
                 aria-invalid={errors.documentUri !== undefined}
                 {...register("documentUri")}
@@ -244,7 +255,7 @@ export default function MeCertificationsPage() {
                 data-testid="me-cert-submit"
                 disabled={isSubmitting || add.isPending}
               >
-                {isSubmitting || add.isPending ? "Salvataggio…" : "Aggiungi"}
+                {isSubmitting || add.isPending ? t("certifications.submitting") : t("certifications.submit")}
               </Button>
               {feedback && (
                 <p
@@ -268,15 +279,15 @@ export default function MeCertificationsPage() {
         <EntityTable<MeCertification>
           isLoading={certs.isLoading}
           isError={certs.isError}
-          errorMessage="Impossibile caricare le certificazioni."
+          errorMessage={t("certifications.errorMessage")}
           rows={certs.data?.items ?? []}
           rowKey={(c) => c.userCertificationId}
           rowTestId="me-certification-row"
-          columns={COLUMNS}
+          columns={columns}
           emptyTestId="me-certifications-empty"
-          emptyTitle="Nessuna certificazione"
-          emptyDescription="Non hai ancora caricato certificazioni."
-          caption="Elenco certificazioni"
+          emptyTitle={t("certifications.emptyTitle")}
+          emptyDescription={t("certifications.emptyDesc")}
+          caption={t("certifications.caption")}
         />
       </div>
     </main>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, EmptyState, Spinner } from "@heuresys/ui";
 import { Users, Crown } from "lucide-react";
 import type { MyTeamsResponse } from "@heuresys/shared";
@@ -11,6 +12,7 @@ import { apiFetch } from "@/lib/api/fetch";
  * Pure live data: GET /v1/me/team (the teams service applies the "my team" scope axis server-side).
  */
 export default function MeTeamPage() {
+  const { t } = useTranslation("ess");
   const teams = useQuery({
     queryKey: ["me", "team"],
     queryFn: ({ signal }) => apiFetch<MyTeamsResponse>("/v1/me/team", { signal }),
@@ -21,8 +23,8 @@ export default function MeTeamPage() {
   return (
     <main data-testid="me-team-page" className="mx-auto max-w-5xl space-y-8 px-6 py-8">
       <PageHeader
-        title="Il mio team"
-        description="I team a cui appartieni o che guidi, con i relativi membri."
+        title={t("team.title")}
+        description={t("team.description")}
       />
 
       {teams.isLoading ? (
@@ -31,13 +33,13 @@ export default function MeTeamPage() {
         </div>
       ) : teams.isError ? (
         <p className="text-sm text-danger" data-testid="me-team-error">
-          Impossibile caricare i tuoi team.
+          {t("team.error")}
         </p>
       ) : (teams.data?.teams.length ?? 0) === 0 ? (
         <EmptyState
           data-testid="me-team-empty"
-          title="Nessun team"
-          description="Non fai parte di alcun team al momento."
+          title={t("team.emptyTitle")}
+          description={t("team.emptyDesc")}
         />
       ) : (
         <section className="space-y-6" data-testid="me-team-list">
@@ -62,7 +64,7 @@ export default function MeTeamPage() {
                       className="flex items-center gap-3 py-2"
                     >
                       {m.role === "LEAD" ? (
-                        <Crown className="h-4 w-4 text-palette-1" aria-label="Team lead" />
+                        <Crown className="h-4 w-4 text-palette-1" aria-label={t("team.leadAria")} />
                       ) : (
                         <Users className="h-4 w-4 text-muted-foreground" />
                       )}
@@ -74,7 +76,7 @@ export default function MeTeamPage() {
                         variant={m.role === "LEAD" ? "default" : "secondary"}
                         className="ml-auto text-xs"
                       >
-                        {m.role === "LEAD" ? "Lead" : "Membro"}
+                        {m.role === "LEAD" ? t("team.lead") : t("team.member")}
                       </Badge>
                     </li>
                   ))}

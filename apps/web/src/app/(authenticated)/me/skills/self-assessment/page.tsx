@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
 import { StatusPill } from "@/components/status-pill";
 import { apiFetch } from "../../../../../lib/api/fetch";
@@ -28,6 +29,7 @@ type SelfAssessmentValues = z.infer<typeof SelfAssessmentSchema>;
 const PROFICIENCY_LEVELS = ["NOVICE", "ADVANCED_BEGINNER", "COMPETENT", "PROFICIENT", "EXPERT"];
 
 export default function MeSelfAssessmentPage() {
+  const { t } = useTranslation("ess");
   const qc = useQueryClient();
   const [filter, setFilter] = useState("");
 
@@ -69,17 +71,17 @@ export default function MeSelfAssessmentPage() {
           data-testid="self-assessment-back"
           className="inline-flex text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
         >
-          ← Le mie skill
+          {t("selfAssessment.back")}
         </Link>
         <PageHeader
           data-testid="self-assessment-title"
-          title="Auto-valutazione skill"
-          description="Dichiara il tuo livello di competenza su una skill; la valutazione sarà revisionata dal tuo manager."
+          title={t("selfAssessment.title")}
+          description={t("selfAssessment.description")}
         />
       </div>
 
       <Card>
-        <CardHeader><CardTitle>Nuova dichiarazione</CardTitle></CardHeader>
+        <CardHeader><CardTitle>{t("selfAssessment.cardTitle")}</CardTitle></CardHeader>
         <CardContent>
           <form
             onSubmit={(e) => { void onSubmit(e); }}
@@ -87,36 +89,36 @@ export default function MeSelfAssessmentPage() {
             data-testid="self-assessment-form"
           >
             <div className="space-y-1.5">
-              <label htmlFor="filter" className="text-sm font-medium text-foreground">Cerca skill</label>
+              <label htmlFor="filter" className="text-sm font-medium text-foreground">{t("selfAssessment.filterLabel")}</label>
               <Input
                 id="filter"
                 data-testid="self-assessment-filter"
-                placeholder="Digita per filtrare…"
+                placeholder={t("selfAssessment.filterPlaceholder")}
                 value={filter}
                 onChange={(e) => setFilter(e.target.value)}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="skillId" className="text-sm font-medium text-foreground">Skill</label>
+              <label htmlFor="skillId" className="text-sm font-medium text-foreground">{t("selfAssessment.skillLabel")}</label>
               <select
                 id="skillId"
                 data-testid="self-assessment-skill"
                 className="w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 {...register("skillId")}
               >
-                <option value="">— Seleziona —</option>
+                <option value="">{t("selfAssessment.selectPlaceholder")}</option>
                 {filteredSkills.slice(0, 50).map((s) => (
                   <option key={s.skillId} value={s.skillId}>{s.code} — {s.name}</option>
                 ))}
               </select>
               {errors.skillId && (
-                <p className="mt-1 text-xs text-danger">Skill richiesta.</p>
+                <p className="mt-1 text-xs text-danger">{t("selfAssessment.skillRequired")}</p>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="declaredProficiency" className="text-sm font-medium text-foreground">Livello</label>
+              <label htmlFor="declaredProficiency" className="text-sm font-medium text-foreground">{t("selfAssessment.levelLabel")}</label>
               <select
                 id="declaredProficiency"
                 data-testid="self-assessment-proficiency"
@@ -128,29 +130,29 @@ export default function MeSelfAssessmentPage() {
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="score" className="text-sm font-medium text-foreground">Punteggio (0-100, opzionale)</label>
+              <label htmlFor="score" className="text-sm font-medium text-foreground">{t("selfAssessment.scoreLabel")}</label>
               <Input
                 id="score"
                 type="text"
                 data-testid="self-assessment-score"
-                placeholder="es. 80"
+                placeholder={t("selfAssessment.scorePlaceholder")}
                 {...register("score")}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="comment" className="text-sm font-medium text-foreground">Commento</label>
+              <label htmlFor="comment" className="text-sm font-medium text-foreground">{t("selfAssessment.commentLabel")}</label>
               <Input id="comment" data-testid="self-assessment-comment" {...register("comment")} />
             </div>
 
             {create.isError && (
               <p className="text-sm text-danger" data-testid="self-assessment-error">
-                Errore durante l&apos;invio.
+                {t("selfAssessment.errorSubmit")}
               </p>
             )}
             {create.isSuccess && (
               <p data-testid="self-assessment-success">
-                <StatusPill tone="success">Auto-valutazione registrata.</StatusPill>
+                <StatusPill tone="success">{t("selfAssessment.success")}</StatusPill>
               </p>
             )}
 
@@ -159,7 +161,7 @@ export default function MeSelfAssessmentPage() {
               data-testid="self-assessment-submit"
               disabled={isSubmitting || create.isPending}
             >
-              {create.isPending ? "Invio…" : "Invia auto-valutazione"}
+              {create.isPending ? t("selfAssessment.submitting") : t("selfAssessment.submit")}
             </Button>
           </form>
         </CardContent>

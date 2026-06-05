@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   AuditFeed,
   type AuditEvent,
@@ -57,6 +58,7 @@ function notificationVisual(n: MeNotification): { icon: AuditEvent["icon"]; tone
 }
 
 export default function MeInboxPage() {
+  const { t } = useTranslation("ess");
   const inbox = useQuery({
     queryKey: ["me", "inbox"],
     queryFn: () => apiFetch<{ items: MeNotification[]; total: number }>("/v1/me/inbox"),
@@ -85,20 +87,20 @@ export default function MeInboxPage() {
     <main data-testid="me-inbox-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="me-inbox-title"
-        title="Inbox"
-        description="Le tue notifiche e comunicazioni recenti."
+        title={t("inbox.title")}
+        description={t("inbox.description")}
         badges={
           <div className="flex items-center gap-2">
             <Badge variant="secondary" data-testid="me-inbox-count">
-              {inbox.data ? `${inbox.data.total} notifiche` : "Caricamento…"}
+              {inbox.data ? t("inbox.count", { count: inbox.data.total }) : t("common:loading")}
             </Badge>
             {unreadCount > 0 && (
               <Badge
                 variant="destructive"
                 data-testid="me-inbox-unread-badge"
-                aria-label={`${unreadCount} notifiche non lette`}
+                aria-label={t("inbox.unreadAria", { count: unreadCount })}
               >
-                {unreadCount} non lette
+                {t("inbox.unreadBadge", { count: unreadCount })}
               </Badge>
             )}
           </div>
@@ -107,18 +109,18 @@ export default function MeInboxPage() {
 
       {inbox.isLoading ? (
         <p className="text-sm text-muted-foreground" data-testid="me-inbox-loading">
-          Caricamento…
+          {t("common:loading")}
         </p>
       ) : inbox.data && inbox.data.items.length === 0 ? (
         <EmptyState
           data-testid="me-inbox-empty"
           icon={<Inbox className="h-6 w-6" />}
-          title="Nessuna notifica"
-          description="Non hai notifiche al momento."
+          title={t("inbox.emptyTitle")}
+          description={t("inbox.emptyDesc")}
         />
       ) : (
         <div data-testid="me-inbox-list">
-          <AuditFeed events={events} title="Notifiche" />
+          <AuditFeed events={events} title={t("inbox.feedTitle")} />
         </div>
       )}
     </main>

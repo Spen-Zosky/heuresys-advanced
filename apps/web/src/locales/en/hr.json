@@ -1,1 +1,136 @@
-{}
+{
+  "shared": {
+    "code": "Code",
+    "name": "Name",
+    "scope": "Scope",
+    "global": "global",
+    "tenant": "tenant",
+    "status": "Status",
+    "user": "User",
+    "loading": "Loading…"
+  },
+  "skills": {
+    "title": "Skill Catalogue",
+    "description": "Skills visible in the catalogue, both global and tenant-scoped.",
+    "count": "{{count}} skills visible",
+    "errorMessage": "Unable to load the skills.",
+    "emptyTitle": "No skills",
+    "emptyDescription": "There are no skills in the catalogue.",
+    "caption": "Skill list"
+  },
+  "kpis": {
+    "title": "KPI Catalogue",
+    "description": "Defined KPIs, with unit, polarity and scope.",
+    "count": "{{count}} KPIs defined",
+    "errorMessage": "Unable to load the KPIs.",
+    "emptyTitle": "No KPIs",
+    "emptyDescription": "There are no KPIs defined.",
+    "caption": "KPI list",
+    "cols": {
+      "unit": "Unit",
+      "polarity": "Polarity"
+    }
+  },
+  "gaps": {
+    "title": "Gap analysis",
+    "description": "Competency gaps by severity, across the whole tenant.",
+    "count": "{{count}} gaps recorded",
+    "error": "Unable to load the gaps.",
+    "emptyTitle": "No gaps recorded",
+    "emptyDescription": "There are no competency gaps at the moment.",
+    "caption": "Gap list",
+    "cols": {
+      "user": "User",
+      "position": "Position",
+      "skill": "Skill",
+      "severity": "Severity",
+      "required": "Required",
+      "current": "Current"
+    }
+  },
+  "career": {
+    "title": "Career & Succession",
+    "description": "Career paths, succession pools and candidates.",
+    "tabs": {
+      "paths": "Career paths",
+      "pools": "Succession pools",
+      "candidates": "Candidates"
+    },
+    "pathsCols": {
+      "code": "Code",
+      "name": "Name",
+      "difficulty": "Difficulty"
+    },
+    "poolsCols": {
+      "code": "Code",
+      "name": "Name",
+      "status": "Status"
+    },
+    "candidatesCols": {
+      "user": "User",
+      "pool": "Pool",
+      "readiness": "Readiness",
+      "status": "Status"
+    },
+    "pipelineTitle": "Readiness pipeline",
+    "pipelineAria": "Candidate distribution by readiness level",
+    "pipelineEmpty": "No candidates to display.",
+    "pathsEmpty": "No career path defined",
+    "pathsCaption": "Career paths",
+    "poolsEmpty": "No pool recorded",
+    "poolsCaption": "Succession pools",
+    "candidatesEmpty": "No candidate recorded",
+    "candidatesCaption": "Succession candidates"
+  },
+  "compensation": {
+    "title": "Compensation intelligence",
+    "description": "Reward gates by evaluation status, across the whole tenant.",
+    "count": "{{count}} reward gates recorded",
+    "distributionTitle": "Status distribution",
+    "distributionAria": "Reward gate distribution by evaluation status",
+    "distributionEmpty": "No distribution data.",
+    "seriesName": "Reward gate",
+    "error": "Access denied or error.",
+    "emptyTitle": "No reward gate",
+    "emptyDescription": "There are no reward gates recorded.",
+    "caption": "Reward gate",
+    "blockingYes": "Yes",
+    "blockingNo": "No",
+    "cols": {
+      "user": "User",
+      "gate": "Gate",
+      "period": "Period",
+      "blocking": "Blocking",
+      "status": "Status"
+    }
+  },
+  "learning": {
+    "title": "Module Catalogue",
+    "description": "Available learning modules, both global and tenant-scoped.",
+    "count": "{{count}} modules",
+    "errorMessage": "Unable to load the modules.",
+    "emptyTitle": "No modules",
+    "emptyDescription": "There are no learning modules.",
+    "caption": "Learning module list",
+    "cols": {
+      "duration": "Duration (min)"
+    }
+  },
+  "training": {
+    "title": "Training initiatives",
+    "description": "Planned delivery sessions.",
+    "count": "{{count}} planned",
+    "errorMessage": "Unable to load the initiatives.",
+    "emptyTitle": "No initiatives",
+    "emptyDescription": "No initiative scheduled.",
+    "caption": "Delivery sessions",
+    "cols": {
+      "cohort": "Cohort",
+      "status": "Status",
+      "start": "Start",
+      "end": "End",
+      "seats": "Seats"
+    },
+    "cohortNd": "N/A"
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Badge, DataTableWithCrossHair, EmptyState, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
 import { Inbox } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
@@ -26,6 +27,7 @@ const SEV_TONE: Record<(typeof SEVERITIES)[number], KpiCardData["iconTone"]> = {
 };
 
 export default function AdminGapsPage() {
+  const { t } = useTranslation("hr");
   const gaps = useQuery({
     queryKey: ["learning-gaps", "all"],
     queryFn: () => apiFetch<{ items: LearningGap[]; total: number }>("/v1/learning-gaps?limit=200"),
@@ -47,11 +49,11 @@ export default function AdminGapsPage() {
     <main data-testid="gaps-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="gaps-title"
-        title="Gap analysis"
-        description="Gap di competenza per severità, sull'intero tenant."
+        title={t("gaps.title")}
+        description={t("gaps.description")}
         badges={
           <Badge variant="secondary" data-testid="gaps-count">
-            {gaps.data ? `${gaps.data.total} gap registrati` : "…"}
+            {gaps.data ? t("gaps.count", { count: gaps.data.total }) : "…"}
           </Badge>
         }
       />
@@ -61,29 +63,29 @@ export default function AdminGapsPage() {
       </section>
 
       {gaps.isLoading ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">Caricamento…</div>
+        <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
       ) : gaps.isError ? (
         <div className="rounded-card border border-border bg-card p-6 text-sm text-destructive" data-testid="gaps-error">
-          Impossibile caricare i gap.
+          {t("gaps.error")}
         </div>
       ) : items.length === 0 ? (
         <EmptyState
           data-testid="gaps-empty"
           icon={<Inbox className="h-6 w-6" />}
-          title="Nessun gap registrato"
-          description="Non ci sono gap di competenza al momento."
+          title={t("gaps.emptyTitle")}
+          description={t("gaps.emptyDescription")}
         />
       ) : (
         <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
-          <DataTableWithCrossHair caption="Elenco gap" className="w-full border-collapse text-sm">
+          <DataTableWithCrossHair caption={t("gaps.caption")} className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 py-2">User</th>
-                <th className="px-4 py-2">Posizione</th>
-                <th className="px-4 py-2">Skill</th>
-                <th className="px-4 py-2">Severità</th>
-                <th className="px-4 py-2">Richiesto</th>
-                <th className="px-4 py-2">Attuale</th>
+                <th className="px-4 py-2">{t("gaps.cols.user")}</th>
+                <th className="px-4 py-2">{t("gaps.cols.position")}</th>
+                <th className="px-4 py-2">{t("gaps.cols.skill")}</th>
+                <th className="px-4 py-2">{t("gaps.cols.severity")}</th>
+                <th className="px-4 py-2">{t("gaps.cols.required")}</th>
+                <th className="px-4 py-2">{t("gaps.cols.current")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

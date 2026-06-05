@@ -1,1 +1,136 @@
-{}
+{
+  "shared": {
+    "code": "Codice",
+    "name": "Nome",
+    "scope": "Scope",
+    "global": "global",
+    "tenant": "tenant",
+    "status": "Stato",
+    "user": "User",
+    "loading": "Caricamento…"
+  },
+  "skills": {
+    "title": "Catalogo skill",
+    "description": "Skill visibili nel catalogo, globali e di tenant.",
+    "count": "{{count}} skill visibili",
+    "errorMessage": "Impossibile caricare le skill.",
+    "emptyTitle": "Nessuna skill",
+    "emptyDescription": "Non ci sono skill nel catalogo.",
+    "caption": "Elenco skill"
+  },
+  "kpis": {
+    "title": "Catalogo KPI",
+    "description": "KPI definiti, con unità, polarità e scope.",
+    "count": "{{count}} KPI definiti",
+    "errorMessage": "Impossibile caricare i KPI.",
+    "emptyTitle": "Nessun KPI",
+    "emptyDescription": "Non ci sono KPI definiti.",
+    "caption": "Elenco KPI",
+    "cols": {
+      "unit": "Unità",
+      "polarity": "Polarità"
+    }
+  },
+  "gaps": {
+    "title": "Gap analysis",
+    "description": "Gap di competenza per severità, sull'intero tenant.",
+    "count": "{{count}} gap registrati",
+    "error": "Impossibile caricare i gap.",
+    "emptyTitle": "Nessun gap registrato",
+    "emptyDescription": "Non ci sono gap di competenza al momento.",
+    "caption": "Elenco gap",
+    "cols": {
+      "user": "User",
+      "position": "Posizione",
+      "skill": "Skill",
+      "severity": "Severità",
+      "required": "Richiesto",
+      "current": "Attuale"
+    }
+  },
+  "career": {
+    "title": "Career & Succession",
+    "description": "Percorsi di carriera, pool di successione e candidati.",
+    "tabs": {
+      "paths": "Career paths",
+      "pools": "Succession pools",
+      "candidates": "Candidati"
+    },
+    "pathsCols": {
+      "code": "Codice",
+      "name": "Nome",
+      "difficulty": "Difficoltà"
+    },
+    "poolsCols": {
+      "code": "Codice",
+      "name": "Nome",
+      "status": "Stato"
+    },
+    "candidatesCols": {
+      "user": "User",
+      "pool": "Pool",
+      "readiness": "Readiness",
+      "status": "Stato"
+    },
+    "pipelineTitle": "Pipeline readiness",
+    "pipelineAria": "Distribuzione candidati per livello di readiness",
+    "pipelineEmpty": "Nessun candidato da rappresentare.",
+    "pathsEmpty": "Nessun career path definito",
+    "pathsCaption": "Career paths",
+    "poolsEmpty": "Nessuna pool registrata",
+    "poolsCaption": "Succession pools",
+    "candidatesEmpty": "Nessun candidato registrato",
+    "candidatesCaption": "Candidati alla succession"
+  },
+  "compensation": {
+    "title": "Compensation intelligence",
+    "description": "Reward gate per stato di valutazione, sull'intero tenant.",
+    "count": "{{count}} reward gate registrati",
+    "distributionTitle": "Distribuzione stati",
+    "distributionAria": "Distribuzione reward gate per stato di valutazione",
+    "distributionEmpty": "Nessun dato di distribuzione.",
+    "seriesName": "Reward gate",
+    "error": "Accesso negato o errore.",
+    "emptyTitle": "Nessun reward gate",
+    "emptyDescription": "Non ci sono reward gate registrati.",
+    "caption": "Reward gate",
+    "blockingYes": "Sì",
+    "blockingNo": "No",
+    "cols": {
+      "user": "User",
+      "gate": "Gate",
+      "period": "Periodo",
+      "blocking": "Blocking",
+      "status": "Stato"
+    }
+  },
+  "learning": {
+    "title": "Catalogo moduli",
+    "description": "Moduli formativi disponibili, globali e di tenant.",
+    "count": "{{count}} moduli",
+    "errorMessage": "Impossibile caricare i moduli.",
+    "emptyTitle": "Nessun modulo",
+    "emptyDescription": "Non ci sono moduli formativi.",
+    "caption": "Elenco moduli formativi",
+    "cols": {
+      "duration": "Durata (min)"
+    }
+  },
+  "training": {
+    "title": "Iniziative formative",
+    "description": "Sessioni di erogazione pianificate.",
+    "count": "{{count}} pianificate",
+    "errorMessage": "Impossibile caricare le iniziative.",
+    "emptyTitle": "Nessuna iniziativa",
+    "emptyDescription": "Nessuna iniziativa schedulata.",
+    "caption": "Sessioni di erogazione",
+    "cols": {
+      "cohort": "Coorte",
+      "status": "Stato",
+      "start": "Inizio",
+      "end": "Fine",
+      "seats": "Posti"
+    },
+    "cohortNd": "ND"
+  }
+}

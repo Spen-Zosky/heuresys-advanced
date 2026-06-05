@@ -1,6 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
@@ -23,23 +26,27 @@ interface TrainingInitiativesList {
   total: number;
 }
 
-const COLUMNS: DataColumn<TrainingInitiative>[] = [
-  {
-    header: "Coorte",
-    cell: (t) => (
-      <div className="flex flex-col">
-        <span className="text-sm font-medium text-foreground">{t.cohortName ?? "ND"}</span>
-        <span className="font-mono text-[11px] text-muted-foreground">{t.code}</span>
-      </div>
-    ),
-  },
-  { header: "Stato", cell: (t) => <StatusBadge value={t.status} /> },
-  { header: "Inizio", cell: (t) => <span className="text-xs text-muted-foreground">{t.startDate ?? "—"}</span> },
-  { header: "Fine", cell: (t) => <span className="text-xs text-muted-foreground">{t.endDate ?? "—"}</span> },
-  { header: "Posti", cell: (t) => <span className="text-xs text-muted-foreground">{t.capacity ?? "—"}</span> },
-];
+function buildColumns(t: TFunction): DataColumn<TrainingInitiative>[] {
+  return [
+    {
+      header: t("training.cols.cohort"),
+      cell: (ti) => (
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-foreground">{ti.cohortName ?? t("training.cohortNd")}</span>
+          <span className="font-mono text-[11px] text-muted-foreground">{ti.code}</span>
+        </div>
+      ),
+    },
+    { header: t("training.cols.status"), cell: (ti) => <StatusBadge value={ti.status} /> },
+    { header: t("training.cols.start"), cell: (ti) => <span className="text-xs text-muted-foreground">{ti.startDate ?? "—"}</span> },
+    { header: t("training.cols.end"), cell: (ti) => <span className="text-xs text-muted-foreground">{ti.endDate ?? "—"}</span> },
+    { header: t("training.cols.seats"), cell: (ti) => <span className="text-xs text-muted-foreground">{ti.capacity ?? "—"}</span> },
+  ];
+}
 
 export default function TrainingInitiativesPage() {
+  const { t } = useTranslation("hr");
+  const columns = useMemo(() => buildColumns(t), [t]);
   const inits = useQuery({
     queryKey: ["training-initiatives", "list"],
     queryFn: () => apiFetch<TrainingInitiativesList>("/v1/training-initiatives?limit=200"),
@@ -50,20 +57,20 @@ export default function TrainingInitiativesPage() {
       pageTestId="training-page"
       titleTestId="training-title"
       countTestId="training-count"
-      title="Iniziative formative"
-      description="Sessioni di erogazione pianificate."
-      count={inits.data ? `${inits.data.total} pianificate` : undefined}
+      title={t("training.title")}
+      description={t("training.description")}
+      count={inits.data ? t("training.count", { count: inits.data.total }) : undefined}
       isLoading={inits.isLoading}
       isError={inits.isError}
-      errorMessage="Impossibile caricare le iniziative."
+      errorMessage={t("training.errorMessage")}
       rows={inits.data?.items ?? []}
-      rowKey={(t) => t.trainingInitiativeId}
+      rowKey={(ti) => ti.trainingInitiativeId}
       rowTestId="training-row"
-      columns={COLUMNS}
+      columns={columns}
       emptyTestId="training-empty"
-      emptyTitle="Nessuna iniziativa"
-      emptyDescription="Nessuna iniziativa schedulata."
-      caption="Sessioni di erogazione"
+      emptyTitle={t("training.emptyTitle")}
+      emptyDescription={t("training.emptyDescription")}
+      caption={t("training.caption")}
     />
   );
 }

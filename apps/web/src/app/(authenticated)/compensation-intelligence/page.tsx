@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Badge, DataTableWithCrossHair, EmptyState, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
 import { Inbox } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
@@ -49,6 +50,7 @@ interface DistributionItem {
 }
 
 export default function CompensationIntelligencePage() {
+  const { t } = useTranslation("hr");
   const gates = useQuery({
     queryKey: ["compensation", "reward-gates"],
     queryFn: () => apiFetch<{ items: RewardGate[]; total: number }>("/v1/compensation/reward-gates?limit=200"),
@@ -83,7 +85,7 @@ export default function CompensationIntelligencePage() {
     },
     series: [
       {
-        name: "Reward gate",
+        name: t("compensation.seriesName"),
         type: "pie" as const,
         radius: ["45%", "72%"],
         avoidLabelOverlap: true,
@@ -102,11 +104,11 @@ export default function CompensationIntelligencePage() {
     <main data-testid="compensation-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
       <PageHeader
         data-testid="compensation-title"
-        title="Compensation intelligence"
-        description="Reward gate per stato di valutazione, sull'intero tenant."
+        title={t("compensation.title")}
+        description={t("compensation.description")}
         badges={
           <Badge variant="secondary" data-testid="compensation-count">
-            {gates.data ? `${gates.data.total} reward gate registrati` : "…"}
+            {gates.data ? t("compensation.count", { count: gates.data.total }) : "…"}
           </Badge>
         }
       />
@@ -120,44 +122,44 @@ export default function CompensationIntelligencePage() {
           data-testid="compensation-distribution-chart"
           className="rounded-card border border-border bg-card p-4 shadow-card"
         >
-          <h2 className="mb-2 text-sm font-medium text-foreground">Distribuzione stati</h2>
+          <h2 className="mb-2 text-sm font-medium text-foreground">{t("compensation.distributionTitle")}</h2>
           {dist.data && dist.data.total > 0 ? (
             <EChartsCard
               option={chartOption}
               height={240}
-              ariaLabel="Distribuzione reward gate per stato di valutazione"
+              ariaLabel={t("compensation.distributionAria")}
             />
           ) : (
             <p className="py-12 text-center text-xs text-muted-foreground">
-              {dist.isLoading ? "Caricamento…" : "Nessun dato di distribuzione."}
+              {dist.isLoading ? t("common:loading") : t("compensation.distributionEmpty")}
             </p>
           )}
         </div>
       </section>
 
       {gates.isLoading ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">Caricamento…</div>
+        <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
       ) : gates.isError ? (
         <div className="rounded-card border border-border bg-card p-6 text-sm text-destructive" data-testid="compensation-error">
-          Accesso negato o errore.
+          {t("compensation.error")}
         </div>
       ) : items.length === 0 ? (
         <EmptyState
           data-testid="compensation-empty"
           icon={<Inbox className="h-6 w-6" />}
-          title="Nessun reward gate"
-          description="Non ci sono reward gate registrati."
+          title={t("compensation.emptyTitle")}
+          description={t("compensation.emptyDescription")}
         />
       ) : (
         <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
-          <DataTableWithCrossHair caption="Reward gate" className="w-full border-collapse text-sm">
+          <DataTableWithCrossHair caption={t("compensation.caption")} className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 py-2">User</th>
-                <th className="px-4 py-2">Gate</th>
-                <th className="px-4 py-2">Periodo</th>
-                <th className="px-4 py-2">Blocking</th>
-                <th className="px-4 py-2">Stato</th>
+                <th className="px-4 py-2">{t("compensation.cols.user")}</th>
+                <th className="px-4 py-2">{t("compensation.cols.gate")}</th>
+                <th className="px-4 py-2">{t("compensation.cols.period")}</th>
+                <th className="px-4 py-2">{t("compensation.cols.blocking")}</th>
+                <th className="px-4 py-2">{t("compensation.cols.status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -169,7 +171,7 @@ export default function CompensationIntelligencePage() {
                     <span className="block text-xs text-muted-foreground">{g.catalogName}</span>
                   </td>
                   <td className="px-4 py-2 text-xs">{g.periodStart} → {g.periodEnd}</td>
-                  <td className="px-4 py-2"><StatusPill tone={g.isBlocking ? "warning" : "neutral"}>{g.isBlocking ? "Sì" : "No"}</StatusPill></td>
+                  <td className="px-4 py-2"><StatusPill tone={g.isBlocking ? "warning" : "neutral"}>{g.isBlocking ? t("compensation.blockingYes") : t("compensation.blockingNo")}</StatusPill></td>
                   <td className="px-4 py-2"><StatusBadge value={g.latestResult?.status ?? "PENDING"} /></td>
                 </tr>
               ))}

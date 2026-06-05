@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -36,30 +38,44 @@ interface ReadinessDistItem {
 }
 
 type Tab = "paths" | "pools" | "candidates";
-const TABS: ReadonlyArray<{ key: Tab; label: string }> = [
-  { key: "paths", label: "Career paths" },
-  { key: "pools", label: "Succession pools" },
-  { key: "candidates", label: "Candidati" },
-];
 
-const PATHS_COLS: DataColumn<CareerPath>[] = [
-  { header: "Codice", cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
-  { header: "Nome", cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
-  { header: "Difficoltà", cell: (p) => <StatusBadge value={p.difficulty} /> },
-];
-const POOLS_COLS: DataColumn<SuccessionPool>[] = [
-  { header: "Codice", cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
-  { header: "Nome", cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
-  { header: "Stato", cell: (p) => <StatusBadge value={p.status} /> },
-];
-const CANDIDATES_COLS: DataColumn<SuccessorCandidate>[] = [
-  { header: "User", cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.userId.slice(0, 8)}</span> },
-  { header: "Pool", cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.successionPoolId.slice(0, 8)}</span> },
-  { header: "Readiness", cell: (c) => <StatusBadge value={c.readinessLevel} /> },
-  { header: "Stato", cell: (c) => <StatusBadge value={c.status} /> },
-];
+function buildTabs(t: TFunction): ReadonlyArray<{ key: Tab; label: string }> {
+  return [
+    { key: "paths", label: t("career.tabs.paths") },
+    { key: "pools", label: t("career.tabs.pools") },
+    { key: "candidates", label: t("career.tabs.candidates") },
+  ];
+}
+
+function buildPathsCols(t: TFunction): DataColumn<CareerPath>[] {
+  return [
+    { header: t("career.pathsCols.code"), cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
+    { header: t("career.pathsCols.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
+    { header: t("career.pathsCols.difficulty"), cell: (p) => <StatusBadge value={p.difficulty} /> },
+  ];
+}
+function buildPoolsCols(t: TFunction): DataColumn<SuccessionPool>[] {
+  return [
+    { header: t("career.poolsCols.code"), cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
+    { header: t("career.poolsCols.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
+    { header: t("career.poolsCols.status"), cell: (p) => <StatusBadge value={p.status} /> },
+  ];
+}
+function buildCandidatesCols(t: TFunction): DataColumn<SuccessorCandidate>[] {
+  return [
+    { header: t("career.candidatesCols.user"), cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.userId.slice(0, 8)}</span> },
+    { header: t("career.candidatesCols.pool"), cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.successionPoolId.slice(0, 8)}</span> },
+    { header: t("career.candidatesCols.readiness"), cell: (c) => <StatusBadge value={c.readinessLevel} /> },
+    { header: t("career.candidatesCols.status"), cell: (c) => <StatusBadge value={c.status} /> },
+  ];
+}
 
 export default function CareerSuccessionPage() {
+  const { t } = useTranslation("hr");
+  const tabs = useMemo(() => buildTabs(t), [t]);
+  const pathsCols = useMemo(() => buildPathsCols(t), [t]);
+  const poolsCols = useMemo(() => buildPoolsCols(t), [t]);
+  const candidatesCols = useMemo(() => buildCandidatesCols(t), [t]);
   const [tab, setTab] = useState<Tab>("paths");
 
   const paths = useQuery({
@@ -114,18 +130,18 @@ export default function CareerSuccessionPage() {
 
   return (
     <main data-testid="career-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
-      <PageHeader data-testid="career-title" title="Career & Succession" description="Percorsi di carriera, pool di successione e candidati." />
+      <PageHeader data-testid="career-title" title={t("career.title")} description={t("career.description")} />
 
       <nav className="flex gap-1 border-b border-border" data-testid="career-tabs">
-        {TABS.map((t) => (
+        {tabs.map((tabItem) => (
           <button
-            key={t.key}
+            key={tabItem.key}
             type="button"
-            onClick={() => setTab(t.key)}
-            data-testid={`career-tab-${t.key}`}
-            className={`px-3 py-2 text-sm transition-colors ${tab === t.key ? "border-b-2 border-primary font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+            onClick={() => setTab(tabItem.key)}
+            data-testid={`career-tab-${tabItem.key}`}
+            className={`px-3 py-2 text-sm transition-colors ${tab === tabItem.key ? "border-b-2 border-primary font-medium text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
-            {t.label}
+            {tabItem.label}
           </button>
         ))}
       </nav>
@@ -138,10 +154,10 @@ export default function CareerSuccessionPage() {
             rows={paths.data?.items ?? []}
             rowKey={(p) => p.careerPathId}
             rowTestId="career-paths-row"
-            columns={PATHS_COLS}
+            columns={pathsCols}
             emptyTestId="career-paths-empty"
-            emptyTitle="Nessun career path definito"
-            caption="Career paths"
+            emptyTitle={t("career.pathsEmpty")}
+            caption={t("career.pathsCaption")}
           />
         </div>
       )}
@@ -153,10 +169,10 @@ export default function CareerSuccessionPage() {
             rows={pools.data?.items ?? []}
             rowKey={(p) => p.successionPoolId}
             rowTestId="career-pools-row"
-            columns={POOLS_COLS}
+            columns={poolsCols}
             emptyTestId="career-pools-empty"
-            emptyTitle="Nessuna pool registrata"
-            caption="Succession pools"
+            emptyTitle={t("career.poolsEmpty")}
+            caption={t("career.poolsCaption")}
           />
         </div>
       )}
@@ -166,16 +182,16 @@ export default function CareerSuccessionPage() {
             data-testid="career-readiness-chart"
             className="rounded-card border border-border bg-card p-4 shadow-card"
           >
-            <h2 className="mb-2 text-sm font-medium text-foreground">Pipeline readiness</h2>
+            <h2 className="mb-2 text-sm font-medium text-foreground">{t("career.pipelineTitle")}</h2>
             {readinessDist.data && readinessDist.data.total > 0 ? (
               <EChartsCard
                 option={readinessOption}
                 height={240}
-                ariaLabel="Distribuzione candidati per livello di readiness"
+                ariaLabel={t("career.pipelineAria")}
               />
             ) : (
               <p className="py-10 text-center text-xs text-muted-foreground">
-                {readinessDist.isLoading ? "Caricamento…" : "Nessun candidato da rappresentare."}
+                {readinessDist.isLoading ? t("common:loading") : t("career.pipelineEmpty")}
               </p>
             )}
           </div>
@@ -185,10 +201,10 @@ export default function CareerSuccessionPage() {
             rows={candidates.data?.items ?? []}
             rowKey={(c) => c.successorCandidateId}
             rowTestId="career-candidates-row"
-            columns={CANDIDATES_COLS}
+            columns={candidatesCols}
             emptyTestId="career-candidates-empty"
-            emptyTitle="Nessun candidato registrato"
-            caption="Candidati alla succession"
+            emptyTitle={t("career.candidatesEmpty")}
+            caption={t("career.candidatesCaption")}
           />
         </div>
       )}

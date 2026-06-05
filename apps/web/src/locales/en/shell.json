@@ -27,5 +27,9 @@
     "label": "Language",
     "it": "Italian",
     "en": "English"
+  },
+  "brand": {
+    "badge": "advanced",
+    "version": "v5 · heuresys-advanced"
   }
 }

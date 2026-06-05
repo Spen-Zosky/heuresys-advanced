@@ -216,7 +216,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           user={identity}
           language={i18n.language === "en" ? "EN" : "IT"}
           logo={<HeuresysWordmark variant="brand" size={24} />}
-          logoBadge={<HeuresysLogoBadge>advanced</HeuresysLogoBadge>}
+          logoBadge={<HeuresysLogoBadge>{t("shell:brand.badge")}</HeuresysLogoBadge>}
         />
       }
       sidebar={
@@ -245,7 +245,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
         <DashboardFooter
           rightSlot={
             <>
-              <span>v5 · heuresys-advanced</span>
+              <span>{t("shell:brand.version")}</span>
               <span aria-hidden className="text-border">·</span>
               <span>{identity.role}</span>
             </>

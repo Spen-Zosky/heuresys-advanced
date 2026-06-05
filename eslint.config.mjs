@@ -76,17 +76,18 @@ export default tseslint.config(
     },
   },
 
-  // i18n guardrail (milestone Fase 0b) — block NEW hardcoded user-facing strings across the WHOLE
-  // app router, so the Italian-hardcoded debt cannot re-form anywhere. v6 default only flags plain
-  // text in JSX markup (NOT className/data-testid/units/etc.), so it targets exactly the renderable
-  // chrome. Severity is `warn` while the ~50 legacy pages are still being migrated (eslint runs with
-  // no --max-warnings, so CI stays green); flip to `error` once the warning count hits 0 at the end
-  // of the milestone — at that point the guardrail becomes hard-enforcing for every future page.
+  // i18n guardrail (milestone Fasi 0b–5, CLOSED 2026-06-05) — hard-block hardcoded user-facing
+  // strings across the WHOLE app router, so the Italian-hardcoded debt cannot re-form anywhere.
+  // v6 default only flags plain text in JSX markup (NOT className/data-testid/units/etc.), so it
+  // targets exactly the renderable chrome. Now `error` (milestone debt reached 0): every future
+  // page MUST render via t(). The showcase/** pages are dev-only design-system docs (English RSC,
+  // gated behind NEXT_PUBLIC_ENABLE_SHOWCASE), explicitly out of i18n scope (design §10) → excluded.
   {
     files: ["apps/web/src/app/**/*.{ts,tsx}"],
+    ignores: ["apps/web/src/app/showcase/**"],
     plugins: { i18next: i18nextPlugin },
     rules: {
-      "i18next/no-literal-string": "warn",
+      "i18next/no-literal-string": "error",
     },
   }
 );

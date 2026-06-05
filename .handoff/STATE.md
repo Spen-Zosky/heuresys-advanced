@@ -6,7 +6,7 @@
 
 ## Last session brief (S965 — ultracode)
 
-i18n milestone **CHIUSA** (45 pagine / 4 namespace + EN gate + guardrail `error` + € locale-aware) · **BI ① P3 org-network** full-stack · **F7** valutato (tokenize fatto; split/extract segnalati) · **next** bump backport (next 16 stand-by) · **react override riconciliato** · **SoT v2**: due viste disgiunte governate da handoff. Tutto pushato, CI verde. (Numeri esatti → `docs/kb/SOT_STATE.md`.)
+i18n milestone **CHIUSA** (45 pagine / 4 namespace + EN gate + guardrail `error` + € locale-aware) · **BI ① P3 org-network** full-stack · **F7** valutato (tokenize fatto; split/extract segnalati) · **next** bump backport (next 16 stand-by) · **react override riconciliato** · **SoT v2 + meta**: due viste disgiunte (STATE rapida + SOT_STATE granulare) + **session-start action-menu** (CLAUDE.md `## Session start`) + **handoff v4** (scrive STATE+SOT_STATE+backlog+debt). Tutto pushato, CI verde. (Numeri esatti → `docs/kb/SOT_STATE.md`.)
 
 ## Top priorities (next session)
 

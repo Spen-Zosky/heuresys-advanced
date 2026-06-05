@@ -320,6 +320,8 @@ Phase mapping al TODO master (`cowork_reserved/12_TODO_LIST_GRANULARE.md`):
 
 The status (design accepted) is distinct from the **implementation**, which remains open as **SOT_BACKLOG B-10 (SDBI Phase 2)** — Goals/OKRs pilot + scale. The §5 acceptance criteria below are the implementation gates for that Phase-2 work, not preconditions for the doctrine-level acceptance recorded here.
 
+> **Implementation status footnote (S968, 2026-06-05)** — B-10 è stato chiuso come **umbrella terminale** (mappa completa: `docs/kb/SDBI_PHASE2_CLOSURE.md`). Delle 8 macro-aree dello scope originale: **5 terminali** (PerformanceReviews + Feedback360 shipped via slice `000065`; Documents + Compensation-history + TalentPool assorbite dal brownfield o già classificate nel reconciliation registry); **3 con schema target genuinamente MANCANTE** (Surveys/Engagement, Mentorship, PredictionsML) scorporate in **B-10b** (deferred modeling stream, ~22-27h / ~3 sessioni). Il **§5 "pilot Goals/OKRs via SDBI" è moot/superseded**: Goals/OKRs sono popolati via brownfield deterministico, non via pilot SDBI — il gate §5 non è una precondizione aperta. Infra reale shipped = `db/migrations/000063_sdbi_infra.sql` + `000065_sdbi_perf_feedback_schema.sql` (la base storica `000036_temp_sdbi_schema.sql` è superata).
+
 ## §8 — References
 
 - `cowork_reserved/00_README_KB.md` — KB index

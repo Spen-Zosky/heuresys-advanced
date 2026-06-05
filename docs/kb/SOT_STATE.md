@@ -35,7 +35,7 @@ Sessione ultracode di **chiusura terminale** (4 item del menu + dead-weight remo
 - **🗂️ SDBI Phase 2 (B-10) → CHIUSO-as-umbrella** (commit `7b0ef9e`): 5/8 macro-aree terminali (PerformanceReviews/Feedback360 via slice `000065`; Documents/Compensation-history/TalentPool assorbite o nel reconciliation registry); 3 reali (Surveys/Mentorship/PredictionsML, schema target mancante) scorporate in **B-10b** (deferred modeling stream P3, ~22-27h/3 sessioni). ADR-0014 footnote di implementazione. Mappa: `docs/kb/SDBI_PHASE2_CLOSURE.md`.
 - **🔧 B-31 ssh-agent → DONE** (commit `5032c1c`): era già realizzato da ADR-0021 (task `HeuresysTunnel5433` live, verificato), solo doc allineata in `SOT_BACKLOG.md` (era stale in 3 punti).
 - **Stack**: `@heuresys/ui` ^0.1.3 → **^0.1.4** (−reactflow). Sibling ux-design-shared HEAD `047d6b9`. DB/migration/API counts invariati (sessione no-DB).
-- **PROD**: **NON ancora ridistribuita** con F7 — il deploy VM è step separato (`scripts/vm-deploy.sh`); `/system-health` live è su `main` ma non in `heuresys.com`.
+- **PROD aggiornata a `36676f0`** (S968): Mac (`mac-local`) + VM (`oracle-vm-default`) allineati; `vm-deploy.sh` eseguito (build prod api tsup + web next, restart systemd, verify **api/readyz OK · web/login 200 0.01s · heuresys.com TLS /login 200**). **F7 (`/system-health` live) ora in produzione.**
 
 ## 1. Git / release
 

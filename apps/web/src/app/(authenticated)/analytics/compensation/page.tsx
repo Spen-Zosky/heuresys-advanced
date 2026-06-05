@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Badge, EChartsCard, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
@@ -17,10 +18,6 @@ const COLOR_PALETTE_2 = "hsl(var(--palette-2))";
 const AXIS_COLOR = "hsl(var(--muted-foreground))";
 const GRID_COLOR = "hsl(var(--border))";
 const PALETTE = [1, 2, 3, 4, 5, 6].map((n) => `hsl(var(--palette-${n}))`);
-
-// €-amounts stay in the it-IT grouping format regardless of UI language (currency
-// follows the data region; locale-aware number formatting is a later enhancement).
-const EUR = new Intl.NumberFormat("it-IT");
 
 /** Horizontal boxplot: per-OU distribution of band mid_eur (pre-computed 5-number summary). */
 function bandingBoxplotOption(rows: CompensationBandingByOuRow[], midAxisLabel: string) {
@@ -90,7 +87,12 @@ function equityScatterOption(
 }
 
 export default function CompensationAnalyticsPage() {
-  const { t } = useTranslation("analytics");
+  const { t, i18n } = useTranslation("analytics");
+  // €-grouping follows the active UI locale (en-US vs it-IT); the currency itself stays € (data region).
+  const EUR = useMemo(
+    () => new Intl.NumberFormat(i18n.language === "en" ? "en-US" : "it-IT"),
+    [i18n.language],
+  );
   const q = useQuery({
     queryKey: ["analytics", "compensation"],
     queryFn: () => apiFetch<CompensationAnalyticsResponse>("/v1/analytics/compensation"),

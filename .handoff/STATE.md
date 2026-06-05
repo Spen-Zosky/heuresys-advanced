@@ -11,7 +11,7 @@
 
 ## Top priorities (next session)
 
-- **next 16** (B-23, #21 — rinviato da Enzo a bump dedicato): rimuovi `eslint` key da `next.config.js` + `eslint-config-next@16` + decisione `middleware.ts`→`proxy.ts` (deferral documentabile, no rename rischioso ora) + rebuild + **full E2E re-validation in prod-mode** + prod smoke. Pre-validato verde-in-isolamento S964 (ma non ancora combinato col nuovo codice i18n → re-validare).
+- **next 16** (B-23, #21 — **STAND-BY**, decisione Enzo S965): bump dedicato SOLO quando emerge un driver (feature/perf next 16 necessaria, o EOL/abbandono backport linea 15). Opzione A già applicata: patch **15.5.18→15.5.19** (backport). Quando si farà B: rimuovi `eslint` key da `next.config.js` + `eslint-config-next@16` + decisione `middleware.ts`→`proxy.ts` + rebuild + **full E2E re-validation prod-mode** + prod smoke (pre-validato verde-in-isolamento S964, da ri-validare col codice i18n attuale).
 - **② AI P1 backfill**: sbloccato da `VOYAGE_API_KEY` nel `.env` VM (azione Enzo) → voyage-3.5 person→occupation + skill→skill, USER-scope.
 - **F7 split/extract** (decisione Enzo): split `SystemHealthDashboard` / extract pattern `DashboardShell` (quest'ultimo è lib-owned → va in repo `ux-design-shared`, non qui).
 
@@ -24,7 +24,7 @@
 ## Stack snapshot
 
 - PROD = `https://www.heuresys.com` → nginx TLS → web `:3013` → api `:8013`. `COOKIE_SECURE=true`. nginx conf versionata `deploy/nginx/`. Deploy = `scripts/vm-deploy.sh` (non tocca nginx/.env).
-- migration `000070`, ~285 endpoint (+org-network), API suite verde. i18n **7 namespace popolati** (common/shell/analytics/admin/blueprints/hr/ess) IT+EN, parity 802×2×7, **guardrail `error`** (showcase escluso). Deps: pino 10.3.1, react 19.2.7, vitest 4.1.8, next **15.5.18** (next 16 deferito).
+- migration `000070`, ~285 endpoint (+org-network), API suite verde. i18n **7 namespace popolati** (common/shell/analytics/admin/blueprints/hr/ess) IT+EN, parity 802×2×7, **guardrail `error`** (showcase escluso). Deps: pino 10.3.1, react 19.2.7, vitest 4.1.8, next **15.5.19** (backport S965; next 16 = stand-by).
 
 ## Verification (next session)
 ```bash

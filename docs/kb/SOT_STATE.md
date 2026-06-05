@@ -1,10 +1,6 @@
-> ⚠ **STORICO — non è una SoT.** Stato corrente vivo: `.handoff/STATE.md` · Backlog: `docs/kb/SOT_BACKLOG.md` · Debiti: `docs/kb/DEBT_REGISTER.md`. Archiviato S965 (2026-06-05); razionale: `docs/superpowers/specs/2026-06-05-sot-unification-design.md`.
+# SOT_STATE — Snapshot granulare del sistema (handoff-governed, SoT v2)
 
-# SOT_STATE — Stato reale heuresys-advanced (CLI-owned Source of Truth)
-
-> **Autorità**: questo è il documento di stato **CLI-owned** che il Claude Code CLI mantiene per operare in autonomia, senza dipendere dal protocollo Cowork. Consolida e riconcilia: ricognizione forense 4-root + handover Cowork S937 + `cowork_reserved/bias_registry.md` + segnali live (git/CI/DB).
-> **Generato/aggiornato**: 2026-05-27 (S939 CLI — ripresa controllo diretto). **Ultimo refresh: 2026-06-05 (S965)** — delta S963→S965 in §0-bis.
-> **Indice file dominio**: `docs/kb/INDEX_PATHS.md` (+ `index_paths.yaml`). **Backlog**: `SOT_BACKLOG.md`. **Debiti**: `DEBT_REGISTER.md`. **Archivio Cowork**: `COWORK_ARCHIVE_NOTE.md`.
+> **Ruolo (SoT v2, S965)**: vista **granulare** dello stato del SISTEMA (git/release · stack · DB/API/web/CI counts · security · narrativa milestone), **ri-derivata e riscritta dalla skill `handoff` a ogni sessione** (counts via psql/ls/git — decisione "robusta"). Lo **stato di lavoro corrente** (priorità, open questions, cosa-faccio-ora) vive in `.handoff/STATE.md` (vista rapida). **Domini disgiunti**: numeri/architettura SOLO qui; priorità/open-Q SOLO in `.handoff/STATE.md` → nessuna divergenza possibile (un solo updater, la skill `handoff`). Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md` · indice → `docs/kb/INDEX_PATHS.md` · storici → `docs/archive/`. Razionale: `docs/superpowers/specs/2026-06-05-sot-unification-design.md` §11.
 
 ## 0. Snapshot in una riga
 

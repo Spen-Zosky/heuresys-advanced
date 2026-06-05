@@ -4,7 +4,7 @@ Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on Po
 
 > **Status — 2026-06-02 · `v1.0.0` GA (tag `v1.0.0` on `main`)**
 > MVP-1 → MVP-4 + RBAC/UIX/Perspectives epic **closed**; **v1.0.0 GA released**. ~279 live API endpoints · **576 vitest tests (60/60 modules covered)** · 65 web routes · 21 Playwright E2E specs on live OCI VM data · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 13/19 IMPORT · **55 migrations** (`000001..000056`, idempotent ×2, `db:validate` 7/7) · 161 users / 2 tenants / 24 teams. VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`).
-> **Live state SoT**: `.handoff/STATE.md` (the single state SoT) · backlog `docs/kb/SOT_BACKLOG.md` · debts `docs/kb/DEBT_REGISTER.md`. The headline numbers below are a milestone snapshot; `.handoff/STATE.md` carries the running counts. (Former `SOT_STATE.md` now at `docs/archive/SOT_STATE.md`.)
+> **Live state SoT (two handoff-governed views)**: `.handoff/STATE.md` (rapid — priorities/open-questions) + `docs/kb/SOT_STATE.md` (granular snapshot — running counts/architecture) · backlog `docs/kb/SOT_BACKLOG.md` · debts `docs/kb/DEBT_REGISTER.md`. The headline numbers below are a milestone snapshot; `docs/kb/SOT_STATE.md` carries the running counts.
 
 ---
 

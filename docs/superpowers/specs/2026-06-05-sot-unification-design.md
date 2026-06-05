@@ -1,7 +1,7 @@
 # SoT Unification — Design Spec
 
-> **Status**: DESIGN (S965, 2026-06-05). Approved by Enzo (brainstorming, 3 locked decisions). No file moves until the implementation plan is approved.
-> **Goal**: collapse the proliferating state/handoff/entry-point `.md` files into **one live SoT per domain**, eliminating manual cross-file alignment and the drift it causes (e.g. `SOT_STATE.md` was 3 sessions stale behind `.handoff/STATE.md` at S965).
+> **Status**: DESIGN v2 (S965, 2026-06-05). v1 (archive SOT_STATE, single condensed file) was implemented in `e7e9de3` then **revised** — Enzo flagged that the condensed `STATE.md` lost SOT_STATE's granularity. **See §11 for the authoritative v2 design** (two handoff-governed views). §1-§10 below are the v1 record (partially superseded by §11).
+> **Goal (v2)**: keep BOTH a rapid view (`.handoff/STATE.md`) AND a granular snapshot (`docs/kb/SOT_STATE.md`), with **disjoint domains** + a **single updater** (the `handoff` skill writes both, same moment) → granularity preserved AND drift structurally impossible.
 
 ## 1. Problem
 
@@ -105,4 +105,41 @@ This is what prevents the proliferation from re-forming.
 | Durable content lost when SOT_STATE archived | §5 gap-audit into CLAUDE.md before the move; archive keeps the full file anyway |
 | Losing a useful historical milestone record | Archived (moved, not deleted) — fully retrievable in `docs/archive/` + git history |
 
-**Non-goals**: regenerating/pruning `INDEX_PATHS.md` (stale but separate concern — own task); changing the `handoff` skill or boot hook (they already target `.handoff/STATE.md` correctly); touching `cowork_*` archives (frozen read-only).
+**Non-goals**: regenerating/pruning `INDEX_PATHS.md` (stale but separate concern — own task); changing the boot hook (it only checks git/tunnel/db); touching `cowork_*` archives (frozen read-only). *(v1 non-goal "changing the handoff skill" is superseded by v2 §11.)*
+
+---
+
+## 11. v2 design (AUTHORITATIVE) — two handoff-governed views
+
+v1 (single condensed `STATE.md` + archive SOT_STATE) preserved no-drift but lost SOT_STATE's granularity. v2 keeps **two views**, disjoint, **both written by the `handoff` skill** each session — granularity AND no-drift.
+
+### 11.1 Two views — disjoint domains (no fact in both)
+
+| File | Domain (ONLY this) |
+|---|---|
+| `.handoff/STATE.md` | VOLATILE work state: last-session brief · top priorities (+effort) · open questions · verification commands. **Zero numbers/counts/stack.** <60 lines, rapid bootstrap. |
+| `docs/kb/SOT_STATE.md` | GRANULAR system snapshot: git/release+tags · full stack versions · API/DB/web/CI counts · security · boot · invariants-ref (→ CLAUDE.md) · milestone narrative. **Zero work-priorities/open-questions.** |
+
+Priorities/open-questions live ONLY in STATE.md; numbers/architecture live ONLY in SOT_STATE.md. The same fact never exists twice → the two cannot diverge.
+
+### 11.2 Single updater (anti-drift core)
+
+The `handoff` skill, at session close, writes BOTH files in the same run. SOT_STATE.md stops being orphaned/hand-maintained → no drift.
+
+### 11.3 handoff skill = global, conditional (decision 1)
+
+Modify `~/.claude/skills/handoff/SKILL.md`: always update `.handoff/STATE.md`; **if** `docs/kb/SOT_STATE.md` exists, also update it in the same run (re-deriving its numbers). Projects without that file are unaffected.
+
+### 11.4 Counts = re-derived (robust — decision 2)
+
+At each handoff the skill RE-DERIVES the granular numbers instead of trusting memory: DB counts via `psql` (sys.* populated, lineage, registry), migration list via `ls db/migrations`, versions via `package.json`, tags via `git tag`. Slower handoff, always-fresh snapshot.
+
+### 11.5 STATE.md = pure disjunction (decision 3)
+
+STATE.md carries NO numbers — only brief/priorities/open-questions/verification + a one-line pointer: "granular snapshot → `docs/kb/SOT_STATE.md`".
+
+### 11.6 Delta vs the v1 implementation (`e7e9de3`)
+
+- **Revert**: de-archive `docs/archive/SOT_STATE.md` → `docs/kb/SOT_STATE.md` (active granular reference), strip the STORICO header + the §0-bis delta (fold its facts into the proper sections).
+- **Keep archived**: `HANDOFF.md` (narrative history), `NEXT_GENERATION_ENTRY_POINT.md` (v1.0.0 milestone record), `NEXT_SESSION_MVP_2A.md` (dead) — true history, not the granular state reference.
+- **Re-point**: CLAUDE.md/README describe BOTH views (rapid + granular, both handoff-governed); governance section lists both as state SoT, still "do not spawn new files beyond these".

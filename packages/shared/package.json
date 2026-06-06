@@ -270,6 +270,10 @@
     "./schemas/observability": {
       "types": "./dist/schemas/observability.d.ts",
       "default": "./src/schemas/observability.ts"
+    },
+    "./schemas/mentorship": {
+      "types": "./dist/schemas/mentorship.d.ts",
+      "default": "./src/schemas/mentorship.ts"
     }
   },
   "scripts": {

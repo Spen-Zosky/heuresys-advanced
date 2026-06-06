@@ -70,3 +70,4 @@ export * from "./schemas/compensation.js";
 export * from "./schemas/dashboard.js";
 export * from "./schemas/analytics.js";
 export * from "./schemas/observability.js";
+export * from "./schemas/mentorship.js";

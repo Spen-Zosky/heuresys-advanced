@@ -52,7 +52,7 @@ Aperto S968 (scorporo da B-10 chiuso). Le 3 macro-aree HRMS con target schema `s
 | Area | Sorgente legacy | Effort | Rischio |
 |---|---|---|---|
 | Surveys/Engagement | `engagement_action_plans`=6 + cluster PULSAR | ~7-9h | MED (schema+module nuovi, 0 test esistenti) |
-| Mentorship | `mentorship_sessions`=355 + `mentor_match_scores`=30 | ~7-8h | MED |
+| ~~Mentorship~~ ✅ **DONE S970** | 4 tab importate RTL (5/63/150/30) + modulo API `/v1/mentorship/*` 17 endpoint + RBAC; mig 000072/073, seed 45, commit `5f164f2` | — | — |
 | PredictionsML | `model_predictions`/`performance_predictions`=267 + `turnover_risk_scores`=267 + `mv_talent_signals`=270 (derived-analytics) | ~8-10h | MED-HIGH (serve regola di derivazione human-authored) |
 
 **Totale**: ~22-27h / ~3 sessioni dedicate. **Regola d'ingaggio**: ciascuna è `design→spec→ok→piano→implementa` con checkpoint di modellazione (autorità semantica Enzo) + pattern modulo a 7 step + atomic commit + test verde. Selezionabile dal menu session-start come capability. Mappa terminale completa: `docs/kb/SDBI_PHASE2_CLOSURE.md`. Doctrine: ADR-0014 (ACCEPTED).
@@ -164,6 +164,16 @@ Sessione ultracode aperta con **discovery 7-agenti evidence-based** (note backlo
 | **#5** | **B-10b** SDBI | 3 schema target MANCANTI; sorgenti legacy più ricche del closure doc (Surveys ~7900/9tab · Mentorship ~521/4tab · PredictionsML ~829+matview). | 3 milestone `design→spec→ok→implementa`, sequenza Mentorship→Surveys→PredictionsML |
 | **#2** | **B-42** LOOKUP_FK `sys_process_kpi_templates` | **NON code-fix**: namespace source/target disgiunti (legacy `business_processes` BP-001.. vs registry '00'..'22', code-overlap 0, name-overlap 1/26). Observability già OK. | crosswalk semantica ~25 righe (mapping bancario) **o** chiudi out-of-scope (registry = tassonomia v5-native) |
 | **#8b** | **NUOVO** category heatmap skills | `sys_skills.skill_category_id` 0/21939; 6 categorie = competency-families non wired alle skill ESCO/O*NET. | mini data-task: mappare le **31 skill referenziate** dalle evidenze → categoria (sblocca heatmap live) **o** defer. UI triviale (clone skills heatmap, swap asse). |
+
+**🟢 Aggiornamento S970 (2026-06-06) — aggregato 7-item (ultracode, un-punto-alla-volta):**
+4 commit pushati su `origin/main` (HEAD `5f164f2` pre-handoff). I 4 "pending decisione Enzo" del S969 risolti in-session + 1ª milestone B-10b:
+- **#9 / B-50 bridge job→position (KPI leg) ✅** (`6365097`): `sys_position_kpi_requirements` 0→**172** (43 pos / 1 tenant) via `tenant_job_kpis` employee-mediated (I14); `job_kpis` ESCO confermato dead-end (`tenant_jobs.source_template_id` 0/20). **Leva successione DEFERITA** (decisione Enzo): `succession_plans.position_id` 100% NULL → solo 9/31 anchor → gap-esplicito; `sys_succession_pools`/`sys_successor_candidates` restano NEEDS_DECISION con rationale `DEFER S970` (sbloccabili da una Wave-2 che popoli `position_id`). Seed 41/42, test 4/4.
+- **#2 / B-42 LOOKUP_FK `sys_process_kpi_templates` ✅ CHIUSO out-of-scope** (`6b33d0b`): card brownfield + registry → `EXCLUDE`. Razionale: registry v5-native (23 process bancari) vs legacy `business_processes` multi-industria (12 banking/7 energy/7 food, 0 code-overlap) = mismatch tassonomico, non code-bug; process-KPI-template = future v5-native authoring. Seed 43, test 3/3. **B-42 chiuso.**
+- **#8b skill-category ✅** (`47d9932`): +7ª categoria `sys_skill_categories` 'Technical / Domain Expertise' + `UPDATE` 31 skill referenziate (23 behavioral + 8 technical). `skill_category_id` nullable (additivo, solo referenziate). Seed 44, test 3/3. **Heatmap per-categoria ora data-ready** (UI = clone skills-heatmap swap-asse, quando si vuole).
+- **B-10b m1 Mentorship ✅** (`5f164f2`): mig 000072 (4 tabelle) + 000073 (RBAC) + modulo API 17 endpoint full-CRUD + seed 45 import RTL (employee-centric 100%, skill ESCO-URI bridge 30/30) + 22 test. Discovery+design via 3 workflow adversarial-verified. **Restano m2 Surveys (~7-9h) + m3 PredictionsML (~8-10h, MED-HIGH).**
+- **Reconciliation registry**: POPULATED **114→118**, NEEDS_DECISION 7, EXCLUDE 6, NO_SOURCE 17, REFERENCE_ONLY 3 (151 tab, 0 UNCLASSIFIED; bucket A14/B16/C23/D25). Suite API **686 green**.
+- **Deploy PROD S970**: Mac+VM allineati `origin/main`, `vm-deploy.sh` eseguito, modulo `/v1/mentorship` live (DB già migrato+seedato via tunnel in-session).
+- **Pending prossima sessione**: #2·m2 Surveys, #2·m3 PredictionsML, ② AI P1 (gated `VOYAGE_API_KEY`), #7 MVP-4, #8 cap ③④⑤.
 
 ## P3 — Infra / robustezza
 

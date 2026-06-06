@@ -92,6 +92,7 @@ import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { analyticsRoutes } from "./modules/analytics/routes.js";
 import { observabilityRoutes } from "./modules/observability/routes.js";
 import { mentorshipRoutes } from "./modules/mentorship/routes.js";
+import { semanticMatchingRoutes } from "./modules/semantic-matching/routes.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
 export interface BuildAppOptions {
@@ -288,6 +289,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(analyticsRoutes, { prefix: "/v1/analytics" });
   await app.register(observabilityRoutes, { prefix: "/v1/observability" });
   await app.register(mentorshipRoutes, { prefix: "/v1/mentorship" });
+  await app.register(semanticMatchingRoutes, { prefix: "/v1/matching" });
 
   return app;
 }

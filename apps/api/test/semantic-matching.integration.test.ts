@@ -29,8 +29,8 @@ let manager: S;          // paolo.caputo (RTL) — seeded profile near "finance"
 let tenantAdmin: S;      // federica (RTL TENANT_ADMIN)
 let menteeNoProfile: S;  // antonio (RTL) — no seeded profile → empty-state
 let admin: S;            // admin@heuresys.com (PLATFORM_ADMIN) — sees across tenants
-let paoloId: string, adminUserId: string, adminTenantId: string, rtlTenant: string;
-let skillA: string, skillB: string, skillC: string; // A=input(RTL), B=RTL-visible, C=NULL-tenant(hidden)
+let paoloId: string, antonioId: string, adminUserId: string, adminTenantId: string, rtlTenant: string;
+let skillA: string, skillB: string, skillC: string; // throwaway skills: A=input(RTL), B=RTL-visible, C=NULL-tenant(hidden)
 
 beforeAll(async () => {
   suite = await buildTestApp();
@@ -41,26 +41,31 @@ beforeAll(async () => {
 
   const ids = await pool.query<{ user_id: string; user_tenant_id: string; user_email: string }>(
     `SELECT user_id, user_tenant_id, user_email FROM sys.sys_users
-     WHERE user_email IN ('paolo.caputo@rtl-bank.org','admin@heuresys.com')`);
+     WHERE user_email IN ('paolo.caputo@rtl-bank.org','antonio.parisi@rtl-bank.org','admin@heuresys.com')`);
   const by = (e: string) => ids.rows.find((r) => r.user_email === e)!;
   paoloId = by("paolo.caputo@rtl-bank.org").user_id;
+  antonioId = by("antonio.parisi@rtl-bank.org").user_id;
   rtlTenant = by("paolo.caputo@rtl-bank.org").user_tenant_id;
   const paoloTenant = rtlTenant;
   adminUserId = by("admin@heuresys.com").user_id;
   adminTenantId = by("admin@heuresys.com").user_tenant_id;
 
-  // Skill-similar cross-tenant fixture: A(input,RTL) + B(RTL-visible) + C(NULL-tenant, hidden to RTL).
-  const rtlSkills = await pool.query<{ skill_id: string }>(
-    `SELECT skill_id FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_is_global = false ORDER BY skill_id LIMIT 2`, [rtlTenant]);
-  const hidden = await pool.query<{ skill_id: string }>(
-    `SELECT skill_id FROM sys.sys_skills WHERE skill_tenant_id IS NULL AND skill_is_global = false ORDER BY skill_id LIMIT 1`);
-  skillA = rtlSkills.rows[0]!.skill_id;
-  skillB = rtlSkills.rows[1]!.skill_id;
-  skillC = hidden.rows[0]!.skill_id;
+  // Skill-similar cross-tenant fixture: THROWAWAY skills (deleted in afterAll) so the test stays
+  // robust even after a real backfill populates sys_skill_embeddings. A=input(RTL), B=RTL-visible,
+  // C=NULL-tenant (hidden to an RTL actor). Defensive pre-clean in case a prior run crashed.
+  await pool.query(`DELETE FROM sys.sys_skills WHERE skill_code IN ('IT_MATCH_A','IT_MATCH_B','IT_MATCH_C')`);
+  const mkSkill = async (code: string, tenant: string | null): Promise<string> => {
+    const r = await pool.query<{ skill_id: string }>(
+      `INSERT INTO sys.sys_skills (skill_code, skill_name, skill_tenant_id, skill_is_global)
+       VALUES ($1, $1, $2, false) RETURNING skill_id`, [code, tenant]);
+    return r.rows[0]!.skill_id;
+  };
+  skillA = await mkSkill("IT_MATCH_A", rtlTenant);
+  skillB = await mkSkill("IT_MATCH_B", rtlTenant);
+  skillC = await mkSkill("IT_MATCH_C", null);
   await pool.query(
     `INSERT INTO sys.sys_skill_embeddings (skill_id, embedding, model_id)
-     VALUES ($1,$4::vector,'itmatch'),($2,$4::vector,'itmatch'),($3,$4::vector,'itmatch')
-     ON CONFLICT (skill_id) DO UPDATE SET embedding=EXCLUDED.embedding`,
+     VALUES ($1,$4::vector,'itmatch'),($2,$4::vector,'itmatch'),($3,$4::vector,'itmatch')`,
     [skillA, skillB, skillC, toVectorLiteral(unit(0))]);
 
   // Seed 2 occupation embeddings (finance @ dim 0, cooking @ dim 10).
@@ -81,6 +86,7 @@ afterAll(async () => {
   await pool.query(`DELETE FROM sys.sys_esco_occupation_embeddings WHERE esco_uri IN ($1,$2)`, [URI_FIN, URI_COOK]);
   await pool.query(`DELETE FROM sys.sys_user_profile_embeddings WHERE user_id IN ($1,$2)`, [paoloId, adminUserId]);
   await pool.query(`DELETE FROM sys.sys_skill_embeddings WHERE skill_id IN ($1,$2,$3)`, [skillA, skillB, skillC]);
+  await pool.query(`DELETE FROM sys.sys_skills WHERE skill_id IN ($1,$2,$3)`, [skillA, skillB, skillC]);
   await suite.app.close();
 });
 
@@ -115,6 +121,16 @@ describe("semantic-matching API", () => {
     const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${paoloId}/occupations`, headers: { cookie: ch(tenantAdmin.cookies) } });
     expect(r.statusCode).toBe(200);
     expect((r.json() as { evidenceCount: number }).evidenceCount).toBe(4);
+  });
+
+  it("GET /users/:id/occupations — plain USER may only target itself (peer → 404), self → 200", async () => {
+    // antonio (role USER) cannot read a peer's occupation-fit...
+    const peer = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${paoloId}/occupations`, headers: { cookie: ch(menteeNoProfile.cookies) } });
+    expect(peer.statusCode).toBe(404);
+    // ...but can read its own (empty-state, no seeded profile).
+    const self = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${antonioId}/occupations`, headers: { cookie: ch(menteeNoProfile.cookies) } });
+    expect(self.statusCode).toBe(200);
+    expect((self.json() as { evidenceCount: number }).evidenceCount).toBe(0);
   });
 
   it("unauthenticated request → 401", async () => {

@@ -25,6 +25,7 @@
     "db:seed-test-admin": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-test-admin.ts",
     "db:seed-r2": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-r2-personas.ts",
     "db:seed-r1b": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-r1b-personas.ts",
+    "embeddings:backfill": "pnpm --filter @heuresys/api exec tsx src/modules/semantic-matching/backfill.ts",
     "i18n:check": "pnpm --filter @heuresys/web run i18n:check",
     "cowork:status": "node scripts/cowork-exchange/status.mjs",
     "cowork:validate": "node scripts/cowork-exchange/validate-naming.mjs",

@@ -86,6 +86,12 @@ const EnvSchema = z.object({
     .string()
     .min(32, "MFA_ENCRYPTION_KEY must be at least 32 bytes (base64 of 24 raw bytes)")
     .optional(),
+
+  // AI ② Semantic Matching — Voyage embeddings API key. OPTIONAL: only the
+  // embedding BACKFILL script (pnpm embeddings:backfill) needs it. The serving
+  // API never calls Voyage (kNN runs over precomputed pgvector rows), so a
+  // missing key does NOT break the server — it only fails the backfill loudly.
+  VOYAGE_API_KEY: z.string().min(1).optional(),
 });
 
 const parsed = EnvSchema.parse(process.env);

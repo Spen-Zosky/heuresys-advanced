@@ -71,3 +71,4 @@ export * from "./schemas/dashboard.js";
 export * from "./schemas/analytics.js";
 export * from "./schemas/observability.js";
 export * from "./schemas/mentorship.js";
+export * from "./schemas/semantic-matching.js";

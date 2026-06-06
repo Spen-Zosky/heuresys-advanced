@@ -274,6 +274,10 @@
     "./schemas/mentorship": {
       "types": "./dist/schemas/mentorship.d.ts",
       "default": "./src/schemas/mentorship.ts"
+    },
+    "./schemas/semantic-matching": {
+      "types": "./dist/schemas/semantic-matching.d.ts",
+      "default": "./src/schemas/semantic-matching.ts"
     }
   },
   "scripts": {

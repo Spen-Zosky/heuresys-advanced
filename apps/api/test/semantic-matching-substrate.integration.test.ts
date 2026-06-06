@@ -4,7 +4,8 @@
  * D7-P0 (AI capability ② — semantic matching, P0 substrate). Asserts the pgvector
  * substrate shipped by migration 000060_pgvector_substrate.sql:
  *   - the `vector` extension is installed,
- *   - the 4 sidecar embedding tables exist, are queryable, and are EMPTY (P0 ships no data),
+ *   - the 4 sidecar embedding tables exist and are queryable (P1's Voyage backfill populates
+ *     them, so no emptiness is assumed — the count is environment-dependent),
  *   - the matching:read / matching:admin permissions are seeded with the documented role grants.
  *
  * Hits the live OCI VM DB through the tunnel (no mocks) — consistent with the rest of the
@@ -46,7 +47,7 @@ describe("D7-P0 pgvector semantic-matching substrate", () => {
   });
 
   it.each(EMBEDDING_TABLES)(
-    "embedding table sys.%s exists, is queryable, and is empty (P0 ships no data)",
+    "embedding table sys.%s exists and is queryable",
     async (table) => {
       // to_regclass returns NULL if the relation does not exist → asserts existence.
       const reg = await pool.query<{ reg: string | null }>(
@@ -55,11 +56,13 @@ describe("D7-P0 pgvector semantic-matching substrate", () => {
       );
       expect(reg.rows[0]?.reg).not.toBeNull();
 
-      // Queryable + empty. (No string interpolation of user input; table is a static literal.)
+      // Queryable (count works). NOT asserting emptiness: P1 (the Voyage backfill) populates these
+      // tables, so the count is environment-dependent — 0 on a fresh DB, >0 after a backfill.
+      // (No string interpolation of user input; table is a static literal.)
       const cnt = await pool.query<{ n: number }>(
         `SELECT count(*)::int AS n FROM sys.${table}`,
       );
-      expect(cnt.rows[0]?.n).toBe(0);
+      expect(cnt.rows[0]?.n).toBeGreaterThanOrEqual(0);
     },
   );
 

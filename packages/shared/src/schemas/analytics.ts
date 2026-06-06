@@ -163,6 +163,49 @@ export const SkillsCoverageAnalyticsResponseSchema = z.object({
 });
 export type SkillsCoverageAnalyticsResponse = z.infer<typeof SkillsCoverageAnalyticsResponseSchema>;
 
+// --- Skills coverage by CATEGORY (BI ①·#8b) ---
+// Same COVERAGE distribution as SkillsCoverage*, with the y-axis swapped from
+// organization_unit to skill_category. The skill→category link (sys_skills.
+// skill_category_id, wired S970) now resolves on every one of the 902 evidences
+// (0 NULL → DENSE heatmap), so the category axis is fully populated. Reuses the
+// same proficiency x-axis enum + rank ordering as SkillsCoverage.
+export const SkillsByCategoryProficiencySchema = SkillsCoverageProficiencySchema;
+export type SkillsByCategoryProficiency = SkillsCoverageProficiency;
+
+// One heatmap cell: skill_category × proficiency → evidence count + distinct users.
+export const SkillsByCategoryCellSchema = z.object({
+  category: z.string(), // skill_category_name
+  proficiency: SkillsByCategoryProficiencySchema,
+  evidenceCount: z.number().int(),
+  distinctUsers: z.number().int(),
+});
+export type SkillsByCategoryCell = z.infer<typeof SkillsByCategoryCellSchema>;
+
+// Per-category row rollup — feeds the summary bar (evidence-desc).
+export const SkillsByCategoryRowSchema = z.object({
+  category: z.string(),
+  evidenceCount: z.number().int(),
+  distinctUsers: z.number().int(),
+});
+export type SkillsByCategoryRow = z.infer<typeof SkillsByCategoryRowSchema>;
+
+export const SkillsByCategoryAnalyticsResponseSchema = z.object({
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
+  // Axis labels for the heatmap (server-ordered): categories = y (rows, evidence-desc),
+  // proficiencyLevels = x (cols, rank NOVICE→MASTER, only levels present in data).
+  categories: z.array(z.string()),
+  proficiencyLevels: z.array(SkillsByCategoryProficiencySchema),
+  cells: z.array(SkillsByCategoryCellSchema),
+  byCategory: z.array(SkillsByCategoryRowSchema),
+  totalEvidence: z.number().int(),
+  distinctUsers: z.number().int(), // grand total (NOT the sum of per-category buckets)
+  distinctCategories: z.number().int(),
+  generatedAt: z.string(),
+});
+export type SkillsByCategoryAnalyticsResponse = z.infer<
+  typeof SkillsByCategoryAnalyticsResponseSchema
+>;
+
 // --- Org-network metrics (P3) ---
 // Structural metrics over the position reports-to graph (position_reports_to_position_id).
 // POSITION-centric: the full org chart (~158 positions, is_active not filtered) is the

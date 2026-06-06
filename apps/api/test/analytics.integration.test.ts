@@ -368,6 +368,99 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect(body.distinctOrgUnits).toBe(21);
   });
 
+  // --- Skills coverage by CATEGORY (BI ①·#8b) — same 902 evidences re-pivoted on
+  // skill_category (y-axis) instead of OU. Deterministic anchors: 902 evidences,
+  // 156 users, 7 categories, 27 category×proficiency cells, 5 proficiency levels
+  // (MASTER absent). DENSE: every evidence resolves to a category (skill_category_id
+  // wired S970). All single-tenant (RTL) → TENANT == PLATFORM.
+
+  interface SkillsByCategoryBody {
+    scope: { kind: string; tenantId: string | null };
+    categories: string[];
+    proficiencyLevels: string[];
+    cells: Array<{ category: string; proficiency: string; evidenceCount: number; distinctUsers: number }>;
+    byCategory: Array<{ category: string; evidenceCount: number; distinctUsers: number }>;
+    totalEvidence: number;
+    distinctUsers: number;
+    distinctCategories: number;
+    generatedAt: string;
+  }
+
+  it("skills-by-category: unauthenticated → 401", async () => {
+    const r = await suite.app.inject({ method: "GET", url: "/v1/analytics/skills-by-category" });
+    expect(r.statusCode).toBe(401);
+  });
+
+  it("skills-by-category: USER (employee) lacks analytics:view → 403", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/skills-by-category",
+      headers: { cookie: ch(employeeS.cookies) },
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
+  });
+
+  it("skills-by-category: PLATFORM_ADMIN sees category heatmap rollup (deterministic seed anchors)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/skills-by-category",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as SkillsByCategoryBody;
+    expect(body.scope.kind).toBe("PLATFORM");
+    expect(body.scope.tenantId).toBeNull();
+    expect(body.totalEvidence).toBe(902);
+    expect(body.distinctUsers).toBe(156);
+    expect(body.distinctCategories).toBe(7);
+    expect(body.categories.length).toBe(7);
+    // 5 levels present, rank-ordered; MASTER absent in the seed.
+    expect(body.proficiencyLevels).toEqual(["NOVICE", "BASIC", "COMPETENT", "PROFICIENT", "EXPERT"]);
+    // 27 populated category×proficiency cells; DENSE (every evidence has a category).
+    expect(body.cells.length).toBe(27);
+    // Per-category row rollup (evidence-desc): the 7 categories with their real counts.
+    const byCat = (c: string) => body.byCategory.find((b) => b.category === c);
+    expect(byCat("Results Orientation")).toMatchObject({ evidenceCount: 261, distinctUsers: 97 });
+    expect(byCat("Leadership")).toMatchObject({ evidenceCount: 194, distinctUsers: 84 });
+    expect(byCat("Innovation")).toMatchObject({ evidenceCount: 150, distinctUsers: 122 });
+    expect(byCat("Technical / Domain Expertise")).toMatchObject({ evidenceCount: 117, distinctUsers: 80 });
+    expect(byCat("Customer Focus")).toMatchObject({ evidenceCount: 100, distinctUsers: 73 });
+    expect(byCat("Collaboration")).toMatchObject({ evidenceCount: 50, distinctUsers: 50 });
+    expect(byCat("Adaptability")).toMatchObject({ evidenceCount: 30, distinctUsers: 30 });
+    // byCategory is server-ordered evidence-desc → first row is the largest category.
+    expect(body.byCategory[0]?.category).toBe("Results Orientation");
+    // categories axis (y) is evidence-desc too → identical head.
+    expect(body.categories[0]).toBe("Results Orientation");
+    // Row totals sum to the grand total of evidences.
+    const rowSum = body.byCategory.reduce((acc, b) => acc + b.evidenceCount, 0);
+    expect(rowSum).toBe(902);
+    // distinctUsers is NON-additive: per-category user counts exceed the grand total
+    // (a user has evidence in multiple categories).
+    const bucketUserSum = body.byCategory.reduce((acc, b) => acc + b.distinctUsers, 0);
+    expect(bucketUserSum).toBeGreaterThan(body.distinctUsers);
+    // Largest heatmap cell: Results Orientation × EXPERT.
+    const maxCell = body.cells.find(
+      (c) => c.category === "Results Orientation" && c.proficiency === "EXPERT",
+    );
+    expect(maxCell).toMatchObject({ evidenceCount: 205, distinctUsers: 89 });
+    expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
+  });
+
+  it("skills-by-category: TENANT_ADMIN sees TENANT scope (all evidence single-tenant RTL → equals platform)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/skills-by-category",
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as SkillsByCategoryBody;
+    expect(body.scope.kind).toBe("TENANT");
+    expect(body.scope.tenantId).not.toBeNull();
+    expect(body.totalEvidence).toBe(902);
+    expect(body.distinctCategories).toBe(7);
+  });
+
   // --- Org-network metrics (P3) — structural metrics over the position reports-to
   // graph. The full org chart (~158 positions, is_active not filtered) is the graph.
 

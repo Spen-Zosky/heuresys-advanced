@@ -240,6 +240,77 @@ export declare const SkillsCoverageAnalyticsResponseSchema: z.ZodObject<{
     generatedAt: z.ZodString;
 }, z.core.$strip>;
 export type SkillsCoverageAnalyticsResponse = z.infer<typeof SkillsCoverageAnalyticsResponseSchema>;
+export declare const SkillsByCategoryProficiencySchema: z.ZodEnum<{
+    NOVICE: "NOVICE";
+    BASIC: "BASIC";
+    COMPETENT: "COMPETENT";
+    PROFICIENT: "PROFICIENT";
+    EXPERT: "EXPERT";
+    MASTER: "MASTER";
+}>;
+export type SkillsByCategoryProficiency = SkillsCoverageProficiency;
+export declare const SkillsByCategoryCellSchema: z.ZodObject<{
+    category: z.ZodString;
+    proficiency: z.ZodEnum<{
+        NOVICE: "NOVICE";
+        BASIC: "BASIC";
+        COMPETENT: "COMPETENT";
+        PROFICIENT: "PROFICIENT";
+        EXPERT: "EXPERT";
+        MASTER: "MASTER";
+    }>;
+    evidenceCount: z.ZodNumber;
+    distinctUsers: z.ZodNumber;
+}, z.core.$strip>;
+export type SkillsByCategoryCell = z.infer<typeof SkillsByCategoryCellSchema>;
+export declare const SkillsByCategoryRowSchema: z.ZodObject<{
+    category: z.ZodString;
+    evidenceCount: z.ZodNumber;
+    distinctUsers: z.ZodNumber;
+}, z.core.$strip>;
+export type SkillsByCategoryRow = z.infer<typeof SkillsByCategoryRowSchema>;
+export declare const SkillsByCategoryAnalyticsResponseSchema: z.ZodObject<{
+    scope: z.ZodObject<{
+        kind: z.ZodEnum<{
+            PLATFORM: "PLATFORM";
+            TENANT: "TENANT";
+            TEAM: "TEAM";
+        }>;
+        tenantId: z.ZodNullable<z.ZodUUID>;
+    }, z.core.$strip>;
+    categories: z.ZodArray<z.ZodString>;
+    proficiencyLevels: z.ZodArray<z.ZodEnum<{
+        NOVICE: "NOVICE";
+        BASIC: "BASIC";
+        COMPETENT: "COMPETENT";
+        PROFICIENT: "PROFICIENT";
+        EXPERT: "EXPERT";
+        MASTER: "MASTER";
+    }>>;
+    cells: z.ZodArray<z.ZodObject<{
+        category: z.ZodString;
+        proficiency: z.ZodEnum<{
+            NOVICE: "NOVICE";
+            BASIC: "BASIC";
+            COMPETENT: "COMPETENT";
+            PROFICIENT: "PROFICIENT";
+            EXPERT: "EXPERT";
+            MASTER: "MASTER";
+        }>;
+        evidenceCount: z.ZodNumber;
+        distinctUsers: z.ZodNumber;
+    }, z.core.$strip>>;
+    byCategory: z.ZodArray<z.ZodObject<{
+        category: z.ZodString;
+        evidenceCount: z.ZodNumber;
+        distinctUsers: z.ZodNumber;
+    }, z.core.$strip>>;
+    totalEvidence: z.ZodNumber;
+    distinctUsers: z.ZodNumber;
+    distinctCategories: z.ZodNumber;
+    generatedAt: z.ZodString;
+}, z.core.$strip>;
+export type SkillsByCategoryAnalyticsResponse = z.infer<typeof SkillsByCategoryAnalyticsResponseSchema>;
 export declare const OrgNetworkDepthRowSchema: z.ZodObject<{
     depth: z.ZodNumber;
     positionCount: z.ZodNumber;

@@ -94,6 +94,24 @@
     "seriesEvidence": "Evidenze",
     "emptyDesc": "Non ci sono evidenze di competenza nel tuo ambito al momento."
   },
+  "skillsByCategory": {
+    "title": "Competenze per categoria",
+    "description": "Distribuzione delle evidenze di competenza dichiarate per categoria di competenza e livello di padronanza nel tuo ambito.",
+    "stats": {
+      "evidenceLabel": "Evidenze totali",
+      "evidenceDesc": "Competenze dichiarate",
+      "usersLabel": "Persone con evidenze",
+      "usersDesc": "Persone con almeno un'evidenza",
+      "categoriesLabel": "Categorie",
+      "categoriesDesc": "Categorie di competenza coperte"
+    },
+    "heatmapTitle": "Copertura per categoria e livello di padronanza",
+    "heatmapAria": "Copertura competenze per categoria e livello di padronanza",
+    "heatmapNote": "Copertura delle evidenze dichiarate ripartite per categoria di competenza (non un gap competenze-vs-requisiti: i requisiti di competenza per posizione non sono ancora popolati).",
+    "categoryTitle": "Evidenze per categoria",
+    "seriesEvidence": "Evidenze",
+    "emptyDesc": "Non ci sono evidenze di competenza nel tuo ambito al momento."
+  },
   "orgNetwork": {
     "title": "Rete organizzativa",
     "description": "Metriche strutturali sul grafo gerarchico delle posizioni (span of control, profondità, raggio) nel tuo ambito.",

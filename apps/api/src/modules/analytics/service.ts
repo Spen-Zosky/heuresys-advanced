@@ -14,6 +14,8 @@ import type {
   CompensationAnalyticsResponse,
   SkillsCoverageAnalyticsResponse,
   SkillsCoverageProficiency,
+  SkillsByCategoryAnalyticsResponse,
+  SkillsByCategoryProficiency,
   OrgNetworkAnalyticsResponse,
   OvertimeAnalyticsResponse,
   OvertimeStatus,
@@ -148,6 +150,33 @@ export const analyticsService = {
       totalEvidence: sk.totalEvidence,
       distinctUsers: sk.distinctUsers,
       distinctOrgUnits: sk.distinctOrgUnits,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  async skillsByCategory(a: ActorContext): Promise<SkillsByCategoryAnalyticsResponse> {
+    const s = await buildScope(a);
+    const sk = await repo.getSkillsByCategory(pool, s.filter);
+    // Repo carries proficiency as string; the live values are guaranteed to be in
+    // the enum (declared_proficiency CHECK) — narrow to the schema union here.
+    return {
+      scope: { kind: s.kind, tenantId: s.tenantId },
+      categories: sk.categories,
+      proficiencyLevels: sk.proficiencyLevels as SkillsByCategoryProficiency[],
+      cells: sk.cells.map((c) => ({
+        category: c.category,
+        proficiency: c.proficiency as SkillsByCategoryProficiency,
+        evidenceCount: c.evidenceCount,
+        distinctUsers: c.distinctUsers,
+      })),
+      byCategory: sk.byCategory.map((b) => ({
+        category: b.category,
+        evidenceCount: b.evidenceCount,
+        distinctUsers: b.distinctUsers,
+      })),
+      totalEvidence: sk.totalEvidence,
+      distinctUsers: sk.distinctUsers,
+      distinctCategories: sk.distinctCategories,
       generatedAt: new Date().toISOString(),
     };
   },

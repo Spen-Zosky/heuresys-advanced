@@ -94,6 +94,24 @@
     "seriesEvidence": "Evidence",
     "emptyDesc": "There is no skill evidence within your scope at the moment."
   },
+  "skillsByCategory": {
+    "title": "Skills by Category",
+    "description": "Distribution of declared skill evidence by skill category and proficiency level within your scope.",
+    "stats": {
+      "evidenceLabel": "Total evidence",
+      "evidenceDesc": "Declared skills",
+      "usersLabel": "People with evidence",
+      "usersDesc": "People with at least one evidence",
+      "categoriesLabel": "Categories",
+      "categoriesDesc": "Skill categories covered"
+    },
+    "heatmapTitle": "Coverage by category and proficiency level",
+    "heatmapAria": "Skills coverage by category and proficiency level",
+    "heatmapNote": "Coverage of declared evidence broken down by skill category (not a skills-vs-requirements gap: the per-position skill requirements are not populated yet).",
+    "categoryTitle": "Evidence by category",
+    "seriesEvidence": "Evidence",
+    "emptyDesc": "There is no skill evidence within your scope at the moment."
+  },
   "orgNetwork": {
     "title": "Org Network",
     "description": "Structural metrics over the position reports-to graph (span of control, depth, reach) within your scope.",

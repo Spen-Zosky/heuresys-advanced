@@ -594,6 +594,135 @@ export async function getSkillsCoverage(
   };
 }
 
+// --- Skills coverage by CATEGORY (BI ①·#8b) ----------------------------------
+// Clone of getSkillsCoverage with the y-axis swapped from OU to skill_category.
+// The category link (sys_skills.skill_category_id → sys_skill_categories, wired
+// S970) resolves on every evidence (0 NULL → dense). Scope is identical:
+// PERSON-scoped via sys.sys_users + userScopeClause (alias u = sys_users, a =
+// PRIMARY/ACTIVE assignment) so TENANT/TEAM filtering matches the OU heatmap.
+// The category JOINs add NO fan-out (one skill → one category; one evidence →
+// one skill), so counts stay 1:1 with the evidence rows.
+
+export interface SkillsByCategoryCell {
+  category: string;
+  proficiency: string;
+  evidenceCount: number;
+  distinctUsers: number;
+}
+
+export interface SkillsByCategoryRow {
+  category: string;
+  evidenceCount: number;
+  distinctUsers: number;
+}
+
+export interface SkillsByCategory {
+  categories: string[];
+  proficiencyLevels: string[];
+  cells: SkillsByCategoryCell[];
+  byCategory: SkillsByCategoryRow[];
+  totalEvidence: number;
+  distinctUsers: number;
+  distinctCategories: number;
+}
+
+// evidence → skill → category, plus the same person/assignment chain as SKILLS_FROM
+// (the assignment join only matters for TEAM scope; it never fans out).
+const SKILLS_BY_CATEGORY_FROM = `
+       FROM sys.sys_user_skill_evidence e
+       JOIN sys.sys_users u ON u.user_id = e.user_skill_evidence_user_id
+       JOIN sys.sys_skills sk ON sk.skill_id = e.user_skill_evidence_skill_id
+       JOIN sys.sys_skill_categories sc ON sc.skill_category_id = sk.skill_category_id
+       LEFT JOIN sys.sys_user_position_assignments a
+         ON a.user_position_assignment_user_id = u.user_id
+        AND a.user_position_assignment_kind = 'PRIMARY'
+        AND a.user_position_assignment_status = 'ACTIVE'`;
+
+export async function getSkillsByCategory(
+  q: DbConnector,
+  scope: ScopeFilter,
+): Promise<SkillsByCategory> {
+  const sc = userScopeClause(scope);
+
+  const cells = await q.query<{
+    category: string;
+    proficiency: string;
+    evidence_count: string;
+    distinct_users: string;
+  }>(
+    `SELECT sc.skill_category_name AS category,
+            e.user_skill_evidence_declared_proficiency AS proficiency,
+            count(*)::text AS evidence_count,
+            count(DISTINCT u.user_id)::text AS distinct_users
+       ${SKILLS_BY_CATEGORY_FROM}
+      WHERE ${sc.sql}
+      GROUP BY 1, 2`,
+    sc.params,
+  );
+
+  const byCat = await q.query<{
+    category: string;
+    evidence_count: string;
+    distinct_users: string;
+  }>(
+    `SELECT sc.skill_category_name AS category,
+            count(*)::text AS evidence_count,
+            count(DISTINCT u.user_id)::text AS distinct_users
+       ${SKILLS_BY_CATEGORY_FROM}
+      WHERE ${sc.sql}
+      GROUP BY 1`,
+    sc.params,
+  );
+
+  const totals = await q.query<{ total: string; users: string; cats: string }>(
+    `SELECT count(*)::text AS total,
+            count(DISTINCT u.user_id)::text AS users,
+            count(DISTINCT sc.skill_category_name)::text AS cats
+       ${SKILLS_BY_CATEGORY_FROM}
+      WHERE ${sc.sql}`,
+    sc.params,
+  );
+
+  const cellRows: SkillsByCategoryCell[] = cells.rows.map((r) => ({
+    category: r.category,
+    proficiency: r.proficiency,
+    evidenceCount: Number(r.evidence_count),
+    distinctUsers: Number(r.distinct_users),
+  }));
+
+  // Heatmap rows: categories ordered by total evidence desc.
+  const catEvidence = new Map<string, number>();
+  for (const c of cellRows) {
+    catEvidence.set(c.category, (catEvidence.get(c.category) ?? 0) + c.evidenceCount);
+  }
+  const categories = [...catEvidence.entries()].sort((x, y) => y[1] - x[1]).map(([cat]) => cat);
+
+  // Heatmap cols: proficiency levels present, ordered by the shared rank.
+  const profOrder = (level: string): number => PROFICIENCY_RANK[level] ?? 99;
+  const proficiencyLevels = [...new Set(cellRows.map((c) => c.proficiency))].sort(
+    (x, y) => profOrder(x) - profOrder(y),
+  );
+
+  const byCategory: SkillsByCategoryRow[] = byCat.rows
+    .map((r) => ({
+      category: r.category,
+      evidenceCount: Number(r.evidence_count),
+      distinctUsers: Number(r.distinct_users),
+    }))
+    .sort((x, y) => y.evidenceCount - x.evidenceCount);
+
+  const t = totals.rows[0];
+  return {
+    categories,
+    proficiencyLevels,
+    cells: cellRows,
+    byCategory,
+    totalEvidence: Number(t?.total ?? 0),
+    distinctUsers: Number(t?.users ?? 0),
+    distinctCategories: Number(t?.cats ?? 0),
+  };
+}
+
 // --- Org-network metrics (P3) ------------------------------------------------
 // Structural metrics over the position reports-to graph. POSITION-centric scope
 // (mirrors compensationScopeClause on alias `p` = sys_positions): TENANT filters

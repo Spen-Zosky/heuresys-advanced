@@ -14,6 +14,7 @@ import {
   AttendanceAnalyticsResponseSchema,
   CompensationAnalyticsResponseSchema,
   SkillsCoverageAnalyticsResponseSchema,
+  SkillsByCategoryAnalyticsResponseSchema,
   OrgNetworkAnalyticsResponseSchema,
   OvertimeAnalyticsResponseSchema,
 } from "@heuresys/shared";
@@ -70,6 +71,15 @@ export const analyticsRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: { response: { 200: SkillsCoverageAnalyticsResponseSchema } },
     },
     async (req) => analyticsService.skills(actor(req)),
+  );
+
+  app.get(
+    "/skills-by-category",
+    {
+      preHandler: [requirePermission("analytics:view")],
+      schema: { response: { 200: SkillsByCategoryAnalyticsResponseSchema } },
+    },
+    async (req) => analyticsService.skillsByCategory(actor(req)),
   );
 
   app.get(

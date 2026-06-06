@@ -4,7 +4,7 @@
  * kNN cosine queries (pgvector <=>). Person profiles are mean-pooled in SQL.
  */
 import type { Pool, PoolClient } from "pg";
-import type { OccupationMatch, SkillMatch } from "@heuresys/shared";
+import type { OccupationMatch, SkillMatch, PositionMatch } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -162,6 +162,49 @@ export async function knnSimilarSkills(q: DbConnector, skillId: string, tenantId
      ORDER BY se.embedding <=> (SELECT embedding FROM s)
      LIMIT $${limIdx}`, params);
   return r.rows.map((x) => ({ skillId: x.skill_id, skillName: x.skill_name, score: num(x.score) }));
+}
+
+/**
+ * A user's person-profile → top-N best-matching POSITIONS (AI ②·Fase 3, "option C").
+ * Positions are not embedded; we rank job_role embeddings by cosine vs the profile and
+ * JOIN to sys_positions via position_job_role_id, so each position carries its role-match
+ * score. Tenant-scoped (I5): only the target user's tenant positions are considered, unless
+ * `tenantId` is undefined (PLATFORM_ADMIN → no filter). Mirrors knnOccupationsForUser's
+ * empty-state: evidenceCount=0 → honest empty items (no profile = no matches).
+ * Note: many positions can share one job role → they share that role's score; ORDER BY
+ * distance then position_code keeps the ordering stable/deterministic.
+ */
+export async function knnPositionsForUser(
+  q: DbConnector,
+  userId: string,
+  tenantId: string | undefined,
+  limit: number,
+): Promise<{ items: PositionMatch[]; evidenceCount: number }> {
+  const prof = await q.query<{ derived_from_evidence_count: number }>(
+    `SELECT derived_from_evidence_count FROM sys.sys_user_profile_embeddings WHERE user_id = $1`, [userId]);
+  if (prof.rowCount === 0) return { items: [], evidenceCount: 0 };
+
+  const params: unknown[] = tenantId === undefined ? [userId, limit] : [userId, limit, tenantId];
+  const tenantFilter = tenantId === undefined ? "" : ` AND p.position_tenant_id = $3`;
+  const r = await q.query<{ position_id: string; position_code: string; position_title: string | null; job_role_id: string | null; score: string }>(
+    `WITH me AS (SELECT embedding FROM sys.sys_user_profile_embeddings WHERE user_id = $1)
+     SELECT p.position_id, p.position_code, p.position_title, p.position_job_role_id AS job_role_id,
+            (1 - (jre.embedding <=> (SELECT embedding FROM me)))::text AS score
+     FROM sys.sys_positions p
+     JOIN sys.sys_job_role_embeddings jre ON jre.job_role_id = p.position_job_role_id
+     WHERE p.position_is_active = true${tenantFilter}
+     ORDER BY jre.embedding <=> (SELECT embedding FROM me), p.position_code
+     LIMIT $2`, params);
+  return {
+    items: r.rows.map((x) => ({
+      positionId: x.position_id,
+      positionCode: x.position_code,
+      positionTitle: x.position_title,
+      jobRoleId: x.job_role_id,
+      score: num(x.score),
+    })),
+    evidenceCount: prof.rows[0]!.derived_from_evidence_count,
+  };
 }
 
 /** Resolve a target user's tenant (for admin scope checks). */

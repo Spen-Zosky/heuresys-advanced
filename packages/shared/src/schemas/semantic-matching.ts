@@ -36,5 +36,25 @@ export const SkillMatchListResponseSchema = z.object({
   total: z.number().int().min(0),
 });
 
+/**
+ * Person → positions match (AI ②·Fase 3, "option C", read-only).
+ * Positions are NOT embedded; the score is the cosine affinity of the position's
+ * job_role embedding to the caller's profile, JOINed via position_job_role_id.
+ */
+export const PositionMatchSchema = z.object({
+  positionId: z.uuid(),
+  positionCode: z.string(),
+  positionTitle: z.string().nullable(),
+  jobRoleId: z.uuid().nullable(),
+  score: z.number(),
+});
+export type PositionMatch = z.infer<typeof PositionMatchSchema>;
+
+export const PositionMatchListResponseSchema = z.object({
+  items: z.array(PositionMatchSchema),
+  total: z.number().int().min(0),
+  evidenceCount: z.number().int().min(0), // person-profile sparsity, honest empty-state
+});
+
 export const MatchUserIdParamSchema = z.object({ userId: z.uuid() });
 export const MatchSkillIdParamSchema = z.object({ skillId: z.uuid() });

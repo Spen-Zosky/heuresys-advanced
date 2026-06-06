@@ -47,4 +47,30 @@ export const semanticMatchingService = {
     const items = await repo.knnSimilarSkills(pool, skillId, tenantId, q.limit);
     return { items, total: items.length };
   },
+
+  /**
+   * Caller's own person-profile → top-N best-matching POSITIONS (AI ②·Fase 3, "option C").
+   * Tenant-scoped (I5): a non-platform actor only sees positions in its own tenant; a no-tenant
+   * non-platform actor matches no real tenant (ZERO_UUID). PLATFORM_ADMIN sees all positions.
+   */
+  async myPositions(a: ActorContext, q: MatchQuery) {
+    const tenantId = isPlatform(a) ? undefined : (a.tenantId ?? ZERO_UUID);
+    return repo.knnPositionsForUser(pool, a.userId, tenantId, q.limit);
+  },
+
+  /**
+   * Any user in the actor's scope → top-N position matches (admin/manager surface). 404 outside scope.
+   * Same gating as userOccupations: a self-only role (USER/TEAM_MEMBER/READ_ONLY) may only target
+   * itself, and a cross-tenant or out-of-scope target is a 404 (no enumeration oracle). Positions are
+   * scoped to the TARGET user's tenant (I5), so a manager sees the peer's matches within that tenant.
+   */
+  async userPositions(a: ActorContext, userId: string, q: MatchQuery) {
+    const canViewOthers = a.roles.some((r) => !SELF_ONLY_ROLES.has(r));
+    if (!canViewOthers && userId !== a.userId) throw new NotFoundError("User");
+    const tenant = await repo.findUserTenant(pool, userId);
+    if (tenant === null) throw new NotFoundError("User");
+    if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");
+    const tenantId = isPlatform(a) ? undefined : tenant;
+    return repo.knnPositionsForUser(pool, userId, tenantId, q.limit);
+  },
 };

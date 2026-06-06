@@ -107,5 +107,12 @@ test.describe("MVP-2a ESS pages — live data", () => {
     await expect(rows.first()).toBeVisible();
     // Affinity is rendered as an integer percentage in the right-most column.
     await expect(rows.first()).toContainText(/%/);
+
+    // AI ②·Fase 3: the positions panel is fed by GET /v1/matching/me/positions.
+    // tommaso's profile + RTL_BANK positions (all have a job_role embedding) → live matches.
+    await expect(page.getByTestId("me-matching-positions")).toBeVisible();
+    const posRows = page.getByTestId("me-position-row");
+    await expect(posRows.first()).toBeVisible();
+    await expect(posRows.first()).toContainText(/%/);
   });
 });

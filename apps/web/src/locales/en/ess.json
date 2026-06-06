@@ -178,7 +178,13 @@
     "emptyDesc": "No occupation matches your profile at the moment.",
     "emptyEvidenceTitle": "Profile not analyzable yet",
     "emptyEvidenceDesc": "Add skill evidence to see compatible ESCO occupations.",
-    "caption": "Compatible ESCO occupations"
+    "caption": "Compatible ESCO occupations",
+    "positions": {
+      "title": "Compatible positions",
+      "colPosition": "Position",
+      "colScore": "Role affinity",
+      "emptyDesc": "No position matches your profile at the moment."
+    }
   },
   "positions": {
     "title": "My positions",

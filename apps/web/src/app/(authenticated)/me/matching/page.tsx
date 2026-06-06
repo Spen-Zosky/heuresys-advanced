@@ -3,17 +3,23 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import type { OccupationMatch } from "@heuresys/shared";
+import { PageHeader, Badge } from "@heuresys/ui";
+import type { OccupationMatch, PositionMatch } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
-import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 
 /**
- * Mirrors OccupationMatchListResponseSchema in @heuresys/shared. The schema's
- * inferred type is not re-exported there (only the `OccupationMatch` row type is),
- * so we declare the response envelope locally — same convention as other /me pages.
+ * Mirrors the *ListResponseSchema envelopes in @heuresys/shared. Those schemas'
+ * inferred response types are not re-exported (only the row types are), so we
+ * declare the envelopes locally — same convention as other /me pages.
  */
 interface OccupationMatchListResponse {
   items: OccupationMatch[];
+  total: number;
+  evidenceCount: number;
+}
+interface PositionMatchListResponse {
+  items: PositionMatch[];
   total: number;
   evidenceCount: number;
 }
@@ -27,12 +33,17 @@ function escoUriTail(uri: string): string {
 
 export default function MeMatchingPage() {
   const { t } = useTranslation("ess");
-  const matching = useQuery({
+
+  const occupations = useQuery({
     queryKey: ["me", "matching", "occupations"],
     queryFn: () => apiFetch<OccupationMatchListResponse>("/v1/matching/me/occupations"),
   });
+  const positions = useQuery({
+    queryKey: ["me", "matching", "positions"],
+    queryFn: () => apiFetch<PositionMatchListResponse>("/v1/matching/me/positions"),
+  });
 
-  const columns = useMemo<DataColumn<OccupationMatch>[]>(
+  const occColumns = useMemo<DataColumn<OccupationMatch>[]>(
     () => [
       {
         header: t("matching.colOccupation"),
@@ -55,27 +66,84 @@ export default function MeMatchingPage() {
     [t],
   );
 
-  const noEvidence = matching.data?.evidenceCount === 0;
+  const posColumns = useMemo<DataColumn<PositionMatch>[]>(
+    () => [
+      {
+        header: t("matching.positions.colPosition"),
+        cell: (p) => (
+          <span className="font-medium text-foreground">{p.positionTitle ?? p.positionCode}</span>
+        ),
+      },
+      {
+        header: t("matching.positions.colScore"),
+        align: "right",
+        cell: (p) => (
+          <span className="font-medium tabular-nums text-foreground">{`${(p.score * 100).toFixed(0)}%`}</span>
+        ),
+      },
+    ],
+    [t],
+  );
+
+  const noOccEvidence = occupations.data?.evidenceCount === 0;
+  const noPosEvidence = positions.data?.evidenceCount === 0;
 
   return (
-    <DataTablePanel<OccupationMatch>
-      pageTestId="me-matching-page"
-      titleTestId="me-matching-title"
-      countTestId="me-matching-count"
-      title={t("matching.title")}
-      description={t("matching.description")}
-      count={matching.data ? t("matching.count", { count: matching.data.total }) : undefined}
-      isLoading={matching.isLoading}
-      isError={matching.isError}
-      errorMessage={t("matching.errorMessage")}
-      rows={matching.data?.items ?? []}
-      rowKey={(m) => m.escoUri}
-      rowTestId="me-match-row"
-      columns={columns}
-      emptyTestId="me-matching-empty"
-      emptyTitle={noEvidence ? t("matching.emptyEvidenceTitle") : t("matching.emptyTitle")}
-      emptyDescription={noEvidence ? t("matching.emptyEvidenceDesc") : t("matching.emptyDesc")}
-      caption={t("matching.caption")}
-    />
+    <main data-testid="me-matching-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+      <section className="space-y-6">
+        <PageHeader
+          data-testid="me-matching-title"
+          title={t("matching.title")}
+          description={t("matching.description")}
+          badges={
+            occupations.data != null ? (
+              <Badge variant="secondary" data-testid="me-matching-count">
+                {t("matching.count", { count: occupations.data.total })}
+              </Badge>
+            ) : undefined
+          }
+        />
+        <EntityTable<OccupationMatch>
+          isLoading={occupations.isLoading}
+          isError={occupations.isError}
+          errorMessage={t("matching.errorMessage")}
+          rows={occupations.data?.items ?? []}
+          rowKey={(m) => m.escoUri}
+          rowTestId="me-match-row"
+          columns={occColumns}
+          emptyTestId="me-matching-empty"
+          emptyTitle={noOccEvidence ? t("matching.emptyEvidenceTitle") : t("matching.emptyTitle")}
+          emptyDescription={noOccEvidence ? t("matching.emptyEvidenceDesc") : t("matching.emptyDesc")}
+          caption={t("matching.caption")}
+        />
+      </section>
+
+      <section data-testid="me-matching-positions" className="space-y-6">
+        <PageHeader
+          data-testid="me-matching-positions-title"
+          title={t("matching.positions.title")}
+          badges={
+            positions.data != null ? (
+              <Badge variant="secondary" data-testid="me-matching-positions-count">
+                {t("matching.count", { count: positions.data.total })}
+              </Badge>
+            ) : undefined
+          }
+        />
+        <EntityTable<PositionMatch>
+          isLoading={positions.isLoading}
+          isError={positions.isError}
+          errorMessage={t("matching.errorMessage")}
+          rows={positions.data?.items ?? []}
+          rowKey={(p) => p.positionId}
+          rowTestId="me-position-row"
+          columns={posColumns}
+          emptyTestId="me-matching-positions-empty"
+          emptyTitle={noPosEvidence ? t("matching.emptyEvidenceTitle") : t("matching.positions.title")}
+          emptyDescription={noPosEvidence ? t("matching.emptyEvidenceDesc") : t("matching.positions.emptyDesc")}
+          caption={t("matching.positions.title")}
+        />
+      </section>
+    </main>
   );
 }

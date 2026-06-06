@@ -3,6 +3,8 @@
  * /v1/matching/* — read-only kNN endpoints (no writes → no CSRF). matching:read.
  *   GET /me/occupations            — caller's profile → ESCO occupations (ESS self)
  *   GET /users/:userId/occupations — any in-scope user → occupations (admin)
+ *   GET /me/positions              — caller's profile → matching positions (ESS self, AI ②·Fase 3)
+ *   GET /users/:userId/positions   — any in-scope user → matching positions (admin)
  *   GET /skills/:skillId/similar    — skill → similar skills (catalog)
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
@@ -11,6 +13,7 @@ import type { FastifyRequest } from "fastify";
 import {
   MatchQuerySchema,
   OccupationMatchListResponseSchema,
+  PositionMatchListResponseSchema,
   SkillMatchListResponseSchema,
   MatchUserIdParamSchema,
   MatchSkillIdParamSchema,
@@ -38,6 +41,22 @@ export const semanticMatchingRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: MatchUserIdParamSchema, querystring: MatchQuerySchema, response: { 200: OccupationMatchListResponseSchema } },
   }, async (req) => {
     const { items, evidenceCount } = await semanticMatchingService.userOccupations(actor(req), req.params.userId, req.query);
+    return { items, total: items.length, evidenceCount };
+  });
+
+  app.get("/me/positions", {
+    preHandler: [requirePermission("matching:read")],
+    schema: { querystring: MatchQuerySchema, response: { 200: PositionMatchListResponseSchema } },
+  }, async (req) => {
+    const { items, evidenceCount } = await semanticMatchingService.myPositions(actor(req), req.query);
+    return { items, total: items.length, evidenceCount };
+  });
+
+  app.get("/users/:userId/positions", {
+    preHandler: [requirePermission("matching:read")],
+    schema: { params: MatchUserIdParamSchema, querystring: MatchQuerySchema, response: { 200: PositionMatchListResponseSchema } },
+  }, async (req) => {
+    const { items, evidenceCount } = await semanticMatchingService.userPositions(actor(req), req.params.userId, req.query);
     return { items, total: items.length, evidenceCount };
   });
 

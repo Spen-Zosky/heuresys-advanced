@@ -178,7 +178,13 @@
     "emptyDesc": "Nessuna occupazione corrisponde al tuo profilo al momento.",
     "emptyEvidenceTitle": "Profilo non ancora analizzabile",
     "emptyEvidenceDesc": "Aggiungi evidenze di competenza per vedere le occupazioni ESCO compatibili.",
-    "caption": "Occupazioni ESCO compatibili"
+    "caption": "Occupazioni ESCO compatibili",
+    "positions": {
+      "title": "Posizioni compatibili",
+      "colPosition": "Posizione",
+      "colScore": "Affinità ruolo",
+      "emptyDesc": "Nessuna posizione corrisponde al tuo profilo al momento."
+    }
   },
   "positions": {
     "title": "Le mie posizioni",

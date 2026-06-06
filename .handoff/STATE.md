@@ -1,27 +1,31 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-06 (S970).
+**Updated**: 2026-06-06 (S971).
 
 > **Vista rapida** dello stato di lavoro (priorità · open questions). Lo **snapshot granulare** (versioni, DB/API/web/CI counts, architettura, migration) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero duplicato qui.
 
-## Last session brief (S970 — ultracode)
+## Last session brief (S971 — ultracode)
 
-Aggregato 7-item affrontato **un-punto-alla-volta**. Chiusi e pushati **4 sviluppi** + il reconciliation umbrella a stato terminale: **#1** bridge job→position (leva KPI via legacy `tenant_job_kpis`, employee-mediated I14; leva successione **deferita** — copertura magra, gap-esplicito); **#4** LOOKUP_FK `sys_process_kpi_templates` chiuso **out-of-scope** (B-42 — tassonomia v5-native vs legacy multi-industria, card+registry → EXCLUDE); **#5** skill-category (+7ª categoria *Technical/Domain Expertise* + 31 skill mappate → sblocca heatmap **#8b**); **#2·m1 SDBI Mentorship** — schema 4 tabelle + modulo API **full-CRUD** (/v1/mentorship/*) + import RTL, **prima delle 3 milestone B-10b**. Discovery+design evidence-based via workflow (adversarial-verified). Mac+VM allineati a `origin/main`, **vm-deploy eseguito** (modulo mentorship live; DB già migrato+seedato via tunnel). Granulare → `SOT_STATE.md`.
+Capability **② AI Semantic Matching — P1** consegnata e **live in PROD**. Sbloccato il gate `VOYAGE_API_KEY` (Enzo ha aggiunto un metodo di pagamento Voyage via Billing→Preferences → **Tier 1**, **$0** entro i 200M gratis; budget limit impostato). Pipeline embedding (client Voyage `voyage-4-lite` dietro `Embedder` iniettabile + `FakeEmbedder` per CI; backfill idempotente hash-skip) + modulo API `semantic-matching` (`/v1/matching/{me/occupations, users/:id/occupations, skills/:id/similar}`, kNN cosine su pgvector, `matching:read`, reads-only). Backfill PROD: **21939 skill + 3040 occupazioni + 227 ruoli + 156 profili** (mean-pool SQL `avg(vector)` su DISTINCT user×skill); il serving non chiama mai Voyage. **Review adversarial 3-lenti** → 1 HIGH I5 (leak cross-tenant similar-skills) + dedup + batch-guard fixati; **opzione-b** (peer occupation-fit solo a ruoli elevati). **6 commit pushati, CI verde, vm-deploy fatto** (`/v1/matching` 401-gated live). kNN reale validato. Granulare → `SOT_STATE.md` §0-sexies.
 
 ## Top priorities (next session)
 
-1. **#2·m2 Surveys + #2·m3 PredictionsML** — le 2 milestone B-10b residue, stesso ciclo `design→spec→OK→implementa` di m1 (Surveys ~7-9h; PredictionsML ~8-10h, MED-HIGH: serve regola di derivazione human-authored). Dettaglio `SOT_BACKLOG.md` B-10b.
-2. **② AI P1 backfill** — ⛔ gated su `VOYAGE_API_KEY` nel `.env` VM (azione Enzo). voyage-3.5 person→occupation + skill→skill. ~3-4h.
-3. **#7 MVP-4** (Wave2 · MFA multi-kind · Mobile+WCAG) · **#8 cap ③④⑤** (data-mining/CMS/scraping, design da zero) — roadmap, decisione Enzo.
+1. **② AI P1b — pagina ESS `/me/matching`** (occupazioni) + Playwright E2E live, pattern BI P1→P1b. ~3-4h. Spec `docs/superpowers/specs/2026-06-03-ai-semantic-matching-design.md` §3.
+2. **② AI P2** — `POST /v1/matching/reindex` (`matching:admin`, già seedato) + ricerca free-text (embed query-time) + Fase 2 (person→job_roles, person↔person). ~4-6h.
+3. **#2·m2 Surveys + #2·m3 PredictionsML** — 2 milestone B-10b residue (Surveys ~7-9h MED; PredictionsML ~8-10h MED-HIGH). `SOT_BACKLOG.md` B-10b.
+4. **#7 MVP-4** · **#8 cap ③④⑤** — roadmap, decisione Enzo.
 
 ## Open questions
 
-- `VOYAGE_API_KEY` nel `.env` VM → sblocca ② AI P1 (azione Enzo).
-- B-10b: confermare la sequenza Mentorship→**Surveys**→PredictionsML, o riprioritizzare le 2 residue?
+- ② sequenza: **P1b** (frontend ESS) prima, o **P2** (backend reindex/free-text/Fase 2)?
+- Opzione-b role-set "self-only" = `{USER, TEAM_MEMBER, READ_ONLY}` (tutto il resto vede i peer) — confermi, o sposti TEAM_LEADER tra i self-only?
+- B-10b: sequenza Surveys→PredictionsML?
+- Mac (`mac-local`) NON allineato in-session a `fab74ce` → allineare ad-hoc o al prossimo handoff (VM/PROD già allineata).
 
 ## Verification (next session)
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
 gh run list --limit 6                                         # main CI verde
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "SELECT resolved_status,count(*) FROM sys.v_reconciliation_status GROUP BY 1"
+curl -s -o /dev/null -w '%{http_code}\n' http://80.225.82.207:8013/v1/matching/me/occupations   # 401 = route live
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "SELECT count(*) FROM sys.sys_skill_embeddings"   # 21939
 ```

@@ -175,6 +175,15 @@ Sessione ultracode aperta con **discovery 7-agenti evidence-based** (note backlo
 - **Deploy PROD S970**: Mac+VM allineati `origin/main`, `vm-deploy.sh` eseguito, modulo `/v1/mentorship` live (DB già migrato+seedato via tunnel in-session).
 - **Pending prossima sessione**: #2·m2 Surveys, #2·m3 PredictionsML, ② AI P1 (gated `VOYAGE_API_KEY`), #7 MVP-4, #8 cap ③④⑤.
 
+**🟢 Aggiornamento S971 (2026-06-06) — ② AI Semantic Matching P1 SHIPPED + LIVE PROD (ultracode):**
+Sessione ultracode, design→piano (skill `writing-plans`)→implementa→review-adversarial→deploy. **6 commit pushati** (`6fcfca0`→`fab74ce`), CI verde, vm-deploy fatto.
+- **Gate `VOYAGE_API_KEY` SBLOCCATO** (azione Enzo, navigazione dashboard Voyage via Claude-in-Chrome): aggiunto metodo di pagamento (Billing → Preferences: company/indirizzo → "Add payment details") → **Usage Tier 1**. **$0** (~1,2M token dentro i 200M gratis), budget limit di safety. La chiave resta nel `.env` locale; la VM/serving non la riceve.
+- **② P1 = pipeline embedding + modulo `semantic-matching`** (`/v1/matching/{me/occupations, users/:id/occupations, skills/:id/similar}`, kNN cosine pgvector, `matching:read`). Substrato mig `000060` già live → **nessuna migration**. Backfill PROD: skill **21939** · occupazioni **3040** · ruoli **227** · profili **156** (`voyage-4-lite`, mean-pool SQL DISTINCT user×skill). kNN reale validato.
+- **Review adversarial**: 1 HIGH I5 (similar-skills cross-tenant leak) fixato + mean-pool dedup + voyage guard + **opzione-b** (peer occupation-fit solo a ruoli elevati; self-only = `{USER,TEAM_MEMBER,READ_ONLY}`) + test backfill-robust (entità throwaway). Fix substrate-test S961 (emptiness→queryable).
+- **② residuo (pending, P3 capability roadmap)**: **P1b** pagina ESS `/me/matching` + Playwright E2E live; **P2** endpoint `POST /v1/matching/reindex` (`matching:admin` già seedato) + ricerca free-text (embed query-time) + **Fase 2** (person→job_roles, person↔person) + **Fase 3** (person→positions, sblocca `position_skill_requirements`). Spec `docs/superpowers/specs/2026-06-03-ai-semantic-matching-design.md`.
+- **Decisione aperta (Enzo)**: confermare self-only role-set; sequenza P1b vs P2.
+- **Pending prossima sessione**: ② P1b/P2, #2·m2 Surveys, #2·m3 PredictionsML, #7 MVP-4, #8 cap ③④⑤.
+
 ## P3 — Infra / robustezza
 
 | ID | Azione | Note |
@@ -199,7 +208,7 @@ Sessione ultracode aperta con **discovery 7-agenti evidence-based** (note backlo
 
 5 capability indipendenti, sequenza CLI-decisa, ciclo per ciascuna `design→spec→ok→piano→implementa` (multi-sessione). Stato:
 - **① BI / analytics** — design+spec+piano ✅; **P1 API + P1b frontend ✅** (`/v1/analytics/{workforce,kpi}` + pagine, mig 000057/000059). **P2 ✅ SHIPPED (S962, 3 viste additive, commit locali `e1b74df`+`73a69ca`+`8983788`)**: `/v1/analytics/{attendance,compensation,skills}` + pagine `@heuresys/ui` EChartsCard + nav mig 000066/067/068 + 10 integration test (deterministic seed anchors) + 3 Playwright E2E verdi. **Verifica adversarial 3-agenti PASS** (scope-isolation I5 cross-tenant, employee-centric sys_users/sys_positions, SQL correctness — 0 bug). Attendance = ore lavorate (OT da `attendance_hours_overtime`, sys_overtime escluso); Compensation = banding boxplot+scatter (y=spread, economic_weight NULL); Skills = COVERAGE heatmap OU×proficiency (gap non computabile, requirements vuoto). **P3 org-network ✅ SHIPPED (S965)**. **P2-ext `overtime` ✅ SHIPPED (S969, `5aec451`)** — 7ª vista, request/approval lifecycle su `sys_overtime`. **Capability ① BI ora COMPLETA (P1→P3 + overtime).** Residuo opzionale: **#8b category heatmap** (gated su `skill_category_id`, data-task — vedi tabella S969 sopra).
-- **② AI semantic-matching** — design+spec ✅ (`2026-06-03-ai-semantic-matching-design.md`); pending piano + **decisione Voyage API key**. Substrate pgvector (NON installato) + embeddings; sblocca anche position_skill_requirements (Fase 3).
+- **② AI semantic-matching** — design+spec ✅; **P1 ✅ SHIPPED + LIVE PROD (S971)**: pipeline Voyage `voyage-4-lite` (substrate pgvector mig `000060` popolato: 21939 skill/3040 occ/227 ruoli/156 profili) + modulo `/v1/matching/*` (3 endpoint kNN, `matching:read`). **Residuo**: **P1b** pagina ESS `/me/matching` + E2E · **P2** reindex (`matching:admin`) + free-text + Fase 2 (person→roles, person↔person) · **Fase 3** person→positions (sblocca `position_skill_requirements`).
 - **③ data-mining · ④ CMS · ⑤ scraping (fonti ufficiali)** — in coda, design quando la sequenza ci arriva.
 
 ---

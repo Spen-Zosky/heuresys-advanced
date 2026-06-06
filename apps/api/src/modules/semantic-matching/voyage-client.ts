@@ -38,6 +38,9 @@ export class VoyageEmbedder implements Embedder {
       }
       const json = (await res.json()) as { data: { index: number; embedding: number[] }[] };
       const ordered = [...json.data].sort((a, b) => a.index - b.index).map((d) => d.embedding);
+      if (ordered.length !== batch.length) {
+        throw new Error(`Voyage returned ${ordered.length}/${batch.length} embeddings for the batch at offset ${i}`);
+      }
       out.push(...ordered);
     }
     return out;

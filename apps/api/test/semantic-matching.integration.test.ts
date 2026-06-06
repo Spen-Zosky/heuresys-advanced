@@ -28,22 +28,40 @@ let suite: TestApp;
 let manager: S;          // paolo.caputo (RTL) — seeded profile near "finance"
 let tenantAdmin: S;      // federica (RTL TENANT_ADMIN)
 let menteeNoProfile: S;  // antonio (RTL) — no seeded profile → empty-state
-let paoloId: string, adminUserId: string, adminTenantId: string;
+let admin: S;            // admin@heuresys.com (PLATFORM_ADMIN) — sees across tenants
+let paoloId: string, adminUserId: string, adminTenantId: string, rtlTenant: string;
+let skillA: string, skillB: string, skillC: string; // A=input(RTL), B=RTL-visible, C=NULL-tenant(hidden)
 
 beforeAll(async () => {
   suite = await buildTestApp();
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
   tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
   menteeNoProfile = await login(suite, "antonio.parisi@rtl-bank.org");
+  admin = await login(suite, "admin@heuresys.com");
 
   const ids = await pool.query<{ user_id: string; user_tenant_id: string; user_email: string }>(
     `SELECT user_id, user_tenant_id, user_email FROM sys.sys_users
      WHERE user_email IN ('paolo.caputo@rtl-bank.org','admin@heuresys.com')`);
   const by = (e: string) => ids.rows.find((r) => r.user_email === e)!;
   paoloId = by("paolo.caputo@rtl-bank.org").user_id;
-  const paoloTenant = by("paolo.caputo@rtl-bank.org").user_tenant_id;
+  rtlTenant = by("paolo.caputo@rtl-bank.org").user_tenant_id;
+  const paoloTenant = rtlTenant;
   adminUserId = by("admin@heuresys.com").user_id;
   adminTenantId = by("admin@heuresys.com").user_tenant_id;
+
+  // Skill-similar cross-tenant fixture: A(input,RTL) + B(RTL-visible) + C(NULL-tenant, hidden to RTL).
+  const rtlSkills = await pool.query<{ skill_id: string }>(
+    `SELECT skill_id FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_is_global = false ORDER BY skill_id LIMIT 2`, [rtlTenant]);
+  const hidden = await pool.query<{ skill_id: string }>(
+    `SELECT skill_id FROM sys.sys_skills WHERE skill_tenant_id IS NULL AND skill_is_global = false ORDER BY skill_id LIMIT 1`);
+  skillA = rtlSkills.rows[0]!.skill_id;
+  skillB = rtlSkills.rows[1]!.skill_id;
+  skillC = hidden.rows[0]!.skill_id;
+  await pool.query(
+    `INSERT INTO sys.sys_skill_embeddings (skill_id, embedding, model_id)
+     VALUES ($1,$4::vector,'itmatch'),($2,$4::vector,'itmatch'),($3,$4::vector,'itmatch')
+     ON CONFLICT (skill_id) DO UPDATE SET embedding=EXCLUDED.embedding`,
+    [skillA, skillB, skillC, toVectorLiteral(unit(0))]);
 
   // Seed 2 occupation embeddings (finance @ dim 0, cooking @ dim 10).
   await pool.query(
@@ -62,6 +80,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await pool.query(`DELETE FROM sys.sys_esco_occupation_embeddings WHERE esco_uri IN ($1,$2)`, [URI_FIN, URI_COOK]);
   await pool.query(`DELETE FROM sys.sys_user_profile_embeddings WHERE user_id IN ($1,$2)`, [paoloId, adminUserId]);
+  await pool.query(`DELETE FROM sys.sys_skill_embeddings WHERE skill_id IN ($1,$2,$3)`, [skillA, skillB, skillC]);
   await suite.app.close();
 });
 
@@ -101,5 +120,22 @@ describe("semantic-matching API", () => {
   it("unauthenticated request → 401", async () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/matching/me/occupations" });
     expect(r.statusCode).toBe(401);
+  });
+
+  it("GET /skills/:id/similar — RTL user is NOT shown a non-visible (NULL-tenant) skill (I5)", async () => {
+    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/skills/${skillA}/similar?limit=20`, headers: { cookie: ch(manager.cookies) } });
+    expect(r.statusCode).toBe(200);
+    const ids = (r.json() as { items: { skillId: string }[] }).items.map((x) => x.skillId);
+    expect(ids).toContain(skillB);      // RTL-owned → visible
+    expect(ids).not.toContain(skillC);  // NULL-tenant non-global → hidden cross-tenant
+    expect(ids).not.toContain(skillA);  // self excluded
+  });
+
+  it("GET /skills/:id/similar — PLATFORM_ADMIN sees across tenants (incl. the NULL-tenant skill)", async () => {
+    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/skills/${skillA}/similar?limit=20`, headers: { cookie: ch(admin.cookies) } });
+    expect(r.statusCode).toBe(200);
+    const ids = (r.json() as { items: { skillId: string }[] }).items.map((x) => x.skillId);
+    expect(ids).toContain(skillB);
+    expect(ids).toContain(skillC);
   });
 });

@@ -90,15 +90,26 @@ export async function upsertOccupationEmbedding(q: DbConnector, uri: string, vec
     [uri, toVectorLiteral(vec), label, isco, modelId, hash]);
 }
 
-/** Mean-pool every person's skill-evidence skill embeddings into a profile vector (SQL avg). Returns #profiles written. */
+/**
+ * Mean-pool every person's skill-evidence skill embeddings into a profile vector (SQL avg).
+ * Dedupes to DISTINCT (user, skill) first: sys_user_skill_evidence has no UNIQUE on (user, skill)
+ * and allows multiple sources per skill (SELF/MANAGER/CERTIFICATION/...), so without DISTINCT a
+ * repeatedly-assessed skill would be weighted N times (skewing the profile) and the count would
+ * report evidence-rows, not distinct skills. derived_from_evidence_count = #distinct skills.
+ * Returns #profiles written.
+ */
 export async function deriveUserProfiles(q: DbConnector, modelId: string): Promise<number> {
   const r = await q.query(
     `INSERT INTO sys.sys_user_profile_embeddings (user_id, tenant_id, embedding, derived_from_evidence_count, model_id)
-     SELECT e.user_skill_evidence_user_id, u.user_tenant_id, avg(se.embedding), count(*)::int, $1
-     FROM sys.sys_user_skill_evidence e
-     JOIN sys.sys_skill_embeddings se ON se.skill_id = e.user_skill_evidence_skill_id
-     JOIN sys.sys_users u ON u.user_id = e.user_skill_evidence_user_id
-     GROUP BY e.user_skill_evidence_user_id, u.user_tenant_id
+     WITH distinct_skill AS (
+       SELECT DISTINCT user_skill_evidence_user_id AS uid, user_skill_evidence_skill_id AS sid
+       FROM sys.sys_user_skill_evidence
+     )
+     SELECT d.uid, u.user_tenant_id, avg(se.embedding), count(*)::int, $1
+     FROM distinct_skill d
+     JOIN sys.sys_skill_embeddings se ON se.skill_id = d.sid
+     JOIN sys.sys_users u ON u.user_id = d.uid
+     GROUP BY d.uid, u.user_tenant_id
      ON CONFLICT (user_id) DO UPDATE SET embedding = EXCLUDED.embedding, derived_from_evidence_count = EXCLUDED.derived_from_evidence_count, model_id = EXCLUDED.model_id`,
     [modelId]);
   return r.rowCount ?? 0;
@@ -122,18 +133,34 @@ export async function knnOccupationsForUser(q: DbConnector, userId: string, limi
   };
 }
 
-export async function knnSimilarSkills(q: DbConnector, skillId: string, limit: number): Promise<SkillMatch[]> {
-  const self = await q.query(`SELECT 1 FROM sys.sys_skill_embeddings WHERE skill_id = $1`, [skillId]);
-  if (self.rowCount === 0) return [];
+/**
+ * A skill → top-N similar skills, TENANT-SCOPED (I5): a skill is visible iff global
+ * OR owned by `tenantId`. PLATFORM_ADMIN passes tenantId=undefined → no filter (sees all).
+ * The visibility predicate guards BOTH the input-skill existence (return [] when the actor
+ * can't see it → no cross-tenant existence oracle) AND the result set.
+ */
+export async function knnSimilarSkills(q: DbConnector, skillId: string, tenantId: string | undefined, limit: number): Promise<SkillMatch[]> {
+  const vis = (paramIdx: number): string =>
+    tenantId === undefined ? "" : ` AND (sk.skill_is_global = true OR sk.skill_tenant_id = $${paramIdx})`;
+
+  // Input skill must be visible to the actor.
+  const existsParams: unknown[] = tenantId === undefined ? [skillId] : [skillId, tenantId];
+  const exists = await q.query(
+    `SELECT 1 FROM sys.sys_skill_embeddings se JOIN sys.sys_skills sk ON sk.skill_id = se.skill_id
+     WHERE se.skill_id = $1${vis(2)}`, existsParams);
+  if (exists.rowCount === 0) return [];
+
+  const params: unknown[] = tenantId === undefined ? [skillId, limit] : [skillId, tenantId, limit];
+  const limIdx = params.length;
   const r = await q.query<{ skill_id: string; skill_name: string | null; score: string }>(
     `WITH s AS (SELECT embedding FROM sys.sys_skill_embeddings WHERE skill_id = $1)
      SELECT se.skill_id, sk.skill_name,
             (1 - (se.embedding <=> (SELECT embedding FROM s)))::text AS score
      FROM sys.sys_skill_embeddings se
      JOIN sys.sys_skills sk ON sk.skill_id = se.skill_id
-     WHERE se.skill_id <> $1
+     WHERE se.skill_id <> $1${vis(2)}
      ORDER BY se.embedding <=> (SELECT embedding FROM s)
-     LIMIT $2`, [skillId, limit]);
+     LIMIT $${limIdx}`, params);
   return r.rows.map((x) => ({ skillId: x.skill_id, skillName: x.skill_name, score: num(x.score) }));
 }
 

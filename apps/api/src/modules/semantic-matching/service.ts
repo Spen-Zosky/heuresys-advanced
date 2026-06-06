@@ -15,6 +15,8 @@ export interface ActorContext {
   roles: RoleCode[];
 }
 const isPlatform = (a: ActorContext): boolean => a.roles.includes("PLATFORM_ADMIN");
+// A non-platform actor with no tenant sees only global skills → match no real tenant.
+const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
 
 export const semanticMatchingService = {
   /** Caller's own person-profile → top-N ESCO occupations. */
@@ -30,9 +32,10 @@ export const semanticMatchingService = {
     return repo.knnOccupationsForUser(pool, userId, q.limit);
   },
 
-  /** A skill → top-N similar skills (catalog dedup/discovery). Actor unused (catalog-global). */
-  async similarSkills(_a: ActorContext, skillId: string, q: MatchQuery) {
-    const items = await repo.knnSimilarSkills(pool, skillId, q.limit);
+  /** A skill → top-N similar skills (catalog dedup/discovery), tenant-scoped (I5). */
+  async similarSkills(a: ActorContext, skillId: string, q: MatchQuery) {
+    const tenantId = isPlatform(a) ? undefined : (a.tenantId ?? ZERO_UUID);
+    const items = await repo.knnSimilarSkills(pool, skillId, tenantId, q.limit);
     return { items, total: items.length };
   },
 };

@@ -4,7 +4,7 @@
  * kNN cosine queries (pgvector <=>). Person profiles are mean-pooled in SQL.
  */
 import type { Pool, PoolClient } from "pg";
-import type { OccupationMatch, SkillMatch, PositionMatch } from "@heuresys/shared";
+import type { OccupationMatch, SkillMatch, PositionMatch, JobRoleMatch, SimilarUserMatch } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -205,6 +205,114 @@ export async function knnPositionsForUser(
     })),
     evidenceCount: prof.rows[0]!.derived_from_evidence_count,
   };
+}
+
+/**
+ * A user's person-profile → top-N best-matching JOB_ROLES (AI ②·Fase 2, read-only).
+ * job_roles are a GLOBAL CATALOG (no tenant column). Tenant-awareness (I5): a non-platform
+ * actor sees the global catalog (roles referenced by NO position) PLUS roles referenced by at
+ * least one position in `tenantId`; a role referenced ONLY by cross-tenant positions is hidden.
+ * `tenantId` undefined (PLATFORM_ADMIN) → no filter (all roles). Mirrors the occupations/positions
+ * empty-state: evidenceCount=0 → honest empty items (no profile = no matches).
+ */
+export async function knnJobRolesForUser(
+  q: DbConnector,
+  userId: string,
+  tenantId: string | undefined,
+  limit: number,
+): Promise<{ items: JobRoleMatch[]; evidenceCount: number }> {
+  const prof = await q.query<{ derived_from_evidence_count: number }>(
+    `SELECT derived_from_evidence_count FROM sys.sys_user_profile_embeddings WHERE user_id = $1`, [userId]);
+  if (prof.rowCount === 0) return { items: [], evidenceCount: 0 };
+
+  const params: unknown[] = tenantId === undefined ? [userId, limit] : [userId, limit, tenantId];
+  // Visibility predicate (only when tenant-scoped): role is global (no referencing position) OR
+  // referenced by an in-tenant position.
+  const vis = tenantId === undefined
+    ? ""
+    : ` AND (
+         NOT EXISTS (SELECT 1 FROM sys.sys_positions p WHERE p.position_job_role_id = jr.job_role_id)
+         OR EXISTS (SELECT 1 FROM sys.sys_positions p WHERE p.position_job_role_id = jr.job_role_id AND p.position_tenant_id = $3)
+       )`;
+  const r = await q.query<{ job_role_id: string; job_role_code: string; job_role_name: string | null; job_role_seniority_level: string | null; score: string }>(
+    `WITH me AS (SELECT embedding FROM sys.sys_user_profile_embeddings WHERE user_id = $1)
+     SELECT jr.job_role_id, jr.job_role_code, jr.job_role_name, jr.job_role_seniority_level,
+            (1 - (jre.embedding <=> (SELECT embedding FROM me)))::text AS score
+     FROM sys.sys_job_role_embeddings jre
+     JOIN sys.sys_job_roles jr ON jr.job_role_id = jre.job_role_id
+     WHERE true${vis}
+     ORDER BY jre.embedding <=> (SELECT embedding FROM me), jr.job_role_code
+     LIMIT $2`, params);
+  return {
+    items: r.rows.map((x) => ({
+      jobRoleId: x.job_role_id,
+      jobRoleCode: x.job_role_code,
+      jobRoleName: x.job_role_name,
+      seniorityLevel: x.job_role_seniority_level,
+      score: num(x.score),
+    })),
+    evidenceCount: prof.rows[0]!.derived_from_evidence_count,
+  };
+}
+
+/**
+ * Person ↔ person: a user's profile → top-N most-similar OTHER users (AI ②·Fase 2).
+ * SELF-EXCLUDED. Tenant-scoped (I5): only profiles in `tenantId` are candidates; `tenantId`
+ * undefined (PLATFORM_ADMIN) → all tenants. Returns [] when the queried user has no profile.
+ */
+export async function knnSimilarUsers(
+  q: DbConnector,
+  userId: string,
+  tenantId: string | undefined,
+  limit: number,
+): Promise<SimilarUserMatch[]> {
+  const exists = await q.query(`SELECT 1 FROM sys.sys_user_profile_embeddings WHERE user_id = $1`, [userId]);
+  if (exists.rowCount === 0) return [];
+
+  const params: unknown[] = tenantId === undefined ? [userId, limit] : [userId, limit, tenantId];
+  const tenantFilter = tenantId === undefined ? "" : ` AND pe.tenant_id = $3`;
+  const r = await q.query<{ user_id: string; user_display_name: string | null; score: string }>(
+    `WITH me AS (SELECT embedding FROM sys.sys_user_profile_embeddings WHERE user_id = $1)
+     SELECT pe.user_id, u.user_display_name,
+            (1 - (pe.embedding <=> (SELECT embedding FROM me)))::text AS score
+     FROM sys.sys_user_profile_embeddings pe
+     JOIN sys.sys_users u ON u.user_id = pe.user_id
+     WHERE pe.user_id <> $1${tenantFilter}
+     ORDER BY pe.embedding <=> (SELECT embedding FROM me), pe.user_id
+     LIMIT $2`, params);
+  return r.rows.map((x) => ({ userId: x.user_id, displayName: x.user_display_name, score: num(x.score) }));
+}
+
+/**
+ * Free-text kNN (AI ②·Fase 2): rank occupations by an externally-supplied query VECTOR
+ * (embedded at request time). No tenant filter — the ESCO occupation corpus is global.
+ */
+export async function knnOccupationsByVector(q: DbConnector, vec: number[], limit: number): Promise<OccupationMatch[]> {
+  const r = await q.query<{ esco_uri: string; label_text: string | null; isco_code: string | null; score: string }>(
+    `SELECT oe.esco_uri, oe.label_text, oe.isco_code,
+            (1 - (oe.embedding <=> $1::vector))::text AS score
+     FROM sys.sys_esco_occupation_embeddings oe
+     ORDER BY oe.embedding <=> $1::vector
+     LIMIT $2`, [toVectorLiteral(vec), limit]);
+  return r.rows.map((x) => ({ escoUri: x.esco_uri, label: x.label_text, iscoCode: x.isco_code, score: num(x.score) }));
+}
+
+/**
+ * Free-text kNN (AI ②·Fase 2): rank skills by an externally-supplied query VECTOR.
+ * Tenant-scoped (I5): a non-platform actor sees only global skills or skills owned by `tenantId`.
+ */
+export async function knnSkillsByVector(q: DbConnector, vec: number[], tenantId: string | undefined, limit: number): Promise<SkillMatch[]> {
+  const params: unknown[] = tenantId === undefined ? [toVectorLiteral(vec), limit] : [toVectorLiteral(vec), limit, tenantId];
+  const vis = tenantId === undefined ? "" : ` AND (sk.skill_is_global = true OR sk.skill_tenant_id = $3)`;
+  const r = await q.query<{ skill_id: string; skill_name: string | null; score: string }>(
+    `SELECT se.skill_id, sk.skill_name,
+            (1 - (se.embedding <=> $1::vector))::text AS score
+     FROM sys.sys_skill_embeddings se
+     JOIN sys.sys_skills sk ON sk.skill_id = se.skill_id
+     WHERE true${vis}
+     ORDER BY se.embedding <=> $1::vector
+     LIMIT $2`, params);
+  return r.rows.map((x) => ({ skillId: x.skill_id, skillName: x.skill_name, score: num(x.score) }));
 }
 
 /** Resolve a target user's tenant (for admin scope checks). */

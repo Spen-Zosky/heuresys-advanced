@@ -67,7 +67,8 @@ describe("/v1/me/interfaces", () => {
     expect(codes(b, "PROCESS")).toEqual([]);       // no Process admin items
     expect(codes(b, "ENTERPRISE")).toEqual([]);    // no Enterprise admin items (incl. no dashboard)
     const talent = codes(b, "TALENT").sort();
-    expect(talent).toEqual(["me-career", "me-home", "me-inbox", "me-learning", "me-skills", "me-team"]); // exactly the 6 ESS (R1b added me-team)
+    // exactly the ESS items (R1b added me-team; AI ② added me-matching as a TALENT self-service page).
+    expect(talent).toEqual(["me-career", "me-home", "me-inbox", "me-learning", "me-matching", "me-skills", "me-team"]);
   });
 
   it("MANAGER (admin-class) is per-permission filtered WITHIN the admin section", async () => {

@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { PageHeader, Badge } from "@heuresys/ui";
-import type { OccupationMatch, PositionMatch } from "@heuresys/shared";
+import type { OccupationMatch, PositionMatch, JobRoleMatch } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 
@@ -20,6 +20,11 @@ interface OccupationMatchListResponse {
 }
 interface PositionMatchListResponse {
   items: PositionMatch[];
+  total: number;
+  evidenceCount: number;
+}
+interface JobRoleMatchListResponse {
+  items: JobRoleMatch[];
   total: number;
   evidenceCount: number;
 }
@@ -41,6 +46,10 @@ export default function MeMatchingPage() {
   const positions = useQuery({
     queryKey: ["me", "matching", "positions"],
     queryFn: () => apiFetch<PositionMatchListResponse>("/v1/matching/me/positions"),
+  });
+  const jobRoles = useQuery({
+    queryKey: ["me", "matching", "job-roles"],
+    queryFn: () => apiFetch<JobRoleMatchListResponse>("/v1/matching/me/job-roles"),
   });
 
   const occColumns = useMemo<DataColumn<OccupationMatch>[]>(
@@ -85,8 +94,32 @@ export default function MeMatchingPage() {
     [t],
   );
 
+  const roleColumns = useMemo<DataColumn<JobRoleMatch>[]>(
+    () => [
+      {
+        header: t("matching.jobRoles.colRole"),
+        cell: (jr) => (
+          <span className="font-medium text-foreground">{jr.jobRoleName ?? jr.jobRoleCode}</span>
+        ),
+      },
+      {
+        header: t("matching.jobRoles.colSeniority"),
+        cell: (jr) => <span className="text-xs text-muted-foreground">{jr.seniorityLevel ?? "—"}</span>,
+      },
+      {
+        header: t("matching.jobRoles.colScore"),
+        align: "right",
+        cell: (jr) => (
+          <span className="font-medium tabular-nums text-foreground">{`${(jr.score * 100).toFixed(0)}%`}</span>
+        ),
+      },
+    ],
+    [t],
+  );
+
   const noOccEvidence = occupations.data?.evidenceCount === 0;
   const noPosEvidence = positions.data?.evidenceCount === 0;
+  const noRoleEvidence = jobRoles.data?.evidenceCount === 0;
 
   return (
     <main data-testid="me-matching-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
@@ -142,6 +175,33 @@ export default function MeMatchingPage() {
           emptyTitle={noPosEvidence ? t("matching.emptyEvidenceTitle") : t("matching.positions.title")}
           emptyDescription={noPosEvidence ? t("matching.emptyEvidenceDesc") : t("matching.positions.emptyDesc")}
           caption={t("matching.positions.title")}
+        />
+      </section>
+
+      <section data-testid="me-matching-job-roles" className="space-y-6">
+        <PageHeader
+          data-testid="me-matching-job-roles-title"
+          title={t("matching.jobRoles.title")}
+          badges={
+            jobRoles.data != null ? (
+              <Badge variant="secondary" data-testid="me-matching-job-roles-count">
+                {t("matching.count", { count: jobRoles.data.total })}
+              </Badge>
+            ) : undefined
+          }
+        />
+        <EntityTable<JobRoleMatch>
+          isLoading={jobRoles.isLoading}
+          isError={jobRoles.isError}
+          errorMessage={t("matching.errorMessage")}
+          rows={jobRoles.data?.items ?? []}
+          rowKey={(jr) => jr.jobRoleId}
+          rowTestId="me-job-role-row"
+          columns={roleColumns}
+          emptyTestId="me-matching-job-roles-empty"
+          emptyTitle={noRoleEvidence ? t("matching.emptyEvidenceTitle") : t("matching.jobRoles.title")}
+          emptyDescription={noRoleEvidence ? t("matching.emptyEvidenceDesc") : t("matching.jobRoles.emptyDesc")}
+          caption={t("matching.jobRoles.title")}
         />
       </section>
     </main>

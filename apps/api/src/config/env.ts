@@ -92,6 +92,14 @@ const EnvSchema = z.object({
   // API never calls Voyage (kNN runs over precomputed pgvector rows), so a
   // missing key does NOT break the server — it only fails the backfill loudly.
   VOYAGE_API_KEY: z.string().min(1).optional(),
+
+  // AI ②·Fase 2 — free-text matching feature flag. Default OFF. When OFF the
+  // GET /v1/matching/search route returns a clean typed 404 (MATCHING_FREETEXT_DISABLED).
+  // When ON the query is embedded AT REQUEST TIME via the injectable Embedder seam
+  // (the SAME seam the backfill uses) — this is the first-ever query-time external
+  // dependency on the serving path, so it stays strictly behind this default-OFF flag
+  // to keep the normal serving path Voyage-free. Requires VOYAGE_API_KEY when ON in prod.
+  MATCHING_FREETEXT_ENABLED: z.coerce.boolean().default(false),
 });
 
 const parsed = EnvSchema.parse(process.env);

@@ -9,7 +9,7 @@
  * of any test that wants to be the last one).
  */
 
-import { buildApp } from "../../src/app.js";
+import { buildApp, type BuildAppOptions } from "../../src/app.js";
 import { loadRolePermissionCache } from "../../src/modules/auth/cache-loader.js";
 import { InMemoryMailer } from "../../src/modules/auth/mailer.js";
 import type { FastifyInstance } from "fastify";
@@ -19,15 +19,18 @@ export interface TestApp {
   mailer: InMemoryMailer;
 }
 
+/** Extra DI overrides a test may pass through to buildApp (mailer is always the InMemoryMailer). */
+export type TestAppOptions = Omit<BuildAppOptions, "authMailer">;
+
 let cacheLoadedOnce = false;
 
-export async function buildTestApp(): Promise<TestApp> {
+export async function buildTestApp(options: TestAppOptions = {}): Promise<TestApp> {
   if (!cacheLoadedOnce) {
     await loadRolePermissionCache();
     cacheLoadedOnce = true;
   }
   const mailer = new InMemoryMailer();
-  const app = await buildApp({ authMailer: mailer });
+  const app = await buildApp({ authMailer: mailer, ...options });
   await app.ready();
   return { app, mailer };
 }

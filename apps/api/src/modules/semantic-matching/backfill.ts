@@ -47,7 +47,15 @@ export async function backfillCorpus(
 
 const log = (o: Record<string, unknown>): void => console.log(JSON.stringify(o));
 
-export async function runBackfill(embedder: Embedder = makeEmbedder()): Promise<void> {
+/** Per-corpus + profile totals returned by a backfill run (also used to shape the reindex API response). */
+export interface BackfillSummary {
+  skills: BackfillStats;
+  jobRoles: BackfillStats;
+  occupations: BackfillStats;
+  profilesWritten: number;
+}
+
+export async function runBackfill(embedder: Embedder = makeEmbedder()): Promise<BackfillSummary> {
   const modelId = embedder.modelId;
   const onBatch = (phase: string) => (done: number, total: number) => log({ phase: "backfill", target: phase, progress: `${done}/${total}` });
 
@@ -71,6 +79,8 @@ export async function runBackfill(embedder: Embedder = makeEmbedder()): Promise<
 
   const profiles = await repo.deriveUserProfiles(pool, modelId);
   log({ phase: "user_profiles", written: profiles });
+
+  return { skills: s1, jobRoles: s2, occupations: s3, profilesWritten: profiles };
 }
 
 // Run when invoked directly (tsx). Closes the pool so the process exits.

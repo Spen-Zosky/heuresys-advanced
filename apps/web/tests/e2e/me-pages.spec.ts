@@ -114,5 +114,12 @@ test.describe("MVP-2a ESS pages — live data", () => {
     const posRows = page.getByTestId("me-position-row");
     await expect(posRows.first()).toBeVisible();
     await expect(posRows.first()).toContainText(/%/);
+
+    // AI ②·Fase 2: the job-roles panel is fed by GET /v1/matching/me/job-roles.
+    // tommaso's profile is cosine-ranked vs the live sys_job_role_embeddings catalog → live matches.
+    await expect(page.getByTestId("me-matching-job-roles")).toBeVisible();
+    const roleRows = page.getByTestId("me-job-role-row");
+    await expect(roleRows.first()).toBeVisible();
+    await expect(roleRows.first()).toContainText(/%/);
   });
 });

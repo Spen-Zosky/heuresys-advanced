@@ -184,6 +184,13 @@
       "colPosition": "Position",
       "colScore": "Role affinity",
       "emptyDesc": "No position matches your profile at the moment."
+    },
+    "jobRoles": {
+      "title": "Compatible roles",
+      "colRole": "Role",
+      "colSeniority": "Seniority",
+      "colScore": "Affinity",
+      "emptyDesc": "No role matches your profile at the moment."
     }
   },
   "positions": {

@@ -166,6 +166,20 @@
     "errorEnroll": "Errore durante l'iscrizione.",
     "enrolledConfirm": "Iscrizione confermata per {{path}}."
   },
+  "matching": {
+    "title": "Occupazioni compatibili",
+    "description": "Le occupazioni ESCO più affini al tuo profilo di competenze.",
+    "count": "{{count}} occupazioni",
+    "colOccupation": "Occupazione",
+    "colIsco": "Codice ISCO",
+    "colScore": "Affinità",
+    "errorMessage": "Impossibile caricare le occupazioni compatibili.",
+    "emptyTitle": "Nessuna occupazione compatibile",
+    "emptyDesc": "Nessuna occupazione corrisponde al tuo profilo al momento.",
+    "emptyEvidenceTitle": "Profilo non ancora analizzabile",
+    "emptyEvidenceDesc": "Aggiungi evidenze di competenza per vedere le occupazioni ESCO compatibili.",
+    "caption": "Occupazioni ESCO compatibili"
+  },
   "positions": {
     "title": "Le mie posizioni",
     "description": "Storico delle tue assegnazioni di posizione.",

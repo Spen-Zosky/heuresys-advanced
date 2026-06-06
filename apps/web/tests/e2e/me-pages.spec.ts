@@ -95,4 +95,17 @@ test.describe("MVP-2a ESS pages — live data", () => {
     await expect(page.getByTestId("me-inbox-page")).toBeVisible();
     await expect(page.getByTestId("me-inbox-count")).toContainText(/\d+\s+notifiche/);
   });
+
+  test("/me/matching shows live ESCO occupation matches", async ({ page }) => {
+    // tommaso.fiore has a real profile embedding (derived_from_evidence_count=2),
+    // so the live kNN endpoint returns ranked ESCO occupation matches.
+    await page.goto("/me/matching");
+    await expect(page.getByTestId("me-matching-page")).toBeVisible();
+    await expect(page.getByTestId("me-matching-title")).toBeVisible();
+    await expect(page.getByTestId("me-matching-count")).toContainText(/\d+\s+occupazioni/);
+    const rows = page.getByTestId("me-match-row");
+    await expect(rows.first()).toBeVisible();
+    // Affinity is rendered as an integer percentage in the right-most column.
+    await expect(rows.first()).toContainText(/%/);
+  });
 });

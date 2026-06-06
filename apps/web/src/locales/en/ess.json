@@ -166,6 +166,20 @@
     "errorEnroll": "Error during enrollment.",
     "enrolledConfirm": "Enrollment confirmed for {{path}}."
   },
+  "matching": {
+    "title": "Compatible occupations",
+    "description": "The ESCO occupations most aligned with your skill profile.",
+    "count": "{{count}} occupations",
+    "colOccupation": "Occupation",
+    "colIsco": "ISCO code",
+    "colScore": "Affinity",
+    "errorMessage": "Unable to load the compatible occupations.",
+    "emptyTitle": "No compatible occupation",
+    "emptyDesc": "No occupation matches your profile at the moment.",
+    "emptyEvidenceTitle": "Profile not analyzable yet",
+    "emptyEvidenceDesc": "Add skill evidence to see compatible ESCO occupations.",
+    "caption": "Compatible ESCO occupations"
+  },
   "positions": {
     "title": "My positions",
     "description": "History of your position assignments.",

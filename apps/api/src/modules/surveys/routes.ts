@@ -1,0 +1,89 @@
+/**
+ * apps/api/src/modules/surveys/routes.ts
+ * /v1/surveys/* — templates + surveys full CRUD; responses read-only (nested + flat).
+ * Reads: requirePermission("surveys:read"). Writes: app.verifyCsrf + surveys:{create,update,delete}.
+ */
+import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import type { FastifyRequest } from "fastify";
+
+import {
+  SurveyTemplateSchema, SurveyTemplateListQuerySchema, SurveyTemplateListResponseSchema,
+  CreateSurveyTemplateBodySchema, UpdateSurveyTemplateBodySchema,
+  SurveySchema, SurveyListQuerySchema, SurveyListResponseSchema,
+  CreateSurveyBodySchema, UpdateSurveyBodySchema,
+  SurveyResponseSchema, SurveyResponseListQuerySchema, SurveyResponseListResponseSchema,
+  SurveyIdParamSchema,
+} from "@heuresys/shared";
+import { surveysService, type ActorContext } from "./service.js";
+import { requirePermission } from "../../middleware/rbac.js";
+import { UnauthorizedError } from "../../errors/index.js";
+
+function actor(req: FastifyRequest): ActorContext {
+  if (!req.user) throw new UnauthorizedError("Authentication required");
+  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
+}
+
+export const surveysRoutes: FastifyPluginAsyncZod = async (app) => {
+  // ── Templates ──
+  app.get("/templates", {
+    preHandler: [requirePermission("surveys:read")],
+    schema: { querystring: SurveyTemplateListQuerySchema, response: { 200: SurveyTemplateListResponseSchema } },
+  }, async (req) => surveysService.listTemplates(actor(req), req.query));
+
+  app.get("/templates/:id", {
+    preHandler: [requirePermission("surveys:read")],
+    schema: { params: SurveyIdParamSchema, response: { 200: SurveyTemplateSchema } },
+  }, async (req) => surveysService.getTemplate(actor(req), req.params.id));
+
+  app.post("/templates", {
+    preHandler: [app.verifyCsrf, requirePermission("surveys:create")],
+    schema: { body: CreateSurveyTemplateBodySchema, response: { 201: SurveyTemplateSchema } },
+  }, async (req, reply) => { reply.code(201).send(await surveysService.createTemplate(actor(req), req.body)); });
+
+  app.patch("/templates/:id", {
+    preHandler: [app.verifyCsrf, requirePermission("surveys:update")],
+    schema: { params: SurveyIdParamSchema, body: UpdateSurveyTemplateBodySchema, response: { 200: SurveyTemplateSchema } },
+  }, async (req) => surveysService.updateTemplate(actor(req), req.params.id, req.body));
+
+  app.delete("/templates/:id", {
+    preHandler: [app.verifyCsrf, requirePermission("surveys:delete")],
+    schema: { params: SurveyIdParamSchema },
+  }, async (req, reply) => { await surveysService.deleteTemplate(actor(req), req.params.id); reply.code(204).send(); });
+
+  // ── Surveys ──
+  app.get("/", {
+    preHandler: [requirePermission("surveys:read")],
+    schema: { querystring: SurveyListQuerySchema, response: { 200: SurveyListResponseSchema } },
+  }, async (req) => surveysService.listSurveys(actor(req), req.query));
+
+  app.get("/:id", {
+    preHandler: [requirePermission("surveys:read")],
+    schema: { params: SurveyIdParamSchema, response: { 200: SurveySchema } },
+  }, async (req) => surveysService.getSurvey(actor(req), req.params.id));
+
+  app.post("/", {
+    preHandler: [app.verifyCsrf, requirePermission("surveys:create")],
+    schema: { body: CreateSurveyBodySchema, response: { 201: SurveySchema } },
+  }, async (req, reply) => { reply.code(201).send(await surveysService.createSurvey(actor(req), req.body)); });
+
+  app.patch("/:id", {
+    preHandler: [app.verifyCsrf, requirePermission("surveys:update")],
+    schema: { params: SurveyIdParamSchema, body: UpdateSurveyBodySchema, response: { 200: SurveySchema } },
+  }, async (req) => surveysService.updateSurvey(actor(req), req.params.id, req.body));
+
+  app.delete("/:id", {
+    preHandler: [app.verifyCsrf, requirePermission("surveys:delete")],
+    schema: { params: SurveyIdParamSchema },
+  }, async (req, reply) => { await surveysService.deleteSurvey(actor(req), req.params.id); reply.code(204).send(); });
+
+  // ── Responses (read-only event log) ──
+  app.get("/:id/responses", {
+    preHandler: [requirePermission("surveys:read")],
+    schema: { params: SurveyIdParamSchema, querystring: SurveyResponseListQuerySchema, response: { 200: SurveyResponseListResponseSchema } },
+  }, async (req) => surveysService.listResponses(actor(req), req.params.id, req.query));
+
+  app.get("/responses/:id", {
+    preHandler: [requirePermission("surveys:read")],
+    schema: { params: SurveyIdParamSchema, response: { 200: SurveyResponseSchema } },
+  }, async (req) => surveysService.getResponse(actor(req), req.params.id));
+};

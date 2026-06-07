@@ -51,11 +51,28 @@ Aperto S968 (scorporo da B-10 chiuso). Le 3 macro-aree HRMS con target schema `s
 
 | Area | Sorgente legacy | Effort | Rischio |
 |---|---|---|---|
-| Surveys/Engagement | `engagement_action_plans`=6 + cluster PULSAR | ~7-9h | MED (schema+module nuovi, 0 test esistenti) |
+| ~~Surveys/Engagement~~ ✅ **DONE S973** | 3 tab importate RTL (templates 5 / surveys 6 / responses 862) + modulo API `/v1/surveys/*` 12 endpoint + RBAC `surveys:{read,create,update,delete}`; mig 000077/078, seed 46, test 9/9. JSONB model sul cluster `engagement_*`. **Resta m2b** (cluster normalizzato `survey_*`/`pulse_checks`, vedi sotto). | — | — |
 | ~~Mentorship~~ ✅ **DONE S970** | 4 tab importate RTL (5/63/150/30) + modulo API `/v1/mentorship/*` 17 endpoint + RBAC; mig 000072/073, seed 45, commit `5f164f2` | — | — |
 | PredictionsML | `model_predictions`/`performance_predictions`=267 + `turnover_risk_scores`=267 + `mv_talent_signals`=270 (derived-analytics) | ~8-10h | MED-HIGH (serve regola di derivazione human-authored) |
 
-**Totale**: ~22-27h / ~3 sessioni dedicate. **Regola d'ingaggio**: ciascuna è `design→spec→ok→piano→implementa` con checkpoint di modellazione (autorità semantica Enzo) + pattern modulo a 7 step + atomic commit + test verde. Selezionabile dal menu session-start come capability. Mappa terminale completa: `docs/kb/SDBI_PHASE2_CLOSURE.md`. Doctrine: ADR-0014 (ACCEPTED).
+**Totale residuo**: ~8-10h / 1 sessione (solo m3 PredictionsML; m1 Mentorship + m2 Surveys shipped). **Regola d'ingaggio**: ciascuna è `design→spec→ok→piano→implementa` con checkpoint di modellazione (autorità semantica Enzo) + pattern modulo a 7 step + atomic commit + test verde. Selezionabile dal menu session-start come capability. Mappa terminale completa: `docs/kb/SDBI_PHASE2_CLOSURE.md`. Doctrine: ADR-0014 (ACCEPTED).
+
+#### B-10b m2b — Surveys/Engagement normalized cluster (follow-up, P3, NON un TODO silente)
+
+Aperto S973 (scorporo esplicito da m2). Il modulo m2 ha importato **solo** il cluster `engagement_*` (modello JSONB: `engagement_surveys`=18 / `engagement_survey_templates`=20 / `engagement_survey_responses`=1327). Il legacy ha un **secondo cluster parallelo normalizzato** non importato (decisione: OUT-OF-SCOPE m2, registrato qui come milestone esplicita). Sorgenti legacy misurate live su VM (`heuresys_platform`, 2026-06-07):
+
+| Tabella legacy | Righe | Note |
+|---|---|---|
+| `survey_responses` | 4482 | response normalizzate (1 riga per answer, non JSONB array) |
+| `pulse_checks` | 1145 | pulse-survey eventi |
+| `survey_questions` | 31 | domande normalizzate (FK a `survey_templates`) |
+| `surveys` | 11 | survey-def cluster normalizzato |
+| `survey_templates` | 9 | template cluster normalizzato |
+| `engagement_pulse_configs` | 3 | config pulse |
+| `engagement_feedback` | 685 | feedback engagement (adiacente, valutare se m2b o feedback-module) |
+| `engagement_action_plans` | 6 | action-plan post-survey (adiacente) |
+
+**Effort stimato**: ~6-8h (schema normalizzato question/answer + bridge ai 3 sys.* di m2 o nuove tab). **Rischio**: MED (modello normalizzato vs JSONB già scelto in m2 → decisione di unificazione semantica = autorità Enzo). **Regola d'ingaggio**: `design→spec→ok→implementa`. **Non è un blocker di m2**: m2 è terminale e live per il cluster `engagement_*`.
 
 ### B-50 — Full reconciliation legacy→advanced (oltre ~49%) — umbrella ADR-0023
 
@@ -200,6 +217,15 @@ I **7** tavoli che restavano `NEEDS_DECISION` nella vista `sys.v_reconciliation_
 - **Vista post-S972**: `NEEDS_DECISION` **7→3** · `NO_SOURCE` **17→21** · `POPULATED` 122 · `EXCLUDE` 2 · `REFERENCE_ONLY` 3 (0 UNCLASSIFIED invariato). Verify: `SELECT resolved_status,count(*) FROM sys.v_reconciliation_status GROUP BY 1 ORDER BY 1`.
 - **Test**: esteso `apps/api/test/reconciliation-registry.integration.test.ts` (+6 assert B-50; 11/11). Fix regressione `reconciliation-f4-bucketc.integration.test.ts` (il prepend del marker B-50 spostava `[F4 NOT-IMPORTABLE` dall'inizio → `LIKE '[F4…'` → `LIKE '%[F4…'`). Reconciliation 9 file/55✓ + brownfield 5 file/29✓; `db:validate` 7/7. Cross-ref dossier `docs/kb/RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md`.
 - **Residuo B-50** = i **3 DEFER** (sbloccabili solo da decisione PM sul bridge `location↔org_unit` / `job→position` o da una Wave-2 che popoli i `position_id`). I 4 NO_SOURCE sono **terminali** (nessun source 1:1 popolato).
+
+**🟢 Aggiornamento S973 (2026-06-07) — B-10b m2 Surveys/Engagement SHIPPED (mig `000077`/`000078`):**
+2ª milestone B-10b chiusa con lo stesso pattern di m1 Mentorship. **Modulo nuovo** `/v1/surveys/*` (12 endpoint: templates CRUD 5 + surveys CRUD 5 + responses read-only 2) su 3 tabelle `sys.*` nuove (schema MANCANTE creato):
+- `sys_engagement_survey_templates` (mutable, trigger updated_at) · `sys_engagement_surveys` (mutable, trigger; questions JSONB, audience_type/status varchar+CHECK) · `sys_engagement_survey_responses` (immutable event log, no updated_at; answers JSONB, subject_user FK).
+- **Import reale RTL** (employee-centric I14, seed `db/seeds/reconciliation/46_engagement_surveys.sql`, baked-VALUES CI-reproducible): templates **5** / surveys **6** / responses **862** (slice RTL del cluster legacy `engagement_*` = 20/18/1327 su 3 tenant; importato solo il tenant RTL `0c54b84a`→`86ba7a65`). **0 subject unresolved** (158/158 distinct responding employees + author survey risolvono via `LEGACY_EMP::`). 0 anonymous rows nel legacy → anon path droppato per v1.
+- **RBAC** `surveys:{read,create,update,delete}` (read=6 HRMS roles; write=PLATFORM_ADMIN/TENANT_ADMIN/HRMS_MANAGER). **Reconciliation registry**: 3 nuove tab classificate `A`/`IMPORT`, risolte `POPULATED` (has_rows). **Test** `surveys.integration.test.ts` 9/9 (RBAC read/write, tenant isolation I5, CRUD, CSRF, live-data 6/5/862, I14 subject resolution).
+- mig `000077` (schema) + `000078` (perms) idempotenti (2° run provato, 0 ERROR, assert `DO $$`). Visibility model = tenant-only (mirror mentorship): non-PLATFORM_ADMIN → own tenant, cross-tenant → 404.
+- **Resta m2b** (cluster normalizzato `survey_*`/`pulse_checks` = OUT-OF-SCOPE m2, registrato come milestone esplicita sopra, NON un TODO silente).
+- **Pending prossima sessione**: ② P1b/P2, **#2·m2b** Surveys normalized, #2·m3 PredictionsML, #7 MVP-4, #8 cap ③④⑤.
 
 ## P3 — Infra / robustezza
 

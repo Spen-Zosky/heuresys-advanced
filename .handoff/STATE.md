@@ -21,7 +21,6 @@ Discovery 9-agenti evidence-based → chiuse **tutte e 9** le action del menu (6
 - **Cap ⑤**: parto da ESCO (open-data, low-legal-risk) — dai il sign-off ToS per quella sorgente?
 - **Free-text matching** (`/v1/matching/search`): abilitare in PROD (`MATCHING_FREETEXT_ENABLED=true` + `VOYAGE_API_KEY` sulla VM, oggi solo locale) o tenere OFF?
 - **EMAIL_OTP**: in PROD dietro enrollment opt-in; serve un mailer reale configurato per l'invio email vero — lo configuriamo?
-- **D-16 hygiene** `analytics.d.ts` (stray tracked in `dist/` gitignored): la untracko (`git rm --cached`)?
 
 ## Verification (next session)
 ```bash

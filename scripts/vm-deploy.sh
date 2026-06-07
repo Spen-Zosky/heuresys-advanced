@@ -51,9 +51,18 @@ log "deps: pnpm install --frozen-lockfile"
 cd "$REPO_DIR"
 pnpm install --frozen-lockfile
 
-# 3. Production builds: API (tsup bundle → node dist/server.js) + web (next build).
-#    Web NEXT_PUBLIC_* are inlined at BUILD time and MUST match the systemd unit's
-#    values — derived here from PUBLIC_HOST/API_PORT.
+# 3. Production builds: shared (clean) → API (tsup bundle → node dist/server.js) → web (next build).
+#    @heuresys/shared MUST be built BEFORE api/web because both typecheck against its
+#    dist/*.d.ts. `pnpm install` alone does NOT reliably rebuild it: the incremental
+#    tsc tsbuildinfo can skip re-emitting .d.ts files that were removed from disk (e.g.
+#    a dist file untracked from git), leaving the web typecheck unable to resolve shared
+#    types ("has no exported member ..."). Force a CLEAN shared build to avoid that.
+log "build: clean @heuresys/shared (rm dist + tsbuildinfo, then tsc)"
+rm -rf "$REPO_DIR/packages/shared/dist" "$REPO_DIR/packages/shared/tsconfig.tsbuildinfo"
+pnpm --filter @heuresys/shared build
+
+# Web NEXT_PUBLIC_* are inlined at BUILD time and MUST match the systemd unit's
+# values — derived here from PUBLIC_HOST/API_PORT.
 log "build: production api (tsup) + web (next build)"
 pnpm --filter @heuresys/api build
 NODE_ENV=production \

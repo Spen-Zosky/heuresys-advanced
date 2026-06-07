@@ -31,7 +31,7 @@ Each capability is sized on: **use-cases** (grounded in the real domain + data),
 
 - **Use-cases**: attrition/flight-risk prediction, skill-gap forecasting, succession-readiness scoring, compensation-anomaly detection, org-network analysis (centrality/silos on the graph). Legacy had `model_predictions`/`performance_predictions` (267 rows, NOT imported) — evidence the domain expects this.
 - **Already exists**: rich feature data (skills/positions/KPI/assessment/attendance/comp) + the visualization graph; `pg_trgm` for fuzzy matching.
-- **Gap**: an analytics/ML pipeline (feature extraction → model → scored outputs into `sys_*_scores` tables that today are empty cat(ii) targets).
+- **Gap**: an analytics/ML pipeline (feature extraction → human-authored derivation rule → scored outputs into `sys_*_scores` tables). NB (S972): those score tables (`sys_talent_scores` 154, `sys_readiness_scores` 90, `sys_succession_scores` 90, `sys_employee_position_fit_scores` 146) are NOT empty — they hold **legacy-seed** values (bucket C/NEEDS_DECISION); cap③ = recompute them **in-platform** from live `sys.*`, distinct from the imported PredictionsML read-model (`/v1/predictions/*`, bucket A). See `2026-06-07-data-mining-design.md`.
 - **Note**: heavy overlap with ② (AI) and ① (BI). "Descriptive" = BI; "predictive/inferential" = data-mining; several use-cases (attrition, succession scoring) are AI-adjacent. Best treated **after** BI + AI substrate exist (it consumes both).
 - **Effort**: **M-L**. **Risk**: medium (model quality, explainability). **Value**: high but depends on BI/AI foundations.
 - **Recommendation**: sequence **after** ①/②; revisit scope once their substrate is in place (avoids building a 3rd parallel analytics stack).
@@ -80,10 +80,10 @@ All 5 approved (Enzo, S958). Sequence (CLI-decided): **① BI → ② AI → ③
 
 | # | Capability | Design/spec | Plan | Implementation |
 |---|---|---|---|---|
-| ① | BI / analytics | ✅ `2026-06-03-bi-analytics-design.md` (approved) | ✅ `2026-06-03-bi-analytics-phase1.md` | ✅ **P1 API done** (analytics module: workforce+kpi rollups, mig 000057, 6/6 tests, full suite 582✓); P1b frontend + P2/P3 next |
-| ② | AI semantic matching | ✅ `2026-06-03-ai-semantic-matching-design.md` | pending Enzo review | — |
-| ③ | data-mining | — | — | — |
-| ④ | CMS | — | — | — |
-| ⑤ | scraping (official sources) | — | — | — |
+| ① | BI / analytics | ✅ `2026-06-03-bi-analytics-design.md` (approved) | ✅ `2026-06-03-bi-analytics-phase1.md` | ✅ **COMPLETE** (P1+P1b+P2+P3): 8 `/v1/analytics/*` views — workforce/kpi/attendance/compensation/skills/org-network/overtime/skills-by-category — + pages (mig 000057..000074) |
+| ② | AI semantic matching | ✅ `2026-06-03-ai-semantic-matching-design.md` (approved; VOYAGE_API_KEY unblocked S971) | ✅ `2026-06-06-ai-semantic-matching-p1.md` | ✅ **P1+P1b+P2+Fase3 SHIPPED + LIVE PROD** — `/v1/matching/*` (me/occupations·positions·job-roles, users/:id/*, skills/:id/similar, users/:id/similar, search [flag-gated], reindex); pgvector substrate populated |
+| ③ | data-mining | ✅ `2026-06-07-data-mining-design.md` (S972 — gate: Enzo) | — | — (dep. on ①/② now largely satisfied) |
+| ④ | CMS | ✅ `2026-06-07-cms-design.md` (S972 — gate: Enzo) | — | — |
+| ⑤ | scraping (official sources) | ✅ `2026-06-07-scraping-design.md` (S972 — gate: Enzo) | — | — |
 
-**Next**: Enzo reviews the AI spec; in parallel CLI designs ① BI (the implementation-lead). Each capability advances design → spec → review → plan → implement. The one external decision pending is the **Voyage API key** for AI's embedding substrate (see AI spec §4).
+**Next (S972)**: ① BI and ② AI are SHIPPED (② live in PROD). Capabilities ③④⑤ now have design specs at the **Enzo gate** (`2026-06-07-{data-mining,cms,scraping}-design.md`) — each carries its open decisions for Enzo; on approval each advances to plan → implementation (multi-session). Recommended next implementation slice when Enzo greenlights: **③ data-mining** (substrate ready) per the sequence above.

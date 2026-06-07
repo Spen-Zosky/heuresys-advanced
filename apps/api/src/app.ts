@@ -100,6 +100,7 @@ import { semanticMatchingRoutes } from "./modules/semantic-matching/routes.js";
 import { insightsRoutes } from "./modules/insights/routes.js";
 import { referenceSyncRoutes } from "./modules/reference-sync/routes.js";
 import type { ReferenceSyncDeps } from "./modules/reference-sync/service.js";
+import { contentRoutes } from "./modules/content/routes.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
@@ -321,6 +322,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(semanticMatchingRoutes, { prefix: "/v1/matching", deps: options.matchingDeps });
   await app.register(insightsRoutes, { prefix: "/v1/insights" });
   await app.register(referenceSyncRoutes, { prefix: "/v1/reference-sync", deps: options.referenceSyncDeps });
+  await app.register(contentRoutes, { prefix: "/v1/content" });
 
   return app;
 }

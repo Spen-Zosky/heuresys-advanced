@@ -76,3 +76,4 @@ export * from "./schemas/predictions.js";
 export * from "./schemas/semantic-matching.js";
 export * from "./schemas/insights.js";
 export * from "./schemas/reference-sync.js";
+export * from "./schemas/content.js";

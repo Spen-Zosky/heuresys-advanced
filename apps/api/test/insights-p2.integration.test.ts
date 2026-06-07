@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { pool } from "../src/db/client.js";
 
 // Cap③ data-mining P2 — succession-readiness (slice B) + skill-gap (slice C).
 // In-platform-derived over the ② embedding substrate; admin/manager-only (insights:view,
@@ -102,6 +103,27 @@ describe("insights API P2 (cap③ succession-readiness + skill-gap)", () => {
     expect(it0.value).toBeLessThanOrEqual(100);
     const keys = it0.features.map((f) => f.feature).sort();
     expect(keys).toEqual(["evidence_sparsity", "role_fit_gap"]);
+  });
+
+  it("D-18: recompute is bounded — one active row per (user[,position]), no accumulation", async () => {
+    const stat = async (sql: string) => Number((await pool.query<{ n: string }>(sql)).rows[0]!.n);
+    // slice B: one row per (user, target position); a 2nd recompute must not grow the table
+    await recompute(admin, "succession-readiness");
+    const srRows1 = await stat(`SELECT count(*)::int AS n FROM sys.sys_succession_readiness_scores`);
+    const srKeys1 = await stat(
+      `SELECT count(DISTINCT (succession_readiness_score_user_id, succession_readiness_score_position_id))::int AS n
+         FROM sys.sys_succession_readiness_scores`,
+    );
+    expect(srRows1).toBe(srKeys1);
+    await recompute(admin, "succession-readiness");
+    expect(await stat(`SELECT count(*)::int AS n FROM sys.sys_succession_readiness_scores`)).toBe(srRows1);
+    // slice C: one row per user
+    await recompute(admin, "skill-gap");
+    const sgRows1 = await stat(`SELECT count(*)::int AS n FROM sys.sys_skill_gap_scores`);
+    const sgUsers1 = await stat(`SELECT count(DISTINCT skill_gap_score_user_id)::int AS n FROM sys.sys_skill_gap_scores`);
+    expect(sgRows1).toBe(sgUsers1);
+    await recompute(admin, "skill-gap");
+    expect(await stat(`SELECT count(*)::int AS n FROM sys.sys_skill_gap_scores`)).toBe(sgRows1);
   });
 
   it("I5: TENANT_ADMIN sees only its own tenant's scores", async () => {

@@ -6,8 +6,8 @@
  *     live sys.* (tenure, attendance/overtime, KPI achievement, engagement-survey,
  *     comp-band position, promotion recency). Returns RAW values; null = no data
  *     for that subject (the service drops it + re-normalizes the weights).
- *   upsertFlightRiskScores — append the recomputed scores (latest-wins via the
- *     *_user_idx DESC index; no destructive delete).
+ *   upsertFlightRiskScores — replace the recomputed subjects' scores (delete-then-
+ *     insert in one atomic CTE → one active row per subject; bounded table, D-18).
  *   readFlightRiskScores / readUserFlightRiskScore — active (latest) score per
  *     subject, scope-filtered (I5 = FK + middleware, never RLS).
  *
@@ -194,22 +194,31 @@ export async function extractFlightRiskFeatures(
 }
 
 /**
- * Append the recomputed scores in one INSERT (all rows share the transaction's
- * now() → a single computed_at cohort). Latest-wins on read; no destructive delete.
+ * Replace the recomputed subjects' scores in ONE atomic statement: a data-modifying
+ * CTE deletes any prior rows for exactly the userIds being re-scored, then inserts the
+ * fresh cohort. This bounds the table to one active row per subject (D-18 — the old
+ * append-only INSERT grew the table monotonically on every recompute/test run). Scope-
+ * safe: only the recomputed subjects' rows are touched (a TEAM/TENANT recompute never
+ * deletes another scope's rows). Atomic: a single statement runs on one connection even
+ * when `q` is the Pool (no explicit transaction needed).
  */
 export async function upsertFlightRiskScores(
   q: DbConnector,
   rows: ScoreToStore[],
 ): Promise<number> {
   if (rows.length === 0) return 0;
-  const params: unknown[] = [];
+  const userIds = [...new Set(rows.map((r) => r.userId))];
+  const params: unknown[] = [userIds]; // $1 = recomputed userIds (deleted, then re-inserted below)
   const tuples = rows.map((r, i) => {
-    const b = i * 6;
+    const b = 1 + i * 6; // tuple columns start at $2 ($1 is the userIds array)
     params.push(r.tenantId, r.userId, r.value, r.band, r.modelVersion, JSON.stringify(r.payload));
     return `($${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}, $${b + 6}::jsonb)`;
   });
   await q.query(
-    `INSERT INTO sys.sys_flight_risk_scores
+    `WITH del AS (
+       DELETE FROM sys.sys_flight_risk_scores WHERE flight_risk_score_user_id = ANY($1::uuid[])
+     )
+     INSERT INTO sys.sys_flight_risk_scores
        (flight_risk_score_tenant_id, flight_risk_score_user_id, flight_risk_score_value,
         flight_risk_score_band, flight_risk_score_model_version, flight_risk_score_payload)
      VALUES ${tuples.join(", ")}`,
@@ -461,17 +470,24 @@ export async function extractSkillGapFeatures(
   }));
 }
 
-// ── Upserts (append-with-latest-wins) ──
+// ── Upserts (delete-then-insert per subject → bounded; D-18) ──
+// Same atomic delete-then-insert CTE as flight-risk. For slice B, deleting ALL of a
+// subject's prior rows (not just the re-inserted (user,position) pairs) is required so a
+// changed top-N candidate set leaves no stale (user,position) row behind.
 export async function upsertReadinessScores(q: DbConnector, rows: SubjectPositionScoreToStore[]): Promise<number> {
   if (rows.length === 0) return 0;
-  const params: unknown[] = [];
+  const userIds = [...new Set(rows.map((r) => r.userId))];
+  const params: unknown[] = [userIds];
   const tuples = rows.map((r, i) => {
-    const b = i * 7;
+    const b = 1 + i * 7;
     params.push(r.tenantId, r.userId, r.positionId, r.value, r.category, r.modelVersion, JSON.stringify(r.payload));
     return `($${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}, $${b + 6}, $${b + 7}::jsonb)`;
   });
   await q.query(
-    `INSERT INTO sys.sys_succession_readiness_scores
+    `WITH del AS (
+       DELETE FROM sys.sys_succession_readiness_scores WHERE succession_readiness_score_user_id = ANY($1::uuid[])
+     )
+     INSERT INTO sys.sys_succession_readiness_scores
        (succession_readiness_score_tenant_id, succession_readiness_score_user_id, succession_readiness_score_position_id,
         succession_readiness_score_value, succession_readiness_score_horizon, succession_readiness_score_model_version, succession_readiness_score_payload)
      VALUES ${tuples.join(", ")}`,
@@ -482,14 +498,18 @@ export async function upsertReadinessScores(q: DbConnector, rows: SubjectPositio
 
 export async function upsertSkillGapScores(q: DbConnector, rows: SubjectPositionScoreToStore[]): Promise<number> {
   if (rows.length === 0) return 0;
-  const params: unknown[] = [];
+  const userIds = [...new Set(rows.map((r) => r.userId))];
+  const params: unknown[] = [userIds];
   const tuples = rows.map((r, i) => {
-    const b = i * 7;
+    const b = 1 + i * 7;
     params.push(r.tenantId, r.userId, r.positionId, r.value, r.category, r.modelVersion, JSON.stringify(r.payload));
     return `($${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}, $${b + 6}, $${b + 7}::jsonb)`;
   });
   await q.query(
-    `INSERT INTO sys.sys_skill_gap_scores
+    `WITH del AS (
+       DELETE FROM sys.sys_skill_gap_scores WHERE skill_gap_score_user_id = ANY($1::uuid[])
+     )
+     INSERT INTO sys.sys_skill_gap_scores
        (skill_gap_score_tenant_id, skill_gap_score_user_id, skill_gap_score_position_id,
         skill_gap_score_value, skill_gap_score_segment, skill_gap_score_model_version, skill_gap_score_payload)
      VALUES ${tuples.join(", ")}`,

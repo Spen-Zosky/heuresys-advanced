@@ -147,6 +147,23 @@ describe("insights API (cap③ flight-risk)", () => {
     expect(after.band).toBe(top.band);
   });
 
+  it("D-18: recompute is bounded (delete-then-insert) — one active row per subject, no accumulation", async () => {
+    const stats = async () => {
+      const r = await pool.query<{ rows: string; users: string }>(
+        `SELECT count(*)::int AS rows, count(DISTINCT flight_risk_score_user_id)::int AS users
+           FROM sys.sys_flight_risk_scores`,
+      );
+      return { rows: Number(r.rows[0]!.rows), users: Number(r.rows[0]!.users) };
+    };
+    expect((await recompute(admin)).statusCode).toBe(200);
+    const s1 = await stats();
+    expect(s1.rows).toBe(s1.users); // exactly one active row per subject — no stale cohorts
+    expect((await recompute(admin)).statusCode).toBe(200);
+    const s2 = await stats();
+    expect(s2.rows).toBe(s1.rows); // a 2nd full recompute does NOT grow the table
+    expect(s2.rows).toBe(s2.users);
+  });
+
   it("single subject: 404 for an unknown user id", async () => {
     const r = await suite.app.inject({
       method: "GET", url: "/v1/insights/users/00000000-0000-0000-0000-000000000000/flight-risk",

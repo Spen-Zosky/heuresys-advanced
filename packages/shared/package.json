@@ -286,6 +286,10 @@
     "./schemas/semantic-matching": {
       "types": "./dist/schemas/semantic-matching.d.ts",
       "default": "./src/schemas/semantic-matching.ts"
+    },
+    "./schemas/insights": {
+      "types": "./dist/schemas/insights.d.ts",
+      "default": "./src/schemas/insights.ts"
     }
   },
   "scripts": {

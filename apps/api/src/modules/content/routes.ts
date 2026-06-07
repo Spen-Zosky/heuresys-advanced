@@ -22,6 +22,7 @@ import {
   ContentCategoryUpdateSchema,
   ContentIdParamSchema,
   ContentCategoryIdParamSchema,
+  ContentVersionRestoreParamSchema,
 } from "@heuresys/shared";
 import { contentService, type ActorContext } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -88,5 +89,32 @@ export const contentRoutes: FastifyPluginAsyncZod = async (app) => {
     "/:id",
     { preHandler: [app.verifyCsrf, requirePermission("content:delete")], schema: { params: ContentIdParamSchema, response: { 200: DeleteDocResponse } } },
     async (req) => contentService.deleteDocument(actor(req), req.params.id),
+  );
+
+  /* --- P2: version restore + publish-workflow --- */
+  app.post(
+    "/:id/versions/:versionId/restore",
+    { preHandler: [app.verifyCsrf, requirePermission("content:update")], schema: { params: ContentVersionRestoreParamSchema, response: { 200: ContentDocumentSchema } } },
+    async (req) => contentService.restoreVersion(actor(req), req.params.id, req.params.versionId),
+  );
+  app.post(
+    "/:id/submit-for-review",
+    { preHandler: [app.verifyCsrf, requirePermission("content:update")], schema: { params: ContentIdParamSchema, response: { 200: ContentDocumentSchema } } },
+    async (req) => contentService.submitForReview(actor(req), req.params.id),
+  );
+  app.post(
+    "/:id/return-to-draft",
+    { preHandler: [app.verifyCsrf, requirePermission("content:publish")], schema: { params: ContentIdParamSchema, response: { 200: ContentDocumentSchema } } },
+    async (req) => contentService.returnToDraft(actor(req), req.params.id),
+  );
+  app.post(
+    "/:id/publish",
+    { preHandler: [app.verifyCsrf, requirePermission("content:publish")], schema: { params: ContentIdParamSchema, response: { 200: ContentDocumentSchema } } },
+    async (req) => contentService.publishDocument(actor(req), req.params.id),
+  );
+  app.post(
+    "/:id/unpublish",
+    { preHandler: [app.verifyCsrf, requirePermission("content:publish")], schema: { params: ContentIdParamSchema, response: { 200: ContentDocumentSchema } } },
+    async (req) => contentService.unpublishDocument(actor(req), req.params.id),
   );
 };

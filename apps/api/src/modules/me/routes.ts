@@ -27,9 +27,12 @@ import {
   MeInterfacesResponseSchema,
   UserPreferenceSchema, UpdateUserPreferenceBodySchema,
   MyTeamsResponseSchema,
+  ContentDocumentListResponseSchema, ContentDocumentDetailResponseSchema,
+  MeContentFilterSchema, ContentIdParamSchema,
 } from "@heuresys/shared";
 import { meService, type SelfActor } from "./service.js";
 import { teamsService } from "../teams/service.js";
+import { contentService } from "../content/service.js";
 import { requirePermission, userPermissionCodes } from "../../middleware/rbac.js";
 import { UnauthorizedError } from "../../errors/index.js";
 
@@ -177,4 +180,17 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
       roles: req.user.roles,
     });
   });
+
+  // ESS knowledge base (cap④ CMS P2) — published, tenant-scoped content the caller can read.
+  // Self-scoped (own tenant); delegates to the content service, which owns the table + the
+  // published-only/effective-window filter. Drafts are never visible here.
+  app.get("/content", {
+    preHandler: [requirePermission("me:content:read")],
+    schema: { querystring: MeContentFilterSchema, response: { 200: ContentDocumentListResponseSchema } },
+  }, async (req) => contentService.listPublishedForMe(selfActor(req).tenantId, req.query));
+
+  app.get("/content/:id", {
+    preHandler: [requirePermission("me:content:read")],
+    schema: { params: ContentIdParamSchema, response: { 200: ContentDocumentDetailResponseSchema } },
+  }, async (req) => contentService.getPublishedForMe(selfActor(req).tenantId, req.params.id));
 };

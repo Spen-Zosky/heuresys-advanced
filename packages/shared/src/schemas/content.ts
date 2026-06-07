@@ -144,3 +144,14 @@ export type ContentDocumentDetailResponse = z.infer<typeof ContentDocumentDetail
 
 export const ContentIdParamSchema = z.object({ id: z.uuid() });
 export const ContentCategoryIdParamSchema = z.object({ id: z.uuid() });
+/** P2: restore an old version → append a copy + repoint head. */
+export const ContentVersionRestoreParamSchema = z.object({ id: z.uuid(), versionId: z.uuid() });
+
+/** P2 ESS read filter (/v1/me/content) — published-only is enforced server-side. */
+export const MeContentFilterSchema = z.object({
+  categoryId: z.uuid().optional(),
+  q: z.string().min(1).max(255).optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
+  offset: z.coerce.number().int().min(0).optional().default(0),
+});
+export type MeContentFilter = z.infer<typeof MeContentFilterSchema>;

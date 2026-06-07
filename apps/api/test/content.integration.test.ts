@@ -163,4 +163,101 @@ describe("content API (cap④ CMS)", () => {
     // gone
     expect((await suite.app.inject({ method: "GET", url: `/v1/content/${created.documentId}`, headers: { cookie: ch(author.cookies) } })).statusCode).toBe(404);
   });
+
+  /* --- P2: restore + publish-workflow + ESS read --- */
+
+  it("P2 restore: restoring an old version appends a copy + repoints the head (history immutable)", async () => {
+    const created = (await suite.app.inject({
+      method: "POST", url: "/v1/content", headers: jhdr(author),
+      payload: { title: `${PFX} Restorable`, body: "v1 body" },
+    })).json() as { documentId: string; currentVersionId: string };
+    const id = created.documentId;
+    const v1Id = created.currentVersionId;
+    await suite.app.inject({ method: "PATCH", url: `/v1/content/${id}`, headers: jhdr(author), payload: { body: "v2 body" } });
+
+    const r = await suite.app.inject({ method: "POST", url: `/v1/content/${id}/versions/${v1Id}/restore`, headers: chdr(author) });
+    expect(r.statusCode).toBe(200);
+    const after = r.json() as { body: string; currentVersionId: string };
+    expect(after.body).toBe("v1 body");             // head content matches the restored version
+    expect(after.currentVersionId).not.toBe(v1Id);  // a NEW version, history not mutated
+
+    const vers = (await suite.app.inject({ method: "GET", url: `/v1/content/${id}/versions`, headers: { cookie: ch(author.cookies) } })).json() as { total: number };
+    expect(vers.total).toBe(3);                      // v1 + v2 + restored v3
+  });
+
+  it("P2 publish-workflow: publish → published, unpublish → draft, double-publish/unpublish → 409", async () => {
+    const id = ((await suite.app.inject({ method: "POST", url: "/v1/content", headers: jhdr(author), payload: { title: `${PFX} Publishable`, body: "x" } })).json() as { documentId: string }).documentId;
+
+    const pub = await suite.app.inject({ method: "POST", url: `/v1/content/${id}/publish`, headers: chdr(author) });
+    expect(pub.statusCode).toBe(200);
+    const pd = pub.json() as { status: string; publishedAt: string | null; publishedByUserId: string | null };
+    expect(pd.status).toBe("published");
+    expect(pd.publishedAt).not.toBeNull();
+    expect(pd.publishedByUserId).not.toBeNull();
+
+    const again = await suite.app.inject({ method: "POST", url: `/v1/content/${id}/publish`, headers: chdr(author) });
+    expect(again.statusCode).toBe(409);
+    expect((again.json() as { error: { code: string } }).error.code).toBe("ALREADY_PUBLISHED");
+
+    const unp = await suite.app.inject({ method: "POST", url: `/v1/content/${id}/unpublish`, headers: chdr(author) });
+    expect(unp.statusCode).toBe(200);
+    const ud = unp.json() as { status: string; publishedAt: string | null };
+    expect(ud.status).toBe("draft");
+    expect(ud.publishedAt).toBeNull();
+
+    const unp2 = await suite.app.inject({ method: "POST", url: `/v1/content/${id}/unpublish`, headers: chdr(author) });
+    expect(unp2.statusCode).toBe(409);
+    expect((unp2.json() as { error: { code: string } }).error.code).toBe("NOT_PUBLISHED");
+  });
+
+  it("P2 publish RBAC: content:publish required — MANAGER (read-only) → 403", async () => {
+    const id = ((await suite.app.inject({ method: "POST", url: "/v1/content", headers: jhdr(author), payload: { title: `${PFX} MgrPub`, body: "x" } })).json() as { documentId: string }).documentId;
+    expect((await suite.app.inject({ method: "POST", url: `/v1/content/${id}/publish`, headers: chdr(manager) })).statusCode).toBe(403);
+  });
+
+  it("P2 in_review chain: draft → submit → in_review → publish; reviewer can return-to-draft", async () => {
+    const id = ((await suite.app.inject({ method: "POST", url: "/v1/content", headers: jhdr(author), payload: { title: `${PFX} ReviewFlow`, body: "x" } })).json() as { documentId: string }).documentId;
+
+    const sub = await suite.app.inject({ method: "POST", url: `/v1/content/${id}/submit-for-review`, headers: chdr(author) });
+    expect(sub.statusCode).toBe(200);
+    expect((sub.json() as { status: string }).status).toBe("in_review");
+    // submit again (not a draft) → 409
+    expect((await suite.app.inject({ method: "POST", url: `/v1/content/${id}/submit-for-review`, headers: chdr(author) })).statusCode).toBe(409);
+
+    const ret = await suite.app.inject({ method: "POST", url: `/v1/content/${id}/return-to-draft`, headers: chdr(author) });
+    expect(ret.statusCode).toBe(200);
+    expect((ret.json() as { status: string }).status).toBe("draft");
+    // return-to-draft when already a draft → 409
+    expect((await suite.app.inject({ method: "POST", url: `/v1/content/${id}/return-to-draft`, headers: chdr(author) })).statusCode).toBe(409);
+
+    // resubmit then publish from in_review
+    await suite.app.inject({ method: "POST", url: `/v1/content/${id}/submit-for-review`, headers: chdr(author) });
+    const pub = await suite.app.inject({ method: "POST", url: `/v1/content/${id}/publish`, headers: chdr(author) });
+    expect(pub.statusCode).toBe(200);
+    expect((pub.json() as { status: string }).status).toBe("published");
+  });
+
+  it("P2 workflow RBAC: submit needs content:update, return needs content:publish — MANAGER lacks both → 403", async () => {
+    const id = ((await suite.app.inject({ method: "POST", url: "/v1/content", headers: jhdr(author), payload: { title: `${PFX} SoD`, body: "x" } })).json() as { documentId: string }).documentId;
+    expect((await suite.app.inject({ method: "POST", url: `/v1/content/${id}/submit-for-review`, headers: chdr(manager) })).statusCode).toBe(403);
+    expect((await suite.app.inject({ method: "POST", url: `/v1/content/${id}/return-to-draft`, headers: chdr(manager) })).statusCode).toBe(403);
+  });
+
+  it("P2 ESS: /v1/me/content shows the tenant's PUBLISHED docs, never drafts (no leak)", async () => {
+    const pubId = ((await suite.app.inject({ method: "POST", url: "/v1/content", headers: jhdr(author), payload: { title: `${PFX} ESS Published`, body: "visible" } })).json() as { documentId: string }).documentId;
+    await suite.app.inject({ method: "POST", url: `/v1/content/${pubId}/publish`, headers: chdr(author) });
+    const draftId = ((await suite.app.inject({ method: "POST", url: "/v1/content", headers: jhdr(author), payload: { title: `${PFX} ESS Draft`, body: "hidden" } })).json() as { documentId: string }).documentId;
+
+    // plainUser (USER, same RTL tenant as the author) reads the ESS knowledge base.
+    const list = await suite.app.inject({ method: "GET", url: "/v1/me/content?limit=200", headers: { cookie: ch(plainUser.cookies) } });
+    expect(list.statusCode).toBe(200);
+    const items = (list.json() as { items: { documentId: string; status: string }[] }).items;
+    expect(items.some((d) => d.documentId === pubId)).toBe(true);      // published visible
+    expect(items.some((d) => d.documentId === draftId)).toBe(false);   // draft hidden
+    expect(items.every((d) => d.status === "published")).toBe(true);   // only ever published
+
+    // ESS detail: a draft → 404 (no leak), the published one → 200
+    expect((await suite.app.inject({ method: "GET", url: `/v1/me/content/${draftId}`, headers: { cookie: ch(plainUser.cookies) } })).statusCode).toBe(404);
+    expect((await suite.app.inject({ method: "GET", url: `/v1/me/content/${pubId}`, headers: { cookie: ch(plainUser.cookies) } })).statusCode).toBe(200);
+  });
 });

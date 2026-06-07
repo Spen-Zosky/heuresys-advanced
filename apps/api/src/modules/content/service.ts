@@ -7,7 +7,7 @@
  */
 import { pool } from "../../db/client.js";
 import type { RoleCode } from "../../config/constants.js";
-import { NotFoundError, ForbiddenError } from "../../errors/index.js";
+import { NotFoundError, ForbiddenError, ConflictError } from "../../errors/index.js";
 import type {
   ContentBodyFormat,
   ContentCategory,
@@ -98,6 +98,70 @@ export const contentService = {
     const r = await repo.deleteDocument(buildScope(a), id);
     if (!r) throw new NotFoundError("Content document");
     return { outcome: r };
+  },
+
+  /* --- P2: version restore + publish-workflow --- */
+
+  async restoreVersion(a: ActorContext, docId: string, versionId: string): Promise<ContentDocument> {
+    const doc = await repo.restoreVersion(buildScope(a), actorRef(a), docId, versionId);
+    if (!doc) throw new NotFoundError("Content document or version");
+    return toDoc(doc);
+  },
+
+  /** draft|in_review|archived → published (stamps published_at/by). Already-published → 409. */
+  async publishDocument(a: ActorContext, id: string): Promise<ContentDocument> {
+    const cur = await repo.findDocumentById(pool, buildScope(a), id);
+    if (!cur) throw new NotFoundError("Content document");
+    if (cur.status === "published") throw new ConflictError("Document is already published", "ALREADY_PUBLISHED");
+    const updated = await repo.setDocumentStatusById(pool, id, "published", { publishedByUserId: a.userId });
+    if (!updated) throw new NotFoundError("Content document");
+    return toDoc(updated);
+  },
+
+  /** published → draft (clears the publish stamp). Non-published → 409. */
+  async unpublishDocument(a: ActorContext, id: string): Promise<ContentDocument> {
+    const cur = await repo.findDocumentById(pool, buildScope(a), id);
+    if (!cur) throw new NotFoundError("Content document");
+    if (cur.status !== "published") throw new ConflictError("Document is not published", "NOT_PUBLISHED");
+    const updated = await repo.setDocumentStatusById(pool, id, "draft", { clearPublished: true });
+    if (!updated) throw new NotFoundError("Content document");
+    return toDoc(updated);
+  },
+
+  /** draft → in_review (the author submits for review). content:update. */
+  async submitForReview(a: ActorContext, id: string): Promise<ContentDocument> {
+    const cur = await repo.findDocumentById(pool, buildScope(a), id);
+    if (!cur) throw new NotFoundError("Content document");
+    if (cur.status !== "draft") throw new ConflictError("Only a draft can be submitted for review", "INVALID_STATE_TRANSITION");
+    const updated = await repo.setDocumentStatusById(pool, id, "in_review", {});
+    if (!updated) throw new NotFoundError("Content document");
+    return toDoc(updated);
+  },
+
+  /** in_review → draft (the reviewer returns it to the author). content:publish. */
+  async returnToDraft(a: ActorContext, id: string): Promise<ContentDocument> {
+    const cur = await repo.findDocumentById(pool, buildScope(a), id);
+    if (!cur) throw new NotFoundError("Content document");
+    if (cur.status !== "in_review") throw new ConflictError("Only an in-review document can be returned to draft", "INVALID_STATE_TRANSITION");
+    const updated = await repo.setDocumentStatusById(pool, id, "draft", {});
+    if (!updated) throw new NotFoundError("Content document");
+    return toDoc(updated);
+  },
+
+  /* --- P2: ESS read surface (published-only, tenant-scoped; consumed by /v1/me/content) --- */
+
+  async listPublishedForMe(tenantId: string | null, filter: { q?: string; categoryId?: string; limit: number; offset: number }): Promise<ContentDocumentListResponse> {
+    if (!tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
+    const { items, total } = await repo.listPublishedForTenant(pool, tenantId, filter);
+    return { items: items.map(toDoc), total };
+  },
+
+  async getPublishedForMe(tenantId: string | null, id: string): Promise<ContentDocumentDetailResponse> {
+    if (!tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
+    const doc = await repo.findPublishedByIdForTenant(pool, tenantId, id);
+    if (!doc) throw new NotFoundError("Content document");
+    const currentVersion = doc.currentVersionId ? await repo.findVersionById(pool, doc.currentVersionId) : null;
+    return { document: toDoc(doc), currentVersion: currentVersion ? toVer(currentVersion) : null };
   },
 
   async listVersions(a: ActorContext, id: string): Promise<ContentVersionListResponse> {

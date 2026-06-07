@@ -397,3 +397,108 @@ export async function deleteDocument(scope: ScopeFilter, id: string): Promise<"a
     return "deleted";
   });
 }
+
+/* --- P2: restore / publish-workflow / ESS read ----------------------------- */
+
+/**
+ * Restore an old version: append a NEW version copying the source version's content
+ * (history is never mutated) + repoint the head. Returns null if the document is out
+ * of scope OR the version does not belong to it (→ 404).
+ */
+export async function restoreVersion(
+  scope: ScopeFilter,
+  actor: ActorRef,
+  docId: string,
+  versionId: string,
+): Promise<DocumentRow | null> {
+  return withTransaction(async (client) => {
+    const cur = await findDocumentById(client, scope, docId);
+    if (!cur) return null;
+    const src = await client.query<{ version_title: string | null; version_body: string | null; version_body_format: string; version_number: number }>(
+      `SELECT version_title, version_body, version_body_format, version_number
+         FROM sys.sys_content_versions WHERE version_id = $1 AND version_document_id = $2`,
+      [versionId, docId],
+    );
+    if (src.rows.length === 0) return null;
+    const s = src.rows[0]!;
+    const nextNum = await client.query<{ n: number }>(
+      `SELECT COALESCE(max(version_number), 0) + 1 AS n FROM sys.sys_content_versions WHERE version_document_id = $1`,
+      [docId],
+    );
+    const verRes = await client.query<{ version_id: string }>(
+      `INSERT INTO sys.sys_content_versions
+         (version_tenant_id, version_document_id, version_number, version_title, version_body, version_body_format, version_author_user_id, version_change_note)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING version_id`,
+      [cur.tenantId, docId, nextNum.rows[0]!.n, s.version_title, s.version_body, s.version_body_format, actor.userId, `Restored from v${s.version_number}`],
+    );
+    const newVersionId = verRes.rows[0]!.version_id;
+    const updated = await client.query(
+      `UPDATE sys.sys_content_documents
+         SET document_current_version_id = $1,
+             document_title = COALESCE($2, document_title),
+             document_body = $3,
+             document_body_format = $4
+       WHERE document_id = $5
+       RETURNING ${DOC_COLS}`,
+      [newVersionId, s.version_title, s.version_body, s.version_body_format, docId],
+    );
+    return mapDocument(updated.rows[0]!);
+  });
+}
+
+/**
+ * Set a document's status by id (the caller scope-checks + validates the transition
+ * first). On publish, stamp published_at/by; on clearPublished, null them.
+ */
+export async function setDocumentStatusById(
+  q: DbConnector,
+  id: string,
+  status: string,
+  opts: { publishedByUserId?: string | null; clearPublished?: boolean },
+): Promise<DocumentRow | null> {
+  const sets: string[] = ["document_status = $1"];
+  const params: unknown[] = [status];
+  if (status === "published") {
+    sets.push("document_published_at = now()");
+    params.push(opts.publishedByUserId ?? null);
+    sets.push(`document_published_by_user_id = $${params.length}`);
+  } else if (opts.clearPublished) {
+    sets.push("document_published_at = NULL", "document_published_by_user_id = NULL");
+  }
+  params.push(id);
+  const res = await q.query(`UPDATE sys.sys_content_documents SET ${sets.join(", ")} WHERE document_id = $${params.length} RETURNING ${DOC_COLS}`, params);
+  return res.rows[0] ? mapDocument(res.rows[0]) : null;
+}
+
+export interface PublishedFilter { q?: string | undefined; categoryId?: string | undefined; limit: number; offset: number }
+
+/** ESS read: published documents of a tenant, within the effective/expiry window. */
+export async function listPublishedForTenant(q: DbConnector, tenantId: string, filter: PublishedFilter): Promise<{ items: DocumentRow[]; total: number }> {
+  const params: unknown[] = [tenantId];
+  const clauses = [
+    "document_tenant_id = $1",
+    "document_status = 'published'",
+    "(document_effective_date IS NULL OR document_effective_date <= CURRENT_DATE)",
+    "(document_expires_date IS NULL OR document_expires_date >= CURRENT_DATE)",
+  ];
+  if (filter.categoryId) { params.push(filter.categoryId); clauses.push(`document_category_id = $${params.length}`); }
+  if (filter.q) { params.push(`%${filter.q}%`); clauses.push(`document_title ILIKE $${params.length}`); }
+  const where = clauses.join(" AND ");
+  const totalRes = await q.query<{ n: number }>(`SELECT count(*)::int AS n FROM sys.sys_content_documents WHERE ${where}`, params);
+  params.push(filter.limit); const limPos = params.length;
+  params.push(filter.offset); const offPos = params.length;
+  const res = await q.query(`SELECT ${DOC_COLS} FROM sys.sys_content_documents WHERE ${where} ORDER BY COALESCE(document_published_at, updated_at) DESC LIMIT $${limPos} OFFSET $${offPos}`, params);
+  return { items: res.rows.map(mapDocument), total: totalRes.rows[0]!.n };
+}
+
+export async function findPublishedByIdForTenant(q: DbConnector, tenantId: string, id: string): Promise<DocumentRow | null> {
+  const res = await q.query(
+    `SELECT ${DOC_COLS} FROM sys.sys_content_documents
+      WHERE document_id = $1 AND document_tenant_id = $2 AND document_status = 'published'
+        AND (document_effective_date IS NULL OR document_effective_date <= CURRENT_DATE)
+        AND (document_expires_date IS NULL OR document_expires_date >= CURRENT_DATE)`,
+    [id, tenantId],
+  );
+  return res.rows[0] ? mapDocument(res.rows[0]) : null;
+}

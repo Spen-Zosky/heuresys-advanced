@@ -2,6 +2,20 @@
 
 > **🔭 S960 UPDATE (2026-06-03) — superseded by the reconciliation-closure cycle.** This doc's open-ended framing is replaced by the closed-loop plan `docs/superpowers/specs/2026-06-03-reconciliation-closure-design.md` (every empty `sys.*` table driven to a terminal state). **F0 (read-only triage) DONE**: all 65 empty tables verified+classified A:5 / B:16 / C:23 / D:21 (report `qa_artifacts/F0_reconciliation_triage.md`, workflow-driven, employee-centric enforced). **F1 (registry) DONE**: migration `000058` + `sys.sys_reconciliation_registry` + view `sys.v_reconciliation_status` — query the live status with `SELECT resolved_status, count(*) FROM sys.v_reconciliation_status GROUP BY 1`. The per-target classification below (§1-§7) remains valid input; the authoritative live state is now the registry/view. **Next**: F2 (import the 5 bucket-A) → F3 (3 structural walls: job→position bridge, org-unit template↔instance, learning-catalog re-import) → F4 (bucket-C derivation dossier). Each phase gated.
 
+> **🏁 S972 UPDATE (2026-06-07) — B-50 residual walls TERMINAL-ANNOTATION close (mig `000076`).** The 7 tables that still RESOLVED to `NEEDS_DECISION` in `sys.v_reconciliation_status` were moved to explicit terminal/deferred states with live-re-measured rationale (advanced `:5433` + VM legacy `heuresys_platform`). **No `sys.*` table was populated** (all 7 stay 0 rows) — this is registry bookkeeping; the actual import of the DEFER tables is multi-session + gated on PM semantic authority (OUT-OF-SCOPE).
+>
+> | Table | S972 verdict | Measured reason |
+> |---|---|---|
+> | `sys_payout_curves` | **NO_SOURCE** (terminal) | no-catalog: no legacy curve/payout catalog table (only the *view* `v_calibration_bell_curve`); human-authored config |
+> | `sys_reward_gate_results` | **NO_SOURCE** (terminal) | cascade+derived: `gate_id` NOT NULL, parent `sys_reward_gates`=0 + no legacy gate-verdict source |
+> | `sys_successor_readiness` | **NO_SOURCE** (terminal) | no-numeric-source+cascade: `candidate_id` NOT NULL, parent `sys_successor_candidates`=0; legacy `readiness_level`=varchar categorical (already in candidates), not a numeric score |
+> | `sys_user_target_positions` | **NO_SOURCE** (terminal) | 0-overlap: legacy `career_goals`(60)/`career_path_recommendations`(85) exist but resolve 0/60 to active RTL users; derived/aspirational |
+> | `sys_branches` | **DEFER** (keep NEEDS_DECISION) | `locations`=34 EXISTS but `branch_organization_unit_id` NOT NULL+UNIQUE vs legacy `org_units→location` 47 FK → 13 distinct (inverse cardinality); needs PM `location↔org_unit` bridge |
+> | `sys_succession_pools` | **DEFER** (keep NEEDS_DECISION) | `talent_pools`=24 EXISTS but `succession_pool_position_id` NOT NULL and `succession_plans.position_id` 31/31 NULL; needs PM job/role→position bridge or Wave-2 `position_id` |
+> | `sys_successor_candidates` | **DEFER** (keep NEEDS_DECISION) | `succession_candidates`=206 EXISTS (person FK via legacy employees, I14) but `successor_candidate_pool_id` NOT NULL cascade on empty pools; coupled to #pools |
+>
+> View net change: `NEEDS_DECISION` 7→3, `NO_SOURCE` 17→21. Mechanism: registry `declared_status` (the 7 have no brownfield card; `NO_SOURCE` is not a valid `brownfield.table_mappings.classification`, unlike the B-42/EXCLUDE precedent). Cross-ref: `docs/kb/RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md`. Tests: `apps/api/test/reconciliation-registry.integration.test.ts` (B-50 block).
+
 > **Status**: authored 2026-06-02 (S958, autonomous backlog sweep). **Execution is GATED on Enzo's go for a supervised production run** (see §6). This document is the evidence-based, ready-to-run plan; the import itself is NOT executed autonomously (it requires a full Wave-1 production re-import on the VM, or loading legacy dumps locally — neither is a low-risk unattended write).
 > **Supersedes the loose B-10 / B-50 entries** in `SOT_BACKLOG.md` with a measured, per-target classification. Backing diagnosis: live queries against advanced (`:5433`) + VM legacy (`heuresys_platform`), S958.
 

@@ -184,6 +184,23 @@ Sessione ultracode, design→piano (skill `writing-plans`)→implementa→review
 - **Decisione aperta (Enzo)**: confermare self-only role-set; sequenza P1b vs P2.
 - **Pending prossima sessione**: ② P1b/P2, #2·m2 Surveys, #2·m3 PredictionsML, #7 MVP-4, #8 cap ③④⑤.
 
+**🟢 Aggiornamento S972 (2026-06-07) — B-50 residual walls TERMINAL-ANNOTATION close (mig `000076`):**
+I **7** tavoli che restavano `NEEDS_DECISION` nella vista `sys.v_reconciliation_status` (stato aperto/ambiguo) sono stati portati a stato terminale/deferred esplicito con rationale **misurata live** (advanced DB :5433 + legacy `heuresys_platform` su VM, ri-verificata in-session). **Nessun `sys.*` business table popolato** (i 7 restano 0 righe verificate) — è bookkeeping/docs, NON un import dati (l'import reale dei deferred è multi-sessione + gated su autorità semantica PM = OUT-OF-SCOPE). Mig `000076` idempotente (2° run identico provato), assert `DO $$` sulla vista, backup `pg_dump_snapshots/pre-b50-terminal-s972.sql` (gitignored). Meccanica: i 7 NON hanno card brownfield → la vista risolve via registry `declared_status` (stesso path dei 17 NO_SOURCE esistenti; `NO_SOURCE` NON è un valore valido per `brownfield.table_mappings.classification` → niente card, a differenza del precedente B-42/EXCLUDE).
+
+| Tabella | Esito S972 | Motivo misurato |
+|---|---|---|
+| `sys_payout_curves` | **→ NO_SOURCE** | no-catalog: nessuna tabella catalogo curve/payout in legacy (solo la *view* `v_calibration_bell_curve`); config human-authored |
+| `sys_reward_gate_results` | **→ NO_SOURCE** | cascade+derived: `gate_id` NOT NULL, parent `sys_reward_gates`=0 + nessuna source verdetto-gate legacy; analytics derivata |
+| `sys_successor_readiness` | **→ NO_SOURCE** | no-numeric-source+cascade: `candidate_id` NOT NULL, parent `sys_successor_candidates`=0; legacy `readiness_level`=varchar **categorico** (già mappato in candidates), non uno score numerico |
+| `sys_user_target_positions` | **→ NO_SOURCE** | 0-overlap: legacy `career_goals`(60)/`career_path_recommendations`(85) esistono ma risolvono **0/60** agli utenti RTL attivi; aspirational/derived |
+| `sys_branches` | **DEFER (resta NEEDS_DECISION)** | source `locations`=34 ESISTE ma `branch_organization_unit_id` NOT NULL+UNIQUE vs legacy `org_units→location` 47 FK → **13 distinte** (cardinalità inversa); serve bridge PM `location↔org_unit` |
+| `sys_succession_pools` | **DEFER (resta NEEDS_DECISION)** | source `talent_pools`=24 ESISTE ma `succession_pool_position_id` NOT NULL e `succession_plans.position_id` **31/31 NULL**; serve bridge PM job/role→position o Wave-2 `position_id` |
+| `sys_successor_candidates` | **DEFER (resta NEEDS_DECISION)** | source `succession_candidates`=206 ESISTE (person FK via legacy employees, I14) ma `successor_candidate_pool_id` NOT NULL cascade su `sys_succession_pools` vuoto; accoppiato a #pools |
+
+- **Vista post-S972**: `NEEDS_DECISION` **7→3** · `NO_SOURCE` **17→21** · `POPULATED` 122 · `EXCLUDE` 2 · `REFERENCE_ONLY` 3 (0 UNCLASSIFIED invariato). Verify: `SELECT resolved_status,count(*) FROM sys.v_reconciliation_status GROUP BY 1 ORDER BY 1`.
+- **Test**: esteso `apps/api/test/reconciliation-registry.integration.test.ts` (+6 assert B-50; 11/11). Fix regressione `reconciliation-f4-bucketc.integration.test.ts` (il prepend del marker B-50 spostava `[F4 NOT-IMPORTABLE` dall'inizio → `LIKE '[F4…'` → `LIKE '%[F4…'`). Reconciliation 9 file/55✓ + brownfield 5 file/29✓; `db:validate` 7/7. Cross-ref dossier `docs/kb/RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md`.
+- **Residuo B-50** = i **3 DEFER** (sbloccabili solo da decisione PM sul bridge `location↔org_unit` / `job→position` o da una Wave-2 che popoli i `position_id`). I 4 NO_SOURCE sono **terminali** (nessun source 1:1 popolato).
+
 ## P3 — Infra / robustezza
 
 | ID | Azione | Note |

@@ -32,11 +32,14 @@ describe('reconciliation F4 bucket-C', () => {
   });
 
   it('the 4 not-importable bucket-C tables are annotated and stay empty', async () => {
+    // B-50 (mig 000076, S972) prepended a [B-50 TERMINAL S972] marker and flipped declared_status
+    // to NO_SOURCE; the original [F4 NOT-IMPORTABLE …] rationale is preserved (prepended, never
+    // overwritten), so it is no longer at the START of the string — match anywhere.
     expect(await count(
       `SELECT count(*)::int AS n FROM sys.sys_reconciliation_registry
         WHERE reconciliation_registry_table_name IN
           ('sys_payout_curves','sys_user_target_positions','sys_successor_readiness','sys_reward_gate_results')
-          AND reconciliation_registry_rationale LIKE '[F4 NOT-IMPORTABLE%'`,
+          AND reconciliation_registry_rationale LIKE '%[F4 NOT-IMPORTABLE%'`,
     )).toBe(4);
   });
 });

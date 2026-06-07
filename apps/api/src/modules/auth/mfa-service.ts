@@ -15,10 +15,18 @@
  * a migration.
  */
 
-import { randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
+import { randomBytes, randomInt, randomUUID, timingSafeEqual } from "node:crypto";
 import * as OTPAuth from "otpauth";
 import { pool } from "../../db/client.js";
-import { NotFoundError, UnauthorizedError, ValidationError } from "../../errors/index.js";
+import {
+  NotFoundError,
+  TooManyRequestsError,
+  UnauthorizedError,
+  ValidationError,
+} from "../../errors/index.js";
+import { hashPassword, verifyPassword } from "./password.js";
+import type { IMailer } from "./mailer.js";
+import { ConsoleMailer } from "./mailer.js";
 import * as mfaRepo from "./mfa-repository.js";
 
 const TOTP_ISSUER = "Heuresys";
@@ -28,6 +36,14 @@ const TOTP_ALGORITHM = "SHA1";
 const TOTP_WINDOW = 1; // ±30s tolerance for clock drift
 
 const CHALLENGE_TTL_MS = 5 * 60 * 1000;
+
+/* --- EMAIL_OTP policy ----------------------------------------------- */
+/** Code lifetime: short window to limit the brute-force surface. */
+const EMAIL_OTP_TTL_MS = 10 * 60 * 1000; // 10 minutes
+/** Max wrong attempts before the challenge is invalidated (forces re-issue). */
+const EMAIL_OTP_MAX_ATTEMPTS = 5;
+/** Minimum seconds between two issuances for the same factor+purpose (anti-spam). */
+const EMAIL_OTP_RESEND_COOLDOWN_MS = 30 * 1000;
 
 interface ChallengeEntry {
   userId: string;
@@ -39,6 +55,12 @@ export interface MfaChallengeStore {
   create(userId: string, now?: number): string;
   /** Consume + validate. Returns userId if valid, throws if not. */
   consume(token: string, now?: number): string;
+  /**
+   * Validate WITHOUT consuming. Returns userId if valid, throws if not.
+   * Used by EMAIL_OTP resend so requesting a fresh code does not burn the
+   * step-2 token.
+   */
+  peek(token: string, now?: number): string;
   /** Test-only: clear all challenges. */
   reset(): void;
 }
@@ -71,6 +93,14 @@ export function createInMemoryChallengeStore(): MfaChallengeStore {
       }
       return entry.userId;
     },
+    peek(token, now = Date.now()) {
+      sweepExpired(now);
+      const entry = entries.get(token);
+      if (!entry || entry.expiresAt <= now) {
+        throw new UnauthorizedError("Invalid or expired MFA challenge", "MFA_CHALLENGE_INVALID");
+      }
+      return entry.userId;
+    },
     reset() {
       entries.clear();
     },
@@ -98,6 +128,27 @@ function verifyTotpCode(secretBase32: string, code: string, now?: number): boole
   return delta !== null;
 }
 
+/* --- EMAIL_OTP helpers ---------------------------------------------- */
+
+/**
+ * Generates a cryptographically-strong 6-digit numeric code using the CSPRNG
+ * (crypto.randomInt) — NEVER Math.random. Range [0, 1_000_000) zero-padded to
+ * 6 digits gives uniform 000000..999999.
+ */
+function generateEmailOtpCode(): string {
+  return randomInt(0, 1_000_000).toString().padStart(6, "0");
+}
+
+/** Mask an email for safe display: keep first char + domain (a***@host). */
+function maskEmail(email: string): string {
+  const at = email.indexOf("@");
+  if (at <= 0) return "***";
+  const local = email.slice(0, at);
+  const domain = email.slice(at);
+  const head = local.slice(0, 1);
+  return `${head}***${domain}`;
+}
+
 /* --- Service surface ----------------------------------------------- */
 
 export interface MfaService {
@@ -121,17 +172,159 @@ export interface MfaService {
     lastUsedAt: string | null;
   }>>;
   deleteFactor(input: { userId: string; factorId: string }): Promise<void>;
+  /**
+   * Start EMAIL_OTP enrollment: create an unverified factor, generate a CSPRNG
+   * code, email it (mailer seam), and store it hashed-at-rest. Returns NO code.
+   */
+  enrollEmailOtp(input: { userId: string; userEmail: string }): Promise<{
+    factorId: string;
+    kind: "EMAIL_OTP";
+    emailHint: string;
+    expiresInSeconds: number;
+    verified: false;
+  }>;
+  /** Confirm EMAIL_OTP enrollment with the emailed code. */
+  verifyEmailOtpSetup(input: { userId: string; factorId: string; code: string }): Promise<{
+    factorId: string;
+    kind: "EMAIL_OTP";
+    verified: true;
+  }>;
+  /** Re-issue a fresh enrollment code (rate-limited cooldown). */
+  resendEmailOtpEnroll(input: { userId: string; userEmail: string; factorId: string }): Promise<{
+    expiresInSeconds: number;
+  }>;
   /** Returns null if the user has no verified factors (MFA not required). */
   beginLoginChallenge(userId: string): Promise<{
     challengeToken: string;
     availableKinds: mfaRepo.MfaKind[];
   } | null>;
   verifyLoginChallenge(input: { challengeToken: string; code: string }): Promise<{ userId: string }>;
+  /** Re-issue the EMAIL_OTP login code tied to an active challenge token. */
+  resendEmailOtpLogin(input: { challengeToken: string }): Promise<{ expiresInSeconds: number }>;
+}
+
+/**
+ * Default mailer for the MFA service singleton. The auth/mfa routes inject the
+ * real DI mailer (InMemoryMailer in tests, the configured transactional mailer
+ * in prod); this fallback only fires if the service is built with no mailer.
+ * It is a ConsoleMailer bound to a minimal console-backed logger so the module
+ * has no init-time dependency on a Fastify instance.
+ */
+function defaultMfaMailer(): IMailer {
+  const consoleLog = {
+    warn: (...args: unknown[]) => console.warn(...args),
+    info: () => {},
+    error: (...args: unknown[]) => console.error(...args),
+    debug: () => {},
+    fatal: (...args: unknown[]) => console.error(...args),
+    trace: () => {},
+    child: () => consoleLog,
+  } as unknown as ConstructorParameters<typeof ConsoleMailer>[0];
+  return new ConsoleMailer(consoleLog);
+}
+
+export interface MfaServiceOptions {
+  challengeStore?: MfaChallengeStore;
+  /** Mailer used to deliver EMAIL_OTP codes. */
+  mailer?: IMailer;
+  /** Overridable clock for tests. */
+  now?: () => number;
 }
 
 export function createMfaService(
-  challengeStore: MfaChallengeStore = sharedMfaChallengeStore,
+  optionsOrStore: MfaServiceOptions | MfaChallengeStore = {},
 ): MfaService {
+  // Back-compat: a bare MfaChallengeStore may still be passed positionally.
+  const options: MfaServiceOptions =
+    typeof (optionsOrStore as MfaChallengeStore).create === "function"
+      ? { challengeStore: optionsOrStore as MfaChallengeStore }
+      : (optionsOrStore as MfaServiceOptions);
+
+  const challengeStore = options.challengeStore ?? sharedMfaChallengeStore;
+  const mailer = options.mailer ?? defaultMfaMailer();
+  const nowMs = options.now ?? (() => Date.now());
+
+  /**
+   * Issue (or re-issue) an EMAIL_OTP code for a factor+purpose: enforce the
+   * resend cooldown, generate a CSPRNG code, store it HASHED, and email the
+   * plaintext via the mailer seam. Returns the TTL in seconds. Never returns
+   * the code.
+   */
+  async function issueEmailOtp(args: {
+    userId: string;
+    userEmail: string;
+    factorId: string;
+    purpose: mfaRepo.MfaOtpPurpose;
+  }): Promise<number> {
+    const existing = await mfaRepo.findActiveOtpChallenge(pool, args.factorId, args.purpose);
+    if (existing) {
+      const age = nowMs() - existing.createdAt.getTime();
+      if (age < EMAIL_OTP_RESEND_COOLDOWN_MS) {
+        const retryAfter = Math.ceil((EMAIL_OTP_RESEND_COOLDOWN_MS - age) / 1000);
+        throw new TooManyRequestsError(
+          "Please wait before requesting a new code.",
+          "MFA_OTP_RESEND_COOLDOWN",
+          retryAfter,
+        );
+      }
+    }
+    const code = generateEmailOtpCode();
+    const codeHash = await hashPassword(code);
+    const expiresAt = new Date(nowMs() + EMAIL_OTP_TTL_MS);
+    await mfaRepo.issueOtpChallenge(pool, {
+      userId: args.userId,
+      factorId: args.factorId,
+      purpose: args.purpose,
+      codeHash,
+      expiresAt,
+    });
+    await mailer.sendMfaOtpEmail(args.userEmail, code, args.purpose);
+    return Math.floor(EMAIL_OTP_TTL_MS / 1000);
+  }
+
+  /**
+   * Verify an EMAIL_OTP code against the active challenge for a factor+purpose.
+   * Enforces: TTL (server-side expiry), single-use (consumed_at), max-attempts
+   * lockout (invalidate on exhaustion), constant-time-ish hash compare (argon2).
+   * Returns true on success (and consumes the challenge); throws on hard
+   * failures (expired/locked); returns false on a plain wrong-code attempt.
+   */
+  async function consumeEmailOtp(args: {
+    factorId: string;
+    purpose: mfaRepo.MfaOtpPurpose;
+    code: string;
+  }): Promise<boolean> {
+    if (!/^\d{6}$/.test(args.code)) return false;
+    const challenge = await mfaRepo.findActiveOtpChallenge(pool, args.factorId, args.purpose);
+    if (!challenge) {
+      // No active code (never issued, already consumed, or replay of a used one).
+      throw new UnauthorizedError("Invalid or expired code", "MFA_OTP_INVALID");
+    }
+    // TTL check (server-side; never trust the client).
+    if (challenge.expiresAt.getTime() <= nowMs()) {
+      await mfaRepo.consumeOtpChallenge(pool, challenge.otpId);
+      throw new UnauthorizedError("Code expired", "MFA_OTP_EXPIRED");
+    }
+    // Lockout check BEFORE compare (defense-in-depth; the column also caps at 5).
+    if (challenge.attemptCount >= EMAIL_OTP_MAX_ATTEMPTS) {
+      await mfaRepo.consumeOtpChallenge(pool, challenge.otpId);
+      throw new UnauthorizedError("Too many attempts; request a new code", "MFA_OTP_LOCKED");
+    }
+    // Constant-time-ish compare via argon2.verify (no early-return string compare).
+    const { ok } = await verifyPassword(challenge.codeHash, args.code);
+    if (!ok) {
+      const attempts = await mfaRepo.incrementOtpAttempt(pool, challenge.otpId);
+      if (attempts >= EMAIL_OTP_MAX_ATTEMPTS) {
+        await mfaRepo.consumeOtpChallenge(pool, challenge.otpId);
+        throw new UnauthorizedError("Too many attempts; request a new code", "MFA_OTP_LOCKED");
+      }
+      throw new UnauthorizedError("Invalid code", "MFA_OTP_INVALID");
+    }
+    // Success → single-use consume.
+    await mfaRepo.consumeOtpChallenge(pool, challenge.otpId);
+    return true;
+  }
+
   return {
     async enrollTotp({ userId, userEmail }) {
       const secret = new OTPAuth.Secret({ size: 20 }).base32;
@@ -192,51 +385,195 @@ export function createMfaService(
       if (!removed) throw new NotFoundError("MFA factor");
     },
 
+    /* --- EMAIL_OTP enrollment ---------------------------------------- */
+    async enrollEmailOtp({ userId, userEmail }) {
+      // Create the (unverified) EMAIL_OTP factor. No secret is stored on the
+      // factor row — the per-attempt codes live hashed in the challenge table.
+      const factor = await mfaRepo.insertMfaFactor(pool, {
+        userId,
+        kind: "EMAIL_OTP",
+        secret: null,
+      });
+      const expiresInSeconds = await issueEmailOtp({
+        userId,
+        userEmail,
+        factorId: factor.factorId,
+        purpose: "ENROLL",
+      });
+      return {
+        factorId: factor.factorId,
+        kind: "EMAIL_OTP" as const,
+        emailHint: maskEmail(userEmail),
+        expiresInSeconds,
+        verified: false as const,
+      };
+    },
+
+    async verifyEmailOtpSetup({ userId, factorId, code }) {
+      const factor = await mfaRepo.findMfaFactorById(pool, factorId);
+      if (!factor) throw new NotFoundError("MFA factor");
+      if (factor.userId !== userId) {
+        // Don't leak existence cross-user; surface as NotFound.
+        throw new NotFoundError("MFA factor");
+      }
+      if (factor.kind !== "EMAIL_OTP") {
+        throw new ValidationError({ kind: factor.kind }, "Factor is not an EMAIL_OTP factor");
+      }
+      await consumeEmailOtp({ factorId, purpose: "ENROLL", code });
+      await mfaRepo.markMfaFactorVerified(pool, factorId);
+      await mfaRepo.markMfaFactorUsed(pool, factorId);
+      return { factorId, kind: "EMAIL_OTP" as const, verified: true as const };
+    },
+
+    async resendEmailOtpEnroll({ userId, userEmail, factorId }) {
+      const factor = await mfaRepo.findMfaFactorById(pool, factorId);
+      if (!factor || factor.userId !== userId) throw new NotFoundError("MFA factor");
+      if (factor.kind !== "EMAIL_OTP") {
+        throw new ValidationError({ kind: factor.kind }, "Factor is not an EMAIL_OTP factor");
+      }
+      const expiresInSeconds = await issueEmailOtp({
+        userId,
+        userEmail,
+        factorId,
+        purpose: "ENROLL",
+      });
+      return { expiresInSeconds };
+    },
+
     async beginLoginChallenge(userId) {
       const verified = await mfaRepo.listVerifiedMfaFactorsForUser(pool, userId);
       if (verified.length === 0) return null;
       const challengeToken = challengeStore.create(userId);
       const availableKinds = [...new Set(verified.map((f) => f.kind))];
+      // For EMAIL_OTP factors, issue + email a code now so it is in the user's
+      // inbox by the time the second step prompts for it. (TOTP needs no send.)
+      const emailFactor = verified.find((f) => f.kind === "EMAIL_OTP");
+      if (emailFactor) {
+        const u = await pool.query<{ user_email: string }>(
+          `SELECT user_email FROM sys.sys_users WHERE user_id = $1`,
+          [userId],
+        );
+        const userEmail = u.rows[0]?.user_email;
+        if (userEmail) {
+          // Cooldown failures here must NOT block the login challenge from being
+          // offered (a recent code is still valid) — swallow the cooldown signal.
+          await issueEmailOtp({
+            userId,
+            userEmail,
+            factorId: emailFactor.factorId,
+            purpose: "LOGIN",
+          }).catch((e) => {
+            if (!(e instanceof TooManyRequestsError)) throw e;
+          });
+        }
+      }
       return { challengeToken, availableKinds };
     },
 
     async verifyLoginChallenge({ challengeToken, code }) {
+      // NOTE: consuming the challenge token is single-use — a wrong code here
+      // burns the token. The /login route re-mints a token on the next attempt
+      // (step 1 is re-issued), and for EMAIL_OTP the underlying emailed code
+      // survives across token re-mints (it is tied to the factor, not the token)
+      // until its own TTL / attempt budget is exhausted.
       const userId = challengeStore.consume(challengeToken);
       const factors = await mfaRepo.listVerifiedMfaFactorsForUser(pool, userId);
       if (factors.length === 0) {
         throw new UnauthorizedError("No MFA factors registered", "MFA_NOT_ENROLLED");
       }
-      // Try each verified TOTP factor (a user with multiple authenticators
-      // might code-in via any). Constant-time-ish: validate ALL secrets even
-      // after a match to avoid timing oracle on factor enumeration.
+
+      // 1. Try each verified TOTP factor first (synchronous, no DB write).
+      //    Constant-time-ish: validate ALL secrets to avoid a factor-enumeration
+      //    timing oracle.
       let matchedFactorId: string | null = null;
       for (const f of factors) {
         if (f.kind === "TOTP" && f.secret && verifyTotpCode(f.secret, code)) {
-          // First match wins, but keep looping for constant-time semantics.
           if (!matchedFactorId) matchedFactorId = f.factorId;
         }
       }
-      // We *can* still leak via overall response time when nothing matches —
-      // for stronger isolation hand a fake secret of equivalent cost. MVP
-      // accepts the residual.
       const expectMatched = matchedFactorId !== null;
-      const actualMatched = expectMatched;
-      // Tiny no-op constant-time compare to keep lint quiet on unused values.
-      timingSafeEqual(Buffer.from([Number(expectMatched)]), Buffer.from([Number(actualMatched)]));
-      if (!matchedFactorId) {
-        throw new UnauthorizedError("Invalid TOTP code", "MFA_TOTP_INVALID");
+      timingSafeEqual(Buffer.from([Number(expectMatched)]), Buffer.from([Number(expectMatched)]));
+      if (matchedFactorId) {
+        await mfaRepo.markMfaFactorUsed(pool, matchedFactorId);
+        return { userId };
       }
-      await mfaRepo.markMfaFactorUsed(pool, matchedFactorId);
-      return { userId };
+
+      // 2. No TOTP match — try the EMAIL_OTP factor against its active LOGIN
+      //    challenge. consumeEmailOtp enforces TTL / single-use / lockout and
+      //    throws typed errors (MFA_OTP_EXPIRED / MFA_OTP_LOCKED) or returns
+      //    false on a plain wrong code.
+      const emailFactor = factors.find((f) => f.kind === "EMAIL_OTP");
+      if (emailFactor) {
+        const ok = await consumeEmailOtp({
+          factorId: emailFactor.factorId,
+          purpose: "LOGIN",
+          code,
+        });
+        if (ok) {
+          await mfaRepo.markMfaFactorUsed(pool, emailFactor.factorId);
+          return { userId };
+        }
+      }
+
+      // 3. Nothing matched. Use TOTP-specific code only when the user has no
+      //    EMAIL_OTP factor (back-compat with the existing TOTP test); otherwise
+      //    surface the generic OTP-invalid code.
+      throw new UnauthorizedError(
+        "Invalid code",
+        emailFactor ? "MFA_OTP_INVALID" : "MFA_TOTP_INVALID",
+      );
+    },
+
+    async resendEmailOtpLogin({ challengeToken }) {
+      // Validate the token WITHOUT consuming it (resend must not burn the step-2
+      // token). We peek via a non-consuming check by re-using the userId binding.
+      const userId = challengeStore.peek(challengeToken);
+      const factors = await mfaRepo.listVerifiedMfaFactorsForUser(pool, userId);
+      const emailFactor = factors.find((f) => f.kind === "EMAIL_OTP");
+      if (!emailFactor) {
+        throw new UnauthorizedError("No EMAIL_OTP factor for this challenge", "MFA_OTP_INVALID");
+      }
+      const u = await pool.query<{ user_email: string }>(
+        `SELECT user_email FROM sys.sys_users WHERE user_id = $1`,
+        [userId],
+      );
+      const userEmail = u.rows[0]?.user_email;
+      if (!userEmail) throw new UnauthorizedError("User not found", "MFA_OTP_INVALID");
+      const expiresInSeconds = await issueEmailOtp({
+        userId,
+        userEmail,
+        factorId: emailFactor.factorId,
+        purpose: "LOGIN",
+      });
+      return { expiresInSeconds };
     },
   };
 }
 
 export const sharedMfaService: MfaService = createMfaService();
 
+/**
+ * Build an MFA service bound to a specific mailer (and optionally an isolated
+ * challenge store). Used by buildApp so the EMAIL_OTP sends go through the same
+ * mailer the rest of auth uses (InMemoryMailer in tests, the configured
+ * transactional mailer in prod). Tests can additionally pass a fresh challenge
+ * store to isolate token state.
+ */
+export function buildMfaServiceWithMailer(
+  mailer: IMailer,
+  challengeStore?: MfaChallengeStore,
+): MfaService {
+  return createMfaService({ mailer, ...(challengeStore ? { challengeStore } : {}) });
+}
+
 /** Test-only export: build a service against an injectable challenge store. */
 export const MFA_INTERNAL = {
   createInMemoryChallengeStore,
   verifyTotpCode,
   generateRandomFactorId: randomUUID,
+  generateEmailOtpCode,
+  maskEmail,
+  EMAIL_OTP_TTL_MS,
+  EMAIL_OTP_MAX_ATTEMPTS,
+  EMAIL_OTP_RESEND_COOLDOWN_MS,
 };

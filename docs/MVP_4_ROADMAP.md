@@ -72,6 +72,8 @@ Ogni stream è auto-contenuto: scope / effort min-max in focused-weeks / depende
 
 ### §2.1 Stream — Brownfield Wave 2 (RTL_BANK_REFERENCE operating model)
 
+> **STATO (S974)**: **BLOCKED / multi-sessione**. Effort ~37-75h, cascade-FK risk alto. Residuo: 17 target Bucket-D `NO_SOURCE` (app-generated, terminali) + i `NEEDS_DECISION` cascade restano **DEFER** (sbloccabili solo da Wave-2 che popoli i `position_id` o da decisione PM sul bridge `location↔org_unit`/`job→position` — vedi `docs/kb/SOT_BACKLOG.md` B-50). Non incluso nello slice EMAIL_OTP S974.
+
 **Scope**: esecuzione Wave 2 per il tenant `RTL_BANK_REFERENCE` — operating model deep import. Source ~94 source tables / target ~31 `sys.*` canonical tables (organization-units, branches, blueprint-activations, KPI definitions, process roles, position requirements). Riferimento `BROWNFIELD_IMPORT_PLAN.md` §4 + runner doc `docs/brownfield/wave_runners/wave_2_runner.md` (deliverable parallelo a questa roadmap).
 
 **Effort**: **1.5 — 3.0 focused-weeks** (37-75h). Range ampio: dipende dalla data-quality discovery (validation failures attesi su FK resolution dell'operating model). Wave 1 ha richiesto 13/19 targets via 5 iterazioni; Wave 2 ha più cross-table FK ⇒ stima maggiore.
@@ -181,10 +183,12 @@ Le legacy sources storicamente proposte come provenance (`benchmark_configs`, `e
 
 ### §2.5 Stream — MFA multi-kind hardening completo
 
+> **STATO (S974, 2026-06-07)**: **EMAIL_OTP slice ✅ DONE** — il secondo factor kind `EMAIL_OTP` è implementato e shipped (discrete shippable slice che "chiude" la parte EMAIL_OTP di MVP-4 §2.5). Migration `000081` (`sys.sys_auth_mfa_otp_challenges`, codici hashed-at-rest Argon2id, TTL 10min, max-attempts 5, single-use, resend cooldown 30s, CSRF, log-redaction), 4 nuovi endpoint `/v1/auth/mfa/email-otp/*`, login step-up via il medesimo state-machine TOTP, UI `/me/security` (IT+EN), integration test (enroll/verify/wrong/expired/replay/lockout/login-step-up/CSRF) + E2E verdi, TOTP + password/JWT/refresh INVARIATI. **Residuo §2.5 (multi-sessione, NON in questo slice)**: WEBAUTHN (FIDO2 + `@simplewebauthn`), SMS_OTP (provider+cost decision), recovery codes, session-enumeration UI `/me/security/sessions`, mandatory-MFA enforcement policy. Vedi anche `docs/kb/SOT_BACKLOG.md` §"Candidati MVP-4".
+
 **Scope**: estendere MFA single-kind TOTP (shipped Tappa E MVP-3) a multi-kind:
 - **WEBAUTHN** (FIDO2 hardware keys, biometric on mobile/laptop) — schema `sys.sys_auth_mfa_factors.mfa_factor_kind = 'WEBAUTHN'` già presente.
-- **EMAIL_OTP** (one-time code via email, fallback per utenti senza app TOTP).
-- **SMS_OTP** (one-time code via SMS, fallback più costoso — valutare se includere o defer).
+- **EMAIL_OTP** ✅ **DONE (S974)** (one-time code via email, fallback per utenti senza app TOTP) — mig 000081, hashed-at-rest, TTL/attempts/single-use, login step-up + `/me/security` UI.
+- **SMS_OTP** (one-time code via SMS, fallback più costoso — valutare se includere o defer) — **multi-sessione, blocked su provider+cost decision (Enzo)**.
 - **Recovery codes** (10 codici single-use stampabili, generati al primo enroll).
 - **Session enumeration UI** (`/me/security/sessions` lista sessioni attive con device fingerprint, last seen, IP geolocation) + revoke per device.
 - **MFA enforcement policy** (opt-in mandatory per `PLATFORM_ADMIN` + `TENANT_ADMIN`, opt-in voluntary per altri).
@@ -235,6 +239,8 @@ Le legacy sources storicamente proposte come provenance (`benchmark_configs`, `e
 ---
 
 ### §2.7 Stream — Mobile responsive audit + WCAG 2.2 AA tail items closure
+
+> **STATO (S974)**: **DEFERITO — multi-sessione**. Effort ~37-62h su ~47 routes × 4 viewport. La axe-playwright suite oggi gate-a `critical=0` (Tappa G MVP-3) → AA non-bloccante in CI; i tail items (serious/moderate/minor) restano da chiudere ma non bloccano la baseline. Non incluso nello slice EMAIL_OTP S974. Ripianificare come stream dedicato.
 
 **Scope**:
 - **Mobile responsive audit**: Tailwind 4 breakpoints (`sm`, `md`, `lg`, `xl`, `2xl`) sono presenti nel design system `@heuresys/ui` ma non auditati cross-device. Audit copertura: 47 routes × 4 viewport (375px iPhone SE, 768px tablet, 1024px laptop, 1440px desktop). Fix layout breakage per page con prio alta (`/login`, `/me`, `/dashboard`).

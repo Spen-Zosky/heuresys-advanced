@@ -76,6 +76,53 @@ test.describe("MVP-3 Tappa E-UI /me/security — TOTP enrollment flow", () => {
     await expect(rows.first().getByTestId("me-security-factor-kind")).toContainText("TOTP");
   });
 
+  test("EMAIL_OTP enroll shows email-code form + resend, cancel restores state", async ({ page }) => {
+    await page.goto("/me/security");
+    await expect(page.getByTestId("me-security-page")).toBeVisible();
+
+    // The EMAIL_OTP enroll button is visible on initial render.
+    await expect(page.getByTestId("me-security-emailotp-enroll-button")).toBeVisible();
+
+    // Kick off EMAIL_OTP enroll → backend issues POST /v1/auth/mfa/email-otp/enroll,
+    // emails a code, returns factorId + emailHint (NEVER the code). The email-code
+    // verify form + resend button should appear.
+    const [enrollResp] = await Promise.all([
+      page.waitForResponse(
+        (r) =>
+          r.url().includes("/v1/auth/mfa/email-otp/enroll") &&
+          r.request().method() === "POST",
+      ),
+      page.getByTestId("me-security-emailotp-enroll-button").click(),
+    ]);
+    expect(enrollResp.status()).toBe(201);
+
+    // SECURITY assertion: the enroll response body must NOT carry the OTP code.
+    const enrollBody = await enrollResp.json();
+    expect(enrollBody.kind).toBe("EMAIL_OTP");
+    expect(enrollBody.code).toBeUndefined();
+    expect(enrollBody.secret).toBeUndefined();
+    expect(typeof enrollBody.emailHint).toBe("string");
+
+    await expect(page.getByTestId("me-security-emailotp-pending-card")).toBeVisible();
+    await expect(page.getByTestId("me-security-emailotp-hint")).toBeVisible();
+    await expect(page.getByTestId("me-security-emailotp-verify-form")).toBeVisible();
+    await expect(page.getByTestId("me-security-emailotp-verify-code")).toBeVisible();
+    await expect(page.getByTestId("me-security-emailotp-verify-submit")).toBeVisible();
+    await expect(page.getByTestId("me-security-emailotp-resend")).toBeVisible();
+    await expect(page.getByTestId("me-security-emailotp-cancel")).toBeVisible();
+
+    // The pending factor appears in the list as EMAIL_OTP (unverified).
+    const rows = page.getByTestId("me-security-factor-row");
+    await expect(
+      rows.filter({ has: page.getByText("EMAIL_OTP") }).first(),
+    ).toBeVisible();
+
+    // Cancel restores the enroll buttons.
+    await page.getByTestId("me-security-emailotp-cancel").click();
+    await expect(page.getByTestId("me-security-emailotp-pending-card")).toHaveCount(0);
+    await expect(page.getByTestId("me-security-emailotp-enroll-button")).toBeVisible();
+  });
+
   test("client-side gate: 5-digit code blocks form submit", async ({ page }) => {
     // Start a fresh enroll to populate the verify form.
     await page.goto("/me/security");

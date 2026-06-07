@@ -39,6 +39,12 @@ export interface AuthRoutesOptions {
   mailer?: IMailer;
   /** Override the constructed service (advanced testing only). */
   service?: AuthService;
+  /**
+   * MFA service used to gate login (mailer-bound, built in buildApp). When
+   * provided, it is threaded into the auth service so login-time EMAIL_OTP
+   * sends use the same mailer as the rest of auth.
+   */
+  mfaService?: import("./mfa-service.js").MfaService;
 }
 
 function getUa(req: { headers: Record<string, string | string[] | undefined> }): string | null {
@@ -56,6 +62,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         app.jwt.sign(payload),
       mailer,
       log: app.log,
+      ...(opts.mfaService ? { mfaService: opts.mfaService } : {}),
     });
 
   // Secure cookies require HTTPS. COOKIE_SECURE overrides the NODE_ENV-based default

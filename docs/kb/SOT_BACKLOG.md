@@ -256,6 +256,15 @@ I **7** tavoli che restavano `NEEDS_DECISION` nella vista `sys.v_reconciliation_
 
 - stream 2.1 Brownfield Wave 2 · 2.5 MFA multi-kind · 2.7 Mobile + WCAG. **Visualization renderers (tappa B) ✅ CHIUSO** (S968): subsystem renderer completo (Mermaid + ECharts force-graph + Cytoscape NetworkGraph; pagine org-chart/visualizations/org-network live), 9 `graph_type` a stato terminale, **brand-gate SOLLEVATO** (brand v1 shipped). Mappa: `docs/kb/VISUALIZATION_RENDERERS_CLOSURE.md`.
 
+### Stato stream MVP-4 (aggiornato S974, 2026-06-07)
+
+| Stream | Stato | Note |
+|---|---|---|
+| **§2.5 MFA multi-kind — EMAIL_OTP slice** | ✅ **DONE** (S974) | Discrete shippable slice che chiude la parte EMAIL_OTP di §2.5. Mig `000081` (`sys_auth_mfa_otp_challenges`: codice hashed-at-rest Argon2id, TTL 10min, max-attempts 5 + lockout, single-use, resend-cooldown 30s, CSRF, log-redaction `req.body.code`/`*.code`/`*.otp`). 4 endpoint `/v1/auth/mfa/email-otp/{enroll,verify-setup,resend,resend-login}` + login step-up (medesimo state-machine TOTP) + UI `/me/security` (IT+EN). Test integration (enroll/verify/wrong/expired/replay/lockout/login-step-up/CSRF) + E2E verdi; full suite 756/0; TOTP + password/JWT/refresh INVARIATI. CSPRNG `crypto.randomInt` (mai Math.random). |
+| **§2.5 MFA multi-kind — residuo** | ⏸ **multi-sessione** | WEBAUTHN (FIDO2 + `@simplewebauthn`), SMS_OTP (⛔ blocked: provider+cost decision Enzo), recovery codes, session-enumeration UI `/me/security/sessions`, mandatory-MFA enforcement policy. |
+| **§2.1 Brownfield Wave 2** | ⛔ **blocked / multi-sessione** | Effort ~37-75h, cascade-FK risk alto. 17 target Bucket-D `NO_SOURCE` (app-generated, terminali) + `NEEDS_DECISION` cascade → **DEFER** (sbloccabili solo da Wave-2 che popoli i `position_id` o decisione PM bridge `location↔org_unit`/`job→position` — vedi B-50). |
+| **§2.7 Mobile + WCAG tail** | ⏸ **multi-sessione** | Effort ~37-62h su ~47 routes. axe baseline `critical=0` già gate-a in CI (AA non-bloccante); i tail items (serious/moderate/minor) restano da chiudere. |
+
 ### Programma capability nuove (approvato Enzo S958) — `docs/superpowers/specs/2026-06-03-platform-capabilities-roadmap.md`
 
 5 capability indipendenti, sequenza CLI-decisa, ciclo per ciascuna `design→spec→ok→piano→implementa` (multi-sessione). Stato:

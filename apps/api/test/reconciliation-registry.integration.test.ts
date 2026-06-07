@@ -7,7 +7,7 @@ import { pool } from '../src/db/client.js';
 // suite (singleThread) so this file does NOT close it.
 
 describe('reconciliation registry (F1)', () => {
-  it('registry holds exactly 83 rows with the signed-off bucket split A19/B16/C23/D25', async () => {
+  it('registry holds exactly 84 rows with the signed-off bucket split A19/B16/C23/D26', async () => {
     const { rows } = await pool.query<{ b: string; n: number }>(
       `SELECT reconciliation_registry_bucket AS b, count(*)::int AS n
          FROM sys.sys_reconciliation_registry GROUP BY 1`,
@@ -21,7 +21,8 @@ describe('reconciliation registry (F1)', () => {
     //   +4 bucket-A IMPORT  — S970 mentorship m1: programs/pairings/sessions/match_scores (mig 000072 + seed 45)
     //   +3 bucket-A IMPORT  — S973 surveys m2: engagement survey templates/surveys/responses (mig 000077 + seed 46)
     //   +2 bucket-A IMPORT  — S973 predictionsml m3: predictive models + model predictions (mig 000079 + seed 47)
-    expect(m).toEqual({ A: 19, B: 16, C: 23, D: 25 });
+    //   +1 bucket-D EXCLUDE — S974 MVP-4 sys_auth_mfa_otp_challenges (EMAIL_OTP infra, mig 000081)
+    expect(m).toEqual({ A: 19, B: 16, C: 23, D: 26 });
   });
 
   it('the v_reconciliation_status view leaves zero UNCLASSIFIED tables', async () => {

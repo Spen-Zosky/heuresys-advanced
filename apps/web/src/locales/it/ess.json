@@ -264,7 +264,16 @@
     "factorRemoved": "Fattore rimosso.",
     "errorUnexpected": "Errore inatteso",
     "errorInvalidCode": "Codice non valido",
-    "errorRemove": "Errore rimozione"
+    "errorRemove": "Errore rimozione",
+    "emailEnrollButton": "Aggiungi codice via email",
+    "emailPendingCardTitle": "Verifica codice email in corso",
+    "emailPendingInstruction": "Abbiamo inviato un codice di 6 cifre a {{email}}. Inseriscilo qui sotto per completare la registrazione del fattore email.",
+    "emailCodeLabel": "Codice via email",
+    "emailResend": "Invia di nuovo",
+    "emailResending": "Invio…",
+    "emailVerifiedActive": "Fattore email verificato e attivo.",
+    "emailResent": "Nuovo codice inviato via email.",
+    "errorResend": "Errore nel reinvio del codice"
   },
   "skills": {
     "title": "Le mie skill",

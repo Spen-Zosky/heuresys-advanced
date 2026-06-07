@@ -22,6 +22,9 @@ import {
   type ListMfaFactorsResponse,
   type MfaFactorListItem,
   type VerifyMfaSetupResponse,
+  type EnrollEmailOtpResponse,
+  type VerifyEmailOtpSetupResponse,
+  type ResendEmailOtpResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 
@@ -38,6 +41,7 @@ export default function MeSecurityPage() {
   const qc = useQueryClient();
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
   const [pendingFactor, setPendingFactor] = useState<EnrollMfaResponse | null>(null);
+  const [pendingEmailOtp, setPendingEmailOtp] = useState<EnrollEmailOtpResponse | null>(null);
 
   const factors = useQuery({
     queryKey: ["me", "mfa", "factors"],
@@ -97,6 +101,63 @@ export default function MeSecurityPage() {
     },
   });
 
+  // --- EMAIL_OTP enrollment ---
+  const enrollEmail = useMutation({
+    mutationFn: () =>
+      apiFetch<EnrollEmailOtpResponse>("/v1/auth/mfa/email-otp/enroll", {
+        method: "POST",
+        body: {},
+      }),
+    onSuccess: (data) => {
+      setPendingEmailOtp(data);
+      setPendingFactor(null);
+      setFeedback(null);
+      void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
+    },
+    onError: (err) => {
+      setFeedback({
+        kind: "err",
+        msg: err instanceof Error ? err.message : t("security.errorUnexpected"),
+      });
+    },
+  });
+
+  const verifyEmail = useMutation({
+    mutationFn: (body: { factorId: string; code: string }) =>
+      apiFetch<VerifyEmailOtpSetupResponse>("/v1/auth/mfa/email-otp/verify-setup", {
+        method: "POST",
+        body,
+      }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
+      setPendingEmailOtp(null);
+      setFeedback({ kind: "ok", msg: t("security.emailVerifiedActive") });
+    },
+    onError: (err) => {
+      setFeedback({
+        kind: "err",
+        msg: err instanceof Error ? err.message : t("security.errorInvalidCode"),
+      });
+    },
+  });
+
+  const resendEmail = useMutation({
+    mutationFn: (factorId: string) =>
+      apiFetch<ResendEmailOtpResponse>("/v1/auth/mfa/email-otp/resend", {
+        method: "POST",
+        body: { factorId },
+      }),
+    onSuccess: () => {
+      setFeedback({ kind: "ok", msg: t("security.emailResent") });
+    },
+    onError: (err) => {
+      setFeedback({
+        kind: "err",
+        msg: err instanceof Error ? err.message : t("security.errorResend"),
+      });
+    },
+  });
+
   const verifyCodeSchema = useMemo(() => buildVerifyCodeSchema(t), [t]);
   const form = useForm<VerifyCodeFormValues>({
     resolver: zodResolver(verifyCodeSchema),
@@ -106,6 +167,16 @@ export default function MeSecurityPage() {
   const onVerify = form.handleSubmit((values) => {
     if (!pendingFactor) return;
     verify.mutate({ factorId: pendingFactor.factorId, code: values.code });
+  });
+
+  const emailForm = useForm<VerifyCodeFormValues>({
+    resolver: zodResolver(verifyCodeSchema),
+    defaultValues: { code: "" },
+  });
+
+  const onVerifyEmail = emailForm.handleSubmit((values) => {
+    if (!pendingEmailOtp) return;
+    verifyEmail.mutate({ factorId: pendingEmailOtp.factorId, code: values.code });
   });
 
   return (
@@ -271,8 +342,81 @@ export default function MeSecurityPage() {
             </form>
           </CardContent>
         </Card>
+      ) : pendingEmailOtp ? (
+        <Card data-testid="me-security-emailotp-pending-card">
+          <CardHeader>
+            <CardTitle>{t("security.emailPendingCardTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm" data-testid="me-security-emailotp-hint">
+              {t("security.emailPendingInstruction", { email: pendingEmailOtp.emailHint })}
+            </p>
+
+            <form
+              onSubmit={onVerifyEmail}
+              className="space-y-3"
+              data-testid="me-security-emailotp-verify-form"
+            >
+              <label className="block text-sm">
+                <span>{t("security.emailCodeLabel")}</span>
+                <Input
+                  {...emailForm.register("code")}
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder={t("security.totpCodePlaceholder")}
+                  data-testid="me-security-emailotp-verify-code"
+                  autoComplete="one-time-code"
+                  className="mt-1"
+                />
+                {emailForm.formState.errors.code ? (
+                  <span className="text-xs text-danger">
+                    {emailForm.formState.errors.code.message}
+                  </span>
+                ) : null}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="submit"
+                  data-testid="me-security-emailotp-verify-submit"
+                  disabled={verifyEmail.isPending}
+                >
+                  {verifyEmail.isPending ? t("security.verifying") : t("security.verifySubmit")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  data-testid="me-security-emailotp-resend"
+                  disabled={resendEmail.isPending}
+                  onClick={() => resendEmail.mutate(pendingEmailOtp.factorId)}
+                >
+                  {resendEmail.isPending ? t("security.emailResending") : t("security.emailResend")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  data-testid="me-security-emailotp-cancel"
+                  onClick={() => {
+                    setPendingEmailOtp(null);
+                    emailForm.reset();
+                  }}
+                >
+                  {t("security.cancel")}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="flex justify-end">
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            data-testid="me-security-emailotp-enroll-button"
+            onClick={() => enrollEmail.mutate()}
+            disabled={enrollEmail.isPending}
+          >
+            {enrollEmail.isPending ? t("security.enrolling") : t("security.emailEnrollButton")}
+          </Button>
           <Button
             type="button"
             data-testid="me-security-enroll-button"

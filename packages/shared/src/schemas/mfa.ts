@@ -101,3 +101,67 @@ export const VerifyMfaLoginBodySchema = z.object({
   code: z.string().regex(/^\d{6}$/),
 });
 export type VerifyMfaLoginBody = z.infer<typeof VerifyMfaLoginBodySchema>;
+
+/* ===================================================================== */
+/* === EMAIL_OTP factor (MVP-4) ======================================== */
+/* ---------------------------------------------------------------------
+ * Second factor kind delivered as a 6-digit one-time code emailed to the
+ * user's VERIFIED address (sys_users.user_email). Unlike TOTP, the server
+ * never returns the code in any response body — it is sent ONLY via the
+ * mailer seam and stored hashed-at-rest. The contracts below carry NO
+ * secret/code field on the issuance/response side by design.
+ * ------------------------------------------------------------------- */
+
+/**
+ * Start EMAIL_OTP enrollment. Body is intentionally empty: the server reads
+ * the destination from the authenticated user's verified email, generates a
+ * CSPRNG code, emails it, and stores it hashed. The response confirms the
+ * pending factor + the (masked) destination — never the code itself.
+ */
+export const EnrollEmailOtpBodySchema = z.strictObject({});
+export type EnrollEmailOtpBody = z.infer<typeof EnrollEmailOtpBodySchema>;
+
+export const EnrollEmailOtpResponseSchema = z.object({
+  factorId: z.uuid(),
+  kind: z.literal("EMAIL_OTP"),
+  /** Partially-masked destination e.g. "a***@rtl-bank.org" — for UI confirmation. */
+  emailHint: z.string().min(3),
+  /** Seconds until the emailed code expires (client countdown). */
+  expiresInSeconds: z.number().int().positive(),
+  verified: z.literal(false),
+});
+export type EnrollEmailOtpResponse = z.infer<typeof EnrollEmailOtpResponseSchema>;
+
+/**
+ * Confirm EMAIL_OTP enrollment with the 6-digit code from the email. On
+ * success the factor flips to verified=true.
+ */
+export const VerifyEmailOtpSetupBodySchema = z.object({
+  factorId: z.uuid(),
+  code: z.string().regex(/^\d{6}$/, "Six-digit email code required"),
+});
+export type VerifyEmailOtpSetupBody = z.infer<typeof VerifyEmailOtpSetupBodySchema>;
+
+export const VerifyEmailOtpSetupResponseSchema = z.object({
+  factorId: z.uuid(),
+  kind: z.literal("EMAIL_OTP"),
+  verified: z.literal(true),
+});
+export type VerifyEmailOtpSetupResponse = z.infer<typeof VerifyEmailOtpSetupResponseSchema>;
+
+/**
+ * Re-issue a fresh EMAIL_OTP code for an in-progress challenge (enroll or
+ * login). Rate-limited server-side (issuance cooldown). The response NEVER
+ * carries the code — only the new expiry for the client countdown.
+ */
+export const ResendEmailOtpBodySchema = z.object({
+  /** For login step-up resends; omitted/ignored for enrollment resends. */
+  challengeToken: z.string().min(16).optional(),
+  factorId: z.uuid().optional(),
+});
+export type ResendEmailOtpBody = z.infer<typeof ResendEmailOtpBodySchema>;
+
+export const ResendEmailOtpResponseSchema = z.object({
+  expiresInSeconds: z.number().int().positive(),
+});
+export type ResendEmailOtpResponse = z.infer<typeof ResendEmailOtpResponseSchema>;

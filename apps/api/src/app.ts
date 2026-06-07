@@ -30,6 +30,8 @@ import { COOKIES } from "./config/constants.js";
 import { metricsStore } from "./modules/observability/metrics-store.js";
 import { authRoutes } from "./modules/auth/routes.js";
 import { mfaRoutes } from "./modules/auth/mfa-routes.js";
+import { ConsoleMailer } from "./modules/auth/mailer.js";
+import { buildMfaServiceWithMailer } from "./modules/auth/mfa-service.js";
 import { tenantsRoutes } from "./modules/tenants/routes.js";
 import { usersRoutes } from "./modules/users/routes.js";
 import { positionsRoutes } from "./modules/positions/routes.js";
@@ -116,11 +118,20 @@ export const LOG_REDACT_PATHS = [
   "req.body.password",
   "req.body.newPassword",
   "req.body.confirmPassword",
+  // MFA second-factor codes carried on request bodies (login step-up +
+  // EMAIL_OTP/TOTP verify-setup) — must never persist in request logs.
+  "req.body.code",
+  "req.body.mfaCode",
   "res.body.token",
   "res.body.refreshToken",
   "*.password",
   "*.hash",
   "*.secret",
+  // MFA OTP plaintext: redact any `code`/`otp`/`devOnlyCode` key at any depth so
+  // an emailed one-time code can never surface in structured log fields.
+  "*.code",
+  "*.otp",
+  "*.devOnlyCode",
 ] as const;
 
 export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyInstance> {
@@ -230,8 +241,14 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   });
 
   // 13. Module routes
-  await app.register(authRoutes, { prefix: "/v1/auth", mailer: options.authMailer });
-  await app.register(mfaRoutes, { prefix: "/v1/auth/mfa" });
+  // Build ONE mailer-bound MFA service so EMAIL_OTP sends (enrollment + login
+  // step-up) flow through the same mailer the rest of auth uses (InMemoryMailer
+  // in tests, the configured transactional mailer in prod). Shared by the auth
+  // login flow (mfaService dep) and the MFA management routes (service).
+  const authMailer = options.authMailer ?? new ConsoleMailer(app.log);
+  const mfaService = buildMfaServiceWithMailer(authMailer);
+  await app.register(authRoutes, { prefix: "/v1/auth", mailer: authMailer, mfaService });
+  await app.register(mfaRoutes, { prefix: "/v1/auth/mfa", service: mfaService });
   await app.register(tenantsRoutes, { prefix: "/v1/tenants" });
   await app.register(usersRoutes, { prefix: "/v1/users" });
   await app.register(positionsRoutes, { prefix: "/v1/positions" });

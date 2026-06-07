@@ -264,7 +264,16 @@
     "factorRemoved": "Factor removed.",
     "errorUnexpected": "Unexpected error",
     "errorInvalidCode": "Invalid code",
-    "errorRemove": "Removal error"
+    "errorRemove": "Removal error",
+    "emailEnrollButton": "Add email code",
+    "emailPendingCardTitle": "Email code verification in progress",
+    "emailPendingInstruction": "We sent a 6-digit code to {{email}}. Enter it below to complete the email factor registration.",
+    "emailCodeLabel": "Email code",
+    "emailResend": "Resend",
+    "emailResending": "Sending…",
+    "emailVerifiedActive": "Email factor verified and active.",
+    "emailResent": "A new code was emailed.",
+    "errorResend": "Error resending the code"
   },
   "skills": {
     "title": "My skills",

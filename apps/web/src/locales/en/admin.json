@@ -420,5 +420,69 @@
     "explainTitle": "Score breakdown — {{name}}",
     "explainDesc": "Score {{score}} ({{band}}) · model {{model}}. Each feature contributes weight × normalized value.",
     "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}"
+  },
+  "insightsReadiness": {
+    "title": "Insights — succession readiness",
+    "description": "Per-person readiness toward best-fit target positions, derived in-platform with a transparent rule.",
+    "descriptionScoped": "{{kind}} scope · per-person, per-target-position succession readiness, explainable per feature.",
+    "count": "{{count}} person-position assessments",
+    "errorMessage": "Unable to load succession readiness.",
+    "emptyTitle": "No scores",
+    "emptyDescription": "No readiness computed yet. Run a recompute.",
+    "caption": "Succession readiness (most ready first)",
+    "colSubject": "Person",
+    "colPosition": "Target position",
+    "colValue": "Readiness",
+    "colHorizon": "Horizon",
+    "horizon": {
+      "READY_NOW": "Ready now",
+      "READY_6_MONTHS": "Ready in 6 months",
+      "READY_1_YEAR": "Ready in 1 year",
+      "READY_2_YEARS": "Ready in 2 years",
+      "NOT_READY": "Not ready"
+    },
+    "feature": {
+      "position_fit": "Position fit",
+      "kpi": "KPI performance",
+      "tenure": "Tenure"
+    },
+    "recompute": "Recompute",
+    "recomputing": "Recomputing…",
+    "recomputeSuccess": "Recompute done: {{scored}} assessments.",
+    "recomputeError": "Recompute failed.",
+    "explainTitle": "Breakdown — {{name}} → {{position}}",
+    "explainDesc": "Readiness {{value}} ({{horizon}}) · model {{model}}. Each feature contributes weight × normalized value.",
+    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}"
+  },
+  "insightsSkillGap": {
+    "title": "Insights — skill gap",
+    "description": "Per-person skill gap vs the current role, derived in-platform with a transparent rule.",
+    "descriptionScoped": "{{kind}} scope · per-person skill gap vs current role, explainable per feature.",
+    "count": "{{count}} people scored",
+    "errorMessage": "Unable to load skill gaps.",
+    "emptyTitle": "No scores",
+    "emptyDescription": "No gap computed yet. Run a recompute.",
+    "caption": "Skill gap (largest gap first)",
+    "colSubject": "Person",
+    "colPosition": "Current role",
+    "colValue": "Gap",
+    "colSegment": "Segment",
+    "segment": {
+      "ALIGNED": "Aligned",
+      "MINOR_GAP": "Minor gap",
+      "MODERATE_GAP": "Moderate gap",
+      "MAJOR_GAP": "Major gap"
+    },
+    "feature": {
+      "role_fit_gap": "Role distance",
+      "evidence_sparsity": "Evidence sparsity"
+    },
+    "recompute": "Recompute",
+    "recomputing": "Recomputing…",
+    "recomputeSuccess": "Recompute done: {{scored}} people scored.",
+    "recomputeError": "Recompute failed.",
+    "explainTitle": "Breakdown — {{name}} ({{position}})",
+    "explainDesc": "Gap {{value}} ({{segment}}) · model {{model}}. Each feature contributes weight × normalized value.",
+    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}"
   }
 }

@@ -420,5 +420,69 @@
     "explainTitle": "Scomposizione del punteggio — {{name}}",
     "explainDesc": "Punteggio {{score}} ({{band}}) · modello {{model}}. Ogni feature contribuisce per peso × valore normalizzato.",
     "featureDetail": "norm {{normalized}} · peso {{weight}}% · contrib {{contribution}}"
+  },
+  "insightsReadiness": {
+    "title": "Insights — prontezza alla successione",
+    "description": "Prontezza per persona verso le posizioni-obiettivo best-fit, derivata in-piattaforma con regola trasparente.",
+    "descriptionScoped": "Ambito {{kind}} · prontezza alla successione per persona e posizione-obiettivo, esplicabile per feature.",
+    "count": "{{count}} valutazioni persona-posizione",
+    "errorMessage": "Impossibile caricare la prontezza alla successione.",
+    "emptyTitle": "Nessun punteggio",
+    "emptyDescription": "Nessuna prontezza calcolata. Esegui un ricalcolo.",
+    "caption": "Prontezza alla successione (più pronti in cima)",
+    "colSubject": "Persona",
+    "colPosition": "Posizione-obiettivo",
+    "colValue": "Prontezza",
+    "colHorizon": "Orizzonte",
+    "horizon": {
+      "READY_NOW": "Pronto ora",
+      "READY_6_MONTHS": "Pronto in 6 mesi",
+      "READY_1_YEAR": "Pronto in 1 anno",
+      "READY_2_YEARS": "Pronto in 2 anni",
+      "NOT_READY": "Non pronto"
+    },
+    "feature": {
+      "position_fit": "Affinità posizione",
+      "kpi": "Performance KPI",
+      "tenure": "Anzianità"
+    },
+    "recompute": "Ricalcola",
+    "recomputing": "Ricalcolo…",
+    "recomputeSuccess": "Ricalcolo completato: {{scored}} valutazioni.",
+    "recomputeError": "Errore nel ricalcolo.",
+    "explainTitle": "Scomposizione — {{name}} → {{position}}",
+    "explainDesc": "Prontezza {{value}} ({{horizon}}) · modello {{model}}. Ogni feature contribuisce per peso × valore normalizzato.",
+    "featureDetail": "norm {{normalized}} · peso {{weight}}% · contrib {{contribution}}"
+  },
+  "insightsSkillGap": {
+    "title": "Insights — gap di competenze",
+    "description": "Gap di competenze per persona rispetto al ruolo attuale, derivato in-piattaforma con regola trasparente.",
+    "descriptionScoped": "Ambito {{kind}} · gap di competenze per persona vs ruolo attuale, esplicabile per feature.",
+    "count": "{{count}} persone valutate",
+    "errorMessage": "Impossibile caricare i gap di competenze.",
+    "emptyTitle": "Nessun punteggio",
+    "emptyDescription": "Nessun gap calcolato. Esegui un ricalcolo.",
+    "caption": "Gap di competenze (gap più ampio in cima)",
+    "colSubject": "Persona",
+    "colPosition": "Ruolo attuale",
+    "colValue": "Gap",
+    "colSegment": "Segmento",
+    "segment": {
+      "ALIGNED": "Allineato",
+      "MINOR_GAP": "Gap minore",
+      "MODERATE_GAP": "Gap moderato",
+      "MAJOR_GAP": "Gap rilevante"
+    },
+    "feature": {
+      "role_fit_gap": "Distanza dal ruolo",
+      "evidence_sparsity": "Scarsità di evidenze"
+    },
+    "recompute": "Ricalcola",
+    "recomputing": "Ricalcolo…",
+    "recomputeSuccess": "Ricalcolo completato: {{scored}} persone valutate.",
+    "recomputeError": "Errore nel ricalcolo.",
+    "explainTitle": "Scomposizione — {{name}} ({{position}})",
+    "explainDesc": "Gap {{value}} ({{segment}}) · modello {{model}}. Ogni feature contribuisce per peso × valore normalizzato.",
+    "featureDetail": "norm {{normalized}} · peso {{weight}}% · contrib {{contribution}}"
   }
 }

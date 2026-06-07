@@ -87,6 +87,19 @@ describe("content API (cap④ CMS)", () => {
     expect(detail.currentVersion?.body).toContain("first body");
   });
 
+  it("PLATFORM_ADMIN without a tenant context → 403 TENANT_ID_REQUIRED (never a 500)", async () => {
+    // admin@heuresys.com is PLATFORM_ADMIN: its JWT carries a NULL tenant (cross-tenant
+    // read scope). Content is tenant-scoped (I5) so an admin author has no tenant to
+    // write into → a clean 403, NEVER an unhandled not-null 500. Regression guard for the
+    // missing resolveWriteTenant (the create path used to insert NULL tenant → 500).
+    const r = await suite.app.inject({
+      method: "POST", url: "/v1/content", headers: jhdr(admin),
+      payload: { title: `${PFX} platform nope`, kind: "article", body: "x" },
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("TENANT_ID_REQUIRED");
+  });
+
   it("edit appends a new version + repoints the head", async () => {
     const created = (await suite.app.inject({
       method: "POST", url: "/v1/content", headers: jhdr(author),

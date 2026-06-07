@@ -7,7 +7,7 @@
  */
 import { pool } from "../../db/client.js";
 import type { RoleCode } from "../../config/constants.js";
-import { NotFoundError } from "../../errors/index.js";
+import { NotFoundError, ForbiddenError } from "../../errors/index.js";
 import type {
   ContentBodyFormat,
   ContentCategory,
@@ -33,6 +33,27 @@ function buildScope(a: ActorContext): repo.ScopeFilter {
   const isPlatform = a.roles.includes("PLATFORM_ADMIN");
   return { isPlatform, tenantId: isPlatform ? null : a.tenantId };
 }
+
+/**
+ * Resolve the tenant a write lands in (mirror of surveys/predictions). Content is
+ * tenant-scoped (I5) so every row needs a concrete tenant_id. A PLATFORM_ADMIN's
+ * JWT carries a NULL tenant (cross-tenant read scope); they cannot author content
+ * without a tenant context → a clean 403, NOT an unhandled not-null 500. Non-platform
+ * writers always have their own tenant pinned. (Tenant-targeted platform authoring is
+ * a P2 concern — it would add a tenantId to the create body + a tenant selector UI.)
+ */
+function resolveWriteTenant(a: ActorContext): string {
+  if (a.roles.includes("PLATFORM_ADMIN")) {
+    if (!a.tenantId) throw new ForbiddenError("PLATFORM_ADMIN must author within a tenant context", "TENANT_ID_REQUIRED");
+    return a.tenantId;
+  }
+  if (!a.tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
+  return a.tenantId;
+}
+const writeActorRef = (a: ActorContext): repo.ActorRef => ({ userId: a.userId, tenantId: resolveWriteTenant(a) });
+// Plain ref for UPDATE paths: updateDocumentAppendVersion stamps the version with the
+// DOCUMENT's tenant (cur.tenantId), not the actor's, so a PLATFORM_ADMIN's null tenant
+// here is unused — they may edit across tenants consistent with their read scope.
 const actorRef = (a: ActorContext): repo.ActorRef => ({ userId: a.userId, tenantId: a.tenantId });
 
 const toDoc = (r: repo.DocumentRow): ContentDocument => ({
@@ -63,7 +84,7 @@ export const contentService = {
     categoryId?: string; slug?: string; effectiveDate?: string; expiresDate?: string;
     changeNote?: string; metadata?: Record<string, unknown>;
   }): Promise<ContentDocument> {
-    const doc = await repo.createDocument(actorRef(a), input);
+    const doc = await repo.createDocument(writeActorRef(a), input);
     return toDoc(doc);
   },
 
@@ -94,7 +115,7 @@ export const contentService = {
   },
 
   async createCategory(a: ActorContext, input: { name: string; slug?: string; description?: string; parentId?: string; metadata?: Record<string, unknown> }): Promise<ContentCategory> {
-    return toCat(await repo.insertCategory(pool, actorRef(a), input));
+    return toCat(await repo.insertCategory(pool, writeActorRef(a), input));
   },
 
   async updateCategory(a: ActorContext, id: string, input: { name?: string; slug?: string; description?: string; parentId?: string; metadata?: Record<string, unknown> }): Promise<ContentCategory> {

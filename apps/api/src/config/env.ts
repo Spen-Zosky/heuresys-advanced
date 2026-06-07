@@ -100,6 +100,21 @@ const EnvSchema = z.object({
   // dependency on the serving path, so it stays strictly behind this default-OFF flag
   // to keep the normal serving path Voyage-free. Requires VOYAGE_API_KEY when ON in prod.
   MATCHING_FREETEXT_ENABLED: z.coerce.boolean().default(false),
+
+  // Transactional mailer (SMTP). All OPTIONAL: when SMTP_HOST + MAIL_FROM are
+  // set, buildApp wires the real SmtpMailer (nodemailer); otherwise it falls
+  // back to the dev ConsoleMailer so the server never hard-fails on a missing
+  // mail backend. SMTP_SECURE is parsed as an explicit 'true'/'false' string
+  // (z.coerce.boolean would turn "false" into true). See modules/auth/smtp-mailer.ts.
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().int().positive().optional(),
+  SMTP_SECURE: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true")),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASSWORD: z.string().optional(),
+  MAIL_FROM: z.string().optional(),
 });
 
 const parsed = EnvSchema.parse(process.env);

@@ -30,7 +30,7 @@ import { COOKIES } from "./config/constants.js";
 import { metricsStore } from "./modules/observability/metrics-store.js";
 import { authRoutes } from "./modules/auth/routes.js";
 import { mfaRoutes } from "./modules/auth/mfa-routes.js";
-import { ConsoleMailer } from "./modules/auth/mailer.js";
+import { makeMailer } from "./modules/auth/smtp-mailer.js";
 import { buildMfaServiceWithMailer } from "./modules/auth/mfa-service.js";
 import { tenantsRoutes } from "./modules/tenants/routes.js";
 import { usersRoutes } from "./modules/users/routes.js";
@@ -245,7 +245,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // step-up) flow through the same mailer the rest of auth uses (InMemoryMailer
   // in tests, the configured transactional mailer in prod). Shared by the auth
   // login flow (mfaService dep) and the MFA management routes (service).
-  const authMailer = options.authMailer ?? new ConsoleMailer(app.log);
+  const authMailer = options.authMailer ?? makeMailer(app.log);
   const mfaService = buildMfaServiceWithMailer(authMailer);
   await app.register(authRoutes, { prefix: "/v1/auth", mailer: authMailer, mfaService });
   await app.register(mfaRoutes, { prefix: "/v1/auth/mfa", service: mfaService });

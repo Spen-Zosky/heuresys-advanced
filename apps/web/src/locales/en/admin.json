@@ -386,5 +386,39 @@
         "actions": "Actions"
       }
     }
+  },
+  "insights": {
+    "title": "Insights — flight risk",
+    "description": "Per-person attrition-risk score, derived in-platform with a transparent rule.",
+    "descriptionScoped": "{{kind}} scope · per-person flight-risk score, explainable per feature.",
+    "count": "{{count}} people scored",
+    "errorMessage": "Unable to load insights.",
+    "emptyTitle": "No scores",
+    "emptyDescription": "No score computed yet. Run a recompute.",
+    "caption": "Flight-risk scores (highest risk first)",
+    "colSubject": "Person",
+    "colScore": "Score",
+    "colBand": "Band",
+    "band": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    },
+    "feature": {
+      "tenure": "Tenure",
+      "attendance": "Attendance / overtime",
+      "kpi": "KPI performance",
+      "engagement": "Engagement",
+      "comp": "Compensation positioning",
+      "promotion": "Promotion recency"
+    },
+    "recompute": "Recompute",
+    "recomputing": "Recomputing…",
+    "recomputeSuccess": "Recompute done: {{scored}} people scored.",
+    "recomputeError": "Recompute failed.",
+    "explainTitle": "Score breakdown — {{name}}",
+    "explainDesc": "Score {{score}} ({{band}}) · model {{model}}. Each feature contributes weight × normalized value.",
+    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}"
   }
 }

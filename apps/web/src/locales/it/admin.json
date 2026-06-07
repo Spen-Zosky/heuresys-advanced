@@ -386,5 +386,39 @@
         "actions": "Azioni"
       }
     }
+  },
+  "insights": {
+    "title": "Insights — rischio di abbandono",
+    "description": "Punteggio di flight-risk per persona, derivato in-piattaforma con regola trasparente.",
+    "descriptionScoped": "Ambito {{kind}} · punteggio di flight-risk per persona, esplicabile per feature.",
+    "count": "{{count}} persone valutate",
+    "errorMessage": "Impossibile caricare gli insights.",
+    "emptyTitle": "Nessun punteggio",
+    "emptyDescription": "Nessun punteggio calcolato. Esegui un ricalcolo.",
+    "caption": "Punteggi di flight-risk (rischio più alto in cima)",
+    "colSubject": "Persona",
+    "colScore": "Punteggio",
+    "colBand": "Fascia",
+    "band": {
+      "LOW": "Basso",
+      "MEDIUM": "Medio",
+      "HIGH": "Alto",
+      "CRITICAL": "Critico"
+    },
+    "feature": {
+      "tenure": "Anzianità",
+      "attendance": "Presenze / straordinari",
+      "kpi": "Performance KPI",
+      "engagement": "Engagement",
+      "comp": "Posizionamento retributivo",
+      "promotion": "Recenza promozione"
+    },
+    "recompute": "Ricalcola",
+    "recomputing": "Ricalcolo…",
+    "recomputeSuccess": "Ricalcolo completato: {{scored}} persone valutate.",
+    "recomputeError": "Errore nel ricalcolo.",
+    "explainTitle": "Scomposizione del punteggio — {{name}}",
+    "explainDesc": "Punteggio {{score}} ({{band}}) · modello {{model}}. Ogni feature contribuisce per peso × valore normalizzato.",
+    "featureDetail": "norm {{normalized}} · peso {{weight}}% · contrib {{contribution}}"
   }
 }

@@ -411,7 +411,8 @@ SELECT r.auth_role_id, p.auth_permission_id
 FROM sys.sys_auth_roles r
 CROSS JOIN sys.sys_auth_permissions p
 WHERE r.auth_role_code = 'TENANT_ADMIN'
-  AND p.auth_permission_code NOT IN ('tenant:create', 'tenant:delete', 'role:create', 'role:update', 'brownfield_adaptation:approve')
+  AND p.auth_permission_code NOT IN ('tenant:create', 'tenant:delete', 'role:create', 'role:update', 'brownfield_adaptation:approve',
+                                     'reference_sync:read', 'reference_sync:trigger')
 ON CONFLICT DO NOTHING;
 
 -- BLUEPRINT_MANAGER — typing, blueprint, processes, base read of most resources

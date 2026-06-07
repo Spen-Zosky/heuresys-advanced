@@ -35,14 +35,15 @@ async function login(t: TestApp, email: string): Promise<S> {
 }
 
 let suite: TestApp;
-let admin: S;   // PLATFORM_ADMIN — reference_sync:read/trigger (explicit, mig 000084)
-let manager: S; // MANAGER — NOT covered by the 000005 catch-all → genuinely lacks reference_sync.
-                // (TENANT_ADMIN would be a poor negative: 000005 grants it ALL perms minus a tiny
-                //  denylist that does NOT exclude reference_sync, so TENANT_ADMIN inherits it.)
+let admin: S;       // PLATFORM_ADMIN — reference_sync:read/trigger (explicit, mig 000084)
+let tenantAdmin: S; // TENANT_ADMIN — DENIED: reference_sync is strict PLATFORM_ADMIN-only (mig 000085
+                    //   + 000005 denylist), because an ESCO refresh mutates GLOBAL reference data.
+let manager: S;     // MANAGER — also denied (never in the 000005 catch-all).
 
 beforeAll(async () => {
   suite = await buildTestApp({ referenceSyncDeps: { escoFetcher: new FixtureEscoFetcher(FIXTURE) } });
   admin = await login(suite, "admin@heuresys.com");
+  tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
 });
 
@@ -67,6 +68,12 @@ describe("reference-sync API (cap⑤ ESCO)", () => {
 
   it("RBAC: MANAGER cannot trigger a sync → 403", async () => {
     expect((await trigger(manager)).statusCode).toBe(403);
+  });
+
+  it("RBAC: TENANT_ADMIN is DENIED (reference_sync strict PLATFORM_ADMIN-only)", async () => {
+    // ESCO refresh mutates GLOBAL reference data → PLATFORM_ADMIN-only (mig 000085 + 000005 denylist).
+    expect((await suite.app.inject({ method: "GET", url: "/v1/reference-sync/sources", headers: { cookie: ch(tenantAdmin.cookies) } })).statusCode).toBe(403);
+    expect((await trigger(tenantAdmin)).statusCode).toBe(403);
   });
 
   it("CSRF: admin trigger without x-csrf-token → 403 CSRF_FAIL", async () => {

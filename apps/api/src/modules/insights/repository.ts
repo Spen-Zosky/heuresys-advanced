@@ -127,10 +127,18 @@ export async function extractFlightRiskFeatures(
       GROUP BY 1
     ),
     eng AS (
+      -- response_answers is jsonb DEFAULT '{}' (an OBJECT) and the surveys module
+      -- documents a dual shape (legacy=array, API-created default={}). Guard the
+      -- LATERAL: a non-array payload yields zero elements (skipped) instead of
+      -- raising "cannot extract elements from an object" — which would abort the
+      -- whole recompute query for the entire scope, not just the offending row.
       SELECT r.response_subject_user_id AS user_id,
              avg(COALESCE((e->>'value')::numeric, (e->>'rating')::numeric)) AS engagement_avg
-      FROM sys.sys_engagement_survey_responses r,
-           LATERAL jsonb_array_elements(r.response_answers) e
+      FROM sys.sys_engagement_survey_responses r
+      CROSS JOIN LATERAL jsonb_array_elements(
+        CASE WHEN jsonb_typeof(r.response_answers) = 'array'
+             THEN r.response_answers ELSE '[]'::jsonb END
+      ) e
       WHERE ((e->>'question_type') = 'rating' OR (e ? 'rating'))
         AND COALESCE((e->>'value')::numeric, (e->>'rating')::numeric) IS NOT NULL
       GROUP BY 1

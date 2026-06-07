@@ -35,13 +35,15 @@ async function login(t: TestApp, email: string): Promise<S> {
 }
 
 let suite: TestApp;
-let admin: S;       // PLATFORM_ADMIN — reference_sync:read/trigger
-let tenantAdmin: S; // TENANT_ADMIN — no reference_sync perms
+let admin: S;   // PLATFORM_ADMIN — reference_sync:read/trigger (explicit, mig 000084)
+let manager: S; // MANAGER — NOT covered by the 000005 catch-all → genuinely lacks reference_sync.
+                // (TENANT_ADMIN would be a poor negative: 000005 grants it ALL perms minus a tiny
+                //  denylist that does NOT exclude reference_sync, so TENANT_ADMIN inherits it.)
 
 beforeAll(async () => {
   suite = await buildTestApp({ referenceSyncDeps: { escoFetcher: new FixtureEscoFetcher(FIXTURE) } });
   admin = await login(suite, "admin@heuresys.com");
-  tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+  manager = await login(suite, "paolo.caputo@rtl-bank.org");
 });
 
 afterAll(async () => {
@@ -58,13 +60,13 @@ async function trigger(s: S) {
 }
 
 describe("reference-sync API (cap⑤ ESCO)", () => {
-  it("RBAC: TENANT_ADMIN lacks reference_sync:read → 403 on sources", async () => {
-    const r = await suite.app.inject({ method: "GET", url: "/v1/reference-sync/sources", headers: { cookie: ch(tenantAdmin.cookies) } });
+  it("RBAC: MANAGER lacks reference_sync:read → 403 on sources", async () => {
+    const r = await suite.app.inject({ method: "GET", url: "/v1/reference-sync/sources", headers: { cookie: ch(manager.cookies) } });
     expect(r.statusCode).toBe(403);
   });
 
-  it("RBAC: TENANT_ADMIN cannot trigger a sync → 403", async () => {
-    expect((await trigger(tenantAdmin)).statusCode).toBe(403);
+  it("RBAC: MANAGER cannot trigger a sync → 403", async () => {
+    expect((await trigger(manager)).statusCode).toBe(403);
   });
 
   it("CSRF: admin trigger without x-csrf-token → 403 CSRF_FAIL", async () => {

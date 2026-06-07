@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { pool } from "../src/db/client.js";
 
 // Cap③ data-mining — in-platform flight-risk scoring (/v1/insights/*). Real login + live DB.
 // insights:view = 6 non-leaf HRMS roles (admin/manager-only, D-6; no ESS for USER/READ_ONLY).
@@ -83,6 +84,34 @@ describe("insights API (cap③ flight-risk)", () => {
     expect(b.accepted).toBe(true);
     expect(b.scored).toBeGreaterThan(100);
     expect(b.modelVersion).toBe("flight-risk-v1");
+  });
+
+  it("recompute survives a non-array (object) response_answers payload — guarded jsonb_array_elements", async () => {
+    // response_answers is jsonb DEFAULT '{}' (an object); an unguarded
+    // jsonb_array_elements over it raises "cannot extract elements from an object"
+    // and aborts the WHOLE recompute. Insert one such row and assert recompute still 200.
+    const seedRow = await pool.query<{ survey_id: string; tenant_id: string; subject: string }>(
+      `SELECT response_survey_id AS survey_id, response_tenant_id AS tenant_id, response_subject_user_id AS subject
+         FROM sys.sys_engagement_survey_responses LIMIT 1`,
+    );
+    const seed = seedRow.rows[0];
+    if (!seed) return; // no engagement data → nothing to guard
+    const ins = await pool.query<{ id: string }>(
+      `INSERT INTO sys.sys_engagement_survey_responses
+         (response_tenant_id, response_natural_key, response_survey_id, response_subject_user_id,
+          response_answers, response_is_complete)
+       VALUES ($1, $2, $3, $4, '{}'::jsonb, false)
+       RETURNING response_id AS id`,
+      [seed.tenant_id, `HEURESYS-SYNCTEST-OBJ-${process.hrtime.bigint()}`, seed.survey_id, seed.subject],
+    );
+    const tmpId = ins.rows[0]!.id;
+    try {
+      const r = await recompute(admin);
+      expect(r.statusCode).toBe(200);
+      expect((r.json() as { scored: number }).scored).toBeGreaterThan(100);
+    } finally {
+      await pool.query("DELETE FROM sys.sys_engagement_survey_responses WHERE response_id = $1", [tmpId]);
+    }
   });
 
   it("list (admin): valid bands/scores, sorted desc, explainable (weights sum 1.0)", async () => {

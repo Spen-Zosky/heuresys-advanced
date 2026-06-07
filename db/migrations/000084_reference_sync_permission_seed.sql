@@ -1,11 +1,18 @@
 -- ============================================================================
 -- 000084_reference_sync_permission_seed.sql — cap⑤ reference-sync RBAC permissions.
 -- Mirrors 000080_predictionsml_permission_seed.sql. Idempotent (ON CONFLICT DO NOTHING).
--- Reference taxonomies (ESCO/ISTAT/…) are GLOBAL platform infra (scraping spec §3.5/§4)
--- -> PLATFORM_ADMIN only (no tenant ESS surface):
+-- Reference taxonomies (ESCO/ISTAT/…) are GLOBAL platform infra (scraping spec §3.5/§4).
+-- This seed EXPLICITLY grants only PLATFORM_ADMIN:
 --   reference_sync:read    — list official sources + sync runs.
 --   reference_sync:trigger — POST a sync run (refresh the reference data; CSRF-guarded).
--- NB PLATFORM_ADMIN is NOT auto-granted later permissions -> listed explicitly.
+-- NB PLATFORM_ADMIN is NOT auto-granted later permissions -> listed explicitly here.
+-- HOWEVER, TENANT_ADMIN ALSO inherits both via the 000005 catch-all (it grants
+-- TENANT_ADMIN every permission EXCEPT a small denylist that does NOT exclude
+-- reference_sync). So effective holders = PLATFORM_ADMIN + TENANT_ADMIN. The
+-- refresh is idempotent + non-destructive (upsert, never delete), so this is
+-- acceptable under the platform's tenant-superuser RBAC model. To make it strictly
+-- PLATFORM_ADMIN-only (spec §3.5), add reference_sync:{read,trigger} to the 000005
+-- TENANT_ADMIN denylist + a revoke — deferred decision (do not modify auth foundation here).
 --    RBAC cache reloads at server boot / first buildTestApp.
 -- Authored: 2026-06-07 (cap⑤ P1 ESCO reference-sync).
 -- ============================================================================

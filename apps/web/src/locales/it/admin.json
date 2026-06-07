@@ -279,5 +279,103 @@
       "edgeArrow": " → ",
       "note": "Renderer Mermaid attivato (max 50 nodi · 200 edge). Liste nodi/edge complete sopra (max 20 + 20 visibili)."
     }
+  },
+  "content": {
+    "title": "Contenuti",
+    "description": "Knowledge base, policy, manuali e annunci del tenant.",
+    "count": "{{count}} documenti",
+    "errorMessage": "Impossibile caricare i contenuti.",
+    "emptyTitle": "Nessun documento",
+    "emptyDescription": "Non ci sono contenuti. Creane uno con il modulo qui sopra.",
+    "caption": "Elenco documenti",
+    "columns": {
+      "title": "Titolo",
+      "kind": "Tipo",
+      "status": "Stato",
+      "category": "Categoria",
+      "updated": "Aggiornato"
+    },
+    "kind": {
+      "article": "Articolo",
+      "policy": "Policy",
+      "announcement": "Annuncio",
+      "handbook": "Manuale",
+      "process_doc": "Doc di processo"
+    },
+    "status": {
+      "draft": "Bozza",
+      "in_review": "In revisione",
+      "published": "Pubblicato",
+      "archived": "Archiviato"
+    },
+    "format": {
+      "markdown": "Markdown",
+      "html": "HTML"
+    },
+    "create": {
+      "cardTitle": "Nuovo documento",
+      "titleLabel": "Titolo",
+      "kindLabel": "Tipo",
+      "categoryLabel": "Categoria",
+      "formatLabel": "Formato",
+      "bodyLabel": "Corpo (markdown)",
+      "changeNoteLabel": "Nota di modifica",
+      "noCategory": "— Nessuna —",
+      "submit": "Crea documento",
+      "submitting": "Creazione…",
+      "successMsg": "Documento creato.",
+      "errorUnexpected": "Errore imprevisto."
+    },
+    "filters": {
+      "kindAll": "Tutti i tipi",
+      "statusAll": "Tutti gli stati",
+      "categoryAll": "Tutte le categorie",
+      "searchLabel": "Cerca",
+      "searchPlaceholder": "Cerca per titolo…"
+    },
+    "validation": {
+      "required": "Campo obbligatorio."
+    },
+    "categories": {
+      "cardTitle": "Categorie",
+      "count": "{{count}} categorie",
+      "nameLabel": "Nome",
+      "descriptionLabel": "Descrizione",
+      "submit": "Aggiungi categoria",
+      "submitting": "Salvataggio…",
+      "successMsg": "Categoria creata.",
+      "empty": "Nessuna categoria.",
+      "colName": "Nome",
+      "colSlug": "Slug",
+      "colActions": "Azioni",
+      "delete": "Elimina"
+    },
+    "detail": {
+      "back": "← Contenuti",
+      "notFound": "Documento non trovato.",
+      "loadError": "Errore di caricamento.",
+      "editCardTitle": "Modifica documento",
+      "statusLabel": "Stato",
+      "save": "Salva modifiche",
+      "saving": "Salvataggio…",
+      "saveSuccess": "Documento aggiornato (nuova versione).",
+      "errorUnexpected": "Errore imprevisto.",
+      "delete": "Elimina documento",
+      "deleting": "Eliminazione…",
+      "noCategory": "— Nessuna —",
+      "versionsTitle": "Cronologia versioni",
+      "versionsCount": "{{count}} versioni",
+      "versionsEmpty": "Nessuna versione.",
+      "versionsCaption": "Versioni del documento",
+      "currentBadge": "Corrente",
+      "vCols": {
+        "version": "Versione",
+        "versionValue": "v{{n}}",
+        "title": "Titolo",
+        "changeNote": "Nota",
+        "author": "Autore",
+        "created": "Creato"
+      }
+    }
   }
 }

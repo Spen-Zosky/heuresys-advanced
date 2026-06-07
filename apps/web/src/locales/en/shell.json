@@ -6,7 +6,8 @@
       "workforce": "Workforce",
       "operations": "Operations",
       "intelligence": "Intelligence",
-      "governance": "Governance"
+      "governance": "Governance",
+      "content": "Content"
     },
     "perspective": {
       "label": "Perspective",

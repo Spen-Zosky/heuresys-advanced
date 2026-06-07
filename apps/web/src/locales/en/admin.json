@@ -279,5 +279,103 @@
       "edgeArrow": " → ",
       "note": "Mermaid renderer active (max 50 nodes · 200 edges). Full node/edge lists above (max 20 + 20 visible)."
     }
+  },
+  "content": {
+    "title": "Content",
+    "description": "Knowledge base, policies, handbooks and announcements for the tenant.",
+    "count": "{{count}} documents",
+    "errorMessage": "Unable to load content.",
+    "emptyTitle": "No documents",
+    "emptyDescription": "There is no content yet. Create one with the form above.",
+    "caption": "Document list",
+    "columns": {
+      "title": "Title",
+      "kind": "Kind",
+      "status": "Status",
+      "category": "Category",
+      "updated": "Updated"
+    },
+    "kind": {
+      "article": "Article",
+      "policy": "Policy",
+      "announcement": "Announcement",
+      "handbook": "Handbook",
+      "process_doc": "Process doc"
+    },
+    "status": {
+      "draft": "Draft",
+      "in_review": "In review",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "format": {
+      "markdown": "Markdown",
+      "html": "HTML"
+    },
+    "create": {
+      "cardTitle": "New document",
+      "titleLabel": "Title",
+      "kindLabel": "Kind",
+      "categoryLabel": "Category",
+      "formatLabel": "Format",
+      "bodyLabel": "Body (markdown)",
+      "changeNoteLabel": "Change note",
+      "noCategory": "— None —",
+      "submit": "Create document",
+      "submitting": "Creating…",
+      "successMsg": "Document created.",
+      "errorUnexpected": "Unexpected error."
+    },
+    "filters": {
+      "kindAll": "All kinds",
+      "statusAll": "All statuses",
+      "categoryAll": "All categories",
+      "searchLabel": "Search",
+      "searchPlaceholder": "Search by title…"
+    },
+    "validation": {
+      "required": "Required field."
+    },
+    "categories": {
+      "cardTitle": "Categories",
+      "count": "{{count}} categories",
+      "nameLabel": "Name",
+      "descriptionLabel": "Description",
+      "submit": "Add category",
+      "submitting": "Saving…",
+      "successMsg": "Category created.",
+      "empty": "No categories.",
+      "colName": "Name",
+      "colSlug": "Slug",
+      "colActions": "Actions",
+      "delete": "Delete"
+    },
+    "detail": {
+      "back": "← Content",
+      "notFound": "Document not found.",
+      "loadError": "Load error.",
+      "editCardTitle": "Edit document",
+      "statusLabel": "Status",
+      "save": "Save changes",
+      "saving": "Saving…",
+      "saveSuccess": "Document updated (new version).",
+      "errorUnexpected": "Unexpected error.",
+      "delete": "Delete document",
+      "deleting": "Deleting…",
+      "noCategory": "— None —",
+      "versionsTitle": "Version history",
+      "versionsCount": "{{count}} versions",
+      "versionsEmpty": "No versions.",
+      "versionsCaption": "Document versions",
+      "currentBadge": "Current",
+      "vCols": {
+        "version": "Version",
+        "versionValue": "v{{n}}",
+        "title": "Title",
+        "changeNote": "Note",
+        "author": "Author",
+        "created": "Created"
+      }
+    }
   }
 }

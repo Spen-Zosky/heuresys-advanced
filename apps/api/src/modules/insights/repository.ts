@@ -291,3 +291,299 @@ export async function readUserFlightRiskScore(
   const row = res.rows[0];
   return row ? mapStored(row) : null;
 }
+
+/* ======================================================================== */
+/* P2 — Slice B: succession-readiness  &  Slice C: skill-gap                 */
+/* In-platform-derived over the ② embedding substrate + live sys.* features. */
+/* ======================================================================== */
+
+/** Raw per-(user, candidate target position) features for slice B. */
+export interface ReadinessFeatureRow {
+  userId: string;
+  tenantId: string;
+  displayName: string | null;
+  positionId: string;
+  positionCode: string | null;
+  positionTitle: string | null;
+  positionFit: number | null;   // cosine 0..1 (profile ↔ target role embedding)
+  kpiAchievement: number | null; // measured/target ratio
+  tenureYears: number | null;
+}
+
+/** A stored readiness/skill-gap row (band-or-horizon-or-segment in `category`). */
+export interface StoredSubjectPositionRow {
+  userId: string;
+  tenantId: string;
+  displayName: string | null;
+  positionId: string;
+  positionCode: string | null;
+  positionTitle: string | null;
+  value: number;
+  category: string;
+  modelVersion: string;
+  computedAt: string;
+  payload: Record<string, unknown>;
+}
+
+export interface SubjectPositionScoreToStore {
+  userId: string;
+  tenantId: string;
+  positionId: string;
+  value: number;
+  category: string; // horizon (B) | segment (C)
+  modelVersion: string;
+  payload: unknown;
+}
+
+/**
+ * Slice B feature extraction: each scoped user's top-N best-fit CANDIDATE target
+ * positions (cosine profile ↔ position's job_role embedding, in-tenant, excluding the
+ * user's current position) + KPI achievement + tenure. The service normalizes + weights.
+ */
+export async function extractReadinessFeatures(
+  q: DbConnector,
+  scope: ScopeFilter,
+  topN: number,
+): Promise<ReadinessFeatureRow[]> {
+  const sc = userScopeClause(scope);
+  const np = sc.params.length;
+  const sql = `
+    WITH scoped AS (
+      SELECT DISTINCT u.user_id, u.user_tenant_id, u.user_display_name
+      FROM sys.sys_users u
+      ${PRIMARY_ASSIGNMENT_JOIN}
+      WHERE u.user_status = 'ACTIVE' AND (${sc.sql})
+    ),
+    cur AS (
+      SELECT user_position_assignment_user_id AS user_id, user_position_assignment_position_id AS position_id
+      FROM sys.sys_user_position_assignments
+      WHERE user_position_assignment_kind = 'PRIMARY' AND user_position_assignment_status = 'ACTIVE'
+    ),
+    cand AS (
+      SELECT s.user_id, s.user_tenant_id AS tenant_id, s.user_display_name AS display_name,
+             p.position_id, p.position_code, p.position_title,
+             (1 - (jre.embedding <=> pe.embedding)) AS cosine,
+             row_number() OVER (PARTITION BY s.user_id ORDER BY (jre.embedding <=> pe.embedding), p.position_code) AS rn
+      FROM scoped s
+      JOIN sys.sys_user_profile_embeddings pe ON pe.user_id = s.user_id
+      JOIN sys.sys_positions p ON p.position_is_active = true AND p.position_tenant_id = s.user_tenant_id
+      JOIN sys.sys_job_role_embeddings jre ON jre.job_role_id = p.position_job_role_id
+      LEFT JOIN cur ON cur.user_id = s.user_id
+      WHERE p.position_id IS DISTINCT FROM cur.position_id
+    ),
+    kpi AS (
+      SELECT user_kpi_evidence_user_id AS user_id,
+             avg(user_kpi_evidence_measured_value / NULLIF(user_kpi_evidence_target_value, 0)) AS achievement
+      FROM sys.sys_user_kpi_evidence
+      WHERE user_kpi_evidence_target_value IS NOT NULL
+      GROUP BY 1
+    ),
+    ten AS (
+      SELECT user_position_assignment_user_id AS user_id, min(user_position_assignment_start_date) AS first_start
+      FROM sys.sys_user_position_assignments
+      WHERE user_position_assignment_start_date IS NOT NULL
+      GROUP BY 1
+    )
+    SELECT c.user_id, c.tenant_id, c.display_name, c.position_id, c.position_code, c.position_title,
+           c.cosine AS position_fit, kpi.achievement AS kpi_achievement,
+           CASE WHEN ten.first_start IS NOT NULL THEN (CURRENT_DATE - ten.first_start)::numeric / 365.25 END AS tenure_years
+    FROM cand c
+    LEFT JOIN kpi ON kpi.user_id = c.user_id
+    LEFT JOIN ten ON ten.user_id = c.user_id
+    WHERE c.rn <= $${np + 1}
+    ORDER BY c.user_id, c.rn
+  `;
+  const res = await q.query(sql, [...sc.params, topN]);
+  return res.rows.map((r) => ({
+    userId: r.user_id as string,
+    tenantId: r.tenant_id as string,
+    displayName: (r.display_name as string | null) ?? null,
+    positionId: r.position_id as string,
+    positionCode: (r.position_code as string | null) ?? null,
+    positionTitle: (r.position_title as string | null) ?? null,
+    positionFit: num(r.position_fit),
+    kpiAchievement: num(r.kpi_achievement),
+    tenureYears: num(r.tenure_years),
+  }));
+}
+
+/** Raw per-user features for slice C (current-role skill-gap). */
+export interface SkillGapFeatureRow {
+  userId: string;
+  tenantId: string;
+  displayName: string | null;
+  positionId: string;
+  positionCode: string | null;
+  positionTitle: string | null;
+  currentRoleFit: number | null; // cosine 0..1 (profile ↔ current role embedding)
+  evidenceCount: number | null;  // # distinct skills with evidence
+}
+
+/**
+ * Slice C feature extraction: each scoped user's cosine fit to their CURRENT position's
+ * role embedding + skill-evidence sparsity (distinct-skill count). The service derives the
+ * gap (1 - cosine) blended with evidence sparsity.
+ */
+export async function extractSkillGapFeatures(
+  q: DbConnector,
+  scope: ScopeFilter,
+): Promise<SkillGapFeatureRow[]> {
+  const sc = userScopeClause(scope);
+  const sql = `
+    WITH scoped AS (
+      SELECT DISTINCT u.user_id, u.user_tenant_id, u.user_display_name
+      FROM sys.sys_users u
+      ${PRIMARY_ASSIGNMENT_JOIN}
+      WHERE u.user_status = 'ACTIVE' AND (${sc.sql})
+    )
+    SELECT s.user_id, s.user_tenant_id AS tenant_id, s.user_display_name AS display_name,
+           p.position_id, p.position_code, p.position_title,
+           (1 - (jre.embedding <=> pe.embedding)) AS current_role_fit,
+           pe.derived_from_evidence_count AS evidence_count
+    FROM scoped s
+    JOIN sys.sys_user_profile_embeddings pe ON pe.user_id = s.user_id
+    JOIN sys.sys_user_position_assignments a ON a.user_position_assignment_user_id = s.user_id
+      AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'
+    JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+    JOIN sys.sys_job_role_embeddings jre ON jre.job_role_id = p.position_job_role_id
+    ORDER BY s.user_id
+  `;
+  const res = await q.query(sql, sc.params);
+  return res.rows.map((r) => ({
+    userId: r.user_id as string,
+    tenantId: r.tenant_id as string,
+    displayName: (r.display_name as string | null) ?? null,
+    positionId: r.position_id as string,
+    positionCode: (r.position_code as string | null) ?? null,
+    positionTitle: (r.position_title as string | null) ?? null,
+    currentRoleFit: num(r.current_role_fit),
+    evidenceCount: num(r.evidence_count),
+  }));
+}
+
+// ── Upserts (append-with-latest-wins) ──
+export async function upsertReadinessScores(q: DbConnector, rows: SubjectPositionScoreToStore[]): Promise<number> {
+  if (rows.length === 0) return 0;
+  const params: unknown[] = [];
+  const tuples = rows.map((r, i) => {
+    const b = i * 7;
+    params.push(r.tenantId, r.userId, r.positionId, r.value, r.category, r.modelVersion, JSON.stringify(r.payload));
+    return `($${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}, $${b + 6}, $${b + 7}::jsonb)`;
+  });
+  await q.query(
+    `INSERT INTO sys.sys_succession_readiness_scores
+       (succession_readiness_score_tenant_id, succession_readiness_score_user_id, succession_readiness_score_position_id,
+        succession_readiness_score_value, succession_readiness_score_horizon, succession_readiness_score_model_version, succession_readiness_score_payload)
+     VALUES ${tuples.join(", ")}`,
+    params,
+  );
+  return rows.length;
+}
+
+export async function upsertSkillGapScores(q: DbConnector, rows: SubjectPositionScoreToStore[]): Promise<number> {
+  if (rows.length === 0) return 0;
+  const params: unknown[] = [];
+  const tuples = rows.map((r, i) => {
+    const b = i * 7;
+    params.push(r.tenantId, r.userId, r.positionId, r.value, r.category, r.modelVersion, JSON.stringify(r.payload));
+    return `($${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}, $${b + 6}, $${b + 7}::jsonb)`;
+  });
+  await q.query(
+    `INSERT INTO sys.sys_skill_gap_scores
+       (skill_gap_score_tenant_id, skill_gap_score_user_id, skill_gap_score_position_id,
+        skill_gap_score_value, skill_gap_score_segment, skill_gap_score_model_version, skill_gap_score_payload)
+     VALUES ${tuples.join(", ")}`,
+    params,
+  );
+  return rows.length;
+}
+
+function mapSubjectPosition(r: Record<string, unknown>): StoredSubjectPositionRow {
+  return {
+    userId: r.user_id as string,
+    tenantId: r.tenant_id as string,
+    displayName: (r.display_name as string | null) ?? null,
+    positionId: r.position_id as string,
+    positionCode: (r.position_code as string | null) ?? null,
+    positionTitle: (r.position_title as string | null) ?? null,
+    value: Number(r.value),
+    category: r.category as string,
+    modelVersion: r.model_version as string,
+    computedAt: (r.computed_at as Date).toISOString(),
+    payload: (r.payload as Record<string, unknown>) ?? {},
+  };
+}
+
+export async function readReadinessScores(q: DbConnector, scope: ScopeFilter): Promise<StoredSubjectPositionRow[]> {
+  const params: unknown[] = [];
+  let where = "TRUE";
+  if (!scope.isPlatformScope) {
+    params.push(scope.tenantId);
+    const clauses = ["sr.succession_readiness_score_tenant_id = $1"];
+    if (scope.teamPositionIds.length > 0) {
+      params.push(scope.teamPositionIds);
+      clauses.push(`a.user_position_assignment_position_id = ANY($${params.length}::uuid[])`);
+    }
+    where = clauses.join(" AND ");
+  }
+  const res = await q.query(
+    `SELECT DISTINCT ON (sr.succession_readiness_score_user_id, sr.succession_readiness_score_position_id)
+            sr.succession_readiness_score_user_id   AS user_id,
+            sr.succession_readiness_score_tenant_id AS tenant_id,
+            u.user_display_name                     AS display_name,
+            sr.succession_readiness_score_position_id AS position_id,
+            p.position_code, p.position_title,
+            sr.succession_readiness_score_value         AS value,
+            sr.succession_readiness_score_horizon       AS category,
+            sr.succession_readiness_score_model_version AS model_version,
+            sr.succession_readiness_score_computed_at   AS computed_at,
+            sr.succession_readiness_score_payload       AS payload
+     FROM sys.sys_succession_readiness_scores sr
+     JOIN sys.sys_users u ON u.user_id = sr.succession_readiness_score_user_id
+     LEFT JOIN sys.sys_positions p ON p.position_id = sr.succession_readiness_score_position_id
+     LEFT JOIN sys.sys_user_position_assignments a
+       ON a.user_position_assignment_user_id = sr.succession_readiness_score_user_id
+      AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'
+     WHERE ${where}
+     ORDER BY sr.succession_readiness_score_user_id, sr.succession_readiness_score_position_id, sr.succession_readiness_score_computed_at DESC`,
+    params,
+  );
+  return res.rows.map(mapSubjectPosition);
+}
+
+export async function readSkillGapScores(q: DbConnector, scope: ScopeFilter): Promise<StoredSubjectPositionRow[]> {
+  const params: unknown[] = [];
+  let where = "TRUE";
+  if (!scope.isPlatformScope) {
+    params.push(scope.tenantId);
+    const clauses = ["sg.skill_gap_score_tenant_id = $1"];
+    if (scope.teamPositionIds.length > 0) {
+      params.push(scope.teamPositionIds);
+      clauses.push(`a.user_position_assignment_position_id = ANY($${params.length}::uuid[])`);
+    }
+    where = clauses.join(" AND ");
+  }
+  const res = await q.query(
+    `SELECT DISTINCT ON (sg.skill_gap_score_user_id)
+            sg.skill_gap_score_user_id   AS user_id,
+            sg.skill_gap_score_tenant_id AS tenant_id,
+            u.user_display_name          AS display_name,
+            sg.skill_gap_score_position_id AS position_id,
+            p.position_code, p.position_title,
+            sg.skill_gap_score_value         AS value,
+            sg.skill_gap_score_segment       AS category,
+            sg.skill_gap_score_model_version AS model_version,
+            sg.skill_gap_score_computed_at   AS computed_at,
+            sg.skill_gap_score_payload       AS payload
+     FROM sys.sys_skill_gap_scores sg
+     JOIN sys.sys_users u ON u.user_id = sg.skill_gap_score_user_id
+     LEFT JOIN sys.sys_positions p ON p.position_id = sg.skill_gap_score_position_id
+     LEFT JOIN sys.sys_user_position_assignments a
+       ON a.user_position_assignment_user_id = sg.skill_gap_score_user_id
+      AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'
+     WHERE ${where}
+     ORDER BY sg.skill_gap_score_user_id, sg.skill_gap_score_computed_at DESC`,
+    params,
+  );
+  return res.rows.map(mapSubjectPosition);
+}

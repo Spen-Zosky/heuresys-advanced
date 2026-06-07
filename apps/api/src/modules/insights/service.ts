@@ -23,6 +23,12 @@ import type {
   FlightRiskListResponse,
   InsightsRecomputeResponse,
   InsightsScopeKind,
+  SuccessionReadinessHorizon,
+  SuccessionReadinessScore,
+  SuccessionReadinessListResponse,
+  SkillGapSegment,
+  SkillGapScore,
+  SkillGapListResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
@@ -184,6 +190,122 @@ function toFlightRiskScore(row: repo.StoredScoreRow): FlightRiskScore {
   };
 }
 
+/* ======================================================================== */
+/* P2 — Slice B: succession-readiness (spec §9.3) — PM tuning delegated.      */
+/* Weights Σ=1: position-fit .50 · KPI .30 · tenure .20. (Seniority-gap was   */
+/* dropped — data-sparse, 49/227 roles, undefined ordinal scale — and its     */
+/* weight redistributed; all 3 retained features are reliably computable.)    */
+/* ======================================================================== */
+export const SUCCESSION_MODEL_VERSION = "succession-readiness-v1";
+const SUCCESSION_RULE_ID = "weighted-linear-succession-readiness";
+export const READINESS_TOP_N = 3;
+export const READINESS_WEIGHTS = { positionFit: 0.5, kpi: 0.3, tenure: 0.2 } as const;
+
+const normPositionFit = (cos: number | null): number | null => (cos === null ? null : clamp(cos * 100));
+const normKpiReadiness = (ach: number | null): number | null => (ach === null ? null : clamp(linUp(ach, 0.4, 1.0)));
+const normTenureReadiness = (y: number | null): number | null => (y === null ? null : clamp(linUp(y, 0.5, 5)));
+
+function horizonOf(v: number): SuccessionReadinessHorizon {
+  if (v >= 85) return "READY_NOW";
+  if (v >= 70) return "READY_6_MONTHS";
+  if (v >= 55) return "READY_1_YEAR";
+  if (v >= 40) return "READY_2_YEARS";
+  return "NOT_READY";
+}
+
+/** Pure, deterministic blend → readiness value + horizon + per-feature explanation. */
+export function scoreReadiness(raw: repo.ReadinessFeatureRow): {
+  value: number;
+  horizon: SuccessionReadinessHorizon;
+  features: FlightRiskFeatureContribution[];
+} {
+  const defs: FeatureDef[] = [
+    { key: "position_fit", weight: READINESS_WEIGHTS.positionFit, raw: raw.positionFit, normalized: normPositionFit(raw.positionFit) },
+    { key: "kpi", weight: READINESS_WEIGHTS.kpi, raw: raw.kpiAchievement, normalized: normKpiReadiness(raw.kpiAchievement) },
+    { key: "tenure", weight: READINESS_WEIGHTS.tenure, raw: raw.tenureYears, normalized: normTenureReadiness(raw.tenureYears) },
+  ];
+  const present = defs.filter((d) => d.normalized !== null);
+  const wsum = present.reduce((s, d) => s + d.weight, 0);
+  const features: FlightRiskFeatureContribution[] = defs.map((d) => {
+    const effW = d.normalized !== null && wsum > 0 ? d.weight / wsum : 0;
+    return {
+      feature: d.key,
+      raw: d.raw,
+      normalized: d.normalized !== null ? round2(d.normalized) : null,
+      weight: round4(effW),
+      contribution: d.normalized !== null ? round2(effW * d.normalized) : 0,
+    };
+  });
+  const value = wsum > 0 ? round2(present.reduce((s, d) => s + (d.weight / wsum) * (d.normalized as number), 0)) : 0;
+  return { value, horizon: horizonOf(value), features };
+}
+
+/* ======================================================================== */
+/* P2 — Slice C: skill-gap (spec §9.4). Weights Σ=1: role-fit-gap .70 ·       */
+/* evidence-sparsity .30. Both always present (cosine + profile count).       */
+/* ======================================================================== */
+export const SKILL_GAP_MODEL_VERSION = "skill-gap-v1";
+const SKILL_GAP_RULE_ID = "weighted-linear-skill-gap";
+export const SKILL_GAP_WEIGHTS = { roleFitGap: 0.7, evidenceSparsity: 0.3 } as const;
+const EVIDENCE_CAP = 12; // ≥12 distinct skills with evidence → no sparsity gap
+
+const cosineGapNorm = (cos: number | null): number | null => (cos === null ? null : clamp((1 - cos) * 100));
+const sparsityGapNorm = (count: number | null): number | null =>
+  count === null ? null : clamp((1 - Math.min(count, EVIDENCE_CAP) / EVIDENCE_CAP) * 100);
+
+function segmentOf(v: number): SkillGapSegment {
+  if (v >= 65) return "MAJOR_GAP";
+  if (v >= 45) return "MODERATE_GAP";
+  if (v >= 25) return "MINOR_GAP";
+  return "ALIGNED";
+}
+
+export function scoreSkillGap(raw: repo.SkillGapFeatureRow): {
+  value: number;
+  segment: SkillGapSegment;
+  features: FlightRiskFeatureContribution[];
+} {
+  const defs: FeatureDef[] = [
+    { key: "role_fit_gap", weight: SKILL_GAP_WEIGHTS.roleFitGap, raw: raw.currentRoleFit, normalized: cosineGapNorm(raw.currentRoleFit) },
+    { key: "evidence_sparsity", weight: SKILL_GAP_WEIGHTS.evidenceSparsity, raw: raw.evidenceCount, normalized: sparsityGapNorm(raw.evidenceCount) },
+  ];
+  const present = defs.filter((d) => d.normalized !== null);
+  const wsum = present.reduce((s, d) => s + d.weight, 0);
+  const features: FlightRiskFeatureContribution[] = defs.map((d) => {
+    const effW = d.normalized !== null && wsum > 0 ? d.weight / wsum : 0;
+    return {
+      feature: d.key,
+      raw: d.raw,
+      normalized: d.normalized !== null ? round2(d.normalized) : null,
+      weight: round4(effW),
+      contribution: d.normalized !== null ? round2(effW * d.normalized) : 0,
+    };
+  });
+  const value = wsum > 0 ? round2(present.reduce((s, d) => s + (d.weight / wsum) * (d.normalized as number), 0)) : 0;
+  return { value, segment: segmentOf(value), features };
+}
+
+function readFeatures(payload: Record<string, unknown>): FlightRiskFeatureContribution[] {
+  const deriv = (payload?.derivation ?? {}) as Record<string, unknown>;
+  return Array.isArray(deriv.features) ? (deriv.features as FlightRiskFeatureContribution[]) : [];
+}
+function toReadinessScore(row: repo.StoredSubjectPositionRow): SuccessionReadinessScore {
+  return {
+    userId: row.userId, tenantId: row.tenantId, displayName: row.displayName,
+    positionId: row.positionId, positionCode: row.positionCode, positionTitle: row.positionTitle,
+    value: row.value, horizon: row.category as SuccessionReadinessHorizon,
+    modelVersion: row.modelVersion, computedAt: row.computedAt, features: readFeatures(row.payload),
+  };
+}
+function toSkillGapScore(row: repo.StoredSubjectPositionRow): SkillGapScore {
+  return {
+    userId: row.userId, tenantId: row.tenantId, displayName: row.displayName,
+    positionId: row.positionId, positionCode: row.positionCode, positionTitle: row.positionTitle,
+    value: row.value, segment: row.category as SkillGapSegment,
+    modelVersion: row.modelVersion, computedAt: row.computedAt, features: readFeatures(row.payload),
+  };
+}
+
 export const insightsService = {
   /** Scored list (scope-filtered), highest risk first. */
   async flightRisk(a: ActorContext): Promise<FlightRiskListResponse> {
@@ -227,5 +349,55 @@ export const insightsService = {
     });
     const scored = await repo.upsertFlightRiskScores(pool, toStore);
     return { accepted: true, scored, modelVersion: MODEL_VERSION, computedAt };
+  },
+
+  /* --- P2 slice B: succession-readiness --- */
+  async successionReadiness(a: ActorContext): Promise<SuccessionReadinessListResponse> {
+    const s = await buildScope(a);
+    const rows = await repo.readReadinessScores(pool, s.filter);
+    const items = rows.map(toReadinessScore).sort((x, y) => y.value - x.value);
+    return { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: new Date().toISOString() };
+  },
+
+  async recomputeReadiness(a: ActorContext): Promise<InsightsRecomputeResponse> {
+    const s = await buildScope(a);
+    const raws = await repo.extractReadinessFeatures(pool, s.filter, READINESS_TOP_N);
+    const computedAt = new Date().toISOString();
+    const toStore: repo.SubjectPositionScoreToStore[] = raws.map((r) => {
+      const { value, horizon, features } = scoreReadiness(r);
+      return {
+        userId: r.userId, tenantId: r.tenantId, positionId: r.positionId, value, category: horizon,
+        modelVersion: SUCCESSION_MODEL_VERSION,
+        payload: { derivation: { rule_id: SUCCESSION_RULE_ID, model_version: SUCCESSION_MODEL_VERSION, computed_at: computedAt, features },
+                   position: { id: r.positionId, code: r.positionCode, title: r.positionTitle } },
+      };
+    });
+    const scored = await repo.upsertReadinessScores(pool, toStore);
+    return { accepted: true, scored, modelVersion: SUCCESSION_MODEL_VERSION, computedAt };
+  },
+
+  /* --- P2 slice C: skill-gap --- */
+  async skillGap(a: ActorContext): Promise<SkillGapListResponse> {
+    const s = await buildScope(a);
+    const rows = await repo.readSkillGapScores(pool, s.filter);
+    const items = rows.map(toSkillGapScore).sort((x, y) => y.value - x.value);
+    return { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: new Date().toISOString() };
+  },
+
+  async recomputeSkillGap(a: ActorContext): Promise<InsightsRecomputeResponse> {
+    const s = await buildScope(a);
+    const raws = await repo.extractSkillGapFeatures(pool, s.filter);
+    const computedAt = new Date().toISOString();
+    const toStore: repo.SubjectPositionScoreToStore[] = raws.map((r) => {
+      const { value, segment, features } = scoreSkillGap(r);
+      return {
+        userId: r.userId, tenantId: r.tenantId, positionId: r.positionId, value, category: segment,
+        modelVersion: SKILL_GAP_MODEL_VERSION,
+        payload: { derivation: { rule_id: SKILL_GAP_RULE_ID, model_version: SKILL_GAP_MODEL_VERSION, computed_at: computedAt, features },
+                   position: { id: r.positionId, code: r.positionCode, title: r.positionTitle } },
+      };
+    });
+    const scored = await repo.upsertSkillGapScores(pool, toStore);
+    return { accepted: true, scored, modelVersion: SKILL_GAP_MODEL_VERSION, computedAt };
   },
 };

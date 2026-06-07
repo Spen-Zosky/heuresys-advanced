@@ -163,6 +163,29 @@ Missing-feature handling (e.g. no survey response for a subject): **re-normalize
 
 **ONLY D-3 — the derivation rule's weights and thresholds (§9.1) — requires Enzo's semantic tuning at implementation kickoff.** It is the one irreducibly human decision (analogous to choosing PredictionsML target variables or `talent_scores` band thresholds): defensible defaults are recorded above, but the exact weights/thresholds are Enzo's to confirm or revise. **All other decisions (D-1, D-2, D-4, D-5, D-6, D-7) are resolved** — no further input needed. With D-3 signed off (or accepted as-is), the spec is ready for **plan → implementation** on Enzo's go.
 
+### 9.3 Slice B — succession-readiness rule (implemented S975-cont, PM tuning delegated)
+
+Per **(subject, candidate target position)**, where candidates = the subject's **top-3 best-fit positions** (② cosine `profile ↔ position.job_role` embedding, in-tenant, excluding the current position). A weighted-linear blend of features normalized `0–100` (higher = readier), re-normalized over present features:
+
+| Feature | Live source | Normalization (→ readiness) | Weight |
+|---|---|---|---|
+| position-fit | ② cosine profile↔target-role | `cosine × 100` (clamp 0–100) | **0.50** |
+| KPI achievement | `sys_user_kpi_evidence` (measured/target) | `linUp(ach, 0.40, 1.0)` (≤40%→0, ≥100%→100) | **0.30** |
+| tenure | assignment start dates | `linUp(years, 0.5, 5)` (≥5y→100) | **0.20** |
+
+**Horizon** (`varchar+CHECK`): ≥85 `READY_NOW` · 70–84 `READY_6_MONTHS` · 55–69 `READY_1_YEAR` · 40–54 `READY_2_YEARS` · <40 `NOT_READY`. **Seniority-gap (originally 0.15) was dropped** — data-sparse (49/227 roles carry `job_role_seniority_level`, undefined ordinal scale) — and its weight redistributed to the three reliably-computable signals (PM tuning delegated to Claude, "best practices + completeness"). Table: **dedicated** `sys_succession_readiness_scores` (mig 000092), NOT a reuse of the legacy-seeded `sys_readiness_scores`. Endpoints: `GET /v1/insights/succession-readiness` (insights:view) + `POST …/recompute` (insights:admin).
+
+### 9.4 Slice C — skill-gap rule (implemented S975-cont)
+
+Per **subject**, gap vs their **current position's role** (no `sys_position_skill_requirements` data → embedding-only path). Blend (both features always present):
+
+| Feature | Source | Normalization (→ gap) | Weight |
+|---|---|---|---|
+| role-fit-gap | ② cosine profile↔current-role | `(1 − cosine) × 100` | **0.70** |
+| evidence-sparsity | `sys_user_profile_embeddings.derived_from_evidence_count` | `(1 − min(count,12)/12) × 100` | **0.30** |
+
+**Segment** (`varchar+CHECK`): ≥65 `MAJOR_GAP` · 45–64 `MODERATE_GAP` · 25–44 `MINOR_GAP` · <25 `ALIGNED`. Table: **dedicated** `sys_skill_gap_scores` (mig 000092). Endpoints: `GET /v1/insights/skill-gap` (insights:view) + `POST …/recompute` (insights:admin). Both slices: deterministic, payload-explainable per-feature, `model_version`-stamped, append-with-latest-wins, scope PLATFORM/TENANT/TEAM (I5), D-6 admin/manager-only.
+
 ## 10. Out of scope (this spec)
 
 - Importing / retraining / replacing **PredictionsML** (`sys_predictive_models` / `sys_model_predictions` / `/v1/predictions/*`) — that is the brownfield import read-model, deliberately separate (§2).

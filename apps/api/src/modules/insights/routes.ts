@@ -16,6 +16,8 @@ import {
   FlightRiskScoreSchema,
   FlightRiskUserIdParamSchema,
   InsightsRecomputeResponseSchema,
+  SuccessionReadinessListResponseSchema,
+  SkillGapListResponseSchema,
 } from "@heuresys/shared";
 import { insightsService, type ActorContext } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -52,5 +54,29 @@ export const insightsRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: { response: { 200: InsightsRecomputeResponseSchema } },
     },
     async (req) => insightsService.recompute(actor(req)),
+  );
+
+  /* --- P2 slice B: succession-readiness --- */
+  app.get(
+    "/succession-readiness",
+    { preHandler: [requirePermission("insights:view")], schema: { response: { 200: SuccessionReadinessListResponseSchema } } },
+    async (req) => insightsService.successionReadiness(actor(req)),
+  );
+  app.post(
+    "/succession-readiness/recompute",
+    { preHandler: [app.verifyCsrf, requirePermission("insights:admin")], schema: { response: { 200: InsightsRecomputeResponseSchema } } },
+    async (req) => insightsService.recomputeReadiness(actor(req)),
+  );
+
+  /* --- P2 slice C: skill-gap --- */
+  app.get(
+    "/skill-gap",
+    { preHandler: [requirePermission("insights:view")], schema: { response: { 200: SkillGapListResponseSchema } } },
+    async (req) => insightsService.skillGap(actor(req)),
+  );
+  app.post(
+    "/skill-gap/recompute",
+    { preHandler: [app.verifyCsrf, requirePermission("insights:admin")], schema: { response: { 200: InsightsRecomputeResponseSchema } } },
+    async (req) => insightsService.recomputeSkillGap(actor(req)),
   );
 };

@@ -71,3 +71,61 @@ export const InsightsRecomputeResponseSchema = z.object({
   computedAt: z.iso.datetime(),
 });
 export type InsightsRecomputeResponse = z.infer<typeof InsightsRecomputeResponseSchema>;
+
+// ─────────────────── P2 · Slice B — succession-readiness ───────────────────
+export const SuccessionReadinessHorizonEnum = z.enum(["READY_NOW", "READY_6_MONTHS", "READY_1_YEAR", "READY_2_YEARS", "NOT_READY"]);
+export type SuccessionReadinessHorizon = z.infer<typeof SuccessionReadinessHorizonEnum>;
+
+/** Per (subject, candidate target position) readiness — same explainable shape as flight-risk. */
+export const SuccessionReadinessScoreSchema = z.object({
+  userId: z.uuid(),
+  tenantId: z.uuid(),
+  displayName: z.string().nullable(),
+  positionId: z.uuid(),
+  positionCode: z.string().nullable(),
+  positionTitle: z.string().nullable(),
+  /** 0..100, higher = more ready to step into the target position. */
+  value: z.number(),
+  horizon: SuccessionReadinessHorizonEnum,
+  modelVersion: z.string(),
+  computedAt: z.iso.datetime(),
+  features: z.array(FlightRiskFeatureContributionSchema),
+});
+export type SuccessionReadinessScore = z.infer<typeof SuccessionReadinessScoreSchema>;
+
+export const SuccessionReadinessListResponseSchema = z.object({
+  scope: InsightsScopeSchema,
+  items: z.array(SuccessionReadinessScoreSchema),
+  total: z.number().int().min(0),
+  generatedAt: z.iso.datetime(),
+});
+export type SuccessionReadinessListResponse = z.infer<typeof SuccessionReadinessListResponseSchema>;
+
+// ─────────────────── P2 · Slice C — skill-gap ───────────────────
+export const SkillGapSegmentEnum = z.enum(["ALIGNED", "MINOR_GAP", "MODERATE_GAP", "MAJOR_GAP"]);
+export type SkillGapSegment = z.infer<typeof SkillGapSegmentEnum>;
+
+/** Per-subject skill-gap vs the CURRENT position's role — same explainable shape. */
+export const SkillGapScoreSchema = z.object({
+  userId: z.uuid(),
+  tenantId: z.uuid(),
+  displayName: z.string().nullable(),
+  positionId: z.uuid(),
+  positionCode: z.string().nullable(),
+  positionTitle: z.string().nullable(),
+  /** 0..100, higher = larger skill gap for the current role. */
+  value: z.number(),
+  segment: SkillGapSegmentEnum,
+  modelVersion: z.string(),
+  computedAt: z.iso.datetime(),
+  features: z.array(FlightRiskFeatureContributionSchema),
+});
+export type SkillGapScore = z.infer<typeof SkillGapScoreSchema>;
+
+export const SkillGapListResponseSchema = z.object({
+  scope: InsightsScopeSchema,
+  items: z.array(SkillGapScoreSchema),
+  total: z.number().int().min(0),
+  generatedAt: z.iso.datetime(),
+});
+export type SkillGapListResponse = z.infer<typeof SkillGapListResponseSchema>;

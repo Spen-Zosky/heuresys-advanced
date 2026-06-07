@@ -18,9 +18,8 @@ Aggregato menu **#6+#8+#1+#3** chiusi + review adversarial, poi 3 decisioni Enzo
 
 ## Open questions
 
-- **Cap④ CMS frontend**: lo costruiamo subito (layer successivo P1) o lo scheduli a parte?
 - **Cap⑤ P2 2ª sorgente**: sign-off ToS per ISTAT/ATECO quando ci arriviamo (ESCO già firmata).
-- *(Risolte S975: #8 mailer → lasciato ConsoleMailer; reference_sync → strict PLATFORM_ADMIN-only; cap④ → greenlit, P1 API done.)*
+- *(Risolte S975: #8 mailer → lasciato ConsoleMailer; reference_sync → strict PLATFORM_ADMIN-only; cap④ greenlit + P1 API done; **cap④ frontend P1 → confermato come task della prossima sessione**, è la top-priority #1 qui sotto.)*
 
 ## Verification (next session)
 ```bash

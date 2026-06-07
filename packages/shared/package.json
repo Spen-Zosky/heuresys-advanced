@@ -279,6 +279,10 @@
       "types": "./dist/schemas/surveys.d.ts",
       "default": "./src/schemas/surveys.ts"
     },
+    "./schemas/predictions": {
+      "types": "./dist/schemas/predictions.d.ts",
+      "default": "./src/schemas/predictions.ts"
+    },
     "./schemas/semantic-matching": {
       "types": "./dist/schemas/semantic-matching.d.ts",
       "default": "./src/schemas/semantic-matching.ts"

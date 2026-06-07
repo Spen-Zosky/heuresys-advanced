@@ -93,6 +93,7 @@ import { analyticsRoutes } from "./modules/analytics/routes.js";
 import { observabilityRoutes } from "./modules/observability/routes.js";
 import { mentorshipRoutes } from "./modules/mentorship/routes.js";
 import { surveysRoutes } from "./modules/surveys/routes.js";
+import { predictionsRoutes } from "./modules/predictions/routes.js";
 import { semanticMatchingRoutes } from "./modules/semantic-matching/routes.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
@@ -294,6 +295,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(observabilityRoutes, { prefix: "/v1/observability" });
   await app.register(mentorshipRoutes, { prefix: "/v1/mentorship" });
   await app.register(surveysRoutes, { prefix: "/v1/surveys" });
+  await app.register(predictionsRoutes, { prefix: "/v1/predictions" });
   await app.register(semanticMatchingRoutes, { prefix: "/v1/matching", deps: options.matchingDeps });
 
   return app;

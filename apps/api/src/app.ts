@@ -98,6 +98,8 @@ import { surveysRoutes } from "./modules/surveys/routes.js";
 import { predictionsRoutes } from "./modules/predictions/routes.js";
 import { semanticMatchingRoutes } from "./modules/semantic-matching/routes.js";
 import { insightsRoutes } from "./modules/insights/routes.js";
+import { referenceSyncRoutes } from "./modules/reference-sync/routes.js";
+import type { ReferenceSyncDeps } from "./modules/reference-sync/service.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 
@@ -106,6 +108,8 @@ export interface BuildAppOptions {
   authMailer?: IMailer;
   /** Semantic-matching DI seams — tests inject a non-destructive backfill + a FakeEmbedder. */
   matchingDeps?: SemanticMatchingDeps;
+  /** Reference-sync DI seam — tests inject a fixture ESCO fetcher (no live HTTP). */
+  referenceSyncDeps?: ReferenceSyncDeps;
 }
 
 /**
@@ -316,6 +320,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(predictionsRoutes, { prefix: "/v1/predictions" });
   await app.register(semanticMatchingRoutes, { prefix: "/v1/matching", deps: options.matchingDeps });
   await app.register(insightsRoutes, { prefix: "/v1/insights" });
+  await app.register(referenceSyncRoutes, { prefix: "/v1/reference-sync", deps: options.referenceSyncDeps });
 
   return app;
 }

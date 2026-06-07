@@ -368,13 +368,22 @@
       "versionsEmpty": "No versions.",
       "versionsCaption": "Document versions",
       "currentBadge": "Current",
+      "workflowTitle": "Publishing workflow",
+      "workflowSuccess": "Status updated.",
+      "submitReview": "Submit for review",
+      "publish": "Publish",
+      "returnToDraft": "Return to draft",
+      "unpublish": "Unpublish",
+      "restore": "Restore",
+      "restoreSuccess": "Version restored (new current version).",
       "vCols": {
         "version": "Version",
         "versionValue": "v{{n}}",
         "title": "Title",
         "changeNote": "Note",
         "author": "Author",
-        "created": "Created"
+        "created": "Created",
+        "actions": "Actions"
       }
     }
   }

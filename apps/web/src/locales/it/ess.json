@@ -1,4 +1,26 @@
 {
+  "handbook": {
+    "title": "Manuale del dipendente",
+    "description": "Knowledge base, policy e annunci pubblicati per il tuo tenant.",
+    "count": "{{count}} documenti",
+    "errorMessage": "Impossibile caricare il manuale.",
+    "emptyTitle": "Nessun documento",
+    "emptyDescription": "Non ci sono ancora contenuti pubblicati.",
+    "caption": "Documenti pubblicati",
+    "colTitle": "Titolo",
+    "colKind": "Tipo",
+    "colUpdated": "Pubblicato",
+    "searchPlaceholder": "Cerca per titolo…",
+    "back": "← Manuale",
+    "notFound": "Documento non trovato.",
+    "kind": {
+      "article": "Articolo",
+      "policy": "Policy",
+      "announcement": "Annuncio",
+      "handbook": "Manuale",
+      "process_doc": "Doc di processo"
+    }
+  },
   "landing": {
     "title": "La mia area",
     "description": "La tua panoramica personale: posizione, formazione e gap di sviluppo.",

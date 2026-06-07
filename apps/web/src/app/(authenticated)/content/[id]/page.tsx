@@ -18,7 +18,10 @@ import type {
   ContentStatus,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+
+type WorkflowAction = "submit-for-review" | "publish" | "unpublish" | "return-to-draft";
 
 const SELECT_CLASS =
   "w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
@@ -106,6 +109,32 @@ export default function ContentEditPage() {
     onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("content.detail.errorUnexpected") }),
   });
 
+  const perms = useCurrentUserPermissions();
+  const can = useMemo(() => {
+    const set = new Set(perms.data?.permissions ?? []);
+    return { update: set.has("content:update"), publish: set.has("content:publish") };
+  }, [perms.data]);
+
+  const invalidateDoc = () => {
+    void qc.invalidateQueries({ queryKey: ["content", "doc", id] });
+    void qc.invalidateQueries({ queryKey: ["content", "versions", id] });
+    void qc.invalidateQueries({ queryKey: ["content", "list"] });
+  };
+
+  // Publish-workflow transitions (in_review chain). Bodyless POST → apiFetch adds the
+  // CSRF header automatically; the server enforces the valid-transition + RBAC gates.
+  const transition = useMutation({
+    mutationFn: (action: WorkflowAction) => apiFetch<ContentDocument>(`/v1/content/${id}/${action}`, { method: "POST" }),
+    onSuccess: () => { invalidateDoc(); setFeedback({ kind: "ok", msg: t("content.detail.workflowSuccess") }); },
+    onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("content.detail.errorUnexpected") }),
+  });
+
+  const restore = useMutation({
+    mutationFn: (versionId: string) => apiFetch<ContentDocument>(`/v1/content/${id}/versions/${versionId}/restore`, { method: "POST" }),
+    onSuccess: () => { invalidateDoc(); setFeedback({ kind: "ok", msg: t("content.detail.restoreSuccess") }); },
+    onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("content.detail.errorUnexpected") }),
+  });
+
   const {
     register,
     handleSubmit,
@@ -140,8 +169,27 @@ export default function ContentEditPage() {
       { header: t("content.detail.vCols.changeNote"), cell: (v) => <span className="text-muted-foreground">{v.changeNote ?? "—"}</span> },
       { header: t("content.detail.vCols.author"), cell: (v) => <span className="font-mono text-xs text-muted-foreground">{v.authorUserId ? v.authorUserId.slice(0, 8) : "—"}</span> },
       { header: t("content.detail.vCols.created"), cell: (v) => <span className="text-xs text-muted-foreground">{v.createdAt.slice(0, 10)}</span> },
+      {
+        header: t("content.detail.vCols.actions"),
+        align: "right",
+        cell: (v) =>
+          v.versionId === currentVersionId ? (
+            <span className="text-xs text-muted-foreground">—</span>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              data-testid="content-version-restore"
+              disabled={restore.isPending}
+              onClick={() => restore.mutate(v.versionId)}
+            >
+              {t("content.detail.restore")}
+            </Button>
+          ),
+      },
     ],
-    [t, currentVersionId],
+    [t, currentVersionId, restore],
   );
 
   if (detail.isError) {
@@ -176,6 +224,40 @@ export default function ContentEditPage() {
           }
         />
       </div>
+
+      {doc && (
+        <Card data-testid="content-workflow">
+          <CardHeader>
+            <CardTitle>{t("content.detail.workflowTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center gap-3">
+            <span className="text-sm text-muted-foreground">{t("content.detail.statusLabel")}</span>
+            <Badge variant={statusVariant(doc.status)} data-testid="content-workflow-status">
+              {t(`content.status.${doc.status}`)}
+            </Badge>
+            {doc.status === "draft" && can.update && (
+              <Button type="button" data-testid="content-submit-review" disabled={transition.isPending} onClick={() => transition.mutate("submit-for-review")}>
+                {t("content.detail.submitReview")}
+              </Button>
+            )}
+            {doc.status === "in_review" && can.publish && (
+              <>
+                <Button type="button" data-testid="content-publish" disabled={transition.isPending} onClick={() => transition.mutate("publish")}>
+                  {t("content.detail.publish")}
+                </Button>
+                <Button type="button" variant="outline" data-testid="content-return-draft" disabled={transition.isPending} onClick={() => transition.mutate("return-to-draft")}>
+                  {t("content.detail.returnToDraft")}
+                </Button>
+              </>
+            )}
+            {doc.status === "published" && can.publish && (
+              <Button type="button" variant="outline" data-testid="content-unpublish" disabled={transition.isPending} onClick={() => transition.mutate("unpublish")}>
+                {t("content.detail.unpublish")}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

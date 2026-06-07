@@ -1,4 +1,26 @@
 {
+  "handbook": {
+    "title": "Employee handbook",
+    "description": "Knowledge base, policies and announcements published for your tenant.",
+    "count": "{{count}} documents",
+    "errorMessage": "Unable to load the handbook.",
+    "emptyTitle": "No documents",
+    "emptyDescription": "No published content yet.",
+    "caption": "Published documents",
+    "colTitle": "Title",
+    "colKind": "Kind",
+    "colUpdated": "Published",
+    "searchPlaceholder": "Search by title…",
+    "back": "← Handbook",
+    "notFound": "Document not found.",
+    "kind": {
+      "article": "Article",
+      "policy": "Policy",
+      "announcement": "Announcement",
+      "handbook": "Handbook",
+      "process_doc": "Process doc"
+    }
+  },
   "landing": {
     "title": "My area",
     "description": "Your personal overview: position, learning and development gaps.",

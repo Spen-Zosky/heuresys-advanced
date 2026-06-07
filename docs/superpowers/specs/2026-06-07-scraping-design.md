@@ -1,6 +1,6 @@
 # Scraping (Official Sources) — External Reference-Data Ingestion — Design Spec
 
-> **Status**: DESIGN (S972, 2026-06-07). Capability ⑤/5 of the platform-capabilities program (`2026-06-03-platform-capabilities-roadmap.md`). **No code until this spec is reviewed + approved + a plan is written.** Implementation is multi-session and out of scope here — this spec closes the **DESIGN stage only** and parks the work at the **Enzo gate** (brainstorm → spec → *approval* → plan → implement).
+> **Status**: DESIGN — RESOLVED (S972, 2026-06-07). Capability ⑤/5 of the platform-capabilities program (`2026-06-03-platform-capabilities-roadmap.md`). The six open design decisions are now **resolved with best-practice defaults** (§8) — the spec is **implementation-ready**. **No code until a plan is written.** Implementation is multi-session and out of scope here — this spec closes the **DESIGN stage only**. The single **residual human gate** is per-source legal/ToS sign-off (D-4): everything else is decided.
 > **Core principle**: ingest **OFFICIAL / AUTHORITATIVE open sources only** (ESCO, ISTAT/Eurostat, ATECO/NACE, public CCNL registries) via their **published APIs / bulk downloads**, and feed them into the **existing brownfield ingestion backbone** (acquisition → staging → transform → `sys.*` + lineage). Build NO parallel pipeline. Explicitly recommend **against** arbitrary web scraping (see §2.1) — that is a stated design principle, not a caveat.
 
 ## 1. Goal & intent
@@ -91,12 +91,12 @@ Proposed table (DDL described, **not** authored here — RD-08 categorical field
 
 **Idempotent re-stage logic**: on each run, `fetch()` compares the upstream etag/version against `source_watermark_cursor`/`_etag`. If unchanged → status `UNCHANGED`, no staging write, run closes COMPLETED with `metadata.skipped=true` (cheap, safe to re-run on any schedule). If changed → re-stage into `staging.<source>_*`, run the transform/upsert, then advance the watermark in the **same transaction** as the run-finish (so a crash mid-load never advances the HWM). Row-level idempotency is preserved by the existing `source_lineage_source_content_hash` + `ON CONFLICT` natural-key upsert — re-running an *identical* artifact is a no-op even if the HWM check is bypassed (belt-and-suspenders).
 
-### 3.4 Scheduler (mechanism is an OPEN DECISION — §8)
+### 3.4 Scheduler — DECIDED: systemd timer on the OCI VM (D-2)
 
-Official sources change rarely (yearly-ish), so a heavy scheduler is unwarranted. Two viable mechanisms, **decided at the Enzo gate**:
+Official sources change rarely (yearly-ish), so a heavy scheduler is unwarranted. **DECIDED (D-2): a systemd timer on the OCI VM**, not an in-app cron — scheduling stays at the OS/infra layer, decoupled from the request path and independently observable.
 
-- **(A) systemd timer on the OCI VM** — a `heuresys-advanced-scraping.timer` calling a one-shot script that hits the trigger endpoint (or runs the connector CLI). Consistent with the existing VM ops model (`vm-deploy.sh`/`vm-bootstrap.sh` already manage systemd units); no in-process scheduler, survives API restarts, observable via `journalctl`. **Recommended default.**
-- **(B) in-app scheduled job** — a Fastify-side cron (e.g. a small interval task) firing the connector. Simpler to ship in one place, but couples long-running fetch/transform to the API process lifecycle and complicates the single-thread test model. Less aligned with the NO-DOCKER native-runtime + VM-systemd posture.
+- **systemd timer on the OCI VM** (the decided mechanism) — a `heuresys-advanced-scraping.timer` calling a one-shot script that hits the trigger endpoint (or runs the connector CLI). Consistent with the existing VM ops model (`vm-deploy.sh`/`vm-bootstrap.sh` already manage systemd units); no in-process scheduler, survives API restarts, observable via `journalctl`.
+- **(rejected) in-app scheduled job** — a Fastify-side cron firing the connector. Simpler to ship in one place, but couples long-running fetch/transform to the API process lifecycle, complicates the single-thread test model, and is less aligned with the NO-DOCKER native-runtime + VM-systemd posture. Not adopted.
 
 Either way the **unit of work is the trigger endpoint** (§3.5): the scheduler is just a clock that POSTs it, so manual + scheduled runs share one code path (matches the wave-executor: a trigger that both humans and automation invoke).
 
@@ -123,7 +123,7 @@ Permission verbs reuse the brownfield RBAC family style (`reference_sync:read` /
 - **Rate-limiting / politeness to official APIs**: conditional requests first (etag / `If-Modified-Since` / version cursor — most runs are a cheap 304-equivalent no-op via the watermark). For bulk downloads, fetch the versioned artifact once per release, not per run. A per-source minimum interval + a single in-flight run guard (status `FETCHING` on the watermark acts as a lock). Polite User-Agent identifying the platform; respect documented quotas. **No parallel hammering** — sources change yearly, there is no need.
 - **Caching / retention**: the raw fetched artifact is cached locally under the user's **`.apify/<YYYY-MM-DD>/` convention** (`.meta.json` + the raw `.content` artifact) — durable copy independent of upstream availability, dated per fetch (matches `memory/feedback_apify_results_storage.md` + the in-repo `.apify/README.md`). This applies to **any acquisition**, including (if ever) a licensed Apify-sourced feed — but per §2.2 Apify here means the *storage convention*, not endorsement of arbitrary-site Apify actors. The `source_exports` row holds the hash/metadata; the bytes live in `.apify/`.
 - **Failure / retry**: a failed fetch sets watermark status `FAILED` and the run `FAILED` **without** advancing the cursor (next run retries the same delta — safe because of row-level idempotency). Transient HTTP errors get a bounded retry with backoff inside `fetch()`; a malformed artifact fails at the `normalize()`/validation phase (reuses `import_validation_results`), leaving `sys.*` untouched. The watermark only advances on a COMPLETED run, in the run-finish transaction.
-- **Observability**: runs surface in the existing `import_runs` lineage views + acceptance endpoint; scheduler runs are additionally visible in `journalctl` (option A). No new dashboards required for P1.
+- **Observability**: runs surface in the existing `import_runs` lineage views + acceptance endpoint; scheduler runs are additionally visible in `journalctl` (systemd timer — D-2). No new dashboards required for P1.
 
 ## 6. Phasing
 
@@ -132,7 +132,7 @@ Permission verbs reuse the brownfield RBAC family style (`reference_sync:read` /
 | Phase | Scope | Deliverable | Effort | Risk |
 |---|---|---|---|---|
 | **P1** | **ESCO, one source end-to-end** (recommended first — the platform already uses ESCO occupation URIs, so the target tables + mappings exist) | ESCO connector (`fetch`/`normalize`/`register`) + `staging.esco_*` + seeded `column_mappings` → `sys_esco_occupation_mappings`/`sys_skills` enrichment via the existing transform engine + integration test + manual-trigger endpoint. **Watermark NOT yet required** (P1 can be a manual one-shot to prove the connector + transform contract). | **M** | med |
-| **P2** | **Watermark + scheduler + a second source** | `brownfield.source_watermarks` table + incremental fetch (etag/version) + idempotent skip-if-unchanged + scheduler (systemd timer, option A) + a second source (ISTAT/ATECO) to prove the contract generalizes. | **M-L** | med |
+| **P2** | **Watermark + scheduler + a second source** | `brownfield.source_watermarks` table + incremental fetch (etag/version) + idempotent skip-if-unchanged + scheduler (systemd timer on the VM — D-2) + a second source (ISTAT/ATECO) to prove the contract generalizes. | **M-L** | med |
 | **P3** | **More sources** | additional official sources (Eurostat/Eurostat-SDMX, public CCNL) as pure config + thin parsers; optional cross-capability re-embed hook into AI ②. | **M** (per source, mostly config) | low-med |
 
 Phasing is deliberately P1-without-watermark-first: it de-risks the *connector + transform mapping* (the part most likely to surprise) before building the HWM machinery, and delivers a usable ESCO refresh immediately.
@@ -149,20 +149,32 @@ Phasing is deliberately P1-without-watermark-first: it de-risks the *connector +
 - **Integration** (`apps/api/test/reference-sync.integration.test.ts`, real DB via tunnel): RBAC (`reference_sync:trigger`/`:read`) + CSRF on trigger; a fixture artifact staged → transform → assert deterministic `sys.*` upsert (e.g. a known ESCO URI appears/updates in `sys_esco_occupation_mappings`); **idempotency** — re-running the *same* artifact upserts 0 net rows (content-hash no-op); **watermark unchanged path** (P2) — second run with same etag closes `UNCHANGED` with no staging write.
 - **No live external API in CI** — the connector's `fetch()` is injected/mocked; the live-data doctrine applies to *our* DB (real tunnel), not to hammering EU servers in CI.
 
-## 8. Dependencies, blockers & OPEN DECISIONS for Enzo (the gate)
+## 8. Dependencies, blockers & RESOLVED DESIGN DECISIONS (S972)
 
 **Missing infra (the one structural gap):** `brownfield.source_watermarks` — the per-source delta/HWM layer — **does not exist** and must be designed/built (P2). Everything else (acquisition → staging → transform → `sys.*` + lineage + audit + content-hash idempotency) is **already live** and reused.
 
-**Open decisions (Enzo decides at the gate):**
+### 8.1 Resolved design decisions (S972)
 
-1. **First official source** — recommend **ESCO** (platform already uses ESCO URIs; target tables exist). Confirm or pick another.
-2. **Scheduler mechanism** — **(A) systemd timer on the VM** (recommended, matches existing ops) vs **(B) in-app scheduled job**.
-3. **Watermark storage** — confirm `brownfield.source_watermarks` (proposed §3.3) as the HWM home (vs an alternative, e.g. per-source rows in `source_exports.metadata`). Recommend the dedicated table.
-4. **Legal / ToS confirmation per source** — explicit sign-off that each chosen source's published API/bulk download licence permits this programmatic re-use (ESCO is EU-open; ISTAT/Eurostat open-data; CCNL registries vary). **Hard gate** before any source ships.
-5. **Refresh cadence** — per-source interval for the scheduler (recommend conservative, e.g. monthly probe / on-release, given sources change ~yearly).
-6. **Arbitrary-scraping / licensed-feed posture** — confirm the §2.2 principle (no HTML scraping; any market/salary data must be a licensed contractual feed through the same connector contract) — so it isn't reopened ad hoc later.
+The six previously-open decisions are now **decided with best-practice defaults**, making the spec implementation-ready. Each records the chosen option + a short rationale. The recommended default was adopted in every case; the only item still needing a human is **D-4** (per-source legal/ToS sign-off — see §8.2).
 
-**Honesty note:** this is **multi-session** work (P1 alone is a module + connector + mappings + tests; P2 adds infra + scheduler). It is **gated on Enzo's approval**. This spec advances capability ⑤ to the Enzo gate and **closes the DESIGN stage only** — no code, no migration, no implementation here.
+| # | Decision | DECIDED | Rationale (best-practice) |
+|---|---|---|---|
+| **D-1** | First official source | **ESCO** | The platform already references ESCO occupation URIs (`sys_esco_occupation_mappings`, 7645 rows) and ships `sys_skills` (21939 rows) — the target tables, lineage, and natural keys already exist, so ESCO is a true end-to-end P1 with no new sink to design. Lowest-friction proof of the connector + transform contract. |
+| **D-2** | Scheduler mechanism | **systemd timer on the OCI VM** (§3.4) | Keep scheduling at the OS/infra layer — observable (`journalctl`), survives API restarts, decoupled from the request path. Matches the existing `vm-deploy.sh`/systemd ops model; avoids coupling long-running fetch/transform to the Fastify process and the single-thread test model. An in-app cron was rejected. |
+| **D-3** | Watermark storage | **dedicated `brownfield.source_watermarks` table** (§3.3) | The one identified missing infra piece. A first-class table gives a typed per-source cursor/etag/version + status with a transactional HWM advance **only on COMPLETED runs**, queryable for observability — superior to stuffing cursor state into `source_exports.metadata` (which would conflate per-artifact provenance with per-source run-state and lose the in-flight `FETCHING` lock). |
+| **D-4** | Legal / ToS confirmation per source | **official/authoritative published APIs & bulk downloads ONLY; each source requires a one-time human legal/ToS confirmation before its connector is enabled** (checklist gate) | This is the **one irreducibly human gate** — licence/ToS interpretation is a legal judgement, not a technical default. Posture is decided (authoritative published interfaces only, never HTML scraping per D-6); the per-source confirmation remains a human checkbox. **ESCO is recommended as the low-legal-risk first source** (EU open data, CC-licensed), so P1 can proceed against the lowest-risk source. See §8.2. |
+| **D-5** | Refresh cadence | **conservative default, watermark-driven, per-source configurable** (e.g. **weekly probe for the ESCO taxonomy**) | Reference taxonomies change slowly (~yearly upstream), so a weekly conditional probe is ample headroom while staying cheap — most runs are a 304-equivalent no-op via the watermark (§3.3/§5). Don't over-poll authoritative sources; cadence is per-source config so slower sources (ISTAT/CCNL) can probe less often. |
+| **D-6** | Arbitrary-scraping / licensed-feed posture | **LOCKED design principle: NO arbitrary web/HTML scraping, ever; any future market/salary data MUST be a LICENSED feed through the same connector contract** (§2.2) | ToS/legal safety + provenance integrity: arbitrary HTML has no authoritative version/etag (defeats the watermark/idempotency model) and carries scraping liability. Licensed contractual feeds ingest through the *same* §2.1 connector shape, preserving lineage and the `column_mappings` transform contract. This is a standing principle, not to be reopened ad hoc. |
+
+### 8.2 Residual human sign-off (the only remaining gate)
+
+Everything above is **resolved** — except **D-4**, which is irreducibly human:
+
+- **ONLY D-4 needs Enzo before a connector is enabled**: a **one-time legal/ToS confirmation per source** that the source's published API/bulk-download licence permits this programmatic re-use. It is a per-source checklist gate, not a re-opening of the design.
+- **ESCO (P1) is recommended as the low-legal-risk first source** — EU open data, CC-licensed — so the first enablement is the safest confirmation to obtain. Subsequent sources (ISTAT/Eurostat open-data; CCNL registries, which vary) each get their own one-time D-4 confirmation as they come online.
+- **No other human decision is outstanding.** D-1, D-2, D-3, D-5, D-6 are decided; the spec is ready for **plan → implementation on Enzo's go**.
+
+**Honesty note:** this remains **design-only** and **multi-session** implementation work (P1 alone is a module + connector + mappings + tests; P2 adds the watermark infra + systemd timer). The design decisions are closed; the spec **closes the DESIGN stage only** — no code, no migration, no implementation here. Implementation proceeds once Enzo gives the go (and provides the per-source D-4 confirmation for ESCO).
 
 ## 9. Out of scope (this spec)
 

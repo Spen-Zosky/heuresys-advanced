@@ -8,6 +8,10 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **~60 
 
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
+## 0-terdecies. Delta S979 (2026-06-08) — dottrina full-alignment (infra deploy)
+
+**Dottrina di allineamento totale (v1+v2) shipped** (HEAD `e6dc503`, pushed origin/main; counts DB/API/web/CI **invariati** da S978 §0-duodecies). Mac+VM = **cloni effettivi** del repo locale, inclusi i gitignored. Nuovi/modificati `scripts/`: `align-clones.sh` (orchestratore `mac|vm|all` — modo `--deploy` full / modo close `--delta --resilient --auto-deploy`), `env-key-merge.sh` (.env key-merge additivo, topology per-macchina intatta), `sync-memory-tree.sh` (memorie Claude, slug per-macchina via `find`), `db/scripts/migrate-if-pending.sh` (migra solo se uno sha256 manca dal ledger `sys_schema_migrations`). `vm-deploy.sh` **hardened**: re-exec self-modify-buffer, clean-reinstall su cambio ABI Node, guard lockfile forte, migrate-if-pending. Marker delta `session-boot.ps1` → `.session-align.marker` (gitignored). **Chiusura automatizzata**: skill `handoff` **Step 4b** lancia `align-clones all --delta --resilient --auto-deploy` (propaga delta + deploy se codice + skip host giù). Verificato **live**: PC=Mac=VM @ `e6dc503`, PROD readyz/login 200, migrate-if-pending → skip. Dottrina → `memory/feedback_full_alignment_doctrine`; ops → `deploy/README.md` §"Full alignment". Residuo: E2E live del path `--delta` al prossimo handoff (marker nato all'avvio).
+
 ## 0-bis. Delta S963 → S966 (refresh 2026-06-05)
 
 Lo snapshot §0 e i conteggi §1-§9 erano scritti a S957/S962. Questo blocco riconcilia i cambiamenti di stato fino a **S966**. Tutto **pushato su origin/main, CI 6/6 verde** (HEAD `c4c6363`).

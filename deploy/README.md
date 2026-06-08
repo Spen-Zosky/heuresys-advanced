@@ -38,6 +38,32 @@ copying the PC's would break the VM's native binaries) — and `.env` (the
 bootstrap owns it; the PC's tunnel `.env` would clobber the VM's local-DB
 config). Run it *while the PC is alive* — it can't read a dead PC.
 
+## Full alignment — Mac + VM as clones (`align-clones.sh`)
+
+The **canonical "allinea Mac e VM" entrypoint.** It makes the remotes idempotent
+clones of the local PC repo (modulo OS/arch), wiring the steps below so nothing
+gitignored is left behind. Run from the local PC — **push local commits first**
+(the remotes reset to `origin/main`):
+
+```bash
+bash scripts/align-clones.sh all --deploy   # both remotes + redeploy PROD
+bash scripts/align-clones.sh mac            # Mac only (dev box, no build)
+bash scripts/align-clones.sh vm             # VM clone payload only (no build/restart)
+```
+
+Per target, in order: hard git sync (`reset --hard origin/main` + `clean -fd`,
+gitignored files preserved) → `pnpm install --frozen-lockfile -r` → `.secrets/` +
+gitignored data (`sync-gitignored-to-vm.sh`) → **`.env` additive key-merge**
+(`env-key-merge.sh` — adds only NEW keys, never overwrites per-machine topology like
+`POSTGRES_PORT`/`COOKIE_SECURE`) → Claude memory tree (`sync-memory-tree.sh`) →
+(VM + `--deploy`) `vm-deploy.sh`.
+
+Propagation rule of thumb — **clone verbatim**: `.secrets/*.pem` + new `.env` keys +
+gitignored data. **Key-merge, value-preserve**: the rest of `.env` (topology stays
+per-machine). **Never propagate**: regenerable/platform objects (`node_modules`,
+`dist`, `.next`, `*.tsbuildinfo`). NB: this is the **hard-clone** path; the per-host
+`dev-bootstrap.sh` below remains the non-destructive *provisioning* path.
+
 ## Linux server (OCI VM / any amd64 Linux) — public, systemd
 
 ```bash

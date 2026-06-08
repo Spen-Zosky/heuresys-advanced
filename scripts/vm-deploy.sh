@@ -46,10 +46,40 @@ git -C "$REPO_DIR" checkout "$BRANCH" --quiet
 git -C "$REPO_DIR" reset --hard "origin/$BRANCH" --quiet
 git -C "$REPO_DIR" log --oneline -1
 
-# 2. Deps (reproducible) + the @heuresys/shared dist (prepare).
-log "deps: pnpm install --frozen-lockfile"
+# Self-modify-buffer fix: bash already buffered the OLD vm-deploy.sh into memory before
+# the reset above pulled a NEW one. If this commit changed vm-deploy.sh, re-exec the
+# freshly-pulled version ONCE (guarded) so the rest of the pipeline runs the update —
+# otherwise steps added in the same commit silently don't take effect until the 2nd run.
+if [ -z "${VM_DEPLOY_REEXEC:-}" ]; then
+  exec env VM_DEPLOY_REEXEC=1 \
+    REPO_DIR="$REPO_DIR" BRANCH="$BRANCH" PUBLIC_HOST="$PUBLIC_HOST" \
+    API_PORT="$API_PORT" WEB_PORT="$WEB_PORT" NODE_MAJOR="$NODE_MAJOR" RESTART_API="$RESTART_API" \
+    bash "$REPO_DIR/scripts/vm-deploy.sh"
+fi
+
+# 2. Deps (reproducible, exact lockfile match). Clean-reinstall if the Node ABI changed
+#    (native modules argon2/@next/swc/sharp must match NODE_MODULE_VERSION) — a frozen
+#    install over a stale node_modules built for another ABI can crash at runtime.
 cd "$REPO_DIR"
-pnpm install --frozen-lockfile
+ABI_SENTINEL="$REPO_DIR/node_modules/.heuresys-node-abi"
+CUR_ABI="$(node -p 'process.versions.modules' 2>/dev/null || echo unknown)"
+PREV_ABI="$(cat "$ABI_SENTINEL" 2>/dev/null || echo none)"
+if [ -d "$REPO_DIR/node_modules" ] && [ "$CUR_ABI" != "$PREV_ABI" ]; then
+  log "deps: Node ABI changed ($PREV_ABI -> $CUR_ABI) — clean reinstall of native modules"
+  rm -rf "$REPO_DIR/node_modules" "$REPO_DIR"/apps/*/node_modules "$REPO_DIR"/packages/*/node_modules
+fi
+log "deps: pnpm install --frozen-lockfile"
+if ! pnpm install --frozen-lockfile; then
+  echo "ERROR: 'pnpm install --frozen-lockfile' failed — pnpm-lock.yaml is out of sync with package.json." >&2
+  echo "       Regenerate + commit the lockfile on the PC (run 'pnpm install', commit pnpm-lock.yaml, push), then redeploy." >&2
+  exit 1
+fi
+mkdir -p "$REPO_DIR/node_modules" && printf '%s' "$CUR_ABI" > "$ABI_SENTINEL"
+
+# 2b. Apply DB migrations (idempotent) as a safety-net so the PROD schema is never behind
+#     the deployed code, even if migrations weren't run from the PC via the tunnel first.
+log "db: migrate (idempotent safety-net)"
+pnpm db:migrate:sh
 
 # 3. Production builds: shared (clean) → API (tsup bundle → node dist/server.js) → web (next build).
 #    @heuresys/shared MUST be built BEFORE api/web because both typecheck against its

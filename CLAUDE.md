@@ -76,6 +76,10 @@ cd apps/api && pnpm dev
 
 The `.env` file is **gitignored** but real; `.env.example` has three runtime blocks (A localhost / B OCI VM / C OCI Managed). **Option B (OCI VM, tunnel 5433) is the active runtime** (RD-25, ADR-0010). Do not commit `.env`, `.secrets/`, or `*.pem`.
 
+## Full alignment & deploy doctrine
+
+"**Allinea Mac e VM**" means making the remotes **true clones** of the local PC repo (idempotency, modulo OS/arch) — including the gitignored payload `git pull` never carries. Canonical entrypoint: **`bash scripts/align-clones.sh <mac|vm|all> [--deploy]`** (push local commits first; remotes `reset --hard origin/main`). Per target it composes: hard git sync → `pnpm install --frozen-lockfile -r` → `.secrets/` + gitignored data (`sync-gitignored-to-vm.sh`) → **`.env` additive key-merge** (`env-key-merge.sh`, never overwrites per-machine topology) → Claude memory tree (`sync-memory-tree.sh`) → (VM `--deploy`) `vm-deploy.sh`. **`vm-deploy.sh`** guarantees a fully-updated PROD (exact lockfile versions + clean-reinstall on Node-ABI change + self-modify-buffer re-exec + `db:migrate:sh` + shared→api→web rebuild + restart). Full rationale: `memory/feedback_full_alignment_doctrine.md`; ops detail: `deploy/README.md` §"Full alignment".
+
 ## High-level architecture
 
 ```

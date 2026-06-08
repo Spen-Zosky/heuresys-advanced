@@ -309,15 +309,16 @@ describe("/v1/positions/* integration", () => {
 
   /* -------------------------------------------------- skill sub-resource */
 
-  it("SKILLS: GET empty → list; POST link → 201; GET → 1 item; DELETE → 204; GET → 0", async () => {
+  it("SKILLS: GET baseline; POST link → 201; GET → +1; DELETE → 204; GET → baseline", async () => {
+    // The position may already carry DERIVED skill requirements (② Fase 3, mig 000096),
+    // so assert RELATIVE to a baseline rather than an absolute empty list.
     const empty = await suite.app.inject({
       method: "GET",
       url: `/v1/positions/${mgrOwnedPositionId}/skills`,
       headers: { cookie: cookieHeader(tenantS.cookies) },
     });
     expect(empty.statusCode).toBe(200);
-    const emptyBody = empty.json() as { items: unknown[] };
-    expect(emptyBody.items.length).toBe(0);
+    const baseline = (empty.json() as { items: unknown[] }).items.length;
 
     const link = await suite.app.inject({
       method: "POST",
@@ -344,7 +345,7 @@ describe("/v1/positions/* integration", () => {
       url: `/v1/positions/${mgrOwnedPositionId}/skills`,
       headers: { cookie: cookieHeader(tenantS.cookies) },
     });
-    expect((list.json() as { items: unknown[] }).items.length).toBe(1);
+    expect((list.json() as { items: unknown[] }).items.length).toBe(baseline + 1);
 
     // Duplicate link → 409
     const dup = await suite.app.inject({
@@ -374,7 +375,7 @@ describe("/v1/positions/* integration", () => {
       url: `/v1/positions/${mgrOwnedPositionId}/skills`,
       headers: { cookie: cookieHeader(tenantS.cookies) },
     });
-    expect((after.json() as { items: unknown[] }).items.length).toBe(0);
+    expect((after.json() as { items: unknown[] }).items.length).toBe(baseline);
   });
 
   /* -------------------------------------------------- kpi sub-resource (read-only) */

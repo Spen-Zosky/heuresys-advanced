@@ -1,12 +1,12 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-08 (S978).
+**Updated**: 2026-06-08 (S979).
 
 > **Vista rapida** dello stato di lavoro (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura, delta per-sessione) → `docs/kb/SOT_STATE.md` (§0-duodecies = S978). Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui.
 
-## Last session brief (S978 — ultracode, aggregato item #1-8 dal menu, decisioni delegate)
+## Last session brief (S979 — tooling, no repo changes)
 
-Eseguiti **8 item in autonomia** (Enzo ha delegato le decisioni semantiche/architetturali per questa sessione). **7 commit nuovi pushati** (`0ea045b`..`385e74e`), full API suite **837/6**, web typecheck+build verdi. **#4** category-heatmap era già shippato (`5ec1c6d`, solo verificato). **#3** insights scheduled-recompute (CLI + systemd daily timer, `0ea045b`). **#1** cap⑤ ESCO **full-catalogue 2942** (era 100; fix paging single-page, `3663371`, live-verified). **#5** cap② Fase 3 **PSR-population** 844 righe via derivazione peer-group (`93e4b45`, mig 000096). **#2** cap② B-10b **m2b normalized cluster** (`afdfd64`, mig 000097 + seed 48: 8 surveys/3792 responses/733 pulse, modulo `/v1/engagement`). **#6** cap④ CMS P3 **full-text search** (`4e85281`, mig 000098). **#7** MVP-4 §2.5 MFA **recovery codes** (`9ba2fba`, mig 000099). **#8** MVP-4 §2.7 WCAG 3.1.1 `<html lang>` dinamico (`385e74e`). Granulare → `SOT_STATE.md` §0-duodecies.
+Sessione di manutenzione setup Claude Code (zero modifiche al repo): risolti i fail `/doctor` MCP — `context7` plugin disabilitato (ridondante col connettore remoto `claude.ai Context7`, verificato live), `chrome-devtools-mcp` spostato da `npx` (cold-start Windows lento → timeout 30s) a binario `node` globale (handshake MCP verde) + hook SessionStart self-healing che ri-applica il bypass dopo ogni update del plugin. Dettaglio in memoria `reference_chrome_devtools_npx_bypass`. I 5 connettori `claude.ai` restano OAuth-only. **Priorità di progetto invariate da S978** (sotto; dettaglio S978 → `SOT_STATE.md` §0-duodecies).
 
 ## Top priorities (next session)
 

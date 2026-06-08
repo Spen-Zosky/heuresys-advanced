@@ -23,12 +23,15 @@ DB_NAME="${DB_NAME:-${POSTGRES_DB:-heuresys_advanced}}"
 PORT="${POSTGRES_PORT:-5432}"
 DBUSER="${POSTGRES_USER:-heuresys}"
 
-echo "[clone-vm-db] $VM_HOST:$DB_NAME  ->  local 127.0.0.1:$PORT/$DB_NAME  (drop+recreate objects)"
-echo "[clone-vm-db] streaming pg_dump | pg_restore ..."
+# Restore with the client matching the LOCAL server major (a v17 pg_restore against a v16
+# server emits v17 GUCs like transaction_timeout that v16 rejects), AS the postgres
+# superuser (so CREATE EXTENSION works and original ownership=heuresys is preserved).
+PG_BIN="${PG_BIN:-/usr/lib/postgresql/16/bin}"
+echo "[clone-vm-db] $VM_HOST:$DB_NAME  ->  local :$PORT/$DB_NAME  (restore as postgres, preserve ownership)"
+echo "[clone-vm-db] streaming pg_dump(VM 16) | pg_restore(local 16) ..."
 set +e
 ssh -o BatchMode=yes "$VM_HOST" "sudo -u postgres pg_dump -Fc '$DB_NAME'" \
-  | pg_restore --clean --if-exists --no-owner --no-acl --role="$DBUSER" \
-      -h 127.0.0.1 -p "$PORT" -U "$DBUSER" -d "$DB_NAME"
+  | sudo -u postgres "$PG_BIN/pg_restore" --clean --if-exists --no-acl -p "$PORT" -d "$DB_NAME"
 rc=${PIPESTATUS[1]}
 set -e
 # pg_restore exits non-zero on benign "already exists / does not exist" notices on first run;

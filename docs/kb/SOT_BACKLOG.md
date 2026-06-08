@@ -254,6 +254,18 @@ I **7** tavoli che restavano `NEEDS_DECISION` nella vista `sys.v_reconciliation_
 - **Decisioni Enzo applicate**: catena `in_review` (vs solo publish/unpublish) · ESS route `/me/handbook` label "Manuale del dipendente" · pesi B/C delegati a Claude (best-practice).
 - **Pending prossima sessione**: **deploy PROD S976** (vm-deploy + Mac align) · **#5 scraping P2** (watermark+systemd timer, verifica VM-only) · **#6 m2b** surveys normalized (modeling: spec→sign-off A/B/C + scope feedback/pulse) · **#4 frontend** opzionale (`/insights/succession-readiness`+`/skill-gap`) · MVP-4 residuo. Debito **D-18** (insights recompute append-accumulation, vedi DEBT_REGISTER).
 
+**🟢 Aggiornamento S978 (2026-06-08) — aggregato item #1-8 SHIPPED (ultracode, decisioni delegate):**
+8 item del menu eseguiti in autonomia, **7 commit pushati** (`0ea045b`..`385e74e`), full API suite **837/6**, web build verde. Dettaglio granulare → `SOT_STATE.md` §0-duodecies.
+- **cap⑤ P1 ESCO full-catalogue ✅** (`3663371`): fix paging single-page → **2942** occupazioni (era 100), live-verified idempotente. **Chiude il follow-up P1 cap⑤.**
+- **cap② Fase 3 PSR-population ✅** (`93e4b45`, mig 000096): `sys_position_skill_requirements` 0→**844** via derivazione peer-group-prevalence-v1 (job_role→skill, tenant-local I5). Sblocca skill-gap analytics reale (PSR non più vuoto).
+- **#6 B-10b m2b Surveys normalized ✅** (`afdfd64`, mig 000097 + seed 48): 4 tab `sys_surveys`/`_questions`/`_responses`/`sys_pulse_checks` + modulo `/v1/engagement` (read-only). Import RTL 8/21/3792/733. **B-10b core + m2b ora COMPLETO.**
+- **cap③ insights scheduled-recompute ✅** (`0ea045b`): CLI `insights:recompute` + systemd daily timer (vm-bootstrap/deploy auto-install). **Chiude l'ultimo residuo cap③.**
+- **cap④ CMS P3 (full-text search) ✅** (`4e85281`, mig 000098): `GET /v1/content/search` (tsvector+GIN). **Residuo P3** (decisione Enzo/PM, NON shipped): rich-text primitive (upstream `@heuresys/ui`); media object-store (⛔ infra/costo PM); BPM cross-link (content↔blueprint); search-UI box su `/content`.
+- **MVP-4 §2.5 MFA recovery codes ✅** (`9ba2fba`, mig 000099): 10 codici SHA-256 single-use + `/v1/auth/mfa/recovery-codes` + login bypass. **Residuo §2.5** (NON shipped): WEBAUTHN (`@simplewebauthn`+ceremony); SMS_OTP (⛔ provider+costo PM); session-enum UI `/me/security/sessions`; mandatory-MFA policy.
+- **MVP-4 §2.7 WCAG ✅ (slice)** (`385e74e`): fix WCAG 3.1.1 `<html lang>` dinamico (era hardcoded `it`). **Residuo §2.7** (multi-sessione ~37-62h): axe serious/moderate/minor tail per-route + mobile sweep (critical=0 già gated).
+- **#8b category-heatmap skills**: era GIÀ shippato (`5ec1c6d`); verificato verde (analytics 28/28). Doc-drift chiuso (non più "opzionale residuo").
+- **Pending close S978**: vm-deploy PROD + Mac/VM align a `385e74e` (in corso); CI da confermare verde.
+
 ## P3 — Infra / robustezza
 
 | ID | Azione | Note |

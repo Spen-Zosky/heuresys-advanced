@@ -82,4 +82,11 @@ test.describe("i18n EN gate — server locale=en flips the chrome to English", (
       await expect(page.getByText(c.en, { exact: false }).first()).toBeVisible({ timeout: 30_000 });
     });
   }
+
+  // WCAG 3.1.1 (Language of Page): the SSR <html lang> must reflect the active locale
+  // (NEXT_LOCALE cookie), not the hardcoded "it". With the en cookie set, lang must be "en".
+  test("WCAG 3.1.1: <html lang> reflects the EN locale", async ({ page }) => {
+    await page.goto("/dashboard", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+  });
 });

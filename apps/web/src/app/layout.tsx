@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { cookies } from "next/headers";
 import { AppProviders } from "../providers/AppProviders";
 
 export const metadata: Metadata = {
@@ -21,9 +22,15 @@ export const metadata: Metadata = {
  */
 const themeBootScript = `(function(){try{var t=localStorage.getItem('heuresys-theme');var d=t?t==='dark':true;var c=document.documentElement.classList;d?c.add('dark'):c.remove('dark');}catch(e){document.documentElement.classList.add('dark');}})();`;
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // WCAG 3.1.1 (Language of Page): the document <html lang> MUST match the rendered
+  // content language. The platform is bilingual (IT default + EN, i18n S965) — read the
+  // NEXT_LOCALE cookie server-side so the lang is correct from the first byte (SSR), not
+  // only after client JS runs. LanguageSwitcher.setLocale syncs document.lang immediately.
+  const cookieLocale = (await cookies()).get("NEXT_LOCALE")?.value;
+  const lang = cookieLocale === "en" ? "en" : "it";
   return (
-    <html lang="it" className="dark" suppressHydrationWarning>
+    <html lang={lang} className="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
       </head>

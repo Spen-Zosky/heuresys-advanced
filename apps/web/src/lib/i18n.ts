@@ -80,6 +80,9 @@ export function setLocale(locale: AppLocale): void {
   void i18next.changeLanguage(locale);
   if (typeof document !== "undefined") {
     document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=31536000; samesite=lax`;
+    // WCAG 3.1.1: keep <html lang> in sync immediately on a client-side locale switch
+    // (the SSR value is set from the cookie in the root layout on the next request).
+    document.documentElement.lang = locale;
   }
 }
 

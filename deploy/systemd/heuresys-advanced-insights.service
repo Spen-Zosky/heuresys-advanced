@@ -1,0 +1,26 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh.
+# Do NOT install this file directly; run the bootstrap script instead.
+#
+# cap③ data-mining: a ONE-SHOT that recomputes the in-platform insight scores
+# (flight-risk, succession-readiness, skill-gap) in-process against the DB —
+# CLI-bypass, no HTTP/auth. Each recompute is a bounded delete-then-insert (D-18) →
+# re-running never grows the score tables. Activated by heuresys-advanced-insights.timer.
+[Unit]
+Description=Heuresys Advanced — insights recompute (cap③ flight-risk/succession/skill-gap, one-shot)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@/apps/api
+# nvm-managed Node (>=22) on PATH; pnpm lives alongside it.
+Environment=PATH=@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
+Environment=NODE_ENV=production
+# Lets env.ts locate the repo-root .env + .secrets when run from apps/api.
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
+# CLI-bypass in-process run (tsx) — devDeps are present (frozen install, not --prod).
+ExecStart=@@NODE_BIN@@/pnpm insights:recompute
+TimeoutStartSec=600

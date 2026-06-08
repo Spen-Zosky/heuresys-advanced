@@ -129,11 +129,12 @@ NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \
 "$NODE_BIN/pnpm" --filter @heuresys/web build
 
 # 6. Render + install systemd unit templates, then (re)start (idempotent) --
-#    api/web are long-running services; `scraping` is a one-shot driven by its timer
-#    (cap⑤ P2, D-2) — installed + enabled but NOT started here (the timer fires it).
+#    api/web are long-running services; `scraping` (cap⑤ P2, D-2) + `insights` (cap③)
+#    are one-shots driven by their timers — installed + enabled but NOT started here
+#    (the timers fire them).
 log "systemd: render templates + install + restart"
 tmp="$(mktemp -d)"
-for svc in api web scraping; do
+for svc in api web scraping insights; do
   sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" \
       -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
       -e "s#@@PUBLIC_HOST@@#$PUBLIC_HOST#g" \
@@ -144,14 +145,18 @@ for svc in api web scraping; do
   sudo install -m 644 -o root -g root "$tmp/heuresys-advanced-$svc.service" \
       "/etc/systemd/system/heuresys-advanced-$svc.service"
 done
-# the scraping timer is static (no placeholders) — install verbatim.
+# the timers are static (no placeholders) — install verbatim.
 sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-scraping.timer" \
     "/etc/systemd/system/heuresys-advanced-scraping.timer"
+sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-insights.timer" \
+    "/etc/systemd/system/heuresys-advanced-insights.timer"
 rm -rf "$tmp"
 sudo systemctl daemon-reload
 sudo systemctl enable heuresys-advanced-api.service heuresys-advanced-web.service >/dev/null
-# weekly ESCO reference-sync probe (cap⑤ P2) — enable + start the TIMER (not the one-shot).
+# weekly ESCO reference-sync probe (cap⑤ P2) + daily insights recompute (cap③) —
+# enable + start the TIMERS (not the one-shots).
 sudo systemctl enable --now heuresys-advanced-scraping.timer >/dev/null
+sudo systemctl enable --now heuresys-advanced-insights.timer >/dev/null
 sudo systemctl restart heuresys-advanced-api.service
 sleep 5
 sudo systemctl restart heuresys-advanced-web.service

@@ -1,0 +1,21 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh.
+#
+# cap③ data-mining: a DAILY recompute of the in-platform insight scores. The inputs
+# (attendance, KPI, engagement, comp, position-fit) change frequently, so a nightly
+# refresh keeps the scores current. Each run is bounded (D-18 delete-then-insert) →
+# cheap, no table growth. Scheduled off-peak and BEFORE the weekly ESCO probe
+# (Sun 03:30) so the two never overlap.
+[Unit]
+Description=Heuresys Advanced — daily insights recompute (cap③)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+# Daily 02:15 local, with a randomized delay so it never fires on the dot.
+OnCalendar=*-*-* 02:15:00
+RandomizedDelaySec=600
+# Run a missed occurrence after downtime (the VM is not always up at 02:15).
+Persistent=true
+Unit=heuresys-advanced-insights.service
+
+[Install]
+WantedBy=timers.target

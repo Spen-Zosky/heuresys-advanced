@@ -70,23 +70,26 @@ NEXT_PUBLIC_API_PROXY_BASE_URL="http://localhost:$API_PORT" \
 NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \
 pnpm --filter @heuresys/web build
 
-# 3c. Install/refresh the scraping one-shot + weekly timer (cap⑤ P2). The api/web unit
-#     files are installed by vm-bootstrap.sh; the scraping units are NEW, so the ROUTINE
-#     deploy installs them too — otherwise the weekly ESCO probe would silently never run.
-#     Idempotent: install + enable --now are safe to re-run; the timer (not the one-shot)
-#     is what gets enabled/started.
-log "systemd: install scraping one-shot + weekly timer (cap⑤ P2)"
+# 3c. Install/refresh the one-shot + timer units driven by schedulers: scraping (cap⑤ P2,
+#     weekly ESCO probe) + insights (cap③, daily recompute). The api/web unit files are
+#     installed by vm-bootstrap.sh; these scheduler units are NEW, so the ROUTINE deploy
+#     installs them too — otherwise the timers would silently never run. Idempotent:
+#     install + enable --now are safe to re-run; the timers (not the one-shots) get enabled.
+log "systemd: install scheduler units (scraping cap⑤ P2 + insights cap③)"
 swtmp="$(mktemp -d)"
-sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
-    "$REPO_DIR/deploy/systemd/heuresys-advanced-scraping.service" \
-    > "$swtmp/heuresys-advanced-scraping.service"
-sudo install -m 644 -o root -g root "$swtmp/heuresys-advanced-scraping.service" \
-    "/etc/systemd/system/heuresys-advanced-scraping.service"
-sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-scraping.timer" \
-    "/etc/systemd/system/heuresys-advanced-scraping.timer"
+for svc in scraping insights; do
+  sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
+      "$REPO_DIR/deploy/systemd/heuresys-advanced-$svc.service" \
+      > "$swtmp/heuresys-advanced-$svc.service"
+  sudo install -m 644 -o root -g root "$swtmp/heuresys-advanced-$svc.service" \
+      "/etc/systemd/system/heuresys-advanced-$svc.service"
+  sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-$svc.timer" \
+      "/etc/systemd/system/heuresys-advanced-$svc.timer"
+done
 rm -rf "$swtmp"
 sudo systemctl daemon-reload
 sudo systemctl enable --now heuresys-advanced-scraping.timer >/dev/null
+sudo systemctl enable --now heuresys-advanced-insights.timer >/dev/null
 
 # 4. Restart services (api first so the web's proxy target is up).
 log "restart"
@@ -101,6 +104,7 @@ sleep 5
 log "verify"
 systemctl is-active heuresys-advanced-api heuresys-advanced-web || true
 echo "  scraping.timer: $(systemctl is-active heuresys-advanced-scraping.timer 2>/dev/null || echo inactive)"
+echo "  insights.timer: $(systemctl is-active heuresys-advanced-insights.timer 2>/dev/null || echo inactive)"
 if curl -fsS -m 8 "http://localhost:$API_PORT/readyz" >/dev/null; then
   echo "  api /readyz OK"
 else

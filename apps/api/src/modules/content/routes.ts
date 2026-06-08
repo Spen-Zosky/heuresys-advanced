@@ -23,6 +23,8 @@ import {
   ContentIdParamSchema,
   ContentCategoryIdParamSchema,
   ContentVersionRestoreParamSchema,
+  ContentSearchQuerySchema,
+  ContentSearchResponseSchema,
 } from "@heuresys/shared";
 import { contentService, type ActorContext } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -57,6 +59,13 @@ export const contentRoutes: FastifyPluginAsyncZod = async (app) => {
     "/categories/:id",
     { preHandler: [app.verifyCsrf, requirePermission("content:delete")], schema: { params: ContentCategoryIdParamSchema, response: { 200: DeleteCatResponse } } },
     async (req) => { await contentService.deleteCategory(actor(req), req.params.id); return { deleted: true as const }; },
+  );
+
+  /* --- P3: full-text search (static path; radix prioritizes over /:id) --- */
+  app.get(
+    "/search",
+    { preHandler: [requirePermission("content:read")], schema: { querystring: ContentSearchQuerySchema, response: { 200: ContentSearchResponseSchema } } },
+    async (req) => contentService.searchDocuments(actor(req), req.query.q, req.query.status),
   );
 
   /* --- documents --- */

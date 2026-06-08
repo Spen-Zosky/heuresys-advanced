@@ -16,6 +16,7 @@ import type {
   ContentDocumentDetailResponse,
   ContentDocumentFilter,
   ContentDocumentListResponse,
+  ContentSearchResponse,
   ContentKind,
   ContentStatus,
   ContentVersion,
@@ -70,6 +71,14 @@ export const contentService = {
   async listDocuments(a: ActorContext, filter: ContentDocumentFilter): Promise<ContentDocumentListResponse> {
     const { items, total } = await repo.listDocuments(pool, buildScope(a), filter);
     return { items: items.map(toDoc), total };
+  },
+
+  /** P3: ranked full-text search (title+body). Scope-filtered (I5); empty query → empty. */
+  async searchDocuments(a: ActorContext, query: string, status?: string): Promise<ContentSearchResponse> {
+    const trimmed = query.trim();
+    if (!trimmed) return { query: trimmed, items: [], total: 0 };
+    const items = await repo.searchDocuments(pool, buildScope(a), trimmed, 50, status);
+    return { query: trimmed, items, total: items.length };
   },
 
   async getDocument(a: ActorContext, id: string): Promise<ContentDocumentDetailResponse> {

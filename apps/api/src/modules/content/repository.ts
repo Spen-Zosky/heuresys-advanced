@@ -260,6 +260,58 @@ export async function findDocumentById(q: DbConnector, scope: ScopeFilter, id: s
   return res.rows[0] ? mapDocument(res.rows[0]) : null;
 }
 
+/* --- P3: full-text search (tsvector/GIN, mig 000098) ---------------------- */
+export interface SearchHit {
+  documentId: string;
+  tenantId: string;
+  title: string;
+  slug: string;
+  kind: string;
+  status: string;
+  categoryId: string | null;
+  rank: number;
+  snippet: string;
+}
+
+/** Ranked full-text search over title (weight A) + body (weight B). Scope-filtered (I5). */
+export async function searchDocuments(
+  q: DbConnector,
+  scope: ScopeFilter,
+  query: string,
+  limit: number,
+  status?: string,
+): Promise<SearchHit[]> {
+  const params: unknown[] = [query]; // $1 = the raw websearch query
+  const clauses: string[] = [`document_search_tsv @@ websearch_to_tsquery('simple', $1)`];
+  if (!scope.isPlatform) { params.push(scope.tenantId); clauses.push(`document_tenant_id = $${params.length}`); }
+  if (status) { params.push(status); clauses.push(`document_status = $${params.length}`); }
+  params.push(limit);
+  const res = await q.query(
+    `SELECT document_id, document_tenant_id, document_title, document_slug, document_kind,
+            document_status, document_category_id,
+            ts_rank(document_search_tsv, websearch_to_tsquery('simple', $1)) AS rank,
+            ts_headline('simple', coalesce(document_body, document_title),
+                        websearch_to_tsquery('simple', $1),
+                        'MaxFragments=2, MinWords=4, MaxWords=18, StartSel=<<, StopSel=>>') AS snippet
+       FROM sys.sys_content_documents
+      WHERE ${clauses.join(" AND ")}
+      ORDER BY rank DESC, updated_at DESC
+      LIMIT $${params.length}`,
+    params,
+  );
+  return res.rows.map((r: Record<string, unknown>) => ({
+    documentId: r.document_id as string,
+    tenantId: r.document_tenant_id as string,
+    title: r.document_title as string,
+    slug: r.document_slug as string,
+    kind: r.document_kind as string,
+    status: r.document_status as string,
+    categoryId: (r.document_category_id as string | null) ?? null,
+    rank: Math.round(Number(r.rank) * 10000) / 10000,
+    snippet: r.snippet as string,
+  }));
+}
+
 export async function findVersionById(q: DbConnector, id: string): Promise<VersionRow | null> {
   const res = await q.query(`SELECT ${VER_COLS} FROM sys.sys_content_versions WHERE version_id = $1`, [id]);
   return res.rows[0] ? mapVersion(res.rows[0]) : null;

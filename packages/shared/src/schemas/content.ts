@@ -147,6 +147,33 @@ export const ContentCategoryIdParamSchema = z.object({ id: z.uuid() });
 /** P2: restore an old version → append a copy + repoint head. */
 export const ContentVersionRestoreParamSchema = z.object({ id: z.uuid(), versionId: z.uuid() });
 
+/** P3: full-text search over title + body (tsvector/GIN, mig 000098). */
+export const ContentSearchQuerySchema = z.object({
+  q: z.string().min(1).max(200),
+  status: z.enum(["draft", "in_review", "published", "archived"]).optional(),
+});
+export type ContentSearchQuery = z.infer<typeof ContentSearchQuerySchema>;
+
+export const ContentSearchHitSchema = z.object({
+  documentId: z.uuid(),
+  tenantId: z.uuid(),
+  title: z.string(),
+  slug: z.string(),
+  kind: z.string(),
+  status: z.string(),
+  categoryId: z.uuid().nullable(),
+  rank: z.number(),
+  snippet: z.string(),
+});
+export type ContentSearchHit = z.infer<typeof ContentSearchHitSchema>;
+
+export const ContentSearchResponseSchema = z.object({
+  query: z.string(),
+  items: z.array(ContentSearchHitSchema),
+  total: z.number().int(),
+});
+export type ContentSearchResponse = z.infer<typeof ContentSearchResponseSchema>;
+
 /** P2 ESS read filter (/v1/me/content) — published-only is enforced server-side. */
 export const MeContentFilterSchema = z.object({
   categoryId: z.uuid().optional(),

@@ -19,6 +19,7 @@
     "db:create:sh": "bash db/scripts/create_local_database.sh",
     "db:migrate": "pwsh -File db/scripts/migrate.ps1",
     "db:migrate:sh": "bash db/scripts/migrate.sh",
+    "db:migrate:if-pending": "bash db/scripts/migrate-if-pending.sh",
     "db:reset": "pwsh -File db/scripts/reset_local_database.ps1",
     "db:validate": "pwsh -File db/scripts/validate_database.ps1",
     "db:seed": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-reference-bank.ts",

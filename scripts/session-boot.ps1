@@ -57,6 +57,24 @@ $head     = (git log -1 --oneline 2>$null)
 $dirty    = @(git status --porcelain 2>$null)
 $unpushed = @(git log '@{u}..HEAD' --oneline 2>$null)
 Pop-Location
+
+# Session-align marker (delta basis for the handoff close-flow). Create-if-absent so a
+# resume/compaction does NOT reset the delta window; the handoff consumes (deletes) it.
+# Line 1 = start HEAD sha; remaining lines = memory-dir manifest (for delete detection);
+# the file's own mtime marks session start (the `-newer` reference). UTF8 no-BOM so bash
+# `head -1` reads a clean sha. Non-fatal.
+try {
+    $marker = Join-Path $ProjectRoot '.session-align.marker'
+    if (-not (Test-Path $marker)) {
+        $startHead = (git -C $ProjectRoot rev-parse HEAD 2>$null)
+        if ($startHead) {
+            $memDir   = Join-Path $env:USERPROFILE '.claude\projects\D--heuresys-advanced\memory'
+            $memFiles = @(if (Test-Path $memDir) { Get-ChildItem -LiteralPath $memDir -File -Name } else { @() })
+            # LF line endings (no CRLF) so bash `head -1` reads a clean sha.
+            [System.IO.File]::WriteAllText($marker, ((@("$startHead") + $memFiles) -join "`n") + "`n")
+        }
+    }
+} catch {}
 $treeMsg = if ($dirty.Count -gt 0)    { "[!]    working tree DIRTY ($($dirty.Count) files)" } else { '[OK]   working tree clean' }
 $pushMsg = if ($unpushed.Count -gt 0) { "[!]    $($unpushed.Count) commit(s) unpushed" }       else { '[OK]   synced with origin' }
 

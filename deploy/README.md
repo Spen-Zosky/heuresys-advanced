@@ -64,6 +64,16 @@ per-machine). **Never propagate**: regenerable/platform objects (`node_modules`,
 `dist`, `.next`, `*.tsbuildinfo`). NB: this is the **hard-clone** path; the per-host
 `dev-bootstrap.sh` below remains the non-destructive *provisioning* path.
 
+**Delta mode (used automatically at session close).** The `handoff` skill runs
+`align-clones.sh all --delta --resilient --auto-deploy`, which propagates **only what
+the session changed** (memories/data with `mtime` newer than the session marker
+`.session-align.marker`, plus deleted-memory propagation), **deploys the VM only if the
+commits touched code** (`apps|packages|db|scripts|deploy`), and **skips an unreachable
+host with a warning** instead of failing. The VM deploy runs `db/scripts/migrate-if-pending.sh`
+(migrates only when an sha256 is missing from the `sys.sys_schema_migrations` ledger —
+normally a no-op on the shared DB). Use the full-clone form above to catch up a host that
+was skipped.
+
 ## Linux server (OCI VM / any amd64 Linux) — public, systemd
 
 ```bash

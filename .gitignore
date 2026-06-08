@@ -4,6 +4,12 @@
 # =============================================================================
 
 # -----------------------------------------------------------------------------
+# Session-align marker — per-session delta basis (written by session-boot.ps1,
+# consumed by the handoff close-flow). Per-machine, never committed.
+# -----------------------------------------------------------------------------
+.session-align.marker
+
+# -----------------------------------------------------------------------------
 # Brownfield extraction & inspection artifacts (HARD REQUIREMENT)
 # -----------------------------------------------------------------------------
 # The original db-export.zip stays versioned as input material under

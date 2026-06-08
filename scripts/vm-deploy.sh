@@ -76,10 +76,12 @@ if ! pnpm install --frozen-lockfile; then
 fi
 mkdir -p "$REPO_DIR/node_modules" && printf '%s' "$CUR_ABI" > "$ABI_SENTINEL"
 
-# 2b. Apply DB migrations (idempotent) as a safety-net so the PROD schema is never behind
-#     the deployed code, even if migrations weren't run from the PC via the tunnel first.
-log "db: migrate (idempotent safety-net)"
-pnpm db:migrate:sh
+# 2b. Apply DB migrations ONLY if a migration is pending (sha256 vs the sys.sys_schema_migrations
+#     ledger). The DBMS is shared (PC tunnel :5433 == this VM's :5432), so it is normally already
+#     migrated during dev → fast no-op; runs only for a genuinely unapplied migration.
+#     Override: DB_MIGRATE=force|skip|auto (default auto).
+log "db: migrate-if-pending"
+bash "$REPO_DIR/db/scripts/migrate-if-pending.sh"
 
 # 3. Production builds: shared (clean) → API (tsup bundle → node dist/server.js) → web (next build).
 #    @heuresys/shared MUST be built BEFORE api/web because both typecheck against its

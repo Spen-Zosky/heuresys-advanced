@@ -1,0 +1,20 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh.
+#
+# cap⑤ scraping P2 (D-5): a CONSERVATIVE weekly probe of the ESCO taxonomy. Reference
+# taxonomies change ~yearly upstream, so most weekly runs are a cheap UNCHANGED no-op
+# via brownfield.source_watermarks (content-hash short-circuit). Don't over-poll
+# authoritative sources.
+[Unit]
+Description=Heuresys Advanced — weekly ESCO reference-sync probe (cap⑤)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+# Sundays 03:30 local, with a randomized delay so we never hit the upstream on the dot.
+OnCalendar=Sun *-*-* 03:30:00
+RandomizedDelaySec=900
+# Run a missed occurrence after downtime (the VM is not always up at 03:30).
+Persistent=true
+Unit=heuresys-advanced-scraping.service
+
+[Install]
+WantedBy=timers.target

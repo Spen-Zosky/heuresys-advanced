@@ -63,9 +63,11 @@ export interface RecordRunArgs {
   sourceKey: string;
   fileHash: string;
   sizeBytes: number;
-  initiatedBy: string;
+  initiatedBy: string | null;
   startedAt: Date;
   counts: EscoUpsertResult;
+  /** true = UNCHANGED no-op run (watermark short-circuit; no catalog upsert performed). */
+  skipped?: boolean;
 }
 
 /** Record the run in the brownfield lineage backbone (source_exports + import_runs). */
@@ -102,7 +104,7 @@ export async function recordSyncRun(
       REFERENCE_SYNC_SCOPE,
       args.startedAt,
       args.initiatedBy,
-      JSON.stringify({ source: args.sourceKey, ...args.counts }),
+      JSON.stringify({ source: args.sourceKey, ...args.counts, skipped: !!args.skipped }),
     ],
   );
   return { runId: run.rows[0]!.id, exportId };
@@ -169,16 +171,26 @@ export async function readLatestRun(sourceKey: string): Promise<SyncRunRow | nul
   return row ? mapRun(row) : null;
 }
 
-/** Run the catalog upsert + the run record atomically. */
+/**
+ * Run the catalog upsert + the run record + the watermark advance ATOMICALLY (one
+ * transaction). When `skipped` (the upstream artifact is unchanged since the last
+ * successful ingest), the catalog upsert is skipped and the watermark advances to
+ * UNCHANGED; otherwise the catalog is upserted and the watermark advances to STAGED.
+ * The HWM only ever advances inside this run-finish transaction, so a crash mid-load
+ * never advances the cursor (scraping spec §3.3).
+ */
 export async function persistEscoSync(args: {
   rows: EscoOccupation[];
   fileHash: string;
   sizeBytes: number;
-  initiatedBy: string;
+  initiatedBy: string | null;
   startedAt: Date;
+  skipped: boolean;
 }): Promise<{ runId: string; counts: EscoUpsertResult }> {
   return withTransaction(async (client) => {
-    const counts = await upsertEscoCatalog(client, args.rows);
+    const counts = args.skipped
+      ? { total: args.rows.length, inserted: 0, updated: 0 }
+      : await upsertEscoCatalog(client, args.rows);
     const { runId } = await recordSyncRun(client, {
       sourceKey: "ESCO",
       fileHash: args.fileHash,
@@ -186,7 +198,152 @@ export async function persistEscoSync(args: {
       initiatedBy: args.initiatedBy,
       startedAt: args.startedAt,
       counts,
+      skipped: args.skipped,
+    });
+    await advanceWatermark(client, {
+      sourceKey: "ESCO",
+      contentHash: args.fileHash,
+      status: args.skipped ? "UNCHANGED" : "STAGED",
+      runId,
     });
     return { runId, counts };
   });
+}
+
+/* ── cap⑤ P2: delta / HWM layer (brownfield.source_watermarks) ───────────── */
+
+export interface WatermarkRow {
+  sourceKey: string;
+  cursor: string | null;
+  contentHash: string | null;
+  status: string;
+  lastFetchedAt: string | null;
+  lastSucceededAt: string | null;
+  lastImportRunId: string | null;
+}
+
+/** Current watermark for a source (null if the row was never seeded). */
+export async function readWatermark(sourceKey: string): Promise<WatermarkRow | null> {
+  const res = await pool.query(
+    `SELECT source_watermark_source_key      AS source_key,
+            source_watermark_cursor          AS cursor,
+            source_watermark_content_hash    AS content_hash,
+            source_watermark_status          AS status,
+            source_watermark_last_fetched_at AS last_fetched_at,
+            source_watermark_last_succeeded_at AS last_succeeded_at,
+            source_watermark_last_import_run_id AS last_import_run_id
+       FROM brownfield.source_watermarks
+      WHERE source_watermark_source_key = $1`,
+    [sourceKey],
+  );
+  const r = res.rows[0];
+  if (!r) return null;
+  return {
+    sourceKey: r.source_key as string,
+    cursor: (r.cursor as string | null) ?? null,
+    contentHash: (r.content_hash as string | null)?.trim() ?? null,
+    status: r.status as string,
+    lastFetchedAt: r.last_fetched_at ? (r.last_fetched_at as Date).toISOString() : null,
+    lastSucceededAt: r.last_succeeded_at ? (r.last_succeeded_at as Date).toISOString() : null,
+    lastImportRunId: (r.last_import_run_id as string | null) ?? null,
+  };
+}
+
+/**
+ * Advance the watermark in the run-finish transaction (called only from persistEscoSync)
+ * and RELEASE the FETCHING lock by overwriting the status: 'STAGED' for a changed ingest
+ * (the terminal-success state for this direct-upsert connector — there is no separate
+ * staging table, so STAGED per the spec §3.3 enum means "successfully ingested into
+ * sys.*") or 'UNCHANGED' for a skipped no-op. Sets content_hash + last_import_run_id and
+ * stamps last_fetched_at/last_succeeded_at = now (an UNCHANGED run is still a success —
+ * nothing to ingest). Upsert by source_key so it is robust even if the seed row is absent.
+ */
+async function advanceWatermark(
+  client: PoolClient,
+  args: { sourceKey: string; contentHash: string; status: "STAGED" | "UNCHANGED"; runId: string },
+): Promise<void> {
+  await client.query(
+    `INSERT INTO brownfield.source_watermarks
+       (source_watermark_source_key, source_watermark_content_hash, source_watermark_status,
+        source_watermark_last_fetched_at, source_watermark_last_succeeded_at,
+        source_watermark_last_import_run_id, updated_at)
+     VALUES ($1, $2, $3, now(), now(), $4, now())
+     ON CONFLICT (source_watermark_source_key) DO UPDATE SET
+       source_watermark_content_hash       = EXCLUDED.source_watermark_content_hash,
+       source_watermark_status             = EXCLUDED.source_watermark_status,
+       source_watermark_last_fetched_at    = now(),
+       source_watermark_last_succeeded_at  = now(),
+       source_watermark_last_import_run_id = EXCLUDED.source_watermark_last_import_run_id,
+       updated_at = now()`,
+    [args.sourceKey, args.contentHash, args.status, args.runId],
+  );
+}
+
+/**
+ * Mark the source FAILED — ONLY if this run still holds the FETCHING lock. The
+ * `status = 'FETCHING'` guard means a late failure of an overtaken run cannot clobber a
+ * row that has already advanced to a newer success (no cross-run state corruption). The
+ * run transaction rolled back, so content_hash/last_succeeded_at were NOT advanced (the
+ * next run retries the same delta). Scraping spec §5. Failures are observable here +
+ * via journalctl (the systemd timer); they intentionally do NOT write an import_runs row
+ * (the run-finish insert lives inside the rolled-back transaction).
+ */
+export async function markWatermarkFailed(sourceKey: string): Promise<void> {
+  await pool.query(
+    `UPDATE brownfield.source_watermarks
+        SET source_watermark_status = 'FAILED', source_watermark_last_fetched_at = now(), updated_at = now()
+      WHERE source_watermark_source_key = $1 AND source_watermark_status = 'FETCHING'`,
+    [sourceKey],
+  );
+}
+
+/** TTL (minutes) after which a stale FETCHING lock (a crashed run) is reclaimable. */
+const LOCK_STALE_MINUTES = 30;
+
+/**
+ * Acquire the per-source in-flight lock (spec §5): atomically set status=FETCHING and
+ * return the PRIOR content_hash/last_succeeded_at (for the UNCHANGED skip decision).
+ * Returns null when a non-stale FETCHING run already holds the lock — the caller bails
+ * with SYNC_IN_PROGRESS. Upsert form so it works even if the seed row is absent; the
+ * ON CONFLICT … WHERE guard rejects a live in-flight run while auto-reclaiming a stale
+ * one (a crash that left FETCHING older than the TTL). advanceWatermark/markWatermarkFailed
+ * release the lock at run-finish by overwriting the status.
+ */
+export async function acquireLock(
+  sourceKey: string,
+): Promise<{ contentHash: string | null; lastSucceededAt: string | null } | null> {
+  const res = await pool.query(
+    `INSERT INTO brownfield.source_watermarks
+       (source_watermark_source_key, source_watermark_status, source_watermark_last_fetched_at)
+     VALUES ($1, 'FETCHING', now())
+     ON CONFLICT (source_watermark_source_key) DO UPDATE SET
+       source_watermark_status = 'FETCHING', source_watermark_last_fetched_at = now(), updated_at = now()
+     WHERE source_watermarks.source_watermark_status <> 'FETCHING'
+        OR source_watermarks.source_watermark_last_fetched_at < now() - make_interval(mins => $2::int)
+     RETURNING source_watermark_content_hash AS content_hash,
+               source_watermark_last_succeeded_at AS last_succeeded_at`,
+    [sourceKey, LOCK_STALE_MINUTES],
+  );
+  const r = res.rows[0];
+  if (!r) return null; // a live FETCHING run already holds the lock
+  return {
+    contentHash: (r.content_hash as string | null)?.trim() ?? null,
+    lastSucceededAt: r.last_succeeded_at ? (r.last_succeeded_at as Date).toISOString() : null,
+  };
+}
+
+/**
+ * Cheap presence check: does the ESCO occupation catalog still hold rows? Makes the
+ * UNCHANGED skip a TRUE optimization rather than the sole correctness gate — if the
+ * global catalog was wiped, the next run re-ingests despite a matching content hash
+ * (the skip path performs NO upsert, so without this guard a wiped catalog would never
+ * self-heal while the watermark records a matching hash).
+ */
+export async function escoCatalogHasRows(): Promise<boolean> {
+  const res = await pool.query<{ has: boolean }>(
+    `SELECT EXISTS(
+       SELECT 1 FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_job_role_id IS NULL
+     ) AS has`,
+  );
+  return res.rows[0]?.has === true;
 }

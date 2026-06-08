@@ -40,15 +40,28 @@ let tenantAdmin: S; // TENANT_ADMIN — DENIED: reference_sync is strict PLATFOR
                     //   + 000005 denylist), because an ESCO refresh mutates GLOBAL reference data.
 let manager: S;     // MANAGER — also denied (never in the 000005 catch-all).
 
+// The test owns the ESCO source lifecycle: synthetic mappings + a reset watermark.
+// Resetting the watermark (content_hash/last_succeeded_at → NULL) guarantees the first
+// trigger is a genuine INSERT (not a watermark UNCHANGED skip from a prior run).
+const RESET_WATERMARK = `
+  UPDATE brownfield.source_watermarks
+     SET source_watermark_content_hash = NULL, source_watermark_last_succeeded_at = NULL,
+         source_watermark_last_fetched_at = NULL, source_watermark_last_import_run_id = NULL,
+         source_watermark_status = 'IDLE'
+   WHERE source_watermark_source_key = 'ESCO'`;
+
 beforeAll(async () => {
   suite = await buildTestApp({ referenceSyncDeps: { escoFetcher: new FixtureEscoFetcher(FIXTURE) } });
   admin = await login(suite, "admin@heuresys.com");
   tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
+  await pool.query("DELETE FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_esco_uri LIKE $1", [`${TEST_PREFIX}%`]);
+  await pool.query(RESET_WATERMARK);
 });
 
 afterAll(async () => {
   await pool.query("DELETE FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_esco_uri LIKE $1", [`${TEST_PREFIX}%`]);
+  await pool.query(RESET_WATERMARK);
   await suite.app.close();
 });
 
@@ -86,15 +99,16 @@ describe("reference-sync API (cap⑤ ESCO)", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("CSRF_FAIL");
   });
 
-  it("first sync inserts the fixture occupations (idempotent upsert, never deletes)", async () => {
+  it("first sync inserts the fixture occupations (changed path: watermark was reset → not skipped)", async () => {
     const r = await trigger(admin);
     expect(r.statusCode).toBe(200);
-    const b = r.json() as { accepted: boolean; source: string; total: number; inserted: number; updated: number; runId: string };
+    const b = r.json() as { accepted: boolean; source: string; total: number; inserted: number; updated: number; skipped: boolean; runId: string };
     expect(b.accepted).toBe(true);
     expect(b.source).toBe("ESCO");
     expect(b.total).toBe(3);
     expect(b.inserted).toBe(3);
     expect(b.updated).toBe(0);
+    expect(b.skipped).toBe(false); // P2: first ingest after a reset is a real upsert
     // the rows really landed in the catalog
     const { rows } = await pool.query<{ n: string }>(
       "SELECT count(*)::text AS n FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_esco_uri LIKE $1",
@@ -103,14 +117,14 @@ describe("reference-sync API (cap⑤ ESCO)", () => {
     expect(Number(rows[0]!.n)).toBe(3);
   });
 
-  it("re-running the same artifact is a pure update (idempotency: 0 net new)", async () => {
+  it("P2 watermark: re-running the SAME artifact is an UNCHANGED no-op (skipped, 0 upsert)", async () => {
     const r = await trigger(admin);
     expect(r.statusCode).toBe(200);
-    const b = r.json() as { total: number; inserted: number; updated: number };
-    expect(b.total).toBe(3);
+    const b = r.json() as { total: number; inserted: number; updated: number; skipped: boolean };
+    expect(b.skipped).toBe(true);   // content_hash matches the last successful ingest → short-circuit
     expect(b.inserted).toBe(0);
-    expect(b.updated).toBe(3);
-    // still exactly 3 synthetic rows (no duplication)
+    expect(b.updated).toBe(0);      // catalog upsert was NOT performed
+    // still exactly 3 synthetic rows (nothing inserted, nothing deleted)
     const { rows } = await pool.query<{ n: string }>(
       "SELECT count(*)::text AS n FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_esco_uri LIKE $1",
       [`${TEST_PREFIX}%`],
@@ -141,12 +155,79 @@ describe("reference-sync API (cap⑤ ESCO)", () => {
     expect(r.statusCode).toBe(404);
   });
 
-  it("GET /sources lists ESCO with its latest run", async () => {
+  it("GET /sources lists ESCO with its latest run + delta watermark (P2)", async () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/reference-sync/sources", headers: { cookie: ch(admin.cookies) } });
     expect(r.statusCode).toBe(200);
-    const b = r.json() as { items: { key: string; lastRun: { total: number } | null }[] };
+    const b = r.json() as {
+      items: { key: string; lastRun: { total: number } | null; watermark: { status: string; contentHash: string | null } | null }[];
+    };
     expect(b.items[0]!.key).toBe("ESCO");
     expect(b.items[0]!.lastRun).not.toBeNull();
     expect(b.items[0]!.lastRun!.total).toBe(3);
+    // P2: the watermark reflects the last ingest (STAGED then UNCHANGED after the re-run)
+    expect(b.items[0]!.watermark).not.toBeNull();
+    expect(["STAGED", "UNCHANGED"]).toContain(b.items[0]!.watermark!.status);
+    expect(b.items[0]!.watermark!.contentHash).not.toBeNull();
+  });
+});
+
+// ── P2 FAILED path + in-flight lock (a separate app injected with a throwing fetcher) ──
+class FailingEscoFetcher implements EscoFetcher {
+  async fetchPage(): Promise<EscoPage> {
+    throw new Error("synthetic ESCO fetch failure");
+  }
+}
+
+describe("reference-sync API (cap⑤ ESCO) — P2 FAILED path (HWM not advanced)", () => {
+  const PRIOR_HASH = "a".repeat(64); // a valid 64-char sha256-shaped hex content hash
+  let failSuite: TestApp;
+  let failAdmin: S;
+
+  beforeAll(async () => {
+    failSuite = await buildTestApp({ referenceSyncDeps: { escoFetcher: new FailingEscoFetcher() } });
+    failAdmin = await login(failSuite, "admin@heuresys.com");
+    // Simulate a prior SUCCESSFUL ingest so we can prove the failure does NOT advance the HWM.
+    await pool.query(
+      `UPDATE brownfield.source_watermarks
+          SET source_watermark_status = 'STAGED', source_watermark_content_hash = $1,
+              source_watermark_last_succeeded_at = now() - interval '1 day',
+              source_watermark_last_fetched_at = now() - interval '1 day'
+        WHERE source_watermark_source_key = 'ESCO'`,
+      [PRIOR_HASH],
+    );
+  });
+
+  afterAll(async () => {
+    await pool.query(RESET_WATERMARK);
+    await failSuite.app.close();
+  });
+
+  it("a failing fetch → FAILED watermark; content_hash + last_succeeded preserved; no partial stage", async () => {
+    const wmBefore = await pool.query<{ succ: Date | null }>(
+      `SELECT source_watermark_last_succeeded_at AS succ FROM brownfield.source_watermarks WHERE source_watermark_source_key = 'ESCO'`,
+    );
+    const countBefore = await pool.query<{ n: string }>(
+      "SELECT count(*)::text AS n FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_job_role_id IS NULL",
+    );
+
+    const r = await failSuite.app.inject({
+      method: "POST", url: "/v1/reference-sync/runs",
+      headers: { cookie: ch(failAdmin.cookies), "x-csrf-token": failAdmin.csrfToken, "content-type": "application/json" },
+      payload: { source: "ESCO" },
+    });
+    expect(r.statusCode).toBe(500); // the synthetic fetch error surfaces as a 500
+
+    const wmAfter = await pool.query<{ status: string; hash: string | null; succ: Date | null }>(
+      `SELECT source_watermark_status AS status, source_watermark_content_hash AS hash, source_watermark_last_succeeded_at AS succ
+         FROM brownfield.source_watermarks WHERE source_watermark_source_key = 'ESCO'`,
+    );
+    expect(wmAfter.rows[0]!.status).toBe("FAILED");                 // lock released as FAILED
+    expect(wmAfter.rows[0]!.hash).toBe(PRIOR_HASH);                 // content_hash NOT advanced
+    expect(wmAfter.rows[0]!.succ?.toISOString()).toBe(wmBefore.rows[0]!.succ?.toISOString()); // last_succeeded NOT advanced
+    // no partial stage — the catalog row count is unchanged
+    const countAfter = await pool.query<{ n: string }>(
+      "SELECT count(*)::text AS n FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_job_role_id IS NULL",
+    );
+    expect(countAfter.rows[0]!.n).toBe(countBefore.rows[0]!.n);
   });
 });

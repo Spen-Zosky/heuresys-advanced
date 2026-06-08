@@ -1,0 +1,25 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh.
+# Do NOT install this file directly; run the bootstrap script instead.
+#
+# cap⑤ scraping P2 (D-2): a ONE-SHOT that refreshes official reference taxonomies
+# (ESCO) in-process against the DB — CLI-bypass, no HTTP/auth (the watermark makes an
+# unchanged upstream a cheap no-op). Activated by heuresys-advanced-scraping.timer.
+[Unit]
+Description=Heuresys Advanced — reference-sync (cap⑤ ESCO official-source refresh, one-shot)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@/apps/api
+# nvm-managed Node (>=22) on PATH; pnpm lives alongside it.
+Environment=PATH=@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
+Environment=NODE_ENV=production
+# Lets env.ts locate the repo-root .env + .secrets when run from apps/api.
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
+# CLI-bypass in-process run (tsx) — devDeps are present (frozen install, not --prod).
+ExecStart=@@NODE_BIN@@/pnpm reference-sync:run
+TimeoutStartSec=900

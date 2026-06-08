@@ -70,6 +70,24 @@ NEXT_PUBLIC_API_PROXY_BASE_URL="http://localhost:$API_PORT" \
 NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \
 pnpm --filter @heuresys/web build
 
+# 3c. Install/refresh the scraping one-shot + weekly timer (cap⑤ P2). The api/web unit
+#     files are installed by vm-bootstrap.sh; the scraping units are NEW, so the ROUTINE
+#     deploy installs them too — otherwise the weekly ESCO probe would silently never run.
+#     Idempotent: install + enable --now are safe to re-run; the timer (not the one-shot)
+#     is what gets enabled/started.
+log "systemd: install scraping one-shot + weekly timer (cap⑤ P2)"
+swtmp="$(mktemp -d)"
+sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
+    "$REPO_DIR/deploy/systemd/heuresys-advanced-scraping.service" \
+    > "$swtmp/heuresys-advanced-scraping.service"
+sudo install -m 644 -o root -g root "$swtmp/heuresys-advanced-scraping.service" \
+    "/etc/systemd/system/heuresys-advanced-scraping.service"
+sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-scraping.timer" \
+    "/etc/systemd/system/heuresys-advanced-scraping.timer"
+rm -rf "$swtmp"
+sudo systemctl daemon-reload
+sudo systemctl enable --now heuresys-advanced-scraping.timer >/dev/null
+
 # 4. Restart services (api first so the web's proxy target is up).
 log "restart"
 if [ "$RESTART_API" = 1 ]; then
@@ -82,6 +100,7 @@ sleep 5
 # 5. Verify.
 log "verify"
 systemctl is-active heuresys-advanced-api heuresys-advanced-web || true
+echo "  scraping.timer: $(systemctl is-active heuresys-advanced-scraping.timer 2>/dev/null || echo inactive)"
 if curl -fsS -m 8 "http://localhost:$API_PORT/readyz" >/dev/null; then
   echo "  api /readyz OK"
 else

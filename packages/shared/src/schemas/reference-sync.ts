@@ -35,11 +35,27 @@ export const ReferenceSyncRunListResponseSchema = z.object({
 });
 export type ReferenceSyncRunListResponse = z.infer<typeof ReferenceSyncRunListResponseSchema>;
 
-/** One registered official source + its latest run (if any). */
+/** Per-source delta/HWM state (brownfield.source_watermarks, P2). */
+export const SourceWatermarkStatusEnum = z.enum(["IDLE", "FETCHING", "STAGED", "FAILED", "UNCHANGED"]);
+export type SourceWatermarkStatus = z.infer<typeof SourceWatermarkStatusEnum>;
+
+export const ReferenceSyncWatermarkSchema = z.object({
+  sourceKey: z.string(),
+  cursor: z.string().nullable(),
+  contentHash: z.string().nullable(),
+  status: SourceWatermarkStatusEnum,
+  lastFetchedAt: z.iso.datetime().nullable(),
+  lastSucceededAt: z.iso.datetime().nullable(),
+  lastImportRunId: z.uuid().nullable(),
+});
+export type ReferenceSyncWatermark = z.infer<typeof ReferenceSyncWatermarkSchema>;
+
+/** One registered official source + its latest run + delta watermark (if any). */
 export const ReferenceSyncSourceSchema = z.object({
   key: ReferenceSyncSourceKeyEnum,
   label: z.string(),
   lastRun: ReferenceSyncRunSchema.nullable(),
+  watermark: ReferenceSyncWatermarkSchema.nullable(),
 });
 export const ReferenceSyncSourceListResponseSchema = z.object({
   items: z.array(ReferenceSyncSourceSchema),
@@ -59,6 +75,9 @@ export const ReferenceSyncTriggerResponseSchema = z.object({
   total: z.number().int().min(0),
   inserted: z.number().int().min(0),
   updated: z.number().int().min(0),
+  /** true = upstream artifact unchanged since the last successful ingest (watermark
+   *  short-circuit: no catalog upsert was performed). P2. */
+  skipped: z.boolean(),
 });
 export type ReferenceSyncTriggerResponse = z.infer<typeof ReferenceSyncTriggerResponseSchema>;
 

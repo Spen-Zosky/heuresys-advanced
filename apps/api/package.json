@@ -15,7 +15,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "typecheck:test": "tsc -p tsconfig.test.json --noEmit",
     "seed:reference-bank": "tsx ../../db/scripts/seed-reference-bank.ts",
-    "embeddings:backfill": "tsx src/modules/semantic-matching/backfill.ts"
+    "embeddings:backfill": "tsx src/modules/semantic-matching/backfill.ts",
+    "reference-sync:run": "tsx src/modules/reference-sync/sync-cli.ts"
   },
   "dependencies": {
     "@fastify/cookie": "11.0.2",

@@ -38,7 +38,9 @@ export const LoginBodySchema = z.object({
    * (6-digit TOTP) from the authenticator app.
    */
   challengeToken: z.string().min(1).max(512).optional(),
-  mfaCode: z.string().min(1).max(16).optional(),
+  // 6-digit TOTP/EMAIL_OTP, or a recovery code (16 hex chars, may be typed with
+  // separators) — normalized server-side before matching. Upper bound 40 covers both.
+  mfaCode: z.string().min(1).max(40).optional(),
 });
 export type LoginBody = z.infer<typeof LoginBodySchema>;
 

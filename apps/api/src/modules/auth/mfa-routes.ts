@@ -30,6 +30,8 @@ import {
   VerifyEmailOtpSetupResponseSchema,
   ResendEmailOtpBodySchema,
   ResendEmailOtpResponseSchema,
+  GenerateRecoveryCodesResponseSchema,
+  RecoveryCodesCountResponseSchema,
 } from "@heuresys/shared";
 import { UnauthorizedError } from "../../errors/index.js";
 import {
@@ -263,6 +265,32 @@ export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, op
         code: req.body.code,
       });
       return {};
+    },
+  );
+
+  /* === recovery codes (MVP-4 §2.5) ================================= */
+
+  /* --- POST /recovery-codes — (re)generate the user's backup codes --- */
+  // Self-service; returns the plaintext set ONCE (regenerating invalidates the old set).
+  app.post(
+    "/recovery-codes",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: { response: { 200: GenerateRecoveryCodesResponseSchema } },
+    },
+    async (req) => {
+      if (!req.user) throw new UnauthorizedError("Authentication required");
+      return service.generateRecoveryCodes(req.user.userId);
+    },
+  );
+
+  /* --- GET /recovery-codes — how many unused codes remain --- */
+  app.get(
+    "/recovery-codes",
+    { schema: { response: { 200: RecoveryCodesCountResponseSchema } } },
+    async (req) => {
+      if (!req.user) throw new UnauthorizedError("Authentication required");
+      return service.countRecoveryCodes(req.user.userId);
     },
   );
 };

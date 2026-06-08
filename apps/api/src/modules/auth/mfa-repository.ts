@@ -262,3 +262,49 @@ export async function consumeOtpChallenge(
     [otpId],
   );
 }
+
+/* --- recovery codes (MVP-4 §2.5) ----------------------------------- */
+
+/** Replace a user's recovery-code set (regenerate): delete old, insert the new hashes. */
+export async function replaceRecoveryCodes(
+  q: DbConnector,
+  userId: string,
+  hashes: string[],
+): Promise<void> {
+  await q.query(`DELETE FROM sys.sys_auth_mfa_recovery_codes WHERE recovery_code_user_id = $1`, [userId]);
+  if (hashes.length === 0) return;
+  // unnest a parallel array of hashes against a single user id.
+  await q.query(
+    `INSERT INTO sys.sys_auth_mfa_recovery_codes (recovery_code_user_id, recovery_code_hash)
+     SELECT $1, h FROM unnest($2::text[]) AS h`,
+    [userId, hashes],
+  );
+}
+
+/** Atomically consume one unused recovery code (single-use). Returns true if a code was burned. */
+export async function consumeRecoveryCode(
+  q: DbConnector,
+  userId: string,
+  codeHash: string,
+): Promise<boolean> {
+  const res = await q.query(
+    `UPDATE sys.sys_auth_mfa_recovery_codes
+        SET recovery_code_used_at = now()
+      WHERE recovery_code_user_id = $1
+        AND recovery_code_hash = $2
+        AND recovery_code_used_at IS NULL
+      RETURNING recovery_code_id`,
+    [userId, codeHash],
+  );
+  return (res.rowCount ?? 0) > 0;
+}
+
+/** Count a user's remaining (unused) recovery codes. */
+export async function countUnusedRecoveryCodes(q: DbConnector, userId: string): Promise<number> {
+  const res = await q.query<{ n: string }>(
+    `SELECT count(*)::text AS n FROM sys.sys_auth_mfa_recovery_codes
+      WHERE recovery_code_user_id = $1 AND recovery_code_used_at IS NULL`,
+    [userId],
+  );
+  return Number(res.rows[0]?.n ?? "0");
+}

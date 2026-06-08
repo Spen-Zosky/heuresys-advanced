@@ -25,9 +25,22 @@ import {
   ValidationError,
 } from "../../errors/index.js";
 import { hashPassword, verifyPassword } from "./password.js";
+import { sha256Hex } from "./tokens.js";
 import type { IMailer } from "./mailer.js";
 import { ConsoleMailer } from "./mailer.js";
 import * as mfaRepo from "./mfa-repository.js";
+
+/* --- recovery codes (MVP-4 §2.5) -------------------------------------- */
+const RECOVERY_CODE_COUNT = 10;
+/** 16 hex chars (64-bit), grouped for readability. */
+function generateRecoveryCodePlain(): string {
+  const hex = randomBytes(8).toString("hex"); // 16 lowercase hex chars
+  return `${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}`;
+}
+/** Strip separators + lowercase so display ("ab12-...") and raw ("ab12...") hash identically. */
+function normalizeRecoveryCode(code: string): string {
+  return code.replace(/[^0-9a-fA-F]/g, "").toLowerCase();
+}
 
 const TOTP_ISSUER = "Heuresys";
 const TOTP_DIGITS = 6;
@@ -201,6 +214,10 @@ export interface MfaService {
   verifyLoginChallenge(input: { challengeToken: string; code: string }): Promise<{ userId: string }>;
   /** Re-issue the EMAIL_OTP login code tied to an active challenge token. */
   resendEmailOtpLogin(input: { challengeToken: string }): Promise<{ expiresInSeconds: number }>;
+  /** Regenerate the user's one-time recovery codes (returns the plaintext set ONCE). */
+  generateRecoveryCodes(userId: string): Promise<{ codes: string[] }>;
+  /** Count the user's remaining (unused) recovery codes. */
+  countRecoveryCodes(userId: string): Promise<{ remaining: number }>;
 }
 
 /**
@@ -515,6 +532,14 @@ export function createMfaService(
         }
       }
 
+      // 2c. No OTP match — try a single-use recovery code (high-entropy backup).
+      //     The length-16 guard keeps short 6-digit OTPs off the recovery path.
+      const normalized = normalizeRecoveryCode(code);
+      if (normalized.length === 16) {
+        const burned = await mfaRepo.consumeRecoveryCode(pool, userId, sha256Hex(normalized));
+        if (burned) return { userId };
+      }
+
       // 3. Nothing matched. Use TOTP-specific code only when the user has no
       //    EMAIL_OTP factor (back-compat with the existing TOTP test); otherwise
       //    surface the generic OTP-invalid code.
@@ -546,6 +571,22 @@ export function createMfaService(
         purpose: "LOGIN",
       });
       return { expiresInSeconds };
+    },
+
+    async generateRecoveryCodes(userId) {
+      // Recovery codes bypass the second factor → only meaningful once a factor is enrolled.
+      const factors = await mfaRepo.listVerifiedMfaFactorsForUser(pool, userId);
+      if (factors.length === 0) {
+        throw new ValidationError("Enroll an MFA factor before generating recovery codes", "MFA_NOT_ENROLLED");
+      }
+      const codes = Array.from({ length: RECOVERY_CODE_COUNT }, generateRecoveryCodePlain);
+      const hashes = codes.map((c) => sha256Hex(normalizeRecoveryCode(c)));
+      await mfaRepo.replaceRecoveryCodes(pool, userId, hashes);
+      return { codes };
+    },
+
+    async countRecoveryCodes(userId) {
+      return { remaining: await mfaRepo.countUnusedRecoveryCodes(pool, userId) };
     },
   };
 }

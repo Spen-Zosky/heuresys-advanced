@@ -165,3 +165,16 @@ export const ResendEmailOtpResponseSchema = z.object({
   expiresInSeconds: z.number().int().positive(),
 });
 export type ResendEmailOtpResponse = z.infer<typeof ResendEmailOtpResponseSchema>;
+
+/* --- recovery codes (MVP-4 §2.5) -------------------------------------- */
+
+/** Regenerate response — the plaintext codes are returned ONCE (never re-fetchable). */
+export const GenerateRecoveryCodesResponseSchema = z.object({
+  codes: z.array(z.string()),
+});
+export type GenerateRecoveryCodesResponse = z.infer<typeof GenerateRecoveryCodesResponseSchema>;
+
+export const RecoveryCodesCountResponseSchema = z.object({
+  remaining: z.number().int().nonnegative(),
+});
+export type RecoveryCodesCountResponse = z.infer<typeof RecoveryCodesCountResponseSchema>;

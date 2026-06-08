@@ -16,11 +16,14 @@
 # available in Git Bash on Windows). Additive overwrite — never deletes VM-side
 # files. Runs from any source workstation with git + tar + ssh (incl. Git Bash).
 #
-# Overridable env: SSH_HOST DEST_DIR
+# Overridable env: SSH_HOST DEST_DIR EXTRA_EXCLUDE_RE
 set -euo pipefail
 
 SSH_HOST="${SSH_HOST:-oracle-vm-default}"
 DEST_DIR="${DEST_DIR:-/home/ubuntu/heuresys-advanced}"
+# Optional caller-supplied extra excludes (e.g. align-clones.sh drops heavy regenerable
+# DATA — pg_dump_snapshots, legacy extracts — that a runtime clone doesn't need).
+EXTRA_EXCLUDE_RE="${EXTRA_EXCLUDE_RE:-}"
 
 # Regenerable / platform-specific / environment-specific — never mirror these.
 EXCLUDE_RE='(^|/)node_modules/$|(^|/)dist/$|(^|/)\.next/$|(^|/)out/$|(^|/)test-results/$|\.tsbuildinfo$|^\.env$'
@@ -28,6 +31,7 @@ EXCLUDE_RE='(^|/)node_modules/$|(^|/)dist/$|(^|/)\.next/$|(^|/)out/$|(^|/)test-r
 cd "$(git rev-parse --show-toplevel)"
 
 list="$(git ls-files --others --ignored --exclude-standard --directory | grep -vE "$EXCLUDE_RE" || true)"
+[ -n "$EXTRA_EXCLUDE_RE" ] && list="$(printf '%s\n' "$list" | grep -vE "$EXTRA_EXCLUDE_RE" || true)"
 if [ -z "$list" ]; then
   echo "Nothing gitignored to sync (after exclusions)."
   exit 0

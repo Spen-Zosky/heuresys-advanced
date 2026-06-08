@@ -59,8 +59,13 @@ align_one() {
     pnpm install --frozen-lockfile -r
   "
 
-  log "[$kind] secrets + gitignored data"
-  SSH_HOST="$HOST" DEST_DIR="$REPO" bash "$SCRIPTS/sync-gitignored-to-vm.sh"
+  log "[$kind] secrets + gitignored config (lean: heavy DATA + per-machine transient excluded)"
+  # A runtime clone needs .secrets/ + small config (.apify), NOT: heavy regenerable working
+  # data (pg_dump_snapshots ~GB, brownfield/seed extracts, qa/graphify), nor per-machine
+  # transient state (logs, .claude/worktrees, cowork/* state, sessioni logs, playwright .auth).
+  SSH_HOST="$HOST" DEST_DIR="$REPO" \
+    EXTRA_EXCLUDE_RE='(^|/)pg_dump_snapshots/|(^|/)legacy_data/|(^|/)extracted/|(^|/)graphify-(db-input|out)/|^qa_artifacts/|(^|/)_inspection_artifacts/|(^|/)db_snapshots/|\.(dump|backup|log)$|^\.claude/|^cowork_(code_exchange|reserved)/|^sessioni/|(^|/)\.auth/' \
+    bash "$SCRIPTS/sync-gitignored-to-vm.sh"
 
   log "[$kind] .env key-merge"
   bash "$SCRIPTS/env-key-merge.sh" "$HOST" "$REPO"

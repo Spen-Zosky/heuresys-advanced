@@ -1,0 +1,80 @@
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+
+// B-10b m2b — normalized engagement read-model (/v1/engagement/*). Real login + live DB.
+// Read-only; permission reuses surveys:read (6 HRMS roles). RTL slice: 8 surveys / 3792
+// responses / 733 pulse checks (all employee-resolved, I14).
+
+const PWD = "Admin#PassW0rd!";
+interface S { cookies: Map<string, string> }
+const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
+
+let suite: TestApp;
+let admin: S;       // PLATFORM_ADMIN — unfiltered
+let tenantAdmin: S; // TENANT_ADMIN (RTL) — surveys:read, own tenant
+let user: S;        // USER — lacks surveys:read → 403
+
+async function login(email: string): Promise<S> {
+  const r = await suite.app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password: PWD } });
+  if (r.statusCode !== 200) throw new Error(`login ${email}: ${r.statusCode}`);
+  const cookies = new Map<string, string>();
+  for (const c of r.cookies) cookies.set(c.name, c.value);
+  return { cookies };
+}
+const get = (url: string, s: S) => suite.app.inject({ method: "GET", url, headers: { cookie: ch(s.cookies) } });
+
+beforeAll(async () => {
+  suite = await buildTestApp();
+  admin = await login("admin@heuresys.com");
+  tenantAdmin = await login("federica.marchetti@rtl-bank.org");
+  user = await login("tommaso.fiore@rtl-bank.org");
+});
+afterAll(async () => { await suite.app.close(); });
+
+describe("engagement normalized read-model (m2b)", () => {
+  it("RBAC: a USER lacking surveys:read is denied (403) on /surveys", async () => {
+    expect((await get("/v1/engagement/surveys", user)).statusCode).toBe(403);
+  });
+
+  it("TENANT_ADMIN lists the RTL normalized surveys with derived counts", async () => {
+    const r = await get("/v1/engagement/surveys", tenantAdmin);
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as { items: { surveyId: string; tenantId: string; questionCount: number; responseCount: number }[]; total: number };
+    expect(b.total).toBe(8);
+    expect(b.items.length).toBe(8);
+    // counts are real (the cluster has 21 questions / 3792 responses across the 8 surveys)
+    expect(b.items.reduce((s, x) => s + x.responseCount, 0)).toBe(3792);
+    expect(b.items.reduce((s, x) => s + x.questionCount, 0)).toBe(21);
+  });
+
+  it("PLATFORM_ADMIN sees the same RTL surveys (only tenant with data)", async () => {
+    const b = (await get("/v1/engagement/surveys", admin)).json() as { total: number };
+    expect(b.total).toBeGreaterThanOrEqual(8);
+  });
+
+  it("per-survey results aggregate by question (count + avg rating)", async () => {
+    const list = (await get("/v1/engagement/surveys", tenantAdmin)).json() as { items: { surveyId: string }[] };
+    const id = list.items[0]!.surveyId;
+    const r = await get(`/v1/engagement/surveys/${id}/results`, tenantAdmin);
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as { surveyId: string; questions: { responseCount: number; avgRating: number | null }[] };
+    expect(b.surveyId).toBe(id);
+    expect(b.questions.length).toBeGreaterThan(0);
+    expect(b.questions.some((q) => q.avgRating !== null && q.avgRating > 0)).toBe(true);
+  });
+
+  it("404 on unknown survey id results (no tenant enumeration)", async () => {
+    const r = await get("/v1/engagement/surveys/00000000-0000-0000-0000-000000000000/results", tenantAdmin);
+    expect(r.statusCode).toBe(404);
+  });
+
+  it("pulse aggregation buckets by week with averages (RTL = 733 checks)", async () => {
+    const r = await get("/v1/engagement/pulse", tenantAdmin);
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as { items: { weekNumber: number | null; count: number; avgMood: number | null }[]; totalChecks: number };
+    expect(b.totalChecks).toBe(733);
+    expect(b.items.length).toBeGreaterThan(0);
+    expect(b.items.reduce((s, x) => s + x.count, 0)).toBe(733);
+    expect(b.items.some((x) => x.avgMood !== null)).toBe(true);
+  });
+});

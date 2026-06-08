@@ -279,6 +279,10 @@
       "types": "./dist/schemas/surveys.d.ts",
       "default": "./src/schemas/surveys.ts"
     },
+    "./schemas/engagement": {
+      "types": "./dist/schemas/engagement.d.ts",
+      "default": "./src/schemas/engagement.ts"
+    },
     "./schemas/predictions": {
       "types": "./dist/schemas/predictions.d.ts",
       "default": "./src/schemas/predictions.ts"

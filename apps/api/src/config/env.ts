@@ -115,6 +115,22 @@ const EnvSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   MAIL_FROM: z.string().optional(),
+
+  // WebAuthn / FIDO2 passkey MFA factor (@simplewebauthn/server). RP config:
+  //  - WEBAUTHN_RP_ID: the Relying Party ID == the effective domain (NO scheme,
+  //    NO port). "localhost" for local dev. PROD must set its own registrable
+  //    domain (e.g. "app.heuresys.com").
+  //  - WEBAUTHN_RP_NAME: human-readable RP name shown by the authenticator UI.
+  //  - WEBAUTHN_ORIGINS: comma-separated allowlist of the EXACT origins the
+  //    ceremony may run on (scheme + host + port), e.g.
+  //    "http://localhost:3000,https://app.heuresys.com".
+  // SECURITY: WebAuthn requires a secure context. `localhost` is exempt, but a
+  // plain-HTTP non-localhost origin is NOT — so passkeys are UNUSABLE on the
+  // current HTTP PROD origin (http://<ip>:3013) until TLS lands. PROD must set
+  // WEBAUTHN_RP_ID to its real domain + an https:// origin in WEBAUTHN_ORIGINS.
+  WEBAUTHN_RP_ID: z.string().default("localhost"),
+  WEBAUTHN_RP_NAME: z.string().default("Heuresys"),
+  WEBAUTHN_ORIGINS: z.string().default("http://localhost:3000"),
 });
 
 const parsed = EnvSchema.parse(process.env);

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { startRegistration } from "@simplewebauthn/browser";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -182,6 +183,35 @@ export default function MeSecurityPage() {
     mutationFn: () => apiFetch<{ revokedFamilies: number }>("/v1/me/security/sessions/revoke-others", { method: "POST", body: { currentFamilyId } }),
     onSuccess: () => { void qc.invalidateQueries({ queryKey: ["me", "sessions"] }); setFeedback({ kind: "ok", msg: t("security.sessions.revokedOthersOk") }); },
     onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("security.errorUnexpected") }),
+  });
+
+  // --- WebAuthn passkey enrollment (MVP-4 §2.5) ---
+  // Gated by secure-context: localhost is exempt, but a plain-HTTP non-localhost
+  // origin disables the WebAuthn JS API entirely → show an "unavailable" note there
+  // instead of a broken button (passkeys need HTTPS on PROD until TLS lands).
+  const [passkeySupported, setPasskeySupported] = useState(false);
+  useEffect(() => {
+    setPasskeySupported(
+      typeof window !== "undefined" && window.isSecureContext && typeof window.PublicKeyCredential !== "undefined",
+    );
+  }, []);
+  const enrollPasskey = useMutation({
+    mutationFn: async () => {
+      const opt = await apiFetch<{ factorId: string; options: Parameters<typeof startRegistration>[0]["optionsJSON"] }>(
+        "/v1/auth/mfa/webauthn/registration/options",
+        { method: "POST", body: {} },
+      );
+      const attResp = await startRegistration({ optionsJSON: opt.options });
+      return apiFetch("/v1/auth/mfa/webauthn/registration/verify", {
+        method: "POST",
+        body: { factorId: opt.factorId, response: attResp, deviceLabel: "Passkey" },
+      });
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
+      setFeedback({ kind: "ok", msg: t("security.passkeyEnrolled") });
+    },
+    onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("security.errorPasskey") }),
   });
 
   const verifyCodeSchema = useMemo(() => buildVerifyCodeSchema(t), [t]);
@@ -451,6 +481,21 @@ export default function MeSecurityPage() {
           >
             {enroll.isPending ? t("security.enrolling") : t("security.enrollButton")}
           </Button>
+          {passkeySupported ? (
+            <Button
+              type="button"
+              variant="secondary"
+              data-testid="me-security-passkey-enroll-button"
+              onClick={() => enrollPasskey.mutate()}
+              disabled={enrollPasskey.isPending}
+            >
+              {enrollPasskey.isPending ? t("security.enrolling") : t("security.passkeyEnrollButton")}
+            </Button>
+          ) : (
+            <span data-testid="me-security-passkey-unsupported" className="self-center text-xs text-muted-foreground">
+              {t("security.passkeyUnsupported")}
+            </span>
+          )}
         </div>
       )}
 

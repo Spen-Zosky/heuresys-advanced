@@ -307,7 +307,11 @@
       "revoking": "Revoca in corso…",
       "revokedOk": "Sessione revocata.",
       "revokedOthersOk": "Tutte le altre sessioni revocate."
-    }
+    },
+    "passkeyEnrollButton": "Aggiungi passkey",
+    "passkeyUnsupported": "Le passkey richiedono una connessione sicura (HTTPS).",
+    "passkeyEnrolled": "Passkey registrata e attiva.",
+    "errorPasskey": "Errore durante la registrazione della passkey."
   },
   "skills": {
     "title": "Le mie skill",

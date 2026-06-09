@@ -32,13 +32,28 @@ import {
   ResendEmailOtpResponseSchema,
   GenerateRecoveryCodesResponseSchema,
   RecoveryCodesCountResponseSchema,
+  WebauthnRegistrationOptionsResponseSchema,
+  WebauthnRegistrationVerifyBodySchema,
+  WebauthnRegistrationVerifyResponseSchema,
+  WebauthnAuthenticationOptionsBodySchema,
+  WebauthnAuthenticationOptionsResponseSchema,
+  WebauthnAuthenticationVerifyBodySchema,
+  WebauthnAuthenticationVerifyResponseSchema,
 } from "@heuresys/shared";
+import type {
+  RegistrationResponseJSON,
+  AuthenticationResponseJSON,
+} from "@simplewebauthn/server";
 import { UnauthorizedError } from "../../errors/index.js";
 import {
   type MfaService,
   sharedMfaService,
   buildMfaServiceWithMailer,
 } from "./mfa-service.js";
+import {
+  type WebauthnService,
+  sharedWebauthnService,
+} from "./webauthn-service.js";
 import type { IMailer } from "./mailer.js";
 import { pool } from "../../db/client.js";
 
@@ -51,12 +66,15 @@ export interface MfaRoutesOptions {
    * through the same seam as the rest of auth (InMemoryMailer in tests).
    */
   mailer?: IMailer;
+  /** Override the WebAuthn service for tests (defaults to the shared singleton). */
+  webauthnService?: WebauthnService;
 }
 
 export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, opts) => {
   const service =
     opts.service ??
     (opts.mailer ? buildMfaServiceWithMailer(opts.mailer) : sharedMfaService);
+  const webauthn = opts.webauthnService ?? sharedWebauthnService;
 
   /** Resolve the authenticated user's verified email from sys.sys_users. */
   async function getUserEmail(userId: string): Promise<string> {
@@ -291,6 +309,100 @@ export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, op
     async (req) => {
       if (!req.user) throw new UnauthorizedError("Authentication required");
       return service.countRecoveryCodes(req.user.userId);
+    },
+  );
+
+  /* === WEBAUTHN / FIDO2 passkey factor ============================== */
+  // Two ceremonies. Registration (authenticated + CSRF) mints a verified
+  // WEBAUTHN factor + credential. Authentication (login step-up — NO auth
+  // cookie, the challengeToken is the proof, mirrors /verify-login) is wired
+  // but DORMANT until login-gating mints the challengeToken (separate
+  // "mandatory-MFA" item). SECURITY: passkeys need a secure context — unusable
+  // on the current plain-HTTP PROD origin until TLS lands (see env WEBAUTHN_*).
+
+  /* --- POST /webauthn/registration/options -------------------------- */
+  // Self-service: any authenticated user. Returns the new (unverified) factorId
+  // + the PublicKeyCredentialCreationOptionsJSON for navigator.credentials.create().
+  app.post(
+    "/webauthn/registration/options",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: {
+        response: { 200: WebauthnRegistrationOptionsResponseSchema },
+      },
+      config: { rateLimit: { max: 10, timeWindow: 60 * 60 * 1000 } },
+    },
+    async (req) => {
+      if (!req.user) throw new UnauthorizedError("Authentication required");
+      const userEmail = await getUserEmail(req.user.userId);
+      const out = await webauthn.startRegistration({ userId: req.user.userId, userEmail });
+      // options is the opaque PublicKeyCredentialCreationOptionsJSON blob — serialised
+      // verbatim into the passthrough z.record response.
+      return { factorId: out.factorId, options: out.options as unknown as Record<string, unknown> };
+    },
+  );
+
+  /* --- POST /webauthn/registration/verify --------------------------- */
+  app.post(
+    "/webauthn/registration/verify",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: {
+        body: WebauthnRegistrationVerifyBodySchema,
+        response: { 200: WebauthnRegistrationVerifyResponseSchema },
+      },
+      config: { rateLimit: { max: 30, timeWindow: 60 * 60 * 1000 } },
+    },
+    async (req) => {
+      if (!req.user) throw new UnauthorizedError("Authentication required");
+      return webauthn.verifyRegistration({
+        userId: req.user.userId,
+        factorId: req.body.factorId,
+        // The opaque passthrough blob is the @simplewebauthn RegistrationResponseJSON.
+        response: req.body.response as unknown as RegistrationResponseJSON,
+        deviceLabel: req.body.deviceLabel ?? "Passkey",
+      });
+    },
+  );
+
+  /* --- POST /webauthn/authentication/options ------------------------ */
+  // Login step-up: NO auth cookie (the challengeToken is the proof; mirrors
+  // /email-otp/resend-login — no verifyCsrf). Rate-limited.
+  app.post(
+    "/webauthn/authentication/options",
+    {
+      schema: {
+        body: WebauthnAuthenticationOptionsBodySchema,
+        response: { 200: WebauthnAuthenticationOptionsResponseSchema },
+      },
+      config: { rateLimit: { max: 10, timeWindow: 5 * 60 * 1000 } },
+    },
+    async (req) => {
+      const out = await webauthn.startAuthentication({
+        challengeToken: req.body.challengeToken,
+      });
+      // options is the opaque PublicKeyCredentialRequestOptionsJSON blob.
+      return { options: out.options as unknown as Record<string, unknown> };
+    },
+  );
+
+  /* --- POST /webauthn/authentication/verify ------------------------- */
+  app.post(
+    "/webauthn/authentication/verify",
+    {
+      schema: {
+        body: WebauthnAuthenticationVerifyBodySchema,
+        response: { 200: WebauthnAuthenticationVerifyResponseSchema },
+      },
+      config: { rateLimit: { max: 10, timeWindow: 5 * 60 * 1000 } },
+    },
+    async (req) => {
+      await webauthn.verifyAuthentication({
+        challengeToken: req.body.challengeToken,
+        // The opaque passthrough blob is the @simplewebauthn AuthenticationResponseJSON.
+        response: req.body.response as unknown as AuthenticationResponseJSON,
+      });
+      return { verified: true as const };
     },
   );
 };

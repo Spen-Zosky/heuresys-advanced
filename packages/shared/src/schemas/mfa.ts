@@ -178,3 +178,89 @@ export const RecoveryCodesCountResponseSchema = z.object({
   remaining: z.number().int().nonnegative(),
 });
 export type RecoveryCodesCountResponse = z.infer<typeof RecoveryCodesCountResponseSchema>;
+
+/* ===================================================================== */
+/* === WEBAUTHN / FIDO2 passkey factor ================================= */
+/* ---------------------------------------------------------------------
+ * Public-key (passkey / security-key) second factor. The @simplewebauthn
+ * browser<->server JSON blobs (PublicKeyCredentialCreationOptionsJSON, the
+ * attestation/assertion responses) are opaque and version-evolving, so we
+ * carry them as passthrough `z.record(z.string(), z.unknown())` objects and
+ * let @simplewebauthn/server validate their internal shape. Only OUR fields
+ * (factorId, deviceLabel, the literal flags) are strictly typed.
+ *
+ * Two ceremonies:
+ *   1. Registration (authenticated): options -> verify, mints a verified
+ *      WEBAUTHN factor + a credential row.
+ *   2. Authentication (login step-up, NO auth cookie — the challengeToken is
+ *      the proof): options -> verify. Dormant until login-gating mints the
+ *      challengeToken (separate "mandatory-MFA" item).
+ * ------------------------------------------------------------------- */
+
+/* --- Registration: options (start) ---------------------------------- */
+/** Body is intentionally empty: the server reads the user from the session. */
+export const WebauthnRegistrationOptionsResponseSchema = z.object({
+  /** The newly-created (unverified) WEBAUTHN factor this ceremony will confirm. */
+  factorId: z.uuid(),
+  /** The PublicKeyCredentialCreationOptionsJSON blob (opaque passthrough). */
+  options: z.record(z.string(), z.unknown()),
+});
+export type WebauthnRegistrationOptionsResponse = z.infer<
+  typeof WebauthnRegistrationOptionsResponseSchema
+>;
+
+/* --- Registration: verify ------------------------------------------- */
+export const WebauthnRegistrationVerifyBodySchema = z.object({
+  factorId: z.uuid(),
+  /** The RegistrationResponseJSON from navigator.credentials.create() (opaque). */
+  response: z.record(z.string(), z.unknown()),
+  /** Friendly label for the authenticator (defaults to "Passkey" server-side). */
+  deviceLabel: z.string().max(120).optional(),
+});
+export type WebauthnRegistrationVerifyBody = z.infer<
+  typeof WebauthnRegistrationVerifyBodySchema
+>;
+
+export const WebauthnRegistrationVerifyResponseSchema = z.object({
+  factorId: z.uuid(),
+  kind: z.literal("WEBAUTHN"),
+  verified: z.literal(true),
+  deviceLabel: z.string(),
+});
+export type WebauthnRegistrationVerifyResponse = z.infer<
+  typeof WebauthnRegistrationVerifyResponseSchema
+>;
+
+/* --- Authentication: options (login step-up) ------------------------ */
+/** No auth cookie: the challengeToken (issued at login step 1) is the proof. */
+export const WebauthnAuthenticationOptionsBodySchema = z.object({
+  challengeToken: z.string().min(1),
+});
+export type WebauthnAuthenticationOptionsBody = z.infer<
+  typeof WebauthnAuthenticationOptionsBodySchema
+>;
+
+export const WebauthnAuthenticationOptionsResponseSchema = z.object({
+  /** The PublicKeyCredentialRequestOptionsJSON blob (opaque passthrough). */
+  options: z.record(z.string(), z.unknown()),
+});
+export type WebauthnAuthenticationOptionsResponse = z.infer<
+  typeof WebauthnAuthenticationOptionsResponseSchema
+>;
+
+/* --- Authentication: verify ----------------------------------------- */
+export const WebauthnAuthenticationVerifyBodySchema = z.object({
+  challengeToken: z.string().min(1),
+  /** The AuthenticationResponseJSON from navigator.credentials.get() (opaque). */
+  response: z.record(z.string(), z.unknown()),
+});
+export type WebauthnAuthenticationVerifyBody = z.infer<
+  typeof WebauthnAuthenticationVerifyBodySchema
+>;
+
+export const WebauthnAuthenticationVerifyResponseSchema = z.object({
+  verified: z.literal(true),
+});
+export type WebauthnAuthenticationVerifyResponse = z.infer<
+  typeof WebauthnAuthenticationVerifyResponseSchema
+>;

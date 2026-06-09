@@ -307,7 +307,11 @@
       "revoking": "Revoking…",
       "revokedOk": "Session revoked.",
       "revokedOthersOk": "All other sessions revoked."
-    }
+    },
+    "passkeyEnrollButton": "Add passkey",
+    "passkeyUnsupported": "Passkeys require a secure connection (HTTPS).",
+    "passkeyEnrolled": "Passkey registered and active.",
+    "errorPasskey": "Passkey registration failed."
   },
   "skills": {
     "title": "My skills",

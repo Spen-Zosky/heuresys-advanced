@@ -26,6 +26,7 @@
     "@fastify/jwt": "10.1.0",
     "@fastify/rate-limit": "10.3.0",
     "@heuresys/shared": "workspace:*",
+    "@simplewebauthn/server": "^13.3.1",
     "argon2": "0.44.0",
     "dotenv": "16.4.7",
     "drizzle-orm": "0.45.2",

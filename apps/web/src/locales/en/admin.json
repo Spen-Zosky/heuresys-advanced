@@ -333,6 +333,17 @@
       "searchLabel": "Search",
       "searchPlaceholder": "Search by title…"
     },
+    "search": {
+      "cardTitle": "Full-text search",
+      "inputLabel": "Search content",
+      "placeholder": "Search title and body…",
+      "hint": "Type at least 2 characters.",
+      "loading": "Searching…",
+      "resultsCount": "{{count}} results",
+      "emptyTitle": "No results",
+      "emptyDescription": "No content matches “{{q}}”.",
+      "errorMessage": "Search failed."
+    },
     "validation": {
       "required": "Required field."
     },

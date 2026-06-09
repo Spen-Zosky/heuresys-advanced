@@ -333,6 +333,17 @@
       "searchLabel": "Cerca",
       "searchPlaceholder": "Cerca per titolo…"
     },
+    "search": {
+      "cardTitle": "Ricerca full-text",
+      "inputLabel": "Cerca nei contenuti",
+      "placeholder": "Cerca in titolo e corpo…",
+      "hint": "Digita almeno 2 caratteri.",
+      "loading": "Ricerca in corso…",
+      "resultsCount": "{{count}} risultati",
+      "emptyTitle": "Nessun risultato",
+      "emptyDescription": "Nessun contenuto corrisponde a «{{q}}».",
+      "errorMessage": "Errore durante la ricerca."
+    },
     "validation": {
       "required": "Campo obbligatorio."
     },

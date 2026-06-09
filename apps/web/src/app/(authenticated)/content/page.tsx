@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -14,6 +14,7 @@ import type {
   ContentKind,
   ContentStatus,
   ContentBodyFormat,
+  ContentSearchResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -51,6 +52,20 @@ function statusVariant(s: ContentStatus): "secondary" | "success" {
   return s === "published" ? "success" : "secondary";
 }
 
+// ts_headline marks full-text matches with << >> (StartSel/StopSel, mig 000098).
+// Render those segments as <mark> — never via dangerouslySetInnerHTML.
+function renderSnippet(snippet: string): ReactNode {
+  return snippet.split(/(<<.*?>>)/g).map((seg, i) =>
+    seg.startsWith("<<") && seg.endsWith(">>") ? (
+      <mark key={i} className="rounded bg-warning/30 px-0.5 text-foreground">
+        {seg.slice(2, -2)}
+      </mark>
+    ) : (
+      <span key={i}>{seg}</span>
+    ),
+  );
+}
+
 export default function ContentPage() {
   const { t } = useTranslation("admin");
   const qc = useQueryClient();
@@ -58,6 +73,8 @@ export default function ContentPage() {
   const [status, setStatus] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [q, setQ] = useState("");
+  const [searchQ, setSearchQ] = useState("");
+  const [searchQDebounced, setSearchQDebounced] = useState("");
   const [docFeedback, setDocFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
   const [catFeedback, setCatFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
 
@@ -79,6 +96,19 @@ export default function ContentPage() {
   const cats = useQuery({
     queryKey: ["content", "categories"],
     queryFn: () => apiFetch<ContentCategoryListResponse>("/v1/content/categories"),
+  });
+
+  // Full-text search (FTS, GET /v1/content/search — mig 000098) is distinct from
+  // the list `q` title-substring filter above: ranked, body-aware, snippet-bearing.
+  useEffect(() => {
+    const id = setTimeout(() => setSearchQDebounced(searchQ.trim()), 300);
+    return () => clearTimeout(id);
+  }, [searchQ]);
+  const searchActive = searchQDebounced.length >= 2;
+  const search = useQuery({
+    queryKey: ["content", "search", searchQDebounced],
+    queryFn: () => apiFetch<ContentSearchResponse>(`/v1/content/search?q=${encodeURIComponent(searchQDebounced)}`),
+    enabled: searchActive,
   });
 
   const catMap = useMemo(() => {
@@ -269,6 +299,63 @@ export default function ContentPage() {
               )}
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      {/* Full-text search (ranked, body-aware, snippet) */}
+      <Card data-testid="content-search">
+        <CardHeader>
+          <CardTitle>{t("content.search.cardTitle")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div>
+            <label htmlFor="content-search-input" className="mb-1 block text-sm font-medium text-foreground">
+              {t("content.search.inputLabel")}
+            </label>
+            <Input
+              id="content-search-input"
+              data-testid="content-search-input"
+              placeholder={t("content.search.placeholder")}
+              value={searchQ}
+              onChange={(e) => setSearchQ(e.target.value)}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">{t("content.search.hint")}</p>
+          </div>
+
+          {searchActive && (
+            <div data-testid="content-search-panel">
+              {search.isLoading ? (
+                <p className="text-sm text-muted-foreground">{t("content.search.loading")}</p>
+              ) : search.isError ? (
+                <p data-testid="content-search-error" role="alert" className="text-sm font-medium text-danger">
+                  {t("content.search.errorMessage")}
+                </p>
+              ) : (search.data?.items.length ?? 0) === 0 ? (
+                <div data-testid="content-search-empty" className="rounded-card border border-border px-4 py-3">
+                  <p className="text-sm font-medium text-foreground">{t("content.search.emptyTitle")}</p>
+                  <p className="text-xs text-muted-foreground">{t("content.search.emptyDescription", { q: searchQDebounced })}</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">{t("content.search.resultsCount", { count: search.data?.total ?? 0 })}</p>
+                  <ul data-testid="content-search-results" className="divide-y divide-border rounded-card border border-border">
+                    {(search.data?.items ?? []).map((hit) => (
+                      <li key={hit.documentId} data-testid="content-search-result" className="px-4 py-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Link href={`/content/${hit.documentId}`} className="font-medium text-foreground hover:underline">
+                            {hit.title}
+                          </Link>
+                          <Badge variant="secondary">{t(`content.kind.${hit.kind}`)}</Badge>
+                          <Badge variant={statusVariant(hit.status as ContentStatus)}>{t(`content.status.${hit.status}`)}</Badge>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">{renderSnippet(hit.snippet)}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 

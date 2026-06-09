@@ -125,6 +125,7 @@ export interface AuthServiceDeps {
     tenant_id: string | null;
     roles: RoleCode[];
     jti: string;
+    fam: string;
   }) => Promise<string> | string;
   mailer: IMailer;
   log: FastifyBaseLogger;
@@ -196,16 +197,17 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
     const roleCodes = [...new Set(args.grants.map((g) => g.roleCode))];
 
     const jti = randomUUID();
+    const familyId = args.familyId ?? randomUUID();
     const accessJwt = await deps.jwtSign({
       sub: args.userId,
       tenant_id: jwtTenantId,
       roles: roleCodes,
       jti,
+      fam: familyId,
     });
 
     const refreshToken = generateOpaqueToken();
     const refreshHash = sha256Hex(refreshToken);
-    const familyId = args.familyId ?? randomUUID();
     const expiresAt = new Date(now().getTime() + REFRESH_TOKEN_TTL_SECONDS * 1000);
 
     await repo.insertRefreshToken(pool, {

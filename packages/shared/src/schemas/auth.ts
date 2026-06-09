@@ -168,3 +168,17 @@ export const ListActiveSessionsResponseSchema = z.object({
   total: z.number().int().min(0),
 });
 export type ListActiveSessionsResponse = z.infer<typeof ListActiveSessionsResponseSchema>;
+
+/* --- Self-service session management (MVP-4 §2.5, /v1/me/security/sessions) ---- */
+
+// The list reuses ListActiveSessionsResponseSchema. The current-session family is
+// resolved separately via GET /v1/auth/sessions/current (the refresh cookie is
+// path-scoped to /v1/auth and is NOT sent to /v1/me/*), and the client marks the
+// matching row as "this device".
+export const RevokeSessionParamsSchema = z.object({ familyId: z.uuid() });
+export const RevokeSessionResponseSchema = z.object({ revoked: z.literal(true) });
+export const RevokeOtherSessionsBodySchema = z.object({ currentFamilyId: z.uuid().nullable() });
+export const RevokeOtherSessionsResponseSchema = z.object({ revokedFamilies: z.number().int().min(0) });
+export type RevokeOtherSessionsResponse = z.infer<typeof RevokeOtherSessionsResponseSchema>;
+export const CurrentSessionResponseSchema = z.object({ familyId: z.uuid().nullable() });
+export type CurrentSessionResponse = z.infer<typeof CurrentSessionResponseSchema>;

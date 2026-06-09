@@ -25,6 +25,9 @@ import {
   type EnrollEmailOtpResponse,
   type VerifyEmailOtpSetupResponse,
   type ResendEmailOtpResponse,
+  type ActiveSession,
+  type ListActiveSessionsResponse,
+  type CurrentSessionResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 
@@ -156,6 +159,29 @@ export default function MeSecurityPage() {
         msg: err instanceof Error ? err.message : t("security.errorResend"),
       });
     },
+  });
+
+  // --- Active sessions (MVP-4 §2.5) — refresh-token families. The current family is
+  // resolved via /v1/auth/sessions/current (the refresh cookie is not sent to /v1/me/*). ---
+  const sessions = useQuery({
+    queryKey: ["me", "sessions"],
+    queryFn: () => apiFetch<ListActiveSessionsResponse>("/v1/me/security/sessions"),
+  });
+  const current = useQuery({
+    queryKey: ["auth", "session", "current"],
+    queryFn: () => apiFetch<CurrentSessionResponse>("/v1/auth/sessions/current"),
+  });
+  const currentFamilyId = current.data?.familyId ?? null;
+
+  const revokeSession = useMutation({
+    mutationFn: (familyId: string) => apiFetch<{ revoked: true }>(`/v1/me/security/sessions/${familyId}`, { method: "DELETE" }),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["me", "sessions"] }); setFeedback({ kind: "ok", msg: t("security.sessions.revokedOk") }); },
+    onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("security.errorUnexpected") }),
+  });
+  const revokeOthers = useMutation({
+    mutationFn: () => apiFetch<{ revokedFamilies: number }>("/v1/me/security/sessions/revoke-others", { method: "POST", body: { currentFamilyId } }),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["me", "sessions"] }); setFeedback({ kind: "ok", msg: t("security.sessions.revokedOthersOk") }); },
+    onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("security.errorUnexpected") }),
   });
 
   const verifyCodeSchema = useMemo(() => buildVerifyCodeSchema(t), [t]);
@@ -427,6 +453,61 @@ export default function MeSecurityPage() {
           </Button>
         </div>
       )}
+
+      <Card data-testid="me-security-sessions-card">
+        <CardHeader>
+          <CardTitle>{t("security.sessions.title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {sessions.isLoading ? (
+            <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+          ) : (sessions.data?.items.length ?? 0) === 0 ? (
+            <p data-testid="me-security-sessions-empty" className="text-sm text-muted-foreground">{t("security.sessions.empty")}</p>
+          ) : (
+            <>
+              <ul className="divide-y divide-border rounded-card border border-border" data-testid="me-security-sessions-list">
+                {(sessions.data?.items ?? []).map((s: ActiveSession) => {
+                  const isCurrent = s.familyId === currentFamilyId;
+                  return (
+                    <li key={s.familyId} data-testid="me-security-session-row" className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
+                      <div>
+                        <div className="flex items-center gap-2 font-medium text-foreground">
+                          <span>{s.ip ?? t("security.sessions.unknownDevice")}</span>
+                          {isCurrent && <Badge variant="success" data-testid="me-security-session-current-badge">{t("security.sessions.thisDevice")}</Badge>}
+                        </div>
+                        <div className="font-mono text-xs text-muted-foreground">
+                          {(s.userAgent ?? t("security.sessions.unknownDevice")).slice(0, 60)} · {t("security.sessions.lastSeen", { date: new Date(s.lastIssuedAt).toLocaleString() })}
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="text-danger"
+                        data-testid="me-security-session-revoke"
+                        disabled={isCurrent || revokeSession.isPending}
+                        onClick={() => revokeSession.mutate(s.familyId)}
+                      >
+                        {t("security.sessions.revoke")}
+                      </Button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  data-testid="me-security-sessions-revoke-others"
+                  disabled={revokeOthers.isPending}
+                  onClick={() => revokeOthers.mutate()}
+                >
+                  {revokeOthers.isPending ? t("security.sessions.revoking") : t("security.sessions.revokeOthers")}
+                </Button>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
     </main>
   );
 }

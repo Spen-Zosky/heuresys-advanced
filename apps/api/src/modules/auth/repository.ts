@@ -307,6 +307,56 @@ export async function revokeAllRefreshTokensForUser(
   return rowCount ?? 0;
 }
 
+/**
+ * Revoke a single family, GUARDED by user_id (self-service: a user can only revoke
+ * their OWN family — prevents cross-user revoke). rowCount 0 => not owned / already
+ * fully revoked => the service treats it as a 404.
+ */
+export async function revokeRefreshFamilyForUser(
+  q: DbConnector,
+  familyId: string,
+  userId: string,
+  reason: string,
+): Promise<number> {
+  const { rowCount } = await q.query(
+    `UPDATE sys.sys_auth_refresh_tokens
+        SET auth_refresh_token_revoked_at = now(),
+            auth_refresh_token_revoke_reason = $3
+      WHERE auth_refresh_token_family_id = $1
+        AND auth_refresh_token_user_id = $2
+        AND auth_refresh_token_revoked_at IS NULL`,
+    [familyId, userId, reason],
+  );
+  return rowCount ?? 0;
+}
+
+/**
+ * Revoke all of a user's active families EXCEPT one (log-out-everywhere-else). A NULL
+ * exceptFamilyId revokes every family. Only ever touches the caller's own families, so
+ * a foreign exceptFamilyId simply revokes everything. Returns DISTINCT families revoked.
+ */
+export async function revokeOtherRefreshFamiliesForUser(
+  q: DbConnector,
+  userId: string,
+  exceptFamilyId: string | null,
+  reason: string,
+): Promise<number> {
+  const { rows } = await q.query<{ n: number }>(
+    `WITH revoked AS (
+       UPDATE sys.sys_auth_refresh_tokens
+          SET auth_refresh_token_revoked_at = now(),
+              auth_refresh_token_revoke_reason = $3
+        WHERE auth_refresh_token_user_id = $1
+          AND ($2::uuid IS NULL OR auth_refresh_token_family_id <> $2)
+          AND auth_refresh_token_revoked_at IS NULL
+        RETURNING auth_refresh_token_family_id
+     )
+     SELECT count(DISTINCT auth_refresh_token_family_id)::int AS n FROM revoked`,
+    [userId, exceptFamilyId, reason],
+  );
+  return rows[0]?.n ?? 0;
+}
+
 /* === Login event log ===================================================== */
 
 export interface InsertLoginEventParams {
@@ -530,6 +580,7 @@ export interface ActiveSessionRow {
 export async function listActiveRefreshTokenFamiliesForUser(
   q: DbConnector,
   userId: string,
+  limit?: number,
 ): Promise<ActiveSessionRow[]> {
   const { rows } = await q.query<{
     family_id: string;
@@ -561,8 +612,8 @@ export async function listActiveRefreshTokenFamiliesForUser(
              AND auth_refresh_token_expires_at > now()
         )
       GROUP BY auth_refresh_token_family_id
-      ORDER BY MAX(auth_refresh_token_issued_at) DESC`,
-    [userId],
+      ORDER BY MAX(auth_refresh_token_issued_at) DESC${limit !== undefined ? " LIMIT $2" : ""}`,
+    limit !== undefined ? [userId, limit] : [userId],
   );
   return rows.map((r) => ({
     familyId: r.family_id,

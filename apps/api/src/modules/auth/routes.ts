@@ -25,6 +25,7 @@ import {
   RolePermissionsResponseSchema,
   ListActiveSessionsParamsSchema,
   ListActiveSessionsResponseSchema,
+  CurrentSessionResponseSchema,
 } from "./schema.js";
 import { createAuthService, type AuthService } from "./service.js";
 import { ConsoleMailer, type IMailer } from "./mailer.js";
@@ -294,6 +295,20 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
     },
     async () => {
       return service.listRolePermissions();
+    },
+  );
+
+  /* --- GET /sessions/current — the caller's current session family -------------- */
+  // Read from the access JWT `fam` claim (carried by the access cookie, path "/", so it
+  // reaches /api/* through the web rewrite proxy — unlike the refresh cookie, path
+  // /v1/auth). The ESS sessions page uses it to flag "this device" + to pass
+  // currentFamilyId to revoke-others. Authenticated-only (reflects self).
+  app.get(
+    "/sessions/current",
+    { schema: { response: { 200: CurrentSessionResponseSchema } } },
+    async (req) => {
+      if (!req.user) throw new UnauthorizedError("Authentication required");
+      return { familyId: req.user.familyId ?? null };
     },
   );
 };

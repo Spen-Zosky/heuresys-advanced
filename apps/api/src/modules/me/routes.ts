@@ -29,6 +29,9 @@ import {
   MyTeamsResponseSchema,
   ContentDocumentListResponseSchema, ContentDocumentDetailResponseSchema,
   MeContentFilterSchema, ContentIdParamSchema,
+  ListActiveSessionsResponseSchema,
+  RevokeSessionParamsSchema, RevokeSessionResponseSchema,
+  RevokeOtherSessionsBodySchema, RevokeOtherSessionsResponseSchema,
 } from "@heuresys/shared";
 import { meService, type SelfActor } from "./service.js";
 import { teamsService } from "../teams/service.js";
@@ -193,4 +196,25 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("me:content:read")],
     schema: { params: ContentIdParamSchema, response: { 200: ContentDocumentDetailResponseSchema } },
   }, async (req) => contentService.getPublishedForMe(selfActor(req).tenantId, req.params.id));
+
+  // Session management (MVP-4 §2.5) — list + revoke the caller's own refresh-token families.
+  // me:sessions:manage (granted to all roles). The "current" family is flagged client-side via
+  // GET /v1/auth/sessions/current (the refresh cookie is not sent to /v1/me/*).
+  app.get("/security/sessions", {
+    preHandler: [requirePermission("me:sessions:manage")],
+    schema: { response: { 200: ListActiveSessionsResponseSchema } },
+  }, async (req) => meService.listSessions(selfActor(req)));
+
+  app.delete("/security/sessions/:familyId", {
+    preHandler: [app.verifyCsrf, requirePermission("me:sessions:manage")],
+    schema: { params: RevokeSessionParamsSchema, response: { 200: RevokeSessionResponseSchema } },
+  }, async (req) => {
+    await meService.revokeSession(selfActor(req), req.params.familyId);
+    return { revoked: true as const };
+  });
+
+  app.post("/security/sessions/revoke-others", {
+    preHandler: [app.verifyCsrf, requirePermission("me:sessions:manage")],
+    schema: { body: RevokeOtherSessionsBodySchema, response: { 200: RevokeOtherSessionsResponseSchema } },
+  }, async (req) => meService.revokeOtherSessions(selfActor(req), req.body.currentFamilyId));
 };

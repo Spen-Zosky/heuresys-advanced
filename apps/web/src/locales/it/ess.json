@@ -295,7 +295,19 @@
     "emailResending": "Invio…",
     "emailVerifiedActive": "Fattore email verificato e attivo.",
     "emailResent": "Nuovo codice inviato via email.",
-    "errorResend": "Errore nel reinvio del codice"
+    "errorResend": "Errore nel reinvio del codice",
+    "sessions": {
+      "title": "Sessioni attive",
+      "empty": "Nessuna sessione attiva.",
+      "thisDevice": "Questo dispositivo",
+      "unknownDevice": "Dispositivo sconosciuto",
+      "lastSeen": "Visto l'ultima volta {{date}}",
+      "revoke": "Revoca",
+      "revokeOthers": "Disconnetti tutte le altre",
+      "revoking": "Revoca in corso…",
+      "revokedOk": "Sessione revocata.",
+      "revokedOthersOk": "Tutte le altre sessioni revocate."
+    }
   },
   "skills": {
     "title": "Le mie skill",

@@ -15,6 +15,10 @@ export interface AuthUser {
   tenantId: string | null;
   roles: RoleCode[];
   jti?: string;
+  /** Refresh-token family of THIS session (access JWT `fam` claim). Lets self-service
+   *  session management flag the current device without the refresh cookie (which is
+   *  path-scoped to /v1/auth and not sent to /api/* through the web proxy). */
+  familyId?: string;
 }
 
 declare module "fastify" {
@@ -30,6 +34,7 @@ declare module "@fastify/jwt" {
       tenant_id: string | null;
       roles: RoleCode[];
       jti?: string;
+      fam?: string;
       iat?: number;
       exp?: number;
       iss?: string;
@@ -55,12 +60,14 @@ const plugin: FastifyPluginAsync = async (app) => {
         tenant_id: string | null;
         roles: RoleCode[];
         jti?: string;
+        fam?: string;
       }>(token);
       req.user = {
         userId: payload.sub,
         tenantId: payload.tenant_id,
         roles: payload.roles ?? [],
         jti: payload.jti,
+        familyId: payload.fam,
       };
     } catch (err) {
       // Token invalid / expired — leave req.user undefined; RBAC handles 401.

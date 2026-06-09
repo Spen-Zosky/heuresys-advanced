@@ -14,6 +14,8 @@ import type {
   UserPreference, UpdateUserPreferenceBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import * as authRepo from "../auth/repository.js";
+import type { ListActiveSessionsResponse, RevokeOtherSessionsResponse } from "@heuresys/shared";
 import { userPermissionCodes } from "../../middleware/rbac.js";
 
 /** Web layout's ADMIN_ROLES (hybrid gate): the admin sidebar section requires one of these roles
@@ -165,5 +167,39 @@ export const meService = {
    *  column is nullable for platform-scoped users). */
   async updatePreferences(actor: SelfActor, patch: UpdateUserPreferenceBody): Promise<UserPreference> {
     return repo.upsertPreferences(pool, actor.userId, actor.tenantId, patch);
+  },
+
+  /* --- Self-service session management (MVP-4 §2.5) — refresh-token families --- */
+
+  /** The caller's own active sessions, most-recent first, capped at 50 (the active set can be
+   *  large with no-rotation logins). The "current" session is resolved client-side via
+   *  GET /v1/auth/sessions/current (the refresh cookie is path-scoped to /v1/auth). */
+  async listSessions(actor: SelfActor): Promise<ListActiveSessionsResponse> {
+    const rows = await authRepo.listActiveRefreshTokenFamiliesForUser(pool, actor.userId, 50);
+    return {
+      items: rows.map((r) => ({
+        familyId: r.familyId,
+        tenantId: r.tenantId,
+        firstIssuedAt: r.firstIssuedAt.toISOString(),
+        lastIssuedAt: r.lastIssuedAt.toISOString(),
+        expiresAt: r.expiresAt.toISOString(),
+        ip: r.ip,
+        userAgent: r.userAgent,
+      })),
+      total: rows.length,
+    };
+  },
+
+  /** Revoke ONE of the caller's own families. user_id-guarded → a foreign familyId is a no-op
+   *  that surfaces as 404 (cross-user revoke is impossible). */
+  async revokeSession(actor: SelfActor, familyId: string): Promise<void> {
+    const n = await authRepo.revokeRefreshFamilyForUser(pool, familyId, actor.userId, "LOGOUT");
+    if (n === 0) throw new NotFoundError("Session");
+  },
+
+  /** Log out everywhere else: revoke all the caller's families except the current one. */
+  async revokeOtherSessions(actor: SelfActor, currentFamilyId: string | null): Promise<RevokeOtherSessionsResponse> {
+    const revokedFamilies = await authRepo.revokeOtherRefreshFamiliesForUser(pool, actor.userId, currentFamilyId, "LOGOUT");
+    return { revokedFamilies };
   },
 };

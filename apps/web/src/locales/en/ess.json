@@ -295,7 +295,19 @@
     "emailResending": "Sending…",
     "emailVerifiedActive": "Email factor verified and active.",
     "emailResent": "A new code was emailed.",
-    "errorResend": "Error resending the code"
+    "errorResend": "Error resending the code",
+    "sessions": {
+      "title": "Active sessions",
+      "empty": "No active sessions.",
+      "thisDevice": "This device",
+      "unknownDevice": "Unknown device",
+      "lastSeen": "Last seen {{date}}",
+      "revoke": "Revoke",
+      "revokeOthers": "Log out everywhere else",
+      "revoking": "Revoking…",
+      "revokedOk": "Session revoked.",
+      "revokedOthersOk": "All other sessions revoked."
+    }
   },
   "skills": {
     "title": "My skills",

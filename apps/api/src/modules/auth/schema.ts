@@ -23,6 +23,7 @@ export {
   ActiveSessionSchema,
   ListActiveSessionsParamsSchema,
   ListActiveSessionsResponseSchema,
+  CurrentSessionResponseSchema,
   type LoginBody,
   type LoginResponse,
   type LoginMfaRequiredResponse,

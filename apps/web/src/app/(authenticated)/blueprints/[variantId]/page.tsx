@@ -33,9 +33,19 @@ interface BlueprintActivation {
   activatedAt: string | null;
 }
 
-type Tab = "processes" | "activations";
+interface LinkedDoc {
+  linkId: string;
+  role: string;
+  documentId: string;
+  documentTitle: string;
+  documentKind: string;
+  documentStatus: string;
+  blueprintProcessName: string;
+}
 
-const TAB_KEYS: ReadonlyArray<Tab> = ["processes", "activations"];
+type Tab = "processes" | "activations" | "documentation";
+
+const TAB_KEYS: ReadonlyArray<Tab> = ["processes", "activations", "documentation"];
 
 export default function BlueprintVariantDetailPage() {
   const { t } = useTranslation("blueprints");
@@ -63,6 +73,15 @@ export default function BlueprintVariantDetailPage() {
         `/v1/blueprint-activations?variantId=${variantId}&limit=200`,
       ),
     enabled: !!variantId && tab === "activations",
+  });
+  // cap④ P3: content documents cross-linked to ANY process of this variant.
+  const documentation = useQuery({
+    queryKey: ["blueprint-docs", variantId],
+    queryFn: () =>
+      apiFetch<{ items: LinkedDoc[]; total: number }>(
+        `/v1/content-blueprint-links/by-variant?variantId=${variantId}`,
+      ),
+    enabled: !!variantId && tab === "documentation",
   });
 
   if (variant.isLoading) {
@@ -169,6 +188,30 @@ export default function BlueprintVariantDetailPage() {
                 { header: t("detail.activationColumns.tenantId"), cell: (a) => <span className="font-mono text-xs">{a.tenantId.slice(0, 8)}</span> },
                 { header: t("detail.activationColumns.status"), cell: (a) => <StatusBadge value={a.status} /> },
                 { header: t("detail.activationColumns.activatedAt"), cell: (a) => <span className="text-xs">{a.activatedAt ?? t("common:value.none")}</span> },
+              ]}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {tab === "documentation" && (
+        <Card data-testid="blueprint-tab-content-documentation">
+          <CardHeader><CardTitle>{t("detail.documentationTitle")}</CardTitle></CardHeader>
+          <CardContent className="p-0">
+            <EntityTable<LinkedDoc>
+              isLoading={documentation.isLoading}
+              isError={documentation.isError}
+              rows={documentation.data?.items ?? []}
+              rowKey={(d) => d.linkId}
+              rowTestId="blueprint-doc-row"
+              emptyTestId="blueprint-documentation-empty"
+              emptyTitle={t("detail.documentationEmpty")}
+              caption={t("detail.documentationCaption")}
+              columns={[
+                { header: t("detail.docColumns.title"), cell: (d) => <Link href={`/content/${d.documentId}`} data-testid="blueprint-doc-link" className="font-medium text-foreground hover:underline">{d.documentTitle}</Link> },
+                { header: t("detail.docColumns.process"), cell: (d) => <span className="text-muted-foreground">{d.blueprintProcessName}</span> },
+                { header: t("detail.docColumns.kind"), cell: (d) => <span className="text-xs text-muted-foreground">{d.documentKind}</span> },
+                { header: t("detail.docColumns.status"), cell: (d) => <StatusBadge value={d.documentStatus} /> },
               ]}
             />
           </CardContent>

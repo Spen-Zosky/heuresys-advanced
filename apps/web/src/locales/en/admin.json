@@ -344,6 +344,22 @@
       "emptyDescription": "No content matches “{{q}}”.",
       "errorMessage": "Search failed."
     },
+    "links": {
+      "title": "Linked blueprints",
+      "process": "Process",
+      "role": "Role",
+      "selectProcess": "— Select a process —",
+      "attach": "Attach",
+      "detach": "Detach",
+      "empty": "No blueprints linked.",
+      "attachSuccess": "Blueprint linked.",
+      "roles": {
+        "documentation": "Documentation",
+        "policy": "Policy",
+        "procedure": "Procedure",
+        "reference": "Reference"
+      }
+    },
     "validation": {
       "required": "Required field."
     },

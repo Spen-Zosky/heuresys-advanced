@@ -19,7 +19,8 @@
     "back": "← Blueprints",
     "tabs": {
       "processes": "Processes",
-      "activations": "Activations"
+      "activations": "Activations",
+      "documentation": "Documentation"
     },
     "processesTitle": "Processes",
     "activationsTitle": "Activations by tenant",
@@ -39,6 +40,15 @@
       "tenantId": "Tenant ID",
       "status": "Status",
       "activatedAt": "Activated"
+    },
+    "documentationTitle": "Linked documentation",
+    "documentationEmpty": "No documents linked.",
+    "documentationCaption": "Documents linked to the variant's processes",
+    "docColumns": {
+      "title": "Title",
+      "process": "Process",
+      "kind": "Kind",
+      "status": "Status"
     }
   },
   "processes": {

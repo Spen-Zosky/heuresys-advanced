@@ -302,6 +302,10 @@
     "./schemas/content": {
       "types": "./dist/schemas/content.d.ts",
       "default": "./src/schemas/content.ts"
+    },
+    "./schemas/content-blueprint-links": {
+      "types": "./dist/schemas/content-blueprint-links.d.ts",
+      "default": "./src/schemas/content-blueprint-links.ts"
     }
   },
   "scripts": {

@@ -16,6 +16,9 @@ import type {
   ContentKind,
   ContentBodyFormat,
   ContentStatus,
+  LinksForDocumentResponse,
+  ContentBlueprintLinkRole,
+  BlueprintProcess,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
@@ -31,6 +34,7 @@ const SELECT_CLASS =
 // sync with packages/shared/src/schemas/content.ts.
 const CONTENT_KINDS: readonly ContentKind[] = ["article", "policy", "announcement", "handbook", "process_doc"];
 const CONTENT_FORMATS: readonly ContentBodyFormat[] = ["markdown", "html"];
+const LINK_ROLES: readonly ContentBlueprintLinkRole[] = ["documentation", "policy", "procedure", "reference"];
 
 interface EditValues {
   title: string;
@@ -52,6 +56,8 @@ export default function ContentEditPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
+  const [linkProcessId, setLinkProcessId] = useState("");
+  const [linkRole, setLinkRole] = useState<ContentBlueprintLinkRole>("documentation");
 
   const detail = useQuery({
     queryKey: ["content", "doc", id],
@@ -64,6 +70,15 @@ export default function ContentEditPage() {
   const cats = useQuery({
     queryKey: ["content", "categories"],
     queryFn: () => apiFetch<ContentCategoryListResponse>("/v1/content/categories"),
+  });
+  // cap④ P3: blueprint cross-links for this document + the process catalog for the attach select.
+  const links = useQuery({
+    queryKey: ["content", "links", id],
+    queryFn: () => apiFetch<LinksForDocumentResponse>(`/v1/content-blueprint-links/by-document?documentId=${id}`),
+  });
+  const processes = useQuery({
+    queryKey: ["blueprint-processes", "all"],
+    queryFn: () => apiFetch<{ items: BlueprintProcess[]; total: number }>("/v1/blueprint-processes?limit=500"),
   });
 
   const formValues = useMemo<EditValues | undefined>(() => {
@@ -132,6 +147,18 @@ export default function ContentEditPage() {
   const restore = useMutation({
     mutationFn: (versionId: string) => apiFetch<ContentDocument>(`/v1/content/${id}/versions/${versionId}/restore`, { method: "POST" }),
     onSuccess: () => { invalidateDoc(); setFeedback({ kind: "ok", msg: t("content.detail.restoreSuccess") }); },
+    onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("content.detail.errorUnexpected") }),
+  });
+
+  const attachLink = useMutation({
+    mutationFn: (v: { blueprintProcessId: string; role: ContentBlueprintLinkRole }) =>
+      apiFetch(`/v1/content-blueprint-links`, { method: "POST", body: { documentId: id, blueprintProcessId: v.blueprintProcessId, role: v.role } }),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["content", "links", id] }); setLinkProcessId(""); setFeedback({ kind: "ok", msg: t("content.links.attachSuccess") }); },
+    onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("content.detail.errorUnexpected") }),
+  });
+  const detachLink = useMutation({
+    mutationFn: (linkId: string) => apiFetch(`/v1/content-blueprint-links/${linkId}`, { method: "DELETE" }),
+    onSuccess: () => { void qc.invalidateQueries({ queryKey: ["content", "links", id] }); },
     onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("content.detail.errorUnexpected") }),
   });
 
@@ -352,6 +379,68 @@ export default function ContentEditPage() {
               )}
             </div>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card data-testid="content-links">
+        <CardHeader>
+          <CardTitle>{t("content.links.title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {can.update && (
+            <form
+              data-testid="content-link-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (linkProcessId) attachLink.mutate({ blueprintProcessId: linkProcessId, role: linkRole });
+              }}
+              className="flex flex-wrap items-end gap-3"
+            >
+              <div className="min-w-64 flex-1">
+                <label htmlFor="link-process" className="mb-1 block text-xs font-medium text-muted-foreground">{t("content.links.process")}</label>
+                <select id="link-process" data-testid="content-link-process" className={SELECT_CLASS} value={linkProcessId} onChange={(e) => setLinkProcessId(e.target.value)}>
+                  <option value="">{t("content.links.selectProcess")}</option>
+                  {(processes.data?.items ?? []).map((p) => (
+                    <option key={p.blueprintProcessId} value={p.blueprintProcessId}>
+                      {p.code} · {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-44">
+                <label htmlFor="link-role" className="mb-1 block text-xs font-medium text-muted-foreground">{t("content.links.role")}</label>
+                <select id="link-role" data-testid="content-link-role" className={SELECT_CLASS} value={linkRole} onChange={(e) => setLinkRole(e.target.value as ContentBlueprintLinkRole)}>
+                  {LINK_ROLES.map((r) => (
+                    <option key={r} value={r}>{t(`content.links.roles.${r}`)}</option>
+                  ))}
+                </select>
+              </div>
+              <Button type="submit" data-testid="content-link-attach" disabled={!linkProcessId || attachLink.isPending}>
+                {t("content.links.attach")}
+              </Button>
+            </form>
+          )}
+
+          {(links.data?.items ?? []).length === 0 ? (
+            <p data-testid="content-links-empty" className="text-sm text-muted-foreground">{t("content.links.empty")}</p>
+          ) : (
+            <ul data-testid="content-links-list" className="divide-y divide-border rounded-card border border-border">
+              {(links.data?.items ?? []).map((l) => (
+                <li key={l.linkId} data-testid="content-link-row" className="flex flex-wrap items-center justify-between gap-3 px-4 py-2 text-sm">
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium text-foreground">{l.blueprintProcessName}</span>
+                    <span className="font-mono text-xs text-muted-foreground">{l.blueprintProcessCode}</span>
+                    <Badge variant="secondary">{t(`content.links.roles.${l.role}`)}</Badge>
+                  </span>
+                  {can.update && (
+                    <Button type="button" variant="outline" size="sm" data-testid="content-link-detach" disabled={detachLink.isPending} onClick={() => detachLink.mutate(l.linkId)}>
+                      {t("content.links.detach")}
+                    </Button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </CardContent>
       </Card>
 

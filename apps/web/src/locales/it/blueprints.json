@@ -19,7 +19,8 @@
     "back": "← Blueprint",
     "tabs": {
       "processes": "Processi",
-      "activations": "Attivazioni"
+      "activations": "Attivazioni",
+      "documentation": "Documentazione"
     },
     "processesTitle": "Processi",
     "activationsTitle": "Attivazioni per tenant",
@@ -39,6 +40,15 @@
       "tenantId": "Tenant ID",
       "status": "Stato",
       "activatedAt": "Attivata"
+    },
+    "documentationTitle": "Documentazione collegata",
+    "documentationEmpty": "Nessun documento collegato.",
+    "documentationCaption": "Documenti collegati ai processi della variante",
+    "docColumns": {
+      "title": "Titolo",
+      "process": "Processo",
+      "kind": "Tipo",
+      "status": "Stato"
     }
   },
   "processes": {

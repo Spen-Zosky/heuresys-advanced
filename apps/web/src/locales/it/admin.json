@@ -344,6 +344,22 @@
       "emptyDescription": "Nessun contenuto corrisponde a «{{q}}».",
       "errorMessage": "Errore durante la ricerca."
     },
+    "links": {
+      "title": "Blueprint collegati",
+      "process": "Processo",
+      "role": "Ruolo",
+      "selectProcess": "— Seleziona un processo —",
+      "attach": "Collega",
+      "detach": "Scollega",
+      "empty": "Nessun blueprint collegato.",
+      "attachSuccess": "Blueprint collegato.",
+      "roles": {
+        "documentation": "Documentazione",
+        "policy": "Policy",
+        "procedure": "Procedura",
+        "reference": "Riferimento"
+      }
+    },
     "validation": {
       "required": "Campo obbligatorio."
     },

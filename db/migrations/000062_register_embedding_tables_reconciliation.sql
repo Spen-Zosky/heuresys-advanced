@@ -10,6 +10,13 @@
 --
 -- IDEMPOTENT: INSERT ... ON CONFLICT (table_name) DO NOTHING. Second run inserts 0.
 -- Applied by migrate.{sh,ps1} under psql -1 -f (no inner BEGIN/COMMIT).
+--
+-- [S982 amendment] + sys_auth_mfa_factors (bucket D / EXCLUDE): the table (mig
+-- 000005) PREDATES the registry and was never registered — it resolved
+-- POPULATED via test-leftover rows, masking the gap, until the strict S982
+-- test cleanup emptied it and THIS migration's 0-UNCLASSIFIED assert tripped
+-- on the full-chain re-run. The row must live HERE (not in a later migration):
+-- on a fresh rebuild the table exists and is empty when this assert runs.
 
 INSERT INTO sys.sys_reconciliation_registry
   (reconciliation_registry_table_name,
@@ -25,7 +32,9 @@ VALUES
   ('sys_job_role_embeddings', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — app-generated AI infra (D7-P0, mig 000060). One vector(1024) per sys_job_roles row, populated by the Voyage P1 backfill; not a legacy-reconciliation target.]'),
   ('sys_user_profile_embeddings', 'D', 'EXCLUDE', NULL,
-   '[sign-off: EXCLUDE — app-generated AI infra (D7-P0, mig 000060). Mean-pooled vector(1024) per user derived from skill-evidence (never a Voyage call); not a legacy-reconciliation target.]')
+   '[sign-off: EXCLUDE — app-generated AI infra (D7-P0, mig 000060). Mean-pooled vector(1024) per user derived from skill-evidence (never a Voyage call); not a legacy-reconciliation target.]'),
+  ('sys_auth_mfa_factors', 'D', 'EXCLUDE', NULL,
+   '[S982] App-generated auth data: user-enrolled MFA factors (TOTP/WEBAUTHN/EMAIL_OTP/SMS_OTP secrets+metadata). No legacy source (legacy heuresys-evo has no MFA). Registered late via S982 amendment: the table (mig 000005) predates the registry and resolved POPULATED via test-leftover rows until the strict S982 cleanup exposed the missing row.')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

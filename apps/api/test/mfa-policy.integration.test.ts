@@ -2,8 +2,9 @@
  * apps/api/test/mfa-policy.integration.test.ts
  *
  * /v1/mfa-policy admin surface (MVP-4 par.2.5 #4). Hits the live DB through
- * the tunnel (no mocks). The policy rows created here are deleted in afterAll
- * so the login gate stays OFF for the rest of the suite.
+ * the tunnel (no mocks). afterAll restores the EXACT pre-suite policy rows
+ * (snapshot-restore, S982): the live DB may carry a REAL activation (e.g. the
+ * RTL role-slice enabled by Enzo) that a blanket delete would silently wipe.
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
@@ -32,6 +33,13 @@ describe("/v1/mfa-policy (mandatory-MFA #4)", () => {
     return { cookie, csrf: json.csrfToken };
   }
 
+  interface SavedPolicy {
+    auth_mfa_policy_tenant_id: string;
+    auth_mfa_policy_enabled: boolean;
+    auth_mfa_policy_role_codes: string[] | null;
+  }
+  let savedPolicies: SavedPolicy[] = [];
+
   beforeAll(async () => {
     app = await buildTestApp();
     const t = await pool.query<{ tenant_id: string; tenant_code: string }>(
@@ -42,12 +50,29 @@ describe("/v1/mfa-policy (mandatory-MFA #4)", () => {
     if (!rtl || !heu) throw new Error("expected the 2 ACTIVE case-study tenants");
     rtlTenantId = rtl.tenant_id;
     heuresysTenantId = heu.tenant_id;
+    // Snapshot the pre-suite policy state of the touched tenants (restored in afterAll).
+    savedPolicies = (
+      await pool.query<SavedPolicy>(
+        `SELECT auth_mfa_policy_tenant_id, auth_mfa_policy_enabled, auth_mfa_policy_role_codes
+           FROM sys.sys_auth_mfa_policies WHERE auth_mfa_policy_tenant_id = ANY($1)`,
+        [[rtlTenantId, heuresysTenantId]],
+      )
+    ).rows;
   });
 
   afterAll(async () => {
+    // Snapshot-restore: wipe the suite's rows, then re-insert the pre-suite state.
     await pool.query(`DELETE FROM sys.sys_auth_mfa_policies WHERE auth_mfa_policy_tenant_id = ANY($1)`, [
       [rtlTenantId, heuresysTenantId],
     ]);
+    for (const p of savedPolicies) {
+      await pool.query(
+        `INSERT INTO sys.sys_auth_mfa_policies
+           (auth_mfa_policy_tenant_id, auth_mfa_policy_enabled, auth_mfa_policy_role_codes)
+         VALUES ($1, $2, $3)`,
+        [p.auth_mfa_policy_tenant_id, p.auth_mfa_policy_enabled, p.auth_mfa_policy_role_codes],
+      );
+    }
     await app.app.close();
   });
 

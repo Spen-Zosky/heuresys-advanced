@@ -523,5 +523,24 @@
     "explainTitle": "Breakdown — {{name}} ({{position}})",
     "explainDesc": "Gap {{value}} ({{segment}}) · model {{model}}. Each feature contributes weight × normalized value.",
     "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}"
+  },
+  "mfaPolicy": {
+    "title": "Mandatory MFA policy",
+    "description": "Mandatory two-step verification per tenant: in-scope users without an active factor must set one up at their next sign-in.",
+    "count": "{{enabled}} active of {{total}} tenants",
+    "cardTitle": "Per-tenant policies",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "toggleOn": "Enable",
+    "toggleOff": "Disable",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Policy saved",
+    "errorSave": "Save failed. Try again.",
+    "allRoles": "All roles",
+    "rolesHint": "Scope: all roles or a selection (at least one).",
+    "empty": "No tenants available.",
+    "accessDeniedTitle": "Access denied",
+    "accessDeniedDesc": "mfa_policy permissions are required to read policies."
   }
 }

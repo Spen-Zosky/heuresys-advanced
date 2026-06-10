@@ -523,5 +523,24 @@
     "explainTitle": "Scomposizione — {{name}} ({{position}})",
     "explainDesc": "Gap {{value}} ({{segment}}) · modello {{model}}. Ogni feature contribuisce per peso × valore normalizzato.",
     "featureDetail": "norm {{normalized}} · peso {{weight}}% · contrib {{contribution}}"
+  },
+  "mfaPolicy": {
+    "title": "Policy MFA obbligatoria",
+    "description": "Verifica in due passaggi obbligatoria per tenant: gli utenti dei ruoli in ambito senza un fattore attivo dovranno configurarne uno al prossimo accesso.",
+    "count": "{{enabled}} attive su {{total}} tenant",
+    "cardTitle": "Policy per tenant",
+    "enabled": "Attiva",
+    "disabled": "Disattiva",
+    "toggleOn": "Abilita",
+    "toggleOff": "Disabilita",
+    "save": "Salva",
+    "saving": "Salvataggio…",
+    "saved": "Policy salvata",
+    "errorSave": "Salvataggio non riuscito. Riprova.",
+    "allRoles": "Tutti i ruoli",
+    "rolesHint": "Ambito: tutti i ruoli oppure una selezione (almeno uno).",
+    "empty": "Nessun tenant disponibile.",
+    "accessDeniedTitle": "Accesso negato",
+    "accessDeniedDesc": "Servono i permessi mfa_policy per leggere le policy."
   }
 }

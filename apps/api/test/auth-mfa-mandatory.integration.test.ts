@@ -64,6 +64,12 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
     );
   }
 
+  interface SavedPolicy {
+    auth_mfa_policy_enabled: boolean;
+    auth_mfa_policy_role_codes: string[] | null;
+  }
+  let savedPolicy: SavedPolicy | null = null;
+
   beforeAll(async () => {
     app = await buildTestApp();
     const u = await pool.query<{ user_id: string; user_tenant_id: string }>(
@@ -74,13 +80,32 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
     if (!row) throw new Error(`R2 persona not seeded: ${READONLY} (run pnpm db:seed-r2)`);
     albertoUserId = row.user_id;
     rtlTenantId = row.user_tenant_id;
+    // Snapshot the pre-suite RTL policy (restored in afterAll — the live DB may
+    // carry a REAL activation that a blanket delete would silently wipe, S982).
+    savedPolicy =
+      (
+        await pool.query<SavedPolicy>(
+          `SELECT auth_mfa_policy_enabled, auth_mfa_policy_role_codes
+             FROM sys.sys_auth_mfa_policies WHERE auth_mfa_policy_tenant_id = $1`,
+          [rtlTenantId],
+        )
+      ).rows[0] ?? null;
   });
 
   afterAll(async () => {
-    // Remove the policy row FIRST (gate off no matter what), then the throwaway factor(s).
+    // Snapshot-restore the policy FIRST (pre-suite state no matter what), then
+    // drop the throwaway factor(s).
     await pool.query(`DELETE FROM sys.sys_auth_mfa_policies WHERE auth_mfa_policy_tenant_id = $1`, [
       rtlTenantId,
     ]);
+    if (savedPolicy) {
+      await pool.query(
+        `INSERT INTO sys.sys_auth_mfa_policies
+           (auth_mfa_policy_tenant_id, auth_mfa_policy_enabled, auth_mfa_policy_role_codes)
+         VALUES ($1, $2, $3)`,
+        [rtlTenantId, savedPolicy.auth_mfa_policy_enabled, savedPolicy.auth_mfa_policy_role_codes],
+      );
+    }
     await pool.query(`DELETE FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`, [
       albertoUserId,
     ]);

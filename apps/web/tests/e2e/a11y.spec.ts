@@ -150,6 +150,19 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
       `Critical a11y violations on ${route}:\n${details}`,
     ).toBe(0);
   }
+
+  // Hard gate (raised S982, per docs/a11y-tail-items.md §3 once stable): the
+  // serious tail is CLOSED — `list` fixed in S981, `color-contrast` retuned in
+  // S982 (179 nodes → 0, app-level tokens). Keep it closed.
+  if (bySeverity.serious.length > 0) {
+    const details = bySeverity.serious
+      .map((v) => `  - [${v.id}] ${v.help} (${v.nodes.length} nodes)`)
+      .join("\n");
+    expect(
+      bySeverity.serious.length,
+      `Serious a11y violations on ${route}:\n${details}`,
+    ).toBe(0);
+  }
 }
 
 for (const [persona, pages] of Object.entries(PAGES_PER_PERSONA)) {

@@ -122,6 +122,26 @@
   --palette-2: #34D3DC !important;
   --palette-3: #B07BFA !important;
   --palette-4: #F8BD55 !important;
+  /* a11y AA retune (S982, axe-measured): the light-mode semantic text colors
+     were NOT dark-adjusted — e.g. info #2563EB on card #131720 = 3.46:1
+     (needs 4.5). Same hue, lighter step (tailwind 400-ramp): info 7.0:1,
+     danger 6.4:1, success 7.8:1 on --card. --warning #F59E0B already 8.3:1. */
+  --info: #60A5FA !important;
+  --danger: #F87171 !important;
+  --success: #22C55E !important;
+  /* a11y AA (S982): the lib pins --color-primary-fg near-white; on the dark
+     primary #5E9DF5 that is 2.68:1. Dark ink flips it to 6.5:1 while keeping
+     the brand blue chip intact (light mode stays white-on-#2563EB, 5.2:1). */
+  --color-primary-fg: #0B1220 !important;
+}
+
+/* a11y AA retune (S982, axe-measured): the lib sidebar group labels use
+   text-muted-foreground/70 — the 30% dilution lands at 4.23:1 on the dark
+   sidebar (needs 4.5). Lift to the full token: 6.6:1 dark / 7.5:1 light.
+   Same-specificity override wins by source order; hover:text-foreground keeps
+   winning (pseudo-class adds specificity). */
+.sidebar-group-toggle {
+  color: var(--muted-foreground);
 }
 
 html,

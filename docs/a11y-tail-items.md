@@ -91,7 +91,12 @@ Audit completo (35 route × 3 personas, WCAG 2.0/2.1/2.2 A+AA, dev-mode, dati li
 |---|---|---|---|---|
 | critical | — | 0 | 0 | ✅ gate CI (invariato) |
 | serious | `list` | 28 | 28 | ✅ **FIXATO S981** — il `customContent` del perspective-switcher (e dell'empty-state) era un `<div>`/`<p>` figlio diretto della `<ul>` della sidebar lib; radice `<li className="list-none">` → 0 violazioni su tutte le route (probe axe post-fix verde) |
-| serious | `color-contrast` | 28 | 179 | ⏸ **RESIDUO — decisione brand (Enzo)**: i nodi sono token di palette condivisi (muted-foreground su sfondi tinted, badge variant, ecc.); il fix è una taratura dei token CSS-var del brand bundle, render-affecting su tutta la app → fuori dall'autorità tecnica (precedente: S952 contrast bug + dottrina brand-fidelity). Censimento per-route in `test-results/a11y-audit/` (rigenerabile con `pnpm exec playwright test a11y.spec.ts`) |
-| moderate/minor | — | 0 | 0 | ✅ nessuno rilevato nell'audit S981 |
+| serious | `color-contrast` | 28 | 179 | ✅ **FIXATO S982** (delega Enzo + checkpoint visivo) — 3 pattern misurati con axe per-nodo, tutti app-level in `apps/web/src/app/globals.css` (zero publish upstream): (1) i token semantici NON avevano override dark → `.dark { --info #60A5FA · --danger #F87171 · --success #22C55E }` (stessa hue, step 400; light invariato); (2) `--color-primary-fg` lib near-white su `--primary` dark #5E9DF5 = 2.68:1 → inchiostro scuro `#0B1220` (6.5:1, blu brand intatto); (3) label gruppi sidebar `text-muted-foreground/70` lib-hardcoded = 4.23:1 → override `.sidebar-group-toggle { color: var(--muted-foreground) }` (6.6:1 dark / 7.5:1 light). Re-audit completo 35×3: **0 serious** |
+| moderate/minor | — | 0 | 0 | ✅ nessuno rilevato nell'audit S981 (confermato S982) |
 
-Il tail §2.7 residuo si riduce quindi a: (a) `color-contrast` (palette, PM/brand), (b) mobile sweep (mai iniziato, multi-sessione).
+## S982 (2026-06-10) — serious tail CHIUSO + gate alzato
+
+Audit completo post-retune (35 route × 3 personas): **critical=0 serious=0 moderate=0 minor=0**.
+Il gate CI in `a11y.spec.ts` è stato alzato da `critical=0` a `critical=0 AND serious=0`
+(strategia §3 di questo doc: soglia alzata una volta stabile). Il tail §2.7 residuo è ora
+SOLO il mobile sweep (mai iniziato, multi-sessione).

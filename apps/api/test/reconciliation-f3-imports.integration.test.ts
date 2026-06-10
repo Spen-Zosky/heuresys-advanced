@@ -2,8 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { pool } from '../src/db/client.js';
 
 // F3 of the reconciliation-closure cycle: bridgeable imports across the job->position wall.
-// Hits the live DB (no mocks). #1 + #2 imported; #3 (successor_candidates) is BLOCKED by a
-// NOT NULL pool_id FK to the empty/dead-end sys_succession_pools — documented here, not imported.
+// Hits the live DB (no mocks). #1 + #2 imported; #3 (successor_candidates) was BLOCKED by a
+// NOT NULL pool_id FK to the then-empty sys_succession_pools — unblocked by the Wave-2 close
+// (S982, mig 000106 + seed 49: incumbent-anchor pools import).
 
 const count = async (sql: string): Promise<number> => {
   const { rows } = await pool.query<{ n: number }>(sql);
@@ -36,10 +37,12 @@ describe('reconciliation F3 imports', () => {
     });
   });
 
-  describe('successor_candidates (#3) — BLOCKED by pool dependency', () => {
-    it('stays empty: its NOT NULL pool_id targets the dead-end empty sys_succession_pools', async () => {
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_successor_candidates`)).toBe(0);
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(0);
+  describe('successor_candidates (#3) — unblocked by Wave-2 close (S982)', () => {
+    it('populated by seed 49: the pool dependency was resolved by the incumbent-anchor import', async () => {
+      // F3 (S960) measured this as BLOCKED (NOT NULL pool_id on empty pools). The Wave-2
+      // close (mig 000106 + seed 49, PM decisions D2/D3) imported 17 pools + 25 candidates.
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_successor_candidates`)).toBe(25);
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(17);
     });
   });
 

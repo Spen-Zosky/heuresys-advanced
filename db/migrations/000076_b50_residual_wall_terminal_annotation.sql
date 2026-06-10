@@ -110,14 +110,20 @@ WHERE r.reconciliation_registry_table_name = d.tbl;
 -- 3) Post-condition assert — measured against the VIEW (resolved_status), which
 --    is the surface the whole reconciliation system reads:
 --      * the 4 terminal tables resolve to NO_SOURCE
---      * the 3 defer tables remain NEEDS_DECISION + carry a non-empty DEFER rationale
---      * VIEW-wide NEEDS_DECISION dropped to exactly 3 (was 7)
+--      * the 3 defer tables carry a non-empty rationale and are either still
+--        NEEDS_DECISION (pre-Wave-2) or POPULATED (post Wave-2 close S982:
+--        mig 000106 + seeds 49-50 import them — re-runs of THIS file must stay
+--        green in both worlds, per the migrate.sh twice-run invariant)
+--      * VIEW-wide NEEDS_DECISION equals exactly the residual of these 3
 --      * each row carries its B-50 marker (idempotent re-run safety)
+--    [S982 amendment] the original assert pinned NEEDS_DECISION=3 and broke the
+--    full-chain re-run after the Wave-2 import; now state-aware (D-12 pattern).
 -- ---------------------------------------------------------------------------
 DO $$
 DECLARE
   v_terminal_no_source int;
-  v_defer_needs_dec    int;
+  v_defer_closed       int;
+  v_defer_still_nd     int;
   v_view_needs_dec     int;
   v_terminal_marked    int;
   v_defer_marked       int;
@@ -129,14 +135,19 @@ BEGIN
          ('sys_payout_curves','sys_reward_gate_results','sys_successor_readiness','sys_user_target_positions')
      AND resolved_status = 'NO_SOURCE';
 
-  -- 3 defer tables resolve to NEEDS_DECISION in the view + carry a non-empty rationale
-  SELECT count(*) INTO v_defer_needs_dec
+  -- 3 defer tables: valid in BOTH worlds (NEEDS_DECISION pre-Wave-2, POPULATED post-S982)
+  SELECT count(*) INTO v_defer_closed
     FROM sys.v_reconciliation_status
    WHERE table_name IN ('sys_branches','sys_succession_pools','sys_successor_candidates')
-     AND resolved_status = 'NEEDS_DECISION'
+     AND resolved_status IN ('NEEDS_DECISION', 'POPULATED')
      AND coalesce(length(trim(rationale)), 0) > 0;
 
-  -- view-wide NEEDS_DECISION must now be exactly 3 (was 7)
+  SELECT count(*) INTO v_defer_still_nd
+    FROM sys.v_reconciliation_status
+   WHERE table_name IN ('sys_branches','sys_succession_pools','sys_successor_candidates')
+     AND resolved_status = 'NEEDS_DECISION';
+
+  -- view-wide NEEDS_DECISION must be exactly the residual of these 3 (3 pre-Wave-2, 0 after)
   SELECT count(*) INTO v_view_needs_dec
     FROM sys.v_reconciliation_status
    WHERE resolved_status = 'NEEDS_DECISION';
@@ -149,17 +160,17 @@ BEGIN
     FROM sys.sys_reconciliation_registry
    WHERE reconciliation_registry_rationale LIKE '%[B-50 DEFER S972]%';
 
-  RAISE NOTICE 'B-50: view terminal NO_SOURCE=% (exp 4), view defer NEEDS_DECISION=% (exp 3), view-wide NEEDS_DECISION=% (exp 3), terminal-marked=% (exp 4), defer-marked=% (exp 3)',
-    v_terminal_no_source, v_defer_needs_dec, v_view_needs_dec, v_terminal_marked, v_defer_marked;
+  RAISE NOTICE 'B-50: view terminal NO_SOURCE=% (exp 4), defer closed-or-nd=% (exp 3, of which still NEEDS_DECISION=%), view-wide NEEDS_DECISION=% (exp = residual), terminal-marked=% (exp 4), defer-marked=% (exp 3)',
+    v_terminal_no_source, v_defer_closed, v_defer_still_nd, v_view_needs_dec, v_terminal_marked, v_defer_marked;
 
   IF v_terminal_no_source <> 4 THEN
     RAISE EXCEPTION 'B-50 assert: expected 4 terminal tables resolve NO_SOURCE in view, got %', v_terminal_no_source;
   END IF;
-  IF v_defer_needs_dec <> 3 THEN
-    RAISE EXCEPTION 'B-50 assert: expected 3 defer tables NEEDS_DECISION+rationale in view, got %', v_defer_needs_dec;
+  IF v_defer_closed <> 3 THEN
+    RAISE EXCEPTION 'B-50 assert: expected 3 defer tables NEEDS_DECISION-or-POPULATED with rationale in view, got %', v_defer_closed;
   END IF;
-  IF v_view_needs_dec <> 3 THEN
-    RAISE EXCEPTION 'B-50 assert: expected view-wide NEEDS_DECISION=3, got %', v_view_needs_dec;
+  IF v_view_needs_dec <> v_defer_still_nd THEN
+    RAISE EXCEPTION 'B-50 assert: expected view-wide NEEDS_DECISION=% (residual of the 3 defer tables), got %', v_defer_still_nd, v_view_needs_dec;
   END IF;
   IF v_terminal_marked <> 4 THEN
     RAISE EXCEPTION 'B-50 assert: expected 4 terminal-marked rationales, got %', v_terminal_marked;

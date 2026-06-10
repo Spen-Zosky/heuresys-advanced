@@ -66,29 +66,29 @@ describe('reconciliation registry (F1)', () => {
   });
 });
 
-// B-50 terminal-annotation close (S972, mig 000076): the 7 residual-wall tables that
-// used to RESOLVE to NEEDS_DECISION in the view were moved to explicit terminal/deferred
-// states. 4 -> NO_SOURCE (no usable 1:1 populated source), 3 -> kept NEEDS_DECISION with
-// an explicit DEFER rationale (legacy source EXISTS but blocked on a PM bridge / Wave-2).
-// NO sys.* business table was populated — this is registry bookkeeping only.
-describe('reconciliation registry — B-50 residual-wall terminal close (S972)', () => {
+// B-50 terminal-annotation close (S972, mig 000076) + Wave-2 close (S982, mig 000106 +
+// seeds 49-50): the 7 residual-wall tables that used to RESOLVE to NEEDS_DECISION are now
+// ALL terminal. 4 -> NO_SOURCE (no usable 1:1 populated source, unchanged since S972);
+// the 3 ex-DEFER tables (branches / succession pools / successor candidates) were IMPORTED
+// under PM decisions D1-D3 (Enzo 2026-06-10) and resolve POPULATED via has_rows.
+describe('reconciliation registry — B-50 residual-wall terminal close (S972) + Wave-2 close (S982)', () => {
   const TERMINAL_NO_SOURCE = [
     'sys_payout_curves',
     'sys_reward_gate_results',
     'sys_successor_readiness',
     'sys_user_target_positions',
   ] as const;
-  const DEFER_NEEDS_DECISION = [
+  const WAVE2_IMPORTED = [
     'sys_branches',
     'sys_succession_pools',
     'sys_successor_candidates',
   ] as const;
 
-  it('view-wide NEEDS_DECISION dropped to exactly 3 (was 7 before B-50)', async () => {
+  it('view-wide NEEDS_DECISION dropped to exactly 0 (was 3 after S972, 7 before B-50)', async () => {
     const { rows } = await pool.query<{ n: number }>(
       `SELECT count(*)::int AS n FROM sys.v_reconciliation_status WHERE resolved_status = 'NEEDS_DECISION'`,
     );
-    expect(rows[0]?.n).toBe(3);
+    expect(rows[0]?.n).toBe(0);
   });
 
   it('the 4 terminal tables resolve to NO_SOURCE in the view', async () => {
@@ -115,39 +115,60 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972)',
     expect(rows.every((r) => r.marked === true)).toBe(true);
   });
 
-  it('the 3 defer tables remain NEEDS_DECISION in the view', async () => {
+  it('the 3 Wave-2 imported tables resolve POPULATED in the view (S982)', async () => {
     const { rows } = await pool.query<{ table_name: string; resolved_status: string }>(
       `SELECT table_name, resolved_status FROM sys.v_reconciliation_status
         WHERE table_name = ANY($1::text[]) ORDER BY table_name`,
-      [DEFER_NEEDS_DECISION as unknown as string[]],
+      [WAVE2_IMPORTED as unknown as string[]],
     );
-    expect(rows.map((r) => r.table_name).sort()).toEqual([...DEFER_NEEDS_DECISION].sort());
-    expect(rows.every((r) => r.resolved_status === 'NEEDS_DECISION')).toBe(true);
+    expect(rows.map((r) => r.table_name).sort()).toEqual([...WAVE2_IMPORTED].sort());
+    expect(rows.every((r) => r.resolved_status === 'POPULATED')).toBe(true);
   });
 
-  it('the 3 defer tables carry a non-empty explicit DEFER rationale (PM-bridge / Wave-2 blocker)', async () => {
-    const { rows } = await pool.query<{ table_name: string; rationale: string; marked: boolean }>(
+  it('the 3 Wave-2 tables carry declared_status IMPORT + a WAVE2 CLOSE rationale', async () => {
+    const { rows } = await pool.query<{ table_name: string; declared: string; marked: boolean }>(
       `SELECT reconciliation_registry_table_name AS table_name,
-              reconciliation_registry_rationale AS rationale,
-              (reconciliation_registry_rationale LIKE '%[B-50 DEFER S972]%') AS marked
+              reconciliation_registry_declared_status AS declared,
+              (reconciliation_registry_rationale LIKE '%[WAVE2 CLOSE S982]%') AS marked
          FROM sys.sys_reconciliation_registry
         WHERE reconciliation_registry_table_name = ANY($1::text[])`,
-      [DEFER_NEEDS_DECISION as unknown as string[]],
+      [WAVE2_IMPORTED as unknown as string[]],
     );
     expect(rows).toHaveLength(3);
+    expect(rows.every((r) => r.declared === 'IMPORT')).toBe(true);
     expect(rows.every((r) => r.marked === true)).toBe(true);
-    expect(rows.every((r) => (r.rationale?.trim().length ?? 0) > 0)).toBe(true);
-    // each DEFER rationale must reference the PM semantic authority / Wave-2 blocker
-    expect(rows.every((r) => /PM semantic authority|Wave-2|bridge/i.test(r.rationale))).toBe(true);
   });
 
-  it('all 7 residual-wall tables remain EMPTY (no data fabricated by the terminal close)', async () => {
-    const all = [...TERMINAL_NO_SOURCE, ...DEFER_NEEDS_DECISION];
-    for (const t of all) {
+  it('the 4 NO_SOURCE tables remain EMPTY; the 3 Wave-2 tables carry the imported counts', async () => {
+    for (const t of TERMINAL_NO_SOURCE) {
       const { rows } = await pool.query<{ n: number }>(
         `SELECT count(*)::int AS n FROM sys.${t}`,
       );
       expect(rows[0]?.n, `${t} must be empty`).toBe(0);
     }
+    const expected: Record<string, number> = {
+      sys_branches: 6,
+      sys_succession_pools: 17,
+      sys_successor_candidates: 25,
+    };
+    for (const [t, n] of Object.entries(expected)) {
+      const { rows } = await pool.query<{ n: number }>(
+        `SELECT count(*)::int AS n FROM sys.${t}`,
+      );
+      expect(rows[0]?.n, `${t} expected ${n} imported rows`).toBe(n);
+    }
+  });
+
+  it('sys_successor_readiness keeps NO_SOURCE with both S972 and WAVE2 markers (cascade branch decayed)', async () => {
+    const { rows } = await pool.query<{ declared: string; r: string }>(
+      `SELECT reconciliation_registry_declared_status AS declared,
+              reconciliation_registry_rationale AS r
+         FROM sys.sys_reconciliation_registry
+        WHERE reconciliation_registry_table_name = 'sys_successor_readiness'`,
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.declared).toBe('NO_SOURCE');
+    expect(rows[0]?.r).toContain('[B-50 TERMINAL S972]');
+    expect(rows[0]?.r).toContain('[WAVE2 S982]');
   });
 });

@@ -39,11 +39,15 @@ describe('reconciliation S970 KPI bridge', () => {
       WHERE coalesce(target_template->'legacy'->>'source_table','') <> 'tenant_job_kpis'`)).toBe(0);
   });
 
-  it('succession deferred: pools+candidates empty and registry-annotated DEFER S970', async () => {
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(0);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_successor_candidates`)).toBe(0);
+  it('succession unblocked by Wave-2 close (S982): pools 17 + candidates 25, DEFER S970 history preserved', async () => {
+    // The S970 DEFER was superseded by the Wave-2 close (PM decisions D2/D3, mig 000106 +
+    // seed 49): incumbent-anchor + CEO/CFO title-match imported both tables. The S970
+    // rationale marker survives (rationale updates are prepend-only).
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(17);
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_successor_candidates`)).toBe(25);
     expect(await count(`SELECT count(*)::int AS n FROM sys.sys_reconciliation_registry
       WHERE reconciliation_registry_table_name IN ('sys_succession_pools','sys_successor_candidates')
-        AND reconciliation_registry_rationale LIKE '%DEFER S970%'`)).toBe(2);
+        AND reconciliation_registry_rationale LIKE '%DEFER S970%'
+        AND reconciliation_registry_rationale LIKE '%[WAVE2 CLOSE S982]%'`)).toBe(2);
   });
 });

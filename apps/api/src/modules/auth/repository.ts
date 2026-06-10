@@ -658,3 +658,48 @@ export async function listRolePermissions(
     permissionAction: row.permission_action,
   }));
 }
+
+/* === Mandatory-MFA policy (MVP-4 par.2.5 #4) ============================== */
+
+export interface MfaPolicyRow {
+  policyId: string;
+  tenantId: string;
+  enabled: boolean;
+  roleCodes: string[] | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/** The tenant's mandatory-MFA policy row, or null when none exists (gate OFF). */
+export async function findMfaPolicyForTenant(
+  db: DbConnector,
+  tenantId: string,
+): Promise<MfaPolicyRow | null> {
+  const result = await db.query<{
+    policy_id: string;
+    tenant_id: string;
+    enabled: boolean;
+    role_codes: string[] | null;
+    created_at: Date;
+    updated_at: Date;
+  }>(
+    `SELECT auth_mfa_policy_id         AS policy_id,
+            auth_mfa_policy_tenant_id  AS tenant_id,
+            auth_mfa_policy_enabled    AS enabled,
+            auth_mfa_policy_role_codes AS role_codes,
+            created_at, updated_at
+       FROM sys.sys_auth_mfa_policies
+      WHERE auth_mfa_policy_tenant_id = $1`,
+    [tenantId],
+  );
+  const row = result.rows[0];
+  if (!row) return null;
+  return {
+    policyId: row.policy_id,
+    tenantId: row.tenant_id,
+    enabled: row.enabled,
+    roleCodes: row.role_codes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}

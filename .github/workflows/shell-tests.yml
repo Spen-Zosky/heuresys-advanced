@@ -1,0 +1,39 @@
+name: Shell tests (deploy/alignment scripts)
+
+# D-19 — regression gate for scripts/ + db/scripts/ shell automation:
+# bash -n on every script, shellcheck severity=error (installed on the runner),
+# and fixture tests for the env-key-merge core + align-clones auto-deploy regex.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - "db/scripts/**"
+      - ".github/workflows/shell-tests.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - "db/scripts/**"
+      - ".github/workflows/shell-tests.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: shell-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shell-tests:
+    # Skip on Dependabot defer-major PRs (single self-hosted runner — see DEBT_REGISTER D-09).
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Run shell test gate
+        run: bash scripts/test/run-shell-tests.sh

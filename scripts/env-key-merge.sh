@@ -11,10 +11,40 @@
 # Backs up the remote .env first. The pushed local .env temp is deleted right after
 # the merge (secret hygiene). Run from the local PC.
 #
-# Usage:  bash scripts/env-key-merge.sh <ssh_host> <remote_repo_path>
+# Usage:      bash scripts/env-key-merge.sh <ssh_host> <remote_repo_path>
+# Test mode:  ENV_MERGE_LOCAL=1 bash scripts/env-key-merge.sh <target_env> <source_env>
+#             (D-19) runs the same merge function locally on two files — no ssh —
+#             and prints the added-key count. Used by scripts/test/run-shell-tests.sh.
 # Overridable env: LOCAL_ENV
 set -euo pipefail
 export MSYS_NO_PATHCONV=1
+
+# Single merge implementation — exercised locally by the D-19 test gate and
+# serialized to the remote via `declare -f` (one source, no heredoc copy to drift).
+# Appends to $1 (target env file) every KEY=VALUE line of $2 (source) whose KEY is
+# absent from the target; echoes the number of keys added. CRLF-tolerant: CR is
+# stripped so a Windows-authored local .env never plants \r into a Linux remote
+# .env value (cousin of the S979 marker-CRLF lesson).
+merge_env_into() {
+  local target="$1" src="$2" added=0 line key
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%$'\r'}"
+    case "$line" in ''|'#'*) continue ;; esac
+    key="${line%%=*}"
+    [ "$key" = "$line" ] && continue                  # no '=' → not a var line
+    if ! grep -q "^${key}=" "$target"; then
+      printf '%s\n' "$line" >> "$target"
+      added=$((added+1))
+    fi
+  done < "$src"
+  echo "$added"
+}
+
+if [ "${ENV_MERGE_LOCAL:-0}" = 1 ]; then
+  merge_env_into "${1:?test mode: env-key-merge.sh <target_env> <source_env>}" \
+                 "${2:?test mode: env-key-merge.sh <target_env> <source_env>}"
+  exit 0
+fi
 
 SSH_HOST="${1:?usage: env-key-merge.sh <ssh_host> <remote_repo_path>}"
 REMOTE_REPO="${2:?usage: env-key-merge.sh <ssh_host> <remote_repo_path>}"
@@ -33,16 +63,8 @@ ssh -o BatchMode=yes "$SSH_HOST" "
     echo 'remote .env missing — run vm-bootstrap.sh first' >&2; rm -f '$tmp'; exit 1
   fi
   cp '$remote_env' '$remote_env.bak-$stamp'
-  added=0
-  while IFS= read -r line; do
-    case \"\$line\" in ''|'#'*) continue ;; esac
-    key=\"\${line%%=*}\"
-    [ \"\$key\" = \"\$line\" ] && continue                  # no '=' → not a var line
-    if ! grep -qE \"^\${key}=\" '$remote_env'; then
-      printf '%s\n' \"\$line\" >> '$remote_env'
-      added=\$((added+1))
-    fi
-  done < '$tmp'
+  $(declare -f merge_env_into)
+  added=\$(merge_env_into '$remote_env' '$tmp')
   rm -f '$tmp'
   echo \"  [.env] added \$added new key(s) to $remote_env (backup .bak-$stamp; existing keys untouched)\"
 "

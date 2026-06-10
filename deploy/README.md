@@ -38,7 +38,9 @@ copying the PC's would break the VM's native binaries) — and `.env` (the
 bootstrap owns it; the PC's tunnel `.env` would clobber the VM's local-DB
 config). Run it *while the PC is alive* — it can't read a dead PC.
 
-## Full alignment — Mac + VM as clones (`align-clones.sh`)
+## Full alignment — Mac + VM (+ linuxpc) as clones (`align-clones.sh`)
+
+> **B-52 (S981)**: `linuxpc` (192.168.1.11, PROD twin autonomo con DB locale clonato) è ora un target di align: `bash scripts/align-clones.sh linuxpc [--deploy]` (strict) ed è incluso in `all` con resilienza FORZATA (PC spento → skip con warning, mai un fail del run). Il deploy leg riusa `vm-deploy.sh` con `REPO_DIR=/home/enzo/heuresys-advanced`; il refresh del DB clone resta `scripts/clone-vm-db.sh` (on-demand). Provisioning da zero: `scripts/provision-linux-pc.sh`.
 
 The **canonical "allinea Mac e VM" entrypoint.** It makes the remotes idempotent
 clones of the local PC repo (modulo OS/arch), wiring the steps below so nothing

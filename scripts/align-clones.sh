@@ -11,7 +11,13 @@
 #                        • lean gitignored data → sync only if it changed this session
 #                        • code → via git reset (already pushed)
 #
-# Flags:  <mac|vm|all>  [--deploy|--no-deploy|--auto-deploy]  [--delta]  [--resilient]
+# Flags:  <mac|vm|linuxpc|all>  [--deploy|--no-deploy|--auto-deploy]  [--delta]  [--resilient]
+#   linuxpc (B-52): the autonomous PROD twin (192.168.1.11, local DB clone). Part of
+#   `all` with FORCED resilience (a LAN host that may be off must never fail the run);
+#   as an explicit target it is strict like mac/vm. Its deploy leg reuses vm-deploy.sh
+#   with REPO_DIR=/home/enzo/heuresys-advanced (script is env-parameterized).
+#   NOTE: its local DB is a clone refreshed via clone-vm-db.sh; migrate-if-pending in
+#   the deploy leg keeps the clone's schema current between refreshes.
 #   --auto-deploy : deploy the VM only if the session's commits touched deploy-relevant paths
 #   --resilient   : skip an unreachable host with a warning instead of failing the run
 # The remotes reset to origin/main, so LOCAL COMMITS MUST BE PUSHED FIRST.
@@ -22,7 +28,7 @@ export MSYS_NO_PATHCONV=1
 TARGETS_ARG=""; DEPLOY_FLAG=off; DELTA=0; RESILIENT=0
 for a in "$@"; do
   case "$a" in
-    mac|vm|all)    TARGETS_ARG="$a" ;;
+    mac|vm|linuxpc|all) TARGETS_ARG="$a" ;;
     --deploy)      DEPLOY_FLAG=on ;;
     --no-deploy)   DEPLOY_FLAG=off ;;
     --auto-deploy) DEPLOY_FLAG=auto ;;
@@ -31,7 +37,7 @@ for a in "$@"; do
     *) echo "unknown arg: $a" >&2; exit 1 ;;
   esac
 done
-[ -n "$TARGETS_ARG" ] || { echo "usage: align-clones.sh <mac|vm|all> [--deploy|--no-deploy|--auto-deploy] [--delta] [--resilient]" >&2; exit 1; }
+[ -n "$TARGETS_ARG" ] || { echo "usage: align-clones.sh <mac|vm|linuxpc|all> [--deploy|--no-deploy|--auto-deploy] [--delta] [--resilient]" >&2; exit 1; }
 
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
 SCRIPTS="$ROOT/scripts"
@@ -86,6 +92,7 @@ esac
 
 mac_cfg() { HOST=mac-local;         REPO=/Users/enzo/heuresys-advanced;  NVMUSE=default; }
 vm_cfg()  { HOST=oracle-vm-default; REPO=/home/ubuntu/heuresys-advanced; NVMUSE=22; }
+linuxpc_cfg() { HOST=linux-pc;      REPO=/home/enzo/heuresys-advanced;   NVMUSE=22; }
 reachable() { ssh -o BatchMode=yes -o ConnectTimeout=8 "$1" 'exit 0' 2>/dev/null; }
 
 SKIPPED=""
@@ -133,20 +140,24 @@ align_one() {
     bash "$SCRIPTS/sync-memory-tree.sh" "$HOST" "$REPO"
   fi
 
-  if [ "$kind" = vm ] && [ "$DEPLOY" = 1 ]; then
-    log "[vm] PROD deploy (build + migrate-if-pending + restart)"
-    ssh -o BatchMode=yes "$HOST" "cd '$REPO' && bash scripts/vm-deploy.sh"
-  elif [ "$kind" = vm ]; then
-    log "[vm] deploy skipped (no code change / --no-deploy)"
+  if { [ "$kind" = vm ] || [ "$kind" = linuxpc ]; } && [ "$DEPLOY" = 1 ]; then
+    log "[$kind] PROD deploy (build + migrate-if-pending + restart)"
+    ssh -o BatchMode=yes "$HOST" "cd '$REPO' && REPO_DIR='$REPO' bash scripts/vm-deploy.sh"
+  elif [ "$kind" = vm ] || [ "$kind" = linuxpc ]; then
+    log "[$kind] deploy skipped (no code change / --no-deploy)"
   fi
 
   log "[$kind] DONE"
 }
 
 case "$TARGETS_ARG" in
-  mac) align_one mac ;;
-  vm)  align_one vm ;;
-  all) align_one mac; align_one vm ;;
+  mac)     align_one mac ;;
+  vm)      align_one vm ;;
+  linuxpc) align_one linuxpc ;;
+  # In `all`, linuxpc is ALWAYS resilient (LAN box, may be off — must not fail
+  # the run). RESILIENT=1 as a function-call prefix persists afterwards in bash,
+  # which is harmless here (last call of the run).
+  all)     align_one mac; align_one vm; RESILIENT=1 align_one linuxpc ;;
 esac
 
 # Consume the marker so the next session starts a fresh delta window.

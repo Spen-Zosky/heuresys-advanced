@@ -100,6 +100,10 @@ test.setTimeout(120_000);
 
 test.describe("MVP-4 par.2.5 #4 /login — mandatory-MFA enrollment gate", () => {
   let tenantId: string;
+  // Snapshot-restore (S982): the live DB may carry a REAL activation (the RTL
+  // role-slice enabled by Enzo) — afterAll must restore the EXACT pre-suite
+  // state, never blanket-disable (this spec once wiped the real activation).
+  let savedPolicy: { enabled: boolean; roleCodes: string[] | null } | null = null;
 
   test.beforeAll(async ({ request }) => {
     // Loud pre-flight: if a previous crashed run left alberto with a verified
@@ -119,12 +123,28 @@ test.describe("MVP-4 par.2.5 #4 /login — mandatory-MFA enrollment gate", () =>
     }
     const csrf = await adminCsrf(request);
     tenantId = await rtlTenantId(request);
+    // Snapshot the pre-suite policy before forcing the gate ON for the test.
+    const list = await request.get(`${API_BASE}/v1/mfa-policy/`);
+    const items = ((await list.json()) as {
+      items: Array<{ tenantId: string; enabled: boolean; roleCodes: string[] | null }>;
+    }).items;
+    const pre = items.find((p) => p.tenantId === tenantId);
+    savedPolicy = pre ? { enabled: pre.enabled, roleCodes: pre.roleCodes } : null;
     await setPolicy(request, csrf, tenantId, true);
   });
 
   test.afterAll(async ({ request }) => {
     const csrf = await adminCsrf(request);
-    await setPolicy(request, csrf, tenantId, false);
+    if (savedPolicy) {
+      // Restore the exact pre-suite state (e.g. the real RTL role-slice activation).
+      const res = await request.put(`${API_BASE}/v1/mfa-policy/${tenantId}`, {
+        headers: { "x-csrf-token": csrf },
+        data: { enabled: savedPolicy.enabled, roleCodes: savedPolicy.roleCodes },
+      });
+      expect(res.status(), "restore pre-suite policy").toBe(200);
+    } else {
+      await setPolicy(request, csrf, tenantId, false);
+    }
   });
 
   test("TOTP leg: gate panel → enroll+verify → auto re-login → MFA challenge → /me", async ({

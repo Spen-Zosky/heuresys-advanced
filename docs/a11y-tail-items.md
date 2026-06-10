@@ -82,3 +82,16 @@ Dal pattern dei design system Tailwind 4 + Radix non specificamente auditati a l
 **Owner**: Claude Opus 4.7 + Enzo.
 **Audit run di riferimento**: 2026-05-17 (HEAD `85562eb` + audit spec creata su sessione closure).
 **Re-audit consigliato**: in apertura di ogni nuova UI feature touching `@heuresys/ui` o aggiunta di rotte.
+
+## S981 (2026-06-10) — slice "serious" + censimento aggiornato
+
+Audit completo (35 route × 3 personas, WCAG 2.0/2.1/2.2 A+AA, dev-mode, dati live):
+
+| Impact | Regola | Route | Nodi | Stato |
+|---|---|---|---|---|
+| critical | — | 0 | 0 | ✅ gate CI (invariato) |
+| serious | `list` | 28 | 28 | ✅ **FIXATO S981** — il `customContent` del perspective-switcher (e dell'empty-state) era un `<div>`/`<p>` figlio diretto della `<ul>` della sidebar lib; radice `<li className="list-none">` → 0 violazioni su tutte le route (probe axe post-fix verde) |
+| serious | `color-contrast` | 28 | 179 | ⏸ **RESIDUO — decisione brand (Enzo)**: i nodi sono token di palette condivisi (muted-foreground su sfondi tinted, badge variant, ecc.); il fix è una taratura dei token CSS-var del brand bundle, render-affecting su tutta la app → fuori dall'autorità tecnica (precedente: S952 contrast bug + dottrina brand-fidelity). Censimento per-route in `test-results/a11y-audit/` (rigenerabile con `pnpm exec playwright test a11y.spec.ts`) |
+| moderate/minor | — | 0 | 0 | ✅ nessuno rilevato nell'audit S981 |
+
+Il tail §2.7 residuo si riduce quindi a: (a) `color-contrast` (palette, PM/brand), (b) mobile sweep (mai iniziato, multi-sessione).

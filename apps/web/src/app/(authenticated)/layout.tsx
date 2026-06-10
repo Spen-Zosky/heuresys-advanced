@@ -158,6 +158,10 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     id: "perspective-switch",
     label: t("shell:nav.perspective.label"),
     customContent: (
+      // <li> root: the lib renders customContent as a direct child of the
+      // sidebar <ul> — a bare <div> there is an axe "list" violation (WCAG
+      // 1.3.1) on every authenticated route (S981 a11y slice).
+      <li className="list-none">
       <div data-testid="perspective-switcher" className="flex flex-wrap gap-1 px-3 py-2">
         {FILTERS.map((code) => (
           <Button
@@ -172,6 +176,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           </Button>
         ))}
       </div>
+      </li>
     ),
   };
 
@@ -181,9 +186,11 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           id: "perspective-empty",
           label: t(`shell:nav.perspective.filters.${filter.toLowerCase()}`),
           customContent: (
-            <p data-testid="perspective-empty" className="px-3 py-2 text-xs text-muted-foreground">
-              {t("shell:nav.perspective.empty")}
-            </p>
+            <li className="list-none">
+              <p data-testid="perspective-empty" className="px-3 py-2 text-xs text-muted-foreground">
+                {t("shell:nav.perspective.empty")}
+              </p>
+            </li>
           ),
         }]
       : [];

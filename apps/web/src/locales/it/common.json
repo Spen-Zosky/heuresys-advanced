@@ -55,7 +55,29 @@
         "codeLabel": "Codice di verifica",
         "submit": "Verifica",
         "invalid": "Codice MFA non valido o scaduto",
-        "expired": "La sfida MFA è scaduta, inserisci un nuovo codice"
+        "expired": "La sfida MFA è scaduta, inserisci un nuovo codice",
+        "usePasskey": "Usa una passkey",
+        "passkeyError": "Accesso con passkey non riuscito. Riprova o usa un codice."
+      },
+      "enroll": {
+        "title": "Configura la verifica in due passaggi",
+        "prompt": "La tua organizzazione richiede un secondo fattore di autenticazione. Configuralo ora per continuare.",
+        "chooseMethod": "Scegli un metodo",
+        "methodTotp": "App authenticator",
+        "methodEmail": "Codice via email",
+        "methodPasskey": "Passkey",
+        "totpInstructions": "Scansiona il codice QR con la tua app authenticator, poi inserisci il codice a 6 cifre.",
+        "secretLabel": "Chiave manuale",
+        "emailSent": "Ti abbiamo inviato un codice via email a {{hint}}.",
+        "codeLabel": "Codice di verifica",
+        "verify": "Verifica e continua",
+        "verifying": "Verifica in corso…",
+        "back": "Annulla e torna all'accesso",
+        "errors": {
+          "generic": "Configurazione non riuscita. Riprova.",
+          "invalidCode": "Codice non valido o scaduto",
+          "expired": "Sessione di configurazione scaduta — esegui di nuovo l'accesso"
+        }
       }
     },
     "logout": {

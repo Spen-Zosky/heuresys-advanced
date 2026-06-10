@@ -74,6 +74,35 @@ export function setAuthCookies(reply: FastifyReply, bundle: AuthCookieBundle): v
 }
 
 /**
+ * Mandatory-MFA enrollment gate (MVP-4 par.2.5 #4): sets ONLY the access JWT
+ * (a restricted enrollment-only token - claim `enr`, roles []) + the CSRF
+ * cookie. NO refresh token: the enrollment window is the access TTL (15 min);
+ * after enrolling a factor the client re-submits /login from scratch.
+ */
+export interface EnrollmentCookieBundle {
+  accessJwt: string;
+  csrfToken: string;
+  secure: boolean;
+}
+
+export function setEnrollmentCookies(reply: FastifyReply, bundle: EnrollmentCookieBundle): void {
+  reply.setCookie(COOKIES.ACCESS, bundle.accessJwt, {
+    httpOnly: true,
+    secure: bundle.secure,
+    sameSite: "lax",
+    path: "/",
+    maxAge: ACCESS_JWT_TTL_SECONDS,
+  });
+  reply.setCookie(COOKIES.CSRF, bundle.csrfToken, {
+    httpOnly: false,
+    secure: bundle.secure,
+    sameSite: "lax",
+    path: "/",
+    maxAge: CSRF_TOKEN_TTL_SECONDS,
+  });
+}
+
+/**
  * Clears all three auth cookies. Must mirror the path attributes used on set,
  * otherwise the browser keeps the cookie alive.
  */

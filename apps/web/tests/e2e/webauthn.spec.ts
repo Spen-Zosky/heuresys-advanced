@@ -8,8 +8,8 @@
  * /webauthn/registration/verify) round-trips through the live API + DB, and a
  * verified WEBAUTHN factor appears in the list. Then it is deleted (cleanup).
  *
- * The login authentication ceremony is dormant until login-gating (the
- * mandatory-MFA item) mints step-up challenge tokens, so it is not exercised here.
+ * The login authentication ceremony is exercised by login-mfa-enrollment.spec.ts
+ * (mandatory-MFA #4): the "use passkey" login leg completes the session there.
  */
 
 import { test, expect } from "@playwright/test";

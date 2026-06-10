@@ -23,9 +23,9 @@
  * origin is NOT — so passkeys are unusable on the current HTTP PROD origin until
  * TLS lands (see env.ts WEBAUTHN_* comment).
  *
- * The authentication ceremony endpoints are wired but DORMANT: they need a
- * challengeToken minted by login-gating (a separate "mandatory-MFA" item) before
- * a real client can exercise them.
+ * The authentication ceremony is LIVE (mandatory-MFA #4, S981): /v1/auth/login
+ * mints the challengeToken and a verified assertion completes the login via
+ * authService.completeMfaLogin in mfa-routes.ts.
  */
 
 import {

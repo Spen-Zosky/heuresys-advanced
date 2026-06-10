@@ -29,7 +29,7 @@ import {
 } from "./schema.js";
 import { createAuthService, type AuthService } from "./service.js";
 import { ConsoleMailer, type IMailer } from "./mailer.js";
-import { setAuthCookies, clearAuthCookies } from "./tokens.js";
+import { setAuthCookies, clearAuthCookies, setEnrollmentCookies } from "./tokens.js";
 import { COOKIES } from "../../config/constants.js";
 import { env } from "../../config/env.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -99,6 +99,20 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
           status: "mfa_required" as const,
           challengeToken: result.challengeToken,
           availableKinds: result.availableKinds,
+        };
+      }
+      if (result.status === "mfa_enrollment_required") {
+        // Mandatory-MFA gate (#4): RESTRICTED enrollment-only session — access
+        // JWT with claim `enr` + roles [] and the CSRF pair; NO refresh token.
+        setEnrollmentCookies(reply, {
+          accessJwt: result.accessJwt,
+          csrfToken: result.csrfToken,
+          secure: secureCookies,
+        });
+        return {
+          status: "mfa_enrollment_required" as const,
+          csrfToken: result.csrfToken,
+          allowedKinds: result.allowedKinds,
         };
       }
       setAuthCookies(reply, {

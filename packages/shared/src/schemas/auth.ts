@@ -72,10 +72,31 @@ export const LoginMfaRequiredResponseSchema = z.object({
 });
 export type LoginMfaRequiredResponse = z.infer<typeof LoginMfaRequiredResponseSchema>;
 
-/** /login 200 body union — success bundle OR MFA-required challenge. */
+/**
+ * First-step response when the tenant's mandatory-MFA policy is enabled, the
+ * user is in scope, and they have NO verified MFA factor (MVP-4 §2.5 #4).
+ * The server sets a RESTRICTED enrollment-only session cookie (access JWT with
+ * claim `enr: true` and roles []) — every permission-gated route denies it; the
+ * only usable surface is the MFA self-service enrollment under /v1/auth/mfa.
+ * `csrfToken` lets the client send the CSRF header on the enrollment POSTs.
+ * After enrolling + verifying a factor the client re-submits /login from
+ * scratch and completes the regular `mfa_required` challenge.
+ */
+export const LoginEnrollmentRequiredResponseSchema = z.object({
+  status: z.literal("mfa_enrollment_required"),
+  csrfToken: z.string().min(1),
+  /** Factor kinds the user may enroll (UI hint). */
+  allowedKinds: z.array(z.string()),
+});
+export type LoginEnrollmentRequiredResponse = z.infer<
+  typeof LoginEnrollmentRequiredResponseSchema
+>;
+
+/** /login 200 body union — success bundle, MFA challenge, or enrollment gate. */
 export const LoginResultResponseSchema = z.discriminatedUnion("status", [
   LoginResponseSchema,
   LoginMfaRequiredResponseSchema,
+  LoginEnrollmentRequiredResponseSchema,
 ]);
 export type LoginResultResponse = z.infer<typeof LoginResultResponseSchema>;
 

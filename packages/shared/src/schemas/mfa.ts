@@ -12,6 +12,7 @@
  */
 
 import { z } from "zod";
+import { LoginResponseSchema } from "./auth.js";
 
 /* --- Factor kinds (mirrors sys_auth_mfa_factors_kind_check) ---------- */
 
@@ -258,9 +259,13 @@ export type WebauthnAuthenticationVerifyBody = z.infer<
   typeof WebauthnAuthenticationVerifyBodySchema
 >;
 
-export const WebauthnAuthenticationVerifyResponseSchema = z.object({
-  verified: z.literal(true),
-});
+/**
+ * On a verified assertion the endpoint COMPLETES the login (mandatory-MFA #4):
+ * it sets the auth cookies and returns the same success bundle as POST /login -
+ * the challengeToken was the proof of the password step, the assertion is the
+ * second factor, so there is nothing left to exchange.
+ */
+export const WebauthnAuthenticationVerifyResponseSchema = LoginResponseSchema;
 export type WebauthnAuthenticationVerifyResponse = z.infer<
   typeof WebauthnAuthenticationVerifyResponseSchema
 >;

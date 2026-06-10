@@ -30,6 +30,7 @@ import { COOKIES } from "./config/constants.js";
 import { metricsStore } from "./modules/observability/metrics-store.js";
 import { authRoutes } from "./modules/auth/routes.js";
 import { mfaRoutes } from "./modules/auth/mfa-routes.js";
+import { mfaPolicyRoutes } from "./modules/mfa-policy/routes.js";
 import { makeMailer } from "./modules/auth/smtp-mailer.js";
 import { buildMfaServiceWithMailer } from "./modules/auth/mfa-service.js";
 import { tenantsRoutes } from "./modules/tenants/routes.js";
@@ -256,7 +257,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   const authMailer = options.authMailer ?? makeMailer(app.log);
   const mfaService = buildMfaServiceWithMailer(authMailer);
   await app.register(authRoutes, { prefix: "/v1/auth", mailer: authMailer, mfaService });
-  await app.register(mfaRoutes, { prefix: "/v1/auth/mfa", service: mfaService });
+  await app.register(mfaRoutes, { prefix: "/v1/auth/mfa", service: mfaService, mailer: authMailer });
+  await app.register(mfaPolicyRoutes, { prefix: "/v1/mfa-policy" });
   await app.register(tenantsRoutes, { prefix: "/v1/tenants" });
   await app.register(usersRoutes, { prefix: "/v1/users" });
   await app.register(positionsRoutes, { prefix: "/v1/positions" });

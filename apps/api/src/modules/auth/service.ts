@@ -61,7 +61,21 @@ export interface LoginMfaRequired {
   availableKinds: string[];
 }
 
-export type LoginResult = LoginSuccess | LoginMfaRequired;
+/**
+ * First-step result when the tenant's mandatory-MFA policy is enabled, the user
+ * is in scope, and they have NO verified factor (MVP-4 par.2.5 #4). A RESTRICTED
+ * enrollment-only access JWT is issued (claim `enr`, roles []) so the client can
+ * reach ONLY the MFA self-service enrollment surface; no refresh token is created.
+ */
+export interface LoginEnrollmentRequired {
+  status: "mfa_enrollment_required";
+  accessJwt: string;
+  csrfToken: string;
+  /** Factor kinds the user may enroll (UI hint). */
+  allowedKinds: string[];
+}
+
+export type LoginResult = LoginSuccess | LoginMfaRequired | LoginEnrollmentRequired;
 
 export interface RefreshInput {
   refreshToken: string;
@@ -126,6 +140,8 @@ export interface AuthServiceDeps {
     roles: RoleCode[];
     jti: string;
     fam: string;
+    /** Enrollment-only restricted session (mandatory-MFA gate, MVP-4 par.2.5 #4). */
+    enr?: boolean;
   }) => Promise<string> | string;
   mailer: IMailer;
   log: FastifyBaseLogger;
@@ -153,6 +169,16 @@ export interface AuthServiceDeps {
 
 export interface AuthService {
   login(input: LoginInput): Promise<LoginResult>;
+  /**
+   * Completes a login whose second factor was verified OUT-OF-BAND of /login
+   * (today: the WebAuthn authentication ceremony, which consumes the login
+   * challengeToken itself). Issues the full session bundle for the user.
+   */
+  completeMfaLogin(input: {
+    userId: string;
+    ip: string | null;
+    userAgent: string | null;
+  }): Promise<LoginSuccess>;
   refresh(input: RefreshInput): Promise<RefreshSuccess>;
   logout(input: LogoutInput): Promise<void>;
   getMe(userId: string): Promise<{
@@ -333,6 +359,49 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
             availableKinds: challenge.availableKinds,
           };
         }
+        // Mandatory-MFA policy gate (MVP-4 par.2.5 #4): the user has NO verified
+        // factor. If the tenant policy is enabled and the user's roles are in
+        // scope, issue a RESTRICTED enrollment-only session instead of tokens.
+        // KNOWN LIMIT (trust-on-first-use): a password-only attacker hitting a
+        // never-enrolled in-scope account can enroll THEIR OWN factor through
+        // this gate — same exposure as pre-#4 (then they got a full session
+        // outright), but the gate adds an auditable LOGIN_MFA_ENROLLMENT_REQUIRED
+        // event. Out-of-band confirmation on first enrollment is the v2 hardening.
+        // (claim `enr`, roles [] -> every requirePermission() denies; the only
+        // usable surface is /v1/auth/mfa self-service). Default OFF: with no
+        // policy row (or enabled=false) behaviour is identical to pre-#4.
+        const policy = await repo.findMfaPolicyForTenant(pool, candidate.userTenantId);
+        if (policy?.enabled) {
+          const grants = await repo.getUserRoleGrants(pool, candidate.userId);
+          const roleCodes = [...new Set(grants.map((g) => g.roleCode))];
+          const inScope =
+            policy.roleCodes === null ||
+            roleCodes.some((r) => policy.roleCodes!.includes(r));
+          if (inScope) {
+            const accessJwt = await deps.jwtSign({
+              sub: candidate.userId,
+              tenant_id: candidate.userTenantId,
+              roles: [],
+              jti: randomUUID(),
+              fam: randomUUID(), // namespace only - no refresh row is created
+              enr: true,
+            });
+            const csrfToken = generateOpaqueToken();
+            await repo.insertLoginEvent(pool, {
+              userId: candidate.userId,
+              tenantId: candidate.userTenantId,
+              type: "LOGIN_MFA_ENROLLMENT_REQUIRED",
+              ip: input.ip,
+              userAgent: input.userAgent,
+            });
+            return {
+              status: "mfa_enrollment_required",
+              accessJwt,
+              csrfToken,
+              allowedKinds: ["TOTP", "EMAIL_OTP", "WEBAUTHN"],
+            };
+          }
+        }
       }
 
       // 4. Resolve roles + issue tokens.
@@ -356,6 +425,34 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         userAgent: input.userAgent,
       });
 
+      return bundle;
+    },
+
+    /* --- complete MFA login out-of-band (WebAuthn ceremony) ----------- */
+    async completeMfaLogin(input) {
+      const me = await repo.findUserForMe(pool, input.userId);
+      if (!me) {
+        throw new UnauthorizedError("User no longer active", "USER_INACTIVE");
+      }
+      const grants = await repo.getUserRoleGrants(pool, input.userId);
+      const bundle = await issueLoginBundle({
+        userId: me.userId,
+        userEmail: me.email,
+        userTenantId: me.userTenantId,
+        grants,
+        familyId: null,
+        previousRefreshId: null,
+        ip: input.ip,
+        userAgent: input.userAgent,
+      });
+      await repo.insertLoginEvent(pool, {
+        userId: me.userId,
+        tenantId: me.userTenantId,
+        type: "LOGIN_SUCCESS",
+        ip: input.ip,
+        userAgent: input.userAgent,
+        details: { method: "WEBAUTHN" },
+      });
       return bundle;
     },
 

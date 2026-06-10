@@ -146,17 +146,25 @@ CREATE TABLE IF NOT EXISTS sys.sys_auth_login_events (
   created_at                 timestamptz  NOT NULL DEFAULT now()
 );
 
-ALTER TABLE sys.sys_auth_login_events
-  DROP CONSTRAINT IF EXISTS sys_auth_login_events_type_check;
-ALTER TABLE sys.sys_auth_login_events
-  ADD CONSTRAINT sys_auth_login_events_type_check
-  CHECK (auth_login_event_type IN (
-    'LOGIN_SUCCESS', 'LOGIN_FAILED', 'LOGIN_UNKNOWN_USER', 'LOGOUT',
-    'REFRESH_OK', 'REFRESH_REPLAY_DETECTED', 'REFRESH_EXPIRED',
-    'PASSWORD_RESET_REQUESTED', 'PASSWORD_RESET_COMPLETED', 'PASSWORD_CHANGED_BY_USER',
-    'MFA_OK', 'MFA_FAIL', 'REVOKED_BY_ADMIN', 'ACCOUNT_LOCKED',
-    'ROLE_GRANTED', 'ROLE_REVOKED'
-  ));
+-- Guarded (S981, D-12(a) lesson): later migrations EXTEND this CHECK (000103
+-- adds LOGIN_MFA_ENROLLMENT_REQUIRED). Re-asserting the original list on a
+-- replay would clobber the newer constraint and fail on rows of newer types,
+-- so the constraint is only created when absent.
+DO $lec$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_auth_login_events_type_check') THEN
+    ALTER TABLE sys.sys_auth_login_events
+      ADD CONSTRAINT sys_auth_login_events_type_check
+      CHECK (auth_login_event_type IN (
+        'LOGIN_SUCCESS', 'LOGIN_FAILED', 'LOGIN_UNKNOWN_USER', 'LOGOUT',
+        'REFRESH_OK', 'REFRESH_REPLAY_DETECTED', 'REFRESH_EXPIRED',
+        'PASSWORD_RESET_REQUESTED', 'PASSWORD_RESET_COMPLETED', 'PASSWORD_CHANGED_BY_USER',
+        'MFA_OK', 'MFA_FAIL', 'REVOKED_BY_ADMIN', 'ACCOUNT_LOCKED',
+        'ROLE_GRANTED', 'ROLE_REVOKED'
+      ));
+  END IF;
+END;
+$lec$;
 
 CREATE INDEX IF NOT EXISTS sys_auth_login_events_user_idx
   ON sys.sys_auth_login_events (auth_login_event_user_id, created_at DESC);

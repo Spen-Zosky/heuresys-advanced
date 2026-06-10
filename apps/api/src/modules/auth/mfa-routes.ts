@@ -4,14 +4,14 @@
  * Routes for MFA management (enroll, verify-setup, list, delete) plus the
  * login-challenge verify endpoint. Mounted under /v1/auth/mfa.
  *
- * Login-time gating (i.e. /v1/auth/login refusing to issue a session when
- * the user has verified MFA factors) is intentionally NOT wired here yet:
- * the response-shape change would force the existing frontend `/login`
- * to handle two response shapes, and the MFA enrollment UI itself is
- * gated by brand-identity v1 (the `/login` page-type is mandated by the
- * brand bundle, doc 12 L64-77). Once both UIs are designed, flip
- * AUTH_SECURITY_PLAN §3 "MFA bypass" mitigation by composing
- * mfaService.beginLoginChallenge into the auth service login() path.
+ * Login-time gating IS wired (MVP-3 Tappa E + MVP-4 par.2.5 #4): /v1/auth/login
+ * composes mfaService.beginLoginChallenge after password verification — a user
+ * with a verified factor gets `mfa_required` + challengeToken; with the tenant
+ * mandatory-MFA policy enabled, an in-scope user with NO factor gets
+ * `mfa_enrollment_required` (restricted `enr` session). The WebAuthn
+ * authentication ceremony below COMPLETES the login on a verified assertion
+ * (sets cookies + returns the success bundle). This header previously said the
+ * gating was "intentionally NOT wired" — that was stale (DEBT D-21, fixed S981).
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
@@ -54,7 +54,10 @@ import {
   type WebauthnService,
   sharedWebauthnService,
 } from "./webauthn-service.js";
-import type { IMailer } from "./mailer.js";
+import { ConsoleMailer, type IMailer } from "./mailer.js";
+import { createAuthService, type AuthService } from "./service.js";
+import { setAuthCookies } from "./tokens.js";
+import { env } from "../../config/env.js";
 import { pool } from "../../db/client.js";
 
 export interface MfaRoutesOptions {
@@ -68,6 +71,8 @@ export interface MfaRoutesOptions {
   mailer?: IMailer;
   /** Override the WebAuthn service for tests (defaults to the shared singleton). */
   webauthnService?: WebauthnService;
+  /** Override the auth service used to complete the WebAuthn login (tests). */
+  authService?: AuthService;
 }
 
 export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, opts) => {
@@ -75,6 +80,17 @@ export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, op
     opts.service ??
     (opts.mailer ? buildMfaServiceWithMailer(opts.mailer) : sharedMfaService);
   const webauthn = opts.webauthnService ?? sharedWebauthnService;
+  // Used by the WebAuthn authentication ceremony to issue the session bundle
+  // once the assertion verifies (mandatory-MFA #4). Stateless factory — safe
+  // to build a second instance alongside the one in routes.ts.
+  const authService =
+    opts.authService ??
+    createAuthService({
+      jwtSign: (payload) => app.jwt.sign(payload),
+      mailer: opts.mailer ?? new ConsoleMailer(app.log),
+      log: app.log,
+    });
+  const secureCookies = env.COOKIE_SECURE ?? env.NODE_ENV === "production";
 
   /** Resolve the authenticated user's verified email from sys.sys_users. */
   async function getUserEmail(userId: string): Promise<string> {
@@ -263,11 +279,10 @@ export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, op
   );
 
   /* --- POST /verify-login (step-up auth) ---------------------------- */
-  // Consumes a challenge token (issued by a future login-flow gating step)
-  // and verifies the TOTP code. Today the challenge token is not yet
-  // produced by /v1/auth/login; this endpoint is wired for the future flow
-  // and is also useful for "elevated permission" re-prompts (e.g. before
-  // an admin destructive operation).
+  // Consumes a challengeToken (minted by /v1/auth/login at the mfa_required
+  // step, MVP-3 Tappa E) and verifies the code. The /login second step is the
+  // primary consumer; this standalone endpoint remains useful for "elevated
+  // permission" re-prompts (e.g. before an admin destructive operation).
   app.post(
     "/verify-login",
     {
@@ -315,10 +330,11 @@ export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, op
   /* === WEBAUTHN / FIDO2 passkey factor ============================== */
   // Two ceremonies. Registration (authenticated + CSRF) mints a verified
   // WEBAUTHN factor + credential. Authentication (login step-up — NO auth
-  // cookie, the challengeToken is the proof, mirrors /verify-login) is wired
-  // but DORMANT until login-gating mints the challengeToken (separate
-  // "mandatory-MFA" item). SECURITY: passkeys need a secure context — unusable
-  // on the current plain-HTTP PROD origin until TLS lands (see env WEBAUTHN_*).
+  // cookie, the challengeToken from /v1/auth/login is the proof) is LIVE
+  // (mandatory-MFA #4): a verified assertion COMPLETES the login below via
+  // authService.completeMfaLogin + setAuthCookies. SECURITY: passkeys need a
+  // secure context — unusable on the current plain-HTTP PROD origin until TLS
+  // lands (see env WEBAUTHN_*).
 
   /* --- POST /webauthn/registration/options -------------------------- */
   // Self-service: any authenticated user. Returns the new (unverified) factorId
@@ -396,13 +412,32 @@ export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, op
       },
       config: { rateLimit: { max: 10, timeWindow: 5 * 60 * 1000 } },
     },
-    async (req) => {
-      await webauthn.verifyAuthentication({
+    async (req, reply) => {
+      const { userId } = await webauthn.verifyAuthentication({
         challengeToken: req.body.challengeToken,
         // The opaque passthrough blob is the @simplewebauthn AuthenticationResponseJSON.
         response: req.body.response as unknown as AuthenticationResponseJSON,
       });
-      return { verified: true as const };
+      // Mandatory-MFA #4: a verified assertion COMPLETES the login. The consumed
+      // challengeToken was the proof of the password step; issue the full bundle.
+      const ua = req.headers["user-agent"];
+      const result = await authService.completeMfaLogin({
+        userId,
+        ip: req.ip ?? null,
+        userAgent: typeof ua === "string" ? ua.slice(0, 1024) : null,
+      });
+      setAuthCookies(reply, {
+        accessJwt: result.accessJwt,
+        refreshToken: result.refreshToken,
+        csrfToken: result.csrfToken,
+        secure: secureCookies,
+      });
+      return {
+        status: "success" as const,
+        user: result.user,
+        roles: result.roles,
+        csrfToken: result.csrfToken,
+      };
     },
   );
 };

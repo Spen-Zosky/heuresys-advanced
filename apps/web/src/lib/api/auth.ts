@@ -38,8 +38,20 @@ export interface LoginMfaRequiredResponse {
   availableKinds: string[];
 }
 
-/** /login 200 body — success bundle OR MFA-required challenge (MVP-3 Tappa E). */
-export type LoginResult = LoginSuccessResponse | LoginMfaRequiredResponse;
+/** Mandatory-MFA gate (MVP-4 par.2.5 #4): a restricted enrollment-only session
+ * was issued (cookie-side); the client must enroll+verify a factor, then
+ * re-submit /login from scratch. */
+export interface LoginEnrollmentRequiredResponse {
+  status: "mfa_enrollment_required";
+  csrfToken: string;
+  allowedKinds: string[];
+}
+
+/** /login 200 body — success, MFA challenge, or mandatory-MFA enrollment gate. */
+export type LoginResult =
+  | LoginSuccessResponse
+  | LoginMfaRequiredResponse
+  | LoginEnrollmentRequiredResponse;
 
 export interface LoginBody {
   email: string;
@@ -163,7 +175,9 @@ export function useLogin() {
         body,
       });
       // MFA-required: no tokens issued yet — caller drives the second step.
-      if (res.status === "success") {
+      if (res.status === "success" || res.status === "mfa_enrollment_required") {
+        // The enrollment gate also returns a csrfToken: the restricted session
+        // must be able to POST the (CSRF-protected) enrollment endpoints.
         csrfStore.set(res.csrfToken);
       }
       return res;

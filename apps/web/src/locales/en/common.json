@@ -55,7 +55,29 @@
         "codeLabel": "Verification code",
         "submit": "Verify",
         "invalid": "Invalid or expired MFA code",
-        "expired": "MFA challenge expired, enter a new code"
+        "expired": "MFA challenge expired, enter a new code",
+        "usePasskey": "Use a passkey",
+        "passkeyError": "Passkey sign-in failed. Try again or use a code."
+      },
+      "enroll": {
+        "title": "Set up two-step verification",
+        "prompt": "Your organisation requires a second authentication factor. Set it up now to continue.",
+        "chooseMethod": "Choose a method",
+        "methodTotp": "Authenticator app",
+        "methodEmail": "Code via email",
+        "methodPasskey": "Passkey",
+        "totpInstructions": "Scan the QR code with your authenticator app, then enter the 6-digit code.",
+        "secretLabel": "Manual key",
+        "emailSent": "We emailed a code to {{hint}}.",
+        "codeLabel": "Verification code",
+        "verify": "Verify and continue",
+        "verifying": "Verifying…",
+        "back": "Cancel and back to sign-in",
+        "errors": {
+          "generic": "Setup failed. Please try again.",
+          "invalidCode": "Invalid or expired code",
+          "expired": "Setup session expired — sign in again"
+        }
       }
     },
     "logout": {

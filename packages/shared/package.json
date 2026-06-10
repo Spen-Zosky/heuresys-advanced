@@ -19,6 +19,10 @@
       "types": "./dist/schemas/mfa.d.ts",
       "default": "./src/schemas/mfa.ts"
     },
+    "./schemas/mfa-policy": {
+      "types": "./dist/schemas/mfa-policy.d.ts",
+      "default": "./src/schemas/mfa-policy.ts"
+    },
     "./schemas/role-codes": {
       "types": "./dist/schemas/role-codes.d.ts",
       "default": "./src/schemas/role-codes.ts"

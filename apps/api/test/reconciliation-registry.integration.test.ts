@@ -7,7 +7,7 @@ import { pool } from '../src/db/client.js';
 // suite (singleThread) so this file does NOT close it.
 
 describe('reconciliation registry (F1)', () => {
-  it('registry holds exactly 97 rows with the signed-off bucket split A23/B16/C23/D35', async () => {
+  it('registry holds exactly 99 rows with the signed-off bucket split A23/B16/C23/D37', async () => {
     const { rows } = await pool.query<{ b: string; n: number }>(
       `SELECT reconciliation_registry_bucket AS b, count(*)::int AS n
          FROM sys.sys_reconciliation_registry GROUP BY 1`,
@@ -29,7 +29,9 @@ describe('reconciliation registry (F1)', () => {
     //   +1 bucket-D EXCLUDE — S978 MVP-4 §2.5 sys_auth_mfa_recovery_codes (app-generated, mig 000099)
     //   +1 bucket-D EXCLUDE — S980 cap④ CMS P3 sys_content_blueprint_links (app-authored cross-link, mig 000100)
     //   +1 bucket-D EXCLUDE — S980 MVP-4 §2.5 sys_auth_mfa_webauthn_credentials (passkey credentials, mig 000102)
-    expect(m).toEqual({ A: 23, B: 16, C: 23, D: 35 });
+    //   +1 bucket-D EXCLUDE - S981 MVP-4 par.2.5 #4 sys_auth_mfa_policies (mandatory-MFA policy config, mig 000103)
+    //   +1 bucket-D EXCLUDE - S981 cap4 CMS P3 sys_content_media (app-uploaded binaries, mig 000105)
+    expect(m).toEqual({ A: 23, B: 16, C: 23, D: 37 });
   });
 
   it('the v_reconciliation_status view leaves zero UNCLASSIFIED tables', async () => {

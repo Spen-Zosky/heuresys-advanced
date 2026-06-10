@@ -19,7 +19,8 @@
       "announcement": "Announcement",
       "handbook": "Handbook",
       "process_doc": "Process doc"
-    }
+    },
+    "attachments": "Attachments"
   },
   "landing": {
     "title": "My area",

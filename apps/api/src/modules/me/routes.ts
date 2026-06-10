@@ -29,6 +29,7 @@ import {
   MyTeamsResponseSchema,
   ContentDocumentListResponseSchema, ContentDocumentDetailResponseSchema,
   MeContentFilterSchema, ContentIdParamSchema,
+  ListContentMediaResponseSchema, ContentMediaDocParamSchema, ContentMediaIdParamSchema,
   ListActiveSessionsResponseSchema,
   RevokeSessionParamsSchema, RevokeSessionResponseSchema,
   RevokeOtherSessionsBodySchema, RevokeOtherSessionsResponseSchema,
@@ -36,8 +37,11 @@ import {
 import { meService, type SelfActor } from "./service.js";
 import { teamsService } from "../teams/service.js";
 import { contentService } from "../content/service.js";
+import { createMediaService } from "../content/media-service.js";
+import { LocalDiskStore } from "../content/media-store.js";
+import { env } from "../../config/env.js";
 import { requirePermission, userPermissionCodes } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
+import { ForbiddenError, UnauthorizedError } from "../../errors/index.js";
 
 function selfActor(req: FastifyRequest): SelfActor {
   if (!req.user) throw new UnauthorizedError("Authentication required");
@@ -196,6 +200,44 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("me:content:read")],
     schema: { params: ContentIdParamSchema, response: { 200: ContentDocumentDetailResponseSchema } },
   }, async (req) => contentService.getPublishedForMe(selfActor(req).tenantId, req.params.id));
+
+  // ESS media serve (cap④ CMS P3 close, S982): the media of PUBLISHED documents
+  // in the caller's tenant. Same blob store as the admin surface; the guard is
+  // published-only (drafts / cross-tenant -> 404, no leak). Read-only — no
+  // multipart, no CSRF. me:content:read covers it ("media is part of the
+  // document", mig 000105).
+  const meMediaService = createMediaService(new LocalDiskStore(env.MEDIA_STORAGE_DIR));
+  const meTenant = (req: FastifyRequest): string => {
+    const { tenantId } = selfActor(req);
+    if (!tenantId) throw new ForbiddenError("ESS content requires a tenant context", "TENANT_REQUIRED");
+    return tenantId;
+  };
+
+  app.get("/content/:id/media", {
+    preHandler: [requirePermission("me:content:read")],
+    schema: { params: ContentMediaDocParamSchema, response: { 200: ListContentMediaResponseSchema } },
+  }, async (req) => meMediaService.listForPublishedDocument(meTenant(req), req.params.id));
+
+  // Binary stream — no zod response schema (passthrough). Images are served
+  // INLINE (handbook embeds render them); everything else stays attachment.
+  // nosniff kept; the upload mime-allowlist excludes SVG, so inline is safe.
+  app.get("/content/media/:mediaId", {
+    preHandler: [requirePermission("me:content:read")],
+    schema: { params: ContentMediaIdParamSchema },
+  }, async (req, reply) => {
+    const { row, stream } = await meMediaService.resolveForDownloadPublished(
+      meTenant(req),
+      req.params.mediaId,
+    );
+    const safeName = row.filename.replace(/[^\w.\- ]+/g, "_");
+    const disposition = row.mime.startsWith("image/") ? "inline" : "attachment";
+    reply
+      .header("content-type", row.mime)
+      .header("content-length", String(row.sizeBytes))
+      .header("content-disposition", `${disposition}; filename="${safeName}"`)
+      .header("x-content-type-options", "nosniff");
+    return reply.send(stream);
+  });
 
   // Session management (MVP-4 §2.5) — list + revoke the caller's own refresh-token families.
   // me:sessions:manage (granted to all roles). The "current" family is flagged client-side via

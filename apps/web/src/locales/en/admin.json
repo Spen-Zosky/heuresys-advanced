@@ -423,7 +423,8 @@
       "delete": "Delete",
       "tooLarge": "File too large (max 10 MB)",
       "uploadError": "Upload failed",
-      "deleteError": "Delete failed"
+      "deleteError": "Delete failed",
+      "copyMarkdown": "Copy markdown"
     }
   },
   "insights": {

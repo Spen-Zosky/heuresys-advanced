@@ -423,7 +423,8 @@
       "delete": "Elimina",
       "tooLarge": "File troppo grande (max 10 MB)",
       "uploadError": "Caricamento non riuscito",
-      "deleteError": "Eliminazione non riuscita"
+      "deleteError": "Eliminazione non riuscita",
+      "copyMarkdown": "Copia markdown"
     }
   },
   "insights": {

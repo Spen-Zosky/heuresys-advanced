@@ -144,18 +144,36 @@ export function ContentMediaPanel({ documentId, canEdit }: { documentId: string;
                     {m.mime} · {fmtSize(m.sizeBytes)}
                   </p>
                 </div>
-                {canEdit && (
+                <div className="flex shrink-0 gap-2">
+                  {/* Copy the embed markdown with the ADMIN url: the admin
+                      preview reads it on any status; the ESS handbook rewrites
+                      it to /api/v1/me/content/media/ (published-only). */}
                   <Button
                     type="button"
                     size="sm"
-                    variant="outline"
-                    data-testid="content-media-delete"
-                    disabled={remove.isPending}
-                    onClick={() => remove.mutate(m.mediaId)}
+                    variant="ghost"
+                    data-testid="content-media-copy-markdown"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(
+                        `![${m.filename}](/api/v1/content/media/${m.mediaId})`,
+                      );
+                    }}
                   >
-                    {t("content.media.delete")}
+                    {t("content.media.copyMarkdown")}
                   </Button>
-                )}
+                  {canEdit && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      data-testid="content-media-delete"
+                      disabled={remove.isPending}
+                      onClick={() => remove.mutate(m.mediaId)}
+                    >
+                      {t("content.media.delete")}
+                    </Button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

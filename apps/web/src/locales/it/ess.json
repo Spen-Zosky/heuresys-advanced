@@ -19,7 +19,8 @@
       "announcement": "Annuncio",
       "handbook": "Manuale",
       "process_doc": "Doc di processo"
-    }
+    },
+    "attachments": "Allegati"
   },
   "landing": {
     "title": "La mia area",

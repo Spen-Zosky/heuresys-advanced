@@ -10,7 +10,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { pool } from "../../db/client.js";
 import type { RoleCode } from "../../config/constants.js";
 import { NotFoundError, ValidationError } from "../../errors/index.js";
-import { findDocumentById, type ScopeFilter } from "./repository.js";
+import { findDocumentById, findPublishedByIdForTenant, type ScopeFilter } from "./repository.js";
 import * as mediaRepo from "./media-repository.js";
 import type { ObjectStore } from "./media-store.js";
 
@@ -109,6 +109,30 @@ export function createMediaService(store: ObjectStore) {
       if (!row) throw new NotFoundError("Media");
       // Scope via the owning document (cross-tenant -> 404, no existence leak).
       const doc = await findDocumentById(pool, buildScope(a), row.documentId);
+      if (!doc) throw new NotFoundError("Media");
+      return { row, stream: store.createReadStream(row.storageKey) };
+    },
+
+    /* --- ESS (published-only) surface — S982 cap④ close ---------------- */
+    /** List the media of a PUBLISHED document in the caller's tenant (draft /
+     *  cross-tenant -> 404, no existence leak — mirrors getPublishedForMe). */
+    async listForPublishedDocument(
+      tenantId: string,
+      documentId: string,
+    ): Promise<{ items: MediaItem[]; total: number }> {
+      const doc = await findPublishedByIdForTenant(pool, tenantId, documentId);
+      if (!doc) throw new NotFoundError("Content document");
+      const items = (await mediaRepo.listMediaForDocument(pool, documentId)).map(toApi);
+      return { items, total: items.length };
+    },
+
+    /** Resolve a media row whose owning document is PUBLISHED in the caller's
+     *  tenant; the route streams the blob (inline for images — the upload
+     *  mime-allowlist excludes SVG, so inline render is safe). */
+    async resolveForDownloadPublished(tenantId: string, mediaId: string) {
+      const row = await mediaRepo.findMediaById(pool, mediaId);
+      if (!row) throw new NotFoundError("Media");
+      const doc = await findPublishedByIdForTenant(pool, tenantId, row.documentId);
       if (!doc) throw new NotFoundError("Media");
       return { row, stream: store.createReadStream(row.storageKey) };
     },

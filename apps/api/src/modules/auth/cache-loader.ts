@@ -19,6 +19,41 @@ export interface CacheLoadResult {
   unknownRolesSkipped: string[];
 }
 
+/** Minimal logger surface so the retry helper stays testable without Fastify. */
+export interface BootRetryLogger {
+  warn: (obj: unknown, msg?: string) => void;
+}
+
+/**
+ * D-20 — boot resilience. A transient pool-establishment timeout through the
+ * SSH tunnel (OCI free-tier jitter) must not kill the API at start (observed
+ * S980: 4 consecutive boot failures, ok at the 5th, while single-shot psql
+ * worked — it is the pool establishment that times out, not the forward).
+ * Retries with capped exponential backoff. A *successful* query that yields an
+ * empty cache is a seed/migration defect, not jitter — that error fails fast.
+ */
+export async function loadRolePermissionCacheWithRetry(
+  log: BootRetryLogger,
+  loader: () => Promise<CacheLoadResult> = loadRolePermissionCache,
+  backoffMs: readonly number[] = [1_000, 2_000, 4_000, 8_000],
+): Promise<CacheLoadResult> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await loader();
+    } catch (err) {
+      const isEmptyCacheDefect =
+        err instanceof Error && err.message.startsWith("RBAC permission cache is empty");
+      if (isEmptyCacheDefect || attempt >= backoffMs.length) throw err;
+      const delayMs = backoffMs[attempt] ?? 0;
+      log.warn(
+        { err, attempt: attempt + 1, maxAttempts: backoffMs.length + 1, delayMs },
+        "RBAC cache boot load failed; retrying after backoff",
+      );
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
 export async function loadRolePermissionCache(): Promise<CacheLoadResult> {
   const result = await pool.query<{ role_code: string; permission_code: string }>(`
     SELECT r.auth_role_code        AS role_code,

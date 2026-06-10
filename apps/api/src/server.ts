@@ -9,7 +9,7 @@
 import { buildApp } from "./app.js";
 import { env } from "./config/env.js";
 import { closePool } from "./db/client.js";
-import { loadRolePermissionCache } from "./modules/auth/cache-loader.js";
+import { loadRolePermissionCacheWithRetry } from "./modules/auth/cache-loader.js";
 
 async function start() {
   const app = await buildApp();
@@ -31,8 +31,9 @@ async function start() {
 
   try {
     // Populate RBAC cache before opening the port: the first request must
-    // never hit requirePermission() with an unloaded cache.
-    const cacheStats = await loadRolePermissionCache();
+    // never hit requirePermission() with an unloaded cache. Retried (D-20):
+    // transient tunnel/OCI jitter at pool establishment must not kill the boot.
+    const cacheStats = await loadRolePermissionCacheWithRetry(app.log);
     app.log.info(cacheStats, "RBAC permission cache loaded");
 
     await app.listen({ host: env.HOST, port: env.PORT });

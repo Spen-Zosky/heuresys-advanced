@@ -275,6 +275,17 @@ Batch del menu eseguito in autonomia (decision-authority session-scoped), 4 comm
 - **#4 mandatory-MFA NON iniziata** (chiusura context-budget Enzo 71%; solo letto il login hot-path). **Finding**: gate MFA al login **GIÀ cablato** (§3b `auth/service.ts`: utente con fattore verificato → `mfa_required`+challengeToken+availableKinds; il commento "Login-time gating intentionally NOT wired" in `mfa-routes.ts` è **STALE → doc-debt**). #4 deve solo: stato `mfa_enrollment_required` per in-scope-senza-fattore + flusso enrollment pre-sessione (token limitato / claim JWT `enr`, riusa l'infra `fam`) + modulo `mfa-policy` (table + admin CRUD + scope-resolution) + 3° stato login web. Default OFF (no lockout). **Sessione dedicata** (login hot-path, ~80 file test sensibili).
 - **Pending prossima sessione**: #4 (dedicata) · ciclo-2 #10 SMS_OTP (buildable code-only) / #9 media local-disk (OK'd Enzo) / #11-13 unblock-package · MFA login web (use-passkey + 3° stato, accoppiato a #4).
 
+**🟢 Aggiornamento S981 (2026-06-10) — batch 11 item (autonomo, full-gated, review adversarial):**
+10 commit pushati (`b7bc8b6`..`4d0b731`), CI verde, full suite **877/0**, migrate ×2 idempotente (105 mig).
+- **#4 mandatory-MFA ✅ SHIPPED** (keystone §2.5, mig 000103/104): policy per-tenant default-OFF + modulo `/v1/mfa-policy` + terzo stato login + sessione `enr` con allowlist guard + enrollment pre-sessione UI + **passkey login LIVE** (la ceremony completa la sessione). Review adversarial 19-agenti, finding tutti fixati. **§2.5 residuo: solo SMS_OTP** (#10, code-only buildable; attivazione ⛔ provider PM) + hardening TOFU v2 (conferma out-of-band primo enrollment, registrato).
+- **#9 media object-store ✅** (mig 000105) + **#13 rich-text ✅** (MarkdownView era GIÀ nella lib — solo wiring) → **cap④ CMS P3 residuo: solo ESS-media serve** (slice ~2h).
+- **B-52 ✅** linuxpc in align-clones (target esplicito + in `all` resiliente; primo run live nel close S981).
+- **D-19 ✅ / D-20 ✅ / D-21 ✅** (vedi DEBT_REGISTER).
+- **#12/#13 unblock-package ✅**: dossier misurati `docs/kb/B50_DEFER_UNBLOCK_PACKAGE.md` + `WAVE2_UNBLOCK_PACKAGE.md` — decision-ready (Decisione #1 sblocca 14-15 pool + 18-24 candidati + 6 branch, import ~1 sessione post-greenlight).
+- **§2.7 a11y**: serious `list` ✅ azzerata (28 route, 1 fix); **residuo = `color-contrast` 28r/179n** (palette brand, decisione Enzo, `docs/a11y-tail-items.md` §S981) + mobile sweep (mai iniziato).
+- **Dependabot**: #31+#29 adottate (`fb5bf49`), **#30 @types/node 25 = defer-major** (types seguono engines floor ≥20; ritargetizzare a ^22 quando engines sale).
+- **Pending prossima sessione**: attivazione policy MFA su tenant reale (1 PUT) + opzionale UI admin mfa-policy · decisioni PM dossier · #10 SMS_OTP · ESS-media · color-contrast (brand) · #11 ISTAT/ATECO (⛔ ToS).
+
 ## P3 — Infra / robustezza
 
 | ID | Azione | Note |

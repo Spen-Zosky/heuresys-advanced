@@ -382,6 +382,8 @@ export default function ContentEditPage() {
         </CardContent>
       </Card>
 
+      <ContentMediaPanel documentId={id} canEdit={can.update} />
+
       <Card data-testid="content-links">
         <CardHeader>
           <CardTitle>{t("content.links.title")}</CardTitle>
@@ -468,3 +470,4 @@ export default function ContentEditPage() {
     </main>
   );
 }
+import { ContentMediaPanel } from "../../../../components/ContentMediaPanel";

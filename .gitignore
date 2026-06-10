@@ -147,3 +147,6 @@ docs/kb/tools/.sync.log
 # cloud dataset IDs + console URLs recorded in each .meta.json are the link back
 # to Apify while the unnamed datasets still exist.
 .apify/
+
+# cap4 CMS P3 - local-disk media object store (default MEDIA_STORAGE_DIR)
+.data/

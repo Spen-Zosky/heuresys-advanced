@@ -182,3 +182,27 @@ export const MeContentFilterSchema = z.object({
   offset: z.coerce.number().int().min(0).optional().default(0),
 });
 export type MeContentFilter = z.infer<typeof MeContentFilterSchema>;
+
+/* --- P3: media attachments (object store, mig 000105) --------------------- */
+
+export const ContentMediaItemSchema = z.object({
+  mediaId: z.uuid(),
+  documentId: z.uuid(),
+  filename: z.string().min(1).max(255),
+  mime: z.string().min(1).max(127),
+  sizeBytes: z.number().int().positive(),
+  sha256: z.string().length(64),
+  uploadedBy: z.uuid().nullable(),
+  createdAt: z.iso.datetime(),
+});
+export type ContentMediaItem = z.infer<typeof ContentMediaItemSchema>;
+
+export const ListContentMediaResponseSchema = z.object({
+  items: z.array(ContentMediaItemSchema),
+  total: z.number().int().min(0),
+});
+export type ListContentMediaResponse = z.infer<typeof ListContentMediaResponseSchema>;
+
+export const ContentMediaDocParamSchema = z.object({ id: z.uuid() });
+export const ContentMediaIdParamSchema = z.object({ mediaId: z.uuid() });
+export const ContentMediaDeleteResponseSchema = z.object({ deleted: z.literal(true) });

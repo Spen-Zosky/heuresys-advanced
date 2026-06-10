@@ -412,6 +412,18 @@
         "created": "Created",
         "actions": "Actions"
       }
+    },
+    "media": {
+      "title": "Attachments",
+      "hint": "PNG, JPEG, WebP, GIF or PDF — max 10 MB. Downloads as attachment.",
+      "upload": "Upload file",
+      "uploading": "Uploading…",
+      "loading": "Loading attachments…",
+      "empty": "No attachments",
+      "delete": "Delete",
+      "tooLarge": "File too large (max 10 MB)",
+      "uploadError": "Upload failed",
+      "deleteError": "Delete failed"
     }
   },
   "insights": {

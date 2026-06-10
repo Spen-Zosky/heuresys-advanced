@@ -93,6 +93,10 @@ const EnvSchema = z.object({
   // missing key does NOT break the server — it only fails the backfill loudly.
   VOYAGE_API_KEY: z.string().min(1).optional(),
 
+  // cap4 CMS P3 - media object store root (local-disk default, S980 decision;
+  // S3/MinIO becomes a different driver behind the same seam, see media-store.ts).
+  MEDIA_STORAGE_DIR: z.string().min(1).default(".data/media"),
+
   // AI ②·Fase 2 — free-text matching feature flag. Default OFF. When OFF the
   // GET /v1/matching/search route returns a clean typed 404 (MATCHING_FREETEXT_DISABLED).
   // When ON the query is embedded AT REQUEST TIME via the injectable Embedder seam

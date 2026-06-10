@@ -412,6 +412,18 @@
         "created": "Creato",
         "actions": "Azioni"
       }
+    },
+    "media": {
+      "title": "Allegati",
+      "hint": "PNG, JPEG, WebP, GIF o PDF — max 10 MB. Download come allegato.",
+      "upload": "Carica file",
+      "uploading": "Caricamento…",
+      "loading": "Caricamento allegati…",
+      "empty": "Nessun allegato",
+      "delete": "Elimina",
+      "tooLarge": "File troppo grande (max 10 MB)",
+      "uploadError": "Caricamento non riuscito",
+      "deleteError": "Eliminazione non riuscita"
     }
   },
   "insights": {

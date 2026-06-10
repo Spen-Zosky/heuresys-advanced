@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { startRegistration } from "@simplewebauthn/browser";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -31,6 +31,9 @@ import {
   type CurrentSessionResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
+
+// Stable no-op subscribe for useSyncExternalStore reads of immutable browser capabilities.
+const subscribeNever = () => () => {};
 
 type SecI18n = (key: string) => string;
 function buildVerifyCodeSchema(t: SecI18n) {
@@ -189,12 +192,13 @@ export default function MeSecurityPage() {
   // Gated by secure-context: localhost is exempt, but a plain-HTTP non-localhost
   // origin disables the WebAuthn JS API entirely → show an "unavailable" note there
   // instead of a broken button (passkeys need HTTPS on PROD until TLS lands).
-  const [passkeySupported, setPasskeySupported] = useState(false);
-  useEffect(() => {
-    setPasskeySupported(
-      typeof window !== "undefined" && window.isSecureContext && typeof window.PublicKeyCredential !== "undefined",
-    );
-  }, []);
+  // useSyncExternalStore (never-firing subscribe): the capability is fixed for the page's
+  // lifetime; server snapshot=false keeps SSR/hydration consistent without a setState-in-effect.
+  const passkeySupported = useSyncExternalStore(
+    subscribeNever,
+    () => window.isSecureContext && typeof window.PublicKeyCredential !== "undefined",
+    () => false,
+  );
   const enrollPasskey = useMutation({
     mutationFn: async () => {
       const opt = await apiFetch<{ factorId: string; options: Parameters<typeof startRegistration>[0]["optionsJSON"] }>(

@@ -28,6 +28,8 @@ import { hashPassword, verifyPassword } from "./password.js";
 import { sha256Hex } from "./tokens.js";
 import type { IMailer } from "./mailer.js";
 import { ConsoleMailer } from "./mailer.js";
+import type { ISmsSender } from "./sms-sender.js";
+import { ConsoleSms } from "./sms-sender.js";
 import * as mfaRepo from "./mfa-repository.js";
 
 /* --- recovery codes (MVP-4 §2.5) -------------------------------------- */
@@ -162,6 +164,32 @@ function maskEmail(email: string): string {
   return `${head}***${domain}`;
 }
 
+/**
+ * SMS_OTP enrollment is OFF without a production-capable provider → 404 with
+ * the precise code SMS_NOT_CONFIGURED (the kind is effectively absent for the
+ * caller). Subclasses NotFoundError so the errorHandler maps it to 404, but
+ * carries its own stable code (mirrors FreeTextDisabledError).
+ */
+class SmsNotConfiguredError extends NotFoundError {
+  constructor() {
+    super("SMS provider");
+    this.code = "SMS_NOT_CONFIGURED";
+    this.message = "SMS provider not configured";
+  }
+}
+
+/** Mask a phone for safe display: keep prefix + last 3 digits (+39•••567). */
+function maskPhone(phone: string): string {
+  if (phone.length < 7) return "•••";
+  return `${phone.slice(0, 3)}•••${phone.slice(-3)}`;
+}
+
+/** Read the SMS destination from an SMS_OTP factor's metadata (set at enroll). */
+function smsFactorPhone(factor: { metadata: Record<string, unknown> }): string | null {
+  const phone = factor.metadata?.["phone"];
+  return typeof phone === "string" && phone.length > 0 ? phone : null;
+}
+
 /* --- Service surface ----------------------------------------------- */
 
 export interface MfaService {
@@ -206,6 +234,36 @@ export interface MfaService {
   resendEmailOtpEnroll(input: { userId: string; userEmail: string; factorId: string }): Promise<{
     expiresInSeconds: number;
   }>;
+  /**
+   * Start SMS_OTP enrollment: store the (E.164-validated) destination on the
+   * factor metadata, text a CSPRNG code via the SMS seam, store it hashed.
+   * Throws 404 SMS_NOT_CONFIGURED when no production-capable provider exists.
+   */
+  enrollSmsOtp(input: { userId: string; phoneNumber: string }): Promise<{
+    factorId: string;
+    kind: "SMS_OTP";
+    phoneHint: string;
+    expiresInSeconds: number;
+    verified: false;
+  }>;
+  /** Confirm SMS_OTP enrollment with the texted code. */
+  verifySmsOtpSetup(input: { userId: string; factorId: string; code: string }): Promise<{
+    factorId: string;
+    kind: "SMS_OTP";
+    verified: true;
+  }>;
+  /** Re-issue a fresh SMS enrollment code (rate-limited cooldown). */
+  resendSmsOtpEnroll(input: { userId: string; factorId: string }): Promise<{
+    expiresInSeconds: number;
+  }>;
+  /** Re-issue the SMS_OTP login code tied to an active challenge token. */
+  resendSmsOtpLogin(input: { challengeToken: string }): Promise<{ expiresInSeconds: number }>;
+  /**
+   * Factor kinds a user may ENROLL right now. TOTP/EMAIL_OTP/WEBAUTHN are
+   * always enrollable; SMS_OTP only when the SMS sender is production-capable
+   * (codes that land only in server logs would lock real users out).
+   */
+  enrollableKinds(): mfaRepo.MfaKind[];
   /** Returns null if the user has no verified factors (MFA not required). */
   beginLoginChallenge(userId: string): Promise<{
     challengeToken: string;
@@ -240,10 +298,30 @@ function defaultMfaMailer(): IMailer {
   return new ConsoleMailer(consoleLog);
 }
 
+/**
+ * Default SMS sender for the MFA service singleton (mirrors defaultMfaMailer):
+ * a ConsoleSms bound to a minimal console-backed logger — not production
+ * capable, so SMS_OTP stays unenrollable unless buildApp injects a real sender.
+ */
+function defaultSmsSender(): ISmsSender {
+  const consoleLog = {
+    warn: (...args: unknown[]) => console.warn(...args),
+    info: () => {},
+    error: (...args: unknown[]) => console.error(...args),
+    debug: () => {},
+    fatal: (...args: unknown[]) => console.error(...args),
+    trace: () => {},
+    child: () => consoleLog,
+  } as unknown as ConstructorParameters<typeof ConsoleSms>[0];
+  return new ConsoleSms(consoleLog);
+}
+
 export interface MfaServiceOptions {
   challengeStore?: MfaChallengeStore;
   /** Mailer used to deliver EMAIL_OTP codes. */
   mailer?: IMailer;
+  /** Sender used to deliver SMS_OTP codes. */
+  smsSender?: ISmsSender;
   /** Overridable clock for tests. */
   now?: () => number;
 }
@@ -259,19 +337,19 @@ export function createMfaService(
 
   const challengeStore = options.challengeStore ?? sharedMfaChallengeStore;
   const mailer = options.mailer ?? defaultMfaMailer();
+  const smsSender = options.smsSender ?? defaultSmsSender();
   const nowMs = options.now ?? (() => Date.now());
 
   /**
-   * Issue (or re-issue) an EMAIL_OTP code for a factor+purpose: enforce the
-   * resend cooldown, generate a CSPRNG code, store it HASHED, and email the
-   * plaintext via the mailer seam. Returns the TTL in seconds. Never returns
-   * the code.
+   * Channel-agnostic OTP issuance core: enforce the resend cooldown, generate
+   * a CSPRNG code, store it HASHED, and hand the plaintext to `deliver` (the
+   * only place the code ever travels). Returns the TTL in seconds.
    */
-  async function issueEmailOtp(args: {
+  async function issueOtpCode(args: {
     userId: string;
-    userEmail: string;
     factorId: string;
     purpose: mfaRepo.MfaOtpPurpose;
+    deliver: (code: string) => Promise<void>;
   }): Promise<number> {
     const existing = await mfaRepo.findActiveOtpChallenge(pool, args.factorId, args.purpose);
     if (existing) {
@@ -295,8 +373,38 @@ export function createMfaService(
       codeHash,
       expiresAt,
     });
-    await mailer.sendMfaOtpEmail(args.userEmail, code, args.purpose);
+    await args.deliver(code);
     return Math.floor(EMAIL_OTP_TTL_MS / 1000);
+  }
+
+  /** Issue (or re-issue) an EMAIL_OTP code — emails the plaintext via the mailer seam. */
+  async function issueEmailOtp(args: {
+    userId: string;
+    userEmail: string;
+    factorId: string;
+    purpose: mfaRepo.MfaOtpPurpose;
+  }): Promise<number> {
+    return issueOtpCode({
+      userId: args.userId,
+      factorId: args.factorId,
+      purpose: args.purpose,
+      deliver: (code) => mailer.sendMfaOtpEmail(args.userEmail, code, args.purpose),
+    });
+  }
+
+  /** Issue (or re-issue) an SMS_OTP code — texts the plaintext via the SMS seam. */
+  async function issueSmsOtp(args: {
+    userId: string;
+    phone: string;
+    factorId: string;
+    purpose: mfaRepo.MfaOtpPurpose;
+  }): Promise<number> {
+    return issueOtpCode({
+      userId: args.userId,
+      factorId: args.factorId,
+      purpose: args.purpose,
+      deliver: (code) => smsSender.sendMfaOtpSms(args.phone, code, args.purpose),
+    });
   }
 
   /**
@@ -457,6 +565,93 @@ export function createMfaService(
       return { expiresInSeconds };
     },
 
+    /* --- SMS_OTP enrollment (code-only slice) -------------------------- */
+    async enrollSmsOtp({ userId, phoneNumber }) {
+      if (!smsSender.productionCapable) {
+        // Typed 404 mirrors the MATCHING_FREETEXT_DISABLED pattern: the kind is
+        // invisible until a deliverable provider exists (codes that only land
+        // in server logs would lock real users out).
+        throw new SmsNotConfiguredError();
+      }
+      // Destination lives on the factor metadata (masked in every response);
+      // per-attempt codes live hashed in the challenge table, like EMAIL_OTP.
+      const factor = await mfaRepo.insertMfaFactor(pool, {
+        userId,
+        kind: "SMS_OTP",
+        secret: null,
+        metadata: { phone: phoneNumber },
+      });
+      const expiresInSeconds = await issueSmsOtp({
+        userId,
+        phone: phoneNumber,
+        factorId: factor.factorId,
+        purpose: "ENROLL",
+      });
+      return {
+        factorId: factor.factorId,
+        kind: "SMS_OTP" as const,
+        phoneHint: maskPhone(phoneNumber),
+        expiresInSeconds,
+        verified: false as const,
+      };
+    },
+
+    async verifySmsOtpSetup({ userId, factorId, code }) {
+      const factor = await mfaRepo.findMfaFactorById(pool, factorId);
+      if (!factor) throw new NotFoundError("MFA factor");
+      if (factor.userId !== userId) {
+        // Don't leak existence cross-user; surface as NotFound.
+        throw new NotFoundError("MFA factor");
+      }
+      if (factor.kind !== "SMS_OTP") {
+        throw new ValidationError({ kind: factor.kind }, "Factor is not an SMS_OTP factor");
+      }
+      // consumeEmailOtp is channel-agnostic (factor+purpose scoped challenge rows).
+      await consumeEmailOtp({ factorId, purpose: "ENROLL", code });
+      await mfaRepo.markMfaFactorVerified(pool, factorId);
+      await mfaRepo.markMfaFactorUsed(pool, factorId);
+      return { factorId, kind: "SMS_OTP" as const, verified: true as const };
+    },
+
+    async resendSmsOtpEnroll({ userId, factorId }) {
+      const factor = await mfaRepo.findMfaFactorById(pool, factorId);
+      if (!factor || factor.userId !== userId) throw new NotFoundError("MFA factor");
+      if (factor.kind !== "SMS_OTP") {
+        throw new ValidationError({ kind: factor.kind }, "Factor is not an SMS_OTP factor");
+      }
+      const phone = smsFactorPhone(factor);
+      if (!phone) throw new ValidationError({ factorId }, "Factor has no phone destination");
+      const expiresInSeconds = await issueSmsOtp({ userId, phone, factorId, purpose: "ENROLL" });
+      return { expiresInSeconds };
+    },
+
+    async resendSmsOtpLogin({ challengeToken }) {
+      // Validate the token WITHOUT consuming it (mirrors resendEmailOtpLogin).
+      const userId = challengeStore.peek(challengeToken);
+      const factors = await mfaRepo.listVerifiedMfaFactorsForUser(pool, userId);
+      const smsFactor = factors.find((f) => f.kind === "SMS_OTP");
+      const phone = smsFactor ? smsFactorPhone(smsFactor) : null;
+      if (!smsFactor || !phone) {
+        throw new UnauthorizedError("No SMS_OTP factor for this challenge", "MFA_OTP_INVALID");
+      }
+      const expiresInSeconds = await issueSmsOtp({
+        userId,
+        phone,
+        factorId: smsFactor.factorId,
+        purpose: "LOGIN",
+      });
+      return { expiresInSeconds };
+    },
+
+    enrollableKinds() {
+      return [
+        "TOTP",
+        "EMAIL_OTP",
+        "WEBAUTHN",
+        ...(smsSender.productionCapable ? (["SMS_OTP"] as const) : []),
+      ];
+    },
+
     async beginLoginChallenge(userId) {
       const verified = await mfaRepo.listVerifiedMfaFactorsForUser(pool, userId);
       if (verified.length === 0) return null;
@@ -478,6 +673,21 @@ export function createMfaService(
             userId,
             userEmail,
             factorId: emailFactor.factorId,
+            purpose: "LOGIN",
+          }).catch((e) => {
+            if (!(e instanceof TooManyRequestsError)) throw e;
+          });
+        }
+      }
+      // Same pre-send for SMS_OTP factors (destination lives on the factor metadata).
+      const smsLoginFactor = verified.find((f) => f.kind === "SMS_OTP");
+      if (smsLoginFactor) {
+        const phone = smsFactorPhone(smsLoginFactor);
+        if (phone) {
+          await issueSmsOtp({
+            userId,
+            phone,
+            factorId: smsLoginFactor.factorId,
             purpose: "LOGIN",
           }).catch((e) => {
             if (!(e instanceof TooManyRequestsError)) throw e;
@@ -532,6 +742,21 @@ export function createMfaService(
         }
       }
 
+      // 2b. No EMAIL match — try the SMS_OTP factor the same way (the challenge
+      //     machinery is channel-agnostic: rows are factor+purpose scoped).
+      const smsFactor = factors.find((f) => f.kind === "SMS_OTP");
+      if (smsFactor) {
+        const ok = await consumeEmailOtp({
+          factorId: smsFactor.factorId,
+          purpose: "LOGIN",
+          code,
+        });
+        if (ok) {
+          await mfaRepo.markMfaFactorUsed(pool, smsFactor.factorId);
+          return { userId };
+        }
+      }
+
       // 2c. No OTP match — try a single-use recovery code (high-entropy backup).
       //     The length-16 guard keeps short 6-digit OTPs off the recovery path.
       const normalized = normalizeRecoveryCode(code);
@@ -541,11 +766,11 @@ export function createMfaService(
       }
 
       // 3. Nothing matched. Use TOTP-specific code only when the user has no
-      //    EMAIL_OTP factor (back-compat with the existing TOTP test); otherwise
-      //    surface the generic OTP-invalid code.
+      //    OTP-channel factor (back-compat with the existing TOTP test);
+      //    otherwise surface the generic OTP-invalid code.
       throw new UnauthorizedError(
         "Invalid code",
-        emailFactor ? "MFA_OTP_INVALID" : "MFA_TOTP_INVALID",
+        emailFactor || smsFactor ? "MFA_OTP_INVALID" : "MFA_TOTP_INVALID",
       );
     },
 
@@ -603,8 +828,13 @@ export const sharedMfaService: MfaService = createMfaService();
 export function buildMfaServiceWithMailer(
   mailer: IMailer,
   challengeStore?: MfaChallengeStore,
+  smsSender?: ISmsSender,
 ): MfaService {
-  return createMfaService({ mailer, ...(challengeStore ? { challengeStore } : {}) });
+  return createMfaService({
+    mailer,
+    ...(challengeStore ? { challengeStore } : {}),
+    ...(smsSender ? { smsSender } : {}),
+  });
 }
 
 /** Test-only export: build a service against an injectable challenge store. */

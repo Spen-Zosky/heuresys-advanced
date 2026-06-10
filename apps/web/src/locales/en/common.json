@@ -66,6 +66,7 @@
         "methodTotp": "Authenticator app",
         "methodEmail": "Code via email",
         "methodPasskey": "Passkey",
+        "methodSms": "Code via SMS",
         "totpInstructions": "Scan the QR code with your authenticator app, then enter the 6-digit code.",
         "secretLabel": "Manual key",
         "emailSent": "We emailed a code to {{hint}}.",
@@ -77,7 +78,11 @@
           "generic": "Setup failed. Please try again.",
           "invalidCode": "Invalid or expired code",
           "expired": "Setup session expired — sign in again"
-        }
+        },
+        "smsPhoneLabel": "Phone number (+39... format)",
+        "smsSend": "Send code",
+        "smsSending": "Sending…",
+        "smsSent": "We sent you a code via SMS to {{hint}}."
       }
     },
     "logout": {

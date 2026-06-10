@@ -311,7 +311,19 @@
     "passkeyEnrollButton": "Aggiungi passkey",
     "passkeyUnsupported": "Le passkey richiedono una connessione sicura (HTTPS).",
     "passkeyEnrolled": "Passkey registrata e attiva.",
-    "errorPasskey": "Errore durante la registrazione della passkey."
+    "errorPasskey": "Errore durante la registrazione della passkey.",
+    "smsEnrollButton": "Aggiungi codice via SMS",
+    "smsPhoneCardTitle": "Aggiungi un numero di telefono",
+    "smsPhoneLabel": "Numero di telefono (formato +39...)",
+    "smsSend": "Invia codice",
+    "smsPendingCardTitle": "Verifica il tuo numero di telefono",
+    "smsPendingInstruction": "Ti abbiamo inviato un codice di verifica via SMS a {{phone}}. Inseriscilo qui sotto.",
+    "smsCodeLabel": "Codice ricevuto via SMS",
+    "smsResend": "Reinvia codice",
+    "smsResending": "Reinvio…",
+    "smsResent": "Codice reinviato",
+    "smsVerifiedActive": "Fattore SMS verificato e attivo",
+    "smsNotConfigured": "L'invio SMS non è disponibile: nessun provider configurato. Contatta l'amministratore."
   },
   "skills": {
     "title": "Le mie skill",

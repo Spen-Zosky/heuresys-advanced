@@ -398,7 +398,9 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
               status: "mfa_enrollment_required",
               accessJwt,
               csrfToken,
-              allowedKinds: ["TOTP", "EMAIL_OTP", "WEBAUTHN"],
+              // Enrollable kinds are provider-aware (SMS_OTP appears only when
+              // a production-capable SMS sender is configured).
+              allowedKinds: mfaService.enrollableKinds(),
             };
           }
         }

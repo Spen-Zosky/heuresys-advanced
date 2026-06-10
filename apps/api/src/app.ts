@@ -107,10 +107,13 @@ import { contentMediaRoutes } from "./modules/content/media-routes.js";
 import { contentBlueprintLinksRoutes } from "./modules/content-blueprint-links/routes.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
+import { makeSmsSender, type ISmsSender } from "./modules/auth/sms-sender.js";
 
 export interface BuildAppOptions {
   /** Custom mailer for the auth module — tests inject InMemoryMailer. */
   authMailer?: IMailer;
+  /** Custom SMS sender for the SMS_OTP factor — tests inject InMemorySms. */
+  smsSender?: ISmsSender;
   /** Semantic-matching DI seams — tests inject a non-destructive backfill + a FakeEmbedder. */
   matchingDeps?: SemanticMatchingDeps;
   /** Reference-sync DI seam — tests inject a fixture ESCO fetcher (no live HTTP). */
@@ -129,9 +132,11 @@ export const LOG_REDACT_PATHS = [
   "req.body.newPassword",
   "req.body.confirmPassword",
   // MFA second-factor codes carried on request bodies (login step-up +
-  // EMAIL_OTP/TOTP verify-setup) — must never persist in request logs.
+  // EMAIL_OTP/TOTP/SMS_OTP verify-setup) — must never persist in request logs.
   "req.body.code",
   "req.body.mfaCode",
+  // SMS_OTP enrollment destination (PII) — only the masked hint may surface.
+  "req.body.phoneNumber",
   "res.body.token",
   "res.body.refreshToken",
   "*.password",
@@ -256,7 +261,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // in tests, the configured transactional mailer in prod). Shared by the auth
   // login flow (mfaService dep) and the MFA management routes (service).
   const authMailer = options.authMailer ?? makeMailer(app.log);
-  const mfaService = buildMfaServiceWithMailer(authMailer);
+  const smsSender = options.smsSender ?? makeSmsSender(app.log);
+  const mfaService = buildMfaServiceWithMailer(authMailer, undefined, smsSender);
   await app.register(authRoutes, { prefix: "/v1/auth", mailer: authMailer, mfaService });
   await app.register(mfaRoutes, { prefix: "/v1/auth/mfa", service: mfaService, mailer: authMailer });
   await app.register(mfaPolicyRoutes, { prefix: "/v1/mfa-policy" });

@@ -30,6 +30,12 @@ import {
   VerifyEmailOtpSetupResponseSchema,
   ResendEmailOtpBodySchema,
   ResendEmailOtpResponseSchema,
+  EnrollSmsOtpBodySchema,
+  EnrollSmsOtpResponseSchema,
+  VerifySmsOtpSetupBodySchema,
+  VerifySmsOtpSetupResponseSchema,
+  ResendSmsOtpBodySchema,
+  ResendSmsOtpResponseSchema,
   GenerateRecoveryCodesResponseSchema,
   RecoveryCodesCountResponseSchema,
   WebauthnRegistrationOptionsResponseSchema,
@@ -275,6 +281,95 @@ export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, op
         throw new UnauthorizedError("challengeToken required for login resend", "MFA_OTP_INVALID");
       }
       return service.resendEmailOtpLogin({ challengeToken: req.body.challengeToken });
+    },
+  );
+
+  /* === SMS_OTP enrollment (MVP-4 §2.5, code-only slice) ============= */
+  /* Mirrors the EMAIL_OTP routes 1:1. Enrollment is gated server-side on a
+   * production-capable SMS provider (404 SMS_NOT_CONFIGURED otherwise). */
+
+  /* --- POST /sms-otp/enroll ------------------------------------------ */
+  app.post(
+    "/sms-otp/enroll",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: {
+        body: EnrollSmsOtpBodySchema,
+        response: { 201: EnrollSmsOtpResponseSchema },
+      },
+      config: { rateLimit: { max: 10, timeWindow: 60 * 60 * 1000 } },
+    },
+    async (req, reply) => {
+      if (!req.user) throw new UnauthorizedError("Authentication required");
+      const out = await service.enrollSmsOtp({
+        userId: req.user.userId,
+        phoneNumber: req.body.phoneNumber,
+      });
+      reply.code(201).send(out);
+    },
+  );
+
+  /* --- POST /sms-otp/verify-setup ------------------------------------ */
+  app.post(
+    "/sms-otp/verify-setup",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: {
+        body: VerifySmsOtpSetupBodySchema,
+        response: { 200: VerifySmsOtpSetupResponseSchema },
+      },
+      config: { rateLimit: { max: 30, timeWindow: 60 * 60 * 1000 } },
+    },
+    async (req) => {
+      if (!req.user) throw new UnauthorizedError("Authentication required");
+      return service.verifySmsOtpSetup({
+        userId: req.user.userId,
+        factorId: req.body.factorId,
+        code: req.body.code,
+      });
+    },
+  );
+
+  /* --- POST /sms-otp/resend ------------------------------------------ */
+  app.post(
+    "/sms-otp/resend",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: {
+        body: ResendSmsOtpBodySchema,
+        response: { 200: ResendSmsOtpResponseSchema },
+      },
+      config: { rateLimit: { max: 10, timeWindow: 60 * 60 * 1000 } },
+    },
+    async (req) => {
+      if (!req.user) throw new UnauthorizedError("Authentication required");
+      if (!req.body.factorId) {
+        throw new UnauthorizedError("factorId required for enrollment resend", "MFA_OTP_INVALID");
+      }
+      return service.resendSmsOtpEnroll({
+        userId: req.user.userId,
+        factorId: req.body.factorId,
+      });
+    },
+  );
+
+  /* --- POST /sms-otp/resend-login ------------------------------------ */
+  // No auth cookie required (mirrors /email-otp/resend-login) — the challenge
+  // token is the proof.
+  app.post(
+    "/sms-otp/resend-login",
+    {
+      schema: {
+        body: ResendSmsOtpBodySchema,
+        response: { 200: ResendSmsOtpResponseSchema },
+      },
+      config: { rateLimit: { max: 10, timeWindow: 5 * 60 * 1000 } },
+    },
+    async (req) => {
+      if (!req.body.challengeToken) {
+        throw new UnauthorizedError("challengeToken required for login resend", "MFA_OTP_INVALID");
+      }
+      return service.resendSmsOtpLogin({ challengeToken: req.body.challengeToken });
     },
   );
 

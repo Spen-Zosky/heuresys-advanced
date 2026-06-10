@@ -100,7 +100,10 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
     const json = resp.json() as { status: string; csrfToken: string; allowedKinds: string[] };
     expect(json.status).toBe("mfa_enrollment_required");
     expect(json.csrfToken.length).toBeGreaterThan(0);
-    expect(json.allowedKinds).toEqual(["TOTP", "EMAIL_OTP", "WEBAUTHN"]);
+    // allowedKinds is provider-aware: the test app's InMemorySms IS production-
+    // capable, so SMS_OTP appears here; in PROD without a real SMS provider the
+    // list is TOTP/EMAIL_OTP/WEBAUTHN only (ConsoleSms is not capable).
+    expect(json.allowedKinds).toEqual(["TOTP", "EMAIL_OTP", "WEBAUTHN", "SMS_OTP"]);
     const names = resp.cookies.map((c) => c.name);
     expect(names).toContain(COOKIES.ACCESS);
     expect(names).toContain(COOKIES.CSRF);

@@ -120,6 +120,14 @@ const EnvSchema = z.object({
   SMTP_PASSWORD: z.string().optional(),
   MAIL_FROM: z.string().optional(),
 
+  // SMS provider (SMS_OTP MFA factor — code-only slice). OPTIONAL: no real
+  // provider is implemented yet; makeSmsSender always returns ConsoleSms (not
+  // production-capable -> SMS_OTP enrollment disabled). When a provider lands
+  // (e.g. "twilio"), these become the activation switch. See
+  // modules/auth/sms-sender.ts.
+  SMS_PROVIDER: z.string().optional(),
+  SMS_FROM: z.string().optional(),
+
   // WebAuthn / FIDO2 passkey MFA factor (@simplewebauthn/server). RP config:
   //  - WEBAUTHN_RP_ID: the Relying Party ID == the effective domain (NO scheme,
   //    NO port). "localhost" for local dev. PROD must set its own registrable

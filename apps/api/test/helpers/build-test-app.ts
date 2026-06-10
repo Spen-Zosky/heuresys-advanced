@@ -12,11 +12,14 @@
 import { buildApp, type BuildAppOptions } from "../../src/app.js";
 import { loadRolePermissionCache } from "../../src/modules/auth/cache-loader.js";
 import { InMemoryMailer } from "../../src/modules/auth/mailer.js";
+import { InMemorySms, type ISmsSender } from "../../src/modules/auth/sms-sender.js";
 import type { FastifyInstance } from "fastify";
 
 export interface TestApp {
   app: FastifyInstance;
   mailer: InMemoryMailer;
+  /** The SMS seam (InMemorySms unless the test passed its own smsSender). */
+  sms: ISmsSender;
 }
 
 /** Extra DI overrides a test may pass through to buildApp (mailer is always the InMemoryMailer). */
@@ -30,7 +33,8 @@ export async function buildTestApp(options: TestAppOptions = {}): Promise<TestAp
     cacheLoadedOnce = true;
   }
   const mailer = new InMemoryMailer();
-  const app = await buildApp({ authMailer: mailer, ...options });
+  const sms = options.smsSender ?? new InMemorySms();
+  const app = await buildApp({ authMailer: mailer, ...options, smsSender: sms });
   await app.ready();
-  return { app, mailer };
+  return { app, mailer, sms };
 }

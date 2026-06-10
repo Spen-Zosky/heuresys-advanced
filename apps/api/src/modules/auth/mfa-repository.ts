@@ -49,14 +49,21 @@ function mapRow(r: {
 
 export async function insertMfaFactor(
   q: DbConnector,
-  params: { userId: string; kind: MfaKind; secret: string | null },
+  params: {
+    userId: string;
+    kind: MfaKind;
+    secret: string | null;
+    /** Kind-specific payload (e.g. SMS_OTP destination phone). Defaults to {}. */
+    metadata?: Record<string, unknown>;
+  },
 ): Promise<MfaFactorRow> {
   const { rows } = await q.query<Parameters<typeof mapRow>[0]>(
     `INSERT INTO sys.sys_auth_mfa_factors
-       (auth_mfa_factor_user_id, auth_mfa_factor_kind, auth_mfa_factor_secret, auth_mfa_factor_verified)
-     VALUES ($1, $2, $3, false)
+       (auth_mfa_factor_user_id, auth_mfa_factor_kind, auth_mfa_factor_secret,
+        auth_mfa_factor_metadata, auth_mfa_factor_verified)
+     VALUES ($1, $2, $3, $4, false)
      RETURNING *`,
-    [params.userId, params.kind, params.secret],
+    [params.userId, params.kind, params.secret, params.metadata ?? {}],
   );
   return mapRow(rows[0]!);
 }

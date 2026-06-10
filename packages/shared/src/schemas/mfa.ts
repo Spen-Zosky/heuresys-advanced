@@ -167,6 +167,58 @@ export const ResendEmailOtpResponseSchema = z.object({
 });
 export type ResendEmailOtpResponse = z.infer<typeof ResendEmailOtpResponseSchema>;
 
+/* ===================================================================== */
+/* === SMS_OTP factor (MVP-4 §2.5, code-only slice) ==================== */
+/* ---------------------------------------------------------------------
+ * Second factor delivered as a 6-digit one-time code texted to a phone the
+ * user provides at enrollment (stored in the factor metadata, masked in every
+ * response). Reuses the EMAIL_OTP challenge machinery (hashed-at-rest codes,
+ * TTL, lockout, single-use). Enrollment is gated on a production-capable SMS
+ * provider (404 SMS_NOT_CONFIGURED otherwise) — the code-only slice ships the
+ * full flow behind that gate without a real provider.
+ * ------------------------------------------------------------------- */
+
+/** E.164: leading +, 7-15 digits total, no separators. */
+export const PhoneE164Schema = z
+  .string()
+  .regex(/^\+[1-9]\d{6,14}$/, "Phone number must be E.164 (+391234567890)");
+export type PhoneE164 = z.infer<typeof PhoneE164Schema>;
+
+export const EnrollSmsOtpBodySchema = z.strictObject({
+  phoneNumber: PhoneE164Schema,
+});
+export type EnrollSmsOtpBody = z.infer<typeof EnrollSmsOtpBodySchema>;
+
+export const EnrollSmsOtpResponseSchema = z.object({
+  factorId: z.uuid(),
+  kind: z.literal("SMS_OTP"),
+  /** Partially-masked destination e.g. "+39•••567" — for UI confirmation. */
+  phoneHint: z.string().min(3),
+  /** Seconds until the texted code expires (client countdown). */
+  expiresInSeconds: z.number().int().positive(),
+  verified: z.literal(false),
+});
+export type EnrollSmsOtpResponse = z.infer<typeof EnrollSmsOtpResponseSchema>;
+
+export const VerifySmsOtpSetupBodySchema = z.object({
+  factorId: z.uuid(),
+  code: z.string().regex(/^\d{6}$/, "Six-digit SMS code required"),
+});
+export type VerifySmsOtpSetupBody = z.infer<typeof VerifySmsOtpSetupBodySchema>;
+
+export const VerifySmsOtpSetupResponseSchema = z.object({
+  factorId: z.uuid(),
+  kind: z.literal("SMS_OTP"),
+  verified: z.literal(true),
+});
+export type VerifySmsOtpSetupResponse = z.infer<typeof VerifySmsOtpSetupResponseSchema>;
+
+/** Resend contracts mirror EMAIL_OTP (challengeToken for login, factorId for enroll). */
+export const ResendSmsOtpBodySchema = ResendEmailOtpBodySchema;
+export type ResendSmsOtpBody = z.infer<typeof ResendSmsOtpBodySchema>;
+export const ResendSmsOtpResponseSchema = ResendEmailOtpResponseSchema;
+export type ResendSmsOtpResponse = z.infer<typeof ResendSmsOtpResponseSchema>;
+
 /* --- recovery codes (MVP-4 §2.5) -------------------------------------- */
 
 /** Regenerate response — the plaintext codes are returned ONCE (never re-fetchable). */

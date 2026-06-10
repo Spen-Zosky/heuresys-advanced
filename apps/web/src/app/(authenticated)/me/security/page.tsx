@@ -26,11 +26,15 @@ import {
   type EnrollEmailOtpResponse,
   type VerifyEmailOtpSetupResponse,
   type ResendEmailOtpResponse,
+  type EnrollSmsOtpResponse,
+  type VerifySmsOtpSetupResponse,
+  type ResendSmsOtpResponse,
   type ActiveSession,
   type ListActiveSessionsResponse,
   type CurrentSessionResponse,
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
+import { isApiError } from "../../../../lib/api/errors";
 
 // Stable no-op subscribe for useSyncExternalStore reads of immutable browser capabilities.
 const subscribeNever = () => () => {};
@@ -49,6 +53,10 @@ export default function MeSecurityPage() {
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
   const [pendingFactor, setPendingFactor] = useState<EnrollMfaResponse | null>(null);
   const [pendingEmailOtp, setPendingEmailOtp] = useState<EnrollEmailOtpResponse | null>(null);
+  // SMS_OTP: phone prompt -> pending code verify (mirrors the EMAIL_OTP card).
+  const [smsPrompt, setSmsPrompt] = useState(false);
+  const [smsPhone, setSmsPhone] = useState("");
+  const [pendingSmsOtp, setPendingSmsOtp] = useState<EnrollSmsOtpResponse | null>(null);
 
   const factors = useQuery({
     queryKey: ["me", "mfa", "factors"],
@@ -165,6 +173,71 @@ export default function MeSecurityPage() {
     },
   });
 
+  // --- SMS_OTP enrollment (code-only slice; server gates on a real provider) ---
+  const enrollSms = useMutation({
+    mutationFn: (phoneNumber: string) =>
+      apiFetch<EnrollSmsOtpResponse>("/v1/auth/mfa/sms-otp/enroll", {
+        method: "POST",
+        body: { phoneNumber },
+      }),
+    onSuccess: (data) => {
+      setPendingSmsOtp(data);
+      setSmsPrompt(false);
+      setPendingFactor(null);
+      setPendingEmailOtp(null);
+      setFeedback(null);
+      void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
+    },
+    onError: (err) => {
+      setSmsPrompt(false);
+      setFeedback({
+        kind: "err",
+        msg:
+          isApiError(err) && err.code === "SMS_NOT_CONFIGURED"
+            ? t("security.smsNotConfigured")
+            : err instanceof Error
+              ? err.message
+              : t("security.errorUnexpected"),
+      });
+    },
+  });
+
+  const verifySms = useMutation({
+    mutationFn: (body: { factorId: string; code: string }) =>
+      apiFetch<VerifySmsOtpSetupResponse>("/v1/auth/mfa/sms-otp/verify-setup", {
+        method: "POST",
+        body,
+      }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
+      setPendingSmsOtp(null);
+      setFeedback({ kind: "ok", msg: t("security.smsVerifiedActive") });
+    },
+    onError: (err) => {
+      setFeedback({
+        kind: "err",
+        msg: err instanceof Error ? err.message : t("security.errorInvalidCode"),
+      });
+    },
+  });
+
+  const resendSms = useMutation({
+    mutationFn: (factorId: string) =>
+      apiFetch<ResendSmsOtpResponse>("/v1/auth/mfa/sms-otp/resend", {
+        method: "POST",
+        body: { factorId },
+      }),
+    onSuccess: () => {
+      setFeedback({ kind: "ok", msg: t("security.smsResent") });
+    },
+    onError: (err) => {
+      setFeedback({
+        kind: "err",
+        msg: err instanceof Error ? err.message : t("security.errorResend"),
+      });
+    },
+  });
+
   // --- Active sessions (MVP-4 §2.5) — refresh-token families. The current family is
   // resolved via /v1/auth/sessions/current (the refresh cookie is not sent to /v1/me/*). ---
   const sessions = useQuery({
@@ -237,6 +310,16 @@ export default function MeSecurityPage() {
   const onVerifyEmail = emailForm.handleSubmit((values) => {
     if (!pendingEmailOtp) return;
     verifyEmail.mutate({ factorId: pendingEmailOtp.factorId, code: values.code });
+  });
+
+  const smsForm = useForm<VerifyCodeFormValues>({
+    resolver: zodResolver(verifyCodeSchema),
+    defaultValues: { code: "" },
+  });
+
+  const onVerifySms = smsForm.handleSubmit((values) => {
+    if (!pendingSmsOtp) return;
+    verifySms.mutate({ factorId: pendingSmsOtp.factorId, code: values.code });
   });
 
   return (
@@ -466,8 +549,130 @@ export default function MeSecurityPage() {
             </form>
           </CardContent>
         </Card>
+      ) : pendingSmsOtp ? (
+        <Card data-testid="me-security-smsotp-pending-card">
+          <CardHeader>
+            <CardTitle>{t("security.smsPendingCardTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm" data-testid="me-security-smsotp-hint">
+              {t("security.smsPendingInstruction", { phone: pendingSmsOtp.phoneHint })}
+            </p>
+
+            <form
+              onSubmit={onVerifySms}
+              className="space-y-3"
+              data-testid="me-security-smsotp-verify-form"
+            >
+              <label className="block text-sm">
+                <span>{t("security.smsCodeLabel")}</span>
+                <Input
+                  {...smsForm.register("code")}
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder={t("security.totpCodePlaceholder")}
+                  data-testid="me-security-smsotp-verify-code"
+                  autoComplete="one-time-code"
+                  className="mt-1"
+                />
+                {smsForm.formState.errors.code ? (
+                  <span className="text-xs text-danger">
+                    {smsForm.formState.errors.code.message}
+                  </span>
+                ) : null}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="submit"
+                  data-testid="me-security-smsotp-verify-submit"
+                  disabled={verifySms.isPending}
+                >
+                  {verifySms.isPending ? t("security.verifying") : t("security.verifySubmit")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  data-testid="me-security-smsotp-resend"
+                  disabled={resendSms.isPending}
+                  onClick={() => resendSms.mutate(pendingSmsOtp.factorId)}
+                >
+                  {resendSms.isPending ? t("security.smsResending") : t("security.smsResend")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  data-testid="me-security-smsotp-cancel"
+                  onClick={() => {
+                    setPendingSmsOtp(null);
+                    smsForm.reset();
+                  }}
+                >
+                  {t("security.cancel")}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      ) : smsPrompt ? (
+        <Card data-testid="me-security-sms-phone-card">
+          <CardHeader>
+            <CardTitle>{t("security.smsPhoneCardTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                enrollSms.mutate(smsPhone.trim());
+              }}
+              className="space-y-3"
+              data-testid="me-security-sms-phone-form"
+            >
+              <label className="block text-sm">
+                <span>{t("security.smsPhoneLabel")}</span>
+                <Input
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder="+393331234567"
+                  data-testid="me-security-sms-phone-input"
+                  className="mt-1"
+                  value={smsPhone}
+                  onChange={(e) => setSmsPhone(e.target.value.replace(/[^\d+]/g, ""))}
+                />
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="submit"
+                  data-testid="me-security-sms-phone-submit"
+                  disabled={enrollSms.isPending || !/^\+[1-9]\d{6,14}$/.test(smsPhone)}
+                >
+                  {enrollSms.isPending ? t("security.enrolling") : t("security.smsSend")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  data-testid="me-security-sms-phone-cancel"
+                  onClick={() => {
+                    setSmsPrompt(false);
+                    setSmsPhone("");
+                  }}
+                >
+                  {t("security.cancel")}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       ) : (
         <div className="flex flex-wrap justify-end gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            data-testid="me-security-smsotp-enroll-button"
+            onClick={() => setSmsPrompt(true)}
+            disabled={enrollSms.isPending}
+          >
+            {t("security.smsEnrollButton")}
+          </Button>
           <Button
             type="button"
             variant="secondary"

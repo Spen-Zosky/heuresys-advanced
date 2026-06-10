@@ -66,6 +66,7 @@
         "methodTotp": "App authenticator",
         "methodEmail": "Codice via email",
         "methodPasskey": "Passkey",
+        "methodSms": "Codice via SMS",
         "totpInstructions": "Scansiona il codice QR con la tua app authenticator, poi inserisci il codice a 6 cifre.",
         "secretLabel": "Chiave manuale",
         "emailSent": "Ti abbiamo inviato un codice via email a {{hint}}.",
@@ -77,7 +78,11 @@
           "generic": "Configurazione non riuscita. Riprova.",
           "invalidCode": "Codice non valido o scaduto",
           "expired": "Sessione di configurazione scaduta — esegui di nuovo l'accesso"
-        }
+        },
+        "smsPhoneLabel": "Numero di telefono (formato +39...)",
+        "smsSend": "Invia codice",
+        "smsSending": "Invio in corso…",
+        "smsSent": "Ti abbiamo inviato un codice via SMS a {{hint}}."
       }
     },
     "logout": {

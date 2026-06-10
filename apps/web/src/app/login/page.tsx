@@ -31,7 +31,7 @@ function readNextParam(): string | null {
 // capabilities (same pattern as /me/security). Server snapshot = false.
 const subscribeNever = () => () => {};
 
-type EnrollKind = "TOTP" | "EMAIL_OTP" | "WEBAUTHN";
+type EnrollKind = "TOTP" | "EMAIL_OTP" | "WEBAUTHN" | "SMS_OTP";
 
 /** Mandatory-MFA gate state: credentials retained for the post-enroll re-login. */
 interface EnrollState {
@@ -46,6 +46,8 @@ interface EnrollState {
   secret: string | null;
   /** EMAIL_OTP: masked destination of the emailed code. */
   emailHint: string | null;
+  /** SMS_OTP: masked destination of the texted code (null until the phone is submitted). */
+  phoneHint: string | null;
 }
 
 export default function LoginPage() {
@@ -65,6 +67,8 @@ export default function LoginPage() {
   // Mandatory-MFA enrollment gate (MVP-4 par.2.5 #4). Null = not gated.
   const [enroll, setEnroll] = useState<EnrollState | null>(null);
   const [enrollCode, setEnrollCode] = useState("");
+  // SMS_OTP enrollment: destination phone typed before the code is texted.
+  const [enrollPhone, setEnrollPhone] = useState("");
   const [enrollBusy, setEnrollBusy] = useState(false);
   const [passkeyBusy, setPasskeyBusy] = useState(false);
 
@@ -131,6 +135,7 @@ export default function LoginPage() {
           otpauthUri: null,
           secret: null,
           emailHint: null,
+          phoneHint: null,
         });
         return;
       }
@@ -201,7 +206,7 @@ export default function LoginPage() {
           setEnrollCode("");
           setEnroll({
             email: mfa.email, password: mfa.password, allowedKinds: fresh.allowedKinds,
-            kind: null, factorId: null, otpauthUri: null, secret: null, emailHint: null,
+            kind: null, factorId: null, otpauthUri: null, secret: null, emailHint: null, phoneHint: null,
           });
           return;
         }
@@ -232,6 +237,11 @@ export default function LoginPage() {
           { method: "POST", body: {} },
         );
         setEnroll({ ...enroll, kind, factorId: res.factorId, otpauthUri: null, secret: null, emailHint: res.emailHint });
+      } else if (kind === "SMS_OTP") {
+        // No API call yet: the destination phone must be typed first (the
+        // dedicated phone form below submits it via submitSmsPhone).
+        setEnrollPhone("");
+        setEnroll({ ...enroll, kind, factorId: null, otpauthUri: null, secret: null, emailHint: null, phoneHint: null });
       } else {
         // WEBAUTHN: the whole ceremony happens here; on success go straight to re-login.
         const opt = await apiFetch<{ factorId: string; options: Parameters<typeof startRegistration>[0]["optionsJSON"] }>(
@@ -252,6 +262,25 @@ export default function LoginPage() {
     }
   }
 
+  /** SMS_OTP step 1: submit the destination phone — the server texts the code. */
+  const submitSmsPhone = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!enroll || enroll.kind !== "SMS_OTP") return;
+    setFormError(null);
+    setEnrollBusy(true);
+    try {
+      const res = await apiFetch<{ factorId: string; phoneHint: string }>(
+        "/v1/auth/mfa/sms-otp/enroll",
+        { method: "POST", body: { phoneNumber: enrollPhone.trim() } },
+      );
+      setEnroll({ ...enroll, factorId: res.factorId, phoneHint: res.phoneHint });
+    } catch (err) {
+      handleEnrollError(err);
+    } finally {
+      setEnrollBusy(false);
+    }
+  };
+
   const onVerifyEnroll = async (e: FormEvent) => {
     e.preventDefault();
     if (!enroll || !enroll.kind || !enroll.factorId) return;
@@ -259,7 +288,11 @@ export default function LoginPage() {
     setEnrollBusy(true);
     try {
       const url =
-        enroll.kind === "TOTP" ? "/v1/auth/mfa/verify-setup" : "/v1/auth/mfa/email-otp/verify-setup";
+        enroll.kind === "TOTP"
+          ? "/v1/auth/mfa/verify-setup"
+          : enroll.kind === "SMS_OTP"
+            ? "/v1/auth/mfa/sms-otp/verify-setup"
+            : "/v1/auth/mfa/email-otp/verify-setup";
       await apiFetch(url, { method: "POST", body: { factorId: enroll.factorId, code: enrollCode } });
       await reloginAfterEnroll();
     } catch (err) {
@@ -294,7 +327,7 @@ export default function LoginPage() {
     setEnrollCode("");
     setEnroll({
       email: enroll.email, password: enroll.password, allowedKinds: res.allowedKinds,
-      kind: null, factorId: null, otpauthUri: null, secret: null, emailHint: null,
+      kind: null, factorId: null, otpauthUri: null, secret: null, emailHint: null, phoneHint: null,
     });
     setFormError(t("auth.login.enroll.errors.generic"));
   }
@@ -318,7 +351,7 @@ export default function LoginPage() {
   const busy = isSubmitting || login.isPending || enrollBusy || passkeyBusy;
   const showPasskeyLogin = mfa !== null && passkeySupported && mfa.availableKinds.includes("WEBAUTHN");
   const enrollKinds: EnrollKind[] = enroll
-    ? (["TOTP", "EMAIL_OTP", "WEBAUTHN"] as const).filter(
+    ? (["TOTP", "EMAIL_OTP", "WEBAUTHN", "SMS_OTP"] as const).filter(
         (k) => enroll.allowedKinds.includes(k) && (k !== "WEBAUTHN" || passkeySupported),
       )
     : [];
@@ -390,10 +423,68 @@ export default function LoginPage() {
                       {t("auth.login.enroll.methodPasskey")}
                     </Button>
                   )}
+                  {enrollKinds.includes("SMS_OTP") && (
+                    <Button
+                      type="button"
+                      data-testid="login-enroll-sms"
+                      variant="outline"
+                      disabled={busy}
+                      className="w-full"
+                      onClick={() => void startEnroll("SMS_OTP")}
+                    >
+                      {t("auth.login.enroll.methodSms")}
+                    </Button>
+                  )}
                 </div>
               )}
 
-              {(enroll.kind === "TOTP" || enroll.kind === "EMAIL_OTP") && (
+              {enroll.kind === "SMS_OTP" && !enroll.factorId && (
+                <form
+                  data-testid="login-enroll-sms-phone-form"
+                  onSubmit={(e) => {
+                    void submitSmsPhone(e);
+                  }}
+                  className="space-y-4"
+                  noValidate
+                >
+                  <div>
+                    <label htmlFor="enrollPhone" className="block text-sm font-medium mb-1">
+                      {t("auth.login.enroll.smsPhoneLabel")}
+                    </label>
+                    <Input
+                      id="enrollPhone"
+                      type="tel"
+                      autoComplete="tel"
+                      autoFocus
+                      data-testid="login-enroll-sms-phone"
+                      placeholder="+393331234567"
+                      value={enrollPhone}
+                      onChange={(e) => setEnrollPhone(e.target.value.replace(/[^\d+]/g, ""))}
+                    />
+                  </div>
+                  {formError && (
+                    <div
+                      role="alert"
+                      data-testid="login-error"
+                      className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"
+                    >
+                      {formError}
+                    </div>
+                  )}
+                  <Button
+                    type="submit"
+                    data-testid="login-enroll-sms-send"
+                    disabled={busy || !/^\+[1-9]\d{6,14}$/.test(enrollPhone)}
+                    className="w-full"
+                  >
+                    {enrollBusy ? t("auth.login.enroll.smsSending") : t("auth.login.enroll.smsSend")}
+                  </Button>
+                </form>
+              )}
+
+              {(enroll.kind === "TOTP" ||
+                enroll.kind === "EMAIL_OTP" ||
+                (enroll.kind === "SMS_OTP" && enroll.factorId !== null)) && (
                 <form
                   data-testid="login-enroll-form"
                   onSubmit={(e) => {
@@ -419,6 +510,11 @@ export default function LoginPage() {
                   {enroll.kind === "EMAIL_OTP" && (
                     <p className="text-sm">
                       {t("auth.login.enroll.emailSent", { hint: enroll.emailHint ?? "" })}
+                    </p>
+                  )}
+                  {enroll.kind === "SMS_OTP" && (
+                    <p className="text-sm">
+                      {t("auth.login.enroll.smsSent", { hint: enroll.phoneHint ?? "" })}
                     </p>
                   )}
                   <div>

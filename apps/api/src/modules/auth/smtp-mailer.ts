@@ -45,15 +45,20 @@ export class SmtpMailer implements IMailer {
   async sendMfaOtpEmail(
     toEmail: string,
     code: string,
-    purpose: "ENROLL" | "LOGIN",
+    purpose: "ENROLL" | "LOGIN" | "CONFIRM_ENROLL",
   ): Promise<void> {
-    const isEnroll = purpose === "ENROLL";
-    const subject = isEnroll
-      ? `${APP_NAME} — Codice di verifica email`
-      : `${APP_NAME} — Codice di accesso`;
-    const intro = isEnroll
-      ? "Conferma il tuo indirizzo email inserendo questo codice di verifica:"
-      : "Usa questo codice per completare l'accesso:";
+    const subject =
+      purpose === "ENROLL"
+        ? `${APP_NAME} — Codice di verifica email`
+        : purpose === "CONFIRM_ENROLL"
+          ? `${APP_NAME} — Conferma il nuovo metodo di verifica`
+          : `${APP_NAME} — Codice di accesso`;
+    const intro =
+      purpose === "ENROLL"
+        ? "Conferma il tuo indirizzo email inserendo questo codice di verifica:"
+        : purpose === "CONFIRM_ENROLL"
+          ? "Stai attivando un nuovo metodo di verifica in due passaggi. Conferma con questo codice:"
+          : "Usa questo codice per completare l'accesso:";
     await this.transporter.sendMail({
       from: this.from,
       to: toEmail,
@@ -63,6 +68,20 @@ export class SmtpMailer implements IMailer {
         `<p>${intro}</p>` +
         `<p style="font-size:24px;font-weight:bold;letter-spacing:3px">${code}</p>` +
         `<p style="color:#888">Il codice scade tra 10 minuti. Se non sei stato tu, ignora questa email.</p>`,
+    });
+  }
+
+  async sendMfaFactorEnrolledNotice(toEmail: string, kind: string): Promise<void> {
+    await this.transporter.sendMail({
+      from: this.from,
+      to: toEmail,
+      subject: `${APP_NAME} — Nuovo metodo di verifica aggiunto al tuo account`,
+      text:
+        `Un nuovo metodo di verifica in due passaggi (${kind}) è stato aggiunto al tuo account.\n\n` +
+        `Se non sei stato tu, contatta subito il tuo amministratore e reimposta la password.`,
+      html:
+        `<p>Un nuovo metodo di verifica in due passaggi (<b>${kind}</b>) è stato aggiunto al tuo account.</p>` +
+        `<p style="color:#888">Se non sei stato tu, contatta subito il tuo amministratore e reimposta la password.</p>`,
     });
   }
 }

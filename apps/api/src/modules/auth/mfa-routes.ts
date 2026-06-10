@@ -36,6 +36,10 @@ import {
   VerifySmsOtpSetupResponseSchema,
   ResendSmsOtpBodySchema,
   ResendSmsOtpResponseSchema,
+  ConfirmEnrollBodySchema,
+  ConfirmEnrollResponseSchema,
+  ResendEnrollConfirmBodySchema,
+  ResendEnrollConfirmResponseSchema,
   GenerateRecoveryCodesResponseSchema,
   RecoveryCodesCountResponseSchema,
   WebauthnRegistrationOptionsResponseSchema,
@@ -281,6 +285,53 @@ export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, op
         throw new UnauthorizedError("challengeToken required for login resend", "MFA_OTP_INVALID");
       }
       return service.resendEmailOtpLogin({ challengeToken: req.body.challengeToken });
+    },
+  );
+
+  /* === TOFU v2: out-of-band enroll confirmation (MVP-4 §2.5) ========= */
+  /* When the enroll-confirm mode is ON, the FIRST self-owned factor
+   * (TOTP/WEBAUTHN/SMS_OTP) stays unverified after its possession proof and an
+   * email code must be submitted here. Reachable from the restricted `enr`
+   * session (prefix allowlist /v1/auth/mfa/). */
+
+  /* --- POST /enroll-confirm ------------------------------------------ */
+  app.post(
+    "/enroll-confirm",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: {
+        body: ConfirmEnrollBodySchema,
+        response: { 200: ConfirmEnrollResponseSchema },
+      },
+      config: { rateLimit: { max: 30, timeWindow: 60 * 60 * 1000 } },
+    },
+    async (req) => {
+      if (!req.user) throw new UnauthorizedError("Authentication required");
+      return service.confirmEnroll({
+        userId: req.user.userId,
+        factorId: req.body.factorId,
+        code: req.body.code,
+      });
+    },
+  );
+
+  /* --- POST /enroll-confirm/resend ----------------------------------- */
+  app.post(
+    "/enroll-confirm/resend",
+    {
+      preHandler: [app.verifyCsrf],
+      schema: {
+        body: ResendEnrollConfirmBodySchema,
+        response: { 200: ResendEnrollConfirmResponseSchema },
+      },
+      config: { rateLimit: { max: 10, timeWindow: 60 * 60 * 1000 } },
+    },
+    async (req) => {
+      if (!req.user) throw new UnauthorizedError("Authentication required");
+      return service.beginEnrollConfirm({
+        userId: req.user.userId,
+        factorId: req.body.factorId,
+      });
     },
   );
 

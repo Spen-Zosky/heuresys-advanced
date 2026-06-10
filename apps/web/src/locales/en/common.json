@@ -82,7 +82,8 @@
         "smsPhoneLabel": "Phone number (+39... format)",
         "smsSend": "Send code",
         "smsSending": "Sending…",
-        "smsSent": "We sent you a code via SMS to {{hint}}."
+        "smsSent": "We sent you a code via SMS to {{hint}}.",
+        "confirmSent": "For security we sent a confirmation code via email to {{hint}}. Enter it to complete activation."
       }
     },
     "logout": {

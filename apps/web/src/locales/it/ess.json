@@ -323,7 +323,11 @@
     "smsResending": "Reinvio…",
     "smsResent": "Codice reinviato",
     "smsVerifiedActive": "Fattore SMS verificato e attivo",
-    "smsNotConfigured": "L'invio SMS non è disponibile: nessun provider configurato. Contatta l'amministratore."
+    "smsNotConfigured": "L'invio SMS non è disponibile: nessun provider configurato. Contatta l'amministratore.",
+    "confirmCardTitle": "Conferma il nuovo metodo di verifica",
+    "confirmInstruction": "Per sicurezza ti abbiamo inviato un codice di conferma via email a {{email}}. Inseriscilo per attivare il nuovo metodo.",
+    "confirmCodeLabel": "Codice di conferma ricevuto via email",
+    "confirmVerifiedActive": "Metodo di verifica confermato e attivo"
   },
   "skills": {
     "title": "Le mie skill",

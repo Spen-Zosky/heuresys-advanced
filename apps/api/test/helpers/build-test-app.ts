@@ -34,7 +34,15 @@ export async function buildTestApp(options: TestAppOptions = {}): Promise<TestAp
   }
   const mailer = new InMemoryMailer();
   const sms = options.smsSender ?? new InMemorySms();
-  const app = await buildApp({ authMailer: mailer, ...options, smsSender: sms });
+  const app = await buildApp({
+    authMailer: mailer,
+    // TOFU v2 confirm defaults OFF in tests (the InMemoryMailer counts as a
+    // "real" mailer, so "auto" would flip it ON and change every pre-v2 suite);
+    // the dedicated enroll-confirm suite opts in with { enrollConfirm: "on" }.
+    enrollConfirm: "off",
+    ...options,
+    smsSender: sms,
+  });
   await app.ready();
   return { app, mailer, sms };
 }

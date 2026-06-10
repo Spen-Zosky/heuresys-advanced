@@ -49,11 +49,56 @@ export const VerifyMfaSetupBodySchema = z.object({
 });
 export type VerifyMfaSetupBody = z.infer<typeof VerifyMfaSetupBodySchema>;
 
-export const VerifyMfaSetupResponseSchema = z.object({
+/* --- TOFU v2: out-of-band enroll confirmation ------------------------- */
+/**
+ * Returned by verify-setup (TOTP/SMS) and webauthn registration verify when
+ * the enroll-confirm mode is ON and this is the user's FIRST factor: the factor
+ * is NOT yet verified — a confirmation code was emailed out-of-band and must be
+ * submitted to POST /v1/auth/mfa/enroll-confirm to activate it.
+ */
+export const EnrollConfirmRequiredSchema = z.object({
+  factorId: z.uuid(),
+  kind: MfaKindSchema,
+  verified: z.literal(false),
+  confirmRequired: z.literal(true),
+  /** Masked email destination of the confirmation code. */
+  emailHint: z.string().min(3),
+  expiresInSeconds: z.number().int().positive(),
+});
+export type EnrollConfirmRequired = z.infer<typeof EnrollConfirmRequiredSchema>;
+
+export const ConfirmEnrollBodySchema = z.object({
+  factorId: z.uuid(),
+  code: z.string().regex(/^\d{6}$/, "Six-digit confirmation code required"),
+});
+export type ConfirmEnrollBody = z.infer<typeof ConfirmEnrollBodySchema>;
+
+export const ConfirmEnrollResponseSchema = z.object({
   factorId: z.uuid(),
   kind: MfaKindSchema,
   verified: z.literal(true),
 });
+export type ConfirmEnrollResponse = z.infer<typeof ConfirmEnrollResponseSchema>;
+
+export const ResendEnrollConfirmBodySchema = z.object({
+  factorId: z.uuid(),
+});
+export type ResendEnrollConfirmBody = z.infer<typeof ResendEnrollConfirmBodySchema>;
+
+export const ResendEnrollConfirmResponseSchema = z.object({
+  emailHint: z.string().min(3),
+  expiresInSeconds: z.number().int().positive(),
+});
+export type ResendEnrollConfirmResponse = z.infer<typeof ResendEnrollConfirmResponseSchema>;
+
+export const VerifyMfaSetupResponseSchema = z.union([
+  z.object({
+    factorId: z.uuid(),
+    kind: MfaKindSchema,
+    verified: z.literal(true),
+  }),
+  EnrollConfirmRequiredSchema,
+]);
 export type VerifyMfaSetupResponse = z.infer<typeof VerifyMfaSetupResponseSchema>;
 
 /* --- List factors ---------------------------------------------------- */
@@ -206,11 +251,14 @@ export const VerifySmsOtpSetupBodySchema = z.object({
 });
 export type VerifySmsOtpSetupBody = z.infer<typeof VerifySmsOtpSetupBodySchema>;
 
-export const VerifySmsOtpSetupResponseSchema = z.object({
-  factorId: z.uuid(),
-  kind: z.literal("SMS_OTP"),
-  verified: z.literal(true),
-});
+export const VerifySmsOtpSetupResponseSchema = z.union([
+  z.object({
+    factorId: z.uuid(),
+    kind: z.literal("SMS_OTP"),
+    verified: z.literal(true),
+  }),
+  EnrollConfirmRequiredSchema,
+]);
 export type VerifySmsOtpSetupResponse = z.infer<typeof VerifySmsOtpSetupResponseSchema>;
 
 /** Resend contracts mirror EMAIL_OTP (challengeToken for login, factorId for enroll). */
@@ -274,12 +322,15 @@ export type WebauthnRegistrationVerifyBody = z.infer<
   typeof WebauthnRegistrationVerifyBodySchema
 >;
 
-export const WebauthnRegistrationVerifyResponseSchema = z.object({
-  factorId: z.uuid(),
-  kind: z.literal("WEBAUTHN"),
-  verified: z.literal(true),
-  deviceLabel: z.string(),
-});
+export const WebauthnRegistrationVerifyResponseSchema = z.union([
+  z.object({
+    factorId: z.uuid(),
+    kind: z.literal("WEBAUTHN"),
+    verified: z.literal(true),
+    deviceLabel: z.string(),
+  }),
+  EnrollConfirmRequiredSchema,
+]);
 export type WebauthnRegistrationVerifyResponse = z.infer<
   typeof WebauthnRegistrationVerifyResponseSchema
 >;

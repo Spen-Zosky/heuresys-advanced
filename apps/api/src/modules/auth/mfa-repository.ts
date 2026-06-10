@@ -150,7 +150,7 @@ export async function deleteMfaFactor(
  * never plaintext. expires_at + attempt_count + consumed_at enforce the
  * TTL / lockout / single-use security invariants. */
 
-export type MfaOtpPurpose = "ENROLL" | "LOGIN";
+export type MfaOtpPurpose = "ENROLL" | "LOGIN" | "CONFIRM_ENROLL";
 
 export interface MfaOtpChallengeRow {
   otpId: string;

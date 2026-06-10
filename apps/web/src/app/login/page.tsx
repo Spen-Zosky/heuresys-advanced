@@ -48,6 +48,9 @@ interface EnrollState {
   emailHint: string | null;
   /** SMS_OTP: masked destination of the texted code (null until the phone is submitted). */
   phoneHint: string | null;
+  /** TOFU v2: the factor passed its possession proof but awaits the
+      out-of-band email confirmation code (emailHint carries the destination). */
+  confirmPending: boolean;
 }
 
 export default function LoginPage() {
@@ -136,6 +139,7 @@ export default function LoginPage() {
           secret: null,
           emailHint: null,
           phoneHint: null,
+          confirmPending: false,
         });
         return;
       }
@@ -206,7 +210,7 @@ export default function LoginPage() {
           setEnrollCode("");
           setEnroll({
             email: mfa.email, password: mfa.password, allowedKinds: fresh.allowedKinds,
-            kind: null, factorId: null, otpauthUri: null, secret: null, emailHint: null, phoneHint: null,
+            kind: null, factorId: null, otpauthUri: null, secret: null, emailHint: null, phoneHint: null, confirmPending: false,
           });
           return;
         }
@@ -243,16 +247,28 @@ export default function LoginPage() {
         setEnrollPhone("");
         setEnroll({ ...enroll, kind, factorId: null, otpauthUri: null, secret: null, emailHint: null, phoneHint: null });
       } else {
-        // WEBAUTHN: the whole ceremony happens here; on success go straight to re-login.
+        // WEBAUTHN: the whole ceremony happens here; on success go straight to
+        // re-login — unless TOFU v2 asks for the out-of-band email confirm.
         const opt = await apiFetch<{ factorId: string; options: Parameters<typeof startRegistration>[0]["optionsJSON"] }>(
           "/v1/auth/mfa/webauthn/registration/options",
           { method: "POST", body: {} },
         );
         const attResp = await startRegistration({ optionsJSON: opt.options });
-        await apiFetch("/v1/auth/mfa/webauthn/registration/verify", {
-          method: "POST",
-          body: { factorId: opt.factorId, response: attResp, deviceLabel: "Passkey" },
-        });
+        const res = await apiFetch<{ verified: boolean; confirmRequired?: boolean; emailHint?: string }>(
+          "/v1/auth/mfa/webauthn/registration/verify",
+          {
+            method: "POST",
+            body: { factorId: opt.factorId, response: attResp, deviceLabel: "Passkey" },
+          },
+        );
+        if (res.confirmRequired) {
+          setEnrollCode("");
+          setEnroll({
+            ...enroll, kind, factorId: opt.factorId, otpauthUri: null, secret: null,
+            emailHint: res.emailHint ?? null, phoneHint: null, confirmPending: true,
+          });
+          return;
+        }
         await reloginAfterEnroll();
       }
     } catch (err) {
@@ -287,13 +303,24 @@ export default function LoginPage() {
     setFormError(null);
     setEnrollBusy(true);
     try {
-      const url =
-        enroll.kind === "TOTP"
+      const url = enroll.confirmPending
+        ? "/v1/auth/mfa/enroll-confirm"
+        : enroll.kind === "TOTP"
           ? "/v1/auth/mfa/verify-setup"
           : enroll.kind === "SMS_OTP"
             ? "/v1/auth/mfa/sms-otp/verify-setup"
             : "/v1/auth/mfa/email-otp/verify-setup";
-      await apiFetch(url, { method: "POST", body: { factorId: enroll.factorId, code: enrollCode } });
+      const res = await apiFetch<{ verified: boolean; confirmRequired?: boolean; emailHint?: string }>(
+        url,
+        { method: "POST", body: { factorId: enroll.factorId, code: enrollCode } },
+      );
+      // TOFU v2: possession proof accepted but the factor awaits the
+      // out-of-band email confirmation — swap the form to the confirm step.
+      if (!enroll.confirmPending && res.confirmRequired) {
+        setEnrollCode("");
+        setEnroll({ ...enroll, confirmPending: true, emailHint: res.emailHint ?? null });
+        return;
+      }
       await reloginAfterEnroll();
     } catch (err) {
       handleEnrollError(err);
@@ -327,7 +354,7 @@ export default function LoginPage() {
     setEnrollCode("");
     setEnroll({
       email: enroll.email, password: enroll.password, allowedKinds: res.allowedKinds,
-      kind: null, factorId: null, otpauthUri: null, secret: null, emailHint: null, phoneHint: null,
+      kind: null, factorId: null, otpauthUri: null, secret: null, emailHint: null, phoneHint: null, confirmPending: false,
     });
     setFormError(t("auth.login.enroll.errors.generic"));
   }
@@ -484,7 +511,8 @@ export default function LoginPage() {
 
               {(enroll.kind === "TOTP" ||
                 enroll.kind === "EMAIL_OTP" ||
-                (enroll.kind === "SMS_OTP" && enroll.factorId !== null)) && (
+                (enroll.kind === "SMS_OTP" && enroll.factorId !== null) ||
+                (enroll.kind === "WEBAUTHN" && enroll.confirmPending)) && (
                 <form
                   data-testid="login-enroll-form"
                   onSubmit={(e) => {
@@ -493,7 +521,12 @@ export default function LoginPage() {
                   className="space-y-4"
                   noValidate
                 >
-                  {enroll.kind === "TOTP" && enroll.otpauthUri && (
+                  {enroll.confirmPending && (
+                    <p className="text-sm" data-testid="login-enroll-confirm-hint">
+                      {t("auth.login.enroll.confirmSent", { hint: enroll.emailHint ?? "" })}
+                    </p>
+                  )}
+                  {!enroll.confirmPending && enroll.kind === "TOTP" && enroll.otpauthUri && (
                     <div className="space-y-2">
                       <p className="text-sm">{t("auth.login.enroll.totpInstructions")}</p>
                       <div className="flex justify-center rounded bg-white p-3">
@@ -507,12 +540,12 @@ export default function LoginPage() {
                       )}
                     </div>
                   )}
-                  {enroll.kind === "EMAIL_OTP" && (
+                  {!enroll.confirmPending && enroll.kind === "EMAIL_OTP" && (
                     <p className="text-sm">
                       {t("auth.login.enroll.emailSent", { hint: enroll.emailHint ?? "" })}
                     </p>
                   )}
-                  {enroll.kind === "SMS_OTP" && (
+                  {!enroll.confirmPending && enroll.kind === "SMS_OTP" && (
                     <p className="text-sm">
                       {t("auth.login.enroll.smsSent", { hint: enroll.phoneHint ?? "" })}
                     </p>

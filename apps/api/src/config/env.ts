@@ -120,6 +120,13 @@ const EnvSchema = z.object({
   SMTP_PASSWORD: z.string().optional(),
   MAIL_FROM: z.string().optional(),
 
+  // TOFU v2 (MVP-4 §2.5): out-of-band email confirmation on the FIRST MFA
+  // factor enrollment for self-owned kinds (TOTP/WEBAUTHN/SMS_OTP). "auto"
+  // (default) = ON only when a real mailer is configured (SMTP_HOST+MAIL_FROM);
+  // ConsoleMailer environments keep the pre-v2 behaviour (a blocking confirm
+  // whose code only lands in server logs would lock real users out).
+  MFA_ENROLL_CONFIRM: z.enum(["auto", "on", "off"]).default("auto"),
+
   // SMS provider (SMS_OTP MFA factor — code-only slice). OPTIONAL: no real
   // provider is implemented yet; makeSmsSender always returns ConsoleSms (not
   // production-capable -> SMS_OTP enrollment disabled). When a provider lands

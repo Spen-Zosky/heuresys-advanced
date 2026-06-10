@@ -29,6 +29,9 @@ import {
   type EnrollSmsOtpResponse,
   type VerifySmsOtpSetupResponse,
   type ResendSmsOtpResponse,
+  type ConfirmEnrollResponse,
+  type ResendEnrollConfirmResponse,
+  type WebauthnRegistrationVerifyResponse,
   type ActiveSession,
   type ListActiveSessionsResponse,
   type CurrentSessionResponse,
@@ -57,6 +60,9 @@ export default function MeSecurityPage() {
   const [smsPrompt, setSmsPrompt] = useState(false);
   const [smsPhone, setSmsPhone] = useState("");
   const [pendingSmsOtp, setPendingSmsOtp] = useState<EnrollSmsOtpResponse | null>(null);
+  // TOFU v2: factor passed its possession proof but awaits the out-of-band
+  // email confirmation (first self-owned factor, confirm mode ON server-side).
+  const [pendingConfirm, setPendingConfirm] = useState<{ factorId: string; emailHint: string } | null>(null);
 
   const factors = useQuery({
     queryKey: ["me", "mfa", "factors"],
@@ -88,9 +94,15 @@ export default function MeSecurityPage() {
         method: "POST",
         body,
       }),
-    onSuccess: () => {
+    onSuccess: (data) => {
       void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
       setPendingFactor(null);
+      if (!data.verified) {
+        // TOFU v2: out-of-band email confirmation required before activation.
+        setPendingConfirm({ factorId: data.factorId, emailHint: data.emailHint });
+        setFeedback(null);
+        return;
+      }
       setFeedback({ kind: "ok", msg: t("security.verifiedActive") });
     },
     onError: (err) => {
@@ -208,15 +220,57 @@ export default function MeSecurityPage() {
         method: "POST",
         body,
       }),
-    onSuccess: () => {
+    onSuccess: (data) => {
       void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
       setPendingSmsOtp(null);
+      if (!data.verified) {
+        setPendingConfirm({ factorId: data.factorId, emailHint: data.emailHint });
+        setFeedback(null);
+        return;
+      }
       setFeedback({ kind: "ok", msg: t("security.smsVerifiedActive") });
     },
     onError: (err) => {
       setFeedback({
         kind: "err",
         msg: err instanceof Error ? err.message : t("security.errorInvalidCode"),
+      });
+    },
+  });
+
+  // --- TOFU v2: out-of-band enroll confirmation ---
+  const confirmEnroll = useMutation({
+    mutationFn: (body: { factorId: string; code: string }) =>
+      apiFetch<ConfirmEnrollResponse>("/v1/auth/mfa/enroll-confirm", {
+        method: "POST",
+        body,
+      }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
+      setPendingConfirm(null);
+      setFeedback({ kind: "ok", msg: t("security.confirmVerifiedActive") });
+    },
+    onError: (err) => {
+      setFeedback({
+        kind: "err",
+        msg: err instanceof Error ? err.message : t("security.errorInvalidCode"),
+      });
+    },
+  });
+
+  const resendConfirm = useMutation({
+    mutationFn: (factorId: string) =>
+      apiFetch<ResendEnrollConfirmResponse>("/v1/auth/mfa/enroll-confirm/resend", {
+        method: "POST",
+        body: { factorId },
+      }),
+    onSuccess: () => {
+      setFeedback({ kind: "ok", msg: t("security.emailResent") });
+    },
+    onError: (err) => {
+      setFeedback({
+        kind: "err",
+        msg: err instanceof Error ? err.message : t("security.errorResend"),
       });
     },
   });
@@ -279,13 +333,22 @@ export default function MeSecurityPage() {
         { method: "POST", body: {} },
       );
       const attResp = await startRegistration({ optionsJSON: opt.options });
-      return apiFetch("/v1/auth/mfa/webauthn/registration/verify", {
-        method: "POST",
-        body: { factorId: opt.factorId, response: attResp, deviceLabel: "Passkey" },
-      });
+      return apiFetch<WebauthnRegistrationVerifyResponse>(
+        "/v1/auth/mfa/webauthn/registration/verify",
+        {
+          method: "POST",
+          body: { factorId: opt.factorId, response: attResp, deviceLabel: "Passkey" },
+        },
+      );
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
+      if (!data.verified) {
+        // TOFU v2: passkey registered but pending the out-of-band email confirm.
+        setPendingConfirm({ factorId: data.factorId, emailHint: data.emailHint });
+        setFeedback(null);
+        return;
+      }
       setFeedback({ kind: "ok", msg: t("security.passkeyEnrolled") });
     },
     onError: (err) => setFeedback({ kind: "err", msg: err instanceof Error ? err.message : t("security.errorPasskey") }),
@@ -320,6 +383,16 @@ export default function MeSecurityPage() {
   const onVerifySms = smsForm.handleSubmit((values) => {
     if (!pendingSmsOtp) return;
     verifySms.mutate({ factorId: pendingSmsOtp.factorId, code: values.code });
+  });
+
+  const confirmForm = useForm<VerifyCodeFormValues>({
+    resolver: zodResolver(verifyCodeSchema),
+    defaultValues: { code: "" },
+  });
+
+  const onConfirmEnroll = confirmForm.handleSubmit((values) => {
+    if (!pendingConfirm) return;
+    confirmEnroll.mutate({ factorId: pendingConfirm.factorId, code: values.code });
   });
 
   return (
@@ -541,6 +614,70 @@ export default function MeSecurityPage() {
                   onClick={() => {
                     setPendingEmailOtp(null);
                     emailForm.reset();
+                  }}
+                >
+                  {t("security.cancel")}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      ) : pendingConfirm ? (
+        <Card data-testid="me-security-confirm-card">
+          <CardHeader>
+            <CardTitle>{t("security.confirmCardTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm" data-testid="me-security-confirm-hint">
+              {t("security.confirmInstruction", { email: pendingConfirm.emailHint })}
+            </p>
+
+            <form
+              onSubmit={onConfirmEnroll}
+              className="space-y-3"
+              data-testid="me-security-confirm-form"
+            >
+              <label className="block text-sm">
+                <span>{t("security.confirmCodeLabel")}</span>
+                <Input
+                  {...confirmForm.register("code")}
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder={t("security.totpCodePlaceholder")}
+                  data-testid="me-security-confirm-code"
+                  autoComplete="one-time-code"
+                  className="mt-1"
+                />
+                {confirmForm.formState.errors.code ? (
+                  <span className="text-xs text-danger">
+                    {confirmForm.formState.errors.code.message}
+                  </span>
+                ) : null}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="submit"
+                  data-testid="me-security-confirm-submit"
+                  disabled={confirmEnroll.isPending}
+                >
+                  {confirmEnroll.isPending ? t("security.verifying") : t("security.verifySubmit")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  data-testid="me-security-confirm-resend"
+                  disabled={resendConfirm.isPending}
+                  onClick={() => resendConfirm.mutate(pendingConfirm.factorId)}
+                >
+                  {resendConfirm.isPending ? t("security.emailResending") : t("security.emailResend")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  data-testid="me-security-confirm-cancel"
+                  onClick={() => {
+                    setPendingConfirm(null);
+                    confirmForm.reset();
                   }}
                 >
                   {t("security.cancel")}

@@ -18,6 +18,8 @@
 import { randomBytes, randomInt, randomUUID, timingSafeEqual } from "node:crypto";
 import * as OTPAuth from "otpauth";
 import { pool } from "../../db/client.js";
+import { env } from "../../config/env.js";
+import { insertLoginEvent } from "./repository.js";
 import {
   NotFoundError,
   TooManyRequestsError,
@@ -192,6 +194,21 @@ function smsFactorPhone(factor: { metadata: Record<string, unknown> }): string |
 
 /* --- Service surface ----------------------------------------------- */
 
+/**
+ * Outcome of a setup verification: verified immediately, or (TOFU v2, first
+ * self-owned factor with confirm ON) pending an out-of-band email confirmation.
+ */
+export type VerifySetupOutcome<K extends mfaRepo.MfaKind> =
+  | { factorId: string; kind: K; verified: true }
+  | {
+      factorId: string;
+      kind: K;
+      verified: false;
+      confirmRequired: true;
+      emailHint: string;
+      expiresInSeconds: number;
+    };
+
 export interface MfaService {
   enrollTotp(input: { userId: string; userEmail: string }): Promise<{
     factorId: string;
@@ -200,11 +217,9 @@ export interface MfaService {
     secret: string;
     verified: false;
   }>;
-  verifyTotpSetup(input: { userId: string; factorId: string; code: string }): Promise<{
-    factorId: string;
-    kind: "TOTP";
-    verified: true;
-  }>;
+  verifyTotpSetup(input: { userId: string; factorId: string; code: string }): Promise<
+    VerifySetupOutcome<"TOTP">
+  >;
   listFactors(userId: string): Promise<Array<{
     factorId: string;
     kind: mfaRepo.MfaKind;
@@ -247,11 +262,9 @@ export interface MfaService {
     verified: false;
   }>;
   /** Confirm SMS_OTP enrollment with the texted code. */
-  verifySmsOtpSetup(input: { userId: string; factorId: string; code: string }): Promise<{
-    factorId: string;
-    kind: "SMS_OTP";
-    verified: true;
-  }>;
+  verifySmsOtpSetup(input: { userId: string; factorId: string; code: string }): Promise<
+    VerifySetupOutcome<"SMS_OTP">
+  >;
   /** Re-issue a fresh SMS enrollment code (rate-limited cooldown). */
   resendSmsOtpEnroll(input: { userId: string; factorId: string }): Promise<{
     expiresInSeconds: number;
@@ -264,6 +277,22 @@ export interface MfaService {
    * (codes that land only in server logs would lock real users out).
    */
   enrollableKinds(): mfaRepo.MfaKind[];
+  /* --- TOFU v2: out-of-band enroll confirmation ---------------------- */
+  /** True when verifying `kind` for `userId` must go through the email confirm. */
+  enrollConfirmRequired(userId: string, kind: mfaRepo.MfaKind): Promise<boolean>;
+  /** Issue (or re-issue) the CONFIRM_ENROLL code for a pending factor. */
+  beginEnrollConfirm(input: { userId: string; factorId: string }): Promise<{
+    emailHint: string;
+    expiresInSeconds: number;
+  }>;
+  /** Submit the emailed confirmation code: flips the pending factor to verified. */
+  confirmEnroll(input: { userId: string; factorId: string; code: string }): Promise<{
+    factorId: string;
+    kind: mfaRepo.MfaKind;
+    verified: true;
+  }>;
+  /** Notification + audit for a factor that just became verified (best-effort mail). */
+  recordFactorEnrolled(userId: string, kind: mfaRepo.MfaKind): Promise<void>;
   /** Returns null if the user has no verified factors (MFA not required). */
   beginLoginChallenge(userId: string): Promise<{
     challengeToken: string;
@@ -316,12 +345,24 @@ function defaultSmsSender(): ISmsSender {
   return new ConsoleSms(consoleLog);
 }
 
+/** Self-owned kinds: the enrolling party controls the channel, so the first
+ *  enrollment needs an out-of-band confirm (TOFU v2). EMAIL_OTP is already
+ *  out-of-band by design (the code travels to the account email). */
+const CONFIRM_KINDS: ReadonlySet<mfaRepo.MfaKind> = new Set(["TOTP", "WEBAUTHN", "SMS_OTP"]);
+
 export interface MfaServiceOptions {
   challengeStore?: MfaChallengeStore;
   /** Mailer used to deliver EMAIL_OTP codes. */
   mailer?: IMailer;
   /** Sender used to deliver SMS_OTP codes. */
   smsSender?: ISmsSender;
+  /**
+   * TOFU v2 out-of-band enroll confirmation mode. Defaults to env
+   * MFA_ENROLL_CONFIRM ("auto" = on only with a real, non-Console mailer).
+   * buildTestApp pins "off" so the pre-v2 suites keep their behaviour; the
+   * dedicated confirm suite passes "on".
+   */
+  enrollConfirm?: "auto" | "on" | "off";
   /** Overridable clock for tests. */
   now?: () => number;
 }
@@ -339,6 +380,24 @@ export function createMfaService(
   const mailer = options.mailer ?? defaultMfaMailer();
   const smsSender = options.smsSender ?? defaultSmsSender();
   const nowMs = options.now ?? (() => Date.now());
+  // TOFU v2 confirm mode: "auto" resolves ON only when the mailer can really
+  // deliver out-of-band (a ConsoleMailer-only environment must not block
+  // enrollments on codes that land in server logs).
+  const confirmMode = options.enrollConfirm ?? env.MFA_ENROLL_CONFIRM;
+  const enrollConfirmOn =
+    confirmMode === "on" || (confirmMode === "auto" && !(mailer instanceof ConsoleMailer));
+
+  /** Resolve the user's email + tenant (notification + audit destinations). */
+  async function getUserContact(
+    userId: string,
+  ): Promise<{ email: string; tenantId: string | null } | null> {
+    const u = await pool.query<{ user_email: string; user_tenant_id: string | null }>(
+      `SELECT user_email, user_tenant_id FROM sys.sys_users WHERE user_id = $1`,
+      [userId],
+    );
+    const row = u.rows[0];
+    return row ? { email: row.user_email, tenantId: row.user_tenant_id } : null;
+  }
 
   /**
    * Channel-agnostic OTP issuance core: enforce the resend cooldown, generate
@@ -403,8 +462,60 @@ export function createMfaService(
       userId: args.userId,
       factorId: args.factorId,
       purpose: args.purpose,
-      deliver: (code) => smsSender.sendMfaOtpSms(args.phone, code, args.purpose),
+      // SMS OTP purposes never include CONFIRM_ENROLL (confirm goes out-of-band
+      // via email); narrow for the SMS sender contract.
+      deliver: (code) =>
+        smsSender.sendMfaOtpSms(args.phone, code, args.purpose as "ENROLL" | "LOGIN"),
     });
+  }
+
+  /* --- TOFU v2 internals ---------------------------------------------- */
+
+  /** True when verifying `kind` for `userId` must pass the out-of-band confirm:
+   *  mode ON + self-owned kind + this would be the user's FIRST verified factor. */
+  async function requiresEnrollConfirm(
+    userId: string,
+    kind: mfaRepo.MfaKind,
+  ): Promise<boolean> {
+    if (!enrollConfirmOn || !CONFIRM_KINDS.has(kind)) return false;
+    const verified = await mfaRepo.listVerifiedMfaFactorsForUser(pool, userId);
+    return verified.length === 0;
+  }
+
+  /** Issue the CONFIRM_ENROLL email code for a pending factor; returns hint + TTL. */
+  async function beginConfirm(
+    userId: string,
+    factorId: string,
+  ): Promise<{ emailHint: string; expiresInSeconds: number }> {
+    const contact = await getUserContact(userId);
+    if (!contact) throw new NotFoundError("User");
+    const expiresInSeconds = await issueEmailOtp({
+      userId,
+      userEmail: contact.email,
+      factorId,
+      purpose: "CONFIRM_ENROLL",
+    });
+    return { emailHint: maskEmail(contact.email), expiresInSeconds };
+  }
+
+  /** Notification email (best-effort) + MFA_FACTOR_ENROLLED audit event. */
+  async function notifyFactorEnrolled(userId: string, kind: mfaRepo.MfaKind): Promise<void> {
+    const contact = await getUserContact(userId);
+    if (!contact) return;
+    await insertLoginEvent(pool, {
+      userId,
+      tenantId: contact.tenantId,
+      type: "MFA_FACTOR_ENROLLED",
+      ip: null,
+      userAgent: null,
+      details: { kind },
+    });
+    try {
+      await mailer.sendMfaFactorEnrolledNotice(contact.email, kind);
+    } catch {
+      // Best-effort by design: the factor IS verified; a mail-backend outage
+      // must not fail the enrollment (the audit event above is the durable record).
+    }
   }
 
   /**
@@ -489,8 +600,21 @@ export function createMfaService(
       if (!verifyTotpCode(factor.secret, code)) {
         throw new UnauthorizedError("Invalid TOTP code", "MFA_TOTP_INVALID");
       }
+      // TOFU v2: first self-owned factor with confirm ON → possession is proven
+      // but the factor stays UNVERIFIED until the out-of-band email confirm.
+      if (await requiresEnrollConfirm(userId, "TOTP")) {
+        const c = await beginConfirm(userId, factorId);
+        return {
+          factorId,
+          kind: "TOTP" as const,
+          verified: false as const,
+          confirmRequired: true as const,
+          ...c,
+        };
+      }
       await mfaRepo.markMfaFactorVerified(pool, factorId);
       await mfaRepo.markMfaFactorUsed(pool, factorId);
+      await notifyFactorEnrolled(userId, "TOTP");
       return { factorId, kind: "TOTP" as const, verified: true as const };
     },
 
@@ -545,8 +669,11 @@ export function createMfaService(
         throw new ValidationError({ kind: factor.kind }, "Factor is not an EMAIL_OTP factor");
       }
       await consumeEmailOtp({ factorId, purpose: "ENROLL", code });
+      // EMAIL_OTP enrollment is already out-of-band (the code travelled to the
+      // account email) → never needs the extra TOFU confirm.
       await mfaRepo.markMfaFactorVerified(pool, factorId);
       await mfaRepo.markMfaFactorUsed(pool, factorId);
+      await notifyFactorEnrolled(userId, "EMAIL_OTP");
       return { factorId, kind: "EMAIL_OTP" as const, verified: true as const };
     },
 
@@ -608,8 +735,21 @@ export function createMfaService(
       }
       // consumeEmailOtp is channel-agnostic (factor+purpose scoped challenge rows).
       await consumeEmailOtp({ factorId, purpose: "ENROLL", code });
+      // TOFU v2: possession of the phone is proven, but the first self-owned
+      // factor still needs the out-of-band EMAIL confirm when the mode is ON.
+      if (await requiresEnrollConfirm(userId, "SMS_OTP")) {
+        const c = await beginConfirm(userId, factorId);
+        return {
+          factorId,
+          kind: "SMS_OTP" as const,
+          verified: false as const,
+          confirmRequired: true as const,
+          ...c,
+        };
+      }
       await mfaRepo.markMfaFactorVerified(pool, factorId);
       await mfaRepo.markMfaFactorUsed(pool, factorId);
+      await notifyFactorEnrolled(userId, "SMS_OTP");
       return { factorId, kind: "SMS_OTP" as const, verified: true as const };
     },
 
@@ -650,6 +790,43 @@ export function createMfaService(
         "WEBAUTHN",
         ...(smsSender.productionCapable ? (["SMS_OTP"] as const) : []),
       ];
+    },
+
+    /* --- TOFU v2: out-of-band enroll confirmation --------------------- */
+    enrollConfirmRequired(userId, kind) {
+      return requiresEnrollConfirm(userId, kind);
+    },
+
+    async beginEnrollConfirm({ userId, factorId }) {
+      const factor = await mfaRepo.findMfaFactorById(pool, factorId);
+      if (!factor || factor.userId !== userId) throw new NotFoundError("MFA factor");
+      if (factor.verified) {
+        throw new ValidationError({ factorId }, "Factor is already verified");
+      }
+      if (!CONFIRM_KINDS.has(factor.kind)) {
+        throw new ValidationError({ kind: factor.kind }, "Factor kind needs no confirmation");
+      }
+      return beginConfirm(userId, factorId);
+    },
+
+    async confirmEnroll({ userId, factorId, code }) {
+      const factor = await mfaRepo.findMfaFactorById(pool, factorId);
+      if (!factor || factor.userId !== userId) throw new NotFoundError("MFA factor");
+      if (factor.verified) {
+        throw new ValidationError({ factorId }, "Factor is already verified");
+      }
+      if (!CONFIRM_KINDS.has(factor.kind)) {
+        throw new ValidationError({ kind: factor.kind }, "Factor kind needs no confirmation");
+      }
+      await consumeEmailOtp({ factorId, purpose: "CONFIRM_ENROLL", code });
+      await mfaRepo.markMfaFactorVerified(pool, factorId);
+      await mfaRepo.markMfaFactorUsed(pool, factorId);
+      await notifyFactorEnrolled(userId, factor.kind);
+      return { factorId, kind: factor.kind, verified: true as const };
+    },
+
+    recordFactorEnrolled(userId, kind) {
+      return notifyFactorEnrolled(userId, kind);
     },
 
     async beginLoginChallenge(userId) {
@@ -829,11 +1006,13 @@ export function buildMfaServiceWithMailer(
   mailer: IMailer,
   challengeStore?: MfaChallengeStore,
   smsSender?: ISmsSender,
+  enrollConfirm?: "auto" | "on" | "off",
 ): MfaService {
   return createMfaService({
     mailer,
     ...(challengeStore ? { challengeStore } : {}),
     ...(smsSender ? { smsSender } : {}),
+    ...(enrollConfirm ? { enrollConfirm } : {}),
   });
 }
 

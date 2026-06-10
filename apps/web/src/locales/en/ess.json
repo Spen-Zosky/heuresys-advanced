@@ -323,7 +323,11 @@
     "smsResending": "Resending…",
     "smsResent": "Code resent",
     "smsVerifiedActive": "SMS factor verified and active",
-    "smsNotConfigured": "SMS delivery is not available: no provider configured. Contact your administrator."
+    "smsNotConfigured": "SMS delivery is not available: no provider configured. Contact your administrator.",
+    "confirmCardTitle": "Confirm the new verification method",
+    "confirmInstruction": "For security we sent a confirmation code via email to {{email}}. Enter it to activate the new method.",
+    "confirmCodeLabel": "Confirmation code received via email",
+    "confirmVerifiedActive": "Verification method confirmed and active"
   },
   "skills": {
     "title": "My skills",

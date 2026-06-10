@@ -105,6 +105,19 @@ function createChallengeStore() {
   };
 }
 
+/** Outcome of registration verify: verified immediately, or pending the TOFU v2
+ *  out-of-band email confirm (first self-owned factor, confirm mode ON). */
+export type WebauthnRegistrationOutcome =
+  | { factorId: string; kind: "WEBAUTHN"; verified: true; deviceLabel: string }
+  | {
+      factorId: string;
+      kind: "WEBAUTHN";
+      verified: false;
+      confirmRequired: true;
+      emailHint: string;
+      expiresInSeconds: number;
+    };
+
 export interface WebauthnService {
   startRegistration(input: { userId: string; userEmail: string }): Promise<{
     factorId: string;
@@ -115,12 +128,7 @@ export interface WebauthnService {
     factorId: string;
     response: RegistrationResponseJSON;
     deviceLabel: string;
-  }): Promise<{
-    factorId: string;
-    kind: "WEBAUTHN";
-    verified: true;
-    deviceLabel: string;
-  }>;
+  }): Promise<WebauthnRegistrationOutcome>;
   startAuthentication(input: { challengeToken: string }): Promise<{
     options: PublicKeyCredentialRequestOptionsJSON;
   }>;
@@ -130,15 +138,26 @@ export interface WebauthnService {
   }): Promise<{ userId: string }>;
 }
 
+/** TOFU v2 hooks provided by the MFA service (app.ts wires them; the bare
+ *  shared singleton has none and keeps the pre-v2 immediate-verify path). */
+export interface WebauthnEnrollConfirmHooks {
+  required(userId: string): Promise<boolean>;
+  begin(userId: string, factorId: string): Promise<{ emailHint: string; expiresInSeconds: number }>;
+  recordEnrolled(userId: string): Promise<void>;
+}
+
 export interface WebauthnServiceOptions {
   /** Login-step challenge store (shared with mfa-service so peek/consume agree). */
   loginChallengeStore?: MfaChallengeStore;
+  /** TOFU v2 out-of-band confirm hooks (from the MFA service). */
+  enrollConfirm?: WebauthnEnrollConfirmHooks;
 }
 
 export function createWebauthnService(
   options: WebauthnServiceOptions = {},
 ): WebauthnService {
   const loginChallengeStore = options.loginChallengeStore ?? sharedMfaChallengeStore;
+  const enrollConfirm = options.enrollConfirm;
   const store = createChallengeStore();
 
   return {
@@ -218,6 +237,13 @@ export function createWebauthnService(
       const { credential, aaguid, credentialBackedUp } =
         verification.registrationInfo;
 
+      // TOFU v2: when this is the user's FIRST self-owned factor and the
+      // confirm mode is ON, persist the credential but keep the factor
+      // UNVERIFIED until the out-of-band email confirm (mfa enroll-confirm).
+      // verifyAuthentication filters on factor.verified, so a pending
+      // credential can never authenticate.
+      const needsConfirm = enrollConfirm ? await enrollConfirm.required(userId) : false;
+
       await withTransaction(async (client) => {
         await webauthnRepo.insertWebauthnCredential(client, {
           factorId,
@@ -232,9 +258,23 @@ export function createWebauthnService(
           backupEligible: credentialBackedUp,
           backupState: credentialBackedUp,
         });
-        await mfaRepo.markMfaFactorVerified(client, factorId);
+        if (!needsConfirm) {
+          await mfaRepo.markMfaFactorVerified(client, factorId);
+        }
       });
 
+      if (needsConfirm && enrollConfirm) {
+        const c = await enrollConfirm.begin(userId, factorId);
+        return {
+          factorId,
+          kind: "WEBAUTHN" as const,
+          verified: false as const,
+          confirmRequired: true as const,
+          ...c,
+        };
+      }
+
+      if (enrollConfirm) await enrollConfirm.recordEnrolled(userId);
       return { factorId, kind: "WEBAUTHN" as const, verified: true as const, deviceLabel };
     },
 
@@ -242,10 +282,16 @@ export function createWebauthnService(
       // peek (non-consuming): the token survives to the verify call.
       const userId = loginChallengeStore.peek(challengeToken);
       const credentials = await webauthnRepo.findCredentialsForUser(pool, userId);
+      // TOFU v2: only credentials whose factor is VERIFIED may authenticate —
+      // a pending-confirm credential (registered but unconfirmed) is excluded.
+      const verifiedFactorIds = new Set(
+        (await mfaRepo.listVerifiedMfaFactorsForUser(pool, userId)).map((f) => f.factorId),
+      );
+      const usable = credentials.filter((c) => verifiedFactorIds.has(c.factorId));
       const options = await generateAuthenticationOptions({
         rpID: RP_ID,
         userVerification: "preferred",
-        allowCredentials: credentials.map((c) => ({
+        allowCredentials: usable.map((c) => ({
           id: c.credentialId,
           transports: parseTransports(c.transports),
         })),
@@ -272,6 +318,16 @@ export function createWebauthnService(
         ? await webauthnRepo.findCredentialByCredentialId(pool, credentialId)
         : null;
       if (!cred || cred.userId !== userId) {
+        throw new UnauthorizedError(
+          "Unknown WebAuthn credential",
+          "WEBAUTHN_AUTH_FAILED",
+        );
+      }
+      // TOFU v2 guard: a credential whose factor is still pending the
+      // out-of-band confirm must NOT authenticate (no existence leak: same
+      // error as an unknown credential).
+      const factor = await mfaRepo.findMfaFactorById(pool, cred.factorId);
+      if (!factor?.verified) {
         throw new UnauthorizedError(
           "Unknown WebAuthn credential",
           "WEBAUTHN_AUTH_FAILED",

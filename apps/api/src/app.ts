@@ -108,12 +108,18 @@ import { contentBlueprintLinksRoutes } from "./modules/content-blueprint-links/r
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 import { makeSmsSender, type ISmsSender } from "./modules/auth/sms-sender.js";
+import { createWebauthnService } from "./modules/auth/webauthn-service.js";
 
 export interface BuildAppOptions {
   /** Custom mailer for the auth module — tests inject InMemoryMailer. */
   authMailer?: IMailer;
   /** Custom SMS sender for the SMS_OTP factor — tests inject InMemorySms. */
   smsSender?: ISmsSender;
+  /**
+   * TOFU v2 enroll-confirm mode override (default: env MFA_ENROLL_CONFIRM).
+   * buildTestApp pins "off" so pre-v2 suites keep their behaviour.
+   */
+  enrollConfirm?: "auto" | "on" | "off";
   /** Semantic-matching DI seams — tests inject a non-destructive backfill + a FakeEmbedder. */
   matchingDeps?: SemanticMatchingDeps;
   /** Reference-sync DI seam — tests inject a fixture ESCO fetcher (no live HTTP). */
@@ -262,9 +268,28 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // login flow (mfaService dep) and the MFA management routes (service).
   const authMailer = options.authMailer ?? makeMailer(app.log);
   const smsSender = options.smsSender ?? makeSmsSender(app.log);
-  const mfaService = buildMfaServiceWithMailer(authMailer, undefined, smsSender);
+  const mfaService = buildMfaServiceWithMailer(
+    authMailer,
+    undefined,
+    smsSender,
+    options.enrollConfirm,
+  );
+  // WebAuthn service wired with the TOFU v2 confirm hooks (first self-owned
+  // factor -> credential persisted but factor pending the email confirm).
+  const webauthnService = createWebauthnService({
+    enrollConfirm: {
+      required: (userId) => mfaService.enrollConfirmRequired(userId, "WEBAUTHN"),
+      begin: (userId, factorId) => mfaService.beginEnrollConfirm({ userId, factorId }),
+      recordEnrolled: (userId) => mfaService.recordFactorEnrolled(userId, "WEBAUTHN"),
+    },
+  });
   await app.register(authRoutes, { prefix: "/v1/auth", mailer: authMailer, mfaService });
-  await app.register(mfaRoutes, { prefix: "/v1/auth/mfa", service: mfaService, mailer: authMailer });
+  await app.register(mfaRoutes, {
+    prefix: "/v1/auth/mfa",
+    service: mfaService,
+    mailer: authMailer,
+    webauthnService,
+  });
   await app.register(mfaPolicyRoutes, { prefix: "/v1/mfa-policy" });
   await app.register(tenantsRoutes, { prefix: "/v1/tenants" });
   await app.register(usersRoutes, { prefix: "/v1/users" });

@@ -13,6 +13,8 @@
  */
 
 @import "@heuresys/ui/styles";
+/* Markdown rendering (MarkdownView prose classes) - cap4 CMS P3 rich-text. */
+@plugin "@tailwindcss/typography";
 /* Universal hover affordance is included in @heuresys/ui globals.css */
 
 /* Tailwind v4 source scanning — pickup utility classes used inside the

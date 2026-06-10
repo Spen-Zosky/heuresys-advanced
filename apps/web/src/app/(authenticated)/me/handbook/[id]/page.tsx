@@ -4,14 +4,15 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, Card, CardContent, PageHeader } from "@heuresys/ui";
+import { Badge, Card, CardContent, PageHeader, MarkdownView } from "@heuresys/ui";
 import type { ContentDocumentDetailResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 
 /**
  * ESS knowledge-base document view (cap④ CMS P2). Reads a PUBLISHED document via
  * GET /v1/me/content/:id (404 for drafts / cross-tenant — no leak). The body is
- * rendered as safe preformatted text; a rich markdown renderer is a P3 @heuresys/ui
+ * rendered as rich markdown via the lib MarkdownView primitive (cap4 CMS P3,
+ * S981 — react-markdown is XSS-safe by default: raw HTML is never executed).
  * primitive (apps/web must not add a UI runtime dep).
  */
 export default function MeHandbookDetailPage() {
@@ -50,8 +51,8 @@ export default function MeHandbookDetailPage() {
       />
       <Card>
         <CardContent className="py-6">
-          <div data-testid="handbook-body" className="whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
-            {body}
+          <div data-testid="handbook-body" className="break-words text-sm leading-relaxed text-foreground">
+            <MarkdownView content={body} />
           </div>
         </CardContent>
       </Card>

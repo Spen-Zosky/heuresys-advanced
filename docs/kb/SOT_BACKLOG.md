@@ -286,6 +286,16 @@ Batch del menu eseguito in autonomia (decision-authority session-scoped), 4 comm
 - **Dependabot**: #31+#29 adottate (`fb5bf49`), **#30 @types/node 25 = defer-major** (types seguono engines floor ≥20; ritargetizzare a ^22 quando engines sale).
 - **Pending prossima sessione**: attivazione policy MFA su tenant reale (1 PUT) + opzionale UI admin mfa-policy · decisioni PM dossier · #10 SMS_OTP · ESS-media · color-contrast (brand) · #11 ISTAT/ATECO (⛔ ToS).
 
+**🟢 Aggiornamento S982 (2026-06-10) — mega-batch da piano approvato (9 task, tutti consegnati):**
+8 commit pushati (`9dd7c68`..`3d361b0`), CI 100% verde, full suite **899/6/0**, migrate ×2 (107 file), align 3 cloni + vm-deploy smoke-verificato. Piano: `docs/superpowers/plans/2026-06-10-s982-mega-batch.md`. Granulare → `SOT_STATE.md` §0-septdecies.
+- **B-50 / Wave-2 ✅ CHIUSI** (`9dd7c68`): i 3 DEFER importati su decisioni PM in-session (D1=B àncora-OU → branches **6**; D2 incumbent-anchor+CEO/CFO → pools **17** / candidates **25**; D3 talent_pools **WON'T-DO** + career cluster + 86 orfani out-of-scope). False-friend `critical_role_id`→`succession_plans` corretto nel registry. **Vista: 0 NEEDS_DECISION / 141 POPULATED** — la riconciliazione non ha più tavoli in stato aperto. Seeds 49-50 + mig 000106; 000076 assert state-aware.
+- **MVP-4 §2.5 ✅ COMPLETO code-side**: #10 SMS_OTP code-only (`b3ac899` — attivazione PROD ⛔ provider+costo PM) · TOFU v2 (`6b3dc56`, mig 000108 — confirm out-of-band env-gated, **dormiente in PROD finché mancano le creds SMTP**, attivazione = solo config) · UI admin `/admin/mfa-policy` (`65e4172`, mig 000107).
+- **🔐 ATTIVAZIONE mandatory-MFA RTL ✅ FATTA e LIVE IN PROD**: slice `roleCodes=[BLUEPRINT_MANAGER,HRMS_MANAGER,PROCESS_OWNER,READ_ONLY]` (verificato live: alberto → `mfa_enrollment_required`; personas E2E fuori scope). I 3 test policy-touching ora snapshot-restore (`3d361b0`). **Estensione agli altri ruoli = ⛔ comunicazione utenti (Enzo)**; se include personas E2E → adattare auth.setup (TOTP fixture ~2-3h).
+- **cap④ CMS ✅ CHIUSA** (`e4eeff8`): ESS-media serve (ultimo residuo P3).
+- **a11y color-contrast ✅ RISOLTO** (`9d48ff5`, delega+checkpoint Enzo): 179 nodi→0, audit pieno 35×3 tutto a 0, **gate CI alzato a serious=0**. §2.7 residuo = SOLO mobile sweep.
+- **engines ≥22 + @types/node 22.19.20 ✅** (`1c91450`): **PR #30 chiusa** not-adopted; label defer-major ripristinata su #28 (stop churn CI rosso del branch dependabot).
+- Fix R3 collaterale: `sys_auth_mfa_factors` mai registrata nel reconciliation registry → D/EXCLUDE via amendment `000062` (registry 100 righe, D38). Vedi DEBT D-22/D-23.
+
 ## P3 — Infra / robustezza
 
 | ID | Azione | Note |

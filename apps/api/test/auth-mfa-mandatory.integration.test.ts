@@ -113,6 +113,10 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
   });
 
   it("policy OFF: the in-scope persona logs in with a full session (pre-#4 regression)", async () => {
+    // Arrange the precondition explicitly: since the REAL RTL activation
+    // (S982) the ambient policy is ON — this test must not depend on it.
+    // The pre-suite state is snapshot-restored in afterAll regardless.
+    await setPolicy(false);
     const resp = await login({ email: READONLY, password: PASSWORD });
     expect(resp.statusCode).toBe(200);
     expect((resp.json() as { status: string }).status).toBe("success");

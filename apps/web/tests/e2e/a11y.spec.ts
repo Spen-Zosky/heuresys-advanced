@@ -114,10 +114,13 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
   const summary = (Object.entries(bySeverity) as [AxeImpact, typeof results.violations][])
     .map(([k, arr]) => `${k}=${arr.length}`)
     .join(" ");
-  fs.mkdirSync(AUDIT_OUT_DIR, { recursive: true });
+  // Namespace per Playwright project (chromium / mobile-a11y) so a mobile
+  // run does not overwrite the desktop JSONs.
+  const outDir = path.join(AUDIT_OUT_DIR, testInfo.project.name || "default");
+  fs.mkdirSync(outDir, { recursive: true });
   const flatName = route.replace(/^\//, "").replace(/\//g, "__") || "root";
   fs.writeFileSync(
-    path.join(AUDIT_OUT_DIR, `${flatName}.json`),
+    path.join(outDir, `${flatName}.json`),
     JSON.stringify(
       {
         route,
@@ -136,7 +139,7 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
     ),
   );
   await testInfo.attach(`axe-${flatName}.json`, {
-    path: path.join(AUDIT_OUT_DIR, `${flatName}.json`),
+    path: path.join(outDir, `${flatName}.json`),
     contentType: "application/json",
   });
 

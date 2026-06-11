@@ -11,22 +11,39 @@
  * API never runs this; it is invoked only by `heuresys-advanced-scraping.timer`
  * (or manually by an operator). Mirrors the embeddings:backfill CLI pattern.
  */
+import type { ReferenceSyncSourceKey } from "@heuresys/shared";
 import { pool } from "../../db/client.js";
 import { referenceSyncService } from "./service.js";
 
 const log = (o: Record<string, unknown>): void => console.log(JSON.stringify({ cli: "reference-sync", ...o }));
 
-export async function runEscoSyncCli(): Promise<void> {
-  const started = Date.now();
-  // System actor: no human userId → recorded as a NULL initiator in import_runs.
-  const result = await referenceSyncService.runEscoSync({ userId: null });
-  log({ phase: "done", ...result, ms: Date.now() - started });
+/** All registered sources, refreshed in sequence (per-source try/catch: one
+ *  failing upstream must not starve the others; any failure → exit 1). */
+const SOURCES: ReferenceSyncSourceKey[] = ["ESCO", "ATECO_2025"];
+
+export async function runReferenceSyncCli(): Promise<void> {
+  const failures: string[] = [];
+  for (const source of SOURCES) {
+    const started = Date.now();
+    try {
+      // System actor: no human userId → recorded as a NULL initiator in import_runs.
+      const result = await referenceSyncService.runSync({ userId: null }, source);
+      log({ phase: "done", ...result, ms: Date.now() - started });
+    } catch (err) {
+      failures.push(source);
+      log({ phase: "failed", source, ms: Date.now() - started });
+      console.error(`reference-sync ${source} FAILED:`, err);
+    }
+  }
+  if (failures.length > 0) {
+    throw new Error(`reference-sync: ${failures.length}/${SOURCES.length} source(s) failed: ${failures.join(", ")}`);
+  }
 }
 
 // Run when invoked directly (tsx). Closes the pool so the process exits cleanly.
 const invoked = process.argv[1] ?? "";
 if (invoked.endsWith("sync-cli.ts") || invoked.endsWith("sync-cli.js")) {
-  runEscoSyncCli()
+  runReferenceSyncCli()
     .then(() => pool.end())
     .then(() => process.exit(0))
     .catch((err: unknown) => {

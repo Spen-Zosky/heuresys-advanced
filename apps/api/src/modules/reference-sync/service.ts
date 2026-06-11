@@ -8,27 +8,41 @@
  * GLOBAL platform infra → no tenant scoping (RBAC gates to PLATFORM_ADMIN).
  */
 import { createHash } from "node:crypto";
+import type { PoolClient } from "pg";
 import { ConflictError, NotFoundError } from "../../errors/index.js";
 import type {
   ReferenceSyncRun,
   ReferenceSyncRunListResponse,
+  ReferenceSyncSourceKey,
   ReferenceSyncSourceListResponse,
   ReferenceSyncTriggerResponse,
   ReferenceSyncWatermark,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { HttpEscoFetcher, fetchAllEscoOccupations, type EscoFetcher } from "./esco-connector.js";
+import { HttpAtecoFetcher, fetchAllAtecoActivities, type AtecoFetcher } from "./istat-ateco-connector.js";
 
 export interface ActorContext {
   /** null = a system/scheduled run (CLI-bypass) → recorded as a NULL import-run initiator. */
   userId: string | null;
 }
 
-/** DI seam — tests inject a fixture fetcher; prod uses the live ESCO API. */
+/** DI seam — tests inject fixture fetchers; prod uses the live published artifacts. */
 export interface ReferenceSyncDeps {
   escoFetcher: EscoFetcher;
+  atecoFetcher: AtecoFetcher;
 }
-export const defaultDeps: ReferenceSyncDeps = { escoFetcher: new HttpEscoFetcher() };
+export const defaultDeps: ReferenceSyncDeps = {
+  escoFetcher: new HttpEscoFetcher(),
+  atecoFetcher: new HttpAtecoFetcher(),
+};
+
+/** Registered official sources (order = display order in /sources). */
+const SOURCE_DEFS: Record<ReferenceSyncSourceKey, { label: string }> = {
+  ESCO: { label: "ESCO — EU occupation & skill taxonomy" },
+  ATECO_2025: { label: "ATECO 2025 — ISTAT Italian economic activity classification" },
+};
+const SOURCE_KEYS = Object.keys(SOURCE_DEFS) as ReferenceSyncSourceKey[];
 
 function toRun(r: repo.SyncRunRow): ReferenceSyncRun {
   return {
@@ -58,16 +72,18 @@ function toWatermark(w: repo.WatermarkRow): ReferenceSyncWatermark {
 
 export const referenceSyncService = {
   async listSources(): Promise<ReferenceSyncSourceListResponse> {
-    const [last, wm] = await Promise.all([repo.readLatestRun("ESCO"), repo.readWatermark("ESCO")]);
-    return {
-      items: [{
-        key: "ESCO",
-        label: "ESCO — EU occupation & skill taxonomy",
-        lastRun: last ? toRun(last) : null,
-        watermark: wm ? toWatermark(wm) : null,
-      }],
-      total: 1,
-    };
+    const items = await Promise.all(
+      SOURCE_KEYS.map(async (key) => {
+        const [last, wm] = await Promise.all([repo.readLatestRun(key), repo.readWatermark(key)]);
+        return {
+          key,
+          label: SOURCE_DEFS[key].label,
+          lastRun: last ? toRun(last) : null,
+          watermark: wm ? toWatermark(wm) : null,
+        };
+      }),
+    );
+    return { items, total: items.length };
   },
 
   async listRuns(): Promise<ReferenceSyncRunListResponse> {
@@ -82,37 +98,59 @@ export const referenceSyncService = {
   },
 
   /**
-   * Trigger an ESCO occupation-catalog refresh (idempotent upsert; never deletes).
+   * Trigger a refresh for one registered source (idempotent upsert; never deletes).
    * Watermark-driven (P2): if the fetched artifact is unchanged since the last
    * successful ingest, the catalog upsert is skipped (cheap UNCHANGED no-op) — the
    * watermark advances transactionally only on a COMPLETED run (scraping spec §3.3).
+   * Generalized from the P1 ESCO-only trigger (S983 WS-C): fetch+normalize, the
+   * upsert closure and the presence guard are bound per-source; the lock/hash/skip/
+   * persist/markFailed pattern is shared and unchanged.
    */
-  async runEscoSync(a: ActorContext, deps: ReferenceSyncDeps = defaultDeps): Promise<ReferenceSyncTriggerResponse> {
+  async runSync(
+    a: ActorContext,
+    source: ReferenceSyncSourceKey,
+    deps: ReferenceSyncDeps = defaultDeps,
+  ): Promise<ReferenceSyncTriggerResponse> {
     const startedAt = new Date();
     // Acquire the per-source in-flight lock (spec §5) — rejects an overlapping run (the
     // weekly timer firing while an operator triggers manually, or two triggers) and
     // returns the PRIOR watermark state for the skip decision. null = already running.
-    const prior = await repo.acquireLock("ESCO");
+    const prior = await repo.acquireLock(source);
     if (!prior) {
-      throw new ConflictError("A reference-sync run for ESCO is already in progress", "SYNC_IN_PROGRESS");
+      throw new ConflictError(`A reference-sync run for ${source} is already in progress`, "SYNC_IN_PROGRESS");
     }
     try {
-      const occupations = await fetchAllEscoOccupations(deps.escoFetcher);
-      const artifact = JSON.stringify(occupations);
+      // Per-source bind: fetched rows, the catalog upsert and the presence guard.
+      let rows: unknown[];
+      let upsert: (client: PoolClient) => Promise<repo.EscoUpsertResult>;
+      let hasRows: () => Promise<boolean>;
+      if (source === "ESCO") {
+        const occupations = await fetchAllEscoOccupations(deps.escoFetcher);
+        rows = occupations;
+        upsert = (client) => repo.upsertEscoCatalog(client, occupations);
+        hasRows = repo.escoCatalogHasRows;
+      } else {
+        const activities = await fetchAllAtecoActivities(deps.atecoFetcher);
+        rows = activities;
+        upsert = (client) => repo.upsertAtecoCatalog(client, activities);
+        hasRows = repo.atecoCatalogHasRows;
+      }
+      const artifact = JSON.stringify(rows);
       const fileHash = createHash("sha256").update(artifact).digest("hex");
       const sizeBytes = Buffer.byteLength(artifact);
       // UNCHANGED short-circuit: identical artifact since the last SUCCESSFUL ingest AND
       // the catalog is still populated → skip the upsert (cheap no-op). The catalog-presence
       // guard keeps the skip a true optimization: a wiped catalog forces a real re-ingest
       // even when the content hash matches (the skip path itself performs NO upsert).
-      const skipped = !!(prior.contentHash === fileHash && prior.lastSucceededAt && (await repo.escoCatalogHasRows()));
-      const { runId, counts } = await repo.persistEscoSync({
-        rows: occupations, fileHash, sizeBytes, initiatedBy: a.userId, startedAt, skipped,
+      const skipped = !!(prior.contentHash === fileHash && prior.lastSucceededAt && (await hasRows()));
+      const { runId, counts } = await repo.persistSync({
+        sourceKey: source, total: rows.length, upsert, fileHash, sizeBytes,
+        initiatedBy: a.userId, startedAt, skipped,
       });
       return {
         accepted: true,
         runId,
-        source: "ESCO",
+        source,
         total: counts.total,
         inserted: counts.inserted,
         updated: counts.updated,
@@ -121,7 +159,7 @@ export const referenceSyncService = {
     } catch (err) {
       // Release the lock as FAILED (only if we still hold FETCHING). The run tx rolled
       // back → content_hash/last_succeeded_at were NOT advanced (next run retries).
-      await repo.markWatermarkFailed("ESCO").catch(() => undefined);
+      await repo.markWatermarkFailed(source).catch(() => undefined);
       throw err;
     }
   },

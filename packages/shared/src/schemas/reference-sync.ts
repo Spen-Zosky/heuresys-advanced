@@ -10,7 +10,7 @@
  */
 import { z } from "zod";
 
-export const ReferenceSyncSourceKeyEnum = z.enum(["ESCO"]);
+export const ReferenceSyncSourceKeyEnum = z.enum(["ESCO", "ATECO_2025"]);
 export type ReferenceSyncSourceKey = z.infer<typeof ReferenceSyncSourceKeyEnum>;
 
 export const ReferenceSyncRunStatusEnum = z.enum(["RUNNING", "COMPLETED", "FAILED", "CANCELLED"]);

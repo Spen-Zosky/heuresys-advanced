@@ -14,6 +14,7 @@ import type { PoolClient } from "pg";
 import { pool } from "../../db/client.js";
 import { withTransaction } from "../auth/repository.js";
 import type { EscoOccupation } from "./esco-connector.js";
+import { ATECO_SCHEME, type AtecoActivity } from "./istat-ateco-connector.js";
 
 export const REFERENCE_SYNC_SCOPE = "reference_sync";
 
@@ -50,6 +51,46 @@ export async function upsertEscoCatalog(
          esco_occupation_mapping_esco_label = EXCLUDED.esco_occupation_mapping_esco_label,
          esco_occupation_mapping_isco_code  = EXCLUDED.esco_occupation_mapping_isco_code,
          esco_occupation_mapping_metadata   = EXCLUDED.esco_occupation_mapping_metadata,
+         updated_at = now()
+       RETURNING (xmax = 0) AS inserted`,
+      params,
+    );
+    inserted += res.rows.filter((x) => x.inserted).length;
+  }
+  return { total: rows.length, inserted, updated: rows.length - inserted };
+}
+
+/**
+ * Idempotent upsert of the ATECO 2025 activity catalog (scheme+code natural key,
+ * unique index sys_activity_classifications_scheme_code_uq from 000007). A NEW
+ * parallel generation under scheme 'ATECO_2025' — the legacy 'ATECO'/'NACE' rows
+ * are never touched (S983 WS-C decision). NEVER deletes (scraping spec §3.3).
+ */
+export async function upsertAtecoCatalog(
+  client: PoolClient,
+  rows: AtecoActivity[],
+): Promise<EscoUpsertResult> {
+  let inserted = 0;
+  for (let i = 0; i < rows.length; i += UPSERT_CHUNK) {
+    const chunk = rows.slice(i, i + UPSERT_CHUNK);
+    const params: unknown[] = [];
+    const tuples = chunk.map((r, j) => {
+      const b = j * 5;
+      params.push(r.code, r.parentCode, r.titleIt, r.level, JSON.stringify(r.metadata));
+      return `('${ATECO_SCHEME}', $${b + 1}, $${b + 2}, $${b + 3}, $${b + 4}, $${b + 5}::jsonb)`;
+    });
+    const res = await client.query<{ inserted: boolean }>(
+      `INSERT INTO sys.sys_activity_classifications
+         (activity_classification_scheme, activity_classification_code,
+          activity_classification_parent_code, activity_classification_name,
+          activity_classification_level, activity_classification_metadata)
+       VALUES ${tuples.join(", ")}
+       ON CONFLICT (activity_classification_scheme, activity_classification_code)
+       DO UPDATE SET
+         activity_classification_parent_code = EXCLUDED.activity_classification_parent_code,
+         activity_classification_name        = EXCLUDED.activity_classification_name,
+         activity_classification_level       = EXCLUDED.activity_classification_level,
+         activity_classification_metadata    = EXCLUDED.activity_classification_metadata,
          updated_at = now()
        RETURNING (xmax = 0) AS inserted`,
       params,
@@ -175,12 +216,17 @@ export async function readLatestRun(sourceKey: string): Promise<SyncRunRow | nul
  * Run the catalog upsert + the run record + the watermark advance ATOMICALLY (one
  * transaction). When `skipped` (the upstream artifact is unchanged since the last
  * successful ingest), the catalog upsert is skipped and the watermark advances to
- * UNCHANGED; otherwise the catalog is upserted and the watermark advances to STAGED.
- * The HWM only ever advances inside this run-finish transaction, so a crash mid-load
- * never advances the cursor (scraping spec §3.3).
+ * UNCHANGED; otherwise the source-specific `upsert` closure runs and the watermark
+ * advances to STAGED. The HWM only ever advances inside this run-finish transaction,
+ * so a crash mid-load never advances the cursor (scraping spec §3.3). Generalized
+ * from the P1 ESCO-only persist (S983 WS-C): the service binds the closure to the
+ * fetched rows; this layer is source-agnostic.
  */
-export async function persistEscoSync(args: {
-  rows: EscoOccupation[];
+export async function persistSync(args: {
+  sourceKey: string;
+  /** Row count recorded for an UNCHANGED skip (no upsert is performed). */
+  total: number;
+  upsert: (client: PoolClient) => Promise<EscoUpsertResult>;
   fileHash: string;
   sizeBytes: number;
   initiatedBy: string | null;
@@ -189,10 +235,10 @@ export async function persistEscoSync(args: {
 }): Promise<{ runId: string; counts: EscoUpsertResult }> {
   return withTransaction(async (client) => {
     const counts = args.skipped
-      ? { total: args.rows.length, inserted: 0, updated: 0 }
-      : await upsertEscoCatalog(client, args.rows);
+      ? { total: args.total, inserted: 0, updated: 0 }
+      : await args.upsert(client);
     const { runId } = await recordSyncRun(client, {
-      sourceKey: "ESCO",
+      sourceKey: args.sourceKey,
       fileHash: args.fileHash,
       sizeBytes: args.sizeBytes,
       initiatedBy: args.initiatedBy,
@@ -201,7 +247,7 @@ export async function persistEscoSync(args: {
       skipped: args.skipped,
     });
     await advanceWatermark(client, {
-      sourceKey: "ESCO",
+      sourceKey: args.sourceKey,
       contentHash: args.fileHash,
       status: args.skipped ? "UNCHANGED" : "STAGED",
       runId,
@@ -344,6 +390,17 @@ export async function escoCatalogHasRows(): Promise<boolean> {
     `SELECT EXISTS(
        SELECT 1 FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_job_role_id IS NULL
      ) AS has`,
+  );
+  return res.rows[0]?.has === true;
+}
+
+/** Same presence guard for the ATECO_2025 generation (see escoCatalogHasRows). */
+export async function atecoCatalogHasRows(): Promise<boolean> {
+  const res = await pool.query<{ has: boolean }>(
+    `SELECT EXISTS(
+       SELECT 1 FROM sys.sys_activity_classifications WHERE activity_classification_scheme = $1
+     ) AS has`,
+    [ATECO_SCHEME],
   );
   return res.rows[0]?.has === true;
 }

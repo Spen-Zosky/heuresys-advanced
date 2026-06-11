@@ -2,10 +2,11 @@
 # Do NOT install this file directly; run the bootstrap script instead.
 #
 # cap⑤ scraping P2 (D-2): a ONE-SHOT that refreshes official reference taxonomies
-# (ESCO) in-process against the DB — CLI-bypass, no HTTP/auth (the watermark makes an
-# unchanged upstream a cheap no-op). Activated by heuresys-advanced-scraping.timer.
+# (ESCO + ISTAT ATECO 2025, S983) in-process against the DB — CLI-bypass, no HTTP/auth
+# (the per-source watermark makes an unchanged upstream a cheap no-op). Activated by
+# heuresys-advanced-scraping.timer; the CLI iterates every registered source.
 [Unit]
-Description=Heuresys Advanced — reference-sync (cap⑤ ESCO official-source refresh, one-shot)
+Description=Heuresys Advanced — reference-sync (cap⑤ official-source refresh ESCO+ATECO, one-shot)
 Documentation=https://github.com/Spen-Zosky/heuresys-advanced
 After=network-online.target postgresql.service
 Wants=network-online.target

@@ -122,8 +122,9 @@ export interface BuildAppOptions {
   enrollConfirm?: "auto" | "on" | "off";
   /** Semantic-matching DI seams — tests inject a non-destructive backfill + a FakeEmbedder. */
   matchingDeps?: SemanticMatchingDeps;
-  /** Reference-sync DI seam — tests inject a fixture ESCO fetcher (no live HTTP). */
-  referenceSyncDeps?: ReferenceSyncDeps;
+  /** Reference-sync DI seam — tests inject fixture fetchers (no live HTTP).
+   *  Partial: a suite injects only the source(s) it exercises. */
+  referenceSyncDeps?: Partial<ReferenceSyncDeps>;
 }
 
 /**

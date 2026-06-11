@@ -30,11 +30,12 @@ function actor(req: FastifyRequest): ActorContext {
 }
 
 export interface ReferenceSyncRoutesOptions {
-  deps?: ReferenceSyncDeps;
+  /** Partial: a suite can inject just the fetcher it exercises; the rest defaults. */
+  deps?: Partial<ReferenceSyncDeps>;
 }
 
 export const referenceSyncRoutes: FastifyPluginAsyncZod<ReferenceSyncRoutesOptions> = async (app, opts) => {
-  const deps = opts.deps ?? defaultDeps;
+  const deps: ReferenceSyncDeps = { ...defaultDeps, ...opts.deps };
 
   app.get(
     "/sources",
@@ -63,6 +64,6 @@ export const referenceSyncRoutes: FastifyPluginAsyncZod<ReferenceSyncRoutesOptio
       preHandler: [app.verifyCsrf, requirePermission("reference_sync:trigger")],
       schema: { body: ReferenceSyncTriggerBodySchema, response: { 200: ReferenceSyncTriggerResponseSchema } },
     },
-    async (req) => referenceSyncService.runEscoSync(actor(req), deps),
+    async (req) => referenceSyncService.runSync(actor(req), req.body.source, deps),
   );
 };

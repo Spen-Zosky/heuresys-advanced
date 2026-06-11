@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool } from "../src/db/client.js";
 import type { EscoFetcher, EscoPage, RawEscoResult } from "../src/modules/reference-sync/esco-connector.js";
+import type { AtecoFetcher, RawAtecoRow } from "../src/modules/reference-sync/istat-ateco-connector.js";
 
 // Cap⑤ scraping — ESCO reference-sync (/v1/reference-sync/*). Real login + live DB.
 // The ESCO fetcher is INJECTED with a fixture (no live HTTP, scraping spec §7). The
@@ -168,6 +169,113 @@ describe("reference-sync API (cap⑤ ESCO)", () => {
     expect(b.items[0]!.watermark).not.toBeNull();
     expect(["STAGED", "UNCHANGED"]).toContain(b.items[0]!.watermark!.status);
     expect(b.items[0]!.watermark!.contentHash).not.toBeNull();
+  });
+});
+
+// ── cap⑤ 2nd source (S983 WS-C): ATECO_2025 via fixture fetcher ─────────────────
+// Synthetic codes use the 'ZZ' prefix (real ATECO sections are A..U) so the suite
+// never collides with a real ATECO_2025 ingest; rows + watermark reset in afterAll.
+const ATECO_TEST_PREFIX = "ZZ";
+const ATECO_FIXTURE: RawAtecoRow[] = [
+  { ordine: 1, code: "ZZ", titleIt: "synctest sezione", titleEn: "synctest section", titleDe: null, level: 1, parentCode: null },
+  { ordine: 2, code: "ZZ.1", titleIt: "synctest divisione", titleEn: null, titleDe: null, level: 2, parentCode: "ZZ" },
+  { ordine: 3, code: "ZZ.1.1", titleIt: "synctest classe", titleEn: null, titleDe: null, level: 3, parentCode: "ZZ.1" },
+];
+
+class FixtureAtecoFetcher implements AtecoFetcher {
+  constructor(private readonly rows: RawAtecoRow[]) {}
+  async fetchAll(): Promise<RawAtecoRow[]> {
+    return this.rows;
+  }
+}
+
+const RESET_ATECO_WATERMARK = RESET_WATERMARK.replace("'ESCO'", "'ATECO_2025'");
+const DELETE_ATECO_ROWS = `
+  DELETE FROM sys.sys_activity_classifications
+   WHERE activity_classification_scheme = 'ATECO_2025'
+     AND activity_classification_code LIKE '${ATECO_TEST_PREFIX}%'`;
+
+describe("reference-sync API (cap⑤ ATECO_2025, 2nd source)", () => {
+  let atecoSuite: TestApp;
+  let atecoAdmin: S;
+
+  beforeAll(async () => {
+    atecoSuite = await buildTestApp({
+      referenceSyncDeps: { atecoFetcher: new FixtureAtecoFetcher(ATECO_FIXTURE) },
+    });
+    atecoAdmin = await login(atecoSuite, "admin@heuresys.com");
+    await pool.query(DELETE_ATECO_ROWS);
+    await pool.query(RESET_ATECO_WATERMARK);
+  });
+
+  afterAll(async () => {
+    await pool.query(DELETE_ATECO_ROWS);
+    await pool.query(RESET_ATECO_WATERMARK);
+    await atecoSuite.app.close();
+  });
+
+  async function triggerAteco(s: S) {
+    return atecoSuite.app.inject({
+      method: "POST", url: "/v1/reference-sync/runs",
+      headers: { cookie: ch(s.cookies), "x-csrf-token": s.csrfToken, "content-type": "application/json" },
+      payload: { source: "ATECO_2025" },
+    });
+  }
+
+  it("first ATECO sync inserts the fixture rows under scheme ATECO_2025", async () => {
+    const r = await triggerAteco(atecoAdmin);
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as { source: string; total: number; inserted: number; updated: number; skipped: boolean };
+    expect(b.source).toBe("ATECO_2025");
+    expect(b.total).toBe(3);
+    expect(b.inserted).toBe(3);
+    expect(b.skipped).toBe(false);
+    // rows really landed: scheme/code/parent/level/metadata round-trip
+    const { rows } = await pool.query<{ code: string; parent: string | null; lvl: number; meta: Record<string, unknown> }>(
+      `SELECT activity_classification_code AS code, activity_classification_parent_code AS parent,
+              activity_classification_level AS lvl, activity_classification_metadata AS meta
+         FROM sys.sys_activity_classifications
+        WHERE activity_classification_scheme = 'ATECO_2025' AND activity_classification_code LIKE $1
+        ORDER BY code`,
+      [`${ATECO_TEST_PREFIX}%`],
+    );
+    expect(rows.map((x) => x.code)).toEqual(["ZZ", "ZZ.1", "ZZ.1.1"]);
+    expect(rows[1]!.parent).toBe("ZZ");
+    expect(rows[2]!.lvl).toBe(3);
+    expect(rows[0]!.meta).toMatchObject({ title_en: "synctest section", ordine: 1 });
+  });
+
+  it("re-running the SAME ATECO artifact is an UNCHANGED no-op (per-source watermark)", async () => {
+    const r = await triggerAteco(atecoAdmin);
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as { skipped: boolean; inserted: number; updated: number };
+    expect(b.skipped).toBe(true);
+    expect(b.inserted).toBe(0);
+    expect(b.updated).toBe(0);
+  });
+
+  it("the legacy ATECO/NACE generations are untouched by the ATECO_2025 ingest", async () => {
+    const { rows } = await pool.query<{ scheme: string; n: string }>(
+      `SELECT activity_classification_scheme AS scheme, count(*)::text AS n
+         FROM sys.sys_activity_classifications
+        WHERE activity_classification_scheme IN ('ATECO', 'NACE') GROUP BY 1 ORDER BY 1`,
+    );
+    // Brownfield baselines (RTL rebuild): ATECO 2210 + NACE 1066 — never deleted/mutated.
+    expect(rows.find((x) => x.scheme === "ATECO")?.n).toBe("2210");
+    expect(rows.find((x) => x.scheme === "NACE")?.n).toBe("1066");
+  });
+
+  it("GET /sources now lists BOTH sources (ESCO + ATECO_2025) with per-source watermark", async () => {
+    const r = await atecoSuite.app.inject({
+      method: "GET", url: "/v1/reference-sync/sources", headers: { cookie: ch(atecoAdmin.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as { items: { key: string; watermark: { status: string } | null }[]; total: number };
+    expect(b.total).toBe(2);
+    expect(b.items.map((x) => x.key)).toEqual(["ESCO", "ATECO_2025"]);
+    const ateco = b.items.find((x) => x.key === "ATECO_2025")!;
+    expect(ateco.watermark).not.toBeNull();
+    expect(["STAGED", "UNCHANGED"]).toContain(ateco.watermark!.status);
   });
 });
 

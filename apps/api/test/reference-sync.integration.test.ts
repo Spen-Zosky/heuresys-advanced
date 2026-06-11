@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import type { EscoFetcher, EscoPage, RawEscoResult } from "../src/modules/reference-sync/esco-connector.js";
 import type { AtecoFetcher, RawAtecoRow } from "../src/modules/reference-sync/istat-ateco-connector.js";
@@ -28,8 +29,7 @@ class FixtureEscoFetcher implements EscoFetcher {
 interface S { cookies: Map<string, string>; csrfToken: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {
-  const r = await t.app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password: PWD } });
-  if (r.statusCode !== 200) throw new Error(`login ${email}: ${r.statusCode}`);
+  const r = await loginRaw(t.app, email, PWD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   return { cookies, csrfToken: (r.json() as { csrfToken: string }).csrfToken };

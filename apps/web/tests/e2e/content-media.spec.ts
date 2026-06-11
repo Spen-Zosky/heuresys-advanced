@@ -9,7 +9,7 @@
  * delete removes the row. The document is deleted in `finally` (cascade).
  */
 import { test, expect, type APIRequestContext } from "@playwright/test";
-import { PERSONAS, TEST_PASSWORD, storageStateFor } from "./fixtures";
+import { PERSONAS, TEST_PASSWORD, storageStateFor, completeApiLogin } from "./fixtures";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 const AUTHOR = PERSONAS.tenantAdmin;
@@ -20,11 +20,9 @@ const PNG = Buffer.concat([
 ]);
 
 async function authorCsrf(request: APIRequestContext): Promise<string> {
-  const res = await request.post(`${API_BASE}/v1/auth/login`, {
-    data: { email: AUTHOR.email, password: TEST_PASSWORD },
-  });
-  expect(res.status(), "author API login").toBe(200);
-  return (await res.json()).csrfToken as string;
+  // Dual-mode (S983 WS-E): completes the TOTP step-2 under the live policy.
+  const { csrfToken } = await completeApiLogin(request, AUTHOR.email);
+  return csrfToken;
 }
 
 test.describe("cap4 CMS P3 /content/[id] — media attachments (live)", () => {

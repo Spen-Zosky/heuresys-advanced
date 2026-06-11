@@ -21,7 +21,7 @@
  */
 import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
 import * as OTPAuth from "otpauth";
-import { PERSONAS, TEST_PASSWORD } from "./fixtures";
+import { completeApiLogin, PERSONAS, TEST_PASSWORD } from "./fixtures";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 const GATED_EMAIL = "alberto.rossetti@rtl-bank.org"; // R2 READ_ONLY persona
@@ -38,11 +38,10 @@ function genTotp(secretBase32: string): string {
 }
 
 async function adminCsrf(request: APIRequestContext): Promise<string> {
-  const res = await request.post(`${API_BASE}/v1/auth/login`, {
-    data: { email: ADMIN.email, password: TEST_PASSWORD },
-  });
-  expect(res.status(), "admin API login").toBe(200);
-  return (await res.json()).csrfToken as string;
+  // Dual-mode (S983 WS-E): TOTP step-2 against the fixture factor when the
+  // live mandatory policy challenges the admin; plain passthrough pre-flip.
+  const { csrfToken } = await completeApiLogin(request, ADMIN.email);
+  return csrfToken;
 }
 
 async function rtlTenantId(request: APIRequestContext): Promise<string> {

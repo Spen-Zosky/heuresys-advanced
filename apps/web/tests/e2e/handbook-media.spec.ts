@@ -7,7 +7,7 @@
  * Setup/teardown via API (two personas), UI assertions as the employee.
  */
 import { test, expect, request as pwRequest } from "@playwright/test";
-import { storageStateFor, TEST_PASSWORD } from "./fixtures";
+import { storageStateFor, TEST_PASSWORD, completeApiLogin } from "./fixtures";
 
 const API_BASE = process.env.API_BASE ?? "http://localhost:3001";
 
@@ -21,11 +21,8 @@ test.use({ storageState: storageStateFor("employee") });
 test("employee sees the embedded image inline + the attachment list on the handbook detail", async ({ page }) => {
   // --- API setup as the author (TENANT_ADMIN) -------------------------
   const ctx = await pwRequest.newContext({ baseURL: API_BASE });
-  const login = await ctx.post("/v1/auth/login", {
-    data: { email: "federica.marchetti@rtl-bank.org", password: TEST_PASSWORD },
-  });
-  expect(login.ok()).toBeTruthy();
-  const { csrfToken } = (await login.json()) as { csrfToken: string };
+  // Dual-mode (S983 WS-E): completes the TOTP step-2 under the live policy.
+  const { csrfToken } = await completeApiLogin(ctx, "federica.marchetti@rtl-bank.org");
   const csrf = { "x-csrf-token": csrfToken };
 
   let documentId = "";

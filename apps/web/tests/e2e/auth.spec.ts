@@ -12,7 +12,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { PERSONAS, TEST_PASSWORD, fillLoginForm } from "./fixtures";
+import { PERSONAS, TEST_PASSWORD, completeMfaIfChallenged, fillLoginForm } from "./fixtures";
 
 test.describe("MVP-2a /login pilot — live data", () => {
   test("PLATFORM_ADMIN login lands on /dashboard, sets HttpOnly access cookie", async ({ page, context }) => {
@@ -29,7 +29,19 @@ test.describe("MVP-2a /login pilot — live data", () => {
     ]);
 
     expect(loginResp.status()).toBe(200);
-    const body = await loginResp.json();
+    let body = await loginResp.json();
+    if (body.status === "mfa_required") {
+      // S983 WS-E: under the live mandatory policy the first response is the
+      // challenge — the SECOND login response carries the success bundle.
+      const [resp2] = await Promise.all([
+        page.waitForResponse(
+          (r) => r.url().includes("/v1/auth/login") && r.request().method() === "POST",
+        ),
+        completeMfaIfChallenged(page, PERSONAS.platformAdmin.email),
+      ]);
+      expect(resp2.status()).toBe(200);
+      body = await resp2.json();
+    }
     expect(body.user.email).toBe(PERSONAS.platformAdmin.email);
     expect(typeof body.csrfToken).toBe("string");
     expect(body.csrfToken.length).toBeGreaterThan(20);
@@ -49,6 +61,7 @@ test.describe("MVP-2a /login pilot — live data", () => {
     await page.goto("/login");
     await fillLoginForm(page, PERSONAS.employee.email, TEST_PASSWORD);
     await page.getByTestId("login-submit").click();
+    await completeMfaIfChallenged(page, PERSONAS.employee.email);
     await page.waitForURL("**/me");
   });
 

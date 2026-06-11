@@ -8,6 +8,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { randomUUID } from "node:crypto";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { tenantsService } from "../src/modules/tenants/service.js";
 
@@ -27,11 +28,7 @@ function cookieHeader(cookies: Map<string, string>): string {
 }
 
 async function loginAdmin(t: TestApp): Promise<LoginResult> {
-  const r = await t.app.inject({
-    method: "POST",
-    url: "/v1/auth/login",
-    payload: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
-  });
+  const r = await loginRaw(t.app, ADMIN_EMAIL, ADMIN_PASSWORD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   const body = r.json() as { csrfToken: string };

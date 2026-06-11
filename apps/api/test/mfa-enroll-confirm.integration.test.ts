@@ -9,6 +9,8 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import * as OTPAuth from "otpauth";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { ensureFixtureTotpFactor } from "./helpers/login.js";
+import { E2E_FIXTURE_LABEL } from "./helpers/mfa-fixture-secrets.js";
 import { pool } from "../src/db/client.js";
 
 const TOTP_USER = "paolo.caputo@rtl-bank.org";
@@ -19,12 +21,29 @@ interface Session { cookies: Map<string, string>; csrf: string; userId: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
 
 async function login(t: TestApp, email: string): Promise<Session> {
+  // TOFU requires ZERO verified factors (full wipe in beforeAll), so under a
+  // live mandatory policy this login lands in the RESTRICTED enr session
+  // (mfa_enrollment_required) — which is exactly the surface this suite
+  // exercises: the /v1/auth/mfa/* self-service routes are allowlisted for it.
+  // Pre-flip (policy off / out-of-scope) it is a plain full session. Both
+  // sessions carry the CSRF cookie + csrfToken needed below.
   const r = await t.app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password: PWD } });
   if (r.statusCode !== 200) throw new Error(`login ${email}: ${r.statusCode} ${r.body}`);
+  const body = r.json() as { status?: string; csrfToken: string; user?: { userId: string } };
+  if (body.status !== "success" && body.status !== "mfa_enrollment_required") {
+    throw new Error(`login ${email}: unexpected status ${body.status} (factors not wiped?)`);
+  }
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
-  const body = r.json() as { csrfToken: string; user: { userId: string } };
-  return { cookies, csrf: body.csrfToken, userId: body.user.userId };
+  const userId =
+    body.user?.userId ??
+    (
+      await pool.query<{ user_id: string }>(
+        `SELECT user_id FROM sys.sys_users WHERE lower(user_email) = lower($1)`,
+        [email],
+      )
+    ).rows[0]!.user_id;
+  return { cookies, csrf: body.csrfToken, userId };
 }
 
 function totpCode(secretBase32: string): string {
@@ -56,17 +75,37 @@ async function factorVerified(factorId: string): Promise<boolean | null> {
 describe("MFA enroll-confirm (TOFU v2, mode ON)", () => {
   let suite: TestApp;
   let s: Session;
+  // Snapshot-restore (D-23 doctrine): TOFU needs a FULL factor wipe, which
+  // also removes any e2e-fixture factor — record whether each persona had one
+  // pre-suite and re-seed it in afterAll ONLY in that case (never minting
+  // state that did not exist on a pre-flip database).
+  const hadFixture: Record<string, boolean> = {};
+
+  async function hasFixtureFactor(email: string): Promise<boolean> {
+    const { rows } = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_auth_mfa_factors f
+        JOIN sys.sys_users u ON u.user_id = f.auth_mfa_factor_user_id
+       WHERE lower(u.user_email) = lower($1)
+         AND f.auth_mfa_factor_metadata->>'label' = '${E2E_FIXTURE_LABEL}'`,
+      [email],
+    );
+    return Number(rows[0]!.n) > 0;
+  }
 
   beforeAll(async () => {
     suite = await buildTestApp({ enrollConfirm: "on" });
-    await cleanupFactors(TOTP_USER);
-    await cleanupFactors(EMAIL_USER);
+    for (const email of [TOTP_USER, EMAIL_USER]) {
+      hadFixture[email] = await hasFixtureFactor(email);
+      await cleanupFactors(email);
+    }
     s = await login(suite, TOTP_USER);
   });
 
   afterAll(async () => {
-    await cleanupFactors(TOTP_USER);
-    await cleanupFactors(EMAIL_USER);
+    for (const email of [TOTP_USER, EMAIL_USER]) {
+      await cleanupFactors(email);
+      if (hadFixture[email]) await ensureFixtureTotpFactor(pool, email);
+    }
     await suite.app.close();
   });
 

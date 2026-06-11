@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 
 // MVP-4 §2.5 — ESS self-service session management (/v1/me/security/sessions + the
 // /v1/auth/sessions/current helper). Real login + live DB. A login creates a refresh-
@@ -10,8 +11,7 @@ const PWD = "Admin#PassW0rd!";
 interface S { cookies: Map<string, string>; csrf: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {
-  const r = await t.app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password: PWD } });
-  if (r.statusCode !== 200) throw new Error(`login ${email}: ${r.statusCode}`);
+  const r = await loginRaw(t.app, email, PWD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   return { cookies, csrf: (r.json() as { csrfToken: string }).csrfToken };

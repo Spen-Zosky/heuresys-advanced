@@ -22,6 +22,7 @@ import { readFileSync } from "node:fs";
 import { resolve as pathResolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -39,12 +40,7 @@ function ch(c: Map<string, string>): string {
 }
 
 async function login(t: TestApp, email: string): Promise<S> {
-  const r = await t.app.inject({
-    method: "POST",
-    url: "/v1/auth/login",
-    payload: { email, password: PWD },
-  });
-  if (r.statusCode !== 200) throw new Error(`login ${email}: ${r.statusCode}`);
+  const r = await loginRaw(t.app, email, PWD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   const body = r.json() as { csrfToken: string; user: { userId: string } };

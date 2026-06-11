@@ -8,6 +8,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 
 const PWD = "Admin#PassW0rd!";
 const AUTHOR = "federica.marchetti@rtl-bank.org"; // TENANT_ADMIN (RTL) — content:update/publish
@@ -37,12 +38,7 @@ describe("ESS media serve (/v1/me/content media)", () => {
   let mediaId = "";
 
   async function login(email: string) {
-    const r = await suite.app.inject({
-      method: "POST",
-      url: "/v1/auth/login",
-      payload: { email, password: PWD },
-    });
-    expect(r.statusCode).toBe(200);
+    const r = await loginRaw(suite.app, email, PWD);
     return {
       cookie: r.cookies.map((c) => `${c.name}=${c.value}`).join("; "),
       csrf: (r.json() as { csrfToken: string }).csrfToken,

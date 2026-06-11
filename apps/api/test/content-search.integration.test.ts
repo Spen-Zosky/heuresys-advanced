@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 
 // cap④ CMS P3 — full-text search (/v1/content/search). Real login + live DB. A real document
 // is created (no fixtures), searched, then cleaned up — live-data E2E doctrine.
@@ -16,8 +17,7 @@ let plainUser: S;  // USER — no content:read → 403
 let docId = "";
 
 async function login(email: string): Promise<S> {
-  const r = await suite.app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password: PWD } });
-  if (r.statusCode !== 200) throw new Error(`login ${email}: ${r.statusCode}`);
+  const r = await loginRaw(suite.app, email, PWD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   return { cookies, csrfToken: (r.json() as { csrfToken: string }).csrfToken };

@@ -32,6 +32,10 @@
 
 import { Client } from "pg";
 import argon2 from "argon2";
+import {
+  E2E_FIXTURE_LABEL,
+  FIXTURE_TOTP_SECRETS,
+} from "../../apps/api/test/helpers/mfa-fixture-secrets.js";
 import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,13 +47,16 @@ dotenvConfig({ path: resolve(repoRoot, ".env") });
 
 const DEFAULT_PASSWORD = "Admin#PassW0rd!";
 
-/** The five E2E/integration personas, by real email. Order = display order. */
+/** The six E2E/integration personas, by real email. Order = display order.
+ *  marco.rinaldi (TEAM_LEADER, r1b) joined the fixture set in S983 WS-E —
+ *  the mandatory-MFA total coverage gates every login-capable persona. */
 const PERSONA_EMAILS: readonly string[] = [
   "admin@heuresys.com",
   "federica.marchetti@rtl-bank.org",
   "paolo.caputo@rtl-bank.org",
   "tommaso.fiore@rtl-bank.org",
   "antonio.parisi@rtl-bank.org",
+  "marco.rinaldi@rtl-bank.org",
 ];
 
 const ARGON2_PARAMS = {
@@ -64,6 +71,34 @@ interface EnsureResult {
   userId: string;
   identityCreated: boolean;
   credentialCreated: boolean;
+  totpFactorCreated: boolean;
+}
+
+/**
+ * S983 WS-E (mandatory-MFA total coverage): ensure the persona carries the
+ * VERIFIED e2e-fixture TOTP factor (single-source secret from
+ * apps/api/test/helpers/mfa-fixture-secrets.ts; base32 stored as-is — the
+ * platform stores TOTP secrets base32-plaintext, see mfa-service.ts). The
+ * metadata label is BOTH the idempotency key (no unique on (user,kind)) and
+ * the discriminator that shields the fixture from the suites' scoped DELETEs.
+ */
+async function ensureTotpFactor(client: Client, userId: string, email: string): Promise<boolean> {
+  const secret = FIXTURE_TOTP_SECRETS[email];
+  if (!secret) throw new Error(`No fixture TOTP secret for ${email} — add it to mfa-fixture-secrets.ts`);
+  const res = await client.query(
+    `INSERT INTO sys.sys_auth_mfa_factors
+       (auth_mfa_factor_user_id, auth_mfa_factor_kind, auth_mfa_factor_secret,
+        auth_mfa_factor_metadata, auth_mfa_factor_verified)
+     SELECT $1, 'TOTP', $2, jsonb_build_object('label', $3::text), true
+      WHERE NOT EXISTS (
+        SELECT 1 FROM sys.sys_auth_mfa_factors f
+         WHERE f.auth_mfa_factor_user_id = $1
+           AND f.auth_mfa_factor_kind = 'TOTP'
+           AND f.auth_mfa_factor_metadata->>'label' = $3
+      )`,
+    [userId, secret, E2E_FIXTURE_LABEL],
+  );
+  return (res.rowCount ?? 0) > 0;
 }
 
 /**
@@ -137,7 +172,7 @@ async function ensureAuth(
     credentialCreated = true;
   }
 
-  return { userId, identityCreated, credentialCreated };
+  return { userId, identityCreated, credentialCreated, totpFactorCreated: false };
 }
 
 async function main() {
@@ -162,6 +197,7 @@ async function main() {
     const report: Array<{ email: string } & EnsureResult> = [];
     for (const email of PERSONA_EMAILS) {
       const r = await ensureAuth(client, email, password, wantsReset);
+      r.totpFactorCreated = await ensureTotpFactor(client, r.userId, email);
       report.push({ email, ...r });
     }
 
@@ -173,6 +209,7 @@ async function main() {
       const flags = [
         r.identityCreated ? "identity=CREATED" : "identity=EXISTS",
         r.credentialCreated ? "credential=CREATED" : "credential=EXISTS",
+        r.totpFactorCreated ? "totp-fixture=CREATED" : "totp-fixture=EXISTS",
       ];
       console.log(`  ${r.email.padEnd(34)} ${flags.join(" ")}`);
     }

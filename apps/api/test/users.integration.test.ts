@@ -8,6 +8,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { randomUUID } from "node:crypto";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 
 const PWD = "Admin#PassW0rd!";
@@ -30,14 +31,7 @@ function cookieHeader(cookies: Map<string, string>): string {
 }
 
 async function login(t: TestApp, email: string): Promise<Session> {
-  const r = await t.app.inject({
-    method: "POST",
-    url: "/v1/auth/login",
-    payload: { email, password: PWD },
-  });
-  if (r.statusCode !== 200) {
-    throw new Error(`login ${email} failed: ${r.statusCode} ${r.payload}`);
-  }
+  const r = await loginRaw(t.app, email, PWD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   const body = r.json() as { user: { userId: string }; csrfToken: string };

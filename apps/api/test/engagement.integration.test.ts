@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 
 // B-10b m2b — normalized engagement read-model (/v1/engagement/*). Real login + live DB.
 // Read-only; permission reuses surveys:read (6 HRMS roles). RTL slice: 8 surveys / 3792
@@ -15,8 +16,7 @@ let tenantAdmin: S; // TENANT_ADMIN (RTL) — surveys:read, own tenant
 let user: S;        // USER — lacks surveys:read → 403
 
 async function login(email: string): Promise<S> {
-  const r = await suite.app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password: PWD } });
-  if (r.statusCode !== 200) throw new Error(`login ${email}: ${r.statusCode}`);
+  const r = await loginRaw(suite.app, email, PWD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   return { cookies };

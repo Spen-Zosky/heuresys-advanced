@@ -12,6 +12,7 @@ import { createHash } from "node:crypto";
 import { Writable } from "node:stream";
 import pino from "pino";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { totpFor } from "./helpers/login.js";
 import { LOG_REDACT_PATHS } from "../src/app.js";
 import { pool, closePool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
@@ -40,11 +41,24 @@ function cookieHeader(cookies: Map<string, string>, names?: string[]): string {
 }
 
 async function performLogin(t: TestApp, email = ADMIN_EMAIL, password = ADMIN_PASSWORD): Promise<LoginBundle> {
-  const resp = await t.app.inject({
+  // Dual-mode (S983 WS-E): SUCCESS paths complete the TOTP step-2 when the
+  // live mandatory policy challenges the fixture persona; FAILURE paths
+  // (wrong creds → 401/429) surface the RAW first response untouched.
+  let resp = await t.app.inject({
     method: "POST",
     url: "/v1/auth/login",
     payload: { email, password },
   });
+  if (resp.statusCode === 200) {
+    const b = resp.json() as { status?: string; challengeToken?: string };
+    if (b.status === "mfa_required") {
+      resp = await t.app.inject({
+        method: "POST",
+        url: "/v1/auth/login",
+        payload: { email, password, challengeToken: b.challengeToken, mfaCode: totpFor(email) },
+      });
+    }
+  }
   const cookies = new Map<string, string>();
   for (const c of resp.cookies) cookies.set(c.name, c.value);
   return { status: resp.statusCode, body: resp.json() as LoginBundle["body"], cookies };
@@ -546,6 +560,11 @@ describe("/v1/auth/* integration", () => {
 
   it("POST /login is rate-limited (11 attempts → 429)", async () => {
     // Use a fresh app so the rate-limit store doesn't leak into other tests.
+    // Pin the per-IP limit to the production default (10): the suite-wide
+    // setup lifts AUTH_LOGIN_RATELIMIT_MAX for the mandatory-MFA 2-step
+    // logins (S983 WS-E) — this test asserts the limiter itself.
+    const prevMax = process.env.AUTH_LOGIN_RATELIMIT_MAX;
+    process.env.AUTH_LOGIN_RATELIMIT_MAX = "10";
     const local = await buildTestApp();
     try {
       const statuses: number[] = [];
@@ -566,6 +585,8 @@ describe("/v1/auth/* integration", () => {
       expect(throttled).toBe(1);
       expect(statuses[10]).toBe(429);
     } finally {
+      if (prevMax === undefined) delete process.env.AUTH_LOGIN_RATELIMIT_MAX;
+      else process.env.AUTH_LOGIN_RATELIMIT_MAX = prevMax;
       await local.app.close();
     }
   });

@@ -2,24 +2,20 @@
  * apps/web/tests/e2e/mfa-policy-admin.spec.ts
  * Admin editor /admin/mfa-policy (MVP-4 §2.5 mandatory-MFA, S982): the first
  * per-tenant config editor. Toggles the policy on the Heuresys System tenant
- * (roleCodes [READ_ONLY]) and restores it OFF in finally — NEVER leave the
- * gate ON for HS (the platformAdmin persona lives there).
+ * (roleCodes [READ_ONLY]) and snapshot-restores the EXACT pre-test policy in
+ * finally (S983 WS-E: the live row may be the REAL mandatory-MFA activation).
  */
 import { test, expect, request as pwRequest } from "@playwright/test";
-import { storageStateFor, TEST_PASSWORD } from "./fixtures";
+import { completeApiLogin, storageStateFor } from "./fixtures";
 
 const API_BASE = process.env.API_BASE ?? "http://localhost:3001";
 
 test.use({ storageState: storageStateFor("platformAdmin") });
 
-/** API-context login: returns cookie-bound context + csrf for state-changing calls. */
+/** API-context login (dual-mode S983 WS-E): cookie-bound context + csrf. */
 async function apiLogin() {
   const ctx = await pwRequest.newContext({ baseURL: API_BASE });
-  const login = await ctx.post("/v1/auth/login", {
-    data: { email: "admin@heuresys.com", password: TEST_PASSWORD },
-  });
-  if (!login.ok()) throw new Error(`API login failed: ${login.status()}`);
-  const { csrfToken } = (await login.json()) as { csrfToken: string };
+  const { csrfToken } = await completeApiLogin(ctx, "admin@heuresys.com");
   return { ctx, csrfToken };
 }
 
@@ -32,7 +28,22 @@ test("mfa-policy admin page: list, toggle HS policy on (READ_ONLY scope), restor
     .find((t) => !t.tenantCode.includes("RTL"));
   if (!hs) throw new Error("Heuresys System tenant not found");
 
+  // SNAPSHOT the pre-test HS policy (S983 WS-E / D-23 doctrine): the live DB
+  // carries the REAL mandatory-MFA activation — a blanket-disable in finally
+  // would silently wipe it. Restore the EXACT row afterwards.
+  const beforeList = await ctx.get("/v1/mfa-policy/");
+  expect(beforeList.ok()).toBeTruthy();
+  const saved = ((await beforeList.json()) as {
+    items: Array<{ tenantId: string; enabled: boolean; roleCodes: string[] | null }>;
+  }).items.find((p) => p.tenantId === hs.tenantId) ?? null;
+
   try {
+    // Arrange a deterministic OFF starting state for the UI toggle flow
+    // (post-flip the live state is enabled+all-roles, which would invert it).
+    await ctx.put(`/v1/mfa-policy/${hs.tenantId}`, {
+      data: { enabled: false, roleCodes: null },
+      headers: { "x-csrf-token": csrfToken },
+    });
     await page.goto("/admin/mfa-policy");
     await expect(page.getByTestId("admin-mfa-policy-page")).toBeVisible();
     // Auto-wait on the HS row FIRST: rows render from the policies fallback
@@ -60,9 +71,10 @@ test("mfa-policy admin page: list, toggle HS policy on (READ_ONLY scope), restor
     expect(item?.roleCodes).toEqual(["READ_ONLY"]);
     await expect(hsRow.getByTestId("mfa-policy-status")).toHaveText(/attiva|enabled/i);
   } finally {
-    // Restore OFF via API (robust even if the UI flow failed midway).
+    // Snapshot-restore the EXACT pre-test policy (never a blanket-disable —
+    // the row may be the REAL activation, S982 lesson).
     await ctx.put(`/v1/mfa-policy/${hs.tenantId}`, {
-      data: { enabled: false, roleCodes: null },
+      data: { enabled: saved?.enabled ?? false, roleCodes: saved?.roleCodes ?? null },
       headers: { "x-csrf-token": csrfToken },
     });
     await ctx.dispose();

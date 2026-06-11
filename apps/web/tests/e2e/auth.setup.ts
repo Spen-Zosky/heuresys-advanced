@@ -12,7 +12,7 @@
  */
 
 import { test as setup } from "@playwright/test";
-import { fillLoginForm, PERSONAS } from "./fixtures";
+import { completeMfaIfChallenged, fillLoginForm, PERSONAS } from "./fixtures";
 
 const TARGET_PERSONAS = [
   "platformAdmin",
@@ -34,6 +34,9 @@ for (const key of TARGET_PERSONAS) {
     await page.getByTestId("login-submit").waitFor({ state: "visible", timeout: 30_000 });
     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
     await page.getByTestId("login-submit").click();
+    // S983 WS-E: under the live mandatory policy the submit lands on the TOTP
+    // step — complete it with the fixture secret; pre-flip this is a no-op.
+    await completeMfaIfChallenged(page, persona.email);
     await page.waitForURL(`**${persona.expectedLandingPath}`, { timeout: 45_000 });
     await page.context().storageState({ path: `tests/.auth/${key}.json` });
   });

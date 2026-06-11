@@ -7,6 +7,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 import { InMemorySms } from "../src/modules/auth/sms-sender.js";
 import { pool } from "../src/db/client.js";
 
@@ -18,8 +19,9 @@ interface Session { cookies: Map<string, string>; csrf: string; userId: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
 
 async function login(t: TestApp): Promise<Session> {
-  const r = await t.app.inject({ method: "POST", url: "/v1/auth/login", payload: { email: EMAIL, password: PWD } });
-  if (r.statusCode !== 200) throw new Error(`login: ${r.statusCode} ${r.body}`);
+  // Dual-mode (S983 WS-E): with the fixture TOTP factor live the login is a
+  // 2-step; loginRaw completes it and returns the full session.
+  const r = await loginRaw(t.app, EMAIL, PWD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   const body = r.json() as { csrfToken: string; user: { userId: string } };

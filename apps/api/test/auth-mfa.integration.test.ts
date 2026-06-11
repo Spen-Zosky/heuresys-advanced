@@ -14,6 +14,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import * as OTPAuth from "otpauth";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
 import { sharedMfaService } from "../src/modules/auth/mfa-service.js";
@@ -78,8 +79,11 @@ describe("/v1/auth/login MFA gating (X20)", () => {
     });
   }
 
-  it("no-MFA account (admin) logs in directly with status: 'success' + cookies", async () => {
-    const resp = await login({ email: "admin@heuresys.com", password: "Admin#PassW0rd!" });
+  it("fixture persona (admin) completes a FULL login — plain success pre-flip, TOTP 2-step under the live mandatory policy (S983 WS-E)", async () => {
+    // Repurposed from "no-MFA account logs in directly": with the e2e-fixture
+    // TOTP factor live there IS no factor-less admin — the invariant under
+    // test is that the login always completes to a FULL session.
+    const resp = await loginRaw(app.app, "admin@heuresys.com", "Admin#PassW0rd!");
     expect(resp.statusCode).toBe(200);
     const json = resp.json();
     expect(json.status).toBe("success");
@@ -170,11 +174,9 @@ describe("/v1/auth/mfa EMAIL_OTP factor (MVP-4)", () => {
   const createdFactorIds = new Set<string>();
 
   async function loginSession(email: string, password: string) {
-    const r = await app.app.inject({
-      method: "POST",
-      url: "/v1/auth/login",
-      payload: { email, password },
-    });
+    // Dual-mode (S983 WS-E): loginRaw completes the TOTP step-2 when the
+    // fixture factor gates the login; pre-flip it is a plain passthrough.
+    const r = await loginRaw(app.app, email, password);
     const c = new Map<string, string>();
     for (const k of r.cookies) c.set(k.name, k.value);
     return { resp: r, cookies: c, csrfToken: (r.json() as { csrfToken?: string }).csrfToken ?? "" };

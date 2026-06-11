@@ -8,6 +8,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 
 const PASSWORD = "Admin#PassW0rd!";
@@ -21,14 +22,10 @@ describe("/v1/mfa-policy (mandatory-MFA #4)", () => {
   let heuresysTenantId: string;
 
   async function loginAs(email: string) {
-    const resp = await app.app.inject({
-      method: "POST",
-      url: "/v1/auth/login",
-      payload: { email, password: PASSWORD },
-    });
-    expect(resp.statusCode).toBe(200);
-    const json = resp.json() as { status: string; csrfToken: string };
-    expect(json.status).toBe("success");
+    // Dual-mode (S983 WS-E): under the live mandatory-MFA policy the login is
+    // a TOTP 2-step — loginRaw absorbs it and returns the full session.
+    const resp = await loginRaw(app.app, email, PASSWORD);
+    const json = resp.json() as { csrfToken: string };
     const cookie = resp.cookies.map((c) => `${c.name}=${c.value}`).join("; ");
     return { cookie, csrf: json.csrfToken };
   }

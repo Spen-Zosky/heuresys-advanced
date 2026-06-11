@@ -6,14 +6,14 @@
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 
 const PWD = "Admin#PassW0rd!";
 function ch(c: Map<string, string>) {
   return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
 }
 async function login(t: TestApp, email: string): Promise<Map<string, string>> {
-  const r = await t.app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password: PWD } });
-  if (r.statusCode !== 200) throw new Error(`login ${email}: ${r.statusCode}`);
+  const r = await loginRaw(t.app, email, PWD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   return cookies;

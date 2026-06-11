@@ -18,7 +18,7 @@
  */
 import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
 import * as OTPAuth from "otpauth";
-import { PERSONAS, TEST_PASSWORD } from "./fixtures";
+import { completeApiLogin, completeMfaIfChallenged, PERSONAS, TEST_PASSWORD } from "./fixtures";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 const MFA_EMAIL = PERSONAS.outsider.email;
@@ -37,11 +37,9 @@ function genTotp(secretBase32: string): string {
 /** Enroll + verify a TOTP factor on `email` via the real API. Returns the
  *  factorId + secret + an authenticated csrfToken for later cleanup. */
 async function enrollVerifiedTotp(request: APIRequestContext, email: string) {
-  const loginRes = await request.post(`${API_BASE}/v1/auth/login`, {
-    data: { email, password: TEST_PASSWORD },
-  });
-  expect(loginRes.status(), "API login for MFA setup").toBe(200);
-  const csrfToken = (await loginRes.json()).csrfToken as string;
+  // Dual-mode (S983 WS-E): under the live mandatory policy this API login is
+  // a TOTP 2-step against the fixture factor; pre-flip a plain passthrough.
+  const { csrfToken } = await completeApiLogin(request, email);
 
   const enrollRes = await request.post(`${API_BASE}/v1/auth/mfa/enroll`, {
     headers: { "x-csrf-token": csrfToken },
@@ -82,11 +80,13 @@ test.describe.configure({ mode: "serial" });
 test.setTimeout(90_000);
 
 test.describe("MVP-3 Tappa E /login — MFA login-gating", () => {
-  test("no-MFA persona logs in directly (regression, no MFA prompt)", async ({ page }) => {
+  test("fixture persona completes a FULL login (direct pre-flip, TOTP 2-step under the live policy)", async ({ page }) => {
+    // S983 WS-E: with mandatory MFA live there is no factor-less fixture
+    // persona — the regression under test is that login always completes.
     await page.goto("/login");
     await submitPassword(page, NO_MFA.email);
+    await completeMfaIfChallenged(page, NO_MFA.email);
     await expect(page).toHaveURL(new RegExp(`${NO_MFA.expectedLandingPath}`), { timeout: 60_000 });
-    await expect(page.getByTestId("login-mfa-form")).toHaveCount(0);
   });
 
   test("MFA persona: step 1 -> mfa_required UI, invalid code errors, valid code succeeds", async ({

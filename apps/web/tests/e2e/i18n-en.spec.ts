@@ -14,18 +14,16 @@
  * Persona: platformAdmin (all permissions → every route reachable).
  */
 import { test, expect, type APIRequestContext } from "@playwright/test";
-import { storageStateFor, PERSONAS, TEST_PASSWORD } from "./fixtures";
+import { storageStateFor, PERSONAS, TEST_PASSWORD, completeApiLogin } from "./fixtures";
 
 const BASE_URL =
   process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${process.env.PLAYWRIGHT_WEB_PORT ?? "3000"}`;
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 
 async function loginCsrf(request: APIRequestContext): Promise<string> {
-  const r = await request.post(`${API_BASE}/v1/auth/login`, {
-    data: { email: PERSONAS.platformAdmin.email, password: TEST_PASSWORD },
-  });
-  expect(r.ok(), "API login platformAdmin").toBeTruthy();
-  return (await r.json()).csrfToken as string;
+  // Dual-mode (S983 WS-E): completes the TOTP step-2 under the live policy.
+  const { csrfToken } = await completeApiLogin(request, PERSONAS.platformAdmin.email);
+  return csrfToken;
 }
 
 async function setServerLocale(request: APIRequestContext, csrf: string, locale: string | null) {

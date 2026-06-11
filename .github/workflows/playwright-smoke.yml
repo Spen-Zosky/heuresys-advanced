@@ -35,6 +35,11 @@ jobs:
       # OCI VM runner already runs Grafana on :3000 (docker-proxy). Run the web
       # app on :3100 to avoid the collision; playwright.config reads this.
       PLAYWRIGHT_WEB_PORT: "3100"
+      # S983 WS-E: under the live mandatory-MFA policy every persona login is
+      # TWO requests (password + TOTP step-2) - the production default per-IP
+      # limit (10/5min) would starve the 5-persona setup + retries. CI-only;
+      # PROD keeps its own value.
+      AUTH_LOGIN_RATELIMIT_MAX: "200"
     steps:
       - name: Checkout
         uses: actions/checkout@v6

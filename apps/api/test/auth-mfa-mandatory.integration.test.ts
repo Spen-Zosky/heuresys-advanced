@@ -139,10 +139,15 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
     expect(names).not.toContain(COOKIES.REFRESH);
   });
 
-  it("policy ON: a user whose roles are OUT of scope (TENANT_ADMIN) is untouched", async () => {
+  it("policy ON: a user whose roles are OUT of scope (TENANT_ADMIN) is never ENROLLMENT-gated by it", async () => {
     const resp = await login({ email: TENANT_ADMIN, password: PASSWORD });
     expect(resp.statusCode).toBe(200);
-    expect((resp.json() as { status: string }).status).toBe("success");
+    const status = (resp.json() as { status: string }).status;
+    // Out-of-scope ⇒ this suite's ['READ_ONLY'] policy adds NOTHING for her:
+    // plain success when the persona has no factor, the REGULAR factor-driven
+    // challenge when the e2e-fixture factor is live (S983 WS-E) — never the
+    // enrollment gate.
+    expect(["success", "mfa_required"]).toContain(status);
   });
 
   it("the enr session is CONTAINED by the allowlist guard: everything outside mfa+login+logout is 401 MFA_ENROLLMENT_ONLY", async () => {

@@ -10,6 +10,8 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import * as OTPAuth from "otpauth";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
+import { E2E_FIXTURE_LABEL } from "./helpers/mfa-fixture-secrets.js";
 import { pool, closePool } from "../src/db/client.js";
 
 const ADMIN_EMAIL = "admin@heuresys.com";
@@ -26,17 +28,23 @@ function cookieHeader(cookies: Map<string, string>): string {
 }
 
 async function loginAdmin(t: TestApp): Promise<Bundle> {
-  const r = await t.app.inject({
-    method: "POST",
-    url: "/v1/auth/login",
-    payload: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
-  });
-  expect(r.statusCode).toBe(200);
+  // Dual-mode (S983 WS-E): with the mandatory-MFA policy live the admin login
+  // is a TOTP 2-step against the PRESERVED e2e-fixture factor (the cleanup
+  // below is scoped to leave it in place).
+  const r = await loginRaw(t.app, ADMIN_EMAIL, ADMIN_PASSWORD);
   const cookies = new Map<string, string>();
   for (const c of r.cookies) cookies.set(c.name, c.value);
   const body = r.json() as { user: { userId: string }; csrfToken: string };
   return { cookies, csrf: body.csrfToken, userId: body.user.userId };
 }
+
+/** Scoped wipe: every THROWAWAY factor of the user — never the e2e-fixture
+ *  one (wiping it under a live mandatory policy would lock the persona into
+ *  mfa_enrollment_required for every other suite). */
+const DELETE_THROWAWAY_FACTORS = `
+  DELETE FROM sys.sys_auth_mfa_factors
+   WHERE auth_mfa_factor_user_id = $1
+     AND coalesce(auth_mfa_factor_metadata->>'label','') <> '${E2E_FIXTURE_LABEL}'`;
 
 describe("/v1/auth/mfa/* integration", () => {
   let suiteApp: TestApp;
@@ -53,18 +61,12 @@ describe("/v1/auth/mfa/* integration", () => {
   });
 
   beforeEach(async () => {
-    // Clean slate per test.
-    await pool.query(
-      `DELETE FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`,
-      [adminUserId],
-    );
+    // Clean slate per test (throwaway factors only — fixture preserved).
+    await pool.query(DELETE_THROWAWAY_FACTORS, [adminUserId]);
   });
 
   afterAll(async () => {
-    await pool.query(
-      `DELETE FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`,
-      [adminUserId],
-    );
+    await pool.query(DELETE_THROWAWAY_FACTORS, [adminUserId]);
     await suiteApp.app.close();
     await closePool();
   });
@@ -189,10 +191,13 @@ describe("/v1/auth/mfa/* integration", () => {
       items: Array<{ factorId: string; kind: string; verified: boolean }>;
       total: number;
     };
-    expect(body.total).toBe(1);
-    expect(body.items[0]!.factorId).toBe(factor1.factorId);
-    expect(body.items[0]!.kind).toBe("TOTP");
-    expect(body.items[0]!.verified).toBe(false);
+    // Filter by factorId (S983 WS-E): with the mandatory-MFA fixture live the
+    // list ALSO contains the persona's preserved e2e-fixture factor.
+    const mine = body.items.find((i) => i.factorId === factor1.factorId);
+    expect(mine).toBeDefined();
+    expect(mine!.kind).toBe("TOTP");
+    expect(mine!.verified).toBe(false);
+    expect(body.total).toBeGreaterThanOrEqual(1);
   });
 
   it("DELETE /factors/:factorId removes the user's factor and 404 on a cross-user one", async () => {

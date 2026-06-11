@@ -10,6 +10,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
+import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 
 const PWD = "Admin#PassW0rd!";
@@ -37,12 +38,7 @@ describe("content media (cap4 CMS P3, object store)", () => {
   let documentId = "";
 
   async function login(email: string) {
-    const r = await suite.app.inject({
-      method: "POST",
-      url: "/v1/auth/login",
-      payload: { email, password: PWD },
-    });
-    expect(r.statusCode).toBe(200);
+    const r = await loginRaw(suite.app, email, PWD);
     return {
       cookie: r.cookies.map((c) => `${c.name}=${c.value}`).join("; "),
       csrf: (r.json() as { csrfToken: string }).csrfToken,

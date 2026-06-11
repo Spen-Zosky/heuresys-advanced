@@ -100,3 +100,14 @@ Audit completo post-retune (35 route × 3 personas): **critical=0 serious=0 mode
 Il gate CI in `a11y.spec.ts` è stato alzato da `critical=0` a `critical=0 AND serious=0`
 (strategia §3 di questo doc: soglia alzata una volta stabile). Il tail §2.7 residuo è ora
 SOLO il mobile sweep (mai iniziato, multi-sessione).
+
+## S983 (2026-06-11) — mobile sweep CHIUSO (§2.7 a11y COMPLETO)
+
+Censimento mobile su project Playwright dedicato `mobile-a11y` (Pixel 7, chromium,
+stesso spec autenticato; output JSON namespaced per project in
+`test-results/a11y-audit/<project>/`): **critical=0 serious=0 moderate=0 minor=0**
+su tutte le 35 route uniche (37 test × 3 personas, 41 passed). Nessuna remediation
+necessaria — il retune token S982 + i fix S981 coprivano anche il viewport mobile.
+Il project `mobile-a11y` è ora **incondizionato** (gate live nelle full run, pattern
+raised-once-stable). Il tail §2.7 non ha più residui: desktop + mobile entrambi a zero
+su tutte le severità.

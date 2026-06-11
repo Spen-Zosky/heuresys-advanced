@@ -29,23 +29,19 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
       use: { ...devices["Desktop Chrome"] },
     },
-    // Mobile-viewport a11y sweep (§2.7): same authenticated a11y spec on a
+    // Mobile-viewport a11y gate (§2.7): same authenticated a11y spec on a
     // Pixel 7 profile (chromium engine — CI installs only chromium; the
-    // iPhone descriptors are webkit). Env-gated until the mobile sweep
-    // reaches critical=0+serious=0, so default/full runs stay green while
-    // remediation is in flight: run with MOBILE_A11Y=1. The testMatch
-    // requires a path separator before the filename so showcase-a11y.spec.ts
-    // (anonymous, different gate) is not picked up.
-    ...(process.env.MOBILE_A11Y === "1"
-      ? [
-          {
-            name: "mobile-a11y",
-            testMatch: /[\\/]a11y\.spec\.ts$/,
-            use: { ...devices["Pixel 7"] },
-            dependencies: ["setup"],
-          },
-        ]
-      : []),
+    // iPhone descriptors are webkit). Census S983: 0 violations of ANY
+    // severity across all 35 unique routes → the gate is live/unconditional
+    // (raised-once-stable, same pattern as the desktop serious gate, S982).
+    // The testMatch requires a path separator before the filename so
+    // showcase-a11y.spec.ts (anonymous, different gate) is not picked up.
+    {
+      name: "mobile-a11y",
+      testMatch: /[\\/]a11y\.spec\.ts$/,
+      use: { ...devices["Pixel 7"] },
+      dependencies: ["setup"],
+    },
     {
       name: "chromium",
       // Match all *.spec.ts EXCEPT showcase-a11y which runs anonymously

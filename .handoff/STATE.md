@@ -6,7 +6,7 @@
 
 ## Last session brief (S982 — mega-batch da piano approvato, 9 task tutti consegnati)
 
-Piano `docs/superpowers/plans/2026-06-10-s982-mega-batch.md` eseguito end-to-end: **Wave-2/B-50 CHIUSO** (import branches+succession su decisioni PM in-session, registry a 0 NEEDS_DECISION — la riconciliazione legacy→advanced non ha più tavoli in stato aperto), **§2.5 MFA completo code-side** (SMS_OTP code-only, TOFU v2 confirm out-of-band env-gated, UI admin policy) e **mandatory-MFA ATTIVATA in PROD su RTL** (slice 4 ruoli senza personas E2E; gate verificato live), **cap④ CMS chiusa** (ESS-media serve), **color-contrast a11y risolto** (0 serious su tutta la matrice, gate CI alzato), engines→22 (#30 chiusa). Push, CI verde, align 3 cloni + vm-deploy, smoke PROD ok.
+Piano `docs/superpowers/plans/2026-06-10-s982-mega-batch.md` eseguito end-to-end: **Wave-2/B-50 CHIUSO** (import branches+succession su decisioni PM in-session, registry a 0 NEEDS_DECISION — la riconciliazione legacy→advanced non ha più tavoli in stato aperto), **§2.5 MFA completo code-side** (SMS_OTP code-only, TOFU v2 confirm out-of-band env-gated, UI admin policy) e **mandatory-MFA ATTIVATA in PROD su RTL** (slice 4 ruoli senza personas E2E; gate verificato live), **cap④ CMS chiusa** (ESS-media serve), **color-contrast a11y risolto** (0 serious su tutta la matrice, gate CI alzato), engines→22 (#30 chiusa). Push, CI verde, align 3 cloni + vm-deploy, smoke PROD ok. **Coda di sessione**: refresh dati del twin `linux-pc` (clone-vm-db + restart) — anche il twin ora ha Wave-2, policy MFA attiva e gate live; tutti e 4 gli ambienti correnti.
 
 ## Top priorities (next session)
 

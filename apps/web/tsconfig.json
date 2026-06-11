@@ -11,7 +11,6 @@
     "incremental": true,
     "isolatedModules": true,
     "plugins": [{ "name": "next" }],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }

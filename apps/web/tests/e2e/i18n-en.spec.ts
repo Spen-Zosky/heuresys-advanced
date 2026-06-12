@@ -14,7 +14,7 @@
  * Persona: platformAdmin (all permissions → every route reachable).
  */
 import { test, expect, type APIRequestContext } from "@playwright/test";
-import { storageStateFor, PERSONAS, TEST_PASSWORD, completeApiLogin } from "./fixtures";
+import { storageStateFor, PERSONAS, completeApiLogin } from "./fixtures";
 
 const BASE_URL =
   process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${process.env.PLAYWRIGHT_WEB_PORT ?? "3000"}`;

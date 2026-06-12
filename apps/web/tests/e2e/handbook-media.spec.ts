@@ -7,7 +7,7 @@
  * Setup/teardown via API (two personas), UI assertions as the employee.
  */
 import { test, expect, request as pwRequest } from "@playwright/test";
-import { storageStateFor, TEST_PASSWORD, completeApiLogin } from "./fixtures";
+import { storageStateFor, completeApiLogin } from "./fixtures";
 
 const API_BASE = process.env.API_BASE ?? "http://localhost:3001";
 

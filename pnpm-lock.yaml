@@ -21,8 +21,8 @@ importers:
   .:
     dependencies:
       '@heuresys/ui':
-        specifier: ^0.1.4
-        version: 0.1.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
+        specifier: ^0.1.5
+        version: 0.1.5(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.5
@@ -155,8 +155,8 @@ importers:
   apps/showcase:
     dependencies:
       '@heuresys/ui':
-        specifier: ^0.1.4
-        version: 0.1.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
+        specifier: ^0.1.5
+        version: 0.1.5(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
       lucide-react:
         specifier: ^1.17.0
         version: 1.17.0(react@19.2.7)
@@ -201,8 +201,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared
       '@heuresys/ui':
-        specifier: ^0.1.4
-        version: 0.1.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
+        specifier: ^0.1.5
+        version: 0.1.5(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
       '@hookform/resolvers':
         specifier: 5.4.0
         version: 5.4.0(react-hook-form@7.78.0(react@19.2.7))
@@ -721,8 +721,8 @@ packages:
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
 
-  '@heuresys/ui@0.1.4':
-    resolution: {integrity: sha512-TUGUODSfUxzZ908JWqT7sZFw14JrDwPl9LqhqU1Kki0OcfdhqgJPt3ffJA0SVW9+EtWxv3iP+qzrBgwDYNEQLw==}
+  '@heuresys/ui@0.1.5':
+    resolution: {integrity: sha512-4rwphg5HKl272XlOgXd3KZ7eTgpL2bJ/cQiwQmrf17N+9hQY+KScr3BVVRxdc+4dl9TQIWYdSbqJsZw8D+CN6Q==}
     engines: {node: '>=20.0.0', npm: '>=10.0.0'}
     peerDependencies:
       '@types/react': 19.2.17
@@ -5068,12 +5068,6 @@ packages:
       react: 19.2.7
       react-dom: 19.2.7
 
-  react-hook-form@7.77.0:
-    resolution: {integrity: sha512-Sslh9YDYc0GDlWT/lxasnIduNo4v3yyvqRGvmGKUre5AFjDs/HV9/OafHGD8d+sB2yoL4UIL9L8X9i0WlZZebg==}
-    engines: {node: '>=18.0.0'}
-    peerDependencies:
-      react: 19.2.7
-
   react-hook-form@7.78.0:
     resolution: {integrity: sha512-EEZqc+N23moyzTlz61Pj+JvcXo76ICkpfOZo8JZw+sM4+wLQGh6nI2Ms+PdMOYNluFu0ghlM7B8mCzhRYtJCnA==}
     engines: {node: '>=18.0.0'}
@@ -6582,12 +6576,12 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
-  '@heuresys/ui@0.1.4(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)':
+  '@heuresys/ui@0.1.5(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)
       '@dnd-kit/utilities': 3.2.2(react@19.2.7)
-      '@hookform/resolvers': 5.4.0(react-hook-form@7.77.0(react@19.2.7))
+      '@hookform/resolvers': 5.4.0(react-hook-form@7.78.0(react@19.2.7))
       '@iarna/toml': 2.2.5
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@radix-ui/react-alert-dialog': 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -6652,7 +6646,7 @@ snapshots:
       react-cytoscapejs: 2.0.0(cytoscape@3.33.4)(react@19.2.7)
       react-dom: 19.2.7(react@19.2.7)
       react-grid-layout: 2.2.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      react-hook-form: 7.77.0(react@19.2.7)
+      react-hook-form: 7.78.0(react@19.2.7)
       react-international-phone: 4.8.0(react@19.2.7)
       react-intersection-observer: 10.0.3(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-markdown: 10.1.0(@types/react@19.2.17)(react@19.2.7)
@@ -6689,11 +6683,6 @@ snapshots:
       - supports-color
 
   '@hexagon/base64@1.1.28': {}
-
-  '@hookform/resolvers@5.4.0(react-hook-form@7.77.0(react@19.2.7))':
-    dependencies:
-      '@standard-schema/utils': 0.3.0
-      react-hook-form: 7.77.0(react@19.2.7)
 
   '@hookform/resolvers@5.4.0(react-hook-form@7.78.0(react@19.2.7))':
     dependencies:
@@ -11389,10 +11378,6 @@ snapshots:
       react-draggable: 4.6.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-resizable: 3.2.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       resize-observer-polyfill: 1.5.1
-
-  react-hook-form@7.77.0(react@19.2.7):
-    dependencies:
-      react: 19.2.7
 
   react-hook-form@7.78.0(react@19.2.7):
     dependencies:

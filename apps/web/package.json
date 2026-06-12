@@ -10,11 +10,12 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:e2e": "playwright test",
+    "test:e2e:prod": "next build && playwright test --config=playwright.prod.config.ts",
     "i18n:check": "tsx scripts/check-i18n-parity.ts"
   },
   "dependencies": {
     "@heuresys/shared": "workspace:*",
-    "@heuresys/ui": "^0.1.4",
+    "@heuresys/ui": "^0.1.5",
     "@hookform/resolvers": "5.4.0",
     "@simplewebauthn/browser": "^13.3.0",
     "@tanstack/react-query": "5.101.0",

@@ -46,6 +46,7 @@ All run from repo root unless noted. Use the project's pnpm package manager (pin
 | Run all tests | `pnpm test` |
 | Run single test file | `cd apps/api && pnpm exec vitest run test/<name>.integration.test.ts` |
 | Run single test by name | `cd apps/api && pnpm exec vitest run -t "<test name pattern>"` |
+| Full E2E web suite (prod build, **only** supported full-run mode — D-24) | `cd apps/web && pnpm test:e2e:prod` — dev config (`test:e2e`) is for per-spec iteration only: auth sessions live 15 min |
 | DB create (Windows) | `pnpm db:create` (uses `pwsh` + `db/scripts/create_local_database.ps1`) |
 | DB create (bash) | `pnpm db:create:sh` |
 | DB migrate | `pnpm db:migrate` / `pnpm db:migrate:sh` — idempotent, twice-run proven |

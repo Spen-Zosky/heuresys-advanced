@@ -56,7 +56,15 @@ export default function AdminRolesPage() {
       />
 
       <Card>
-        <CardContent className="p-0 overflow-x-auto">
+        {/* tabIndex/role: the matrix is a wide scrollable region whose content
+            (text + decorative icons) has nothing focusable — without these,
+            keyboard users cannot scroll it (axe scrollable-region-focusable). */}
+        <CardContent
+          className="p-0 overflow-x-auto"
+          tabIndex={0}
+          role="region"
+          aria-label={t("roles.title")}
+        >
           {rp.isLoading ? (
             <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
               <Spinner /> {t("common:loading")}

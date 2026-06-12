@@ -4,8 +4,16 @@ import { defineConfig, devices } from "@playwright/test";
 // VM self-hosted runner already runs Grafana on :3000 (docker-proxy), so the
 // playwright-smoke workflow sets PLAYWRIGHT_WEB_PORT=3100. Locally it defaults
 // to 3000. baseURL follows the same override.
-const WEB_PORT = process.env.PLAYWRIGHT_WEB_PORT ?? "3000";
-const WEB_BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${WEB_PORT}`;
+//
+// D-24 doctrine: this dev-mode config is for PER-SPEC iteration only. The
+// storageState sessions from auth.setup live exactly 15 minutes (hrx_access
+// TTL; the refresh cookie never traverses the /api proxy) — a full dev-mode
+// run (~90min) dies mid-suite with cascading /login redirects. Run the FULL
+// suite via `pnpm test:e2e:prod` (playwright.prod.config.ts: prod build +
+// mid-suite re-login).
+export const WEB_PORT = process.env.PLAYWRIGHT_WEB_PORT ?? "3000";
+export const WEB_BASE_URL =
+  process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${WEB_PORT}`;
 
 export default defineConfig({
   testDir: "./tests/e2e",

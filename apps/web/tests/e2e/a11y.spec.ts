@@ -81,6 +81,13 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
     // networkidle may not settle on pages with long-poll websockets; ignore
   });
 
+  // D-24 anti-vacuity guard: an expired session is redirected server-side to
+  // /login BEFORE any client API call, and the login page audits clean — the
+  // census would silently "pass" on the wrong page (97 vacuous passes, S984).
+  // URL-based (not testid) so it holds on the Pixel 7 mobile-a11y project too.
+  const audited = new URL(page.url()).pathname;
+  expect(audited, `dead session: requested ${route}, audited ${audited}`).toBe(route);
+
   const results = await new AxeBuilder({ page })
     // WCAG 2.0 A/AA + 2.1 A/AA + 2.2 A/AA (Tappa G — extended ruleset).
     // The 2.2 additions cover: focus-not-obscured, focus-appearance (AAA),

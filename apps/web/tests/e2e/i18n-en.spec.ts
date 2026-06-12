@@ -26,28 +26,46 @@ async function loginCsrf(request: APIRequestContext): Promise<string> {
   return csrfToken;
 }
 
-async function setServerLocale(request: APIRequestContext, csrf: string, locale: string | null) {
+async function setServerLocale(request: APIRequestContext, csrf: string, locale: string) {
+  // string, not string|null: the PATCH schema is .optional() NOT .nullable() —
+  // {locale:null} would 400 and silently skip the restore (latent D-25 bug).
   const r = await request.patch(`${API_BASE}/v1/me/preferences`, {
     headers: { "x-csrf-token": csrf },
     data: { locale },
   });
-  expect(r.ok(), `PATCH locale=${String(locale)}`).toBeTruthy();
+  expect(r.ok(), `PATCH locale=${locale}`).toBeTruthy();
 }
 
 test.use({ storageState: storageStateFor("platformAdmin") });
 
-let originalLocale: string | null = null;
+// ME_PREFERENCE_DEFAULTS.locale — the IT baseline every other spec asserts.
+let originalLocale = "it";
 
 test.beforeAll(async ({ request }) => {
   const csrf = await loginCsrf(request);
   const cur = await request.get(`${API_BASE}/v1/me/preferences`);
-  if (cur.ok()) originalLocale = ((await cur.json()).locale as string | null) ?? null;
+  if (cur.ok()) originalLocale = ((await cur.json()).locale as string | undefined) ?? "it";
+  // D-25 sanitized snapshot: this is the ONLY spec that drives EN, so a stored
+  // "en" here can only be the leftover of a run that died before afterAll.
+  // Snapshotting it verbatim would re-poison the baseline on restore —
+  // normalize to the IT default instead (self-healing across runs).
+  if (originalLocale === "en") originalLocale = "it";
   await setServerLocale(request, csrf, "en");
 });
 
 test.afterAll(async ({ request }) => {
-  const csrf = await loginCsrf(request);
-  await setServerLocale(request, csrf, originalLocale);
+  try {
+    const csrf = await loginCsrf(request);
+    await setServerLocale(request, csrf, originalLocale);
+  } catch (err) {
+    throw new Error(
+      "i18n-en locale restore FAILED — platformAdmin may be stuck on locale=en and " +
+        "every IT-asserting spec would fail until recovered. Recover with: " +
+        "UPDATE sys.sys_user_preferences SET user_preference_locale='it' WHERE user_preference_user_id = " +
+        "(SELECT user_id FROM sys.sys_users WHERE user_email='admin@heuresys.com'); — " +
+        String(err),
+    );
+  }
 });
 
 test.beforeEach(async ({ context }) => {

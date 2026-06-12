@@ -77,6 +77,15 @@ jobs:
       - name: Boot API server (background)
         working-directory: apps/api
         run: |
+          # Guard: the runner VM is a multi-app host (see deploy/README.md
+          # "Mappa porte VM") — if anything already answers on :3001 it is a
+          # foreign process; fail loud instead of health-checking the wrong app
+          # (S984 lesson, same class as the :3100 web collision).
+          if curl -sf http://localhost:3001/readyz > /dev/null 2>&1 || curl -sf http://localhost:3001 > /dev/null 2>&1; then
+            echo "port 3001 already in use by a foreign process:"
+            ss -ltnp | grep ":3001" || true
+            exit 1
+          fi
           # setsid detaches into a new session so the server survives this
           # step's shell exit (a bare `&` child gets SIGHUP'd between steps →
           # the next step finds nothing listening).
@@ -86,6 +95,9 @@ jobs:
             sleep 1
           done
           curl -sf http://localhost:3001/readyz > /dev/null || { echo "API failed to start"; tail -50 /tmp/api.log; exit 1; }
+          # Identity check: our readyz reports the DB probe.
+          curl -s http://localhost:3001/readyz | grep -q '"database"' || \
+            { echo "served app on :3001 is NOT the heuresys-advanced API"; tail -50 /tmp/api.log; exit 1; }
 
       - name: Boot web server (background)
         working-directory: apps/web

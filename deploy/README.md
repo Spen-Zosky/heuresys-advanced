@@ -89,6 +89,35 @@ bash scripts/vm-bootstrap.sh          # API :8013, web :3013, systemd units, ufw
   `journalctl -u heuresys-advanced-api -f`.
 - Override: `REPO_DIR=… PUBLIC_HOST=… API_PORT=… WEB_PORT=… bash scripts/vm-bootstrap.sh`.
 
+### Mappa porte VM (oracle-vm-default) — registro allocazioni
+
+La VM è un host **multi-app**: heuresys-advanced convive con evo legacy, Grafana,
+altri progetti e tooling. Census live 2026-06-12 (S984). **Regola**: prima di
+deployare QUALSIASI nuovo servizio sulla VM, consultare/aggiornare questa mappa —
+una porta "libera" non è una porta "disponibile". Lezione S984: un next-server
+estraneo su :3100 ha silenziato lo smoke CI per un giorno (il vecchio healthcheck
+`curl -sf` passava contro l'app sbagliata).
+
+| Porta | Servizio | Owner |
+|---|---|---|
+| 22 / 80 / 443 | sshd · nginx (TLS Certbot: `www.heuresys.com`→3013, `evo.heuresys.com`→3200, `lalibraiascalza.com`→3100) | sistema |
+| 3000 | Grafana (docker) | observability |
+| **3001** | **RISERVATA CI** — API effimera del job `playwright-smoke` (runner self-hosted) | heuresys-advanced CI |
+| 3012 / 3200 / 8012 | evo legacy (web ×2 + api-gateway docker) | heuresys-evo |
+| **3013 / 8013** | **PROD heuresys-advanced** (web `next start` + API tsup), systemd `heuresys-advanced-{web,api}` | heuresys-advanced |
+| 3100 | La Libraia Scalza (Next.js, systemd `lalibraiascalza.service`) | lalibraiascalza.com |
+| **3187** | **RISERVATA CI** — web effimero del job `playwright-smoke` (`PLAYWRIGHT_WEB_PORT`) | heuresys-advanced CI |
+| 3847 / 4000 / 37035 / 8200 / 37777 | tooling vario (vibe-kanban, claude-mem worker, ecc.) | tooling |
+| 5432 | PostgreSQL 16 nativo (`heuresys_advanced` + `heuresys_platform`) — localhost only | DB |
+| 5433 / 6379 / 8020 | docker evo (legacy DB · redis · misc) — localhost only | heuresys-evo |
+| 6432 | pgbouncer — localhost only | DB |
+| 9090 / 9100 / 9187 | prometheus · node-exporter · pg-exporter (docker) | observability |
+
+I due boot-step del workflow `playwright-smoke.yml` hanno **guard pre-bind**
+(fail-loud se la porta risponde prima del nostro boot) + **identity-check**
+dell'app servita (marker `heuresys` su `/login`; JSON `"database"` su `/readyz`)
+— una nuova collisione produce un errore esplicito, mai un test sull'app sbagliata.
+
 ## Mac (Darwin Intel / OpenCore) or Linux desktop — dev, on-demand
 
 ```bash

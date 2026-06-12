@@ -32,9 +32,13 @@ jobs:
     env:
       NODE_ENV: test
       LOG_LEVEL: warn
-      # OCI VM runner already runs Grafana on :3000 (docker-proxy). Run the web
-      # app on :3100 to avoid the collision; playwright.config reads this.
-      PLAYWRIGHT_WEB_PORT: "3100"
+      # OCI VM runner already runs Grafana on :3000 (docker-proxy). :3100 was
+      # the first relocation, but on 2026-06-11 an unrelated next-server on the
+      # VM grabbed it and the old `curl -sf` health check happily passed against
+      # the WRONG app (S984 root-cause of the all-personas login-submit
+      # timeout). Use a less obvious port AND guard the boot step below with a
+      # pre-bind check + served-app identity check; playwright.config reads this.
+      PLAYWRIGHT_WEB_PORT: "3187"
       # S983 WS-E: under the live mandatory-MFA policy every persona login is
       # TWO requests (password + TOTP step-2) - the production default per-IP
       # limit (10/5min) would starve the 5-persona setup + retries. CI-only;
@@ -86,17 +90,28 @@ jobs:
       - name: Boot web server (background)
         working-directory: apps/web
         run: |
+          # Guard: if ANYTHING already answers on the port, it is a foreign
+          # process (we have not started ours yet) — fail loud instead of
+          # letting the health check below pass against the wrong app (S984).
+          if curl -sf "http://localhost:${PLAYWRIGHT_WEB_PORT}" > /dev/null 2>&1; then
+            echo "port ${PLAYWRIGHT_WEB_PORT} already in use by a foreign process:"
+            ss -ltnp | grep ":${PLAYWRIGHT_WEB_PORT}" || true
+            exit 1
+          fi
           pnpm build
-          # :3000 is Grafana (docker-proxy) on this runner host → use :3100.
           # Invoke `next start` directly: the package `start` script hardcodes
           # `-p 3000`, which ignores PORT and collides with Grafana. setsid so
           # the server survives into the Playwright step.
-          setsid bash -c 'pnpm exec next start -p 3100 > /tmp/web.log 2>&1' &
+          setsid bash -c "pnpm exec next start -p ${PLAYWRIGHT_WEB_PORT} > /tmp/web.log 2>&1" &
           for i in $(seq 1 90); do
-            curl -sf http://localhost:3100 > /dev/null && { echo "web up"; break; }
+            curl -sf "http://localhost:${PLAYWRIGHT_WEB_PORT}" > /dev/null && { echo "web up"; break; }
             sleep 1
           done
-          curl -sf http://localhost:3100 > /dev/null || { echo "web failed to start"; tail -50 /tmp/web.log; exit 1; }
+          curl -sf "http://localhost:${PLAYWRIGHT_WEB_PORT}" > /dev/null || { echo "web failed to start"; tail -50 /tmp/web.log; exit 1; }
+          # Identity check: the served app must be OURS (the login page HTML
+          # carries the heuresys brand marker; a foreign app will not).
+          curl -s "http://localhost:${PLAYWRIGHT_WEB_PORT}/login" | grep -qi heuresys || \
+            { echo "served app on :${PLAYWRIGHT_WEB_PORT} is NOT heuresys-advanced web"; tail -50 /tmp/web.log; exit 1; }
 
       - name: Run Playwright smoke suite
         working-directory: apps/web

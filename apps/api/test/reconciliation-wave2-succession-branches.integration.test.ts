@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildTestApp, type TestApp } from './helpers/build-test-app.js';
+import { loginRaw } from './helpers/login.js';
 import { pool } from '../src/db/client.js';
 
 // Wave-2 / B-50 close (S982, mig 000106 + seeds 49-50): the last 3 NEEDS_DECISION tables
@@ -123,11 +124,10 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
 
     beforeAll(async () => {
       suite = await buildTestApp();
-      const r = await suite.app.inject({
-        method: 'POST', url: '/v1/auth/login',
-        payload: { email: 'federica.marchetti@rtl-bank.org', password: 'Admin#PassW0rd!' },
-      });
-      if (r.statusCode !== 200) throw new Error(`login failed: ${r.statusCode}`);
+      // S984: dual-mode login (raw single-step broke at fixture-seed time —
+      // step-1 returns 200 mfa_required with NO cookies once the persona has
+      // a verified factor, policy-independent).
+      const r = await loginRaw(suite.app, 'federica.marchetti@rtl-bank.org', 'Admin#PassW0rd!');
       cookieHeader = r.cookies.map((c) => `${c.name}=${c.value}`).join('; ');
     });
 

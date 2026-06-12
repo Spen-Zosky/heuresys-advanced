@@ -76,6 +76,36 @@ host with a warning** instead of failing. The VM deploy runs `db/scripts/migrate
 normally a no-op on the shared DB). Use the full-clone form above to catch up a host that
 was skipped.
 
+## Claude ecosystem alignment (`align-claude-ecosystem.sh`)
+
+Canonical replacement of the manual S979 procedure. Clones the **Windows user-level
+Claude catalog** (`~/.claude` portable subset) onto mac / vm / linuxpc, making them
+idempotent ecosystem clones (modulo OS): `CLAUDE.md`, `skills/`, `commands/`,
+`statusline-command.sh`, per-OS-transformed `settings.json` (PowerShell hooks → bash
+`session-bootstrap.sh`, statusline repath, drive letters dropped), claude-mem
+`settings.json` (path keys per host, **DB never copied** — fresh per machine), and a
+**native plugin reinstall** on each remote (6 marketplaces + 16 enabled plugins — the
+plugin registry is never raw-copied: foreign absolute paths were the S979 corruption).
+
+```bash
+bash scripts/align-claude-ecosystem.sh linuxpc --dry-run   # preview (no remote writes)
+bash scripts/align-claude-ecosystem.sh all                 # align (linuxpc resilient)
+bash scripts/align-claude-ecosystem.sh all --verify        # drift reports only
+bash scripts/align-claude-ecosystem.sh vm --rollback <stamp>
+```
+
+Safety by construction: first run moves the whole remote `~/.claude` to
+`~/.claude.bak-<stamp>` (old lineage archived, recoverable) and restores
+`.credentials.json`/`projects/`/`settings.local.json`/state from it; later runs take a
+tgz of managed paths only. **Auth is never cloned and credentials are forward-only**
+(rollback keeps the newest `.credentials.json` — restoring a stale copy over rotated
+OAuth tokens bricks auth; learned the hard way on the VM, 2026-06-12). A headless
+smoke test (`claude -p --tools ""`) gates startup breakage with auto-rollback; a 401
+only warns (auth ≠ alignment; fix with `claude login` on the host). Drift reports land
+in `deploy/reports/claude-align/` (gitignored). The Mac runs config-only
+(`--skip-plugins --skip-smoke`): Claude Code ≥2.x is AVX2-native and the 2012 Mac has
+no AVX2 — see `deploy/reports/claude-align/mac-cli-repair-20260612.md`.
+
 ## Linux server (OCI VM / any amd64 Linux) — public, systemd
 
 ```bash

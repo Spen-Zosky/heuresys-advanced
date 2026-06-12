@@ -150,3 +150,6 @@ docs/kb/tools/.sync.log
 
 # cap4 CMS P3 - local-disk media object store (default MEDIA_STORAGE_DIR)
 .data/
+
+# Claude ecosystem alignment - drift/acceptance reports (per-machine, local-only)
+deploy/reports/

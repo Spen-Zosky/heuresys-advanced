@@ -296,6 +296,9 @@ Batch del menu eseguito in autonomia (decision-authority session-scoped), 4 comm
 - **engines ≥22 + @types/node 22.19.20 ✅** (`1c91450`): **PR #30 chiusa** not-adopted; label defer-major ripristinata su #28 (stop churn CI rosso del branch dependabot).
 - Fix R3 collaterale: `sys_auth_mfa_factors` mai registrata nel reconciliation registry → D/EXCLUDE via amendment `000062` (registry 100 righe, D38). Vedi DEBT D-22/D-23.
 
+**🟢 Aggiornamento S985 (2026-06-12/13) — batch 1+2+5: D-24/D-25 chiusi · dossier roadmap · D-26 aperto:**
+2 commit (`41e01ed` test-infra+a11y · `a629844` docs/kb). **D-24 + D-25 ✅ RISOLTI** (vedi DEBT_REGISTER per il dettaglio): full suite E2E ora canonica su build prod (`pnpm test:e2e:prod`, re-login mid-suite + anti-vacuità; gate **200 pass / 1 flaky-retry / 9.6min**); locale baseline crash-resilient. **🔴 D-26 NUOVO** (hard-logout 15min utenti PROD — silent-refresh rotto dietro `/api`): priorità n°1, sessione dedicata. Collaterale R3: 2 violazioni a11y serious reali smascherate dall'anti-vacuità → fixate (`@heuresys/ui@0.1.5` shell `<main>` + matrice `/admin/roles`). **Roadmap post-v1.0**: la SoT delle direzioni candidate è ora il **dossier `docs/kb/POST_V1_ROADMAP_DOSSIER.md`** (SuccessFactors sandbox-gated · Wave-3 = multi-tenant onboarding 3 livelli · **F7 terminale/label stale** · 12 residui R1-R12 · 9 direzioni nuove 3.1-3.9 incl. go-to-market come domanda madre) — le decisioni restano PM; i quick-wins R5 (backup DB) + R7 (timer reindex embeddings) + 3.7 (DR drill) sono CLASSE A eseguibili senza gate. Item #2 STATE S984 (3 fattori MFA throwaway) = autopulito, verificato.
+
 ## P3 — Infra / robustezza
 
 | ID | Azione | Note |

@@ -106,6 +106,18 @@ in `deploy/reports/claude-align/` (gitignored). The Mac runs config-only
 (`--skip-plugins --skip-smoke`): Claude Code ≥2.x is AVX2-native and the 2012 Mac has
 no AVX2 — see `deploy/reports/claude-align/mac-cli-repair-20260612.md`.
 
+**SDK parity** (opzione C, 2026-06-12): the Anthropic SDKs are part of the ecosystem on
+every machine — npm `@anthropic-ai/claude-agent-sdk` + `@anthropic-ai/sdk` (global) and
+pip `anthropic` + `claude-agent-sdk` (user site). The align/`--sdks-only` stage equalizes
+remotes to the versions INSTALLED on the Windows SoT (read at runtime from `npm ls -g` /
+`pip show` — to bump everyone, update the SoT then re-run) and prunes the deprecated
+`claude-code-sdk`. pip falls back to `--break-system-packages` for PEP 668 hosts
+(Ubuntu 24.04). Mac note: works (SDKs are pure JS/Python — no AVX2 constraint), but the
+*Agent* SDKs spawn the Claude Code CLI at runtime, which the 2012 Mac cannot run: there
+they are install-parity only; the plain API SDKs (`@anthropic-ai/sdk`, `anthropic`) are
+fully usable. `claude --version` / `claude plugin list` checks include SDK versions in
+the `--verify` drift report.
+
 ## Linux server (OCI VM / any amd64 Linux) — public, systemd
 
 ```bash

@@ -15,7 +15,7 @@
 # Usage:
 #   align-claude-ecosystem.sh <mac|vm|linuxpc|all> [--dry-run] [--verify] [--delta]
 #                             [--resilient] [--skip-plugins] [--skip-smoke]
-#                             [--rollback <stamp>]
+#                             [--skip-sdks] [--sdks-only] [--rollback <stamp>]
 #
 # Modes:
 #   (default)   align: backup remote ~/.claude (first run: full mv; later: tgz of managed
@@ -72,20 +72,31 @@ PLUGINS_TO_INSTALL=(
   claude-mem@thedotmack
 )
 
+# SDK parity (opzione C, 2026-06-12): the Anthropic SDKs are part of the ecosystem on
+# every machine, equalized at runtime to the versions INSTALLED on the Windows SoT
+# (npm -g / pip). claude-code-sdk is the deprecated predecessor of claude-agent-sdk
+# and gets pruned wherever found.
+NPM_SDKS=( "@anthropic-ai/claude-agent-sdk" "@anthropic-ai/sdk" )
+PIP_SDKS=( anthropic claude-agent-sdk )
+PIP_PRUNE=( claude-code-sdk )
+
 # --- host configs ---------------------------------------------------------------------
 mac_cfg()     { HOST=mac-local;         RHOME=/Users/enzo;  NVMUSE=default; FOREIGN_RE='C:\\\\Users|/home/(enzo|ubuntu)'; }
 vm_cfg()      { HOST=oracle-vm-default; RHOME=/home/ubuntu; NVMUSE=22;      FOREIGN_RE='C:\\\\Users|/Users/|/home/enzo'; }
 linuxpc_cfg() { HOST=linux-pc;          RHOME=/home/enzo;   NVMUSE=22;      FOREIGN_RE='C:\\\\Users|/Users/|/home/ubuntu'; }
 rssh()        { MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes "$@"; }
 reachable()   { rssh -o ConnectTimeout=8 "$1" 'exit 0' 2>/dev/null; }
-nvm_pre()     { printf 'export NVM_DIR="$HOME/.nvm"; set +e; . "$NVM_DIR/nvm.sh" >/dev/null 2>&1; nvm use %s >/dev/null 2>&1; set -e; export PATH="$HOME/.local/bin:$PATH"; ' "$NVMUSE"; }
+# /usr/local/bin in PATH: on the mac the non-interactive SSH PATH would otherwise resolve
+# pip3 to the CommandLineTools Python 3.9 (too old for claude-agent-sdk) instead of the
+# /usr/local/bin python3 3.14; harmless on the Linux hosts.
+nvm_pre()     { printf 'export NVM_DIR="$HOME/.nvm"; set +e; . "$NVM_DIR/nvm.sh" >/dev/null 2>&1; nvm use %s >/dev/null 2>&1; set -e; export PATH="$HOME/.local/bin:/usr/local/bin:$PATH"; ' "$NVMUSE"; }
 
 log()  { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
 warn() { printf '\033[33m[warn]\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[31m[FATAL]\033[0m %s\n' "$*" >&2; exit 1; }
 
 # --- args -----------------------------------------------------------------------------
-TARGETS_ARG=""; DRY=0; VERIFY_ONLY=0; DELTA=0; RESILIENT=0; SKIP_PLUGINS=0; SKIP_SMOKE=0; ROLLBACK_STAMP=""
+TARGETS_ARG=""; DRY=0; VERIFY_ONLY=0; DELTA=0; RESILIENT=0; SKIP_PLUGINS=0; SKIP_SMOKE=0; SKIP_SDKS=0; SDKS_ONLY=0; ROLLBACK_STAMP=""
 expect_stamp=0
 for a in "$@"; do
   if [ "$expect_stamp" = 1 ]; then ROLLBACK_STAMP="$a"; expect_stamp=0; continue; fi
@@ -97,6 +108,8 @@ for a in "$@"; do
     --resilient)    RESILIENT=1 ;;
     --skip-plugins) SKIP_PLUGINS=1 ;;
     --skip-smoke)   SKIP_SMOKE=1 ;;
+    --skip-sdks)    SKIP_SDKS=1 ;;
+    --sdks-only)    SDKS_ONLY=1 ;;
     --rollback)     expect_stamp=1 ;;
     *) die "unknown arg: $a" ;;
   esac
@@ -115,6 +128,45 @@ preflight_local() {
   [ -d "$SRC/commands" ]          || die "$SRC/commands missing"
   [ -f "$BOOTSTRAP_SRC" ]         || die "session-bootstrap.sh missing at: $BOOTSTRAP_SRC"
   [ -f "$CLAUDE_MEM_SRC" ]        || die "claude-mem settings missing at: $CLAUDE_MEM_SRC"
+  resolve_sdk_specs
+}
+
+# Resolve the SDK versions installed on the SoT — remotes are equalized to THESE.
+NPM_SPECS=""; PIP_SPECS=""
+resolve_sdk_specs() {
+  local p v
+  for p in "${NPM_SDKS[@]}"; do
+    v="$(npm ls -g --depth=0 --json 2>/dev/null | jq -r --arg p "$p" '.dependencies[$p].version // empty')"
+    if [ -n "$v" ]; then NPM_SPECS="$NPM_SPECS $p@$v"; else warn "SoT npm SDK not installed: $p — skipped"; fi
+  done
+  for p in "${PIP_SDKS[@]}"; do
+    v="$(pip show "$p" 2>/dev/null | awk '/^Version:/{print $2}')"
+    if [ -n "$v" ]; then PIP_SPECS="$PIP_SPECS $p==$v"; else warn "SoT pip SDK not installed: $p — skipped"; fi
+  done
+  [ -n "$NPM_SPECS$PIP_SPECS" ] && echo "[sdk] SoT specs:$NPM_SPECS$PIP_SPECS"
+}
+
+# Equalize the remote's global SDKs to the SoT versions; prune deprecated packages.
+# pip fallback --break-system-packages covers PEP 668 (Ubuntu 24.04, Homebrew python).
+sdk_stage() {
+  if [ -z "$NPM_SPECS$PIP_SPECS" ]; then warn "[sdk] no SoT specs resolved — stage skipped"; return 0; fi
+  rssh "$HOST" "$(nvm_pre)"'
+    for s in '"$NPM_SPECS"'; do
+      npm i -g "$s" >/dev/null 2>&1 && echo "[sdk][npm] $s OK" || echo "[sdk][npm][WARN] $s FAILED"
+    done
+    for s in '"$PIP_SPECS"'; do
+      if pip3 install --user --upgrade --quiet "$s" >/dev/null 2>&1 \
+         || pip3 install --user --break-system-packages --upgrade --quiet "$s" >/dev/null 2>&1; then
+        echo "[sdk][pip] $s OK"
+      else echo "[sdk][pip][WARN] $s FAILED"; fi
+    done
+    for p in '"${PIP_PRUNE[*]}"'; do
+      if pip3 show "$p" >/dev/null 2>&1; then
+        if pip3 uninstall -y "$p" >/dev/null 2>&1 || pip3 uninstall -y --break-system-packages "$p" >/dev/null 2>&1; then
+          echo "[sdk][pip] pruned deprecated: $p"
+        else echo "[sdk][pip][WARN] prune failed: $p"; fi
+      fi
+    done'
 }
 
 # --- staging ----------------------------------------------------------------------------
@@ -334,9 +386,21 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
     if [ -f "$HOME/.claude/plugins/installed_plugins.json" ]; then
       grep -cE '"'"'$FOREIGN_RE'"'"' "$HOME/.claude/plugins/installed_plugins.json" | sed "s/^/foreign_paths=/"
     else echo "foreign_paths=NO_REGISTRY"; fi
+    for s in '"$NPM_SPECS"'; do
+      ver="${s##*@}"; pkg="${s%@$ver}"
+      npm ls -g --depth=0 "$pkg" 2>/dev/null | grep -q "@$ver" && echo "sdk_npm_ok=$s" || echo "sdk_npm_MISSING=$s"
+    done
+    for s in '"$PIP_SPECS"'; do
+      pkg="${s%%==*}"; ver="${s##*==}"
+      v="$(pip3 show "$pkg" 2>/dev/null | awk "/^Version:/{print \$2}")"
+      [ "$v" = "$ver" ] && echo "sdk_pip_ok=$s" || echo "sdk_pip_MISSING=$pkg have=${v:-none}"
+    done
+    for p in '"${PIP_PRUNE[*]}"'; do
+      pip3 show "$p" >/dev/null 2>&1 && echo "sdk_pip_DEPRECATED_PRESENT=$p"
+    done
   ' 2>&1 || true)"
   { echo '```'; printf '%s\n' "$checks"; echo '```'; } >> "$report"
-  printf '%s\n' "$checks" | grep -qE 'plugin_MISSING|purity_FAIL|claude_version=BROKEN|sentinel=MISSING' && issues=$((issues+1))
+  printf '%s\n' "$checks" | grep -qE 'plugin_MISSING|purity_FAIL|claude_version=BROKEN|sentinel=MISSING|sdk_npm_MISSING|sdk_pip_MISSING|sdk_pip_DEPRECATED_PRESENT' && issues=$((issues+1))
   printf '%s\n' "$checks" | grep -q "mem_datadir=$RHOME/.claude-mem" || issues=$((issues+1))
   local fp; fp="$(printf '%s\n' "$checks" | grep -oE 'foreign_paths=[0-9]+' | cut -d= -f2 || echo '')"
   [ -n "$fp" ] && [ "$fp" != 0 ] && issues=$((issues+1))
@@ -414,6 +478,13 @@ align_host() {  # $1 = kind
   log "[$kind] claude-mem settings (fresh per-machine DB preserved)"
   setup_claude_mem
 
+  if [ "$SKIP_SDKS" = 1 ]; then
+    log "[$kind] SDK stage skipped (--skip-sdks)"
+  else
+    log "[$kind] SDK parity (npm + pip pinned to SoT, prune deprecated)"
+    sdk_stage || warn "[$kind] SDK stage incomplete — re-run with --sdks-only"
+  fi
+
   log "[$kind] auth presence (post) — files must not have disappeared"
   local auth_post; auth_post="$(auth_presence)"
   echo "$auth_post" | sed 's/^/  /'
@@ -445,6 +516,16 @@ align_host() {  # $1 = kind
 run_target() {  # dispatch one kind through the requested mode
   local kind="$1"
   if [ -n "$ROLLBACK_STAMP" ]; then rollback_host "$kind" "$ROLLBACK_STAMP"; return; fi
+  if [ "$SDKS_ONLY" = 1 ]; then
+    "${kind}_cfg"
+    if ! reachable "$HOST"; then
+      if [ "$RESILIENT" = 1 ]; then warn "[$kind] unreachable — sdk stage skipped"; SKIPPED="$SKIPPED $kind"; return 0
+      else die "[$kind] $HOST unreachable"; fi
+    fi
+    log "[$kind] SDK parity (sdks-only)"
+    sdk_stage
+    return
+  fi
   if [ "$VERIFY_ONLY" = 1 ]; then
     "${kind}_cfg"
     if ! reachable "$HOST"; then

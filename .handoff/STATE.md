@@ -1,29 +1,30 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-10 (S982).
+**Updated**: 2026-06-12 (S984).
 
 > **Vista rapida** dello stato di lavoro (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura, delta per-sessione) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui.
 
-## Last session brief (S982 — mega-batch da piano approvato, 9 task tutti consegnati)
+## Last session brief (S984 — ripresa batch S983 interrotto, chiusura totale P1/P2/P3)
 
-Piano `docs/superpowers/plans/2026-06-10-s982-mega-batch.md` eseguito end-to-end: **Wave-2/B-50 CHIUSO** (import branches+succession su decisioni PM in-session, registry a 0 NEEDS_DECISION — la riconciliazione legacy→advanced non ha più tavoli in stato aperto), **§2.5 MFA completo code-side** (SMS_OTP code-only, TOFU v2 confirm out-of-band env-gated, UI admin policy) e **mandatory-MFA ATTIVATA in PROD su RTL** (slice 4 ruoli senza personas E2E; gate verificato live), **cap④ CMS chiusa** (ESS-media serve), **color-contrast a11y risolto** (0 serious su tutta la matrice, gate CI alzato), engines→22 (#30 chiusa). Push, CI verde, align 3 cloni + vm-deploy, smoke PROD ok. **Coda di sessione**: refresh dati del twin `linux-pc` (clone-vm-db + restart) — anche il twin ora ha Wave-2, policy MFA attiva e gate live; tutti e 4 gli ambienti correnti.
+S983 (interrotta da riavvio PC, mai handoffata) recuperata e chiusa in S984. S983 aveva shippato WS-A/B/C/D (mobile-a11y census a zero + gate incondizionato; ISTAT/ATECO 2ª sorgente; vite 8 + TypeScript 6) e WS-E E1-E4 (retrofit dual-mode dell'intera suite, pre-mutazione). S984 ha completato il batch: **E4** push+CI verde (3 fix: lint, porta smoke CI 3100→3187 con guard+identity-check — un next-server estraneo `lalibraiascalza.com` sulla VM aveva occupato :3100 silenziando lo smoke; gap dual-mode in wave2 trovato dalla verifica adversarial pre-mutazione) → **E5** mutazione (6 fattori TOTP fixture + flip policy: **mandatory-MFA copertura totale LIVE su RTL + Heuresys System**, `roles=NULL`; rollback `qa_artifacts/s983_mfa_rollback.sql`, flip `qa_artifacts/s984_mfa_flip.sql`) → gates post-flip tutti verdi (il collasso 97-fail della full Playwright dev-mode era un artefatto finestra-sessione ~45min vs run 90min → DEBT D-24/D-25, rerun prod-build verde in 7min) → **E6** PROD verificato (login TOTP headless completo via `https://www.heuresys.com`: admin tenant HS + tommaso RTL/USER, `/me` 200). P3 chiusi: TS6 era già adottato (S983); SMS_OTP/TOFU-SMTP gates confermati chiusi sul campo → dormienti by-design.
 
 ## Top priorities (next session)
 
-1. **Estensione mandatory-MFA agli altri ruoli RTL** (TENANT_ADMIN/MANAGER/USER…): 1 PUT o via UI `/admin/mfa-policy`, ⛔ decisione comunicazione utenti (Enzo); se include le personas E2E serve l'adattamento auth.setup (TOTP fixture, ~2-3h).
-2. **Attivazioni gated dei meccanismi già code-complete**: TOFU v2 confirm in PROD = ⛔ creds SMTP nel `.env` VM (item #8 storico) · SMS_OTP in PROD = ⛔ provider+costo (PM); a valle solo config, zero codice.
-3. **Mobile a11y sweep** (§2.7, unico tail a11y residuo, mai iniziato): multi-sessione (~37-62h storici, da ri-stimare — il serious desktop è a 0 e il gate CI ora copre serious).
+1. **D-24 + D-25 remediation** (~1-2h, P3): full-suite Playwright locale oltre la finestra di validità sessione → standardizzare la run su build prod (7min, provato S984) e/o setup re-login per-chunk; rendere crash-resilient il restore server-side di `i18n-en.spec` (leftover `locale=en` ripristinato a mano S984). Vedi `DEBT_REGISTER.md`.
+2. **Attivazioni dormienti** (config-only, ⛔ PM): SMS_OTP (provider+costo) · TOFU v2/SMTP (creds nel `.env` VM). Chiavi censite S984: `SMTP_HOST/PORT/SECURE/USER/PASSWORD` + `MFA_ENROLL_CONFIRM`; `SMS_PROVIDER`/`SMS_FROM` + adapter provider.
+3. **Nuove direzioni prodotto** (PM): backlog operativo sostanzialmente a zero — roadmap post-v1.0 da definire (candidati storici: connettore SuccessFactors, Wave-3 import, F7 refactor estetico showcase).
 
 ## Open questions
 
-- **Comunicazione utenti per estendere la policy MFA** (vedi priorità 1) — quando/come, autorità Enzo.
-- **#11 cap⑤ 2ª sorgente ISTAT/ATECO**: sign-off ToS (legale) — invariata.
-- **SMS provider** (quale, costo) per l'attivazione PROD di SMS_OTP — PM.
+- **SMS provider** (quale, costo) per attivare SMS_OTP in PROD — PM (invariata).
+- **Creds SMTP** nel `.env` VM per attivare TOFU v2 confirm — Enzo (invariata).
+- **Residuo cosmetico**: 3 fattori MFA throwaway di tommaso (`verified=false`, enroll E2E non confermati) — ininfluenti sul gate, ripuliti dal prossimo run delle suite.
 
 ## Verification (next session)
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
-curl -s -o /dev/null -w 'VM %{http_code}\n' http://80.225.82.207:8013/readyz
-PGPASSWORD="$(grep -m1 localhost:5433 ~/.pgpass|cut -d: -f5)" psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT auth_mfa_policy_enabled, auth_mfa_policy_role_codes FROM sys.sys_auth_mfa_policies WHERE auth_mfa_policy_tenant_id='86ba7a65-217f-48ba-8ce5-5c09b40a66b0'"   # t | {BLUEPRINT_MANAGER,HRMS_MANAGER,PROCESS_OWNER,READ_ONLY}
-bash db/scripts/migrate.sh | tail -1   # OK: 107 migrations applied (idempotente)
+curl -s -o /dev/null -w 'PROD %{http_code}\n' https://www.heuresys.com/login   # 200 (TLS nginx → :3013)
+PGPASSWORD="$(grep -m1 localhost:5433 ~/.pgpass|cut -d: -f5)" psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT auth_mfa_policy_enabled||'|'||coalesce(auth_mfa_policy_role_codes::text,'ALL') FROM sys.sys_auth_mfa_policies"   # 2 righe: true|ALL (copertura totale)
+PGPASSWORD="$(grep -m1 localhost:5433 ~/.pgpass|cut -d: -f5)" psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT count(*) FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_metadata->>'label'='e2e-fixture'"   # 6
+bash db/scripts/migrate.sh | tail -1   # OK: 108 migrations applied (idempotente)
 ```

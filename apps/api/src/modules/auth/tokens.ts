@@ -1,10 +1,16 @@
 /**
  * apps/api/src/modules/auth/tokens.ts
  * Opaque-token generation, SHA-256 hashing, and cookie helpers for the auth
- * module. Cookies follow AUTH_SECURITY_PLAN §4.3 with one correction: the
- * refresh cookie path is "/v1/auth" (the real route prefix), not "/auth" as
- * shown in the plan example — the original would never be sent to the actual
- * endpoints. Documented in commit message and in the AUTH plan errata.
+ * module. Cookies follow AUTH_SECURITY_PLAN §4.3 with one errata (D-26): the
+ * refresh cookie path is "/" — NOT the API route prefix "/v1/auth" — because
+ * the browser only reaches the API through prefix-stripping proxies (Next
+ * rewrite `/api/:path*` → `/:path*` in dev; nginx → next → same rewrite in
+ * PROD). A cookie scoped to "/v1/auth" never matches the browser-visible URL
+ * `/api/v1/auth/refresh`, so the silent refresh could never fire and every
+ * session died at the 15-min access TTL. Compensating controls for the wider
+ * scope: HttpOnly + Secure + SameSite=Lax, TLS end-to-end, pino cookie
+ * redaction (LOG_REDACT_PATHS), single-use rotation with family-revoking
+ * replay detection, and CSRF double-submit on /refresh.
  */
 
 import { randomBytes, createHash } from "node:crypto";
@@ -17,7 +23,14 @@ import {
 } from "../../config/constants.js";
 
 export const OPAQUE_TOKEN_BYTES = 32;
-export const REFRESH_COOKIE_PATH = "/v1/auth";
+export const REFRESH_COOKIE_PATH = "/";
+/**
+ * Pre-D-26 refresh cookies in the wild are scoped to the old "/v1/auth" path;
+ * a clear on the new path does not touch them (the browser keys cookies on
+ * name+domain+path). Logout clears BOTH paths so no orphan survives a clean
+ * sign-out; cookies never cleared simply age out at their 30-day maxAge.
+ */
+export const LEGACY_REFRESH_COOKIE_PATH = "/v1/auth";
 
 /**
  * Generates a 32-byte cryptographically random token, encoded as base64url.
@@ -109,5 +122,6 @@ export function setEnrollmentCookies(reply: FastifyReply, bundle: EnrollmentCook
 export function clearAuthCookies(reply: FastifyReply): void {
   reply.clearCookie(COOKIES.ACCESS, { path: "/" });
   reply.clearCookie(COOKIES.REFRESH, { path: REFRESH_COOKIE_PATH });
+  reply.clearCookie(COOKIES.REFRESH, { path: LEGACY_REFRESH_COOKIE_PATH });
   reply.clearCookie(COOKIES.CSRF, { path: "/" });
 }

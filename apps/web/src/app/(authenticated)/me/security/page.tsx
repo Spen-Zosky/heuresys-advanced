@@ -293,7 +293,7 @@ export default function MeSecurityPage() {
   });
 
   // --- Active sessions (MVP-4 §2.5) — refresh-token families. The current family is
-  // resolved via /v1/auth/sessions/current (the refresh cookie is not sent to /v1/me/*). ---
+  // resolved via /v1/auth/sessions/current (access JWT `fam` claim). ---
   const sessions = useQuery({
     queryKey: ["me", "sessions"],
     queryFn: () => apiFetch<ListActiveSessionsResponse>("/v1/me/security/sessions"),

@@ -4,8 +4,9 @@ import { loginRaw } from "./helpers/login.js";
 
 // MVP-4 §2.5 — ESS self-service session management (/v1/me/security/sessions + the
 // /v1/auth/sessions/current helper). Real login + live DB. A login creates a refresh-
-// token family; the helper resolves the current family from the refresh cookie (which
-// is path-scoped to /v1/auth and not sent to /v1/me/*). me:sessions:manage = all roles.
+// token family; the helper resolves the current family from the access JWT `fam`
+// claim (the refresh token is opaque and never parsed outside the rotation flow).
+// me:sessions:manage = all roles.
 
 const PWD = "Admin#PassW0rd!";
 interface S { cookies: Map<string, string>; csrf: string }

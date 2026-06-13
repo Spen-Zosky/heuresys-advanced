@@ -387,15 +387,21 @@ reply.setCookie('hrx_access', accessJwt, {
   maxAge: 60 * 15,   // 15 min
 });
 
-// Refresh token cookie (scoped to /v1/auth/refresh + /v1/auth/logout).
-// Path MUST match the real route prefix declared in app.ts
-// (`await app.register(authRoutes, { prefix: "/v1/auth" })`), otherwise
-// the browser never returns the cookie to those endpoints.
+// Refresh token cookie. ERRATA D-26 (2026-06-13, S986): path MUST be "/",
+// NOT the API route prefix "/v1/auth" as originally planned. The browser
+// only reaches the API through prefix-stripping proxies (Next rewrite
+// `/api/:path*` → `/:path*` in dev; nginx → next → same rewrite in PROD),
+// so a cookie scoped to the API-side prefix never matches the
+// browser-visible URL `/api/v1/auth/refresh`: the silent refresh could
+// never fire and every session died at the 15-min access TTL.
+// Compensating controls for the wider scope: HttpOnly + Secure +
+// SameSite=Lax, TLS end-to-end, pino cookie redaction, single-use rotation
+// with family-revoking replay detection, CSRF double-submit on /refresh.
 reply.setCookie('hrx_refresh', refreshTokenOpaque, {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax',
-  path: '/v1/auth',
+  path: '/',
   maxAge: 60 * 60 * 24 * 30,   // 30 days
 });
 

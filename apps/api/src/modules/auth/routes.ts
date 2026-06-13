@@ -313,9 +313,12 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
   );
 
   /* --- GET /sessions/current — the caller's current session family -------------- */
-  // Read from the access JWT `fam` claim (carried by the access cookie, path "/", so it
-  // reaches /api/* through the web rewrite proxy — unlike the refresh cookie, path
-  // /v1/auth). The ESS sessions page uses it to flag "this device" + to pass
+  // Read from the access JWT `fam` claim. (Historically the refresh cookie was
+  // path-scoped to /v1/auth and unreadable behind the /api proxy, which forced
+  // the claim-based design; post-D-26 the refresh cookie is on path "/" too,
+  // but the claim remains the right source — the refresh token is opaque and
+  // HttpOnly, and no endpoint should parse it outside the rotation flow.)
+  // The ESS sessions page uses it to flag "this device" + to pass
   // currentFamilyId to revoke-others. Authenticated-only (reflects self).
   app.get(
     "/sessions/current",

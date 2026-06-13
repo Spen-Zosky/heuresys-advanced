@@ -2,11 +2,15 @@
  * apps/web/playwright.prod.config.ts — D-24 full-suite config (prod build).
  *
  * The dev-mode config (playwright.config.ts) is for per-spec iteration only:
- * auth.setup sessions live exactly 15 minutes (hrx_access cookie TTL; the
- * refresh cookie is path-scoped to /v1/auth and never traverses the /api
- * proxy), so a ~90min dev-mode full run dies mid-suite. This config is the
- * canonical FULL-SUITE entrypoint (`pnpm test:e2e:prod`, which runs
- * `next build` first):
+ * auth.setup storageState sessions are only safe for ~15 minutes (hrx_access
+ * cookie TTL). Post-D-26 the silent refresh DOES work in the app, but it
+ * cannot save a long suite run: every test context re-loads the SAME
+ * tests/.auth/*.json, so after the first context rotates the single-use
+ * refresh token, any other context that 401s presents the OLD token →
+ * REFRESH_REPLAY_DETECTED → the whole family is revoked (worse than the old
+ * redirect cascade). The 15-min ceiling + mid-suite re-login below remain
+ * the doctrine. This config is the canonical FULL-SUITE entrypoint
+ * (`pnpm test:e2e:prod`, which runs `next build` first):
  *
  *  - webServer = `next start` on the build emitted by the npm script
  *    (S984 proof: prod-mode rerun of ~100 tests in 7min, green; doctrine

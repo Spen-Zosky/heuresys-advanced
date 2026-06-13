@@ -6,9 +6,10 @@ import { defineConfig, devices } from "@playwright/test";
 // to 3000. baseURL follows the same override.
 //
 // D-24 doctrine: this dev-mode config is for PER-SPEC iteration only. The
-// storageState sessions from auth.setup live exactly 15 minutes (hrx_access
-// TTL; the refresh cookie never traverses the /api proxy) — a full dev-mode
-// run (~90min) dies mid-suite with cascading /login redirects. Run the FULL
+// storageState sessions from auth.setup are only safe for ~15 minutes
+// (hrx_access TTL): past that, contexts sharing the same tests/.auth/*.json
+// would silent-refresh the SAME single-use token (post-D-26 the refresh
+// works) → replay detection revokes the family mid-suite. Run the FULL
 // suite via `pnpm test:e2e:prod` (playwright.prod.config.ts: prod build +
 // mid-suite re-login).
 export const WEB_PORT = process.env.PLAYWRIGHT_WEB_PORT ?? "3000";

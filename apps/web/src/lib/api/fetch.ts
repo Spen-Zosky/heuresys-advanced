@@ -7,7 +7,7 @@
  * Features:
  *   - automatic `credentials: "include"` for cookie forwarding,
  *   - automatic `x-csrf-token` injection on mutations from `csrfStore`,
- *   - silent refresh on 401 (one retry via /v1/auth/refresh),
+ *   - silent refresh on 401 (single-flight, one retry via /v1/auth/refresh),
  *   - typed error throw (ApiError / SessionExpiredError / NetworkError),
  *   - optional Zod schema validation on success body.
  */
@@ -60,6 +60,37 @@ async function attemptRefresh(baseUrl: string): Promise<boolean> {
   }
 }
 
+let refreshInFlight: Promise<boolean> | null = null;
+
+/**
+ * Single-flight + cross-tab-serialized silent refresh (D-26).
+ *
+ * Refresh tokens are SINGLE-USE (server-side rotation + replay detection):
+ * two concurrent POSTs presenting the same token are a replay and revoke the
+ * whole token family — a hard logout. A page load fires many queries in
+ * parallel, so concurrent 401s are the norm, not the exception.
+ *
+ *   - the module-level promise collapses concurrent 401s from THIS tab into
+ *     one POST (everyone awaits the same flight);
+ *   - the Web Lock serializes refreshes ACROSS tabs: the loser of the race
+ *     runs after the winner's Set-Cookie landed, so its own POST carries the
+ *     freshly rotated token — a valid rotation, not a replay.
+ */
+function refreshOnce(baseUrl: string): Promise<boolean> {
+  if (!refreshInFlight) {
+    const run: Promise<boolean> =
+      typeof navigator !== "undefined" && "locks" in navigator && navigator.locks
+        ? (navigator.locks.request("hrx_refresh_rotation", () =>
+            attemptRefresh(baseUrl),
+          ) as Promise<boolean>)
+        : attemptRefresh(baseUrl);
+    refreshInFlight = run.finally(() => {
+      refreshInFlight = null;
+    });
+  }
+  return refreshInFlight;
+}
+
 export async function apiFetch<T = unknown>(
   path: string,
   options: ApiFetchOptions<ZodTypeAny | undefined> = {},
@@ -103,9 +134,9 @@ export async function apiFetch<T = unknown>(
     throw new NetworkError("Unable to reach the API", err);
   }
 
-  // Silent refresh on 401 (once).
+  // Silent refresh on 401 (once, single-flight).
   if (response.status === 401 && !isRetry && path !== "/v1/auth/login" && path !== "/v1/auth/refresh") {
-    const ok = await attemptRefresh(baseUrl);
+    const ok = await refreshOnce(baseUrl);
     if (ok) {
       return apiFetch<T>(path, { ...options, isRetry: true });
     }

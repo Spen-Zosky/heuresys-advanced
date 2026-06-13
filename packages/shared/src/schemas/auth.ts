@@ -193,9 +193,9 @@ export type ListActiveSessionsResponse = z.infer<typeof ListActiveSessionsRespon
 /* --- Self-service session management (MVP-4 §2.5, /v1/me/security/sessions) ---- */
 
 // The list reuses ListActiveSessionsResponseSchema. The current-session family is
-// resolved separately via GET /v1/auth/sessions/current (the refresh cookie is
-// path-scoped to /v1/auth and is NOT sent to /v1/me/*), and the client marks the
-// matching row as "this device".
+// resolved separately via GET /v1/auth/sessions/current (from the access JWT `fam`
+// claim — the refresh token is opaque + HttpOnly and is never parsed outside the
+// rotation flow), and the client marks the matching row as "this device".
 export const RevokeSessionParamsSchema = z.object({ familyId: z.uuid() });
 export const RevokeSessionResponseSchema = z.object({ revoked: z.literal(true) });
 export const RevokeOtherSessionsBodySchema = z.object({ currentFamilyId: z.uuid().nullable() });

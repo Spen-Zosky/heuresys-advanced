@@ -3,6 +3,14 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🔭 Programma 100X (S-100X) — audit forense QA E2E + release radicale (avviato 2026-06-13)
+
+Epic multi-sessione: audit forense end-to-end + miglioramento "100x" (robustezza, modernità, performance, semplicità, footprint, DX, UX-IX, processi) dalla baseline GA v1.0.0. **SoT del programma in `docs/kb/improvement/`**: `MASTER_PLAN_100X.md` · `TODO_100X.md` (tracker machine-checkable) · `BASELINE_METRICS.md` · `INTERVIEW_LOG.md` · `AUDIT_PROTOCOL.md` · `FINDINGS/` · `DOSSIERS/`. Kickoff: `docs/kb/improvement/2026-06-13_heuresys-advanced-100x-kickoff-prompt.md`.
+
+- **S-100X-0 ✅ DONE** (2026-06-13): recon read-only (3 sub-agent) + baseline misurata + intervista (asse dominante **robustezza/operability**; breaking **aperto/radicale via dossier**; appetite **evoluzione selettiva**; **audit completo poi decido**) + master plan + protocollo. Doc-only.
+- **Prossimo**: S-100X-A1 (WS-G CI/CD & deploy — runner SPOF + 0 rollback, alta leva). Sequenza audit robustness-first A1..A11 + A-L (WS-L ecosistema Claude design-only). Poi S-100X-C (dossier finali → **decide Enzo per-dossier**) → S-100X-E? esecuzione.
+- **Leve top misurate**: CI runner self-hosted unico = VM prod (SPOF) · deploy senza rollback · suite 901 test serial single-worker · 31G `.next`/dumps rigenerabili · drizzle dead-dep · 8 env non documentate. **D-26 = fuori perimetro** (sessione prodotto dedicata).
+
 ## ✅ Verifica stato 2026-05-27 (evidence-based, pre-resolution)
 
 > Accertamento reale di ogni item aperto (grep/read/DB/gh), per ripartire informati. Nessun fix applicato qui (solo D-12 migrate.sh chain + 000044 reclass eseguiti come task isolato approvato, vedi DEBT_REGISTER).

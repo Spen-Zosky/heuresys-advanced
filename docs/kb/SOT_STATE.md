@@ -71,6 +71,16 @@ HEAD **`a629844`** (2 commit: `41e01ed` test-infra+a11y · `a629844` docs/kb; + 
 - **Dossier roadmap post-v1.0** → `docs/kb/POST_V1_ROADMAP_DOSSIER.md` (decision-ready: 3 candidate storiche misurate, 12 residui in 3 fasce, 9 direzioni nuove, conteggi pinnati). **F7 = label stale, terminale** (3 chiusure verificate WS-6d/S961/S965-S969).
 - **Counts S985 (ri-derivati 2026-06-12/13)**: route registrations API **407** (`grep app.<verb>` su src) · API test file **129** su disco / 889 `it()` (suite API non ri-eseguita — cambi web-only) · Playwright spec **46** · **full suite E2E prod 200 pass / 1 flaky-retry-green in 9.6min** (gate D-24) · typecheck **4/4 ws** · vista reconciliation: **POPULATED 143 · NO_SOURCE 21 · EXCLUDE 6 · REFERENCE_ONLY 2** (drift fisiologico: `sys_auth_mfa_factors` D/EXCLUDE ora has_rows→POPULATED con i 6 fattori fixture) · `sys_auth_mfa_factors` **6** (i 3 throwaway di tommaso autopuliti dal run suite, verificato) · stack: `@heuresys/ui` 0.1.4→**0.1.5**.
 
+## 0-vigesimo. Delta S-100X-0 (2026-06-13) — apertura programma RELEASE 100X (doc-only, read-only sul codice)
+
+Sessione di apertura del programma **100X** (audit forense QA E2E + miglioramento radicale). **Read-only sul codice**: nessun cambio a src/db/config/CI/deploy → **counts DB/API/web/CI/migration INVARIATI da S985** (108 migration `000001..000109`, 72 moduli, ~407 endpoint, full suite 912/6, web pages 83, Playwright 46). HEAD = commit di handoff (post `eb98acc`).
+- **Deliverable doc-only** in nuovo albero `docs/kb/improvement/`: `MASTER_PLAN_100X.md` · `TODO_100X.md` · `BASELINE_METRICS.md` · `INTERVIEW_LOG.md` · `AUDIT_PROTOCOL.md` · `FINDINGS/` (README + `S-100X-0_recon.md`) · `DOSSIERS/` (register D-01..D-14) + epic 100X in `SOT_BACKLOG.md`. Commit `eb98acc`.
+- **Recon 3-agente read-only**: leve top = CI runner self-hosted unico = VM prod (SPOF, 7/8 workflow) · `vm-deploy.sh` distruttivo senza rollback · suite 901 `it()` single-worker serial · repo on-disk **31G** (24G `apps/web/.next` + 3.7G dumps, rigenerabili) · `drizzle-orm`/`-kit` dead-dep · 8 env var non documentate. Asset confermati: raw SQL (0 N+1), boot hardened, design-system pulito (0 primitive in-repo), auth hardened, git-history sano (.git 23M).
+- **Intervista** (gate): asse dominante **robustezza/operability** · breaking **aperto/radicale via dossier** · appetite **evoluzione selettiva** · scope **audit completo poi decido**. 6 default accettati (`INTERVIEW_LOG.md`).
+- **WIP D-26 scoperta nel working tree** (NON committata, fuori da questo handoff): fix parziale silent-refresh — vedi `DEBT_REGISTER.md` D-26. Resta uncommitted per la sessione D-26 dedicata.
+- **Incidente d'ambiente** (NON repo): hook `claude-mem` worker down tutta la sessione → plugin disabilitato in `~/.claude/settings.json:156` (reversibile, backup `settings.json.bak-100x-*`). Tracked come item WS-L del programma 100X.
+- **Prossimo**: S-100X-A1 (audit WS-G CI/CD & deploy). Stack invariato (TS 6.0.3 · Next 16.2.7 · Fastify 5.8.5 · Zod 4.4.3 · vitest 4.1.8 · node dev-host v24.3.0).
+
 ## 0-bis. Delta S963 → S966 (refresh 2026-06-05)
 
 Lo snapshot §0 e i conteggi §1-§9 erano scritti a S957/S962. Questo blocco riconcilia i cambiamenti di stato fino a **S966**. Tutto **pushato su origin/main, CI 6/6 verde** (HEAD `c4c6363`).

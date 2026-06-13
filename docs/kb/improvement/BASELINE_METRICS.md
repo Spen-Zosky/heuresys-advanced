@@ -49,14 +49,16 @@ grep -hE '"(typescript|next|fastify|zod|vitest)"' apps/*/package.json packages/*
 
 | Workflow | Durata | Runner |
 |---|---|---|
-| Typecheck (all ws) | **14m0s** | self-hosted oci-vm |
-| Test (api integration) | **12m42s** | self-hosted oci-vm |
+| Typecheck (all ws) | **14m0s** wall / **76s** compute | self-hosted oci-vm |
+| Test (api integration) | **12m42s** wall / **386s** compute (vitest 353s) | self-hosted oci-vm |
 | Lint (all ws) | 3m20s | self-hosted oci-vm |
 | Playwright smoke | 6m15s | self-hosted oci-vm |
 | Build (web) | 1m53s | self-hosted oci-vm |
 | Deploy showcase (gh-pages) | 32s–1m56s | ubuntu-latest |
 
 8 workflow totali; **7/8 sul runner self-hosted unico = la VM prod** (SPOF). `gh run list -L 8`.
+
+**Refinement S-100X-A1 (WS-G audit, `gh run view --json jobs`)**: le durate wall sono ~80-90% **coda** sul runner unico, NON compute (typecheck 14m wall / **76s** compute; test 12m42s wall / **386s** compute). Leva velocity #1 = 2° runner (parallelizza il fan-out). Inoltre: **0/13 actions SHA-pinned** (tag mobili); `main` ruleset = solo `deletion`+`non_fast_forward`, **0 required-status-checks** (CI advisory); **242 commit direct-to-main** dal v1.0.0 (0 merge); caching dichiarato 1/8 workflow. Dettaglio + 30 finding (1 CRITICAL fork-PR, 10 HIGH) → `FINDINGS/WS-G.md`.
 
 ## Footprint
 

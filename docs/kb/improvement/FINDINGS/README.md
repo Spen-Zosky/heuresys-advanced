@@ -5,7 +5,7 @@
 | File | WS | Sessione | Stato |
 |---|---|---|---|
 | `S-100X-0_recon.md` | A..K (recon trasversale) | S-100X-0 | seed ✅ |
-| `WS-G.md` | CI/CD & deploy | A1 | TODO |
+| `WS-G.md` | CI/CD & deploy | A1 | **done ✅** (S987 — 30 finding, 1 CRITICAL) |
 | `WS-H.md` | Sicurezza & supply chain | A2 | TODO |
 | `WS-F.md` | Test & QA | A3 | TODO |
 | `WS-C.md` | Dati & persistenza | A4 | TODO |

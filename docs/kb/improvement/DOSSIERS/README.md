@@ -11,7 +11,7 @@
 | D-05 | Design system `@heuresys/ui` | disciplina pulita; evoluzione lib | PENDING |
 | D-06 | Tooling/build (pnpm + tsup/tsc, cache, affected) | task-runner/affected | PENDING |
 | D-07 | Migration squash-to-baseline | baseline GA + delta separati | PENDING |
-| D-08 | **CI/CD: runner SPOF + 0 rollback** | **alta leva** (release-dir+symlink, runner off-prod, health-gated) | PENDING |
+| D-08 | **CI/CD: runner SPOF + 0 rollback** + **🔴 fork-PR ACE su prod host (public repo)** | **alta leva — ora security-priority** (drop PR-trigger self-hosted + require-approval · cgroup/ephemeral · DB CI separato · LAST_GOOD+vm-rollback+pg_dump pre-deploy · required-checks+deploy-gate · runner off-prod). Audit A1 ✅ `FINDINGS/WS-G.md` (30 finding) | PENDING (audited) |
 | D-09 | Observability (no `/metrics`) | prom-client → OTel | PENDING |
 | D-10 | Architettura applicativa (monolite vs servizi) | monolite sano | PENDING |
 | D-11 | Brownfield/ingestion engine (riconciliazione 0 stati aperti) | keep/freeze/extract | PENDING |

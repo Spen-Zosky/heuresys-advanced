@@ -11,7 +11,7 @@
 
 ## Fase A — Audit per-WS (read-only, sub-agent fan-out; robustness-first)
 
-- [ ] S-100X-A1 | WS-G | audit CI/CD & deploy (runner SPOF, rollback, caching, release) | FINDINGS/WS-G.md + baseline durate CI | TODO
+- [x] S-100X-A1 | WS-G | audit CI/CD & deploy (runner SPOF, rollback, caching, release) | FINDINGS/WS-G.md + baseline durate CI | **DONE** (S987 — 30 finding: 1 CRITICAL fork-PR ACE su prod host, 10 HIGH, 5 QW-G; D-08 → security-priority)
 - [ ] S-100X-A2 | WS-H | audit sicurezza & supply chain (auth, secrets, OWASP, SBOM, env-doc) | FINDINGS/WS-H.md | TODO
 - [ ] S-100X-A3 | WS-F | audit test & QA (unit-layer, parallelism, isolation, flakiness) | FINDINGS/WS-F.md + baseline durate suite | TODO
 - [ ] S-100X-A4 | WS-C | audit dati & persistenza (squash, backup/restore, indici, dead schema) | FINDINGS/WS-C.md | TODO
@@ -40,3 +40,11 @@
 - [ ] QW-3 | WS-J | 8 env var non documentate → `.env.example` (meglio auto-gen dal zod env.ts) | `.env.example` completo / generator | TODO
 - [ ] QW-4 | WS-B | estrai `withTransaction` + helper query da auth → `src/db/` | 67 moduli possono riusarlo, test verdi | TODO
 - [ ] QW-5 | WS-I | fix `apps/api/package.json` description stale (58/272 → 72/407) | descrizione allineata | TODO
+
+## Quick-wins WS-G (da S-100X-A1; CLASS-A; esecuzione gated dal go di Enzo)
+
+- [ ] QW-G1 | WS-G | caching CI dichiarato: `cache: pnpm` sui 6 setup-node self-hosted + `actions/cache` `apps/web/.next/cache` | cache esplicita + portabile (prereq 2° runner) | TODO
+- [ ] QW-G2 | WS-G | SHA-pin delle 13 GitHub Actions (esp. third-party peaceiris/actions-gh-pages) | `uses:` a SHA 40-char + `# vN`; Dependabot bump preservato | TODO
+- [ ] QW-G3 | WS-G | env-contract: 7+ var `env.ts` → `.env.example` + nota SoT (incl. POSTGRES_DB/POSTGRES_DATABASE dual-set) | `.env.example` completo (lega a QW-3/R09) | TODO
+- [ ] QW-G4 | WS-G | `showcase.yml` drop checkout sister-repo + `npm install --legacy-peer-deps` (premessa `link:` stantia; reale npm `@heuresys/ui@^0.1.5`) | verify build registry-only → drop step + fix comment | TODO
+- [ ] QW-G5 | WS-G | cache `~/.cache/ms-playwright` + reuse build-web artifact in playwright-smoke (no rebuild) | smoke verde, browser/`.next` cache | TODO

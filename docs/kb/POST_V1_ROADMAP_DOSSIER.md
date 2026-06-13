@@ -115,13 +115,19 @@ Tutti i candidati "chiusi?" verificati con evidenza (ESS-media S982, rich-text S
 4. **Scelte semantiche brevi quando capita** (R1-R3): un pomeriggio ciascuna, nessuna fretta.
 5. **Bet di prodotto** (3.3-3.6, 3.8): da prioritizzare DOPO la risposta al punto 3 — tutti componibili, nessuno bloccante per gli altri.
 
-### Open questions per il PM (consolidato)
-- D-26: greenlight fix prossima sessione?
-- Go-to-market (3.1): il prodotto punta a un pilota reale o resta reference case-study?
-- Wave-3: livello 1 (fix HS), 2 (pilota EcoNova) o 3 (completo)? SmartFood/EcoNova diventano tenant ACTIVE (multi-industry)?
-- SuccessFactors: procurare sandbox SAP (F0) o congelare al design? F1 fixture-driven vale anche senza sandbox?
-- F7: ok a rimuovere la label stale dalla lista candidati?
-- R1/R2/R3, R9/R12, 3.4 SMTP, 3.8 spend LLM: vedi gate per-item sopra.
+### Open questions per il PM — DECISE S987 (2026-06-13)
+
+Tutte le direzioni sono state decise da Enzo in S987 (intervista P3 + decisioni Fase 3). Record durevole: `memory/project_post_v1_program_s987.md` + `SOT_BACKLOG.md` §S987. **Non ri-chiedere.**
+
+- **D-26**: ✅ greenlight + **FATTO** S987 (mig/fix `fa564fe`, gate verde).
+- **Go-to-market (3.1)**: → **IBRIDO** — provisioning self-service + GDPR tooling (3.9) come fondazione additiva, no pilota reale ora (Fase 5).
+- **Wave-3 (1.B)**: → **L1** — solo fix Heuresys System (#8a mapping ✅ S987 `a589a6e`; #8b import solo chiara.spenuso). SmartFood/EcoNova NON onboardati (no multi-industry).
+- **SuccessFactors (1.A)**: → **ESCLUSO** dal programma (#7 fuori scope per scelta Enzo).
+- **F7**: terminale/label stale (verdetto S985 confermato).
+- **R1/R2/R3**: → tutti e 3 ESEGUIRE — R1 modulo feedback + import 400+6 · R2 popola crosswalk ~5.5k · R3 cleanup 91 + catalogo families + ESCO (dettaglio in `memory/project_post_v1_program_s987.md`).
+- **#9 bet ondata 1**: → tutti e 4 (3.2 security · 3.3 BPM runtime · 3.4 notifications · 3.5 reporting). Ondata 2: 3.6 PWA · 3.8 AI (⛔ LLM spend).
+- **3.4 SMTP / 3.8 LLM spend**: restano gate di attivazione (config/costo) — il codice si costruisce comunque.
+- **D-08 CRITICAL** (fork-PR su prod, audit A1) + **3.9 GDPR**: gated, decisione esecuzione Enzo (fase E 100X / Fase 5).
 
 ---
 *Fonti: workflow `s985-discovery` (7 agenti, output completo nel transcript S985) · misure live 2026-06-12 · doc citati inline. Questo dossier è uno snapshot decisionale, non una SoT di stato: lo stato vive in `.handoff/STATE.md` + `docs/kb/SOT_STATE.md`.*

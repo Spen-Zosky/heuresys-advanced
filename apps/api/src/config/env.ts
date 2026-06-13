@@ -14,6 +14,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { z } from "zod";
+import { parseTrustProxy } from "./trust-proxy.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -51,7 +52,13 @@ const EnvSchema = z.object({
   HOST: z.string().default("0.0.0.0"),
   PORT: z.coerce.number().int().positive().default(3001),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
-  TRUST_PROXY: z.coerce.boolean().default(false),
+  // Reverse-proxy trust for req.ip (drives per-IP rate-limiting). Parsed via parseTrustProxy,
+  // NOT z.coerce.boolean — that turns "false" into true (the same footgun COOKIE_SECURE avoids,
+  // see below). D-28 / S-100X-A2 F-WS-H-1: PROD behind the nginx TLS proxy MUST set TRUST_PROXY=1
+  // (one hop) so the login brute-force limiter keys on the genuine client IP and a forged
+  // X-Forwarded-For cannot evade it. "false"/"" = direct (no proxy); "true" = trust-all (spoofable);
+  // "<n>" = hop count; "<ip|cidr>[,…]" = trust-list. Yields boolean | number | string.
+  TRUST_PROXY: z.string().default("false").transform(parseTrustProxy),
 
   // Database
   POSTGRES_HOST: z.string(),

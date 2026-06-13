@@ -5,7 +5,7 @@
  *   GET /v1/analytics/kpi       — KPI achievement rollup
  *
  * Hits the live OCI VM DB through the tunnel (no mocks). The aggregate numbers
- * (headcount 161, kpi targets 248) are pinned against the live seed (S958).
+ * (headcount 162 — 161 post-collapse + chiara.spenuso imported S988 #8b; kpi targets 248) are pinned against the live seed.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -61,7 +61,7 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
-  it("workforce: PLATFORM_ADMIN sees full headcount (161)", async () => {
+  it("workforce: PLATFORM_ADMIN sees full headcount (162)", async () => {
     const r = await suite.app.inject({
       method: "GET",
       url: "/v1/analytics/workforce",
@@ -77,12 +77,14 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     };
     expect(body.scope.kind).toBe("PLATFORM");
     expect(body.scope.tenantId).toBeNull();
-    expect(body.totalHeadcount).toBe(161);
+    expect(body.totalHeadcount).toBe(162);
     expect(body.byOrgUnit.length).toBeGreaterThan(0);
     expect(body.byJobRole.length).toBeGreaterThan(0);
-    // The OU rollup must sum to the total (one primary active assignment per user).
+    // The OU rollup must sum to the total: position-less users (e.g. chiara.spenuso,
+    // imported S988 #8b with no assignment) fall into the COALESCE '(unassigned)' bucket,
+    // so total == ouSum still holds.
     const ouSum = body.byOrgUnit.reduce((acc, r2) => acc + r2.headcount, 0);
-    expect(ouSum).toBe(161);
+    expect(ouSum).toBe(162);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
@@ -101,7 +103,7 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect(body.scope.tenantId).not.toBeNull();
     // Own-tenant headcount is a strict subset of the platform total.
     expect(body.totalHeadcount).toBeGreaterThan(0);
-    expect(body.totalHeadcount).toBeLessThanOrEqual(161);
+    expect(body.totalHeadcount).toBeLessThanOrEqual(162);
   });
 
   it("kpi: PLATFORM_ADMIN sees the kpi rollup (248 targets)", async () => {

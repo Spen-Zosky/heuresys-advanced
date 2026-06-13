@@ -77,7 +77,7 @@ describe("/v1/users/* integration (4-tier scope)", () => {
 
   /* -------------------------------------------------- list scope tiers */
 
-  it("LIST: PLATFORM_ADMIN sees all users in DB (161 real users post-collapse)", async () => {
+  it("LIST: PLATFORM_ADMIN sees all users in DB (162 real users: 161 post-collapse + chiara.spenuso S988 #8b)", async () => {
     const r = await suite.app.inject({
       method: "GET",
       url: "/v1/users?limit=200",
@@ -85,7 +85,7 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { total: number };
-    expect(body.total).toBeGreaterThanOrEqual(161);
+    expect(body.total).toBeGreaterThanOrEqual(162);
   });
 
   it("LIST: TENANT_ADMIN sees only own-tenant users", async () => {

@@ -150,6 +150,13 @@ const EnvSchema = z.object({
   WEBAUTHN_RP_ID: z.string().default("localhost"),
   WEBAUTHN_RP_NAME: z.string().default("Heuresys"),
   WEBAUTHN_ORIGINS: z.string().default("http://localhost:3000"),
+
+  // R6 (100X): OpenAPI/Swagger exposure of the Zod-typed routes — Swagger UI at
+  // /docs + the OpenAPI spec at /openapi.json. DEFAULT OFF: the full API surface
+  // (~407 /v1/* endpoints) must not be public on the production origin without a
+  // deliberate decision. Enable in dev/staging (API_DOCS_ENABLED=true), or behind
+  // an authenticated edge in prod. When OFF neither route is registered.
+  API_DOCS_ENABLED: z.coerce.boolean().default(false),
 });
 
 const parsed = EnvSchema.parse(process.env);

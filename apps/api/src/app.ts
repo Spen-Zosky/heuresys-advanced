@@ -13,10 +13,13 @@ import helmet from "@fastify/helmet";
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
 import rateLimit from "@fastify/rate-limit";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 import {
   ZodTypeProvider,
   serializerCompiler,
   validatorCompiler,
+  jsonSchemaTransform,
 } from "fastify-type-provider-zod";
 
 import { env } from "./config/env.js";
@@ -170,6 +173,29 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // 1. Type-provider compilers (FIRST — subsequent routes use Zod schemas)
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+
+  // 1b. OpenAPI/Swagger (R6) — gated OFF by default (env.API_DOCS_ENABLED). Registered
+  //     right after the type-provider compilers so its onRoute hook captures EVERY route
+  //     declared below (the Zod schemas are converted via jsonSchemaTransform). When the
+  //     flag is off neither /docs (UI) nor /openapi.json (spec) exists.
+  if (env.API_DOCS_ENABLED) {
+    await app.register(fastifySwagger, {
+      openapi: {
+        info: {
+          title: "Heuresys Advanced API",
+          description: "Fastify 5 + Zod-typed contract — the /v1/* endpoint surface.",
+          version: "1.0.0",
+        },
+        servers: [{ url: "/", description: "same-origin (behind the /api proxy in the web app)" }],
+      },
+      transform: jsonSchemaTransform,
+    });
+    await app.register(fastifySwaggerUi, { routePrefix: "/docs" });
+    // Canonical OpenAPI spec endpoint (swagger-ui also serves it at /docs/json).
+    // app.swagger() is resolved at request time (after ready) → captures every route.
+    // hide:true keeps this meta-route out of the spec it returns.
+    app.get("/openapi.json", { schema: { hide: true } }, async () => app.swagger());
+  }
 
   // 2. Request id (so every subsequent log/error/response carries it)
   await app.register(requestIdPlugin);

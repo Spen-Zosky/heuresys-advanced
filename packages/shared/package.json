@@ -287,6 +287,10 @@
       "types": "./dist/schemas/engagement.d.ts",
       "default": "./src/schemas/engagement.ts"
     },
+    "./schemas/engagement-feedback": {
+      "types": "./dist/schemas/engagement-feedback.d.ts",
+      "default": "./src/schemas/engagement-feedback.ts"
+    },
     "./schemas/predictions": {
       "types": "./dist/schemas/predictions.d.ts",
       "default": "./src/schemas/predictions.ts"

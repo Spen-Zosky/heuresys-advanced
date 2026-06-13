@@ -7,7 +7,7 @@ import { pool } from '../src/db/client.js';
 // suite (singleThread) so this file does NOT close it.
 
 describe('reconciliation registry (F1)', () => {
-  it('registry holds exactly 100 rows with the signed-off bucket split A23/B16/C23/D38', async () => {
+  it('registry holds exactly 102 rows with the signed-off bucket split A25/B16/C23/D38', async () => {
     const { rows } = await pool.query<{ b: string; n: number }>(
       `SELECT reconciliation_registry_bucket AS b, count(*)::int AS n
          FROM sys.sys_reconciliation_registry GROUP BY 1`,
@@ -34,7 +34,9 @@ describe('reconciliation registry (F1)', () => {
     //   +1 bucket-D EXCLUDE - S982 sys_auth_mfa_factors (app-generated MFA factors; latent gap —
     //     the table predates the registry and rode on test-leftover has_rows — closed by the
     //     S982 amendment to mig 000062, where the row must live for fresh-rebuild ordering)
-    expect(m).toEqual({ A: 23, B: 16, C: 23, D: 38 });
+    //   +2 bucket-A IMPORT  — S988 R1 Fase3 engagement_feedback m: sys_engagement_feedback +
+    //     sys_engagement_action_plans (mig 000113 + seed 51; RTL import 400 + 6)
+    expect(m).toEqual({ A: 25, B: 16, C: 23, D: 38 });
   });
 
   it('the v_reconciliation_status view leaves zero UNCLASSIFIED tables', async () => {

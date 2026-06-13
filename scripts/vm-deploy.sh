@@ -107,9 +107,9 @@ pnpm --filter @heuresys/web build
 #     installed by vm-bootstrap.sh; these scheduler units are NEW, so the ROUTINE deploy
 #     installs them too — otherwise the timers would silently never run. Idempotent:
 #     install + enable --now are safe to re-run; the timers (not the one-shots) get enabled.
-log "systemd: install scheduler units (scraping cap⑤ P2 + insights cap③)"
+log "systemd: install scheduler units (scraping cap⑤ P2 + insights cap③ + backup R5 + reindex R7)"
 swtmp="$(mktemp -d)"
-for svc in scraping insights; do
+for svc in scraping insights backup reindex; do
   sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
       "$REPO_DIR/deploy/systemd/heuresys-advanced-$svc.service" \
       > "$swtmp/heuresys-advanced-$svc.service"
@@ -122,6 +122,8 @@ rm -rf "$swtmp"
 sudo systemctl daemon-reload
 sudo systemctl enable --now heuresys-advanced-scraping.timer >/dev/null
 sudo systemctl enable --now heuresys-advanced-insights.timer >/dev/null
+sudo systemctl enable --now heuresys-advanced-backup.timer >/dev/null
+sudo systemctl enable --now heuresys-advanced-reindex.timer >/dev/null
 
 # 4. Restart services (api first so the web's proxy target is up).
 log "restart"
@@ -137,6 +139,8 @@ log "verify"
 systemctl is-active heuresys-advanced-api heuresys-advanced-web || true
 echo "  scraping.timer: $(systemctl is-active heuresys-advanced-scraping.timer 2>/dev/null || echo inactive)"
 echo "  insights.timer: $(systemctl is-active heuresys-advanced-insights.timer 2>/dev/null || echo inactive)"
+echo "  backup.timer:   $(systemctl is-active heuresys-advanced-backup.timer 2>/dev/null || echo inactive)"
+echo "  reindex.timer:  $(systemctl is-active heuresys-advanced-reindex.timer 2>/dev/null || echo inactive)"
 if curl -fsS -m 8 "http://localhost:$API_PORT/readyz" >/dev/null; then
   echo "  api /readyz OK"
 else

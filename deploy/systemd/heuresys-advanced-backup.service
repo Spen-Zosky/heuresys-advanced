@@ -1,0 +1,22 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh / vm-deploy.sh.
+# Do NOT install this file directly; run the bootstrap/deploy script instead.
+#
+# R5: scheduled DB backup. A ONE-SHOT that runs scripts/backup-db.sh (pg_dump -Fc of the
+# live heuresys_advanced DB → timestamped file + retention pruning + optional off-host).
+# Before this the single live DB had ZERO scheduled backup. Activated by the .timer.
+[Unit]
+Description=Heuresys Advanced — scheduled DB backup (R5, pg_dump -Fc + retention)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@
+# pg_dump (PostgreSQL 16 native) lives in /usr/bin; no Node needed for this one-shot.
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/backup-db.sh
+TimeoutStartSec=900

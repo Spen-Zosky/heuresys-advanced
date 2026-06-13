@@ -1,0 +1,18 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh / vm-deploy.sh.
+#
+# R5: a DAILY DB backup at 01:30 local — BEFORE the insights recompute (02:15) and the
+# weekly ESCO probe (Sun 03:30) so the dump captures a quiescent DB and the three never
+# overlap. Each run is bounded (one pg_dump + retention prune) — cheap.
+[Unit]
+Description=Heuresys Advanced — daily DB backup (R5)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=*-*-* 01:30:00
+RandomizedDelaySec=300
+# Run a missed occurrence after downtime (the free-tier VM is not always up at 01:30).
+Persistent=true
+Unit=heuresys-advanced-backup.service
+
+[Install]
+WantedBy=timers.target

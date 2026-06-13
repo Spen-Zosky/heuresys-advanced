@@ -134,7 +134,7 @@ NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \
 #    (the timers fire them).
 log "systemd: render templates + install + restart"
 tmp="$(mktemp -d)"
-for svc in api web scraping insights; do
+for svc in api web scraping insights backup reindex; do
   sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" \
       -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
       -e "s#@@PUBLIC_HOST@@#$PUBLIC_HOST#g" \
@@ -150,6 +150,10 @@ sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-
     "/etc/systemd/system/heuresys-advanced-scraping.timer"
 sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-insights.timer" \
     "/etc/systemd/system/heuresys-advanced-insights.timer"
+sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-backup.timer" \
+    "/etc/systemd/system/heuresys-advanced-backup.timer"
+sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-reindex.timer" \
+    "/etc/systemd/system/heuresys-advanced-reindex.timer"
 rm -rf "$tmp"
 sudo systemctl daemon-reload
 sudo systemctl enable heuresys-advanced-api.service heuresys-advanced-web.service >/dev/null
@@ -157,6 +161,9 @@ sudo systemctl enable heuresys-advanced-api.service heuresys-advanced-web.servic
 # enable + start the TIMERS (not the one-shots).
 sudo systemctl enable --now heuresys-advanced-scraping.timer >/dev/null
 sudo systemctl enable --now heuresys-advanced-insights.timer >/dev/null
+# daily DB backup (R5) + weekly embeddings reindex (R7) — enable + start the TIMERS.
+sudo systemctl enable --now heuresys-advanced-backup.timer >/dev/null
+sudo systemctl enable --now heuresys-advanced-reindex.timer >/dev/null
 sudo systemctl restart heuresys-advanced-api.service
 sleep 5
 sudo systemctl restart heuresys-advanced-web.service

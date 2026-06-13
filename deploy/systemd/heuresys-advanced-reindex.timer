@@ -1,0 +1,19 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh / vm-deploy.sh.
+#
+# R7: a WEEKLY embeddings reindex on Sun 04:30 local — AFTER the weekly ESCO probe (Sun 03:30)
+# so a fresh reference catalogue is reflected, and clear of the daily backup (01:30) + insights
+# (02:15). The embedding substrate drifts slowly (new skills/occupations), so weekly is ample;
+# hash-skip makes an unchanged run a cheap no-op.
+[Unit]
+Description=Heuresys Advanced — weekly embeddings reindex (R7)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=Sun *-*-* 04:30:00
+RandomizedDelaySec=600
+# Run a missed occurrence after downtime.
+Persistent=true
+Unit=heuresys-advanced-reindex.service
+
+[Install]
+WantedBy=timers.target

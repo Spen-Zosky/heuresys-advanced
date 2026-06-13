@@ -1,0 +1,31 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh / vm-deploy.sh.
+# Do NOT install this file directly; run the bootstrap/deploy script instead.
+#
+# R7: reindex of the pgvector embedding substrate (skill/occupation/role/profile). A
+# ONE-SHOT that runs the existing `embeddings:backfill` CLI in-process (hash-skip idempotent
+# → a cheap no-op when nothing changed). Activated by the .timer.
+#
+# NOTE: the backfill calls Voyage and therefore needs VOYAGE_API_KEY in the repo-root .env.
+# By design the serving VM does NOT carry the key (it lives on the dev box that ran the
+# original backfill) — so on a VM WITHOUT the key this one-shot is a documented no-op/fail
+# (logged, harmless, isolated from the api/web units). Enabling real reindex on the VM =
+# add VOYAGE_API_KEY to the VM .env (Enzo decision — Voyage spend, ~$0 within free tier).
+[Unit]
+Description=Heuresys Advanced — weekly embeddings reindex (R7, semantic-matching substrate)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@/apps/api
+# nvm-managed Node (>=22) on PATH; pnpm lives alongside it.
+Environment=PATH=@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
+Environment=NODE_ENV=production
+# Lets env.ts locate the repo-root .env + .secrets when run from apps/api.
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
+ExecStart=@@NODE_BIN@@/pnpm embeddings:backfill
+# Voyage calls over the network can be slow for a full reindex.
+TimeoutStartSec=1800

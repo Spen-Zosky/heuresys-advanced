@@ -1,0 +1,53 @@
+/**
+ * apps/web/tests/e2e/global-teardown.ts
+ *
+ * D-29: the ESS certifications spec (ess-certifications-upload.spec.ts) creates
+ * one `E2E Test Cert <ts>` row per run — the ESS cert surface is create+list
+ * only (no DELETE endpoint) and Playwright has no DB client, so without this the
+ * rows accumulate (drift ~1/run). This global teardown deletes them via psql
+ * after the suite, using the same Postgres connection the API uses (host/port/db/
+ * user read from the repo-root .env; the password comes from ~/.pgpass, never
+ * read or logged here — secret hygiene). Best-effort: any failure is logged and
+ * swallowed so it never fails the run (the rows are harmless and a11y-neutral
+ * since @heuresys/ui@0.1.6 made the table region keyboard-focusable regardless
+ * of row count — see D-27).
+ */
+import { execFileSync } from "node:child_process";
+import { readFileSync, existsSync } from "node:fs";
+import { resolve } from "node:path";
+
+/** Read ONLY the non-secret Postgres connection keys from the repo-root .env. */
+function readPgEnv(): Record<string, string> {
+  const envPath = resolve(process.cwd(), "..", "..", ".env");
+  const out: Record<string, string> = {};
+  if (!existsSync(envPath)) return out;
+  for (const line of readFileSync(envPath, "utf8").split(/\r?\n/)) {
+    const m = /^(POSTGRES_(?:HOST|PORT|DB|USER))=(.*)$/.exec(line.trim());
+    if (m) out[m[1]!] = m[2]!;
+  }
+  return out;
+}
+
+export default async function globalTeardown(): Promise<void> {
+  const env = readPgEnv();
+  const host = process.env.PGHOST ?? env.POSTGRES_HOST ?? "localhost";
+  const port = process.env.PGPORT ?? env.POSTGRES_PORT ?? "5433";
+  const db = process.env.PGDATABASE ?? env.POSTGRES_DB ?? "heuresys_advanced";
+  const user = process.env.PGUSER ?? env.POSTGRES_USER ?? "heuresys";
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH d AS (DELETE FROM sys.sys_user_certifications WHERE user_certification_name LIKE 'E2E Test Cert%' RETURNING 1) SELECT count(*) FROM d",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] D-29: deleted ${out} E2E cert row(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] D-29 cert cleanup skipped:", (err as Error).message);
+  }
+}

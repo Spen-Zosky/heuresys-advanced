@@ -18,6 +18,10 @@ export const WEB_BASE_URL =
 
 export default defineConfig({
   testDir: "./tests/e2e",
+  // D-29: clean up the `E2E Test Cert <ts>` rows the ESS cert spec leaves behind
+  // (create+list-only surface, no DELETE endpoint). Inherited by the prod config
+  // via `...baseConfig`. Best-effort (never fails the run).
+  globalTeardown: "./tests/e2e/global-teardown.ts",
   fullyParallel: false,
   // Dev-mode runtime (compile-on-demand, Tailwind 4 JIT) introduces occasional
   // hydration-race jitter on cold first-hit, especially on the 4th/5th persona

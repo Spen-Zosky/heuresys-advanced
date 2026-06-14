@@ -25,12 +25,10 @@ test.describe("ESS certifications upload form — live data", () => {
     // Use a unique name per run so the row is identifiable even if the
     // seed already has certifications. Date is ISO so the input type="date"
     // accepts it.
-    // NB (D-27): there is intentionally no teardown — the ESS cert surface is
-    // create+list only (no DELETE endpoint) and Playwright has no DB access here,
-    // so each run leaves one `E2E Test Cert <ts>` row (slow ~1/run drift, cleaned
-    // by ops when needed). This is a11y-NEUTRAL since @heuresys/ui@0.1.6 made the
-    // scrollable table region keyboard-focusable regardless of row count (the
-    // D-27 fix); the residue no longer drives the mobile axe violation.
+    // Unique name per run so the row is identifiable. The ESS cert surface is
+    // create+list only (no DELETE endpoint), so the `E2E Test Cert <ts>` rows are
+    // cleaned after the suite by the Playwright global teardown via psql (D-29,
+    // global-teardown.ts). a11y-neutral regardless (D-27 / @heuresys/ui@0.1.6).
     const uniqueName = `E2E Test Cert ${Date.now()}`;
 
     await page.getByTestId("me-cert-name").fill(uniqueName);

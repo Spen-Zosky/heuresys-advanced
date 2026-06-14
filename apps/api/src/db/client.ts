@@ -1,14 +1,15 @@
 /**
  * apps/api/src/db/client.ts
- * Drizzle ORM + pg Pool initialisation. Single shared pool for the API
- * runtime. Graceful shutdown is wired in server.ts (SIGINT/SIGTERM).
+ * pg Pool initialisation. Single shared pool for the API runtime. Graceful
+ * shutdown is wired in server.ts (SIGINT/SIGTERM). Business queries use raw
+ * parameterized SQL over `pool` (ADR-0003 superseded — Drizzle ORM was never
+ * adopted as a query builder and the dead `db` export was removed, S989/QW-H1).
  *
  * Pool sizing: 20 (RD-16 — appropriate for shared OCI VM dev/test).
  * Production tuning is post-MVP.
  */
 
 import pg from "pg";
-import { drizzle } from "drizzle-orm/node-postgres";
 import { env } from "../config/env.js";
 
 export const pool = new pg.Pool({
@@ -43,8 +44,6 @@ pool.on("error", (err) => {
     }),
   );
 });
-
-export const db = drizzle(pool);
 
 /**
  * Lightweight readiness check used by GET /readyz.

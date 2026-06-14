@@ -5,7 +5,7 @@ import { defineConfig } from "tsup";
  *
  * `@heuresys/shared` is "source-first" — its package `exports` point to .ts, which `tsx` (dev) can
  * load but plain `node` cannot. So bundle that workspace package IN (noExternal). Everything listed
- * in `dependencies` (fastify, @fastify/*, pg, pg-format, argon2 [native], drizzle-orm, otpauth,
+ * in `dependencies` (fastify, @fastify/*, pg, pg-format, argon2 [native], otpauth,
  * zod, dotenv, …) stays EXTERNAL and is loaded from node_modules at runtime (argon2 is a native
  * .node addon and MUST NOT be bundled).
  *

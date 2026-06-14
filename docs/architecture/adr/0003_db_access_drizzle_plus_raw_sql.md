@@ -1,6 +1,6 @@
 # ADR‑0003 — DB Access: Drizzle ORM + Raw SQL Migrations
 
-- **Status:** Accepted (overridable)
+- **Status:** Superseded in part (S989, 2026‑06‑14) — the **Drizzle ORM** half (point 2) was never adopted: every business query is raw parameterized SQL over the pg `pool`, the `db = drizzle(pool)` export had zero consumers, and `drizzle-orm`/`drizzle-kit` were dead dependencies. They were removed (QW-H1 / TODO_100X QW-1), which also closed the lone esbuild Dependabot alert (`drizzle-kit` was its only carrier; override bumped to `>=0.28.1`). The **raw SQL migrations** half (point 1) remains fully in force.
 - **Date:** 2026‑05‑16
 
 ## Context

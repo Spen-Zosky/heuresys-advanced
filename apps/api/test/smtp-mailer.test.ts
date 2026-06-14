@@ -93,3 +93,29 @@ describe("makeMailer factory", () => {
     expect(m).toBeInstanceOf(ConsoleMailer);
   });
 });
+
+describe("ConsoleMailer OTP redaction (F-WS-H1-5 / QW-H5)", () => {
+  it("never puts the OTP code in any log field or message (raw-console leak closed)", async () => {
+    const calls: Array<{ obj: unknown; msg: unknown }> = [];
+    const capLog = {
+      warn(obj: unknown, msg?: unknown) {
+        calls.push({ obj, msg });
+      },
+      info() {},
+      error() {},
+      debug() {},
+      fatal() {},
+      trace() {},
+      child() {
+        return capLog;
+      },
+    } as unknown as FastifyBaseLogger;
+    const mailer = new ConsoleMailer(capLog);
+    const SECRET = "424242";
+    await mailer.sendMfaOtpEmail("user@example.com", SECRET, "LOGIN");
+    expect(calls).toHaveLength(1);
+    // The OTP must not appear in the structured field NOR the message string —
+    // even on a logger that does NOT apply pino redaction (the fallback path).
+    expect(JSON.stringify(calls[0])).not.toContain(SECRET);
+  });
+});

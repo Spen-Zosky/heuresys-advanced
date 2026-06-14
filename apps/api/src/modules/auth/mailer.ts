@@ -55,13 +55,16 @@ export class ConsoleMailer implements IMailer {
     code: string,
     purpose: "ENROLL" | "LOGIN" | "CONFIRM_ENROLL",
   ): Promise<void> {
-    // SECURITY: the OTP code is NEVER placed in the structured log fields (it
-    // would survive in log storage). Even in DEV we log only the destination +
-    // purpose; the code is intentionally interpolated into the message string
-    // gated behind the same DEV_ONLY warning a developer must opt into reading.
-    // Pino redaction (`*.code`) further censors any accidental field leak.
+    // SECURITY (F-WS-H1-5): the OTP code is NEVER logged — not as a structured
+    // field nor in the message string. The earlier `devOnlyCode: code` field was
+    // redundant (pino `*.devOnlyCode` redacted it in the live server anyway) yet
+    // it leaked the plaintext OTP through the raw-console fallback mailer
+    // (defaultMfaMailer, which bypasses pino redaction). Dropped. We log only the
+    // destination + purpose; the code is read from the DB challenge / InMemoryMailer
+    // in tests. Pino `*.code`/`*.otp`/`*.devOnlyCode` redaction stays as defense.
+    void code; // never logged — see above
     this.log.warn(
-      { toEmail, purpose, mailer: "ConsoleMailer", devOnlyCode: code },
+      { toEmail, purpose, mailer: "ConsoleMailer" },
       "[DEV_ONLY] MFA EMAIL_OTP code would be emailed to user. " +
         "Production must replace ConsoleMailer with a real SMTP/transactional mailer.",
     );

@@ -266,11 +266,15 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     cookie: { cookieName: COOKIES.ACCESS, signed: false },
   });
 
-  // 7. Rate limit (defaults; per-route overrides applied in auth module)
+  // 7. Rate limit (defaults; per-route overrides applied in auth module).
+  // Keyed on req.ip: rate-limit registers BEFORE the auth plugin (step 8) that
+  // decorates req.user, so its onRequest hook always saw req.user === undefined —
+  // the `req.user?.userId ??` branch was dead code (F-WS-H-2, removed). The
+  // genuine client IP depends on TRUST_PROXY (D-28) behind the nginx proxy.
   await app.register(rateLimit, {
     max: 600,
     timeWindow: "1 minute",
-    keyGenerator: (req) => req.user?.userId ?? req.ip,
+    keyGenerator: (req) => req.ip,
   });
 
   // 8. Auth (decorates req.user from JWT cookie when present)

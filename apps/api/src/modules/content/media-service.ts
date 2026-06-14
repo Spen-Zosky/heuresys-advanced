@@ -59,6 +59,41 @@ const toApi = (r: mediaRepo.MediaRow): MediaItem => ({
   createdAt: r.createdAt.toISOString(),
 });
 
+/**
+ * Magic-byte sniff (QW-H2 / F-WS-H1-6). The declared Content-Type (file.mime) is
+ * client-controlled; the ALLOWED_MIME allowlist alone trusts that header. We
+ * verify the REAL leading bytes against the 5 allowlisted signatures and persist
+ * the SNIFFED mime so the stored/echoed content-type can't be spoofed (the ESS
+ * path serves images inline). Hand-rolled (conservative) — returns the canonical
+ * mime or null if the bytes match none of the allowlisted types.
+ */
+function sniffMime(buf: Buffer): string | null {
+  if (
+    buf.length >= 8 &&
+    buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47 &&
+    buf[4] === 0x0d && buf[5] === 0x0a && buf[6] === 0x1a && buf[7] === 0x0a
+  ) {
+    return "image/png";
+  }
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) {
+    return "image/jpeg";
+  }
+  if (buf.length >= 4 && buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x38) {
+    return "image/gif"; // "GIF8" (87a/89a)
+  }
+  if (
+    buf.length >= 12 &&
+    buf[0] === 0x52 && buf[1] === 0x49 && buf[2] === 0x46 && buf[3] === 0x46 && // "RIFF"
+    buf[8] === 0x57 && buf[9] === 0x45 && buf[10] === 0x42 && buf[11] === 0x50 // "WEBP"
+  ) {
+    return "image/webp";
+  }
+  if (buf.length >= 4 && buf[0] === 0x25 && buf[1] === 0x50 && buf[2] === 0x44 && buf[3] === 0x46) {
+    return "application/pdf"; // "%PDF"
+  }
+  return null;
+}
+
 export function createMediaService(store: ObjectStore) {
   return {
     async upload(
@@ -77,6 +112,16 @@ export function createMediaService(store: ObjectStore) {
           "Media exceeds the size limit",
         );
       }
+      // QW-H2 (F-WS-H1-6): verify the real bytes match the declared (allowlisted)
+      // type — a client cannot pass a non-image body as image/png. Persist the
+      // sniffed mime below so the stored content-type is trustworthy.
+      const sniffedMime = sniffMime(file.data);
+      if (sniffedMime === null || sniffedMime !== file.mime) {
+        throw new ValidationError(
+          { declaredMime: file.mime, detectedMime: sniffedMime },
+          "Media content does not match its declared type",
+        );
+      }
       const mediaId = randomUUID();
       const storageKey = `${doc.tenantId}/${mediaId}`;
       // Blob first, row second: a crash in between leaves an orphan FILE
@@ -87,7 +132,7 @@ export function createMediaService(store: ObjectStore) {
         tenantId: doc.tenantId,
         documentId,
         filename: file.filename.slice(0, 255),
-        mime: file.mime,
+        mime: sniffedMime, // sniffed == declared here, but store the trusted value
         sizeBytes: file.data.length,
         sha256: createHash("sha256").update(file.data).digest("hex"),
         storageKey,

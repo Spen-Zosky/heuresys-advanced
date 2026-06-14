@@ -158,6 +158,24 @@ describe("content media (cap4 CMS P3, object store)", () => {
     expect(r.statusCode).toBe(400);
   });
 
+  it("magic-byte mismatch: PDF bytes declared as image/png → 400 (QW-H2)", async () => {
+    // declared mime is allowlisted (image/png) but the real bytes are a PDF →
+    // the sniff rejects the spoof; the legit media (mediaId) stays untouched.
+    const r = await upload(
+      { cookie: authorCookie, "x-csrf-token": authorCsrf },
+      Buffer.from("%PDF-1.4 not really a png at all"),
+      "image/png",
+      "spoof.png",
+    );
+    expect(r.statusCode).toBe(400);
+    const list = await suite.app.inject({
+      method: "GET",
+      url: `/v1/content/${documentId}/media`,
+      headers: { cookie: authorCookie },
+    });
+    expect((list.json() as { total: number }).total).toBe(1);
+  });
+
   it("delete removes the row AND the blob; download then 404", async () => {
     const del = await suite.app.inject({
       method: "DELETE",

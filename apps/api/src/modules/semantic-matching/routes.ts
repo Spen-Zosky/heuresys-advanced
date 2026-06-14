@@ -108,12 +108,19 @@ export const semanticMatchingRoutes: FastifyPluginAsyncZod<SemanticMatchingRoute
 
   // ── AI ②·Fase 2: free-text search (flag-gated; embeds the query at request time via the DI seam) ──
   app.get("/search", {
+    // QW-H6 (F-WS-H-4): tight per-route cap — free-text embeds the query at
+    // request time via Voyage (billable external call), so it must be bounded
+    // below the global 600/min limiter to cap cost/abuse.
+    config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
     preHandler: [requirePermission("matching:read")],
     schema: { querystring: FreeTextQuerySchema, response: { 200: FreeTextSearchResponseSchema } },
   }, async (req) => semanticMatchingService.freeTextSearch(actor(req), req.query, deps));
 
   // ── AI ②·Fase 2: reindex (matching:admin, CSRF; triggers the hash-skip-idempotent backfill) ──
   app.post("/reindex", {
+    // QW-H6 (F-WS-H-4): very low cap — reindex runs a full embedding backfill
+    // (expensive); a handful per hour is ample for an admin-triggered rebuild.
+    config: { rateLimit: { max: 5, timeWindow: "1 hour" } },
     preHandler: [app.verifyCsrf, requirePermission("matching:admin")],
     schema: { response: { 200: ReindexResponseSchema } },
   }, async (req) => semanticMatchingService.reindex(actor(req), deps));

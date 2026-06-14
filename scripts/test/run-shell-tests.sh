@@ -69,6 +69,17 @@ printf 'F=6' > "$T/s3"
 added="$(ENV_MERGE_LOCAL=1 bash scripts/env-key-merge.sh "$T/t3" "$T/s3")"
 if [ "$added" = "1" ] && grep -q '^F=6$' "$T/t3"; then ok "no-trailing-newline source line merges"; else fail "no-trailing-newline (added=$added)"; fi
 
+# C5: denylist — dev-only neutralization switches NEVER propagate to a remote
+# (S989 MFA enforcement: a local 'false' must not silently disable PROD MFA).
+printf 'A=1\n' > "$T/t5"
+printf 'MFA_ENFORCEMENT_ENABLED=false\nG=7\n' > "$T/s5"
+added="$(ENV_MERGE_LOCAL=1 bash scripts/env-key-merge.sh "$T/t5" "$T/s5")"
+if [ "$added" = "1" ] && grep -q '^G=7$' "$T/t5" && ! grep -q 'MFA_ENFORCEMENT_ENABLED' "$T/t5"; then
+  ok "denylist: MFA_ENFORCEMENT_ENABLED not propagated (no silent PROD downgrade)"
+else
+  fail "denylist (added=$added)"
+fi
+
 # --------------------- D. align-clones.sh auto-deploy gate (production regex)
 section "align-clones.sh — DEPLOY_PATHS_RE auto-deploy gate"
 RE_LINE="$(grep -m1 '^DEPLOY_PATHS_RE=' scripts/align-clones.sh)"

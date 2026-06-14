@@ -134,6 +134,24 @@ const EnvSchema = z.object({
   // whose code only lands in server logs would lock real users out).
   MFA_ENROLL_CONFIRM: z.enum(["auto", "on", "off"]).default("auto"),
 
+  // Mandatory-MFA login ENFORCEMENT kill-switch (dev/test neutralization seam,
+  // S989). DEFAULT true: the login §3b gate (mfa_required for accounts WITH a
+  // verified factor + mfa_enrollment_required for in-scope accounts WITHOUT one)
+  // is enforced everywhere unless explicitly turned off. PROD/VM/linuxpc leave it
+  // UNSET → true → zero security regression (mandatory-MFA stays live). Set
+  // MFA_ENFORCEMENT_ENABLED=false ONLY in a dev/test .env to bypass the gate
+  // entirely so development + automated testing proceed without a second factor.
+  // The MFA capability, enrolled factors and the per-tenant policy DATA all stay
+  // intact — only login-time enforcement is suspended; re-enable = config only.
+  // Parsed as an explicit 'true'/'false' string (z.coerce.boolean would turn the
+  // literal "false" into true — the COOKIE_SECURE / TRUST_PROXY / D-28 footgun).
+  // Per-machine topology: on the env-key-merge denylist so a dev 'false' can
+  // never propagate to PROD via scripts/align-clones.sh.
+  MFA_ENFORCEMENT_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((v) => v === "true"),
+
   // SMS provider (SMS_OTP MFA factor — code-only slice). OPTIONAL: no real
   // provider is implemented yet; makeSmsSender always returns ConsoleSms (not
   // production-capable -> SMS_OTP enrollment disabled). When a provider lands

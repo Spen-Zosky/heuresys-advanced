@@ -46,6 +46,11 @@ export interface AuthRoutesOptions {
    * sends use the same mailer as the rest of auth.
    */
   mfaService?: import("./mfa-service.js").MfaService;
+  /**
+   * Mandatory-MFA login enforcement (S989). Threaded into the auth service;
+   * defaults to env.MFA_ENFORCEMENT_ENABLED inside the service when omitted.
+   */
+  mfaEnforcement?: boolean;
 }
 
 function getUa(req: { headers: Record<string, string | string[] | undefined> }): string | null {
@@ -64,6 +69,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
       mailer,
       log: app.log,
       ...(opts.mfaService ? { mfaService: opts.mfaService } : {}),
+      ...(opts.mfaEnforcement !== undefined ? { mfaEnforcement: opts.mfaEnforcement } : {}),
     });
 
   // Secure cookies require HTTPS. COOKIE_SECURE overrides the NODE_ENV-based default

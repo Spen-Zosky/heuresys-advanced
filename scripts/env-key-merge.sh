@@ -27,11 +27,16 @@ export MSYS_NO_PATHCONV=1
 # .env value (cousin of the S979 marker-CRLF lesson).
 merge_env_into() {
   local target="$1" src="$2" added=0 line key
+  # Dev/test-only neutralization switches that must NEVER reach a remote: a local
+  # 'false' would silently disable a PROD security control (S989, MFA enforcement).
+  # Space-padded for whole-word containment match.
+  local denylist=" MFA_ENFORCEMENT_ENABLED "
   while IFS= read -r line || [ -n "$line" ]; do
     line="${line%$'\r'}"
     case "$line" in ''|'#'*) continue ;; esac
     key="${line%%=*}"
     [ "$key" = "$line" ] && continue                  # no '=' → not a var line
+    case "$denylist" in *" $key "*) continue ;; esac  # never propagate dev-only switches
     if ! grep -q "^${key}=" "$target"; then
       printf '%s\n' "$line" >> "$target"
       added=$((added+1))

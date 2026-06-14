@@ -40,6 +40,10 @@ export async function buildTestApp(options: TestAppOptions = {}): Promise<TestAp
     // "real" mailer, so "auto" would flip it ON and change every pre-v2 suite);
     // the dedicated enroll-confirm suite opts in with { enrollConfirm: "on" }.
     enrollConfirm: "off",
+    // Mandatory-MFA enforcement pinned ON by default so the existing suites stay
+    // identical regardless of a dev .env MFA_ENFORCEMENT_ENABLED=false (S989);
+    // the dedicated bypass test opts out with { mfaEnforcement: false }.
+    mfaEnforcement: true,
     ...options,
     smsSender: sms,
   });

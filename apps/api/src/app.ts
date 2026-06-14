@@ -129,6 +129,13 @@ export interface BuildAppOptions {
   /** Reference-sync DI seam — tests inject fixture fetchers (no live HTTP).
    *  Partial: a suite injects only the source(s) it exercises. */
   referenceSyncDeps?: Partial<ReferenceSyncDeps>;
+  /**
+   * Mandatory-MFA login enforcement (S989 neutralization seam). Defaults to
+   * env.MFA_ENFORCEMENT_ENABLED (true). buildTestApp pins true so existing
+   * suites are unaffected; the dedicated bypass test passes false. When false
+   * the login §3b gate is suspended (dev/test proceeds without a second factor).
+   */
+  mfaEnforcement?: boolean;
 }
 
 /**
@@ -295,6 +302,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // in tests, the configured transactional mailer in prod). Shared by the auth
   // login flow (mfaService dep) and the MFA management routes (service).
   const authMailer = options.authMailer ?? makeMailer(app.log);
+  const mfaEnforcement = options.mfaEnforcement ?? env.MFA_ENFORCEMENT_ENABLED;
   const smsSender = options.smsSender ?? makeSmsSender(app.log);
   const mfaService = buildMfaServiceWithMailer(
     authMailer,
@@ -311,7 +319,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       recordEnrolled: (userId) => mfaService.recordFactorEnrolled(userId, "WEBAUTHN"),
     },
   });
-  await app.register(authRoutes, { prefix: "/v1/auth", mailer: authMailer, mfaService });
+  await app.register(authRoutes, { prefix: "/v1/auth", mailer: authMailer, mfaService, mfaEnforcement });
   await app.register(mfaRoutes, {
     prefix: "/v1/auth/mfa",
     service: mfaService,

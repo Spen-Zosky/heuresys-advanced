@@ -163,6 +163,15 @@ export interface AuthServiceDeps {
    * in-memory challenge store.
    */
   mfaService?: MfaService;
+  /**
+   * Mandatory-MFA login enforcement (S989 neutralization seam). When false the
+   * §3b login gate is bypassed ENTIRELY (no mfa_required / mfa_enrollment_required)
+   * so dev/test can proceed without a second factor — the MFA capability, enrolled
+   * factors and per-tenant policy data are untouched. Defaults to
+   * env.MFA_ENFORCEMENT_ENABLED (true). buildTestApp pins it true so existing
+   * suites are unaffected; the dedicated bypass test passes false.
+   */
+  mfaEnforcement?: boolean;
 }
 
 /* === Service factory ===================================================== */
@@ -207,6 +216,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
   const resetBaseUrl = deps.resetBaseUrl ?? env.ADMIN_ORIGIN;
   const emailRateLimiter = deps.emailRateLimiter ?? sharedEmailRateLimiter;
   const mfaService = deps.mfaService ?? sharedMfaService;
+  const mfaEnforcement = deps.mfaEnforcement ?? env.MFA_ENFORCEMENT_ENABLED;
 
   async function issueLoginBundle(args: {
     userId: string;
@@ -338,7 +348,12 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       //     - Second step (challengeToken + mfaCode): verify the TOTP challenge
       //       (single-use, short-TTL) before falling through to token issuance.
       //     Accounts with no verified factor skip the gate entirely.
-      if (input.challengeToken) {
+      //     DEV/TEST NEUTRALIZATION (S989): when mfaEnforcement is false (env
+      //     MFA_ENFORCEMENT_ENABLED=false) the WHOLE gate is bypassed — login
+      //     falls straight through to token issuance, no second factor. PROD
+      //     keeps it true (default); enrolled factors + the per-tenant policy
+      //     are untouched, only login-time enforcement is suspended.
+      if (mfaEnforcement && input.challengeToken) {
         if (!input.mfaCode) {
           throw new UnauthorizedError("MFA code required", "MFA_CODE_REQUIRED");
         }
@@ -350,7 +365,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
           // Challenge token resolved to a different identity → reject.
           throw new UnauthorizedError("Invalid MFA challenge", "MFA_INVALID");
         }
-      } else {
+      } else if (mfaEnforcement) {
         const challenge = await mfaService.beginLoginChallenge(candidate.userId);
         if (challenge) {
           return {

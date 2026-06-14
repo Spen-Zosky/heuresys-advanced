@@ -16,6 +16,7 @@ import {
   EmptyResponseSchema,
 } from "@heuresys/shared";
 import { skillTaxonomyEdgesService, type ActorContext } from "./service.js";
+import { requirePermission } from "../../middleware/rbac.js";
 import { UnauthorizedError } from "../../errors/index.js";
 
 function actor(req: FastifyRequest): ActorContext {
@@ -33,7 +34,7 @@ export const skillTaxonomyEdgesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => skillTaxonomyEdgesService.getById(actor(req), req.params.id));
 
   app.post("/", {
-    preHandler: [app.verifyCsrf],
+    preHandler: [app.verifyCsrf, requirePermission("skill:create")],
     schema: { body: CreateSkillTaxonomyEdgeBodySchema, response: { 201: SkillTaxonomyEdgeSchema } },
   }, async (req, reply) => {
     const e = await skillTaxonomyEdgesService.create(actor(req), req.body);
@@ -41,7 +42,7 @@ export const skillTaxonomyEdgesRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf],
+    preHandler: [app.verifyCsrf, requirePermission("skill:update")],
     schema: { params: SkillTaxonomyEdgeIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillTaxonomyEdgesService.delete(actor(req), req.params.id);

@@ -18,6 +18,7 @@ import {
   EmptyResponseSchema,
 } from "@heuresys/shared";
 import { skillFamiliesService, type ActorContext } from "./service.js";
+import { requirePermission } from "../../middleware/rbac.js";
 import { UnauthorizedError } from "../../errors/index.js";
 
 function actor(req: FastifyRequest): ActorContext {
@@ -35,7 +36,7 @@ export const skillFamiliesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => skillFamiliesService.getById(actor(req), req.params.id));
 
   app.post("/", {
-    preHandler: [app.verifyCsrf],
+    preHandler: [app.verifyCsrf, requirePermission("skill:create")],
     schema: { body: CreateSkillFamilyBodySchema, response: { 201: SkillFamilySchema } },
   }, async (req, reply) => {
     const f = await skillFamiliesService.create(actor(req), req.body);
@@ -43,12 +44,12 @@ export const skillFamiliesRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.patch("/:id", {
-    preHandler: [app.verifyCsrf],
+    preHandler: [app.verifyCsrf, requirePermission("skill:update")],
     schema: { params: SkillFamilyIdParamSchema, body: UpdateSkillFamilyBodySchema, response: { 200: SkillFamilySchema } },
   }, async (req) => skillFamiliesService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf],
+    preHandler: [app.verifyCsrf, requirePermission("skill:update")],
     schema: { params: SkillFamilyIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillFamiliesService.delete(actor(req), req.params.id);

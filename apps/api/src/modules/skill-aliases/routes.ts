@@ -16,6 +16,7 @@ import {
   EmptyResponseSchema,
 } from "@heuresys/shared";
 import { skillAliasesService, type ActorContext } from "./service.js";
+import { requirePermission } from "../../middleware/rbac.js";
 import { UnauthorizedError } from "../../errors/index.js";
 
 function actor(req: FastifyRequest): ActorContext {
@@ -33,7 +34,7 @@ export const skillAliasesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => skillAliasesService.getById(actor(req), req.params.id));
 
   app.post("/", {
-    preHandler: [app.verifyCsrf],
+    preHandler: [app.verifyCsrf, requirePermission("skill:create")],
     schema: { body: CreateSkillAliasBodySchema, response: { 201: SkillAliasSchema } },
   }, async (req, reply) => {
     const a = await skillAliasesService.create(actor(req), req.body);
@@ -41,12 +42,12 @@ export const skillAliasesRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.patch("/:id", {
-    preHandler: [app.verifyCsrf],
+    preHandler: [app.verifyCsrf, requirePermission("skill:update")],
     schema: { params: SkillAliasIdParamSchema, body: UpdateSkillAliasBodySchema, response: { 200: SkillAliasSchema } },
   }, async (req) => skillAliasesService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf],
+    preHandler: [app.verifyCsrf, requirePermission("skill:update")],
     schema: { params: SkillAliasIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillAliasesService.delete(actor(req), req.params.id);

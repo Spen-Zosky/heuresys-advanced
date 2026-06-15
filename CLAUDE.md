@@ -78,7 +78,7 @@ psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "\dt sys.sys_auth*
 
 # 3. (optional) API dev server — restart if process died
 cd apps/api && pnpm dev
-# Look for: "RBAC permission cache loaded rolesLoaded:8 mappingsLoaded:394"
+# Look for: "RBAC permission cache loaded rolesLoaded:11 mappingsLoaded:586"
 ```
 
 The `.env` file is **gitignored** but real; `.env.example` has three runtime blocks (A localhost / B OCI VM / C OCI Managed). **Option B (OCI VM, tunnel 5433) is the active runtime** (RD-25, ADR-0010). Do not commit `.env`, `.secrets/`, or `*.pem`.
@@ -158,7 +158,7 @@ Entry split: `src/server.ts` is the network binding + env validation; `src/app.t
 12. /healthz + /readyz  → 13. module routes (/v1/<module>)
 ```
 
-Auth is **non-enforcing at the plugin level**: `auth.ts` decodes the JWT cookie into `req.user` if present; per-route enforcement is done with `requirePermission('perm:code')` from `middleware/rbac.ts`. The RBAC permission map (394 role×permission mappings, 8 roles) is **loaded once at server start** from `sys.sys_auth_role_permissions` — `requirePermission` throws `RBAC_NOT_LOADED` if used before the cache is populated.
+Auth is **non-enforcing at the plugin level**: `auth.ts` decodes the JWT cookie into `req.user` if present; per-route enforcement is done with `requirePermission('perm:code')` from `middleware/rbac.ts`. The RBAC permission map (586 role×permission mappings, 11 roles) is **loaded once at server start** from `sys.sys_auth_role_permissions` — `requirePermission` throws `RBAC_NOT_LOADED` if used before the cache is populated.
 
 The server logger redacts secrets via the exported `LOG_REDACT_PATHS` constant in `app.ts` (cookies, Authorization, password fields, refresh tokens, `*.password`, `*.hash`, `*.secret`). Tests verify this is live.
 
@@ -203,7 +203,7 @@ When a new requirement seems to conflict with these, **stop and ask** rather tha
 - Refresh token: 30 d, single-use, rotation with replay detection. Replay attempt revokes the entire family and returns `401 REFRESH_REPLAY_DETECTED`.
 - CSRF: double-submit cookie pattern via `csrfPlugin`. Opt-in per route — apply `app.verifyCsrf` preHandler to all state-changing routes (POST/PATCH/DELETE).
 - Login returns `200` with body (not 204 — Fastify strips bodies from 204; documented errata in commit `7450f77`).
-- 8 roles: `PLATFORM_ADMIN`, `TENANT_ADMIN`, `BLUEPRINT_MANAGER`, `HRMS_MANAGER`, `PROCESS_OWNER`, `MANAGER`, `USER`, `READ_ONLY`.
+- 11 roles: `PLATFORM_ADMIN`, `TENANT_ADMIN`, `BLUEPRINT_MANAGER`, `HRMS_MANAGER`, `PROCESS_OWNER`, `MANAGER`, `USER`, `READ_ONLY` + 3 holderless functional roles added in the S953/R2 epic (mig 000049): `CEO`, `TEAM_LEADER`, `TEAM_MEMBER`. (586 role×permission mappings — verify live: `SELECT count(*) FROM sys.sys_auth_role_permissions`.)
 - Test personas (post-S950 RTL rebuild: **real RTL_BANK users**, not the old `*.test` accounts which were deleted; `pnpm db:seed-test-admin` is now idempotent + login-only — it ensures a LOCAL auth identity + ARGON2ID credential for users created by the rebuild seeds, password `Admin#PassW0rd!`): `admin@heuresys.com` (PLATFORM_ADMIN), `federica.marchetti@rtl-bank.org` (TENANT_ADMIN), `paolo.caputo@rtl-bank.org` (MANAGER), `tommaso.fiore@rtl-bank.org` (USER, paolo's report), `antonio.parisi@rtl-bank.org` (USER, outsider). The manager→employee reports-to edge is a real org relationship. Mapping authority: `db/scripts/seed-test-admin.ts`.
 
 ## Database migrations

@@ -3,6 +3,19 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🔌 Integrazione #9 — Agent SDK + layer MCP del plugin `human-resources-plus` (PLAN prodotto 2026-06-15)
+
+Riconciliata da `COWORK_INBOX` (entry `2026-06-14 | #9`). Design read-only Cowork nel repo plugin (`docs/{PLATFORM_MAP,MCP_TOOL_CATALOG,AUTH_AND_COMPLIANCE_DESIGN,BLUEPRINT_BUILDERS,SDK_INTEGRATION_PLAN}.md` + `reference-backend/` pilota mock + skeleton SDK/MCP). **PLAN heuresys-side**: `docs/integrations/agent_sdk_mcp_integration_plan_2026-06-15.md` (evidence-based; verifica forense indipendente sul codice reale via Explore agent + letture mirate).
+
+Obiettivo: rendere le `/hr` skill del plugin callable dalle webapp via Claude Agent SDK, con le `/v1/*` esposte come tool MCP e compliance a runtime (plan→diff→approve→apply, GDPR Art.22). Cinque work-item (**DA APPROVARE — nessuna migration applicata, DDL = PROPOSED**):
+- **WI-A** service user PLATFORM_ADMIN + esenzione MFA (gate `auth/service.ts §3b`) — ⚠ security decision: flag DB **A1** (raccomandata) / env allowlist A2 / naturale-tenant-null A3.
+- **WI-B** backend Agent SDK + MCP in nuovo workspace **`apps/agent-gateway`** (TS) — auth ibrido (forwarded user / service user) + CSRF + `canUseTool` write-gate + `compliance-guard`.
+- **WI-C** generatore materializzazione per-tenant (Phase B) — modulo `tenant-materialization`, idempotente `ON CONFLICT`, modella `db/scripts/seed-reference-bank.ts`.
+- **WI-D opzionali** (decide Enzo): D1 bulk-apply lineage-imitating (wave-executor non riusabile) · D2 ranking/priorità KPI (schema addition — oggi solo `weight numeric(4,3)`) · D3 recommender typing→variant via `size_band_id` (net-new, non esiste).
+- **Pilota** blueprint-builder banca retail 8 step (generate→plan→apply), separazione **Phase A** catalogo (principal=service) / **Phase B** istanza tenant (principal=user/generatore).
+
+3 scoperte design-changing confermate: `blueprint-variant` = header catalogo (no payload org/role/skill/kpi) · `blueprint-activation` = 1 riga link (non istanzia) · archetipo da seed deterministico (no recommender typing→variant). Punti aperti per la review → §7 del PLAN. **Stato**: PLAN prodotto, awaiting review Cowork + go Enzo.
+
 ## 🔭 Programma 100X (S-100X) — audit forense QA E2E + release radicale (avviato 2026-06-13)
 
 Epic multi-sessione: audit forense end-to-end + miglioramento "100x" (robustezza, modernità, performance, semplicità, footprint, DX, UX-IX, processi) dalla baseline GA v1.0.0. **SoT del programma in `docs/kb/improvement/`**: `MASTER_PLAN_100X.md` · `TODO_100X.md` (tracker machine-checkable) · `BASELINE_METRICS.md` · `INTERVIEW_LOG.md` · `AUDIT_PROTOCOL.md` · `FINDINGS/` · `DOSSIERS/`. Kickoff: `docs/kb/improvement/2026-06-13_heuresys-advanced-100x-kickoff-prompt.md`.

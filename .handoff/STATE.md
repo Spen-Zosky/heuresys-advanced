@@ -1,8 +1,20 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-14 (S989).
+**Updated**: 2026-06-15 (#9 Agent SDK integration — continuazione live E2E, da riprendere in sessione fresca).
 
 > **Vista rapida** dello stato di lavoro (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura, delta per-sessione) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui.
+
+## ⭐ RIPRESA #9 — Agent SDK + MCP integration (continuazione in sessione fresca, 2026-06-15)
+
+Dettaglio completo: `docs/kb/SOT_BACKLOG.md §🔌 Integrazione #9` + `docs/integrations/agent_sdk_mcp_integration_plan_2026-06-15.md`. **DoD live vincolante** (CLAUDE.md §Definition of Done).
+
+**✅ DONE-LIVE**: §0 DoD persistita · WI-A esenzione MFA (mig `000116/000117`) · M-8/M-8b (mig `000118` SERVICE-only + audit) · WI-B mock-first (`apps/agent-gateway`) · **WI-B.2 READ+AGENTE live** (gateway SSE → SDK **subscription-auth** → tool MCP `hrx_org_units_list` → /v1 → **26 org-unit RTL_BANK reali**) · §0.5 safety verde (tenant test = **RTL_BANK `86ba7a65`**; DB = OCI VM reale via tunnel :5433; mai scrivere su HEURESYS `8bc5bc59`).
+
+**🛑 BLOCKER (blocked-on-Enzo) — WI-C/WI-D**: sovrapposti alla spec parallela **non committata** `docs/integrations/tenant_onboarding_esco_04_tenant_onboarding_spec_2026-06-15.md` (Cowork/Enzo) + **conflitto numerazione**: il #04 dichiara "Migration next = 000118" ma è già **M-8b**. Decisioni: (1) WI-C secondo spec #04 (riconciliare) o Cowork-owned? (2) spec parallele rinumerano `000119+`? (3) i 4 file `tenant_onboarding_esco_*` + `DEBT_REGISTER.md` (M) sono nel working tree **non committati** — lasciati intatti (non-CLI).
+
+**Residuo non-bloccato**: **M-2** (write-gate completo + 1 write-live gated su RTL_BANK: approval+rollback+audit) · **WI-B.3** (3 skill /hr live) + **WI-B.4** (pagina dev Next) — **agente, vincolati dal rate-limit subscription** `out_of_credits`; porta PROD agente = API key reale/Bedrock/Vertex.
+
+**Auth agente DEV**: gateway con `AGENT_GATEWAY_SUBSCRIPTION_AUTH=1` (unset ANTHROPIC_API_KEY → subscription Claude). **Nessun push** (commit locali #9, da `20fac45` a `5996d1c`). Migration su disco `000001..000118`.
 
 ## Last session brief (S989 — chiusura pending + tech debt, autonomo)
 

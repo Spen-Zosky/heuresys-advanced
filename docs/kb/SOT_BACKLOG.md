@@ -9,9 +9,9 @@ Batch autonomo (decision-authority session-scoped), 11 commit `ce558d3`..`913a07
 
 **RESIDUO OPEN (next session):**
 - **#9 agente** (⛔ credenziale `ANTHROPIC_API_KEY`/Bedrock/Vertex): M-2 write-live gated su RTL_BANK + WI-B.3/B.4 demo live (code pronto). + **WI-C generatore materializzazione** (= T3.7 spec #04, motore tenant-onboarding) ancora da costruire.
-- **ESCO downstream** (⛔ network): **T1.1 backfill 14k** (`POST /v1/reference-sync/runs {source:'ESCO_SKILL_HIERARCHY'}`) → **T2.6** clustering + **T3.8** Skills-Group-Share chart. **T2.5 assignment data** (OU→processi reali) = mapping business Enzo (schema+modulo pronti, 1 DoD row demo su RTL).
+- **ESCO downstream**: **T1.1 backfill ESEGUITO** (skill_group_uri 0→12892, 828 URI stale-404 saltati su 14011; connector reso skip-tolerant) → **T2.6** clustering + **T3.8** Skills-Group-Share chart ora **data-ready** = feature future (autorità *cosa* Enzo). **T2.5 assignment data** (OU→processi reali) = mapping business Enzo (schema+modulo pronti, 1 DoD row demo su RTL).
 - **#8 Fasi 4-8** post-v1.0 (4 design-doc pronti: 3.5 reporting/3.3 BPM/3.2 sec-audit/#6 provisioning; autorità *cosa*=Enzo). **S-100X-A4..A11** audit forense.
-- **#11 dependabot**: 5 PR etichettati `defer-major` per fermare il **CI-race** che cancellava il profilo reference RTL (enterprise-typing test, classe D-23, fixato `5e3e56f`; radice strutturale = **WS-G F-3**, CI sul DB PROD condiviso). **Enzo: rimuovi `defer-major` + merge #32 (minor group) + #35 (cross-env)**; #33/#34/#36 restano deferiti (test-integration fail).
+- **#11 dependabot ✅ CHIUSO**: adottati #37 (minor group, 8 update) + #35 (cross-env) — typecheck verde post-merge; #33/#34/#36 restano `defer-major` (2 rotti + @types/node major engines-floor) = decisi/parcheggiati. Il **CI-race** che cancellava RTL è risolto alla radice (enterprise-typing test → snapshot-restore `5e3e56f`); radice strutturale = WS-G F-3 (CI sul DB PROD condiviso, dossier 100X).
 - **T2.4 hard/soft layer** + **D-35 closure-table** (verdetto-b): residui semantici/decisi → DEBT_REGISTER.
 
 ## 🔌 Integrazione #9 — Agent SDK + layer MCP del plugin `human-resources-plus` (PLAN prodotto 2026-06-15)

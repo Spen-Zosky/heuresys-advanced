@@ -34,15 +34,67 @@ let sizeBandId: string;
 let operatingModelId: string;
 let profileId: string | null = null;
 
+// D-23 fix: this pipeline test upserts the typing profile of RTL_BANK (federica's
+// tenant), which is now a REFERENCE row seeded by mig 000119 (T1.3). Snapshot it in
+// beforeAll and RESTORE it in afterAll instead of deleting — deleting destroys the
+// reference profile (the full suite runs against the shared live DB; this wiped the
+// T1.3 RTL row, caught in the post-deploy PROD verification).
+let rtlTenantId: string | null = null;
+interface TypingSnapshot {
+  industryClassId: string | null; sizeBandId: string | null; operatingModelId: string | null;
+  regulatoryIntensity: string; employeeCount: number | null; countryCode: string | null;
+  metadata: unknown;
+}
+let rtlSnapshot: TypingSnapshot | null = null;
+
 describe("/v1/enterprise-typing pipeline", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "admin@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
+    const tq = await pool.query<{ tenant_id: string }>(
+      `SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'`,
+    );
+    rtlTenantId = tq.rows[0]?.tenant_id ?? null;
+    if (rtlTenantId) {
+      const sq = await pool.query(
+        `SELECT enterprise_typing_industry_class_id AS industry, enterprise_typing_size_band_id AS size,
+                enterprise_typing_operating_model_id AS opmodel, enterprise_typing_regulatory_intensity AS reg,
+                enterprise_typing_employee_count AS emp, enterprise_typing_country_code AS country,
+                enterprise_typing_metadata AS metadata
+           FROM sys.sys_enterprise_typing_profiles WHERE enterprise_typing_tenant_id = $1`,
+        [rtlTenantId],
+      );
+      const row = sq.rows[0];
+      if (row) {
+        rtlSnapshot = {
+          industryClassId: row.industry, sizeBandId: row.size, operatingModelId: row.opmodel,
+          regulatoryIntensity: row.reg, employeeCount: row.emp, countryCode: row.country,
+          metadata: row.metadata,
+        };
+      }
+    }
   });
 
   afterAll(async () => {
-    if (profileId) {
+    // D-23: restore RTL_BANK's REFERENCE typing profile (T1.3 mig 000119) to its
+    // pre-test state instead of deleting it; only delete if it did NOT pre-exist.
+    if (rtlSnapshot && rtlTenantId) {
+      try {
+        await pool.query(
+          `UPDATE sys.sys_enterprise_typing_profiles SET
+             enterprise_typing_industry_class_id = $2, enterprise_typing_size_band_id = $3,
+             enterprise_typing_operating_model_id = $4, enterprise_typing_regulatory_intensity = $5,
+             enterprise_typing_employee_count = $6, enterprise_typing_country_code = $7,
+             enterprise_typing_metadata = $8::jsonb, updated_at = now()
+           WHERE enterprise_typing_tenant_id = $1`,
+          [rtlTenantId, rtlSnapshot.industryClassId, rtlSnapshot.sizeBandId,
+           rtlSnapshot.operatingModelId, rtlSnapshot.regulatoryIntensity,
+           rtlSnapshot.employeeCount, rtlSnapshot.countryCode,
+           JSON.stringify(rtlSnapshot.metadata ?? {})],
+        );
+      } catch { /* ignore */ }
+    } else if (profileId) {
       try { await pool.query(`DELETE FROM sys.sys_enterprise_typing_profiles WHERE enterprise_typing_profile_id = $1`, [profileId]); }
       catch { /* ignore */ }
     }

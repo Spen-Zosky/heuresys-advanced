@@ -244,17 +244,30 @@ export async function resolveEscoSkillHierarchies(
   uris: string[],
   concurrency: number = ESCO_SKILL_CONCURRENCY,
 ): Promise<EscoSkillHierarchy[]> {
-  const out: EscoSkillHierarchy[] = new Array<EscoSkillHierarchy>(uris.length);
+  const out: (EscoSkillHierarchy | undefined)[] = new Array<EscoSkillHierarchy | undefined>(uris.length);
   let next = 0;
+  let skipped = 0;
   const workers = Array.from({ length: Math.min(Math.max(concurrency, 1), uris.length || 1) }, async () => {
     for (;;) {
       const i = next++;
       if (i >= uris.length) return;
       const uri = uris[i]!;
-      const raw = await fetcher.fetchSkill(uri);
-      out[i] = normalizeEscoSkillResource(uri, raw);
+      try {
+        const raw = await fetcher.fetchSkill(uri);
+        out[i] = normalizeEscoSkillResource(uri, raw);
+      } catch {
+        // A stale/retired ESCO URI (HTTP 404) — or a fetch still failing past its 429
+        // retries — must NOT abort the whole backfill. The legacy-imported catalogue has
+        // some URIs that no longer resolve on live ESCO; skip them (their hierarchy stays
+        // NULL) and continue. Only the resolvable skills are returned + persisted.
+        skipped++;
+      }
     }
   });
   await Promise.all(workers);
-  return out;
+  const resolved = out.filter((h): h is EscoSkillHierarchy => h !== undefined);
+  if (skipped > 0) {
+    console.warn(JSON.stringify({ connector: "esco-skill-hierarchy", phase: "resolve", resolved: resolved.length, skipped }));
+  }
+  return resolved;
 }

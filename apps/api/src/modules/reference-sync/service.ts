@@ -19,7 +19,14 @@ import type {
   ReferenceSyncWatermark,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-import { HttpEscoFetcher, fetchAllEscoOccupations, type EscoFetcher } from "./esco-connector.js";
+import {
+  HttpEscoFetcher,
+  HttpEscoSkillFetcher,
+  fetchAllEscoOccupations,
+  resolveEscoSkillHierarchies,
+  type EscoFetcher,
+  type EscoSkillFetcher,
+} from "./esco-connector.js";
 import { HttpAtecoFetcher, fetchAllAtecoActivities, type AtecoFetcher } from "./istat-ateco-connector.js";
 
 export interface ActorContext {
@@ -31,16 +38,24 @@ export interface ActorContext {
 export interface ReferenceSyncDeps {
   escoFetcher: EscoFetcher;
   atecoFetcher: AtecoFetcher;
+  escoSkillFetcher: EscoSkillFetcher;
+  /** The set of ESCO skill URIs the T1.1 backfill resolves. Prod = every sys_skills
+   *  row carrying a URI (~14k). The integration suite injects a tiny synthetic list so
+   *  it never resolves/mutates the real catalog (mirrors the synthetic-URI fixtures). */
+  escoSkillUriSource: () => Promise<string[]>;
 }
 export const defaultDeps: ReferenceSyncDeps = {
   escoFetcher: new HttpEscoFetcher(),
   atecoFetcher: new HttpAtecoFetcher(),
+  escoSkillFetcher: new HttpEscoSkillFetcher(),
+  escoSkillUriSource: repo.readEscoSkillUris,
 };
 
 /** Registered official sources (order = display order in /sources). */
 const SOURCE_DEFS: Record<ReferenceSyncSourceKey, { label: string }> = {
   ESCO: { label: "ESCO — EU occupation & skill taxonomy" },
   ATECO_2025: { label: "ATECO 2025 — ISTAT Italian economic activity classification" },
+  ESCO_SKILL_HIERARCHY: { label: "ESCO skill hierarchy — skill_group_uri + broader_uri backfill" },
 };
 const SOURCE_KEYS = Object.keys(SOURCE_DEFS) as ReferenceSyncSourceKey[];
 
@@ -129,6 +144,16 @@ export const referenceSyncService = {
         rows = occupations;
         upsert = (client) => repo.upsertEscoCatalog(client, occupations);
         hasRows = repo.escoCatalogHasRows;
+      } else if (source === "ESCO_SKILL_HIERARCHY") {
+        // T1.1: backfill skill_group_uri + broader_uri on sys_skills for every skill
+        // carrying an ESCO URI (the DEFERRED live run resolves ~14k via the HTTP fetcher;
+        // tests inject a fixture fetcher → no live HTTP). Resolve under a bounded pool,
+        // then merge idempotently into skill_metadata.
+        const uris = await deps.escoSkillUriSource();
+        const hierarchies = await resolveEscoSkillHierarchies(deps.escoSkillFetcher, uris);
+        rows = hierarchies;
+        upsert = (client) => repo.upsertEscoSkillHierarchy(client, hierarchies);
+        hasRows = repo.escoSkillHierarchyHasRows;
       } else {
         const activities = await fetchAllAtecoActivities(deps.atecoFetcher);
         rows = activities;

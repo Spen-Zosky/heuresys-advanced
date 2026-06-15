@@ -271,8 +271,10 @@ describe("reference-sync API (cap⑤ ATECO_2025, 2nd source)", () => {
     });
     expect(r.statusCode).toBe(200);
     const b = r.json() as { items: { key: string; watermark: { status: string } | null }[]; total: number };
-    expect(b.total).toBe(2);
-    expect(b.items.map((x) => x.key)).toEqual(["ESCO", "ATECO_2025"]);
+    // T1.1 added a third source (ESCO_SKILL_HIERARCHY); the display order is the
+    // SOURCE_DEFS key order. This suite exercises ESCO + ATECO_2025 only.
+    expect(b.total).toBe(3);
+    expect(b.items.map((x) => x.key)).toEqual(["ESCO", "ATECO_2025", "ESCO_SKILL_HIERARCHY"]);
     const ateco = b.items.find((x) => x.key === "ATECO_2025")!;
     expect(ateco.watermark).not.toBeNull();
     expect(["STAGED", "UNCHANGED"]).toContain(ateco.watermark!.status);

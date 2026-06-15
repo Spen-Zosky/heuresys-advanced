@@ -13,7 +13,7 @@
 import type { PoolClient } from "pg";
 import { pool } from "../../db/client.js";
 import { withTransaction } from "../auth/repository.js";
-import type { EscoOccupation } from "./esco-connector.js";
+import type { EscoOccupation, EscoSkillHierarchy } from "./esco-connector.js";
 import { ATECO_SCHEME, type AtecoActivity } from "./istat-ateco-connector.js";
 
 export const REFERENCE_SYNC_SCOPE = "reference_sync";
@@ -98,6 +98,73 @@ export async function upsertAtecoCatalog(
     inserted += res.rows.filter((x) => x.inserted).length;
   }
   return { total: rows.length, inserted, updated: rows.length - inserted };
+}
+
+/* ── T1.1: ESCO skill-hierarchy backfill (skill_group_uri + broader_uri) ─────────
+ *
+ * Persistence is an idempotent jsonb-merge UPDATE on sys.sys_skills keyed by the
+ * natural ESCO URI (skill_esco_uri). NO new column — the jsonb keys already exist in
+ * the scaffold (T2.4's skill_kind column is a SEPARATE concern, untouched here).
+ *
+ *   UPDATE sys.sys_skills
+ *      SET skill_metadata = skill_metadata || jsonb_build_object('skill_group_uri',$1,'broader_uri',$2)
+ *    WHERE skill_esco_uri = $3
+ *
+ * Policy: a NULL resolved value is written as a JSON null into the merged object,
+ * preserving the "skill group unavailable" bucket explicitly (the key is present with
+ * value null). Re-running with the same resolution produces an identical row → the
+ * `||` merge is naturally idempotent; the watermark hash-skip makes the whole run a
+ * no-op when the resolved artifact is unchanged. */
+
+/** Read the ESCO skill URIs that need a hierarchy backfill (all skills with a URI). */
+export async function readEscoSkillUris(): Promise<string[]> {
+  const res = await pool.query<{ uri: string }>(
+    `SELECT skill_esco_uri AS uri FROM sys.sys_skills
+      WHERE skill_esco_uri IS NOT NULL
+      ORDER BY skill_esco_uri`,
+  );
+  return res.rows.map((r) => r.uri);
+}
+
+/**
+ * Idempotent jsonb-merge of the resolved skill hierarchy into sys.sys_skills.
+ * One UPDATE per skill (the natural URI key); chunked param batching is unnecessary —
+ * a single skill maps to a single row. Counts a row as "updated" when the UPDATE
+ * actually matched a sys_skills row (rowCount), "inserted" stays 0 (this is a backfill
+ * of existing rows, never an INSERT). NULLs are merged as JSON null (group-unavailable
+ * bucket preserved). Mirrors the EscoUpsertResult contract so persistSync is reused.
+ */
+export async function upsertEscoSkillHierarchy(
+  client: PoolClient,
+  rows: EscoSkillHierarchy[],
+): Promise<EscoUpsertResult> {
+  let updated = 0;
+  for (const r of rows) {
+    const res = await client.query(
+      `UPDATE sys.sys_skills
+          SET skill_metadata = skill_metadata
+              || jsonb_build_object('skill_group_uri', $1::text, 'broader_uri', $2::text)
+        WHERE skill_esco_uri = $3`,
+      [r.skillGroupUri, r.broaderUri, r.skillEscoUri],
+    );
+    updated += res.rowCount ?? 0;
+  }
+  return { total: rows.length, inserted: 0, updated };
+}
+
+/**
+ * Presence guard for the ESCO_SKILL_HIERARCHY watermark skip: have ANY skills had
+ * their group URI backfilled yet? Keeps the UNCHANGED hash-skip a TRUE optimization —
+ * if the backfill was never run (or wiped), a matching content hash must NOT skip the
+ * real backfill. Mirrors escoCatalogHasRows / atecoCatalogHasRows.
+ */
+export async function escoSkillHierarchyHasRows(): Promise<boolean> {
+  const res = await pool.query<{ has: boolean }>(
+    `SELECT EXISTS(
+       SELECT 1 FROM sys.sys_skills WHERE skill_metadata->>'skill_group_uri' IS NOT NULL
+     ) AS has`,
+  );
+  return res.rows[0]?.has === true;
 }
 
 export interface RecordRunArgs {

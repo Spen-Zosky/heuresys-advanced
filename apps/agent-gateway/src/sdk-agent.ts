@@ -11,13 +11,20 @@
  */
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { buildHeuresysMcp } from "./mcp-tools.js";
-import { makeCanUseTool, type ApproveFn } from "./write-gate.js";
+import { makeCanUseTool, type ApproveFn, type GatePrincipal } from "./write-gate.js";
+import type { AuditSink } from "./audit-sink.js";
 import type { HeuresysClient } from "./heuresys-client.js";
 
 export interface RunHrAgentOptions {
   /** Bridges to the webapp (SSE/WebSocket) so a human authorises each write. */
   approve: ApproveFn;
   approvalTimeoutMs?: number;
+  /** Audit sink for every gate decision (defaults to FileAuditSink inside the gate). */
+  audit?: AuditSink;
+  /** Allowlist override (defaults to the catalogue set inside the gate). */
+  allowlist?: ReadonlySet<string>;
+  /** Principal context for the audit trail (forwarded user vs service user). */
+  principal?: GatePrincipal;
 }
 
 export async function* runHrAgent(
@@ -26,7 +33,12 @@ export async function* runHrAgent(
   opts: RunHrAgentOptions,
 ) {
   const heuresys = buildHeuresysMcp(client);
-  const canUseTool = makeCanUseTool(opts.approve, { approvalTimeoutMs: opts.approvalTimeoutMs });
+  const canUseTool = makeCanUseTool(opts.approve, {
+    ...(opts.approvalTimeoutMs !== undefined ? { approvalTimeoutMs: opts.approvalTimeoutMs } : {}),
+    ...(opts.audit !== undefined ? { audit: opts.audit } : {}),
+    ...(opts.allowlist !== undefined ? { allowlist: opts.allowlist } : {}),
+    ...(opts.principal !== undefined ? { principal: opts.principal } : {}),
+  });
 
   const iterator = query({
     prompt,

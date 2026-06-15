@@ -1,22 +1,36 @@
 /**
  * Agent gateway HTTP server (#9 WI-B.2) — READ-LIVE service port.
  *
- * POST /agent  → Server-Sent Events stream of the Agent SDK run (runHrAgent).
+ * POST /agent          → Server-Sent Events stream of the Agent SDK run (runHrAgent).
  *   Auth (READ): the caller's heuresys session cookies (hrx_access + hrx_csrf) are
  *   FORWARDED per request → the agent acts as the logged-in user (RBAC + tenant
  *   enforced by /v1). No service account / secret for reads (PLATFORM_MAP §1).
- *   Write gate: in this phase every write is DENIED (approve → false) — zero
- *   mutations; reads auto-allow (write-gate.ts). The live write path is M-2.
- * GET  /healthz → liveness.
+ *   Write gate (M-2): every write triggers a human-in-the-loop round-trip. The stream
+ *   emits an `approval_required` event carrying an `approvalId` + the REDACTED tool/args;
+ *   a human resolves it via POST /agent/approve. DENY-BY-DEFAULT on timeout / unknown id.
+ *   Reads auto-allow (write-gate.ts). EVERY decision is audited (audit-sink.ts).
+ * POST /agent/approve   → { approvalId, decision:'allow'|'deny' } resolves a pending write.
+ * GET  /healthz         → liveness.
  *
  * Node http only (no framework dep). HEURESYS_API defaults to the dev API on :3001.
  */
 import { createServer, type IncomingMessage } from "node:http";
+import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
+import { FileAuditSink } from "./audit-sink.js";
 import { HeuresysClient } from "./heuresys-client.js";
+import { redact } from "./redact.js";
 import { runHrAgent } from "./sdk-agent.js";
+import type { GatePrincipal } from "./write-gate.js";
 
 const PORT = Number(process.env.AGENT_GATEWAY_PORT ?? 8790);
 const HEURESYS_API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
+const APPROVAL_TIMEOUT_MS = Number(process.env.AGENT_GATEWAY_APPROVAL_TIMEOUT_MS ?? 120_000);
+
+// Module-level singletons (one per server process):
+//  - the HITL approval registry bridges the SSE stream ↔ POST /agent/approve;
+//  - the file audit sink leaves a tamper-evident trail of EVERY gate decision (M-4).
+const approvals = new ApprovalRegistry({ approvalTimeoutMs: APPROVAL_TIMEOUT_MS });
+const auditSink = new FileAuditSink();
 
 // #9 §A.1 — DEV subscription auth: with AGENT_GATEWAY_SUBSCRIPTION_AUTH=1 do NOT
 // forward an ANTHROPIC_API_KEY to the SDK, so query() falls back to the machine's
@@ -54,6 +68,31 @@ const server = createServer(async (req, res) => {
       return;
     }
 
+    // HITL resolve route: a human allows/denies a pending write from the webapp.
+    if (req.method === "POST" && req.url === "/agent/approve") {
+      const body = await readBody(req);
+      let parsed: { approvalId?: string; decision?: string };
+      try {
+        parsed = JSON.parse(body || "{}") as { approvalId?: string; decision?: string };
+      } catch {
+        res.writeHead(400, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "BAD_JSON" }));
+        return;
+      }
+      const approvalId = parsed.approvalId;
+      const decision = parsed.decision;
+      if (!approvalId || (decision !== "allow" && decision !== "deny")) {
+        res.writeHead(400, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "BAD_REQUEST", message: "approvalId + decision:'allow'|'deny'" }));
+        return;
+      }
+      // unknown / expired / already-resolved id → no-op (deny-by-default semantics).
+      const resolved = approvals.resolve(approvalId, decision as ApprovalDecision);
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ ok: true, resolved }));
+      return;
+    }
+
     if (req.method === "POST" && req.url === "/agent") {
       const cookies = parseCookies(req.headers.cookie);
       const cookieAccess = cookies["hrx_access"];
@@ -81,10 +120,29 @@ const server = createServer(async (req, res) => {
         "cache-control": "no-cache",
         connection: "keep-alive",
       });
-      // READ phase: deny every write (HITL bridge wired in WI-B.4 / M-2).
-      const approve = async () => false;
+
+      // M-2 HITL bridge: each write registers a pending approval, emits an
+      // `approval_required` SSE event with the REDACTED tool/args, and awaits the
+      // human's decision via POST /agent/approve (deny-by-default on timeout).
+      const principal: GatePrincipal = { principal: "user" };
+      const approve = async (reqApprove: { tool: string; input: unknown }): Promise<boolean> => {
+        const { approvalId, decided } = approvals.create();
+        const payload = {
+          approvalId,
+          tool: redact(reqApprove.tool),
+          input: redact(reqApprove.input),
+        };
+        res.write(`event: approval_required\ndata: ${JSON.stringify(payload)}\n\n`);
+        return decided; // resolves allow/deny; false on timeout / unknown id
+      };
+
       try {
-        for await (const event of runHrAgent(prompt, client, { approve })) {
+        for await (const event of runHrAgent(prompt, client, {
+          approve,
+          approvalTimeoutMs: APPROVAL_TIMEOUT_MS,
+          audit: auditSink,
+          principal,
+        })) {
           res.write(`data: ${JSON.stringify(event)}\n\n`);
         }
       } catch (err) {

@@ -44,9 +44,15 @@ export async function* runHrAgent(
     prompt,
     options: {
       settingSources: ["project", "user"], // discover the plugin's skills + agents
-      allowedTools: ["Skill", "mcp__heuresys__*"], // model-invoked skills + heuresys tools
+      // CRITICAL (M-2): do NOT put `mcp__heuresys__*` in allowedTools — per the SDK,
+      // allowedTools are "auto-allowed without prompting", which BYPASSES canUseTool.
+      // That would let WRITE tools execute with no human approval. Instead every
+      // heuresys MCP tool falls through to canUseTool, which auto-allows reads and
+      // routes writes to the HITL gate — and audits EVERY decision (M-4). Built-in
+      // tools (Bash/ToolSearch the skills use) stay governed by settingSources.
+      allowedTools: ["Skill"], // model-invoked skills only; heuresys tools → canUseTool
       mcpServers: { heuresys },
-      permissionMode: "default", // writes fall through to canUseTool
+      permissionMode: "default", // unlisted tools (the heuresys MCP set) → canUseTool
       canUseTool,
     },
   });

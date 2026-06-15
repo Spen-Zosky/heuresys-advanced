@@ -66,8 +66,15 @@ const SKILL_CASES: readonly SkillCase[] = [
   },
 ] as const;
 
-/** SSE markers that mean the agent could not run for credential/credit reasons. */
-const CREDENTIAL_BLOCK = /out_of_credits|insufficient[_\s-]?credit|401|invalid[_\s-]?(api[_\s-]?)?key|no api key|authentication[_\s-]?error|unauthor/i;
+/**
+ * SSE markers that mean the agent could not run for credential/credit reasons.
+ * Specific by design: a bare `401`/`unauthor` matched business data inside a
+ * tool_result (e.g. an id/code containing "401") and false-aborted a live run.
+ * These markers only appear in an SDK auth/credit failure, never in /v1 data;
+ * the caller additionally scopes the check to `result(is_error)` / `error` events.
+ */
+const CREDENTIAL_BLOCK =
+  /out_of_credits|insufficient[_\s-]?credit|invalid[_\s-]?(api[_\s-]?)?key|no api key|authentication[_\s-]?error|api_error_status"?\s*:\s*(401|403)|overageStatus"?\s*:\s*"?out_of_credits/i;
 
 function base32Decode(s: string): Buffer {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -178,8 +185,11 @@ async function runSkill(c: SkillCase, cookies: string): Promise<SkillRunResult> 
     if (/"?Skill"?/.test(flat) && flat.includes(c.command)) result.skillFired = true;
     // (b) a heuresys MCP tool fired (namespaced or bare catalogue name).
     if (/mcp__heuresys__[a-z_]+|hrx_[a-z_]+/.test(flat)) result.mcpToolFired = true;
-    // credential / credit block surfaced as an `error` SSE event or inline error.
-    if (CREDENTIAL_BLOCK.test(flat)) {
+    // credential / credit block surfaced as an `error` SSE event or a result event
+    // with is_error — NEVER from tool_result business data (that false-aborted runs).
+    const isErrorEvent = /event:\s*error/.test(flat) || /"type"\s*:\s*"error"/.test(flat);
+    const isResultError = /"type"\s*:\s*"result"/.test(flat) && /"is_error"\s*:\s*true/.test(flat);
+    if ((isErrorEvent || isResultError) && CREDENTIAL_BLOCK.test(flat)) {
       result.credentialBlocked = true;
       result.blockDetail = flat.slice(0, 300);
     }

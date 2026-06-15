@@ -84,11 +84,12 @@ const EnvSchema = z.object({
     .optional()
     .transform((v) => (v === undefined ? undefined : v === "true")),
 
-  // MFA encryption key (S935 SEC base — required in production, optional in dev).
-  // Format: base64-encoded 32-byte random string. Generate with:
-  //   openssl rand -base64 32
-  // Required when NODE_ENV=production OR MFA feature is enabled at any tenant
-  // (mfa-service throws MFA_ENCRYPTION_KEY_MISSING at boot if absent and used).
+  // MFA encryption key (S935 SEC base). RESERVED / currently INERT (D-30, 2026-06-15):
+  // validated here but NOT consumed by any code today — TOTP factor secrets are
+  // stored base32-plaintext in sys_auth_mfa_factors (behind auth+RBAC; no real
+  // PII per ADR-0023). This is the future seam for AES-256-GCM encryption-at-rest
+  // (see mfa-service.ts header TODO). Format: base64 32-byte (openssl rand -base64 32).
+  // Optional everywhere until that encryption seam actually lands.
   MFA_ENCRYPTION_KEY: z
     .string()
     .min(32, "MFA_ENCRYPTION_KEY must be at least 32 bytes (base64 of 24 raw bytes)")
@@ -186,17 +187,17 @@ const EnvSchema = z.object({
 
 const parsed = EnvSchema.parse(process.env);
 
-// S935 SEC base — soft-fail warning at boot when MFA key is absent in production.
-// We don't hard-fail (back-compat with envs that don't have MFA enabled yet),
-// but we make the gap loud rather than silent (mirror CW-B61 observability
-// doctrine: every absence has a trace).
+// D-30 (2026-06-15): MFA_ENCRYPTION_KEY is currently INERT — no code consumes it
+// yet (TOTP secrets are base32 behind auth+RBAC). The warn below is kept as a
+// reserved-seam reminder for the future AES-256-GCM encryption-at-rest work,
+// corrected from the previous (false) "will throw at runtime" claim.
 if (parsed.NODE_ENV === "production" && !parsed.MFA_ENCRYPTION_KEY) {
   console.warn(
     JSON.stringify({
       level: "warn",
       phase: "env-validation",
       sub_phase: "mfa-key-check",
-      msg: "MFA_ENCRYPTION_KEY is not set in production environment. MFA features will throw MFA_ENCRYPTION_KEY_MISSING at runtime when invoked. Set the env var (openssl rand -base64 32) or disable MFA per tenant.",
+      msg: "MFA_ENCRYPTION_KEY is not set. It is currently INERT (reserved for future AES-256-GCM encryption-at-rest of MFA factor secrets; no code consumes it today, so its absence is harmless). Set it (openssl rand -base64 32) before enabling encryption-at-rest.",
     }),
   );
 }

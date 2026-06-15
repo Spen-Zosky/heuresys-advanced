@@ -60,3 +60,42 @@ Work items proposti per il CLI (net-new heuresys-side):
 Pilota: blueprint-builder archetipo banca retail (8 step generate→plan→apply). Reference backend (mock-first, fuori da heuresys) prodotto da Cowork nel repo plugin `reference-backend/`. **Nessuna migration creata/applicata; nulla scritto qui fuori da questo inbox.**
 
 stato: [RICONCILIATA 20fac45] — CLI 2026-06-15: PLAN heuresys-side prodotto in `docs/integrations/agent_sdk_mcp_integration_plan_2026-06-15.md` (5 work-item a/b/c/d + pilota; verifica forense indipendente sul codice reale). Le 3 scoperte design-changing + le decisioni auth-ibrido/materializzazione-in-fasi sono confermate e tradotte in WI-A..WI-D. Aperto item `SOT_BACKLOG.md §🔌 Integrazione #9` + delta `SOT_STATE.md`. **Nessuna migration applicata (DDL=PROPOSED).** Awaiting review Cowork + go Enzo sui punti aperti (§7 del PLAN): (1) meccanica esenzione MFA — flag DB A1 racc. / env A2 / naturale A3; (2) tenant del service user; (3) collocazione `apps/agent-gateway` (TS); (4) quali opzionali D; (5) KPI per-position vs template.
+
+
+### 2026-06-15 | nota | REVIEW Cowork del PLAN #9 (Agent SDK + MCP) — verdetto GO-con-modifiche
+
+Review architetto/supervisore del PLAN `docs/integrations/agent_sdk_mcp_integration_plan_2026-06-15.md` (`20fac45`). Read-only; nessun commit/edit fuori da questo inbox. Dettaglio completo in scratchpad Cowork `outputs/REVIEW_plan9_agent_sdk_2026-06-15.md`.
+
+**Verdetto: GO-con-modifiche.** Il PLAN resta nel "come", gate "cosa" a Enzo OK, RBAC 11/586/133 e invarianti (I3/I4, I5, I8, ADR-0023, R11) coerenti, verifica forense §1 solida. 7 modifiche di hardening pre-esecuzione (nessuna riprogettazione):
+- **M-1 (HIGH)** tenant isolation di `tenant.materialize`: gira come PLATFORM_ADMIN tenant-null -> tenantId dall'input, non dal JWT; serve validazione (esiste+ACTIVE) + conferma tenant nell'approval + test negativi cross-tenant; correggere la riga I5 di §2.
+- **M-2 (HIGH)** test adversarial `canUseTool`: replay token, timeout->deny-by-default, principal confusion user/service, write senza token.
+- **M-3 (MED)** I8 come allowlist deny-by-default esplicita del catalogo tool (non sola esclusione onboarding/recruit).
+- **M-4 (MED)** specificare sink audit >=6 mesi; se tabella sys_* -> registry row nella stessa migration (classe D-22).
+- **M-5 (MED)** gateway->/v1 rate-limit post-D-28 + CSRF lifecycle + mutex refresh proprio del service user.
+- **M-6 (LOW)** idempotenza re-run pilota sull'attivazione (one-active-per-tenant -> PATCH vs POST).
+- **M-7 (LOW)** users materializzati Phase B = persone credential-less, non crosswalk LEGACY_EMP:: (I14).
+- chiarimento §7.2: A1 = controllo primario, tenant-null = difesa-in-profondita.
+
+Restano i 5 punti aperti §7 = autorita Enzo (esenzione MFA A1/A2/A3, tenant service user, apps/agent-gateway TS, quali opzionali D, KPI per-position vs template).
+
+stato: [RICONCILIATA 5f37cc1] — CLI 2026-06-15: verdetto GO-con-modifiche registrato; i 7 hardening M-1..M-7 + il chiarimento §7.2 recepiti nel PLAN §9 (`5f37cc1`). I 5 punti §7 sono chiusi dall'AMENDMENT sotto (riconciliato nello stesso commit).
+
+
+### 2026-06-15 | proposta-stato | AMENDMENT PLAN #9 — 5 punti §7 chiusi (delega Enzo) + hardening M-1..M-7
+
+Su delega Enzo, Cowork ha chiuso i 5 punti aperti §7 del PLAN `docs/integrations/agent_sdk_mcp_integration_plan_2026-06-15.md` e prodotto un amendment incorporabile in un passaggio. Dettaglio completo in scratchpad Cowork `outputs/AMENDMENT_plan9_agent_sdk_2026-06-15.md`. Read-only; nessun commit; DDL = PROPOSED/DO-NOT-APPLY.
+
+**5 decisioni §7 (ancorate a precedente):**
+- (a) Esenzione MFA: **A1 flag-DB = controllo PRIMARIO** in tabella **`sys.sys_auth_mfa_exemptions`** (NON colonna su `sys_users` — ancora **I7**: auth separato in `sys_auth_*`); **A3 tenant-null = difesa-in-profondita** (tensione A1-vs-A3 eliminata); A2 scartata. Guard `auth/service.ts §3b` via DI seam come `mfaEnforcement` (S989) + registry row stessa migration (classe D-22) + audit LOGIN_*.
+- (b) Tenant service user: **platform-level (tenant-null)** — ancora §1.1 + catalogo globale (job-families `ensurePlatformAdmin`) + §7.2.
+- (c) **`apps/agent-gateway` in TypeScript = SI** — monorepo TS + skeleton reference TS + SDK TS-native; client HTTP di `/v1`, non modulo `/v1` (no violazione module-pattern); pin SDK.
+- (d) Opzionali: **abilita D2; rinvia D1 e D3**. D2 necessario (verifica 2026-06-15: `positions/routes.ts:162 /:id/kpis` read-only; `sys_position_kpi_requirements 000011:138` solo `weight`, no rank → "8 KPI ranked" non esprimibili). D1 coperto da SDK+WI-C; D3 = net-new senza precedente (no recommender, §1.8.7) → "cosa" separata.
+- (e) KPI **per-position con rank (= D2)** per il ruolo flagship; template restano per livelli aggregati. **Edge I9**: estendere la VIEW PIP (`000011:284-299`) per esporre `rank`.
+
+**7 hardening M-1..M-7** mappati a sezione/riga del PLAN (M-1 tenant isolation materialize §2/I5+WI-C, ancora wave-executor §1.5; M-2 adversarial canUseTool; M-3 I8 allowlist deny-by-default; M-4 audit-sink+registry; M-5 rate-limit post-D-28+CSRF+refresh mutex; M-6 idempotenza attivazione pilota; M-7 users Phase B credential-less I14).
+
+**Impatto §6 migration**: M1 confermata (`sys_auth_mfa_exemptions`+registry), M4=D2 confermata (`rank`+VIEW PIP+endpoint), M5=D3 NON creata, +M0 audit-sink (se DB). Tutto idempotente, dopo `000115`.
+
+Restano a Enzo solo i go operativi (nessuna ulteriore scelta §7 pendente). Prossimo passo: ingest CLI dell'amendment → esecuzione WI-A.
+
+stato: [RICONCILIATA 5f37cc1] — CLI 2026-06-15: 5 decisioni §7 (a-e) + 7 hardening M-1..M-7 + impatto migration recepiti nel PLAN §9 + `SOT_BACKLOG §🔌 #9` + delta `SOT_STATE` (`5f37cc1`). D2 abilitato, D1/D3 rinviati; esenzione MFA in `sys.sys_auth_mfa_exemptions` (I7, non su `sys_users`). **DDL=PROPOSED, nessuna migration applicata.** Restano solo i go operativi di Enzo → esecuzione WI-A.

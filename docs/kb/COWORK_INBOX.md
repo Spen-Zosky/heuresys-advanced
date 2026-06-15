@@ -99,3 +99,20 @@ Su delega Enzo, Cowork ha chiuso i 5 punti aperti §7 del PLAN `docs/integration
 Restano a Enzo solo i go operativi (nessuna ulteriore scelta §7 pendente). Prossimo passo: ingest CLI dell'amendment → esecuzione WI-A.
 
 stato: [RICONCILIATA 5f37cc1] — CLI 2026-06-15: 5 decisioni §7 (a-e) + 7 hardening M-1..M-7 + impatto migration recepiti nel PLAN §9 + `SOT_BACKLOG §🔌 #9` + delta `SOT_STATE` (`5f37cc1`). D2 abilitato, D1/D3 rinviati; esenzione MFA in `sys.sys_auth_mfa_exemptions` (I7, non su `sys_users`). **DDL=PROPOSED, nessuna migration applicata.** Restano solo i go operativi di Enzo → esecuzione WI-A.
+
+
+### 2026-06-15 | nota | REVIEW #9 (re-review post-WI-A) — conferma GO + M-8 + 2 verifiche
+
+Re-review evidence-based su HEAD `1a8738b`. **Verdetto: GO confermato** (allineato al GO-con-modifiche già riconciliato `5f37cc1`). PLAN solido e forense-grounded; WI-A ben impostato.
+
+Conferme positive:
+- WI-A esenzione MFA in **tabella dedicata** `sys.sys_auth_mfa_exemptions` (mig `000116`), **NON** colonna su `sys_users` → **I7** rispettato; registry D/EXCLUDE nella stessa migration; **default-safe** (tabella vuota = login byte-identico a pre-000116); idempotente. Guard in `auth/service.ts:~367` + `repository.ts:715` (`isUserMfaExempt`).
+- `apps/agent-gateway` = workspace TS separato (client HTTP di `/v1`, non modulo Fastify) → no violazione module-pattern. WI-C `tenant-materialization` come modulo con dry-run + `ON CONFLICT` idempotente (coerente con Phase B). D2 (rank KPI) correttamente identificato necessario + edge **I9** sulla VIEW PIP. M-1..M-7 solidi.
+
+Findings da recepire (nessuna riprogettazione):
+- **M-8 (HIGH) — vincolare lo scope dell'esenzione a livello codice/DB, non solo operativo.** `isUserMfaExempt(userId)` (`repository.ts:715-728`) ha chiave solo su `userId`+`enabled=true`: una riga su un utente **umano** disabiliterebbe silenziosamente la sua MFA a tempo indefinito (unica traccia = audit `LOGIN_*` + colonna `reason`). La garanzia "solo service user" oggi è solo disciplina operativa. Raccomando: CHECK/guard che limiti l'esenzione a utenti **platform-level / tenant-null** (o vincolo a PLATFORM_ADMIN) + audit periodico del contenuto + alert su INSERT. (Estende M-2/M-4.)
+- **V-1 (bloccante) — confermare che `000116` NON è stata APPLICATA al DB senza go.** Il file esiste e il guard è live (default-safe), ma il vincolo era "non applicare migration senza conferma". Verificare il ledger `sys_schema_migrations` (000116 atteso ASSENTE) e allineare i doc: PLAN header/§6 dicono ancora "DDL=PROPOSED/non creata" mentre `000116` è **creata+committata** → aggiornare in "creata, default-safe, da APPLICARE su go".
+- **V-2 — WI-A sub-task 3 (seed service user) e 4 (test) mancanti.** Il path `exempt=true` è oggi dead-code non testato. Al seed del service user, i test devono coprire: (i) exempt=true salta il gate; (ii) **negativo**: un utente umano/tenant-scoped NON può essere esentato (se M-8 adottata); (iii) refresh/mutex (M-5).
+
+Nessun blocco di design. Ordine confermato: WI-A → WI-B (mock-first) → WI-C → pilota → WI-D2.
+stato: [RICONCILIATA baaf424] — CLI 2026-06-15: **M-8 implementato** (mig `000117` trigger eligibility — esenzione consentita solo a tenant-null OR PLATFORM_ADMIN; `user_tenant_id` è NOT NULL → ramo PLATFORM_ADMIN operativo; admin eligibile, tommaso USER bloccato) + test neg/pos, commit `9005adc`. **V-1**: 000116/000117 **APPLICATE** sotto il go "procedi" di Enzo (ledger `sys_schema_migrations` id 6828) — NON un'applicazione senza go; doc PLAN header/§6/§9 allineati a "creata+APPLICATA, default-safe" (`baaf424`). **V-2**: path `exempt=true` già testato (test "ACTIVE exemption"); negativo M-8 testato; seed service user = **WI-A.2** scaffolding opt-in `db/scripts/seed-service-user.ts` (`ca7c193`, no-op senza `AGENT_SERVICE_USER_*`, R11 — non creato live); mutex refresh (M-5) → WI-B. **WI-A ✅ DONE** (exemption 5/5, auth+mfa 83/83, typecheck verde). Prossimo: **WI-B (mock-first)**.

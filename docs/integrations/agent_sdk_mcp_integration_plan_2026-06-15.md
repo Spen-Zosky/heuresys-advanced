@@ -97,7 +97,8 @@ Endpoint reali (verbo · permission · CSRF):
 | Invariante | Come il PLAN lo rispetta |
 |---|---|
 | **I3/I4** schema discipline | Zero nuovi schemi (no `sf_*`/`agent_*`). Phase B scrive solo in `sys.sys_*`; eventuali buffer in `staging.*`. WI-D1 lineage in `sys.sys_source_lineage_records` esistente. |
-| **I5** tenant isolation = FK + middleware (NEVER RLS) | Auth ibrido fa girare le ops user-scoped **come l'utente** → tenant dal claim, filtro middleware naturale. Il generatore Phase B risolve `tenant_id` come il seed e applica `tenant_id` su ogni INSERT. Nessun RLS. |
+| **I5** tenant isolation = FK + middleware (NEVER RLS) | Ops user-scoped girano **come l'utente** → tenant dal claim, filtro middleware naturale. **⚠ M-1**: `tenant.materialize` (WI-C) gira come PLATFORM_ADMIN **tenant-null** → `tenantId` viene dall'**INPUT, non dal JWT** → obbligatori validazione tenant (esiste + ACTIVE), conferma tenant nell'approval, e test negativi cross-tenant. Il generatore applica `tenant_id` su ogni INSERT. Nessun RLS. |
+| **I7** auth separato da `sys_users` (11 tabelle `sys_auth_*`) | **M-1/WI-A**: l'esenzione MFA del service user vive in **`sys.sys_auth_mfa_exemptions`** (tabella `sys_auth_*`), **mai** come colonna su `sys_users`. |
 | **I8** out-of-scope HARD (payroll/T&A/benefits/recruiting/onboarding/IAM) | Il blueprint-builder genera **solo** org/processi/ruoli/skill/KPI/blueprint. Builder `compensation` resta **decision-support** (`/compensation/recommendations`), mai payroll. Builder `onboarding`/`recruit` del catalogo plugin = `doc`-only, **non** esposti come write-tool. |
 | **R11** secret hygiene | Credenziali service user in secret store / `.env` per-host, **mai loggate**; secret-scan sullo staged diff pre-commit. |
 | **ADR-0023** no-PII globale | Dati synthetic case-study; nessun gate privacy aggiuntivo. |
@@ -220,7 +221,11 @@ Nessuna applicata in questa sessione. Su go, l'esecuzione introdurrebbe (idempot
 
 ---
 
-## 7. Punti aperti — decisione Enzo (per la review del PLAN)
+## 7. Punti aperti — ✅ CHIUSI 2026-06-15 (delega Enzo, amendment Cowork — vedi §9)
+
+> **Decisioni**: (1) esenzione MFA = **A1 flag-DB primario in `sys.sys_auth_mfa_exemptions`** (tabella `sys_auth_*` per **I7**, non colonna su `sys_users`) + **A3 tenant-null = difesa-in-profondità**; A2 scartata · (2) service user = **platform-level (tenant-null)** · (3) **`apps/agent-gateway` (TS) = SÌ** · (4) opzionali = **D2 abilitato; D1 e D3 rinviati** · (5) **KPI per-position con rank (= D2)** per il ruolo flagship (edge **I9**: estendere la VIEW PIP `sys_position_intelligence_profiles_v`, 000011:272-299). Dettaglio + 7 hardening M-1..M-7 in **§9**. Le voci sottostanti restano come storico della review.
+
+*(storico — punti come presentati alla review)*:
 
 1. **Meccanica esenzione MFA**: A1 (flag DB, raccomandata) vs A2 (env allowlist) vs A3 (naturale, sconsigliata). *Security call.*
 2. **Tenant del service user**: platform-level (tenant-null) vs tenant HEURESYS. Raccomando platform-null + flag esplicito A1.
@@ -236,4 +241,39 @@ Nessuna applicata in questa sessione. Su go, l'esecuzione introdurrebbe (idempot
 
 ---
 
-*Fine PLAN #9. Prossimo passo: review (Cowork) + go di Enzo → esecuzione WI-A. Nessuna migration applicata.*
+## 9. AMENDMENT 2026-06-15 — review Cowork (GO-con-modifiche) + chiusura §7 (delega Enzo)
+
+> Recepisce le entry `docs/kb/COWORK_INBOX.md` `2026-06-15 | REVIEW` + `2026-06-15 | AMENDMENT`. Verdetto **GO-con-modifiche** (PLAN nel "come"; invarianti I3/I4·I5·I8·ADR-0023·R11 coerenti; verifica forense §1 solida). §7 chiuso **su delega Enzo**; restano solo i **go operativi**. Nulla eseguito: DDL = PROPOSED.
+
+### 9.1 — Chiusura §7 (5 decisioni)
+- **(a) Esenzione MFA** = **A1 flag-DB CONTROLLO PRIMARIO** in nuova tabella **`sys.sys_auth_mfa_exemptions`** (tabella `sys_auth_*` — ancora **I7**, NON colonna su `sys_users`); **A3 tenant-null = difesa-in-profondità** (tensione A1↔A3 del §7.2 eliminata: A1 primario + A3 layer); **A2 (env) scartata**. Guard `auth/service.ts §3b` via DI seam (come `mfaEnforcement`, S989) + registry row nella stessa migration (classe D-22) + audit `LOGIN_*`.
+- **(b) Tenant service user** = **platform-level (tenant-null)** (coerente §1.1 + catalogo globale: `job-families` `ensurePlatformAdmin`).
+- **(c) `apps/agent-gateway` (TypeScript) = SÌ** (monorepo TS + skeleton reference TS + SDK TS-native; client HTTP di `/v1`, **non** modulo `/v1` → no violazione module-pattern; pin SDK).
+- **(d) Opzionali**: **D2 ABILITATO; D1 e D3 RINVIATI.** D2 necessario (verificato: `positions/routes.ts:162 /:id/kpis` read-only + `sys_position_kpi_requirements` 000011:132 solo `weight`, no rank → "8 KPI ranked" non esprimibili). D1 coperto da SDK + WI-C; D3 = net-new senza precedente (no recommender, §1.8.7) → "cosa" separata (autorità Enzo).
+- **(e) KPI per-position con rank (= D2)** per il ruolo flagship; i template (`*-kpi-templates`) restano per livelli aggregati. **Edge I9**: la PIP è una VIEW (`sys.sys_position_intelligence_profiles_v`, 000011:272-299, che già legge `sys_position_kpi_requirements`) → estenderla per esporre `rank`.
+
+### 9.2 — 7 hardening pre-esecuzione (mappati al PLAN)
+
+| # | Sev | Hardening | Dove |
+|---|---|---|---|
+| M-1 | HIGH | tenant isolation `tenant.materialize`: tenantId dall'input (gira PLATFORM_ADMIN tenant-null) → validazione esiste+ACTIVE + conferma tenant nell'approval + test negativi cross-tenant | §2 I5 (corretta) + WI-C |
+| M-2 | HIGH | test adversarial `canUseTool`: replay token, timeout→deny-by-default, principal confusion user/service, write senza token | WI-B success criteria |
+| M-3 | MED | I8 come **allowlist deny-by-default** esplicita del catalogo tool (non sola esclusione onboarding/recruit) | WI-B / §2 I8 |
+| M-4 | MED | sink audit ≥6 mesi specificato; se tabella `sys_*` → registry row stessa migration (classe D-22) | WI-B + §6 |
+| M-5 | MED | gateway→`/v1` rate-limit post-D-28 + CSRF lifecycle + mutex refresh proprio del service user | WI-A/WI-B |
+| M-6 | LOW | idempotenza re-run pilota sull'attivazione (one-active-per-tenant → PATCH vs POST) | §4 pilota |
+| M-7 | LOW | users materializzati Phase B = persone **credential-less**, non crosswalk `LEGACY_EMP::` (I14) | WI-C |
+
+### 9.3 — Migration inventory aggiornato (§6 — sempre DA APPLICARE SOLO SU CONFERMA)
+- **M1** confermata: `sys.sys_auth_mfa_exemptions` + registry row (WI-A).
+- **M4 = D2** confermata: colonna `rank` su `sys_position_kpi_requirements` + estensione VIEW PIP + write-endpoint per-position KPI (WI-D2).
+- **M5 = D3 NON creata** (rinviata).
+- **+M0** audit-sink (solo se DB: tabella `sys_*` + registry row, classe D-22).
+- Tutte idempotenti, numerazione dopo `000115`.
+
+### 9.4 — Stato
+Design **approvato (GO-con-modifiche)**, §7 chiuso. **Restano a Enzo solo i go operativi** (nessuna scelta §7 pendente). Ordine all'ok: **WI-A** (`sys_auth_mfa_exemptions` + guard §3b + service user) → WI-B (mock-first) → WI-C → pilota → WI-D2.
+
+---
+
+*Fine PLAN #9 (amendment 2026-06-15 incorporato). Prossimo passo: go operativo Enzo → esecuzione WI-A. Nessuna migration applicata.*

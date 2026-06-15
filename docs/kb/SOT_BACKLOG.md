@@ -3,6 +3,24 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🟢 Aggiornamento S991 (2026-06-15) — batch delega: #1 agente LIVE + fix sicurezza · #2 Skills-Group-Share
+
+Batch decision-authority session-scoped (Enzo: "backup DBMS poi esegui tutto in autonomia, decidi tu quante feature"). Backup PROD `/home/ubuntu/pre-s991-batch.dump`. 2 commit `ce7e2bd`+`088cccb` pushati (`bd156cd..088cccb`).
+
+**DONE-LIVE:**
+- **#1 agente #9** — sbloccato da S990 (`blocked-on-credential out_of_credits`): subscription MAX **viva** (PONG, five_hour=allowed). **WI-B.3 3 skill `/hr` LIVE** + **M-2 write-gate dimostrato LIVE** su RTL_BANK (ALLOW→201 persistito · DENY→fail-closed · rollback · audit M-4). **🔴 fix sicurezza** (`ce7e2bd`): `allowedTools:["mcp__heuresys__*"]` auto-approvava i write **bypassando il gate HITL** → ora tutti i tool MCP passano per `canUseTool` (read auto-allow+audit, write HITL). Gateway 47/47. `scripts/live-write-acceptance.ts` nuovo.
+- **#2 Skills-Group-Share (T3.8) + clustering (T2.6)** (`088cccb`) — full-stack live: endpoint `GET /v1/analytics/skills-group-share` (9° analytics) + 4 test (suite 32/32) + pagina + nav mig 000125 + i18n + **E2E Playwright verde**. Sblocca i dati ESCO backfillati S990 (12892 skill / 400 gruppi).
+- **#3 T2.5** verificato già-fatto (modulo OU↔processi + demo S990).
+
+**RESIDUO OPEN (richiede decisione PRODOTTO/MODELLAZIONE Enzo — NON inventato):**
+- **#5 m2b Surveys normalized** — sorgenti legacy su VM `heuresys_platform` (survey_responses 4482 / pulse_checks 1145 / survey_questions 31 / surveys 11 / survey_templates 9 + engagement_feedback 685 / action_plans 6). **Decisione semantica aperta**: tabelle `sys_survey_*` nuove normalizzate (mirror legacy, separate da `engagement_*`) **vs** unificazione col cluster JSONB esistente = autorità Enzo (`design→spec→ok`).
+- **#4 reporting/export** (3.5) — quale reporting/export? `design→spec→ok`. Slice tecnico possibile: CSV/JSON export delle 9 viste analytics esistenti (no decisione prodotto).
+- **T2.5 mapping RACI reale** OU↔processi — quale OU è Responsible/Accountable/Consulted/Informed per quale processo = mapping business Enzo (schema+modulo+demo pronti).
+- **⚠ 2 alert Dependabot NUOVI** (1 high + 1 moderate, comparsi al push S991, **non dai commit S991**): verificare `gh api repos/Spen-Zosky/heuresys-advanced/dependabot/alerts` e chiudere. ~1h.
+- **#8 Fasi 4-8 post-v1.0** (3.2 sec-audit / 3.3 BPM / 3.4 notif / 3.5 reporting) + **S-100X-A4..A11** audit. `design→spec→ok`.
+- **Agente #9 PROD-serving**: serve API key Anthropic reale o Bedrock/Vertex per esporlo a webapp cliente (dev gira su subscription MAX, gratis). Decisione PM.
+- **Infra**: E2E locale richiede Node 22 (Node 24 di sistema rompe Playwright 1.61) — workaround documentato, fix-proper = bump Playwright o pin Node 22 per lo step E2E.
+
 ## 🟢 Aggiornamento S990 (2026-06-15) — batch menu 1→11 (ESCO data + agent-gateway + audit)
 
 Batch autonomo (decision-authority session-scoped), 11 commit `ce558d3`..`913a07e` pushati + PROD-deployed + verificato live multi-angolo. **DONE-LIVE**: **#3 ESCO** — T1.3 typing-profiles (D-31, mig 000119) · T2.4 skill_kind (D-34, mig 000120, 14036/21939) · T2.5 modulo `organization-unit-processes` (mig 000121/122, 74° modulo, RACI) · T1.2 occupation→skill **126051 righe** (D-33, mig 000123+seed 52) · T1.1 connector skill-hierarchy code-slice (D-32, mig 000124). **#4** RBAC doc-fix (8/394→11/586/133) · **#5/D-30** doc-fix · **#7** audit A3/WS-F (19 finding). **CODE-slice (live ⛔ blocked-on-Enzo = credenziale agente `out_of_credits`)**: **#1** M-2 write-gate (redaction+audit-sink+M-3 allowlist+approval bridge, 47/47) · **#6** dev page `/dev/agent` + 3-skill harness. **Il #9 BLOCKER coordinamento è SUPERATO**: spec ESCO #01-#04 + DEBT_REGISTER committate da Enzo (`913a07e`); conflitto numerazione risolto (mie migration `000119..000124`, non 000118). Gate verde: full API suite **963/0/6-skip**, migrate-chain 123 idempotente, web build, i18n 1198×2×7. **#9 ② AI free-text già live** (confermato, 844 PSR).

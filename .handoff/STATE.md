@@ -1,27 +1,28 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-15 (S990 — batch menu 1→11 + convergenza post-close: backfill ESCO + dipendenze chiuse da me).
+**Updated**: 2026-06-15 (S991 — batch delega: #1 agente live + fix sicurezza · #2 Skills-Group-Share full-stack live · convergenza).
 
 > **Vista rapida** (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura, delta per-sessione) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui.
 
-## Last session brief (S990 — batch 1→11 + chiusura dei fili che dipendevano solo da me)
+## Last session brief (S991 — batch end-to-end delegato, decisione scope mia)
 
-Eseguito l'intero menu in autonomia + chiuse a fine sessione tutte le cose che potevo chiudere io, per lasciare una lista che si accorcia (canone `feedback_converge_and_plain_reporting`). **Spedito + in PROD**: #4 RBAC doc-fix · #5/D-30 doc-fix · #7 audit A3/WS-F · #3 ESCO completo (T1.1 connector **+ backfill live: skill_group_uri 0→12892** · T1.2 occupation→skill 126051 · T1.3 typing · T2.4 skill_kind · T2.5 modulo OU↔process). **Code pronto; demo live eseguibili sul tuo abbonamento MAX** (verificato S990: nessuna chiave API serve, non c'è serving a clienti): #1 M-2 write-gate · #6 dev page + harness. **Dipendenze**: 2 PR sicuri adottati, 3 lasciati deferiti (rompono — decisione chiusa). Regressione dati (test che cancellava il profilo RTL) trovata in PROD e corretta. Gate verde + PROD 200. Tutto pushato (HEAD `c343380`).
+Delega batch ("backup DBMS poi esegui tutto in autonomia, decidi tu quante feature"). Backup PROD fatto (`/home/ubuntu/pre-s991-batch.dump`, rollback point). **Consegnato + pushato (HEAD `088cccb`)**: **#1 agente #9 LIVE** — le 3 skill `/hr` girano live su dati reali (subscription MAX viva, NIENTE out_of_credits) + **M-2 write-gate dimostrato live** su RTL_BANK (ALLOW→write 201 persistito · DENY→fail-closed · rollback) + audit M-4. **La DoD live ha scoperto un difetto di sicurezza reale e l'ho corretto**: `sdk-agent.ts` aveva `allowedTools:["mcp__heuresys__*"]` che **auto-approvava i write bypassando il gate HITL** → ora ogni tool MCP passa per `canUseTool` (`ce7e2bd`). **#2 Skills-Group-Share (T3.8) + clustering (T2.6)** full-stack live (`088cccb`): endpoint `/v1/analytics/skills-group-share` + 4 test (analytics 32/32) + pagina + nav (mig 000125) + i18n + **E2E Playwright verde**. **#3** verificato già-fatto (modulo OU↔processi + demo S990; mapping RACI reale = tua decisione). **Convergenza**: il resto del menu (m2b, reporting, mapping RACI) richiede una tua decisione di prodotto/modellazione → lasciato residuo, non inventato.
 
 ## Top priorities (next session)
 
-1. **#9 agente — demo live** (lavoro MIO, nessun input da te): far girare M-2 (1 scrittura approvata su RTL_BANK) + le 3 skill /hr + la pagina dev. Gira sul tuo abbonamento MAX (verificato S990 — nessuna chiave API necessaria). Sessione dedicata (avvio gateway + API + flusso di approvazione).
-2. **Feature future (decidi tu il "cosa")**: grafico Skills-Group-Share (T3.8) + clustering skill (T2.6) — ora che i dati ESCO sono pronti · #8 Fasi 4-8 post-v1.0 (reporting/BPM/sec-audit/provisioning) · assegnazioni reali OU↔processi (T2.5, mapping di business). Memoria `project_post_v1_program_s987`.
-3. **Audit 100X A4..A11** (sola lettura, opzionale) — da fare solo se vuoi continuare il programma di audit.
+1. **2 alert Dependabot nuovi** (1 high, 1 moderate, comparsi al push S991 — non dai miei commit): verificare e chiudere (`gh api .../dependabot/alerts`). Effort ~1h.
+2. **Feature che richiedono il tuo "cosa"**: #5 **m2b Surveys normalized** (decisione semantica: tabelle nuove normalizzate vs unificare col cluster `engagement_*` JSONB — sorgenti legacy su VM `heuresys_platform`) · #4 **reporting/export** (quale reporting?) · **T2.5 mapping RACI reale** OU↔processi (quale OU è R/A/C/I per quale processo). Memoria `project_post_v1_program_s987`.
+3. **#8 Fasi 4-8 post-v1.0** (sec-audit 3.2 / BPM 3.3 / notif 3.4 / reporting 3.5) + **Audit 100X A4..A11** (read-only). `design→spec→ok`.
 
 ## Open questions
 
-- **Un solo rischio reale, strutturale**: i test automatici girano contro il database di produzione, quindi un test scritto male può cancellare dati reali (è successo stavolta col profilo RTL; tappato il caso). La soluzione di fondo è un DB di test separato (è un lavoro a sé, dossier 100X) — vuoi affrontarlo?
+- **m2b**: come modellare il cluster Surveys normalizzato legacy (4482 response + 1145 pulse + 31 question)? Tabelle `sys_survey_*` nuove (mirror del legacy, separate da `engagement_*`) o unificazione semantica col JSONB esistente? = tua autorità.
+- **Agente #9 in PROD**: per esporre l'agente a una webapp servita ai clienti serve una API key Anthropic reale (o Bedrock/Vertex). In dev gira sulla tua subscription MAX (gratis, verificato). Vuoi pianificare il serving PROD?
 
 ## Verification (next session)
 
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT count(skill_metadata->>'skill_group_uri') FROM sys.sys_skills"  # 12892
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT count(*) FROM sys.sys_ui_interfaces WHERE ui_interface_code='analytics-skills-group-share'"  # 1
 curl -s -o /dev/null -w 'PROD %{http_code}\n' https://www.heuresys.com/login   # 200
 ```

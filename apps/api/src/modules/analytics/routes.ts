@@ -17,6 +17,7 @@ import {
   SkillsByCategoryAnalyticsResponseSchema,
   OrgNetworkAnalyticsResponseSchema,
   OvertimeAnalyticsResponseSchema,
+  SkillsGroupShareAnalyticsResponseSchema,
 } from "@heuresys/shared";
 import { analyticsService, type ActorContext } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -98,5 +99,14 @@ export const analyticsRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: { response: { 200: OvertimeAnalyticsResponseSchema } },
     },
     async (req) => analyticsService.overtime(actor(req)),
+  );
+
+  app.get(
+    "/skills-group-share",
+    {
+      preHandler: [requirePermission("analytics:view")],
+      schema: { response: { 200: SkillsGroupShareAnalyticsResponseSchema } },
+    },
+    async (req) => analyticsService.skillsGroupShare(actor(req)),
   );
 };

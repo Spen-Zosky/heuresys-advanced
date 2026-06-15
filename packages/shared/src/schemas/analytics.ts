@@ -315,3 +315,34 @@ export const OvertimeAnalyticsResponseSchema = z.object({
   generatedAt: z.string(),
 });
 export type OvertimeAnalyticsResponse = z.infer<typeof OvertimeAnalyticsResponseSchema>;
+
+// --- Skills-group share (T3.8 chart + T2.6 clustering) -----------------------
+// Distribution of the ESCO skill catalogue across its ~400 skill GROUPS
+// (skill_metadata->>'skill_group_uri', backfilled live S990: 12892/21939 skills).
+// The ESCO groups ARE the natural skill clusters (T2.6); their share is the
+// "Skills Group Share" chart (T3.8). The catalogue is platform-global (ESCO
+// skills carry tenantId=null) — scope is reported for surface parity but the
+// rollup is global.
+
+export const SkillsGroupShareGroupSchema = z.object({
+  groupCode: z.string(), // human-readable ESCO group, e.g. "skill/S2.8.1" / "isced-f/0613"
+  groupUri: z.string(),
+  skillCount: z.number().int(),
+  sharePct: z.number(), // % of total grouped skills (2-dp)
+});
+export type SkillsGroupShareGroup = z.infer<typeof SkillsGroupShareGroupSchema>;
+
+export const SkillsGroupShareAnalyticsResponseSchema = z.object({
+  scope: z.object({ kind: AnalyticsScopeKindSchema, tenantId: z.uuid().nullable() }),
+  groups: z.array(SkillsGroupShareGroupSchema), // top-N, skillCount desc
+  otherGroupsCount: z.number().int(), // groups beyond top-N
+  otherSkillCount: z.number().int(), // skills in those groups
+  totalSkills: z.number().int(), // all catalogue skills
+  totalGrouped: z.number().int(), // skills with a group_uri
+  ungroupedSkills: z.number().int(), // totalSkills - totalGrouped
+  distinctGroups: z.number().int(), // distinct skill_group_uri
+  generatedAt: z.string(),
+});
+export type SkillsGroupShareAnalyticsResponse = z.infer<
+  typeof SkillsGroupShareAnalyticsResponseSchema
+>;

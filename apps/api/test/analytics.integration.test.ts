@@ -654,4 +654,86 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect(body.totalRequests).toBe(221);
     expect(body.byOrgUnit.length).toBe(22);
   });
+
+  // --- Skills-group share (T3.8 chart + T2.6 clustering) — ESCO skill GROUPS.
+  // Catalogue-global rollup (ESCO skills are platform-global, tenantId=null).
+  // Deterministic anchors pinned against the live backfill (S990): 21939 skills,
+  // 12892 grouped across 400 distinct groups; largest group = skill/S2.8.1 (314).
+  interface SkillsGroupShareBody {
+    scope: { kind: string; tenantId: string | null };
+    groups: Array<{ groupCode: string; groupUri: string; skillCount: number; sharePct: number }>;
+    otherGroupsCount: number;
+    otherSkillCount: number;
+    totalSkills: number;
+    totalGrouped: number;
+    ungroupedSkills: number;
+    distinctGroups: number;
+    generatedAt: string;
+  }
+
+  it("skills-group-share: unauthenticated → 401", async () => {
+    const r = await suite.app.inject({ method: "GET", url: "/v1/analytics/skills-group-share" });
+    expect(r.statusCode).toBe(401);
+  });
+
+  it("skills-group-share: USER (employee) lacks analytics:view → 403", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/skills-group-share",
+      headers: { cookie: ch(employeeS.cookies) },
+    });
+    expect(r.statusCode).toBe(403);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
+  });
+
+  it("skills-group-share: PLATFORM_ADMIN sees the ESCO group distribution (live backfill anchors)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/skills-group-share",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as SkillsGroupShareBody;
+    // Catalogue-global anchors.
+    expect(body.totalSkills).toBe(21939);
+    expect(body.totalGrouped).toBe(12892);
+    expect(body.distinctGroups).toBe(400);
+    expect(body.ungroupedSkills).toBe(21939 - 12892);
+    // top-N groups, skillCount-desc, capped at 25; "other" holds the remaining 375.
+    expect(body.groups.length).toBe(25);
+    expect(body.otherGroupsCount).toBe(400 - 25);
+    for (let i = 1; i < body.groups.length; i++) {
+      expect(body.groups[i]!.skillCount).toBeLessThanOrEqual(body.groups[i - 1]!.skillCount);
+    }
+    // Largest ESCO group in the live backfill = skill/S2.8.1 (314 skills).
+    expect(body.groups[0]!.groupCode).toBe("skill/S2.8.1");
+    expect(body.groups[0]!.skillCount).toBe(314);
+    // groupCode is the readable vocabulary segment (skill/… or isced-f/…), NOT the API path.
+    for (const g of body.groups) {
+      expect(g.groupCode).toMatch(/^(skill|isced-f|occupation)\//);
+      expect(g.groupCode).not.toContain("api/");
+      expect(g.groupUri).toContain("esco");
+      expect(g.sharePct).toBeGreaterThan(0);
+    }
+    // top-N + the "other" bucket reconcile to the grand grouped total.
+    const topSum = body.groups.reduce((acc, g) => acc + g.skillCount, 0);
+    expect(topSum + body.otherSkillCount).toBe(body.totalGrouped);
+    // sharePct self-consistent (314/12892 ≈ 2.44%).
+    expect(body.groups[0]!.sharePct).toBeCloseTo((314 / 12892) * 100, 1);
+    expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
+  });
+
+  it("skills-group-share: TENANT_ADMIN sees TENANT scope tag but the same global catalogue", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/analytics/skills-group-share",
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as SkillsGroupShareBody;
+    expect(body.scope.kind).toBe("TENANT");
+    // The ESCO catalogue is global → TENANT sees the same totals as PLATFORM.
+    expect(body.totalGrouped).toBe(12892);
+    expect(body.distinctGroups).toBe(400);
+  });
 });

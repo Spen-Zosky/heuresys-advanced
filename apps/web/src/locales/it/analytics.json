@@ -112,6 +112,28 @@
     "seriesEvidence": "Evidenze",
     "emptyDesc": "Non ci sono evidenze di competenza nel tuo ambito al momento."
   },
+  "skillsGroupShare": {
+    "title": "Quote competenze per gruppo ESCO",
+    "description": "Distribuzione del catalogo competenze ESCO tra i suoi gruppi (cluster). Il catalogo è globale di piattaforma.",
+    "stats": {
+      "groupedLabel": "Competenze raggruppate",
+      "groupedDesc": "Competenze con un gruppo ESCO assegnato",
+      "groupsLabel": "Gruppi distinti",
+      "groupsDesc": "Cluster ESCO presenti nel catalogo",
+      "ungroupedLabel": "Senza gruppo",
+      "ungroupedDesc": "Competenze non ancora mappate a un gruppo"
+    },
+    "chartTitle": "Competenze per gruppo (primi {{n}})",
+    "chartAria": "Numero di competenze per gruppo ESCO",
+    "seriesSkills": "Competenze",
+    "otherLabel": "Altri {{count}} gruppi",
+    "chartNote": "I primi {{n}} gruppi sui {{total}} totali; i restanti sono aggregati in «Altri». La quota è calcolata sulle competenze raggruppate.",
+    "tableTitle": "Quota dei gruppi principali",
+    "colGroup": "Gruppo",
+    "colCount": "Competenze",
+    "colShare": "Quota",
+    "emptyDesc": "Il catalogo competenze non ha ancora gruppi ESCO popolati."
+  },
   "orgNetwork": {
     "title": "Rete organizzativa",
     "description": "Metriche strutturali sul grafo gerarchico delle posizioni (span of control, profondità, raggio) nel tuo ambito.",

@@ -20,6 +20,7 @@ import type {
   OvertimeAnalyticsResponse,
   OvertimeStatus,
   OvertimeType,
+  SkillsGroupShareAnalyticsResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
@@ -229,6 +230,24 @@ export const analyticsService = {
         count: r.count,
         hours: r.hours,
       })),
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  // The ESCO skill catalogue is platform-global (tenantId=null), so the group
+  // share is global; scope is reported for surface parity only (no tenant filter).
+  async skillsGroupShare(a: ActorContext): Promise<SkillsGroupShareAnalyticsResponse> {
+    const s = await buildScope(a);
+    const g = await repo.getSkillsGroupShare(pool);
+    return {
+      scope: { kind: s.kind, tenantId: s.tenantId },
+      groups: g.groups,
+      otherGroupsCount: g.otherGroupsCount,
+      otherSkillCount: g.otherSkillCount,
+      totalSkills: g.totalSkills,
+      totalGrouped: g.totalGrouped,
+      ungroupedSkills: g.ungroupedSkills,
+      distinctGroups: g.distinctGroups,
       generatedAt: new Date().toISOString(),
     };
   },

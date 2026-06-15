@@ -1070,3 +1070,83 @@ export async function getOvertimeRollups(
     })),
   };
 }
+
+// --- Skills-group share (T3.8 chart + T2.6 clustering) -----------------------
+// Catalogue-global rollup: the ESCO skill GROUPS (skill_metadata->>'skill_group_uri')
+// and how the catalogue's skills distribute across them. ESCO skills are
+// platform-global (tenantId=null) so this rollup carries NO scope filter — the
+// groups themselves are the clusters (T2.6); the share is the chart (T3.8).
+
+export const SKILLS_GROUP_SHARE_TOP_N = 25;
+
+export interface SkillsGroupShareGroupRow {
+  groupCode: string;
+  groupUri: string;
+  skillCount: number;
+  sharePct: number;
+}
+
+export interface SkillsGroupShare {
+  groups: SkillsGroupShareGroupRow[];
+  otherGroupsCount: number;
+  otherSkillCount: number;
+  totalSkills: number;
+  totalGrouped: number;
+  ungroupedSkills: number;
+  distinctGroups: number;
+}
+
+/** Human-readable ESCO group code from the concept URI. The URI carries TWO
+ *  `/esco/` segments — the API path (.../esco/api/resource/concept?uri=...) and the
+ *  vocabulary IRI (.../data.europa.eu/esco/skill/S2.8.1). We want the vocabulary one:
+ *  "skill/S2.8.1" / "isced-f/0613". Falls back to a non-`api/` `/esco/` segment. */
+function escoGroupCode(uri: string): string {
+  const m =
+    uri.match(/data\.europa\.eu\/esco\/([^&?#]+)/) ?? uri.match(/\/esco\/(?!api\/)([^&?#]+)/);
+  return (m?.[1] ?? uri).replace(/\/+$/, "");
+}
+
+export async function getSkillsGroupShare(q: DbConnector): Promise<SkillsGroupShare> {
+  const totals = await q.query<{ total: string; grouped: string; groups: string }>(
+    `SELECT count(*)::text AS total,
+            count(skill_metadata->>'skill_group_uri')::text AS grouped,
+            count(DISTINCT skill_metadata->>'skill_group_uri')::text AS groups
+       FROM sys.sys_skills`,
+  );
+  const perGroup = await q.query<{ group_uri: string; n: string }>(
+    `SELECT skill_metadata->>'skill_group_uri' AS group_uri, count(*)::text AS n
+       FROM sys.sys_skills
+      WHERE skill_metadata->>'skill_group_uri' IS NOT NULL
+      GROUP BY 1
+      ORDER BY count(*) DESC, 1`,
+  );
+
+  const t = totals.rows[0];
+  const totalSkills = Number(t?.total ?? 0);
+  const totalGrouped = Number(t?.grouped ?? 0);
+
+  const all = perGroup.rows.map((r) => ({
+    groupUri: r.group_uri,
+    groupCode: escoGroupCode(r.group_uri),
+    count: Number(r.n),
+  }));
+  const top = all.slice(0, SKILLS_GROUP_SHARE_TOP_N);
+  const rest = all.slice(SKILLS_GROUP_SHARE_TOP_N);
+
+  const groups: SkillsGroupShareGroupRow[] = top.map((g) => ({
+    groupCode: g.groupCode,
+    groupUri: g.groupUri,
+    skillCount: g.count,
+    sharePct: totalGrouped > 0 ? Math.round((g.count / totalGrouped) * 10000) / 100 : 0,
+  }));
+
+  return {
+    groups,
+    otherGroupsCount: rest.length,
+    otherSkillCount: rest.reduce((s, g) => s + g.count, 0),
+    totalSkills,
+    totalGrouped,
+    ungroupedSkills: totalSkills - totalGrouped,
+    distinctGroups: Number(t?.groups ?? 0),
+  };
+}

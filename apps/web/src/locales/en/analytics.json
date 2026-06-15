@@ -112,6 +112,28 @@
     "seriesEvidence": "Evidence",
     "emptyDesc": "There is no skill evidence within your scope at the moment."
   },
+  "skillsGroupShare": {
+    "title": "Skills group share (ESCO)",
+    "description": "Distribution of the ESCO skill catalogue across its groups (clusters). The catalogue is platform-global.",
+    "stats": {
+      "groupedLabel": "Grouped skills",
+      "groupedDesc": "Skills with an ESCO group assigned",
+      "groupsLabel": "Distinct groups",
+      "groupsDesc": "ESCO clusters present in the catalogue",
+      "ungroupedLabel": "Ungrouped",
+      "ungroupedDesc": "Skills not yet mapped to a group"
+    },
+    "chartTitle": "Skills per group (top {{n}})",
+    "chartAria": "Number of skills per ESCO group",
+    "seriesSkills": "Skills",
+    "otherLabel": "{{count}} more groups",
+    "chartNote": "Top {{n}} of {{total}} groups; the rest are folded into “other”. Share is computed over the grouped skills.",
+    "tableTitle": "Top groups share",
+    "colGroup": "Group",
+    "colCount": "Skills",
+    "colShare": "Share",
+    "emptyDesc": "The skill catalogue has no ESCO groups populated yet."
+  },
   "orgNetwork": {
     "title": "Org Network",
     "description": "Structural metrics over the position reports-to graph (span of control, depth, reach) within your scope.",

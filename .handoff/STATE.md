@@ -1,38 +1,29 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-15 (#9 Agent SDK integration — continuazione live E2E, da riprendere in sessione fresca).
+**Updated**: 2026-06-15 (S990 — batch menu 1→11 autonomo, pushato + deployato + PROD-verificato).
 
-> **Vista rapida** dello stato di lavoro (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura, delta per-sessione) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui.
+> **Vista rapida** (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura, delta per-sessione) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui.
 
-## ⭐ RIPRESA #9 — Agent SDK + MCP integration (continuazione in sessione fresca, 2026-06-15)
+## Last session brief (S990 — batch 1→11 con decision-authority session-scoped)
 
-Dettaglio completo: `docs/kb/SOT_BACKLOG.md §🔌 Integrazione #9` + `docs/integrations/agent_sdk_mcp_integration_plan_2026-06-15.md`. **DoD live vincolante** (CLAUDE.md §Definition of Done).
-
-**✅ DONE-LIVE**: §0 DoD persistita · WI-A esenzione MFA (mig `000116/000117`) · M-8/M-8b (mig `000118` SERVICE-only + audit) · WI-B mock-first (`apps/agent-gateway`) · **WI-B.2 READ+AGENTE live** (gateway SSE → SDK **subscription-auth** → tool MCP `hrx_org_units_list` → /v1 → **26 org-unit RTL_BANK reali**) · §0.5 safety verde (tenant test = **RTL_BANK `86ba7a65`**; DB = OCI VM reale via tunnel :5433; mai scrivere su HEURESYS `8bc5bc59`).
-
-**🛑 BLOCKER (blocked-on-Enzo) — WI-C/WI-D**: sovrapposti alla spec parallela **non committata** `docs/integrations/tenant_onboarding_esco_04_tenant_onboarding_spec_2026-06-15.md` (Cowork/Enzo) + **conflitto numerazione**: il #04 dichiara "Migration next = 000118" ma è già **M-8b**. Decisioni: (1) WI-C secondo spec #04 (riconciliare) o Cowork-owned? (2) spec parallele rinumerano `000119+`? (3) i 4 file `tenant_onboarding_esco_*` + `DEBT_REGISTER.md` (M) sono nel working tree **non committati** — lasciati intatti (non-CLI).
-
-**Residuo non-bloccato**: **M-2** (write-gate completo + 1 write-live gated su RTL_BANK: approval+rollback+audit) · **WI-B.3** (3 skill /hr live) + **WI-B.4** (pagina dev Next) — **agente, vincolati dal rate-limit subscription** `out_of_credits`; porta PROD agente = API key reale/Bedrock/Vertex.
-
-**Auth agente DEV**: gateway con `AGENT_GATEWAY_SUBSCRIPTION_AUTH=1` (unset ANTHROPIC_API_KEY → subscription Claude). **Nessun push** (commit locali #9, da `20fac45` a `5996d1c`). Migration su disco `000001..000118`.
-
-## Last session brief (S989 — chiusura pending + tech debt, autonomo)
-
-Batch "chiusura completa pending + tech debt" (decision-authority session-scoped). **MFA/SMTP neutralization** (la sola implementazione richiesta da Enzo): nuovo kill-switch `MFA_ENFORCEMENT_ENABLED` (default true → PROD invariato; `=false` nel `.env` dev locale; gate login `§3b` bypassato; DI seam + **denylist `env-key-merge` anti-propagazione PROD** + test dedicato) — SMTP/email-OTP/SMS-OTP/TOFU erano **già** neutrali by-design (factory Console fallback, mai throw). **Tutti e 6 i QW-H** (S-100X-A2 WS-H) chiusi: H1 drizzle dead-dep + esbuild≥0.28.1 (**alert Dependabot chiuso, `pnpm audit`=0**), H2 media magic-byte sniff, H3 rate-limit keyGen dead, H4 skill-taxonomy requirePermission, H5 ConsoleMailer OTP redaction, H6 matching/reindex rate-limit. **D-29** cert E2E teardown RISOLTO (Playwright globalTeardown psql). **3 open-question S988 risolte** (CLASS-A, veto Enzo): R3 KEEP `sys_job_families`, R2 KEEP crosswalk bidirezionale 5730, ESCO 11 low-conf già flaggati (design corretto). Gate verde: full API suite 918/0 + 21-skip, typecheck 4/4, web build, i18n 1177×2×7, lint, shell 43/43, audit 0. Push + align Mac/VM/linuxpc + vm-deploy PROD.
+Eseguito l'intero menu di sessione in autonomia (discovery evidence-based 5-agenti → esecuzione → full gate → push → align → vm-deploy → **PROD verify multi-angolo**). 11 commit (`ce558d3`..`913a07e`). **DONE-LIVE**: #4 RBAC doc-fix (8/394→11/586/133) · #5/D-30 doc-fix · #7 audit **A3/WS-F** (19 finding) · #3 ESCO **T1.3** enterprise-typing (mig 000119) · **T2.4** skill_kind (000120) · **T2.5** modulo OU↔process (000121/122) · **T1.2** occupation→skill 126051 righe (000123) · **T1.1** connector skill-hierarchy code-slice (000124, backfill deferred). **CODE-slice (live blocked-on-Enzo)**: #1 M-2 (redaction+audit-sink+M-3 allowlist+approval bridge, 47/47) · #6 WI-B.3/B.4 (agent dev page + 3-skill harness). Gate verde: full API suite **963/0/6-skip**, migrate-chain 123 idempotenti, web build, i18n 1198×2×7. PROD: `/login` 200 · `/api/readyz` 200 · nuovo codice live · dati live. **Regressione catturata in PROD-verify**: enterprise-typing test cancellava il profilo reference RTL_BANK (classe D-23, smascherata da T1.3) → fix snapshot-restore (`5e3e56f`) + dato ripristinato; 5 PR dependabot etichettati `defer-major` per fermare il CI-race old-test sul DB condiviso (WS-G F-3). Spec ESCO + DEBT_REGISTER committati da Enzo (`913a07e`).
 
 ## Top priorities (next session)
 
-1. **Item #4 — Fasi 4-8** (programma post-v1.0): 3.5 reporting/export → 3.4 notifications → #6 provisioning+3.9 GDPR → 3.2 sec-audit → 3.3 BPM runtime → 3.6 PWA+3.8 AI. Ognuna `design→spec→ok→implementa` (autorità *cosa* = Enzo). Multi-sessione. Memoria `project_post_v1_program_s987`.
-2. **S-100X-A3** (+ A4..A11) — prossimi workstream audit forense 100X (read-only, doc-only). `SOT_BACKLOG §100X`.
-3. **A2 residuo**: i 6 QW-H ✅ DONE; resta solo il doc-fix RBAC baseline (CLAUDE.md stale "8 ruoli/394" → reale **11/586/133**, WS-H §104).
+1. **#8 Item #4 — Fasi 4-8** (post-v1.0): 4 design-doc producibili subito (3.5 reporting · 3.3 BPM runtime · 3.2 sec-audit · #6 provisioning) — autorità *cosa*=Enzo, `design→spec→ok→implementa`. Memoria `project_post_v1_program_s987`.
+2. **#9 residuo agente** (⛔ blocked-on-Enzo = credenziale `ANTHROPIC_API_KEY`/Bedrock/Vertex, subscription `out_of_credits`): M-2 write-live gated su RTL_BANK + WI-B.3/B.4 demo live (code già pronto).
+3. **ESCO downstream** (⛔ network): T1.1 backfill 14k (`POST /v1/reference-sync/runs {source:'ESCO_SKILL_HIERARCHY'}`, PLATFORM_ADMIN) → sblocca **T2.6** clustering + **T3.8** Skills-Group-Share.
+4. **S-100X-A4..A11** audit forense (read-only doc-only). **#11 dependabot**: #32/#35 CLEAN (rimuovi `defer-major` + merge), #33/#34/#36 restano deferiti (test-integration fail).
 
 ## Open questions
 
-- (nessuna bloccante) Le 3 deviazioni S988 sono risolte CLASS-A con veto tuo: vuoi R2 solo-NARROWER? → `DELETE … kind='BROADER'` (2865). Vuoi rivedere i 6/11 match ESCO low-conf deboli (commercial pilot, fight director…)? → data-task opzionale (sono già flaggati, non usati come verità).
+- **#11**: i 5 PR dependabot sono `defer-major` (per fermare il CI-race che cancellava RTL). Vuoi che rimuova il label + mergi #32 (minor group) + #35 (cross-env) e lasci deferiti i 3 major rotti? (azione remota, attendo go).
+- **WS-G F-3 strutturale**: la CI gira gli integration test contro il DB PROD condiviso → i test che mutano dati reference (enterprise-typing fixato) rischiano data-loss. Dossier 100X (DB hermetico) = decisione.
 
 ## Verification (next session)
+
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT count(*) FROM sys.sys_activity_classification_mappings"  # 5730
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT count(enterprise_typing_industry_class_id) FROM sys.sys_enterprise_typing_profiles"  # 2
 curl -s -o /dev/null -w 'PROD %{http_code}\n' https://www.heuresys.com/login   # 200
 ```

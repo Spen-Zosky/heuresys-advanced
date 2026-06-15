@@ -3,6 +3,17 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🟢 Aggiornamento S990 (2026-06-15) — batch menu 1→11 (ESCO data + agent-gateway + audit)
+
+Batch autonomo (decision-authority session-scoped), 11 commit `ce558d3`..`913a07e` pushati + PROD-deployed + verificato live multi-angolo. **DONE-LIVE**: **#3 ESCO** — T1.3 typing-profiles (D-31, mig 000119) · T2.4 skill_kind (D-34, mig 000120, 14036/21939) · T2.5 modulo `organization-unit-processes` (mig 000121/122, 74° modulo, RACI) · T1.2 occupation→skill **126051 righe** (D-33, mig 000123+seed 52) · T1.1 connector skill-hierarchy code-slice (D-32, mig 000124). **#4** RBAC doc-fix (8/394→11/586/133) · **#5/D-30** doc-fix · **#7** audit A3/WS-F (19 finding). **CODE-slice (live ⛔ blocked-on-Enzo = credenziale agente `out_of_credits`)**: **#1** M-2 write-gate (redaction+audit-sink+M-3 allowlist+approval bridge, 47/47) · **#6** dev page `/dev/agent` + 3-skill harness. **Il #9 BLOCKER coordinamento è SUPERATO**: spec ESCO #01-#04 + DEBT_REGISTER committate da Enzo (`913a07e`); conflitto numerazione risolto (mie migration `000119..000124`, non 000118). Gate verde: full API suite **963/0/6-skip**, migrate-chain 123 idempotente, web build, i18n 1198×2×7. **#9 ② AI free-text già live** (confermato, 844 PSR).
+
+**RESIDUO OPEN (next session):**
+- **#9 agente** (⛔ credenziale `ANTHROPIC_API_KEY`/Bedrock/Vertex): M-2 write-live gated su RTL_BANK + WI-B.3/B.4 demo live (code pronto). + **WI-C generatore materializzazione** (= T3.7 spec #04, motore tenant-onboarding) ancora da costruire.
+- **ESCO downstream** (⛔ network): **T1.1 backfill 14k** (`POST /v1/reference-sync/runs {source:'ESCO_SKILL_HIERARCHY'}`) → **T2.6** clustering + **T3.8** Skills-Group-Share chart. **T2.5 assignment data** (OU→processi reali) = mapping business Enzo (schema+modulo pronti, 1 DoD row demo su RTL).
+- **#8 Fasi 4-8** post-v1.0 (4 design-doc pronti: 3.5 reporting/3.3 BPM/3.2 sec-audit/#6 provisioning; autorità *cosa*=Enzo). **S-100X-A4..A11** audit forense.
+- **#11 dependabot**: 5 PR etichettati `defer-major` per fermare il **CI-race** che cancellava il profilo reference RTL (enterprise-typing test, classe D-23, fixato `5e3e56f`; radice strutturale = **WS-G F-3**, CI sul DB PROD condiviso). **Enzo: rimuovi `defer-major` + merge #32 (minor group) + #35 (cross-env)**; #33/#34/#36 restano deferiti (test-integration fail).
+- **T2.4 hard/soft layer** + **D-35 closure-table** (verdetto-b): residui semantici/decisi → DEBT_REGISTER.
+
 ## 🔌 Integrazione #9 — Agent SDK + layer MCP del plugin `human-resources-plus` (PLAN prodotto 2026-06-15)
 
 Riconciliata da `COWORK_INBOX` (entry `2026-06-14 | #9`). Design read-only Cowork nel repo plugin (`docs/{PLATFORM_MAP,MCP_TOOL_CATALOG,AUTH_AND_COMPLIANCE_DESIGN,BLUEPRINT_BUILDERS,SDK_INTEGRATION_PLAN}.md` + `reference-backend/` pilota mock + skeleton SDK/MCP). **PLAN heuresys-side**: `docs/integrations/agent_sdk_mcp_integration_plan_2026-06-15.md` (evidence-based; verifica forense indipendente sul codice reale via Explore agent + letture mirate).

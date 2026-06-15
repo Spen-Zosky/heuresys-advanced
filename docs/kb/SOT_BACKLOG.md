@@ -28,7 +28,9 @@ Obiettivo: rendere le `/hr` skill del plugin callable dalle webapp via Claude Ag
 - **🔴 blocked-on-Enzo — `ANTHROPIC_API_KEY` valida per l'SDK**: `query()` → `api_error 401 "Invalid API key"` con la key in env → blocca **WI-B.3** (3 skill /hr live), **WI-B.4** (acceptance pagina E2E), **M-2** (write-live via agente).
 - **🔴 gate migration-apply** (go esplicito Enzo): blocca **WI-C** (generatore materializzazione), **WI-D**/**WI-D2** (pilota + rank KPI), **M-8b** (marker is_service + audit/alert).
 - **🔴 approval umana**: M-2 write-live (+ B.4 screenshot).
-Nulla marcato "done" senza dimostrazione live (DoD). **Sblocco**: (1) ANTHROPIC_API_KEY SDK-valida; (2) go migration-apply; (3) approval write. Dev server `:3001` + gateway `:8790` lasciati up per ri-test post-key.
+Nulla marcato "done" senza dimostrazione live (DoD).
+
+**Continuazione (2026-06-15, §A subscription auth + §B migration-apply autorizzato)**: **§A.1 RISOLTO** — l'SDK autentica via **subscription Claude** (credenziali loggate `~/.claude/.credentials.json`) quando `ANTHROPIC_API_KEY` è unset; flag `AGENT_GATEWAY_SUBSCRIPTION_AUTH=1` nel gateway (la key a livello User-env dava 401). Smoke `query()`→`PONG` is_error=false. **WI-B.2 AGENTE ✅ DONE-LIVE**: domanda reale → agente (`claude-opus-4-8`) → `ToolSearch` → tool MCP `mcp__heuresys__hrx_org_units_list` → `/v1` live → **26 org-unit reali** → risposta SSE (`result is_error=false, num_turns=3, 65s`). ⚠ subscription `rate_limit five_hour` + `overage out_of_credits` → query agente con parsimonia; **porta PROD richiederà API key reale o Bedrock/Vertex** (annotato, non-bloccante dev). Prossimo: §B migration-apply (M-8b/WI-C/M-2/WI-D2 — no-agente, no rate-limit).
 
 ## 🔭 Programma 100X (S-100X) — audit forense QA E2E + release radicale (avviato 2026-06-13)
 

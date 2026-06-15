@@ -18,6 +18,15 @@ import { runHrAgent } from "./sdk-agent.js";
 const PORT = Number(process.env.AGENT_GATEWAY_PORT ?? 8790);
 const HEURESYS_API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
 
+// #9 §A.1 — DEV subscription auth: with AGENT_GATEWAY_SUBSCRIPTION_AUTH=1 do NOT
+// forward an ANTHROPIC_API_KEY to the SDK, so query() falls back to the machine's
+// logged-in Claude credentials (subscription, zero cost). The PROD service port
+// MUST instead provide a real ANTHROPIC_API_KEY (or AWS Bedrock / GCP Vertex auth).
+if (process.env.AGENT_GATEWAY_SUBSCRIPTION_AUTH === "1") {
+  delete process.env.ANTHROPIC_API_KEY;
+  delete process.env.ANTHROPIC_AUTH_TOKEN;
+}
+
 function parseCookies(header: string | undefined): Record<string, string> {
   const out: Record<string, string> = {};
   if (!header) return out;

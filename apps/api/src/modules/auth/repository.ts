@@ -703,3 +703,27 @@ export async function findMfaPolicyForTenant(
     updatedAt: row.updated_at,
   };
 }
+
+/* === MFA exemptions (#9 WI-A) ============================================= */
+
+/**
+ * True when the user has an ACTIVE per-user MFA exemption
+ * (sys.sys_auth_mfa_exemptions, mig 000116). Used by the login §3b gate to let a
+ * headless service account (Agent SDK, PLATFORM_ADMIN) bypass the mandatory-MFA
+ * requirement. Invariant I7: the exemption is an auth-only table, never a flag on
+ * sys_users. Empty table -> returns false for everyone (login behaviour unchanged).
+ */
+export async function isUserMfaExempt(
+  db: DbConnector,
+  userId: string,
+): Promise<boolean> {
+  const result = await db.query<{ exempt: boolean }>(
+    `SELECT EXISTS (
+        SELECT 1 FROM sys.sys_auth_mfa_exemptions
+         WHERE auth_mfa_exemption_user_id = $1
+           AND auth_mfa_exemption_enabled = true
+      ) AS exempt`,
+    [userId],
+  );
+  return result.rows[0]?.exempt ?? false;
+}

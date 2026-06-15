@@ -365,7 +365,12 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
           // Challenge token resolved to a different identity → reject.
           throw new UnauthorizedError("Invalid MFA challenge", "MFA_INVALID");
         }
-      } else if (mfaEnforcement) {
+      } else if (mfaEnforcement && !(await repo.isUserMfaExempt(pool, candidate.userId))) {
+        // #9 WI-A: a user with an ACTIVE MFA exemption (headless service account,
+        // sys_auth_mfa_exemptions / mig 000116) skips the WHOLE gate (no
+        // mfa_required, no mfa_enrollment_required) and falls through to full
+        // token issuance. Empty table = no exemptions = behaviour identical to
+        // pre-000116. Invariant I7: exemption is an auth-only table.
         const challenge = await mfaService.beginLoginChallenge(candidate.userId);
         if (challenge) {
           return {

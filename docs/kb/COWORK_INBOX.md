@@ -116,3 +116,16 @@ Findings da recepire (nessuna riprogettazione):
 
 Nessun blocco di design. Ordine confermato: WI-A → WI-B (mock-first) → WI-C → pilota → WI-D2.
 stato: [RICONCILIATA baaf424] — CLI 2026-06-15: **M-8 implementato** (mig `000117` trigger eligibility — esenzione consentita solo a tenant-null OR PLATFORM_ADMIN; `user_tenant_id` è NOT NULL → ramo PLATFORM_ADMIN operativo; admin eligibile, tommaso USER bloccato) + test neg/pos, commit `9005adc`. **V-1**: 000116/000117 **APPLICATE** sotto il go "procedi" di Enzo (ledger `sys_schema_migrations` id 6828) — NON un'applicazione senza go; doc PLAN header/§6/§9 allineati a "creata+APPLICATA, default-safe" (`baaf424`). **V-2**: path `exempt=true` già testato (test "ACTIVE exemption"); negativo M-8 testato; seed service user = **WI-A.2** scaffolding opt-in `db/scripts/seed-service-user.ts` (`ca7c193`, no-op senza `AGENT_SERVICE_USER_*`, R11 — non creato live); mutex refresh (M-5) → WI-B. **WI-A ✅ DONE** (exemption 5/5, auth+mfa 83/83, typecheck verde). Prossimo: **WI-B (mock-first)**.
+
+
+### 2026-06-15 | nota | REGOLA VINCOLANTE — Definition of Done = live E2E con dati reali
+
+Regola di Enzo (vincolante, cross-sessione, su #9 e sviluppi futuri): **nessun task/step è "fatto" se non abilita l'uso reale live end-to-end con dati live.** Mock / placeholder / green-test = solo scaffold transitorio DENTRO uno step, **mai** endpoint accettabile. Step-by-step ok, ma ogni step si chiude SOLO con una **dimostrazione live su dati reali** (output reale allegato). Unica attesa ammessa: input che solo Enzo può fornire (secret/credenziale, approval umana) — R23(iii); in tal caso lo stato è **blocked-on-Enzo**, non "done".
+
+Implicazione per #9 (acceptance LIVE, non mock — da recepire nel PLAN § acceptance e in SOT_BACKLOG #9):
+- **WI-B.2 / read-live**: gateway in esecuzione → richiesta reale (sessione utente reale, es. login come persona fixture E2E) → `/v1` LIVE → **dati reali del tenant** in streaming a un client reale. Il mock vale solo come scaffold intermedio.
+- **Write-live (gated)**: scrittura reale, approvata human-in-the-loop, **applicata** a un tenant (di test) reale, osservabile in piattaforma, reversibile.
+- **Pilota-live**: generate → plan → **apply** di un blueprint reale su un tenant di test reale, osservabile.
+
+Doc di riferimento (repo plugin): `docs/DEFINITION_OF_DONE.md`. Da riflettere come DoD per ogni WI.
+stato: [RICONCILIATA 2f47ef2] — CLI 2026-06-15: DoD recepita e **persistita** in `CLAUDE.md §"Definition of Done — live E2E con dati reali"` (regola durevole, riletta a ogni sessione del repo) + acceptance LIVE in `SOT_BACKLOG #9` e nel PLAN §3.0 (commit `2f47ef2`). Vale per OGNI WI: chiusura SOLO con dimostrazione live su dati reali (output reale, R5); secret/approval/migration-apply mancanti → `blocked-on-Enzo`, mai "done".

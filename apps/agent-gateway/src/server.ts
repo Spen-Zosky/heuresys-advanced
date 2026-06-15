@@ -32,10 +32,14 @@ const APPROVAL_TIMEOUT_MS = Number(process.env.AGENT_GATEWAY_APPROVAL_TIMEOUT_MS
 const approvals = new ApprovalRegistry({ approvalTimeoutMs: APPROVAL_TIMEOUT_MS });
 const auditSink = new FileAuditSink();
 
-// #9 §A.1 — DEV subscription auth: with AGENT_GATEWAY_SUBSCRIPTION_AUTH=1 do NOT
-// forward an ANTHROPIC_API_KEY to the SDK, so query() falls back to the machine's
-// logged-in Claude credentials (subscription, zero cost). The PROD service port
-// MUST instead provide a real ANTHROPIC_API_KEY (or AWS Bedrock / GCP Vertex auth).
+// #9 §A.1 — subscription auth: with AGENT_GATEWAY_SUBSCRIPTION_AUTH=1 do NOT forward
+// an ANTHROPIC_API_KEY to the SDK, so query() falls back to the machine's logged-in
+// Claude credentials (the operator's Claude MAX subscription, zero marginal cost).
+// This is SUFFICIENT for this platform: Heuresys owns it + RTL_BANK is the test tenant
+// — there is NO customer-facing agent serving, so no separate API key is required.
+// A real ANTHROPIC_API_KEY (or AWS Bedrock / GCP Vertex) would only be needed IF a
+// customer-facing production serving is ever added. Verified live (S990): query()
+// → "PONG" via the MAX subscription, is_error=false, no out_of_credits.
 if (process.env.AGENT_GATEWAY_SUBSCRIPTION_AUTH === "1") {
   delete process.env.ANTHROPIC_API_KEY;
   delete process.env.ANTHROPIC_AUTH_TOKEN;

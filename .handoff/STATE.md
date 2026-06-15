@@ -6,11 +6,11 @@
 
 ## Last session brief (S990 — batch 1→11 + chiusura dei fili che dipendevano solo da me)
 
-Eseguito l'intero menu in autonomia + chiuse a fine sessione tutte le cose che potevo chiudere io, per lasciare una lista che si accorcia (canone `feedback_converge_and_plain_reporting`). **Spedito + in PROD**: #4 RBAC doc-fix · #5/D-30 doc-fix · #7 audit A3/WS-F · #3 ESCO completo (T1.1 connector **+ backfill live: skill_group_uri 0→12892** · T1.2 occupation→skill 126051 · T1.3 typing · T2.4 skill_kind · T2.5 modulo OU↔process). **Code pronto, demo live in attesa di chiave agente**: #1 M-2 write-gate · #6 dev page + harness. **Dipendenze**: 2 PR sicuri adottati, 3 lasciati deferiti (rompono — decisione chiusa). Regressione dati (test che cancellava il profilo RTL) trovata in PROD e corretta. Gate verde + PROD 200. Tutto pushato (HEAD `c343380`).
+Eseguito l'intero menu in autonomia + chiuse a fine sessione tutte le cose che potevo chiudere io, per lasciare una lista che si accorcia (canone `feedback_converge_and_plain_reporting`). **Spedito + in PROD**: #4 RBAC doc-fix · #5/D-30 doc-fix · #7 audit A3/WS-F · #3 ESCO completo (T1.1 connector **+ backfill live: skill_group_uri 0→12892** · T1.2 occupation→skill 126051 · T1.3 typing · T2.4 skill_kind · T2.5 modulo OU↔process). **Code pronto; demo live eseguibili sul tuo abbonamento MAX** (verificato S990: nessuna chiave API serve, non c'è serving a clienti): #1 M-2 write-gate · #6 dev page + harness. **Dipendenze**: 2 PR sicuri adottati, 3 lasciati deferiti (rompono — decisione chiusa). Regressione dati (test che cancellava il profilo RTL) trovata in PROD e corretta. Gate verde + PROD 200. Tutto pushato (HEAD `c343380`).
 
 ## Top priorities (next session)
 
-1. **#9 agente — demo live** (⛔ serve **solo la chiave API** Anthropic/Bedrock/Vertex, tua): far girare M-2 (1 scrittura approvata su RTL_BANK) + le 3 skill /hr + la pagina dev. Il codice è pronto, manca solo il tuo input.
+1. **#9 agente — demo live** (lavoro MIO, nessun input da te): far girare M-2 (1 scrittura approvata su RTL_BANK) + le 3 skill /hr + la pagina dev. Gira sul tuo abbonamento MAX (verificato S990 — nessuna chiave API necessaria). Sessione dedicata (avvio gateway + API + flusso di approvazione).
 2. **Feature future (decidi tu il "cosa")**: grafico Skills-Group-Share (T3.8) + clustering skill (T2.6) — ora che i dati ESCO sono pronti · #8 Fasi 4-8 post-v1.0 (reporting/BPM/sec-audit/provisioning) · assegnazioni reali OU↔processi (T2.5, mapping di business). Memoria `project_post_v1_program_s987`.
 3. **Audit 100X A4..A11** (sola lettura, opzionale) — da fare solo se vuoi continuare il programma di audit.
 

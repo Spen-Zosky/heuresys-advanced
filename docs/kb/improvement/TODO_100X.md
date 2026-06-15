@@ -12,8 +12,8 @@
 ## Fase A — Audit per-WS (read-only, sub-agent fan-out; robustness-first)
 
 - [x] S-100X-A1 | WS-G | audit CI/CD & deploy (runner SPOF, rollback, caching, release) | FINDINGS/WS-G.md + baseline durate CI | **DONE** (S987 — 30 finding: 1 CRITICAL fork-PR ACE su prod host, 10 HIGH, 5 QW-G; D-08 → security-priority)
-- [ ] S-100X-A2 | WS-H | audit sicurezza & supply chain (auth, secrets, OWASP, SBOM, env-doc) | FINDINGS/WS-H.md | TODO
-- [ ] S-100X-A3 | WS-F | audit test & QA (unit-layer, parallelism, isolation, flakiness) | FINDINGS/WS-F.md + baseline durate suite | TODO
+- [x] S-100X-A2 | WS-H | audit sicurezza & supply chain (auth, secrets, OWASP, SBOM, env-doc) | FINDINGS/WS-H.md | **DONE** (S988 — fan-out 5 sub-agent: 1 HIGH TRUST_PROXY [D-28 RISOLTO S988], MED rate-limit/skill-taxonomy/media-sniff; 6 QW-H tutti chiusi S989; SQL 100% param, Zod 415/415, pnpm audit 0)
+- [x] S-100X-A3 | WS-F | audit test & QA (unit-layer, parallelism, isolation, flakiness) | FINDINGS/WS-F.md + baseline durate suite | **DONE** (S990, 2026-06-15 — 19 finding: 3 HIGH no-full-E2E-in-CI / no-unit-layer / tunnel-coupling, 5 MED, 6 LOW, 5 INFO; 6 QW-F + 6 DOSSIER + 3 ASSET; baseline 134 file/~920 case/73-su-73 mod/0 mock/ratio 6.7:1; anchor x19a stale pre-MFA 86.53s)
 - [ ] S-100X-A4 | WS-C | audit dati & persistenza (squash, backup/restore, indici, dead schema) | FINDINGS/WS-C.md | TODO
 - [ ] S-100X-A5 | WS-B | audit backend/servizi (module-pattern cost, hot path, repo SQL) | FINDINGS/WS-B.md | TODO
 - [ ] S-100X-A6 | WS-A | audit architettura (coupling, dead code, dep inutilizzate) | FINDINGS/WS-A.md | TODO

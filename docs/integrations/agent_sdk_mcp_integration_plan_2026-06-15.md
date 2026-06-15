@@ -4,7 +4,7 @@
 > **Data**: 2026-06-15. **Riconcilia**: `docs/kb/COWORK_INBOX.md` entry `2026-06-14 | #9`.
 > **Design di riferimento (read-only, prodotto da Cowork nel repo plugin `D:\enzospenuso\Documents\GitHub\human-resources-plus\`)**:
 > `docs/PLATFORM_MAP.md` · `docs/MCP_TOOL_CATALOG.md` · `docs/AUTH_AND_COMPLIANCE_DESIGN.md` · `docs/BLUEPRINT_BUILDERS.md` · `docs/SDK_INTEGRATION_PLAN.md` · `reference-backend/` (pilota mock eseguibile + skeleton SDK/MCP).
-> **Vincolo cardinale**: nessuna migration creata/applicata in questa sessione. Questo documento è il deliverable; codice e DDL sono **PROPOSED / DO-NOT-APPLY** fino al go di Enzo.
+> **Vincolo cardinale (aggiornato 2026-06-15)**: WI-A è in esecuzione **sotto il go esplicito di Enzo** ("procedi"). Le migration **000116** (esenzione MFA) + **000117** (M-8 eligibility) sono **CREATE e APPLICATE** al DB OCI (additive, idempotenti, **tabella vuota = login default-safe**, byte-identico a pre-000116). Tutto il resto (WI-B/C/D) resta **PROPOSED / DO-NOT-APPLY** fino al rispettivo go. Vedi §6.
 
 ---
 
@@ -207,17 +207,25 @@ Catena: `process-builder → orgunit-builder → orgchart-builder(+FTE) → area
 
 ---
 
-## 6. Migration inventory — **DA APPLICARE SOLO SU CONFERMA**
+## 6. Migration inventory
 
-Nessuna applicata in questa sessione. Su go, l'esecuzione introdurrebbe (idempotenti, numerazione sequenziale dopo `000115`):
+**APPLICATE (su go "procedi" di Enzo, 2026-06-15)** — additive, idempotenti, default-safe:
+
+| File | Work-item | Stato |
+|---|---|---|
+| `000116_mfa_exemptions.sql` | WI-A | **APPLICATA** (ledger id 6828, 2026-06-15 03:03) — `sys.sys_auth_mfa_exemptions` (auth-only I7) + registry D/EXCLUDE; **tabella vuota = login byte-identico a pre-000116** |
+| `000117_mfa_exemption_eligibility.sql` | WI-A / M-8 | **APPLICATA** — trigger eligibilità (solo tenant-null OR PLATFORM_ADMIN) |
+
+WI-A.2 (service user) = **0 migration** — script seed opt-in `db/scripts/seed-service-user.ts` (no-op senza `AGENT_SERVICE_USER_*`).
+
+**PROPOSED / DA APPLICARE SOLO SU GO** (work-item successivi, numerazione dopo `000117`):
 
 | # | Migration candidata | Work-item | Note |
 |---|---|---|---|
-| M1 | esenzione MFA (flag su `sys_users` o tabella `sys_auth_mfa_exemptions`) + registry row | WI-A (se opz. A1) | A2 evita la migration (env) |
-| M2 | seed service user (perms già esistenti; eventuale seed identità) | WI-A | analogo `seed-test-admin.ts` |
-| M3 | schema generatore Phase B (se serve tabella di tracking/lineage dedicata) | WI-C | spesso 0-migration (scrive su `sys_*` esistenti) |
-| M4 | `rank/priority` su junction KPI (+ write-endpoint) | WI-D2 | solo se D2 approvato |
-| M5 | tabella/colonne recommender typing→variant | WI-D3 | solo se D3 approvato |
+| M4 | `rank` su `sys_position_kpi_requirements` + estensione VIEW PIP `sys_position_intelligence_profiles_v` (edge I9) + write-endpoint per-position KPI | WI-D2 | **abilitato** (decisione d) |
+| M3 | (eventuale) tabella tracking/lineage del generatore Phase B | WI-C | spesso 0-migration (scrive su `sys_*` esistenti) |
+| M0 | audit-sink del gateway (se persistito su DB) | WI-B / M-4 | registry row stessa migration (classe D-22) |
+| M5 | recommender typing→variant | WI-D3 | **rinviato** |
 
 ---
 
@@ -264,12 +272,15 @@ Nessuna applicata in questa sessione. Su go, l'esecuzione introdurrebbe (idempot
 | M-6 | LOW | idempotenza re-run pilota sull'attivazione (one-active-per-tenant → PATCH vs POST) | §4 pilota |
 | M-7 | LOW | users materializzati Phase B = persone **credential-less**, non crosswalk `LEGACY_EMP::` (I14) | WI-C |
 
-### 9.3 — Migration inventory aggiornato (§6 — sempre DA APPLICARE SOLO SU CONFERMA)
-- **M1** confermata: `sys.sys_auth_mfa_exemptions` + registry row (WI-A).
-- **M4 = D2** confermata: colonna `rank` su `sys_position_kpi_requirements` + estensione VIEW PIP + write-endpoint per-position KPI (WI-D2).
+### 9.3 — Migration inventory (vedi §6 per lo stato applicazione)
+- **000116** (`sys_auth_mfa_exemptions` + registry) + **000117** (M-8 eligibility trigger) = **APPLICATE** su go (WI-A).
+- **M4 = D2**: colonna `rank` su `sys_position_kpi_requirements` + estensione VIEW PIP + write-endpoint per-position KPI (WI-D2, abilitato).
 - **M5 = D3 NON creata** (rinviata).
 - **+M0** audit-sink (solo se DB: tabella `sys_*` + registry row, classe D-22).
-- Tutte idempotenti, numerazione dopo `000115`.
+- Tutte idempotenti, numerazione dopo `000117`.
+
+### 9.4bis — Re-review post-WI-A recepita (2026-06-15)
+GO confermato. **M-8** implementato (trigger `000117` + test negativo/positivo). **V-1**: 000116/000117 APPLICATE su go (ledger confermato) → doc allineati (§6, header). **V-2**: path `exempt=true` testato (test "ACTIVE exemption"), negativo M-8 testato, seed service user = WI-A.2 scaffolding (opt-in); mutex refresh (M-5) → WI-B.
 
 ### 9.4 — Stato
 Design **approvato (GO-con-modifiche)**, §7 chiuso. **Restano a Enzo solo i go operativi** (nessuna scelta §7 pendente). Ordine all'ok: **WI-A** (`sys_auth_mfa_exemptions` + guard §3b + service user) → WI-B (mock-first) → WI-C → pilota → WI-D2.

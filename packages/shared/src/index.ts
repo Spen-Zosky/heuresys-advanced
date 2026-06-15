@@ -80,4 +80,5 @@ export * from "./schemas/insights.js";
 export * from "./schemas/reference-sync.js";
 export * from "./schemas/content.js";
 export * from "./schemas/content-blueprint-links.js";
+export * from "./schemas/organization-unit-processes.js";
 export * from "./schemas/engagement.js";

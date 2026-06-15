@@ -7,7 +7,7 @@ import { pool } from '../src/db/client.js';
 // suite (singleThread) so this file does NOT close it.
 
 describe('reconciliation registry (F1)', () => {
-  it('registry holds exactly 102 rows with the signed-off bucket split A25/B16/C23/D38', async () => {
+  it('registry holds exactly 105 rows with the signed-off bucket split A25/B16/C23/D41', async () => {
     const { rows } = await pool.query<{ b: string; n: number }>(
       `SELECT reconciliation_registry_bucket AS b, count(*)::int AS n
          FROM sys.sys_reconciliation_registry GROUP BY 1`,
@@ -36,7 +36,13 @@ describe('reconciliation registry (F1)', () => {
     //     S982 amendment to mig 000062, where the row must live for fresh-rebuild ordering)
     //   +2 bucket-A IMPORT  — S988 R1 Fase3 engagement_feedback m: sys_engagement_feedback +
     //     sys_engagement_action_plans (mig 000113 + seed 51; RTL import 400 + 6)
-    expect(m).toEqual({ A: 25, B: 16, C: 23, D: 38 });
+    //   +1 bucket-D EXCLUDE — #9 WI-A sys_auth_mfa_exemptions (auth config, mig 000116). The #9
+    //     commits applied this registry row but left this assert stale (was already red at the
+    //     S990 session start) — absorbed here, S990.
+    //   +1 bucket-D EXCLUDE — #9 M-8b sys_auth_mfa_exemption_audit (audit trail, mig 000118)
+    //   +1 bucket-D EXCLUDE — T2.5 sys_organization_unit_processes (app-authored OU↔process RACI
+    //     links, no legacy source, mig 000121)
+    expect(m).toEqual({ A: 25, B: 16, C: 23, D: 41 });
   });
 
   it('the v_reconciliation_status view leaves zero UNCLASSIFIED tables', async () => {

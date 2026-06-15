@@ -314,6 +314,10 @@
     "./schemas/content-blueprint-links": {
       "types": "./dist/schemas/content-blueprint-links.d.ts",
       "default": "./src/schemas/content-blueprint-links.ts"
+    },
+    "./schemas/organization-unit-processes": {
+      "types": "./dist/schemas/organization-unit-processes.d.ts",
+      "default": "./src/schemas/organization-unit-processes.ts"
     }
   },
   "scripts": {

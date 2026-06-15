@@ -1,5 +1,7 @@
 # PLAN — #9 Integrazione Agent SDK + layer MCP del plugin `human-resources-plus` (heuresys-side)
 
+> 🔒 **DoD VINCOLANTE (§0, riconfermata 2026-06-15)**: nessuno step è *done* senza dimostrazione **live E2E su dati reali** (output reale allegato, R5); il mock è solo scaffold transitorio; secret/approval/migration-apply mancanti → `blocked-on-Enzo`. Persistita in `CLAUDE.md §Definition of Done` (commit `2f47ef2`) + §3.0. **Tenant di test = RTL_BANK** (`86ba7a65`, synthetic no-PII ADR-0023); scritture **mai** su HEURESYS proprietario (`8bc5bc59`). DB target = OCI VM reale via tunnel :5433 (NODE_ENV dev, DB prod-condiviso) → safety §0.5 verde 2026-06-15.
+
 > **Tipo**: PLAN (governance Cowork↔CLI — step 2). **Stato**: prodotto dal CLI, **da approvare** prima dell'esecuzione.
 > **Data**: 2026-06-15. **Riconcilia**: `docs/kb/COWORK_INBOX.md` entry `2026-06-14 | #9`.
 > **Design di riferimento (read-only, prodotto da Cowork nel repo plugin `D:\enzospenuso\Documents\GitHub\human-resources-plus\`)**:

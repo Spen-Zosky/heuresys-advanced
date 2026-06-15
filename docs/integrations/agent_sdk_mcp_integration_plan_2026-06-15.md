@@ -106,6 +106,10 @@ Endpoint reali (verbo · permission · CSRF):
 
 ---
 
+## 3.0 — Acceptance LIVE (DoD vincolante, recepita 2026-06-15)
+
+Ogni WI sotto si chiude SOLO con una **dimostrazione live E2E su dati reali** (tenant di TEST), output reale allegato (R5) — il mock è solo scaffold transitorio, mai endpoint. Secret/approval/migration-apply mancanti → **`blocked-on-Enzo`**, mai "done". Ref: `CLAUDE.md §Definition of Done` + `docs/kb/COWORK_INBOX.md 2026-06-15` + repo plugin `docs/DEFINITION_OF_DONE.md`.
+
 ## 3. Work-item — dettaglio, sequenza, success criteria
 
 > Ordine consigliato: **WI-A → WI-B (mock-first) → WI-C → pilota → WI-D**. Mock-first = il lifecycle (reference-backend `run-pilot.mjs`) gira contro la mock API prima del live.

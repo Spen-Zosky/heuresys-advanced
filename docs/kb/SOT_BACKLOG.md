@@ -7,6 +7,8 @@
 
 Riconciliata da `COWORK_INBOX` (entry `2026-06-14 | #9`). Design read-only Cowork nel repo plugin (`docs/{PLATFORM_MAP,MCP_TOOL_CATALOG,AUTH_AND_COMPLIANCE_DESIGN,BLUEPRINT_BUILDERS,SDK_INTEGRATION_PLAN}.md` + `reference-backend/` pilota mock + skeleton SDK/MCP). **PLAN heuresys-side**: `docs/integrations/agent_sdk_mcp_integration_plan_2026-06-15.md` (evidence-based; verifica forense indipendente sul codice reale via Explore agent + letture mirate).
 
+**Acceptance (DoD live VINCOLANTE, recepita 2026-06-15)**: ogni WI chiude SOLO con dimostrazione **live E2E su dati reali** (tenant di TEST; output reale allegato R5) — mai mock/green-test. Secret/approval/migration-apply mancanti → **`blocked-on-Enzo`**, mai "done". Ref: `CLAUDE.md §Definition of Done` + `COWORK_INBOX 2026-06-15` + repo plugin `docs/DEFINITION_OF_DONE.md`.
+
 Obiettivo: rendere le `/hr` skill del plugin callable dalle webapp via Claude Agent SDK, con le `/v1/*` esposte come tool MCP e compliance a runtime (plan→diff→approve→apply, GDPR Art.22). Cinque work-item (**DA APPROVARE — nessuna migration applicata, DDL = PROPOSED**):
 - **WI-A** service user PLATFORM_ADMIN + esenzione MFA (gate `auth/service.ts §3b`) — ⚠ security decision: flag DB **A1** (raccomandata) / env allowlist A2 / naturale-tenant-null A3.
 - **WI-B** backend Agent SDK + MCP in nuovo workspace **`apps/agent-gateway`** (TS) — auth ibrido (forwarded user / service user) + CSRF + `canUseTool` write-gate + `compliance-guard`.

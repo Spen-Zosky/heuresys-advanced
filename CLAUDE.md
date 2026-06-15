@@ -10,6 +10,12 @@ The project is at **`v1.0.0` GA baseline** (released S957, 2026-06-02): MVP-0→
 
 **Data provenance** (ADR-0023): the `sys.*` business tables are populated by a deterministic brownfield ingestion pipeline whose **authoritative data source** is the legacy `heuresys-evo` Docker DB (`heuresys_evo_platform_db` / db `heuresys_platform`) — synthetic case-study data, no real PII (I12). The advanced `sys.*` schema is the **structural authority** (the legacy adapts to it). The RTL_BANK reference tenant was rebuilt (S950) by matching+wiring real legacy records (161 users / 2 active tenants). See `docs/kb/SOT_STATE.md` §4.
 
+## Definition of Done — live E2E con dati reali (VINCOLANTE, cross-sessione)
+
+> Regola di Enzo recepita 2026-06-15 (`docs/kb/COWORK_INBOX.md` entry `2026-06-15 | REGOLA VINCOLANTE`; riferimento nel repo plugin `Spen-Zosky/human-resources-plus` → `docs/DEFINITION_OF_DONE.md`). **Vale per OGNI work-item, non solo #9.**
+
+**Nessuno step si chiude su mock / placeholder / green-test.** Il mock è solo impalcatura transitoria DENTRO uno step; ogni step si chiude SOLO con una **dimostrazione LIVE su dati reali** — output reale allegato (comando + output + path assoluto + timestamp, R5). "Green test" o "il mock funziona" = **in-progress**, non *done*. Unica attesa ammessa: un input che solo Enzo può fornire (secret/credenziale, approval umana) → stato = **`blocked-on-Enzo: <cosa, perché>`**, MAI "done". Scritture dimostrative su **tenant di TEST**, mai produzione. Coerente con la dottrina "LIVE DATA E2E ONLY" della sezione MVP-2a/2b in fondo a questo file.
+
 ## Source of Truth (single per domain — do not duplicate)
 
 - **Current state — two handoff-governed views** (disjoint domains, no number duplicated between them): `.handoff/STATE.md` (rapid — priorities + open questions) and `docs/kb/SOT_STATE.md` (granular — versions, DB/API/web/CI counts, architecture, milestone narrative). Both are rewritten by the `handoff` skill at session close (it re-derives the granular counts via psql/ls/git). Do NOT create other state/handoff/entry-point files.

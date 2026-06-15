@@ -543,5 +543,28 @@
     "empty": "No tenants available.",
     "accessDeniedTitle": "Access denied",
     "accessDeniedDesc": "mfa_policy permissions are required to read policies."
+  },
+  "agentDev": {
+    "title": "Agent console (DEV)",
+    "description": "Developer tool: send a prompt to the agent gateway and watch the live stream (messages, tool-calls and write-approval requests).",
+    "disabledTitle": "Agent console disabled",
+    "disabledDesc": "This developer console is turned off. Enable it by setting the agent console environment flag.",
+    "promptLabel": "Prompt",
+    "promptPlaceholder": "e.g. List my tenant's organization units and tell me how many there are.",
+    "run": "Run",
+    "running": "Running…",
+    "stop": "Stop",
+    "streamTitle": "Event stream",
+    "streamEmpty": "No events yet. Send a prompt to start the agent.",
+    "gatewayLabel": "Gateway",
+    "approvalTitle": "Approval required",
+    "approvalDesc": "The agent wants to perform a write. Tool and input are already redacted by the gateway.",
+    "approvalTool": "Tool",
+    "approvalInput": "Input (redacted)",
+    "allow": "Allow",
+    "deny": "Deny",
+    "approvalResolved": "Decision sent: {{decision}}",
+    "errorRun": "Run failed: {{message}}",
+    "noSession": "No session: log in so the cookies are forwarded to the gateway."
   }
 }

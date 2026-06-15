@@ -543,5 +543,28 @@
     "empty": "Nessun tenant disponibile.",
     "accessDeniedTitle": "Accesso negato",
     "accessDeniedDesc": "Servono i permessi mfa_policy per leggere le policy."
+  },
+  "agentDev": {
+    "title": "Console agente (DEV)",
+    "description": "Strumento di sviluppo: invia un prompt all'agent gateway e osserva lo stream live (messaggi, tool-call e richieste di approvazione write).",
+    "disabledTitle": "Console agente disabilitata",
+    "disabledDesc": "Questa console di sviluppo è disattivata. Abilitala impostando il flag d'ambiente per la console agente.",
+    "promptLabel": "Prompt",
+    "promptPlaceholder": "Es. Elenca le organization unit del mio tenant e dimmi quante sono.",
+    "run": "Esegui",
+    "running": "In esecuzione…",
+    "stop": "Interrompi",
+    "streamTitle": "Stream eventi",
+    "streamEmpty": "Nessun evento ancora. Invia un prompt per avviare l'agente.",
+    "gatewayLabel": "Gateway",
+    "approvalTitle": "Approvazione richiesta",
+    "approvalDesc": "L'agente vuole eseguire una scrittura. Tool e input sono già oscurati dal gateway.",
+    "approvalTool": "Tool",
+    "approvalInput": "Input (oscurato)",
+    "allow": "Consenti",
+    "deny": "Nega",
+    "approvalResolved": "Decisione inviata: {{decision}}",
+    "errorRun": "Esecuzione fallita: {{message}}",
+    "noSession": "Nessuna sessione: effettua il login per inoltrare i cookie al gateway."
   }
 }

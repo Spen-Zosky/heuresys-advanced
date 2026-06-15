@@ -123,7 +123,7 @@ async function agentLive(cookies: string): Promise<void> {
 async function main() {
   console.log(`=== WI-B.2 live READ acceptance — ${EMAIL} @ ${API} / gateway ${GATEWAY} ===`);
   const cookies = await login();
-  console.log(`[login] session cookies acquired: ${cookies.split(";").map((c) => c.split("=")[0].trim()).join(", ")}`);
+  console.log(`[login] session cookies acquired: ${cookies.split(";").map((c) => c.split("=")[0]?.trim()).join(", ")}`);
   await readLive(cookies);
   await agentLive(cookies);
   console.log("=== done ===");

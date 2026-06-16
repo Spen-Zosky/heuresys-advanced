@@ -1,0 +1,26 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh.
+# Do NOT install this file directly; run the bootstrap script instead.
+#
+# 3.4 notification center: a ONE-SHOT that emails each opted-in user a digest of
+# their UNREAD in-app notifications. SMTP-gated — makeMailer is a no-op/log until
+# SMTP creds are configured. CLI-bypass, no HTTP/auth. Activated by
+# heuresys-advanced-notifications-digest.timer.
+[Unit]
+Description=Heuresys Advanced — notification digest (3.4, one-shot)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@/apps/api
+# nvm-managed Node (>=22) on PATH; pnpm lives alongside it.
+Environment=PATH=@@NODE_BIN@@:/usr/local/bin:/usr/bin:/bin
+Environment=NODE_ENV=production
+# Lets env.ts locate the repo-root .env + .secrets when run from apps/api.
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
+# CLI-bypass in-process run (tsx) — devDeps are present (frozen install, not --prod).
+ExecStart=@@NODE_BIN@@/pnpm notifications:digest
+TimeoutStartSec=600

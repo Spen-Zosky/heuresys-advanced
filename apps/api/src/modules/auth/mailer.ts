@@ -32,6 +32,12 @@ export interface IMailer {
    * Best-effort — callers must not fail the enrollment if this send fails.
    */
   sendMfaFactorEnrolledNotice(toEmail: string, kind: string): Promise<void>;
+  /**
+   * 3.4 notification digest: a periodic summary of unread in-app notifications.
+   * Best-effort (the scheduler must not fail on a send error). Gated on SMTP creds
+   * in production (SmtpMailer); ConsoleMailer logs it; InMemoryMailer captures it.
+   */
+  sendNotificationDigest(toEmail: string, unreadCount: number): Promise<void>;
 }
 
 /**
@@ -76,6 +82,13 @@ export class ConsoleMailer implements IMailer {
       "[DEV_ONLY] 'New MFA method added' notice would be emailed to user.",
     );
   }
+
+  async sendNotificationDigest(toEmail: string, unreadCount: number): Promise<void> {
+    this.log.warn(
+      { toEmail, unreadCount, mailer: "ConsoleMailer" },
+      "[DEV_ONLY] Notification digest would be emailed to user.",
+    );
+  }
 }
 
 /**
@@ -98,12 +111,19 @@ export interface SentFactorNotice {
   kind: string;
 }
 
+export interface SentDigest {
+  toEmail: string;
+  unreadCount: number;
+}
+
 export class InMemoryMailer implements IMailer {
   public readonly sent: SentEmail[] = [];
   /** MFA EMAIL_OTP codes captured for test assertions (read the latest .code). */
   public readonly sentOtps: SentMfaOtp[] = [];
   /** "New MFA method added" notices captured for test assertions (TOFU v2). */
   public readonly sentNotices: SentFactorNotice[] = [];
+  /** Notification digests captured for test assertions (3.4). */
+  public readonly sentDigests: SentDigest[] = [];
 
   async sendPasswordResetEmail(toEmail: string, resetUrl: string): Promise<void> {
     this.sent.push({ toEmail, resetUrl });
@@ -119,6 +139,10 @@ export class InMemoryMailer implements IMailer {
 
   async sendMfaFactorEnrolledNotice(toEmail: string, kind: string): Promise<void> {
     this.sentNotices.push({ toEmail, kind });
+  }
+
+  async sendNotificationDigest(toEmail: string, unreadCount: number): Promise<void> {
+    this.sentDigests.push({ toEmail, unreadCount });
   }
 
   /** Returns the most recently emailed OTP code (test seam), or null. */

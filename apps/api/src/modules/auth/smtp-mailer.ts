@@ -84,6 +84,16 @@ export class SmtpMailer implements IMailer {
         `<p style="color:#888">Se non sei stato tu, contatta subito il tuo amministratore e reimposta la password.</p>`,
     });
   }
+
+  async sendNotificationDigest(toEmail: string, unreadCount: number): Promise<void> {
+    await this.transporter.sendMail({
+      from: this.from,
+      to: toEmail,
+      subject: `${APP_NAME} — Hai ${unreadCount} notifiche non lette`,
+      text: `Hai ${unreadCount} notifiche non lette nel tuo spazio. Accedi per consultarle.`,
+      html: `<p>Hai <b>${unreadCount}</b> notifiche non lette nel tuo spazio. Accedi per consultarle.</p>`,
+    });
+  }
 }
 
 /** Minimal SMTP config shape (subset of the parsed env), explicit for testability. */

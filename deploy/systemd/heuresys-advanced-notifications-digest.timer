@@ -1,0 +1,19 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh.
+#
+# 3.4 notification digest: a DAILY send of unread-notification digests to opted-in
+# users. Scheduled after the insights recompute (02:15) and before the weekly ESCO
+# probe (Sun 03:30) so they never overlap.
+[Unit]
+Description=Heuresys Advanced — daily notification digest (3.4)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+# Daily 02:45 local, with a randomized delay so it never fires on the dot.
+OnCalendar=*-*-* 02:45:00
+RandomizedDelaySec=600
+# Run a missed occurrence after downtime (the VM is not always up at 02:45).
+Persistent=true
+Unit=heuresys-advanced-notifications-digest.service
+
+[Install]
+WantedBy=timers.target

@@ -11,6 +11,7 @@
 
 import { pool } from "../../db/client.js";
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
+import { emitNotification } from "../../lib/notifications/emit.js";
 import type { RoleCode } from "../../config/constants.js";
 import type {
   AssessmentResult,
@@ -67,6 +68,32 @@ export const assessmentResultsService = {
         );
       }
     }
-    return repo.insertResult(pool, parent.tenantId, body);
+    const created = await repo.insertResult(pool, parent.tenantId, body);
+    // 3.4 MANAGER_FEEDBACK_READY — notify the assessment subject a result is in (best-effort).
+    try {
+      const subj = await pool.query<{ uid: string; tid: string }>(
+        `SELECT assessment_subject_user_id AS uid, assessment_tenant_id AS tid
+           FROM sys.sys_assessments WHERE assessment_id = $1`,
+        [body.assessmentId],
+      );
+      const row = subj.rows[0];
+      if (row) {
+        await emitNotification(pool, {
+          tenantId: row.tid,
+          userId: row.uid,
+          type: "MANAGER_FEEDBACK_READY",
+          subject: "Feedback di valutazione disponibile",
+          body: "Un valutatore ha registrato un risultato per la tua valutazione.",
+          priority: "MEDIUM",
+          resourceType: "ASSESSMENT",
+          resourceId: body.assessmentId,
+          actionUrl: "/me/assessments",
+          createdBy: actor.userId,
+        });
+      }
+    } catch {
+      /* best-effort */
+    }
+    return created;
   },
 };

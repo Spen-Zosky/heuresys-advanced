@@ -16,6 +16,7 @@
 
 import { pool } from "../../db/client.js";
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
+import { emitNotification } from "../../lib/notifications/emit.js";
 import type { RoleCode } from "../../config/constants.js";
 import type {
   Assessment,
@@ -85,7 +86,25 @@ export const assessmentsService = {
       const ok = await methodExists(pool, body.methodId);
       if (!ok) throw new NotFoundError("AssessmentMethod");
     }
-    return repo.insertAssessment(pool, tenantId, body, actor.userId);
+    const created = await repo.insertAssessment(pool, tenantId, body, actor.userId);
+    // 3.4 ASSESSMENT_REQUEST — notify the subject of the new assessment (best-effort).
+    try {
+      await emitNotification(pool, {
+        tenantId,
+        userId: created.subjectUserId,
+        type: "ASSESSMENT_REQUEST",
+        subject: "Nuova valutazione richiesta",
+        body: `Ti è stata assegnata una valutazione (${created.kind}).`,
+        priority: "MEDIUM",
+        resourceType: "ASSESSMENT",
+        resourceId: created.assessmentId,
+        actionUrl: "/me/assessments",
+        createdBy: actor.userId,
+      });
+    } catch {
+      /* best-effort */
+    }
+    return created;
   },
 
   async update(actor: ActorContext, id: string, patch: UpdateAssessmentBody): Promise<Assessment> {

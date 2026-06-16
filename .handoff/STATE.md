@@ -11,7 +11,7 @@ Due aspetti sbloccati + audit forense completo + molti QW chiusi live. **(1) Mai
 ## Top priorities (next session)
 
 1. **Programma 100X — FASE C (dossier → decide Enzo per-finding)**: la fase A (audit A1–A11) è chiusa; i finding confluiscono nei dossier `DOSSIERS/` per la tua decisione go/defer/won't. Resta **S-100X-A-L** (ecosistema Claude, design-only) come unico audit non fatto.
-2. **QW residui CLASS-A (~17, chiudibili da Claude su via libera)** — i più di valore: **QW-B2** (LIMIT su 4 list endpoint, HIGH) · **QW-D1** (chart code-split, bundle) · **QW-B4/B6** (shared ActorContext/withTransaction, =QW-4) · **QW-I1/I2** (README/CLAUDE drift) · **QW-E1** (token rosso) · **QW-A2** (agent-gateway in CI). Lista completa + gate in `docs/kb/improvement/TODO_100X.md`.
+2. **QW residui CLASS-A (chiudibili da Claude su via libera)** — QW-B2 ✅ chiuso (S993). I prossimi di valore: **QW-D1** (chart code-split, bundle — gate next-build) · **QW-B4/B6** (shared ActorContext/withTransaction, =QW-4, refactor ampio) · **QW-I1/I2** (README/CLAUDE drift — ⚠ ri-drifterà senza il fix strutturale, vedi dossier anti-drift sotto) · **QW-E1** (token rosso) · **QW-A2** (agent-gateway in CI) · **QW-A1** (dead deps, gate clean-install). Lista completa + gate in `docs/kb/improvement/TODO_100X.md`.
 3. **Item prodotto/dati (tuo "cosa" / multi-sessione)**: #5 BPM 3.3 · #6 m2b Surveys · #7 RACI · #8 B-50 · #10 Fasi 4-8.
 
 ## Open questions

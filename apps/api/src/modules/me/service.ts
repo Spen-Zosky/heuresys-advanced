@@ -19,6 +19,7 @@ import * as repo from "./repository.js";
 import * as authRepo from "../auth/repository.js";
 import type { ListActiveSessionsResponse, RevokeOtherSessionsResponse } from "@heuresys/shared";
 import { userPermissionCodes } from "../../middleware/rbac.js";
+import { emitNotification } from "../../lib/notifications/emit.js";
 
 /** Web layout's ADMIN_ROLES (hybrid gate): the admin sidebar section requires one of these roles
  *  AND the per-item permission. Mirrors apps/web (authenticated)/layout.tsx so the DB-driven
@@ -106,7 +107,20 @@ export const meService = {
 
   async enrollLearning(actor: SelfActor, body: CreateMeEnrollmentBody) {
     const tenantId = requireTenant(actor);
-    return repo.insertEnrollment(pool, actor.userId, tenantId, body);
+    const created = await repo.insertEnrollment(pool, actor.userId, tenantId, body);
+    // 3.4 TRAINING_DEADLINE — confirm the enrolment + flag deadlines (best-effort).
+    try {
+      await emitNotification(pool, {
+        tenantId, userId: actor.userId, type: "TRAINING_DEADLINE",
+        subject: "Percorso formativo in agenda",
+        body: "Ti sei iscritto a un percorso formativo: controlla le scadenze previste.",
+        priority: "INFO", resourceType: "LEARNING_MODULE", actionUrl: "/me/learning",
+        createdBy: actor.userId,
+      });
+    } catch {
+      /* best-effort */
+    }
+    return created;
   },
 
   async listGaps(actor: SelfActor) {
@@ -126,7 +140,20 @@ export const meService = {
     if (!(await repo.positionInTenant(pool, body.positionId, tenantId))) {
       throw new NotFoundError("Position");
     }
-    return repo.insertCareerTarget(pool, actor.userId, tenantId, body);
+    const created = await repo.insertCareerTarget(pool, actor.userId, tenantId, body);
+    // 3.4 CAREER_TARGET_STATUS — confirm the target + track its status (best-effort).
+    try {
+      await emitNotification(pool, {
+        tenantId, userId: actor.userId, type: "CAREER_TARGET_STATUS",
+        subject: "Obiettivo di carriera registrato",
+        body: "Il tuo obiettivo di carriera è stato registrato (stato: richiesto).",
+        priority: "INFO", resourceType: "CAREER_TARGET", resourceId: body.positionId,
+        actionUrl: "/me/career", createdBy: actor.userId,
+      });
+    } catch {
+      /* best-effort */
+    }
+    return created;
   },
 
   async listInbox(actor: SelfActor, query: MeInboxQuery) {

@@ -32,6 +32,34 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
+import { emitNotification } from "../../lib/notifications/emit.js";
+
+/**
+ * 3.4 GAP_CLOSURE_DUE producer — notify the highest-gap subjects of an open
+ * skill gap after a recompute. Best-effort (a notification failure must never
+ * break the recompute) and dedupe-on (collapses to one UNREAD per user, so
+ * repeated recomputes don't flood the inbox). Capped at the top 50 by gap value.
+ */
+async function notifySkillGaps(toStore: repo.SubjectPositionScoreToStore[]): Promise<void> {
+  const top = [...toStore].sort((a, b) => b.value - a.value).slice(0, 50);
+  for (const t of top) {
+    try {
+      await emitNotification(pool, {
+        tenantId: t.tenantId,
+        userId: t.userId,
+        type: "GAP_CLOSURE_DUE",
+        subject: "Gap di competenze da colmare",
+        body: `È stato rilevato un gap di competenze per la tua posizione (priorità ${t.category}).`,
+        priority: "MEDIUM",
+        resourceType: "SKILL",
+        actionUrl: "/me/gaps",
+        dedupe: true,
+      });
+    } catch {
+      /* best-effort */
+    }
+  }
+}
 
 export interface ActorContext {
   userId: string;
@@ -398,6 +426,7 @@ export const insightsService = {
       };
     });
     const scored = await repo.upsertSkillGapScores(pool, toStore);
+    await notifySkillGaps(toStore); // 3.4 GAP_CLOSURE_DUE (best-effort, dedupe)
     return { accepted: true, scored, modelVersion: SKILL_GAP_MODEL_VERSION, computedAt };
   },
 };

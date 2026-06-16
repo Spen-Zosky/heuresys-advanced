@@ -15,7 +15,7 @@
 - [x] S-100X-A2 | WS-H | audit sicurezza & supply chain (auth, secrets, OWASP, SBOM, env-doc) | FINDINGS/WS-H.md | **DONE** (S988 — fan-out 5 sub-agent: 1 HIGH TRUST_PROXY [D-28 RISOLTO S988], MED rate-limit/skill-taxonomy/media-sniff; 6 QW-H tutti chiusi S989; SQL 100% param, Zod 415/415, pnpm audit 0)
 - [x] S-100X-A3 | WS-F | audit test & QA (unit-layer, parallelism, isolation, flakiness) | FINDINGS/WS-F.md + baseline durate suite | **DONE** (S990, 2026-06-15 — 19 finding: 3 HIGH no-full-E2E-in-CI / no-unit-layer / tunnel-coupling, 5 MED, 6 LOW, 5 INFO; 6 QW-F + 6 DOSSIER + 3 ASSET; baseline 134 file/~920 case/73-su-73 mod/0 mock/ratio 6.7:1; anchor x19a stale pre-MFA 86.53s)
 - [x] S-100X-A4 | WS-C | audit dati & persistenza (squash, backup/restore, indici, dead schema) | FINDINGS/WS-C.md | **DONE** (S993 — 0 CRITICAL / 3 HIGH: F-WS-C-1 243 FK no-index (56 tenant_id) · F-WS-C-4 auth-audit unbounded (46.3k refresh-token/9 utenti, 57k login-events, no pruning) · reconciles WS-G F-10 backup=SHIPPED not zero; QW-C1..C4. ASSET: 0 dead-schema, RD-08 perfetto, D-18 verificato chiuso, squash=DON'T)
-- [ ] S-100X-A5 | WS-B | audit backend/servizi (module-pattern cost, hot path, repo SQL) | FINDINGS/WS-B.md | TODO
+- [x] S-100X-A5 | WS-B | audit backend/servizi (module-pattern cost, hot path, repo SQL) | FINDINGS/WS-B.md | **DONE** (S993 — 1 CRIT B-1 broadcast N+1 [→QW-B1 FIXED] · 3 HIGH (4 list no-LIMIT, boilerplate 28k LOC, pagination caps incoerenti) · ASSET: 0 IDOR/tenant-break, 0 dead modules, 0 SQL-injection, single pool. QW-B1..B7)
 - [x] S-100X-A6 | WS-A | audit architettura (coupling, dead code, dep inutilizzate) | FINDINGS/WS-A.md | **DONE** (S993 — 0 CRIT/HIGH, 2 MED: agent-gateway fuori da build/lint/CI · pino mis-classed devDep+dead-deps; ASSET: 0 circular, 0 web→api-internal, drizzle removed. QW-A1..A4)
 - [x] S-100X-A7 | WS-D | audit frontend (RSC/streaming, bundle, data-fetching) | FINDINGS/WS-D.md | **DONE** (S993 — 2 HIGH: chart code-split incoerente (8 analytics eager-import EChartsCard) · app `(authenticated)` 65/66 client-side (DOSSIER); ASSET: live-data doctrine 100%, 0 mock. QW-D1/D2)
 - [x] S-100X-A8 | WS-E | audit design-system / UX-IX (token, a11y tail, euristiche, i18n) | FINDINGS/WS-E.md | **DONE** (S993 — 0 CRIT/HIGH, 3 MED: doppio token rosso `text-destructive`/`text-danger` · SystemHealthDashboard no-i18n+duplicato · i18n-gap; ASSET: a11y serious=0, 0 raw-hex, i18n parity 1216. QW-E1..E5. Contrary-evidence: `text-destructive` memo STALE — ora renderizza, verify-first contrast)
@@ -86,3 +86,16 @@
 - [ ] QW-K3 | WS-K | retention/archival off-disk dei 27 pre-op dump (3.7G) — MAI auto-delete | decisione Enzo (couples WS-C F-5 / WS-G F-2) | TODO (dossier)
 
 > **Dossier anti-drift (WS-I, decide Enzo)**: README/CLAUDE/INDEX vivono fuori dal flusso `handoff` → il fix one-shot ri-drifta (già successo con D-01). Opzioni: de-hardcode i counts (→SOT_STATE) · CI drift-check shell-test · generare le sezioni-conteggio dal `handoff`.
+
+## Quick-wins WS-B backend (da `FINDINGS/WS-B.md`, S993; CLASS-A)
+
+**DONE:**
+- [x] QW-B1 | WS-B | broadcast `POST /v1/notifications` set-based (no N+1) (F-WS-B-1 CRITICAL) | broadcast a ≤500 utenti = 3 query totali, notifications suite verde | **DONE-LIVE** (`emit.ts emitNotificationsBulk`: opt-out lookup + unnest INSERT; service.ts usa bulk; typecheck + notifications 13/13. NB schema già `.max(500)` — l'N+1 1000-1500q→3q era il difetto reale)
+
+**TODO (residuo, chiudibili da Claude su via libera):**
+- [ ] QW-B2 | WS-B | LIMIT+cap su insights flight-risk/readiness/skill-gap + engagement.listSurveys + org-unit-processes + content-blueprint-links (F-WS-B-2 HIGH) | ogni list ritorna pagina capped, suite verde | TODO
+- [ ] QW-B4 | WS-B | estrai shared `ActorContext`+`actor()`+`isPlatform()` (~150 dup, =QW-4) (F-WS-B-3) | typecheck+test(576) verdi, diff meccanico | TODO
+- [ ] QW-B5 | WS-B | `paginationSchema(max)` factory (caps 200/500/1000 incoerenti) | ~60 schemi la usano, test invariati | TODO
+- [ ] QW-B6 | WS-B | sposta `withTransaction` da auth/repository.ts a db/client.ts (=QW-4) | typecheck + auth/content/reference-sync verdi | TODO
+- [ ] QW-B3 | WS-B | de-N+1 teams my-team (batch members) | `/v1/me/team` 2 query, payload identico | TODO
+- [ ] QW-B7 | WS-B | doc-fix CLAUDE.md error-envelope (requestId = header `x-request-id`, non body) | doc-only (parte di QW-I2) | TODO

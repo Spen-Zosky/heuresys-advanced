@@ -5,7 +5,7 @@
  * emitter). I5: non-platform actors can only reach users in their own tenant.
  */
 import { pool } from "../../db/client.js";
-import { emitNotification } from "../../lib/notifications/emit.js";
+import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
 import type { RoleCode } from "../../config/constants.js";
 import type { BroadcastNotificationBody, BroadcastNotificationResponse } from "@heuresys/shared";
 
@@ -28,20 +28,21 @@ export const notificationsService = {
       ? res.rows
       : res.rows.filter((r) => r.tenant === actor.tenantId);
 
-    let emitted = 0;
-    for (const r of recipients) {
-      const id = await emitNotification(pool, {
-        tenantId: r.tenant,
-        userId: r.user_id,
+    // QW-B1 (WS-B F-WS-B-1): set-based bulk emit — opt-out lookup + one unnest
+    // INSERT, a fixed 3 queries total (recipients + opt-out + insert) regardless
+    // of the up-to-500 userIds, instead of the prior N×emitNotification N+1.
+    const emitted = await emitNotificationsBulk(
+      pool,
+      recipients.map((r) => ({ userId: r.user_id, tenantId: r.tenant })),
+      {
         type: "SYSTEM",
         subject: body.subject,
         body: body.body ?? null,
         priority: body.priority ?? "INFO",
         actionUrl: body.actionUrl ?? null,
         createdBy: actor.userId,
-      });
-      if (id) emitted++;
-    }
+      },
+    );
     return { requested: body.userIds.length, emitted };
   },
 };

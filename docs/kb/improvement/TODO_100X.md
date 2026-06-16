@@ -52,7 +52,7 @@
 ## Quick-wins 3.2 security ASVS (da `FINDINGS/3.2_ASVS_MAPPING.md`, S993; CLASS-A)
 
 - [x] QW-SEC2 | 3.2 | HSTS header al TLS edge nginx (V9.2/V14.4, net-new gap) | `curl -sI https://www.heuresys.com \| grep -i strict-transport` mostra l'header | **DONE-LIVE** (S993: `add_header Strict-Transport-Security "max-age=31536000" always` nel repo mirror + applicato live VM, nginx -t ok + reload; verificato su HEAD 307→/login e GET)
-- [ ] QW-SEC1 | 3.2 | verifica live VM `.env` TRUST_PROXY=1 + COOKIE_SECURE=true (lente D-26/D-28) | grep KEY via SSH + due client IP → req.ip distinti | TODO (D-28 già risolto S988 — solo re-verify evidence)
+- [x] QW-SEC1 | 3.2 | verifica live VM `.env` TRUST_PROXY=1 + COOKIE_SECURE=true (lente D-26/D-28) | grep KEY via SSH | **DONE** (S993 evidence: VM `.env` → `TRUST_PROXY=1` + `COOKIE_SECURE=true`; `SMTP_HOST` unset → EMAIL_OTP gated in PROD, coerente col workaround aspetto-1)
 - [ ] QW-SEC5 | 3.2 | log strutturato `security-audit` su authn-failure (V7.1.3/4) | vitest cattura failed-login/replay record, no plaintext | TODO (hot-path auth → cautela)
 - [ ] QW-SEC6 | 3.2 | AES-256-GCM encryption-at-rest TOTP secret (consuma MFA_ENCRYPTION_KEY inerte, D-30) | enroll→colonna ciphertext, decifra a codice valido | DEFERRED (L2, decisione sicurezza = autorità Enzo)
 - [x] ~~QW-SEC3/SEC4/SEC7~~ | 3.2 | skill-taxonomy authz / media magic-byte / matching rate-limit | — | **GIÀ FATTI S989** (QW-H H4/H2/H6; il subagent li ha ri-proposti da WS-H.md che li elencava come finding originali)

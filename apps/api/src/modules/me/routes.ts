@@ -20,6 +20,7 @@ import {
   MeCareerResponseSchema, MeCareerTargetSchema, CreateMeCareerTargetBodySchema,
   MeInboxResponseSchema, MeInboxNotificationSchema, MeInboxQuerySchema,
   PatchMeInboxBodySchema, NotificationIdParamSchema,
+  NotificationPreferencesResponseSchema, UpdateNotificationPreferenceBodySchema,
   MeKpisResponseSchema,
   MeCertificationsResponseSchema, MeCertificationSchema, CreateMeCertificationBodySchema,
   MeDocumentsResponseSchema,
@@ -138,6 +139,18 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, requirePermission("notification:mark_read:self")],
     schema: { params: NotificationIdParamSchema, body: PatchMeInboxBodySchema, response: { 200: MeInboxNotificationSchema } },
   }, async (req) => meService.patchInbox(selfActor(req), req.params.notificationId, req.body));
+
+  // 3.4 notification center — per-user delivery preferences (self). GET+PATCH both
+  // under notification:read:self (self preference management, no separate write perm).
+  app.get("/notification-preferences", {
+    preHandler: [requirePermission("notification:read:self")],
+    schema: { response: { 200: NotificationPreferencesResponseSchema } },
+  }, async (req) => meService.getNotificationPreferences(selfActor(req)));
+
+  app.patch("/notification-preferences", {
+    preHandler: [app.verifyCsrf, requirePermission("notification:read:self")],
+    schema: { body: UpdateNotificationPreferenceBodySchema, response: { 200: NotificationPreferencesResponseSchema } },
+  }, async (req) => meService.updateNotificationPreference(selfActor(req), req.body));
 
   app.get("/kpis", {
     preHandler: [requirePermission("kpi:read:self")],

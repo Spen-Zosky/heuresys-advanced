@@ -499,6 +499,44 @@ export async function listInbox(q: DbConnector, userId: string, query: MeInboxQu
   return { items: res.rows.map(toNotif), total: Number(tr.rows[0]?.total ?? 0) };
 }
 
+/* --- notification preferences (3.4) ----------------------------------- */
+
+export async function getNotificationPreferenceRows(
+  q: DbConnector,
+  userId: string,
+): Promise<{ type: string; in_app: boolean; email: boolean }[]> {
+  const res = await q.query<{ type: string; in_app: boolean; email: boolean }>(
+    `SELECT preference_notification_type AS type,
+            preference_in_app_enabled    AS in_app,
+            preference_email_enabled     AS email
+       FROM sys.sys_notification_preferences
+      WHERE preference_user_id = $1`,
+    [userId],
+  );
+  return res.rows;
+}
+
+/** Upsert one (user,type) preference; partial — a null channel keeps the existing value. */
+export async function upsertNotificationPreference(
+  q: DbConnector,
+  tenantId: string | null,
+  userId: string,
+  type: string,
+  inApp: boolean | null,
+  email: boolean | null,
+): Promise<void> {
+  await q.query(
+    `INSERT INTO sys.sys_notification_preferences (
+       preference_tenant_id, preference_user_id, preference_notification_type,
+       preference_in_app_enabled, preference_email_enabled
+     ) VALUES ($1, $2, $3, COALESCE($4, true), COALESCE($5, false))
+     ON CONFLICT (preference_user_id, preference_notification_type) DO UPDATE SET
+       preference_in_app_enabled = COALESCE($4, sys.sys_notification_preferences.preference_in_app_enabled),
+       preference_email_enabled  = COALESCE($5, sys.sys_notification_preferences.preference_email_enabled)`,
+    [tenantId, userId, type, inApp, email],
+  );
+}
+
 export async function findInboxNotification(q: DbConnector, userId: string, notificationId: string) {
   const res = await q.query<NotificationRow>(
     `SELECT notification_id, notification_type, notification_subject, notification_body,

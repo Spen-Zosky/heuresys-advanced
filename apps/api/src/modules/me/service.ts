@@ -12,7 +12,9 @@ import type {
   CreateMeCertificationBody,
   MeInterfacesResponse,
   UserPreference, UpdateUserPreferenceBody,
+  NotificationPreferencesResponse, UpdateNotificationPreferenceBody,
 } from "@heuresys/shared";
+import { NotificationTypeSchema } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import * as authRepo from "../auth/repository.js";
 import type { ListActiveSessionsResponse, RevokeOtherSessionsResponse } from "@heuresys/shared";
@@ -137,6 +139,38 @@ export const meService = {
     const updated = await repo.patchInboxNotification(pool, actor.userId, notificationId, body);
     if (!updated) throw new NotFoundError("Notification");
     return updated;
+  },
+
+  /** 3.4 — all six notification types with their effective per-user state
+   *  (default-on in-app, default-off email when no row exists). */
+  async getNotificationPreferences(actor: SelfActor): Promise<NotificationPreferencesResponse> {
+    const rows = await repo.getNotificationPreferenceRows(pool, actor.userId);
+    const byType = new Map(rows.map((r) => [r.type, r]));
+    const items = NotificationTypeSchema.options.map((notificationType) => {
+      const r = byType.get(notificationType);
+      return {
+        notificationType,
+        inAppEnabled: r ? r.in_app : true,
+        emailEnabled: r ? r.email : false,
+      };
+    });
+    return { items, total: items.length };
+  },
+
+  /** 3.4 — upsert one type's channels (partial), return the full refreshed list. */
+  async updateNotificationPreference(
+    actor: SelfActor,
+    body: UpdateNotificationPreferenceBody,
+  ): Promise<NotificationPreferencesResponse> {
+    await repo.upsertNotificationPreference(
+      pool,
+      actor.tenantId,
+      actor.userId,
+      body.notificationType,
+      body.inAppEnabled ?? null,
+      body.emailEnabled ?? null,
+    );
+    return this.getNotificationPreferences(actor);
   },
 
   async listKpis(actor: SelfActor) {

@@ -95,5 +95,17 @@ export default tseslint.config(
     rules: {
       "i18next/no-literal-string": "error",
     },
+  },
+
+  // Node-runtime dev script (D-36 E2E wrapper): plain .mjs run directly by `node`,
+  // not browser/Next code — give it Node globals so process/fetch/Buffer/console
+  // don't trip no-undef. Scoped to this file (the other apps/web/scripts/*.mjs
+  // declare their own `/* global */` incl. `document`, so a broad .mjs block would
+  // collide with them via no-redeclare).
+  {
+    files: ["apps/web/scripts/e2e-node22.mjs"],
+    languageOptions: {
+      globals: { ...globals.node },
+    },
   }
 );

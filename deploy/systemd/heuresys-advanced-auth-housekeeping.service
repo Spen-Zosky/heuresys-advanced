@@ -1,0 +1,22 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh / vm-deploy.sh.
+# Do NOT install this file directly; run the bootstrap/deploy script instead.
+#
+# QW-C2 (WS-C F-WS-C-4): scheduled prune of the unbounded auth-audit tables. A
+# ONE-SHOT that runs scripts/auth-housekeeping.sh (delete revoked/expired
+# refresh-tokens + login-events past retention). Activated by the .timer.
+[Unit]
+Description=Heuresys Advanced — auth-audit housekeeping (QW-C2 refresh-token/login-event prune)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@
+# psql (PostgreSQL 16 native) lives in /usr/bin; no Node needed for this one-shot.
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/auth-housekeeping.sh
+TimeoutStartSec=300

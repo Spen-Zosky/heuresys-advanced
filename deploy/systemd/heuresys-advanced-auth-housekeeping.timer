@@ -1,0 +1,18 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh / vm-deploy.sh.
+#
+# QW-C2: a DAILY auth-audit prune at 02:00 local — AFTER the backup (01:30, so the dump
+# captures the pre-prune state) and BEFORE the insights recompute (02:15) / digest (02:45)
+# so the four nightly one-shots never overlap. Each run is a couple of bounded DELETEs.
+[Unit]
+Description=Heuresys Advanced — daily auth-audit housekeeping (QW-C2)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+RandomizedDelaySec=120
+# Run a missed occurrence after downtime (the free-tier VM is not always up at 02:00).
+Persistent=true
+Unit=heuresys-advanced-auth-housekeeping.service
+
+[Install]
+WantedBy=timers.target

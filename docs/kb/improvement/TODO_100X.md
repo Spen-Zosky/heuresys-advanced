@@ -56,3 +56,10 @@
 - [ ] QW-SEC5 | 3.2 | log strutturato `security-audit` su authn-failure (V7.1.3/4) | vitest cattura failed-login/replay record, no plaintext | TODO (hot-path auth → cautela)
 - [ ] QW-SEC6 | 3.2 | AES-256-GCM encryption-at-rest TOTP secret (consuma MFA_ENCRYPTION_KEY inerte, D-30) | enroll→colonna ciphertext, decifra a codice valido | DEFERRED (L2, decisione sicurezza = autorità Enzo)
 - [x] ~~QW-SEC3/SEC4/SEC7~~ | 3.2 | skill-taxonomy authz / media magic-byte / matching rate-limit | — | **GIÀ FATTI S989** (QW-H H4/H2/H6; il subagent li ha ri-proposti da WS-H.md che li elencava come finding originali)
+
+## Quick-wins WS-C dati & persistenza (da `FINDINGS/WS-C.md`, S993; CLASS-A)
+
+- [x] QW-C1 | WS-C | indici additivi `*_tenant_idx` sulle 6 tabelle >5MB con tenant-FK senza indice (F-WS-C-1) | EXPLAIN list-by-tenant → Index Scan post-fix | **DONE-LIVE** (S993, mig `000130`: 6 indici creati live; EXPLAIN `sys_auth_refresh_tokens` → Bitmap Index Scan su `sys_auth_refresh_tokens_tenant_idx`; `sys_source_lineage_records` resta seq-scan = tenant unico, indice disponibile per multi-tenant)
+- [x] QW-C2 | WS-C | pruning auth-audit (refresh-token revoked/expired + login-event retention) (F-WS-C-4) | count crolla + suite auth verde | **DONE-LIVE** (S993: mig `000129` one-time `46.348→37.028` (−9.320 revoked+expired, 0 prunable residui) + job ricorrente `scripts/auth-housekeeping.sh` + systemd timer daily 02:00 (wired vm-bootstrap); SAFE — solo revoked/scaduti, mai sessioni vive; i 37k attivi scadono e li raccoglie il job; auth+refresh+sessions 29/29 verde)
+- [ ] QW-C3 | WS-C | timer systemd settimanale per `dr-drill.sh` con alert RPO/row-count (F-WS-C-5) | run timer → `[dr-drill] PASS` + drift→exit!=0 | TODO
+- [ ] QW-C4 | WS-C | drop `sys_source_lineage_records_natural_key_idx` (10MB, idx_scan=0) verify-first (F-WS-C-2) | grep `ON CONFLICT natural_key`=0 + ingestion ok post-drop | TODO (verify-first)

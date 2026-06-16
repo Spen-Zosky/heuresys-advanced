@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:e2e": "playwright test",
+    "test:e2e:node22": "node scripts/e2e-node22.mjs test",
     "test:e2e:prod": "next build && playwright test --config=playwright.prod.config.ts",
+    "test:e2e:prod:node22": "next build && node scripts/e2e-node22.mjs test --config=playwright.prod.config.ts",
     "i18n:check": "tsx scripts/check-i18n-parity.ts"
   },
   "dependencies": {

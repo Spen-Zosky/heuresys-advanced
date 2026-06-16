@@ -18,10 +18,19 @@ import {
   OrgNetworkAnalyticsResponseSchema,
   OvertimeAnalyticsResponseSchema,
   SkillsGroupShareAnalyticsResponseSchema,
+  AnalyticsExportParamsSchema,
+  AnalyticsExportQuerySchema,
 } from "@heuresys/shared";
 import { analyticsService, type ActorContext } from "./service.js";
+import { toCsv } from "./csv.js";
 import { requirePermission } from "../../middleware/rbac.js";
 import { UnauthorizedError } from "../../errors/index.js";
+
+/** Date stamp (YYYY-MM-DD) for the download filename, taken from the payload's generatedAt. */
+function stampFrom(payload: Record<string, unknown>): string {
+  const g = payload.generatedAt;
+  return typeof g === "string" ? g.slice(0, 10) : new Date().toISOString().slice(0, 10);
+}
 
 function actor(req: FastifyRequest): ActorContext {
   if (!req.user) throw new UnauthorizedError("Authentication required");
@@ -108,5 +117,33 @@ export const analyticsRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: { response: { 200: SkillsGroupShareAnalyticsResponseSchema } },
     },
     async (req) => analyticsService.skillsGroupShare(actor(req)),
+  );
+
+  // Export any of the 9 views as a downloadable CSV (default) or JSON file.
+  // Raw response (no 200 response-schema) so Fastify ships text/csv|application/json
+  // verbatim instead of JSON-serialising. Same analytics:view gate + scope as the views.
+  app.get(
+    "/:view/export",
+    {
+      preHandler: [requirePermission("analytics:view")],
+      schema: {
+        params: AnalyticsExportParamsSchema,
+        querystring: AnalyticsExportQuerySchema,
+      },
+    },
+    async (req, reply) => {
+      const { view } = req.params;
+      const { format } = req.query;
+      const payload = await analyticsService.exportView(actor(req), view);
+      const stamp = stampFrom(payload);
+      const filename = `analytics-${view}-${stamp}.${format}`;
+      reply.header("content-disposition", `attachment; filename="${filename}"`);
+      if (format === "json") {
+        reply.type("application/json; charset=utf-8");
+        return JSON.stringify(payload, null, 2);
+      }
+      reply.type("text/csv; charset=utf-8");
+      return toCsv(payload);
+    },
   );
 };

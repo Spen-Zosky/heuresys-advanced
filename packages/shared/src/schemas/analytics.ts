@@ -346,3 +346,33 @@ export const SkillsGroupShareAnalyticsResponseSchema = z.object({
 export type SkillsGroupShareAnalyticsResponse = z.infer<
   typeof SkillsGroupShareAnalyticsResponseSchema
 >;
+
+// --- Export (CSV / JSON download of any analytics view) ---
+// The export endpoint is format-agnostic over the 9 views above: it re-runs the
+// view aggregator and serialises the result. The slug list MUST mirror the route
+// segments registered in apps/api/src/modules/analytics/routes.ts.
+export const AnalyticsViewSlugSchema = z.enum([
+  "workforce",
+  "kpi",
+  "attendance",
+  "compensation",
+  "skills",
+  "skills-by-category",
+  "org-network",
+  "overtime",
+  "skills-group-share",
+]);
+export type AnalyticsViewSlug = z.infer<typeof AnalyticsViewSlugSchema>;
+
+export const AnalyticsExportFormatSchema = z.enum(["csv", "json"]);
+export type AnalyticsExportFormat = z.infer<typeof AnalyticsExportFormatSchema>;
+
+export const AnalyticsExportParamsSchema = z.object({
+  view: AnalyticsViewSlugSchema,
+});
+export type AnalyticsExportParams = z.infer<typeof AnalyticsExportParamsSchema>;
+
+export const AnalyticsExportQuerySchema = z.object({
+  format: AnalyticsExportFormatSchema.default("csv"),
+});
+export type AnalyticsExportQuery = z.infer<typeof AnalyticsExportQuerySchema>;

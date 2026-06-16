@@ -21,6 +21,7 @@ import type {
   OvertimeStatus,
   OvertimeType,
   SkillsGroupShareAnalyticsResponse,
+  AnalyticsViewSlug,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
@@ -250,5 +251,34 @@ export const analyticsService = {
       distinctGroups: g.distinctGroups,
       generatedAt: new Date().toISOString(),
     };
+  },
+
+  /**
+   * Export dispatcher — re-runs one of the 9 view aggregators by its route slug.
+   * Returns the same scope-filtered payload the view endpoint returns; the route
+   * layer serialises it to CSV or JSON. Slugs mirror AnalyticsViewSlugSchema and
+   * the route segments in routes.ts.
+   */
+  async exportView(a: ActorContext, view: AnalyticsViewSlug): Promise<Record<string, unknown>> {
+    switch (view) {
+      case "workforce":
+        return this.workforce(a);
+      case "kpi":
+        return this.kpi(a);
+      case "attendance":
+        return this.attendance(a);
+      case "compensation":
+        return this.compensation(a);
+      case "skills":
+        return this.skills(a);
+      case "skills-by-category":
+        return this.skillsByCategory(a);
+      case "org-network":
+        return this.orgNetwork(a);
+      case "overtime":
+        return this.overtime(a);
+      case "skills-group-share":
+        return this.skillsGroupShare(a);
+    }
   },
 };

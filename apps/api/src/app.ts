@@ -96,6 +96,7 @@ import { meRoutes } from "./modules/me/routes.js";
 import { compensationRoutes } from "./modules/compensation/routes.js";
 import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { analyticsRoutes } from "./modules/analytics/routes.js";
+import { addExportHook } from "./lib/export/hook.js";
 import { observabilityRoutes } from "./modules/observability/routes.js";
 import { mentorshipRoutes } from "./modules/mentorship/routes.js";
 import { surveysRoutes } from "./modules/surveys/routes.js";
@@ -224,6 +225,11 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       /* metrics must never break the response */
     }
   });
+
+  // 2c. Reporting/export (3.5) — global onSend hook: `?format=csv|xlsx|pdf` on any
+  //     {items,total} list endpoint downloads it as a file. Runs after the handler,
+  //     so RBAC/scope/filters already applied. No-op without ?format. (§3.2-independent)
+  addExportHook(app);
 
   // 3. Security headers
   await app.register(helmet, {

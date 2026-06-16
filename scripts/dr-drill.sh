@@ -56,7 +56,12 @@ broken=0
 for tbl in sys.sys_users sys.sys_positions sys.sys_attendance sys.sys_auth_credentials; do
   s="$(sudo -u postgres psql -d "$SCRATCH" -tAc "SELECT count(*) FROM $tbl" 2>/dev/null || echo '?')"
   p="$(sudo -u postgres psql -d "$DB_NAME" -tAc "SELECT count(*) FROM $tbl" 2>/dev/null || echo '?')"
-  st="$([ "$s" = "$p" ] && echo OK || { ok=0; echo DIFF; })"
+  # NB: assign ok=0 OUTSIDE a $()-subshell — the previous `st="$(… ok=0 …)"` set
+  # ok=0 only inside the command-substitution subshell, so the parent ok stayed 1
+  # and the drill printed PASS even on DIFF (pre-existing bug, found S993 by the
+  # strict-mode end-to-end run). The strict `broken`/`fail` flags were already
+  # outside the subshell, so STRICT FAIL was correct; this fixes the PASS/WARN line.
+  if [ "$s" = "$p" ]; then st=OK; else st=DIFF; ok=0; fi
   # A restore that didn't bring the table at all ('?' / empty-while-prod-has-rows)
   # is a HARD failure, distinct from a benign post-backup drift.
   if [ "$s" = "?" ] || { [ "$s" = "0" ] && [ "$p" != "0" ] && [ "$p" != "?" ]; }; then broken=1; fi

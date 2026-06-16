@@ -93,7 +93,7 @@
 - [x] QW-B1 | WS-B | broadcast `POST /v1/notifications` set-based (no N+1) (F-WS-B-1 CRITICAL) | broadcast a ≤500 utenti = 3 query totali, notifications suite verde | **DONE-LIVE** (`emit.ts emitNotificationsBulk`: opt-out lookup + unnest INSERT; service.ts usa bulk; typecheck + notifications 13/13. NB schema già `.max(500)` — l'N+1 1000-1500q→3q era il difetto reale)
 
 **TODO (residuo, chiudibili da Claude su via libera):**
-- [ ] QW-B2 | WS-B | LIMIT+cap su insights flight-risk/readiness/skill-gap + engagement.listSurveys + org-unit-processes + content-blueprint-links (F-WS-B-2 HIGH) | ogni list ritorna pagina capped, suite verde | TODO
+- [x] QW-B2 | WS-B | LIMIT+cap su insights flight-risk/readiness/skill-gap + engagement.listSurveys (F-WS-B-2 HIGH) | suite verde | **DONE** (S993: `LIMIT 5000` cap difensivo sulle 3 read insights + listSurveys — chiude il full-table illimitato; comportamento identico oggi, typecheck + insights/engagement/surveys 34/34. Paginazione esposta completa + org-unit-processes/content-blueprint-links = DOSSIER F-WS-B-6, autorità Enzo)
 - [ ] QW-B4 | WS-B | estrai shared `ActorContext`+`actor()`+`isPlatform()` (~150 dup, =QW-4) (F-WS-B-3) | typecheck+test(576) verdi, diff meccanico | TODO
 - [ ] QW-B5 | WS-B | `paginationSchema(max)` factory (caps 200/500/1000 incoerenti) | ~60 schemi la usano, test invariati | TODO
 - [ ] QW-B6 | WS-B | sposta `withTransaction` da auth/repository.ts a db/client.ts (=QW-4) | typecheck + auth/content/reference-sync verdi | TODO

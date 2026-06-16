@@ -278,7 +278,8 @@ export async function readFlightRiskScores(
   const res = await q.query(
     `${ACTIVE_SCORE_JOIN_SELECT}
       WHERE ${sc.sql}
-      ORDER BY fr.flight_risk_score_user_id, fr.flight_risk_score_computed_at DESC`,
+      ORDER BY fr.flight_risk_score_user_id, fr.flight_risk_score_computed_at DESC
+      LIMIT 5000`,
     sc.params,
   );
   return res.rows.map(mapStored);
@@ -565,7 +566,8 @@ export async function readReadinessScores(q: DbConnector, scope: ScopeFilter): P
        ON a.user_position_assignment_user_id = sr.succession_readiness_score_user_id
       AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'
      WHERE ${where}
-     ORDER BY sr.succession_readiness_score_user_id, sr.succession_readiness_score_position_id, sr.succession_readiness_score_computed_at DESC`,
+     ORDER BY sr.succession_readiness_score_user_id, sr.succession_readiness_score_position_id, sr.succession_readiness_score_computed_at DESC
+     LIMIT 5000`,
     params,
   );
   return res.rows.map(mapSubjectPosition);
@@ -602,7 +604,8 @@ export async function readSkillGapScores(q: DbConnector, scope: ScopeFilter): Pr
        ON a.user_position_assignment_user_id = sg.skill_gap_score_user_id
       AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'
      WHERE ${where}
-     ORDER BY sg.skill_gap_score_user_id, sg.skill_gap_score_computed_at DESC`,
+     ORDER BY sg.skill_gap_score_user_id, sg.skill_gap_score_computed_at DESC
+     LIMIT 5000`,
     params,
   );
   return res.rows.map(mapSubjectPosition);

@@ -25,7 +25,8 @@ export async function listSurveys(pool: Pool, tenantId: string | undefined): Pro
             (SELECT count(*) FROM sys.sys_survey_responses r WHERE r.survey_response_survey_id = s.survey_id) AS response_count
        FROM sys.sys_surveys s
       WHERE ($1::uuid IS NULL OR s.survey_tenant_id = $1)
-      ORDER BY s.survey_start_date DESC NULLS LAST, s.survey_title`,
+      ORDER BY s.survey_start_date DESC NULLS LAST, s.survey_title
+      LIMIT 5000`,
     [tenantId ?? null],
   );
   return res.rows.map((r) => ({

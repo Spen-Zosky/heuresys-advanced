@@ -16,12 +16,12 @@
 - [x] S-100X-A3 | WS-F | audit test & QA (unit-layer, parallelism, isolation, flakiness) | FINDINGS/WS-F.md + baseline durate suite | **DONE** (S990, 2026-06-15 — 19 finding: 3 HIGH no-full-E2E-in-CI / no-unit-layer / tunnel-coupling, 5 MED, 6 LOW, 5 INFO; 6 QW-F + 6 DOSSIER + 3 ASSET; baseline 134 file/~920 case/73-su-73 mod/0 mock/ratio 6.7:1; anchor x19a stale pre-MFA 86.53s)
 - [x] S-100X-A4 | WS-C | audit dati & persistenza (squash, backup/restore, indici, dead schema) | FINDINGS/WS-C.md | **DONE** (S993 — 0 CRITICAL / 3 HIGH: F-WS-C-1 243 FK no-index (56 tenant_id) · F-WS-C-4 auth-audit unbounded (46.3k refresh-token/9 utenti, 57k login-events, no pruning) · reconciles WS-G F-10 backup=SHIPPED not zero; QW-C1..C4. ASSET: 0 dead-schema, RD-08 perfetto, D-18 verificato chiuso, squash=DON'T)
 - [ ] S-100X-A5 | WS-B | audit backend/servizi (module-pattern cost, hot path, repo SQL) | FINDINGS/WS-B.md | TODO
-- [ ] S-100X-A6 | WS-A | audit architettura (coupling, dead code, dep inutilizzate) | FINDINGS/WS-A.md | TODO
-- [ ] S-100X-A7 | WS-D | audit frontend (RSC/streaming, bundle, data-fetching) | FINDINGS/WS-D.md + bundle baseline | TODO
-- [ ] S-100X-A8 | WS-E | audit design-system / UX-IX (token, a11y tail, euristiche, i18n) | FINDINGS/WS-E.md | TODO
-- [ ] S-100X-A9 | WS-J | audit config & env (env contract, script, multi-host) | FINDINGS/WS-J.md | TODO
-- [ ] S-100X-A10 | WS-K | audit repo hygiene & footprint (cleanup, retention, LFS) | FINDINGS/WS-K.md + misura prima/dopo | TODO
-- [ ] S-100X-A11 | WS-I | audit documentazione (drift, duplicazioni, index) | FINDINGS/WS-I.md | TODO
+- [x] S-100X-A6 | WS-A | audit architettura (coupling, dead code, dep inutilizzate) | FINDINGS/WS-A.md | **DONE** (S993 — 0 CRIT/HIGH, 2 MED: agent-gateway fuori da build/lint/CI · pino mis-classed devDep+dead-deps; ASSET: 0 circular, 0 web→api-internal, drizzle removed. QW-A1..A4)
+- [x] S-100X-A7 | WS-D | audit frontend (RSC/streaming, bundle, data-fetching) | FINDINGS/WS-D.md | **DONE** (S993 — 2 HIGH: chart code-split incoerente (8 analytics eager-import EChartsCard) · app `(authenticated)` 65/66 client-side (DOSSIER); ASSET: live-data doctrine 100%, 0 mock. QW-D1/D2)
+- [x] S-100X-A8 | WS-E | audit design-system / UX-IX (token, a11y tail, euristiche, i18n) | FINDINGS/WS-E.md | **DONE** (S993 — 0 CRIT/HIGH, 3 MED: doppio token rosso `text-destructive`/`text-danger` · SystemHealthDashboard no-i18n+duplicato · i18n-gap; ASSET: a11y serious=0, 0 raw-hex, i18n parity 1216. QW-E1..E5. Contrary-evidence: `text-destructive` memo STALE — ora renderizza, verify-first contrast)
+- [x] S-100X-A9 | WS-J | audit config & env (env contract, script, multi-host) | FINDINGS/WS-J.md | **DONE** (S993 — 0 CRIT/HIGH, 3 MED: z.coerce.boolean footgun su MATCHING_FREETEXT/API_DOCS [→QW-J1 FIXED] · denylist parziale [→QW-J2 FIXED] · TRUST_PROXY manual-only; QW-3/G3 env-contract confermato chiuso, secret-hygiene pulita)
+- [x] S-100X-A10 | WS-K | audit repo hygiene & footprint (cleanup, retention, LFS) | FINDINGS/WS-K.md + misura prima/dopo | **DONE** (S993 — 1 HIGH: apps/web/.next 29G (28G dev-cache, +1.7G/g), no clean script [→QW-2 FIXED]; MED pre-op dumps 3.7G no-retention; ~32G recuperabili; ASSET: 0 tracked generated, 0 LFS, .git 28M sano)
+- [x] S-100X-A11 | WS-I | audit documentazione (drift, duplicazioni, index) | FINDINGS/WS-I.md | **DONE** (S993 — 3 HIGH drift: README ~12 numeri stale · CLAUDE.md 4 sezioni (60mod→75, 55mig→130, 586map→600) · INDEX_PATHS stale (13+ moduli mancanti); ASSET: disjunction SoT v2 rispettata 0-dup. QW-I1..I4 + dossier anti-drift)
 - [ ] S-100X-A-L | WS-L | ecosistema Claude design-only (claude-ecosystem-optimizer) + bug claude-mem hook | WS-L_PLAN.md + WS-L_TODO.md | TODO
 
 ## Fase C — Consolidamento (dossier finali → decide Enzo)
@@ -36,7 +36,7 @@
 ## Quick-wins misurati (CLASS-A; esecuzione gated dal go di Enzo)
 
 - [x] QW-1 | WS-A | rimuovi drizzle-orm + drizzle-kit (dead dep, 0 importatori del `db` export) | typecheck+test verdi, dep assenti | **DONE** (S989; verificato S993: 0 ref `drizzle` in qualsiasi package.json)
-- [ ] QW-2 | WS-K | `clean` script + retention `.next`/pg_dump_snapshots (−~31G) | script idempotente + doc | TODO
+- [x] QW-2 | WS-K | `clean` script + retention `.next`/pg_dump_snapshots (−~31G) | script idempotente + doc | **DONE** (S993: `scripts/clean.sh` + `pnpm clean`/`clean:dumps`(dry-run, mai auto-delete restore-point)/`clean:deep`; ~32G regenerable. = QW-K1)
 - [x] QW-3 | WS-J | 8 env var non documentate → `.env.example` (meglio auto-gen dal zod env.ts) | `.env.example` completo / generator | **DONE** (S993: diff env.ts↔.env.example → 7 var mancanti aggiunte — MFA_ENROLL_CONFIRM, WEBAUTHN_RP_ID/NAME/ORIGINS, SMS_PROVIDER/FROM, MEDIA_STORAGE_DIR; chiude anche QW-G3)
 - [ ] QW-4 | WS-B | estrai `withTransaction` + helper query da auth → `src/db/` | 67 moduli possono riusarlo, test verdi | TODO
 - [x] QW-5 | WS-I | fix `apps/api/package.json` description stale (58/272 → 72/407) | descrizione allineata | **DONE** (S993: → "75 business modules + auth, ~407 /v1 endpoints; v1.0.0 GA + post-v1 ondata-1")
@@ -63,3 +63,26 @@
 - [x] QW-C2 | WS-C | pruning auth-audit (refresh-token revoked/expired + login-event retention) (F-WS-C-4) | count crolla + suite auth verde | **DONE-LIVE** (S993: mig `000129` one-time `46.348→37.028` (−9.320 revoked+expired, 0 prunable residui) + job ricorrente `scripts/auth-housekeeping.sh` + systemd timer daily 02:00 (wired vm-bootstrap); SAFE — solo revoked/scaduti, mai sessioni vive; i 37k attivi scadono e li raccoglie il job; auth+refresh+sessions 29/29 verde)
 - [x] QW-C3 | WS-C | timer systemd settimanale per `dr-drill.sh` con alert RPO/row-count (F-WS-C-5) | run timer → `[dr-drill] PASS` + drift→exit!=0 | **DONE** (S993: `dr-drill.sh` strict-mode `DR_DRILL_STRICT=1` — exit!=0 SOLO su DR reale (no-backup / RPO>48h / restore rotto), il drift row-count fisiologico resta WARN; `heuresys-advanced-dr-drill.{service,timer}` Sun 04:00 + wiring vm-bootstrap. bash -n OK; test live end-to-end al deploy)
 - [x] QW-C4 | WS-C | drop `sys_source_lineage_records_natural_key_idx` (10MB, idx_scan=0) verify-first (F-WS-C-2) | grep `ON CONFLICT natural_key`=0 + ingestion ok post-drop | **DONE-LIVE** (S993, mig `000131`: verified non-unique/no-constraint/0-scan/no-ON-CONFLICT → dropped live; `sys_source_lineage_records` 70MB→60MB. Reversible via 000025 def.)
+
+## Quick-wins A6–A11 (S993; CLASS-A)
+
+**DONE:**
+- [x] QW-J1 | WS-J | enum-parse i 2 flag footgun (MATCHING_FREETEXT_ENABLED + API_DOCS_ENABLED) — `=false` non li accende più | typecheck api + shell-tests 45/0 | **DONE** (env.ts, fail-open chiuso)
+- [x] QW-J2 | WS-J | denylist env-key-merge estesa ai 4 gate-flag (no propagazione dev→PROD) | shell-tests 45/0 | **DONE**
+
+**TODO (residuo, chiudibili da Claude su via libera):**
+- [ ] QW-A1 | WS-A | drop 3 dead deps (@tanstack/react-query-devtools, supertest, @types/supertest) + pino dev→deps | typecheck+api test(inject)+boot | TODO (richiede clean install)
+- [ ] QW-A2 | WS-A | `build`+`lint` script ad apps/agent-gateway (oggi fuori da CI) | pnpm build/lint coprono il workspace | TODO
+- [ ] QW-A4 | WS-A | fix menzione stale "supertest" in CLAUDE.md (harness reale = inject) | doc-only | TODO (parte di QW-I2)
+- [ ] QW-D1 | WS-D | instrada 8 analytics + MermaidDiagram via `_charts-client` (next/dynamic) | next build + E2E + bundle echarts fuori chunk iniziale | TODO
+- [ ] QW-D2 | WS-D | `experimental.optimizePackageImports` (lucide-react, @heuresys/ui) verify-first | build verde + bundle ridotto | TODO
+- [ ] QW-E1 | WS-E | normalizza 9 prod `text-destructive`→`text-danger` + fix memo stale | axe serious=0 + i18n:check | TODO (verify-first contrast)
+- [ ] QW-E2..E5 | WS-E | i18n SystemHealthDashboard + EmptyStates · isError branch ~5 pagine · de-dup primitive (→@heuresys/ui DOSSIER) | i18n:check + E2E | TODO
+- [ ] QW-I1 | WS-I | rewrite README headline/stack/layout (12 numeri stale) | numeri = live | TODO
+- [ ] QW-I2 | WS-I | fix 4 punti CLAUDE.md drift (60→75 mod, 55→130 mig, 586→600 map, endpoint/test line) | numeri = live | TODO
+- [ ] QW-I3 | WS-I | rigenera INDEX_PATHS via build_index.py | paths/moduli live | TODO
+- [ ] QW-I4 | WS-I | fix FINDINGS/README register (WS-A/D/E/J/K/I = DONE) | register allineato | TODO
+- [ ] QW-J3 | WS-J | assert `TRUST_PROXY=1` in vm-bootstrap/provision-linux-pc (governance; runtime già ok D-28) | grep post-bootstrap non-false | TODO
+- [ ] QW-K3 | WS-K | retention/archival off-disk dei 27 pre-op dump (3.7G) — MAI auto-delete | decisione Enzo (couples WS-C F-5 / WS-G F-2) | TODO (dossier)
+
+> **Dossier anti-drift (WS-I, decide Enzo)**: README/CLAUDE/INDEX vivono fuori dal flusso `handoff` → il fix one-shot ri-drifta (già successo con D-01). Opzioni: de-hardcode i counts (→SOT_STATE) · CI drift-check shell-test · generare le sezioni-conteggio dal `handoff`.

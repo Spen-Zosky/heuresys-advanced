@@ -3,6 +3,22 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🟢 Aggiornamento S993 (2026-06-16) — workaround mail/MFA senza SMTP + agente MAX stabilizzato + 100X A4/WS-C + 3.2 ASVS + QW live
+
+Batch decision-authority session-scoped (Enzo: "risolvi i 2 aspetti, poi procedi con tutti i punti, chiudi tutto il possibile"). 6 commit `59ecb75`..`eabae4a` pushati + deploy. Dettaglio granulare → `SOT_STATE.md §Delta S993`.
+
+**DONE-LIVE:**
+- **Aspetto-1 mail/MFA senza provider SMTP** — EMAIL_OTP gated su `mailer.productionCapable` (anti-lockout, mirror SMS_OTP) → **MFA opera su TOTP+WebAuthn senza email**; 3.4 digest = **dormiente-opzionale** (NON più `blocked-on-Enzo: SMTP creds`); ricette gratuite Outlook/Gmail in `.env.example`. Unit 5/5 + MFA integration 22/22.
+- **Aspetto-2 agente #9 su abbonamento MAX** — STABILIZZATO/CHIUSO (memoria `project_agent9_subscription_max` + `.env.example AGENT_GATEWAY_SUBSCRIPTION_AUTH=1`). **NON più gated/decisione-PM/blocked-on-API-key.** (API key/Bedrock/Vertex solo per eventuale serving customer-facing futuro = nuovo scope.)
+- **100X A4 / WS-C** audit DONE (`FINDINGS/WS-C.md`, 0 CRIT/3 HIGH) + **3.2 ASVS** mapping (`FINDINGS/3.2_ASVS_MAPPING.md`).
+- **QW CLASS-A chiusi**: QW-1(drizzle verify)/QW-3+G3(env-doc)/QW-5(package.json) · **QW-SEC2 HSTS** live · QW-SEC1 verify · **QW-C1** 6 indici tenant-FK (mig 000130) · **QW-C2** auth-audit prune (mig 000129, 46.348→37k + job ricorrente daily 02:00) · **QW-C4** drop dead idx (mig 000131, −10MB).
+
+**RESIDUO OPEN (decisione prodotto Enzo / multi-sessione — NON inventato):**
+- **P3 ondata-1 → 3.3 BPM** (3.2 security audit-side coperto: A4/WS-C + 3.2 ASVS + HSTS; resta eventuale feature security-dashboard) · **3.5/Fasi 4-8** = autorità "cosa" Enzo (`design→spec→ok`).
+- **#6 m2b Surveys normalized** · **#7 RACI mapping** OU↔processi (fatto business) · **#8 B-50 reconciliation** — decisione prodotto/dati Enzo, multi-sessione.
+- **Audit 100X A5–A11** (5 wave forensi) + **QW residui CLASS-A**: **QW-C3** (dr-drill timer settimanale), **QW-SEC5** (security-audit log authn-failure), **QW-SEC6** (AES-at-rest TOTP, L2), **B-30** (2° runner CI = riduce SPOF), **QW-2** (clean −31G), **QW-G2** (SHA-pin Actions) — chiudibili da Claude su via libera.
+- **Email reale** = dormiente per scelta Enzo; riattivabile con una app-password Outlook/Gmail (transport già pronto).
+
 ## 🟢 Aggiornamento S992 (2026-06-16) — batch 1-4 + P3 ondata-1: 3.5 reporting/export + 3.4 notification center
 
 Sessione lunga delegata per fasi, ogni fase chiusa con gate+push+deploy+CI. HEAD `93e5791` (pushato).

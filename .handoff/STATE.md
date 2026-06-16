@@ -1,29 +1,29 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-16 (S993 — workaround mail/MFA senza SMTP + agente MAX stabilizzato + 100X A4/WS-C + 3.2 ASVS + QW live).
+**Updated**: 2026-06-16 (S993 — workaround mail/MFA + agente MAX + **programma 100X FASE A COMPLETA (A1–A11)** + ~10 QW live).
 
 > **Vista rapida** (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura, delta per-sessione) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui.
 
-## Last session brief (S993 — batch post-menu, decision-authority session-scoped)
+## Last session brief (S993 — batch + "via libera", decision-authority session-scoped)
 
-Due aspetti sbloccati + batch di QW chiusi live, poi push+deploy+handoff. **(1) Mail/MFA senza provider SMTP RISOLTO**: EMAIL_OTP ora gated su un transport reale (`mailer.productionCapable`, anti-lockout, come SMS_OTP) → MFA gira pulito su **TOTP + WebAuthn senza email**; le notifiche restano in-app (primario); il **digest 3.4 è dormiente-opzionale** (si accende da solo con SMTP), non più "blocked-on-Enzo"; ricette SMTP **gratuite** (Outlook/Gmail app-password) in `.env.example`. Email reale lasciata dormiente per **scelta di Enzo**. **(2) Agente #9 su abbonamento Claude MAX STABILIZZATO/CHIUSO** (memoria `project_agent9_subscription_max` + `.env.example` `AGENT_GATEWAY_SUBSCRIPTION_AUTH=1`) — niente API key, **non più da riportare come gated/decisione-PM**. **(3) 100X**: audit **A4/WS-C** (dati & persistenza, 0 CRIT/3 HIGH) + **3.2 ASVS mapping** prodotti; QW chiusi live — **HSTS** al TLS edge (verificato curl), **6 indici tenant-FK** (mig 000130), **pruning auth-audit** (mig 000129: 46.348→37k + job ricorrente daily 02:00) + drop indice dead (mig 000131, −10MB), + env-doc/package.json/QW-SEC1-verify. 6 commit pushati, align Mac/VM/linux-pc + deploy VM.
+Due aspetti sbloccati + audit forense completo + molti QW chiusi live. **(1) Mail/MFA senza SMTP RISOLTO** (EMAIL_OTP gated → MFA su TOTP+WebAuthn; digest 3.4 dormiente-opzionale; ricette gratuite). **(2) Agente #9 su MAX STABILIZZATO/CHIUSO** (no API key). **(3) Programma 100X — FASE A AUDIT COMPLETA (A1–A11)**: 7 nuovi audit forensi (WS-B/A/D/E/J/K/I) via fan-out read-only. Trovato + **fixato il CRITICAL B-1** (broadcast `POST /v1/notifications` N+1 → set-based, notifications 13/13). **QW chiusi live**: HSTS al TLS edge · 6 indici tenant-FK · pruning auth-audit (46k→37k + job daily) · drop dead idx · env footgun fail-open (`API_DOCS_ENABLED`) · clean script (`.next` 29G→0) · QW-1/3/5. Tutto pushato + align Mac/VM/linux-pc + deploy.
 
 ## Top priorities (next session)
 
-1. **P3 ondata-1 prosegue → 3.3 BPM** (3.2 security audit-side coperto da A4/WS-C + 3.2 ASVS + HSTS; resta l'eventuale feature security-dashboard se la vuoi). 3.3/3.5 e le Fasi 4-8 = decisione di prodotto tua (`design→spec→ok`). Memoria `project_post_v1_program_s987`.
-2. **Audit 100X A5–A11** (5 wave forensi read-only, multi-sessione) + **QW residui CLASS-A**: QW-C3 (dr-drill timer settimanale), QW-SEC5 (security-audit log authn-failure), B-30 (2° runner CI = riduce SPOF), QW-2 (clean script −31G), QW-G2 (SHA-pin Actions). Tutti chiudibili da me su tuo via libera.
-3. **Item prodotto/dati** (tuo "cosa" / multi-sessione, NON inventabili): #6 m2b Surveys normalized · #7 RACI mapping OU↔processi · #8 B-50 reconciliation · #5 BPM scope · QW-SEC6 AES-at-rest TOTP (L2).
+1. **Programma 100X — FASE C (dossier → decide Enzo per-finding)**: la fase A (audit A1–A11) è chiusa; i finding confluiscono nei dossier `DOSSIERS/` per la tua decisione go/defer/won't. Resta **S-100X-A-L** (ecosistema Claude, design-only) come unico audit non fatto.
+2. **QW residui CLASS-A (~17, chiudibili da Claude su via libera)** — i più di valore: **QW-B2** (LIMIT su 4 list endpoint, HIGH) · **QW-D1** (chart code-split, bundle) · **QW-B4/B6** (shared ActorContext/withTransaction, =QW-4) · **QW-I1/I2** (README/CLAUDE drift) · **QW-E1** (token rosso) · **QW-A2** (agent-gateway in CI). Lista completa + gate in `docs/kb/improvement/TODO_100X.md`.
+3. **Item prodotto/dati (tuo "cosa" / multi-sessione)**: #5 BPM 3.3 · #6 m2b Surveys · #7 RACI · #8 B-50 · #10 Fasi 4-8.
 
 ## Open questions
 
-- **3.3 BPM + 3.2 dashboard**: quale forma/scope vuoi? = tua autorità di prodotto.
-- **#7 RACI**: quale OU è R/A/C/I per quale processo (fatto di business, solo tu).
-- **SMTP**: resta dormiente per tua scelta; se vorrai l'email reale basta una app-password Outlook/Gmail (la wiro io).
+- **Dossier anti-drift (WS-I)**: README/CLAUDE/INDEX driftano perché fuori dal flusso `handoff` — vuoi de-hardcode counts / CI drift-check / generazione da handoff?
+- **QW-K3 archival dump** (3.7G off-disk) + **3.3 BPM / #7 RACI**: decisioni tue.
+- **SMTP**: resta dormiente per tua scelta (riattivabile con una app-password).
 
 ## Verification (next session)
 
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
 curl -sI https://www.heuresys.com | grep -i strict-transport   # HSTS live
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT count(*) FROM pg_indexes WHERE schemaname='sys' AND indexname LIKE '%_tenant_idx'"  # >=6
+ls docs/kb/improvement/FINDINGS/WS-*.md | wc -l   # 9 (WS-A..K, fase A completa)
 ```

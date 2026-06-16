@@ -2,7 +2,7 @@
   "name": "heuresys-advanced",
   "version": "1.0.0",
   "private": true,
-  "description": "Heuresys Advanced HRMS/BPM Platform v5 — monorepo (Fastify API + Next.js 15 admin/ESS + shared schemas + DB migrations)",
+  "description": "Heuresys Advanced HRMS/BPM Platform v5 — monorepo (Fastify API + Next.js 16 admin/ESS + agent-gateway + shared schemas + DB migrations)",
   "license": "UNLICENSED",
   "packageManager": "pnpm@9.15.0",
   "engines": {
@@ -15,6 +15,9 @@
     "test": "pnpm -r --filter=\"@heuresys/*\" run test",
     "lint": "pnpm -r --filter=\"@heuresys/*\" run lint",
     "typecheck": "pnpm -r --filter=\"@heuresys/*\" run typecheck",
+    "clean": "bash scripts/clean.sh",
+    "clean:dumps": "bash scripts/clean.sh --dumps-dry-run",
+    "clean:deep": "bash scripts/clean.sh --deep",
     "db:create": "pwsh -File db/scripts/create_local_database.ps1",
     "db:create:sh": "bash db/scripts/create_local_database.sh",
     "db:migrate": "pwsh -File db/scripts/migrate.ps1",

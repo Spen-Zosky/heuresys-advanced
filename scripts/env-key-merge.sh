@@ -27,10 +27,12 @@ export MSYS_NO_PATHCONV=1
 # .env value (cousin of the S979 marker-CRLF lesson).
 merge_env_into() {
   local target="$1" src="$2" added=0 line key
-  # Dev/test-only neutralization switches that must NEVER reach a remote: a local
-  # 'false' would silently disable a PROD security control (S989, MFA enforcement).
+  # Dev/test-only neutralization + gate switches that must NEVER reach a remote: a
+  # local value would silently flip a PROD control. MFA_ENFORCEMENT_ENABLED (S989);
+  # the 4 boolean gate flags added by QW-J2 (WS-J F-J-3) — all now enum-parsed, but a
+  # stray dev value must not propagate additively to a PROD host missing the key.
   # Space-padded for whole-word containment match.
-  local denylist=" MFA_ENFORCEMENT_ENABLED "
+  local denylist=" MFA_ENFORCEMENT_ENABLED MATCHING_FREETEXT_ENABLED API_DOCS_ENABLED COOKIE_SECURE TRUST_PROXY "
   while IFS= read -r line || [ -n "$line" ]; do
     line="${line%$'\r'}"
     case "$line" in ''|'#'*) continue ;; esac

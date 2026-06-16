@@ -111,7 +111,11 @@ const EnvSchema = z.object({
   // (the SAME seam the backfill uses) — this is the first-ever query-time external
   // dependency on the serving path, so it stays strictly behind this default-OFF flag
   // to keep the normal serving path Voyage-free. Requires VOYAGE_API_KEY when ON in prod.
-  MATCHING_FREETEXT_ENABLED: z.coerce.boolean().default(false),
+  // Parsed as an explicit 'true'/'false' string, NOT z.coerce.boolean — the latter
+  // turns the literal "false" into true (QW-J1 / WS-J F-J-2 footgun), so writing
+  // MATCHING_FREETEXT_ENABLED=false to DISABLE it would ENABLE it. Same fix already
+  // applied to COOKIE_SECURE / TRUST_PROXY / MFA_ENFORCEMENT_ENABLED.
+  MATCHING_FREETEXT_ENABLED: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
 
   // Transactional mailer (SMTP). All OPTIONAL: when SMTP_HOST + MAIL_FROM are
   // set, buildApp wires the real SmtpMailer (nodemailer); otherwise it falls
@@ -182,7 +186,10 @@ const EnvSchema = z.object({
   // (~407 /v1/* endpoints) must not be public on the production origin without a
   // deliberate decision. Enable in dev/staging (API_DOCS_ENABLED=true), or behind
   // an authenticated edge in prod. When OFF neither route is registered.
-  API_DOCS_ENABLED: z.coerce.boolean().default(false),
+  // Explicit 'true'/'false' string, NOT z.coerce.boolean (QW-J1 / WS-J F-J-2): with
+  // coerce, API_DOCS_ENABLED=false would EXPOSE the full ~407-endpoint Swagger on
+  // prod (Boolean("false")===true) — a fail-open. Mirrors the other gate flags.
+  API_DOCS_ENABLED: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
 });
 
 const parsed = EnvSchema.parse(process.env);

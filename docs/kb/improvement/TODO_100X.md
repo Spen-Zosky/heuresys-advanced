@@ -35,16 +35,16 @@
 
 ## Quick-wins misurati (CLASS-A; esecuzione gated dal go di Enzo)
 
-- [ ] QW-1 | WS-A | rimuovi drizzle-orm + drizzle-kit (dead dep, 0 importatori del `db` export) | typecheck+test verdi, dep assenti | TODO
+- [x] QW-1 | WS-A | rimuovi drizzle-orm + drizzle-kit (dead dep, 0 importatori del `db` export) | typecheck+test verdi, dep assenti | **DONE** (S989; verificato S993: 0 ref `drizzle` in qualsiasi package.json)
 - [ ] QW-2 | WS-K | `clean` script + retention `.next`/pg_dump_snapshots (−~31G) | script idempotente + doc | TODO
-- [ ] QW-3 | WS-J | 8 env var non documentate → `.env.example` (meglio auto-gen dal zod env.ts) | `.env.example` completo / generator | TODO
+- [x] QW-3 | WS-J | 8 env var non documentate → `.env.example` (meglio auto-gen dal zod env.ts) | `.env.example` completo / generator | **DONE** (S993: diff env.ts↔.env.example → 7 var mancanti aggiunte — MFA_ENROLL_CONFIRM, WEBAUTHN_RP_ID/NAME/ORIGINS, SMS_PROVIDER/FROM, MEDIA_STORAGE_DIR; chiude anche QW-G3)
 - [ ] QW-4 | WS-B | estrai `withTransaction` + helper query da auth → `src/db/` | 67 moduli possono riusarlo, test verdi | TODO
-- [ ] QW-5 | WS-I | fix `apps/api/package.json` description stale (58/272 → 72/407) | descrizione allineata | TODO
+- [x] QW-5 | WS-I | fix `apps/api/package.json` description stale (58/272 → 72/407) | descrizione allineata | **DONE** (S993: → "75 business modules + auth, ~407 /v1 endpoints; v1.0.0 GA + post-v1 ondata-1")
 
 ## Quick-wins WS-G (da S-100X-A1; CLASS-A; esecuzione gated dal go di Enzo)
 
 - [ ] QW-G1 | WS-G | caching CI dichiarato: `cache: pnpm` sui 6 setup-node self-hosted + `actions/cache` `apps/web/.next/cache` | cache esplicita + portabile (prereq 2° runner) | TODO
 - [ ] QW-G2 | WS-G | SHA-pin delle 13 GitHub Actions (esp. third-party peaceiris/actions-gh-pages) | `uses:` a SHA 40-char + `# vN`; Dependabot bump preservato | TODO
-- [ ] QW-G3 | WS-G | env-contract: 7+ var `env.ts` → `.env.example` + nota SoT (incl. POSTGRES_DB/POSTGRES_DATABASE dual-set) | `.env.example` completo (lega a QW-3/R09) | TODO
+- [x] QW-G3 | WS-G | env-contract: 7+ var `env.ts` → `.env.example` + nota SoT (incl. POSTGRES_DB/POSTGRES_DATABASE dual-set) | `.env.example` completo (lega a QW-3/R09) | **DONE** (S993, via QW-3 — diff completo env.ts↔.env.example chiuso)
 - [ ] QW-G4 | WS-G | `showcase.yml` drop checkout sister-repo + `npm install --legacy-peer-deps` (premessa `link:` stantia; reale npm `@heuresys/ui@^0.1.5`) | verify build registry-only → drop step + fix comment | TODO
 - [ ] QW-G5 | WS-G | cache `~/.cache/ms-playwright` + reuse build-web artifact in playwright-smoke (no rebuild) | smoke verde, browser/`.next` cache | TODO

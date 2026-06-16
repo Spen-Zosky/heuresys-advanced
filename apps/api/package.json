@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Heuresys Advanced — Fastify 5 API (58 modules, 272 endpoints, MVP-1 + ESS MVP-2b + MFA TOTP MVP-3 + brownfield-wave-executor state machine 8 stati)",
+  "description": "Heuresys Advanced — Fastify 5 API (75 business modules + auth, ~407 /v1 endpoints; v1.0.0 GA + post-v1 ondata-1: reporting/export, notification center, agent-gateway)",
   "main": "src/server.ts",
   "scripts": {
     "dev": "tsx watch src/server.ts",

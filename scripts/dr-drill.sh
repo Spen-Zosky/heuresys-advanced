@@ -45,7 +45,12 @@ sudo -u postgres dropdb --if-exists "$SCRATCH"
 sudo -u postgres createdb "$SCRATCH"
 t0=$(date +%s)
 # --no-owner/--no-acl: scratch restore need not reproduce grants; benign notices ignored.
-sudo -u postgres pg_restore --no-owner --no-acl -d "$SCRATCH" "$latest" >/dev/null 2>&1 || true
+# Feed the dump via STDIN (redirect opened by the invoking user) instead of passing
+# the path to `sudo -u postgres pg_restore <path>`: the backup lives under
+# /home/ubuntu (0750) which postgres cannot traverse, so an absolute-path arg fails
+# with "could not open input file: Permission denied" (found S993 by the QW-C3
+# strict drill). The redirect hands postgres an already-open fd → no traversal.
+sudo -u postgres pg_restore --no-owner --no-acl -d "$SCRATCH" < "$latest" >/dev/null 2>&1 || true
 t1=$(date +%s)
 printf '[dr-drill] RTO: restore completed in %ds\n' "$((t1-t0))"
 

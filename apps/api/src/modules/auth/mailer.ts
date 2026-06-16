@@ -14,6 +14,14 @@
 import type { FastifyBaseLogger } from "fastify";
 
 export interface IMailer {
+  /**
+   * True when this mailer can really deliver to a user's inbox (SmtpMailer with
+   * SMTP_HOST+MAIL_FROM configured / InMemoryMailer in tests). False for the dev
+   * ConsoleMailer, whose "emails" only land in server logs. Drives EMAIL_OTP
+   * enrollability: offering EMAIL_OTP without a real transport would lock real
+   * users out (codes they never receive) — mirrors ISmsSender.productionCapable.
+   */
+  readonly productionCapable: boolean;
   sendPasswordResetEmail(toEmail: string, resetUrl: string): Promise<void>;
   /**
    * Sends an MFA EMAIL_OTP one-time code. `purpose` distinguishes enrollment
@@ -46,6 +54,9 @@ export interface IMailer {
  * it. Never use this in production.
  */
 export class ConsoleMailer implements IMailer {
+  /** Logs instead of delivering — NOT a real channel, so EMAIL_OTP stays off. */
+  readonly productionCapable = false;
+
   constructor(private readonly log: FastifyBaseLogger) {}
 
   async sendPasswordResetEmail(toEmail: string, resetUrl: string): Promise<void> {
@@ -117,6 +128,9 @@ export interface SentDigest {
 }
 
 export class InMemoryMailer implements IMailer {
+  /** Tests assert on captured mail, so EMAIL_OTP must stay enrollable. */
+  readonly productionCapable = true;
+
   public readonly sent: SentEmail[] = [];
   /** MFA EMAIL_OTP codes captured for test assertions (read the latest .code). */
   public readonly sentOtps: SentMfaOtp[] = [];

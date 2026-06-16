@@ -21,6 +21,9 @@ import { ConsoleMailer, type IMailer } from "./mailer.js";
 const APP_NAME = "Heuresys";
 
 export class SmtpMailer implements IMailer {
+  /** A configured SMTP transport really delivers → EMAIL_OTP is safe to enroll. */
+  readonly productionCapable = true;
+
   constructor(
     private readonly transporter: Transporter,
     private readonly from: string,

@@ -180,6 +180,20 @@ class SmsNotConfiguredError extends NotFoundError {
   }
 }
 
+/**
+ * EMAIL_OTP enrollment is OFF without a configured SMTP transport (mirrors
+ * SmsNotConfiguredError): a code that only lands in server logs would lock a
+ * real user out. The kind is hidden from enrollableKinds(); this also guards a
+ * direct POST. 404 + stable code so existence isn't leaked.
+ */
+class EmailNotConfiguredError extends NotFoundError {
+  constructor() {
+    super("Email provider");
+    this.code = "EMAIL_NOT_CONFIGURED";
+    this.message = "Email provider not configured";
+  }
+}
+
 /** Mask a phone for safe display: keep prefix + last 3 digits (+39•••567). */
 function maskPhone(phone: string): string {
   if (phone.length < 7) return "•••";
@@ -636,6 +650,9 @@ export function createMfaService(
 
     /* --- EMAIL_OTP enrollment ---------------------------------------- */
     async enrollEmailOtp({ userId, userEmail }) {
+      // Anti-lockout: refuse EMAIL_OTP enrollment when no real transport exists
+      // (hidden from enrollableKinds(); this guards a direct POST).
+      if (!mailer.productionCapable) throw new EmailNotConfiguredError();
       // Create the (unverified) EMAIL_OTP factor. No secret is stored on the
       // factor row — the per-attempt codes live hashed in the challenge table.
       const factor = await mfaRepo.insertMfaFactor(pool, {
@@ -786,7 +803,11 @@ export function createMfaService(
     enrollableKinds() {
       return [
         "TOTP",
-        "EMAIL_OTP",
+        // EMAIL_OTP only with a real transport — without SMTP the code lands in
+        // server logs and a real user enrolling it would lock themselves out
+        // (mirrors the SMS_OTP provider gate just below). TOTP + WEBAUTHN keep
+        // MFA fully operable with no email backend at all.
+        ...(mailer.productionCapable ? (["EMAIL_OTP"] as const) : []),
         "WEBAUTHN",
         ...(smsSender.productionCapable ? (["SMS_OTP"] as const) : []),
       ];

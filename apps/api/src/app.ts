@@ -97,6 +97,7 @@ import { compensationRoutes } from "./modules/compensation/routes.js";
 import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { analyticsRoutes } from "./modules/analytics/routes.js";
 import { addExportHook } from "./lib/export/hook.js";
+import { notificationsRoutes } from "./modules/notifications/routes.js";
 import { observabilityRoutes } from "./modules/observability/routes.js";
 import { mentorshipRoutes } from "./modules/mentorship/routes.js";
 import { surveysRoutes } from "./modules/surveys/routes.js";
@@ -398,6 +399,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(compensationRoutes, { prefix: "/v1/compensation" });
   await app.register(dashboardRoutes, { prefix: "/v1/dashboard" });
   await app.register(analyticsRoutes, { prefix: "/v1/analytics" });
+  await app.register(notificationsRoutes, { prefix: "/v1/notifications" });
   await app.register(observabilityRoutes, { prefix: "/v1/observability" });
   await app.register(mentorshipRoutes, { prefix: "/v1/mentorship" });
   await app.register(surveysRoutes, { prefix: "/v1/surveys" });

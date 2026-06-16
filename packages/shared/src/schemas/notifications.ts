@@ -48,3 +48,22 @@ export const UpdateNotificationPreferenceBodySchema = z
     error: "At least one of inAppEnabled / emailEnabled must be provided",
   });
 export type UpdateNotificationPreferenceBody = z.infer<typeof UpdateNotificationPreferenceBodySchema>;
+
+/** SYSTEM broadcast (admin, notification:create) — emit a SYSTEM notification to
+ *  a target user list. Recipients outside the actor's tenant are dropped for
+ *  non-platform actors (I5); PLATFORM_ADMIN may target any tenant. */
+export const BroadcastNotificationBodySchema = z.object({
+  userIds: z.array(z.uuid()).min(1).max(500),
+  subject: z.string().min(1).max(255),
+  body: z.string().max(8192).nullable().optional(),
+  priority: NotificationPrioritySchema.optional(),
+  actionUrl: z.string().max(1024).nullable().optional(),
+  tenantId: z.uuid().nullable().optional(),
+});
+export type BroadcastNotificationBody = z.infer<typeof BroadcastNotificationBodySchema>;
+
+export const BroadcastNotificationResponseSchema = z.object({
+  requested: z.number().int(),
+  emitted: z.number().int(),
+});
+export type BroadcastNotificationResponse = z.infer<typeof BroadcastNotificationResponseSchema>;

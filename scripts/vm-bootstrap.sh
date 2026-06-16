@@ -134,7 +134,7 @@ NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \
 #    (the timers fire them).
 log "systemd: render templates + install + restart"
 tmp="$(mktemp -d)"
-for svc in api web scraping insights backup reindex notifications-digest auth-housekeeping; do
+for svc in api web scraping insights backup reindex notifications-digest auth-housekeeping dr-drill; do
   sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" \
       -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
       -e "s#@@PUBLIC_HOST@@#$PUBLIC_HOST#g" \
@@ -158,6 +158,8 @@ sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-
     "/etc/systemd/system/heuresys-advanced-notifications-digest.timer"
 sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-auth-housekeeping.timer" \
     "/etc/systemd/system/heuresys-advanced-auth-housekeeping.timer"
+sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-dr-drill.timer" \
+    "/etc/systemd/system/heuresys-advanced-dr-drill.timer"
 rm -rf "$tmp"
 sudo systemctl daemon-reload
 sudo systemctl enable heuresys-advanced-api.service heuresys-advanced-web.service >/dev/null
@@ -172,6 +174,8 @@ sudo systemctl enable --now heuresys-advanced-reindex.timer >/dev/null
 sudo systemctl enable --now heuresys-advanced-notifications-digest.timer >/dev/null
 # daily auth-audit housekeeping (QW-C2) — enable + start the TIMER (refresh-token/login-event prune).
 sudo systemctl enable --now heuresys-advanced-auth-housekeeping.timer >/dev/null
+# weekly DR drill (QW-C3) — enable + start the TIMER (restore-verify the backup, strict alert).
+sudo systemctl enable --now heuresys-advanced-dr-drill.timer >/dev/null
 sudo systemctl restart heuresys-advanced-api.service
 sleep 5
 sudo systemctl restart heuresys-advanced-web.service

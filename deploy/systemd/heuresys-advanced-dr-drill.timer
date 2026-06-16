@@ -1,0 +1,19 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh / vm-deploy.sh.
+#
+# QW-C3: a WEEKLY DR drill on Sunday 04:00 local — after the daily backup (01:30),
+# auth-housekeeping (02:00), insights recompute (02:15), notification digest (02:45)
+# and the weekly ESCO probe (Sun 03:30), so the nightly/weekly one-shots never overlap.
+# Bounded (one restore into scratch + drop) — proves "a backup never restored is not a backup".
+[Unit]
+Description=Heuresys Advanced — weekly DR drill (QW-C3)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=Sun *-*-* 04:00:00
+RandomizedDelaySec=300
+# Run a missed occurrence after downtime (the free-tier VM is not always up at 04:00).
+Persistent=true
+Unit=heuresys-advanced-dr-drill.service
+
+[Install]
+WantedBy=timers.target

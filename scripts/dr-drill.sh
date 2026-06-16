@@ -18,6 +18,12 @@ ENV_FILE="${ENV_FILE:-$ROOT/.env}"
 DB_NAME="${DB_NAME:-${POSTGRES_DB:-heuresys_advanced}}"
 SCRATCH="${SCRATCH_DB:-${DB_NAME}_drdrill}"
 BACKUP_DIR="${BACKUP_DIR:-$ROOT/pg_dump_snapshots/scheduled}"
+# QW-C3: strict mode (used by the weekly systemd timer) turns REAL DR failures
+# into a non-zero exit so systemd marks the unit failed (= the alert). A benign
+# row-count drift (prod mutated since the backup) stays a WARN, never an alert.
+STRICT="${DR_DRILL_STRICT:-0}"
+MAX_RPO_HOURS="${DR_DRILL_MAX_RPO_HOURS:-48}"
+fail=0
 
 latest="$(ls -t "$BACKUP_DIR"/"${DB_NAME}"_*.dump 2>/dev/null | head -1 || true)"
 if [ -z "$latest" ]; then
@@ -28,6 +34,10 @@ fi
 # RPO: how stale is the most recent restore point.
 age_s=$(( $(date +%s) - $(stat -c %Y "$latest") ))
 printf '[dr-drill] RPO: latest backup is %dh%02dm old — %s\n' "$((age_s/3600))" "$(((age_s%3600)/60))" "$(basename "$latest")"
+if [ "$age_s" -gt $(( MAX_RPO_HOURS * 3600 )) ]; then
+  echo "[dr-drill] WARN: RPO exceeds ${MAX_RPO_HOURS}h — the daily backup timer may not be running" >&2
+  fail=1
+fi
 
 # RTO: time to a usable restored DB.
 echo "[dr-drill] restoring into scratch DB '$SCRATCH' ..."
@@ -42,12 +52,17 @@ printf '[dr-drill] RTO: restore completed in %ds\n' "$((t1-t0))"
 # Integrity: row-counts scratch (restored) vs prod (live).
 echo "[dr-drill] integrity check (restored vs live prod):"
 ok=1
+broken=0
 for tbl in sys.sys_users sys.sys_positions sys.sys_attendance sys.sys_auth_credentials; do
   s="$(sudo -u postgres psql -d "$SCRATCH" -tAc "SELECT count(*) FROM $tbl" 2>/dev/null || echo '?')"
   p="$(sudo -u postgres psql -d "$DB_NAME" -tAc "SELECT count(*) FROM $tbl" 2>/dev/null || echo '?')"
   st="$([ "$s" = "$p" ] && echo OK || { ok=0; echo DIFF; })"
+  # A restore that didn't bring the table at all ('?' / empty-while-prod-has-rows)
+  # is a HARD failure, distinct from a benign post-backup drift.
+  if [ "$s" = "?" ] || { [ "$s" = "0" ] && [ "$p" != "0" ] && [ "$p" != "?" ]; }; then broken=1; fi
   printf '  %-30s restored=%-7s prod=%-7s %s\n' "$tbl" "$s" "$p" "$st"
 done
+[ "$broken" = 1 ] && fail=1
 
 # Cleanup scratch (the drill proved restorability; we don't keep the copy).
 sudo -u postgres dropdb --if-exists "$SCRATCH"
@@ -58,3 +73,11 @@ else
   echo "[dr-drill] WARN — restored counts differ from live prod (expected if prod mutated since the backup; investigate if large)" >&2
 fi
 echo "[dr-drill] done"
+
+# QW-C3 strict mode (weekly timer): exit non-zero ONLY on real DR failures
+# (no backup / RPO too old / restore did not bring the data) so systemd raises
+# the alert. A benign row-count drift alone never fails the drill.
+if [ "$STRICT" = 1 ] && [ "$fail" = 1 ]; then
+  echo "[dr-drill] STRICT FAIL — DR problem detected (stale RPO or broken restore)" >&2
+  exit 1
+fi

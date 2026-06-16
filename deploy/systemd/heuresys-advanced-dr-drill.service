@@ -1,0 +1,25 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh / vm-deploy.sh.
+# Do NOT install this file directly; run the bootstrap/deploy script instead.
+#
+# QW-C3 (WS-C F-WS-C-5): weekly DR drill. A ONE-SHOT that runs scripts/dr-drill.sh
+# (restore the latest backup into a scratch DB, verify RPO + row-counts, drop the
+# scratch). DR_DRILL_STRICT=1 → a REAL DR failure (stale RPO / broken restore)
+# makes the unit fail, surfacing via `systemctl --failed` = the alert. A benign
+# row-count drift never fails it. Activated by the .timer.
+[Unit]
+Description=Heuresys Advanced — weekly DR drill (QW-C3, restore-verify the backup)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@
+# pg_restore/psql (PostgreSQL 16 native) live in /usr/bin; no Node needed.
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
+Environment=DR_DRILL_STRICT=1
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/dr-drill.sh
+TimeoutStartSec=900

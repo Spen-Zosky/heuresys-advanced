@@ -1,28 +1,28 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-15 (S991 — batch delega: #1 agente live + fix sicurezza · #2 Skills-Group-Share full-stack live · convergenza).
+**Updated**: 2026-06-16 (S992 — batch 1-4 + P3 3.5 reporting/export + P3 3.4 notification center; tutto live PROD + CI verde).
 
 > **Vista rapida** (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura, delta per-sessione) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui.
 
-## Last session brief (S991 — batch end-to-end delegato, decisione scope mia)
+## Last session brief (S992 — batch + P3 ondata-1: 3.5 + 3.4)
 
-Delega batch ("backup DBMS poi esegui tutto in autonomia, decidi tu quante feature"). Backup PROD fatto (`/home/ubuntu/pre-s991-batch.dump`, rollback point). **Consegnato + pushato (HEAD `088cccb`)**: **#1 agente #9 LIVE** — le 3 skill `/hr` girano live su dati reali (subscription MAX viva, NIENTE out_of_credits) + **M-2 write-gate dimostrato live** su RTL_BANK (ALLOW→write 201 persistito · DENY→fail-closed · rollback) + audit M-4. **La DoD live ha scoperto un difetto di sicurezza reale e l'ho corretto**: `sdk-agent.ts` aveva `allowedTools:["mcp__heuresys__*"]` che **auto-approvava i write bypassando il gate HITL** → ora ogni tool MCP passa per `canUseTool` (`ce7e2bd`). **#2 Skills-Group-Share (T3.8) + clustering (T2.6)** full-stack live (`088cccb`): endpoint `/v1/analytics/skills-group-share` + 4 test (analytics 32/32) + pagina + nav (mig 000125) + i18n + **E2E Playwright verde**. **#3** verificato già-fatto (modulo OU↔processi + demo S990; mapping RACI reale = tua decisione). **Convergenza**: il resto del menu (m2b, reporting, mapping RACI) richiede una tua decisione di prodotto/modellazione → lasciato residuo, non inventato.
+Sessione lunga, delega per fasi. **Batch 1-4**: #1 Dependabot (già chiuso da `c92c3a9`, verificato) · #3 AI-matching P1b (già fatto `664588e`, E2E ri-verde live) · **#2 reporting export** (nuovo: `GET /v1/analytics/:view/export?format=csv|json`) · **#4 D-36** (wrapper `e2e-node22.mjs` — Playwright 1.61 è latest stable, no bump → pin Node 22 riproducibile; RISOLTO). **P3 ondata-1** (ordine S987, design→ok→implementa): **3.5 reporting/export** = exporter generico `?format=csv|xlsx|pdf` su tutti gli ~85 endpoint list `{items,total}` (hook `onSend` zero-touch, RBAC-safe) · **3.4 notification center** = chassis (`sys_notification_preferences` mig 000126 + `emitNotification` + `/me/notification-preferences`) + **6 producer event-driven** (GAP_CLOSURE_DUE/ASSESSMENT_REQUEST/MANAGER_FEEDBACK_READY/TRAINING_DEADLINE/CAREER_TARGET_STATUS + SYSTEM broadcast `POST /v1/notifications`, mig 000127) + digest scheduler (mig 000128 registry + systemd timer). Tutto pushato (`03b46d3..93e5791`), deployato PROD (VM/Mac/linux-pc), CI 6/6 verde. **Lavoro VM divergente preservato** (assorbito in origin: playwright root pin `f278ede` + agent-sdk 0.3.178).
 
 ## Top priorities (next session)
 
-1. **2 alert Dependabot nuovi** (1 high, 1 moderate, comparsi al push S991 — non dai miei commit): verificare e chiudere (`gh api .../dependabot/alerts`). Effort ~1h.
-2. **Feature che richiedono il tuo "cosa"**: #5 **m2b Surveys normalized** (decisione semantica: tabelle nuove normalizzate vs unificare col cluster `engagement_*` JSONB — sorgenti legacy su VM `heuresys_platform`) · #4 **reporting/export** (quale reporting?) · **T2.5 mapping RACI reale** OU↔processi (quale OU è R/A/C/I per quale processo). Memoria `project_post_v1_program_s987`.
-3. **#8 Fasi 4-8 post-v1.0** (sec-audit 3.2 / BPM 3.3 / notif 3.4 / reporting 3.5) + **Audit 100X A4..A11** (read-only). `design→spec→ok`.
+1. **P3 ondata-1 prosegue → 3.2 security** (poi 3.3 BPM). ⚠ scope da chiarire con Enzo: report OWASP ASVS · hardening attuativo dei finding · oppure feature security/audit-log dashboard (si sovrappone in parte all'audit WS-H già fatto). `design→spec→ok`. Memoria `project_post_v1_program_s987`.
+2. **3.4 digest email = `blocked-on-Enzo: SMTP creds`** — il chassis (digest scheduler + `IMailer.sendNotificationDigest` + systemd timer daily 02:45) è completo e testato (InMemoryMailer); l'invio email reale è no-op finché non fornisci le credenziali SMTP. Il notification center **in-app è pienamente live**.
+3. **Altri P3** (decisione prodotto = tuo "cosa"): #5 m2b Surveys normalized (tabelle nuove vs JSONB) · T2.5 mapping RACI OU↔processi · #8 audit 100X A4..A11 (sospeso, sessione dedicata).
 
 ## Open questions
 
-- **m2b**: come modellare il cluster Surveys normalizzato legacy (4482 response + 1145 pulse + 31 question)? Tabelle `sys_survey_*` nuove (mirror del legacy, separate da `engagement_*`) o unificazione semantica col JSONB esistente? = tua autorità.
-- **Agente #9 in PROD**: per esporre l'agente a una webapp servita ai clienti serve una API key Anthropic reale (o Bedrock/Vertex). In dev gira sulla tua subscription MAX (gratis, verificato). Vuoi pianificare il serving PROD?
+- **3.2 security**: quale forma vuoi (report ASVS / hardening / feature dashboard)? = tua autorità.
+- **SMTP creds**: per attivare l'invio email del digest 3.4 (oggi gated, in-app funzionante).
 
 ## Verification (next session)
 
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline   # vuoto = synced
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT count(*) FROM sys.sys_ui_interfaces WHERE ui_interface_code='analytics-skills-group-share'"  # 1
-curl -s -o /dev/null -w 'PROD %{http_code}\n' https://www.heuresys.com/login   # 200
+curl -s -o /dev/null -w 'PROD export %{http_code}\n' https://www.heuresys.com/api/v1/users   # 401 (route live)
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT count(*) FROM sys.v_reconciliation_status WHERE resolved_status='UNCLASSIFIED'"  # 0
 ```

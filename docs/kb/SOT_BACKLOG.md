@@ -3,6 +3,20 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🟢 Aggiornamento S992 (2026-06-16) — batch 1-4 + P3 ondata-1: 3.5 reporting/export + 3.4 notification center
+
+Sessione lunga delegata per fasi, ogni fase chiusa con gate+push+deploy+CI. HEAD `93e5791` (pushato).
+
+**DONE:**
+- **Batch 1-4**: #1 Dependabot (già chiuso `c92c3a9`, verificato) · #3 AI-matching P1b (già fatto `664588e`, E2E ri-verde) — backlog stale, no lavoro inventato · **#2 reporting export** (`69f77fb`) · **#4 D-36** wrapper Node22 (`addb19a`/`cbfff34`) — **DEBT D-36 RISOLTO**.
+- **#4 reporting/export (3.5)** — superato lo "slice tecnico": exporter generico `?format=csv|xlsx|pdf` su **tutti** gli ~85 endpoint list (hook onSend zero-touch) + l'endpoint export delle 9 viste analytics (#2). Capability 3.5 ondata-1 **DONE-LIVE**. Design `docs/superpowers/specs/2026-06-16-reporting-export-design.md`.
+- **3.4 notification center (ondata-1) DONE-LIVE** (in-app): chassis (mig 000126 + emitter + preferenze API) + **6 producer** (mig 000127 broadcast) + digest scheduler (mig 000128 registry + systemd timer). 75° modulo `notifications`.
+
+**RESIDUO OPEN:**
+- **P3 ondata-1 prosegue → 3.2 security** (poi 3.3 BPM). ⚠ **scope da chiarire con Enzo** (`design→spec→ok`): report OWASP ASVS · hardening attuativo dei finding (parziale overlap con WS-H/S-100X-A2 già fatto) · feature security/audit-log dashboard. Memoria `project_post_v1_program_s987`.
+- **3.4 digest EMAIL = `blocked-on-Enzo: SMTP creds`** — chassis (digest scheduler + IMailer + systemd timer daily) completo+testato (InMemoryMailer); invio email no-op finché non fornite le credenziali SMTP. In-app pienamente live.
+- **#5 m2b Surveys normalized** · **T2.5 mapping RACI** OU↔processi · **#8 audit 100X A4..A11** (sospeso, sessione dedicata) — invariati, decisione prodotto/scope = Enzo.
+
 ## 🟢 Aggiornamento S991 (2026-06-15) — batch delega: #1 agente LIVE + fix sicurezza · #2 Skills-Group-Share
 
 Batch decision-authority session-scoped (Enzo: "backup DBMS poi esegui tutto in autonomia, decidi tu quante feature"). Backup PROD `/home/ubuntu/pre-s991-batch.dump`. 2 commit `ce7e2bd`+`088cccb` pushati (`bd156cd..088cccb`).

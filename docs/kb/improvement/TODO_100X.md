@@ -14,7 +14,7 @@
 - [x] S-100X-A1 | WS-G | audit CI/CD & deploy (runner SPOF, rollback, caching, release) | FINDINGS/WS-G.md + baseline durate CI | **DONE** (S987 — 30 finding: 1 CRITICAL fork-PR ACE su prod host, 10 HIGH, 5 QW-G; D-08 → security-priority)
 - [x] S-100X-A2 | WS-H | audit sicurezza & supply chain (auth, secrets, OWASP, SBOM, env-doc) | FINDINGS/WS-H.md | **DONE** (S988 — fan-out 5 sub-agent: 1 HIGH TRUST_PROXY [D-28 RISOLTO S988], MED rate-limit/skill-taxonomy/media-sniff; 6 QW-H tutti chiusi S989; SQL 100% param, Zod 415/415, pnpm audit 0)
 - [x] S-100X-A3 | WS-F | audit test & QA (unit-layer, parallelism, isolation, flakiness) | FINDINGS/WS-F.md + baseline durate suite | **DONE** (S990, 2026-06-15 — 19 finding: 3 HIGH no-full-E2E-in-CI / no-unit-layer / tunnel-coupling, 5 MED, 6 LOW, 5 INFO; 6 QW-F + 6 DOSSIER + 3 ASSET; baseline 134 file/~920 case/73-su-73 mod/0 mock/ratio 6.7:1; anchor x19a stale pre-MFA 86.53s)
-- [ ] S-100X-A4 | WS-C | audit dati & persistenza (squash, backup/restore, indici, dead schema) | FINDINGS/WS-C.md | TODO
+- [x] S-100X-A4 | WS-C | audit dati & persistenza (squash, backup/restore, indici, dead schema) | FINDINGS/WS-C.md | **DONE** (S993 — 0 CRITICAL / 3 HIGH: F-WS-C-1 243 FK no-index (56 tenant_id) · F-WS-C-4 auth-audit unbounded (46.3k refresh-token/9 utenti, 57k login-events, no pruning) · reconciles WS-G F-10 backup=SHIPPED not zero; QW-C1..C4. ASSET: 0 dead-schema, RD-08 perfetto, D-18 verificato chiuso, squash=DON'T)
 - [ ] S-100X-A5 | WS-B | audit backend/servizi (module-pattern cost, hot path, repo SQL) | FINDINGS/WS-B.md | TODO
 - [ ] S-100X-A6 | WS-A | audit architettura (coupling, dead code, dep inutilizzate) | FINDINGS/WS-A.md | TODO
 - [ ] S-100X-A7 | WS-D | audit frontend (RSC/streaming, bundle, data-fetching) | FINDINGS/WS-D.md + bundle baseline | TODO
@@ -48,3 +48,11 @@
 - [x] QW-G3 | WS-G | env-contract: 7+ var `env.ts` → `.env.example` + nota SoT (incl. POSTGRES_DB/POSTGRES_DATABASE dual-set) | `.env.example` completo (lega a QW-3/R09) | **DONE** (S993, via QW-3 — diff completo env.ts↔.env.example chiuso)
 - [ ] QW-G4 | WS-G | `showcase.yml` drop checkout sister-repo + `npm install --legacy-peer-deps` (premessa `link:` stantia; reale npm `@heuresys/ui@^0.1.5`) | verify build registry-only → drop step + fix comment | TODO
 - [ ] QW-G5 | WS-G | cache `~/.cache/ms-playwright` + reuse build-web artifact in playwright-smoke (no rebuild) | smoke verde, browser/`.next` cache | TODO
+
+## Quick-wins 3.2 security ASVS (da `FINDINGS/3.2_ASVS_MAPPING.md`, S993; CLASS-A)
+
+- [x] QW-SEC2 | 3.2 | HSTS header al TLS edge nginx (V9.2/V14.4, net-new gap) | `curl -sI https://www.heuresys.com \| grep -i strict-transport` mostra l'header | **DONE-LIVE** (S993: `add_header Strict-Transport-Security "max-age=31536000" always` nel repo mirror + applicato live VM, nginx -t ok + reload; verificato su HEAD 307→/login e GET)
+- [ ] QW-SEC1 | 3.2 | verifica live VM `.env` TRUST_PROXY=1 + COOKIE_SECURE=true (lente D-26/D-28) | grep KEY via SSH + due client IP → req.ip distinti | TODO (D-28 già risolto S988 — solo re-verify evidence)
+- [ ] QW-SEC5 | 3.2 | log strutturato `security-audit` su authn-failure (V7.1.3/4) | vitest cattura failed-login/replay record, no plaintext | TODO (hot-path auth → cautela)
+- [ ] QW-SEC6 | 3.2 | AES-256-GCM encryption-at-rest TOTP secret (consuma MFA_ENCRYPTION_KEY inerte, D-30) | enroll→colonna ciphertext, decifra a codice valido | DEFERRED (L2, decisione sicurezza = autorità Enzo)
+- [x] ~~QW-SEC3/SEC4/SEC7~~ | 3.2 | skill-taxonomy authz / media magic-byte / matching rate-limit | — | **GIÀ FATTI S989** (QW-H H4/H2/H6; il subagent li ha ri-proposti da WS-H.md che li elencava come finding originali)

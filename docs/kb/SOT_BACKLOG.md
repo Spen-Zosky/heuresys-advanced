@@ -3,6 +3,30 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🟢 Aggiornamento S994 (2026-06-17) — batch 13-item intervista-guidata: QW CLASS-A + SEC6 + B-50 close + RACI demo + design-spec
+
+Batch decision-authority session-scoped via **intervista preventiva** (Enzo ha scelto 13 item; discovery 6-agenti read-only evidence-based; ultracode multi-workflow). 10 commit `7dbfa96`..`c89c749` pushati + full close (align Mac/VM + deploy PROD). Granulare → `SOT_STATE.md §Delta S994`.
+
+**DONE-LIVE (QW CLASS-A chiusi):**
+- **QW-4/B4/B6/B5/B3** refactor backend (shared `ActorContext` + `withTransaction`→`db/client.ts` + `paginationSchema` factory + teams N+1; −626 LOC, vitest 1012/0).
+- **QW-D1** chart code-split (9 analytics + Mermaid via `_charts-client`) · **QW-D2** `optimizePackageImports` · **QW-E1** token rosso (`text-destructive`→`text-danger`: era invisibile) · **QW-E2** isError branch ×4 + i18n.
+- **QW-G1/G2/G4/G5/A2** CI hardening (cache pnpm/.next + SHA-pin 26 action + showcase sister-checkout drop + agent-gateway in CI).
+- **QW-K3** dump archival off-disk → VM OCI (27/3.7G live, idempotente).
+- **QW-A1** dead-deps drop + `pino` dev→deps + clean install · **QW-A4/B7/I1/I2/I3/I4** doc-fix (de-hardcode counts anti-drift + INDEX regen + supertest/error-envelope + FINDINGS register).
+- **QW-SEC6** AES-256-GCM TOTP encryption-at-rest (key-presence-gated, retro-compat, lazy re-encrypt + skip-guard fixture; bulk script READY-BUT-UNRUN; D-30 corretto).
+- **B-50 CHIUSO terminale** (148 POPULATED / 0 UNCLASSIFIED) + **B-42 ri-confermato** (process_kpi import muro 0/25). **#11 RACI demo LIVE** su RTL_BANK (0 HEURESYS).
+
+**CONSEGNATI (design-spec — attendono go Enzo per implementare, `design→spec→ok→implementa`):**
+- **#9 BPM approval-flow** → `docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md` (slice-D, riusa notification center 3.4; ~1-2 sessioni).
+- **#10 Surveys UI admin+ESS** → `docs/superpowers/specs/2026-06-17-surveys-engagement-ui-design.md` (admin read-only + ESS self-response write-path; ~12-16h).
+- **14 dossier Fase-C** → `docs/kb/improvement/DOSSIERS/D-01..D-14` (option-triad + raccomandazione) → **decide Enzo per-dossier** go/defer/won't → poi **S-100X-E** esecuzione epic.
+
+**RESIDUO OPEN (decisione/input Enzo):**
+- **#12 import `process_kpi_templates`**: serve **crosswalk processi autorato** (legacy BP-*/EN/SF → v5 ordinal 00..22, code-overlap 0/25), oppure resta EXCLUDE (B-50 chiuso a parte questo).
+- **#11 RACI di produzione**: quale OU è R/A/C/I reale (la demo RTL_BANK è dimostrativa).
+- **QW residui CLASS-A**: **QW-E5** de-dup primitive (richiede publish `@heuresys/ui`, out-of-session) · **S-100X-A-L** (ecosistema Claude, design-only — unico audit Fase-A non fatto).
+- **#15 bulk-encrypt**: N/A sui 6 secret (tutti e2e-fixture, plaintext by-design); l'encryption-at-rest vale per future enrollment reali.
+
 ## 🟢 Aggiornamento S993 (2026-06-16) — workaround mail/MFA senza SMTP + agente MAX stabilizzato + 100X A4/WS-C + 3.2 ASVS + QW live
 
 Batch decision-authority session-scoped (Enzo: "risolvi i 2 aspetti, poi procedi con tutti i punti, chiudi tutto il possibile"). 6 commit `59ecb75`..`eabae4a` pushati + deploy. Dettaglio granulare → `SOT_STATE.md §Delta S993`.

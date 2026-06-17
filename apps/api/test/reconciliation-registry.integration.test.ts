@@ -187,3 +187,41 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
     expect(rows[0]?.r).toContain('[WAVE2 S982]');
   });
 });
+
+// B-42 RE-CONFIRMATION (S994, item #12, seed 53). sys_process_kpi_templates is the only
+// EXCLUDE row with a measurable legacy source (process_kpis). It was re-measured live: the
+// KPI side resolves 1:1 (81/81 kpi_code in sys_kpi_definitions) but the NOT-NULL process FK
+// to sys_blueprint_process_registry cannot resolve (CODE-overlap 0/25, NAME-overlap 1/25 vs
+// the legacy business_processes BP-xxx keyspace). Importing would require an Enzo-authored
+// process crosswalk (a WHAT decision) -> kept EXCLUDE, fresh evidence appended to the
+// registry rationale. This guards against a silent regression that imports the table or
+// flips its terminal status without the crosswalk.
+describe('reconciliation registry — B-42 process_kpi_templates EXCLUDE re-confirmed (S994)', () => {
+  it('sys_process_kpi_templates resolves EXCLUDE in the view and stays empty', async () => {
+    const { rows: view } = await pool.query<{ resolved_status: string }>(
+      `SELECT resolved_status FROM sys.v_reconciliation_status
+        WHERE table_name = 'sys_process_kpi_templates'`,
+    );
+    expect(view).toHaveLength(1);
+    expect(view[0]?.resolved_status).toBe('EXCLUDE');
+
+    const { rows: cnt } = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.sys_process_kpi_templates`,
+    );
+    expect(cnt[0]?.n, 'sys_process_kpi_templates must remain empty (no fabricated crosswalk)').toBe(0);
+  });
+
+  it('the registry row carries declared_status EXCLUDE + the S994 re-confirmation evidence', async () => {
+    const { rows } = await pool.query<{ declared: string; r: string }>(
+      `SELECT reconciliation_registry_declared_status AS declared,
+              reconciliation_registry_rationale AS r
+         FROM sys.sys_reconciliation_registry
+        WHERE reconciliation_registry_table_name = 'sys_process_kpi_templates'`,
+    );
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.declared).toBe('EXCLUDE');
+    // S994 fresh-evidence marker (seed 53) + the original S970 out-of-scope marker (seed 43).
+    expect(rows[0]?.r).toContain('RE-CONFIRMED S994');
+    expect(rows[0]?.r).toContain('OUT-OF-SCOPE S970');
+  });
+});

@@ -127,6 +127,7 @@
     "emptyPrefix": "No ORG_CHART graph registered for the tenant. Generate it with",
     "seedFile": "db/seeds/org_chart_rtl_demo.sql",
     "noNodes": "The graph has no nodes.",
+    "error": "Could not load the org chart.",
     "graphAria": "Interactive org chart of positions",
     "note": "Interactive force graph (zoom/pan). Nodes are the tenant's active positions; edges are the reports-to relationships."
   },

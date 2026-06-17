@@ -140,7 +140,7 @@ export default function CompensationIntelligencePage() {
       {gates.isLoading ? (
         <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
       ) : gates.isError ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-destructive" data-testid="compensation-error">
+        <div className="rounded-card border border-border bg-card p-6 text-sm text-danger" data-testid="compensation-error">
           {t("compensation.error")}
         </div>
       ) : items.length === 0 ? (

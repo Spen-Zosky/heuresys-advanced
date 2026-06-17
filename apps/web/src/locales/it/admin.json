@@ -127,6 +127,7 @@
     "emptyPrefix": "Nessun grafo ORG_CHART registrato per il tenant. Generarlo con",
     "seedFile": "db/seeds/org_chart_rtl_demo.sql",
     "noNodes": "Il grafo non ha nodi.",
+    "error": "Impossibile caricare l'organigramma.",
     "graphAria": "Organigramma interattivo delle posizioni",
     "note": "Grafo a forza interattivo (zoom/pan). I nodi sono le posizioni attive del tenant; gli archi le relazioni reports-to."
   },

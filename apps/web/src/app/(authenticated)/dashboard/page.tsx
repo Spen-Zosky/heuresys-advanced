@@ -42,7 +42,7 @@ function activityVisual(kind: string): { icon: AuditEvent["icon"]; tone: AuditTo
 }
 
 const SEVERITY_CLASS: Record<string, string> = {
-  CRITICAL: "bg-destructive/10 text-destructive",
+  CRITICAL: "bg-danger/10 text-danger",
   HIGH: "bg-warning/15 text-warning",
 };
 
@@ -77,7 +77,7 @@ export default function DashboardPage() {
   if (widgets.isError) {
     return (
       <main data-testid="dashboard-error" className="mx-auto max-w-7xl px-6 py-8">
-        <p className="text-sm text-destructive">{t("dashboard.error")}</p>
+        <p className="text-sm text-danger">{t("dashboard.error")}</p>
       </main>
     );
   }

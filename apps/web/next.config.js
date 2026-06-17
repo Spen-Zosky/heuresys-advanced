@@ -2,6 +2,9 @@
 module.exports = {
   reactStrictMode: true,
   transpilePackages: ["@heuresys/ui", "@heuresys/shared"],
+  experimental: {
+    optimizePackageImports: ["lucide-react", "@heuresys/ui"],
+  },
   // Proxy /api/* to the Fastify API on :3001 so cookies (HttpOnly, SameSite=Lax)
   // remain same-origin and CSRF double-submit works without CORS preflights.
   async rewrites() {

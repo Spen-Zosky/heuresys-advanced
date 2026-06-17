@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   Badge,
-  EChartsCard,
   EmptyState,
   PageHeader,
   RadialGauge,
@@ -12,6 +11,7 @@ import {
   echartsPresets,
 } from "@heuresys/ui";
 import { Gauge, Target } from "lucide-react";
+import { EChartsCard } from "../../_charts-client";
 import type { KpiAnalyticsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 

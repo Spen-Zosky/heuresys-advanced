@@ -42,6 +42,10 @@ export default function MeSkillsPage() {
         <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">
           {t("common:loading")}
         </div>
+      ) : skills.isError ? (
+        <div className="rounded-card border border-border bg-card p-6 text-sm text-danger" data-testid="me-skills-error">
+          {t("skills.error")}
+        </div>
       ) : skills.data && skills.data.items.length === 0 ? (
         <EmptyState
           data-testid="me-skills-empty"

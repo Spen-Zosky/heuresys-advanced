@@ -51,7 +51,7 @@ export default function PositionDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="position-error">
         <Link href="/positions" className="text-sm underline">{t("positions.detail.back")}</Link>
-        <p className="mt-4 text-destructive">{code === 404 ? t("positions.detail.notFound") : t("positions.detail.loadError")}</p>
+        <p className="mt-4 text-danger">{code === 404 ? t("positions.detail.notFound") : t("positions.detail.loadError")}</p>
       </main>
     );
   }

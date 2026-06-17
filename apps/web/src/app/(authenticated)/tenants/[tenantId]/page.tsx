@@ -81,7 +81,7 @@ export default function TenantDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="tenant-error">
         <Link href="/tenants" className="text-sm underline">{t("tenants.detail.back")}</Link>
-        <p className="mt-4 text-destructive">
+        <p className="mt-4 text-danger">
           {status === 404 ? t("tenants.detail.notFound") : t("tenants.detail.loadError")}
         </p>
       </main>

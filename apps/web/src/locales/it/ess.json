@@ -40,6 +40,7 @@
     "title": "La mia carriera",
     "description": "Le tue posizioni target dichiarate.",
     "count": "{{count}} obiettivi",
+    "error": "Impossibile caricare i tuoi obiettivi di carriera.",
     "emptyTitle": "Nessun obiettivo di carriera",
     "emptyDesc": "Nessun obiettivo di carriera dichiarato.",
     "colPosition": "Posizione target",
@@ -131,6 +132,7 @@
     "count": "{{count}} notifiche",
     "unreadAria": "{{count}} notifiche non lette",
     "unreadBadge": "{{count}} non lette",
+    "error": "Impossibile caricare la tua inbox.",
     "emptyTitle": "Nessuna notifica",
     "emptyDesc": "Non hai notifiche al momento.",
     "feedTitle": "Notifiche"
@@ -334,6 +336,7 @@
     "title": "Le mie skill",
     "description": "Evidenze di competenza raccolte sul tuo profilo.",
     "count": "{{count}} evidenze",
+    "error": "Impossibile caricare le tue skill.",
     "emptyTitle": "Nessuna skill ancora dichiarata",
     "emptyDesc": "Le evidenze di competenza appariranno qui una volta raccolte.",
     "colSkill": "Skill",

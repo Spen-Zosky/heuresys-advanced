@@ -65,7 +65,7 @@ export default function AdminGapsPage() {
       {gaps.isLoading ? (
         <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
       ) : gaps.isError ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-destructive" data-testid="gaps-error">
+        <div className="rounded-card border border-border bg-card p-6 text-sm text-danger" data-testid="gaps-error">
           {t("gaps.error")}
         </div>
       ) : items.length === 0 ? (

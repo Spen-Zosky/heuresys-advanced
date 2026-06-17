@@ -111,6 +111,10 @@ export default function MeInboxPage() {
         <p className="text-sm text-muted-foreground" data-testid="me-inbox-loading">
           {t("common:loading")}
         </p>
+      ) : inbox.isError ? (
+        <p className="text-sm text-danger" data-testid="me-inbox-error">
+          {t("inbox.error")}
+        </p>
       ) : inbox.data && inbox.data.items.length === 0 ? (
         <EmptyState
           data-testid="me-inbox-empty"

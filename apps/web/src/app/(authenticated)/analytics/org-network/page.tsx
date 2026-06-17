@@ -2,8 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, EChartsCard, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
+import { Badge, EmptyState, PageHeader, StatsCard } from "@heuresys/ui";
 import { GitBranch, Layers, Network, Sigma, Users } from "lucide-react";
+import { EChartsCard } from "../../_charts-client";
 import type {
   OrgNetworkAnalyticsResponse,
   OrgNetworkDepthRow,

@@ -40,6 +40,7 @@
     "title": "My career",
     "description": "Your declared target positions.",
     "count": "{{count}} goals",
+    "error": "Could not load your career goals.",
     "emptyTitle": "No career goals",
     "emptyDesc": "No career goal declared.",
     "colPosition": "Target position",
@@ -131,6 +132,7 @@
     "count": "{{count}} notifications",
     "unreadAria": "{{count}} unread notifications",
     "unreadBadge": "{{count}} unread",
+    "error": "Could not load your inbox.",
     "emptyTitle": "No notifications",
     "emptyDesc": "You have no notifications at the moment.",
     "feedTitle": "Notifications"
@@ -334,6 +336,7 @@
     "title": "My skills",
     "description": "Skill evidence collected on your profile.",
     "count": "{{count}} evidence",
+    "error": "Could not load your skills.",
     "emptyTitle": "No skill declared yet",
     "emptyDesc": "Skill evidence will appear here once collected.",
     "colSkill": "Skill",

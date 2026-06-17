@@ -23,3 +23,8 @@ export const EChartsCard = dynamic(
   () => import("@heuresys/ui").then((m) => ({ default: m.EChartsCard })),
   { ssr: false },
 );
+
+export const MermaidDiagram = dynamic(
+  () => import("@heuresys/ui").then((m) => ({ default: m.MermaidDiagram })),
+  { ssr: false },
+);

@@ -49,7 +49,7 @@ export default function UserDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="user-error">
         <Link href="/users" className="text-sm underline">{t("users.detail.back")}</Link>
-        <p className="mt-4 text-destructive">{code === 404 ? t("users.detail.notFound") : t("users.detail.loadError")}</p>
+        <p className="mt-4 text-danger">{code === 404 ? t("users.detail.notFound") : t("users.detail.loadError")}</p>
       </main>
     );
   }

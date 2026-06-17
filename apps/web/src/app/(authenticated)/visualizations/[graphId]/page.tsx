@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, MermaidDiagram, PageHeader } from "@heuresys/ui";
+import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { MermaidDiagram } from "../../_charts-client";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { StatusPill } from "@/components/status-pill";
@@ -72,7 +73,7 @@ export default function VisualizationDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="visualization-error">
         <Link href="/visualizations" className="text-sm underline">{t("visualizations.detail.back")}</Link>
-        <p className="mt-4 text-destructive">
+        <p className="mt-4 text-danger">
           {status === 404 ? t("visualizations.detail.notFound") : t("visualizations.detail.loadError")}
         </p>
       </main>

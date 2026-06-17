@@ -96,7 +96,7 @@ export default function BlueprintVariantDetailPage() {
     return (
       <main className="mx-auto max-w-5xl px-6 py-8" data-testid="blueprint-error">
         <Link href="/blueprints" className="text-sm underline">{t("detail.back")}</Link>
-        <p className="mt-4 text-destructive">
+        <p className="mt-4 text-danger">
           {status === 404 ? t("detail.notFound") : t("detail.error")}
         </p>
       </main>

@@ -45,6 +45,10 @@ export default function MeCareerPage() {
         <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">
           {t("common:loading")}
         </div>
+      ) : career.isError ? (
+        <div className="rounded-card border border-border bg-card p-6 text-sm text-danger" data-testid="me-career-error">
+          {t("career.error")}
+        </div>
       ) : career.data && items.length === 0 ? (
         <EmptyState
           data-testid="me-career-empty"

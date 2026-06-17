@@ -121,6 +121,10 @@ export default function OrgChartPage() {
             </div>
           ) : render.isLoading ? (
             <div className="p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
+          ) : render.isError ? (
+            <div className="p-6 text-sm text-danger" data-testid="org-chart-error">
+              {t("orgChart.error")}
+            </div>
           ) : nodeCount === 0 ? (
             <div className="p-6 text-sm text-muted-foreground" data-testid="org-chart-nodes-empty">
               {t("orgChart.noNodes")}

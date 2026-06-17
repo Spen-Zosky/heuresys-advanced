@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "10.4.0",
-    "@types/node": "22.19.20",
+    "@types/node": "25.9.3",
     "@types/nodemailer": "^8.0.0",
     "@types/pdfkit": "^0.17.6",
     "@types/pg": "8.20.0",

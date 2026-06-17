@@ -29,31 +29,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      # Two repos must sit side-by-side because the root package.json declares
-      # `"@heuresys/ui": "link:../ux-design-shared/ui"` — pnpm resolves that
-      # relative to the package.json on disk, so the sister repo must exist
-      # at `<workspace>/../ux-design-shared/ui` once both are checked out.
+      # @heuresys/ui is npm-published (post-X18 migration): the root package.json
+      # declares it as a normal semver dep (`"@heuresys/ui": "^0.1.x"`) resolved by
+      # pnpm from the registry — no sister-repo checkout or local `link:` is needed.
       - name: Checkout heuresys-advanced
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           path: heuresys-advanced
           fetch-depth: 1
 
-      - name: Checkout ux-design-shared (sister repo, for @heuresys/ui)
-        uses: actions/checkout@v6
-        with:
-          repository: Spen-Zosky/ux-design-shared
-          path: ux-design-shared
-          ref: main
-          fetch-depth: 1
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
         with:
           version: 9.15.0
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           # 22, not 20: a transitive dep (camera-controls@3.1.2 via three.js in
           # @heuresys/ui) requires Node >=22, so `pnpm install --frozen-lockfile`
@@ -62,17 +53,6 @@ jobs:
           node-version: "22"
           cache: pnpm
           cache-dependency-path: heuresys-advanced/pnpm-lock.yaml
-
-      # ux-design-shared uses npm (its package-lock.json is committed) and its
-      # @heuresys/ui package re-exports React components from
-      # `ui/src/components/brand/candidates/Logo*.tsx`. Those files import
-      # `react` types — which need to resolve through ux-design-shared/ui's
-      # own node_modules during Next.js's transpilePackages typecheck step.
-      # Locally this works because the user ran `npm install` in
-      # ux-design-shared once at setup; in CI we replay it.
-      - name: Install ux-design-shared deps (for @types/react resolution)
-        working-directory: ux-design-shared
-        run: npm install --legacy-peer-deps --ignore-scripts --prefer-offline --no-audit --no-fund
 
       - name: Install heuresys-advanced
         working-directory: heuresys-advanced
@@ -88,7 +68,7 @@ jobs:
           test -f heuresys-advanced/apps/showcase/out/showcase/index.html
 
       - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./heuresys-advanced/apps/showcase/out

@@ -5,7 +5,9 @@
   "type": "module",
   "description": "Agent SDK backend for #9 — exposes heuresys /v1 as MCP tools to the human-resources-plus plugin, with hybrid auth + CSRF + human-in-the-loop write gate. Mock-first: core gate/client unit-tested without the live SDK or heuresys.",
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "dev": "tsx watch src/server.ts"
   },

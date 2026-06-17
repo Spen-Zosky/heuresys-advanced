@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const REGULATORY_INTENSITY_VALUES = ["LOW", "MEDIUM", "HIGH", "EXTREME"] as const;
 export const RegulatoryIntensitySchema = z.enum(REGULATORY_INTENSITY_VALUES);
 export type RegulatoryIntensity = z.infer<typeof RegulatoryIntensitySchema>;
@@ -29,8 +30,7 @@ export const EnterpriseTypingProfileListQuerySchema = z.object({
   regulatoryIntensity: RegulatoryIntensitySchema.optional(),
   industryClassId: z.uuid().optional(),
   sizeBandId: z.uuid().optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type EnterpriseTypingProfileListQuery = z.infer<typeof EnterpriseTypingProfileListQuerySchema>;
 

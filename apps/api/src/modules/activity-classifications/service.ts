@@ -3,16 +3,15 @@
  * Global catalog: read for everyone (no tenant filter), write PLATFORM_ADMIN only.
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   ActivityClassification, ActivityClassificationListQuery,
   CreateActivityClassificationBody, UpdateActivityClassificationBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext { userId: string; tenantId: string | null; roles: RoleCode[] }
-function isPlatform(a: ActorContext): boolean { return a.roles.includes("PLATFORM_ADMIN"); }
 
 export const activityClassificationsService = {
   async list(_actor: ActorContext, query: ActivityClassificationListQuery) {

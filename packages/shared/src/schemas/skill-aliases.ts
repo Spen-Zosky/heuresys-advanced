@@ -8,6 +8,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const SkillAliasSchema = z.object({
   aliasId: z.uuid(),
   skillId: z.uuid(),
@@ -22,8 +23,7 @@ export const SkillAliasListQuerySchema = z.object({
   skillId: z.uuid().optional(),
   locale: z.string().min(1).max(16).optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type SkillAliasListQuery = z.infer<typeof SkillAliasListQuerySchema>;
 

@@ -7,18 +7,14 @@
  */
 
 import { createHash, randomUUID } from "node:crypto";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { pool } from "../../db/client.js";
-import type { RoleCode } from "../../config/constants.js";
 import { NotFoundError, ValidationError } from "../../errors/index.js";
 import { findDocumentById, findPublishedByIdForTenant, type ScopeFilter } from "./repository.js";
 import * as mediaRepo from "./media-repository.js";
 import type { ObjectStore } from "./media-store.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 function buildScope(a: ActorContext): ScopeFilter {
   const isPlatform = a.roles.includes("PLATFORM_ADMIN");

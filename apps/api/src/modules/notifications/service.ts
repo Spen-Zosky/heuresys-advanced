@@ -5,15 +5,11 @@
  * emitter). I5: non-platform actors can only reach users in their own tenant.
  */
 import { pool } from "../../db/client.js";
-import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
-import type { RoleCode } from "../../config/constants.js";
-import type { BroadcastNotificationBody, BroadcastNotificationResponse } from "@heuresys/shared";
+import type { ActorContext } from "../../lib/actor.js";
 
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
+export type { ActorContext };
+import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
+import type { BroadcastNotificationBody, BroadcastNotificationResponse } from "@heuresys/shared";
 
 const isPlatform = (a: ActorContext): boolean => a.roles.includes("PLATFORM_ADMIN");
 

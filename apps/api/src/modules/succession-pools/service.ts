@@ -5,8 +5,10 @@
  */
 
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   SuccessionPool,
   SuccessionPoolListQuery,
@@ -15,15 +17,6 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
-
-function isPlatform(a: ActorContext): boolean {
-  return a.roles.includes("PLATFORM_ADMIN");
-}
 function visible(actor: ActorContext, p: SuccessionPool): boolean {
   if (isPlatform(actor)) return true;
   return actor.tenantId !== null && p.tenantId === actor.tenantId;

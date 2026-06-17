@@ -2,20 +2,14 @@
  * apps/api/src/modules/visualization-nodes/routes.ts
  */
 import { z } from "zod";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
 import {
   VizNodeSchema, VizNodeListQuerySchema, VizNodeListResponseSchema,
   CreateVizNodeBodySchema, UpdateVizNodeBodySchema, VizNodeIdParamSchema,
 } from "@heuresys/shared";
-import { visualizationNodesService, type ActorContext } from "./service.js";
+import { visualizationNodesService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const visualizationNodesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

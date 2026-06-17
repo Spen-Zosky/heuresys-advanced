@@ -9,6 +9,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 const META = z.record(z.string(), z.unknown());
 
 export const ContentKindEnum = z.enum(["article", "policy", "announcement", "handbook", "process_doc"]);
@@ -124,8 +125,7 @@ export const ContentDocumentFilterSchema = z.object({
   status: ContentStatusEnum.optional(),
   categoryId: z.uuid().optional(),
   q: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type ContentDocumentFilter = z.infer<typeof ContentDocumentFilterSchema>;
 
@@ -178,8 +178,7 @@ export type ContentSearchResponse = z.infer<typeof ContentSearchResponseSchema>;
 export const MeContentFilterSchema = z.object({
   categoryId: z.uuid().optional(),
   q: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type MeContentFilter = z.infer<typeof MeContentFilterSchema>;
 

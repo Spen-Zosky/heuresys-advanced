@@ -7,6 +7,9 @@
  */
 
 import { pool } from "../../db/client.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import {
   NotFoundError,
   ConflictError,
@@ -23,12 +26,6 @@ import type {
 } from "@heuresys/shared";
 import { NON_PRIVILEGED_UPDATABLE_FIELDS } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 const NON_PRIVILEGED_FIELDS = new Set<string>(NON_PRIVILEGED_UPDATABLE_FIELDS);
 

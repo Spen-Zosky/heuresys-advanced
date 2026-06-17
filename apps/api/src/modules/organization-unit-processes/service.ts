@@ -8,7 +8,9 @@
  * tenant-filtered on org_unit_process_tenant_id (PLATFORM_ADMIN cross-tenant).
  */
 import { pool } from "../../db/client.js";
-import type { RoleCode } from "../../config/constants.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ConflictError } from "../../errors/index.js";
 import type {
   OrgUnitProcess,
@@ -17,12 +19,6 @@ import type {
   OrgUnitProcessesForProcessResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 function buildScope(a: ActorContext): repo.ScopeFilter {
   const isPlatform = a.roles.includes("PLATFORM_ADMIN");

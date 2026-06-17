@@ -3,6 +3,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const ACTIVITY_MAPPING_KIND_VALUES = [
   "EXACT", "NARROWER", "BROADER", "RELATED", "APPROXIMATE",
 ] as const;
@@ -25,8 +26,7 @@ export const ActivityMappingListQuerySchema = z.object({
   sourceId: z.uuid().optional(),
   targetId: z.uuid().optional(),
   kind: ActivityMappingKindSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(500).optional().default(100),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(500, 100),
 });
 export type ActivityMappingListQuery = z.infer<typeof ActivityMappingListQuerySchema>;
 

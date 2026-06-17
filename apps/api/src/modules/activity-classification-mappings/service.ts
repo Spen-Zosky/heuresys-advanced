@@ -2,15 +2,14 @@
  * apps/api/src/modules/activity-classification-mappings/service.ts
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   ActivityClassificationMapping, ActivityMappingListQuery, CreateActivityMappingBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext { userId: string; tenantId: string | null; roles: RoleCode[] }
-function isPlatform(a: ActorContext): boolean { return a.roles.includes("PLATFORM_ADMIN"); }
 
 export const activityMappingsService = {
   async list(_actor: ActorContext, query: ActivityMappingListQuery) {

@@ -6,6 +6,9 @@
  */
 
 import { pool } from "../../db/client.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import type { RoleCode } from "../../config/constants.js";
 import type {
   WorkforceAnalyticsResponse,
@@ -25,12 +28,6 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 type ScopeKind = "PLATFORM" | "TENANT" | "TEAM";
 

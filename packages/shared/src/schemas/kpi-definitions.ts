@@ -6,6 +6,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const KPI_POLARITY_VALUES = ["HIGHER_IS_BETTER", "LOWER_IS_BETTER", "TARGET_RANGE"] as const;
 export const KpiPolaritySchema = z.enum(KPI_POLARITY_VALUES);
 
@@ -29,8 +30,7 @@ export const KpiDefinitionListQuerySchema = z.object({
   isGlobal: z.coerce.boolean().optional(),
   polarity: KpiPolaritySchema.optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type KpiDefinitionListQuery = z.infer<typeof KpiDefinitionListQuerySchema>;
 

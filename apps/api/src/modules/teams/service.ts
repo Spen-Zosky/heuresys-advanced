@@ -9,25 +9,19 @@
  *     belongs to. This is the new 3rd axis, beyond tenant / self / reports-of-mine.
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { ForbiddenError, NotFoundError } from "../../errors/index.js";
 import type { RoleCode } from "../../config/constants.js";
 import type { Team, TeamDetail, TeamListQuery, MyTeamsResponse } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 /** Roles that browse ALL teams in their tenant (vs. the team-scoped "my team" axis). */
 const TEAM_ADMIN_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>([
   "PLATFORM_ADMIN", "TENANT_ADMIN", "MANAGER", "CEO", "HRMS_MANAGER",
 ]);
 
-function isPlatform(a: ActorContext): boolean {
-  return a.roles.includes("PLATFORM_ADMIN");
-}
 function isTeamAdmin(a: ActorContext): boolean {
   return a.roles.some((r) => TEAM_ADMIN_ROLES.has(r));
 }

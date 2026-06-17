@@ -14,7 +14,7 @@
  *   POST /reindex                   — trigger the embedding backfill (matching:admin, CSRF)
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import {
   MatchQuerySchema,
@@ -29,14 +29,8 @@ import {
   MatchUserIdParamSchema,
   MatchSkillIdParamSchema,
 } from "@heuresys/shared";
-import { semanticMatchingService, defaultDeps, type ActorContext, type SemanticMatchingDeps } from "./service.js";
+import { semanticMatchingService, defaultDeps, type SemanticMatchingDeps } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 /** Routes options — `deps` lets the integration suite inject a non-destructive backfill + a FakeEmbedder. */
 export interface SemanticMatchingRoutesOptions {

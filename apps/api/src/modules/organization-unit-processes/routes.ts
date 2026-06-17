@@ -6,7 +6,7 @@
  * snake_case per project convention — cf. reference_sync:read for module /v1/reference-sync.)
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import { z } from "zod";
 
 import {
@@ -18,14 +18,8 @@ import {
   OrgUnitProcessesForOuResponseSchema,
   OrgUnitProcessesForProcessResponseSchema,
 } from "@heuresys/shared";
-import { organizationUnitProcessService, type ActorContext } from "./service.js";
+import { organizationUnitProcessService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 const DeleteResponse = z.object({ deleted: z.literal(true) });
 

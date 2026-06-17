@@ -3,6 +3,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const VizNodeLayoutSchema = z.object({
   nodeLayoutId: z.uuid(),
   layoutId: z.uuid(),
@@ -20,8 +21,7 @@ export type VizNodeLayout = z.infer<typeof VizNodeLayoutSchema>;
 export const VizNodeLayoutListQuerySchema = z.object({
   layoutId: z.uuid().optional(),
   nodeId: z.uuid().optional(),
-  limit: z.coerce.number().int().min(1).max(1000).optional().default(200),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(1000, 200),
 });
 export type VizNodeLayoutListQuery = z.infer<typeof VizNodeLayoutListQuerySchema>;
 

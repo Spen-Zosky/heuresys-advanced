@@ -8,6 +8,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 const META = z.record(z.string(), z.unknown());
 
 // ─────────────────────────── Programs ───────────────────────────
@@ -38,8 +39,7 @@ export const MentorshipProgramListQuerySchema = z.object({
   status: ProgramStatusEnum.optional(),
   type: ProgramTypeEnum.optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type MentorshipProgramListQuery = z.infer<typeof MentorshipProgramListQuerySchema>;
 
@@ -109,8 +109,7 @@ export const MentorshipListQuerySchema = z.object({
   programId: z.uuid().optional(),
   mentorUserId: z.uuid().optional(),
   menteeUserId: z.uuid().optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type MentorshipListQuery = z.infer<typeof MentorshipListQuerySchema>;
 
@@ -223,8 +222,7 @@ export const MentorMatchScoreListQuerySchema = z.object({
   mentorUserId: z.uuid().optional(),
   menteeUserId: z.uuid().optional(),
   isRecommended: z.coerce.boolean().optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type MentorMatchScoreListQuery = z.infer<typeof MentorMatchScoreListQuerySchema>;
 

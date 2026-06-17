@@ -10,7 +10,7 @@
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import multipart from "@fastify/multipart";
 
 import {
@@ -22,18 +22,13 @@ import {
 } from "@heuresys/shared";
 import { env } from "../../config/env.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError, ValidationError } from "../../errors/index.js";
-import { createMediaService, MEDIA_MAX_BYTES, type ActorContext } from "./media-service.js";
+import { ValidationError } from "../../errors/index.js";
+import { createMediaService, MEDIA_MAX_BYTES } from "./media-service.js";
 import { LocalDiskStore, type ObjectStore } from "./media-store.js";
 
 export interface ContentMediaRoutesOptions {
   /** Override the blob store (tests use a temp dir). */
   store?: ObjectStore;
-}
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
 }
 
 export const contentMediaRoutes: FastifyPluginAsyncZod<ContentMediaRoutesOptions> = async (

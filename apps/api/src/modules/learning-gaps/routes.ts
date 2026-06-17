@@ -6,8 +6,8 @@
  */
 
 import { z } from "zod";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
 
 import {
   LearningGapSchema,
@@ -17,14 +17,8 @@ import {
   UpdateLearningGapBodySchema,
   LearningGapIdParamSchema,
 } from "@heuresys/shared";
-import { learningGapsService, type ActorContext } from "./service.js";
+import { learningGapsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const learningGapsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

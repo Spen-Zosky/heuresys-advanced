@@ -5,7 +5,7 @@
  * Writes: app.verifyCsrf + engagement_feedback:{create,update,delete}.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import {
   EngagementFeedbackSchema, EngagementFeedbackListQuerySchema, EngagementFeedbackListResponseSchema,
@@ -14,14 +14,8 @@ import {
   CreateEngagementActionPlanBodySchema, UpdateEngagementActionPlanBodySchema,
   EngagementFeedbackIdParamSchema,
 } from "@heuresys/shared";
-import { engagementFeedbackService, type ActorContext } from "./service.js";
+import { engagementFeedbackService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const engagementFeedbackRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── Action plans (nested static segment — declared before /:id so the radix router prefers it) ──

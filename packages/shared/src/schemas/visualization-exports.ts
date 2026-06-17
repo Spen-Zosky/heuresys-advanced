@@ -3,6 +3,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const VIZ_EXPORT_FORMAT_VALUES = [
   "SVG", "PDF", "PNG", "GENERIC_JSON", "REACT_FLOW_JSON", "MERMAID",
 ] as const;
@@ -25,8 +26,7 @@ export const VizExportListQuerySchema = z.object({
   graphId: z.uuid().optional(),
   layoutId: z.uuid().optional(),
   format: VizExportFormatSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type VizExportListQuery = z.infer<typeof VizExportListQuerySchema>;
 

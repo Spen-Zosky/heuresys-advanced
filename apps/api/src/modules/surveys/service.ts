@@ -5,8 +5,10 @@
  * templates/surveys are mutable CRUD; responses are a read-only immutable event log nested under a survey.
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   SurveyTemplateListQuery, CreateSurveyTemplateBody, UpdateSurveyTemplateBody,
   SurveyListQuery, CreateSurveyBody, UpdateSurveyBody,
@@ -15,16 +17,6 @@ import type {
 import * as repo from "./repository.js";
 
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
-
-function isPlatform(a: ActorContext): boolean {
-  return a.roles.includes("PLATFORM_ADMIN");
-}
 
 /** List-scope filter: undefined = no filter (PLATFORM_ADMIN); else own tenant (zero-uuid if tenantless → 0 rows). */
 function listTenantFilter(a: ActorContext): string | undefined {

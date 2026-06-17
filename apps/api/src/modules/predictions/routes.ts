@@ -4,21 +4,15 @@
  * All routes: requirePermission("predictions:read"). No writes (no CSRF preHandler needed).
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import {
   PredictiveModelSchema, PredictiveModelListQuerySchema, PredictiveModelListResponseSchema,
   ModelPredictionSchema, ModelPredictionListQuerySchema, ModelPredictionListResponseSchema,
   PredictionIdParamSchema,
 } from "@heuresys/shared";
-import { predictionsService, type ActorContext } from "./service.js";
+import { predictionsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const predictionsRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── Models (registry) ──

@@ -10,7 +10,6 @@
  * Per AUTH_SECURITY_PLAN §2, §4, §6, §9 + I5 (tenant isolation in API layer).
  */
 
-import { pool } from "../../db/client.js";
 import type { Pool, PoolClient } from "pg";
 import type { RoleCode } from "../../config/constants.js";
 
@@ -529,31 +528,6 @@ export async function findUsersByEmailForReset(
     [email],
   );
   return rows.map((r) => ({ userId: r.user_id, tenantId: r.user_tenant_id }));
-}
-
-/* === Transaction helper ================================================== */
-
-/**
- * Runs the callback inside a single transaction. Auto-commits on success,
- * rolls back on any thrown error. The callback receives the PoolClient and
- * passes it to the repository functions to ensure all queries share the
- * same transaction.
- */
-export async function withTransaction<T>(
-  fn: (client: PoolClient) => Promise<T>,
-): Promise<T> {
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-    const result = await fn(client);
-    await client.query("COMMIT");
-    return result;
-  } catch (err) {
-    await client.query("ROLLBACK");
-    throw err;
-  } finally {
-    client.release();
-  }
 }
 
 /* --- Active session listing (MVP-3 Tappa E admin endpoint) ------------ */

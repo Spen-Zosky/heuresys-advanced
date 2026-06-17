@@ -144,10 +144,52 @@ export async function findTeamsForUser(pool: Pool, userId: string): Promise<Team
       ORDER BY t.team_code`,
     [userId],
   );
-  const teams: TeamDetail[] = [];
-  for (const row of res.rows) {
-    const members = await loadTeamMembers(pool, row.team_id);
-    teams.push({ ...mapTeam(row), members });
+  if (res.rows.length === 0) return [];
+
+  // Batched member load (was N+1: one loadTeamMembers() call per team). A single
+  // query over all the caller's team ids, grouped in JS — keeping the identical
+  // per-team member ordering ((role='LEAD') DESC, display_name NULLS LAST).
+  const teamIds = res.rows.map((r) => r.team_id);
+  const membersByTeam = await loadTeamMembersBatch(pool, teamIds);
+  return res.rows.map((row) => ({
+    ...mapTeam(row),
+    members: membersByTeam.get(row.team_id) ?? [],
+  }));
+}
+
+/**
+ * Loads members for many teams in a single query (collapses the /v1/me/team N+1).
+ * Returns a map team_id → ordered member list, each list ordered exactly like
+ * loadTeamMembers() ((role='LEAD') DESC, display_name NULLS LAST). The SQL
+ * orders by team first so JS grouping preserves per-team member order.
+ */
+async function loadTeamMembersBatch(
+  pool: Pool,
+  teamIds: string[],
+): Promise<Map<string, TeamMember[]>> {
+  const res = await pool.query<MemberRow & { team_member_team_id: string }>(
+    `SELECT m.team_member_team_id, m.team_member_user_id, m.team_member_role, m.team_member_is_active,
+            u.user_email, u.user_display_name
+       FROM sys.sys_team_members m
+       LEFT JOIN sys.sys_users u ON u.user_id = m.team_member_user_id
+      WHERE m.team_member_team_id = ANY($1)
+      ORDER BY m.team_member_team_id, (m.team_member_role = 'LEAD') DESC, u.user_display_name NULLS LAST`,
+    [teamIds],
+  );
+  const byTeam = new Map<string, TeamMember[]>();
+  for (const r of res.rows) {
+    let list = byTeam.get(r.team_member_team_id);
+    if (!list) {
+      list = [];
+      byTeam.set(r.team_member_team_id, list);
+    }
+    list.push({
+      userId: r.team_member_user_id,
+      role: r.team_member_role,
+      email: r.user_email,
+      fullName: r.user_display_name,
+      isActive: r.team_member_is_active,
+    });
   }
-  return teams;
+  return byTeam;
 }

@@ -3,8 +3,10 @@
  * Orchestration of the 6-state wave executor. PLATFORM_ADMIN gated.
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { ForbiddenError, NotFoundError, ValidationError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   WaveExecutorRun,
   WaveExecutorRunListQuery,
@@ -29,15 +31,6 @@ import {
 import { ensureLegacyMirrorDDL, loadLegacyMirrorData } from "./loader.js";
 import { isTerminal } from "./state.js";
 import { logRunEvent } from "./run-logger.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
-function isPlatform(a: ActorContext): boolean {
-  return a.roles.includes("PLATFORM_ADMIN");
-}
 
 export const brownfieldWaveExecutorService = {
   async list(_actor: ActorContext, query: WaveExecutorRunListQuery) {

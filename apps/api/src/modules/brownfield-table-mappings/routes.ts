@@ -3,20 +3,14 @@
  * 3 endpoints: list/get/PATCH-decide.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import {
   BrownfieldTableMappingSchema, BrownfieldTableMappingListQuerySchema,
   BrownfieldTableMappingListResponseSchema, ApproveBrownfieldTableMappingBodySchema,
   BrownfieldTableMappingIdParamSchema,
 } from "@heuresys/shared";
-import { brownfieldTableMappingsService, type ActorContext } from "./service.js";
+import { brownfieldTableMappingsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const brownfieldTableMappingsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

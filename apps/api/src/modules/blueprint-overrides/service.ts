@@ -4,15 +4,14 @@
  * Process must belong to the activation's variant.
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   BlueprintOverride, BlueprintOverrideListQuery, UpsertBlueprintOverrideBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext { userId: string; tenantId: string | null; roles: RoleCode[] }
-function isPlatform(a: ActorContext): boolean { return a.roles.includes("PLATFORM_ADMIN"); }
 
 async function ensureActivationVisible(actor: ActorContext, activationId: string): Promise<void> {
   const t = await repo.getActivationTenant(pool, activationId);

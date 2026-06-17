@@ -5,18 +5,15 @@
  */
 
 import { pool } from "../../db/client.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import type { RoleCode } from "../../config/constants.js";
 import type {
   DashboardScopeKind,
   DashboardWidgetsResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 const PLATFORM_ROLES: RoleCode[] = ["PLATFORM_ADMIN"];
 const TENANT_ROLES: RoleCode[] = [

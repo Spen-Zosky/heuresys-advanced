@@ -3,6 +3,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const VIZ_EDGE_TYPE_VALUES = [
   "REPORTS_TO", "REQUIRES_SKILL", "NEXT_STEP", "SUCCESSOR_OF",
   "PART_OF", "INFLUENCES", "ESCALATES_TO", "GENERIC",
@@ -27,8 +28,7 @@ export const VizEdgeListQuerySchema = z.object({
   sourceNodeId: z.uuid().optional(),
   targetNodeId: z.uuid().optional(),
   type: VizEdgeTypeSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(500).optional().default(100),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(500, 100),
 });
 export type VizEdgeListQuery = z.infer<typeof VizEdgeListQuerySchema>;
 

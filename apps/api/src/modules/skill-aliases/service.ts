@@ -9,8 +9,10 @@
  */
 
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   SkillAlias,
   SkillAliasListQuery,
@@ -18,16 +20,6 @@ import type {
   UpdateSkillAliasBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
-
-function isPlatform(a: ActorContext): boolean {
-  return a.roles.includes("PLATFORM_ADMIN");
-}
 
 function tenantFilterFor(actor: ActorContext): string | undefined {
   return isPlatform(actor) ? undefined : actor.tenantId ?? undefined;

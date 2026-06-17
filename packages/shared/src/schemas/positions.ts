@@ -8,6 +8,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const POSITION_CRITICALITY_VALUES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const;
 export const PositionCriticalitySchema = z.enum(POSITION_CRITICALITY_VALUES);
 
@@ -56,8 +57,7 @@ export const PositionListQuerySchema = z.object({
   organizationUnitId: z.uuid().optional(),
   jobRoleId: z.uuid().optional(),
   ownerUserId: z.uuid().optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type PositionListQuery = z.infer<typeof PositionListQuerySchema>;
 

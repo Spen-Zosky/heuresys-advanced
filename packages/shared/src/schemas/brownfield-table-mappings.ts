@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const BROWNFIELD_APPROVAL_STATUS_VALUES = [
   "PROPOSED", "APPROVED", "REJECTED", "ARCHIVED",
 ] as const;
@@ -31,8 +32,7 @@ export const BrownfieldTableMappingListQuerySchema = z.object({
   sourceTableId: z.uuid().optional(),
   approvalStatus: BrownfieldApprovalStatusSchema.optional(),
   targetSchema: z.string().min(1).max(64).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type BrownfieldTableMappingListQuery = z.infer<typeof BrownfieldTableMappingListQuerySchema>;
 

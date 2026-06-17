@@ -12,7 +12,7 @@
  */
 import type { PoolClient } from "pg";
 import { pool } from "../../db/client.js";
-import { withTransaction } from "../auth/repository.js";
+import { withTransaction } from "../../db/client.js";
 import type { EscoOccupation, EscoSkillHierarchy } from "./esco-connector.js";
 import { ATECO_SCHEME, type AtecoActivity } from "./istat-ateco-connector.js";
 

@@ -6,8 +6,10 @@
  */
 
 import { pool } from "../../db/client.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ConflictError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   JobRole,
   JobRoleListQuery,
@@ -15,12 +17,6 @@ import type {
   UpdateJobRoleBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 export const jobRolesService = {
   async list(_actor: ActorContext, query: JobRoleListQuery) {

@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const BLUEPRINT_ACTIVATION_STATUS_VALUES = ["PROPOSED", "ACTIVE", "SUSPENDED", "RETIRED"] as const;
 export const BlueprintActivationStatusSchema = z.enum(BLUEPRINT_ACTIVATION_STATUS_VALUES);
 export type BlueprintActivationStatus = z.infer<typeof BlueprintActivationStatusSchema>;
@@ -26,8 +27,7 @@ export type BlueprintActivation = z.infer<typeof BlueprintActivationSchema>;
 export const BlueprintActivationListQuerySchema = z.object({
   variantId: z.uuid().optional(),
   status: BlueprintActivationStatusSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type BlueprintActivationListQuery = z.infer<typeof BlueprintActivationListQuerySchema>;
 

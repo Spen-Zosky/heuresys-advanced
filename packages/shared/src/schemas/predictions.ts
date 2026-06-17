@@ -8,6 +8,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 const META = z.record(z.string(), z.unknown());
 
 // ─────────────────────────── Models (registry) ───────────────────────────
@@ -38,8 +39,7 @@ export const PredictiveModelListQuerySchema = z.object({
   type: PredictiveModelTypeEnum.optional(),
   status: PredictiveModelStatusEnum.optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type PredictiveModelListQuery = z.infer<typeof PredictiveModelListQuerySchema>;
 
@@ -74,8 +74,7 @@ export const ModelPredictionListQuerySchema = z.object({
   modelId: z.uuid().optional(),
   subjectUserId: z.uuid().optional(),
   label: z.string().min(1).max(100).optional(),
-  limit: z.coerce.number().int().min(1).max(500).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(500, 50),
 });
 export type ModelPredictionListQuery = z.infer<typeof ModelPredictionListQuerySchema>;
 

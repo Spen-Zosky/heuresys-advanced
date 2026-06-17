@@ -5,6 +5,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const SuccessorReadinessSchema = z.object({
   successorReadinessId: z.uuid(),
   candidateId: z.uuid(),
@@ -20,8 +21,7 @@ export type SuccessorReadiness = z.infer<typeof SuccessorReadinessSchema>;
 export const SuccessorReadinessListQuerySchema = z.object({
   candidateId: z.uuid().optional(),
   horizon: z.string().min(1).max(32).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type SuccessorReadinessListQuery = z.infer<typeof SuccessorReadinessListQuerySchema>;
 

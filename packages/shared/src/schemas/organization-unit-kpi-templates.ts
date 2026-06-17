@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const OrganizationUnitKpiTemplateSchema = z.object({
   organizationUnitKpiTemplateId: z.uuid(),
   // Dual-mode (D4 C(i)): a row is keyed EITHER on a real org-unit INSTANCE (unitId + tenantId,
@@ -24,8 +25,7 @@ export type OrganizationUnitKpiTemplate = z.infer<typeof OrganizationUnitKpiTemp
 export const OrganizationUnitKpiTemplateListQuerySchema = z.object({
   unitId: z.uuid().optional(),
   kpiId: z.uuid().optional(),
-  limit: z.coerce.number().int().min(1).max(500).optional().default(100),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(500, 100),
 });
 export type OrganizationUnitKpiTemplateListQuery = z.infer<typeof OrganizationUnitKpiTemplateListQuerySchema>;
 

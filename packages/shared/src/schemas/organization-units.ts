@@ -5,6 +5,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const OrganizationUnitSchema = z.object({
   organizationUnitId: z.uuid(),
   tenantId: z.uuid(),
@@ -27,8 +28,7 @@ export const OrganizationUnitListQuerySchema = z.object({
   isActive: z.coerce.boolean().optional(),
   parentId: z.uuid().optional(),
   managerUserId: z.uuid().optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type OrganizationUnitListQuery = z.infer<typeof OrganizationUnitListQuerySchema>;
 

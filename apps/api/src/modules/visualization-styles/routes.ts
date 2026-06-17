@@ -3,20 +3,14 @@
  * 4 endpoints — no PATCH (immutable per row; delete + re-create to change).
  */
 import { z } from "zod";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
 import {
   VizStyleSchema, VizStyleListQuerySchema, VizStyleListResponseSchema,
   CreateVizStyleBodySchema, VizStyleIdParamSchema,
 } from "@heuresys/shared";
-import { visualizationStylesService, type ActorContext } from "./service.js";
+import { visualizationStylesService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const visualizationStylesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

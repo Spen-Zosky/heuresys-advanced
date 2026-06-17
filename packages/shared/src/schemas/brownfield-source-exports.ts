@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const BROWNFIELD_SOURCE_EXPORT_STATUS_VALUES = [
   "AVAILABLE", "INGESTED", "ARCHIVED", "CORRUPTED",
 ] as const;
@@ -25,8 +26,7 @@ export type BrownfieldSourceExport = z.infer<typeof BrownfieldSourceExportSchema
 export const BrownfieldSourceExportListQuerySchema = z.object({
   status: BrownfieldSourceExportStatusSchema.optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type BrownfieldSourceExportListQuery = z.infer<typeof BrownfieldSourceExportListQuerySchema>;
 

@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const ProcessKpiTemplateSchema = z.object({
   processKpiTemplateId: z.uuid(),
   processId: z.uuid(),
@@ -19,8 +20,7 @@ export type ProcessKpiTemplate = z.infer<typeof ProcessKpiTemplateSchema>;
 export const ProcessKpiTemplateListQuerySchema = z.object({
   processId: z.uuid().optional(),
   kpiId: z.uuid().optional(),
-  limit: z.coerce.number().int().min(1).max(500).optional().default(100),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(500, 100),
 });
 export type ProcessKpiTemplateListQuery = z.infer<typeof ProcessKpiTemplateListQuerySchema>;
 

@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const BROWNFIELD_IMPORT_STATUS_VALUES = [
   "RUNNING", "COMPLETED", "FAILED", "CANCELLED", "AWAITING_APPROVAL",
 ] as const;
@@ -28,8 +29,7 @@ export const BrownfieldImportRunListQuerySchema = z.object({
   exportId: z.uuid().optional(),
   status: BrownfieldImportStatusSchema.optional(),
   wave: z.coerce.number().int().min(0).max(32767).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type BrownfieldImportRunListQuery = z.infer<typeof BrownfieldImportRunListQuerySchema>;
 

@@ -10,6 +10,7 @@
  */
 
 import pg from "pg";
+import type { PoolClient } from "pg";
 import { env } from "../config/env.js";
 
 export const pool = new pg.Pool({
@@ -60,4 +61,29 @@ export async function isDatabaseReady(): Promise<boolean> {
 
 export async function closePool(): Promise<void> {
   await pool.end();
+}
+
+/* === Transaction helper ================================================== */
+
+/**
+ * Runs the callback inside a single transaction. Auto-commits on success,
+ * rolls back on any thrown error. The callback receives the PoolClient and
+ * passes it to the repository functions to ensure all queries share the
+ * same transaction.
+ */
+export async function withTransaction<T>(
+  fn: (client: PoolClient) => Promise<T>,
+): Promise<T> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await fn(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 }

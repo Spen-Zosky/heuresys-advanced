@@ -4,14 +4,10 @@
  */
 
 import { pool } from "../../db/client.js";
-import type { RoleCode } from "../../config/constants.js";
-import * as repo from "./repository.js";
+import type { ActorContext } from "../../lib/actor.js";
 
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
+export type { ActorContext };
+import * as repo from "./repository.js";
 
 export const assessmentMethodsService = {
   async list(_actor: ActorContext) {

@@ -2,16 +2,15 @@
  * apps/api/src/modules/blueprint-variants/service.ts
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   BlueprintVariant, BlueprintVariantListQuery,
   CreateBlueprintVariantBody, UpdateBlueprintVariantBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext { userId: string; tenantId: string | null; roles: RoleCode[] }
-function isPlatform(a: ActorContext): boolean { return a.roles.includes("PLATFORM_ADMIN"); }
 
 export const blueprintVariantsService = {
   async list(_actor: ActorContext, query: BlueprintVariantListQuery) {

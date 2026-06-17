@@ -5,6 +5,7 @@
  * need tree-shaking or a smaller surface.
  */
 
+export * from "./schemas/_pagination.js";
 export * from "./schemas/role-codes.js";
 export * from "./schemas/auth.js";
 export * from "./schemas/mfa.js";

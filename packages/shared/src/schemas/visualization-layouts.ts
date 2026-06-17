@@ -3,6 +3,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const VIZ_LAYOUT_ENGINE_VALUES = [
   "AUTO", "DAGRE", "ELK", "HIERARCHICAL", "TREE",
   "SWIMLANE", "TIMELINE", "FORCE_DIRECTED", "MANUAL",
@@ -26,8 +27,7 @@ export const VizLayoutListQuerySchema = z.object({
   graphId: z.uuid().optional(),
   engine: VizLayoutEngineSchema.optional(),
   isDefault: z.coerce.boolean().optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type VizLayoutListQuery = z.infer<typeof VizLayoutListQuerySchema>;
 

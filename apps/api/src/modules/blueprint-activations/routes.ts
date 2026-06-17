@@ -2,21 +2,15 @@
  * apps/api/src/modules/blueprint-activations/routes.ts
  */
 import { z } from "zod";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
 import {
   BlueprintActivationSchema, BlueprintActivationListQuerySchema,
   BlueprintActivationListResponseSchema, CreateBlueprintActivationBodySchema,
   UpdateBlueprintActivationBodySchema, BlueprintActivationIdParamSchema,
 } from "@heuresys/shared";
-import { blueprintActivationsService, type ActorContext } from "./service.js";
+import { blueprintActivationsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const blueprintActivationsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

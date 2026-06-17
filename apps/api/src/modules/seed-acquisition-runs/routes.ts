@@ -2,21 +2,15 @@
  * apps/api/src/modules/seed-acquisition-runs/routes.ts
  */
 import { z } from "zod";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
 import {
   SeedAcquisitionRunSchema, SeedAcquisitionRunListQuerySchema,
   SeedAcquisitionRunListResponseSchema, CreateSeedAcquisitionRunBodySchema,
   UpdateSeedAcquisitionRunBodySchema, SeedAcquisitionRunIdParamSchema,
 } from "@heuresys/shared";
-import { seedAcquisitionRunsService, type ActorContext } from "./service.js";
+import { seedAcquisitionRunsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const seedAcquisitionRunsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

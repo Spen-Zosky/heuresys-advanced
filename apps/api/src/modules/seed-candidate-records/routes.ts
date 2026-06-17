@@ -3,19 +3,13 @@
  * 2 read-only endpoints.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import {
   SeedCandidateRecordSchema, SeedCandidateRecordListQuerySchema,
   SeedCandidateRecordListResponseSchema, SeedCandidateRecordIdParamSchema,
 } from "@heuresys/shared";
-import { seedCandidateRecordsService, type ActorContext } from "./service.js";
+import { seedCandidateRecordsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const seedCandidateRecordsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

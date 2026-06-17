@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const BLUEPRINT_OVERRIDE_INCLUSION_VALUES = ["IN", "PARTIAL", "OUT"] as const;
 export const BlueprintOverrideInclusionSchema = z.enum(BLUEPRINT_OVERRIDE_INCLUSION_VALUES);
 export type BlueprintOverrideInclusion = z.infer<typeof BlueprintOverrideInclusionSchema>;
@@ -24,8 +25,7 @@ export const BlueprintOverrideListQuerySchema = z.object({
   activationId: z.uuid().optional(),
   processId: z.uuid().optional(),
   inclusion: BlueprintOverrideInclusionSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(500).optional().default(100),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(500, 100),
 });
 export type BlueprintOverrideListQuery = z.infer<typeof BlueprintOverrideListQuerySchema>;
 

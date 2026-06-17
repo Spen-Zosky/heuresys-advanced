@@ -5,8 +5,10 @@
  * Mirrors modules/surveys/service.ts.
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   EngagementFeedbackListQuery, CreateEngagementFeedbackBody, UpdateEngagementFeedbackBody,
   EngagementActionPlanListQuery, CreateEngagementActionPlanBody, UpdateEngagementActionPlanBody,
@@ -15,15 +17,6 @@ import * as repo from "./repository.js";
 
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
 
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
-
-function isPlatform(a: ActorContext): boolean {
-  return a.roles.includes("PLATFORM_ADMIN");
-}
 function listTenantFilter(a: ActorContext): string | undefined {
   if (isPlatform(a)) return undefined;
   return a.tenantId ?? ZERO_UUID;

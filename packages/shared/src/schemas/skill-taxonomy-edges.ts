@@ -7,6 +7,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const SkillEdgeKindSchema = z.enum(["IS_A", "PART_OF", "RELATED", "PREREQUISITE_OF"]);
 export type SkillEdgeKind = z.infer<typeof SkillEdgeKindSchema>;
 
@@ -24,8 +25,7 @@ export const SkillTaxonomyEdgeListQuerySchema = z.object({
   parentSkillId: z.uuid().optional(),
   childSkillId: z.uuid().optional(),
   kind: SkillEdgeKindSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type SkillTaxonomyEdgeListQuery = z.infer<typeof SkillTaxonomyEdgeListQuerySchema>;
 

@@ -7,6 +7,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const TrainingInitiativeStatusSchema = z.enum([
   "PLANNED",
   "OPEN",
@@ -40,8 +41,7 @@ export const TrainingInitiativeListQuerySchema = z.object({
   moduleId: z.uuid().optional(),
   status: TrainingInitiativeStatusSchema.optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type TrainingInitiativeListQuery = z.infer<typeof TrainingInitiativeListQuerySchema>;
 

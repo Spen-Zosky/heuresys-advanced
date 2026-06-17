@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const SEED_APPROVAL_STATUS_VALUES = [
   "APPROVED", "REJECTED", "NEEDS_CHANGES",
 ] as const;
@@ -24,8 +25,7 @@ export type SeedApprovalDecision = z.infer<typeof SeedApprovalDecisionSchema>;
 export const SeedApprovalDecisionListQuerySchema = z.object({
   candidateId: z.uuid().optional(),
   status: SeedApprovalStatusSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type SeedApprovalDecisionListQuery = z.infer<typeof SeedApprovalDecisionListQuerySchema>;
 

@@ -9,16 +9,13 @@
  */
 
 import { pool } from "../../db/client.js";
-import { ROLE_CODES, type RoleCode } from "../../config/constants.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
+import { ROLE_CODES } from "../../config/constants.js";
 import { ForbiddenError, NotFoundError, ValidationError } from "../../errors/index.js";
 import type { MfaPolicy } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 const KNOWN_ROLES = new Set<string>(ROLE_CODES);
 

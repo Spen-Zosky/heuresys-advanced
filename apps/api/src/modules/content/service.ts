@@ -6,7 +6,9 @@
  * Writes are owned by the actor's tenant. Publish-workflow / restore / ESS = P2.
  */
 import { pool } from "../../db/client.js";
-import type { RoleCode } from "../../config/constants.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ForbiddenError, ConflictError } from "../../errors/index.js";
 import type {
   ContentBodyFormat,
@@ -23,12 +25,6 @@ import type {
   ContentVersionListResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 function buildScope(a: ActorContext): repo.ScopeFilter {
   const isPlatform = a.roles.includes("PLATFORM_ADMIN");

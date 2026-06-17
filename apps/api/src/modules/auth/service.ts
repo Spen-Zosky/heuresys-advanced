@@ -16,7 +16,7 @@ import {
   type RoleCode,
 } from "../../config/constants.js";
 import { UnauthorizedError, NotFoundError, ForbiddenError } from "../../errors/index.js";
-import { pool } from "../../db/client.js";
+import { pool, withTransaction } from "../../db/client.js";
 
 import { hashPassword, verifyPassword } from "./password.js";
 import { generateOpaqueToken, sha256Hex } from "./tokens.js";
@@ -332,7 +332,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       // 3. Rehash transparently if Argon2 params have evolved.
       if (needsRehash) {
         const newHash = await hashPassword(input.password);
-        await repo.withTransaction(async (tx) => {
+        await withTransaction(async (tx) => {
           await repo.markCredentialNotCurrent(tx, candidate.credentialId);
           await repo.insertCredential(tx, {
             identityId: candidate.identityId,
@@ -489,7 +489,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
 
       // Replay detection: token already used → revoke whole family.
       if (row.usedAt !== null) {
-        await repo.withTransaction(async (tx) => {
+        await withTransaction(async (tx) => {
           await repo.revokeRefreshFamily(tx, row.familyId, "REPLAY_DETECTED");
           await repo.insertLoginEvent(tx, {
             userId: row.userId,
@@ -523,7 +523,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         row.refreshTokenId,
       );
       if (!marked) {
-        await repo.withTransaction(async (tx) => {
+        await withTransaction(async (tx) => {
           await repo.revokeRefreshFamily(tx, row.familyId, "REPLAY_DETECTED");
           await repo.insertLoginEvent(tx, {
             userId: row.userId,
@@ -657,7 +657,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
       }
 
       const newHash = await hashPassword(input.newPassword);
-      await repo.withTransaction(async (tx) => {
+      await withTransaction(async (tx) => {
         await repo.markAllCredentialsNotCurrentForUser(tx, rec.userId);
         await repo.insertCredential(tx, {
           identityId: identity.identityId,
@@ -691,7 +691,7 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
           throw new ForbiddenError("Cannot revoke users outside your tenant");
         }
       }
-      await repo.withTransaction(async (tx) => {
+      await withTransaction(async (tx) => {
         await repo.revokeAllRefreshTokensForUser(tx, input.targetUserId, "REVOKED_BY_ADMIN");
         await repo.insertLoginEvent(tx, {
           userId: input.targetUserId,

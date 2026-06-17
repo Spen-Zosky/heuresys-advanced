@@ -14,6 +14,9 @@
  * is sensitive → admin/manager-only (D-6); RBAC gates the routes to insights:view.
  */
 import { pool } from "../../db/client.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import type { RoleCode } from "../../config/constants.js";
 import { NotFoundError } from "../../errors/index.js";
 import type {
@@ -59,12 +62,6 @@ async function notifySkillGaps(toStore: repo.SubjectPositionScoreToStore[]): Pro
       /* best-effort */
     }
   }
-}
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
 }
 
 export const MODEL_VERSION = "flight-risk-v1";

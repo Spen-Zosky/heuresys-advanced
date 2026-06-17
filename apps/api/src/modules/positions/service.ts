@@ -8,6 +8,9 @@
  */
 
 import { pool } from "../../db/client.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
 import type { RoleCode } from "../../config/constants.js";
 import type {
@@ -22,12 +25,6 @@ import type {
   PositionIntelligenceProfile,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 const ADMIN_ROLES: RoleCode[] = ["PLATFORM_ADMIN", "TENANT_ADMIN", "HRMS_MANAGER"];
 

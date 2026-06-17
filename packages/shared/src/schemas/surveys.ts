@@ -8,6 +8,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 const META = z.record(z.string(), z.unknown());
 
 // ─────────────────────────── Templates ───────────────────────────
@@ -35,8 +36,7 @@ export const SurveyTemplateListQuerySchema = z.object({
   category: SurveyTemplateCategoryEnum.optional(),
   isSystem: z.coerce.boolean().optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type SurveyTemplateListQuery = z.infer<typeof SurveyTemplateListQuerySchema>;
 
@@ -101,8 +101,7 @@ export const SurveyListQuerySchema = z.object({
   audienceType: SurveyAudienceTypeEnum.optional(),
   templateId: z.uuid().optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type SurveyListQuery = z.infer<typeof SurveyListQuerySchema>;
 
@@ -166,8 +165,7 @@ export type SurveyResponse = z.infer<typeof SurveyResponseSchema>;
 export const SurveyResponseListQuerySchema = z.object({
   subjectUserId: z.uuid().optional(),
   isComplete: z.coerce.boolean().optional(),
-  limit: z.coerce.number().int().min(1).max(500).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(500, 50),
 });
 export type SurveyResponseListQuery = z.infer<typeof SurveyResponseListQuerySchema>;
 

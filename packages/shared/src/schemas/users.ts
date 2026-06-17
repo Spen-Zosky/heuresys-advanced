@@ -7,6 +7,7 @@
  */
 
 import { z } from "zod";
+import { paginationFields } from "./_pagination.js";
 import { RoleCodeSchema } from "./role-codes.js";
 
 export const USER_STATUS_VALUES = [
@@ -105,8 +106,7 @@ export const UserListQuerySchema = z.object({
   status: UserStatusSchema.optional(),
   type: UserTypeSchema.optional(),
   isSynthetic: z.coerce.boolean().optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type UserListQuery = z.infer<typeof UserListQuerySchema>;
 

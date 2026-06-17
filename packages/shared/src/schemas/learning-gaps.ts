@@ -6,6 +6,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const LEARNING_GAP_SEVERITY_VALUES = ["LOW", "MEDIUM", "HIGH", "CRITICAL"] as const;
 export const LearningGapSeveritySchema = z.enum(LEARNING_GAP_SEVERITY_VALUES);
 export type LearningGapSeverity = z.infer<typeof LearningGapSeveritySchema>;
@@ -32,8 +33,7 @@ export const LearningGapListQuerySchema = z.object({
   positionId: z.uuid().optional(),
   skillId: z.uuid().optional(),
   severity: LearningGapSeveritySchema.optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type LearningGapListQuery = z.infer<typeof LearningGapListQuerySchema>;
 

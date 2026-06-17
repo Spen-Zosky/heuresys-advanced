@@ -6,6 +6,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const SkillCategorySchema = z.object({
   skillCategoryId: z.uuid(),
   familyId: z.uuid(),
@@ -21,8 +22,7 @@ export type SkillCategory = z.infer<typeof SkillCategorySchema>;
 export const SkillCategoryListQuerySchema = z.object({
   familyId: z.uuid().optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type SkillCategoryListQuery = z.infer<typeof SkillCategoryListQuerySchema>;
 

@@ -5,7 +5,7 @@
  * Publish-workflow (/publish, /unpublish, /restore) + ESS (/me/content) = P2.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import { z } from "zod";
 
 import {
@@ -26,14 +26,8 @@ import {
   ContentSearchQuerySchema,
   ContentSearchResponseSchema,
 } from "@heuresys/shared";
-import { contentService, type ActorContext } from "./service.js";
+import { contentService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 const DeleteDocResponse = z.object({ outcome: z.enum(["archived", "deleted"]) });
 const DeleteCatResponse = z.object({ deleted: z.literal(true) });

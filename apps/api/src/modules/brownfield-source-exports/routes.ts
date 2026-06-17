@@ -3,19 +3,13 @@
  * 2 endpoints: list/get. Read-only.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import {
   BrownfieldSourceExportSchema, BrownfieldSourceExportListQuerySchema,
   BrownfieldSourceExportListResponseSchema, BrownfieldSourceExportIdParamSchema,
 } from "@heuresys/shared";
-import { brownfieldSourceExportsService, type ActorContext } from "./service.js";
+import { brownfieldSourceExportsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const brownfieldSourceExportsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

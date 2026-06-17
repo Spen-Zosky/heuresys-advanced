@@ -6,6 +6,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const SUCCESSION_POOL_STATUS_VALUES = ["ACTIVE", "ARCHIVED", "PROPOSED"] as const;
 export const SuccessionPoolStatusSchema = z.enum(SUCCESSION_POOL_STATUS_VALUES);
 export type SuccessionPoolStatus = z.infer<typeof SuccessionPoolStatusSchema>;
@@ -28,8 +29,7 @@ export const SuccessionPoolListQuerySchema = z.object({
   positionId: z.uuid().optional(),
   status: SuccessionPoolStatusSchema.optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type SuccessionPoolListQuery = z.infer<typeof SuccessionPoolListQuerySchema>;
 

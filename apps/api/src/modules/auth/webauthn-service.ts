@@ -44,7 +44,7 @@ import type {
 import { pool } from "../../db/client.js";
 import { ApiError, UnauthorizedError } from "../../errors/index.js";
 import { env } from "../../config/env.js";
-import { withTransaction } from "./repository.js";
+import { withTransaction } from "../../db/client.js";
 import { sharedMfaChallengeStore, type MfaChallengeStore } from "./mfa-service.js";
 import * as mfaRepo from "./mfa-repository.js";
 import * as webauthnRepo from "./webauthn-repository.js";

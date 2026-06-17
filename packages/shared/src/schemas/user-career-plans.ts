@@ -5,6 +5,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const USER_CAREER_PLAN_STATUS_VALUES = ["ACTIVE", "COMPLETED", "PAUSED", "CANCELLED"] as const;
 export const UserCareerPlanStatusSchema = z.enum(USER_CAREER_PLAN_STATUS_VALUES);
 export type UserCareerPlanStatus = z.infer<typeof UserCareerPlanStatusSchema>;
@@ -28,8 +29,7 @@ export const UserCareerPlanListQuerySchema = z.object({
   pathId: z.uuid().optional(),
   targetPositionId: z.uuid().optional(),
   status: UserCareerPlanStatusSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type UserCareerPlanListQuery = z.infer<typeof UserCareerPlanListQuerySchema>;
 

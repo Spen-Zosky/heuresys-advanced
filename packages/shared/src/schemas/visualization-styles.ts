@@ -3,6 +3,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const VizStyleSchema = z.object({
   styleId: z.uuid(),
   graphId: z.uuid(),
@@ -17,8 +18,7 @@ export type VizStyle = z.infer<typeof VizStyleSchema>;
 export const VizStyleListQuerySchema = z.object({
   graphId: z.uuid().optional(),
   nodeType: z.string().min(1).max(64).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type VizStyleListQuery = z.infer<typeof VizStyleListQuerySchema>;
 

@@ -3,6 +3,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const BlueprintFamilySchema = z.object({
   blueprintFamilyId: z.uuid(),
   code: z.string(),
@@ -16,8 +17,7 @@ export type BlueprintFamily = z.infer<typeof BlueprintFamilySchema>;
 
 export const BlueprintFamilyListQuerySchema = z.object({
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type BlueprintFamilyListQuery = z.infer<typeof BlueprintFamilyListQuerySchema>;
 

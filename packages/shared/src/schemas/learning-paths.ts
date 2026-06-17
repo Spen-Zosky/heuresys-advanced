@@ -5,6 +5,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const LearningPathSchema = z.object({
   learningPathId: z.uuid(),
   tenantId: z.uuid().nullable(),
@@ -22,8 +23,7 @@ export type LearningPath = z.infer<typeof LearningPathSchema>;
 export const LearningPathListQuerySchema = z.object({
   isGlobal: z.coerce.boolean().optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type LearningPathListQuery = z.infer<typeof LearningPathListQuerySchema>;
 

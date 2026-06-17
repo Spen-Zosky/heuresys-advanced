@@ -6,7 +6,7 @@
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import {
   WorkforceAnalyticsResponseSchema,
@@ -21,20 +21,14 @@ import {
   AnalyticsExportParamsSchema,
   AnalyticsExportQuerySchema,
 } from "@heuresys/shared";
-import { analyticsService, type ActorContext } from "./service.js";
+import { analyticsService } from "./service.js";
 import { toCsv } from "./csv.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
 
 /** Date stamp (YYYY-MM-DD) for the download filename, taken from the payload's generatedAt. */
 function stampFrom(payload: Record<string, unknown>): string {
   const g = payload.generatedAt;
   return typeof g === "string" ? g.slice(0, 10) : new Date().toISOString().slice(0, 10);
-}
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
 }
 
 export const analyticsRoutes: FastifyPluginAsyncZod = async (app) => {

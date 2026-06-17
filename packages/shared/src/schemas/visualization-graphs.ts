@@ -2,6 +2,7 @@
  * packages/shared/src/schemas/visualization-graphs.ts
  */
 import { z } from "zod";
+import { paginationFields } from "./_pagination.js";
 import { VizNodeSchema } from "./visualization-nodes.js";
 import { VizEdgeSchema } from "./visualization-edges.js";
 
@@ -33,8 +34,7 @@ export const VizGraphListQuerySchema = z.object({
   type: VizGraphTypeSchema.optional(),
   isActive: z.coerce.boolean().optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type VizGraphListQuery = z.infer<typeof VizGraphListQuerySchema>;
 

@@ -3,16 +3,16 @@
  * Upsert by (layout, node). Both must belong to same graph.
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   VizNodeLayout, VizNodeLayoutListQuery, UpsertVizNodeLayoutBody, VizGraph,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findGraphById } from "../visualization-graphs/repository.js";
 
-export interface ActorContext { userId: string; tenantId: string | null; roles: RoleCode[] }
-function isPlatform(a: ActorContext): boolean { return a.roles.includes("PLATFORM_ADMIN"); }
 function graphVisible(a: ActorContext, g: VizGraph): boolean {
   if (isPlatform(a)) return true;
   return a.tenantId !== null && g.tenantId === a.tenantId;

@@ -10,7 +10,7 @@
 import { randomUUID } from "node:crypto";
 import type { PoolClient } from "pg";
 import { pool } from "../../db/client.js";
-import { withTransaction } from "../auth/repository.js";
+import { withTransaction } from "../../db/client.js";
 
 export type DbConnector = typeof pool | PoolClient;
 

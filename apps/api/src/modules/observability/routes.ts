@@ -8,17 +8,11 @@
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import { SystemHealthResponseSchema } from "@heuresys/shared";
-import { observabilityService, type ActorContext } from "./service.js";
+import { observabilityService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const observabilityRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/system-health", {

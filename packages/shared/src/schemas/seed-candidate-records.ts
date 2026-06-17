@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const SEED_CANDIDATE_VALIDATION_STATUS_VALUES = [
   "PENDING", "PASSED", "FAILED", "WARNING", "APPROVED", "REJECTED", "APPLIED",
 ] as const;
@@ -29,8 +30,7 @@ export const SeedCandidateRecordListQuerySchema = z.object({
   domain: z.string().min(1).max(64).optional(),
   validationStatus: SeedCandidateValidationStatusSchema.optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(500).optional().default(100),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(500, 100),
 });
 export type SeedCandidateRecordListQuery = z.infer<typeof SeedCandidateRecordListQuerySchema>;
 

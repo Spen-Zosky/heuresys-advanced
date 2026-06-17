@@ -3,6 +3,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const VIZ_NODE_SOURCE_ENTITY_TYPE_VALUES = [
   "POSITION", "USER", "SKILL", "KPI", "PROCESS", "UNIT",
   "LEARNING_MODULE", "CAREER_PATH", "BLUEPRINT_VARIANT",
@@ -29,8 +30,7 @@ export const VizNodeListQuerySchema = z.object({
   graphId: z.uuid().optional(),
   sourceEntityType: VizNodeSourceEntityTypeSchema.optional(),
   groupKey: z.string().min(1).max(128).optional(),
-  limit: z.coerce.number().int().min(1).max(500).optional().default(100),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(500, 100),
 });
 export type VizNodeListQuery = z.infer<typeof VizNodeListQuerySchema>;
 

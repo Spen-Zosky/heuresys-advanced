@@ -11,6 +11,10 @@
       "types": "./dist/index.d.ts",
       "default": "./src/index.ts"
     },
+    "./schemas/_pagination": {
+      "types": "./dist/schemas/_pagination.d.ts",
+      "default": "./src/schemas/_pagination.ts"
+    },
     "./schemas/auth": {
       "types": "./dist/schemas/auth.d.ts",
       "default": "./src/schemas/auth.ts"

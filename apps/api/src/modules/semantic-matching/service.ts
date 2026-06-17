@@ -4,6 +4,9 @@
  * Skills catalog is largely global → similar-skills is matching:read for any actor.
  */
 import { pool } from "../../db/client.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
 import { env } from "../../config/env.js";
 import type { RoleCode } from "../../config/constants.js";
@@ -12,11 +15,6 @@ import * as repo from "./repository.js";
 import { runBackfill, type BackfillSummary } from "./backfill.js";
 import { makeEmbedder, type Embedder } from "./voyage-client.js";
 
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 const isPlatform = (a: ActorContext): boolean => a.roles.includes("PLATFORM_ADMIN");
 // A non-platform actor with no tenant sees only global skills → match no real tenant.
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";

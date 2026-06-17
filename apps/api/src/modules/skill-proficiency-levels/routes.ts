@@ -4,16 +4,10 @@
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import { SkillProficiencyLevelListResponseSchema } from "@heuresys/shared";
-import { skillProficiencyLevelsService, type ActorContext } from "./service.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
+import { skillProficiencyLevelsService } from "./service.js";
 
 export const skillProficiencyLevelsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

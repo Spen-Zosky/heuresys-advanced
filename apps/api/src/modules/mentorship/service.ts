@@ -4,8 +4,10 @@
  * PLATFORM_ADMIN: unfiltered. Others: limited to own tenant; not-visible rows surface as 404 (no leak).
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ForbiddenError, ValidationError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   MentorshipProgramListQuery, CreateMentorshipProgramBody, UpdateMentorshipProgramBody,
   MentorshipListQuery, CreateMentorshipBody, UpdateMentorshipBody,
@@ -15,16 +17,6 @@ import type {
 import * as repo from "./repository.js";
 
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
-
-function isPlatform(a: ActorContext): boolean {
-  return a.roles.includes("PLATFORM_ADMIN");
-}
 
 /** List-scope filter: undefined = no filter (PLATFORM_ADMIN); else own tenant (zero-uuid if tenantless → 0 rows). */
 function listTenantFilter(a: ActorContext): string | undefined {

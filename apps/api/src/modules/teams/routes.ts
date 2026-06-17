@@ -4,7 +4,7 @@
  * Read-only in R1b — teams are derived from the org by db/seeds/rtl-rebuild/13_teams_from_org.sql.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import {
   TeamDetailSchema,
@@ -12,14 +12,8 @@ import {
   TeamListResponseSchema,
   TeamIdParamSchema,
 } from "@heuresys/shared";
-import { teamsService, type ActorContext } from "./service.js";
+import { teamsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const teamsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

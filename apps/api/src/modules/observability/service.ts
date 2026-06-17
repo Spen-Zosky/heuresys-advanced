@@ -7,17 +7,13 @@
  */
 
 import { pool } from "../../db/client.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { rbacCacheStats } from "../../middleware/rbac.js";
-import type { RoleCode } from "../../config/constants.js";
 import type { SystemHealthResponse } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { metricsStore } from "./metrics-store.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 /**
  * App-configured pool client cap. Mirrors `max: 20` in db/client.ts — pg.Pool

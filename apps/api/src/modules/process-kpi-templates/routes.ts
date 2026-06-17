@@ -3,21 +3,15 @@
  * 4 endpoints: list/get/PUT-upsert/delete.
  */
 import { z } from "zod";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
 import {
   ProcessKpiTemplateSchema, ProcessKpiTemplateListQuerySchema,
   ProcessKpiTemplateListResponseSchema, UpsertProcessKpiTemplateBodySchema,
   ProcessKpiTemplateIdParamSchema,
 } from "@heuresys/shared";
-import { processKpiTemplatesService, type ActorContext } from "./service.js";
+import { processKpiTemplatesService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const processKpiTemplatesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

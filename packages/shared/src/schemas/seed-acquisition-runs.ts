@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const SEED_ACQUISITION_RUN_STATUS_VALUES = [
   "RUNNING", "COMPLETED", "FAILED", "CANCELLED",
 ] as const;
@@ -28,8 +29,7 @@ export type SeedAcquisitionRun = z.infer<typeof SeedAcquisitionRunSchema>;
 export const SeedAcquisitionRunListQuerySchema = z.object({
   status: SeedAcquisitionRunStatusSchema.optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type SeedAcquisitionRunListQuery = z.infer<typeof SeedAcquisitionRunListQuerySchema>;
 

@@ -4,8 +4,10 @@
  * READ-ONLY. PLATFORM_ADMIN: unfiltered. Others: own tenant only; out-of-scope rows → 404 (no leak).
  */
 import { pool } from "../../db/client.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   EngagementSurveyListResponse,
   EngagementSurveyResultsResponse,
@@ -14,12 +16,6 @@ import type {
 import * as repo from "./repository.js";
 
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 const isPlatform = (a: ActorContext): boolean => a.roles.includes("PLATFORM_ADMIN");
 

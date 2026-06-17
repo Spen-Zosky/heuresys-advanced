@@ -4,17 +4,11 @@
  * The per-user inbox + preferences live under /v1/me/* (self-scope).
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import { BroadcastNotificationBodySchema, BroadcastNotificationResponseSchema } from "@heuresys/shared";
-import { notificationsService, type ActorContext } from "./service.js";
+import { notificationsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const notificationsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(

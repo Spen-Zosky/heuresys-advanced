@@ -3,13 +3,12 @@
  * PLATFORM_ADMIN only for writes (catalog-level).
  */
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type { ProcessKpiTemplate, ProcessKpiTemplateListQuery, UpsertProcessKpiTemplateBody } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext { userId: string; tenantId: string | null; roles: RoleCode[] }
-function isPlatform(a: ActorContext): boolean { return a.roles.includes("PLATFORM_ADMIN"); }
 
 export const processKpiTemplatesService = {
   async list(_actor: ActorContext, query: ProcessKpiTemplateListQuery) {

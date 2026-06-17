@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 // Must mirror the DB CHECK on sys.sys_activity_classifications.activity_classification_scheme
 // (RD-08: varchar+CHECK is the structural authority). The brownfield Wave-1 ingestion populates
 // the unversioned "ATECO"/"NACE" scheme codes (3276 rows); omitting them here caused the
@@ -32,8 +33,7 @@ export const ActivityClassificationListQuerySchema = z.object({
   scheme: ActivityClassSchemeSchema.optional(),
   parentCode: z.string().min(1).max(32).optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(500).optional().default(100),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(500, 100),
 });
 export type ActivityClassificationListQuery = z.infer<typeof ActivityClassificationListQuerySchema>;
 

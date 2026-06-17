@@ -8,8 +8,10 @@
  */
 
 import { pool } from "../../db/client.js";
+import type { ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   Tenant,
   TenantListQuery,
@@ -18,12 +20,6 @@ import type {
   UpdateTenantBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
 
 function isPlatformAdmin(actor: ActorContext): boolean {
   return actor.roles.includes("PLATFORM_ADMIN");

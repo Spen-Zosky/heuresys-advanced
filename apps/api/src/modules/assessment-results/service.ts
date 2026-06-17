@@ -10,9 +10,11 @@
  */
 
 import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+
+export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
 import { emitNotification } from "../../lib/notifications/emit.js";
-import type { RoleCode } from "../../config/constants.js";
 import type {
   AssessmentResult,
   AssessmentResultListQuery,
@@ -21,16 +23,6 @@ import type {
 import * as repo from "./repository.js";
 import { findAssessmentById } from "../assessments/repository.js";
 import { getUserTenant } from "../assessments/repository.js";
-
-export interface ActorContext {
-  userId: string;
-  tenantId: string | null;
-  roles: RoleCode[];
-}
-
-function isPlatform(a: ActorContext): boolean {
-  return a.roles.includes("PLATFORM_ADMIN");
-}
 
 function visible(actor: ActorContext, r: AssessmentResult): boolean {
   if (isPlatform(actor)) return true;

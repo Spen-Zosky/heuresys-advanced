@@ -7,6 +7,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 const META = z.record(z.string(), z.unknown());
 
 // ─────────────────────────── Feedback ───────────────────────────
@@ -33,8 +34,7 @@ export const EngagementFeedbackListQuerySchema = z.object({
   category: FeedbackCategoryEnum.optional(),
   status: FeedbackStatusEnum.optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type EngagementFeedbackListQuery = z.infer<typeof EngagementFeedbackListQuerySchema>;
 
@@ -97,8 +97,7 @@ export const EngagementActionPlanListQuerySchema = z.object({
   priority: ActionPlanPriorityEnum.optional(),
   ownerUserId: z.uuid().optional(),
   search: z.string().min(1).max(255).optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type EngagementActionPlanListQuery = z.infer<typeof EngagementActionPlanListQuerySchema>;
 

@@ -4,7 +4,7 @@
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import {
   OrganizationUnitSchema,
@@ -15,14 +15,8 @@ import {
   OrganizationUnitIdParamSchema,
   EmptyResponseSchema,
 } from "@heuresys/shared";
-import { organizationUnitsService, type ActorContext } from "./service.js";
+import { organizationUnitsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const organizationUnitsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {

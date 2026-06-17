@@ -4,7 +4,7 @@
  * Reads: requirePermission("surveys:read"). Writes: app.verifyCsrf + surveys:{create,update,delete}.
  */
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import {
   SurveyTemplateSchema, SurveyTemplateListQuerySchema, SurveyTemplateListResponseSchema,
@@ -14,14 +14,8 @@ import {
   SurveyResponseSchema, SurveyResponseListQuerySchema, SurveyResponseListResponseSchema,
   SurveyIdParamSchema,
 } from "@heuresys/shared";
-import { surveysService, type ActorContext } from "./service.js";
+import { surveysService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const surveysRoutes: FastifyPluginAsyncZod = async (app) => {
   // ── Templates ──

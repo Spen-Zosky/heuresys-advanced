@@ -4,6 +4,7 @@
  */
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 // -----------------------------------------------------------------------------
 // State machine
 // -----------------------------------------------------------------------------
@@ -70,8 +71,7 @@ export type WaveExecutorRun = z.infer<typeof WaveExecutorRunSchema>;
 export const WaveExecutorRunListQuerySchema = z.object({
   wave: z.coerce.number().int().min(1).max(4).optional(),
   state: WaveExecutorStateSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(200).default(50),
-  offset: z.coerce.number().int().min(0).default(0),
+  ...paginationFields(200, 50),
 });
 export type WaveExecutorRunListQuery = z.infer<typeof WaveExecutorRunListQuerySchema>;
 

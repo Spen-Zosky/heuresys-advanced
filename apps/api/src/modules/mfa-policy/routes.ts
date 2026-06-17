@@ -6,7 +6,7 @@
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import type { FastifyRequest } from "fastify";
+import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import {
   ListMfaPoliciesResponseSchema,
@@ -14,14 +14,8 @@ import {
   UpsertMfaPolicyBodySchema,
   UpsertMfaPolicyResponseSchema,
 } from "@heuresys/shared";
-import { mfaPolicyService, type ActorContext } from "./service.js";
+import { mfaPolicyService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
-import { UnauthorizedError } from "../../errors/index.js";
-
-function actor(req: FastifyRequest): ActorContext {
-  if (!req.user) throw new UnauthorizedError("Authentication required");
-  return { userId: req.user.userId, tenantId: req.user.tenantId, roles: req.user.roles };
-}
 
 export const mfaPolicyRoutes: FastifyPluginAsyncZod = async (app) => {
   /* --- GET / — list (PLATFORM all tenants, TENANT_ADMIN own) ---------- */

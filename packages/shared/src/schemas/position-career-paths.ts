@@ -6,6 +6,7 @@
 
 import { z } from "zod";
 
+import { paginationFields } from "./_pagination.js";
 export const PositionCareerPathSchema = z.object({
   positionCareerPathId: z.uuid(),
   positionId: z.uuid(),
@@ -20,8 +21,7 @@ export type PositionCareerPath = z.infer<typeof PositionCareerPathSchema>;
 export const PositionCareerPathListQuerySchema = z.object({
   positionId: z.uuid().optional(),
   careerPathId: z.uuid().optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  ...paginationFields(200, 50),
 });
 export type PositionCareerPathListQuery = z.infer<typeof PositionCareerPathListQuerySchema>;
 

@@ -1,38 +1,40 @@
 # Heuresys Advanced — HRMS / BPM Platform v5
 
-Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on PostgreSQL 16, Next.js 15 admin SPA + ESS portal, shared Zod contracts. Multi-tenant via API middleware (no Postgres RLS), 8 roles × 99 permissions × 394 mappings seeded.
+Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on PostgreSQL 16, Next.js 15 admin SPA + ESS portal, shared Zod contracts. Multi-tenant via API middleware (no Postgres RLS); RBAC is role × permission × mapping seeded (**live counts: `docs/kb/SOT_STATE.md`**).
 
-> **Status — 2026-06-02 · `v1.0.0` GA (tag `v1.0.0` on `main`)**
-> MVP-1 → MVP-4 + RBAC/UIX/Perspectives epic **closed**; **v1.0.0 GA released**. ~279 live API endpoints · **576 vitest tests (60/60 modules covered)** · 65 web routes · 21 Playwright E2E specs on live OCI VM data · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 13/19 IMPORT · **55 migrations** (`000001..000056`, idempotent ×2, `db:validate` 7/7) · 161 users / 2 tenants / 24 teams. VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`).
-> **Live state SoT (two handoff-governed views)**: `.handoff/STATE.md` (rapid — priorities/open-questions) + `docs/kb/SOT_STATE.md` (granular snapshot — running counts/architecture) · backlog `docs/kb/SOT_BACKLOG.md` · debts `docs/kb/DEBT_REGISTER.md`. The headline numbers below are a milestone snapshot; `docs/kb/SOT_STATE.md` carries the running counts.
+> **Status — `v1.0.0` GA baseline (tag `v1.0.0` on `main`, S957) + post-v1.0 program in flight**
+> MVP-1 → MVP-4 + RBAC/UIX/Perspectives epic **closed**; **v1.0.0 GA released**. The API ships ~75 business modules + auth under `/v1/*`, hitting the real OCI VM PostgreSQL through the SSH tunnel · zero mocks · MFA TOTP login-gating shipped · Brownfield Wave 1 IMPORT · idempotent migrations (run twice → empty `pg_dump` diff, `db:validate` 7/7) · live data on the rebuilt RTL_BANK reference tenant. VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`).
+> **All running counts live in `docs/kb/SOT_STATE.md`** (handoff-governed — re-derived every session). This README intentionally avoids hardcoding volatile counts (modules / migrations / endpoints / tests / RBAC mappings); they drifted before (D-01) — `SOT_STATE.md` is the single source.
+> **Live state SoT (two handoff-governed views)**: `.handoff/STATE.md` (rapid — priorities/open-questions) + `docs/kb/SOT_STATE.md` (granular snapshot — running counts/architecture) · backlog `docs/kb/SOT_BACKLOG.md` · debts `docs/kb/DEBT_REGISTER.md`.
 
 ---
 
 ## Headline numbers
 
-| Layer | Count | Notes |
+> **Running counts are not hardcoded here** — they live (and are re-derived every session) in **`docs/kb/SOT_STATE.md`**. This avoids the recurring drift that hardcoded README numbers caused before. The shape of the system, layer by layer:
+
+| Layer | What it is | Live count |
 |---|---|---|
-| API endpoints | **272** business + 2 health | 14 auth+mfa · 17 me ESS · 236 business · 2 health · 1 dashboard aggregator · 4 compensation |
-| API modules | **60** | Fastify 5 routes registered under `/v1/*` |
-| Shared Zod schemas | **62 modules** in 62 subpath exports | `@heuresys/shared` workspace package |
-| DB tables | **~138** in `sys.*` + 11 views + 18 staging.wave1_* + 7 brownfield aux + 4 audit aux | 55 idempotent migrations (`000001..000056`) |
-| Integration tests | **576 PASS / 5 SKIP** (60/60 modules covered, WS-5 backfill) | vitest single-thread, real DB via SSH tunnel |
-| Web routes shipped | **65** | admin + 15 ESS `/me/*` + teams + login + system-health + root router |
-| Playwright E2E tests | **21 spec** | live-data, storageState-backed, 5 personas |
-| Design system components | **14+ dashboard widgets** + brand mark/wordmark + Shell/Header/Sidebar/Footer | `@heuresys/ui` npm-published `^0.1.1` (post-X18) · live Storybook: **[spen-zosky.github.io/ux-design-shared](https://spen-zosky.github.io/ux-design-shared/)** |
-| Showcase site | **19 routes** | Static Next.js 15 export, GitHub Pages deploy via `.github/workflows/showcase.yml` |
+| API modules + endpoints | Fastify 5 business modules registered under `/v1/*` (+ auth/mfa/me ESS · 2 health) | `docs/kb/SOT_STATE.md` |
+| Shared Zod schemas | `@heuresys/shared` workspace package — schemas + TS types, subpath exports per module | `docs/kb/SOT_STATE.md` |
+| DB tables + migrations | `sys.*` business tables + views + staging/brownfield/audit aux · idempotent numbered migrations (`000001..`) | `docs/kb/SOT_STATE.md` |
+| Integration tests | vitest single-thread, real DB via SSH tunnel, no mocks | `docs/kb/SOT_STATE.md` |
+| Web routes | admin SPA + ESS `/me/*` + teams + login + system-health + root router | `docs/kb/SOT_STATE.md` |
+| Playwright E2E | live-data, storageState-backed, real seeded personas | `docs/kb/SOT_STATE.md` |
+| Design system | `@heuresys/ui` npm-published (post-X18) — dashboard widgets + brand mark/wordmark + Shell/Header/Sidebar/Footer · live Storybook: **[spen-zosky.github.io/ux-design-shared](https://spen-zosky.github.io/ux-design-shared/)** | `docs/kb/SOT_STATE.md` |
+| Showcase site | Static Next.js export, GitHub Pages deploy via `.github/workflows/showcase.yml` | `docs/kb/SOT_STATE.md` |
 
 ---
 
 ## Tech stack
 
-**Backend** — Fastify 5.8 · Zod type-provider · Argon2id (64 MiB / 3 / 4) · RS256 JWT 15 min + 30 d refresh rotation w/ replay detection · CSRF double-submit · MFA TOTP RFC 6238 (otpauth) login-gating · raw parameterised SQL on `pg` (Drizzle only as pool wrapper) · `vitest 4` + `supertest` via `app.inject`.
+**Backend** — Fastify 5 · Zod type-provider · Argon2id (64 MiB / 3 / 4) · RS256 JWT 15 min + 30 d refresh rotation w/ replay detection · CSRF double-submit · MFA TOTP RFC 6238 (otpauth) login-gating · raw parameterised SQL on `pg` · `vitest 4` via `app.inject`. (Exact pinned versions: `package.json` + `docs/kb/SOT_STATE.md`.)
 
-**Frontend** — Next.js 15.5 App Router · React 19.2 · Tailwind CSS 4.3 · TanStack Query v5.62 · React Hook Form 7.55 · Zod 3.25 · react-i18next 15 (it/en) · Playwright 1.55 · axe-playwright (WCAG 2.2 AA) · `@heuresys/ui` npm-published consumed as transitive dep (no duplication).
+**Frontend** — Next.js App Router · React 19 · Tailwind CSS 4 · TanStack Query v5 · React Hook Form · Zod · react-i18next (it/en) · Playwright · axe-playwright (WCAG 2.2 AA) · `@heuresys/ui` npm-published consumed as transitive dep (no duplication). (Exact pinned versions: `package.json` + `docs/kb/SOT_STATE.md`.)
 
 **Database** — PostgreSQL 16 (native, no Docker — ADR-0004) running on OCI VM `oracle-vm-default` (eu-milan-1), reached via SSH tunnel `5433 → :5432` (ADR-0010 Option B / RD-25). Multi-tenant via FK + API middleware filter (I5 — never RLS).
 
-**Tooling** — pnpm 9.15 workspaces · TypeScript 5.7 strict mode (`noUncheckedIndexedAccess`, `noUnusedLocals/Parameters`) · Node 20 LTS · Git on Windows + macOS + Linux · 5 pnpm.overrides (vite, postcss, esbuild, qs, exceljs>uuid) per security CVE bumps.
+**Tooling** — pnpm workspaces · TypeScript strict mode (`noUncheckedIndexedAccess`, `noUnusedLocals/Parameters`) · Node (see `.nvmrc`) · Git on Windows + macOS + Linux · `pnpm.overrides` for security CVE bumps (current set: root `package.json`).
 
 ---
 
@@ -41,62 +43,62 @@ Position-centric HR + BPM platform built as a pnpm monorepo. Fastify 5 API on Po
 ```
 heuresys-advanced/
 ├── apps/
-│   ├── api/                            Fastify 5 API (58 modules, /v1/*)
+│   ├── api/                            Fastify 5 API — business modules under /v1/*
 │   │   ├── src/
 │   │   │   ├── app.ts                  13-step plugin chain + LOG_REDACT_PATHS
 │   │   │   ├── server.ts               network bind + env validation
 │   │   │   ├── db/client.ts            singleton pg pool + withTransaction + isDatabaseReady
 │   │   │   ├── middleware/             auth · rbac · csrf · tenantContext · requestId · errorHandler
-│   │   │   ├── modules/                58 business modules
-│   │   │   │   ├── auth/               9 endpoints + mfa-routes 5 endpoints (TOTP enroll/verify/list/del/verify-login)
-│   │   │   │   ├── me/                 17 ESS endpoints (hard self-scope)
-│   │   │   │   ├── compensation/       4 endpoints (decision support, I8)
-│   │   │   │   ├── dashboard/          1 role-gated aggregator
-│   │   │   │   ├── brownfield-wave-executor/  state machine 8 stati + transform-compiler + upsert-sql + audit-rule-codes
-│   │   │   │   ├── …54 more business modules
+│   │   │   ├── modules/                business modules (one dir each: repository/service/routes)
+│   │   │   │   ├── auth/               login/refresh + mfa-routes (TOTP enroll/verify/list/del/verify-login)
+│   │   │   │   ├── me/                 ESS endpoints (hard self-scope)
+│   │   │   │   ├── compensation/       decision support (I8)
+│   │   │   │   ├── dashboard/          role-gated aggregator
+│   │   │   │   ├── brownfield-wave-executor/  state machine + transform-compiler + upsert-sql + audit-rule-codes
+│   │   │   │   └── …more business modules (full list: docs/kb/INDEX_PATHS.md)
 │   │   │   └── errors/                 typed error classes (UnauthorizedError, ForbiddenError, etc.)
-│   │   └── test/                       52 test files (41 *.integration.test.ts + 11 unit)
+│   │   └── test/                       integration test files (*.integration.test.ts) + unit
 │   │
-│   ├── web/                            Next.js 15 SPA (47 routes)
+│   ├── web/                            Next.js App Router SPA
 │   │   ├── src/
 │   │   │   ├── app/
 │   │   │   │   ├── layout.tsx          root provider tree
 │   │   │   │   ├── login/page.tsx      auth + MFA 2-step
 │   │   │   │   ├── (authenticated)/
 │   │   │   │   │   ├── layout.tsx      role-gated nav + logout
-│   │   │   │   │   ├── me/…            14 ESS pages (incl. /me/security MFA enroll)
+│   │   │   │   │   ├── me/…            ESS pages (incl. /me/security MFA enroll)
 │   │   │   │   │   ├── dashboard/      admin landing
 │   │   │   │   │   ├── system-health/  PLATFORM_ADMIN dashboard
 │   │   │   │   │   ├── users/…         list + detail
-│   │   │   │   │   ├── positions/…     list + detail + 3 sub-resources
+│   │   │   │   │   ├── positions/…     list + detail + sub-resources
 │   │   │   │   │   └── …other admin routes
 │   │   │   ├── lib/api/                fetchApi · csrf-store · auth · landing · errors
 │   │   │   ├── components/             SystemHealthDashboard (composition of @heuresys/ui widgets)
-│   │   │   └── locales/{it,en}/        23 keys × 2 locales (parity verified)
-│   │   └── tests/e2e/                  20 spec files (61 test() calls) + auth.setup persona project
+│   │   │   └── locales/{it,en}/        i18n keys × 2 locales (parity verified, i18n:check)
+│   │   └── tests/e2e/                  spec files + auth.setup persona project
 │   │
-│   └── showcase/                       Static Next.js 15 brand identity site (19 routes)
-│       ├── src/app/showcase/           18 brand pages (icons/logo/palettes/tables/charts/etc.)
+│   └── showcase/                       Static Next.js brand identity site
+│       ├── src/app/showcase/           brand pages (icons/logo/palettes/tables/charts/etc.)
 │       └── next.config.js              STATIC_EXPORT=1 → GitHub Pages /heuresys-advanced
 │
 ├── packages/
-│   └── shared/                         @heuresys/shared — 59 subpath exports, 427 Zod schemas
+│   └── shared/                         @heuresys/shared — Zod schemas + TS types, subpath exports per module
 │
 ├── db/
-│   ├── migrations/                     43 idempotent SQL files (000001..000044, gap 000035 cosmetico)
-│   ├── seeds/                          RTL_BANK_REFERENCE (158 users + 55 positions + brownfield wave1 registry + SDBI Goals/OKRs)
+│   ├── migrations/                     idempotent numbered SQL files (000001.., gap 000035 cosmetico)
+│   ├── seeds/                          RTL_BANK_REFERENCE (users + positions + brownfield wave1 registry + SDBI Goals/OKRs)
 │   └── scripts/                        .ps1 + .sh twins (create / migrate / reset / validate / brownfield-wave-1-preflight)
 │
 ├── docs/
 │   ├── BOOTSTRAP_EXECUTION_PLAN.md     §5 roadmap · §8 risk register · §9 decision log RD-01..RD-25
 │   ├── api/API_IMPLEMENTATION_PLAN.md
 │   ├── api/MVP_2A_API_GAP_AUDIT.md     v2.0 refreshed X12 (gap zero)
-│   ├── architecture/adr/               18 ADRs (16 file + ADR-0017 retroactive)
+│   ├── architecture/adr/               ADRs (architectural decision records)
 │   ├── frontend/FRONTEND_IMPLEMENTATION_PLAN.md
 │   ├── security/AUTH_SECURITY_PLAN.md
 │   ├── db/TARGET_SCHEMA_DESIGN.md
-│   ├── brownfield/                     5 canonical + wave_runners/ (Wave 1 + future Wave 2-4 stubs)
-│   ├── github/                         32 docs (8 cluster onboarding curriculum)
+│   ├── brownfield/                     canonical docs + wave_runners/
+│   ├── kb/                             SOT_STATE.md (running counts) · INDEX_PATHS.md (path index) · backlog · debts
 │   └── a11y-tail-items.md              MVP-3 register
 │
 ├── cowork_code_exchange/               Cowork↔Claude Code CLI protocol v2.2 (~140 file: Goal 001/002/003 + batch X1-X21)
@@ -154,15 +156,16 @@ cd apps/web && pnpm dev   # → :3000  Next.js 15 SPA
 cd apps/showcase && pnpm dev  # → :3010  Static brand showcase
 ```
 
-Open `http://localhost:3000`, log in as one of the 5 seeded personas (password `Admin#PassW0rd!`):
+Open `http://localhost:3000`, log in as one of the seeded personas (password `Admin#PassW0rd!`). These are **real RTL_BANK users** wired by the S950 rebuild (the old `*.test` accounts were deleted); authority: `db/scripts/seed-test-admin.ts`:
 
 | Persona | Email | Role | Lands on |
 |---|---|---|---|
 | Platform Admin | `admin@heuresys.com` | `PLATFORM_ADMIN` | `/dashboard` |
-| Tenant Admin | `tenant_admin_test@rtl-bank.test` | `TENANT_ADMIN` | `/dashboard` |
-| Manager | `manager_test@rtl-bank.test` | `MANAGER` | `/dashboard` |
-| Employee | `employee_test@rtl-bank.test` | `USER` | `/me` |
-| Outsider | `outsider_test@rtl-bank.test` | `USER` | `/me` |
+| Tenant Admin | `federica.marchetti@rtl-bank.org` | `TENANT_ADMIN` | `/dashboard` |
+| Manager | `paolo.caputo@rtl-bank.org` | `MANAGER` | `/dashboard` |
+| Employee (Paolo's report) | `tommaso.fiore@rtl-bank.org` | `USER` | `/me` |
+| Outsider | `antonio.parisi@rtl-bank.org` | `USER` | `/me` |
+| Employee | `marco.rinaldi@rtl-bank.org` | `USER` | `/me` |
 
 ---
 
@@ -172,24 +175,24 @@ Open `http://localhost:3000`, log in as one of the 5 seeded personas (password `
 
 ```bash
 cd apps/api
-pnpm test                                                  # full suite (~341 PASS / 1 FAIL skills:131 / 5 SKIP, ~3-8 min)
+pnpm test                                                  # full suite (real DB via SSH tunnel)
 pnpm exec vitest run test/<module>.integration.test.ts    # focused
 ```
 
-Tests hit the **real DB through the SSH tunnel**. There are no mocks; the auth flow rotates real cookies, validates the JWT chain end-to-end, and MFA TOTP login-gating uses real RFC 6238 challenges.
+Tests hit the **real DB through the SSH tunnel**. There are no mocks; the auth flow rotates real cookies, validates the JWT chain end-to-end, and MFA TOTP login-gating uses real RFC 6238 challenges. (Current suite size / pass counts: `docs/kb/SOT_STATE.md`.)
 
 ### Frontend E2E
 
 ```bash
 cd apps/web
 pnpm exec playwright install --with-deps chromium     # once
-pnpm exec playwright test                              # full suite (61 tests)
+pnpm exec playwright test                              # full suite
 pnpm exec playwright test landing-pages.spec.ts        # focused
 ```
 
-The setup project (`tests/e2e/auth.setup.ts`) logs in 5 personas once and persists their cookie state to `tests/.auth/<persona>.json`, so individual specs reuse the session without hitting the login rate limit (10/5 min per email).
+The setup project (`tests/e2e/auth.setup.ts`) logs the seeded personas in once and persists their cookie state to `tests/.auth/<persona>.json`, so individual specs reuse the session without hitting the login rate limit (10/5 min per email).
 
-Every spec asserts on **live data** from the seeded `RTL_BANK_REFERENCE` tenant (158 personas + 55 positions). No mocks, no fixtures inlined in tests, no stubbed endpoints. **MFA enroll + verify-login** flows tested end-to-end with real TOTP tokens.
+Every spec asserts on **live data** from the seeded `RTL_BANK_REFERENCE` reference tenant (real RTL_BANK users + positions — see `docs/kb/SOT_STATE.md` §4). No mocks, no fixtures inlined in tests, no stubbed endpoints. **MFA enroll + verify-login** flows tested end-to-end with real TOTP tokens.
 
 ---
 
@@ -236,7 +239,7 @@ For details on what's next, see `.handoff/STATE.md` (live state) and `sessioni/s
 
 - **Code**: https://github.com/Spen-Zosky/heuresys-advanced (public)
 - **Design system source**: https://github.com/Spen-Zosky/ux-design-shared (public, sorgente dev di `@heuresys/ui`)
-- **Design system npm**: `@heuresys/ui` (semver `^0.1.1`, consumed as standard dep)
+- **Design system npm**: `@heuresys/ui` (consumed as a standard npm dep; current pinned range in `package.json`)
 - **Design system Storybook (live)**: https://spen-zosky.github.io/ux-design-shared/
 - **License**: UNLICENSED (private project, contact the author before reuse)
 - **Author**: Enzo Spenuso

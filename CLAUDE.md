@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Heuresys Advanced HRMS/BPM Platform v5** — pnpm monorepo bootstrapped 2026-05-16. Backend-heavy: Fastify 5 API on top of PostgreSQL 16 with a Zod-typed contract layer shared with a Next.js 15 admin SPA + ESS portal (both shipped — MVP-2a/2b).
 
-The project is at **`v1.0.0` GA baseline** (released S957, 2026-06-02): MVP-0→4 + the RBAC/UIX/Perspectives epic are closed. The API ships ~60 business modules + auth (~279 live `/v1/*` endpoints, 576 integration tests across ~82 files, **60/60 modules covered**, hitting the real DB through the SSH tunnel); the Next.js web app ships the admin SPA (MVP-2a) + ESS portal (MVP-2b) + teams "my team" scope axis; a static brand showcase is deployed to GitHub Pages. The VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`). **Project state lives in two handoff-governed views**: `.handoff/STATE.md` (rapid — priorities/open-questions) + `docs/kb/SOT_STATE.md` (granular system snapshot — versions/counts/architecture). Open backlog in `docs/kb/SOT_BACKLOG.md`, technical debts in `docs/kb/DEBT_REGISTER.md`. Historical records (`HANDOFF.md`, the v1.0.0 entry-point) archived under `docs/archive/`; architectural decisions in `docs/architecture/adr/`. The invariants, module pattern, security model, and Design System sections below remain authoritative.
+The project is at **`v1.0.0` GA baseline** (released S957, 2026-06-02) with a post-v1.0 program in flight: MVP-0→4 + the RBAC/UIX/Perspectives epic are closed. The API ships ~75 business modules + auth under `/v1/*` (every module covered by integration tests hitting the real DB through the SSH tunnel); the Next.js web app ships the admin SPA (MVP-2a) + ESS portal (MVP-2b) + teams "my team" scope axis; a static brand showcase is deployed to GitHub Pages. The VM runs in **production mode** (API tsup bundle `node dist/server.js` + web `next start`). **The running counts (modules / migrations / endpoints / tests / RBAC mappings) are NOT hardcoded here — they live in `docs/kb/SOT_STATE.md`** (handoff-governed, re-derived every session; they drifted before — D-01). **Project state lives in two handoff-governed views**: `.handoff/STATE.md` (rapid — priorities/open-questions) + `docs/kb/SOT_STATE.md` (granular system snapshot — versions/counts/architecture). Open backlog in `docs/kb/SOT_BACKLOG.md`, technical debts in `docs/kb/DEBT_REGISTER.md`. Historical records (`HANDOFF.md`, the v1.0.0 entry-point) archived under `docs/archive/`; architectural decisions in `docs/architecture/adr/`. The invariants, module pattern, security model, and Design System sections below remain authoritative.
 
 **Data provenance** (ADR-0023): the `sys.*` business tables are populated by a deterministic brownfield ingestion pipeline whose **authoritative data source** is the legacy `heuresys-evo` Docker DB (`heuresys_evo_platform_db` / db `heuresys_platform`) — synthetic case-study data, no real PII (I12). The advanced `sys.*` schema is the **structural authority** (the legacy adapts to it). The RTL_BANK reference tenant was rebuilt (S950) by matching+wiring real legacy records (161 users / 2 active tenants). See `docs/kb/SOT_STATE.md` §4.
 
@@ -78,7 +78,7 @@ psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "\dt sys.sys_auth*
 
 # 3. (optional) API dev server — restart if process died
 cd apps/api && pnpm dev
-# Look for: "RBAC permission cache loaded rolesLoaded:11 mappingsLoaded:586"
+# Look for: "RBAC permission cache loaded rolesLoaded:11 mappingsLoaded:<N>" (current N: docs/kb/SOT_STATE.md)
 ```
 
 The `.env` file is **gitignored** but real; `.env.example` has three runtime blocks (A localhost / B OCI VM / C OCI Managed). **Option B (OCI VM, tunnel 5433) is the active runtime** (RD-25, ADR-0010). Do not commit `.env`, `.secrets/`, or `*.pem`.
@@ -92,17 +92,17 @@ The `.env` file is **gitignored** but real; `.env.example` has three runtime blo
 ```
 heuresys-advanced/
 ├── apps/
-│   ├── api/       Fastify 5 + Zod + Argon2id + RS256 JWT — ~60 business modules + auth shipped (MVP-1→4, v1.0.0)
+│   ├── api/       Fastify 5 + Zod + Argon2id + RS256 JWT — ~75 business modules + auth shipped (MVP-1→4, v1.0.0). Live count: docs/kb/SOT_STATE.md
 │   ├── web/       Next.js 15 App Router — admin SPA + ESS portal shipped (MVP-2a/2b)
 │   └── showcase/  Next.js 15 static export — brand identity site, GitHub Pages deploy
 ├── packages/
 │   └── shared/   @heuresys/shared — Zod schemas + TS types, subpath exports per module
 ├── db/
-│   ├── migrations/  55 idempotent SQL files (000001..000056, 000035 gap cosmetic)
+│   ├── migrations/  idempotent numbered SQL files (000001.., 000035 gap cosmetic). Live count: docs/kb/SOT_STATE.md
 │   ├── seeds/       CSV + INSERT for RTL_BANK_REFERENCE tenant
 │   └── scripts/     PS1 + SH twins: create/migrate/reset/validate/seed
-├── docs/         CANONICAL planning + ADR + brownfield (8 priming docs — read on session start)
-├── tests/        vitest + supertest + playwright (top-level, currently unused; tests live per-app)
+├── docs/         CANONICAL planning + ADR + brownfield (8 priming docs — read on session start). Path index: docs/kb/INDEX_PATHS.md
+├── tests/        vitest + playwright (top-level, currently unused; tests live per-app)
 └── qa_artifacts/ acceptance outputs + Mermaid diagrams (runs/ is gitignored)
 ```
 
@@ -158,20 +158,20 @@ Entry split: `src/server.ts` is the network binding + env validation; `src/app.t
 12. /healthz + /readyz  → 13. module routes (/v1/<module>)
 ```
 
-Auth is **non-enforcing at the plugin level**: `auth.ts` decodes the JWT cookie into `req.user` if present; per-route enforcement is done with `requirePermission('perm:code')` from `middleware/rbac.ts`. The RBAC permission map (586 role×permission mappings, 11 roles) is **loaded once at server start** from `sys.sys_auth_role_permissions` — `requirePermission` throws `RBAC_NOT_LOADED` if used before the cache is populated.
+Auth is **non-enforcing at the plugin level**: `auth.ts` decodes the JWT cookie into `req.user` if present; per-route enforcement is done with `requirePermission('perm:code')` from `middleware/rbac.ts`. The RBAC permission map (role×permission mappings across 11 roles — live counts in `docs/kb/SOT_STATE.md`; verify with `SELECT count(*) FROM sys.sys_auth_role_permissions`) is **loaded once at server start** from `sys.sys_auth_role_permissions` — `requirePermission` throws `RBAC_NOT_LOADED` if used before the cache is populated.
 
 The server logger redacts secrets via the exported `LOG_REDACT_PATHS` constant in `app.ts` (cookies, Authorization, password fields, refresh tokens, `*.password`, `*.hash`, `*.secret`). Tests verify this is live.
 
 ### The module pattern (mandatory for every new API module)
 
-This pattern has been replicated 11 times — **do not deviate**:
+This pattern has been replicated across every business module (current count: `docs/kb/SOT_STATE.md`) — **do not deviate**:
 
 1. `packages/shared/src/schemas/<module>.ts` — Zod schemas (Create/Update/Filter/Response). Export from `packages/shared/src/index.ts` AND add a subpath export in `packages/shared/package.json` → `./schemas/<module>`.
 2. `apps/api/src/modules/<module>/repository.ts` — **raw parameterized SQL** against `sys.sys_<plural>`. No Drizzle query builder for selects/inserts (Drizzle is used only via the pg pool wrapper). Always `$1, $2` params, never string interpolation. For multi-statement atomic operations (token rotation, hierarchical inserts), use the `withTransaction(pool, async (client) => { ... })` helper pattern from `modules/auth/repository.ts` instead of acquiring a client manually.
 3. `apps/api/src/modules/<module>/service.ts` — business logic + scope authorization based on an `ActorContext` built from `req.user`. Visibility model is module-specific (tenant-only, global+tenant, platform-only — see existing modules for examples).
-4. `apps/api/src/modules/<module>/routes.ts` — `FastifyPluginAsyncZod` with `requirePermission('<resource>:<verb>')` on every route + `app.verifyCsrf` on POST/PATCH/DELETE. Errors thrown from service/repository must use the typed classes in `src/errors/index.ts` (`UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ValidationError`, `ConflictError`) with a `SCREAMING_SNAKE` code as second arg — e.g. `throw new ForbiddenError('Missing permission: skills:write', 'PERMISSION_DENIED')`. The error handler turns this into a stable `{error:{code, message, requestId}}` response. Existing codes to mimic: `LOGIN_INVALID`, `REFRESH_REPLAY_DETECTED`, `RBAC_NOT_LOADED`, `PERMISSION_DENIED`.
+4. `apps/api/src/modules/<module>/routes.ts` — `FastifyPluginAsyncZod` with `requirePermission('<resource>:<verb>')` on every route + `app.verifyCsrf` on POST/PATCH/DELETE. Errors thrown from service/repository must use the typed classes in `src/errors/index.ts` (`UnauthorizedError`, `ForbiddenError`, `NotFoundError`, `ValidationError`, `ConflictError`) with a `SCREAMING_SNAKE` code as second arg — e.g. `throw new ForbiddenError('Missing permission: skills:write', 'PERMISSION_DENIED')`. The error handler turns this into a stable `{error:{code, message}}` response body (`details?` for validation errors); the request id is returned in the `x-request-id` **response header** (set by the `requestId` plugin), not in the body. Existing codes to mimic: `LOGIN_INVALID`, `REFRESH_REPLAY_DETECTED`, `RBAC_NOT_LOADED`, `PERMISSION_DENIED`.
 5. Register in `apps/api/src/app.ts` at step 13 with `app.register(<module>Routes, { prefix: '/v1/<module>' })`.
-6. `apps/api/test/<module>.integration.test.ts` — supertest via `buildTestApp()` helper (4–8 tests per module). Tests hit the **real DB** through the tunnel; there are no mocks.
+6. `apps/api/test/<module>.integration.test.ts` — via `buildTestApp()` helper (`app.inject()`, 4–8 tests per module). Tests hit the **real DB** through the tunnel; there are no mocks.
 7. `pnpm test` must be 100% green. Then **atomic commit**: `feat(api): MVP-1 5.1.X — <module> module (N endpoints, M tests)`.
 
 ### Tests
@@ -203,12 +203,12 @@ When a new requirement seems to conflict with these, **stop and ask** rather tha
 - Refresh token: 30 d, single-use, rotation with replay detection. Replay attempt revokes the entire family and returns `401 REFRESH_REPLAY_DETECTED`.
 - CSRF: double-submit cookie pattern via `csrfPlugin`. Opt-in per route — apply `app.verifyCsrf` preHandler to all state-changing routes (POST/PATCH/DELETE).
 - Login returns `200` with body (not 204 — Fastify strips bodies from 204; documented errata in commit `7450f77`).
-- 11 roles: `PLATFORM_ADMIN`, `TENANT_ADMIN`, `BLUEPRINT_MANAGER`, `HRMS_MANAGER`, `PROCESS_OWNER`, `MANAGER`, `USER`, `READ_ONLY` + 3 holderless functional roles added in the S953/R2 epic (mig 000049): `CEO`, `TEAM_LEADER`, `TEAM_MEMBER`. (586 role×permission mappings — verify live: `SELECT count(*) FROM sys.sys_auth_role_permissions`.)
+- 11 roles: `PLATFORM_ADMIN`, `TENANT_ADMIN`, `BLUEPRINT_MANAGER`, `HRMS_MANAGER`, `PROCESS_OWNER`, `MANAGER`, `USER`, `READ_ONLY` + 3 holderless functional roles added in the S953/R2 epic (mig 000049): `CEO`, `TEAM_LEADER`, `TEAM_MEMBER`. (Role×permission mapping count lives in `docs/kb/SOT_STATE.md` — verify live: `SELECT count(*) FROM sys.sys_auth_role_permissions`.)
 - Test personas (post-S950 RTL rebuild: **real RTL_BANK users**, not the old `*.test` accounts which were deleted; `pnpm db:seed-test-admin` is now idempotent + login-only — it ensures a LOCAL auth identity + ARGON2ID credential for users created by the rebuild seeds, password `Admin#PassW0rd!`): `admin@heuresys.com` (PLATFORM_ADMIN), `federica.marchetti@rtl-bank.org` (TENANT_ADMIN), `paolo.caputo@rtl-bank.org` (MANAGER), `tommaso.fiore@rtl-bank.org` (USER, paolo's report), `antonio.parisi@rtl-bank.org` (USER, outsider). The manager→employee reports-to edge is a real org relationship. Mapping authority: `db/scripts/seed-test-admin.ts`.
 
 ## Database migrations
 
-55 numbered SQL files in `db/migrations/000001_*.sql..000056_*.sql` (the `000035` gap is cosmetic and documented). Every migration is **idempotent** — `CREATE TABLE IF NOT EXISTS`, `INSERT … ON CONFLICT DO NOTHING`, etc. — and running the full set twice produces an empty `pg_dump` diff (proven and recorded). When adding a new migration, follow the existing pattern: next sequential number, single descriptive file, idempotent body, no destructive ops.
+Numbered SQL files in `db/migrations/000001_*.sql..` (the `000035` gap is cosmetic and documented). The exact file count is **not hardcoded here** — it lives in `docs/kb/SOT_STATE.md` (re-derived every session: `ls db/migrations/*.sql`). Every migration is **idempotent** — `CREATE TABLE IF NOT EXISTS`, `INSERT … ON CONFLICT DO NOTHING`, etc. — and running the full set twice produces an empty `pg_dump` diff (proven and recorded). When adding a new migration, follow the existing pattern: next sequential number, single descriptive file, idempotent body, no destructive ops.
 
 ## What NOT to touch
 

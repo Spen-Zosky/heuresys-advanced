@@ -4,9 +4,18 @@
  * Raw SQL access to sys.sys_auth_mfa_factors. Follows the same idioms as
  * the rest of apps/api: parameterised pg queries, no Drizzle query builder
  * (per CLAUDE.md invariant).
+ *
+ * QW-SEC6: TOTP factor secrets are encrypted-at-rest (AES-256-GCM) at this
+ * boundary — encryptSecret on WRITE (insertMfaFactor), decryptSecret on every
+ * READ (mapRow). The column is `text` and accepts the enc:v1:… ciphertext with
+ * NO migration. The key-presence gate (modules/auth/secret-crypto.ts) makes
+ * this non-breaking: without MFA_ENCRYPTION_KEY the secret is plaintext as
+ * before; legacy plaintext rows always decrypt to themselves (retro-compat).
+ * The service/verify layer keeps working on the plaintext secret it gets back.
  */
 
 import type { Pool, PoolClient } from "pg";
+import { encryptSecret, decryptSecret, isEncrypted, encryptionEnabled } from "./secret-crypto.js";
 
 type DbConnector = Pool | PoolClient;
 
@@ -16,9 +25,14 @@ export interface MfaFactorRow {
   factorId: string;
   userId: string;
   kind: MfaKind;
-  /** Stored as base32 for TOTP. For prod a KMS-wrapped ciphertext would
-      replace this — schema column is `text` so a swap is non-breaking. */
+  /** Plaintext base32 for TOTP as seen by the service layer. At rest it is
+      AES-256-GCM ciphertext (enc:v1:…) when MFA_ENCRYPTION_KEY is set, or
+      base32 plaintext otherwise — decryptSecret in mapRow normalises both
+      back to plaintext here (QW-SEC6). EMAIL_OTP/SMS_OTP carry no secret. */
   secret: string | null;
+  /** True when the secret was stored as enc:v1: ciphertext at rest (vs legacy
+      plaintext). Drives lazy re-encryption (needsRehash-style) in the service. */
+  secretWasEncrypted: boolean;
   metadata: Record<string, unknown>;
   verified: boolean;
   lastUsedAt: Date | null;
@@ -35,11 +49,15 @@ function mapRow(r: {
   auth_mfa_factor_last_used_at: Date | null;
   created_at: Date;
 }): MfaFactorRow {
+  const stored = r.auth_mfa_factor_secret;
   return {
     factorId: r.auth_mfa_factor_id,
     userId: r.auth_mfa_factor_user_id,
     kind: r.auth_mfa_factor_kind as MfaKind,
-    secret: r.auth_mfa_factor_secret,
+    // QW-SEC6: decrypt on read. Legacy plaintext (no enc:v1: prefix) returns
+    // unchanged; enc:v1: ciphertext is decrypted with the env key.
+    secret: stored === null ? null : decryptSecret(stored),
+    secretWasEncrypted: stored !== null && isEncrypted(stored),
     metadata: r.auth_mfa_factor_metadata,
     verified: r.auth_mfa_factor_verified,
     lastUsedAt: r.auth_mfa_factor_last_used_at,
@@ -57,15 +75,49 @@ export async function insertMfaFactor(
     metadata?: Record<string, unknown>;
   },
 ): Promise<MfaFactorRow> {
+  // QW-SEC6: encrypt the secret on write. encryptSecret is gated (returns
+  // plaintext unchanged when MFA_ENCRYPTION_KEY is unset) and idempotent
+  // (never double-wraps an already-enc:v1: value). null secrets (EMAIL/SMS_OTP)
+  // pass straight through.
+  const storedSecret = params.secret === null ? null : encryptSecret(params.secret);
   const { rows } = await q.query<Parameters<typeof mapRow>[0]>(
     `INSERT INTO sys.sys_auth_mfa_factors
        (auth_mfa_factor_user_id, auth_mfa_factor_kind, auth_mfa_factor_secret,
         auth_mfa_factor_metadata, auth_mfa_factor_verified)
      VALUES ($1, $2, $3, $4, false)
      RETURNING *`,
-    [params.userId, params.kind, params.secret, params.metadata ?? {}],
+    [params.userId, params.kind, storedSecret, params.metadata ?? {}],
   );
   return mapRow(rows[0]!);
+}
+
+/**
+ * QW-SEC6 lazy re-encryption (mirrors the password needsRehash path): when a
+ * factor whose secret is still legacy-plaintext is read+used AND the encryption
+ * key is present, re-write it as enc:v1: ciphertext. Best-effort — the caller
+ * MUST NOT block verify on this; any failure is swallowed by the caller.
+ *
+ * Idempotent + safe by construction: the UPDATE is guarded by a WHERE clause
+ * that only rewrites the row when its stored value is STILL the exact legacy
+ * plaintext we read (so a concurrent encryption never clobbers, and an already
+ * enc:v1: row is skipped). Returns true if a row was upgraded.
+ */
+export async function reencryptFactorSecret(
+  q: DbConnector,
+  factorId: string,
+  plaintextSecret: string,
+): Promise<boolean> {
+  if (!encryptionEnabled()) return false; // gate off → nothing to upgrade
+  const ciphertext = encryptSecret(plaintextSecret);
+  if (!isEncrypted(ciphertext)) return false; // defensive: gate flipped mid-call
+  const { rowCount } = await q.query(
+    `UPDATE sys.sys_auth_mfa_factors
+        SET auth_mfa_factor_secret = $2
+      WHERE auth_mfa_factor_id = $1
+        AND auth_mfa_factor_secret = $3`,
+    [factorId, ciphertext, plaintextSecret],
+  );
+  return (rowCount ?? 0) > 0;
 }
 
 export async function findMfaFactorById(

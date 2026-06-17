@@ -84,15 +84,20 @@ const EnvSchema = z.object({
     .optional()
     .transform((v) => (v === undefined ? undefined : v === "true")),
 
-  // MFA encryption key (S935 SEC base). RESERVED / currently INERT (D-30, 2026-06-15):
-  // validated here but NOT consumed by any code today — TOTP factor secrets are
-  // stored base32-plaintext in sys_auth_mfa_factors (behind auth+RBAC; no real
-  // PII per ADR-0023). This is the future seam for AES-256-GCM encryption-at-rest
-  // (see mfa-service.ts header TODO). Format: base64 32-byte (openssl rand -base64 32).
-  // Optional everywhere until that encryption seam actually lands.
+  // MFA encryption key (QW-SEC6, D-30 RESOLVED 2026-06-17): AES-256-GCM
+  // encryption-at-rest for TOTP factor secrets in sys_auth_mfa_factors. NOW
+  // CONSUMED by modules/auth/secret-crypto.ts at the mfa-repository boundary.
+  // KEY-PRESENCE GATE (non-breaking): UNSET → secrets stay base32-plaintext
+  // (legacy behaviour, full retro-compat); SET → new writes are encrypted
+  // (enc:v1:… prefix) and legacy plaintext still decrypts/reads unchanged.
+  // Derivation (secret-crypto.ts): 64-hex → 32 raw bytes; base64-of-32 → direct;
+  // else scrypt-derive to 32 bytes. Generate a strong key with:
+  //   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+  // MUST be present (same value) on every box that stores/reads ciphertext —
+  // propagates to PROD via align-clones.sh (NOT on the env-key-merge denylist).
   MFA_ENCRYPTION_KEY: z
     .string()
-    .min(32, "MFA_ENCRYPTION_KEY must be at least 32 bytes (base64 of 24 raw bytes)")
+    .min(32, "MFA_ENCRYPTION_KEY must be at least 32 chars (e.g. 64-hex or base64 of 32 bytes)")
     .optional(),
 
   // AI ② Semantic Matching — Voyage embeddings API key. OPTIONAL: only the
@@ -194,17 +199,20 @@ const EnvSchema = z.object({
 
 const parsed = EnvSchema.parse(process.env);
 
-// D-30 (2026-06-15): MFA_ENCRYPTION_KEY is currently INERT — no code consumes it
-// yet (TOTP secrets are base32 behind auth+RBAC). The warn below is kept as a
-// reserved-seam reminder for the future AES-256-GCM encryption-at-rest work,
-// corrected from the previous (false) "will throw at runtime" claim.
+// QW-SEC6 (D-30 RESOLVED 2026-06-17): MFA_ENCRYPTION_KEY now drives AES-256-GCM
+// encryption-at-rest for TOTP factor secrets (modules/auth/secret-crypto.ts).
+// KEY-PRESENCE GATE: when UNSET, secrets stay base32-plaintext (non-breaking,
+// retro-compatible) — so its absence is still harmless, NOT a hard failure. The
+// PROD warn below now flags that encryption-at-rest is OFF (the key was not
+// supplied) so a deployment that intends ciphertext notices the gap before
+// running the one-time bulk-encrypt (db:encrypt-totp).
 if (parsed.NODE_ENV === "production" && !parsed.MFA_ENCRYPTION_KEY) {
   console.warn(
     JSON.stringify({
       level: "warn",
       phase: "env-validation",
       sub_phase: "mfa-key-check",
-      msg: "MFA_ENCRYPTION_KEY is not set. It is currently INERT (reserved for future AES-256-GCM encryption-at-rest of MFA factor secrets; no code consumes it today, so its absence is harmless). Set it (openssl rand -base64 32) before enabling encryption-at-rest.",
+      msg: "MFA_ENCRYPTION_KEY is not set — MFA TOTP encryption-at-rest is DISABLED (secrets stored as base32 plaintext, the legacy non-breaking mode). Set it (e.g. node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\") on every box, then run db:encrypt-totp once, to enable AES-256-GCM encryption-at-rest.",
     }),
   );
 }

@@ -9,10 +9,14 @@
  * multi-process (PM2 cluster / k8s replicas) replace it with Redis. The
  * interface (`MfaChallengeStore`) is stable so the swap is local.
  *
- * Secrets are stored as base32 in `sys_auth_mfa_factors.auth_mfa_factor_secret`.
- * For production deploys, wrap with KMS-based AES-GCM at the repository
- * boundary — the schema column type (`text`) accepts ciphertext without
- * a migration.
+ * TOTP secrets are encrypted-at-rest (AES-256-GCM) at the repository boundary
+ * (QW-SEC6 — modules/auth/secret-crypto.ts + mfa-repository.ts). The service
+ * layer always sees the PLAINTEXT base32 (mapRow decrypts on read), so the
+ * TOTP build/validate code below is unchanged. Encryption is gated on
+ * MFA_ENCRYPTION_KEY presence (non-breaking) and the schema column type
+ * (`text`) accepts the enc:v1:… ciphertext without a migration. Legacy
+ * plaintext rows are lazily upgraded to ciphertext on a successful read+use
+ * (needsRehash-style, best-effort — never blocks verify).
  */
 
 import { randomBytes, randomInt, randomUUID, timingSafeEqual } from "node:crypto";
@@ -45,6 +49,16 @@ function generateRecoveryCodePlain(): string {
 function normalizeRecoveryCode(code: string): string {
   return code.replace(/[^0-9a-fA-F]/g, "").toLowerCase();
 }
+
+/**
+ * QW-SEC6: metadata.label of the committed demo-grade TOTP fixture factors
+ * (the 6 seeded personas). MUST mirror helpers/mfa-fixture-secrets.ts
+ * E2E_FIXTURE_LABEL (kept as a literal here — src must not import from test/).
+ * These factors are intentionally PLAINTEXT (committed base32 seeds drive PROD
+ * smoke / CI / Playwright) and are owned by the controlled bulk-encrypt, so
+ * lazy re-encryption (verifyLoginChallenge) explicitly skips them.
+ */
+const FIXTURE_FACTOR_LABEL = "e2e-fixture";
 
 const TOTP_ISSUER = "Heuresys";
 const TOTP_DIGITS = 6;
@@ -910,16 +924,34 @@ export function createMfaService(
       // 1. Try each verified TOTP factor first (synchronous, no DB write).
       //    Constant-time-ish: validate ALL secrets to avoid a factor-enumeration
       //    timing oracle.
-      let matchedFactorId: string | null = null;
+      let matchedFactor: mfaRepo.MfaFactorRow | null = null;
       for (const f of factors) {
         if (f.kind === "TOTP" && f.secret && verifyTotpCode(f.secret, code)) {
-          if (!matchedFactorId) matchedFactorId = f.factorId;
+          if (!matchedFactor) matchedFactor = f;
         }
       }
-      const expectMatched = matchedFactorId !== null;
+      const expectMatched = matchedFactor !== null;
       timingSafeEqual(Buffer.from([Number(expectMatched)]), Buffer.from([Number(expectMatched)]));
-      if (matchedFactorId) {
-        await mfaRepo.markMfaFactorUsed(pool, matchedFactorId);
+      if (matchedFactor) {
+        await mfaRepo.markMfaFactorUsed(pool, matchedFactor.factorId);
+        // QW-SEC6 lazy re-encryption: a successfully-used factor whose secret is
+        // still legacy-plaintext gets upgraded to enc:v1: ciphertext (when the
+        // key is present). Best-effort — a failure here must NEVER fail a valid
+        // login, so it is fully swallowed (mirrors password needsRehash).
+        //
+        // EXCEPTION — the committed e2e-fixture factors (metadata.label =
+        // "e2e-fixture") are deliberately kept PLAINTEXT: their base32 seeds are
+        // committed (helpers/mfa-fixture-secrets.ts) so PROD smoke / CI /
+        // Playwright complete TOTP step-2 deterministically, and they are the
+        // exact rows the controlled one-time bulk-encrypt (db:encrypt-totp)
+        // owns. Lazy-upgrading them here would mutate live shared-DB rows that
+        // the currently-deployed (plaintext-expecting) PROD still reads → skip.
+        const isCommittedFixture = matchedFactor.metadata?.["label"] === FIXTURE_FACTOR_LABEL;
+        if (!matchedFactor.secretWasEncrypted && matchedFactor.secret && !isCommittedFixture) {
+          await mfaRepo
+            .reencryptFactorSecret(pool, matchedFactor.factorId, matchedFactor.secret)
+            .catch(() => {});
+        }
         return { userId };
       }
 
@@ -1047,4 +1079,7 @@ export const MFA_INTERNAL = {
   EMAIL_OTP_TTL_MS,
   EMAIL_OTP_MAX_ATTEMPTS,
   EMAIL_OTP_RESEND_COOLDOWN_MS,
+  /** QW-SEC6: exposed so a parity test asserts it never drifts from the test
+   *  helper E2E_FIXTURE_LABEL (the lazy-re-encrypt skip relies on the match). */
+  FIXTURE_FACTOR_LABEL,
 };

@@ -24,8 +24,21 @@ MODE="${1:-}"
 if [ "$MODE" = "--dumps-dry-run" ]; then
   echo "[clean] pre-op dumps (NOT deleted — archival is a manual decision, QW-K3):"
   du -sh pg_dump_snapshots/pre-* 2>/dev/null || echo "  (none)"
-  echo "[clean] pg_dump_snapshots total:"
+  echo "[clean] pg_dump_snapshots total (local):"
   du -sh pg_dump_snapshots 2>/dev/null || echo "  (none)"
+  # Off-disk archive status (QW-K3): the VM holds a copy at /home/ubuntu/dump_archive/
+  # (scripts/archive-dumps.sh). Report it so the dry-run shows BOTH local and archived
+  # state. Non-destructive, non-fatal if the VM is unreachable.
+  ARCHIVE_HOST="${ARCHIVE_HOST:-oracle-vm-default}"
+  ARCHIVE_REMOTE_DIR="${ARCHIVE_REMOTE_DIR:-/home/ubuntu/dump_archive}"
+  echo "[clean] off-disk archive ($ARCHIVE_HOST:$ARCHIVE_REMOTE_DIR):"
+  if archive_stat="$(MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes -o ConnectTimeout=10 "$ARCHIVE_HOST" \
+        "n=\$(find '$ARCHIVE_REMOTE_DIR' -maxdepth 1 -type f 2>/dev/null | wc -l); s=\$(du -sh '$ARCHIVE_REMOTE_DIR' 2>/dev/null | cut -f1); printf '%s file(s), %s' \"\$n\" \"\${s:-0}\"" 2>/dev/null)"; then
+    echo "  $archive_stat"
+    echo "  (refresh with: bash scripts/archive-dumps.sh — see docs/kb/DUMP_ARCHIVAL_RUNBOOK.md)"
+  else
+    echo "  (VM unreachable — run 'bash scripts/archive-dumps.sh' when online to verify/refresh the off-disk copy)"
+  fi
   exit 0
 fi
 

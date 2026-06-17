@@ -3,7 +3,7 @@
  * Builds the Fastify app with the canonical plugin order per
  * API_IMPLEMENTATION_PLAN §3.2 + §14.
  *
- * Exported as a function so tests (supertest) can build an isolated app
+ * Exported as a function so tests (via app.inject) can build an isolated app
  * without binding to a network port.
  */
 

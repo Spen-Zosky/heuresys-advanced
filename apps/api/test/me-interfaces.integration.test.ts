@@ -68,8 +68,11 @@ describe("/v1/me/interfaces", () => {
     expect(codes(b, "ENTERPRISE")).toEqual([]);    // no Enterprise admin items (incl. no dashboard)
     const talent = codes(b, "TALENT").sort();
     // exactly the ESS items (R1b added me-team; AI ② added me-matching; cap④ CMS P2 added
-    // me-handbook — the ESS knowledge base, an always-visible TALENT self-service page).
-    expect(talent).toEqual(["me-career", "me-handbook", "me-home", "me-inbox", "me-learning", "me-matching", "me-skills", "me-team"]);
+    // me-handbook; Surveys-M2 S995 added me-surveys — the ESS self-response page, an
+    // always-visible TALENT self-service gated by surveys:respond:self which ALL roles incl
+    // USER hold, mig 000135/000136). This assert was a latent S995 regression (the ESS nav
+    // shipped but the expected set was not updated) — caught + fixed by the S996 full-suite gate.
+    expect(talent).toEqual(["me-career", "me-handbook", "me-home", "me-inbox", "me-learning", "me-matching", "me-skills", "me-surveys", "me-team"]);
   });
 
   it("MANAGER (admin-class) is per-permission filtered WITHIN the admin section", async () => {

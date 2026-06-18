@@ -34,7 +34,12 @@ WHERE p.auth_permission_code IN ('surveys:create','surveys:update','surveys:dele
 ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
 DO $$ DECLARE v int; BEGIN
-  SELECT count(*) INTO v FROM sys.sys_auth_permissions WHERE auth_permission_resource = 'surveys';
-  RAISE NOTICE '000078: surveys permissions present: % (expect 4)', v;
-  IF v <> 4 THEN RAISE EXCEPTION '000078: expected 4 surveys permissions, found %', v; END IF;
+  -- Count ONLY the 4 permission codes this migration owns (scope by code, NOT by resource):
+  -- later migrations legitimately add more surveys:* perms (e.g. surveys:respond:self, mig
+  -- 000135 / S995) — a resource-wide count breaks the twice-run idempotency invariant once
+  -- they exist (D-12/D-22 class; surfaced at the first post-S995 deploy, S996).
+  SELECT count(*) INTO v FROM sys.sys_auth_permissions
+   WHERE auth_permission_code IN ('surveys:read', 'surveys:create', 'surveys:update', 'surveys:delete');
+  RAISE NOTICE '000078: surveys base permissions present: % (expect 4)', v;
+  IF v <> 4 THEN RAISE EXCEPTION '000078: expected 4 surveys base permissions, found %', v; END IF;
 END $$;

@@ -10,9 +10,11 @@ Enzo: "esegui tutti i punti da #4 a #14 in autonomia, intervista iniziale poi ne
 
 ## Top priorities (next session)
 
-1. **#8 QW-E5 — de-dup `status-pill` → `@heuresys/ui@0.1.7`** (controlled-defer: publish npm **irreversibile** + cross-repo). Pre-work fatto/verificato (auth `spen-zosky` OK, duplicato byte-identico web+showcase, build-entry `src/index.ts`, type `StatusPillTone` per evitare collisione). **Ricetta completa 1-step in `SOT_BACKLOG §S996`**. ~1 sessione focalizzata.
-2. **#5 BPM slice-3** — effect-wiring registry (code seam) + SLA/escalation scheduler. Spec `docs/superpowers/specs/2026-06-18-bpm-approval-slice2-3-design.md`. Multi-sessione (SLA needs systemd deploy; effects needs natural target).
-3. **#4 WI-C residuo** — users/assignments/skills/ranked-KPI materialization + demo agent live E2E (rate-limited MAX / no API key).
+> **#8 QW-E5 ✅ FATTO** (`@heuresys/ui@0.1.7` pubblicato su npm + deployato live su PROD — VM ui=0.1.7; ux-design-shared `a815421`, consumer `cdff66c`). + **fix deploy-blocker `000078`** (`ac4b723`, assert surveys-perm reso re-run-safe — break latente S995).
+
+1. **#5 BPM slice-3** — effect-wiring registry (code seam) + SLA/escalation scheduler. Spec `docs/superpowers/specs/2026-06-18-bpm-approval-slice2-3-design.md`. Multi-sessione (SLA needs systemd deploy; effects needs natural target).
+2. **#4 WI-C residuo** — users/assignments/skills/ranked-KPI materialization + demo agent live E2E (rate-limited MAX / no API key).
+3. **QW follow-up** — `detail-panel.tsx` FieldGrid è il 2° primitive duplicato web+showcase (stessa de-dup di QW-E5).
 
 ## Open questions (autorità *cosa* = Enzo, invariate)
 

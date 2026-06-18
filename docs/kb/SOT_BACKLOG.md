@@ -3,6 +3,20 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🟢 Aggiornamento S995 (2026-06-18) — batch P1: #1 BPM approval-flow + #2 Surveys-M2 (full-stack live, commit LOCALI)
+
+Batch P1 (Enzo: "procedi con i P1"; su #2 "parti ora ma chiudi anche UI"). **4 commit LOCALI non pushati** — Enzo: stop ai commit, NO push/align/deploy. Granulare → `SOT_STATE.md §Delta S995`.
+
+**DONE-LIVE (full-stack, E2E live verde):**
+- **#1 BPM approval-flow 3.3 slice-D** (`c582109` backend + `90d03dc` frontend) — runtime approvazioni generico (mig 000132/133/134, modulo `/v1/approvals` 5 endpoint + 10 test, admin-track + decision-page + inbox-actions). Riusa notification center 3.4. Slice-2 (chain ordinato) + slice-3 (effect-wiring/SLA) = roadmap (ordinal+SKIPPED già in schema). Spec `docs/superpowers/specs/2026-06-17-bpm-approval-flow-design.md`.
+- **#2 Surveys-M2** (`fc47eee` backend + `8e69a28` frontend) — decisione Enzo **M2**: `sys_survey_assignments` (audience esplicita) + perm `surveys:respond:self` + seed 8 RTL (mig 000135/136), ESS `/v1/me/surveys` (6 test), admin `/engagement` + ESS `/me/surveys` form. OQ minori chiuse coi default (edit strict one-shot, anonimato display-only, ruoli all, **pulse-write ESS = deferito follow-up**). Spec `docs/superpowers/specs/2026-06-17-surveys-engagement-ui-design.md`.
+
+**CONSEGNATO / DEFERITO (scelta Enzo → sessione dedicata):**
+- **#3 triage 14 dossier Fase-C**: tabella decision-ready prodotta (option-triad + raccomandazione per D-01..D-14; molti già parz. fatti, drift tracker `TODO_100X.md`). **Decisioni per-riga go/defer/won't + epic S-100X-E = sessione dedicata.** Quick-win Tier-1 suggeriti: D-12(2 footgun ~1h)/D-03/D-07(no-op)/D-05/D-10/D-11; leva strutturale D-08 (pg_dump pre-deploy).
+- **#5 audit ecosistema Claude S-100X-A-L** (design-only, unico audit Fase-A mai fatto) = **sessione dedicata**.
+
+**RESIDUO OPEN**: push/align/deploy dei commit S995 (gated Enzo) · verifica esito full suite API (background fine-sessione, gate mirati verdi).
+
 ## 🟢 Aggiornamento S994 (2026-06-17) — batch 13-item intervista-guidata: QW CLASS-A + SEC6 + B-50 close + RACI demo + design-spec
 
 Batch decision-authority session-scoped via **intervista preventiva** (Enzo ha scelto 13 item; discovery 6-agenti read-only evidence-based; ultracode multi-workflow). 10 commit `7dbfa96`..`c89c749` pushati + full close (align Mac/VM + deploy PROD). Granulare → `SOT_STATE.md §Delta S994`.

@@ -1,41 +1,41 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-17T02:57:45Z da docs/kb/tools/build_index.py
+# generato: 2026-06-18T16:08:29Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-17T02:57:45Z"
-  total_files: 1995
+  generated_at: "2026-06-18T16:08:29Z"
+  total_files: 2040
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 24
     api-core: 18
-    api-module: 259
+    api-module: 262
     ci: 15
-    claude-config: 2
+    claude-config: 6
     config: 94
     cowork-archive: 14
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 131
+    db-migration: 136
     db-script: 23
-    db-seed: 102
-    doc-canonical: 347
+    db-seed: 103
+    doc-canonical: 368
     handoff-state: 1
     qa-artifact: 96
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 79
+    shared-schema: 80
     showcase-source: 13
-    test: 207
+    test: 211
     ux-design-archive: 80
-    web-source: 138
+    web-source: 144
   status_counts:
     archive: 488
     external-archive: 50
-    live: 1457
+    live: 1502
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -346,6 +346,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\analytics\service.ts'
     root: repo
     rel: 'apps/api/src/modules/analytics/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/approvals/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/approvals/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/approvals/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -1942,6 +1960,30 @@ files:
   - path: 'D:\heuresys-advanced\.claude\settings.local.json'
     root: repo
     rel: '.claude/settings.local.json'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\consolida-pagina\SKILL.md'
+    root: repo
+    rel: '.claude/skills/consolida-pagina/SKILL.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\consolida-pagina\references\functional_areas.md'
+    root: repo
+    rel: '.claude/skills/consolida-pagina/references/functional_areas.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\dashboards-jobs\SKILL.md'
+    root: repo
+    rel: '.claude/skills/dashboards-jobs/SKILL.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\multi-tenant-validator\SKILL.md'
+    root: repo
+    rel: '.claude/skills/multi-tenant-validator/SKILL.md'
     category: claude-config
     status: live
     provenance: git-tracked
@@ -5359,6 +5401,36 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000132_approval_runtime.sql'
+    root: repo
+    rel: 'db/migrations/000132_approval_runtime.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000133_approval_permission_seed.sql'
+    root: repo
+    rel: 'db/migrations/000133_approval_permission_seed.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000134_approvals_ui_interface.sql'
+    root: repo
+    rel: 'db/migrations/000134_approvals_ui_interface.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000135_survey_assignments_and_respond_perm.sql'
+    root: repo
+    rel: 'db/migrations/000135_survey_assignments_and_respond_perm.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000136_surveys_ui_interfaces.sql'
+    root: repo
+    rel: 'db/migrations/000136_surveys_ui_interfaces.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\README.md'
     root: repo
     rel: 'db/scripts/README.md'
@@ -6109,6 +6181,12 @@ files:
     category: db-seed
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\survey-assignments-demo.sql'
+    root: repo
+    rel: 'db/seeds/survey-assignments-demo.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\CLAUDE.md'
     root: repo
     rel: 'CLAUDE.md'
@@ -6466,6 +6544,132 @@ files:
   - path: 'D:\heuresys-advanced\docs\db\TARGET_SCHEMA_DESIGN.md'
     root: repo
     rel: 'docs/db/TARGET_SCHEMA_DESIGN.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\00_CHARTER.md'
+    root: repo
+    rel: 'docs/due-diligence/00_CHARTER.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\01_DISCOVERY.md'
+    root: repo
+    rel: 'docs/due-diligence/01_DISCOVERY.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\EXECUTIVE_SUMMARY.md'
+    root: repo
+    rel: 'docs/due-diligence/EXECUTIVE_SUMMARY.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\REPORT.md'
+    root: repo
+    rel: 'docs/due-diligence/REPORT.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\SCORECARD.md'
+    root: repo
+    rel: 'docs/due-diligence/SCORECARD.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-P1.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-P1.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-P2.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-P2.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-P3.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-P3.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-P4.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-P4.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-T1.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-T1.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-T2.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-T2.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-T3.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-T3.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-T4.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-T4.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-T5.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-T5.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-T6.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-T6.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-T7.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-T7.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-T8.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-T8.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-T9.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-T9.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-X1.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-X1.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-X2.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-X2.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\due-diligence\workstreams\WS-X3.md'
+    root: repo
+    rel: 'docs/due-diligence/workstreams/WS-X3.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -8929,6 +9133,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\approvals.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/approvals.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\assessment-methods.ts'
     root: repo
     rel: 'packages/shared/src/schemas/assessment-methods.ts'
@@ -9487,6 +9697,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\approvals.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/approvals.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\assessment-methods.integration.test.ts'
     root: repo
     rel: 'apps/api/test/assessment-methods.integration.test.ts'
@@ -9844,6 +10060,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\me-sessions.integration.test.ts'
     root: repo
     rel: 'apps/api/test/me-sessions.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\me-surveys.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/me-surveys.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -10459,6 +10681,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\approvals.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/approvals.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\auth.setup.ts'
     root: repo
     rel: 'apps/web/tests/e2e/auth.setup.ts'
@@ -10654,6 +10882,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\smoke-5-personas.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/smoke-5-personas.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\surveys-m2.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/surveys-m2.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11329,6 +11563,18 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\approvals\[id]\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/approvals/[id]/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\approvals\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/approvals/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\blueprints\[variantId]\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/blueprints/[variantId]/page.tsx'
@@ -11380,6 +11626,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\dev\agent\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/dev/agent/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\engagement\[surveyId]\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/engagement/[surveyId]/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\engagement\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/engagement/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked
@@ -11536,6 +11794,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\skills\self-assessment\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/me/skills/self-assessment/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\surveys\[surveyId]\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/me/surveys/[surveyId]/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\surveys\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/me/surveys/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked

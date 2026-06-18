@@ -399,4 +399,102 @@ describe("/v1/positions/* integration", () => {
     expect(r.statusCode).toBe(200);
     expect((r.json() as { items: unknown[] }).items.length).toBe(0);
   });
+
+  /* -------------------------------------------------- kpi sub-resource WRITE (WI-D2) */
+
+  it("KPIS WI-D2: POST ranked → GET ordered rank NULLS LAST,weight DESC; PIP carries rank; PATCH; dup 409; scope 403; DELETE", async () => {
+    const code = `${SUITE_PREFIX}_KPIW`;
+    const created = await suite.app.inject({
+      method: "POST",
+      url: "/v1/positions",
+      headers: {
+        cookie: cookieHeader(tenantS.cookies),
+        "x-csrf-token": tenantS.csrfToken,
+        "content-type": "application/json",
+      },
+      payload: { code, title: "Kpi Write Target" },
+    });
+    const { positionId } = created.json() as { positionId: string };
+    createdPositionIds.push(positionId);
+
+    // KPI definitions are GLOBAL (tenant-null); the FK only needs existence.
+    const kpiRows = await pool.query<{ kpi_definition_id: string }>(
+      `SELECT kpi_definition_id FROM sys.sys_kpi_definitions ORDER BY kpi_definition_code LIMIT 2`,
+    );
+    const kpiA = kpiRows.rows[0]!.kpi_definition_id;
+    const kpiB = kpiRows.rows[1]!.kpi_definition_id;
+
+    const postKpi = (s: Session, payload: Record<string, unknown>) =>
+      suite.app.inject({
+        method: "POST",
+        url: `/v1/positions/${positionId}/kpis`,
+        headers: { cookie: cookieHeader(s.cookies), "x-csrf-token": s.csrfToken, "content-type": "application/json" },
+        payload,
+      });
+
+    // kpiA rank 2 / weight 1, kpiB rank 1 / weight 5 → rank ordering must win.
+    const a = await postKpi(tenantS, { kpiDefinitionId: kpiA, rank: 2, weight: 1 });
+    expect(a.statusCode).toBe(201);
+    expect((a.json() as { rank: number; kpiDefinitionId: string }).rank).toBe(2);
+    const b = await postKpi(tenantS, { kpiDefinitionId: kpiB, rank: 1, weight: 5 });
+    expect(b.statusCode).toBe(201);
+
+    // GET /kpis ordered: rank 1 (kpiB) before rank 2 (kpiA).
+    const list = await suite.app.inject({
+      method: "GET",
+      url: `/v1/positions/${positionId}/kpis`,
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    const items = (list.json() as { items: { rank: number; kpiDefinitionId: string }[] }).items;
+    expect(items.map((i) => i.rank)).toEqual([1, 2]);
+    expect(items[0]!.kpiDefinitionId).toBe(kpiB);
+
+    // PIP view projects rank, same ordering (requiredKpis is z.unknown() passthrough).
+    const pip = await suite.app.inject({
+      method: "GET",
+      url: `/v1/positions/${positionId}/intelligence-profile`,
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    const reqKpis = (pip.json() as { requiredKpis: { rank: number; kpi_definition_id: string }[] }).requiredKpis;
+    expect(reqKpis[0]!.rank).toBe(1);
+    expect(reqKpis[0]!.kpi_definition_id).toBe(kpiB);
+
+    // Duplicate (same kpi on same position) → 409.
+    const dup = await postKpi(tenantS, { kpiDefinitionId: kpiA });
+    expect(dup.statusCode).toBe(409);
+    expect((dup.json() as { error: { code: string } }).error.code).toBe("POSITION_KPI_DUPLICATE");
+
+    // PATCH rank 2 → 5.
+    const patch = await suite.app.inject({
+      method: "PATCH",
+      url: `/v1/positions/${positionId}/kpis/${kpiA}`,
+      headers: { cookie: cookieHeader(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+      payload: { rank: 5 },
+    });
+    expect(patch.statusCode).toBe(200);
+    expect((patch.json() as { rank: number }).rank).toBe(5);
+
+    // USER (no position:update) → 403 at the permission gate.
+    const userWrite = await postKpi(employeeS, { kpiDefinitionId: kpiB });
+    expect(userWrite.statusCode).toBe(403);
+
+    // MANAGER has position:update but does NOT own this position → 403 scope.
+    const mgrWrite = await postKpi(managerS, { kpiDefinitionId: kpiB });
+    expect(mgrWrite.statusCode).toBe(403);
+    expect((mgrWrite.json() as { error: { code: string } }).error.code).toBe("POSITION_KPI_WRITE_FORBIDDEN");
+
+    // DELETE kpiA → 204; list back to 1 (kpiB).
+    const del = await suite.app.inject({
+      method: "DELETE",
+      url: `/v1/positions/${positionId}/kpis/${kpiA}`,
+      headers: { cookie: cookieHeader(tenantS.cookies), "x-csrf-token": tenantS.csrfToken },
+    });
+    expect(del.statusCode).toBe(204);
+    const after = await suite.app.inject({
+      method: "GET",
+      url: `/v1/positions/${positionId}/kpis`,
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    expect((after.json() as { items: unknown[] }).items.length).toBe(1);
+  });
 });

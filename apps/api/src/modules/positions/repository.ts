@@ -13,6 +13,8 @@ import type {
   PositionSkillRequirement,
   AddPositionSkillBody,
   PositionKpiRequirement,
+  AddPositionKpiBody,
+  UpdatePositionKpiBody,
   PositionIntelligenceProfile,
 } from "@heuresys/shared";
 
@@ -420,6 +422,7 @@ interface RawKpiReqRow {
   kpi_definition_id: string;
   target_template: Record<string, unknown>;
   weight: string;
+  rank: number | null;
   position_kpi_requirement_metadata: Record<string, unknown>;
   created_at: Date;
   updated_at: Date;
@@ -433,24 +436,115 @@ function rowToKpiReq(r: RawKpiReqRow): PositionKpiRequirement {
     kpiDefinitionId: r.kpi_definition_id,
     targetTemplate: r.target_template,
     weight: Number(r.weight),
+    rank: r.rank,
     metadata: r.position_kpi_requirement_metadata,
     createdAt: r.created_at.toISOString(),
     updatedAt: r.updated_at.toISOString(),
   };
 }
 
+const KPI_REQ_COLS = `position_kpi_requirement_id, position_id,
+  position_kpi_requirement_tenant_id, kpi_definition_id,
+  target_template, weight, rank,
+  position_kpi_requirement_metadata, created_at, updated_at`;
+
 export async function listKpiRequirements(
   q: DbConnector,
   positionId: string,
 ): Promise<PositionKpiRequirement[]> {
   const res = await q.query<RawKpiReqRow>(
-    `SELECT position_kpi_requirement_id, position_id,
-            position_kpi_requirement_tenant_id, kpi_definition_id,
-            target_template, weight,
-            position_kpi_requirement_metadata, created_at, updated_at
+    `SELECT ${KPI_REQ_COLS}
        FROM sys.sys_position_kpi_requirements
-      WHERE position_id = $1 ORDER BY weight DESC`,
+      WHERE position_id = $1
+      ORDER BY rank NULLS LAST, weight DESC`,
     [positionId],
   );
   return res.rows.map(rowToKpiReq);
+}
+
+export async function findKpiRequirement(
+  q: DbConnector,
+  positionId: string,
+  kpiDefinitionId: string,
+): Promise<PositionKpiRequirement | null> {
+  const res = await q.query<RawKpiReqRow>(
+    `SELECT ${KPI_REQ_COLS} FROM sys.sys_position_kpi_requirements
+      WHERE position_id = $1 AND kpi_definition_id = $2`,
+    [positionId, kpiDefinitionId],
+  );
+  return res.rows[0] ? rowToKpiReq(res.rows[0]) : null;
+}
+
+export async function insertKpiRequirement(
+  q: DbConnector,
+  positionId: string,
+  tenantId: string,
+  body: AddPositionKpiBody,
+  createdBy: string,
+): Promise<PositionKpiRequirement> {
+  const res = await q.query<RawKpiReqRow>(
+    `INSERT INTO sys.sys_position_kpi_requirements (
+        position_id, position_kpi_requirement_tenant_id, kpi_definition_id,
+        target_template, weight, rank,
+        position_kpi_requirement_metadata, created_by
+      ) VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7::jsonb, $8)
+      RETURNING ${KPI_REQ_COLS}`,
+    [
+      positionId,
+      tenantId,
+      body.kpiDefinitionId,
+      JSON.stringify(body.targetTemplate ?? {}),
+      body.weight,
+      body.rank ?? null,
+      JSON.stringify(body.metadata ?? {}),
+      createdBy,
+    ],
+  );
+  return rowToKpiReq(res.rows[0]!);
+}
+
+export async function updateKpiRequirement(
+  q: DbConnector,
+  positionId: string,
+  kpiDefinitionId: string,
+  patch: UpdatePositionKpiBody,
+  updatedBy: string,
+): Promise<PositionKpiRequirement | null> {
+  // COALESCE keeps unspecified fields intact; rank is explicitly settable to NULL
+  // via a sentinel (passing null clears it, undefined leaves it).
+  const res = await q.query<RawKpiReqRow>(
+    `UPDATE sys.sys_position_kpi_requirements SET
+        target_template = COALESCE($3::jsonb, target_template),
+        weight          = COALESCE($4, weight),
+        rank            = CASE WHEN $5::boolean THEN $6 ELSE rank END,
+        position_kpi_requirement_metadata = COALESCE($7::jsonb, position_kpi_requirement_metadata),
+        updated_by      = $8,
+        updated_at      = now()
+      WHERE position_id = $1 AND kpi_definition_id = $2
+      RETURNING ${KPI_REQ_COLS}`,
+    [
+      positionId,
+      kpiDefinitionId,
+      patch.targetTemplate !== undefined ? JSON.stringify(patch.targetTemplate) : null,
+      patch.weight ?? null,
+      patch.rank !== undefined, // rankProvided sentinel
+      patch.rank ?? null,
+      patch.metadata !== undefined ? JSON.stringify(patch.metadata) : null,
+      updatedBy,
+    ],
+  );
+  return res.rows[0] ? rowToKpiReq(res.rows[0]) : null;
+}
+
+export async function deleteKpiRequirement(
+  q: DbConnector,
+  positionId: string,
+  kpiDefinitionId: string,
+): Promise<boolean> {
+  const res = await q.query(
+    `DELETE FROM sys.sys_position_kpi_requirements
+      WHERE position_id = $1 AND kpi_definition_id = $2`,
+    [positionId, kpiDefinitionId],
+  );
+  return (res.rowCount ?? 0) === 1;
 }

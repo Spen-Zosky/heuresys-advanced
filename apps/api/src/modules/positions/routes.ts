@@ -22,6 +22,10 @@ import {
   AddPositionSkillBodySchema,
   PositionSkillIdParamSchema,
   PositionKpiListResponseSchema,
+  PositionKpiRequirementSchema,
+  AddPositionKpiBodySchema,
+  UpdatePositionKpiBodySchema,
+  PositionKpiIdParamSchema,
   EmptyResponseSchema,
 } from "@heuresys/shared";
 import { positionsService } from "./service.js";
@@ -151,7 +155,7 @@ export const positionsRoutes: FastifyPluginAsyncZod = async (app) => {
     },
   );
 
-  /* --- KPI sub-resource (read-only MVP-1) -------------------------- */
+  /* --- KPI sub-resource (WI-D2: read + ranked write) --------------- */
   app.get(
     "/:id/kpis",
     {
@@ -164,5 +168,50 @@ export const positionsRoutes: FastifyPluginAsyncZod = async (app) => {
     async (req) => ({
       items: await positionsService.listKpis(actorFromReq(req), req.params.id),
     }),
+  );
+
+  app.post(
+    "/:id/kpis",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("position:update")],
+      schema: {
+        params: PositionIdParamSchema,
+        body: AddPositionKpiBodySchema,
+        response: { 201: PositionKpiRequirementSchema },
+      },
+    },
+    async (req, reply) => {
+      const created = await positionsService.addKpi(actorFromReq(req), req.params.id, req.body);
+      reply.code(201).send(created);
+    },
+  );
+
+  app.patch(
+    "/:id/kpis/:kpiId",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("position:update")],
+      schema: {
+        params: PositionKpiIdParamSchema,
+        body: UpdatePositionKpiBodySchema,
+        response: { 200: PositionKpiRequirementSchema },
+      },
+    },
+    async (req) =>
+      positionsService.updateKpi(actorFromReq(req), req.params.id, req.params.kpiId, req.body),
+  );
+
+  app.delete(
+    "/:id/kpis/:kpiId",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("position:update")],
+      schema: {
+        params: PositionKpiIdParamSchema,
+        response: { 204: EmptyResponseSchema },
+      },
+    },
+    async (req, reply) => {
+      await positionsService.removeKpi(actorFromReq(req), req.params.id, req.params.kpiId);
+      reply.code(204).send({});
+    },
   );
 };

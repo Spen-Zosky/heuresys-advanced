@@ -184,6 +184,7 @@ export const PositionKpiRequirementSchema = z.object({
   kpiDefinitionId: z.uuid(),
   targetTemplate: z.record(z.string(), z.unknown()),
   weight: z.number(),
+  rank: z.number().int().min(1).nullable(), // WI-D2: 1 = highest priority; null = unranked
   metadata: z.record(z.string(), z.unknown()),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
@@ -194,3 +195,27 @@ export const PositionKpiListResponseSchema = z.object({
   items: z.array(PositionKpiRequirementSchema),
 });
 export type PositionKpiListResponse = z.infer<typeof PositionKpiListResponseSchema>;
+
+/* --- kpi sub-resource writes (WI-D2) ----------------------------------- */
+
+export const AddPositionKpiBodySchema = z.object({
+  kpiDefinitionId: z.uuid(),
+  targetTemplate: z.record(z.string(), z.unknown()).optional().default({}),
+  weight: z.number().min(0).max(9.999).optional().default(1), // numeric(4,3)
+  rank: z.number().int().min(1).nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional().default({}),
+});
+export type AddPositionKpiBody = z.infer<typeof AddPositionKpiBodySchema>;
+
+export const UpdatePositionKpiBodySchema = z.object({
+  targetTemplate: z.record(z.string(), z.unknown()).optional(),
+  weight: z.number().min(0).max(9.999).optional(),
+  rank: z.number().int().min(1).nullable().optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+});
+export type UpdatePositionKpiBody = z.infer<typeof UpdatePositionKpiBodySchema>;
+
+export const PositionKpiIdParamSchema = z.object({
+  id: z.uuid(),
+  kpiId: z.uuid(), // = kpi_definition_id (natural sub-resource key, UNIQUE per position)
+});

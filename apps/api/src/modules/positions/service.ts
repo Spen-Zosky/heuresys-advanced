@@ -22,6 +22,8 @@ import type {
   PositionSkillRequirement,
   AddPositionSkillBody,
   PositionKpiRequirement,
+  AddPositionKpiBody,
+  UpdatePositionKpiBody,
   PositionIntelligenceProfile,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
@@ -191,10 +193,62 @@ export const positionsService = {
     if (!ok) throw new NotFoundError("Skill requirement");
   },
 
-  /* -------------------------------------------------- kpi requirements (read-only) */
+  /* -------------------------------------------------- kpi requirements (WI-D2: read + write) */
 
   async listKpis(actor: ActorContext, positionId: string): Promise<PositionKpiRequirement[]> {
     const pos = await this.getById(actor, positionId);
     return repo.listKpiRequirements(pool, pos.positionId);
+  },
+
+  async addKpi(
+    actor: ActorContext,
+    positionId: string,
+    body: AddPositionKpiBody,
+  ): Promise<PositionKpiRequirement> {
+    const pos = await this.getById(actor, positionId);
+    if (!(await canUpdate(actor, pos))) {
+      throw new ForbiddenError(
+        "Insufficient privileges to modify this position's KPIs",
+        "POSITION_KPI_WRITE_FORBIDDEN",
+      );
+    }
+    const dup = await repo.findKpiRequirement(pool, pos.positionId, body.kpiDefinitionId);
+    if (dup) {
+      throw new ConflictError(
+        "KPI requirement already exists on this position",
+        "POSITION_KPI_DUPLICATE",
+      );
+    }
+    return repo.insertKpiRequirement(pool, pos.positionId, pos.tenantId, body, actor.userId);
+  },
+
+  async updateKpi(
+    actor: ActorContext,
+    positionId: string,
+    kpiDefinitionId: string,
+    patch: UpdatePositionKpiBody,
+  ): Promise<PositionKpiRequirement> {
+    const pos = await this.getById(actor, positionId);
+    if (!(await canUpdate(actor, pos))) {
+      throw new ForbiddenError(
+        "Insufficient privileges to modify this position's KPIs",
+        "POSITION_KPI_WRITE_FORBIDDEN",
+      );
+    }
+    const updated = await repo.updateKpiRequirement(pool, pos.positionId, kpiDefinitionId, patch, actor.userId);
+    if (!updated) throw new NotFoundError("KPI requirement");
+    return updated;
+  },
+
+  async removeKpi(actor: ActorContext, positionId: string, kpiDefinitionId: string): Promise<void> {
+    const pos = await this.getById(actor, positionId);
+    if (!(await canUpdate(actor, pos))) {
+      throw new ForbiddenError(
+        "Insufficient privileges to modify this position's KPIs",
+        "POSITION_KPI_WRITE_FORBIDDEN",
+      );
+    }
+    const ok = await repo.deleteKpiRequirement(pool, pos.positionId, kpiDefinitionId);
+    if (!ok) throw new NotFoundError("KPI requirement");
   },
 };

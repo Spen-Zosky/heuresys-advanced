@@ -71,6 +71,7 @@ const toStep = (r: repo.ApprovalStepRow): ApprovalStep => ({
   tenantId: r.tenantId,
   approverUserId: r.approverUserId,
   ordinal: r.ordinal,
+  levelPolicy: r.levelPolicy as ApprovalDecisionPolicy | null,
   status: r.status as ApprovalStepStatus,
   decisionComment: r.decisionComment,
   decidedAt: r.decidedAt,
@@ -92,20 +93,47 @@ const toListItem = (r: repo.ApprovalRequestListRow): ApprovalRequestListItem => 
   pendingStepCount: r.pendingStepCount,
 });
 
-/** Pure re-derivation of request status from its steps (§2.3). */
-function deriveStatus(policy: string, steps: repo.ApprovalStepRow[]): "APPROVED" | "REJECTED" | "PENDING" {
-  if (steps.some((s) => s.status === "REJECTED")) return "REJECTED";
-  if (policy === "ALL_OF" && steps.every((s) => s.status === "APPROVED")) return "APPROVED";
-  if (policy === "ANY_OF" && steps.some((s) => s.status === "APPROVED")) return "APPROVED";
-  return "PENDING";
+interface ChainPlan {
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  activeOrdinal?: number; // PENDING: the first in-progress level (its pending steps get the inbox)
+  failedOrdinal?: number; // REJECTED: the level that failed (it + higher → SKIPPED)
+}
+
+/** Level-aware re-derivation of the request status (slice-2 ordered chain).
+ *  Evaluates levels in ascending ordinal; per-level quorum = the step's level_policy
+ *  (falls back to the request policy). A level FAILS (→ REJECTED) on ALL_OF any-reject or
+ *  ANY_OF all-reject; SATISFIES on ALL_OF all-approved or ANY_OF any-approved; otherwise it
+ *  is the active (in-progress) level. A single level reproduces slice-1 deriveStatus exactly. */
+function deriveChain(requestPolicy: string, steps: repo.ApprovalStepRow[]): ChainPlan {
+  const ordinals = [...new Set(steps.map((s) => s.ordinal))].sort((a, b) => a - b);
+  for (const ord of ordinals) {
+    const lvl = steps.filter((s) => s.ordinal === ord);
+    const policy = lvl.find((s) => s.levelPolicy)?.levelPolicy ?? requestPolicy;
+    const total = lvl.length;
+    const approved = lvl.filter((s) => s.status === "APPROVED").length;
+    const rejected = lvl.filter((s) => s.status === "REJECTED").length;
+    const failed = policy === "ALL_OF" ? rejected > 0 : rejected === total;
+    if (failed) return { status: "REJECTED", failedOrdinal: ord };
+    const satisfied = policy === "ALL_OF" ? approved === total : approved > 0;
+    if (satisfied) continue; // level done → evaluate the next
+    return { status: "PENDING", activeOrdinal: ord }; // first level still open
+  }
+  return { status: "APPROVED" };
 }
 
 export const approvalService = {
   async createRequest(a: ActorContext, body: CreateApprovalRequestBody): Promise<ApprovalRequest> {
-    const approverIds = [...new Set(body.approverUserIds)];
+    // Normalize to canonical ordered levels (slice-1 flat approverUserIds = a single level).
+    const rawLevels = body.levels ?? [{ approverUserIds: body.approverUserIds!, policy: undefined }];
+    const levels = rawLevels.map((l) => ({ approverUserIds: [...new Set(l.approverUserIds)], policy: l.policy }));
+    const allIds = levels.flatMap((l) => l.approverUserIds);
+    // The 000132 UNIQUE(request, approver) means an approver may appear in only ONE level.
+    if (new Set(allIds).size !== allIds.length) {
+      throw new ValidationError({ approverUserIds: "An approver may appear in only one level" }, "Duplicate approver across levels");
+    }
     // Resolve approvers + derive the request tenant (all approvers share one tenant — I5).
-    const approvers = await repo.resolveApprovers(pool, approverIds);
-    if (approvers.length !== approverIds.length) {
+    const approvers = await repo.resolveApprovers(pool, allIds);
+    if (approvers.length !== allIds.length) {
       throw new ValidationError({ approverUserIds: "One or more approvers do not exist" }, "Unknown approver");
     }
     const tenants = new Set(approvers.map((u) => u.tenantId));
@@ -121,6 +149,13 @@ export const approvalService = {
       throw new ForbiddenError("Approvers must be in your tenant", "CROSS_TENANT_APPROVER");
     }
 
+    const requestPolicy = body.decisionPolicy ?? "ALL_OF";
+    // Materialize steps: ordinal = 1-based level index; level_policy = explicit per-level
+    // policy or NULL (→ falls back to the request policy at derive time).
+    const stepInputs: repo.StepInput[] = levels.flatMap((l, i) =>
+      l.approverUserIds.map((uid) => ({ approverUserId: uid, ordinal: i + 1, levelPolicy: l.policy ?? null })),
+    );
+
     const request = await withTransaction(async (client) => {
       const req = await repo.insertRequest(client, {
         tenantId: requestTenant,
@@ -128,13 +163,15 @@ export const approvalService = {
         body: body.body ?? null,
         resourceType: body.resourceType ?? null,
         resourceId: body.resourceId ?? null,
-        decisionPolicy: body.decisionPolicy ?? "ALL_OF",
+        decisionPolicy: requestPolicy,
         priority: body.priority ?? "MEDIUM",
         createdBy: a.userId,
       });
-      const steps = await repo.insertSteps(client, req.approvalRequestId, requestTenant, approverIds);
-      // Deliver each step to the approver's inbox (3.4 notification center) in-txn.
+      const steps = await repo.insertSteps(client, req.approvalRequestId, requestTenant, stepInputs);
+      // Deliver ONLY the first level's steps to their inbox; higher levels open as prior
+      // levels are satisfied (slice-2). Single-level requests behave exactly as slice-1.
       for (const step of steps) {
+        if (step.ordinal !== 1) continue;
         await emitNotification(client, {
           tenantId: step.tenantId,
           userId: step.approverUserId,
@@ -185,20 +222,50 @@ export const approvalService = {
       if (found.requestStatus !== "PENDING") {
         throw new ConflictError("Request already resolved", "REQUEST_RESOLVED");
       }
+      // slice-2: the step's level must be ACTIVE (the MIN pending ordinal). A higher-level
+      // approver cannot pre-decide before the prior levels resolve.
+      const active = await repo.activePendingOrdinal(client, requestId);
+      if (active !== null && found.step.ordinal !== active) {
+        throw new ConflictError("This approval level is not yet active", "LEVEL_NOT_ACTIVE");
+      }
       const newStatus = body.decision === "APPROVE" ? "APPROVED" : "REJECTED";
       const step = await repo.decideStepGuarded(client, stepId, newStatus, body.comment ?? null, a.userId);
       if (!step) throw new ConflictError("This step was already decided", "ALREADY_DECIDED");
 
       await repo.markInboxReadForStep(client, stepId, a.userId);
 
-      // Re-derive the parent request status from all its steps.
+      // Re-derive the chain (level-aware) from all steps.
       const steps = await repo.loadSteps(client, requestId);
-      const derived = deriveStatus(found.requestPolicy, steps);
-      if (derived === "REJECTED") {
+      const plan = deriveChain(found.requestPolicy, steps);
+      if (plan.status === "REJECTED") {
+        await repo.skipPendingGte(client, requestId, plan.failedOrdinal!); // failed level + higher → SKIPPED
         await repo.setRequestStatus(client, requestId, "REJECTED");
-      } else if (derived === "APPROVED") {
-        if (found.requestPolicy === "ANY_OF") await repo.skipPendingSiblings(client, requestId);
+      } else if (plan.status === "APPROVED") {
+        await repo.skipPendingGte(client, requestId, 1); // any leftover ANY_OF pending → SKIPPED
         await repo.setRequestStatus(client, requestId, "APPROVED");
+      } else {
+        // Still PENDING: a higher level may have just opened. Skip satisfied lower-level
+        // siblings, then deliver the active level's pending steps to their inbox (dedupe →
+        // already-notified steps are never re-notified, so level 1 stays put).
+        await repo.skipPendingLt(client, requestId, plan.activeOrdinal!);
+        const req = await repo.findRequestScoped(client, scope, requestId);
+        const fresh = await repo.loadSteps(client, requestId);
+        for (const s of fresh) {
+          if (s.status !== "PENDING" || s.ordinal !== plan.activeOrdinal) continue;
+          await emitNotification(client, {
+            tenantId: s.tenantId,
+            userId: s.approverUserId,
+            type: "APPROVAL_REQUEST",
+            subject: req?.title ?? "Approval required",
+            body: req?.body ?? null,
+            priority: (req?.priority as ApprovalPriority) ?? "MEDIUM",
+            resourceType: "APPROVAL_STEP",
+            resourceId: s.approvalStepId,
+            actionUrl: `/approvals/${requestId}?step=${s.approvalStepId}`,
+            createdBy: req?.createdBy ?? a.userId,
+            dedupe: true,
+          });
+        }
       }
       return step;
     });

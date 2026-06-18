@@ -42,6 +42,7 @@ export interface ApprovalStepRow {
   tenantId: string;
   approverUserId: string;
   ordinal: number;
+  levelPolicy: string | null;
   status: string;
   decisionComment: string | null;
   decidedAt: string | null;
@@ -73,9 +74,9 @@ const REQ_COLS = `approval_request_id, approval_request_tenant_id, approval_requ
   created_at, created_by, updated_at`;
 
 const STEP_COLS = `approval_step_id, approval_step_request_id, approval_step_tenant_id,
-  approval_step_approver_user_id, approval_step_ordinal, approval_step_status,
-  approval_step_decision_comment, approval_step_decided_at, approval_step_decided_by,
-  approval_step_metadata, created_at, updated_at`;
+  approval_step_approver_user_id, approval_step_ordinal, approval_step_level_policy,
+  approval_step_status, approval_step_decision_comment, approval_step_decided_at,
+  approval_step_decided_by, approval_step_metadata, created_at, updated_at`;
 // Same columns prefixed with the step alias — required whenever the query joins
 // sys_users (which also has created_at/updated_at → otherwise an ambiguous reference).
 const STEP_COLS_S = STEP_COLS.split(",").map((c) => "s." + c.trim()).join(", ");
@@ -107,6 +108,7 @@ function mapStep(r: Record<string, unknown>): ApprovalStepRow {
     tenantId: r.approval_step_tenant_id as string,
     approverUserId: r.approval_step_approver_user_id as string,
     ordinal: Number(r.approval_step_ordinal),
+    levelPolicy: (r.approval_step_level_policy as string | null) ?? null,
     status: r.approval_step_status as string,
     decisionComment: (r.approval_step_decision_comment as string | null) ?? null,
     decidedAt: isoN(r.approval_step_decided_at),
@@ -157,14 +159,34 @@ export async function insertRequest(client: PoolClient, input: InsertRequestInpu
   return mapRequest(res.rows[0]!);
 }
 
-/** Set-based INSERT of one PENDING step per approver (unnest, one round-trip). */
-export async function insertSteps(client: PoolClient, requestId: string, tenantId: string, approverUserIds: readonly string[]): Promise<ApprovalStepRow[]> {
+export interface StepInput {
+  approverUserId: string;
+  ordinal: number;
+  levelPolicy: string | null;
+}
+
+/** Set-based INSERT of the materialized steps (per-level ordinal + policy). One round-trip.
+ *  slice-1 callers pass all steps at ordinal=1, levelPolicy=null. */
+export async function insertSteps(
+  client: PoolClient,
+  requestId: string,
+  tenantId: string,
+  steps: readonly StepInput[],
+): Promise<ApprovalStepRow[]> {
   const res = await client.query(
     `INSERT INTO sys.sys_approval_steps
-       (approval_step_request_id, approval_step_tenant_id, approval_step_approver_user_id)
-     SELECT $1, $2, uid FROM unnest($3::uuid[]) AS uid
+       (approval_step_request_id, approval_step_tenant_id, approval_step_approver_user_id,
+        approval_step_ordinal, approval_step_level_policy)
+     SELECT $1, $2, t.uid, t.ord, t.pol
+       FROM unnest($3::uuid[], $4::int[], $5::varchar[]) AS t(uid, ord, pol)
      RETURNING ${STEP_COLS}`,
-    [requestId, tenantId, approverUserIds],
+    [
+      requestId,
+      tenantId,
+      steps.map((s) => s.approverUserId),
+      steps.map((s) => s.ordinal),
+      steps.map((s) => s.levelPolicy),
+    ],
   );
   return res.rows.map(mapStep);
 }
@@ -294,13 +316,34 @@ export async function loadSteps(client: PoolClient, requestId: string): Promise<
   return res.rows.map(mapStep);
 }
 
-/** ANY_OF short-circuit: remaining PENDING siblings → SKIPPED. */
-export async function skipPendingSiblings(client: PoolClient, requestId: string): Promise<void> {
+/** Skip PENDING steps at ordinal >= `ordinal` (reject cascade: the failed level + all higher;
+ *  ordinal=1 → skip every PENDING step, used when the request reaches APPROVED). */
+export async function skipPendingGte(client: PoolClient, requestId: string, ordinal: number): Promise<void> {
   await client.query(
     `UPDATE sys.sys_approval_steps SET approval_step_status = 'SKIPPED'
+      WHERE approval_step_request_id = $1 AND approval_step_status = 'PENDING' AND approval_step_ordinal >= $2`,
+    [requestId, ordinal],
+  );
+}
+
+/** Skip PENDING steps at ordinal < `ordinal` (satisfied lower ANY_OF siblings once a higher level opens). */
+export async function skipPendingLt(client: PoolClient, requestId: string, ordinal: number): Promise<void> {
+  await client.query(
+    `UPDATE sys.sys_approval_steps SET approval_step_status = 'SKIPPED'
+      WHERE approval_step_request_id = $1 AND approval_step_status = 'PENDING' AND approval_step_ordinal < $2`,
+    [requestId, ordinal],
+  );
+}
+
+/** The active level = MIN ordinal among PENDING steps (null = none pending → request is terminal). */
+export async function activePendingOrdinal(client: PoolClient, requestId: string): Promise<number | null> {
+  const res = await client.query(
+    `SELECT min(approval_step_ordinal) AS m FROM sys.sys_approval_steps
       WHERE approval_step_request_id = $1 AND approval_step_status = 'PENDING'`,
     [requestId],
   );
+  const m = res.rows[0]?.m;
+  return m == null ? null : Number(m);
 }
 
 /** Re-derive: set the request to a terminal status (+ resolved_at). */

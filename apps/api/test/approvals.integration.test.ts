@@ -61,6 +61,28 @@ function decide(s: S, reqId: string, stepId: string, decision: "APPROVE" | "REJE
 }
 const stepOf = (d: Detail, userId: string) => d.steps.find((s) => s.approverUserId === userId)!;
 
+// slice-2: create an ordered multi-level chain.
+async function createChain(
+  s: S,
+  levels: { approverUserIds: string[]; policy?: "ALL_OF" | "ANY_OF" }[],
+  title?: string,
+): Promise<ReqRow> {
+  const r = await suite.app.inject({
+    method: "POST", url: "/v1/approvals", headers: jhdr(s),
+    payload: { title: title ?? `${TITLE_PREFIX} chain`, levels },
+  });
+  if (r.statusCode !== 200) throw new Error(`createChain: ${r.statusCode} ${r.body}`);
+  return r.json() as ReqRow;
+}
+async function inboxCount(stepId: string): Promise<number> {
+  const r = await pool.query<{ c: string }>(
+    `SELECT count(*) AS c FROM sys.sys_inbox_notifications
+      WHERE notification_resource_id = $1 AND notification_resource_type = 'APPROVAL_STEP'`,
+    [stepId],
+  );
+  return Number(r.rows[0]!.c);
+}
+
 beforeAll(async () => {
   suite = await buildTestApp();
   admin = await login(suite, "admin@heuresys.com");
@@ -224,5 +246,70 @@ describe("generic approval runtime API (3.3 slice-D)", () => {
     });
     expect(r.statusCode).toBe(403);
     expect((r.json() as { error: { code: string } }).error.code).toBe("CROSS_TENANT_APPROVER");
+  });
+});
+
+describe("approval ordered multi-level chains (3.3 slice-2)", () => {
+  it("chain happy: only L1 opens at creation; approve L1 → L2 opens (inbox) → approve L2 → APPROVED", async () => {
+    const req = await createChain(
+      paolo,
+      [{ approverUserIds: [federicaId] }, { approverUserIds: [paoloId] }],
+      `${TITLE_PREFIX} chain-happy`,
+    );
+    expect(req.status).toBe("PENDING");
+    const d0 = await getDetail(paolo, req.approvalRequestId);
+    expect(d0.steps).toHaveLength(2);
+    const fStep = stepOf(d0, federicaId);
+    const pStep = stepOf(d0, paoloId);
+
+    // At creation ONLY level 1 (federica) is delivered to the inbox; level 2 (paolo) is not yet open.
+    expect(await inboxCount(fStep.approvalStepId)).toBe(1);
+    expect(await inboxCount(pStep.approvalStepId)).toBe(0);
+
+    // Approve L1 → request still PENDING, and level 2 just opened (paolo now has an inbox task).
+    expect((await decide(federica, req.approvalRequestId, fStep.approvalStepId, "APPROVE")).statusCode).toBe(200);
+    expect((await getDetail(paolo, req.approvalRequestId)).status).toBe("PENDING");
+    expect(await inboxCount(pStep.approvalStepId)).toBe(1);
+
+    // Approve L2 → terminal APPROVED.
+    expect((await decide(paolo, req.approvalRequestId, pStep.approvalStepId, "APPROVE")).statusCode).toBe(200);
+    expect((await getDetail(paolo, req.approvalRequestId)).status).toBe("APPROVED");
+  });
+
+  it("level-not-active: deciding L2 before L1 resolves → 409 LEVEL_NOT_ACTIVE", async () => {
+    const req = await createChain(
+      paolo,
+      [{ approverUserIds: [federicaId] }, { approverUserIds: [paoloId] }],
+      `${TITLE_PREFIX} chain-guard`,
+    );
+    const d = await getDetail(paolo, req.approvalRequestId);
+    const r = await decide(paolo, req.approvalRequestId, stepOf(d, paoloId).approvalStepId, "APPROVE");
+    expect(r.statusCode).toBe(409);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("LEVEL_NOT_ACTIVE");
+  });
+
+  it("reject cascade: reject L1 → request REJECTED + the L2 step → SKIPPED (never opened)", async () => {
+    const req = await createChain(
+      paolo,
+      [{ approverUserIds: [federicaId] }, { approverUserIds: [paoloId] }],
+      `${TITLE_PREFIX} chain-reject`,
+    );
+    const d = await getDetail(paolo, req.approvalRequestId);
+    expect((await decide(federica, req.approvalRequestId, stepOf(d, federicaId).approvalStepId, "REJECT")).statusCode).toBe(200);
+    const after = await getDetail(paolo, req.approvalRequestId);
+    expect(after.status).toBe("REJECTED");
+    expect(stepOf(after, paoloId).status).toBe("SKIPPED");
+  });
+
+  it("validation: the same approver in two levels → 400 (an approver may appear in only one level)", async () => {
+    const r = await suite.app.inject({
+      method: "POST", url: "/v1/approvals", headers: jhdr(paolo),
+      payload: {
+        title: `${TITLE_PREFIX} chain-dup`,
+        levels: [{ approverUserIds: [federicaId] }, { approverUserIds: [federicaId] }],
+      },
+    });
+    expect(r.statusCode).toBe(400);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("VALIDATION_ERROR");
   });
 });

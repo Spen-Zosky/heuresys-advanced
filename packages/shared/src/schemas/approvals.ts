@@ -55,6 +55,7 @@ export const ApprovalStepSchema = z.object({
   tenantId: z.uuid(),
   approverUserId: z.uuid(),
   ordinal: z.number().int(),
+  levelPolicy: ApprovalDecisionPolicyEnum.nullable(), // slice-2: per-level quorum (null → request policy)
   status: ApprovalStepStatusEnum,
   decisionComment: z.string().nullable(),
   decidedAt: z.iso.datetime().nullable(),
@@ -93,15 +94,29 @@ export const ApprovalListResponseSchema = z.object({
 export type ApprovalListResponse = z.infer<typeof ApprovalListResponseSchema>;
 
 /* --- request bodies / params ----------------------------------------------- */
-export const CreateApprovalRequestBodySchema = z.object({
-  title: z.string().min(1).max(255),
-  body: z.string().max(8192).nullable().optional(),
-  resourceType: z.string().max(64).nullable().optional(),
-  resourceId: z.uuid().nullable().optional(),
-  priority: ApprovalPriorityEnum.optional(),
-  decisionPolicy: ApprovalDecisionPolicyEnum.optional(),
+/** slice-2: one ordered level of an approval chain. policy falls back to the request decisionPolicy. */
+export const ApprovalLevelInputSchema = z.object({
   approverUserIds: z.array(z.uuid()).min(1).max(50),
+  policy: ApprovalDecisionPolicyEnum.optional(),
 });
+export type ApprovalLevelInput = z.infer<typeof ApprovalLevelInputSchema>;
+
+export const CreateApprovalRequestBodySchema = z
+  .object({
+    title: z.string().min(1).max(255),
+    body: z.string().max(8192).nullable().optional(),
+    resourceType: z.string().max(64).nullable().optional(),
+    resourceId: z.uuid().nullable().optional(),
+    priority: ApprovalPriorityEnum.optional(),
+    decisionPolicy: ApprovalDecisionPolicyEnum.optional(),
+    // slice-1 sugar: a single level of approvers. Mutually exclusive with `levels`.
+    approverUserIds: z.array(z.uuid()).min(1).max(50).optional(),
+    // slice-2: ordered multi-level chain (level 1 first; a level opens only once the prior is satisfied).
+    levels: z.array(ApprovalLevelInputSchema).min(1).max(10).optional(),
+  })
+  .refine((b) => (b.approverUserIds ? 1 : 0) + (b.levels ? 1 : 0) === 1, {
+    error: "Provide exactly one of approverUserIds (single level) or levels (ordered chain)",
+  });
 export type CreateApprovalRequestBody = z.infer<typeof CreateApprovalRequestBodySchema>;
 
 export const DecideApprovalStepBodySchema = z.object({

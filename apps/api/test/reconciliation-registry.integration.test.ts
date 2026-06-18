@@ -7,7 +7,7 @@ import { pool } from '../src/db/client.js';
 // suite (singleThread) so this file does NOT close it.
 
 describe('reconciliation registry (F1)', () => {
-  it('registry holds exactly 107 rows with the signed-off bucket split A26/B16/C23/D42', async () => {
+  it('registry holds exactly 109 rows with the signed-off bucket split A26/B16/C23/D44', async () => {
     const { rows } = await pool.query<{ b: string; n: number }>(
       `SELECT reconciliation_registry_bucket AS b, count(*)::int AS n
          FROM sys.sys_reconciliation_registry GROUP BY 1`,
@@ -46,7 +46,9 @@ describe('reconciliation registry (F1)', () => {
     //     requirements; legacy esco_occupation_skills 126051 rows, mig 000123 + seed 52)
     //   +1 bucket-D EXCLUDE — 3.4 sys_notification_preferences (per-user notification delivery
     //     prefs; app-authored config, no legacy source, mig 000128)
-    expect(m).toEqual({ A: 26, B: 16, C: 23, D: 42 });
+    //   +2 bucket-D EXCLUDE — 3.3 slice-D approval runtime: sys_approval_requests +
+    //     sys_approval_steps (app-authored BPM instance/step ledger, no legacy source, mig 000132)
+    expect(m).toEqual({ A: 26, B: 16, C: 23, D: 44 });
   });
 
   it('the v_reconciliation_status view leaves zero UNCLASSIFIED tables', async () => {

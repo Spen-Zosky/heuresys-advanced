@@ -48,11 +48,11 @@ describe("3.4 notification preferences + emitter (live)", () => {
     await closePool();
   });
 
-  it("GET preferences: all six types, default-on in-app / default-off email", async () => {
+  it("GET preferences: all seven types, default-on in-app / default-off email", async () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/me/notification-preferences", headers: { cookie: ch(empCookies) } });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { items: { notificationType: string; inAppEnabled: boolean; emailEnabled: boolean }[]; total: number };
-    expect(body.total).toBe(6);
+    expect(body.total).toBe(7);
     expect(body.items.every((i) => i.inAppEnabled === true && i.emailEnabled === false)).toBe(true);
     expect(body.items.map((i) => i.notificationType).sort()).toContain("SYSTEM");
   });

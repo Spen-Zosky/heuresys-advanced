@@ -279,6 +279,10 @@
       "types": "./dist/schemas/notifications.d.ts",
       "default": "./src/schemas/notifications.ts"
     },
+    "./schemas/approvals": {
+      "types": "./dist/schemas/approvals.d.ts",
+      "default": "./src/schemas/approvals.ts"
+    },
     "./schemas/observability": {
       "types": "./dist/schemas/observability.d.ts",
       "default": "./src/schemas/observability.ts"

@@ -16,6 +16,7 @@ export const NotificationTypeSchema = z.enum([
   "CAREER_TARGET_STATUS",
   "GAP_CLOSURE_DUE",
   "SYSTEM",
+  "APPROVAL_REQUEST",
 ]);
 export type NotificationType = z.infer<typeof NotificationTypeSchema>;
 

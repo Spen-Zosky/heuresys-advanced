@@ -116,6 +116,67 @@ export const CreateMeSelfAssessmentBodySchema = z.object({
 });
 export type CreateMeSelfAssessmentBody = z.infer<typeof CreateMeSelfAssessmentBodySchema>;
 
+/* --- surveys (Surveys-M2 ESS self-response) -------------------------- */
+
+export const MeSurveyListItemSchema = z.object({
+  surveyId: z.uuid(),
+  title: z.string(),
+  status: z.string(),
+  isAnonymous: z.boolean(),
+  questionCount: z.number().int(),
+  assignedAt: z.iso.datetime(),
+  completedAt: z.iso.datetime().nullable(),
+});
+export type MeSurveyListItem = z.infer<typeof MeSurveyListItemSchema>;
+export const MeSurveysResponseSchema = z.object({
+  items: z.array(MeSurveyListItemSchema), total: z.number().int().min(0),
+});
+export type MeSurveysResponse = z.infer<typeof MeSurveysResponseSchema>;
+
+export const MeSurveyQuestionSchema = z.object({
+  questionId: z.uuid(),
+  text: z.string(),
+  type: z.string(),
+  category: z.string().nullable(),
+  displayOrder: z.number().int().nullable(),
+  isRequired: z.boolean(),
+});
+export const MeSurveyAnswerSchema = z.object({
+  questionId: z.uuid(),
+  ratingValue: z.number().int().nullable(),
+  textValue: z.string().nullable(),
+  choiceValue: z.string().nullable(),
+});
+export const MeSurveyDetailSchema = z.object({
+  surveyId: z.uuid(),
+  title: z.string(),
+  status: z.string(),
+  isAnonymous: z.boolean(),
+  completedAt: z.iso.datetime().nullable(),
+  questions: z.array(MeSurveyQuestionSchema),
+  myAnswers: z.array(MeSurveyAnswerSchema),
+});
+export type MeSurveyDetail = z.infer<typeof MeSurveyDetailSchema>;
+
+export const SubmitMeSurveyAnswerSchema = z.object({
+  questionId: z.uuid(),
+  ratingValue: z.number().int().min(0).max(10).nullable().optional(),
+  textValue: z.string().max(4096).nullable().optional(),
+  choiceValue: z.string().max(200).nullable().optional(),
+});
+export const SubmitMeSurveyResponseBodySchema = z.object({
+  answers: z.array(SubmitMeSurveyAnswerSchema).min(1).max(100),
+});
+export type SubmitMeSurveyResponseBody = z.infer<typeof SubmitMeSurveyResponseBodySchema>;
+
+export const SubmitMeSurveyResultSchema = z.object({
+  submitted: z.number().int(),
+  completedAt: z.iso.datetime(),
+});
+export type SubmitMeSurveyResult = z.infer<typeof SubmitMeSurveyResultSchema>;
+
+export const MeSurveyIdParamSchema = z.object({ surveyId: z.uuid() });
+
 /* --- learning -------------------------------------------------------- */
 
 export const MeLearningAssignmentSchema = z.object({

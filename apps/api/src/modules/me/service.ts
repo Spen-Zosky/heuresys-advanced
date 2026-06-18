@@ -3,8 +3,8 @@
  * All methods take the canonical userId from the route, which sources it
  * from req.user.userId. No method accepts userId from user input.
  */
-import { pool } from "../../db/client.js";
-import { NotFoundError, ForbiddenError } from "../../errors/index.js";
+import { pool, withTransaction } from "../../db/client.js";
+import { NotFoundError, ForbiddenError, ConflictError, UnprocessableEntityError } from "../../errors/index.js";
 import type {
   MeProfile, UpdateMeProfileBody, CreateMeSelfAssessmentBody,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
@@ -13,6 +13,7 @@ import type {
   MeInterfacesResponse,
   UserPreference, UpdateUserPreferenceBody,
   NotificationPreferencesResponse, UpdateNotificationPreferenceBody,
+  MeSurveysResponse, MeSurveyDetail, SubmitMeSurveyResponseBody, SubmitMeSurveyResult,
 } from "@heuresys/shared";
 import { NotificationTypeSchema } from "@heuresys/shared";
 import * as repo from "./repository.js";
@@ -38,6 +39,48 @@ export interface SelfActor { userId: string; tenantId: string | null; roles: str
 function requireTenant(a: SelfActor): string {
   if (!a.tenantId) throw new ForbiddenError("Tenant context required");
   return a.tenantId;
+}
+
+/** One submitted answer (zod-validated shape). */
+type SurveyAnswerInput = SubmitMeSurveyResponseBody["answers"][number];
+
+/** Enforce that the answer's populated value column matches the question's type. rating/nps take a
+ *  ratingValue (and reject a text/choice value); text takes a textValue; choice takes a choiceValue.
+ *  A mismatch is a 422 SURVEY_ANSWER_TYPE_MISMATCH (semantic, payload was schema-valid). */
+function assertAnswerMatchesType(questionType: string, ans: SurveyAnswerInput): void {
+  const fail = (reason: string): never => {
+    throw new UnprocessableEntityError(
+      { questionId: ans.questionId, questionType, reason },
+      `Answer type mismatch: ${reason}`,
+      "SURVEY_ANSWER_TYPE_MISMATCH",
+    );
+  };
+  const hasRating = ans.ratingValue !== undefined && ans.ratingValue !== null;
+  const hasText = ans.textValue !== undefined && ans.textValue !== null;
+  const hasChoice = ans.choiceValue !== undefined && ans.choiceValue !== null;
+
+  switch (questionType) {
+    case "rating":
+    case "nps":
+      if (!hasRating) fail(`question type '${questionType}' requires ratingValue`);
+      if (hasText || hasChoice) fail(`question type '${questionType}' accepts only ratingValue`);
+      break;
+    case "text":
+      if (!hasText) fail("question type 'text' requires textValue");
+      if (hasRating || hasChoice) fail("question type 'text' accepts only textValue");
+      break;
+    case "choice":
+      if (!hasChoice) fail("question type 'choice' requires choiceValue");
+      if (hasRating || hasText) fail("question type 'choice' accepts only choiceValue");
+      break;
+    default:
+      fail(`unknown question type '${questionType}'`);
+  }
+}
+
+/** Detect a Postgres unique-violation (SQLSTATE 23505) on the natural-key index (race re-submit). */
+function isUniqueViolation(err: unknown): boolean {
+  return typeof err === "object" && err !== null && (err as { code?: string }).code === "23505";
 }
 
 export const meService = {
@@ -99,6 +142,94 @@ export const meService = {
       throw new NotFoundError("Skill");
     }
     return repo.insertSelfAssessment(pool, actor.userId, tenantId, body);
+  },
+
+  /* --- surveys (Surveys-M2 ESS self-response) ----------------------- */
+
+  /** Surveys assigned to the caller that are active. requireTenant — the per-user assignment is
+   *  tenant-scoped (FK isolation, never from request input). */
+  async listSurveys(actor: SelfActor): Promise<MeSurveysResponse> {
+    const tenantId = requireTenant(actor);
+    const items = await repo.listMyAssignedSurveys(pool, actor.userId, tenantId);
+    return { items, total: items.length };
+  },
+
+  /** One assigned survey + its questions + the caller's own existing answers. A survey that is
+   *  not assigned to the caller (or cross-tenant) surfaces as 404 (no-leak). */
+  async getSurvey(actor: SelfActor, surveyId: string): Promise<MeSurveyDetail> {
+    const tenantId = requireTenant(actor);
+    const assignment = await repo.findMySurveyAssignment(pool, actor.userId, tenantId, surveyId);
+    if (!assignment) throw new NotFoundError("Survey");
+    const [questions, myAnswers] = await Promise.all([
+      repo.listSurveyQuestions(pool, surveyId),
+      repo.listMySurveyAnswers(pool, actor.userId, tenantId, surveyId),
+    ]);
+    return {
+      surveyId,
+      title: assignment.title,
+      status: assignment.surveyStatus,
+      isAnonymous: assignment.isAnonymous,
+      completedAt: assignment.completedAt ? assignment.completedAt.toISOString() : null,
+      questions,
+      myAnswers,
+    };
+  },
+
+  /** Submit the caller's own answers (one append-only row per answer) + stamp the assignment
+   *  completed, atomically. Guards: must be assigned (404), survey active (404), not already
+   *  answered (409). Each answer's value column must match its question type (422), and the
+   *  question must belong to this survey (422). A concurrent re-submit races on the natural-key
+   *  unique → 23505 mapped to 409. */
+  async submitSurvey(
+    actor: SelfActor, surveyId: string, body: SubmitMeSurveyResponseBody,
+  ): Promise<SubmitMeSurveyResult> {
+    const tenantId = requireTenant(actor);
+    const assignment = await repo.findMySurveyAssignment(pool, actor.userId, tenantId, surveyId);
+    if (!assignment) throw new NotFoundError("Survey", "SURVEY_NOT_ASSIGNED");
+    if (assignment.surveyStatus !== "active") throw new NotFoundError("Survey", "SURVEY_NOT_ASSIGNED");
+    if (assignment.completedAt !== null) {
+      throw new ConflictError("Survey already answered", "SURVEY_ALREADY_ANSWERED");
+    }
+
+    // Validate the answers against the survey's real questions (type ↔ column, membership).
+    const questions = await repo.listSurveyQuestions(pool, surveyId);
+    const byId = new Map(questions.map((q) => [q.questionId, q]));
+    for (const ans of body.answers) {
+      const q = byId.get(ans.questionId);
+      if (!q) {
+        throw new UnprocessableEntityError(
+          { questionId: ans.questionId },
+          "Answer references a question that is not part of this survey",
+          "SURVEY_ANSWER_TYPE_MISMATCH",
+        );
+      }
+      assertAnswerMatchesType(q.type, ans);
+    }
+
+    let completedAt: string;
+    try {
+      completedAt = await withTransaction(async (client) => {
+        for (const ans of body.answers) {
+          await repo.insertSurveyResponse(client, {
+            surveyId,
+            questionId: ans.questionId,
+            tenantId,
+            userId: actor.userId,
+            naturalKey: `ESS::${surveyId}::${ans.questionId}::${actor.userId}`,
+            ratingValue: ans.ratingValue ?? null,
+            textValue: ans.textValue ?? null,
+            choiceValue: ans.choiceValue ?? null,
+          });
+        }
+        return repo.markSurveyAssignmentCompleted(client, actor.userId, tenantId, surveyId);
+      });
+    } catch (err) {
+      if (isUniqueViolation(err)) {
+        throw new ConflictError("Survey already answered", "SURVEY_ALREADY_ANSWERED");
+      }
+      throw err;
+    }
+    return { submitted: body.answers.length, completedAt };
   },
 
   async listLearning(actor: SelfActor) {

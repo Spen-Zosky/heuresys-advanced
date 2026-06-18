@@ -14,6 +14,7 @@ import {
   UnauthorizedError,
   ForbiddenError,
   ValidationError,
+  UnprocessableEntityError,
   NotFoundError,
   ConflictError,
   TenantBoundaryViolation,
@@ -57,6 +58,12 @@ export async function errorHandler(
   }
   if (err instanceof ValidationError) {
     reply.code(400).send({
+      error: { code: err.code, message: err.message, details: err.details },
+    });
+    return;
+  }
+  if (err instanceof UnprocessableEntityError) {
+    reply.code(422).send({
       error: { code: err.code, message: err.message, details: err.details },
     });
     return;

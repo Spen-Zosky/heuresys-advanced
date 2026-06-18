@@ -30,8 +30,19 @@ export class ValidationError extends ApiError {
 }
 
 export class NotFoundError extends ApiError {
-  constructor(resource: string) {
-    super("NOT_FOUND", `${resource} not found`);
+  constructor(resource: string, code = "NOT_FOUND") {
+    super(code, `${resource} not found`);
+  }
+}
+
+/**
+ * 422 Unprocessable Entity — the payload is syntactically valid (passed Zod) but fails a
+ * semantic/business rule (e.g. an answer's value column doesn't match its question type, or
+ * references a question outside the survey). Distinct from ValidationError (400, schema-shape).
+ */
+export class UnprocessableEntityError extends ApiError {
+  constructor(public details: unknown, message = "Unprocessable entity", code = "UNPROCESSABLE_ENTITY") {
+    super(code, message);
   }
 }
 

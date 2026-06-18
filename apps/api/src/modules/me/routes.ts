@@ -15,6 +15,8 @@ import {
   MeProfileSchema, UpdateMeProfileBodySchema,
   MePositionsResponseSchema,
   MeSkillsResponseSchema, MeSkillEvidenceSchema, CreateMeSelfAssessmentBodySchema,
+  MeSurveysResponseSchema, MeSurveyDetailSchema,
+  SubmitMeSurveyResponseBodySchema, SubmitMeSurveyResultSchema, MeSurveyIdParamSchema,
   MeLearningResponseSchema, MeLearningAssignmentSchema, CreateMeEnrollmentBodySchema,
   MeGapsResponseSchema, MeAssessmentsResponseSchema,
   MeCareerResponseSchema, MeCareerTargetSchema, CreateMeCareerTargetBodySchema,
@@ -92,6 +94,36 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req, reply) => {
     const e = await meService.submitSelfAssessment(selfActor(req), req.body);
     reply.code(201).send(e);
+  });
+
+  /* --- surveys (Surveys-M2 ESS self-response) -------------------------- */
+
+  // List the surveys ASSIGNED to me that are active (per-user M2 assignment). Self-scoped; the
+  // userId is always req.user, never a URL param.
+  app.get("/surveys", {
+    preHandler: [requirePermission("surveys:respond:self")],
+    schema: { response: { 200: MeSurveysResponseSchema } },
+  }, async (req) => meService.listSurveys(selfActor(req)));
+
+  // One assigned survey + its questions + my existing answers. A survey not assigned to me (or
+  // cross-tenant) → 404 (no-leak).
+  app.get("/surveys/:surveyId", {
+    preHandler: [requirePermission("surveys:respond:self")],
+    schema: { params: MeSurveyIdParamSchema, response: { 200: MeSurveyDetailSchema } },
+  }, async (req) => meService.getSurvey(selfActor(req), req.params.surveyId));
+
+  // Submit my own answers (append-only, one row per answer) + mark the assignment completed.
+  // CSRF-protected state change. Re-submit → 409 SURVEY_ALREADY_ANSWERED; type mismatch → 422.
+  app.post("/surveys/:surveyId/responses", {
+    preHandler: [app.verifyCsrf, requirePermission("surveys:respond:self")],
+    schema: {
+      params: MeSurveyIdParamSchema,
+      body: SubmitMeSurveyResponseBodySchema,
+      response: { 201: SubmitMeSurveyResultSchema },
+    },
+  }, async (req, reply) => {
+    const result = await meService.submitSurvey(selfActor(req), req.params.surveyId, req.body);
+    reply.code(201).send(result);
   });
 
   app.get("/learning", {

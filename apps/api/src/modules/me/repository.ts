@@ -280,6 +280,190 @@ export async function skillVisibleToTenant(q: DbConnector, skillId: string, tena
   return res.rows.length > 0;
 }
 
+/* --- surveys (Surveys-M2 ESS self-response) -------------------------- */
+
+export interface SurveyListItem {
+  surveyId: string; title: string; status: string; isAnonymous: boolean;
+  questionCount: number; assignedAt: string; completedAt: string | null;
+}
+
+/** Surveys ASSIGNED to the caller that are currently active (per-user M2 assignment + active
+ *  status). questionCount is a correlated subquery so an unanswered survey still shows its size. */
+export async function listMyAssignedSurveys(
+  q: DbConnector, userId: string, tenantId: string,
+): Promise<SurveyListItem[]> {
+  const res = await q.query<{
+    survey_id: string; survey_title: string; survey_status: string;
+    survey_is_anonymous: boolean; question_count: string;
+    survey_assignment_assigned_at: Date; survey_assignment_completed_at: Date | null;
+  }>(
+    `SELECT s.survey_id, s.survey_title, s.survey_status, s.survey_is_anonymous,
+            (SELECT count(*) FROM sys.sys_survey_questions qq
+              WHERE qq.survey_question_survey_id = s.survey_id)::text AS question_count,
+            a.survey_assignment_assigned_at, a.survey_assignment_completed_at
+       FROM sys.sys_survey_assignments a
+       JOIN sys.sys_surveys s ON s.survey_id = a.survey_assignment_survey_id
+      WHERE a.survey_assignment_user_id = $1
+        AND a.survey_assignment_tenant_id = $2
+        AND s.survey_status = 'active'
+      ORDER BY a.survey_assignment_assigned_at DESC`,
+    [userId, tenantId],
+  );
+  return res.rows.map((r) => ({
+    surveyId: r.survey_id,
+    title: r.survey_title,
+    status: r.survey_status,
+    isAnonymous: r.survey_is_anonymous,
+    questionCount: Number(r.question_count),
+    assignedAt: r.survey_assignment_assigned_at.toISOString(),
+    completedAt: r.survey_assignment_completed_at
+      ? r.survey_assignment_completed_at.toISOString() : null,
+  }));
+}
+
+export interface SurveyAssignmentRow {
+  completedAt: Date | null;
+  surveyStatus: string;
+  title: string;
+  isAnonymous: boolean;
+}
+
+/** The caller's assignment for one survey (self-scope guard). Null = not assigned to me → 404
+ *  no-leak (cross-tenant / cross-user surveys are indistinguishable from non-existent). */
+export async function findMySurveyAssignment(
+  q: DbConnector, userId: string, tenantId: string, surveyId: string,
+): Promise<SurveyAssignmentRow | null> {
+  const res = await q.query<{
+    survey_assignment_completed_at: Date | null;
+    survey_status: string; survey_title: string; survey_is_anonymous: boolean;
+  }>(
+    `SELECT a.survey_assignment_completed_at, s.survey_status,
+            s.survey_title, s.survey_is_anonymous
+       FROM sys.sys_survey_assignments a
+       JOIN sys.sys_surveys s ON s.survey_id = a.survey_assignment_survey_id
+      WHERE a.survey_assignment_user_id = $1
+        AND a.survey_assignment_tenant_id = $2
+        AND a.survey_assignment_survey_id = $3`,
+    [userId, tenantId, surveyId],
+  );
+  const r = res.rows[0];
+  if (!r) return null;
+  return {
+    completedAt: r.survey_assignment_completed_at,
+    surveyStatus: r.survey_status,
+    title: r.survey_title,
+    isAnonymous: r.survey_is_anonymous,
+  };
+}
+
+export interface SurveyQuestionRow {
+  questionId: string; text: string; type: string;
+  category: string | null; displayOrder: number | null; isRequired: boolean;
+}
+
+/** The ordered questions of a survey. */
+export async function listSurveyQuestions(
+  q: DbConnector, surveyId: string,
+): Promise<SurveyQuestionRow[]> {
+  const res = await q.query<{
+    survey_question_id: string; survey_question_text: string;
+    survey_question_type: string; survey_question_category: string | null;
+    survey_question_display_order: number | null; survey_question_is_required: boolean;
+  }>(
+    `SELECT survey_question_id, survey_question_text, survey_question_type,
+            survey_question_category, survey_question_display_order,
+            survey_question_is_required
+       FROM sys.sys_survey_questions
+      WHERE survey_question_survey_id = $1
+      ORDER BY survey_question_display_order NULLS LAST, survey_question_id`,
+    [surveyId],
+  );
+  return res.rows.map((r) => ({
+    questionId: r.survey_question_id,
+    text: r.survey_question_text,
+    type: r.survey_question_type,
+    category: r.survey_question_category,
+    displayOrder: r.survey_question_display_order === null
+      ? null : Number(r.survey_question_display_order),
+    isRequired: r.survey_question_is_required,
+  }));
+}
+
+export interface SurveyAnswerRow {
+  questionId: string; ratingValue: number | null;
+  textValue: string | null; choiceValue: string | null;
+}
+
+/** The caller's OWN responses for one survey (subject_user_id = me), mapped to the answer shape. */
+export async function listMySurveyAnswers(
+  q: DbConnector, userId: string, tenantId: string, surveyId: string,
+): Promise<SurveyAnswerRow[]> {
+  const res = await q.query<{
+    survey_response_question_id: string | null;
+    survey_response_rating_value: number | null;
+    survey_response_text_value: string | null;
+    survey_response_choice_value: string | null;
+  }>(
+    `SELECT survey_response_question_id, survey_response_rating_value,
+            survey_response_text_value, survey_response_choice_value
+       FROM sys.sys_survey_responses
+      WHERE survey_response_survey_id = $1
+        AND survey_response_tenant_id = $2
+        AND survey_response_subject_user_id = $3
+      ORDER BY created_at`,
+    [surveyId, tenantId, userId],
+  );
+  return res.rows
+    .filter((r) => r.survey_response_question_id !== null)
+    .map((r) => ({
+      questionId: r.survey_response_question_id as string,
+      ratingValue: r.survey_response_rating_value,
+      textValue: r.survey_response_text_value,
+      choiceValue: r.survey_response_choice_value,
+    }));
+}
+
+/** INSERT one append-only response row (inside a tx). The natural key makes a re-submit collide on
+ *  UNIQUE(tenant, natural_key) → the caller maps 23505 to 409 ALREADY_ANSWERED. */
+export async function insertSurveyResponse(
+  client: PoolClient,
+  args: {
+    surveyId: string; questionId: string; tenantId: string; userId: string;
+    naturalKey: string; ratingValue: number | null;
+    textValue: string | null; choiceValue: string | null;
+  },
+): Promise<void> {
+  await client.query(
+    `INSERT INTO sys.sys_survey_responses (
+        survey_response_survey_id, survey_response_question_id,
+        survey_response_tenant_id, survey_response_subject_user_id,
+        survey_response_natural_key, survey_response_rating_value,
+        survey_response_text_value, survey_response_choice_value
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    [
+      args.surveyId, args.questionId, args.tenantId, args.userId,
+      args.naturalKey, args.ratingValue, args.textValue, args.choiceValue,
+    ],
+  );
+}
+
+/** Stamp the assignment completed (inside the same tx as the response inserts). Returns the
+ *  completion timestamp. user_id + tenant guarded → only the caller's own assignment. */
+export async function markSurveyAssignmentCompleted(
+  client: PoolClient, userId: string, tenantId: string, surveyId: string,
+): Promise<string> {
+  const res = await client.query<{ survey_assignment_completed_at: Date }>(
+    `UPDATE sys.sys_survey_assignments
+        SET survey_assignment_completed_at = now(), updated_at = now()
+      WHERE survey_assignment_user_id = $1
+        AND survey_assignment_tenant_id = $2
+        AND survey_assignment_survey_id = $3
+      RETURNING survey_assignment_completed_at`,
+    [userId, tenantId, surveyId],
+  );
+  return res.rows[0]!.survey_assignment_completed_at.toISOString();
+}
+
 /* --- learning ------------------------------------------------------- */
 
 interface LearningRow {

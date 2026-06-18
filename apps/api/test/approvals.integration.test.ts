@@ -12,7 +12,6 @@ import { pool } from "../src/db/client.js";
 
 const PWD = "Admin#PassW0rd!";
 const RTL = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
-const ZERO = "00000000-0000-0000-0000-000000000000";
 const TITLE_PREFIX = "TEST-APPROVAL";
 
 interface S { cookies: Map<string, string>; csrfToken: string }
@@ -34,7 +33,7 @@ interface Detail extends ReqRow { steps: StepDetail[]; createdByEmail: string | 
 
 let suite: TestApp;
 let admin: S, federica: S, paolo: S, tommaso: S;
-let federicaId: string, paoloId: string, tommasoId: string, adminId: string;
+let federicaId: string, paoloId: string, adminId: string;
 let heuTenant: string;
 let crossTenantReqId: string, crossTenantStepId: string;
 
@@ -76,7 +75,6 @@ beforeAll(async () => {
   const byEmail = new Map(ids.rows.map((r) => [r.user_email, r.user_id]));
   federicaId = byEmail.get("federica.marchetti@rtl-bank.org")!;
   paoloId = byEmail.get("paolo.caputo@rtl-bank.org")!;
-  tommasoId = byEmail.get("tommaso.fiore@rtl-bank.org")!;
   adminId = byEmail.get("admin@heuresys.com")!;
 
   // A tenant that is NOT RTL (for the I5 no-leak proof). admin (HEURESYS) belongs to it.

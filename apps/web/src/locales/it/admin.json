@@ -1,4 +1,46 @@
 {
+  "approvals": {
+    "title": "Approvazioni",
+    "description": "Crea e traccia le richieste di approvazione.",
+    "count": "{{count}} richieste",
+    "columns": { "title": "Titolo", "status": "Stato", "policy": "Quorum", "priority": "Priorità", "steps": "Passi", "created": "Creata" },
+    "status": { "PENDING": "In attesa", "APPROVED": "Approvata", "REJECTED": "Rifiutata", "APPLIED": "Applicata" },
+    "stepStatus": { "PENDING": "In attesa", "APPROVED": "Approvato", "REJECTED": "Rifiutato", "SKIPPED": "Saltato" },
+    "policy": { "ALL_OF": "Tutti", "ANY_OF": "Almeno uno" },
+    "priority": { "INFO": "Info", "MEDIUM": "Media", "HIGH": "Alta", "CRITICAL": "Critica" },
+    "stepSummary": "{{pending}} in attesa / {{total}}",
+    "create": {
+      "cardTitle": "Nuova richiesta di approvazione",
+      "titleLabel": "Titolo",
+      "policyLabel": "Quorum",
+      "priorityLabel": "Priorità",
+      "approversLabel": "Approvatori",
+      "approversHint": "Seleziona uno o più approvatori (Ctrl/Cmd per selezione multipla).",
+      "bodyLabel": "Descrizione",
+      "submit": "Crea richiesta",
+      "submitting": "Creazione…",
+      "successMsg": "Richiesta creata.",
+      "errorUnexpected": "Errore imprevisto."
+    },
+    "filters": { "statusAll": "Tutti gli stati" },
+    "emptyTitle": "Nessuna richiesta",
+    "emptyDescription": "Non ci sono richieste di approvazione.",
+    "caption": "Richieste di approvazione",
+    "errorMessage": "Impossibile caricare le richieste.",
+    "detail": {
+      "back": "Torna alle approvazioni",
+      "notFound": "Richiesta non trovata.",
+      "yourDecisionTitle": "La tua decisione",
+      "commentLabel": "Commento (opzionale)",
+      "approve": "Approva",
+      "reject": "Rifiuta",
+      "applyTitle": "Applica",
+      "apply": "Applica la decisione",
+      "ledgerTitle": "Passi di approvazione",
+      "decideSuccess": "Decisione registrata.",
+      "applySuccess": "Richiesta applicata."
+    }
+  },
   "users": {
     "title": "Utenti",
     "description": "Utenti del tenant con stato e tipo.",

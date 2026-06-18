@@ -135,7 +135,12 @@
     "error": "Could not load your inbox.",
     "emptyTitle": "No notifications",
     "emptyDesc": "You have no notifications at the moment.",
-    "feedTitle": "Notifications"
+    "feedTitle": "Notifications",
+    "approvals": {
+      "title": "Pending approvals",
+      "approve": "Approve",
+      "reject": "Reject"
+    }
   },
   "kpis": {
     "title": "My KPIs",

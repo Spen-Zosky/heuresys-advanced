@@ -1,12 +1,17 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import {
   AuditFeed,
   type AuditEvent,
   type AuditTone,
   Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
   EmptyState,
   PageHeader,
   formatRelativeTime,
@@ -28,6 +33,9 @@ interface MeNotification {
   status: string;
   priority: string;
   createdAt: string;
+  actionUrl: string | null;
+  resourceType: string | null;
+  resourceId: string | null;
 }
 
 // Polling cadence — chosen so the inbox feels reactive without hammering the
@@ -57,8 +65,16 @@ function notificationVisual(n: MeNotification): { icon: AuditEvent["icon"]; tone
   return { icon: <Info className={ICON_CLS} />, tone: "info" };
 }
 
+/** Extract the request id from an approval action_url ("/approvals/<id>?step=<stepId>"). */
+function approvalRequestId(actionUrl: string | null): string | null {
+  if (!actionUrl) return null;
+  const m = actionUrl.match(/\/approvals\/([0-9a-fA-F-]+)/);
+  return m ? m[1]! : null;
+}
+
 export default function MeInboxPage() {
   const { t } = useTranslation("ess");
+  const qc = useQueryClient();
   const inbox = useQuery({
     queryKey: ["me", "inbox"],
     queryFn: () => apiFetch<{ items: MeNotification[]; total: number }>("/v1/me/inbox"),
@@ -67,6 +83,18 @@ export default function MeInboxPage() {
     refetchOnWindowFocus: true,
     staleTime: 10_000,
   });
+
+  // Inline approval actions: UNREAD APPROVAL_STEP notifications carry the
+  // request id (action_url) + step id (resource_id) — enough to decide in place.
+  const decide = useMutation({
+    mutationFn: (v: { reqId: string; stepId: string; decision: "APPROVE" | "REJECT" }) =>
+      apiFetch(`/v1/approvals/${v.reqId}/steps/${v.stepId}/decide`, { method: "POST", body: { decision: v.decision } }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ["me", "inbox"] }),
+  });
+
+  const pendingApprovals = (inbox.data?.items ?? []).filter(
+    (n) => n.resourceType === "APPROVAL_STEP" && n.status === "UNREAD" && approvalRequestId(n.actionUrl) && n.resourceId,
+  );
 
   const unreadCount =
     inbox.data?.items.filter((n) => n.status === "UNREAD" || n.status === "PENDING")
@@ -106,6 +134,35 @@ export default function MeInboxPage() {
           </div>
         }
       />
+
+      {/* Pending approvals — inline Approve/Reject (additive; the feed below is unchanged) */}
+      {pendingApprovals.length > 0 && (
+        <Card data-testid="me-inbox-approvals">
+          <CardHeader>
+            <CardTitle>{t("inbox.approvals.title")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="divide-y divide-border rounded-card border border-border">
+              {pendingApprovals.map((n) => {
+                const reqId = approvalRequestId(n.actionUrl)!;
+                return (
+                  <li key={n.notificationId} data-testid="me-inbox-approval-row" className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
+                    <span className="font-medium text-foreground">{n.subject}</span>
+                    <div className="flex items-center gap-2">
+                      <Button type="button" size="sm" data-testid="me-inbox-approval-approve" disabled={decide.isPending} onClick={() => decide.mutate({ reqId, stepId: n.resourceId!, decision: "APPROVE" })}>
+                        {t("inbox.approvals.approve")}
+                      </Button>
+                      <Button type="button" size="sm" variant="outline" data-testid="me-inbox-approval-reject" disabled={decide.isPending} onClick={() => decide.mutate({ reqId, stepId: n.resourceId!, decision: "REJECT" })}>
+                        {t("inbox.approvals.reject")}
+                      </Button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
 
       {inbox.isLoading ? (
         <p className="text-sm text-muted-foreground" data-testid="me-inbox-loading">

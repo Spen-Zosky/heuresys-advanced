@@ -50,4 +50,25 @@ export default async function globalTeardown(): Promise<void> {
   } catch (err) {
     console.warn("[e2e teardown] D-29 cert cleanup skipped:", (err as Error).message);
   }
+
+  // 3.3 slice-D: the approvals E2E creates `E2E Approval <ts>` requests on the RTL
+  // test tenant (no DELETE endpoint exposed). Purge them + their emitted inbox
+  // tasks (CASCADE drops the steps). Best-effort, same secret-hygiene rules.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH n AS (DELETE FROM sys.sys_inbox_notifications WHERE notification_subject LIKE 'E2E Approval%'), " +
+          "d AS (DELETE FROM sys.sys_approval_requests WHERE approval_request_title LIKE 'E2E Approval%' RETURNING 1) SELECT count(*) FROM d",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] slice-D: deleted ${out} E2E approval request(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] approval cleanup skipped:", (err as Error).message);
+  }
 }

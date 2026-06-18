@@ -1,4 +1,46 @@
 {
+  "approvals": {
+    "title": "Approvals",
+    "description": "Create and track approval requests.",
+    "count": "{{count}} requests",
+    "columns": { "title": "Title", "status": "Status", "policy": "Quorum", "priority": "Priority", "steps": "Steps", "created": "Created" },
+    "status": { "PENDING": "Pending", "APPROVED": "Approved", "REJECTED": "Rejected", "APPLIED": "Applied" },
+    "stepStatus": { "PENDING": "Pending", "APPROVED": "Approved", "REJECTED": "Rejected", "SKIPPED": "Skipped" },
+    "policy": { "ALL_OF": "All of", "ANY_OF": "Any of" },
+    "priority": { "INFO": "Info", "MEDIUM": "Medium", "HIGH": "High", "CRITICAL": "Critical" },
+    "stepSummary": "{{pending}} pending / {{total}}",
+    "create": {
+      "cardTitle": "New approval request",
+      "titleLabel": "Title",
+      "policyLabel": "Quorum",
+      "priorityLabel": "Priority",
+      "approversLabel": "Approvers",
+      "approversHint": "Select one or more approvers (Ctrl/Cmd for multi-select).",
+      "bodyLabel": "Description",
+      "submit": "Create request",
+      "submitting": "Creating…",
+      "successMsg": "Request created.",
+      "errorUnexpected": "Unexpected error."
+    },
+    "filters": { "statusAll": "All statuses" },
+    "emptyTitle": "No requests",
+    "emptyDescription": "There are no approval requests.",
+    "caption": "Approval requests",
+    "errorMessage": "Could not load requests.",
+    "detail": {
+      "back": "Back to approvals",
+      "notFound": "Request not found.",
+      "yourDecisionTitle": "Your decision",
+      "commentLabel": "Comment (optional)",
+      "approve": "Approve",
+      "reject": "Reject",
+      "applyTitle": "Apply",
+      "apply": "Apply the decision",
+      "ledgerTitle": "Approval steps",
+      "decideSuccess": "Decision recorded.",
+      "applySuccess": "Request applied."
+    }
+  },
   "users": {
     "title": "Users",
     "description": "Tenant users with status and type.",

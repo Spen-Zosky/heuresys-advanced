@@ -135,7 +135,12 @@
     "error": "Impossibile caricare la tua inbox.",
     "emptyTitle": "Nessuna notifica",
     "emptyDesc": "Non hai notifiche al momento.",
-    "feedTitle": "Notifiche"
+    "feedTitle": "Notifiche",
+    "approvals": {
+      "title": "Approvazioni in attesa",
+      "approve": "Approva",
+      "reject": "Rifiuta"
+    }
   },
   "kpis": {
     "title": "I miei KPI",

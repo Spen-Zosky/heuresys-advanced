@@ -10,6 +10,7 @@ export type { ActorContext };
 import { NotFoundError } from "../../errors/index.js";
 import type {
   EngagementSurveyListResponse,
+  EngagementTemplateListResponse,
   EngagementSurveyResultsResponse,
   EngagementPulseResponse,
 } from "@heuresys/shared";
@@ -33,6 +34,11 @@ function assertVisible(a: ActorContext, rowTenantId: string, resource: string): 
 export const engagementService = {
   async listSurveys(a: ActorContext): Promise<EngagementSurveyListResponse> {
     const items = await repo.listSurveys(pool, listTenantFilter(a));
+    return { items, total: items.length };
+  },
+
+  async listTemplates(a: ActorContext): Promise<EngagementTemplateListResponse> {
+    const items = await repo.listTemplates(pool, listTenantFilter(a));
     return { items, total: items.length };
   },
 

@@ -77,4 +77,25 @@ describe("engagement normalized read-model (m2b)", () => {
     expect(b.items.reduce((s, x) => s + x.count, 0)).toBe(733);
     expect(b.items.some((x) => x.avgMood !== null)).toBe(true);
   });
+
+  /* --- survey templates mirror (#6/#10) --------------------------------- */
+
+  it("RBAC: a USER lacking surveys:read is denied (403) on /templates", async () => {
+    expect((await get("/v1/engagement/templates", user)).statusCode).toBe(403);
+  });
+
+  it("TENANT_ADMIN sees only the RTL template (tenant-scoped); PLATFORM_ADMIN sees both", async () => {
+    const rtl = await get("/v1/engagement/templates", tenantAdmin);
+    expect(rtl.statusCode).toBe(200);
+    const rb = rtl.json() as { items: { tenantId: string; name: string; questionCount: number; type: string | null }[]; total: number };
+    expect(rb.total).toBe(1); // legacy 0c54b84a -> RTL only
+    expect(rb.items[0]!.name).toBe("Custom Engagement Survey");
+    expect(rb.items[0]!.questionCount).toBe(5);
+    expect(rb.items[0]!.type).toBe("custom");
+
+    const all = (await get("/v1/engagement/templates", admin)).json() as { items: { tenantId: string }[]; total: number };
+    // PLATFORM_ADMIN unfiltered: RTL + HEURESYS mapped templates.
+    expect(all.total).toBeGreaterThanOrEqual(2);
+    expect(new Set(all.items.map((x) => x.tenantId)).size).toBeGreaterThanOrEqual(2);
+  });
 });

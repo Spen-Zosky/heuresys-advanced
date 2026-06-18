@@ -7,6 +7,7 @@
 import type { Pool } from "pg";
 import type {
   EngagementSurvey,
+  EngagementSurveyTemplate,
   EngagementQuestionResult,
   EngagementPulseWeek,
 } from "@heuresys/shared";
@@ -42,6 +43,33 @@ export async function listSurveys(pool: Pool, tenantId: string | undefined): Pro
     totalInvitations: numOrNull(r.survey_total_invitations),
     questionCount: Number(r.question_count),
     responseCount: Number(r.response_count),
+  }));
+}
+
+/** Survey templates (mirror catalog, #6/#10). `tenantId` undefined = no filter (PLATFORM_ADMIN). */
+export async function listTemplates(pool: Pool, tenantId: string | undefined): Promise<EngagementSurveyTemplate[]> {
+  const res = await pool.query(
+    `SELECT survey_template_id, survey_template_tenant_id, survey_template_natural_key,
+            survey_template_name, survey_template_description, survey_template_type,
+            jsonb_array_length(survey_template_questions) AS question_count,
+            survey_template_is_anonymous, survey_template_estimated_minutes, survey_template_is_system
+       FROM sys.sys_survey_templates
+      WHERE ($1::uuid IS NULL OR survey_template_tenant_id = $1)
+      ORDER BY survey_template_name
+      LIMIT 5000`,
+    [tenantId ?? null],
+  );
+  return res.rows.map((r) => ({
+    templateId: r.survey_template_id,
+    tenantId: r.survey_template_tenant_id,
+    naturalKey: r.survey_template_natural_key,
+    name: r.survey_template_name,
+    description: r.survey_template_description,
+    type: r.survey_template_type,
+    questionCount: Number(r.question_count),
+    isAnonymous: r.survey_template_is_anonymous,
+    estimatedMinutes: numOrNull(r.survey_template_estimated_minutes),
+    isSystem: r.survey_template_is_system,
   }));
 }
 

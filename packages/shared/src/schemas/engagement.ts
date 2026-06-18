@@ -66,3 +66,25 @@ export type EngagementPulseResponse = z.infer<typeof EngagementPulseResponseSche
 
 export const EngagementSurveyIdParamSchema = z.object({ surveyId: z.uuid() });
 export type EngagementSurveyIdParam = z.infer<typeof EngagementSurveyIdParamSchema>;
+
+/* --- survey templates mirror (#6/#10 S996, read-only) ------------------ */
+
+export const EngagementSurveyTemplateSchema = z.object({
+  templateId: z.uuid(),
+  tenantId: z.uuid(),
+  naturalKey: z.string(),
+  name: z.string(),
+  description: z.string().nullable(),
+  type: z.string().nullable(),
+  questionCount: z.number().int(),
+  isAnonymous: z.boolean(),
+  estimatedMinutes: z.number().int().nullable(),
+  isSystem: z.boolean(),
+});
+export type EngagementSurveyTemplate = z.infer<typeof EngagementSurveyTemplateSchema>;
+
+export const EngagementTemplateListResponseSchema = z.object({
+  items: z.array(EngagementSurveyTemplateSchema),
+  total: z.number().int(),
+});
+export type EngagementTemplateListResponse = z.infer<typeof EngagementTemplateListResponseSchema>;

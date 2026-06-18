@@ -8,6 +8,7 @@ import { actorFromRequest as actor } from "../../lib/actor.js";
 
 import {
   EngagementSurveyListResponseSchema,
+  EngagementTemplateListResponseSchema,
   EngagementSurveyResultsResponseSchema,
   EngagementPulseResponseSchema,
   EngagementSurveyIdParamSchema,
@@ -30,4 +31,9 @@ export const engagementRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("surveys:read")],
     schema: { response: { 200: EngagementPulseResponseSchema } },
   }, async (req) => engagementService.pulse(actor(req)));
+
+  app.get("/templates", {
+    preHandler: [requirePermission("surveys:read")],
+    schema: { response: { 200: EngagementTemplateListResponseSchema } },
+  }, async (req) => engagementService.listTemplates(actor(req)));
 };

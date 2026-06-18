@@ -3,6 +3,25 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🟢 Aggiornamento S996 (2026-06-18) — batch autonomo #4-#14 (intervista-guidata): 8 item shipped + push/align/deploy
+
+Batch decision-authority session-scoped (Enzo: "esegui tutti i punti da #4 a #14 in autonomia, intervista iniziale poi nessuna interruzione"). 8 commit `bd1d5eb`..`1efeafd` + handoff, pushati. Granulare → `SOT_STATE.md §Delta S996`. Intervista: **nessuna credenziale** abilitata · Surveys=**mirror** · RACI/process_kpi=**keep demo+EXCLUDE** · MFA=**slice attuale**.
+
+**DONE-LIVE (full-stack, gate verde):**
+- **D-37 ✅ RISOLTO** (`bd1d5eb`) — `reference-sync.integration` hook-timeout = latenza DB/login sotto carico (no HTTP esterno); per-hook 60s + stub difensivo seam ESCO. → DEBT_REGISTER.
+- **#4 WI-D2** (`c58a505`, mig 000137) — position KPI `rank` + PIP view + write API `/v1/positions/:id/kpis` (riusa `position:update`).
+- **#7 B-10b ✅ CHIUSO** (`a60b339`) — doc-truth: le 3 aree (mentorship/surveys/predictions) erano GIÀ shipped S970-S988; `engagement_pulse_configs`→WON'T-DO. **Non più P3-deferred.**
+- **#6/#10 Surveys normalized-mirror** (`d69de4e`, mig 000140 + seed 55) — `sys_survey_templates` completa il cluster m2b (000097 era già ~90%); legacy `surveys` senza template_id → catalogo standalone; import 2 template (RTL+HEU) + GET `/v1/engagement/templates`.
+- **#5 BPM slice-2** (`8cc2e46`, mig 000138) — ordered multi-level chains (`level_policy` + deriveChain + LEVEL_NOT_ACTIVE guard). slice-3 spec (`9d090fb`).
+- **#4 WI-C** (`e31835a`) — modulo `tenant-materialization` generatore (archetipo→org-units+positions, plan/apply, M-1 tenant-ACTIVE, PLATFORM_ADMIN) + MCP `hrx_tenant_materialize`. 76° prefix /v1.
+- **test-fix** (`1efeafd`) — reconciliation A26→27 + me-interfaces +me-surveys (**regressione latente S995** catturata dal gate).
+
+**RESIDUO OPEN (next session):**
+- **#8 QW-E5 — de-dup `status-pill` → `@heuresys/ui@0.1.7`** (CONTROLLED-DEFER: publish npm **irreversibile** + cross-repo `ux-design-shared`). Pre-work verificato: auth `spen-zosky` OK; duplicato byte-identico `apps/{web,showcase}/src/components/status-pill.tsx`; build-entry `ux-design-shared/ui/src/index.ts` (import relativi no-ext); `@types/react` optional peer (single-instance). **Ricetta (1 step focalizzato)**: (1) `D:/ux-design-shared/ui/src/components/status-pill.tsx` = copia il primitive, rinomina type `StatusTone`→`StatusPillTone` (evita collisione barrel); (2) aggiungi a `src/index.ts`: `export { StatusPill, StatusBadge, statusTone, type StatusPillTone } from './components/status-pill'`; (3) bump ui `0.1.6`→`0.1.7`; (4) upstream typecheck+lint+test+build + `publish:dry` → se verde `publish:release`; (5) heuresys bump `^0.1.6`→`^0.1.7` in root+web+showcase `package.json`; (6) i 2 `apps/{web,showcase}/src/components/status-pill.tsx` → shim `export { StatusPill, StatusBadge, statusTone } from '@heuresys/ui'; export type { StatusPillTone as StatusTone } from '@heuresys/ui';`; (7) clean install (`rm -rf node_modules/.pnpm/@heuresys+ui*`, disciplina D-15) + typecheck 5ws + web+showcase build; (8) showcase `globals.css` add `@source` per `@heuresys/ui` dist (guard Tailwind purge). Dup secondario trovato: `detail-panel.tsx` FieldGrid (follow-up QW).
+- **#5 BPM slice-3** — effect-wiring registry (code seam, serve target effetto naturale) + SLA/escalation scheduler (mig + sla.ts/sla-cli.ts + systemd timer, serve VM bootstrap re-run). Spec `docs/superpowers/specs/2026-06-18-bpm-approval-slice2-3-design.md`. Multi-sessione.
+- **#4 WI-C residuo** — users/assignments (credential-less SYNTHETIC_REFERENCE, mai LEGACY_EMP::) + skill/ranked-KPI materialization + variantId-as-source; demo agent live E2E (rate-limited MAX / no API key).
+- **Decisioni prodotto Enzo (invariate)**: Surveys mirror **full-fleet** (oltre RTL+HEU, serve tenant-mapping per i legacy-tenant non mappati) · RACI **produzione** · process_kpi **crosswalk** · credenziali dormienti (VOYAGE/SMTP/SMS/API-key) · MFA **estensione ruoli**.
+
 ## 🟢 Aggiornamento S995 (2026-06-18) — batch P1: #1 BPM approval-flow + #2 Surveys-M2 (full-stack live, commit LOCALI)
 
 Batch P1 (Enzo: "procedi con i P1"; su #2 "parti ora ma chiudi anche UI"). **4 commit LOCALI non pushati** — Enzo: stop ai commit, NO push/align/deploy. Granulare → `SOT_STATE.md §Delta S995`.

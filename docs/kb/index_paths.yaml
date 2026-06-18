@@ -1,16 +1,16 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-18T16:08:29Z da docs/kb/tools/build_index.py
+# generato: 2026-06-18T18:16:05Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-18T16:08:29Z"
-  total_files: 2040
+  generated_at: "2026-06-18T18:16:05Z"
+  total_files: 2051
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 24
     api-core: 18
-    api-module: 262
+    api-module: 266
     ci: 15
     claude-config: 6
     config: 94
@@ -18,24 +18,24 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 136
+    db-migration: 139
     db-script: 23
-    db-seed: 103
-    doc-canonical: 368
+    db-seed: 104
+    doc-canonical: 369
     handoff-state: 1
     qa-artifact: 96
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 80
+    shared-schema: 81
     showcase-source: 13
-    test: 211
+    test: 212
     ux-design-archive: 80
     web-source: 144
   status_counts:
     archive: 488
     external-archive: 50
-    live: 1502
+    live: 1513
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -1660,6 +1660,30 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\teams\service.ts'
     root: repo
     rel: 'apps/api/src/modules/teams/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\blueprints.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-materialization/blueprints.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-materialization/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-materialization/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-materialization/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -5431,6 +5455,24 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000137_position_kpi_rank.sql'
+    root: repo
+    rel: 'db/migrations/000137_position_kpi_rank.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000138_approval_chains.sql'
+    root: repo
+    rel: 'db/migrations/000138_approval_chains.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000140_survey_templates_mirror.sql'
+    root: repo
+    rel: 'db/migrations/000140_survey_templates_mirror.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\README.md'
     root: repo
     rel: 'db/scripts/README.md'
@@ -6046,6 +6088,12 @@ files:
   - path: 'D:\heuresys-advanced\db\seeds\reconciliation\54_raci_demo_rtl_s994.sql'
     root: repo
     rel: 'db/seeds/reconciliation/54_raci_demo_rtl_s994.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\reconciliation\55_survey_templates.sql'
+    root: repo
+    rel: 'db/seeds/reconciliation/55_survey_templates.sql'
     category: db-seed
     status: live
     provenance: git-tracked
@@ -8389,6 +8437,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-06-18-bpm-approval-slice2-3-design.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-06-18-bpm-approval-slice2-3-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md'
     root: repo
     rel: 'heuresys-advanced-bootstrap-vm.md'
@@ -9523,6 +9577,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\tenant-materialization.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/tenant-materialization.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\tenants.ts'
     root: repo
     rel: 'packages/shared/src/schemas/tenants.ts'
@@ -10444,6 +10504,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\teams.integration.test.ts'
     root: repo
     rel: 'apps/api/test/teams.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\tenant-materialization.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/tenant-materialization.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

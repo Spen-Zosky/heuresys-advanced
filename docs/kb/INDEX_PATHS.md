@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-18T18:16:05Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2051**
+**Generato**: 2026-06-18T21:27:47Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2051**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 

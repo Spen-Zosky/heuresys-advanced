@@ -24,6 +24,9 @@
  */
 @source "./showcase/**/*.{ts,tsx}";
 @source "../lib/**/*.{ts,tsx}";
+/* QW-E5: scan the @heuresys/ui dist so StatusPill's chip utility classes (border-green-200,
+   bg-green-100, …) survive purge now that the primitive is published (was a local file before). */
+@source "../../node_modules/@heuresys/ui/dist/**/*.{js,mjs}";
 
 :root {
   --background: #FAFBFD;

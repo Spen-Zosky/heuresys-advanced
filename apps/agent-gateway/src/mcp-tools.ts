@@ -83,7 +83,16 @@ export function buildHeuresysMcp(client: HeuresysClient) {
       up("hrx_blueprint_families_upsert", "/blueprint-families"), // blueprint:activate/override (PLATFORM_ADMIN)
       up("hrx_blueprint_variants_upsert", "/blueprint-variants"),
       up("hrx_blueprint_processes_upsert", "/blueprint-processes"),
-      // FUTURE (Phase B, WI-C): hrx_tenant_materialize — per-tenant generator, not built yet.
+      // WI-C: per-tenant materialization generator (WRITE; PLATFORM_ADMIN service principal).
+      // mode=plan is a dry-run (no writes); mode=apply mutates. Both route through the HITL
+      // gate (classified WRITE by name in mcp-tool-names.ts → canUseTool approval).
+      tool(
+        "hrx_tenant_materialize",
+        "Materialize an archetype (org-units + positions) into a target tenant. mode=plan (dry-run) | apply (WRITE). PLATFORM_ADMIN.",
+        { tenantId: z.string(), archetypeKey: z.string(), mode: z.enum(["plan", "apply"]) },
+        async (a: { tenantId: string; archetypeKey: string; mode: "plan" | "apply" }) =>
+          ok(await client.call("POST", "/tenant-materialization", a)),
+      ),
     ],
   });
 }

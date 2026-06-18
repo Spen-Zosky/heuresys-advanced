@@ -35,6 +35,10 @@
       "types": "./dist/schemas/tenants.d.ts",
       "default": "./src/schemas/tenants.ts"
     },
+    "./schemas/tenant-materialization": {
+      "types": "./dist/schemas/tenant-materialization.d.ts",
+      "default": "./src/schemas/tenant-materialization.ts"
+    },
     "./schemas/users": {
       "types": "./dist/schemas/users.d.ts",
       "default": "./src/schemas/users.ts"

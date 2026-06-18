@@ -113,6 +113,7 @@ import { contentMediaRoutes } from "./modules/content/media-routes.js";
 import { contentBlueprintLinksRoutes } from "./modules/content-blueprint-links/routes.js";
 import { organizationUnitProcessesRoutes } from "./modules/organization-unit-processes/routes.js";
 import { approvalsRoutes } from "./modules/approvals/routes.js";
+import { tenantMaterializationRoutes } from "./modules/tenant-materialization/routes.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
 import { makeSmsSender, type ISmsSender } from "./modules/auth/sms-sender.js";
@@ -344,6 +345,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(usersRoutes, { prefix: "/v1/users" });
   await app.register(positionsRoutes, { prefix: "/v1/positions" });
   await app.register(organizationUnitsRoutes, { prefix: "/v1/organization-units" });
+  await app.register(tenantMaterializationRoutes, { prefix: "/v1/tenant-materialization" });
   await app.register(teamsRoutes, { prefix: "/v1/teams" });
   await app.register(skillsRoutes, { prefix: "/v1/skills" });
   await app.register(kpiDefinitionsRoutes, { prefix: "/v1/kpi-definitions" });

@@ -55,6 +55,7 @@ export const WRITE_TOOL_NAMES = [
   "hrx_blueprint_families_upsert",
   "hrx_blueprint_variants_upsert",
   "hrx_blueprint_processes_upsert",
+  "hrx_tenant_materialize", // WI-C — dry-run plan + apply both gated (deny-by-default → allowlisted)
 ] as const;
 
 /**

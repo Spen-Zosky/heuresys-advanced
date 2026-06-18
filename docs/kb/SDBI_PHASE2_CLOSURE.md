@@ -4,6 +4,24 @@
 > **Creato**: 2026-06-05 (S968), evidence-based su query live del registry + row-count reali + F0 triage.
 > **SoT**: lo stato vivo resta `docs/kb/SOT_STATE.md` §4 + `sys.v_reconciliation_status`; questo doc è la **mappa terminale** di SDBI. Backlog → `SOT_BACKLOG.md` (B-10 / B-10b). Doctrine → `docs/architecture/adr/0014_*.md` (ACCEPTED).
 
+## ⬆ Aggiornamento S996 (2026-06-18) — B-10b INTERAMENTE SHIPPED (doc-truth)
+
+> Questo doc (S968) marcava le **3 macro-aree residue** (Surveys/Engagement, Mentorship, PredictionsML) come `🟡 DEFERRED-MODELING-STREAM → B-10b`. **Verifica evidence-based dai file (S996): tutte e 3 sono SHIPPED end-to-end** (schema + migration + import + registry + modulo + RBAC + test) tra S970 e S988. La cornice "deferred ~22-27h" è **stale** e non implica più lavoro aperto.
+
+| Area B-10b | Stato reale (S996) | Evidenza |
+|---|---|---|
+| **Mentorship** (m1) | ✅ SHIPPED (S970) | mig `000072`/`000073` (4 tab `sys_mentorship_*`) · seed `45_mentorship.sql` · modulo `/v1/mentorship` (17 endpoint) · 22 test |
+| **Surveys/Engagement** (m2) | ✅ SHIPPED (S972) + **m2b normalized** (S978) + **R1 feedback** (S988) | mig `000077`/`000078` (JSONB authoring, `/v1/surveys`) · mig `000097` (cluster normalized `sys_surveys/_questions/_responses/_pulse_checks`, `/v1/engagement`) · mig `000113`/`000114` (`sys_engagement_feedback`/`_action_plans`, `/v1/engagement-feedback`) · seed 46/48/51 |
+| **PredictionsML** (m3) | ✅ SHIPPED (S972) | mig `000079`/`000080` (`sys_predictive_models`/`sys_model_predictions`, read-model import-as-is, NO ML in-platform) · seed `47_predictionsml.sql` · `/v1/predictions` · 8 test |
+
+**Registry live (S996, `sys.v_reconciliation_status`)**: `POPULATED 149 · NO_SOURCE 21 · EXCLUDE 11 · REFERENCE_ONLY 1`, **0 UNCLASSIFIED**. Tutte e 15 le tabelle B-10b sono registrate e classificate.
+
+**Unica adiacenza non importata** → `engagement_pulse_configs` (3 righe legacy di config cadenza pulse). **Decisione S996 = ⚪ WON'T-DO** (config a basso valore; `sys_pulse_checks` — i dati che configura — è già importato; coerente con l'header di `000097` che la marcava "adjacent, low value — deferred"). Riapribile solo su un caso reale di prodotto (autorità *cosa* Enzo). Nessuno schema/import creato.
+
+**Verdetto**: B-10b **CHIUSO** (non più P3 deferred). La sezione "Lavoro residuo reale" sotto è storica (pre-shipping).
+
+---
+
 ## TL;DR — verdetto di chiusura
 
 SDBI Phase 2 (scope originale **7-8 macro-aree HRMS** con target schema MISSING, PROMPT 027 / ADR-0014, stima 75-125h) è **chiuso come umbrella**:

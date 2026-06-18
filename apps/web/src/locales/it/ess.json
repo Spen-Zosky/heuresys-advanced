@@ -1,4 +1,25 @@
 {
+  "surveys": {
+    "title": "Sondaggi",
+    "description": "I sondaggi assegnati a te.",
+    "count": "{{count}} sondaggi",
+    "error": "Impossibile caricare i sondaggi.",
+    "emptyTitle": "Nessun sondaggio",
+    "emptyDesc": "Non hai sondaggi assegnati al momento.",
+    "questionCount": "{{count}} domande",
+    "completed": "Completato",
+    "pending": "Da compilare",
+    "review": "Rivedi",
+    "answer": "Compila",
+    "back": "Torna ai sondaggi",
+    "notFound": "Sondaggio non trovato.",
+    "yourAnswers": "Le tue risposte",
+    "formTitle": "Compila il sondaggio",
+    "submit": "Invia risposte",
+    "submitting": "Invio…",
+    "submitSuccess": "Risposte inviate.",
+    "submitError": "Invio non riuscito."
+  },
   "handbook": {
     "title": "Manuale del dipendente",
     "description": "Knowledge base, policy e annunci pubblicati per il tuo tenant.",

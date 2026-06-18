@@ -41,6 +41,39 @@
       "applySuccess": "Request applied."
     }
   },
+  "engagement": {
+    "title": "Engagement & Surveys",
+    "description": "Survey results and pulse trend.",
+    "count": "{{count}} surveys",
+    "columns": { "title": "Title", "status": "Status", "type": "Type", "responses": "Responses", "questions": "Questions", "invitations": "Invitations" },
+    "status": { "active": "Active", "draft": "Draft", "closed": "Closed", "archived": "Archived" },
+    "pulse": {
+      "cardTitle": "Pulse trend",
+      "mood": "Mood",
+      "workload": "Workload",
+      "satisfaction": "Satisfaction",
+      "totalChecks": "{{count}} total checks",
+      "empty": "No pulse data."
+    },
+    "results": {
+      "back": "Back to Engagement",
+      "notFound": "Survey not found.",
+      "subtitle": "{{count}} questions",
+      "question": "Question",
+      "type": "Type",
+      "category": "Category",
+      "responses": "Responses",
+      "avg": "Average",
+      "emptyTitle": "No questions",
+      "emptyDescription": "This survey has no questions.",
+      "caption": "Per-question results",
+      "chartTitle": "Average rating per question"
+    },
+    "emptyTitle": "No surveys",
+    "emptyDescription": "There are no surveys.",
+    "caption": "Surveys",
+    "errorMessage": "Could not load surveys."
+  },
   "users": {
     "title": "Users",
     "description": "Tenant users with status and type.",

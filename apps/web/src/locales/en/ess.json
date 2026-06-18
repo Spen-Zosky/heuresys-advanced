@@ -142,6 +142,27 @@
       "reject": "Reject"
     }
   },
+  "surveys": {
+    "title": "Surveys",
+    "description": "Surveys assigned to you.",
+    "count": "{{count}} surveys",
+    "error": "Could not load surveys.",
+    "emptyTitle": "No surveys",
+    "emptyDesc": "You have no assigned surveys at the moment.",
+    "questionCount": "{{count}} questions",
+    "completed": "Completed",
+    "pending": "To answer",
+    "review": "Review",
+    "answer": "Answer",
+    "back": "Back to surveys",
+    "notFound": "Survey not found.",
+    "yourAnswers": "Your answers",
+    "formTitle": "Answer the survey",
+    "submit": "Submit responses",
+    "submitting": "Submitting…",
+    "submitSuccess": "Responses submitted.",
+    "submitError": "Submission failed."
+  },
   "kpis": {
     "title": "My KPIs",
     "description": "Active KPI targets on your positions.",

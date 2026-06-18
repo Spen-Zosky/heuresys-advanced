@@ -41,6 +41,39 @@
       "applySuccess": "Richiesta applicata."
     }
   },
+  "engagement": {
+    "title": "Engagement & Sondaggi",
+    "description": "Risultati dei sondaggi e andamento pulse.",
+    "count": "{{count}} sondaggi",
+    "columns": { "title": "Titolo", "status": "Stato", "type": "Tipo", "responses": "Risposte", "questions": "Domande", "invitations": "Inviti" },
+    "status": { "active": "Attivo", "draft": "Bozza", "closed": "Chiuso", "archived": "Archiviato" },
+    "pulse": {
+      "cardTitle": "Andamento Pulse",
+      "mood": "Umore",
+      "workload": "Carico",
+      "satisfaction": "Soddisfazione",
+      "totalChecks": "{{count}} check totali",
+      "empty": "Nessun dato pulse."
+    },
+    "results": {
+      "back": "Torna a Engagement",
+      "notFound": "Sondaggio non trovato.",
+      "subtitle": "{{count}} domande",
+      "question": "Domanda",
+      "type": "Tipo",
+      "category": "Categoria",
+      "responses": "Risposte",
+      "avg": "Media",
+      "emptyTitle": "Nessuna domanda",
+      "emptyDescription": "Questo sondaggio non ha domande.",
+      "caption": "Risultati per domanda",
+      "chartTitle": "Media valutazioni per domanda"
+    },
+    "emptyTitle": "Nessun sondaggio",
+    "emptyDescription": "Non ci sono sondaggi.",
+    "caption": "Sondaggi",
+    "errorMessage": "Impossibile caricare i sondaggi."
+  },
   "users": {
     "title": "Utenti",
     "description": "Utenti del tenant con stato e tipo.",

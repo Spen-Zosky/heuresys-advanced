@@ -71,4 +71,30 @@ export default async function globalTeardown(): Promise<void> {
   } catch (err) {
     console.warn("[e2e teardown] approval cleanup skipped:", (err as Error).message);
   }
+
+  // Surveys-M2: the ESS spec answers an assigned survey (tommaso → Q4 Pulse),
+  // which inserts ESS responses + flips the assignment to completed. Reset both
+  // so the spec is re-runnable (the survey must be pending again next run).
+  // Only touches the test persona's ESS-prefixed responses on the RTL tenant.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH tom AS (SELECT user_id FROM sys.sys_users WHERE user_email='tommaso.fiore@rtl-bank.org'), " +
+          "r AS (DELETE FROM sys.sys_survey_responses WHERE survey_response_subject_user_id IN (SELECT user_id FROM tom) " +
+          "AND survey_response_natural_key LIKE 'ESS::%' RETURNING 1) " +
+          "SELECT count(*) FROM r; " +
+          "UPDATE sys.sys_survey_assignments SET survey_assignment_completed_at=NULL " +
+          "WHERE survey_assignment_user_id IN (SELECT user_id FROM sys.sys_users WHERE user_email='tommaso.fiore@rtl-bank.org');",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] Surveys-M2: reset ESS survey responses/assignment (${out})`);
+  } catch (err) {
+    console.warn("[e2e teardown] survey cleanup skipped:", (err as Error).message);
+  }
 }

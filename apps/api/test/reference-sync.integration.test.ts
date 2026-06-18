@@ -52,13 +52,26 @@ const RESET_WATERMARK = `
    WHERE source_watermark_source_key = 'ESCO'`;
 
 beforeAll(async () => {
-  suite = await buildTestApp({ referenceSyncDeps: { escoFetcher: new FixtureEscoFetcher(FIXTURE) } });
+  suite = await buildTestApp({
+    referenceSyncDeps: {
+      escoFetcher: new FixtureEscoFetcher(FIXTURE),
+      // D-37: pin the skill-hierarchy seam + URI source so NO live ESCO HTTP can ever run
+      // from this file (it only triggers ESCO/ATECO_2025, never ESCO_SKILL_HIERARCHY) —
+      // belt-and-suspenders against future edits. The default HttpEscoSkillFetcher would
+      // hit the live EU API; this suite must stay fully offline + deterministic.
+      escoSkillFetcher: { fetchSkill: async () => { throw new Error("escoSkillFetcher must not be called in this suite"); } },
+      escoSkillUriSource: async () => [],
+    },
+  });
   admin = await login(suite, "admin@heuresys.com");
   tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
   await pool.query("DELETE FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_esco_uri LIKE $1", [`${TEST_PREFIX}%`]);
   await pool.query(RESET_WATERMARK);
-});
+  // D-37: the real cost here is buildTestApp (full Fastify boot + RBAC cache) + 3 live
+  // logins + 2 DB writes over the SSH tunnel — under full-suite contention the default
+  // 30s hookTimeout is exhausted by DB/login latency (NOT external HTTP). 60s headroom.
+}, 60_000);
 
 afterAll(async () => {
   await pool.query("DELETE FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_esco_uri LIKE $1", [`${TEST_PREFIX}%`]);
@@ -206,7 +219,7 @@ describe("reference-sync API (cap⑤ ATECO_2025, 2nd source)", () => {
     atecoAdmin = await login(atecoSuite, "admin@heuresys.com");
     await pool.query(DELETE_ATECO_ROWS);
     await pool.query(RESET_ATECO_WATERMARK);
-  });
+  }, 60_000); // D-37: per-hook headroom (DB/login latency under full-suite load)
 
   afterAll(async () => {
     await pool.query(DELETE_ATECO_ROWS);
@@ -305,7 +318,7 @@ describe("reference-sync API (cap⑤ ESCO) — P2 FAILED path (HWM not advanced)
         WHERE source_watermark_source_key = 'ESCO'`,
       [PRIOR_HASH],
     );
-  });
+  }, 60_000); // D-37: per-hook headroom (DB/login latency under full-suite load)
 
   afterAll(async () => {
     await pool.query(RESET_WATERMARK);

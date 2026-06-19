@@ -43,7 +43,7 @@ log "[1.2] secrets + PROD-local .env"
 tar -C "$LOCAL_ROOT" -czf - .secrets | ssh -o BatchMode=yes "$HOST" "tar -C '$REPO' -xzf -"
 cat "$LOCAL_ROOT/.env" | ssh -o BatchMode=yes "$HOST" "cat > '$REPO/.env'"
 ssh -o BatchMode=yes "$HOST" "cd '$REPO'
-  for kv in POSTGRES_HOST=localhost POSTGRES_PORT=5432 NODE_ENV=production HOST=0.0.0.0 PORT=$API_PORT PUBLIC_HOST=$LAN_HOST COOKIE_SECURE=false ADMIN_ORIGIN=http://$LAN_HOST:$WEB_PORT; do
+  for kv in POSTGRES_HOST=localhost POSTGRES_PORT=5432 NODE_ENV=production HOST=0.0.0.0 PORT=$API_PORT PUBLIC_HOST=$LAN_HOST COOKIE_SECURE=false TRUST_PROXY=false ADMIN_ORIGIN=http://$LAN_HOST:$WEB_PORT; do
     k=\${kv%%=*}; if grep -qE \"^\${k}=\" .env; then sed -i \"s|^\${k}=.*|\${kv}|\" .env; else printf '%s\n' \"\$kv\" >> .env; fi
   done"
 

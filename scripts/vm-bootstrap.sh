@@ -94,10 +94,19 @@ fi
 chmod 700 "$REPO_DIR/.secrets"
 chmod 600 "$REPO_DIR/.env" "$REPO_DIR/.secrets/"*.pem
 
-# 3. Normalise the two host-specific .env values (idempotent) --------------
+# 3. Normalise the host-specific .env values (idempotent) ------------------
 log "env: POSTGRES_PORT -> $DB_PORT, PORT -> $API_PORT (host-local)"
 sed -i -E "s|^POSTGRES_PORT=.*|POSTGRES_PORT=$DB_PORT|" "$REPO_DIR/.env"
 sed -i -E "s|^PORT=.*|PORT=$API_PORT|" "$REPO_DIR/.env"
+# QW-J3: the VM sits behind the nginx TLS reverse proxy (1 hop) → TRUST_PROXY=1
+# so Fastify reads the real client IP from X-Forwarded-For (per-IP rate-limiting,
+# D-28). Governance assert: set-or-append idempotently so a fresh provision is
+# correct (runtime already verified ok S993, this prevents future drift).
+if grep -qE '^TRUST_PROXY=' "$REPO_DIR/.env"; then
+  sed -i -E "s|^TRUST_PROXY=.*|TRUST_PROXY=1|" "$REPO_DIR/.env"
+else
+  printf '%s\n' 'TRUST_PROXY=1' >> "$REPO_DIR/.env"
+fi
 
 # 4. Node via nvm + pnpm via corepack (both arch-agnostic) -----------------
 log "node: nvm install/use $NODE_MAJOR; pnpm via corepack"

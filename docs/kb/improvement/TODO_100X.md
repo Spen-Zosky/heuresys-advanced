@@ -2,6 +2,14 @@
 
 > Formato: `[ ] S-100X-?? | WS | task | gate di verifica | stato`. Stati: TODO · IN-PROGRESS · DONE · DEFERRED · BLOCKED. Aggiornato a ogni sessione. Cross-ref: `MASTER_PLAN_100X.md`, `AUDIT_PROTOCOL.md`.
 
+## ⚠️ Riconciliazione drift S997 (2026-06-19) — questo tracker era stale
+
+Le checkbox `[ ]` qui sotto **precedono S994/S996**: molti QW marcati TODO sono in realtà **CHIUSI**. Autorità reale = `docs/kb/SOT_BACKLOG.md` (§S994/§S996/§S997). Stato vero dei QW CLASS-A:
+- **Chiusi S994** (`SOT_BACKLOG §S994`): QW-4, QW-B3/B4/B5/B6/B7, QW-D1/D2, QW-E1/E2, QW-G1/G2/G4/G5, QW-A1/A2/A4, QW-K3, QW-I1/I2/I3/I4, QW-SEC6.
+- **Chiuso S996**: QW-E5 (status-pill → `@heuresys/ui@0.1.7`).
+- **Chiusi S997** (questa sessione): **QW-SEC5** (MFA_FAIL security-audit su authn-failure, no migration — `MFA_FAIL` già nel CHECK; +test auth-mfa 13/13) · **QW-J3** (TRUST_PROXY governance assert in `vm-bootstrap.sh`=1 / `provision-linux-pc.sh`=false; shell-tests 46/0). + QW de-dup FieldGrid → `@heuresys/ui@0.1.8` (follow-up QW-E5).
+- **Residuo TODO CLASS-A reale**: nessuno bloccante. Restano solo voci **gated/decisione-Enzo** (dossier anti-drift WS-I, QW-K3 retention dossier già chiuso S994) e **S-100X-A-L** (audit ecosistema Claude, design-only, sessione dedicata).
+
 ## Fase 0 — Recon (S-100X-0, 2026-06-13)
 
 - [x] S-100X-0 | — | grounding live SoT + counts + CI + footprint | drift annotato in BASELINE_METRICS | DONE
@@ -53,7 +61,7 @@
 
 - [x] QW-SEC2 | 3.2 | HSTS header al TLS edge nginx (V9.2/V14.4, net-new gap) | `curl -sI https://www.heuresys.com \| grep -i strict-transport` mostra l'header | **DONE-LIVE** (S993: `add_header Strict-Transport-Security "max-age=31536000" always` nel repo mirror + applicato live VM, nginx -t ok + reload; verificato su HEAD 307→/login e GET)
 - [x] QW-SEC1 | 3.2 | verifica live VM `.env` TRUST_PROXY=1 + COOKIE_SECURE=true (lente D-26/D-28) | grep KEY via SSH | **DONE** (S993 evidence: VM `.env` → `TRUST_PROXY=1` + `COOKIE_SECURE=true`; `SMTP_HOST` unset → EMAIL_OTP gated in PROD, coerente col workaround aspetto-1)
-- [ ] QW-SEC5 | 3.2 | log strutturato `security-audit` su authn-failure (V7.1.3/4) | vitest cattura failed-login/replay record, no plaintext | TODO (hot-path auth → cautela)
+- [x] QW-SEC5 | 3.2 | log strutturato `security-audit` su authn-failure (V7.1.3/4) | vitest cattura failed-login/replay record, no plaintext | **DONE** (S997: login-failure + refresh-replay/expired erano GIÀ auditati via `insertLoginEvent`; il gap reale = i fallimenti del 2° fattore non lasciavano traccia (`MFA_FAIL` mai emesso, 0 nel DB live). Fix in `service.login` step-2: try/catch attorno a `verifyLoginChallenge` + identity-mismatch → `insertLoginEvent type='MFA_FAIL'` con `details.reason` tipato, MAI il codice submesso. No migration (`MFA_FAIL` già nel CHECK 000005). Test auth-mfa 13/13 incl. assert event+no-plaintext. Path step-up `/mfa/verify-login` = copertura nota-parziale (no pool nel handler; il login è il primary consumer))
 - [ ] QW-SEC6 | 3.2 | AES-256-GCM encryption-at-rest TOTP secret (consuma MFA_ENCRYPTION_KEY inerte, D-30) | enroll→colonna ciphertext, decifra a codice valido | DEFERRED (L2, decisione sicurezza = autorità Enzo)
 - [x] ~~QW-SEC3/SEC4/SEC7~~ | 3.2 | skill-taxonomy authz / media magic-byte / matching rate-limit | — | **GIÀ FATTI S989** (QW-H H4/H2/H6; il subagent li ha ri-proposti da WS-H.md che li elencava come finding originali)
 
@@ -82,7 +90,7 @@
 - [ ] QW-I2 | WS-I | fix 4 punti CLAUDE.md drift (60→75 mod, 55→130 mig, 586→600 map, endpoint/test line) | numeri = live | TODO
 - [ ] QW-I3 | WS-I | rigenera INDEX_PATHS via build_index.py | paths/moduli live | TODO
 - [ ] QW-I4 | WS-I | fix FINDINGS/README register (WS-A/D/E/J/K/I = DONE) | register allineato | TODO
-- [ ] QW-J3 | WS-J | assert `TRUST_PROXY=1` in vm-bootstrap/provision-linux-pc (governance; runtime già ok D-28) | grep post-bootstrap non-false | TODO
+- [x] QW-J3 | WS-J | assert `TRUST_PROXY=1` in vm-bootstrap/provision-linux-pc (governance; runtime già ok D-28) | grep post-bootstrap non-false | **DONE** (S997: `vm-bootstrap.sh` set-or-append idempotente `TRUST_PROXY=1` (dietro nginx, 1 hop) · `provision-linux-pc.sh` aggiunge `TRUST_PROXY=false` alla kv-list (bind diretto, no proxy). bash -n + shell-tests 46/0. Previene drift su fresh provision; runtime già corretto D-28)
 - [ ] QW-K3 | WS-K | retention/archival off-disk dei 27 pre-op dump (3.7G) — MAI auto-delete | decisione Enzo (couples WS-C F-5 / WS-G F-2) | TODO (dossier)
 
 > **Dossier anti-drift (WS-I, decide Enzo)**: README/CLAUDE/INDEX vivono fuori dal flusso `handoff` → il fix one-shot ri-drifta (già successo con D-01). Opzioni: de-hardcode i counts (→SOT_STATE) · CI drift-check shell-test · generare le sezioni-conteggio dal `handoff`.

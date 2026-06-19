@@ -18,7 +18,7 @@
 import { pool, withTransaction } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { isPlatform } from "../../lib/actor.js";
-import { NotFoundError, ForbiddenError, ConflictError, ValidationError } from "../../errors/index.js";
+import { NotFoundError, ForbiddenError, ConflictError, ValidationError, ApiError } from "../../errors/index.js";
 import { emitNotification } from "../../lib/notifications/emit.js";
 import type {
   ApprovalRequest,
@@ -36,6 +36,7 @@ import type {
   ApprovalListQuery,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { getApplyEffect } from "./effects/index.js";
 
 export type { ActorContext };
 
@@ -279,7 +280,25 @@ export const approvalService = {
     if (current.status !== "APPROVED") {
       throw new ConflictError("Request is not in APPROVED state", "NOT_APPROVED");
     }
-    const applied = await withTransaction(async (client) => repo.markApplied(client, id));
+    // slice-3a: markApplied + the dispatched apply-effect run in ONE transaction — a
+    // handler throw rolls back the APPLIED flip (atomic). An unknown/null resource_type
+    // has no handler → the apply stays a pure marker (backward-compatible).
+    const applied = await withTransaction(async (client) => {
+      const row = await repo.markApplied(client, id);
+      if (!row) return null;
+      const handler = getApplyEffect(current.resourceType);
+      if (handler) {
+        try {
+          await handler(client, row);
+        } catch (err) {
+          // Typed errors (e.g. APPLY_EFFECT_FAILED) propagate as-is; any other throw is
+          // wrapped so the client gets a stable 409 instead of a leaked 500.
+          if (err instanceof ApiError) throw err;
+          throw new ConflictError(`Apply effect failed: ${(err as Error).message}`, "APPLY_EFFECT_FAILED");
+        }
+      }
+      return row;
+    });
     if (!applied) throw new ConflictError("Request is not in APPROVED state", "NOT_APPROVED");
     return toRequest(applied);
   },

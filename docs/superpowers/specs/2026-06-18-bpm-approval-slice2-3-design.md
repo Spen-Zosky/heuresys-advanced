@@ -24,17 +24,22 @@ once the prior level is satisfied.
 
 ## slice-3 — effect-wiring + SLA/escalation
 
-> **Update S997 (2026-06-19)**: **3b SLA/escalation ✅ SHIPPED** (live, mig `000141`). **3a
-> effect-wiring stays RESIDUO** (needs a natural apply-effect target — shipping a seam-only
-> registry would be scaffold, against the repo DoD; the WI-C tenant-materialization activation
-> is the leading candidate target).
+> **Update S997 (2026-06-19)**: **3b SLA/escalation ✅ SHIPPED** (live, mig `000141`).
+> **Update S998 (2026-06-19)**: **3a effect-wiring ✅ SHIPPED** — the handler registry +
+> the first real handler `TENANT_ACTIVATION` (flips a subject tenant
+> `PENDING_ACTIVATION → ACTIVE`, a real pre-existing transition; not scaffold). Apply now
+> dispatches the registered handler inside the markApplied transaction (atomic; throw →
+> `APPLY_EFFECT_FAILED` rollback; unknown/null `resource_type` → pure marker). Live-verified
+> on throwaway tenants (`approvals-effects.integration` 3/3). The WI-C
+> materialization-on-activation is now a pure add-a-handler against the same registry.
 
 Two independent sub-features. 3b is shipped; 3a carries a real blocker that makes it multi-session.
 
-### 3a. Effect-wiring (apply actually mutates the subject)
+### 3a. Effect-wiring (apply actually mutates the subject) — ✅ SHIPPED S998
 
-Today `applyRequest` is a pure marker (APPROVED→APPLIED). Design = a **handler registry** keyed by
-`approval_request_resource_type`:
+As shipped: `apps/api/src/modules/approvals/effects/{registry,tenant-activation,index}.ts` +
+`applyRequest` dispatch. Before this, `applyRequest` was a pure marker (APPROVED→APPLIED). Design =
+a **handler registry** keyed by `approval_request_resource_type`:
 
 - `apps/api/src/modules/approvals/effects/registry.ts`: `type ApplyEffectHandler = (client:
   PoolClient, request: ApprovalRequestRow) => Promise<void>` + a `Map<string, handler>` with

@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-18T21:27:47Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2051**
+**Generato**: 2026-06-19T02:23:40Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2064**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -10,18 +10,18 @@
 |---|---|
 | ADR | 24 |
 | api-core | 18 |
-| api-module | 266 |
+| api-module | 268 |
 | ci | 15 |
 | claude-config | 6 |
-| config | 94 |
+| config | 96 |
 | cowork-archive | 14 |
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 139 |
+| db-migration | 140 |
 | db-script | 23 |
 | db-seed | 104 |
-| doc-canonical | 369 |
+| doc-canonical | 376 |
 | handoff-state | 1 |
 | qa-artifact | 96 |
 | script | 6 |
@@ -29,10 +29,10 @@
 | shared-pkg | 4 |
 | shared-schema | 81 |
 | showcase-source | 13 |
-| test | 212 |
+| test | 213 |
 | ux-design-archive | 80 |
 | web-source | 144 |
-| **TOTALE** | **2051** |
+| **TOTALE** | **2064** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 488 |
 | external-archive | 50 |
-| live | 1513 |
+| live | 1526 |
 
 ## File per categoria
 
@@ -108,6 +108,8 @@
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\approvals\sla-cli.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\approvals\sla.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\assessment-methods\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\assessment-methods\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\assessment-methods\service.ts` · *live* · git-tracked
@@ -425,6 +427,8 @@
 - `D:\heuresys-advanced\apps\api\vitest.config.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\nginx\www.heuresys.com.conf` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-api.service` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-approvals-sla.service` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-approvals-sla.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-auth-housekeeping.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-auth-housekeeping.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-backup.service` · *live* · git-tracked
@@ -983,6 +987,7 @@
 - `D:\heuresys-advanced\db\migrations\000137_position_kpi_rank.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000138_approval_chains.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000140_survey_templates_mirror.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000141_approval_sla_escalation.sql` · *live* · git-tracked
 
 ### db-script
 
@@ -1184,6 +1189,7 @@
 - `D:\heuresys-advanced\docs\due-diligence\EXECUTIVE_SUMMARY.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\due-diligence\REPORT.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\due-diligence\SCORECARD.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\due-diligence\SCORECARD_ACQUIRER_RUTHLESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\due-diligence\workstreams\WS-P1.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\due-diligence\workstreams\WS-P2.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\due-diligence\workstreams\WS-P3.md` · *live* · git-tracked
@@ -1308,6 +1314,12 @@
 - `D:\heuresys-advanced\docs\kb\tools\sync.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\sync.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\preflight-residual-todo.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\BUSINESS_SCOPE_AND_PRD.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\COMPETITIVE_SCORECARD.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\LATENT_CAPABILITY_CATALOG.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\PRD_heuresys-advanced_2026-06-17.docx` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\WORKITEM_GAP1_PHASE0_VERIFICATION.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\sdbi\RUNBOOK.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\security\.keep` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\security\AUTH_SECURITY_PLAN.md` · *live* · git-tracked
@@ -1730,6 +1742,7 @@
 - `D:\heuresys-advanced\apps\api\test\analytics-csv.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics-export.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\approvals-sla.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\approvals.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\assessment-methods.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\assessment-results.integration.test.ts` · *live* · git-tracked

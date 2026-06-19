@@ -5,7 +5,7 @@
 
 ## 🟢 Aggiornamento S997 (2026-06-19) — batch autonomo 1→6 + 10: prodotto SoT + Fase 0 + Dependabot + de-dup + ...
 
-Batch decision-authority session-scoped (Enzo: "da 1 a 6 e poi 10, tutto in autonomia" + sblocco item-3: "adottare docs/product/ come SoT prodotto + ri-verificare latent-capability su schema advanced"). In corso — granulare → `SOT_STATE.md §Delta S997` (a fine sessione).
+Batch decision-authority session-scoped (Enzo: "da 1 a 6 e poi 10, tutto in autonomia" + sblocco item-3: "adottare docs/product/ come SoT prodotto + ri-verificare latent-capability su schema advanced"). **CHIUSO**: 8 commit `b7bf710`..`8df493b` pushati + align Mac/VM/linux-pc + deploy PROD verificato live. Granulare → `SOT_STATE.md §Delta S997`.
 
 **DONE-LIVE in-session (5 item pieni + 1 slice):**
 - **#6 Dependabot ✅** (`b7bf710`): nodemailer 8→9.0.1 (alert #82+#84, message-level raw → file-read+SSRF; nostro `SmtpMailer` non usa `raw`, 0 API-surface change) + dompurify override →3.4.11 (alert #83, ALLOWED_ATTR pollution). Gate: typecheck 5/5 + smtp-mailer 6/6 + runtime nodemailer=9.0.1 only.

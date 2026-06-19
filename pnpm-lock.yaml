@@ -24,8 +24,8 @@ importers:
   .:
     dependencies:
       '@heuresys/ui':
-        specifier: ^0.1.7
-        version: 0.1.7(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
+        specifier: ^0.1.8
+        version: 0.1.8(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.5
@@ -183,8 +183,8 @@ importers:
   apps/showcase:
     dependencies:
       '@heuresys/ui':
-        specifier: ^0.1.7
-        version: 0.1.7(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
+        specifier: ^0.1.8
+        version: 0.1.8(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
       lucide-react:
         specifier: ^1.18.0
         version: 1.18.0(react@19.2.7)
@@ -229,8 +229,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/shared
       '@heuresys/ui':
-        specifier: ^0.1.7
-        version: 0.1.7(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
+        specifier: ^0.1.8
+        version: 0.1.8(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)
       '@hookform/resolvers':
         specifier: 5.4.0
         version: 5.4.0(react-hook-form@7.79.0(react@19.2.7))
@@ -811,8 +811,8 @@ packages:
   '@floating-ui/utils@0.2.11':
     resolution: {integrity: sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg==}
 
-  '@heuresys/ui@0.1.7':
-    resolution: {integrity: sha512-Ux7HlhSUO4y4zqriTG1noZSx9+PzjMaJpKeWAOqJ+u/1ihP7IZqnY3BSpTvSm/b2DbYBkQODJArnsCH3Qx7nzA==}
+  '@heuresys/ui@0.1.8':
+    resolution: {integrity: sha512-B1BK2L6P9f0E2/C944CehBp6CszJJAjPFpJMHGI+utqaIVy0YW8xd/Zbq8+wHa2j2FGOAGWjzpgymJo19LYhIg==}
     engines: {node: '>=20.0.0', npm: '>=10.0.0'}
     peerDependencies:
       '@types/react': 19.2.17
@@ -6876,7 +6876,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.11': {}
 
-  '@heuresys/ui@0.1.7(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)':
+  '@heuresys/ui@0.1.8(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(@types/three@0.184.1)(immer@11.1.8)(prop-types@15.8.1)(react-dom@19.2.7(react@19.2.7))(react-is@16.13.1)(react@19.2.7)(redux@5.0.1)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@dnd-kit/sortable': 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react@19.2.7)

@@ -6,7 +6,8 @@
  * tenant's pre-existing data — applying to a populated tenant only adds the archetype's
  * rows (ON CONFLICT skips the rest). 3 confirmed design facts (PLAN §9): the catalog is the
  * source of structure (no recommender), variants are thin headers, activation is a link row.
- * Slice-1 = org-units + positions only (users/assignments/skills/KPI = residuo).
+ * Slice-1 = org-units + positions; slice-2a adds one SYNTHETIC_REFERENCE incumbent per
+ * position + a PRIMARY ACTIVE assignment (skills/ranked-KPI = slice-2b residuo).
  */
 
 type OrgUnitType = "HEADQUARTERS" | "DIVISION" | "DEPARTMENT" | "TEAM" | "BRANCH" | "OFFICE";
@@ -72,4 +73,37 @@ export function getArchetype(key: string): Archetype | null {
 }
 export function listArchetypes(): Archetype[] {
   return Object.values(ARCHETYPES);
+}
+
+/* --- slice-2a: synthetic incumbents ---------------------------------------- */
+// Fixed name pools → deterministic synthetic identities (no Faker dependency at request time).
+const SYN_FIRST = ["Marco", "Giulia", "Luca", "Sofia", "Andrea", "Chiara", "Matteo", "Elena", "Davide", "Francesca", "Stefano", "Alessia"];
+const SYN_LAST = ["Rossi", "Bianchi", "Ferrari", "Russo", "Esposito", "Romano", "Colombo", "Ricci", "Marino", "Greco", "Bruno", "Gallo"];
+
+export interface ArchetypeUser {
+  externalCode: string; // SYN_<positionCode> — NEVER LEGACY_EMP:: (the brownfield real-person key, I14/ADR-0024)
+  email: string;
+  firstName: string;
+  lastName: string;
+  displayName: string;
+  positionCode: string; // the position this synthetic user is the PRIMARY ACTIVE incumbent of
+}
+
+/** One synthetic SYNTHETIC_REFERENCE incumbent per archetype position (slice-2a). Deterministic:
+ *  name from the fixed pools by position index; email keyed on the unique position code (→ unique
+ *  per tenant via sys_users_tenant_email_uq); a clearly-synthetic reserved .example domain. */
+export function archetypeUsers(a: Archetype): ArchetypeUser[] {
+  const slug = a.key.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return a.positions.map((p, i) => {
+    const firstName = SYN_FIRST[i % SYN_FIRST.length]!;
+    const lastName = SYN_LAST[i % SYN_LAST.length]!;
+    return {
+      externalCode: `SYN_${p.code}`,
+      email: `syn.${p.code.toLowerCase()}@${slug}.synthetic.example`,
+      firstName,
+      lastName,
+      displayName: `${firstName} ${lastName}`,
+      positionCode: p.code,
+    };
+  });
 }

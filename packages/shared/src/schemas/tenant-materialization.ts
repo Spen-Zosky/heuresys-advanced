@@ -4,7 +4,9 @@
  * archetype, generate org-units + positions for a target tenant (Phase B instance),
  * idempotently (ON CONFLICT). PLATFORM_ADMIN-gated; the target tenant must exist and be
  * ACTIVE (M-1 tenant isolation: every row is tagged with the validated tenant_id, I5).
- * Slice-1 materializes org-units + positions only; users/assignments/skills/KPI = residuo.
+ * Slice-1 materializes org-units + positions; slice-2a also materializes one
+ * SYNTHETIC_REFERENCE incumbent per position + its PRIMARY ACTIVE assignment
+ * (skills/ranked-KPI = slice-2b residuo).
  */
 import { z } from "zod";
 
@@ -21,6 +23,8 @@ export type MaterializeRequestBody = z.infer<typeof MaterializeRequestBodySchema
 const MaterializeCountsSchema = z.object({
   orgUnits: z.number().int(),
   positions: z.number().int(),
+  users: z.number().int(),
+  assignments: z.number().int(),
 });
 export type MaterializeCounts = z.infer<typeof MaterializeCountsSchema>;
 

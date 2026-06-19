@@ -12,7 +12,7 @@ import type { ActorContext } from "../../lib/actor.js";
 export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
 import type { MaterializeRequestBody, MaterializeResult, ArchetypeListResponse } from "@heuresys/shared";
-import { getArchetype, listArchetypes } from "./blueprints.js";
+import { getArchetype, listArchetypes, archetypeUsers } from "./blueprints.js";
 import * as repo from "./repository.js";
 
 function ensurePlatformAdmin(actor: ActorContext): void {
@@ -45,11 +45,19 @@ export const tenantMaterializationService = {
       throw new ForbiddenError(`Tenant is not ACTIVE (status=${status})`, "TENANT_NOT_ACTIVE");
     }
 
-    const total = { orgUnits: archetype.orgUnits.length, positions: archetype.positions.length };
+    const userCount = archetypeUsers(archetype).length; // one PRIMARY ACTIVE assignment per synthetic incumbent
+    const total = {
+      orgUnits: archetype.orgUnits.length,
+      positions: archetype.positions.length,
+      users: userCount,
+      assignments: userCount,
+    };
     const created = await withTransaction((client) => repo.materialize(client, body.tenantId, archetype, body.mode));
     const skipped = {
       orgUnits: total.orgUnits - created.orgUnits,
       positions: total.positions - created.positions,
+      users: total.users - created.users,
+      assignments: total.assignments - created.assignments,
     };
     return { tenantId: body.tenantId, archetypeKey: archetype.key, mode: body.mode, created, skipped, total };
   },

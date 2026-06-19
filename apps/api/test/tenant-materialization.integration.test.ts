@@ -27,10 +27,11 @@ let suite: TestApp;
 let admin: S, federica: S;
 let suspendedTenantId: string;
 
+interface Counts { orgUnits: number; positions: number; users: number; assignments: number }
 interface Result {
-  created: { orgUnits: number; positions: number };
-  skipped: { orgUnits: number; positions: number };
-  total: { orgUnits: number; positions: number };
+  created: Counts;
+  skipped: Counts;
+  total: Counts;
   tenantId: string;
 }
 function materialize(s: S, tenantId: string, mode: "plan" | "apply") {
@@ -51,8 +52,31 @@ async function countRbr(tenantId: string): Promise<{ ou: number; pos: number }> 
   return { ou: Number(ou.rows[0]!.c), pos: Number(pos.rows[0]!.c) };
 }
 async function purgeRbr(tenantId: string): Promise<void> {
+  // Order matters (FK): synthetic assignments → synthetic users → positions → org-units.
+  await pool.query(
+    `DELETE FROM sys.sys_user_position_assignments a USING sys.sys_users u
+      WHERE a.user_position_assignment_user_id = u.user_id
+        AND u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'`,
+    [tenantId],
+  );
+  await pool.query(`DELETE FROM sys.sys_users WHERE user_tenant_id = $1 AND user_external_code LIKE 'SYN_RBR-%'`, [tenantId]);
   await pool.query(`DELETE FROM sys.sys_positions WHERE position_tenant_id = $1 AND position_code LIKE 'RBR-%'`, [tenantId]);
   await pool.query(`DELETE FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1 AND organization_unit_code LIKE 'RBR-%'`, [tenantId]);
+}
+// slice-2a: synthetic SYNTHETIC_REFERENCE incumbents (SYN_RBR-*) + their PRIMARY ACTIVE assignments.
+async function countSyn(tenantId: string): Promise<{ users: number; assignments: number }> {
+  const u = await pool.query<{ c: string }>(
+    `SELECT count(*) AS c FROM sys.sys_users WHERE user_tenant_id = $1 AND user_external_code LIKE 'SYN_RBR-%'`,
+    [tenantId],
+  );
+  const a = await pool.query<{ c: string }>(
+    `SELECT count(*) AS c FROM sys.sys_user_position_assignments a
+       JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
+      WHERE u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'
+        AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'`,
+    [tenantId],
+  );
+  return { users: Number(u.rows[0]!.c), assignments: Number(a.rows[0]!.c) };
 }
 
 beforeAll(async () => {
@@ -93,10 +117,11 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     const r = await materialize(admin, RTL, "plan");
     expect(r.statusCode).toBe(200);
     const b = r.json() as Result;
-    expect(b.created).toEqual({ orgUnits: 7, positions: 11 });
-    expect(b.total).toEqual({ orgUnits: 7, positions: 11 });
+    expect(b.created).toEqual({ orgUnits: 7, positions: 11, users: 11, assignments: 11 });
+    expect(b.total).toEqual({ orgUnits: 7, positions: 11, users: 11, assignments: 11 });
     // No writes happened.
     expect(await countRbr(RTL)).toEqual({ ou: 0, pos: 0 });
+    expect(await countSyn(RTL)).toEqual({ users: 0, assignments: 0 });
   });
 
   it("apply mode creates the org-units + positions, tagged to the target tenant", async () => {
@@ -104,21 +129,25 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     expect(r.statusCode).toBe(200);
     const b = r.json() as Result;
     expect(b.tenantId).toBe(RTL);
-    expect(b.created).toEqual({ orgUnits: 7, positions: 11 });
-    expect(b.skipped).toEqual({ orgUnits: 0, positions: 0 });
+    expect(b.created).toEqual({ orgUnits: 7, positions: 11, users: 11, assignments: 11 });
+    expect(b.skipped).toEqual({ orgUnits: 0, positions: 0, users: 0, assignments: 0 });
     expect(await countRbr(RTL)).toEqual({ ou: 7, pos: 11 });
+    // slice-2a: each position now has a SYNTHETIC_REFERENCE incumbent + a PRIMARY ACTIVE assignment.
+    expect(await countSyn(RTL)).toEqual({ users: 11, assignments: 11 });
   });
 
   it("re-apply is idempotent (0 created, all skipped)", async () => {
     const r = await materialize(admin, RTL, "apply");
     const b = r.json() as Result;
-    expect(b.created).toEqual({ orgUnits: 0, positions: 0 });
-    expect(b.skipped).toEqual({ orgUnits: 7, positions: 11 });
+    expect(b.created).toEqual({ orgUnits: 0, positions: 0, users: 0, assignments: 0 });
+    expect(b.skipped).toEqual({ orgUnits: 7, positions: 11, users: 11, assignments: 11 });
     expect(await countRbr(RTL)).toEqual({ ou: 7, pos: 11 });
+    expect(await countSyn(RTL)).toEqual({ users: 11, assignments: 11 });
   });
 
   it("M-1 tenant isolation: a RTL materialization never touches HEURESYS", async () => {
     expect(await countRbr(HEU)).toEqual({ ou: 0, pos: 0 });
+    expect(await countSyn(HEU)).toEqual({ users: 0, assignments: 0 });
   });
 
   it("RBAC: a non-PLATFORM_ADMIN (TENANT_ADMIN) is denied → 403", async () => {
@@ -137,6 +166,7 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     expect(r.statusCode).toBe(403);
     expect((r.json() as { error: { code: string } }).error.code).toBe("TENANT_NOT_ACTIVE");
     expect(await countRbr(suspendedTenantId)).toEqual({ ou: 0, pos: 0 });
+    expect(await countSyn(suspendedTenantId)).toEqual({ users: 0, assignments: 0 });
   });
 
   it("an unknown archetype → 404", async () => {

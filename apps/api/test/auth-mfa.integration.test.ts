@@ -128,7 +128,17 @@ describe("/v1/auth/login MFA gating (X20)", () => {
     expect(setCookies).toContain(COOKIES.CSRF);
   });
 
-  it("MFA account step 2 with invalid TOTP returns 401", async () => {
+  it("MFA account step 2 with invalid TOTP returns 401 + audits an MFA_FAIL event (no plaintext code) [QW-SEC5]", async () => {
+    const countMfaFail = async () =>
+      (
+        await pool.query<{ n: number }>(
+          `SELECT count(*)::int AS n FROM sys.sys_auth_login_events
+             WHERE auth_login_event_user_id = $1 AND auth_login_event_type = 'MFA_FAIL'`,
+          [mfaUserId],
+        )
+      ).rows[0]!.n;
+    const before = await countMfaFail();
+
     const step1 = await login({ email: MFA_EMAIL, password: MFA_PASSWORD });
     const challengeToken = step1.json().challengeToken as string;
     const resp = await login({
@@ -139,6 +149,18 @@ describe("/v1/auth/login MFA gating (X20)", () => {
     });
     expect(resp.statusCode).toBe(401);
     expect(resp.json().error?.code).toBe("MFA_TOTP_INVALID");
+
+    // QW-SEC5: the failed second factor is now audited as a security event.
+    expect(await countMfaFail()).toBe(before + 1);
+    // The audited record carries a typed reason and NEVER the submitted code.
+    const ev = await pool.query<{ details: { reason?: string } }>(
+      `SELECT auth_login_event_details AS details FROM sys.sys_auth_login_events
+         WHERE auth_login_event_user_id = $1 AND auth_login_event_type = 'MFA_FAIL'
+         ORDER BY created_at DESC LIMIT 1`,
+      [mfaUserId],
+    );
+    expect(ev.rows[0]!.details.reason).toBe("MFA_TOTP_INVALID");
+    expect(JSON.stringify(ev.rows[0]!.details)).not.toContain("000000");
   });
 
   it("MFA account step 2 without mfaCode returns 401 MFA_CODE_REQUIRED", async () => {

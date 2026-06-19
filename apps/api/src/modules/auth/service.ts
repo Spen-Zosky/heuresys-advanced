@@ -15,7 +15,7 @@ import {
   REFRESH_TOKEN_TTL_SECONDS,
   type RoleCode,
 } from "../../config/constants.js";
-import { UnauthorizedError, NotFoundError, ForbiddenError } from "../../errors/index.js";
+import { UnauthorizedError, NotFoundError, ForbiddenError, ApiError } from "../../errors/index.js";
 import { pool, withTransaction } from "../../db/client.js";
 
 import { hashPassword, verifyPassword } from "./password.js";
@@ -357,12 +357,36 @@ export function createAuthService(deps: AuthServiceDeps): AuthService {
         if (!input.mfaCode) {
           throw new UnauthorizedError("MFA code required", "MFA_CODE_REQUIRED");
         }
-        const verified = await mfaService.verifyLoginChallenge({
-          challengeToken: input.challengeToken,
-          code: input.mfaCode,
-        });
+        let verified: { userId: string };
+        try {
+          verified = await mfaService.verifyLoginChallenge({
+            challengeToken: input.challengeToken,
+            code: input.mfaCode,
+          });
+        } catch (err) {
+          // QW-SEC5 (ASVS V7.1.3/4): audit the second-factor failure (wrong/
+          // expired/invalid TOTP challenge). NEVER persist the submitted code —
+          // only the typed failure reason. Control flow preserved (re-throw).
+          await repo.insertLoginEvent(pool, {
+            userId: candidate.userId,
+            tenantId: candidate.userTenantId,
+            type: "MFA_FAIL",
+            ip: input.ip,
+            userAgent: input.userAgent,
+            details: { reason: err instanceof ApiError ? err.code : "MFA_CHALLENGE_ERROR" },
+          });
+          throw err;
+        }
         if (verified.userId !== candidate.userId) {
-          // Challenge token resolved to a different identity → reject.
+          // Challenge token resolved to a different identity → reject + audit (QW-SEC5).
+          await repo.insertLoginEvent(pool, {
+            userId: candidate.userId,
+            tenantId: candidate.userTenantId,
+            type: "MFA_FAIL",
+            ip: input.ip,
+            userAgent: input.userAgent,
+            details: { reason: "IDENTITY_MISMATCH" },
+          });
           throw new UnauthorizedError("Invalid MFA challenge", "MFA_INVALID");
         }
       } else if (mfaEnforcement && !(await repo.isUserMfaExempt(pool, candidate.userId))) {

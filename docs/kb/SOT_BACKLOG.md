@@ -3,6 +3,15 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🔴 GATE ATTIVO (S998, 2026-06-19) — Riallineamento analisi ai product docs consolidati
+
+**Decisione Enzo (S998)**: è in corso un **consolidamento della documentazione di prodotto** (`docs/product/`). Le analisi di prodotto già prodotte possono diventare **obsolete/incoerenti** col risultato del consolidamento. → **Azione programmata (gated)**: a consolidamento **concluso** (segnale di Enzo), eseguire un **riallineamento completo** di tutte le analisi product-derived contro i `docs/product/` consolidati, PRIMA di costruire qualsiasi cosa che vi dipenda.
+
+- **Scope del riallineamento** (ri-validare / aggiornare / eventualmente archiviare): `WORKITEM_GAP1_DESIGN_SPEC.md` (spec esecutivo S998 — banner PENDING RE-ALIGNMENT già apposto), `WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` (piano), `WORKITEM_GAP1_PHASE0_VERIFICATION.md` (Fase-0), `LATENT_CAPABILITY_CATALOG.md`, `COMPETITIVE_SCORECARD.md`, `BUSINESS_SCOPE_AND_PRD.md` + ogni riferimento prodotto in `SOT_STATE`/`SOT_BACKLOG`/`STATE`. Metodo: diff narrativa-consolidata vs analisi → marcare coerenti/obsolete, aggiornare gli spec, ri-derivare le decisioni di scope.
+- **Nota validità**: la parte *tecnica verificata-live* dello spec Gap#1 (data-model, algoritmi, query, conteggi DB, gap economic_weight/closure-table, migration) resta ground-truth sullo schema reale; è la parte *product-narrative* (scope prospettive, rubrica L0-L5, priorità, framing) che va ri-validata.
+- **Gating**: ⛔ bloccato finché Enzo non segnala "consolidamento product docs concluso". **Sospende il programma-faro Gap#1** (#3): NON avviare il build (RBAC/Porta-1 inclusi) prima del riallineamento, per non costruire su scope che cambierà.
+- **Effort**: ~0.5-1 sessione (delta-check + aggiornamenti doc); poi riprende Gap#1 con lo spec ri-validato.
+
 ## 🟢 Aggiornamento S998 (2026-06-19) — batch autonomo "chiudere tutto": menu 1/2/6/15 + #7 + dispozioni rimanenti
 
 Batch decision-authority session-scoped (Enzo: "esegui 1/2/6/15 in autonomia, poi affrontiamo i rimanenti; chiudere tutto tranne audit 9/10/11" → "confermo in blocco" sulle dispozioni proposte). **5 commit local** (`d0b1105` #15/#6 + `36daa47` #1 + `ee266ea` #2 + `85d6418` #7, + `b082336` docs pre-esistente); granulare → `SOT_STATE.md §Delta S998`. Gate: full API suite **1063 pass / 6 skip / 0 fail** + typecheck 5/5 ws + typecheck:test. Questa sezione **supersede** i residui #1 slice-3a + #2 WI-C elencati nel blocco S997 sotto.

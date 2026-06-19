@@ -1,5 +1,7 @@
 # Gap #1 — Design-Spec esecutivo (Porte Process/Org UI + MLCE + Maturity engine)
 
+> ⚠️ **PENDING RE-ALIGNMENT (S998, 2026-06-19)** — È in corso un **consolidamento della documentazione di prodotto** (`docs/product/`). La parte *tecnica/verificata-live* di questo spec (data-model, algoritmi, query, conteggi DB, migration, gap economic_weight/closure-table) resta valida (è ground-truth sullo schema reale), ma la parte che dipende dalla **narrativa di prodotto** (scope delle 3 prospettive, rubrica L0-L5, priorità porte, framing scorecard) **va ri-validata contro i product docs consolidati prima di costruire**. Non avviare il build di Gap#1 senza l'azione di riallineamento (vedi `SOT_BACKLOG.md` → item "Riallineamento analisi ai product docs consolidati").
+
 > **Companion tecnico** del piano `WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` (scope/fasi/effort) e della verifica `WORKITEM_GAP1_PHASE0_VERIFICATION.md` (stato reale). Questo file è il **blueprint implementativo**: data-model, algoritmi, endpoint, file, test e numerazione migration, tutto verificato live (tunnel :5433, 2026-06-19) con `file:line` reali. **Stato: PROPOSTA** — gate "go" + decisioni di scope = Enzo (sezione §8). Autore: CLI S998. DoD del repo: chiusura solo con dimostrazione LIVE su dati reali (no mock).
 
 ## 1. Sintesi e sequenza di build

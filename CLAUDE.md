@@ -23,6 +23,7 @@ The project is at **`v1.0.0` GA baseline** (released S957, 2026-06-02) with a po
 - **Technical debts** → `docs/kb/DEBT_REGISTER.md`.
 - **Durable rules / architecture** → this file (`CLAUDE.md`).
 - **Path index** → `docs/kb/INDEX_PATHS.md`. Public overview → `README.md`.
+- **Product level** (business scope / PRD / competitive scorecard / latent-capability catalog / product work-item specs) → `docs/product/` (adopted as SoT for the **product domain** S997, Enzo decision). Disjoint from `docs/kb/` (technical state) and `docs/due-diligence/` (investor DD). ⚠️ The "latent capabilities" the catalog declares are **wiki-derived and partly describe legacy `heuresys-evo`** — re-verify on the *advanced* schema before committing to roadmap (Fase-0 method + a worked example: `docs/product/WORKITEM_GAP1_PHASE0_VERIFICATION.md`).
 
 Historical records live in `docs/archive/` and are **not** SoT. When state changes, update the relevant SoT above — never spawn a new file. (Rationale: `docs/superpowers/specs/2026-06-05-sot-unification-design.md` §11.)
 

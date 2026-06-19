@@ -3,6 +3,17 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## 🟢 Aggiornamento S997 (2026-06-19) — batch autonomo 1→6 + 10: prodotto SoT + Fase 0 + Dependabot + de-dup + ...
+
+Batch decision-authority session-scoped (Enzo: "da 1 a 6 e poi 10, tutto in autonomia" + sblocco item-3: "adottare docs/product/ come SoT prodotto + ri-verificare latent-capability su schema advanced"). In corso — granulare → `SOT_STATE.md §Delta S997` (a fine sessione).
+
+**DONE in-session:**
+- **#6 Dependabot ✅** (`b7bf710`): nodemailer 8→9.0.1 (alert #82+#84, message-level raw → file-read+SSRF; nostro `SmtpMailer` non usa `raw`, 0 API-surface change) + dompurify override →3.4.11 (alert #83, ALLOWED_ATTR pollution). Gate: typecheck 5/5 + smtp-mailer 6/6 + runtime nodemailer=9.0.1 only.
+- **#3 prodotto ✅** (adozione + Fase 0): `docs/product/` **adottata come SoT del dominio prodotto** (CLAUDE.md §Source of Truth, disgiunta da docs/kb + docs/due-diligence) + 5 deliverable Cowork committati (BUSINESS_SCOPE_AND_PRD / COMPETITIVE_SCORECARD / LATENT_CAPABILITY_CATALOG / PRD.docx / WORKITEM_GAP1) + DD `SCORECARD_ACQUIRER_RUTHLESS.md`. **Fase 0 eseguita LIVE** (`WORKITEM_GAP1_PHASE0_VERIFICATION.md`, count reali su :5433): MLCE/maturity/event-store **confermati assenti** (0 tabelle); building-block presenti+popolati (ESCO occupation-skill **126051**, PIP VIEW, requirements 844/172/1791, insights 159/462/154, org 26 OU/162 pos); RACI = **demo 13 righe** RTL (NOT production); catalogo latente **sovrastima** event-sourcing/maturity (era legacy evo). COWORK_INBOX entry 2026-06-17 riconciliata.
+
+**OPEN — Gap #1 (candidato roadmap, autorità *cosa* = Enzo):**
+- **Gap #1 — Porte Process-Owner/Org-Director UI + scorecard prescrittiva (MLCE + Maturity engine)**. Converte la narrativa di prodotto in prodotto dimostrabile (oggi 3 prospettive promesse / **1 implementata**, nessun layer prescrittivo capability). Piano: `docs/product/WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` (6 fasi: 0-verifica✅ · 1-MLCE API · 2-Maturity API · 3-Org-Director UI · 4-Process-Owner UI · 5-scorecard+hardening). Effort **~7.5-9 person-week**, additivo (no rewrite). Prerequisiti da costruire (Fase-0 verified-live): MLCE da zero (no event-store → ricomposizione batch pattern-insights), Maturity da zero, RBAC ruolo `ORG_DIRECTOR` + permission `{process-owner,org-director,capability}:read`. Input prodotto Enzo: RACI di **produzione** (oggi demo), scorecard Maturity-vs-VRIO (raccomandata Maturity), priorità Porta-2-prima.
+
 ## 🟢 Aggiornamento S996 (2026-06-18) — batch autonomo #4-#14 (intervista-guidata): 8 item shipped + push/align/deploy
 
 Batch decision-authority session-scoped (Enzo: "esegui tutti i punti da #4 a #14 in autonomia, intervista iniziale poi nessuna interruzione"). 8 commit `bd1d5eb`..`1efeafd` + handoff, pushati. Granulare → `SOT_STATE.md §Delta S996`. Intervista: **nessuna credenziale** abilitata · Surveys=**mirror** · RACI/process_kpi=**keep demo+EXCLUDE** · MFA=**slice attuale**.

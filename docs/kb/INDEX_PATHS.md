@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-19T02:23:40Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2064**
+**Generato**: 2026-06-19T15:01:20Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2069**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -10,7 +10,7 @@
 |---|---|
 | ADR | 24 |
 | api-core | 18 |
-| api-module | 268 |
+| api-module | 271 |
 | ci | 15 |
 | claude-config | 6 |
 | config | 96 |
@@ -21,7 +21,7 @@
 | db-migration | 140 |
 | db-script | 23 |
 | db-seed | 104 |
-| doc-canonical | 376 |
+| doc-canonical | 377 |
 | handoff-state | 1 |
 | qa-artifact | 96 |
 | script | 6 |
@@ -29,10 +29,10 @@
 | shared-pkg | 4 |
 | shared-schema | 81 |
 | showcase-source | 13 |
-| test | 213 |
+| test | 214 |
 | ux-design-archive | 80 |
 | web-source | 144 |
-| **TOTALE** | **2064** |
+| **TOTALE** | **2069** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 488 |
 | external-archive | 50 |
-| live | 1526 |
+| live | 1531 |
 
 ## File per categoria
 
@@ -105,6 +105,9 @@
 - `D:\heuresys-advanced\apps\api\src\modules\analytics\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\analytics\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\analytics\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\index.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\registry.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-activation.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\service.ts` · *live* · git-tracked
@@ -1499,6 +1502,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-17-bpm-approval-flow-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-17-surveys-engagement-ui-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-18-bpm-approval-slice2-3-design.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-06-19-integrazione-llmwiki-hrplus-heuresys-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md` · *live* · git-tracked
 
 ### handoff-state
@@ -1742,6 +1746,7 @@
 - `D:\heuresys-advanced\apps\api\test\analytics-csv.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics-export.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\approvals-effects.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\approvals-sla.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\approvals.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\assessment-methods.integration.test.ts` · *live* · git-tracked

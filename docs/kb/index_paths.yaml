@@ -1,16 +1,16 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-19T02:23:40Z da docs/kb/tools/build_index.py
+# generato: 2026-06-19T15:01:20Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-19T02:23:40Z"
-  total_files: 2064
+  generated_at: "2026-06-19T15:01:20Z"
+  total_files: 2069
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 24
     api-core: 18
-    api-module: 268
+    api-module: 271
     ci: 15
     claude-config: 6
     config: 96
@@ -21,7 +21,7 @@ meta:
     db-migration: 140
     db-script: 23
     db-seed: 104
-    doc-canonical: 376
+    doc-canonical: 377
     handoff-state: 1
     qa-artifact: 96
     script: 6
@@ -29,13 +29,13 @@ meta:
     shared-pkg: 4
     shared-schema: 81
     showcase-source: 13
-    test: 213
+    test: 214
     ux-design-archive: 80
     web-source: 144
   status_counts:
     archive: 488
     external-archive: 50
-    live: 1526
+    live: 1531
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -346,6 +346,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\analytics\service.ts'
     root: repo
     rel: 'apps/api/src/modules/analytics/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\effects\index.ts'
+    root: repo
+    rel: 'apps/api/src/modules/approvals/effects/index.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\effects\registry.ts'
+    root: repo
+    rel: 'apps/api/src/modules/approvals/effects/registry.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-activation.ts'
+    root: repo
+    rel: 'apps/api/src/modules/approvals/effects/tenant-activation.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -8515,6 +8533,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-06-19-integrazione-llmwiki-hrplus-heuresys-design.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-06-19-integrazione-llmwiki-hrplus-heuresys-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md'
     root: repo
     rel: 'heuresys-advanced-bootstrap-vm.md'
@@ -9826,6 +9850,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\analytics.integration.test.ts'
     root: repo
     rel: 'apps/api/test/analytics.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\approvals-effects.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/approvals-effects.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

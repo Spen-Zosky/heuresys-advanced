@@ -115,7 +115,7 @@ I tre cunei reali su cui costruire il posizionamento:
 
 ## 2.5 Inventario funzionale attuale (sintesi — dettaglio in cartografia F0)
 
-Conteggi reali ri-derivati dal codice: **75 moduli · ~399 endpoint nei moduli (~424 col conteggio storico incl. health/auth) · 130 migration · 180 tabelle `sys.*`**.
+> I **conteggi** (moduli / endpoint / migration / tabelle) vivono nella SoT tecnica `docs/kb/SOT_STATE.md` (ri-derivata ogni sessione) e l'inventario funzionale verificato voce-per-voce nel `FUNCTIONAL_CAPABILITY_LEDGER.md` — non ripetuti qui per evitare drift (regola anti-duplicazione T2, design SoT prodotto 2026-06-19).
 
 | Dimensione | Shipped (estratto) | Parziale / assente |
 |---|---|---|

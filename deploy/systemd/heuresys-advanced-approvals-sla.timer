@@ -1,0 +1,18 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh.
+#
+# 3.3 BPM approval SLA: an HOURLY scan for overdue approval steps (reminders +
+# escalation). Hourly granularity matches intra-day SLA windows (RD-09 timestamptz).
+[Unit]
+Description=Heuresys Advanced — hourly approval SLA/escalation scan (3.3 slice-3b)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+# Hourly at :20 past the hour, with a randomized delay so it never fires on the dot.
+OnCalendar=*-*-* *:20:00
+RandomizedDelaySec=120
+# Run a missed occurrence after downtime (the VM is not always up).
+Persistent=true
+Unit=heuresys-advanced-approvals-sla.service
+
+[Install]
+WantedBy=timers.target

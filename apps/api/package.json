@@ -18,7 +18,8 @@
     "embeddings:backfill": "tsx src/modules/semantic-matching/backfill.ts",
     "reference-sync:run": "tsx src/modules/reference-sync/sync-cli.ts",
     "insights:recompute": "tsx src/modules/insights/recompute-cli.ts",
-    "notifications:digest": "tsx src/modules/notifications/digest-cli.ts"
+    "notifications:digest": "tsx src/modules/notifications/digest-cli.ts",
+    "approvals:sla": "tsx src/modules/approvals/sla-cli.ts"
   },
   "dependencies": {
     "@fastify/cookie": "11.0.2",

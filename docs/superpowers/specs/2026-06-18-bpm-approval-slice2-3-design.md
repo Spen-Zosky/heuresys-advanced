@@ -22,10 +22,14 @@ once the prior level is satisfied.
   An approver may appear in only one level (000132 UNIQUE(request, approver)).
 - **Behavior-preserving**: a single level reproduces slice-1 exactly (10 slice-1 tests green).
 
-## slice-3 — effect-wiring + SLA/escalation (RESIDUO, designed)
+## slice-3 — effect-wiring + SLA/escalation
 
-Two independent sub-features. Neither is shipped yet; both are robustly implementable but each
-carries a real blocker that makes it multi-session.
+> **Update S997 (2026-06-19)**: **3b SLA/escalation ✅ SHIPPED** (live, mig `000141`). **3a
+> effect-wiring stays RESIDUO** (needs a natural apply-effect target — shipping a seam-only
+> registry would be scaffold, against the repo DoD; the WI-C tenant-materialization activation
+> is the leading candidate target).
+
+Two independent sub-features. 3b is shipped; 3a carries a real blocker that makes it multi-session.
 
 ### 3a. Effect-wiring (apply actually mutates the subject)
 
@@ -45,7 +49,18 @@ Today `applyRequest` is a pure marker (APPROVED→APPLIED). Design = a **handler
   one or ship the seam + a documented first handler in the same session that introduces a
   resource with an approvable lifecycle.
 
-### 3b. SLA / escalation (the scheduler sub-feature)
+### 3b. SLA / escalation (the scheduler sub-feature) — ✅ SHIPPED S997 (mig 000141)
+
+**As shipped** (`000141` + `approvals/sla.ts` + `sla-cli.ts` + 2 systemd units + vm-bootstrap wiring):
+columns `approval_step_{due_at,reminder_count,escalated_at}` + `approval_request_sla_hours` +
+partial due-index + inbox CHECK widened (`NotificationTypeSchema` += APPROVAL_REMINDER/OVERDUE).
+`runApprovalSla(pool)` scans overdue PENDING steps → reminder to approver (dedupe, in-app) + bump
+count + escalate to `created_by` once `reminder_count >= ESCALATE_AFTER` (3). Live-verified on
+RTL_BANK (`approvals-sla.integration` 2/2: reminder+bump, escalate-once). The systemd timer is
+inert until a `vm-bootstrap.sh` re-run installs it (ops gap, D-17); the runtime is proven live via
+the test/CLI. Email escalation rides the SMTP-gated digest; in-app is fully functional now.
+
+**Original design (for reference):**
 
 - **Schema** (new migration, next free number): on `sys_approval_steps` add
   `approval_step_due_at timestamptz` (RD-09: intra-day reminders → timestamptz, not date),

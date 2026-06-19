@@ -17,6 +17,8 @@ export const NotificationTypeSchema = z.enum([
   "GAP_CLOSURE_DUE",
   "SYSTEM",
   "APPROVAL_REQUEST",
+  "APPROVAL_REMINDER",
+  "APPROVAL_OVERDUE",
 ]);
 export type NotificationType = z.infer<typeof NotificationTypeSchema>;
 

@@ -76,6 +76,32 @@ if ! pnpm install --frozen-lockfile; then
 fi
 mkdir -p "$REPO_DIR/node_modules" && printf '%s' "$CUR_ABI" > "$ABI_SENTINEL"
 
+# 2a. Pre-deploy DB safety snapshot (D-08 rollback net). Take a pg_dump -Fc BEFORE the
+#     migration step (2b) — the first thing that mutates the live DB — so a bad deploy is
+#     restorable (pg_restore). Kept in a dedicated pre-deploy/ dir (distinct from the
+#     scheduled R5 daily backups). Fail-loud on an empty/short dump (a silent 0-byte safety
+#     net is worse than none → abort the deploy). Skip with PREDEPLOY_BACKUP=skip (fast
+#     iteration only). Overridable: PREDEPLOY_DIR, PREDEPLOY_RETAIN (keep newest N).
+if [ "${PREDEPLOY_BACKUP:-run}" != "skip" ]; then
+  log "db: pre-deploy snapshot (pg_dump -Fc, rollback net)"
+  PD_DB="${DB_NAME:-${POSTGRES_DB:-heuresys_advanced}}"
+  PD_DIR="${PREDEPLOY_DIR:-$REPO_DIR/pg_dump_snapshots/pre-deploy}"
+  PD_RETAIN="${PREDEPLOY_RETAIN:-10}"
+  mkdir -p "$PD_DIR"
+  pd_out="$PD_DIR/${PD_DB}_predeploy_$(date -u +%Y%m%dT%H%M%SZ).dump"
+  sudo -u postgres pg_dump -Fc "$PD_DB" > "$pd_out"
+  if [ ! -s "$pd_out" ] || [ "$(stat -c %s "$pd_out")" -lt 1024 ]; then
+    echo "ERROR: pre-deploy dump is empty/too small ($pd_out) — aborting deploy" >&2
+    rm -f "$pd_out"; exit 1
+  fi
+  echo "  pre-deploy snapshot: $pd_out ($(du -h "$pd_out" | cut -f1))"
+  # Retention: keep only the newest N pre-deploy dumps (deploy net, not a long-term archive).
+  ls -1t "$PD_DIR/${PD_DB}_predeploy_"*.dump 2>/dev/null | tail -n +"$((PD_RETAIN + 1))" | xargs -r rm -f
+  echo "  pre-deploy retention: kept newest $PD_RETAIN"
+else
+  log "db: pre-deploy snapshot SKIPPED (PREDEPLOY_BACKUP=skip)"
+fi
+
 # 2b. Apply DB migrations ONLY if a migration is pending (sha256 vs the sys.sys_schema_migrations
 #     ledger). The DBMS is shared (PC tunnel :5433 == this VM's :5432), so it is normally already
 #     migrated during dev → fast no-op; runs only for a genuinely unapplied migration.

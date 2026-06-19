@@ -8,7 +8,7 @@
 import type { PoolClient } from "pg";
 import { pool } from "../../db/client.js";
 import type { Archetype } from "./blueprints.js";
-import { archetypeUsers } from "./blueprints.js";
+import { archetypeUsers, synProficiency, synKpiValue } from "./blueprints.js";
 
 export type DbConnector = typeof pool | PoolClient;
 
@@ -17,6 +17,10 @@ export interface MaterializeCounts {
   positions: number;
   users: number;
   assignments: number;
+  skills: number;
+  kpis: number;
+  skillEvidence: number;
+  kpiEvidence: number;
 }
 
 /** Tenant status for the M-1 validation (null = tenant does not exist). */
@@ -123,14 +127,75 @@ export async function materialize(
     }
   }
 
-  // slice-2a: one SYNTHETIC_REFERENCE incumbent per position + a PRIMARY ACTIVE assignment.
-  // Mirrors db/scripts/seed-reference-bank.ts (user_type='SYNTHETIC_REFERENCE', user_is_synthetic,
-  // user_external_code='SYN_...', NEVER 'LEGACY_EMP::' — that is the brownfield real-person key, I14).
-  // Idempotent: user via ON CONFLICT (tenant, lower(email)); assignment via an existence check (the
-  // partial unique sys_upa_one_primary_active_per_user allows exactly one PRIMARY ACTIVE per user).
+  // slice-2b: tenant-scoped synthetic skill + KPI catalog (RBR-SK-* / RBR-KPI-*). Created once per
+  // tenant, idempotent via existence-check (the unique index is on COALESCE(tenant,0)+code). The ids
+  // feed the per-incumbent evidence below.
+  const skillCodeToId = new Map<string, string>();
+  let skillsCreated = 0;
+  for (const sk of archetype.skills) {
+    if (mode === "apply") {
+      const ex = await client.query<{ skill_id: string }>(
+        `SELECT skill_id FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_code = $2`,
+        [tenantId, sk.code],
+      );
+      if (ex.rows[0]) {
+        skillCodeToId.set(sk.code, ex.rows[0].skill_id);
+      } else {
+        const ins = await client.query<{ skill_id: string }>(
+          `INSERT INTO sys.sys_skills (skill_tenant_id, skill_code, skill_name, skill_kind, skill_is_global, skill_metadata)
+           VALUES ($1, $2, $3, $4, false, jsonb_build_object('materialized_from', $5::text))
+           RETURNING skill_id`,
+          [tenantId, sk.code, sk.name, sk.kind, archetype.key],
+        );
+        skillCodeToId.set(sk.code, ins.rows[0]!.skill_id);
+        skillsCreated++;
+      }
+    } else {
+      const ex = await client.query(`SELECT 1 FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_code = $2`, [tenantId, sk.code]);
+      if (ex.rowCount === 0) skillsCreated++;
+    }
+  }
+
+  const kpiCodeToId = new Map<string, string>();
+  let kpisCreated = 0;
+  for (const kp of archetype.kpis) {
+    if (mode === "apply") {
+      const ex = await client.query<{ kpi_definition_id: string }>(
+        `SELECT kpi_definition_id FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id = $1 AND kpi_definition_code = $2`,
+        [tenantId, kp.code],
+      );
+      if (ex.rows[0]) {
+        kpiCodeToId.set(kp.code, ex.rows[0].kpi_definition_id);
+      } else {
+        const ins = await client.query<{ kpi_definition_id: string }>(
+          `INSERT INTO sys.sys_kpi_definitions (kpi_definition_tenant_id, kpi_definition_code, kpi_definition_name, kpi_definition_unit, kpi_definition_polarity, kpi_definition_is_global, kpi_definition_metadata)
+           VALUES ($1, $2, $3, $4, $5, false, jsonb_build_object('materialized_from', $6::text))
+           RETURNING kpi_definition_id`,
+          [tenantId, kp.code, kp.name, kp.unit, kp.polarity, archetype.key],
+        );
+        kpiCodeToId.set(kp.code, ins.rows[0]!.kpi_definition_id);
+        kpisCreated++;
+      }
+    } else {
+      const ex = await client.query(`SELECT 1 FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id = $1 AND kpi_definition_code = $2`, [tenantId, kp.code]);
+      if (ex.rowCount === 0) kpisCreated++;
+    }
+  }
+
+  // slice-2a + 2b: one SYNTHETIC_REFERENCE incumbent per position (+ PRIMARY ACTIVE assignment), each
+  // with skill evidence (one per archetype skill, deterministic proficiency) + KPI evidence (one per
+  // archetype KPI, deterministic measured_value → cross-incumbent ranking). Keying = SYN_, NEVER
+  // LEGACY_EMP:: (I14/ADR-0024). Mirrors db/scripts/seed-reference-bank.ts. Idempotent: user via ON
+  // CONFLICT (tenant, lower(email)); assignment/evidence via existence-check (no natural unique on the
+  // evidence tables; the partial unique sys_upa_one_primary_active_per_user allows one PRIMARY ACTIVE/user).
+  const synUsers = archetypeUsers(archetype);
+  const applyUserIds: (string | null)[] = new Array(synUsers.length).fill(null); // apply: ui → userId (for set-based evidence)
   let usersCreated = 0;
   let assignmentsCreated = 0;
-  for (const su of archetypeUsers(archetype)) {
+  let skillEvidenceCreated = 0;
+  let kpiEvidenceCreated = 0;
+  for (let ui = 0; ui < synUsers.length; ui++) {
+    const su = synUsers[ui]!;
     if (mode === "apply") {
       const ins = await client.query<{ user_id: string }>(
         `INSERT INTO sys.sys_users
@@ -153,6 +218,7 @@ export async function materialize(
         );
         userId = ex.rows[0]!.user_id;
       }
+      applyUserIds[ui] = userId;
       const posId = posCodeToId.get(su.positionCode);
       if (posId) {
         const existing = await client.query(
@@ -175,7 +241,7 @@ export async function materialize(
         }
       }
     } else {
-      // plan: count what WOULD be created (user absent / no PRIMARY ACTIVE assignment yet).
+      // plan: count what WOULD be created (user/assignment/evidence absent yet).
       const ux = await client.query(
         `SELECT 1 FROM sys.sys_users WHERE user_tenant_id = $1 AND lower(user_email) = lower($2)`,
         [tenantId, su.email],
@@ -193,5 +259,90 @@ export async function materialize(
     }
   }
 
-  return { orgUnits: orgUnitsCreated, positions: positionsCreated, users: usersCreated, assignments: assignmentsCreated };
+  // Evidence — set-based to keep round-trips low (matters over the dev SSH tunnel). apply = anti-join
+  // INSERT (rowCount = created); plan = anti-join COUNT (would-create). Both fed by the deterministic
+  // synthetic matrices (incumbent × archetype skill, incumbent × archetype KPI).
+  if (mode === "apply") {
+    const seU: string[] = [], seS: string[] = [], seP: string[] = [];
+    const keU: string[] = [], keK: string[] = [], keV: number[] = [], keUnit: string[] = [];
+    for (let ui = 0; ui < synUsers.length; ui++) {
+      const uid = applyUserIds[ui];
+      if (!uid) continue;
+      for (let sj = 0; sj < archetype.skills.length; sj++) {
+        const sid = skillCodeToId.get(archetype.skills[sj]!.code);
+        if (sid) { seU.push(uid); seS.push(sid); seP.push(synProficiency(ui, sj)); }
+      }
+      for (let kj = 0; kj < archetype.kpis.length; kj++) {
+        const kid = kpiCodeToId.get(archetype.kpis[kj]!.code);
+        if (kid) { keU.push(uid); keK.push(kid); keV.push(synKpiValue(ui, kj)); keUnit.push(archetype.kpis[kj]!.unit); }
+      }
+    }
+    if (seU.length) {
+      const r = await client.query(
+        `INSERT INTO sys.sys_user_skill_evidence
+           (user_skill_evidence_user_id, user_skill_evidence_tenant_id, user_skill_evidence_skill_id,
+            user_skill_evidence_declared_proficiency, user_skill_evidence_source)
+         SELECT t.uid, $1, t.sid, t.prof, 'MANAGER_ASSESSMENT'
+           FROM unnest($2::uuid[], $3::uuid[], $4::varchar[]) AS t(uid, sid, prof)
+          WHERE NOT EXISTS (SELECT 1 FROM sys.sys_user_skill_evidence e
+            WHERE e.user_skill_evidence_user_id = t.uid AND e.user_skill_evidence_skill_id = t.sid)`,
+        [tenantId, seU, seS, seP],
+      );
+      skillEvidenceCreated = r.rowCount ?? 0;
+    }
+    if (keU.length) {
+      const r = await client.query(
+        `INSERT INTO sys.sys_user_kpi_evidence
+           (user_kpi_evidence_user_id, user_kpi_evidence_tenant_id, user_kpi_evidence_kpi_id,
+            user_kpi_evidence_period_start, user_kpi_evidence_period_end,
+            user_kpi_evidence_measured_value, user_kpi_evidence_target_value, user_kpi_evidence_unit)
+         SELECT t.uid, $1, t.kid, '2024-01-01', '2024-12-31', t.val, 80, t.unit
+           FROM unnest($2::uuid[], $3::uuid[], $4::numeric[], $5::varchar[]) AS t(uid, kid, val, unit)
+          WHERE NOT EXISTS (SELECT 1 FROM sys.sys_user_kpi_evidence e
+            WHERE e.user_kpi_evidence_user_id = t.uid AND e.user_kpi_evidence_kpi_id = t.kid)`,
+        [tenantId, keU, keK, keV, keUnit],
+      );
+      kpiEvidenceCreated = r.rowCount ?? 0;
+    }
+  } else {
+    const seEmail: string[] = [], seCode: string[] = [];
+    const keEmail: string[] = [], keCode: string[] = [];
+    for (const su of synUsers) {
+      for (const sk of archetype.skills) { seEmail.push(su.email); seCode.push(sk.code); }
+      for (const kp of archetype.kpis) { keEmail.push(su.email); keCode.push(kp.code); }
+    }
+    if (seEmail.length) {
+      const r = await client.query<{ c: number }>(
+        `SELECT count(*)::int AS c FROM unnest($2::text[], $3::text[]) AS t(email, scode)
+          WHERE NOT EXISTS (SELECT 1 FROM sys.sys_user_skill_evidence e
+            JOIN sys.sys_users u ON u.user_id = e.user_skill_evidence_user_id
+            JOIN sys.sys_skills s ON s.skill_id = e.user_skill_evidence_skill_id
+           WHERE u.user_tenant_id = $1 AND lower(u.user_email) = lower(t.email) AND s.skill_tenant_id = $1 AND s.skill_code = t.scode)`,
+        [tenantId, seEmail, seCode],
+      );
+      skillEvidenceCreated = Number(r.rows[0]!.c);
+    }
+    if (keEmail.length) {
+      const r = await client.query<{ c: number }>(
+        `SELECT count(*)::int AS c FROM unnest($2::text[], $3::text[]) AS t(email, kcode)
+          WHERE NOT EXISTS (SELECT 1 FROM sys.sys_user_kpi_evidence e
+            JOIN sys.sys_users u ON u.user_id = e.user_kpi_evidence_user_id
+            JOIN sys.sys_kpi_definitions k ON k.kpi_definition_id = e.user_kpi_evidence_kpi_id
+           WHERE u.user_tenant_id = $1 AND lower(u.user_email) = lower(t.email) AND k.kpi_definition_tenant_id = $1 AND k.kpi_definition_code = t.kcode)`,
+        [tenantId, keEmail, keCode],
+      );
+      kpiEvidenceCreated = Number(r.rows[0]!.c);
+    }
+  }
+
+  return {
+    orgUnits: orgUnitsCreated,
+    positions: positionsCreated,
+    users: usersCreated,
+    assignments: assignmentsCreated,
+    skills: skillsCreated,
+    kpis: kpisCreated,
+    skillEvidence: skillEvidenceCreated,
+    kpiEvidence: kpiEvidenceCreated,
+  };
 }

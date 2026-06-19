@@ -12,6 +12,8 @@
 
 type OrgUnitType = "HEADQUARTERS" | "DIVISION" | "DEPARTMENT" | "TEAM" | "BRANCH" | "OFFICE";
 type Criticality = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+type SkillKind = "SKILL" | "KNOWLEDGE" | "COMPETENCE" | "BEHAVIOR"; // sys_skills.skill_kind CHECK domain
+type KpiPolarity = "HIGHER_IS_BETTER" | "LOWER_IS_BETTER" | "TARGET_RANGE"; // sys_kpi_definitions.polarity CHECK domain
 
 export interface ArchetypeOrgUnit {
   code: string;
@@ -27,11 +29,24 @@ export interface ArchetypePosition {
   criticality: Criticality;
   economicWeight: number;
 }
+export interface ArchetypeSkill {
+  code: string;
+  name: string;
+  kind: SkillKind;
+}
+export interface ArchetypeKpi {
+  code: string;
+  name: string;
+  polarity: KpiPolarity;
+  unit: string;
+}
 export interface Archetype {
   key: string;
   label: string;
   orgUnits: ArchetypeOrgUnit[];
   positions: ArchetypePosition[];
+  skills: ArchetypeSkill[];
+  kpis: ArchetypeKpi[];
 }
 
 // RETAIL_BANK_REFERENCE — a compact, deterministic retail-bank skeleton: 1 HQ, 3 directorates,
@@ -61,6 +76,24 @@ const RETAIL_BANK_REFERENCE: Archetype = {
     { code: "RBR-BR-ROMA-TELLER", title: "Teller (Roma)", orgUnitCode: "RBR-BR-ROMA", criticality: "MEDIUM", economicWeight: 0.3 },
     { code: "RBR-BR-TORINO-MGR", title: "Branch Manager (Torino)", orgUnitCode: "RBR-BR-TORINO", criticality: "HIGH", economicWeight: 0.5 },
     { code: "RBR-BR-TORINO-TELLER", title: "Teller (Torino)", orgUnitCode: "RBR-BR-TORINO", criticality: "MEDIUM", economicWeight: 0.3 },
+  ],
+  // slice-2b: a compact synthetic skill set (kind from the ESCO domain) + ranked KPIs for the archetype.
+  // Codes are RBR-namespaced (collision-safe). These materialize a tenant-scoped catalog + per-incumbent evidence.
+  skills: [
+    { code: "RBR-SK-CREDIT-RISK", name: "Credit Risk Analysis", kind: "KNOWLEDGE" },
+    { code: "RBR-SK-AML", name: "AML & Compliance", kind: "KNOWLEDGE" },
+    { code: "RBR-SK-ADVISORY", name: "Customer Advisory", kind: "SKILL" },
+    { code: "RBR-SK-BRANCH-OPS", name: "Branch Operations", kind: "SKILL" },
+    { code: "RBR-SK-FIN-REPORTING", name: "Financial Reporting", kind: "KNOWLEDGE" },
+    { code: "RBR-SK-LEADERSHIP", name: "Leadership", kind: "COMPETENCE" },
+    { code: "RBR-SK-DIGITAL", name: "Digital Banking", kind: "SKILL" },
+    { code: "RBR-SK-CASH", name: "Cash Handling", kind: "SKILL" },
+  ],
+  kpis: [
+    { code: "RBR-KPI-CSAT", name: "Customer Satisfaction", polarity: "HIGHER_IS_BETTER", unit: "score" },
+    { code: "RBR-KPI-PORTFOLIO", name: "Loan Portfolio Quality", polarity: "HIGHER_IS_BETTER", unit: "%" },
+    { code: "RBR-KPI-EFFICIENCY", name: "Operational Efficiency", polarity: "HIGHER_IS_BETTER", unit: "%" },
+    { code: "RBR-KPI-SALES", name: "Sales Target Attainment", polarity: "HIGHER_IS_BETTER", unit: "%" },
   ],
 };
 
@@ -106,4 +139,15 @@ export function archetypeUsers(a: Archetype): ArchetypeUser[] {
       positionCode: p.code,
     };
   });
+}
+
+/* --- slice-2b: deterministic synthetic skill/KPI evidence (no PII) --------- */
+const PROFICIENCY_SCALE = ["NOVICE", "BASIC", "COMPETENT", "PROFICIENT", "EXPERT", "MASTER"] as const;
+/** Deterministic declared-proficiency for incumbent #userIdx on archetype skill #skillIdx (cycles the scale). */
+export function synProficiency(userIdx: number, skillIdx: number): string {
+  return PROFICIENCY_SCALE[(userIdx + skillIdx) % PROFICIENCY_SCALE.length]!;
+}
+/** Deterministic KPI measured value (60..99) — gives a stable cross-incumbent ranking per KPI. */
+export function synKpiValue(userIdx: number, kpiIdx: number): number {
+  return 60 + ((userIdx * 7 + kpiIdx * 13) % 40);
 }

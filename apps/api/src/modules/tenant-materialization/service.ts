@@ -51,6 +51,10 @@ export const tenantMaterializationService = {
       positions: archetype.positions.length,
       users: userCount,
       assignments: userCount,
+      skills: archetype.skills.length,
+      kpis: archetype.kpis.length,
+      skillEvidence: userCount * archetype.skills.length, // one evidence per incumbent × archetype skill
+      kpiEvidence: userCount * archetype.kpis.length, // one evidence per incumbent × archetype KPI
     };
     const created = await withTransaction((client) => repo.materialize(client, body.tenantId, archetype, body.mode));
     const skipped = {
@@ -58,6 +62,10 @@ export const tenantMaterializationService = {
       positions: total.positions - created.positions,
       users: total.users - created.users,
       assignments: total.assignments - created.assignments,
+      skills: total.skills - created.skills,
+      kpis: total.kpis - created.kpis,
+      skillEvidence: total.skillEvidence - created.skillEvidence,
+      kpiEvidence: total.kpiEvidence - created.kpiEvidence,
     };
     return { tenantId: body.tenantId, archetypeKey: archetype.key, mode: body.mode, created, skipped, total };
   },

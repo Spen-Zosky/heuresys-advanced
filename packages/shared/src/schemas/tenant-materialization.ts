@@ -25,6 +25,10 @@ const MaterializeCountsSchema = z.object({
   positions: z.number().int(),
   users: z.number().int(),
   assignments: z.number().int(),
+  skills: z.number().int(),
+  kpis: z.number().int(),
+  skillEvidence: z.number().int(),
+  kpiEvidence: z.number().int(),
 });
 export type MaterializeCounts = z.infer<typeof MaterializeCountsSchema>;
 

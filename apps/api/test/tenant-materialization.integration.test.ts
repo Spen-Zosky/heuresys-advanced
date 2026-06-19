@@ -27,7 +27,9 @@ let suite: TestApp;
 let admin: S, federica: S;
 let suspendedTenantId: string;
 
-interface Counts { orgUnits: number; positions: number; users: number; assignments: number }
+interface Counts { orgUnits: number; positions: number; users: number; assignments: number; skills: number; kpis: number; skillEvidence: number; kpiEvidence: number }
+const C = (orgUnits: number, positions: number, users: number, assignments: number, skills: number, kpis: number, skillEvidence: number, kpiEvidence: number): Counts =>
+  ({ orgUnits, positions, users, assignments, skills, kpis, skillEvidence, kpiEvidence });
 interface Result {
   created: Counts;
   skipped: Counts;
@@ -52,7 +54,19 @@ async function countRbr(tenantId: string): Promise<{ ou: number; pos: number }> 
   return { ou: Number(ou.rows[0]!.c), pos: Number(pos.rows[0]!.c) };
 }
 async function purgeRbr(tenantId: string): Promise<void> {
-  // Order matters (FK): synthetic assignments → synthetic users → positions → org-units.
+  // Order matters (FK): synthetic skill/KPI evidence → assignments → users → catalog → positions → org-units.
+  await pool.query(
+    `DELETE FROM sys.sys_user_skill_evidence e USING sys.sys_users u
+      WHERE e.user_skill_evidence_user_id = u.user_id
+        AND u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'`,
+    [tenantId],
+  );
+  await pool.query(
+    `DELETE FROM sys.sys_user_kpi_evidence e USING sys.sys_users u
+      WHERE e.user_kpi_evidence_user_id = u.user_id
+        AND u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'`,
+    [tenantId],
+  );
   await pool.query(
     `DELETE FROM sys.sys_user_position_assignments a USING sys.sys_users u
       WHERE a.user_position_assignment_user_id = u.user_id
@@ -60,6 +74,8 @@ async function purgeRbr(tenantId: string): Promise<void> {
     [tenantId],
   );
   await pool.query(`DELETE FROM sys.sys_users WHERE user_tenant_id = $1 AND user_external_code LIKE 'SYN_RBR-%'`, [tenantId]);
+  await pool.query(`DELETE FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_code LIKE 'RBR-SK-%'`, [tenantId]);
+  await pool.query(`DELETE FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id = $1 AND kpi_definition_code LIKE 'RBR-KPI-%'`, [tenantId]);
   await pool.query(`DELETE FROM sys.sys_positions WHERE position_tenant_id = $1 AND position_code LIKE 'RBR-%'`, [tenantId]);
   await pool.query(`DELETE FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1 AND organization_unit_code LIKE 'RBR-%'`, [tenantId]);
 }
@@ -77,6 +93,33 @@ async function countSyn(tenantId: string): Promise<{ users: number; assignments:
     [tenantId],
   );
   return { users: Number(u.rows[0]!.c), assignments: Number(a.rows[0]!.c) };
+}
+// slice-2b: tenant-scoped synthetic skill/KPI catalog (RBR-SK-* / RBR-KPI-*) + per-incumbent evidence.
+async function countCatalog(tenantId: string): Promise<{ skills: number; kpis: number }> {
+  const s = await pool.query<{ c: string }>(
+    `SELECT count(*) AS c FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_code LIKE 'RBR-SK-%'`,
+    [tenantId],
+  );
+  const k = await pool.query<{ c: string }>(
+    `SELECT count(*) AS c FROM sys.sys_kpi_definitions WHERE kpi_definition_tenant_id = $1 AND kpi_definition_code LIKE 'RBR-KPI-%'`,
+    [tenantId],
+  );
+  return { skills: Number(s.rows[0]!.c), kpis: Number(k.rows[0]!.c) };
+}
+async function countEvidence(tenantId: string): Promise<{ skillEvidence: number; kpiEvidence: number }> {
+  const se = await pool.query<{ c: string }>(
+    `SELECT count(*) AS c FROM sys.sys_user_skill_evidence e
+       JOIN sys.sys_users u ON u.user_id = e.user_skill_evidence_user_id
+      WHERE u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'`,
+    [tenantId],
+  );
+  const ke = await pool.query<{ c: string }>(
+    `SELECT count(*) AS c FROM sys.sys_user_kpi_evidence e
+       JOIN sys.sys_users u ON u.user_id = e.user_kpi_evidence_user_id
+      WHERE u.user_tenant_id = $1 AND u.user_external_code LIKE 'SYN_RBR-%'`,
+    [tenantId],
+  );
+  return { skillEvidence: Number(se.rows[0]!.c), kpiEvidence: Number(ke.rows[0]!.c) };
 }
 
 beforeAll(async () => {
@@ -117,11 +160,13 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     const r = await materialize(admin, RTL, "plan");
     expect(r.statusCode).toBe(200);
     const b = r.json() as Result;
-    expect(b.created).toEqual({ orgUnits: 7, positions: 11, users: 11, assignments: 11 });
-    expect(b.total).toEqual({ orgUnits: 7, positions: 11, users: 11, assignments: 11 });
+    expect(b.created).toEqual(C(7, 11, 11, 11, 8, 4, 88, 44));
+    expect(b.total).toEqual(C(7, 11, 11, 11, 8, 4, 88, 44));
     // No writes happened.
     expect(await countRbr(RTL)).toEqual({ ou: 0, pos: 0 });
     expect(await countSyn(RTL)).toEqual({ users: 0, assignments: 0 });
+    expect(await countCatalog(RTL)).toEqual({ skills: 0, kpis: 0 });
+    expect(await countEvidence(RTL)).toEqual({ skillEvidence: 0, kpiEvidence: 0 });
   });
 
   it("apply mode creates the org-units + positions, tagged to the target tenant", async () => {
@@ -129,25 +174,32 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     expect(r.statusCode).toBe(200);
     const b = r.json() as Result;
     expect(b.tenantId).toBe(RTL);
-    expect(b.created).toEqual({ orgUnits: 7, positions: 11, users: 11, assignments: 11 });
-    expect(b.skipped).toEqual({ orgUnits: 0, positions: 0, users: 0, assignments: 0 });
+    expect(b.created).toEqual(C(7, 11, 11, 11, 8, 4, 88, 44));
+    expect(b.skipped).toEqual(C(0, 0, 0, 0, 0, 0, 0, 0));
     expect(await countRbr(RTL)).toEqual({ ou: 7, pos: 11 });
     // slice-2a: each position now has a SYNTHETIC_REFERENCE incumbent + a PRIMARY ACTIVE assignment.
     expect(await countSyn(RTL)).toEqual({ users: 11, assignments: 11 });
+    // slice-2b: tenant skill/KPI catalog (8 skills + 4 KPIs) + per-incumbent evidence (11×8 skill, 11×4 KPI).
+    expect(await countCatalog(RTL)).toEqual({ skills: 8, kpis: 4 });
+    expect(await countEvidence(RTL)).toEqual({ skillEvidence: 88, kpiEvidence: 44 });
   });
 
   it("re-apply is idempotent (0 created, all skipped)", async () => {
     const r = await materialize(admin, RTL, "apply");
     const b = r.json() as Result;
-    expect(b.created).toEqual({ orgUnits: 0, positions: 0, users: 0, assignments: 0 });
-    expect(b.skipped).toEqual({ orgUnits: 7, positions: 11, users: 11, assignments: 11 });
+    expect(b.created).toEqual(C(0, 0, 0, 0, 0, 0, 0, 0));
+    expect(b.skipped).toEqual(C(7, 11, 11, 11, 8, 4, 88, 44));
     expect(await countRbr(RTL)).toEqual({ ou: 7, pos: 11 });
     expect(await countSyn(RTL)).toEqual({ users: 11, assignments: 11 });
+    expect(await countCatalog(RTL)).toEqual({ skills: 8, kpis: 4 });
+    expect(await countEvidence(RTL)).toEqual({ skillEvidence: 88, kpiEvidence: 44 });
   });
 
   it("M-1 tenant isolation: a RTL materialization never touches HEURESYS", async () => {
     expect(await countRbr(HEU)).toEqual({ ou: 0, pos: 0 });
     expect(await countSyn(HEU)).toEqual({ users: 0, assignments: 0 });
+    expect(await countCatalog(HEU)).toEqual({ skills: 0, kpis: 0 });
+    expect(await countEvidence(HEU)).toEqual({ skillEvidence: 0, kpiEvidence: 0 });
   });
 
   it("RBAC: a non-PLATFORM_ADMIN (TENANT_ADMIN) is denied → 403", async () => {
@@ -167,6 +219,8 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("TENANT_NOT_ACTIVE");
     expect(await countRbr(suspendedTenantId)).toEqual({ ou: 0, pos: 0 });
     expect(await countSyn(suspendedTenantId)).toEqual({ users: 0, assignments: 0 });
+    expect(await countCatalog(suspendedTenantId)).toEqual({ skills: 0, kpis: 0 });
+    expect(await countEvidence(suspendedTenantId)).toEqual({ skillEvidence: 0, kpiEvidence: 0 });
   });
 
   it("an unknown archetype → 404", async () => {

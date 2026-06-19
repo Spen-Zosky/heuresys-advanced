@@ -134,7 +134,7 @@ Batch decision-authority session-scoped (Enzo: "backup DBMS poi esegui tutto in 
 - **⚠ 2 alert Dependabot NUOVI** (1 high + 1 moderate, comparsi al push S991, **non dai commit S991**): verificare `gh api repos/Spen-Zosky/heuresys-advanced/dependabot/alerts` e chiudere. ~1h.
 - **#8 Fasi 4-8 post-v1.0** (3.2 sec-audit / 3.3 BPM / 3.4 notif / 3.5 reporting) + **S-100X-A4..A11** audit. `design→spec→ok`.
 - **Agente #9 PROD-serving**: serve API key Anthropic reale o Bedrock/Vertex per esporlo a webapp cliente (dev gira su subscription MAX, gratis). Decisione PM.
-- **Infra**: E2E locale richiede Node 22 (Node 24 di sistema rompe Playwright 1.61) — workaround documentato, fix-proper = bump Playwright o pin Node 22 per lo step E2E.
+- **Infra E2E Node 22 ✅ RISOLTO (D-36, commit `addb19a` S992)** — ~~E2E locale richiede Node 22 (Node 24 di sistema rompe Playwright 1.61)~~ → fix-proper riproducibile = wrapper `apps/web/scripts/e2e-node22.mjs` + script `test:e2e:node22`/`test:e2e:prod:node22` (passthrough su Node ≤22 → CI/Mac/VM invariati; auto-provision Node 22 su Node ≥23). "bump Playwright" scartato con evidenza live (1.61.0 è latest stable; i successori sono prerelease alpha). Vedi `DEBT_REGISTER.md` D-36 RISOLTO + `SOT_BACKLOG.md:112`. Questo bullet S991 era pre-fix (1 giorno prima).
 
 ## 🟢 Aggiornamento S990 (2026-06-15) — batch menu 1→11 (ESCO data + agent-gateway + audit)
 

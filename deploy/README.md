@@ -118,6 +118,40 @@ they are install-parity only; the plain API SDKs (`@anthropic-ai/sdk`, `anthropi
 fully usable. `claude --version` / `claude plugin list` checks include SDK versions in
 the `--verify` drift report.
 
+## Canonical session close (`close-propagate.sh`)
+
+> **Non-bypassable doctrine (2026-06-20, design §12-§13).** The `handoff` skill Step 4b calls this script; both channels below are **always enforced** on every reachable host.
+
+The single canonical orchestrator for session-close propagation — all three steps:
+
+```bash
+# Typical close (delta: only session changes, auto-deploy if code changed):
+MSYS_NO_PATHCONV=1 bash scripts/close-propagate.sh --delta --auto-deploy
+
+# Full catch-up after a skipped host or fresh setup:
+MSYS_NO_PATHCONV=1 bash scripts/close-propagate.sh --full --deploy --clone-db
+```
+
+**Channel 1 — `align-clones.sh all`**: repo hard-sync + gitignored payload (`.secrets`, gitignored data) + `.env` key-merge + project memories (`sync-memory-tree.sh`) + PROD deploy (vm + linuxpc). See *Full alignment* above.
+
+**Channel 2 — `align-claude-ecosystem.sh all`**: Claude catalog (`CLAUDE.md`, `skills/`, `commands/`, `settings.json` OS-transformed, claude-mem settings) + SDK parity + plugin verify-SHA. See *Claude ecosystem alignment* above.
+
+**Channel 3 (conditional) — `clone-vm-db.sh` on linux-pc**: refreshes the linux-pc bare-metal PostgreSQL clone from the VM. Auto-triggered when `db/migrations/` or `db/seeds/` changed this session; use `--clone-db` to force.
+
+**Resilience**: both channels use `--resilient` — an **unreachable** host is skipped with a warning (catch up manually when it's back); a channel that **fails on a reachable** host is **fail-loud** (the close is not clean — investigate, never bypass). The script exits non-zero on any reachable-host failure; the `handoff` skill must not push on a red exit.
+
+**Flags**:
+
+| Flag | Meaning |
+|---|---|
+| `--full` | Full re-sync (default: `--delta` propagates only session changes) |
+| `--delta` | Only mtime-newer memories + auto-deploy gate (default) |
+| `--deploy` | Force PROD deploy on vm + linuxpc (default: `--auto-deploy`) |
+| `--auto-deploy` | Deploy only if commits touched `apps\|packages\|db\|scripts\|deploy` |
+| `--no-deploy` | Skip deploy entirely |
+| `--clone-db` | Force linux-pc DB clone regardless of migration changes |
+| `--no-clone-db` | Skip clone-db even if migrations changed |
+
 ## Linux server (OCI VM / any amd64 Linux) — public, systemd
 
 ```bash

@@ -307,6 +307,10 @@
       "types": "./dist/schemas/engagement-feedback.d.ts",
       "default": "./src/schemas/engagement-feedback.ts"
     },
+    "./schemas/goals": {
+      "types": "./dist/schemas/goals.d.ts",
+      "default": "./src/schemas/goals.ts"
+    },
     "./schemas/predictions": {
       "types": "./dist/schemas/predictions.d.ts",
       "default": "./src/schemas/predictions.ts"

@@ -1,0 +1,61 @@
+/**
+ * apps/api/src/modules/goals/service.ts
+ * Goals CRUD with tenant-only visibility. PLATFORM_ADMIN unfiltered; others own tenant;
+ * not-visible -> 404 (no leak). Mirrors modules/engagement-feedback/service.ts.
+ */
+import { pool } from "../../db/client.js";
+import { isPlatform, type ActorContext } from "../../lib/actor.js";
+export type { ActorContext };
+import { NotFoundError, ForbiddenError } from "../../errors/index.js";
+import type { GoalListQuery, CreateGoalBody, UpdateGoalBody } from "@heuresys/shared";
+import * as repo from "./repository.js";
+
+const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
+
+function listTenantFilter(a: ActorContext): string | undefined {
+  if (isPlatform(a)) return undefined;
+  return a.tenantId ?? ZERO_UUID;
+}
+function assertVisible(a: ActorContext, rowTenantId: string, resource: string): void {
+  if (isPlatform(a)) return;
+  if (a.tenantId === null || rowTenantId !== a.tenantId) throw new NotFoundError(resource);
+}
+function resolveWriteTenant(a: ActorContext, bodyTenantId?: string): string {
+  if (isPlatform(a)) {
+    const t = bodyTenantId ?? a.tenantId;
+    if (!t) throw new ForbiddenError("PLATFORM_ADMIN must supply tenantId", "TENANT_ID_REQUIRED");
+    return t;
+  }
+  if (!a.tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
+  return a.tenantId;
+}
+
+export const goalsService = {
+  async listGoals(a: ActorContext, query: GoalListQuery) {
+    return repo.listGoals(pool, listTenantFilter(a), query);
+  },
+  async getGoal(a: ActorContext, id: string) {
+    const g = await repo.findGoalById(pool, id);
+    if (!g) throw new NotFoundError("Goal");
+    assertVisible(a, g.tenantId, "Goal");
+    return g;
+  },
+  async createGoal(a: ActorContext, body: CreateGoalBody) {
+    const tenantId = resolveWriteTenant(a, body.tenantId);
+    return repo.insertGoal(pool, tenantId, body);
+  },
+  async updateGoal(a: ActorContext, id: string, patch: UpdateGoalBody) {
+    const g = await repo.findGoalById(pool, id);
+    if (!g) throw new NotFoundError("Goal");
+    assertVisible(a, g.tenantId, "Goal");
+    const updated = await repo.updateGoalPartial(pool, id, patch);
+    if (!updated) throw new NotFoundError("Goal");
+    return updated;
+  },
+  async deleteGoal(a: ActorContext, id: string): Promise<void> {
+    const g = await repo.findGoalById(pool, id);
+    if (!g) throw new NotFoundError("Goal");
+    assertVisible(a, g.tenantId, "Goal");
+    await repo.deleteGoal(pool, id);
+  },
+};

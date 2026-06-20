@@ -90,9 +90,12 @@ case "$DEPLOY_FLAG" in
     fi ;;
 esac
 
-mac_cfg() { HOST=mac-local;         REPO=/Users/enzo/heuresys-advanced;  NVMUSE=default; }
-vm_cfg()  { HOST=oracle-vm-default; REPO=/home/ubuntu/heuresys-advanced; NVMUSE=22; }
-linuxpc_cfg() { HOST=linux-pc;      REPO=/home/enzo/heuresys-advanced;   NVMUSE=22; }
+# DEPLOY_ENV: extra env prepended to vm-deploy.sh per host. The VM uses vm-deploy's defaults
+# (PUBLIC_HOST=80.225.82.207, SERVICE_USER=ubuntu); linux-pc is the LAN PROD twin running as
+# 'enzo' on 192.168.1.11 → it must render the web URL + systemd unit owner for THAT host (§12.4).
+mac_cfg() { HOST=mac-local;         REPO=/Users/enzo/heuresys-advanced;  NVMUSE=default; DEPLOY_ENV=""; }
+vm_cfg()  { HOST=oracle-vm-default; REPO=/home/ubuntu/heuresys-advanced; NVMUSE=22; DEPLOY_ENV=""; }
+linuxpc_cfg() { HOST=linux-pc;      REPO=/home/enzo/heuresys-advanced;   NVMUSE=22; DEPLOY_ENV="PUBLIC_HOST=192.168.1.11 SERVICE_USER=enzo API_PORT=8013 WEB_PORT=3013"; }
 reachable() { ssh -o BatchMode=yes -o ConnectTimeout=8 "$1" 'exit 0' 2>/dev/null; }
 
 SKIPPED=""
@@ -142,7 +145,7 @@ align_one() {
 
   if { [ "$kind" = vm ] || [ "$kind" = linuxpc ]; } && [ "$DEPLOY" = 1 ]; then
     log "[$kind] PROD deploy (build + migrate-if-pending + restart)"
-    ssh -o BatchMode=yes "$HOST" "cd '$REPO' && REPO_DIR='$REPO' bash scripts/vm-deploy.sh"
+    ssh -o BatchMode=yes "$HOST" "cd '$REPO' && env REPO_DIR='$REPO' ${DEPLOY_ENV} bash scripts/vm-deploy.sh"
   elif [ "$kind" = vm ] || [ "$kind" = linuxpc ]; then
     log "[$kind] deploy skipped (no code change / --no-deploy)"
   fi

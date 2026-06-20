@@ -21,6 +21,11 @@ API_PORT="${API_PORT:-8013}"
 WEB_PORT="${WEB_PORT:-3013}"
 NODE_MAJOR="${NODE_MAJOR:-22}"
 RESTART_API="${RESTART_API:-1}"   # set 0 to skip restarting the API (web-only deploy)
+# systemd unit owner. Default ubuntu (the OCI VM). The linux-pc PROD twin runs as 'enzo' —
+# align-clones passes SERVICE_USER=enzo PUBLIC_HOST=192.168.1.11 for that leg so the scheduler
+# units (and the inlined web URL) are rendered for the right host (design §12.4).
+SERVICE_USER="${SERVICE_USER:-ubuntu}"
+SERVICE_GROUP="${SERVICE_GROUP:-$SERVICE_USER}"
 
 log() { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
 
@@ -54,6 +59,7 @@ if [ -z "${VM_DEPLOY_REEXEC:-}" ]; then
   exec env VM_DEPLOY_REEXEC=1 \
     REPO_DIR="$REPO_DIR" BRANCH="$BRANCH" PUBLIC_HOST="$PUBLIC_HOST" \
     API_PORT="$API_PORT" WEB_PORT="$WEB_PORT" NODE_MAJOR="$NODE_MAJOR" RESTART_API="$RESTART_API" \
+    SERVICE_USER="$SERVICE_USER" SERVICE_GROUP="$SERVICE_GROUP" \
     bash "$REPO_DIR/scripts/vm-deploy.sh"
 fi
 
@@ -136,7 +142,11 @@ pnpm --filter @heuresys/web build
 log "systemd: install scheduler units (scraping cap⑤ P2 + insights cap③ + backup R5 + reindex R7)"
 swtmp="$(mktemp -d)"
 for svc in scraping insights backup reindex; do
+  # Render ALL placeholders + the unit owner. The .service templates hard-code User=ubuntu;
+  # on the linux-pc twin (SERVICE_USER=enzo) the sed rewrites it, else they'd fail to start (§12.4).
   sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
+      -e "s#@@PUBLIC_HOST@@#$PUBLIC_HOST#g" -e "s#@@API_PORT@@#$API_PORT#g" -e "s#@@WEB_PORT@@#$WEB_PORT#g" \
+      -e "s#^User=ubuntu#User=$SERVICE_USER#g" -e "s#^Group=ubuntu#Group=$SERVICE_GROUP#g" \
       "$REPO_DIR/deploy/systemd/heuresys-advanced-$svc.service" \
       > "$swtmp/heuresys-advanced-$svc.service"
   sudo install -m 644 -o root -g root "$swtmp/heuresys-advanced-$svc.service" \

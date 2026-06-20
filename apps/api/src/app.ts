@@ -103,6 +103,7 @@ import { mentorshipRoutes } from "./modules/mentorship/routes.js";
 import { surveysRoutes } from "./modules/surveys/routes.js";
 import { engagementFeedbackRoutes } from "./modules/engagement-feedback/routes.js";
 import { goalsRoutes } from "./modules/goals/routes.js";
+import { okrsRoutes } from "./modules/okrs/routes.js";
 import { predictionsRoutes } from "./modules/predictions/routes.js";
 import { engagementRoutes } from "./modules/engagement/routes.js";
 import { semanticMatchingRoutes } from "./modules/semantic-matching/routes.js";
@@ -409,6 +410,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(surveysRoutes, { prefix: "/v1/surveys" });
   await app.register(engagementFeedbackRoutes, { prefix: "/v1/engagement-feedback" });
   await app.register(goalsRoutes, { prefix: "/v1/goals" });
+  await app.register(okrsRoutes, { prefix: "/v1/okrs" });
   await app.register(predictionsRoutes, { prefix: "/v1/predictions" });
   await app.register(engagementRoutes, { prefix: "/v1/engagement" });
   await app.register(semanticMatchingRoutes, { prefix: "/v1/matching", deps: options.matchingDeps });

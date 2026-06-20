@@ -174,7 +174,7 @@ sdk_stage() {
 # STAGE/claude-mem-settings.json    -> pushed to remote ~/.claude-mem/settings.json
 # STAGE/MANIFEST.sha256             -> checksums of payload (relative paths)
 STAGE=""
-cleanup() { [ -n "$STAGE" ] && rm -rf "$STAGE"; }
+cleanup() { [ -n "$STAGE" ] && { rm -rf "$STAGE"; STAGE=""; }; return 0; }
 trap cleanup EXIT
 
 # MSYS path conversion mangles POSIX-looking values (args AND env vars) passed to the

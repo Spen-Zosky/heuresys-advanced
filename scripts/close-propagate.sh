@@ -21,7 +21,9 @@
 #                                   [--clone-db|--no-clone-db]
 #   defaults: --delta --auto-deploy   clone-db=auto (refresh iff db/migrations|db/seeds changed)
 set -euo pipefail
-export MSYS_NO_PATHCONV=1
+# NOTE: do NOT globally export MSYS_NO_PATHCONV=1 — align-claude-ecosystem.sh manages
+# it per-ssh-call (rssh) and its local jq calls on staging-dir POSIX paths need MSYS
+# path conversion active. Close-propagate only needs it for its own direct SSH calls.
 
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
 SCRIPTS="$ROOT/scripts"
@@ -82,8 +84,8 @@ case "$CLONE_DB" in
 esac
 if [ "$need_clone" = 1 ]; then
   log "clone-db — linux-pc DB refresh (VM data changed this session / forced)"
-  if ssh -o BatchMode=yes -o ConnectTimeout=8 linux-pc 'exit 0' 2>/dev/null; then
-    if ! ssh -o BatchMode=yes linux-pc "cd '$LINUXPC_REPO' && bash scripts/clone-vm-db.sh"; then
+  if MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes -o ConnectTimeout=8 linux-pc 'exit 0' 2>/dev/null; then
+    if ! MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes linux-pc "cd '$LINUXPC_REPO' && bash scripts/clone-vm-db.sh"; then
       FAILED="$FAILED clone-vm-db"
     fi
   else

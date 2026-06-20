@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-20T16:01:43Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2111**
+**Generato**: 2026-06-20T18:22:35Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2114**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,7 +13,7 @@
 | api-module | 285 |
 | ci | 15 |
 | claude-config | 6 |
-| config | 97 |
+| config | 98 |
 | cowork-archive | 14 |
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
@@ -21,7 +21,7 @@
 | db-migration | 148 |
 | db-script | 23 |
 | db-seed | 104 |
-| doc-canonical | 381 |
+| doc-canonical | 383 |
 | handoff-state | 1 |
 | qa-artifact | 96 |
 | script | 6 |
@@ -32,7 +32,7 @@
 | test | 220 |
 | ux-design-archive | 80 |
 | web-source | 149 |
-| **TOTALE** | **2111** |
+| **TOTALE** | **2114** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 488 |
 | external-archive | 50 |
-| live | 1573 |
+| live | 1576 |
 
 ## File per categoria
 
@@ -474,6 +474,7 @@
 - `D:\heuresys-advanced\scripts\bisect-cw-b59-createctx.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\clean.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\clone-vm-db.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\close-propagate.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\codemods\s983-mfa-loginraw.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\cowork-exchange\apply-pending.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\cowork-exchange\finalize-session-2026-05-19.ps1` · *live* · git-tracked
@@ -1333,6 +1334,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\build_graph_mirror.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_index.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_linked_manifest.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\handoff_lint.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-commit` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-merge` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\install-hooks.sh` · *live* · git-tracked
@@ -1530,6 +1532,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-18-bpm-approval-slice2-3-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-19-integrazione-llmwiki-hrplus-heuresys-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-19-product-sot-consolidation-design.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-06-20-handoff-rigor-and-hold-lane-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md` · *live* · git-tracked
 
 ### handoff-state

@@ -405,6 +405,28 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
   local fp; fp="$(printf '%s\n' "$checks" | grep -oE 'foreign_paths=[0-9]+' | cut -d= -f2 || echo '')"
   [ -n "$fp" ] && [ "$fp" != 0 ] && issues=$((issues+1))
 
+  # 4. Plugin marketplace SHA parity (Opzione C, design §13.2): make plugin-version drift VISIBLE.
+  #    The CLI has no version pin and `claude-plugins-official` is non-git, so we compare the git
+  #    HEAD of each git-backed marketplace (Windows SoT vs remote). DRIFT here is INFORMATIVE, NOT a
+  #    verdict failure (Enzo updates plugins manually per machine) — it does not bump $issues.
+  echo '## 4. plugin marketplace SHA parity (Opzione C — drift visible, manual update by Enzo)' >> "$report"
+  {
+    echo '```'
+    drift=0
+    for d in "$SRC/plugins/marketplaces"/*/; do
+      [ -d "$d/.git" ] || continue
+      nm="$(basename "$d")"
+      lsha="$(git -C "$d" rev-parse HEAD 2>/dev/null || echo NONE)"
+      rsha="$(rssh "$HOST" "git -C \"\$HOME/.claude/plugins/marketplaces/$nm\" rev-parse HEAD 2>/dev/null" || true)"
+      [ -n "$rsha" ] || rsha=MISSING
+      if [ "$lsha" = "$rsha" ]; then echo "marketplace_sha $nm: OK (${lsha:0:10})"
+      else echo "marketplace_sha $nm: DRIFT win=${lsha:0:10} remote=${rsha:0:10}"; drift=$((drift+1)); fi
+    done
+    echo "marketplace official: non-git (plugin version not SHA-verifiable — manual update)"
+    [ "$drift" != 0 ] && echo "NOTE: $drift marketplace(s) drift — informativo, update manuale Enzo (not a verdict fail)"
+    echo '```'
+  } >> "$report"
+
   echo >> "$report"
   if [ "$issues" = 0 ]; then
     echo "## VERDICT: CLEAN — $kind is an effective clone of the Windows catalog" >> "$report"

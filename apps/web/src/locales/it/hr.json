@@ -31,6 +31,16 @@
       "polarity": "Polarità"
     }
   },
+  "goals": {
+    "title": "Obiettivi",
+    "description": "Obiettivi e goal sull'intero tenant",
+    "count": "{{count}} obiettivi",
+    "errorMessage": "Impossibile caricare gli obiettivi",
+    "emptyTitle": "Nessun obiettivo",
+    "emptyDescription": "Non ci sono obiettivi per questo tenant",
+    "caption": "Elenco obiettivi",
+    "cols": { "type": "Tipo", "priority": "Priorità", "progress": "Avanzamento", "due": "Scadenza" }
+  },
   "gaps": {
     "title": "Gap analysis",
     "description": "Gap di competenza per severità, sull'intero tenant.",

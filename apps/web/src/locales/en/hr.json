@@ -31,6 +31,16 @@
       "polarity": "Polarity"
     }
   },
+  "goals": {
+    "title": "Goals",
+    "description": "Objectives and goals across the tenant",
+    "count": "{{count}} goals",
+    "errorMessage": "Failed to load goals",
+    "emptyTitle": "No goals",
+    "emptyDescription": "No goals found for this tenant",
+    "caption": "Goals",
+    "cols": { "type": "Type", "priority": "Priority", "progress": "Progress", "due": "Due date" }
+  },
   "gaps": {
     "title": "Gap analysis",
     "description": "Competency gaps by severity, across the whole tenant.",

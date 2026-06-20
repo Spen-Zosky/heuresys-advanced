@@ -26,7 +26,7 @@ import { emitNotification } from "../../lib/notifications/emit.js";
  *  AND the per-item permission. Mirrors apps/web (authenticated)/layout.tsx so the DB-driven
  *  sidebar does not leak admin nav to a pure USER (who holds several *:read codes for ESS). */
 const UI_ADMIN_ROLES = new Set([
-  "PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER",
+  "PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER", "ORG_DIRECTOR",
 ]);
 const UI_PERSPECTIVES = [
   { code: "PROCESS" as const, label: "Process" },

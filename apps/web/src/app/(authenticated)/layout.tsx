@@ -200,7 +200,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const groups: NavGroup[] = [switcherGroup, ...navGroups, ...emptyGroup];
 
   const roles = user.roles ?? [];
-  const ADMIN_ROLES = new Set(["PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER"]);
+  const ADMIN_ROLES = new Set(["PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER", "ORG_DIRECTOR"]);
   const hasAdminRole = roles.some((r) => ADMIN_ROLES.has(r));
   const displayName = user.displayName?.trim() || user.email;
   const initials = (

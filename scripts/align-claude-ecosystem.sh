@@ -236,9 +236,13 @@ backup_remote() {  # sets BACKUP_KIND=full|incr — runs the backup + wipe of ma
   local managed="${MANAGED_REMOTE_PATHS[*]}" preserve="${PRESERVE_FROM_REMOTE[*]}"
   if rssh "$HOST" '[ -f "$HOME/.claude/.ecosystem-align.json" ]'; then
     BACKUP_KIND=incr
+    # Use an array (not a space-joined string) so that "tar ... ${to_tar[@]}" is
+    # properly word-split in BOTH bash (Linux/VM) AND zsh (macOS login shell).
+    # Unquoted $var word-splitting is disabled in zsh by default (SH_WORD_SPLIT off),
+    # so "tar ... $existing" would pass the whole string as one argument on Mac.
     rssh "$HOST" "set -e; cd \"\$HOME/.claude\"
-      existing=''; for p in $managed; do [ -e \"\$p\" ] && existing=\"\$existing \$p\"; done
-      if [ -n \"\$existing\" ]; then tar -czf \"\$HOME/.claude.bak-$STAMP.tgz\" \$existing; fi
+      to_tar=(); for p in $managed; do [ -e \"\$p\" ] && to_tar+=(\"\$p\"); done
+      (( \${#to_tar[@]} )) && tar -czf \"\$HOME/.claude.bak-$STAMP.tgz\" \"\${to_tar[@]}\" || true
       rm -rf $managed"
   else
     BACKUP_KIND=full

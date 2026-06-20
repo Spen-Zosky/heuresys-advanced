@@ -1,6 +1,6 @@
 # Fase 0 — Verifica building-block (Gap #1: Porte Process/Org UI + scorecard prescrittiva di capability)
 
-> Esecuzione della **Fase 0** del work-item `WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` (decisione Enzo S997: "ri-verificare latent-capability su schema advanced"). Verifica fatta sullo **schema reale del repo `heuresys-advanced`** (NON sul wiki legacy `heuresys-evo`), perché `LATENT_CAPABILITY_CATALOG.md` segnala (disclaimer riga 4) che il wiki sovrastima la prontezza descrivendo in parte il legacy.
+> Esecuzione della **Fase 0** del work-item `WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` (decisione Enzo S997: "ri-verificare latent-capability su schema advanced"). Verifica fatta sullo **schema reale del repo `heuresys-advanced`** (NON sul wiki legacy `heuresys-evo`), perché il `FUNCTIONAL_CAPABILITY_LEDGER.md` §7/§9 (che ha assorbito `LATENT_CAPABILITY_CATALOG.md`) segnala che il wiki sovrastima la prontezza descrivendo in parte il legacy.
 > **Metodo**: cartografia codice/migration (read-only, file:line) + **count LIVE sul DB reale** (tunnel :5433, OCI VM) — R5 / DoD live-data. Migrazioni `000001..000140`. Schema DB = `sys.*`.
 > **Eseguita**: 2026-06-19 (S997).
 

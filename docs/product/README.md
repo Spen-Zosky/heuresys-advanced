@@ -10,6 +10,7 @@ Questa cartella è la **SoT del dominio prodotto** di heuresys-advanced (adottat
 | `BUSINESS_SCOPE_AND_PRD.md` | Doc strategico: natura, ICP, posizionamento, moat, personas, gap G1-G6, roadmap, metriche, rischi, domande al founder | per la visione/strategia di prodotto |
 | `COMPETITIVE_SCORECARD.md` | Benchmark vs 27-vendor (web live), adjudicazione dei differenziatori | per il posizionamento competitivo |
 | `WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` | Piano esecutivo del Gap #1 (2 Porte UI + MLCE + Maturity) | primo work-item derivato — esempio del metodo |
+| `WORKITEM_GAP1_DESIGN_SPEC.md` | Blueprint esecutivo del Gap #1: data-model, algoritmi, endpoint, migration, 9 decisioni di scope (RE-ALIGNED vs Ledger) | prima di costruire Gap #1 |
 | `WORKITEM_GAP1_PHASE0_VERIFICATION.md` | Verifica live dei building-block del Gap #1 | esempio gold-standard del metodo di verifica |
 | `LATENT_CAPABILITY_CATALOG.md` | **Stub-redirect** → assorbito nel Ledger §7 (ri-verificato live) | storico/compat |
 

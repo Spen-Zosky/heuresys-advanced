@@ -8,7 +8,7 @@
 - Oggi delle 3 prospettive promesse (Process Owner / Org Director / HR) **ne esiste 1** (verified: `find apps/web/src/app` → 0 route per le altre due). La risposta alla domanda VC "mostrami un Process Owner che usa la piattaforma" è oggi *silenzio*.
 - Manca qualunque **layer prescrittivo di capability** (verified: nessuna scorecard/maturity engine in `apps/api/src/modules`). Senza, il prodotto è "HRMS+skills", non "intelligence".
 
-Il dato abilitante è che **i dati esistono già** (ESCO 21.9k skill, 126k requirements, PIP VIEW, org-units, positions, embeddings): manca l'**orchestration/computation layer + le 2 UI**, non i dati.
+Il dato abilitante è che **i dati esistono già** (ESCO 21.939 skill, 126.051 occupation-skill req — verifica live 2026-06-19, Ledger §4; PIP VIEW, org-units, positions, embeddings): manca l'**orchestration/computation layer + le 2 UI**, non i dati.
 
 ## Scope
 
@@ -29,7 +29,7 @@ Il dato abilitante è che **i dati esistono già** (ESCO 21.9k skill, 126k requi
 - **MLCE** come nuovo modulo `apps/api/src/modules/capability-composition/` (read+compute; nessun ENUM, `varchar+CHECK` per aggregation_mode; lineage append-only). Edge **I9**: se serve esporre score compositi a livello posizione, estendere la VIEW PIP, non creare blob JSONB.
 - **Maturity** come modulo `capability-maturity/` che consuma MLCE + rubrica; output scorecard read-only.
 - **UI** in `apps/web` come composizione di primitive `@heuresys/ui` (no nuove primitive qui) + TanStack Query su `/v1/*` reali; **live-data only**.
-- **RBAC**: nuove permission `process-owner:read`, `org-director:read`, `capability:read` mappate ai ruoli `PROCESS_OWNER` / `BLUEPRINT_MANAGER` / `HRMS_MANAGER` (già esistenti) — verificare i 600 mapping prima.
+- **RBAC**: nuove permission `process-owner:read`, `org-director:read`, `capability:read` mappate ai ruoli `PROCESS_OWNER` / `BLUEPRINT_MANAGER` / `HRMS_MANAGER` (già esistenti) — verificare i role-permission mapping prima (live 2026-06-19: **630** mapping / **141** permission; SoT: `docs/kb/SOT_STATE.md`, evidenza Ledger §6).
 
 ## Fasi, effort, acceptance (LIVE)
 
@@ -56,4 +56,4 @@ Ogni fase si chiude **solo** con dimostrazione live su tenant di test reale (RTL
 - **Building-block legacy vs advanced**: rischio che la rubrica/aggregation assuma schema legacy → mitigato da Fase 0.
 - **Scelta scorecard**: Maturity (raccomandata) vs VRIO (più board-friendly ma senza rubrica pronta) — decisione Enzo.
 - **Ruolo PROCESS_OWNER senza runtime**: la Porta 1 mostra il grafo, non esegue processi; va comunicato per non ri-creare l'aspettativa "BPM".
-- Open: priorità Porta 2 vs Porta 1 (raccomando Porta 2 prima — riusa di più l'esistente).
+- Sequenza canonica = quella del blueprint esecutivo (`WORKITEM_GAP1_DESIGN_SPEC.md` §1): RBAC → **Porta 1** (tutto live oggi) → MLCE → Maturity → **Porta 2** piena → hardening. (La precedente preferenza "Porta 2 prima" è superata: Porta 1 è interamente costruibile live.)

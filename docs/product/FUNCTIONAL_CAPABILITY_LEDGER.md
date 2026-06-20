@@ -246,7 +246,7 @@ Ordinati per leva (valore alto × effort favorevole). I primi sono "dati già li
 - **Completare ESCO wiring** dei 111 ruoli (engine trgm riusabile).
 
 **Tier B — alto valore / effort alto (costruzione vera, sblocca il layer prescrittivo)**
-- **MLCE Phase-1** (capability_score cross-livello + lineage) — prerequisito numerico di tutto il prescrittivo; building-block (PIP, pesi, gerarchia) pronti. *(già scoping in `WORKITEM_GAP1_*`)*
+- **MLCE Phase-1** (capability_score cross-livello + lineage) — prerequisito numerico di tutto il prescrittivo; building-block (PIP, pesi, gerarchia) pronti. *(blueprint esecutivo: `WORKITEM_GAP1_DESIGN_SPEC.md`; piano + Fase-0: `WORKITEM_GAP1_PERSPECTIVES_AND_SCORECARD.md` / `_PHASE0_VERIFICATION.md`)*
 - **Capability Maturity engine (L0-L5)** sopra MLCE. *(Gap #1)*
 - **Porte UI Process-Owner / Org-Director** (le 2 prospettive mancanti su 3). *(Gap #1)*
 - **Approval runtime → prima istanza live + estensione** verso workflow-engine generico (riusa apply-effects S-PROC1).

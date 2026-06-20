@@ -311,6 +311,10 @@
       "types": "./dist/schemas/goals.d.ts",
       "default": "./src/schemas/goals.ts"
     },
+    "./schemas/okrs": {
+      "types": "./dist/schemas/okrs.d.ts",
+      "default": "./src/schemas/okrs.ts"
+    },
     "./schemas/predictions": {
       "types": "./dist/schemas/predictions.d.ts",
       "default": "./src/schemas/predictions.ts"

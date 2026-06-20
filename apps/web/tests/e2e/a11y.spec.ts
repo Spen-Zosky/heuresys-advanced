@@ -88,6 +88,19 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
   const audited = new URL(page.url()).pathname;
   expect(audited, `dead session: requested ${route}, audited ${audited}`).toBe(route);
 
+  // Wait for the root layout to inject <html lang> before axe runs — ensures
+  // the SSR lang attribute is present in the DOM (Next.js SPA transitions can
+  // produce a brief window where lang is absent, causing spurious html-has-lang
+  // violations). 3 s timeout is generous; in practice < 100 ms after networkidle.
+  await page.waitForFunction(
+    () => document.documentElement.getAttribute("lang") != null,
+    undefined,
+    { timeout: 3000 },
+  ).catch(() => {
+    // If the attribute still is not present after 3 s, let axe detect and report
+    // the real violation (don't silently swallow it).
+  });
+
   const results = await new AxeBuilder({ page })
     // WCAG 2.0 A/AA + 2.1 A/AA + 2.2 A/AA (Tappa G — extended ruleset).
     // The 2.2 additions cover: focus-not-obscured, focus-appearance (AAA),

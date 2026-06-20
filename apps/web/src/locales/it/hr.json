@@ -41,6 +41,16 @@
     "caption": "Elenco obiettivi",
     "cols": { "type": "Tipo", "priority": "Priorità", "progress": "Avanzamento", "due": "Scadenza" }
   },
+  "okrs": {
+    "title": "OKR",
+    "description": "Obiettivi e risultati chiave sull'intero tenant",
+    "count": "{{count}} OKR",
+    "errorMessage": "Impossibile caricare gli OKR",
+    "emptyTitle": "Nessun OKR",
+    "emptyDescription": "Non ci sono OKR per questo tenant",
+    "caption": "Elenco OKR",
+    "cols": { "objective": "Obiettivo", "type": "Tipo", "period": "Periodo", "progress": "Avanzamento" }
+  },
   "gaps": {
     "title": "Gap analysis",
     "description": "Gap di competenza per severità, sull'intero tenant.",

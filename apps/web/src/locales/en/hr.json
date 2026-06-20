@@ -41,6 +41,16 @@
     "caption": "Goals",
     "cols": { "type": "Type", "priority": "Priority", "progress": "Progress", "due": "Due date" }
   },
+  "okrs": {
+    "title": "OKRs",
+    "description": "Objectives and Key Results across the tenant",
+    "count": "{{count}} OKRs",
+    "errorMessage": "Failed to load OKRs",
+    "emptyTitle": "No OKRs",
+    "emptyDescription": "No OKRs found for this tenant",
+    "caption": "OKR list",
+    "cols": { "objective": "Objective", "type": "Type", "period": "Period", "progress": "Progress" }
+  },
   "gaps": {
     "title": "Gap analysis",
     "description": "Competency gaps by severity, across the whole tenant.",

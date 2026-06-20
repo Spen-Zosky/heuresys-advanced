@@ -1,41 +1,41 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-19T17:06:37Z da docs/kb/tools/build_index.py
+# generato: 2026-06-20T16:01:43Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-19T17:06:37Z"
-  total_files: 2069
+  generated_at: "2026-06-20T16:01:43Z"
+  total_files: 2111
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 24
     api-core: 18
-    api-module: 271
+    api-module: 285
     ci: 15
     claude-config: 6
-    config: 96
+    config: 97
     cowork-archive: 14
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 140
+    db-migration: 148
     db-script: 23
     db-seed: 104
-    doc-canonical: 377
+    doc-canonical: 381
     handoff-state: 1
     qa-artifact: 96
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 81
+    shared-schema: 85
     showcase-source: 13
-    test: 214
+    test: 220
     ux-design-archive: 80
-    web-source: 144
+    web-source: 149
   status_counts:
     archive: 488
     external-archive: 50
-    live: 1531
+    live: 1573
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -763,6 +763,54 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-composition\recompute-cli.ts'
+    root: repo
+    rel: 'apps/api/src/modules/capability-composition/recompute-cli.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-composition\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/capability-composition/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-composition\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/capability-composition/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-composition\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/capability-composition/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-maturity\recompute-cli.ts'
+    root: repo
+    rel: 'apps/api/src/modules/capability-maturity/recompute-cli.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-maturity\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/capability-maturity/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-maturity\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/capability-maturity/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-maturity\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/capability-maturity/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\career-path-steps\repository.ts'
     root: repo
     rel: 'apps/api/src/modules/career-path-steps/repository.ts'
@@ -964,6 +1012,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\enterprise-typing-profiles\service.ts'
     root: repo
     rel: 'apps/api/src/modules/enterprise-typing-profiles/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\goals\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/goals/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\goals\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/goals/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\goals\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/goals/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -1210,6 +1276,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\observability\service.ts'
     root: repo
     rel: 'apps/api/src/modules/observability/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\okrs\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/okrs/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\okrs\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/okrs/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\okrs\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/okrs/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -2092,6 +2176,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\agent-gateway\scripts\live-skills-acceptance.ts'
     root: repo
     rel: 'apps/agent-gateway/scripts/live-skills-acceptance.ts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\scripts\live-tenant-materialization-acceptance.ts'
+    root: repo
+    rel: 'apps/agent-gateway/scripts/live-tenant-materialization-acceptance.ts'
     category: config
     status: live
     provenance: git-tracked
@@ -5521,6 +5611,54 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000142_goals_okrs_permission_seed.sql'
+    root: repo
+    rel: 'db/migrations/000142_goals_okrs_permission_seed.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000143_goals_ui_interface.sql'
+    root: repo
+    rel: 'db/migrations/000143_goals_ui_interface.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000144_okrs_ui_interface.sql'
+    root: repo
+    rel: 'db/migrations/000144_okrs_ui_interface.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000145_capability_rbac_seed.sql'
+    root: repo
+    rel: 'db/migrations/000145_capability_rbac_seed.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000146_capability_scores.sql'
+    root: repo
+    rel: 'db/migrations/000146_capability_scores.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000147_capability_maturity_scores.sql'
+    root: repo
+    rel: 'db/migrations/000147_capability_maturity_scores.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000148_org_director_ui_interface.sql'
+    root: repo
+    rel: 'db/migrations/000148_org_director_ui_interface.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000149_process_owner_ui_interface.sql'
+    root: repo
+    rel: 'db/migrations/000149_process_owner_ui_interface.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\README.md'
     root: repo
     rel: 'db/scripts/README.md'
@@ -7435,15 +7573,27 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\product\FUNCTIONAL_CAPABILITY_LEDGER.md'
+    root: repo
+    rel: 'docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\product\LATENT_CAPABILITY_CATALOG.md'
     root: repo
     rel: 'docs/product/LATENT_CAPABILITY_CATALOG.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\product\PRD_heuresys-advanced_2026-06-17.docx'
+  - path: 'D:\heuresys-advanced\docs\product\README.md'
     root: repo
-    rel: 'docs/product/PRD_heuresys-advanced_2026-06-17.docx'
+    rel: 'docs/product/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\product\WORKITEM_GAP1_DESIGN_SPEC.md'
+    root: repo
+    rel: 'docs/product/WORKITEM_GAP1_DESIGN_SPEC.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -8437,6 +8587,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-06-20-goals-okr-module.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-06-20-goals-okr-module.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-05-28-cross-os-bootstrap-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-05-28-cross-os-bootstrap-design.md'
@@ -8536,6 +8692,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-06-19-integrazione-llmwiki-hrplus-heuresys-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-06-19-integrazione-llmwiki-hrplus-heuresys-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-06-19-product-sot-consolidation-design.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-06-19-product-sot-consolidation-design.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -9367,6 +9529,18 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\capability-composition.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/capability-composition.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\capability-maturity.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/capability-maturity.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\career-path-steps.ts'
     root: repo
     rel: 'packages/shared/src/schemas/career-path-steps.ts'
@@ -9424,6 +9598,12 @@ files:
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\enterprise-typing-profiles.ts'
     root: repo
     rel: 'packages/shared/src/schemas/enterprise-typing-profiles.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\goals.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/goals.ts'
     category: shared-schema
     status: live
     provenance: git-tracked
@@ -9514,6 +9694,12 @@ files:
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\observability.ts'
     root: repo
     rel: 'packages/shared/src/schemas/observability.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\okrs.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/okrs.ts'
     category: shared-schema
     status: live
     provenance: git-tracked
@@ -9997,6 +10183,18 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\capability-composition.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/capability-composition.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\capability-maturity.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/capability-maturity.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\career-path-steps.integration.test.ts'
     root: repo
     rel: 'apps/api/test/career-path-steps.integration.test.ts'
@@ -10096,6 +10294,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\export-serializers.test.ts'
     root: repo
     rel: 'apps/api/test/export-serializers.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\goals.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/goals.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -10336,6 +10540,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\occupation-skill-requirements.integration.test.ts'
     root: repo
     rel: 'apps/api/test/occupation-skill-requirements.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\okrs.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/okrs.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -10927,9 +11137,21 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\gap1-consoles.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/gap1-consoles.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\global-teardown.ts'
     root: repo
     rel: 'apps/web/tests/e2e/global-teardown.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\goals.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/goals.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11761,6 +11983,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\brownfield-adaptation\layout.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/brownfield-adaptation/layout.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\brownfield-adaptation\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/brownfield-adaptation/page.tsx'
@@ -11818,6 +12046,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\gaps\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/gaps/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\goals\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/goals/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked
@@ -11989,6 +12223,18 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\okrs\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/okrs/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\org-director\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/org-director/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\organization\org-chart\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/organization/org-chart/page.tsx'
@@ -12028,6 +12274,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/positions/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\process-owner\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/process-owner/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked

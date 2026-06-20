@@ -3,6 +3,27 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## ✅ Gap#1 DONE (S999, 2026-06-20) — programma-faro "rendi il prodotto dimostrabile" chiuso end-to-end
+
+Il **#3 Gap#1** (Porte Process/Org UI + MLCE + Maturity) — l'abilitatore del go-to-market — è **costruito, testato live su RTL_BANK, deployato in PROD e dimostrato**. 6 commit (`3d2b0a7→f133b04`) pushati, mig 000145-149. Granulare → `SOT_STATE.md §Delta S999`.
+
+- **RBAC** (000145): ruolo `ORG_DIRECTOR` holderless + 4 perms (`process_owner:read`/`org_director:read`/`capability:read`/`capability:admin`); fix `RoleCode` union (cache skippava ORG_DIRECTOR). ✅
+- **MLCE** (000146): engine `capability-composition`, composite 4-livelli, 317 score live, 11/11. ✅
+- **Maturity** (000147): engine `capability-maturity` L0-L5 **v1-full** (rubrica scelta da Enzo), 20 OU→L2/L3/L5 gated, 9/9. ✅
+- **Porte UI** (000148/149): console `/org-director` + `/process-owner`, E2E 7/7 live. ✅
+- **WI-C demo agente** PASS: agente MAX → HITL → `hrx_tenant_materialize` plan (7 OU/11 pos, read-only). ✅
+- Close: push + VM PROD deploy verificato + Mac align.
+
+**Decisioni di scope sciolte in-session** (autorità: Enzo D2 rubrica = v1-full; resto = decisioni tecniche prese da Claude): D1=B (holderless, demo federica) · D3=B (vacant drop) · D-grain=A (org-unit) · D-cap=A · D-mode=WEIGHTED_AVG · D-RACI=A (demo etichettata) · D5=snake_case · D-opt=defer.
+
+**RESIDUO (non bloccante, autorità *cosa* = Enzo)** → ora è il **programma post-Gap#1**:
+- **#4 GO-TO-MARKET** — Gap#1 ha reso il prodotto dimostrabile; è il next del programma-faro (il *cosa* = Enzo).
+- **#5 RACI di produzione** (mapping reale OU↔processo, oggi 13 demo) · **#13 B-50 bridges** (location↔OU, job→position) · **#17 Wave-3** (multi-tenant-onboarding, fondazione WI-C pronta) = input di #4.
+- **#8 EMAIL** app-password Outlook (blocked-on-Enzo) · **#16 SuccessFactors de-prioritizzato** (S999).
+- **Gap#1 follow-up CLASS-A** (Claude, su via libera): D1-A grant ORG_DIRECTOR a holder reale quando nominato · Porta-1 RACI drill-down (`/v1/organization-unit-processes/by-process/:id`) · arricchimento UI porte (CapabilityRadar/PIP drill-down) · rubrica Maturity rivedibile (`rubric_version`).
+
+**Nota goals/okrs (S999, stesso giorno)**: moduli read-only `goals`+`okrs` shippati full-stack (mig 000142-144) — completano il gruppo sidebar `intelligence`.
+
 ## ✅ RESOLVED (S998, 2026-06-20) — Riallineamento analisi ai product docs consolidati
 
 **Decisione Enzo (S998)**: è in corso un **consolidamento della documentazione di prodotto** (`docs/product/`). Le analisi di prodotto già prodotte possono diventare **obsolete/incoerenti** col risultato del consolidamento. → **Azione programmata (gated)**: a consolidamento **concluso** (segnale di Enzo), eseguire un **riallineamento completo** di tutte le analisi product-derived contro i `docs/product/` consolidati, PRIMA di costruire qualsiasi cosa che vi dipenda.

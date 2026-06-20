@@ -331,6 +331,10 @@
       "types": "./dist/schemas/capability-composition.d.ts",
       "default": "./src/schemas/capability-composition.ts"
     },
+    "./schemas/capability-maturity": {
+      "types": "./dist/schemas/capability-maturity.d.ts",
+      "default": "./src/schemas/capability-maturity.ts"
+    },
     "./schemas/reference-sync": {
       "types": "./dist/schemas/reference-sync.d.ts",
       "default": "./src/schemas/reference-sync.ts"

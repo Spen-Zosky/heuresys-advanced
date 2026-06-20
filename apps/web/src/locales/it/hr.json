@@ -51,6 +51,28 @@
     "caption": "Elenco OKR",
     "cols": { "objective": "Obiettivo", "type": "Tipo", "period": "Periodo", "progress": "Avanzamento" }
   },
+  "orgDirector": {
+    "title": "Console Org Director",
+    "description": "Capability e maturità per unità organizzativa, dai motori MLCE e Maturity.",
+    "count": "{{count}} unità",
+    "errorMessage": "Impossibile caricare la capability/maturità",
+    "emptyTitle": "Nessun dato di capability",
+    "emptyDescription": "I motori non sono ancora stati calcolati per questo tenant.",
+    "caption": "Capability e maturità per unità",
+    "cols": { "unit": "Unità", "capability": "Capability", "coverage": "Copertura", "positions": "Posizioni", "maturity": "Maturità" }
+  },
+  "processOwner": {
+    "title": "Console Process Owner",
+    "description": "Catalogo dei processi del blueprint (navigazione del grafo, non runtime BPM).",
+    "count": "{{count}} processi",
+    "errorMessage": "Impossibile caricare i processi",
+    "emptyTitle": "Nessun processo",
+    "emptyDescription": "Non ci sono processi nel blueprint.",
+    "caption": "Catalogo processi",
+    "core": "Core",
+    "optional": "Opzionale",
+    "cols": { "ordinal": "#", "code": "Codice", "name": "Processo", "kind": "Tipo" }
+  },
   "gaps": {
     "title": "Gap analysis",
     "description": "Gap di competenza per severità, sull'intero tenant.",

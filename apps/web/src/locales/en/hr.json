@@ -51,6 +51,28 @@
     "caption": "OKR list",
     "cols": { "objective": "Objective", "type": "Type", "period": "Period", "progress": "Progress" }
   },
+  "orgDirector": {
+    "title": "Org-Director Console",
+    "description": "Capability and maturity per org unit, from the MLCE and Maturity engines.",
+    "count": "{{count}} units",
+    "errorMessage": "Failed to load capability/maturity",
+    "emptyTitle": "No capability data",
+    "emptyDescription": "The engines have not been computed for this tenant yet.",
+    "caption": "Capability and maturity per unit",
+    "cols": { "unit": "Unit", "capability": "Capability", "coverage": "Coverage", "positions": "Positions", "maturity": "Maturity" }
+  },
+  "processOwner": {
+    "title": "Process-Owner Console",
+    "description": "Blueprint process catalog (graph navigation, not BPM runtime).",
+    "count": "{{count}} processes",
+    "errorMessage": "Failed to load processes",
+    "emptyTitle": "No processes",
+    "emptyDescription": "There are no processes in the blueprint.",
+    "caption": "Process catalog",
+    "core": "Core",
+    "optional": "Optional",
+    "cols": { "ordinal": "#", "code": "Code", "name": "Process", "kind": "Kind" }
+  },
   "gaps": {
     "title": "Gap analysis",
     "description": "Competency gaps by severity, across the whole tenant.",

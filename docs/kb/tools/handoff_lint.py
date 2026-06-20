@@ -190,9 +190,13 @@ def parse_register_items(md):
             cur = {"title": m.group(1).strip(), "status": m.group(2).strip(), "fields": {}}
             continue
         if cur:
-            mk = re.match(r"\s*-\s+([a-zà-ù\-]+):\s*(.+)", line, flags=re.IGNORECASE)
-            if mk:
-                cur["fields"][mk.group(1).strip().lower()] = mk.group(2).strip()
+            fld = re.match(r"\s*-\s+(.*)", line)
+            if fld:
+                # one sub-bullet may carry several "key: value" segments separated by ·
+                for seg in fld.group(1).split("·"):
+                    mk = re.match(r"\s*([a-zà-ù][a-zà-ù\-]*):\s*(.+)", seg.strip(), flags=re.IGNORECASE)
+                    if mk:
+                        cur["fields"][mk.group(1).strip().lower()] = mk.group(2).strip()
             elif line.strip() and not line.startswith(" "):
                 items.append(cur)
                 cur = None

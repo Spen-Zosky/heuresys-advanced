@@ -3,6 +3,37 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
+## ⏸ HOLD register — azioni parcheggiate (corsia pull, fuori dal menu)
+
+> **Corsia pull** (design `2026-06-20-handoff-rigor-and-hold-lane-design.md` §3): questi item NON compaiono nel menu di session-start — solo come conteggio-sommario. Entrano in menu **solo** su richiesta esplicita di Enzo o quando il loro `reactivation-trigger` scatta. `WAIT-INPUT` = aspetta un input che solo Enzo fornisce (resta nel vassoio "aspetta te"). Integrità verificata da `handoff_lint.py` (H1/S2). Stato corrente post-Gap#1-DONE (S999).
+
+- **#4 go-to-market** · status: HOLD
+  - hold-reason: prodotto reso dimostrabile da Gap#1; la strategia/scope GTM è autorità *cosa* = Enzo
+  - decided-by: Enzo · hold-since: S999 (2026-06-20)
+  - reactivation-trigger: Enzo definisce scope/strategia go-to-market
+- **#5/#11 RACI di produzione** · status: HOLD
+  - hold-reason: oggi 13 righe demo su RTL_BANK; il mapping reale OU↔processo R/A/C/I è un fatto-business da autorare
+  - decided-by: Enzo · hold-since: S999 (2026-06-20)
+  - reactivation-trigger: Enzo fornisce/decide il mapping RACI reale (input di #4)
+- **#13 B-50 bridges** · status: HOLD
+  - hold-reason: bridge `location↔org_unit` / `job→position` richiedono una decisione PM (o una Wave-2 che popoli `position_id`)
+  - decided-by: Enzo · hold-since: S999 (2026-06-20)
+  - reactivation-trigger: decisione PM sul bridge, oppure Wave-2 popola `position_id` (input di #4)
+- **#17 Wave-3 multi-tenant-onboarding** · status: HOLD
+  - hold-reason: follow di #4; fondazione WI-C pronta ma l'avvio dipende dalla strategia multi-tenant
+  - decided-by: Enzo · hold-since: S999 (2026-06-20)
+  - reactivation-trigger: Enzo avvia l'onboarding multi-tenant
+- **#9/#10/#11 audit forense 100X** · status: HOLD
+  - hold-reason: programma audit (S-100X-A ecosistema design-only + triage 14 dossier Fase-C + epic S-100X-E) — esplicitamente a sessione dedicata
+  - decided-by: Enzo · hold-since: S999 (2026-06-20)
+  - reactivation-trigger: Enzo richiede una sessione di audit dedicata
+- **#8 EMAIL dormiente** · status: WAIT-INPUT
+  - input-richiesto: app-password Outlook (`enzo.spenuso@outlook.com`)
+  - perche-solo-tuo: credenziale personale → attiva EMAIL_OTP + digest live in 1 mossa (transport già pronto)
+- **#16 SuccessFactors** · status: WAIT-INPUT
+  - input-richiesto: un sandbox SuccessFactors (esterno, costo)
+  - perche-solo-tuo: accesso/provisioning del sandbox è una risorsa che solo Enzo può procurare; de-prioritizzato S999
+
 ## ✅ Gap#1 DONE (S999, 2026-06-20) — programma-faro "rendi il prodotto dimostrabile" chiuso end-to-end
 
 Il **#3 Gap#1** (Porte Process/Org UI + MLCE + Maturity) — l'abilitatore del go-to-market — è **costruito, testato live su RTL_BANK, deployato in PROD e dimostrato**. 6 commit (`3d2b0a7→f133b04`) pushati, mig 000145-149. Granulare → `SOT_STATE.md §Delta S999`.

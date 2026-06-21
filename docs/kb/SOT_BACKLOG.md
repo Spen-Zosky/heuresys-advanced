@@ -12,9 +12,10 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
-- **Gap#1 follow-up (CLASS-A, non bloccanti)** · status: ACTIVE
-  - priority: P3 · effort: ~2-4h · doc: docs/kb/SOT_STATE.md §Delta S999
-  - note: grant `ORG_DIRECTOR` a un holder reale quando nominato · Porta-1 RACI drill-down (`/v1/organization-unit-processes/by-process/:id`) · rubrica Maturity `rubric_version` rivedibile · arricchimento UI porte (radar/PIP drill-down)
+- **Gap#1 follow-up — rubrica Maturity rivedibile (c)** · status: HOLD
+  - hold-reason: 3/4 sotto-task CLASS-A chiusi live S1002 (Porta-1 RACI drill-down `fcdc61f` · ORG_DIRECTOR holder-of-record = Valentina, mig 000150 `184a5fe` · Org-Director maturity radar `473f848`); resta solo rendere parametrizzabile `RUBRIC_VERSION='v1-full'` (costante hard-coded) = basso valore + scope-decisione (la v1-full l'ha scelta Enzo)
+  - decided-by: Enzo · hold-since: S1002 (2026-06-21)
+  - reactivation-trigger: Enzo vuole rivedere le soglie/bande della rubrica Maturity (rubric v2)
 
 - **#4 go-to-market** · status: HOLD
   - hold-reason: prodotto reso dimostrabile da Gap#1; la strategia/scope GTM è autorità *cosa* = Enzo
@@ -72,6 +73,17 @@ Il **#3 Gap#1** (Porte Process/Org UI + MLCE + Maturity) — l'abilitatore del g
 - **Nota validità**: la parte *tecnica verificata-live* dello spec Gap#1 (data-model, algoritmi, query, conteggi DB, gap economic_weight/closure-table, migration) resta ground-truth sullo schema reale; è la parte *product-narrative* (scope prospettive, rubrica L0-L5, priorità, framing) che va ri-validata.
 - **Gating**: ✅ **SBLOCCATO ed ESEGUITO (2026-06-20)**. Consolidamento concluso (SoT `docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md` + `README.md`); delta-check Gap#1↔SoT eseguito (convergenza alta, **0 contraddizioni di fatto**); spec Gap#1 ri-allineati (riferimenti/framing + conteggio 600→630, priorità Porte, banner DESIGN_SPEC→RE-ALIGNED). Il programma-faro Gap#1 (#3) **non è più sospeso da questo gate**: il build resta subordinato solo al go + decisioni §8 di Enzo.
 - **Effort**: ~0.5-1 sessione (delta-check + aggiornamenti doc); poi riprende Gap#1 con lo spec ri-validato.
+
+## 🟢 Aggiornamento S1002 (2026-06-21) — Gap#1 follow-up CLASS-A: 3/4 sotto-task chiusi live
+
+Sessione di prodotto leggera sull'unico item ACTIVE del menu (Gap#1 follow-up). 3 commit atomici locali → pushati al handoff. Granulare → `SOT_STATE.md §Delta S1002`.
+
+- **(b) Porta-1 RACI drill-down ✅** (`fcdc61f`): console `/process-owner` non più catalogo piatto — selezionando un processo carica le OU assegnate col ruolo RACI (endpoint `by-process` già esistente, solo wiring UI). E2E live verde (*Human Capital Management*, 2 OU).
+- **(a) ORG_DIRECTOR holder-of-record ✅** (`184a5fe`, mig 000150): nominato l'holder reale del ruolo funzionale holderless = **Valentina Conti** (HR Director, best-fit su struttura org). Grant **semantico** (non access-change — vedeva già la Porta-2 via HRMS_MANAGER), idempotente, chain migrate verde.
+- **(d) Org-Director maturity radar ✅** (`473f848`): `CapabilityRadar` (@heuresys/ui) drill-down delle 5 dimensioni maturity dai `criteria[]` live. E2E live verde.
+- **(c) rubrica `rubric_version` rivedibile** → **HOLD** (vedi Action register): basso valore + scope-decisione, la v1-full già scelta da Enzo.
+- **Osservazione (non-azione, by-design)**: `org_director:read`/`capability:read` sono mappati anche a HRMS_MANAGER (mig 000145, deliberato) → la Porta-2 è accessibile a HRMS_MANAGER/TENANT_ADMIN oltre che a ORG_DIRECTOR. Se in futuro si volesse il ruolo funzionale *esclusivo*, sarebbe una decisione RBAC di Enzo (non aperta come item).
+- Gate: E2E `gap1-consoles` **9/9 verde** · typecheck web + eslint puliti · i18n parity 1403.
 
 ## 🟢 Aggiornamento S1001 (2026-06-21) — design handoff-rigor IMPLEMENTED end-to-end + close-flow live
 

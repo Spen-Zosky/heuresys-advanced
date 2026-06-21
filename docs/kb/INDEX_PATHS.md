@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-21T02:58:10Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2117**
+**Generato**: 2026-06-21T15:03:49Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2118**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,7 +18,7 @@
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 148 |
+| db-migration | 149 |
 | db-script | 23 |
 | db-seed | 104 |
 | doc-canonical | 384 |
@@ -32,7 +32,7 @@
 | test | 220 |
 | ux-design-archive | 80 |
 | web-source | 149 |
-| **TOTALE** | **2117** |
+| **TOTALE** | **2118** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 488 |
 | external-archive | 50 |
-| live | 1579 |
+| live | 1580 |
 
 ## File per categoria
 
@@ -1017,6 +1017,7 @@
 - `D:\heuresys-advanced\db\migrations\000147_capability_maturity_scores.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000148_org_director_ui_interface.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000149_process_owner_ui_interface.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000150_org_director_grant_valentina.sql` · *live* · git-tracked
 
 ### db-script
 

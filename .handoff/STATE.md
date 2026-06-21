@@ -12,7 +12,7 @@ Sessione di infrastruttura (nessun modulo business). **Verifica** del design `do
 
 1. **Gap#1 follow-up (CLASS-A, non bloccanti)** — dal register `ACTIVE` P3: grant `ORG_DIRECTOR` reale · Porta-1 RACI drill-down · rubrica Maturity rivedibile · arricchimento UI porte (~2-4h, doc `SOT_STATE.md §Delta S999`).
 2. **Blocked-on-Enzo** — **#8 EMAIL** (WAIT-INPUT): app-password Outlook → attiva EMAIL_OTP + digest live. (#16 SuccessFactors WAIT-INPUT, de-prioritizzato.)
-3. **Igiene ecosistema** — `align-claude-ecosystem` deve preservare gli `enabledPlugins` di Windows post-reinstall (debito D-40, oggi il reinstall riabilita `claude-mem`) · verifica `project_memory` sul mac alla prossima accensione (D-41, falso `remote=0` via ssh/zsh).
+3. **Igiene ecosistema** — verifica `project_memory` sul mac alla prossima accensione (D-41, falso `remote=0` via ssh/zsh). (D-40 ✅ RISOLTO S1001: `enabledPlugins` di Windows ri-applicati post-reinstall → `claude-mem=false` durevole.)
 
 ## Open questions (autorità *cosa* = Enzo)
 

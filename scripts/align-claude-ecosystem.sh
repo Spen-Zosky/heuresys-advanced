@@ -296,6 +296,22 @@ reinstall_plugins() {
       warn "plugin stage ended with rc=$rc on $HOST"; return 1; }
 }
 
+reapply_enabled_plugins() {
+  # D-40: `claude plugin install` (reinstall step) re-enables EVERY plugin in the remote
+  # settings.json, clobbering the Windows enabledPlugins (e.g. a deliberately-disabled
+  # `claude-mem@thedotmack: false`). Re-apply the Windows enabledPlugins onto the remote —
+  # Windows values WIN (right operand of jq `+`) — leaving extraKnownMarketplaces (CLI-managed)
+  # untouched, so the disabled state survives EVERY align (durable, not a manual per-machine fix).
+  local win_enabled
+  win_enabled="$(MSYS_NO_PATHCONV=1 jq -c '.enabledPlugins // {}' "$(cygpath -m "$STAGE/payload/settings.json")")"
+  [ -n "$win_enabled" ] && [ "$win_enabled" != "null" ] && [ "$win_enabled" != "{}" ] || return 0
+  rssh "$HOST" "
+    set -e
+    f=\"\$HOME/.claude/settings.json\"; [ -f \"\$f\" ] || exit 0
+    tmp=\"\$(mktemp)\"
+    jq --argjson win '$win_enabled' '.enabledPlugins = ((.enabledPlugins // {}) + \$win)' \"\$f\" > \"\$tmp\" && mv \"\$tmp\" \"\$f\""
+}
+
 setup_claude_mem() {
   rssh "$HOST" "set -e; mkdir -p \"\$HOME/.claude-mem\"
     [ -f \"\$HOME/.claude-mem/settings.json\" ] && cp -a \"\$HOME/.claude-mem/settings.json\" \"\$HOME/.claude-mem/settings.json.bak-$STAMP\" || true
@@ -529,6 +545,9 @@ align_host() {  # $1 = kind
   else
     log "[$kind] reinstall plugins (native, fixes foreign-path registries)"
     reinstall_plugins || warn "[$kind] plugin stage incomplete — re-run or check verify report"
+    # D-40: reinstall re-enables every plugin; re-apply the Windows enabledPlugins (SoT) so a
+    # deliberately-disabled plugin (e.g. claude-mem=false) stays disabled on the clone.
+    reapply_enabled_plugins || warn "[$kind] enabledPlugins re-apply incomplete (D-40)"
   fi
 
   log "[$kind] claude-mem settings (fresh per-machine DB preserved)"

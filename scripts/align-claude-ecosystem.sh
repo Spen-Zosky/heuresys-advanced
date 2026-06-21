@@ -354,7 +354,7 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
   local kind="$1"; "${kind}_cfg"
   build_stage "$RHOME"
   mkdir -p "$REPORTS_DIR"
-  local report="$REPORTS_DIR/drift-$kind-$STAMP.md" issues=0
+  local report="$REPORTS_DIR/drift-$kind-$STAMP.md" issues=0 mem_drift=0
   {
     echo "# Drift report — $kind ($HOST) — $STAMP"
     echo
@@ -430,6 +430,36 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
     [ "$drift" != 0 ] && echo "NOTE: $drift marketplace(s) drift — informativo, update manuale Enzo (not a verdict fail)"
     echo '```'
   } >> "$report"
+
+  # 5. Project memory tree parity (design §13.3/§13.6). The per-project Claude memories travel
+  #    on the OTHER channel (align-clones → sync-memory-tree), but the idempotence verdict must
+  #    still SEE them — else "ecosystem idempotent" stays partial. Compare the memory manifest
+  #    (count + names) Windows vs remote. Unlike marketplace_sha, memory DRIFT IS blocking (§13.5).
+  echo '## 5. project memory tree (canale align-clones/sync-memory-tree — count + presence parity)' >> "$report"
+  {
+    echo '```'
+    local lmem="$HOME/.claude/projects/D--heuresys-advanced/memory"
+    local lman rman lc rc
+    lman="$( [ -d "$lmem" ] && (cd "$lmem" && ls -1 2>/dev/null | LC_ALL=C sort) || true )"
+    # Resolve the remote memory dir the same way sync-memory-tree.sh does (find = zsh-safe).
+    rman="$(rssh "$HOST" '
+      base="$HOME/.claude/projects"
+      d="$(find "$base" -maxdepth 1 -type d -name "*heuresys-advanced*" 2>/dev/null | head -1)"
+      [ -n "$d" ] && cd "$d/memory" 2>/dev/null && ls -1 2>/dev/null | LC_ALL=C sort
+    ' 2>/dev/null || true)"
+    lc="$(printf '%s\n' "$lman" | grep -c . || true)"
+    rc="$(printf '%s\n' "$rman" | grep -c . || true)"
+    if [ "$lman" = "$rman" ]; then
+      echo "project_memory: win=$lc remote=$rc OK"
+    else
+      echo "project_memory: win=$lc remote=$rc DRIFT"
+      echo '--- diff (< only-on-Windows / > only-on-remote) ---'
+      diff <(printf '%s\n' "$lman") <(printf '%s\n' "$rman") 2>/dev/null | grep -E '^[<>]' | head -20
+      mem_drift=1
+    fi
+    echo '```'
+  } >> "$report"
+  [ "$mem_drift" = 1 ] && issues=$((issues+1))
 
   echo >> "$report"
   if [ "$issues" = 0 ]; then

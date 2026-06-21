@@ -1,16 +1,16 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-21T15:03:49Z da docs/kb/tools/build_index.py
+# generato: 2026-06-21T21:13:38Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-21T15:03:49Z"
-  total_files: 2118
+  generated_at: "2026-06-21T21:13:38Z"
+  total_files: 2134
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 24
     api-core: 18
-    api-module: 285
+    api-module: 289
     ci: 16
     claude-config: 6
     config: 99
@@ -18,24 +18,24 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 149
+    db-migration: 151
     db-script: 23
     db-seed: 104
-    doc-canonical: 384
+    doc-canonical: 386
     handoff-state: 1
     qa-artifact: 96
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 85
+    shared-schema: 86
     showcase-source: 13
-    test: 220
+    test: 223
     ux-design-archive: 80
-    web-source: 149
+    web-source: 153
   status_counts:
     archive: 488
     external-archive: 50
-    live: 1580
+    live: 1596
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -805,6 +805,12 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-maturity\rubric.ts'
+    root: repo
+    rel: 'apps/api/src/modules/capability-maturity/rubric.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\capability-maturity\service.ts'
     root: repo
     rel: 'apps/api/src/modules/capability-maturity/service.ts'
@@ -1108,6 +1114,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\kpi-definitions\service.ts'
     root: repo
     rel: 'apps/api/src/modules/kpi-definitions/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\leads\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/leads/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\leads\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/leads/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\leads\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/leads/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -5683,6 +5707,18 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000151_reconcile_needs_decision_registry.sql'
+    root: repo
+    rel: 'db/migrations/000151_reconcile_needs_decision_registry.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000152_leads.sql'
+    root: repo
+    rel: 'db/migrations/000152_leads.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\README.md'
     root: repo
     rel: 'db/scripts/README.md'
@@ -8629,6 +8665,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-06-21-gtm-front-door-landing-lead-capture.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-06-21-gtm-front-door-landing-lead-capture.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-05-28-cross-os-bootstrap-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-05-28-cross-os-bootstrap-design.md'
@@ -8740,6 +8782,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-06-20-handoff-rigor-and-hold-lane-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-06-20-handoff-rigor-and-hold-lane-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-06-21-gtm-front-door-landing-lead-capture-design.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-06-21-gtm-front-door-landing-lead-capture-design.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -9673,6 +9721,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\leads.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/leads.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\learning-gaps.ts'
     root: repo
     rel: 'packages/shared/src/schemas/learning-gaps.ts'
@@ -10231,6 +10285,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\capability-maturity-rubric.test.ts'
+    root: repo
+    rel: 'apps/api/test/capability-maturity-rubric.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\capability-maturity.integration.test.ts'
     root: repo
     rel: 'apps/api/test/capability-maturity.integration.test.ts'
@@ -10414,6 +10474,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\kpi-definitions.integration.test.ts'
     root: repo
     rel: 'apps/api/test/kpi-definitions.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\leads.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/leads.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11230,6 +11296,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\landing-pages.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/landing-pages.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\landing.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/landing.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -12427,6 +12499,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\privacy\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/privacy/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\showcase\_ui-client.tsx'
     root: repo
     rel: 'apps/web/src/app/showcase/_ui-client.tsx'
@@ -12589,6 +12667,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\components\lead-form.tsx'
+    root: repo
+    rel: 'apps/web/src/components/lead-form.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\components\preferences-applier.tsx'
     root: repo
     rel: 'apps/web/src/components/preferences-applier.tsx'
@@ -12679,6 +12763,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\locales\en\landing.json'
+    root: repo
+    rel: 'apps/web/src/locales/en/landing.json'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\locales\en\shell.json'
     root: repo
     rel: 'apps/web/src/locales/en/shell.json'
@@ -12718,6 +12808,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\locales\it\hr.json'
     root: repo
     rel: 'apps/web/src/locales/it/hr.json'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\locales\it\landing.json'
+    root: repo
+    rel: 'apps/web/src/locales/it/landing.json'
     category: web-source
     status: live
     provenance: git-tracked

@@ -1,30 +1,28 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-21 (S1002 — Gap#1 follow-up CLASS-A: sotto-task eseguibili chiusi live).
+**Updated**: 2026-06-21 (S1002 — Gap#1 follow-up + RACI + #13 + (c) + #4 go-to-market primo deliverable).
 
 > **Vista rapida** (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui. Menu generato da `docs/kb/tools/build_menu.py` (P2).
 
-## Last session brief (S1002 — Gap#1 follow-up CLASS-A)
+## Last session brief (S1002 — lunga, multi-blocco)
 
-Sessione di prodotto leggera sull'unico item ACTIVE del menu (Gap#1 follow-up). **Tre dei quattro sotto-task chiusi live su dati reali** (il quarto in HOLD), tre commit atomici: **(b)** Porta-1 RACI drill-down nella console process-owner (endpoint `by-process` già esistente → wiring UI con badge RACI OWNER·A/CONTRIBUTOR·R/CONSULTED·C/INFORMED·I); **(a)** grant `ORG_DIRECTOR` holder-of-record = **Valentina Conti** (HR Director, manager Divisione HR — best-fit sulla struttura org reale; grant **semantico**, non access-change: vedeva già la Porta-2 via HRMS_MANAGER), mig `000150` idempotente + chain `migrate.sh` verde; **(d)** radar maturità nella console org-director (`CapabilityRadar` @heuresys/ui, 5 dimensioni dai `criteria[]` live, no nuovo endpoint). Gate: **E2E `gap1-consoles` tutto verde** (Node22 wrapper), typecheck web + eslint puliti, i18n parity verde. **Residuo (c)** rubrica `rubric_version` rivedibile = **HOLD** (basso valore, scope-decisione; la v1-full l'hai già scelta tu). **Post-handoff**: sbloccato il HOLD **#5/#11 RACI di produzione** — Claude ha proposto il mapping OU↔processo, Enzo ha approvato → seed riscritto come SoT dichiarativa con **105 assegnazioni reali** (23 processi, 1 OWNER ciascuno), fix test D-23, live sul DB VM (PROD già aggiornata), integration + E2E verdi (`9ce9a92`). La Porta-1 RACI drill-down ora rende la mappa reale completa. Granulare → `SOT_STATE.md §Delta S1002`.
+Sessione lunga e produttiva, partita dal menu (Gap#1 follow-up) e proseguita su richiesta di Enzo item dopo item, con consolidamento progressivo. **Blocchi**: (1) **Gap#1 follow-up CLASS-A chiuso 100%** — (a) grant `ORG_DIRECTOR` holder-of-record = Valentina Conti, (b) Porta-1 RACI drill-down, (d) radar maturità Org-Director, (c) rubrica Maturity estratta a registry config versionato `rubric.ts` (behavior-preserving). (2) **#5/#11 RACI di produzione** — Claude ha proposto e Enzo approvato il mapping completo OU↔processo: seed declarative SoT, 105 assegnazioni reali su 23 processi. (3) **#13 B-50 bridges chiuso** — i bridge erano già risolti (sys_branches + derivazioni); residuo doc-drift reconciliato (mig 000151, 28 registry NEEDS_DECISION→IMPORT, 0 residui). (4) **#4 GO-TO-MARKET — primo deliverable SHIPPED**: front-door landing pubblica su `www.heuresys.com/` + lead capture GDPR (modulo `/v1/leads`, migration `sys_leads`, pagina `/privacy`), brainstorming→spec→piano→esecuzione **subagent-driven** (11 task), final review opus. Il processo rigoroso ha intercettato 4 bug reali (RBAC re-grant leak, honeypot schema, GET authz codes, form select — l'ultimo scovato dall'E2E live). Tutto live-verified (lead reale salvato con consenso). Granulare → `SOT_STATE.md §Delta S1002-GTM`.
 
 ## Top priorities (next session)
 
-1. **#4 go-to-market** — Gap#1 ora più dimostrabile (console arricchite live in PROD); scope/forma del go-to-market è autorità *cosa* = Enzo.
-2. **Blocked-on-Enzo** — **#8 EMAIL** (WAIT-INPUT): app-password Outlook → attiva EMAIL_OTP + digest live. (#16 SuccessFactors WAIT-INPUT, de-prioritizzato.)
-
-> Il backlog ACTIVE autonomo è **esaurito**: l'unico item ACTIVE (Gap#1 follow-up) è chiuso al 75%, il residuo (c) è in HOLD. Tutto il resto è HOLD/WAIT-INPUT → si sblocca con una tua decisione di prodotto o un tuo input.
+1. **#4 go-to-market — prossimo deliverable** (autorità *cosa* = Enzo): il primo (front-door + lead form) è live; i candidati next dal brainstorming = investor one-pager · demo guidata · pricing. È il keystone del programma.
+2. **C1 deploy-verify** (debt P2): verificare LIVE in PROD che il rate-limit per-IP di `/v1/leads` keyi sul client IP reale dietro i 2 hop nginx→Next→API (stesso meccanismo del login, verificato S984). Se collassa → D-28-followup app-wide.
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **Go-to-market**: scope/forma ora che il prodotto è dimostrabile (Gap#1 live PROD).
-- **RACI di produzione** + **holder reale `ORG_DIRECTOR`**: il grant S1002 nomina Valentina come holder-of-record (best-fit su dati); se l'org-director reale è un'altra persona, fornisci il nome.
+- **Go-to-market — forma dei prossimi deliverable**: investor one-pager vs demo guidata vs pricing (il primo, la front-door, è shipped).
+- **Lead pipeline ops**: chi gestisce i lead in arrivo (oggi: GET admin + export CSV/XLSX; lead-management UI = follow-up deferito).
 
 ## Verification (next session)
 
 ```bash
-git -C /d/heuresys-advanced log origin/main..HEAD --oneline    # 0 dopo handoff push S1002
-python docs/kb/tools/handoff_lint.py                           # handoff-lint OK (0 fail)
-python docs/kb/tools/build_menu.py --no-db                     # menu generato dal register
-cd apps/web && pnpm exec eslint "src/app/(authenticated)/org-director/page.tsx"   # clean
+git -C /d/heuresys-advanced log origin/main..HEAD --oneline    # 0 dopo handoff push
+python docs/kb/tools/handoff_lint.py                           # OK (0 fail)
+curl -s -o /dev/null -w "%{http_code}" https://www.heuresys.com/    # 200 (landing pubblica, non più redirect login)
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "\d sys.sys_leads"   # tabella lead esiste
 ```

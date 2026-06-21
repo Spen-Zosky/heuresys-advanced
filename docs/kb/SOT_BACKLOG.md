@@ -12,19 +12,13 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
-- **Gap#1 follow-up — rubrica Maturity rivedibile (c)** · status: HOLD
-  - hold-reason: 3/4 sotto-task CLASS-A chiusi live S1002 (Porta-1 RACI drill-down `fcdc61f` · ORG_DIRECTOR holder-of-record = Valentina, mig 000150 `184a5fe` · Org-Director maturity radar `473f848`); resta solo rendere parametrizzabile `RUBRIC_VERSION='v1-full'` (costante hard-coded) = basso valore + scope-decisione (la v1-full l'ha scelta Enzo)
-  - decided-by: Enzo · hold-since: S1002 (2026-06-21)
-  - reactivation-trigger: Enzo vuole rivedere le soglie/bande della rubrica Maturity (rubric v2)
-
-- **#4 go-to-market** · status: HOLD
-  - hold-reason: prodotto reso dimostrabile da Gap#1; la strategia/scope GTM è autorità *cosa* = Enzo
-  - decided-by: Enzo · hold-since: S999 (2026-06-20)
-  - reactivation-trigger: Enzo definisce scope/strategia go-to-market
-- **#13 B-50 bridges** · status: HOLD
-  - hold-reason: bridge `location↔org_unit` / `job→position` richiedono una decisione PM (o una Wave-2 che popoli `position_id`)
-  - decided-by: Enzo · hold-since: S999 (2026-06-20)
-  - reactivation-trigger: decisione PM sul bridge, oppure Wave-2 popola `position_id` (input di #4)
+- **#4 go-to-market** · status: ACTIVE
+  - priority: P1 · effort: per-deliverable · doc: docs/superpowers/specs/2026-06-21-gtm-front-door-landing-lead-capture-design.md
+  - note: PRIMO DELIVERABLE SHIPPED S1002 (front-door landing pubblica `www.heuresys.com/` sostituisce il redirect-login + lead capture GDPR `/v1/leads`+`sys_leads`). Programma in-flight; la FORMA del prossimo deliverable è autorità *cosa* = Enzo — candidati dal brainstorming: investor one-pager · demo guidata · pricing. Scegli la forma → stesso flow brainstorm→spec→piano→build.
+- **#4 GTM v1-deferrals (follow-up del primo deliverable)** · status: HOLD
+  - hold-reason: non-bloccanti, deferiti al final review del primo deliverable: lead-management admin UI + status-filter (oggi GET admin + export CSV/XLSX) · honeypot-trip observability · `/privacy` full page (oggi stub) · landing a11y audit dedicato
+  - decided-by: Claude (deferral v1) · hold-since: S1002 (2026-06-21)
+  - reactivation-trigger: Enzo li richiede, o quando il programma GTM matura oltre il primo deliverable
 - **#17 Wave-3 multi-tenant-onboarding** · status: HOLD
   - hold-reason: follow di #4; fondazione WI-C pronta ma l'avvio dipende dalla strategia multi-tenant
   - decided-by: Enzo · hold-since: S999 (2026-06-20)

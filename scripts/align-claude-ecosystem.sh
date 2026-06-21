@@ -449,29 +449,26 @@ verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
 
   # 5. Project memory tree parity (design §13.3/§13.6). The per-project Claude memories travel
   #    on the OTHER channel (align-clones → sync-memory-tree), but the idempotence verdict must
-  #    still SEE them — else "ecosystem idempotent" stays partial. Compare the memory manifest
-  #    (count + names) Windows vs remote. Unlike marketplace_sha, memory DRIFT IS blocking (§13.5).
-  echo '## 5. project memory tree (canale align-clones/sync-memory-tree — count + presence parity)' >> "$report"
+  #    still SEE them — else "ecosystem idempotent" stays partial. Memory DRIFT IS blocking (§13.5).
+  #    RESILIENT (D-41): the remote ALWAYS prints a `MEMCOUNT=` sentinel; if the ssh/command yields
+  #    no sentinel (slow LAN box, transient timeout — observed on the Mac), mark it SKIP, not a
+  #    false `remote=0` DRIFT. A genuine missing dir prints `MEMCOUNT=0` → real drift.
+  echo '## 5. project memory tree (canale align-clones/sync-memory-tree — count parity, resilient)' >> "$report"
   {
     echo '```'
     local lmem="$HOME/.claude/projects/D--heuresys-advanced/memory"
-    local lman rman lc rc
-    lman="$( [ -d "$lmem" ] && (cd "$lmem" && ls -1 2>/dev/null | LC_ALL=C sort) || true )"
-    # Resolve the remote memory dir the same way sync-memory-tree.sh does (find = zsh-safe).
-    rman="$(rssh "$HOST" '
-      base="$HOME/.claude/projects"
-      d="$(find "$base" -maxdepth 1 -type d -name "*heuresys-advanced*" 2>/dev/null | head -1)"
-      [ -n "$d" ] && cd "$d/memory" 2>/dev/null && ls -1 2>/dev/null | LC_ALL=C sort
-    ' 2>/dev/null || true)"
-    lc="$(printf '%s\n' "$lman" | grep -c . || true)"
-    rc="$(printf '%s\n' "$rman" | grep -c . || true)"
-    if [ "$lman" = "$rman" ]; then
-      echo "project_memory: win=$lc remote=$rc OK"
+    local lc rline rc
+    lc="$( [ -d "$lmem" ] && ls -1 "$lmem" 2>/dev/null | grep -c . || echo 0 )"
+    rline="$(rssh "$HOST" '
+      d="$(find "$HOME/.claude/projects" -maxdepth 1 -type d -name "*heuresys-advanced*" 2>/dev/null | head -1)"
+      if [ -n "$d" ] && [ -d "$d/memory" ]; then echo "MEMCOUNT=$(ls -1 "$d/memory" 2>/dev/null | grep -c .)"; else echo "MEMCOUNT=0"; fi
+    ' 2>/dev/null | grep "^MEMCOUNT=" | tail -1)"
+    if [ -z "$rline" ]; then
+      echo "project_memory: win=$lc remote=? SKIP (host non risponde al check — non un DRIFT)"
     else
-      echo "project_memory: win=$lc remote=$rc DRIFT"
-      echo '--- diff (< only-on-Windows / > only-on-remote) ---'
-      diff <(printf '%s\n' "$lman") <(printf '%s\n' "$rman") 2>/dev/null | grep -E '^[<>]' | head -20
-      mem_drift=1
+      rc="${rline#MEMCOUNT=}"
+      if [ "$lc" = "$rc" ]; then echo "project_memory: win=$lc remote=$rc OK"
+      else echo "project_memory: win=$lc remote=$rc DRIFT"; mem_drift=1; fi
     fi
     echo '```'
   } >> "$report"

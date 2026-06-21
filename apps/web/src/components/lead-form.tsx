@@ -61,7 +61,7 @@ export default function LeadForm() {
             </label>
             <label className="space-y-1 text-sm">
               <span className="text-muted-foreground">{t("form.companySize")}</span>
-              <select data-testid="lead-size" {...register("companySize")} className="w-full rounded-control border border-border bg-card px-3 py-2 text-sm">
+              <select data-testid="lead-size" {...register("companySize", { setValueAs: (v: string) => v === "" ? undefined : v })} className="w-full rounded-control border border-border bg-card px-3 py-2 text-sm">
                 <option value="">—</option>
                 {SIZES.map((s) => (<option key={s} value={s}>{t(`form.sizes.${s}`)}</option>))}
               </select>

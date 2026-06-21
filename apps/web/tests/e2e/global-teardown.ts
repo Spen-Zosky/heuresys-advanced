@@ -72,6 +72,26 @@ export default async function globalTeardown(): Promise<void> {
     console.warn("[e2e teardown] approval cleanup skipped:", (err as Error).message);
   }
 
+  // GTM lead-capture: the landing E2E creates a `%@leads-e2e.test` row per run
+  // (no DELETE endpoint). Purge them so leads don't accumulate in the DB.
+  // Best-effort, same secret-hygiene rules.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH d AS (DELETE FROM sys.sys_leads WHERE lead_email LIKE '%@leads-e2e.test' RETURNING 1) SELECT count(*) FROM d",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] GTM: deleted ${out} E2E lead row(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] GTM lead cleanup skipped:", (err as Error).message);
+  }
+
   // Surveys-M2: the ESS spec answers an assigned survey (tommaso → Q4 Pulse),
   // which inserts ESS responses + flips the assignment to completed. Reset both
   // so the spec is re-runnable (the survey must be pending again next run).

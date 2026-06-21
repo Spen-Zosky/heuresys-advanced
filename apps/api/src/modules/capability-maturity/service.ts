@@ -18,11 +18,13 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import type { MaturityInputs, MaturityRow } from "./repository.js";
+import { ACTIVE_RUBRIC_VERSION, getRubric } from "./rubric.js";
 
 export type { ActorContext };
 
 const MODEL_VERSION = "capability-maturity-v1";
-const RUBRIC_VERSION = "v1-full";
+// The active rubric version + its thresholds live in ./rubric.ts (reviewable/versionable).
+const RUBRIC_VERSION = ACTIVE_RUBRIC_VERSION;
 const LEVEL_LABEL: Record<MaturityLevel, string> = {
   L0: "Ad-hoc", L1: "Initial", L2: "Repeatable", L3: "Defined", L4: "Managed", L5: "Optimizing",
 };
@@ -45,23 +47,19 @@ export interface MaturityMetrics {
 interface Gate { metric: string; operator: ">=" | "=="; threshold: number; value: number }
 const passes = (g: Gate): boolean => (g.operator === ">=" ? g.value >= g.threshold : g.value === g.threshold);
 
-/** v1-full rubric: bands + gate criteria. Returns the achieved level + the full
- *  audited criteria list (every level's gates with met flags). Deterministic. */
-export function deriveLevel(m: MaturityMetrics): { level: MaturityLevel; criteria: MaturityCriterion[] } {
-  const ladder: Array<{ level: MaturityLevel; gates: Gate[] }> = [
-    { level: "L0", gates: [] },
-    { level: "L1", gates: [{ metric: "composite", operator: ">=", threshold: 20, value: m.composite }] },
-    { level: "L2", gates: [{ metric: "composite", operator: ">=", threshold: 40, value: m.composite }, { metric: "skillCoverage", operator: ">=", threshold: 0.4, value: m.skillCoverage }] },
-    { level: "L3", gates: [{ metric: "composite", operator: ">=", threshold: 55, value: m.composite }, { metric: "kpiAchievement", operator: ">=", threshold: 0.7, value: m.kpiAchievement }, { metric: "skillCoverage", operator: ">=", threshold: 0.6, value: m.skillCoverage }] },
-    { level: "L4", gates: [{ metric: "composite", operator: ">=", threshold: 70, value: m.composite }, { metric: "kpiAchievement", operator: ">=", threshold: 0.85, value: m.kpiAchievement }, { metric: "readinessCoverage", operator: ">=", threshold: 0.5, value: m.readinessCoverage }] },
-    { level: "L5", gates: [{ metric: "composite", operator: ">=", threshold: 85, value: m.composite }, { metric: "kpiAchievement", operator: ">=", threshold: 0.85, value: m.kpiAchievement }, { metric: "readinessCoverage", operator: ">=", threshold: 0.5, value: m.readinessCoverage }, { metric: "majorGapRatio", operator: "==", threshold: 0, value: m.majorGapRatio }] },
-  ];
+/** Derive the achieved level + the full audited criteria list (every level's gates
+ *  with met flags) from a versioned rubric (default = the active version). The level
+ *  is the highest contiguous rung whose gates all pass (gated downgrade). Deterministic.
+ *  Thresholds come from ./rubric.ts — `v1-full` reproduces the original bands verbatim. */
+export function deriveLevel(m: MaturityMetrics, rubricVersion: string = RUBRIC_VERSION): { level: MaturityLevel; criteria: MaturityCriterion[] } {
+  const rubric = getRubric(rubricVersion);
   const criteria: MaturityCriterion[] = [];
   let achieved: MaturityLevel = "L0";
   let stillClimbing = true;
-  for (const rung of ladder) {
-    const allMet = rung.gates.every(passes);
-    for (const g of rung.gates) {
+  for (const rung of rubric.ladder) {
+    const gates: Gate[] = rung.gates.map((g) => ({ metric: g.metric, operator: g.operator, threshold: g.threshold, value: m[g.metric] }));
+    const allMet = gates.every(passes);
+    for (const g of gates) {
       criteria.push({ level: rung.level, label: LEVEL_LABEL[rung.level], met: passes(g), metric: g.metric, value: round4(g.value), threshold: g.threshold, operator: g.operator });
     }
     if (rung.level === "L0") { achieved = "L0"; continue; }

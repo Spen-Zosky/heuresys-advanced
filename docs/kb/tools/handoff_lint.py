@@ -4,26 +4,30 @@ handoff_lint.py — deterministic gate for the handoff/SoT system.
 
 Verifies that the state sources are coherent BEFORE the handoff skill commits + pushes
 (design: docs/superpowers/specs/2026-06-20-handoff-rigor-and-hold-lane-design.md §4).
-The handoff skill runs this and must not push on a red lint (like a red CI — R3).
+The handoff skill runs this and must not push on a red gate (like a red CI — R3).
 
-Checks (pragmatic subset, anchored to the REAL files — the 132KB backlog is mostly
-historical archive, so the "every item has a status" rule applies only to the tagged
-HOLD/WAIT-INPUT register, not the whole file — see design §4/§7 refinement note):
+10 checks (design §4.2), grouped into a few read-only functions over the working tree:
 
   D1  STATE disjunction   — .handoff/STATE.md carries no counts outside the Verification block
-  D2  SOT internal        — §0 headline migration count == the latest "## Delta" block
-  D3  SOT freshness        — declared migration count == real (ls db/migrations) [needs repo only]
-  D4  SOT head             — the latest Delta's cited HEAD sha == git rev-parse HEAD (warn)
-  S1  STATE structure      — required sections present, <= MAX_STATE_LINES, 1..3 priorities
-  H1  HOLD integrity       — every item in the HOLD register has the 4 required fields
-  S2  vocabulary           — every register item has a status from the closed vocabulary
-  H2  no orphan defer       — STATE "Top priorities" has no raw DEFER/sospeso/differito (use HOLD)
+  D2  SOT internal        — §0 headline migration count == the freshest "## Delta" in the doc
+  D3  SOT freshness       — declared migration count == real (ls db/migrations); cited git tags exist
+  D4  SOT head            — the latest Delta's cited HEAD sha == git rev-parse HEAD (warn — pre-commit)
+  S1  STATE structure     — required sections present, <= MAX_STATE_LINES, 1..4 priorities
+  S2  vocabulary          — every register item has a status from the closed vocabulary
+  H1  HOLD integrity      — every HOLD item has the 4 required fields (WAIT-INPUT its 2)
+  H2  no orphan defer     — no raw DEFER/sospeso/differito in STATE priorities OR in an ACTIVE
+                            (non-archive, non-terminal) backlog item — parked work belongs in the
+                            tagged HOLD register, not in prose (design §1.3/§4.2/§7)
+  A1  atomicity / refs    — the SoT files exist; every #id cited in STATE's actionable sections
+                            resolves to the backlog (no dangling/partial handoff)
+  A2  loop closed         — every #id STATE marks as closed/done is terminal in the backlog
+                            (not still listed as an active item)
 
-Exit: 0 = pass (or warn-only mode) | 1 = at least one FAIL in --strict | 2 = internal error.
+Exit: 0 = pass | 1 = at least one FAIL (default: blocking gate) | 2 = internal error.
 Usage:
-    python docs/kb/tools/handoff_lint.py            # warn-only (prints FAIL/WARN, exit 0)
-    python docs/kb/tools/handoff_lint.py --strict   # gate: exit 1 on any FAIL
-    python docs/kb/tools/handoff_lint.py --no-db     # (reserved) skip DB-derived checks
+    python docs/kb/tools/handoff_lint.py            # gate: exit 1 on any FAIL (design §4.1/§8)
+    python docs/kb/tools/handoff_lint.py --warn-only # soft: print FAIL/WARN but exit 0
+    python docs/kb/tools/handoff_lint.py --no-db     # skip DB-derived freshness checks (tunnel down)
 """
 import argparse
 import glob
@@ -49,9 +53,26 @@ DEFER_WORDS = ("differit", "sospes", "rimandat", "sessione dedicata", "DEFER ")
 COUNT_RE = re.compile(r"\b\d+\s*(?:file|moduli|module|test|endpoint|tabelle|migration)\b"
                       r"|\b\d+\s*/\s*\d+\b", re.IGNORECASE)
 
-FAILS, WARNS = [], []
+# An item/line is "terminal" (closed) if it carries any of these markers — such lines may
+# legitimately mention a defer word as HISTORY (e.g. "✅ CHIUSO — i 3 DEFER importati").
+TERMINAL_RE = re.compile(r"✅|⚪|🏁|~~|\bFATTO\b|\bDONE\b|WON'?T-DO|\bRISOLTO\b|\bCHIUS[OIE]\b"
+                         r"|OBSOLETE|SUPERSED|ESEGUIT|RESOLVED|EXECUTED|\bCLOSED\b", re.IGNORECASE)
+# A "## " section heading that is an archive/record (not an actionable menu section). Everything
+# under it is history → H2 does not scan it.
+ARCHIVE_HEADER_RE = re.compile(r"^(?:[✅⚪🟢🏁🔭⏸]|.*(?:Aggiornament|Verifica stato|RESOLVED|HOLD register"
+                               r"|Programma 100X|DONE))", re.IGNORECASE)
+# A bold sub-block "**<emoji> Aggiornamento SXXX …**" inside an active section: from it to the
+# next "## " heading is history (the backlog interleaves session records under P-sections).
+# Emoji-agnostic: any bold heading whose text contains "Aggiornamento" is a session record.
+ARCHIVE_BLOCK_RE = re.compile(r"^\s*\*\*[^*]*Aggiornament", re.IGNORECASE)
+DEFER_MAJOR_RE = re.compile(r"defer-major", re.IGNORECASE)  # a CI label, not a deferral
+ID_RE = re.compile(r"#(\d+)\b")
+CLOSURE_RE = re.compile(r"✅|\bFATTO\b|\bDONE\b|\bRISOLT[OA]\b|\bchius[oie]\b|\bCLOSED\b", re.IGNORECASE)
+
+FAILS, WARNS, SKIPS = [], [], []
 def fail(cid, msg): FAILS.append(f"{cid}: {msg}")
 def warn(cid, msg): WARNS.append(f"{cid}: {msg}")
+def skip(cid, msg): SKIPS.append(f"{cid}: {msg}")
 
 
 def read(path):
@@ -80,6 +101,12 @@ def strip_code_blocks(text):
     return re.sub(r"```.*?```", "", text, flags=re.DOTALL)
 
 
+def has_defer(line):
+    """True if the line carries a raw deferral word that is NOT just the 'defer-major' CI label."""
+    probe = DEFER_MAJOR_RE.sub("", line)
+    return any(w.lower() in probe.lower() for w in DEFER_WORDS)
+
+
 def real_migration_count():
     files = glob.glob(os.path.join(REPO, "db", "migrations", "*.sql"))
     nums = []
@@ -98,9 +125,19 @@ def git_head():
         return None
 
 
+def git_tags():
+    try:
+        out = subprocess.check_output(["git", "-C", REPO, "tag"], text=True,
+                                      stderr=subprocess.DEVNULL)
+        return set(out.split())
+    except Exception:
+        return None
+
+
 # --- checks -------------------------------------------------------------------------------
 
 def check_state(md):
+    """D1 (disjunction), S1 (structure), H2 (STATE priorities have no raw defer)."""
     if md is None:
         fail("S1", f"{STATE_MD} missing")
         return
@@ -114,8 +151,6 @@ def check_state(md):
 
     # D1 — counts outside the Verification fenced block
     no_code = strip_code_blocks(md)
-    # drop the Verification section heading body lines that are inside ``` already removed;
-    # scan the prose that remains
     offenders = []
     for ln in no_code.splitlines():
         s = ln.strip()
@@ -127,18 +162,17 @@ def check_state(md):
         warn("D1", f"STATE.md carries {len(offenders)} count-like token(s) outside Verification "
                    f"(disjunction: counts belong in SOT_STATE). e.g. {sample}")
 
-    # S1 — number of priorities (look at the 'Top priorities' section)
+    # S1 — number of priorities + H2 — no raw defer markers in the priorities prose
     secs = split_sections(md)
     for h, body in secs:
         if "top priorities" in h.lower():
             items = re.findall(r"^\s*\d+\.\s", body, flags=re.MULTILINE)
             if not (1 <= len(items) <= 4):
                 warn("S1", f"STATE.md 'Top priorities' has {len(items)} numbered items (expected 1-3)")
-            # H2 — no raw defer markers in the priorities prose
-            for w in DEFER_WORDS:
-                if w.lower() in body.lower():
-                    warn("H2", f"STATE.md priorities contain raw rinvio marker '{w.strip()}' "
-                               f"— formalize as HOLD in the backlog register")
+            for ln in strip_code_blocks(body).splitlines():
+                if has_defer(ln):
+                    fail("H2", f"STATE.md priorities carry a raw rinvio marker "
+                               f"({ln.strip()[:70]!r}) — formalize it as HOLD in the backlog register")
                     break
 
 
@@ -148,7 +182,8 @@ def declared_migration_ranges(md):
     return [int(y) for y in re.findall(r"000\d{3}\s*\.\.\s*`?000(\d{3})", md)]
 
 
-def check_sot(md):
+def check_sot(md, use_db):
+    """D2 (internal coherence), D3 (freshness vs disk + cited tags), D4 (head sha — warn)."""
     if md is None:
         warn("D2", f"{SOT_MD} missing (granular view absent — ok in minimal projects)")
         return
@@ -168,6 +203,18 @@ def check_sot(md):
         if head_max != doc_max:
             fail("D2", f"SOT_STATE internal drift: §0 headline 000{head_max:03d} vs freshest in-doc "
                        f"000{doc_max:03d} — the headline was not updated to the latest Delta")
+
+    # D3 (cont.) — every git tag the SOT cites must actually exist (a phantom 'v1.2.0' = drift).
+    if use_db is not False:  # repo-only, but skipped under --no-db for symmetry with the contract
+        tags = git_tags()
+        if tags is not None:
+            cited = set(re.findall(r"`(v\d+\.\d+\.\d+)`", md))
+            phantom = sorted(t for t in cited if t not in tags)
+            if phantom:
+                fail("D3", f"SOT_STATE cites git tag(s) that do not exist: {phantom} "
+                           f"(create the tag or fix the reference)")
+    else:
+        skip("D3", "git-tag existence check skipped (--no-db)")
 
     # D4 — HEAD cited in the doc vs git (warn: only equal when run pre-commit at handoff)
     head = git_head()
@@ -192,7 +239,6 @@ def parse_register_items(md):
         if cur:
             fld = re.match(r"\s*-\s+(.*)", line)
             if fld:
-                # one sub-bullet may carry several "key: value" segments separated by ·
                 for seg in fld.group(1).split("·"):
                     mk = re.match(r"\s*([a-zà-ù][a-zà-ù\-]*):\s*(.+)", seg.strip(), flags=re.IGNORECASE)
                     if mk:
@@ -206,6 +252,7 @@ def parse_register_items(md):
 
 
 def check_register(md):
+    """S2 (closed vocabulary), H1 (HOLD/WAIT-INPUT metadata integrity)."""
     if md is None:
         fail("H1", f"{BACKLOG_MD} missing")
         return
@@ -238,29 +285,131 @@ def check_register(md):
           f"{sum(1 for i in items if i['status']=='WAIT-INPUT')} WAIT-INPUT)")
 
 
+def check_backlog_defer(md):
+    """H2 (backlog) — a raw deferral in an ACTIVE backlog item is an orphan: it must be a HOLD.
+
+    Scope (low false-positive on the 130KB historical archive): scan only ACTIVE sections,
+    skipping (a) archive '## ' headings (✅/🟢/🔭/⏸/Aggiornamento/…), (b) bold '**🟢 Aggiornamento
+    SXXX**' sub-blocks inside active sections, (c) lines already carrying a terminal marker
+    (✅/⚪/~~/FATTO/DONE/…) — those mention a defer word as closed history, not as a live park.
+    """
+    if md is None:
+        return
+    in_archive_header = False   # under an archive '## ' section
+    in_archive_block = False    # under a '**🟢 Aggiornamento**' sub-block (until next '## ')
+    for raw in strip_code_blocks(md).splitlines():
+        if raw.startswith("## "):
+            header = raw[3:].strip()
+            in_archive_header = bool(ARCHIVE_HEADER_RE.match(header))
+            in_archive_block = False
+            continue
+        if in_archive_header:
+            continue
+        if ARCHIVE_BLOCK_RE.match(raw):
+            in_archive_block = True
+            continue
+        if in_archive_block:
+            continue
+        if has_defer(raw) and not TERMINAL_RE.search(raw):
+            fail("H2", f"backlog has an orphan rinvio in an active item "
+                       f"({raw.strip()[:80]!r}) — move it to the HOLD register with a "
+                       f"reactivation-trigger (design §7)")
+            return  # one is enough to block; reporting the first keeps the output actionable
+
+
+def _state_actionable_ids(state_md):
+    """#ids cited in STATE's actionable sections (Top priorities + Open questions)."""
+    ids = set()
+    for h, body in split_sections(state_md):
+        if "top priorities" in h.lower() or "open questions" in h.lower():
+            ids |= set(ID_RE.findall(strip_code_blocks(body)))
+    return ids
+
+
+def check_atomicity(state_md, backlog_md, sot_md):
+    """A1 — SoT files present + every #id cited in STATE's actionable sections resolves in the
+    backlog/SOT (a dangling reference means a partial/incoherent handoff)."""
+    if state_md is None:
+        fail("A1", "STATE.md missing — the rapid view is mandatory")
+        return
+    if backlog_md is None:
+        return  # minimal project: no backlog to cross-reference
+    haystack = backlog_md + ("\n" + sot_md if sot_md else "")
+    for cid in sorted(_state_actionable_ids(state_md), key=int):
+        if not re.search(rf"#{cid}\b", haystack):
+            fail("A1", f"STATE cites #{cid} in an actionable section but it resolves to no "
+                       f"backlog/SOT item (dangling reference — partial handoff)")
+
+
+def check_loop_closed(state_md, backlog_md):
+    """A2 — every #id STATE marks as closed/done must be terminal in the backlog, never still
+    listed as an active (non-archive, non-terminal) item."""
+    if state_md is None or backlog_md is None:
+        return
+    closed_ids = set()
+    for ln in strip_code_blocks(state_md).splitlines():
+        if CLOSURE_RE.search(ln):
+            closed_ids |= set(ID_RE.findall(ln))
+    if not closed_ids:
+        return
+    # Build the set of #ids that appear as ACTIVE backlog items (non-archive, non-terminal line).
+    active_ids = set()
+    in_archive_header = in_archive_block = False
+    for raw in strip_code_blocks(backlog_md).splitlines():
+        if raw.startswith("## "):
+            in_archive_header = bool(ARCHIVE_HEADER_RE.match(raw[3:].strip()))
+            in_archive_block = False
+            continue
+        if in_archive_header:
+            continue
+        if ARCHIVE_BLOCK_RE.match(raw):
+            in_archive_block = True
+            continue
+        if in_archive_block or TERMINAL_RE.search(raw):
+            continue
+        if re.match(r"\s*-\s+\*\*", raw) or raw.startswith("|"):
+            active_ids |= set(ID_RE.findall(raw))
+    for cid in sorted(closed_ids & active_ids, key=int):
+        fail("A2", f"STATE marks #{cid} as closed but the backlog still lists it as an active "
+                   f"item (loop not closed — mark it DONE/terminal in the backlog)")
+
+
 def main():
     ap = argparse.ArgumentParser(description="Deterministic gate for the handoff/SoT system.")
-    ap.add_argument("--strict", action="store_true", help="exit 1 on any FAIL (gate mode)")
-    ap.add_argument("--no-db", action="store_true", help="skip DB-derived checks (reserved)")
+    ap.add_argument("--warn-only", action="store_true",
+                    help="print FAIL/WARN but exit 0 (soft mode; default is blocking, design §4.1)")
+    ap.add_argument("--strict", action="store_true",
+                    help="(default) exit 1 on any FAIL — kept for back-compat with earlier callers")
+    ap.add_argument("--no-db", action="store_true", help="skip DB-derived freshness checks (tunnel down)")
     args = ap.parse_args()
+    use_db = not args.no_db
 
     try:
-        check_state(read(STATE_MD))
-        check_sot(read(SOT_MD))
-        check_register(read(BACKLOG_MD))
+        state = read(STATE_MD)
+        sot = read(SOT_MD)
+        backlog = read(BACKLOG_MD)
+        check_state(state)
+        check_sot(sot, use_db)
+        check_register(backlog)
+        check_backlog_defer(backlog)
+        check_atomicity(state, backlog, sot)
+        check_loop_closed(state, backlog)
     except Exception as exc:  # never let the lint itself crash the handoff silently
         print(f"handoff-lint INTERNAL ERROR: {exc}", file=sys.stderr)
         return 2
 
+    for s in SKIPS:
+        print(f"SKIPPED {s}")
     for w in WARNS:
         print(f"WARN {w}")
     for f in FAILS:
         print(f"FAIL {f}")
 
-    if FAILS and args.strict:
-        print(f"\nhandoff-lint: {len(FAILS)} FAIL, {len(WARNS)} WARN — strict mode → blocking")
+    blocking = not args.warn_only
+    if FAILS and blocking:
+        print(f"\nhandoff-lint: {len(FAILS)} FAIL, {len(WARNS)} WARN — blocking (fix before push)")
         return 1
-    print(f"\nhandoff-lint OK ({len(FAILS)} fail / {len(WARNS)} warn"
+    print(f"\nhandoff-lint OK ({len(FAILS)} fail / {len(WARNS)} warn / {len(SKIPS)} skipped"
           f"{' — warn-only mode, not blocking' if FAILS else ''})")
     return 0
 

@@ -29,7 +29,7 @@ EXTRA_EXCLUDE_RE="${EXTRA_EXCLUDE_RE:-}"
 # `.superpowers/` is session scratch (SDD ledger/briefs/diffs); on Windows its files can
 # present to tar as "hardlink pointing to itself" → a non-zero tar exit aborts the whole
 # sync (set -e) and fails the close. It is local-only scratch → exclude like test-results.
-EXCLUDE_RE='(^|/)node_modules/$|(^|/)dist/$|(^|/)\.next/$|(^|/)out/$|(^|/)test-results/$|(^|/)\.superpowers/$|\.tsbuildinfo$|^\.env$'
+EXCLUDE_RE='(^|/)node_modules/$|(^|/)dist/$|(^|/)\.next/$|(^|/)out/$|(^|/)test-results/$|(^|/)\.superpowers/|\.tsbuildinfo$|^\.env$'
 
 cd "$(git rev-parse --show-toplevel)"
 

@@ -559,7 +559,7 @@ align-claude-ecosystem.sh all --verify   # drift report per-macchina sotto deplo
 | §4 handoff-lint | ✅ DONE | **10/10 check** (D1-D4 · S1-S2 · H1-H2 · A1-A2), **blocking by default** (exit 1 su FAIL), `--warn-only` soft, `--no-db` skip. H2 esteso al backlog (section/block/terminal-aware, basso falso-positivo) |
 | §5 skill v5.1 | ✅ DONE | Step 3e gate bloccante + Step 4 rebase-safe (P5) + Step 4b `close-propagate.sh` |
 | §7 migrazione rinvii | ✅ DONE | rinvii attivi → HOLD register; 0 orfani attivi (archivio storico escluso per scope) |
-| §11 P1-P9 | ◐ P5+P8 done, resto opzionale | P8 INTERRUPTED ✅ · P5 rebase-safe ✅ (skill) · P1/P2/P3/P9 = decisione architetturale Enzo (gated) · P4 journal / P6 CI-lint / P7 boot-reality-check = futuri opzionali additivi |
+| §11 P1-P9 | ✅ **DONE (tutti)** | P1 register canonico (store strutturato item) · P2 `build_menu.py` (menu generato) · P3 trigger valutabili `{kind: query\|file-exists\|manual}` · P4 `session-journal.ndjson` (boot-rotate / close-consolidate / `journal-append.sh`) · P5 rebase-safe push · P6 `state-lint.yml` CI · P7 boot reality-check · P8 INTERRUPTED · P9 age-in-sessions + stale-count TTL |
 | §12 close-propagate + vm-deploy | ✅ DONE | orchestratore dual-channel + clone-db Opzione B + fail-loud + `--dry-run`; `vm-deploy.sh` rende **TUTTE** le unit (api/web + scheduler) con `SERVICE_USER` → entrypoint unico VM+linux-pc; test §12.5 in `run-shell-tests.sh` |
 | §13 ecosystem verify | ✅ DONE | marketplace-SHA (Opzione C, informativo) + `project_memory` parity (**bloccante**) + mac/vm/linuxpc in scope |
 | docs/rollout | ✅ DONE | questo status-flip + CLAUDE.md doctrine + memoria addendum + D-39 RISOLTO |

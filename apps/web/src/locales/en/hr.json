@@ -59,7 +59,15 @@
     "emptyTitle": "No capability data",
     "emptyDescription": "The engines have not been computed for this tenant yet.",
     "caption": "Capability and maturity per unit",
-    "cols": { "unit": "Unit", "capability": "Capability", "coverage": "Coverage", "positions": "Positions", "maturity": "Maturity" }
+    "cols": { "unit": "Unit", "capability": "Capability", "coverage": "Coverage", "positions": "Positions", "maturity": "Maturity", "actions": "Radar" },
+    "radar": {
+      "view": "View radar",
+      "title": "Maturity radar — {{unit}}",
+      "titleIdle": "Maturity radar",
+      "subtitle": "Maturity dimensions of the selected unit (Maturity engine), normalized 0-100.",
+      "hint": "Select a unit to see the radar of its maturity dimensions.",
+      "axes": { "composite": "Composite", "skill": "Skill coverage", "kpi": "KPI achievement", "readiness": "Readiness", "gapFree": "Gap-freeness" }
+    }
   },
   "processOwner": {
     "title": "Process-Owner Console",

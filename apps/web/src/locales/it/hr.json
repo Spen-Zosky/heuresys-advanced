@@ -59,7 +59,15 @@
     "emptyTitle": "Nessun dato di capability",
     "emptyDescription": "I motori non sono ancora stati calcolati per questo tenant.",
     "caption": "Capability e maturità per unità",
-    "cols": { "unit": "Unità", "capability": "Capability", "coverage": "Copertura", "positions": "Posizioni", "maturity": "Maturità" }
+    "cols": { "unit": "Unità", "capability": "Capability", "coverage": "Copertura", "positions": "Posizioni", "maturity": "Maturità", "actions": "Radar" },
+    "radar": {
+      "view": "Vedi radar",
+      "title": "Radar maturità — {{unit}}",
+      "titleIdle": "Radar maturità",
+      "subtitle": "Dimensioni di maturità dell'unità selezionata (motore Maturity), normalizzate 0-100.",
+      "hint": "Seleziona un'unità per vedere il radar delle sue dimensioni di maturità.",
+      "axes": { "composite": "Composite", "skill": "Copertura skill", "kpi": "Raggiungimento KPI", "readiness": "Readiness", "gapFree": "Assenza gap" }
+    }
   },
   "processOwner": {
     "title": "Console Process Owner",

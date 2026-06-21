@@ -22,6 +22,21 @@ test.describe("Org-Director console — live capability/maturity", () => {
     await expect(page.getByTestId("org-director-count")).toContainText(/\d+/);
     await expect(page.getByTestId("org-director-row").first()).toBeVisible();
   });
+
+  // Gap#1 follow-up: the CapabilityRadar (@heuresys/ui) drill-down of an org-unit's
+  // live Maturity dimensions (composite / skill / KPI / readiness / gap-freeness,
+  // from the Maturity engine criteria). 20 RTL_BANK OUs carry maturity scores.
+  test("maturity radar drill-down renders for a scored org-unit", async ({ page }) => {
+    await page.goto("/org-director", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(page.getByTestId("org-director-row").first()).toBeVisible({ timeout: 45_000 });
+    // Idle state before any selection: the hint, not a chart.
+    await expect(page.getByTestId("org-director-radar-hint")).toBeVisible();
+    // Pick the first OU that actually has maturity criteria (enabled button).
+    await page.locator('[data-testid="org-director-radar-btn"]:not([disabled])').first().click();
+    await expect(page.getByTestId("org-director-radar-chart")).toBeVisible({ timeout: 30_000 });
+    // CapabilityRadar renders an SVG from the live maturity dimensions.
+    await expect(page.getByTestId("org-director-radar-chart").locator("svg")).toBeVisible();
+  });
 });
 
 test.describe("Process-Owner console — live process catalog", () => {

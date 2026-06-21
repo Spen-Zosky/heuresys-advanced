@@ -30,7 +30,7 @@ SCRIPTS="$ROOT/scripts"
 MARKER="$ROOT/.session-align.marker"
 LINUXPC_REPO="${LINUXPC_REPO:-/home/enzo/heuresys-advanced}"
 
-MODE="--delta"; DEPLOY="--auto-deploy"; CLONE_DB="auto"
+MODE="--delta"; DEPLOY="--auto-deploy"; CLONE_DB="auto"; DRYRUN="${CLOSE_PROPAGATE_DRYRUN:-}"
 for a in "$@"; do
   case "$a" in
     --full)        MODE="" ;;            # align-clones full mode = omit --delta
@@ -41,6 +41,7 @@ for a in "$@"; do
     --resilient)   : ;;                  # accepted for compat; resilience is always on here
     --clone-db)    CLONE_DB="force" ;;
     --no-clone-db) CLONE_DB="skip" ;;
+    --dry-run)     DRYRUN=1 ;;           # print the resolved plan and exit (no channel runs)
     *) echo "unknown arg: $a" >&2; exit 1 ;;
   esac
 done
@@ -50,6 +51,29 @@ warn() { printf '\033[33m[warn]\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[31m[FATAL]\033[0m %s\n' "$*" >&2; exit 1; }
 
 FAILED=""
+
+# --- clone-db decision (policy §12.3-B: conditional) — computed up-front so --dry-run shows it
+need_clone=0
+case "$CLONE_DB" in
+  force) need_clone=1 ;;
+  skip)  need_clone=0 ;;
+  auto)
+    if [ -f "$MARKER" ]; then
+      start_head="$(head -1 "$MARKER" | tr -d '\r')"
+      if [ -n "$start_head" ] && \
+         [ -n "$(git diff --name-only "$start_head"..HEAD 2>/dev/null | grep -E '^db/(migrations|seeds)/' || true)" ]; then
+        need_clone=1
+      fi
+    fi ;;
+esac
+
+# --dry-run / CLOSE_PROPAGATE_DRYRUN: print the resolved plan and exit BEFORE touching any channel
+# (used by scripts/test/run-shell-tests.sh — flag parsing + clone-db conditional decision, §12.5).
+if [ -n "$DRYRUN" ]; then
+  mode_label="$([ -n "$MODE" ] && echo delta || echo full)"
+  echo "PLAN mode=$mode_label deploy=$DEPLOY clone-db=$CLONE_DB need_clone=$need_clone"
+  exit 0
+fi
 
 # --- channel 1: repo + payload + memories + deploy -----------------------------------------
 log "channel 1/2 — align-clones (repo + payload + memories + PROD deploy)"
@@ -70,20 +94,7 @@ else
   warn "align-claude-ecosystem.sh absent — ecosystem channel skipped (skill/CLAUDE.md won't propagate)"
 fi
 
-# --- linux-pc bare-metal DB refresh (policy §12.3-B: conditional) ---------------------------
-need_clone=0
-case "$CLONE_DB" in
-  force) need_clone=1 ;;
-  skip)  need_clone=0 ;;
-  auto)
-    if [ -f "$MARKER" ]; then
-      start_head="$(head -1 "$MARKER" | tr -d '\r')"
-      if [ -n "$start_head" ] && \
-         [ -n "$(git diff --name-only "$start_head"..HEAD 2>/dev/null | grep -E '^db/(migrations|seeds)/' || true)" ]; then
-        need_clone=1
-      fi
-    fi ;;
-esac
+# --- linux-pc bare-metal DB refresh (policy §12.3-B: conditional; need_clone computed above) -
 if [ "$need_clone" = 1 ]; then
   log "clone-db — linux-pc DB refresh (VM data changed this session / forced)"
   if MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes -o ConnectTimeout=8 linux-pc 'exit 0' 2>/dev/null; then

@@ -113,6 +113,37 @@ printf 'abc1234\r\nmemory_one.md\r\n' > "$T/marker"
 sha="$(head -1 "$T/marker" | tr -d '\r')"
 if [ "$sha" = "abc1234" ]; then ok "CRLF marker line-1 parses to a clean sha"; else fail "marker parse ('$sha')"; fi
 
+# ----------------- F. close-propagate.sh — flag parse + clone-db decision + resilience (§12.5)
+section "close-propagate.sh — dry-run plan + resilience wiring"
+CP="scripts/close-propagate.sh"
+# F1: defaults — delta / auto-deploy / clone-db auto
+out="$(CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" 2>&1)"
+if printf '%s' "$out" | grep -q 'mode=delta deploy=--auto-deploy clone-db=auto'; then
+  ok "defaults: --delta --auto-deploy clone-db=auto"
+else fail "defaults plan ($out)"; fi
+# F2: explicit flags parsed correctly
+out="$(CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --full --no-deploy --no-clone-db 2>&1)"
+if printf '%s' "$out" | grep -q 'mode=full deploy=--no-deploy clone-db=skip'; then
+  ok "flags: --full --no-deploy --no-clone-db"
+else fail "explicit flags plan ($out)"; fi
+# F3: --clone-db forces the conditional DB refresh (need_clone=1, regardless of the marker)
+out="$(CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --clone-db 2>&1)"
+if printf '%s' "$out" | grep -q 'clone-db=force need_clone=1'; then
+  ok "--clone-db forces the DB refresh (§12.3 override)"
+else fail "--clone-db force ($out)"; fi
+# F4: unknown flag rejected before any channel runs (exit 1)
+if CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --bogus-flag >/dev/null 2>&1; then
+  fail "unknown flag should exit non-zero"
+else ok "unknown flag rejected (exit 1, before any channel)"; fi
+# F5: idempotent plan — two dry-runs produce identical output
+a="$(CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta 2>&1)"; b="$(CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta 2>&1)"
+if [ "$a" = "$b" ]; then ok "dry-run plan is idempotent (stable across runs)"; else fail "dry-run not idempotent"; fi
+# F6: host-off resilience + fail-loud wiring present (static — no live LAN host in CI)
+if grep -q 'ConnectTimeout=8' "$CP" && grep -q 'unreachable' "$CP" \
+   && grep -q 'failed on a reachable host' "$CP"; then
+  ok "resilience: unreachable→skip+warn, reachable-fail→fail-loud (die)"
+else fail "resilience/fail-loud wiring missing"; fi
+
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

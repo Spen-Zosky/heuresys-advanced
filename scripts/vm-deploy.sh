@@ -134,32 +134,38 @@ NEXT_PUBLIC_API_PROXY_BASE_URL="http://localhost:$API_PORT" \
 NEXT_PUBLIC_API_BASE_URL="http://$PUBLIC_HOST:$API_PORT/v1" \
 pnpm --filter @heuresys/web build
 
-# 3c. Install/refresh the one-shot + timer units driven by schedulers: scraping (cap⑤ P2,
-#     weekly ESCO probe) + insights (cap③, daily recompute). The api/web unit files are
-#     installed by vm-bootstrap.sh; these scheduler units are NEW, so the ROUTINE deploy
-#     installs them too — otherwise the timers would silently never run. Idempotent:
-#     install + enable --now are safe to re-run; the timers (not the one-shots) get enabled.
-log "systemd: install scheduler units (scraping cap⑤ P2 + insights cap③ + backup R5 + reindex R7)"
+# 3c. Render + install ALL systemd units (api/web + EVERY scheduler) from deploy/systemd/.
+#     vm-deploy is the SINGLE deploy entrypoint for BOTH the VM (User=ubuntu) and the linux-pc
+#     twin (SERVICE_USER=enzo): the sed rewrites User=/Group= + all @@placeholders@@ on EVERY
+#     unit — not just the schedulers — so api/web are correct on the twin too (design §12.4;
+#     removes the divergence with provision-linux-pc.sh). The 5 placeholders are exactly the
+#     ones the sed covers (verified); a unit that still carries an unrendered @@…@@ aborts the
+#     deploy (fail-loud > installing a broken unit). Idempotent: re-render + install + enable.
+log "systemd: render + install ALL units (api/web + schedulers) — User=$SERVICE_USER (§12.4)"
 swtmp="$(mktemp -d)"
-for svc in scraping insights backup reindex; do
-  # Render ALL placeholders + the unit owner. The .service templates hard-code User=ubuntu;
-  # on the linux-pc twin (SERVICE_USER=enzo) the sed rewrites it, else they'd fail to start (§12.4).
+render_unit() {  # $1 = absolute path to a template unit file
+  local base; base="$(basename "$1")"
   sed -e "s#@@REPO_DIR@@#$REPO_DIR#g" -e "s#@@NODE_BIN@@#$NODE_BIN#g" \
       -e "s#@@PUBLIC_HOST@@#$PUBLIC_HOST#g" -e "s#@@API_PORT@@#$API_PORT#g" -e "s#@@WEB_PORT@@#$WEB_PORT#g" \
       -e "s#^User=ubuntu#User=$SERVICE_USER#g" -e "s#^Group=ubuntu#Group=$SERVICE_GROUP#g" \
-      "$REPO_DIR/deploy/systemd/heuresys-advanced-$svc.service" \
-      > "$swtmp/heuresys-advanced-$svc.service"
-  sudo install -m 644 -o root -g root "$swtmp/heuresys-advanced-$svc.service" \
-      "/etc/systemd/system/heuresys-advanced-$svc.service"
-  sudo install -m 644 -o root -g root "$REPO_DIR/deploy/systemd/heuresys-advanced-$svc.timer" \
-      "/etc/systemd/system/heuresys-advanced-$svc.timer"
+      "$1" > "$swtmp/$base"
+  if grep -q '@@' "$swtmp/$base"; then
+    echo "ERROR: unrendered placeholder in $base — vm-deploy sed does not cover it:" >&2
+    grep -n '@@' "$swtmp/$base" >&2; rm -rf "$swtmp"; exit 1
+  fi
+  sudo install -m 644 -o root -g root "$swtmp/$base" "/etc/systemd/system/$base"
+}
+for unit in "$REPO_DIR"/deploy/systemd/*.service "$REPO_DIR"/deploy/systemd/*.timer; do
+  render_unit "$unit"
 done
 rm -rf "$swtmp"
 sudo systemctl daemon-reload
-sudo systemctl enable --now heuresys-advanced-scraping.timer >/dev/null
-sudo systemctl enable --now heuresys-advanced-insights.timer >/dev/null
-sudo systemctl enable --now heuresys-advanced-backup.timer >/dev/null
-sudo systemctl enable --now heuresys-advanced-reindex.timer >/dev/null
+# api/web are long-running services (restarted in step 4 below); ensure they're enabled at boot.
+sudo systemctl enable heuresys-advanced-api.service heuresys-advanced-web.service >/dev/null 2>&1 || true
+# every scheduler timer: enable + start now (idempotent — re-run safe).
+for t in "$REPO_DIR"/deploy/systemd/*.timer; do
+  sudo systemctl enable --now "$(basename "$t")" >/dev/null
+done
 
 # 4. Restart services (api first so the web's proxy target is up).
 log "restart"

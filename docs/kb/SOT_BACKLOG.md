@@ -21,10 +21,6 @@
   - hold-reason: prodotto reso dimostrabile da Gap#1; la strategia/scope GTM è autorità *cosa* = Enzo
   - decided-by: Enzo · hold-since: S999 (2026-06-20)
   - reactivation-trigger: Enzo definisce scope/strategia go-to-market
-- **#5/#11 RACI di produzione** · status: HOLD
-  - hold-reason: oggi 13 righe demo su RTL_BANK; il mapping reale OU↔processo R/A/C/I è un fatto-business da autorare
-  - decided-by: Enzo · hold-since: S999 (2026-06-20)
-  - reactivation-trigger: Enzo fornisce/decide il mapping RACI reale (input di #4)
 - **#13 B-50 bridges** · status: HOLD
   - hold-reason: bridge `location↔org_unit` / `job→position` richiedono una decisione PM (o una Wave-2 che popoli `position_id`)
   - decided-by: Enzo · hold-since: S999 (2026-06-20)
@@ -84,6 +80,8 @@ Sessione di prodotto leggera sull'unico item ACTIVE del menu (Gap#1 follow-up). 
 - **(c) rubrica `rubric_version` rivedibile** → **HOLD** (vedi Action register): basso valore + scope-decisione, la v1-full già scelta da Enzo.
 - **Osservazione (non-azione, by-design)**: `org_director:read`/`capability:read` sono mappati anche a HRMS_MANAGER (mig 000145, deliberato) → la Porta-2 è accessibile a HRMS_MANAGER/TENANT_ADMIN oltre che a ORG_DIRECTOR. Se in futuro si volesse il ruolo funzionale *esclusivo*, sarebbe una decisione RBAC di Enzo (non aperta come item).
 - Gate: E2E `gap1-consoles` **9/9 verde** · typecheck web + eslint puliti · i18n parity 1403.
+
+**Post-handoff — #5/#11 RACI di produzione ✅** (`9ce9a92`, esce da HOLD): Enzo ha sbloccato il HOLD chiedendo a Claude di *proporre* il mapping RACI; proposta evidence-based su org+processi reali → **approvata**. Seed `54_raci_*` riscritto come SoT dichiarativa: **DELETE 13 demo → INSERT 105** assegnazioni reali (23 processi, 1 OWNER ciascuno + 30 R / 29 C / 23 I), idempotente (v5 PK + timestamp fissi), RTL-only. Fix test collision (D-23 snapshot-restore di DIR-AML/DIR-BACKOFF, ora owner). Applicato live sul DB VM condiviso → **PROD mostra già le 105 righe** (no re-deploy: nessun runtime code). La Porta-1 RACI drill-down (b) ora rende la mappa reale completa. Integration 9/9 + restore provato (count 105) · E2E gap1-consoles 9/9.
 
 ## 🟢 Aggiornamento S1001 (2026-06-21) — design handoff-rigor IMPLEMENTED end-to-end + close-flow live
 

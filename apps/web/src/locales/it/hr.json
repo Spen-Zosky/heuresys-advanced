@@ -71,7 +71,20 @@
     "caption": "Catalogo processi",
     "core": "Core",
     "optional": "Opzionale",
-    "cols": { "ordinal": "#", "code": "Codice", "name": "Processo", "kind": "Tipo" }
+    "cols": { "ordinal": "#", "code": "Codice", "name": "Processo", "kind": "Tipo", "actions": "RACI" },
+    "raci": {
+      "view": "Vedi RACI",
+      "title": "RACI — {{process}}",
+      "titleIdle": "Drill-down RACI",
+      "subtitle": "Unità organizzative assegnate al processo e relativo ruolo RACI.",
+      "hint": "Seleziona un processo per vedere le unità organizzative assegnate e il loro ruolo RACI.",
+      "count": "{{count}} unità",
+      "caption": "Assegnazioni RACI del processo",
+      "errorMessage": "Impossibile caricare le assegnazioni RACI",
+      "empty": "Nessuna unità organizzativa assegnata a questo processo.",
+      "cols": { "unit": "Unità organizzativa", "code": "Codice", "role": "Ruolo RACI" },
+      "roles": { "OWNER": "Owner · A", "CONTRIBUTOR": "Contributor · R", "CONSULTED": "Consulted · C", "INFORMED": "Informed · I" }
+    }
   },
   "gaps": {
     "title": "Gap analysis",

@@ -71,7 +71,20 @@
     "caption": "Process catalog",
     "core": "Core",
     "optional": "Optional",
-    "cols": { "ordinal": "#", "code": "Code", "name": "Process", "kind": "Kind" }
+    "cols": { "ordinal": "#", "code": "Code", "name": "Process", "kind": "Kind", "actions": "RACI" },
+    "raci": {
+      "view": "View RACI",
+      "title": "RACI — {{process}}",
+      "titleIdle": "RACI drill-down",
+      "subtitle": "Organization units assigned to the process and their RACI role.",
+      "hint": "Select a process to see the assigned organization units and their RACI role.",
+      "count": "{{count}} units",
+      "caption": "Process RACI assignments",
+      "errorMessage": "Failed to load RACI assignments",
+      "empty": "No organization unit is assigned to this process.",
+      "cols": { "unit": "Organization unit", "code": "Code", "role": "RACI role" },
+      "roles": { "OWNER": "Owner · A", "CONTRIBUTOR": "Contributor · R", "CONSULTED": "Consulted · C", "INFORMED": "Informed · I" }
+    }
   },
   "gaps": {
     "title": "Gap analysis",

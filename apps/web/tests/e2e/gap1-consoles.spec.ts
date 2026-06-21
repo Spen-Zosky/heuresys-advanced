@@ -30,4 +30,22 @@ test.describe("Process-Owner console — live process catalog", () => {
     await expect(page.getByTestId("process-owner-title")).toBeVisible({ timeout: 45_000 });
     await expect(page.getByTestId("process-owner-row").first()).toBeVisible();
   });
+
+  // Gap#1 follow-up: the RACI drill-down (/v1/organization-unit-processes/by-process/:id).
+  // "Human Capital Management" (process 17) has live OU↔process RACI assignments on the
+  // rebuilt RTL_BANK reference tenant (2 OUs, OWNER + CONTRIBUTOR).
+  test("RACI drill-down loads live org-unit assignments for a selected process", async ({ page }) => {
+    await page.goto("/process-owner", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(page.getByTestId("process-owner-row").first()).toBeVisible({ timeout: 45_000 });
+    // Idle state before any selection: the hint, not a table.
+    await expect(page.getByTestId("raci-drill-hint")).toBeVisible();
+    await page
+      .getByTestId("process-owner-row")
+      .filter({ hasText: "Human Capital Management" })
+      .getByTestId("process-owner-raci-btn")
+      .click();
+    // Live data from the by-process endpoint: a non-empty count + at least one OU row.
+    await expect(page.getByTestId("raci-drill-count")).toContainText(/\d+/, { timeout: 45_000 });
+    await expect(page.getByTestId("raci-drill-row").first()).toBeVisible();
+  });
 });

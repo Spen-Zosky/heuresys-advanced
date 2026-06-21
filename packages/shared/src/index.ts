@@ -19,6 +19,7 @@ export * from "./schemas/skills.js";
 export * from "./schemas/kpi-definitions.js";
 export * from "./schemas/job-families.js";
 export * from "./schemas/job-roles.js";
+export * from "./schemas/leads.js";
 export * from "./schemas/learning-modules.js";
 export * from "./schemas/skill-families.js";
 export * from "./schemas/skill-categories.js";

@@ -71,6 +71,10 @@
       "types": "./dist/schemas/job-roles.d.ts",
       "default": "./src/schemas/job-roles.ts"
     },
+    "./schemas/leads": {
+      "types": "./dist/schemas/leads.d.ts",
+      "default": "./src/schemas/leads.ts"
+    },
     "./schemas/learning-modules": {
       "types": "./dist/schemas/learning-modules.d.ts",
       "default": "./src/schemas/learning-modules.ts"

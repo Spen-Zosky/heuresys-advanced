@@ -13,7 +13,7 @@ const REFRESH_COOKIE = "hrx_refresh";
 // `/showcase` is gated independently in apps/web/src/app/showcase/layout.tsx
 // (env flag + non-production check). It must be public at the middleware level
 // so Product Owner brand review does not require a login.
-const PUBLIC_PATHS = ["/login", "/_next", "/api", "/showcase"];
+const PUBLIC_PATHS = ["/login", "/_next", "/api", "/showcase", "/privacy"];
 
 function isPublic(pathname: string): boolean {
   if (pathname === "/") return true; // public marketing landing (front door)

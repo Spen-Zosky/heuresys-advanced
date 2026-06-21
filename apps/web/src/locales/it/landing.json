@@ -29,12 +29,20 @@
     "companySize": "Dimensione azienda",
     "sizes": { "LT_50": "Meno di 50", "50_250": "50–250", "250_2000": "250–2000", "GT_2000": "Oltre 2000" },
     "message": "Messaggio (facoltativo)",
-    "consent": "Acconsento al trattamento dei miei dati per essere ricontattato (vedi {{privacy}}).",
-    "privacyLink": "informativa privacy",
+    "consent": "Acconsento al trattamento dei miei dati per essere ricontattato (vedi <privacy>informativa privacy</privacy>).",
     "submit": "Invia richiesta",
     "submitting": "Invio…",
     "success": "Grazie! Ti ricontattiamo a breve.",
     "error": "Invio non riuscito. Riprova."
+  },
+  "privacy": {
+    "title": "Informativa sulla privacy",
+    "intro": "Ai sensi dell'art. 13 del Regolamento (UE) 2016/679 (GDPR), ti forniamo le seguenti informazioni.",
+    "dataCollected": "Raccogliamo i dati che fornisci tramite il modulo di contatto: nome e cognome, azienda, indirizzo e-mail e, facoltativamente, ruolo e messaggio.",
+    "purpose": "I dati sono trattati al solo scopo di darti riscontro sulla richiesta di demo e di contattarti per illustrare i servizi Heuresys.",
+    "legalBasis": "La base giuridica del trattamento è il consenso esplicito da te prestato (art. 6, par. 1, lett. a GDPR).",
+    "retention": "I dati sono conservati per il tempo strettamente necessario a gestire la tua richiesta e, in ogni caso, non oltre 24 mesi dalla raccolta. Puoi revocare il consenso in qualsiasi momento scrivendo all'indirizzo indicato di seguito.",
+    "contact": "Titolare del trattamento: Heuresys S.r.l. — privacy@heuresys.com"
   },
   "footer": { "tagline": "Heuresys — Skills & Org Intelligence EU-native." }
 }

@@ -29,12 +29,20 @@
     "companySize": "Company size",
     "sizes": { "LT_50": "Under 50", "50_250": "50–250", "250_2000": "250–2000", "GT_2000": "Over 2000" },
     "message": "Message (optional)",
-    "consent": "I consent to my data being processed so you can contact me (see {{privacy}}).",
-    "privacyLink": "privacy notice",
+    "consent": "I consent to my data being processed so you can contact me (see <privacy>privacy notice</privacy>).",
     "submit": "Send request",
     "submitting": "Sending…",
     "success": "Thank you! We'll be in touch soon.",
     "error": "Submission failed. Please try again."
+  },
+  "privacy": {
+    "title": "Privacy Notice",
+    "intro": "Pursuant to Art. 13 of Regulation (EU) 2016/679 (GDPR), we provide the following information.",
+    "dataCollected": "We collect the data you submit via the contact form: full name, company, work email and, optionally, role and message.",
+    "purpose": "Your data is processed solely to respond to your demo request and to contact you about Heuresys services.",
+    "legalBasis": "The legal basis for processing is your explicit consent (Art. 6(1)(a) GDPR).",
+    "retention": "Data is retained for the time strictly necessary to handle your request and, in any event, no longer than 24 months from collection. You may withdraw consent at any time by writing to the address below.",
+    "contact": "Data controller: Heuresys S.r.l. — privacy@heuresys.com"
   },
   "footer": { "tagline": "Heuresys — EU-native Skills & Org Intelligence." }
 }

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslation } from "react-i18next";
+import { useTranslation, Trans } from "react-i18next";
 import { Button, Card, CardContent, Input } from "@heuresys/ui";
 import { LeadCreateSchema, type LeadCreate } from "@heuresys/shared/schemas/leads";
 
@@ -76,7 +76,11 @@ export default function LeadForm() {
           <label className="flex items-start gap-2 text-sm">
             <input data-testid="lead-consent" type="checkbox" {...register("consent")} className="mt-1" />
             <span className="text-muted-foreground">
-              {t("form.consent", { privacy: t("form.privacyLink") })}
+              <Trans
+                t={t}
+                i18nKey="form.consent"
+                components={{ privacy: <a href="/privacy" className="underline hover:text-foreground" target="_blank" rel="noopener noreferrer" /> }}
+              />
             </span>
           </label>
           <Button type="submit" disabled={state === "submitting"} data-testid="lead-submit">

@@ -16,6 +16,7 @@ const REFRESH_COOKIE = "hrx_refresh";
 const PUBLIC_PATHS = ["/login", "/_next", "/api", "/showcase"];
 
 function isPublic(pathname: string): boolean {
+  if (pathname === "/") return true; // public marketing landing (front door)
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 

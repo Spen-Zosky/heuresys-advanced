@@ -11,7 +11,7 @@ Sessione lunga e produttiva, partita dal menu (Gap#1 follow-up) e proseguita su 
 ## Top priorities (next session)
 
 1. **#4 go-to-market — prossimo deliverable** (autorità *cosa* = Enzo): il primo (front-door + lead form) è live; i candidati next dal brainstorming = investor one-pager · demo guidata · pricing. È il keystone del programma.
-2. **C1 deploy-verify** (debt P2): verificare LIVE in PROD che il rate-limit per-IP di `/v1/leads` keyi sul client IP reale dietro i 2 hop nginx→Next→API (stesso meccanismo del login, verificato S984). Se collassa → D-28-followup app-wide.
+2. **#8 EMAIL dormiente** (WAIT-INPUT): app-password Outlook → attiva EMAIL_OTP + digest live (transport pronto). *(C1 rate-limit deploy-verify già RISOLTO live post-deploy — D-42: 429 sul burst, per-IP funziona.)*
 
 ## Open questions (autorità *cosa* = Enzo)
 

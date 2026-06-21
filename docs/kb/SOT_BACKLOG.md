@@ -3,9 +3,18 @@
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
 > **Aggiornato**: 2026-05-27 (S939; + verifica stato evidence-based pre-resolution).
 
-## ⏸ HOLD register — azioni parcheggiate (corsia pull, fuori dal menu)
+## 🗂 Action register — item strutturati del menu (corsie ACTIVE/GATED/WAIT-INPUT/HOLD/INTERRUPTED)
 
-> **Corsia pull** (design `2026-06-20-handoff-rigor-and-hold-lane-design.md` §3): questi item NON compaiono nel menu di session-start — solo come conteggio-sommario. Entrano in menu **solo** su richiesta esplicita di Enzo o quando il loro `reactivation-trigger` scatta. `WAIT-INPUT` = aspetta un input che solo Enzo fornisce (resta nel vassoio "aspetta te"). Integrità verificata da `handoff_lint.py` (H1/S2). Stato corrente post-Gap#1-DONE (S999).
+> **Canonical item store** (design `2026-06-20-handoff-rigor-and-hold-lane-design.md` §3/§11.1/P1): gli item del menu vivono qui come **blocchi-dati machine-parseable**; la narrativa storica resta prosa sotto le sezioni `🟢 Aggiornamento`. Formato di una voce:
+> ```
+> - **#<id> <titolo>** · status: <ACTIVE|GATED|WAIT-INPUT|HOLD|INTERRUPTED>
+>   - <campo>: <valore> · <campo>: <valore>
+> ```
+> **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
+
+- **Gap#1 follow-up (CLASS-A, non bloccanti)** · status: ACTIVE
+  - priority: P3 · effort: ~2-4h · doc: docs/kb/SOT_STATE.md §Delta S999
+  - note: grant `ORG_DIRECTOR` a un holder reale quando nominato · Porta-1 RACI drill-down (`/v1/organization-unit-processes/by-process/:id`) · rubrica Maturity `rubric_version` rivedibile · arricchimento UI porte (radar/PIP drill-down)
 
 - **#4 go-to-market** · status: HOLD
   - hold-reason: prodotto reso dimostrabile da Gap#1; la strategia/scope GTM è autorità *cosa* = Enzo

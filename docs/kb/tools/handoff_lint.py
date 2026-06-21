@@ -42,6 +42,7 @@ SOT_MD = os.path.join(REPO, "docs", "kb", "SOT_STATE.md")
 BACKLOG_MD = os.path.join(REPO, "docs", "kb", "SOT_BACKLOG.md")
 
 MAX_STATE_LINES = 70  # STATE.md is the rapid view — keep it short (design §3 says <60; +slack)
+STALE_TTL = 3         # a "(non ri-derivato)" count older than this many sessions → FAIL (P9/§11.9)
 VALID_STATES = {"ACTIVE", "GATED", "WAIT-INPUT", "HOLD", "INTERRUPTED", "DONE", "FATTO", "WON'T-DO"}
 HOLD_REQUIRED = ("hold-reason", "decided-by", "hold-since", "reactivation-trigger")
 WAIT_REQUIRED = ("input-richiesto", "perche-solo-tuo")
@@ -59,7 +60,7 @@ TERMINAL_RE = re.compile(r"✅|⚪|🏁|~~|\bFATTO\b|\bDONE\b|WON'?T-DO|\bRISOLT
                          r"|OBSOLETE|SUPERSED|ESEGUIT|RESOLVED|EXECUTED|\bCLOSED\b", re.IGNORECASE)
 # A "## " section heading that is an archive/record (not an actionable menu section). Everything
 # under it is history → H2 does not scan it.
-ARCHIVE_HEADER_RE = re.compile(r"^(?:[✅⚪🟢🏁🔭⏸]|.*(?:Aggiornament|Verifica stato|RESOLVED|HOLD register"
+ARCHIVE_HEADER_RE = re.compile(r"^(?:[✅⚪🟢🏁🔭⏸🗂]|.*(?:Aggiornament|Verifica stato|RESOLVED|register"
                                r"|Programma 100X|DONE))", re.IGNORECASE)
 # A bold sub-block "**<emoji> Aggiornamento SXXX …**" inside an active section: from it to the
 # next "## " heading is history (the backlog interleaves session records under P-sections).
@@ -115,6 +116,15 @@ def real_migration_count():
         if m:
             nums.append(int(m.group(1)))
     return len(files), (max(nums) if nums else 0)
+
+
+def current_session(state_md):
+    """Current session number — the first 'SXXX' token in STATE (header/brief). None if absent.
+    Shared with build_menu.py (P2/P9)."""
+    if not state_md:
+        return None
+    m = re.search(r"\bS(\d{3,4})\b", state_md)
+    return int(m.group(1)) if m else None
 
 
 def git_head():
@@ -182,8 +192,8 @@ def declared_migration_ranges(md):
     return [int(y) for y in re.findall(r"000\d{3}\s*\.\.\s*`?000(\d{3})", md)]
 
 
-def check_sot(md, use_db):
-    """D2 (internal coherence), D3 (freshness vs disk + cited tags), D4 (head sha — warn)."""
+def check_sot(md, use_db, cur=None):
+    """D2 (internal coherence), D3 (freshness vs disk + cited tags + stale-count TTL), D4 (head sha)."""
     if md is None:
         warn("D2", f"{SOT_MD} missing (granular view absent — ok in minimal projects)")
         return
@@ -207,7 +217,9 @@ def check_sot(md, use_db):
     # D3 (cont.) — every git tag the SOT cites must actually exist (a phantom 'v1.2.0' = drift).
     if use_db is not False:  # repo-only, but skipped under --no-db for symmetry with the contract
         tags = git_tags()
-        if tags is not None:
+        # Only assert when SOME tags are present: a shallow CI checkout (fetch-depth 1, no tags)
+        # has an empty tag set — there we can't claim a cited tag is phantom, so skip.
+        if tags:
             cited = set(re.findall(r"`(v\d+\.\d+\.\d+)`", md))
             phantom = sorted(t for t in cited if t not in tags)
             if phantom:
@@ -223,6 +235,21 @@ def check_sot(md, use_db):
         if shas and not any(s.startswith(head) or head.startswith(s) for s in shas):
             warn("D4", f"SOT_STATE cites HEAD {shas[0]} but git HEAD is {head} "
                        f"(stale unless this runs pre-commit)")
+
+    # P9 / §11.9 — stale-count TTL: a count in the CURRENT snapshot marked "(non ri-derivato …)"
+    # must be re-derived within STALE_TTL sessions — a tunnel-down marker can't live forever.
+    # Scope = the snapshot region only (everything before the first Delta/archive section), so the
+    # historical "non ri-derivati" records inside old Delta blocks don't false-positive.
+    snapshot = re.split(r"(?m)^##\s+(?:.*Delta|.*Aggiornament|[✅⚪🟢🏁🔭⏸🗂])", md, maxsplit=1)[0]
+    for m in re.finditer(r"non ri-derivat\w*", snapshot, re.IGNORECASE):
+        seg = snapshot[m.start():m.start() + 140]
+        sm = re.search(r"S(\d{3,4})", seg)
+        if not sm:
+            warn("D3", "snapshot has a '(non ri-derivato)' count without a session stamp — mark it "
+                       "'(non ri-derivato — tunnel down, SXXX)' so its staleness is bounded")
+        elif cur is not None and cur - int(sm.group(1)) > STALE_TTL:
+            fail("D3", f"snapshot count '(non ri-derivato)' stamped S{sm.group(1)} is "
+                       f"{cur - int(sm.group(1))} sessions stale (> TTL {STALE_TTL}) — re-derive it")
 
 
 def parse_register_items(md):
@@ -257,11 +284,11 @@ def check_register(md):
         fail("H1", f"{BACKLOG_MD} missing")
         return
     secs = split_sections(md)
-    reg = [b for h, b in secs if "hold register" in h.lower() or "wait-input" in h.lower()
-           or "registro hold" in h.lower()]
+    reg = [b for h, b in secs if "action register" in h.lower() or "hold register" in h.lower()
+           or "wait-input" in h.lower() or "registro hold" in h.lower()]
     if not reg:
-        warn("H1", "SOT_BACKLOG has no tagged HOLD/WAIT-INPUT register section "
-                   "(design §3.4 / §7 — parked items should live there, out of the menu)")
+        warn("H1", "SOT_BACKLOG has no tagged Action/HOLD register section "
+                   "(design §3.4 / §7 — menu items should live there, structured)")
         return
     items = []
     for b in reg:
@@ -280,9 +307,9 @@ def check_register(md):
                                                         for f in it["fields"])]
             if miss:
                 warn("H1", f"WAIT-INPUT item {it['title']!r} should carry {WAIT_REQUIRED}")
-    print(f"  [register] {len(items)} parked item(s) parsed "
-          f"({sum(1 for i in items if i['status']=='HOLD')} HOLD, "
-          f"{sum(1 for i in items if i['status']=='WAIT-INPUT')} WAIT-INPUT)")
+    def _n(st): return sum(1 for i in items if i["status"] == st)
+    print(f"  [register] {len(items)} item(s): {_n('ACTIVE')} ACTIVE, {_n('GATED')} GATED, "
+          f"{_n('WAIT-INPUT')} WAIT-INPUT, {_n('HOLD')} HOLD, {_n('INTERRUPTED')} INTERRUPTED")
 
 
 def check_backlog_defer(md):
@@ -389,7 +416,7 @@ def main():
         sot = read(SOT_MD)
         backlog = read(BACKLOG_MD)
         check_state(state)
-        check_sot(sot, use_db)
+        check_sot(sot, use_db, current_session(state))
         check_register(backlog)
         check_backlog_defer(backlog)
         check_atomicity(state, backlog, sot)

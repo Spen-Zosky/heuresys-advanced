@@ -17,7 +17,7 @@ export const LeadCreateSchema = z.object({
   companySize: LeadCompanySizeEnum.optional(),
   message: z.string().trim().max(2000).optional(),
   consent: z.literal(true),
-  website: z.string().max(0).optional().default(""), // honeypot: must be empty
+  website: z.string().optional().default(""), // honeypot: real users leave it empty; the service swallows non-empty silently
 });
 export type LeadCreate = z.infer<typeof LeadCreateSchema>;
 

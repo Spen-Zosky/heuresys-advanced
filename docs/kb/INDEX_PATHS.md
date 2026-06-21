@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-20T18:22:35Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2114**
+**Generato**: 2026-06-21T02:58:10Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2117**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -11,9 +11,9 @@
 | ADR | 24 |
 | api-core | 18 |
 | api-module | 285 |
-| ci | 15 |
+| ci | 16 |
 | claude-config | 6 |
-| config | 98 |
+| config | 99 |
 | cowork-archive | 14 |
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
@@ -21,7 +21,7 @@
 | db-migration | 148 |
 | db-script | 23 |
 | db-seed | 104 |
-| doc-canonical | 383 |
+| doc-canonical | 384 |
 | handoff-state | 1 |
 | qa-artifact | 96 |
 | script | 6 |
@@ -32,7 +32,7 @@
 | test | 220 |
 | ux-design-archive | 80 |
 | web-source | 149 |
-| **TOTALE** | **2114** |
+| **TOTALE** | **2117** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 488 |
 | external-archive | 50 |
-| live | 1576 |
+| live | 1579 |
 
 ## File per categoria
 
@@ -396,6 +396,7 @@
 - `D:\heuresys-advanced\.github\workflows\playwright-smoke.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\shell-tests.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\showcase.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\workflows\state-lint.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\test-integration.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\typecheck.yml` · *live* · git-tracked
 
@@ -494,6 +495,7 @@
 - `D:\heuresys-advanced\scripts\env-key-merge.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\generate_wave1_column_mappings.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\generate_wave1_seeds.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\journal-append.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\provision-linux-pc.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\restore-showcase-routes.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\run-wave1-fullscale.mjs` · *live* · git-tracked
@@ -1334,6 +1336,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\build_graph_mirror.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_index.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_linked_manifest.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\build_menu.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\handoff_lint.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-commit` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-merge` · *live* · git-tracked

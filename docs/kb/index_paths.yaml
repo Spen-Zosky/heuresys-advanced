@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-20T18:22:35Z da docs/kb/tools/build_index.py
+# generato: 2026-06-21T02:58:10Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-20T18:22:35Z"
-  total_files: 2114
+  generated_at: "2026-06-21T02:58:10Z"
+  total_files: 2117
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -11,9 +11,9 @@ meta:
     ADR: 24
     api-core: 18
     api-module: 285
-    ci: 15
+    ci: 16
     claude-config: 6
-    config: 98
+    config: 99
     cowork-archive: 14
     cowork-exchange: 203
     cowork-reserved: 119
@@ -21,7 +21,7 @@ meta:
     db-migration: 148
     db-script: 23
     db-seed: 104
-    doc-canonical: 383
+    doc-canonical: 384
     handoff-state: 1
     qa-artifact: 96
     script: 6
@@ -35,7 +35,7 @@ meta:
   status_counts:
     archive: 488
     external-archive: 50
-    live: 1576
+    live: 1579
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2077,6 +2077,12 @@ files:
     category: ci
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.github\workflows\state-lint.yml'
+    root: repo
+    rel: '.github/workflows/state-lint.yml'
+    category: ci
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.github\workflows\test-integration.yml'
     root: repo
     rel: '.github/workflows/test-integration.yml'
@@ -2626,6 +2632,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\generate_wave1_seeds.mjs'
     root: repo
     rel: 'scripts/generate_wave1_seeds.mjs'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\journal-append.sh'
+    root: repo
+    rel: 'scripts/journal-append.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -7522,6 +7534,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\build_linked_manifest.py'
     root: repo
     rel: 'docs/kb/tools/build_linked_manifest.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\build_menu.py'
+    root: repo
+    rel: 'docs/kb/tools/build_menu.py'
     category: doc-canonical
     status: live
     provenance: git-tracked

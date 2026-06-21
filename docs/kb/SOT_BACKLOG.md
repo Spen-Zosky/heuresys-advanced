@@ -73,6 +73,17 @@ Il **#3 Gap#1** (Porte Process/Org UI + MLCE + Maturity) — l'abilitatore del g
 - **Gating**: ✅ **SBLOCCATO ed ESEGUITO (2026-06-20)**. Consolidamento concluso (SoT `docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md` + `README.md`); delta-check Gap#1↔SoT eseguito (convergenza alta, **0 contraddizioni di fatto**); spec Gap#1 ri-allineati (riferimenti/framing + conteggio 600→630, priorità Porte, banner DESIGN_SPEC→RE-ALIGNED). Il programma-faro Gap#1 (#3) **non è più sospeso da questo gate**: il build resta subordinato solo al go + decisioni §8 di Enzo.
 - **Effort**: ~0.5-1 sessione (delta-check + aggiornamenti doc); poi riprende Gap#1 con lo spec ri-validato.
 
+## 🟢 Aggiornamento S1001 (2026-06-21) — design handoff-rigor IMPLEMENTED end-to-end + close-flow live
+
+Sessione infra. Verifica del design `2026-06-20-handoff-rigor-and-hold-lane-design.md` (risultava un *subset pragmatico*) → chiusi i 9 gap + implementati §11 P1-P9. 10 commit pushati (`545ec8a→6bb83d8`).
+- **§4 handoff-lint**: 10 check (D1-D4·S1-S2·H1-H2·A1-A2), bloccante default, H2 esteso alle sezioni attive del backlog (section/block/terminal-aware), `--no-db`/`--warn-only`; 5 exit-criteria §8 testati inject→FAIL→restore.
+- **§5 skill `handoff` v5.1**: gate bloccante + push rebase-safe (P5).
+- **§11 P1-P9 (tutti)**: P1 `🗂 Action register` store canonico · P2 `build_menu.py` · P3 trigger `{kind:query/file-exists/manual}` · P4 `session-journal.ndjson`+`journal-append.sh` · P5 rebase-push · P6 `state-lint.yml` · P7 boot reality-check · P8 INTERRUPTED · P9 age+stale-TTL.
+- **§12**: `vm-deploy.sh` rende TUTTE le unit con `SERVICE_USER` (entrypoint unico VM+linux-pc; fix guard placeholder `@@NAME@@`) + test close-propagate in `run-shell-tests.sh`.
+- **§13**: `project_memory` parity verify (bloccante) in `align-claude-ecosystem`.
+- **Close-flow live** (close-propagate) **exit 0**: VM + linux-pc PROD ri-deployati (`/readyz`+`/login 200`), skill v5.1 + memorie propagate. Primo run fail-loud su guard bug (PROD intatta) → fixato `6bb83d8`.
+- **Decisione Enzo**: `claude-mem` enabled=false (vm+linux-pc; mac alla prossima accensione). Nuovi debiti D-40 (ecosystem enabledPlugins) + D-41 (mac project_memory verify).
+
 ## 🟢 Aggiornamento S998 (2026-06-19) — batch autonomo "chiudere tutto": menu 1/2/6/15 + #7 + dispozioni rimanenti
 
 Batch decision-authority session-scoped (Enzo: "esegui 1/2/6/15 in autonomia, poi affrontiamo i rimanenti; chiudere tutto tranne audit 9/10/11" → "confermo in blocco" sulle dispozioni proposte). **5 commit local** (`d0b1105` #15/#6 + `36daa47` #1 + `ee266ea` #2 + `85d6418` #7, + `b082336` docs pre-esistente); granulare → `SOT_STATE.md §Delta S998`. Gate: full API suite **1063 pass / 6 skip / 0 fail** + typecheck 5/5 ws + typecheck:test. Questa sezione **supersede** i residui #1 slice-3a + #2 WI-C elencati nel blocco S997 sotto.

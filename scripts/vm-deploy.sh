@@ -149,9 +149,11 @@ render_unit() {  # $1 = absolute path to a template unit file
       -e "s#@@PUBLIC_HOST@@#$PUBLIC_HOST#g" -e "s#@@API_PORT@@#$API_PORT#g" -e "s#@@WEB_PORT@@#$WEB_PORT#g" \
       -e "s#^User=ubuntu#User=$SERVICE_USER#g" -e "s#^Group=ubuntu#Group=$SERVICE_GROUP#g" \
       "$1" > "$swtmp/$base"
-  if grep -q '@@' "$swtmp/$base"; then
+  # Only REAL placeholders (@@NAME@@, uppercase token) — NOT the literal "@@...@@" that the
+  # template header comment carries ("placeholders (@@...@@) are rendered by …").
+  if grep -qE '@@[A-Z_]+@@' "$swtmp/$base"; then
     echo "ERROR: unrendered placeholder in $base — vm-deploy sed does not cover it:" >&2
-    grep -n '@@' "$swtmp/$base" >&2; rm -rf "$swtmp"; exit 1
+    grep -nE '@@[A-Z_]+@@' "$swtmp/$base" >&2; rm -rf "$swtmp"; exit 1
   fi
   sudo install -m 644 -o root -g root "$swtmp/$base" "/etc/systemd/system/$base"
 }

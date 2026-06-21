@@ -75,6 +75,42 @@ try {
         }
     }
 } catch {}
+
+# 5. Session journal (P4, design §11.4): rotate at boot so a pending/decision/interrupted logged
+#    mid-session survives a context compaction. If non-empty at boot, the previous session died
+#    without a close → preserve it as .recovered + flag it; then start a clean journal.
+$journalMsg = '[OK]   session journal ready'
+try {
+    $journal = Join-Path $ProjectRoot '.handoff\session-journal.ndjson'
+    if ((Test-Path $journal) -and ((Get-Item $journal).Length -gt 0)) {
+        $jn = @(Get-Content -LiteralPath $journal -ErrorAction SilentlyContinue).Count
+        $recovered = Join-Path $ProjectRoot '.handoff\session-journal.recovered.ndjson'
+        Move-Item -LiteralPath $journal -Destination $recovered -Force
+        $journalMsg = "[!]    session journal: $jn entry da una sessione non chiusa -> .recovered (consolidare al close)"
+    }
+    if (-not (Test-Path $journal)) { New-Item -ItemType File -Path $journal -Force | Out-Null }
+} catch {}
+
+# 6. State coherence reality-check (P7, design §11.7): run the handoff lint READ-ONLY and surface
+#    its verdict, so the action menu is not built on already-drifted state (a concurrent session
+#    may have left it incoherent before this one started).
+$lintMsg = '[--]   handoff-lint not run (python/script absent)'
+try {
+    $lintPy = Join-Path $ProjectRoot 'docs\kb\tools\handoff_lint.py'
+    if ((Get-Command python -ErrorAction SilentlyContinue) -and (Test-Path $lintPy)) {
+        Push-Location $ProjectRoot
+        $lintOut = & python $lintPy --warn-only 2>&1
+        Pop-Location
+        $lintFails = @($lintOut | Select-String -Pattern '^FAIL ')
+        if ($lintFails.Count -eq 0) {
+            $lintMsg = '[OK]   stato coerente (handoff-lint)'
+        } else {
+            $detail = ($lintFails | ForEach-Object { '       ' + $_.Line }) -join "`n"
+            $lintMsg = "[!]    stato DRIFTATO: $($lintFails.Count) FAIL (handoff-lint)`n$detail"
+        }
+    }
+} catch {}
+
 $treeMsg = if ($dirty.Count -gt 0)    { "[!]    working tree DIRTY ($($dirty.Count) files)" } else { '[OK]   working tree clean' }
 $pushMsg = if ($unpushed.Count -gt 0) { "[!]    $($unpushed.Count) commit(s) unpushed" }       else { '[OK]   synced with origin' }
 
@@ -85,4 +121,6 @@ Write-Output $dbMsg
 Write-Output "branch $branch @ $head"
 Write-Output $treeMsg
 Write-Output $pushMsg
+Write-Output $journalMsg
+Write-Output $lintMsg
 Write-Output '==================================='

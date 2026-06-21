@@ -1,0 +1,40 @@
+{
+  "nav": { "login": "Accedi", "cta": "Prenota una demo" },
+  "hero": {
+    "title": "La piattaforma Skills & Org Intelligence EU-native, ESCO-based e spiegabile per il mid-market regolato",
+    "subtitle": "Governa competenze, posizioni e capacità organizzativa con uno standard pubblico europeo (ESCO) e raccomandazioni auditabili, compliant con l'AI Act.",
+    "cta": "Prenota una demo"
+  },
+  "wedges": {
+    "title": "Perché Heuresys",
+    "esco": { "title": "ESCO-native, aperta", "body": "Standard pubblico EU: nessun lock-in proprietario, benchmarking cross-country, interoperabilità." },
+    "explain": { "title": "Spiegabile = compliance AI Act", "body": "Ogni raccomandazione (successione, flight-risk, gap) è deterministica e auditabile davanti a un regolatore. Niente black-box." },
+    "position": { "title": "Modello position-centric", "body": "La posizione è entità prima: org-design e legame struttura↔processo↔competenza che gli ERP servono a costi proibitivi." }
+  },
+  "icp": {
+    "title": "Per chi",
+    "body": "Mid-market europeo, 250–2000 dipendenti, in settori strutturati e regolati: banking, assicurazioni, sanità, utility."
+  },
+  "credibility": {
+    "title": "Costruita su standard, non su promesse",
+    "body": "ESCO (Commissione Europea) come ontologia delle competenze, euristiche deterministiche al posto di ML opaco, modello dati position-centric: ogni numero è tracciabile alla sua fonte."
+  },
+  "form": {
+    "title": "Prenota una demo",
+    "subtitle": "Raccontaci della tua organizzazione: ti ricontattiamo per una demo guidata.",
+    "name": "Nome e cognome",
+    "company": "Azienda",
+    "email": "Email di lavoro",
+    "role": "Ruolo (facoltativo)",
+    "companySize": "Dimensione azienda",
+    "sizes": { "LT_50": "Meno di 50", "50_250": "50–250", "250_2000": "250–2000", "GT_2000": "Oltre 2000" },
+    "message": "Messaggio (facoltativo)",
+    "consent": "Acconsento al trattamento dei miei dati per essere ricontattato (vedi {{privacy}}).",
+    "privacyLink": "informativa privacy",
+    "submit": "Invia richiesta",
+    "submitting": "Invio…",
+    "success": "Grazie! Ti ricontattiamo a breve.",
+    "error": "Invio non riuscito. Riprova."
+  },
+  "footer": { "tagline": "Heuresys — Skills & Org Intelligence EU-native." }
+}

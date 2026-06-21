@@ -1,0 +1,40 @@
+{
+  "nav": { "login": "Sign in", "cta": "Book a demo" },
+  "hero": {
+    "title": "The EU-native, ESCO-based, explainable Skills & Org Intelligence platform for the regulated mid-market",
+    "subtitle": "Govern skills, positions and organizational capability on a European public standard (ESCO) with auditable, AI-Act-ready recommendations.",
+    "cta": "Book a demo"
+  },
+  "wedges": {
+    "title": "Why Heuresys",
+    "esco": { "title": "ESCO-native, open", "body": "An EU public standard: no proprietary lock-in, cross-country benchmarking, interoperability." },
+    "explain": { "title": "Explainable = AI-Act compliance", "body": "Every recommendation (succession, flight-risk, gap) is deterministic and auditable before a regulator. No black-box." },
+    "position": { "title": "Position-centric model", "body": "The position is a first-class entity: org-design and the structure↔process↔skill link that ERPs charge a fortune for." }
+  },
+  "icp": {
+    "title": "Who it's for",
+    "body": "European mid-market, 250–2000 employees, in structured and regulated sectors: banking, insurance, healthcare, utilities."
+  },
+  "credibility": {
+    "title": "Built on standards, not promises",
+    "body": "ESCO (European Commission) as the skills ontology, deterministic heuristics instead of opaque ML, a position-centric data model: every number traces back to its source."
+  },
+  "form": {
+    "title": "Book a demo",
+    "subtitle": "Tell us about your organization — we'll get back to you for a guided demo.",
+    "name": "Full name",
+    "company": "Company",
+    "email": "Work email",
+    "role": "Role (optional)",
+    "companySize": "Company size",
+    "sizes": { "LT_50": "Under 50", "50_250": "50–250", "250_2000": "250–2000", "GT_2000": "Over 2000" },
+    "message": "Message (optional)",
+    "consent": "I consent to my data being processed so you can contact me (see {{privacy}}).",
+    "privacyLink": "privacy notice",
+    "submit": "Send request",
+    "submitting": "Sending…",
+    "success": "Thank you! We'll be in touch soon.",
+    "error": "Submission failed. Please try again."
+  },
+  "footer": { "tagline": "Heuresys — EU-native Skills & Org Intelligence." }
+}

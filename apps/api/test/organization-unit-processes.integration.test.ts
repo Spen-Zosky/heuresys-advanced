@@ -34,6 +34,11 @@ let ou0: string;  // a real RTL org unit
 let ou1: string;  // a second RTL org unit (isolation)
 let proc0: string; // a real global blueprint process step
 let proc1: string; // a second one (reverse lookup)
+// D-23 snapshot-restore: the approved S1002 RACI seed (54_raci_*) assigns DIR-AML /
+// DIR-BACKOFF (the 2 OUs this suite pins to) as owners. Capture their seeded rows
+// before the pristine-start wipe and restore them in afterAll so the production
+// mapping survives the suite (never blanket-delete real config — D-23).
+let ouProcSnapshot: Array<Record<string, unknown>> = [];
 
 async function assign(s: S, ouId: string, processId: string, role?: string): Promise<{ orgUnitProcessId: string; role: string }> {
   const payload: Record<string, unknown> = { ouId, processId };
@@ -66,12 +71,33 @@ beforeAll(async () => {
   proc0 = pr.rows[0]!.blueprint_process_id;
   proc1 = pr.rows[1]!.blueprint_process_id;
 
-  // Pristine start: drop any leftover assignments on the test OUs.
+  // D-23: snapshot the seeded RACI rows on the test OUs BEFORE wiping, then pristine-start.
+  const snap = await pool.query(
+    `SELECT organization_unit_process_id, org_unit_process_tenant_id, org_unit_process_org_unit_id,
+            org_unit_process_blueprint_process_id, org_unit_process_role, org_unit_process_metadata,
+            created_at, updated_at
+       FROM sys.sys_organization_unit_processes WHERE org_unit_process_org_unit_id = ANY($1)`,
+    [[ou0, ou1]],
+  );
+  ouProcSnapshot = snap.rows;
   await pool.query("DELETE FROM sys.sys_organization_unit_processes WHERE org_unit_process_org_unit_id = ANY($1)", [[ou0, ou1]]);
 });
 
 afterAll(async () => {
   await pool.query("DELETE FROM sys.sys_organization_unit_processes WHERE org_unit_process_org_unit_id = ANY($1)", [[ou0, ou1]]);
+  // D-23 restore: faithfully re-insert the snapshot captured in beforeAll (incl. PK +
+  // metadata + timestamps) so the approved RACI mapping is not destroyed by this suite.
+  for (const r of ouProcSnapshot) {
+    await pool.query(
+      `INSERT INTO sys.sys_organization_unit_processes
+         (organization_unit_process_id, org_unit_process_tenant_id, org_unit_process_org_unit_id,
+          org_unit_process_blueprint_process_id, org_unit_process_role, org_unit_process_metadata, created_at, updated_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING`,
+      [r.organization_unit_process_id, r.org_unit_process_tenant_id, r.org_unit_process_org_unit_id,
+       r.org_unit_process_blueprint_process_id, r.org_unit_process_role,
+       JSON.stringify(r.org_unit_process_metadata ?? {}), r.created_at, r.updated_at],
+    );
+  }
   await suite.app.close();
 });
 

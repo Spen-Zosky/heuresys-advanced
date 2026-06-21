@@ -1,6 +1,6 @@
 # Handoff Rigor + HOLD Lane — Design Spec
 
-> **Status**: DESIGN v1 (S999-analysis, 2026-06-20). Read-only analysis session (Enzo). NOT yet implemented.
+> **Status**: ✅ **IMPLEMENTED** (S1000-S1001, 2026-06-20/21). The foundation (§3 closed-vocabulary + HOLD pull-lane), the gate (§4 `handoff_lint.py`, 10/10 checks, **blocking by default**), the skill (§5 v5.1 + §11.5/P5 rebase-safe push), the close-flow orchestrator (§12 `close-propagate.sh` + context-aware `vm-deploy.sh`) and the ecosystem idempotence verify (§13 marketplace-SHA + `project_memory`) are all shipped and verified. Deliberate deviations + the additive §11 enhancements still optional/Enzo-gated are recorded in **§14 Implementation status** at the bottom.
 > **Goal**: rendere il sistema di handoff **rigoroso per enforcement, non per fiducia** — un gate deterministico (`handoff-lint`) che la skill `handoff` deve far passare prima del push — **e** introdurre un ciclo di vita degli stati a vocabolario chiuso con una corsia **HOLD** *pull-based*, così che le azioni esplicitamente rimandate a sessioni dedicate **non rientrino più nel menu dei pending** ma vivano in un registro separato, auditabile e attivabile solo su richiesta.
 > **Scope**: estende la dottrina SoT v2 (`2026-06-05-sot-unification-design.md` §11-12). Non la sostituisce: i domini disgiunti + single-updater restano; qui si aggiunge **l'enforcement** che oggi manca, **la corsia di stato** che oggi non esiste, (§12) la **stabilizzazione del close-flow completo** (deploy + ecosystem-align + clone-DB del PROD twin) perché sia *sempre* eseguito in futuro, e (§13) la **garanzia di idempotenza dei 4 ecosistemi Claude** (Windows/mac/vm/linux-pc) misurata via `--verify`, non un'azione one-shot.
 
@@ -551,4 +551,26 @@ align-claude-ecosystem.sh all --verify   # drift report per-macchina sotto deplo
 
 ---
 
-*Design prodotto in sessione di sola analisi (read-only) S999, 2026-06-20. Nessun file di stato/skill/CLAUDE.md modificato da questo doc — è la spec, non l'implementazione. Estende `2026-06-05-sot-unification-design.md` (SoT v2 §11-12). §11 (potenziamenti P1-P9) + §12 (stabilizzazione del close-flow completo) + §13 (idempotenza ecosistemi Claude, 4 macchine — Opzione C plugin) aggiunte su richiesta Enzo, stessa sessione.*
+## 14. Implementation status (S1000-S1001, 2026-06-20/21)
+
+| Area | Stato | Note |
+|---|---|---|
+| §3 vocabolario + HOLD lane | ✅ DONE | CLAUDE.md (Source of Truth + Session start render) + HOLD register (5 HOLD / 2 WAIT-INPUT, metadati completi) |
+| §4 handoff-lint | ✅ DONE | **10/10 check** (D1-D4 · S1-S2 · H1-H2 · A1-A2), **blocking by default** (exit 1 su FAIL), `--warn-only` soft, `--no-db` skip. H2 esteso al backlog (section/block/terminal-aware, basso falso-positivo) |
+| §5 skill v5.1 | ✅ DONE | Step 3e gate bloccante + Step 4 rebase-safe (P5) + Step 4b `close-propagate.sh` |
+| §7 migrazione rinvii | ✅ DONE | rinvii attivi → HOLD register; 0 orfani attivi (archivio storico escluso per scope) |
+| §11 P1-P9 | ◐ P5+P8 done, resto opzionale | P8 INTERRUPTED ✅ · P5 rebase-safe ✅ (skill) · P1/P2/P3/P9 = decisione architetturale Enzo (gated) · P4 journal / P6 CI-lint / P7 boot-reality-check = futuri opzionali additivi |
+| §12 close-propagate + vm-deploy | ✅ DONE | orchestratore dual-channel + clone-db Opzione B + fail-loud + `--dry-run`; `vm-deploy.sh` rende **TUTTE** le unit (api/web + scheduler) con `SERVICE_USER` → entrypoint unico VM+linux-pc; test §12.5 in `run-shell-tests.sh` |
+| §13 ecosystem verify | ✅ DONE | marketplace-SHA (Opzione C, informativo) + `project_memory` parity (**bloccante**) + mac/vm/linuxpc in scope |
+| docs/rollout | ✅ DONE | questo status-flip + CLAUDE.md doctrine + memoria addendum + D-39 RISOLTO |
+
+**Deviazioni deliberate (non difetti)**:
+- **D4 = WARN non FAIL**: lo sha citato dal SOT diverge legittimamente da HEAD finché il handoff non committa (il lint gira pre-commit) → un FAIL darebbe falso positivo a ogni run.
+- **H2/S2 scope**: il "no orphan defer" enforce le **sezioni attive** del backlog (P0-P4, Candidati, Integrazione) + le priorità di STATE; i ~130KB di archivio (`✅`/`🟢 Aggiornamento SXXX`/`🔭`/`Verifica stato`) sono esclusi by-design (record di sessione, non rinvii vivi). S2 valida il vocabolario sul register taggato.
+- **--no-db**: non ci sono check psql pesanti (i count DB restano ri-derivati dal handoff Step 3b); `--no-db` salta i check repo-derivati tunnel-dipendenti e li marca `SKIPPED`.
+
+**Verifica live (S1001)**: lint 10/10 + i 5 exit-criteria §8 (D3/H1/H2/A1/A2 inject→FAIL→restore, git pulito); shell-suite **53/53**; `bash -n` su tutti gli script. **Resta da dimostrare al PRIMO close reale** (§12.7/§13.7): `align-claude-ecosystem all --verify` → CLEAN sui remoti raggiungibili — è il close-flow E2E live, eseguibile solo a fine di una sessione con propagazione.
+
+---
+
+*Design prodotto in sessione di sola analisi (read-only) S999, 2026-06-20; **implementato S1000-S1001 (2026-06-20/21) — vedi §14**. Estende `2026-06-05-sot-unification-design.md` (SoT v2 §11-12). §11 (potenziamenti P1-P9) + §12 (stabilizzazione del close-flow completo) + §13 (idempotenza ecosistemi Claude, 4 macchine — Opzione C plugin) aggiunte su richiesta Enzo.*

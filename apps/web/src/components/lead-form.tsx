@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, Input } from "@heuresys/ui";
-import { LeadCreateSchema, type LeadCreate } from "@heuresys/shared";
+import { LeadCreateSchema, type LeadCreate } from "@heuresys/shared/schemas/leads";
 
 const SIZES = ["LT_50", "50_250", "250_2000", "GT_2000"] as const;
 

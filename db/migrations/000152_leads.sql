@@ -46,13 +46,29 @@ VALUES
    '[sign-off: EXCLUDE — app-authored GTM website leads (mig 000152, #4). Real opt-in prospect PII captured via the public POST /v1/leads form with consent; never imported from legacy.]')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
+-- 000005 grants TENANT_ADMIN every permission EXCEPT a hardcoded platform-only NOT-IN
+-- list; a chain RE-RUN (with leads:read already present) therefore grants leads:read to
+-- TENANT_ADMIN, which a fresh rebuild does not. leads = platform-level prospect PII →
+-- PLATFORM_ADMIN only. 000152 runs last, so strip any non-PLATFORM_ADMIN leads:read mapping.
+DELETE FROM sys.sys_auth_role_permissions rp
+USING sys.sys_auth_permissions p, sys.sys_auth_roles r
+WHERE rp.auth_permission_id = p.auth_permission_id
+  AND rp.auth_role_id = r.auth_role_id
+  AND p.auth_permission_code = 'leads:read'
+  AND r.auth_role_code <> 'PLATFORM_ADMIN';
+
 DO $$
-DECLARE n int;
+DECLARE n_total int; n_pa int;
 BEGIN
-  SELECT count(*) INTO n FROM sys.sys_auth_role_permissions rp
+  SELECT count(*) INTO n_total FROM sys.sys_auth_role_permissions rp
+   JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
+   WHERE p.auth_permission_code = 'leads:read';
+  SELECT count(*) INTO n_pa FROM sys.sys_auth_role_permissions rp
    JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    JOIN sys.sys_auth_roles r ON r.auth_role_id = rp.auth_role_id
    WHERE p.auth_permission_code = 'leads:read' AND r.auth_role_code = 'PLATFORM_ADMIN';
-  IF n <> 1 THEN RAISE EXCEPTION '000152: expected leads:read mapped to PLATFORM_ADMIN, found %', n; END IF;
-  RAISE NOTICE '000152: sys_leads + leads:read (PLATFORM_ADMIN) + registry EXCLUDE.';
+  IF n_total <> 1 OR n_pa <> 1 THEN
+    RAISE EXCEPTION '000152: expected leads:read mapped to exactly 1 role (PLATFORM_ADMIN), found total=% pa=%', n_total, n_pa;
+  END IF;
+  RAISE NOTICE '000152: sys_leads + leads:read (PLATFORM_ADMIN only) + registry EXCLUDE.';
 END $$;

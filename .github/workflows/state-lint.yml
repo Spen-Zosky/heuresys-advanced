@@ -1,0 +1,50 @@
+name: State lint (handoff/SoT coherence)
+
+# P6 (design 2026-06-20 §11.6) — second gate for the handoff/SoT system: the same
+# handoff_lint.py the close-flow runs locally also runs in CI, so a hand-edit to the
+# state/backlog/debt files OUTSIDE the handoff (another session touching them without
+# closing) is caught too. 10 checks: D1-D4 drift/freshness · S1-S2 · H1-H2 · A1-A2.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".handoff/**"
+      - "docs/kb/SOT_STATE.md"
+      - "docs/kb/SOT_BACKLOG.md"
+      - "docs/kb/DEBT_REGISTER.md"
+      - "docs/kb/tools/handoff_lint.py"
+      - ".github/workflows/state-lint.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - ".handoff/**"
+      - "docs/kb/SOT_STATE.md"
+      - "docs/kb/SOT_BACKLOG.md"
+      - "docs/kb/DEBT_REGISTER.md"
+      - "docs/kb/tools/handoff_lint.py"
+      - ".github/workflows/state-lint.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: state-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  state-lint:
+    # Security (D-08): the self-hosted runner sits on the PROD host — a fork PR must NEVER
+    # run on it. Same-repo PRs (Dependabot lives in this repo) + push/dispatch only; skip
+    # Dependabot defer-major PRs (single-runner churn, D-09). Push events have no PR context.
+    if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
+    runs-on: [self-hosted, oci-vm]
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 1
+
+      - name: Run handoff lint (blocking gate)
+        # The runner VM has the local DB, but the lint is repo-only (no heavy psql checks);
+        # default mode is blocking (exit 1 on any FAIL).
+        run: python3 docs/kb/tools/handoff_lint.py

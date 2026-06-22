@@ -71,6 +71,15 @@ export default defineConfig({
       testMatch: /showcase-a11y\.spec\.ts/,
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      // On-demand guided-demo screenshot generator (#4). Not part of the default
+      // suite (the .gen.ts name is outside the /.*\.spec\.ts/ testMatch). Depends
+      // on setup to mint fresh persona storageState (post-MFA).
+      name: "capture-demo",
+      testMatch: /capture-demo\.gen\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+      dependencies: ["setup"],
+    },
   ],
   webServer: [
     {

@@ -118,6 +118,7 @@ import { contentBlueprintLinksRoutes } from "./modules/content-blueprint-links/r
 import { organizationUnitProcessesRoutes } from "./modules/organization-unit-processes/routes.js";
 import { approvalsRoutes } from "./modules/approvals/routes.js";
 import { leadsRoutes } from "./modules/leads/routes.js";
+import { publicStatsRoutes } from "./modules/public-stats/routes.js";
 import { tenantMaterializationRoutes } from "./modules/tenant-materialization/routes.js";
 import type { SemanticMatchingDeps } from "./modules/semantic-matching/service.js";
 import type { IMailer } from "./modules/auth/mailer.js";
@@ -427,6 +428,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(organizationUnitProcessesRoutes, { prefix: "/v1/organization-unit-processes" });
   await app.register(approvalsRoutes, { prefix: "/v1/approvals" });
   await app.register(leadsRoutes, { prefix: "/v1/leads" });
+  await app.register(publicStatsRoutes, { prefix: "/v1/public" });
 
   return app;
 }

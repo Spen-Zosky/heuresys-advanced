@@ -75,6 +75,10 @@
       "types": "./dist/schemas/leads.d.ts",
       "default": "./src/schemas/leads.ts"
     },
+    "./schemas/public-stats": {
+      "types": "./dist/schemas/public-stats.d.ts",
+      "default": "./src/schemas/public-stats.ts"
+    },
     "./schemas/learning-modules": {
       "types": "./dist/schemas/learning-modules.d.ts",
       "default": "./src/schemas/learning-modules.ts"

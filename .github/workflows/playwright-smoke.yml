@@ -80,7 +80,7 @@ jobs:
 
       - name: Cache Playwright browsers (~/.cache/ms-playwright)
         id: pw-cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-ms-playwright-${{ steps.pw-version.outputs.version }}
@@ -98,7 +98,7 @@ jobs:
       # Next.js build cache for the `pnpm build` in the "Boot web server" step —
       # standard key: lockfile + web source hash, lockfile-only restore-key fallback.
       - name: Cache Next.js build (apps/web/.next/cache)
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: apps/web/.next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('apps/web/**/*.{js,jsx,ts,tsx}') }}

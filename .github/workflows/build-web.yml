@@ -60,7 +60,7 @@ jobs:
       # an unchanged source set restores a warm .next/cache (faster incremental
       # builds); the lockfile-only restore-key gives a partial hit on source churn.
       - name: Cache Next.js build (apps/web/.next/cache)
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: apps/web/.next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-${{ hashFiles('apps/web/**/*.{js,jsx,ts,tsx}') }}

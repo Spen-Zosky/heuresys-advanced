@@ -34,7 +34,7 @@ org-units **26** · positions **162** (RTL_BANK + HEURESYS).
 
 1. **Event-sourcing — SOVRASTIMATO.** Catalogo righe 27/42 ("DPI/RMA sfruttano event-sourcing", "asset event-sourcing dichiarato presente"): nel repo advanced **non esiste alcun event-store di dominio** (#4, confermato live). Solo log goal-specifici + audit auth. È esattamente il caso previsto dal disclaimer (legacy evo).
 2. **Maturity — lieve sovrastima.** "rubric stabile; engine design-pending" (riga 23): la rubrica è **solo documentale**, nel codice 0 (#6).
-3. **RACI — sovrastima di maturità.** Modulo reale ma "RACI-style" a ruolo singolo e popolazione **demo su tenant TEST** ("NOT production truth"), non dati di produzione (#7).
+3. **RACI — sovrastima di maturità.** Modulo reale ma "RACI-style" a ruolo singolo e popolazione ancora **minimale** (demo ~12 righe su RTL Bank — tenant di produzione customer-example, dati trattati come reali, ADR-0026) → serve popolazione piena (#7).
 4. **goal_alignments — scope più stretto del percepito.** Esiste (#3, 100 righe) ma è goal↔goal, non goal↔capability/position.
 5. **MLCE / capability_score — catalogo ACCURATO** (design-pending, confermato assente). Nessuna sovrastima.
 6. **Porte UI — catalogo ONESTO e allineato** ("zero pagine, solo HR"): verifica indipendente conferma 1/3 (#11).

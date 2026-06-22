@@ -50,7 +50,7 @@ Il dato abilitante è che **i dati esistono già** (ESCO 21.939 skill, 126.051 o
 - **Infra de-risk / commercial layer** (DD): paralleli, non bloccanti per questo WI tecnico.
 
 ## Definition of Done (vincolante, repo)
-Ogni fase si chiude **solo** con dimostrazione live su tenant di test reale (RTL_BANK): output reale allegato (comando + risposta API reale + screenshot UI + path/timestamp, R5). Mock = scaffold intermedio, mai chiusura. Mancano secret/approval → stato `blocked-on-Enzo`, mai "done".
+Ogni fase si chiude **solo** con dimostrazione live sul tenant di produzione RTL Bank (customer-example, dati trattati come reali — ADR-0026 §2.2/§2.3): output reale allegato (comando + risposta API reale + screenshot UI + path/timestamp, R5). Mock = scaffold intermedio, mai chiusura. Mancano secret/approval → stato `blocked-on-Enzo`, mai "done".
 
 ## Rischi & open question
 - **Building-block legacy vs advanced**: rischio che la rubrica/aggregation assuma schema legacy → mitigato da Fase 0.

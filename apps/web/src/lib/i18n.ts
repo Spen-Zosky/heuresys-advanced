@@ -19,6 +19,8 @@ import landingIt from "../locales/it/landing.json";
 import landingEn from "../locales/en/landing.json";
 import investorsIt from "../locales/it/investors.json";
 import investorsEn from "../locales/en/investors.json";
+import demoIt from "../locales/it/demo.json";
+import demoEn from "../locales/en/demo.json";
 
 export const SUPPORTED_LOCALES = ["it", "en"] as const;
 export type AppLocale = (typeof SUPPORTED_LOCALES)[number];
@@ -27,7 +29,7 @@ export const DEFAULT_LOCALE: AppLocale = "it";
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 
 /** One namespace per app area (separate locale files → parallel extraction, no conflicts). */
-export const NAMESPACES = ["common", "shell", "analytics", "admin", "blueprints", "hr", "ess", "landing", "investors"] as const;
+export const NAMESPACES = ["common", "shell", "analytics", "admin", "blueprints", "hr", "ess", "landing", "investors", "demo"] as const;
 
 const resources = {
   it: {
@@ -40,6 +42,7 @@ const resources = {
     ess: essIt,
     landing: landingIt,
     investors: investorsIt,
+    demo: demoIt,
   },
   en: {
     common: commonEn,
@@ -51,6 +54,7 @@ const resources = {
     ess: essEn,
     landing: landingEn,
     investors: investorsEn,
+    demo: demoEn,
   },
 } as const;
 

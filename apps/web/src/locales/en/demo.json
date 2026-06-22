@@ -1,0 +1,24 @@
+{
+  "nav": { "login": "Sign in" },
+  "hero": {
+    "title": "A guided tour of Heuresys",
+    "subtitle": "Ten stops on the RTL Bank reference tenant: from the org structure to capability maturity, all the way to the executive dashboard. Real data, no slides."
+  },
+  "steps": {
+    "s01": { "persona": "Prospect", "shows": "Public landing + GDPR lead form", "narration": "What a buyer sees — and how a contact becomes a record." },
+    "s02": { "persona": "Federica · Tenant Admin", "shows": "RTL Bank's real org chart (158 positions, 26 units)", "narration": "Position-centric: the chair, not the person — the bank's real structure." },
+    "s03": { "persona": "Federica · Tenant Admin", "shows": "The bank's positions with their requirements", "narration": "Each position carries its own skill and KPI requirements, independent of who sits in it." },
+    "s04": { "persona": "Federica · Tenant Admin", "shows": "Skill-coverage heatmap by unit", "narration": "Where the bank is strong and where it's thin — computed live, not a slide." },
+    "s05": { "persona": "Federica · Tenant Admin", "shows": "Succession readiness, explainable per feature", "narration": "Predictive people analytics — and the why: every score breaks down into weighted features." },
+    "s06": { "persona": "Federica · Tenant Admin", "shows": "L0-L5 organizational capability maturity by unit", "narration": "The differentiator: organizational maturity rolled up bottom-up from real evidence." },
+    "s07": { "persona": "Federica · Tenant Admin", "shows": "Process Owner console + RACI map", "narration": "Processes are owned, with live RACI accountability per org unit." },
+    "s08": { "persona": "Tommaso · Employee", "shows": "AI matching to ESCO occupations and positions, with affinity", "narration": "Through the employee's eyes: the engine matches me to occupations and roles, with an affinity score." },
+    "s09": { "persona": "Paolo · Manager", "shows": "'My team' view: direct reports only", "narration": "Scope is enforced, not cosmetic — a manager sees his team, no further." },
+    "s10": { "persona": "Federica · Tenant Admin", "shows": "Cross-module executive dashboard", "narration": "A live overview: users, positions, critical gaps and recent activity at a glance." }
+  },
+  "cta": {
+    "title": "Book a guided demo",
+    "subtitle": "Want to see it on your own data? Leave us a contact: we'll set up a 1:1 demo."
+  },
+  "footer": { "tagline": "Heuresys — EU-native Skills & Org Intelligence." }
+}

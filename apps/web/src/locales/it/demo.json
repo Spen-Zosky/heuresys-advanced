@@ -1,0 +1,24 @@
+{
+  "nav": { "login": "Accedi" },
+  "hero": {
+    "title": "Una visita guidata di Heuresys",
+    "subtitle": "Dieci tappe sul tenant di riferimento RTL Bank: dalla struttura organizzativa alla maturità di capacità, fino alla dashboard direzionale. Dati reali, niente slide."
+  },
+  "steps": {
+    "s01": { "persona": "Prospect", "shows": "Landing pubblica + modulo lead GDPR", "narration": "Ciò che vede un buyer — e come un contatto diventa un record." },
+    "s02": { "persona": "Federica · Tenant Admin", "shows": "Org chart reale di RTL Bank (158 posizioni, 26 unità)", "narration": "Position-centric: la sedia, non la persona — la struttura reale della banca." },
+    "s03": { "persona": "Federica · Tenant Admin", "shows": "Le posizioni della banca con i loro requisiti", "narration": "Ogni posizione porta i propri requisiti di competenze e KPI, indipendentemente da chi la occupa." },
+    "s04": { "persona": "Federica · Tenant Admin", "shows": "Heatmap di copertura competenze per unità", "narration": "Dove la banca è forte e dove è scoperta — calcolato live, non una slide." },
+    "s05": { "persona": "Federica · Tenant Admin", "shows": "Prontezza alla successione, spiegabile per feature", "narration": "Analytics predittiva delle persone — e il perché: ogni score si scompone in feature pesate." },
+    "s06": { "persona": "Federica · Tenant Admin", "shows": "Maturità di capacità organizzativa L0-L5 per unità", "narration": "Il differenziatore: maturità organizzativa aggregata dal basso a partire da evidenze reali." },
+    "s07": { "persona": "Federica · Tenant Admin", "shows": "Console Process Owner + mappa RACI", "narration": "I processi sono presidiati, con accountability RACI viva per unità organizzativa." },
+    "s08": { "persona": "Tommaso · Dipendente", "shows": "Matching AI a occupazioni ESCO e posizioni, con affinità", "narration": "Occhi del dipendente: il motore mi abbina a occupazioni e ruoli, con una percentuale di affinità." },
+    "s09": { "persona": "Paolo · Manager", "shows": "Vista 'il mio team': solo i riporti diretti", "narration": "Lo scope è imposto, non cosmetico — un manager vede il suo team, niente di più." },
+    "s10": { "persona": "Federica · Tenant Admin", "shows": "Dashboard direzionale cross-modulo", "narration": "Una panoramica viva: utenti, posizioni, gap critici e attività recenti in un colpo d'occhio." }
+  },
+  "cta": {
+    "title": "Prenota una demo guidata",
+    "subtitle": "Vuoi vederla sui tuoi dati? Lasciaci un contatto: organizziamo una demo 1:1."
+  },
+  "footer": { "tagline": "Heuresys — Skills & Org Intelligence EU-native." }
+}

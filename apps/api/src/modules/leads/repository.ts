@@ -7,7 +7,7 @@ import type { LeadResponse, LeadCompanySize } from "@heuresys/shared";
 export interface InsertLeadRow {
   name: string; company: string; email: string;
   role: string | null; companySize: LeadCompanySize | null; message: string | null;
-  consentVersion: string;
+  source: string; consentVersion: string;
 }
 
 export async function insertLead(r: InsertLeadRow): Promise<void> {
@@ -15,8 +15,8 @@ export async function insertLead(r: InsertLeadRow): Promise<void> {
     `INSERT INTO sys.sys_leads
        (lead_name, lead_company, lead_email, lead_role, lead_company_size,
         lead_message, lead_source, lead_consent_at, lead_consent_version)
-     VALUES ($1,$2,$3,$4,$5,$6,'website', now(), $7)`,
-    [r.name, r.company, r.email, r.role, r.companySize, r.message, r.consentVersion],
+     VALUES ($1,$2,$3,$4,$5,$6,$7, now(), $8)`,
+    [r.name, r.company, r.email, r.role, r.companySize, r.message, r.source, r.consentVersion],
   );
 }
 

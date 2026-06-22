@@ -8,6 +8,10 @@ import { z } from "zod";
 export const LeadCompanySizeEnum = z.enum(["LT_50", "50_250", "250_2000", "GT_2000"]);
 export type LeadCompanySize = z.infer<typeof LeadCompanySizeEnum>;
 
+/** Where the lead came from — segments the pipeline (landing / one-pager / demo). */
+export const LeadSourceEnum = z.enum(["WEBSITE", "INVESTOR", "DEMO"]);
+export type LeadSource = z.infer<typeof LeadSourceEnum>;
+
 /** Public submission. `website` is a honeypot — real users never fill it. */
 export const LeadCreateSchema = z.object({
   name: z.string().trim().min(1).max(200),
@@ -16,6 +20,7 @@ export const LeadCreateSchema = z.object({
   role: z.string().trim().max(160).optional(),
   companySize: LeadCompanySizeEnum.optional(),
   message: z.string().trim().max(2000).optional(),
+  source: LeadSourceEnum.optional(),
   consent: z.literal(true),
   website: z.string().optional().default(""), // honeypot: real users leave it empty; the service swallows non-empty silently
 });

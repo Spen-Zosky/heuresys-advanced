@@ -8,7 +8,7 @@ import { LeadCreateSchema, type LeadCreate } from "@heuresys/shared/schemas/lead
 
 const SIZES = ["LT_50", "50_250", "250_2000", "GT_2000"] as const;
 
-export default function LeadForm() {
+export default function LeadForm({ source = "WEBSITE" }: { source?: "WEBSITE" | "INVESTOR" | "DEMO" } = {}) {
   const { t } = useTranslation("landing");
   const [state, setState] = useState<"idle" | "submitting" | "ok" | "error">("idle");
   const { register, handleSubmit, formState: { errors } } = useForm({
@@ -22,7 +22,7 @@ export default function LeadForm() {
       const res = await fetch("/api/v1/leads", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, source }),
       });
       setState(res.ok ? "ok" : "error");
     } catch {

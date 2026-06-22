@@ -23,6 +23,7 @@ export const leadsService = {
       role: input.role ?? null,
       companySize: input.companySize ?? null,
       message: input.message ?? null,
+      source: input.source ?? "WEBSITE",
       consentVersion: LEAD_CONSENT_VERSION,
     });
     return { ok: true };

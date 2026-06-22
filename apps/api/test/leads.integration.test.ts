@@ -80,4 +80,35 @@ describe("/v1/leads (GTM lead capture)", () => {
     });
     expect(r.statusCode).toBe(403);
   });
+
+  // Distinct remoteAddress per POST → separate per-IP rate-limit buckets, so these
+  // extra submissions don't trip the 5/min cap shared by the earlier POSTs (the
+  // production rate-limit is unchanged; only the test's source IP differs).
+  it("public POST with source=INVESTOR stores INVESTOR", async () => {
+    const r = await suite.app.inject({
+      method: "POST", url: "/v1/leads", remoteAddress: "10.10.0.1",
+      payload: { name: "VC One", company: "Fund X", email: `vc${E2E_DOMAIN}`, source: "INVESTOR", consent: true },
+    });
+    expect(r.statusCode).toBe(200);
+    const { rows } = await pool.query(`SELECT lead_source FROM sys.sys_leads WHERE lead_email=$1`, [`vc${E2E_DOMAIN}`]);
+    expect(rows[0].lead_source).toBe("INVESTOR");
+  });
+
+  it("public POST without source defaults to WEBSITE", async () => {
+    const r = await suite.app.inject({
+      method: "POST", url: "/v1/leads", remoteAddress: "10.10.0.2",
+      payload: { name: "Web One", company: "Co", email: `web${E2E_DOMAIN}`, consent: true },
+    });
+    expect(r.statusCode).toBe(200);
+    const { rows } = await pool.query(`SELECT lead_source FROM sys.sys_leads WHERE lead_email=$1`, [`web${E2E_DOMAIN}`]);
+    expect(rows[0].lead_source).toBe("WEBSITE");
+  });
+
+  it("invalid source → 400", async () => {
+    const r = await suite.app.inject({
+      method: "POST", url: "/v1/leads", remoteAddress: "10.10.0.3",
+      payload: { name: "Bad", company: "Co", email: `bad${E2E_DOMAIN}`, source: "HACKER", consent: true },
+    });
+    expect(r.statusCode).toBe(400);
+  });
 });

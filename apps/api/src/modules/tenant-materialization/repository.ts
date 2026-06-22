@@ -182,7 +182,7 @@ export async function materialize(
     }
   }
 
-  // slice-2a + 2b: one SYNTHETIC_REFERENCE incumbent per position (+ PRIMARY ACTIVE assignment), each
+  // slice-2a + 2b: one GENERATED_INCUMBENT placeholder incumbent per position (+ PRIMARY ACTIVE assignment), each
   // with skill evidence (one per archetype skill, deterministic proficiency) + KPI evidence (one per
   // archetype KPI, deterministic measured_value → cross-incumbent ranking). Keying = SYN_, NEVER
   // LEGACY_EMP:: (I14/ADR-0024). Mirrors db/scripts/seed-reference-bank.ts. Idempotent: user via ON
@@ -201,8 +201,8 @@ export async function materialize(
         `INSERT INTO sys.sys_users
            (user_tenant_id, user_external_code, user_email, user_display_name,
             user_first_name, user_last_name, user_status, user_type,
-            user_is_synthetic, user_locale, user_timezone)
-         VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE', 'SYNTHETIC_REFERENCE', true, 'it-IT', 'Europe/Rome')
+            user_locale, user_timezone)
+         VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE', 'GENERATED_INCUMBENT', 'it-IT', 'Europe/Rome')
          ON CONFLICT (user_tenant_id, lower(user_email)) DO NOTHING
          RETURNING user_id`,
         [tenantId, su.externalCode, su.email, su.displayName, su.firstName, su.lastName],

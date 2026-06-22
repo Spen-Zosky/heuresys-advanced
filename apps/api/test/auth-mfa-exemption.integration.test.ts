@@ -50,8 +50,8 @@ describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", ()
     // throwaway SERVICE user (loginable) in admin's tenant
     await pool.query(`DELETE FROM sys.sys_users WHERE lower(user_email) = lower($1)`, [SVC_EMAIL]);
     const su = await pool.query<{ user_id: string }>(
-      `INSERT INTO sys.sys_users (user_tenant_id, user_email, user_display_name, user_status, user_type, user_is_synthetic)
-       VALUES ($1, $2, 'WI-A Service Test', 'ACTIVE', 'SERVICE', false) RETURNING user_id`,
+      `INSERT INTO sys.sys_users (user_tenant_id, user_email, user_display_name, user_status, user_type)
+       VALUES ($1, $2, 'WI-A Service Test', 'ACTIVE', 'SERVICE') RETURNING user_id`,
       [tenantId, SVC_EMAIL],
     );
     svcUserId = su.rows[0]!.user_id;

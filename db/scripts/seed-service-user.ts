@@ -105,8 +105,8 @@ async function main() {
       userRes = await client.query<{ user_id: string }>(
         `INSERT INTO sys.sys_users
            (user_tenant_id, user_external_code, user_email, user_display_name,
-            user_status, user_type, user_is_synthetic)
-         VALUES ($1, $2, $3, $4, 'ACTIVE', 'SERVICE', false)
+            user_status, user_type)
+         VALUES ($1, $2, $3, $4, 'ACTIVE', 'SERVICE')
          RETURNING user_id`,
         [tenantId, EXTERNAL_CODE, email, displayName],
       );

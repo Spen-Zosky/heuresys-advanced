@@ -6,7 +6,7 @@
  * tenant's pre-existing data — applying to a populated tenant only adds the archetype's
  * rows (ON CONFLICT skips the rest). 3 confirmed design facts (PLAN §9): the catalog is the
  * source of structure (no recommender), variants are thin headers, activation is a link row.
- * Slice-1 = org-units + positions; slice-2a adds one SYNTHETIC_REFERENCE incumbent per
+ * Slice-1 = org-units + positions; slice-2a adds one GENERATED_INCUMBENT placeholder incumbent per
  * position + a PRIMARY ACTIVE assignment (skills/ranked-KPI = slice-2b residuo).
  */
 
@@ -122,7 +122,7 @@ export interface ArchetypeUser {
   positionCode: string; // the position this synthetic user is the PRIMARY ACTIVE incumbent of
 }
 
-/** One synthetic SYNTHETIC_REFERENCE incumbent per archetype position (slice-2a). Deterministic:
+/** One GENERATED_INCUMBENT placeholder incumbent per archetype position (slice-2a). Deterministic:
  *  name from the fixed pools by position index; email keyed on the unique position code (→ unique
  *  per tenant via sys_users_tenant_email_uq); a clearly-synthetic reserved .example domain. */
 export function archetypeUsers(a: Archetype): ArchetypeUser[] {

@@ -35,7 +35,6 @@ PSQL=(psql -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" -U "$POSTGRES_USER" -d "$POST
 STRUCTURAL_VIEWS=(
   'sys.v_orphan_position_assignments'
   'sys.v_tenant_boundary_violations'
-  'sys.v_synthetic_user_flag_consistency'
   'sys.v_canonical_outside_sys'
   'sys.v_active_primary_assignment_per_user'
   'sys.v_visualization_node_in_canonical_node'

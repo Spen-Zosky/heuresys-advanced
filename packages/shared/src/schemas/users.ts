@@ -22,7 +22,7 @@ export const UserStatusSchema = z.enum(USER_STATUS_VALUES);
 
 export const USER_TYPE_VALUES = [
   "STANDARD",
-  "SYNTHETIC_REFERENCE",
+  "GENERATED_INCUMBENT",
   "SERVICE",
 ] as const;
 export type UserType = (typeof USER_TYPE_VALUES)[number];
@@ -40,7 +40,6 @@ export const UserSchema = z.object({
   externalCode: z.string().nullable(),
   status: UserStatusSchema,
   type: UserTypeSchema,
-  isSynthetic: z.boolean(),
   locale: z.string().nullable(),
   timezone: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),
@@ -105,7 +104,6 @@ export const NON_PRIVILEGED_UPDATABLE_FIELDS = [
 export const UserListQuerySchema = z.object({
   status: UserStatusSchema.optional(),
   type: UserTypeSchema.optional(),
-  isSynthetic: z.coerce.boolean().optional(),
   ...paginationFields(200, 50),
 });
 export type UserListQuery = z.infer<typeof UserListQuerySchema>;

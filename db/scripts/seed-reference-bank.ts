@@ -12,14 +12,14 @@
  *   - 25 branch positions (5 per branch: Branch Manager, Senior Teller, Teller,
  *                          Customer Advisor, Operations Officer)
  *   - 30 HQ positions (Risk/Compliance/AML/HR + supporting roles)
- *   - 158 synthetic users (user_is_synthetic=true, user_type=SYNTHETIC_REFERENCE)
+ *   - 158 generated-incumbent users (user_type=GENERATED_INCUMBENT)
  *   - 158 PRIMARY ACTIVE assignments (one user → one position)
  *
  * Acceptance (per BOOTSTRAP_EXECUTION_PLAN §6 A14):
  *   - RTL_BANK_REFERENCE tenant exists ✓ (already seeded by 000021)
  *   - sys.sys_branches count = 5 for the tenant
  *   - sys.sys_positions count = 55 (25 branch + 30 HQ) for the tenant
- *   - sys.sys_users count = 158 with user_is_synthetic = true
+ *   - sys.sys_users count = 158 with user_type = GENERATED_INCUMBENT
  *   - sys.sys_user_position_assignments PRIMARY ACTIVE count = 158
  *
  * Connection: reads .env at repo root (POSTGRES_HOST/PORT/USER/PASSWORD/DB).
@@ -348,9 +348,9 @@ async function seedUsersAndAssignments(tenantId: string, positions: SeededPositi
       `INSERT INTO sys.sys_users
          (user_tenant_id, user_external_code, user_email, user_display_name,
           user_first_name, user_last_name, user_status, user_type,
-          user_is_synthetic, user_locale, user_timezone)
-       VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE', 'SYNTHETIC_REFERENCE',
-               true, 'it-IT', 'Europe/Rome')
+          user_locale, user_timezone)
+       VALUES ($1, $2, $3, $4, $5, $6, 'ACTIVE', 'GENERATED_INCUMBENT',
+               'it-IT', 'Europe/Rome')
        ON CONFLICT (user_tenant_id, lower(user_email)) DO NOTHING`,
       [tenantId, externalCode, email, displayName, firstName, lastName],
     );
@@ -414,7 +414,7 @@ async function main() {
        FROM sys.sys_positions WHERE position_tenant_id = $1
        UNION ALL
        SELECT 'synthetic_users', count(*)::text
-       FROM sys.sys_users WHERE user_tenant_id = $1 AND user_is_synthetic = true
+       FROM sys.sys_users WHERE user_tenant_id = $1 AND user_type = 'GENERATED_INCUMBENT'
        UNION ALL
        SELECT 'primary_active_assignments', count(*)::text
        FROM sys.sys_user_position_assignments a

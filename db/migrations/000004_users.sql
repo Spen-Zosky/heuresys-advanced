@@ -7,8 +7,10 @@
 --
 -- Invariants:
 --   - (user_tenant_id, lower(user_email)) is unique per tenant.
---   - `user_is_synthetic` flags reference/test users (e.g. RTL_BANK_REFERENCE
---     seeded by 000021). Must be consistent with `user_type` ('SYNTHETIC_REFERENCE').
+--   - `user_type` = GENERATED_INCUMBENT marks blueprint-generated placeholder
+--     incumbents (tenant-materialization). The synthetic flag was retired (ADR-0026, mig 000154);
+--     the user_type CHECK below keeps SYNTHETIC_REFERENCE as a transition-tolerant value so the
+--     migration chain stays twice-run idempotent before 000154 renames it away.
 --   - No passwords/hashes ever stored on this table (per AUTH_SECURITY_PLAN).
 -- =============================================================================
 
@@ -22,7 +24,6 @@ CREATE TABLE IF NOT EXISTS sys.sys_users (
   user_last_name       varchar(128),
   user_status          varchar(32)  NOT NULL DEFAULT 'ACTIVE',
   user_type            varchar(32)  NOT NULL DEFAULT 'STANDARD',
-  user_is_synthetic    boolean      NOT NULL DEFAULT false,
   user_locale          varchar(16),
   user_timezone        varchar(64),
   user_metadata        jsonb        NOT NULL DEFAULT '{}'::jsonb,
@@ -41,17 +42,7 @@ ALTER TABLE sys.sys_users
   DROP CONSTRAINT IF EXISTS sys_users_user_type_check;
 ALTER TABLE sys.sys_users
   ADD CONSTRAINT sys_users_user_type_check
-  CHECK (user_type IN ('STANDARD', 'SYNTHETIC_REFERENCE', 'SERVICE'));
-
--- Synthetic flag must be coherent with user_type (validation view will also flag)
-ALTER TABLE sys.sys_users
-  DROP CONSTRAINT IF EXISTS sys_users_synthetic_consistency_check;
-ALTER TABLE sys.sys_users
-  ADD CONSTRAINT sys_users_synthetic_consistency_check
-  CHECK (
-    (user_type = 'SYNTHETIC_REFERENCE' AND user_is_synthetic = true) OR
-    (user_type <> 'SYNTHETIC_REFERENCE' AND user_is_synthetic = false)
-  );
+  CHECK (user_type IN ('STANDARD', 'SYNTHETIC_REFERENCE', 'GENERATED_INCUMBENT', 'SERVICE'));
 
 -- Tenant-scoped unique email (case-insensitive)
 CREATE UNIQUE INDEX IF NOT EXISTS sys_users_tenant_email_uq
@@ -63,10 +54,6 @@ CREATE INDEX IF NOT EXISTS sys_users_tenant_status_idx
 CREATE INDEX IF NOT EXISTS sys_users_external_code_idx
   ON sys.sys_users (user_external_code)
   WHERE user_external_code IS NOT NULL;
-
-CREATE INDEX IF NOT EXISTS sys_users_synthetic_idx
-  ON sys.sys_users (user_is_synthetic)
-  WHERE user_is_synthetic = true;
 
 -- Trigger
 DO $trg$

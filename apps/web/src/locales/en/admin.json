@@ -102,11 +102,8 @@
         "type": "Type",
         "locale": "Locale",
         "timezone": "Timezone",
-        "synthetic": "Synthetic",
         "createdAt": "Created"
       },
-      "syntheticYes": "yes",
-      "syntheticNo": "no",
       "dash": "—"
     }
   },

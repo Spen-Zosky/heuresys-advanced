@@ -61,13 +61,8 @@ WHERE ba.blueprint_activation_status = 'ACTIVE'
 GROUP BY t.tenant_id, t.tenant_code, ba.blueprint_activation_variant_id
 HAVING count(*) FILTER (WHERE g.reward_gate_catalog_id IS NULL) > 0;
 
--- 6. Synthetic-user flag consistency (already enforced by CHECK on table,
--- but the view double-checks across rows)
-CREATE OR REPLACE VIEW sys.v_synthetic_user_flag_consistency AS
-SELECT user_id, user_type, user_is_synthetic
-FROM sys.sys_users
-WHERE (user_type = 'SYNTHETIC_REFERENCE' AND user_is_synthetic = false)
-   OR (user_type <> 'SYNTHETIC_REFERENCE' AND user_is_synthetic = true);
+-- 6. (retired) synthetic-user flag consistency view — the `user_is_synthetic`
+-- flag was removed in mig 000154 (ADR-0026 decision A); nothing to validate here.
 
 -- 7. Canonical tables outside sys schema (schema policy guard)
 CREATE OR REPLACE VIEW sys.v_canonical_outside_sys AS

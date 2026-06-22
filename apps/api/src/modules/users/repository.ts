@@ -30,7 +30,6 @@ interface RawUserRow {
   user_external_code: string | null;
   user_status: string;
   user_type: string;
-  user_is_synthetic: boolean;
   user_locale: string | null;
   user_timezone: string | null;
   user_metadata: Record<string, unknown>;
@@ -49,7 +48,6 @@ function rowToUser(r: RawUserRow): User {
     externalCode: r.user_external_code,
     status: r.user_status as UserStatus,
     type: r.user_type as UserType,
-    isSynthetic: r.user_is_synthetic,
     locale: r.user_locale,
     timezone: r.user_timezone,
     metadata: r.user_metadata,
@@ -60,7 +58,7 @@ function rowToUser(r: RawUserRow): User {
 
 const USER_COLS = `user_id, user_tenant_id, user_email, user_display_name,
        user_first_name, user_last_name, user_external_code,
-       user_status, user_type, user_is_synthetic,
+       user_status, user_type,
        user_locale, user_timezone, user_metadata,
        created_at, updated_at`;
 
@@ -100,10 +98,6 @@ export async function listUsers(
   if (filter.query.type) {
     params.push(filter.query.type);
     where.push(`user_type = $${params.length}`);
-  }
-  if (filter.query.isSynthetic !== undefined) {
-    params.push(filter.query.isSynthetic);
-    where.push(`user_is_synthetic = $${params.length}`);
   }
   const whereClause = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
 
@@ -199,9 +193,9 @@ export async function insertUser(
     `INSERT INTO sys.sys_users (
         user_tenant_id, user_email, user_display_name,
         user_first_name, user_last_name, user_external_code,
-        user_status, user_type, user_is_synthetic,
+        user_status, user_type,
         user_locale, user_timezone, user_metadata
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false, $9, $10, $11::jsonb)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb)
       RETURNING ${USER_COLS}`,
     [
       tenantId,

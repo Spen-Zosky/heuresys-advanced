@@ -20,13 +20,13 @@
 -- 1) The person (sys_users) — HEURESYS tenant, employee-centric key, real (not synthetic) row.
 INSERT INTO sys.sys_users
   (user_tenant_id, user_external_code, user_email, user_display_name,
-   user_first_name, user_last_name, user_status, user_type, user_is_synthetic, user_metadata)
+   user_first_name, user_last_name, user_status, user_type, user_metadata)
 SELECT
   t.tenant_id,
   'LEGACY_EMP::2b1cc664-5631-45d8-a82d-cc05d9b028f3',
   'chiara.spenuso@heuresys.com',
   'Chiara Spenuso', 'Chiara', 'Spenuso',
-  'ACTIVE', 'STANDARD', false,
+  'ACTIVE', 'STANDARD',
   jsonb_build_object(
     'source', 's988-fase3-8b-import',
     'legacy_employee_id', '2b1cc664-5631-45d8-a82d-cc05d9b028f3',

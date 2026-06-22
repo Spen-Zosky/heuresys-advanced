@@ -21,7 +21,6 @@ interface UserDetail {
   type: string;
   locale: string | null;
   timezone: string | null;
-  isSynthetic: boolean;
   metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
@@ -84,7 +83,6 @@ export default function UserDetailPage() {
               { label: t("users.detail.fields.type"), value: u.type },
               { label: t("users.detail.fields.locale"), value: u.locale ?? t("users.detail.dash") },
               { label: t("users.detail.fields.timezone"), value: u.timezone ?? t("users.detail.dash") },
-              { label: t("users.detail.fields.synthetic"), value: u.isSynthetic ? t("users.detail.syntheticYes") : t("users.detail.syntheticNo") },
               { label: t("users.detail.fields.createdAt"), value: u.createdAt },
             ]}
           />

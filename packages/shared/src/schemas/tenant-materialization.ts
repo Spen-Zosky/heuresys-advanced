@@ -5,7 +5,7 @@
  * idempotently (ON CONFLICT). PLATFORM_ADMIN-gated; the target tenant must exist and be
  * ACTIVE (M-1 tenant isolation: every row is tagged with the validated tenant_id, I5).
  * Slice-1 materializes org-units + positions; slice-2a also materializes one
- * SYNTHETIC_REFERENCE incumbent per position + its PRIMARY ACTIVE assignment
+ * GENERATED_INCUMBENT placeholder incumbent per position + its PRIMARY ACTIVE assignment
  * (skills/ranked-KPI = slice-2b residuo).
  */
 import { z } from "zod";

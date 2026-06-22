@@ -79,7 +79,7 @@ async function purgeRbr(tenantId: string): Promise<void> {
   await pool.query(`DELETE FROM sys.sys_positions WHERE position_tenant_id = $1 AND position_code LIKE 'RBR-%'`, [tenantId]);
   await pool.query(`DELETE FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1 AND organization_unit_code LIKE 'RBR-%'`, [tenantId]);
 }
-// slice-2a: synthetic SYNTHETIC_REFERENCE incumbents (SYN_RBR-*) + their PRIMARY ACTIVE assignments.
+// slice-2a: GENERATED_INCUMBENT placeholder incumbents (SYN_RBR-*) + their PRIMARY ACTIVE assignments.
 async function countSyn(tenantId: string): Promise<{ users: number; assignments: number }> {
   const u = await pool.query<{ c: string }>(
     `SELECT count(*) AS c FROM sys.sys_users WHERE user_tenant_id = $1 AND user_external_code LIKE 'SYN_RBR-%'`,
@@ -177,7 +177,7 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     expect(b.created).toEqual(C(7, 11, 11, 11, 8, 4, 88, 44));
     expect(b.skipped).toEqual(C(0, 0, 0, 0, 0, 0, 0, 0));
     expect(await countRbr(RTL)).toEqual({ ou: 7, pos: 11 });
-    // slice-2a: each position now has a SYNTHETIC_REFERENCE incumbent + a PRIMARY ACTIVE assignment.
+    // slice-2a: each position now has a GENERATED_INCUMBENT incumbent + a PRIMARY ACTIVE assignment.
     expect(await countSyn(RTL)).toEqual({ users: 11, assignments: 11 });
     // slice-2b: tenant skill/KPI catalog (8 skills + 4 KPIs) + per-incumbent evidence (11×8 skill, 11×4 KPI).
     expect(await countCatalog(RTL)).toEqual({ skills: 8, kpis: 4 });

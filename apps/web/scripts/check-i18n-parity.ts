@@ -14,7 +14,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const LOCALES = ["it", "en"] as const;
-const NAMESPACES = ["common", "shell", "analytics", "admin", "blueprints", "hr", "ess", "landing"] as const;
+const NAMESPACES = ["common", "shell", "analytics", "admin", "blueprints", "hr", "ess", "landing", "investors"] as const;
 const BASE = path.resolve(__dirname, "..", "src", "locales");
 
 function flatten(obj: unknown, prefix = ""): string[] {

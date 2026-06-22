@@ -1,0 +1,61 @@
+{
+  "nav": { "login": "Accedi", "downloadPdf": "Scarica PDF" },
+  "hero": {
+    "title": "La piattaforma Skills & Org Intelligence EU-native, ESCO-based e spiegabile per il mid-market regolato",
+    "thesis": "Fondazione di prodotto solida e in GA tecnica — pre-commerciale, in cerca di design partner."
+  },
+  "opportunity": {
+    "title": "L'opportunità",
+    "body": "Il mid-market europeo regolato (banking, assicurazioni, sanità, utility) deve governare competenze e struttura organizzativa su uno standard aperto (ESCO) con raccomandazioni auditabili secondo l'AI Act. In questa nicchia il concorrente diretto è circa uno, non ventisette."
+  },
+  "proof": {
+    "title": "Cosa abbiamo costruito",
+    "tagline": "Ogni numero è tracciabile alla sua fonte.",
+    "liveLabel": "live",
+    "asOf": "dati di codebase, S1003",
+    "live": {
+      "skills": "Competenze ESCO (tassonomia)",
+      "occupationSkillEdges": "Collegamenti occupazione→competenza",
+      "escoOccupationMappings": "Mappature occupazioni ESCO",
+      "users": "Utenti (org reale)",
+      "positions": "Posizioni",
+      "organizationUnits": "Unità organizzative",
+      "teams": "Team",
+      "rolePermissionMappings": "Mappature ruolo×permesso (RBAC)",
+      "uiInterfaces": "Interfacce UI gated da RBAC",
+      "activeTenancies": "Tenant attivi"
+    },
+    "static": {
+      "modules": "Moduli business (API)",
+      "endpoints": "Endpoint /v1/*",
+      "migrations": "Migrazioni DB idempotenti",
+      "apiTests": "Test di integrazione API (DB reale)",
+      "e2e": "Test E2E Playwright",
+      "pages": "Pagine web (admin + ESS)"
+    }
+  },
+  "wedges": {
+    "title": "Perché Heuresys",
+    "esco": { "title": "ESCO-native, aperta", "body": "Standard pubblico EU: nessun lock-in proprietario, benchmarking cross-country, interoperabilità con il mercato del lavoro europeo." },
+    "explain": { "title": "Spiegabile = compliance AI Act", "body": "Ogni raccomandazione (successione, flight-risk, gap) è deterministica e auditabile davanti a un regolatore. Niente black-box: il vantaggio più sottovalutato." },
+    "position": { "title": "Modello position-centric", "body": "La posizione è entità prima: org-design e legame struttura↔processo↔competenza che gli ERP servono a costi proibitivi." }
+  },
+  "traction": {
+    "title": "A che punto siamo (onesto)",
+    "body": "GA tecnica live in produzione su www.heuresys.com. Pre-commerciale: zero clienti paganti, dati case-study sintetici (tenant di riferimento RTL Bank), in cerca di design partner. Efficienza di capitale: burn ≈ €0 (infra free-tier + tempo del founder).",
+    "gapClosed": "Aggiornamento: il gap di credibilità #1 è chiuso — tutte e tre le prospettive (HR, Process Owner, Org Director) hanno ora UI live, inclusa la maturità organizzativa L0-L5."
+  },
+  "whyNow": {
+    "title": "Perché ora, perché noi",
+    "body": "ESCO + AI Act rendono attuale lo standard aperto e la spiegabilità. Disciplina ingegneristica che sotto-promette e si auto-espone (23 ADR, findings pubblici); layer dati allineato agli standard, difendibile."
+  },
+  "roadmap": {
+    "title": "Dove stiamo andando",
+    "body": "De-personalizzare l'infrastruttura, far crescere il team, costruire il layer commerciale (signup, billing, onboarding), formalizzare la compliance EU e firmare il primo pilota a pagamento."
+  },
+  "cta": {
+    "title": "Parliamone",
+    "subtitle": "Sei un investitore o un design partner? Lasciaci un contatto: ti rispondiamo a breve."
+  },
+  "footer": { "tagline": "Heuresys — Skills & Org Intelligence EU-native." }
+}

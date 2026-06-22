@@ -1,29 +1,29 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-22T12:27:01Z da docs/kb/tools/build_index.py
+# generato: 2026-06-22T21:20:50Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-22T12:27:01Z"
-  total_files: 2162
+  generated_at: "2026-06-22T21:20:50Z"
+  total_files: 2170
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 24
+    ADR: 25
     api-core: 18
     api-module: 292
     ci: 16
     claude-config: 6
-    config: 99
+    config: 100
     cowork-archive: 14
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 152
+    db-migration: 153
     db-script: 23
     db-seed: 104
     doc-canonical: 388
     handoff-state: 1
-    qa-artifact: 96
+    qa-artifact: 101
     script: 6
     session: 12
     shared-pkg: 4
@@ -33,9 +33,9 @@ meta:
     ux-design-archive: 80
     web-source: 170
   status_counts:
-    archive: 488
+    archive: 493
     external-archive: 50
-    live: 1624
+    live: 1627
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -178,6 +178,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\0025_sys_skill_categories_nullable_family_fk.md'
     root: repo
     rel: 'docs/architecture/adr/0025_sys_skill_categories_nullable_family_fk.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0026_single_production_environment_two_tenants.md'
+    root: repo
+    rel: 'docs/architecture/adr/0026_single_production_environment_two_tenants.md'
     category: ADR
     status: live
     provenance: git-tracked
@@ -2638,6 +2644,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\cowork-exchange\validate-naming.mjs'
     root: repo
     rel: 'scripts/cowork-exchange/validate-naming.mjs'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\db-health-graph.sh'
+    root: repo
+    rel: 'scripts/db-health-graph.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -5740,6 +5752,12 @@ files:
   - path: 'D:\heuresys-advanced\db\migrations\000153_lead_source_enum.sql'
     root: repo
     rel: 'db/migrations/000153_lead_source_enum.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000154_retire_synthetic_user_flag.sql'
+    root: repo
+    rel: 'db/migrations/000154_retire_synthetic_user_flag.sql'
     category: db-migration
     status: live
     provenance: git-tracked
@@ -9082,6 +9100,36 @@ files:
   - path: 'D:\heuresys-advanced\qa_artifacts\data_integrity\20260531_s952\sys_skill_learning_mappings.candidate.csv'
     root: repo
     rel: 'qa_artifacts/data_integrity/20260531_s952/sys_skill_learning_mappings.candidate.csv'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\dbms_health_2026-06-22\FINAL_REPORT.md'
+    root: repo
+    rel: 'qa_artifacts/dbms_health_2026-06-22/FINAL_REPORT.md'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\dbms_health_2026-06-22\adr0026_audit_register.csv'
+    root: repo
+    rel: 'qa_artifacts/dbms_health_2026-06-22/adr0026_audit_register.csv'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\dbms_health_2026-06-22\rowcount_all_tables.csv'
+    root: repo
+    rel: 'qa_artifacts/dbms_health_2026-06-22/rowcount_all_tables.csv'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\dbms_health_2026-06-22\sys_column_completeness.csv'
+    root: repo
+    rel: 'qa_artifacts/dbms_health_2026-06-22/sys_column_completeness.csv'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\dbms_health_2026-06-22\webapp_coverage_matrix.csv'
+    root: repo
+    rel: 'qa_artifacts/dbms_health_2026-06-22/webapp_coverage_matrix.csv'
     category: qa-artifact
     status: archive
     provenance: git-tracked

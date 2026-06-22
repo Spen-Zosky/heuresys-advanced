@@ -33,6 +33,12 @@
 - **#16 SuccessFactors** · status: WAIT-INPUT
   - input-richiesto: un sandbox SuccessFactors (esterno, costo)
   - perche-solo-tuo: accesso/provisioning del sandbox è una risorsa che solo Enzo può procurare; de-prioritizzato S999
+- **#18 doc-cleanup `is_synthetic`** · status: ACTIVE
+  - priority: P2 · effort: ~0.5h · doc: DEBT_REGISTER D-44
+  - note: ~8 doc descrittivi (`TARGET_SCHEMA_DESIGN`, `BOOTSTRAP §I14`, brownfield {IMPORT_PLAN,ADAPTATION_MAP,TABLE_CLASSIFICATION}, `MIGRATION_IMPLEMENTATION_PLAN`, `AUTH_SECURITY_PLAN`, `MVP_4_ROADMAP`) citano ancora `user_is_synthetic`/`SYNTHETIC_REFERENCE` come parte schema → allineare a ADR-0026/mig 000154 (codice+DB già ritirati S1004, drift solo doc)
+- **#19 E2E users-page post-synthetic** · status: ACTIVE
+  - priority: P3 · effort: ~0.3h · doc: -
+  - note: Playwright `users/[userId]` — verifica visiva che il campo "Synthetic" è sparito dopo il refactor A (funzionale già coperto dai 26 test API live S1004)
 
 ## ✅ Gap#1 DONE (S999, 2026-06-20) — programma-faro "rendi il prodotto dimostrabile" chiuso end-to-end
 

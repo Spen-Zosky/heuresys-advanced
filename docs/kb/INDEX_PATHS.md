@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-22T12:27:01Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2162**
+**Generato**: 2026-06-22T21:20:50Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2170**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -8,22 +8,22 @@
 
 | Categoria | File |
 |---|---|
-| ADR | 24 |
+| ADR | 25 |
 | api-core | 18 |
 | api-module | 292 |
 | ci | 16 |
 | claude-config | 6 |
-| config | 99 |
+| config | 100 |
 | cowork-archive | 14 |
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 152 |
+| db-migration | 153 |
 | db-script | 23 |
 | db-seed | 104 |
 | doc-canonical | 388 |
 | handoff-state | 1 |
-| qa-artifact | 96 |
+| qa-artifact | 101 |
 | script | 6 |
 | session | 12 |
 | shared-pkg | 4 |
@@ -32,15 +32,15 @@
 | test | 227 |
 | ux-design-archive | 80 |
 | web-source | 170 |
-| **TOTALE** | **2162** |
+| **TOTALE** | **2170** |
 
 ## Conteggi per status
 
 | Status | File |
 |---|---|
-| archive | 488 |
+| archive | 493 |
 | external-archive | 50 |
-| live | 1624 |
+| live | 1627 |
 
 ## File per categoria
 
@@ -71,6 +71,7 @@
 - `D:\heuresys-advanced\docs\architecture\adr\0023_data_source_doctrine.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0024_legacy_ingestion_employee_centric.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0025_sys_skill_categories_nullable_family_fk.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0026_single_production_environment_two_tenants.md` · *live* · git-tracked
 
 ### api-core
 
@@ -496,6 +497,7 @@
 - `D:\heuresys-advanced\scripts\cowork-exchange\session-start.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\cowork-exchange\status.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\cowork-exchange\validate-naming.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\db-health-graph.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\dev-bootstrap.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\dev-bootstrap.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\dr-drill.sh` · *live* · git-tracked
@@ -1028,6 +1030,7 @@
 - `D:\heuresys-advanced\db\migrations\000151_reconcile_needs_decision_registry.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000152_leads.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000153_lead_source_enum.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000154_retire_synthetic_user_flag.sql` · *live* · git-tracked
 
 ### db-script
 
@@ -1600,6 +1603,11 @@
 - `D:\heuresys-advanced\qa_artifacts\data_integrity\20260531_s952\sys_skill_categories.candidate.csv` · *archive* · git-tracked
 - `D:\heuresys-advanced\qa_artifacts\data_integrity\20260531_s952\sys_skill_families.candidate.csv` · *archive* · git-tracked
 - `D:\heuresys-advanced\qa_artifacts\data_integrity\20260531_s952\sys_skill_learning_mappings.candidate.csv` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\dbms_health_2026-06-22\FINAL_REPORT.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\dbms_health_2026-06-22\adr0026_audit_register.csv` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\dbms_health_2026-06-22\rowcount_all_tables.csv` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\dbms_health_2026-06-22\sys_column_completeness.csv` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\dbms_health_2026-06-22\webapp_coverage_matrix.csv` · *archive* · git-tracked
 - `D:\heuresys-advanced\qa_artifacts\diagrams\bootstrap_mvp_flow.mmd` · *archive* · git-tracked
 - `D:\heuresys-advanced\qa_artifacts\diagrams\bootstrap_mvp_flow.png` · *archive* · git-tracked
 - `D:\heuresys-advanced\qa_artifacts\diagrams\bootstrap_mvp_flow.svg` · *archive* · git-tracked

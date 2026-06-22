@@ -1,0 +1,1854 @@
+tbl,col,type,rows,non_null,null_pct
+sys_activity_classification_mappings,activity_class_mapping_id,uuid,5730,5730,0.0
+sys_activity_classification_mappings,activity_class_mapping_source_id,uuid,5730,5730,0.0
+sys_activity_classification_mappings,activity_class_mapping_target_id,uuid,5730,5730,0.0
+sys_activity_classification_mappings,activity_class_mapping_kind,character varying,5730,5730,0.0
+sys_activity_classification_mappings,activity_class_mapping_confidence,numeric,5730,5730,0.0
+sys_activity_classification_mappings,activity_class_mapping_metadata,jsonb,5730,5730,0.0
+sys_activity_classification_mappings,created_at,timestamp with time zone,5730,5730,0.0
+sys_activity_classification_mappings,updated_at,timestamp with time zone,5730,5730,0.0
+sys_activity_classifications,activity_classification_id,uuid,6533,6533,0.0
+sys_activity_classifications,activity_classification_scheme,character varying,6533,6533,0.0
+sys_activity_classifications,activity_classification_code,character varying,6533,6533,0.0
+sys_activity_classifications,activity_classification_parent_code,character varying,6533,6489,0.7
+sys_activity_classifications,activity_classification_name,character varying,6533,6533,0.0
+sys_activity_classifications,activity_classification_description,text,6533,0,100.0
+sys_activity_classifications,activity_classification_level,smallint,6533,6533,0.0
+sys_activity_classifications,activity_classification_metadata,jsonb,6533,6533,0.0
+sys_activity_classifications,created_at,timestamp with time zone,6533,6533,0.0
+sys_activity_classifications,updated_at,timestamp with time zone,6533,6533,0.0
+sys_assessment_methods,assessment_method_id,uuid,5,5,0.0
+sys_assessment_methods,assessment_method_code,character varying,5,5,0.0
+sys_assessment_methods,assessment_method_name,character varying,5,5,0.0
+sys_assessment_methods,assessment_method_description,text,5,0,100.0
+sys_assessment_methods,assessment_method_metadata,jsonb,5,5,0.0
+sys_assessment_methods,created_at,timestamp with time zone,5,5,0.0
+sys_assessment_results,assessment_result_id,uuid,1560,1560,0.0
+sys_assessment_results,assessment_result_assessment_id,uuid,1560,1560,0.0
+sys_assessment_results,assessment_result_tenant_id,uuid,1560,1560,0.0
+sys_assessment_results,assessment_result_dimension,character varying,1560,1560,0.0
+sys_assessment_results,assessment_result_score,numeric,1560,1560,0.0
+sys_assessment_results,assessment_result_narrative,text,1560,0,100.0
+sys_assessment_results,assessment_result_assessor_user_id,uuid,1560,0,100.0
+sys_assessment_results,assessment_result_recorded_at,timestamp with time zone,1560,1560,0.0
+sys_assessment_results,assessment_result_metadata,jsonb,1560,1560,0.0
+sys_assessment_results,created_at,timestamp with time zone,1560,1560,0.0
+sys_assessments,assessment_id,uuid,615,615,0.0
+sys_assessments,assessment_tenant_id,uuid,615,615,0.0
+sys_assessments,assessment_subject_user_id,uuid,615,615,0.0
+sys_assessments,assessment_method_id,uuid,615,0,100.0
+sys_assessments,assessment_kind,character varying,615,615,0.0
+sys_assessments,assessment_period_start,date,615,0,100.0
+sys_assessments,assessment_period_end,date,615,303,50.7
+sys_assessments,assessment_status,character varying,615,615,0.0
+sys_assessments,assessment_metadata,jsonb,615,615,0.0
+sys_assessments,created_at,timestamp with time zone,615,615,0.0
+sys_assessments,created_by,uuid,615,0,100.0
+sys_assessments,updated_at,timestamp with time zone,615,615,0.0
+sys_assessments,updated_by,uuid,615,0,100.0
+sys_attendance,attendance_id,uuid,3180,3180,0.0
+sys_attendance,attendance_tenant_id,uuid,3180,3180,0.0
+sys_attendance,attendance_natural_key,character varying,3180,3180,0.0
+sys_attendance,attendance_subject_user_id,uuid,3180,3180,0.0
+sys_attendance,attendance_date,date,3180,3180,0.0
+sys_attendance,attendance_clock_in,time without time zone,3180,3180,0.0
+sys_attendance,attendance_clock_out,time without time zone,3180,3180,0.0
+sys_attendance,attendance_break_start,time without time zone,3180,0,100.0
+sys_attendance,attendance_break_end,time without time zone,3180,0,100.0
+sys_attendance,attendance_hours_regular,numeric,3180,3180,0.0
+sys_attendance,attendance_hours_overtime,numeric,3180,3180,0.0
+sys_attendance,attendance_hours_night,numeric,3180,3180,0.0
+sys_attendance,attendance_hours_holiday,numeric,3180,3180,0.0
+sys_attendance,attendance_hours_total,numeric,3180,3180,0.0
+sys_attendance,attendance_status,character varying,3180,3180,0.0
+sys_attendance,attendance_source,character varying,3180,3180,0.0
+sys_attendance,attendance_source_reference,text,3180,0,100.0
+sys_attendance,attendance_is_validated,boolean,3180,3180,0.0
+sys_attendance,attendance_validated_by_user_id,uuid,3180,0,100.0
+sys_attendance,attendance_validated_at,timestamp with time zone,3180,0,100.0
+sys_attendance,attendance_notes,text,3180,0,100.0
+sys_attendance,attendance_metadata,jsonb,3180,3180,0.0
+sys_attendance,attendance_created_by,uuid,3180,0,100.0
+sys_attendance,attendance_updated_by,uuid,3180,0,100.0
+sys_attendance,created_at,timestamp with time zone,3180,3180,0.0
+sys_attendance,updated_at,timestamp with time zone,3180,3180,0.0
+sys_auth_credentials,auth_credential_id,uuid,12,12,0.0
+sys_auth_credentials,auth_credential_identity_id,uuid,12,12,0.0
+sys_auth_credentials,auth_credential_algorithm,character varying,12,12,0.0
+sys_auth_credentials,auth_credential_hash,text,12,12,0.0
+sys_auth_credentials,auth_credential_is_current,boolean,12,12,0.0
+sys_auth_credentials,auth_credential_must_rotate,boolean,12,12,0.0
+sys_auth_credentials,created_at,timestamp with time zone,12,12,0.0
+sys_auth_credentials,rotated_at,timestamp with time zone,12,0,100.0
+sys_auth_identities,auth_identity_id,uuid,12,12,0.0
+sys_auth_identities,auth_identity_user_id,uuid,12,12,0.0
+sys_auth_identities,auth_identity_provider,character varying,12,12,0.0
+sys_auth_identities,auth_identity_provider_subject,character varying,12,0,100.0
+sys_auth_identities,auth_identity_email_verified,boolean,12,12,0.0
+sys_auth_identities,auth_identity_is_active,boolean,12,12,0.0
+sys_auth_identities,created_at,timestamp with time zone,12,12,0.0
+sys_auth_identities,updated_at,timestamp with time zone,12,12,0.0
+sys_auth_login_events,auth_login_event_id,uuid,75847,75847,0.0
+sys_auth_login_events,auth_login_event_user_id,uuid,75847,64934,14.4
+sys_auth_login_events,auth_login_event_tenant_id,uuid,75847,69444,8.4
+sys_auth_login_events,auth_login_event_type,character varying,75847,75847,0.0
+sys_auth_login_events,auth_login_event_ip,inet,75847,74236,2.1
+sys_auth_login_events,auth_login_event_user_agent,text,75847,73885,2.6
+sys_auth_login_events,auth_login_event_details,jsonb,75847,75847,0.0
+sys_auth_login_events,created_at,timestamp with time zone,75847,75847,0.0
+sys_auth_mfa_factors,auth_mfa_factor_id,uuid,6,6,0.0
+sys_auth_mfa_factors,auth_mfa_factor_user_id,uuid,6,6,0.0
+sys_auth_mfa_factors,auth_mfa_factor_kind,character varying,6,6,0.0
+sys_auth_mfa_factors,auth_mfa_factor_secret,text,6,6,0.0
+sys_auth_mfa_factors,auth_mfa_factor_metadata,jsonb,6,6,0.0
+sys_auth_mfa_factors,auth_mfa_factor_verified,boolean,6,6,0.0
+sys_auth_mfa_factors,auth_mfa_factor_last_used_at,timestamp with time zone,6,6,0.0
+sys_auth_mfa_factors,created_at,timestamp with time zone,6,6,0.0
+sys_auth_mfa_policies,auth_mfa_policy_id,uuid,2,2,0.0
+sys_auth_mfa_policies,auth_mfa_policy_tenant_id,uuid,2,2,0.0
+sys_auth_mfa_policies,auth_mfa_policy_enabled,boolean,2,2,0.0
+sys_auth_mfa_policies,auth_mfa_policy_role_codes,ARRAY,2,0,100.0
+sys_auth_mfa_policies,created_at,timestamp with time zone,2,2,0.0
+sys_auth_mfa_policies,created_by,uuid,2,0,100.0
+sys_auth_mfa_policies,updated_at,timestamp with time zone,2,2,0.0
+sys_auth_mfa_policies,updated_by,uuid,2,0,100.0
+sys_auth_password_reset_tokens,auth_password_reset_token_id,uuid,411,411,0.0
+sys_auth_password_reset_tokens,auth_password_reset_user_id,uuid,411,411,0.0
+sys_auth_password_reset_tokens,auth_password_reset_token_hash,character,411,411,0.0
+sys_auth_password_reset_tokens,auth_password_reset_expires_at,timestamp with time zone,411,411,0.0
+sys_auth_password_reset_tokens,auth_password_reset_used_at,timestamp with time zone,411,0,100.0
+sys_auth_password_reset_tokens,auth_password_reset_requester_ip,inet,411,411,0.0
+sys_auth_password_reset_tokens,created_at,timestamp with time zone,411,411,0.0
+sys_auth_permissions,auth_permission_id,uuid,154,154,0.0
+sys_auth_permissions,auth_permission_code,character varying,154,154,0.0
+sys_auth_permissions,auth_permission_name,character varying,154,154,0.0
+sys_auth_permissions,auth_permission_resource,character varying,154,154,0.0
+sys_auth_permissions,auth_permission_action,character varying,154,154,0.0
+sys_auth_permissions,auth_permission_description,text,154,1,99.4
+sys_auth_permissions,created_at,timestamp with time zone,154,154,0.0
+sys_auth_refresh_tokens,auth_refresh_token_id,uuid,47594,47594,0.0
+sys_auth_refresh_tokens,auth_refresh_token_user_id,uuid,47594,47594,0.0
+sys_auth_refresh_tokens,auth_refresh_token_tenant_id,uuid,47594,47594,0.0
+sys_auth_refresh_tokens,auth_refresh_token_family_id,uuid,47594,47594,0.0
+sys_auth_refresh_tokens,auth_refresh_token_previous_id,uuid,47594,330,99.3
+sys_auth_refresh_tokens,auth_refresh_token_hash,character,47594,47594,0.0
+sys_auth_refresh_tokens,auth_refresh_token_issued_at,timestamp with time zone,47594,47594,0.0
+sys_auth_refresh_tokens,auth_refresh_token_expires_at,timestamp with time zone,47594,47594,0.0
+sys_auth_refresh_tokens,auth_refresh_token_used_at,timestamp with time zone,47594,330,99.3
+sys_auth_refresh_tokens,auth_refresh_token_revoked_at,timestamp with time zone,47594,262,99.4
+sys_auth_refresh_tokens,auth_refresh_token_revoke_reason,character varying,47594,262,99.4
+sys_auth_refresh_tokens,auth_refresh_token_ip,inet,47594,47594,0.0
+sys_auth_refresh_tokens,auth_refresh_token_user_agent,text,47594,47594,0.0
+sys_auth_role_permissions,auth_role_id,uuid,681,681,0.0
+sys_auth_role_permissions,auth_permission_id,uuid,681,681,0.0
+sys_auth_role_permissions,granted_at,timestamp with time zone,681,681,0.0
+sys_auth_roles,auth_role_id,uuid,12,12,0.0
+sys_auth_roles,auth_role_code,character varying,12,12,0.0
+sys_auth_roles,auth_role_name,character varying,12,12,0.0
+sys_auth_roles,auth_role_description,text,12,12,0.0
+sys_auth_roles,auth_role_is_platform,boolean,12,12,0.0
+sys_auth_roles,created_at,timestamp with time zone,12,12,0.0
+sys_auth_roles,auth_role_category,character varying,12,12,0.0
+sys_behavioral_assessments,behavioral_assessment_id,uuid,465,465,0.0
+sys_behavioral_assessments,behavioral_assessment_tenant_id,uuid,465,465,0.0
+sys_behavioral_assessments,behavioral_assessment_user_id,uuid,465,465,0.0
+sys_behavioral_assessments,behavioral_assessment_competency,character varying,465,465,0.0
+sys_behavioral_assessments,behavioral_assessment_score,numeric,465,465,0.0
+sys_behavioral_assessments,behavioral_assessment_evidence_payload,jsonb,465,465,0.0
+sys_behavioral_assessments,behavioral_assessment_recorded_at,timestamp with time zone,465,465,0.0
+sys_behavioral_assessments,created_at,timestamp with time zone,465,465,0.0
+sys_blueprint_families,blueprint_family_id,uuid,1,1,0.0
+sys_blueprint_families,blueprint_family_code,character varying,1,1,0.0
+sys_blueprint_families,blueprint_family_name,character varying,1,1,0.0
+sys_blueprint_families,blueprint_family_description,text,1,1,0.0
+sys_blueprint_families,blueprint_family_metadata,jsonb,1,1,0.0
+sys_blueprint_families,created_at,timestamp with time zone,1,1,0.0
+sys_blueprint_families,updated_at,timestamp with time zone,1,1,0.0
+sys_blueprint_process_registry,blueprint_process_id,uuid,23,23,0.0
+sys_blueprint_process_registry,blueprint_process_variant_id,uuid,23,23,0.0
+sys_blueprint_process_registry,blueprint_process_code,character varying,23,23,0.0
+sys_blueprint_process_registry,blueprint_process_name,character varying,23,23,0.0
+sys_blueprint_process_registry,blueprint_process_ordinal,smallint,23,23,0.0
+sys_blueprint_process_registry,blueprint_process_description,text,23,0,100.0
+sys_blueprint_process_registry,blueprint_process_is_optional,boolean,23,23,0.0
+sys_blueprint_process_registry,blueprint_process_metadata,jsonb,23,23,0.0
+sys_blueprint_process_registry,created_at,timestamp with time zone,23,23,0.0
+sys_blueprint_process_registry,updated_at,timestamp with time zone,23,23,0.0
+sys_blueprint_variants,blueprint_variant_id,uuid,1,1,0.0
+sys_blueprint_variants,blueprint_variant_family_id,uuid,1,1,0.0
+sys_blueprint_variants,blueprint_variant_code,character varying,1,1,0.0
+sys_blueprint_variants,blueprint_variant_name,character varying,1,1,0.0
+sys_blueprint_variants,blueprint_variant_description,text,1,0,100.0
+sys_blueprint_variants,blueprint_variant_size_band_id,uuid,1,1,0.0
+sys_blueprint_variants,blueprint_variant_metadata,jsonb,1,1,0.0
+sys_blueprint_variants,created_at,timestamp with time zone,1,1,0.0
+sys_blueprint_variants,updated_at,timestamp with time zone,1,1,0.0
+sys_bonus_pools,bonus_pool_id,uuid,6,6,0.0
+sys_bonus_pools,bonus_pool_tenant_id,uuid,6,6,0.0
+sys_bonus_pools,bonus_pool_scope,character varying,6,6,0.0
+sys_bonus_pools,bonus_pool_organization_unit_id,uuid,6,0,100.0
+sys_bonus_pools,bonus_pool_period_start,date,6,6,0.0
+sys_bonus_pools,bonus_pool_period_end,date,6,6,0.0
+sys_bonus_pools,bonus_pool_total_eur,numeric,6,6,0.0
+sys_bonus_pools,bonus_pool_payload,jsonb,6,6,0.0
+sys_bonus_pools,created_at,timestamp with time zone,6,6,0.0
+sys_bonus_pools,updated_at,timestamp with time zone,6,6,0.0
+sys_branches,branch_id,uuid,6,6,0.0
+sys_branches,branch_organization_unit_id,uuid,6,6,0.0
+sys_branches,branch_tenant_id,uuid,6,6,0.0
+sys_branches,branch_code,character varying,6,6,0.0
+sys_branches,branch_address_line1,character varying,6,6,0.0
+sys_branches,branch_address_line2,character varying,6,0,100.0
+sys_branches,branch_city,character varying,6,6,0.0
+sys_branches,branch_postal_code,character varying,6,6,0.0
+sys_branches,branch_country_code,character,6,6,0.0
+sys_branches,branch_region_code,character varying,6,6,0.0
+sys_branches,branch_opening_hours,jsonb,6,6,0.0
+sys_branches,branch_regulatory_zone,character varying,6,0,100.0
+sys_branches,branch_metadata,jsonb,6,6,0.0
+sys_branches,created_at,timestamp with time zone,6,6,0.0
+sys_branches,created_by,uuid,6,0,100.0
+sys_branches,updated_at,timestamp with time zone,6,6,0.0
+sys_branches,updated_by,uuid,6,0,100.0
+sys_capability_maturity_scores,capability_maturity_score_id,uuid,20,20,0.0
+sys_capability_maturity_scores,capability_maturity_score_tenant_id,uuid,20,20,0.0
+sys_capability_maturity_scores,capability_maturity_score_org_unit_id,uuid,20,20,0.0
+sys_capability_maturity_scores,capability_maturity_score_capability_ref,character varying,20,20,0.0
+sys_capability_maturity_scores,capability_maturity_score_level,character varying,20,20,0.0
+sys_capability_maturity_scores,capability_maturity_score_composite,numeric,20,20,0.0
+sys_capability_maturity_scores,capability_maturity_score_rubric_version,character varying,20,20,0.0
+sys_capability_maturity_scores,capability_maturity_score_model_version,character varying,20,20,0.0
+sys_capability_maturity_scores,capability_maturity_score_payload,jsonb,20,20,0.0
+sys_capability_maturity_scores,capability_maturity_score_computed_at,timestamp with time zone,20,20,0.0
+sys_capability_maturity_scores,created_at,timestamp with time zone,20,20,0.0
+sys_capability_score_lineage,capability_score_lineage_id,uuid,316,316,0.0
+sys_capability_score_lineage,capability_score_lineage_tenant_id,uuid,316,316,0.0
+sys_capability_score_lineage,capability_score_lineage_parent_type,character varying,316,316,0.0
+sys_capability_score_lineage,capability_score_lineage_parent_id,uuid,316,316,0.0
+sys_capability_score_lineage,capability_score_lineage_child_type,character varying,316,316,0.0
+sys_capability_score_lineage,capability_score_lineage_child_id,uuid,316,316,0.0
+sys_capability_score_lineage,capability_score_lineage_child_value,numeric,316,316,0.0
+sys_capability_score_lineage,capability_score_lineage_weight,numeric,316,316,0.0
+sys_capability_score_lineage,capability_score_lineage_computed_at,timestamp with time zone,316,316,0.0
+sys_capability_score_lineage,created_at,timestamp with time zone,316,316,0.0
+sys_capability_scores,capability_score_id,uuid,317,317,0.0
+sys_capability_scores,capability_score_tenant_id,uuid,317,317,0.0
+sys_capability_scores,capability_score_subject_type,character varying,317,317,0.0
+sys_capability_scores,capability_score_subject_id,uuid,317,317,0.0
+sys_capability_scores,capability_score_value,numeric,317,317,0.0
+sys_capability_scores,capability_score_coverage,numeric,317,317,0.0
+sys_capability_scores,capability_score_aggregation_mode,character varying,317,317,0.0
+sys_capability_scores,capability_score_model_version,character varying,317,317,0.0
+sys_capability_scores,capability_score_child_count,integer,317,317,0.0
+sys_capability_scores,capability_score_payload,jsonb,317,317,0.0
+sys_capability_scores,capability_score_computed_at,timestamp with time zone,317,317,0.0
+sys_capability_scores,created_at,timestamp with time zone,317,317,0.0
+sys_career_path_steps,career_path_step_id,uuid,35,35,0.0
+sys_career_path_steps,career_path_step_path_id,uuid,35,35,0.0
+sys_career_path_steps,career_path_step_ordinal,smallint,35,35,0.0
+sys_career_path_steps,career_path_step_origin_position_id,uuid,35,0,100.0
+sys_career_path_steps,career_path_step_target_position_id,uuid,35,0,100.0
+sys_career_path_steps,career_path_step_required_proficiency_uplift,jsonb,35,35,0.0
+sys_career_path_steps,career_path_step_typical_duration_months,integer,35,0,100.0
+sys_career_path_steps,career_path_step_metadata,jsonb,35,35,0.0
+sys_career_path_steps,created_at,timestamp with time zone,35,35,0.0
+sys_career_path_steps,updated_at,timestamp with time zone,35,35,0.0
+sys_career_paths,career_path_id,uuid,28,28,0.0
+sys_career_paths,career_path_tenant_id,uuid,28,28,0.0
+sys_career_paths,career_path_code,character varying,28,28,0.0
+sys_career_paths,career_path_name,character varying,28,28,0.0
+sys_career_paths,career_path_description,text,28,7,75.0
+sys_career_paths,career_path_kind,character varying,28,28,0.0
+sys_career_paths,career_path_is_global,boolean,28,28,0.0
+sys_career_paths,career_path_metadata,jsonb,28,28,0.0
+sys_career_paths,created_at,timestamp with time zone,28,28,0.0
+sys_career_paths,created_by,uuid,28,0,100.0
+sys_career_paths,updated_at,timestamp with time zone,28,28,0.0
+sys_career_paths,updated_by,uuid,28,0,100.0
+sys_compensation_bands,compensation_band_id,uuid,87,87,0.0
+sys_compensation_bands,compensation_band_tenant_id,uuid,87,12,86.2
+sys_compensation_bands,compensation_band_code,character varying,87,87,0.0
+sys_compensation_bands,compensation_band_name,character varying,87,87,0.0
+sys_compensation_bands,compensation_band_min_eur,numeric,87,12,86.2
+sys_compensation_bands,compensation_band_mid_eur,numeric,87,12,86.2
+sys_compensation_bands,compensation_band_max_eur,numeric,87,12,86.2
+sys_compensation_bands,compensation_band_is_global,boolean,87,87,0.0
+sys_compensation_bands,compensation_band_metadata,jsonb,87,87,0.0
+sys_compensation_bands,created_at,timestamp with time zone,87,87,0.0
+sys_compensation_bands,updated_at,timestamp with time zone,87,87,0.0
+sys_compensation_recommendations,compensation_recommendation_id,uuid,116,116,0.0
+sys_compensation_recommendations,compensation_recommendation_tenant_id,uuid,116,116,0.0
+sys_compensation_recommendations,compensation_recommendation_user_id,uuid,116,116,0.0
+sys_compensation_recommendations,compensation_recommendation_position_id,uuid,116,0,100.0
+sys_compensation_recommendations,compensation_recommendation_period_start,date,116,116,0.0
+sys_compensation_recommendations,compensation_recommendation_period_end,date,116,116,0.0
+sys_compensation_recommendations,compensation_recommendation_signal,character varying,116,116,0.0
+sys_compensation_recommendations,compensation_recommendation_amount_eur,numeric,116,116,0.0
+sys_compensation_recommendations,compensation_recommendation_narrative,text,116,0,100.0
+sys_compensation_recommendations,compensation_recommendation_payload,jsonb,116,116,0.0
+sys_compensation_recommendations,compensation_recommendation_computed_at,timestamp with time zone,116,116,0.0
+sys_compensation_recommendations,created_at,timestamp with time zone,116,116,0.0
+sys_content_blueprint_links,link_id,uuid,1,1,0.0
+sys_content_blueprint_links,link_tenant_id,uuid,1,1,0.0
+sys_content_blueprint_links,link_document_id,uuid,1,1,0.0
+sys_content_blueprint_links,link_blueprint_process_id,uuid,1,1,0.0
+sys_content_blueprint_links,link_role,character varying,1,1,0.0
+sys_content_blueprint_links,link_note,text,1,0,100.0
+sys_content_blueprint_links,link_metadata,jsonb,1,1,0.0
+sys_content_blueprint_links,link_created_by,uuid,1,1,0.0
+sys_content_blueprint_links,created_at,timestamp with time zone,1,1,0.0
+sys_content_blueprint_links,updated_at,timestamp with time zone,1,1,0.0
+sys_content_documents,document_id,uuid,121,121,0.0
+sys_content_documents,document_tenant_id,uuid,121,121,0.0
+sys_content_documents,document_natural_key,character varying,121,121,0.0
+sys_content_documents,document_category_id,uuid,121,0,100.0
+sys_content_documents,document_title,character varying,121,121,0.0
+sys_content_documents,document_slug,character varying,121,121,0.0
+sys_content_documents,document_kind,character varying,121,121,0.0
+sys_content_documents,document_status,character varying,121,121,0.0
+sys_content_documents,document_body,text,121,121,0.0
+sys_content_documents,document_body_format,character varying,121,121,0.0
+sys_content_documents,document_current_version_id,uuid,121,121,0.0
+sys_content_documents,document_author_user_id,uuid,121,121,0.0
+sys_content_documents,document_published_at,timestamp with time zone,121,109,9.9
+sys_content_documents,document_published_by_user_id,uuid,121,109,9.9
+sys_content_documents,document_effective_date,date,121,0,100.0
+sys_content_documents,document_expires_date,date,121,0,100.0
+sys_content_documents,document_metadata,jsonb,121,121,0.0
+sys_content_documents,created_at,timestamp with time zone,121,121,0.0
+sys_content_documents,updated_at,timestamp with time zone,121,121,0.0
+sys_content_documents,document_search_tsv,tsvector,121,121,0.0
+sys_content_versions,version_id,uuid,132,132,0.0
+sys_content_versions,version_tenant_id,uuid,132,132,0.0
+sys_content_versions,version_document_id,uuid,132,132,0.0
+sys_content_versions,version_number,integer,132,132,0.0
+sys_content_versions,version_title,character varying,132,132,0.0
+sys_content_versions,version_body,text,132,132,0.0
+sys_content_versions,version_body_format,character varying,132,132,0.0
+sys_content_versions,version_author_user_id,uuid,132,132,0.0
+sys_content_versions,version_change_note,text,132,121,8.3
+sys_content_versions,version_metadata,jsonb,132,132,0.0
+sys_content_versions,created_at,timestamp with time zone,132,132,0.0
+sys_continuous_feedback,feedback_id,uuid,474,474,0.0
+sys_continuous_feedback,feedback_tenant_id,uuid,474,474,0.0
+sys_continuous_feedback,feedback_natural_key,character varying,474,474,0.0
+sys_continuous_feedback,feedback_from_user_id,uuid,474,473,0.2
+sys_continuous_feedback,feedback_to_user_id,uuid,474,474,0.0
+sys_continuous_feedback,feedback_related_goal_id,uuid,474,146,69.2
+sys_continuous_feedback,feedback_type,character varying,474,474,0.0
+sys_continuous_feedback,feedback_message,text,474,474,0.0
+sys_continuous_feedback,feedback_category,character varying,474,0,100.0
+sys_continuous_feedback,feedback_visibility,character varying,474,474,0.0
+sys_continuous_feedback,feedback_is_private,boolean,474,474,0.0
+sys_continuous_feedback,feedback_tags,ARRAY,474,0,100.0
+sys_continuous_feedback,feedback_sentiment_score,numeric,474,8,98.3
+sys_continuous_feedback,feedback_acknowledged,boolean,474,474,0.0
+sys_continuous_feedback,feedback_acknowledged_at,timestamp with time zone,474,0,100.0
+sys_continuous_feedback,feedback_metadata,jsonb,474,474,0.0
+sys_continuous_feedback,created_at,timestamp with time zone,474,474,0.0
+sys_critical_positions,critical_position_id,uuid,8,8,0.0
+sys_critical_positions,critical_position_tenant_id,uuid,8,8,0.0
+sys_critical_positions,critical_position_position_id,uuid,8,8,0.0
+sys_critical_positions,critical_position_rationale,text,8,0,100.0
+sys_critical_positions,critical_position_business_impact_score,numeric,8,0,100.0
+sys_critical_positions,critical_position_flagged_at,timestamp with time zone,8,8,0.0
+sys_critical_positions,critical_position_metadata,jsonb,8,8,0.0
+sys_critical_positions,created_at,timestamp with time zone,8,8,0.0
+sys_critical_positions,created_by,uuid,8,0,100.0
+sys_critical_role_coverage_status,critical_role_coverage_status_id,uuid,8,8,0.0
+sys_critical_role_coverage_status,critical_role_coverage_status_tenant_id,uuid,8,8,0.0
+sys_critical_role_coverage_status,critical_role_coverage_status_position_id,uuid,8,8,0.0
+sys_critical_role_coverage_status,critical_role_coverage_ready_now_count,integer,8,8,0.0
+sys_critical_role_coverage_status,critical_role_coverage_ready_6mo_count,integer,8,8,0.0
+sys_critical_role_coverage_status,critical_role_coverage_ready_1y_count,integer,8,8,0.0
+sys_critical_role_coverage_status,critical_role_coverage_overall_score,numeric,8,3,62.5
+sys_critical_role_coverage_status,critical_role_coverage_computed_at,timestamp with time zone,8,8,0.0
+sys_critical_role_coverage_status,critical_role_coverage_payload,jsonb,8,8,0.0
+sys_critical_role_coverage_status,created_at,timestamp with time zone,8,8,0.0
+sys_employee_position_fit_scores,employee_position_fit_score_id,uuid,146,146,0.0
+sys_employee_position_fit_scores,employee_position_fit_score_tenant_id,uuid,146,146,0.0
+sys_employee_position_fit_scores,employee_position_fit_score_user_id,uuid,146,146,0.0
+sys_employee_position_fit_scores,employee_position_fit_score_position_id,uuid,146,146,0.0
+sys_employee_position_fit_scores,employee_position_fit_score_dimension,character varying,146,146,0.0
+sys_employee_position_fit_scores,employee_position_fit_score_score,numeric,146,146,0.0
+sys_employee_position_fit_scores,employee_position_fit_score_computed_at,timestamp with time zone,146,146,0.0
+sys_employee_position_fit_scores,employee_position_fit_score_payload,jsonb,146,146,0.0
+sys_employee_position_fit_scores,created_at,timestamp with time zone,146,146,0.0
+sys_engagement_action_plans,action_plan_id,uuid,6,6,0.0
+sys_engagement_action_plans,action_plan_tenant_id,uuid,6,6,0.0
+sys_engagement_action_plans,action_plan_natural_key,character varying,6,6,0.0
+sys_engagement_action_plans,action_plan_source_type,character varying,6,6,0.0
+sys_engagement_action_plans,action_plan_source_id,uuid,6,6,0.0
+sys_engagement_action_plans,action_plan_title,character varying,6,6,0.0
+sys_engagement_action_plans,action_plan_description,text,6,6,0.0
+sys_engagement_action_plans,action_plan_owner_user_id,uuid,6,6,0.0
+sys_engagement_action_plans,action_plan_status,character varying,6,6,0.0
+sys_engagement_action_plans,action_plan_priority,character varying,6,6,0.0
+sys_engagement_action_plans,action_plan_due_date,date,6,6,0.0
+sys_engagement_action_plans,action_plan_completed_at,timestamp with time zone,6,0,100.0
+sys_engagement_action_plans,action_plan_created_by_user_id,uuid,6,6,0.0
+sys_engagement_action_plans,action_plan_metadata,jsonb,6,6,0.0
+sys_engagement_action_plans,created_at,timestamp with time zone,6,6,0.0
+sys_engagement_action_plans,updated_at,timestamp with time zone,6,6,0.0
+sys_engagement_feedback,feedback_id,uuid,400,400,0.0
+sys_engagement_feedback,feedback_tenant_id,uuid,400,400,0.0
+sys_engagement_feedback,feedback_natural_key,character varying,400,400,0.0
+sys_engagement_feedback,feedback_category,character varying,400,400,0.0
+sys_engagement_feedback,feedback_message,text,400,400,0.0
+sys_engagement_feedback,feedback_status,character varying,400,400,0.0
+sys_engagement_feedback,feedback_reviewed_by_user_id,uuid,400,45,88.8
+sys_engagement_feedback,feedback_reviewed_at,timestamp with time zone,400,45,88.8
+sys_engagement_feedback,feedback_action_notes,text,400,15,96.3
+sys_engagement_feedback,feedback_metadata,jsonb,400,400,0.0
+sys_engagement_feedback,created_at,timestamp with time zone,400,400,0.0
+sys_engagement_feedback,updated_at,timestamp with time zone,400,400,0.0
+sys_engagement_survey_responses,response_id,uuid,862,862,0.0
+sys_engagement_survey_responses,response_tenant_id,uuid,862,862,0.0
+sys_engagement_survey_responses,response_natural_key,character varying,862,862,0.0
+sys_engagement_survey_responses,response_survey_id,uuid,862,862,0.0
+sys_engagement_survey_responses,response_subject_user_id,uuid,862,862,0.0
+sys_engagement_survey_responses,response_answers,jsonb,862,862,0.0
+sys_engagement_survey_responses,response_is_complete,boolean,862,862,0.0
+sys_engagement_survey_responses,response_started_at,timestamp with time zone,862,862,0.0
+sys_engagement_survey_responses,response_completed_at,timestamp with time zone,862,796,7.7
+sys_engagement_survey_responses,response_metadata,jsonb,862,862,0.0
+sys_engagement_survey_responses,created_at,timestamp with time zone,862,862,0.0
+sys_engagement_survey_templates,template_id,uuid,5,5,0.0
+sys_engagement_survey_templates,template_tenant_id,uuid,5,5,0.0
+sys_engagement_survey_templates,template_natural_key,character varying,5,5,0.0
+sys_engagement_survey_templates,template_name,character varying,5,5,0.0
+sys_engagement_survey_templates,template_description,text,5,5,0.0
+sys_engagement_survey_templates,template_category,character varying,5,5,0.0
+sys_engagement_survey_templates,template_questions,jsonb,5,5,0.0
+sys_engagement_survey_templates,template_is_system,boolean,5,5,0.0
+sys_engagement_survey_templates,template_created_by_user_id,uuid,5,0,100.0
+sys_engagement_survey_templates,template_metadata,jsonb,5,5,0.0
+sys_engagement_survey_templates,created_at,timestamp with time zone,5,5,0.0
+sys_engagement_survey_templates,updated_at,timestamp with time zone,5,5,0.0
+sys_engagement_surveys,survey_id,uuid,6,6,0.0
+sys_engagement_surveys,survey_tenant_id,uuid,6,6,0.0
+sys_engagement_surveys,survey_natural_key,character varying,6,6,0.0
+sys_engagement_surveys,survey_template_id,uuid,6,0,100.0
+sys_engagement_surveys,survey_title,character varying,6,6,0.0
+sys_engagement_surveys,survey_description,text,6,6,0.0
+sys_engagement_surveys,survey_questions,jsonb,6,6,0.0
+sys_engagement_surveys,survey_status,character varying,6,6,0.0
+sys_engagement_surveys,survey_audience_type,character varying,6,6,0.0
+sys_engagement_surveys,survey_audience_ids,ARRAY,6,6,0.0
+sys_engagement_surveys,survey_is_anonymous,boolean,6,6,0.0
+sys_engagement_surveys,survey_total_invitations,integer,6,6,0.0
+sys_engagement_surveys,survey_total_responses,integer,6,6,0.0
+sys_engagement_surveys,survey_created_by_user_id,uuid,6,6,0.0
+sys_engagement_surveys,survey_start_date,timestamp with time zone,6,6,0.0
+sys_engagement_surveys,survey_end_date,timestamp with time zone,6,6,0.0
+sys_engagement_surveys,survey_metadata,jsonb,6,6,0.0
+sys_engagement_surveys,created_at,timestamp with time zone,6,6,0.0
+sys_engagement_surveys,updated_at,timestamp with time zone,6,6,0.0
+sys_enterprise_size_bands,enterprise_size_band_id,uuid,4,4,0.0
+sys_enterprise_size_bands,enterprise_size_band_code,character varying,4,4,0.0
+sys_enterprise_size_bands,enterprise_size_band_name,character varying,4,4,0.0
+sys_enterprise_size_bands,enterprise_size_band_min_employees,integer,4,4,0.0
+sys_enterprise_size_bands,enterprise_size_band_max_employees,integer,4,4,0.0
+sys_enterprise_size_bands,enterprise_size_band_min_revenue_eur,numeric,4,0,100.0
+sys_enterprise_size_bands,enterprise_size_band_max_revenue_eur,numeric,4,0,100.0
+sys_enterprise_size_bands,enterprise_size_band_description,text,4,0,100.0
+sys_enterprise_size_bands,enterprise_size_band_metadata,jsonb,4,4,0.0
+sys_enterprise_size_bands,created_at,timestamp with time zone,4,4,0.0
+sys_enterprise_size_bands,updated_at,timestamp with time zone,4,4,0.0
+sys_enterprise_typing_profiles,enterprise_typing_profile_id,uuid,2,2,0.0
+sys_enterprise_typing_profiles,enterprise_typing_tenant_id,uuid,2,2,0.0
+sys_enterprise_typing_profiles,enterprise_typing_industry_class_id,uuid,2,2,0.0
+sys_enterprise_typing_profiles,enterprise_typing_size_band_id,uuid,2,2,0.0
+sys_enterprise_typing_profiles,enterprise_typing_operating_model_id,uuid,2,2,0.0
+sys_enterprise_typing_profiles,enterprise_typing_regulatory_intensity,character varying,2,2,0.0
+sys_enterprise_typing_profiles,enterprise_typing_employee_count,integer,2,1,50.0
+sys_enterprise_typing_profiles,enterprise_typing_revenue_eur,numeric,2,0,100.0
+sys_enterprise_typing_profiles,enterprise_typing_country_code,character,2,2,0.0
+sys_enterprise_typing_profiles,enterprise_typing_assessed_at,timestamp with time zone,2,2,0.0
+sys_enterprise_typing_profiles,enterprise_typing_metadata,jsonb,2,2,0.0
+sys_enterprise_typing_profiles,created_at,timestamp with time zone,2,2,0.0
+sys_enterprise_typing_profiles,created_by,uuid,2,0,100.0
+sys_enterprise_typing_profiles,updated_at,timestamp with time zone,2,2,0.0
+sys_enterprise_typing_profiles,updated_by,uuid,2,1,50.0
+sys_esco_occupation_embeddings,esco_occupation_embedding_id,uuid,3045,3045,0.0
+sys_esco_occupation_embeddings,esco_uri,text,3045,3045,0.0
+sys_esco_occupation_embeddings,embedding,USER-DEFINED,3045,3045,0.0
+sys_esco_occupation_embeddings,label_text,text,3045,3045,0.0
+sys_esco_occupation_embeddings,isco_code,text,3045,3045,0.0
+sys_esco_occupation_embeddings,model_id,text,3045,3045,0.0
+sys_esco_occupation_embeddings,source_text_hash,text,3045,3045,0.0
+sys_esco_occupation_embeddings,created_at,timestamp with time zone,3045,3045,0.0
+sys_esco_occupation_mappings,esco_occupation_mapping_id,uuid,7675,7675,0.0
+sys_esco_occupation_mappings,esco_occupation_mapping_job_role_id,uuid,7675,25,99.7
+sys_esco_occupation_mappings,esco_occupation_mapping_esco_uri,text,7675,7675,0.0
+sys_esco_occupation_mappings,esco_occupation_mapping_esco_label,character varying,7675,3070,60.0
+sys_esco_occupation_mappings,esco_occupation_mapping_isco_code,character varying,7675,3070,60.0
+sys_esco_occupation_mappings,esco_occupation_mapping_confidence,numeric,7675,7675,0.0
+sys_esco_occupation_mappings,esco_occupation_mapping_metadata,jsonb,7675,7675,0.0
+sys_esco_occupation_mappings,created_at,timestamp with time zone,7675,7675,0.0
+sys_esco_occupation_mappings,updated_at,timestamp with time zone,7675,7675,0.0
+sys_feedback_360_responses,response_id,uuid,390,390,0.0
+sys_feedback_360_responses,response_tenant_id,uuid,390,390,0.0
+sys_feedback_360_responses,response_natural_key,character varying,390,390,0.0
+sys_feedback_360_responses,response_target_user_id,uuid,390,390,0.0
+sys_feedback_360_responses,response_reviewer_user_id,uuid,390,390,0.0
+sys_feedback_360_responses,response_review_id,uuid,390,0,100.0
+sys_feedback_360_responses,response_relationship_type,character varying,390,390,0.0
+sys_feedback_360_responses,response_overall_rating,numeric,390,390,0.0
+sys_feedback_360_responses,response_strengths,text,390,390,0.0
+sys_feedback_360_responses,response_areas_for_improvement,text,390,390,0.0
+sys_feedback_360_responses,response_is_anonymous,boolean,390,390,0.0
+sys_feedback_360_responses,response_status,character varying,390,390,0.0
+sys_feedback_360_responses,response_sentiment_score,numeric,390,0,100.0
+sys_feedback_360_responses,response_submission_time_seconds,integer,390,0,100.0
+sys_feedback_360_responses,response_completed_at,timestamp with time zone,390,390,0.0
+sys_feedback_360_responses,response_metadata,jsonb,390,390,0.0
+sys_feedback_360_responses,created_at,timestamp with time zone,390,390,0.0
+sys_flight_risk_scores,flight_risk_score_id,uuid,159,159,0.0
+sys_flight_risk_scores,flight_risk_score_tenant_id,uuid,159,159,0.0
+sys_flight_risk_scores,flight_risk_score_user_id,uuid,159,159,0.0
+sys_flight_risk_scores,flight_risk_score_value,numeric,159,159,0.0
+sys_flight_risk_scores,flight_risk_score_band,character varying,159,159,0.0
+sys_flight_risk_scores,flight_risk_score_model_version,character varying,159,159,0.0
+sys_flight_risk_scores,flight_risk_score_payload,jsonb,159,159,0.0
+sys_flight_risk_scores,flight_risk_score_computed_at,timestamp with time zone,159,159,0.0
+sys_flight_risk_scores,created_at,timestamp with time zone,159,159,0.0
+sys_gap_analysis_results,gap_analysis_result_id,uuid,270,270,0.0
+sys_gap_analysis_results,gap_analysis_result_tenant_id,uuid,270,270,0.0
+sys_gap_analysis_results,gap_analysis_result_user_id,uuid,270,270,0.0
+sys_gap_analysis_results,gap_analysis_result_position_id,uuid,270,0,100.0
+sys_gap_analysis_results,gap_analysis_result_kind,character varying,270,270,0.0
+sys_gap_analysis_results,gap_analysis_result_payload,jsonb,270,270,0.0
+sys_gap_analysis_results,gap_analysis_result_overall_score,numeric,270,270,0.0
+sys_gap_analysis_results,gap_analysis_result_computed_at,timestamp with time zone,270,270,0.0
+sys_gap_analysis_results,created_at,timestamp with time zone,270,270,0.0
+sys_gap_closure_actions,gap_closure_action_id,uuid,440,440,0.0
+sys_gap_closure_actions,gap_closure_action_gap_id,uuid,440,440,0.0
+sys_gap_closure_actions,gap_closure_action_tenant_id,uuid,440,440,0.0
+sys_gap_closure_actions,gap_closure_action_kind,character varying,440,440,0.0
+sys_gap_closure_actions,gap_closure_action_status,character varying,440,440,0.0
+sys_gap_closure_actions,gap_closure_action_owner_user_id,uuid,440,0,100.0
+sys_gap_closure_actions,gap_closure_action_due_date,date,440,0,100.0
+sys_gap_closure_actions,gap_closure_action_payload,jsonb,440,440,0.0
+sys_gap_closure_actions,created_at,timestamp with time zone,440,440,0.0
+sys_gap_closure_actions,updated_at,timestamp with time zone,440,440,0.0
+sys_gap_closure_plans,gap_closure_plan_id,uuid,36,36,0.0
+sys_gap_closure_plans,gap_closure_plan_tenant_id,uuid,36,36,0.0
+sys_gap_closure_plans,gap_closure_plan_user_id,uuid,36,36,0.0
+sys_gap_closure_plans,gap_closure_plan_position_id,uuid,36,0,100.0
+sys_gap_closure_plans,gap_closure_plan_milestones,jsonb,36,36,0.0
+sys_gap_closure_plans,gap_closure_plan_status,character varying,36,36,0.0
+sys_gap_closure_plans,gap_closure_plan_owner_user_id,uuid,36,0,100.0
+sys_gap_closure_plans,gap_closure_plan_target_completion_date,date,36,0,100.0
+sys_gap_closure_plans,gap_closure_plan_metadata,jsonb,36,36,0.0
+sys_gap_closure_plans,created_at,timestamp with time zone,36,36,0.0
+sys_gap_closure_plans,created_by,uuid,36,0,100.0
+sys_gap_closure_plans,updated_at,timestamp with time zone,36,36,0.0
+sys_gap_closure_plans,updated_by,uuid,36,0,100.0
+sys_goal_alignments,alignment_id,uuid,100,100,0.0
+sys_goal_alignments,alignment_tenant_id,uuid,100,100,0.0
+sys_goal_alignments,alignment_source_goal_id,uuid,100,100,0.0
+sys_goal_alignments,alignment_aligned_goal_id,uuid,100,100,0.0
+sys_goal_alignments,alignment_natural_key,character varying,100,100,0.0
+sys_goal_alignments,alignment_type,character varying,100,100,0.0
+sys_goal_alignments,alignment_weight,numeric,100,100,0.0
+sys_goal_alignments,alignment_metadata,jsonb,100,100,0.0
+sys_goal_alignments,created_at,timestamp with time zone,100,100,0.0
+sys_goal_check_ins,check_in_id,uuid,1000,1000,0.0
+sys_goal_check_ins,check_in_tenant_id,uuid,1000,1000,0.0
+sys_goal_check_ins,check_in_goal_id,uuid,1000,1000,0.0
+sys_goal_check_ins,check_in_subject_user_id,uuid,1000,1000,0.0
+sys_goal_check_ins,check_in_natural_key,character varying,1000,1000,0.0
+sys_goal_check_ins,check_in_date,date,1000,1000,0.0
+sys_goal_check_ins,check_in_previous_progress,integer,1000,1000,0.0
+sys_goal_check_ins,check_in_new_progress,integer,1000,1000,0.0
+sys_goal_check_ins,check_in_status_update,character varying,1000,1000,0.0
+sys_goal_check_ins,check_in_notes,text,1000,1000,0.0
+sys_goal_check_ins,check_in_blockers,text,1000,197,80.3
+sys_goal_check_ins,check_in_next_steps,text,1000,809,19.1
+sys_goal_check_ins,check_in_confidence_level,integer,1000,1000,0.0
+sys_goal_check_ins,check_in_metadata,jsonb,1000,1000,0.0
+sys_goal_check_ins,created_at,timestamp with time zone,1000,1000,0.0
+sys_goal_comments,comment_id,uuid,856,856,0.0
+sys_goal_comments,comment_tenant_id,uuid,856,856,0.0
+sys_goal_comments,comment_goal_id,uuid,856,856,0.0
+sys_goal_comments,comment_author_user_id,uuid,856,0,100.0
+sys_goal_comments,comment_parent_comment_id,uuid,856,0,100.0
+sys_goal_comments,comment_natural_key,character varying,856,856,0.0
+sys_goal_comments,comment_content,text,856,856,0.0
+sys_goal_comments,comment_is_private,boolean,856,856,0.0
+sys_goal_comments,comment_metadata,jsonb,856,856,0.0
+sys_goal_comments,created_at,timestamp with time zone,856,856,0.0
+sys_goal_comments,updated_at,timestamp with time zone,856,856,0.0
+sys_goal_milestones,milestone_id,uuid,1000,1000,0.0
+sys_goal_milestones,milestone_tenant_id,uuid,1000,1000,0.0
+sys_goal_milestones,milestone_goal_id,uuid,1000,1000,0.0
+sys_goal_milestones,milestone_natural_key,character varying,1000,1000,0.0
+sys_goal_milestones,milestone_title,character varying,1000,1000,0.0
+sys_goal_milestones,milestone_description,text,1000,1000,0.0
+sys_goal_milestones,milestone_target_date,date,1000,1000,0.0
+sys_goal_milestones,milestone_completed_at,timestamp with time zone,1000,218,78.2
+sys_goal_milestones,milestone_status,character varying,1000,1000,0.0
+sys_goal_milestones,milestone_weight,numeric,1000,1000,0.0
+sys_goal_milestones,milestone_metadata,jsonb,1000,1000,0.0
+sys_goal_milestones,milestone_created_by,uuid,1000,0,100.0
+sys_goal_milestones,milestone_updated_by,uuid,1000,0,100.0
+sys_goal_milestones,created_at,timestamp with time zone,1000,1000,0.0
+sys_goal_milestones,updated_at,timestamp with time zone,1000,1000,0.0
+sys_goal_templates,template_id,uuid,40,40,0.0
+sys_goal_templates,template_tenant_id,uuid,40,40,0.0
+sys_goal_templates,template_role_id,uuid,40,0,100.0
+sys_goal_templates,template_org_unit_id,uuid,40,0,100.0
+sys_goal_templates,template_natural_key,character varying,40,40,0.0
+sys_goal_templates,template_name,character varying,40,40,0.0
+sys_goal_templates,template_description,text,40,40,0.0
+sys_goal_templates,template_category,character varying,40,40,0.0
+sys_goal_templates,template_goal_type,character varying,40,40,0.0
+sys_goal_templates,template_suggested_metrics,ARRAY,40,40,0.0
+sys_goal_templates,template_suggested_duration_days,integer,40,40,0.0
+sys_goal_templates,template_suggested_weight,numeric,40,40,0.0
+sys_goal_templates,template_difficulty_level,character varying,40,40,0.0
+sys_goal_templates,template_is_company_wide,boolean,40,40,0.0
+sys_goal_templates,template_usage_count,integer,40,40,0.0
+sys_goal_templates,template_is_active,boolean,40,40,0.0
+sys_goal_templates,template_deleted_at,timestamp with time zone,40,0,100.0
+sys_goal_templates,template_metadata,jsonb,40,40,0.0
+sys_goal_templates,template_created_by,uuid,40,0,100.0
+sys_goal_templates,template_updated_by,uuid,40,0,100.0
+sys_goal_templates,created_at,timestamp with time zone,40,40,0.0
+sys_goal_templates,updated_at,timestamp with time zone,40,40,0.0
+sys_goal_updates,update_id,uuid,1811,1811,0.0
+sys_goal_updates,update_tenant_id,uuid,1811,1811,0.0
+sys_goal_updates,update_goal_id,uuid,1811,1811,0.0
+sys_goal_updates,update_author_user_id,uuid,1811,0,100.0
+sys_goal_updates,update_natural_key,character varying,1811,1811,0.0
+sys_goal_updates,update_type,character varying,1811,1811,0.0
+sys_goal_updates,update_previous_progress,numeric,1811,1811,0.0
+sys_goal_updates,update_new_progress,numeric,1811,1811,0.0
+sys_goal_updates,update_previous_status,character varying,1811,99,94.5
+sys_goal_updates,update_new_status,character varying,1811,99,94.5
+sys_goal_updates,update_content,text,1811,1712,5.5
+sys_goal_updates,update_attachments,jsonb,1811,1811,0.0
+sys_goal_updates,update_metadata,jsonb,1811,1811,0.0
+sys_goal_updates,created_at,timestamp with time zone,1811,1811,0.0
+sys_goals,goal_id,uuid,1067,1067,0.0
+sys_goals,goal_tenant_id,uuid,1067,1067,0.0
+sys_goals,goal_natural_key,character varying,1067,1067,0.0
+sys_goals,goal_subject_user_id,uuid,1067,0,100.0
+sys_goals,goal_owner_user_id,uuid,1067,0,100.0
+sys_goals,goal_parent_goal_id,uuid,1067,0,100.0
+sys_goals,goal_template_id,uuid,1067,0,100.0
+sys_goals,goal_title,character varying,1067,1067,0.0
+sys_goals,goal_description,text,1067,1067,0.0
+sys_goals,goal_type,character varying,1067,1067,0.0
+sys_goals,goal_category,character varying,1067,978,8.3
+sys_goals,goal_priority,character varying,1067,1067,0.0
+sys_goals,goal_status,character varying,1067,1067,0.0
+sys_goals,goal_progress_percent,integer,1067,1067,0.0
+sys_goals,goal_weight,numeric,1067,1067,0.0
+sys_goals,goal_start_date,date,1067,1067,0.0
+sys_goals,goal_due_date,date,1067,1067,0.0
+sys_goals,goal_completed_at,timestamp with time zone,1067,0,100.0
+sys_goals,goal_tags,jsonb,1067,1067,0.0
+sys_goals,goal_custom_fields,jsonb,1067,1067,0.0
+sys_goals,goal_metadata,jsonb,1067,1067,0.0
+sys_goals,goal_created_by,uuid,1067,0,100.0
+sys_goals,goal_updated_by,uuid,1067,0,100.0
+sys_goals,created_at,timestamp with time zone,1067,1067,0.0
+sys_goals,updated_at,timestamp with time zone,1067,1067,0.0
+sys_inbox_notifications,notification_id,uuid,50,50,0.0
+sys_inbox_notifications,notification_tenant_id,uuid,50,50,0.0
+sys_inbox_notifications,notification_user_id,uuid,50,50,0.0
+sys_inbox_notifications,notification_type,character varying,50,50,0.0
+sys_inbox_notifications,notification_subject,character varying,50,50,0.0
+sys_inbox_notifications,notification_body,text,50,50,0.0
+sys_inbox_notifications,notification_action_url,text,50,50,0.0
+sys_inbox_notifications,notification_resource_type,character varying,50,50,0.0
+sys_inbox_notifications,notification_resource_id,uuid,50,0,100.0
+sys_inbox_notifications,notification_priority,character varying,50,50,0.0
+sys_inbox_notifications,notification_status,character varying,50,50,0.0
+sys_inbox_notifications,notification_read_at,timestamp with time zone,50,0,100.0
+sys_inbox_notifications,notification_dismissed_at,timestamp with time zone,50,0,100.0
+sys_inbox_notifications,notification_expires_at,timestamp with time zone,50,0,100.0
+sys_inbox_notifications,created_at,timestamp with time zone,50,50,0.0
+sys_inbox_notifications,created_by,uuid,50,0,100.0
+sys_job_families,job_family_id,uuid,27,27,0.0
+sys_job_families,job_family_code,character varying,27,27,0.0
+sys_job_families,job_family_name,character varying,27,27,0.0
+sys_job_families,job_family_description,text,27,27,0.0
+sys_job_families,job_family_metadata,jsonb,27,27,0.0
+sys_job_families,created_at,timestamp with time zone,27,27,0.0
+sys_job_families,updated_at,timestamp with time zone,27,27,0.0
+sys_job_role_embeddings,job_role_embedding_id,uuid,136,136,0.0
+sys_job_role_embeddings,job_role_id,uuid,136,136,0.0
+sys_job_role_embeddings,embedding,USER-DEFINED,136,136,0.0
+sys_job_role_embeddings,model_id,text,136,136,0.0
+sys_job_role_embeddings,source_text_hash,text,136,136,0.0
+sys_job_role_embeddings,created_at,timestamp with time zone,136,136,0.0
+sys_job_roles,job_role_id,uuid,136,136,0.0
+sys_job_roles,job_role_family_id,uuid,136,25,81.6
+sys_job_roles,job_role_code,character varying,136,136,0.0
+sys_job_roles,job_role_name,character varying,136,136,0.0
+sys_job_roles,job_role_description,text,136,49,64.0
+sys_job_roles,job_role_seniority_level,character varying,136,74,45.6
+sys_job_roles,job_role_metadata,jsonb,136,136,0.0
+sys_job_roles,created_at,timestamp with time zone,136,136,0.0
+sys_job_roles,created_by,uuid,136,0,100.0
+sys_job_roles,updated_at,timestamp with time zone,136,136,0.0
+sys_job_roles,updated_by,uuid,136,0,100.0
+sys_kpi_assessment_methods,kpi_assessment_method_id,uuid,5,5,0.0
+sys_kpi_assessment_methods,kpi_assessment_method_code,character varying,5,5,0.0
+sys_kpi_assessment_methods,kpi_assessment_method_name,character varying,5,5,0.0
+sys_kpi_assessment_methods,kpi_assessment_method_description,text,5,0,100.0
+sys_kpi_assessment_methods,kpi_assessment_method_metadata,jsonb,5,5,0.0
+sys_kpi_assessment_methods,created_at,timestamp with time zone,5,5,0.0
+sys_kpi_assessment_results,kpi_assessment_result_id,uuid,248,248,0.0
+sys_kpi_assessment_results,kpi_assessment_result_tenant_id,uuid,248,248,0.0
+sys_kpi_assessment_results,kpi_assessment_result_kpi_id,uuid,248,248,0.0
+sys_kpi_assessment_results,kpi_assessment_result_user_id,uuid,248,248,0.0
+sys_kpi_assessment_results,kpi_assessment_result_position_id,uuid,248,0,100.0
+sys_kpi_assessment_results,kpi_assessment_result_period_start,date,248,248,0.0
+sys_kpi_assessment_results,kpi_assessment_result_period_end,date,248,248,0.0
+sys_kpi_assessment_results,kpi_assessment_result_method_id,uuid,248,0,100.0
+sys_kpi_assessment_results,kpi_assessment_result_score,numeric,248,248,0.0
+sys_kpi_assessment_results,kpi_assessment_result_payload,jsonb,248,248,0.0
+sys_kpi_assessment_results,kpi_assessment_result_computed_at,timestamp with time zone,248,248,0.0
+sys_kpi_assessment_results,created_at,timestamp with time zone,248,248,0.0
+sys_kpi_definitions,kpi_definition_id,uuid,243,243,0.0
+sys_kpi_definitions,kpi_definition_tenant_id,uuid,243,0,100.0
+sys_kpi_definitions,kpi_definition_code,character varying,243,243,0.0
+sys_kpi_definitions,kpi_definition_name,character varying,243,243,0.0
+sys_kpi_definitions,kpi_definition_description,text,243,126,48.1
+sys_kpi_definitions,kpi_definition_formula,text,243,0,100.0
+sys_kpi_definitions,kpi_definition_unit,character varying,243,226,7.0
+sys_kpi_definitions,kpi_definition_polarity,character varying,243,243,0.0
+sys_kpi_definitions,kpi_definition_is_global,boolean,243,243,0.0
+sys_kpi_definitions,kpi_definition_metadata,jsonb,243,243,0.0
+sys_kpi_definitions,created_at,timestamp with time zone,243,243,0.0
+sys_kpi_definitions,created_by,uuid,243,0,100.0
+sys_kpi_definitions,updated_at,timestamp with time zone,243,243,0.0
+sys_kpi_definitions,updated_by,uuid,243,0,100.0
+sys_kpi_measurements,kpi_measurement_id,uuid,248,248,0.0
+sys_kpi_measurements,kpi_measurement_tenant_id,uuid,248,248,0.0
+sys_kpi_measurements,kpi_measurement_kpi_id,uuid,248,248,0.0
+sys_kpi_measurements,kpi_measurement_user_id,uuid,248,248,0.0
+sys_kpi_measurements,kpi_measurement_position_id,uuid,248,0,100.0
+sys_kpi_measurements,kpi_measurement_period_start,date,248,248,0.0
+sys_kpi_measurements,kpi_measurement_period_end,date,248,248,0.0
+sys_kpi_measurements,kpi_measurement_value,numeric,248,248,0.0
+sys_kpi_measurements,kpi_measurement_unit,character varying,248,0,100.0
+sys_kpi_measurements,kpi_measurement_source,character varying,248,248,0.0
+sys_kpi_measurements,kpi_measurement_recorded_at,timestamp with time zone,248,248,0.0
+sys_kpi_measurements,kpi_measurement_metadata,jsonb,248,248,0.0
+sys_kpi_measurements,created_at,timestamp with time zone,248,248,0.0
+sys_kpi_metric_definitions,kpi_metric_definition_id,uuid,243,243,0.0
+sys_kpi_metric_definitions,kpi_metric_definition_kpi_id,uuid,243,243,0.0
+sys_kpi_metric_definitions,kpi_metric_definition_code,character varying,243,243,0.0
+sys_kpi_metric_definitions,kpi_metric_definition_name,character varying,243,243,0.0
+sys_kpi_metric_definitions,kpi_metric_definition_unit,character varying,243,226,7.0
+sys_kpi_metric_definitions,kpi_metric_definition_aggregation,character varying,243,243,0.0
+sys_kpi_metric_definitions,kpi_metric_definition_metadata,jsonb,243,243,0.0
+sys_kpi_metric_definitions,created_at,timestamp with time zone,243,243,0.0
+sys_kpi_metric_definitions,updated_at,timestamp with time zone,243,243,0.0
+sys_kpi_targets,kpi_target_id,uuid,248,248,0.0
+sys_kpi_targets,kpi_target_tenant_id,uuid,248,248,0.0
+sys_kpi_targets,kpi_target_kpi_id,uuid,248,248,0.0
+sys_kpi_targets,kpi_target_position_id,uuid,248,0,100.0
+sys_kpi_targets,kpi_target_user_id,uuid,248,248,0.0
+sys_kpi_targets,kpi_target_period_start,date,248,248,0.0
+sys_kpi_targets,kpi_target_period_end,date,248,248,0.0
+sys_kpi_targets,kpi_target_target_value,numeric,248,248,0.0
+sys_kpi_targets,kpi_target_minimum_value,numeric,248,142,42.7
+sys_kpi_targets,kpi_target_stretch_value,numeric,248,142,42.7
+sys_kpi_targets,kpi_target_unit,character varying,248,0,100.0
+sys_kpi_targets,kpi_target_metadata,jsonb,248,248,0.0
+sys_kpi_targets,created_at,timestamp with time zone,248,248,0.0
+sys_kpi_targets,created_by,uuid,248,0,100.0
+sys_kpi_targets,updated_at,timestamp with time zone,248,248,0.0
+sys_kpi_targets,updated_by,uuid,248,0,100.0
+sys_kpi_weighting_rules,kpi_weighting_rule_id,uuid,3,3,0.0
+sys_kpi_weighting_rules,kpi_weighting_rule_code,character varying,3,3,0.0
+sys_kpi_weighting_rules,kpi_weighting_rule_name,character varying,3,3,0.0
+sys_kpi_weighting_rules,kpi_weighting_rule_kind,character varying,3,3,0.0
+sys_kpi_weighting_rules,kpi_weighting_rule_payload,jsonb,3,3,0.0
+sys_kpi_weighting_rules,kpi_weighting_rule_description,text,3,0,100.0
+sys_kpi_weighting_rules,created_at,timestamp with time zone,3,3,0.0
+sys_learning_gaps,learning_gap_id,uuid,270,270,0.0
+sys_learning_gaps,learning_gap_tenant_id,uuid,270,270,0.0
+sys_learning_gaps,learning_gap_user_id,uuid,270,270,0.0
+sys_learning_gaps,learning_gap_position_id,uuid,270,0,100.0
+sys_learning_gaps,learning_gap_skill_id,uuid,270,0,100.0
+sys_learning_gaps,learning_gap_required_proficiency,character varying,270,0,100.0
+sys_learning_gaps,learning_gap_current_proficiency,character varying,270,0,100.0
+sys_learning_gaps,learning_gap_score,numeric,270,270,0.0
+sys_learning_gaps,learning_gap_severity,character varying,270,270,0.0
+sys_learning_gaps,learning_gap_detected_at,timestamp with time zone,270,270,0.0
+sys_learning_gaps,learning_gap_metadata,jsonb,270,270,0.0
+sys_learning_gaps,created_at,timestamp with time zone,270,270,0.0
+sys_learning_gaps,updated_at,timestamp with time zone,270,270,0.0
+sys_learning_modules,learning_module_id,uuid,7427,7427,0.0
+sys_learning_modules,learning_module_tenant_id,uuid,7427,4959,33.2
+sys_learning_modules,learning_module_code,character varying,7427,7427,0.0
+sys_learning_modules,learning_module_title,character varying,7427,7427,0.0
+sys_learning_modules,learning_module_description,text,7427,912,87.7
+sys_learning_modules,learning_module_kind,character varying,7427,7427,0.0
+sys_learning_modules,learning_module_delivery,character varying,7427,7427,0.0
+sys_learning_modules,learning_module_duration_minutes,integer,7427,912,87.7
+sys_learning_modules,learning_module_is_global,boolean,7427,7427,0.0
+sys_learning_modules,learning_module_metadata,jsonb,7427,7427,0.0
+sys_learning_modules,created_at,timestamp with time zone,7427,7427,0.0
+sys_learning_modules,created_by,uuid,7427,1,100.0
+sys_learning_modules,updated_at,timestamp with time zone,7427,7427,0.0
+sys_learning_modules,updated_by,uuid,7427,0,100.0
+sys_learning_path_steps,learning_path_step_id,uuid,124,124,0.0
+sys_learning_path_steps,learning_path_step_path_id,uuid,124,124,0.0
+sys_learning_path_steps,learning_path_step_module_id,uuid,124,124,0.0
+sys_learning_path_steps,learning_path_step_ordinal,smallint,124,124,0.0
+sys_learning_path_steps,learning_path_step_is_prerequisite_for,jsonb,124,124,0.0
+sys_learning_path_steps,learning_path_step_metadata,jsonb,124,124,0.0
+sys_learning_path_steps,created_at,timestamp with time zone,124,124,0.0
+sys_learning_path_steps,updated_at,timestamp with time zone,124,124,0.0
+sys_learning_paths,learning_path_id,uuid,4667,4667,0.0
+sys_learning_paths,learning_path_tenant_id,uuid,4667,3219,31.0
+sys_learning_paths,learning_path_code,character varying,4667,4667,0.0
+sys_learning_paths,learning_path_name,character varying,4667,4667,0.0
+sys_learning_paths,learning_path_description,text,4667,157,96.6
+sys_learning_paths,learning_path_target_outcome,text,4667,0,100.0
+sys_learning_paths,learning_path_is_global,boolean,4667,4667,0.0
+sys_learning_paths,learning_path_metadata,jsonb,4667,4667,0.0
+sys_learning_paths,created_at,timestamp with time zone,4667,4667,0.0
+sys_learning_paths,created_by,uuid,4667,0,100.0
+sys_learning_paths,updated_at,timestamp with time zone,4667,4667,0.0
+sys_learning_paths,updated_by,uuid,4667,0,100.0
+sys_leave_accrual_rules,accrual_rule_id,uuid,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_tenant_id,uuid,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_natural_key,character varying,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_leave_type,character varying,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_name,character varying,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_description,text,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_method,character varying,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_amount,numeric,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_max_accrual,numeric,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_allow_carryover,boolean,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_max_carryover_days,numeric,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_carryover_expiry_months,integer,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_min_tenure_months,integer,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_prorated_first_year,boolean,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_ccnl_type,character varying,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_is_ccnl_default,boolean,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_is_active,boolean,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_deleted_at,timestamp with time zone,20,0,100.0
+sys_leave_accrual_rules,accrual_rule_metadata,jsonb,20,20,0.0
+sys_leave_accrual_rules,accrual_rule_created_by,uuid,20,0,100.0
+sys_leave_accrual_rules,accrual_rule_updated_by,uuid,20,0,100.0
+sys_leave_accrual_rules,created_at,timestamp with time zone,20,20,0.0
+sys_leave_accrual_rules,updated_at,timestamp with time zone,20,20,0.0
+sys_leave_balance_transactions,transaction_id,uuid,20,20,0.0
+sys_leave_balance_transactions,transaction_tenant_id,uuid,20,20,0.0
+sys_leave_balance_transactions,transaction_natural_key,character varying,20,20,0.0
+sys_leave_balance_transactions,transaction_balance_id,uuid,20,20,0.0
+sys_leave_balance_transactions,transaction_type,character varying,20,20,0.0
+sys_leave_balance_transactions,transaction_days_amount,numeric,20,20,0.0
+sys_leave_balance_transactions,transaction_reference_type,character varying,20,20,0.0
+sys_leave_balance_transactions,transaction_reference_id,uuid,20,0,100.0
+sys_leave_balance_transactions,transaction_description,text,20,20,0.0
+sys_leave_balance_transactions,transaction_performed_by_user_id,uuid,20,0,100.0
+sys_leave_balance_transactions,transaction_metadata,jsonb,20,20,0.0
+sys_leave_balance_transactions,created_at,timestamp with time zone,20,20,0.0
+sys_mentor_match_scores,match_id,uuid,30,30,0.0
+sys_mentor_match_scores,match_tenant_id,uuid,30,30,0.0
+sys_mentor_match_scores,match_natural_key,character varying,30,30,0.0
+sys_mentor_match_scores,match_mentee_user_id,uuid,30,30,0.0
+sys_mentor_match_scores,match_mentor_user_id,uuid,30,30,0.0
+sys_mentor_match_scores,match_skill_id,uuid,30,30,0.0
+sys_mentor_match_scores,match_skill_name,character varying,30,30,0.0
+sys_mentor_match_scores,match_mentee_level,numeric,30,30,0.0
+sys_mentor_match_scores,match_mentor_level,numeric,30,30,0.0
+sys_mentor_match_scores,match_score,numeric,30,30,0.0
+sys_mentor_match_scores,match_factors,jsonb,30,30,0.0
+sys_mentor_match_scores,match_is_recommended,boolean,30,30,0.0
+sys_mentor_match_scores,match_recommendation_rank,integer,30,10,66.7
+sys_mentor_match_scores,match_expires_at,timestamp with time zone,30,30,0.0
+sys_mentor_match_scores,match_metadata,jsonb,30,30,0.0
+sys_mentor_match_scores,created_at,timestamp with time zone,30,30,0.0
+sys_mentorship_programs,program_id,uuid,5,5,0.0
+sys_mentorship_programs,program_tenant_id,uuid,5,5,0.0
+sys_mentorship_programs,program_natural_key,character varying,5,5,0.0
+sys_mentorship_programs,program_name,character varying,5,5,0.0
+sys_mentorship_programs,program_description,text,5,5,0.0
+sys_mentorship_programs,program_type,character varying,5,5,0.0
+sys_mentorship_programs,program_status,character varying,5,5,0.0
+sys_mentorship_programs,program_duration_months,integer,5,5,0.0
+sys_mentorship_programs,program_max_participants,integer,5,5,0.0
+sys_mentorship_programs,program_focus_areas,ARRAY,5,5,0.0
+sys_mentorship_programs,program_eligibility_criteria,jsonb,5,5,0.0
+sys_mentorship_programs,program_start_date,date,5,5,0.0
+sys_mentorship_programs,program_end_date,date,5,0,100.0
+sys_mentorship_programs,program_metadata,jsonb,5,5,0.0
+sys_mentorship_programs,created_at,timestamp with time zone,5,5,0.0
+sys_mentorship_programs,updated_at,timestamp with time zone,5,5,0.0
+sys_mentorship_sessions,session_id,uuid,150,150,0.0
+sys_mentorship_sessions,session_tenant_id,uuid,150,150,0.0
+sys_mentorship_sessions,session_natural_key,character varying,150,150,0.0
+sys_mentorship_sessions,session_mentorship_id,uuid,150,150,0.0
+sys_mentorship_sessions,session_date,timestamp with time zone,150,150,0.0
+sys_mentorship_sessions,session_duration_minutes,integer,150,150,0.0
+sys_mentorship_sessions,session_status,character varying,150,150,0.0
+sys_mentorship_sessions,session_topics,ARRAY,150,150,0.0
+sys_mentorship_sessions,session_notes,text,150,97,35.3
+sys_mentorship_sessions,session_rating,integer,150,97,35.3
+sys_mentorship_sessions,session_metadata,jsonb,150,150,0.0
+sys_mentorship_sessions,created_at,timestamp with time zone,150,150,0.0
+sys_mentorships,mentorship_id,uuid,63,63,0.0
+sys_mentorships,mentorship_tenant_id,uuid,63,63,0.0
+sys_mentorships,mentorship_natural_key,character varying,63,63,0.0
+sys_mentorships,mentorship_program_id,uuid,63,45,28.6
+sys_mentorships,mentorship_mentor_user_id,uuid,63,63,0.0
+sys_mentorships,mentorship_mentee_user_id,uuid,63,63,0.0
+sys_mentorships,mentorship_status,character varying,63,63,0.0
+sys_mentorships,mentorship_focus_areas,ARRAY,63,63,0.0
+sys_mentorships,mentorship_meeting_frequency,character varying,63,63,0.0
+sys_mentorships,mentorship_goals,ARRAY,63,63,0.0
+sys_mentorships,mentorship_match_score,numeric,63,45,28.6
+sys_mentorships,mentorship_start_date,date,63,63,0.0
+sys_mentorships,mentorship_end_date,date,63,18,71.4
+sys_mentorships,mentorship_notes,text,63,18,71.4
+sys_mentorships,mentorship_metadata,jsonb,63,63,0.0
+sys_mentorships,created_at,timestamp with time zone,63,63,0.0
+sys_mentorships,updated_at,timestamp with time zone,63,63,0.0
+sys_model_predictions,prediction_id,uuid,468,468,0.0
+sys_model_predictions,prediction_tenant_id,uuid,468,468,0.0
+sys_model_predictions,prediction_natural_key,character varying,468,468,0.0
+sys_model_predictions,prediction_model_id,uuid,468,0,100.0
+sys_model_predictions,prediction_subject_user_id,uuid,468,468,0.0
+sys_model_predictions,prediction_type,character varying,468,468,0.0
+sys_model_predictions,prediction_value,numeric,468,468,0.0
+sys_model_predictions,prediction_label,character varying,468,312,33.3
+sys_model_predictions,prediction_confidence,numeric,468,312,33.3
+sys_model_predictions,prediction_details,jsonb,468,468,0.0
+sys_model_predictions,prediction_valid_until,timestamp with time zone,468,312,33.3
+sys_model_predictions,prediction_computed_at,timestamp with time zone,468,468,0.0
+sys_model_predictions,prediction_metadata,jsonb,468,468,0.0
+sys_model_predictions,created_at,timestamp with time zone,468,468,0.0
+sys_objective_reward_rules,objective_reward_rule_id,uuid,6,6,0.0
+sys_objective_reward_rules,objective_reward_rule_tenant_id,uuid,6,6,0.0
+sys_objective_reward_rules,objective_reward_rule_code,character varying,6,6,0.0
+sys_objective_reward_rules,objective_reward_rule_name,character varying,6,6,0.0
+sys_objective_reward_rules,objective_reward_rule_payload,jsonb,6,6,0.0
+sys_objective_reward_rules,created_at,timestamp with time zone,6,6,0.0
+sys_objective_reward_rules,updated_at,timestamp with time zone,6,6,0.0
+sys_occupation_skill_requirements,occupation_skill_requirement_id,uuid,126051,126051,0.0
+sys_occupation_skill_requirements,occupation_skill_req_occupation_uri,text,126051,126051,0.0
+sys_occupation_skill_requirements,occupation_skill_req_skill_id,uuid,126051,126051,0.0
+sys_occupation_skill_requirements,occupation_skill_req_skill_esco_uri,text,126051,126051,0.0
+sys_occupation_skill_requirements,occupation_skill_req_relation,character varying,126051,126051,0.0
+sys_occupation_skill_requirements,occupation_skill_req_is_global,boolean,126051,126051,0.0
+sys_occupation_skill_requirements,occupation_skill_req_metadata,jsonb,126051,126051,0.0
+sys_occupation_skill_requirements,created_at,timestamp with time zone,126051,126051,0.0
+sys_occupation_skill_requirements,updated_at,timestamp with time zone,126051,126051,0.0
+sys_okr_check_ins,check_in_id,uuid,25,25,0.0
+sys_okr_check_ins,check_in_tenant_id,uuid,25,25,0.0
+sys_okr_check_ins,check_in_okr_id,uuid,25,25,0.0
+sys_okr_check_ins,check_in_key_result_id,uuid,25,15,40.0
+sys_okr_check_ins,check_in_subject_user_id,uuid,25,0,100.0
+sys_okr_check_ins,check_in_natural_key,character varying,25,25,0.0
+sys_okr_check_ins,check_in_scope,character varying,25,25,0.0
+sys_okr_check_ins,check_in_date,date,25,25,0.0
+sys_okr_check_ins,check_in_previous_value,numeric,25,15,40.0
+sys_okr_check_ins,check_in_new_value,numeric,25,15,40.0
+sys_okr_check_ins,check_in_previous_progress,numeric,25,0,100.0
+sys_okr_check_ins,check_in_new_progress,numeric,25,0,100.0
+sys_okr_check_ins,check_in_overall_progress,numeric,25,10,60.0
+sys_okr_check_ins,check_in_status_update,text,25,10,60.0
+sys_okr_check_ins,check_in_next_steps,text,25,10,60.0
+sys_okr_check_ins,check_in_key_result_updates_snapshot,jsonb,25,10,60.0
+sys_okr_check_ins,check_in_confidence_level,numeric,25,25,0.0
+sys_okr_check_ins,check_in_notes,text,25,15,40.0
+sys_okr_check_ins,check_in_blockers,text,25,3,88.0
+sys_okr_check_ins,check_in_metadata,jsonb,25,25,0.0
+sys_okr_check_ins,created_at,timestamp with time zone,25,25,0.0
+sys_okr_key_results,key_result_id,uuid,20,20,0.0
+sys_okr_key_results,key_result_tenant_id,uuid,20,20,0.0
+sys_okr_key_results,key_result_okr_id,uuid,20,20,0.0
+sys_okr_key_results,key_result_owner_user_id,uuid,20,0,100.0
+sys_okr_key_results,key_result_natural_key,character varying,20,20,0.0
+sys_okr_key_results,key_result_description,text,20,20,0.0
+sys_okr_key_results,key_result_metric_type,character varying,20,20,0.0
+sys_okr_key_results,key_result_start_value,numeric,20,20,0.0
+sys_okr_key_results,key_result_target_value,numeric,20,20,0.0
+sys_okr_key_results,key_result_current_value,numeric,20,20,0.0
+sys_okr_key_results,key_result_unit,character varying,20,20,0.0
+sys_okr_key_results,key_result_progress_percent,numeric,20,20,0.0
+sys_okr_key_results,key_result_status,character varying,20,20,0.0
+sys_okr_key_results,key_result_weight,numeric,20,20,0.0
+sys_okr_key_results,key_result_confidence_level,integer,20,20,0.0
+sys_okr_key_results,key_result_last_check_in_at,timestamp with time zone,20,0,100.0
+sys_okr_key_results,key_result_metadata,jsonb,20,20,0.0
+sys_okr_key_results,created_at,timestamp with time zone,20,20,0.0
+sys_okr_key_results,updated_at,timestamp with time zone,20,20,0.0
+sys_okrs,okr_id,uuid,20,20,0.0
+sys_okrs,okr_tenant_id,uuid,20,20,0.0
+sys_okrs,okr_owner_user_id,uuid,20,0,100.0
+sys_okrs,okr_created_by_user_id,uuid,20,0,100.0
+sys_okrs,okr_parent_okr_id,uuid,20,0,100.0
+sys_okrs,okr_natural_key,character varying,20,20,0.0
+sys_okrs,okr_objective,text,20,20,0.0
+sys_okrs,okr_description,text,20,0,100.0
+sys_okrs,okr_okr_type,character varying,20,20,0.0
+sys_okrs,okr_department,character varying,20,20,0.0
+sys_okrs,okr_period_type,character varying,20,20,0.0
+sys_okrs,okr_period_start,date,20,20,0.0
+sys_okrs,okr_period_end,date,20,20,0.0
+sys_okrs,okr_fiscal_year,integer,20,20,0.0
+sys_okrs,okr_fiscal_quarter,integer,20,0,100.0
+sys_okrs,okr_status,character varying,20,20,0.0
+sys_okrs,okr_overall_progress,numeric,20,20,0.0
+sys_okrs,okr_confidence_level,numeric,20,20,0.0
+sys_okrs,okr_tags,jsonb,20,20,0.0
+sys_okrs,okr_metadata,jsonb,20,20,0.0
+sys_okrs,created_at,timestamp with time zone,20,20,0.0
+sys_okrs,updated_at,timestamp with time zone,20,20,0.0
+sys_operating_model_catalog,operating_model_id,uuid,6,6,0.0
+sys_operating_model_catalog,operating_model_code,character varying,6,6,0.0
+sys_operating_model_catalog,operating_model_name,character varying,6,6,0.0
+sys_operating_model_catalog,operating_model_description,text,6,0,100.0
+sys_operating_model_catalog,operating_model_metadata,jsonb,6,6,0.0
+sys_operating_model_catalog,created_at,timestamp with time zone,6,6,0.0
+sys_operating_model_catalog,updated_at,timestamp with time zone,6,6,0.0
+sys_organization_unit_kpi_templates,organization_unit_kpi_template_id,uuid,100,100,0.0
+sys_organization_unit_kpi_templates,organization_unit_kpi_template_unit_id,uuid,100,0,100.0
+sys_organization_unit_kpi_templates,organization_unit_kpi_template_kpi_id,uuid,100,100,0.0
+sys_organization_unit_kpi_templates,organization_unit_kpi_template_tenant_id,uuid,100,0,100.0
+sys_organization_unit_kpi_templates,organization_unit_kpi_template_weight,numeric,100,100,0.0
+sys_organization_unit_kpi_templates,organization_unit_kpi_template_target,jsonb,100,100,0.0
+sys_organization_unit_kpi_templates,organization_unit_kpi_template_metadata,jsonb,100,100,0.0
+sys_organization_unit_kpi_templates,created_at,timestamp with time zone,100,100,0.0
+sys_organization_unit_kpi_templates,updated_at,timestamp with time zone,100,100,0.0
+sys_organization_unit_kpi_templates,organization_unit_kpi_template_unit_template_id,uuid,100,100,0.0
+sys_organization_unit_processes,organization_unit_process_id,uuid,105,105,0.0
+sys_organization_unit_processes,org_unit_process_tenant_id,uuid,105,105,0.0
+sys_organization_unit_processes,org_unit_process_org_unit_id,uuid,105,105,0.0
+sys_organization_unit_processes,org_unit_process_blueprint_process_id,uuid,105,105,0.0
+sys_organization_unit_processes,org_unit_process_role,character varying,105,105,0.0
+sys_organization_unit_processes,org_unit_process_metadata,jsonb,105,105,0.0
+sys_organization_unit_processes,created_at,timestamp with time zone,105,105,0.0
+sys_organization_unit_processes,updated_at,timestamp with time zone,105,105,0.0
+sys_organization_unit_templates,organization_unit_template_id,uuid,225,225,0.0
+sys_organization_unit_templates,organization_unit_template_blueprint_id,uuid,225,225,0.0
+sys_organization_unit_templates,organization_unit_template_code,character varying,225,225,0.0
+sys_organization_unit_templates,organization_unit_template_name,character varying,225,225,0.0
+sys_organization_unit_templates,organization_unit_template_name_en,character varying,225,225,0.0
+sys_organization_unit_templates,organization_unit_template_parent_id,uuid,225,216,4.0
+sys_organization_unit_templates,organization_unit_template_type_id,uuid,225,225,0.0
+sys_organization_unit_templates,organization_unit_template_level,smallint,225,225,0.0
+sys_organization_unit_templates,organization_unit_template_nature,character varying,225,225,0.0
+sys_organization_unit_templates,organization_unit_template_metadata,jsonb,225,225,0.0
+sys_organization_unit_templates,created_at,timestamp with time zone,225,225,0.0
+sys_organization_unit_templates,created_by,uuid,225,0,100.0
+sys_organization_unit_templates,updated_at,timestamp with time zone,225,225,0.0
+sys_organization_unit_templates,updated_by,uuid,225,0,100.0
+sys_organization_unit_types,organization_unit_type_id,uuid,8,8,0.0
+sys_organization_unit_types,organization_unit_type_code,character varying,8,8,0.0
+sys_organization_unit_types,organization_unit_type_name,character varying,8,8,0.0
+sys_organization_unit_types,organization_unit_type_description,text,8,0,100.0
+sys_organization_unit_types,organization_unit_type_metadata,jsonb,8,8,0.0
+sys_organization_unit_types,created_at,timestamp with time zone,8,8,0.0
+sys_organization_unit_types,updated_at,timestamp with time zone,8,8,0.0
+sys_organization_units,organization_unit_id,uuid,26,26,0.0
+sys_organization_units,organization_unit_tenant_id,uuid,26,26,0.0
+sys_organization_units,organization_unit_code,character varying,26,26,0.0
+sys_organization_units,organization_unit_name,character varying,26,26,0.0
+sys_organization_units,organization_unit_type_id,uuid,26,26,0.0
+sys_organization_units,organization_unit_type,character varying,26,26,0.0
+sys_organization_units,organization_unit_parent_id,uuid,26,24,7.7
+sys_organization_units,organization_unit_manager_user_id,uuid,26,24,7.7
+sys_organization_units,organization_unit_effective_from,date,26,26,0.0
+sys_organization_units,organization_unit_effective_to,date,26,0,100.0
+sys_organization_units,organization_unit_is_active,boolean,26,26,0.0
+sys_organization_units,organization_unit_metadata,jsonb,26,26,0.0
+sys_organization_units,created_at,timestamp with time zone,26,26,0.0
+sys_organization_units,created_by,uuid,26,0,100.0
+sys_organization_units,updated_at,timestamp with time zone,26,26,0.0
+sys_organization_units,updated_by,uuid,26,0,100.0
+sys_overtime,overtime_id,uuid,221,221,0.0
+sys_overtime,overtime_tenant_id,uuid,221,221,0.0
+sys_overtime,overtime_natural_key,character varying,221,221,0.0
+sys_overtime,overtime_subject_user_id,uuid,221,221,0.0
+sys_overtime,overtime_date,date,221,221,0.0
+sys_overtime,overtime_type,character varying,221,221,0.0
+sys_overtime,overtime_hours,numeric,221,221,0.0
+sys_overtime,overtime_rate_multiplier,numeric,221,221,0.0
+sys_overtime,overtime_hourly_rate,numeric,221,221,0.0
+sys_overtime,overtime_total_compensation,numeric,221,221,0.0
+sys_overtime,overtime_status,character varying,221,221,0.0
+sys_overtime,overtime_requested_by_user_id,uuid,221,0,100.0
+sys_overtime,overtime_requested_at,timestamp with time zone,221,221,0.0
+sys_overtime,overtime_approved_by_user_id,uuid,221,0,100.0
+sys_overtime,overtime_approved_at,timestamp with time zone,221,0,100.0
+sys_overtime,overtime_rejection_reason,text,221,0,100.0
+sys_overtime,overtime_exported_at,timestamp with time zone,221,0,100.0
+sys_overtime,overtime_reason,text,221,221,0.0
+sys_overtime,overtime_notes,text,221,221,0.0
+sys_overtime,overtime_metadata,jsonb,221,221,0.0
+sys_overtime,created_at,timestamp with time zone,221,221,0.0
+sys_overtime,updated_at,timestamp with time zone,221,221,0.0
+sys_performance_review_competency_ratings,rating_id,uuid,465,465,0.0
+sys_performance_review_competency_ratings,rating_tenant_id,uuid,465,465,0.0
+sys_performance_review_competency_ratings,rating_review_id,uuid,465,465,0.0
+sys_performance_review_competency_ratings,rating_subject_user_id,uuid,465,465,0.0
+sys_performance_review_competency_ratings,rating_natural_key,character varying,465,465,0.0
+sys_performance_review_competency_ratings,rating_ksaba_dimension,character varying,465,465,0.0
+sys_performance_review_competency_ratings,rating_competency_name,character varying,465,465,0.0
+sys_performance_review_competency_ratings,rating_self_rating,numeric,465,465,0.0
+sys_performance_review_competency_ratings,rating_manager_rating,numeric,465,465,0.0
+sys_performance_review_competency_ratings,rating_self_comment,text,465,465,0.0
+sys_performance_review_competency_ratings,rating_manager_comment,text,465,465,0.0
+sys_performance_review_competency_ratings,rating_self_evidence,ARRAY,465,0,100.0
+sys_performance_review_competency_ratings,rating_weight,numeric,465,465,0.0
+sys_performance_review_competency_ratings,rating_metadata,jsonb,465,465,0.0
+sys_performance_review_competency_ratings,created_at,timestamp with time zone,465,465,0.0
+sys_performance_review_competency_ratings,updated_at,timestamp with time zone,465,465,0.0
+sys_performance_reviews,review_id,uuid,161,161,0.0
+sys_performance_reviews,review_tenant_id,uuid,161,161,0.0
+sys_performance_reviews,review_natural_key,character varying,161,161,0.0
+sys_performance_reviews,review_subject_user_id,uuid,161,159,1.2
+sys_performance_reviews,review_reviewer_user_id,uuid,161,157,2.5
+sys_performance_reviews,review_calibrated_by_user_id,uuid,161,0,100.0
+sys_performance_reviews,review_finalized_by_user_id,uuid,161,0,100.0
+sys_performance_reviews,review_period_start,date,161,161,0.0
+sys_performance_reviews,review_period_end,date,161,161,0.0
+sys_performance_reviews,review_type,character varying,161,161,0.0
+sys_performance_reviews,review_status,character varying,161,161,0.0
+sys_performance_reviews,review_potential_rating,character varying,161,161,0.0
+sys_performance_reviews,review_overall_rating,numeric,161,161,0.0
+sys_performance_reviews,review_goal_achievement_rating,numeric,161,159,1.2
+sys_performance_reviews,review_competency_rating,numeric,161,159,1.2
+sys_performance_reviews,review_self_rating,numeric,161,0,100.0
+sys_performance_reviews,review_calibrated_rating,numeric,161,0,100.0
+sys_performance_reviews,review_pre_calibration_rating,numeric,161,0,100.0
+sys_performance_reviews,review_performance_box,integer,161,161,0.0
+sys_performance_reviews,review_potential_box,integer,161,161,0.0
+sys_performance_reviews,review_strengths,text,161,159,1.2
+sys_performance_reviews,review_areas_for_improvement,text,161,159,1.2
+sys_performance_reviews,review_manager_comments,text,161,159,1.2
+sys_performance_reviews,review_employee_comments,text,161,0,100.0
+sys_performance_reviews,review_self_comments,text,161,0,100.0
+sys_performance_reviews,review_development_plan,text,161,0,100.0
+sys_performance_reviews,review_career_aspirations,text,161,0,100.0
+sys_performance_reviews,review_calibration_notes,text,161,0,100.0
+sys_performance_reviews,review_section_ratings,jsonb,161,161,0.0
+sys_performance_reviews,review_competency_ratings_snapshot,jsonb,161,161,0.0
+sys_performance_reviews,review_goal_ratings_snapshot,jsonb,161,161,0.0
+sys_performance_reviews,review_recommended_actions,jsonb,161,161,0.0
+sys_performance_reviews,review_self_submitted_at,timestamp with time zone,161,0,100.0
+sys_performance_reviews,review_manager_submitted_at,timestamp with time zone,161,0,100.0
+sys_performance_reviews,review_calibrated_at,timestamp with time zone,161,0,100.0
+sys_performance_reviews,review_finalized_at,timestamp with time zone,161,0,100.0
+sys_performance_reviews,review_self_review_completed_at,timestamp with time zone,161,0,100.0
+sys_performance_reviews,review_shared_at,timestamp with time zone,161,0,100.0
+sys_performance_reviews,review_submitted_at,timestamp with time zone,161,155,3.7
+sys_performance_reviews,review_acknowledged_at,timestamp with time zone,161,155,3.7
+sys_performance_reviews,review_self_assessment_status,character varying,161,161,0.0
+sys_performance_reviews,review_metadata,jsonb,161,161,0.0
+sys_performance_reviews,created_at,timestamp with time zone,161,161,0.0
+sys_performance_reviews,updated_at,timestamp with time zone,161,161,0.0
+sys_person_evidence_records,person_evidence_record_id,uuid,237,237,0.0
+sys_person_evidence_records,person_evidence_record_user_id,uuid,237,237,0.0
+sys_person_evidence_records,person_evidence_record_tenant_id,uuid,237,237,0.0
+sys_person_evidence_records,person_evidence_type,character varying,237,237,0.0
+sys_person_evidence_records,person_evidence_resource_type,character varying,237,0,100.0
+sys_person_evidence_records,person_evidence_resource_id,uuid,237,0,100.0
+sys_person_evidence_records,person_evidence_source,character varying,237,237,0.0
+sys_person_evidence_records,person_evidence_recorded_at,timestamp with time zone,237,237,0.0
+sys_person_evidence_records,person_evidence_recorded_by,uuid,237,0,100.0
+sys_person_evidence_records,person_evidence_payload,jsonb,237,237,0.0
+sys_person_evidence_records,created_at,timestamp with time zone,237,237,0.0
+sys_person_evidence_records,updated_at,timestamp with time zone,237,237,0.0
+sys_position_career_paths,position_career_path_id,uuid,40,40,0.0
+sys_position_career_paths,position_id,uuid,40,40,0.0
+sys_position_career_paths,position_career_path_tenant_id,uuid,40,40,0.0
+sys_position_career_paths,career_path_id,uuid,40,40,0.0
+sys_position_career_paths,position_career_path_metadata,jsonb,40,40,0.0
+sys_position_career_paths,created_at,timestamp with time zone,40,40,0.0
+sys_position_career_paths,created_by,uuid,40,0,100.0
+sys_position_career_paths,updated_at,timestamp with time zone,40,40,0.0
+sys_position_career_paths,updated_by,uuid,40,0,100.0
+sys_position_compensation_profiles,position_compensation_profile_id,uuid,159,159,0.0
+sys_position_compensation_profiles,position_id,uuid,159,159,0.0
+sys_position_compensation_profiles,position_compensation_profile_tenant_id,uuid,159,159,0.0
+sys_position_compensation_profiles,compensation_band_id,uuid,159,155,2.5
+sys_position_compensation_profiles,economic_weight,numeric,159,0,100.0
+sys_position_compensation_profiles,reward_gates_applied,jsonb,159,159,0.0
+sys_position_compensation_profiles,position_compensation_profile_metadata,jsonb,159,159,0.0
+sys_position_compensation_profiles,created_at,timestamp with time zone,159,159,0.0
+sys_position_compensation_profiles,created_by,uuid,159,0,100.0
+sys_position_compensation_profiles,updated_at,timestamp with time zone,159,159,0.0
+sys_position_compensation_profiles,updated_by,uuid,159,0,100.0
+sys_position_economic_weight,position_economic_weight_id,uuid,24,24,0.0
+sys_position_economic_weight,position_economic_weight_position_id,uuid,24,24,0.0
+sys_position_economic_weight,position_economic_weight_tenant_id,uuid,24,24,0.0
+sys_position_economic_weight,position_economic_weight_value,numeric,24,24,0.0
+sys_position_economic_weight,position_economic_weight_period_start,date,24,0,100.0
+sys_position_economic_weight,position_economic_weight_period_end,date,24,0,100.0
+sys_position_economic_weight,position_economic_weight_metadata,jsonb,24,24,0.0
+sys_position_economic_weight,created_at,timestamp with time zone,24,24,0.0
+sys_position_economic_weight,updated_at,timestamp with time zone,24,24,0.0
+sys_position_kpi_requirements,position_kpi_requirement_id,uuid,172,172,0.0
+sys_position_kpi_requirements,position_id,uuid,172,172,0.0
+sys_position_kpi_requirements,position_kpi_requirement_tenant_id,uuid,172,172,0.0
+sys_position_kpi_requirements,kpi_definition_id,uuid,172,172,0.0
+sys_position_kpi_requirements,target_template,jsonb,172,172,0.0
+sys_position_kpi_requirements,weight,numeric,172,172,0.0
+sys_position_kpi_requirements,position_kpi_requirement_metadata,jsonb,172,172,0.0
+sys_position_kpi_requirements,created_at,timestamp with time zone,172,172,0.0
+sys_position_kpi_requirements,created_by,uuid,172,0,100.0
+sys_position_kpi_requirements,updated_at,timestamp with time zone,172,172,0.0
+sys_position_kpi_requirements,updated_by,uuid,172,0,100.0
+sys_position_kpi_requirements,rank,smallint,172,0,100.0
+sys_position_learning_requirements,position_learning_requirement_id,uuid,1791,1791,0.0
+sys_position_learning_requirements,position_id,uuid,1791,1791,0.0
+sys_position_learning_requirements,position_learning_requirement_tenant_id,uuid,1791,1791,0.0
+sys_position_learning_requirements,learning_path_id,uuid,1791,1791,0.0
+sys_position_learning_requirements,is_mandatory,boolean,1791,1791,0.0
+sys_position_learning_requirements,deadline_rule,jsonb,1791,1791,0.0
+sys_position_learning_requirements,position_learning_requirement_metadata,jsonb,1791,1791,0.0
+sys_position_learning_requirements,created_at,timestamp with time zone,1791,1791,0.0
+sys_position_learning_requirements,created_by,uuid,1791,0,100.0
+sys_position_learning_requirements,updated_at,timestamp with time zone,1791,1791,0.0
+sys_position_learning_requirements,updated_by,uuid,1791,0,100.0
+sys_position_skill_requirements,position_skill_requirement_id,uuid,844,844,0.0
+sys_position_skill_requirements,position_id,uuid,844,844,0.0
+sys_position_skill_requirements,position_skill_requirement_tenant_id,uuid,844,844,0.0
+sys_position_skill_requirements,skill_id,uuid,844,844,0.0
+sys_position_skill_requirements,required_proficiency,character varying,844,844,0.0
+sys_position_skill_requirements,weight,numeric,844,844,0.0
+sys_position_skill_requirements,criticality,character varying,844,844,0.0
+sys_position_skill_requirements,position_skill_requirement_metadata,jsonb,844,844,0.0
+sys_position_skill_requirements,created_at,timestamp with time zone,844,844,0.0
+sys_position_skill_requirements,created_by,uuid,844,0,100.0
+sys_position_skill_requirements,updated_at,timestamp with time zone,844,844,0.0
+sys_position_skill_requirements,updated_by,uuid,844,0,100.0
+sys_position_succession_relevance,position_succession_relevance_id,uuid,9,9,0.0
+sys_position_succession_relevance,position_id,uuid,9,9,0.0
+sys_position_succession_relevance,position_succession_relevance_tenant_id,uuid,9,9,0.0
+sys_position_succession_relevance,is_critical,boolean,9,9,0.0
+sys_position_succession_relevance,readiness_horizon,character varying,9,0,100.0
+sys_position_succession_relevance,position_succession_relevance_metadata,jsonb,9,9,0.0
+sys_position_succession_relevance,created_at,timestamp with time zone,9,9,0.0
+sys_position_succession_relevance,created_by,uuid,9,0,100.0
+sys_position_succession_relevance,updated_at,timestamp with time zone,9,9,0.0
+sys_position_succession_relevance,updated_by,uuid,9,0,100.0
+sys_positions,position_id,uuid,162,162,0.0
+sys_positions,position_tenant_id,uuid,162,162,0.0
+sys_positions,position_code,character varying,162,162,0.0
+sys_positions,position_title,character varying,162,162,0.0
+sys_positions,position_organization_unit_id,uuid,162,160,1.2
+sys_positions,position_job_role_id,uuid,162,162,0.0
+sys_positions,position_reports_to_position_id,uuid,162,159,1.9
+sys_positions,position_owner_user_id,uuid,162,157,3.1
+sys_positions,position_esco_occupation_uri,text,162,0,100.0
+sys_positions,position_criticality,character varying,162,162,0.0
+sys_positions,position_economic_weight,numeric,162,0,100.0
+sys_positions,position_is_active,boolean,162,162,0.0
+sys_positions,position_effective_from,date,162,162,0.0
+sys_positions,position_effective_to,date,162,0,100.0
+sys_positions,position_metadata,jsonb,162,162,0.0
+sys_positions,position_ai_hints,jsonb,162,162,0.0
+sys_positions,created_at,timestamp with time zone,162,162,0.0
+sys_positions,created_by,uuid,162,0,100.0
+sys_positions,updated_at,timestamp with time zone,162,162,0.0
+sys_positions,updated_by,uuid,162,2,98.8
+sys_predictive_models,model_id,uuid,4,4,0.0
+sys_predictive_models,model_tenant_id,uuid,4,4,0.0
+sys_predictive_models,model_natural_key,character varying,4,4,0.0
+sys_predictive_models,model_name,character varying,4,4,0.0
+sys_predictive_models,model_type,character varying,4,4,0.0
+sys_predictive_models,model_version,character varying,4,4,0.0
+sys_predictive_models,model_algorithm,character varying,4,4,0.0
+sys_predictive_models,model_target_variable,character varying,4,4,0.0
+sys_predictive_models,model_status,character varying,4,4,0.0
+sys_predictive_models,model_accuracy_metrics,jsonb,4,4,0.0
+sys_predictive_models,model_metadata,jsonb,4,4,0.0
+sys_predictive_models,created_at,timestamp with time zone,4,4,0.0
+sys_pulse_checks,pulse_check_id,uuid,733,733,0.0
+sys_pulse_checks,pulse_check_tenant_id,uuid,733,733,0.0
+sys_pulse_checks,pulse_check_subject_user_id,uuid,733,733,0.0
+sys_pulse_checks,pulse_check_natural_key,text,733,733,0.0
+sys_pulse_checks,pulse_check_mood_score,integer,733,733,0.0
+sys_pulse_checks,pulse_check_workload_score,integer,733,733,0.0
+sys_pulse_checks,pulse_check_satisfaction_score,integer,733,733,0.0
+sys_pulse_checks,pulse_check_comment,text,733,573,21.8
+sys_pulse_checks,pulse_check_date,date,733,733,0.0
+sys_pulse_checks,pulse_check_week_number,integer,733,733,0.0
+sys_pulse_checks,pulse_check_metadata,jsonb,733,733,0.0
+sys_pulse_checks,created_at,timestamp with time zone,733,733,0.0
+sys_readiness_scores,readiness_score_id,uuid,90,90,0.0
+sys_readiness_scores,readiness_score_tenant_id,uuid,90,90,0.0
+sys_readiness_scores,readiness_score_user_id,uuid,90,90,0.0
+sys_readiness_scores,readiness_score_position_id,uuid,90,90,0.0
+sys_readiness_scores,readiness_score_horizon,character varying,90,90,0.0
+sys_readiness_scores,readiness_score_value,numeric,90,90,0.0
+sys_readiness_scores,readiness_score_payload,jsonb,90,90,0.0
+sys_readiness_scores,readiness_score_computed_at,timestamp with time zone,90,90,0.0
+sys_readiness_scores,created_at,timestamp with time zone,90,90,0.0
+sys_reconciliation_registry,reconciliation_registry_id,uuid,115,115,0.0
+sys_reconciliation_registry,reconciliation_registry_table_name,character varying,115,115,0.0
+sys_reconciliation_registry,reconciliation_registry_bucket,character varying,115,115,0.0
+sys_reconciliation_registry,reconciliation_registry_declared_status,character varying,115,115,0.0
+sys_reconciliation_registry,reconciliation_registry_legacy_source,character varying,115,44,61.7
+sys_reconciliation_registry,reconciliation_registry_legacy_source_rows,integer,115,43,62.6
+sys_reconciliation_registry,reconciliation_registry_wall,text,115,22,80.9
+sys_reconciliation_registry,reconciliation_registry_rationale,text,115,115,0.0
+sys_reconciliation_registry,reconciliation_registry_decided_at,timestamp with time zone,115,115,0.0
+sys_reconciliation_registry,created_at,timestamp with time zone,115,115,0.0
+sys_reconciliation_registry,created_by,uuid,115,0,100.0
+sys_reconciliation_registry,updated_at,timestamp with time zone,115,115,0.0
+sys_reconciliation_registry,updated_by,uuid,115,0,100.0
+sys_reward_gate_catalog,reward_gate_catalog_id,uuid,7,7,0.0
+sys_reward_gate_catalog,reward_gate_catalog_blueprint_variant_id,uuid,7,7,0.0
+sys_reward_gate_catalog,reward_gate_catalog_code,character varying,7,7,0.0
+sys_reward_gate_catalog,reward_gate_catalog_name,character varying,7,7,0.0
+sys_reward_gate_catalog,reward_gate_catalog_description,text,7,7,0.0
+sys_reward_gate_catalog,reward_gate_catalog_is_blocking,boolean,7,7,0.0
+sys_reward_gate_catalog,reward_gate_catalog_metadata,jsonb,7,7,0.0
+sys_reward_gate_catalog,created_at,timestamp with time zone,7,7,0.0
+sys_reward_gate_catalog,updated_at,timestamp with time zone,7,7,0.0
+sys_schema_migrations,migration_id,integer,151,151,0.0
+sys_schema_migrations,file_name,character varying,151,151,0.0
+sys_schema_migrations,sha256,character,151,151,0.0
+sys_schema_migrations,applied_at,timestamp with time zone,151,151,0.0
+sys_schema_migrations,applied_by,character varying,151,151,0.0
+sys_schema_migrations,duration_ms,integer,151,151,0.0
+sys_skill_aliases,skill_alias_id,uuid,80,80,0.0
+sys_skill_aliases,skill_alias_skill_id,uuid,80,80,0.0
+sys_skill_aliases,skill_alias_label,character varying,80,80,0.0
+sys_skill_aliases,skill_alias_locale,character varying,80,80,0.0
+sys_skill_aliases,skill_alias_metadata,jsonb,80,80,0.0
+sys_skill_aliases,created_at,timestamp with time zone,80,80,0.0
+sys_skill_categories,skill_category_id,uuid,7,7,0.0
+sys_skill_categories,skill_category_family_id,uuid,7,0,100.0
+sys_skill_categories,skill_category_code,character varying,7,7,0.0
+sys_skill_categories,skill_category_name,character varying,7,7,0.0
+sys_skill_categories,skill_category_description,text,7,6,14.3
+sys_skill_categories,skill_category_metadata,jsonb,7,7,0.0
+sys_skill_categories,created_at,timestamp with time zone,7,7,0.0
+sys_skill_categories,updated_at,timestamp with time zone,7,7,0.0
+sys_skill_embeddings,skill_embedding_id,uuid,21939,21939,0.0
+sys_skill_embeddings,skill_id,uuid,21939,21939,0.0
+sys_skill_embeddings,embedding,USER-DEFINED,21939,21939,0.0
+sys_skill_embeddings,model_id,text,21939,21939,0.0
+sys_skill_embeddings,source_text_hash,text,21939,21939,0.0
+sys_skill_embeddings,created_at,timestamp with time zone,21939,21939,0.0
+sys_skill_families,skill_family_id,uuid,77,77,0.0
+sys_skill_families,skill_family_code,character varying,77,77,0.0
+sys_skill_families,skill_family_name,character varying,77,77,0.0
+sys_skill_families,skill_family_description,text,77,53,31.2
+sys_skill_families,skill_family_metadata,jsonb,77,77,0.0
+sys_skill_families,created_at,timestamp with time zone,77,77,0.0
+sys_skill_families,updated_at,timestamp with time zone,77,77,0.0
+sys_skill_gap_scores,skill_gap_score_id,uuid,154,154,0.0
+sys_skill_gap_scores,skill_gap_score_tenant_id,uuid,154,154,0.0
+sys_skill_gap_scores,skill_gap_score_user_id,uuid,154,154,0.0
+sys_skill_gap_scores,skill_gap_score_position_id,uuid,154,154,0.0
+sys_skill_gap_scores,skill_gap_score_value,numeric,154,154,0.0
+sys_skill_gap_scores,skill_gap_score_segment,character varying,154,154,0.0
+sys_skill_gap_scores,skill_gap_score_model_version,character varying,154,154,0.0
+sys_skill_gap_scores,skill_gap_score_payload,jsonb,154,154,0.0
+sys_skill_gap_scores,skill_gap_score_computed_at,timestamp with time zone,154,154,0.0
+sys_skill_gap_scores,created_at,timestamp with time zone,154,154,0.0
+sys_skill_learning_mappings,skill_learning_mapping_id,uuid,635,635,0.0
+sys_skill_learning_mappings,skill_learning_mapping_skill_id,uuid,635,635,0.0
+sys_skill_learning_mappings,skill_learning_mapping_module_id,uuid,635,635,0.0
+sys_skill_learning_mappings,skill_learning_mapping_target_proficiency,character varying,635,635,0.0
+sys_skill_learning_mappings,skill_learning_mapping_metadata,jsonb,635,635,0.0
+sys_skill_learning_mappings,created_at,timestamp with time zone,635,635,0.0
+sys_skill_proficiency_levels,skill_proficiency_level_id,uuid,6,6,0.0
+sys_skill_proficiency_levels,skill_proficiency_level_code,character varying,6,6,0.0
+sys_skill_proficiency_levels,skill_proficiency_level_name,character varying,6,6,0.0
+sys_skill_proficiency_levels,skill_proficiency_level_rank,smallint,6,6,0.0
+sys_skill_proficiency_levels,skill_proficiency_level_description,text,6,0,100.0
+sys_skill_proficiency_levels,skill_proficiency_level_metadata,jsonb,6,6,0.0
+sys_skill_proficiency_levels,created_at,timestamp with time zone,6,6,0.0
+sys_skill_proficiency_levels,updated_at,timestamp with time zone,6,6,0.0
+sys_skill_taxonomy_edges,skill_taxonomy_edge_id,uuid,11965,11965,0.0
+sys_skill_taxonomy_edges,skill_taxonomy_edge_parent_id,uuid,11965,11965,0.0
+sys_skill_taxonomy_edges,skill_taxonomy_edge_child_id,uuid,11965,11965,0.0
+sys_skill_taxonomy_edges,skill_taxonomy_edge_kind,character varying,11965,11965,0.0
+sys_skill_taxonomy_edges,skill_taxonomy_edge_metadata,jsonb,11965,11965,0.0
+sys_skill_taxonomy_edges,created_at,timestamp with time zone,11965,11965,0.0
+sys_skills,skill_id,uuid,21939,21939,0.0
+sys_skills,skill_tenant_id,uuid,21939,5618,74.4
+sys_skills,skill_category_id,uuid,21939,31,99.9
+sys_skills,skill_code,character varying,21939,21939,0.0
+sys_skills,skill_name,character varying,21939,21939,0.0
+sys_skills,skill_description,text,21939,14211,35.2
+sys_skills,skill_esco_uri,text,21939,14011,36.1
+sys_skills,skill_is_global,boolean,21939,21939,0.0
+sys_skills,skill_metadata,jsonb,21939,21939,0.0
+sys_skills,created_at,timestamp with time zone,21939,21939,0.0
+sys_skills,created_by,uuid,21939,0,100.0
+sys_skills,updated_at,timestamp with time zone,21939,21939,0.0
+sys_skills,updated_by,uuid,21939,0,100.0
+sys_skills,skill_kind,character varying,21939,14036,36.0
+sys_source_lineage_records,source_lineage_record_id,uuid,70972,70972,0.0
+sys_source_lineage_records,source_lineage_tenant_id,uuid,70972,70972,0.0
+sys_source_lineage_records,source_lineage_source_system,character varying,70972,70972,0.0
+sys_source_lineage_records,source_lineage_source_table,character varying,70972,70972,0.0
+sys_source_lineage_records,source_lineage_source_record_id,character varying,70972,70972,0.0
+sys_source_lineage_records,source_lineage_source_natural_key,character varying,70972,64482,9.1
+sys_source_lineage_records,source_lineage_source_content_hash,character,70972,57053,19.6
+sys_source_lineage_records,source_lineage_import_run_id,uuid,70972,44744,37.0
+sys_source_lineage_records,source_lineage_table_mapping_id,uuid,70972,57053,19.6
+sys_source_lineage_records,source_lineage_target_table_name,character varying,70972,70972,0.0
+sys_source_lineage_records,source_lineage_target_record_id,uuid,70972,70972,0.0
+sys_source_lineage_records,source_lineage_mapping_confidence,numeric,70972,70972,0.0
+sys_source_lineage_records,source_lineage_validation_status,character varying,70972,70972,0.0
+sys_source_lineage_records,source_lineage_metadata,jsonb,70972,70972,0.0
+sys_source_lineage_records,created_at,timestamp with time zone,70972,70972,0.0
+sys_source_lineage_records,source_lineage_sdbi_mapping_card_id,character varying,70972,1490,97.9
+sys_source_lineage_records,source_lineage_sdbi_confidence,numeric,70972,1490,97.9
+sys_source_lineage_records,source_lineage_sdbi_ai_model_id,character varying,70972,1490,97.9
+sys_source_lineage_records,source_lineage_sdbi_human_approver,character varying,70972,1490,97.9
+sys_succession_pools,succession_pool_id,uuid,17,17,0.0
+sys_succession_pools,succession_pool_tenant_id,uuid,17,17,0.0
+sys_succession_pools,succession_pool_position_id,uuid,17,17,0.0
+sys_succession_pools,succession_pool_code,character varying,17,17,0.0
+sys_succession_pools,succession_pool_name,character varying,17,17,0.0
+sys_succession_pools,succession_pool_description,text,17,0,100.0
+sys_succession_pools,succession_pool_status,character varying,17,17,0.0
+sys_succession_pools,succession_pool_metadata,jsonb,17,17,0.0
+sys_succession_pools,created_at,timestamp with time zone,17,17,0.0
+sys_succession_pools,created_by,uuid,17,0,100.0
+sys_succession_pools,updated_at,timestamp with time zone,17,17,0.0
+sys_succession_pools,updated_by,uuid,17,0,100.0
+sys_succession_readiness_scores,succession_readiness_score_id,uuid,462,462,0.0
+sys_succession_readiness_scores,succession_readiness_score_tenant_id,uuid,462,462,0.0
+sys_succession_readiness_scores,succession_readiness_score_user_id,uuid,462,462,0.0
+sys_succession_readiness_scores,succession_readiness_score_position_id,uuid,462,462,0.0
+sys_succession_readiness_scores,succession_readiness_score_value,numeric,462,462,0.0
+sys_succession_readiness_scores,succession_readiness_score_horizon,character varying,462,462,0.0
+sys_succession_readiness_scores,succession_readiness_score_model_version,character varying,462,462,0.0
+sys_succession_readiness_scores,succession_readiness_score_payload,jsonb,462,462,0.0
+sys_succession_readiness_scores,succession_readiness_score_computed_at,timestamp with time zone,462,462,0.0
+sys_succession_readiness_scores,created_at,timestamp with time zone,462,462,0.0
+sys_succession_scores,succession_score_id,uuid,90,90,0.0
+sys_succession_scores,succession_score_tenant_id,uuid,90,90,0.0
+sys_succession_scores,succession_score_user_id,uuid,90,90,0.0
+sys_succession_scores,succession_score_position_id,uuid,90,90,0.0
+sys_succession_scores,succession_score_value,numeric,90,90,0.0
+sys_succession_scores,succession_score_horizon,character varying,90,90,0.0
+sys_succession_scores,succession_score_payload,jsonb,90,90,0.0
+sys_succession_scores,succession_score_computed_at,timestamp with time zone,90,90,0.0
+sys_succession_scores,created_at,timestamp with time zone,90,90,0.0
+sys_successor_candidates,successor_candidate_id,uuid,25,25,0.0
+sys_successor_candidates,successor_candidate_pool_id,uuid,25,25,0.0
+sys_successor_candidates,successor_candidate_tenant_id,uuid,25,25,0.0
+sys_successor_candidates,successor_candidate_user_id,uuid,25,25,0.0
+sys_successor_candidates,successor_candidate_status,character varying,25,25,0.0
+sys_successor_candidates,successor_candidate_readiness_level,character varying,25,25,0.0
+sys_successor_candidates,successor_candidate_metadata,jsonb,25,25,0.0
+sys_successor_candidates,created_at,timestamp with time zone,25,25,0.0
+sys_successor_candidates,updated_at,timestamp with time zone,25,25,0.0
+sys_survey_assignments,survey_assignment_id,uuid,8,8,0.0
+sys_survey_assignments,survey_assignment_survey_id,uuid,8,8,0.0
+sys_survey_assignments,survey_assignment_user_id,uuid,8,8,0.0
+sys_survey_assignments,survey_assignment_tenant_id,uuid,8,8,0.0
+sys_survey_assignments,survey_assignment_assigned_at,timestamp with time zone,8,8,0.0
+sys_survey_assignments,survey_assignment_completed_at,timestamp with time zone,8,0,100.0
+sys_survey_assignments,survey_assignment_metadata,jsonb,8,8,0.0
+sys_survey_assignments,created_at,timestamp with time zone,8,8,0.0
+sys_survey_assignments,updated_at,timestamp with time zone,8,8,0.0
+sys_survey_questions,survey_question_id,uuid,21,21,0.0
+sys_survey_questions,survey_question_survey_id,uuid,21,21,0.0
+sys_survey_questions,survey_question_tenant_id,uuid,21,21,0.0
+sys_survey_questions,survey_question_natural_key,text,21,21,0.0
+sys_survey_questions,survey_question_text,text,21,21,0.0
+sys_survey_questions,survey_question_type,character varying,21,21,0.0
+sys_survey_questions,survey_question_options,jsonb,21,0,100.0
+sys_survey_questions,survey_question_category,character varying,21,21,0.0
+sys_survey_questions,survey_question_display_order,integer,21,21,0.0
+sys_survey_questions,survey_question_is_required,boolean,21,21,0.0
+sys_survey_questions,created_at,timestamp with time zone,21,21,0.0
+sys_survey_responses,survey_response_id,uuid,3792,3792,0.0
+sys_survey_responses,survey_response_survey_id,uuid,3792,3792,0.0
+sys_survey_responses,survey_response_question_id,uuid,3792,3792,0.0
+sys_survey_responses,survey_response_tenant_id,uuid,3792,3792,0.0
+sys_survey_responses,survey_response_subject_user_id,uuid,3792,3792,0.0
+sys_survey_responses,survey_response_natural_key,text,3792,3792,0.0
+sys_survey_responses,survey_response_rating_value,integer,3792,3792,0.0
+sys_survey_responses,survey_response_text_value,text,3792,0,100.0
+sys_survey_responses,survey_response_choice_value,character varying,3792,0,100.0
+sys_survey_responses,survey_response_metadata,jsonb,3792,3792,0.0
+sys_survey_responses,created_at,timestamp with time zone,3792,3792,0.0
+sys_survey_templates,survey_template_id,uuid,2,2,0.0
+sys_survey_templates,survey_template_tenant_id,uuid,2,2,0.0
+sys_survey_templates,survey_template_natural_key,text,2,2,0.0
+sys_survey_templates,survey_template_name,character varying,2,2,0.0
+sys_survey_templates,survey_template_description,text,2,2,0.0
+sys_survey_templates,survey_template_type,character varying,2,2,0.0
+sys_survey_templates,survey_template_questions,jsonb,2,2,0.0
+sys_survey_templates,survey_template_is_anonymous,boolean,2,2,0.0
+sys_survey_templates,survey_template_estimated_minutes,integer,2,2,0.0
+sys_survey_templates,survey_template_is_system,boolean,2,2,0.0
+sys_survey_templates,survey_template_metadata,jsonb,2,2,0.0
+sys_survey_templates,created_at,timestamp with time zone,2,2,0.0
+sys_survey_templates,updated_at,timestamp with time zone,2,2,0.0
+sys_surveys,survey_id,uuid,8,8,0.0
+sys_surveys,survey_tenant_id,uuid,8,8,0.0
+sys_surveys,survey_natural_key,text,8,8,0.0
+sys_surveys,survey_title,character varying,8,8,0.0
+sys_surveys,survey_description,text,8,8,0.0
+sys_surveys,survey_type,character varying,8,8,0.0
+sys_surveys,survey_status,character varying,8,8,0.0
+sys_surveys,survey_start_date,date,8,7,12.5
+sys_surveys,survey_end_date,date,8,7,12.5
+sys_surveys,survey_is_anonymous,boolean,8,8,0.0
+sys_surveys,survey_total_invitations,integer,8,8,0.0
+sys_surveys,survey_metadata,jsonb,8,8,0.0
+sys_surveys,created_at,timestamp with time zone,8,8,0.0
+sys_surveys,updated_at,timestamp with time zone,8,8,0.0
+sys_talent_scores,talent_score_id,uuid,154,154,0.0
+sys_talent_scores,talent_score_tenant_id,uuid,154,154,0.0
+sys_talent_scores,talent_score_user_id,uuid,154,154,0.0
+sys_talent_scores,talent_score_potential,numeric,154,154,0.0
+sys_talent_scores,talent_score_performance,numeric,154,154,0.0
+sys_talent_scores,talent_score_band,character varying,154,154,0.0
+sys_talent_scores,talent_score_payload,jsonb,154,154,0.0
+sys_talent_scores,talent_score_computed_at,timestamp with time zone,154,154,0.0
+sys_talent_scores,created_at,timestamp with time zone,154,154,0.0
+sys_team_members,team_member_id,uuid,176,176,0.0
+sys_team_members,team_member_team_id,uuid,176,176,0.0
+sys_team_members,team_member_user_id,uuid,176,176,0.0
+sys_team_members,team_member_role,character varying,176,176,0.0
+sys_team_members,team_member_is_active,boolean,176,176,0.0
+sys_team_members,created_at,timestamp with time zone,176,176,0.0
+sys_team_members,created_by,uuid,176,0,100.0
+sys_team_members,updated_at,timestamp with time zone,176,176,0.0
+sys_team_members,updated_by,uuid,176,0,100.0
+sys_teams,team_id,uuid,24,24,0.0
+sys_teams,team_tenant_id,uuid,24,24,0.0
+sys_teams,team_code,character varying,24,24,0.0
+sys_teams,team_name,character varying,24,24,0.0
+sys_teams,team_organization_unit_id,uuid,24,24,0.0
+sys_teams,team_lead_user_id,uuid,24,24,0.0
+sys_teams,team_is_active,boolean,24,24,0.0
+sys_teams,team_metadata,jsonb,24,24,0.0
+sys_teams,created_at,timestamp with time zone,24,24,0.0
+sys_teams,created_by,uuid,24,0,100.0
+sys_teams,updated_at,timestamp with time zone,24,24,0.0
+sys_teams,updated_by,uuid,24,0,100.0
+sys_tenancies,tenant_id,uuid,2,2,0.0
+sys_tenancies,tenant_code,character varying,2,2,0.0
+sys_tenancies,tenant_name,character varying,2,2,0.0
+sys_tenancies,tenant_legal_name,character varying,2,2,0.0
+sys_tenancies,tenant_country_code,character,2,2,0.0
+sys_tenancies,tenant_industry_code,character varying,2,1,50.0
+sys_tenancies,tenant_size_band,character varying,2,2,0.0
+sys_tenancies,tenant_status,character varying,2,2,0.0
+sys_tenancies,tenant_metadata,jsonb,2,2,0.0
+sys_tenancies,created_at,timestamp with time zone,2,2,0.0
+sys_tenancies,updated_at,timestamp with time zone,2,2,0.0
+sys_time_off_balances,balance_id,uuid,494,494,0.0
+sys_time_off_balances,balance_tenant_id,uuid,494,494,0.0
+sys_time_off_balances,balance_natural_key,character varying,494,494,0.0
+sys_time_off_balances,balance_subject_user_id,uuid,494,494,0.0
+sys_time_off_balances,balance_leave_type,character varying,494,494,0.0
+sys_time_off_balances,balance_year,integer,494,494,0.0
+sys_time_off_balances,balance_total_days,numeric,494,494,0.0
+sys_time_off_balances,balance_used_days,numeric,494,494,0.0
+sys_time_off_balances,balance_pending_days,numeric,494,494,0.0
+sys_time_off_balances,balance_carryover_days,numeric,494,494,0.0
+sys_time_off_balances,balance_carryover_expires_at,date,494,0,100.0
+sys_time_off_balances,balance_accrued_days,numeric,494,494,0.0
+sys_time_off_balances,balance_adjustment_days,numeric,494,494,0.0
+sys_time_off_balances,balance_adjustment_reason,text,494,0,100.0
+sys_time_off_balances,balance_metadata,jsonb,494,494,0.0
+sys_time_off_balances,created_at,timestamp with time zone,494,494,0.0
+sys_time_off_balances,updated_at,timestamp with time zone,494,494,0.0
+sys_time_off_requests,request_id,uuid,69,69,0.0
+sys_time_off_requests,request_tenant_id,uuid,69,69,0.0
+sys_time_off_requests,request_natural_key,character varying,69,69,0.0
+sys_time_off_requests,request_subject_user_id,uuid,69,69,0.0
+sys_time_off_requests,request_leave_type,character varying,69,69,0.0
+sys_time_off_requests,request_start_date,date,69,69,0.0
+sys_time_off_requests,request_end_date,date,69,69,0.0
+sys_time_off_requests,request_days_requested,numeric,69,69,0.0
+sys_time_off_requests,request_half_day_start,boolean,69,69,0.0
+sys_time_off_requests,request_half_day_end,boolean,69,69,0.0
+sys_time_off_requests,request_reason,text,69,69,0.0
+sys_time_off_requests,request_status,character varying,69,69,0.0
+sys_time_off_requests,request_approver_user_id,uuid,69,47,31.9
+sys_time_off_requests,request_approved_at,timestamp with time zone,69,43,37.7
+sys_time_off_requests,request_rejection_reason,text,69,0,100.0
+sys_time_off_requests,request_overlap_approved,boolean,69,69,0.0
+sys_time_off_requests,request_medical_cert_required,boolean,69,69,0.0
+sys_time_off_requests,request_medical_cert_uploaded,boolean,69,69,0.0
+sys_time_off_requests,request_cancellation_requested,boolean,69,69,0.0
+sys_time_off_requests,request_cancellation_reason,text,69,0,100.0
+sys_time_off_requests,request_cancelled_at,timestamp with time zone,69,0,100.0
+sys_time_off_requests,request_cancelled_by_user_id,uuid,69,0,100.0
+sys_time_off_requests,request_metadata,jsonb,69,69,0.0
+sys_time_off_requests,created_at,timestamp with time zone,69,69,0.0
+sys_time_off_requests,updated_at,timestamp with time zone,69,69,0.0
+sys_training_initiatives,training_initiative_id,uuid,1,1,0.0
+sys_training_initiatives,training_initiative_tenant_id,uuid,1,1,0.0
+sys_training_initiatives,training_initiative_module_id,uuid,1,1,0.0
+sys_training_initiatives,training_initiative_code,character varying,1,1,0.0
+sys_training_initiatives,training_initiative_cohort_name,character varying,1,0,100.0
+sys_training_initiatives,training_initiative_start_date,date,1,1,0.0
+sys_training_initiatives,training_initiative_end_date,date,1,0,100.0
+sys_training_initiatives,training_initiative_facilitator_user_id,uuid,1,0,100.0
+sys_training_initiatives,training_initiative_status,character varying,1,1,0.0
+sys_training_initiatives,training_initiative_capacity,integer,1,0,100.0
+sys_training_initiatives,training_initiative_metadata,jsonb,1,1,0.0
+sys_training_initiatives,created_at,timestamp with time zone,1,1,0.0
+sys_training_initiatives,created_by,uuid,1,0,100.0
+sys_training_initiatives,updated_at,timestamp with time zone,1,1,0.0
+sys_training_initiatives,updated_by,uuid,1,0,100.0
+sys_ui_interfaces,ui_interface_id,uuid,47,47,0.0
+sys_ui_interfaces,ui_interface_code,character varying,47,47,0.0
+sys_ui_interfaces,ui_interface_label,character varying,47,47,0.0
+sys_ui_interfaces,ui_interface_route,character varying,47,47,0.0
+sys_ui_interfaces,ui_interface_icon,character varying,47,47,0.0
+sys_ui_interfaces,ui_interface_sidebar_group,character varying,47,47,0.0
+sys_ui_interfaces,ui_interface_perspective,character varying,47,47,0.0
+sys_ui_interfaces,ui_interface_required_resource,character varying,47,38,19.1
+sys_ui_interfaces,ui_interface_required_action,character varying,47,38,19.1
+sys_ui_interfaces,ui_interface_requires_admin,boolean,47,47,0.0
+sys_ui_interfaces,ui_interface_order,integer,47,47,0.0
+sys_ui_interfaces,ui_interface_is_active,boolean,47,47,0.0
+sys_ui_interfaces,created_at,timestamp with time zone,47,47,0.0
+sys_ui_interfaces,updated_at,timestamp with time zone,47,47,0.0
+sys_user_assessment_evidence,user_assessment_evidence_id,uuid,1560,1560,0.0
+sys_user_assessment_evidence,user_assessment_evidence_user_id,uuid,1560,1560,0.0
+sys_user_assessment_evidence,user_assessment_evidence_tenant_id,uuid,1560,1560,0.0
+sys_user_assessment_evidence,user_assessment_evidence_assessment_id,uuid,1560,1560,0.0
+sys_user_assessment_evidence,user_assessment_evidence_dimension,character varying,1560,1560,0.0
+sys_user_assessment_evidence,user_assessment_evidence_score,numeric,1560,1560,0.0
+sys_user_assessment_evidence,user_assessment_evidence_narrative,text,1560,0,100.0
+sys_user_assessment_evidence,user_assessment_evidence_assessor_user_id,uuid,1560,0,100.0
+sys_user_assessment_evidence,user_assessment_evidence_recorded_at,timestamp with time zone,1560,1560,0.0
+sys_user_assessment_evidence,user_assessment_evidence_metadata,jsonb,1560,1560,0.0
+sys_user_assessment_evidence,created_at,timestamp with time zone,1560,1560,0.0
+sys_user_assessment_evidence,created_by,uuid,1560,0,100.0
+sys_user_assessment_evidence,updated_at,timestamp with time zone,1560,1560,0.0
+sys_user_assessment_evidence,updated_by,uuid,1560,0,100.0
+sys_user_auth_roles,user_auth_role_id,uuid,329,329,0.0
+sys_user_auth_roles,user_auth_role_user_id,uuid,329,329,0.0
+sys_user_auth_roles,user_auth_role_role_id,uuid,329,329,0.0
+sys_user_auth_roles,user_auth_role_tenant_id,uuid,329,328,0.3
+sys_user_auth_roles,user_auth_role_granted_by,uuid,329,0,100.0
+sys_user_auth_roles,user_auth_role_granted_at,timestamp with time zone,329,329,0.0
+sys_user_auth_roles,user_auth_role_revoked_at,timestamp with time zone,329,0,100.0
+sys_user_career_plans,user_career_plan_id,uuid,113,113,0.0
+sys_user_career_plans,user_career_plan_tenant_id,uuid,113,113,0.0
+sys_user_career_plans,user_career_plan_user_id,uuid,113,113,0.0
+sys_user_career_plans,user_career_plan_path_id,uuid,113,113,0.0
+sys_user_career_plans,user_career_plan_target_position_id,uuid,113,0,100.0
+sys_user_career_plans,user_career_plan_horizon_months,integer,113,0,100.0
+sys_user_career_plans,user_career_plan_status,character varying,113,113,0.0
+sys_user_career_plans,user_career_plan_metadata,jsonb,113,113,0.0
+sys_user_career_plans,created_at,timestamp with time zone,113,113,0.0
+sys_user_career_plans,created_by,uuid,113,0,100.0
+sys_user_career_plans,updated_at,timestamp with time zone,113,113,0.0
+sys_user_career_plans,updated_by,uuid,113,0,100.0
+sys_user_certifications,user_certification_id,uuid,420,420,0.0
+sys_user_certifications,user_certification_user_id,uuid,420,420,0.0
+sys_user_certifications,user_certification_tenant_id,uuid,420,420,0.0
+sys_user_certifications,user_certification_name,character varying,420,420,0.0
+sys_user_certifications,user_certification_issuer,character varying,420,420,0.0
+sys_user_certifications,user_certification_issued_date,date,420,420,0.0
+sys_user_certifications,user_certification_expires_date,date,420,420,0.0
+sys_user_certifications,user_certification_credential_id,character varying,420,195,53.6
+sys_user_certifications,user_certification_document_uri,text,420,0,100.0
+sys_user_certifications,user_certification_metadata,jsonb,420,420,0.0
+sys_user_certifications,created_at,timestamp with time zone,420,420,0.0
+sys_user_certifications,created_by,uuid,420,0,100.0
+sys_user_certifications,updated_at,timestamp with time zone,420,420,0.0
+sys_user_certifications,updated_by,uuid,420,0,100.0
+sys_user_documents,user_document_id,uuid,657,657,0.0
+sys_user_documents,user_document_user_id,uuid,657,657,0.0
+sys_user_documents,user_document_tenant_id,uuid,657,657,0.0
+sys_user_documents,user_document_kind,character varying,657,657,0.0
+sys_user_documents,user_document_title,character varying,657,657,0.0
+sys_user_documents,user_document_uri,text,657,657,0.0
+sys_user_documents,user_document_mime_type,character varying,657,657,0.0
+sys_user_documents,user_document_size_bytes,bigint,657,657,0.0
+sys_user_documents,user_document_metadata,jsonb,657,657,0.0
+sys_user_documents,created_at,timestamp with time zone,657,657,0.0
+sys_user_documents,created_by,uuid,657,0,100.0
+sys_user_documents,updated_at,timestamp with time zone,657,657,0.0
+sys_user_documents,updated_by,uuid,657,0,100.0
+sys_user_education_records,user_education_record_id,uuid,157,157,0.0
+sys_user_education_records,user_education_record_user_id,uuid,157,157,0.0
+sys_user_education_records,user_education_record_tenant_id,uuid,157,157,0.0
+sys_user_education_records,user_education_degree,character varying,157,157,0.0
+sys_user_education_records,user_education_institution,character varying,157,157,0.0
+sys_user_education_records,user_education_field_of_study,character varying,157,157,0.0
+sys_user_education_records,user_education_start_date,date,157,0,100.0
+sys_user_education_records,user_education_end_date,date,157,156,0.6
+sys_user_education_records,user_education_grade,character varying,157,0,100.0
+sys_user_education_records,user_education_esco_qualification_uri,text,157,0,100.0
+sys_user_education_records,user_education_metadata,jsonb,157,157,0.0
+sys_user_education_records,created_at,timestamp with time zone,157,157,0.0
+sys_user_education_records,created_by,uuid,157,0,100.0
+sys_user_education_records,updated_at,timestamp with time zone,157,157,0.0
+sys_user_education_records,updated_by,uuid,157,0,100.0
+sys_user_kpi_evidence,user_kpi_evidence_id,uuid,248,248,0.0
+sys_user_kpi_evidence,user_kpi_evidence_user_id,uuid,248,248,0.0
+sys_user_kpi_evidence,user_kpi_evidence_tenant_id,uuid,248,248,0.0
+sys_user_kpi_evidence,user_kpi_evidence_kpi_id,uuid,248,248,0.0
+sys_user_kpi_evidence,user_kpi_evidence_period_start,date,248,248,0.0
+sys_user_kpi_evidence,user_kpi_evidence_period_end,date,248,248,0.0
+sys_user_kpi_evidence,user_kpi_evidence_measured_value,numeric,248,248,0.0
+sys_user_kpi_evidence,user_kpi_evidence_target_value,numeric,248,248,0.0
+sys_user_kpi_evidence,user_kpi_evidence_unit,character varying,248,0,100.0
+sys_user_kpi_evidence,user_kpi_evidence_recorded_at,timestamp with time zone,248,248,0.0
+sys_user_kpi_evidence,user_kpi_evidence_metadata,jsonb,248,248,0.0
+sys_user_kpi_evidence,created_at,timestamp with time zone,248,248,0.0
+sys_user_kpi_evidence,created_by,uuid,248,0,100.0
+sys_user_kpi_evidence,updated_at,timestamp with time zone,248,248,0.0
+sys_user_kpi_evidence,updated_by,uuid,248,0,100.0
+sys_user_learning_assignments,user_learning_assignment_id,uuid,1990,1990,0.0
+sys_user_learning_assignments,user_learning_assignment_tenant_id,uuid,1990,1990,0.0
+sys_user_learning_assignments,user_learning_assignment_user_id,uuid,1990,1990,0.0
+sys_user_learning_assignments,user_learning_assignment_initiative_id,uuid,1990,0,100.0
+sys_user_learning_assignments,user_learning_assignment_module_id,uuid,1990,0,100.0
+sys_user_learning_assignments,user_learning_assignment_path_id,uuid,1990,1990,0.0
+sys_user_learning_assignments,user_learning_assignment_is_mandatory,boolean,1990,1990,0.0
+sys_user_learning_assignments,user_learning_assignment_deadline,date,1990,0,100.0
+sys_user_learning_assignments,user_learning_assignment_status,character varying,1990,1990,0.0
+sys_user_learning_assignments,user_learning_assignment_assigned_by,uuid,1990,0,100.0
+sys_user_learning_assignments,user_learning_assignment_metadata,jsonb,1990,1990,0.0
+sys_user_learning_assignments,created_at,timestamp with time zone,1990,1990,0.0
+sys_user_learning_assignments,updated_at,timestamp with time zone,1990,1990,0.0
+sys_user_learning_evidence,user_learning_evidence_id,uuid,1434,1434,0.0
+sys_user_learning_evidence,user_learning_evidence_user_id,uuid,1434,1434,0.0
+sys_user_learning_evidence,user_learning_evidence_tenant_id,uuid,1434,1434,0.0
+sys_user_learning_evidence,user_learning_evidence_module_id,uuid,1434,1434,0.0
+sys_user_learning_evidence,user_learning_evidence_completed_at,timestamp with time zone,1434,1434,0.0
+sys_user_learning_evidence,user_learning_evidence_score,numeric,1434,34,97.6
+sys_user_learning_evidence,user_learning_evidence_certificate_uri,text,1434,0,100.0
+sys_user_learning_evidence,user_learning_evidence_metadata,jsonb,1434,1434,0.0
+sys_user_learning_evidence,created_at,timestamp with time zone,1434,1434,0.0
+sys_user_learning_evidence,created_by,uuid,1434,0,100.0
+sys_user_learning_evidence,updated_at,timestamp with time zone,1434,1434,0.0
+sys_user_learning_evidence,updated_by,uuid,1434,0,100.0
+sys_user_position_assignments,user_position_assignment_id,uuid,160,160,0.0
+sys_user_position_assignments,user_position_assignment_tenant_id,uuid,160,160,0.0
+sys_user_position_assignments,user_position_assignment_user_id,uuid,160,160,0.0
+sys_user_position_assignments,user_position_assignment_position_id,uuid,160,160,0.0
+sys_user_position_assignments,user_position_assignment_kind,character varying,160,160,0.0
+sys_user_position_assignments,user_position_assignment_fte,numeric,160,160,0.0
+sys_user_position_assignments,user_position_assignment_start_date,date,160,160,0.0
+sys_user_position_assignments,user_position_assignment_end_date,date,160,0,100.0
+sys_user_position_assignments,user_position_assignment_status,character varying,160,160,0.0
+sys_user_position_assignments,user_position_assignment_notes,text,160,0,100.0
+sys_user_position_assignments,user_position_assignment_metadata,jsonb,160,160,0.0
+sys_user_position_assignments,created_at,timestamp with time zone,160,160,0.0
+sys_user_position_assignments,created_by,uuid,160,0,100.0
+sys_user_position_assignments,updated_at,timestamp with time zone,160,160,0.0
+sys_user_position_assignments,updated_by,uuid,160,0,100.0
+sys_user_preferences,user_preference_id,uuid,4,4,0.0
+sys_user_preferences,user_preference_user_id,uuid,4,4,0.0
+sys_user_preferences,user_preference_tenant_id,uuid,4,3,25.0
+sys_user_preferences,user_preference_theme,character varying,4,4,0.0
+sys_user_preferences,user_preference_palette,character varying,4,4,0.0
+sys_user_preferences,created_at,timestamp with time zone,4,4,0.0
+sys_user_preferences,created_by,uuid,4,4,0.0
+sys_user_preferences,updated_at,timestamp with time zone,4,4,0.0
+sys_user_preferences,updated_by,uuid,4,4,0.0
+sys_user_preferences,user_preference_locale,character varying,4,4,0.0
+sys_user_profile_embeddings,user_profile_embedding_id,uuid,156,156,0.0
+sys_user_profile_embeddings,user_id,uuid,156,156,0.0
+sys_user_profile_embeddings,tenant_id,uuid,156,156,0.0
+sys_user_profile_embeddings,embedding,USER-DEFINED,156,156,0.0
+sys_user_profile_embeddings,derived_from_evidence_count,integer,156,156,0.0
+sys_user_profile_embeddings,model_id,text,156,156,0.0
+sys_user_profile_embeddings,created_at,timestamp with time zone,156,156,0.0
+sys_user_profiles,user_profile_id,uuid,157,157,0.0
+sys_user_profiles,user_profile_user_id,uuid,157,157,0.0
+sys_user_profiles,user_profile_tenant_id,uuid,157,157,0.0
+sys_user_profiles,user_profile_bio,text,157,1,99.4
+sys_user_profiles,user_profile_picture_uri,text,157,0,100.0
+sys_user_profiles,user_profile_phone,character varying,157,156,0.6
+sys_user_profiles,user_profile_linkedin_uri,text,157,0,100.0
+sys_user_profiles,user_profile_contact_prefs,jsonb,157,157,0.0
+sys_user_profiles,user_profile_metadata,jsonb,157,157,0.0
+sys_user_profiles,created_at,timestamp with time zone,157,157,0.0
+sys_user_profiles,created_by,uuid,157,1,99.4
+sys_user_profiles,updated_at,timestamp with time zone,157,157,0.0
+sys_user_profiles,updated_by,uuid,157,1,99.4
+sys_user_skill_evidence,user_skill_evidence_id,uuid,902,902,0.0
+sys_user_skill_evidence,user_skill_evidence_user_id,uuid,902,902,0.0
+sys_user_skill_evidence,user_skill_evidence_tenant_id,uuid,902,902,0.0
+sys_user_skill_evidence,user_skill_evidence_skill_id,uuid,902,902,0.0
+sys_user_skill_evidence,user_skill_evidence_declared_proficiency,character varying,902,902,0.0
+sys_user_skill_evidence,user_skill_evidence_source,character varying,902,902,0.0
+sys_user_skill_evidence,user_skill_evidence_assessed_at,timestamp with time zone,902,902,0.0
+sys_user_skill_evidence,user_skill_evidence_assessor_user_id,uuid,902,0,100.0
+sys_user_skill_evidence,user_skill_evidence_score,numeric,902,902,0.0
+sys_user_skill_evidence,user_skill_evidence_comment,text,902,0,100.0
+sys_user_skill_evidence,user_skill_evidence_metadata,jsonb,902,902,0.0
+sys_user_skill_evidence,created_at,timestamp with time zone,902,902,0.0
+sys_user_skill_evidence,created_by,uuid,902,0,100.0
+sys_user_skill_evidence,updated_at,timestamp with time zone,902,902,0.0
+sys_user_skill_evidence,updated_by,uuid,902,0,100.0
+sys_users,user_id,uuid,162,162,0.0
+sys_users,user_tenant_id,uuid,162,162,0.0
+sys_users,user_external_code,character varying,162,161,0.6
+sys_users,user_email,character varying,162,162,0.0
+sys_users,user_display_name,character varying,162,162,0.0
+sys_users,user_first_name,character varying,162,162,0.0
+sys_users,user_last_name,character varying,162,162,0.0
+sys_users,user_status,character varying,162,162,0.0
+sys_users,user_type,character varying,162,162,0.0
+sys_users,user_is_synthetic,boolean,162,162,0.0
+sys_users,user_locale,character varying,162,160,1.2
+sys_users,user_timezone,character varying,162,160,1.2
+sys_users,user_metadata,jsonb,162,162,0.0
+sys_users,created_at,timestamp with time zone,162,162,0.0
+sys_users,updated_at,timestamp with time zone,162,162,0.0
+sys_variable_pay_calculations,variable_pay_calculation_id,uuid,121,121,0.0
+sys_variable_pay_calculations,variable_pay_calculation_tenant_id,uuid,121,121,0.0
+sys_variable_pay_calculations,variable_pay_calculation_user_id,uuid,121,121,0.0
+sys_variable_pay_calculations,variable_pay_calculation_position_id,uuid,121,0,100.0
+sys_variable_pay_calculations,variable_pay_calculation_period_start,date,121,121,0.0
+sys_variable_pay_calculations,variable_pay_calculation_period_end,date,121,121,0.0
+sys_variable_pay_calculations,variable_pay_calculation_signal_score,numeric,121,0,100.0
+sys_variable_pay_calculations,variable_pay_calculation_amount_eur,numeric,121,87,28.1
+sys_variable_pay_calculations,variable_pay_calculation_payload,jsonb,121,121,0.0
+sys_variable_pay_calculations,variable_pay_calculation_computed_at,timestamp with time zone,121,121,0.0
+sys_variable_pay_calculations,created_at,timestamp with time zone,121,121,0.0
+sys_visualization_edges,edge_id,uuid,157,157,0.0
+sys_visualization_edges,edge_graph_id,uuid,157,157,0.0
+sys_visualization_edges,edge_source_node_id,uuid,157,157,0.0
+sys_visualization_edges,edge_target_node_id,uuid,157,157,0.0
+sys_visualization_edges,edge_type,character varying,157,157,0.0
+sys_visualization_edges,edge_weight,numeric,157,0,100.0
+sys_visualization_edges,edge_metadata,jsonb,157,157,0.0
+sys_visualization_edges,created_at,timestamp with time zone,157,157,0.0
+sys_visualization_graphs,graph_id,uuid,1,1,0.0
+sys_visualization_graphs,graph_tenant_id,uuid,1,1,0.0
+sys_visualization_graphs,graph_code,character varying,1,1,0.0
+sys_visualization_graphs,graph_type,character varying,1,1,0.0
+sys_visualization_graphs,graph_name,character varying,1,1,0.0
+sys_visualization_graphs,graph_description,text,1,1,0.0
+sys_visualization_graphs,graph_source_query,text,1,0,100.0
+sys_visualization_graphs,graph_version,integer,1,1,0.0
+sys_visualization_graphs,graph_is_active,boolean,1,1,0.0
+sys_visualization_graphs,graph_metadata,jsonb,1,1,0.0
+sys_visualization_graphs,created_at,timestamp with time zone,1,1,0.0
+sys_visualization_graphs,created_by,uuid,1,0,100.0
+sys_visualization_graphs,updated_at,timestamp with time zone,1,1,0.0
+sys_visualization_graphs,updated_by,uuid,1,0,100.0
+sys_visualization_nodes,node_id,uuid,158,158,0.0
+sys_visualization_nodes,node_graph_id,uuid,158,158,0.0
+sys_visualization_nodes,node_source_entity_type,character varying,158,158,0.0
+sys_visualization_nodes,node_source_entity_id,uuid,158,158,0.0
+sys_visualization_nodes,node_label,character varying,158,158,0.0
+sys_visualization_nodes,node_type,character varying,158,0,100.0
+sys_visualization_nodes,node_group_key,character varying,158,0,100.0
+sys_visualization_nodes,node_metadata,jsonb,158,158,0.0
+sys_visualization_nodes,created_at,timestamp with time zone,158,158,0.0
+sys_visualization_nodes,updated_at,timestamp with time zone,158,158,0.0

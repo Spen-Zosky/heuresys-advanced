@@ -1,16 +1,16 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-21T21:13:38Z da docs/kb/tools/build_index.py
+# generato: 2026-06-22T12:27:01Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-21T21:13:38Z"
-  total_files: 2134
+  generated_at: "2026-06-22T12:27:01Z"
+  total_files: 2162
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 24
     api-core: 18
-    api-module: 289
+    api-module: 292
     ci: 16
     claude-config: 6
     config: 99
@@ -18,24 +18,24 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 151
+    db-migration: 152
     db-script: 23
     db-seed: 104
-    doc-canonical: 386
+    doc-canonical: 388
     handoff-state: 1
     qa-artifact: 96
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 86
+    shared-schema: 87
     showcase-source: 13
-    test: 223
+    test: 227
     ux-design-archive: 80
-    web-source: 153
+    web-source: 170
   status_counts:
     archive: 488
     external-archive: 50
-    live: 1596
+    live: 1624
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -1480,6 +1480,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\process-kpi-templates\service.ts'
     root: repo
     rel: 'apps/api/src/modules/process-kpi-templates/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\public-stats\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/public-stats/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\public-stats\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/public-stats/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\public-stats\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/public-stats/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -5719,6 +5737,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000153_lead_source_enum.sql'
+    root: repo
+    rel: 'db/migrations/000153_lead_source_enum.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\README.md'
     root: repo
     rel: 'db/scripts/README.md'
@@ -8671,6 +8695,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-06-22-gtm-investor-onepager-and-guided-demo.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-06-22-gtm-investor-onepager-and-guided-demo.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-05-28-cross-os-bootstrap-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-05-28-cross-os-bootstrap-design.md'
@@ -8788,6 +8818,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-06-21-gtm-front-door-landing-lead-capture-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-06-21-gtm-front-door-landing-lead-capture-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-06-22-gtm-investor-onepager-and-guided-demo-design.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-06-22-gtm-investor-onepager-and-guided-demo-design.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -9853,6 +9889,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\public-stats.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/public-stats.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\reference-sync.ts'
     root: repo
     rel: 'packages/shared/src/schemas/reference-sync.ts'
@@ -10729,6 +10771,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\public-stats.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/public-stats.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\rbac-cache-boot-retry.test.ts'
     root: repo
     rel: 'apps/api/test/rbac-cache-boot-retry.test.ts'
@@ -11191,6 +11239,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\capture-demo.gen.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/capture-demo.gen.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\closing-pages.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/closing-pages.spec.ts'
@@ -11230,6 +11284,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\content.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/content.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\demo.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/demo.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11290,6 +11350,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\insights.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/insights.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\investors.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/investors.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11977,6 +12043,66 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\public\demo\01-landing.png'
+    root: repo
+    rel: 'apps/web/public/demo/01-landing.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\public\demo\02-org-chart.png'
+    root: repo
+    rel: 'apps/web/public/demo/02-org-chart.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\public\demo\03-positions.png'
+    root: repo
+    rel: 'apps/web/public/demo/03-positions.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\public\demo\04-skills.png'
+    root: repo
+    rel: 'apps/web/public/demo/04-skills.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\public\demo\05-succession.png'
+    root: repo
+    rel: 'apps/web/public/demo/05-succession.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\public\demo\06-maturity.png'
+    root: repo
+    rel: 'apps/web/public/demo/06-maturity.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\public\demo\07-raci.png'
+    root: repo
+    rel: 'apps/web/public/demo/07-raci.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\public\demo\08-matching.png'
+    root: repo
+    rel: 'apps/web/public/demo/08-matching.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\public\demo\09-team.png'
+    root: repo
+    rel: 'apps/web/public/demo/09-team.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\public\demo\10-dashboard.png'
+    root: repo
+    rel: 'apps/web/public/demo/10-dashboard.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\scripts\check-i18n-parity.ts'
     root: repo
     rel: 'apps/web/scripts/check-i18n-parity.ts'
@@ -12475,9 +12601,21 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\demo\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/demo/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\globals.css'
     root: repo
     rel: 'apps/web/src/app/globals.css'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\investors\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/investors/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked
@@ -12715,6 +12853,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\lib\api\public-stats.ts'
+    root: repo
+    rel: 'apps/web/src/lib/api/public-stats.ts'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\lib\i18n.ts'
     root: repo
     rel: 'apps/web/src/lib/i18n.ts'
@@ -12751,6 +12895,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\locales\en\demo.json'
+    root: repo
+    rel: 'apps/web/src/locales/en/demo.json'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\locales\en\ess.json'
     root: repo
     rel: 'apps/web/src/locales/en/ess.json'
@@ -12760,6 +12910,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\locales\en\hr.json'
     root: repo
     rel: 'apps/web/src/locales/en/hr.json'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\locales\en\investors.json'
+    root: repo
+    rel: 'apps/web/src/locales/en/investors.json'
     category: web-source
     status: live
     provenance: git-tracked
@@ -12799,6 +12955,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\locales\it\demo.json'
+    root: repo
+    rel: 'apps/web/src/locales/it/demo.json'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\locales\it\ess.json'
     root: repo
     rel: 'apps/web/src/locales/it/ess.json'
@@ -12808,6 +12970,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\locales\it\hr.json'
     root: repo
     rel: 'apps/web/src/locales/it/hr.json'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\locales\it\investors.json'
+    root: repo
+    rel: 'apps/web/src/locales/it/investors.json'
     category: web-source
     status: live
     provenance: git-tracked

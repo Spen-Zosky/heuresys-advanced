@@ -12,6 +12,7 @@
     "title": "Cosa abbiamo costruito",
     "tagline": "Ogni numero è tracciabile alla sua fonte.",
     "liveLabel": "live",
+    "loading": "—",
     "asOf": "dati di codebase, S1003",
     "live": {
       "skills": "Competenze ESCO (tassonomia)",

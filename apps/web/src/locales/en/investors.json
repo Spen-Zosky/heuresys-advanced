@@ -12,6 +12,7 @@
     "title": "What we've built",
     "tagline": "Every number traces back to its source.",
     "liveLabel": "live",
+    "loading": "—",
     "asOf": "codebase data, S1003",
     "live": {
       "skills": "ESCO skills (taxonomy)",

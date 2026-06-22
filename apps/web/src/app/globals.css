@@ -197,3 +197,11 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
+
+/* GTM investor one-pager (#4) — print-to-PDF. The rendered page IS the PDF;
+   chrome carries print:hidden (Tailwind). Page-level rules here. */
+@media print {
+  @page { size: A4; margin: 14mm; }
+  html, body { background: #fff !important; color: #000 !important; }
+  [data-print-card] { break-inside: avoid; }
+}

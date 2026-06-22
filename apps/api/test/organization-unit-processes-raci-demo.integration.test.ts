@@ -4,25 +4,29 @@ import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 
 /**
- * ITEM #11 (S994) — LIVE verification of the RACI OU<->process DEMO seed.
+ * ITEM #5/#11 — LIVE verification of the PRODUCTION RACI OU<->process seed.
  *
- * Companion to organization-unit-processes.integration.test.ts (T2.5, which
- * exercises the contract on EPHEMERAL OUs it wipes). This file instead READS BACK
- * the persistent AUTHORED DEMO crosswalk seeded by
- *   db/seeds/reconciliation/54_raci_demo_rtl_s994.sql
- * through the REAL endpoints, as the real RTL_BANK TENANT_ADMIN persona
+ * Originally (S994 #11) this read back the small DEMO crosswalk (12 rows tagged
+ * 'S994-#11'). S1002 (commit 9ce9a92) replaced that demo with the APPROVED
+ * PRODUCTION mapping — 105 assignments tagged 'S1002-#5/#11' (DELETE demo →
+ * INSERT 105) in db/seeds/reconciliation/54_raci_demo_rtl_s994.sql. This test
+ * was re-pointed to the production seed and its role assertions re-verified
+ * against the live DB (S1003) so the suite stays green after that refactor.
+ *
+ * It READS BACK the persistent AUTHORED PRODUCTION crosswalk through the REAL
+ * endpoints, as the real RTL_BANK TENANT_ADMIN persona
  * (federica.marchetti@rtl-bank.org), and asserts the RACI roles are served from
  * the live DB. It also proves the write-path live (POST->GET->DELETE) on a
- * non-seed (OU,process) pair so it never disturbs the 12 seeded demo rows.
+ * non-seed (OU,process) pair so it never disturbs the seeded rows.
  *
  * SAFETY: every assertion is scoped to RTL_BANK OUs; the write round-trip targets
  * an RTL OU only (the assignment inherits the OU's tenant — never HEURESYS, I5).
- * No DELETE of seeded demo rows (the temp assignment uses an unused OU/process).
+ * No DELETE of seeded rows (the temp assignment uses an unused OU/process).
  */
 
 const PWD = "Admin#PassW0rd!";
 const RTL = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
-const DEMO_ITEM = "S994-#11";
+const SEED_ITEM = "S1002-#5/#11";
 
 interface S { cookies: Map<string, string>; csrfToken: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
@@ -60,15 +64,15 @@ beforeAll(async () => {
   suite = await buildTestApp();
   author = await login(suite, "federica.marchetti@rtl-bank.org");
 
-  // Precondition: the demo seed must be applied (12 RTL rows tagged S994-#11).
+  // Precondition: the production seed must be applied (105 RTL rows tagged S1002-#5/#11).
   const seeded = await pool.query<{ n: string }>(
     `SELECT count(*) AS n FROM sys.sys_organization_unit_processes
       WHERE org_unit_process_tenant_id=$1 AND org_unit_process_metadata->>'item'=$2`,
-    [RTL, DEMO_ITEM],
+    [RTL, SEED_ITEM],
   );
-  if (Number(seeded.rows[0]!.n) < 12) {
+  if (Number(seeded.rows[0]!.n) < 100) {
     throw new Error(
-      `RACI demo seed missing (${seeded.rows[0]!.n}/12). Apply ` +
+      `RACI production seed missing (${seeded.rows[0]!.n}/105). Apply ` +
         "db/seeds/reconciliation/54_raci_demo_rtl_s994.sql first.",
     );
   }
@@ -78,24 +82,24 @@ afterAll(async () => {
   await suite.app.close();
 });
 
-describe("RACI OU<->process DEMO seed — live read-back via real API (S994 #11)", () => {
-  it("by-ou: DIV-RISK is OWNER of '02 KYC / AML' (demo seed, served live)", async () => {
+describe("RACI OU<->process PRODUCTION seed — live read-back via real API (S1002 #5/#11)", () => {
+  it("by-ou: DIV-RISK is INFORMED on '02 KYC / AML' (production seed, served live)", async () => {
     const ou = await ouIdByCode("DIV-RISK");
     const r = await suite.app.inject({ method: "GET", url: `/v1/organization-unit-processes/by-ou/${ou}`, headers: { cookie: ch(author.cookies) } });
     expect(r.statusCode).toBe(200);
     const items = (r.json() as { items: { blueprintProcessCode: string; blueprintProcessName: string; role: string }[] }).items;
     const aml = items.find((i) => i.blueprintProcessCode === "02");
     expect(aml).toBeTruthy();
-    expect(aml!.role).toBe("OWNER");
+    expect(aml!.role).toBe("INFORMED");
     expect(aml!.blueprintProcessName).toContain("KYC");
   });
 
-  it("by-ou: DIV-LEGAL is CONSULTED on '11 Compliance & Regulatory Reporting'", async () => {
+  it("by-ou: DIV-LEGAL is OWNER of '11 Compliance & Regulatory Reporting'", async () => {
     const ou = await ouIdByCode("DIV-LEGAL");
     const r = await suite.app.inject({ method: "GET", url: `/v1/organization-unit-processes/by-ou/${ou}`, headers: { cookie: ch(author.cookies) } });
     expect(r.statusCode).toBe(200);
     const items = (r.json() as { items: { blueprintProcessCode: string; role: string }[] }).items;
-    expect(items.find((i) => i.blueprintProcessCode === "11")?.role).toBe("CONSULTED");
+    expect(items.find((i) => i.blueprintProcessCode === "11")?.role).toBe("OWNER");
   });
 
   it("by-ou: DIV-OPS is INFORMED on '12 Internal Audit'", async () => {
@@ -106,28 +110,28 @@ describe("RACI OU<->process DEMO seed — live read-back via real API (S994 #11)
     expect(items.find((i) => i.blueprintProcessCode === "12")?.role).toBe("INFORMED");
   });
 
-  it("by-process: '10 Risk Management' reverse-lookup lists DIR-RISKM as CONTRIBUTOR", async () => {
+  it("by-process: '10 Risk Management' reverse-lookup lists DIR-RISKM as OWNER", async () => {
     const proc = await processIdByCode("10");
     const r = await suite.app.inject({ method: "GET", url: `/v1/organization-unit-processes/by-process/${proc}`, headers: { cookie: ch(author.cookies) } });
     expect(r.statusCode).toBe(200);
     const items = (r.json() as { items: { orgUnitCode: string; orgUnitName: string; role: string }[] }).items;
     const riskm = items.find((i) => i.orgUnitCode === "DIR-RISKM");
     expect(riskm).toBeTruthy();
-    expect(riskm!.role).toBe("CONTRIBUTOR");
+    expect(riskm!.role).toBe("OWNER");
     expect(riskm!.orgUnitName).toBeTruthy();
   });
 
-  it("all 4 RACI roles (OWNER/CONTRIBUTOR/CONSULTED/INFORMED) are present across the demo OUs, served via the API", async () => {
-    // Pull the demo OUs from the DB, then collect roles strictly through the API.
-    const demoOus = await pool.query<{ code: string; id: string }>(
+  it("all 4 RACI roles (OWNER/CONTRIBUTOR/CONSULTED/INFORMED) are present across the seeded OUs, served via the API", async () => {
+    // Pull the seeded OUs from the DB, then collect roles strictly through the API.
+    const seedOus = await pool.query<{ code: string; id: string }>(
       `SELECT DISTINCT ou.organization_unit_code AS code, ou.organization_unit_id AS id
          FROM sys.sys_organization_unit_processes x
          JOIN sys.sys_organization_units ou ON ou.organization_unit_id=x.org_unit_process_org_unit_id
         WHERE x.org_unit_process_metadata->>'item'=$1 AND x.org_unit_process_tenant_id=$2`,
-      [DEMO_ITEM, RTL],
+      [SEED_ITEM, RTL],
     );
     const roles = new Set<string>();
-    for (const ou of demoOus.rows) {
+    for (const ou of seedOus.rows) {
       const r = await suite.app.inject({ method: "GET", url: `/v1/organization-unit-processes/by-ou/${ou.id}`, headers: { cookie: ch(author.cookies) } });
       expect(r.statusCode).toBe(200);
       for (const it of (r.json() as { items: { role: string }[] }).items) roles.add(it.role);
@@ -136,7 +140,7 @@ describe("RACI OU<->process DEMO seed — live read-back via real API (S994 #11)
   });
 
   it("write-path live: POST a fresh RACI assignment (CSRF) → GET by-ou → DELETE (no seed disturbed)", async () => {
-    // Use a (OU, process) pair NOT in the demo seed: FIL-MI-CEN (a branch) x '13 Branch Operations'.
+    // Use a (OU, process) pair NOT in the seed: FIL-MI-CEN (a branch) x '13 Branch Operations'.
     const ou = await ouIdByCode("FIL-MI-CEN");
     const proc = await processIdByCode("13");
     // Pristine: ensure no leftover assignment from a prior run.

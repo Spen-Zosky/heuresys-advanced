@@ -10,12 +10,12 @@ import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 
 interface PositionSkillReq {
-  positionSkillRequirementId: string;
+  requirementId: string;
   skillId: string;
-  skillCode: string;
-  skillName: string;
-  proficiency: string;
-  weight: string;
+  skillCode: string | null;
+  skillName: string | null;
+  requiredProficiency: string;
+  weight: number;
 }
 
 export default function PositionSkillsPage() {
@@ -58,15 +58,15 @@ export default function PositionSkillsPage() {
             isLoading={skills.isLoading}
             isError={skills.isError}
             rows={items}
-            rowKey={(s) => s.positionSkillRequirementId}
+            rowKey={(s) => s.requirementId}
             rowTestId="position-skill-row"
             emptyTestId="position-skills-empty"
             emptyTitle={t("positions.skills.empty")}
             caption={t("positions.skills.caption")}
             columns={[
-              { header: t("positions.skills.columns.code"), cell: (s) => <span className="font-mono text-xs">{s.skillCode}</span> },
-              { header: t("positions.skills.columns.skill"), cell: (s) => s.skillName },
-              { header: t("positions.skills.columns.proficiency"), cell: (s) => <StatusBadge value={s.proficiency} /> },
+              { header: t("positions.skills.columns.code"), cell: (s) => <span className="font-mono text-xs">{s.skillCode ?? "—"}</span> },
+              { header: t("positions.skills.columns.skill"), cell: (s) => s.skillName ?? s.skillId.slice(0, 8) },
+              { header: t("positions.skills.columns.proficiency"), cell: (s) => <StatusBadge value={s.requiredProficiency} /> },
               { header: t("positions.skills.columns.weight"), cell: (s) => <span className="text-xs">{s.weight}</span> },
             ]}
           />

@@ -325,6 +325,8 @@ interface RawSkillReqRow {
   position_skill_requirement_metadata: Record<string, unknown>;
   created_at: Date;
   updated_at: Date;
+  skill_code?: string | null; // B-06: joined on the list query, undefined elsewhere
+  skill_name?: string | null;
 }
 
 function rowToSkillReq(r: RawSkillReqRow): PositionSkillRequirement {
@@ -333,6 +335,8 @@ function rowToSkillReq(r: RawSkillReqRow): PositionSkillRequirement {
     positionId: r.position_id,
     tenantId: r.position_skill_requirement_tenant_id,
     skillId: r.skill_id,
+    skillCode: r.skill_code ?? null,
+    skillName: r.skill_name ?? null,
     requiredProficiency: r.required_proficiency as PositionSkillRequirement["requiredProficiency"],
     weight: Number(r.weight),
     criticality: r.criticality as PositionSkillRequirement["criticality"],
@@ -352,8 +356,14 @@ export async function listSkillRequirements(
   positionId: string,
 ): Promise<PositionSkillRequirement[]> {
   const res = await q.query<RawSkillReqRow>(
-    `SELECT ${SKILL_REQ_COLS} FROM sys.sys_position_skill_requirements
-      WHERE position_id = $1 ORDER BY criticality DESC, weight DESC`,
+    `SELECT psr.position_skill_requirement_id, psr.position_id,
+            psr.position_skill_requirement_tenant_id, psr.skill_id,
+            psr.required_proficiency, psr.weight, psr.criticality,
+            psr.position_skill_requirement_metadata, psr.created_at, psr.updated_at,
+            s.skill_code, s.skill_name
+       FROM sys.sys_position_skill_requirements psr
+       LEFT JOIN sys.sys_skills s ON s.skill_id = psr.skill_id
+      WHERE psr.position_id = $1 ORDER BY psr.criticality DESC, psr.weight DESC`,
     [positionId],
   );
   return res.rows.map(rowToSkillReq);
@@ -426,6 +436,8 @@ interface RawKpiReqRow {
   position_kpi_requirement_metadata: Record<string, unknown>;
   created_at: Date;
   updated_at: Date;
+  kpi_definition_code?: string | null; // B-06: joined on the list query, undefined elsewhere
+  kpi_definition_name?: string | null;
 }
 
 function rowToKpiReq(r: RawKpiReqRow): PositionKpiRequirement {
@@ -434,6 +446,8 @@ function rowToKpiReq(r: RawKpiReqRow): PositionKpiRequirement {
     positionId: r.position_id,
     tenantId: r.position_kpi_requirement_tenant_id,
     kpiDefinitionId: r.kpi_definition_id,
+    kpiCode: r.kpi_definition_code ?? null,
+    kpiName: r.kpi_definition_name ?? null,
     targetTemplate: r.target_template,
     weight: Number(r.weight),
     rank: r.rank,
@@ -453,10 +467,15 @@ export async function listKpiRequirements(
   positionId: string,
 ): Promise<PositionKpiRequirement[]> {
   const res = await q.query<RawKpiReqRow>(
-    `SELECT ${KPI_REQ_COLS}
-       FROM sys.sys_position_kpi_requirements
-      WHERE position_id = $1
-      ORDER BY rank NULLS LAST, weight DESC`,
+    `SELECT pkr.position_kpi_requirement_id, pkr.position_id,
+            pkr.position_kpi_requirement_tenant_id, pkr.kpi_definition_id,
+            pkr.target_template, pkr.weight, pkr.rank,
+            pkr.position_kpi_requirement_metadata, pkr.created_at, pkr.updated_at,
+            k.kpi_definition_code, k.kpi_definition_name
+       FROM sys.sys_position_kpi_requirements pkr
+       LEFT JOIN sys.sys_kpi_definitions k ON k.kpi_definition_id = pkr.kpi_definition_id
+      WHERE pkr.position_id = $1
+      ORDER BY pkr.rank NULLS LAST, pkr.weight DESC`,
     [positionId],
   );
   return res.rows.map(rowToKpiReq);

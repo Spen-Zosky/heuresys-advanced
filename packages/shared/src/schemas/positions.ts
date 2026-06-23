@@ -147,6 +147,10 @@ export const PositionSkillRequirementSchema = z.object({
   positionId: z.uuid(),
   tenantId: z.uuid(),
   skillId: z.uuid(),
+  // human-readable skill identity, resolved via a LEFT JOIN on the list endpoint
+  // (B-06 fix); null on create/update responses, which don't join.
+  skillCode: z.string().nullable(),
+  skillName: z.string().nullable(),
   requiredProficiency: SkillProficiencySchema,
   weight: z.number(),
   criticality: RequirementCriticalitySchema,
@@ -182,6 +186,10 @@ export const PositionKpiRequirementSchema = z.object({
   positionId: z.uuid(),
   tenantId: z.uuid(),
   kpiDefinitionId: z.uuid(),
+  // human-readable KPI identity, resolved via a LEFT JOIN on the list endpoint
+  // (B-06 fix); null on create/update responses, which don't join.
+  kpiCode: z.string().nullable(),
+  kpiName: z.string().nullable(),
   targetTemplate: z.record(z.string(), z.unknown()),
   weight: z.number(),
   rank: z.number().int().min(1).nullable(), // WI-D2: 1 = highest priority; null = unranked

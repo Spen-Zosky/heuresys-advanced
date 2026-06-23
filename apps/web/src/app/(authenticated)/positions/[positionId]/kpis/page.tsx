@@ -9,11 +9,11 @@ import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable } from "@/components/data-table-panel";
 
 interface PositionKpiReq {
-  positionKpiRequirementId: string;
+  requirementId: string;
   kpiDefinitionId: string;
-  kpiCode: string;
-  kpiName: string;
-  weight: string;
+  kpiCode: string | null;
+  kpiName: string | null;
+  weight: number;
   targetTemplate: Record<string, unknown>;
 }
 
@@ -57,14 +57,14 @@ export default function PositionKpisPage() {
             isLoading={kpis.isLoading}
             isError={kpis.isError}
             rows={items}
-            rowKey={(k) => k.positionKpiRequirementId}
+            rowKey={(k) => k.requirementId}
             rowTestId="position-kpi-row"
             emptyTestId="position-kpis-empty"
             emptyTitle={t("positions.kpis.empty")}
             caption={t("positions.kpis.caption")}
             columns={[
-              { header: t("positions.kpis.columns.code"), cell: (k) => <span className="font-mono text-xs">{k.kpiCode}</span> },
-              { header: t("positions.kpis.columns.kpi"), cell: (k) => k.kpiName },
+              { header: t("positions.kpis.columns.code"), cell: (k) => <span className="font-mono text-xs">{k.kpiCode ?? "—"}</span> },
+              { header: t("positions.kpis.columns.kpi"), cell: (k) => k.kpiName ?? k.kpiDefinitionId.slice(0, 8) },
               { header: t("positions.kpis.columns.weight"), cell: (k) => <span className="text-xs">{k.weight}</span> },
               { header: t("positions.kpis.columns.template"), cell: (k) => <span className="font-mono text-xs">{JSON.stringify(k.targetTemplate)}</span> },
             ]}

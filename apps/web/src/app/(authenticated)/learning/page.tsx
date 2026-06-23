@@ -11,7 +11,7 @@ import { StatusPill } from "@/components/status-pill";
 interface LearningModule {
   learningModuleId: string;
   code: string;
-  name: string;
+  title: string;
   isGlobal: boolean;
   durationMinutes: number | null;
 }
@@ -24,7 +24,7 @@ interface LearningModulesList {
 function buildColumns(t: TFunction): DataColumn<LearningModule>[] {
   return [
     { header: t("shared.code"), cell: (m) => <span className="font-mono text-xs">{m.code}</span> },
-    { header: t("shared.name"), cell: (m) => <span className="font-medium text-foreground">{m.name}</span> },
+    { header: t("shared.name"), cell: (m) => <span className="font-medium text-foreground">{m.title}</span> },
     {
       header: t("learning.cols.duration"),
       cell: (m) => <span className="text-xs text-muted-foreground">{m.durationMinutes ?? "—"}</span>,

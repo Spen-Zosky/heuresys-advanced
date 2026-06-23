@@ -6,13 +6,12 @@
 
 ## Last session brief (S1005 — batch #18/#19/#17 delegato da Enzo)
 
-Sessione doc + verifica (nessuna migration nuova). (1) **#18 doc-cleanup `is_synthetic`** (`c3ac0cc`, **D-44 RISOLTO**): 8 doc design/plan allineati a ADR-0026/mig 000154 — colonna `user_is_synthetic` rimossa, `SYNTHETIC_REFERENCE`→`STANDARD` (import legacy = persone reali) / `GENERATED_INCUMBENT` (placeholder materializer), vista `v_synthetic_user_flag_consistency` tolta dalle liste live (DDL storico con nota di ritiro). Grep verde; marginali fuori-scope segnalati (wave_runners ×2, due-diligence/WS-T5). (2) **#19 users-page** verificata **LIVE**: login reale `admin@heuresys.com` → `GET /v1/users` 200, `type:STANDARD`, zero `is_synthetic`; DB census colonna assente + 162 STANDARD; codice zero-ref. Prod-E2E UI coperta da CI (non rieseguita, P3). (3) **#17 Wave-3 L1**: discovery → **già eseguito** in S987/S988 (mig 000110 remap + 000111 import chiara.spenuso); premessa menu stale (dossier pre-S987). Nessuna scrittura su prod (R14). Register #17 → residuo L2/L3 multi-industry, resta HOLD (decisione Enzo "solo aggiorna register"). 2 commit, register+SOT aggiornati.
+Sessione doc + verifica (nessuna migration nuova). (1) **#18 doc-cleanup `is_synthetic`** (`c3ac0cc`, **D-44 RISOLTO**): 8 doc design/plan allineati a ADR-0026/mig 000154 — colonna `user_is_synthetic` rimossa, `SYNTHETIC_REFERENCE`→`STANDARD` (import legacy = persone reali) / `GENERATED_INCUMBENT` (placeholder materializer), vista `v_synthetic_user_flag_consistency` tolta dalle liste live (DDL storico con nota di ritiro). Grep verde; marginali fuori-scope segnalati (wave_runners ×2, due-diligence/WS-T5). (2) **#19 users-page** verificata **LIVE**: login reale `admin@heuresys.com` → `GET /v1/users` 200, `type:STANDARD`, zero `is_synthetic`; DB census colonna assente + 162 STANDARD; codice zero-ref. Prod-E2E UI coperta da CI (non rieseguita, P3). (3) **#17 Wave-3 L1**: discovery → **già eseguito** in S987/S988 (mig 000110 remap + 000111 import chiara.spenuso); premessa menu stale (dossier pre-S987). Nessuna scrittura su prod (R14). Register #17 → residuo L2/L3 multi-industry, resta HOLD (decisione Enzo "solo aggiorna register"). 2 commit, register+SOT aggiornati. Post-handoff (richiesta Enzo): aggiornato `POST_V1_ROADMAP_DOSSIER §1.B` — L1 marcato ✅ DONE, mapping HS corretto, count viste 6.
 
 ## Top priorities (next session)
 
 1. **#4 go-to-market — prossimo deliverable** (autorità *cosa* = Enzo): candidato **pricing page** (serve numeri prezzi/tier) o altro. Keystone del programma.
-2. **TODO doc (minore)**: aggiornare `docs/kb/POST_V1_ROADMAP_DOSSIER.md §1.B` — è pre-S987 e descrive ancora il Wave-3 L1 (fix HS) come da-fare, ma è già stato eseguito (rischio: una sessione futura ripropone L1).
-3. **#8 EMAIL dormiente** (WAIT-INPUT): app-password Outlook → EMAIL_OTP + digest live.
+2. **#8 EMAIL dormiente** (WAIT-INPUT): app-password Outlook → EMAIL_OTP + digest live.
 
 ## Open questions (autorità *cosa* = Enzo)
 

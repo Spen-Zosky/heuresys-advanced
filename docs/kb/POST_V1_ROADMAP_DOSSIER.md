@@ -36,18 +36,20 @@ NB: CLAUDE.md/SOT_STATE riportano conteggi più vecchi (~279 endpoint, 576 test)
 
 ### 1.B Wave-3 import — residuo genuino, ma RIDEFINITO: multi-tenant legacy onboarding
 
+> **Stato S1005 (2026-06-23)**: il **Livello 1 (fix Heuresys System) è già eseguito** (S987/S988, mig `000110`+`000111`). Il residuo genuino di questo item è ora **L2/L3** (onboarding SmartFood/EcoNova), che resta una **decisione di prodotto** (multi-industry vs single-industry) in HOLD — vedi `SOT_BACKLOG` Action register **#17**.
+
 **Cosa era**: "Demo Person Data Import" (BROWNFIELD_IMPORT_PLAN §5, runner DRAFT mai eseguito, MVP_4_ROADMAP §2.2 stimava 50-87h **inclusa** una human-approval UI). Per RTL quel lavoro è stato consegnato per vie diverse (rebuild S950 + ciclo reconciliation S958→S982): la vista è terminale (0 NEEDS_DECISION).
 
-**Cosa resta davvero**: i **tenant legacy non-RTL mai onboardati** — SmartFood (82 employees, industria food), EcoNova (26, energy), Heuresys System (4). ~112 employees + satelliti. `brownfield.tenant_id_mappings` ha 2 sole righe **entrambe collassate su RTL**, e quella di Heuresys System è **stale/mis-mappata** (legacy `d5855519` → RTL benché la tenancy HEURESYS `8bc5bc59` esista). Skip documentati recuperabili: 12 models + 999 predictions, 164 kpi_targets, ~465 survey responses, career_goals 60/85 (il cui recupero farebbe decadere il NO_SOURCE di `sys_user_target_positions`).
+**Cosa resta davvero**: i **tenant legacy non-RTL mai onboardati** — SmartFood (82 employees, industria food), EcoNova (26, energy), Heuresys System (4). ~112 employees + satelliti. `brownfield.tenant_id_mappings` ha 2 righe; la riga di Heuresys System era **stale/mis-mappata** (legacy `d5855519` → RTL) ma è stata **corretta in S987** (mig `000110`: `d5855519`→HEURESYS `8bc5bc59`) — resta collassata su RTL solo la riga RTL stessa (`0c54b84a`). Skip documentati recuperabili: 12 models + 999 predictions, 164 kpi_targets, ~465 survey responses, career_goals 60/85 (il cui recupero farebbe decadere il NO_SOURCE di `sys_user_target_positions`).
 
 **Decisione PM a monte** (non meccanica): SmartFood/EcoNova sono industrie **non-banking** e la tassonomia processi/KPI v5 è banking-native (decisione S970) → onboardarli è una scelta di prodotto (multi-industry vs single-industry reference).
 
 **Livelli componibili**:
-1. **Solo fix Heuresys System** (rimappa `d5855519`→`8bc5bc59` + import 4 employees): ~3-5h — chiude l'incoerenza più visibile.
+1. ✅ **DONE (S987/S988)** — **Solo fix Heuresys System**: rimappa `d5855519`→`8bc5bc59` (mig `000110`) + import della persona reale `chiara.spenuso` WITH login (mig `000111`). Decisione `#8 = solo chiara.spenuso` (intervista P3), non i 4 legacy employees indistinti. Tenant HEURESYS live: 4 utenti / 4 pos / 3 OU; incoerenza del mapping chiusa.
 2. **+1 tenant pilota** (EcoNova, il più piccolo): ~8-14h.
 3. **Onboarding completo + skip-recovery**: ~20-35h (3-5 sessioni). La human-approval UI del piano originale è **opzionale** (ADR-0023 demo-data giustifica auto-approval): +25-40h solo se la si vuole.
 
-**Rischi**: leakage cross-tenant in viste/BI (mitigato da db:validate 7 viste + test I5), policy mandatory-MFA da seedare per i nuovi tenant (ora copertura totale per-tenant, S984), mapping stale da correggere PRIMA dei satelliti.
+**Rischi**: leakage cross-tenant in viste/BI (mitigato da db:validate **6 viste strutturali** — era 7, `v_synthetic_user_flag_consistency` ritirata in 000154/ADR-0026 — + test I5), policy mandatory-MFA da seedare per i nuovi tenant (ora copertura totale per-tenant, S984), mapping stale da correggere PRIMA dei satelliti (il mapping HS è già corretto, vedi sopra).
 
 ### 1.C F7 "refactor estetico showcase" — **label STALE, item terminale**
 

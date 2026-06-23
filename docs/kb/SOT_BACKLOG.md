@@ -19,10 +19,10 @@
   - hold-reason: non-bloccanti, deferiti al final review del primo deliverable: lead-management admin UI + status-filter (oggi GET admin + export CSV/XLSX) · honeypot-trip observability · `/privacy` full page (oggi stub) · landing a11y audit dedicato
   - decided-by: Claude (deferral v1) · hold-since: S1002 (2026-06-21)
   - reactivation-trigger: Enzo li richiede, o quando il programma GTM matura oltre il primo deliverable
-- **#17 Wave-3 multi-tenant-onboarding** · status: HOLD
-  - hold-reason: follow di #4; fondazione WI-C pronta ma l'avvio dipende dalla strategia multi-tenant
-  - decided-by: Enzo · hold-since: S999 (2026-06-20)
-  - reactivation-trigger: Enzo avvia l'onboarding multi-tenant
+- **#17 Wave-3 multi-tenant-onboarding (residuo L2/L3 multi-industry)** · status: HOLD
+  - hold-reason: **L1 (fix Heuresys System) GIÀ FATTO** (S987/S988 — mig `000110` remap `d5855519`→HEURESYS + `000111` import `chiara.spenuso` WITH login; tenant HEURESYS live: 4 utenti / 4 pos / 3 OU, mapping corretto — verificato S1005). Il residuo è l'onboarding **L2/L3** dei tenant legacy **non-banking** SmartFood (82 emp) + EcoNova (26 emp) → **decisione di prodotto** (la tassonomia processi/KPI v5 è banking-native: multi-industry vs single-industry reference), autorità *cosa* = Enzo.
+  - decided-by: Enzo · hold-since: S999 (2026-06-20) · L1-confermato-done S1005 ("solo aggiorna register")
+  - reactivation-trigger: Enzo decide la strategia multi-industry e avvia L2 (pilota EcoNova) o L3
 - **#9/#10/#11 audit forense 100X** · status: HOLD
   - hold-reason: programma audit (S-100X-A ecosistema design-only + triage 14 dossier Fase-C + epic S-100X-E) — esplicitamente a sessione dedicata
   - decided-by: Enzo · hold-since: S999 (2026-06-20)
@@ -33,12 +33,12 @@
 - **#16 SuccessFactors** · status: WAIT-INPUT
   - input-richiesto: un sandbox SuccessFactors (esterno, costo)
   - perche-solo-tuo: accesso/provisioning del sandbox è una risorsa che solo Enzo può procurare; de-prioritizzato S999
-- **#18 doc-cleanup `is_synthetic`** · status: ACTIVE
+- **#18 doc-cleanup `is_synthetic`** · status: DONE
   - priority: P2 · effort: ~0.5h · doc: DEBT_REGISTER D-44
-  - note: ~8 doc descrittivi (`TARGET_SCHEMA_DESIGN`, `BOOTSTRAP §I14`, brownfield {IMPORT_PLAN,ADAPTATION_MAP,TABLE_CLASSIFICATION}, `MIGRATION_IMPLEMENTATION_PLAN`, `AUTH_SECURITY_PLAN`, `MVP_4_ROADMAP`) citano ancora `user_is_synthetic`/`SYNTHETIC_REFERENCE` come parte schema → allineare a ADR-0026/mig 000154 (codice+DB già ritirati S1004, drift solo doc)
-- **#19 E2E users-page post-synthetic** · status: ACTIVE
+  - note: ✅ DONE S1005 (commit `c3ac0cc`) — 8 doc design/plan allineati a ADR-0026/000154 (`user_is_synthetic` rimosso; `SYNTHETIC_REFERENCE`→`STANDARD` per import legacy / `GENERATED_INCUMBENT` per il materializer; `v_synthetic_user_flag_consistency` tolta dalle liste di validazione live + nota storica sul DDL di 000023). Zero residui (grep verde, restano solo menzioni-di-ritiro). Marginali fuori-scope **segnalati e non toccati**: `wave_runners/{wave_2,wave_3}_runner.md`, `due-diligence/WS-T5.md` (cita 7 viste → ora 6).
+- **#19 E2E users-page post-synthetic** · status: DONE
   - priority: P3 · effort: ~0.3h · doc: -
-  - note: Playwright `users/[userId]` — verifica visiva che il campo "Synthetic" è sparito dopo il refactor A (funzionale già coperto dai 26 test API live S1004)
+  - note: ✅ DONE S1005 — verificato LIVE: login reale `admin@heuresys.com` → `GET /v1/users` 200 + utenti RTL reali + `type:STANDARD` + **zero campo `is_synthetic`** nella response; DB census (colonna assente, 162 STANDARD); codice TS **zero-ref** alla colonna. Prod-E2E UI (`admin-lists.spec`) coperta da CI — non rieseguita in locale (P3, rischio nullo: la pagina è thin-client dell'endpoint verificato).
 
 ## ✅ Gap#1 DONE (S999, 2026-06-20) — programma-faro "rendi il prodotto dimostrabile" chiuso end-to-end
 

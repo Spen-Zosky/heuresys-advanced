@@ -59,7 +59,7 @@ export default function OrgChartPage() {
         type: "graph" as const,
         layout: "force" as const,
         roam: true,
-        label: { show: false },
+        label: { show: true, position: "right" as const, fontSize: 11, color: "#e2e8f0" },
         force: { repulsion: 60, edgeLength: 80, gravity: 0.08 },
         data: (render.data?.nodes ?? []).map((n) => ({ id: n.nodeId, name: n.label })),
         links: (render.data?.edges ?? []).map((e) => ({ source: e.sourceNodeId, target: e.targetNodeId })),

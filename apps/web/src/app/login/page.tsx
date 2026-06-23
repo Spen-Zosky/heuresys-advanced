@@ -671,6 +671,8 @@ export default function LoginPage() {
           ) : (
             <form
               data-testid="login-form"
+              method="post"
+              action="/login"
               onSubmit={(e) => {
                 void onSubmit(e);
               }}

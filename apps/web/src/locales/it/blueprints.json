@@ -85,7 +85,7 @@
     "inventoryColumns": {
       "system": "Sistema",
       "capturedAt": "Catturato",
-      "rowCount": "Righe",
+      "size": "Dimensione",
       "status": "Stato"
     },
     "mappingColumns": {

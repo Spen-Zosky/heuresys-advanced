@@ -85,7 +85,7 @@
     "inventoryColumns": {
       "system": "System",
       "capturedAt": "Captured",
-      "rowCount": "Rows",
+      "size": "Size",
       "status": "Status"
     },
     "mappingColumns": {

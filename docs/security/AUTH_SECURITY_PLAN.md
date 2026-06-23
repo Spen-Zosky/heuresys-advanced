@@ -844,7 +844,7 @@ Audit log retention: indefinite (legal/compliance). Volume mitigation: partition
 - [ ] Rate limit test: 11 logins in 5 min from same IP → 429.
 - [ ] Pino redaction test: log a request body containing `password` → log shows `[REDACTED]`.
 - [ ] Tenant isolation test: user from tenant A cannot GET `/positions/{id}` belonging to tenant B (404).
-- [ ] Validation views (000023) `sys.v_synthetic_user_flag_consistency`, `sys.v_canonical_outside_sys` return 0 rows.
+- [ ] Validation view (000023) `sys.v_canonical_outside_sys` returns 0 rows. (NB: `sys.v_synthetic_user_flag_consistency` was retired by 000154/ADR-0026.)
 - [ ] Argon2id parameters match §3 baseline; `needsRehash` triggers re‑hash on login when params change.
 
 ---

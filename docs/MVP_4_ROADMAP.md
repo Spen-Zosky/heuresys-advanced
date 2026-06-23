@@ -115,7 +115,7 @@ Le legacy sources storicamente proposte come provenance (`benchmark_configs`, `e
 - Frontend: nuove route `/brownfield-adaptation/[runId]/decisions` con UI approve/reject + comment.
 
 **Acceptance criteria**:
-1. 270 users imported con `user_is_synthetic = true` (verified via `sys.v_synthetic_user_flag_consistency` = 0).
+1. 270 users imported con `user_type = STANDARD` (verified via `user_external_code LIKE 'LEGACY_EMP::%'`; the synthetic flag + its `v_synthetic_user_flag_consistency` view were retired by 000154/ADR-0026).
 2. Auto-approval funziona per confidence ≥ 0.80 + PASSED + 0 PII-pattern hit; human gate funziona per resto.
 3. 0 password hash legacy importati (tutti `must_rotate = true`, placeholder hash flagged).
 4. Audit trail `audit.import_approval_decisions` ha 1 row per ogni decision (auto o human).

@@ -116,8 +116,7 @@ CREATE TABLE IF NOT EXISTS sys.sys_users (
   user_first_name      varchar(128),
   user_last_name       varchar(128),
   user_status          varchar(32) NOT NULL DEFAULT 'ACTIVE',
-  user_type            varchar(32) NOT NULL DEFAULT 'STANDARD',  -- STANDARD | SYNTHETIC_REFERENCE | SERVICE
-  user_is_synthetic    boolean NOT NULL DEFAULT false,
+  user_type            varchar(32) NOT NULL DEFAULT 'STANDARD',  -- STANDARD | GENERATED_INCUMBENT | SERVICE (ADR-0026/000154 retired the user_is_synthetic flag)
   user_locale          varchar(16),
   user_timezone        varchar(64),
   user_metadata        jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -130,7 +129,7 @@ CREATE INDEX IF NOT EXISTS sys_users_tenant_status_idx ON sys.sys_users(user_ten
 
 - FK `user_tenant_id → sys_tenancies.tenant_id` is the **canonical tenant linkage**.
 - `(user_tenant_id, lower(user_email))` is unique — tenant‑scoped email uniqueness.
-- `user_is_synthetic = true` + `user_type = SYNTHETIC_REFERENCE` marks dev/test reference data.
+- `user_type = GENERATED_INCUMBENT` marks blueprint-generated placeholder incumbents (tenant-materialization). The former `user_is_synthetic` boolean + `SYNTHETIC_REFERENCE` type were **retired by migration 000154** (ADR-0026: a single production-grade environment, data treated as real — there is no synthetic-vs-real dichotomy).
 
 ### 1.3 Auth foundation (11 tables, migration 000005)
 
@@ -611,7 +610,6 @@ A set of `CREATE OR REPLACE VIEW`s that surface structural violations:
 | `sys.v_positions_without_job_role` | Positions missing `position_job_role_id` |
 | `sys.v_pip_completeness` | Positions missing one or more PIP base‑table entries (skill/KPI/learning/career/compensation) |
 | `sys.v_reward_gate_completeness` | Active blueprint requires gates X,Y,Z but tenant has missing reward_gate_catalog entries |
-| `sys.v_synthetic_user_flag_consistency` | Users with `user_type=SYNTHETIC_REFERENCE` but `user_is_synthetic=false`, or vice versa |
 | `sys.v_canonical_outside_sys` | Tables outside `sys` matching `sys_*` (should be empty — schema policy guard) |
 | `sys.v_active_primary_assignment_per_user` | Users with > 1 ACTIVE PRIMARY assignment (should be empty — partial unique index also enforces) |
 | `sys.v_visualization_node_in_canonical_node` | Visualization nodes whose `source_entity_id` does not exist in the referenced canonical table |
@@ -629,7 +627,7 @@ Idempotent inserts (via `ON CONFLICT DO NOTHING`) seed:
 - 5 branches (organization units, type `BRANCH`).
 - 25 branch positions (5 per branch).
 - ~30 headquarters positions (Branch Manager, AML Officer, Compliance Officer, Risk Manager, etc. — exact list comes from FIN_BANKING blueprint).
-- 158 synthetic users (`user_is_synthetic = true`, `user_type = SYNTHETIC_REFERENCE`) assigned to positions via `sys.sys_user_position_assignments`.
+- 158 reference users (deterministic Faker identities; `user_type = STANDARD` — the S950 RTL rebuild wired them to real legacy records, and 000154 retired the synthetic flag) assigned to positions via `sys.sys_user_position_assignments`.
 - Seed of `sys.sys_reward_gate_catalog` for FIN_BANKING (7 gate types).
 - Seed of `sys.sys_blueprint_families` + `sys.sys_blueprint_variants` for FIN_BANKING.
 

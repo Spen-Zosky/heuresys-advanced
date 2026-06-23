@@ -345,7 +345,6 @@ $views = @(
     'sys.v_positions_without_job_role',
     'sys.v_pip_completeness',
     'sys.v_reward_gate_completeness',
-    'sys.v_synthetic_user_flag_consistency',
     'sys.v_canonical_outside_sys',
     'sys.v_active_primary_assignment_per_user',
     'sys.v_visualization_node_in_canonical_node',
@@ -452,11 +451,10 @@ FROM sys.sys_positions p
 WHERE NOT EXISTS (SELECT 1 FROM sys.sys_position_skill_requirements WHERE position_id = p.position_id);
 -- Violation: a position has no required skills.
 
-CREATE OR REPLACE VIEW sys.v_synthetic_user_flag_consistency AS
-SELECT user_id, user_type, user_is_synthetic
-FROM sys.sys_users
-WHERE (user_type = 'SYNTHETIC_REFERENCE' AND user_is_synthetic = false)
-   OR (user_type <> 'SYNTHETIC_REFERENCE' AND user_is_synthetic = true);
+-- NOTE: sys.v_synthetic_user_flag_consistency (originally created by 000023)
+-- was RETIRED by migration 000154 (ADR-0026): the user_is_synthetic column was
+-- dropped and user_type 'SYNTHETIC_REFERENCE' renamed to 'GENERATED_INCUMBENT'.
+-- The structural validation set is now 6 views (was 7).
 
 CREATE OR REPLACE VIEW sys.v_canonical_outside_sys AS
 SELECT table_schema, table_name
@@ -553,7 +551,7 @@ Driven by Drizzle ORM + `@faker-js/faker` with a fixed seed. The script:
    - 5 branches (`BRANCH_01..BRANCH_05`).
    - 25 branch positions (5 per branch: `Branch Manager`, `Senior Teller`, `Teller`, `Customer Advisor`, `Operations Officer`).
    - ~30 HQ positions (Risk Manager, Compliance Officer, AML Officer, HR Director, etc.).
-   - 158 users with `user_is_synthetic = true`, `user_type = 'SYNTHETIC_REFERENCE'`, deterministic names from Faker.
+   - 158 reference users (deterministic Faker names; `user_type = STANDARD` — no synthetic flag, retired by 000154/ADR-0026).
    - 158 PRIMARY active assignments (each user → one position).
    - Seed `sys.sys_reward_gate_catalog` for FIN_BANKING (7 gates).
    - Seed `sys.sys_blueprint_families` / `sys.sys_blueprint_variants` / `sys.sys_blueprint_activations` for FIN_BANKING/REGIONAL_RETAIL_BANK_MEDIUM.
@@ -582,9 +580,8 @@ WHERE position_tenant_id = (SELECT tenant_id FROM sys.sys_tenancies WHERE tenant
 -- = ~55 (25 branch + 30 HQ)
 
 SELECT count(*) FROM sys.sys_users
-WHERE user_tenant_id = (SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK_REFERENCE')
-  AND user_is_synthetic = true;
--- = 158
+WHERE user_tenant_id = (SELECT tenant_id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK_REFERENCE');
+-- = 158 (seed reference users; the user_is_synthetic filter was retired by 000154/ADR-0026)
 
 SELECT count(*) FROM sys.sys_user_position_assignments a
 JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id

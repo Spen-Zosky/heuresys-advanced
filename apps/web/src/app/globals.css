@@ -205,3 +205,15 @@ body {
   html, body { background: #fff !important; color: #000 !important; }
   [data-print-card] { break-inside: avoid; }
 }
+
+/* G-03 (audit S1006): hide the DashboardHeader's built-in language button. The
+   @heuresys/ui shell renders it unconditionally, but this app never wires its
+   onToggleLanguage handler (locale switching lives in the functional sidebar
+   LanguageSwitcher, which also carries the ESS-preferences PATCH + the E2E
+   contract). So the header button is a dead duplicate that confused users on
+   every authenticated page — hide it. Its aria-label is a fixed lib string
+   (locale-independent), so the selector is stable. Remove this rule if the lib
+   ever exposes a prop to omit the button (the proper upstream fix). */
+button[aria-label="Cambia lingua tra italiano e inglese"] {
+  display: none !important;
+}

@@ -89,7 +89,7 @@ export default function AnalyticsKpiPage() {
           className="flex items-center justify-center rounded-card border border-border bg-card p-4"
         >
           <RadialGauge
-            value={overallAvg ?? 0}
+            value={overallAvg === null ? 0 : Math.round(overallAvg)}
             max={100}
             unit="%"
             label={t("kpi.gaugeLabel")}

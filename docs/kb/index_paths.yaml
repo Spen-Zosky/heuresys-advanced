@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-24T00:25:27Z da docs/kb/tools/build_index.py
+# generato: 2026-06-24T01:40:53Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-24T00:25:27Z"
-  total_files: 2177
+  generated_at: "2026-06-24T01:40:53Z"
+  total_files: 2182
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,15 +13,15 @@ meta:
     api-module: 292
     ci: 16
     claude-config: 6
-    config: 100
+    config: 102
     cowork-archive: 14
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 160
+    db-migration: 161
     db-script: 23
     db-seed: 104
-    doc-canonical: 388
+    doc-canonical: 390
     handoff-state: 1
     qa-artifact: 101
     script: 6
@@ -35,7 +35,7 @@ meta:
   status_counts:
     archive: 493
     external-archive: 50
-    live: 1634
+    live: 1639
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2374,6 +2374,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\vitest.config.ts'
     root: repo
     rel: 'apps/api/vitest.config.ts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\audit\_groups.json'
+    root: repo
+    rel: 'audit/_groups.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\audit\_visual-confirmed.json'
+    root: repo
+    rel: 'audit/_visual-confirmed.json'
     category: config
     status: live
     provenance: git-tracked
@@ -5803,6 +5815,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000162_g01_esco_skill_names_it_llm.sql'
+    root: repo
+    rel: 'db/migrations/000162_g01_esco_skill_names_it_llm.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\README.md'
     root: repo
     rel: 'db/scripts/README.md'
@@ -6586,6 +6604,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\agent-gateway\README.md'
     root: repo
     rel: 'apps/agent-gateway/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\audit\FINDINGS.md'
+    root: repo
+    rel: 'audit/FINDINGS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\audit\FORENSIC-NOTES-S1006-cli.md'
+    root: repo
+    rel: 'audit/FORENSIC-NOTES-S1006-cli.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

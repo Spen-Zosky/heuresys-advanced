@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-24T00:25:27Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2177**
+**Generato**: 2026-06-24T01:40:53Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2182**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,15 +13,15 @@
 | api-module | 292 |
 | ci | 16 |
 | claude-config | 6 |
-| config | 100 |
+| config | 102 |
 | cowork-archive | 14 |
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 160 |
+| db-migration | 161 |
 | db-script | 23 |
 | db-seed | 104 |
-| doc-canonical | 388 |
+| doc-canonical | 390 |
 | handoff-state | 1 |
 | qa-artifact | 101 |
 | script | 6 |
@@ -32,7 +32,7 @@
 | test | 227 |
 | ux-design-archive | 80 |
 | web-source | 170 |
-| **TOTALE** | **2177** |
+| **TOTALE** | **2182** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1634 |
+| live | 1639 |
 
 ## File per categoria
 
@@ -452,6 +452,8 @@
 - `D:\heuresys-advanced\apps\api\tsconfig.test.json` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\tsup.config.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\vitest.config.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\audit\_groups.json` · *live* · git-tracked
+- `D:\heuresys-advanced\audit\_visual-confirmed.json` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\nginx\www.heuresys.com.conf` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-api.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-approvals-sla.service` · *live* · git-tracked
@@ -1038,6 +1040,7 @@
 - `D:\heuresys-advanced\db\migrations\000159_g01_esco_skill_names_it.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000160_cleanup_junk_skills.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000161_clean_legacy_skill_codes.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000162_g01_esco_skill_names_it_llm.sql` · *live* · git-tracked
 
 ### db-script
 
@@ -1178,6 +1181,8 @@
 - `D:\heuresys-advanced\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\START_HERE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\audit\FINDINGS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\audit\FORENSIC-NOTES-S1006-cli.md` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\A11Y_AUDIT_TIER7_2026-05-20.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\BOOTSTRAP_EXECUTION_PLAN.md` · *live* · git-tracked

@@ -2,11 +2,11 @@
 
 ## TAIL STATUS (final, S1006 close)
 DONE + deployed/live: G-01 (KPI/processi/non-ESCO/13k ESCO — mig 000156-159) · junk-skills clean (000160, 7846→archive) · skill_code clean OLDDB::→ESCO::/COMP:: (000161) · G-02 org PARENT + gaps user/position/skill names (correlated subqueries). B-01..B-07/G-03/CSP deployed earlier. DATA dashboard "—0.0%" + insights "Medio" = **NON-BUGS** (real data: static synthetic → flat WoW; flight-risk 120 LOW + 39 MEDIUM, no HIGH → top risks legitimately "Medio").
-DEFERRED (precise residuals for a fresh session):
-- **career-succession** G-02 — same correlated-subquery pattern as gaps: resolve user name (sys_users.user_display_name) + succession pool name on the candidates list endpoint; page reads `c.userId.slice` / `c.successionPoolId.slice` at career-succession/page.tsx:66-67.
-- **a11y** — /dashboard 9 tap-targets <24px (WCAG2.2) + 1 serious + 3 moderate axe; needs per-control min-size (NOT a blind global CSS rule — layout-regression risk).
-- **perf** — single JS chunk 1.68MB (`_next/static/chunks/0m5f3qo3lbrvq.js`); code-splitting / dynamic-import of heavy deps (dedicated task; CWV already excellent).
-- **817 ESCO skills** still EN — no IT label in ESCO / persistent API failures (re-fetch yielded 0 on 2nd run); ~94% ESCO IT coverage (13185/14002). Re-runnable later with slower rate.
+#21 RESIDUO — STATUS (resolved this continuation):
+- ✅ **career-succession** G-02 DONE (mig n/a, code) — correlated-subquery user/pool name on successor-candidates list + fixed the local-type `successionPoolId`→`poolId` contract bug. Deployed.
+- ✅ **817 stale-ESCO skills** DONE (mig 000162) — their ESCO URIs 404 in current ESCO (stale concepts, NO official IT label) → translated via parallel LLM agents (Enzo: LLM-assisted fallback). **ESCO IT coverage now 14002/14002 = 100%**.
+- ⛔ **a11y** /dashboard — **LIB-BLOCKED**: ALL violations are in `@heuresys/ui` shell components, NOT in this repo's pages (verified: `.max-h-[420px]` scrollable-region, `button.sidebar-*` + `footer a` tap-targets, the shell `<main>` duplicate-landmark — none present in apps/web/src). Fix lives in **ux-design-shared** (publish + bump). Not resolvable in heuresys-advanced without the lib change.
+- ⛔ **perf** single JS chunk — **LIB-BLOCKED**: the chunk is the `@heuresys/ui` barrel (echarts+three+d3 pulled together by the `import("@heuresys/ui")` dynamic import). `@heuresys/ui` exposes ONLY the barrel `.` (no per-component subpath exports), so the split needs **ux-design-shared** to add subpath exports + publish. CWV already excellent (chunk is on-demand, not blocking initial paint).
 - **MFA** stays DISABLED (Enzo decision 2026-06-24).
 
 

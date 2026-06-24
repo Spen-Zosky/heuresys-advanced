@@ -27,8 +27,10 @@ interface SuccessionPool {
 }
 interface SuccessorCandidate {
   successorCandidateId: string;
-  successionPoolId: string;
+  poolId: string;
+  poolName: string | null;
   userId: string;
+  userName: string | null;
   readinessLevel: string | null;
   status: string;
 }
@@ -63,8 +65,8 @@ function buildPoolsCols(t: TFunction): DataColumn<SuccessionPool>[] {
 }
 function buildCandidatesCols(t: TFunction): DataColumn<SuccessorCandidate>[] {
   return [
-    { header: t("career.candidatesCols.user"), cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.userId.slice(0, 8)}</span> },
-    { header: t("career.candidatesCols.pool"), cell: (c) => <span className="font-mono text-xs text-muted-foreground">{c.successionPoolId.slice(0, 8)}</span> },
+    { header: t("career.candidatesCols.user"), cell: (c) => <span className="text-xs text-foreground">{c.userName ?? c.userId.slice(0, 8)}</span> },
+    { header: t("career.candidatesCols.pool"), cell: (c) => <span className="text-xs text-muted-foreground">{c.poolName ?? c.poolId.slice(0, 8)}</span> },
     { header: t("career.candidatesCols.readiness"), cell: (c) => <StatusBadge value={c.readinessLevel} /> },
     { header: t("career.candidatesCols.status"), cell: (c) => <StatusBadge value={c.status} /> },
   ];

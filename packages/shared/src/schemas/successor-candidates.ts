@@ -18,8 +18,10 @@ export type SuccessorCandidateStatus = z.infer<typeof SuccessorCandidateStatusSc
 export const SuccessorCandidateSchema = z.object({
   successorCandidateId: z.uuid(),
   poolId: z.uuid(),
+  poolName: z.string().nullable(), // G-02: resolved on the list endpoint
   tenantId: z.uuid(),
   userId: z.uuid(),
+  userName: z.string().nullable(),
   status: SuccessorCandidateStatusSchema,
   readinessLevel: z.string().nullable(),
   metadata: z.record(z.string(), z.unknown()),

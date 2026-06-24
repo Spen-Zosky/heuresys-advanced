@@ -24,6 +24,8 @@ interface Row {
   successor_candidate_metadata: Record<string, unknown>;
   created_at: Date;
   updated_at: Date;
+  user_name?: string | null; // G-02: resolved on the list query, undefined elsewhere
+  pool_name?: string | null;
 }
 
 const COLS = `successor_candidate_id, successor_candidate_pool_id, successor_candidate_tenant_id,
@@ -36,6 +38,8 @@ function toCand(r: Row): SuccessorCandidate {
     poolId: r.successor_candidate_pool_id,
     tenantId: r.successor_candidate_tenant_id,
     userId: r.successor_candidate_user_id,
+    userName: r.user_name ?? null,
+    poolName: r.pool_name ?? null,
     status: r.successor_candidate_status,
     readinessLevel: r.successor_candidate_readiness_level,
     metadata: r.successor_candidate_metadata,
@@ -79,7 +83,10 @@ export async function listCandidates(
   params.push(filter.query.offset);
   const off = params.length;
   const res = await q.query<Row>(
-    `SELECT ${COLS} FROM sys.sys_successor_candidates ${whereClause}
+    `SELECT ${COLS},
+            (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = sys.sys_successor_candidates.successor_candidate_user_id) AS user_name,
+            (SELECT sp.succession_pool_name FROM sys.sys_succession_pools sp WHERE sp.succession_pool_id = sys.sys_successor_candidates.successor_candidate_pool_id) AS pool_name
+       FROM sys.sys_successor_candidates ${whereClause}
       ORDER BY created_at DESC, successor_candidate_id
       LIMIT $${lim} OFFSET $${off}`,
     params,

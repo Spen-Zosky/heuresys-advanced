@@ -169,3 +169,15 @@ deploy/reports/
 audit/roles-config.json
 audit/auth-*.json
 audit/manual-auth-*.json
+# Heavy/transient audit working artifacts (screenshots, per-page logs, batch logs,
+# inventories). The lightweight report deliverables (FINDINGS.md, FORENSIC-NOTES*.md,
+# _visual-confirmed.json) stay committable.
+audit/screenshots/
+audit/pages/
+audit/logs/
+audit/inventory/
+audit/*.log
+audit/reverify*.json
+audit/runner-summary.json
+audit/execution-context.json
+audit/stack-detection.json

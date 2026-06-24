@@ -1,0 +1,802 @@
+{
+  "confirmed": [
+    {
+      "route": "/admin/roles",
+      "severity": "low",
+      "type": "READABILITY",
+      "title": "Permission codes shown as raw technical strings in the leftmost identity column",
+      "evidence": "The matrix's first column 'permission \\ role' lists rows like 'analytics:view', 'approval:create', 'assessment:read:self', 'brownfield_adaptation:approve', 'bpm_process:read', 'capability:admin' as the primary (and only) human-facing label for each row. These are raw resource:verb permission codes with no Italian/human-readable description, used as the row identity in an otherwise Italian-chrome UI.",
+      "note": "Screenshot directly confirms the claim. The \"Ruoli × Permessi\" matrix at /admin/roles has a header \"permission \\ role\"; every visible row uses a raw resource:verb code as its sole human-facing label, rendered in monospace with no Italian/human-readable description. All cited examples are present verbatim: analytics:view, approval:create, assessment:read:self, brownfield_adaptation:approve, bpm_process:read, capability:admin (plus approval:decide, blueprint:read, career:request_target:self, etc.). Surrounding chrome is Italian (Ruoli × Permessi, \"Matrice sola lettura — la modifica live arriverà in MVP-3\", Prospettiva/Operazioni), confirming the language contrast.\n\nSeverity adjusted medium -> low: this is a PLATFORM_ADMIN-only surface (admin badge top-right/bottom-right), it is explicitly a read-only RBAC matrix, and for the technical admin audience resource:verb codes are arguably the precise intended identity. The header already labels the column \"permission \\ role\". It is a real readability gap (no localized labels/tooltips for less-expert admins) but low-impact: admin-only, self-descriptive noun:verb pattern, read-only, no functional blockage. Medium overstates a cosmetic/labeling nicety on a non-customer-facing admin tool."
+    },
+    {
+      "route": "/admin/roles",
+      "severity": "low",
+      "type": "I18N",
+      "title": "Column headers and permission codes are English-only while UI chrome is Italian",
+      "evidence": "Page title 'Ruoli x Permessi' and subtitle 'Matrice sola lettura' are Italian, but all role column headers (BLUEPRINT_MANAGER, CEO, HRMS_MANAGER, MANAGER, ORG_DIRECTOR, PLATFORM_ADMIN, PROCESS_OWNER, READ_ONLY) and every permission row are English technical identifiers, producing mixed EN/IT content in the same data table.",
+      "note": "Read the screenshot directly. The factual claim holds: the UI chrome is Italian (title \"Ruoli × Permessi\", subtitle \"Matrice sola lettura — la modifica live di permessi e ruoli arriverà in MVP-3.\", sidebar groups PROSPETTIVA/OPERAZIONI/PANORAMICA/INTELLIGENCE, \"Esci\", IT toggle active), while the data table is English: column header \"permission \\ role\", role headers BLUEPRINT_MANAGER, CEO, HRMS_MANAGER, MANAGER, ORG_DIRECTOR, PLATFORM_ADMIN, PROCESS_OWNER, READ_ONLY, and permission rows analytics:view, approval:create/decide/read, assessment:*, blueprint:*, bpm_process:read, etc. Every cited role header is visible on screen, so the evidence is accurate (not fabricated). Severity stays low — and is arguably overstated: the role codes and permission codes are stable system technical identifiers (RoleCode union + resource:verb codes, per CLAUDE.md src/config/constants.ts and the module pattern), deliberately canonical and untranslatable — rendering them verbatim in an admin-only, read-only RBAC reference matrix is correct, not a defect. The only genuine localizable gap is the literal label \"permission \\ role\" (could be \"permesso \\ ruolo\"); the codes themselves should NOT be translated. Low severity confirmed."
+    },
+    {
+      "route": "/analytics/kpi",
+      "severity": "high",
+      "type": "DATA",
+      "title": "Gauge KPI mostra valore assurdo '4300370281' invece di una percentuale",
+      "evidence": "La card gauge (terza in alto, arco giallo) mostra il numero '4300370281' che fuoriesce/è troncato dall'arco. Un gauge di 'Raggiungimento medio target KPI' dovrebbe essere una percentuale 0-100%; 4.3 miliardi è un valore placeholder/calcolo errato. KPI DISTINTI=9, TARGET TOTALI=248 sono plausibili, ma il gauge no.",
+      "note": "Confermato leggendo lo screenshot. La terza card in alto (arco gauge giallo/arancio), etichettata come \"Raggiungimento medio dei target KPI nel tuo ambito\", mostra in grande il numero 4300370281 (~4,3 miliardi) che riempie/fuoriesce dall'arco. Un gauge di achievement medio dovrebbe essere 0-100%. Le altre due card sono plausibili (TARGET TOTALI=248, KPI DISTINTI=9) e il bar chart sottostante \"Raggiungimento medio per KPI\" mostra barre tutte ~80-100 su asse 0-100 — quindi i valori per-KPI SONO percentuali corrette, rendendo l'aggregato di 4,3 miliardi ancora piu' chiaramente un difetto di calcolo/formattazione (sum non scalato / epoch / unita' errata). Difetto DATA reale e prominente su una superficie analytics primaria, fuorviante per l'utente. Severity high confermata."
+    },
+    {
+      "route": "/analytics/overtime",
+      "severity": "high",
+      "type": "DARK_THEME",
+      "title": "Donut 'Richieste per stato' renderizzato in nero su sfondo scuro, invisibile",
+      "evidence": "Il grafico a ciambella sotto 'Richieste per stato' è un anello completamente nero/scurissimo indistinguibile dallo sfondo; si intravede solo la label 'In attesa' e una pill vuota sotto. Nessuna fetta colorata è leggibile nonostante RICHIESTE TOTALI=221.",
+      "note": "Verified by reading the screenshot + pixel sampling. The donut ring under 'Richieste per stato' samples to avg RGB (6,7,10), near pure black; its BRIGHTEST pixel is (13,16,23) — identical to the panel background (13,16,23). No colored arc/segment is visible at any angle around the ring; hue variation is effectively zero. The chart fill failed to pick up the dark-theme palette and defaulted to near-black, so the whole ring blends into the dark surface. Evidence corroborated: legend label 'In attesa' + connector line visible at bottom-left of the chart, an empty/blank legend swatch pill below it, and KPI 'RICHIESTE TOTALI 221' confirmed in the top card — so real data exists but the primary visualization conveys nothing. Consistent with the repo's known dark-theme token failures (media-based dark:, CSS-var invisibility). Severity high upheld: the page's core status visualization is fully non-functional, not cosmetic."
+    },
+    {
+      "route": "/analytics/overtime",
+      "severity": "medium",
+      "type": "DARK_THEME",
+      "title": "Barre 'Richieste per tipo' in nero, basso contrasto",
+      "evidence": "Le barre orizzontali per Notturno/Feriale/Weekend/Festivo sono renderizzate in nero pieno sullo sfondo scuro; visibili solo per il bordo, le serie non hanno colore di riempimento percepibile.",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean/analytics__overtime.png. The horizontal bar chart 'Richieste per tipo' (rows Notturno/Feriale/Weekend/Festivo) renders its bars as near-solid-black fills against the dark navy background. The bars are perceivable only via their edge/outline and a faint tonal step from the background — no theme-aware fill color is applied, exactly as claimed. The same near-black rendering also affects the donut 'Richieste per stato' on the left, confirming a chart-series color-token defect under the dark theme rather than a one-off. Severity medium upheld: data legibility is degraded but not destroyed — axis (0-70) and category labels stay readable and bar lengths still convey relative magnitude, so it is a contrast/readability impairment, not a total data loss."
+    },
+    {
+      "route": "/analytics/org-network",
+      "severity": "medium",
+      "type": "DARK_THEME",
+      "title": "Grafico 'Posizioni per livello gerarchico' a barre nere invisibili",
+      "evidence": "Nell'area chart sotto 'Posizioni per livello gerarchico' è visibile una sola barra nera (vicino al livello ~120 sull'asse), il resto delle barre non si distingue dallo sfondo scuro. Le KPI in alto (162/3/28/5.68/4) sono popolate ma la visualizzazione è dark-on-dark.",
+      "note": "Confermato leggendo lo screenshot. Sotto 'Posizioni per livello gerarchico' il plot area mostra una sola barra nera piena (fill ~#000) che sale dalla baseline fino a circa il livello 120 sull'asse Y (gridlines visibili 30/60/90/120/150), posizionata sul lato destro del grafico. Nessun'altra barra si distingue dallo sfondo scuro navy: la barra e' percepibile solo grazie al bordo netto leggermente piu' scuro del background = classico difetto dark-on-dark con fill non theme-aware (dovrebbe usare l'accento brand blu/teal come le icone KPI). Le KPI in alto sono tutte popolate e corrette (162 / 3 / 28 / 5.68 / 4), quindi i dati ci sono: il difetto e' puramente di rendering/contrasto della visualizzazione, non di pipeline dati. Rettifica severity high->medium: la pagina carica, i dati sono presenti, il grafico DISEGNA effettivamente una barra (non e' del tutto invisibile, ha un edge contro lo sfondo); e' un difetto di tematizzazione/leggibilita' cosmetico che degrada la lettura ma non blocca la funzionalita' ne' causa perdita dati. Coerente con la nota memoria del progetto su token colore dark-mode (text-destructive / dark: media-based / contrasto invisibile). Screenshot: D:/heuresys-advanced/audit/screenshots/clean/analytics__org-network.png"
+    },
+    {
+      "route": "/analytics/attendance",
+      "severity": "medium",
+      "type": "DARK_THEME",
+      "title": "Linee 'Ore per mese' scure su sfondo scuro, quasi invisibili",
+      "evidence": "Nel grafico 'Ore per mese' sono visibili solo i marker bianchi dei punti dati; i segmenti di linea che li collegano (serie 'Ore totali' e 'Straordinario') e i pallini di legenda sono neri/scuri e quasi impercettibili contro lo sfondo dark, tranne il picco intorno a 2025-11.",
+      "note": "Confermato per ispezione + misura pixel sullo screenshot D:/heuresys-advanced/audit/screenshots/clean/analytics__attendance.png. Nel grafico 'Ore per mese' i segmenti di linea che collegano i punti dati (serie 'Ore totali'/'Straordinario') sono near-black: luminanza ~0-15, pixel piu chiaro campionato (13,16,23), praticamente identici allo sfondo dark del plot RGB ~(12.6,15.5,22.2), luminanza ~15. La linea e di fatto piu scura del fondo navy -> contrasto quasi nullo. Visibili solo i marker bianchi circolari dei data point (luminanza fino a 255) e il picco prominente intorno a 2025-11 dove la linea attraversa l'area piu chiara verso i 20.000h. Per il resto della serie (la lunga tratta a baseline 2024-10..2025-10) la linea di connessione e impercettibile. Difetto reale di leggibilita data-viz (theme color della linea non adattato al dark theme). Severity confermata medium: i marker e il picco restano leggibili (degradazione, non perdita totale d'informazione), ma il trend espresso dalla linea e di fatto non leggibile su gran parte del grafico."
+    },
+    {
+      "route": "/analytics/skills-by-category",
+      "severity": "medium",
+      "type": "I18N",
+      "title": "Categorie e livelli di competenza in inglese mentre la UI è in italiano",
+      "evidence": "La heatmap 'Copertura per categoria' elenca categorie in inglese: 'Adaptability', 'Collaboration', 'Customer Focus', 'Technical / Domain Expert...', 'Innovation', 'Leadership', 'Results Orientation'; l'asse dei livelli mostra 'NOVICE / BASIC / COMPETENT / PROFICIENT / EXPERT' in inglese. Chrome UI (titoli, descrizioni, KPI) è in italiano.",
+      "note": "Verificato leggendo lo screenshot direttamente. Entrambe le affermazioni del finding sono chiaramente visibili. (1) Le etichette di riga della heatmap \"Copertura per categoria e livello di padronanza\" sono in inglese: Adaptability, Collaboration, Customer Focus, Technical / Domain Expert..., Innovation, Leadership, Results Orientation. (2) L'asse x dei livelli mostra NOVICE / BASIC / COMPETENT / PROFICIENT / EXPERT in inglese. Il resto della UI è inequivocabilmente in italiano: titolo \"Competenze per categoria\", descrizione \"Distribuzione delle evidenze di competenza dichiarate per categoria di competenza e livello di padronanza nel tuo ambito\", KPI (\"EVIDENZE TOTALI\" 902 / \"PERSONE CON EVIDENZE\" 156 / \"CATEGORIE\" 7), header sezione e sidebar (Blueprint, Processi, Brownfield, Approvazioni), selettore lingua su IT. Il mismatch i18n è reale e in chiaro sul grafico principale della pagina. Severity confermata a medium: leakage su una pagina di analytics primaria che riguarda etichette dati derivate dalla tassonomia DB (gap di localizzazione contenuti, non chiave UI mancante) — visibile e impattante ma non bloccante."
+    },
+    {
+      "route": "/analytics/skills",
+      "severity": "medium",
+      "type": "DARK_THEME",
+      "title": "Heatmap copertura competenze in scala di grigi su sfondo scuro, intensità poco leggibile",
+      "evidence": "Nel grafico 'Copertura per unità e livello di padronanza' le celle sono grigio chiaro/scuro senza scala cromatica; le colonne a destra diventano nere indistinguibili dallo sfondo, perdendo la lettura dell'intensità per ogni OU.",
+      "note": "Verificato leggendo lo screenshot D:/heuresys-advanced/audit/screenshots/clean/analytics__skills.png. Il grafico \"Copertura per unità e livello di padronanza\" rende le celle solo in toni di grigio/nero, senza alcuna scala cromatica (nessun gradiente colore). Le colonne progrediscono da grigio chiaro (sinistra) a quasi-nero (destra): la colonna piu a destra (5° livello) e praticamente indistinguibile dallo sfondo scuro del tema, e diverse celle scure si confondono con il background, compromettendo la lettura dell'intensita per le righe OU interessate (es. RTL Bank S.p.A., Divisione Operations, Direzione Risk Management). Nessuna legenda/colorbar visibile nel viewport per disambiguare l'intensita. Evidenza riscontrata come dichiarata. Severity medium confermata: e un degrado di leggibilita/contrasto in dark theme su una singola chart analytics, non un blocco funzionale (le celle piu chiare restano leggibili), ma l'illeggibilita delle celle a bassa luminosita giustifica la priorita media, non bassa."
+    },
+    {
+      "route": "/analytics/skills",
+      "severity": "low",
+      "type": "READABILITY",
+      "title": "Etichette unità organizzative troncate nella heatmap",
+      "evidence": "Le label OU sulla colonna sinistra sono troncate: 'Divisione Human Resourc...', 'Direzione Sviluppo Soft...', 'Direzione AML/Antiricic...', 'Direzione Risk Manageme...', 'Direzione Corporate Ban...' — il nome completo non è leggibile.",
+      "note": "Verificato leggendo lo screenshot. Sull'asse sinistro della heatmap \"Copertura per unità e livello di padronanza\" diverse label OU sono chiaramente troncate con ellipsis e i nomi completi non sono leggibili: \"Divisione Human Resourc...\", \"Direzione Sviluppo Soft...\", \"Direzione AML/Antiricic...\", \"Direzione Risk Manageme...\", \"Direzione Corporate Ban...\". Le label più corte (RTL Bank S.p.A., Direzione Pagamenti, Ufficio Crediti Retail, Filiale Brescia Centro) entrano per intero, quindi il troncamento colpisce solo i nomi lunghi. Conferma esatta dell'evidence dichiarata. Severity confermata LOW: è una readability nuisance, le celle dati restano leggibili e la funzionalità non è compromessa."
+    },
+    {
+      "route": "/analytics/kpi",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Barre 'Raggiungimento medio per KPI' per lo più senza etichetta",
+      "evidence": "Il grafico a barre mostra ~9 barre ma solo 3 etichette sull'asse X (Productivity, Customers, Report Accuracy); le altre barre non hanno nome leggibile, impedendo di associare il valore al KPI.",
+      "note": "Verificato leggendo lo screenshot. Il grafico a barre \"Raggiungimento medio per KPI\" mostra 9 barre (4 a ~82-85% a sinistra + 5 a ~98-100% a destra) ma l'asse X riporta solo 3 etichette di testo leggibili: \"Productivity\", \"Customers\", \"Report Accuracy\". Le restanti ~6 barre non hanno alcun nome associato, e le 3 etichette presenti non sono allineate 1:1 sotto le barre (sembrano campionate/diradate). Risultato: impossibile associare ~6 barre su 9 al rispettivo KPI, vanificando lo scopo del grafico. Confermato. Severity portata da low a medium: non e' un difetto puramente cosmetico — i due terzi della serie dati sono non identificabili, quindi il valore informativo primario della visualizzazione e' in gran parte perso. (Nota fuori scope: e' visibile anche un secondo bug nel gauge in alto a destra che mostra il numero malformato \"4300370281\".)"
+    },
+    {
+      "route": "/analytics/kpi",
+      "severity": "low",
+      "type": "I18N",
+      "title": "Nomi KPI sull'asse in inglese mentre la UI è italiana",
+      "evidence": "Le etichette dei KPI nel grafico a barre sono in inglese: 'Productivity', 'Customers', 'Report Accuracy', a fronte di una chrome UI completamente italiana (titolo 'Analisi KPI', 'Raggiungimento medio per KPI').",
+      "note": "Verificato leggendo lo screenshot D:/heuresys-advanced/audit/screenshots/clean/analytics__kpi.png. Le etichette dell'asse X del grafico a barre \"Raggiungimento medio per KPI\" mostrano nomi KPI in inglese — \"Productivity\", \"Customers\", \"Report Accuracy\" — mentre tutta la chrome circostante è in italiano (titolo \"Analisi KPI\", sottotitolo \"Raggiungimento medio dei target KPI nel tuo ambito\", card \"TARGET TOTALI\"/\"KPI DISTINTI\", legenda \"Raggiungimento medio %\", sidebar di navigazione, lingua selezionata IT in alto a destra e in basso a sinistra). Tutte e tre le etichette d'asse visibili sono in inglese, a fronte di una UI 100% italiana: l'incoerenza I18N è reale e direttamente osservabile. Severità \"low\" confermata: i nomi KPI sono valori data-derived (provenienti dal dataset/seed, non chiavi di stringa UI passate dal layer i18n), l'impatto è puramente cosmetico/localizzazione-dati, limitato alle label dell'asse, non compromette funzionalità né comprensione critica. Nota collaterale (fuori scope di questo finding ma visibile): la gauge in alto a destra mostra un valore palesemente corrotto \"4300370281…\" invece di una percentuale, ma non è oggetto di questa verifica I18N."
+    },
+    {
+      "route": "/analytics/compensation",
+      "severity": "medium",
+      "type": "DARK_THEME",
+      "title": "Barre bande retributive e label OU a basso contrasto",
+      "evidence": "Nel grafico 'Distribuzione bande retributive per unità' le barre sono grigio scuro piatto poco distinguibili dallo sfondo; le etichette delle OU sulla sinistra (es. 'Divisione Human Resources', 'Direzione AML/Antiriciclaggio') sono grigio tenue su scuro, ai limiti della leggibilità.",
+      "note": "Confermato leggendo lo screenshot e misurando i pixel. Nel chart \"Distribuzione bande retributive per unità (mid €)\" le barre sono un grigio piatto uniforme ~RGB(84,85,90) su sfondo ~RGB(13,16,23): contrasto WCAG misurato 2.56:1 (alcune barre AML ~2.40:1). Le etichette OU sulla sinistra (es. \"Divisione Human Resources\", \"Direzione Sviluppo Software\", \"Direzione AML/Antiriciclaggio\") usano lo stesso colore ~RGB(84,85,90) → 2.56:1, sotto la soglia WCAG AA per testo normale (4.5:1) e appena sopra i 3:1 del testo grande, leggibili solo con sforzo come grigio tenue su scuro. Lo zoom conferma barre poco distinguibili dallo sfondo ed etichette ai limiti della leggibilità. Difetto dark-theme reale; severity medium congrua: il dato resta interpretabile (non high) ma l'accessibilità/leggibilità di un grafico analytics core è compromessa (non low). Screenshot: D:/heuresys-advanced/audit/screenshots/clean/analytics__compensation.png"
+    },
+    {
+      "route": "/analytics/attendance",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Controllo lingua duplicato (header IT + toggle IT/EN in sidebar)",
+      "evidence": "In alto a destra è presente un selettore lingua '🌐 IT'; in basso a sinistra nella sidebar c'è un secondo toggle 'IT / EN'. Due controlli di lingua distinti coesistono sulla stessa schermata (ricorre su tutte le pagine analytics).",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean/analytics__attendance.png. The screenshot clearly shows TWO distinct language controls: (1) top-right header has a globe icon followed by \"IT\" (language selector/indicator), positioned next to the palette and user-avatar controls; (2) bottom-left sidebar, just under the \"admin@heuresys.com\" label, has a separate two-button toggle \"IT | EN\" with \"IT\" highlighted in blue as active. Both controls govern UI language and coexist on the same screen, matching the claimed evidence exactly. Severity confirmed as low: this is a UX redundancy/clutter concern (two controls for the same function, potential user confusion) — not a functional break, broken layout, or data defect. No escalation warranted. The claim that it recurs across all analytics pages is plausible since both controls live in the shared shell (header + sidebar), though this single screenshot only proves the attendance page; the layout-level placement strongly implies cross-page recurrence."
+    },
+    {
+      "route": "/analytics/workforce",
+      "severity": "medium",
+      "type": "DARK_THEME",
+      "title": "Bars in both 'Headcount per unità organizzativa' and 'Headcount per ruolo' charts render near-black on dark background, nearly invisible",
+      "evidence": "Both bar charts under the KPI cards show bars filled in pure/near black against the very dark panel; the horizontal bars next to OU labels (Divisione Risk & Compliance, Divisione Commercial Banking, etc.) and the vertical bars in the role chart are barely distinguishable from the chart background — only their edges hint at their length. Compare with the skills-group-share chart on the sibling page where bars are clearly blue.",
+      "note": "Verified by reading the screenshot. Both charts under the KPI cards (Headcount totale 162 / Unità organizzative 23 / Ruoli 24) render their bars in solid near-black against the dark chart panel. Left chart: horizontal bars beside OU labels (Divisione Risk & Compliance, Divisione Commercial Banking, Divisione CFO, Filiale Milano Centro, etc.) are black blocks distinguishable only by their edges/length. Right chart: vertical bars (axis 0-30, tallest ~27) are also black, visible only by silhouette against the dark background. No brand-blue (or any) fill is applied — clearly a dark-theme bar-fill defect where the chart used a default black/foreground color instead of a theme-aware accent. Finding CONFIRMED. Severity adjusted high->medium: the bars are not fully invisible — their length/silhouette still conveys approximate values, so data isn't lost, but the primary visualization element is effectively unstyled across both charts, a prominent theming/contrast defect rather than a functional blocker."
+    },
+    {
+      "route": "/analytics/skills-group-share",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Bar chart x-axis uses raw ESCO/skill group codes as labels instead of human-readable group names",
+      "evidence": "The 'Competenze per gruppo (primi 25)' chart x-axis labels are technical codes like 'skill/S2.8.1', 'isced-f/0613', 'skill/S2.1.1', 'skill/S2.2.5', 'isced-f/0612', 'isced-f/0722' rather than readable cluster/group names.",
+      "note": "Screenshot clearly shows the 'Competenze per gruppo (primi 25)' bar chart x-axis labeled with raw technical taxonomy codes: skill/S2.8.1, isced-f/0613, skill/S2.1.1, skill/S2.2.5, isced-f/0612, skill/S1.6.1, isced-f/0722. These are unreadable ESCO skill codes and ISCED-F field codes, not the human-readable cluster/group names the chart's title and subtitle ('Distribuzione del catalogo competenze ESCO tra i suoi gruppi (cluster)') promise. A user cannot interpret what each bar represents without an external code lookup, defeating the chart's purpose. Finding CONFIRMED — the claimed evidence matches the screenshot (the exact subset of tick labels differs slightly since these are sampled axis ticks, but the code-pattern and core entries are identical). Severity held at medium: it materially degrades usability of the page's primary visualization, but the data renders correctly and the page is functional (non-blocking)."
+    },
+    {
+      "route": "/analytics/skills-group-share",
+      "severity": "medium",
+      "type": "DATA",
+      "title": "Skills-per-group distribution is dominated by a single outlier bar making the rest of the chart unreadable",
+      "evidence": "In 'Competenze per gruppo (primi 25)' one bar on the far right (label 'isced-f/0722') reaches ~9000 while all other 24 bars are flattened to near-zero height against the 0–10,000 scale, so the distribution among the remaining groups is not legible.",
+      "note": "Verified directly from the screenshot. The \"Competenze per gruppo (primi 25)\" bar chart uses a shared linear Y-axis (0-10,000, gridlines every 2,000). The far-right bar (X-axis label \"isced-f/0722\") reaches ~8,800-9,000, while all other ~24 bars are flattened to near-zero slivers at the baseline, none visibly exceeding a few hundred. Every detail of the claim checks out: outlier location (far right), label (isced-f/0722), magnitude (~9,000 vs 0-10,000 scale), and the consequence (remaining 24 of 25 groups illegible). The KPI cards corroborate the skew (12,892 grouped competencies across 400 groups, one group holding ~9,000). This is a genuine data-viz usability defect — the chart fails its stated purpose of showing the distribution across groups since 24/25 bars convey no readable comparison. Severity raised from low to medium: the entire chart is rendered useless for its intended comparison (not merely cosmetic), but it is NOT a data-correctness bug (values appear correct), causes no crash, and is isolated to one analytics view — so not high. Remediation: log scale, capped axis with outlier annotation, or excluding/separating the dominant group."
+    },
+    {
+      "route": "/brownfield-adaptation",
+      "severity": "high",
+      "type": "EMPTY_STATE",
+      "title": "Pagina rotta: 'This page couldn't load' invece di contenuto o empty-state",
+      "evidence": "Lo screenshot mostra una pagina interamente bianca (fuori tema, niente sidebar/chrome HRMS) con icona triangolo di warning, testo 'This page couldn't load' / 'Reload to try again, or go back.' e bottoni 'Reload'/'Back'. Non è un empty-state progettato ma un crash di rendering della route (data-hint txt:70, rows:0). Il testo di errore è anche in inglese mentre l'app è in italiano.",
+      "note": "Screenshot read and matches the claim. Shows a fully blank, out-of-theme page with NO HRMS sidebar/chrome: a warning-triangle icon, heading \"This page couldn't load\", subtext \"Reload to try again, or go back.\" and two buttons \"Reload\" (filled) / \"Back\" (outlined). This is the Next.js top-level error-boundary fallback (renders outside the authenticated layout), i.e. a render/server crash of the route, NOT a designed empty-state. The error text is also in English while the app is Italian. The route is entirely unusable. Severity confirmed high: whole-page crash + i18n leak + escaped to global error boundary. (Claimed evidence omits the leading \"Reload to try again,\" fragment but the screenshot fully contains and corroborates the claim.)"
+    },
+    {
+      "route": "/process-owner",
+      "severity": "medium",
+      "type": "I18N",
+      "title": "Nomi processi BPM in inglese mentre la UI è in italiano",
+      "evidence": "La colonna PROCESSO elenca tutti i nomi in inglese ('Enterprise Strategy & Governance', 'Customer Acquisition & Onboarding', 'KYC / AML', 'Account Opening & Maintenance', 'Payments & Transfers', 'Credit Origination', 'Credit Monitoring & Workout', 'Wealth Advisory', 'Retail Investments', 'Treasury & ALM') mentre intestazioni e chrome sono in italiano (titolo 'Console Process Owner', '23 processi', 'Catalogo dei processi del blueprint', colonne CODICE/PROCESSO/TIPO/RACI, bottoni 'Vedi RACI', toggle IT attivo).",
+      "note": "Screenshot legge esattamente come descritto. La colonna PROCESSO elenca tutti i 10 nomi rivendicati in inglese: 'Enterprise Strategy & Governance' (00), 'Customer Acquisition & Onboarding' (01), 'KYC / AML' (02), 'Account Opening & Maintenance' (03), 'Payments & Transfers' (04), 'Credit Origination' (05), 'Credit Monitoring & Workout' (06), 'Wealth Advisory' (07), 'Retail Investments' (08), 'Treasury & ALM' (09). Chrome interamente in italiano e coerente: titolo 'Console Process Owner', badge '23 processi', sottotitolo 'Catalogo dei processi del blueprint (navigazione del grafo, non runtime BPM).', header colonne CODICE/PROCESSO/TIPO/RACI, bottoni 'Vedi RACI', sidebar IT (Blueprint/Processi/Brownfield/Approvazioni), toggle IT attivo (evidenziato) ed EN inattivo, 'Esci'. La mismatch i18n è reale e verificata. Severity abbassata da high a medium: e' un difetto di localizzazione del contenuto (nomi catalogo non tradotti), non funzionale — i dati si visualizzano correttamente, nessun workflow bloccato, nessun problema d'integrita'. Inoltre diversi termini sono gergo bancario tipicamente mantenuto in inglese anche in IT (KYC/AML, Treasury & ALM, Wealth Advisory), il che riduce ulteriormente l'impatto."
+    },
+    {
+      "route": "/processes",
+      "severity": "medium",
+      "type": "I18N",
+      "title": "Nomi processi BPM in inglese mentre la UI è in italiano",
+      "evidence": "La colonna NOME mostra tutti i processi in inglese ('Enterprise Strategy & Governance', 'Customer Acquisition & Onboarding', 'KYC / AML', 'Account Opening & Maintenance', 'Payments & Transfers', 'Credit Origination', 'Credit Monitoring & Workout', 'Wealth Advisory', 'Retail Investments', 'Treasury & ALM', 'Risk Management', 'Compliance & Regulatory Reporting', 'Internal Audit', 'Branch Operations', 'Customer Service', 'Marketing & Communications') in un'app con chrome italiana (titolo 'Processi BPM', '23 processi', 'Catalogo processi blueprint-anchored', colonne CODICE/NOME/OPZIONALE con valori 'NO', toggle IT attivo).",
+      "note": "Screenshot letto direttamente: conferma reale. Chrome UI in italiano (titolo \"Processi BPM\", badge \"23 processi\", sottotitolo \"Catalogo processi blueprint-anchored.\", sidebar \"PROSPETTIVA/OPERAZIONI/PANORAMICA/INTELLIGENCE\", \"Esci\", colonna \"OPZIONALE\" con valori \"NO\", toggle IT attivo). Tutta la colonna NOME è in inglese: \"Enterprise Strategy & Governance\", \"Customer Acquisition & Onboarding\", \"KYC / AML\", \"Account Opening & Maintenance\", \"Payments & Transfers\", \"Credit Origination\", \"Credit Monitoring & Workout\", \"Wealth Advisory\", \"Retail Investments\", \"Treasury & ALM\", \"Risk Management\", \"Compliance & Regulatory Reporting\", \"Internal Audit\", \"Branch Operations\", \"Customer Service\", \"Marketing & Communications\" (ultima riga parziale in fondo). Mismatch i18n innegabile e visibile. Severity declassata da high a medium: si tratta di dati di dominio seedati (nomi processi BPM del tenant RTL Bank), non di label UI rotte; sono coerenti, leggibili e diversi sono termini settoriali bancari spesso lasciati in inglese anche in contesti IT (KYC/AML, Treasury & ALM, Wealth Advisory). Gap di localizzazione del contenuto che riduce la rifinitura ma non blocca funzioni, non rompe il layout, non nasconde informazioni -> profilo medium, non high. Screenshot: D:/heuresys-advanced/audit/screenshots/clean/processes.png."
+    },
+    {
+      "route": "/blueprints/[variantId]",
+      "severity": "low",
+      "type": "I18N",
+      "title": "Nomi processi del blueprint in inglese mentre la UI è in italiano",
+      "evidence": "Sotto la tab 'Processi' la colonna NOME elenca processi in inglese ('Enterprise Strategy & Governance', 'Customer Acquisition & Onboarding', 'KYC / AML', 'Account Opening & Maintenance', 'Payments & Transfers', 'Credit Origination', 'Credit Monitoring & Workout', 'Wealth Advisory', 'Retail Investments', 'Treasury & ALM', 'Risk Management', 'Compliance & Regulatory Reporting') mentre il resto è italiano (tab 'Processi/Attivazioni/Documentazione', colonne CODICE/NOME/OPZIONALE, valori 'NO', toggle IT).",
+      "note": "Screenshot confirms the finding exactly. Under the \"Processi\" tab the NOME column lists all 12 process names in English (Enterprise Strategy & Governance, Customer Acquisition & Onboarding, KYC / AML, Account Opening & Maintenance, Payments & Transfers, Credit Origination, Credit Monitoring & Workout, Wealth Advisory, Retail Investments, Treasury & ALM, Risk Management, Compliance & Regulatory Reporting) — each matches the evidence verbatim. The surrounding UI chrome is unambiguously Italian: tabs \"Processi/Attivazioni/Documentazione\", columns \"CODICE/NOME/OPZIONALE\", OPZIONALE values \"NO\", sidebar groups (PROSPETTIVA, OPERAZIONI, PANORAMICA, INTELLIGENCE), and the language toggle bottom-left set to IT. So the inconsistency is real and clearly visible. Severity adjusted high → low: these are blueprint/business-dataset process names (RTL Bank reference tenant content), not UI translation strings. The UI shell is correctly localized; only data content is English. This is a content/i18n-data consistency issue, cosmetic, no functional breakage — not a high-severity UI translation defect."
+    },
+    {
+      "route": "/blueprints",
+      "severity": "low",
+      "type": "I18N",
+      "title": "Nome famiglia industry in inglese mentre la UI è in italiano",
+      "evidence": "Nella tabella la colonna FAMIGLIA mostra 'Financial Services — Banking' in inglese, su una pagina con chrome italiana (titolo 'Blueprint', '1 varianti', sottotitolo 'Varianti di blueprint con famiglia e industry', colonne NOME/FAMIGLIA/INDUSTRY).",
+      "note": "Confermato dalla lettura diretta dello screenshot. La pagina è chrome italiana (titolo \"Blueprint\", badge \"1 varianti\", sottotitolo \"Varianti di blueprint con famiglia e industry\", header colonne NOME/FAMIGLIA/INDUSTRY, toggle lingua su IT, sidebar IT). Nella colonna FAMIGLIA il valore \"Financial Services — Banking\" è in inglese, sulla riga \"Regional Retail Bank (Medium)\" (codice REGIONAL_RETAIL_BANK_MEDIUM); INDUSTRY = \"ND\". L'incoerenza linguistica è reale e visibile. Severità abbassata a low: non è una stringa di UI/chiave i18n mancante (tutta la chrome è correttamente localizzata) ma un VALORE DATI (nome famiglia industry, reference/taxonomy data) — spesso volutamente memorizzato in forma canonica inglese (tassonomie tipo GICS/NAICS/ESCO). Nessun impatto funzionale, singolo valore, possibile by-design. Resta un'incoerenza cosmetica notabile ma di basso impatto."
+    },
+    {
+      "route": "/blueprints",
+      "severity": "low",
+      "type": "READABILITY",
+      "title": "Codice tecnico mostrato sotto il nome leggibile della variante",
+      "evidence": "La riga della tabella mostra 'Regional Retail Bank (Medium)' come identità primaria, ma sotto è riportato il codice grezzo 'REGIONAL_RETAIL_BANK_MEDIUM' in monospace; la colonna INDUSTRY mostra il placeholder 'ND' (nessun dato).",
+      "note": "Screenshot read directly and every claimed element is visible exactly as described. The table row shows \"Regional Retail Bank (Medium)\" as the primary readable name, with the raw code \"REGIONAL_RETAIL_BANK_MEDIUM\" rendered in smaller monospace immediately beneath it, and the INDUSTRY column displays the \"ND\" (no-data) placeholder. (FAMIGLIA shows \"Financial Services — Banking\", not relevant to the claim.) This is a genuine but minor readability/polish issue: the slug is redundant secondary info under a perfectly readable name and \"ND\" is a terse empty-state token — no functional impact, no data loss. Low severity is correct, not understated."
+    },
+    {
+      "route": "/blueprints/[variantId]",
+      "severity": "low",
+      "type": "READABILITY",
+      "title": "Codice tecnico della variante esposto nell'header di dettaglio",
+      "evidence": "Nell'header la variante è 'Regional Retail Bank (Medium)' seguita dal codice grezzo 'REGIONAL_RETAIL_BANK_MEDIUM' in monospace accanto al titolo.",
+      "note": "Verified by reading the screenshot. The detail header shows the title \"Regional Retail Bank (Medium)\" in large bold text, immediately followed inline by the raw technical code \"REGIONAL_RETAIL_BANK_MEDIUM\" in a smaller, lighter monospace font. The SCREAMING_SNAKE_CASE internal variant code is exposed directly next to the human-readable name in the user-facing header, exactly as claimed. READABILITY issue confirmed; severity low is correct — it does not break functionality and is plausibly an intentional admin reference identifier, but it does add technical clutter to the header for end users (the page is logged in as PLATFORM_ADMIN, so impact is bounded to admin views)."
+    },
+    {
+      "route": "/approvals/[id]",
+      "severity": "low",
+      "type": "EMPTY_STATE",
+      "title": "Dettaglio approvazione: 'Richiesta non trovata' (404 sull'id richiesto)",
+      "evidence": "La pagina mostra solo il link '← Torna alle approvazioni' e il messaggio in rosso 'Richiesta non trovata.' (data-hint 404:1, rows:0). È un empty/error-state in italiano coerente con l'assenza della risorsa, ma resta una route di dettaglio che non risolve a nessun record.",
+      "note": "Screenshot read directly. Content area shows exactly two elements: the link \"← Torna alle approvazioni\" and the red message \"Richiesta non trovata.\" No record detail rendered (rows:0), confirming a 404/not-found empty-state. User is logged in as PLATFORM_ADMIN (sidebar \"Approvazioni\" highlighted active), so this is not an auth/permission failure. The visual claim is CONFIRMED. However, severity is adjusted from medium to low: this is a correctly-rendered, fully-localized (Italian), recoverable not-found state with a working back-link — not a crash, white screen, broken layout, or console error. The /approvals/[id] route itself renders correctly; it simply resolved an id that has no matching record (a data/test-fixture provenance issue, e.g. a deep-link to a synthetic/missing id), not a UI defect. Graceful 404 empty-states are expected behavior, hence low severity."
+    },
+    {
+      "route": "/approvals",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Doppio toggle lingua visibile (header globe IT/EN + IT/EN nel footer sidebar)",
+      "evidence": "In alto a destra è presente il selettore lingua con 'globe IT'; contemporaneamente nel footer della sidebar a sinistra ci sono due pulsanti 'IT'/'EN' (IT evidenziato). Due controlli di selezione lingua distinti coesistono nella stessa schermata.",
+      "note": "Confermato leggendo lo screenshot D:/heuresys-advanced/audit/screenshots/clean/approvals.png. Coesistono due controlli di selezione lingua distinti nella stessa viewport: (1) header in alto a destra con icona globe + etichetta \"IT\"; (2) footer della sidebar in basso a sinistra, sotto \"admin@heuresys.com\", con coppia di pulsanti \"IT\" (attivo, sfondo blu) ed \"EN\" (inattivo). Sono due meccanismi separati di language-switch visibili simultaneamente = ridondanza UX. Severity low corretta: e' duplicazione cosmetica/UX, nessun impatto funzionale o sui dati (entrambi i controlli mostrano coerentemente IT come lingua corrente)."
+    },
+    {
+      "route": "/seed-acquisition/runs",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Doppio selettore di lingua visibile contemporaneamente (header + footer sidebar)",
+      "evidence": "In alto a destra c'è un controllo lingua con icona globo che mostra 'IT'; in basso nella sidebar è presente un secondo toggle lingua con i bottoni 'IT' (attivo, evidenziato) ed 'EN'. Due switcher di lingua distinti sono visibili nella stessa schermata.",
+      "note": "Verificato leggendo lo screenshot. Sono visibili due controlli di lingua distinti nella stessa schermata: (1) header in alto a destra, controllo con icona globo che mostra \"IT\" (accanto ai controlli palette/tema); (2) footer della sidebar in basso a sinistra, toggle a due bottoni \"IT\" (attivo, evidenziato in blu) ed \"EN\", posizionato sopra il bottone \"Esci\" e sotto l'email utente admin@heuresys.com. Entrambi sono inequivocabilmente selettori di lingua, quindi la ridondanza descritta nell'evidence e' reale. Severity confermata low: e' un problema di ridondanza/coerenza UX (controllo duplicato), non un blocco funzionale ne' di accessibilita' ne' di integrita' dati. Non rompe nulla; e' solo potenzialmente confusivo su quale switcher sia autoritativo."
+    },
+    {
+      "route": "/career-succession",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Career-path rows identified by raw legacy UUID codes instead of a human label",
+      "evidence": "Under the 'Career paths' tab the CODICE column shows opaque keys like 'LEGACY_CP::32d41abe-6da7-4934-9ae0-a6aec5fca1e2' and 'LEGACY_CP::b758c4dc-01e1-4888-8a4c-c43225f13da8' for every row. The technical 'LEGACY_CP::<uuid>' prefix+UUID is the primary visible identity in the leftmost column.",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean/career-succession.png. The active tab is \"Career paths\"; the leftmost column header is \"CODICE\" and every visible row in it shows opaque keys of the form LEGACY_CP::<uuid> — the two exact codes cited in the evidence are present (LEGACY_CP::32d41abe-6da7-4934-9ae0-a6aec5fca1e2 in row 1; LEGACY_CP::b758c4dc-01e1-4888-8a4c-c43225f13da8 in the highlighted row), plus ~15 more identical-pattern rows. The technical LEGACY_CP:: prefix + UUID is indeed the primary visible identity in the leftmost column. Finding CONFIRMED. Severity adjusted high→medium: a human-readable NOME column (Banking Operations Track, Compliance & Legal Track, etc.) sits immediately to the right, so users are not deprived of meaning and the page remains usable — this is a readability/polish defect that leaks legacy migration internals as the primary key, not a functional blocker or data-integrity issue. Note: several rows carry the placeholder NOME \"Test Auth Path\", which is a separate (unclaimed) data-quality observation."
+    },
+    {
+      "route": "/career-succession",
+      "severity": "medium",
+      "type": "I18N",
+      "title": "Career-path names are in English while the UI chrome is Italian",
+      "evidence": "The NOME column data values are all English: 'Banking Operations Track', 'Compliance & Legal Track', 'Corporate Banking Track', 'Management Track', 'Risk Management Track', 'Software Engineering Track', 'Technology Leadership Track' — within an otherwise Italian UI (page title 'Career & Succession', subtitle 'Percorsi di carriera, pool di successione e candidati.').",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean/career-succession.png. The NOME column shows the exact English values claimed — \"Banking Operations Track\", \"Compliance & Legal Track\", \"Corporate Banking Track\", \"Management Track\", \"Risk Management Track\", \"Software Engineering Track\", \"Technology Leadership Track\" — all ending in the English word \"Track\". The surrounding UI chrome is Italian: subtitle \"Percorsi di carriera, pool di successione e candidati.\", tab \"Candidati\", column headers \"CODICE / NOME / DIFFICOLTÀ\", sidebar groups \"PROSPETTIVA / OPERAZIONI / PANORAMICA / INTELLIGENCE\". The CODICE values are prefixed \"LEGACY_CP::\", confirming these are untranslated legacy-imported data values, not UI strings. Additional rows below (\"Test Auth Path\") are seed/test data and don't contradict the finding. Severity lowered from high to medium: this is an i18n/data-quality issue on data-layer catalog content (untranslated reference data), not a functional defect or broken UI chrome — no layout breakage, no blocked workflow; the framework strings are correctly localized."
+    },
+    {
+      "route": "/career-succession",
+      "severity": "medium",
+      "type": "DATA",
+      "title": "Multiple rows share placeholder 'Test Auth Path' name and empty difficulty",
+      "evidence": "From row 8 downward at least 9 consecutive rows all have NOME = 'Test Auth Path' (a test/placeholder value) and the DIFFICOLTÀ column shows '—' for every single visible row, so the entire difficulty column is empty.",
+      "note": "Screenshot directly confirms both claims on the Career paths tab of /career-succession. Reading the table top-to-bottom: rows 1-7 are real named tracks (Banking Operations Track, Compliance & Legal Track, Corporate Banking Track, Management Track, Risk Management Track, Software Engineering Track, Technology Leadership Track). From row 8 (the highlighted/selected row, LEGACY_CP::b758c4dc...) downward, every subsequent NOME reads the placeholder 'Test Auth Path' — 7 fully visible identical rows (rows 8-14) plus a partial 8th at the bottom, consistent with the claimed 'at least 9 consecutive rows'. Separately, the DIFFICOLTA column shows '—' (em-dash, empty) for every single visible row without exception, so the entire difficulty column is unpopulated. Both observations are verified visually, not inferred. Severity kept at medium: under the project's prod-grade two-tenant doctrine (ADR-0026) RTL Bank data is treated as real, so placeholder 'Test Auth Path' records leaking into a customer-visible list plus a fully empty DIFFICOLTA column is a genuine data-integrity/completeness defect — more than cosmetic (not low) but non-blocking, no functional/security break (not high)."
+    },
+    {
+      "route": "/gaps",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Gap rows identified only by truncated hex user IDs, not user names",
+      "evidence": "The USER column shows bare hex fragments as primary identity for every row: 'd5cf0e32', '362f7442', '992de2a7', '1738330b', 'a3d7be7d', 'ea6ea05b', etc. No human-readable user name is shown.",
+      "note": "Confirmed by direct read of D:/heuresys-advanced/audit/screenshots/clean/gaps.png. The USER column of the Gap analysis table shows bare 8-char hex fragments as the sole row identity for every visible row: d5cf0e32, 362f7442, 992de2a7, 1738330b, a3d7be7d, fd3a690c, ea6ea05b, 216db6d9, fb054fde, b2dac9be, ad432f1a, af324579, 2fa7d505 — exactly as claimed. No human-readable user name appears anywhere in the row. These are truncated UUID prefixes (the underlying ids are full UUIDs); an admin cannot tell which person each of the 270 gaps belongs to, impairing the core act-on-gap workflow. Notably POSIZIONE, SKILL, RICHIESTO and ATTUALE are all em-dashes (empty) too, so the row is essentially unidentifiable and uninformative. Severity adjusted high->medium: it is a readability/identification defect that degrades usefulness but does not crash or block the page (table renders, severity badges and sort work), so it does not meet the high bar of a functional/blocking failure."
+    },
+    {
+      "route": "/gaps",
+      "severity": "high",
+      "type": "WIRING",
+      "title": "Gap-analysis table columns empty for every row (POSIZIONE, SKILL, RICHIESTO, ATTUALE)",
+      "evidence": "Across all visible rows the POSIZIONE, SKILL, RICHIESTO and ATTUALE columns show '—' in every cell. Only USER (hex id) and SEVERITÀ (badge) carry data, so four of the six columns are empty for the entire table despite '270 gap registrati'.",
+      "note": "Screenshot directly verified. The gap-analysis table has 6 columns: USER, POSIZIONE, SKILL, SEVERITA, RICHIESTO, ATTUALE. Across all 13 visible rows, USER (hex ids e.g. d5cf0e32, 362f7442) and SEVERITA (MEDIUM/HIGH badges) are populated, but POSIZIONE, SKILL, RICHIESTO and ATTUALE every single cell shows an em-dash placeholder. So 4 of 6 columns are empty for the entire table, despite the header '270 gap registrati' and populated severity counters (CRITICAL 3 / HIGH 90 / MEDIUM 72 / LOW 35). This matches the claimed evidence exactly. It is a genuine WIRING defect: the rows render with severity but the core descriptive fields (which skill, which position, required-vs-actual proficiency delta) are not bound, making the gap table functionally useless for its primary purpose. Severity kept at high — not a total page failure (page loads, counts and severity render), but the central data of a skill-gap table is absent on every row."
+    },
+    {
+      "route": "/learning",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Training module rows identified by raw legacy UUID codes",
+      "evidence": "Lower rows in the CODICE column show 'OLDDB::course_modules::74d620da-bfdd-4954-8929-01d8bdebc9f0', 'OLDDB::course_modules::09da4038-d505-41c7-90f6-24d7bb46fc57', etc. — the technical 'OLDDB::course_modules::<uuid>' string is the primary identity of those rows.",
+      "note": "Screenshot at D:/heuresys-advanced/audit/screenshots/clean/learning.png clearly confirms the finding. The \"Catalogo moduli\" table on /learning shows, in the lower (TENANT-scoped) rows of the CODICE column, raw legacy identity strings: 'OLDDB::course_modules::74d620da-bfdd-4954-8929-01d8bdebc9f0', 'OLDDB::course_modules::09da4038-d505-41c7-90f6-24d7bb46fc57', 'OLDDB::course_modules::e11a5db2-869a-470f-a347-f2dc2ddee075', 'OLDDB::course_modules::105f2455-889a-4c6c-9fa5-8d0c9cd1cb13', and others. For these rows the NOME column is empty, so the technical OLDDB::course_modules::<uuid> string IS the row's primary user-facing identity, with no human-readable fallback. Upper rows have readable codes (ABA-TELL-001, AML-102, CRS-econova-2, etc.), so the issue is confined to a block of legacy-imported tenant modules rather than the whole table. Adjusted high->medium: this is a real readability/data-quality defect (a UUID is meaningless to a user and it leaks internal legacy-system naming into a user-facing catalog), but it is not a functional break or security issue and affects only a subset of rows; it sits at the top of medium."
+    },
+    {
+      "route": "/learning",
+      "severity": "high",
+      "type": "WIRING",
+      "title": "NOME column empty for most module rows",
+      "evidence": "In the 'Catalogo moduli' table the NOME column is blank for the majority of rows (ABA-TELL-001, AML-102, CRS-econova-2, CRS-rt1-bank-2, CRS-smartfood-2, CRS-heuresys-2, ALLERG-001, all CRS-*-9 rows, and every OLDDB::course_modules row) — only the CODICE is shown, so the human-readable name column is empty across the visible page.",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean/learning.png. The \"Catalogo moduli\" table has columns CODICE, NOME, DURATA (MIN), SCOPE. The NOME column (between CODICE and DURATA) renders blank for EVERY visible row without exception: ABA-TELL-001, AML-102, CRS-econova-2, CRS-rt1-bank-2, CRS-smartfood-2, CRS-heuresys-2, ALLERG-001, CRS-smartfood-9, CRS-econova-9, CRS-rt1-bank-9, CRS-heuresys-9, and all OLDDB::course_modules rows. CODICE shows codes, DURATA shows values (960/720/45) or em-dash for nulls, SCOPE shows GLOBAL/TENANT badges — only NOME is universally empty. One correction to the evidence framing: the em-dashes (\"—\") belong to the DURATA column (null/zero duration), not to NOME; the NOME column has no content at all, which actually strengthens the wiring-defect read. Severity kept high: the primary human-readable name column is blank across the entire catalog (header says 7427 moduli), defeating the page's browse-by-name purpose; CODICE is the only mitigating fallback identifier."
+    },
+    {
+      "route": "/learning",
+      "severity": "low",
+      "type": "DATA",
+      "title": "DURATA (MIN) missing for many catalog rows",
+      "evidence": "The DURATA (MIN) column shows '—' for CRS-econova-2, CRS-rt1-bank-2, CRS-smartfood-2, CRS-heuresys-2 and all CRS-*-9 rows, mixed with numeric values (960, 720, 45) on other rows, leaving duration absent for a large share of visible rows.",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean/learning.png. The DURATA (MIN) column in the \"Catalogo moduli\" table shows \"—\" (em-dash placeholder) for exactly the rows named: CRS-econova-2, CRS-rt1-bank-2, CRS-smartfood-2, CRS-heuresys-2, and all CRS-*-9 rows (CRS-smartfood-9, CRS-econova-9, CRS-rt1-bank-9, CRS-heuresys-9). These are interleaved with numeric values (ABA-TELL-001=960, AML-102=720, ALLERG-001=720, and the OLDDB::course_modules rows=45). The finding's evidence matches the screenshot precisely — confirmed as a genuine DATA gap. Severity downgraded medium→low: duration is a sparse/optional field, the table renders correctly with a proper empty-value placeholder (\"—\", not a broken cell or error), no workflow is blocked, and missing duration on synthetic catalog rows is a populate/quality issue rather than a functional defect."
+    },
+    {
+      "route": "/learning/training-initiatives",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Single training initiative shows placeholder cohort 'ND' and raw bad-data code",
+      "evidence": "The one row in the 'Iniziative formative' table has COORTE = 'ND' with the technical sub-label 'IT_TI_A00EDC19_BAD_FAC' beneath it. The code literally contains 'BAD_FAC', and 'ND' is a placeholder, used as the row's primary identity.",
+      "note": "Read the screenshot directly. The single row in the 'Iniziative formative' table (badge ' 1 pianificate') has COORTE primary cell = 'ND' (bold) with the monospace technical sub-label 'IT_TI_A00EDC19_BAD_FAC' beneath it. The code visibly contains the token 'BAD_FAC' and 'ND' is a placeholder used as the row's primary identity. STATO=PLANNED, INIZIO=2026-06-01, FINE/POSTI = '—'. All three sub-claims confirmed from pixels; text is fully legible (no contrast problem). Severity lowered high->medium: this is a real data-quality/readability leak (internal bad-data marker surfaced to the UI plus a generic placeholder label), but it is confined to a single record, is cosmetic/professionalism-impacting rather than functionality-breaking, and content remains readable."
+    },
+    {
+      "route": "/learning/training-initiatives",
+      "severity": "low",
+      "type": "DATA",
+      "title": "Initiative row has empty FINE and POSTI",
+      "evidence": "The single row shows INIZIO = '2026-06-01' but FINE = '—' and POSTI = '—', so the end-date and seats columns are empty for the only record.",
+      "note": "Confirmed by reading the screenshot. The single table row (COORTE \"ND\" / code IT_TI_A00EDC19_BAD_FAC, STATO PLANNED) shows INIZIO = \"2026-06-01\" while both FINE and POSTI render an em-dash \"—\" (empty). This matches the evidence exactly. Severity correctly stays LOW: the \"—\" is the standard intentional empty-state for nullable end-date/seats fields, not a rendering bug or broken data pipeline — the page renders fine and the convention is applied as designed. FINE/POSTI can legitimately be unset for a PLANNED initiative, and the \"_BAD_FAC\" cohort code indicates a deliberately-seeded edge-case record. This is a minor data-completeness observation, not a functional defect."
+    },
+    {
+      "route": "/skills",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Skill catalog rows identified by raw legacy UUID codes",
+      "evidence": "Every row's CODICE column is a technical key: 'OLDDB::esco_skills::94787f6e-271d-41cd-8270-2913b3d7bac1', 'OLDDB::competencies::36496a19-6aff-4e83-847a-92ae49db3bb0', etc. The 'OLDDB::esco_skills::<uuid>' / 'OLDDB::competencies::<uuid>' string is the primary leftmost identity for all rows.",
+      "note": "Screenshot directly confirms it. The leftmost CODICE column (the primary identity column, currently the active/highlighted sort column) shows raw legacy keys on every visible row: e.g. 'OLDDB::esco_skills::94787f6e-271d-41cd-8270-2913b3d7bac1' (3D body scanning technologies), 'OLDDB::esco_skills::1a39bab5-e0a7-4946-9dad-3a0900e80c7f' (3D lighting), 'OLDDB::competencies::36496a19-6aff-4e83-847a-92ae49db3bb0' (Adaptability). All ~16 rows follow this OLDDB::esco_skills::<uuid> / OLDDB::competencies::<uuid> pattern. The human-readable label IS present in the adjacent NOME column (3D modelling, ABAP, Adaptability) and SCOPE shows TENANT, so the page is functional and not broken. Downgraded high->medium: this is a genuine readability/professionalism defect (the primary catalog identity is an opaque internal provenance key that leaks the legacy OLDDB data source to end users), but it blocks no task and the readable name is right beside it. Cosmetic-polish severity, not high."
+    },
+    {
+      "route": "/skills",
+      "severity": "medium",
+      "type": "I18N",
+      "title": "Skill names are in English in an Italian UI",
+      "evidence": "The NOME column lists English skill names: '3D body scanning technologies', '3D lighting', '3D modelling', '3D printing process', '3D texturing', '5S methodology', 'ABAP', 'ABBYY FineReader', 'AJAX', 'APL', 'ASP.NET', 'ATM systems', 'Absorb (learning management systems)', 'Adaptability' — while the page chrome is Italian ('Catalogo skill', 'Skill visibili nel catalogo, globali e di tenant.').",
+      "note": "Screenshot at D:/heuresys-advanced/audit/screenshots/clean/skills.png clearly confirms the finding. Page chrome is Italian (title \"Catalogo skill\", subtitle \"Skill visibili nel catalogo, globali e di tenant.\", IT toggle active, sidebar labels Italian) while the NOME column lists English skill names. All 14 claimed names match exactly: 3D body scanning technologies, 3D lighting, 3D modelling, 3D printing process, 3D texturing, 5S methodology, ABAP, ABBYY FineReader, AJAX, APL, ASP.NET, ATM systems, Absorb (learning management systems), Adaptability. The mismatch is real and visible. Severity adjusted high->medium: these are catalog DATA rows, not UI-chrome strings — the CODICE column reveals they are brownfield ESCO/competency imports (prefixes OLDDB::esco_skills::... and OLDDB::competencies::...). ESCO is a multilingual reference taxonomy whose entries are commonly stored in source-language English; this is a data-localization gap in imported reference content, not a broken application translation layer (all chrome/nav/headers are correctly Italian). User-facing impact is moderate, not high."
+    },
+    {
+      "route": "/skills",
+      "severity": "low",
+      "type": "DATA",
+      "title": "Duplicate 'Adaptability' competency entries with distinct codes",
+      "evidence": "Two consecutive rows both show NOME = 'Adaptability' with different codes ('OLDDB::competencies::36496a19-...' and 'OLDDB::competencies::4cbf5cba-...'), and a third partially-visible 'Adaptability' row below, indicating duplicated skill records in the catalog.",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean/skills.png. The \"Catalogo skill\" table (21939 skills visibili) shows, at the bottom, two consecutive fully-visible rows both with NOME = \"Adaptability\" and SCOPE TENANT, carrying distinct codes: OLDDB::competencies::36496a19-6aff-4e83-847a-92ae49db3bb0 and OLDDB::competencies::4cbf5cba-32af-4d77-9e8d-6aabbbed6359. A third, partially-visible \"Adaptability\" row appears just below with code OLDDB::esco_skills::09e9b149-16ab-473b-a47f-de58ac5653a8. So the catalog genuinely contains multiple \"Adaptability\" entries with different external codes — confirmed as described. Severity kept at low: this is a DATA-hygiene issue (catalog duplication), not a crash, security, or access-control defect. The two OLDDB::competencies:: rows are a true intra-source duplicate; the third is from a different source (esco_skills), which is more an expected cross-taxonomy overlap. It can degrade skill-matching/gap-analysis quality but is non-blocking, so low is appropriate."
+    },
+    {
+      "route": "/kpis",
+      "severity": "medium",
+      "type": "I18N",
+      "title": "Nomi KPI in lingua mista EN/IT nella stessa lista (chrome IT)",
+      "evidence": "La colonna NOME mescola nomi inglesi ('AML Alert Resolution Rate', 'AML alert resolution time', 'AUM Growth Rate', 'AUM growth', 'Accuracy rate', 'Audit Findings', 'Audit plan completion rate', 'Change success rate', 'Churn rate', 'Client satisfaction') e italiani ('Accuratezza stime produzione', 'Aderenza cronogramma', 'Aderenza piano produzione', 'Collaborazione team') nella stessa colonna, mentre l'intera UI/chrome (header 'Catalogo KPI', 'KPI definiti, con unità, polarità e scope', sidebar) è in italiano.",
+      "note": "Verificato leggendo direttamente lo screenshot (1440x900) con crop+upscale della colonna NOME, della sidebar e dell'header. La colonna NOME mescola chiaramente nomi inglesi ('AML Alert Resolution Rate', 'AML alert resolution time', 'AUM Growth Rate', 'AUM growth', 'Accuracy rate', 'Audit Findings', 'Audit plan completion rate', 'Change success rate', 'Churn rate', 'Client satisfaction') e italiani ('Accuratezza stime produzione', 'Aderenza cronogramma', 'Aderenza piano produzione', 'Collaborazione team') nella stessa lista visibile. Si nota anche incoerenza di casing tra i nomi EN ('AUM Growth Rate' vs 'AUM growth'). Il chrome/UI e' coerentemente italiano: header 'Catalogo KPI' + badge '243 KPI definiti', sottotitolo 'KPI definiti, con unita, polarita e scope.', sezioni sidebar 'NAVIGATION/PROSPETTIVA/OPERAZIONI/PANORAMICA/INTELLIGENCE'. Tutti gli elementi dell'evidence claimed sono leggibili e corrispondono. Severity mantenuta a medium: e' un problema reale di coerenza i18n nei dati user-facing della colonna primaria, ma e' data-content (nomi dal catalogo KPI, non stringhe di traduzione UI) e non blocca alcuna funzionalita."
+    },
+    {
+      "route": "/kpis",
+      "severity": "low",
+      "type": "I18N",
+      "title": "Colonna UNITÀ con valori misti EN/IT",
+      "evidence": "La colonna UNITÀ mostra sia termini italiani ('percentuale', 'punteggio 1-10') sia termini/codici inglesi ('days', 'count', 'points', '%') nella stessa lista, sotto un'intestazione italiana 'UNITÀ'.",
+      "note": "Verificato leggendo lo screenshot (1440x900, ritaglio tabella ingrandito 2x). Sotto l'intestazione italiana \"UNITÀ\" la colonna mostra chiaramente valori in lingue miste: termini italiani (\"percentuale\" su AUM growth/Accuracy rate/Accuratezza stime/Aderenza/Change success/Churn rate; \"punteggio 1-10\" su Client satisfaction) e termini/codici inglesi (\"days\" su AML alert resolution time; \"count\" su Audit Findings; \"points\" su Collaborazione team) oltre al simbolo \"%\" (Audit plan completion rate) e a celle vuote em-dash \"—\". Evidenza della finding accurata e direttamente osservabile. Severità abbassata da medium a low: è un'incoerenza cosmetica/di data-quality sui label delle unità (contenuto dati, non UI chrome), senza impatto funzionale e con valori comunque comprensibili a livello di dominio; non blocca alcun flusso."
+    },
+    {
+      "route": "/kpis",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Colonna POLARITÀ mostra enum grezzi invece di etichette leggibili",
+      "evidence": "Ogni riga della colonna POLARITÀ visualizza il codice enum SCREAMING_SNAKE 'HIGHER_IS_BETTER' / 'LOWER_IS_BETTER' come testo primario invece di una etichetta umana (es. 'Più alto è meglio' / 'Più basso è meglio'); la chrome circostante è in italiano.",
+      "note": "Confermato leggendo lo screenshot (zoom 2x della regione header+righe della tabella). La colonna intestata \"POLARITÀ\" mostra in ogni riga i codici enum SCREAMING_SNAKE 'HIGHER_IS_BETTER' / 'LOWER_IS_BETTER' come testo primario, senza mapping a etichette umane. La chrome circostante è interamente in italiano: titolo \"Catalogo KPI\", sottotitolo \"KPI definiti, con unità, polarità e scope.\", header colonne CODICE / NOME / UNITÀ / POLARITÀ / SCOPE — quindi il valore inglese grezzo stride con la UI localizzata. Tutte le righe visibili sono affette (AML-ALERTS, BP-009-KPI-02, AUM-GROWTH, BP-007-KPI-01, ecc.). Issue reale di readability ma cosmetica: i valori restano distinguibili e comprensibili, nessun dato errato né funzionalità rotta. Severity confermata medium (visibile a tutti, ogni riga, incoerente con la localizzazione, ma non bloccante)."
+    },
+    {
+      "route": "/content/[id]",
+      "severity": "low",
+      "type": "DATA",
+      "title": "Document identity is a placeholder seed fixture (\"[me-media-it] ESS media doc\" / body \"[me-media-it] body\")",
+      "evidence": "The document page header reads \"[me-media-it] ESS media doc\" and the body field (Corpo markdown) literally contains \"[me-media-it] body\". The \"[me-media-it]\" token is an internal slug-style marker shown as the primary title and body of a real (Bozza) document, i.e. placeholder fixture text rather than human-readable content.",
+      "note": "Confirmed by reading the screenshot. The H1 header reads \"[me-media-it] ESS media doc\" (with a \"Bozza\"/Draft badge), the \"Titolo\" input contains the same \"[me-media-it] ESS media doc\", and the \"Corpo (markdown)\" body field literally contains \"[me-media-it] body\". The \"[me-media-it]\" slug-style token is plainly internal placeholder/seed-fixture text, not human-readable content. Severity adjusted medium->low: this is a content/data-quality issue on a DRAFT document only — the page renders fine, the publish workflow and edit form work, nothing is functionally broken, and no customer-facing/published content is affected. (Side note also visible: title says \"media doc\" but Tipo is set to \"Articolo\" — minor metadata inconsistency, consistent with fixture data.) Real fixture present in the two production-grade tenants, but low operational risk."
+    },
+    {
+      "route": "/content",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Duplicated language toggle (header IT globe + sidebar IT/EN)",
+      "evidence": "Top-right header shows a globe with \"IT\" language selector, while the bottom-left sidebar shows a separate \"IT / EN\" toggle (IT highlighted). Two distinct language controls are visible on the same screen.",
+      "note": "Screenshot D:/heuresys-advanced/audit/screenshots/clean/content.png clearly shows TWO distinct language controls on the same screen: (1) top-right header has a globe icon + \"IT\" label (language selector in the toolbar); (2) bottom-left sidebar, directly under admin@heuresys.com, has a separate two-segment \"IT | EN\" toggle with IT highlighted in blue. Both are language controls visible simultaneously, exactly as the finding describes. CONFIRMED. Severity remains low: this is UX redundancy/duplication (two controls for the same locale concern) — confusing but not a functional break, data error, or accessibility blocker. Recommendation: consolidate into a single language control."
+    },
+    {
+      "route": "/content/[id]",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Duplicated language toggle (header IT globe + sidebar IT/EN)",
+      "evidence": "Same as the list page: a globe \"IT\" selector in the top-right header plus a separate \"IT / EN\" toggle in the bottom-left sidebar are both visible simultaneously.",
+      "note": "Screenshot clearly shows BOTH controls simultaneously: (1) a globe + \"IT\" language selector in the top-right header (~x1047,y31), and (2) a separate \"IT\"/\"EN\" two-button toggle in the bottom-left sidebar (IT highlighted blue, EN unhighlighted) directly above the \"Esci\" button. This is genuine UX redundancy — two distinct controls switching the same UI language. Severity correctly stays 'low': purely cosmetic/UX duplication, no functional break, no data loss, no accessibility blocker. Matches the same duplication reported on the content list page."
+    },
+    {
+      "route": "/dashboard",
+      "severity": "low",
+      "type": "DATA",
+      "title": "Tutti i delta-trend KPI mostrano \"—0.0% vs settimana prec.\" (valore placeholder)",
+      "evidence": "Le 5 card con trend (UTENTI 162, POSIZIONI 162, ORG UNITS 26, LEARNING PATHS 4667, LEARNING GAPS 270) riportano tutte identicamente la riga \"— 0.0%  vs settimana prec.\" con dash em e zero percentuale; nessun delta reale differenziato tra le card.",
+      "note": "Confermato leggendo lo screenshot D:/heuresys-advanced/audit/screenshots/clean/dashboard.png. Le 5 card con riga di trend — UTENTI 162, POSIZIONI 162, ORG UNITS 26, LEARNING PATHS 4667, LEARNING GAPS 270 — riportano tutte identicamente \"— 0.0%  vs settimana prec.\" con dash em e zero percentuale; nessun delta differenziato. Le altre 3 card (TENANT 2, BLUEPRINT 1) non hanno riga di trend, coerente con l'evidence. Ogni card mostra una sparkline disegnata ma il delta testuale è uniformemente hard-coded a 0.0% = placeholder non calcolato. Severity abbassata da medium a low: i conteggi reali (162/162/26/4667/270) sono corretti e differenziati; il difetto è solo cosmetico/credibilità su una metrica informativa non-bloccante, non impatta navigazione, dati core o workflow."
+    },
+    {
+      "route": "/dashboard",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Toggle lingua duplicato (header globe IT + toggle IT/EN nella sidebar)",
+      "evidence": "In alto a destra c'è un controllo globo con etichetta \"IT\"; in basso nella sidebar, sotto admin@heuresys.com, c'è una seconda coppia di pulsanti \"IT\"/\"EN\" (IT evidenziato in blu). Due controlli lingua distinti sulla stessa schermata.",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean/dashboard.png directly. Two distinct language controls are both visible on /dashboard: (1) top-right header has a globe icon with an \"IT\" label (~x=1047, y=31), next to the search bar; (2) the sidebar footer, below admin@heuresys.com (~y=770), shows a paired button group \"IT\" (highlighted in blue/selected) and \"EN\", above the \"Esci\" logout button. These are two separate, simultaneous language-switching controls duplicating the same function. Finding confirmed exactly as described. Severity kept at low: it is a cosmetic/UX redundancy (potential user confusion about the canonical control) with no functional, data-integrity, or accessibility-blocking impact. Recommendation: consolidate to a single language switcher."
+    },
+    {
+      "route": "/system-health",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Toggle lingua duplicato (header globe IT + toggle IT/EN nella sidebar)",
+      "evidence": "Header in alto a destra mostra il controllo globo \"IT\"; la sidebar in basso ripropone una coppia separata di pulsanti \"IT\"/\"EN\" (IT attivo in blu). Stesso doppione di controllo lingua visto sulla dashboard.",
+      "note": "Verificato leggendo lo screenshot D:/heuresys-advanced/audit/screenshots/clean/system-health.png. Sono visibili due controlli lingua distinti sulla stessa schermata: (1) nell'header in alto a destra, icona globo seguita da \"IT\"; (2) nella sidebar in basso a sinistra, una coppia di pulsanti toggle \"IT\"/\"EN\" con \"IT\" attivo evidenziato in blu, posizionata sotto l'email admin@heuresys.com e sopra il pulsante \"Esci\". Entrambi gli elementi controllano la stessa funzione (selezione lingua IT/EN), quindi la duplicazione e' reale e chiaramente visibile. Severity confermata LOW: e' una ridondanza UX/layout (due language switcher sulla stessa pagina), non un difetto funzionale, stato rotto o problema di integrita' dati; genera lieve confusione ma nessuna perdita di funzionalita'."
+    },
+    {
+      "route": "/engagement",
+      "severity": "medium",
+      "type": "I18N",
+      "title": "Tutti i titoli dei sondaggi e i valori della colonna TIPO sono in inglese mentre la UI è in italiano",
+      "evidence": "Chrome IT (intestazioni 'TITOLO/STATO/TIPO/RISPOSTE/DOMANDE/INVITI', sottotitolo 'Risultati dei sondaggi e andamento pulse'), ma ogni riga ha titolo EN ('Q4 2025 Pulse Survey', 'New Hire Onboarding Survey', 'Manager Effectiveness Survey', 'Annual Engagement Survey 2025', 'Digital Transformation Feedback') e la colonna TIPO mostra valori EN raw ('pulse', 'onboarding', 'custom', 'annual', 'engagement', 'feedback').",
+      "note": "Verified by reading audit/screenshots/clean/engagement.png. UI chrome is Italian (headers TITOLO/STATO/TIPO/RISPOSTE/DOMANDE/INVITI, subtitle \"Risultati dei sondaggi e andamento pulse\", section \"Andamento Pulse\"), yet every survey title in the table is English (Q4 2025 Pulse Survey, New Hire Onboarding Survey, Manager Effectiveness Survey, Annual Engagement Survey 2025, Q4 2024 Employee Engagement Survey, Digital Transformation Feedback, Q3 2024 Pulse Survey, QA Survey) and the TIPO column shows raw lowercase enum codes untranslated (pulse, onboarding, custom, annual, engagement, feedback). All claimed evidence matches. Note: the STATO column IS correctly localized (Attivo/Chiuso/Bozza), which the finding does not dispute. Severity held at medium: a genuine i18n/label-localization defect visible across the whole primary table (notably the raw TIPO enum codes), but no layout break or functional failure — page is fully usable; titles being English is partly authored-content rather than a missing translation, so not high."
+    },
+    {
+      "route": "/engagement",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Doppio selettore di lingua sulla stessa schermata",
+      "evidence": "Nell'header in alto c'è un toggle globo + pill 'IT'; in basso a sinistra nella sidebar c'è un secondo toggle con due bottoni 'IT' (attivo, evidenziato) ed 'EN'. Due controlli di lingua distinti visibili contemporaneamente.",
+      "note": "Verificato leggendo lo screenshot D:/heuresys-advanced/audit/screenshots/clean/engagement.png. Sono visibili contemporaneamente DUE controlli di lingua distinti: (1) header in alto a destra = icona globo + pill \"IT\"; (2) sidebar in basso a sinistra (sotto admin@heuresys.com) = segmented control a due bottoni \"IT\" (attivo, evidenziato in blu) ed \"EN\". Confermato esattamente come descritto. E' una ridondanza di layout/UX (due switcher di lingua sulla stessa pagina), non un bug funzionale: nessuna rottura, ma incoerenza/confusione UI. Severity low corretta."
+    },
+    {
+      "route": "/goals",
+      "severity": "low",
+      "type": "I18N",
+      "title": "Nomi degli obiettivi misti inglese/italiano nella stessa lista",
+      "evidence": "Sotto la colonna 'NOME' coesistono righe EN ('Complete RBP compliance training', 'Improve HR onboarding TTD by 20%') e righe IT ('Raggiungere target volumi trading mensili', 'Completare certificazione FRM Part I entro Q2 2025', 'Ridurre tasso difetti prodotto sotto 0.5%', 'Aumentare AUM del portafoglio clienti dell'8%', 'Generare risparmi energetici per 500 MWh') con UI italiana ('Obiettivi', 'Obiettivi e goal sull'intero tenant').",
+      "note": "Confermato leggendo lo screenshot (zoom 3x della colonna NOME, salvato in C:\\Users\\ENZOSP~1\\AppData\\Local\\Temp\\claude\\D--heuresys-advanced\\98b9c986-e8a0-48aa-9e07-5da6b7cda51a\\scratchpad\\goals_name_col.png). La UI/chrome e' interamente in italiano: titolo \"Obiettivi\", sottotitolo \"Obiettivi e goal sull'intero tenant\", badge \"1067 obiettivi\". Sotto la colonna NOME coesistono righe EN (\"Complete RBP compliance training\", \"Improve HR onboarding TTD by 20%\") e righe IT (\"Raggiungere target volumi trading mensili\", \"Completare certificazione FRM Part I entro...\", \"Ridurre tasso difetti prodotto sotto 0.5%\", \"Aumentare AUM del portafoglio clienti dell'...\", \"Generare risparmi energetici per 500 MWh\", \"Raggiungere OEE 85% sulle linee assegnate...\"). L'evidenza nel claim corrisponde a quanto visibile. Severity abbassata da medium a low: i nomi degli obiettivi sono DATI di business generati per-tenant (synthetic/seed data), non stringhe UI hardcoded; il layer i18n del prodotto e' coerente (tutto il chrome e' IT). Si tratta di una incoerenza di data-quality/consistenza del dataset, non di un difetto di localizzazione del prodotto, quindi impatto basso. Non e' un bug del codice i18n."
+    },
+    {
+      "route": "/goals",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Le colonne TIPO/PRIORITA/STATO mostrano codici enum grezzi invece di etichette localizzate",
+      "evidence": "In una UI italiana le celle mostrano valori SCREAMING_SNAKE/uppercase non tradotti: TIPO = 'OBJECTIVE'/'INDIVIDUAL', PRIORITA = 'MEDIUM'/'HIGH', STATO = 'IN_PROGRESS'/'NOT_STARTED'/'ON_TRACK' (badge).",
+      "note": "Verified by reading and zooming the screenshot (D:/heuresys-advanced/audit/screenshots/clean/goals.png, 1440x900). The UI is unambiguously Italian (header \"Obiettivi\", subtitle \"Obiettivi e goal sull'intero tenant\", column headers TIPO/PRIORITA/AVANZAMENTO/SCADENZA/STATO). The data cells render raw English enum codes uppercased: TIPO = OBJECTIVE / INDIVIDUAL; PRIORITA = MEDIUM / HIGH; STATO badges = IN_PROGRESS, NOT_STARTED, ON_TRACK (SCREAMING_SNAKE, untranslated and unformatted). All three claimed columns and all claimed values are present in the screenshot. Severity kept at medium: it is a pervasive i18n/readability defect across three columns of a primary table, but values remain human-parseable, nothing is invisible or broken, and no flow is blocked — a polish/localization issue, not high."
+    },
+    {
+      "route": "/okrs",
+      "severity": "low",
+      "type": "I18N",
+      "title": "Tutti gli obiettivi OKR sono in inglese mentre la UI è in italiano",
+      "evidence": "Titolo pagina 'OKR' + sottotitolo IT 'Obiettivi e risultati chiave sull'intero tenant', ma ogni riga OBIETTIVO è EN ('Reduce loan processing time by 30%', 'Implement AI-powered fraud detection', 'Achieve 98% AML compliance score', 'Launch mobile banking app v3.0', 'Reduce operational costs by 12%', 'Achieve ISO 22000 certification').",
+      "note": "Verificato leggendo direttamente lo screenshot (ingrandito via crop, D:/heuresys-advanced/audit/screenshots/clean/okrs.png). Le label statiche della UI sono italiane: titolo \"OKR\" + badge \"20 OKR\", sottotitolo \"Obiettivi e risultati chiave sull'intero ten[ant]\", intestazione colonna \"OBIETTIVO\". I dati nella colonna OBIETTIVO sono invece tutti in inglese: \"Reduce loan processing time by 30%\", \"Implement AI-powered fraud detection\", \"Achieve 98% AML compliance score\", \"Launch mobile banking app v3.0\", \"Increase corporate lending by 20%\", \"Reduce operational costs by 12%\", \"Achieve 100% supplier traceability\", \"Reduce packaging waste by 30%\". L'evidenza corrisponde esattamente: chrome IT + righe EN = mismatch confermato. Severity abbassata da medium a low: non è un difetto di localizzazione UI (tutte le stringhe statiche sono tradotte correttamente) ma contenuto seed/business (titoli obiettivi RTL Bank, redatti in inglese per provenienza dei dati). La pagina renderizza e funziona; è un problema di coerenza/rifinitura del contenuto, non funzionale."
+    },
+    {
+      "route": "/okrs",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Le colonne TIPO e STATO mostrano codici enum grezzi",
+      "evidence": "In UI italiana la colonna TIPO mostra 'DEPARTMENT'/'COMPANY' e la colonna STATO il badge 'ACTIVE' non tradotti/localizzati.",
+      "note": "Verificato leggendo lo screenshot (1440x900) con crop/zoom 4x delle colonne. UI in italiano (header OBIETTIVO, TIPO, PERIODO, AVANZAMENTO, STATO; sottotitolo \"Obiettivi e risultati chiave sull'intero tenant\"). La colonna TIPO mostra il codice enum grezzo non tradotto \"DEPARTMENT\" (inglese, maiuscolo) su tutte le righe visibili. La colonna STATO mostra il badge \"ACTIVE\" (inglese, maiuscolo, non localizzato in \"Attivo\"). Difetto di localizzazione/readability reale e confermato. Nota: nello screenshot ho osservato solo \"DEPARTMENT\" (nessuna riga \"COMPANY\"), ma il claim su COMPANY era ipotetico/hedged e il cuore del finding (enum grezzi in TIPO e badge ACTIVE in STATO in UI italiana) e' pienamente confermato. Severity mantenuta a medium: e' un gap i18n su una list view primaria, ma cosmetico — i valori restano leggibili e inequivocabili, non bloccano comprensione o funzione."
+    },
+    {
+      "route": "/insights/skill-gap",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Raw technical code used as person identity instead of a human name",
+      "evidence": "The first/top row of the table under column PERSONA displays \"IT_ME_D585D56B-name\" as the person's identity (the highest-gap row, GAP 59.2, Securities Dealer). All other rows show real names (Tommaso Caputo, Ilaria Bruno, etc.), so this one row exposes a raw placeholder/technical code instead of a readable label.",
+      "note": "Confirmed by reading the screenshot. The top row of the table (PERSONA column) — the highest-gap entry: GAP 59.2, RUOLO ATTUALE \"Securities Dealer\", \"Gap moderato\" — displays \"IT_ME_D585D56B-name\" as the person's identity. All other visible rows show proper human names (Tommaso Caputo, Ilaria Bruno, Paolo Villa, Luca Ferri, Giorgio Mancini, Cristina Ferri, etc.), so this single row exposes a raw placeholder/technical code instead of a readable label. Real READABILITY/data-quality defect. Severity lowered high->medium: it is one record out of 154 valued persons, the page stays fully usable and no functionality breaks; it is a visible polish/data-integrity leak confined to a single row, not a page blocker. Likely root cause is a synthetic/placeholder user (user_external_code style \"IT_ME_...\"-derived label) that lacks a populated display name and falls back to the raw code."
+    },
+    {
+      "route": "/insights",
+      "severity": "medium",
+      "type": "DATA",
+      "title": "All flight-risk rows collapse to identical \"Medio\" band with a narrow score range",
+      "evidence": "Every visible row in the flight-risk table (scores 51.0 down to 43.0) shows the FASCIA badge \"Medio\" with no variation — Alice Costa 51.0 Medio, Xenia Leone 49.1 Medio, ... Marta Pellegrini 43.0 Medio. No \"Alto\" or \"Basso\" band appears among 159 evaluated people, suggesting the banding thresholds are not differentiating the data.",
+      "note": "Read the screenshot directly (D:/heuresys-advanced/audit/screenshots/clean/insights.png). The /insights \"rischio di abbandono\" table header confirms \"159 persone valutate\". All 15 visible rows show FASCIA=\"Medio\" with scores from 51.0 (Alice Costa, top) down to 43.0 (Marta Pellegrini) — an 8pt spread that never leaves the \"Medio\" band. Specific evidence claims match exactly: Alice Costa 51.0 Medio, Xenia Leone 49.1 Medio, Marta Pellegrini 43.0 Medio. No \"Alto\" or \"Basso\" badge appears in any visible row. The table is sorted descending by score, so the most at-risk person (51.0) still reads only \"Medio\" — meaning no row reaches \"Alto,\" which is the diagnostically meaningful part of the claim. Caveat: only 15 of 159 rows are above the fold, so I cannot strictly confirm zero Alto/Basso across all 159; but the top-of-distribution evidence strongly supports that the banding thresholds are not differentiating. Severity kept at medium: data renders and scores vary, but the band classifier is effectively non-discriminating, undermining the flight-risk insight's value — an analytics-quality issue, not a crash/broken-pipeline."
+    },
+    {
+      "route": "/insights/succession-readiness",
+      "severity": "medium",
+      "type": "DATA",
+      "title": "Duplicate person+position rows with near-identical readiness scores",
+      "evidence": "The succession table repeats the same person against the same target position multiple consecutive times: \"Luca Conti / Compliance Officer\" appears 3x (89.3, 89.3, 89.3), \"Alberto Serra / Compliance Officer\" 3x (89.1), \"Marco De Santis / Compliance Officer\" 3x (89.0), \"Andrea Greco\" 3x (88.8), \"Roberta Benedetti\" 3x (88.7). Every visible row targets the same position \"Compliance Officer\" and band \"Pronto ora\", which looks like a cartesian/duplication artifact rather than distinct evaluations.",
+      "note": "Confirmed by reading the screenshot directly. The succession table shows each person+target-position triplicated in consecutive rows with identical readiness scores: Luca Conti / Compliance Officer 3x (89.3), Alberto Serra 3x (89.1), Marco De Santis 3x (89.0), Andrea Greco 3x (88.8), Roberta Benedetti 3x (88.7). Every visible Posizione-obiettivo cell is \"Compliance Officer\" and every Orizzonte badge is \"Pronto ora\". The header advertises \"462 valutazioni persona-posizione\" yet the entire viewport is the same position with each person repeated exactly 3x — a clear cartesian/fan-out duplication signature, not distinct evaluations. All five claimed evidence rows match the screenshot exactly. Severity kept at medium: a DATA-integrity defect that inflates counts and makes the table misleading, but no crash/hard error — more than cosmetic, less than blocking."
+    },
+    {
+      "route": "/me",
+      "severity": "medium",
+      "type": "DATA",
+      "title": "Greeting shows no name and empty role despite logged-in user",
+      "evidence": "The hero greeting reads 'Ciao, …' (ellipsis, no name) and below it 'Ruoli: —' (em-dash, no roles), even though the top-right header clearly identifies the user as 'paolo.caputo@rtl-bank.org / TEAM_LEADER'. The user's name and role failed to populate in the page body.",
+      "note": "Confirmed by reading D:/heuresys-advanced/audit/screenshots/clean-ess/me.png. The hero in the page body reads \"Ciao, …\" (ellipsis, no name) with \"Ruoli: —\" (em-dash, no role) immediately below it. The same screenshot shows the user IS identified everywhere else: top-right header chip \"paolo.caputo@rtl-bank.org / TEAM_LEADER\" and sidebar footer \"paolo.caputo@rtl-bank.org\", plus the page footer \"TEAM_LEADER\". So identity data is available to the app but the greeting/role fields in the /me hero failed to populate — a real DATA defect, not refuted. Severity downgraded high→medium: it is a cosmetic presentation gap on a personal-area greeting (name/role render correctly in header+sidebar+footer), with no functional, security, or data-integrity impact, and the cards below show correct live empty-states (\"Nessuna posizione primaria attiva\", \"0 assegnati\", \"0 aperti\")."
+    },
+    {
+      "route": "/me",
+      "severity": "low",
+      "type": "DATA",
+      "title": "Posizione attuale shows placeholder dots then empty message",
+      "evidence": "The 'POSIZIONE ATTUALE' card shows '...' as its value and the text 'Nessuna posizione primaria attiva.', while 'PERCORSI FORMATIVI' shows '0 assegnati' and 'GAP DI SVILUPPO' shows '0 aperti'. The '...' placeholder reads as unresolved rather than a clean empty value.",
+      "note": "Verified by reading audit/screenshots/clean-ess/me.png. The POSIZIONE ATTUALE card clearly shows literal \"...\" (three dots) as its prominent value, with \"Nessuna posizione primaria attiva.\" beneath it. The two sibling cards resolve their empty state cleanly: PERCORSI FORMATIVI shows \"0 assegnati\" and GAP DI SVILUPPO shows \"0 aperti\". So the \"...\" reads as an unresolved/loading placeholder inconsistent with the sibling cards' clean zero-value treatment — exactly as claimed. (Side note: the greeting \"Ciao, …\" and \"Ruoli: —\" also appear unresolved, but the finding is correctly scoped to the card.) Severity adjusted medium→low: this is a cosmetic empty-state polish inconsistency, not a data corruption or broken-functionality DATA defect — the page renders, the empty-state sentence is present, no workflow is blocked. The literal dots are an unpolished placeholder, purely a visual presentation issue."
+    },
+    {
+      "route": "/me",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Language toggle appears twice on the page",
+      "evidence": "A globe 'IT' control sits in the top header, and a separate IT/EN toggle pair (IT highlighted) is rendered at the bottom of the left sidebar above 'Esci' — two distinct language selectors visible simultaneously.",
+      "note": "Confirmed by reading D:/heuresys-advanced/audit/screenshots/clean-ess/me.png. Two distinct language selectors are visible simultaneously: (1) a globe icon + \"IT\" control in the top-right header (sitting between the search bar and the theme/palette + dark-mode controls), and (2) an IT/EN toggle pair at the bottom of the left sidebar, directly under the user email paolo.caputo@rtl-bank.org and above the \"Esci\" (logout) button, with \"IT\" highlighted in blue (active) and \"EN\" unselected. Both are language switchers shown at the same time — a genuine redundancy. Severity stays low: both controls are functional and the duplication is cosmetic/UX-consistency only, non-blocking with no data or flow impact."
+    },
+    {
+      "route": "/me/career",
+      "severity": "high",
+      "type": "WIRING",
+      "title": "Career objectives fail to load with error message",
+      "evidence": "Under the title 'La mia carriera' (still showing a 'Caricamento…' badge) the content panel displays the red error text 'Impossibile caricare i tuoi obiettivi di carriera.' instead of a list or a clean empty-state. Data hint shows 403:1.",
+      "note": "Screenshot at D:/heuresys-advanced/audit/screenshots/clean-ess/me__career.png clearly confirms the core finding. Under the title \"La mia carriera\" — which still shows a \"Caricamento…\" badge (stuck loading state) — and subtitle \"Le tue posizioni target dichiarate.\", the content panel displays red error text \"Impossibile caricare i tuoi obiettivi di carriera.\" instead of a list or a clean empty-state. Logged in as paolo.caputo@rtl-bank.org (TEAM_LEADER). The page is fully non-functional: only the broken error state is rendered. This is a genuine WIRING defect (the /v1/me/career data fetch fails, leaving the loading badge unresolved and surfacing a hard error). Caveat: the claimed evidence detail \"Data hint shows 403:1\" is NOT visible/rendered anywhere in the screenshot — no such badge or text is present in the image, so that specific datapoint is unverifiable from the screenshot alone (though it is consistent with a permission/authorization failure causing the error). Severity kept at high: a core ESS page is entirely unusable for this real production user, showing only an error rather than content or an empty state."
+    },
+    {
+      "route": "/me/career",
+      "severity": "low",
+      "type": "DATA",
+      "title": "Loading badge stuck visible alongside error",
+      "evidence": "The header keeps a 'Caricamento…' pill next to 'La mia carriera' even though the body has already resolved to an error state ('Impossibile caricare…'), so loading and error states are shown at the same time.",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean-ess/me__career.png. The page header shows the title \"La mia carriera\" with a pill labeled \"Caracamento…\" (Caricamento… = Loading…) directly to its right, while the body has ALREADY resolved to an error state: a card displays \"Impossibile caricare i tuoi obiettivi di carriera.\" in red. Both the loading indicator and the error are rendered simultaneously, which are mutually exclusive query states (a failed request is no longer loading). This confirms the finding: the loading badge is not cleared when the query settles into error. Classified DATA/UX state-management bug. Severity remains low — non-blocking cosmetic inconsistency; the user still sees and understands the error message. The badge should be hidden once the query reaches an error state."
+    },
+    {
+      "route": "/me/certifications",
+      "severity": "high",
+      "type": "WIRING",
+      "title": "Certifications list fails to load with error",
+      "evidence": "Below the 'Aggiungi certificazione' form, a panel shows 'Impossibile caricare le certificazioni.' with subtext 'Riprova più tardi o verifica la connessione.' instead of the registered certifications list or a clean empty-state. Data hint shows 403:1.",
+      "note": "Screenshot directly confirms the core finding. On /me/certifications (logged in as paolo.caputo@rtl-bank.org, role TEAM_LEADER), below the \"Aggiungi certificazione\" form a panel shows the bold error heading \"Impossibile caricare le certificazioni.\" with subtext \"Riprova piu tardi o verifica la connessione.\" — an error state, not a clean empty-state or the registered list. The page title still shows a \"Caricamento...\" badge, indicating the list fetch never resolved successfully. This is a real WIRING defect that leaves an authenticated ESS page broken (user cannot view/confirm certifications). Severity kept high: full feature breakage on an authenticated page. Caveat: the claimed \"Data hint shows 403:1\" is NOT legible/visible anywhere in the screenshot itself — that specific status-code detail is unverifiable from the image alone, though the visible error message fully substantiates the load failure."
+    },
+    {
+      "route": "/me/certifications",
+      "severity": "low",
+      "type": "DATA",
+      "title": "Loading badge stuck visible alongside error",
+      "evidence": "The 'Caricamento…' pill remains next to the 'Le mie certificazioni' title while the list panel below already shows the 'Impossibile caricare le certificazioni.' error — loading and error states coexist.",
+      "note": "Screenshot confirms the finding. A \"Caricamento…\" pill is rendered next to the \"Le mie certificazioni\" title while the data panel below simultaneously shows the error state \"Impossibile caricare le certificazioni.\" / \"Riprova più tardi o verifica la connessione.\" Both the loading indicator and the error state coexist, which is contradictory — on request failure the loading badge should have cleared. This is a UI state-management inconsistency (loading flag not reset when the query errors). Severity remains low: it is confusing/cosmetic but does not block functionality — the error message is shown and the \"Aggiungi certificazione\" form remains usable. No data corruption or broken feature. Verified by Read of D:/heuresys-advanced/audit/screenshots/clean-ess/me__certifications.png (user paolo.caputo@rtl-bank.org / TEAM_LEADER)."
+    },
+    {
+      "route": "/me/documents",
+      "severity": "medium",
+      "type": "WIRING",
+      "title": "Documents fail to load with error",
+      "evidence": "The single content panel shows 'Impossibile caricare i documenti.' with subtext 'Riprova più tardi o verifica la connessione.' instead of a document list or a designed empty-state. Data hint shows 403:1.",
+      "note": "Screenshot at D:/heuresys-advanced/audit/screenshots/clean-ess/me__documents.png confirms it. The /me/documents page (\"I miei documenti\", subtitle \"Documenti caricati sul tuo profilo.\") renders a bordered content box with bold \"Impossibile caricare i documenti.\" and subtext \"Riprova piu' tardi o verifica la connessione.\" — an error/failure state, not a document list and not a designed empty-state (no \"nessun documento\" affordance, no upload CTA). User is authenticated as paolo.caputo@rtl-bank.org, role TEAM_LEADER (shown top-right and bottom-right footer), consistent with the claimed 403 data hint: the backing /v1/me/* call almost certainly returns 403 for this role/profile, so the page can never show data. This is a real WIRING/permission defect that makes the page unusable. Severity adjusted high->medium: failure is contained to a single ESS sub-page for this role, degrades gracefully to an error box (no crash, no data loss, no security exposure), and does not affect the rest of the app shell/navigation which renders fine."
+    },
+    {
+      "route": "/me/gaps",
+      "severity": "high",
+      "type": "WIRING",
+      "title": "Development gaps fail to load with error",
+      "evidence": "Under 'I miei gap' the content panel displays 'Impossibile caricare i gap.' with subtext 'Riprova più tardi o verifica la connessione.' instead of a gaps list or a clean empty-state. Data hint shows 403:1.",
+      "note": "Screenshot at D:/heuresys-advanced/audit/screenshots/clean-ess/me__gaps.png clearly shows the /me/gaps page (\"I miei gap\", subtitle \"Gap di sviluppo aperti sulle tue skill.\") rendering an error card instead of data or a clean empty-state: bold \"Impossibile caricare i gap.\" with subtext \"Riprova più tardi o verifica la connessione.\" User is logged in as paolo.caputo@rtl-bank.org (TEAM_LEADER, shown top-right and in footer). This is a genuine WIRING/load-failure defect: the page's core content is entirely non-functional for an authenticated ESS user. CAVEAT: the claimed \"403:1\" data hint is NOT visible in the screenshot itself — there is no status badge, network panel, or devtools overlay in the image. A 403 is plausible (self-scope /me route, TEAM_LEADER persona) but the specific status code is unverified from the image alone; only the rendered error state is confirmed. Severity kept at high because the page degrades to a complete load failure rather than showing the user's development gaps."
+    },
+    {
+      "route": "/me/inbox",
+      "severity": "high",
+      "type": "WIRING",
+      "title": "Inbox fails to load with permission error for the page owner",
+      "evidence": "Page header 'Inbox' shows a 'Caricamento...' pill stuck, and below the subtitle a red message 'Impossibile caricare la tua inbox.' is displayed. The data-hint shows 403:1 — paolo.caputo is denied access to his OWN self-scope inbox, so no notifications render at all.",
+      "note": "Screenshot at D:/heuresys-advanced/audit/screenshots/clean-ess/me__inbox.png clearly shows the failure: header \"Inbox\" with a stuck \"Caricamento...\" pill, subtitle \"Le tue notifiche e comunicazioni recenti.\", and a red error \"Impossibile caricare la tua inbox.\" with zero inbox content rendered. Logged-in user is paolo.caputo@rtl-bank.org (TEAM_LEADER, shown top-right and bottom-right) — i.e. the page owner of this self-scope /me/inbox route. The page hard-fails to load its own owner's data: a broken core ESS page, justifying HIGH severity. CAVEAT (adversarial): the screenshot does NOT show any \"data-hint\" or \"403:1\" indicator — that comes from DOM/network inspection, not the image. The visible message is a generic load-failure, not an explicit 403/permission message. So the WIRING failure (page doesn't work for its owner) is fully confirmed by the screenshot; the specific \"permission error / 403\" root-cause attribution in the title is plausible but NOT verifiable from the screenshot alone."
+    },
+    {
+      "route": "/me/kpis",
+      "severity": "high",
+      "type": "WIRING",
+      "title": "My-KPIs page cannot load self-scope KPI data (403)",
+      "evidence": "Under the title 'I miei KPI' / 'Obiettivi KPI attivi sulle tue posizioni.', a bordered card reads 'Impossibile caricare i KPI.' with subtext 'Riprova più tardi o verifica la connessione.' The data-hint shows 403:1, so the failure is an access denial on the logged-in user's own KPIs, not a transient network issue.",
+      "note": "Screenshot (paolo.caputo@rtl-bank.org / TEAM_LEADER) clearly shows the page broken: under title 'I miei KPI' / 'Obiettivi KPI attivi sulle tue posizioni.' a bordered card reads 'Impossibile caricare i KPI.' with subtext 'Riprova più tardi o verifica la connessione.' instead of any KPI data. The page is fully non-functional for the logged-in user's own self-scope data — confirmed WIRING failure, high severity (a self-service page returns no data). CAVEAT on root cause: the claimed 'data-hint shows 403:1' is a DOM data attribute and is NOT visible in a rendered screenshot, so the specific 403/access-denial diagnosis cannot be verified from the image. The rendered message ('Riprova più tardi o verifica la connessione' = retry/check-connection) is in fact a generic transient-error string that does not itself indicate a 403 rather than a 500/network error. Verdict: the visible defect (error card, no data) is confirmed; the precise 403 status code is unverifiable from the screenshot and would need a network-trace/log check to substantiate."
+    },
+    {
+      "route": "/me/learning",
+      "severity": "high",
+      "type": "WIRING",
+      "title": "My-learning-paths page cannot load self-scope data (403)",
+      "evidence": "Under 'I miei percorsi' / 'I percorsi formativi a te assegnati.', a card shows 'Impossibile caricare i percorsi.' with 'Riprova più tardi o verifica la connessione.' The data-hint shows 403:1 — the user's own assigned learning paths are denied, leaving the page empty.",
+      "note": "Screenshot at D:/heuresys-advanced/audit/screenshots/clean-ess/me__learning.png clearly shows the failure. Header \"I miei percorsi\" / subtitle \"I percorsi formativi a te assegnati.\" identifies the /me/learning page. The main content card renders the error state \"Impossibile caricare i percorsi.\" with \"Riprova piu tardi o verifica la connessione.\" and no learning paths below it — the page is left empty. Logged in as paolo.caputo@rtl-bank.org (TEAM_LEADER), a real authenticated self-scope persona where own assigned paths should load, so this is a genuine functional failure, not an empty-state. Caveat: the data-hint 403:1 HTTP status is DOM metadata and is NOT visually rendered in the screenshot — the image alone proves the load-failure error UI but not specifically the 403 code; however the visible error card is fully consistent with the claimed denied self-scope fetch. Severity high confirmed: a core ESS page is non-functional, blocking the user from their own learning data."
+    },
+    {
+      "route": "/me/positions",
+      "severity": "medium",
+      "type": "WIRING",
+      "title": "My-positions page cannot load assignment history (403)",
+      "evidence": "Under 'Le mie posizioni' / 'Storico delle tue assegnazioni di posizione.', a card reads 'Impossibile caricare le posizioni.' with 'Riprova più tardi o verifica la connessione.' The data-hint shows 403:1 — the user's own position-assignment history is access-denied and nothing renders.",
+      "note": "Screenshot read directly. The page \"Le mie posizioni\" (subtitle \"Storico delle tue assegnazioni di posizione.\") for user paolo.caputo@rtl-bank.org (TEAM_LEADER) renders an error card instead of data: \"Impossibile caricare le posizioni.\" / \"Riprova più tardi o verifica la connessione.\" No assignment history is shown. The broken/error state is visually CONFIRMED. CAVEAT: the specific \"403:1\" status code and the WIRING/access-denied attribution are NOT visible in the rendered image — the error copy is generic (\"verifica la connessione\") and could equally stem from a 500/network failure; the 403 claim relies on DOM data-hint inspection not shown here. Adjusted to medium: a self-service user unable to view their own position history is a real broken-page defect, but it is a single contained page error (not a security breach or system-wide outage), and the root-cause status code is not visually verifiable. To pin the exact cause, inspect the /v1/me/positions network response."
+    },
+    {
+      "route": "/me/handbook/[id]",
+      "severity": "medium",
+      "type": "WIRING",
+      "title": "Handbook document route resolves to 'document not found'",
+      "evidence": "Under a '← Manuale' back link, the page body shows only a red 'Documento non trovato.' message. The data-hint shows 404:1, meaning the handbook id in the URL does not resolve to any document — the detail route is broken/unwired for this user.",
+      "note": "Screenshot directly confirms the visible state: under a \"← Manuale\" back link, the page body shows only a red \"Documento non trovato.\" message. The user is logged in as paolo.caputo@rtl-bank.org (TEAM_LEADER role, visible top-right and bottom-right). The full app shell renders correctly — sidebar navigation (Prospettiva/Operazioni/Panoramica/Intelligence), header search, language toggle, theme/palette controls, and footer are all intact — so the failure is scoped specifically to the handbook document-detail content, which does not resolve for the supplied id. This is a genuine WIRING/resolution defect (the handbook id in the URL maps to no document for this user). Verdict confirmed: the not-found state is unambiguous in the screenshot. Severity adjusted high→medium because the defect is scoped to a single detail route and degrades gracefully (clean error state shown, the \"← Manuale\" back link remains usable, no crash, rest of app functional). It does not block the module or the session. The screenshot alone cannot prove the route is universally broken vs. a specific missing/non-seeded id for this persona, which also tempers a \"high\" rating."
+    },
+    {
+      "route": "/me/matching",
+      "severity": "medium",
+      "type": "I18N",
+      "title": "All ESCO occupation names rendered in English in an Italian UI",
+      "evidence": "In the 'Occupazioni compatibili' table every 'OCCUPAZIONE' value is English: 'business manager', 'strategic planning manager', 'business service manager', 'human resources manager', 'product and services manager', 'project manager', 'supply chain manager', 'operations manager', 'ICT operations manager', 'quality services manager' — while the chrome, headers and 'Posizioni compatibili' section are Italian.",
+      "note": "Read of D:/heuresys-advanced/audit/screenshots/clean-ess/me__matching.png confirms the finding. The \"Occupazioni compatibili\" table (paolo.caputo@rtl-bank.org, TEAM_LEADER) shows all 10 OCCUPAZIONE values in English, verbatim-matching the evidence list: business manager (ISCO 1213, 78%), strategic planning manager (1213, 78%), business service manager (1219, 77%), human resources manager (1212, 77%), product and services manager (2431, 77%), project manager (1219, 76%), supply chain manager (1324, 76%), operations manager (1321, 76%), ICT operations manager (1330, 75%), quality services manager (1219, 75%). Meanwhile the chrome and headers are Italian: heading \"Occupazioni compatibili\", subtitle \"Le occupazioni ESCO più affini al tuo profilo di competenze.\", column headers OCCUPAZIONE / CODICE ISCO / AFFINITÀ, sidebar (Blueprint, Processi, Approvazioni, Dashboard, Visualizzazioni, Organizzazione, Analisi forza lavoro, Analisi KPI), Prospettiva tabs, \"Posizioni compatibili\" section, and the IT language toggle. The ESCO taxonomy ships Italian preferredLabels, so the API/data layer is serving the English label instead of the localized one. Severity kept at medium: it is cosmetic (data correct, scores and ISCO codes usable, no functional block) but affects the entire core content column of the page in a localized product, not a single stray string. Note: the adjacent \"Posizioni compatibili\" names (HR Manager, Operations Director) are internal RTL Bank position titles, outside this finding's ESCO scope."
+    },
+    {
+      "route": "/me/learning/catalogue",
+      "severity": "low",
+      "type": "I18N",
+      "title": "Course catalogue mixes English and Italian course titles",
+      "evidence": "The 'Catalogo percorsi' table lists English titles ('ABA Bank Teller Certificate - Foundations', 'AML Transaction Monitoring', 'Advanced Data Analysis', 'Allergen Management & Control') alongside Italian ones ('Antiriciclaggio AML'), with English descriptions ('Analisi dati avanzata con Python e SQL' is IT but rows like 'AML Transaction Monitoring' have EN descriptions) — inconsistent language for data content in an Italian UI.",
+      "note": "Screenshot READ directly. Confirmed: in the Italian UI \"Catalogo percorsi\" table, course titles are mixed-language — English (\"ABA Bank Teller Certificate - Foundations\", \"AML Transaction Monitoring\", \"Advanced Data Analysis\" x4 rows, \"Allergen Management & Control\") alongside Italian (\"Antiriciclaggio AML\"). The UI chrome itself is fully Italian (PERCORSO/CODICE/TIPO/AZIONE/OPZIONALE/Iscriviti), so the inconsistency is in the data content, not in i18n strings. One inaccuracy in the claimed evidence: it states some rows have \"EN descriptions\" — false. All visible descriptions are Italian (e.g. the \"AML Transaction Monitoring\" row's description is \"Tecniche di monitoraggio transazioni, red flags, pattern sospetti...\"; the \"ABA Bank Teller\" row's is \"Fondamenti operativita di cassa...\"). So only the titles are mixed-language, not the descriptions. Severity lowered medium→low: this is catalog/seed data-quality inconsistency with minimal functional/user impact, and English titles for industry certifications/courses (AML, ABA Bank Teller) are a common, defensible pattern even in Italian-language HR products; it is not a UI/translation defect."
+    },
+    {
+      "route": "/me/learning/catalogue",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Duplicate course titles distinguished only by raw technical codes",
+      "evidence": "Four rows are all titled 'Advanced Data Analysis' and can only be told apart by the CODICE column codes 'CRS-econova-2', 'CRS-rtl-bank-2', 'CRS-smartfood-2', 'CRS-heuresys-2'. The human label is non-unique, forcing the user to read internal tenant-suffixed codes as the real identity.",
+      "note": "Screenshot directly confirms the finding. Four consecutive rows all titled \"Advanced Data Analysis\" are distinguishable only by the CODICE column: CRS-econova-2, CRS-rtl-bank-2, CRS-smartfood-2, CRS-heuresys-2 — raw tenant-suffixed internal codes (econova/rtl-bank/smartfood/heuresys are org names embedded in the identifier). The description, where shown, is also identical (\"Analisi dati avanzata con Python e SQL\"), and two of the four rows show no description at all, so it provides no disambiguation. The human-readable label is non-unique, forcing the user to read internal codes as the real identity. Severity medium confirmed: real readability/usability degradation (the collision recurs across a 3219-entry catalogue and impairs choosing the correct course), but not high — nothing is broken or blocking, data renders correctly, and the codes do technically disambiguate. Evidence: D:/heuresys-advanced/audit/screenshots/clean-ess/me__learning__catalogue.png, rows 3-6 of the catalogue table."
+    },
+    {
+      "route": "/me/learning/catalogue",
+      "severity": "medium",
+      "type": "DATA",
+      "title": "Catalogue count badge (3219) inconsistent with rendered scope",
+      "evidence": "The header badge reads '3219 percorsi disponibili' for a single employee's browsable catalogue (data-hint rows:25). 3219 courses available to enrol in is a suspiciously large, likely cross-tenant count surfaced to one ESS user rather than a tenant-scoped figure.",
+      "note": "Confirmed by reading the screenshot. User is paolo.caputo@rtl-bank.org (TEAM_LEADER, RTL Bank tenant). Header badge reads \"3219 percorsi disponibili\" on a single ESS user's catalogue. Direct on-screen evidence of cross-tenant leakage: the rendered course CODICE column embeds tenant slugs from MULTIPLE unrelated tenants — CRS-econova-2, CRS-rtl-bank-2, CRS-smartfood-2, CRS-heuresys-2 (the same title \"Advanced Data Analysis\" repeated once per tenant), plus food-industry content (ALLERG-001 \"Allergen Management & Control\", CRS-smartfood-9) irrelevant to a bank employee. So the catalogue is not tenant-scoped; it surfaces at least 4 tenants' courses to one RTL Bank user, corroborating that 3219 is a cross-tenant aggregate. This is not just a large-number heuristic — the leak is visibly rendered in the rows. Severity raised low->medium: this is a tenant-isolation/scope defect (violates invariant I5 tenant isolation) exposed in the UI, not a cosmetic count quirk; data is reference/catalogue (course names+codes, no PII) so not high. Recommend verifying GET /v1/me/learning/catalogue applies the tenant filter in repository/service before closing."
+    },
+    {
+      "route": "/me/inbox",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Language toggle appears twice on screen",
+      "evidence": "A globe 'IT' control sits in the top header bar while a separate IT/EN pair (IT highlighted) is rendered at the bottom of the left sidebar above 'Esci'. The same language switcher is duplicated in two places (visible on every page in this set).",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean-ess/me__inbox.png. Two distinct language switchers are visible simultaneously: (1) top header bar, top-right, a globe icon + \"IT\" label; (2) bottom of the left sidebar, directly above the \"Esci\" logout button, an explicit IT/EN toggle pair with \"IT\" highlighted (blue) and \"EN\" unselected. Both are language-selection controls, so the switcher is duplicated on the same screen. Confirmed. Severity stays low: it is a cosmetic/redundancy LAYOUT issue (confusing, redundant affordance) rather than broken functionality. Note this page also shows an unrelated error state (\"Impossibile caricare la tua inbox.\") which is not part of this finding."
+    },
+    {
+      "route": "/me/skills",
+      "severity": "high",
+      "type": "WIRING",
+      "title": "Pagina 'Le mie skill' in errore: 'Impossibile caricare le tue skill' + badge 'Caricamento...' bloccato",
+      "evidence": "Il corpo pagina mostra un box di errore col testo rosso 'Impossibile caricare le tue skill.' e accanto al titolo 'Le mie skill' resta il badge 'Caricamento...' non risolto. Il data-hint riporta 403:1, quindi la chiamata API e' stata rifiutata. Non e' un empty-state progettato ma un fallimento di caricamento.",
+      "note": "Screenshot letto direttamente: conferma tutti gli elementi rivendicati. Sotto il titolo \"Le mie skill\" e' presente un badge pill \"Caricamento...\" non risolto, accanto al titolo. Nel corpo pagina un box bordato mostra il testo rosso esatto \"Impossibile caricare le tue skill.\" Non e' un empty-state progettato (\"nessuna skill ancora\") ma un messaggio di errore hard: la coesistenza di badge \"Caricamento...\" bloccato + box di errore indica un load fallito che non si e' mai risolto. Utente loggato reale: paolo.caputo@rtl-bank.org, ruolo TEAM_LEADER (visibile in alto a destra e nel footer). Il 'data-hint 403:1' rivendicato non e' visibile in uno screenshot renderizzato (sarebbe un attributo DOM, non testo a video) quindi non verificabile dall'immagine; tuttavia la UI di errore visibile e' pienamente coerente con una chiamata API /v1/me/skills rifiutata/fallita. Severity high confermata: pagina ESS self-service completamente non funzionante per una persona reale autenticata, fallimento WIRING di pagina user-facing, non cosmetico. Un 403 su una chiamata self-scope /me/skills per un utente legittimamente autenticato e' un difetto reale di wiring/permessi."
+    },
+    {
+      "route": "/me/skills/self-assessment",
+      "severity": "medium",
+      "type": "I18N",
+      "title": "Valore enum inglese 'COMPETENT' mostrato nel dropdown 'Livello' in UI italiana",
+      "evidence": "Il campo 'Livello' (label italiana) ha come valore selezionato di default 'COMPETENT', codice enum grezzo in inglese, mentre tutto il resto del form (Cerca skill, Skill, Punteggio, Commento, Invia auto-valutazione) e' in italiano.",
+      "note": "Confermato leggendo lo screenshot. Il campo 'Livello' (label italiana) mostra come valore selezionato di default 'COMPETENT' — codice enum grezzo in inglese maiuscolo — mentre tutti gli altri elementi del form sono in italiano: 'Cerca skill', 'Digita per filtrare...', 'Skill'/'— Seleziona —', 'Punteggio (0-100, opzionale)', 'Commento', e il bottone 'Invia auto-valutazione'. Header pagina 'Auto-valutazione skill' anch'esso italiano, lingua attiva IT (toggle IT/EN in basso a sinistra). Il valore enum di proficiency non viene localizzato/umanizzato per il display. Difetto i18n reale ma cosmetico: il dropdown resta funzionale e il valore è intelligibile. Severity 'medium' confermata — è un valore prominente, default-selected su un campo primario del form, quindi non triviale, ma non blocca il workflow né causa problemi di dati."
+    },
+    {
+      "route": "/me/profile",
+      "severity": "low",
+      "type": "DATA",
+      "title": "Campo 'Nome visualizzato' vuoto per un utente con nome noto (Paolo Caputo)",
+      "evidence": "In alto a destra l'utente loggato e' 'paolo.caputo@rtl-bank.org' con avatar 'PA', ma nel form Anagrafica il campo 'Nome visualizzato' e' completamente vuoto, cosi' come Telefono, LinkedIn URL e Bio. Il data-hint segnala anche 403:1 (una chiamata negata).",
+      "note": "Confermato leggendo lo screenshot. Utente loggato in alto a destra = paolo.caputo@rtl-bank.org, avatar \"PA\", ruolo TEAM_LEADER (stesso identificativo ripetuto in fondo alla sidebar). Nel form \"Anagrafica\" il campo \"Nome visualizzato\" e' visibilmente vuoto, cosi' come Telefono, LinkedIn URL e Bio, mentre Locale (it-IT) e Timezone (Europe/Rome) sono popolati. Per un utente con nome noto (Paolo Caputo, derivabile da email/avatar) il display name vuoto e' un genuino gap di completezza dati/UX (gli altri campi anagrafici di base sono valorizzati). CAVEAT: i campi Telefono/LinkedIn/Bio vuoti sono plausibilmente empty-state legittimi (l'utente non li ha compilati), quindi il problema sostanziale e' circoscritto a \"Nome visualizzato\". Inoltre la sotto-affermazione \"data-hint 403:1 (chiamata negata)\" NON e' supportata dallo screenshot: non e' presente alcun badge/indicatore data-hint ne' la stringa \"403:1\" nell'immagine, quindi quella parte dell'evidenza non e' verificabile dal solo screenshot. Severita' low confermata: gap dati/UX non bloccante, nessun errore funzionale visibile."
+    },
+    {
+      "route": "/me/surveys",
+      "severity": "low",
+      "type": "DATA",
+      "title": "Sondaggio con '0 domande' proposto comunque come compilabile",
+      "evidence": "La riga 'New Hire Onboarding Survey' mostra '0 domande' ma ha lo stesso badge 'Da compilare' e il pulsante azzurro 'Compila' attivo come 'Q4 2025 Pulse Survey' (3 domande). Un sondaggio senza domande non dovrebbe essere offerto per la compilazione.",
+      "note": "Screenshot conferma direttamente il finding. Pagina /me/surveys (heading \"Sondaggi\", \"I sondaggi assegnati a te\"). Due righe: (1) \"Q4 2025 Pulse Survey\" con \"3 domande\", badge \"Da compilare\", pulsante azzurro \"Compila\"; (2) \"New Hire Onboarding Survey\" con \"0 domande\", stesso badge \"Da compilare\" e stesso pulsante azzurro \"Compila\" attivo. Il sondaggio a 0 domande e' offerto come compilabile in modo identico a quello valido a 3 domande. Evidenza visibile esplicitamente, nessuna inferenza. Severity 'low' confermata: difetto data/UX di edge-case (Compila porta a form vuoto/dead-end), non rottura funzionale ne' problema di sicurezza/integrita' dati."
+    },
+    {
+      "route": "/me/surveys",
+      "severity": "low",
+      "type": "I18N",
+      "title": "Titoli dei sondaggi in inglese in interfaccia italiana",
+      "evidence": "I due sondaggi assegnati sono 'Q4 2025 Pulse Survey' e 'New Hire Onboarding Survey', interamente in inglese, mentre la chrome della pagina e' italiana ('Sondaggi', '2 sondaggi', 'I sondaggi assegnati a te.', 'Da compilare', 'Compila').",
+      "note": "Screenshot conferma: chrome pagina interamente in italiano (titolo \"Sondaggi\", badge \"2 sondaggi\", sottotitolo \"I sondaggi assegnati a te.\", badge \"Da compilare\", bottone \"Compila\", filtri prospettiva \"Tutte/Process/Enterprise/Talent\", toggle lingua su IT) mentre i due titoli sondaggio sono in inglese: \"Q4 2025 Pulse Survey\" e \"New Hire Onboarding Survey\". I sottotitoli conteggio sono in italiano (\"3 domande\", \"0 domande\"), accentuando la presentazione mista IT/EN. Nota di precisione: si tratta di contenuto a livello DATI (nomi sondaggio nel seed/DB, autorati), non di una stringa UI non tradotta — la chrome localizza correttamente. Severity low confermata: difetto cosmetico di coerenza linguistica, non funzionale; titoli di contenuto utente nella lingua di origine sono comuni. Allineamento dei nomi seed all'italiano resta opportuno per coerenza visiva."
+    },
+    {
+      "route": "/me/security",
+      "severity": "low",
+      "type": "DATA",
+      "title": "Sessione attiva con IP loopback 127.0.0.1/32 mostrata in ambiente di produzione",
+      "evidence": "Nel box 'Sessioni attive' una sessione e' identificata come '127.0.0.1/32' (indirizzo di loopback locale) con 'Visto l'ultima volta 22/06/2026, 21:41:49', accanto alla sessione reale '188.216.74.236/32' marcata 'Questo dispositivo'. Una sessione 127.0.0.1 e' un artefatto di accesso locale/dev visibile in produzione.",
+      "note": "Confermato leggendo lo screenshot D:/heuresys-advanced/audit/screenshots/clean-ess/me__security.png. Nel box \"Sessioni attive\" sono visibili due entry: (1) \"188.216.74.236/32\" con badge verde \"Questo dispositivo\", UA \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36\", \"Visto l'ultima volta 23/06/2026, 22:26:01\"; (2) \"127.0.0.1/32\" con stessa UA, \"Visto l'ultima volta 22/06/2026, 21:41:49\", pulsante \"Revoca\". L'indirizzo 127.0.0.1 e' un loopback locale: in un ambiente prod dietro nginx reverse proxy (PROD HTTPS) una sessione utente reale dovrebbe portare l'IP client forward-ato, non loopback. Indica una probabile lacuna di trust-proxy / gestione X-Forwarded-For (coerente con il debito aperto D-28 TRUST_PROXY citato nella memoria di progetto) oppure una sessione residua da accesso locale/dev affiorata in produzione. Tutte le claim fattuali del finding (valore 127.0.0.1/32, coesistenza con la sessione reale 188.216.74.236/32 marcata \"Questo dispositivo\", timestamp 22/06/2026 21:41:49) sono verificate sullo screenshot. Severita': \"low\" appropriata e supportata (nessun segreto esposto, display read-only); \"medium\" sarebbe difendibile perche' il loopback segnala una mis-attribuzione IP sistemica delle sessioni in produzione, ma resta low."
+    },
+    {
+      "route": "/organization",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "PARENT column shows truncated raw UUID fragments instead of parent unit names",
+      "evidence": "In the 'Organization Units' table the PARENT column displays bare hex fragments like '552ade21', '3143be6b', '1e2339ef', '17c31724', 'aeee7c08' for every row, while the human-readable parent names (Direzione/Divisione) clearly exist elsewhere in the same table. A parent reference is rendered as an unresolved UUID fragment instead of a label.",
+      "note": "Confirmed by reading the screenshot. In the \"Organization Units\" table the PARENT column renders bare 8-char hex strings for every row (DIR-AML=552ade21, DIR-BACKOFF=3143be6b, DIR-CORP/DIR-CREDITI=1e2339ef, DIR-DEV/DIR-INFRA=17c31724, DIR-RISKM=552ade21, all DIV-* rows=aeee7c08, etc.). These are first-segment UUID fragments, not human-readable labels. The NOME column proves readable parent names exist in the same dataset (Direzione AML/Antiriciclaggio, Direzione Back Office, Divisione CFO...), so the parent reference is an unresolved ID instead of a resolved name. Genuine readability defect. Severity lowered from high to medium: it is a real, clear usability bug isolated to one column on a non-critical admin listing page — no broken/blocking/error state, page loads and remains otherwise usable, no security or data-loss impact, so it does not meet the bar for high."
+    },
+    {
+      "route": "/organization",
+      "severity": "low",
+      "type": "WIRING",
+      "title": "PARENT values are truncated mid-UUID and non-clickable",
+      "evidence": "Each PARENT cell shows an 8-char hex string that is not a full code, not a name, and not rendered as a link to the parent unit row, so the parent relationship is effectively dead/unnavigable from the table.",
+      "note": "Confirmed by reading the screenshot. The PARENT column in the Organization Units table shows raw 8-char hex strings (e.g. 552ade21, 3143be6b, 1e2339ef, aeee7c08) — these are the first group of a UUID, truncated mid-identifier. They are NOT the human-readable code (the CODICE column uses values like DIR-AML / DIV-CFO, which the PARENT column does not reference) and NOT a unit name. They are rendered in the same muted gray plain-text style as the TIPO cells (e.g. \"DIVISION\") with no link affordance: no underline, no accent color, no distinct styling versus surrounding non-interactive text. So the parent relationship is effectively dead/unnavigable — a user cannot click through to the parent row, and because the table is keyed by CODICE (not UUID), the fragment cannot even be visually correlated with any visible row. The evidence in the claim matches the screenshot exactly. Severity kept at low: it is a real WIRING/UX defect (internal DB UUIDs leaking into the UI + a non-navigable foreign-key relationship) but it is cosmetic/usability only — no data loss, no broken page, no security impact. Note: this is a refute/confirm verdict on the visual finding only; the underlying fix (resolve parent_id to the parent's CODICE/NOME and render as a link to the parent row) was not independently traced in code."
+    },
+    {
+      "route": "/organization/org-chart",
+      "severity": "high",
+      "type": "READABILITY",
+      "title": "Org chart nodes are unlabeled dots — no position/unit identity visible",
+      "evidence": "The 'Organigramma (158 posizioni)' graph renders ~158 plain blue dots connected by faint edges with no text labels on any node. It is impossible to identify which node is which position or unit; the chart conveys topology only, not identity.",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean/organization__org-chart.png. The \"Organigramma (158 posizioni)\" graph renders as a force-directed network of ~158 uniform solid-blue circular nodes connected by faint purple edges. Every node is a plain dot: NO text label of any kind (no position title, no org-unit name, no incumbent name, no abbreviation/identifier) appears on or beside any node. Nodes are also visually undifferentiated (same size/color), so there is no encoding of level/role/unit either. The only text in the chart area is the \"Organigramma (158 posizioni)\" header. The evidence claim is accurate: the chart conveys topology/connectivity only, not identity — a viewer cannot determine which node is which position or unit. For a page whose explicit purpose is an organigramma (who reports to whom, which position is which), unlabeled nodes defeat the core function, so severity high is upheld. Caveat (cannot be confirmed from a static screenshot): labels may appear on hover/click interaction; if so the at-rest readability is still poor but the defect would be partial rather than total. No data-correctness/crash/security issue — the 158 real positions and edges do render — so this is a presentation-layer readability failure, not a broken pipeline."
+    },
+    {
+      "route": "/organization/org-chart",
+      "severity": "low",
+      "type": "DARK_THEME",
+      "title": "Org chart edges are very low contrast against dark background",
+      "evidence": "The connecting lines between the blue nodes are rendered in a dark, faint stroke barely distinguishable from the near-black canvas, making the hierarchy links hard to follow.",
+      "note": "Read the screenshot directly. The force-directed \"Organigramma (158 posizioni)\" graph shows bright blue nodes on a near-black canvas, with connecting edges rendered as thin purple/indigo strokes that are clearly lower contrast than the nodes. The edges ARE faint relative to the nodes and get harder to trace in denser peripheral clusters, which supports the finding. However, the \"barely distinguishable / very low contrast\" framing is slightly overstated: the lines have a discernible purple tint that lifts them off the background and the overall radial hierarchy remains followable — they are not invisible and there is no functional blocker. Confirmed as a real readability nit but downgraded medium -> low: the topology stays legible and the issue is cosmetic, fixable by lightening the edge stroke color/opacity for better node-vs-edge and edge-vs-background contrast."
+    },
+    {
+      "route": "/positions/[positionId]",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "Position Intelligence Profile shows raw UUIDs for every relational field",
+      "evidence": "On the Bank Teller (POS-00000347) detail, POSITION ID, TENANT ID, ORG UNIT, JOB ROLE, OWNER and 'RIFERISCE A' all display full bare UUIDs (e.g. ORG UNIT '85219cbf-6efb-4581-a72e-e58fce88c20a', JOB ROLE '180c1851-808d-4211-8cc7-8f03c5458eb9', OWNER '7469f887-163d-4dce-ac22-e4105325e9b1') instead of human-readable unit/role/person names.",
+      "note": "Screenshot confirms the finding directly. On the Bank Teller (POS-00000347) detail, the Position Intelligence Profile card renders bare UUIDs for ORG UNIT (85219cbf-6efb-4581-a72e-e58fce88c20a), JOB ROLE (180c1851-808d-4211-8cc7-8f03c5458eb9), OWNER (7469f887-163d-4dce-ac22-e4105325e9b1) and RIFERISCE A (75391eeb-8a3e-4808-8e6d-432733940dc7), plus POSITION ID and TENANT ID. The four relational fields (org unit, role, owner, parent/reports-to) should resolve to human-readable names but show raw IDs, making the page unusable for a human reader. Adjusted high->medium: it severely degrades readability of one detail page but does not block functionality (data, status, criticality, dates all render), is not a data-integrity/security issue, and is a single-surface wiring gap (label-lookup not joined). POSITION/TENANT IDs being technical identifiers is borderline acceptable; the person/unit/role fields are the real defect."
+    },
+    {
+      "route": "/positions/[positionId]",
+      "severity": "low",
+      "type": "DATA",
+      "title": "PESO ECONOMICO and IN VIGORE AL render as em-dash placeholders",
+      "evidence": "In the PIP card 'PESO ECONOMICO' shows '—' and 'IN VIGORE AL' shows '—'; while these may be legitimately empty, the position detail offers no economic-weight value and no end-of-validity date for the record.",
+      "note": "Screenshot READ and verified. In the Position Intelligence Profile card for \"Bank Teller\" (POS-00000347), the label \"PESO ECONOMICO\" is followed by \"—\" and \"IN VIGORE AL\" is followed by \"—\". The visual observation is factually accurate. However this is correct empty-state UI, not a defect: the em-dash is the intentional placeholder for nullable optional fields. The sibling \"IN VIGORE DAL\" renders a real value (2015-07-26), proving the rendering pipeline works — so these em-dashes reflect genuinely null DB values, not a render bug. A null end-of-validity date is consistent with the position's \"ATTIVA\" status (active, no expiry). The finding itself concedes the fields \"may be legitimately empty.\" Verdict: confirmed as a literal visual observation, but it is expected behavior, not an actionable bug. Severity remains low (arguably informational/non-issue). No code or data action warranted."
+    },
+    {
+      "route": "/positions/[positionId]/kpis",
+      "severity": "medium",
+      "type": "READABILITY",
+      "title": "TEMPLATE column dumps raw JSON instead of structured KPI fields",
+      "evidence": "Every row in the 'Requisiti' table shows the full raw JSON string in the TEMPLATE column, e.g. {\"legacy\":{\"kpi_code\":\"KPI4\",\"source_table\":\"tenant_job_kpis\"},\"target_value\":85,\"min_acceptable\":70,\"stretch_target\":100}, rather than parsed/labeled values.",
+      "note": "Verified by reading the screenshot directly. The \"Requisiti\" table (columns CODICE, KPI, PESO, TEMPLATE) shows, in all 4 rows, the full raw JSON string in the TEMPLATE column rendered verbatim in monospace, e.g. {\"legacy\":{\"kpi_code\":\"KPI4\",\"source_table\":\"tenant_job_kpis\"},\"target_value\":85,\"min_acceptable\":70,\"stretch_target\":100} (also KPI1/KPI2/KPI3). CODICE and KPI columns are empty; PESO = 0.25 per row. The claim matches the image exactly — confirmed. Severity adjusted high→medium: this is a presentation/readability defect (unparsed JSON blob), not a functional/data/security break. All 4 KPIs and weights render and the data is technically readable; it degrades UX and looks unpolished but blocks no task. The empty CODICE/KPI columns combined with the JSON dump suggest the renderer is binding the whole config object to one cell instead of mapping kpi_code→CODICE, target_value/min_acceptable/stretch_target→labeled fields."
+    },
+    {
+      "route": "/positions/[positionId]/kpis",
+      "severity": "medium",
+      "type": "WIRING",
+      "title": "CODICE and KPI columns are empty for every row",
+      "evidence": "In the 'Requisiti' table the CODICE and KPI column headers are present but every one of the 4 rows has those two columns blank; only PESO (0.25) and the raw JSON TEMPLATE are populated. The KPI identity (KPI1-KPI4) is hidden inside the JSON instead of in the dedicated CODICE/KPI columns.",
+      "note": "Verified by reading D:/heuresys-advanced/audit/screenshots/clean/positions___positionId___kpis.png. The \"Requisiti\" table has headers CODICE | KPI | PESO | TEMPLATE. All 4 rows show CODICE and KPI visibly blank (whitespace), while PESO (0.25) and TEMPLATE are populated. The KPI identity is present only inside the raw JSON TEMPLATE field as \"kpi_code\":\"KPI1\"..\"KPI4\" — confirming the data exists but is not mapped to its dedicated CODICE/KPI columns. This is a genuine WIRING defect: two of four columns empty for 100% of rows, plus raw JSON exposed in the UI. Severity lowered from high to medium: the data is not lost (it renders inside the JSON), the table still loads and shows weights, and it is a presentation/column-mapping defect rather than a blocking or data-loss issue."
+    },
+    {
+      "route": "/positions/[positionId]/skills",
+      "severity": "high",
+      "type": "WIRING",
+      "title": "Tabella Requisiti: colonne CODICE e SKILL vuote per tutte le 5 righe",
+      "evidence": "Header dichiara 'Skill richieste · 5 skill associate'. La tabella 'Requisiti' ha 5 righe ma le colonne CODICE e SKILL sono completamente vuote in ogni riga; PROFICIENCY mostra '—' su tutte le righe; solo PESO è popolato (=1). Nessun nome o codice skill è leggibile: la tabella è priva della sua identità di riga.",
+      "note": "Screenshot confirms the finding precisely. Header reads \"Skill richieste · 5 skill associate\". The \"Requisiti\" table renders exactly 5 data rows. Across all 5 rows the CODICE column (leftmost) and SKILL column (second) are completely blank — no skill code or name text is visible anywhere. The PROFICIENCY column shows the em-dash \"—\" on every row, and only PESO is populated (value \"1\" on all 5 rows). The table thus shows the correct row count but is stripped of its row identity (code/name) and proficiency, leaving only a meaningless weight. This is a genuine data-wiring defect, not a rendering/contrast artifact (the \"—\" and \"1\" render clearly, so empty cells are truly empty, not invisible text). Severity correctly high: the page's sole purpose — displaying which skills a position requires and at what level — is non-functional, conveying no usable information."
+    },
+    {
+      "route": "/positions/[positionId]/skills",
+      "severity": "medium",
+      "type": "DATA",
+      "title": "PROFICIENCY mostra '—' (placeholder) su tutte le righe",
+      "evidence": "La colonna PROFICIENCY contiene il carattere placeholder '—' in tutte e 5 le righe della tabella Requisiti, nessun valore di proficiency reale è renderizzato.",
+      "note": "Confermato leggendo lo screenshot. La tabella \"Requisiti\" ha 5 righe (coerente con l'header \"5 skill associate\") e la colonna PROFICIENCY mostra il placeholder em-dash '—' in tutte e 5 le righe — nessun valore reale di proficiency. Nota adversariale che aggrava il quadro ma non smentisce il claim: anche le colonne CODICE e SKILL sono completamente vuote in tutte le righe; l'unico dato renderizzato è PESO='1'. Quindi il problema di rendering dati non è isolato a PROFICIENCY (più colonne vuote), ma il claim specifico — PROFICIENCY = '—' su tutte le righe — è verificato esattamente. Severity confermata medium: dati visibilmente mancanti su una pagina autenticata, ma non bloccante a livello di navigazione/login."
+    },
+    {
+      "route": "/positions/[positionId]/skills",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Doppio toggle lingua: globo 'IT' in header + toggle IT/EN in sidebar",
+      "evidence": "In alto a destra è presente un selettore lingua con icona globo che mostra 'IT'; in basso a sinistra nella sidebar, sotto admin@heuresys.com, è presente un secondo toggle IT/EN (IT evidenziato in blu). Due controlli distinti per la stessa funzione lingua, visibili su tutte le pagine.",
+      "note": "Screenshot conferma due controlli lingua distinti e co-presenti: (1) header in alto a destra (~x=1047,y=31) icona globo + etichetta \"IT\"; (2) sidebar in basso a sinistra, sotto \"admin@heuresys.com\" (~x=20-235,y=752-788), toggle a due pulsanti \"IT | EN\" con IT evidenziato in blu (attivo) ed EN inattivo. Sono due controlli separati per la stessa funzione di selezione lingua, parte del chrome persistente (header + sidebar) quindi visibili su tutte le pagine autenticate, non specifici di questa route. Finding REALE e ben descritto dall'evidenza. Severity abbassata a low: e' una ridondanza UX/layout cosmetica (entrambi i controlli sono funzionanti, stato coerente IT su entrambi), non un difetto funzionale ne accessibilita-bloccante; impatto = potenziale confusione utente. Nota: il fix appropriato e' consolidare in un unico controllo, ma essendo chrome globale il finding andrebbe deduplicato a livello di app, non per-route."
+    },
+    {
+      "route": "/visualizations/[graphId]",
+      "severity": "high",
+      "type": "READABILITY",
+      "title": "Org-chart nodes show raw N_<uuid> codes instead of person/position names",
+      "evidence": "In the 'Diagramma' panel of 'RTL Bank — Organigramma', the majority of nodes render bare technical identifiers like 'N_6ea6a587_b077_4d53_8240_1202b420f0d7', 'N_e1c1d68b_2685_4838_b281_888d52dfd2f3', 'N_bba14bca_e198_47b9_b24a_eab1c545821c', 'N_5f995381_f8ca_4194_951a_46e5ddeec428' as the node label. Only a few nodes (e.g. 'Securities Dealer', 'Compliance Officer', 'Risk Analyst') show a human-readable title; the rest are unreadable UUIDs used as primary node identity.",
+      "note": "Confirmed by reading the screenshot. In the \"Diagramma\" panel of \"RTL Bank — Organigramma\" (RTL_ORG_CHART / ORG_CHART), ~10 of the visible nodes render bare technical identifiers as their primary label, exactly as claimed: N_6ea6a587_b077_4d53_8240_1202b420f0d7, N_e1c1d68b_2685_4838_b281_888d52dfd2f3, N_bba14bca_e198_47b9_b24a_eab1c545821c, N_5f995381_f8ca_4194_951a_46e5ddeec428, plus N_5fd2a021_..., N_df1e21d2_..., N_d8bb59cf_..., N_c78767b3_..., N_0adf6c52_..., N_05d978fc_... Only 3 nodes show human-readable titles (Securities Dealer, Compliance Officer, Risk Analyst). The majority of nodes are unreadable UUIDs, defeating the core purpose of the org-chart page. Severity high is appropriate: this is the page's primary deliverable and most nodes are illegible, not a cosmetic edge case. Likely a node-label fallback bug where the rendered label uses the synthetic node id (N_ + dashed UUID) instead of resolving the person/position display name; positions with a resolvable title render correctly, which is why a few read cleanly."
+    },
+    {
+      "route": "/visualizations/[graphId]",
+      "severity": "low",
+      "type": "DARK_THEME",
+      "title": "Node label boxes are light-on-light, edge curves dark-on-dark (low contrast)",
+      "evidence": "Node labels render as dark text inside near-white boxes that stand out harshly, while the connecting edge curves are dark grey against the dark canvas and nearly invisible. The diagram lacks coherent dark-theme styling for both the boxes and the connectors.",
+      "note": "Confirmed by reading the screenshot + pixel sampling of D:/heuresys-advanced/audit/screenshots/clean/visualizations___graphId_.png (RTL Bank — Organigramma graph). Both halves of the claim hold: (1) Node label boxes (the N_<uuid> boxes plus \"Securities Dealer\"/\"Compliance Officer\"/\"Risk Analyst\") render with a near-white fill (sampled ~(236,236,255), overall ~(219,219,236)) on a near-black dark canvas (~(13,16,23)) — box-vs-canvas contrast ~16.3:1, so they stand out harshly and are clearly an un-themed light-theme default. (2) The connecting edge curves measure a representative stroke color of ~(36,35,48) against the (13,16,23) canvas = ~1.23:1 contrast (brightest segments only ~1.6:1), i.e. dark-grey on dark, effectively invisible — the right-side org-chart connectors are barely perceptible. The diagram lacks coherent dark-theme styling for both fills and connectors, matching the evidence verbatim. Severity kept low: cosmetic dark-theme defect only, no data loss or functional break (diagram still loads/reads), though invisible edges do hinder tracing org relationships. Method: PIL crop/avg + WCAG relative-luminance contrast computation."
+    },
+    {
+      "route": "/visualizations",
+      "severity": "low",
+      "type": "COPY",
+      "title": "Badge count grammar: '1 grafici' (singular count with plural noun)",
+      "evidence": "The header next to 'Visualizations' shows the pill '1 grafici' — count of 1 paired with the Italian plural 'grafici' (should be '1 grafico').",
+      "note": "Verified by reading the screenshot directly. The pill badge immediately to the right of the \"Visualizations\" page heading reads \"1 grafici\". In Italian, \"grafici\" is the plural of \"grafico\"; a count of 1 grammatically requires the singular \"1 grafico\". The mismatch is clearly legible in the screenshot, and the single table row (RTL_ORG_CHART / RTL Bank — Organigramma) plus the donut chart showing a single ORG CHART slice corroborate that the count is genuinely 1. This is a cosmetic copy/i18n pluralization defect with no functional impact, surfacing only when the count equals 1 — severity low is correct."
+    },
+    {
+      "route": "/visualizations",
+      "severity": "low",
+      "type": "LAYOUT",
+      "title": "Two language toggles visible simultaneously (header globe 'IT' + sidebar IT/EN switch)",
+      "evidence": "The top header shows a globe control labeled 'IT' while the bottom-left of the sidebar shows a separate IT / EN toggle pair (IT highlighted). Two distinct language controls are rendered on the same screen.",
+      "note": "Verified by reading the screenshot directly. Two distinct language controls are rendered on the same viewport: (1) top header, right side — a globe icon with the label \"IT\" (~x=1047, near the search bar and palette switcher); (2) bottom-left of the sidebar, just above the \"Esci\" button — a segmented IT/EN toggle pair with \"IT\" highlighted (blue/active) and \"EN\" inactive. Both are clearly visible at once, confirming the redundant dual language affordance described. Severity confirmed as low: it is a UX-consistency/redundancy issue with no functional, data, or security impact (both controls appear operational). Not refuted — the screenshot unambiguously shows both controls."
+    }
+  ],
+  "uncertain": [
+    {
+      "route": "/analytics/skills-by-category",
+      "type": "DARK_THEME",
+      "title": "Heatmap competenze in scala di grigi quasi nera, intensità illeggibile",
+      "note": "Letto lo screenshot. La heatmap \"Copertura per categoria e livello di padronanza\" usa una palette MONOCROMATICA (scala di grigi) su tema scuro. Verifica cella per cella: le colonne NOVICE/BASIC/COMPETENT mostrano celle in grigio chiaro-medio CHIARAMENTE LEGGIBILI per la maggior parte delle categorie (Adaptability, Collaboration, Customer Focus, Innovation, Leadership, Results Orientation). Le colonne PROFICIENT ed EXPERT sono effettivamente nere/indistinguibili dallo sfondo, come dichiarato — MA questo si spiega più plausibilmente con dati di copertura pari a ZERO a quei livelli (evidenze di competenza dichiarate concentrate ai livelli bassi), non con un bug di contrasto che nasconde dati esistenti: una heatmap rende correttamente le celle a valore zero col colore minimo (qui ~nero su sfondo scuro). La tesi centrale del finding (\"impossibile leggere l'intensità della copertura\") è REFUTATA per le celle popolate, che sono legibili in grigi distinti. Il vero artefatto a basso contrasto è la barra-legenda della scala colori in basso al centro (~x850 y793), nera-su-nero e illeggibile — ma non è ciò che il finding descrive nel titolo/evidenza. Verdetto uncertain (default avversariale): lo screenshot non dimostra chiaramente un bug di contrasto, e la severità claimed=medium è sovrastimata. La preoccupazione legittima residua è che una palette grayscale con estremo basso ~nero su tema scuro ha contrasto debole nel range inferiore + la legenda nera-su-nera → severità low."
+    },
+    {
+      "route": "/visualizations/[graphId]",
+      "type": "WIRING",
+      "title": "Org-chart edges/connectors barely visible and many UUID nodes appear disconnected",
+      "note": "Read the screenshot at 1.8x-4x zoom and measured edge contrast objectively. Split verdict on the two halves of the claim:\n\nCONFIRMED half: the relationship curves ARE extremely faint. Isolating pure curve pixels (excluding bright node boxes) in the empty diagram region, the connector lines have luminance ~26 vs a background of ~16 — WCAG non-text contrast ~1.10:1 (max 1.19:1), far below the 3:1 threshold (WCAG 1.4.11). They are real thin curves, hard to read at normal viewing.\n\nREFUTED half: the claim that the N_<uuid> column \"has no clear connectors rendered to any parent\" / nodes \"appear disconnected\" is wrong. At 4x zoom (gap between UUID column and labeled nodes) EVERY UUID node has a connector emerging from its right side, fanning into the parent position nodes (Securities Dealer, Risk Analyst), and arrowheads are visible where edges enter the labeled nodes. The hierarchy IS wired and traceable — the edges are just low-contrast, not missing.\n\nSo this is NOT a WIRING/data-connectivity defect (topology renders correctly: all nodes connected, arrowheads present). It is a visual/contrast legibility issue on the edge stroke color against the dark canvas. Type misclassified as WIRING. Severity lowered medium->low: cosmetic edge-contrast styling, no broken functionality or missing data. Marked verdict 'uncertain' because the headline mixes a true observation (faint edges) with a false conclusion (disconnected/unwired nodes) — the latter does not hold up to the screenshot."
+    }
+  ]
+}

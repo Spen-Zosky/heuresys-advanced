@@ -1,30 +1,30 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-23 (S1005 — cleanup doc is_synthetic + verifica users-page + Wave-3 L1 già-fatto).
+**Updated**: 2026-06-24 (S1006 — audit forense QA E2E 74 pagine + ~20 fix deployati live su PROD).
 
 > **Vista rapida** (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui. Menu generato da `docs/kb/tools/build_menu.py`.
 
-## Last session brief (S1005 — batch #18/#19/#17 delegato da Enzo)
+## Last session brief (S1006 — audit forense + fix + deploy, delega Enzo)
 
-Sessione doc + verifica (nessuna migration nuova). (1) **#18 doc-cleanup `is_synthetic`** (`c3ac0cc`, **D-44 RISOLTO**): 8 doc design/plan allineati a ADR-0026/mig 000154 — colonna `user_is_synthetic` rimossa, `SYNTHETIC_REFERENCE`→`STANDARD` (import legacy = persone reali) / `GENERATED_INCUMBENT` (placeholder materializer), vista `v_synthetic_user_flag_consistency` tolta dalle liste live (DDL storico con nota di ritiro). Grep verde; marginali fuori-scope segnalati (wave_runners ×2, due-diligence/WS-T5). (2) **#19 users-page** verificata **LIVE**: login reale `admin@heuresys.com` → `GET /v1/users` 200, `type:STANDARD`, zero `is_synthetic`; DB census colonna assente + 162 STANDARD; codice zero-ref. Prod-E2E UI coperta da CI (non rieseguita, P3). (3) **#17 Wave-3 L1**: discovery → **già eseguito** in S987/S988 (mig 000110 remap + 000111 import chiara.spenuso); premessa menu stale (dossier pre-S987). Nessuna scrittura su prod (R14). Register #17 → residuo L2/L3 multi-industry, resta HOLD (decisione Enzo "solo aggiorna register"). 2 commit, register+SOT aggiornati. Post-handoff (richiesta Enzo): aggiornato `POST_V1_ROADMAP_DOSSIER §1.B` — L1 marcato ✅ DONE, mapping HS corretto, count viste 6.
+Audit forense QA E2E su **74 pagine autenticate** (PROD, dati reali, batch headless + ri-verifica anti-token-TTL + pass ESS persona reale + scansioni perf/a11y/security + **workflow visivo multi-agent 98 finding confermati**). Poi fase fix **end-to-end + deploy**: **~20 fix verificati live su PROD**. Bug 🔴 chiusi: **B-01** brownfield mis-wired al contratto (crash), **B-03** ESS lockout RBAC (dipendenti funzionali senza `USER` → 403 sul proprio ESS; fix additivo mig 000155, decisione Enzo), **B-04** gauge KPI (formato, non dato), **B-05** chart dark invisibili (CSS-var non risolte nel canvas echarts; wrapper unico), **B-06** brownfield/learning/positions (contract-drift + JOIN nomi), **B-07** org-chart label. 🟡: **B-02** login GET-creds, **G-03** toggle lingua duplicato (header no-op nascosto), **CSP+Permissions-Policy** (nginx). **G-01 i18n-dati** (decisione Enzo = tradurre nel DB, IT-canonical): KPI+processi+41 non-ESCO + **13.032 skill ESCO** via API ESCO `language=it` (mig 000156-159). **Clean**: 7846 junk-skills rimossi+archiviati (000160, catalogo 21939→14093); skill_code `OLDDB::`→`ESCO::`/`COMP::` (000161). **G-02** org PARENT + gaps user/position/skill (correlated-subquery joins). **DATA** dashboard/insights = **NON-BUG** (dati synthetic statici → trend piatto; flight-risk 120 LOW+39 MEDIUM no HIGH). Deploy: 2× `vm-deploy.sh` + CSP su nginx live + tutto ri-verificato su `www.heuresys.com`. MFA resta **OFF** (decisione Enzo). Artefatti audit: `audit/FINDINGS.md` + `FORENSIC-NOTES-S1006-cli.md` + `_visual-confirmed.json`.
 
 ## Top priorities (next session)
 
-1. **#4 go-to-market — prossimo deliverable** (autorità *cosa* = Enzo): candidato **pricing page** (serve numeri prezzi/tier) o altro. Keystone del programma.
-2. **#8 EMAIL dormiente** (WAIT-INPUT): app-password Outlook → EMAIL_OTP + digest live.
+1. **Residuo tail audit S1006** (autonomo, spec precisa in `audit/FORENSIC-NOTES-S1006-cli.md`): career-succession G-02 (stesso pattern join nomi) · a11y dashboard (9 tap-target <24px, fix per-control) · perf code-splitting (chunk JS 1.68MB) · 817 skill ESCO ancora EN (no label IT in ESCO).
+2. **#4 go-to-market — prossimo deliverable** (autorità *cosa* = Enzo): pricing page o altro.
+3. **#8 EMAIL dormiente** (WAIT-INPUT): app-password Outlook → EMAIL_OTP + digest live.
 
 ## Open questions (autorità *cosa* = Enzo)
 
 - **Forma del prossimo deliverable GTM**: pricing page (serve i suoi numeri) vs altro.
-- **Strategia multi-industry (#17 L2/L3)**: onboardare i tenant legacy non-banking SmartFood/EcoNova nella tassonomia banking-native (multi-industry) vs restare single-industry reference. Solo se/quando Enzo lo decide.
+- **Strategia multi-industry (#17 L2/L3)**: onboarding tenant legacy non-banking vs single-industry reference (HOLD).
 
 ## Verification (next session)
 
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline    # 0 dopo handoff push
 python docs/kb/tools/handoff_lint.py                           # OK (0 fail)
-# #18: zero residui non-storici nei doc allineati
-grep -rl "user_is_synthetic\|SYNTHETIC_REFERENCE" docs/db docs/brownfield docs/security docs/MVP_4_ROADMAP.md docs/BOOTSTRAP_EXECUTION_PLAN.md  # solo menzioni-di-ritiro
-# #17 L1 già fatto (mapping corretto + 4 utenti HEURESYS)
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "SELECT legacy_id, canonical_tenant_id FROM brownfield.tenant_id_mappings WHERE legacy_id LIKE 'd5855519%'"  # → HEURESYS 8bc5bc59
+# S1006: skill catalogo pulito + IT
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "SELECT count(*) FROM sys.sys_skills WHERE skill_code LIKE 'OLDDB::%'"  # 0
+curl -sI https://www.heuresys.com/login | grep -i content-security-policy  # presente
 ```

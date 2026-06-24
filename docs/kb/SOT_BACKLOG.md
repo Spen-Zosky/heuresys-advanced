@@ -39,6 +39,12 @@
 - **#19 E2E users-page post-synthetic** · status: DONE
   - priority: P3 · effort: ~0.3h · doc: -
   - note: ✅ DONE S1005 — verificato LIVE: login reale `admin@heuresys.com` → `GET /v1/users` 200 + utenti RTL reali + `type:STANDARD` + **zero campo `is_synthetic`** nella response; DB census (colonna assente, 162 STANDARD); codice TS **zero-ref** alla colonna. Prod-E2E UI (`admin-lists.spec`) coperta da CI — non rieseguita in locale (P3, rischio nullo: la pagina è thin-client dell'endpoint verificato).
+- **#20 audit QA forense S1006 — il grosso** · status: DONE
+  - priority: P1 · effort: ~ (multi-fase) · doc: audit/FINDINGS.md + audit/FORENSIC-NOTES-S1006-cli.md
+  - note: ✅ DONE S1006 — audit forense 74 pagine (98 finding) + ~20 fix live PROD (B-01..B-07, B-03 RBAC mig 000155, G-03, B-02, CSP) + G-01 i18n-dati IT-canonical (KPI/processi/non-ESCO + 13k ESCO, mig 000156-159) + clean junk-skills (000160, 21939→14093) + skill_code clean (000161) + G-02 org/gaps. DATA dashboard/insights = non-bug verificati. Deploy 2× + CSP nginx + ri-verifica PROD. MFA OFF (Enzo).
+- **#21 residuo tail audit S1006** · status: ACTIVE
+  - priority: P2 · effort: ~3h · doc: audit/FORENSIC-NOTES-S1006-cli.md (sezione TAIL STATUS)
+  - note: autonomo, spec precisa nel doc. (a) **career-succession G-02** — stesso pattern correlated-subquery di gaps: user name (`sys_users.user_display_name`) + pool name sul list-endpoint candidati; page `career-succession/page.tsx:66-67` legge `userId.slice`/`successionPoolId.slice`. (b) **a11y dashboard** — 9 tap-target <24px (WCAG2.2) + 1 serious + 3 moderate axe; fix **per-control** (NO regola CSS globale cieca, rischio layout). (c) **perf** — chunk JS singolo 1.68MB (`_next/static/chunks/0m5f3qo3lbrvq.js`) → code-splitting / dynamic-import (CWV già ottimi, non user-perceived). (d) **817 skill ESCO ancora EN** — no label IT in ESCO (re-fetch ×2 = 0 recuperati); ~94% ESCO IT (13185/14002); re-runnable a rate più lento.
 
 ## ✅ Gap#1 DONE (S999, 2026-06-20) — programma-faro "rendi il prodotto dimostrabile" chiuso end-to-end
 

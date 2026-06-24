@@ -1,0 +1,444 @@
+[
+  {
+    "group": "Admin_Dev",
+    "n": 3,
+    "pages": [
+      {
+        "route": "/admin/mfa-policy",
+        "href": "/admin/mfa-policy",
+        "slug": "admin__mfa-policy"
+      },
+      {
+        "route": "/admin/roles",
+        "href": "/admin/roles",
+        "slug": "admin__roles"
+      },
+      {
+        "route": "/dev/agent",
+        "href": "/dev/agent",
+        "slug": "dev__agent"
+      }
+    ]
+  },
+  {
+    "group": "Analytics",
+    "n": 9,
+    "pages": [
+      {
+        "route": "/analytics/attendance",
+        "href": "/analytics/attendance",
+        "slug": "analytics__attendance"
+      },
+      {
+        "route": "/analytics/compensation",
+        "href": "/analytics/compensation",
+        "slug": "analytics__compensation"
+      },
+      {
+        "route": "/analytics/kpi",
+        "href": "/analytics/kpi",
+        "slug": "analytics__kpi"
+      },
+      {
+        "route": "/analytics/org-network",
+        "href": "/analytics/org-network",
+        "slug": "analytics__org-network"
+      },
+      {
+        "route": "/analytics/overtime",
+        "href": "/analytics/overtime",
+        "slug": "analytics__overtime"
+      },
+      {
+        "route": "/analytics/skills",
+        "href": "/analytics/skills",
+        "slug": "analytics__skills"
+      },
+      {
+        "route": "/analytics/skills-by-category",
+        "href": "/analytics/skills-by-category",
+        "slug": "analytics__skills-by-category"
+      },
+      {
+        "route": "/analytics/skills-group-share",
+        "href": "/analytics/skills-group-share",
+        "slug": "analytics__skills-group-share"
+      },
+      {
+        "route": "/analytics/workforce",
+        "href": "/analytics/workforce",
+        "slug": "analytics__workforce"
+      }
+    ]
+  },
+  {
+    "group": "BPM_Process",
+    "n": 8,
+    "pages": [
+      {
+        "route": "/approvals",
+        "href": "/approvals",
+        "slug": "approvals"
+      },
+      {
+        "route": "/approvals/[id]",
+        "href": "/approvals/69137767-5795-47f7-8868-fd8461d68fa4",
+        "slug": "approvals___id_"
+      },
+      {
+        "route": "/blueprints",
+        "href": "/blueprints",
+        "slug": "blueprints"
+      },
+      {
+        "route": "/blueprints/[variantId]",
+        "href": "/blueprints/b6e81585-8526-410f-bb1b-0138e2cb425f",
+        "slug": "blueprints___variantId_"
+      },
+      {
+        "route": "/brownfield-adaptation",
+        "href": "/brownfield-adaptation",
+        "slug": "brownfield-adaptation"
+      },
+      {
+        "route": "/process-owner",
+        "href": "/process-owner",
+        "slug": "process-owner"
+      },
+      {
+        "route": "/processes",
+        "href": "/processes",
+        "slug": "processes"
+      },
+      {
+        "route": "/seed-acquisition/runs",
+        "href": "/seed-acquisition/runs",
+        "slug": "seed-acquisition__runs"
+      }
+    ]
+  },
+  {
+    "group": "Skills_Learning",
+    "n": 5,
+    "pages": [
+      {
+        "route": "/career-succession",
+        "href": "/career-succession",
+        "slug": "career-succession"
+      },
+      {
+        "route": "/gaps",
+        "href": "/gaps",
+        "slug": "gaps"
+      },
+      {
+        "route": "/learning",
+        "href": "/learning",
+        "slug": "learning"
+      },
+      {
+        "route": "/learning/training-initiatives",
+        "href": "/learning/training-initiatives",
+        "slug": "learning__training-initiatives"
+      },
+      {
+        "route": "/skills",
+        "href": "/skills",
+        "slug": "skills"
+      }
+    ]
+  },
+  {
+    "group": "KPI_Comp",
+    "n": 2,
+    "pages": [
+      {
+        "route": "/compensation-intelligence",
+        "href": "/compensation-intelligence",
+        "slug": "compensation-intelligence"
+      },
+      {
+        "route": "/kpis",
+        "href": "/kpis",
+        "slug": "kpis"
+      }
+    ]
+  },
+  {
+    "group": "Content",
+    "n": 2,
+    "pages": [
+      {
+        "route": "/content",
+        "href": "/content",
+        "slug": "content"
+      },
+      {
+        "route": "/content/[id]",
+        "href": "/content/69137767-5795-47f7-8868-fd8461d68fa4",
+        "slug": "content___id_"
+      }
+    ]
+  },
+  {
+    "group": "Core_Overview",
+    "n": 2,
+    "pages": [
+      {
+        "route": "/dashboard",
+        "href": "/dashboard",
+        "slug": "dashboard"
+      },
+      {
+        "route": "/system-health",
+        "href": "/system-health",
+        "slug": "system-health"
+      }
+    ]
+  },
+  {
+    "group": "Engagement_Goals",
+    "n": 4,
+    "pages": [
+      {
+        "route": "/engagement",
+        "href": "/engagement",
+        "slug": "engagement"
+      },
+      {
+        "route": "/engagement/[surveyId]",
+        "href": "/engagement/57850d00-c7cd-4f66-8acd-20586bc63eda",
+        "slug": "engagement___surveyId_"
+      },
+      {
+        "route": "/goals",
+        "href": "/goals",
+        "slug": "goals"
+      },
+      {
+        "route": "/okrs",
+        "href": "/okrs",
+        "slug": "okrs"
+      }
+    ]
+  },
+  {
+    "group": "Insights",
+    "n": 3,
+    "pages": [
+      {
+        "route": "/insights",
+        "href": "/insights",
+        "slug": "insights"
+      },
+      {
+        "route": "/insights/skill-gap",
+        "href": "/insights/skill-gap",
+        "slug": "insights__skill-gap"
+      },
+      {
+        "route": "/insights/succession-readiness",
+        "href": "/insights/succession-readiness",
+        "slug": "insights__succession-readiness"
+      }
+    ]
+  },
+  {
+    "group": "ESS_me",
+    "n": 21,
+    "pages": [
+      {
+        "route": "/me",
+        "href": "/me",
+        "slug": "me"
+      },
+      {
+        "route": "/me/career",
+        "href": "/me/career",
+        "slug": "me__career"
+      },
+      {
+        "route": "/me/career/target",
+        "href": "/me/career/target",
+        "slug": "me__career__target"
+      },
+      {
+        "route": "/me/certifications",
+        "href": "/me/certifications",
+        "slug": "me__certifications"
+      },
+      {
+        "route": "/me/documents",
+        "href": "/me/documents",
+        "slug": "me__documents"
+      },
+      {
+        "route": "/me/gaps",
+        "href": "/me/gaps",
+        "slug": "me__gaps"
+      },
+      {
+        "route": "/me/handbook",
+        "href": "/me/handbook",
+        "slug": "me__handbook"
+      },
+      {
+        "route": "/me/handbook/[id]",
+        "href": "/me/handbook/69137767-5795-47f7-8868-fd8461d68fa4",
+        "slug": "me__handbook___id_"
+      },
+      {
+        "route": "/me/inbox",
+        "href": "/me/inbox",
+        "slug": "me__inbox"
+      },
+      {
+        "route": "/me/kpis",
+        "href": "/me/kpis",
+        "slug": "me__kpis"
+      },
+      {
+        "route": "/me/learning",
+        "href": "/me/learning",
+        "slug": "me__learning"
+      },
+      {
+        "route": "/me/learning/catalogue",
+        "href": "/me/learning/catalogue",
+        "slug": "me__learning__catalogue"
+      },
+      {
+        "route": "/me/matching",
+        "href": "/me/matching",
+        "slug": "me__matching"
+      },
+      {
+        "route": "/me/positions",
+        "href": "/me/positions",
+        "slug": "me__positions"
+      },
+      {
+        "route": "/me/profile",
+        "href": "/me/profile",
+        "slug": "me__profile"
+      },
+      {
+        "route": "/me/security",
+        "href": "/me/security",
+        "slug": "me__security"
+      },
+      {
+        "route": "/me/skills",
+        "href": "/me/skills",
+        "slug": "me__skills"
+      },
+      {
+        "route": "/me/skills/self-assessment",
+        "href": "/me/skills/self-assessment",
+        "slug": "me__skills__self-assessment"
+      },
+      {
+        "route": "/me/surveys",
+        "href": "/me/surveys",
+        "slug": "me__surveys"
+      },
+      {
+        "route": "/me/surveys/[surveyId]",
+        "href": "/me/surveys/57850d00-c7cd-4f66-8acd-20586bc63eda",
+        "slug": "me__surveys___surveyId_"
+      },
+      {
+        "route": "/me/team",
+        "href": "/me/team",
+        "slug": "me__team"
+      }
+    ]
+  },
+  {
+    "group": "People_Org",
+    "n": 13,
+    "pages": [
+      {
+        "route": "/org-director",
+        "href": "/org-director",
+        "slug": "org-director"
+      },
+      {
+        "route": "/organization",
+        "href": "/organization",
+        "slug": "organization"
+      },
+      {
+        "route": "/organization/org-chart",
+        "href": "/organization/org-chart",
+        "slug": "organization__org-chart"
+      },
+      {
+        "route": "/positions",
+        "href": "/positions",
+        "slug": "positions"
+      },
+      {
+        "route": "/positions/[positionId]",
+        "href": "/positions/0e51c0bb-f0df-4752-b003-b75a8607ea88",
+        "slug": "positions___positionId_"
+      },
+      {
+        "route": "/positions/[positionId]/kpis",
+        "href": "/positions/0e51c0bb-f0df-4752-b003-b75a8607ea88/kpis",
+        "slug": "positions___positionId___kpis"
+      },
+      {
+        "route": "/positions/[positionId]/learning",
+        "href": "/positions/0e51c0bb-f0df-4752-b003-b75a8607ea88/learning",
+        "slug": "positions___positionId___learning"
+      },
+      {
+        "route": "/positions/[positionId]/skills",
+        "href": "/positions/0e51c0bb-f0df-4752-b003-b75a8607ea88/skills",
+        "slug": "positions___positionId___skills"
+      },
+      {
+        "route": "/tenants",
+        "href": "/tenants",
+        "slug": "tenants"
+      },
+      {
+        "route": "/tenants/[tenantId]",
+        "href": "/tenants/86ba7a65-217f-48ba-8ce5-5c09b40a66b0",
+        "slug": "tenants___tenantId_"
+      },
+      {
+        "route": "/tenants/[tenantId]/enterprise-typing",
+        "href": "/tenants/86ba7a65-217f-48ba-8ce5-5c09b40a66b0/enterprise-typing",
+        "slug": "tenants___tenantId___enterprise-typing"
+      },
+      {
+        "route": "/users",
+        "href": "/users",
+        "slug": "users"
+      },
+      {
+        "route": "/users/[userId]",
+        "href": "/users/b113459e-5102-4cdd-8f3b-37f654896d9d",
+        "slug": "users___userId_"
+      }
+    ]
+  },
+  {
+    "group": "Visualizations",
+    "n": 2,
+    "pages": [
+      {
+        "route": "/visualizations",
+        "href": "/visualizations",
+        "slug": "visualizations"
+      },
+      {
+        "route": "/visualizations/[graphId]",
+        "href": "/visualizations/325ecb42-a79f-4426-93d2-263dc3584ade",
+        "slug": "visualizations___graphId_"
+      }
+    ]
+  }
+]

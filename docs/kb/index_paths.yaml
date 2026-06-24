@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-23T02:04:14Z da docs/kb/tools/build_index.py
+# generato: 2026-06-24T00:25:27Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-23T02:04:14Z"
-  total_files: 2170
+  generated_at: "2026-06-24T00:25:27Z"
+  total_files: 2177
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,7 +18,7 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 153
+    db-migration: 160
     db-script: 23
     db-seed: 104
     doc-canonical: 388
@@ -35,7 +35,7 @@ meta:
   status_counts:
     archive: 493
     external-archive: 50
-    live: 1627
+    live: 1634
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -5758,6 +5758,48 @@ files:
   - path: 'D:\heuresys-advanced\db\migrations\000154_retire_synthetic_user_flag.sql'
     root: repo
     rel: 'db/migrations/000154_retire_synthetic_user_flag.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000155_grant_user_role_to_functional_employees.sql'
+    root: repo
+    rel: 'db/migrations/000155_grant_user_role_to_functional_employees.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000156_g01_kpi_names_it.sql'
+    root: repo
+    rel: 'db/migrations/000156_g01_kpi_names_it.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000157_g01_process_names_it.sql'
+    root: repo
+    rel: 'db/migrations/000157_g01_process_names_it.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000158_g01_non_esco_skill_names_it.sql'
+    root: repo
+    rel: 'db/migrations/000158_g01_non_esco_skill_names_it.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000159_g01_esco_skill_names_it.sql'
+    root: repo
+    rel: 'db/migrations/000159_g01_esco_skill_names_it.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000160_cleanup_junk_skills.sql'
+    root: repo
+    rel: 'db/migrations/000160_cleanup_junk_skills.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000161_clean_legacy_skill_codes.sql'
+    root: repo
+    rel: 'db/migrations/000161_clean_legacy_skill_codes.sql'
     category: db-migration
     status: live
     provenance: git-tracked

@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-23T02:04:14Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2170**
+**Generato**: 2026-06-24T00:25:27Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2177**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,7 +18,7 @@
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 153 |
+| db-migration | 160 |
 | db-script | 23 |
 | db-seed | 104 |
 | doc-canonical | 388 |
@@ -32,7 +32,7 @@
 | test | 227 |
 | ux-design-archive | 80 |
 | web-source | 170 |
-| **TOTALE** | **2170** |
+| **TOTALE** | **2177** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1627 |
+| live | 1634 |
 
 ## File per categoria
 
@@ -1031,6 +1031,13 @@
 - `D:\heuresys-advanced\db\migrations\000152_leads.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000153_lead_source_enum.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000154_retire_synthetic_user_flag.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000155_grant_user_role_to_functional_employees.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000156_g01_kpi_names_it.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000157_g01_process_names_it.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000158_g01_non_esco_skill_names_it.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000159_g01_esco_skill_names_it.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000160_cleanup_junk_skills.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000161_clean_legacy_skill_codes.sql` · *live* · git-tracked
 
 ### db-script
 

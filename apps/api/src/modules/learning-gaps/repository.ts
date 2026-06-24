@@ -28,6 +28,9 @@ interface Row {
   learning_gap_metadata: Record<string, unknown>;
   created_at: Date;
   updated_at: Date;
+  user_name?: string | null; // G-02: resolved on the list query, undefined elsewhere
+  position_title?: string | null;
+  skill_name?: string | null;
 }
 
 const COLS = `learning_gap_id, learning_gap_tenant_id, learning_gap_user_id,
@@ -40,8 +43,11 @@ function toGap(r: Row): LearningGap {
     learningGapId: r.learning_gap_id,
     tenantId: r.learning_gap_tenant_id,
     userId: r.learning_gap_user_id,
+    userName: r.user_name ?? null,
     positionId: r.learning_gap_position_id,
+    positionTitle: r.position_title ?? null,
     skillId: r.learning_gap_skill_id,
+    skillName: r.skill_name ?? null,
     requiredProficiency: r.learning_gap_required_proficiency,
     currentProficiency: r.learning_gap_current_proficiency,
     score: r.learning_gap_score === null ? null : Number(r.learning_gap_score),
@@ -92,7 +98,11 @@ export async function listGaps(
   params.push(filter.query.offset);
   const off = params.length;
   const res = await q.query<Row>(
-    `SELECT ${COLS} FROM sys.sys_learning_gaps ${whereClause}
+    `SELECT ${COLS},
+            (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = sys.sys_learning_gaps.learning_gap_user_id) AS user_name,
+            (SELECT p.position_title FROM sys.sys_positions p WHERE p.position_id = sys.sys_learning_gaps.learning_gap_position_id) AS position_title,
+            (SELECT s.skill_name FROM sys.sys_skills s WHERE s.skill_id = sys.sys_learning_gaps.learning_gap_skill_id) AS skill_name
+       FROM sys.sys_learning_gaps ${whereClause}
       ORDER BY learning_gap_detected_at DESC, learning_gap_id
       LIMIT $${lim} OFFSET $${off}`,
     params,

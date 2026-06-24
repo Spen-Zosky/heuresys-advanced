@@ -28,6 +28,7 @@ interface Row {
   organization_unit_metadata: Record<string, unknown>;
   created_at: Date;
   updated_at: Date;
+  parent_name?: string | null; // G-02: resolved on the list query, undefined elsewhere
 }
 
 const COLS = `organization_unit_id, organization_unit_tenant_id,
@@ -51,6 +52,7 @@ function toOu(r: Row): OrganizationUnit {
     typeId: r.organization_unit_type_id,
     type: r.organization_unit_type,
     parentId: r.organization_unit_parent_id,
+    parentName: r.parent_name ?? null,
     managerUserId: r.organization_unit_manager_user_id,
     effectiveFrom: dateOnly(r.organization_unit_effective_from)!,
     effectiveTo: dateOnly(r.organization_unit_effective_to),
@@ -89,7 +91,10 @@ export async function listOus(
   const offIdx = params.length;
 
   const res = await q.query<Row>(
-    `SELECT ${COLS} FROM sys.sys_organization_units ${whereClause}
+    `SELECT ${COLS},
+            (SELECT p.organization_unit_name FROM sys.sys_organization_units p
+              WHERE p.organization_unit_id = sys.sys_organization_units.organization_unit_parent_id) AS parent_name
+       FROM sys.sys_organization_units ${whereClause}
       ORDER BY organization_unit_code LIMIT $${limIdx} OFFSET $${offIdx}`,
     params,
   );

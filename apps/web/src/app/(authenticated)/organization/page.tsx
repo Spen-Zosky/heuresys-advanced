@@ -13,6 +13,7 @@ interface OrgUnit {
   name: string;
   type: string;
   parentId: string | null;
+  parentName: string | null;
   managerUserId: string | null;
   effectiveFrom: string | null;
   effectiveTo: string | null;
@@ -38,7 +39,7 @@ export default function OrganizationPage() {
       { header: t("organization.columns.type"), cell: (o) => <span className="text-xs uppercase text-muted-foreground">{o.type}</span> },
       {
         header: t("organization.columns.parent"),
-        cell: (o) => <span className="font-mono text-xs text-muted-foreground">{o.parentId?.slice(0, 8) ?? t("organization.dash")}</span>,
+        cell: (o) => <span className="text-xs text-muted-foreground">{o.parentName ?? (o.parentId ? o.parentId.slice(0, 8) : t("organization.dash"))}</span>,
       },
       {
         header: t("organization.columns.active"),

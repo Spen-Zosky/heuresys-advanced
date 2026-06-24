@@ -10,8 +10,11 @@ import { StatusBadge } from "@/components/status-pill";
 interface LearningGap {
   learningGapId: string;
   userId: string;
+  userName: string | null;
   positionId: string | null;
+  positionTitle: string | null;
   skillId: string | null;
+  skillName: string | null;
   severity: string;
   requiredProficiency: string | null;
   currentProficiency: string | null;
@@ -91,9 +94,9 @@ export default function AdminGapsPage() {
             <tbody className="divide-y divide-border">
               {items.map((g) => (
                 <tr key={g.learningGapId} data-testid="gaps-row" className="transition-colors hover:bg-muted/60">
-                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{g.userId.slice(0, 8)}</td>
-                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{g.positionId?.slice(0, 8) ?? "—"}</td>
-                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{g.skillId?.slice(0, 8) ?? "—"}</td>
+                  <td className="px-4 py-2 text-xs text-foreground">{g.userName ?? g.userId.slice(0, 8)}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground">{g.positionTitle ?? (g.positionId ? g.positionId.slice(0, 8) : "—")}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground">{g.skillName ?? (g.skillId ? g.skillId.slice(0, 8) : "—")}</td>
                   <td className="px-4 py-2"><StatusBadge value={g.severity} /></td>
                   <td className="px-4 py-2 text-xs">{g.requiredProficiency ?? "—"}</td>
                   <td className="px-4 py-2 text-xs">{g.currentProficiency ?? "—"}</td>

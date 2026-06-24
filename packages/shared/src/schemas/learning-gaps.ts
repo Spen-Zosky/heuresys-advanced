@@ -15,8 +15,11 @@ export const LearningGapSchema = z.object({
   learningGapId: z.uuid(),
   tenantId: z.uuid(),
   userId: z.uuid(),
+  userName: z.string().nullable(), // G-02: human names resolved on the list endpoint
   positionId: z.uuid().nullable(),
+  positionTitle: z.string().nullable(),
   skillId: z.uuid().nullable(),
+  skillName: z.string().nullable(),
   requiredProficiency: z.string().nullable(),
   currentProficiency: z.string().nullable(),
   score: z.number().nullable(),

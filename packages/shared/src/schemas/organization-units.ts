@@ -14,6 +14,7 @@ export const OrganizationUnitSchema = z.object({
   typeId: z.uuid().nullable(),
   type: z.string().nullable(),
   parentId: z.uuid().nullable(),
+  parentName: z.string().nullable(), // G-02: parent OU name, resolved on the list endpoint
   managerUserId: z.uuid().nullable(),
   effectiveFrom: z.string(),
   effectiveTo: z.string().nullable(),

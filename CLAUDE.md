@@ -39,6 +39,8 @@ After the infra hooks (tunnel/db/branch), **before** asking what to do or starti
 
 Do NOT start work before presenting this menu and getting the user's choice — UNLESS the user's first message already names a specific task. Rationale + the writing side (handoff): `docs/superpowers/specs/2026-06-05-sot-unification-design.md` §12.
 
+**Live health at a glance** (complements the menu): after the boot hook, `python docs/kb/tools/status_dashboard.py` (alias `pnpm status`) re-derives the real state from the live sources — git sync, last CI conclusion per workflow, PROD `/login`+`/api/readyz`, DB migrations/integrity/counts, a **staleness self-check** (live numbers vs `SOT_STATE.md` §0 → flags drift), backlog lanes, open debts, and the decisions waiting on Enzo. It never trusts a cached number; tunnel/offline degrade to `[? ]`, never to a stale guess. Born S1007 to end "sono al buio".
+
 ## Canonical commands
 
 All run from repo root unless noted. Use the project's pnpm package manager (pinned via `packageManager` in `package.json`).
@@ -64,6 +66,7 @@ All run from repo root unless noted. Use the project's pnpm package manager (pin
 | Seed test admin/personas | `pnpm db:seed-test-admin` |
 | i18n parity check (web) | `pnpm i18n:check` |
 | Typecheck test files separately | `cd apps/api && pnpm typecheck:test` (uses `tsconfig.test.json`) |
+| Status dashboard (live health) | `python docs/kb/tools/status_dashboard.py` (or `pnpm status`) — re-derives git/CI/PROD/DB/backlog/debts/drift live; flags `--no-db` `--no-net` `--md` `--strict` |
 
 PowerShell scripts are the Windows canonical; `.sh` siblings exist for bash/SSH-to-VM use. Every `db/scripts/*.{ps1,sh}` is idempotent and safe to re-run.
 

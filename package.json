@@ -33,6 +33,7 @@
     "db:encrypt-totp": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/encrypt-totp-secrets.ts",
     "embeddings:backfill": "pnpm --filter @heuresys/api exec tsx src/modules/semantic-matching/backfill.ts",
     "i18n:check": "pnpm --filter @heuresys/web run i18n:check",
+    "status": "python docs/kb/tools/status_dashboard.py",
     "cowork:status": "node scripts/cowork-exchange/status.mjs",
     "cowork:validate": "node scripts/cowork-exchange/validate-naming.mjs",
     "cowork:validate:strict": "node scripts/cowork-exchange/validate-naming.mjs --strict",

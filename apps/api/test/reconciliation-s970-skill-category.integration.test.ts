@@ -3,7 +3,7 @@ import { pool } from '../src/db/client.js';
 
 // S970 #5: skill-category heatmap prerequisite (Enzo decision b). A 7th 'Technical / Domain Expertise'
 // category is added; the 31 referenced skills are mapped (23 clean behavioral fits + 8 technical/domain).
-// Only the referenced skills are categorized (the 21939-skill catalog is otherwise untouched).
+// Only the referenced skills are categorized (the rest of the skill catalog is otherwise untouched).
 
 const count = async (sql: string): Promise<number> => {
   const { rows } = await pool.query<{ n: number }>(sql);

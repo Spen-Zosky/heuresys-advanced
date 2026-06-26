@@ -440,7 +440,7 @@ describe("semantic-matching API", () => {
 
 // A FakeEmbedder + a STUB backfill that returns a static summary WITHOUT touching the DB. Injected via
 // the DI seam so the reindex/free-text tests are fully non-destructive (the real embedding tables —
-// 21939 skills / 3040 occupations / 227 job_roles / 156 profiles — are never re-embedded by the suite).
+// 14093 skills / 3040 occupations / 227 job_roles / 156 profiles — are never re-embedded by the suite).
 function makeFakeDeps(onBackfill?: () => void): SemanticMatchingDeps {
   const summary: BackfillSummary = {
     skills: { embedded: 0, skipped: 0 },

@@ -11,7 +11,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
-import { closePool } from "../src/db/client.js";
+import { closePool, pool } from "../src/db/client.js";
 
 const PWD = "Admin#PassW0rd!";
 
@@ -657,8 +657,10 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
 
   // --- Skills-group share (T3.8 chart + T2.6 clustering) — ESCO skill GROUPS.
   // Catalogue-global rollup (ESCO skills are platform-global, tenantId=null).
-  // Deterministic anchors pinned against the live backfill (S990): 21939 skills,
-  // 12892 grouped across 400 distinct groups; largest group = skill/S2.8.1 (314).
+  // Deterministic anchors pinned against the live backfill: 12892 grouped across
+  // 400 distinct groups; largest group = skill/S2.8.1 (314). The catalogue total
+  // (totalSkills) is derived live from sys.sys_skills so the test survives catalogue
+  // cleans (e.g. the S1006 junk purge that took it 21939 → 14093, mig 000160).
   interface SkillsGroupShareBody {
     scope: { kind: string; tenantId: string | null };
     groups: Array<{ groupCode: string; groupUri: string; skillCount: number; sharePct: number }>;
@@ -694,11 +696,16 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as SkillsGroupShareBody;
-    // Catalogue-global anchors.
-    expect(body.totalSkills).toBe(21939);
+    // Catalogue-global anchors. totalSkills is derived live (catalogue size changes
+    // with cleans); the ESCO-grouped subset (12892 / 400 groups) is stable backfill.
+    const { rows: skillRows } = await pool.query<{ n: string }>(
+      "SELECT count(*)::text AS n FROM sys.sys_skills",
+    );
+    const expectedTotalSkills = Number(skillRows[0]!.n);
+    expect(body.totalSkills).toBe(expectedTotalSkills);
     expect(body.totalGrouped).toBe(12892);
     expect(body.distinctGroups).toBe(400);
-    expect(body.ungroupedSkills).toBe(21939 - 12892);
+    expect(body.ungroupedSkills).toBe(expectedTotalSkills - body.totalGrouped);
     // top-N groups, skillCount-desc, capped at 25; "other" holds the remaining 375.
     expect(body.groups.length).toBe(25);
     expect(body.otherGroupsCount).toBe(400 - 25);

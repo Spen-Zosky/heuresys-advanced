@@ -181,3 +181,12 @@ audit/reverify*.json
 audit/runner-summary.json
 audit/execution-context.json
 audit/stack-detection.json
+# Machine-output trees + transient run-logs surfaced by the S1006 forensic audit
+# (axe/cwv/security JSON dumps, the visual-workflow driver, per-run history/blocklog).
+# Reproducible from a re-run; the curated reports above stay committed.
+audit/a11y/
+audit/perf/
+audit/security/
+audit/context-history.json
+audit/_visual-workflow.js
+audit/BLOCKED-LOG.md

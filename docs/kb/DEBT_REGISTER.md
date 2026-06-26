@@ -1,7 +1,7 @@
 # DEBT_REGISTER — Debiti / incoerenze rilevati (CLI-owned)
 
 > Tutti i debiti, drift e incoerenze emersi nella ricognizione forense S939 (4-root). Per ognuno: severità, evidenza, remediation, stato. **Tutti in scope** (R3 cross-project: il codebase va lasciato migliore). Quelli operativi sono linkati al `SOT_BACKLOG.md`.
-> **Aggiornato**: 2026-05-27 (S939; + D-12 migrate.sh idempotency repair).
+> **Aggiornato**: 2026-06-26 (S1007 consolidamento SoT; header era fermo a S939 — corretto). Tabella aggiornata fino a D-45 / S1006.
 
 | ID | Sev | Debito | Evidenza | Remediation | Stato |
 |---|---|---|---|---|---|
@@ -57,9 +57,11 @@
 
 ## Sintesi scope
 
-- **Trattati in questa sessione (S939)**: D-02, D-03, D-08, D-10, D-11 (via indice + SoT + archive note); D-06, D-07 (chiariti).
-- **Risolti**: D-12 (migrate.sh idempotency chain repair, 2026-05-27); **D-01** (doc-drift CLAUDE.md+README → MVP-4, 2026-05-28).
-- **In backlog operativo**: — (tutti i debiti azionabili chiusi 2026-05-28: D-01, D-04, D-09).
+> ⚠️ **Footer storico (S939)** sotto — superato. **Stato live S1007: 0 debiti aperti**, D-01…D-45 tutti terminali (RISOLTO/non-issue/gestito/monitor). Verifica live: `python docs/kb/tools/status_dashboard.py` (sezione DEBITI). Unico sotto-pezzo deferito = D-34 taxonomy hard/soft skill (decisione Enzo, non un debito azionabile).
+
+- **Trattati nella sessione storica (S939)**: D-02, D-03, D-08, D-10, D-11 (via indice + SoT + archive note); D-06, D-07 (chiariti).
+- **Risolti (storico)**: D-12 (migrate.sh idempotency chain repair, 2026-05-27); **D-01** (doc-drift CLAUDE.md+README → MVP-4, 2026-05-28).
+- **In backlog operativo**: — (S1007: **0 debiti aperti**, D-01…D-45 tutti chiusi).
 - **Deferiti con registrazione**: D-05 (monitor, si allinea al prossimo handoff).
 - **Risolti 2026-05-28**: D-01 (doc-drift), D-04 (root cleanup → docs/archive/).
 

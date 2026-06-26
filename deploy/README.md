@@ -38,18 +38,18 @@ copying the PC's would break the VM's native binaries) — and `.env` (the
 bootstrap owns it; the PC's tunnel `.env` would clobber the VM's local-DB
 config). Run it *while the PC is alive* — it can't read a dead PC.
 
-## Full alignment — Mac + VM (+ linuxpc) as clones (`align-clones.sh`)
+## Full alignment — VM + linuxpc as clones (`align-clones.sh`) — Mac on-demand only (S1007)
 
 > **B-52 (S981)**: `linuxpc` (192.168.1.11, PROD twin autonomo con DB locale clonato) è ora un target di align: `bash scripts/align-clones.sh linuxpc [--deploy]` (strict) ed è incluso in `all` con resilienza FORZATA (PC spento → skip con warning, mai un fail del run). Il deploy leg riusa `vm-deploy.sh` con `REPO_DIR=/home/enzo/heuresys-advanced`; il refresh del DB clone resta `scripts/clone-vm-db.sh` (on-demand). Provisioning da zero: `scripts/provision-linux-pc.sh`.
 
-The **canonical "allinea Mac e VM" entrypoint.** It makes the remotes idempotent
+The **canonical "allinea i cloni" entrypoint** (VM + linux-pc; the Mac is retired from `all` in S1007 — on-demand only). It makes the remotes idempotent
 clones of the local PC repo (modulo OS/arch), wiring the steps below so nothing
 gitignored is left behind. Run from the local PC — **push local commits first**
 (the remotes reset to `origin/main`):
 
 ```bash
 bash scripts/align-clones.sh all --deploy   # both remotes + redeploy PROD
-bash scripts/align-clones.sh mac            # Mac only (dev box, no build)
+bash scripts/align-clones.sh mac            # Mac — ON-DEMAND ONLY (retired from `all`, S1007)
 bash scripts/align-clones.sh vm             # VM clone payload only (no build/restart)
 ```
 
@@ -102,9 +102,10 @@ tgz of managed paths only. **Auth is never cloned and credentials are forward-on
 OAuth tokens bricks auth; learned the hard way on the VM, 2026-06-12). A headless
 smoke test (`claude -p --tools ""`) gates startup breakage with auto-rollback; a 401
 only warns (auth ≠ alignment; fix with `claude login` on the host). Drift reports land
-in `deploy/reports/claude-align/` (gitignored). The Mac runs config-only
-(`--skip-plugins --skip-smoke`): Claude Code ≥2.x is AVX2-native and the 2012 Mac has
-no AVX2 — see `deploy/reports/claude-align/mac-cli-repair-20260612.md`.
+in `deploy/reports/claude-align/` (gitignored). **The Mac is RETIRED from `all`/close-propagate
+(S1007)** — dead weight: Claude Code ≥2.x is AVX2-native and the 2012 Mac has no AVX2 (its CLI
+SIGILLs), so the ecosystem channel kept failing 16 plugins + drift. On-demand `align-clones.sh mac`
+still runs config-only (`--skip-plugins --skip-smoke`); see `deploy/reports/claude-align/mac-cli-repair-20260612.md`.
 
 **SDK parity** (opzione C, 2026-06-12): the Anthropic SDKs are part of the ecosystem on
 every machine — npm `@anthropic-ai/claude-agent-sdk` + `@anthropic-ai/sdk` (global) and

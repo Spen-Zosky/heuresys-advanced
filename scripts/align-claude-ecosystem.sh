@@ -612,10 +612,10 @@ run_target() {  # dispatch one kind through the requested mode
 
 preflight_local
 case "$TARGETS_ARG" in
-  mac)     run_target mac ;;
+  mac)     run_target mac ;;   # on-demand only — RETIRED from `all` (S1007: Mac SIGILL/plugin failures)
   vm)      run_target vm ;;
   linuxpc) run_target linuxpc ;;
-  all)     run_target mac; run_target vm; RESILIENT=1 run_target linuxpc ;;
+  all)     run_target vm; RESILIENT=1 run_target linuxpc ;;
 esac
 
 log "ecosystem alignment complete (mode: dry=$DRY verify=$VERIFY_ONLY delta=$DELTA${SKIPPED:+ skipped:$SKIPPED})"

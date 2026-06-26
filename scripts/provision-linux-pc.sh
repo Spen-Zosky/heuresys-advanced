@@ -4,7 +4,7 @@
 # x86_64, user enzo) as an AUTONOMOUS PROD TWIN of the OCI VM: local PostgreSQL runtime
 # (full clone of the VM's real DB), prod build, systemd services, LAN-accessible.
 #
-# ISOLATED / on-demand: this is NOT wired into align-clones (mac+vm). Run it explicitly.
+# ISOLATED / on-demand: this is NOT wired into align-clones provisioning. Run it explicitly.
 # Orchestrated from the local PC (Git Bash). Idempotent. Captures the exact working
 # sequence (incl. the deps discovered on first run: pgvector, libpq-dev).
 #

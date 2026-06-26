@@ -12,6 +12,9 @@
 #                        • code → via git reset (already pushed)
 #
 # Flags:  <mac|vm|linuxpc|all>  [--deploy|--no-deploy|--auto-deploy]  [--delta]  [--resilient]
+#   mac (S1007): RETIRED from `all`/close-propagate (2012 MBP, OpenCore — dead weight; its
+#   claude CLI SIGILLs on the Ivy Bridge CPU). Still works as an EXPLICIT on-demand target
+#   (`align-clones.sh mac`) if ever revived; it is simply no longer dragged into `all`.
 #   linuxpc (B-52): the autonomous PROD twin (192.168.1.11, local DB clone). Part of
 #   `all` with FORCED resilience (a LAN host that may be off must never fail the run);
 #   as an explicit target it is strict like mac/vm. Its deploy leg reuses vm-deploy.sh
@@ -154,13 +157,13 @@ align_one() {
 }
 
 case "$TARGETS_ARG" in
-  mac)     align_one mac ;;
+  mac)     align_one mac ;;   # on-demand only — RETIRED from `all` (S1007, see header note)
   vm)      align_one vm ;;
   linuxpc) align_one linuxpc ;;
   # In `all`, linuxpc is ALWAYS resilient (LAN box, may be off — must not fail
   # the run). RESILIENT=1 as a function-call prefix persists afterwards in bash,
-  # which is harmless here (last call of the run).
-  all)     align_one mac; align_one vm; RESILIENT=1 align_one linuxpc ;;
+  # which is harmless here (last call of the run). mac excluded from `all` (S1007).
+  all)     align_one vm; RESILIENT=1 align_one linuxpc ;;
 esac
 
 # Consume the marker so the next session starts a fresh delta window.

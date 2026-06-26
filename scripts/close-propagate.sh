@@ -2,8 +2,9 @@
 #
 # scripts/close-propagate.sh — the SINGLE canonical close propagation (design §12.2 / §13.3).
 #
-# Runs BOTH channels that keep the 4 machines (Windows source + mac + vm + linux-pc) true
-# clones, so neither can be silently skipped:
+# Runs BOTH channels that keep the active machines (Windows source + vm + linux-pc) true
+# clones, so neither can be silently skipped. (Mac RETIRED from `all` in S1007 — dead weight:
+# 2012 MBP, claude CLI SIGILLs; still reachable on-demand via `align-clones.sh mac`.)
 #   1. align-clones.sh all      — repo + gitignored payload + .env key-merge + project memories
 #                                 (sync-memory-tree) + PROD deploy (vm/linux-pc)
 #   2. align-claude-ecosystem.sh all — Claude catalog (CLAUDE.md/skills/commands/settings) + SDK
@@ -85,8 +86,8 @@ fi
 log "channel 2/2 — align-claude-ecosystem (catalog + skills + SDK)"
 if [ -f "$SCRIPTS/align-claude-ecosystem.sh" ]; then
   eco_mode=""; [ "$MODE" = "--delta" ] && eco_mode="--delta"
-  # --skip-smoke: Mac claude CLI crashes (SIGILL on Ivy Bridge CPU) — smoke can never pass there.
-  # VM + linux-pc smoke is bypassed too for symmetry; verify report is the quality gate instead.
+  # --skip-smoke: VM + linux-pc smoke is bypassed; the verify report is the quality gate instead.
+  # (Mac retired from `all` in S1007; its claude CLI SIGILLed on the 2012 Ivy Bridge CPU anyway.)
   if ! bash "$SCRIPTS/align-claude-ecosystem.sh" all $eco_mode --resilient --skip-smoke; then
     FAILED="$FAILED align-claude-ecosystem"
   fi

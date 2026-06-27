@@ -30,7 +30,9 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ComponentProps } from "react";
 
 const RawEChartsCard = dynamic(
-  () => import("@heuresys/ui").then((m) => ({ default: m.EChartsCard })),
+  // Subpath `/charts` isolates echarts so this lazy import does NOT drag the whole
+  // @heuresys/ui barrel (mermaid/cytoscape/three/…) into one ~1.68MB chunk (#21).
+  () => import("@heuresys/ui/charts").then((m) => ({ default: m.EChartsCard })),
   { ssr: false },
 );
 
@@ -92,6 +94,7 @@ export function EChartsCard(props: EChartsCardProps) {
 }
 
 export const MermaidDiagram = dynamic(
-  () => import("@heuresys/ui").then((m) => ({ default: m.MermaidDiagram })),
+  // Subpath `/markdown` isolates mermaid from the barrel (#21 perf chunk-split).
+  () => import("@heuresys/ui/markdown").then((m) => ({ default: m.MermaidDiagram })),
   { ssr: false },
 );

@@ -42,11 +42,9 @@
 - **#20 audit QA forense S1006 — il grosso** · status: DONE
   - priority: P1 · effort: ~ (multi-fase) · doc: audit/FINDINGS.md + audit/FORENSIC-NOTES-S1006-cli.md
   - note: ✅ DONE S1006 — audit forense 74 pagine (98 finding) + ~20 fix live PROD (B-01..B-07, B-03 RBAC mig 000155, G-03, B-02, CSP) + G-01 i18n-dati IT-canonical (KPI/processi/non-ESCO + 13k ESCO, mig 000156-159) + clean junk-skills (000160, 21939→14093) + skill_code clean (000161) + G-02 org/gaps. DATA dashboard/insights = non-bug verificati. Deploy 2× + CSP nginx + ri-verifica PROD. MFA OFF (Enzo).
-- **#21 residuo tail audit S1006 — a11y + perf (lib-blocked)** · status: GATED
-  - blocker: i fix vivono in **`@heuresys/ui` / ux-design-shared** (repo lib pubblicata), non in heuresys-advanced
-  - unblock-trigger: {kind: manual} — Enzo apre una sessione su `ux-design-shared` (shell a11y + subpath exports) → publish + bump qui
-  - doc: audit/FORENSIC-NOTES-S1006-cli.md (sezione #21 RESIDUO — STATUS)
-  - note: **2/4 DONE in-repo S1006**: ✅ (a) **career-succession G-02** (join user/pool name + fix contract `successionPoolId`→`poolId`, deployato) · ✅ (d) **817 stale-ESCO** tradotti via LLM (mig 000162, **ESCO IT 14002/14002 = 100%**). **GATED su lib**: (b) **a11y dashboard** — TUTTE le violazioni (9 tap-target + landmark-main duplicato + scrollable-region) sono in componenti `@heuresys/ui` shell (verificato: non presenti in apps/web/src). (c) **perf** chunk JS — è il barrel `@heuresys/ui` (echarts+three+d3), che espone solo `.` (no subpath) → split richiede subpath exports nel lib. CWV già ottimi (chunk on-demand).
+- **#21 residuo tail audit S1006 — a11y + perf** · status: DONE
+  - priority: P2 · effort: ~3h · doc: audit/FORENSIC-NOTES-S1006-cli.md
+  - note: ✅ DONE S1008 — gate sciolto alla radice (era GATED su `ux-design-shared`, anche parz. obsoleto: la 0.1.8 già consumata aveva 2 fix a11y dentro). **`@heuresys/ui@0.1.9`** pubblicato (lib `c31e4c7`): **a11y shell** — `DashboardShell` `<main>`→`<div tabIndex=0>` (−3 landmark: no-duplicate-main/landmark-unique/main-is-top-level) · `sidebar-group-toggle` `min-h-6` (23→24px tap-target ×9) · `AuditFeed`/`LogStream` scroll-region `tabIndex=0`+`aria-label` (scrollable-region-focusable serious); **perf** — subpath exports `./charts` (echarts) + `./markdown` (mermaid) via tsup multi-entry, così un dynamic import non tira più il barrel ~1.68MB. Bump `^0.1.9` (root+web+showcase) + `_charts-client` rewire (`dd8deb8`). **LIVE www.heuresys.com** (login reale `admin@`): `/dashboard` axe **0 violazioni** (era 4 core + 9 tap-target); chunk splittato (echarts 1.1MB / mermaid 3.9MB / cytoscape 420KB separati). CI 9/9 verde · deploy VM verde · lib 116 test + 5 regression-guard.
 
 ## ✅ Gap#1 DONE (S999, 2026-06-20) — programma-faro "rendi il prodotto dimostrabile" chiuso end-to-end
 

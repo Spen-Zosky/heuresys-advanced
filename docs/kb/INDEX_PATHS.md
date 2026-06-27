@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-24T01:40:53Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2182**
+**Generato**: 2026-06-27T14:06:28Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2183**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -21,7 +21,7 @@
 | db-migration | 161 |
 | db-script | 23 |
 | db-seed | 104 |
-| doc-canonical | 390 |
+| doc-canonical | 391 |
 | handoff-state | 1 |
 | qa-artifact | 101 |
 | script | 6 |
@@ -32,7 +32,7 @@
 | test | 227 |
 | ux-design-archive | 80 |
 | web-source | 170 |
-| **TOTALE** | **2182** |
+| **TOTALE** | **2183** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1639 |
+| live | 1640 |
 
 ## File per categoria
 
@@ -1368,6 +1368,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-merge` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\install-hooks.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\reconstruct_linked_manifest.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\status_dashboard.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\sync.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\sync.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\preflight-residual-todo.md` · *live* · git-tracked

@@ -1,18 +1,18 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-24 (S1006 — audit forense QA E2E 74 pagine + ~20 fix deployati live su PROD).
+**Updated**: 2026-06-27 (S1008 — #21 chiuso: @heuresys/ui 0.1.9 a11y shell + perf subpath split, live su PROD).
 
 > **Vista rapida** (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui. Menu generato da `docs/kb/tools/build_menu.py`.
 
-## Last session brief (S1006 — audit forense + fix + deploy, delega Enzo)
+## Last session brief (S1008 — #21 a11y + perf, gate sciolto alla radice)
 
-Audit forense QA E2E su **74 pagine autenticate** (PROD, dati reali, batch headless + ri-verifica anti-token-TTL + pass ESS persona reale + scansioni perf/a11y/security + **workflow visivo multi-agent 98 finding confermati**). Poi fase fix **end-to-end + deploy**: **~20 fix verificati live su PROD**. Bug 🔴 chiusi: **B-01** brownfield mis-wired al contratto (crash), **B-03** ESS lockout RBAC (dipendenti funzionali senza `USER` → 403 sul proprio ESS; fix additivo mig 000155, decisione Enzo), **B-04** gauge KPI (formato, non dato), **B-05** chart dark invisibili (CSS-var non risolte nel canvas echarts; wrapper unico), **B-06** brownfield/learning/positions (contract-drift + JOIN nomi), **B-07** org-chart label. 🟡: **B-02** login GET-creds, **G-03** toggle lingua duplicato (header no-op nascosto), **CSP+Permissions-Policy** (nginx). **G-01 i18n-dati** (decisione Enzo = tradurre nel DB, IT-canonical): KPI+processi+41 non-ESCO + **13.032 skill ESCO** via API ESCO `language=it` (mig 000156-159). **Clean**: 7846 junk-skills rimossi+archiviati (000160, catalogo 21939→14093); skill_code `OLDDB::`→`ESCO::`/`COMP::` (000161). **G-02** org PARENT + gaps user/position/skill (correlated-subquery joins). **DATA** dashboard/insights = **NON-BUG** (dati synthetic statici → trend piatto; flight-risk 120 LOW+39 MEDIUM no HIGH). Deploy: 3× `vm-deploy.sh` + CSP su nginx live + tutto ri-verificato su `www.heuresys.com`. MFA resta **OFF** (decisione Enzo). Artefatti audit: `audit/FINDINGS.md` + `FORENSIC-NOTES-S1006-cli.md` + `_visual-confirmed.json`. **Residuo #21 risolto in-repo**: career-succession G-02 + **817 stale-ESCO tradotti via workflow LLM** (ESCO 100% IT, mig 000162); a11y + perf = **lib-blocked** (`@heuresys/ui`/ux-design-shared) → backlog **#21 GATED**.
+#21 (residuo tail audit S1006, era **GATED** su `ux-design-shared`) **chiuso end-to-end e live**. Il gate era anche parzialmente obsoleto (la 0.1.8 già consumata aveva 2 fix a11y dentro) → sciolto alla radice invece di assumerlo, misurando le violazioni reali dal report axe S1006. **`@heuresys/ui@0.1.9` pubblicato** (lib commit `c31e4c7`): **a11y shell** — `DashboardShell` `<main>`→`<div tabIndex=0>` (elimina i 3 landmark: no-duplicate-main / landmark-unique / main-is-top-level, perché ogni pagina rende già il proprio `<main>`); `sidebar-group-toggle` `min-h-6` (23→24px, WCAG 2.5.8 tap-target ×9); `AuditFeed`/`LogStream` scroll-region `tabIndex=0`+`aria-label` (scrollable-region-focusable, serious). **perf** — subpath exports `./charts` (echarts) + `./markdown` (mermaid) via tsup multi-entry, così un dynamic import non tira più l'intero barrel da ~1.68MB. Lato repo (`dd8deb8`): bump `^0.1.9` (root+web+showcase) + `_charts-client.tsx` rewire ai subpath. **Verifica LIVE www.heuresys.com** (login reale `admin@`): `/dashboard` axe **0 violazioni totali** (era 4 core + 9 tap-target), `<main>`=1, toggle=24px, feed focusabile; chunk barrel splittato (echarts 1.1MB / mermaid 3.9MB / cytoscape 420KB ora separati). CI **9/9 verde**, deploy VM verde, lib **116 test + 5 regression-guard nuovi** (`dashboard-a11y-21.test.tsx`).
 
 ## Top priorities (next session)
 
-1. **#4 go-to-market — prossimo deliverable** (autorità *cosa* = Enzo): pricing page o altro. Keystone del programma.
+1. **#4 go-to-market — prossimo deliverable** (autorità *cosa* = Enzo): pricing page o altro. Keystone del programma, P1 sbloccato.
 2. **#8 EMAIL dormiente** (WAIT-INPUT): app-password Outlook → EMAIL_OTP + digest live.
-3. **#21 GATED** — a11y shell + perf chunk-split vivono in `ux-design-shared` (`@heuresys/ui`); unblock = sessione su quel repo → publish + bump qui.
+3. **#16 SuccessFactors** (WAIT-INPUT): sandbox esterno (costo).
 
 ## Open questions (autorità *cosa* = Enzo)
 
@@ -24,7 +24,6 @@ Audit forense QA E2E su **74 pagine autenticate** (PROD, dati reali, batch headl
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline    # 0 dopo handoff push
 python docs/kb/tools/handoff_lint.py                           # OK (0 fail)
-# S1006: skill catalogo pulito + IT
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "SELECT count(*) FROM sys.sys_skills WHERE skill_code LIKE 'OLDDB::%'"  # 0
+npm view @heuresys/ui version                                  # 0.1.9
 curl -sI https://www.heuresys.com/login | grep -i content-security-policy  # presente
 ```

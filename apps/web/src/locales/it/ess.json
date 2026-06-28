@@ -55,7 +55,10 @@
     "learningCount": "{{count}} assegnati",
     "gapsLabel": "Gap di sviluppo",
     "gapsUnit": "aperti",
-    "gapsCount": "{{count}} aperti"
+    "gapsCount": "{{count}} aperti",
+    "tabs": { "summary": "Riepilogo", "performance": "Performance", "attendance": "Presenze", "aria": "Sezioni My HR" },
+    "perf": { "error": "Impossibile caricare le valutazioni.", "none": "Nessuna valutazione", "review": "Valutazione", "status": "Stato", "overall": "Voto complessivo", "goal": "Obiettivi", "competency": "Competenze", "perfBox": "Box performance", "potBox": "Box potenziale", "period": "Periodo" },
+    "att": { "error": "Impossibile caricare le presenze.", "none": "Nessun dato", "balancesTitle": "Saldi ferie/permessi", "daysUsed": "giorni usati", "pending": "in attesa", "recentTitle": "Presenze recenti", "overtimeTitle": "Straordinari" }
   },
   "career": {
     "title": "La mia carriera",

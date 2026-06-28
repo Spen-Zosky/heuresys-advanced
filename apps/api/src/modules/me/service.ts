@@ -139,6 +139,17 @@ export const meService = {
     return { items, total: items.length };
   },
 
+  /** Performance review history (read-only) — My HR Performance sub-tab (F3a). */
+  async getPerformance(actor: SelfActor) {
+    const items = await repo.loadPerformance(pool, actor.userId);
+    return { items, total: items.length };
+  },
+
+  /** Attendance/overtime/leave consultation (imported, read-only) — My HR Presenze sub-tab (F3a). */
+  async getAttendance(actor: SelfActor) {
+    return repo.loadAttendance(pool, actor.userId);
+  },
+
   async updateProfile(actor: SelfActor, patch: UpdateMeProfileBody): Promise<MeProfile> {
     await repo.upsertProfile(pool, actor.userId, actor.tenantId, patch);
     const p = await repo.loadProfile(pool, actor.userId, actor.roles);

@@ -34,7 +34,10 @@
     "learningCount": "{{count}} assigned",
     "gapsLabel": "Development gaps",
     "gapsUnit": "open",
-    "gapsCount": "{{count}} open"
+    "gapsCount": "{{count}} open",
+    "tabs": { "summary": "Summary", "performance": "Performance", "attendance": "Attendance", "aria": "My HR sections" },
+    "perf": { "error": "Unable to load reviews.", "none": "No reviews", "review": "Review", "status": "Status", "overall": "Overall rating", "goal": "Goals", "competency": "Competencies", "perfBox": "Performance box", "potBox": "Potential box", "period": "Period" },
+    "att": { "error": "Unable to load attendance.", "none": "No data", "balancesTitle": "Leave balances", "daysUsed": "days used", "pending": "pending", "recentTitle": "Recent attendance", "overtimeTitle": "Overtime" }
   },
   "career": {
     "title": "My career",

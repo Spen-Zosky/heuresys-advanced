@@ -197,6 +197,60 @@ export const MeContractsResponseSchema = z.object({
 });
 export type MeContractsResponse = z.infer<typeof MeContractsResponseSchema>;
 
+/* --- performance (S1010 F3a — review history, read-only consultation) ------ */
+
+export const MePerformanceReviewSchema = z.object({
+  type: z.string().nullable(),
+  status: z.string().nullable(),
+  periodStart: z.string().nullable(),
+  periodEnd: z.string().nullable(),
+  overallRating: z.number().nullable(),
+  goalRating: z.number().nullable(),
+  competencyRating: z.number().nullable(),
+  potentialRating: z.string().nullable(),
+  performanceBox: z.number().int().nullable(),
+  potentialBox: z.number().int().nullable(),
+});
+export type MePerformanceReview = z.infer<typeof MePerformanceReviewSchema>;
+export const MePerformanceResponseSchema = z.object({
+  items: z.array(MePerformanceReviewSchema),
+  total: z.number().int().min(0),
+});
+export type MePerformanceResponse = z.infer<typeof MePerformanceResponseSchema>;
+
+/* --- attendance (S1010 F3a — imported attendance/overtime/leave, read-only) - */
+
+export const MeAttendanceDaySchema = z.object({
+  date: z.string().nullable(),
+  clockIn: z.string().nullable(),
+  clockOut: z.string().nullable(),
+  hoursRegular: z.number().nullable(),
+  hoursOvertime: z.number().nullable(),
+  hoursTotal: z.number().nullable(),
+  status: z.string().nullable(),
+});
+export const MeOvertimeEntrySchema = z.object({
+  date: z.string().nullable(),
+  type: z.string().nullable(),
+  hours: z.number().nullable(),
+  totalCompensation: z.number().nullable(),
+  status: z.string().nullable(),
+});
+export const MeLeaveBalanceSchema = z.object({
+  leaveType: z.string().nullable(),
+  year: z.number().int().nullable(),
+  totalDays: z.number().nullable(),
+  usedDays: z.number().nullable(),
+  pendingDays: z.number().nullable(),
+  carryoverDays: z.number().nullable(),
+});
+export const MeAttendanceResponseSchema = z.object({
+  recent: z.array(MeAttendanceDaySchema),
+  overtime: z.array(MeOvertimeEntrySchema),
+  leaveBalances: z.array(MeLeaveBalanceSchema),
+});
+export type MeAttendanceResponse = z.infer<typeof MeAttendanceResponseSchema>;
+
 /* --- permissions (RBAC -> UI gating; reflects the caller's OWN grants) ---- */
 
 export const MePermissionsResponseSchema = z.object({

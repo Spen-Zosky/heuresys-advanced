@@ -6,7 +6,7 @@
  */
 import type { Pool, PoolClient } from "pg";
 import type {
-  MeProfile, MeProfileFull, MeContract, UpdateMeProfileBody,
+  MeProfile, MeProfileFull, MeContract, MePerformanceReview, MeAttendanceResponse, UpdateMeProfileBody,
   MeSkillEvidenceSchema, CreateMeSelfAssessmentBody,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
@@ -342,6 +342,69 @@ export async function loadContracts(q: DbConnector, userId: string): Promise<MeC
     workScheduleType: r.work_schedule_type, partTimePercentage: num(r.part_time_percentage), jobTitle: r.job_title,
     status: r.status, terminationDate: r.termination_date, terminationReason: r.termination_reason, notes: r.notes,
   }));
+}
+
+/* --- performance (S1010 F3a, read-only) ------------------------------ */
+
+export async function loadPerformance(q: DbConnector, userId: string): Promise<MePerformanceReview[]> {
+  const res = await q.query<{
+    type: string | null; status: string | null; period_start: string | null; period_end: string | null;
+    overall_rating: string | null; goal_rating: string | null; competency_rating: string | null;
+    potential_rating: string | null; performance_box: number | null; potential_box: number | null;
+  }>(
+    `SELECT review_type AS type, review_status AS status,
+            to_char(review_period_start,'YYYY-MM-DD') AS period_start,
+            to_char(review_period_end,'YYYY-MM-DD') AS period_end,
+            review_overall_rating AS overall_rating, review_goal_achievement_rating AS goal_rating,
+            review_competency_rating AS competency_rating, review_potential_rating AS potential_rating,
+            review_performance_box AS performance_box, review_potential_box AS potential_box
+       FROM sys.sys_performance_reviews WHERE review_subject_user_id = $1
+      ORDER BY review_period_end DESC NULLS LAST`, [userId],
+  );
+  const num = (v: string | null): number | null => (v == null ? null : Number(v));
+  return res.rows.map((r) => ({
+    type: r.type, status: r.status, periodStart: r.period_start, periodEnd: r.period_end,
+    overallRating: num(r.overall_rating), goalRating: num(r.goal_rating), competencyRating: num(r.competency_rating),
+    potentialRating: r.potential_rating, performanceBox: r.performance_box, potentialBox: r.potential_box,
+  }));
+}
+
+/* --- attendance (S1010 F3a — consultation of imported data) ---------- */
+
+export async function loadAttendance(q: DbConnector, userId: string): Promise<MeAttendanceResponse> {
+  const num = (v: string | null): number | null => (v == null ? null : Number(v));
+  const [att, ot, bal] = await Promise.all([
+    q.query<{ date: string | null; clock_in: string | null; clock_out: string | null; hours_regular: string | null; hours_overtime: string | null; hours_total: string | null; status: string | null }>(
+      `SELECT to_char(attendance_date,'YYYY-MM-DD') AS date,
+              to_char(attendance_clock_in,'HH24:MI') AS clock_in, to_char(attendance_clock_out,'HH24:MI') AS clock_out,
+              attendance_hours_regular AS hours_regular, attendance_hours_overtime AS hours_overtime,
+              attendance_hours_total AS hours_total, attendance_status AS status
+         FROM sys.sys_attendance WHERE attendance_subject_user_id = $1
+        ORDER BY attendance_date DESC LIMIT 30`, [userId]),
+    q.query<{ date: string | null; type: string | null; hours: string | null; total_compensation: string | null; status: string | null }>(
+      `SELECT to_char(overtime_date,'YYYY-MM-DD') AS date, overtime_type AS type, overtime_hours AS hours,
+              overtime_total_compensation AS total_compensation, overtime_status AS status
+         FROM sys.sys_overtime WHERE overtime_subject_user_id = $1
+        ORDER BY overtime_date DESC LIMIT 30`, [userId]),
+    q.query<{ leave_type: string | null; year: number | null; total_days: string | null; used_days: string | null; pending_days: string | null; carryover_days: string | null }>(
+      `SELECT balance_leave_type AS leave_type, balance_year AS year, balance_total_days AS total_days,
+              balance_used_days AS used_days, balance_pending_days AS pending_days, balance_carryover_days AS carryover_days
+         FROM sys.sys_time_off_balances WHERE balance_subject_user_id = $1
+        ORDER BY balance_year DESC, balance_leave_type`, [userId]),
+  ]);
+  return {
+    recent: att.rows.map((r) => ({
+      date: r.date, clockIn: r.clock_in, clockOut: r.clock_out,
+      hoursRegular: num(r.hours_regular), hoursOvertime: num(r.hours_overtime), hoursTotal: num(r.hours_total), status: r.status,
+    })),
+    overtime: ot.rows.map((r) => ({
+      date: r.date, type: r.type, hours: num(r.hours), totalCompensation: num(r.total_compensation), status: r.status,
+    })),
+    leaveBalances: bal.rows.map((r) => ({
+      leaveType: r.leave_type, year: r.year, totalDays: num(r.total_days), usedDays: num(r.used_days),
+      pendingDays: num(r.pending_days), carryoverDays: num(r.carryover_days),
+    })),
+  };
 }
 
 /* --- positions ------------------------------------------------------- */

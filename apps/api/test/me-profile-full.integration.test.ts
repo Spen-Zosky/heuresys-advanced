@@ -86,6 +86,27 @@ describe("GET /v1/me/profile/full", () => {
     expect(typeof c.grossAnnualSalary).toBe("number");
   });
 
+  it("returns the caller's performance reviews (F3a, read-only)", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/me/performance", headers: { cookie: ch(tommaso.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as { items: Array<{ overallRating: number | null }>; total: number };
+    expect(b.total).toBeGreaterThanOrEqual(1);
+    expect(typeof b.items[0]!.overallRating).toBe("number");
+  });
+
+  it("returns the caller's attendance/leave consultation (F3a)", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/me/attendance", headers: { cookie: ch(tommaso.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as { recent: unknown[]; overtime: unknown[]; leaveBalances: unknown[] };
+    expect(Array.isArray(b.recent)).toBe(true);
+    expect(Array.isArray(b.overtime)).toBe(true);
+    expect(b.leaveBalances.length).toBeGreaterThanOrEqual(1);
+  });
+
   it("rejects an unauthenticated request", async () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/me/profile/full" });
     expect(r.statusCode).toBe(401);

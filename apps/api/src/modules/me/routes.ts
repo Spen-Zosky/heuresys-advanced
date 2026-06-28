@@ -12,7 +12,8 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
-  MeProfileSchema, MeProfileFullSchema, MeContractsResponseSchema, UpdateMeProfileBodySchema,
+  MeProfileSchema, MeProfileFullSchema, MeContractsResponseSchema,
+  MePerformanceResponseSchema, MeAttendanceResponseSchema, UpdateMeProfileBodySchema,
   MePositionsResponseSchema,
   MeSkillsResponseSchema, MeSkillEvidenceSchema, CreateMeSelfAssessmentBodySchema,
   MeSurveysResponseSchema, MeSurveyDetailSchema,
@@ -89,6 +90,18 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("user_profile:read:self")],
     schema: { response: { 200: MeContractsResponseSchema } },
   }, async (req) => meService.getContracts(selfActor(req)));
+
+  // Performance review history (read-only) — My HR Performance sub-tab (F3a).
+  app.get("/performance", {
+    preHandler: [requirePermission("assessment:read:self")],
+    schema: { response: { 200: MePerformanceResponseSchema } },
+  }, async (req) => meService.getPerformance(selfActor(req)));
+
+  // Attendance/overtime/leave consultation (read-only) — My HR Presenze sub-tab (F3a).
+  app.get("/attendance", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { response: { 200: MeAttendanceResponseSchema } },
+  }, async (req) => meService.getAttendance(selfActor(req)));
 
   app.get("/positions", {
     preHandler: [requirePermission("user_position_assignment:read:self")],

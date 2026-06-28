@@ -28,10 +28,15 @@ import { emitNotification } from "../../lib/notifications/emit.js";
 const UI_ADMIN_ROLES = new Set([
   "PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER", "ORG_DIRECTOR",
 ]);
+// Sidebar sections (S1009 IA redesign) — 5 always-returned collapsible groups, in display
+// order. Replaces the 3 PET perspectives. An empty section renders an honest empty-state in
+// the UI, so a non-admin (e.g. ESS-only) still gets a coherent sidebar.
 const UI_PERSPECTIVES = [
-  { code: "PROCESS" as const, label: "Process" },
-  { code: "ENTERPRISE" as const, label: "Enterprise" },
-  { code: "TALENT" as const, label: "Talent" },
+  { code: "OVERVIEW" as const, label: "Panoramica" },
+  { code: "GOVERNANCE" as const, label: "Governance" },
+  { code: "WORKFORCE" as const, label: "Forza lavoro" },
+  { code: "INTELLIGENCE" as const, label: "Intelligence" },
+  { code: "PERSONAL" as const, label: "Area personale" },
 ];
 
 export interface SelfActor { userId: string; tenantId: string | null; roles: string[] }
@@ -85,7 +90,7 @@ function isUniqueViolation(err: unknown): boolean {
 
 export const meService = {
   /** Sidebar registry filtered to the caller (U1). ESS items are always visible; admin items
-   *  require an admin-class role AND the per-item permission. All 3 PET perspectives are always
+   *  require an admin-class role AND the per-item permission. All 5 sections are always
    *  returned (an empty one renders an honest empty-state in the UI). */
   async getInterfaces(actor: SelfActor): Promise<MeInterfacesResponse> {
     const permSet = new Set(userPermissionCodes({ roles: actor.roles }));

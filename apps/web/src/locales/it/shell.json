@@ -3,22 +3,22 @@
     "groups": {
       "overview": "Panoramica",
       "me": "Area personale",
+      "personal": "Area personale",
       "workforce": "Forza lavoro",
       "operations": "Operazioni",
       "intelligence": "Intelligence",
       "governance": "Governance",
       "content": "Contenuti"
-    },
-    "perspective": {
-      "label": "Prospettiva",
-      "filters": {
-        "all": "Tutte",
-        "process": "Process",
-        "enterprise": "Enterprise",
-        "talent": "Talent"
-      },
-      "empty": "Nessuna interfaccia in questa prospettiva."
     }
+  },
+  "tabs": {
+    "label": "Navigazione sezione",
+    "org": { "overview": "Organizzazione", "network": "Rete organizzativa" },
+    "attendance": { "main": "Presenze", "overtime": "Straordinari" },
+    "skill": { "coverage": "Copertura", "category": "Per categoria", "group": "Per gruppo", "catalog": "Catalogo", "gap": "Gap", "skillGap": "Skill gap" },
+    "comp": { "analytics": "Analisi", "intelligence": "Compensation" },
+    "kpi": { "analytics": "Analisi", "catalog": "Catalogo KPI" },
+    "career": { "main": "Carriera", "readiness": "Readiness successione" }
   },
   "session": {
     "error": "Errore sessione"

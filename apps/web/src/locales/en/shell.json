@@ -3,22 +3,22 @@
     "groups": {
       "overview": "Overview",
       "me": "My area",
+      "personal": "Personal area",
       "workforce": "Workforce",
       "operations": "Operations",
       "intelligence": "Intelligence",
       "governance": "Governance",
       "content": "Content"
-    },
-    "perspective": {
-      "label": "Perspective",
-      "filters": {
-        "all": "All",
-        "process": "Process",
-        "enterprise": "Enterprise",
-        "talent": "Talent"
-      },
-      "empty": "No interface in this perspective."
     }
+  },
+  "tabs": {
+    "label": "Section navigation",
+    "org": { "overview": "Organization", "network": "Org network" },
+    "attendance": { "main": "Attendance", "overtime": "Overtime" },
+    "skill": { "coverage": "Coverage", "category": "By category", "group": "By group", "catalog": "Catalog", "gap": "Gap", "skillGap": "Skill gap" },
+    "comp": { "analytics": "Analytics", "intelligence": "Compensation" },
+    "kpi": { "analytics": "Analytics", "catalog": "KPI catalog" },
+    "career": { "main": "Career", "readiness": "Succession readiness" }
   },
   "session": {
     "error": "Session error"

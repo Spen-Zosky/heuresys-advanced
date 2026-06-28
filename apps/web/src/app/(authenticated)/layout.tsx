@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Button,
@@ -37,10 +37,11 @@ import {
   Users,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useCurrentUser, useLogout, useMyInterfaces, type MyInterface } from "../../lib/api/auth";
+import { useCurrentUser, useLogout, useMyInterfaces, useUpdateMyPreferences, type MyInterface } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
+import { setLocale } from "../../lib/i18n";
 import { PreferencesApplier } from "../../components/preferences-applier";
-import { LanguageSwitcher } from "../../components/language-switcher";
+import { SectionTabs } from "../../components/section-tabs";
 
 const ICON = "h-4 w-4 shrink-0";
 
@@ -77,12 +78,6 @@ const NAV_TESTID: Record<string, string> = {
   users: "nav-users",
 };
 
-/** Perspective filter codes. "ALL" (default) keeps every perspective visible — behaviour-
- *  preserving vs the old all-groups sidebar; the PET codes focus a single perspective.
- *  Labels are i18n (shell:nav.perspective.filters.*). */
-const FILTERS = ["ALL", "PROCESS", "ENTERPRISE", "TALENT"] as const;
-type FilterCode = (typeof FILTERS)[number];
-
 function navLabel(testId: string, text: string) {
   return <span data-testid={testId}>{text}</span>;
 }
@@ -94,7 +89,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   const me = useCurrentUser();
   const ifaces = useMyInterfaces();
   const logout = useLogout();
-  const [filter, setFilter] = useState<FilterCode>("ALL");
+  const updatePrefs = useUpdateMyPreferences();
 
   if (me.isLoading || ifaces.isLoading) {
     return (
@@ -124,24 +119,25 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
-  // Build the sidebar from the DB-driven registry (GET /v1/me/interfaces); server-side gating means
-  // we render exactly what is returned. Sub-groups (sidebar_group) become NavGroups, ordered by
-  // perspective then by the registry order. The filter focuses a single perspective when not "ALL".
-  const perspectives = ifaces.data?.perspectives ?? [];
-  const shown = filter === "ALL" ? perspectives : perspectives.filter((p) => p.code === filter);
+  // Build the sidebar from the DB-driven registry (GET /v1/me/interfaces). Server-side gating
+  // means we render exactly what is returned. The registry groups interfaces into 5 always-present
+  // SECTIONS (Panoramica / Governance / Forza lavoro / Intelligence / Area personale — S1009 IA
+  // redesign, the old PET perspective filter is retired); each section becomes a collapsible
+  // NavGroup whose label comes from i18n and whose items keep the registry order.
+  const sections = ifaces.data?.perspectives ?? [];
 
   const navGroups: NavGroup[] = [];
-  for (const persp of shown) {
+  for (const section of sections) {
     const bySub = new Map<string, MyInterface[]>();
-    for (const i of persp.interfaces) {
+    for (const i of section.interfaces) {
       const arr = bySub.get(i.sidebarGroup);
       if (arr) arr.push(i);
       else bySub.set(i.sidebarGroup, [i]);
     }
     for (const [sub, items] of bySub) {
       navGroups.push({
-        id: `${persp.code}-${sub}`,
-        label: t(`shell:nav.groups.${sub}`, { defaultValue: sub }),
+        id: `${section.code}-${sub}`,
+        label: t(`shell:nav.groups.${sub}`, { defaultValue: section.label }),
         items: items.map((i) => {
           const testId = NAV_TESTID[i.code];
           return {
@@ -156,48 +152,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     }
   }
 
-  const switcherGroup: NavGroup = {
-    id: "perspective-switch",
-    label: t("shell:nav.perspective.label"),
-    customContent: (
-      // <li> root: the lib renders customContent as a direct child of the
-      // sidebar <ul> — a bare <div> there is an axe "list" violation (WCAG
-      // 1.3.1) on every authenticated route (S981 a11y slice).
-      <li className="list-none">
-      <div data-testid="perspective-switcher" className="flex flex-wrap gap-1 px-3 py-2">
-        {FILTERS.map((code) => (
-          <Button
-            key={code}
-            type="button"
-            size="sm"
-            variant={filter === code ? "default" : "outline"}
-            data-testid={`perspective-${code.toLowerCase()}`}
-            onClick={() => setFilter(code)}
-          >
-            {t(`shell:nav.perspective.filters.${code.toLowerCase()}`)}
-          </Button>
-        ))}
-      </div>
-      </li>
-    ),
-  };
-
-  const emptyGroup: NavGroup[] =
-    filter !== "ALL" && navGroups.length === 0
-      ? [{
-          id: "perspective-empty",
-          label: t(`shell:nav.perspective.filters.${filter.toLowerCase()}`),
-          customContent: (
-            <li className="list-none">
-              <p data-testid="perspective-empty" className="px-3 py-2 text-xs text-muted-foreground">
-                {t("shell:nav.perspective.empty")}
-              </p>
-            </li>
-          ),
-        }]
-      : [];
-
-  const groups: NavGroup[] = [switcherGroup, ...navGroups, ...emptyGroup];
+  const groups: NavGroup[] = navGroups;
 
   const roles = user.roles ?? [];
   const ADMIN_ROLES = new Set(["PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER", "ORG_DIRECTOR"]);
@@ -220,12 +175,22 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     router.replace("/login");
   }
 
+  // Language lives in the HEADER (S1009): one toggle IT↔EN, persisted to sys_user_preferences
+  // (server source of truth) so the choice follows the user across pages and devices. The cookie
+  // covers same-device reloads; PreferencesApplier re-applies the server locale on a fresh device.
+  function handleToggleLanguage() {
+    const next = i18n.language === "it" ? "en" : "it";
+    setLocale(next);
+    updatePrefs.mutate({ locale: next });
+  }
+
   return (
     <DashboardShell
       header={
         <DashboardHeader
           user={identity}
           language={i18n.language === "en" ? "EN" : "IT"}
+          onToggleLanguage={handleToggleLanguage}
           logo={<HeuresysWordmark variant="brand" size={24} />}
           logoBadge={<HeuresysLogoBadge>{t("shell:brand.badge")}</HeuresysLogoBadge>}
         />
@@ -238,7 +203,6 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               <p data-testid="app-user-email" className="truncate text-xs text-muted-foreground">
                 {user.email}
               </p>
-              <LanguageSwitcher />
               <Button
                 variant="outline"
                 size="sm"
@@ -264,9 +228,11 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
         />
       }
     >
-      {/* WS-4 P1: apply the user's server-stored theme + palette (source of truth) once the
-          session is known. Renders nothing. */}
+      {/* WS-4 P1: apply the user's server-stored theme + palette + locale (source of truth) once
+          the session is known. Renders nothing. */}
       <PreferencesApplier />
+      {/* S1009: in-page tab bar for the 6 merge groups; renders nothing off those routes. */}
+      <SectionTabs />
       {children}
     </DashboardShell>
   );

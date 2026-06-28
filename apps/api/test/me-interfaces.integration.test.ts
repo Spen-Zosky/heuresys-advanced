@@ -1,8 +1,11 @@
 /**
  * apps/api/test/me-interfaces.integration.test.ts
  * GET /v1/me/interfaces — the DB-driven sidebar registry (U1), filtered to the caller and
- * grouped by the 3 PET perspectives. Faithfully replicates the web layout's hybrid gate:
- * ESS items always visible; admin items require an admin-class role AND the per-item permission.
+ * grouped into the 5 SECTIONS (S1009 IA redesign: OVERVIEW/GOVERNANCE/WORKFORCE/INTELLIGENCE/
+ * PERSONAL, replacing the 3 PET perspectives). Faithfully replicates the web layout's hybrid
+ * gate: ESS items always visible; admin items require an admin-class role AND the per-item
+ * permission. Absorbed analytics pages (is_active=false, reached via the in-page tab bar) are
+ * NOT returned here.
  *
  * Personas are the seed-test-admin set ONLY (login-capable in CI): admin (PLATFORM_ADMIN),
  * paolo.caputo (MANAGER), tommaso.fiore (pure USER). R2-seeded users are NOT used (their logins
@@ -30,9 +33,20 @@ async function interfaces(t: TestApp, c: Map<string, string>): Promise<Body> {
   expect(r.statusCode).toBe(200);
   return r.json() as Body;
 }
-function codes(b: Body, perspective: string): string[] {
-  return (b.perspectives.find((p) => p.code === perspective)?.interfaces ?? []).map((i) => i.code);
+function codes(b: Body, section: string): string[] {
+  return (b.perspectives.find((p) => p.code === section)?.interfaces ?? []).map((i) => i.code);
 }
+function allCodes(b: Body): string[] {
+  return b.perspectives.flatMap((p) => p.interfaces.map((i) => i.code));
+}
+
+// Pages folded into the 6 merge entries (is_active=false in the registry) — they must NOT
+// appear in the sidebar anymore; their routes stay live and are reached via the tab bar.
+const ABSORBED = [
+  "gaps", "kpis", "comp", "analytics-overtime", "analytics-org-network",
+  "analytics-skills-by-category", "analytics-skills-group-share",
+  "insights-skill-gap", "insights-succession-readiness",
+];
 
 let suite: TestApp;
 let adminC: Map<string, string>;
@@ -48,47 +62,51 @@ describe("/v1/me/interfaces", () => {
   });
   afterAll(async () => { await suite.app.close(); });
 
-  it("always returns the 3 PET perspectives (honest empty-state)", async () => {
+  it("always returns the 5 sections in display order (honest empty-state)", async () => {
     const b = await interfaces(suite, userC);
-    expect(b.perspectives.map((p) => p.code)).toEqual(["PROCESS", "ENTERPRISE", "TALENT"]);
+    expect(b.perspectives.map((p) => p.code)).toEqual([
+      "OVERVIEW", "GOVERNANCE", "WORKFORCE", "INTELLIGENCE", "PERSONAL",
+    ]);
   });
 
   it("PLATFORM_ADMIN sees the full registry incl. admin-only interfaces", async () => {
     const b = await interfaces(suite, adminC);
-    // admin-only items (perms a pure USER lacks) are present
-    expect(codes(b, "PROCESS")).toEqual(expect.arrayContaining(["blueprints", "processes", "brownfield", "seeds"]));
-    expect(codes(b, "ENTERPRISE")).toEqual(expect.arrayContaining(["dashboard", "kpis", "comp", "roles", "system-health"]));
-    // TALENT carries both the ESS items and the admin workforce items
-    expect(codes(b, "TALENT")).toEqual(expect.arrayContaining(["me-home", "me-inbox", "positions", "gaps", "career-succession"]));
+    expect(codes(b, "OVERVIEW")).toEqual(expect.arrayContaining(["dashboard", "system-health", "brownfield", "seeds", "approvals"]));
+    expect(codes(b, "GOVERNANCE")).toEqual(expect.arrayContaining(["blueprints", "processes", "positions", "roles", "skills", "users"]));
+    expect(codes(b, "WORKFORCE")).toEqual(expect.arrayContaining(["analytics-workforce", "org", "career-succession", "goals", "okrs"]));
+    expect(codes(b, "INTELLIGENCE")).toEqual(expect.arrayContaining(["insights", "viz", "engagement", "content"]));
+    expect(codes(b, "PERSONAL")).toEqual(expect.arrayContaining(["me-home", "me-inbox"]));
+    // dashboard is the first item of the first section (Enzo req 1)
+    expect(codes(b, "OVERVIEW")[0]).toBe("dashboard");
+    // absorbed analytics pages are out of the sidebar
+    const all = allCodes(b);
+    for (const tab of ABSORBED) expect(all).not.toContain(tab);
   });
 
   it("pure USER sees ONLY the ESS items — no admin-nav leak", async () => {
     const b = await interfaces(suite, userC);
-    expect(codes(b, "PROCESS")).toEqual([]);       // no Process admin items
-    expect(codes(b, "ENTERPRISE")).toEqual([]);    // no Enterprise admin items (incl. no dashboard)
-    const talent = codes(b, "TALENT").sort();
-    // exactly the ESS items (R1b added me-team; AI ② added me-matching; cap④ CMS P2 added
-    // me-handbook; Surveys-M2 S995 added me-surveys — the ESS self-response page, an
-    // always-visible TALENT self-service gated by surveys:respond:self which ALL roles incl
-    // USER hold, mig 000135/000136). This assert was a latent S995 regression (the ESS nav
-    // shipped but the expected set was not updated) — caught + fixed by the S996 full-suite gate.
-    expect(talent).toEqual(["me-career", "me-handbook", "me-home", "me-inbox", "me-learning", "me-matching", "me-skills", "me-surveys", "me-team"]);
+    expect(codes(b, "OVERVIEW")).toEqual([]);
+    expect(codes(b, "GOVERNANCE")).toEqual([]);
+    expect(codes(b, "WORKFORCE")).toEqual([]);
+    expect(codes(b, "INTELLIGENCE")).toEqual([]);
+    const personal = codes(b, "PERSONAL").sort();
+    // exactly the ESS items (me-team R1b, me-matching AI ②, me-handbook cap④, me-surveys S995),
+    // all always-visible self-service gated by perms every role incl. USER holds.
+    expect(personal).toEqual(["me-career", "me-handbook", "me-home", "me-inbox", "me-learning", "me-matching", "me-skills", "me-surveys", "me-team"]);
   });
 
-  it("MANAGER (admin-class) is per-permission filtered WITHIN the admin section", async () => {
+  it("MANAGER (admin-class) is per-permission filtered WITHIN the admin sections", async () => {
     const b = await interfaces(suite, managerC);
-    const proc = codes(b, "PROCESS");
-    const ent = codes(b, "ENTERPRISE");
+    const gov = codes(b, "GOVERNANCE");
+    const over = codes(b, "OVERVIEW");
     // holds blueprint:read + bpm_process:read → sees those…
-    expect(proc).toEqual(expect.arrayContaining(["blueprints", "processes"]));
-    // …but lacks brownfield_adaptation:read + seed_acquisition:read → does NOT see those
-    expect(proc).not.toContain("brownfield");
-    expect(proc).not.toContain("seeds");
-    // has admin reach → dashboard + the perms it holds (kpi/viz/org/tenant/user) show…
-    expect(ent).toEqual(expect.arrayContaining(["dashboard", "kpis"]));
-    // …but lacks compensation_intelligence:read + role:read → no comp / roles
-    expect(ent).not.toContain("comp");
-    expect(ent).not.toContain("roles");
+    expect(gov).toEqual(expect.arrayContaining(["blueprints", "processes"]));
+    // …but lacks role:read → does NOT see roles
+    expect(gov).not.toContain("roles");
+    // admin reach → dashboard shows; lacks brownfield/seed perms → not in Overview
+    expect(over).toEqual(expect.arrayContaining(["dashboard"]));
+    expect(over).not.toContain("brownfield");
+    expect(over).not.toContain("seeds");
   });
 
   it("unauthenticated → 401", async () => {

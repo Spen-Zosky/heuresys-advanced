@@ -47,8 +47,13 @@ export const MePermissionsResponseSchema = z.object({
 });
 export type MePermissionsResponse = z.infer<typeof MePermissionsResponseSchema>;
 
-/* --- UI interfaces registry (U1) — DB-driven sidebar, PET perspectives --- */
-export const PerspectiveCodeSchema = z.enum(["PROCESS", "ENTERPRISE", "TALENT"]);
+/* --- UI interfaces registry (U1) — DB-driven sidebar, 5 SECTIONS (S1009 IA redesign) --- */
+// The 3 PET perspectives (PROCESS/ENTERPRISE/TALENT) were replaced by 5 always-visible
+// collapsible sections. The response key stays `perspectives` for continuity; the codes
+// are the section ids, returned in display order.
+export const PerspectiveCodeSchema = z.enum([
+  "OVERVIEW", "GOVERNANCE", "WORKFORCE", "INTELLIGENCE", "PERSONAL",
+]);
 export type PerspectiveCode = z.infer<typeof PerspectiveCodeSchema>;
 
 export const MeInterfaceSchema = z.object({

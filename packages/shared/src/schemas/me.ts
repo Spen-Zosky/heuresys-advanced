@@ -166,6 +166,37 @@ export const MeProfileFullSchema = z.object({
 });
 export type MeProfileFull = z.infer<typeof MeProfileFullSchema>;
 
+/* --- contracts (S1010 F2 — employment contract history, mig 000165) -------- */
+
+export const MeContractSchema = z.object({
+  type: z.string().nullable(),
+  code: z.string().nullable(),
+  startDate: z.string().nullable(),
+  endDate: z.string().nullable(),
+  probationEndDate: z.string().nullable(),
+  ccnlType: z.string().nullable(),
+  ccnlLevel: z.string().nullable(),
+  grossAnnualSalary: z.number().nullable(),
+  currency: z.string().nullable(),
+  salaryType: z.string().nullable(),
+  paymentFrequency: z.string().nullable(),
+  workHoursWeekly: z.number().nullable(),
+  workScheduleType: z.string().nullable(),
+  partTimePercentage: z.number().nullable(),
+  jobTitle: z.string().nullable(),
+  status: z.string().nullable(),
+  terminationDate: z.string().nullable(),
+  terminationReason: z.string().nullable(),
+  notes: z.string().nullable(),
+});
+export type MeContract = z.infer<typeof MeContractSchema>;
+
+export const MeContractsResponseSchema = z.object({
+  items: z.array(MeContractSchema),
+  total: z.number().int().min(0),
+});
+export type MeContractsResponse = z.infer<typeof MeContractsResponseSchema>;
+
 /* --- permissions (RBAC -> UI gating; reflects the caller's OWN grants) ---- */
 
 export const MePermissionsResponseSchema = z.object({

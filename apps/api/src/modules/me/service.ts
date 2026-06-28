@@ -133,6 +133,12 @@ export const meService = {
     return p;
   },
 
+  /** Employment contract history (mig 000165) — feeds the /me/profile Contratti tab. */
+  async getContracts(actor: SelfActor) {
+    const items = await repo.loadContracts(pool, actor.userId);
+    return { items, total: items.length };
+  },
+
   async updateProfile(actor: SelfActor, patch: UpdateMeProfileBody): Promise<MeProfile> {
     await repo.upsertProfile(pool, actor.userId, actor.tenantId, patch);
     const p = await repo.loadProfile(pool, actor.userId, actor.roles);

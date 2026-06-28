@@ -13,6 +13,8 @@ import { useMyPreferences, useUpdateMyPreferences } from "../../../../lib/api/au
 import { ProfileTabs, type ProfileTabDef } from "../../../../components/profile-tabs";
 import { OverviewTab } from "./_components/overview-tab";
 import { OrganizationTab } from "./_components/organization-tab";
+import { ContractsTab } from "./_components/contracts-tab";
+import { DocumentsTab } from "./_components/documents-tab";
 
 interface MeProfile {
   userId: string;
@@ -222,6 +224,14 @@ function ProfileTabsSection() {
     {
       id: "organizzazione", label: t("profile.full.tabs.organization"),
       testId: "profile-tab-organizzazione", render: () => <OrganizationTab data={data} />,
+    },
+    {
+      id: "contratti", label: t("profile.full.tabs.contracts"),
+      testId: "profile-tab-contratti", render: () => <ContractsTab />,
+    },
+    {
+      id: "documenti", label: t("profile.full.tabs.documents"),
+      testId: "profile-tab-documenti", render: () => <DocumentsTab />,
     },
   ];
   return <ProfileTabs tabs={tabs} ariaLabel={t("profile.full.tabs.aria")} />;

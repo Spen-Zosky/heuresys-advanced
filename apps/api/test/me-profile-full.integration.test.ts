@@ -73,6 +73,19 @@ describe("GET /v1/me/profile/full", () => {
     expect(b.auth.roles.length).toBeGreaterThan(0);
   });
 
+  it("returns the caller's contracts from the imported legacy history (mig 000165)", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/me/contracts", headers: { cookie: ch(tommaso.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as { items: Array<{ ccnlType: string | null; grossAnnualSalary: number | null }>; total: number };
+    expect(b.total).toBeGreaterThanOrEqual(1);
+    expect(b.items.length).toBe(b.total);
+    const c = b.items[0]!;
+    expect(c.ccnlType).toBe("CCNL Credito 2024");
+    expect(typeof c.grossAnnualSalary).toBe("number");
+  });
+
   it("rejects an unauthenticated request", async () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/me/profile/full" });
     expect(r.statusCode).toBe(401);

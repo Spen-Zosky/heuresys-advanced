@@ -47,6 +47,20 @@ test.describe("/me/profile navtab — live anagraphic data", () => {
     await expect(page.getByTestId("profile-panel-panoramica")).toBeHidden();
   });
 
+  test("Contratti + Documenti tabs render from their own endpoints (lazy)", async ({ page }) => {
+    await page.goto("/me/profile");
+
+    await page.getByTestId("profile-tab-contratti").click();
+    await expect(page.getByTestId("profile-contracts")).toBeVisible();
+    await expect(page.getByTestId("section-contract-primary")).toBeVisible();
+    await expect(page.getByTestId("ct-gross")).toContainText("€");
+    await expect(page).toHaveURL(/[?&]tab=contratti/);
+
+    await page.getByTestId("profile-tab-documenti").click();
+    await expect(page.getByTestId("profile-documents")).toBeVisible();
+    await expect(page.getByTestId("profile-documents-list")).toBeVisible();
+  });
+
   test("the editable Settings section stays available below the tabs", async ({ page }) => {
     await page.goto("/me/profile");
     await expect(page.getByTestId("me-profile-settings")).toBeVisible();

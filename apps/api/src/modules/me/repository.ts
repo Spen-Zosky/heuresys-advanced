@@ -6,7 +6,7 @@
  */
 import type { Pool, PoolClient } from "pg";
 import type {
-  MeProfile, MeProfileFull, UpdateMeProfileBody,
+  MeProfile, MeProfileFull, MeContract, UpdateMeProfileBody,
   MeSkillEvidenceSchema, CreateMeSelfAssessmentBody,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
@@ -306,6 +306,42 @@ export async function loadProfileFull(q: DbConnector, userId: string, roles: str
       : null,
     auth: { username: u.user_email, roles, lastLogin: null },
   };
+}
+
+/* --- contracts (S1010 F2, mig 000165) -------------------------------- */
+
+export async function loadContracts(q: DbConnector, userId: string): Promise<MeContract[]> {
+  const res = await q.query<{
+    type: string | null; code: string | null; start_date: string | null; end_date: string | null;
+    probation_end_date: string | null; ccnl_type: string | null; ccnl_level: string | null;
+    gross_annual_salary: string | null; currency: string | null; salary_type: string | null;
+    payment_frequency: string | null; work_hours_weekly: string | null; work_schedule_type: string | null;
+    part_time_percentage: string | null; job_title: string | null; status: string | null;
+    termination_date: string | null; termination_reason: string | null; notes: string | null;
+  }>(
+    `SELECT user_contract_type AS type, user_contract_code AS code,
+            to_char(user_contract_start_date,'YYYY-MM-DD') AS start_date,
+            to_char(user_contract_end_date,'YYYY-MM-DD') AS end_date,
+            to_char(user_contract_probation_end_date,'YYYY-MM-DD') AS probation_end_date,
+            user_contract_ccnl_type AS ccnl_type, user_contract_ccnl_level AS ccnl_level,
+            user_contract_gross_annual_salary AS gross_annual_salary, user_contract_currency AS currency,
+            user_contract_salary_type AS salary_type, user_contract_payment_frequency AS payment_frequency,
+            user_contract_work_hours_weekly AS work_hours_weekly, user_contract_work_schedule_type AS work_schedule_type,
+            user_contract_part_time_percentage AS part_time_percentage, user_contract_job_title AS job_title,
+            user_contract_status AS status,
+            to_char(user_contract_termination_date,'YYYY-MM-DD') AS termination_date,
+            user_contract_termination_reason AS termination_reason, user_contract_notes AS notes
+       FROM sys.sys_user_contracts WHERE user_contract_user_id = $1
+      ORDER BY user_contract_start_date DESC NULLS LAST`, [userId],
+  );
+  const num = (v: string | null): number | null => (v == null ? null : Number(v));
+  return res.rows.map((r) => ({
+    type: r.type, code: r.code, startDate: r.start_date, endDate: r.end_date, probationEndDate: r.probation_end_date,
+    ccnlType: r.ccnl_type, ccnlLevel: r.ccnl_level, grossAnnualSalary: num(r.gross_annual_salary), currency: r.currency,
+    salaryType: r.salary_type, paymentFrequency: r.payment_frequency, workHoursWeekly: num(r.work_hours_weekly),
+    workScheduleType: r.work_schedule_type, partTimePercentage: num(r.part_time_percentage), jobTitle: r.job_title,
+    status: r.status, terminationDate: r.termination_date, terminationReason: r.termination_reason, notes: r.notes,
+  }));
 }
 
 /* --- positions ------------------------------------------------------- */

@@ -12,7 +12,7 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
-  MeProfileSchema, MeProfileFullSchema, UpdateMeProfileBodySchema,
+  MeProfileSchema, MeProfileFullSchema, MeContractsResponseSchema, UpdateMeProfileBodySchema,
   MePositionsResponseSchema,
   MeSkillsResponseSchema, MeSkillEvidenceSchema, CreateMeSelfAssessmentBodySchema,
   MeSurveysResponseSchema, MeSurveyDetailSchema,
@@ -83,6 +83,12 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("user_profile:read:self")],
     schema: { response: { 200: MeProfileFullSchema } },
   }, async (req) => meService.getProfileFull(selfActor(req)));
+
+  // Employment contract history (mig 000165) — Contratti tab.
+  app.get("/contracts", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { response: { 200: MeContractsResponseSchema } },
+  }, async (req) => meService.getContracts(selfActor(req)));
 
   app.get("/positions", {
     preHandler: [requirePermission("user_position_assignment:read:self")],

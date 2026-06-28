@@ -67,7 +67,8 @@ legacy.users.employee_id  =  bridge only, never imported as data
 | `skills[]` | `sys.sys_user_skill_evidence` | exploded to evidence rows |
 | `highest_education_*`, `education_history` | `sys.sys_user_education_records` | |
 | `phone_*`, bio, linkedin | `sys.sys_user_profiles` | |
-| `iban`, `salary`, `passport`, `tax_id`, payroll (~50 col) | dedicated satellites / out-of-scope | never inlined into `sys.sys_users` |
+| `tax_id`, `passport`, `national_id`, `driver_license` (+ expiries), `birth_*`, `gender`, `nationality`, `marital_status`, `middle_name`, `address_*`/`temp_address_*`, `family_members`, `iban`/banking | **dedicated satellites — TO IMPLEMENT, treated as production data** (`sys.sys_user_demographics` / `_identity_documents` / `_addresses` / `_family_members` / `_bank_details`) | no-PII policy **abandoned** (ADR-0023/0026). **NOT** "out-of-scope". "Never inlined into `sys.sys_users`" = normalization choice (own satellite), **not** omission |
+| `salary`/RAL, payroll, payslips | import-fed read-only satellite (`sys.sys_user_employment` / payroll) for **consultation/intelligence** | **I8**: the platform does **not execute** payroll; it consults/analyses imported data. Product-scope exclusion (pay execution), **not privacy** |
 | `auth_username`, `auth_password_hash`, `auth_role` *(legacy employees also mirror auth)* | `sys.sys_auth_*` | I7 — but the authoritative auth source is legacy `users`, not these mirror columns |
 
 ### 3.3 Column-level map (legacy `users` → advanced)

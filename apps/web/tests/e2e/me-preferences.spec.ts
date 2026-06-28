@@ -101,12 +101,19 @@ test.describe("ESS preferences — UI locale server source-of-truth (i18n Fase 0
     await loginAs(page, "employee");
     await openProfile(page);
 
-    // Default locale = IT (the language switcher lives in the authenticated shell).
-    await expect(page.getByTestId("language-it")).toHaveAttribute("aria-pressed", "true");
+    // S1009: the language switch is a SINGLE header toggle (a button whose text is the
+    // current locale, IT/EN), not the old 2-button language-it/en group with aria-pressed.
+    // The aria-label is itself localized, so match it bilingually.
+    const langToggle = page.getByRole("button", { name: /lingua|language/i });
+    const waitPrefsPatch = () =>
+      page.waitForResponse((r) => r.url().includes("/v1/me/preferences") && r.request().method() === "PATCH");
 
-    // Flip to EN via the real switcher — the click PATCHes /v1/me/preferences (locale) → DB.
-    await patchAndWait(page, "language-en");
-    await expect(page.getByTestId("language-en")).toHaveAttribute("aria-pressed", "true");
+    // Default locale = IT.
+    await expect(langToggle).toHaveText("IT");
+
+    // Flip to EN via the real toggle — the click PATCHes /v1/me/preferences (locale) → DB.
+    await Promise.all([waitPrefsPatch(), langToggle.click()]);
+    await expect(langToggle).toHaveText("EN");
     // setLocale also writes the NEXT_LOCALE cookie (same-device first-paint cache).
     await expect.poll(() => nextLocaleCookie(page)).toBe("en");
 
@@ -115,7 +122,7 @@ test.describe("ESS preferences — UI locale server source-of-truth (i18n Fase 0
     expect(apiResp.status()).toBe(200);
     expect(await apiResp.json()).toMatchObject({ locale: "en" });
 
-    // Clear BOTH the NEXT_LOCALE cookie (only) and localStorage, then reload: the re-applied locale
+    // Clear the NEXT_LOCALE cookie (only) and localStorage, then reload: the re-applied locale
     // can ONLY come from the server (GET /v1/me/preferences → PreferencesApplier → setLocale, which
     // rewrites the cookie to 'en'). The auth cookie is preserved so the session survives.
     await page.context().clearCookies({ name: "NEXT_LOCALE" });
@@ -124,12 +131,12 @@ test.describe("ESS preferences — UI locale server source-of-truth (i18n Fase 0
     await page.waitForLoadState("networkidle");
     await expect(page.getByTestId("me-appearance")).toBeVisible({ timeout: 20_000 });
 
-    // After reload the switcher shows EN again + the cookie was re-written from the server choice.
-    await expect(page.getByTestId("language-en")).toHaveAttribute("aria-pressed", "true");
+    // After reload the toggle shows EN again + the cookie was re-written from the server choice.
+    await expect(langToggle).toHaveText("EN");
     await expect.poll(() => nextLocaleCookie(page)).toBe("en");
 
     // Reset to the IT default so the suite is deterministic and leaves no residue.
-    await patchAndWait(page, "language-it");
-    await expect(page.getByTestId("language-it")).toHaveAttribute("aria-pressed", "true");
+    await Promise.all([waitPrefsPatch(), langToggle.click()]);
+    await expect(langToggle).toHaveText("IT");
   });
 });

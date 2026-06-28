@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-27T14:06:28Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2183**
+**Generato**: 2026-06-28T04:40:24Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2185**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,7 +18,7 @@
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 161 |
+| db-migration | 162 |
 | db-script | 23 |
 | db-seed | 104 |
 | doc-canonical | 391 |
@@ -31,8 +31,8 @@
 | showcase-source | 13 |
 | test | 227 |
 | ux-design-archive | 80 |
-| web-source | 170 |
-| **TOTALE** | **2183** |
+| web-source | 171 |
+| **TOTALE** | **2185** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1640 |
+| live | 1642 |
 
 ## File per categoria
 
@@ -1041,6 +1041,7 @@
 - `D:\heuresys-advanced\db\migrations\000160_cleanup_junk_skills.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000161_clean_legacy_skill_codes.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000162_g01_esco_skill_names_it_llm.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000163_sidebar_five_sections_taxonomy.sql` · *live* · git-tracked
 
 ### db-script
 
@@ -2267,6 +2268,7 @@
 - `D:\heuresys-advanced\apps\web\src\components\language-switcher.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\lead-form.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\preferences-applier.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\components\section-tabs.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\status-pill.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\api\auth.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\api\csrf-store.ts` · *live* · git-tracked

@@ -1,7 +1,7 @@
 # DEBT_REGISTER — Debiti / incoerenze rilevati (CLI-owned)
 
 > Tutti i debiti, drift e incoerenze emersi nella ricognizione forense S939 (4-root). Per ognuno: severità, evidenza, remediation, stato. **Tutti in scope** (R3 cross-project: il codebase va lasciato migliore). Quelli operativi sono linkati al `SOT_BACKLOG.md`.
-> **Aggiornato**: 2026-06-26 (S1007 consolidamento SoT; header era fermo a S939 — corretto). Tabella aggiornata fino a D-45 / S1006.
+> **Aggiornato**: 2026-06-28 (S1009 — +D-46 CHECK-unione sidebar). Tabella aggiornata fino a D-46.
 
 | ID | Sev | Debito | Evidenza | Remediation | Stato |
 |---|---|---|---|---|---|
@@ -54,10 +54,11 @@
 
 | **D-44** | 🟢 bassa | **Doc descrittivi citano `user_is_synthetic`/`SYNTHETIC_REFERENCE` dopo il ritiro (S1004, mig 000154)**: ~8 doc di design/plan (`TARGET_SCHEMA_DESIGN`, `BOOTSTRAP_EXECUTION_PLAN §I14`, brownfield {IMPORT_PLAN, ADAPTATION_MAP, TABLE_CLASSIFICATION}, `MIGRATION_IMPLEMENTATION_PLAN`, `AUTH_SECURITY_PLAN`, `MVP_4_ROADMAP`) descrivono ancora la colonna/flag ritirati come parte dello schema. | grep `user_is_synthetic\|SYNTHETIC_REFERENCE` su docs/ (S1004) | Allineare le descrizioni schema a ADR-0026/000154 (user_type `GENERATED_INCUMBENT`, niente `is_synthetic`). Backlog #18. | ✅ **RISOLTO** 2026-06-23 (S1005, commit `c3ac0cc`): 8 doc design/plan allineati a ADR-0026/000154 (`user_is_synthetic` rimosso, `SYNTHETIC_REFERENCE`→`STANDARD`/`GENERATED_INCUMBENT`, vista tolta dalle liste live). Zero residui. Marginali fuori-scope segnalati (wave_runners ×2, due-diligence/WS-T5). |
 | **D-45** | 🟡 media | **Drop-column su DB condiviso applicato PRIMA del deploy-codice → finestra di incoerenza schema↔codice in PROD (S1004)**: il refactor A ha droppato `user_is_synthetic` dal DB OCI VM (condiviso col PROD :8013) via `migrate` PRIMA di deployare il codice nuovo sulla VM → nella finestra migrate↔vm-deploy l'API PROD (codice vecchio, `SELECT user_is_synthetic`) avrebbe dato **500** su `GET /v1/users`. | osservato S1004 (drop-first); chiuso col `vm-deploy` immediato (`/users` 401 non-500 post-deploy) | **RISOLTO** 2026-06-22 (S1004): vm-deploy eseguito subito dopo → coerenza ripristinata + verificata live. **Lezione**: per migration distruttive su `sys_users`/tabelle hot del DB condiviso, deployare il codice compatibile PRIMA del drop (o 2-fasi deprecate→drop). |
+| **D-46** | 🟢 bassa | **CHECK `sys_ui_interfaces_perspective` accetta l'unione PET∪5-sezioni** (8 valori) invece dei soli 5 valori-sezione: le mig interfaces 000050+ re-inseriscono i valori PET (PROCESS/ENTERPRISE/TALENT) su ogni re-run idempotente PRIMA che 000163 li rimappi, e la riga è validata dal CHECK prima di ON CONFLICT → un CHECK 5-only rompe l'invariante twice-run (deploy VM S1009 fallito a 000050). Le righe persistite sono SEMPRE 5-sezioni; PET è solo transitorio upstream. | deploy VM S1009 fallito a 000050 pre-fix; `000163` ADD CONSTRAINT union | Restringere il CHECK ai soli 5 valori-sezione quando le mig 000050+ saranno normalizzate (o consolidate in una baseline migration). Non urgente: il CHECK è permissivo ma lo stato persistito è sempre valido. | **APERTO** (P3 cosmetico, S1009) |
 
 ## Sintesi scope
 
-> ⚠️ **Footer storico (S939)** sotto — superato. **Stato live S1007: 0 debiti aperti**, D-01…D-45 tutti terminali (RISOLTO/non-issue/gestito/monitor). Verifica live: `python docs/kb/tools/status_dashboard.py` (sezione DEBITI). Unico sotto-pezzo deferito = D-34 taxonomy hard/soft skill (decisione Enzo, non un debito azionabile).
+> ⚠️ **Footer storico (S939)** sotto — superato. **Stato live S1009: 1 debito aperto** (D-46, cosmetico P3), D-01…D-45 tutti terminali (RISOLTO/non-issue/gestito/monitor). Verifica live: `python docs/kb/tools/status_dashboard.py` (sezione DEBITI). Unico sotto-pezzo deferito = D-34 taxonomy hard/soft skill (decisione Enzo, non un debito azionabile).
 
 - **Trattati nella sessione storica (S939)**: D-02, D-03, D-08, D-10, D-11 (via indice + SoT + archive note); D-06, D-07 (chiariti).
 - **Risolti (storico)**: D-12 (migrate.sh idempotency chain repair, 2026-05-27); **D-01** (doc-drift CLAUDE.md+README → MVP-4, 2026-05-28).

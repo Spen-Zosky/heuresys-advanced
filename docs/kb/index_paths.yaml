@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-27T14:06:28Z da docs/kb/tools/build_index.py
+# generato: 2026-06-28T04:40:24Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-27T14:06:28Z"
-  total_files: 2183
+  generated_at: "2026-06-28T04:40:24Z"
+  total_files: 2185
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,7 +18,7 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 161
+    db-migration: 162
     db-script: 23
     db-seed: 104
     doc-canonical: 391
@@ -31,11 +31,11 @@ meta:
     showcase-source: 13
     test: 227
     ux-design-archive: 80
-    web-source: 170
+    web-source: 171
   status_counts:
     archive: 493
     external-archive: 50
-    live: 1640
+    live: 1642
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -5818,6 +5818,12 @@ files:
   - path: 'D:\heuresys-advanced\db\migrations\000162_g01_esco_skill_names_it_llm.sql'
     root: repo
     rel: 'db/migrations/000162_g01_esco_skill_names_it_llm.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000163_sidebar_five_sections_taxonomy.sql'
+    root: repo
+    rel: 'db/migrations/000163_sidebar_five_sections_taxonomy.sql'
     category: db-migration
     status: live
     provenance: git-tracked
@@ -12940,6 +12946,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\components\preferences-applier.tsx'
     root: repo
     rel: 'apps/web/src/components/preferences-applier.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\components\section-tabs.tsx'
+    root: repo
+    rel: 'apps/web/src/components/section-tabs.tsx'
     category: web-source
     status: live
     provenance: git-tracked

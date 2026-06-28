@@ -1,29 +1,30 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-06-27 (S1008 — #21 chiuso: @heuresys/ui 0.1.9 a11y shell + perf subpath split, live su PROD).
+**Updated**: 2026-06-28 (S1009 — redesign sidebar 5 sezioni + lingua nell'header + tab-merge, live su PROD).
 
 > **Vista rapida** (priorità · open questions). Snapshot granulare (versioni, DB/API/web/CI counts, architettura) → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti — nessun numero qui. Menu generato da `docs/kb/tools/build_menu.py`.
 
-## Last session brief (S1008 — #21 a11y + perf, gate sciolto alla radice)
+## Last session brief (S1009 — sidebar IA redesign, 3 richieste Enzo + #21 chiuso)
 
-#21 (residuo tail audit S1006, era **GATED** su `ux-design-shared`) **chiuso end-to-end e live**. Il gate era anche parzialmente obsoleto (la 0.1.8 già consumata aveva 2 fix a11y dentro) → sciolto alla radice invece di assumerlo, misurando le violazioni reali dal report axe S1006. **`@heuresys/ui@0.1.9` pubblicato** (lib commit `c31e4c7`): **a11y shell** — `DashboardShell` `<main>`→`<div tabIndex=0>` (elimina i 3 landmark: no-duplicate-main / landmark-unique / main-is-top-level, perché ogni pagina rende già il proprio `<main>`); `sidebar-group-toggle` `min-h-6` (23→24px, WCAG 2.5.8 tap-target ×9); `AuditFeed`/`LogStream` scroll-region `tabIndex=0`+`aria-label` (scrollable-region-focusable, serious). **perf** — subpath exports `./charts` (echarts) + `./markdown` (mermaid) via tsup multi-entry, così un dynamic import non tira più l'intero barrel da ~1.68MB. Lato repo (`dd8deb8`): bump `^0.1.9` (root+web+showcase) + `_charts-client.tsx` rewire ai subpath. **Verifica LIVE www.heuresys.com** (login reale `admin@`): `/dashboard` axe **0 violazioni totali** (era 4 core + 9 tap-target), `<main>`=1, toggle=24px, feed focusabile; chunk barrel splittato (echarts 1.1MB / mermaid 3.9MB / cytoscape 420KB ora separati). CI **9/9 verde**, deploy VM verde, lib **116 test + 5 regression-guard nuovi** (`dashboard-a11y-21.test.tsx`).
+Due blocchi. **(1) #21 chiuso** (a11y shell + perf subpath, `@heuresys/ui@0.1.9`) — già live, vedi Delta S1008. **(2) Ridisegno sidebar autenticata** (richieste Enzo): le 3 prospettive PET sostituite da **5 sezioni** collassabili sempre visibili — Panoramica · Governance · Forza lavoro · Intelligence · Area personale (mig **000163** sul registro `sys_ui_interfaces`). **Dashboard è la prima voce** (req 1). **Lingua IT/EN nell'header** (toggle `DashboardHeader` cablato + persistito su `sys_user_preferences`, ereditabile tra pagine come il tema; rimossa dalla sidebar + tolto il CSS-hide G-03) (req 2). **Selettore prospettiva decaduto** (le 5 sezioni sono gruppi collassabili, stato in localStorage) (req 3). **Merge = navigazione** (decisione Enzo): 6 voci-merge aprono la pagina principale con un **TabNav** verso le pagine assorbite (9 pagine → `is_active=false`, route vive); componente `apps/web/src/components/section-tabs.tsx` montato 1× nel layout. API `me/service` 5 sezioni + shared enum 5 valori + i18n it/en (sezioni + tab labels). **Verifica LIVE www** (login `admin@`): sidebar 5 sezioni in ordine, dashboard prima, lingua header persiste it→en, TabNav su `/analytics/skills`, selettore prospettiva assente. Gate verde end-to-end (typecheck · i18n parity · me-interfaces integration · a11y E2E · CI · deploy VM). **Intoppo risolto**: il CHECK perspective ristretto rompeva l'idempotenza-chain (le mig 000050+ re-inseriscono valori PET prima del remap) → CHECK allargato all'unione PET∪5-sezioni (debito cosmetico D-46).
 
 ## Top priorities (next session)
 
-1. **#4 go-to-market — prossimo deliverable** (autorità *cosa* = Enzo): pricing page o altro. Keystone del programma, P1 sbloccato.
+1. **#4 go-to-market — prossimo deliverable** (autorità *cosa* = Enzo): pricing page o altro. P1 sbloccato.
 2. **#8 EMAIL dormiente** (WAIT-INPUT): app-password Outlook → EMAIL_OTP + digest live.
-3. **#16 SuccessFactors** (WAIT-INPUT): sandbox esterno (costo).
+3. **D-46** (P3 cosmetico): restringere il CHECK `sys_ui_interfaces_perspective` ai soli 5 valori quando le mig interfaces 000050+ saranno normalizzate (oggi unione per idempotenza).
 
 ## Open questions (autorità *cosa* = Enzo)
 
 - **Forma del prossimo deliverable GTM**: pricing page (serve i suoi numeri) vs altro.
-- **Strategia multi-industry (#17 L2/L3)**: onboarding tenant legacy non-banking vs single-industry reference (HOLD).
+- **Sidebar per altri ruoli**: la struttura 5-sezioni vale per tutti, filtrata da RBAC (un employee vede di fatto solo "Area personale"); eventuali viste dedicate per ruolo da definire se servono.
 
 ## Verification (next session)
 
 ```bash
 git -C /d/heuresys-advanced log origin/main..HEAD --oneline    # 0 dopo handoff push
 python docs/kb/tools/handoff_lint.py                           # OK (0 fail)
+# S1009: sidebar 5 sezioni
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "SELECT DISTINCT ui_interface_perspective FROM sys.sys_ui_interfaces ORDER BY 1"  # 5 sezioni
 npm view @heuresys/ui version                                  # 0.1.9
-curl -sI https://www.heuresys.com/login | grep -i content-security-policy  # presente
 ```

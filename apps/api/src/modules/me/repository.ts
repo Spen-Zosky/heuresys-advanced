@@ -6,7 +6,7 @@
  */
 import type { Pool, PoolClient } from "pg";
 import type {
-  MeProfile, UpdateMeProfileBody,
+  MeProfile, MeProfileFull, UpdateMeProfileBody,
   MeSkillEvidenceSchema, CreateMeSelfAssessmentBody,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
@@ -144,6 +144,168 @@ export async function upsertProfile(
       patch.contactPrefs !== undefined,
     ],
   );
+}
+
+/* --- extended profile (full aggregate — anagraphic satellites, mig 000164) -- */
+
+export async function loadProfileFull(q: DbConnector, userId: string, roles: string[]): Promise<MeProfileFull | null> {
+  const userRes = await q.query<{
+    user_id: string; user_email: string; user_display_name: string | null;
+    user_first_name: string | null; user_last_name: string | null;
+  }>(
+    `SELECT user_id, user_email, user_display_name, user_first_name, user_last_name
+       FROM sys.sys_users WHERE user_id = $1`, [userId],
+  );
+  const u = userRes.rows[0];
+  if (!u) return null;
+
+  const [demoRes, docsRes, addrRes, famRes, eduRes, bankRes, empRes, orgRes] = await Promise.all([
+    q.query<{
+      middle_name: string | null; birth_date: string | null; birth_place: string | null;
+      gender: string | null; nationality: string | null; marital_status: string | null; tax_id: string | null;
+      phone_mobile: string | null; phone_home: string | null; personal_email: string | null;
+      emergency_name: string | null; emergency_phone: string | null; emergency_relationship: string | null;
+    }>(
+      `SELECT user_demographics_middle_name AS middle_name,
+              to_char(user_demographics_birth_date,'YYYY-MM-DD') AS birth_date,
+              user_demographics_birth_place AS birth_place,
+              user_demographics_gender AS gender,
+              user_demographics_nationality AS nationality,
+              user_demographics_marital_status AS marital_status,
+              user_demographics_tax_id AS tax_id,
+              user_demographics_phone_mobile AS phone_mobile,
+              user_demographics_phone_home AS phone_home,
+              user_demographics_personal_email AS personal_email,
+              user_demographics_emergency_name AS emergency_name,
+              user_demographics_emergency_phone AS emergency_phone,
+              user_demographics_emergency_relationship AS emergency_relationship
+         FROM sys.sys_user_demographics WHERE user_demographics_user_id = $1`, [userId]),
+    q.query<{ kind: string; number: string; expiry_date: string | null }>(
+      `SELECT user_identity_document_kind AS kind, user_identity_document_number AS number,
+              to_char(user_identity_document_expiry_date,'YYYY-MM-DD') AS expiry_date
+         FROM sys.sys_user_identity_documents WHERE user_identity_document_user_id = $1
+        ORDER BY user_identity_document_kind`, [userId]),
+    q.query<{ kind: string; street: string | null; city: string | null; postal_code: string | null; country: string | null; region: string | null }>(
+      `SELECT user_address_kind AS kind, user_address_street AS street, user_address_city AS city,
+              user_address_postal_code AS postal_code, user_address_country AS country, user_address_region AS region
+         FROM sys.sys_user_addresses WHERE user_address_user_id = $1
+        ORDER BY user_address_is_primary DESC, user_address_kind`, [userId]),
+    q.query<{ first_name: string | null; last_name: string | null; relationship: string | null; birth_date: string | null; gender: string | null; is_dependent: boolean }>(
+      `SELECT user_family_member_first_name AS first_name, user_family_member_last_name AS last_name,
+              user_family_member_relationship AS relationship,
+              to_char(user_family_member_birth_date,'YYYY-MM-DD') AS birth_date,
+              user_family_member_gender AS gender, user_family_member_is_dependent AS is_dependent
+         FROM sys.sys_user_family_members WHERE user_family_member_user_id = $1
+        ORDER BY user_family_member_birth_date NULLS LAST`, [userId]),
+    q.query<{ degree: string; institution: string; field_of_study: string | null; start_date: string | null; end_date: string | null; grade: string | null }>(
+      `SELECT user_education_degree AS degree, user_education_institution AS institution,
+              user_education_field_of_study AS field_of_study,
+              to_char(user_education_start_date,'YYYY-MM-DD') AS start_date,
+              to_char(user_education_end_date,'YYYY-MM-DD') AS end_date,
+              user_education_grade AS grade
+         FROM sys.sys_user_education_records WHERE user_education_record_user_id = $1
+        ORDER BY user_education_end_date DESC NULLS LAST`, [userId]),
+    q.query<{ iban: string | null; swift_bic: string | null; bank_name: string | null; account_number: string | null }>(
+      `SELECT user_bank_iban AS iban, user_bank_swift_bic AS swift_bic,
+              user_bank_bank_name AS bank_name, user_bank_account_number AS account_number
+         FROM sys.sys_user_bank_details WHERE user_bank_user_id = $1`, [userId]),
+    q.query<{
+      salary: string | null; currency: string | null; pay_scale_area: string | null; pay_scale_type: string | null;
+      pay_scale_group: string | null; pay_scale_level: string | null; pay_periods_per_year: number | null; work_schedule_pct: string | null;
+      pernr: string | null; company_code: string | null; personnel_area: string | null; personnel_subarea: string | null;
+      hire_date: string | null; seniority_date: string | null; probation_end_date: string | null; contract_end_date: string | null;
+      termination_date: string | null; termination_reason: string | null; status: string | null;
+    }>(
+      `SELECT user_employment_salary AS salary, user_employment_currency AS currency,
+              user_employment_pay_scale_area AS pay_scale_area, user_employment_pay_scale_type AS pay_scale_type,
+              user_employment_pay_scale_group AS pay_scale_group, user_employment_pay_scale_level AS pay_scale_level,
+              user_employment_pay_periods_per_year AS pay_periods_per_year, user_employment_work_schedule_pct AS work_schedule_pct,
+              user_employment_pernr AS pernr, user_employment_company_code AS company_code,
+              user_employment_personnel_area AS personnel_area, user_employment_personnel_subarea AS personnel_subarea,
+              to_char(user_employment_hire_date,'YYYY-MM-DD') AS hire_date,
+              to_char(user_employment_seniority_date,'YYYY-MM-DD') AS seniority_date,
+              to_char(user_employment_probation_end_date,'YYYY-MM-DD') AS probation_end_date,
+              to_char(user_employment_contract_end_date,'YYYY-MM-DD') AS contract_end_date,
+              to_char(user_employment_termination_date,'YYYY-MM-DD') AS termination_date,
+              user_employment_termination_reason AS termination_reason, user_employment_status AS status
+         FROM sys.sys_user_employment WHERE user_employment_user_id = $1`, [userId]),
+    q.query<{ position_code: string | null; position_title: string | null; org_unit_name: string | null; manager_name: string | null }>(
+      `SELECT p.position_code, p.position_title,
+              ou.organization_unit_name AS org_unit_name,
+              mu.user_display_name AS manager_name
+         FROM sys.sys_user_position_assignments a
+         JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+         LEFT JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id
+         LEFT JOIN sys.sys_positions mp ON mp.position_id = p.position_reports_to_position_id
+         LEFT JOIN sys.sys_users mu ON mu.user_id = mp.position_owner_user_id
+        WHERE a.user_position_assignment_user_id = $1
+          AND a.user_position_assignment_kind = 'PRIMARY'
+        ORDER BY a.user_position_assignment_start_date DESC NULLS LAST
+        LIMIT 1`, [userId]),
+  ]);
+
+  const d = demoRes.rows[0];
+  const bank = bankRes.rows[0];
+  const emp = empRes.rows[0];
+  const org = orgRes.rows[0];
+  const num = (v: string | null | undefined): number | null => (v == null ? null : Number(v));
+
+  return {
+    userId: u.user_id,
+    displayName: u.user_display_name,
+    email: u.user_email,
+    identity: {
+      firstName: u.user_first_name, lastName: u.user_last_name,
+      middleName: d?.middle_name ?? null, birthDate: d?.birth_date ?? null, birthPlace: d?.birth_place ?? null,
+      gender: d?.gender ?? null, nationality: d?.nationality ?? null,
+      maritalStatus: d?.marital_status ?? null, taxId: d?.tax_id ?? null,
+    },
+    documents: docsRes.rows.map((r) => ({ kind: r.kind, number: r.number, expiryDate: r.expiry_date })),
+    addresses: addrRes.rows.map((r) => ({
+      kind: r.kind, street: r.street, city: r.city, postalCode: r.postal_code, country: r.country, region: r.region,
+    })),
+    contacts: {
+      phoneMobile: d?.phone_mobile ?? null, phoneHome: d?.phone_home ?? null, personalEmail: d?.personal_email ?? null,
+    },
+    emergency: {
+      name: d?.emergency_name ?? null, phone: d?.emergency_phone ?? null, relationship: d?.emergency_relationship ?? null,
+    },
+    family: famRes.rows.map((r) => ({
+      firstName: r.first_name, lastName: r.last_name, relationship: r.relationship,
+      birthDate: r.birth_date, gender: r.gender, isDependent: r.is_dependent,
+    })),
+    education: eduRes.rows.map((r) => ({
+      degree: r.degree, institution: r.institution, fieldOfStudy: r.field_of_study,
+      startDate: r.start_date, endDate: r.end_date, grade: r.grade,
+    })),
+    banking: bank
+      ? { iban: bank.iban, swiftBic: bank.swift_bic, bankName: bank.bank_name, accountNumber: bank.account_number }
+      : null,
+    organization: {
+      jobTitle: org?.position_title ?? null,
+      department: org?.org_unit_name ?? null,
+      orgUnit: org?.org_unit_name ?? null,
+      location: null,
+      costCenter: null,
+      managerName: org?.manager_name ?? null,
+      positionCode: org?.position_code ?? null,
+      positionTitle: org?.position_title ?? null,
+    },
+    employment: emp
+      ? {
+          salary: num(emp.salary), currency: emp.currency,
+          payScaleArea: emp.pay_scale_area, payScaleType: emp.pay_scale_type,
+          payScaleGroup: emp.pay_scale_group, payScaleLevel: emp.pay_scale_level,
+          payPeriodsPerYear: emp.pay_periods_per_year, workSchedulePct: num(emp.work_schedule_pct),
+          pernr: emp.pernr, companyCode: emp.company_code,
+          personnelArea: emp.personnel_area, personnelSubarea: emp.personnel_subarea,
+          hireDate: emp.hire_date, seniorityDate: emp.seniority_date,
+          probationEndDate: emp.probation_end_date, contractEndDate: emp.contract_end_date,
+          terminationDate: emp.termination_date, terminationReason: emp.termination_reason, status: emp.status,
+        }
+      : null,
+    auth: { username: u.user_email, roles, lastLogin: null },
+  };
 }
 
 /* --- positions ------------------------------------------------------- */

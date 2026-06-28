@@ -6,7 +6,7 @@
 import { pool, withTransaction } from "../../db/client.js";
 import { NotFoundError, ForbiddenError, ConflictError, UnprocessableEntityError } from "../../errors/index.js";
 import type {
-  MeProfile, UpdateMeProfileBody, CreateMeSelfAssessmentBody,
+  MeProfile, MeProfileFull, UpdateMeProfileBody, CreateMeSelfAssessmentBody,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
   CreateMeCertificationBody,
@@ -122,6 +122,13 @@ export const meService = {
 
   async getProfile(actor: SelfActor): Promise<MeProfile> {
     const p = await repo.loadProfile(pool, actor.userId, actor.roles);
+    if (!p) throw new NotFoundError("User");
+    return p;
+  },
+
+  /** Aggregate profile (anagraphic satellites, mig 000164) feeding the tabbed /me/profile UI. */
+  async getProfileFull(actor: SelfActor): Promise<MeProfileFull> {
+    const p = await repo.loadProfileFull(pool, actor.userId, actor.roles);
     if (!p) throw new NotFoundError("User");
     return p;
   },

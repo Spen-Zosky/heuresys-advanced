@@ -1,14 +1,18 @@
 "use client";
 
+import { Suspense } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import type { MeProfileFull, MeTheme, MePalette } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { useMyPreferences, useUpdateMyPreferences } from "../../../../lib/api/auth";
-import type { MeTheme, MePalette } from "@heuresys/shared";
+import { ProfileTabs, type ProfileTabDef } from "../../../../components/profile-tabs";
+import { OverviewTab } from "./_components/overview-tab";
+import { OrganizationTab } from "./_components/organization-tab";
 
 interface MeProfile {
   userId: string;
@@ -108,7 +112,8 @@ function AppearanceCard() {
   );
 }
 
-export default function MeProfilePage() {
+/** Edit form for the editable subset (displayName/locale/timezone/phone/linkedin/bio). */
+function SettingsForm() {
   const { t } = useTranslation("ess");
   const qc = useQueryClient();
   const profile = useQuery({
@@ -143,7 +148,94 @@ export default function MeProfilePage() {
   });
 
   return (
-    <main data-testid="me-profile-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+    <Card>
+      <CardHeader><CardTitle>{t("profile.anagraficaTitle")}</CardTitle></CardHeader>
+      <CardContent>
+        {profile.isLoading ? (
+          <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
+        ) : (
+          <form onSubmit={(e) => { void onSubmit(e); }} className="space-y-4" data-testid="me-profile-form">
+            <div className="space-y-1">
+              <label htmlFor="displayName" className="text-sm font-medium text-foreground">{t("profile.displayNameLabel")}</label>
+              <Input id="displayName" data-testid="profile-displayName" {...register("displayName")} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label htmlFor="locale" className="text-sm font-medium text-foreground">{t("profile.localeLabel")}</label>
+                <Input id="locale" data-testid="profile-locale" placeholder="it-IT" {...register("locale")} />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="timezone" className="text-sm font-medium text-foreground">{t("profile.timezoneLabel")}</label>
+                <Input id="timezone" data-testid="profile-timezone" placeholder="Europe/Rome" {...register("timezone")} />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="phone" className="text-sm font-medium text-foreground">{t("profile.phoneLabel")}</label>
+              <Input id="phone" data-testid="profile-phone" {...register("phone")} />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="linkedinUri" className="text-sm font-medium text-foreground">{t("profile.linkedinLabel")}</label>
+              <Input id="linkedinUri" data-testid="profile-linkedinUri" {...register("linkedinUri")} />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="bio" className="text-sm font-medium text-foreground">{t("profile.bioLabel")}</label>
+              <Input id="bio" data-testid="profile-bio" {...register("bio")} />
+            </div>
+
+            {update.isSuccess && (
+              <p className="text-sm text-success" data-testid="profile-saved">{t("profile.saved")}</p>
+            )}
+            {update.isError && (
+              <p className="text-sm text-danger" data-testid="profile-error">{t("profile.errorSave")}</p>
+            )}
+
+            <Button type="submit" data-testid="profile-submit" disabled={isSubmitting || update.isPending || !isDirty}>
+              {update.isPending ? t("profile.submitting") : t("profile.submit")}
+            </Button>
+          </form>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Read-only tabbed view (Panoramica + Organizzazione) fed by GET /v1/me/profile/full. */
+function ProfileTabsSection() {
+  const { t } = useTranslation("ess");
+  const full = useQuery({
+    queryKey: ["me", "profile", "full"],
+    queryFn: () => apiFetch<MeProfileFull>("/v1/me/profile/full"),
+  });
+
+  if (full.isLoading) {
+    return <span className="text-sm text-muted-foreground" data-testid="profile-full-loading">{t("common:loading")}</span>;
+  }
+  if (full.isError || !full.data) {
+    return <p className="text-sm text-danger" data-testid="profile-full-error">{t("profile.full.error")}</p>;
+  }
+  const data = full.data;
+  const tabs: ProfileTabDef[] = [
+    {
+      id: "panoramica", label: t("profile.full.tabs.overview"),
+      testId: "profile-tab-panoramica", render: () => <OverviewTab data={data} />,
+    },
+    {
+      id: "organizzazione", label: t("profile.full.tabs.organization"),
+      testId: "profile-tab-organizzazione", render: () => <OrganizationTab data={data} />,
+    },
+  ];
+  return <ProfileTabs tabs={tabs} ariaLabel={t("profile.full.tabs.aria")} />;
+}
+
+export default function MeProfilePage() {
+  const { t } = useTranslation("ess");
+  const profile = useQuery({
+    queryKey: ["me", "profile"],
+    queryFn: () => apiFetch<MeProfile>("/v1/me/profile"),
+  });
+
+  return (
+    <main data-testid="me-profile-page" className="mx-auto max-w-5xl space-y-8 px-6 py-8">
       <PageHeader
         data-testid="me-profile-title"
         title={t("profile.title")}
@@ -155,66 +247,15 @@ export default function MeProfilePage() {
         }
       />
 
-      <Card>
-        <CardHeader><CardTitle>{t("profile.anagraficaTitle")}</CardTitle></CardHeader>
-        <CardContent>
-          {profile.isLoading ? (
-            <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
-          ) : (
-            <form
-              onSubmit={(e) => { void onSubmit(e); }}
-              className="space-y-4"
-              data-testid="me-profile-form"
-            >
-              <div className="space-y-1">
-                <label htmlFor="displayName" className="text-sm font-medium text-foreground">{t("profile.displayNameLabel")}</label>
-                <Input id="displayName" data-testid="profile-displayName" {...register("displayName")} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label htmlFor="locale" className="text-sm font-medium text-foreground">{t("profile.localeLabel")}</label>
-                  <Input id="locale" data-testid="profile-locale" placeholder="it-IT" {...register("locale")} />
-                </div>
-                <div className="space-y-1">
-                  <label htmlFor="timezone" className="text-sm font-medium text-foreground">{t("profile.timezoneLabel")}</label>
-                  <Input id="timezone" data-testid="profile-timezone" placeholder="Europe/Rome" {...register("timezone")} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <label htmlFor="phone" className="text-sm font-medium text-foreground">{t("profile.phoneLabel")}</label>
-                <Input id="phone" data-testid="profile-phone" {...register("phone")} />
-              </div>
-              <div className="space-y-1">
-                <label htmlFor="linkedinUri" className="text-sm font-medium text-foreground">{t("profile.linkedinLabel")}</label>
-                <Input id="linkedinUri" data-testid="profile-linkedinUri" {...register("linkedinUri")} />
-              </div>
-              <div className="space-y-1">
-                <label htmlFor="bio" className="text-sm font-medium text-foreground">{t("profile.bioLabel")}</label>
-                <Input id="bio" data-testid="profile-bio" {...register("bio")} />
-              </div>
+      <Suspense fallback={<span className="text-sm text-muted-foreground">{t("common:loading")}</span>}>
+        <ProfileTabsSection />
+      </Suspense>
 
-              {update.isSuccess && (
-                <p className="text-sm text-success" data-testid="profile-saved">{t("profile.saved")}</p>
-              )}
-              {update.isError && (
-                <p className="text-sm text-danger" data-testid="profile-error">
-                  {t("profile.errorSave")}
-                </p>
-              )}
-
-              <Button
-                type="submit"
-                data-testid="profile-submit"
-                disabled={isSubmitting || update.isPending || !isDirty}
-              >
-                {update.isPending ? t("profile.submitting") : t("profile.submit")}
-              </Button>
-            </form>
-          )}
-        </CardContent>
-      </Card>
-
-      <AppearanceCard />
+      <section className="space-y-6" data-testid="me-profile-settings">
+        <h2 className="text-lg font-semibold text-foreground">{t("profile.settingsTitle")}</h2>
+        <SettingsForm />
+        <AppearanceCard />
+      </section>
     </main>
   );
 }

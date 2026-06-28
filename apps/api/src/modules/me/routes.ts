@@ -12,7 +12,7 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
-  MeProfileSchema, UpdateMeProfileBodySchema,
+  MeProfileSchema, MeProfileFullSchema, UpdateMeProfileBodySchema,
   MePositionsResponseSchema,
   MeSkillsResponseSchema, MeSkillEvidenceSchema, CreateMeSelfAssessmentBodySchema,
   MeSurveysResponseSchema, MeSurveyDetailSchema,
@@ -77,6 +77,12 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, requirePermission("user_profile:update:self")],
     schema: { body: UpdateMeProfileBodySchema, response: { 200: MeProfileSchema } },
   }, async (req) => meService.updateProfile(selfActor(req), req.body));
+
+  // Aggregate anagraphic/employment profile (mig 000164) — feeds the tabbed /me/profile UI.
+  app.get("/profile/full", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { response: { 200: MeProfileFullSchema } },
+  }, async (req) => meService.getProfileFull(selfActor(req)));
 
   app.get("/positions", {
     preHandler: [requirePermission("user_position_assignment:read:self")],

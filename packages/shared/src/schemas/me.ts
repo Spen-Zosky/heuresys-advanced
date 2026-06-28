@@ -39,6 +39,133 @@ export const UpdateMeProfileBodySchema = z.object({
 });
 export type UpdateMeProfileBody = z.infer<typeof UpdateMeProfileBodySchema>;
 
+/* --- extended profile (S1010 — anagraphic/employment satellites, mig 000164) --
+ * Feeds the /me/profile tab UI (Panoramica + Organizzazione), mirroring the
+ * legacy portal profile. Read-only aggregate; data is production (no-PII
+ * abandoned, ADR-0023/0026). All scalar sections are nullable-by-field. */
+
+export const MeIdentitySchema = z.object({
+  firstName: z.string().nullable(),
+  lastName: z.string().nullable(),
+  middleName: z.string().nullable(),
+  birthDate: z.string().nullable(),
+  birthPlace: z.string().nullable(),
+  gender: z.string().nullable(),
+  nationality: z.string().nullable(),
+  maritalStatus: z.string().nullable(),
+  taxId: z.string().nullable(),
+});
+
+export const MeIdentityDocumentSchema = z.object({
+  kind: z.string(),
+  number: z.string(),
+  expiryDate: z.string().nullable(),
+});
+
+export const MeAddressSchema = z.object({
+  kind: z.string(),
+  street: z.string().nullable(),
+  city: z.string().nullable(),
+  postalCode: z.string().nullable(),
+  country: z.string().nullable(),
+  region: z.string().nullable(),
+});
+
+export const MeContactsSchema = z.object({
+  phoneMobile: z.string().nullable(),
+  phoneHome: z.string().nullable(),
+  personalEmail: z.string().nullable(),
+});
+
+export const MeEmergencyContactSchema = z.object({
+  name: z.string().nullable(),
+  phone: z.string().nullable(),
+  relationship: z.string().nullable(),
+});
+
+export const MeFamilyMemberSchema = z.object({
+  firstName: z.string().nullable(),
+  lastName: z.string().nullable(),
+  relationship: z.string().nullable(),
+  birthDate: z.string().nullable(),
+  gender: z.string().nullable(),
+  isDependent: z.boolean(),
+});
+
+export const MeEducationSchema = z.object({
+  degree: z.string(),
+  institution: z.string(),
+  fieldOfStudy: z.string().nullable(),
+  startDate: z.string().nullable(),
+  endDate: z.string().nullable(),
+  grade: z.string().nullable(),
+});
+
+export const MeBankingSchema = z.object({
+  iban: z.string().nullable(),
+  swiftBic: z.string().nullable(),
+  bankName: z.string().nullable(),
+  accountNumber: z.string().nullable(),
+});
+
+export const MeOrganizationSchema = z.object({
+  jobTitle: z.string().nullable(),
+  department: z.string().nullable(),
+  orgUnit: z.string().nullable(),
+  location: z.string().nullable(),
+  costCenter: z.string().nullable(),
+  managerName: z.string().nullable(),
+  positionCode: z.string().nullable(),
+  positionTitle: z.string().nullable(),
+});
+
+export const MeEmploymentSchema = z.object({
+  salary: z.number().nullable(),
+  currency: z.string().nullable(),
+  payScaleArea: z.string().nullable(),
+  payScaleType: z.string().nullable(),
+  payScaleGroup: z.string().nullable(),
+  payScaleLevel: z.string().nullable(),
+  payPeriodsPerYear: z.number().int().nullable(),
+  workSchedulePct: z.number().nullable(),
+  pernr: z.string().nullable(),
+  companyCode: z.string().nullable(),
+  personnelArea: z.string().nullable(),
+  personnelSubarea: z.string().nullable(),
+  hireDate: z.string().nullable(),
+  seniorityDate: z.string().nullable(),
+  probationEndDate: z.string().nullable(),
+  contractEndDate: z.string().nullable(),
+  terminationDate: z.string().nullable(),
+  terminationReason: z.string().nullable(),
+  status: z.string().nullable(),
+});
+
+export const MeAuthSummarySchema = z.object({
+  username: z.string().nullable(),
+  roles: z.array(z.string()),
+  lastLogin: z.string().nullable(),
+});
+
+/** GET /v1/me/profile/full — aggregate profile feeding the tabbed /me/profile UI. */
+export const MeProfileFullSchema = z.object({
+  userId: z.uuid(),
+  displayName: z.string().nullable(),
+  email: z.email(),
+  identity: MeIdentitySchema,
+  documents: z.array(MeIdentityDocumentSchema),
+  addresses: z.array(MeAddressSchema),
+  contacts: MeContactsSchema,
+  emergency: MeEmergencyContactSchema,
+  family: z.array(MeFamilyMemberSchema),
+  education: z.array(MeEducationSchema),
+  banking: MeBankingSchema.nullable(),
+  organization: MeOrganizationSchema,
+  employment: MeEmploymentSchema.nullable(),
+  auth: MeAuthSummarySchema,
+});
+export type MeProfileFull = z.infer<typeof MeProfileFullSchema>;
+
 /* --- permissions (RBAC -> UI gating; reflects the caller's OWN grants) ---- */
 
 export const MePermissionsResponseSchema = z.object({

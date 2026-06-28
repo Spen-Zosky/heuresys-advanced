@@ -287,6 +287,26 @@
       "coolOcean": "Cool ocean",
       "warmSunset": "Warm sunset",
       "brandMono": "Brand mono"
+    },
+    "settingsTitle": "Impostazioni",
+    "full": {
+      "error": "Impossibile caricare il profilo.",
+      "tabs": { "overview": "Panoramica", "organization": "Organizzazione", "aria": "Sezioni del profilo" },
+      "identity": { "title": "Identità", "firstName": "Nome", "lastName": "Cognome", "middleName": "Secondo nome", "birthDate": "Data di nascita", "birthPlace": "Luogo di nascita", "gender": "Genere", "nationality": "Nazionalità", "maritalStatus": "Stato civile", "taxId": "Codice fiscale" },
+      "documents": { "title": "Documenti identità", "expiry": "scad.", "none": "Nessun documento" },
+      "docKind": { "nationalId": "Documento identità", "passport": "Passaporto", "driverLicense": "Patente" },
+      "address": { "street": "Via", "city": "Città", "postalCode": "CAP", "country": "Paese", "region": "Regione" },
+      "addrKind": { "permanent": "Indirizzo permanente", "temporary": "Indirizzo temporaneo" },
+      "contacts": { "title": "Contatti personali", "phoneMobile": "Cellulare", "phoneHome": "Telefono casa", "personalEmail": "Email personale" },
+      "emergency": { "name": "Contatto di emergenza", "phone": "Telefono emergenza", "relationship": "Relazione" },
+      "family": { "title": "Emergenza & famiglia", "member": "Familiare", "dependent": "a carico" },
+      "education": { "title": "Istruzione", "none": "Nessun titolo di studio" },
+      "banking": { "title": "Dati bancari", "iban": "IBAN", "swiftBic": "SWIFT/BIC", "bankName": "Banca", "accountNumber": "Numero conto" },
+      "role": { "title": "Ruolo & posizione", "jobTitle": "Mansione", "positionCode": "Codice posizione", "orgUnit": "Unità organizzativa", "department": "Dipartimento", "location": "Sede", "costCenter": "Centro di costo", "manager": "Manager" },
+      "lifecycle": { "title": "Ciclo di vita", "hireDate": "Data assunzione", "seniorityDate": "Data anzianità", "probationEnd": "Fine periodo di prova", "contractEnd": "Scadenza contratto", "status": "Stato", "terminationDate": "Data cessazione" },
+      "compensation": { "title": "Retribuzione", "salary": "Retribuzione", "payScaleArea": "Area contrattuale", "payScaleType": "Tipo inquadramento", "payScaleGroup": "Gruppo retributivo", "payScaleLevel": "Livello retributivo", "payPeriods": "Mensilità annue", "workSchedulePct": "Percentuale orario" },
+      "sap": { "title": "SAP", "pernr": "PERNR", "companyCode": "Codice società", "personnelArea": "Area del personale", "personnelSubarea": "Sottoarea del personale" },
+      "auth": { "title": "Autenticazione", "username": "Username", "roles": "Ruoli", "lastLogin": "Ultimo accesso" }
     }
   },
   "security": {

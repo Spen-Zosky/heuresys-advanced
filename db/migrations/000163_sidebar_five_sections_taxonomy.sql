@@ -84,9 +84,17 @@ UPDATE sys.sys_ui_interfaces t SET
 FROM ui_remap r
 WHERE t.ui_interface_route = r.route;
 
+-- The CHECK accepts the UNION of the legacy PET values AND the 5 sections. Reason:
+-- the earlier interface migrations (000050+) re-INSERT/UPDATE rows with PET values
+-- on every idempotent chain re-run, and they run BEFORE this file remaps them — a
+-- row is validated against the CHECK before ON CONFLICT resolves, so a 5-only CHECK
+-- breaks the twice-run invariant. The final rows are ALL 5-section (this file is the
+-- last interface migration and remaps every row above); PET values are never the
+-- persisted end-state, they only pass transiently through the upstream re-runs.
 ALTER TABLE sys.sys_ui_interfaces
   ADD CONSTRAINT sys_ui_interfaces_perspective_check
   CHECK (ui_interface_perspective::text = ANY (ARRAY[
     'OVERVIEW'::varchar, 'GOVERNANCE'::varchar, 'WORKFORCE'::varchar,
-    'INTELLIGENCE'::varchar, 'PERSONAL'::varchar
+    'INTELLIGENCE'::varchar, 'PERSONAL'::varchar,
+    'PROCESS'::varchar, 'ENTERPRISE'::varchar, 'TALENT'::varchar
   ]::text[]));

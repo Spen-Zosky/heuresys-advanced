@@ -12,7 +12,7 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_sidebar_group, ui_interface_perspective,
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
-  ('me-team', 'Il mio team', '/me/team', 'Users', 'me', 'TALENT', NULL, NULL, false, 6)
+  ('me-team', 'Il mio team', '/me/team', 'Users', 'me', 'PERSONAL', NULL, NULL, false, 6)
 ON CONFLICT (ui_interface_code) DO NOTHING;
 
 DO $$

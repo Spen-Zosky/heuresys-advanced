@@ -17,9 +17,9 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
   ('insights-succession-readiness', 'Succession readiness', '/insights/succession-readiness', 'TrendingUp',
-   'intelligence', 'ENTERPRISE', 'insights', 'view', true, 43),
+   'intelligence', 'WORKFORCE', 'insights', 'view', true, 43),
   ('insights-skill-gap', 'Skill gap', '/insights/skill-gap', 'Gauge',
-   'intelligence', 'ENTERPRISE', 'insights', 'view', true, 44)
+   'intelligence', 'WORKFORCE', 'insights', 'view', true, 44)
 ON CONFLICT (ui_interface_code) DO NOTHING;
 
 DO $$

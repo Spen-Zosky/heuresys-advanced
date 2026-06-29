@@ -17,7 +17,7 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
   ('admin-mfa-policy', 'Policy MFA', '/admin/mfa-policy', 'ShieldCheck',
-   'governance', 'ENTERPRISE', 'mfa_policy', 'read', true, 51)
+   'governance', 'OVERVIEW', 'mfa_policy', 'read', true, 51)
 ON CONFLICT (ui_interface_code) DO NOTHING;
 
 DO $$

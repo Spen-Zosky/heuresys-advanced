@@ -13,7 +13,7 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_sidebar_group, ui_interface_perspective,
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
-  ('org-director-console', 'Console Org Director', '/org-director', 'Network', 'intelligence', 'ENTERPRISE', 'org_director', 'read', true, 34)
+  ('org-director-console', 'Console Org Director', '/org-director', 'Network', 'intelligence', 'OVERVIEW', 'org_director', 'read', true, 34)
 ON CONFLICT (ui_interface_code) DO NOTHING;
 
 DO $$

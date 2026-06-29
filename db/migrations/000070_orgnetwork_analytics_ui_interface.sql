@@ -17,7 +17,7 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_sidebar_group, ui_interface_perspective,
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
-  ('analytics-org-network', 'Rete organizzativa', '/analytics/org-network', 'Network', 'intelligence', 'ENTERPRISE', 'analytics', 'view', true, 39)
+  ('analytics-org-network', 'Rete organizzativa', '/analytics/org-network', 'Network', 'intelligence', 'WORKFORCE', 'analytics', 'view', true, 39)
 ON CONFLICT (ui_interface_code) DO NOTHING;
 
 DO $$

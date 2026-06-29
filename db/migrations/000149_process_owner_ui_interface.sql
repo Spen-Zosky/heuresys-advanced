@@ -12,7 +12,7 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_sidebar_group, ui_interface_perspective,
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
-  ('process-owner-console', 'Console Process Owner', '/process-owner', 'GitBranch', 'operations', 'PROCESS', 'process_owner', 'read', true, 25)
+  ('process-owner-console', 'Console Process Owner', '/process-owner', 'GitBranch', 'operations', 'OVERVIEW', 'process_owner', 'read', true, 25)
 ON CONFLICT (ui_interface_code) DO NOTHING;
 
 DO $$

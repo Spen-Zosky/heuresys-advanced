@@ -22,7 +22,7 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_sidebar_group, ui_interface_perspective,
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
-  ('analytics-skills-group-share', 'Quote competenze per gruppo', '/analytics/skills-group-share', 'PieChart', 'intelligence', 'ENTERPRISE', 'analytics', 'view', true, 42)
+  ('analytics-skills-group-share', 'Quote competenze per gruppo', '/analytics/skills-group-share', 'PieChart', 'intelligence', 'WORKFORCE', 'analytics', 'view', true, 42)
 ON CONFLICT (ui_interface_code) DO NOTHING;
 
 DO $$

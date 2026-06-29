@@ -21,8 +21,8 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_sidebar_group, ui_interface_perspective,
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
-  ('analytics-workforce', 'Analisi forza lavoro', '/analytics/workforce', 'TrendingUp', 'intelligence', 'ENTERPRISE', 'analytics', 'view', true, 34),
-  ('analytics-kpi',       'Analisi KPI',          '/analytics/kpi',       'Gauge',      'intelligence', 'ENTERPRISE', 'analytics', 'view', true, 35)
+  ('analytics-workforce', 'Analisi forza lavoro', '/analytics/workforce', 'TrendingUp', 'intelligence', 'WORKFORCE', 'analytics', 'view', true, 34),
+  ('analytics-kpi',       'Analisi KPI',          '/analytics/kpi',       'Gauge',      'intelligence', 'WORKFORCE', 'analytics', 'view', true, 35)
 ON CONFLICT (ui_interface_code) DO NOTHING;
 
 DO $$

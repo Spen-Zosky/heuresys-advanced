@@ -14,8 +14,8 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_sidebar_group, ui_interface_perspective,
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
-  ('engagement', 'Engagement & Sondaggi', '/engagement', 'Activity', 'workforce', 'TALENT', 'surveys', 'read', true, 15),
-  ('me-surveys', 'I miei sondaggi', '/me/surveys', 'FileText', 'me', 'TALENT', 'surveys', 'respond:self', false, 9)
+  ('engagement', 'Engagement & Sondaggi', '/engagement', 'Activity', 'workforce', 'INTELLIGENCE', 'surveys', 'read', true, 15),
+  ('me-surveys', 'I miei sondaggi', '/me/surveys', 'FileText', 'me', 'PERSONAL', 'surveys', 'respond:self', false, 9)
 ON CONFLICT (ui_interface_code) DO NOTHING;
 
 DO $$

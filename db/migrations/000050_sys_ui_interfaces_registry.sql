@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS sys.sys_ui_interfaces (
   updated_at                     timestamptz   NOT NULL DEFAULT now(),
   CONSTRAINT sys_ui_interfaces_code_uq UNIQUE (ui_interface_code),
   CONSTRAINT sys_ui_interfaces_perspective_check
-    CHECK (ui_interface_perspective IN ('PROCESS','ENTERPRISE','TALENT')),
+    CHECK (ui_interface_perspective IN ('OVERVIEW','GOVERNANCE','WORKFORCE','INTELLIGENCE','PERSONAL')),
   CONSTRAINT sys_ui_interfaces_perm_pair_check
     CHECK ((ui_interface_required_resource IS NULL) = (ui_interface_required_action IS NULL))
 );
@@ -54,43 +54,41 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
   -- Overview (admin reach, no dedicated permission)
-  ('dashboard',         'Dashboard',               '/dashboard',                'LayoutDashboard', 'overview',     'ENTERPRISE', NULL,                        NULL,    true,  0),
+  ('dashboard',         'Dashboard',               '/dashboard',                'LayoutDashboard', 'overview',     'OVERVIEW', NULL,                        NULL,    true,  0),
   -- ESS / Me (always visible to an authenticated user)
-  ('me-home',           'My HR',                   '/me',                       'User',            'me',           'TALENT',     NULL,                        NULL,    false, 1),
-  ('me-skills',         'Le mie competenze',       '/me/skills',                'Layers',          'me',           'TALENT',     NULL,                        NULL,    false, 2),
-  ('me-learning',       'Formazione',              '/me/learning',              'GraduationCap',   'me',           'TALENT',     NULL,                        NULL,    false, 3),
-  ('me-career',         'Carriera',                '/me/career',                'TrendingUp',      'me',           'TALENT',     NULL,                        NULL,    false, 4),
-  ('me-inbox',          'Inbox',                   '/me/inbox',                 'Inbox',           'me',           'TALENT',     NULL,                        NULL,    false, 5),
+  ('me-home',           'My HR',                   '/me',                       'User',            'me',           'PERSONAL',     NULL,                        NULL,    false, 1),
+  ('me-skills',         'Le mie competenze',       '/me/skills',                'Layers',          'me',           'PERSONAL',     NULL,                        NULL,    false, 2),
+  ('me-learning',       'Formazione',              '/me/learning',              'GraduationCap',   'me',           'PERSONAL',     NULL,                        NULL,    false, 3),
+  ('me-career',         'Carriera',                '/me/career',                'TrendingUp',      'me',           'PERSONAL',     NULL,                        NULL,    false, 4),
+  ('me-inbox',          'Inbox',                   '/me/inbox',                 'Inbox',           'me',           'PERSONAL',     NULL,                        NULL,    false, 5),
   -- Workforce (TALENT)
-  ('positions',         'Posizioni',               '/positions',                'Briefcase',       'workforce',    'TALENT',     'position',                  'read',  true,  10),
-  ('skills',            'Competenze',              '/skills',                   'Layers',          'workforce',    'TALENT',     'skill',                     'read',  true,  11),
-  ('gaps',              'Gap',                     '/gaps',                     'TriangleAlert',   'workforce',    'TALENT',     'gap_analysis',              'read',  true,  12),
-  ('career-succession', 'Carriera & successione',  '/career-succession',        'TrendingUp',      'workforce',    'TALENT',     'career_succession',         'read',  true,  13),
-  ('learning',          'Formazione',              '/learning',                 'GraduationCap',   'workforce',    'TALENT',     'learning',                  'read',  true,  14),
+  ('positions',         'Posizioni',               '/positions',                'Briefcase',       'workforce',    'GOVERNANCE',     'position',                  'read',  true,  10),
+  ('skills',            'Competenze',              '/skills',                   'Layers',          'workforce',    'GOVERNANCE',     'skill',                     'read',  true,  11),
+  ('gaps',              'Gap',                     '/gaps',                     'TriangleAlert',   'workforce',    'WORKFORCE',     'gap_analysis',              'read',  true,  12),
+  ('career-succession', 'Carriera & successione',  '/career-succession',        'TrendingUp',      'workforce',    'WORKFORCE',     'career_succession',         'read',  true,  13),
+  ('learning',          'Formazione',              '/learning',                 'GraduationCap',   'workforce',    'GOVERNANCE',     'learning',                  'read',  true,  14),
   -- Operations (PROCESS)
-  ('blueprints',        'Blueprint',               '/blueprints',               'FileText',        'operations',   'PROCESS',    'blueprint',                 'read',  true,  20),
-  ('processes',         'Processi',                '/processes',                'GitBranch',       'operations',   'PROCESS',    'bpm_process',               'read',  true,  21),
-  ('brownfield',        'Brownfield',              '/brownfield-adaptation',    'Database',        'operations',   'PROCESS',    'brownfield_adaptation',     'read',  true,  22),
-  ('seeds',             'Seed acquisition',        '/seed-acquisition/runs',    'Sprout',          'operations',   'PROCESS',    'seed_acquisition',          'read',  true,  23),
+  ('blueprints',        'Blueprint',               '/blueprints',               'FileText',        'operations',   'GOVERNANCE',    'blueprint',                 'read',  true,  20),
+  ('processes',         'Processi',                '/processes',                'GitBranch',       'operations',   'GOVERNANCE',    'bpm_process',               'read',  true,  21),
+  ('brownfield',        'Brownfield',              '/brownfield-adaptation',    'Database',        'operations',   'OVERVIEW',    'brownfield_adaptation',     'read',  true,  22),
+  ('seeds',             'Seed acquisition',        '/seed-acquisition/runs',    'Sprout',          'operations',   'OVERVIEW',    'seed_acquisition',          'read',  true,  23),
   -- Intelligence (ENTERPRISE)
-  ('kpis',              'KPI',                     '/kpis',                     'Gauge',           'intelligence', 'ENTERPRISE', 'kpi',                       'read',  true,  30),
-  ('comp',              'Compensation',            '/compensation-intelligence','Coins',           'intelligence', 'ENTERPRISE', 'compensation_intelligence', 'read',  true,  31),
-  ('viz',               'Visualizzazioni',         '/visualizations',           'Network',         'intelligence', 'ENTERPRISE', 'visualization',             'read',  true,  32),
-  ('org',               'Organizzazione',          '/organization',             'Building2',       'intelligence', 'ENTERPRISE', 'organization_unit',         'read',  true,  33),
+  ('kpis',              'KPI',                     '/kpis',                     'Gauge',           'intelligence', 'WORKFORCE', 'kpi',                       'read',  true,  30),
+  ('comp',              'Compensation',            '/compensation-intelligence','Coins',           'intelligence', 'WORKFORCE', 'compensation_intelligence', 'read',  true,  31),
+  ('viz',               'Visualizzazioni',         '/visualizations',           'Network',         'intelligence', 'INTELLIGENCE', 'visualization',             'read',  true,  32),
+  ('org',               'Organizzazione',          '/organization',             'Building2',       'intelligence', 'WORKFORCE', 'organization_unit',         'read',  true,  33),
   -- Governance (ENTERPRISE)
-  ('tenants',           'Tenant',                  '/tenants',                  'Building2',       'governance',   'ENTERPRISE', 'tenant',                    'read',  true,  40),
-  ('users',             'Utenti',                  '/users',                    'Users',           'governance',   'ENTERPRISE', 'user',                      'read',  true,  41),
-  ('roles',             'Ruoli',                   '/admin/roles',              'ShieldCheck',     'governance',   'ENTERPRISE', 'role',                      'read',  true,  42),
-  ('system-health',     'System health',           '/system-health',            'Activity',        'governance',   'ENTERPRISE', 'tenant',                    'read',  true,  43)
+  ('tenants',           'Tenant',                  '/tenants',                  'Building2',       'governance',   'GOVERNANCE', 'tenant',                    'read',  true,  40),
+  ('users',             'Utenti',                  '/users',                    'Users',           'governance',   'GOVERNANCE', 'user',                      'read',  true,  41),
+  ('roles',             'Ruoli',                   '/admin/roles',              'ShieldCheck',     'governance',   'GOVERNANCE', 'role',                      'read',  true,  42),
+  ('system-health',     'System health',           '/system-health',            'Activity',        'governance',   'OVERVIEW', 'tenant',                    'read',  true,  43)
 ON CONFLICT (ui_interface_code) DO NOTHING;
 
 -- Verification (NOTICE only).
 DO $$
-DECLARE n int; p int; e int; t int;
+DECLARE n int;
 BEGIN
   SELECT count(*) INTO n FROM sys.sys_ui_interfaces;
-  SELECT count(*) FILTER (WHERE ui_interface_perspective='PROCESS')    INTO p FROM sys.sys_ui_interfaces;
-  SELECT count(*) FILTER (WHERE ui_interface_perspective='ENTERPRISE') INTO e FROM sys.sys_ui_interfaces;
-  SELECT count(*) FILTER (WHERE ui_interface_perspective='TALENT')     INTO t FROM sys.sys_ui_interfaces;
-  RAISE NOTICE 'U1: % interfaces (PROCESS=%, ENTERPRISE=%, TALENT=%) — expect 23 (4/9/10)', n, p, e, t;
+  -- D-46 (S1011): rows now seeded directly with their 5-section perspective value.
+  RAISE NOTICE 'U1: % interfaces in sys_ui_interfaces (this migration seeds 23 on a fresh chain)', n;
 END $$;

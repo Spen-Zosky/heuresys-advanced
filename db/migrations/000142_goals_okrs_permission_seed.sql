@@ -37,6 +37,8 @@ ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
 DO $$ DECLARE v int; BEGIN
   SELECT count(*) INTO v FROM sys.sys_auth_permissions WHERE auth_permission_resource IN ('goal','okr');
-  RAISE NOTICE '000142: goal/okr permissions present: % (expect 8)', v;
-  IF v <> 8 THEN RAISE EXCEPTION '000142: expected 8 goal/okr permissions, found %', v; END IF;
+  -- Floor, not exact: later migrations legitimately add goal/okr perms (e.g. goal:read:self
+  -- in 000166, S1011). The invariant this guards is "the 8 canonical CRUD perms were seeded".
+  RAISE NOTICE '000142: goal/okr permissions present: % (expect >= 8)', v;
+  IF v < 8 THEN RAISE EXCEPTION '000142: expected at least 8 goal/okr permissions, found %', v; END IF;
 END $$;

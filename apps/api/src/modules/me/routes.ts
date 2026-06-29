@@ -12,7 +12,7 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { FastifyRequest } from "fastify";
 import {
-  MeProfileSchema, MeProfileFullSchema, MeContractsResponseSchema,
+  MeProfileSchema, MeProfileFullSchema, MeContractsResponseSchema, MePaySlipsResponseSchema,
   MePerformanceResponseSchema, MeAttendanceResponseSchema, UpdateMeProfileBodySchema,
   MePositionsResponseSchema,
   MeSkillsResponseSchema, MeSkillEvidenceSchema, CreateMeSelfAssessmentBodySchema,
@@ -91,6 +91,12 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("user_profile:read:self")],
     schema: { response: { 200: MeContractsResponseSchema } },
   }, async (req) => meService.getContracts(selfActor(req)));
+
+  // Pay-slips / cedolini history (mig 000167) — Cedolini tab (F4). Self read-only consultation.
+  app.get("/pay-slips", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { response: { 200: MePaySlipsResponseSchema } },
+  }, async (req) => meService.getPaySlips(selfActor(req)));
 
   // Performance review history (read-only) — My HR Performance sub-tab (F3a).
   app.get("/performance", {

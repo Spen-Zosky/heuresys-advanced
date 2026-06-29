@@ -14,6 +14,7 @@ import { ProfileTabs, type ProfileTabDef } from "../../../../components/profile-
 import { OverviewTab } from "./_components/overview-tab";
 import { OrganizationTab } from "./_components/organization-tab";
 import { ContractsTab } from "./_components/contracts-tab";
+import { PaySlipsTab } from "./_components/pay-slips-tab";
 import { DocumentsTab } from "./_components/documents-tab";
 
 interface MeProfile {
@@ -228,6 +229,10 @@ function ProfileTabsSection() {
     {
       id: "contratti", label: t("profile.full.tabs.contracts"),
       testId: "profile-tab-contratti", render: () => <ContractsTab />,
+    },
+    {
+      id: "cedolini", label: t("profile.full.tabs.paySlips"),
+      testId: "profile-tab-cedolini", render: () => <PaySlipsTab />,
     },
     {
       id: "documenti", label: t("profile.full.tabs.documents"),

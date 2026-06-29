@@ -367,7 +367,8 @@
         "organization": "Organizzazione",
         "contracts": "Contratti",
         "documents": "Documenti",
-        "aria": "Sezioni del profilo"
+        "aria": "Sezioni del profilo",
+        "paySlips": "Cedolini"
       },
       "identity": {
         "title": "Identità",
@@ -490,6 +491,15 @@
       "documentsTab": {
         "title": "Documenti personali",
         "none": "Nessun documento"
+      },
+      "paySlips": {
+        "none": "Nessun cedolino disponibile.",
+        "title": "Cedolino",
+        "status": "Stato",
+        "gross": "Lordo",
+        "net": "Netto",
+        "paymentDate": "Data pagamento",
+        "totalDeductions": "Totale trattenute"
       }
     }
   },

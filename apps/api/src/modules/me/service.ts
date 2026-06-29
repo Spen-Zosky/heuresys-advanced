@@ -139,6 +139,12 @@ export const meService = {
     return { items, total: items.length };
   },
 
+  /** Cedolini sub-tab (F4) — the caller's own pay-slips history (read-only). */
+  async getPaySlips(actor: SelfActor) {
+    const items = await repo.loadPaySlips(pool, actor.userId);
+    return { items, total: items.length };
+  },
+
   /** Performance review history (read-only) — My HR Performance sub-tab (F3a). */
   async getPerformance(actor: SelfActor) {
     const items = await repo.loadPerformance(pool, actor.userId);

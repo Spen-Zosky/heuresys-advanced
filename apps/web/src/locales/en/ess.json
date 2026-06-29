@@ -367,7 +367,8 @@
         "organization": "Organization",
         "contracts": "Contracts",
         "documents": "Documents",
-        "aria": "Profile sections"
+        "aria": "Profile sections",
+        "paySlips": "Payroll"
       },
       "identity": {
         "title": "Identity",
@@ -490,6 +491,15 @@
       "documentsTab": {
         "title": "Personal documents",
         "none": "No documents"
+      },
+      "paySlips": {
+        "none": "No pay-slips available.",
+        "title": "Pay-slip",
+        "status": "Status",
+        "gross": "Gross",
+        "net": "Net",
+        "paymentDate": "Payment date",
+        "totalDeductions": "Total deductions"
       }
     }
   },

@@ -197,6 +197,26 @@ export const MeContractsResponseSchema = z.object({
 });
 export type MeContractsResponse = z.infer<typeof MeContractsResponseSchema>;
 
+/* --- pay-slips (S1011 F4 — cedolini history, mig 000167) ------------------ */
+
+export const MePaySlipSchema = z.object({
+  period: z.string().nullable(),
+  periodStart: z.string().nullable(),
+  periodEnd: z.string().nullable(),
+  grossPay: z.number().nullable(),
+  netPay: z.number().nullable(),
+  deductions: z.record(z.string(), z.number()),
+  paymentDate: z.string().nullable(),
+  status: z.string().nullable(),
+});
+export type MePaySlip = z.infer<typeof MePaySlipSchema>;
+
+export const MePaySlipsResponseSchema = z.object({
+  items: z.array(MePaySlipSchema),
+  total: z.number().int().min(0),
+});
+export type MePaySlipsResponse = z.infer<typeof MePaySlipsResponseSchema>;
+
 /* --- performance (S1010 F3a — review history, read-only consultation) ------ */
 
 export const MePerformanceReviewSchema = z.object({

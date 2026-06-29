@@ -6,7 +6,7 @@
  */
 import type { Pool, PoolClient } from "pg";
 import type {
-  MeProfile, MeProfileFull, MeContract, MePerformanceReview, MeAttendanceResponse, UpdateMeProfileBody,
+  MeProfile, MeProfileFull, MeContract, MePaySlip, MePerformanceReview, MeAttendanceResponse, UpdateMeProfileBody,
   MeGoal, MeRiskResponse, MeCareerPathsResponse,
   MeSkillEvidenceSchema, CreateMeSelfAssessmentBody,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
@@ -342,6 +342,31 @@ export async function loadContracts(q: DbConnector, userId: string): Promise<MeC
     salaryType: r.salary_type, paymentFrequency: r.payment_frequency, workHoursWeekly: num(r.work_hours_weekly),
     workScheduleType: r.work_schedule_type, partTimePercentage: num(r.part_time_percentage), jobTitle: r.job_title,
     status: r.status, terminationDate: r.termination_date, terminationReason: r.termination_reason, notes: r.notes,
+  }));
+}
+
+/* --- pay-slips (S1011 F4, mig 000167) -------------------------------- */
+
+export async function loadPaySlips(q: DbConnector, userId: string): Promise<MePaySlip[]> {
+  const res = await q.query<{
+    period: string | null; period_start: string | null; period_end: string | null;
+    gross_pay: string | null; net_pay: string | null; deductions: Record<string, number> | null;
+    payment_date: string | null; status: string | null;
+  }>(
+    `SELECT user_pay_slip_period AS period,
+            to_char(user_pay_slip_period_start,'YYYY-MM-DD') AS period_start,
+            to_char(user_pay_slip_period_end,'YYYY-MM-DD') AS period_end,
+            user_pay_slip_gross_pay AS gross_pay, user_pay_slip_net_pay AS net_pay,
+            user_pay_slip_deductions AS deductions,
+            to_char(user_pay_slip_payment_date,'YYYY-MM-DD') AS payment_date,
+            user_pay_slip_status AS status
+       FROM sys.sys_user_pay_slips WHERE user_pay_slip_user_id = $1
+      ORDER BY user_pay_slip_period_start DESC NULLS LAST`, [userId],
+  );
+  return res.rows.map((r) => ({
+    period: r.period, periodStart: r.period_start, periodEnd: r.period_end,
+    grossPay: numOrNull(r.gross_pay), netPay: numOrNull(r.net_pay),
+    deductions: r.deductions ?? {}, paymentDate: r.payment_date, status: r.status,
   }));
 }
 

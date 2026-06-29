@@ -1,6 +1,6 @@
 # GTM Deliverables 2 & 3 — Investor One-Pager + Interactive Guided Demo — Design
 
-**Date**: 2026-06-22 (S1003) · **Status**: proposed (awaiting Enzo) · **Item**: #4 go-to-market (second + third deliverables)
+**Date**: 2026-06-22 (S1003) · **Status**: IMPLEMENTED & live (reconciled S1011) · **Item**: #4 go-to-market (second + third deliverables)
 
 ## 1. Goal & context
 
@@ -24,8 +24,8 @@ The due-diligence (S994) flagged "credibility gap #1": *Process Owner* and *Org 
 
 Source: S1003 discovery (psql against the live DB on the tunnel + on-disk counts). The one-pager presents these as facts "traceable to source" (the established credibility line "ogni numero è tracciabile alla sua fonte").
 
-- DB-derivable (served **live** via the new public stats endpoint, see §3.2): **21,939 ESCO skills**, **126,051 occupation→skill requirement edges**, **7,675 ESCO occupation mappings**, **162 users**, **162 positions**, **26 org units**, **24 teams**, **12 RBAC roles**, **154 permissions**, **681 role×permission mappings**, **47 RBAC-gated UI interfaces**, **2 active tenancies**.
-- Codebase facts (declared with an "as of S1003" provenance line — build facts, not runtime data): **84 business modules**, **432 `/v1/*` endpoints**, **150 idempotent migrations**, **1,080 API integration tests** (live DB, zero mocks) + **107 Playwright E2E**, **96 web pages** (admin SPA + ESS).
+- DB-derivable (served **live** via the new public stats endpoint, see §3.2): **14,093 ESCO skills**, **126,051 occupation→skill requirement edges**, **7,675 ESCO occupation mappings**, **162 users**, **162 positions**, **26 org units**, **24 teams**, **12 RBAC roles**, **154 permissions**, **681 role×permission mappings**, **47 RBAC-gated UI interfaces**, **2 active tenancies**.
+- Codebase facts (declared with an "as of S1011" provenance line — build facts, not runtime data): **85 business modules**, **466 `/v1/*` endpoints**, **165 idempotent migrations**, **1,098 API integration tests** (live DB, zero mocks) + **123 Playwright E2E**, **98 web pages** (admin SPA + ESS). *(S1011: the skills moat was re-derived 21,939→14,093 after the 000160/000161 junk-skill cleanup; the live tile self-corrects via F2.)*
 - Capital efficiency (qualitative, from DD): burn ≈ €0 (OCI free-tier + founder time).
 
 ## 2. Architecture overview
@@ -84,7 +84,7 @@ A public, read-only, aggregate-only endpoint feeding the one-pager's live metric
 1. **Header/nav** — wordmark + "Accedi" (`/login`) + "Download PDF" button (`window.print()`). `data-testid` on each.
 2. **Hero** — positioning headline (the adopted line) + a one-line honest thesis sub: *"GA tecnica in produzione, pre-commerciale — fondazione di prodotto solida, in cerca di design partner."*
 3. **The opportunity** — EU regulated mid-market needs Skills & Org intelligence on an open standard (ESCO) with AI-Act-grade explainability; in that niche the direct competitor is ≈ one (365Talents), not 27.
-4. **What we've built — live proof** — a tile grid: the **live** DB metrics (fetched from `F2`, with a small "live" indicator) + the codebase facts (with an "as of S1003" provenance line). Lead the grid with the moat: **21,939 ESCO skills · 126,051 occupation→skill edges**. Tagline: "ogni numero è tracciabile alla sua fonte / every number traces back to its source."
+4. **What we've built — live proof** — a tile grid: the **live** DB metrics (fetched from `F2`, with a small "live" indicator) + the codebase facts (with an "as of S1011" provenance line). Lead the grid with the moat: **14,093 ESCO skills · 126,051 occupation→skill edges**. Tagline: "ogni numero è tracciabile alla sua fonte / every number traces back to its source."
 5. **3 wedges** — ESCO-native open · deterministic explainability = AI-Act compliance · position-centric model (reuse the landing's proven copy, expanded one line each).
 6. **Traction — honest** — explicit: technical GA live (`www.heuresys.com`), **0 paying customers**, synthetic case-study reference tenant (RTL_BANK, a bank), **seeking design partners**; capital efficiency (burn ≈ €0). Plus the fresh win: "credibility gap #1 closed — all three perspectives (HR, Process Owner, Org Director) now have live UI."
 7. **Why now / why us** — ESCO + AI-Act timing; under-promise engineering discipline (self-exposes its own findings; 23 ADRs); defensible standards-aligned data layer.

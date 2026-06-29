@@ -12,8 +12,8 @@ const LIVE_KEYS: (keyof PlatformStatsResponse)[] = [
 ];
 
 const STATIC_FACTS = [
-  { key: "modules", value: 84 }, { key: "endpoints", value: 432 }, { key: "migrations", value: 150 },
-  { key: "apiTests", value: 1080 }, { key: "e2e", value: 107 }, { key: "pages", value: 96 },
+  { key: "modules", value: 85 }, { key: "endpoints", value: 466 }, { key: "migrations", value: 165 },
+  { key: "apiTests", value: 1098 }, { key: "e2e", value: 123 }, { key: "pages", value: 98 },
 ] as const;
 
 export default function InvestorsPage() {

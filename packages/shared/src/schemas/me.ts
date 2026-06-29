@@ -555,6 +555,41 @@ export const MeCareerPathsResponseSchema = z.object({
 });
 export type MeCareerPathsResponse = z.infer<typeof MeCareerPathsResponseSchema>;
 
+/* --- personal analytics (S1011 F5.1 — /me/analytics) ------------------ */
+
+export const MeAnalyticsMonthSchema = z.object({
+  month: z.string(),            // 'YYYY-MM'
+  regularHours: z.number(),
+  overtimeHours: z.number(),
+});
+export const MeAnalyticsResponseSchema = z.object({
+  attendanceTrend: z.array(MeAnalyticsMonthSchema),
+  summary: z.object({
+    goalsCount: z.number().int(),
+    skillsCount: z.number().int(),
+    latestPerformanceRating: z.number().nullable(),
+    leaveBalanceDays: z.number().nullable(),
+  }),
+});
+export type MeAnalyticsResponse = z.infer<typeof MeAnalyticsResponseSchema>;
+
+/* --- personal approvals (S1011 F5.3 — /me/approvals, track-only) ------ */
+
+export const MeApprovalRowSchema = z.object({
+  title: z.string().nullable(),
+  status: z.string().nullable(),
+  priority: z.string().nullable(),
+  resourceType: z.string().nullable(),
+  createdAt: z.string().nullable(),
+  resolvedAt: z.string().nullable(),
+});
+export const MeApprovalsResponseSchema = z.object({
+  items: z.array(MeApprovalRowSchema),
+  byStatus: z.object({ pending: z.number().int(), approved: z.number().int(), rejected: z.number().int() }),
+  total: z.number().int().min(0),
+});
+export type MeApprovalsResponse = z.infer<typeof MeApprovalsResponseSchema>;
+
 /* --- inbox ----------------------------------------------------------- */
 
 export const MeInboxNotificationSchema = z.object({

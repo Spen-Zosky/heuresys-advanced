@@ -172,6 +172,16 @@ export const meService = {
     return repo.loadMyCareerPaths(pool, actor.userId);
   },
 
+  /** Personal analytics (F5.1) — own attendance trend + summary KPIs. */
+  async getAnalytics(actor: SelfActor) {
+    return repo.loadMyAnalytics(pool, actor.userId);
+  },
+
+  /** Personal approvals (F5.3, track-only) — the caller's own approval requests. */
+  async getApprovals(actor: SelfActor) {
+    return repo.loadMyApprovals(pool, actor.userId);
+  },
+
   async updateProfile(actor: SelfActor, patch: UpdateMeProfileBody): Promise<MeProfile> {
     await repo.upsertProfile(pool, actor.userId, actor.tenantId, patch);
     const p = await repo.loadProfile(pool, actor.userId, actor.roles);

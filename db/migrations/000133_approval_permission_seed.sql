@@ -54,6 +54,8 @@ ON CONFLICT (auth_role_id, auth_permission_id) DO NOTHING;
 
 DO $$ DECLARE v int; BEGIN
   SELECT count(*) INTO v FROM sys.sys_auth_permissions WHERE auth_permission_resource = 'approval';
-  RAISE NOTICE '000133: approval permissions present: % (expect 3)', v;
-  IF v <> 3 THEN RAISE EXCEPTION '000133: expected 3 approval permissions, found %', v; END IF;
+  -- Floor, not exact: later migrations legitimately add approval perms (e.g.
+  -- approval:read:self in 000168, S1011 F5.3). Guards "the 3 base perms exist".
+  RAISE NOTICE '000133: approval permissions present: % (expect >= 3)', v;
+  IF v < 3 THEN RAISE EXCEPTION '000133: expected at least 3 approval permissions, found %', v; END IF;
 END $$;

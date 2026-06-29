@@ -22,6 +22,7 @@ import {
   MeGapsResponseSchema, MeAssessmentsResponseSchema,
   MeCareerResponseSchema, MeCareerTargetSchema, CreateMeCareerTargetBodySchema,
   MeGoalsResponseSchema, MeRiskResponseSchema, MeCareerPathsResponseSchema,
+  MeAnalyticsResponseSchema, MeApprovalsResponseSchema,
   MeInboxResponseSchema, MeInboxNotificationSchema, MeInboxQuerySchema,
   PatchMeInboxBodySchema, NotificationIdParamSchema,
   NotificationPreferencesResponseSchema, UpdateNotificationPreferenceBodySchema,
@@ -210,6 +211,18 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("career_succession:read:self")],
     schema: { response: { 200: MeCareerPathsResponseSchema } },
   }, async (req) => meService.getCareerPaths(selfActor(req)));
+
+  // Personal analytics (F5.1) — own attendance trend + summary KPIs (broad self read).
+  app.get("/analytics", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { response: { 200: MeAnalyticsResponseSchema } },
+  }, async (req) => meService.getAnalytics(selfActor(req)));
+
+  // Personal approvals (F5.3, track-only) — the caller's own approval requests (approval:read:self, mig 000168).
+  app.get("/approvals", {
+    preHandler: [requirePermission("approval:read:self")],
+    schema: { response: { 200: MeApprovalsResponseSchema } },
+  }, async (req) => meService.getApprovals(selfActor(req)));
 
   app.get("/inbox", {
     preHandler: [requirePermission("notification:read:self")],

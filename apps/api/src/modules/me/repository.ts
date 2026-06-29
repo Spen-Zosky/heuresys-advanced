@@ -7,7 +7,7 @@
 import type { Pool, PoolClient } from "pg";
 import type {
   MeProfile, MeProfileFull, MeContract, MePaySlip, MePerformanceReview, MeAttendanceResponse, UpdateMeProfileBody,
-  MeGoal, MeRiskResponse, MeCareerPathsResponse,
+  MeGoal, MeRiskResponse, MeCareerPathsResponse, MeAnalyticsResponse, MeApprovalsResponse,
   MeSkillEvidenceSchema, CreateMeSelfAssessmentBody,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
@@ -552,6 +552,64 @@ export async function loadMyCareerPaths(q: DbConnector, userId: string): Promise
       status: pl.status, targetPositionTitle: pl.target_title, horizonMonths: pl.horizon_months,
     })),
   };
+}
+
+/* --- personal analytics (S1011 F5.1) --------------------------------- */
+
+export async function loadMyAnalytics(q: DbConnector, userId: string): Promise<MeAnalyticsResponse> {
+  const [trend, goals, skills, perf, leave] = await Promise.all([
+    q.query<{ month: string; regular: string | null; overtime: string | null }>(
+      `SELECT to_char(date_trunc('month', attendance_date), 'YYYY-MM') AS month,
+              sum(attendance_hours_regular) AS regular, sum(attendance_hours_overtime) AS overtime
+         FROM sys.sys_attendance WHERE attendance_subject_user_id = $1
+        GROUP BY 1 ORDER BY 1`, [userId]),
+    q.query<{ n: string }>(`SELECT count(*) AS n FROM sys.sys_goals WHERE goal_subject_user_id = $1`, [userId]),
+    q.query<{ n: string }>(`SELECT count(*) AS n FROM sys.sys_user_skill_evidence WHERE user_skill_evidence_user_id = $1`, [userId]),
+    q.query<{ rating: string | null }>(
+      `SELECT review_overall_rating AS rating FROM sys.sys_performance_reviews
+        WHERE review_subject_user_id = $1 ORDER BY review_period_end DESC NULLS LAST LIMIT 1`, [userId]),
+    q.query<{ days: string | null }>(
+      `SELECT sum(balance_total_days - COALESCE(balance_used_days, 0)) AS days
+         FROM sys.sys_time_off_balances WHERE balance_subject_user_id = $1`, [userId]),
+  ]);
+  return {
+    attendanceTrend: trend.rows.map((r) => ({
+      month: r.month, regularHours: Number(r.regular ?? 0), overtimeHours: Number(r.overtime ?? 0),
+    })),
+    summary: {
+      goalsCount: Number(goals.rows[0]?.n ?? 0),
+      skillsCount: Number(skills.rows[0]?.n ?? 0),
+      latestPerformanceRating: numOrNull(perf.rows[0]?.rating ?? null),
+      leaveBalanceDays: numOrNull(leave.rows[0]?.days ?? null),
+    },
+  };
+}
+
+/* --- personal approvals (S1011 F5.3, track-only — own requests) ------ */
+
+export async function loadMyApprovals(q: DbConnector, userId: string): Promise<MeApprovalsResponse> {
+  const res = await q.query<{
+    title: string | null; status: string | null; priority: string | null;
+    resource_type: string | null; created_at: Date | null; resolved_at: Date | null;
+  }>(
+    `SELECT approval_request_title AS title, approval_request_status AS status,
+            approval_request_priority AS priority, approval_request_resource_type AS resource_type,
+            created_at, approval_request_resolved_at AS resolved_at
+       FROM sys.sys_approval_requests WHERE created_by = $1
+      ORDER BY created_at DESC`, [userId],
+  );
+  const items = res.rows.map((r) => ({
+    title: r.title, status: r.status, priority: r.priority, resourceType: r.resource_type,
+    createdAt: r.created_at ? r.created_at.toISOString() : null,
+    resolvedAt: r.resolved_at ? r.resolved_at.toISOString() : null,
+  }));
+  const byStatus = { pending: 0, approved: 0, rejected: 0 };
+  for (const it of items) {
+    if (it.status === "APPROVED") byStatus.approved++;
+    else if (it.status === "REJECTED") byStatus.rejected++;
+    else byStatus.pending++;
+  }
+  return { items, byStatus, total: items.length };
 }
 
 /* --- positions ------------------------------------------------------- */

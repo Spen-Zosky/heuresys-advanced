@@ -614,5 +614,47 @@
     "leadAria": "Team lead",
     "lead": "Lead",
     "member": "Membro"
+  },
+  "analytics": {
+    "title": "Le mie analisi",
+    "description": "Andamento presenze e indicatori personali.",
+    "error": "Impossibile caricare le analisi.",
+    "regular": "Ore ordinarie",
+    "overtime": "Straordinario",
+    "trendTitle": "Presenze per mese",
+    "trendEmpty": "Nessun dato di presenza.",
+    "trendAria": "Grafico presenze mensili",
+    "kpi": {
+      "goals": "Obiettivi",
+      "skills": "Competenze",
+      "performance": "Valutazione recente",
+      "leave": "Giorni ferie residui"
+    }
+  },
+  "orgChart": {
+    "title": "Organigramma",
+    "description": "La tua posizione nell'organizzazione.",
+    "personalView": "Vista personale",
+    "nodeCount": "{{count}} posizioni",
+    "empty": "Nessun organigramma disponibile.",
+    "error": "Impossibile caricare l'organigramma.",
+    "noNodes": "Organigramma vuoto.",
+    "graphAria": "Grafico organigramma"
+  },
+  "approvals": {
+    "title": "Le mie approvazioni",
+    "description": "Stato delle tue richieste di approvazione.",
+    "error": "Impossibile caricare le approvazioni.",
+    "status": {
+      "pending": "In attesa",
+      "approved": "Approvate",
+      "rejected": "Respinte"
+    },
+    "emptyTitle": "Nessuna richiesta",
+    "emptyDesc": "Non hai richieste di approvazione.",
+    "colTitle": "Titolo",
+    "colStatus": "Stato",
+    "colPriority": "Priorità",
+    "colCreated": "Creata"
   }
 }

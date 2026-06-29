@@ -614,5 +614,47 @@
     "leadAria": "Team lead",
     "lead": "Lead",
     "member": "Member"
+  },
+  "analytics": {
+    "title": "My analytics",
+    "description": "Attendance trend and personal indicators.",
+    "error": "Could not load analytics.",
+    "regular": "Regular hours",
+    "overtime": "Overtime",
+    "trendTitle": "Attendance by month",
+    "trendEmpty": "No attendance data.",
+    "trendAria": "Monthly attendance chart",
+    "kpi": {
+      "goals": "Goals",
+      "skills": "Skills",
+      "performance": "Latest rating",
+      "leave": "Leave days left"
+    }
+  },
+  "orgChart": {
+    "title": "Org chart",
+    "description": "Your position in the organization.",
+    "personalView": "Personal view",
+    "nodeCount": "{{count}} positions",
+    "empty": "No org chart available.",
+    "error": "Could not load the org chart.",
+    "noNodes": "Empty org chart.",
+    "graphAria": "Org chart graph"
+  },
+  "approvals": {
+    "title": "My approvals",
+    "description": "Status of your approval requests.",
+    "error": "Could not load approvals.",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "emptyTitle": "No requests",
+    "emptyDesc": "You have no approval requests.",
+    "colTitle": "Title",
+    "colStatus": "Status",
+    "colPriority": "Priority",
+    "colCreated": "Created"
   }
 }

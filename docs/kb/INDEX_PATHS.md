@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-29T00:05:18Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2203**
+**Generato**: 2026-06-29T15:55:25Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2215**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,9 +18,9 @@
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 164 |
-| db-script | 25 |
-| db-seed | 106 |
+| db-migration | 166 |
+| db-script | 26 |
+| db-seed | 107 |
 | doc-canonical | 391 |
 | handoff-state | 1 |
 | qa-artifact | 101 |
@@ -29,10 +29,10 @@
 | shared-pkg | 4 |
 | shared-schema | 87 |
 | showcase-source | 13 |
-| test | 230 |
+| test | 234 |
 | ux-design-archive | 80 |
-| web-source | 180 |
-| **TOTALE** | **2203** |
+| web-source | 184 |
+| **TOTALE** | **2215** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1660 |
+| live | 1672 |
 
 ## File per categoria
 
@@ -1044,6 +1044,8 @@
 - `D:\heuresys-advanced\db\migrations\000163_sidebar_five_sections_taxonomy.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000164_user_anagraphic_satellites.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000165_user_contracts.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000166_me_goals_self.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000167_user_pay_slips.sql` · *live* · git-tracked
 
 ### db-script
 
@@ -1059,6 +1061,7 @@
 - `D:\heuresys-advanced\db\scripts\extract_users_employees_legacy.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\gen-anagraphic-seed.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\gen-contracts-seed.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\gen-pay-slips-seed.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate-if-pending.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate.sh` · *live* · git-tracked
@@ -1173,6 +1176,7 @@
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\13_teams_from_org.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\14_user_anagraphic_satellites.generated.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\15_user_contracts.generated.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\rtl-rebuild\16_user_pay_slips.generated.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl_positions_hierarchy.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\sdbi\_template\01_temp_sdbi_ddl.sql` · *live* · git-tracked
@@ -1890,9 +1894,11 @@
 - `D:\heuresys-advanced\apps\api\test\learning-modules.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-path-steps.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\learning-paths.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\me-career-tabs.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-content-media.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-ess-extensions.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-interfaces.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\me-pay-slips.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-permissions.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-preferences.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-profile-full.integration.test.ts` · *live* · git-tracked
@@ -2030,8 +2036,10 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\landing.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\login-mfa-enrollment.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\login-mfa.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\me-career-tabs.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\me-myhr-tabs.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\me-pages.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\me-pay-slips.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\me-preferences.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\me-profile-tabs.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\me-sessions.spec.ts` · *live* · git-tracked
@@ -2200,6 +2208,9 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\_components\attendance-tab.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\_components\performance-tab.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\_components\summary-tab.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\career\_components\goals-tab.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\career\_components\paths-tab.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\career\_components\risk-tab.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\career\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\career\target\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\certifications\page.tsx` · *live* · git-tracked
@@ -2219,6 +2230,7 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\profile\_components\field.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\profile\_components\organization-tab.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\profile\_components\overview-tab.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\profile\_components\pay-slips-tab.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\profile\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\security\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\skills\page.tsx` · *live* · git-tracked

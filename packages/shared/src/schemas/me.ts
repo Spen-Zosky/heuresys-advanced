@@ -465,6 +465,76 @@ export const CreateMeCareerTargetBodySchema = z.object({
 });
 export type CreateMeCareerTargetBody = z.infer<typeof CreateMeCareerTargetBodySchema>;
 
+/* --- career sub-tabs (S1011 F3b — /me/career navtab) ------------------ */
+
+// Obiettivi — the caller's own goals (sys_goals, subject-user backfilled mig 000166).
+export const MeGoalSchema = z.object({
+  title: z.string().nullable(),
+  description: z.string().nullable(),
+  type: z.string().nullable(),
+  category: z.string().nullable(),
+  status: z.string().nullable(),
+  priority: z.string().nullable(),
+  progressPercent: z.number().nullable(),
+  weight: z.number().nullable(),
+  startDate: z.string().nullable(),
+  dueDate: z.string().nullable(),
+  completedAt: z.string().nullable(),
+});
+export type MeGoal = z.infer<typeof MeGoalSchema>;
+export const MeGoalsResponseSchema = z.object({
+  items: z.array(MeGoalSchema),
+  total: z.number().int().min(0),
+});
+export type MeGoalsResponse = z.infer<typeof MeGoalsResponseSchema>;
+
+// Rischio & Successione — own flight-risk (latest) + succession-readiness per target position (latest).
+export const MeFlightRiskSchema = z.object({
+  value: z.number().nullable(),
+  band: z.string().nullable(),
+  modelVersion: z.string().nullable(),
+  computedAt: z.string().nullable(),
+});
+export const MeSuccessionRowSchema = z.object({
+  positionId: z.uuid(),
+  positionTitle: z.string().nullable(),
+  value: z.number().nullable(),
+  horizon: z.string().nullable(),
+  modelVersion: z.string().nullable(),
+  computedAt: z.string().nullable(),
+});
+export const MeRiskResponseSchema = z.object({
+  flightRisk: MeFlightRiskSchema.nullable(),
+  succession: z.array(MeSuccessionRowSchema),
+});
+export type MeRiskResponse = z.infer<typeof MeRiskResponseSchema>;
+
+// Percorsi — career paths reachable from the caller's PRIMARY position + own personal plans.
+export const MeCareerPathStepSchema = z.object({
+  ordinal: z.number().int(),
+  originPositionTitle: z.string().nullable(),
+  targetPositionTitle: z.string().nullable(),
+  typicalDurationMonths: z.number().int().nullable(),
+});
+export const MeCareerPathSchema = z.object({
+  careerPathId: z.uuid(),
+  code: z.string().nullable(),
+  name: z.string().nullable(),
+  kind: z.string().nullable(),
+  steps: z.array(MeCareerPathStepSchema),
+});
+export const MeCareerPlanSchema = z.object({
+  status: z.string().nullable(),
+  targetPositionTitle: z.string().nullable(),
+  horizonMonths: z.number().int().nullable(),
+});
+export const MeCareerPathsResponseSchema = z.object({
+  fromPositionTitle: z.string().nullable(),
+  paths: z.array(MeCareerPathSchema),
+  plans: z.array(MeCareerPlanSchema),
+});
+export type MeCareerPathsResponse = z.infer<typeof MeCareerPathsResponseSchema>;
+
 /* --- inbox ----------------------------------------------------------- */
 
 export const MeInboxNotificationSchema = z.object({

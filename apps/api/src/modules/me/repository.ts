@@ -7,6 +7,7 @@
 import type { Pool, PoolClient } from "pg";
 import type {
   MeProfile, MeProfileFull, MeContract, MePerformanceReview, MeAttendanceResponse, UpdateMeProfileBody,
+  MeGoal, MeRiskResponse, MeCareerPathsResponse,
   MeSkillEvidenceSchema, CreateMeSelfAssessmentBody,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
@@ -403,6 +404,127 @@ export async function loadAttendance(q: DbConnector, userId: string): Promise<Me
     leaveBalances: bal.rows.map((r) => ({
       leaveType: r.leave_type, year: r.year, totalDays: num(r.total_days), usedDays: num(r.used_days),
       pendingDays: num(r.pending_days), carryoverDays: num(r.carryover_days),
+    })),
+  };
+}
+
+/* --- career sub-tabs (S1011 F3b) ------------------------------------- */
+
+const numOrNull = (v: string | null): number | null => (v == null ? null : Number(v));
+
+/** Obiettivi — the caller's own goals (subject-user backfilled by mig 000166). */
+export async function loadMyGoals(q: DbConnector, userId: string): Promise<MeGoal[]> {
+  const res = await q.query<{
+    title: string | null; description: string | null; type: string | null; category: string | null;
+    status: string | null; priority: string | null; progress_percent: string | null; weight: string | null;
+    start_date: string | null; due_date: string | null; completed_at: Date | null;
+  }>(
+    `SELECT goal_title AS title, goal_description AS description, goal_type AS type, goal_category AS category,
+            goal_status AS status, goal_priority AS priority,
+            goal_progress_percent AS progress_percent, goal_weight AS weight,
+            to_char(goal_start_date,'YYYY-MM-DD') AS start_date,
+            to_char(goal_due_date,'YYYY-MM-DD') AS due_date,
+            goal_completed_at AS completed_at
+       FROM sys.sys_goals WHERE goal_subject_user_id = $1
+      ORDER BY goal_due_date DESC NULLS LAST, goal_title`, [userId],
+  );
+  return res.rows.map((r) => ({
+    title: r.title, description: r.description, type: r.type, category: r.category,
+    status: r.status, priority: r.priority,
+    progressPercent: numOrNull(r.progress_percent), weight: numOrNull(r.weight),
+    startDate: r.start_date, dueDate: r.due_date,
+    completedAt: r.completed_at ? r.completed_at.toISOString() : null,
+  }));
+}
+
+/** Rischio & Successione — own latest flight-risk + latest succession-readiness per target position. */
+export async function loadMyRisk(q: DbConnector, userId: string): Promise<MeRiskResponse> {
+  const [fr, sc] = await Promise.all([
+    q.query<{ value: string | null; band: string | null; model_version: string | null; computed_at: Date | null }>(
+      `SELECT flight_risk_score_value AS value, flight_risk_score_band AS band,
+              flight_risk_score_model_version AS model_version, flight_risk_score_computed_at AS computed_at
+         FROM sys.sys_flight_risk_scores WHERE flight_risk_score_user_id = $1
+        ORDER BY flight_risk_score_computed_at DESC LIMIT 1`, [userId]),
+    q.query<{ position_id: string; position_title: string | null; value: string | null; horizon: string | null; model_version: string | null; computed_at: Date | null }>(
+      `SELECT DISTINCT ON (s.succession_readiness_score_position_id)
+              s.succession_readiness_score_position_id AS position_id, p.position_title,
+              s.succession_readiness_score_value AS value, s.succession_readiness_score_horizon AS horizon,
+              s.succession_readiness_score_model_version AS model_version,
+              s.succession_readiness_score_computed_at AS computed_at
+         FROM sys.sys_succession_readiness_scores s
+         LEFT JOIN sys.sys_positions p ON p.position_id = s.succession_readiness_score_position_id
+        WHERE s.succession_readiness_score_user_id = $1
+        ORDER BY s.succession_readiness_score_position_id, s.succession_readiness_score_computed_at DESC`, [userId]),
+  ]);
+  const frRow = fr.rows[0];
+  return {
+    flightRisk: frRow
+      ? { value: numOrNull(frRow.value), band: frRow.band, modelVersion: frRow.model_version,
+          computedAt: frRow.computed_at ? frRow.computed_at.toISOString() : null }
+      : null,
+    succession: sc.rows.map((r) => ({
+      positionId: r.position_id, positionTitle: r.position_title, value: numOrNull(r.value),
+      horizon: r.horizon, modelVersion: r.model_version,
+      computedAt: r.computed_at ? r.computed_at.toISOString() : null,
+    })),
+  };
+}
+
+/** Percorsi — career paths reachable from the caller's PRIMARY position + own personal plans. */
+export async function loadMyCareerPaths(q: DbConnector, userId: string): Promise<MeCareerPathsResponse> {
+  const prim = await q.query<{ position_id: string; position_title: string | null }>(
+    `SELECT a.user_position_assignment_position_id AS position_id, p.position_title
+       FROM sys.sys_user_position_assignments a
+       JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+      WHERE a.user_position_assignment_user_id = $1 AND a.user_position_assignment_kind = 'PRIMARY'
+      LIMIT 1`, [userId],
+  );
+  const primary = prim.rows[0] ?? null;
+
+  const pathsRes = primary
+    ? await q.query<{ career_path_id: string; code: string | null; name: string | null; kind: string | null }>(
+        `SELECT cp.career_path_id, cp.career_path_code AS code, cp.career_path_name AS name, cp.career_path_kind AS kind
+           FROM sys.sys_position_career_paths pcp
+           JOIN sys.sys_career_paths cp ON cp.career_path_id = pcp.career_path_id
+          WHERE pcp.position_id = $1
+          ORDER BY cp.career_path_name`, [primary.position_id])
+    : { rows: [] as Array<{ career_path_id: string; code: string | null; name: string | null; kind: string | null }> };
+
+  const pathIds = pathsRes.rows.map((r) => r.career_path_id);
+  const stepsRes = pathIds.length > 0
+    ? await q.query<{ path_id: string; ordinal: number; origin_title: string | null; target_title: string | null; duration: number | null }>(
+        `SELECT s.career_path_step_path_id AS path_id, s.career_path_step_ordinal AS ordinal,
+                po.position_title AS origin_title, pt.position_title AS target_title,
+                s.career_path_step_typical_duration_months AS duration
+           FROM sys.sys_career_path_steps s
+           LEFT JOIN sys.sys_positions po ON po.position_id = s.career_path_step_origin_position_id
+           LEFT JOIN sys.sys_positions pt ON pt.position_id = s.career_path_step_target_position_id
+          WHERE s.career_path_step_path_id = ANY($1::uuid[])
+          ORDER BY s.career_path_step_path_id, s.career_path_step_ordinal`, [pathIds])
+    : { rows: [] as Array<{ path_id: string; ordinal: number; origin_title: string | null; target_title: string | null; duration: number | null }> };
+
+  const plansRes = await q.query<{ status: string | null; target_title: string | null; horizon_months: number | null }>(
+    `SELECT pl.user_career_plan_status AS status, pt.position_title AS target_title,
+            pl.user_career_plan_horizon_months AS horizon_months
+       FROM sys.sys_user_career_plans pl
+       LEFT JOIN sys.sys_positions pt ON pt.position_id = pl.user_career_plan_target_position_id
+      WHERE pl.user_career_plan_user_id = $1
+      ORDER BY pl.created_at DESC`, [userId],
+  );
+
+  return {
+    fromPositionTitle: primary?.position_title ?? null,
+    paths: pathsRes.rows.map((p) => ({
+      careerPathId: p.career_path_id, code: p.code, name: p.name, kind: p.kind,
+      steps: stepsRes.rows
+        .filter((s) => s.path_id === p.career_path_id)
+        .map((s) => ({
+          ordinal: s.ordinal, originPositionTitle: s.origin_title,
+          targetPositionTitle: s.target_title, typicalDurationMonths: s.duration,
+        })),
+    })),
+    plans: plansRes.rows.map((pl) => ({
+      status: pl.status, targetPositionTitle: pl.target_title, horizonMonths: pl.horizon_months,
     })),
   };
 }

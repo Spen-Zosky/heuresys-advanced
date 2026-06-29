@@ -35,13 +35,37 @@
     "gapsLabel": "Development gaps",
     "gapsUnit": "open",
     "gapsCount": "{{count}} open",
-    "tabs": { "summary": "Summary", "performance": "Performance", "attendance": "Attendance", "aria": "My HR sections" },
-    "perf": { "error": "Unable to load reviews.", "none": "No reviews", "review": "Review", "status": "Status", "overall": "Overall rating", "goal": "Goals", "competency": "Competencies", "perfBox": "Performance box", "potBox": "Potential box", "period": "Period" },
-    "att": { "error": "Unable to load attendance.", "none": "No data", "balancesTitle": "Leave balances", "daysUsed": "days used", "pending": "pending", "recentTitle": "Recent attendance", "overtimeTitle": "Overtime" }
+    "tabs": {
+      "summary": "Summary",
+      "performance": "Performance",
+      "attendance": "Attendance",
+      "aria": "My HR sections"
+    },
+    "perf": {
+      "error": "Unable to load reviews.",
+      "none": "No reviews",
+      "review": "Review",
+      "status": "Status",
+      "overall": "Overall rating",
+      "goal": "Goals",
+      "competency": "Competencies",
+      "perfBox": "Performance box",
+      "potBox": "Potential box",
+      "period": "Period"
+    },
+    "att": {
+      "error": "Unable to load attendance.",
+      "none": "No data",
+      "balancesTitle": "Leave balances",
+      "daysUsed": "days used",
+      "pending": "pending",
+      "recentTitle": "Recent attendance",
+      "overtimeTitle": "Overtime"
+    }
   },
   "career": {
     "title": "My career",
-    "description": "Your declared target positions.",
+    "description": "Goals, career paths, and succession readiness.",
     "count": "{{count}} goals",
     "error": "Could not load your career goals.",
     "emptyTitle": "No career goals",
@@ -49,7 +73,51 @@
     "colPosition": "Target position",
     "colStatus": "Status",
     "colDate": "Date",
-    "colNotes": "Notes"
+    "colNotes": "Notes",
+    "tabs": {
+      "obiettivi": "Goals",
+      "percorsi": "Paths",
+      "rischio": "Risk & Succession",
+      "aria": "Career sections"
+    },
+    "goals": {
+      "none": "No goals assigned.",
+      "error": "Could not load your goals.",
+      "untitled": "Goal",
+      "status": "Status",
+      "progress": "Progress",
+      "priority": "Priority",
+      "weight": "Weight",
+      "type": "Type",
+      "due": "Due"
+    },
+    "risk": {
+      "none": "No data",
+      "error": "Could not load risk data.",
+      "flightTitle": "Flight risk",
+      "value": "Value",
+      "band": "Band",
+      "model": "Model",
+      "computedAt": "Computed at",
+      "successionTitle": "Succession readiness",
+      "position": "Position",
+      "horizon": "Horizon",
+      "noSuccession": "No succession assessment."
+    },
+    "paths": {
+      "none": "No career paths from your position.",
+      "error": "Could not load paths.",
+      "untitled": "Path",
+      "from": "Paths from position: {{position}}",
+      "kind": "Kind",
+      "steps": "Steps",
+      "months": "{{n}} months",
+      "plansTitle": "My career plans",
+      "noPlans": "No personal career plan.",
+      "planStatus": "Status",
+      "planTarget": "Target position",
+      "planHorizon": "Horizon"
+    }
   },
   "careerTarget": {
     "back": "← My career",
@@ -294,24 +362,135 @@
     "settingsTitle": "Settings",
     "full": {
       "error": "Unable to load the profile.",
-      "tabs": { "overview": "Overview", "organization": "Organization", "contracts": "Contracts", "documents": "Documents", "aria": "Profile sections" },
-      "identity": { "title": "Identity", "firstName": "First name", "lastName": "Last name", "middleName": "Middle name", "birthDate": "Date of birth", "birthPlace": "Place of birth", "gender": "Gender", "nationality": "Nationality", "maritalStatus": "Marital status", "taxId": "Tax ID" },
-      "documents": { "title": "Identity documents", "expiry": "exp.", "none": "No documents" },
-      "docKind": { "nationalId": "National ID", "passport": "Passport", "driverLicense": "Driver license" },
-      "address": { "street": "Street", "city": "City", "postalCode": "Postal code", "country": "Country", "region": "Region" },
-      "addrKind": { "permanent": "Permanent address", "temporary": "Temporary address" },
-      "contacts": { "title": "Personal contacts", "phoneMobile": "Mobile", "phoneHome": "Home phone", "personalEmail": "Personal email" },
-      "emergency": { "name": "Emergency contact", "phone": "Emergency phone", "relationship": "Relationship" },
-      "family": { "title": "Emergency & family", "member": "Family member", "dependent": "dependent" },
-      "education": { "title": "Education", "none": "No education records" },
-      "banking": { "title": "Bank details", "iban": "IBAN", "swiftBic": "SWIFT/BIC", "bankName": "Bank", "accountNumber": "Account number" },
-      "role": { "title": "Role & position", "jobTitle": "Job title", "positionCode": "Position code", "orgUnit": "Org unit", "department": "Department", "location": "Location", "costCenter": "Cost center", "manager": "Manager" },
-      "lifecycle": { "title": "Lifecycle", "hireDate": "Hire date", "seniorityDate": "Seniority date", "probationEnd": "Probation end", "contractEnd": "Contract end", "status": "Status", "terminationDate": "Termination date" },
-      "compensation": { "title": "Compensation", "salary": "Salary", "payScaleArea": "Pay scale area", "payScaleType": "Pay scale type", "payScaleGroup": "Pay scale group", "payScaleLevel": "Pay scale level", "payPeriods": "Pay periods/year", "workSchedulePct": "Work schedule %" },
-      "sap": { "title": "SAP", "pernr": "PERNR", "companyCode": "Company code", "personnelArea": "Personnel area", "personnelSubarea": "Personnel subarea" },
-      "auth": { "title": "Authentication", "username": "Username", "roles": "Roles", "lastLogin": "Last login" },
-      "contracts": { "none": "No contracts", "title": "Contract", "type": "Contract type", "status": "Status", "ccnlType": "CCNL", "ccnlLevel": "CCNL level", "gross": "Gross annual", "workHours": "Weekly hours", "scheduleType": "Schedule type", "partTime": "Part-time", "startDate": "Start date", "endDate": "End date", "probationEnd": "Probation end", "jobTitle": "Job title" },
-      "documentsTab": { "title": "Personal documents", "none": "No documents" }
+      "tabs": {
+        "overview": "Overview",
+        "organization": "Organization",
+        "contracts": "Contracts",
+        "documents": "Documents",
+        "aria": "Profile sections"
+      },
+      "identity": {
+        "title": "Identity",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "middleName": "Middle name",
+        "birthDate": "Date of birth",
+        "birthPlace": "Place of birth",
+        "gender": "Gender",
+        "nationality": "Nationality",
+        "maritalStatus": "Marital status",
+        "taxId": "Tax ID"
+      },
+      "documents": {
+        "title": "Identity documents",
+        "expiry": "exp.",
+        "none": "No documents"
+      },
+      "docKind": {
+        "nationalId": "National ID",
+        "passport": "Passport",
+        "driverLicense": "Driver license"
+      },
+      "address": {
+        "street": "Street",
+        "city": "City",
+        "postalCode": "Postal code",
+        "country": "Country",
+        "region": "Region"
+      },
+      "addrKind": {
+        "permanent": "Permanent address",
+        "temporary": "Temporary address"
+      },
+      "contacts": {
+        "title": "Personal contacts",
+        "phoneMobile": "Mobile",
+        "phoneHome": "Home phone",
+        "personalEmail": "Personal email"
+      },
+      "emergency": {
+        "name": "Emergency contact",
+        "phone": "Emergency phone",
+        "relationship": "Relationship"
+      },
+      "family": {
+        "title": "Emergency & family",
+        "member": "Family member",
+        "dependent": "dependent"
+      },
+      "education": {
+        "title": "Education",
+        "none": "No education records"
+      },
+      "banking": {
+        "title": "Bank details",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "bankName": "Bank",
+        "accountNumber": "Account number"
+      },
+      "role": {
+        "title": "Role & position",
+        "jobTitle": "Job title",
+        "positionCode": "Position code",
+        "orgUnit": "Org unit",
+        "department": "Department",
+        "location": "Location",
+        "costCenter": "Cost center",
+        "manager": "Manager"
+      },
+      "lifecycle": {
+        "title": "Lifecycle",
+        "hireDate": "Hire date",
+        "seniorityDate": "Seniority date",
+        "probationEnd": "Probation end",
+        "contractEnd": "Contract end",
+        "status": "Status",
+        "terminationDate": "Termination date"
+      },
+      "compensation": {
+        "title": "Compensation",
+        "salary": "Salary",
+        "payScaleArea": "Pay scale area",
+        "payScaleType": "Pay scale type",
+        "payScaleGroup": "Pay scale group",
+        "payScaleLevel": "Pay scale level",
+        "payPeriods": "Pay periods/year",
+        "workSchedulePct": "Work schedule %"
+      },
+      "sap": {
+        "title": "SAP",
+        "pernr": "PERNR",
+        "companyCode": "Company code",
+        "personnelArea": "Personnel area",
+        "personnelSubarea": "Personnel subarea"
+      },
+      "auth": {
+        "title": "Authentication",
+        "username": "Username",
+        "roles": "Roles",
+        "lastLogin": "Last login"
+      },
+      "contracts": {
+        "none": "No contracts",
+        "title": "Contract",
+        "type": "Contract type",
+        "status": "Status",
+        "ccnlType": "CCNL",
+        "ccnlLevel": "CCNL level",
+        "gross": "Gross annual",
+        "workHours": "Weekly hours",
+        "scheduleType": "Schedule type",
+        "partTime": "Part-time",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "probationEnd": "Probation end",
+        "jobTitle": "Job title"
+      },
+      "documentsTab": {
+        "title": "Personal documents",
+        "none": "No documents"
+      }
     }
   },
   "security": {

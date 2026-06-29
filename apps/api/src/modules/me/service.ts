@@ -150,6 +150,22 @@ export const meService = {
     return repo.loadAttendance(pool, actor.userId);
   },
 
+  /** Obiettivi sub-tab (F3b) — the caller's own goals. */
+  async getGoals(actor: SelfActor) {
+    const items = await repo.loadMyGoals(pool, actor.userId);
+    return { items, total: items.length };
+  },
+
+  /** Rischio & Successione sub-tab (F3b) — own flight-risk + succession-readiness. */
+  async getRisk(actor: SelfActor) {
+    return repo.loadMyRisk(pool, actor.userId);
+  },
+
+  /** Percorsi sub-tab (F3b) — career paths from the PRIMARY position + own plans. */
+  async getCareerPaths(actor: SelfActor) {
+    return repo.loadMyCareerPaths(pool, actor.userId);
+  },
+
   async updateProfile(actor: SelfActor, patch: UpdateMeProfileBody): Promise<MeProfile> {
     await repo.upsertProfile(pool, actor.userId, actor.tenantId, patch);
     const p = await repo.loadProfile(pool, actor.userId, actor.roles);

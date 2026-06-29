@@ -56,13 +56,37 @@
     "gapsLabel": "Gap di sviluppo",
     "gapsUnit": "aperti",
     "gapsCount": "{{count}} aperti",
-    "tabs": { "summary": "Riepilogo", "performance": "Performance", "attendance": "Presenze", "aria": "Sezioni My HR" },
-    "perf": { "error": "Impossibile caricare le valutazioni.", "none": "Nessuna valutazione", "review": "Valutazione", "status": "Stato", "overall": "Voto complessivo", "goal": "Obiettivi", "competency": "Competenze", "perfBox": "Box performance", "potBox": "Box potenziale", "period": "Periodo" },
-    "att": { "error": "Impossibile caricare le presenze.", "none": "Nessun dato", "balancesTitle": "Saldi ferie/permessi", "daysUsed": "giorni usati", "pending": "in attesa", "recentTitle": "Presenze recenti", "overtimeTitle": "Straordinari" }
+    "tabs": {
+      "summary": "Riepilogo",
+      "performance": "Performance",
+      "attendance": "Presenze",
+      "aria": "Sezioni My HR"
+    },
+    "perf": {
+      "error": "Impossibile caricare le valutazioni.",
+      "none": "Nessuna valutazione",
+      "review": "Valutazione",
+      "status": "Stato",
+      "overall": "Voto complessivo",
+      "goal": "Obiettivi",
+      "competency": "Competenze",
+      "perfBox": "Box performance",
+      "potBox": "Box potenziale",
+      "period": "Periodo"
+    },
+    "att": {
+      "error": "Impossibile caricare le presenze.",
+      "none": "Nessun dato",
+      "balancesTitle": "Saldi ferie/permessi",
+      "daysUsed": "giorni usati",
+      "pending": "in attesa",
+      "recentTitle": "Presenze recenti",
+      "overtimeTitle": "Straordinari"
+    }
   },
   "career": {
     "title": "La mia carriera",
-    "description": "Le tue posizioni target dichiarate.",
+    "description": "Obiettivi, percorsi di carriera e prontezza alla successione.",
     "count": "{{count}} obiettivi",
     "error": "Impossibile caricare i tuoi obiettivi di carriera.",
     "emptyTitle": "Nessun obiettivo di carriera",
@@ -70,7 +94,51 @@
     "colPosition": "Posizione target",
     "colStatus": "Stato",
     "colDate": "Data",
-    "colNotes": "Note"
+    "colNotes": "Note",
+    "tabs": {
+      "obiettivi": "Obiettivi",
+      "percorsi": "Percorsi",
+      "rischio": "Rischio & Successione",
+      "aria": "Sezioni Carriera"
+    },
+    "goals": {
+      "none": "Nessun obiettivo assegnato.",
+      "error": "Impossibile caricare i tuoi obiettivi.",
+      "untitled": "Obiettivo",
+      "status": "Stato",
+      "progress": "Avanzamento",
+      "priority": "Priorità",
+      "weight": "Peso",
+      "type": "Tipo",
+      "due": "Scadenza"
+    },
+    "risk": {
+      "none": "Nessun dato",
+      "error": "Impossibile caricare i dati di rischio.",
+      "flightTitle": "Rischio di abbandono",
+      "value": "Valore",
+      "band": "Fascia",
+      "model": "Modello",
+      "computedAt": "Calcolato il",
+      "successionTitle": "Prontezza alla successione",
+      "position": "Posizione",
+      "horizon": "Orizzonte",
+      "noSuccession": "Nessuna valutazione di successione."
+    },
+    "paths": {
+      "none": "Nessun percorso di carriera dalla tua posizione.",
+      "error": "Impossibile caricare i percorsi.",
+      "untitled": "Percorso",
+      "from": "Percorsi dalla posizione: {{position}}",
+      "kind": "Tipo",
+      "steps": "Tappe",
+      "months": "{{n}} mesi",
+      "plansTitle": "I miei piani di carriera",
+      "noPlans": "Nessun piano di carriera personale.",
+      "planStatus": "Stato",
+      "planTarget": "Posizione target",
+      "planHorizon": "Orizzonte"
+    }
   },
   "careerTarget": {
     "back": "← La mia carriera",
@@ -294,24 +362,135 @@
     "settingsTitle": "Impostazioni",
     "full": {
       "error": "Impossibile caricare il profilo.",
-      "tabs": { "overview": "Panoramica", "organization": "Organizzazione", "contracts": "Contratti", "documents": "Documenti", "aria": "Sezioni del profilo" },
-      "identity": { "title": "Identità", "firstName": "Nome", "lastName": "Cognome", "middleName": "Secondo nome", "birthDate": "Data di nascita", "birthPlace": "Luogo di nascita", "gender": "Genere", "nationality": "Nazionalità", "maritalStatus": "Stato civile", "taxId": "Codice fiscale" },
-      "documents": { "title": "Documenti identità", "expiry": "scad.", "none": "Nessun documento" },
-      "docKind": { "nationalId": "Documento identità", "passport": "Passaporto", "driverLicense": "Patente" },
-      "address": { "street": "Via", "city": "Città", "postalCode": "CAP", "country": "Paese", "region": "Regione" },
-      "addrKind": { "permanent": "Indirizzo permanente", "temporary": "Indirizzo temporaneo" },
-      "contacts": { "title": "Contatti personali", "phoneMobile": "Cellulare", "phoneHome": "Telefono casa", "personalEmail": "Email personale" },
-      "emergency": { "name": "Contatto di emergenza", "phone": "Telefono emergenza", "relationship": "Relazione" },
-      "family": { "title": "Emergenza & famiglia", "member": "Familiare", "dependent": "a carico" },
-      "education": { "title": "Istruzione", "none": "Nessun titolo di studio" },
-      "banking": { "title": "Dati bancari", "iban": "IBAN", "swiftBic": "SWIFT/BIC", "bankName": "Banca", "accountNumber": "Numero conto" },
-      "role": { "title": "Ruolo & posizione", "jobTitle": "Mansione", "positionCode": "Codice posizione", "orgUnit": "Unità organizzativa", "department": "Dipartimento", "location": "Sede", "costCenter": "Centro di costo", "manager": "Manager" },
-      "lifecycle": { "title": "Ciclo di vita", "hireDate": "Data assunzione", "seniorityDate": "Data anzianità", "probationEnd": "Fine periodo di prova", "contractEnd": "Scadenza contratto", "status": "Stato", "terminationDate": "Data cessazione" },
-      "compensation": { "title": "Retribuzione", "salary": "Retribuzione", "payScaleArea": "Area contrattuale", "payScaleType": "Tipo inquadramento", "payScaleGroup": "Gruppo retributivo", "payScaleLevel": "Livello retributivo", "payPeriods": "Mensilità annue", "workSchedulePct": "Percentuale orario" },
-      "sap": { "title": "SAP", "pernr": "PERNR", "companyCode": "Codice società", "personnelArea": "Area del personale", "personnelSubarea": "Sottoarea del personale" },
-      "auth": { "title": "Autenticazione", "username": "Username", "roles": "Ruoli", "lastLogin": "Ultimo accesso" },
-      "contracts": { "none": "Nessun contratto", "title": "Contratto", "type": "Tipo contratto", "status": "Stato", "ccnlType": "CCNL", "ccnlLevel": "Livello CCNL", "gross": "RAL", "workHours": "Ore settimanali", "scheduleType": "Tipo orario", "partTime": "Part-time", "startDate": "Data inizio", "endDate": "Data fine", "probationEnd": "Fine periodo di prova", "jobTitle": "Mansione" },
-      "documentsTab": { "title": "Documenti personali", "none": "Nessun documento" }
+      "tabs": {
+        "overview": "Panoramica",
+        "organization": "Organizzazione",
+        "contracts": "Contratti",
+        "documents": "Documenti",
+        "aria": "Sezioni del profilo"
+      },
+      "identity": {
+        "title": "Identità",
+        "firstName": "Nome",
+        "lastName": "Cognome",
+        "middleName": "Secondo nome",
+        "birthDate": "Data di nascita",
+        "birthPlace": "Luogo di nascita",
+        "gender": "Genere",
+        "nationality": "Nazionalità",
+        "maritalStatus": "Stato civile",
+        "taxId": "Codice fiscale"
+      },
+      "documents": {
+        "title": "Documenti identità",
+        "expiry": "scad.",
+        "none": "Nessun documento"
+      },
+      "docKind": {
+        "nationalId": "Documento identità",
+        "passport": "Passaporto",
+        "driverLicense": "Patente"
+      },
+      "address": {
+        "street": "Via",
+        "city": "Città",
+        "postalCode": "CAP",
+        "country": "Paese",
+        "region": "Regione"
+      },
+      "addrKind": {
+        "permanent": "Indirizzo permanente",
+        "temporary": "Indirizzo temporaneo"
+      },
+      "contacts": {
+        "title": "Contatti personali",
+        "phoneMobile": "Cellulare",
+        "phoneHome": "Telefono casa",
+        "personalEmail": "Email personale"
+      },
+      "emergency": {
+        "name": "Contatto di emergenza",
+        "phone": "Telefono emergenza",
+        "relationship": "Relazione"
+      },
+      "family": {
+        "title": "Emergenza & famiglia",
+        "member": "Familiare",
+        "dependent": "a carico"
+      },
+      "education": {
+        "title": "Istruzione",
+        "none": "Nessun titolo di studio"
+      },
+      "banking": {
+        "title": "Dati bancari",
+        "iban": "IBAN",
+        "swiftBic": "SWIFT/BIC",
+        "bankName": "Banca",
+        "accountNumber": "Numero conto"
+      },
+      "role": {
+        "title": "Ruolo & posizione",
+        "jobTitle": "Mansione",
+        "positionCode": "Codice posizione",
+        "orgUnit": "Unità organizzativa",
+        "department": "Dipartimento",
+        "location": "Sede",
+        "costCenter": "Centro di costo",
+        "manager": "Manager"
+      },
+      "lifecycle": {
+        "title": "Ciclo di vita",
+        "hireDate": "Data assunzione",
+        "seniorityDate": "Data anzianità",
+        "probationEnd": "Fine periodo di prova",
+        "contractEnd": "Scadenza contratto",
+        "status": "Stato",
+        "terminationDate": "Data cessazione"
+      },
+      "compensation": {
+        "title": "Retribuzione",
+        "salary": "Retribuzione",
+        "payScaleArea": "Area contrattuale",
+        "payScaleType": "Tipo inquadramento",
+        "payScaleGroup": "Gruppo retributivo",
+        "payScaleLevel": "Livello retributivo",
+        "payPeriods": "Mensilità annue",
+        "workSchedulePct": "Percentuale orario"
+      },
+      "sap": {
+        "title": "SAP",
+        "pernr": "PERNR",
+        "companyCode": "Codice società",
+        "personnelArea": "Area del personale",
+        "personnelSubarea": "Sottoarea del personale"
+      },
+      "auth": {
+        "title": "Autenticazione",
+        "username": "Username",
+        "roles": "Ruoli",
+        "lastLogin": "Ultimo accesso"
+      },
+      "contracts": {
+        "none": "Nessun contratto",
+        "title": "Contratto",
+        "type": "Tipo contratto",
+        "status": "Stato",
+        "ccnlType": "CCNL",
+        "ccnlLevel": "Livello CCNL",
+        "gross": "RAL",
+        "workHours": "Ore settimanali",
+        "scheduleType": "Tipo orario",
+        "partTime": "Part-time",
+        "startDate": "Data inizio",
+        "endDate": "Data fine",
+        "probationEnd": "Fine periodo di prova",
+        "jobTitle": "Mansione"
+      },
+      "documentsTab": {
+        "title": "Documenti personali",
+        "none": "Nessun documento"
+      }
     }
   },
   "security": {

@@ -21,6 +21,7 @@ import {
   MeLearningResponseSchema, MeLearningAssignmentSchema, CreateMeEnrollmentBodySchema,
   MeGapsResponseSchema, MeAssessmentsResponseSchema,
   MeCareerResponseSchema, MeCareerTargetSchema, CreateMeCareerTargetBodySchema,
+  MeGoalsResponseSchema, MeRiskResponseSchema, MeCareerPathsResponseSchema,
   MeInboxResponseSchema, MeInboxNotificationSchema, MeInboxQuerySchema,
   PatchMeInboxBodySchema, NotificationIdParamSchema,
   NotificationPreferencesResponseSchema, UpdateNotificationPreferenceBodySchema,
@@ -186,6 +187,23 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     const t = await meService.addCareerTarget(selfActor(req), req.body);
     reply.code(201).send(t);
   });
+
+  // /me/career sub-tabs (S1011 F3b). Obiettivi reads own goals (goal:read:self, mig 000166);
+  // Rischio & Successione + Percorsi reuse career_succession:read:self. All self-scoped.
+  app.get("/goals", {
+    preHandler: [requirePermission("goal:read:self")],
+    schema: { response: { 200: MeGoalsResponseSchema } },
+  }, async (req) => meService.getGoals(selfActor(req)));
+
+  app.get("/risk", {
+    preHandler: [requirePermission("career_succession:read:self")],
+    schema: { response: { 200: MeRiskResponseSchema } },
+  }, async (req) => meService.getRisk(selfActor(req)));
+
+  app.get("/career-paths", {
+    preHandler: [requirePermission("career_succession:read:self")],
+    schema: { response: { 200: MeCareerPathsResponseSchema } },
+  }, async (req) => meService.getCareerPaths(selfActor(req)));
 
   app.get("/inbox", {
     preHandler: [requirePermission("notification:read:self")],

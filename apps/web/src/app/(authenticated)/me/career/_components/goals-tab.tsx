@@ -1,0 +1,36 @@
+"use client";
+
+import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import type { MeGoalsResponse } from "@heuresys/shared";
+import { apiFetch } from "@/lib/api/fetch";
+import { Field, ProfileSection, fmtDate } from "../../profile/_components/field";
+
+/** Obiettivi — the caller's own goals (read-only), lazy on tab open. */
+export function GoalsTab() {
+  const { t } = useTranslation("ess");
+  const q = useQuery({
+    queryKey: ["me", "goals"],
+    queryFn: () => apiFetch<MeGoalsResponse>("/v1/me/goals"),
+  });
+
+  if (q.isLoading) return <span className="text-sm text-muted-foreground">{t("common:loading")}</span>;
+  if (q.isError || !q.data) return <p className="text-sm text-danger" data-testid="career-goals-error">{t("career.goals.error")}</p>;
+  const items = q.data.items;
+  if (items.length === 0) return <p className="text-sm text-muted-foreground" data-testid="career-goals-empty">{t("career.goals.none")}</p>;
+
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2" data-testid="career-goals">
+      {items.map((g, i) => (
+        <ProfileSection key={`goal-${i}`} title={g.title ?? t("career.goals.untitled")} testId={i === 0 ? "career-goal-primary" : undefined}>
+          <Field label={t("career.goals.status")} value={g.status} testId={i === 0 ? "career-goal-status" : undefined} />
+          <Field label={t("career.goals.progress")} value={g.progressPercent != null ? `${g.progressPercent}%` : null} />
+          <Field label={t("career.goals.priority")} value={g.priority} />
+          <Field label={t("career.goals.weight")} value={g.weight != null ? String(g.weight) : null} />
+          <Field label={t("career.goals.type")} value={g.type ?? g.category} />
+          <Field label={t("career.goals.due")} value={fmtDate(g.dueDate)} />
+        </ProfileSection>
+      ))}
+    </div>
+  );
+}

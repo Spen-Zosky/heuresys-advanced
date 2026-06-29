@@ -1,91 +1,27 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
-import { EmptyState, PageHeader } from "@heuresys/ui";
-import { Target } from "lucide-react";
-import { apiFetch } from "@/lib/api/fetch";
-import { StatusBadge } from "@/components/status-pill";
+import { PageHeader } from "@heuresys/ui";
+import { ProfileTabs, type ProfileTabDef } from "@/components/profile-tabs";
+import { GoalsTab } from "./_components/goals-tab";
+import { PathsTab } from "./_components/paths-tab";
+import { RiskTab } from "./_components/risk-tab";
 
-interface MeCareerTarget {
-  userCareerPlanId: string;
-  positionId: string;
-  positionTitle: string;
-  status: string;
-  targetDate: string | null;
-  notes: string | null;
-}
-
+/** Carriera (Personal area) — sub-tab IA (S1011 F3b): Obiettivi + Percorsi + Rischio & Successione. */
 export default function MeCareerPage() {
   const { t } = useTranslation("ess");
-  const career = useQuery({
-    queryKey: ["me", "career"],
-    queryFn: () => apiFetch<{ items: MeCareerTarget[]; total: number }>("/v1/me/career"),
-  });
-
-  const items = career.data?.items ?? [];
-
+  const tabs: ProfileTabDef[] = [
+    { id: "obiettivi", label: t("career.tabs.obiettivi"), testId: "career-tab-obiettivi", render: () => <GoalsTab /> },
+    { id: "percorsi", label: t("career.tabs.percorsi"), testId: "career-tab-percorsi", render: () => <PathsTab /> },
+    { id: "rischio", label: t("career.tabs.rischio"), testId: "career-tab-rischio", render: () => <RiskTab /> },
+  ];
   return (
-    <main data-testid="me-career-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
-      <PageHeader
-        data-testid="me-career-title"
-        title={t("career.title")}
-        description={t("career.description")}
-        badges={
-          <span
-            data-testid="me-career-count"
-            className="inline-flex items-center rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
-          >
-            {career.data ? t("career.count", { count: career.data.total }) : t("common:loading")}
-          </span>
-        }
-      />
-
-      {career.isLoading ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">
-          {t("common:loading")}
-        </div>
-      ) : career.isError ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-danger" data-testid="me-career-error">
-          {t("career.error")}
-        </div>
-      ) : career.data && items.length === 0 ? (
-        <EmptyState
-          data-testid="me-career-empty"
-          icon={<Target className="h-6 w-6" />}
-          title={t("career.emptyTitle")}
-          description={t("career.emptyDesc")}
-        />
-      ) : (
-        <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
-          <table data-testid="me-career-table" className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 py-2">{t("career.colPosition")}</th>
-                <th className="px-4 py-2">{t("career.colStatus")}</th>
-                <th className="px-4 py-2">{t("career.colDate")}</th>
-                <th className="px-4 py-2">{t("career.colNotes")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {items.map((c) => (
-                <tr
-                  key={c.userCareerPlanId}
-                  data-testid="me-career-row"
-                  className="transition-colors hover:bg-muted/60"
-                >
-                  <td className="px-4 py-2 align-middle font-medium text-foreground">{c.positionTitle}</td>
-                  <td className="px-4 py-2 align-middle">
-                    <StatusBadge value={c.status} />
-                  </td>
-                  <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{c.targetDate ?? "—"}</td>
-                  <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{c.notes ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+    <main data-testid="me-career-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+      <PageHeader title={t("career.title")} description={t("career.description")} />
+      <Suspense fallback={<span className="text-sm text-muted-foreground">{t("common:loading")}</span>}>
+        <ProfileTabs tabs={tabs} ariaLabel={t("career.tabs.aria")} />
+      </Suspense>
     </main>
   );
 }

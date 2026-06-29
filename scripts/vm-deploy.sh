@@ -185,7 +185,11 @@ echo "  scraping.timer: $(systemctl is-active heuresys-advanced-scraping.timer 2
 echo "  insights.timer: $(systemctl is-active heuresys-advanced-insights.timer 2>/dev/null || echo inactive)"
 echo "  backup.timer:   $(systemctl is-active heuresys-advanced-backup.timer 2>/dev/null || echo inactive)"
 echo "  reindex.timer:  $(systemctl is-active heuresys-advanced-reindex.timer 2>/dev/null || echo inactive)"
-if curl -fsS -m 8 "http://localhost:$API_PORT/readyz" >/dev/null; then
+# D-48: the API needs ~40s to boot (RBAC cache + DB connect through OCI jitter), so a
+# bare curl right after the systemd restart hits ECONNREFUSED (false negative). Retry
+# with backoff over the boot window: --retry-connrefused covers "not listening yet",
+# --retry-all-errors covers the brief 503 while the readiness cache loads.
+if curl -fsS --retry 45 --retry-delay 1 --retry-connrefused --retry-all-errors -m 8 "http://localhost:$API_PORT/readyz" >/dev/null; then
   echo "  api /readyz OK"
 else
   echo "  api /readyz FAILED — journalctl -u heuresys-advanced-api -n 50" >&2

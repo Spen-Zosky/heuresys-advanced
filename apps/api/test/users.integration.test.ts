@@ -10,6 +10,7 @@ import { randomUUID } from "node:crypto";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
+import { orgSubtreeUserIds } from "../src/lib/scope/org.js";
 
 const PWD = "Admin#PassW0rd!";
 const PLATFORM_EMAIL = "admin@heuresys.com";
@@ -110,26 +111,51 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { items: { userId: string; email: string }[]; total: number };
-    // paolo.caputo (manager persona) sees self + the incumbents of the positions he owns
-    // (his direct reports) — a small set, NOT the whole tenant (163+).
+    // paolo.caputo (manager persona) sees self + his TRANSITIVE org sub-tree (F1) — a
+    // bounded set, NOT the whole tenant (163+). The exact-subtree assertion is the next test.
     expect(body.total).toBeGreaterThanOrEqual(2);
     expect(body.total).toBeLessThan(50);
     const emails = new Set(body.items.map((u) => u.email));
     expect(emails.has(MANAGER_EMAIL)).toBe(true); // self
-    expect(emails.has(EMPLOYEE_EMAIL)).toBe(true); // a direct report (tommaso.fiore)
-    expect(emails.has(OUTSIDER_EMAIL)).toBe(false); // different team (antonio, claudia's report)
+    expect(emails.has(EMPLOYEE_EMAIL)).toBe(true); // a report (tommaso.fiore)
+    expect(emails.has(OUTSIDER_EMAIL)).toBe(false); // different org branch (antonio, claudia's report)
   });
 
-  it("LIST: USER sees only self", async () => {
+  it("LIST: MANAGER scope is the TRANSITIVE org sub-tree, not just direct reports (F1, ADR-0027)", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/users?limit=200",
+      headers: { cookie: cookieHeader(managerS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const apiIds = new Set((r.json() as { items: { userId: string }[] }).items.map((u) => u.userId));
+    const subtree = new Set(await orgSubtreeUserIds(pool, managerS.userId));
+    // No leak: paolo never sees a user outside his transitive sub-tree. (The list may be a
+    // subset of the sub-tree because listUsers also filters by user_status — that's expected.)
+    for (const id of apiIds) expect(subtree.has(id)).toBe(true);
+    // TRANSITIVE: paolo sees at least one 2-hop report — a report of his report tommaso —
+    // which the OLD one-hop walk would have excluded. Derived from the helper (no hardcoding).
+    const tommasoReports = (await orgSubtreeUserIds(pool, employeeId)).filter((id) => id !== employeeId);
+    expect(tommasoReports.length).toBeGreaterThan(0); // tommaso is not a leaf (verified on real data)
+    expect(tommasoReports.some((id) => apiIds.has(id))).toBe(true);
+  });
+
+  it("LIST: a NON-MANAGERIAL user sees ONLY self — even with reports in the chart (F1 constraint)", async () => {
+    // Enzo's constraint: the org sub-tree applies only to explicit managerial roles. tommaso has
+    // reports in the org chart but NO managerial role (USER/TEAM_MEMBER, not an OU manager) → he
+    // sees just himself, not his reports.
     const r = await suite.app.inject({
       method: "GET",
       url: "/v1/users?limit=200",
       headers: { cookie: cookieHeader(employeeS.cookies) },
     });
     expect(r.statusCode).toBe(200);
-    const body = r.json() as { items: { email: string }[]; total: number };
+    const body = r.json() as { items: { userId: string }[]; total: number };
     expect(body.total).toBe(1);
-    expect(body.items[0]!.email).toBe(EMPLOYEE_EMAIL);
+    expect(body.items[0]!.userId).toBe(employeeS.userId);
+    // sanity: the gate is the managerial role, not the absence of reports — tommaso DOES have reports
+    const reports = (await orgSubtreeUserIds(pool, employeeS.userId)).filter((id) => id !== employeeS.userId);
+    expect(reports.length).toBeGreaterThan(0);
   });
 
   /* -------------------------------------------------- get by id scope */

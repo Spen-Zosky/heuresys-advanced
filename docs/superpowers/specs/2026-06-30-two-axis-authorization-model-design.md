@@ -56,7 +56,7 @@ Rules (first match):
 1. **self** is always in the allow-list (I17).
 2. **HR-mandated roles** (default: `PLATFORM_ADMIN`, `TENANT_ADMIN`, `HRMS_MANAGER`) → tenant-wide for sensitive classes (their explicit HR mandate, not peer-snooping). *(The exact HR-mandated set is the one decision to confirm at F1 start — see §5.)*
 3. **dataClass = ACTIVITY** → `functionalScopeUserIds(actor)` (team/process I lead).
-4. **dataClass sensitive** → `orgSubtreeUserIds(actor)` — **only** my transitive reports (I18/I20). Functional membership is ignored here (cardinal rule, absolute).
+4. **dataClass sensitive** → **only if the actor holds an explicit managerial role** (`isManagerial`: RBAC `MANAGER`/`CEO` OR `isOrgUnitManager`) → `orgSubtreeUserIds(actor)`, their transitive reports (I18/I20). A non-managerial actor sees only self even if their position has reports (Enzo's F1 constraint, 2026-07-01). Functional membership is ignored here (cardinal rule, absolute).
 5. otherwise → `[self]`.
 
 This **replaces** the scattered ad-hoc checks (`users/service.resolveReadScope`, `positions/service.canUpdate` ownerUserId match, `teams/service.userInTeam`) with one audited decision. Peer-isolation (I19) and the cross-tree leader fall out: a leader's functional scope grants activities; only rule 4 (org sub-tree) grants sensitive data.

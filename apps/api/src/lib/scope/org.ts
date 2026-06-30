@@ -84,6 +84,24 @@ export async function orgAncestorUserIds(q: DbConnector, userId: string): Promis
 }
 
 /**
+ * True iff the user is the explicit manager of at least one organization unit
+ * (`organization_unit_manager_user_id`) — i.e. responsabile di Divisione / Direzione / centro
+ * di costo / unità organizzativa. One of the two signals of an explicit managerial role that
+ * Enzo's F1 constraint requires before the organizational sub-tree scope applies (the other is
+ * an RBAC managerial role; see resolver.ts MANAGERIAL_ROLES).
+ */
+export async function isOrgUnitManager(q: DbConnector, userId: string): Promise<boolean> {
+  const res = await q.query<{ hit: boolean }>(
+    `SELECT EXISTS (
+       SELECT 1 FROM sys.sys_organization_units
+        WHERE organization_unit_manager_user_id = $1
+     ) AS hit`,
+    [userId],
+  );
+  return res.rows[0]?.hit ?? false;
+}
+
+/**
  * True iff `targetUserId` is in `actorUserId`'s organizational sub-tree (self counts).
  * The boolean form of the cardinal-rule check used by the sensitive-data gate in F3.
  */

@@ -26,6 +26,7 @@ import type {
 } from "@heuresys/shared";
 import { NON_PRIVILEGED_UPDATABLE_FIELDS } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 const NON_PRIVILEGED_FIELDS = new Set<string>(NON_PRIVILEGED_UPDATABLE_FIELDS);
 
@@ -35,40 +36,31 @@ function isPlatformAdmin(a: ActorContext): boolean {
 function isTenantAdmin(a: ActorContext): boolean {
   return a.roles.includes("TENANT_ADMIN");
 }
-function isManager(a: ActorContext): boolean {
-  return a.roles.includes("MANAGER");
-}
-function isStandardUser(a: ActorContext): boolean {
-  return a.roles.includes("USER") || a.roles.includes("READ_ONLY");
-}
-
 function requireOwnTenant(a: ActorContext): string {
   if (!a.tenantId) throw new ForbiddenError("Tenant context required");
   return a.tenantId;
 }
 
 /**
- * Decide which user_id allow-list (if any) applies to the actor's reads.
- * - PLATFORM_ADMIN: undefined (no restriction).
- * - TENANT_ADMIN: undefined (tenant filter handled separately).
- * - MANAGER (without higher role): manager team set.
- * - USER / READ_ONLY (without higher role): [self].
+ * The actor's organizational read scope, mapped to the users-repo filter shape.
+ * Delegates to the shared resolver (ADR-0027 F1): PLATFORM_ADMIN → all; HR-mandated
+ * (TENANT_ADMIN, HRMS_MANAGER) → whole tenant; anyone with reports → their TRANSITIVE
+ * org sub-tree; everyone else → self. (Was a one-hop MANAGER-team walk.)
  */
 async function resolveReadScope(actor: ActorContext): Promise<{
   tenantId?: string;
   userIdAllowList?: string[];
 }> {
-  if (isPlatformAdmin(actor)) return {};
-  if (isTenantAdmin(actor)) return { tenantId: requireOwnTenant(actor) };
-  if (isManager(actor)) {
-    const team = await repo.getManagerTeamUserIds(pool, actor.userId);
-    return { tenantId: requireOwnTenant(actor), userIdAllowList: team };
+  const scope = await resolveOrgReadScope(pool, actor);
+  switch (scope.kind) {
+    case "all":
+      return {};
+    case "tenant":
+      return { tenantId: scope.tenantId };
+    case "subtree":
+    case "self":
+      return { tenantId: scope.tenantId, userIdAllowList: scope.userIdAllowList };
   }
-  if (isStandardUser(actor)) {
-    return { tenantId: requireOwnTenant(actor), userIdAllowList: [actor.userId] };
-  }
-  // Any other authenticated user with no recognised role: see self only.
-  return { tenantId: requireOwnTenant(actor), userIdAllowList: [actor.userId] };
 }
 
 async function canActOnTarget(
@@ -76,31 +68,15 @@ async function canActOnTarget(
   target: User,
   intent: "read" | "update" | "delete",
 ): Promise<boolean> {
-  if (isPlatformAdmin(actor)) return true;
-  // Tenant boundary (everything below requires actor.tenantId).
-  const ownTenant = actor.tenantId;
-  if (!ownTenant || target.tenantId !== ownTenant) return false;
-
-  if (isTenantAdmin(actor)) return true;
-
   if (intent === "delete") {
-    // Only PLATFORM/TENANT admins can delete; we already rejected MANAGER/USER.
-    return false;
+    // Delete stays admin-only — no axis grants it.
+    if (isPlatformAdmin(actor)) return true;
+    if (!actor.tenantId || target.tenantId !== actor.tenantId) return false;
+    return isTenantAdmin(actor);
   }
-
-  if (isManager(actor)) {
-    const team = await repo.getManagerTeamUserIds(pool, actor.userId);
-    if (team.includes(target.userId)) return true;
-    // MANAGER may always read+update themselves via the same logic — team
-    // already includes the manager id via UNION in the SQL.
-    return false;
-  }
-
-  if (isStandardUser(actor)) {
-    return target.userId === actor.userId;
-  }
-
-  return false;
+  // read / update: self, HR-mandate, or the actor's TRANSITIVE org sub-tree (ADR-0027 F1).
+  // Field-level limits for non-admins are enforced separately by ensureFieldsAllowed.
+  return canReadOrgTarget(pool, actor, target.userId, target.tenantId);
 }
 
 function ensureFieldsAllowed(actor: ActorContext, patch: UpdateUserBody): void {

@@ -51,7 +51,9 @@ The two axes are **independent**: team/process membership does **not** imply org
 
 ### §2.2 — Organizational axis → sensitive personal data
 
-Access to another user's **sensitive personal data** requires that user to be in the actor's **organizational sub-tree** (transitive reports-to). This is the **only** gate for sensitive data — §2.5.
+Access to another user's **sensitive personal data** requires **both**: (a) the actor holds an **explicit managerial role**, and (b) that user is in the actor's **organizational sub-tree** (transitive reports-to). This is the **only** gate for sensitive data — §2.5.
+
+**Explicit managerial role** (Enzo's F1 constraint, 2026-07-01): an RBAC managerial role (`MANAGER`, `CEO`) **OR** being the manager of ≥1 organization unit (`organization_unit_manager_user_id` — *responsabile di Divisione / Direzione / centro di costo / unità organizzativa*). A plain employee who merely has reports in the chart does **NOT** get the sub-tree scope — they see only themselves. This stops the org sub-tree from silently widening visibility for non-managerial staff who happen to sit above someone in the chart. (Codified as `MANAGERIAL_ROLES` + `isOrgUnitManager` in `apps/api/src/lib/scope/`.)
 
 ### §2.3 — Functional axis → activities (Enzo's four)
 

@@ -148,40 +148,6 @@ export async function findUserByEmailInTenant(
   return res.rows[0] ? rowToUser(res.rows[0]) : null;
 }
 
-/* === MANAGER team lookup ================================================ */
-
-/**
- * Returns the set of user_ids that are subordinates of `managerUserId` —
- * users assigned (PRIMARY ACTIVE) to a position whose
- * position_reports_to_position_id is one of the manager's own ACTIVE
- * positions.
- *
- * The manager themselves is always included in the returned set so
- * `MANAGER can read self via the same code path that handles team.
- */
-export async function getManagerTeamUserIds(
-  q: DbConnector,
-  managerUserId: string,
-): Promise<string[]> {
-  const res = await q.query<{ user_id: string }>(
-    `WITH mgr_positions AS (
-       SELECT user_position_assignment_position_id AS position_id
-         FROM sys.sys_user_position_assignments
-        WHERE user_position_assignment_user_id = $1
-          AND user_position_assignment_status = 'ACTIVE'
-     )
-     SELECT DISTINCT upa.user_position_assignment_user_id AS user_id
-       FROM sys.sys_user_position_assignments upa
-       JOIN sys.sys_positions p ON p.position_id = upa.user_position_assignment_position_id
-      WHERE upa.user_position_assignment_status = 'ACTIVE'
-        AND p.position_reports_to_position_id IN (SELECT position_id FROM mgr_positions)
-     UNION
-     SELECT $1::uuid AS user_id`,
-    [managerUserId],
-  );
-  return res.rows.map((r) => r.user_id);
-}
-
 /* === Create ============================================================ */
 
 export async function insertUser(

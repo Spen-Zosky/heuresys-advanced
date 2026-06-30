@@ -147,8 +147,8 @@ align_one() {
   fi
 
   if { [ "$kind" = vm ] || [ "$kind" = linuxpc ]; } && [ "$DEPLOY" = 1 ]; then
-    log "[$kind] PROD deploy (build + migrate-if-pending + restart)"
-    ssh -o BatchMode=yes "$HOST" "cd '$REPO' && env REPO_DIR='$REPO' ${DEPLOY_ENV} bash scripts/vm-deploy.sh"
+    log "[$kind] PROD deploy (detached + poll — survives a client-SSH timeout, D-49)"
+    REMOTE_REPO="$REPO" DEPLOY_ENV="$DEPLOY_ENV" KIND="$kind" bash "$SCRIPTS/vm-deploy-remote.sh" "$HOST"
   elif [ "$kind" = vm ] || [ "$kind" = linuxpc ]; then
     log "[$kind] deploy skipped (no code change / --no-deploy)"
   fi

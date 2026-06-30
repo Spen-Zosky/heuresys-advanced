@@ -144,6 +144,34 @@ if grep -q 'ConnectTimeout=8' "$CP" && grep -q 'unreachable' "$CP" \
   ok "resilience: unreachable→skip+warn, reachable-fail→fail-loud (die)"
 else fail "resilience/fail-loud wiring missing"; fi
 
+# ------------------- G. vm-deploy-remote.sh — detached-deploy wiring (D-49, static)
+section "vm-deploy-remote.sh — detached deploy + poll wiring (D-49)"
+VDR="scripts/vm-deploy-remote.sh"
+if [ -f "$VDR" ]; then
+  # G1: detaches the deploy from the client connection (setsid + nohup) so a
+  #     client-side SSH timeout can't SIGTERM the build mid-flight.
+  if grep -q 'setsid' "$VDR" && grep -q 'nohup' "$VDR"; then
+    ok "detaches deploy from client SSH (setsid + nohup)"
+  else fail "missing setsid/nohup detachment"; fi
+  # G2: captures the REAL deploy exit code via a remote sentinel it then polls.
+  if grep -qF 'echo \$? >' "$VDR" && grep -q 'rc=' "$VDR"; then
+    ok "captures deploy exit code in a remote sentinel + polls it"
+  else fail "missing exit-code sentinel / poll"; fi
+  # G3: bounded poll budget — the watcher detaches instead of hanging forever,
+  #     and never kills the still-running deploy.
+  if grep -q 'POLL_MAX' "$VDR" && grep -q 'DETACHING watcher' "$VDR"; then
+    ok "bounded poll budget — watcher detaches, deploy continues"
+  else fail "missing bounded poll budget"; fi
+  # G4: align-clones routes the PROD deploy THROUGH it — no bare foreground
+  #     `ssh host bash scripts/vm-deploy.sh` that a client timeout can truncate.
+  if grep -q 'vm-deploy-remote.sh' scripts/align-clones.sh \
+     && ! grep -qE 'ssh .*bash scripts/vm-deploy\.sh' scripts/align-clones.sh; then
+    ok "align-clones deploys via vm-deploy-remote.sh (no foreground ssh vm-deploy)"
+  else fail "align-clones still uses a foreground ssh vm-deploy.sh"; fi
+else
+  fail "$VDR missing"
+fi
+
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

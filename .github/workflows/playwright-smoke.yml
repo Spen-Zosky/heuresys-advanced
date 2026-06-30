@@ -85,15 +85,27 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-ms-playwright-${{ steps.pw-version.outputs.version }}
 
-      - name: Install Playwright browsers
+      - name: Install Playwright browser binaries (cache miss)
         if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: pnpm --filter @heuresys/web exec playwright install --with-deps chromium
+        run: pnpm --filter @heuresys/web exec playwright install chromium
 
-      # On a cache hit the browser binaries are restored but the OS-level deps
-      # (--with-deps) are not in the cache — re-run the apt step only (fast, idempotent).
-      - name: Install Playwright OS deps (cache hit)
-        if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: pnpm --filter @heuresys/web exec playwright install-deps chromium
+      # OS-level browser libs (apt) — runs on hit AND miss. On the PERSISTENT
+      # self-hosted runner these libs are already installed (the binary install
+      # pulled them once; apt packages persist), so this only re-applies apt to be
+      # safe. But unattended-upgrades / another apt-get intermittently holds
+      # /var/lib/apt/lists/lock → install-deps exits 100: a CI-red phantom
+      # unrelated to the change under test (S1012). Wait for the lock, then run
+      # BEST-EFFORT — if apt is still busy the already-present libs carry the run;
+      # a genuinely missing lib surfaces as a clear browser-launch error in the
+      # Playwright step, not as an opaque apt failure here.
+      - name: Install Playwright OS deps (apt, lock-resilient, best-effort)
+        run: |
+          for i in $(seq 1 30); do
+            sudo fuser /var/lib/apt/lists/lock /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || break
+            echo "apt busy (lock held by another process) — waiting ${i}/30…"; sleep 6
+          done
+          pnpm --filter @heuresys/web exec playwright install-deps chromium \
+            || echo "::warning::install-deps skipped (apt still busy); proceeding — OS browser libs already present on the persistent runner"
 
       # Next.js build cache for the `pnpm build` in the "Boot web server" step —
       # standard key: lockfile + web source hash, lockfile-only restore-key fallback.

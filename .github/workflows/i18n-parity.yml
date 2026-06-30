@@ -2,7 +2,12 @@ name: i18n parity (it/en)
 
 # S935 phase F — CI gate #3: i18n parity check for apps/web.
 # Verifies it.json and en.json have the same keys (no orphan translations,
-# no missing translations). Fast (<5s), runs on every push.
+# no missing translations). The check itself is <5s, but the job also does
+# checkout + `pnpm install`; on the SINGLE self-hosted runner a big push (F5
+# fired 6 workflows at once) serializes those under contention. timeout-minutes
+# is sized for that setup cost, not the check — aligned with the other
+# install+check jobs (lint/shell-tests/state-lint = 5), which held on the same
+# push where a 3-min cap cancelled this one (S1012).
 
 on:
   push:
@@ -30,7 +35,7 @@ jobs:
     # runner churn — DEBT_REGISTER D-09). Push events have no PR context → run.
     if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
     runs-on: [self-hosted, oci-vm]
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6

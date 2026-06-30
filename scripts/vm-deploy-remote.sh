@@ -24,7 +24,10 @@
 #
 # Usage:  bash scripts/vm-deploy-remote.sh <ssh-host>
 # Env:
-#   REMOTE_REPO    repo dir on the host           (default /home/ubuntu/heuresys-advanced)
+#   REMOTE_REPO    repo dir ON THE HOST — REQUIRED, no default. This script runs from
+#                  the client toward an arbitrary host, so it must NOT bake in one host's
+#                  layout (VM=/home/ubuntu/…, linux-pc=/home/enzo/…); align-clones passes
+#                  the right value per target (idempotency across machines/OS/paths).
 #   DEPLOY_ENV     extra `env` assignments prepended to the deploy command (per-host)
 #   DEPLOY_CMD     remote command to run detached  (default 'bash scripts/vm-deploy.sh';
 #                  overridable so the shell-test / a dry self-test can exercise the
@@ -44,7 +47,9 @@ set -uo pipefail
 export MSYS_NO_PATHCONV=1
 
 HOST="${1:?usage: vm-deploy-remote.sh <ssh-host>}"
-REMOTE_REPO="${REMOTE_REPO:-/home/ubuntu/heuresys-advanced}"
+# REQUIRED, no default: a per-host absolute path baked in here would be wrong on
+# every other target. align-clones always passes it (REMOTE_REPO="$REPO").
+REMOTE_REPO="${REMOTE_REPO:?REMOTE_REPO required — the repo dir on $HOST (align-clones passes it per target)}"
 DEPLOY_ENV="${DEPLOY_ENV:-}"
 DEPLOY_CMD="${DEPLOY_CMD:-bash scripts/vm-deploy.sh}"
 KIND="${KIND:-vm}"

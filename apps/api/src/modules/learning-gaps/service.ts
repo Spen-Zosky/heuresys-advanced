@@ -19,11 +19,7 @@ import type {
   UpdateLearningGapBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-function visible(actor: ActorContext, g: LearningGap): boolean {
-  if (isPlatform(actor)) return true;
-  return actor.tenantId !== null && g.tenantId === actor.tenantId;
-}
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 async function validateFks(
   body: { userId: string; positionId?: string | null; skillId?: string | null },
@@ -55,14 +51,33 @@ async function validateFks(
 
 export const learningGapsService = {
   async list(actor: ActorContext, query: LearningGapListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listGaps(pool, { tenantId, query });
+    // ADR-0027 F3: resolve the actor's ORGANIZATIONAL read scope once and filter the list by
+    // userIdAllowList (self / transitive org sub-tree), not by tenant alone. HR-mandated
+    // (TENANT_ADMIN, HRMS_MANAGER) → whole tenant; PLATFORM_ADMIN → all. Mirrors users/service.ts.
+    const scope = await resolveOrgReadScope(pool, actor);
+    switch (scope.kind) {
+      case "all":
+        return repo.listGaps(pool, { query });
+      case "tenant":
+        return repo.listGaps(pool, { tenantId: scope.tenantId, query });
+      case "subtree":
+      case "self":
+        return repo.listGaps(pool, {
+          tenantId: scope.tenantId,
+          userIdAllowList: scope.userIdAllowList,
+          query,
+        });
+    }
   },
 
   async getById(actor: ActorContext, id: string): Promise<LearningGap> {
     const target = await repo.findGapById(pool, id);
     if (!target) throw new NotFoundError("LearningGap");
-    if (!visible(actor, target)) throw new NotFoundError("LearningGap");
+    // ADR-0027 F3: gate the per-target read by the organizational axis (self / HR-mandate /
+    // transitive org sub-tree). 404 (not 403) to avoid existence enumeration across the boundary.
+    if (!(await canReadOrgTarget(pool, actor, target.userId, target.tenantId))) {
+      throw new NotFoundError("LearningGap");
+    }
     return target;
   },
 
@@ -88,10 +103,10 @@ export const learningGapsService = {
   async update(actor: ActorContext, id: string, patch: UpdateLearningGapBody): Promise<LearningGap> {
     const target = await repo.findGapById(pool, id);
     if (!target) throw new NotFoundError("LearningGap");
-    if (!isPlatform(actor)) {
-      if (!actor.tenantId || target.tenantId !== actor.tenantId) {
-        throw new NotFoundError("LearningGap");
-      }
+    // ADR-0027 F3: mutating another user's gap requires the organizational axis, not just tenant
+    // match (self / HR-mandate / org sub-tree). 404 to avoid existence enumeration.
+    if (!(await canReadOrgTarget(pool, actor, target.userId, target.tenantId))) {
+      throw new NotFoundError("LearningGap");
     }
     const updated = await repo.updateGapPartial(pool, id, patch);
     if (!updated) throw new NotFoundError("LearningGap");
@@ -101,10 +116,10 @@ export const learningGapsService = {
   async delete(actor: ActorContext, id: string): Promise<void> {
     const target = await repo.findGapById(pool, id);
     if (!target) throw new NotFoundError("LearningGap");
-    if (!isPlatform(actor)) {
-      if (!actor.tenantId || target.tenantId !== actor.tenantId) {
-        throw new NotFoundError("LearningGap");
-      }
+    // ADR-0027 F3: deleting another user's gap requires the organizational axis, not just tenant
+    // match (self / HR-mandate / org sub-tree). 404 to avoid existence enumeration.
+    if (!(await canReadOrgTarget(pool, actor, target.userId, target.tenantId))) {
+      throw new NotFoundError("LearningGap");
     }
     const ok = await repo.deleteGap(pool, id);
     if (!ok) throw new NotFoundError("LearningGap");

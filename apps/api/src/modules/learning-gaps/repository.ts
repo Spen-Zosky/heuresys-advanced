@@ -61,13 +61,19 @@ function toGap(r: Row): LearningGap {
 
 export async function listGaps(
   q: DbConnector,
-  filter: { tenantId?: string; query: LearningGapListQuery },
+  filter: { tenantId?: string; userIdAllowList?: string[]; query: LearningGapListQuery },
 ): Promise<{ items: LearningGap[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
   if (filter.tenantId) {
     params.push(filter.tenantId);
     where.push(`learning_gap_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    // ADR-0027 F3: an empty allow-list means nobody is visible — short-circuit to empty.
+    if (filter.userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(filter.userIdAllowList);
+    where.push(`learning_gap_user_id = ANY($${params.length}::uuid[])`);
   }
   if (filter.query.userId) {
     params.push(filter.query.userId);

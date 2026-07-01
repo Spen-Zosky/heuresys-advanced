@@ -99,6 +99,7 @@ Every user is at least a `USER` → has the Employee Portal (ESS) and can see **
 - **I18 — Sensitive data is organizational-only.** Another user's `PERSONAL/COMPENSATION/SKILL/EVALUATION` data is accessible **only** through the organizational chain (transitive reports-to). Functional (team/process) membership alone NEVER unlocks sensitive data.
 - **I19 — Peer isolation.** Holders of disjoint organizational sub-trees are peers: none sees the other's sensitive data.
 - **I20 — Organizational prevalence (absolute for sensitive data).** When axes concur, the organizational chain prevails for sensitive data, with no exceptions.
+- **I21 — HR data plenipotentiary.** `HRMS_MANAGER` (Responsabile Direzione HR / HR Manager) may read/write/create/delete ANY business datum — the **non-technological** counterpart of `PLATFORM_ADMIN` (which owns the technological plane). It bypasses the two-axis cardinal rule entirely (Enzo, 2026-07-01). *(Read is enforced today via `HR_MANDATED_ROLES`; full write/delete parity is a follow-up RBAC grant — HRMS currently lacks a few non-self perms, e.g. `compensation_intelligence:update`, `user:delete`.)*
 
 ---
 

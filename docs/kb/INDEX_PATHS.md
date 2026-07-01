@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-06-29T17:17:33Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2221**
+**Generato**: 2026-07-01T01:30:25Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2231**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -8,12 +8,12 @@
 
 | Categoria | File |
 |---|---|
-| ADR | 25 |
-| api-core | 18 |
+| ADR | 26 |
+| api-core | 21 |
 | api-module | 292 |
 | ci | 16 |
 | claude-config | 6 |
-| config | 102 |
+| config | 103 |
 | cowork-archive | 14 |
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
@@ -21,7 +21,7 @@
 | db-migration | 167 |
 | db-script | 26 |
 | db-seed | 107 |
-| doc-canonical | 391 |
+| doc-canonical | 393 |
 | handoff-state | 1 |
 | qa-artifact | 101 |
 | script | 6 |
@@ -29,10 +29,10 @@
 | shared-pkg | 4 |
 | shared-schema | 87 |
 | showcase-source | 13 |
-| test | 236 |
+| test | 239 |
 | ux-design-archive | 80 |
 | web-source | 187 |
-| **TOTALE** | **2221** |
+| **TOTALE** | **2231** |
 
 ## Conteggi per status
 
@@ -40,7 +40,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1678 |
+| live | 1688 |
 
 ## File per categoria
 
@@ -72,6 +72,7 @@
 - `D:\heuresys-advanced\docs\architecture\adr\0024_legacy_ingestion_employee_centric.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0025_sys_skill_categories_nullable_family_fk.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0026_single_production_environment_two_tenants.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0027_two_axis_contextual_authorization.md` · *live* · git-tracked
 
 ### api-core
 
@@ -86,6 +87,9 @@
 - `D:\heuresys-advanced\apps\api\src\lib\export\serializers.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\lib\notifications\digest.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\lib\notifications\emit.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\lib\scope\data-classes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\lib\scope\org.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\lib\scope\resolver.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\middleware\auth.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\middleware\csrf.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\middleware\errorHandler.ts` · *live* · git-tracked
@@ -519,6 +523,7 @@
 - `D:\heuresys-advanced\scripts\test\run-shell-tests.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\tunnel-keepalive.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vm-bootstrap.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\vm-deploy-remote.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vm-deploy.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\tsconfig.base.json` · *live* · git-tracked
 
@@ -1579,6 +1584,8 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-20-handoff-rigor-and-hold-lane-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-21-gtm-front-door-landing-lead-capture-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-22-gtm-investor-onepager-and-guided-demo-design.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-06-30-two-axis-authorization-model-design.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-07-01-f3-sensitive-modules-map.md` · *live* · git-tracked
 - `D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md` · *live* · git-tracked
 
 ### handoff-state
@@ -1951,6 +1958,9 @@
 - `D:\heuresys-advanced\apps\api\test\reference-sync-esco-skill-hierarchy.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\reference-sync.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\run-logger.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\scope-data-classes.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\scope-org.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\scope-resolver.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\sdbi-perf-feedback.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\seed-acquisition-runs.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\seed-acquisition.integration.test.ts` · *live* · git-tracked

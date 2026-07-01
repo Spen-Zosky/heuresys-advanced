@@ -1,19 +1,19 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-06-29T17:17:33Z da docs/kb/tools/build_index.py
+# generato: 2026-07-01T01:30:25Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-06-29T17:17:33Z"
-  total_files: 2221
+  generated_at: "2026-07-01T01:30:25Z"
+  total_files: 2231
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 25
-    api-core: 18
+    ADR: 26
+    api-core: 21
     api-module: 292
     ci: 16
     claude-config: 6
-    config: 102
+    config: 103
     cowork-archive: 14
     cowork-exchange: 203
     cowork-reserved: 119
@@ -21,7 +21,7 @@ meta:
     db-migration: 167
     db-script: 26
     db-seed: 107
-    doc-canonical: 391
+    doc-canonical: 393
     handoff-state: 1
     qa-artifact: 101
     script: 6
@@ -29,13 +29,13 @@ meta:
     shared-pkg: 4
     shared-schema: 87
     showcase-source: 13
-    test: 236
+    test: 239
     ux-design-archive: 80
     web-source: 187
   status_counts:
     archive: 493
     external-archive: 50
-    live: 1678
+    live: 1688
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -187,6 +187,12 @@ files:
     category: ADR
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0027_two_axis_contextual_authorization.md'
+    root: repo
+    rel: 'docs/architecture/adr/0027_two_axis_contextual_authorization.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\app.ts'
     root: repo
     rel: 'apps/api/src/app.ts'
@@ -250,6 +256,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\lib\notifications\emit.ts'
     root: repo
     rel: 'apps/api/src/lib/notifications/emit.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\data-classes.ts'
+    root: repo
+    rel: 'apps/api/src/lib/scope/data-classes.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\org.ts'
+    root: repo
+    rel: 'apps/api/src/lib/scope/org.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\resolver.ts'
+    root: repo
+    rel: 'apps/api/src/lib/scope/resolver.ts'
     category: api-core
     status: live
     provenance: git-tracked
@@ -2776,6 +2800,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\vm-bootstrap.sh'
     root: repo
     rel: 'scripts/vm-bootstrap.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\vm-deploy-remote.sh'
+    root: repo
+    rel: 'scripts/vm-deploy-remote.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -8995,6 +9025,18 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-06-30-two-axis-authorization-model-design.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-06-30-two-axis-authorization-model-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-01-f3-sensitive-modules-map.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-07-01-f3-sensitive-modules-map.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md'
     root: repo
     rel: 'heuresys-advanced-bootstrap-vm.md'
@@ -11080,6 +11122,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\run-logger.test.ts'
     root: repo
     rel: 'apps/api/test/run-logger.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\scope-data-classes.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/scope-data-classes.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\scope-org.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/scope-org.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\scope-resolver.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/scope-resolver.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

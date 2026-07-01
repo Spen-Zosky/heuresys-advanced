@@ -213,10 +213,12 @@ describe("semantic-matching API", () => {
 
   // ── person → positions (AI ②·Fase 3, "option C"): role-match score via position_job_role_id ──
   it("ranks the near-role position first for a user's profile + carries the role score", async () => {
-    // Query as the RTL manager → only the RTL throwaway position is visible among our synthetic
-    // ones (the Heuresys one is cross-tenant). unit(0) role vs near(0) profile ≈ 0.999, far above
-    // any real position's score (max ≈0.62 observed), so it always ranks first.
-    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/positions?limit=50`, headers: { cookie: ch(manager.cookies) } });
+    // Query as an RTL HR-mandated actor (TENANT_ADMIN). Post-F3 (ADR-0027) the per-target matching
+    // endpoints are org-gated (matching = SKILL/sensitive), so only self / HR-mandate / org sub-tree
+    // may target uHas; federica's HR mandate keeps the legitimate tenant-wide reach a plain MANAGER
+    // no longer has. Only the RTL throwaway position is visible (the Heuresys one is cross-tenant).
+    // unit(0) role vs near(0) profile ≈ 0.999, far above any real position's score, so it ranks first.
+    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/positions?limit=50`, headers: { cookie: ch(tenantAdmin.cookies) } });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { items: { positionId: string; positionCode: string; jobRoleId: string | null; score: number }[]; evidenceCount: number };
     expect(body.items[0]?.positionCode).toBe("IT_MATCH_POS_RTL");
@@ -233,8 +235,10 @@ describe("semantic-matching API", () => {
     expect(body.evidenceCount).toBe(0);
   });
 
-  it("positions are tenant-scoped (I5): a manager sees the in-tenant position but NOT the cross-tenant one", async () => {
-    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/positions?limit=50`, headers: { cookie: ch(manager.cookies) } });
+  it("positions are tenant-scoped (I5): an HR-mandated actor sees the in-tenant position but NOT the cross-tenant one", async () => {
+    // Post-F3 (ADR-0027) per-target endpoints are org-gated; an HR-mandated actor (TENANT_ADMIN)
+    // retains tenant-wide reach, so this still exercises the I5 tenant filter on the results.
+    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/positions?limit=50`, headers: { cookie: ch(tenantAdmin.cookies) } });
     expect(r.statusCode).toBe(200);
     const codes = (r.json() as { items: { positionCode: string }[] }).items.map((x) => x.positionCode);
     expect(codes).toContain("IT_MATCH_POS_RTL");      // RTL-owned → visible to the RTL manager
@@ -278,7 +282,7 @@ describe("semantic-matching API", () => {
 
   // ── AI ②·Fase 2: person → job_roles ──
   it("ranks the near job_role first for a user's profile + carries code/score (job-roles)", async () => {
-    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/job-roles?limit=50`, headers: { cookie: ch(manager.cookies) } });
+    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/job-roles?limit=50`, headers: { cookie: ch(tenantAdmin.cookies) } });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { items: { jobRoleId: string; jobRoleCode: string; score: number }[]; evidenceCount: number };
     expect(body.items[0]?.jobRoleCode).toBe("IT_MATCH_JR_NEAR"); // unit(0) vs near(0) ≈ 0.999 → rank 1
@@ -287,8 +291,8 @@ describe("semantic-matching API", () => {
     expect(body.evidenceCount).toBe(4);
   });
 
-  it("job-roles are tenant-scoped (I5): a manager sees the in-tenant-referenced role but NOT the cross-tenant-only one", async () => {
-    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/job-roles?limit=50`, headers: { cookie: ch(manager.cookies) } });
+  it("job-roles are tenant-scoped (I5): an HR-mandated actor sees the in-tenant-referenced role but NOT the cross-tenant-only one", async () => {
+    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/job-roles?limit=50`, headers: { cookie: ch(tenantAdmin.cookies) } });
     expect(r.statusCode).toBe(200);
     const codes = (r.json() as { items: { jobRoleCode: string }[] }).items.map((x) => x.jobRoleCode);
     expect(codes).toContain("IT_MATCH_JR_NEAR");      // referenced by an RTL position → visible
@@ -325,15 +329,15 @@ describe("semantic-matching API", () => {
 
   // ── AI ②·Fase 2: person ↔ person similar-users (ELEVATED-ROLE only; self-excluded; I5) ──
   it("returns peers most-similar to a profile, SELF-EXCLUDED", async () => {
-    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/similar?limit=50`, headers: { cookie: ch(manager.cookies) } });
+    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/similar?limit=50`, headers: { cookie: ch(tenantAdmin.cookies) } });
     expect(r.statusCode).toBe(200);
     const ids = (r.json() as { items: { userId: string }[] }).items.map((x) => x.userId);
     expect(ids).toContain(uPeerRtl);   // RTL peer @ unit(0) ≈ 0.999 vs uHas near(0) → present
     expect(ids).not.toContain(uHas);   // self excluded
   });
 
-  it("similar-users is tenant-isolated (I5): an RTL manager does NOT see the cross-tenant peer", async () => {
-    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/similar?limit=50`, headers: { cookie: ch(manager.cookies) } });
+  it("similar-users is tenant-isolated (I5): an RTL HR-mandated actor does NOT see the cross-tenant peer", async () => {
+    const r = await suite.app.inject({ method: "GET", url: `/v1/matching/users/${uHas}/similar?limit=50`, headers: { cookie: ch(tenantAdmin.cookies) } });
     expect(r.statusCode).toBe(200);
     const ids = (r.json() as { items: { userId: string }[] }).items.map((x) => x.userId);
     expect(ids).toContain(uPeerRtl);     // same tenant → visible

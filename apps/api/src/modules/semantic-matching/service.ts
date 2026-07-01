@@ -12,6 +12,7 @@ import { env } from "../../config/env.js";
 import type { RoleCode } from "../../config/constants.js";
 import type { MatchQuery, FreeTextQuery } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { canReadOrgTarget } from "../../lib/scope/resolver.js";
 import { runBackfill, type BackfillSummary } from "./backfill.js";
 import { makeEmbedder, type Embedder } from "./voyage-client.js";
 
@@ -63,6 +64,7 @@ export const semanticMatchingService = {
     const tenant = await repo.findUserTenant(pool, userId);
     if (tenant === null) throw new NotFoundError("User");
     if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");
+    if (!(await canReadOrgTarget(pool, a, userId, tenant))) throw new NotFoundError("User");
     return repo.knnOccupationsForUser(pool, userId, q.limit);
   },
 
@@ -95,6 +97,7 @@ export const semanticMatchingService = {
     const tenant = await repo.findUserTenant(pool, userId);
     if (tenant === null) throw new NotFoundError("User");
     if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");
+    if (!(await canReadOrgTarget(pool, a, userId, tenant))) throw new NotFoundError("User");
     const tenantId = isPlatform(a) ? undefined : tenant;
     return repo.knnPositionsForUser(pool, userId, tenantId, q.limit);
   },
@@ -117,6 +120,7 @@ export const semanticMatchingService = {
     const tenant = await repo.findUserTenant(pool, userId);
     if (tenant === null) throw new NotFoundError("User");
     if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");
+    if (!(await canReadOrgTarget(pool, a, userId, tenant))) throw new NotFoundError("User");
     const tenantId = isPlatform(a) ? undefined : tenant;
     return repo.knnJobRolesForUser(pool, userId, tenantId, q.limit);
   },
@@ -132,6 +136,7 @@ export const semanticMatchingService = {
     const tenant = await repo.findUserTenant(pool, userId);
     if (tenant === null) throw new NotFoundError("User");
     if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");
+    if (!(await canReadOrgTarget(pool, a, userId, tenant))) throw new NotFoundError("User");
     const tenantId = isPlatform(a) ? undefined : tenant;
     const items = await repo.knnSimilarUsers(pool, userId, tenantId, q.limit);
     return { items, total: items.length };

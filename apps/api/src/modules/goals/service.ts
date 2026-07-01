@@ -9,6 +9,7 @@ export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
 import type { GoalListQuery, CreateGoalBody, UpdateGoalBody } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -32,12 +33,20 @@ function resolveWriteTenant(a: ActorContext, bodyTenantId?: string): string {
 
 export const goalsService = {
   async listGoals(a: ActorContext, query: GoalListQuery) {
-    return repo.listGoals(pool, listTenantFilter(a), query);
+    // ADR-0027 F3: filter the list by the actor's organizational read scope.
+    const scope = await resolveOrgReadScope(pool, a);
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    return repo.listGoals(pool, listTenantFilter(a), query, userIdAllowList);
   },
   async getGoal(a: ActorContext, id: string) {
     const g = await repo.findGoalById(pool, id);
     if (!g) throw new NotFoundError("Goal");
     assertVisible(a, g.tenantId, "Goal");
+    // ADR-0027 F3: a subject-bound goal is org-gated; 404 across the org boundary (no leak).
+    if (g.subjectUserId && !(await canReadOrgTarget(pool, a, g.subjectUserId, g.tenantId))) {
+      throw new NotFoundError("Goal");
+    }
     return g;
   },
   async createGoal(a: ActorContext, body: CreateGoalBody) {
@@ -48,6 +57,9 @@ export const goalsService = {
     const g = await repo.findGoalById(pool, id);
     if (!g) throw new NotFoundError("Goal");
     assertVisible(a, g.tenantId, "Goal");
+    if (g.subjectUserId && !(await canReadOrgTarget(pool, a, g.subjectUserId, g.tenantId))) {
+      throw new NotFoundError("Goal");
+    }
     const updated = await repo.updateGoalPartial(pool, id, patch);
     if (!updated) throw new NotFoundError("Goal");
     return updated;
@@ -56,6 +68,9 @@ export const goalsService = {
     const g = await repo.findGoalById(pool, id);
     if (!g) throw new NotFoundError("Goal");
     assertVisible(a, g.tenantId, "Goal");
+    if (g.subjectUserId && !(await canReadOrgTarget(pool, a, g.subjectUserId, g.tenantId))) {
+      throw new NotFoundError("Goal");
+    }
     await repo.deleteGoal(pool, id);
   },
 };

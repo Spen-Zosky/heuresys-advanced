@@ -46,9 +46,15 @@ function toGoal(r: GoalRow): Goal {
 
 export async function listGoals(
   q: DbConnector, tenantId: string | undefined, query: GoalListQuery,
+  userIdAllowList?: string[],
 ): Promise<{ items: Goal[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
   if (tenantId) { params.push(tenantId); where.push(`goal_tenant_id = $${params.length}`); }
+  if (userIdAllowList) {
+    if (userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(userIdAllowList);
+    where.push(`(goal_subject_user_id = ANY($${params.length}::uuid[]) OR goal_subject_user_id IS NULL)`);
+  }
   if (query.status) { params.push(query.status); where.push(`goal_status = $${params.length}`); }
   if (query.type) { params.push(query.type); where.push(`goal_type = $${params.length}`); }
   if (query.priority) { params.push(query.priority); where.push(`goal_priority = $${params.length}`); }

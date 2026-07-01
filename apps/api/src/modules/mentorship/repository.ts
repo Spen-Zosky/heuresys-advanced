@@ -123,10 +123,15 @@ function toMentorship(r: MentorshipRow): Mentorship {
 }
 
 export async function listMentorships(
-  q: DbConnector, tenantId: string | undefined, query: MentorshipListQuery,
+  q: DbConnector, tenantId: string | undefined, userIdAllowList: string[] | undefined, query: MentorshipListQuery,
 ): Promise<{ items: Mentorship[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
   if (tenantId) { params.push(tenantId); where.push(`mentorship_tenant_id = $${params.length}`); }
+  if (userIdAllowList) {
+    if (userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(userIdAllowList);
+    where.push(`(mentorship_mentor_user_id = ANY($${params.length}::uuid[]) OR mentorship_mentee_user_id = ANY($${params.length}::uuid[]))`);
+  }
   if (query.status) { params.push(query.status); where.push(`mentorship_status = $${params.length}`); }
   if (query.programId) { params.push(query.programId); where.push(`mentorship_program_id = $${params.length}`); }
   if (query.mentorUserId) { params.push(query.mentorUserId); where.push(`mentorship_mentor_user_id = $${params.length}`); }
@@ -257,10 +262,15 @@ function toMatch(r: MatchRow): MentorMatchScore {
   };
 }
 export async function listMatchScores(
-  q: DbConnector, tenantId: string | undefined, query: MentorMatchScoreListQuery,
+  q: DbConnector, tenantId: string | undefined, userIdAllowList: string[] | undefined, query: MentorMatchScoreListQuery,
 ): Promise<{ items: MentorMatchScore[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
   if (tenantId) { params.push(tenantId); where.push(`match_tenant_id = $${params.length}`); }
+  if (userIdAllowList) {
+    if (userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(userIdAllowList);
+    where.push(`(match_mentor_user_id = ANY($${params.length}::uuid[]) OR match_mentee_user_id = ANY($${params.length}::uuid[]))`);
+  }
   if (query.mentorUserId) { params.push(query.mentorUserId); where.push(`match_mentor_user_id = $${params.length}`); }
   if (query.menteeUserId) { params.push(query.menteeUserId); where.push(`match_mentee_user_id = $${params.length}`); }
   if (query.isRecommended !== undefined) { params.push(query.isRecommended); where.push(`match_is_recommended = $${params.length}`); }

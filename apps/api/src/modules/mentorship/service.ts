@@ -15,6 +15,7 @@ import type {
   MentorMatchScoreListQuery,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -39,6 +40,24 @@ function resolveWriteTenant(a: ActorContext, bodyTenantId?: string): string {
   }
   if (!a.tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
   return a.tenantId;
+}
+
+/**
+ * The actor's ORGANIZATIONAL read allow-list for LIST filtering (ADR-0027 F1, D-50).
+ * undefined = no per-user restriction (PLATFORM_ADMIN cross-tenant / HR-mandated tenant-wide);
+ * else the exact set of subject user ids the actor may read (managerial sub-tree, or self).
+ * The repo applies it as (mentor = ANY OR mentee = ANY): a row is visible when EITHER party is in scope.
+ */
+async function resolveReadAllowList(a: ActorContext): Promise<string[] | undefined> {
+  const scope = await resolveOrgReadScope(pool, a);
+  switch (scope.kind) {
+    case "all":
+    case "tenant":
+      return undefined;
+    case "subtree":
+    case "self":
+      return scope.userIdAllowList;
+  }
 }
 
 export const mentorshipService = {
@@ -73,12 +92,16 @@ export const mentorshipService = {
 
   // ── Pairings ──
   async listMentorships(a: ActorContext, query: MentorshipListQuery) {
-    return repo.listMentorships(pool, listTenantFilter(a), query);
+    return repo.listMentorships(pool, listTenantFilter(a), await resolveReadAllowList(a), query);
   },
   async getMentorship(a: ActorContext, id: string) {
     const m = await repo.findMentorshipById(pool, id);
     if (!m) throw new NotFoundError("Mentorship");
     assertVisible(a, m.tenantId, "Mentorship");
+    // F3 org-axis gate (ADR-0027, D-50): BOTH parties must be in the actor's org read scope,
+    // else 404 (not 403) — hides the pairing AND the unavailable counterpart.
+    if (m.mentorUserId && !(await canReadOrgTarget(pool, a, m.mentorUserId, m.tenantId))) throw new NotFoundError("Mentorship");
+    if (m.menteeUserId && !(await canReadOrgTarget(pool, a, m.menteeUserId, m.tenantId))) throw new NotFoundError("Mentorship");
     return m;
   },
   async createMentorship(a: ActorContext, body: CreateMentorshipBody) {
@@ -144,12 +167,15 @@ export const mentorshipService = {
 
   // ── Match scores (read-only) ──
   async listMatchScores(a: ActorContext, query: MentorMatchScoreListQuery) {
-    return repo.listMatchScores(pool, listTenantFilter(a), query);
+    return repo.listMatchScores(pool, listTenantFilter(a), await resolveReadAllowList(a), query);
   },
   async getMatchScore(a: ActorContext, id: string) {
     const ms = await repo.findMatchScoreById(pool, id);
     if (!ms) throw new NotFoundError("Mentor match score");
     assertVisible(a, ms.tenantId, "Mentor match score");
+    // F3 org-axis gate (ADR-0027, D-50): BOTH parties must be in the actor's org read scope.
+    if (ms.mentorUserId && !(await canReadOrgTarget(pool, a, ms.mentorUserId, ms.tenantId))) throw new NotFoundError("Mentor match score");
+    if (ms.menteeUserId && !(await canReadOrgTarget(pool, a, ms.menteeUserId, ms.tenantId))) throw new NotFoundError("Mentor match score");
     return ms;
   },
 };

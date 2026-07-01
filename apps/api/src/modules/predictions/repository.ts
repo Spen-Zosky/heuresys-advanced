@@ -85,9 +85,15 @@ function toPrediction(r: PredictionRow): ModelPrediction {
 
 export async function listPredictions(
   q: DbConnector, tenantId: string | undefined, query: ModelPredictionListQuery,
+  userIdAllowList?: string[],
 ): Promise<{ items: ModelPrediction[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
   if (tenantId) { params.push(tenantId); where.push(`prediction_tenant_id = $${params.length}`); }
+  if (userIdAllowList) {
+    // ADR-0027 F3 (D-50): restrict per-person predictions to the actor's org read scope.
+    if (userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(userIdAllowList); where.push(`prediction_subject_user_id = ANY($${params.length}::uuid[])`);
+  }
   if (query.type) { params.push(query.type); where.push(`prediction_type = $${params.length}`); }
   if (query.modelId) { params.push(query.modelId); where.push(`prediction_model_id = $${params.length}`); }
   if (query.subjectUserId) { params.push(query.subjectUserId); where.push(`prediction_subject_user_id = $${params.length}`); }

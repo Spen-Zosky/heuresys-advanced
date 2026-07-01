@@ -13,6 +13,7 @@ import type {
   PredictiveModelListQuery, ModelPredictionListQuery,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -42,12 +43,25 @@ export const predictionsService = {
 
   // ── Predictions ──
   async listPredictions(a: ActorContext, query: ModelPredictionListQuery) {
-    return repo.listPredictions(pool, listTenantFilter(a), query);
+    // ADR-0027 F3 (D-50): filter per-person predictions by the actor's ORGANIZATIONAL read
+    // scope (self / HR-mandate / transitive org sub-tree), not by tenant alone. PLATFORM_ADMIN
+    // (kind "all") stays unfiltered; HR-mandated (kind "tenant") stays tenant-wide.
+    const scope = await resolveOrgReadScope(pool, a);
+    const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    return repo.listPredictions(pool, tenantId, query, userIdAllowList);
   },
   async getPrediction(a: ActorContext, id: string) {
     const p = await repo.findPredictionById(pool, id);
     if (!p) throw new NotFoundError("Prediction");
     assertVisible(a, p.tenantId, "Prediction");
+    // ADR-0027 F3 (D-50): a per-person prediction is org-gated — the actor must be able to read
+    // the subject's sensitive data (self / HR-mandate / transitive org sub-tree). 404 (not 403)
+    // to avoid existence enumeration across the org boundary.
+    if (p.subjectUserId && !(await canReadOrgTarget(pool, a, p.subjectUserId, p.tenantId))) {
+      throw new NotFoundError("Prediction");
+    }
     return p;
   },
 };

@@ -128,7 +128,7 @@ describe("D7-P0 pgvector semantic-matching substrate", () => {
     ]);
   });
 
-  it("matching:admin is granted to platform + tenant admin only (2 total)", async () => {
+  it("matching:admin (reindex) is admin-only — always PLATFORM_ADMIN, never an operational/read-only role", async () => {
     const { rows } = await pool.query<{ role: string }>(
       `SELECT r.auth_role_code AS role
          FROM sys.sys_auth_role_permissions rp
@@ -137,6 +137,12 @@ describe("D7-P0 pgvector semantic-matching substrate", () => {
         WHERE p.auth_permission_code = 'matching:admin'
         ORDER BY r.auth_role_code`,
     );
-    expect(rows.map((r) => r.role)).toEqual(["PLATFORM_ADMIN", "TENANT_ADMIN"]);
+    // Invariant, not an enumerated list: the exact holder set may grow (I21 added HRMS_MANAGER as a
+    // data-plenipotentiary; the DB is the source of truth — no-hardcode rule). What must ALWAYS hold:
+    const holders = new Set(rows.map((r) => r.role));
+    expect(holders.has("PLATFORM_ADMIN")).toBe(true); // the technological admin always holds it
+    for (const forbidden of ["USER", "READ_ONLY", "MANAGER", "TEAM_MEMBER", "TEAM_LEADER"]) {
+      expect(holders.has(forbidden), `${forbidden} must NOT hold matching:admin (reindex is not an operational op)`).toBe(false);
+    }
   });
 });

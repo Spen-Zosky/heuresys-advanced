@@ -61,6 +61,9 @@ function toAssessment(r: Row): Assessment {
 
 export interface ListFilter {
   tenantId?: string;
+  /** Restrict to this set of subject user ids (org sub-tree / self, ADR-0027 F3).
+   *  undefined = no id restriction; empty = nobody is visible. */
+  userIdAllowList?: string[];
   query: AssessmentListQuery;
 }
 
@@ -73,6 +76,14 @@ export async function listAssessments(
   if (filter.tenantId) {
     params.push(filter.tenantId);
     where.push(`assessment_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    if (filter.userIdAllowList.length === 0) {
+      // Empty allow-list = nobody is visible. Short-circuit (org-axis, ADR-0027 F3).
+      return { items: [], total: 0 };
+    }
+    params.push(filter.userIdAllowList);
+    where.push(`assessment_subject_user_id = ANY($${params.length}::uuid[])`);
   }
   if (filter.query.subjectUserId) {
     params.push(filter.query.subjectUserId);

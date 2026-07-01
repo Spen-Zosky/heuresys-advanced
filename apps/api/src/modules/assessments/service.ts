@@ -28,11 +28,7 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { methodExists } from "../assessment-methods/repository.js";
-
-function visible(actor: ActorContext, a: Assessment): boolean {
-  if (isPlatform(actor)) return true;
-  return actor.tenantId !== null && a.tenantId === actor.tenantId;
-}
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 async function ensureSubjectInTenant(subjectUserId: string, tenantId: string): Promise<void> {
   const u = await repo.getUserTenant(pool, subjectUserId);
@@ -47,14 +43,24 @@ async function ensureSubjectInTenant(subjectUserId: string, tenantId: string): P
 
 export const assessmentsService = {
   async list(actor: ActorContext, query: AssessmentListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listAssessments(pool, { tenantId, query });
+    // ADR-0027 F3: resolve the actor's ORGANIZATIONAL read scope once, then filter the list
+    // by it. PLATFORM_ADMIN -> all; HR-mandated (TENANT_ADMIN/HRMS_MANAGER) -> whole tenant;
+    // managerial -> transitive org sub-tree; everyone else -> self.
+    const scope = await resolveOrgReadScope(pool, actor);
+    const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    return repo.listAssessments(pool, { tenantId, userIdAllowList, query });
   },
 
   async getById(actor: ActorContext, id: string): Promise<Assessment> {
     const target = await repo.findAssessmentById(pool, id);
     if (!target) throw new NotFoundError("Assessment");
-    if (!visible(actor, target)) throw new NotFoundError("Assessment");
+    // ADR-0027 F3: gate the per-target read on the organizational axis (self / HR-mandate /
+    // transitive org sub-tree). 404 (not 403) avoids existence enumeration across the boundary.
+    if (!(await canReadOrgTarget(pool, actor, target.subjectUserId, target.tenantId))) {
+      throw new NotFoundError("Assessment");
+    }
     return target;
   },
 

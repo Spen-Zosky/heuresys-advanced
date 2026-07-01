@@ -7,6 +7,7 @@ export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
 import type { OkrListQuery, CreateOkrBody, UpdateOkrBody } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
 function listTenantFilter(a: ActorContext): string | undefined { return isPlatform(a) ? undefined : (a.tenantId ?? ZERO_UUID); }
@@ -21,14 +22,21 @@ function resolveWriteTenant(a: ActorContext, bodyTenantId?: string): string {
 }
 
 export const okrsService = {
-  async listOkrs(a: ActorContext, query: OkrListQuery) { return repo.listOkrs(pool, listTenantFilter(a), query); },
+  async listOkrs(a: ActorContext, query: OkrListQuery) {
+    const scope = await resolveOrgReadScope(pool, a);
+    const userIdAllowList = scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    return repo.listOkrs(pool, listTenantFilter(a), query, userIdAllowList);
+  },
   async getOkr(a: ActorContext, id: string) {
     const o = await repo.findOkrById(pool, id); if (!o) throw new NotFoundError("OKR");
-    assertVisible(a, o.tenantId, "OKR"); return o;
+    assertVisible(a, o.tenantId, "OKR");
+    if (o.ownerUserId && !(await canReadOrgTarget(pool, a, o.ownerUserId, o.tenantId))) throw new NotFoundError("OKR");
+    return o;
   },
   async listKeyResults(a: ActorContext, okrId: string) {
     const o = await repo.findOkrById(pool, okrId); if (!o) throw new NotFoundError("OKR");
     assertVisible(a, o.tenantId, "OKR");
+    if (o.ownerUserId && !(await canReadOrgTarget(pool, a, o.ownerUserId, o.tenantId))) throw new NotFoundError("OKR");
     return repo.listKeyResultsByOkr(pool, okrId);
   },
   async createOkr(a: ActorContext, body: CreateOkrBody) { return repo.insertOkr(pool, resolveWriteTenant(a, body.tenantId), body); },

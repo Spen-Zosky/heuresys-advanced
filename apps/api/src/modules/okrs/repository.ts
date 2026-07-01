@@ -41,9 +41,14 @@ function toOkr(r: OkrRow): Okr {
 
 export async function listOkrs(
   q: DbConnector, tenantId: string | undefined, query: OkrListQuery,
+  userIdAllowList?: string[],
 ): Promise<{ items: Okr[]; total: number }> {
   const where: string[] = []; const params: unknown[] = [];
   if (tenantId) { params.push(tenantId); where.push(`okr_tenant_id = $${params.length}`); }
+  if (userIdAllowList) {
+    if (userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(userIdAllowList); where.push(`okr_owner_user_id = ANY($${params.length}::uuid[])`);
+  }
   if (query.status) { params.push(query.status); where.push(`okr_status = $${params.length}`); }
   if (query.okrType) { params.push(query.okrType); where.push(`okr_okr_type = $${params.length}`); }
   if (query.ownerUserId) { params.push(query.ownerUserId); where.push(`okr_owner_user_id = $${params.length}`); }

@@ -16,6 +16,7 @@ import type { ActorContext } from "../actor.js";
 import type { RoleCode } from "../../config/constants.js";
 import { ForbiddenError } from "../../errors/index.js";
 import { orgSubtreeUserIds, isInOrgSubtree, isOrgUnitManager, type DbConnector } from "./org.js";
+import { recordScopeAccess, type ScopeAxis } from "./audit.js";
 
 /**
  * Roles with an explicit HR mandate to read sensitive personal data tenant-wide (ADR-0027 §2.5,
@@ -53,18 +54,30 @@ async function isManagerial(q: DbConnector, actor: ActorContext): Promise<boolea
   return isOrgUnitManager(q, actor.userId);
 }
 
-/** Resolve the actor's organizational read scope (ADR-0027 F1). See module header. */
+/** Resolve the actor's organizational read scope (ADR-0027 F1). Records the authorizing axis (F6). */
 export async function resolveOrgReadScope(q: DbConnector, actor: ActorContext): Promise<OrgReadScope> {
-  if (actor.roles.includes("PLATFORM_ADMIN")) return { kind: "all" };
+  const audit = (axis: ScopeAxis, tenantId: string | null) =>
+    recordScopeAccess({ op: "resolve", actorUserId: actor.userId, tenantId, granted: true, axis });
+  if (actor.roles.includes("PLATFORM_ADMIN")) {
+    audit("platform", actor.tenantId);
+    return { kind: "all" };
+  }
   const tenantId = actor.tenantId;
   if (!tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
-  if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) return { kind: "tenant", tenantId };
+  if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) {
+    audit("hr_mandate", tenantId);
+    return { kind: "tenant", tenantId };
+  }
   // Org sub-tree ONLY for explicit managerial roles — not for any employee who merely has reports
   // in the chart (Enzo's F1 constraint). Non-managerial actors see self only.
   if (await isManagerial(q, actor)) {
     const subtree = await orgSubtreeUserIds(q, actor.userId);
-    if (subtree.length > 1) return { kind: "subtree", tenantId, userIdAllowList: subtree };
+    if (subtree.length > 1) {
+      audit("org_subtree", tenantId);
+      return { kind: "subtree", tenantId, userIdAllowList: subtree };
+    }
   }
+  audit("self", tenantId);
   return { kind: "self", tenantId, userIdAllowList: [actor.userId] };
 }
 
@@ -79,10 +92,15 @@ export async function canReadOrgTarget(
   targetUserId: string,
   targetTenantId: string | null,
 ): Promise<boolean> {
-  if (actor.roles.includes("PLATFORM_ADMIN")) return true;
-  if (!actor.tenantId || targetTenantId !== actor.tenantId) return false;
-  if (actor.userId === targetUserId) return true; // self (I17)
-  if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) return true; // HR mandate (I20)
-  if (!(await isManagerial(q, actor))) return false; // non-managerial → self only (F1 constraint)
-  return isInOrgSubtree(q, actor.userId, targetUserId); // org sub-tree (I18) — transitive
+  const audit = (granted: boolean, axis: ScopeAxis): boolean => {
+    recordScopeAccess({ op: "target", actorUserId: actor.userId, tenantId: actor.tenantId, targetUserId, granted, axis });
+    return granted;
+  };
+  if (actor.roles.includes("PLATFORM_ADMIN")) return audit(true, "platform");
+  if (!actor.tenantId || targetTenantId !== actor.tenantId) return audit(false, "denied");
+  if (actor.userId === targetUserId) return audit(true, "self"); // self (I17)
+  if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) return audit(true, "hr_mandate"); // HR mandate (I20)
+  if (!(await isManagerial(q, actor))) return audit(false, "denied"); // non-managerial → self only (F1 constraint)
+  const inTree = await isInOrgSubtree(q, actor.userId, targetUserId); // org sub-tree (I18) — transitive
+  return audit(inTree, inTree ? "org_subtree" : "denied");
 }

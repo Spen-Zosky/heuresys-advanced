@@ -47,6 +47,15 @@ describe("scope/data-classes — taxonomy (F2, ADR-0027)", () => {
     expect(SENSITIVE_DATA_CLASSES.has("ACTIVITY")).toBe(false);
   });
 
+  it("Enzo 2026-07-01: formazione/mentorship/matching/capacità sensitive; feedback & surveys normal", () => {
+    for (const r of ["learning", "training_initiative", "mentorship", "matching", "capability"]) {
+      expect(isSensitiveResource(r), `${r} must be sensitive per Enzo`).toBe(true);
+    }
+    for (const r of ["engagement_feedback", "surveys"]) {
+      expect(isSensitiveResource(r), `${r} must stay normal per Enzo`).toBe(false);
+    }
+  });
+
   it("a non-person resource is unclassified → RBAC + tenant only", () => {
     expect(dataClassOf("blueprint")).toBeNull();
     expect(dataClassOf("tenant")).toBeNull();

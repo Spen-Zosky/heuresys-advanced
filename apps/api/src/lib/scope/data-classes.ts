@@ -35,10 +35,10 @@ export const SENSITIVE_DATA_CLASSES: ReadonlySet<DataClass> = new Set<DataClass>
  *  - EVALUATION   assessments, performance KPIs/goals/OKRs, succession & talent predictions
  *  - ACTIVITY     team/process work items (added at F4 — none mapped yet)
  *
- * Borderline resources deliberately LEFT UNMAPPED at F2 (treated as non-sensitive until Enzo
- * confirms at F3): `learning`, `mentorship`, `engagement_feedback`, `matching`, `capability`,
- * `surveys`, `training_initiative`. They are development/derived/process data, not squarely one
- * of the four categories.
+ * Borderline resources resolved by Enzo (2026-07-01): `learning` + `training_initiative`
+ * (formazione), `matching` + `capability` (matching/capacità, derived from competencies) → SKILL;
+ * `mentorship` → PERSONAL — all RISERVATI. `engagement_feedback` + `surveys` (feedback/clima) stay
+ * UNMAPPED → NORMAL (Enzo: often anonymous/aggregated by policy, not org-gated).
  */
 export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   // PERSONAL
@@ -47,11 +47,16 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   document: "PERSONAL",
   certification: "PERSONAL",
   career: "PERSONAL",
+  mentorship: "PERSONAL", // Enzo 2026-07-01: riservato (personal development relationship)
   // COMPENSATION
   compensation_intelligence: "COMPENSATION",
-  // SKILL
+  // SKILL (competency + development + competency-derived)
   skill: "SKILL",
   gap_analysis: "SKILL",
+  learning: "SKILL", // Enzo 2026-07-01: formazione riservata
+  training_initiative: "SKILL", // Enzo 2026-07-01: formazione riservata
+  matching: "SKILL", // Enzo 2026-07-01: matching riservato (derived from competencies)
+  capability: "SKILL", // Enzo 2026-07-01: capacità riservate (derived from competencies)
   // EVALUATION
   assessment: "EVALUATION",
   kpi: "EVALUATION",

@@ -42,13 +42,22 @@ function toRd(r: Row): SuccessorReadiness {
 
 export async function listReadiness(
   q: DbConnector,
-  filter: { tenantId?: string; query: SuccessorReadinessListQuery },
+  filter: { tenantId?: string; userIdAllowList?: string[]; query: SuccessorReadinessListQuery },
 ): Promise<{ items: SuccessorReadiness[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
   if (filter.tenantId) {
     params.push(filter.tenantId);
     where.push(`successor_readiness_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    // F3 (ADR-0027): keep only readiness rows whose parent candidate's subject user is in
+    // the actor's organizational allow-list. Empty allow-list = nobody is visible.
+    if (filter.userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(filter.userIdAllowList);
+    where.push(
+      `successor_readiness_candidate_id IN (SELECT successor_candidate_id FROM sys.sys_successor_candidates WHERE successor_candidate_user_id = ANY($${params.length}::uuid[]))`,
+    );
   }
   if (filter.query.candidateId) {
     params.push(filter.query.candidateId);

@@ -235,12 +235,18 @@ function mapScoreRow(r: Record<string, unknown>): ActiveScoreRow {
 }
 
 export async function listActiveScores(
-  scope: { tenantId: string | null }, subjectType: CapabilitySubjectType | undefined, q: Queryable = pool,
+  scope: { tenantId: string | null; userIdAllowList?: string[] }, subjectType: CapabilitySubjectType | undefined, q: Queryable = pool,
 ): Promise<ActiveScoreRow[]> {
   const clauses: string[] = [];
   const params: unknown[] = [];
   if (scope.tenantId !== null) { params.push(scope.tenantId); clauses.push(`s.capability_score_tenant_id = $${params.length}`); }
   if (subjectType) { params.push(subjectType); clauses.push(`s.capability_score_subject_type = $${params.length}`); }
+  // ADR-0027 F3 (D-50): restrict EMPLOYEE (per-person) rows to the actor's org read-scope allow-list.
+  // POSITION / ORG_UNIT / ORG are aggregates (no individual sensitive data) → never id-filtered.
+  if (scope.userIdAllowList && subjectType === "EMPLOYEE") {
+    params.push(scope.userIdAllowList);
+    clauses.push(`s.capability_score_subject_id = ANY($${params.length}::uuid[])`);
+  }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   const res = await q.query(
     `${SCORE_SELECT} ${where}

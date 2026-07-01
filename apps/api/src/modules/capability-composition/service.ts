@@ -14,10 +14,11 @@
  * Every aggregate is reproducible from its lineage arcs (frozen child value +
  * effective normalized weight). No ML, no external service, no clock in the math.
  */
-import { withTransaction } from "../../db/client.js";
+import { pool, withTransaction } from "../../db/client.js";
 import { ForbiddenError, NotFoundError } from "../../errors/index.js";
 import type { ActorContext } from "../../lib/actor.js";
 import { isPlatform } from "../../lib/actor.js";
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 import type {
   CapabilityScore, CapabilityScoreListResponse, CapabilityRecomputeResponse,
   CapabilitySubjectType, CapabilityScope,
@@ -250,7 +251,13 @@ export const capabilityCompositionService = {
 
   async composition(actor: ActorContext, subjectType?: CapabilitySubjectType): Promise<CapabilityScoreListResponse> {
     const scope = buildScope(actor);
-    const rows = await repo.listActiveScores(scope, subjectType);
+    // ADR-0027 F3 (D-50): EMPLOYEE (per-person) capability scores are SENSITIVE (SKILL) data.
+    // Resolve the actor's organizational read-scope; for non-mandated / non-platform actors this
+    // narrows the EMPLOYEE rows to their org sub-tree (self only for a non-managerial actor).
+    const orgScope = await resolveOrgReadScope(pool, actor);
+    const userIdAllowList =
+      orgScope.kind === "subtree" || orgScope.kind === "self" ? orgScope.userIdAllowList : undefined;
+    const rows = await repo.listActiveScores({ tenantId: scope.tenantId, userIdAllowList }, subjectType);
     return {
       scope,
       items: rows.map((r) => toScore(r, [])),
@@ -263,6 +270,11 @@ export const capabilityCompositionService = {
     const scope = buildScope(actor);
     const row = await repo.getActiveScore(scope, subjectType, subjectId);
     if (!row) throw new NotFoundError("Capability score", "CAPABILITY_SCORE_NOT_FOUND");
+    // ADR-0027 F3 (D-50): an individual EMPLOYEE score is sensitive per-person data — gate it by
+    // the organizational axis (404 to avoid cross-subtree existence enumeration).
+    if (subjectType === "EMPLOYEE" && !(await canReadOrgTarget(pool, actor, subjectId, row.tenantId))) {
+      throw new NotFoundError("Capability score", "CAPABILITY_SCORE_NOT_FOUND");
+    }
     const lineage = await repo.getActiveLineage(row.tenantId, subjectType, subjectId);
     return toScore(row, lineage);
   },

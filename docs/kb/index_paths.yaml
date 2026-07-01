@@ -1,15 +1,15 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-01T01:30:25Z da docs/kb/tools/build_index.py
+# generato: 2026-07-01T17:50:26Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-01T01:30:25Z"
-  total_files: 2231
+  generated_at: "2026-07-01T17:50:26Z"
+  total_files: 2247
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 26
-    api-core: 21
+    api-core: 22
     api-module: 292
     ci: 16
     claude-config: 6
@@ -18,7 +18,7 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 167
+    db-migration: 168
     db-script: 26
     db-seed: 107
     doc-canonical: 393
@@ -29,13 +29,13 @@ meta:
     shared-pkg: 4
     shared-schema: 87
     showcase-source: 13
-    test: 239
+    test: 253
     ux-design-archive: 80
     web-source: 187
   status_counts:
     archive: 493
     external-archive: 50
-    live: 1688
+    live: 1704
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -256,6 +256,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\lib\notifications\emit.ts'
     root: repo
     rel: 'apps/api/src/lib/notifications/emit.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\audit.ts'
+    root: repo
+    rel: 'apps/api/src/lib/scope/audit.ts'
     category: api-core
     status: live
     provenance: git-tracked
@@ -5887,6 +5893,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000169_hrms_manager_data_plenipotentiary_grant.sql'
+    root: repo
+    rel: 'db/migrations/000169_hrms_manager_data_plenipotentiary_grant.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\README.md'
     root: repo
     rel: 'db/scripts/README.md'
@@ -10447,6 +10459,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\assessments-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/assessments-scope.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\assessments.integration.test.ts'
     root: repo
     rel: 'apps/api/test/assessments.integration.test.ts'
@@ -10561,6 +10579,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\capability-composition-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/capability-composition-scope.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\capability-composition.integration.test.ts'
     root: repo
     rel: 'apps/api/test/capability-composition.integration.test.ts'
@@ -10588,6 +10612,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\career-paths.integration.test.ts'
     root: repo
     rel: 'apps/api/test/career-paths.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\compensation-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/compensation-scope.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -10681,6 +10711,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\goals-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/goals-scope.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\goals.integration.test.ts'
     root: repo
     rel: 'apps/api/test/goals.integration.test.ts'
@@ -10711,6 +10747,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\hrms-plenipotentiary.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/hrms-plenipotentiary.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\insights-p2.integration.test.ts'
     root: repo
     rel: 'apps/api/test/insights-p2.integration.test.ts'
@@ -10720,6 +10762,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\insights-recompute-cli.integration.test.ts'
     root: repo
     rel: 'apps/api/test/insights-recompute-cli.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\insights-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/insights-scope.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -10762,6 +10810,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\leads.integration.test.ts'
     root: repo
     rel: 'apps/api/test/leads.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\learning-gaps-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/learning-gaps-scope.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -10867,6 +10921,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\mentorship-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/mentorship-scope.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\mentorship.integration.test.ts'
     root: repo
     rel: 'apps/api/test/mentorship.integration.test.ts'
@@ -10957,6 +11017,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\okrs-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/okrs-scope.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\okrs.integration.test.ts'
     root: repo
     rel: 'apps/api/test/okrs.integration.test.ts'
@@ -11014,6 +11080,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\positions.integration.test.ts'
     root: repo
     rel: 'apps/api/test/positions.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\predictions-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/predictions-scope.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11125,6 +11197,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\scope-audit.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/scope-audit.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\scope-data-classes.integration.test.ts'
     root: repo
     rel: 'apps/api/test/scope-data-classes.integration.test.ts'
@@ -11134,6 +11212,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\scope-org.integration.test.ts'
     root: repo
     rel: 'apps/api/test/scope-org.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\scope-peer-isolation.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/scope-peer-isolation.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11176,6 +11260,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\semantic-matching-backfill.test.ts'
     root: repo
     rel: 'apps/api/test/semantic-matching-backfill.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\semantic-matching-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/semantic-matching-scope.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11242,6 +11332,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\successor-candidates.integration.test.ts'
     root: repo
     rel: 'apps/api/test/successor-candidates.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\successor-readiness-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/successor-readiness-scope.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

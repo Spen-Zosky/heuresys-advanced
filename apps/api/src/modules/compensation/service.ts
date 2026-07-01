@@ -20,6 +20,7 @@ import type {
   CompensationDistributionResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 function requireTenant(a: ActorContext): string {
   if (!a.tenantId) {
@@ -44,8 +45,19 @@ export const compensationService = {
     actor: ActorContext,
     query: RewardGatesListQuery,
   ): Promise<{ items: RewardGate[]; total: number }> {
-    const tenantId = isPlatform(actor) ? undefined : requireTenant(actor);
-    return repo.listRewardGates(pool, { tenantId, query });
+    // ADR-0027 F3 (D-50): gate cross-user reward-gate reads by the actor's ORGANIZATIONAL
+    // sub-tree. PLATFORM_ADMIN → all tenants; HR-mandated (TENANT_ADMIN, HRMS_MANAGER) →
+    // whole tenant; managerial → transitive org sub-tree; everyone else → self.
+    const scope = await resolveOrgReadScope(pool, actor);
+    const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    // A caller filtering by an explicit userId they may not read gets an empty page
+    // (not another user's data) — mirrors the users-module per-target gate.
+    if (query.userId && !(await canReadOrgTarget(pool, actor, query.userId, tenantId ?? null))) {
+      return { items: [], total: 0 };
+    }
+    return repo.listRewardGates(pool, { tenantId, userIdAllowList, query });
   },
 
   async getRewardGateDistribution(actor: ActorContext): Promise<CompensationDistributionResponse> {

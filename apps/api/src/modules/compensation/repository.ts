@@ -158,13 +158,21 @@ function toGate(r: GateRow): RewardGate {
 
 export async function listRewardGates(
   q: DbConnector,
-  filter: { tenantId: string | undefined; query: RewardGatesListQuery },
+  filter: { tenantId: string | undefined; userIdAllowList?: string[]; query: RewardGatesListQuery },
 ): Promise<{ items: RewardGate[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
   if (filter.tenantId) {
     params.push(filter.tenantId);
     where.push(`g.reward_gate_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    // ADR-0027 F3 (D-50): restrict to the actor's org sub-tree. Empty list ⇒ nobody visible.
+    if (filter.userIdAllowList.length === 0) {
+      return { items: [], total: 0 };
+    }
+    params.push(filter.userIdAllowList);
+    where.push(`g.reward_gate_user_id = ANY($${params.length}::uuid[])`);
   }
   if (filter.query.periodStart) {
     params.push(filter.query.periodStart);

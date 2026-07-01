@@ -36,6 +36,7 @@ import type {
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
 import { emitNotification } from "../../lib/notifications/emit.js";
+import { resolveOrgReadScope, canReadOrgTarget, type OrgReadScope } from "../../lib/scope/resolver.js";
 
 /**
  * 3.4 GAP_CLOSURE_DUE producer — notify the highest-gap subjects of an open
@@ -98,6 +99,16 @@ async function buildScope(
   const teamPositionIds = kind === "TEAM" ? await findOwnedPositionIds(pool, a.userId) : [];
   const tenantId = isPlatform ? null : a.tenantId;
   return { kind, tenantId, filter: { tenantId, teamPositionIds, isPlatformScope: isPlatform } };
+}
+
+/**
+ * ADR-0027 F3: the actor's ORGANIZATIONAL read allow-list (subject user ids) for the person
+ * axis, layered ON TOP of the PLATFORM/TENANT/TEAM scope. `undefined` = no id restriction
+ * (PLATFORM_ADMIN → all; HR-mandated TENANT_ADMIN/HRMS_MANAGER → whole tenant); a subtree/self
+ * actor is pinned to the exact set of subject user ids they may read (excludes org peers, I18/I19).
+ */
+function orgAllowList(scope: OrgReadScope): string[] | undefined {
+  return scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
 }
 
 /* --- normalization (pure; 0..100 risk-oriented; null = absent) ------------ */
@@ -335,7 +346,11 @@ export const insightsService = {
   /** Scored list (scope-filtered), highest risk first. */
   async flightRisk(a: ActorContext): Promise<FlightRiskListResponse> {
     const s = await buildScope(a);
-    const rows = await repo.readFlightRiskScores(pool, s.filter);
+    const orgScope = await resolveOrgReadScope(pool, a);
+    const rows = await repo.readFlightRiskScores(pool, {
+      ...s.filter,
+      userIdAllowList: orgAllowList(orgScope),
+    });
     const items = rows.map(toFlightRiskScore).sort((x, y) => y.score - x.score);
     return {
       scope: { kind: s.kind, tenantId: s.tenantId },
@@ -350,6 +365,11 @@ export const insightsService = {
     const s = await buildScope(a);
     const row = await repo.readUserFlightRiskScore(pool, s.filter, userId);
     if (!row) throw new NotFoundError("Flight-risk score");
+    // ADR-0027 F3: gate the per-subject read by the ORGANIZATIONAL axis (transitive reports-to).
+    // 404 (not 403) to avoid existence enumeration across the org boundary.
+    if (!(await canReadOrgTarget(pool, a, userId, row.tenantId))) {
+      throw new NotFoundError("Flight-risk score");
+    }
     return toFlightRiskScore(row);
   },
 
@@ -379,7 +399,11 @@ export const insightsService = {
   /* --- P2 slice B: succession-readiness --- */
   async successionReadiness(a: ActorContext): Promise<SuccessionReadinessListResponse> {
     const s = await buildScope(a);
-    const rows = await repo.readReadinessScores(pool, s.filter);
+    const orgScope = await resolveOrgReadScope(pool, a);
+    const rows = await repo.readReadinessScores(pool, {
+      ...s.filter,
+      userIdAllowList: orgAllowList(orgScope),
+    });
     const items = rows.map(toReadinessScore).sort((x, y) => y.value - x.value);
     return { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: new Date().toISOString() };
   },
@@ -404,7 +428,11 @@ export const insightsService = {
   /* --- P2 slice C: skill-gap --- */
   async skillGap(a: ActorContext): Promise<SkillGapListResponse> {
     const s = await buildScope(a);
-    const rows = await repo.readSkillGapScores(pool, s.filter);
+    const orgScope = await resolveOrgReadScope(pool, a);
+    const rows = await repo.readSkillGapScores(pool, {
+      ...s.filter,
+      userIdAllowList: orgAllowList(orgScope),
+    });
     const items = rows.map(toSkillGapScore).sort((x, y) => y.value - x.value);
     return { scope: { kind: s.kind, tenantId: s.tenantId }, items, total: items.length, generatedAt: new Date().toISOString() };
   },

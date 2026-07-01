@@ -24,6 +24,9 @@ export interface ScopeFilter {
   tenantId: string | null;
   teamPositionIds: string[];
   isPlatformScope: boolean;
+  /** ADR-0027 F3 organizational allow-list (subject user ids). undefined = no id restriction
+   *  (PLATFORM → all; HR-mandated → whole tenant); an empty array yields no rows. */
+  userIdAllowList?: string[];
 }
 
 /** Raw per-subject feature values (null = absent → dropped + weights re-normalized). */
@@ -266,6 +269,10 @@ function readScopeClause(scope: ScopeFilter): { sql: string; params: unknown[] }
   if (scope.teamPositionIds.length > 0) {
     params.push(scope.teamPositionIds);
     clauses.push(`a.user_position_assignment_position_id = ANY($${params.length}::uuid[])`);
+  }
+  if (scope.userIdAllowList) {
+    params.push(scope.userIdAllowList);
+    clauses.push(`fr.flight_risk_score_user_id = ANY($${params.length}::uuid[])`);
   }
   return { sql: clauses.join(" AND "), params };
 }
@@ -545,6 +552,10 @@ export async function readReadinessScores(q: DbConnector, scope: ScopeFilter): P
       params.push(scope.teamPositionIds);
       clauses.push(`a.user_position_assignment_position_id = ANY($${params.length}::uuid[])`);
     }
+    if (scope.userIdAllowList) {
+      params.push(scope.userIdAllowList);
+      clauses.push(`sr.succession_readiness_score_user_id = ANY($${params.length}::uuid[])`);
+    }
     where = clauses.join(" AND ");
   }
   const res = await q.query(
@@ -582,6 +593,10 @@ export async function readSkillGapScores(q: DbConnector, scope: ScopeFilter): Pr
     if (scope.teamPositionIds.length > 0) {
       params.push(scope.teamPositionIds);
       clauses.push(`a.user_position_assignment_position_id = ANY($${params.length}::uuid[])`);
+    }
+    if (scope.userIdAllowList) {
+      params.push(scope.userIdAllowList);
+      clauses.push(`sg.skill_gap_score_user_id = ANY($${params.length}::uuid[])`);
     }
     where = clauses.join(" AND ");
   }

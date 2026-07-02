@@ -50,13 +50,27 @@ function toCand(r: Row): SuccessorCandidate {
 
 export async function listCandidates(
   q: DbConnector,
-  filter: { tenantId?: string; query: SuccessorCandidateListQuery },
+  filter: {
+    tenantId?: string;
+    /** Restrict to candidates whose user is in this set (org sub-tree / self, ADR-0027
+     *  F3). undefined = no restriction; empty = nobody is visible. */
+    userIdAllowList?: string[];
+    query: SuccessorCandidateListQuery;
+  },
 ): Promise<{ items: SuccessorCandidate[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
   if (filter.tenantId) {
     params.push(filter.tenantId);
     where.push(`successor_candidate_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    if (filter.userIdAllowList.length === 0) {
+      // Empty allow-list = nobody is visible. Short-circuit (org-axis, ADR-0027 F3).
+      return { items: [], total: 0 };
+    }
+    params.push(filter.userIdAllowList);
+    where.push(`successor_candidate_user_id = ANY($${params.length}::uuid[])`);
   }
   if (filter.query.poolId) {
     params.push(filter.query.poolId);

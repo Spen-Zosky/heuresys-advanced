@@ -18,19 +18,21 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findPoolById } from "../succession-pools/repository.js";
-
-function visible(actor: ActorContext, c: SuccessorCandidate): boolean {
-  if (isPlatform(actor)) return true;
-  return actor.tenantId !== null && c.tenantId === actor.tenantId;
-}
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 export const successorCandidatesService = {
   async list(actor: ActorContext, query: SuccessorCandidateListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listCandidates(pool, { tenantId, query });
+    // ADR-0027 F3: filter the list by the actor's organizational read scope (D-50).
+    const scope = await resolveOrgReadScope(pool, actor);
+    const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    return repo.listCandidates(pool, { tenantId, userIdAllowList, query });
   },
 
   async readinessDistribution(actor: ActorContext): Promise<SuccessorReadinessDistributionResponse> {
+    // Stays TENANT-wide by design (F3 aggregates doctrine): grouped counts only, no
+    // per-person data is exposed, so the org axis does not apply.
     const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
     return repo.getReadinessDistribution(pool, tenantId);
   },
@@ -38,7 +40,11 @@ export const successorCandidatesService = {
   async getById(actor: ActorContext, id: string): Promise<SuccessorCandidate> {
     const target = await repo.findCandidateById(pool, id);
     if (!target) throw new NotFoundError("SuccessorCandidate");
-    if (!visible(actor, target)) throw new NotFoundError("SuccessorCandidate");
+    // ADR-0027 F3: gate the per-target read on the organizational axis (self / HR-mandate /
+    // transitive org sub-tree). 404 (not 403) avoids existence enumeration.
+    if (!(await canReadOrgTarget(pool, actor, target.userId, target.tenantId))) {
+      throw new NotFoundError("SuccessorCandidate");
+    }
     return target;
   },
 

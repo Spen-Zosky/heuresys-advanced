@@ -23,22 +23,29 @@ import type {
 import * as repo from "./repository.js";
 import { findAssessmentById } from "../assessments/repository.js";
 import { getUserTenant } from "../assessments/repository.js";
-
-function visible(actor: ActorContext, r: AssessmentResult): boolean {
-  if (isPlatform(actor)) return true;
-  return actor.tenantId !== null && r.tenantId === actor.tenantId;
-}
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 export const assessmentResultsService = {
   async list(actor: ActorContext, query: AssessmentResultListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listResults(pool, { tenantId, query });
+    // ADR-0027 F3: a result's subject is the PARENT assessment's subject user — filter the
+    // list by the actor's organizational read scope, like the parent assessments module.
+    const scope = await resolveOrgReadScope(pool, actor);
+    const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    return repo.listResults(pool, { tenantId, userIdAllowList, query });
   },
 
   async getById(actor: ActorContext, id: string): Promise<AssessmentResult> {
     const target = await repo.findResultById(pool, id);
     if (!target) throw new NotFoundError("AssessmentResult");
-    if (!visible(actor, target)) throw new NotFoundError("AssessmentResult");
+    // ADR-0027 F3: gate the per-target read on the org axis via the PARENT assessment's
+    // subject (self / HR-mandate / transitive org sub-tree). 404 avoids existence enumeration.
+    const parent = await findAssessmentById(pool, target.assessmentId);
+    if (!parent) throw new NotFoundError("AssessmentResult");
+    if (!(await canReadOrgTarget(pool, actor, parent.subjectUserId, target.tenantId))) {
+      throw new NotFoundError("AssessmentResult");
+    }
     return target;
   },
 

@@ -49,6 +49,9 @@ function toResult(r: Row): AssessmentResult {
 
 export interface ListFilter {
   tenantId?: string;
+  /** Restrict to results whose PARENT assessment's subject user is in this set (org
+   *  sub-tree / self, ADR-0027 F3). undefined = no restriction; empty = nobody visible. */
+  userIdAllowList?: string[];
   query: AssessmentResultListQuery;
 }
 
@@ -61,6 +64,18 @@ export async function listResults(
   if (filter.tenantId) {
     params.push(filter.tenantId);
     where.push(`assessment_result_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    if (filter.userIdAllowList.length === 0) {
+      // Empty allow-list = nobody is visible. Short-circuit (org-axis, ADR-0027 F3).
+      return { items: [], total: 0 };
+    }
+    params.push(filter.userIdAllowList);
+    where.push(`EXISTS (
+      SELECT 1 FROM sys.sys_assessments a
+       WHERE a.assessment_id = assessment_result_assessment_id
+         AND a.assessment_subject_user_id = ANY($${params.length}::uuid[])
+    )`);
   }
   if (filter.query.assessmentId) {
     params.push(filter.query.assessmentId);

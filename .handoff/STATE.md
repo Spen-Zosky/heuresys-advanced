@@ -6,7 +6,7 @@
 
 ## Last session brief (S1013)
 
-Batch autorizzazione bi-assiale (ADR-0027) chiuso end-to-end. **D-50 🔴 RISOLTO**: **F3** org-axis enforcement sui moduli sensibili (list filtrata da `resolveOrgReadScope.userIdAllowList`, per-target da `canReadOrgTarget`) — dimostrato red→green su personas reali (`paolo→tommaso` ok / `paolo→antonio` 404 / USER 403 / HR-mandated tenant-wide). **I21**: HRMS_MANAGER plenipotenziario dati (mig 000169, permessi business, tecnologici esclusi; live E2E). **F5**: peer-isolation I19 bidirezionale (paolo⊥claudia, sub-tree disgiunti). **F6**: scope-access audit centralizzato nel resolver. Regressione chiusa dentro il lavoro: semantic-matching per-target ora org-gated (frontend usa solo `/me/*` → invisibile) + test `matching:admin` de-hardcodato (regola S1012). Suite API verde, typecheck verde, commit atomici per modulo. Enzo: `matching:admin`/`capability:admin` tenuti in HRMS (confermato). Dettaglio + counts → SOT_STATE Delta S1013.
+Batch autorizzazione bi-assiale (ADR-0027) chiuso end-to-end. **D-50 🔴 RISOLTO**: **F3** org-axis enforcement sui moduli sensibili, dimostrato red→green su personas reali (`paolo→tommaso` ok / `paolo→antonio` 404 / USER 403 / HR-mandated tenant-wide); **I21** HRMS_MANAGER plenipotenziario dati; **F5** peer-isolation I19 bidirezionale; **F6** scope-access audit centralizzato nel resolver. Regressione chiusa dentro il lavoro: semantic-matching per-target ora org-gated (frontend usa solo `/me/*` → invisibile) + test `matching:admin` de-hardcodato (regola S1012). Suite API verde, typecheck verde, commit atomici per modulo. Enzo: `matching:admin`/`capability:admin` tenuti in HRMS (confermato). Dettaglio, meccanica e counts → SOT_STATE Delta S1013 (un posto solo).
 
 ## Top priorities (next session)
 
@@ -21,7 +21,7 @@ Batch autorizzazione bi-assiale (ADR-0027) chiuso end-to-end. **D-50 🔴 RISOLT
 ## Verification (next session)
 
 ```bash
-git -C /d/heuresys-advanced log origin/main..HEAD --oneline          # 0 dopo handoff push
+git log origin/main..HEAD --oneline                                  # 0 dopo handoff push (dalla repo root)
 cd apps/api && pnpm exec vitest run test/scope-peer-isolation.integration.test.ts test/scope-audit.integration.test.ts test/hrms-plenipotentiary.integration.test.ts   # F5/F6/I21 verdi
 python docs/kb/tools/handoff_lint.py                                 # OK
 ```

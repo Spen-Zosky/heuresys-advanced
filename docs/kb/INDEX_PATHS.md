@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-01T17:50:26Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2247**
+**Generato**: 2026-07-02T14:24:10Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2251**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,7 +18,8 @@
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 168 |
+| db-migration | 167 |
+| db-other | 1 |
 | db-script | 26 |
 | db-seed | 107 |
 | doc-canonical | 393 |
@@ -29,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 87 |
 | showcase-source | 13 |
-| test | 253 |
+| test | 257 |
 | ux-design-archive | 80 |
 | web-source | 187 |
-| **TOTALE** | **2247** |
+| **TOTALE** | **2251** |
 
 ## Conteggi per status
 
@@ -40,7 +41,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1704 |
+| live | 1708 |
 
 ## File per categoria
 
@@ -886,7 +887,6 @@
 
 ### db-migration
 
-- `D:\heuresys-advanced\db\migrations\.gitkeep` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000001_init_extensions.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000002_init_sys_schema.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000003_tenancies.sql` · *live* · git-tracked
@@ -1054,6 +1054,10 @@
 - `D:\heuresys-advanced\db\migrations\000167_user_pay_slips.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000168_me_f5_personal_area.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000169_hrms_manager_data_plenipotentiary_grant.sql` · *live* · git-tracked
+
+### db-other
+
+- `D:\heuresys-advanced\db\migrations\.gitkeep` · *live* · git-tracked
 
 ### db-script
 
@@ -1846,6 +1850,7 @@
 - `D:\heuresys-advanced\apps\api\test\approvals-sla.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\approvals.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\assessment-methods.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\assessment-results-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\assessment-results.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\assessments-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\assessments.integration.test.ts` · *live* · git-tracked
@@ -1991,7 +1996,9 @@
 - `D:\heuresys-advanced\apps\api\test\skill-taxonomy-edges.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\skills.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\smtp-mailer.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\succession-pools-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\succession-pools.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\successor-candidates-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\successor-candidates.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\successor-readiness-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\successor-readiness.integration.test.ts` · *live* · git-tracked
@@ -2008,6 +2015,7 @@
 - `D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b60-a-silent-skip.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\upsert-sql-type-coerce.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\upsert-sql.cw-b49-coalesce-conflict.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\user-career-plans-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\user-career-plans.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\users.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\visualization-edges.integration.test.ts` · *live* · git-tracked

@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-01T17:50:26Z da docs/kb/tools/build_index.py
+# generato: 2026-07-02T14:24:10Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-01T17:50:26Z"
-  total_files: 2247
+  generated_at: "2026-07-02T14:24:10Z"
+  total_files: 2251
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,7 +18,8 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 168
+    db-migration: 167
+    db-other: 1
     db-script: 26
     db-seed: 107
     doc-canonical: 393
@@ -29,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 87
     showcase-source: 13
-    test: 253
+    test: 257
     ux-design-archive: 80
     web-source: 187
   status_counts:
     archive: 493
     external-archive: 50
-    live: 1704
+    live: 1708
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -4891,12 +4892,6 @@ files:
     category: cowork-snapshot
     status: external-archive
     provenance: claude-desktop:outputs
-  - path: 'D:\heuresys-advanced\db\migrations\.gitkeep'
-    root: repo
-    rel: 'db/migrations/.gitkeep'
-    category: db-migration
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\migrations\000001_init_extensions.sql'
     root: repo
     rel: 'db/migrations/000001_init_extensions.sql'
@@ -5897,6 +5892,12 @@ files:
     root: repo
     rel: 'db/migrations/000169_hrms_manager_data_plenipotentiary_grant.sql'
     category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\.gitkeep'
+    root: repo
+    rel: 'db/migrations/.gitkeep'
+    category: db-other
     status: live
     provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\README.md'
@@ -10453,6 +10454,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\assessment-results-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/assessment-results-scope.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\assessment-results.integration.test.ts'
     root: repo
     rel: 'apps/api/test/assessment-results.integration.test.ts'
@@ -11323,9 +11330,21 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\succession-pools-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/succession-pools-scope.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\succession-pools.integration.test.ts'
     root: repo
     rel: 'apps/api/test/succession-pools.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\successor-candidates-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/successor-candidates-scope.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11422,6 +11441,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\upsert-sql.cw-b49-coalesce-conflict.test.ts'
     root: repo
     rel: 'apps/api/test/upsert-sql.cw-b49-coalesce-conflict.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\user-career-plans-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/user-career-plans-scope.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

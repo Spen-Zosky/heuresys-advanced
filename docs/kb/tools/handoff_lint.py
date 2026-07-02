@@ -266,7 +266,10 @@ def parse_register_items(md):
         if cur:
             fld = re.match(r"\s*-\s+(.*)", line)
             if fld:
-                for seg in fld.group(1).split("·"):
+                # Split on '·' only where a 'key:' follows — a '·' inside a field VALUE is
+                # prose (e.g. "F0·F1·F2" in a hold-reason), not a delimiter. A plain
+                # split("·") truncated every value at its first '·' (S1014 fix).
+                for seg in re.split(r"·(?=\s*[A-Za-zà-ù][A-Za-zà-ù\-]*:\s)", fld.group(1)):
                     mk = re.match(r"\s*([a-zà-ù][a-zà-ù\-]*):\s*(.+)", seg.strip(), flags=re.IGNORECASE)
                     if mk:
                         cur["fields"][mk.group(1).strip().lower()] = mk.group(2).strip()

@@ -126,6 +126,10 @@ def classify(rel):
     ]
     for prefix, cat, st in rules:
         if r.startswith(prefix):
+            # Only real .sql files are migrations: .gitkeep & co. must not inflate the
+            # db-migration count vs SOT_STATE §0 (S1014 fix — perpetual +1 drift).
+            if cat == "db-migration" and not r.endswith(".sql"):
+                return "db-other", st
             return cat, st
     # root-level files
     if r.endswith(".md"):

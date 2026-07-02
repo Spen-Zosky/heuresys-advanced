@@ -19,11 +19,7 @@ import type {
   UpdateUserCareerPlanBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
-
-function visible(actor: ActorContext, p: UserCareerPlan): boolean {
-  if (isPlatform(actor)) return true;
-  return actor.tenantId !== null && p.tenantId === actor.tenantId;
-}
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 async function validateFks(
   body: { userId: string; pathId?: string | null; targetPositionId?: string | null },
@@ -55,14 +51,22 @@ async function validateFks(
 
 export const userCareerPlansService = {
   async list(actor: ActorContext, query: UserCareerPlanListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listPlans(pool, { tenantId, query });
+    // ADR-0027 F3: filter the list by the actor's organizational read scope (D-50).
+    const scope = await resolveOrgReadScope(pool, actor);
+    const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    return repo.listPlans(pool, { tenantId, userIdAllowList, query });
   },
 
   async getById(actor: ActorContext, id: string): Promise<UserCareerPlan> {
     const target = await repo.findPlanById(pool, id);
     if (!target) throw new NotFoundError("UserCareerPlan");
-    if (!visible(actor, target)) throw new NotFoundError("UserCareerPlan");
+    // ADR-0027 F3: gate the per-target read on the organizational axis (self / HR-mandate /
+    // transitive org sub-tree). 404 (not 403) avoids existence enumeration.
+    if (!(await canReadOrgTarget(pool, actor, target.userId, target.tenantId))) {
+      throw new NotFoundError("UserCareerPlan");
+    }
     return target;
   },
 

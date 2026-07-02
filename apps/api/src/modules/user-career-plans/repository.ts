@@ -49,13 +49,27 @@ function toUcp(r: Row): UserCareerPlan {
 
 export async function listPlans(
   q: DbConnector,
-  filter: { tenantId?: string; query: UserCareerPlanListQuery },
+  filter: {
+    tenantId?: string;
+    /** Restrict to plans whose subject user is in this set (org sub-tree / self,
+     *  ADR-0027 F3). undefined = no restriction; empty = nobody is visible. */
+    userIdAllowList?: string[];
+    query: UserCareerPlanListQuery;
+  },
 ): Promise<{ items: UserCareerPlan[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
   if (filter.tenantId) {
     params.push(filter.tenantId);
     where.push(`user_career_plan_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    if (filter.userIdAllowList.length === 0) {
+      // Empty allow-list = nobody is visible. Short-circuit (org-axis, ADR-0027 F3).
+      return { items: [], total: 0 };
+    }
+    params.push(filter.userIdAllowList);
+    where.push(`user_career_plan_user_id = ANY($${params.length}::uuid[])`);
   }
   if (filter.query.userId) {
     params.push(filter.query.userId);

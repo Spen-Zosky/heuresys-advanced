@@ -48,13 +48,36 @@ function toPool(r: Row): SuccessionPool {
 
 export async function listPools(
   q: DbConnector,
-  filter: { tenantId?: string; query: SuccessionPoolListQuery },
+  filter: {
+    tenantId?: string;
+    /** Org-axis allow-list (ADR-0027 F3). A pool's person subject is its position's ACTIVE
+     *  incumbent: keep rows whose position is VACANT (no person subject → tenant-visible)
+     *  or has an incumbent in this set. undefined = no restriction. */
+    userIdAllowList?: string[];
+    query: SuccessionPoolListQuery;
+  },
 ): Promise<{ items: SuccessionPool[]; total: number }> {
   const where: string[] = [];
   const params: unknown[] = [];
   if (filter.tenantId) {
     params.push(filter.tenantId);
     where.push(`succession_pool_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    params.push(filter.userIdAllowList);
+    where.push(`(
+      NOT EXISTS (
+        SELECT 1 FROM sys.sys_user_position_assignments upa
+         WHERE upa.user_position_assignment_position_id = succession_pool_position_id
+           AND upa.user_position_assignment_status = 'ACTIVE'
+      )
+      OR EXISTS (
+        SELECT 1 FROM sys.sys_user_position_assignments upa
+         WHERE upa.user_position_assignment_position_id = succession_pool_position_id
+           AND upa.user_position_assignment_status = 'ACTIVE'
+           AND upa.user_position_assignment_user_id = ANY($${params.length}::uuid[])
+      )
+    )`);
   }
   if (filter.query.positionId) {
     params.push(filter.query.positionId);
@@ -106,6 +129,22 @@ export async function findPoolByCodeInTenant(
     [tenantId, code],
   );
   return res.rows[0] ? toPool(res.rows[0]) : null;
+}
+
+/** ACTIVE incumbent user ids of a position — the pool's person subject(s) for the org
+ *  axis (ADR-0027 F3). Empty = vacant position = no person subject. */
+export async function positionIncumbentUserIds(
+  q: DbConnector,
+  positionId: string,
+): Promise<string[]> {
+  const res = await q.query<{ user_id: string }>(
+    `SELECT user_position_assignment_user_id AS user_id
+       FROM sys.sys_user_position_assignments
+      WHERE user_position_assignment_position_id = $1
+        AND user_position_assignment_status = 'ACTIVE'`,
+    [positionId],
+  );
+  return res.rows.map((r) => r.user_id);
 }
 
 export async function positionInTenant(

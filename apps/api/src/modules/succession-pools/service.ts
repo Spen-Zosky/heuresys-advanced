@@ -16,6 +16,7 @@ import type {
   UpdateSuccessionPoolBody,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 function visible(actor: ActorContext, p: SuccessionPool): boolean {
   if (isPlatform(actor)) return true;
@@ -24,14 +25,33 @@ function visible(actor: ActorContext, p: SuccessionPool): boolean {
 
 export const successionPoolsService = {
   async list(actor: ActorContext, query: SuccessionPoolListQuery) {
-    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listPools(pool, { tenantId, query });
+    // ADR-0027 F3: a pool's person subject is the position's ACTIVE incumbent (the person
+    // whose succession is planned). Filter by the actor's organizational read scope;
+    // vacant positions have no person subject and stay tenant-visible (D-50).
+    const scope = await resolveOrgReadScope(pool, actor);
+    const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    return repo.listPools(pool, { tenantId, userIdAllowList, query });
   },
 
   async getById(actor: ActorContext, id: string): Promise<SuccessionPool> {
     const target = await repo.findPoolById(pool, id);
     if (!target) throw new NotFoundError("SuccessionPool");
     if (!visible(actor, target)) throw new NotFoundError("SuccessionPool");
+    // ADR-0027 F3: gate on the position's ACTIVE incumbent(s); a vacant position has no
+    // person subject → tenant check above suffices. 404 avoids existence enumeration.
+    const incumbents = await repo.positionIncumbentUserIds(pool, target.positionId);
+    if (incumbents.length > 0) {
+      let allowed = false;
+      for (const incumbentUserId of incumbents) {
+        if (await canReadOrgTarget(pool, actor, incumbentUserId, target.tenantId)) {
+          allowed = true;
+          break;
+        }
+      }
+      if (!allowed) throw new NotFoundError("SuccessionPool");
+    }
     return target;
   },
 

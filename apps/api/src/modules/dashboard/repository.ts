@@ -356,14 +356,33 @@ export async function getDashboardTrends(
            date_trunc('week', now()),
            interval '1 week'
          ) AS w
-       )
-       SELECT (
-         SELECT count(*) FROM ${e.table} t
-          WHERE t.${e.tsColumn} < wk.w + interval '1 week'
+       ),
+       bounds AS (SELECT min(w) AS first_w, max(w) AS last_w FROM wk),
+       inc AS (
+         SELECT date_trunc('week', t.${e.tsColumn}) AS wb, count(*)::int AS n
+           FROM ${e.table} t, bounds b
+          WHERE t.${e.tsColumn} >= b.first_w
+            AND t.${e.tsColumn} <  b.last_w + interval '1 week'
             ${tenantClause}
             ${e.extraWhere}
+          GROUP BY 1
+       ),
+       baseline AS (
+         SELECT count(*)::int AS n
+           FROM ${e.table} t, bounds b
+          WHERE t.${e.tsColumn} < b.first_w
+            ${tenantClause}
+            ${e.extraWhere}
+       )
+       -- Cumulative weekly count = rows before the window (baseline) + running sum of
+       -- per-week increments. Two scans total (baseline + inc) instead of one correlated
+       -- count(*) re-scanning the table per week bucket. Output is identical. F-005.
+       SELECT (
+         (SELECT n FROM baseline)
+         + (SUM(COALESCE(i.n, 0)) OVER (ORDER BY wk.w))
        )::int AS c
        FROM wk
+       LEFT JOIN inc i ON i.wb = wk.w
        ORDER BY wk.w`,
       params,
     );

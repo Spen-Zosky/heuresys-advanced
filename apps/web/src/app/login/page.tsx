@@ -24,7 +24,11 @@ type LoginFormValues = z.infer<typeof LoginFormSchema>;
 function readNextParam(): string | null {
   if (typeof window === "undefined") return null;
   const next = new URLSearchParams(window.location.search).get("next");
-  return next && next.startsWith("/") ? next : null;
+  // Same-origin absolute path only: a single leading slash, never protocol-relative
+  // ("//evil.com") nor backslash-smuggled ("/\evil.com") — browsers resolve those to a
+  // foreign origin, so an unvalidated `next` is an open redirect. F-002.
+  if (!next || next[0] !== "/" || next[1] === "/" || next[1] === "\\") return null;
+  return next;
 }
 
 // Stable no-op subscribe for useSyncExternalStore reads of immutable browser
@@ -493,7 +497,7 @@ export default function LoginPage() {
                     <div
                       role="alert"
                       data-testid="login-error"
-                      className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"
+                      className="text-sm text-danger bg-danger/10 border border-danger/30 rounded px-3 py-2"
                     >
                       {formError}
                     </div>
@@ -571,7 +575,7 @@ export default function LoginPage() {
                     <div
                       role="alert"
                       data-testid="login-error"
-                      className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"
+                      className="text-sm text-danger bg-danger/10 border border-danger/30 rounded px-3 py-2"
                     >
                       {formError}
                     </div>
@@ -591,7 +595,7 @@ export default function LoginPage() {
                 <div
                   role="alert"
                   data-testid="login-error"
-                  className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"
+                  className="text-sm text-danger bg-danger/10 border border-danger/30 rounded px-3 py-2"
                 >
                   {formError}
                 </div>
@@ -640,7 +644,7 @@ export default function LoginPage() {
                 <div
                   role="alert"
                   data-testid="login-error"
-                  className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"
+                  className="text-sm text-danger bg-danger/10 border border-danger/30 rounded px-3 py-2"
                 >
                   {formError}
                 </div>
@@ -693,7 +697,7 @@ export default function LoginPage() {
                   {...register("email")}
                 />
                 {errors.email && (
-                  <p className="text-xs text-red-600 mt-1">{errors.email.message}</p>
+                  <p className="text-xs text-danger mt-1">{errors.email.message}</p>
                 )}
               </div>
 
@@ -710,7 +714,7 @@ export default function LoginPage() {
                   {...register("password")}
                 />
                 {errors.password && (
-                  <p className="text-xs text-red-600 mt-1">{errors.password.message}</p>
+                  <p className="text-xs text-danger mt-1">{errors.password.message}</p>
                 )}
               </div>
 
@@ -718,7 +722,7 @@ export default function LoginPage() {
                 <div
                   role="alert"
                   data-testid="login-error"
-                  className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2"
+                  className="text-sm text-danger bg-danger/10 border border-danger/30 rounded px-3 py-2"
                 >
                   {formError}
                 </div>

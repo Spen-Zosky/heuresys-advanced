@@ -28,10 +28,20 @@ const plugin: FastifyPluginAsync = async (app) => {
       throw new CsrfFailedError();
     }
 
-    // Origin / Referer check (defence in depth).
-    const origin = req.headers.origin ?? req.headers.referer;
-    if (origin && env.ADMIN_ORIGIN && !origin.startsWith(env.ADMIN_ORIGIN)) {
-      throw new ForbiddenError("Request origin not allowed", "ORIGIN_MISMATCH");
+    // Origin / Referer check (defence in depth). Compare the PARSED origin for EXACT
+    // equality — a prefix match (startsWith) would admit look-alike hosts such as
+    // "https://admin.example.com.evil.com" or "http://localhost:30000". F-007/F-010.
+    const originHeader = req.headers.origin ?? req.headers.referer;
+    if (originHeader && env.ADMIN_ORIGIN) {
+      let requestOrigin: string | null = null;
+      try {
+        requestOrigin = new URL(originHeader).origin;
+      } catch {
+        requestOrigin = null;
+      }
+      if (requestOrigin !== new URL(env.ADMIN_ORIGIN).origin) {
+        throw new ForbiddenError("Request origin not allowed", "ORIGIN_MISMATCH");
+      }
     }
   }
 

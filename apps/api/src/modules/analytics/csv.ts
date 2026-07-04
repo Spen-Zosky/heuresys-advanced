@@ -22,10 +22,28 @@ function isPlainObject(v: Json): v is Record<string, Json> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
-/** RFC-4180 cell escaping. null/undefined render as the empty string. */
+/**
+ * Neutralize spreadsheet formula / DDE injection: a cell whose text begins with a
+ * formula trigger (`= + @`, or a leading TAB/CR) — or a leading `-` that is NOT a plain
+ * number — is prefixed with a single quote so Excel/Sheets/LibreOffice render it as text,
+ * never as a live formula (e.g. `=cmd|'/c calc'!A1`). Plain negative numbers pass through
+ * unchanged. F-004 (OWASP CSV injection).
+ */
+const PLAIN_NUMBER = /^-?\d+(?:\.\d+)?$/;
+function neutralizeFormula(s: string): string {
+  if (s === "") return s;
+  const first = s[0]!;
+  const isTrigger =
+    first === "=" || first === "+" || first === "@" || first === "\t" || first === "\r" ||
+    (first === "-" && !PLAIN_NUMBER.test(s));
+  return isTrigger ? `'${s}` : s;
+}
+
+/** RFC-4180 cell escaping + formula-injection neutralization. null/undefined → "". */
 export function csvCell(value: Json): string {
   if (value === null || value === undefined) return "";
-  const s = typeof value === "object" ? JSON.stringify(value) : String(value);
+  const raw = typeof value === "object" ? JSON.stringify(value) : String(value);
+  const s = neutralizeFormula(raw);
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 

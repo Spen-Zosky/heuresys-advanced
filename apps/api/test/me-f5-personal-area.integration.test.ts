@@ -10,8 +10,9 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { closePool } from "../src/db/client.js";
 import type { MeAnalyticsResponse, MeApprovalsResponse } from "@heuresys/shared";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 async function cookie(t: TestApp, email: string): Promise<string> {
   const r = await loginRaw(t.app, email, PWD);
   return r.cookies.map((c) => `${c.name}=${c.value}`).join("; ");

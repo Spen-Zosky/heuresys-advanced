@@ -22,7 +22,7 @@
  * "BLOCKED: agent credential required" message — it MUST NOT fake-pass.
  *
  * Run (from repo root) — DO NOT run live until a credential is provisioned (Enzo):
- *   ACC_EMAIL=admin@heuresys.com ACC_PASSWORD='Admin#PassW0rd!' \
+ *   ACC_EMAIL=admin@heuresys.com ACC_PASSWORD='<password>' \
  *   pnpm --filter @heuresys/agent-gateway exec tsx scripts/live-skills-acceptance.ts
  *
  * TOTP is computed inline (RFC 6238, node:crypto) — no extra dep. Fixture secrets
@@ -34,7 +34,7 @@ import { FIXTURE_TOTP_SECRETS } from "../../api/test/helpers/mfa-fixture-secrets
 const API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
 const GATEWAY = (process.env.AGENT_GATEWAY ?? "http://localhost:8790").replace(/\/$/, "");
 const EMAIL = process.env.ACC_EMAIL ?? "admin@heuresys.com";
-const PASSWORD = process.env.ACC_PASSWORD ?? "Admin#PassW0rd!";
+const PASSWORD = process.env.ACC_PASSWORD ?? process.env.TEST_ADMIN_PASSWORD ?? "";
 
 /** The 3 pinned skills + a prompt designed to route the model into each skill. */
 interface SkillCase {

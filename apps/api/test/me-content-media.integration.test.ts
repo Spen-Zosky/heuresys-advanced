@@ -9,8 +9,9 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const AUTHOR = "federica.marchetti@rtl-bank.org"; // TENANT_ADMIN (RTL) — content:update/publish
 const EMPLOYEE = "tommaso.fiore@rtl-bank.org"; // USER (RTL) — me:content:read only
 const CROSS_TENANT = "admin@heuresys.com"; // PLATFORM_ADMIN, tenant HEURESYS (≠ RTL)

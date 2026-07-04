@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 /**
  * ITEM #5/#11 — LIVE verification of the PRODUCTION RACI OU<->process seed.
@@ -24,7 +25,7 @@ import { pool } from "../src/db/client.js";
  * No DELETE of seeded rows (the temp assignment uses an unused OU/process).
  */
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const RTL = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
 const SEED_ITEM = "S1002-#5/#11";
 

@@ -3,12 +3,13 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { deriveLevel, type MaturityMetrics } from "../src/modules/capability-maturity/service.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // Gap#1 Maturity engine Phase-2 (/v1/capability/maturity/*). Real login + live DB.
 // Derives L0..L5 per org-unit from the MLCE composite + the v1-full coded rubric
 // (bands + gate criteria). capability:read = admin/ORG_DIRECTOR/HR; recompute = admin+CSRF.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 interface S { cookies: Map<string, string>; csrfToken: string; userId: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // MVP-4 §2.5 — ESS self-service session management (/v1/me/security/sessions + the
 // /v1/auth/sessions/current helper). Real login + live DB. A login creates a refresh-
@@ -8,7 +9,7 @@ import { loginRaw } from "./helpers/login.js";
 // claim (the refresh token is opaque and never parsed outside the rotation flow).
 // me:sessions:manage = all roles.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 interface S { cookies: Map<string, string>; csrf: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {

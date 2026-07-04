@@ -20,7 +20,7 @@ import { FIXTURE_TOTP_SECRETS } from "../../api/test/helpers/mfa-fixture-secrets
 const API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
 const GATEWAY = (process.env.AGENT_GATEWAY ?? "http://localhost:8790").replace(/\/$/, "");
 const EMAIL = process.env.ACC_EMAIL ?? "admin@heuresys.com";
-const PASSWORD = process.env.ACC_PASSWORD ?? "Admin#PassW0rd!";
+const PASSWORD = process.env.ACC_PASSWORD ?? process.env.TEST_ADMIN_PASSWORD ?? "";
 const RTL_TENANT = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
 const ARCHETYPE = "RETAIL_BANK_REFERENCE";
 

@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // S973 #2·m3 — PredictionsML read-model API (/v1/predictions/*). Real login + live DB (SSH tunnel).
 // READ-ONLY surface: reads need predictions:read (6 HRMS roles). No writes.
 // Live data = the RTL predictive-analytics import: models 4 / predictions 468
 //   (156 GENERIC + 156 PERFORMANCE + 156 TURNOVER). All subjects resolve to sys_users (0 unresolved).
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 interface S { cookies: Map<string, string> }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {

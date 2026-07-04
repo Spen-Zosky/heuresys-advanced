@@ -2,12 +2,13 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // Cap③ data-mining P2 — succession-readiness (slice B) + skill-gap (slice C).
 // In-platform-derived over the ② embedding substrate; admin/manager-only (insights:view,
 // D-6); recompute = insights:admin + CSRF. Real login + live DB.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 interface S { cookies: Map<string, string>; csrfToken: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {

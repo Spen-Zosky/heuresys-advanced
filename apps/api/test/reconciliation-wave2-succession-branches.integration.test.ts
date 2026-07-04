@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildTestApp, type TestApp } from './helpers/build-test-app.js';
 import { loginRaw } from './helpers/login.js';
 import { pool } from '../src/db/client.js';
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // Wave-2 / B-50 close (S982, mig 000106 + seeds 49-50): the last 3 NEEDS_DECISION tables
 // were imported under PM decisions D1-D3 (Enzo 2026-06-10, dossiers
@@ -127,7 +128,7 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
       // S984: dual-mode login (raw single-step broke at fixture-seed time —
       // step-1 returns 200 mfa_required with NO cookies once the persona has
       // a verified factor, policy-independent).
-      const r = await loginRaw(suite.app, 'federica.marchetti@rtl-bank.org', 'Admin#PassW0rd!');
+      const r = await loginRaw(suite.app, 'federica.marchetti@rtl-bank.org', TEST_PERSONA_PASSWORD);
       cookieHeader = r.cookies.map((c) => `${c.name}=${c.value}`).join('; ');
     });
 

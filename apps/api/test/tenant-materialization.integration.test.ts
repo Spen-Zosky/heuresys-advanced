@@ -2,13 +2,14 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // #4 WI-C — tenant materialization generator (/v1/tenant-materialization). Real login + live DB.
 // PLATFORM_ADMIN-only; the target tenant must exist + be ACTIVE (M-1). Archetype codes are
 // RBR-* (own namespace) so they never collide with a tenant's real seed data. Writes touch
 // only the validated target tenant (I5). afterAll purges every RBR-* row + the temp tenant.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const RTL = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
 const HEU = "8bc5bc59-f2d2-4a8a-882a-ea26ac367858";
 const ARCHETYPE = "RETAIL_BANK_REFERENCE";

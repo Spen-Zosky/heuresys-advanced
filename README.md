@@ -156,7 +156,7 @@ cd apps/web && pnpm dev   # → :3000  Next.js 15 SPA
 cd apps/showcase && pnpm dev  # → :3010  Static brand showcase
 ```
 
-Open `http://localhost:3000`, log in as one of the seeded personas (password `Admin#PassW0rd!`). These are **real RTL_BANK users** wired by the S950 rebuild (the old `*.test` accounts were deleted); authority: `db/scripts/seed-test-admin.ts`:
+Open `http://localhost:3000`, log in as one of the seeded personas (password from the `TEST_ADMIN_PASSWORD` env — set it in `.env`, no committed default; F-001). These are **real RTL_BANK users** wired by the S950 rebuild (the old `*.test` accounts were deleted); authority: `db/scripts/seed-test-admin.ts`:
 
 | Persona | Email | Role | Lands on |
 |---|---|---|---|

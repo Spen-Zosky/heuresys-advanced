@@ -18,8 +18,9 @@ import argon2 from "argon2";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PASSWORD = "Admin#PassW0rd!";
+const PASSWORD = TEST_PERSONA_PASSWORD;
 const ADMIN = "admin@heuresys.com"; // human PLATFORM_ADMIN -> NOT exemptable (M-8b)
 const SVC_EMAIL = "wi-a-svc-test@heuresys.local"; // throwaway SERVICE -> exemptable
 

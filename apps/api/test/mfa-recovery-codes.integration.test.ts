@@ -4,6 +4,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool } from "../src/db/client.js";
 import { sharedMfaService } from "../src/modules/auth/mfa-service.js";
 import * as mfaRepo from "../src/modules/auth/mfa-repository.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // MVP-4 §2.5 MFA — recovery codes. A throwaway verified TOTP factor is enrolled on a
 // dedicated persona (antonio.parisi) so login gates; recovery codes are generated via the
@@ -11,7 +12,7 @@ import * as mfaRepo from "../src/modules/auth/mfa-repository.js";
 // single-use. Live DB; factor + codes cleaned up in afterAll.
 
 const EMAIL = "antonio.parisi@rtl-bank.org";
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 
 function genTotp(secretBase32: string): string {
   return new OTPAuth.TOTP({

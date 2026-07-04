@@ -15,8 +15,9 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 
 interface S {
   cookies: Map<string, string>;

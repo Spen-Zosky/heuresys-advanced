@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // 3.3 slice-D — generic approval runtime (/v1/approvals/*). Real login + live DB.
 // Writes = approval:create (admin/TENANT_ADMIN/HRMS/PROCESS_OWNER/MANAGER) +
@@ -10,7 +11,7 @@ import { pool } from "../src/db/client.js";
 // the data-layer "own step only" check. Tests pin to real RTL_BANK personas; writes
 // touch the RTL test tenant only (NEVER HEURESYS). afterAll purges every TEST- row.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const RTL = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
 const TITLE_PREFIX = "TEST-APPROVAL";
 

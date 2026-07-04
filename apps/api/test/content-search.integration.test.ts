@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // cap④ CMS P3 — full-text search (/v1/content/search). Real login + live DB. A real document
 // is created (no fixtures), searched, then cleaned up — live-data E2E doctrine.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const TOKEN = "quokkasearchtoken9173"; // unique nonsense term → deterministic match
 const PFX = "[SRCH-TEST]";
 interface S { cookies: Map<string, string>; csrfToken: string }

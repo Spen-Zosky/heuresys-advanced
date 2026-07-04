@@ -8,6 +8,7 @@ import {
   type EscoSkillFetcher,
   type RawEscoSkillResource,
 } from "../src/modules/reference-sync/esco-connector.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // Cap⑤ T1.1 — ESCO skill-hierarchy backfill (/v1/reference-sync source
 // ESCO_SKILL_HIERARCHY). Real login + live DB. The skill fetcher is INJECTED with a
@@ -16,7 +17,7 @@ import {
 // rows are inserted, then deleted in afterAll). PLATFORM_ADMIN-only (reference_sync,
 // source-agnostic permission 000084).
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const SKILL_PREFIX = "http://data.europa.eu/esco/skill/HEURESYS-T11-";
 const GROUPED_URI = `${SKILL_PREFIX}grouped`;
 const UNGROUPED_URI = `${SKILL_PREFIX}ungrouped`;

@@ -2,13 +2,14 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // Cap④ CMS — tenant-scoped content (/v1/content/*). Real login + live DB.
 // content:read = 6 non-leaf roles; write (create/update/delete) = PLATFORM/TENANT_ADMIN/HRMS_MANAGER.
 // Author = TENANT_ADMIN (federica) — definitely has a tenant + content:create. Test rows are
 // prefixed ZZZCMSTEST and removed in afterAll (cascade drops versions).
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const PFX = "ZZZCMSTEST";
 interface S { cookies: Map<string, string>; csrfToken: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }

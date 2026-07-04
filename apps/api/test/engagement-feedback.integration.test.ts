@@ -2,13 +2,14 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // R1 Fase3 (S988) — engagement feedback API module (/v1/engagement-feedback/*). Real login +
 // live DB (SSH tunnel). Reads need engagement_feedback:read (6 HRMS roles); writes need
 // engagement_feedback:{create,update,delete} (admins + HR). Live data = the RTL engagement import:
 // feedback 400 (anonymous) / action_plans 6.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 interface S { cookies: Map<string, string>; csrfToken: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {

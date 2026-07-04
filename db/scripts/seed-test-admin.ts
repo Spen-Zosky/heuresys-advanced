@@ -45,8 +45,6 @@ const __dirname = dirname(__filename);
 const repoRoot = resolve(__dirname, "..", "..");
 dotenvConfig({ path: resolve(repoRoot, ".env") });
 
-const DEFAULT_PASSWORD = "Admin#PassW0rd!";
-
 /** The six E2E/integration personas, by real email. Order = display order.
  *  marco.rinaldi (TEAM_LEADER, r1b) joined the fixture set in S983 WS-E —
  *  the mandatory-MFA total coverage gates every login-capable persona. */
@@ -176,7 +174,15 @@ async function ensureAuth(
 }
 
 async function main() {
-  const password = process.env.TEST_ADMIN_PASSWORD ?? DEFAULT_PASSWORD;
+  // F-001: no committed default — the persona password is environment-driven and the seeder
+  // fails closed if it is unset, so a public/default password can never be written to the DB.
+  const password = process.env.TEST_ADMIN_PASSWORD;
+  if (!password) {
+    console.error(
+      "TEST_ADMIN_PASSWORD is not set — set it in the repo-root .env and re-run (F-001, no committed default).",
+    );
+    process.exit(1);
+  }
   const wantsReset = process.env.TEST_ADMIN_RESET_PASSWORD === "1";
 
   const client = new Client({
@@ -213,10 +219,7 @@ async function main() {
       ];
       console.log(`  ${r.email.padEnd(34)} ${flags.join(" ")}`);
     }
-    console.log(
-      `  password : ${password}` +
-        (process.env.TEST_ADMIN_PASSWORD ? " (env)" : " (default — set TEST_ADMIN_PASSWORD to override)"),
-    );
+    console.log(`  password : (from $TEST_ADMIN_PASSWORD, ${password.length} chars — value never logged)`);
     console.log("─".repeat(76));
   } catch (err) {
     await client.query("ROLLBACK");

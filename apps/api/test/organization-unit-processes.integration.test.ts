@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // T2.5 — org-unit ↔ business-process RACI assignment (/v1/organization-unit-processes/*).
 // Real login + live DB. Writes = organization_unit_processes:create/delete (PLATFORM/TENANT_ADMIN/
@@ -10,7 +11,7 @@ import { pool } from "../src/db/client.js";
 // afterAll deletes every assignment created on those OUs (live-data isolation, writes to RTL test
 // tenant only — NEVER HEURESYS).
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const RTL = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
 const ZERO = "00000000-0000-0000-0000-000000000000";
 

@@ -10,8 +10,9 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PASSWORD = "Admin#PassW0rd!";
+const PASSWORD = TEST_PERSONA_PASSWORD;
 const PLATFORM = "admin@heuresys.com";
 const TENANT_ADMIN = "federica.marchetti@rtl-bank.org";
 const MANAGER = "paolo.caputo@rtl-bank.org";

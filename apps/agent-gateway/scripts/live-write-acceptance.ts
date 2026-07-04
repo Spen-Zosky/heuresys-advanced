@@ -17,7 +17,7 @@
  * → re-fetch → gone. The FileAuditSink records every gate decision (M-4).
  *
  * Run (from apps/agent-gateway):
- *   ACC_EMAIL=federica.marchetti@rtl-bank.org ACC_PASSWORD='Admin#PassW0rd!' \
+ *   ACC_EMAIL=federica.marchetti@rtl-bank.org ACC_PASSWORD='<password>' \
  *   pnpm exec tsx scripts/live-write-acceptance.ts
  *
  * TOTP computed inline (RFC 6238). Fixture secrets are repo test fixtures (no real
@@ -29,7 +29,7 @@ import { FIXTURE_TOTP_SECRETS } from "../../api/test/helpers/mfa-fixture-secrets
 const API = (process.env.HEURESYS_API ?? "http://localhost:3001").replace(/\/$/, "");
 const GATEWAY = (process.env.AGENT_GATEWAY ?? "http://localhost:8790").replace(/\/$/, "");
 const EMAIL = process.env.ACC_EMAIL ?? "federica.marchetti@rtl-bank.org";
-const PASSWORD = process.env.ACC_PASSWORD ?? "Admin#PassW0rd!";
+const PASSWORD = process.env.ACC_PASSWORD ?? process.env.TEST_ADMIN_PASSWORD ?? "";
 
 function base32Decode(s: string): Buffer {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";

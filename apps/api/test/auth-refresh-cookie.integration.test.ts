@@ -24,9 +24,10 @@ import {
   LEGACY_REFRESH_COOKIE_PATH,
 } from "../src/modules/auth/tokens.js";
 import { closePool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const ADMIN_EMAIL = "admin@heuresys.com";
-const ADMIN_PASSWORD = "Admin#PassW0rd!";
+const ADMIN_PASSWORD = TEST_PERSONA_PASSWORD;
 
 /** light-my-request parsed Set-Cookie entry (attributes included). */
 interface InjectCookie {

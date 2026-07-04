@@ -1,4 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
+import { config as dotenvConfig } from "dotenv";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+// Load repo-root .env so TEST_ADMIN_PASSWORD (and NEXT_PUBLIC_*) resolve the same way the
+// API test suite loads them via test/helpers/setup.ts. F-001: the persona login password is
+// environment-driven (not a committed constant); fixtures.ts reads it from process.env.
+dotenvConfig({ path: resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", ".env") });
 
 // Web server port is overridable so CI can avoid host port collisions. The OCI
 // VM self-hosted runner already runs Grafana on :3000 (docker-proxy), so the

@@ -2,13 +2,14 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // Gap#1 MLCE Phase-1 — in-platform capability composition (/v1/capability/composition/*).
 // Real login + live DB (RTL_BANK). capability:read = PLATFORM_ADMIN/TENANT_ADMIN/ORG_DIRECTOR/
 // HRMS_MANAGER (no MANAGER, no ESS). capability:admin (recompute, CSRF) = PLATFORM_ADMIN/TENANT_ADMIN.
 // Score is a DETERMINISTIC bottom-up rule (employee->position->org-unit->org) over live sys.*.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 interface S { cookies: Map<string, string>; csrfToken: string; userId: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {

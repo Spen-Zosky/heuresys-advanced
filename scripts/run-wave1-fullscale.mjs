@@ -31,7 +31,7 @@
 
 const API_BASE = process.env.API_BASE ?? "http://localhost:3001";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@heuresys.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "Admin#PassW0rd!";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? process.env.TEST_ADMIN_PASSWORD ?? "";
 const HARD_TIMEOUT_MS = Number(process.env.HARD_TIMEOUT_MS ?? 11 * 60 * 1000); // 11 min per R3
 const SOFT_TIMEOUT_MS = 10 * 60 * 1000; // 10 min per PROMPT A10 / R3 acceptance
 

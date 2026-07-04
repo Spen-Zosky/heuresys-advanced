@@ -7,6 +7,7 @@ import { env } from "../src/config/env.js";
 import { FakeEmbedder, fakeVector } from "../src/modules/semantic-matching/voyage-client.js";
 import type { SemanticMatchingDeps } from "../src/modules/semantic-matching/service.js";
 import type { BackfillSummary } from "../src/modules/semantic-matching/backfill.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // AI ② P1 — semantic-matching API (/v1/matching/*). Real login + live DB (SSH tunnel).
 // DATA-CONTENT assertions run on THROWAWAY entities (users/occupations/skills created here and
@@ -14,7 +15,7 @@ import type { BackfillSummary } from "../src/modules/semantic-matching/backfill.
 // tables are EMPTY (normal CI) or POPULATED (after an operator backfill). Persona logins are used
 // only for auth/scope status assertions, never for content that a backfill would change.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 interface S { cookies: Map<string, string>; csrfToken: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
 async function login(t: TestApp, email: string): Promise<S> {

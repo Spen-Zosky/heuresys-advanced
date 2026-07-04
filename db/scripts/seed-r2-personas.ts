@@ -35,8 +35,6 @@ const __dirname = dirname(__filename);
 const repoRoot = resolve(__dirname, "..", "..");
 dotenvConfig({ path: resolve(repoRoot, ".env") });
 
-const DEFAULT_PASSWORD = "Admin#PassW0rd!";
-
 /** R2 role-holders that must become login-capable. */
 const R2_EMAILS: readonly string[] = [
   "luca.bianchi@rtl-bank.org",
@@ -129,7 +127,12 @@ async function ensureAuth(
 }
 
 async function main() {
-  const password = process.env.R2_PASSWORD ?? DEFAULT_PASSWORD;
+  // F-001: env-driven, no committed default; fail closed if unset.
+  const password = process.env.R2_PASSWORD ?? process.env.TEST_ADMIN_PASSWORD;
+  if (!password) {
+    console.error("Set TEST_ADMIN_PASSWORD (or R2_PASSWORD) in .env — no committed default (F-001).");
+    process.exit(1);
+  }
   const wantsReset = process.env.R2_RESET_PASSWORD === "1";
 
   const client = new Client({
@@ -159,7 +162,7 @@ async function main() {
         `  ${r.email.padEnd(34)} identity=${r.identityCreated ? "CREATED" : "EXISTS"} credential=${r.credentialCreated ? "CREATED" : "EXISTS"}`,
       );
     }
-    console.log(`  password : ${password}${process.env.R2_PASSWORD ? " (env)" : " (default)"}`);
+    console.log(`  password : (from env, ${password.length} chars — value never logged)`);
     console.log("─".repeat(76));
   } catch (err) {
     await client.query("ROLLBACK");

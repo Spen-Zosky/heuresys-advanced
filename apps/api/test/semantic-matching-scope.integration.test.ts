@@ -49,8 +49,9 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 
 /** The four per-person read surfaces of the matching module — all org-gated by the F3 fix. */
 const PER_TARGET_ENDPOINTS = ["occupations", "positions", "job-roles", "similar"] as const;

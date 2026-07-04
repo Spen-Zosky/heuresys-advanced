@@ -11,9 +11,10 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { tenantsService } from "../src/modules/tenants/service.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const ADMIN_EMAIL = "admin@heuresys.com";
-const ADMIN_PASSWORD = "Admin#PassW0rd!";
+const ADMIN_PASSWORD = TEST_PERSONA_PASSWORD;
 
 // Per-suite prefix so concurrent or repeated runs produce unique codes.
 const SUITE_PREFIX = `IT_${randomUUID().slice(0, 8).toUpperCase()}`;

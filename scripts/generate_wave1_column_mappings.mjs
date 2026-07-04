@@ -39,8 +39,17 @@ const OUT_REPORT = path.join(OUT_DIR, '04_column_mappings_report.md');
 
 const EXPORT_NAME = 'db-export-2026-05-15';
 
-const DB_URL = process.env.DBURL || 'postgres://heuresys:heuresys@localhost:5433/heuresys_advanced';
-if (!process.env.PGPASSWORD) process.env.PGPASSWORD = 'heuresys';
+// F-013: build the connection from env, NEVER a hardcoded DB password. Host/port/db/user
+// fall back to the standard local tunnel defaults; the password comes from POSTGRES_PASSWORD
+// or, if unset, psql's ~/.pgpass (no secret committed to the repo).
+const PGHOST = process.env.POSTGRES_HOST || 'localhost';
+const PGPORT = process.env.POSTGRES_PORT || '5433';
+const PGDB = process.env.POSTGRES_DB || 'heuresys_advanced';
+const PGUSER = process.env.POSTGRES_USER || 'heuresys';
+const DB_URL = process.env.DBURL || `postgres://${PGUSER}@${PGHOST}:${PGPORT}/${PGDB}`;
+if (!process.env.PGPASSWORD && process.env.POSTGRES_PASSWORD) {
+  process.env.PGPASSWORD = process.env.POSTGRES_PASSWORD;
+}
 
 // ---------------------------------------------------------------------------
 // Live DB introspection: pull target column lists for the 20 distinct targets.

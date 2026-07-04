@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // cap④ CMS P3 — content↔blueprint cross-link (/v1/content-blueprint-links/*). Real
 // login + live DB. Writes = content:update (PLATFORM/TENANT_ADMIN/HRMS_MANAGER);
@@ -9,7 +10,7 @@ import { pool } from "../src/db/client.js";
 // owned by the document's tenant (I5). Test docs are ZZZCBLTEST-prefixed; deleting
 // them CASCADEs the links (FK ON DELETE CASCADE), so afterAll cleans the docs.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const PFX = "ZZZCBLTEST";
 const ZERO = "00000000-0000-0000-0000-000000000000";
 

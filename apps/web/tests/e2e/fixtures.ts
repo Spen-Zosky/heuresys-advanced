@@ -12,7 +12,19 @@ import { FIXTURE_TOTP_SECRETS } from "./mfa-fixture-secrets";
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 
-export const TEST_PASSWORD = "Admin#PassW0rd!";
+// F-001: the persona login password is environment-driven, not committed. playwright.config.ts
+// loads the repo-root .env so TEST_ADMIN_PASSWORD is present here; fail closed if it is missing.
+function requireTestPassword(): string {
+  const v = process.env.TEST_ADMIN_PASSWORD;
+  if (!v) {
+    throw new Error(
+      "TEST_ADMIN_PASSWORD is not set — add it to the repo-root .env (loaded by playwright.config.ts). F-001.",
+    );
+  }
+  return v;
+}
+
+export const TEST_PASSWORD = requireTestPassword();
 
 /** Current TOTP code for a fixture persona (S983 WS-E mandatory-MFA). */
 export function totpFor(email: string): string {

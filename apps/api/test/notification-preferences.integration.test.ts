@@ -13,8 +13,9 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { emitNotification } from "../src/lib/notifications/emit.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const MARK = "E2E-3.4 test notification";
 
 function ch(c: Map<string, string>) {

@@ -4,13 +4,14 @@ import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import type { EscoFetcher, EscoPage, RawEscoResult } from "../src/modules/reference-sync/esco-connector.js";
 import type { AtecoFetcher, RawAtecoRow } from "../src/modules/reference-sync/istat-ateco-connector.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // Cap⑤ scraping — ESCO reference-sync (/v1/reference-sync/*). Real login + live DB.
 // The ESCO fetcher is INJECTED with a fixture (no live HTTP, scraping spec §7). The
 // fixture uses SYNTHETIC test URIs only — the real 7645-row ESCO catalog is untouched
 // (the synthetic rows are inserted, then deleted in afterAll). PLATFORM_ADMIN-only.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const TEST_PREFIX = "http://data.europa.eu/esco/occupation/HEURESYS-SYNCTEST-";
 const FIXTURE: RawEscoResult[] = [
   { uri: `${TEST_PREFIX}0001`, title: "synctest occupation alpha", code: "9001", className: "Occupation", status: "released" },

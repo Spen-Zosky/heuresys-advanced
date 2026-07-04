@@ -19,13 +19,14 @@ import { COOKIES } from "../src/config/constants.js";
 import { createAuthService } from "../src/modules/auth/service.js";
 import { InMemoryMailer } from "../src/modules/auth/mailer.js";
 import { sharedEmailRateLimiter } from "../src/modules/auth/email-rate-limit.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
 const ADMIN_EMAIL = "admin@heuresys.com";
-const ADMIN_PASSWORD = "Admin#PassW0rd!";
+const ADMIN_PASSWORD = TEST_PERSONA_PASSWORD;
 
 interface LoginBundle {
   status: number;

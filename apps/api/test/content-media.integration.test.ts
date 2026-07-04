@@ -12,8 +12,9 @@ import { resolve } from "node:path";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const AUTHOR = "federica.marchetti@rtl-bank.org"; // TENANT_ADMIN — content:update
 const READER = "paolo.caputo@rtl-bank.org"; // MANAGER — content:read only
 const PFX = "[media-it]";

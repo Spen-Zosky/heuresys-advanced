@@ -15,8 +15,9 @@ import { randomUUID } from "node:crypto";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 
 // Seeded fixture (verified live): "Q4 2025 Pulse Survey" assigned to tommaso, 3 questions
 // (1 nps + 2 rating — all three take a ratingValue per the type↔column rule).

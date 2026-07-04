@@ -12,10 +12,11 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { ensureFixtureTotpFactor } from "./helpers/login.js";
 import { E2E_FIXTURE_LABEL } from "./helpers/mfa-fixture-secrets.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const TOTP_USER = "paolo.caputo@rtl-bank.org";
 const EMAIL_USER = "tommaso.fiore@rtl-bank.org";
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 
 interface Session { cookies: Map<string, string>; csrf: string; userId: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");

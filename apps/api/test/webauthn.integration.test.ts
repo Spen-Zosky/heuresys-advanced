@@ -19,9 +19,10 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { E2E_FIXTURE_LABEL } from "./helpers/mfa-fixture-secrets.js";
 import { pool, closePool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const ADMIN_EMAIL = "admin@heuresys.com";
-const ADMIN_PASSWORD = "Admin#PassW0rd!";
+const ADMIN_PASSWORD = TEST_PERSONA_PASSWORD;
 
 interface Bundle {
   cookies: Map<string, string>;

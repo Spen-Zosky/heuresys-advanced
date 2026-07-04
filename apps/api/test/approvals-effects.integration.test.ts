@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // 3.3 slice-3a — approval apply-effect wiring (/v1/approvals/:id/apply dispatches a
 // registered handler that MUTATES the real subject, atomically with markApplied).
@@ -11,7 +12,7 @@ import { pool } from "../src/db/client.js";
 // touches only throwaway [TEST] FX tenants; afterAll purges all of them. NEVER touches
 // the real RTL_BANK / HEURESYS tenants.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 const TITLE_PREFIX = "TEST-APVFX";
 
 interface S { cookies: Map<string, string>; csrfToken: string }

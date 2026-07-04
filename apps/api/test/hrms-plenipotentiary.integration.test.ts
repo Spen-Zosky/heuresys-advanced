@@ -23,8 +23,9 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 // A syntactically-valid RFC-4122 v4 uuid that does not exist → a granted call 404s at
 // the handler (past the permission gate); an ungranted call 403s at the gate.
 const GHOST = "00000000-0000-4000-8000-0000000000ff";

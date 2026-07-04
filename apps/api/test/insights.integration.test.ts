@@ -2,13 +2,14 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
+import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // Cap③ data-mining — in-platform flight-risk scoring (/v1/insights/*). Real login + live DB.
 // insights:view = 6 non-leaf HRMS roles (admin/manager-only, D-6; no ESS for USER/READ_ONLY).
 // insights:admin (recompute, CSRF) = PLATFORM_ADMIN/TENANT_ADMIN/HRMS_MANAGER.
 // The score is a DETERMINISTIC weighted-linear rule over live sys.* features.
 
-const PWD = "Admin#PassW0rd!";
+const PWD = TEST_PERSONA_PASSWORD;
 interface S { cookies: Map<string, string>; csrfToken: string; userId: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {

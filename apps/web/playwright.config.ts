@@ -1,12 +1,26 @@
 import { defineConfig, devices } from "@playwright/test";
-import { config as dotenvConfig } from "dotenv";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
-// Load repo-root .env so TEST_ADMIN_PASSWORD (and NEXT_PUBLIC_*) resolve the same way the
-// API test suite loads them via test/helpers/setup.ts. F-001: the persona login password is
-// environment-driven (not a committed constant); fixtures.ts reads it from process.env.
-dotenvConfig({ path: resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", ".env") });
+// Local convenience: hydrate TEST_ADMIN_PASSWORD (F-001: env-driven persona password, read by
+// fixtures.ts from process.env) from the gitignored repo-root .env when Playwright is run from a
+// dev shell. In CI the value comes from the runner env and the repo .env is absent → this is
+// skipped. Parsed with fs (no dotenv dependency, no import.meta) so the Playwright config loader
+// evaluates it in any module context. Never overrides an existing process.env value (CI wins).
+try {
+  const envPath = resolve(process.cwd(), "..", "..", ".env");
+  for (const line of readFileSync(envPath, "utf8").split("\n")) {
+    const m = /^\s*([A-Z0-9_]+)\s*=\s*(.*)$/.exec(line);
+    if (!m || m[1] === undefined) continue;
+    let val = (m[2] ?? "").trim();
+    if ((val.startsWith("'") && val.endsWith("'")) || (val.startsWith('"') && val.endsWith('"'))) {
+      val = val.slice(1, -1);
+    }
+    if (process.env[m[1]] === undefined) process.env[m[1]] = val;
+  }
+} catch {
+  // .env absent (CI) — values come from the process environment.
+}
 
 // Web server port is overridable so CI can avoid host port collisions. The OCI
 // VM self-hosted runner already runs Grafana on :3000 (docker-proxy), so the

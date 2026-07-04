@@ -63,6 +63,12 @@
     "typescript-eslint": "8.61.0"
   },
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "argon2",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ],
     "overrides": {
       "vite": "^8.0.16",
       "postcss": "^8.5.10",

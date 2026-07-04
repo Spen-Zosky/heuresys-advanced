@@ -6,7 +6,10 @@
     "generic": "An error occurred",
     "load": "Unable to load data.",
     "loadHint": "Try again later or check your connection.",
-    "save": "Error while saving."
+    "save": "Error while saving.",
+    "boundaryTitle": "Something went wrong",
+    "boundaryBody": "An unexpected error occurred while loading this section. Try again; if the problem persists, reload the page.",
+    "boundaryRef": "Reference:"
   },
   "actions": {
     "cancel": "Cancel",

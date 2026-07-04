@@ -6,7 +6,10 @@
     "generic": "Si è verificato un errore",
     "load": "Impossibile caricare i dati.",
     "loadHint": "Riprova più tardi o verifica la connessione.",
-    "save": "Errore durante il salvataggio."
+    "save": "Errore durante il salvataggio.",
+    "boundaryTitle": "Qualcosa è andato storto",
+    "boundaryBody": "Si è verificato un errore imprevisto durante il caricamento di questa sezione. Riprova; se il problema persiste, ricarica la pagina.",
+    "boundaryRef": "Riferimento:"
   },
   "actions": {
     "cancel": "Annulla",

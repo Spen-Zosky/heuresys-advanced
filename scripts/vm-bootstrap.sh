@@ -31,6 +31,9 @@ API_PORT="${API_PORT:-8013}"
 WEB_PORT="${WEB_PORT:-3013}"
 DB_PORT="${DB_PORT:-5432}"   # native PostgreSQL on the host (no SSH tunnel here)
 NVM_VERSION="${NVM_VERSION:-v0.40.1}"
+# F-011: pinned SHA256 of the nvm install.sh for the default NVM_VERSION, verified before
+# execution (see the install block below). Override when bumping NVM_VERSION.
+NVM_INSTALL_SHA256="${NVM_INSTALL_SHA256:-abdb525ee9f5b48b34d8ed9fc67c6013fb0f659712e401ecd88ab989b3af8f53}"
 
 log() { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
 
@@ -55,7 +58,23 @@ fi
 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 if [ ! -s "$NVM_DIR/nvm.sh" ]; then
   echo "  installing nvm $NVM_VERSION"
-  curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" | bash
+  # F-011: download the installer to a file and verify its SHA256 BEFORE executing it, rather
+  # than piping the network straight into a shell (which also executes partial content on a
+  # truncated download). Fails closed on mismatch; NVM_INSTALL_SHA256="" skips (not advised).
+  nvm_installer="$(mktemp)"
+  curl -fsSL "https://raw.githubusercontent.com/nvm-sh/nvm/$NVM_VERSION/install.sh" -o "$nvm_installer"
+  if [ -n "$NVM_INSTALL_SHA256" ]; then
+    if ! echo "$NVM_INSTALL_SHA256  $nvm_installer" | sha256sum -c - >/dev/null 2>&1; then
+      echo "  ERROR: nvm installer SHA256 mismatch (expected $NVM_INSTALL_SHA256) — aborting." >&2
+      rm -f "$nvm_installer"
+      exit 1
+    fi
+    echo "  nvm installer checksum verified"
+  else
+    echo "  WARNING: NVM_INSTALL_SHA256 unset — running nvm installer WITHOUT checksum verification" >&2
+  fi
+  bash "$nvm_installer"
+  rm -f "$nvm_installer"
 fi
 # nvm.sh is NOT safe under `set -e`/`set -u`/`pipefail` (it runs commands that
 # return non-zero by design, e.g. nvm_ls_current). Relax strict mode around it.

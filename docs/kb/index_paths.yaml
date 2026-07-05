@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-05T14:34:07Z da docs/kb/tools/build_index.py
+# generato: 2026-07-05T16:56:23Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-05T14:34:07Z"
-  total_files: 2263
+  generated_at: "2026-07-05T16:56:23Z"
+  total_files: 2266
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -22,7 +22,7 @@ meta:
     db-other: 1
     db-script: 26
     db-seed: 107
-    doc-canonical: 397
+    doc-canonical: 400
     handoff-state: 1
     qa-artifact: 101
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 493
     external-archive: 50
-    live: 1720
+    live: 1723
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -7568,6 +7568,18 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\atlas\ATLAS.md'
+    root: repo
+    rel: 'docs/kb/atlas/ATLAS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\atlas\atlas.yaml'
+    root: repo
+    rel: 'docs/kb/atlas/atlas.yaml'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\full-forensic-audit\AUDIT_FORENSE_heuresys_2026-07-03_151241.md'
     root: repo
     rel: 'docs/kb/full-forensic-audit/AUDIT_FORENSE_heuresys_2026-07-03_151241.md'
@@ -7811,6 +7823,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\integrations\INTEGRATIONS.md'
     root: repo
     rel: 'docs/kb/integrations/INTEGRATIONS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\build_atlas.py'
+    root: repo
+    rel: 'docs/kb/tools/build_atlas.py'
     category: doc-canonical
     status: live
     provenance: git-tracked

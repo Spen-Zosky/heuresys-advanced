@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-05T14:34:07Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2263**
+**Generato**: 2026-07-05T16:56:23Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2266**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -22,7 +22,7 @@
 | db-other | 1 |
 | db-script | 26 |
 | db-seed | 107 |
-| doc-canonical | 397 |
+| doc-canonical | 400 |
 | handoff-state | 1 |
 | qa-artifact | 101 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 262 |
 | ux-design-archive | 80 |
 | web-source | 189 |
-| **TOTALE** | **2263** |
+| **TOTALE** | **2266** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1720 |
+| live | 1723 |
 
 ## File per categoria
 
@@ -1345,6 +1345,8 @@
 - `D:\heuresys-advanced\docs\kb\SOT_STATE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\VISUALIZATION_RENDERERS_CLOSURE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\WAVE2_UNBLOCK_PACKAGE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\atlas\ATLAS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\atlas\atlas.yaml` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\AUDIT_FORENSE_heuresys_2026-07-03_151241.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\FINDINGS_2026-07-03_151241.json` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\FP_CHECK_VERIFICATION_2026-07-03_151241.md` · *live* · git-tracked
@@ -1386,6 +1388,7 @@
 - `D:\heuresys-advanced\docs\kb\improvement\TODO_100X.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\index_paths.yaml` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\integrations\INTEGRATIONS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\build_atlas.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_graph_hub.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_graph_mirror.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_index.py` · *live* · git-tracked

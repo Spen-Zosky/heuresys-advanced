@@ -52,11 +52,11 @@ PRESERVE_FROM_REMOTE=( .credentials.json projects settings.local.json history.js
 # staging blocklist — none of these may ever appear in the payload:
 BLOCKLIST_RE='\.credentials\.json|claude-mem\.db|history\.jsonl|stats-cache|installed_plugins\.json|known_marketplaces\.json|\.bak'
 
+# S1015 parity fix: buildwithclaude / claude-code-plugins-plus-skills / n-skills removed —
+# dismessi sul SoT Windows (nessun marketplace clone, nessuna enabledPlugins entry); le voci
+# stale qui re-installavano su ogni align plugin che Windows non ha più (drift §2/§3 linux-pc).
 MARKETPLACES=(
   "claude-plugins-official=anthropics/claude-plugins-official"
-  "buildwithclaude=davepoon/buildwithclaude"
-  "claude-code-plugins-plus-skills=jeremylongshore/claude-code-plugins-plus-skills"
-  "n-skills=numman-ali/n-skills"
   "gmickel-claude-marketplace=gmickel/gmickel-claude-marketplace"
   "thedotmack=thedotmack/claude-mem"
 )
@@ -68,7 +68,6 @@ PLUGINS_TO_INSTALL=(
   claude-md-management@claude-plugins-official skill-creator@claude-plugins-official
   claude-code-setup@claude-plugins-official chrome-devtools-mcp@claude-plugins-official
   frontend-design@claude-plugins-official
-  frontend-design-pro@buildwithclaude nextjs-expert@buildwithclaude
   claude-mem@thedotmack
 )
 

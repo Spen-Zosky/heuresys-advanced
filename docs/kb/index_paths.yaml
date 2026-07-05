@@ -1,15 +1,15 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-02T14:24:10Z da docs/kb/tools/build_index.py
+# generato: 2026-07-05T14:34:07Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-02T14:24:10Z"
-  total_files: 2251
+  generated_at: "2026-07-05T14:34:07Z"
+  total_files: 2263
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 26
-    api-core: 22
+    api-core: 23
     api-module: 292
     ci: 16
     claude-config: 6
@@ -22,7 +22,7 @@ meta:
     db-other: 1
     db-script: 26
     db-seed: 107
-    doc-canonical: 393
+    doc-canonical: 397
     handoff-state: 1
     qa-artifact: 101
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 87
     showcase-source: 13
-    test: 257
+    test: 262
     ux-design-archive: 80
-    web-source: 187
+    web-source: 189
   status_counts:
     archive: 493
     external-archive: 50
-    live: 1708
+    live: 1720
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -269,6 +269,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\data-classes.ts'
     root: repo
     rel: 'apps/api/src/lib/scope/data-classes.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\gate.ts'
+    root: repo
+    rel: 'apps/api/src/lib/scope/gate.ts'
     category: api-core
     status: live
     provenance: git-tracked
@@ -7562,6 +7568,30 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\full-forensic-audit\AUDIT_FORENSE_heuresys_2026-07-03_151241.md'
+    root: repo
+    rel: 'docs/kb/full-forensic-audit/AUDIT_FORENSE_heuresys_2026-07-03_151241.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\full-forensic-audit\FINDINGS_2026-07-03_151241.json'
+    root: repo
+    rel: 'docs/kb/full-forensic-audit/FINDINGS_2026-07-03_151241.json'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\full-forensic-audit\FP_CHECK_VERIFICATION_2026-07-03_151241.md'
+    root: repo
+    rel: 'docs/kb/full-forensic-audit/FP_CHECK_VERIFICATION_2026-07-03_151241.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\full-forensic-audit\INDEX.md'
+    root: repo
+    rel: 'docs/kb/full-forensic-audit/INDEX.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\improvement\2026-06-13_heuresys-advanced-100x-kickoff-prompt.md'
     root: repo
     rel: 'docs/kb/improvement/2026-06-13_heuresys-advanced-100x-kickoff-prompt.md'
@@ -10658,6 +10688,18 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\csrf-origin.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/csrf-origin.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\csv-formula-injection.test.ts'
+    root: repo
+    rel: 'apps/api/test/csv-formula-injection.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\dashboard.integration.test.ts'
     root: repo
     rel: 'apps/api/test/dashboard.integration.test.ts'
@@ -10748,9 +10790,21 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\helpers\personas.ts'
+    root: repo
+    rel: 'apps/api/test/helpers/personas.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\helpers\setup.ts'
     root: repo
     rel: 'apps/api/test/helpers/setup.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\helpers\tx-isolation.ts'
+    root: repo
+    rel: 'apps/api/test/helpers/tx-isolation.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11039,6 +11093,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\operating-models.integration.test.ts'
     root: repo
     rel: 'apps/api/test/operating-models.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\org-gate.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/org-gate.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -13127,6 +13187,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\demo\page.tsx'
     root: repo
     rel: 'apps/web/src/app/demo/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\error.tsx'
+    root: repo
+    rel: 'apps/web/src/app/error.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\global-error.tsx'
+    root: repo
+    rel: 'apps/web/src/app/global-error.tsx'
     category: web-source
     status: live
     provenance: git-tracked

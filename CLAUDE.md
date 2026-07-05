@@ -185,6 +185,8 @@ This pattern has been replicated across every business module (current count: `d
 
 Vitest config (`apps/api/vitest.config.ts`) runs **singleThread** to avoid refresh-rotation race conditions and shares one DB pool across the suite. The helper `apps/api/test/helpers/build-test-app.ts` boots an isolated Fastify instance per test, loads the RBAC cache once, and injects an `InMemoryMailer` so auth assertions can inspect outgoing mail without I/O. Tests hit the live OCI VM DB — **the SSH tunnel must be up**. There is no separate unit/integration split today; all tests in `apps/api/test/*.test.ts` are integration-level.
 
+**Transactional isolation (D-52, S1015)**: every test FILE runs inside ONE real transaction rolled back at file end (`test/helpers/setup.ts` → `test/helpers/tx-isolation.ts`) — zero residue on the shared DB, no inter-file coupling; the legacy `afterAll` DELETE cleanups are now redundant-but-harmless. Direct `pool.query` WRITE statements (INSERT/UPDATE/DELETE/MERGE, incl. writing CTEs) run in serialized per-statement savepoints so intentional DB-error tests keep autocommit semantics; reads pass straight through; the app's `withTransaction` maps BEGIN/COMMIT/ROLLBACK to savepoints. Deltas to know: `now()` is frozen per file (transaction_timestamp); fixtures created in `beforeAll` are rolled back too; an intentionally-failing SELECT would abort the file tx (none exists today — extend the write-detector if one appears). Escape hatch: `TEST_TX_ISOLATION=0` (legacy autocommit).
+
 ## Non-negotiable invariants
 
 These are enforced architecturally and cannot be revisited without a new ADR / decision-log entry. They override "common patterns" you may want to apply from other projects.

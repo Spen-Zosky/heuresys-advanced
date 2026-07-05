@@ -19,6 +19,11 @@ import re
 import subprocess
 import sys
 
+try:
+    sys.stdout.reconfigure(encoding="utf-8")  # glyph/arrow-safe su console Windows cp1252
+except Exception:
+    pass
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from handoff_lint import (read, split_sections, parse_register_items, current_session,  # noqa: E402
                           BACKLOG_MD, STATE_MD, REPO)

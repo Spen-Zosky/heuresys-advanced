@@ -57,6 +57,55 @@
   - priority: P1 · effort: ~4h · doc: docs/kb/SOT_STATE.md §"Delta S1009"
   - note: ✅ DONE S1009 — richiesta diretta Enzo. 3 prospettive PET → **5 sezioni** collassabili (Panoramica/Governance/Forza lavoro/Intelligence/Area personale, mig **000163**); **Dashboard prima** (req 1); **lingua IT/EN nell'header** persistita su `sys_user_preferences`, ereditabile come il tema (req 2); **selettore prospettiva ritirato** (req 3, stato gruppi in localStorage); **6 voci-merge con TabNav** (`section-tabs.tsx`, 9 pagine `is_active=false` route-vive) — merge=navigazione per decisione Enzo; rinomine (Analisi Organizzativa/Skill/Obiettivi/OKR) + `/content`→Intelligence. Gate typecheck 5/5 + me-interfaces 5/5 + a11y E2E 40 + **CI 7/7** + deploy VM verde + **verifica LIVE www** (login `admin@`: 5 sezioni in ordine, dashboard prima, lingua persiste it→en, TabNav 6 tab). Intoppo CHECK-idempotenza-chain risolto → **D-46**.
 
+### Serie A+B (S1016 — selezione Enzo "procedi con B + A", dossier `docs/product/DEVELOPMENT_LINES_{A,B}_*.md`)
+
+- **#25 A/L5 — ponte posizione→learning (accende `positions/[id]/learning`)** · status: ACTIVE
+  - priority: P1 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L5
+  - note: `position_learning_requirements` 1791 + `skill_learning_mappings` 635 → read API + pagina esistente oggi vuota (gap-DATI censito S1004). orgGate `catalog`.
+- **#26 A/L1 — vita dei goal/OKR (updates, check-ins, milestones, comments, alignments)** · status: ACTIVE
+  - priority: P1 · effort: ~6-10h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L1
+  - note: ~4.8k righe; sub-risorse read + timeline in `/goals`, `/okrs`, `/me/career`. EVALUATION → orgGate; `goal:read:self` già seedato.
+- **#27 A/L2 — evidence layer (le prove sotto gli score)** · status: ACTIVE
+  - priority: P1 · effort: ~8-12h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L2
+  - note: ~5.3k righe (assessment/learning evidence, 360, continuous feedback, behavioral). Drill-down "perché questo score" su insights/gaps/reviews + self-scope ESS. Sostanza del wedge explainability/AI-Act. SENSITIVE → orgGate + estensione tassonomia data-classes.
+- **#28 A/L0 — Trust Ledger: read-API provenance (70.972 righe lineage)** · status: ACTIVE
+  - priority: P1 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L0
+  - note: `/v1/provenance` per-record+aggregata; pannello in `/brownfield-adaptation` (o nuova `/provenance`). Deliverable citabile GTM (AI-Act/art.22). Si rafforza con #27.
+- **#29 A/L3 — talent-review 9-box (talent/fit/readiness/succession scores)** · status: ACTIVE
+  - priority: P2 · effort: ~6-8h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L3
+  - note: 9-box derivata da `sys_talent_scores` (NB: `sys_nine_box_grid` NON esiste — drift Ledger). NUOVA `/talent-review` o tab in `/career-succession`; componenti tier17 @heuresys/ui mai usati. SENSITIVE, no self-view di default.
+- **#30 A/L4 — gap closure (plans/actions/results)** · status: ACTIVE
+  - priority: P2 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L4
+  - note: 746 righe; tab "Piani di chiusura" in `/gaps` + `/me/gaps` (self).
+- **#31 A/L6 — metrologia KPI (measurements/methods/weighting)** · status: ACTIVE
+  - priority: P3 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L6
+- **#32 A/L7 — comp & reward in lettura (+handoff ledger, +recommendations list)** · status: ACTIVE
+  - priority: P3 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L7
+  - note: chiude l'anomalia `sys_payroll_handoff_records` write-only. COMPENSATION → orgGate + I21 (HRMS_MANAGER plenipotenziario).
+- **#33 A/L8 — time-off/leave consultivo (read-only)** · status: ACTIVE
+  - priority: P3 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L8
+  - note: requests/rules/transactions (balances già esposta via `me`). Submission ESS = decisione prodotto separata (Serie E-E3, non aperta).
+- **#34 B/B3 — approval effects: nuovi handler (primo flusso approvativo reale)** · status: ACTIVE
+  - priority: P1 · effort: ~2-4h per handler · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B3
+  - note: registry con 1 solo handler; candidato TENANT_MATERIALIZATION (seam pronto). `sys_approval_requests`=0 oggi: il BPM smette di essere vuoto.
+- **#35 B/B7 — observability completa (/metrics Prometheus + slow-query + 4 sezioni system-health)** · status: ACTIVE
+  - priority: P2 · effort: ~4-6h · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B7
+  - note: `pg_stat_statements` già installato; riaccende le 4 sezioni droppate di `/system-health`.
+- **#36 B/B5 — visualization: versioning + export engine** · status: ACTIVE
+  - priority: P2 · effort: ~4-6h · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B5
+- **#37 B/B2 — reward-gate engine sui 121 variable-pay** · status: ACTIVE
+  - priority: P2 · effort: ~6-8h · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B2
+- **#38 B/B6 — inbox push SSE (da polling 30s)** · status: ACTIVE
+  - priority: P3 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B6
+- **#39 B/B4 — EMAIL: digest + EMAIL_OTP + UI preferenze notifiche** · status: GATED
+  - blocker: dipende da **#8** (app-password Outlook, WAIT-INPUT) — transport pronto, chassis testato
+  - unblock-trigger: {kind: manual} — #8 risolto (credenziale fornita da Enzo)
+  - doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B4 · effort post-input: ~2h
+- **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: GATED
+  - blocker: richiede embedding Voyage a query-time → decisione credenziale runtime (S996 le tiene dormienti)
+  - unblock-trigger: {kind: manual} — Enzo autorizza l'uso runtime della API key Voyage
+  - doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B1 · effort post-decisione: ~2h
+
 ## ✅ Gap#1 DONE (S999, 2026-06-20) — programma-faro "rendi il prodotto dimostrabile" chiuso end-to-end
 
 Il **#3 Gap#1** (Porte Process/Org UI + MLCE + Maturity) — l'abilitatore del go-to-market — è **costruito, testato live su RTL_BANK, deployato in PROD e dimostrato**. 6 commit (`3d2b0a7→f133b04`) pushati, mig 000145-149. Granulare → `SOT_STATE.md §Delta S999`.

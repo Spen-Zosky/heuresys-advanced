@@ -64,6 +64,20 @@ Formato: dati (righe live 2026-07-05) → cosa costruire → vincoli → effort 
 - **Costruire**: read admin+ESS di richieste/regole/transazioni — consultazione, NON submission (la submission ferie resta decisione prodotto, cfr. register #23 residuo).
 - **Effort**: ~0,5-1. **Valore**: embrione del verticale Time&Attendance (il cantiere evo lo ha completo; advanced ha i dati e zero feature).
 
+## 2-bis. Webapp impattate (mappa per linea — pagine dall'atlas S1016)
+
+| Linea | Pagine esistenti impattate | Pagine/tab NUOVE |
+|---|---|---|
+| L1 goals | `/goals` · `/okrs` · `/me/career` (tab Obiettivi) | timeline in-page, nessuna route nuova |
+| L2 evidence | `/insights` · `/insights/skill-gap` · `/gaps` · `/me/gaps` · `/users/[userId]` | pannelli drill-down "perché questo score" nelle pagine sopra |
+| L0 provenance | `/brownfield-adaptation` (fit naturale) | oppure **NUOVA `/provenance`** se il pannello cresce |
+| L3 talent | `/career-succession` | **NUOVA `/talent-review`** (matrice 9-box) o tab dedicata in career-succession |
+| L4 gap closure | `/gaps` · `/me/gaps` | tab "Piani di chiusura" |
+| L5 learning bridge | **`/positions/[positionId]/learning` (esiste ed è VUOTA — si accende)** · `/learning` | nessuna |
+| L6 KPI metrology | `/kpis` · `/positions/[positionId]/kpis` | nessuna |
+| L7 comp & reward | `/compensation-intelligence` | pannello "Handoff audit" in-page |
+| L8 time-off read | `/me` (tab Presenze) · `/analytics/attendance` | console richieste → rinviata alla Serie E-E3 (`/attendance`) |
+
 ## 3. Vincoli trasversali (non negoziabili, già impianti)
 
 - **DoD live E2E** (ADR-0026): ogni linea si chiude con login reale + dato reale a schermo; niente mock.

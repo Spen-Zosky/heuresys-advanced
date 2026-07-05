@@ -13,6 +13,7 @@ Questa cartella è la **SoT del dominio prodotto** di heuresys-advanced (adottat
 | `WORKITEM_GAP1_DESIGN_SPEC.md` | Blueprint esecutivo del Gap #1: data-model, algoritmi, endpoint, migration, 9 decisioni di scope (RE-ALIGNED vs Ledger) | prima di costruire Gap #1 |
 | `WORKITEM_GAP1_PHASE0_VERIFICATION.md` | Verifica live dei building-block del Gap #1 | esempio gold-standard del metodo di verifica |
 | `LATENT_CAPABILITY_CATALOG.md` | **Stub-redirect** → assorbito nel Ledger §7 (ri-verificato live) | storico/compat |
+| **`DEVELOPMENT_LINES_{A..G}_*.md`** | Portafoglio linee di sviluppo evidence-based (S1016, da atlas+full-sweep): A esporre dati dormienti · B attivare codice dormiente · C admin editing UI · D Wave-2 legacy · E verticali evo · F intelligence prescrittiva · G piattaforma/igiene. Ogni linea con webapp impattate/nuove, effort, sequenza | quando si seleziona la roadmap: la scelta (quali/quando) = Enzo → Action register |
 
 ## Come si legge la SoT prodotto
 

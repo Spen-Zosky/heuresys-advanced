@@ -82,7 +82,7 @@
 ## 9. Wiki e grafi (viste parallele, MAI SoT)
 
 - **Wiki advanced** ferma al 2026-05-27 (**pre-GA**, 748 commit dietro): ADR coperti 19/26 (mancano 0023/0024/0026/0027 = le dottrine cardine), invarianti I1-I13 vs I1-I21 attuali, 2 source path morti in `linked_sources.yaml` (+ path assoluti da parametrizzare). **Trattarla come fonte storica**; ADR ≤0020 e record brownfield/brand riusabili as-is.
-- **Grafo graphify in-repo**: refresh full-codebase eseguito in S1016 (questa sessione) — vista esplorativa, subordinata all'atlas.
+- **Grafo graphify in-repo**: refresh full-codebase eseguito in S1016 (13.777 nodi / 18.774 edge, report 2026-07-05; sub-viste `graph-{api,web,shared}.html` rigenerate). ⚠️ Parziale onesto: 26/52 chunk semantici estratti freschi, i restanti ~201 file doc/immagine mantengono l'estrazione del run precedente o solo-AST (limite di spesa mensile colpito durante il run) — ripresa documentata in `graphify-out/PENDING_SEMANTIC_TOPUP.md`. Vista esplorativa, subordinata all'atlas.
 
 ## 10. Incoerenze tecniche minori catalogate (candidate debt-register, non urgenti)
 

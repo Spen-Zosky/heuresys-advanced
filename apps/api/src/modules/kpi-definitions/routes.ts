@@ -20,11 +20,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const kpiDefinitionsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("kpi:read")],
     schema: { querystring: KpiDefinitionListQuerySchema, response: { 200: KpiDefinitionListResponseSchema } },
   }, async (req) => kpiDefinitionsService.list(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("kpi:read")],
     schema: { params: KpiDefinitionIdParamSchema, response: { 200: KpiDefinitionSchema } },
   }, async (req) => kpiDefinitionsService.getById(actor(req), req.params.id));

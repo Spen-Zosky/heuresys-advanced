@@ -13,11 +13,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const goalsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { querystring: GoalListQuerySchema, response: { 200: GoalListResponseSchema } },
   }, async (req) => goalsService.listGoals(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("goal:read")],
     schema: { params: GoalIdParamSchema, response: { 200: GoalSchema } },
   }, async (req) => goalsService.getGoal(actor(req), req.params.id));

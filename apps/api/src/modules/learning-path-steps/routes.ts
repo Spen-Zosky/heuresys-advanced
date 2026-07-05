@@ -21,11 +21,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const learningPathStepsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("learning:read")],
     schema: { querystring: LearningPathStepListQuerySchema, response: { 200: LearningPathStepListResponseSchema } },
   }, async (req) => learningPathStepsService.list(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("learning:read")],
     schema: { params: LearningPathStepIdParamSchema, response: { 200: LearningPathStepSchema } },
   }, async (req) => learningPathStepsService.getById(actor(req), req.params.id));

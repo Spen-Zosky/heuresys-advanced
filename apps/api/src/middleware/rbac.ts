@@ -75,7 +75,7 @@ export function userPermissionCodes(user: { roles: readonly string[] }): string[
 }
 
 export function requirePermission(permissionCode: string): preHandlerAsyncHookHandler {
-  return async (req: FastifyRequest, _reply: FastifyReply) => {
+  const handler: preHandlerAsyncHookHandler = async (req: FastifyRequest, _reply: FastifyReply) => {
     if (!isRolePermissionCacheLoaded()) {
       throw new ForbiddenError(
         "RBAC permission cache not loaded — server bootstrap incomplete",
@@ -87,4 +87,7 @@ export function requirePermission(permissionCode: string): preHandlerAsyncHookHa
       throw new ForbiddenError(`Missing permission: ${permissionCode}`);
     }
   };
+  // The permission code rides on the handler so the org-gate boot assertion
+  // (lib/scope/gate.ts, D-51) can map every route to its RBAC resource.
+  return Object.assign(handler, { permissionCode });
 }

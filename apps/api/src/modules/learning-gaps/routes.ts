@@ -22,11 +22,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const learningGapsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("gap_analysis:read")],
     schema: { querystring: LearningGapListQuerySchema, response: { 200: LearningGapListResponseSchema } },
   }, async (req) => learningGapsService.list(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("gap_analysis:read")],
     schema: { params: LearningGapIdParamSchema, response: { 200: LearningGapSchema } },
   }, async (req) => learningGapsService.getById(actor(req), req.params.id));

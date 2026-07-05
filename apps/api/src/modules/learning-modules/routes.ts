@@ -19,11 +19,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const learningModulesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("learning:read")],
     schema: { querystring: LearningModuleListQuerySchema, response: { 200: LearningModuleListResponseSchema } },
   }, async (req) => learningModulesService.list(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("learning:read")],
     schema: { params: LearningModuleIdParamSchema, response: { 200: LearningModuleSchema } },
   }, async (req) => learningModulesService.getById(actor(req), req.params.id));

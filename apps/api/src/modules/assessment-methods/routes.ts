@@ -13,6 +13,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const assessmentMethodsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("assessment:read")],
     schema: { response: { 200: AssessmentMethodListResponseSchema } },
   }, async (req) => assessmentMethodsService.list(actor(req)));

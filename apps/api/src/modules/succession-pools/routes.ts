@@ -20,11 +20,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const successionPoolsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("career_succession:read")],
     schema: { querystring: SuccessionPoolListQuerySchema, response: { 200: SuccessionPoolListResponseSchema } },
   }, async (req) => successionPoolsService.list(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("career_succession:read")],
     schema: { params: SuccessionPoolIdParamSchema, response: { 200: SuccessionPoolSchema } },
   }, async (req) => successionPoolsService.getById(actor(req), req.params.id));

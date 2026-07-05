@@ -22,16 +22,19 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/profiles/:positionId", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: { params: CompensationProfilePositionParamSchema, response: { 200: CompensationProfileSchema } },
   }, async (req) => compensationService.getProfileByPosition(actor(req), req.params.positionId));
 
   app.get("/reward-gates", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: { querystring: RewardGatesListQuerySchema, response: { 200: RewardGatesListResponseSchema } },
   }, async (req) => compensationService.listRewardGates(actor(req), req.query));
 
   app.get("/distribution", {
+    config: { orgGate: "aggregate" },
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: { response: { 200: CompensationDistributionResponseSchema } },
   }, async (req) => compensationService.getRewardGateDistribution(actor(req)));

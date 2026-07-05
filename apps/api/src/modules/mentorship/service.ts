@@ -132,16 +132,26 @@ export const mentorshipService = {
   },
 
   // ── Sessions (nested under a pairing) ──
+  // Session reads carry the pairing's person-level content (topics, notes, rating), so they are
+  // org-gated exactly like the pairing itself (I18 — surfaced by the D-51 org-gate assertion:
+  // before this, sessions were tenant-gated only while their parent pairing was org-gated).
   async listSessions(a: ActorContext, mentorshipId: string) {
     const m = await repo.findMentorshipById(pool, mentorshipId);
     if (!m) throw new NotFoundError("Mentorship");
     assertVisible(a, m.tenantId, "Mentorship");
+    if (m.mentorUserId && !(await canReadOrgTarget(pool, a, m.mentorUserId, m.tenantId))) throw new NotFoundError("Mentorship");
+    if (m.menteeUserId && !(await canReadOrgTarget(pool, a, m.menteeUserId, m.tenantId))) throw new NotFoundError("Mentorship");
     return repo.listSessionsByMentorship(pool, mentorshipId);
   },
   async getSession(a: ActorContext, id: string) {
     const s = await repo.findSessionById(pool, id);
     if (!s) throw new NotFoundError("Mentorship session");
     assertVisible(a, s.tenantId, "Mentorship session");
+    const m = await repo.findMentorshipById(pool, s.mentorshipId);
+    if (m) {
+      if (m.mentorUserId && !(await canReadOrgTarget(pool, a, m.mentorUserId, m.tenantId))) throw new NotFoundError("Mentorship session");
+      if (m.menteeUserId && !(await canReadOrgTarget(pool, a, m.menteeUserId, m.tenantId))) throw new NotFoundError("Mentorship session");
+    }
     return s;
   },
   async createSession(a: ActorContext, mentorshipId: string, body: CreateMentorshipSessionBody) {

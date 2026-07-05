@@ -30,6 +30,7 @@ export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/",
     {
+      config: { orgGate: "service" },
       preHandler: [requirePermission("user:read")],
       schema: {
         querystring: UserListQuerySchema,
@@ -43,6 +44,7 @@ export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/:id",
     {
+      config: { orgGate: "service" },
       preHandler: [requirePermission("user:read")],
       schema: { params: UserIdParamSchema, response: { 200: UserSchema } },
     },
@@ -97,6 +99,7 @@ export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/:id/roles",
     {
+      config: { orgGate: "service" },
       preHandler: [requirePermission("user:read")],
       schema: {
         params: UserIdParamSchema,

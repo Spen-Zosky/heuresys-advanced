@@ -20,11 +20,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const trainingInitiativesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("training_initiative:list")],
     schema: { querystring: TrainingInitiativeListQuerySchema, response: { 200: TrainingInitiativeListResponseSchema } },
   }, async (req) => trainingInitiativesService.list(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("training_initiative:read")],
     schema: { params: TrainingInitiativeIdParamSchema, response: { 200: TrainingInitiativeSchema } },
   }, async (req) => trainingInitiativesService.getById(actor(req), req.params.id));

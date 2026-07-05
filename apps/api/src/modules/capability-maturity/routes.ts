@@ -22,13 +22,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 export const capabilityMaturityRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/maturity",
-    { preHandler: [requirePermission("capability:read")], schema: { response: { 200: CapabilityMaturityListResponseSchema } } },
+    { config: { orgGate: "aggregate" }, preHandler: [requirePermission("capability:read")], schema: { response: { 200: CapabilityMaturityListResponseSchema } } },
     async (req) => capabilityMaturityService.maturity(actor(req)),
   );
 
   app.get(
     "/maturity/org-units/:orgUnitId",
-    { preHandler: [requirePermission("capability:read")], schema: { params: CapabilityMaturityOrgUnitParamSchema, response: { 200: CapabilityMaturityScoreSchema } } },
+    { config: { orgGate: "aggregate" }, preHandler: [requirePermission("capability:read")], schema: { params: CapabilityMaturityOrgUnitParamSchema, response: { 200: CapabilityMaturityScoreSchema } } },
     async (req) => capabilityMaturityService.orgUnit(actor(req), req.params.orgUnitId),
   );
 

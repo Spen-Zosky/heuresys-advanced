@@ -22,11 +22,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const careerPathsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("career_succession:read")],
     schema: { querystring: CareerPathListQuerySchema, response: { 200: CareerPathListResponseSchema } },
   }, async (req) => careerPathsService.list(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("career_succession:read")],
     schema: { params: CareerPathIdParamSchema, response: { 200: CareerPathSchema } },
   }, async (req) => careerPathsService.getById(actor(req), req.params.id));

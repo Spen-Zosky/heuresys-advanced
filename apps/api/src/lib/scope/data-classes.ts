@@ -6,7 +6,9 @@
  *   PERSONAL / COMPENSATION / SKILL / EVALUATION  → SENSITIVE → ORGANIZATIONAL axis (reports-to)
  *   ACTIVITY                                       → FUNCTIONAL axis (team/process membership)
  *
- * F2 only CLASSIFIES — it does not enforce. F3 consumes `dataClassOf` to gate sensitive reads
+ * F2 classifies AND (since D-51) prescribes: `lib/scope/gate.ts` refuses to boot the app if a
+ * read route on a resource classified sensitive here lacks a `config.orgGate` declaration, so a
+ * new sensitive module can no longer omit the org gate silently. F3 enforces at the data level
  * (a manager may read a report's COMPENSATION only if the report is in their org sub-tree). A
  * resource NOT in the map carries no person-level sensitive data and stays RBAC+tenant-gated
  * (blueprints, processes, tenants, roles, org structure, …).

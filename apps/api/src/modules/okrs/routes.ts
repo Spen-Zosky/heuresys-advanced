@@ -13,16 +13,19 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const okrsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("okr:read")],
     schema: { querystring: OkrListQuerySchema, response: { 200: OkrListResponseSchema } },
   }, async (req) => okrsService.listOkrs(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("okr:read")],
     schema: { params: OkrIdParamSchema, response: { 200: OkrSchema } },
   }, async (req) => okrsService.getOkr(actor(req), req.params.id));
 
   app.get("/:id/key-results", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("okr:read")],
     schema: { params: OkrIdParamSchema, response: { 200: OkrKeyResultListResponseSchema } },
   }, async (req) => okrsService.listKeyResults(actor(req), req.params.id));

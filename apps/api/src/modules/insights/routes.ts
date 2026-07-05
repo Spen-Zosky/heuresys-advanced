@@ -26,6 +26,7 @@ export const insightsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/flight-risk",
     {
+      config: { orgGate: "service" },
       preHandler: [requirePermission("insights:view")],
       schema: { response: { 200: FlightRiskListResponseSchema } },
     },
@@ -35,6 +36,7 @@ export const insightsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     "/users/:userId/flight-risk",
     {
+      config: { orgGate: "service" },
       preHandler: [requirePermission("insights:view")],
       schema: { params: FlightRiskUserIdParamSchema, response: { 200: FlightRiskScoreSchema } },
     },
@@ -53,7 +55,8 @@ export const insightsRoutes: FastifyPluginAsyncZod = async (app) => {
   /* --- P2 slice B: succession-readiness --- */
   app.get(
     "/succession-readiness",
-    { preHandler: [requirePermission("insights:view")], schema: { response: { 200: SuccessionReadinessListResponseSchema } } },
+    {
+      config: { orgGate: "service" }, preHandler: [requirePermission("insights:view")], schema: { response: { 200: SuccessionReadinessListResponseSchema } } },
     async (req) => insightsService.successionReadiness(actor(req)),
   );
   app.post(
@@ -65,7 +68,8 @@ export const insightsRoutes: FastifyPluginAsyncZod = async (app) => {
   /* --- P2 slice C: skill-gap --- */
   app.get(
     "/skill-gap",
-    { preHandler: [requirePermission("insights:view")], schema: { response: { 200: SkillGapListResponseSchema } } },
+    {
+      config: { orgGate: "service" }, preHandler: [requirePermission("insights:view")], schema: { response: { 200: SkillGapListResponseSchema } } },
     async (req) => insightsService.skillGap(actor(req)),
   );
   app.post(

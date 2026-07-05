@@ -41,6 +41,7 @@ export const semanticMatchingRoutes: FastifyPluginAsyncZod<SemanticMatchingRoute
   const deps = opts.deps ?? defaultDeps;
 
   app.get("/me/occupations", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("matching:read")],
     schema: { querystring: MatchQuerySchema, response: { 200: OccupationMatchListResponseSchema } },
   }, async (req) => {
@@ -49,6 +50,7 @@ export const semanticMatchingRoutes: FastifyPluginAsyncZod<SemanticMatchingRoute
   });
 
   app.get("/users/:userId/occupations", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("matching:read")],
     schema: { params: MatchUserIdParamSchema, querystring: MatchQuerySchema, response: { 200: OccupationMatchListResponseSchema } },
   }, async (req) => {
@@ -57,6 +59,7 @@ export const semanticMatchingRoutes: FastifyPluginAsyncZod<SemanticMatchingRoute
   });
 
   app.get("/me/positions", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("matching:read")],
     schema: { querystring: MatchQuerySchema, response: { 200: PositionMatchListResponseSchema } },
   }, async (req) => {
@@ -65,6 +68,7 @@ export const semanticMatchingRoutes: FastifyPluginAsyncZod<SemanticMatchingRoute
   });
 
   app.get("/users/:userId/positions", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("matching:read")],
     schema: { params: MatchUserIdParamSchema, querystring: MatchQuerySchema, response: { 200: PositionMatchListResponseSchema } },
   }, async (req) => {
@@ -74,6 +78,7 @@ export const semanticMatchingRoutes: FastifyPluginAsyncZod<SemanticMatchingRoute
 
   // ── AI ②·Fase 2: person → job_roles ──
   app.get("/me/job-roles", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("matching:read")],
     schema: { querystring: MatchQuerySchema, response: { 200: JobRoleMatchListResponseSchema } },
   }, async (req) => {
@@ -82,6 +87,7 @@ export const semanticMatchingRoutes: FastifyPluginAsyncZod<SemanticMatchingRoute
   });
 
   app.get("/users/:userId/job-roles", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("matching:read")],
     schema: { params: MatchUserIdParamSchema, querystring: MatchQuerySchema, response: { 200: JobRoleMatchListResponseSchema } },
   }, async (req) => {
@@ -91,11 +97,13 @@ export const semanticMatchingRoutes: FastifyPluginAsyncZod<SemanticMatchingRoute
 
   // ── AI ②·Fase 2: person ↔ person (ELEVATED-ROLE only; no ESS self surface) ──
   app.get("/users/:userId/similar", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("matching:read")],
     schema: { params: MatchUserIdParamSchema, querystring: MatchQuerySchema, response: { 200: SimilarUserMatchListResponseSchema } },
   }, async (req) => semanticMatchingService.similarPeople(actor(req), req.params.userId, req.query));
 
   app.get("/skills/:skillId/similar", {
+    config: { orgGate: "catalog" },
     preHandler: [requirePermission("matching:read")],
     schema: { params: MatchSkillIdParamSchema, querystring: MatchQuerySchema, response: { 200: SkillMatchListResponseSchema } },
   }, async (req) => semanticMatchingService.similarSkills(actor(req), req.params.skillId, req.query));
@@ -105,7 +113,7 @@ export const semanticMatchingRoutes: FastifyPluginAsyncZod<SemanticMatchingRoute
     // QW-H6 (F-WS-H-4): tight per-route cap — free-text embeds the query at
     // request time via Voyage (billable external call), so it must be bounded
     // below the global 600/min limiter to cap cost/abuse.
-    config: { rateLimit: { max: 30, timeWindow: "1 minute" } },
+    config: { orgGate: "catalog", rateLimit: { max: 30, timeWindow: "1 minute" } },
     preHandler: [requirePermission("matching:read")],
     schema: { querystring: FreeTextQuerySchema, response: { 200: FreeTextSearchResponseSchema } },
   }, async (req) => semanticMatchingService.freeTextSearch(actor(req), req.query, deps));

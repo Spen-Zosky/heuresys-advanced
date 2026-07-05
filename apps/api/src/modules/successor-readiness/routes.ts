@@ -18,11 +18,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const successorReadinessRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("career_succession:read")],
     schema: { querystring: SuccessorReadinessListQuerySchema, response: { 200: SuccessorReadinessListResponseSchema } },
   }, async (req) => successorReadinessService.list(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("career_succession:read")],
     schema: { params: SuccessorReadinessIdParamSchema, response: { 200: SuccessorReadinessSchema } },
   }, async (req) => successorReadinessService.getById(actor(req), req.params.id));

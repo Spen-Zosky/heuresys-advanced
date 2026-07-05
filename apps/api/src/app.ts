@@ -97,6 +97,7 @@ import { compensationRoutes } from "./modules/compensation/routes.js";
 import { dashboardRoutes } from "./modules/dashboard/routes.js";
 import { analyticsRoutes } from "./modules/analytics/routes.js";
 import { addExportHook } from "./lib/export/hook.js";
+import { registerOrgGateAssertion } from "./lib/scope/gate.js";
 import { notificationsRoutes } from "./modules/notifications/routes.js";
 import { observabilityRoutes } from "./modules/observability/routes.js";
 import { mentorshipRoutes } from "./modules/mentorship/routes.js";
@@ -192,6 +193,11 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   // 1. Type-provider compilers (FIRST — subsequent routes use Zod schemas)
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+
+  // 1a. Org-gate boot assertion (ADR-0027 F2 prescriptive, D-51) — must precede every route
+  //     registration: onRoute only sees routes declared after the hook. Refuses to boot if a
+  //     read route on a SENSITIVE data-class resource lacks a config.orgGate declaration.
+  registerOrgGateAssertion(app);
 
   // 1b. OpenAPI/Swagger (R6) — gated OFF by default (env.API_DOCS_ENABLED). Registered
   //     right after the type-provider compilers so its onRoute hook captures EVERY route

@@ -19,11 +19,13 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const assessmentResultsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("assessment:read")],
     schema: { querystring: AssessmentResultListQuerySchema, response: { 200: AssessmentResultListResponseSchema } },
   }, async (req) => assessmentResultsService.list(actor(req), req.query));
 
   app.get("/:id", {
+    config: { orgGate: "service" },
     preHandler: [requirePermission("assessment:read")],
     schema: { params: AssessmentResultIdParamSchema, response: { 200: AssessmentResultSchema } },
   }, async (req) => assessmentResultsService.getById(actor(req), req.params.id));

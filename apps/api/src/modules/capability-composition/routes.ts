@@ -24,6 +24,7 @@ export const capabilityCompositionRoutes: FastifyPluginAsyncZod = async (app) =>
   app.get(
     "/composition",
     {
+      config: { orgGate: "service" },
       preHandler: [requirePermission("capability:read")],
       schema: { querystring: CapabilityCompositionListQuerySchema, response: { 200: CapabilityScoreListResponseSchema } },
     },
@@ -33,6 +34,7 @@ export const capabilityCompositionRoutes: FastifyPluginAsyncZod = async (app) =>
   app.get(
     "/composition/:subjectType/:subjectId",
     {
+      config: { orgGate: "service" },
       preHandler: [requirePermission("capability:read")],
       schema: { params: CapabilitySubjectParamSchema, response: { 200: CapabilityScoreSchema } },
     },

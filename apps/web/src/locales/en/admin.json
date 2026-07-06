@@ -3,11 +3,36 @@
     "title": "Approvals",
     "description": "Create and track approval requests.",
     "count": "{{count}} requests",
-    "columns": { "title": "Title", "status": "Status", "policy": "Quorum", "priority": "Priority", "steps": "Steps", "created": "Created" },
-    "status": { "PENDING": "Pending", "APPROVED": "Approved", "REJECTED": "Rejected", "APPLIED": "Applied" },
-    "stepStatus": { "PENDING": "Pending", "APPROVED": "Approved", "REJECTED": "Rejected", "SKIPPED": "Skipped" },
-    "policy": { "ALL_OF": "All of", "ANY_OF": "Any of" },
-    "priority": { "INFO": "Info", "MEDIUM": "Medium", "HIGH": "High", "CRITICAL": "Critical" },
+    "columns": {
+      "title": "Title",
+      "status": "Status",
+      "policy": "Quorum",
+      "priority": "Priority",
+      "steps": "Steps",
+      "created": "Created"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "APPLIED": "Applied"
+    },
+    "stepStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "SKIPPED": "Skipped"
+    },
+    "policy": {
+      "ALL_OF": "All of",
+      "ANY_OF": "Any of"
+    },
+    "priority": {
+      "INFO": "Info",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    },
     "stepSummary": "{{pending}} pending / {{total}}",
     "create": {
       "cardTitle": "New approval request",
@@ -22,7 +47,9 @@
       "successMsg": "Request created.",
       "errorUnexpected": "Unexpected error."
     },
-    "filters": { "statusAll": "All statuses" },
+    "filters": {
+      "statusAll": "All statuses"
+    },
     "emptyTitle": "No requests",
     "emptyDescription": "There are no approval requests.",
     "caption": "Approval requests",
@@ -45,8 +72,20 @@
     "title": "Engagement & Surveys",
     "description": "Survey results and pulse trend.",
     "count": "{{count}} surveys",
-    "columns": { "title": "Title", "status": "Status", "type": "Type", "responses": "Responses", "questions": "Questions", "invitations": "Invitations" },
-    "status": { "active": "Active", "draft": "Draft", "closed": "Closed", "archived": "Archived" },
+    "columns": {
+      "title": "Title",
+      "status": "Status",
+      "type": "Type",
+      "responses": "Responses",
+      "questions": "Questions",
+      "invitations": "Invitations"
+    },
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "closed": "Closed",
+      "archived": "Archived"
+    },
     "pulse": {
       "cardTitle": "Pulse trend",
       "mood": "Mood",
@@ -255,19 +294,46 @@
       }
     },
     "learning": {
-      "title": "Position learning gaps",
+      "title": "Position learning",
       "back": "← Position",
-      "count": "{{count}} gap open",
-      "cardTitle": "Open gaps",
-      "empty": "No learning gap linked to this position.",
-      "caption": "Open learning gaps for the position",
-      "columns": {
-        "user": "User",
-        "skill": "Skill",
-        "severity": "Severity",
-        "detected": "Detected"
+      "count": "{{count}} paths · {{modules}} modules",
+      "dash": "—",
+      "requirements": {
+        "cardTitle": "Required paths",
+        "caption": "Learning paths required by the position",
+        "empty": "No learning path required for this position.",
+        "mandatoryYes": "Mandatory",
+        "mandatoryNo": "Recommended",
+        "columns": {
+          "path": "Path",
+          "mandatory": "Constraint",
+          "since": "Since"
+        }
       },
-      "dash": "—"
+      "modules": {
+        "cardTitle": "Modules for required skills",
+        "caption": "Learning modules covering the position's required skills",
+        "empty": "No module mapped to the required skills.",
+        "minutes": "{{count}} min",
+        "columns": {
+          "skill": "Skill",
+          "required": "Required",
+          "module": "Module",
+          "delivery": "Delivery",
+          "target": "Target"
+        }
+      },
+      "gaps": {
+        "cardTitle": "Open gaps",
+        "caption": "Open learning gaps for the position",
+        "empty": "No learning gap associated with this position.",
+        "columns": {
+          "user": "User",
+          "skill": "Skill",
+          "severity": "Severity",
+          "detected": "Detected"
+        }
+      }
     },
     "skills": {
       "title": "Required skills",

@@ -22,6 +22,8 @@ import {
   AddPositionSkillBodySchema,
   PositionSkillIdParamSchema,
   PositionKpiListResponseSchema,
+  PositionLearningRequirementListResponseSchema,
+  PositionLearningModuleListResponseSchema,
   PositionKpiRequirementSchema,
   AddPositionKpiBodySchema,
   UpdatePositionKpiBodySchema,
@@ -153,6 +155,35 @@ export const positionsRoutes: FastifyPluginAsyncZod = async (app) => {
       );
       reply.code(204).send({});
     },
+  );
+
+  /* --- learning bridge (#25 A/L5: read-only) ------------------------ */
+  app.get(
+    "/:id/learning-requirements",
+    {
+      preHandler: [requirePermission("position:read")],
+      schema: {
+        params: PositionIdParamSchema,
+        response: { 200: PositionLearningRequirementListResponseSchema },
+      },
+    },
+    async (req) => ({
+      items: await positionsService.listLearningRequirements(actorFromReq(req), req.params.id),
+    }),
+  );
+
+  app.get(
+    "/:id/learning-modules",
+    {
+      preHandler: [requirePermission("position:read")],
+      schema: {
+        params: PositionIdParamSchema,
+        response: { 200: PositionLearningModuleListResponseSchema },
+      },
+    },
+    async (req) => ({
+      items: await positionsService.listLearningModules(actorFromReq(req), req.params.id),
+    }),
   );
 
   /* --- KPI sub-resource (WI-D2: read + ranked write) --------------- */

@@ -3,11 +3,36 @@
     "title": "Approvazioni",
     "description": "Crea e traccia le richieste di approvazione.",
     "count": "{{count}} richieste",
-    "columns": { "title": "Titolo", "status": "Stato", "policy": "Quorum", "priority": "Priorità", "steps": "Passi", "created": "Creata" },
-    "status": { "PENDING": "In attesa", "APPROVED": "Approvata", "REJECTED": "Rifiutata", "APPLIED": "Applicata" },
-    "stepStatus": { "PENDING": "In attesa", "APPROVED": "Approvato", "REJECTED": "Rifiutato", "SKIPPED": "Saltato" },
-    "policy": { "ALL_OF": "Tutti", "ANY_OF": "Almeno uno" },
-    "priority": { "INFO": "Info", "MEDIUM": "Media", "HIGH": "Alta", "CRITICAL": "Critica" },
+    "columns": {
+      "title": "Titolo",
+      "status": "Stato",
+      "policy": "Quorum",
+      "priority": "Priorità",
+      "steps": "Passi",
+      "created": "Creata"
+    },
+    "status": {
+      "PENDING": "In attesa",
+      "APPROVED": "Approvata",
+      "REJECTED": "Rifiutata",
+      "APPLIED": "Applicata"
+    },
+    "stepStatus": {
+      "PENDING": "In attesa",
+      "APPROVED": "Approvato",
+      "REJECTED": "Rifiutato",
+      "SKIPPED": "Saltato"
+    },
+    "policy": {
+      "ALL_OF": "Tutti",
+      "ANY_OF": "Almeno uno"
+    },
+    "priority": {
+      "INFO": "Info",
+      "MEDIUM": "Media",
+      "HIGH": "Alta",
+      "CRITICAL": "Critica"
+    },
     "stepSummary": "{{pending}} in attesa / {{total}}",
     "create": {
       "cardTitle": "Nuova richiesta di approvazione",
@@ -22,7 +47,9 @@
       "successMsg": "Richiesta creata.",
       "errorUnexpected": "Errore imprevisto."
     },
-    "filters": { "statusAll": "Tutti gli stati" },
+    "filters": {
+      "statusAll": "Tutti gli stati"
+    },
     "emptyTitle": "Nessuna richiesta",
     "emptyDescription": "Non ci sono richieste di approvazione.",
     "caption": "Richieste di approvazione",
@@ -45,8 +72,20 @@
     "title": "Engagement & Sondaggi",
     "description": "Risultati dei sondaggi e andamento pulse.",
     "count": "{{count}} sondaggi",
-    "columns": { "title": "Titolo", "status": "Stato", "type": "Tipo", "responses": "Risposte", "questions": "Domande", "invitations": "Inviti" },
-    "status": { "active": "Attivo", "draft": "Bozza", "closed": "Chiuso", "archived": "Archiviato" },
+    "columns": {
+      "title": "Titolo",
+      "status": "Stato",
+      "type": "Tipo",
+      "responses": "Risposte",
+      "questions": "Domande",
+      "invitations": "Inviti"
+    },
+    "status": {
+      "active": "Attivo",
+      "draft": "Bozza",
+      "closed": "Chiuso",
+      "archived": "Archiviato"
+    },
     "pulse": {
       "cardTitle": "Andamento Pulse",
       "mood": "Umore",
@@ -255,19 +294,46 @@
       }
     },
     "learning": {
-      "title": "Gap formativi della posizione",
+      "title": "Formazione della posizione",
       "back": "← Posizione",
-      "count": "{{count}} gap aperti",
-      "cardTitle": "Gap aperti",
-      "empty": "Nessun gap formativo associato a questa posizione.",
-      "caption": "Gap formativi aperti per la posizione",
-      "columns": {
-        "user": "User",
-        "skill": "Skill",
-        "severity": "Severità",
-        "detected": "Rilevato"
+      "count": "{{count}} percorsi · {{modules}} moduli",
+      "dash": "—",
+      "requirements": {
+        "cardTitle": "Percorsi richiesti",
+        "caption": "Percorsi formativi richiesti dalla posizione",
+        "empty": "Nessun percorso formativo richiesto per questa posizione.",
+        "mandatoryYes": "Obbligatorio",
+        "mandatoryNo": "Consigliato",
+        "columns": {
+          "path": "Percorso",
+          "mandatory": "Vincolo",
+          "since": "Dal"
+        }
       },
-      "dash": "—"
+      "modules": {
+        "cardTitle": "Moduli per le skill richieste",
+        "caption": "Moduli formativi che coprono le skill richieste dalla posizione",
+        "empty": "Nessun modulo mappato sulle skill richieste.",
+        "minutes": "{{count}} min",
+        "columns": {
+          "skill": "Skill",
+          "required": "Richiesta",
+          "module": "Modulo",
+          "delivery": "Erogazione",
+          "target": "Target"
+        }
+      },
+      "gaps": {
+        "cardTitle": "Gap aperti",
+        "caption": "Gap formativi aperti per la posizione",
+        "empty": "Nessun gap formativo associato a questa posizione.",
+        "columns": {
+          "user": "User",
+          "skill": "Skill",
+          "severity": "Severità",
+          "detected": "Rilevato"
+        }
+      }
     },
     "skills": {
       "title": "Skill richieste",

@@ -227,3 +227,54 @@ export const PositionKpiIdParamSchema = z.object({
   id: z.uuid(),
   kpiId: z.uuid(), // = kpi_definition_id (natural sub-resource key, UNIQUE per position)
 });
+
+/* --- learning sub-resources (#25 A/L5, S1016) --------------------------- */
+/* Read-only bridge position -> learning: mandatory paths declared on the
+ * position (sys_position_learning_requirements) and the module coverage of
+ * the position's required skills (sys_position_skill_requirements JOIN
+ * sys_skill_learning_mappings). Names resolved via LEFT JOIN on the list
+ * endpoints (same convention as skill/kpi sub-resources, B-06). */
+
+export const PositionLearningRequirementSchema = z.object({
+  requirementId: z.uuid(),
+  positionId: z.uuid(),
+  tenantId: z.uuid(),
+  learningPathId: z.uuid(),
+  learningPathCode: z.string().nullable(),
+  learningPathName: z.string().nullable(),
+  isMandatory: z.boolean(),
+  deadlineRule: z.record(z.string(), z.unknown()),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+export type PositionLearningRequirement = z.infer<typeof PositionLearningRequirementSchema>;
+
+export const PositionLearningRequirementListResponseSchema = z.object({
+  items: z.array(PositionLearningRequirementSchema),
+});
+export type PositionLearningRequirementListResponse = z.infer<
+  typeof PositionLearningRequirementListResponseSchema
+>;
+
+export const PositionLearningModuleSchema = z.object({
+  skillId: z.uuid(),
+  skillCode: z.string().nullable(),
+  skillName: z.string().nullable(),
+  requiredProficiency: SkillProficiencySchema,
+  learningModuleId: z.uuid(),
+  learningModuleCode: z.string().nullable(),
+  learningModuleTitle: z.string().nullable(),
+  learningModuleKind: z.string().nullable(),
+  learningModuleDelivery: z.string().nullable(),
+  learningModuleDurationMinutes: z.number().int().nullable(),
+  targetProficiency: SkillProficiencySchema,
+});
+export type PositionLearningModule = z.infer<typeof PositionLearningModuleSchema>;
+
+export const PositionLearningModuleListResponseSchema = z.object({
+  items: z.array(PositionLearningModuleSchema),
+});
+export type PositionLearningModuleListResponse = z.infer<
+  typeof PositionLearningModuleListResponseSchema
+>;

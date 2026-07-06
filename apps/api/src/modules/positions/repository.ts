@@ -16,6 +16,8 @@ import type {
   AddPositionKpiBody,
   UpdatePositionKpiBody,
   PositionIntelligenceProfile,
+  PositionLearningRequirement,
+  PositionLearningModule,
 } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
@@ -566,4 +568,101 @@ export async function deleteKpiRequirement(
     [positionId, kpiDefinitionId],
   );
   return (res.rowCount ?? 0) === 1;
+}
+
+/* --- learning sub-resources (#25 A/L5, S1016) -------------------------- */
+
+interface RawLearningReqRow {
+  position_learning_requirement_id: string;
+  position_id: string;
+  position_learning_requirement_tenant_id: string;
+  learning_path_id: string;
+  is_mandatory: boolean;
+  deadline_rule: Record<string, unknown>;
+  position_learning_requirement_metadata: Record<string, unknown>;
+  created_at: Date;
+  updated_at: Date;
+  learning_path_code: string | null;
+  learning_path_name: string | null;
+}
+
+export async function listLearningRequirements(
+  q: DbConnector,
+  positionId: string,
+): Promise<PositionLearningRequirement[]> {
+  const res = await q.query<RawLearningReqRow>(
+    `SELECT plr.position_learning_requirement_id, plr.position_id,
+            plr.position_learning_requirement_tenant_id, plr.learning_path_id,
+            plr.is_mandatory, plr.deadline_rule,
+            plr.position_learning_requirement_metadata, plr.created_at, plr.updated_at,
+            lp.learning_path_code, lp.learning_path_name
+       FROM sys.sys_position_learning_requirements plr
+       LEFT JOIN sys.sys_learning_paths lp ON lp.learning_path_id = plr.learning_path_id
+      WHERE plr.position_id = $1
+      ORDER BY plr.is_mandatory DESC, lp.learning_path_name ASC NULLS LAST`,
+    [positionId],
+  );
+  return res.rows.map((r) => ({
+    requirementId: r.position_learning_requirement_id,
+    positionId: r.position_id,
+    tenantId: r.position_learning_requirement_tenant_id,
+    learningPathId: r.learning_path_id,
+    learningPathCode: r.learning_path_code ?? null,
+    learningPathName: r.learning_path_name ?? null,
+    isMandatory: r.is_mandatory,
+    deadlineRule: r.deadline_rule,
+    metadata: r.position_learning_requirement_metadata,
+    createdAt: r.created_at.toISOString(),
+    updatedAt: r.updated_at.toISOString(),
+  }));
+}
+
+interface RawLearningModuleRow {
+  skill_id: string;
+  skill_code: string | null;
+  skill_name: string | null;
+  required_proficiency: string;
+  learning_module_id: string;
+  learning_module_code: string | null;
+  learning_module_title: string | null;
+  learning_module_kind: string | null;
+  learning_module_delivery: string | null;
+  learning_module_duration_minutes: number | null;
+  target_proficiency: string;
+}
+
+export async function listLearningModuleCoverage(
+  q: DbConnector,
+  positionId: string,
+): Promise<PositionLearningModule[]> {
+  const res = await q.query<RawLearningModuleRow>(
+    `SELECT psr.skill_id, s.skill_code, s.skill_name, psr.required_proficiency,
+            lm.learning_module_id, lm.learning_module_code, lm.learning_module_title,
+            lm.learning_module_kind, lm.learning_module_delivery,
+            lm.learning_module_duration_minutes,
+            slm.skill_learning_mapping_target_proficiency AS target_proficiency
+       FROM sys.sys_position_skill_requirements psr
+       JOIN sys.sys_skill_learning_mappings slm
+         ON slm.skill_learning_mapping_skill_id = psr.skill_id
+       JOIN sys.sys_learning_modules lm
+         ON lm.learning_module_id = slm.skill_learning_mapping_module_id
+       LEFT JOIN sys.sys_skills s ON s.skill_id = psr.skill_id
+      WHERE psr.position_id = $1
+      ORDER BY s.skill_name ASC NULLS LAST, lm.learning_module_title ASC NULLS LAST`,
+    [positionId],
+  );
+  return res.rows.map((r) => ({
+    skillId: r.skill_id,
+    skillCode: r.skill_code ?? null,
+    skillName: r.skill_name ?? null,
+    requiredProficiency: r.required_proficiency as PositionLearningModule["requiredProficiency"],
+    learningModuleId: r.learning_module_id,
+    learningModuleCode: r.learning_module_code ?? null,
+    learningModuleTitle: r.learning_module_title ?? null,
+    learningModuleKind: r.learning_module_kind ?? null,
+    learningModuleDelivery: r.learning_module_delivery ?? null,
+    learningModuleDurationMinutes:
+      r.learning_module_duration_minutes === null ? null : Number(r.learning_module_duration_minutes),
+    targetProficiency: r.target_proficiency as PositionLearningModule["targetProficiency"],
+  }));
 }

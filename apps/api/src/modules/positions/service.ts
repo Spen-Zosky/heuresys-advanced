@@ -25,6 +25,8 @@ import type {
   AddPositionKpiBody,
   UpdatePositionKpiBody,
   PositionIntelligenceProfile,
+  PositionLearningRequirement,
+  PositionLearningModule,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
@@ -191,6 +193,24 @@ export const positionsService = {
     }
     const ok = await repo.deleteSkillRequirement(pool, pos.positionId, skillId);
     if (!ok) throw new NotFoundError("Skill requirement");
+  },
+
+  /* -------------------------------------------------- learning bridge (#25 A/L5, read-only) */
+
+  async listLearningRequirements(
+    actor: ActorContext,
+    positionId: string,
+  ): Promise<PositionLearningRequirement[]> {
+    const pos = await this.getById(actor, positionId); // re-uses scope check
+    return repo.listLearningRequirements(pool, pos.positionId);
+  },
+
+  async listLearningModules(
+    actor: ActorContext,
+    positionId: string,
+  ): Promise<PositionLearningModule[]> {
+    const pos = await this.getById(actor, positionId); // re-uses scope check
+    return repo.listLearningModuleCoverage(pool, pos.positionId);
   },
 
   /* -------------------------------------------------- kpi requirements (WI-D2: read + write) */

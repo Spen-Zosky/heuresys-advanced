@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-06T14:08:06Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2275**
+**Generato**: 2026-07-06T17:20:39Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2308**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -12,7 +12,7 @@
 | api-core | 23 |
 | api-module | 292 |
 | ci | 16 |
-| claude-config | 6 |
+| claude-config | 15 |
 | config | 103 |
 | cowork-archive | 14 |
 | cowork-exchange | 203 |
@@ -22,7 +22,7 @@
 | db-other | 1 |
 | db-script | 26 |
 | db-seed | 107 |
-| doc-canonical | 408 |
+| doc-canonical | 432 |
 | handoff-state | 1 |
 | qa-artifact | 101 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 263 |
 | ux-design-archive | 80 |
 | web-source | 189 |
-| **TOTALE** | **2275** |
+| **TOTALE** | **2308** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1732 |
+| live | 1765 |
 
 ## File per categoria
 
@@ -423,6 +423,15 @@
 - `D:\heuresys-advanced\.claude\skills\consolida-pagina\references\functional_areas.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\dashboards-jobs\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\multi-tenant-validator\SKILL.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\project-atlas\SKILL.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\project-atlas\references\LEARNINGS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\project-atlas\references\atlas.config.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\project-atlas\references\curated-template.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\project-atlas\references\dossier-template.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\project-atlas\references\goal-recipes.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\project-atlas\references\model-map.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\project-atlas\references\planner.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\project-atlas\references\sweep-prompts.md` · *live* · git-tracked
 
 ### config
 
@@ -1389,6 +1398,28 @@
 - `D:\heuresys-advanced\docs\kb\improvement\TODO_100X.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\index_paths.yaml` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\integrations\INTEGRATIONS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\atlas-full-sweep.workflow.js` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\api_c1.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\api_c2.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\api_c3.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\api_c4.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\api_c5.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\api_c6.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\api_c7.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\api_c8.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\api_c9.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\db_live.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\legacy_cantiere.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\legacy_primary.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\ops.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\shared_schemas.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\ui_lib.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\web_admin.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\web_me_public.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\web_showcase_lib.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\fragments_s1016\wiki.yaml` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\graphify-semantic-extract.workflow.js` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\sweep_digest_s1016.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_atlas.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_graph_hub.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_graph_mirror.py` · *live* · git-tracked
@@ -1585,6 +1616,7 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-06-20-goals-okr-module.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-06-21-gtm-front-door-landing-lead-capture.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-06-22-gtm-investor-onepager-and-guided-demo.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-07-06-project-atlas-skill.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-28-cross-os-bootstrap-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-30-rtl-tenant-rebuild-import-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-30-rtl-tenant-rebuild.md` · *live* · git-tracked
@@ -1608,6 +1640,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-22-gtm-investor-onepager-and-guided-demo-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-30-two-axis-authorization-model-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-01-f3-sensitive-modules-map.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-07-06-project-atlas-skill-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md` · *live* · git-tracked
 
 ### handoff-state

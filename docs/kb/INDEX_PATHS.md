@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-05T16:56:23Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2266**
+**Generato**: 2026-07-06T14:08:06Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2275**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -22,7 +22,7 @@
 | db-other | 1 |
 | db-script | 26 |
 | db-seed | 107 |
-| doc-canonical | 400 |
+| doc-canonical | 408 |
 | handoff-state | 1 |
 | qa-artifact | 101 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 87 |
 | showcase-source | 13 |
-| test | 262 |
+| test | 263 |
 | ux-design-archive | 80 |
 | web-source | 189 |
-| **TOTALE** | **2266** |
+| **TOTALE** | **2275** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1723 |
+| live | 1732 |
 
 ## File per categoria
 
@@ -1346,6 +1346,7 @@
 - `D:\heuresys-advanced\docs\kb\VISUALIZATION_RENDERERS_CLOSURE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\WAVE2_UNBLOCK_PACKAGE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\atlas\ATLAS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\atlas\ATLAS_CURATED.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\atlas\atlas.yaml` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\AUDIT_FORENSE_heuresys_2026-07-03_151241.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\FINDINGS_2026-07-03_151241.json` · *live* · git-tracked
@@ -1405,6 +1406,13 @@
 - `D:\heuresys-advanced\docs\preflight-residual-todo.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\BUSINESS_SCOPE_AND_PRD.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\COMPETITIVE_SCORECARD.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_E_EVO_VERTICALS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\FUNCTIONAL_CAPABILITY_LEDGER.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\LATENT_CAPABILITY_CATALOG.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\product\README.md` · *live* · git-tracked
@@ -1968,6 +1976,7 @@
 - `D:\heuresys-advanced\apps\api\test\pg-pool-resilience.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\position-career-paths.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\position-succession-relevance.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\positions-learning.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\positions.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\predictions-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\predictions.integration.test.ts` · *live* · git-tracked

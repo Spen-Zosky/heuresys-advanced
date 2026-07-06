@@ -1,7 +1,7 @@
 # SOT_BACKLOG — Azioni da riprendere (CLI-owned)
 
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
-> **Aggiornato**: 2026-06-26 (S1007 consolidamento SoT; header era fermo a S939 — corretto). Corpo aggiornato fino a S1006.
+> **Aggiornato**: 2026-07-06 (S1016 — register esteso con serie A+B #25-#40 + #41 graphify top-up; #25 DONE live).
 
 ## 🗂 Action register — item strutturati del menu (corsie ACTIVE/GATED/WAIT-INPUT/HOLD/INTERRUPTED)
 
@@ -105,6 +105,10 @@
   - blocker: richiede embedding Voyage a query-time → decisione credenziale runtime (S996 le tiene dormienti)
   - unblock-trigger: {kind: manual} — Enzo autorizza l'uso runtime della API key Voyage
   - doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B1 · effort post-decisione: ~2h
+- **#41 graphify — top-up semantico (26 chunk mancanti)** · status: GATED
+  - blocker: limite di spesa mensile Claude colpito durante il run S1016 (26/52 chunk estratti; ~201 file con estrazione previous-run o solo-AST)
+  - unblock-trigger: {kind: manual} — limite di spesa resettato/alzato (claude.ai/settings/usage)
+  - doc: graphify-out/PENDING_SEMANTIC_TOPUP.md · effort post-reset: ~0.5h (chunk fatti = cache; girano solo i mancanti, poi merge+recluster)
 
 ## ✅ Gap#1 DONE (S999, 2026-06-20) — programma-faro "rendi il prodotto dimostrabile" chiuso end-to-end
 

@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-05T16:56:23Z da docs/kb/tools/build_index.py
+# generato: 2026-07-06T14:08:06Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-05T16:56:23Z"
-  total_files: 2266
+  generated_at: "2026-07-06T14:08:06Z"
+  total_files: 2275
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -22,7 +22,7 @@ meta:
     db-other: 1
     db-script: 26
     db-seed: 107
-    doc-canonical: 400
+    doc-canonical: 408
     handoff-state: 1
     qa-artifact: 101
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 87
     showcase-source: 13
-    test: 262
+    test: 263
     ux-design-archive: 80
     web-source: 189
   status_counts:
     archive: 493
     external-archive: 50
-    live: 1723
+    live: 1732
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -7574,6 +7574,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\atlas\ATLAS_CURATED.md'
+    root: repo
+    rel: 'docs/kb/atlas/ATLAS_CURATED.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\atlas\atlas.yaml'
     root: repo
     rel: 'docs/kb/atlas/atlas.yaml'
@@ -7925,6 +7931,48 @@ files:
   - path: 'D:\heuresys-advanced\docs\product\COMPETITIVE_SCORECARD.md'
     root: repo
     rel: 'docs/product/COMPETITIVE_SCORECARD.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md'
+    root: repo
+    rel: 'docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md'
+    root: repo
+    rel: 'docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md'
+    root: repo
+    rel: 'docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md'
+    root: repo
+    rel: 'docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_E_EVO_VERTICALS.md'
+    root: repo
+    rel: 'docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md'
+    root: repo
+    rel: 'docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\product\DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md'
+    root: repo
+    rel: 'docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11159,6 +11207,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\position-succession-relevance.integration.test.ts'
     root: repo
     rel: 'apps/api/test/position-succession-relevance.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\positions-learning.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/positions-learning.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

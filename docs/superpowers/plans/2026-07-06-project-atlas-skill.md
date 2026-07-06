@@ -357,7 +357,9 @@ Formato blocco (canonico, verificato da handoff_lint S2/H1):
 - **#<id> <serie>/<linea> — <titolo>** · status: ACTIVE|GATED
   - priority: P1|P2|P3 · effort: ~Xh · doc: docs/product/DEVELOPMENT_LINES_<...>.md §<linea>
   - note: <sintesi con evidenza>
-  [se GATED] - blocker: <dipendenza reale> / - unblock-trigger: {kind: manual|query|file-exists} — <condizione>
+  [se GATED, aggiungere due righe separate:]
+  - blocker: <dipendenza reale>
+  - unblock-trigger: {kind: manual|query|file-exists} — <condizione>
 ```
 
 Procedura: (1) id = max esistente + 1; (2) inserire nella sezione `🗂 Action register` di

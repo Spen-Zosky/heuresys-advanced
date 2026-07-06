@@ -1,0 +1,59 @@
+# atlas.config.yaml — manifest della skill project-atlas (heuresys-advanced)
+# DEFAULT = verita' di progetto, modificabili solo a mano.
+# `adaptive:` = override auto-appresi dal self-learning (reversibili: azzera la sezione per tornare ai default).
+# Path SEMPRE relativi alla repo root; nessun path assoluto (feedback_no_absolute_paths).
+
+project: heuresys-advanced
+
+# F0 — letture di contesto a inizio sessione di analisi (il contenuto vive la', non qui)
+sot_reads:
+  - .handoff/STATE.md
+  - docs/kb/SOT_STATE.md            # a sezioni: §0 + delta recenti + sezioni 1-10
+  - docs/kb/SOT_BACKLOG.md          # solo Action register
+  - docs/kb/DEBT_REGISTER.md        # solo item non-RISOLTO
+  - docs/product/README.md
+  - docs/product/FUNCTIONAL_CAPABILITY_LEDGER.md
+  - docs/kb/atlas/ATLAS_CURATED.md
+
+# Layer del sweep con target DERIVABILI a runtime (il planner esegue `derive`, mai liste hardcoded)
+layers:
+  api:
+    globs: ["apps/api/src/modules/**", "apps/api/src/lib/**", "packages/shared/src/schemas/**"]
+    derive: "ls apps/api/src/modules"
+    staleness_probe: "git log --oneline --since=<curated_date> -- apps/api/src packages/shared/src | wc -l"
+  web:
+    globs: ["apps/web/src/**"]
+    derive: "ls 'apps/web/src/app' && find apps/web/src/app -name page.tsx | wc -l"
+    staleness_probe: "git log --oneline --since=<curated_date> -- apps/web/src | wc -l"
+  db:
+    globs: ["db/migrations/**", "db/seeds/**"]
+    derive: "psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc \"SELECT count(*) FROM pg_stat_user_tables\""
+    staleness_probe: "ls db/migrations/*.sql | wc -l   # confronta col count nell'ultimo run-record"
+  ops:
+    globs: ["scripts/**", ".github/workflows/**", "deploy/**", "db/scripts/**"]
+    derive: "ls scripts .github/workflows db/scripts"
+    staleness_probe: "git log --oneline --since=<curated_date> -- scripts .github deploy db/scripts | wc -l"
+
+# Famiglie NON derivabili: lista corta esplicita + probe di esistenza PRIMA del lancio (skip+warn se assente)
+families_static:
+  legacy_primary:
+    probe: "MSYS_NO_PATHCONV=1 ssh oracle-vm-default 'test -d /home/ubuntu/heuresys-evo && echo OK'"
+    note: "DB dati = PG nativo heuresys_platform su VM (ADR-0023); stats legacy azzerate -> usare reltuples/count"
+  legacy_cantiere:
+    probe: "MSYS_NO_PATHCONV=1 ssh oracle-vm-default 'test -d /home/ubuntu/heuresys.com.evo && echo OK'"
+    note: "vivaio idee, NON in produzione"
+  wiki:
+    probe: "test -d \"$HOME/wiki-space/heuresys-advanced-wiki\" && echo OK"
+    note: "per-machine (Windows SoT); trattare come fonte storica se stale"
+  design_system:
+    probe: "test -d /d/ux-design-shared && echo OK"
+    note: "per-machine; sorgente di @heuresys/ui"
+
+thresholds:
+  curated_stale_warn_days: 14      # modo dossier: warning oltre questa eta' del curated
+  curated_stale_block_days: 45     # modo dossier: rifiuto (serve refresh) oltre questa eta'
+  chunk_modules_per_agent: 10      # dimensione chunk API di default (adattiva)
+  full_sweep_token_estimate: "~2.5M token / ~19 agenti (osservato S1016)"
+
+# Override auto-appresi (self-learning §6 dello spec). AZZERARE per tornare ai default.
+adaptive: {}

@@ -1,0 +1,249 @@
+# Atlas fragment: frontend Next.js 15 — zona ESS /me/* + pagine pubbliche
+# Scope: apps/web/src/app/(authenticated)/me/**/page.tsx (24) + apps/web/src/app/{,app,demo,investors,login,privacy}/page.tsx (6). Escluse: showcase, (authenticated) non-me.
+# Convenzioni: hooks = custom hook importati da lib (le pagine senza voce usano useQuery/useMutation raw + apiFetch); ui = import diretti da @heuresys/ui; i componenti locali condivisi sono in sezione components.
+fragment: web_me_public
+generated: 2026-07-05
+pages:
+  /me:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/profile, GET /v1/me/positions, GET /v1/me/learning, GET /v1/me/gaps, GET /v1/me/performance, GET /v1/me/attendance]
+    ui: [PageHeader]
+    notes: ["landing 'My HR' con sub-tab IA S1010 F3a (Riepilogo/Performance/Presenze) via ProfileTabs + _components (summary-tab, performance-tab, attendance-tab)", "i18n namespace ess"]
+  /me/profile:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/profile/page.tsx
+    hooks: [useMyPreferences, useUpdateMyPreferences]
+    endpoints: [GET /v1/me/profile, PATCH /v1/me/profile, GET /v1/me/profile/full, GET /v1/me/preferences, PATCH /v1/me/preferences, GET /v1/me/contracts, GET /v1/me/pay-slips, GET /v1/me/documents]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader]
+    notes: ["5 tab read-only (Panoramica/Organizzazione/Contratti/Cedolini/Documenti) da /v1/me/profile/full + tab lazy", "form editabile react-hook-form+zod (subset displayName/locale/timezone/phone/linkedin/bio)", "AppearanceCard = theme+palette WS-4 P1, server source-of-truth"]
+  /me/documents:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/documents/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/documents]
+    ui: []
+    notes: [DataTablePanel pattern, empty-state dedicato]
+  /me/security:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/security/page.tsx
+    hooks: []
+    endpoints: [GET /v1/auth/mfa/factors, POST /v1/auth/mfa/enroll, POST /v1/auth/mfa/verify-setup, "DELETE /v1/auth/mfa/factors/:factorId", POST /v1/auth/mfa/email-otp/enroll, POST /v1/auth/mfa/email-otp/verify-setup, POST /v1/auth/mfa/email-otp/resend, POST /v1/auth/mfa/sms-otp/enroll, POST /v1/auth/mfa/sms-otp/verify-setup, POST /v1/auth/mfa/sms-otp/resend, POST /v1/auth/mfa/enroll-confirm, POST /v1/auth/mfa/enroll-confirm/resend, POST /v1/auth/mfa/webauthn/registration/options, POST /v1/auth/mfa/webauthn/registration/verify, GET /v1/me/security/sessions, "DELETE /v1/me/security/sessions/:familyId", POST /v1/me/security/sessions/revoke-others, GET /v1/auth/sessions/current]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader]
+    notes: ["pagina piu densa dell'area (905 righe): MFA self-service TOTP+EMAIL_OTP+SMS_OTP+WebAuthn passkey + TOFU v2 confirm out-of-band + sessioni attive (revoke singola/others)", "passkey gated su window.isSecureContext via useSyncExternalStore", "SMS enroll gestisce errore SMS_NOT_CONFIGURED", QRCodeSVG per otpauth]
+  /me/skills:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/skills/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/skills]
+    ui: [Badge, EmptyState, PageHeader]
+    notes: ["tabella HTML raw (non DataTablePanel) — incoerenza col pattern delle altre list page"]
+  /me/skills/self-assessment:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/skills/self-assessment/page.tsx
+    hooks: []
+    endpoints: ["GET /v1/skills?limit=200", POST /v1/me/skills/self-assessments]
+    ui: [Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader]
+    notes: ["select nativo con filtro client + cap slice(0,50)", "5 livelli proficiency hardcoded (NOVICE..EXPERT)"]
+  /me/certifications:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/certifications/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/certifications, POST /v1/me/certifications]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader]
+    notes: ["form add con schema zod client mirror di CreateMeCertificationBodySchema (server canonico)", EntityTable per la lista]
+  /me/gaps:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/gaps/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/gaps]
+    ui: []
+    notes: [DataTablePanel pattern, StatusBadge su severity]
+  /me/kpis:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/kpis/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/kpis]
+    ui: []
+    notes: [DataTablePanel pattern]
+  /me/learning:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/learning/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/learning]
+    ui: []
+    notes: [DataTablePanel pattern, StatusPill mandatory/optional]
+  /me/learning/catalogue:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/learning/catalogue/page.tsx
+    hooks: []
+    endpoints: ["GET /v1/learning-paths?limit=200", POST /v1/me/learning/enrollments]
+    ui: [Badge, Button, Input, PageHeader]
+    notes: ["self-enroll da catalogo, filtro client", "enroll.isPending globale disabilita TUTTI i bottoni riga", "conferma successo mostra learningPathId raw (UUID) non il nome"]
+  /me/positions:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/positions/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/positions]
+    ui: []
+    notes: [DataTablePanel pattern, StatusPill primary/alt]
+  /me/career:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/career/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/goals, GET /v1/me/career-paths, GET /v1/me/risk]
+    ui: [PageHeader]
+    notes: ["sub-tab IA S1011 F3b (Obiettivi/Percorsi/Rischio&Successione) via ProfileTabs + career/_components"]
+  /me/career/target:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/career/target/page.tsx
+    hooks: []
+    endpoints: ["GET /v1/positions?limit=200", POST /v1/me/career/target-positions]
+    ui: [Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader]
+    notes: ["write-only: nessuna vista lista dei target creati (i career tab leggono goals/career-paths/risk, non target-positions)", "select posizioni con filtro client + cap 50"]
+  /me/team:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/team/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/team]
+    ui: [PageHeader, Card, CardHeader, CardTitle, CardContent, Badge, EmptyState, Spinner]
+    notes: ["WS-4 R1b — scope axis 'my team' applicato server-side", "icona Crown per LEAD", staleTime 60s + retry 0]
+  /me/matching:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/matching/page.tsx
+    hooks: []
+    endpoints: [GET /v1/matching/me/occupations, GET /v1/matching/me/positions, GET /v1/matching/me/job-roles]
+    ui: [PageHeader, Badge]
+    notes: ["3 sezioni EntityTable: occupazioni ESCO + posizioni + job-role", "empty-state biforcato: evidenceCount=0 -> messaggio 'nessuna evidenza' dedicato", "envelope types dichiarati localmente (shared esporta solo i row types)"]
+  /me/inbox:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/inbox/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/inbox, "POST /v1/approvals/:requestId/steps/:stepId/decide"]
+    ui: [AuditFeed, Badge, Button, Card, CardContent, CardHeader, CardTitle, EmptyState, PageHeader, formatRelativeTime]
+    notes: ["polling 30s refetchInterval + refetchOnWindowFocus (SSE/websocket dichiarato post-MVP-3)", "approvazioni APPROVAL_STEP UNREAD decise inline (reqId dal parse di actionUrl)", "badge unread contati client-side"]
+  /me/surveys:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/surveys/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/surveys]
+    ui: [Badge, Button, Card, CardContent, EmptyState, PageHeader]
+    notes: [lista con stato completed/pending e link alla compilazione]
+  /me/surveys/[surveyId]:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/surveys/[surveyId]/page.tsx
+    hooks: []
+    endpoints: ["GET /v1/me/surveys/:surveyId", "POST /v1/me/surveys/:surveyId/responses"]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader]
+    notes: ["form dinamico per tipo domanda (rating/nps=number, choice/text=textarea)", "isRequired solo asterisco visivo: nessuna validazione client dei required", "modalita review read-only se completedAt"]
+  /me/handbook:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/handbook/page.tsx
+    hooks: []
+    endpoints: ["GET /v1/me/content?limit=200&q="]
+    ui: [Input]
+    notes: ["knowledge base ESS cap4 CMS P2 (ADR-0011): solo PUBLISHED + effective-window server-side", "search q server-side via queryKey", DataTablePanel pattern]
+  /me/handbook/[id]:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/handbook/[id]/page.tsx
+    hooks: []
+    endpoints: ["GET /v1/me/content/:id", "GET /v1/me/content/:id/media", "GET /v1/me/content/media/:mediaId (href diretto img/attachment)"]
+    ui: [Badge, Card, CardContent, CardHeader, CardTitle, PageHeader, MarkdownView]
+    notes: ["MarkdownView XSS-safe (react-markdown, raw HTML mai eseguito)", "img renderer riscrive /api/v1/content/media/ (admin) -> /api/v1/me/content/media/ (ESS published-only)", "404 per draft/cross-tenant = no leak"]
+  /me/analytics:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/analytics/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/analytics]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader]
+    notes: ["S1011 F5.1 — 4 KPI card + trend presenze bar stacked via EChartsCard locale", "colori chart hardcoded hex (#6366f1/#f59e0b/#94a3b8) non token CSS-var", empty-state trend dedicato]
+  /me/org-chart:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/org-chart/page.tsx
+    hooks: []
+    endpoints: ["GET /v1/visualization-graphs?type=ORG_CHART&limit=10", "GET /v1/visualization-graphs/:graphId/render", GET /v1/me/positions]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader]
+    notes: ["S1011 F5.2 — riusa il grafo ORG_CHART live e evidenzia il nodo della propria posizione primaria (symbolSize 30 + bordo)", "colori hardcoded hex come analytics", "query render abilitata solo se esiste graphId (chain)"]
+  /me/approvals:
+    zone: me
+    file: apps/web/src/app/(authenticated)/me/approvals/page.tsx
+    hooks: []
+    endpoints: [GET /v1/me/approvals]
+    ui: [Card, CardContent, EmptyState, PageHeader]
+    notes: ["S1011 F5.3 — track-only delle PROPRIE richieste (decide sta in /me/inbox)", "3 card byStatus pending/approved/rejected", "tabella HTML raw con rowKey da indice (appr-i), non id stabile"]
+  /:
+    zone: public
+    file: apps/web/src/app/page.tsx
+    hooks: []
+    endpoints: [POST /v1/leads (via LeadForm)]
+    ui: [Button, Card, CardContent, HeuresysWordmark]
+    notes: ["landing prospect (ADR-0026 percorso pubblico): hero + 3 wedge card + ICP + LeadForm", i18n namespace landing]
+  /app:
+    zone: public
+    file: apps/web/src/app/app/page.tsx
+    hooks: []
+    endpoints: []
+    ui: []
+    notes: ["server redirect -> /login (home autenticata del logo DashboardHeader; /login smista poi per ruolo)"]
+  /demo:
+    zone: public
+    file: apps/web/src/app/demo/page.tsx
+    hooks: []
+    endpoints: [POST /v1/leads (via LeadForm source=DEMO)]
+    ui: [HeuresysWordmark]
+    notes: ["walkthrough 10 step con PNG statici pre-catturati in /public/demo/*.png (rischio drift vs UI live)", i18n namespace demo]
+  /investors:
+    zone: public
+    file: apps/web/src/app/investors/page.tsx
+    hooks: [usePlatformStats]
+    endpoints: [GET /v1/public/platform-stats, POST /v1/leads (via LeadForm source=INVESTOR)]
+    ui: [Button, Card, CardContent, HeuresysWordmark]
+    notes: ["10 stat LIVE dal DB + 6 STATIC_FACTS hardcoded (modules 85, endpoints 466, migrations 165, apiTests 1098, e2e 123, pages 98) — drift risk vs SOT_STATE", "download PDF = window.print() con classi print:"]
+  /login:
+    zone: public
+    file: apps/web/src/app/login/page.tsx
+    hooks: [useLogin]
+    endpoints: [POST /v1/auth/login, POST /v1/auth/mfa/webauthn/authentication/options, POST /v1/auth/mfa/webauthn/authentication/verify, POST /v1/auth/mfa/enroll, POST /v1/auth/mfa/email-otp/enroll, POST /v1/auth/mfa/sms-otp/enroll, POST /v1/auth/mfa/webauthn/registration/options, POST /v1/auth/mfa/webauthn/registration/verify, POST /v1/auth/mfa/verify-setup, POST /v1/auth/mfa/email-otp/verify-setup, POST /v1/auth/mfa/sms-otp/verify-setup, POST /v1/auth/mfa/enroll-confirm]
+    ui: [Button, Card, CardContent, CardHeader, CardTitle, HeuresysWordmark, Input]
+    notes: ["state machine a 3 pannelli: password -> MFA challenge (code o passkey) -> enrollment gate MFA obbligatoria (MVP-4 2.5#4, TOTP/EMAIL/SMS/WEBAUTHN + TOFU v2 confirm)", "guard open-redirect su ?next= (F-002: solo path same-origin)", "passkey login ri-minta il challenge token dopo ceremony fallita", "csrfStore.set post webauthn verify (fix S981)", "redirect post-login per ruolo via landingForRoles"]
+  /privacy:
+    zone: public
+    file: apps/web/src/app/privacy/page.tsx
+    hooks: []
+    endpoints: []
+    ui: []
+    notes: [informativa statica pura i18n (namespace landing), nessuna chiamata]
+lib:
+  apps/web/src/lib/api/auth.ts:
+    hooks:
+      useCurrentUser: GET /v1/auth/me
+      useLogin: POST /v1/auth/login (seed csrfStore + invalida user)
+      useLogout: POST /v1/auth/logout
+      useMyInterfaces: GET /v1/me/interfaces (sidebar DB-driven, raggruppata per 3 prospettive PET)
+      useMyPreferences: GET /v1/me/preferences
+      useUpdateMyPreferences: PATCH /v1/me/preferences
+  apps/web/src/lib/api/public-stats.ts:
+    hooks:
+      usePlatformStats: GET /api/v1/public/platform-stats (fetch raw, endpoint pubblico non autenticato)
+  apps/web/src/lib/api/fetch.ts: "apiFetch<T> — wrapper fetch same-origin /api + CSRF + errori tipizzati (usato da tutte le pagine)"
+  apps/web/src/lib/api/csrf-store.ts: csrfStore (double-submit token client-side)
+  apps/web/src/lib/api/errors.ts: isApiError (discrimina code/status)
+  apps/web/src/lib/landing.ts: landingForRoles (routing post-login per ruolo)
+components:
+  apps/web/src/components/data-table-panel.tsx: "DataTablePanel + EntityTable + DataColumn — pattern list-page canonico brand-fidelity (usato da documents/gaps/kpis/learning/positions/handbook; EntityTable standalone da certifications/catalogue/matching)"
+  apps/web/src/components/status-pill.tsx: "StatusPill (tone) + StatusBadge (value->tone)"
+  apps/web/src/components/profile-tabs.tsx: "ProfileTabs + ProfileTabDef — sub-tab IA con testId, usato da /me, /me/profile, /me/career"
+  apps/web/src/components/lead-form.tsx: "LeadForm(source) -> POST /api/v1/leads (lead capture pubblico, no CSRF-session)"
+  apps/web/src/app/(authenticated)/_charts-client.tsx: "EChartsCard — wrapper echarts client-only (usato da me/analytics, me/org-chart)"
+counts:
+  pages_me: 24
+  pages_public: 6
+  pages_total: 30
+  endpoints_distinct: 66
+patterns:
+  - "tutte le pagine me sono client components ('use client') con useQuery+apiFetch diretto; nessun server component data-fetching"
+  - "i18n: zona me = namespace 'ess'; public = landing/demo/investors; login = default namespace"
+  - "empty-state reale su lista vuota ovunque (doctrine LIVE DATA E2E ONLY, no mock)"
+  - "gating RBAC client assente by design: sidebar server-driven via GET /v1/me/interfaces (U2 S955, gating client rimosso); self-scope garantito server-side (I17)"
+  - "perspective PET: filtro applicato nel layout/sidebar (useMyInterfaces raggruppa per PET), non nelle singole pagine"

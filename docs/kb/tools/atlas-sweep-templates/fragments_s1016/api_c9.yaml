@@ -1,0 +1,121 @@
+# atlas fragment — batch C9 (users + 7 visualization-* modules)
+# source: apps/api/src/app.ts:357,387-393 + per-module routes/repository/service (HEAD main, 2026-07-05)
+modules:
+  users:
+    prefix: /v1/users
+    endpoints:
+      - {method: GET, path: /, permission: 'user:read', csrf: false, orgGate: service}
+      - {method: GET, path: /:id, permission: 'user:read', csrf: false, orgGate: service}
+      - {method: POST, path: /, permission: 'user:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'user:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'user:delete', csrf: true, orgGate: false}
+      - {method: GET, path: /:id/roles, permission: 'user:read', csrf: false, orgGate: service}
+      - {method: POST, path: /:id/roles, permission: 'role:assign', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id/roles/:grantId, permission: 'role:assign', csrf: true, orgGate: false}
+    tables: [sys.sys_users, sys.sys_user_auth_roles, sys.sys_auth_roles]
+    schemas: [users]
+    tests: [users.integration.test.ts]
+    notes:
+      - "visibilita 4-tier ADR-0027 F1: PLATFORM_ADMIN=all, HR-mandated (TENANT_ADMIN/HRMS_MANAGER)=tenant, chi ha report=subtree org TRANSITIVO, altrimenti self — delegata a lib/scope/resolver.ts (resolveOrgReadScope/canReadOrgTarget), che tocca tabelle org fuori dal repository del modulo"
+      - "PATCH field-level restriction per non-privilegiati via NON_PRIVILEGED_UPDATABLE_FIELDS (@heuresys/shared); errore FIELD_NOT_ALLOWED"
+      - "DELETE = soft delete (user_status -> DEACTIVATED); delete admin-only, nessun asse lo concede"
+      - "getById risponde 404 (non 403) oltre boundary per anti-enumeration"
+      - "role grants: revoca logica (revoked_at), grant unico attivo per (user,role,tenant)"
+  visualization-graphs:
+    prefix: /v1/visualization-graphs
+    endpoints:
+      - {method: GET, path: /, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: GET, path: /summary, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id/render, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'visualization:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'visualization:update_layout', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'visualization:update_layout', csrf: true, orgGate: false}
+    tables: [sys.sys_visualization_graphs, sys.sys_visualization_nodes, sys.sys_visualization_edges]
+    schemas: [visualization-graphs]
+    tests: [visualization-graphs.integration.test.ts, visualizations.integration.test.ts]
+    notes:
+      - "tenant-scoped (platform vede tutto; PLATFORM_ADMIN in create puo targetizzare body.tenantId, altrimenti TENANT_ID_REQUIRED)"
+      - "unique (tenant, code, version); version default 1 su insert"
+      - "/summary = distribuzione per graph_type; /:id/render = payload nodi+archi per il renderer"
+  visualization-nodes:
+    prefix: /v1/visualization-nodes
+    endpoints:
+      - {method: GET, path: /, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'visualization:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'visualization:update_layout', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'visualization:update_layout', csrf: true, orgGate: false}
+    tables: [sys.sys_visualization_nodes, sys.sys_visualization_graphs]
+    schemas: [visualization-nodes]
+    tests: [visualization-nodes.integration.test.ts, visualizations.integration.test.ts]
+    notes:
+      - "visibilita derivata dal graph padre (ensureGraphVisible via import cross-modulo di visualization-graphs/repository.findGraphById)"
+  visualization-edges:
+    prefix: /v1/visualization-edges
+    endpoints:
+      - {method: GET, path: /, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'visualization:create', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'visualization:update_layout', csrf: true, orgGate: false}
+    tables: [sys.sys_visualization_edges, sys.sys_visualization_nodes, sys.sys_visualization_graphs]
+    schemas: [visualization-edges]
+    tests: [visualization-edges.integration.test.ts, visualizations.integration.test.ts]
+    notes:
+      - "edge immutabile: no PATCH (delete + re-create)"
+      - "create valida che source e target node appartengano allo stesso graph di body.graphId"
+      - "visibilita derivata dal graph padre (cross-modulo visualization-graphs/repository)"
+  visualization-layouts:
+    prefix: /v1/visualization-layouts
+    endpoints:
+      - {method: GET, path: /, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'visualization:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'visualization:update_layout', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'visualization:update_layout', csrf: true, orgGate: false}
+    tables: [sys.sys_visualization_layouts, sys.sys_visualization_graphs]
+    schemas: [visualization-layouts]
+    tests: [visualization-layouts.integration.test.ts, visualizations.integration.test.ts]
+    notes:
+      - "CRUD standard graph-scoped; visibilita derivata dal graph padre"
+  visualization-node-layouts:
+    prefix: /v1/visualization-node-layouts
+    endpoints:
+      - {method: GET, path: /, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: PUT, path: /, permission: 'visualization:update_layout', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'visualization:update_layout', csrf: true, orgGate: false}
+    tables: [sys.sys_visualization_node_layouts, sys.sys_visualization_layouts, sys.sys_visualization_nodes, sys.sys_visualization_graphs]
+    schemas: [visualization-node-layouts]
+    tests: [visualization-node-layouts.integration.test.ts, visualizations.integration.test.ts]
+    notes:
+      - "unico modulo del batch con PUT upsert (no POST/PATCH): posizione (x,y) per coppia layout+node"
+  visualization-styles:
+    prefix: /v1/visualization-styles
+    endpoints:
+      - {method: GET, path: /, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'visualization:create', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'visualization:update_layout', csrf: true, orgGate: false}
+    tables: [sys.sys_visualization_styles, sys.sys_visualization_graphs]
+    schemas: [visualization-styles]
+    tests: [visualization-styles.integration.test.ts, visualizations.integration.test.ts]
+    notes:
+      - "riga immutabile: no PATCH, cambio stile = delete + re-create"
+  visualization-exports:
+    prefix: /v1/visualization-exports
+    endpoints:
+      - {method: GET, path: /, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'visualization:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'visualization:create', csrf: true, orgGate: false}
+    tables: [sys.sys_visualization_exports, sys.sys_visualization_graphs, sys.sys_visualization_layouts]
+    schemas: [visualization-exports]
+    tests: [visualization-exports.integration.test.ts, visualizations.integration.test.ts]
+    notes:
+      - "registro append-only di export: no PATCH/DELETE; 'the actual rendering happens elsewhere' (service.ts:3) — nessun endpoint produce/scarica l'artefatto"
+      - "create valida graphId visibile + eventuale layoutId appartenente allo stesso graph (via visualization-layouts/repository)"
+counts: {modules: 8, endpoints: 40, tables_distinct: 10}
+cross_module_facts:
+  - "test extra condiviso: visualizations.integration.test.ts (6 test) esercita la pipeline completa graph->nodes->edge->layout->node_layout->style->export"
+  - "permission set visualization nei grants (grep db/migrations): solo visualization:create(3), visualization:read(8), visualization:update_layout(4) — NON esiste visualization:delete"
+  - "nessuna route visualization ha config.orgGate (asimmetria con users GET orgGate:service — coerente: dati viz non sensibili)"

@@ -1,0 +1,107 @@
+# atlas fragment: ops (scripts / workflows / db_scripts / deploy docs / systemd)
+# repo: D:/heuresys-advanced @ main (115d7983), generated 2026-07-05
+
+scripts:  # D:/heuresys-advanced/scripts/ — 30 top-level + test/run-shell-tests.sh (+ subdir codemods/, cowork-exchange/)
+  - {name: align-claude-ecosystem.sh, does: "clona ecosistema Claude Windows (CLAUDE.md/skills/commands/settings jq-transform per-OS, session-bootstrap, claude-mem settings) su mac|vm|linuxpc; backup+wipe managed paths+push+reinstall plugin+smoke test con auto-rollback; modi --dry-run/--verify/--delta/--resilient/--rollback", when: "session-close (canale 2 di close-propagate) + on-demand"}
+  - {name: align-clones.sh, does: "rende VM/linux-pc CLONI del repo locale: hard git sync + payload gitignored + .env key-merge + memorie + deploy; modi FULL/DELTA(--delta da handoff); mac RITIRATO da 'all' (S1007), solo target esplicito; linuxpc con resilienza forzata", when: "session-close (canale 1 di close-propagate) + catch-up manuale"}
+  - {name: archive-dumps.sh, does: "QW-K3: archivia off-machine i pg_dump pre-op (pg_dump_snapshots/ top-level, ~3.7G) sulla VM /home/ubuntu/dump_archive via scp emulando rsync --ignore-existing; mai delete", when: "one-shot/on-demand DR"}
+  - {name: auth-housekeeping.sh, does: "QW-C2: prune giornaliero tabelle auth-audit (refresh_tokens revocati/scaduti + login_events oltre retention 180d); gira sulla VM, legge .env", when: "timer systemd daily 02:00"}
+  - {name: backup-db.sh, does: "R5: pg_dump -Fc schedulato del DB prod con retention (BACKUP_RETENTION_DAYS) in pg_dump_snapshots/scheduled; off-host OPT-IN via BACKUP_OFFHOST_SSH", when: "timer systemd daily 01:30 (sulla VM)"}
+  - {name: bisect-cw-b59-createctx.ps1, does: "bisect message-grep per failure build /showcase CW-B59 (createContext / class-extends-undefined), v2 S937", when: "one-shot debug (era S935-S937, chiuso)"}
+  - {name: clean.sh, does: "QW-2/QW-K1: rimuove artefatti build rigenerabili (.next ~29G, dist, tsbuildinfo, .cache); --deep anche node_modules/.cache+.turbo; --dumps-dry-run lista dump pre-op senza cancellare", when: "on-demand manutenzione disco"}
+  - {name: clone-vm-db.sh, does: "refresh full del DB locale da heuresys_advanced della VM: pg_dump (VM) -> pg_restore (--clean --if-exists) via SSH stream; idempotente", when: "on-demand + leg condizionale di close-propagate (linux-pc twin)"}
+  - {name: close-propagate.sh, does: "UNICO orchestratore di chiusura: align-clones all (repo+payload+memorie+deploy) + align-claude-ecosystem all (catalogo Claude+SDK+plugin SHA) + clone-db linux-pc condizionale; --resilient su host spenti, fail-loud su host raggiungibili", when: "session-close (handoff skill Step 4b)"}
+  - {name: db-health-graph.sh, does: "censimento salute DBMS ripetibile: rowcount/completeness CSV in qa_artifacts/dbms_health_<date>/ + refresh input graphify-db-input (schema+data md); richiede tunnel :5433", when: "on-demand (prima di rebuild grafo DB)"}
+  - {name: dev-bootstrap.ps1, does: "bootstrap idempotente workstation dev Windows: prerequisiti, Node 22, clone/update repo, .env tunnel, deps; -Run lancia pnpm dev", when: "one-shot setup nuova macchina Windows"}
+  - {name: dev-bootstrap.sh, does: "twin bash del bootstrap dev per macOS Intel / Linux desktop: nvm Node 22, corepack pnpm, tunnel VM, deps; --run avvia pnpm dev", when: "one-shot setup nuova macchina Unix"}
+  - {name: dr-drill.sh, does: "3.7/QW-C3: drill disaster-recovery — restore ultimo backup schedulato in DB scratch, verifica row-count vs prod, riporta RPO/RTO, droppa scratch; STRICT mode per timer", when: "timer systemd weekly Sun 04:00 + on-demand"}
+  - {name: env-key-merge.sh, does: "merge additivo del .env locale nel .env remoto: aggiunge SOLO chiavi assenti, mai overwrite topologia per-macchina; backup remoto prima; test mode locale D-19", when: "dentro align-clones per ogni target"}
+  - {name: generate_wave1_column_mappings.mjs, does: "genera seed SQL idempotente per brownfield.column_mappings Wave 1 (overrides > alias semantici > match canonico > lineage default > embed-metadata > skip); input catalog.json + PG live", when: "one-shot/rigenerabile pipeline brownfield"}
+  - {name: generate_wave1_seeds.mjs, does: "genera i 4 seed SQL idempotenti registry brownfield Wave 1 (00_source_export..03_table_mappings) da catalog.json + tables_with_domains.csv", when: "one-shot/rigenerabile pipeline brownfield"}
+  - {name: journal-append.sh, does: "appende una entry (pending|decision|defer|interrupted|note) a .handoff/session-journal.ndjson così i fatti mid-session sopravvivono alla compaction; consolidato dal handoff", when: "mid-session, ogni volta che emerge un fatto"}
+  - {name: provision-linux-pc.sh, does: "provisioning del linux-pc (192.168.1.11 Zorin x86_64) come PROD twin autonomo: PG locale clonato dalla VM, build prod, systemd, LAN-accessible; ISOLATO da align-clones; richiede sudoers scoped one-time", when: "one-shot/on-demand (non in align all)"}
+  - {name: restore-showcase-routes.ps1, does: "ripristina route /showcase da _disabled_showcase_X18 a app/showcase (pre-step del bisect CW-B59); idempotente, -DryRun", when: "one-shot debug (era S935, chiuso)"}
+  - {name: run-wave1-fullscale.mjs, does: "runner full-scale Wave 1 durabile: trigger /v1/brownfield/wave-executor/runs mode=EXECUTE senza cap; output dual-channel JSON/stderr; exit codes su wall-clock/state", when: "one-shot esecuzione brownfield (richiede tunnel + api dev :3001)"}
+  - {name: session-boot.ps1, does: "SessionStart hook progetto: assicura tunnel :5433 (chiave heuresys-tunnel no-passphrase, ADR-0021), verifica .pgpass, smoke DB, stampa boot status; self-guard per-repo", when: "session-start (hook), fallback del task schedulato"}
+  - {name: setup-local-pg.sh, does: "setup one-time PostgreSQL locale per box self-hosted (es. linux-pc): ruolo heuresys + DB + md5 auth localhost + .pgpass; legge .env", when: "one-shot provisioning"}
+  - {name: setup-tunnel-automation.ps1, does: "setup one-shot automazione tunnel hands-off (ADR-0021): chiave dedicata no-passphrase, authorized_keys capability-restricted (solo forward :5432), alias ssh, pgpass, scheduled task At-Logon HeuresysTunnel5433", when: "one-shot setup Windows"}
+  - {name: sync-gitignored-to-vm.sh, does: "mirror dei dati gitignored (brownfield extracts, graphify-out, qa snapshots, .secrets) verso il clone VM via tar-over-ssh, ESCLUSI node_modules/dist/.next/.env; additive, mai delete", when: "dentro align-clones + on-demand"}
+  - {name: sync-memory-tree.sh, does: "mirror del memory tree Claude del progetto (~/.claude/projects/<slug>/memory) verso Mac/VM/linux-pc risolvendo lo slug remoto; FULL o DELTA (MEM_INCLUDE/MEM_DELETE)", when: "dentro align-clones (session-close)"}
+  - {name: sync-showcase.sh, does: "sync pagine showcase + theme da apps/web (canonico) a apps/showcase (static export GitHub Pages); chiamato dal prebuild di apps/showcase", when: "build showcase / CI showcase.yml"}
+  - {name: tunnel-keepalive.ps1, does: "supervisore tunnel SSH :5433->VM:5432: target del task Windows HeuresysTunnel5433 (At-Logon), riapre con backoff se cade, idle se porta già tenuta", when: "automatico At-Logon Windows"}
+  - {name: vm-bootstrap.sh, does: "bootstrap idempotente heuresys-advanced su Linux (arm64/amd64) come servizi systemd: prerequisiti, nvm Node, deps frozen-lockfile, .env VM-specifici, render+install unit template, start", when: "one-shot first-time VM / full re-setup"}
+  - {name: vm-deploy.sh, does: "redeploy PROD routine sulla VM: fetch+reset --hard, pnpm install frozen, build shared->api(tsup)->web(next build), migrate-if-pending, restart systemd api/web; env-parametrizzato (riusato dal linux-pc con SERVICE_USER=enzo)", when: "deploy (leg --deploy di align-clones o diretto via SSH)"}
+  - {name: vm-deploy-remote.sh, does: "D-49: lancia vm-deploy.sh sull'host remoto DETACHED (setsid+nohup+sentinel) con poll loop breve — il deploy sopravvive a timeout/drop della connessione SSH client (fix incidente S1011)", when: "deploy da PC (usato da align-clones)"}
+  - {name: test/run-shell-tests.sh, does: "gate regressione D-19 per scripts/ + db/scripts/: bash -n, shellcheck severity=error, fixture test env-key-merge + regex auto-deploy", when: "CI shell-tests.yml + pre-commit locale"}
+  subdirs:
+    codemods: [s983-mfa-loginraw.mjs]  # one-shot codemod MFA S983
+    cowork-exchange: "12 helper mjs/ps1 del protocollo Cowork<->CLI (inbox, locks, session-start/end, validate-naming, hooks) — protocollo CONGELATO da S939 (CLI SoT takeover)"
+
+workflows:  # D:/heuresys-advanced/.github/workflows/ — 9 yml; 8/9 su runner self-hosted [self-hosted, oci-vm] (= host PROD, guard D-08 anti fork-PR + skip label defer-major su tutti)
+  - {name: build-web.yml, trigger: "push main (paths apps/web, packages/shared, lockfile) + PR + dispatch", jobs: "build-web: next build prod di apps/web", runner: self-hosted-oci-vm, timeout_min: 20}
+  - {name: i18n-parity.yml, trigger: "push main (locales, check-i18n-parity.ts) + PR + dispatch", jobs: "i18n-parity: parita' chiavi it.json/en.json", runner: self-hosted-oci-vm, timeout_min: 5}
+  - {name: lint.yml, trigger: "push main (paths-ignore docs/md/qa) + PR + dispatch", jobs: "lint: ESLint 9 flat su tutti i workspace", runner: self-hosted-oci-vm, timeout_min: 5}
+  - {name: playwright-smoke.yml, trigger: "push main (web/api/shared/tests) + PR + dispatch", jobs: "playwright-smoke: E2E web con API :3001 + web dev + DB seeded (porta smoke :3187 anti-collisione Grafana/next-server)", runner: self-hosted-oci-vm, timeout_min: 30}
+  - {name: shell-tests.yml, trigger: "push+PR (paths scripts/, db/scripts/) + dispatch", jobs: "shell-tests: bash -n + shellcheck error + fixture env-key-merge/auto-deploy (D-19)", runner: self-hosted-oci-vm, timeout_min: 5}
+  - {name: showcase.yml, trigger: "push main (paths showcase/theme/components) + dispatch", jobs: "build-deploy: static export apps/showcase -> GitHub Pages (permissions contents:write)", runner: ubuntu-latest, timeout_min: 15, note: "UNICO workflow su runner GitHub-hosted"}
+  - {name: state-lint.yml, trigger: "push+PR (paths .handoff/, SOT_STATE, SOT_BACKLOG, DEBT_REGISTER, handoff_lint.py)", jobs: "state-lint: handoff_lint.py 10 check (D1-D4/S1-S2/H1-H2/A1-A2) — P6 gate SoT", runner: self-hosted-oci-vm, timeout_min: 5}
+  - {name: test-integration.yml, trigger: "push main (paths-ignore docs/web/showcase) + PR (api/shared/db) + dispatch", jobs: "test-integration: vitest apps/api contro PG live (runner = host DB, no tunnel); creds da /etc/heuresys-runner.env; no cancel-in-progress", runner: self-hosted-oci-vm}
+  - {name: typecheck.yml, trigger: "push main (paths-ignore docs) + PR + dispatch", jobs: "typecheck: tsc strict su tutti i workspace (<30s con cache pnpm calda)", runner: self-hosted-oci-vm, timeout_min: 10}
+
+db_scripts:  # D:/heuresys-advanced/db/scripts/ — 24 file + _lib/ (2)
+  - {name: brownfield-wave-1-preflight.ps1, purpose: "twin PS del preflight Wave 1 (read-only, exit codes come .sh)"}
+  - {name: brownfield-wave-1-preflight.sh, purpose: "validazione pre-flight read-only prima dell'esecuzione Brownfield Wave 1 (mappings APPROVED wave=1, schema post-ADR-0012)"}
+  - {name: create_local_database.ps1, purpose: "Model A Windows: crea ruolo+DB+schemi canonici (sys, brownfield, staging, audit), idempotente"}
+  - {name: create_local_database.sh, purpose: "Model A bash: idem per Linux/macOS/Git-Bash"}
+  - {name: encrypt-totp-secrets.ts, purpose: "QW-SEC6 ONE-TIME deploy-gated: cifra AES-256-GCM i secret TOTP plaintext in sys_auth_mfa_factors (stesso helper dell'API)"}
+  - {name: extract_users_employees_legacy.sh, purpose: "CW-B27/B28: estende legacy_mirror con users + employees_* dal legacy (5 tabelle) con hardening cross-OS"}
+  - {name: extract-wave1-legacy.sh, purpose: "rigenera i dump data-only Wave 1 (88 tabelle, ~356MB gitignored) da heuresys_platform sulla VM"}
+  - {name: gen-anagraphic-seed.sql, purpose: "GENERATOR contro DB legacy: emette seed idempotente anagrafica/identity/employment nei satelliti advanced (mig 000164, chiave LEGACY_EMP::)"}
+  - {name: gen-contracts-seed.sql, purpose: "GENERATOR: seed idempotente legacy contracts -> sys_user_contracts (000165), delete-then-insert scoped"}
+  - {name: gen-pay-slips-seed.sql, purpose: "GENERATOR: seed idempotente employee_pay_stubs -> sys_user_pay_slips (000167), uuid_v5 deterministico + empty-diff"}
+  - {name: migrate.ps1, purpose: "applica db/migrations/*.sql in ordine lessicale, ogni file in transazione singola, ledger sys_schema_migrations"}
+  - {name: migrate.sh, purpose: "twin bash del runner migrazioni (Model A e B)"}
+  - {name: migrate-if-pending.sh, purpose: "wrapper: esegue migrate.sh SOLO se ledger (file+sha256) ha pending — no-op veloce al deploy; DB_MIGRATE=force|skip|auto"}
+  - {name: README.md, purpose: "doc dei due modelli operativi A(localhost)/B(OCI VM) e mapping script"}
+  - {name: reset_local_database.ps1, purpose: "DEV-ONLY distruttivo Model A: drop+ricrea DB vuoto, conferma salvo -Force"}
+  - {name: reset_local_database.sh, purpose: "twin bash del reset distruttivo Model A"}
+  - {name: seed-r1b-personas.ts, purpose: "provisioner login persona TEAM_LEADER (marco.rinaldi) — identity LOCAL + credential ARGON2ID (companion mig 000054)"}
+  - {name: seed-r2-personas.ts, purpose: "provisioner login per i role-holder R2 (PROCESS_OWNER/BLUEPRINT_MANAGER/READ_ONLY..., companion mig 000049)"}
+  - {name: seed-reference-bank.ts, purpose: "MVP-0 5.0.7: seed deterministico (faker seed 42) del tenant RTL_BANK_REFERENCE — branch, posizioni, HQ"}
+  - {name: seed-service-user.ts, purpose: "WI-A.2: service account PLATFORM_ADMIN headless per Agent SDK gateway + esenzione MFA (mig 000116/000117)"}
+  - {name: seed-test-admin.ts, purpose: "rende login-capable le 5 personas REALI post-RTL-rebuild (identity LOCAL + ARGON2ID, password da TEST_ADMIN_PASSWORD env); non crea utenti"}
+  - {name: setup_oci_vm_database.sh, purpose: "Model B one-shot via SSH: ruolo+DB heuresys_advanced+schemi sulla VM (sudo -u postgres, peer auth)"}
+  - {name: validate_database.ps1, purpose: "validazione 2 parti: viste sys.v_* tutte a 0 + prova idempotenza twice-run via pg_dump diff"}
+  - {name: validate_database.sh, purpose: "twin bash della validazione"}
+  - {name: _lib/cross_os_pipeline.sh, purpose: "libreria sourceable pipeline pg_dump/restore cross-OS (mitigazione CW-B28: strip \\restrict PG16+, normalize vector/uuid fn)"}
+  - {name: _lib/README.md, purpose: "doc della libreria xos_lib"}
+
+deploy_docs:  # D:/heuresys-advanced/deploy/README.md — indice sezioni
+  - {section: "Secrets", line: 6, gist: "sempre richiesti, mai in git (.env, .secrets/*.pem), trasferimento out-of-band"}
+  - {section: "Gitignored data -> VM", line: 21, gist: "uso di sync-gitignored-to-vm.sh per il payload non tracciato"}
+  - {section: "Full alignment (align-clones.sh)", line: 41, gist: "VM+linuxpc come cloni; Mac on-demand only da S1007"}
+  - {section: "Claude ecosystem alignment", line: 79, gist: "align-claude-ecosystem.sh — catalogo Claude cross-machine"}
+  - {section: "Canonical session close (close-propagate.sh)", line: 122, gist: "chiusura delta/full con esempi comando"}
+  - {section: "Linux server (OCI VM) — public, systemd", line: 156, gist: "deploy pubblico systemd; include Mappa porte VM (registro allocazioni, riga 169)"}
+  - {section: "Mac / Linux desktop — dev on-demand", line: 198, gist: "dev-bootstrap.sh per host Unix"}
+  - {section: "Windows — dev on-demand (PowerShell)", line: 215, gist: "dev-bootstrap.ps1"}
+  - {section: "Idempotency", line: 225, gist: "garanzie re-run di tutti gli script"}
+  - {section: "Cross-platform notes", line: 236, gist: "quirk Git Bash/rsync/MSYS"}
+
+systemd:  # unit note su oracle-vm-default; file template in deploy/systemd/ (@@VAR@@ renderizzati da vm-bootstrap)
+  services_long_running:
+    - {unit: heuresys-advanced-api.service, exec: "node dist/server.js (bundle tsup)", port: 8013}
+    - {unit: heuresys-advanced-web.service, exec: "next start -H 0.0.0.0", port: 3013}
+  oneshot_with_timer:  # tutti Persistent=true
+    - {unit: heuresys-advanced-approvals-sla, cadence: "hourly *:20", exec: "pnpm approvals:sla", scope: "scan SLA/escalation approvazioni (3.3 slice-3b)"}
+    - {unit: heuresys-advanced-backup, cadence: "daily 01:30", exec: "scripts/backup-db.sh", scope: "pg_dump -Fc + retention (R5)"}
+    - {unit: heuresys-advanced-auth-housekeeping, cadence: "daily 02:00", exec: "scripts/auth-housekeeping.sh", scope: "prune refresh-token/login-event (QW-C2)"}
+    - {unit: heuresys-advanced-insights, cadence: "daily 02:15", exec: "pnpm insights:recompute", scope: "flight-risk/succession/skill-gap (cap3)"}
+    - {unit: heuresys-advanced-notifications-digest, cadence: "daily 02:45", exec: "pnpm notifications:digest", scope: "digest notifiche (3.4)"}
+    - {unit: heuresys-advanced-scraping, cadence: "weekly Sun 03:30", exec: "pnpm reference-sync:run", scope: "refresh ESCO+ATECO da fonti ufficiali (cap5)"}
+    - {unit: heuresys-advanced-dr-drill, cadence: "weekly Sun 04:00", exec: "scripts/dr-drill.sh", scope: "restore-verify backup, RPO/RTO (QW-C3)"}
+    - {unit: heuresys-advanced-reindex, cadence: "weekly Sun 04:30", exec: "pnpm embeddings:backfill", scope: "reindex embeddings semantic-matching (R7)"}
+  other_on_vm_not_in_repo:
+    - "heuresys-{api-gateway,app,enrichment} — stack legacy heuresys-evo (unit non in questo repo)"
+    - "GitHub Actions self-hosted runner (label oci-vm; env creds in /etc/heuresys-runner.env, docs/ci/self-hosted-runners-setup.md)"
+  windows_scheduled_task: {name: HeuresysTunnel5433, trigger: At-Logon, exec: tunnel-keepalive.ps1, scope: "tunnel :5433->VM:5432 (ADR-0021)"}

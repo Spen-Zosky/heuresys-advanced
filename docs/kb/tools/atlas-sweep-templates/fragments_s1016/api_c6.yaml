@@ -1,0 +1,149 @@
+# atlas fragment api_c6 — moduli API: organization-units, position-career-paths,
+# position-succession-relevance, positions, predictions, process-kpi-templates,
+# public-stats, reference-sync, seed-acquisition-runs
+# fonte: apps/api/src/app.ts (registrazioni) + routes/repository/service per modulo · 2026-07-05
+modules:
+  organization-units:
+    prefix: /v1/organization-units
+    endpoints:
+      - {method: GET, path: /, permission: 'organization_unit:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'organization_unit:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'organization_unit:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'organization_unit:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'organization_unit:delete', csrf: true, orgGate: false}
+    tables: [sys.sys_organization_units]
+    schemas: [organization-units]
+    tests: [organization-units.integration.test.ts]
+    notes:
+      - "CRUD tenant-scoped; PLATFORM_ADMIN cross-tenant (service.ts header)"
+      - "DELETE = soft-delete (service.softDelete)"
+      - "moduli affini organization-unit-kpi-templates / organization-unit-processes sono moduli SEPARATI (fuori scope C6)"
+  position-career-paths:
+    prefix: /v1/position-career-paths
+    endpoints:
+      - {method: GET, path: /, permission: 'career_succession:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: /:id, permission: 'career_succession:read', csrf: false, orgGate: catalog}
+      - {method: POST, path: /, permission: 'career_succession:create', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'career_succession:update', csrf: true, orgGate: false}
+    tables: [sys.sys_position_career_paths, sys.sys_career_paths, sys.sys_positions]
+    schemas: [position-career-paths]
+    tests: [position-career-paths.integration.test.ts]
+    notes:
+      - "junction table position<->career_path; nessun PATCH by design (link immutabile: create/delete)"
+      - "tenant ereditato dalla position; career path visibile se global o own-tenant"
+      - "DELETE usa permission career_succession:update (nessun career_succession:delete)"
+  position-succession-relevance:
+    prefix: /v1/position-succession-relevance
+    endpoints:
+      - {method: GET, path: /, permission: 'career_succession:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: /:id, permission: 'career_succession:read', csrf: false, orgGate: catalog}
+      - {method: PUT, path: /, permission: 'career_succession:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'career_succession:update', csrf: true, orgGate: false}
+    tables: [sys.sys_position_succession_relevance, sys.sys_positions]
+    schemas: [position-succession-relevance]
+    tests: [position-succession-relevance.integration.test.ts]
+    notes:
+      - "PUT-style upsert idempotente su positionId; 1:1 con position via unique index"
+      - "tenant ereditato dalla position"
+  positions:
+    prefix: /v1/positions
+    endpoints:
+      - {method: GET, path: /, permission: 'position:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'position:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'position:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'position:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'position:delete', csrf: true, orgGate: false}
+      - {method: GET, path: /:id/intelligence-profile, permission: 'position:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id/skills, permission: 'position:read', csrf: false, orgGate: false}
+      - {method: POST, path: /:id/skills, permission: 'position:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id/skills/:skillId, permission: 'position:update', csrf: true, orgGate: false}
+      - {method: GET, path: /:id/kpis, permission: 'position:read', csrf: false, orgGate: false}
+      - {method: POST, path: /:id/kpis, permission: 'position:update', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id/kpis/:kpiId, permission: 'position:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id/kpis/:kpiId, permission: 'position:update', csrf: true, orgGate: false}
+    tables: [sys.sys_positions, sys.sys_position_skill_requirements, sys.sys_position_kpi_requirements,
+             sys.sys_position_intelligence_profiles_v, sys.sys_kpi_definitions, sys.sys_skills]
+    schemas: [positions]
+    tests: [positions.integration.test.ts]
+    notes:
+      - "PIP letto dalla VIEW sys.sys_position_intelligence_profiles_v (ADR-0008, I9: mai JSONB blob)"
+      - "scope: PLATFORM_ADMIN cross-tenant, altri own-tenant only"
+      - "sub-CRUD skills (add/remove) + KPI (WI-D2: read + ranked write add/update/remove)"
+      - "DELETE core = soft-delete"
+  predictions:
+    prefix: /v1/predictions
+    endpoints:
+      - {method: GET, path: /models, permission: 'predictions:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: /models/:id, permission: 'predictions:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: /, permission: 'predictions:read', csrf: false, orgGate: service}
+      - {method: GET, path: /:id, permission: 'predictions:read', csrf: false, orgGate: service}
+    tables: [sys.sys_predictive_models, sys.sys_model_predictions]
+    schemas: [predictions]
+    tests: [predictions.integration.test.ts, predictions-scope.integration.test.ts]
+    notes:
+      - "READ-ONLY read-model (B-10b m3, import-as-read-model): valori predittivi legacy precomputati esposti as-is, nessun endpoint di write/recompute"
+      - "visibilita tenant-only (no global rows); PLATFORM_ADMIN unfiltered; riga non visibile -> 404 (no leak)"
+      - "orgGate service sulle predictions person-level (usa resolveOrgReadScope/canReadOrgTarget); catalog sui models"
+  process-kpi-templates:
+    prefix: /v1/process-kpi-templates
+    endpoints:
+      - {method: GET, path: /, permission: 'bpm_process:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'bpm_process:read', csrf: false, orgGate: false}
+      - {method: PUT, path: /, permission: 'bpm_process:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'bpm_process:update', csrf: true, orgGate: false}
+    tables: [sys.sys_process_kpi_templates, sys.sys_blueprint_process_registry, sys.sys_kpi_definitions]
+    schemas: [process-kpi-templates]
+    tests: [process-kpi-templates.integration.test.ts]
+    notes:
+      - "catalog-level: writes riservati a PLATFORM_ADMIN (check nel service oltre a RBAC bpm_process:update)"
+      - "PUT-upsert idempotente; nessuna permission dedicata process_kpi_template:* (riusa bpm_process:*)"
+  public-stats:
+    prefix: /v1/public
+    endpoints:
+      - {method: GET, path: /platform-stats, permission: null, csrf: false, orgGate: false}
+    tables: [sys.sys_users, sys.sys_positions, sys.sys_organization_units, sys.sys_teams, sys.sys_skills,
+             sys.sys_esco_occupation_mappings, sys.sys_occupation_skill_requirements,
+             sys.sys_auth_roles, sys.sys_auth_permissions, sys.sys_auth_role_permissions, sys.sys_ui_interfaces]
+    schemas: [public-stats]
+    tests: [public-stats.integration.test.ts]
+    notes:
+      - "UNICO endpoint PUBBLICO (no auth, no CSRF); rate-limit per-route 30 req/60s"
+      - "aggregate-only counts per i metric tiles della one-pager GTM/investor"
+      - "cache TTL in-process 5 min (stale-by-<=5min accettato); _reset() per i test"
+  reference-sync:
+    prefix: /v1/reference-sync
+    endpoints:
+      - {method: GET, path: /sources, permission: 'reference_sync:read', csrf: false, orgGate: false}
+      - {method: GET, path: /runs, permission: 'reference_sync:read', csrf: false, orgGate: false}
+      - {method: GET, path: /runs/:id, permission: 'reference_sync:read', csrf: false, orgGate: false}
+      - {method: POST, path: /runs, permission: 'reference_sync:trigger', csrf: true, orgGate: false}
+    tables: [sys.sys_activity_classifications, sys.sys_esco_occupation_mappings, sys.sys_skills,
+             brownfield.import_runs, brownfield.source_watermarks, brownfield.source_exports]
+    schemas: [reference-sync]
+    tests: [reference-sync.integration.test.ts, reference-sync-esco-skill-hierarchy.integration.test.ts]
+    notes:
+      - "cap5 refresh reference-data ufficiali; 3 sorgenti registrate: ESCO, ATECO_2025 (ISTAT), ESCO_SKILL_HIERARCHY"
+      - "connettori esterni HTTP: esco-connector.ts + istat-ateco-connector.ts; DI seam `deps` (fixture fetcher nei test, iniettabile da buildApp options.referenceSyncDeps)"
+      - "sync-cli.ts = entrypoint CLI per systemd timer heuresys-advanced-scraping.timer (in-process, no HTTP/auth, import_run_initiated_by NULL; pattern D-2)"
+      - "GLOBAL platform infra, nessun tenant scoping: RBAC ristretto a PLATFORM_ADMIN (mig 000084 seed + 000085 revoke TENANT_ADMIN)"
+      - "watermark short-circuit: catalogo upstream invariato -> run UNCHANGED no-op; lineage run-level in brownfield.import_runs + source_exports (sha256 artifact)"
+  seed-acquisition-runs:
+    prefix: /v1/seed-acquisition-runs
+    endpoints:
+      - {method: GET, path: /, permission: 'seed_acquisition:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'seed_acquisition:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'seed_acquisition:trigger', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'seed_acquisition:trigger', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'seed_acquisition:trigger', csrf: true, orgGate: false}
+    tables: [sys.sys_seed_acquisition_runs]
+    schemas: [seed-acquisition-runs]
+    tests: [seed-acquisition-runs.integration.test.ts, seed-acquisition.integration.test.ts]
+    notes:
+      - "tenant-scoped; PLATFORM_ADMIN deve fornire body.tenantId (TENANT_ID_REQUIRED)"
+      - "trigger = solo INSERT del run record (nessuna esecuzione acquisizione in-process); PATCH aggiorna stato/esiti"
+      - "POST/PATCH/DELETE tutti sotto seed_acquisition:trigger (nessuna :update/:delete dedicata)"
+      - "seed-acquisition.integration.test.ts copre la pipeline completa e colpisce anche /v1/seed-acquisition-runs"
+counts:
+  modules: 9
+  endpoints: 44
+  tables_distinct: 27

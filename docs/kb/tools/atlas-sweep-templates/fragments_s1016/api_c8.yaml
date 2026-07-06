@@ -1,0 +1,137 @@
+# atlas fragment api_c8 — moduli API: succession-pools, successor-candidates, successor-readiness,
+# surveys, teams, tenant-materialization, tenants, training-initiatives, user-career-plans
+# fonte: apps/api/src/app.ts (register), apps/api/src/modules/<m>/{routes,repository,service}.ts
+modules:
+  succession-pools:
+    prefix: /v1/succession-pools
+    endpoints:
+      - {method: GET, path: /, permission: 'career_succession:read', csrf: false, orgGate: service}
+      - {method: GET, path: /:id, permission: 'career_succession:read', csrf: false, orgGate: service}
+      - {method: POST, path: /, permission: 'career_succession:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'career_succession:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'career_succession:update', csrf: true, orgGate: false}
+    tables: [sys.sys_succession_pools, sys.sys_positions, sys.sys_successor_candidates, sys.sys_user_position_assignments]
+    schemas: [succession-pools]
+    tests: [succession-pools.integration.test.ts, succession-pools-scope.integration.test.ts]
+    notes:
+      - tenant-scoped; position FK deve essere same-tenant; code unico per tenant
+      - list filtrata per org read scope (resolveOrgReadScope, ADR-0027 F3/D-50)
+      - DELETE riusa career_succession:update (nessuna permission :delete dedicata)
+  successor-candidates:
+    prefix: /v1/successor-candidates
+    endpoints:
+      - {method: GET, path: /, permission: 'career_succession:read', csrf: false, orgGate: service}
+      - {method: GET, path: /readiness-distribution, permission: 'career_succession:read', csrf: false, orgGate: aggregate}
+      - {method: GET, path: /:id, permission: 'career_succession:read', csrf: false, orgGate: service}
+      - {method: POST, path: /, permission: 'career_succession:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'career_succession:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'career_succession:update', csrf: true, orgGate: false}
+    tables: [sys.sys_successor_candidates, sys.sys_succession_pools, sys.sys_users]
+    schemas: [successor-candidates]
+    tests: [successor-candidates.integration.test.ts, successor-candidates-scope.integration.test.ts]
+    notes:
+      - org read scope su list (all/tenant/subtree/self via resolveOrgReadScope, D-50)
+      - endpoint aggregato readiness-distribution con orgGate aggregate
+  successor-readiness:
+    prefix: /v1/successor-readiness
+    endpoints:
+      - {method: GET, path: /, permission: 'career_succession:read', csrf: false, orgGate: service}
+      - {method: GET, path: /:id, permission: 'career_succession:read', csrf: false, orgGate: service}
+      - {method: POST, path: /, permission: 'career_succession:create', csrf: true, orgGate: false}
+    tables: [sys.sys_successor_readiness, sys.sys_successor_candidates]
+    schemas: [successor-readiness]
+    tests: [successor-readiness.integration.test.ts, successor-readiness-scope.integration.test.ts]
+    notes:
+      - append-only/immutabile by design (no PATCH/DELETE) — event log di readiness assessment
+      - org read scope su list (PLATFORM_ADMIN->all, HR-mandated->tenant, managerial->subtree, altri->self)
+  surveys:
+    prefix: /v1/surveys
+    endpoints:
+      - {method: GET, path: /templates, permission: 'surveys:read', csrf: false, orgGate: false}
+      - {method: GET, path: /templates/:id, permission: 'surveys:read', csrf: false, orgGate: false}
+      - {method: POST, path: /templates, permission: 'surveys:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /templates/:id, permission: 'surveys:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /templates/:id, permission: 'surveys:delete', csrf: true, orgGate: false}
+      - {method: GET, path: /, permission: 'surveys:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'surveys:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'surveys:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'surveys:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'surveys:delete', csrf: true, orgGate: false}
+      - {method: GET, path: /:id/responses, permission: 'surveys:read', csrf: false, orgGate: false}
+      - {method: GET, path: /responses/:id, permission: 'surveys:read', csrf: false, orgGate: false}
+    tables: [sys.sys_engagement_survey_templates, sys.sys_engagement_surveys, sys.sys_engagement_survey_responses]
+    schemas: [surveys]
+    tests: [surveys.integration.test.ts]
+    notes:
+      - tri-entita' in un modulo (templates + surveys CRUD, responses read-only event log)
+      - visibilita' tenant-only (no righe global); PLATFORM_ADMIN unfiltered; fuori-scope -> 404 anti-enumeration
+      - write delle responses lato ESS nel modulo me (test me-surveys.integration.test.ts)
+  teams:
+    prefix: /v1/teams
+    endpoints:
+      - {method: GET, path: /, permission: 'team:list', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'team:read', csrf: false, orgGate: false}
+    tables: [sys.sys_teams, sys.sys_team_members, sys.sys_users]
+    schemas: [teams]
+    tests: [teams.integration.test.ts]
+    notes:
+      - read-only (R1b); teams derivati dall'org via db/seeds/rtl-rebuild/13_teams_from_org.sql
+      - 3o asse scope RBAC "my team" (oltre tenant/self/reports-of-mine); browse-all per PLATFORM_ADMIN/TENANT_ADMIN/MANAGER/CEO/HRMS_MANAGER, team-scoped per TEAM_LEADER/TEAM_MEMBER/USER
+      - teamsService ri-esportato per il mount di GET /v1/me/team nel modulo me
+  tenant-materialization:
+    prefix: /v1/tenant-materialization
+    endpoints:
+      - {method: GET, path: /archetypes, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: null, csrf: true, orgGate: false}
+    tables: [sys.sys_tenancies, sys.sys_organization_units, sys.sys_organization_unit_types, sys.sys_positions, sys.sys_users, sys.sys_user_position_assignments, sys.sys_skills, sys.sys_kpi_definitions, sys.sys_user_skill_evidence, sys.sys_user_kpi_evidence]
+    schemas: [tenant-materialization]
+    tests: [tenant-materialization.integration.test.ts]
+    notes:
+      - "#4 WI-C: generatore archetipi org (catalogo deterministico in blueprints.ts, namespace RBR-* anti-collisione, ON CONFLICT additive)"
+      - POST modes plan|apply, ritorna 200 (idempotente, non create singola risorsa)
+      - service-gate PLATFORM_ADMIN-only (ensurePlatformAdmin), NESSUNA requirePermission granulare nel seed (come job-families)
+      - GET /archetypes aperto a qualsiasi autenticato (nessuna permission)
+      - slice-1 org-units+positions; slice-2a incumbent GENERATED_INCUMBENT + assignment PRIMARY ACTIVE; slice-2b (skills/ranked-KPI) residuo
+  tenants:
+    prefix: /v1/tenants
+    endpoints:
+      - {method: GET, path: /, permission: 'tenant:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'tenant:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'tenant:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'tenant:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'tenant:delete', csrf: true, orgGate: false}
+    tables: [sys.sys_tenancies]
+    schemas: [tenants]
+    tests: [tenants.integration.test.ts]
+    notes:
+      - DELETE = soft delete (status ARCHIVED), mai hard delete
+      - scope AUTH §6: PLATFORM_ADMIN cross-tenant; altri attori pinnati al proprio tenant
+  training-initiatives:
+    prefix: /v1/training-initiatives
+    endpoints:
+      - {method: GET, path: /, permission: 'training_initiative:list', csrf: false, orgGate: catalog}
+      - {method: GET, path: /:id, permission: 'training_initiative:read', csrf: false, orgGate: catalog}
+      - {method: POST, path: /, permission: 'training_initiative:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'training_initiative:update', csrf: true, orgGate: false}
+    tables: [sys.sys_training_initiatives, sys.sys_learning_modules, sys.sys_users]
+    schemas: [training-initiatives]
+    tests: [training-initiatives.integration.test.ts]
+    notes:
+      - no DELETE by design — chiusura via status=CANCELLED
+      - sempre tenant-scoped (tenant_id NOT NULL); PLATFORM_ADMIN cross-tenant con body.tenantId esplicito
+      - orgGate catalog (dataclass catalogo) sui read
+  user-career-plans:
+    prefix: /v1/user-career-plans
+    endpoints:
+      - {method: GET, path: /, permission: 'career_succession:read', csrf: false, orgGate: service}
+      - {method: GET, path: /:id, permission: 'career_succession:read', csrf: false, orgGate: service}
+      - {method: POST, path: /, permission: 'career_succession:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'career_succession:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'career_succession:update', csrf: true, orgGate: false}
+    tables: [sys.sys_user_career_plans, sys.sys_career_paths, sys.sys_positions, sys.sys_users]
+    schemas: [user-career-plans]
+    tests: [user-career-plans.integration.test.ts, user-career-plans-scope.integration.test.ts]
+    notes:
+      - tenant-scoped only; FK pathId validato per visibilita' tenant (global o own) -> 404
+      - org read scope su list (resolveOrgReadScope); DELETE riusa career_succession:update
+counts: {modules: 9, endpoints: 44, tables_distinct: 22}

@@ -1,0 +1,80 @@
+# Atlas fragment — wiki esterna (wiki-space) — assessment read-only 2026-07-05
+wiki_vault:
+  path: C:/Users/enzospenuso/wiki-space/heuresys-advanced-wiki
+  engine: llm-wiki v1.3, source_mode linked (linked_sources.yaml, 63 source files repo, sha256-tracked in manifest.yaml)
+  index_claims: "67 pages (63 sources, 2 concepts, 2 entities, 0 syntheses), last rebuild 2026-05-27 18:04"
+  md_files_under_wiki: 68  # 63 sources + overview + 2 concepts + 2 entities + index esterno
+
+pages:
+  default_mtime: 2026-05-27          # tutte le pagine salvo eccezioni sotto
+  refreshed_2026-05-31:              # unico refresh successivo alla build
+    [adr-0006-auth-strategy, adr-0011-ess-scope-inclusion, preflight-residual-todo,
+     wave-3-runner, wave-4-runner, workflows-overview]
+  by_theme:
+    overview: [overview]                                        # KB prosa, entry vault
+    concepts: [cowork-bias-registry, invarianti-architetturali] # invarianti = SOLO I1-I13/RD-08/RD-09
+    entities: [brownfield-wave-executor, oci-vm-runtime]
+    adr:  # 19 pagine: 0001-0018 + 0020 (0019 assente anche nel vault)
+      [adr-0001-monorepo-pnpm, adr-0002-backend-fastify, adr-0003-db-access-drizzle-raw-sql,
+       adr-0004-no-docker-postgresql, adr-0005-password-argon2id, adr-0006-auth-strategy,
+       adr-0007-frontend-next15, adr-0008-pip-as-view, adr-0009-visualization-node-layouts,
+       adr-0010-postgresql-runtime-location, adr-0011-ess-scope-inclusion,
+       adr-0012-brownfield-table-mapping-wave, adr-0013-showcase-sot-policy,
+       adr-0014-sdbi-semantic-driven-brownfield-import, adr-0015-sys-job-roles-nullable-family-fk,
+       adr-0016-sys-esco-occupation-mappings-nullable-job-role-fk, adr-0017-lookup-fk-2hop,
+       adr-0018-coalesce-uq-class-of-bug, adr-0020-wave2-scope-application-level-targets]
+    planning_roadmap:
+      [api-implementation-plan, auth-security-plan, bootstrap-execution-plan,
+       frontend-implementation-plan, migration-implementation-plan, mvp-4-roadmap,
+       next-session-mvp-2a, next-session-mvp-closure, target-schema-design,
+       architectural-decision-records-index]
+    brownfield_waves:
+      [brownfield-adaptation-map, brownfield-exclusion-report, brownfield-import-plan,
+       brownfield-table-classification-report, migration-status-2026-05-18,
+       wave-1-execution-runbook, wave-2-runner, wave-3-runner, wave-4-runner]
+    state_sot_mirror:  # copie delle SoT repo al 27-31/05 — le più deperibili
+      [sot-state, sot-backlog, debt-register, handoff-cronologia-sessioni, handoff-brand,
+       start-here-entry-point, index-paths, integrations, cowork-inbox, cowork-archive-note,
+       claude-md-project-guidance, readme-heuresys-advanced]
+    audit_qa:
+      [a11y-audit-tier-7-2026-05-20, accessibility-manual-checklist-heuresys-advanced,
+       accessibility-tail-items-mvp-2a-mvp-3, mvp-2a-api-gap-audit, showcase-audit-2026-05-20,
+       goal-b-report-2026-05-18, cw-b59-true-root-cause-analysis-s935-path-a-bisect-outcome]
+    brand: [brand-session-charter, brand-v1-deferred-refinements]
+    infra_ci: [heuresys-advanced-bootstrap-vm, self-hosted-runners-setup, workflows-overview,
+               preflight-residual-todo]
+  page_structure: "sources = Overview/Key points/Related/Sources (sintesi per-file, 1 source ciascuna)"
+
+graph:
+  path: C:/Users/enzospenuso/wiki-space/heuresys-advanced-graph/src-mirror/graphify-out
+  graph_json_mtime: 2026-05-27 18:15
+  nodes: 8561
+  edges: 10088
+  communities: 802   # 753 mostrate, 49 thin omesse
+  extraction: "100% EXTRACTED, 4 edge INFERRED (conf 0.8)"
+  built_from_commit: 548399ea (2026-05-27)
+  commits_behind_head: 748   # HEAD e7aeae45 2026-07-05
+  artifacts: [graph.json 6.9MB, graph.html 6.8MB, GRAPH_TREE.html, GRAPH_REPORT.md 184KB, .graphify_labels.json]
+  refresh_cmd: "graphify update .  # dichiarato no-API-cost in GRAPH_REPORT.md"
+
+staleness_verdict:
+  snapshot_epoch: "2026-05-27/31 = PRE-v1.0.0-GA (GA 2026-06-02); oggi 2026-07-05, HEAD 2026-07-05"
+  stale_hard:  # da rigenerare, non riusabili as-is
+    - "state_sot_mirror (12 pagine): sot-state/backlog/debt-register/handoff riscritti ogni sessione da allora; start-here/handoff-cronologia mirano a file ora archiviati (HANDOFF.md e BRAND_SESSION_CHARTER.md NON esistono più a repo root — verified ls 2026-07-05)"
+    - "conteggi: era wiki ~mig 000050 vs repo attuale 167 file fino a 000169; moduli ~75; ruoli 8→11"
+    - "ADR: wiki 19 pagine (max 0020) vs repo 25 ADR (max 0027) — mancano 0021-0027 incl. dottrine 0023 data-source, 0024 employee-centric, 0026 single-prod-env, 0027 bi-axial auth"
+    - "invarianti-architetturali: copre I1-I13 vs repo I1-I20 (mancano I14-I20 bi-axial/ESS-floor/peer-isolation)"
+    - "roadmap/planning: mvp-4-roadmap + next-session-* descrivono programma pre-GA; assente tutto il post-v1.0 (programma 8 fasi S987, docs/product/ SoT S997, teams, TOTP, HTTPS prod)"
+    - "graph: 748 commit indietro, non vede teams/ESS shipped/RBAC-UIX epic/000051-000169/product docs"
+  reusable_as_is:
+    - "adr 0001-0018+0020: decisioni immutabili, pagine ancora corrette"
+    - "brownfield_waves + audit_qa + brand: record storici stabili (chiusi, datati nel titolo)"
+    - "concepts/entities scaffolding + struttura vault (raw/wiki/manifest)"
+    - "meccanica linked-mode: manifest.yaml traccia sha256+status per source → refresh incrementale deterministico"
+
+vaults:  # nessun registry centrale: .wiki-vaults.yaml NON esiste (ls -A wiki-space = solo 5 dir)
+  - {name: heuresys-advanced-wiki,  mtime: 2026-05-31, pages: 68, note: "vault progetto, linked-mode"}
+  - {name: heuresys-advanced-graph, mtime: 2026-05-27, note: "mirror graphify-out (graph.json 8561 nodi) + index.html"}
+  - {name: heuresys-wiki,           mtime: 2026-05-31, pages: 157, note: "legacy heuresys/evo, rebuild 2026-04-27"}
+  - {name: llmwiki-demo,            mtime: 2026-06-18, note: "vault demo engine, index vuoto/minimale"}
+  - {name: nose-wiki,               mtime: 2026-04-27, note: "progetto estraneo"}

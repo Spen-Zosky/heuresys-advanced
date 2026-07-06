@@ -1,0 +1,377 @@
+# atlas fragment — frontend admin (apps/web, (authenticated) excl. me/)
+# generated: 2026-07-05 | source sweep: 53 page.tsx + lib/api + components locali
+# convenzione hooks: "inline-useQuery"/"inline-useMutation" = TanStack Query inline in page con apiFetch (pattern dominante, nessun layer hook per-modulo)
+# convenzione ui: nomi = import diretti da @heuresys/ui; "local:X" = wrapper locale apps/web/src/components (mapping in components:)
+meta:
+  scope: apps/web/src/app/(authenticated)/ (route group non in URL), zona admin
+  pages_count: 53
+  i18n_namespaces: {admin: 30, hr: 11, analytics: 9, blueprints: 5}
+  write_capable_pages: 9  # solo approvals, approvals/[id], content, content/[id], admin/mfa-policy, tenants/[tenantId]/enterprise-typing, insights x3 (recompute)
+
+pages:
+  /dashboard:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/dashboard/widgets"]
+    ui: [AuditFeed, Badge, EmptyState, PageHeader, StatsCard, formatRelativeTime]
+    notes: [5 counter trended WoW+sparkline (users/positions/OU/learningPaths/learningGaps), audit feed live, stati loading/error dedicati con data-testid]
+  /users:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/users"]
+    ui: ["local:DataTablePanel", "local:StatusBadge"]
+    notes: [read-only list, link a detail]
+  /users/[userId]:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/users/:userId"]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader, "local:FieldGrid", "local:StatusBadge"]
+    notes: [404 gestito via isApiError]
+  /tenants:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/tenants?limit=200"]
+    ui: ["local:DataTablePanel", "local:StatusBadge"]
+    notes: [read-only list]
+  /tenants/[tenantId]:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/tenants/:tenantId", "GET /v1/enterprise-typing-profiles?tenantId=&limit=10"]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader, "local:FieldGrid", "local:StatusBadge"]
+    notes: [isApiError 404, link a enterprise-typing]
+  /tenants/[tenantId]/enterprise-typing:
+    zone: admin
+    hooks: [inline-useQuery, inline-useMutation, useForm+zodResolver]
+    endpoints: ["GET /v1/blueprint-families?limit=200", "GET /v1/blueprint-variants?limit=200", "GET /v1/operating-models?limit=200", "GET /v1/enterprise-size-bands?limit=200", "POST /v1/enterprise-typing-profiles"]
+    ui: [Button, Card, CardContent, CardHeader, CardTitle, PageHeader]
+    notes: [form react-hook-form con Zod schema locale, filtro variants per familyId client-side]
+  /positions:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/positions"]
+    ui: ["local:DataTablePanel", "local:StatusBadge", "local:StatusPill"]
+    notes: [read-only list]
+  /positions/[positionId]:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/positions/:positionId"]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader, "local:FieldGrid", "local:StatusBadge", "local:StatusPill"]
+    notes: [isApiError 404, hub verso sub-page kpis/skills/learning]
+  /positions/[positionId]/kpis:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/positions/:positionId/kpis"]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader, "local:EntityTable"]
+    notes: [empty-state via EntityTable]
+  /positions/[positionId]/skills:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/positions/:positionId/skills"]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader, "local:EntityTable", "local:StatusBadge"]
+    notes: []
+  /positions/[positionId]/learning:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/learning-gaps?positionId=&limit=200"]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader, "local:EntityTable", "local:StatusBadge"]
+    notes: [riusa endpoint learning-gaps filtrato per posizione]
+  /organization:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/organization-units?limit=200"]
+    ui: ["local:DataTablePanel", "local:StatusPill"]
+    notes: [read-only list]
+  /organization/org-chart:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/visualization-graphs?type=ORG_CHART&limit=10", "GET /v1/visualization-graphs/:graphId/render"]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader, "local:EChartsCard"]
+    notes: [selettore grafo su max 10 grafi ORG_CHART (limit=10 hard), render payload server-side]
+  /skills:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/skills?limit=200"]
+    ui: ["local:DataTablePanel", "local:StatusPill"]
+    notes: [read-only list]
+  /kpis:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/kpi-definitions?limit=200"]
+    ui: ["local:DataTablePanel", "local:StatusPill"]
+    notes: [read-only list]
+  /learning:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/learning-modules?limit=200"]
+    ui: ["local:DataTablePanel", "local:StatusPill"]
+    notes: [read-only list]
+  /learning/training-initiatives:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/training-initiatives?limit=200"]
+    ui: ["local:DataTablePanel", "local:StatusBadge"]
+    notes: [read-only list]
+  /goals:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/goals?limit=200"]
+    ui: ["local:DataTablePanel", "local:StatusPill"]
+    notes: [read-only list]
+  /okrs:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/okrs?limit=200"]
+    ui: ["local:DataTablePanel", "local:StatusPill"]
+    notes: [read-only list]
+  /processes:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/blueprint-processes?limit=200"]
+    ui: ["local:DataTablePanel", "local:StatusPill"]
+    notes: [read-only list]
+  /blueprints:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/blueprint-families?limit=200", "GET /v1/blueprint-variants?limit=200"]
+    ui: ["local:DataTablePanel"]
+    notes: [2 tabelle (families + variants), link a variant detail]
+  /blueprints/[variantId]:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/blueprint-variants/:variantId", "GET /v1/blueprint-processes?variantId=&limit=200", "GET /v1/blueprint-activations?variantId=&limit=200", "GET /v1/content-blueprint-links/by-variant?variantId="]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader, "local:EntityTable", "local:StatusBadge", "local:StatusPill"]
+    notes: [isApiError 404, mostra anche i documenti content linkati alla variante]
+  /seed-acquisition/runs:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/seed-acquisition-runs?limit=200"]
+    ui: ["local:DataTablePanel", "local:StatusBadge"]
+    notes: [read-only list dei run di scraping/seed]
+  /system-health:
+    zone: admin
+    hooks: [useCurrentUser, useSystemHealth, useRolePermissions]
+    endpoints: ["GET /v1/auth/me", "GET /v1/observability/system-health", "GET /v1/auth/role-permissions"]
+    ui: [AuditFeed, Badge, EmptyState, ErrorRateBreakdown, KPIStrip, RBACMatrix]
+    notes: [gate client-side PLATFORM_ADMIN con router.replace('/') per non-admin, layout.tsx sibling = fullscreen takeover, rendering delegato a SystemHealthLive (100% live post-F7), 4 sezioni del mock droppate per assenza backend (log tail / slow-query / incidents / sparkline time-series)]
+  /insights:
+    zone: admin
+    hooks: [inline-useQuery, inline-useMutation, useCurrentUserPermissions]
+    endpoints: ["GET /v1/insights/flight-risk", "POST /v1/insights/recompute"]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, "local:DataTablePanel"]
+    notes: ["bottone recompute gated client su permission insights:admin"]
+  /insights/skill-gap:
+    zone: admin
+    hooks: [inline-useQuery, inline-useMutation, useCurrentUserPermissions]
+    endpoints: ["GET /v1/insights/skill-gap", "POST /v1/insights/skill-gap/recompute"]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, "local:DataTablePanel"]
+    notes: ["recompute gated su insights:admin"]
+  /insights/succession-readiness:
+    zone: admin
+    hooks: [inline-useQuery, inline-useMutation, useCurrentUserPermissions]
+    endpoints: ["GET /v1/insights/succession-readiness", "POST /v1/insights/succession-readiness/recompute"]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, "local:DataTablePanel"]
+    notes: ["recompute gated su insights:admin"]
+  /content:
+    zone: admin
+    hooks: [inline-useQuery, inline-useMutation, useForm]
+    endpoints: ["GET /v1/content?<filtri>", "GET /v1/content/categories", "GET /v1/content/search?q=", "POST /v1/content", "POST /v1/content/categories", "DELETE /v1/content/categories/:id"]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader, "local:EntityTable"]
+    notes: [search full-text debounced, form creazione documento+categoria, value-list status/category duplicati come literal locali (apps/web importa solo TYPES da @heuresys/shared)]
+  /content/[id]:
+    zone: admin
+    hooks: [inline-useQuery, inline-useMutation, useForm, useCurrentUserPermissions]
+    endpoints: ["GET /v1/content/:id", "GET /v1/content/:id/versions", "GET /v1/content/categories", "GET /v1/content-blueprint-links/by-document?documentId=", "GET /v1/blueprint-processes?limit=500", "PATCH /v1/content/:id", "DELETE /v1/content/:id", "POST /v1/content/:id/:action", "POST /v1/content/:id/versions/:versionId/restore", "POST /v1/content-blueprint-links", "DELETE /v1/content-blueprint-links/:linkId", "GET /v1/content/:id/media", "POST /v1/content/:id/media (multipart raw fetch)", "DELETE /v1/content/media/:mediaId"]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader, "local:EntityTable", "local:ContentMediaPanel"]
+    notes: ["pagina più ricca dello SPA: 5 query + 6 mutation + media panel", "gating client su content:update / content:publish", workflow publish a transizioni (POST bodyless :action), archive-or-delete (DELETE ritorna outcome), version restore]
+  /admin/mfa-policy:
+    zone: admin
+    hooks: [inline-useQuery, inline-useMutation, useCurrentUserPermissions]
+    endpoints: ["GET /v1/mfa-policy/", "GET /v1/tenants?limit=200", "PUT /v1/mfa-policy/:tenantId"]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, ErrorState, PageHeader, Spinner]
+    notes: ["editing gated client su mfa_policy:manage", "semantica roleCodes null = TUTTI i ruoli (contratto server)"]
+  /admin/roles:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/auth/role-permissions"]
+    ui: [Badge, Card, CardContent, ErrorState, PageHeader, Spinner]
+    notes: [matrice role x permission read-only]
+  /dev/agent:
+    zone: admin
+    hooks: [raw-fetch+SSE (no TanStack)]
+    endpoints: ["POST {NEXT_PUBLIC_AGENT_GATEWAY_URL}/agent (SSE stream, non /v1)", "POST {gateway}/agent/approve"]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle]
+    notes: [console agent-gateway #9 WI-B.4, feature flag NEXT_PUBLIC_ENABLE_AGENT_DEV=1 (off = notice soft non 404), pannello approval human-in-the-loop su evento approval_required (tool/input già redacted dal gateway), live drive blocked-on-Enzo (credenziale/credit), fuori i18n guardrail]
+  /analytics/attendance:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/analytics/attendance"]
+    ui: [Badge, EmptyState, PageHeader, StatsCard, "local:EChartsCard"]
+    notes: [empty-state reale su dataset vuoto]
+  /analytics/compensation:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/analytics/compensation"]
+    ui: [Badge, EmptyState, PageHeader, StatsCard, "local:EChartsCard"]
+    notes: []
+  /analytics/kpi:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/analytics/kpi"]
+    ui: [Badge, EmptyState, PageHeader, RadialGauge, StatsCard, echartsPresets, "local:EChartsCard"]
+    notes: [unica pagina analytics con RadialGauge]
+  /analytics/org-network:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/analytics/org-network"]
+    ui: [Badge, EmptyState, PageHeader, StatsCard, "local:EChartsCard"]
+    notes: [grafo rete organizzativa echarts]
+  /analytics/overtime:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/analytics/overtime"]
+    ui: [Badge, EmptyState, PageHeader, StatsCard, formatCurrency, "local:EChartsCard"]
+    notes: []
+  /analytics/skills:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/analytics/skills"]
+    ui: [Badge, EmptyState, PageHeader, StatsCard, echartsPresets, "local:EChartsCard"]
+    notes: [coverage skills]
+  /analytics/skills-by-category:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/analytics/skills-by-category"]
+    ui: [Badge, EmptyState, PageHeader, StatsCard, echartsPresets, "local:EChartsCard"]
+    notes: []
+  /analytics/skills-group-share:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/analytics/skills-group-share"]
+    ui: [Badge, EmptyState, PageHeader, StatsCard, echartsPresets, "local:EChartsCard"]
+    notes: []
+  /analytics/workforce:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/analytics/workforce"]
+    ui: [Badge, EmptyState, PageHeader, StatsCard, "local:EChartsCard"]
+    notes: [breakdown per dimensione (WorkforceByDimensionRow)]
+  /compensation-intelligence:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/compensation/reward-gates?limit=200", "GET /v1/compensation/distribution"]
+    ui: [Badge, DataTableWithCrossHair, EmptyState, KPIStrip, PageHeader, "local:StatusBadge", "local:StatusPill", "local:EChartsCard"]
+    notes: [usa DataTableWithCrossHair diretto (non via EntityTable)]
+  /gaps:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/learning-gaps?limit=200"]
+    ui: [Badge, DataTableWithCrossHair, EmptyState, KPIStrip, PageHeader, "local:StatusBadge"]
+    notes: [KPI strip derivata client-side dai gap]
+  /career-succession:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/career-paths?limit=200", "GET /v1/succession-pools?limit=200", "GET /v1/successor-candidates?limit=200", "GET /v1/successor-candidates/readiness-distribution"]
+    ui: [PageHeader, "local:EntityTable", "local:StatusBadge", "local:EChartsCard"]
+    notes: [3 tabelle + chart distribuzione readiness]
+  /approvals:
+    zone: admin
+    hooks: [inline-useQuery, inline-useMutation]
+    endpoints: ["GET /v1/approvals?<filtri>", "GET /v1/users?limit=200", "POST /v1/approvals"]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader, "local:EntityTable"]
+    notes: [form creazione richiesta con scelta approver da lista utenti, value-list (status/tipi) duplicate come literal locali per il vincolo type-only import da @heuresys/shared]
+  /approvals/[id]:
+    zone: admin
+    hooks: [inline-useQuery, inline-useMutation, useCurrentUser]
+    endpoints: ["GET /v1/approvals/:id", "POST /v1/approvals/:id/steps/:stepId/decide", "POST /v1/approvals/:id/apply", "GET /v1/auth/me"]
+    ui: [Badge, Button, Card, CardContent, CardHeader, CardTitle, PageHeader]
+    notes: [decide UI mostrata solo se lo step PENDING appartiene all'utente corrente (match approverUserId), apply post-approvazione]
+  /engagement:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/engagement/surveys", "GET /v1/engagement/pulse"]
+    ui: [Badge, Card, CardContent, CardHeader, CardTitle, PageHeader, "local:EntityTable", "local:EChartsCard"]
+    notes: [pulse chart + lista survey con link ai results]
+  /engagement/[surveyId]:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/engagement/surveys/:surveyId/results"]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader, "local:EntityTable", "local:EChartsCard"]
+    notes: [risultati per-domanda]
+  /process-owner:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/blueprint-processes?limit=200", "GET /v1/organization-unit-processes/by-process/:id"]
+    ui: [Badge, Button, PageHeader, "local:EntityTable", "local:StatusPill"]
+    notes: [master-detail - la seconda query parte alla selezione di un processo (enabled on selection)]
+  /org-director:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/capability/composition?subjectType=ORG_UNIT", "GET /v1/capability/maturity"]
+    ui: [Badge, Button, CapabilityRadar, PageHeader, "local:EntityTable", "local:StatusPill"]
+    notes: [radar capability per OU, unica pagina con CapabilityRadar]
+  /brownfield-adaptation:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/brownfield-source-exports?limit=200", "GET /v1/brownfield-table-mappings?limit=200", "GET /v1/brownfield-import-runs?limit=200"]
+    ui: [PageHeader, "local:EntityTable", "local:StatusBadge"]
+    notes: [3 tabelle read-only sulla pipeline di ingestione legacy]
+  /visualizations:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/visualization-graphs?limit=200", "GET /v1/visualization-graphs/summary"]
+    ui: [Badge, PageHeader, "local:EntityTable", "local:StatusBadge", "local:EChartsCard"]
+    notes: [chart distribuzione per graph_type + lista grafi]
+  /visualizations/[graphId]:
+    zone: admin
+    hooks: [inline-useQuery]
+    endpoints: ["GET /v1/visualization-graphs/:graphId", "GET /v1/visualization-nodes?graphId=&limit=500", "GET /v1/visualization-edges?graphId=&limit=500"]
+    ui: [Card, CardContent, CardHeader, CardTitle, PageHeader, "local:MermaidDiagram", "local:StatusPill"]
+    notes: [render Mermaid client-only, isApiError 404, cap nodes/edges a 500]
+
+lib:
+  lib/api/fetch.ts:
+    exports: [apiFetch]
+    notes: [wrapper unico HTTP dietro proxy Next /api (cookie same-origin), CSRF header auto su metodi non-GET da csrfStore, silent-refresh 401 single-flight + Web Locks cross-tab (D-26) via POST /v1/auth/refresh, errori tipizzati ApiError/SessionExpiredError/NetworkError, validazione Zod opzionale]
+  lib/api/auth.ts:
+    hooks:
+      useCurrentUser: "GET /v1/auth/me"
+      useCurrentUserPermissions: "GET /v1/me/permissions"
+      useMyInterfaces: "GET /v1/me/interfaces"
+      useMyPreferences: "GET /v1/me/preferences"
+      useUpdateMyPreferences: "PATCH /v1/me/preferences"
+      useLogin: "POST /v1/auth/login (3 stati: success | mfa_required | mfa_enrollment_required)"
+      useLogout: "POST /v1/auth/logout"
+  lib/api/observability.ts:
+    hooks:
+      useSystemHealth: "GET /v1/observability/system-health"
+      useRolePermissions: "GET /v1/auth/role-permissions"
+  lib/api/errors.ts: {exports: [ApiError, NetworkError, SessionExpiredError, isApiError]}
+  lib/api/csrf-store.ts: {exports: [csrfStore], notes: [seed da login/refresh, unico punto CSRF]}
+  lib/api/public-stats.ts: {notes: [zona public/landing, fuori scope admin]}
+  lib/i18n.ts: {notes: [namespaces admin/hr/analytics/blueprints + common]}
+
+components:
+  data-table-panel.tsx:
+    exports: [EntityTable, DataTablePanel, DataColumn]
+    ui_wrapped: [DataTableWithCrossHair, EmptyState, ErrorState, PageHeader, Badge, Button]
+    notes: [state-machine loading/error/empty presentazionale - la page possiede la query, empty branch = empty-state reale (dottrina live-data), DataTablePanel = PageHeader + EntityTable - usato da ~15 list page, EntityTable standalone da ~12]
+  detail-panel.tsx: {exports: [FieldGrid], notes: [puro re-export da @heuresys/ui]}
+  status-pill.tsx: {exports: [StatusPill, StatusBadge, statusTone], notes: [puro re-export da @heuresys/ui]}
+  section-tabs.tsx: {exports: [SectionTabs], notes: [usato solo da (authenticated)/layout.tsx]}
+  SystemHealthLive.tsx:
+    hooks: [useSystemHealth, useRolePermissions]
+    ui_wrapped: [AuditFeed, Badge, EmptyState, ErrorRateBreakdown, KPIStrip, RBACMatrix]
+    notes: [renderer produzione /system-health 100% live (chiusura F7), copy inglese - vive fuori dal guardrail i18n di app/**]
+  SystemHealthDashboard.tsx:
+    notes: [mock brand-showcase con dati fabbricati (tenant GENESIS_DEMO/ACME_CORP, sparkline hardcoded) - consumato SOLO da /showcase/system-health, artefatto demo documentato]
+  ContentMediaPanel.tsx:
+    endpoints: ["GET /v1/content/:id/media", "POST /api/v1/content/:id/media (multipart, raw fetch - apiFetch è JSON-only)", "DELETE /v1/content/media/:mediaId"]
+    notes: [upload FormData con fetch raw, download href diretto /api/v1/content/media/:mediaId]
+  preferences-applier.tsx: {notes: [applica theme/palette/locale server-side (useMyPreferences) nel layout autenticato]}
+  profile-tabs.tsx: {notes: [usato solo nella zona me/ (fuori scope di questo frammento)]}
+  "_charts-client.tsx (app/(authenticated)/)":
+    exports: [EChartsCard, MermaidDiagram]
+    notes: [re-export dynamic ssr:false dei chart pesanti (echarts crasha il prerender server - CW-B59), subpath @heuresys/ui/charts per non trascinare il barrel ~1.68MB, resolver var(--x) -> colore concreto per canvas echarts (fix B-05), da importare SEMPRE da qui nelle pagine chart]
+  "(authenticated)/layout.tsx":
+    hooks: [useCurrentUser, useMyInterfaces, useLogout, useUpdateMyPreferences]
+    notes: [sidebar DB-driven da GET /v1/me/interfaces (gating server-side, zero filtri client), filtro perspective PET RITIRATO - le 3 perspective sono ora sezioni collassabili, badge tone admin da set ADMIN_ROLES client, PreferencesApplier montato qui]

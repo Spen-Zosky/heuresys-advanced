@@ -1,0 +1,83 @@
+# Atlas fragment — CANTIERE legacy /home/ubuntu/heuresys.com.evo (VM oracle-vm-default)
+# Lineage attivo NON in produzione-advanced; ultimo commit 71f64a5b 2026-06-29. Read-only via SSH 2026-07-05.
+
+repo: /home/ubuntu/heuresys.com.evo
+github_mirror: heuresys/heuresys.com.evo
+last_commit: {sha: 71f64a5b, date: 2026-06-29}
+counts:
+  commits_since_2026_04_01: 483
+  frontend_pages: 231            # HANDOFF.md tabella canale A
+  api_endpoints: 1481
+  db_models_active: ~635
+  route_files: 135               # services/api-gateway/src/routes
+  service_files: 54              # services/api-gateway/src/services
+  jest_tests: 3099               # .handoff/STATE.md 2026-06-29: 3099/3099 green
+
+recent_commits_themes:           # git log --since=2026-04-01 (483 commit)
+  - theme: programma-100x-forensic (2026-06-24..29)
+    items:
+      - security D5-xxx: scope/authz fixes (pay-stubs COMPENSATION, talent-intelligence cross-tenant CRITICAL f51e6972, salary-bands scope-gate 29b344fa, IDOR gap-analysis 3c348499, payroll AES key fail-closed D1-001 f78b8b4f, is_system_role SUPERUSER-only da5ba0ea, nonce-based CSP ff1ad4da)
+      - D5-001 RBP scope redesign: table-aware scope profiles + named-param predicate + scopeContext + USE_RBP_SCOPE flip globale (7f1f6235..57783f30)
+      - B1 pagination SoT su ~100 list-GET route (7 batch)
+      - B2 lint-zero: 2171→0 warning (sweep req.dbClient!→getDb su 83 route b6c8a748, wave 1-4B)
+      - B4 shared query-builder FilterBuilder/paginate ADR-012 (a892b172 + Phase1-3, ~74 route)
+      - B3 firstRowOrThrow su 81 file/376 siti + eslint rule no-unsafe-row-access d0efdefc
+      - B5 dead-code: 8 GET '/' duplicati rimossi 821b0480
+      - B6 a11y WCAG-AA: 0 axe violations pagine chiave light+dark (b7a0c877, 09c0c112, Progress aria-label 71f64a5b)
+  - theme: RTG-bridge-program (apr-mag, [RTG-L]/[RTG-E] tags)
+    items:
+      - Phase 0 L3 automation (scripts/rtg/* gate engine, dashboard, rollback, escalation cron)
+      - Phase 1-2 legacy unblock + security green (TDR-003 CI secrets, TDR-008 migration drift 11 file, SSO open-redirect fix be6df068, CSRF SameSite, DOMPurify, TOTP mig 221, compose secrets param)
+      - Phase 3-5 evo acceleration + parity audit + cutover prep (poi SUPERSEDED)
+      - pivot 2026-05-02: cutover-event ABBANDONATO → phased portfolio migration PET-driven (dfd313a9); sanity check 231 vs 3 pagine, 1481 vs 11 endpoint
+  - theme: orchestrazione-dual-cantiere
+    items: [Cantiere A legacy autonomous.md, Cantiere B evo-hardening charter, HANDOFF dual-channel, monitoring dashboard cantieri 45ed638b]
+  - theme: ci-cd-monitoring
+    items: [remediation CI/CD 17 commit d5c9a760, Grafana provisioning + postgres_exporter 90bf1591, jest --forceExit fix hang 6h d56b17c4]
+
+structure:
+  layout: npm workspaces (packages/* + services/*)   # NON pnpm
+  services:
+    - api-gateway        # Express 5, 135 route / 54 service files
+    - enrichment-engine  # servizio separato
+    - frontend           # Next.js 16, porta 3012, 231 pagine, widget engine (generate-widget-map.mjs)
+  packages: [shared]
+  altre_dir: [db, docs (00-start-here..90-archive numerati), infra (docker compose), scripts (incl. rtg/), governance, audit, tests, cowork_code_exchange]
+  deploy:
+    api: docker container heuresys_evo_api_gateway, porta :8012
+    frontend: pm2 bare-metal, porta :3012 (NON Docker)
+    db: container heuresys_evo_platform_db :5433, db heuresys_platform   # = la data-source ADR-0023 di advanced
+
+stack:
+  runtime: Node>=20, TypeScript 5.9.3, npm (no pnpm)
+  api: [express 5.2, pg 8.20, zod 3.25, jsonwebtoken, bcryptjs, otplib TOTP, ioredis + rate-limit-redis, helmet, pino, prom-client, @sentry/node, swagger-jsdoc/ui, pdfkit, exceljs, papaparse, adm-zip, qrcode, multer]
+  frontend: [next 16.1.7, react 19.2.1, radix-ui, tanstack query/table, d3, echarts, cytoscape, xyflow, excalidraw, gsap, framer-motion, next-intl, next-themes, storybook, tailwind forms/typography]
+  test: [jest 29 (api, 3099), vitest (frontend), playwright, axe-core a11y]
+
+state_summary: >
+  Produzione matura in pensionamento progressivo (modello PET-driven phased portfolio,
+  non cutover-event — ROAD_TO_GLORY Phase 6+ SUPERSEDED 2026-05-02). Live su VM api :8012
+  + web :3012. Al 2026-06-29: tsc 0 / jest 3099 verdi / eslint 0 / a11y 0 axe su pagine
+  chiave light+dark; working tree pulito. Programma 100x: 0 CRITICAL aperti; restano
+  finding architetturali LARGE gated (D6-003/004/005/009) + workstream a11y pagine
+  secondarie (SelectTrigger, badge hardcoded, status-colors DATA-DRIVEN nel DB registry,
+  text-blue-600 dark-fail ~30 file). HANDOFF descrive dual-channel: canale A = questo
+  legacy; canale B = heuresys-evo greenfield NestJS+Prisma (terzo lineage, distinto da
+  heuresys-advanced). Vision: piattaforma Capability Governance a 3 lenti P/E/T
+  (Process/Enterprise/Talent), HR = una lente, 33 aree funzionali / 47 mappature
+  rbp_area_perspectives, migrazione Tier 1→2→3.
+
+divergent_features:              # presenti nel cantiere legacy, ASSENTI (o molto oltre) in heuresys-advanced (83 moduli)
+  - recruiting_ats: [candidates, interviews, offers, job-postings, requisitions]   # advanced: zero recruiting
+  - time_attendance: [attendance, leave, time-off, overtime, time-analytics]       # advanced: solo dati attendance seedati, nessun modulo
+  - payroll_comp_ops: [payroll, pay-stubs, salary-bands, bonus-plans, merit-cycles, benefits, compensation-analytics, payroll-integration service]
+  - ai_native_layer: [ai-chat, ai-providers, ai-orchestrator, embeddings + embedding-pipeline/queue, rag-documents/sessions/chunking, knowledge-base, career-coach, advanced-semantic-search, unified-semantic-service, cross-entity-embedding, ontology-embedding, predictive-analytics, skill-extraction, inference-review, training-recommendations]   # advanced ha solo semantic-matching + predictions
+  - marketplace_plugin_ecosystem: [marketplace-{plugins,installations,reviews,hooks,webhooks,runtime,developer,api-keys,dependencies}, plugin-runtime, webhook-dispatcher, public-api]
+  - wellbeing_social_compliance: [wellbeing, wellbeing-dashboard, social, recognition, continuous-feedback, 360-reviews, whistleblowing]
+  - workforce_org_intelligence: [workforce-planning, org-scenarios, org-charts generator, benchmarking, organization-intelligence, calibration-sessions, review-cycles]
+  - reference_data_integrations: [onet, nace, ontology + ontology-relations, esco-auto-linker, sap-migration, import/export-engine, report-builder + report-subscriptions]
+  - auth_sso: [sso.ts Azure+Google OAuth]            # advanced: solo login locale + MFA TOTP
+  - employee_lifecycle_ops: [contracts, employee-documents, locations, cost-centers, audit-logs, news, courses, internal-mobility, tenant-onboarding, tenant-setup, workspace + workspace-templates, admin-components]
+  - rbp_ui_graph: [rbp dashboards/pages/nav data-driven, field policies, prospettive PET complete 33 aree]   # advanced: solo sys_ui_interfaces U1/U2
+  - observability_stack: [Sentry, prom-client, Grafana provisioning, postgres_exporter, Prometheus scrape]
+  - doctrine_divergence: legacy USA RLS (mig 228 career tables) — advanced la VIETA (I5)

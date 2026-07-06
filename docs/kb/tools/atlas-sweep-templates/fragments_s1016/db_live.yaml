@@ -1,0 +1,415 @@
+# DB live snapshot — heuresys_advanced (PostgreSQL 16, OCI VM via tunnel :5433)
+# generated: 2026-07-05T16:54:42Z
+schemas: [audit, brownfield, public, staging, sys, temp_sdbi]  # public: nessuna tabella utente
+
+extensions:
+  - {name: pg_stat_statements, version: 1.10}
+  - {name: pg_trgm, version: 1.6}
+  - {name: pgcrypto, version: 1.3}
+  - {name: plpgsql, version: 1.0}
+  - {name: uuid-ossp, version: 1.1}
+  - {name: vector, version: 0.8.2}
+
+tables:  # tutte le 276 tabelle utente (rows = n_live_tup; size = pg_total_relation_size)
+  - {schema: audit, name: import_approval_decisions, rows: 1593, size: 480kB}
+  - {schema: audit, name: import_run_logs, rows: 3128, size: 888kB}
+  - {schema: audit, name: import_validation_results, rows: 1553686, size: 547MB}
+  - {schema: audit, name: import_validation_rule_codes, rows: 13, size: 48kB}
+  - {schema: audit, name: skills_junk_archive, rows: 7846, size: 2760kB}
+  - {schema: audit, name: user_self_service_actions, rows: 0, size: 48kB}
+  - {schema: brownfield, name: column_mappings, rows: 1225, size: 616kB}
+  - {schema: brownfield, name: import_runs, rows: 1186, size: 536kB}
+  - {schema: brownfield, name: source_columns, rows: 1174, size: 424kB}
+  - {schema: brownfield, name: source_exports, rows: 4, size: 48kB}
+  - {schema: brownfield, name: source_tables, rows: 94, size: 112kB}
+  - {schema: brownfield, name: source_watermarks, rows: 3, size: 80kB}
+  - {schema: brownfield, name: table_mappings, rows: 97, size: 152kB}
+  - {schema: brownfield, name: tenant_id_mappings, rows: 2, size: 32kB}
+  - {schema: staging, name: legacy_rtl_occupations, rows: 0, size: 16kB}
+  - {schema: staging, name: rtl_certifications, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_employee_attendance, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_employee_certifications, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_employee_contracts, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_employee_module_completions, rows: 11, size: 16kB}
+  - {schema: staging, name: rtl_employee_skill_assessments, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_employee_skill_profiles, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_employee_skills, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_employees, rows: 162, size: 168kB}
+  - {schema: staging, name: rtl_org_units, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_salary_band_assignments, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_salary_bands, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_tenant_custom_skills, rows: 0, size: 8192bytes}
+  - {schema: staging, name: rtl_users, rows: 0, size: 8192bytes}
+  - {schema: staging, name: tmp_d4_org_unit_kpis, rows: 100, size: 56kB}
+  - {schema: staging, name: tmp_d4_org_unit_templates, rows: 225, size: 80kB}
+  - {schema: staging, name: tmp_f2_bonus_pools, rows: 14, size: 16kB}
+  - {schema: staging, name: tmp_f2_career_paths, rows: 32, size: 16kB}
+  - {schema: staging, name: tmp_f2_gap_analysis, rows: 304, size: 320kB}
+  - {schema: staging, name: tmp_f2_user_career_plans, rows: 128, size: 56kB}
+  - {schema: staging, name: tmp_f2_user_documents, rows: 1089, size: 304kB}
+  - {schema: staging, name: tmp_f3_ecp, rows: 40, size: 16kB}
+  - {schema: staging, name: tmp_f3_jtc, rows: 207, size: 64kB}
+  - {schema: staging, name: tmp_f3c_cpl, rows: 75, size: 16kB}
+  - {schema: staging, name: tmp_f3c_cr, rows: 16, size: 16kB}
+  - {schema: staging, name: tmp_f3c_sp, rows: 31, size: 16kB}
+  - {schema: staging, name: tmp_f3c_ula, rows: 3393, size: 400kB}
+  - {schema: staging, name: tmp_f4_ba, rows: 465, size: 80kB}
+  - {schema: staging, name: tmp_f4_cr, rows: 208, size: 56kB}
+  - {schema: staging, name: tmp_f4_ekt, rows: 412, size: 88kB}
+  - {schema: staging, name: tmp_f4_gca, rows: 1045, size: 128kB}
+  - {schema: staging, name: tmp_f4_gcp, rows: 65, size: 16kB}
+  - {schema: staging, name: tmp_f4_km, rows: 0, size: 8192bytes}
+  - {schema: staging, name: tmp_f4_or, rows: 14, size: 16kB}
+  - {schema: staging, name: tmp_f4_pe, rows: 237, size: 64kB}
+  - {schema: staging, name: tmp_f4_pew, rows: 15, size: 16kB}
+  - {schema: staging, name: tmp_f4_sc, rows: 206, size: 56kB}
+  - {schema: staging, name: tmp_f4_ts, rows: 264, size: 48kB}
+  - {schema: staging, name: tmp_f4_vp, rows: 244, size: 56kB}
+  - {schema: staging, name: tmp_w3_ces, rows: 717, size: 176kB}
+  - {schema: staging, name: tmp_w3_courses, rows: 127, size: 64kB}
+  - {schema: staging, name: tmp_w3_evidence, rows: 1928, size: 248kB}
+  - {schema: staging, name: tmp_w3_lpc, rows: 124, size: 48kB}
+  - {schema: staging, name: wave1_activity_classification_mappings, rows: 0, size: 112kB}
+  - {schema: staging, name: wave1_activity_classifications, rows: 0, size: 1272kB}
+  - {schema: staging, name: wave1_blueprint_process_registry, rows: 0, size: 88kB}
+  - {schema: staging, name: wave1_compensation_bands, rows: 0, size: 88kB}
+  - {schema: staging, name: wave1_esco_occupation_mappings, rows: 0, size: 2280kB}
+  - {schema: staging, name: wave1_job_families, rows: 0, size: 40kB}
+  - {schema: staging, name: wave1_job_roles, rows: 0, size: 192kB}
+  - {schema: staging, name: wave1_learning_modules, rows: 0, size: 1608kB}
+  - {schema: staging, name: wave1_learning_path_steps, rows: 0, size: 40kB}
+  - {schema: staging, name: wave1_learning_paths, rows: 0, size: 1104kB}
+  - {schema: staging, name: wave1_process_kpi_templates, rows: 0, size: 104kB}
+  - {schema: staging, name: wave1_skill_aliases, rows: 0, size: 136kB}
+  - {schema: staging, name: wave1_skill_categories, rows: 0, size: 184kB}
+  - {schema: staging, name: wave1_skill_families, rows: 0, size: 88kB}
+  - {schema: staging, name: wave1_skill_learning_mappings, rows: 0, size: 40kB}
+  - {schema: staging, name: wave1_skill_taxonomy_edges, rows: 0, size: 1000kB}
+  - {schema: staging, name: wave1_skills, rows: 0, size: 1712kB}
+  - {schema: staging, name: wave1_user_certifications, rows: 0, size: 120kB}
+  - {schema: sys, name: sys_activity_classification_mappings, rows: 5730, size: 2240kB}
+  - {schema: sys, name: sys_activity_classifications, rows: 6533, size: 3872kB}
+  - {schema: sys, name: sys_approval_requests, rows: 0, size: 80kB}
+  - {schema: sys, name: sys_approval_steps, rows: 0, size: 128kB}
+  - {schema: sys, name: sys_assessment_methods, rows: 5, size: 48kB}
+  - {schema: sys, name: sys_assessment_results, rows: 1560, size: 384kB}
+  - {schema: sys, name: sys_assessments, rows: 615, size: 368kB}
+  - {schema: sys, name: sys_attendance, rows: 3180, size: 8192kB}
+  - {schema: sys, name: sys_auth_credentials, rows: 23, size: 80kB}
+  - {schema: sys, name: sys_auth_identities, rows: 12, size: 80kB}
+  - {schema: sys, name: sys_auth_login_events, rows: 91157, size: 29MB}
+  - {schema: sys, name: sys_auth_mfa_exemption_audit, rows: 0, size: 40kB}
+  - {schema: sys, name: sys_auth_mfa_exemptions, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_auth_mfa_factors, rows: 6, size: 80kB}
+  - {schema: sys, name: sys_auth_mfa_otp_challenges, rows: 0, size: 80kB}
+  - {schema: sys, name: sys_auth_mfa_policies, rows: 2, size: 80kB}
+  - {schema: sys, name: sys_auth_mfa_recovery_codes, rows: 0, size: 80kB}
+  - {schema: sys, name: sys_auth_mfa_webauthn_credentials, rows: 0, size: 80kB}
+  - {schema: sys, name: sys_auth_password_reset_tokens, rows: 452, size: 232kB}
+  - {schema: sys, name: sys_auth_permissions, rows: 156, size: 104kB}
+  - {schema: sys, name: sys_auth_refresh_tokens, rows: 44408, size: 26MB}
+  - {schema: sys, name: sys_auth_role_permissions, rows: 698, size: 136kB}
+  - {schema: sys, name: sys_auth_roles, rows: 12, size: 48kB}
+  - {schema: sys, name: sys_auth_sessions, rows: 0, size: 24kB}
+  - {schema: sys, name: sys_behavioral_assessments, rows: 465, size: 256kB}
+  - {schema: sys, name: sys_blueprint_activations, rows: 0, size: 80kB}
+  - {schema: sys, name: sys_blueprint_families, rows: 1, size: 80kB}
+  - {schema: sys, name: sys_blueprint_overrides, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_blueprint_process_registry, rows: 23, size: 104kB}
+  - {schema: sys, name: sys_blueprint_variants, rows: 1, size: 96kB}
+  - {schema: sys, name: sys_bonus_pools, rows: 6, size: 48kB}
+  - {schema: sys, name: sys_branches, rows: 6, size: 64kB}
+  - {schema: sys, name: sys_capability_maturity_scores, rows: 20, size: 136kB}
+  - {schema: sys, name: sys_capability_score_lineage, rows: 316, size: 400kB}
+  - {schema: sys, name: sys_capability_scores, rows: 317, size: 832kB}
+  - {schema: sys, name: sys_career_path_steps, rows: 35, size: 88kB}
+  - {schema: sys, name: sys_career_paths, rows: 28, size: 88kB}
+  - {schema: sys, name: sys_compensation_bands, rows: 87, size: 152kB}
+  - {schema: sys, name: sys_compensation_recommendations, rows: 116, size: 112kB}
+  - {schema: sys, name: sys_content_blueprint_links, rows: 1, size: 128kB}
+  - {schema: sys, name: sys_content_categories, rows: 0, size: 80kB}
+  - {schema: sys, name: sys_content_documents, rows: 161, size: 288kB}
+  - {schema: sys, name: sys_content_media, rows: 0, size: 96kB}
+  - {schema: sys, name: sys_content_versions, rows: 172, size: 168kB}
+  - {schema: sys, name: sys_continuous_feedback, rows: 474, size: 496kB}
+  - {schema: sys, name: sys_critical_positions, rows: 8, size: 48kB}
+  - {schema: sys, name: sys_critical_role_coverage_status, rows: 8, size: 48kB}
+  - {schema: sys, name: sys_employee_position_fit_scores, rows: 146, size: 136kB}
+  - {schema: sys, name: sys_engagement_action_plans, rows: 6, size: 112kB}
+  - {schema: sys, name: sys_engagement_feedback, rows: 400, size: 312kB}
+  - {schema: sys, name: sys_engagement_survey_responses, rows: 862, size: 864kB}
+  - {schema: sys, name: sys_engagement_survey_templates, rows: 5, size: 112kB}
+  - {schema: sys, name: sys_engagement_surveys, rows: 6, size: 120kB}
+  - {schema: sys, name: sys_enterprise_size_bands, rows: 4, size: 80kB}
+  - {schema: sys, name: sys_enterprise_typing_profiles, rows: 2, size: 80kB}
+  - {schema: sys, name: sys_esco_occupation_embeddings, rows: 3045, size: 44MB}
+  - {schema: sys, name: sys_esco_occupation_mappings, rows: 7675, size: 7664kB}
+  - {schema: sys, name: sys_feedback_360_responses, rows: 390, size: 440kB}
+  - {schema: sys, name: sys_flight_risk_scores, rows: 159, size: 1368kB}
+  - {schema: sys, name: sys_gap_analysis_results, rows: 270, size: 448kB}
+  - {schema: sys, name: sys_gap_closure_actions, rows: 440, size: 232kB}
+  - {schema: sys, name: sys_gap_closure_plans, rows: 36, size: 80kB}
+  - {schema: sys, name: sys_goal_alignments, rows: 100, size: 192kB}
+  - {schema: sys, name: sys_goal_check_ins, rows: 1000, size: 1224kB}
+  - {schema: sys, name: sys_goal_comments, rows: 856, size: 952kB}
+  - {schema: sys, name: sys_goal_milestones, rows: 1000, size: 1088kB}
+  - {schema: sys, name: sys_goal_templates, rows: 40, size: 136kB}
+  - {schema: sys, name: sys_goal_updates, rows: 1811, size: 2056kB}
+  - {schema: sys, name: sys_goals, rows: 1067, size: 1928kB}
+  - {schema: sys, name: sys_inbox_notifications, rows: 55, size: 128kB}
+  - {schema: sys, name: sys_job_families, rows: 27, size: 96kB}
+  - {schema: sys, name: sys_job_role_embeddings, rows: 136, size: 3056kB}
+  - {schema: sys, name: sys_job_roles, rows: 136, size: 368kB}
+  - {schema: sys, name: sys_kpi_assessment_methods, rows: 5, size: 48kB}
+  - {schema: sys, name: sys_kpi_assessment_results, rows: 248, size: 184kB}
+  - {schema: sys, name: sys_kpi_definitions, rows: 243, size: 208kB}
+  - {schema: sys, name: sys_kpi_measurements, rows: 248, size: 192kB}
+  - {schema: sys, name: sys_kpi_metric_definitions, rows: 243, size: 144kB}
+  - {schema: sys, name: sys_kpi_targets, rows: 248, size: 184kB}
+  - {schema: sys, name: sys_kpi_weighting_rules, rows: 3, size: 48kB}
+  - {schema: sys, name: sys_leads, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_learning_gaps, rows: 270, size: 336kB}
+  - {schema: sys, name: sys_learning_modules, rows: 7427, size: 6480kB}
+  - {schema: sys, name: sys_learning_path_steps, rows: 124, size: 120kB}
+  - {schema: sys, name: sys_learning_paths, rows: 4667, size: 5616kB}
+  - {schema: sys, name: sys_leave_accrual_rules, rows: 20, size: 128kB}
+  - {schema: sys, name: sys_leave_balance_transactions, rows: 20, size: 128kB}
+  - {schema: sys, name: sys_mentor_match_scores, rows: 30, size: 160kB}
+  - {schema: sys, name: sys_mentorship_programs, rows: 5, size: 112kB}
+  - {schema: sys, name: sys_mentorship_sessions, rows: 150, size: 184kB}
+  - {schema: sys, name: sys_mentorships, rows: 63, size: 208kB}
+  - {schema: sys, name: sys_model_predictions, rows: 468, size: 576kB}
+  - {schema: sys, name: sys_notification_preferences, rows: 0, size: 80kB}
+  - {schema: sys, name: sys_objective_reward_rules, rows: 6, size: 48kB}
+  - {schema: sys, name: sys_occupation_skill_requirements, rows: 126051, size: 96MB}
+  - {schema: sys, name: sys_okr_check_ins, rows: 25, size: 168kB}
+  - {schema: sys, name: sys_okr_key_results, rows: 20, size: 128kB}
+  - {schema: sys, name: sys_okrs, rows: 20, size: 176kB}
+  - {schema: sys, name: sys_operating_model_catalog, rows: 6, size: 80kB}
+  - {schema: sys, name: sys_organization_hierarchies, rows: 0, size: 24kB}
+  - {schema: sys, name: sys_organization_unit_history, rows: 0, size: 24kB}
+  - {schema: sys, name: sys_organization_unit_kpi_templates, rows: 100, size: 136kB}
+  - {schema: sys, name: sys_organization_unit_processes, rows: 105, size: 192kB}
+  - {schema: sys, name: sys_organization_unit_templates, rows: 225, size: 512kB}
+  - {schema: sys, name: sys_organization_unit_types, rows: 8, size: 48kB}
+  - {schema: sys, name: sys_organization_units, rows: 26, size: 160kB}
+  - {schema: sys, name: sys_overtime, rows: 221, size: 432kB}
+  - {schema: sys, name: sys_payout_curves, rows: 0, size: 24kB}
+  - {schema: sys, name: sys_payroll_handoff_records, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_performance_review_competency_ratings, rows: 465, size: 568kB}
+  - {schema: sys, name: sys_performance_reviews, rows: 161, size: 336kB}
+  - {schema: sys, name: sys_person_evidence_records, rows: 237, size: 160kB}
+  - {schema: sys, name: sys_position_career_paths, rows: 40, size: 104kB}
+  - {schema: sys, name: sys_position_compensation_profiles, rows: 159, size: 136kB}
+  - {schema: sys, name: sys_position_economic_weight, rows: 24, size: 48kB}
+  - {schema: sys, name: sys_position_kpi_requirements, rows: 172, size: 176kB}
+  - {schema: sys, name: sys_position_learning_requirements, rows: 1791, size: 992kB}
+  - {schema: sys, name: sys_position_skill_requirement_history, rows: 0, size: 32kB}
+  - {schema: sys, name: sys_position_skill_requirements, rows: 844, size: 760kB}
+  - {schema: sys, name: sys_position_succession_relevance, rows: 9, size: 80kB}
+  - {schema: sys, name: sys_positions, rows: 162, size: 488kB}
+  - {schema: sys, name: sys_predictive_models, rows: 4, size: 80kB}
+  - {schema: sys, name: sys_process_kpi_templates, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_pulse_checks, rows: 733, size: 408kB}
+  - {schema: sys, name: sys_readiness_scores, rows: 90, size: 96kB}
+  - {schema: sys, name: sys_reconciliation_registry, rows: 115, size: 264kB}
+  - {schema: sys, name: sys_reward_gate_catalog, rows: 7, size: 80kB}
+  - {schema: sys, name: sys_reward_gate_results, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_reward_gates, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_schema_migrations, rows: 167, size: 136kB}
+  - {schema: sys, name: sys_seed_acquisition_runs, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_seed_approval_decisions, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_seed_candidate_records, rows: 0, size: 80kB}
+  - {schema: sys, name: sys_seed_source_evidence, rows: 0, size: 24kB}
+  - {schema: sys, name: sys_seed_validation_results, rows: 0, size: 24kB}
+  - {schema: sys, name: sys_skill_aliases, rows: 80, size: 200kB}
+  - {schema: sys, name: sys_skill_categories, rows: 7, size: 104kB}
+  - {schema: sys, name: sys_skill_embeddings, rows: 17631, size: 372MB}
+  - {schema: sys, name: sys_skill_families, rows: 77, size: 120kB}
+  - {schema: sys, name: sys_skill_gap_scores, rows: 154, size: 536kB}
+  - {schema: sys, name: sys_skill_learning_mappings, rows: 635, size: 368kB}
+  - {schema: sys, name: sys_skill_proficiency_levels, rows: 6, size: 64kB}
+  - {schema: sys, name: sys_skill_taxonomy_edges, rows: 11965, size: 6512kB}
+  - {schema: sys, name: sys_skills, rows: 14093, size: 46MB}
+  - {schema: sys, name: sys_source_lineage_records, rows: 70972, size: 60MB}
+  - {schema: sys, name: sys_succession_pools, rows: 17, size: 88kB}
+  - {schema: sys, name: sys_succession_readiness_scores, rows: 462, size: 2336kB}
+  - {schema: sys, name: sys_succession_scores, rows: 90, size: 96kB}
+  - {schema: sys, name: sys_successor_candidates, rows: 25, size: 96kB}
+  - {schema: sys, name: sys_successor_readiness, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_survey_assignments, rows: 8, size: 80kB}
+  - {schema: sys, name: sys_survey_questions, rows: 21, size: 96kB}
+  - {schema: sys, name: sys_survey_responses, rows: 3792, size: 1640kB}
+  - {schema: sys, name: sys_survey_templates, rows: 2, size: 64kB}
+  - {schema: sys, name: sys_surveys, rows: 8, size: 96kB}
+  - {schema: sys, name: sys_talent_scores, rows: 154, size: 112kB}
+  - {schema: sys, name: sys_team_members, rows: 176, size: 112kB}
+  - {schema: sys, name: sys_teams, rows: 24, size: 96kB}
+  - {schema: sys, name: sys_tenancies, rows: 2, size: 112kB}
+  - {schema: sys, name: sys_time_off_balances, rows: 494, size: 720kB}
+  - {schema: sys, name: sys_time_off_requests, rows: 69, size: 216kB}
+  - {schema: sys, name: sys_training_initiatives, rows: 1, size: 80kB}
+  - {schema: sys, name: sys_ui_interfaces, rows: 50, size: 112kB}
+  - {schema: sys, name: sys_user_addresses, rows: 169, size: 168kB}
+  - {schema: sys, name: sys_user_assessment_evidence, rows: 1560, size: 664kB}
+  - {schema: sys, name: sys_user_auth_roles, rows: 339, size: 216kB}
+  - {schema: sys, name: sys_user_bank_details, rows: 156, size: 152kB}
+  - {schema: sys, name: sys_user_career_plans, rows: 113, size: 120kB}
+  - {schema: sys, name: sys_user_certifications, rows: 420, size: 424kB}
+  - {schema: sys, name: sys_user_contracts, rows: 158, size: 184kB}
+  - {schema: sys, name: sys_user_demographics, rows: 161, size: 168kB}
+  - {schema: sys, name: sys_user_documents, rows: 657, size: 448kB}
+  - {schema: sys, name: sys_user_education_records, rows: 157, size: 112kB}
+  - {schema: sys, name: sys_user_employment, rows: 161, size: 160kB}
+  - {schema: sys, name: sys_user_family_members, rows: 150, size: 152kB}
+  - {schema: sys, name: sys_user_identity_documents, rows: 328, size: 248kB}
+  - {schema: sys, name: sys_user_kpi_evidence, rows: 248, size: 240kB}
+  - {schema: sys, name: sys_user_learning_assignments, rows: 1990, size: 808kB}
+  - {schema: sys, name: sys_user_learning_evidence, rows: 1434, size: 624kB}
+  - {schema: sys, name: sys_user_pay_slips, rows: 42, size: 96kB}
+  - {schema: sys, name: sys_user_position_assignments, rows: 160, size: 248kB}
+  - {schema: sys, name: sys_user_preferences, rows: 4, size: 88kB}
+  - {schema: sys, name: sys_user_professional_experiences, rows: 0, size: 24kB}
+  - {schema: sys, name: sys_user_profile_embeddings, rows: 156, size: 1616kB}
+  - {schema: sys, name: sys_user_profiles, rows: 157, size: 160kB}
+  - {schema: sys, name: sys_user_skill_evidence, rows: 902, size: 680kB}
+  - {schema: sys, name: sys_user_target_positions, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_users, rows: 162, size: 504kB}
+  - {schema: sys, name: sys_variable_pay_calculations, rows: 121, size: 104kB}
+  - {schema: sys, name: sys_visualization_edges, rows: 157, size: 192kB}
+  - {schema: sys, name: sys_visualization_exports, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_visualization_graphs, rows: 1, size: 96kB}
+  - {schema: sys, name: sys_visualization_layouts, rows: 0, size: 80kB}
+  - {schema: sys, name: sys_visualization_node_layouts, rows: 0, size: 64kB}
+  - {schema: sys, name: sys_visualization_nodes, rows: 158, size: 192kB}
+  - {schema: sys, name: sys_visualization_styles, rows: 0, size: 64kB}
+  - {schema: temp_sdbi, name: pf_competency_review_ratings, rows: 465, size: 312kB}
+  - {schema: temp_sdbi, name: pf_continuous_feedback, rows: 474, size: 184kB}
+  - {schema: temp_sdbi, name: pf_feedback_360, rows: 390, size: 184kB}
+  - {schema: temp_sdbi, name: pf_performance_reviews, rows: 161, size: 192kB}
+
+empty_tables:  # verificate con SELECT count(*)=0 esatto (2026-07-05)
+  - audit.user_self_service_actions
+  - staging.legacy_rtl_occupations
+  - staging.rtl_certifications
+  - staging.rtl_employee_attendance
+  - staging.rtl_employee_certifications
+  - staging.rtl_employee_contracts
+  - staging.rtl_employee_skill_assessments
+  - staging.rtl_employee_skill_profiles
+  - staging.rtl_employee_skills
+  - staging.rtl_org_units
+  - staging.rtl_salary_band_assignments
+  - staging.rtl_salary_bands
+  - staging.rtl_tenant_custom_skills
+  - staging.rtl_users
+  - staging.tmp_f4_km
+  - staging.wave1_activity_classification_mappings
+  - staging.wave1_activity_classifications
+  - staging.wave1_blueprint_process_registry
+  - staging.wave1_compensation_bands
+  - staging.wave1_esco_occupation_mappings
+  - staging.wave1_job_families
+  - staging.wave1_job_roles
+  - staging.wave1_learning_modules
+  - staging.wave1_learning_path_steps
+  - staging.wave1_learning_paths
+  - staging.wave1_process_kpi_templates
+  - staging.wave1_skill_aliases
+  - staging.wave1_skill_categories
+  - staging.wave1_skill_families
+  - staging.wave1_skill_learning_mappings
+  - staging.wave1_skill_taxonomy_edges
+  - staging.wave1_skills
+  - staging.wave1_user_certifications
+  - sys.sys_approval_requests
+  - sys.sys_approval_steps
+  - sys.sys_auth_mfa_exemption_audit
+  - sys.sys_auth_mfa_exemptions
+  - sys.sys_auth_mfa_otp_challenges
+  - sys.sys_auth_mfa_recovery_codes
+  - sys.sys_auth_mfa_webauthn_credentials
+  - sys.sys_auth_sessions
+  - sys.sys_blueprint_activations
+  - sys.sys_blueprint_overrides
+  - sys.sys_content_categories
+  - sys.sys_content_media
+  - sys.sys_leads
+  - sys.sys_notification_preferences
+  - sys.sys_organization_hierarchies
+  - sys.sys_organization_unit_history
+  - sys.sys_payout_curves
+  - sys.sys_payroll_handoff_records
+  - sys.sys_position_skill_requirement_history
+  - sys.sys_process_kpi_templates
+  - sys.sys_reward_gate_results
+  - sys.sys_reward_gates
+  - sys.sys_seed_acquisition_runs
+  - sys.sys_seed_approval_decisions
+  - sys.sys_seed_candidate_records
+  - sys.sys_seed_source_evidence
+  - sys.sys_seed_validation_results
+  - sys.sys_successor_readiness
+  - sys.sys_user_professional_experiences
+  - sys.sys_user_target_positions
+  - sys.sys_visualization_exports
+  - sys.sys_visualization_layouts
+  - sys.sys_visualization_node_layouts
+  - sys.sys_visualization_styles
+
+views:  # schema sys
+  - sys_nine_box_grid
+  - sys_position_intelligence_profiles_v
+  - v_active_primary_assignment_per_user
+  - v_canonical_outside_sys
+  - v_inbox_resource_consistency
+  - v_orphan_position_assignments
+  - v_pip_completeness
+  - v_positions_without_job_role
+  - v_reconciliation_status
+  - v_reward_gate_completeness
+  - v_tenant_boundary_violations
+  - v_visualization_node_in_canonical_node
+
+matviews: []  # nessuna materialized view in tutto il DB (pg_matviews vuota)
+
+top_size:  # top 20 per pg_total_relation_size
+  - {schema: audit, name: import_validation_results, bytes: 573661184, size: 547MB}
+  - {schema: sys, name: sys_skill_embeddings, bytes: 390111232, size: 372MB}
+  - {schema: sys, name: sys_occupation_skill_requirements, bytes: 100990976, size: 96MB}
+  - {schema: sys, name: sys_source_lineage_records, bytes: 62685184, size: 60MB}
+  - {schema: sys, name: sys_skills, bytes: 47874048, size: 46MB}
+  - {schema: sys, name: sys_esco_occupation_embeddings, bytes: 46579712, size: 44MB}
+  - {schema: sys, name: sys_auth_login_events, bytes: 30785536, size: 29MB}
+  - {schema: sys, name: sys_auth_refresh_tokens, bytes: 26755072, size: 26MB}
+  - {schema: sys, name: sys_attendance, bytes: 8388608, size: 8192kB}
+  - {schema: sys, name: sys_esco_occupation_mappings, bytes: 7847936, size: 7664kB}
+  - {schema: sys, name: sys_skill_taxonomy_edges, bytes: 6668288, size: 6512kB}
+  - {schema: sys, name: sys_learning_modules, bytes: 6635520, size: 6480kB}
+  - {schema: sys, name: sys_learning_paths, bytes: 5750784, size: 5616kB}
+  - {schema: sys, name: sys_activity_classifications, bytes: 3964928, size: 3872kB}
+  - {schema: sys, name: sys_job_role_embeddings, bytes: 3129344, size: 3056kB}
+  - {schema: audit, name: skills_junk_archive, bytes: 2826240, size: 2760kB}
+  - {schema: sys, name: sys_succession_readiness_scores, bytes: 2392064, size: 2336kB}
+  - {schema: staging, name: wave1_esco_occupation_mappings, bytes: 2334720, size: 2280kB}
+  - {schema: sys, name: sys_activity_classification_mappings, bytes: 2293760, size: 2240kB}
+  - {schema: sys, name: sys_goal_updates, bytes: 2105344, size: 2056kB}
+
+key_counts:
+  tenants_total: 2
+  tenants_active: 2   # HEURESYS + RTL_BANK (tenant_status=ACTIVE)
+  users: 162
+  positions: 162
+  org_units: 26
+  auth_roles: 12      # 12o ruolo = ORG_DIRECTOR (CLAUDE.md ne dichiara 11)
+  role_permissions: 698
+  permissions: 156
+  ui_interfaces: 50
+  schema_migrations_applied: 167
+
+counts:
+  tables: 276
+  empty_tables: 67
+  views_sys: 12
+  matviews: 0
+  extensions: 6

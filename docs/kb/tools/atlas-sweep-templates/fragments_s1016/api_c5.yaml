@@ -1,0 +1,275 @@
+# atlas fragment api_c5 — moduli API: me, mentorship, mfa-policy, notifications,
+# observability, okrs, operating-models, organization-unit-kpi-templates, organization-unit-processes
+# fonte: apps/api/src/app.ts (registrazioni) + routes/repository/service per modulo — 2026-07-05
+modules:
+  me:
+    prefix: /v1/me
+    endpoints:
+      - {method: GET, path: /permissions, permission: null, csrf: false, orgGate: false}   # authenticated-only by design
+      - {method: GET, path: /interfaces, permission: null, csrf: false, orgGate: false}    # authenticated-only, gating in service (U1)
+      - {method: GET, path: /profile, permission: 'user_profile:read:self', csrf: false, orgGate: false}
+      - {method: PATCH, path: /profile, permission: 'user_profile:update:self', csrf: true, orgGate: false}
+      - {method: GET, path: /profile/full, permission: 'user_profile:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /contracts, permission: 'user_profile:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /pay-slips, permission: 'user_profile:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /performance, permission: 'assessment:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /attendance, permission: 'user_profile:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /positions, permission: 'user_position_assignment:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /skills, permission: 'skill:read:self', csrf: false, orgGate: false}
+      - {method: POST, path: /skills/self-assessments, permission: 'skill:self_assess', csrf: true, orgGate: false}
+      - {method: GET, path: /surveys, permission: 'surveys:respond:self', csrf: false, orgGate: false}
+      - {method: GET, path: '/surveys/:surveyId', permission: 'surveys:respond:self', csrf: false, orgGate: false}
+      - {method: POST, path: '/surveys/:surveyId/responses', permission: 'surveys:respond:self', csrf: true, orgGate: false}
+      - {method: GET, path: /learning, permission: 'learning:read:self', csrf: false, orgGate: false}
+      - {method: POST, path: /learning/enrollments, permission: 'learning:enroll:self', csrf: true, orgGate: false}
+      - {method: GET, path: /gaps, permission: 'gap_analysis:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /assessments, permission: 'assessment:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /career, permission: 'career_succession:read:self', csrf: false, orgGate: false}
+      - {method: POST, path: /career/target-positions, permission: 'career:request_target:self', csrf: true, orgGate: false}
+      - {method: GET, path: /goals, permission: 'goal:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /risk, permission: 'career_succession:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /career-paths, permission: 'career_succession:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /analytics, permission: 'user_profile:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /approvals, permission: 'approval:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /inbox, permission: 'notification:read:self', csrf: false, orgGate: false}
+      - {method: PATCH, path: '/inbox/:notificationId', permission: 'notification:mark_read:self', csrf: true, orgGate: false}
+      - {method: GET, path: /notification-preferences, permission: 'notification:read:self', csrf: false, orgGate: false}
+      - {method: PATCH, path: /notification-preferences, permission: 'notification:read:self', csrf: true, orgGate: false}  # write sotto perm :read:self (F-031, by design)
+      - {method: GET, path: /kpis, permission: 'kpi:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /certifications, permission: 'certification:read:self', csrf: false, orgGate: false}
+      - {method: POST, path: /certifications, permission: 'certification:upload:self', csrf: true, orgGate: false}
+      - {method: GET, path: /documents, permission: 'document:read:self', csrf: false, orgGate: false}
+      - {method: GET, path: /preferences, permission: 'me:preferences:read', csrf: false, orgGate: false}
+      - {method: PATCH, path: /preferences, permission: 'me:preferences:update', csrf: true, orgGate: false}
+      - {method: GET, path: /team, permission: 'team:read:self', csrf: false, orgGate: false}      # delega a teamsService.myTeams
+      - {method: GET, path: /content, permission: 'me:content:read', csrf: false, orgGate: false}  # delega a contentService (published-only)
+      - {method: GET, path: '/content/:id', permission: 'me:content:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/content/:id/media', permission: 'me:content:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/content/media/:mediaId', permission: 'me:content:read', csrf: false, orgGate: false}  # binary stream, no zod response, inline per image/*
+      - {method: GET, path: /security/sessions, permission: 'me:sessions:manage', csrf: false, orgGate: false}
+      - {method: DELETE, path: '/security/sessions/:familyId', permission: 'me:sessions:manage', csrf: true, orgGate: false}
+      - {method: POST, path: /security/sessions/revoke-others, permission: 'me:sessions:manage', csrf: true, orgGate: false}
+    tables:  # 45 nel modulo (repository.ts + service.ts); sessions delegano a auth/repository (sys_auth_refresh_tokens fuori modulo)
+      - sys.sys_approval_requests
+      - sys.sys_assessments
+      - sys.sys_attendance
+      - sys.sys_career_path_steps
+      - sys.sys_career_paths
+      - sys.sys_flight_risk_scores
+      - sys.sys_goals
+      - sys.sys_inbox_notifications
+      - sys.sys_kpi_definitions
+      - sys.sys_learning_gaps
+      - sys.sys_notification_preferences
+      - sys.sys_organization_units
+      - sys.sys_overtime
+      - sys.sys_performance_reviews
+      - sys.sys_position_career_paths
+      - sys.sys_position_kpi_requirements
+      - sys.sys_positions
+      - sys.sys_skills
+      - sys.sys_succession_readiness_scores
+      - sys.sys_survey_assignments
+      - sys.sys_survey_questions
+      - sys.sys_survey_responses
+      - sys.sys_surveys
+      - sys.sys_time_off_balances
+      - sys.sys_ui_interfaces
+      - sys.sys_user_addresses
+      - sys.sys_user_bank_details
+      - sys.sys_user_career_plans
+      - sys.sys_user_certifications
+      - sys.sys_user_contracts
+      - sys.sys_user_demographics
+      - sys.sys_user_documents
+      - sys.sys_user_education_records
+      - sys.sys_user_employment
+      - sys.sys_user_family_members
+      - sys.sys_user_identity_documents
+      - sys.sys_user_kpi_evidence
+      - sys.sys_user_learning_assignments
+      - sys.sys_user_pay_slips
+      - sys.sys_user_position_assignments
+      - sys.sys_user_preferences
+      - sys.sys_user_profiles
+      - sys.sys_user_skill_evidence
+      - sys.sys_user_target_positions
+      - sys.sys_users
+    schemas: [me, me-preferences, content (cross-module), teams (cross-module)]  # import dal barrel "@heuresys/shared", non subpath
+    tests:
+      - me.integration.test.ts
+      - me-career-tabs.integration.test.ts
+      - me-content-media.integration.test.ts
+      - me-ess-extensions.integration.test.ts
+      - me-f5-personal-area.integration.test.ts
+      - me-interfaces.integration.test.ts
+      - me-pay-slips.integration.test.ts
+      - me-permissions.integration.test.ts
+      - me-preferences.integration.test.ts
+      - me-profile-full.integration.test.ts
+      - me-sessions.integration.test.ts
+      - me-surveys.integration.test.ts
+    notes:
+      - "ESS portal ADR-0011: hard self-scope — nessun :userId in URL, userId sempre da req.user (helper selfActor); I17 universal ESS floor"
+      - "orgGate assente per design (self-scope override di ogni asse, I17)"
+      - "delega cross-module: /team -> teams/service, /content* -> content/service + media-service (LocalDiskStore su env.MEDIA_STORAGE_DIR), sessions -> auth/repository"
+      - "emitNotification (lib/notifications/emit) usato dal service per effetti inbox su eventi self"
+      - "GET /permissions e /interfaces senza requirePermission (authenticated-only, riflettono se stessi)"
+  mentorship:
+    prefix: /v1/mentorship
+    endpoints:
+      - {method: GET, path: /programs, permission: 'mentorship:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: '/programs/:id', permission: 'mentorship:read', csrf: false, orgGate: catalog}
+      - {method: POST, path: /programs, permission: 'mentorship:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/programs/:id', permission: 'mentorship:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/programs/:id', permission: 'mentorship:delete', csrf: true, orgGate: false}
+      - {method: GET, path: /pairings, permission: 'mentorship:read', csrf: false, orgGate: service}
+      - {method: GET, path: '/pairings/:id', permission: 'mentorship:read', csrf: false, orgGate: service}
+      - {method: POST, path: /pairings, permission: 'mentorship:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/pairings/:id', permission: 'mentorship:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/pairings/:id', permission: 'mentorship:delete', csrf: true, orgGate: false}
+      - {method: GET, path: '/pairings/:id/sessions', permission: 'mentorship:read', csrf: false, orgGate: service}
+      - {method: POST, path: '/pairings/:id/sessions', permission: 'mentorship:create', csrf: true, orgGate: false}
+      - {method: GET, path: '/sessions/:id', permission: 'mentorship:read', csrf: false, orgGate: service}
+      - {method: PATCH, path: '/sessions/:id', permission: 'mentorship:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/sessions/:id', permission: 'mentorship:delete', csrf: true, orgGate: false}
+      - {method: GET, path: /match-scores, permission: 'mentorship:read', csrf: false, orgGate: service}
+      - {method: GET, path: '/match-scores/:id', permission: 'mentorship:read', csrf: false, orgGate: service}
+    tables:
+      - sys.sys_mentor_match_scores
+      - sys.sys_mentorship_programs
+      - sys.sys_mentorship_sessions
+      - sys.sys_mentorships
+    schemas: [mentorship]
+    tests:
+      - mentorship.integration.test.ts
+      - mentorship-data.integration.test.ts
+      - mentorship-scope.integration.test.ts
+    notes:
+      - "visibilita tenant-only (no global rows): PLATFORM_ADMIN unfiltered, altri limitati al proprio tenant, not-visible -> 404 no-leak"
+      - "template canonico per nuovi moduli SDBI B-10b (pattern di riferimento route-file)"
+      - "match-scores read-only (nessuna write route); orgGate solo sulle GET (catalog per programs, service per pairings/sessions/match-scores)"
+  mfa-policy:
+    prefix: /v1/mfa-policy
+    endpoints:
+      - {method: GET, path: /, permission: 'mfa_policy:read', csrf: false, orgGate: false}
+      - {method: PUT, path: '/:tenantId', permission: 'mfa_policy:manage', csrf: true, orgGate: false}
+    tables:
+      - sys.sys_auth_mfa_policies
+      - sys.sys_tenancies
+    schemas: [mfa-policy]
+    tests:
+      - mfa-policy.integration.test.ts   # gli altri mfa-*.test.ts appartengono al modulo auth/MFA, non a mfa-policy
+    notes:
+      - "visibilita: PLATFORM_ADMIN tutti i tenant, TENANT_ADMIN solo il proprio (cross-tenant -> 404); perms seedate solo a PLATFORM_ADMIN+TENANT_ADMIN (mig 000104)"
+      - "PUT upsert idempotente per tenant; roleCodes validati contro i RoleCode canonici (commento service dice '8 canonical' — i ruoli oggi sono 11)"
+  notifications:
+    prefix: /v1/notifications
+    endpoints:
+      - {method: POST, path: /, permission: 'notification:create', csrf: true, orgGate: false}
+    tables:  # nel modulo solo sys_users; l'insert inbox avviene in lib/notifications/emit.ts (sys_inbox_notifications, sys_notification_preferences)
+      - sys.sys_users
+    schemas: [notifications]
+    tests:
+      - notification-broadcast.integration.test.ts
+      - notification-digest.integration.test.ts
+      - notification-preferences.integration.test.ts
+      - notification-producers.integration.test.ts
+    notes:
+      - "modulo write-only: broadcast SYSTEM admin (max 500 userIds); inbox+preferences per-utente vivono sotto /v1/me/*"
+      - "I5: attore non-platform raggiunge solo utenti del proprio tenant (filtro recipient)"
+      - "QW-B1 set-based bulk emit: 3 query fisse (recipients + opt-out + unnest INSERT) indipendenti dal numero di destinatari"
+      - "digest-cli.ts: entrypoint CLI per systemd timer (pnpm --filter @heuresys/api notifications:digest), in-process no HTTP/auth; SmtpMailer se SMTP configurato altrimenti ConsoleMailer (chassis, nessun invio reale)"
+      - "nessun repository.ts: SQL diretto nel service + delega a lib/notifications/{emit,digest}"
+  observability:
+    prefix: /v1/observability
+    endpoints:
+      - {method: GET, path: /system-health, permission: 'tenant:create', csrf: false, orgGate: false}
+    tables:
+      - audit.user_self_service_actions
+      - sys.sys_auth_login_events
+      - sys.sys_auth_refresh_tokens
+      - sys.sys_tenancies
+      - sys.sys_users
+    schemas: [observability]
+    tests:
+      - observability.integration.test.ts
+    notes:
+      - "platform-only via proxy-perm tenant:create (unica perm esclusiva PLATFORM_ADMIN che da 403 pulito a TENANT_ADMIN) — nessuna perm observability:* dedicata"
+      - "metrics-store.ts: ring in-memory 1440 minute-buckets (24h) alimentato dal hook onResponse in app.ts; self-pruning, no DB, no timer"
+      - "aggrega: pg.Pool counters live + RBAC cache stats + tenant fleet + auth integrity + schema counts + audit feed (limit 20) + request metrics 24h"
+      - "POOL_MAX_CLIENTS=20 hardcoded a specchio di db/client.ts (pg.Pool non espone max) — duplicazione dichiarata"
+      - "nessun endpoint Prometheus /metrics — solo /system-health JSON"
+  okrs:
+    prefix: /v1/okrs
+    endpoints:
+      - {method: GET, path: /, permission: 'okr:read', csrf: false, orgGate: service}
+      - {method: GET, path: '/:id', permission: 'okr:read', csrf: false, orgGate: service}
+      - {method: GET, path: '/:id/key-results', permission: 'okr:read', csrf: false, orgGate: service}
+      - {method: POST, path: /, permission: 'okr:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'okr:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'okr:delete', csrf: true, orgGate: false}
+    tables:
+      - sys.sys_okr_key_results
+      - sys.sys_okrs
+    schemas: [okrs]
+    tests:
+      - okrs.integration.test.ts
+      - okrs-scope.integration.test.ts
+    notes:
+      - "visibilita tenant-only; key-results read-only (nessuna write route dedicata sui key-results)"
+  operating-models:
+    prefix: /v1/operating-models
+    endpoints:
+      - {method: GET, path: /, permission: 'enterprise_typing:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/:id', permission: 'enterprise_typing:read', csrf: false, orgGate: false}
+      - {method: PUT, path: /, permission: 'enterprise_typing:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'enterprise_typing:update', csrf: true, orgGate: false}
+    tables:
+      - sys.sys_operating_model_catalog
+    schemas: [operating-models]
+    tests:
+      - operating-models.integration.test.ts
+    notes:
+      - "riusa le perm enterprise_typing:* (nessuna perm operating_model:* dedicata); DELETE sotto :update, non :delete"
+      - "catalogo (upsert via PUT /), single-table"
+  organization-unit-kpi-templates:
+    prefix: /v1/organization-unit-kpi-templates
+    endpoints:
+      - {method: GET, path: /, permission: 'bpm_process:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/:id', permission: 'bpm_process:read', csrf: false, orgGate: false}
+      - {method: PUT, path: /, permission: 'bpm_process:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'bpm_process:update', csrf: true, orgGate: false}
+    tables:
+      - sys.sys_kpi_definitions
+      - sys.sys_organization_unit_kpi_templates
+      - sys.sys_organization_units
+    schemas: [organization-unit-kpi-templates]
+    tests:
+      - organization-unit-kpi-templates.integration.test.ts
+    notes:
+      - "riusa le perm bpm_process:* (nessuna perm dedicata); tenant ereditato dall'org unit, KPI deve essere visibile al tenant"
+  organization-unit-processes:
+    prefix: /v1/organization-unit-processes
+    endpoints:
+      - {method: POST, path: /, permission: 'organization_unit_processes:create', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'organization_unit_processes:delete', csrf: true, orgGate: false}
+      - {method: GET, path: '/by-ou/:ouId', permission: 'organization_unit_processes:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/by-process/:processId', permission: 'organization_unit_processes:read', csrf: false, orgGate: false}
+    tables:
+      - sys.sys_blueprint_process_registry
+      - sys.sys_blueprint_variants
+      - sys.sys_organization_unit_processes
+      - sys.sys_organization_units
+    schemas: [organization-unit-processes]
+    tests:
+      - organization-unit-processes.integration.test.ts
+      - organization-unit-processes-raci-demo.integration.test.ts
+    notes:
+      - "T2.5 assegnazione OU <-> business-process con ruolo RACI sulla riga; writer puo assegnare solo OU nel proprio tenant scope (I5), assignment eredita il tenant dell'OU"
+      - "catalogo blueprint globale: il process e validato solo per esistenza; reads tenant-filtered (PLATFORM_ADMIN cross-tenant)"
+      - "no route PATCH: assignment immutabile (solo create/delete)"
+counts:
+  modules: 9
+  endpoints: 83   # me 44, mentorship 17, mfa-policy 2, notifications 1, observability 1, okrs 6, operating-models 4, ou-kpi-templates 4, ou-processes 4
+  tables_distinct: 61

@@ -1,0 +1,154 @@
+# atlas fragment api_c4 — moduli API 19-27 (alfabetico): insights..learning-paths
+# fonte: apps/api/src/modules/<m>/{routes,repository,service}.ts + app.ts (HEAD 115d7983, 2026-07-05)
+modules:
+  insights:
+    prefix: /v1/insights
+    endpoints:
+      - {method: GET, path: /flight-risk, permission: 'insights:view', csrf: false, orgGate: service}
+      - {method: GET, path: '/users/:userId/flight-risk', permission: 'insights:view', csrf: false, orgGate: service}
+      - {method: POST, path: /recompute, permission: 'insights:admin', csrf: true, orgGate: false}
+      - {method: GET, path: /succession-readiness, permission: 'insights:view', csrf: false, orgGate: service}
+      - {method: POST, path: /succession-readiness/recompute, permission: 'insights:admin', csrf: true, orgGate: false}
+      - {method: GET, path: /skill-gap, permission: 'insights:view', csrf: false, orgGate: service}
+      - {method: POST, path: /skill-gap/recompute, permission: 'insights:admin', csrf: true, orgGate: false}
+    tables:
+      - sys.sys_users
+      - sys.sys_user_position_assignments
+      - sys.sys_attendance
+      - sys.sys_user_kpi_evidence
+      - sys.sys_engagement_survey_responses
+      - sys.sys_position_compensation_profiles
+      - sys.sys_compensation_bands
+      - sys.sys_flight_risk_scores
+      - sys.sys_positions
+      - sys.sys_user_profile_embeddings
+      - sys.sys_job_role_embeddings
+      - sys.sys_succession_readiness_scores
+      - sys.sys_skill_gap_scores
+    schemas: [insights]
+    tests:
+      - insights.integration.test.ts
+      - insights-p2.integration.test.ts
+      - insights-recompute-cli.integration.test.ts
+      - insights-scope.integration.test.ts
+    notes:
+      - "cap-3 data-mining: 3 slice di scoring (flight-risk / succession-readiness / skill-gap), pesi lineari deterministici + payload explainability"
+      - "CLI file recompute-cli.ts: entrypoint systemd timer heuresys-advanced-insights.timer, in-process (no HTTP/auth), synthetic PLATFORM actor NIL-UUID"
+      - "scope: PLATFORM (tutto) / TENANT / TEAM (posizioni owned dal manager) + ADR-0027 F3 userIdAllowList org-subtree; reads admin/manager-only, NO ESS self-view (D-6)"
+      - "upsert delete-then-insert atomico in una CTE (D-18, tabella bounded 1 riga attiva/subject); read LIMIT 5000"
+      - "slice B/C usano pgvector cosine (embedding <=> embedding) su user_profile/job_role embeddings"
+      - "eng CTE guarda dual-shape response_answers jsonb (legacy array vs default object {}) con jsonb_typeof guard"
+  job-families:
+    prefix: /v1/job-families
+    endpoints:
+      - {method: GET, path: /, permission: null, csrf: false, orgGate: false}
+      - {method: GET, path: '/:id', permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: null, csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: null, csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: null, csrf: true, orgGate: false}
+    tables: [sys.sys_job_families]
+    schemas: [job-families]
+    tests:
+      - job-families.integration.test.ts
+      - job-families-and-roles.integration.test.ts
+    notes:
+      - "nessuna requirePermission su alcuna route: job_family CRUD non e' nella permission matrix del seed; read = qualsiasi autenticato (actorFromRequest lancia 401 se anonimo), mutazioni gated nel service a PLATFORM_ADMIN"
+      - "reference data platform-level: tabella senza tenant_id"
+  job-roles:
+    prefix: /v1/job-roles
+    endpoints:
+      - {method: GET, path: /, permission: 'job_role:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/:id', permission: 'job_role:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'job_role:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'job_role:update', csrf: true, orgGate: false}
+    tables: [sys.sys_job_roles, sys.sys_job_families]
+    schemas: [job-roles]
+    tests:
+      - job-roles.integration.test.ts
+      - job-families-and-roles.integration.test.ts
+    notes:
+      - "nessun DELETE endpoint (perm job_role:delete non in seed)"
+      - "platform-level (no tenant_id), FK a sys_job_families; job_role_family_id nullable per import legacy senza family canonica (ADR-0015 / CW-B26)"
+  kpi-definitions:
+    prefix: /v1/kpi-definitions
+    endpoints:
+      - {method: GET, path: /, permission: 'kpi:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: '/:id', permission: 'kpi:read', csrf: false, orgGate: catalog}
+      - {method: POST, path: /, permission: 'kpi:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'kpi:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'kpi:delete', csrf: true, orgGate: false}
+    tables: [sys.sys_kpi_definitions]
+    schemas: [kpi-definitions]
+    tests: [kpi-definitions.integration.test.ts]
+    notes:
+      - "visibilita' global+tenant (is_global=true OR tenant match), specchia skills; PLATFORM_ADMIN richiesto per mutazioni su definizioni globali; unicita' code per scope via COALESCE NIL-uuid"
+  leads:
+    prefix: /v1/leads
+    endpoints:
+      - {method: POST, path: /, permission: null, csrf: false, orgGate: false}
+      - {method: GET, path: /, permission: 'leads:read', csrf: false, orgGate: false}
+    tables: [sys.sys_leads]
+    schemas: [leads]
+    tests: [leads.integration.test.ts]
+    notes:
+      - "POST PUBBLICO (form sito, no auth/CSRF) con rate-limit per-IP 5/60s e honeypot campo website nel service (accetta silenziosamente senza scrivere)"
+      - "consenso stampato con LEAD_CONSENT_VERSION '2026-06-21-v1'; GET = PLATFORM_ADMIN, esportabile CSV/XLSX via onSend exporter globale"
+      - "repository devia dal pattern DbConnector: usa direttamente il pool singleton; list senza paginazione ne' tenant scoping (dato platform-only)"
+  learning-gaps:
+    prefix: /v1/learning-gaps
+    endpoints:
+      - {method: GET, path: /, permission: 'gap_analysis:read', csrf: false, orgGate: service}
+      - {method: GET, path: '/:id', permission: 'gap_analysis:read', csrf: false, orgGate: service}
+      - {method: POST, path: /, permission: 'gap_analysis:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'gap_analysis:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'gap_analysis:update', csrf: true, orgGate: false}
+    tables: [sys.sys_learning_gaps, sys.sys_users, sys.sys_positions, sys.sys_skills]
+    schemas: [learning-gaps]
+    tests:
+      - learning-gaps.integration.test.ts
+      - learning-gaps-scope.integration.test.ts
+    notes:
+      - "tenant-scoped + ADR-0027 F3 userIdAllowList (self/org-subtree; lista vuota => zero righe short-circuit); HR-mandated => intero tenant"
+      - "DELETE riusa gap_analysis:update (gap_analysis:delete non in seed)"
+      - "list arricchisce user_name/position_title/skill_name via subselect (G-02)"
+  learning-modules:
+    prefix: /v1/learning-modules
+    endpoints:
+      - {method: GET, path: /, permission: 'learning:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: '/:id', permission: 'learning:read', csrf: false, orgGate: catalog}
+      - {method: POST, path: /, permission: 'learning:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'learning:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'learning:delete', csrf: true, orgGate: false}
+    tables: [sys.sys_learning_modules]
+    schemas: [learning-modules]
+    tests: [learning-modules.integration.test.ts]
+    notes:
+      - "visibilita' global+tenant identica a skills/kpi-definitions; mutazioni su moduli globali riservate a PLATFORM_ADMIN"
+  learning-path-steps:
+    prefix: /v1/learning-path-steps
+    endpoints:
+      - {method: GET, path: /, permission: 'learning:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: '/:id', permission: 'learning:read', csrf: false, orgGate: catalog}
+      - {method: POST, path: /, permission: 'learning:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'learning:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'learning:delete', csrf: true, orgGate: false}
+    tables: [sys.sys_learning_path_steps, sys.sys_learning_paths, sys.sys_learning_modules]
+    schemas: [learning-path-steps]
+    tests: [learning-path-steps.integration.test.ts]
+    notes:
+      - "visibilita'/diritti di edit ereditati dal parent path via JOIN (global path => solo PLATFORM_ADMIN modifica step)"
+      - "is_prerequisite_for persistito come jsonb array; unicita' (path, ordinal) verificata in repository"
+  learning-paths:
+    prefix: /v1/learning-paths
+    endpoints:
+      - {method: GET, path: /, permission: 'learning:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: '/:id', permission: 'learning:read', csrf: false, orgGate: catalog}
+      - {method: POST, path: /, permission: 'learning:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'learning:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'learning:delete', csrf: true, orgGate: false}
+    tables: [sys.sys_learning_paths, sys.sys_learning_path_steps]
+    schemas: [learning-paths]
+    tests: [learning-paths.integration.test.ts]
+    notes:
+      - "visibilita' global+tenant come learning-modules; DELETE bloccato se il path ha step (guard pathHasSteps)"
+counts: {modules: 9, endpoints: 43, tables_distinct: 22}

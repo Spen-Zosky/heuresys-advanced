@@ -1,0 +1,168 @@
+# atlas fragment api_c3 — moduli API batch C3 (10 moduli)
+# fonte: apps/api/src/modules/* + apps/api/src/app.ts (register 379-433) — generato 2026-07-05
+modules:
+  career-paths:
+    prefix: /v1/career-paths
+    endpoints:
+      - {method: GET, path: /, permission: 'career_succession:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: '/:id', permission: 'career_succession:read', csrf: false, orgGate: catalog}
+      - {method: POST, path: /, permission: 'career_succession:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'career_succession:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'career_succession:update', csrf: true, orgGate: false}
+    tables: [sys.sys_career_paths, sys.sys_career_path_steps]
+    schemas: [career-paths]
+    tests: [career-paths.integration.test.ts]
+    notes:
+      - "visibilita global+tenant (stesso modello di learning-paths; service.ts:3)"
+      - "solo PLATFORM_ADMIN puo creare/editare/cancellare path globali; per non-global deve fornire body.tenantId"
+      - "DELETE usa permission career_succession:update, non :delete"
+  compensation:
+    prefix: /v1/compensation
+    endpoints:
+      - {method: GET, path: '/profiles/:positionId', permission: 'compensation_intelligence:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: /reward-gates, permission: 'compensation_intelligence:read', csrf: false, orgGate: service}
+      - {method: GET, path: /distribution, permission: 'compensation_intelligence:read', csrf: false, orgGate: aggregate}
+      - {method: POST, path: /recommendations, permission: 'compensation_intelligence:update', csrf: true, orgGate: false}
+      - {method: POST, path: /handoff-records, permission: 'compensation_intelligence:update', csrf: true, orgGate: false}
+    tables: [sys.sys_position_compensation_profiles, sys.sys_positions, sys.sys_reward_gates, sys.sys_reward_gate_results, sys.sys_reward_gate_catalog, sys.sys_compensation_bands, sys.sys_compensation_recommendations, sys.sys_payroll_handoff_records, sys.sys_users]
+    schemas: [compensation]
+    tests: [compensation.integration.test.ts, compensation-scope.integration.test.ts]
+    notes:
+      - "scope org sub-tree (bi-axial I16): PLATFORM_ADMIN tutti i tenant; HR-mandated (TENANT_ADMIN, HRMS_MANAGER) tenant-wide (service.ts:49)"
+      - "usa i 3 valori orgGate distinti: catalog/service/aggregate"
+      - "POST recommendations/handoff-records = ledger append-only (solo INSERT nel repository)"
+  content:
+    prefix: /v1/content
+    endpoints:
+      - {method: GET, path: /categories, permission: 'content:read', csrf: false, orgGate: false}
+      - {method: POST, path: /categories, permission: 'content:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/categories/:id', permission: 'content:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/categories/:id', permission: 'content:delete', csrf: true, orgGate: false}
+      - {method: GET, path: /search, permission: 'content:read', csrf: false, orgGate: false}
+      - {method: GET, path: /, permission: 'content:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/:id', permission: 'content:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/:id/versions', permission: 'content:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'content:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'content:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'content:delete', csrf: true, orgGate: false}
+      - {method: POST, path: '/:id/versions/:versionId/restore', permission: 'content:update', csrf: true, orgGate: false}
+      - {method: POST, path: '/:id/submit-for-review', permission: 'content:update', csrf: true, orgGate: false}
+      - {method: POST, path: '/:id/return-to-draft', permission: 'content:update', csrf: true, orgGate: false}
+      - {method: POST, path: '/:id/publish', permission: 'content:publish', csrf: true, orgGate: false}
+      - {method: POST, path: '/:id/unpublish', permission: 'content:publish', csrf: true, orgGate: false}
+      # media-routes.ts (secondo plugin sullo stesso prefix /v1/content)
+      - {method: POST, path: '/:id/media', permission: 'content:update', csrf: true, orgGate: false}
+      - {method: GET, path: '/:id/media', permission: 'content:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/media/:mediaId', permission: 'content:read', csrf: false, orgGate: false}
+      - {method: DELETE, path: '/media/:mediaId', permission: 'content:update', csrf: true, orgGate: false}
+    tables: [sys.sys_content_documents, sys.sys_content_categories, sys.sys_content_versions, sys.sys_content_media]
+    schemas: [content]
+    tests: [content.integration.test.ts, content-media.integration.test.ts, content-search.integration.test.ts, me-content-media.integration.test.ts]
+    notes:
+      - "CMS cap4: workflow draft->review->publish/unpublish + versioning con restore"
+      - "file extra: media-routes.ts / media-service.ts / media-repository.ts / media-store.ts (ObjectStore seam)"
+      - "media: @fastify/multipart scoped al plugin (1 file/request, hard byte cap MEDIA_MAX_BYTES); driver default LocalDiskStore su env.MEDIA_STORAGE_DIR; S3/MinIO previsto come config-swap MEDIA_STORAGE_DRIVER non ancora implementato (media-store.ts:3-6)"
+      - "chiavi blob server-generated '<tenantId>/<mediaId>' + prefix-check anti path-traversal (media-store.ts:36-41)"
+      - "visibilita tenant-only (mirror surveys/predictions); PLATFORM_ADMIN cross-tenant ma deve authorare dentro un tenant (service.ts:4,44)"
+      - "permission dedicata content:publish per publish/unpublish (oltre a read/create/update/delete)"
+  content-blueprint-links:
+    prefix: /v1/content-blueprint-links
+    endpoints:
+      - {method: POST, path: /, permission: 'content:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'content:update', csrf: true, orgGate: false}
+      - {method: GET, path: /by-document, permission: 'content:read', csrf: false, orgGate: false}
+      - {method: GET, path: /by-process, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: GET, path: /by-variant, permission: 'blueprint:read', csrf: false, orgGate: false}
+    tables: [sys.sys_content_blueprint_links, sys.sys_content_documents, sys.sys_blueprint_process_registry, sys.sys_blueprint_variants]
+    schemas: [content-blueprint-links]
+    tests: [content-blueprint-links.integration.test.ts]
+    notes:
+      - "modulo ponte content<->blueprint: il link eredita il tenant del DOCUMENT; letture filtrate su link_tenant_id (PLATFORM_ADMIN cross-tenant) (service.ts:6-8)"
+      - "permissions miste da due resource: content:* per link CRUD, blueprint:read per lookup lato processo/variante"
+  dashboard:
+    prefix: /v1/dashboard
+    endpoints:
+      - {method: GET, path: /widgets, permission: 'dashboard:view', csrf: false, orgGate: false}
+    tables: [sys.sys_users, sys.sys_positions, sys.sys_user_position_assignments, sys.sys_organization_units, sys.sys_tenancies, sys.sys_skills, sys.sys_learning_paths, sys.sys_learning_gaps, sys.sys_blueprint_activations, sys.sys_blueprint_variants, sys.sys_compensation_recommendations]
+    schemas: [dashboard]
+    tests: [dashboard.integration.test.ts]
+    notes:
+      - "aggregatore role-gated: payload widget composto per tier di ruolo PLATFORM / TENANT / TEAM (service.ts:3-4)"
+      - "singolo endpoint read-only che tocca 11 tabelle cross-dominio"
+  engagement:
+    prefix: /v1/engagement
+    endpoints:
+      - {method: GET, path: /surveys, permission: 'surveys:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/surveys/:surveyId/results', permission: 'surveys:read', csrf: false, orgGate: false}
+      - {method: GET, path: /pulse, permission: 'surveys:read', csrf: false, orgGate: false}
+      - {method: GET, path: /templates, permission: 'surveys:read', csrf: false, orgGate: false}
+    tables: [sys.sys_surveys, sys.sys_survey_questions, sys.sys_survey_responses, sys.sys_survey_templates, sys.sys_pulse_checks]
+    schemas: [engagement]
+    tests: [engagement.integration.test.ts]
+    notes:
+      - "B-10b m2b: read-model normalizzato READ-ONLY, riusa la permission m2 surveys:read; nessuna write -> no CSRF (routes.ts:4)"
+      - "tenant-only: PLATFORM_ADMIN unfiltered, altri own-tenant, out-of-scope -> 404 no-leak (service.ts:4)"
+  engagement-feedback:
+    prefix: /v1/engagement-feedback
+    endpoints:
+      - {method: GET, path: /action-plans, permission: 'engagement_feedback:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/action-plans/:id', permission: 'engagement_feedback:read', csrf: false, orgGate: false}
+      - {method: POST, path: /action-plans, permission: 'engagement_feedback:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/action-plans/:id', permission: 'engagement_feedback:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/action-plans/:id', permission: 'engagement_feedback:delete', csrf: true, orgGate: false}
+      - {method: GET, path: /, permission: 'engagement_feedback:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/:id', permission: 'engagement_feedback:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'engagement_feedback:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'engagement_feedback:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'engagement_feedback:delete', csrf: true, orgGate: false}
+    tables: [sys.sys_engagement_feedback, sys.sys_engagement_action_plans]
+    schemas: [engagement-feedback]
+    tests: [engagement-feedback.integration.test.ts]
+    notes:
+      - "doppio CRUD nello stesso modulo: feedback (/) + action plans (/action-plans)"
+      - "tenant-only, no global rows; PLATFORM_ADMIN unfiltered ma deve fornire tenantId sulle write; not-visible -> 404 no-leak (service.ts:3-4,31)"
+      - "set permission completo :read/:create/:update/:delete (a differenza di career-paths/enterprise-*)"
+  enterprise-size-bands:
+    prefix: /v1/enterprise-size-bands
+    endpoints:
+      - {method: GET, path: /, permission: 'enterprise_typing:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/:id', permission: 'enterprise_typing:read', csrf: false, orgGate: false}
+      - {method: PUT, path: /, permission: 'enterprise_typing:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'enterprise_typing:update', csrf: true, orgGate: false}
+    tables: [sys.sys_enterprise_size_bands]
+    schemas: [enterprise-size-bands]
+    tests: [enterprise-size-bands.integration.test.ts, enterprise-typing.integration.test.ts]
+    notes:
+      - "reference-data platform-only: upsert/delete richiedono PLATFORM_ADMIN nel service (service.ts:20,24); read libera per enterprise_typing:read"
+      - "PUT / = upsert idempotente (pattern reference-data, non POST+PATCH)"
+      - "DELETE usa enterprise_typing:update, non :delete"
+  enterprise-typing-profiles:
+    prefix: /v1/enterprise-typing-profiles
+    endpoints:
+      - {method: GET, path: /, permission: 'enterprise_typing:read', csrf: false, orgGate: false}
+      - {method: GET, path: '/:id', permission: 'enterprise_typing:read', csrf: false, orgGate: false}
+      - {method: PUT, path: /, permission: 'enterprise_typing:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'enterprise_typing:update', csrf: true, orgGate: false}
+    tables: [sys.sys_enterprise_typing_profiles]
+    schemas: [enterprise-typing-profiles]
+    tests: [enterprise-typing-profiles.integration.test.ts, enterprise-typing.integration.test.ts]
+    notes:
+      - "profilo 1:1 col tenant; read tenant-scoped, PUT/upsert da tenant_admin+; PLATFORM_ADMIN cross-tenant ma deve fornire body.tenantId (service.ts:3,35)"
+      - "stesso pattern PUT-upsert e stessa resource permission (enterprise_typing) di enterprise-size-bands"
+  goals:
+    prefix: /v1/goals
+    endpoints:
+      - {method: GET, path: /, permission: 'goal:read', csrf: false, orgGate: service}
+      - {method: GET, path: '/:id', permission: 'goal:read', csrf: false, orgGate: service}
+      - {method: POST, path: /, permission: 'goal:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: '/:id', permission: 'goal:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: '/:id', permission: 'goal:delete', csrf: true, orgGate: false}
+    tables: [sys.sys_goals]
+    schemas: [goals]
+    tests: [goals.integration.test.ts, goals-scope.integration.test.ts]
+    notes:
+      - "CRUD tenant-only: PLATFORM_ADMIN unfiltered (tenantId obbligatorio su write), altri own-tenant, 404 no-leak (service.ts:3,27)"
+      - "orgGate 'service' sulle sole read"
+meta:
+  import_style: "tutti i moduli importano dal barrel root '@heuresys/shared' (named imports), non dai subpath schemas/<x>; i file schema corrispondenti esistono in packages/shared/src/schemas/<nome-modulo>.ts"
+  counts: {modules: 10, endpoints: 63, tables_distinct: 35}

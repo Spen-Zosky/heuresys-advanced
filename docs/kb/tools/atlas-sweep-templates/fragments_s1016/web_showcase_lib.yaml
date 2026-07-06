@@ -1,0 +1,224 @@
+# Atlas fragment — sweep: showcase pages + lib + components + proxy/middleware
+# repo: D:/heuresys-advanced | generated: 2026-07-05 | agent: web_showcase_lib
+# NB showcase segment: le pagine NON importano @heuresys/ui direttamente ma via
+# app/showcase/_ui-client.tsx (next/dynamic ssr:false wrappers, fix CW-B59 barrel crash).
+# Tutte le pagine showcase sono demo brand statiche: zero hook dati, zero endpoint /v1.
+# Gate: showcase/layout.tsx:20-25 — notFound() se NODE_ENV=production && NEXT_PUBLIC_ENABLE_SHOWCASE!=1; robots noindex.
+
+pages:
+  /showcase:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: []  # card grid nativo; registry 17 route con status (canonical/scaffold) + decisionId UXIX-*
+    notes: [indice del Brand Identity Showcase, elenco route con blurb e DECISION_REGISTER id]
+  /showcase/system-health:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: [SystemHealthDashboard (local, mock)]
+    notes: [CANONICAL reference DashboardShell SUPERUSER, wrapper su components/SystemHealthDashboard.tsx (dati 100% hardcoded, demo dichiarata), layout.tsx sibling fa fullscreen overlay position:fixed z-50 per nascondere il chrome showcase]
+  /showcase/shell:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: [DashboardShell, DashboardHeader, DashboardSidebar, DashboardFooter (via _ui-client)]
+    notes: [prototipo shell App completa, decisionId UXIX]
+  /showcase/palettes:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: [PaletteDropdown (via layout)]
+    notes: [4 palette candidates con swatch groups, persistenza localStorage heuresys-palette]
+  /showcase/typography:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: []
+    notes: [candidati font Exo2/Inter via next/font/google self-hosted, preview con vero typeface]
+  /showcase/logo:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: [HeuresysMark, HeuresysWordmark, HeuresysLogoBadge]
+    notes: [varianti logo/wordmark/badge]
+  /showcase/header:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: [DashboardHeader]
+    notes: [varianti composizione top region, UXIX-0002]
+  /showcase/sidebar:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: [DashboardSidebar]
+    notes: [tree groups open/closed, badge, active route, collapsed icon-only, UXIX-0004]
+  /showcase/footer:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: [DashboardFooter]
+    notes: [copyright + link + 4 varianti social icons, UXIX-0003]
+  /showcase/icons:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: [StatusIcon]
+    notes: [libreria lucide outline + semantic tones, UXIX-0008, client component senza metadata export]
+  /showcase/page-types:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: []
+    notes: [tassonomia tipi pagina - dashboard/module±tabs/login/primary-initial/public-landing]
+  /showcase/dashboard-cards:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: [KPIStrip, AuditFeed]
+    notes: [KPI card/sparkline/data-card variants con dati esempio hardcoded (personas fittizie)]
+  /showcase/forms:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: []
+    notes: [form controls + validation states, demo statica]
+  /showcase/tables:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: [DataTableWithCrossHair]
+    notes: [density/sort/filter/pagination con 10 righe POS-xxxx hardcoded demo]
+  /showcase/charts:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: []
+    notes: [bar/line/donut/heatmap su dominio Heuresys, dati demo statici]
+  /showcase/landing-page:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: []
+    notes: [prototipo full della landing marketing pubblica, 4 value-prop cards]
+  /showcase/login-page:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: []
+    notes: [prototipo entry autenticazione, nessun submit reale]
+  /showcase/primary-initial-page:
+    zone: showcase
+    hooks: []
+    endpoints: []
+    ui: []
+    notes: [landing autenticata generica (distinta da dashboard role-specific), quick-actions demo]
+
+lib:
+  apps/web/src/lib/api/fetch.ts:
+    exports: [apiFetch, ApiFetchOptions, HttpMethod]
+    hooks: []
+    endpoints: [POST /v1/auth/refresh]  # interno al silent-refresh
+    role: wrapper fetch unico dietro proxy /api — credentials include, x-csrf-token da csrfStore su mutazioni, silent refresh su 401 (single-flight + Web Lock hrx_refresh_rotation cross-tab, D-26), errori tipizzati, Zod opzionale su success body
+  apps/web/src/lib/api/auth.ts:
+    exports: [useCurrentUser, useCurrentUserPermissions, useMyInterfaces, useMyPreferences, useUpdateMyPreferences, useLogin, useLogout, AUTH_ME_QUERY_KEY, ME_PERMISSIONS_QUERY_KEY, ME_INTERFACES_QUERY_KEY, ME_PREFERENCES_QUERY_KEY]
+    hooks: [useCurrentUser, useCurrentUserPermissions, useMyInterfaces, useMyPreferences, useUpdateMyPreferences, useLogin, useLogout]
+    endpoints: [GET /v1/auth/me, GET /v1/me/permissions, GET /v1/me/interfaces, GET /v1/me/preferences, PATCH /v1/me/preferences, POST /v1/auth/login, POST /v1/auth/logout]
+    role: hook TanStack Query auth+RBAC+PET-sidebar+preferenze; login gestisce 3 stati (success | mfa_required | mfa_enrollment_required) e semina csrfStore; useMyInterfaces = sidebar DB-driven server-gated (nessun filtering client)
+  apps/web/src/lib/api/csrf-store.ts:
+    exports: [csrfStore]
+    hooks: []
+    endpoints: []
+    role: store CSRF a 3 livelli — in-memory + cookie leggibile hrx_csrf + BroadcastChannel hrx_csrf_rotation per sync cross-tab
+  apps/web/src/lib/api/errors.ts:
+    exports: [ApiError, SessionExpiredError, NetworkError, isApiError, ApiErrorBody]
+    hooks: []
+    endpoints: []
+    role: classi errore tipizzate speculari a apps/api/src/errors (branch su error.code senza parsing stringhe)
+  apps/web/src/lib/api/observability.ts:
+    exports: [useSystemHealth, useRolePermissions, SYSTEM_HEALTH_QUERY_KEY, ROLE_PERMISSIONS_QUERY_KEY]
+    hooks: [useSystemHealth, useRolePermissions]
+    endpoints: [GET /v1/observability/system-health, GET /v1/auth/role-permissions]
+    role: superficie observability PLATFORM_ADMIN (F7 — sostituisce il mock /system-health)
+  apps/web/src/lib/api/public-stats.ts:
+    exports: [usePlatformStats]
+    hooks: [usePlatformStats]
+    endpoints: [GET /v1/public/platform-stats]
+    role: metriche pubbliche GTM one-pager, NO auth; implementato con useEffect/useState manuale (non TanStack Query)
+  apps/web/src/lib/landing.ts:
+    exports: [landingForRoles]
+    hooks: []
+    endpoints: []
+    role: routing post-login §11.2 — set hardcoded di 6 ADMIN_ROLES → /dashboard, altrimenti /me
+  apps/web/src/lib/i18n.ts:
+    exports: [i18n, setLocale, SUPPORTED_LOCALES, DEFAULT_LOCALE, LOCALE_COOKIE, NAMESPACES, AppLocale]
+    hooks: []
+    endpoints: []
+    role: istanza i18next singola SSR+client, 10 namespace × 2 locale (it default/completo, en fallback→it), cookie NEXT_LOCALE 1y, sync <html lang> WCAG 3.1.1
+
+components:
+  SystemHealthDashboard:
+    file: apps/web/src/components/SystemHealthDashboard.tsx
+    composes: dashboard SUPERUSER canonical reference — MOCK 100% hardcoded, consumato SOLO da /showcase/system-health (demo artifact dichiarato)
+    ui: [AlertBanner, AuditFeed, DashboardFooter, DashboardHeader, DashboardShell, DashboardSidebar, DBSupervisorSidebar, ErrorRateBreakdown, HeuresysLogoBadge, HeuresysWordmark, IncidentTimeline, KPIStrip, LogStream, PageActions, RBACMatrix, SQLSlowQueryTable, TenantFleetTable, TimeRangeSelector]
+  SystemHealthLive:
+    file: apps/web/src/components/SystemHealthLive.tsx
+    composes: renderer PRODUZIONE /system-health, 100% live (F7); sezioni senza backend /v1 (LogStream, SQLSlowQueryTable, IncidentTimeline, sparkline) volutamente omesse
+    hooks: [useSystemHealth, useRolePermissions]
+    endpoints: [GET /v1/observability/system-health, GET /v1/auth/role-permissions]
+    ui: [AuditFeed, Badge, EmptyState, ErrorRateBreakdown, KPIStrip, RBACMatrix]
+  EntityTable+DataTablePanel:
+    file: apps/web/src/components/data-table-panel.tsx
+    composes: composizione canonica list-page — state machine loading/error/empty + tabella + paginazione client-side (25 default, opzioni 10/25/50/100); DataTablePanel = main+PageHeader+EntityTable
+    ui: [Badge, Button, DataTableWithCrossHair, EmptyState, ErrorState, PageHeader]
+  ContentMediaPanel:
+    file: apps/web/src/components/ContentMediaPanel.tsx
+    composes: pannello media attachments CMS per /content/[id] — list via apiFetch, upload FormData via raw fetch (apiFetch è JSON-only) con header CSRF manuale, delete via apiFetch
+    endpoints: [GET /v1/content/:id/media, POST /v1/content/:id/media, DELETE /v1/content/media/:mediaId]
+    ui: [Button, Card, CardContent, CardHeader, CardTitle]
+  FieldGrid (detail-panel):
+    file: apps/web/src/components/detail-panel.tsx
+    composes: shim re-export — primitiva promossa a @heuresys/ui@0.1.8 (QW-E5 de-dup), path locale mantenuto per i consumer esistenti
+    ui: [FieldGrid]
+  StatusPill (status-pill):
+    file: apps/web/src/components/status-pill.tsx
+    composes: shim re-export — StatusPill/StatusBadge/statusTone promossi a @heuresys/ui>=0.1.7 (QW-E5)
+    ui: [StatusPill, StatusBadge]
+  LanguageSwitcher:
+    file: apps/web/src/components/language-switcher.tsx
+    composes: toggle IT/EN — setLocale (cookie+i18next) + persist server best-effort via useUpdateMyPreferences
+    hooks: [useUpdateMyPreferences]
+    endpoints: [PATCH /v1/me/preferences]
+    ui: [Button]
+  LeadForm:
+    file: apps/web/src/components/lead-form.tsx
+    composes: form lead-capture pubblico (landing/investors/demo) — react-hook-form + zodResolver(LeadCreateSchema), honeypot, consenso privacy, raw fetch senza CSRF (endpoint pubblico)
+    endpoints: [POST /v1/leads]
+    ui: [Button, Card, CardContent, Input]
+  PreferencesApplier:
+    file: apps/web/src/components/preferences-applier.tsx
+    composes: componente renderless nel layout autenticato — applica theme/palette/locale server-stored (server=SoT, localStorage solo cache no-FOUC)
+    hooks: [useMyPreferences]
+    endpoints: [GET /v1/me/preferences]
+    ui: [useTheme, applyPalette]
+  ProfileTabs:
+    file: apps/web/src/components/profile-tabs.tsx
+    composes: navtab profilo /me con deep-link ?tab= + lazy-mount per-tab (fetch on demand); markup nativo role=tablist, nessuna primitiva Tabs condivisa (promote upstream se compare 2° consumer)
+    ui: []
+  SectionTabs:
+    file: apps/web/src/components/section-tabs.tsx
+    composes: tab bar in-page dei 6 merge-group della sidebar IA S1009 (org/attendance/skill/compensation/kpi/career); montata una volta nel layout autenticato, deriva il gruppo dal pathname, null su route non-merge
+    ui: [cn]
+
+middleware_proxy:
+  middleware_ts: ASSENTE  # nessun middleware.ts in apps/web — protezione route interamente client-side (layout autenticato + hook) + enforcement RBAC lato API
+  next_config: apps/web/next.config.js
+  rewrite: "/api/:path* -> ${NEXT_PUBLIC_API_PROXY_BASE_URL|http://localhost:3001}/:path*"
+  rationale: cookie HttpOnly SameSite=Lax same-origin + CSRF double-submit senza CORS preflight
+  transpilePackages: ["@heuresys/ui", "@heuresys/shared"]
+  optimizePackageImports: [lucide-react, "@heuresys/ui"]
+
+counts:
+  pages: 18
+  endpoints_distinct: 15  # method+path distinti citati in lib+components di questa sweep

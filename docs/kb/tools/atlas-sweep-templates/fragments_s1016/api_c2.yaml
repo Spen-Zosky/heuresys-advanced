@@ -1,0 +1,162 @@
+# atlas fragment api_c2 — 10 moduli (blueprint-*, brownfield-*, capability-*, career-path-steps)
+# fonte: apps/api/src/app.ts + apps/api/src/modules/<m>/{routes,repository,service}.ts (HEAD 115d7983, 2026-07-05)
+modules:
+  blueprint-overrides:
+    prefix: /v1/blueprint-overrides
+    endpoints:
+      - {method: GET, path: /, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: PUT, path: /, permission: 'blueprint:override', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'blueprint:override', csrf: true, orgGate: false}
+    tables: [sys.sys_blueprint_overrides, sys.sys_blueprint_activations, sys.sys_blueprint_process_registry]
+    schemas: [blueprint-overrides]
+    tests: [blueprint-overrides.integration.test.ts]
+    notes:
+      - upsert semantico PUT per (activation, process); tenant ereditato dall'activation
+      - visibilita tenant-scoped con bypass platform (service.ts:19 NotFoundError se tenant mismatch)
+  blueprint-processes:
+    prefix: /v1/blueprint-processes
+    endpoints:
+      - {method: GET, path: /, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'blueprint:activate', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'blueprint:override', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'blueprint:override', csrf: true, orgGate: false}
+    tables: [sys.sys_blueprint_process_registry, sys.sys_blueprint_variants]
+    schemas: [blueprint-processes]
+    tests: [blueprint-processes.integration.test.ts]
+    notes:
+      - writes platform-only (service isPlatform guard su create/update/delete)
+  blueprint-variants:
+    prefix: /v1/blueprint-variants
+    endpoints:
+      - {method: GET, path: /, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'blueprint:activate', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'blueprint:override', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'blueprint:override', csrf: true, orgGate: false}
+    tables: [sys.sys_blueprint_variants, sys.sys_blueprint_families, sys.sys_enterprise_size_bands]
+    schemas: [blueprint-variants]
+    tests: [blueprint-variants.integration.test.ts]
+    notes:
+      - writes platform-only (service isPlatform guard)
+  brownfield-import-runs:
+    prefix: /v1/brownfield-import-runs
+    endpoints:
+      - {method: GET, path: /, permission: 'brownfield_adaptation:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'brownfield_adaptation:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'brownfield_adaptation:trigger', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'brownfield_adaptation:trigger', csrf: true, orgGate: false}
+    tables: [brownfield.import_runs]
+    schemas: [brownfield-import-runs]
+    tests: [brownfield-import-runs.integration.test.ts, brownfield.integration.test.ts]
+    notes:
+      - PLATFORM_ADMIN gated (service isPlatform su trigger/update); nessun DELETE
+  brownfield-source-exports:
+    prefix: /v1/brownfield-source-exports
+    endpoints:
+      - {method: GET, path: /, permission: 'brownfield_adaptation:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'brownfield_adaptation:read', csrf: false, orgGate: false}
+    tables: [brownfield.source_exports]
+    schemas: [brownfield-source-exports]
+    tests: [brownfield-source-exports.integration.test.ts, brownfield.integration.test.ts]
+    notes:
+      - read-only viewer; righe inserite solo dalla pipeline brownfield offline
+  brownfield-table-mappings:
+    prefix: /v1/brownfield-table-mappings
+    endpoints:
+      - {method: GET, path: /, permission: 'brownfield_adaptation:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'brownfield_adaptation:read', csrf: false, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'brownfield_adaptation:approve', csrf: true, orgGate: false}
+    tables: [brownfield.table_mappings]
+    schemas: [brownfield-table-mappings]
+    tests: [brownfield-table-mappings.integration.test.ts, brownfield.integration.test.ts]
+    notes:
+      - PATCH = decide (approve/reject mapping), permission dedicata brownfield_adaptation:approve
+  brownfield-wave-executor:
+    prefix: /v1/brownfield/wave-executor
+    endpoints:
+      - {method: GET, path: /runs, permission: 'brownfield_adaptation:read', csrf: false, orgGate: false}
+      - {method: GET, path: /runs/:runId, permission: 'brownfield_adaptation:read', csrf: false, orgGate: false}
+      - {method: POST, path: /runs, permission: 'brownfield_adaptation:trigger', csrf: true, orgGate: false}
+      - {method: POST, path: /runs/:runId/cancel, permission: 'brownfield_adaptation:trigger', csrf: true, orgGate: false}
+      - {method: GET, path: /runs/:runId/acceptance, permission: 'brownfield_adaptation:read', csrf: false, orgGate: false}
+    tables:
+      - brownfield.import_runs
+      - brownfield.table_mappings
+      - brownfield.column_mappings
+      - brownfield.source_exports
+      - brownfield.source_tables
+      - brownfield.source_columns
+      - brownfield.tenant_id_mappings
+      - audit.import_run_logs
+      - audit.import_validation_results
+      - audit.import_approval_decisions
+      - sys.sys_source_lineage_records
+      - sys.sys_tenancies
+      - sys.sys_users
+      # + dinamiche: sys.sys_<target> (upsert data-driven), staging.wave<N>_<target>, legacy_mirror.* (88 tabelle wave1 + esco_occupations)
+    schemas: [brownfield-wave-executor]
+    tests: [brownfield-wave-executor.integration.test.ts]
+    notes:
+      - modulo piu grande (11 file): engine.ts (stage/validate/upsert data-driven da table/column_mappings), state.ts (state machine 6 stati PENDING→STAGING→VALIDATING→APPROVED→UPSERTING→COMPLETE + FAILED/CANCELLED), loader.ts (schema legacy_mirror, seed SQL da db/seeds/brownfield/wave1/legacy_data), transform-compiler.ts (12 transform code meccanici), upsert-sql.ts (UPSERT SQL-side), run-logger.ts (audit.import_run_logs), audit-rule-codes.ts
+      - PLATFORM_ADMIN gated; logger pino child dedicato (no req/app)
+      - ETL non hardcodati - configurazioni in brownfield.column_mappings iterate genericamente
+  capability-composition:
+    prefix: /v1/capability
+    endpoints:
+      - {method: GET, path: /composition, permission: 'capability:read', csrf: false, orgGate: service}
+      - {method: GET, path: /composition/:subjectType/:subjectId, permission: 'capability:read', csrf: false, orgGate: service}
+      - {method: POST, path: /composition/recompute, permission: 'capability:admin', csrf: true, orgGate: false}
+    tables:
+      - sys.sys_capability_scores
+      - sys.sys_capability_score_lineage
+      - sys.sys_users
+      - sys.sys_positions
+      - sys.sys_organization_units
+      - sys.sys_tenancies
+      - sys.sys_position_skill_requirements
+      - sys.sys_skill_proficiency_levels
+      - sys.sys_user_position_assignments
+      - sys.sys_user_skill_evidence
+    schemas: [capability-composition]
+    tests: [capability-composition.integration.test.ts, capability-composition-scope.integration.test.ts]
+    notes:
+      - MLCE Phase-1 (Gap#1 Step 3); recompute bottom-up delete-then-insert bounded per-tenant (D-18)
+      - recompute-cli.ts = entrypoint systemd timer in-process (pnpm --filter @heuresys/api capability:recompute), synthetic system actor PLATFORM-scoped, no HTTP/auth/CSRF
+      - scope org service-level via resolveOrgReadScope/canReadOrgTarget; no ESS self-view (routes.ts:8)
+  capability-maturity:
+    prefix: /v1/capability
+    endpoints:
+      - {method: GET, path: /maturity, permission: 'capability:read', csrf: false, orgGate: aggregate}
+      - {method: GET, path: /maturity/org-units/:orgUnitId, permission: 'capability:read', csrf: false, orgGate: aggregate}
+      - {method: POST, path: /maturity/recompute, permission: 'capability:admin', csrf: true, orgGate: false}
+    tables:
+      - sys.sys_capability_maturity_scores
+      - sys.sys_capability_scores
+      - sys.sys_organization_units
+      - sys.sys_positions
+      - sys.sys_user_position_assignments
+      - sys.sys_skill_gap_scores
+      - sys.sys_succession_readiness_scores
+      - sys.sys_user_kpi_evidence
+    schemas: [capability-maturity]
+    tests: [capability-maturity.integration.test.ts, capability-maturity-rubric.test.ts]
+    notes:
+      - Maturity engine Phase-2 (Gap#1 Step 4); deriva livelli L0..L5 dal composito MLCE; rubric.ts = criteri auditabili (unit test dedicato)
+      - recompute-cli.ts = entrypoint systemd timer (capability-maturity:recompute), da eseguire DOPO il recompute MLCE
+      - condivide prefix /v1/capability con capability-composition (app.ts:428-429, path disgiunti)
+  career-path-steps:
+    prefix: /v1/career-path-steps
+    endpoints:
+      - {method: GET, path: /, permission: 'career_succession:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: /:id, permission: 'career_succession:read', csrf: false, orgGate: catalog}
+      - {method: POST, path: /, permission: 'career_succession:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'career_succession:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'career_succession:update', csrf: true, orgGate: false}
+    tables: [sys.sys_career_path_steps, sys.sys_career_paths, sys.sys_positions]
+    schemas: [career-path-steps]
+    tests: [career-path-steps.integration.test.ts]
+    notes:
+      - visibilita/edit ereditate dal career path padre; step di path global modificabili solo da PLATFORM_ADMIN
+counts: {modules: 10, endpoints: 39, tables_distinct: 33}

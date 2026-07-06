@@ -1,0 +1,149 @@
+# atlas fragment api_c7 — moduli: seed-approval-decisions, seed-candidate-records, semantic-matching,
+# skill-aliases, skill-categories, skill-families, skill-proficiency-levels, skill-taxonomy-edges, skills
+# fonte: apps/api/src/modules/* + app.ts (registrazioni righe 362-426) — generato 2026-07-05
+modules:
+  seed-approval-decisions:
+    prefix: /v1/seed-approval-decisions
+    endpoints:
+      - {method: GET, path: /, permission: 'seed_acquisition:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'seed_acquisition:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'seed_acquisition:approve', csrf: true, orgGate: false}
+    tables: [sys.sys_seed_approval_decisions, sys.sys_seed_candidate_records]
+    schemas: [seed-approval-decisions]
+    tests: [seed-approval-decisions.integration.test.ts]
+    notes:
+      - append-only decision ledger (no update/delete); tenant inherited dal candidate via JOIN
+      - visibilita: platform=all, tenant actor filtrato su tenant del candidate; cross-tenant -> 404 anti-enumeration
+      - il POST inserisce SOLO la decisione; nessun UPDATE dello status del candidate in questo modulo
+  seed-candidate-records:
+    prefix: /v1/seed-candidate-records
+    endpoints:
+      - {method: GET, path: /, permission: 'seed_acquisition:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'seed_acquisition:read', csrf: false, orgGate: false}
+    tables: [sys.sys_seed_candidate_records]
+    schemas: [seed-candidate-records]
+    tests: [seed-candidate-records.integration.test.ts]
+    notes:
+      - modulo read-only viewer; i write arrivano dalla pipeline seed-acquisition (altro modulo)
+      - filtri: runId, domain, validationStatus, search ILIKE su natural_key; payload/metadata JSONB passthrough
+  semantic-matching:
+    prefix: /v1/matching
+    endpoints:
+      - {method: GET, path: /me/occupations, permission: 'matching:read', csrf: false, orgGate: service}
+      - {method: GET, path: /users/:userId/occupations, permission: 'matching:read', csrf: false, orgGate: service}
+      - {method: GET, path: /me/positions, permission: 'matching:read', csrf: false, orgGate: service}
+      - {method: GET, path: /users/:userId/positions, permission: 'matching:read', csrf: false, orgGate: service}
+      - {method: GET, path: /me/job-roles, permission: 'matching:read', csrf: false, orgGate: service}
+      - {method: GET, path: /users/:userId/job-roles, permission: 'matching:read', csrf: false, orgGate: service}
+      - {method: GET, path: /users/:userId/similar, permission: 'matching:read', csrf: false, orgGate: service}
+      - {method: GET, path: /skills/:skillId/similar, permission: 'matching:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: /search, permission: 'matching:read', csrf: false, orgGate: catalog, rateLimit: 30/min}
+      - {method: POST, path: /reindex, permission: 'matching:admin', csrf: true, orgGate: false, rateLimit: 5/h}
+    tables:
+      - sys.sys_skills
+      - sys.sys_job_roles
+      - sys.sys_esco_occupation_mappings
+      - sys.sys_skill_embeddings
+      - sys.sys_job_role_embeddings
+      - sys.sys_esco_occupation_embeddings
+      - sys.sys_user_profile_embeddings
+      - sys.sys_user_skill_evidence
+      - sys.sys_users
+      - sys.sys_positions
+    schemas: [semantic-matching]
+    tests:
+      - semantic-matching.integration.test.ts
+      - semantic-matching-scope.integration.test.ts
+      - semantic-matching-substrate.integration.test.ts
+      - semantic-matching-backfill.test.ts
+    notes:
+      - kNN cosine pgvector (<=>); person profile = mean-pool SQL delle skill-evidence embeddings (DISTINCT user,skill)
+      - connettore esterno Voyage AI REST (voyage-4-lite, dim 1024, backfill-only + free-text query-time); FakeEmbedder deterministico per CI
+      - CLI entrypoint backfill.ts eseguibile diretto (pnpm embeddings:backfill), hash-skip idempotente
+      - DI seam SemanticMatchingDeps (backfill + makeEmbedder) iniettata via route options da app.ts (matchingDeps)
+      - free-text /search gated da env MATCHING_FREETEXT_ENABLED (default OFF -> 404 MATCHING_FREETEXT_DISABLED)
+      - scope: self-only roles USER/TEAM_MEMBER/READ_ONLY solo se stessi; /users/:id/similar richiede ruolo elevated (403); org-chain via canReadOrgTarget; I5 tenant filter (ZERO_UUID per actor senza tenant)
+  skill-aliases:
+    prefix: /v1/skill-aliases
+    endpoints:
+      - {method: GET, path: /, permission: null, csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'skill:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'skill:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'skill:update', csrf: true, orgGate: false}
+    tables: [sys.sys_skill_aliases, sys.sys_skills]
+    schemas: [skill-aliases]
+    tests: [skill-aliases.integration.test.ts]
+    notes:
+      - scope ereditato dalla skill parent (global OR own tenant) via JOIN; alias di skill globali scrivibili solo da PLATFORM_ADMIN (GLOBAL_SKILL_ALIAS_ADMIN_ONLY)
+      - dup-check case-insensitive label+locale (SKILL_ALIAS_CONFLICT); read senza requirePermission (any authenticated)
+  skill-categories:
+    prefix: /v1/skill-categories
+    endpoints:
+      - {method: GET, path: /, permission: null, csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'skill:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'skill:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'skill:update', csrf: true, orgGate: false}
+    tables: [sys.sys_skill_categories, sys.sys_skill_families, sys.sys_skills]
+    schemas: [skill-categories]
+    tests: [skill-categories.integration.test.ts, reconciliation-s970-skill-category.integration.test.ts]
+    notes:
+      - taxonomy platform-level (no tenant); read open, mutazioni PLATFORM_ADMIN-only nel service (SKILL_CATEGORY_ADMIN_ONLY)
+      - FK-check su family in create/update; DELETE rifiuta con 409 SKILL_CATEGORY_IN_USE se skill attaccate (evita orphan SET NULL silente)
+  skill-families:
+    prefix: /v1/skill-families
+    endpoints:
+      - {method: GET, path: /, permission: null, csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'skill:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'skill:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'skill:update', csrf: true, orgGate: false}
+    tables: [sys.sys_skill_families, sys.sys_skill_categories]
+    schemas: [skill-families]
+    tests: [skill-families.integration.test.ts]
+    notes:
+      - anchor taxonomy platform-level (no tenant_id); mutazioni PLATFORM_ADMIN-only (SKILL_FAMILY_ADMIN_ONLY)
+      - DELETE pre-check figli: rifiuta 409 SKILL_FAMILY_IN_USE invece di affidarsi al CASCADE di mig 000013
+  skill-proficiency-levels:
+    prefix: /v1/skill-proficiency-levels
+    endpoints:
+      - {method: GET, path: /, permission: null, csrf: false, orgGate: false}
+    tables: [sys.sys_skill_proficiency_levels]
+    schemas: [skill-proficiency-levels]
+    tests: [skill-proficiency-levels.integration.test.ts]
+    notes:
+      - catalogo read-only seedato da mig 000013 (NOVICE..MASTER rank 1..6); nessuna mutazione via API; any authenticated
+  skill-taxonomy-edges:
+    prefix: /v1/skill-taxonomy-edges
+    endpoints:
+      - {method: GET, path: /, permission: null, csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'skill:create', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'skill:update', csrf: true, orgGate: false}
+    tables: [sys.sys_skill_taxonomy_edges, sys.sys_skills]
+    schemas: [skill-taxonomy-edges]
+    tests: [skill-taxonomy-edges.integration.test.ts]
+    notes:
+      - edges immutabili (no PATCH by design); mutazioni PLATFORM_ADMIN-only (SKILL_TAXONOMY_ADMIN_ONLY)
+      - visibilita read = double JOIN su sys_skills (parent E child entrambi global-or-own-tenant)
+      - validazioni create: no self-loop, skill esistenti, dup (parent,child,kind) -> 409; kind default IS_A
+  skills:
+    prefix: /v1/skills
+    endpoints:
+      - {method: GET, path: /, permission: 'skill:read', csrf: false, orgGate: catalog}
+      - {method: GET, path: /:id, permission: 'skill:read', csrf: false, orgGate: catalog}
+      - {method: POST, path: /, permission: 'skill:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'skill:update', csrf: true, orgGate: false}
+    tables: [sys.sys_skills]
+    schemas: [skills]
+    tests: [skills.integration.test.ts]
+    notes:
+      - visibilita global-vs-tenant (skill_is_global OR own tenant); PLATFORM_ADMIN no filter
+      - no DELETE per design (AUTH par.6: skills referenziate da requirements + evidence; soft-deactivation post-MVP)
+      - create: non-platform forza isGlobal=false nel proprio tenant; platform global=NULL tenant o tenant esplicito (TENANT_ID_REQUIRED)
+      - unique code per scope via COALESCE(tenant, zero-uuid) -> 409 SKILL_CODE_CONFLICT; audit created_by/updated_by
+counts:
+  modules: 9
+  endpoints: 39
+  tables_distinct: 17

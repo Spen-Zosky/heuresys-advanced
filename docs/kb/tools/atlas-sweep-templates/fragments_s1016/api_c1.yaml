@@ -1,0 +1,176 @@
+# atlas fragment api_c1 — moduli API 1-10 (alfabetico) — generato 2026-07-05
+# fonte: apps/api/src/app.ts (registrazioni) + routes/repository/service per modulo
+modules:
+  activity-classification-mappings:
+    prefix: /v1/activity-classification-mappings
+    endpoints:
+      - {method: GET, path: /, permission: 'enterprise_typing:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'enterprise_typing:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'enterprise_typing:create', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'enterprise_typing:update', csrf: true, orgGate: false}
+    tables: [sys.sys_activity_classification_mappings, sys.sys_activity_classifications]
+    schemas: [activity-classification-mappings]
+    tests: [activity-classification-mappings.integration.test.ts]
+    notes:
+      - export name activityMappingsRoutes (non activityClassificationMappingsRoutes) — app.ts:77,395
+      - global catalog; writes PLATFORM_ADMIN-only (service.ts:24,32); no PATCH (create/delete only)
+      - DELETE gated da enterprise_typing:update (non :delete)
+  activity-classifications:
+    prefix: /v1/activity-classifications
+    endpoints:
+      - {method: GET, path: /, permission: 'enterprise_typing:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'enterprise_typing:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'enterprise_typing:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'enterprise_typing:update', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'enterprise_typing:update', csrf: true, orgGate: false}
+    tables: [sys.sys_activity_classifications]
+    schemas: [activity-classifications]
+    tests: [activity-classifications.integration.test.ts]
+    notes:
+      - 'global catalog: read per tutti (no tenant filter), write PLATFORM_ADMIN only (service.ts:3)'
+  analytics:
+    prefix: /v1/analytics
+    endpoints:
+      - {method: GET, path: /workforce, permission: 'analytics:view', csrf: false, orgGate: false}
+      - {method: GET, path: /kpi, permission: 'analytics:view', csrf: false, orgGate: false}
+      - {method: GET, path: /attendance, permission: 'analytics:view', csrf: false, orgGate: false}
+      - {method: GET, path: /compensation, permission: 'analytics:view', csrf: false, orgGate: false}
+      - {method: GET, path: /skills, permission: 'analytics:view', csrf: false, orgGate: false}
+      - {method: GET, path: /skills-by-category, permission: 'analytics:view', csrf: false, orgGate: false}
+      - {method: GET, path: /org-network, permission: 'analytics:view', csrf: false, orgGate: false}
+      - {method: GET, path: /overtime, permission: 'analytics:view', csrf: false, orgGate: false}
+      - {method: GET, path: /skills-group-share, permission: 'analytics:view', csrf: false, orgGate: false}
+      - {method: GET, path: /:view/export, permission: 'analytics:view', csrf: false, orgGate: false}
+    tables: [sys.sys_user_position_assignments, sys.sys_positions, sys.sys_users, sys.sys_organization_units, sys.sys_kpi_targets, sys.sys_kpi_definitions, sys.sys_attendance, sys.sys_position_compensation_profiles, sys.sys_compensation_bands, sys.sys_user_skill_evidence, sys.sys_skills, sys.sys_skill_categories, sys.sys_overtime]
+    schemas: [analytics]
+    tests: [analytics.integration.test.ts, analytics-csv.test.ts, analytics-export.integration.test.ts]
+    notes:
+      - scope tiering PLATFORM/TENANT/TEAM mirrora dashboard/service.ts (service.ts:32-59)
+      - csv.ts = serializzatore CSV per export; export route senza response-schema (raw text/csv|json passthrough, routes.ts:117)
+      - BI read-only aggregator, 13 tabelle lette, nessuna scrittura
+  approvals:
+    prefix: /v1/approvals
+    endpoints:
+      - {method: POST, path: /, permission: 'approval:create', csrf: true, orgGate: false}
+      - {method: GET, path: /, permission: 'approval:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'approval:read', csrf: false, orgGate: false}
+      - {method: POST, path: /:id/steps/:stepId/decide, permission: 'approval:decide', csrf: true, orgGate: false}
+      - {method: POST, path: /:id/apply, permission: 'approval:create', csrf: true, orgGate: false}
+    tables: [sys.sys_users, sys.sys_approval_requests, sys.sys_approval_steps, sys.sys_inbox_notifications, sys.sys_tenancies]
+    schemas: [approvals, seed-approval-decisions]
+    tests: [approvals.integration.test.ts, approvals-effects.integration.test.ts, approvals-sla.integration.test.ts, seed-approval-decisions.integration.test.ts]
+    notes:
+      - 'effects/ registry (apply post-approvazione): unico effect implementato = tenant-activation (UPDATE sys.sys_tenancies)'
+      - sla.ts + sla-cli.ts = escalation SLA con entrypoint CLI (candidato cron/systemd timer)
+      - tenant della request derivato dagli approvers (tutti stesso tenant, I5); PLATFORM_ADMIN cross-tenant
+      - decide doppio gate = permission + data-layer own-step; scrive inbox notifications
+  assessment-methods:
+    prefix: /v1/assessment-methods
+    endpoints:
+      - {method: GET, path: /, permission: 'assessment:read', csrf: false, orgGate: catalog}
+    tables: [sys.sys_assessment_methods]
+    schemas: [assessment-methods]
+    tests: [assessment-methods.integration.test.ts]
+    notes:
+      - catalogo read-only, 1 solo endpoint; riusa permission assessment:read
+  assessment-results:
+    prefix: /v1/assessment-results
+    endpoints:
+      - {method: GET, path: /, permission: 'assessment:read', csrf: false, orgGate: service}
+      - {method: GET, path: /:id, permission: 'assessment:read', csrf: false, orgGate: service}
+      - {method: POST, path: /, permission: 'assessment:create', csrf: true, orgGate: false}
+    tables: [sys.sys_assessment_results, sys.sys_assessments]
+    schemas: [assessment-results]
+    tests: [assessment-results.integration.test.ts, assessment-results-scope.integration.test.ts]
+    notes:
+      - immutabile (no update/delete, routes.ts:3)
+      - ADR-0027 org read scope via resolveOrgReadScope/canReadOrgTarget (service.ts:26-46); tenant propagato dal parent assessment
+  assessments:
+    prefix: /v1/assessments
+    endpoints:
+      - {method: GET, path: /, permission: 'assessment:read', csrf: false, orgGate: service}
+      - {method: GET, path: /:id, permission: 'assessment:read', csrf: false, orgGate: service}
+      - {method: POST, path: /, permission: 'assessment:create', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'assessment:update', csrf: true, orgGate: false}
+    tables: [sys.sys_assessments, sys.sys_users]
+    schemas: [assessments]
+    tests: [assessments.integration.test.ts, assessments-scope.integration.test.ts]
+    notes:
+      - no DELETE by design — usare status=CANCELLED (routes.ts:3)
+      - tenant-scoped only; PLATFORM_ADMIN cross-tenant con body.tenantId su create; org read scope ADR-0027 F3
+  auth:
+    prefix: /v1/auth (+ /v1/auth/mfa per mfa-routes.ts)
+    endpoints:
+      # routes.ts — /v1/auth
+      - {method: POST, path: /login, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /refresh, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /logout, permission: null, csrf: true, orgGate: false}
+      - {method: GET, path: /me, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /password-reset/request, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /password-reset/complete, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /admin/revoke-user/:userId, permission: 'auth:revoke_user', csrf: true, orgGate: false}
+      - {method: GET, path: /admin/users/:userId/sessions, permission: 'auth:revoke_user', csrf: false, orgGate: false}
+      - {method: GET, path: /role-permissions, permission: 'auth:revoke_user', csrf: false, orgGate: false}
+      - {method: GET, path: /sessions/current, permission: null, csrf: false, orgGate: false}
+      # mfa-routes.ts — /v1/auth/mfa
+      - {method: POST, path: /mfa/enroll, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/verify-setup, permission: null, csrf: true, orgGate: false}
+      - {method: GET, path: /mfa/factors, permission: null, csrf: false, orgGate: false}
+      - {method: DELETE, path: /mfa/factors/:factorId, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/email-otp/enroll, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/email-otp/verify-setup, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/email-otp/resend, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/email-otp/resend-login, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /mfa/enroll-confirm, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/enroll-confirm/resend, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/sms-otp/enroll, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/sms-otp/verify-setup, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/sms-otp/resend, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/sms-otp/resend-login, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /mfa/verify-login, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /mfa/recovery-codes, permission: null, csrf: true, orgGate: false}
+      - {method: GET, path: /mfa/recovery-codes, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /mfa/webauthn/registration/options, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/webauthn/registration/verify, permission: null, csrf: true, orgGate: false}
+      - {method: POST, path: /mfa/webauthn/authentication/options, permission: null, csrf: false, orgGate: false}
+      - {method: POST, path: /mfa/webauthn/authentication/verify, permission: null, csrf: false, orgGate: false}
+    tables: [sys.sys_users, sys.sys_auth_identities, sys.sys_auth_credentials, sys.sys_user_auth_roles, sys.sys_auth_roles, sys.sys_auth_permissions, sys.sys_auth_role_permissions, sys.sys_auth_refresh_tokens, sys.sys_auth_login_events, sys.sys_auth_password_reset_tokens, sys.sys_auth_mfa_factors, sys.sys_auth_mfa_otp_challenges, sys.sys_auth_mfa_recovery_codes, sys.sys_auth_mfa_policies, sys.sys_auth_mfa_exemptions, sys.sys_auth_mfa_webauthn_credentials]
+    schemas: [auth (shared, MFA/webauthn) + schema Zod core LOCALE in modules/auth/schema.ts]
+    tests: [auth.integration.test.ts, auth-mfa.integration.test.ts, auth-mfa-enforcement-switch.integration.test.ts, auth-mfa-exemption.integration.test.ts, auth-mfa-mandatory.integration.test.ts, auth-refresh-cookie.integration.test.ts, mfa.integration.test.ts, mfa-email-otp-gating.test.ts, mfa-enroll-confirm.integration.test.ts, mfa-fixture-parity.test.ts, mfa-policy.integration.test.ts, mfa-recovery-codes.integration.test.ts, mfa-secret-crypto.integration.test.ts, mfa-sms.integration.test.ts, webauthn.integration.test.ts]
+    notes:
+      - 2 route-file (routes.ts 10 ep + mfa-routes.ts 21 ep); registrazioni separate app.ts:348-354
+      - rate-limit per-endpoint (login 10/5min override AUTH_LOGIN_RATELIMIT_MAX; me 600/min; reset 5/h...)
+      - aux files: cache-loader (RBAC cache), tokens (cookie mint), password (Argon2id), secret-crypto, email-rate-limit
+      - connettori esterni: smtp-mailer (SMTP), sms-sender (provider SMS STUB — enroll 404 SMS_NOT_CONFIGURED), @simplewebauthn (FIDO2)
+      - login 3 esiti: success | mfa_required (challengeToken) | mfa_enrollment_required (sessione ristretta `enr`, S989)
+      - webauthn authentication/verify COMPLETA il login (setAuthCookies) senza cookie auth — challengeToken come proof
+  blueprint-activations:
+    prefix: /v1/blueprint-activations
+    endpoints:
+      - {method: GET, path: /, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'blueprint:activate', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'blueprint:activate', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'blueprint:activate', csrf: true, orgGate: false}
+    tables: [sys.sys_blueprint_activations, sys.sys_blueprint_variants]
+    schemas: [blueprint-activations]
+    tests: [blueprint-activations.integration.test.ts]
+    notes:
+      - tenant-scoped; vincolo un solo ACTIVE per tenant (service.ts:3,44); FK-check esistenza variant
+      - PLATFORM_ADMIN deve fornire body.tenantId (service.ts:36)
+  blueprint-families:
+    prefix: /v1/blueprint-families
+    endpoints:
+      - {method: GET, path: /, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: GET, path: /:id, permission: 'blueprint:read', csrf: false, orgGate: false}
+      - {method: POST, path: /, permission: 'blueprint:activate', csrf: true, orgGate: false}
+      - {method: PATCH, path: /:id, permission: 'blueprint:override', csrf: true, orgGate: false}
+      - {method: DELETE, path: /:id, permission: 'blueprint:override', csrf: true, orgGate: false}
+    tables: [sys.sys_blueprint_families, sys.sys_blueprint_variants]
+    schemas: [blueprint-families]
+    tests: [blueprint-families.integration.test.ts]
+    notes:
+      - global catalog, writes PLATFORM_ADMIN only (service.ts:3)
+      - delete guardato da esistenza variants (repository.ts:94)
+      - split permission POST=blueprint:activate vs PATCH/DELETE=blueprint:override (routes.ts:24,31,35)
+counts: {modules: 10, endpoints: 73, tables_distinct: 40}

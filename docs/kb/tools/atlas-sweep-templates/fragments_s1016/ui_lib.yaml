@@ -1,0 +1,76 @@
+fragment: ui_lib
+generated: 2026-07-05
+source_repo: D:/ux-design-shared (workspace root; lib in ui/)
+consumer_repo: D:/heuresys-advanced
+
+versions:
+  source:
+    package: "@heuresys/ui"
+    path: D:/ux-design-shared/ui/package.json
+    version: 0.1.9
+    license: PROPRIETARY
+    head_commit: c31e4c7 # 2026-06-27 "fix(ui): #21 a11y shell + perf subpath exports + v0.1.9"
+    git_status: clean salvo untracked ui/pnpm-lock.yaml
+    last_tag: v0.4.0-brand-v1 # tag repo-level (brand bundle), NON versione lib
+    react_peer: "^19.2.0 (peerDependencies, @types optional)"
+    build: tsup (dist cjs+mjs+d.ts)
+  published_consumed:
+    npm_registry_latest: 0.1.9 # npm view @heuresys/ui version
+    consumed_range: "^0.1.9" # heuresys-advanced package.json:53 + apps/web:20 + apps/showcase:14
+    lockfile_resolved: 0.1.9 # heuresys-advanced pnpm-lock.yaml:814
+    subpath_exports: [".", "./charts", "./markdown", "./styles", "./brand/candidates", "./assets/brand/*"]
+
+components: # da ui/src/index.ts (469 righe); PascalCase value exports = 201, +44 hooks/utils = 245 value exports totali
+  base_core: # exports storici + B7 base
+    - Button; Card(+Header/Title/Description/Content/Footer); Input; Toast(famiglia 7); ThemeProvider/useTheme; ThemeToggle
+    - Dialog(famiglia 10); DropdownMenu(famiglia 14); Popover(4); Tooltip(4); Tabs(4); Accordion(4)
+    - Checkbox; Switch; Avatar(+Image/Fallback/Group); Badge; Skeleton; Spinner; EmptyState; ErrorState
+    - LayoutPrimitives [Stack, Cluster, Center, Cover, Frame, Grid, Switcher]
+    - Motion [FadeIn, SlideIn, ScaleIn, StaggerChildren, StaggerItem]
+    - CommandPalette(+useGlobalCmdK); DataTable
+  tier1_layout_nav_admin: [PageHeader, FilterBar, AppShell, BentoGrid, BentoCell, Breadcrumbs, Stepper, Pagination, FAB, MobileBottomNav, TabsOverflow, AppSwitcher, MegaMenu]
+  tier2_brand_theming: [ThemeBuilderWizard(+preset/export utils), GlassCard, NeumorphicCard, oklch-lib(8 fn)]
+  tier3_wow_micro: [StatsCard, ActivityFeed, NotificationCenter, ConfettiButton(+useConfetti), AchievementBadge, OnboardingTour, KeyboardShortcutsModal, MeshGradient, AuroraBackground, DotGrid, NoiseOverlay, TiltCard, Banner, LottiePlayer]
+  tier4_charts: [EChartsCard(+echartsPresets), Sparkline, WinLossSparkline, RadialGauge, ActivityRing, LinearGauge, NetworkGraph]
+  tier5_collab: [KanbanBoard, Timeline, CommentThread, CalendarGrid]
+  tier6_forms_avanzati: [FormWizard, PhoneInputField, MoneyInput, IbanInput, TaxIdInput, OtpInput, PasswordStrengthMeter, SignaturePadField, FileDropzone]
+  tier7_media: [VideoPlayer, QRCodeView, ImageGallery]
+  tier8_ai: [ChatProvider(+useChat), Chatbot, ToolCallView, VoiceInput]
+  tier9_files_dataops: [DiffViewer, JsonTree, parsers(parseCSV/exportCSV/parseExcel/exportExcel/parseJSON/parseTOML/parseXML)]
+  tier10_markdown: [MarkdownView, MermaidDiagram, Admonition, TableOfContents]
+  tier11_i18n: [LanguagePicker, format-utils(Currency/Number/Percent/Date/DateTime/RelativeTime/List), SUPPORTED_LOCALES]
+  tier12_a11y: [SkipLink, AccessibilityPanel, LiveRegionProvider, useAnnounce]
+  tier13_devtools: [PerfMonitor]
+  tier14_marketing_hero: [HeroSplit, HeroCentered, HeroVideoBackground]
+  tier15_utility_text: [AnimatedNumber, Typewriter, GradientText, Marquee]
+  tier16_xr: [ThreeScene]
+  tier17_dashboard_atomics: [IntegrationHealthPill, KpiRing, SuccessionCard, CareerArc, KgMiniGraph, SkillHeatmap, CapabilityRadar, RbacMatrix]
+  brand: [HeuresysWordmark, HeuresysMark, HeuresysLogoBadge]
+  explorer_atomics_sprint3G: [ESCOTreeNavigator, KGGraphCanvas, SAPSyncPanel]
+  dashboard_pattern_2026_05: [StatusIcon, DashboardShell, DashboardHeader, DashboardSidebar, DashboardFooter, PaletteDropdown(+PALETTES/applyPalette), GroupToggle, AlertBanner, DataTableWithCrossHair, TimeRangeSelector, PageActions, KPIStrip, KpiCard, LogStream, AuditFeed, IncidentTimeline, SQLSlowQueryTable, RBACMatrix, TenantFleetTable, ErrorRateBreakdown, DBSupervisorSidebar, attachCrossHair]
+  qw_promotions: [StatusPill, StatusBadge(+statusTone), FieldGrid] # promossi da heuresys-advanced (QW-E5 + follow-up)
+
+stories_count: 122 # find ui/src -name '*.stories.*'
+components_count: 201 # PascalCase value exports in index.ts
+
+usage_in_consumer: # grep -w in apps/web/src + apps/showcase/src (file count)
+  heavily_used: {StatusPill: 24w, EChartsCard: 18w, StatsCard: 11w, DashboardShell: 9w+6s, KPIStrip: 6w+3s, AuditFeed: 6w+3s, DataTableWithCrossHair: 5w+2s, FieldGrid: 4w+1s}
+  lightly_used: {MermaidDiagram: 2w, MarkdownView: 1w, CapabilityRadar: 1w, LogStream: 2w, IncidentTimeline: 2w, SQLSlowQueryTable: 2w, TenantFleetTable: 1w, ErrorRateBreakdown: 2w, Sparkline: 1w, RadialGauge: 1w}
+  unused_in_both_apps: # 0 occorrenze web+showcase
+    - [ESCOTreeNavigator, KGGraphCanvas, SAPSyncPanel] # costruiti PER heuresys, mai wired
+    - [SkillHeatmap, SuccessionCard, CareerArc, KgMiniGraph] # HR dashboard atomics
+    - [FormWizard, PhoneInputField, MoneyInput, IbanInput, TaxIdInput, OtpInput, PasswordStrengthMeter, SignaturePadField, FileDropzone] # intero tier forms
+    - [KanbanBoard, Timeline, CommentThread, CalendarGrid] # intero tier collab
+    - [VideoPlayer, QRCodeView, ImageGallery, Chatbot, VoiceInput, ThreeScene] # media+AI+XR
+    - [HeroSplit, HeroCentered, HeroVideoBackground, ThemeBuilderWizard, GlassCard, NeumorphicCard, TiltCard]
+    - [CommandPalette, BentoGrid, Stepper, FAB, MobileBottomNav, MegaMenu, AppSwitcher, OnboardingTour, KeyboardShortcutsModal]
+    - [NotificationCenter, ActivityFeed, AchievementBadge, ConfettiButton, LottiePlayer, MeshGradient, AuroraBackground]
+    - [DiffViewer, JsonTree, LanguagePicker, AccessibilityPanel, PerfMonitor, AnimatedNumber, Typewriter, GradientText, Marquee, NetworkGraph]
+
+delta_notes:
+  - "ALLINEATO: working copy (0.1.9, HEAD c31e4c7 2026-06-27) == npm latest (0.1.9) == range consumato (^0.1.9) == lockfile (0.1.9). Nessun commit non pubblicato."
+  - "Tag git v0.4.0-brand-v1 e' versioning del brand bundle repo-level, disgiunto dal semver della lib (0.1.9) — due assi di versione nello stesso repo."
+  - "CLAUDE.md di heuresys-advanced (sezione Design System) e' stale: dichiara '^0.1.1' + HEAD ad7d5c0/S932; reale ^0.1.9 (8 release dopo)."
+  - "ui/pnpm-lock.yaml untracked nel repo lib (root usa npm package-lock.json) — mix npm/pnpm non riconciliato."
+  - "Stories coverage parziale: 122 stories vs 201 componenti; i promossi recenti (status-pill, field-grid, esco-tree-navigator, kg-graph-canvas, sap-sync-panel, StatusIcon, dashboard/*) senza .stories."
+  - "Naming collision in index.ts: RbacMatrix (tier17, riga 293) e RBACMatrix (dashboard pattern, riga 439) coesistono."

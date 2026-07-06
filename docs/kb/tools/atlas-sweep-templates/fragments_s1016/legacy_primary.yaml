@@ -1,0 +1,102 @@
+fragment: legacy_primary
+generated: 2026-07-05
+source_of_truth: ADR-0023 (legacy heuresys_platform = authoritative data source; sys.* = structural authority)
+
+legacy_db:
+  location: oracle-vm-default:5432 (native PG16, db heuresys_platform, accessed sudo -u postgres)
+  size: 1113 MB
+  schemas:
+    public: 582            # ordinary tables (relkind='r')
+    learning: 6             # certificates, learning_path_courses, skill_gaps, courses, learning_paths, enrollments
+  tables_total_ordinary: 588
+  pg_stat_user_tables_count: 594   # includes non-'r' relkinds / partitions
+  stats_caveat: "n_live_tup STALE (runtime stats reset: only 5 tables >0, sum 69721) -> row estimates use pg_class.reltuples"
+  core_entities:
+    employees: 270          # real count(*); reltuples was -1 (never analyzed)
+    users: 274
+    tenants: 4              # Heuresys System, RTL Bank, SmartFood, EcoNova
+  notable_matview: mv_occupation_similarity ~69182 rows
+
+legacy_tables:
+  gt_1000_rows: 78          # tables with reltuples > 1000
+  top_30: # name|est_rows
+    - kg_edges|139451
+    - esco_occupation_skills|126051
+    - job_template_skills|28983
+    - ext_pa0024|18272
+    - kg_nodes|17260
+    - esco_skills|14011
+    - pcl2|12562
+    - skill_adjacencies|11634
+    - pa0024|9640
+    - skill_classifications|7215
+    - pa2002|6072
+    - esco_skill_relations|5818
+    - pa2005|5358
+    - employee_attendance|5237
+    - analytics_events|5000
+    - employee_timeline|4641
+    - occupation_industry_classifications|4565
+    - survey_responses|4482
+    - semantic_entity_index|4115
+    - pa2006|3426
+    - industry_classifications|3276
+    - employee_skill_assessments|3140
+    - course_enrollments|3052
+    - esco_occupations|3040
+    - module_completions|2899
+    - pa0105|2598
+    - check_ins|2495
+    - pb0024|2400
+    - pa0185|2268
+    - pb4005|2000
+
+coverage: # brownfield registry in heuresys_advanced (localhost:5433)
+  table_mappings_rows: 97
+  table_mappings_by_wave_status: {wave1_APPROVED: 97}   # no other wave/status exists
+  source_tables_registered: 94
+  distinct_source_tables_mapped: 94    # 100% of registered; 97 rows because 3 tables map to 2 targets
+  column_mappings_total: 1225
+  column_mappings_by_wave: {wave1: 1225}
+  registry_coverage_of_legacy: "94/582 public tables = ~16%"
+  wave1_scope: "skills/taxonomy (ESCO+O*NET+ontology), learning, CCNL/ITLAB, industry classifications, process registry -> targets sys.sys_skill*, sys_learning*, sys_compensation_bands, sys_job_*, sys_esco_*, sys_position_skill_requirements"
+  out_of_registry_ingestion: "people/org (employees 270 -> sys_users, org units, positions, attendance 3180) wired by RTL rebuild seeds S950 (user_external_code LEGACY::), NOT tracked in brownfield.table_mappings"
+
+uncovered_big_tables: # 65 legacy tables >1000 rows with NO table_mapping (covered_big=13)
+  by_cluster:
+    knowledge_graph: [kg_edges|139451, kg_nodes|17260]   # ESKAP core, only esco_* projected
+    sap_infotypes_mirror: # ~30 pa*/pb*/pcl2/ext_pa* tables, ~1142 rows each unless noted
+      [ext_pa0024|18272, pcl2|12562, pa0024|9640, pa2002|6072, pa2005|5358, pa2006|3426,
+       pa0105|2598, pb0024|2400, pa0185|2268, pb4005|2000, pb4001|2000, pb4000|2000,
+       pa0001|1774, pb0022|1600, pa0021|1530, pa0002|1458, pa2001|1444, pa0000..pa2007|~1142 x18,
+       pa0022|1138, pa0009|1134, ext_pa0002|1064, pb0002|1010]
+    employee_skill_layer: [employee_skill_assessments|3140, employee_skills|1445, employee_skill_mappings|1121, career_skills|1106, position_skill_requirements|1632]
+    engagement_pulsar: [survey_responses|4482, check_ins|2495, engagement_survey_responses|1327, pulse_checks|1145, wellbeing_checkins|1142, news_reads|1139]
+    performance_gokmer: [goal_updates|1811, goals|1068]
+    time_attendance: [employee_attendance|5237]   # partially seeded (3180) outside registry
+    analytics_timeline: [analytics_events|5000, employee_timeline|4641]
+    job_template_detail: [job_tasks|2000, job_skills|2000, job_kpis|2000, job_qualifications|1500]
+    ai_infra_epra: [embedding_queue|1620]
+    documents_misc: [employee_documents|1089]
+  count: 65
+
+db_export_files: # D:/evo.heuresys.com/db-export/ — local data dictionary (generated 2026-05-15, PG 16.13)
+  - README.md|10418           # index read: 576/582 tables cataloged, 335 tenant-scoped, 950 FK, 376 RLS policies, 110 views + 6 matviews, 16 lexicon domains
+  - catalog.json|3966516      # machine-readable full catalog (columns/FK/RLS/domains per table)
+  - schema.sql|2012877        # filtered DDL (pg_dump schema-only, exclusions applied)
+  - schema-raw.sql|2028271
+  - views.md|133789
+  - exclusions.md|1643        # 7 excluded tables (NextAuth etc.)
+  - generate.mjs|41224
+  - db-export.zip|1066682
+  - .meta-columns.json|3088218
+  - .meta-fks.json|268455
+  - .meta-indexes.json|628506
+  - .meta-tables.json|97468
+  - .meta-views.json|132194
+  - .meta-rls.json|115697
+  - .meta-pks.json|45745
+  - .meta-matviews.json|10975
+  - .meta-col-comments.json|33298
+  - domains/|dir              # 16 lexicon domain docs (OPOURSKA, PET, INDOOR, TALPIPE, H2R, SKILGRO, GOKMER, PROGOV, ESKAP, ITLAB, RBP, DGOV, SMERTO, PULSAR, EPRA, CASCADIA) + index + uncategorized
+  lexicon_domains_table_counts: {DGOV: 188, H2R: 80, SKILGRO: 45, OPOURSKA: 41, GOKMER: 40, RBP: 32, ESKAP: 31, PULSAR: 29, TALPIPE: 28, EPRA: 19, PROGOV: 16, SMERTO: 16, INDOOR: 13, ITLAB: 10, PET: 2, CASCADIA: 0}

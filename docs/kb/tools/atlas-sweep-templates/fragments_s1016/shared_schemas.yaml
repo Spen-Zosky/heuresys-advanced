@@ -1,0 +1,445 @@
+# Atlas fragment: packages/shared/src/schemas inventory (generated 2026-07-05)
+schemas:
+  _pagination:
+    exports: [paginationFields]
+    subpath_export: true
+    consumers_api: []
+    consumers_web: []
+  activity-classification-mappings:
+    exports: [ActivityMappingKindSchema, ActivityClassificationMappingSchema, ActivityMappingListQuerySchema, ActivityMappingListResponseSchema, CreateActivityMappingBodySchema, ActivityMappingIdParamSchema]
+    subpath_export: true
+    consumers_api: [activity-classification-mappings]
+    consumers_web: []
+  activity-classifications:
+    exports: [ActivityClassSchemeSchema, ActivityClassificationSchema, ActivityClassificationListQuerySchema, ActivityClassificationListResponseSchema, CreateActivityClassificationBodySchema, UpdateActivityClassificationBodySchema, ActivityClassificationIdParamSchema]
+    subpath_export: true
+    consumers_api: [activity-classifications]
+    consumers_web: []
+  analytics:
+    exports: [AnalyticsScopeKindSchema, WorkforceByDimensionRowSchema, WorkforceAnalyticsResponseSchema, KpiAchievementRowSchema, KpiAnalyticsResponseSchema, AttendanceMonthlyRowSchema, AttendanceByOrgUnitRowSchema, AttendanceAnalyticsResponseSchema, CompensationBandingByOuRowSchema, CompensationScatterPointSchema, CompensationAnalyticsResponseSchema, SkillsCoverageProficiencySchema, SkillsCoverageCellSchema, SkillsCoverageByProficiencyRowSchema, SkillsCoverageAnalyticsResponseSchema, SkillsByCategoryProficiencySchema, SkillsByCategoryCellSchema, SkillsByCategoryRowSchema, SkillsByCategoryAnalyticsResponseSchema, OrgNetworkDepthRowSchema, OrgNetworkSpanRowSchema, OrgNetworkReachRowSchema, OrgNetworkAnalyticsResponseSchema, OvertimeStatusSchema, OvertimeTypeSchema, OvertimeByStatusRowSchema, OvertimeByTypeRowSchema, OvertimeMonthlyRowSchema, OvertimeByOrgUnitRowSchema, OvertimeAnalyticsResponseSchema, SkillsGroupShareGroupSchema, SkillsGroupShareAnalyticsResponseSchema, AnalyticsViewSlugSchema, AnalyticsExportFormatSchema, AnalyticsExportParamsSchema, AnalyticsExportQuerySchema]
+    subpath_export: true
+    consumers_api: [analytics]
+    consumers_web: ["app/(authenticated)/analytics/attendance/page.tsx", "app/(authenticated)/analytics/compensation/page.tsx", "app/(authenticated)/analytics/kpi/page.tsx", "app/(authenticated)/analytics/org-network/page.tsx", "app/(authenticated)/analytics/overtime/page.tsx", "app/(authenticated)/analytics/skills-by-category/page.tsx", "app/(authenticated)/analytics/skills-group-share/page.tsx", "app/(authenticated)/analytics/skills/page.tsx", "app/(authenticated)/analytics/workforce/page.tsx"]
+  approvals:
+    exports: [ApprovalRequestSchema, ApprovalStepSchema, ApprovalStepDetailSchema, ApprovalRequestDetailSchema, ApprovalRequestListItemSchema, ApprovalListResponseSchema, ApprovalLevelInputSchema, CreateApprovalRequestBodySchema, DecideApprovalStepBodySchema, ApprovalIdParamSchema, ApprovalDecideParamsSchema, ApprovalListQuerySchema]
+    subpath_export: true
+    consumers_api: [approvals]
+    consumers_web: ["app/(authenticated)/approvals/[id]/page.tsx", "app/(authenticated)/approvals/page.tsx"]
+  assessment-methods:
+    exports: [AssessmentMethodCodeSchema, AssessmentMethodSchema, AssessmentMethodListResponseSchema]
+    subpath_export: true
+    consumers_api: [assessment-methods]
+    consumers_web: []
+  assessment-results:
+    exports: [AssessmentResultSchema, AssessmentResultListQuerySchema, AssessmentResultListResponseSchema, CreateAssessmentResultBodySchema, AssessmentResultIdParamSchema]
+    subpath_export: true
+    consumers_api: [assessment-results]
+    consumers_web: []
+  assessments:
+    exports: [AssessmentKindSchema, AssessmentStatusSchema, AssessmentSchema, AssessmentListQuerySchema, AssessmentListResponseSchema, CreateAssessmentBodySchema, UpdateAssessmentBodySchema, AssessmentIdParamSchema]
+    subpath_export: true
+    consumers_api: [assessments]
+    consumers_web: []
+  auth:
+    exports: [LoginBodySchema, LoginResponseSchema, LoginMfaRequiredResponseSchema, LoginEnrollmentRequiredResponseSchema, LoginResultResponseSchema, MeResponseSchema, PasswordResetRequestBodySchema, PasswordResetCompleteBodySchema, RevokeUserParamsSchema, EmptyResponseSchema, ErrorEnvelopeSchema, RolePermissionItemSchema, RolePermissionsResponseSchema, ActiveSessionSchema, ListActiveSessionsParamsSchema, ListActiveSessionsResponseSchema, RevokeSessionParamsSchema, RevokeSessionResponseSchema, RevokeOtherSessionsBodySchema, RevokeOtherSessionsResponseSchema, CurrentSessionResponseSchema]
+    subpath_export: true
+    consumers_api: [auth, job-families, kpi-definitions, learning-modules, me, organization-units, positions, skill-aliases, skill-categories, skill-families, skill-taxonomy-edges, tenants, users]
+    consumers_web: ["app/(authenticated)/me/security/page.tsx", lib/api/observability.ts]
+  blueprint-activations:
+    exports: [BlueprintActivationStatusSchema, BlueprintActivationSchema, BlueprintActivationListQuerySchema, BlueprintActivationListResponseSchema, CreateBlueprintActivationBodySchema, UpdateBlueprintActivationBodySchema, BlueprintActivationIdParamSchema]
+    subpath_export: true
+    consumers_api: [blueprint-activations]
+    consumers_web: []
+  blueprint-families:
+    exports: [BlueprintFamilySchema, BlueprintFamilyListQuerySchema, BlueprintFamilyListResponseSchema, CreateBlueprintFamilyBodySchema, UpdateBlueprintFamilyBodySchema, BlueprintFamilyIdParamSchema]
+    subpath_export: true
+    consumers_api: [blueprint-families]
+    consumers_web: []
+  blueprint-overrides:
+    exports: [BlueprintOverrideInclusionSchema, BlueprintOverrideSchema, BlueprintOverrideListQuerySchema, BlueprintOverrideListResponseSchema, UpsertBlueprintOverrideBodySchema, BlueprintOverrideIdParamSchema]
+    subpath_export: true
+    consumers_api: [blueprint-overrides]
+    consumers_web: []
+  blueprint-processes:
+    exports: [BlueprintProcessSchema, BlueprintProcessListQuerySchema, BlueprintProcessListResponseSchema, CreateBlueprintProcessBodySchema, UpdateBlueprintProcessBodySchema, BlueprintProcessIdParamSchema]
+    subpath_export: true
+    consumers_api: [blueprint-processes]
+    consumers_web: ["app/(authenticated)/content/[id]/page.tsx"]
+  blueprint-variants:
+    exports: [BlueprintVariantSchema, BlueprintVariantListQuerySchema, BlueprintVariantListResponseSchema, CreateBlueprintVariantBodySchema, UpdateBlueprintVariantBodySchema, BlueprintVariantIdParamSchema]
+    subpath_export: true
+    consumers_api: [blueprint-variants]
+    consumers_web: []
+  brownfield-import-runs:
+    exports: [BrownfieldImportStatusSchema, BrownfieldImportRunSchema, BrownfieldImportRunListQuerySchema, BrownfieldImportRunListResponseSchema, CreateBrownfieldImportRunBodySchema, UpdateBrownfieldImportRunBodySchema, BrownfieldImportRunIdParamSchema]
+    subpath_export: true
+    consumers_api: [brownfield-import-runs]
+    consumers_web: ["app/(authenticated)/brownfield-adaptation/page.tsx"]
+  brownfield-source-exports:
+    exports: [BrownfieldSourceExportStatusSchema, BrownfieldSourceExportSchema, BrownfieldSourceExportListQuerySchema, BrownfieldSourceExportListResponseSchema, BrownfieldSourceExportIdParamSchema]
+    subpath_export: true
+    consumers_api: [brownfield-source-exports]
+    consumers_web: ["app/(authenticated)/brownfield-adaptation/page.tsx"]
+  brownfield-table-mappings:
+    exports: [BrownfieldApprovalStatusSchema, BrownfieldTableMappingSchema, BrownfieldTableMappingListQuerySchema, BrownfieldTableMappingListResponseSchema, ApproveBrownfieldTableMappingBodySchema, BrownfieldTableMappingIdParamSchema]
+    subpath_export: true
+    consumers_api: [brownfield-table-mappings]
+    consumers_web: ["app/(authenticated)/brownfield-adaptation/page.tsx"]
+  brownfield-wave-executor:
+    exports: [WaveExecutorStateSchema, WaveExecutorModeSchema, TriggerWaveBodySchema, WaveStageStatsSchema, WaveExecutorRunSchema, WaveExecutorRunListQuerySchema, WaveExecutorRunListResponseSchema, WaveExecutorRunIdParamSchema, AcceptanceCheckSchema, WaveAcceptanceReportSchema]
+    subpath_export: true
+    consumers_api: [brownfield-wave-executor]
+    consumers_web: []
+  capability-composition:
+    exports: [CapabilityScopeSchema, CapabilityLineageEntrySchema, CapabilityScoreSchema, CapabilityCompositionListQuerySchema, CapabilitySubjectParamSchema, CapabilityScoreListResponseSchema, CapabilityRecomputeResponseSchema]
+    subpath_export: true
+    consumers_api: [capability-composition, capability-maturity]
+    consumers_web: []
+  capability-maturity:
+    exports: [MaturityCriterionSchema, CapabilityMaturityScoreSchema, CapabilityMaturityListResponseSchema, CapabilityMaturityOrgUnitParamSchema, CapabilityMaturityRecomputeResponseSchema]
+    subpath_export: true
+    consumers_api: [capability-maturity]
+    consumers_web: ["app/(authenticated)/org-director/page.tsx"]
+  career-path-steps:
+    exports: [CareerPathStepSchema, CareerPathStepListQuerySchema, CareerPathStepListResponseSchema, CreateCareerPathStepBodySchema, UpdateCareerPathStepBodySchema, CareerPathStepIdParamSchema]
+    subpath_export: true
+    consumers_api: [career-path-steps]
+    consumers_web: []
+  career-paths:
+    exports: [CareerPathKindSchema, CareerPathSchema, CareerPathListQuerySchema, CareerPathListResponseSchema, CreateCareerPathBodySchema, UpdateCareerPathBodySchema, CareerPathIdParamSchema]
+    subpath_export: true
+    consumers_api: [career-path-steps, career-paths]
+    consumers_web: []
+  compensation:
+    exports: [CompensationBandSchema, CompensationProfileSchema, CompensationProfilePositionParamSchema, RewardGateResultStatusSchema, RewardGateResultSchema, RewardGateSchema, RewardGatesListQuerySchema, RewardGatesListResponseSchema, CompensationDistributionItemSchema, CompensationDistributionResponseSchema, CompensationRecommendationSignalSchema, CompensationRecommendationSchema, CreateCompensationRecommendationBodySchema, PayrollHandoffStatusSchema, PayrollHandoffRecordSchema, CreatePayrollHandoffRecordBodySchema]
+    subpath_export: true
+    consumers_api: [compensation]
+    consumers_web: []
+  content:
+    exports: [ContentCategorySchema, ContentCategoryCreateSchema, ContentCategoryUpdateSchema, ContentCategoryListResponseSchema, ContentVersionSchema, ContentVersionListResponseSchema, ContentDocumentSchema, ContentDocumentCreateSchema, ContentDocumentUpdateSchema, ContentDocumentFilterSchema, ContentDocumentListResponseSchema, ContentDocumentDetailResponseSchema, ContentIdParamSchema, ContentCategoryIdParamSchema, ContentVersionRestoreParamSchema, ContentSearchQuerySchema, ContentSearchHitSchema, ContentSearchResponseSchema, MeContentFilterSchema, ContentMediaItemSchema, ListContentMediaResponseSchema, ContentMediaDocParamSchema, ContentMediaIdParamSchema, ContentMediaDeleteResponseSchema]
+    subpath_export: true
+    consumers_api: [content, me]
+    consumers_web: ["app/(authenticated)/content/[id]/page.tsx", "app/(authenticated)/content/page.tsx", "app/(authenticated)/me/handbook/[id]/page.tsx", "app/(authenticated)/me/handbook/page.tsx", components/ContentMediaPanel.tsx]
+  content-blueprint-links:
+    exports: [ContentBlueprintLinkSchema, ContentBlueprintLinkCreateSchema, ContentBlueprintLinkIdParamSchema, LinksByDocumentQuerySchema, LinksByProcessQuerySchema, LinksByVariantQuerySchema, ContentLinkForDocumentSchema, LinksForDocumentResponseSchema, ContentLinkForProcessSchema, LinksForProcessResponseSchema]
+    subpath_export: true
+    consumers_api: [content-blueprint-links]
+    consumers_web: ["app/(authenticated)/content/[id]/page.tsx"]
+  dashboard:
+    exports: [DashboardScopeKindSchema, DashboardCountersSchema, DashboardLearningDeadlineSchema, DashboardRecentActivitySchema, DashboardTrendKeySchema, DashboardTrendSchema, DashboardWidgetsResponseSchema]
+    subpath_export: true
+    consumers_api: [dashboard]
+    consumers_web: ["app/(authenticated)/dashboard/page.tsx"]
+  engagement:
+    exports: [EngagementSurveySchema, EngagementSurveyListResponseSchema, EngagementQuestionResultSchema, EngagementSurveyResultsResponseSchema, EngagementPulseWeekSchema, EngagementPulseResponseSchema, EngagementSurveyIdParamSchema, EngagementSurveyTemplateSchema, EngagementTemplateListResponseSchema]
+    subpath_export: true
+    consumers_api: [engagement]
+    consumers_web: ["app/(authenticated)/engagement/[surveyId]/page.tsx", "app/(authenticated)/engagement/page.tsx"]
+  engagement-feedback:
+    exports: [EngagementFeedbackSchema, EngagementFeedbackListQuerySchema, EngagementFeedbackListResponseSchema, CreateEngagementFeedbackBodySchema, UpdateEngagementFeedbackBodySchema, EngagementActionPlanSchema, EngagementActionPlanListQuerySchema, EngagementActionPlanListResponseSchema, CreateEngagementActionPlanBodySchema, UpdateEngagementActionPlanBodySchema, EngagementFeedbackIdParamSchema]
+    subpath_export: true
+    consumers_api: [engagement-feedback]
+    consumers_web: []
+  enterprise-size-bands:
+    exports: [EnterpriseSizeBandCodeSchema, EnterpriseSizeBandSchema, EnterpriseSizeBandListResponseSchema, UpsertEnterpriseSizeBandBodySchema, EnterpriseSizeBandIdParamSchema]
+    subpath_export: true
+    consumers_api: [enterprise-size-bands]
+    consumers_web: []
+  enterprise-typing-profiles:
+    exports: [RegulatoryIntensitySchema, EnterpriseTypingProfileSchema, EnterpriseTypingProfileListQuerySchema, EnterpriseTypingProfileListResponseSchema, UpsertEnterpriseTypingProfileBodySchema, EnterpriseTypingProfileIdParamSchema]
+    subpath_export: true
+    consumers_api: [enterprise-typing-profiles]
+    consumers_web: []
+  goals:
+    exports: [GoalSchema, GoalListQuerySchema, GoalListResponseSchema, CreateGoalBodySchema, UpdateGoalBodySchema, GoalIdParamSchema]
+    subpath_export: true
+    consumers_api: [goals]
+    consumers_web: []
+  insights:
+    exports: [FlightRiskFeatureContributionSchema, FlightRiskScoreSchema, InsightsScopeSchema, FlightRiskListResponseSchema, FlightRiskUserIdParamSchema, InsightsRecomputeResponseSchema, SuccessionReadinessScoreSchema, SuccessionReadinessListResponseSchema, SkillGapScoreSchema, SkillGapListResponseSchema]
+    subpath_export: true
+    consumers_api: [insights]
+    consumers_web: ["app/(authenticated)/insights/page.tsx", "app/(authenticated)/insights/skill-gap/page.tsx", "app/(authenticated)/insights/succession-readiness/page.tsx"]
+  job-families:
+    exports: [JobFamilySchema, JobFamilyListQuerySchema, JobFamilyListResponseSchema, CreateJobFamilyBodySchema, UpdateJobFamilyBodySchema, JobFamilyIdParamSchema]
+    subpath_export: true
+    consumers_api: [job-families]
+    consumers_web: []
+  job-roles:
+    exports: [JobRoleSenioritySchema, JobRoleSchema, JobRoleListQuerySchema, JobRoleListResponseSchema, CreateJobRoleBodySchema, UpdateJobRoleBodySchema, JobRoleIdParamSchema]
+    subpath_export: true
+    consumers_api: [job-roles]
+    consumers_web: []
+  kpi-definitions:
+    exports: [KpiPolaritySchema, KpiDefinitionSchema, KpiDefinitionListQuerySchema, KpiDefinitionListResponseSchema, CreateKpiDefinitionBodySchema, UpdateKpiDefinitionBodySchema, KpiDefinitionIdParamSchema]
+    subpath_export: true
+    consumers_api: [kpi-definitions]
+    consumers_web: []
+  leads:
+    exports: [LeadCreateSchema, LeadCreateResponseSchema, LeadResponseSchema, LeadListResponseSchema]
+    subpath_export: true
+    consumers_api: [leads]
+    consumers_web: [components/lead-form.tsx]
+  learning-gaps:
+    exports: [LearningGapSeveritySchema, LearningGapSchema, LearningGapListQuerySchema, LearningGapListResponseSchema, CreateLearningGapBodySchema, UpdateLearningGapBodySchema, LearningGapIdParamSchema]
+    subpath_export: true
+    consumers_api: [learning-gaps]
+    consumers_web: []
+  learning-modules:
+    exports: [LearningKindSchema, LearningDeliverySchema, LearningModuleSchema, LearningModuleListQuerySchema, LearningModuleListResponseSchema, CreateLearningModuleBodySchema, UpdateLearningModuleBodySchema, LearningModuleIdParamSchema]
+    subpath_export: true
+    consumers_api: [learning-modules]
+    consumers_web: []
+  learning-path-steps:
+    exports: [LearningPathStepSchema, LearningPathStepListQuerySchema, LearningPathStepListResponseSchema, CreateLearningPathStepBodySchema, UpdateLearningPathStepBodySchema, LearningPathStepIdParamSchema]
+    subpath_export: true
+    consumers_api: [learning-path-steps]
+    consumers_web: []
+  learning-paths:
+    exports: [LearningPathSchema, LearningPathListQuerySchema, LearningPathListResponseSchema, CreateLearningPathBodySchema, UpdateLearningPathBodySchema, LearningPathIdParamSchema]
+    subpath_export: true
+    consumers_api: [learning-path-steps, learning-paths]
+    consumers_web: []
+  me:
+    exports: [MeProfileSchema, UpdateMeProfileBodySchema, MeIdentitySchema, MeIdentityDocumentSchema, MeAddressSchema, MeContactsSchema, MeEmergencyContactSchema, MeFamilyMemberSchema, MeEducationSchema, MeBankingSchema, MeOrganizationSchema, MeEmploymentSchema, MeAuthSummarySchema, MeProfileFullSchema, MeContractSchema, MeContractsResponseSchema, MePaySlipSchema, MePaySlipsResponseSchema, MePerformanceReviewSchema, MePerformanceResponseSchema, MeAttendanceDaySchema, MeOvertimeEntrySchema, MeLeaveBalanceSchema, MeAttendanceResponseSchema, MePermissionsResponseSchema, PerspectiveCodeSchema, MeInterfaceSchema, MePerspectiveGroupSchema, MeInterfacesResponseSchema, MePositionAssignmentSchema, MePositionsResponseSchema, MeSkillEvidenceSchema, MeSkillsResponseSchema, CreateMeSelfAssessmentBodySchema, MeSurveyListItemSchema, MeSurveysResponseSchema, MeSurveyQuestionSchema, MeSurveyAnswerSchema, MeSurveyDetailSchema, SubmitMeSurveyAnswerSchema, SubmitMeSurveyResponseBodySchema, SubmitMeSurveyResultSchema, MeSurveyIdParamSchema, MeLearningAssignmentSchema, MeLearningResponseSchema, CreateMeEnrollmentBodySchema, MeGapSchema, MeGapsResponseSchema, MeAssessmentSchema, MeAssessmentsResponseSchema, MeCareerTargetSchema, MeCareerResponseSchema, CreateMeCareerTargetBodySchema, MeGoalSchema, MeGoalsResponseSchema, MeFlightRiskSchema, MeSuccessionRowSchema, MeRiskResponseSchema, MeCareerPathStepSchema, MeCareerPathSchema, MeCareerPlanSchema, MeCareerPathsResponseSchema, MeAnalyticsMonthSchema, MeAnalyticsResponseSchema, MeApprovalRowSchema, MeApprovalsResponseSchema, MeInboxNotificationSchema, MeInboxResponseSchema, MeInboxQuerySchema, PatchMeInboxBodySchema, NotificationIdParamSchema, MeKpiTargetSchema, MeKpisResponseSchema, MeCertificationSchema, MeCertificationsResponseSchema, CreateMeCertificationBodySchema, MeDocumentSchema, MeDocumentsResponseSchema]
+    subpath_export: true
+    consumers_api: [me]
+    consumers_web: ["app/(authenticated)/me/_components/attendance-tab.tsx", "app/(authenticated)/me/_components/performance-tab.tsx", "app/(authenticated)/me/analytics/page.tsx", "app/(authenticated)/me/approvals/page.tsx", "app/(authenticated)/me/career/_components/goals-tab.tsx", "app/(authenticated)/me/career/_components/paths-tab.tsx", "app/(authenticated)/me/career/_components/risk-tab.tsx", "app/(authenticated)/me/profile/_components/contracts-tab.tsx", "app/(authenticated)/me/profile/_components/organization-tab.tsx", "app/(authenticated)/me/profile/_components/overview-tab.tsx", "app/(authenticated)/me/profile/_components/pay-slips-tab.tsx", "app/(authenticated)/me/profile/page.tsx", "app/(authenticated)/me/surveys/[surveyId]/page.tsx", "app/(authenticated)/me/surveys/page.tsx"]
+  me-preferences:
+    exports: [MeThemeSchema, MePaletteSchema, MeLocaleSchema, UserPreferenceSchema, UpdateUserPreferenceBodySchema]
+    subpath_export: true
+    consumers_api: [me]
+    consumers_web: ["app/(authenticated)/me/profile/page.tsx", components/preferences-applier.tsx, lib/api/auth.ts]
+  mentorship:
+    exports: [MentorshipProgramSchema, MentorshipProgramListQuerySchema, MentorshipProgramListResponseSchema, CreateMentorshipProgramBodySchema, UpdateMentorshipProgramBodySchema, MentorshipSchema, MentorshipListQuerySchema, MentorshipListResponseSchema, CreateMentorshipBodySchema, UpdateMentorshipBodySchema, MentorshipSessionSchema, MentorshipSessionListResponseSchema, CreateMentorshipSessionBodySchema, UpdateMentorshipSessionBodySchema, MentorMatchScoreSchema, MentorMatchScoreListQuerySchema, MentorMatchScoreListResponseSchema, MentorshipIdParamSchema]
+    subpath_export: true
+    consumers_api: [mentorship]
+    consumers_web: []
+  mfa:
+    exports: [MfaKindSchema, EnrollMfaBodySchema, EnrollMfaResponseSchema, VerifyMfaSetupBodySchema, EnrollConfirmRequiredSchema, ConfirmEnrollBodySchema, ConfirmEnrollResponseSchema, ResendEnrollConfirmBodySchema, ResendEnrollConfirmResponseSchema, VerifyMfaSetupResponseSchema, MfaFactorListItemSchema, ListMfaFactorsResponseSchema, MfaFactorIdParamSchema, MfaChallengeSchema, VerifyMfaLoginBodySchema, EnrollEmailOtpBodySchema, EnrollEmailOtpResponseSchema, VerifyEmailOtpSetupBodySchema, VerifyEmailOtpSetupResponseSchema, ResendEmailOtpBodySchema, ResendEmailOtpResponseSchema, PhoneE164Schema, EnrollSmsOtpBodySchema, EnrollSmsOtpResponseSchema, VerifySmsOtpSetupBodySchema, VerifySmsOtpSetupResponseSchema, ResendSmsOtpBodySchema, ResendSmsOtpResponseSchema, GenerateRecoveryCodesResponseSchema, RecoveryCodesCountResponseSchema, WebauthnRegistrationOptionsResponseSchema, WebauthnRegistrationVerifyBodySchema, WebauthnRegistrationVerifyResponseSchema, WebauthnAuthenticationOptionsBodySchema, WebauthnAuthenticationOptionsResponseSchema, WebauthnAuthenticationVerifyBodySchema, WebauthnAuthenticationVerifyResponseSchema]
+    subpath_export: true
+    consumers_api: [auth]
+    consumers_web: ["app/(authenticated)/me/security/page.tsx"]
+  mfa-policy:
+    exports: [MfaPolicySchema, ListMfaPoliciesResponseSchema, UpsertMfaPolicyParamsSchema, UpsertMfaPolicyBodySchema, UpsertMfaPolicyResponseSchema]
+    subpath_export: true
+    consumers_api: [mfa-policy]
+    consumers_web: ["app/(authenticated)/admin/mfa-policy/page.tsx"]
+  notifications:
+    exports: [NotificationTypeSchema, NotificationPrioritySchema, NotificationPreferenceSchema, NotificationPreferencesResponseSchema, UpdateNotificationPreferenceBodySchema, BroadcastNotificationBodySchema, BroadcastNotificationResponseSchema]
+    subpath_export: true
+    consumers_api: [me, notifications, src/lib/notifications/emit.ts]
+    consumers_web: []
+  observability:
+    exports: [ObservabilityPoolSchema, ObservabilityRbacSchema, ObservabilityTenantFleetEntrySchema, ObservabilityAuthIntegritySchema, ObservabilitySchemaCountsSchema, ObservabilityAuditEventSchema, ObservabilityRequestMetricsSchema, SystemHealthResponseSchema]
+    subpath_export: true
+    consumers_api: [observability]
+    consumers_web: [lib/api/observability.ts]
+  okrs:
+    exports: [OkrSchema, OkrListQuerySchema, OkrListResponseSchema, CreateOkrBodySchema, UpdateOkrBodySchema, OkrIdParamSchema, OkrKeyResultSchema, OkrKeyResultListResponseSchema]
+    subpath_export: true
+    consumers_api: [okrs]
+    consumers_web: []
+  operating-models:
+    exports: [OperatingModelSchema, OperatingModelListResponseSchema, UpsertOperatingModelBodySchema, OperatingModelIdParamSchema]
+    subpath_export: true
+    consumers_api: [operating-models]
+    consumers_web: []
+  organization-unit-kpi-templates:
+    exports: [OrganizationUnitKpiTemplateSchema, OrganizationUnitKpiTemplateListQuerySchema, OrganizationUnitKpiTemplateListResponseSchema, UpsertOrganizationUnitKpiTemplateBodySchema, OrganizationUnitKpiTemplateIdParamSchema]
+    subpath_export: true
+    consumers_api: [organization-unit-kpi-templates]
+    consumers_web: []
+  organization-unit-processes:
+    exports: [OrgUnitProcessSchema, OrgUnitProcessCreateSchema, OrgUnitProcessIdParamSchema, OrgUnitProcessByOuParamSchema, OrgUnitProcessByProcessParamSchema, OrgUnitProcessForOuSchema, OrgUnitProcessesForOuResponseSchema, OrgUnitProcessForProcessSchema, OrgUnitProcessesForProcessResponseSchema]
+    subpath_export: true
+    consumers_api: [organization-unit-processes]
+    consumers_web: ["app/(authenticated)/process-owner/page.tsx"]
+  organization-units:
+    exports: [OrganizationUnitSchema, OrganizationUnitListQuerySchema, OrganizationUnitListResponseSchema, CreateOrganizationUnitBodySchema, UpdateOrganizationUnitBodySchema, OrganizationUnitIdParamSchema]
+    subpath_export: true
+    consumers_api: [organization-units]
+    consumers_web: []
+  position-career-paths:
+    exports: [PositionCareerPathSchema, PositionCareerPathListQuerySchema, PositionCareerPathListResponseSchema, CreatePositionCareerPathBodySchema, PositionCareerPathIdParamSchema]
+    subpath_export: true
+    consumers_api: [position-career-paths]
+    consumers_web: []
+  position-succession-relevance:
+    exports: [ReadinessHorizonSchema, PositionSuccessionRelevanceSchema, PositionSuccessionRelevanceListQuerySchema, PositionSuccessionRelevanceListResponseSchema, UpsertPositionSuccessionRelevanceBodySchema, PositionSuccessionRelevanceIdParamSchema]
+    subpath_export: true
+    consumers_api: [position-succession-relevance]
+    consumers_web: []
+  positions:
+    exports: [PositionCriticalitySchema, SkillProficiencySchema, RequirementCriticalitySchema, PositionSchema, PositionListQuerySchema, PositionListResponseSchema, CreatePositionBodySchema, UpdatePositionBodySchema, PositionIdParamSchema, PositionIntelligenceProfileSchema, PositionSkillRequirementSchema, PositionSkillListResponseSchema, AddPositionSkillBodySchema, PositionSkillIdParamSchema, PositionKpiRequirementSchema, PositionKpiListResponseSchema, AddPositionKpiBodySchema, UpdatePositionKpiBodySchema, PositionKpiIdParamSchema]
+    subpath_export: true
+    consumers_api: [positions]
+    consumers_web: []
+  predictions:
+    exports: [PredictiveModelSchema, PredictiveModelListQuerySchema, PredictiveModelListResponseSchema, ModelPredictionSchema, ModelPredictionListQuerySchema, ModelPredictionListResponseSchema, PredictionIdParamSchema]
+    subpath_export: true
+    consumers_api: [predictions]
+    consumers_web: []
+  process-kpi-templates:
+    exports: [ProcessKpiTemplateSchema, ProcessKpiTemplateListQuerySchema, ProcessKpiTemplateListResponseSchema, UpsertProcessKpiTemplateBodySchema, ProcessKpiTemplateIdParamSchema]
+    subpath_export: true
+    consumers_api: [process-kpi-templates]
+    consumers_web: []
+  public-stats:
+    exports: [PlatformStatsResponseSchema]
+    subpath_export: true
+    consumers_api: [public-stats]
+    consumers_web: [app/investors/page.tsx, lib/api/public-stats.ts]
+  reference-sync:
+    exports: [ReferenceSyncRunSchema, ReferenceSyncRunListResponseSchema, ReferenceSyncWatermarkSchema, ReferenceSyncSourceSchema, ReferenceSyncSourceListResponseSchema, ReferenceSyncTriggerBodySchema, ReferenceSyncTriggerResponseSchema, ReferenceSyncRunIdParamSchema]
+    subpath_export: true
+    consumers_api: [reference-sync]
+    consumers_web: []
+  role-codes:
+    exports: [RoleCodeSchema]
+    subpath_export: true
+    consumers_api: [auth, src/config/constants.ts]
+    consumers_web: []
+  seed-acquisition-runs:
+    exports: [SeedAcquisitionRunStatusSchema, SeedAcquisitionRunSchema, SeedAcquisitionRunListQuerySchema, SeedAcquisitionRunListResponseSchema, CreateSeedAcquisitionRunBodySchema, UpdateSeedAcquisitionRunBodySchema, SeedAcquisitionRunIdParamSchema]
+    subpath_export: true
+    consumers_api: [seed-acquisition-runs]
+    consumers_web: []
+  seed-approval-decisions:
+    exports: [SeedApprovalStatusSchema, SeedApprovalDecisionSchema, SeedApprovalDecisionListQuerySchema, SeedApprovalDecisionListResponseSchema, CreateSeedApprovalDecisionBodySchema, SeedApprovalDecisionIdParamSchema]
+    subpath_export: true
+    consumers_api: [seed-approval-decisions]
+    consumers_web: []
+  seed-candidate-records:
+    exports: [SeedCandidateValidationStatusSchema, SeedCandidateRecordSchema, SeedCandidateRecordListQuerySchema, SeedCandidateRecordListResponseSchema, SeedCandidateRecordIdParamSchema]
+    subpath_export: true
+    consumers_api: [seed-candidate-records]
+    consumers_web: []
+  semantic-matching:
+    exports: [MatchQuerySchema, OccupationMatchSchema, OccupationMatchListResponseSchema, SkillMatchSchema, SkillMatchListResponseSchema, PositionMatchSchema, PositionMatchListResponseSchema, MatchUserIdParamSchema, MatchSkillIdParamSchema, JobRoleMatchSchema, JobRoleMatchListResponseSchema, SimilarUserMatchSchema, SimilarUserMatchListResponseSchema, FreeTextQuerySchema, FreeTextSearchResponseSchema, ReindexResponseSchema]
+    subpath_export: true
+    consumers_api: [semantic-matching]
+    consumers_web: ["app/(authenticated)/me/matching/page.tsx"]
+  skill-aliases:
+    exports: [SkillAliasSchema, SkillAliasListQuerySchema, SkillAliasListResponseSchema, CreateSkillAliasBodySchema, UpdateSkillAliasBodySchema, SkillAliasIdParamSchema]
+    subpath_export: true
+    consumers_api: [skill-aliases]
+    consumers_web: []
+  skill-categories:
+    exports: [SkillCategorySchema, SkillCategoryListQuerySchema, SkillCategoryListResponseSchema, CreateSkillCategoryBodySchema, UpdateSkillCategoryBodySchema, SkillCategoryIdParamSchema]
+    subpath_export: true
+    consumers_api: [skill-categories]
+    consumers_web: []
+  skill-families:
+    exports: [SkillFamilySchema, SkillFamilyListQuerySchema, SkillFamilyListResponseSchema, CreateSkillFamilyBodySchema, UpdateSkillFamilyBodySchema, SkillFamilyIdParamSchema]
+    subpath_export: true
+    consumers_api: [skill-families]
+    consumers_web: []
+  skill-proficiency-levels:
+    exports: [SkillProficiencyLevelCodeSchema, SkillProficiencyLevelSchema, SkillProficiencyLevelListResponseSchema]
+    subpath_export: true
+    consumers_api: [skill-proficiency-levels]
+    consumers_web: []
+  skill-taxonomy-edges:
+    exports: [SkillEdgeKindSchema, SkillTaxonomyEdgeSchema, SkillTaxonomyEdgeListQuerySchema, SkillTaxonomyEdgeListResponseSchema, CreateSkillTaxonomyEdgeBodySchema, SkillTaxonomyEdgeIdParamSchema]
+    subpath_export: true
+    consumers_api: [skill-taxonomy-edges]
+    consumers_web: []
+  skills:
+    exports: [SkillSchema, SkillListQuerySchema, SkillListResponseSchema, CreateSkillBodySchema, UpdateSkillBodySchema, SkillIdParamSchema]
+    subpath_export: true
+    consumers_api: [skills]
+    consumers_web: []
+  succession-pools:
+    exports: [SuccessionPoolStatusSchema, SuccessionPoolSchema, SuccessionPoolListQuerySchema, SuccessionPoolListResponseSchema, CreateSuccessionPoolBodySchema, UpdateSuccessionPoolBodySchema, SuccessionPoolIdParamSchema]
+    subpath_export: true
+    consumers_api: [succession-pools]
+    consumers_web: []
+  successor-candidates:
+    exports: [SuccessorCandidateStatusSchema, SuccessorCandidateSchema, SuccessorCandidateListQuerySchema, SuccessorCandidateListResponseSchema, SuccessorReadinessDistributionItemSchema, SuccessorReadinessDistributionResponseSchema, CreateSuccessorCandidateBodySchema, UpdateSuccessorCandidateBodySchema, SuccessorCandidateIdParamSchema]
+    subpath_export: true
+    consumers_api: [successor-candidates]
+    consumers_web: []
+  successor-readiness:
+    exports: [SuccessorReadinessSchema, SuccessorReadinessListQuerySchema, SuccessorReadinessListResponseSchema, CreateSuccessorReadinessBodySchema, SuccessorReadinessIdParamSchema]
+    subpath_export: true
+    consumers_api: [successor-readiness]
+    consumers_web: []
+  surveys:
+    exports: [SurveyTemplateSchema, SurveyTemplateListQuerySchema, SurveyTemplateListResponseSchema, CreateSurveyTemplateBodySchema, UpdateSurveyTemplateBodySchema, SurveySchema, SurveyListQuerySchema, SurveyListResponseSchema, CreateSurveyBodySchema, UpdateSurveyBodySchema, SurveyResponseSchema, SurveyResponseListQuerySchema, SurveyResponseListResponseSchema, SurveyIdParamSchema]
+    subpath_export: true
+    consumers_api: [surveys]
+    consumers_web: []
+  teams:
+    exports: [TeamMemberRoleSchema, TeamSchema, TeamMemberSchema, TeamDetailSchema, TeamListQuerySchema, TeamListResponseSchema, TeamIdParamSchema, MyTeamsResponseSchema]
+    subpath_export: true
+    consumers_api: [me, teams]
+    consumers_web: ["app/(authenticated)/me/team/page.tsx"]
+  tenant-materialization:
+    exports: [MaterializeRequestBodySchema, MaterializeResultSchema, ArchetypeSummarySchema, ArchetypeListResponseSchema]
+    subpath_export: true
+    consumers_api: [tenant-materialization]
+    consumers_web: []
+  tenants:
+    exports: [TenantStatusSchema, TenantSizeBandSchema, TenantSchema, CreateTenantBodySchema, UpdateTenantBodySchema, TenantListQuerySchema, TenantListResponseSchema, TenantIdParamSchema]
+    subpath_export: true
+    consumers_api: [tenants]
+    consumers_web: []
+  training-initiatives:
+    exports: [TrainingInitiativeStatusSchema, TrainingInitiativeSchema, TrainingInitiativeListQuerySchema, TrainingInitiativeListResponseSchema, CreateTrainingInitiativeBodySchema, UpdateTrainingInitiativeBodySchema, TrainingInitiativeIdParamSchema]
+    subpath_export: true
+    consumers_api: [training-initiatives]
+    consumers_web: []
+  user-career-plans:
+    exports: [UserCareerPlanStatusSchema, UserCareerPlanSchema, UserCareerPlanListQuerySchema, UserCareerPlanListResponseSchema, CreateUserCareerPlanBodySchema, UpdateUserCareerPlanBodySchema, UserCareerPlanIdParamSchema]
+    subpath_export: true
+    consumers_api: [user-career-plans]
+    consumers_web: []
+  users:
+    exports: [UserStatusSchema, UserTypeSchema, UserSchema, CreateUserBodySchema, UpdateUserBodySchema, UserListQuerySchema, UserListResponseSchema, UserIdParamSchema, RoleGrantSchema, RoleGrantListResponseSchema, GrantRoleBodySchema, GrantIdParamSchema]
+    subpath_export: true
+    consumers_api: [users]
+    consumers_web: ["app/(authenticated)/approvals/page.tsx"]
+  visualization-edges:
+    exports: [VizEdgeTypeSchema, VizEdgeSchema, VizEdgeListQuerySchema, VizEdgeListResponseSchema, CreateVizEdgeBodySchema, VizEdgeIdParamSchema]
+    subpath_export: true
+    consumers_api: [visualization-edges, visualization-graphs]
+    consumers_web: []
+  visualization-exports:
+    exports: [VizExportFormatSchema, VizExportSchema, VizExportListQuerySchema, VizExportListResponseSchema, CreateVizExportBodySchema, VizExportIdParamSchema]
+    subpath_export: true
+    consumers_api: [visualization-exports]
+    consumers_web: []
+  visualization-graphs:
+    exports: [VizGraphTypeSchema, VizGraphSchema, VizGraphListQuerySchema, VizGraphListResponseSchema, VizGraphTypeDistributionItemSchema, VizGraphSummaryResponseSchema, VizGraphRenderResponseSchema, CreateVizGraphBodySchema, UpdateVizGraphBodySchema, VizGraphIdParamSchema]
+    subpath_export: true
+    consumers_api: [visualization-edges, visualization-exports, visualization-graphs, visualization-layouts, visualization-node-layouts, visualization-nodes, visualization-styles]
+    consumers_web: []
+  visualization-layouts:
+    exports: [VizLayoutEngineSchema, VizLayoutSchema, VizLayoutListQuerySchema, VizLayoutListResponseSchema, CreateVizLayoutBodySchema, UpdateVizLayoutBodySchema, VizLayoutIdParamSchema]
+    subpath_export: true
+    consumers_api: [visualization-layouts]
+    consumers_web: []
+  visualization-node-layouts:
+    exports: [VizNodeLayoutSchema, VizNodeLayoutListQuerySchema, VizNodeLayoutListResponseSchema, UpsertVizNodeLayoutBodySchema, VizNodeLayoutIdParamSchema]
+    subpath_export: true
+    consumers_api: [visualization-node-layouts]
+    consumers_web: []
+  visualization-nodes:
+    exports: [VizNodeSourceEntityTypeSchema, VizNodeSchema, VizNodeListQuerySchema, VizNodeListResponseSchema, CreateVizNodeBodySchema, UpdateVizNodeBodySchema, VizNodeIdParamSchema]
+    subpath_export: true
+    consumers_api: [visualization-graphs, visualization-nodes]
+    consumers_web: []
+  visualization-styles:
+    exports: [VizStyleSchema, VizStyleListQuerySchema, VizStyleListResponseSchema, CreateVizStyleBodySchema, VizStyleIdParamSchema]
+    subpath_export: true
+    consumers_api: [visualization-styles]
+    consumers_web: []
+orphans:
+  - name: _pagination
+    non_app_usage: []
+    intra_shared_importers: 61
+export_mismatches:
+  files_without_subpath: []
+  subpaths_without_file: []
+counts: {schemas: 87, subpath_exports: 87, orphans: 1}

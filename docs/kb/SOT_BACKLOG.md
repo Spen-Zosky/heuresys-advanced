@@ -59,9 +59,9 @@
 
 ### Serie A+B (S1016 — selezione Enzo "procedi con B + A", dossier `docs/product/DEVELOPMENT_LINES_{A,B}_*.md`)
 
-- **#25 A/L5 — ponte posizione→learning (accende `positions/[id]/learning`)** · status: ACTIVE
+- **#25 A/L5 — ponte posizione→learning (accende `positions/[id]/learning`)** · status: DONE
   - priority: P1 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L5
-  - note: `position_learning_requirements` 1791 + `skill_learning_mappings` 635 → read API + pagina esistente oggi vuota (gap-DATI censito S1004). orgGate `catalog`.
+  - note: ✅ DONE S1016 (commit `e22dcdb7`) — `GET /v1/positions/:id/{learning-requirements,learning-modules}` (JOIN paths/modules/skills, pattern sub-resource, `position:read`); pagina a 3 sezioni (percorsi richiesti + copertura moduli + gap) con tipi shared + i18n IT/EN (parity 1745). Integration 5/5 (attese derivate live) + E2E position-sub 8/8 su dati reali. Gap-DATI S1004 chiuso. NB: le risorse position non sono nella tassonomia sensitive → nessun orgGate richiesto dal boot-gate D-51 (coerente coi sibling /skills /kpis; la nota "orgGate catalog" del dossier era prudenziale).
 - **#26 A/L1 — vita dei goal/OKR (updates, check-ins, milestones, comments, alignments)** · status: ACTIVE
   - priority: P1 · effort: ~6-10h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L1
   - note: ~4.8k righe; sub-risorse read + timeline in `/goals`, `/okrs`, `/me/career`. EVALUATION → orgGate; `goal:read:self` già seedato.

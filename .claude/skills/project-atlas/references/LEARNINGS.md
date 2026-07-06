@@ -33,3 +33,12 @@ Schema di ogni record:
 ```
 
 <!-- I record vengono appesi sotto questa riga -->
+- date: 2026-07-06
+  mode: acceptance (status+query+planner dry-run — collaudo Task 10 del piano di build)
+  layers: [api, web, db, ops, legacy_primary, legacy_cantiere, wiki, design_system]
+  agents: 0
+  est_tokens: ~0 (nessun sweep: solo probe + query atlas-first)
+  coverage: ok (status: api/web stale per commit e22dcdb7 post-curated — rilevazione corretta; ops fresco; famiglie 4/4 raggiungibili)
+  duration_min: 6
+  errors: []
+  adaptations: []

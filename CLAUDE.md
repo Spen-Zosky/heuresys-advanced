@@ -32,16 +32,16 @@ Historical records live in `docs/archive/` and are **not** SoT. When state chang
 
 ## Session start (do this first, every session)
 
-After the infra hooks (tunnel/db/branch), **before** asking what to do or starting work, build the **action menu** from all live sources so the user picks from a complete list — never from memory:
+After the infra hooks (tunnel/db/branch), **before** asking what to do or starting work, build the **action menu** from all live sources so the user picks from a complete list — never from memory. Do it with ONE command, in ONE model round — this replaces the old two-script, N-round boot that was the dominant cost of a slow "avvia sessione" (forensics: `docs/kb/SESSION_START_FORENSICS.md`):
 
-1. **Read** the action sources: `.handoff/STATE.md` (priorities + open questions), `docs/kb/SOT_BACKLOG.md` (items NOT `✅ DONE`/`✅ FATTO`/`⚪ WON'T-DO`), `docs/kb/DEBT_REGISTER.md` (debts NOT `RISOLTO`), `docs/kb/SOT_STATE.md` §"Prossimo"/roadmap + gated.
-2. **Aggregate** into ONE **priority-tiered** menu — **P1** high-impact/unblocking · **P2** quality/debt · **P3** roadmap/gated. Each row: `# · short title · [source] · gating (⛔ reason if blocked) · effort (~Xh)`. Derive priority from the existing markers (DEBT 🔴→P1 / 🟡→P2 / 🟢→P3; backlog P1-P3 sections; STATE top-priorities) plus judgment on impact/unblocking. **If `docs/kb/tools/build_menu.py` exists, run it first** (`python docs/kb/tools/build_menu.py`): it generates the register-driven menu (ACTIVE tiers + GATED + WAIT-INPUT tray + HOLD count + INTERRUPTED top, with P3 trigger-eval flagging unblockable parked items + P9 age) from the canonical Action register — present its output and ADD the debt (not-`RISOLTO`) + SOT roadmap/gated items it doesn't yet cover (P2, design §11.2).
+1. **Run `python docs/kb/tools/session_start.py`** (pass `--no-db` if the tunnel is down). One process that prints the register-driven action menu (`build_menu`) **plus** the live health dashboard (`status_dashboard`), which **at boot runs offline-fast** (`--no-net`): the git-fetch / CI / PROD probes are monitoring data, not inputs to the menu, and the boot hook already established tunnel + DB + branch/dirty/unpushed. **Do NOT read `SOT_BACKLOG.md` / `SOT_STATE.md` / `DEBT_REGISTER.md` raw at boot** (156KB + 206KB + 65KB — mostly historical archive the script already distills into menu + debts + decisions + drift). Open a source raw **only in drill-down, for the item the user chooses**. You may read the small `.handoff/STATE.md` (~3KB — priorities + open-questions prose) if you want the narrative.
+2. **Aggregate**: the menu is generated exhaustively from the canonical Action register (ACTIVE tiers + GATED + WAIT-INPUT tray + HOLD count + INTERRUPTED top, with P3 trigger-eval flagging unblockable parked items + P9 age — design §11.2). Present it and **ADD only what the register doesn't yet cover**: debts not-`RISOLTO` (already in the dashboard's debt section) + SOT roadmap/gated items — with judgment on impact/unblocking (**P1** high-impact/unblocking · **P2** quality/debt · **P3** roadmap/gated).
 3. **Exclude** definitively-concluded work (`DONE`/`FATTO`/`RISOLTO`/`WON'T-DO` + shipped MVPs). **Keep** `GATED` items (`⛔`-marked with the blocker — visible but clearly not ready) and `WAIT-INPUT` items in a dedicated "aspetta un tuo input" tray. **Exclude `HOLD` items from the menu body** — show them only as a one-line count summary ("⏸ N azioni in HOLD — scrivi *mostra hold*"); they enter the menu only on the user's explicit request or when their `reactivation-trigger` fires. Put any `INTERRUPTED` item at the **top** (work in flight to resume).
 4. **Present** the menu, then: *"Scegli #, aggrega (es. 1+4), o nuovo."* The user may aggregate several items into one session.
 
 Do NOT start work before presenting this menu and getting the user's choice — UNLESS the user's first message already names a specific task. Rationale + the writing side (handoff): `docs/superpowers/specs/2026-06-05-sot-unification-design.md` §12.
 
-**Live health at a glance** (complements the menu): after the boot hook, `python docs/kb/tools/status_dashboard.py` (alias `pnpm status`) re-derives the real state from the live sources — git sync, last CI conclusion per workflow, PROD `/login`+`/api/readyz`, DB migrations/integrity/counts, a **staleness self-check** (live numbers vs `SOT_STATE.md` §0 → flags drift), backlog lanes, open debts, and the decisions waiting on Enzo. It never trusts a cached number; tunnel/offline degrade to `[? ]`, never to a stale guess. Born S1007 to end "sono al buio".
+**Full live health on demand** (NOT at boot — it costs ~5s of network + a tail-risk timeout): `python docs/kb/tools/status_dashboard.py` (alias `pnpm status`), or `session_start.py --net`, adds the network probes on top of the boot view — git sync vs origin, last CI conclusion per workflow, PROD `/login`+`/api/readyz`. The DB migrations/integrity/counts, **staleness self-check** (live vs `SOT_STATE.md` §0 → flags drift), backlog lanes, open debts and decisions-waiting-on-Enzo are already in the boot view. It never trusts a cached number; tunnel/offline degrade to `[? ]`, never to a stale guess. Born S1007 to end "sono al buio"; the two scripts were consolidated into `session_start.py` at the 2026-07-07 session-start forensics.
 
 ## Canonical commands
 
@@ -68,7 +68,8 @@ All run from repo root unless noted. Use the project's pnpm package manager (pin
 | Seed test admin/personas | `pnpm db:seed-test-admin` |
 | i18n parity check (web) | `pnpm i18n:check` |
 | Typecheck test files separately | `cd apps/api && pnpm typecheck:test` (uses `tsconfig.test.json`) |
-| Status dashboard (live health) | `python docs/kb/tools/status_dashboard.py` (or `pnpm status`) — re-derives git/CI/PROD/DB/backlog/debts/drift live; flags `--no-db` `--no-net` `--md` `--strict` |
+| **Session start (menu + health, ONE round)** | `python docs/kb/tools/session_start.py` — register-driven action menu **+** offline-fast health in one process; `--no-db` (tunnel down), `--show-hold`, `--net` (add CI/PROD/git-fetch probes). This is the canonical boot command |
+| Status dashboard (FULL live health, on demand) | `python docs/kb/tools/status_dashboard.py` (or `pnpm status`) — re-derives git/CI/PROD/DB/backlog/debts/drift live; flags `--no-db` `--no-net` `--md` `--strict`. NOT run at boot (network cost) — the boot view (`session_start.py`) already carries DB/backlog/debts/drift |
 
 PowerShell scripts are the Windows canonical; `.sh` siblings exist for bash/SSH-to-VM use. Every `db/scripts/*.{ps1,sh}` is idempotent and safe to re-run.
 
@@ -117,40 +118,13 @@ heuresys-advanced/
 
 ## Design System — `@heuresys/ui` (npm-published, post-migrazione X18)
 
-All reusable UI/UX components live in **`@heuresys/ui`**, una libreria condivisa derivata da `ux-design-shared` (originariamente extracted from `heuresys-evo`). Dal 2026-05 (migrazione X18) la lib è **pubblicata come pacchetto npm versionato**, non più consumata via `link:` symlink locale. La dep è risolta da pnpm contro il registry e installata in `node_modules/@heuresys/ui` come dipendenza normale (pnpm crea un symlink interno alla cache `.pnpm/`, ma è meccanica pnpm — non un live-link a una working copy).
+Reusable UI/UX components live in **`@heuresys/ui`** — an npm-published versioned lib derived from `ux-design-shared` (ex-`heuresys-evo`), consumed as a normal dep (not `link:`) since migration X18 (2026-05). Import: `import { Button, Card, DataTable } from "@heuresys/ui"`. UI runtime deps (Radix, Tailwind 4, framer-motion, d3, echarts, three.js, …) are declared inside the lib and arrive as transitive deps. **Full setup (Tailwind `content` path, `transpilePackages`), the modify-a-component workflow (Storybook → npm release → bump here), maintenance and the X18 migration history → `docs/kb/DESIGN_SYSTEM_UI.md`.**
 
-**Stato attuale verificato (HEAD `ad7d5c0`, S932)**:
-- Dep in `package.json` (root e `apps/showcase/package.json`): `"@heuresys/ui": "^0.1.1"`. **NON è più `link:../ux-design-shared/ui`.**
-- `node_modules/@heuresys/ui` è un symlink pnpm verso `node_modules/.pnpm/@heuresys+ui@<ver>/node_modules/@heuresys/ui` — è la normale risoluzione pnpm, immutabile a runtime.
-- Le UI runtime deps (Radix, Tailwind 4, framer-motion, d3, echarts, three.js, ecc.) sono dichiarate dentro `@heuresys/ui` e tirate dentro come transitive deps quando si fa `pnpm install`. Questo repo non le installa direttamente.
-- Import standard invariato: `import { Button, Card, DataTable } from "@heuresys/ui"`.
-- Tailwind 4 in `apps/web` / `apps/showcase`: `tailwind.config` deve includere `"./node_modules/@heuresys/ui/dist/**/*.{js,mjs}"` (o equivalente path al build output della lib) nel `content` array per raccogliere le utility classes usate dai componenti pubblicati.
-- Next.js in `apps/web` / `apps/showcase`: `transpilePackages: ["@heuresys/ui"]` in `next.config.js` se la lib espone ESM/TSX non pre-transpilato; verificare il `package.json` di `@heuresys/ui@0.1.1` per il vero `exports` map.
-
-**Workflow per modificare componenti UI (post-X18)**:
-- Le modifiche al codice di `@heuresys/ui` **NON sono live** in questo repo: bisogna versionare, pubblicare una nuova versione della lib, poi bumpare la dep qui (`pnpm update @heuresys/ui` o cambiando `^0.1.1` → versione target) e rifare `pnpm install`.
-- Per dev rapido di un componente nuovo o modifica esistente, il flusso consigliato è: lavorare nel repo `ux-design-shared` con Storybook (`npm run storybook` → `http://localhost:6006`), validare, tagliare release npm, poi consumare qui.
-- In emergenza (debug rapido di un componente già in prod) è possibile temporaneamente reintrodurre `link:` o `pnpm.overrides` puntando a una working copy locale, MA è un detour — va ripristinato a versione npm prima del commit.
-
-**Rules** (non-negotiable, invariati nello spirito):
+**Rules** (non-negotiable):
 - **NEVER** create reusable UI components in `apps/web`, `apps/showcase` o `packages/*` di questo repo. Vanno nel repo `ux-design-shared` (sorgente di `@heuresys/ui`).
 - **NEVER** aggiungere UI runtime deps (Radix, framer-motion, recharts, ecc.) ai `package.json` di questo repo. Appartengono a `@heuresys/ui` e arrivano come transitive deps.
 - Se un componente è genuinamente heuresys-advanced-specific (es. tenant-aware widget che usa schemi Zod da `@heuresys/shared`), vive in `apps/web/src/components/` o `apps/showcase/src/components/` — e anche in quel caso, prefer composing primitives di `@heuresys/ui` invece di reimplementarle.
 - React peer: `@heuresys/ui` dichiara React via `peerDependencies`; `apps/web` / `apps/showcase` installano la versione concreta di React (oggi 19.2.5). Evita il crash "due React istanze".
-
-**Maintenance / evolution**:
-- Bump versione: `pnpm update @heuresys/ui` (segue il range `^0.1.1`) oppure pinning esplicito a una versione specifica nel `package.json`.
-- Aggiungere un nuovo componente o nuova dep: lavoro nel repo `ux-design-shared` → release npm → bump qui.
-- Storybook: `cd D:\ux-design-shared && npm run storybook` → `http://localhost:6006` (51 componenti, 16 tier — count storico, verificare allo state corrente del repo).
-- Re-validation post-`pnpm install`: il check storico `readlink -f node_modules/@heuresys/ui → /d/ux-design-shared/ui` è **obsoleto** (era valido pre-X18). Oggi `readlink -f node_modules/@heuresys/ui` ritorna un path dentro `node_modules/.pnpm/@heuresys+ui@<ver>/node_modules/@heuresys/ui` — è il pattern pnpm standard.
-
-**Apps che consumano `@heuresys/ui`** (allo stato corrente):
-- `apps/web` — admin SPA + ESS portal (Next.js 15, codebase MVP-2a/2b in costruzione).
-- `apps/showcase` — Heuresys brand identity v1, static site GitHub Pages (Next.js 15 static export). Aggiunto post-CLAUDE.md originale.
-
-**Note migrazione X18** (storico, leggibile dai commit):
-- Prima della migrazione X18 (2026-05), `@heuresys/ui` era consumato via `link:../ux-design-shared/ui` (live symlink). La sezione precedente di questo file descriveva quella configurazione.
-- Il switch a npm-published è stato fatto per (i) eliminare la dipendenza dalla working copy locale per dev su altre macchine (Mac/VM), (ii) garantire reproducibilità (lockfile pinning), (iii) supportare deploy CI/CD senza accesso al filesystem dello sviluppatore.
 
 ### apps/api — the heart of MVP-1
 
@@ -244,26 +218,19 @@ Numbered SQL files in `db/migrations/000001_*.sql..` (the `000035` gap is cosmet
 
 ## Autonomia operativa cross-tool (R23 globale — project enforcement)
 
-Vale la regola **R23** della SoT cross-tool (`C:\Users\enzospenuso\.claude\CLAUDE.md`): zero delega evitabile + proactive tool loading + self-diagnose fallback + no user-executable instructions when autonomously executable + evidence non suggerimento. Specifiche project-level che si applicano sopra R23 in heuresys-advanced:
-
-- **Tool primari per task tipici di questo repo**: edits codice/test/migration → preferire Filesystem MCP o Desktop Commander `edit_block` (real disk) per file >900B, con Windows-MCP PowerShell come fallback. Bash sandbox solo per logica/calcolo non-stateful (parsing, format, regex). Git operations → sempre via Windows-MCP PowerShell (`.git/index.lock` può non rimuoversi dal sandbox mount).
-- **Push autorizzazione**: la regola storica "never `git push` without explicit ask" resta valida come default ma **una volta che l'utente ha autorizzato push autonomi in una sessione (esplicitamente, es. via /authorize o approvazione esplicita), l'autorizzazione vale per quella sessione fino a sua revoca**. La nuova sessione riparte da default "ask". Esempio: S933 ha autorizzato push autonomi → S934 + S935 + S936 hanno ereditato → la prossima nuova sessione richiederà nuova autorizzazione.
-- **CI workflow + self-hosted runner**: post-S935 F, i 6 workflow GitHub Actions girano su OCI VM runner. Il commit autonomo include automatica esecuzione CI se il path tocca file rilevanti (vedi `.github/workflows/*.yml` paths-ignore). Claude può consultare lo stato CI via `gh run list` + `gh run watch` come parte di evidenza (R23/e). Una CI rossa è un errore Claude DEVE correggere (R3 cross-project), non scaricare all'utente.
-- **Live re-run + DB queries**: per task che richiedono SSH tunnel 5433 attivo, Claude prima verifica `Test-NetConnection localhost -Port 5433`; se down, tenta start tunnel via SSH agent loaded; se passphrase prompt → fallback documentato (vedi `qa_artifacts/s936_outcome_summary.md` §5 workaround SSH automation). Non chiedere all'utente di "aprire un terminale per il tunnel" se ssh-agent persistent setup è già documentato come task open.
-- **Test verification level**: vitest test files con mocked pool (es. `upsert-sql-cw-b60-a-silent-skip.test.ts`) sono sufficienti come unit verification per R3 closure di un fix observability. Live DB validation è "belt-and-suspenders" non-blocking quando il fix è già unit-tested verde.
+Global rule **R23** (`~/.claude/CLAUDE.md`) applies: zero avoidable delegation + proactive tool loading + self-diagnose fallback + no user-executable instructions when autonomously executable + evidence-not-suggestion. **Project-level specifics — preferred tools per task, self-hosted CI runner, tunnel handling, test-verification level → `docs/kb/AUTONOMY_R23_PROJECT.md`.** Two rules to keep top-of-mind:
+- **Push authorization is session-scoped**: the historical "never `git push` without explicit ask" is the default; once you authorize autonomous push in a session it holds until revoked, and a **new session resets to "ask"**.
+- **A red CI is an error Claude MUST fix** (R3), never hand back to the user — consult `gh run list`/`gh run watch` as evidence (R23/e).
 
 Cross-reference: R6 (global no-delega base), R22 (CLASSE A/B decision), R23 (autonomy comprehensive), R3 (correggere ogni errore), R12 (git safety cross-project).
 
 ## MVP-2a / MVP-2b frontend — LIVE DATA E2E ONLY (non-negotiable)
 
-When the next session opens MVP-2a (admin web SPA) and MVP-2b frontend (13 ESS pages), the **canonical entry point** is `NEXT_SESSION_MVP_2A.md` at the repo root. Read that file in full before any code action — it contains the doctrine, the audit-first / TDD ordering, the page-by-page loop, and the literal session prompt.
+MVP-2a (admin web SPA) + MVP-2b (13 ESS pages) are **shipped**, but the binding doctrine survives for **any new frontend work** and is enforced here so future sessions inherit it:
 
-**Non-negotiable rules** locked in by that doctrine (also enforced here so future sessions inherit them):
+- **No mock data / demo fixtures / placeholder hard-codes / stubbed endpoints / static-JSON Next.js routes / hard-coded TanStack `initialData`/`placeholderData`.** Every cell, chart, table, form is fed by a real `/v1/*` call hitting the OCI VM PostgreSQL via the live pool; the only "empty data" allowed is a real empty-state UI when the live API returns an empty list.
+- **API-first ordering** — never build UI before the endpoint exists, is typed in `@heuresys/shared`, and is covered by a green integration test in `apps/api/test/`. If a page needs a missing endpoint, open a mini API milestone and ship the endpoint + tests first (atomic commit).
+- **Complete wiring before "done"**: shared Zod schema → API repository/service/route → integration test → frontend types from `@heuresys/shared` → TanStack Query hook → component composed from `@heuresys/ui` primitives → **Playwright E2E green** (real login — e.g. `admin@heuresys.com` with the `TEST_ADMIN_PASSWORD` env password, or a seeded persona — navigate + assert on seeded data; mutations verify via re-fetch). Any missing layer = not done.
+- **Correction + retest is mandatory**: any regression in TypeScript, vitest, Playwright, or i18n parity blocks the merge — no "TODO: fix later" in production code. **No UI primitive duplication** (primitives come from `@heuresys/ui`; page-specific composition in `apps/web/src/components/` only as composition + tenant/RBAC wrappers from `@heuresys/shared`).
 
-- **No mock data, no demo fixtures, no placeholder hard-codes** in any page. Every cell, chart, table, form is fed by a real `/v1/*` call hitting the OCI VM PostgreSQL via the live pool. The only "empty data" allowed is a real empty-state UI when the live API returns an empty list.
-- **No stubbed endpoints, no Next.js routes that return static JSON, no TanStack Query with hard-coded `initialData`/`placeholderData`.**
-- **No page commit without a Playwright E2E test green** that performs a real login (`admin@heuresys.com` with the `TEST_ADMIN_PASSWORD` env password, or the appropriate seeded persona), navigates, and asserts on data that came from the seed (the rebuilt RTL_BANK reference tenant + the 5 real seeded personas — see Security model). Mutations must call the real endpoint and verify state via re-fetch.
-- **API-first ordering** — never build UI before the endpoint exists, is typed in `@heuresys/shared`, and is covered by a green integration test in `apps/api/test/`. If a page needs an endpoint that doesn't exist, open a mini API milestone (e.g. `5.1.24 — dashboard aggregators`) and ship the endpoint + tests first, atomic commit.
-- **Complete wiring at every level before a page is "done"**: shared Zod schema → API repository/service/route → integration test → frontend types reused from `@heuresys/shared` → TanStack Query hook → component composed from `@heuresys/ui` primitives → Playwright E2E green. If any layer is missing, the page is not done.
-- **Correction + retest cycle is mandatory**: any regression in TypeScript, vitest API suite, Playwright, or i18n parity blocks the merge of the current page. No "TODO: fix later" comments shipped to production code.
-- **No UI primitive duplication** — every reusable component lives nel repo sorgente `ux-design-shared` ed è consumato via `@heuresys/ui` npm-published (post-X18, vedi sezione Design System). Page-specific composition stays in `apps/web/src/components/` but only as composition of `@heuresys/ui` primitives plus tenant/RBAC-aware wrappers from `@heuresys/shared`.
+Full doctrine (audit-first / TDD ordering, page-by-page loop, literal session prompt): **`docs/archive/NEXT_SESSION_MVP_2A.md`** (archived — the MVPs shipped).

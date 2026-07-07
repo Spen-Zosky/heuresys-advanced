@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-06T17:20:39Z da docs/kb/tools/build_index.py
+# generato: 2026-07-07T16:26:40Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-06T17:20:39Z"
-  total_files: 2308
+  generated_at: "2026-07-07T16:26:40Z"
+  total_files: 2339
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -22,7 +22,7 @@ meta:
     db-other: 1
     db-script: 26
     db-seed: 107
-    doc-canonical: 432
+    doc-canonical: 463
     handoff-state: 1
     qa-artifact: 101
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 493
     external-archive: 50
-    live: 1765
+    live: 1796
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -7514,6 +7514,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\AUTONOMY_R23_PROJECT.md'
+    root: repo
+    rel: 'docs/kb/AUTONOMY_R23_PROJECT.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\B50_DEFER_UNBLOCK_PACKAGE.md'
     root: repo
     rel: 'docs/kb/B50_DEFER_UNBLOCK_PACKAGE.md'
@@ -7556,6 +7562,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\DESIGN_SYSTEM_UI.md'
+    root: repo
+    rel: 'docs/kb/DESIGN_SYSTEM_UI.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\DUMP_ARCHIVAL_RUNBOOK.md'
     root: repo
     rel: 'docs/kb/DUMP_ARCHIVAL_RUNBOOK.md'
@@ -7595,6 +7607,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\SDBI_PHASE2_CLOSURE.md'
     root: repo
     rel: 'docs/kb/SDBI_PHASE2_CLOSURE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\SESSION_START_FORENSICS.md'
+    root: repo
+    rel: 'docs/kb/SESSION_START_FORENSICS.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -8081,6 +8099,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\reconstruct_linked_manifest.py'
     root: repo
     rel: 'docs/kb/tools/reconstruct_linked_manifest.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\session_start.py'
+    root: repo
+    rel: 'docs/kb/tools/session_start.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -9341,6 +9365,168 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-06-project-atlas-skill-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-07-06-project-atlas-skill-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\03-localai.md'
+    root: repo
+    rel: 'docs/wargames/03-localai.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md'
+    root: repo
+    rel: 'docs/wargames/11-heuresys-evidence.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md'
+    root: repo
+    rel: 'docs/wargames/12-heuresys-goals-okr.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\13-heuresys-f4-activity.md'
+    root: repo
+    rel: 'docs/wargames/13-heuresys-f4-activity.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\14-heuresys-provenance.md'
+    root: repo
+    rel: 'docs/wargames/14-heuresys-provenance.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\15-heuresys-pricing.md'
+    root: repo
+    rel: 'docs/wargames/15-heuresys-pricing.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\16-heuresys-approval-effects.md'
+    root: repo
+    rel: 'docs/wargames/16-heuresys-approval-effects.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\17-heuresys-wave3.md'
+    root: repo
+    rel: 'docs/wargames/17-heuresys-wave3.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\LEDGER.md'
+    root: repo
+    rel: 'docs/wargames/LEDGER.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\README.md'
+    root: repo
+    rel: 'docs/wargames/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\SUCCESS.md'
+    root: repo
+    rel: 'docs/wargames/SUCCESS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\reviews\REVIEW-03.md'
+    root: repo
+    rel: 'docs/wargames/reviews/REVIEW-03.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\reviews\REVIEW-11.md'
+    root: repo
+    rel: 'docs/wargames/reviews/REVIEW-11.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\reviews\REVIEW-12.md'
+    root: repo
+    rel: 'docs/wargames/reviews/REVIEW-12.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\reviews\REVIEW-13.md'
+    root: repo
+    rel: 'docs/wargames/reviews/REVIEW-13.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\reviews\REVIEW-14.md'
+    root: repo
+    rel: 'docs/wargames/reviews/REVIEW-14.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\reviews\REVIEW-15.md'
+    root: repo
+    rel: 'docs/wargames/reviews/REVIEW-15.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\reviews\REVIEW-16.md'
+    root: repo
+    rel: 'docs/wargames/reviews/REVIEW-16.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\reviews\REVIEW-17.md'
+    root: repo
+    rel: 'docs/wargames/reviews/REVIEW-17.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\tasks\03-localai.md'
+    root: repo
+    rel: 'docs/wargames/tasks/03-localai.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\tasks\11-heuresys-evidence.md'
+    root: repo
+    rel: 'docs/wargames/tasks/11-heuresys-evidence.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\tasks\12-heuresys-goals-okr.md'
+    root: repo
+    rel: 'docs/wargames/tasks/12-heuresys-goals-okr.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\tasks\13-heuresys-f4-activity.md'
+    root: repo
+    rel: 'docs/wargames/tasks/13-heuresys-f4-activity.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\tasks\14-heuresys-provenance.md'
+    root: repo
+    rel: 'docs/wargames/tasks/14-heuresys-provenance.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\tasks\15-heuresys-pricing.md'
+    root: repo
+    rel: 'docs/wargames/tasks/15-heuresys-pricing.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\tasks\16-heuresys-approval-effects.md'
+    root: repo
+    rel: 'docs/wargames/tasks/16-heuresys-approval-effects.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\wargames\tasks\17-heuresys-wave3.md'
+    root: repo
+    rel: 'docs/wargames/tasks/17-heuresys-wave3.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

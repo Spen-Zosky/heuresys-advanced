@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-06T17:20:39Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2308**
+**Generato**: 2026-07-07T16:26:40Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2339**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -22,7 +22,7 @@
 | db-other | 1 |
 | db-script | 26 |
 | db-seed | 107 |
-| doc-canonical | 432 |
+| doc-canonical | 463 |
 | handoff-state | 1 |
 | qa-artifact | 101 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 263 |
 | ux-design-archive | 80 |
 | web-source | 189 |
-| **TOTALE** | **2308** |
+| **TOTALE** | **2339** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 493 |
 | external-archive | 50 |
-| live | 1765 |
+| live | 1796 |
 
 ## File per categoria
 
@@ -1336,6 +1336,7 @@
 - `D:\heuresys-advanced\docs\integrations\tenant_onboarding_esco_02_dbms_population_todo_2026-06-15.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\integrations\tenant_onboarding_esco_03_esco_population_spec_2026-06-15.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\integrations\tenant_onboarding_esco_04_tenant_onboarding_spec_2026-06-15.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\AUTONOMY_R23_PROJECT.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\B50_DEFER_UNBLOCK_PACKAGE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\COWORK_ARCHIVE_NOTE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\COWORK_INBOX.md` · *live* · git-tracked
@@ -1343,6 +1344,7 @@
 - `D:\heuresys-advanced\docs\kb\D6_SDBI_OPTION_B_DESIGN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\DATA_RECONCILIATION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\DEBT_REGISTER.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\DESIGN_SYSTEM_UI.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\DUMP_ARCHIVAL_RUNBOOK.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\INDEX_PATHS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\POST_V1_ROADMAP_DOSSIER.md` · *live* · git-tracked
@@ -1350,6 +1352,7 @@
 - `D:\heuresys-advanced\docs\kb\RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\RTL_STABILIZATION_PLAN.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\SDBI_PHASE2_CLOSURE.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\SESSION_START_FORENSICS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\SOT_BACKLOG.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\SOT_STATE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\VISUALIZATION_RENDERERS_CLOSURE.md` · *live* · git-tracked
@@ -1431,6 +1434,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-merge` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\install-hooks.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\reconstruct_linked_manifest.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\session_start.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\status_dashboard.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\sync.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\sync.sh` · *live* · git-tracked
@@ -1641,6 +1645,33 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-30-two-axis-authorization-model-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-01-f3-sensitive-modules-map.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-06-project-atlas-skill-design.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\13-heuresys-f4-activity.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\14-heuresys-provenance.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\15-heuresys-pricing.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\16-heuresys-approval-effects.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\17-heuresys-wave3.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\LEDGER.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\SUCCESS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\reviews\REVIEW-03.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\reviews\REVIEW-11.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\reviews\REVIEW-12.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\reviews\REVIEW-13.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\reviews\REVIEW-14.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\reviews\REVIEW-15.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\reviews\REVIEW-16.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\reviews\REVIEW-17.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\tasks\03-localai.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\tasks\11-heuresys-evidence.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\tasks\12-heuresys-goals-okr.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\tasks\13-heuresys-f4-activity.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\tasks\14-heuresys-provenance.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\tasks\15-heuresys-pricing.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\tasks\16-heuresys-approval-effects.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\wargames\tasks\17-heuresys-wave3.md` · *live* · git-tracked
 - `D:\heuresys-advanced\heuresys-advanced-bootstrap-vm.md` · *live* · git-tracked
 
 ### handoff-state

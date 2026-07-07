@@ -69,12 +69,13 @@ run-record) PRIMA di qualsiasi modo diverso da query.
 ## Protocollo self-learning (fine refresh/dossier)
 1. APPENDI il run-record a `references/LEARNINGS.md` (schema nel file).
 2. Se un pattern si e' ripetuto ≥2 volte: aggiungi la Lezione in prosa.
-3. Adattamenti parametri (chunk size, promozione modello per famiglia — regole in model-map.md §2):
+3. Adattamenti parametri (chunk size, promozione modello per famiglia — regole in model-map.md §Regole 2-4):
    scrivili in `atlas.config.yaml → adaptive` col perche' nel run-record. MAI toccare i template
    (quelli cambiano solo per mano umana o proposta esplicita a Enzo, R15).
 
 ## Degradazione ed errori
 - Tunnel/host giu' → `[non verificato: X]` e si prosegue sul resto.
-- Spend-limit a meta' sweep → salva frammenti fatti + scrivi pending-file + item GATED nel register.
+- Spend-limit a meta' sweep → salva frammenti fatti + scrivi il pending-file docs/kb/atlas/PENDING_TOPUP.md (layer/chunk mancanti + istruzioni di ripresa) + item GATED nel register.
 - Frammento mancante → coverage check fail-loud (planner §3), 1 retry mirato, poi riporta.
 - Known issues gia' catalogati in LEARNINGS: consultali PRIMA di ri-diagnosticare.
+- File ops SEMPRE con i tool nativi (Read/Write/Edit/Bash): MAI Windows-MCP/chrome-tools in questo flusso.

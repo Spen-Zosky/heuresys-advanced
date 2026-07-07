@@ -18,7 +18,7 @@
 - §6 Prossimo passo (selezione Enzo → register).
 
 ## Conversione in Action register (dopo selezione di Enzo)
-Formato blocco (canonico, verificato da handoff_lint S2/H1):
+Formato blocco (canonico: vocabolario/campi verificati da handoff_lint S2/H1; la forma a due bullet dei GATED segue i blocchi live #39/#40):
 
 ```
 - **#<id> <serie>/<linea> — <titolo>** · status: ACTIVE|GATED

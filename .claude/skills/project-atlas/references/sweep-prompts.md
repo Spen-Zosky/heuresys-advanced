@@ -135,7 +135,7 @@ TASK: inventario operativo. Target: {{TARGETS}}.
 2. {{REPO}}/.github/workflows/: nome, trigger (on:), jobs principali, runner (self-hosted VM?).
 3. {{REPO}}/db/scripts/: nome + scopo in una riga (dai commenti header).
 4. {{REPO}}/deploy/README.md: sezioni principali (solo indice + 1 riga ciascuna).
-5. Unita' systemd note sulla VM: riporta la lista gia' verificata nel manifest/probe del planner, integrala se deploy/ contiene unit file. Se {{REPO}}/deploy/ contiene i file .service/.timer, elenca i timer e le cadenze.
+5. Unita' systemd: se {{REPO}}/deploy/ contiene i file .service/.timer, elenca i timer e le cadenze.
 
 Scrivi {{FRAGMENT_PATH}} con sezioni: scripts, workflows, db_scripts, deploy_docs, systemd.
 counts: {scripts: N, workflows: N, db_scripts: N}.

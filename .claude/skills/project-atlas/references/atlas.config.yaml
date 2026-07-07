@@ -1,7 +1,7 @@
 # atlas.config.yaml — manifest della skill project-atlas (heuresys-advanced)
 # DEFAULT = verita' di progetto, modificabili solo a mano.
 # `adaptive:` = override auto-appresi dal self-learning (reversibili: azzera la sezione per tornare ai default).
-# Path SEMPRE relativi alla repo root; nessun path assoluto (feedback_no_absolute_paths).
+# Path repo-relativi (feedback_no_absolute_paths); le probe per-host delle famiglie statiche sono l'eccezione documentata (skip+warn se assenti).
 
 project: heuresys-advanced
 
@@ -28,7 +28,7 @@ layers:
   db:
     globs: ["db/migrations/**", "db/seeds/**"]
     derive: "psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc \"SELECT count(*) FROM pg_stat_user_tables\""
-    staleness_probe: "ls db/migrations/*.sql | wc -l   # confronta col count nell'ultimo run-record"
+    staleness_probe: "git log --oneline --since=<curated_date> -- db/migrations db/seeds | wc -l"
   ops:
     globs: ["scripts/**", ".github/workflows/**", "deploy/**", "db/scripts/**"]
     derive: "ls scripts .github/workflows db/scripts"
@@ -37,10 +37,10 @@ layers:
 # Famiglie NON derivabili: lista corta esplicita + probe di esistenza PRIMA del lancio (skip+warn se assente)
 families_static:
   legacy_primary:
-    probe: "MSYS_NO_PATHCONV=1 ssh oracle-vm-default 'test -d /home/ubuntu/heuresys-evo && echo OK'"
+    probe: "MSYS_NO_PATHCONV=1 ssh oracle-vm-default 'test -d ~/heuresys-evo && echo OK'"
     note: "DB dati = PG nativo heuresys_platform su VM (ADR-0023); stats legacy azzerate -> usare reltuples/count"
   legacy_cantiere:
-    probe: "MSYS_NO_PATHCONV=1 ssh oracle-vm-default 'test -d /home/ubuntu/heuresys.com.evo && echo OK'"
+    probe: "MSYS_NO_PATHCONV=1 ssh oracle-vm-default 'test -d ~/heuresys.com.evo && echo OK'"
     note: "vivaio idee, NON in produzione"
   wiki:
     probe: "test -d \"$HOME/wiki-space/heuresys-advanced-wiki\" && echo OK"

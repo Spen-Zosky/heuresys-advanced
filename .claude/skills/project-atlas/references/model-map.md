@@ -14,3 +14,6 @@ Regole:
    per 2 run consecutivi → promuovi quella famiglia di un gradino (haiku→sonnet, sonnet→sessione),
    registra il perche' nel run-record e l'override in `atlas.config.yaml → adaptive.model_overrides`.
 3. Demozione: consentita SOLO manualmente (mai automatica).
+4. Chunk-size adattivo: se un agente sfora (return troncato/frammento incompleto per dimensione)
+   → riduci `chunk_modules_per_agent` di 2-3 in `atlas.config.yaml → adaptive`, motivo nel run-record.
+5. La cadenza dei probe di staleness NON e' adattiva (si esegue a ogni status/refresh).

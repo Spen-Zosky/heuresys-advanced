@@ -22,7 +22,7 @@ Schema di ogni record:
 
 ```yaml
 - date: YYYY-MM-DD
-  mode: refresh-delta | refresh-full | dossier
+  mode: refresh-delta | refresh-full | dossier | acceptance
   layers: [api, web]            # o famiglie
   agents: 0                     # lanciati
   est_tokens: 0                 # stima

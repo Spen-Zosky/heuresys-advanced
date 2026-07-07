@@ -15,15 +15,20 @@ Per ogni layer in `atlas.config.yaml → layers` (piu' le `families_static` col 
    - `chunk_size = adaptive.chunk_modules_per_agent ?? thresholds.chunk_modules_per_agent`
    - N agenti = ceil(len(targets) / chunk_size)
 3. Per ogni chunk/famiglia istanzia il template corrispondente da `sweep-prompts.md`
-   riempiendo i segnaposto `{{TARGETS}}`, `{{FRAGMENT_PATH}}`, `{{REPO}}`.
+   riempiendo i segnaposto `{{TARGETS}}`, `{{FRAGMENT_PATH}}`, `{{REPO}}`, `{{ASPETTO}}`,
+   `{{LEGACY_TARGET}}`, `{{CURATED_DATE}}`.
 4. Frammenti attesi: uno per chunk/famiglia, nello scratchpad di sessione
    (`<scratchpad>/atlas_fragments/<label>.yaml`). Registra la LISTA ATTESA prima di lanciare.
+   Convenzione label: api_c1..cN · web_<gruppo> · shared · db_live · ops · legacy_primary ·
+   legacy_cantiere · wiki · design_system (esempio storico: docs/kb/tools/atlas-sweep-templates/fragments_s1016/).
 
 ## 2. Lancio (sempre via Workflow tool)
 
 - Un solo `parallel()` di tutti i chunk (sono indipendenti); schema di ritorno compatto
   `{fragment_file, counts, notables, summary}` — il dettaglio sta nei frammenti su file.
 - Modello/effort per agente: da `model-map.md`. MAI Agent sciolti per il sweep.
+- Formato/esempio di script Workflow: docs/kb/tools/atlas-sweep-templates/atlas-full-sweep.workflow.js.
+  Se il Workflow tool non e' disponibile nella sessione → STOP e riporta (mai fallback ad Agent sciolti per il sweep).
 
 ## 3. COVERAGE CHECK (bloccante, fail-loud)
 
@@ -50,6 +55,6 @@ python docs/kb/tools/handoff_lint.py         # exit 0
 
 ## 5. Delta vs full
 
-- **Delta (default)**: solo i layer con `staleness_probe` > 0 dal timestamp dell'ultimo run-record
-  (LEARNINGS.md) o dalla data in testa ad ATLAS_CURATED.md.
+- **Delta (default)**: solo i layer con `staleness_probe` > 0 dalla PIU' RECENTE tra: timestamp
+  dell'ultimo run-record (LEARNINGS.md) e data in testa ad ATLAS_CURATED.md.
 - **Full**: SOLO su richiesta esplicita + conferma R20 + /goal (vedi goal-recipes.md).

@@ -1,31 +1,32 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-07-06 (S1016 — atlas conoscenza + portafoglio dev-lines + #25 live).
+**Updated**: 2026-07-08 (S1017 — forensica + ottimizzazione session-start + fix integrità DB).
 
-> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti. Menu generato da `docs/kb/tools/build_menu.py`.
+> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti. Menu generato da `docs/kb/tools/session_start.py` (nuovo — menu+salute in 1 round; wrappa `build_menu` + `status_dashboard --no-net`).
 
-## Last session brief (S1016)
+## Last session brief (S1017)
 
-Nata l'**infrastruttura di conoscenza** per il brainstorming: atlas cross-layer interrogabile (`docs/kb/tools/build_atlas.py` → `docs/kb/atlas/{ATLAS.md,atlas.yaml}`, idempotente, ~7s; **SoT** — graphify/wiki-graph = viste parallele mai autoritative) + full-sweep 19 agenti distillato in `ATLAS_CURATED.md` (193 rilievi con evidenza; drift documentali censiti in §11, incl. CLAUDE.md "11 ruoli"→12 / `^0.1.1`→`^0.1.9` / PET ritirato, e Ledger pre-Gap#1: VRIO/OHI/Ranker in realtà SBLOCCATI). Grafo graphify rigenerato full-codebase (top-up semantico pendente → `graphify-out/PENDING_SEMANTIC_TOPUP.md`, register #41). Prodotto: **7 dossier** `docs/product/DEVELOPMENT_LINES_{A..G}` (41 linee, webapp mappate); Enzo ha selezionato **serie A+B** → register **#25-#40** (14 ACTIVE + 2 GATED). **#25 SHIPPED live**: ponte posizione→learning (endpoint sub-resource dedicati + pagina rinnovata su dati reali), integration + E2E + CI tutti verdi, deploy VM, endpoint verificati su www (numeri → SOT_STATE §Delta S1016). Fix: `build_menu.py` UTF-8, retry psql in atlas.
+**Forensica session-start**: "avvia sessione" impiegava >20 min — causa dominante = **(N round-modello della doctrine) × (decode a xhigh)**, NON gli MCP (referto `docs/kb/SESSION_START_FORENSICS.md`, workflow 4 profiler + verificatore). Fix shippati (tutti reversibili): **`docs/kb/tools/session_start.py`** (menu+salute in 1 processo/1 round, `--no-net` al boot); **CLAUDE.md** "Session start" riscritta (niente lettura raw dei file di stato grossi al boot) + slim 270→236 righe (Design-System→`docs/kb/DESIGN_SYSTEM_UI.md`, R23-project→`docs/kb/AUTONOMY_R23_PROJECT.md`, pointer MVP stale corretto). Config **globali fuori repo** (effetto prossima sessione CLI, backup `.bak-forensic-20260707`): `~/.claude/settings.json` plugin **40→17** (voltagent/trailofbits/… disabilitati; serena+playwright lazy-load), `~/.claude-mem` obs **50→12**. **Fix integrità DB**: notifiche inbox orfane ASSESSMENT di paolo.caputo eliminate (snapshot+guard) → **tutte le viste strutturali di validazione pulite** (`qa_artifacts/inbox-orphan-cleanup-20260707.{md,csv}`).
 
 ## Top priorities (next session)
 
-1. **#27 evidence layer** (P1, ~8-12h, dossier A §L2) — rende dimostrabile il wedge explainability/AI-Act; si rafforza con #28 trust-ledger (~4h, accoppiabili).
-2. **#26 vita dei goal** (~6-10h) e/o **#34 primo approval handler** (~2-4h) — P1 del register, componibili.
+1. **#27 evidence layer** (P1, ~8-12h, dossier A §L2) — wedge explainability/AI-Act; si rafforza con **#28 trust-ledger** (~4h, accoppiabili).
+2. **#26 vita dei goal** (~6-10h) e/o **#34 primo approval handler** (~2-4h) — P1 register, componibili.
 3. **pricing page GTM** (#4, ACTIVE — autorità *cosa* = Enzo: servono numeri prezzi/tier).
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **Serie C-G** dei dossier development-lines: quali/quando convertire in register (solo A+B selezionate finora).
-- **Sblocchi GATED**: #39 EMAIL (app-password Outlook = #8) · #40 free-text search (ok all'uso runtime della key Voyage).
+- **Serie C-G** dei dossier development-lines: quali/quando convertire in register (solo A+B finora).
+- **Sblocchi GATED**: #39 EMAIL (app-password Outlook = #8) · #40 free-text search (ok all'uso runtime key Voyage).
 - **F4 activity entities** (HOLD #24) · **pricing** numeri tier.
+- **Boot a effort ridotto** (raccomandazione S1017, non forzabile): adottare l'abitudine `/effort` basso all'avvio, bump a xhigh sul work-item? Metà del fix session-start.
 
 ## Verification (next session)
 
 ```bash
 git log origin/main..HEAD --oneline                                   # 0 (tutto pushato)
-python docs/kb/tools/build_atlas.py                                   # atlas ~7s, idempotente
-cd apps/api && pnpm exec vitest run test/positions-learning.integration.test.ts   # 5/5 (#25)
-curl -s -o /dev/null -w "%{http_code}\n" "https://www.heuresys.com/api/v1/positions/00000000-0000-4000-8000-000000000000/learning-requirements"   # 401 = #25 live
+python docs/kb/tools/session_start.py                                 # menu + salute in 1 round (offline-fast)
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc \
+  "SELECT count(*) FROM sys.v_inbox_resource_consistency"             # 0 (integrità inbox ripristinata)
 python docs/kb/tools/handoff_lint.py                                  # OK
 ```

@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-07T16:26:40Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2339**
+**Generato**: 2026-07-08T00:52:28Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2341**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -24,7 +24,7 @@
 | db-seed | 107 |
 | doc-canonical | 463 |
 | handoff-state | 1 |
-| qa-artifact | 101 |
+| qa-artifact | 103 |
 | script | 6 |
 | session | 12 |
 | shared-pkg | 4 |
@@ -33,13 +33,13 @@
 | test | 263 |
 | ux-design-archive | 80 |
 | web-source | 189 |
-| **TOTALE** | **2339** |
+| **TOTALE** | **2341** |
 
 ## Conteggi per status
 
 | Status | File |
 |---|---|
-| archive | 493 |
+| archive | 495 |
 | external-archive | 50 |
 | live | 1796 |
 
@@ -1729,6 +1729,8 @@
 - `D:\heuresys-advanced\qa_artifacts\diagrams\bootstrap_mvp_flow.mmd` · *archive* · git-tracked
 - `D:\heuresys-advanced\qa_artifacts\diagrams\bootstrap_mvp_flow.png` · *archive* · git-tracked
 - `D:\heuresys-advanced\qa_artifacts\diagrams\bootstrap_mvp_flow.svg` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\inbox-orphan-cleanup-20260707.csv` · *archive* · git-tracked
+- `D:\heuresys-advanced\qa_artifacts\inbox-orphan-cleanup-20260707.md` · *archive* · git-tracked
 - `D:\heuresys-advanced\qa_artifacts\mvp3_full_release_notes_v0.3.2.md` · *archive* · git-tracked
 - `D:\heuresys-advanced\qa_artifacts\s936_outcome_summary.md` · *archive* · git-tracked
 - `D:\heuresys-advanced\qa_artifacts\s936_pathG_build_202605261618.txt` · *archive* · git-tracked

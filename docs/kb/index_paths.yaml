@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-07T16:26:40Z da docs/kb/tools/build_index.py
+# generato: 2026-07-08T00:52:28Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-07T16:26:40Z"
-  total_files: 2339
+  generated_at: "2026-07-08T00:52:28Z"
+  total_files: 2341
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -24,7 +24,7 @@ meta:
     db-seed: 107
     doc-canonical: 463
     handoff-state: 1
-    qa-artifact: 101
+    qa-artifact: 103
     script: 6
     session: 12
     shared-pkg: 4
@@ -34,7 +34,7 @@ meta:
     ux-design-archive: 80
     web-source: 189
   status_counts:
-    archive: 493
+    archive: 495
     external-archive: 50
     live: 1796
 files:
@@ -9833,6 +9833,18 @@ files:
   - path: 'D:\heuresys-advanced\qa_artifacts\diagrams\bootstrap_mvp_flow.svg'
     root: repo
     rel: 'qa_artifacts/diagrams/bootstrap_mvp_flow.svg'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\inbox-orphan-cleanup-20260707.csv'
+    root: repo
+    rel: 'qa_artifacts/inbox-orphan-cleanup-20260707.csv'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\inbox-orphan-cleanup-20260707.md'
+    root: repo
+    rel: 'qa_artifacts/inbox-orphan-cleanup-20260707.md'
     category: qa-artifact
     status: archive
     provenance: git-tracked

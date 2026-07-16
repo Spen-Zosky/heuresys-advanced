@@ -15,6 +15,7 @@ import {
   MeProfileSchema, MeProfileFullSchema, MeContractsResponseSchema, MePaySlipsResponseSchema,
   MePerformanceResponseSchema, MeAttendanceResponseSchema, UpdateMeProfileBodySchema,
   MePositionsResponseSchema, MeGoalIdParamSchema, GoalTimelineResponseSchema,
+  MeGapClosureResponseSchema,
   MeSkillsResponseSchema, MeSkillEvidenceSchema, CreateMeSelfAssessmentBodySchema,
   MeSurveysResponseSchema, MeSurveyDetailSchema,
   SubmitMeSurveyResponseBodySchema, SubmitMeSurveyResultSchema, MeSurveyIdParamSchema,
@@ -176,6 +177,12 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("gap_analysis:read:self")],
     schema: { response: { 200: MeGapsResponseSchema } },
   }, async (req) => meService.listGaps(selfActor(req)));
+
+  // #30 (S1018): own gap-closure plans + actions (read-only, I17 self floor).
+  app.get("/gaps/closure", {
+    preHandler: [requirePermission("gap_analysis:read:self")],
+    schema: { response: { 200: MeGapClosureResponseSchema } },
+  }, async (req) => meService.getGapsClosure(selfActor(req)));
 
   app.get("/assessments", {
     preHandler: [requirePermission("assessment:read:self")],

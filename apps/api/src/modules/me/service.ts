@@ -19,6 +19,7 @@ import { NotificationTypeSchema } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import * as goalsRepo from "../goals/repository.js";
 import { buildGoalTimeline } from "../goals/service.js";
+import * as gapsRepo from "../learning-gaps/repository.js";
 import * as authRepo from "../auth/repository.js";
 import type { ListActiveSessionsResponse, RevokeOtherSessionsResponse } from "@heuresys/shared";
 import { userPermissionCodes } from "../../middleware/rbac.js";
@@ -326,6 +327,15 @@ export const meService = {
 
   async listGaps(actor: SelfActor) {
     return repo.listMyGaps(pool, actor.userId);
+  },
+
+  /** #30 (S1018): own gap-closure plans + actions on own gaps (I17 self floor). */
+  async getGapsClosure(actor: SelfActor) {
+    const [plans, actions] = await Promise.all([
+      gapsRepo.listClosurePlansForUser(pool, actor.userId),
+      gapsRepo.listClosureActionsForUser(pool, actor.userId),
+    ]);
+    return { plans, actions };
   },
 
   async listAssessments(actor: SelfActor) {

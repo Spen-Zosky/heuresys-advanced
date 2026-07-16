@@ -69,3 +69,81 @@ export const UpdateLearningGapBodySchema = z.object({
 export type UpdateLearningGapBody = z.infer<typeof UpdateLearningGapBodySchema>;
 
 export const LearningGapIdParamSchema = z.object({ id: z.uuid() });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #30 (S1018) — gap-closure layer: READ-only over plans (user+position-keyed,
+// NOT gap-keyed), per-gap actions, and analysis results. Enums mirror 000016/17.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const GapClosureActionKindEnum = z.enum([
+  "TRAINING_ASSIGNMENT","CERTIFICATION_REQUIRED","MANAGER_INTERVENTION",
+  "PEER_COACHING","ON_THE_JOB_EXPOSURE","MENTORING",
+]);
+export const GapClosureActionStatusEnum = z.enum(["PROPOSED","IN_PROGRESS","COMPLETED","CANCELLED"]);
+export const GapClosureActionSchema = z.object({
+  actionId: z.uuid(),
+  gapId: z.uuid(),
+  kind: GapClosureActionKindEnum,
+  status: GapClosureActionStatusEnum,
+  ownerUserId: z.uuid().nullable(),
+  dueDate: z.string().nullable(),
+  payload: z.record(z.string(), z.unknown()),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+export type GapClosureAction = z.infer<typeof GapClosureActionSchema>;
+export const GapClosureActionListResponseSchema = z.object({
+  items: z.array(GapClosureActionSchema), total: z.number().int().min(0),
+});
+
+export const GapClosurePlanStatusEnum = z.enum(["PROPOSED","ACTIVE","COMPLETED","CANCELLED","ON_HOLD"]);
+export const GapClosurePlanSchema = z.object({
+  planId: z.uuid(),
+  userId: z.uuid(),
+  positionId: z.uuid().nullable(),
+  /** jsonb array — shape is plan-authored, not normalized. */
+  milestones: z.array(z.unknown()),
+  status: GapClosurePlanStatusEnum,
+  ownerUserId: z.uuid().nullable(),
+  targetCompletionDate: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+export type GapClosurePlan = z.infer<typeof GapClosurePlanSchema>;
+export const GapClosurePlanListQuerySchema = z.object({
+  userId: z.uuid().optional(),
+  status: GapClosurePlanStatusEnum.optional(),
+  ...paginationFields(200, 50),
+});
+export type GapClosurePlanListQuery = z.infer<typeof GapClosurePlanListQuerySchema>;
+export const GapClosurePlanListResponseSchema = z.object({
+  items: z.array(GapClosurePlanSchema), total: z.number().int().min(0),
+});
+
+export const GapAnalysisResultKindEnum = z.enum(["SKILL","KPI","LEARNING","CERTIFICATION","BEHAVIORAL","COMPOSITE"]);
+export const GapAnalysisResultSchema = z.object({
+  resultId: z.uuid(),
+  userId: z.uuid(),
+  positionId: z.uuid().nullable(),
+  kind: GapAnalysisResultKindEnum,
+  overallScore: z.number().nullable(),
+  payload: z.record(z.string(), z.unknown()),
+  computedAt: z.iso.datetime(),
+});
+export type GapAnalysisResult = z.infer<typeof GapAnalysisResultSchema>;
+export const GapAnalysisResultListQuerySchema = z.object({
+  userId: z.uuid().optional(),
+  kind: GapAnalysisResultKindEnum.optional(),
+  ...paginationFields(200, 50),
+});
+export type GapAnalysisResultListQuery = z.infer<typeof GapAnalysisResultListQuerySchema>;
+export const GapAnalysisResultListResponseSchema = z.object({
+  items: z.array(GapAnalysisResultSchema), total: z.number().int().min(0),
+});
+
+/** GET /v1/me/gaps/closure — own plans + actions on own gaps (I17 self floor). */
+export const MeGapClosureResponseSchema = z.object({
+  plans: z.array(GapClosurePlanSchema),
+  actions: z.array(GapClosureActionSchema),
+});
+export type MeGapClosureResponse = z.infer<typeof MeGapClosureResponseSchema>;

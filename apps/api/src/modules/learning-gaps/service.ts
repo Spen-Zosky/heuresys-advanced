@@ -17,6 +17,8 @@ import type {
   LearningGapListQuery,
   CreateLearningGapBody,
   UpdateLearningGapBody,
+  GapClosurePlanListQuery,
+  GapAnalysisResultListQuery,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
@@ -123,5 +125,26 @@ export const learningGapsService = {
     }
     const ok = await repo.deleteGap(pool, id);
     if (!ok) throw new NotFoundError("LearningGap");
+  },
+
+  // ── #30 (S1018): gap-closure reads — org axis on the subject user ──
+  async listClosurePlans(actor: ActorContext, query: GapClosurePlanListQuery) {
+    const scope = await resolveOrgReadScope(pool, actor);
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+    return repo.listClosurePlans(pool, tenantId, query, userIdAllowList);
+  },
+  async listAnalysisResults(actor: ActorContext, query: GapAnalysisResultListQuery) {
+    const scope = await resolveOrgReadScope(pool, actor);
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+    return repo.listAnalysisResults(pool, tenantId, query, userIdAllowList);
+  },
+  /** Actions inherit the parent gap's org gate (getById 404s across the boundary). */
+  async listClosureActions(actor: ActorContext, gapId: string) {
+    await this.getById(actor, gapId);
+    return repo.listClosureActionsByGap(pool, gapId);
   },
 };

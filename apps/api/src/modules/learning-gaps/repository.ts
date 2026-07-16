@@ -222,3 +222,148 @@ export async function deleteGap(q: DbConnector, id: string): Promise<boolean> {
   const res = await q.query(`DELETE FROM sys.sys_learning_gaps WHERE learning_gap_id = $1`, [id]);
   return (res.rowCount ?? 0) === 1;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #30 (S1018) — gap-closure reads (000016/000017 satellites).
+// ─────────────────────────────────────────────────────────────────────────────
+
+import type {
+  GapClosureAction, GapClosurePlan, GapClosurePlanListQuery,
+  GapAnalysisResult, GapAnalysisResultListQuery,
+} from "@heuresys/shared";
+
+interface ActionRow {
+  gap_closure_action_id: string; gap_closure_action_gap_id: string;
+  gap_closure_action_kind: string; gap_closure_action_status: string;
+  gap_closure_action_owner_user_id: string | null; gap_closure_action_due_date: string | null;
+  gap_closure_action_payload: Record<string, unknown>; created_at: Date; updated_at: Date;
+}
+function toAction(r: ActionRow): GapClosureAction {
+  return {
+    actionId: r.gap_closure_action_id, gapId: r.gap_closure_action_gap_id,
+    kind: r.gap_closure_action_kind as GapClosureAction["kind"],
+    status: r.gap_closure_action_status as GapClosureAction["status"],
+    ownerUserId: r.gap_closure_action_owner_user_id, dueDate: r.gap_closure_action_due_date,
+    payload: r.gap_closure_action_payload ?? {},
+    createdAt: r.created_at.toISOString(), updatedAt: r.updated_at.toISOString(),
+  };
+}
+const ACTION_COLS = `gap_closure_action_id, gap_closure_action_gap_id, gap_closure_action_kind,
+  gap_closure_action_status, gap_closure_action_owner_user_id,
+  gap_closure_action_due_date::text AS gap_closure_action_due_date,
+  gap_closure_action_payload, created_at, updated_at`;
+
+export async function listClosureActionsByGap(
+  q: DbConnector, gapId: string,
+): Promise<{ items: GapClosureAction[]; total: number }> {
+  const res = await q.query<ActionRow>(
+    `SELECT ${ACTION_COLS} FROM sys.sys_gap_closure_actions
+      WHERE gap_closure_action_gap_id = $1 ORDER BY created_at DESC`, [gapId]);
+  return { total: res.rowCount ?? 0, items: res.rows.map(toAction) };
+}
+
+/** Actions attached to ANY of the subject's own gaps (ESS self view). */
+export async function listClosureActionsForUser(
+  q: DbConnector, userId: string,
+): Promise<GapClosureAction[]> {
+  const res = await q.query<ActionRow>(
+    `SELECT ${ACTION_COLS} FROM sys.sys_gap_closure_actions a
+      WHERE EXISTS (SELECT 1 FROM sys.sys_learning_gaps g
+                     WHERE g.learning_gap_id = a.gap_closure_action_gap_id
+                       AND g.learning_gap_user_id = $1)
+      ORDER BY created_at DESC`, [userId]);
+  return res.rows.map(toAction);
+}
+
+interface PlanRow {
+  gap_closure_plan_id: string; gap_closure_plan_user_id: string;
+  gap_closure_plan_position_id: string | null; gap_closure_plan_milestones: unknown[];
+  gap_closure_plan_status: string; gap_closure_plan_owner_user_id: string | null;
+  gap_closure_plan_target_completion_date: string | null; created_at: Date; updated_at: Date;
+}
+function toPlan(r: PlanRow): GapClosurePlan {
+  return {
+    planId: r.gap_closure_plan_id, userId: r.gap_closure_plan_user_id,
+    positionId: r.gap_closure_plan_position_id, milestones: r.gap_closure_plan_milestones ?? [],
+    status: r.gap_closure_plan_status as GapClosurePlan["status"],
+    ownerUserId: r.gap_closure_plan_owner_user_id,
+    targetCompletionDate: r.gap_closure_plan_target_completion_date,
+    createdAt: r.created_at.toISOString(), updatedAt: r.updated_at.toISOString(),
+  };
+}
+const PLAN_COLS = `gap_closure_plan_id, gap_closure_plan_user_id, gap_closure_plan_position_id,
+  gap_closure_plan_milestones, gap_closure_plan_status, gap_closure_plan_owner_user_id,
+  gap_closure_plan_target_completion_date::text AS gap_closure_plan_target_completion_date,
+  created_at, updated_at`;
+
+export async function listClosurePlans(
+  q: DbConnector, tenantId: string | undefined, query: GapClosurePlanListQuery,
+  userIdAllowList?: string[],
+): Promise<{ items: GapClosurePlan[]; total: number }> {
+  const where: string[] = []; const params: unknown[] = [];
+  if (tenantId) { params.push(tenantId); where.push(`gap_closure_plan_tenant_id = $${params.length}`); }
+  if (userIdAllowList) {
+    if (userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(userIdAllowList);
+    where.push(`gap_closure_plan_user_id = ANY($${params.length}::uuid[])`);
+  }
+  if (query.userId) { params.push(query.userId); where.push(`gap_closure_plan_user_id = $${params.length}`); }
+  if (query.status) { params.push(query.status); where.push(`gap_closure_plan_status = $${params.length}`); }
+  const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_gap_closure_plans ${wc}`, params);
+  params.push(query.limit); const lim = params.length; params.push(query.offset); const off = params.length;
+  const res = await q.query<PlanRow>(
+    `SELECT ${PLAN_COLS} FROM sys.sys_gap_closure_plans ${wc}
+      ORDER BY created_at DESC LIMIT $${lim} OFFSET $${off}`, params);
+  return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toPlan) };
+}
+
+export async function listClosurePlansForUser(q: DbConnector, userId: string): Promise<GapClosurePlan[]> {
+  const res = await q.query<PlanRow>(
+    `SELECT ${PLAN_COLS} FROM sys.sys_gap_closure_plans
+      WHERE gap_closure_plan_user_id = $1 ORDER BY created_at DESC`, [userId]);
+  return res.rows.map(toPlan);
+}
+
+interface ResultRow {
+  gap_analysis_result_id: string; gap_analysis_result_user_id: string;
+  gap_analysis_result_position_id: string | null; gap_analysis_result_kind: string;
+  gap_analysis_result_overall_score: string | null;
+  gap_analysis_result_payload: Record<string, unknown>; gap_analysis_result_computed_at: Date;
+}
+export async function listAnalysisResults(
+  q: DbConnector, tenantId: string | undefined, query: GapAnalysisResultListQuery,
+  userIdAllowList?: string[],
+): Promise<{ items: GapAnalysisResult[]; total: number }> {
+  const where: string[] = []; const params: unknown[] = [];
+  if (tenantId) { params.push(tenantId); where.push(`gap_analysis_result_tenant_id = $${params.length}`); }
+  if (userIdAllowList) {
+    if (userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(userIdAllowList);
+    where.push(`gap_analysis_result_user_id = ANY($${params.length}::uuid[])`);
+  }
+  if (query.userId) { params.push(query.userId); where.push(`gap_analysis_result_user_id = $${params.length}`); }
+  if (query.kind) { params.push(query.kind); where.push(`gap_analysis_result_kind = $${params.length}`); }
+  const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_gap_analysis_results ${wc}`, params);
+  params.push(query.limit); const lim = params.length; params.push(query.offset); const off = params.length;
+  const res = await q.query<ResultRow>(
+    `SELECT gap_analysis_result_id, gap_analysis_result_user_id, gap_analysis_result_position_id,
+            gap_analysis_result_kind, gap_analysis_result_overall_score, gap_analysis_result_payload,
+            gap_analysis_result_computed_at
+       FROM sys.sys_gap_analysis_results ${wc}
+      ORDER BY gap_analysis_result_computed_at DESC LIMIT $${lim} OFFSET $${off}`, params);
+  return {
+    total: Number(totalRow.rows[0]?.total ?? 0),
+    items: res.rows.map((r) => ({
+      resultId: r.gap_analysis_result_id, userId: r.gap_analysis_result_user_id,
+      positionId: r.gap_analysis_result_position_id,
+      kind: r.gap_analysis_result_kind as GapAnalysisResult["kind"],
+      overallScore: r.gap_analysis_result_overall_score === null ? null : Number(r.gap_analysis_result_overall_score),
+      payload: r.gap_analysis_result_payload ?? {},
+      computedAt: r.gap_analysis_result_computed_at.toISOString(),
+    })),
+  };
+}

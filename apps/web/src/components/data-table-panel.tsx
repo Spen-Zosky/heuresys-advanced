@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Badge, Button, DataTableWithCrossHair, EmptyState, ErrorState, PageHeader } from "@heuresys/ui";
 import { Inbox } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import type { ServerPagination } from "@/lib/hooks/use-paginated-list";
 
 /**
  * Canonical list-page composition (brand-component-contract.md: "Data table /
@@ -43,6 +44,12 @@ export interface EntityTableProps<T> {
   caption?: string;
   /** Client-side rows per page. Defaults to 25. Pagination UI shows only when rows.length exceeds this. */
   pageSize?: number;
+  /**
+   * SERVER-side pagination (C4-mini, S1018): `rows` are ALREADY the current page and
+   * total/page state live in the caller — plug in `usePaginatedList(...).server`.
+   * When set, client slicing and the rows-change page reset are disabled.
+   */
+  server?: ServerPagination;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
@@ -53,7 +60,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
     isLoading, isError, errorTestId, errorMessage,
     rows, rowKey, rowTestId, columns,
     emptyTestId, emptyTitle, emptyDescription, caption,
-    pageSize: pageSizeProp,
+    pageSize: pageSizeProp, server,
   } = props;
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -64,7 +71,9 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
   // filter shrinks the result set → new array reference). Adjust-state-during-render
   // (the React-recommended pattern) instead of a setState-in-effect, which
   // react-hooks/set-state-in-effect (eslint-config-next@16) flags.
-  if (trackedRows !== rows) {
+  // Server mode: page changes legitimately swap the rows array — never reset there
+  // (the hook owns the reset-on-filter-change).
+  if (!server && trackedRows !== rows) {
     setTrackedRows(rows);
     setPageIndex(0);
   }
@@ -85,7 +94,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       />
     );
   }
-  if (rows.length === 0) {
+  if (rows.length === 0 && (!server || server.total === 0)) {
     return (
       <EmptyState
         data-testid={emptyTestId}
@@ -95,15 +104,26 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
       />
     );
   }
-  const total = rows.length;
-  const showPagination = total > pageSize;
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
-  const safePageIndex = Math.min(pageIndex, pageCount - 1);
-  const start = safePageIndex * pageSize;
-  const end = Math.min(start + pageSize, total);
-  const visibleRows = showPagination ? rows.slice(start, end) : rows;
+  const total = server ? server.total : rows.length;
+  const effPageSize = server ? server.pageSize : pageSize;
+  const pageCount = Math.max(1, Math.ceil(total / effPageSize));
+  const safePageIndex = Math.min(server ? server.pageIndex : pageIndex, pageCount - 1);
+  const showPagination = total > effPageSize;
+  const start = safePageIndex * effPageSize;
+  const visibleRows = server ? rows : showPagination ? rows.slice(start, start + effPageSize) : rows;
+  const end = server ? start + rows.length : Math.min(start + effPageSize, total);
   const from = total === 0 ? 0 : start + 1;
   const to = end;
+  const goToPage = (i: number) =>
+    server ? server.onPageIndexChange(i) : setPageIndex(i);
+  const changePageSize = (s: number) => {
+    if (server) {
+      server.onPageSizeChange(s);
+    } else {
+      setPageSize(s);
+      setPageIndex(0);
+    }
+  };
 
   return (
     <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
@@ -142,7 +162,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
               size="sm"
               data-testid="pagination-prev"
               disabled={safePageIndex <= 0}
-              onClick={() => setPageIndex((p) => Math.max(0, p - 1))}
+              onClick={() => goToPage(Math.max(0, safePageIndex - 1))}
             >
               {t("pagination.prev")}
             </Button>
@@ -152,18 +172,15 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
               size="sm"
               data-testid="pagination-next"
               disabled={safePageIndex >= pageCount - 1}
-              onClick={() => setPageIndex((p) => Math.min(pageCount - 1, p + 1))}
+              onClick={() => goToPage(Math.min(pageCount - 1, safePageIndex + 1))}
             >
               {t("pagination.next")}
             </Button>
             <select
               aria-label={t("pagination.rowsPerPage")}
               className="rounded-control border border-border bg-card px-2 py-1 text-sm text-muted-foreground hover:bg-muted disabled:opacity-50"
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setPageIndex(0);
-              }}
+              value={effPageSize}
+              onChange={(e) => changePageSize(Number(e.target.value))}
             >
               {PAGE_SIZE_OPTIONS.map((size) => (
                 <option key={size} value={size}>

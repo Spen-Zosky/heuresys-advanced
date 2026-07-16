@@ -204,11 +204,13 @@ export interface DataTablePanelProps<T> extends EntityTableProps<T> {
   /** Rendered in a badge next to the title (e.g. "433 totali"). */
   count?: ReactNode;
   actions?: ReactNode;
+  /** Rendered between the PageHeader and the table (filter bars, search panels, …). */
+  children?: ReactNode;
 }
 
 export function DataTablePanel<T>(props: DataTablePanelProps<T>) {
   const {
-    pageTestId, titleTestId, countTestId, title, description, count, actions,
+    pageTestId, titleTestId, countTestId, title, description, count, actions, children,
     ...table
   } = props;
 
@@ -225,6 +227,7 @@ export function DataTablePanel<T>(props: DataTablePanelProps<T>) {
           ) : undefined
         }
       />
+      {children}
       <EntityTable<T> {...table} />
     </main>
   );

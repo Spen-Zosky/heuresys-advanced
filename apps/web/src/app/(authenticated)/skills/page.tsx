@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { SemanticSearchPanel } from "@/components/semantic-search-panel";
 import { StatusPill } from "@/components/status-pill";
 
 interface Skill {
@@ -63,6 +64,9 @@ export default function SkillsCataloguePage() {
       emptyTitle={t("skills.emptyTitle")}
       emptyDescription={t("skills.emptyDescription")}
       caption={t("skills.caption")}
-    />
+    >
+      {/* #40 (S1018): semantic catalog search — live pgvector + query-time Voyage embedding */}
+      <SemanticSearchPanel />
+    </DataTablePanel>
   );
 }

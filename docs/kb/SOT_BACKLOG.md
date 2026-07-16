@@ -97,9 +97,9 @@
   - blocker: dipende da **#8** (app-password Outlook, WAIT-INPUT) — transport pronto, chassis testato
   - unblock-trigger: {kind: manual} — #8 risolto (credenziale fornita da Enzo)
   - doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B4 · effort post-input: ~2h
-- **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: ACTIVE
+- **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: DONE
   - priority: P1 · effort: ~2h · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B1
-  - note: sbloccato S1018 — **Enzo autorizza l'uso runtime della API key Voyage** (unblock-trigger sciolto). Flag già ON in `.env` VM; resta il wiring UI (`/me/matching` + `/skills`) + verifica live del query-time embedding. Wave W1 programma S1018.
+  - note: ✅ DONE S1018 — Enzo ha autorizzato il runtime Voyage; `SemanticSearchPanel` condiviso in `/me/matching` + `/skills` (submit esplicito, cap 30/min rispettato, stati disabled/throttled). LIVE E2E: login reale tommaso.fiore → query "gestione del rischio bancario" → embedding runtime + ranking reale dal pgvector (top skill 0.561); Playwright `matching-freetext.spec.ts` 2/2 verde su stack locale (:3400/:3401). Test flag-OFF reso machine-independent (branch 404 pinnato flippando il flag call-time).
 - **#41 graphify — top-up semantico (26 chunk mancanti)** · status: GATED
   - blocker: limite di spesa mensile Claude colpito durante il run S1016 (26/52 chunk estratti; ~201 file con estrazione previous-run o solo-AST)
   - unblock-trigger: {kind: manual} — limite di spesa resettato/alzato (claude.ai/settings/usage)

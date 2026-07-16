@@ -92,5 +92,22 @@
     "logout": {
       "title": "Esci"
     }
+  },
+  "semanticSearch": {
+    "title": "Ricerca semantica",
+    "description": "Ricerca a testo libero sull'indice live di skill e occupazioni ESCO (embedding AI). Parte solo al submit.",
+    "placeholder": "es. gestione del rischio bancario",
+    "submit": "Cerca",
+    "disabled": "La ricerca semantica è al momento disabilitata su questo ambiente.",
+    "throttled": "Troppe ricerche — attendi un momento e riprova.",
+    "error": "Ricerca non riuscita. Riprova.",
+    "occupations": "Occupazioni ESCO",
+    "skills": "Competenze",
+    "colOccupation": "Occupazione",
+    "colIsco": "ISCO",
+    "colScore": "Affinità",
+    "colSkill": "Competenza",
+    "emptyTitle": "Nessun risultato",
+    "emptyDesc": "Nessun risultato per questa query — prova una formulazione diversa."
   }
 }

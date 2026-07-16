@@ -7,6 +7,7 @@ import { PageHeader, Badge } from "@heuresys/ui";
 import type { OccupationMatch, PositionMatch, JobRoleMatch } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { SemanticSearchPanel } from "@/components/semantic-search-panel";
 
 /**
  * Mirrors the *ListResponseSchema envelopes in @heuresys/shared. Those schemas'
@@ -123,6 +124,8 @@ export default function MeMatchingPage() {
 
   return (
     <main data-testid="me-matching-page" className="mx-auto max-w-7xl space-y-8 px-6 py-8">
+      {/* #40 (S1018): free-text semantic search — live pgvector + query-time Voyage embedding */}
+      <SemanticSearchPanel />
       <section className="space-y-6">
         <PageHeader
           data-testid="me-matching-title"

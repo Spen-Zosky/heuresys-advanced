@@ -92,5 +92,22 @@
     "logout": {
       "title": "Sign out"
     }
+  },
+  "semanticSearch": {
+    "title": "Semantic search",
+    "description": "Free-text search over the live skills and ESCO occupations index (AI embeddings). Fires only on submit.",
+    "placeholder": "e.g. banking risk management",
+    "submit": "Search",
+    "disabled": "Semantic search is currently disabled on this environment.",
+    "throttled": "Too many searches — wait a moment and try again.",
+    "error": "Search failed. Try again.",
+    "occupations": "ESCO occupations",
+    "skills": "Skills",
+    "colOccupation": "Occupation",
+    "colIsco": "ISCO",
+    "colScore": "Affinity",
+    "colSkill": "Skill",
+    "emptyTitle": "No matches",
+    "emptyDesc": "No results for this query — try different wording."
   }
 }

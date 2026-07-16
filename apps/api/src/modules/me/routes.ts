@@ -15,7 +15,7 @@ import {
   MeProfileSchema, MeProfileFullSchema, MeContractsResponseSchema, MePaySlipsResponseSchema,
   MePerformanceResponseSchema, MeAttendanceResponseSchema, UpdateMeProfileBodySchema,
   MePositionsResponseSchema, MeGoalIdParamSchema, GoalTimelineResponseSchema,
-  MeGapClosureResponseSchema,
+  MeGapClosureResponseSchema, EvidenceSubjectQuerySchema, EvidenceListResponseSchema,
   MeSkillsResponseSchema, MeSkillEvidenceSchema, CreateMeSelfAssessmentBodySchema,
   MeSurveysResponseSchema, MeSurveyDetailSchema,
   SubmitMeSurveyResponseBodySchema, SubmitMeSurveyResultSchema, MeSurveyIdParamSchema,
@@ -183,6 +183,12 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("gap_analysis:read:self")],
     schema: { response: { 200: MeGapClosureResponseSchema } },
   }, async (req) => meService.getGapsClosure(selfActor(req)));
+
+  // #27 (S1018): own evidence drill-down ("why my scores"), I17 self floor.
+  app.get("/evidence", {
+    preHandler: [requirePermission("evidence:read:self")],
+    schema: { querystring: EvidenceSubjectQuerySchema, response: { 200: EvidenceListResponseSchema } },
+  }, async (req) => meService.getEvidence(selfActor(req), req.query.types, req.query.limit, req.query.offset));
 
   app.get("/assessments", {
     preHandler: [requirePermission("assessment:read:self")],

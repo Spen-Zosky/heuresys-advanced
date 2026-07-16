@@ -323,6 +323,10 @@
       "types": "./dist/schemas/provenance.d.ts",
       "default": "./src/schemas/provenance.ts"
     },
+    "./schemas/evidence": {
+      "types": "./dist/schemas/evidence.d.ts",
+      "default": "./src/schemas/evidence.ts"
+    },
     "./schemas/okrs": {
       "types": "./dist/schemas/okrs.d.ts",
       "default": "./src/schemas/okrs.ts"

@@ -20,6 +20,7 @@ import * as repo from "./repository.js";
 import * as goalsRepo from "../goals/repository.js";
 import { buildGoalTimeline } from "../goals/service.js";
 import * as gapsRepo from "../learning-gaps/repository.js";
+import * as evidenceRepo from "../evidence/repository.js";
 import * as authRepo from "../auth/repository.js";
 import type { ListActiveSessionsResponse, RevokeOtherSessionsResponse } from "@heuresys/shared";
 import { userPermissionCodes } from "../../middleware/rbac.js";
@@ -336,6 +337,11 @@ export const meService = {
       gapsRepo.listClosureActionsForUser(pool, actor.userId),
     ]);
     return { plans, actions };
+  },
+
+  /** #27 (S1018): own evidence (I17). Private continuous feedback excluded (safe default). */
+  async getEvidence(actor: SelfActor, types: string | undefined, limit: number, offset: number) {
+    return evidenceRepo.listEvidenceForSubject(pool, actor.userId, types ? types.split(",").map((s) => s.trim()).filter(Boolean) as Parameters<typeof evidenceRepo.listEvidenceForSubject>[2] : [], false, limit, offset);
   },
 
   async listAssessments(actor: SelfActor) {

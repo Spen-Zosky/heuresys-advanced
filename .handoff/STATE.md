@@ -1,32 +1,33 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-07-08 (S1017 — forensica + ottimizzazione session-start + fix integrità DB).
+**Updated**: 2026-07-16 (S1018 — batch autonomo full-scope, **congelato per fresh session**).
 
-> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Domini disgiunti. Menu generato da `docs/kb/tools/session_start.py` (nuovo — menu+salute in 1 round; wrappa `build_menu` + `status_dashboard --no-net`).
+> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md` (Delta S1018). Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. **Ripartenza batch → `docs/kb/RESUME_S1018_BATCH.md`** (autoritativo) + piano `~/.claude/plans/usa-superpowers-skills-tools-compressed-ocean.md`.
 
-## Last session brief (S1017)
+## Last session brief (S1018)
 
-**Forensica session-start**: "avvia sessione" impiegava >20 min — causa dominante = **(N round-modello della doctrine) × (decode a xhigh)**, NON gli MCP (referto `docs/kb/SESSION_START_FORENSICS.md`, workflow 4 profiler + verificatore). Fix shippati (tutti reversibili): **`docs/kb/tools/session_start.py`** (menu+salute in 1 processo/1 round, `--no-net` al boot); **CLAUDE.md** "Session start" riscritta (niente lettura raw dei file di stato grossi al boot) + slim 270→236 righe (Design-System→`docs/kb/DESIGN_SYSTEM_UI.md`, R23-project→`docs/kb/AUTONOMY_R23_PROJECT.md`, pointer MVP stale corretto). Config **globali fuori repo** (effetto prossima sessione CLI, backup `.bak-forensic-20260707`): `~/.claude/settings.json` plugin **40→17** (voltagent/trailofbits/… disabilitati; serena+playwright lazy-load), `~/.claude-mem` obs **50→12**. **Fix integrità DB**: notifiche inbox orfane ASSESSMENT di paolo.caputo eliminate (snapshot+guard) → **tutte le viste strutturali di validazione pulite** (`qa_artifacts/inbox-orphan-cleanup-20260707.{md,csv}`).
+**Batch autonomo full-scope** (Enzo: "esegui tutte le attività pending, debiti, dossier; autonomo, senza presidio"). Piano W0-W13 (13 wave). **Congelato su richiesta di Enzo** per continuare in fresh session — ripartenza senza ripetizioni via `RESUME_S1018_BATCH.md`. **Nessun deploy** (scelta Enzo: deploy solo a W13) → PROD www gira ancora la versione pre-batch; tutto è pushato su `main` (HEAD `ee3b0558`), durevole.
+
+**FATTO**: **W0** (register serie C-G→#42-#63; D-08 probe-gate+rollback; C4-mini paginazione; fix test-harness). **W1 Serie-A P1 completa**: #40 free-text search · D-54 inbox-orphans (**RISOLTO**, mig 000170) · #26 goal/OKR life · #27 evidence-layer ⭐ (mig 000172) · #28 trust-ledger ⭐ (mig 000171) · #30 gap-closure · #31 KPI-metrology — tutti API+web+E2E verdi. **RESIDUO**: #29/#32/#33 (Serie-A P2/P3) NON fatti + W3-W13.
 
 ## Top priorities (next session)
 
-1. **#27 evidence layer** (P1, ~8-12h, dossier A §L2) — wedge explainability/AI-Act; si rafforza con **#28 trust-ledger** (~4h, accoppiabili).
-2. **#26 vita dei goal** (~6-10h) e/o **#34 primo approval handler** (~2-4h) — P1 register, componibili.
-3. **pricing page GTM** (#4, ACTIVE — autorità *cosa* = Enzo: servono numeri prezzi/tier).
+1. **Serie-A P2/P3 residua** — #29 talent-review (9-box), #32 comp-read, #33 time-off (ancora ACTIVE, blueprint nel piano W2).
+2. **W3 Serie B** — #34 approval-handlers, #37 reward-gate-engine, #36 viz-versioning, #38 inbox-SSE, #35 observability.
+3. Poi W4-W13 in ordine (RESUME doc). Deploy PROD SOLO a W13 (`vm-deploy.sh` ora protetto da D-08).
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **Serie C-G** dei dossier development-lines: quali/quando convertire in register (solo A+B finora).
-- **Sblocchi GATED**: #39 EMAIL (app-password Outlook = #8) · #40 free-text search (ok all'uso runtime key Voyage).
-- **F4 activity entities** (HOLD #24) · **pricing** numeri tier.
-- **Boot a effort ridotto** (raccomandazione S1017, non forzabile): adottare l'abitudine `/effort` basso all'avvio, bump a xhigh sul work-item? Metà del fix session-start.
+- **Pricing page** (#4): numeri prezzi/tier — non forniti (pagina resta in attesa).
+- **#8 app-password Outlook** → sblocca #39 EMAIL (WAIT-INPUT). **#52 E2 SSO**: serve client-id/secret IdP.
+- **#16 SuccessFactors**: sandbox esterno (WAIT-INPUT).
 
 ## Verification (next session)
 
 ```bash
 git log origin/main..HEAD --oneline                                   # 0 (tutto pushato)
-python docs/kb/tools/session_start.py                                 # menu + salute in 1 round (offline-fast)
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc \
-  "SELECT count(*) FROM sys.v_inbox_resource_consistency"             # 0 (integrità inbox ripristinata)
-python docs/kb/tools/handoff_lint.py                                  # OK
+export NVM_DIR="$HOME/.nvm"; . "$NVM_DIR/nvm.sh"; nvm use 22
+python docs/kb/tools/handoff_lint.py                                  # OK atteso
+ls db/migrations/*.sql | tail -1                                      # 000172 (DB già migrato)
+cd apps/api && pnpm exec vitest run test/goals-life test/evidence test/provenance test/gap-closure test/kpi-metrology test/inbox-consistency  # verdi (S1018)
 ```

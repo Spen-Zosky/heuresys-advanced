@@ -47,6 +47,14 @@ echo "node=$(node -v) pnpm=$(pnpm -v)"
 #    gitignored .env/.secrets are preserved by reset).
 log "sync: $BRANCH @ origin"
 git -C "$REPO_DIR" fetch origin --quiet
+# D-08 (F-8): capture the CURRENTLY-DEPLOYED sha BEFORE the reset — it is the app
+# rollback target if the new deploy fails its probe gate (scripts/vm-rollback.sh).
+# Survives the self-modify re-exec below via VM_DEPLOY_PREV_SHA.
+if [ -z "${VM_DEPLOY_REEXEC:-}" ]; then
+  PREV_SHA="$(git -C "$REPO_DIR" rev-parse HEAD)"
+else
+  PREV_SHA="${VM_DEPLOY_PREV_SHA:-unknown}"
+fi
 git -C "$REPO_DIR" checkout "$BRANCH" --quiet
 git -C "$REPO_DIR" reset --hard "origin/$BRANCH" --quiet
 git -C "$REPO_DIR" log --oneline -1
@@ -56,7 +64,7 @@ git -C "$REPO_DIR" log --oneline -1
 # freshly-pulled version ONCE (guarded) so the rest of the pipeline runs the update —
 # otherwise steps added in the same commit silently don't take effect until the 2nd run.
 if [ -z "${VM_DEPLOY_REEXEC:-}" ]; then
-  exec env VM_DEPLOY_REEXEC=1 \
+  exec env VM_DEPLOY_REEXEC=1 VM_DEPLOY_PREV_SHA="$PREV_SHA" \
     REPO_DIR="$REPO_DIR" BRANCH="$BRANCH" PUBLIC_HOST="$PUBLIC_HOST" \
     API_PORT="$API_PORT" WEB_PORT="$WEB_PORT" NODE_MAJOR="$NODE_MAJOR" RESTART_API="$RESTART_API" \
     SERVICE_USER="$SERVICE_USER" SERVICE_GROUP="$SERVICE_GROUP" \
@@ -189,13 +197,43 @@ echo "  reindex.timer:  $(systemctl is-active heuresys-advanced-reindex.timer 2>
 # bare curl right after the systemd restart hits ECONNREFUSED (false negative). Retry
 # with backoff over the boot window: --retry-connrefused covers "not listening yet",
 # --retry-all-errors covers the brief 503 while the readiness cache loads.
+DEPLOY_OK=1
 if curl -fsS --retry 45 --retry-delay 1 --retry-connrefused --retry-all-errors -m 8 "http://localhost:$API_PORT/readyz" >/dev/null; then
   echo "  api /readyz OK"
 else
   echo "  api /readyz FAILED — journalctl -u heuresys-advanced-api -n 50" >&2
+  DEPLOY_OK=0
 fi
 code=$(curl -s -o /dev/null -m 25 -w '%{http_code}' "http://localhost:$WEB_PORT/login" || echo ERR)
 t=$(curl -s -o /dev/null -m 25 -w '%{time_total}' "http://localhost:$WEB_PORT/login" || echo ERR)
 echo "  web /login HTTP $code in ${t}s (prod = sub-second)"
+if [ "$code" != "200" ]; then
+  echo "  web /login FAILED (expected 200) — journalctl -u heuresys-advanced-web -n 50" >&2
+  DEPLOY_OK=0
+fi
+
+# D-08 (F-9/12): the probe is a GATE, not an observer. On failure the deploy exits
+# non-zero (align-clones sees red) and prints the one-command rollback; on success
+# the deployed sha becomes the durable LAST_GOOD rollback target. AUTO_ROLLBACK=1
+# triggers scripts/vm-rollback.sh automatically (default: manual — vm-deploy is always
+# operator-driven; preserving no-auto-deploy is D-08's most important control).
+if [ "$DEPLOY_OK" != 1 ]; then
+  last_dump="$(ls -1t "$REPO_DIR"/pg_dump_snapshots/pre-deploy/*.dump 2>/dev/null | head -1 || true)"
+  {
+    echo ""
+    echo "DEPLOY FAILED at probe gate (sha $(git -C "$REPO_DIR" rev-parse --short HEAD))."
+    echo "  app rollback:  bash scripts/vm-rollback.sh ${PREV_SHA}"
+    echo "  db snapshot (pg_restore is DESTRUCTIVE — only if a migration broke data):"
+    echo "    ${last_dump:-<none taken this run>}"
+  } >&2
+  if [ "${AUTO_ROLLBACK:-0}" = 1 ] && [ "$PREV_SHA" != "unknown" ]; then
+    echo "AUTO_ROLLBACK=1 → rolling back to $PREV_SHA" >&2
+    exec bash "$REPO_DIR/scripts/vm-rollback.sh" "$PREV_SHA"
+  fi
+  exit 1
+fi
+mkdir -p "$REPO_DIR/pg_dump_snapshots"
+printf '%s\n' "$(git -C "$REPO_DIR" rev-parse HEAD)" > "$REPO_DIR/pg_dump_snapshots/LAST_GOOD_SHA"
+echo "  LAST_GOOD recorded: $(git -C "$REPO_DIR" rev-parse --short HEAD)"
 echo
 echo "Done. Web http://$PUBLIC_HOST:$WEB_PORT  |  API http://$PUBLIC_HOST:$API_PORT"

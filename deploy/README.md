@@ -195,6 +195,38 @@ I due boot-step del workflow `playwright-smoke.yml` hanno **guard pre-bind**
 dell'app servita (marker `heuresys` su `/login`; JSON `"database"` su `/readyz`)
 — una nuova collisione produce un errore esplicito, mai un test sull'app sbagliata.
 
+## Rollback runbook (D-08 — LAST_GOOD + probe-as-gate)
+
+`vm-deploy.sh` is guarded end-to-end (S1018):
+
+1. **Pre-deploy DB snapshot** (step 2a): `pg_dump -Fc` → `pg_dump_snapshots/pre-deploy/`
+   BEFORE the first mutating step; fail-loud on empty dump; keeps newest 10.
+2. **PREV_SHA capture**: the currently-deployed sha is recorded before `reset --hard`
+   (survives the self-modify re-exec via `VM_DEPLOY_PREV_SHA`).
+3. **Probe gate** (step 5): `/readyz` (45×1s retry) **and** web `/login` HTTP 200 must
+   pass, otherwise the deploy **exits non-zero** (align-clones sees red) and prints the
+   rollback one-liner. On success the sha is persisted to
+   `pg_dump_snapshots/LAST_GOOD_SHA`.
+
+**App rollback** (non-destructive — DB untouched, migrations are additive by doctrine):
+
+```bash
+bash scripts/vm-rollback.sh              # → LAST_GOOD_SHA
+bash scripts/vm-rollback.sh <sha>        # → explicit target (e.g. the printed PREV_SHA)
+```
+
+Standalone by design (never sources the possibly-broken vm-deploy of the new sha):
+checkout `--detach` → frozen install → clean shared→api→web build → restart → same
+probe gate. `AUTO_ROLLBACK=1 bash scripts/vm-deploy.sh` chains it automatically on a
+failed gate (default: manual — vm-deploy stays operator-driven, D-08's key control).
+
+**DB restore** (DESTRUCTIVE — only if a migration broke data; always confirm with Enzo):
+
+```bash
+sudo -u postgres pg_restore -d heuresys_advanced --clean --if-exists \
+  pg_dump_snapshots/pre-deploy/<dump>
+```
+
 ## Mac (Darwin Intel / OpenCore) or Linux desktop — dev, on-demand
 
 ```bash

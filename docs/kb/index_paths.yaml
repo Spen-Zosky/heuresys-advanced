@@ -1,42 +1,42 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-08T00:52:28Z da docs/kb/tools/build_index.py
+# generato: 2026-07-16T16:47:41Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-08T00:52:28Z"
-  total_files: 2341
+  generated_at: "2026-07-16T16:47:41Z"
+  total_files: 2375
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 26
-    api-core: 23
-    api-module: 292
+    api-core: 24
+    api-module: 298
     ci: 16
     claude-config: 15
-    config: 103
+    config: 104
     cowork-archive: 14
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 167
+    db-migration: 170
     db-other: 1
     db-script: 26
     db-seed: 107
-    doc-canonical: 463
+    doc-canonical: 465
     handoff-state: 1
     qa-artifact: 103
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 87
+    shared-schema: 89
     showcase-source: 13
-    test: 263
+    test: 274
     ux-design-archive: 80
-    web-source: 189
+    web-source: 197
   status_counts:
     archive: 495
     external-archive: 50
-    live: 1796
+    live: 1830
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -245,6 +245,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\lib\export\serializers.ts'
     root: repo
     rel: 'apps/api/src/lib/export/serializers.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\notifications\cleanup.ts'
+    root: repo
+    rel: 'apps/api/src/lib/notifications/cleanup.ts'
     category: api-core
     status: live
     provenance: git-tracked
@@ -1064,6 +1070,24 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\evidence\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/evidence/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\evidence\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/evidence/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\evidence\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/evidence/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\goals\repository.ts'
     root: repo
     rel: 'apps/api/src/modules/goals/repository.ts'
@@ -1523,6 +1547,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\process-kpi-templates\service.ts'
     root: repo
     rel: 'apps/api/src/modules/process-kpi-templates/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\provenance\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/provenance/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\provenance\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/provenance/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\provenance\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/provenance/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -2879,6 +2921,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\vm-deploy.sh'
     root: repo
     rel: 'scripts/vm-deploy.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\vm-rollback.sh'
+    root: repo
+    rel: 'scripts/vm-rollback.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -5954,6 +6002,24 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000170_inbox_orphan_purge.sql'
+    root: repo
+    rel: 'db/migrations/000170_inbox_orphan_purge.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000171_provenance_permission_seed_and_ui.sql'
+    root: repo
+    rel: 'db/migrations/000171_provenance_permission_seed_and_ui.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000172_evidence_permission_seed.sql'
+    root: repo
+    rel: 'db/migrations/000172_evidence_permission_seed.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\migrations\.gitkeep'
     root: repo
     rel: 'db/migrations/.gitkeep'
@@ -7580,6 +7646,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\PLAN_S1018_BATCH.md'
+    root: repo
+    rel: 'docs/kb/PLAN_S1018_BATCH.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\POST_V1_ROADMAP_DOSSIER.md'
     root: repo
     rel: 'docs/kb/POST_V1_ROADMAP_DOSSIER.md'
@@ -7595,6 +7667,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md'
     root: repo
     rel: 'docs/kb/RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\RESUME_S1018_BATCH.md'
+    root: repo
+    rel: 'docs/kb/RESUME_S1018_BATCH.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10472,6 +10550,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\evidence.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/evidence.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\goals.ts'
     root: repo
     rel: 'packages/shared/src/schemas/goals.ts'
@@ -10631,6 +10715,12 @@ files:
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\process-kpi-templates.ts'
     root: repo
     rel: 'packages/shared/src/schemas/process-kpi-templates.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\provenance.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/provenance.ts'
     category: shared-schema
     status: live
     provenance: git-tracked
@@ -11210,6 +11300,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\evidence.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/evidence.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\export-list.integration.test.ts'
     root: repo
     rel: 'apps/api/test/export-list.integration.test.ts'
@@ -11219,6 +11315,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\export-serializers.test.ts'
     root: repo
     rel: 'apps/api/test/export-serializers.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\gap-closure.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/gap-closure.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\goals-life.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/goals-life.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11276,6 +11384,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\inbox-consistency.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/inbox-consistency.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\insights-p2.integration.test.ts'
     root: repo
     rel: 'apps/api/test/insights-p2.integration.test.ts'
@@ -11327,6 +11441,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\kpi-definitions.integration.test.ts'
     root: repo
     rel: 'apps/api/test/kpi-definitions.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\kpi-metrology.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/kpi-metrology.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11633,6 +11753,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\process-kpi-templates.integration.test.ts'
     root: repo
     rel: 'apps/api/test/process-kpi-templates.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\provenance.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/provenance.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -12230,6 +12356,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\evidence-drawer.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/evidence-drawer.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\fixtures.ts'
     root: repo
     rel: 'apps/web/tests/e2e/fixtures.ts'
@@ -12245,6 +12377,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\global-teardown.ts'
     root: repo
     rel: 'apps/web/tests/e2e/global-teardown.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\goals-life.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/goals-life.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -12311,6 +12449,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\login-mfa.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/login-mfa.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\matching-freetext.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/matching-freetext.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -12392,9 +12536,21 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\provenance.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/provenance.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\rbac-route-matrix.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/rbac-route-matrix.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\serie-a-panels.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/serie-a-panels.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -13580,6 +13736,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\provenance\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/provenance/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\seed-acquisition\runs\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/seed-acquisition/runs/page.tsx'
@@ -13862,6 +14024,30 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\components\evidence-drawer.tsx'
+    root: repo
+    rel: 'apps/web/src/components/evidence-drawer.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\components\gap-closure-panel.tsx'
+    root: repo
+    rel: 'apps/web/src/components/gap-closure-panel.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\components\goal-timeline-dialog.tsx'
+    root: repo
+    rel: 'apps/web/src/components/goal-timeline-dialog.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\components\kpi-metrology-panel.tsx'
+    root: repo
+    rel: 'apps/web/src/components/kpi-metrology-panel.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\components\language-switcher.tsx'
     root: repo
     rel: 'apps/web/src/components/language-switcher.tsx'
@@ -13871,6 +14057,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\components\lead-form.tsx'
     root: repo
     rel: 'apps/web/src/components/lead-form.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\components\okr-checkins-dialog.tsx'
+    root: repo
+    rel: 'apps/web/src/components/okr-checkins-dialog.tsx'
     category: web-source
     status: live
     provenance: git-tracked
@@ -13889,6 +14081,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\components\section-tabs.tsx'
     root: repo
     rel: 'apps/web/src/components/section-tabs.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\components\semantic-search-panel.tsx'
+    root: repo
+    rel: 'apps/web/src/components/semantic-search-panel.tsx'
     category: web-source
     status: live
     provenance: git-tracked
@@ -13931,6 +14129,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\lib\api\public-stats.ts'
     root: repo
     rel: 'apps/web/src/lib/api/public-stats.ts'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\lib\hooks\use-paginated-list.ts'
+    root: repo
+    rel: 'apps/web/src/lib/hooks/use-paginated-list.ts'
     category: web-source
     status: live
     provenance: git-tracked

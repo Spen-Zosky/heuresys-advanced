@@ -58,23 +58,24 @@
 - **#25 A/L5 — ponte posizione→learning (accende `positions/[id]/learning`)** · status: DONE
   - priority: P1 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L5
   - note: ✅ DONE S1016 (commit `e22dcdb7`) — `GET /v1/positions/:id/{learning-requirements,learning-modules}` (JOIN paths/modules/skills, pattern sub-resource, `position:read`); pagina a 3 sezioni (percorsi richiesti + copertura moduli + gap) con tipi shared + i18n IT/EN (parity 1745). Integration 5/5 (attese derivate live) + E2E position-sub 8/8 su dati reali. Gap-DATI S1004 chiuso. NB: le risorse position non sono nella tassonomia sensitive → nessun orgGate richiesto dal boot-gate D-51 (coerente coi sibling /skills /kpis; la nota "orgGate catalog" del dossier era prudenziale).
-- **#26 A/L1 — vita dei goal/OKR (updates, check-ins, milestones, comments, alignments)** · status: ACTIVE
+- **#26 A/L1 — vita dei goal/OKR (updates, check-ins, milestones, comments, alignments)** · status: DONE
   - priority: P1 · effort: ~6-10h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L1
-  - note: ~4.8k righe; sub-risorse read + timeline in `/goals`, `/okrs`, `/me/career`. EVALUATION → orgGate; `goal:read:self` già seedato.
+  - note: ✅ DONE S1018 (commit 66f3c91c API + c22725ef web) — ~4.8k righe dormienti esposte. API: sub-read goals (updates/check-ins/milestones/comments/alignments/templates/timeline) + okrs/:id/check-ins + me/goals/:id/timeline; autorizzazione centralizzata in canReadGoal/loadReadableOkr (contratto F4). Web: GoalTimelineDialog + OkrCheckInsDialog in /goals /okrs /me/career. Test goals-life 10/10 API + goals-life 3/3 E2E (login reali paolo→tommaso in-subtree, →antonio 404 I19; self 200/404).
 - **#27 A/L2 — evidence layer (le prove sotto gli score)** · status: ACTIVE
   - priority: P1 · effort: ~8-12h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L2
-  - note: ~5.3k righe (assessment/learning evidence, 360, continuous feedback, behavioral). Drill-down "perché questo score" su insights/gaps/reviews + self-scope ESS. Sostanza del wedge explainability/AI-Act. SENSITIVE → orgGate + estensione tassonomia data-classes.
+  - note: ⏳ **API DONE + LIVE-TESTED S1018** (commit d4d0eae3): modulo evidence (/subject/:userId + /for-score + /me/evidence) UNION su 9 tabelle + footer provenance lineage; data-class evidence=EVALUATION (D-51) + orgGate + I19 + 360-anon null; perm mig 000172. Test 7/7 live. **RESTA la UI web** (EvidenceDrawer in insights/skill-gap/gaps/me-gaps/users) → non chiuso DoD finché la pagina non è dimostrata live.
 - **#28 A/L0 — Trust Ledger: read-API provenance (70.972 righe lineage)** · status: ACTIVE
   - priority: P1 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L0
-  - note: `/v1/provenance` per-record+aggregata; pannello in `/brownfield-adaptation` (o nuova `/provenance`). Deliverable citabile GTM (AI-Act/art.22). Si rafforza con #27.
+  - note: ⏳ **API DONE + LIVE-TESTED S1018** (commit e65482a6): modulo provenance /v1/provenance (filtri+paginazione) + /summary (GROUP BY); perm provenance:read PLATFORM/TENANT_ADMIN + sidebar row (mig 000171). Test 6/6 live (total==70.972). **RESTA la pagina web** `/provenance` (KPIStrip + tabelle) → DoD live pending.
 - **#29 A/L3 — talent-review 9-box (talent/fit/readiness/succession scores)** · status: ACTIVE
   - priority: P2 · effort: ~6-8h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L3
   - note: 9-box derivata da `sys_talent_scores` (NB: `sys_nine_box_grid` NON esiste — drift Ledger). NUOVA `/talent-review` o tab in `/career-succession`; componenti tier17 @heuresys/ui mai usati. SENSITIVE, no self-view di default.
 - **#30 A/L4 — gap closure (plans/actions/results)** · status: ACTIVE
   - priority: P2 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L4
-  - note: 746 righe; tab "Piani di chiusura" in `/gaps` + `/me/gaps` (self).
+  - note: ⏳ **API DONE + LIVE-TESTED S1018** (commit d48f4d4a): learning-gaps/closure-plans + analysis-results + :id/closure-actions + me/gaps/closure. Test 5/5 live. **RESTA tab web** "Piani di chiusura" in /gaps + /me/gaps.
 - **#31 A/L6 — metrologia KPI (measurements/methods/weighting)** · status: ACTIVE
   - priority: P3 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L6
+  - note: ⏳ **API DONE + LIVE-TESTED S1018** (commit e0748c87): kpi-definitions/assessment-methods + weighting-rules + :id/metrics + :id/measurements (orgGate service). Test 6/6 live. **RESTA panel web** Metrologia in /kpis + /positions/[id]/kpis.
 - **#32 A/L7 — comp & reward in lettura (+handoff ledger, +recommendations list)** · status: ACTIVE
   - priority: P3 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L7
   - note: chiude l'anomalia `sys_payroll_handoff_records` write-only. COMPENSATION → orgGate + I21 (HRMS_MANAGER plenipotenziario).

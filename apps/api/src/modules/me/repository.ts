@@ -440,11 +440,12 @@ const numOrNull = (v: string | null): number | null => (v == null ? null : Numbe
 /** Obiettivi — the caller's own goals (subject-user backfilled by mig 000166). */
 export async function loadMyGoals(q: DbConnector, userId: string): Promise<MeGoal[]> {
   const res = await q.query<{
+    goal_id: string;
     title: string | null; description: string | null; type: string | null; category: string | null;
     status: string | null; priority: string | null; progress_percent: string | null; weight: string | null;
     start_date: string | null; due_date: string | null; completed_at: Date | null;
   }>(
-    `SELECT goal_title AS title, goal_description AS description, goal_type AS type, goal_category AS category,
+    `SELECT goal_id, goal_title AS title, goal_description AS description, goal_type AS type, goal_category AS category,
             goal_status AS status, goal_priority AS priority,
             goal_progress_percent AS progress_percent, goal_weight AS weight,
             to_char(goal_start_date,'YYYY-MM-DD') AS start_date,
@@ -454,6 +455,7 @@ export async function loadMyGoals(q: DbConnector, userId: string): Promise<MeGoa
       ORDER BY goal_due_date DESC NULLS LAST, goal_title`, [userId],
   );
   return res.rows.map((r) => ({
+    goalId: r.goal_id,
     title: r.title, description: r.description, type: r.type, category: r.category,
     status: r.status, priority: r.priority,
     progressPercent: numOrNull(r.progress_percent), weight: numOrNull(r.weight),

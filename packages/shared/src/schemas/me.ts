@@ -489,6 +489,7 @@ export type CreateMeCareerTargetBody = z.infer<typeof CreateMeCareerTargetBodySc
 
 // Obiettivi — the caller's own goals (sys_goals, subject-user backfilled mig 000166).
 export const MeGoalSchema = z.object({
+  goalId: z.uuid(), // #26 (S1018): enables the self activity-timeline drill-down
   title: z.string().nullable(),
   description: z.string().nullable(),
   type: z.string().nullable(),

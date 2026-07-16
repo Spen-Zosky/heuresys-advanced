@@ -1,7 +1,7 @@
 # RESUME — Batch autonomo S1018 (fresh session restart point)
 
 > **Scopo**: ripartire dal punto esatto di interruzione del batch full-scope S1018 senza ripetere azioni fatte né perdere azioni da fare. Congelato 2026-07-16 su richiesta di Enzo (fresh session).
-> **Piano completo (autoritativo)**: `/home/ubuntu/.claude/plans/usa-superpowers-skills-tools-compressed-ocean.md` — leggilo per intero all'avvio. **Register**: `docs/kb/SOT_BACKLOG.md` (item #4-#63). Questo file è l'indice di stato del batch.
+> **Piano completo (autoritativo)**: `docs/kb/PLAN_S1018_BATCH.md` (versionato nel repo — origine: piano di sessione VM S1018) — leggilo per intero all'avvio. **Register**: `docs/kb/SOT_BACKLOG.md` (item #4-#63). Questo file è l'indice di stato del batch.
 
 ## Come ripartire (fresh session)
 1. `avvia sessione` → menu; poi leggi **questo file** + il **piano** sopra.
@@ -51,7 +51,7 @@ Le assertion GRANT-count NON-scoped di `000060` (matching:read/admin) e `000145`
 
 ## DA FARE (ordine wave — riprendi da W2)
 Riferimento dettagliato per-wave nel **piano** (link in cima). Sintesi:
-- **W2** Serie A P2/P3 = **GIÀ FATTA** (#29 talent-review NON fatto! — vedi sotto). **ATTENZIONE**: #29 talent-review (9-box) è ancora **ACTIVE, da fare** — era in W2 del piano ma NON è stato eseguito. Blueprint completo nell'output del Plan agent (in `usa-superpowers...md` sezione W2 + conversazione). #32 comp read e #33 time-off del piano W2 NON ancora fatti neanche loro. **→ Prossimo step concreto: #29, #32, #33** (Serie A P2/P3 residua) OPPURE passare a W3 Serie B.
+- **W2** Serie A P2/P3 = **GIÀ FATTA** (#29 talent-review NON fatto! — vedi sotto). **ATTENZIONE**: #29 talent-review (9-box) è ancora **ACTIVE, da fare** — era in W2 del piano ma NON è stato eseguito. Blueprint completo nell'output del Plan agent (in `docs/kb/PLAN_S1018_BATCH.md` sezione W2 + conversazione). #32 comp read e #33 time-off del piano W2 NON ancora fatti neanche loro. **→ Prossimo step concreto: #29, #32, #33** (Serie A P2/P3 residua) OPPURE passare a W3 Serie B.
 - **W3** Serie B: #34 approval handlers, #37 reward-gate engine, #36 viz versioning+export, #38 inbox SSE, #35 observability. Blueprint dettagliato = output Plan agent "B-series" (in conversazione S1018 / piano).
 - **W4** GTM deferrals (#4): lead admin UI, honeypot obs, /privacy reale, a11y Lighthouse ≥95.
 - **W5** Serie G: #61 G2 (:delete perms 27 route), #62 G3 (acyclicity+warn), #60 G1 (retention 547MB, snapshot prima), #63 G5 (archive script).

@@ -1,7 +1,7 @@
 # SOT_BACKLOG — Azioni da riprendere (CLI-owned)
 
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
-> **Aggiornato**: 2026-07-06 (S1016 — register esteso con serie A+B #25-#40 + #41 graphify top-up; #25 DONE live).
+> **Aggiornato**: 2026-07-16 (S1018 — batch full-scope: serie C-G convertite in register (#42-#63), riattivate #4-deferrals/#24/#9-11, #40 sbloccato — Voyage autorizzato da Enzo).
 
 ## 🗂 Action register — item strutturati del menu (corsie ACTIVE/GATED/WAIT-INPUT/HOLD/INTERRUPTED)
 
@@ -15,26 +15,22 @@
 - **#4 go-to-market** · status: ACTIVE
   - priority: P1 · effort: per-deliverable · doc: docs/superpowers/specs/2026-06-22-gtm-investor-onepager-and-guided-demo-design.md
   - note: SHIPPED — front-door landing (S1002) + investor one-pager `/investors` + demo guidata `/demo` (S1003 deliverable 2+3: metriche live via `GET /v1/public/platform-stats`, print-PDF, tour 10 screenshot reali RTL_BANK; `lead_source` enum WEBSITE/INVESTOR/DEMO). **S1011 verify+riconciliazione**: STATIC_FACTS aggiornati a S1011 (modules 85/endpoints 466/migrations 165/apiTests 1098/e2e 123/pages 98), moat skills **21939→14093** corretto nel doc-spec (il tile è live da F2), spec → **IMPLEMENTED**; 9/9 E2E + i18n verdi su www. Programma in-flight; prossimo deliverable autorità *cosa* = Enzo — candidato: **pricing page** (serve numeri prezzi/tier). Stesso flow brainstorm→spec→piano→build.
-- **#24 Autorizzazione bi-assiale (ADR-0027) — resta solo F4 (asse funzionale/attività)** · status: HOLD
-  - hold-reason: **F0+F1+F2+F3+F5+F6+I21 DONE (S1013 → D-50 RISOLTO; S1014 estende F3 a 4 moduli sibling fuori-mappa scoperti in code-review → 15 moduli org-gated)** — elenco moduli e dettaglio chiusura in un posto solo: `DEBT_REGISTER.md` D-50 (che riconcilia anche la mappa F3: 13 heading = 11 moduli unici, 2 heading duplicati). Resta solo **F4**: asse funzionale + endpoint attività (tasks/objectives/operational-KPI/operational-approvals) + `sys_process_participants` (user-level process membership) — il pezzo più grosso (nuovo dominio "activity"), include la metà cross-tree di F5.
-  - doc: docs/architecture/adr/0027_two_axis_contextual_authorization.md §5 + docs/superpowers/specs/2026-06-30-two-axis-authorization-model-design.md §3 (F4) + docs/superpowers/specs/2026-07-01-f3-sensitive-modules-map.md (storico)
-  - decided-by: Enzo (opzione A: no sicurezza affrettata; F4 a sessione dedicata) · hold-since: S1013 (2026-07-01)
-  - reactivation-trigger: {kind: manual} — Enzo conferma le **activity entities** (task model generico vs riuso goals/approvals, design §4-§5) e avvia F4
+- **#24 Autorizzazione bi-assiale (ADR-0027) — resta solo F4 (asse funzionale/attività)** · status: ACTIVE
+  - priority: P1 · effort: ~1-2 sessioni · doc: docs/architecture/adr/0027_two_axis_contextual_authorization.md §5 + docs/superpowers/specs/2026-06-30-two-axis-authorization-model-design.md §3 (F4)
+  - note: riattivato S1018 (trigger manuale sciolto): **decisione Enzo = activity entities via riuso goals/approvals** (no task model generico). Storico F0-F3+F5+F6+I21 chiuso: `DEBT_REGISTER.md` D-50. Scope: `sys_process_participants` + resolver funzionale (`resolveActivityReadScope`, hard-throw su risorse sensibili) + boot-gate `activityGate` + dual-class row-shape in `canReadGoal`/`canReadOkr` + approvals→ACTIVITY; rollout shadow→enforce + rerun 21 suite scope (wave W9 programma S1018).
 - **#23 Personal area /me — portale legacy → navtab (programma S1010-S1011)** · status: DONE
   - priority: P1 · effort: chiuso · doc: SOT_STATE Delta S1010+S1011
   - note: ✅ **DONE S1011** — programma completo, tutto LIVE in prod. `/me/profile` a tab Panoramica/Organizzazione/Contratti/**Cedolini**/Documenti (7 satelliti persona + `sys_user_pay_slips` mig 000164-167) · My HR `/me` a sub-tab Riepilogo/Performance/Presenze · **`/me/career`** 3 sub-tab Obiettivi/Percorsi/Rischio&Successione (backfill goals 632 + `goal:read:self`) · **F5** completa la Personal area: **/me/analytics** (attendance-trend + KPI), **/me/org-chart** (ORG_CHART live + highlight nodo proprio), **/me/approvals** (track-only, empty-state reale) — mig 000168 (3 nav PERSONAL + `approval:read:self`). Decisione IA **Ibrido** (Enzo); approvals **track-only** (Enzo, no submission). `ProfileTabs` riusabile. integration + Playwright verdi per fase; deploy VM + live www verificati (route 401, pagine 307). Residuo evoluzione (submission ferie/permessi) = decisione di prodotto futura, non aperta.
-- **#4 GTM v1-deferrals (follow-up del primo deliverable)** · status: HOLD
-  - hold-reason: non-bloccanti, deferiti al final review del primo deliverable: lead-management admin UI + status-filter (oggi GET admin + export CSV/XLSX) · honeypot-trip observability · `/privacy` full page (oggi stub) · landing a11y audit dedicato
-  - decided-by: Claude (deferral v1) · hold-since: S1002 (2026-06-21)
-  - reactivation-trigger: Enzo li richiede, o quando il programma GTM matura oltre il primo deliverable
+- **#4 GTM v1-deferrals (follow-up del primo deliverable)** · status: ACTIVE
+  - priority: P2 · effort: ~0.5-1 sessione · doc: docs/superpowers/specs/2026-06-22-gtm-investor-onepager-and-guided-demo-design.md
+  - note: riattivato S1018 su scelta Enzo (trigger sciolto): lead-management admin UI + status-filter + PATCH status · honeypot-trip observability · `/privacy` full page reale IT/EN · landing a11y audit (Lighthouse ≥95 su `/`, `/investors`, `/demo`, `/login`). Wave W4 programma S1018.
 - **#17 Wave-3 multi-tenant-onboarding (residuo L2/L3 multi-industry)** · status: HOLD
   - hold-reason: **L1 (fix Heuresys System) GIÀ FATTO** (S987/S988 — mig `000110` remap `d5855519`→HEURESYS + `000111` import `chiara.spenuso` WITH login; tenant HEURESYS live: 4 utenti / 4 pos / 3 OU, mapping corretto — verificato S1005). Il residuo è l'onboarding **L2/L3** dei tenant legacy **non-banking** SmartFood (82 emp) + EcoNova (26 emp) → **decisione di prodotto** (la tassonomia processi/KPI v5 è banking-native: multi-industry vs single-industry reference), autorità *cosa* = Enzo.
   - decided-by: Enzo · hold-since: S999 (2026-06-20) · L1-confermato-done S1005 ("solo aggiorna register")
   - reactivation-trigger: Enzo decide la strategia multi-industry e avvia L2 (pilota EcoNova) o L3
-- **#9/#10/#11 audit forense 100X** · status: HOLD
-  - hold-reason: programma audit (S-100X-A ecosistema design-only + triage 14 dossier Fase-C + epic S-100X-E) — esplicitamente a sessione dedicata
-  - decided-by: Enzo · hold-since: S999 (2026-06-20)
-  - reactivation-trigger: Enzo richiede una sessione di audit dedicata
+- **#9/#10/#11 audit forense 100X** · status: ACTIVE
+  - priority: P2 · effort: ~1-2 sessioni (WS-L + triage + gate) · doc: docs/kb/improvement/MASTER_PLAN_100X.md + docs/kb/improvement/TODO_100X.md
+  - note: riattivato S1018 (Enzo, trigger sciolto). Scope wave W12: **WS-L** ecosystem design-only (skill claude-ecosystem-optimizer, NO implementazione → WS-L_PLAN.md + WS-L_TODO.md) + fix bug hook claude-mem · **triage D-01..D-14** con esito registrato per dossier secondo le raccomandazioni interne (mandato batch S1018) · epiche GO conservative piccole inline; epiche strutturali GO → branch dedicati successivi (regola MASTER_PLAN) · re-run `/full-forensic-audit` come gate pre-release del batch.
 - **#8 EMAIL dormiente** · status: WAIT-INPUT
   - input-richiesto: app-password Outlook (`enzo.spenuso@outlook.com`)
   - perche-solo-tuo: credenziale personale → attiva EMAIL_OTP + digest live in 1 mossa (transport già pronto)
@@ -101,14 +97,73 @@
   - blocker: dipende da **#8** (app-password Outlook, WAIT-INPUT) — transport pronto, chassis testato
   - unblock-trigger: {kind: manual} — #8 risolto (credenziale fornita da Enzo)
   - doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B4 · effort post-input: ~2h
-- **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: GATED
-  - blocker: richiede embedding Voyage a query-time → decisione credenziale runtime (S996 le tiene dormienti)
-  - unblock-trigger: {kind: manual} — Enzo autorizza l'uso runtime della API key Voyage
-  - doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B1 · effort post-decisione: ~2h
+- **#40 B/B1 — free-text semantic search (flag `MATCHING_FREETEXT_ENABLED`)** · status: ACTIVE
+  - priority: P1 · effort: ~2h · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B1
+  - note: sbloccato S1018 — **Enzo autorizza l'uso runtime della API key Voyage** (unblock-trigger sciolto). Flag già ON in `.env` VM; resta il wiring UI (`/me/matching` + `/skills`) + verifica live del query-time embedding. Wave W1 programma S1018.
 - **#41 graphify — top-up semantico (26 chunk mancanti)** · status: GATED
   - blocker: limite di spesa mensile Claude colpito durante il run S1016 (26/52 chunk estratti; ~201 file con estrazione previous-run o solo-AST)
   - unblock-trigger: {kind: manual} — limite di spesa resettato/alzato (claude.ai/settings/usage)
   - doc: graphify-out/PENDING_SEMANTIC_TOPUP.md · effort post-reset: ~0.5h (chunk fatti = cache; girano solo i mancanti, poi merge+recluster)
+
+### Serie C+D+E+F+G (S1018 — selezione Enzo "includile tutte", dossier `docs/product/DEVELOPMENT_LINES_{C,D,E,F,G}_*.md`)
+
+- **#42 C/C4 — fondazioni frontend (paginazione server-side, refactor shared-types, apiFetch FormData)** · status: ACTIVE
+  - priority: P1 · effort: ~1.5-2 sessioni · doc: docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md §C4
+  - note: il pattern list-query nasce in W0 (C4-mini) e vale per tutte le pagine NUOVE del batch; qui il retrofit delle ~20 pagine esistenti + refactor dei 62/87 shared schemas senza consumer tipizzato.
+- **#43 C/C2 — editing cataloghi (skills/KPI/learning/job) + nuova `/job-catalog`** · status: ACTIVE
+  - priority: P2 · effort: ~2-2.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md §C2
+- **#44 C/C1 — editing People & Org (users/positions/org-units)** · status: ACTIVE
+  - priority: P2 · effort: ~2 sessioni · doc: docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md §C1
+- **#45 C/C3 — editing tenant & platform** · status: ACTIVE
+  - priority: P3 · effort: ~1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md §C3
+- **#46 D/D1 — skill possession per-employee (import wave-2)** · status: ACTIVE
+  - priority: P1 · effort: ~1.5-2 sessioni · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D1
+- **#47 D/D2 — engagement/PULSAR history (sblocca flight-risk pieno + fix dual-shape)** · status: ACTIVE
+  - priority: P1 · effort: ~1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D2
+  - note: regression obbligatoria — recompute flight-risk before/after diffabile su `sys_flight_risk_scores`.
+- **#48 D/D3 — goal history GOKMER (gemello di #26)** · status: ACTIVE
+  - priority: P2 · effort: ~1 sessione · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D3
+  - note: a valle ri-eseguire l'E2E di #26 come regression.
+- **#49 D/D5 — employee timeline** · status: ACTIVE
+  - priority: P2 · effort: ~1-1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D5
+- **#50 D/D4 — legacy knowledge graph (kg_nodes/kg_edges 139k)** · status: ACTIVE
+  - priority: P3 · effort: ~2-3 sessioni · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D4
+  - note: richiede destination design prima dell'import.
+- **#51 E/E1 — whistleblowing (D.Lgs 24/2023) con ruolo custodian dedicato** · status: ACTIVE
+  - priority: P1 · effort: ~2-3 sessioni · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E1
+  - note: **decisione Enzo S1018: sì, compliance-by-design** — ruolo WHISTLEBLOWING_CUSTODIAN fuori catena org (deroga ADR-0027 → nuovo ADR-0028 + proposta invariante I22), canale anche anonimo (access-code), crypto app-level, test negativi TA/HRMS/PA/MANAGER=403. Wave W10.
+- **#52 E/E2 — SSO enterprise (Azure AD / Google OIDC)** · status: WAIT-INPUT
+  - input-richiesto: client ID + secret di un IdP reale (app registration Azure AD oppure OAuth client Google OIDC)
+  - perche-solo-tuo: la registrazione dell'app su un tenant IdP è una risorsa esterna che solo Enzo può creare; senza IdP reale la DoD live E2E non è dimostrabile
+- **#53 E/E4 — payroll ops read-extended** · status: ACTIVE
+  - priority: P3 · effort: ~1-1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E4
+  - note: self-contained (import comp in W7 + read); payroll EXECUTION resta non-goal.
+- **#54 E/E5 — recruiting/ATS (cluster `/recruiting`)** · status: ACTIVE
+  - priority: P2 · effort: ~5-7 sessioni (fasi con commit atomici) · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E5
+  - note: decisione Enzo S1018 — in coda al batch (wave W11). Concept-porting dal cantiere evo, mai codice (I5: no RLS).
+- **#55 F/F1 — Essential Capability Ranker** · status: ACTIVE
+  - priority: P1 · effort: ~1.5-2 sessioni · doc: docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md §F1
+- **#56 F/F2 — VRIO scorecard (`/org-director/vrio`)** · status: ACTIVE
+  - priority: P2 · effort: ~2-2.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md §F2
+- **#57 F/F3 — OHI org-health scorecard** · status: ACTIVE
+  - priority: P2 · effort: ~2-2.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md §F3
+  - note: dipende da #47 (D2 engagement); componente mancante → re-normalize-on-missing, mai fabbricata.
+- **#58 F/F4 — AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie)** · status: ACTIVE
+  - priority: P2 · effort: ~2-3 sessioni · doc: docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md §F4
+  - note: audit table `sys_advisor_suggestions` persistita PRIMA del display; validator scarta suggerimenti senza citations risolvibili.
+- **#59 F/F5 — ESS self-view FULL (capability + flight-risk con evidenze)** · status: ACTIVE
+  - priority: P2 · effort: ~1 sessione · doc: docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md §F5
+  - note: **decisione Enzo S1018: tutto visibile al dipendente** — supersede della scelta D-6 da registrare nel decision-log PRIMA del codice.
+- **#60 G/G1 — retention & storage (archive `audit.import_validation_results` 547MB)** · status: ACTIVE
+  - priority: P2 · effort: ~1-1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md §G1
+  - note: snapshot PRIMA; policy keep failures+90gg; VACUUM FULL = op manuale off-hours documentata.
+- **#61 G/G2 — RBAC hygiene (perm `:delete` dedicati su 27 route; normalizzazione proxy)** · status: ACTIVE
+  - priority: P1 · effort: ~1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md §G2
+- **#62 G/G3 — integrità preventiva (acyclicity IS_A, warn LIMIT 5000, dual-shape)** · status: ACTIVE
+  - priority: P2 · effort: ~1 sessione · doc: docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md §G3
+- **#63 G/G5 — archivio script esausti (move-not-delete)** · status: ACTIVE
+  - priority: P3 · effort: ~0.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md §G5
+  - note: G4 doc-drift confluisce nel handoff di chiusura; G6 wiki-note idem (il top-up semantico resta #41 GATED su spend-limit).
 
 ## ✅ Gap#1 DONE (S999, 2026-06-20) — programma-faro "rendi il prodotto dimostrabile" chiuso end-to-end
 

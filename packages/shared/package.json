@@ -319,6 +319,10 @@
       "types": "./dist/schemas/goals.d.ts",
       "default": "./src/schemas/goals.ts"
     },
+    "./schemas/provenance": {
+      "types": "./dist/schemas/provenance.d.ts",
+      "default": "./src/schemas/provenance.ts"
+    },
     "./schemas/okrs": {
       "types": "./dist/schemas/okrs.d.ts",
       "default": "./src/schemas/okrs.ts"

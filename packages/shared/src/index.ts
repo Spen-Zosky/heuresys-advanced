@@ -80,6 +80,7 @@ export * from "./schemas/surveys.js";
 export * from "./schemas/engagement-feedback.js";
 export * from "./schemas/goals.js";
 export * from "./schemas/okrs.js";
+export * from "./schemas/provenance.js";
 export * from "./schemas/predictions.js";
 export * from "./schemas/semantic-matching.js";
 export * from "./schemas/insights.js";

@@ -105,6 +105,7 @@ import { surveysRoutes } from "./modules/surveys/routes.js";
 import { engagementFeedbackRoutes } from "./modules/engagement-feedback/routes.js";
 import { goalsRoutes } from "./modules/goals/routes.js";
 import { okrsRoutes } from "./modules/okrs/routes.js";
+import { provenanceRoutes } from "./modules/provenance/routes.js";
 import { predictionsRoutes } from "./modules/predictions/routes.js";
 import { engagementRoutes } from "./modules/engagement/routes.js";
 import { semanticMatchingRoutes } from "./modules/semantic-matching/routes.js";
@@ -421,6 +422,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(engagementFeedbackRoutes, { prefix: "/v1/engagement-feedback" });
   await app.register(goalsRoutes, { prefix: "/v1/goals" });
   await app.register(okrsRoutes, { prefix: "/v1/okrs" });
+  await app.register(provenanceRoutes, { prefix: "/v1/provenance" }); // #28 Trust Ledger (S1018)
   await app.register(predictionsRoutes, { prefix: "/v1/predictions" });
   await app.register(engagementRoutes, { prefix: "/v1/engagement" });
   await app.register(semanticMatchingRoutes, { prefix: "/v1/matching", deps: options.matchingDeps });

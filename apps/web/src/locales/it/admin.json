@@ -705,5 +705,33 @@
     "approvalResolved": "Decisione inviata: {{decision}}",
     "errorRun": "Esecuzione fallita: {{message}}",
     "noSession": "Nessuna sessione: effettua il login per inoltrare i cookie al gateway."
+  },
+  "provenance": {
+    "title": "Registro di provenienza",
+    "description": "Lineage di ingestione di ogni record importato — fonte, confidenza di mapping, marcatori di assistenza AI e approvazione umana (audit AI-Act / GDPR art.22).",
+    "byTable": "Per tabella di destinazione",
+    "records": "Record",
+    "error": "Errore di caricamento.",
+    "empty": "Nessun record di lineage.",
+    "allStatuses": "Tutti gli stati",
+    "aiAssisted": "Assistito AI",
+    "humanApproved": "Approvato da umano",
+    "kpi": {
+      "records": "Record",
+      "avgConfidence": "Confidenza media",
+      "humanApproved": "Approvati",
+      "aiAssisted": "Assistiti AI",
+      "conflicted": "In conflitto"
+    },
+    "cols": {
+      "targetTable": "Tabella destinazione",
+      "sourceTable": "Tabella sorgente",
+      "confidence": "Confidenza",
+      "status": "Stato",
+      "provenance": "Marcatori",
+      "total": "Totale",
+      "avgConfidence": "Conf. media",
+      "conflicted": "In conflitto"
+    }
   }
 }

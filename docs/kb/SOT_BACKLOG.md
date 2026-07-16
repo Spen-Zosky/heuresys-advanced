@@ -64,9 +64,9 @@
 - **#27 A/L2 — evidence layer (le prove sotto gli score)** · status: ACTIVE
   - priority: P1 · effort: ~8-12h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L2
   - note: ⏳ **API DONE + LIVE-TESTED S1018** (commit d4d0eae3): modulo evidence (/subject/:userId + /for-score + /me/evidence) UNION su 9 tabelle + footer provenance lineage; data-class evidence=EVALUATION (D-51) + orgGate + I19 + 360-anon null; perm mig 000172. Test 7/7 live. **RESTA la UI web** (EvidenceDrawer in insights/skill-gap/gaps/me-gaps/users) → non chiuso DoD finché la pagina non è dimostrata live.
-- **#28 A/L0 — Trust Ledger: read-API provenance (70.972 righe lineage)** · status: ACTIVE
+- **#28 A/L0 — Trust Ledger: read-API provenance (70.972 righe lineage)** · status: DONE
   - priority: P1 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L0
-  - note: ⏳ **API DONE + LIVE-TESTED S1018** (commit e65482a6): modulo provenance /v1/provenance (filtri+paginazione) + /summary (GROUP BY); perm provenance:read PLATFORM/TENANT_ADMIN + sidebar row (mig 000171). Test 6/6 live (total==70.972). **RESTA la pagina web** `/provenance` (KPIStrip + tabelle) → DoD live pending.
+  - note: ✅ DONE S1018 (API e65482a6 + web) — modulo provenance /v1/provenance + /summary (perm PLATFORM/TENANT_ADMIN, mig 000171); pagina `/provenance` (KPIStrip totals + summary per-tabella + record paginati server-side C4-mini + filtro status). Test 6/6 API + E2E provenance verde (platformAdmin reale, 70.972 righe live). Deliverable GTM AI-Act/art.22.
 - **#29 A/L3 — talent-review 9-box (talent/fit/readiness/succession scores)** · status: ACTIVE
   - priority: P2 · effort: ~6-8h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L3
   - note: 9-box derivata da `sys_talent_scores` (NB: `sys_nine_box_grid` NON esiste — drift Ledger). NUOVA `/talent-review` o tab in `/career-succession`; componenti tier17 @heuresys/ui mai usati. SENSITIVE, no self-view di default.

@@ -705,5 +705,33 @@
     "approvalResolved": "Decision sent: {{decision}}",
     "errorRun": "Run failed: {{message}}",
     "noSession": "No session: log in so the cookies are forwarded to the gateway."
+  },
+  "provenance": {
+    "title": "Provenance ledger",
+    "description": "Ingestion lineage of every imported record — source, mapping confidence, AI-assist and human-approval marks (AI-Act / GDPR art.22 audit).",
+    "byTable": "By target table",
+    "records": "Records",
+    "error": "Failed to load.",
+    "empty": "No lineage records.",
+    "allStatuses": "All statuses",
+    "aiAssisted": "AI-assisted",
+    "humanApproved": "Human-approved",
+    "kpi": {
+      "records": "Records",
+      "avgConfidence": "Avg confidence",
+      "humanApproved": "Human-approved",
+      "aiAssisted": "AI-assisted",
+      "conflicted": "Conflicted"
+    },
+    "cols": {
+      "targetTable": "Target table",
+      "sourceTable": "Source table",
+      "confidence": "Confidence",
+      "status": "Status",
+      "provenance": "Marks",
+      "total": "Total",
+      "avgConfidence": "Avg conf.",
+      "conflicted": "Conflicted"
+    }
   }
 }

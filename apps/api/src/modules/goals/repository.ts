@@ -116,3 +116,216 @@ export async function deleteGoal(q: DbConnector, id: string): Promise<boolean> {
   const res = await q.query(`DELETE FROM sys.sys_goals WHERE goal_id = $1`, [id]);
   return (res.rowCount ?? 0) > 0;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #26 (S1018) — goal-life sub-resources (READ-only, mig 000037 satellites).
+// Same conventions: date ::text, numeric → Number(), {items,total} envelopes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+import type {
+  GoalUpdate, GoalCheckIn, GoalMilestone, GoalComment, GoalAlignment,
+  GoalTemplate, GoalTemplateListQuery,
+} from "@heuresys/shared";
+
+interface GoalUpdateRow {
+  update_id: string; update_goal_id: string; update_author_user_id: string | null;
+  update_type: string; update_previous_progress: string | null; update_new_progress: string | null;
+  update_previous_status: string | null; update_new_status: string | null;
+  update_content: string | null; update_attachments: unknown[]; created_at: Date;
+}
+export async function listGoalUpdates(
+  q: DbConnector, goalId: string, limit: number, offset: number,
+): Promise<{ items: GoalUpdate[]; total: number }> {
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_goal_updates WHERE update_goal_id = $1`, [goalId]);
+  const res = await q.query<GoalUpdateRow>(
+    `SELECT update_id, update_goal_id, update_author_user_id, update_type,
+            update_previous_progress, update_new_progress, update_previous_status,
+            update_new_status, update_content, update_attachments, created_at
+       FROM sys.sys_goal_updates WHERE update_goal_id = $1
+      ORDER BY created_at DESC LIMIT $2 OFFSET $3`, [goalId, limit, offset]);
+  return {
+    total: Number(totalRow.rows[0]?.total ?? 0),
+    items: res.rows.map((r) => ({
+      updateId: r.update_id, goalId: r.update_goal_id, authorUserId: r.update_author_user_id,
+      type: r.update_type as GoalUpdate["type"],
+      previousProgress: r.update_previous_progress === null ? null : Number(r.update_previous_progress),
+      newProgress: r.update_new_progress === null ? null : Number(r.update_new_progress),
+      previousStatus: r.update_previous_status, newStatus: r.update_new_status,
+      content: r.update_content, attachments: r.update_attachments ?? [],
+      createdAt: r.created_at.toISOString(),
+    })),
+  };
+}
+
+interface GoalCheckInRow {
+  check_in_id: string; check_in_goal_id: string; check_in_subject_user_id: string;
+  check_in_date: string; check_in_previous_progress: number | null; check_in_new_progress: number;
+  check_in_status_update: string | null; check_in_notes: string | null;
+  check_in_blockers: string | null; check_in_next_steps: string | null;
+  check_in_confidence_level: number | null; created_at: Date;
+}
+export async function listGoalCheckIns(
+  q: DbConnector, goalId: string, limit: number, offset: number,
+): Promise<{ items: GoalCheckIn[]; total: number }> {
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_goal_check_ins WHERE check_in_goal_id = $1`, [goalId]);
+  const res = await q.query<GoalCheckInRow>(
+    `SELECT check_in_id, check_in_goal_id, check_in_subject_user_id, check_in_date::text AS check_in_date,
+            check_in_previous_progress, check_in_new_progress, check_in_status_update,
+            check_in_notes, check_in_blockers, check_in_next_steps, check_in_confidence_level, created_at
+       FROM sys.sys_goal_check_ins WHERE check_in_goal_id = $1
+      ORDER BY created_at DESC LIMIT $2 OFFSET $3`, [goalId, limit, offset]);
+  return {
+    total: Number(totalRow.rows[0]?.total ?? 0),
+    items: res.rows.map((r) => ({
+      checkInId: r.check_in_id, goalId: r.check_in_goal_id, subjectUserId: r.check_in_subject_user_id,
+      date: r.check_in_date, previousProgress: r.check_in_previous_progress,
+      newProgress: r.check_in_new_progress,
+      statusUpdate: r.check_in_status_update as GoalCheckIn["statusUpdate"],
+      notes: r.check_in_notes, blockers: r.check_in_blockers, nextSteps: r.check_in_next_steps,
+      confidenceLevel: r.check_in_confidence_level, createdAt: r.created_at.toISOString(),
+    })),
+  };
+}
+
+interface GoalMilestoneRow {
+  milestone_id: string; milestone_goal_id: string; milestone_title: string;
+  milestone_description: string | null; milestone_target_date: string | null;
+  milestone_completed_at: Date | null; milestone_status: string; milestone_weight: string;
+  created_at: Date; updated_at: Date;
+}
+export async function listGoalMilestones(
+  q: DbConnector, goalId: string, limit: number, offset: number,
+): Promise<{ items: GoalMilestone[]; total: number }> {
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_goal_milestones WHERE milestone_goal_id = $1`, [goalId]);
+  const res = await q.query<GoalMilestoneRow>(
+    `SELECT milestone_id, milestone_goal_id, milestone_title, milestone_description,
+            milestone_target_date::text AS milestone_target_date, milestone_completed_at,
+            milestone_status, milestone_weight, created_at, updated_at
+       FROM sys.sys_goal_milestones WHERE milestone_goal_id = $1
+      ORDER BY milestone_target_date ASC NULLS LAST, created_at ASC LIMIT $2 OFFSET $3`,
+    [goalId, limit, offset]);
+  return {
+    total: Number(totalRow.rows[0]?.total ?? 0),
+    items: res.rows.map((r) => ({
+      milestoneId: r.milestone_id, goalId: r.milestone_goal_id, title: r.milestone_title,
+      description: r.milestone_description, targetDate: r.milestone_target_date,
+      completedAt: r.milestone_completed_at ? r.milestone_completed_at.toISOString() : null,
+      status: r.milestone_status as GoalMilestone["status"], weight: Number(r.milestone_weight),
+      createdAt: r.created_at.toISOString(), updatedAt: r.updated_at.toISOString(),
+    })),
+  };
+}
+
+interface GoalCommentRow {
+  comment_id: string; comment_goal_id: string; comment_author_user_id: string | null;
+  comment_parent_comment_id: string | null; comment_content: string;
+  comment_is_private: boolean; created_at: Date; updated_at: Date;
+}
+/**
+ * Private comments are visible only to their author or to a tenant-wide reader
+ * (org scope kind all|tenant) — decided in the service, passed as includePrivate.
+ */
+export async function listGoalComments(
+  q: DbConnector, goalId: string, viewerUserId: string, includePrivate: boolean,
+  limit: number, offset: number,
+): Promise<{ items: GoalComment[]; total: number }> {
+  const vis = includePrivate
+    ? ""
+    : ` AND (comment_is_private = false OR comment_author_user_id = $2)`;
+  const baseParams: unknown[] = includePrivate ? [goalId] : [goalId, viewerUserId];
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_goal_comments WHERE comment_goal_id = $1${vis}`,
+    baseParams);
+  const params = [...baseParams, limit, offset];
+  const res = await q.query<GoalCommentRow>(
+    `SELECT comment_id, comment_goal_id, comment_author_user_id, comment_parent_comment_id,
+            comment_content, comment_is_private, created_at, updated_at
+       FROM sys.sys_goal_comments WHERE comment_goal_id = $1${vis}
+      ORDER BY created_at ASC LIMIT $${params.length - 1} OFFSET $${params.length}`, params);
+  return {
+    total: Number(totalRow.rows[0]?.total ?? 0),
+    items: res.rows.map((r) => ({
+      commentId: r.comment_id, goalId: r.comment_goal_id, authorUserId: r.comment_author_user_id,
+      parentCommentId: r.comment_parent_comment_id, content: r.comment_content,
+      isPrivate: r.comment_is_private,
+      createdAt: r.created_at.toISOString(), updatedAt: r.updated_at.toISOString(),
+    })),
+  };
+}
+
+interface GoalAlignmentRow {
+  alignment_id: string; alignment_source_goal_id: string; alignment_aligned_goal_id: string;
+  other_title: string | null; direction: "OUT" | "IN"; alignment_type: string;
+  alignment_weight: string; created_at: Date;
+}
+/** Both directions: OUT (goal → other) and IN (other → goal), other goal title joined. */
+export async function listGoalAlignments(
+  q: DbConnector, goalId: string, limit: number, offset: number,
+): Promise<{ items: GoalAlignment[]; total: number }> {
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_goal_alignments
+      WHERE alignment_source_goal_id = $1 OR alignment_aligned_goal_id = $1`, [goalId]);
+  const res = await q.query<GoalAlignmentRow>(
+    `SELECT a.alignment_id, a.alignment_source_goal_id, a.alignment_aligned_goal_id,
+            g.goal_title AS other_title,
+            CASE WHEN a.alignment_source_goal_id = $1 THEN 'OUT' ELSE 'IN' END AS direction,
+            a.alignment_type, a.alignment_weight, a.created_at
+       FROM sys.sys_goal_alignments a
+       LEFT JOIN sys.sys_goals g ON g.goal_id =
+         CASE WHEN a.alignment_source_goal_id = $1 THEN a.alignment_aligned_goal_id
+              ELSE a.alignment_source_goal_id END
+      WHERE a.alignment_source_goal_id = $1 OR a.alignment_aligned_goal_id = $1
+      ORDER BY a.created_at DESC LIMIT $2 OFFSET $3`, [goalId, limit, offset]);
+  return {
+    total: Number(totalRow.rows[0]?.total ?? 0),
+    items: res.rows.map((r) => ({
+      alignmentId: r.alignment_id, sourceGoalId: r.alignment_source_goal_id,
+      alignedGoalId: r.alignment_aligned_goal_id, alignedGoalTitle: r.other_title,
+      direction: r.direction, type: r.alignment_type as GoalAlignment["type"],
+      weight: Number(r.alignment_weight), createdAt: r.created_at.toISOString(),
+    })),
+  };
+}
+
+interface GoalTemplateRow {
+  template_id: string; template_name: string; template_description: string | null;
+  template_category: string | null; template_goal_type: string;
+  template_suggested_metrics: string[] | null; template_suggested_duration_days: number | null;
+  template_suggested_weight: string; template_difficulty_level: string;
+  template_is_company_wide: boolean; template_usage_count: number;
+  template_is_active: boolean; created_at: Date;
+}
+export async function listGoalTemplates(
+  q: DbConnector, tenantId: string | undefined, query: GoalTemplateListQuery,
+): Promise<{ items: GoalTemplate[]; total: number }> {
+  const where: string[] = ["template_deleted_at IS NULL"]; const params: unknown[] = [];
+  if (tenantId) { params.push(tenantId); where.push(`template_tenant_id = $${params.length}`); }
+  if (query.category) { params.push(query.category); where.push(`template_category = $${params.length}`); }
+  if (query.isActive !== undefined) { params.push(query.isActive); where.push(`template_is_active = $${params.length}`); }
+  const wc = `WHERE ${where.join(" AND ")}`;
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_goal_templates ${wc}`, params);
+  params.push(query.limit); const lim = params.length; params.push(query.offset); const off = params.length;
+  const res = await q.query<GoalTemplateRow>(
+    `SELECT template_id, template_name, template_description, template_category, template_goal_type,
+            template_suggested_metrics, template_suggested_duration_days, template_suggested_weight,
+            template_difficulty_level, template_is_company_wide, template_usage_count,
+            template_is_active, created_at
+       FROM sys.sys_goal_templates ${wc}
+      ORDER BY template_usage_count DESC, template_name ASC LIMIT $${lim} OFFSET $${off}`, params);
+  return {
+    total: Number(totalRow.rows[0]?.total ?? 0),
+    items: res.rows.map((r) => ({
+      templateId: r.template_id, name: r.template_name, description: r.template_description,
+      category: r.template_category, goalType: r.template_goal_type as GoalTemplate["goalType"],
+      suggestedMetrics: r.template_suggested_metrics, suggestedDurationDays: r.template_suggested_duration_days,
+      suggestedWeight: Number(r.template_suggested_weight),
+      difficultyLevel: r.template_difficulty_level as GoalTemplate["difficultyLevel"],
+      isCompanyWide: r.template_is_company_wide, usageCount: r.template_usage_count,
+      isActive: r.template_is_active, createdAt: r.created_at.toISOString(),
+    })),
+  };
+}

@@ -106,3 +106,34 @@ export const OkrKeyResultSchema = z.object({
 });
 export type OkrKeyResult = z.infer<typeof OkrKeyResultSchema>;
 export const OkrKeyResultListResponseSchema = z.object({ items: z.array(OkrKeyResultSchema), total: z.number().int().min(0) });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #26 (S1018) — OKR check-ins: READ-only over sys.sys_okr_check_ins (mig 000037).
+// NB: check_in_status_update is free TEXT in the DDL (unlike goal check-ins) —
+// deliberately NOT an enum here.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const OkrCheckInScopeEnum = z.enum(["KEY_RESULT","OKR_AGGREGATE"]);
+export const OkrCheckInSchema = z.object({
+  checkInId: z.uuid(),
+  okrId: z.uuid(),
+  keyResultId: z.uuid().nullable(),
+  subjectUserId: z.uuid().nullable(),
+  scope: OkrCheckInScopeEnum,
+  date: z.string(),
+  previousValue: z.number().nullable(),
+  newValue: z.number().nullable(),
+  previousProgress: z.number().nullable(),
+  newProgress: z.number().nullable(),
+  overallProgress: z.number().nullable(),
+  statusUpdate: z.string().nullable(),
+  nextSteps: z.string().nullable(),
+  confidenceLevel: z.number().nullable(),
+  notes: z.string().nullable(),
+  blockers: z.string().nullable(),
+  createdAt: z.iso.datetime(),
+});
+export type OkrCheckIn = z.infer<typeof OkrCheckInSchema>;
+export const OkrCheckInListResponseSchema = z.object({
+  items: z.array(OkrCheckInSchema), total: z.number().int().min(0),
+});

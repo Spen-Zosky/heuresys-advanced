@@ -706,3 +706,6 @@ export const MeDocumentsResponseSchema = z.object({
   items: z.array(MeDocumentSchema),
   total: z.number().int().min(0),
 });
+
+/** #26 (S1018): param for GET /v1/me/goals/:goalId/timeline. */
+export const MeGoalIdParamSchema = z.object({ goalId: z.uuid() });

@@ -17,6 +17,8 @@ import type {
 } from "@heuresys/shared";
 import { NotificationTypeSchema } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import * as goalsRepo from "../goals/repository.js";
+import { buildGoalTimeline } from "../goals/service.js";
 import * as authRepo from "../auth/repository.js";
 import type { ListActiveSessionsResponse, RevokeOtherSessionsResponse } from "@heuresys/shared";
 import { userPermissionCodes } from "../../middleware/rbac.js";
@@ -160,6 +162,13 @@ export const meService = {
   async getGoals(actor: SelfActor) {
     const items = await repo.loadMyGoals(pool, actor.userId);
     return { items, total: items.length };
+  },
+
+  /** #26 (S1018): activity timeline of ONE own goal — I17 self-scope: 404 unless subject = caller. */
+  async getGoalTimeline(actor: SelfActor, goalId: string) {
+    const g = await goalsRepo.findGoalById(pool, goalId);
+    if (!g || g.subjectUserId !== actor.userId) throw new NotFoundError("Goal");
+    return buildGoalTimeline(g);
   },
 
   /** Rischio & Successione sub-tab (F3b) — own flight-risk + succession-readiness. */

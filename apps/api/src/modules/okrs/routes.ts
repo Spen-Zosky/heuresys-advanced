@@ -7,6 +7,7 @@ import { actorFromRequest as actor } from "../../lib/actor.js";
 import {
   OkrSchema, OkrListQuerySchema, OkrListResponseSchema,
   CreateOkrBodySchema, UpdateOkrBodySchema, OkrIdParamSchema, OkrKeyResultListResponseSchema,
+  OkrCheckInListResponseSchema, GoalSubListQuerySchema,
 } from "@heuresys/shared";
 import { okrsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -29,6 +30,13 @@ export const okrsRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("okr:read")],
     schema: { params: OkrIdParamSchema, response: { 200: OkrKeyResultListResponseSchema } },
   }, async (req) => okrsService.listKeyResults(actor(req), req.params.id));
+
+  // #26 (S1018): OKR check-in history (read-only).
+  app.get("/:id/check-ins", {
+    config: { orgGate: "service" },
+    preHandler: [requirePermission("okr:read")],
+    schema: { params: OkrIdParamSchema, querystring: GoalSubListQuerySchema, response: { 200: OkrCheckInListResponseSchema } },
+  }, async (req) => okrsService.listCheckIns(actor(req), req.params.id, req.query));
 
   app.post("/", {
     preHandler: [app.verifyCsrf, requirePermission("okr:create")],

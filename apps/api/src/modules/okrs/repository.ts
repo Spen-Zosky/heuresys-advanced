@@ -134,3 +134,47 @@ export async function listKeyResultsByOkr(q: DbConnector, okrId: string): Promis
   const res = await q.query<KrRow>(`SELECT ${KR_COLS} FROM sys.sys_okr_key_results WHERE key_result_okr_id = $1 ORDER BY created_at ASC`, [okrId]);
   return { items: res.rows.map(toKr), total: res.rows.length };
 }
+
+// ── #26 (S1018): OKR check-ins (READ-only, sys.sys_okr_check_ins) ──
+import type { OkrCheckIn } from "@heuresys/shared";
+
+interface OkrCheckInRow {
+  check_in_id: string; check_in_okr_id: string; check_in_key_result_id: string | null;
+  check_in_subject_user_id: string | null; check_in_scope: string; check_in_date: string;
+  check_in_previous_value: string | null; check_in_new_value: string | null;
+  check_in_previous_progress: string | null; check_in_new_progress: string | null;
+  check_in_overall_progress: string | null; check_in_status_update: string | null;
+  check_in_next_steps: string | null; check_in_confidence_level: string | null;
+  check_in_notes: string | null; check_in_blockers: string | null; created_at: Date;
+}
+const numOrNull = (v: string | null): number | null => (v === null ? null : Number(v));
+
+export async function listOkrCheckIns(
+  q: DbConnector, okrId: string, limit: number, offset: number,
+): Promise<{ items: OkrCheckIn[]; total: number }> {
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_okr_check_ins WHERE check_in_okr_id = $1`, [okrId]);
+  const res = await q.query<OkrCheckInRow>(
+    `SELECT check_in_id, check_in_okr_id, check_in_key_result_id, check_in_subject_user_id,
+            check_in_scope, check_in_date::text AS check_in_date, check_in_previous_value,
+            check_in_new_value, check_in_previous_progress, check_in_new_progress,
+            check_in_overall_progress, check_in_status_update, check_in_next_steps,
+            check_in_confidence_level, check_in_notes, check_in_blockers, created_at
+       FROM sys.sys_okr_check_ins WHERE check_in_okr_id = $1
+      ORDER BY created_at DESC LIMIT $2 OFFSET $3`, [okrId, limit, offset]);
+  return {
+    total: Number(totalRow.rows[0]?.total ?? 0),
+    items: res.rows.map((r) => ({
+      checkInId: r.check_in_id, okrId: r.check_in_okr_id, keyResultId: r.check_in_key_result_id,
+      subjectUserId: r.check_in_subject_user_id, scope: r.check_in_scope as OkrCheckIn["scope"],
+      date: r.check_in_date,
+      previousValue: numOrNull(r.check_in_previous_value), newValue: numOrNull(r.check_in_new_value),
+      previousProgress: numOrNull(r.check_in_previous_progress), newProgress: numOrNull(r.check_in_new_progress),
+      overallProgress: numOrNull(r.check_in_overall_progress),
+      statusUpdate: r.check_in_status_update, nextSteps: r.check_in_next_steps,
+      confidenceLevel: numOrNull(r.check_in_confidence_level),
+      notes: r.check_in_notes, blockers: r.check_in_blockers,
+      createdAt: r.created_at.toISOString(),
+    })),
+  };
+}

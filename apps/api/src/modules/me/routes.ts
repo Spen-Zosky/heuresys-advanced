@@ -14,7 +14,7 @@ import type { FastifyRequest } from "fastify";
 import {
   MeProfileSchema, MeProfileFullSchema, MeContractsResponseSchema, MePaySlipsResponseSchema,
   MePerformanceResponseSchema, MeAttendanceResponseSchema, UpdateMeProfileBodySchema,
-  MePositionsResponseSchema,
+  MePositionsResponseSchema, MeGoalIdParamSchema, GoalTimelineResponseSchema,
   MeSkillsResponseSchema, MeSkillEvidenceSchema, CreateMeSelfAssessmentBodySchema,
   MeSurveysResponseSchema, MeSurveyDetailSchema,
   SubmitMeSurveyResponseBodySchema, SubmitMeSurveyResultSchema, MeSurveyIdParamSchema,
@@ -201,6 +201,12 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("goal:read:self")],
     schema: { response: { 200: MeGoalsResponseSchema } },
   }, async (req) => meService.getGoals(selfActor(req)));
+
+  // #26 (S1018): activity timeline of one OWN goal (updates ∪ check-ins ∪ milestones).
+  app.get("/goals/:goalId/timeline", {
+    preHandler: [requirePermission("goal:read:self")],
+    schema: { params: MeGoalIdParamSchema, response: { 200: GoalTimelineResponseSchema } },
+  }, async (req) => meService.getGoalTimeline(selfActor(req), req.params.goalId));
 
   app.get("/risk", {
     preHandler: [requirePermission("career_succession:read:self")],

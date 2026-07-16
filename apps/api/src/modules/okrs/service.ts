@@ -21,6 +21,21 @@ function resolveWriteTenant(a: ActorContext, bodyTenantId?: string): string {
   return a.tenantId;
 }
 
+/**
+ * ADR-0027 F3 + F4-contract (S1018 #26): per-OKR read authorization centralized —
+ * every sub-resource read flows through here (same doctrine as goals/canReadGoal;
+ * W9/F4 extends the body for team-bound OKRs without touching routes).
+ */
+async function loadReadableOkr(a: ActorContext, id: string) {
+  const o = await repo.findOkrById(pool, id);
+  if (!o) throw new NotFoundError("OKR");
+  assertVisible(a, o.tenantId, "OKR");
+  if (o.ownerUserId && !(await canReadOrgTarget(pool, a, o.ownerUserId, o.tenantId))) {
+    throw new NotFoundError("OKR");
+  }
+  return o;
+}
+
 export const okrsService = {
   async listOkrs(a: ActorContext, query: OkrListQuery) {
     const scope = await resolveOrgReadScope(pool, a);
@@ -28,16 +43,16 @@ export const okrsService = {
     return repo.listOkrs(pool, listTenantFilter(a), query, userIdAllowList);
   },
   async getOkr(a: ActorContext, id: string) {
-    const o = await repo.findOkrById(pool, id); if (!o) throw new NotFoundError("OKR");
-    assertVisible(a, o.tenantId, "OKR");
-    if (o.ownerUserId && !(await canReadOrgTarget(pool, a, o.ownerUserId, o.tenantId))) throw new NotFoundError("OKR");
-    return o;
+    return loadReadableOkr(a, id);
   },
   async listKeyResults(a: ActorContext, okrId: string) {
-    const o = await repo.findOkrById(pool, okrId); if (!o) throw new NotFoundError("OKR");
-    assertVisible(a, o.tenantId, "OKR");
-    if (o.ownerUserId && !(await canReadOrgTarget(pool, a, o.ownerUserId, o.tenantId))) throw new NotFoundError("OKR");
+    await loadReadableOkr(a, okrId);
     return repo.listKeyResultsByOkr(pool, okrId);
+  },
+  // #26 (S1018): OKR check-in history — gated by the same centralized helper.
+  async listCheckIns(a: ActorContext, okrId: string, q: { limit: number; offset: number }) {
+    await loadReadableOkr(a, okrId);
+    return repo.listOkrCheckIns(pool, okrId, q.limit, q.offset);
   },
   async createOkr(a: ActorContext, body: CreateOkrBody) { return repo.insertOkr(pool, resolveWriteTenant(a, body.tenantId), body); },
   async updateOkr(a: ActorContext, id: string, patch: UpdateOkrBody) {

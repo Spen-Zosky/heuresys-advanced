@@ -96,3 +96,143 @@ export const UpdateGoalBodySchema = z.object({
 export type UpdateGoalBody = z.infer<typeof UpdateGoalBodySchema>;
 
 export const GoalIdParamSchema = z.object({ id: z.uuid() });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #26 (S1018) — goal-life sub-resources: READ-only over the 000037 satellite
+// tables (updates / check-ins / milestones / comments / alignments / templates).
+// CHECK enums mirror migration 000037. Event logs are immutable (no updatedAt).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const GoalUpdateTypeEnum = z.enum(["PROGRESS","STATUS_CHANGE","MILESTONE","BLOCKER","NOTE"]);
+export const GoalUpdateSchema = z.object({
+  updateId: z.uuid(),
+  goalId: z.uuid(),
+  authorUserId: z.uuid().nullable(),
+  type: GoalUpdateTypeEnum,
+  previousProgress: z.number().nullable(),
+  newProgress: z.number().nullable(),
+  previousStatus: z.string().nullable(),
+  newStatus: z.string().nullable(),
+  content: z.string().nullable(),
+  attachments: z.array(z.unknown()),
+  createdAt: z.iso.datetime(),
+});
+export type GoalUpdate = z.infer<typeof GoalUpdateSchema>;
+export const GoalUpdateListResponseSchema = z.object({
+  items: z.array(GoalUpdateSchema), total: z.number().int().min(0),
+});
+
+export const GoalCheckInStatusEnum = z.enum(["ON_TRACK","AHEAD","AT_RISK","BLOCKED","COMPLETED"]);
+export const GoalCheckInSchema = z.object({
+  checkInId: z.uuid(),
+  goalId: z.uuid(),
+  subjectUserId: z.uuid(),
+  date: z.string(),
+  previousProgress: z.number().int().nullable(),
+  newProgress: z.number().int().min(0).max(100),
+  statusUpdate: GoalCheckInStatusEnum.nullable(),
+  notes: z.string().nullable(),
+  blockers: z.string().nullable(),
+  nextSteps: z.string().nullable(),
+  confidenceLevel: z.number().int().min(1).max(5).nullable(),
+  createdAt: z.iso.datetime(),
+});
+export type GoalCheckIn = z.infer<typeof GoalCheckInSchema>;
+export const GoalCheckInListResponseSchema = z.object({
+  items: z.array(GoalCheckInSchema), total: z.number().int().min(0),
+});
+
+export const GoalMilestoneStatusEnum = z.enum(["PENDING","IN_PROGRESS","COMPLETED","MISSED","CANCELLED"]);
+export const GoalMilestoneSchema = z.object({
+  milestoneId: z.uuid(),
+  goalId: z.uuid(),
+  title: z.string(),
+  description: z.string().nullable(),
+  targetDate: z.string().nullable(),
+  completedAt: z.iso.datetime().nullable(),
+  status: GoalMilestoneStatusEnum,
+  weight: z.number(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+export type GoalMilestone = z.infer<typeof GoalMilestoneSchema>;
+export const GoalMilestoneListResponseSchema = z.object({
+  items: z.array(GoalMilestoneSchema), total: z.number().int().min(0),
+});
+
+export const GoalCommentSchema = z.object({
+  commentId: z.uuid(),
+  goalId: z.uuid(),
+  authorUserId: z.uuid().nullable(),
+  parentCommentId: z.uuid().nullable(),
+  content: z.string(),
+  isPrivate: z.boolean(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
+});
+export type GoalComment = z.infer<typeof GoalCommentSchema>;
+export const GoalCommentListResponseSchema = z.object({
+  items: z.array(GoalCommentSchema), total: z.number().int().min(0),
+});
+
+export const GoalAlignmentTypeEnum = z.enum(["SUPPORTS","CONTRIBUTES_TO","DERIVED_FROM","DEPENDS_ON"]);
+export const GoalAlignmentSchema = z.object({
+  alignmentId: z.uuid(),
+  sourceGoalId: z.uuid(),
+  alignedGoalId: z.uuid(),
+  /** Title of the OTHER goal in the pair (joined server-side for display). */
+  alignedGoalTitle: z.string().nullable(),
+  /** "OUT" = this goal supports/depends-on another; "IN" = another goal aligns to this one. */
+  direction: z.enum(["OUT","IN"]),
+  type: GoalAlignmentTypeEnum,
+  weight: z.number(),
+  createdAt: z.iso.datetime(),
+});
+export type GoalAlignment = z.infer<typeof GoalAlignmentSchema>;
+export const GoalAlignmentListResponseSchema = z.object({
+  items: z.array(GoalAlignmentSchema), total: z.number().int().min(0),
+});
+
+export const GoalTemplateDifficultyEnum = z.enum(["EASY","MEDIUM","HARD","STRETCH"]);
+export const GoalTemplateSchema = z.object({
+  templateId: z.uuid(),
+  name: z.string(),
+  description: z.string().nullable(),
+  category: z.string().nullable(),
+  goalType: GoalTypeEnum,
+  suggestedMetrics: z.array(z.string()).nullable(),
+  suggestedDurationDays: z.number().int().nullable(),
+  suggestedWeight: z.number(),
+  difficultyLevel: GoalTemplateDifficultyEnum,
+  isCompanyWide: z.boolean(),
+  usageCount: z.number().int(),
+  isActive: z.boolean(),
+  createdAt: z.iso.datetime(),
+});
+export type GoalTemplate = z.infer<typeof GoalTemplateSchema>;
+export const GoalTemplateListQuerySchema = z.object({
+  category: z.string().max(100).optional(),
+  isActive: z.coerce.boolean().optional(),
+  ...paginationFields(200, 50),
+});
+export type GoalTemplateListQuery = z.infer<typeof GoalTemplateListQuerySchema>;
+export const GoalTemplateListResponseSchema = z.object({
+  items: z.array(GoalTemplateSchema), total: z.number().int().min(0),
+});
+
+/** Shared limit/offset for the per-goal sub-resource lists. */
+export const GoalSubListQuerySchema = z.object({ ...paginationFields(200, 50) });
+export type GoalSubListQuery = z.infer<typeof GoalSubListQuerySchema>;
+
+/** Merged per-goal activity timeline (updates ∪ check-ins ∪ milestones), newest first. */
+export const GoalTimelineEventSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("UPDATE"), at: z.iso.datetime(), update: GoalUpdateSchema }),
+  z.object({ kind: z.literal("CHECK_IN"), at: z.iso.datetime(), checkIn: GoalCheckInSchema }),
+  z.object({ kind: z.literal("MILESTONE"), at: z.iso.datetime(), milestone: GoalMilestoneSchema }),
+]);
+export type GoalTimelineEvent = z.infer<typeof GoalTimelineEventSchema>;
+export const GoalTimelineResponseSchema = z.object({
+  goal: GoalSchema,
+  events: z.array(GoalTimelineEventSchema),
+});
+export type GoalTimelineResponse = z.infer<typeof GoalTimelineResponseSchema>;

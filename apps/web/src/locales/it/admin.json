@@ -662,7 +662,8 @@
     "recomputeError": "Errore nel ricalcolo.",
     "explainTitle": "Scomposizione — {{name}} ({{position}})",
     "explainDesc": "Gap {{value}} ({{segment}}) · modello {{model}}. Ogni feature contribuisce per peso × valore normalizzato.",
-    "featureDetail": "norm {{normalized}} · peso {{weight}}% · contrib {{contribution}}"
+    "featureDetail": "norm {{normalized}} · peso {{weight}}% · contrib {{contribution}}",
+    "evidenceOpen": "Vedi evidenze"
   },
   "mfaPolicy": {
     "title": "Policy MFA obbligatoria",

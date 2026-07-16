@@ -63,6 +63,7 @@ export const EvidenceListResponseSchema = z.object({
   items: z.array(EvidenceItemSchema),
   total: z.number().int().min(0),
 });
+export type EvidenceListResponse = z.infer<typeof EvidenceListResponseSchema>;
 
 export const EvidenceScoreTypeEnum = z.enum([
   "LEARNING_GAP",

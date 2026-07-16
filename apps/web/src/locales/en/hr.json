@@ -258,5 +258,25 @@
       "seats": "Seats"
     },
     "cohortNd": "N/A"
+  },
+  "evidence": {
+    "title": "Underlying evidence",
+    "empty": "No evidence recorded.",
+    "error": "Failed to load.",
+    "source": "Source",
+    "confidence": "confidence",
+    "humanApproved": "human-approved",
+    "aiModel": "model",
+    "kind": {
+      "ASSESSMENT": "Assessments",
+      "SKILL": "Skills",
+      "LEARNING": "Learning",
+      "CONTINUOUS_FEEDBACK": "Continuous feedback",
+      "BEHAVIORAL": "Behavioral",
+      "COMPETENCY_RATING": "Competency ratings",
+      "FEEDBACK_360": "360 feedback",
+      "KPI_RESULT": "KPI results",
+      "PERSON_RECORD": "Records"
+    }
   }
 }

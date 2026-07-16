@@ -258,5 +258,25 @@
       "seats": "Posti"
     },
     "cohortNd": "ND"
+  },
+  "evidence": {
+    "title": "Evidenze sottostanti",
+    "empty": "Nessuna evidenza registrata.",
+    "error": "Errore di caricamento.",
+    "source": "Fonte",
+    "confidence": "confidenza",
+    "humanApproved": "approvato da umano",
+    "aiModel": "modello",
+    "kind": {
+      "ASSESSMENT": "Assessment",
+      "SKILL": "Competenze",
+      "LEARNING": "Formazione",
+      "CONTINUOUS_FEEDBACK": "Feedback continuo",
+      "BEHAVIORAL": "Comportamentale",
+      "COMPETENCY_RATING": "Valutazioni competenze",
+      "FEEDBACK_360": "Feedback 360",
+      "KPI_RESULT": "Risultati KPI",
+      "PERSON_RECORD": "Record"
+    }
   }
 }

@@ -13,6 +13,7 @@ import type {
 import { apiFetch } from "@/lib/api/fetch";
 import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { EvidenceDrawer } from "@/components/evidence-drawer";
 
 // Higher value = larger gap = worse: ALIGNED → success, MAJOR_GAP → destructive.
 // Only confirmed @heuresys/ui Badge variants + registered text tokens.
@@ -35,6 +36,7 @@ export default function SkillGapPage() {
   const { t } = useTranslation("admin");
   const qc = useQueryClient();
   const [selected, setSelected] = useState<SkillGapScore | null>(null);
+  const [evidenceFor, setEvidenceFor] = useState<SkillGapScore | null>(null);
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
 
   const perms = useCurrentUserPermissions();
@@ -121,6 +123,10 @@ export default function SkillGapPage() {
               <p className="text-sm text-muted-foreground">
                 {t("insightsSkillGap.explainDesc", { value: selected.value.toFixed(1), segment: t(`insightsSkillGap.segment.${selected.segment}`), model: selected.modelVersion })}
               </p>
+              <Button type="button" variant="outline" size="sm" data-testid="skillgap-evidence-open"
+                      onClick={() => setEvidenceFor(selected)}>
+                {t("insightsSkillGap.evidenceOpen")}
+              </Button>
               {selected.features.map((f) => (
                 <div key={f.feature} data-testid="skillgap-feature" className="flex items-center gap-3 text-sm">
                   <span className="w-36 shrink-0 text-foreground">{t(`insightsSkillGap.feature.${f.feature}`, { defaultValue: f.feature })}</span>
@@ -135,6 +141,15 @@ export default function SkillGapPage() {
             </CardContent>
           </Card>
         </div>
+      )}
+
+      {evidenceFor && (
+        <EvidenceDrawer
+          subjectUserId={evidenceFor.userId}
+          subjectName={evidenceFor.displayName ?? evidenceFor.userId.slice(0, 8)}
+          open={evidenceFor !== null}
+          onOpenChange={(o) => { if (!o) setEvidenceFor(null); }}
+        />
       )}
     </div>
   );

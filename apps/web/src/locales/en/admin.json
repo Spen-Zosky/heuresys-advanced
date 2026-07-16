@@ -662,7 +662,8 @@
     "recomputeError": "Recompute failed.",
     "explainTitle": "Breakdown — {{name}} ({{position}})",
     "explainDesc": "Gap {{value}} ({{segment}}) · model {{model}}. Each feature contributes weight × normalized value.",
-    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}"
+    "featureDetail": "norm {{normalized}} · weight {{weight}}% · contrib {{contribution}}",
+    "evidenceOpen": "View evidence"
   },
   "mfaPolicy": {
     "title": "Mandatory MFA policy",

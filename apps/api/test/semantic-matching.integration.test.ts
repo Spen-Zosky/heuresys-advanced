@@ -365,11 +365,20 @@ describe("semantic-matching API", () => {
   });
 
   // ── AI ②·Fase 2: free-text search (flag-gated) ──
-  it("free-text search is DISABLED by default → 404 MATCHING_FREETEXT_DISABLED", async () => {
-    expect(env.MATCHING_FREETEXT_ENABLED).toBe(false); // default-OFF invariant
-    const r = await suite.app.inject({ method: "GET", url: "/v1/matching/search?q=finance", headers: { cookie: ch(manager.cookies) } });
-    expect(r.statusCode).toBe(404);
-    expect((r.json() as { error: { code: string } }).error.code).toBe("MATCHING_FREETEXT_DISABLED");
+  it("free-text search with flag OFF → 404 MATCHING_FREETEXT_DISABLED", async () => {
+    // S1018 (#40): the PROD .env now ships MATCHING_FREETEXT_ENABLED=true (Enzo authorized
+    // runtime Voyage), so the old "default-OFF invariant" assertion is machine-dependent.
+    // The schema default in env.ts stays "false"; here we pin the BEHAVIOR of the OFF
+    // branch by flipping the call-time flag, same pattern as the flag-ON test below.
+    const prev = env.MATCHING_FREETEXT_ENABLED;
+    try {
+      (env as { MATCHING_FREETEXT_ENABLED: boolean }).MATCHING_FREETEXT_ENABLED = false;
+      const r = await suite.app.inject({ method: "GET", url: "/v1/matching/search?q=finance", headers: { cookie: ch(manager.cookies) } });
+      expect(r.statusCode).toBe(404);
+      expect((r.json() as { error: { code: string } }).error.code).toBe("MATCHING_FREETEXT_DISABLED");
+    } finally {
+      (env as { MATCHING_FREETEXT_ENABLED: boolean }).MATCHING_FREETEXT_ENABLED = prev;
+    }
   });
 
   it("free-text search, flag ON + FakeEmbedder, returns ranked occupations + skills (no Voyage)", async () => {

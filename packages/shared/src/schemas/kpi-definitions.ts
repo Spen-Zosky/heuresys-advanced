@@ -63,3 +63,73 @@ export const UpdateKpiDefinitionBodySchema = z.object({
 export type UpdateKpiDefinitionBody = z.infer<typeof UpdateKpiDefinitionBodySchema>;
 
 export const KpiDefinitionIdParamSchema = z.object({ id: z.uuid() });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// #31 (S1018) — KPI metrology: READ-only over the 000015 satellites
+// (metric definitions, measurements, assessment-method & weighting-rule catalogs).
+// CHECK enums mirror migration 000015.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const KpiMetricAggregationEnum = z.enum(["SUM","AVG","MIN","MAX","COUNT","RATIO","CUSTOM"]);
+export const KpiMetricDefinitionSchema = z.object({
+  metricId: z.uuid(),
+  kpiId: z.uuid(),
+  code: z.string(),
+  name: z.string(),
+  unit: z.string().nullable(),
+  aggregation: KpiMetricAggregationEnum,
+  createdAt: z.iso.datetime(),
+});
+export type KpiMetricDefinition = z.infer<typeof KpiMetricDefinitionSchema>;
+export const KpiMetricListResponseSchema = z.object({
+  items: z.array(KpiMetricDefinitionSchema), total: z.number().int().min(0),
+});
+
+export const KpiAssessmentMethodCodeEnum = z.enum(["DELTA_VS_TARGET","PERCENTILE","BANDED","LINEAR_SCORE","STEPPED"]);
+export const KpiAssessmentMethodSchema = z.object({
+  methodId: z.uuid(),
+  code: KpiAssessmentMethodCodeEnum,
+  name: z.string(),
+  description: z.string().nullable(),
+});
+export type KpiAssessmentMethod = z.infer<typeof KpiAssessmentMethodSchema>;
+export const KpiAssessmentMethodListResponseSchema = z.object({
+  items: z.array(KpiAssessmentMethodSchema), total: z.number().int().min(0),
+});
+
+export const KpiWeightingRuleKindEnum = z.enum(["LINEAR","CAPPED","STEP"]);
+export const KpiWeightingRuleSchema = z.object({
+  ruleId: z.uuid(),
+  code: z.string(),
+  name: z.string(),
+  kind: KpiWeightingRuleKindEnum,
+  payload: z.record(z.string(), z.unknown()),
+  description: z.string().nullable(),
+});
+export type KpiWeightingRule = z.infer<typeof KpiWeightingRuleSchema>;
+export const KpiWeightingRuleListResponseSchema = z.object({
+  items: z.array(KpiWeightingRuleSchema), total: z.number().int().min(0),
+});
+
+export const KpiMeasurementSchema = z.object({
+  measurementId: z.uuid(),
+  kpiId: z.uuid(),
+  userId: z.uuid().nullable(),
+  positionId: z.uuid().nullable(),
+  periodStart: z.string(),
+  periodEnd: z.string(),
+  value: z.number(),
+  unit: z.string().nullable(),
+  source: z.string().nullable(),
+  recordedAt: z.iso.datetime(),
+});
+export type KpiMeasurement = z.infer<typeof KpiMeasurementSchema>;
+export const KpiMeasurementListQuerySchema = z.object({
+  userId: z.uuid().optional(),
+  positionId: z.uuid().optional(),
+  ...paginationFields(200, 50),
+});
+export type KpiMeasurementListQuery = z.infer<typeof KpiMeasurementListQuerySchema>;
+export const KpiMeasurementListResponseSchema = z.object({
+  items: z.array(KpiMeasurementSchema), total: z.number().int().min(0),
+});

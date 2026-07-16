@@ -15,8 +15,10 @@ import type {
   KpiDefinitionListQuery,
   CreateKpiDefinitionBody,
   UpdateKpiDefinitionBody,
+  KpiMeasurementListQuery,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { resolveOrgReadScope } from "../../lib/scope/resolver.js";
 
 function visible(actor: ActorContext, k: KpiDefinition): boolean {
   if (k.isGlobal) return true;
@@ -107,5 +109,31 @@ export const kpiDefinitionsService = {
       return repo.deleteKpi(client, id);
     });
     if (!ok) throw new NotFoundError("KpiDefinition");
+  },
+
+  // ── #31 (S1018): KPI metrology reads ──
+  async listMetrics(actor: ActorContext, kpiId: string) {
+    await this.getById(actor, kpiId); // 404 across visibility boundaries (no leak)
+    return repo.listMetricsByKpi(pool, kpiId);
+  },
+  /** Global catalog (no tenant column, 000015 §7) — readable by any kpi:read holder. */
+  async listAssessmentMethods() {
+    return repo.listAssessmentMethods(pool);
+  },
+  /** Global catalog (no tenant column, 000015 §8) — readable by any kpi:read holder. */
+  async listWeightingRules() {
+    return repo.listWeightingRules(pool);
+  },
+  /**
+   * Measurements carry person-level rows (kpi = EVALUATION class): org axis applies —
+   * subtree/self scopes see only allow-listed users' rows + NULL-user (org-level) rows.
+   */
+  async listMeasurements(actor: ActorContext, kpiId: string, query: KpiMeasurementListQuery) {
+    await this.getById(actor, kpiId);
+    const scope = await resolveOrgReadScope(pool, actor);
+    const userIdAllowList =
+      scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
+    const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
+    return repo.listMeasurements(pool, kpiId, tenantId, query, userIdAllowList);
   },
 };

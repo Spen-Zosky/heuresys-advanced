@@ -4,7 +4,8 @@
  * editable on globals only, code uniqueness per scope.
  */
 
-import { pool } from "../../db/client.js";
+import { pool, withTransaction } from "../../db/client.js";
+import { deleteInboxNotificationsForResource } from "../../lib/notifications/cleanup.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
@@ -99,7 +100,12 @@ export const kpiDefinitionsService = {
         throw new NotFoundError("KpiDefinition");
       }
     }
-    const ok = await repo.deleteKpi(pool, id);
+    // D-54: hard delete → purge the polymorphic inbox notifications pointing at this
+    // KPI IN the same transaction (no FK exists; see lib/notifications/cleanup.ts).
+    const ok = await withTransaction(async (client) => {
+      await deleteInboxNotificationsForResource(client, "KPI", id);
+      return repo.deleteKpi(client, id);
+    });
     if (!ok) throw new NotFoundError("KpiDefinition");
   },
 };

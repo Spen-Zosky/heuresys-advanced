@@ -3,7 +3,8 @@
  * Same global+tenant visibility model as skills + kpi-definitions.
  */
 
-import { pool } from "../../db/client.js";
+import { pool, withTransaction } from "../../db/client.js";
+import { deleteInboxNotificationsForResource } from "../../lib/notifications/cleanup.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
@@ -98,7 +99,12 @@ export const learningModulesService = {
         throw new NotFoundError("LearningModule");
       }
     }
-    const ok = await repo.deleteLm(pool, id);
+    // D-54: hard delete → purge the polymorphic inbox notifications pointing at this
+    // module IN the same transaction (no FK exists; see lib/notifications/cleanup.ts).
+    const ok = await withTransaction(async (client) => {
+      await deleteInboxNotificationsForResource(client, "LEARNING_MODULE", id);
+      return repo.deleteLm(client, id);
+    });
     if (!ok) throw new NotFoundError("LearningModule");
   },
 };

@@ -74,8 +74,10 @@ BEGIN
   SELECT count(*) INTO maps FROM sys.sys_auth_role_permissions rp
     JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
    WHERE p.auth_permission_code IN ('process_owner:read','org_director:read','capability:read','capability:admin');
-  -- 4 + 8 + 2 = 14 expected mappings
-  IF maps <> 14 THEN RAISE EXCEPTION '000145: expected 14 capability/console role-mappings, found %', maps; END IF;
+  -- 4 + 8 + 2 = 14 seeded here. FLOOR, not exact census (S1018 twice-run fix):
+  -- later additive migrations legitimately extend these grants (000169 I21
+  -- HRMS_MANAGER → 15); an exact-count broke the idempotent full-chain re-run.
+  IF maps < 14 THEN RAISE EXCEPTION '000145: expected >=14 capability/console role-mappings, found %', maps; END IF;
 
   RAISE NOTICE '000145: ORG_DIRECTOR role + 4 perms + 14 mappings OK.';
 END $$;

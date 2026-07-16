@@ -186,20 +186,24 @@ BEGIN
     RAISE EXCEPTION 'D7-P0: expected 4 embedding tables, found %', tbl_count;
   END IF;
 
+  -- S1018 twice-run fix: grant counts are a FLOOR, not an exact census — later
+  -- additive migrations legitimately extend them (e.g. 000169 I21 grants
+  -- HRMS_MANAGER matching:admin → 3). An exact-count here broke the idempotent
+  -- full-chain re-run (migrate-if-pending → migrate.sh) at this file.
   SELECT count(*) INTO read_grants
   FROM sys.sys_auth_role_permissions rp
   JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
   WHERE p.auth_permission_code = 'matching:read';
-  IF read_grants <> 7 THEN
-    RAISE EXCEPTION 'D7-P0: expected 7 matching:read grants (6 analytics roles + USER), found %', read_grants;
+  IF read_grants < 7 THEN
+    RAISE EXCEPTION 'D7-P0: expected >=7 matching:read grants (6 analytics roles + USER), found %', read_grants;
   END IF;
 
   SELECT count(*) INTO admin_grants
   FROM sys.sys_auth_role_permissions rp
   JOIN sys.sys_auth_permissions p ON p.auth_permission_id = rp.auth_permission_id
   WHERE p.auth_permission_code = 'matching:admin';
-  IF admin_grants <> 2 THEN
-    RAISE EXCEPTION 'D7-P0: expected 2 matching:admin grants (platform + tenant admin), found %', admin_grants;
+  IF admin_grants < 2 THEN
+    RAISE EXCEPTION 'D7-P0: expected >=2 matching:admin grants (platform + tenant admin), found %', admin_grants;
   END IF;
 
   RAISE NOTICE 'D7-P0: pgvector substrate ready — 4 embedding tables, matching:read=% grants, matching:admin=% grants.', read_grants, admin_grants;

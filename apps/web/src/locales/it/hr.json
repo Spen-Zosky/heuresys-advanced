@@ -29,6 +29,16 @@
     "cols": {
       "unit": "Unità",
       "polarity": "Polarità"
+    },
+    "metrology": {
+      "title": "Metrologia",
+      "description2": "Come i KPI vengono misurati e ponderati.",
+      "methods": "Metodi di valutazione",
+      "rules": "Regole di ponderazione",
+      "code": "Codice",
+      "kind": "Tipo",
+      "description": "Descrizione",
+      "empty": "Nessuna voce."
     }
   },
   "goals": {
@@ -172,6 +182,17 @@
       "severity": "Severità",
       "required": "Richiesto",
       "current": "Attuale"
+    },
+    "closure": {
+      "plansTitle": "Piani di chiusura",
+      "plansEmpty": "Nessun piano di chiusura.",
+      "resultsTitle": "Risultati analisi",
+      "resultsEmpty": "Nessun risultato di analisi.",
+      "subject": "Soggetto",
+      "milestones": "Milestone",
+      "target": "Scadenza",
+      "kind": "Tipo",
+      "score": "Punteggio"
     }
   },
   "career": {

@@ -6,6 +6,7 @@ import { Badge, DataTableWithCrossHair, EmptyState, KPIStrip, PageHeader, type K
 import { Inbox } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
 import { StatusBadge } from "@/components/status-pill";
+import { GapClosurePanel } from "@/components/gap-closure-panel";
 
 interface LearningGap {
   learningGapId: string;
@@ -106,6 +107,9 @@ export default function AdminGapsPage() {
           </DataTableWithCrossHair>
         </div>
       )}
+
+      {/* #30 (S1018): gap-closure layer — remediation plans + analysis results */}
+      <GapClosurePanel />
     </main>
   );
 }

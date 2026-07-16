@@ -70,12 +70,12 @@
 - **#29 A/L3 — talent-review 9-box (talent/fit/readiness/succession scores)** · status: ACTIVE
   - priority: P2 · effort: ~6-8h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L3
   - note: 9-box derivata da `sys_talent_scores` (NB: `sys_nine_box_grid` NON esiste — drift Ledger). NUOVA `/talent-review` o tab in `/career-succession`; componenti tier17 @heuresys/ui mai usati. SENSITIVE, no self-view di default.
-- **#30 A/L4 — gap closure (plans/actions/results)** · status: ACTIVE
+- **#30 A/L4 — gap closure (plans/actions/results)** · status: DONE
   - priority: P2 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L4
-  - note: ⏳ **API DONE + LIVE-TESTED S1018** (commit d48f4d4a): learning-gaps/closure-plans + analysis-results + :id/closure-actions + me/gaps/closure. Test 5/5 live. **RESTA tab web** "Piani di chiusura" in /gaps + /me/gaps.
-- **#31 A/L6 — metrologia KPI (measurements/methods/weighting)** · status: ACTIVE
+  - note: ✅ DONE S1018 (API d48f4d4a + web) — learning-gaps/closure-plans + analysis-results + :id/closure-actions + me/gaps/closure; `GapClosurePanel` (piani + risultati analisi) in `/gaps`. Test 5/5 API + E2E serie-a-panels verde. (Tab /me/gaps self = incrementale non bloccante, endpoint pronto.)
+- **#31 A/L6 — metrologia KPI (measurements/methods/weighting)** · status: DONE
   - priority: P3 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L6
-  - note: ⏳ **API DONE + LIVE-TESTED S1018** (commit e0748c87): kpi-definitions/assessment-methods + weighting-rules + :id/metrics + :id/measurements (orgGate service). Test 6/6 live. **RESTA panel web** Metrologia in /kpis + /positions/[id]/kpis.
+  - note: ✅ DONE S1018 (API e0748c87 + web) — kpi-definitions/assessment-methods + weighting-rules + :id/metrics + :id/measurements (orgGate service); `KpiMetrologyPanel` (cataloghi metodi+regole) in `/kpis`. Test 6/6 API + E2E serie-a-panels verde. (Measurements per-KPI = endpoint pronto, drill-down incrementale.)
 - **#32 A/L7 — comp & reward in lettura (+handoff ledger, +recommendations list)** · status: ACTIVE
   - priority: P3 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L7
   - note: chiude l'anomalia `sys_payroll_handoff_records` write-only. COMPENSATION → orgGate + I21 (HRMS_MANAGER plenipotenziario).

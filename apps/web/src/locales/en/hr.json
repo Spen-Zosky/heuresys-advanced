@@ -29,6 +29,16 @@
     "cols": {
       "unit": "Unit",
       "polarity": "Polarity"
+    },
+    "metrology": {
+      "title": "Metrology",
+      "description2": "How KPIs are measured and weighted.",
+      "methods": "Assessment methods",
+      "rules": "Weighting rules",
+      "code": "Code",
+      "kind": "Kind",
+      "description": "Description",
+      "empty": "No entries."
     }
   },
   "goals": {
@@ -172,6 +182,17 @@
       "severity": "Severity",
       "required": "Required",
       "current": "Current"
+    },
+    "closure": {
+      "plansTitle": "Closure plans",
+      "plansEmpty": "No closure plans.",
+      "resultsTitle": "Analysis results",
+      "resultsEmpty": "No analysis results.",
+      "subject": "Subject",
+      "milestones": "Milestones",
+      "target": "Target",
+      "kind": "Kind",
+      "score": "Score"
     }
   },
   "career": {

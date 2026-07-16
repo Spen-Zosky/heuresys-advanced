@@ -7,6 +7,7 @@ import type { TFunction } from "i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { KpiMetrologyPanel } from "@/components/kpi-metrology-panel";
 
 interface KpiDef {
   kpiDefinitionId: string;
@@ -66,6 +67,9 @@ export default function KpisCataloguePage() {
       emptyTitle={t("kpis.emptyTitle")}
       emptyDescription={t("kpis.emptyDescription")}
       caption={t("kpis.caption")}
-    />
+    >
+      {/* #31 (S1018): metrology — assessment methods + weighting rules catalogs */}
+      <KpiMetrologyPanel />
+    </DataTablePanel>
   );
 }

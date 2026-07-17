@@ -50,6 +50,7 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   certification: "PERSONAL",
   career: "PERSONAL",
   mentorship: "PERSONAL", // Enzo 2026-07-01: riservato (personal development relationship)
+  leave: "PERSONAL", // A/L8 (#33): time-off requests + balance ledger — person-level, org-gated
   // COMPENSATION
   compensation_intelligence: "COMPENSATION",
   // SKILL (competency + development + competency-derived)

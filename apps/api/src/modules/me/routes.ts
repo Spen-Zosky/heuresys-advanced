@@ -40,8 +40,10 @@ import {
   ListActiveSessionsResponseSchema,
   RevokeSessionParamsSchema, RevokeSessionResponseSchema,
   RevokeOtherSessionsBodySchema, RevokeOtherSessionsResponseSchema,
+  TimeOffRequestListQuerySchema, TimeOffRequestListResponseSchema,
 } from "@heuresys/shared";
 import { meService, type SelfActor } from "./service.js";
+import { timeOffService } from "../time-off/service.js";
 import { teamsService } from "../teams/service.js";
 import { contentService } from "../content/service.js";
 import { createMediaService } from "../content/media-service.js";
@@ -111,6 +113,13 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("user_profile:read:self")],
     schema: { response: { 200: MeAttendanceResponseSchema } },
   }, async (req) => meService.getAttendance(selfActor(req)));
+
+  // A/L8 (#33): own time-off REQUESTS (the requests table, never surfaced before). Balances
+  // stay on /me/attendance; this is the consultative request history. I17 self floor.
+  app.get("/time-off/requests", {
+    preHandler: [requirePermission("leave:read:self")],
+    schema: { querystring: TimeOffRequestListQuerySchema, response: { 200: TimeOffRequestListResponseSchema } },
+  }, async (req) => timeOffService.listOwnRequests(selfActor(req), req.query));
 
   app.get("/positions", {
     preHandler: [requirePermission("user_position_assignment:read:self")],

@@ -734,5 +734,38 @@
       "avgConfidence": "Conf. media",
       "conflicted": "In conflitto"
     }
+  },
+  "timeOff": {
+    "title": "Ferie & permessi",
+    "description": "Richieste di assenza, policy di maturazione del tenant e registro delle transazioni per saldo. Consultazione in sola lettura.",
+    "requests": "Richieste di assenza",
+    "accrualRules": "Regole di maturazione",
+    "transactions": "Transazioni saldo",
+    "error": "Errore di caricamento.",
+    "empty": "Nessun record.",
+    "allStatuses": "Tutti gli stati",
+    "active": "Attiva",
+    "inactive": "Inattiva",
+    "kpi": {
+      "requests": "Richieste",
+      "rules": "Regole",
+      "transactions": "Transazioni"
+    },
+    "cols": {
+      "employee": "Dipendente",
+      "leaveType": "Tipo assenza",
+      "period": "Periodo",
+      "days": "Giorni",
+      "status": "Stato",
+      "ruleName": "Regola",
+      "method": "Metodo",
+      "amount": "Quantità",
+      "ccnl": "CCNL",
+      "active": "Attiva",
+      "txnType": "Tipo",
+      "description": "Descrizione",
+      "reference": "Riferimento",
+      "date": "Data"
+    }
   }
 }

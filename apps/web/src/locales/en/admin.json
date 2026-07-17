@@ -734,5 +734,38 @@
       "avgConfidence": "Avg conf.",
       "conflicted": "Conflicted"
     }
+  },
+  "timeOff": {
+    "title": "Time-off & leave",
+    "description": "Leave requests, tenant accrual policy and the per-balance transaction ledger. Read-only consultation.",
+    "requests": "Leave requests",
+    "accrualRules": "Accrual rules",
+    "transactions": "Balance transactions",
+    "error": "Failed to load.",
+    "empty": "No records.",
+    "allStatuses": "All statuses",
+    "active": "Active",
+    "inactive": "Inactive",
+    "kpi": {
+      "requests": "Requests",
+      "rules": "Accrual rules",
+      "transactions": "Transactions"
+    },
+    "cols": {
+      "employee": "Employee",
+      "leaveType": "Leave type",
+      "period": "Period",
+      "days": "Days",
+      "status": "Status",
+      "ruleName": "Rule",
+      "method": "Method",
+      "amount": "Amount",
+      "ccnl": "CCNL",
+      "active": "Active",
+      "txnType": "Type",
+      "description": "Description",
+      "reference": "Reference",
+      "date": "Date"
+    }
   }
 }

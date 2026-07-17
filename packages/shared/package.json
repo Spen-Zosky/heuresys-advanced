@@ -327,6 +327,10 @@
       "types": "./dist/schemas/evidence.d.ts",
       "default": "./src/schemas/evidence.ts"
     },
+    "./schemas/time-off": {
+      "types": "./dist/schemas/time-off.d.ts",
+      "default": "./src/schemas/time-off.ts"
+    },
     "./schemas/okrs": {
       "types": "./dist/schemas/okrs.d.ts",
       "default": "./src/schemas/okrs.ts"

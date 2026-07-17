@@ -18,6 +18,12 @@ import type {
   PayrollHandoffRecord,
   CreatePayrollHandoffRecordBody,
   CompensationDistributionResponse,
+  VariablePayCalculationListQuery,
+  CompensationRecommendationListQuery,
+  BonusPoolListQuery,
+  ObjectiveRewardRuleListQuery,
+  PositionEconomicWeightListQuery,
+  PayrollHandoffRecordListQuery,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
@@ -27,6 +33,28 @@ function requireTenant(a: ActorContext): string {
     throw new ForbiddenError("Tenant context required", "TENANT_CONTEXT_REQUIRED");
   }
   return a.tenantId;
+}
+
+/** Reduce an OrgReadScope to the (tenantId?, userIdAllowList?) repo filter for the
+ *  person-level compensation reads (A/L7 #32 — mirrors time-off/service.ts). */
+async function orgFilter(
+  actor: ActorContext,
+): Promise<{ tenantId?: string; userIdAllowList?: string[] }> {
+  const scope = await resolveOrgReadScope(pool, actor);
+  switch (scope.kind) {
+    case "all":
+      return {};
+    case "tenant":
+      return { tenantId: scope.tenantId };
+    case "subtree":
+    case "self":
+      return { tenantId: scope.tenantId, userIdAllowList: scope.userIdAllowList };
+  }
+}
+
+/** Tenant filter for the catalog reads: PLATFORM_ADMIN → all tenants; else own tenant. */
+function catalogTenant(actor: ActorContext): string | undefined {
+  return isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
 }
 
 export const compensationService = {
@@ -105,5 +133,37 @@ export const compensationService = {
       );
     }
     return repo.insertPayrollHandoffRecord(pool, tenantId, body);
+  },
+
+  // ── A/L7 (#32) reads ────────────────────────────────────────────────────────
+
+  /** Org-gated per-person variable pay (I18) — gated on the calculation's subject user. */
+  async listVariablePay(actor: ActorContext, query: VariablePayCalculationListQuery) {
+    return repo.listVariablePay(pool, { ...(await orgFilter(actor)), query });
+  },
+
+  /** Org-gated per-person compensation recommendations (I18). */
+  async listRecommendations(actor: ActorContext, query: CompensationRecommendationListQuery) {
+    return repo.listRecommendations(pool, { ...(await orgFilter(actor)), query });
+  },
+
+  /** Tenant/OU bonus pools (no person rows) — tenant-scoped only. */
+  async listBonusPools(actor: ActorContext, query: BonusPoolListQuery) {
+    return repo.listBonusPools(pool, catalogTenant(actor), query);
+  },
+
+  /** Tenant objective reward-rule catalog — tenant-scoped only. */
+  async listObjectiveRewardRules(actor: ActorContext, query: ObjectiveRewardRuleListQuery) {
+    return repo.listObjectiveRewardRules(pool, catalogTenant(actor), query);
+  },
+
+  /** Position economic weight — tenant-scoped only (no person rows). */
+  async listPositionEconomicWeight(actor: ActorContext, query: PositionEconomicWeightListQuery) {
+    return repo.listPositionEconomicWeight(pool, catalogTenant(actor), query);
+  },
+
+  /** Tenant payroll handoff records (no user column) — tenant-scoped only. */
+  async listPayrollHandoffRecords(actor: ActorContext, query: PayrollHandoffRecordListQuery) {
+    return repo.listPayrollHandoffRecords(pool, catalogTenant(actor), query);
   },
 };

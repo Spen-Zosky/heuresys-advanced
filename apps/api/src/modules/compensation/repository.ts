@@ -13,6 +13,17 @@ import type {
   PayrollHandoffRecord,
   CreatePayrollHandoffRecordBody,
   RewardGatesListQuery,
+  VariablePayCalculation,
+  VariablePayCalculationListQuery,
+  CompensationRecommendationRow,
+  CompensationRecommendationListQuery,
+  BonusPool,
+  BonusPoolListQuery,
+  ObjectiveRewardRule,
+  ObjectiveRewardRuleListQuery,
+  PositionEconomicWeight,
+  PositionEconomicWeightListQuery,
+  PayrollHandoffRecordListQuery,
 } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
@@ -457,4 +468,462 @@ export async function findUserTenantId(
     [userId],
   );
   return r.rows[0]?.user_tenant_id ?? null;
+}
+
+// ===================================================================
+// A/L7 (#32) — read/list over six dormant compensation & reward tables.
+// Org scoping (userIdAllowList) is resolved by the service via
+// resolveOrgReadScope; this layer only receives the resolved filter.
+// ===================================================================
+
+// -------------------------------------------------------------------
+// Variable-pay calculations (per-person — COMPENSATION, org-gated)
+// -------------------------------------------------------------------
+
+interface VariablePayRow {
+  variable_pay_calculation_id: string;
+  variable_pay_calculation_tenant_id: string;
+  variable_pay_calculation_user_id: string;
+  subject_user_name: string | null;
+  variable_pay_calculation_position_id: string | null;
+  variable_pay_calculation_period_start: string;
+  variable_pay_calculation_period_end: string;
+  variable_pay_calculation_signal_score: string | null;
+  variable_pay_calculation_amount_eur: string | null;
+  variable_pay_calculation_payload: Record<string, unknown> | null;
+  variable_pay_calculation_computed_at: Date;
+  created_at: Date;
+}
+
+const VARIABLE_PAY_COLS = `variable_pay_calculation_id, variable_pay_calculation_tenant_id,
+  variable_pay_calculation_user_id,
+  (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = variable_pay_calculation_user_id) AS subject_user_name,
+  variable_pay_calculation_position_id,
+  variable_pay_calculation_period_start::text AS variable_pay_calculation_period_start,
+  variable_pay_calculation_period_end::text AS variable_pay_calculation_period_end,
+  variable_pay_calculation_signal_score, variable_pay_calculation_amount_eur,
+  variable_pay_calculation_payload, variable_pay_calculation_computed_at, created_at`;
+
+function toVariablePay(r: VariablePayRow): VariablePayCalculation {
+  return {
+    variablePayCalculationId: r.variable_pay_calculation_id,
+    tenantId: r.variable_pay_calculation_tenant_id,
+    userId: r.variable_pay_calculation_user_id,
+    subjectUserName: r.subject_user_name ?? null,
+    positionId: r.variable_pay_calculation_position_id,
+    periodStart: r.variable_pay_calculation_period_start,
+    periodEnd: r.variable_pay_calculation_period_end,
+    signalScore:
+      r.variable_pay_calculation_signal_score === null
+        ? null
+        : Number(r.variable_pay_calculation_signal_score),
+    amountEur:
+      r.variable_pay_calculation_amount_eur === null
+        ? null
+        : Number(r.variable_pay_calculation_amount_eur),
+    payload: r.variable_pay_calculation_payload ?? {},
+    computedAt: r.variable_pay_calculation_computed_at.toISOString(),
+    createdAt: r.created_at.toISOString(),
+  };
+}
+
+export async function listVariablePay(
+  q: DbConnector,
+  filter: { tenantId?: string; userIdAllowList?: string[]; query: VariablePayCalculationListQuery },
+): Promise<{ items: VariablePayCalculation[]; total: number }> {
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (filter.tenantId) {
+    params.push(filter.tenantId);
+    where.push(`variable_pay_calculation_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    if (filter.userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(filter.userIdAllowList);
+    where.push(`variable_pay_calculation_user_id = ANY($${params.length}::uuid[])`);
+  }
+  if (filter.query.userId) {
+    params.push(filter.query.userId);
+    where.push(`variable_pay_calculation_user_id = $${params.length}`);
+  }
+  if (filter.query.positionId) {
+    params.push(filter.query.positionId);
+    where.push(`variable_pay_calculation_position_id = $${params.length}`);
+  }
+  const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_variable_pay_calculations ${wc}`,
+    params,
+  );
+  params.push(filter.query.limit);
+  const lim = params.length;
+  params.push(filter.query.offset);
+  const off = params.length;
+  const res = await q.query<VariablePayRow>(
+    `SELECT ${VARIABLE_PAY_COLS} FROM sys.sys_variable_pay_calculations ${wc}
+      ORDER BY variable_pay_calculation_period_end DESC, variable_pay_calculation_id
+      LIMIT $${lim} OFFSET $${off}`,
+    params,
+  );
+  return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toVariablePay) };
+}
+
+// -------------------------------------------------------------------
+// Compensation recommendations (read row — COMPENSATION, org-gated)
+// -------------------------------------------------------------------
+
+interface RecReadRow {
+  compensation_recommendation_id: string;
+  compensation_recommendation_tenant_id: string;
+  compensation_recommendation_user_id: string;
+  subject_user_name: string | null;
+  compensation_recommendation_position_id: string | null;
+  compensation_recommendation_period_start: string;
+  compensation_recommendation_period_end: string;
+  compensation_recommendation_signal: string;
+  compensation_recommendation_amount_eur: string | null;
+  compensation_recommendation_narrative: string | null;
+  compensation_recommendation_payload: Record<string, unknown> | null;
+  compensation_recommendation_computed_at: Date;
+  created_at: Date;
+}
+
+const REC_READ_COLS = `compensation_recommendation_id, compensation_recommendation_tenant_id,
+  compensation_recommendation_user_id,
+  (SELECT u.user_display_name FROM sys.sys_users u WHERE u.user_id = compensation_recommendation_user_id) AS subject_user_name,
+  compensation_recommendation_position_id,
+  compensation_recommendation_period_start::text AS compensation_recommendation_period_start,
+  compensation_recommendation_period_end::text AS compensation_recommendation_period_end,
+  compensation_recommendation_signal, compensation_recommendation_amount_eur,
+  compensation_recommendation_narrative, compensation_recommendation_payload,
+  compensation_recommendation_computed_at, created_at`;
+
+function toRecRead(r: RecReadRow): CompensationRecommendationRow {
+  return {
+    compensationRecommendationId: r.compensation_recommendation_id,
+    tenantId: r.compensation_recommendation_tenant_id,
+    userId: r.compensation_recommendation_user_id,
+    subjectUserName: r.subject_user_name ?? null,
+    positionId: r.compensation_recommendation_position_id,
+    periodStart: r.compensation_recommendation_period_start,
+    periodEnd: r.compensation_recommendation_period_end,
+    signal: r.compensation_recommendation_signal,
+    amountEur:
+      r.compensation_recommendation_amount_eur === null
+        ? null
+        : Number(r.compensation_recommendation_amount_eur),
+    narrative: r.compensation_recommendation_narrative,
+    payload: r.compensation_recommendation_payload ?? {},
+    computedAt: r.compensation_recommendation_computed_at.toISOString(),
+    createdAt: r.created_at.toISOString(),
+  };
+}
+
+export async function listRecommendations(
+  q: DbConnector,
+  filter: { tenantId?: string; userIdAllowList?: string[]; query: CompensationRecommendationListQuery },
+): Promise<{ items: CompensationRecommendationRow[]; total: number }> {
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (filter.tenantId) {
+    params.push(filter.tenantId);
+    where.push(`compensation_recommendation_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    if (filter.userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(filter.userIdAllowList);
+    where.push(`compensation_recommendation_user_id = ANY($${params.length}::uuid[])`);
+  }
+  if (filter.query.userId) {
+    params.push(filter.query.userId);
+    where.push(`compensation_recommendation_user_id = $${params.length}`);
+  }
+  if (filter.query.positionId) {
+    params.push(filter.query.positionId);
+    where.push(`compensation_recommendation_position_id = $${params.length}`);
+  }
+  if (filter.query.signal) {
+    params.push(filter.query.signal);
+    where.push(`compensation_recommendation_signal = $${params.length}`);
+  }
+  const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_compensation_recommendations ${wc}`,
+    params,
+  );
+  params.push(filter.query.limit);
+  const lim = params.length;
+  params.push(filter.query.offset);
+  const off = params.length;
+  const res = await q.query<RecReadRow>(
+    `SELECT ${REC_READ_COLS} FROM sys.sys_compensation_recommendations ${wc}
+      ORDER BY compensation_recommendation_period_end DESC, compensation_recommendation_id
+      LIMIT $${lim} OFFSET $${off}`,
+    params,
+  );
+  return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toRecRead) };
+}
+
+// -------------------------------------------------------------------
+// Bonus pools (tenant / OU pools — catalog, no person rows)
+// -------------------------------------------------------------------
+
+interface BonusPoolRow {
+  bonus_pool_id: string;
+  bonus_pool_tenant_id: string;
+  bonus_pool_scope: string;
+  bonus_pool_organization_unit_id: string | null;
+  bonus_pool_period_start: string;
+  bonus_pool_period_end: string;
+  bonus_pool_total_eur: string | null;
+  bonus_pool_payload: Record<string, unknown> | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+const BONUS_POOL_COLS = `bonus_pool_id, bonus_pool_tenant_id, bonus_pool_scope,
+  bonus_pool_organization_unit_id,
+  bonus_pool_period_start::text AS bonus_pool_period_start,
+  bonus_pool_period_end::text AS bonus_pool_period_end,
+  bonus_pool_total_eur, bonus_pool_payload, created_at, updated_at`;
+
+function toBonusPool(r: BonusPoolRow): BonusPool {
+  return {
+    bonusPoolId: r.bonus_pool_id,
+    tenantId: r.bonus_pool_tenant_id,
+    scope: r.bonus_pool_scope,
+    organizationUnitId: r.bonus_pool_organization_unit_id,
+    periodStart: r.bonus_pool_period_start,
+    periodEnd: r.bonus_pool_period_end,
+    totalEur: r.bonus_pool_total_eur === null ? null : Number(r.bonus_pool_total_eur),
+    payload: r.bonus_pool_payload ?? {},
+    createdAt: r.created_at.toISOString(),
+    updatedAt: r.updated_at.toISOString(),
+  };
+}
+
+export async function listBonusPools(
+  q: DbConnector,
+  tenantId: string | undefined,
+  query: BonusPoolListQuery,
+): Promise<{ items: BonusPool[]; total: number }> {
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (tenantId) {
+    params.push(tenantId);
+    where.push(`bonus_pool_tenant_id = $${params.length}`);
+  }
+  if (query.scope) {
+    params.push(query.scope);
+    where.push(`bonus_pool_scope = $${params.length}`);
+  }
+  if (query.organizationUnitId) {
+    params.push(query.organizationUnitId);
+    where.push(`bonus_pool_organization_unit_id = $${params.length}`);
+  }
+  const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_bonus_pools ${wc}`,
+    params,
+  );
+  params.push(query.limit);
+  const lim = params.length;
+  params.push(query.offset);
+  const off = params.length;
+  const res = await q.query<BonusPoolRow>(
+    `SELECT ${BONUS_POOL_COLS} FROM sys.sys_bonus_pools ${wc}
+      ORDER BY bonus_pool_period_end DESC, bonus_pool_id
+      LIMIT $${lim} OFFSET $${off}`,
+    params,
+  );
+  return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toBonusPool) };
+}
+
+// -------------------------------------------------------------------
+// Objective reward rules (tenant catalog)
+// -------------------------------------------------------------------
+
+interface ObjectiveRewardRuleRow {
+  objective_reward_rule_id: string;
+  objective_reward_rule_tenant_id: string;
+  objective_reward_rule_code: string;
+  objective_reward_rule_name: string;
+  objective_reward_rule_payload: Record<string, unknown> | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+const OBJECTIVE_REWARD_RULE_COLS = `objective_reward_rule_id, objective_reward_rule_tenant_id,
+  objective_reward_rule_code, objective_reward_rule_name, objective_reward_rule_payload,
+  created_at, updated_at`;
+
+function toObjectiveRewardRule(r: ObjectiveRewardRuleRow): ObjectiveRewardRule {
+  return {
+    objectiveRewardRuleId: r.objective_reward_rule_id,
+    tenantId: r.objective_reward_rule_tenant_id,
+    code: r.objective_reward_rule_code,
+    name: r.objective_reward_rule_name,
+    payload: r.objective_reward_rule_payload ?? {},
+    createdAt: r.created_at.toISOString(),
+    updatedAt: r.updated_at.toISOString(),
+  };
+}
+
+export async function listObjectiveRewardRules(
+  q: DbConnector,
+  tenantId: string | undefined,
+  query: ObjectiveRewardRuleListQuery,
+): Promise<{ items: ObjectiveRewardRule[]; total: number }> {
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (tenantId) {
+    params.push(tenantId);
+    where.push(`objective_reward_rule_tenant_id = $${params.length}`);
+  }
+  if (query.code) {
+    params.push(query.code);
+    where.push(`objective_reward_rule_code = $${params.length}`);
+  }
+  const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_objective_reward_rules ${wc}`,
+    params,
+  );
+  params.push(query.limit);
+  const lim = params.length;
+  params.push(query.offset);
+  const off = params.length;
+  const res = await q.query<ObjectiveRewardRuleRow>(
+    `SELECT ${OBJECTIVE_REWARD_RULE_COLS} FROM sys.sys_objective_reward_rules ${wc}
+      ORDER BY objective_reward_rule_code, objective_reward_rule_id
+      LIMIT $${lim} OFFSET $${off}`,
+    params,
+  );
+  return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toObjectiveRewardRule) };
+}
+
+// -------------------------------------------------------------------
+// Position economic weight (catalog)
+// -------------------------------------------------------------------
+
+interface PositionEconomicWeightRow {
+  position_economic_weight_id: string;
+  position_economic_weight_position_id: string;
+  position_economic_weight_tenant_id: string;
+  position_economic_weight_value: string;
+  position_economic_weight_period_start: string | null;
+  position_economic_weight_period_end: string | null;
+  position_economic_weight_metadata: Record<string, unknown> | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+const POSITION_ECONOMIC_WEIGHT_COLS = `position_economic_weight_id, position_economic_weight_position_id,
+  position_economic_weight_tenant_id, position_economic_weight_value,
+  position_economic_weight_period_start::text AS position_economic_weight_period_start,
+  position_economic_weight_period_end::text AS position_economic_weight_period_end,
+  position_economic_weight_metadata, created_at, updated_at`;
+
+function toPositionEconomicWeight(r: PositionEconomicWeightRow): PositionEconomicWeight {
+  return {
+    positionEconomicWeightId: r.position_economic_weight_id,
+    positionId: r.position_economic_weight_position_id,
+    tenantId: r.position_economic_weight_tenant_id,
+    value: Number(r.position_economic_weight_value),
+    periodStart: r.position_economic_weight_period_start,
+    periodEnd: r.position_economic_weight_period_end,
+    metadata: r.position_economic_weight_metadata ?? {},
+    createdAt: r.created_at.toISOString(),
+    updatedAt: r.updated_at.toISOString(),
+  };
+}
+
+export async function listPositionEconomicWeight(
+  q: DbConnector,
+  tenantId: string | undefined,
+  query: PositionEconomicWeightListQuery,
+): Promise<{ items: PositionEconomicWeight[]; total: number }> {
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (tenantId) {
+    params.push(tenantId);
+    where.push(`position_economic_weight_tenant_id = $${params.length}`);
+  }
+  if (query.positionId) {
+    params.push(query.positionId);
+    where.push(`position_economic_weight_position_id = $${params.length}`);
+  }
+  const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_position_economic_weight ${wc}`,
+    params,
+  );
+  params.push(query.limit);
+  const lim = params.length;
+  params.push(query.offset);
+  const off = params.length;
+  const res = await q.query<PositionEconomicWeightRow>(
+    `SELECT ${POSITION_ECONOMIC_WEIGHT_COLS} FROM sys.sys_position_economic_weight ${wc}
+      ORDER BY position_economic_weight_id
+      LIMIT $${lim} OFFSET $${off}`,
+    params,
+  );
+  return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toPositionEconomicWeight) };
+}
+
+// -------------------------------------------------------------------
+// Payroll handoff records (list — catalog, no user column)
+// -------------------------------------------------------------------
+
+export async function listPayrollHandoffRecords(
+  q: DbConnector,
+  tenantId: string | undefined,
+  query: PayrollHandoffRecordListQuery,
+): Promise<{ items: PayrollHandoffRecord[]; total: number }> {
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (tenantId) {
+    params.push(tenantId);
+    where.push(`payroll_handoff_record_tenant_id = $${params.length}`);
+  }
+  if (query.recipientSystem) {
+    params.push(query.recipientSystem);
+    where.push(`payroll_handoff_record_recipient_system = $${params.length}`);
+  }
+  if (query.status) {
+    params.push(query.status);
+    where.push(`payroll_handoff_record_status = $${params.length}`);
+  }
+  const wc = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_payroll_handoff_records ${wc}`,
+    params,
+  );
+  params.push(query.limit);
+  const lim = params.length;
+  params.push(query.offset);
+  const off = params.length;
+  const res = await q.query<HandoffRow>(
+    `SELECT
+       payroll_handoff_record_id,
+       payroll_handoff_record_tenant_id,
+       payroll_handoff_record_period_start,
+       payroll_handoff_record_period_end,
+       payroll_handoff_record_recipient_system,
+       payroll_handoff_record_payload,
+       payroll_handoff_record_handed_off_at,
+       payroll_handoff_record_status,
+       created_at
+     FROM sys.sys_payroll_handoff_records ${wc}
+     ORDER BY payroll_handoff_record_period_end DESC, payroll_handoff_record_id
+     LIMIT $${lim} OFFSET $${off}`,
+    params,
+  );
+  return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toHandoff) };
 }

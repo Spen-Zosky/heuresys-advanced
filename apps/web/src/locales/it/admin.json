@@ -767,5 +767,33 @@
       "reference": "Riferimento",
       "date": "Data"
     }
+  },
+  "compReward": {
+    "variablePay": "Retribuzione variabile",
+    "recommendations": "Raccomandazioni retributive",
+    "bonusPools": "Pool bonus",
+    "objectiveRewardRules": "Regole di premio su obiettivi",
+    "positionEconomicWeight": "Peso economico posizione",
+    "handoffRecords": "Record di handoff payroll",
+    "empty": "Nessun record.",
+    "error": "Errore di caricamento.",
+    "cols": {
+      "employee": "Dipendente",
+      "period": "Periodo",
+      "signalScore": "Punteggio segnale",
+      "amount": "Importo (EUR)",
+      "signal": "Segnale",
+      "narrative": "Motivazione",
+      "scope": "Ambito",
+      "orgUnit": "Unità org.",
+      "total": "Totale (EUR)",
+      "code": "Codice",
+      "name": "Nome",
+      "position": "Posizione",
+      "value": "Valore",
+      "recipient": "Sistema destinatario",
+      "status": "Stato",
+      "handedOff": "Consegnato"
+    }
   }
 }

@@ -767,5 +767,33 @@
       "reference": "Reference",
       "date": "Date"
     }
+  },
+  "compReward": {
+    "variablePay": "Variable pay",
+    "recommendations": "Compensation recommendations",
+    "bonusPools": "Bonus pools",
+    "objectiveRewardRules": "Objective reward rules",
+    "positionEconomicWeight": "Position economic weight",
+    "handoffRecords": "Payroll handoff records",
+    "empty": "No records.",
+    "error": "Failed to load.",
+    "cols": {
+      "employee": "Employee",
+      "period": "Period",
+      "signalScore": "Signal score",
+      "amount": "Amount (EUR)",
+      "signal": "Signal",
+      "narrative": "Narrative",
+      "scope": "Scope",
+      "orgUnit": "Org unit",
+      "total": "Total (EUR)",
+      "code": "Code",
+      "name": "Name",
+      "position": "Position",
+      "value": "Value",
+      "recipient": "Recipient system",
+      "status": "Status",
+      "handedOff": "Handed off"
+    }
   }
 }

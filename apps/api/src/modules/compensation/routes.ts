@@ -16,6 +16,18 @@ import {
   CreateCompensationRecommendationBodySchema,
   PayrollHandoffRecordSchema,
   CreatePayrollHandoffRecordBodySchema,
+  VariablePayCalculationListQuerySchema,
+  VariablePayCalculationListResponseSchema,
+  CompensationRecommendationListQuerySchema,
+  CompensationRecommendationListResponseSchema,
+  BonusPoolListQuerySchema,
+  BonusPoolListResponseSchema,
+  ObjectiveRewardRuleListQuerySchema,
+  ObjectiveRewardRuleListResponseSchema,
+  PositionEconomicWeightListQuerySchema,
+  PositionEconomicWeightListResponseSchema,
+  PayrollHandoffRecordListQuerySchema,
+  PayrollHandoffRecordListResponseSchema,
 } from "@heuresys/shared";
 import { compensationService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -54,4 +66,62 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
     const h = await compensationService.createHandoffRecord(actor(req), req.body);
     reply.code(201).send(h);
   });
+
+  // ── A/L7 (#32) reads over six dormant compensation & reward tables ───────────
+  // variable-pay & recommendations expose per-person rows → orgGate "service"
+  // (resolveOrgReadScope in the service). The rest carry no person rows → "catalog".
+
+  app.get("/variable-pay", {
+    config: { orgGate: "service" },
+    preHandler: [requirePermission("compensation_intelligence:read")],
+    schema: {
+      querystring: VariablePayCalculationListQuerySchema,
+      response: { 200: VariablePayCalculationListResponseSchema },
+    },
+  }, async (req) => compensationService.listVariablePay(actor(req), req.query));
+
+  app.get("/recommendations", {
+    config: { orgGate: "service" },
+    preHandler: [requirePermission("compensation_intelligence:read")],
+    schema: {
+      querystring: CompensationRecommendationListQuerySchema,
+      response: { 200: CompensationRecommendationListResponseSchema },
+    },
+  }, async (req) => compensationService.listRecommendations(actor(req), req.query));
+
+  app.get("/bonus-pools", {
+    config: { orgGate: "catalog" },
+    preHandler: [requirePermission("compensation_intelligence:read")],
+    schema: {
+      querystring: BonusPoolListQuerySchema,
+      response: { 200: BonusPoolListResponseSchema },
+    },
+  }, async (req) => compensationService.listBonusPools(actor(req), req.query));
+
+  app.get("/objective-reward-rules", {
+    config: { orgGate: "catalog" },
+    preHandler: [requirePermission("compensation_intelligence:read")],
+    schema: {
+      querystring: ObjectiveRewardRuleListQuerySchema,
+      response: { 200: ObjectiveRewardRuleListResponseSchema },
+    },
+  }, async (req) => compensationService.listObjectiveRewardRules(actor(req), req.query));
+
+  app.get("/position-economic-weight", {
+    config: { orgGate: "catalog" },
+    preHandler: [requirePermission("compensation_intelligence:read")],
+    schema: {
+      querystring: PositionEconomicWeightListQuerySchema,
+      response: { 200: PositionEconomicWeightListResponseSchema },
+    },
+  }, async (req) => compensationService.listPositionEconomicWeight(actor(req), req.query));
+
+  app.get("/handoff-records", {
+    config: { orgGate: "catalog" },
+    preHandler: [requirePermission("compensation_intelligence:read")],
+    schema: {
+      querystring: PayrollHandoffRecordListQuerySchema,
+      response: { 200: PayrollHandoffRecordListResponseSchema },
+    },
+  }, async (req) => compensationService.listPayrollHandoffRecords(actor(req), req.query));
 };

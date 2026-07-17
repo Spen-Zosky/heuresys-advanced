@@ -71,6 +71,7 @@ export * from "./schemas/seed-approval-decisions.js";
 export * from "./schemas/me.js";
 export * from "./schemas/me-preferences.js";
 export * from "./schemas/compensation.js";
+export * from "./schemas/compensation-read.js";
 export * from "./schemas/dashboard.js";
 export * from "./schemas/analytics.js";
 export * from "./schemas/notifications.js";

@@ -279,6 +279,10 @@
       "types": "./dist/schemas/compensation.d.ts",
       "default": "./src/schemas/compensation.ts"
     },
+    "./schemas/compensation-read": {
+      "types": "./dist/schemas/compensation-read.d.ts",
+      "default": "./src/schemas/compensation-read.ts"
+    },
     "./schemas/dashboard": {
       "types": "./dist/schemas/dashboard.d.ts",
       "default": "./src/schemas/dashboard.ts"

@@ -67,21 +67,21 @@
 - **#28 A/L0 — Trust Ledger: read-API provenance (70.972 righe lineage)** · status: DONE
   - priority: P1 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L0
   - note: ✅ DONE S1018 (API e65482a6 + web) — modulo provenance /v1/provenance + /summary (perm PLATFORM/TENANT_ADMIN, mig 000171); pagina `/provenance` (KPIStrip totals + summary per-tabella + record paginati server-side C4-mini + filtro status). Test 6/6 API + E2E provenance verde (platformAdmin reale, 70.972 righe live). Deliverable GTM AI-Act/art.22.
-- **#29 A/L3 — talent-review 9-box (talent/fit/readiness/succession scores)** · status: ACTIVE
+- **#29 A/L3 — talent-review 9-box (talent/fit/readiness/succession scores)** · status: ✅ DONE
   - priority: P2 · effort: ~6-8h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L3
-  - note: 9-box derivata da `sys_talent_scores` (NB: `sys_nine_box_grid` NON esiste — drift Ledger). NUOVA `/talent-review` o tab in `/career-succession`; componenti tier17 @heuresys/ui mai usati. SENSITIVE, no self-view di default.
+  - note: ✅ DONE S1020 (`42f4838d`) — modulo `talent-review` 6 GET (/nine-box /fit /readiness /succession /critical-positions /critical-coverage); 9-box derivata da `sys_talent_scores` (potential×performance 50/75 → LOW/MEDIUM/HIGH; `sys_nine_box_grid` NON esiste). EVALUATION org-gated (service+catalog), NO self-view. mig 000174 (`talent:read` 6-role, sidebar). NUOVA pagina `/talent-review` griglia 3×3 board-ready + pannelli. Integration 9/9 + org-gate/data-class regression + E2E verde.
 - **#30 A/L4 — gap closure (plans/actions/results)** · status: DONE
   - priority: P2 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L4
   - note: ✅ DONE S1018 (API d48f4d4a + web) — learning-gaps/closure-plans + analysis-results + :id/closure-actions + me/gaps/closure; `GapClosurePanel` (piani + risultati analisi) in `/gaps`. Test 5/5 API + E2E serie-a-panels verde. (Tab /me/gaps self = incrementale non bloccante, endpoint pronto.)
 - **#31 A/L6 — metrologia KPI (measurements/methods/weighting)** · status: DONE
   - priority: P3 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L6
   - note: ✅ DONE S1018 (API e0748c87 + web) — kpi-definitions/assessment-methods + weighting-rules + :id/metrics + :id/measurements (orgGate service); `KpiMetrologyPanel` (cataloghi metodi+regole) in `/kpis`. Test 6/6 API + E2E serie-a-panels verde. (Measurements per-KPI = endpoint pronto, drill-down incrementale.)
-- **#32 A/L7 — comp & reward in lettura (+handoff ledger, +recommendations list)** · status: ACTIVE
+- **#32 A/L7 — comp & reward in lettura (+handoff ledger, +recommendations list)** · status: ✅ DONE
   - priority: P3 · effort: ~4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L7
-  - note: chiude l'anomalia `sys_payroll_handoff_records` write-only. COMPENSATION → orgGate + I21 (HRMS_MANAGER plenipotenziario).
-- **#33 A/L8 — time-off/leave consultivo (read-only)** · status: ACTIVE
+  - note: ✅ DONE S1020 (`c10abc06`) — modulo `compensation` esteso con 6 GET (variable-pay, recommendations, bonus-pools, objective-reward-rules, position-economic-weight, handoff-records). Riuso `compensation_intelligence:read` (nessuna migration). variable-pay/recommendations orgGate service, resto catalog. Chiude `sys_payroll_handoff_records` write-only (0 righe = empty state). Pannelli su `/compensation-intelligence`. Integration 8/8 + E2E verde.
+- **#33 A/L8 — time-off/leave consultivo (read-only)** · status: ✅ DONE
   - priority: P3 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L8
-  - note: requests/rules/transactions (balances già esposta via `me`). Submission ESS = decisione prodotto separata (Serie E-E3, non aperta).
+  - note: ✅ DONE S1020 (`a5c8a586`) — modulo `time-off` 3 GET (requests/accrual-rules/balance-transactions) + ESS `GET /v1/me/time-off/requests`. `leave` = PERSONAL org-gated (service per requests/transactions + catalog per accrual rules). mig 000173 (`leave:read` + `:self` + sidebar `/time-off`). Pagina admin `/time-off`. Integration 8/8 + E2E verde. (Submission ferie ESS resta fuori — Serie E-E3.)
 - **#34 B/B3 — approval effects: nuovi handler (primo flusso approvativo reale)** · status: ACTIVE
   - priority: P1 · effort: ~2-4h per handler · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B3
   - note: registry con 1 solo handler; candidato TENANT_MATERIALIZATION (seam pronto). `sys_approval_requests`=0 oggi: il BPM smette di essere vuoto.

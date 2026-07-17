@@ -768,6 +768,52 @@
       "date": "Date"
     }
   },
+  "talentReview": {
+    "title": "Talent review",
+    "description": "Board-ready 9-box talent grid plus position-fit, readiness, succession and critical-role coverage. Read-only consultation.",
+    "error": "Failed to load.",
+    "empty": "No records.",
+    "nineBox": {
+      "title": "9-box grid",
+      "axisPotential": "Potential",
+      "axisPerformance": "Performance",
+      "band": {
+        "LOW": "Low",
+        "MEDIUM": "Medium",
+        "HIGH": "High"
+      }
+    },
+    "kpi": {
+      "assessed": "Assessed",
+      "fit": "Position fit",
+      "readiness": "Readiness",
+      "succession": "Succession",
+      "criticalPositions": "Critical positions"
+    },
+    "sections": {
+      "fit": "Position fit",
+      "readiness": "Readiness",
+      "succession": "Succession",
+      "criticalPositions": "Critical positions",
+      "criticalCoverage": "Critical-role coverage"
+    },
+    "cols": {
+      "employee": "Employee",
+      "position": "Position",
+      "dimension": "Dimension",
+      "score": "Score",
+      "horizon": "Horizon",
+      "value": "Value",
+      "rationale": "Rationale",
+      "businessImpact": "Business impact",
+      "flaggedAt": "Flagged",
+      "readyNow": "Ready now",
+      "ready6mo": "Ready 6mo",
+      "ready1y": "Ready 1y",
+      "coverage": "Coverage",
+      "computedAt": "Computed"
+    }
+  },
   "compReward": {
     "variablePay": "Variable pay",
     "recommendations": "Compensation recommendations",

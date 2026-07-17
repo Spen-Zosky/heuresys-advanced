@@ -69,6 +69,7 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   predictions: "EVALUATION",
   insights: "EVALUATION",
   evidence: "EVALUATION", // #27 (S1018): the explainability layer over EVALUATION/SKILL evidence
+  talent: "EVALUATION", // A/L3 (#29): 9-box / fit / readiness / succession — person-level talent intelligence
 };
 
 /** The data class of a resource, or null when the resource carries no person-level data. */

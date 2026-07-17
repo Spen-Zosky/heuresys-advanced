@@ -335,6 +335,10 @@
       "types": "./dist/schemas/time-off.d.ts",
       "default": "./src/schemas/time-off.ts"
     },
+    "./schemas/talent-review": {
+      "types": "./dist/schemas/talent-review.d.ts",
+      "default": "./src/schemas/talent-review.ts"
+    },
     "./schemas/okrs": {
       "types": "./dist/schemas/okrs.d.ts",
       "default": "./src/schemas/okrs.ts"

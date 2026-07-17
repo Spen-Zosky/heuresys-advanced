@@ -768,6 +768,52 @@
       "date": "Data"
     }
   },
+  "talentReview": {
+    "title": "Revisione talenti",
+    "description": "Griglia 9-box dei talenti, più fit di posizione, prontezza, successione e copertura dei ruoli critici. Consultazione in sola lettura.",
+    "error": "Errore di caricamento.",
+    "empty": "Nessun record.",
+    "nineBox": {
+      "title": "Griglia 9-box",
+      "axisPotential": "Potenziale",
+      "axisPerformance": "Performance",
+      "band": {
+        "LOW": "Basso",
+        "MEDIUM": "Medio",
+        "HIGH": "Alto"
+      }
+    },
+    "kpi": {
+      "assessed": "Valutati",
+      "fit": "Fit di posizione",
+      "readiness": "Prontezza",
+      "succession": "Successione",
+      "criticalPositions": "Posizioni critiche"
+    },
+    "sections": {
+      "fit": "Fit di posizione",
+      "readiness": "Prontezza",
+      "succession": "Successione",
+      "criticalPositions": "Posizioni critiche",
+      "criticalCoverage": "Copertura ruoli critici"
+    },
+    "cols": {
+      "employee": "Dipendente",
+      "position": "Posizione",
+      "dimension": "Dimensione",
+      "score": "Punteggio",
+      "horizon": "Orizzonte",
+      "value": "Valore",
+      "rationale": "Motivazione",
+      "businessImpact": "Impatto business",
+      "flaggedAt": "Segnalata",
+      "readyNow": "Pronti ora",
+      "ready6mo": "Pronti 6 mesi",
+      "ready1y": "Pronti 1 anno",
+      "coverage": "Copertura",
+      "computedAt": "Calcolato"
+    }
+  },
   "compReward": {
     "variablePay": "Retribuzione variabile",
     "recommendations": "Raccomandazioni retributive",

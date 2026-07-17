@@ -108,6 +108,7 @@ import { okrsRoutes } from "./modules/okrs/routes.js";
 import { provenanceRoutes } from "./modules/provenance/routes.js";
 import { evidenceRoutes } from "./modules/evidence/routes.js";
 import { timeOffRoutes } from "./modules/time-off/routes.js";
+import { talentReviewRoutes } from "./modules/talent-review/routes.js";
 import { predictionsRoutes } from "./modules/predictions/routes.js";
 import { engagementRoutes } from "./modules/engagement/routes.js";
 import { semanticMatchingRoutes } from "./modules/semantic-matching/routes.js";
@@ -427,6 +428,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(provenanceRoutes, { prefix: "/v1/provenance" }); // #28 Trust Ledger (S1018)
   await app.register(evidenceRoutes, { prefix: "/v1/evidence" }); // #27 evidence layer (S1018)
   await app.register(timeOffRoutes, { prefix: "/v1/time-off" }); // A/L8 (#33) time-off/leave read
+  await app.register(talentReviewRoutes, { prefix: "/v1/talent-review" }); // A/L3 (#29) talent-review 9-box
   await app.register(predictionsRoutes, { prefix: "/v1/predictions" });
   await app.register(engagementRoutes, { prefix: "/v1/engagement" });
   await app.register(semanticMatchingRoutes, { prefix: "/v1/matching", deps: options.matchingDeps });

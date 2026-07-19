@@ -1,26 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Badge, DataTableWithCrossHair, EmptyState, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
-import { Inbox } from "lucide-react";
+import { Badge, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
+import type { LearningGap, LearningGapSummaryResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
+import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { GapClosurePanel } from "@/components/gap-closure-panel";
-
-interface LearningGap {
-  learningGapId: string;
-  userId: string;
-  userName: string | null;
-  positionId: string | null;
-  positionTitle: string | null;
-  skillId: string | null;
-  skillName: string | null;
-  severity: string;
-  requiredProficiency: string | null;
-  currentProficiency: string | null;
-  detectedAt: string;
-}
 
 const SEVERITIES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const;
 const SEV_TONE: Record<(typeof SEVERITIES)[number], KpiCardData["iconTone"]> = {
@@ -32,22 +21,61 @@ const SEV_TONE: Record<(typeof SEVERITIES)[number], KpiCardData["iconTone"]> = {
 
 export default function AdminGapsPage() {
   const { t } = useTranslation("hr");
-  const gaps = useQuery({
-    queryKey: ["learning-gaps", "all"],
-    queryFn: () => apiFetch<{ items: LearningGap[]; total: number }>("/v1/learning-gaps?limit=200"),
+
+  // C4 (#42): the table is one SERVER page…
+  const gaps = usePaginatedList<LearningGap>({
+    queryKey: ["learning-gaps", "list"],
+    path: "/v1/learning-gaps",
   });
 
-  const items = gaps.data?.items ?? [];
-  const bySev = items.reduce<Record<string, number>>((acc, g) => {
-    acc[g.severity] = (acc[g.severity] ?? 0) + 1;
-    return acc;
-  }, {});
+  // …and the severity strip comes from a SERVER-side aggregate over the whole
+  // visible set. Previously both were derived from a single `?limit=200` fetch:
+  // the badge showed the real total while the strip counted at most 200 gaps, so
+  // the two numbers on this screen disagreed by construction whenever a tenant
+  // had more than 200 gaps. Same ADR-0027 scope on both endpoints.
+  const summary = useQuery({
+    queryKey: ["learning-gaps", "summary"],
+    queryFn: () => apiFetch<LearningGapSummaryResponse>("/v1/learning-gaps/summary"),
+  });
 
   const sevItems: KpiCardData[] = SEVERITIES.map((s) => ({
     label: s,
-    value: <span data-testid={`gaps-severity-${s}`}>{bySev[s] ?? 0}</span>,
+    value: (
+      <span data-testid={`gaps-severity-${s}`}>
+        {summary.data?.items.find((i) => i.severity === s)?.count ?? 0}
+      </span>
+    ),
     iconTone: SEV_TONE[s],
   }));
+
+  const columns = useMemo<DataColumn<LearningGap>[]>(
+    () => [
+      {
+        header: t("gaps.cols.user"),
+        cell: (g) => <span className="text-xs text-foreground">{g.userName ?? g.userId.slice(0, 8)}</span>,
+      },
+      {
+        header: t("gaps.cols.position"),
+        cell: (g) => (
+          <span className="text-xs text-muted-foreground">
+            {g.positionTitle ?? (g.positionId ? g.positionId.slice(0, 8) : "—")}
+          </span>
+        ),
+      },
+      {
+        header: t("gaps.cols.skill"),
+        cell: (g) => (
+          <span className="text-xs text-muted-foreground">
+            {g.skillName ?? (g.skillId ? g.skillId.slice(0, 8) : "—")}
+          </span>
+        ),
+      },
+      { header: t("gaps.cols.severity"), cell: (g) => <StatusBadge value={g.severity} /> },
+      { header: t("gaps.cols.required"), cell: (g) => <span className="text-xs">{g.requiredProficiency ?? "—"}</span> },
+      { header: t("gaps.cols.current"), cell: (g) => <span className="text-xs">{g.currentProficiency ?? "—"}</span> },
+    ],
+    [t],
+  );
 
   return (
     <main data-testid="gaps-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
@@ -57,7 +85,7 @@ export default function AdminGapsPage() {
         description={t("gaps.description")}
         badges={
           <Badge variant="secondary" data-testid="gaps-count">
-            {gaps.data ? t("gaps.count", { count: gaps.data.total }) : "…"}
+            {gaps.query.data ? t("gaps.count", { count: gaps.total }) : "…"}
           </Badge>
         }
       />
@@ -66,47 +94,23 @@ export default function AdminGapsPage() {
         <KPIStrip items={sevItems} />
       </section>
 
-      {gaps.isLoading ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
-      ) : gaps.isError ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-danger" data-testid="gaps-error">
-          {t("gaps.error")}
-        </div>
-      ) : items.length === 0 ? (
-        <EmptyState
-          data-testid="gaps-empty"
-          icon={<Inbox className="h-6 w-6" />}
-          title={t("gaps.emptyTitle")}
-          description={t("gaps.emptyDescription")}
+      <div data-testid="gaps-list">
+        <EntityTable<LearningGap>
+          isLoading={gaps.query.isLoading}
+          isError={gaps.query.isError}
+          errorTestId="gaps-error"
+          errorMessage={t("gaps.error")}
+          rows={gaps.rows}
+          server={gaps.server}
+          rowKey={(g) => g.learningGapId}
+          rowTestId="gaps-row"
+          columns={columns}
+          emptyTestId="gaps-empty"
+          emptyTitle={t("gaps.emptyTitle")}
+          emptyDescription={t("gaps.emptyDescription")}
+          caption={t("gaps.caption")}
         />
-      ) : (
-        <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
-          <DataTableWithCrossHair caption={t("gaps.caption")} className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 py-2">{t("gaps.cols.user")}</th>
-                <th className="px-4 py-2">{t("gaps.cols.position")}</th>
-                <th className="px-4 py-2">{t("gaps.cols.skill")}</th>
-                <th className="px-4 py-2">{t("gaps.cols.severity")}</th>
-                <th className="px-4 py-2">{t("gaps.cols.required")}</th>
-                <th className="px-4 py-2">{t("gaps.cols.current")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {items.map((g) => (
-                <tr key={g.learningGapId} data-testid="gaps-row" className="transition-colors hover:bg-muted/60">
-                  <td className="px-4 py-2 text-xs text-foreground">{g.userName ?? g.userId.slice(0, 8)}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{g.positionTitle ?? (g.positionId ? g.positionId.slice(0, 8) : "—")}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{g.skillName ?? (g.skillId ? g.skillId.slice(0, 8) : "—")}</td>
-                  <td className="px-4 py-2"><StatusBadge value={g.severity} /></td>
-                  <td className="px-4 py-2 text-xs">{g.requiredProficiency ?? "—"}</td>
-                  <td className="px-4 py-2 text-xs">{g.currentProficiency ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </DataTableWithCrossHair>
-        </div>
-      )}
+      </div>
 
       {/* #30 (S1018): gap-closure layer — remediation plans + analysis results */}
       <GapClosurePanel />

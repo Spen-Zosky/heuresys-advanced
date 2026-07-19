@@ -1,6 +1,6 @@
 /**
  * apps/api/src/modules/learning-gaps/routes.ts
- * 5 endpoints under /v1/learning-gaps.
+ * 6 endpoints under /v1/learning-gaps.
  * Permissions: gap_analysis:read for list/get, gap_analysis:create for POST,
  * gap_analysis:update for PATCH and DELETE (no gap_analysis:delete in seed).
  */
@@ -13,6 +13,7 @@ import {
   LearningGapSchema,
   LearningGapListQuerySchema,
   LearningGapListResponseSchema,
+  LearningGapSummaryResponseSchema,
   CreateLearningGapBodySchema,
   UpdateLearningGapBodySchema,
   LearningGapIdParamSchema,
@@ -44,6 +45,13 @@ export const learningGapsRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("gap_analysis:read")],
     schema: { querystring: GapAnalysisResultListQuerySchema, response: { 200: GapAnalysisResultListResponseSchema } },
   }, async (req) => learningGapsService.listAnalysisResults(actor(req), req.query));
+
+  // C4 (#42) — severity aggregate for the /gaps KPI strip (literal route before /:id).
+  app.get("/summary", {
+    config: { orgGate: "service" },
+    preHandler: [requirePermission("gap_analysis:read")],
+    schema: { response: { 200: LearningGapSummaryResponseSchema } },
+  }, async (req) => learningGapsService.severitySummary(actor(req)));
 
   app.get("/:id", {
     config: { orgGate: "service" },

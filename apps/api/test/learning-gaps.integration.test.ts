@@ -87,6 +87,59 @@ describe("/v1/learning-gaps integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("NOT_FOUND");
   });
 
+  /**
+   * C4 (#42): the /gaps KPI strip used to reduce severities in the browser over a
+   * `?limit=200` fetch, so it described only the first 200 gaps while the badge
+   * showed the true total — two numbers on one screen that disagreed by
+   * construction. The summary endpoint must agree with the LIST total (same
+   * scope, no limit). Expectations are derived from the live endpoints, never
+   * hardcoded.
+   */
+  it("GET /summary: severity counts agree with the scoped list total and track writes", async () => {
+    const summary = async (s: S) => {
+      const r = await suite.app.inject({
+        method: "GET", url: "/v1/learning-gaps/summary",
+        headers: { cookie: ch(s.cookies) },
+      });
+      expect(r.statusCode).toBe(200);
+      return r.json() as { items: { severity: string; count: number }[]; total: number };
+    };
+    const listTotal = async (s: S) => {
+      const r = await suite.app.inject({
+        method: "GET", url: "/v1/learning-gaps?limit=1",
+        headers: { cookie: ch(s.cookies) },
+      });
+      expect(r.statusCode).toBe(200);
+      return (r.json() as { total: number }).total;
+    };
+
+    const before = await summary(tenantS);
+    // The aggregate must cover the whole visible set, not a page of it.
+    expect(before.total).toBe(await listTotal(tenantS));
+    expect(before.items.reduce((s, i) => s + i.count, 0)).toBe(before.total);
+
+    const created = await suite.app.inject({
+      method: "POST", url: "/v1/learning-gaps",
+      headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+      payload: { userId: managerS.userId, severity: "MEDIUM", metadata: { suitePrefix: SUITE_PREFIX } },
+    });
+    expect(created.statusCode).toBe(201);
+    createdGapIds.push((created.json() as { learningGapId: string }).learningGapId);
+
+    const after = await summary(tenantS);
+    const medBefore = before.items.find((i) => i.severity === "MEDIUM")?.count ?? 0;
+    const medAfter = after.items.find((i) => i.severity === "MEDIUM")?.count ?? 0;
+    expect(medAfter).toBe(medBefore + 1);
+    expect(after.total).toBe(before.total + 1);
+    expect(after.total).toBe(await listTotal(tenantS));
+
+    // ADR-0027: the summary is scoped like the list — a manager sees no more than
+    // the tenant admin, and its own total still matches its own list.
+    const mgr = await summary(managerS);
+    expect(mgr.total).toBeLessThanOrEqual(after.total);
+    expect(mgr.total).toBe(await listTotal(managerS));
+  });
+
   it("PATCH severity CRITICAL then DELETE", async () => {
     const c = await suite.app.inject({
       method: "POST", url: "/v1/learning-gaps",

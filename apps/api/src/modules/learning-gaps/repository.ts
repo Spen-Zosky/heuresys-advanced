@@ -116,6 +116,40 @@ export async function listGaps(
   return { items: res.rows.map(toGap), total };
 }
 
+/**
+ * C4 (#42): severity counts for the /gaps KPI strip, computed server-side.
+ * Takes the SAME scope filter as listGaps (tenant + ADR-0027 org allow-list) so
+ * the summary can never describe gaps the actor cannot list. Deliberately has no
+ * limit/offset: it is an aggregate over the whole visible set, which is exactly
+ * what the old client-side reduce over `?limit=200` failed to be.
+ */
+export async function getSeverityDistribution(
+  q: DbConnector,
+  filter: { tenantId?: string; userIdAllowList?: string[] },
+): Promise<{ items: { severity: LearningGapSeverity; count: number }[]; total: number }> {
+  const where: string[] = [];
+  const params: unknown[] = [];
+  if (filter.tenantId) {
+    params.push(filter.tenantId);
+    where.push(`learning_gap_tenant_id = $${params.length}`);
+  }
+  if (filter.userIdAllowList) {
+    if (filter.userIdAllowList.length === 0) return { items: [], total: 0 };
+    params.push(filter.userIdAllowList);
+    where.push(`learning_gap_user_id = ANY($${params.length}::uuid[])`);
+  }
+  const whereClause = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
+  const res = await q.query<{ severity: LearningGapSeverity; count: string }>(
+    `SELECT learning_gap_severity AS severity, count(*)::text AS count
+       FROM sys.sys_learning_gaps ${whereClause}
+      GROUP BY learning_gap_severity
+      ORDER BY count(*) DESC, learning_gap_severity`,
+    params,
+  );
+  const items = res.rows.map((r) => ({ severity: r.severity, count: Number(r.count) }));
+  return { items, total: items.reduce((sum, i) => sum + i.count, 0) };
+}
+
 export async function findGapById(q: DbConnector, id: string): Promise<LearningGap | null> {
   const res = await q.query<Row>(
     `SELECT ${COLS} FROM sys.sys_learning_gaps WHERE learning_gap_id = $1`, [id],

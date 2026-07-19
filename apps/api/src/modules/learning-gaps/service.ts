@@ -128,6 +128,27 @@ export const learningGapsService = {
   },
 
   // ── #30 (S1018): gap-closure reads — org axis on the subject user ──
+  /**
+   * C4 (#42): severity distribution over the actor's WHOLE visible gap set.
+   * Resolves the identical ADR-0027 organizational read scope as `list`, so the
+   * KPI strip and the (now paginated) table always describe the same population.
+   */
+  async severitySummary(actor: ActorContext) {
+    const scope = await resolveOrgReadScope(pool, actor);
+    switch (scope.kind) {
+      case "all":
+        return repo.getSeverityDistribution(pool, {});
+      case "tenant":
+        return repo.getSeverityDistribution(pool, { tenantId: scope.tenantId });
+      case "subtree":
+      case "self":
+        return repo.getSeverityDistribution(pool, {
+          tenantId: scope.tenantId,
+          userIdAllowList: scope.userIdAllowList,
+        });
+    }
+  },
+
   async listClosurePlans(actor: ActorContext, query: GapClosurePlanListQuery) {
     const scope = await resolveOrgReadScope(pool, actor);
     const userIdAllowList =

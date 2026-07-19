@@ -45,6 +45,28 @@ export const LearningGapListResponseSchema = z.object({
   total: z.number().int().min(0),
 });
 
+/**
+ * C4 (#42): server-side severity aggregate for the /gaps KPI strip. The page used
+ * to count severities in the browser over a `?limit=200` fetch, so the strip
+ * silently described only the first 200 gaps while the badge showed the true
+ * total. Aggregating server-side lets the table paginate without narrowing the
+ * summary. Scoped identically to the list endpoint (ADR-0027 organizational read
+ * scope), so the counts never exceed what the actor may see.
+ */
+export const LearningGapSeverityDistributionItemSchema = z.object({
+  severity: LearningGapSeveritySchema,
+  count: z.number().int().min(0),
+});
+export type LearningGapSeverityDistributionItem = z.infer<
+  typeof LearningGapSeverityDistributionItemSchema
+>;
+
+export const LearningGapSummaryResponseSchema = z.object({
+  items: z.array(LearningGapSeverityDistributionItemSchema),
+  total: z.number().int().min(0),
+});
+export type LearningGapSummaryResponse = z.infer<typeof LearningGapSummaryResponseSchema>;
+
 export const CreateLearningGapBodySchema = z.object({
   userId: z.uuid(),
   positionId: z.uuid().nullable().optional(),

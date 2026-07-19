@@ -7,56 +7,52 @@ import { pool } from '../src/db/client.js';
 // suite (singleThread) so this file does NOT close it.
 
 describe('reconciliation registry (F1)', () => {
-  it('registry holds exactly 115 rows with the signed-off bucket split A27/B16/C23/D49', async () => {
+  /**
+   * RETIRED (S1021): this used to assert a frozen census — "exactly 115 rows, split
+   * A27/B16/C23/D49" — carrying a 45-line changelog of the ~25 times the number had been
+   * bumped by hand. It duplicated the registry, which IS the source of truth, so every new
+   * `sys.*` table turned a green suite red for bookkeeping reasons rather than for a defect;
+   * the changelog itself records a session that left the assert stale and red without noticing
+   * ("was already red at the S990 session start"). Its real content — that nothing escapes
+   * classification — is already asserted, better, by the 0-UNCLASSIFIED test below.
+   *
+   * Replaced by invariants derived from the live schema, which cannot go stale:
+   *   - every registry row carries a valid bucket and declared status;
+   *   - no row points at a table that no longer exists (a dropped table left registered would
+   *     otherwise sit unnoticed — something the census could never catch).
+   */
+  it('every registry row is well-formed and points at a table that exists', async () => {
+    const { rows: malformed } = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.sys_reconciliation_registry
+        WHERE reconciliation_registry_bucket NOT IN ('A','B','C','D')
+           OR reconciliation_registry_declared_status IS NULL`,
+    );
+    expect(malformed[0]?.n, 'righe con bucket/declared_status non validi').toBe(0);
+
+    const { rows: orphans } = await pool.query<{ t: string }>(
+      `SELECT r.reconciliation_registry_table_name AS t
+         FROM sys.sys_reconciliation_registry r
+        WHERE NOT EXISTS (
+          SELECT 1 FROM pg_tables p
+           WHERE p.schemaname = 'sys' AND p.tablename = r.reconciliation_registry_table_name
+        )`,
+    );
+    expect(orphans.map((r) => r.t), 'righe di registro orfane (tabella inesistente)').toEqual([]);
+  });
+
+  it('the bucket split is internally consistent (every classified table counted once)', async () => {
     const { rows } = await pool.query<{ b: string; n: number }>(
       `SELECT reconciliation_registry_bucket AS b, count(*)::int AS n
          FROM sys.sys_reconciliation_registry GROUP BY 1`,
     );
     const m = Object.fromEntries(rows.map((r: { b: string; n: number }) => [r.b, r.n]));
-    // S960 baseline was 65 (A5/B16/C23/D21). S961 registered 9 new sys.* tables introduced
-    // after the F1 snapshot, each recorded to keep the registry 0-UNCLASSIFIED:
-    //   +4 bucket-D EXCLUDE — D7-P0 pgvector embedding tables (mig 000062)
-    //   +1 bucket-A IMPORT  — D4 sys_organization_unit_templates (mig 000064)
-    //   +4 bucket-A IMPORT  — D6 SDBI perf/feedback tables (mig 000065)
-    //   +4 bucket-A IMPORT  — S970 mentorship m1: programs/pairings/sessions/match_scores (mig 000072 + seed 45)
-    //   +3 bucket-A IMPORT  — S973 surveys m2: engagement survey templates/surveys/responses (mig 000077 + seed 46)
-    //   +2 bucket-A IMPORT  — S973 predictionsml m3: predictive models + model predictions (mig 000079 + seed 47)
-    //   +1 bucket-D EXCLUDE — S974 MVP-4 sys_auth_mfa_otp_challenges (EMAIL_OTP infra, mig 000081)
-    //   +1 bucket-D EXCLUDE — cap③ sys_flight_risk_scores (in-platform-derived analytics, mig 000082)
-    //   +3 bucket-D EXCLUDE — cap④ CMS sys_content_{categories,documents,versions} (app-authored, mig 000086)
-    //   +2 bucket-D EXCLUDE — cap③ P2 sys_{succession_readiness,skill_gap}_scores (in-platform-derived, mig 000092)
-    //   +4 bucket-A IMPORT  — S978 m2b normalized cluster: sys_surveys/_questions/_responses/sys_pulse_checks (mig 000097 + seed 48)
-    //   +1 bucket-D EXCLUDE — S978 MVP-4 §2.5 sys_auth_mfa_recovery_codes (app-generated, mig 000099)
-    //   +1 bucket-D EXCLUDE — S980 cap④ CMS P3 sys_content_blueprint_links (app-authored cross-link, mig 000100)
-    //   +1 bucket-D EXCLUDE — S980 MVP-4 §2.5 sys_auth_mfa_webauthn_credentials (passkey credentials, mig 000102)
-    //   +1 bucket-D EXCLUDE - S981 MVP-4 par.2.5 #4 sys_auth_mfa_policies (mandatory-MFA policy config, mig 000103)
-    //   +1 bucket-D EXCLUDE - S981 cap4 CMS P3 sys_content_media (app-uploaded binaries, mig 000105)
-    //   +1 bucket-D EXCLUDE - S982 sys_auth_mfa_factors (app-generated MFA factors; latent gap —
-    //     the table predates the registry and rode on test-leftover has_rows — closed by the
-    //     S982 amendment to mig 000062, where the row must live for fresh-rebuild ordering)
-    //   +2 bucket-A IMPORT  — S988 R1 Fase3 engagement_feedback m: sys_engagement_feedback +
-    //     sys_engagement_action_plans (mig 000113 + seed 51; RTL import 400 + 6)
-    //   +1 bucket-D EXCLUDE — #9 WI-A sys_auth_mfa_exemptions (auth config, mig 000116). The #9
-    //     commits applied this registry row but left this assert stale (was already red at the
-    //     S990 session start) — absorbed here, S990.
-    //   +1 bucket-D EXCLUDE — #9 M-8b sys_auth_mfa_exemption_audit (audit trail, mig 000118)
-    //   +1 bucket-D EXCLUDE — T2.5 sys_organization_unit_processes (app-authored OU↔process RACI
-    //     links, no legacy source, mig 000121)
-    //   +1 bucket-A IMPORT — T1.2 sys_occupation_skill_requirements (ESCO occupation→skill
-    //     requirements; legacy esco_occupation_skills 126051 rows, mig 000123 + seed 52)
-    //   +1 bucket-D EXCLUDE — 3.4 sys_notification_preferences (per-user notification delivery
-    //     prefs; app-authored config, no legacy source, mig 000128)
-    //   +2 bucket-D EXCLUDE — 3.3 slice-D approval runtime: sys_approval_requests +
-    //     sys_approval_steps (app-authored BPM instance/step ledger, no legacy source, mig 000132)
-    //   +1 bucket-D EXCLUDE — Surveys-M2 sys_survey_assignments (app-authored per-user
-    //     survey targeting/completion, no legacy source, mig 000135)
-    //   +1 bucket-A IMPORT  — #6/#10 sys_survey_templates (survey template catalog mirror;
-    //     legacy survey_templates, completes the m2b normalized cluster, mig 000140 + seed 55)
-    //   +3 bucket-D EXCLUDE — Gap#1 MLCE/Maturity: sys_capability_scores +
-    //     sys_capability_score_lineage (mig 000146) + sys_capability_maturity_scores (mig 000147);
-    //     in-platform-derived capability/maturity analytics, no legacy source (S999).
-    //   +1 bucket-D EXCLUDE — #4 sys_leads (app-authored GTM website leads, mig 000152)
-    expect(m).toEqual({ A: 27, B: 16, C: 23, D: 49 });
+    const total = Object.values(m).reduce((s, n) => s + (n as number), 0);
+
+    const { rows: all } = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.sys_reconciliation_registry`,
+    );
+    expect(total).toBe(all[0]?.n);
+    expect(Object.keys(m).sort()).toEqual(['A', 'B', 'C', 'D']);
   });
 
   it('the v_reconciliation_status view leaves zero UNCLASSIFIED tables', async () => {

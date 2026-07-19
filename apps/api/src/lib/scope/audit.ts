@@ -14,7 +14,18 @@
 import { pino } from "pino";
 
 /** The authorizing axis of a scope decision (ADR-0027 §2.4 Pillar 4). */
-export type ScopeAxis = "platform" | "hr_mandate" | "org_subtree" | "self" | "tenant" | "denied";
+/**
+ * `functional` (F4) = granted by team/process membership. It authorizes ACTIVITIES only:
+ * an audit row carrying `functional` must never sit on a sensitive-data read (I18).
+ */
+export type ScopeAxis =
+  | "platform"
+  | "hr_mandate"
+  | "org_subtree"
+  | "functional"
+  | "self"
+  | "tenant"
+  | "denied";
 
 export interface ScopeAccessEvent {
   /** "resolve" = list scope resolution; "target" = per-target read gate. */

@@ -16,6 +16,7 @@ import type { ActorContext } from "../actor.js";
 import type { RoleCode } from "../../config/constants.js";
 import { ForbiddenError } from "../../errors/index.js";
 import { orgSubtreeUserIds, isInOrgSubtree, isOrgUnitManager, type DbConnector } from "./org.js";
+import { functionalScopeUserIds } from "./functional.js";
 import { recordScopeAccess, type ScopeAxis } from "./audit.js";
 
 /**
@@ -76,6 +77,59 @@ export async function resolveOrgReadScope(q: DbConnector, actor: ActorContext): 
       audit("org_subtree", tenantId);
       return { kind: "subtree", tenantId, userIdAllowList: subtree };
     }
+  }
+  audit("self", tenantId);
+  return { kind: "self", tenantId, userIdAllowList: [actor.userId] };
+}
+
+/** The functional (activity) read scope — ADR-0027 F4. Same shape as {@link OrgReadScope}
+ *  except the sub-tree kind is replaced by `functional`, so a caller can never mistake one
+ *  axis's allow-list for the other's when reading a scope value. */
+export type ActivityScope =
+  | { kind: "all" }
+  | { kind: "tenant"; tenantId: string }
+  | { kind: "functional"; tenantId: string; userIdAllowList: string[] }
+  | { kind: "self"; tenantId: string; userIdAllowList: string[] };
+
+/**
+ * Resolve the actor's FUNCTIONAL scope — "whose ACTIVITIES may this actor see/manage"
+ * (ADR-0027 F4). Deliberately NOT interchangeable with {@link resolveOrgReadScope}:
+ *
+ *   - route a data class of ACTIVITY here;
+ *   - route PERSONAL / COMPENSATION / SKILL / EVALUATION to the organizational resolver.
+ *
+ * Calling this one for sensitive data would hand a team leader their members' private
+ * records — precisely the leak ADR-0027 exists to prevent (I18, cardinal rule). The
+ * data-class taxonomy (`data-classes.ts`) makes the choice mechanical.
+ *
+ * HR-mandated roles keep tenant-wide reach here too: their mandate covers business data
+ * generally, activities included (HRMS_MANAGER is plenipotentiary on business data).
+ */
+export async function resolveActivityScope(
+  q: DbConnector,
+  actor: ActorContext,
+): Promise<ActivityScope> {
+  const audit = (axis: ScopeAxis, tenantId: string | null) =>
+    recordScopeAccess({ op: "resolve", actorUserId: actor.userId, tenantId, granted: true, axis });
+
+  if (actor.roles.includes("PLATFORM_ADMIN")) {
+    audit("platform", actor.tenantId);
+    return { kind: "all" };
+  }
+  const tenantId = actor.tenantId;
+  if (!tenantId) throw new ForbiddenError("Tenant context required", "TENANT_REQUIRED");
+  if (actor.roles.some((r) => HR_MANDATED_ROLES.has(r))) {
+    audit("hr_mandate", tenantId);
+    return { kind: "tenant", tenantId };
+  }
+
+  // No managerial-role precondition here (unlike the org axis): leading a team or owning a
+  // process IS the credential. That is the point of the second axis — a TEAM_LEADER with no
+  // org-chart reports still runs their team's work.
+  const scope = await functionalScopeUserIds(q, actor.userId);
+  if (scope.length > 1) {
+    audit("functional", tenantId);
+    return { kind: "functional", tenantId, userIdAllowList: scope };
   }
   audit("self", tenantId);
   return { kind: "self", tenantId, userIdAllowList: [actor.userId] };

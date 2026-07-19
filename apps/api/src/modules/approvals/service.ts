@@ -37,6 +37,7 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { getApplyEffect } from "./effects/index.js";
+import { resolveActivityScope } from "../../lib/scope/resolver.js";
 
 export type { ActorContext };
 
@@ -45,6 +46,23 @@ const DEFAULT_LIST_LIMIT = 50;
 function buildScope(a: ActorContext): repo.ScopeFilter {
   const platform = isPlatform(a);
   return { isPlatform: platform, tenantId: platform ? null : a.tenantId };
+}
+
+/**
+ * F4 (#24, ADR-0027): the READ scope for approvals — `approval` is ACTIVITY-class, so it is
+ * gated by the FUNCTIONAL axis (teams/processes I lead), not by the org chart.
+ *
+ * Applied to the read surface only (list + detail). The write paths keep their own
+ * authorization — you may decide a step because it is ASSIGNED to you, and apply because you
+ * hold the permission — so narrowing reads never blocks a legitimate decision. Before F4 the
+ * read surface was tenant-wide: any holder of `approval:read` saw every request in the tenant.
+ */
+async function buildReadScope(a: ActorContext): Promise<repo.ScopeFilter> {
+  const base = buildScope(a);
+  const scope = await resolveActivityScope(pool, a);
+  // `all` (platform) and `tenant` (HR mandate) keep the unrestricted view.
+  if (scope.kind === "all" || scope.kind === "tenant") return base;
+  return { ...base, visibleCreatorUserIds: scope.userIdAllowList, actorUserId: a.userId };
 }
 
 /* --- row → contract mappers ------------------------------------------------ */
@@ -166,6 +184,7 @@ export const approvalService = {
         resourceId: body.resourceId ?? null,
         decisionPolicy: requestPolicy,
         priority: body.priority ?? "MEDIUM",
+        metadata: body.metadata ?? {},
         createdBy: a.userId,
       });
       const steps = await repo.insertSteps(client, req.approvalRequestId, requestTenant, stepInputs);
@@ -193,7 +212,7 @@ export const approvalService = {
   },
 
   async listRequests(a: ActorContext, query: ApprovalListQuery): Promise<ApprovalListResponse> {
-    const items = await repo.listRequests(pool, buildScope(a), {
+    const items = await repo.listRequests(pool, await buildReadScope(a), {
       status: query.status,
       resourceType: query.resourceType,
       limit: query.limit ?? DEFAULT_LIST_LIMIT,
@@ -202,7 +221,7 @@ export const approvalService = {
   },
 
   async getRequest(a: ActorContext, id: string): Promise<ApprovalRequestDetail> {
-    const detail = await repo.findRequestDetail(pool, buildScope(a), id);
+    const detail = await repo.findRequestDetail(pool, await buildReadScope(a), id);
     if (!detail) throw new NotFoundError("Approval request");
     return {
       ...toRequest(detail.request),

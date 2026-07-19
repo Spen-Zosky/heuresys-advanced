@@ -35,7 +35,7 @@ export const SENSITIVE_DATA_CLASSES: ReadonlySet<DataClass> = new Set<DataClass>
  *  - COMPENSATION pay, variable pay, comp recommendations
  *  - SKILL        competency evidence + gaps
  *  - EVALUATION   assessments, performance KPIs/goals/OKRs, succession & talent predictions
- *  - ACTIVITY     team/process work items (added at F4 — none mapped yet)
+ *  - ACTIVITY     team/process work items — gated by the FUNCTIONAL axis (F4)
  *
  * Borderline resources resolved by Enzo (2026-07-01): `learning` + `training_initiative`
  * (formazione), `matching` + `capability` (matching/capacità, derived from competencies) → SKILL;
@@ -70,6 +70,18 @@ export const RESOURCE_DATA_CLASS: Readonly<Record<string, DataClass>> = {
   insights: "EVALUATION",
   evidence: "EVALUATION", // #27 (S1018): the explainability layer over EVALUATION/SKILL evidence
   talent: "EVALUATION", // A/L3 (#29): 9-box / fit / readiness / succession — person-level talent intelligence
+  // ACTIVITY — F4 (#24), Enzo 2026-07-19. WORK, not the person: what someone is doing,
+  // which a team/process leader coordinates. Deliberately NOT extended to goal/okr/kpi:
+  // those stay EVALUATION (Enzo 2026-07-01) because they measure the PERSON, and moving
+  // them here would let a leader read the records of the 34 RTL users who sit in their
+  // functional scope but outside their org sub-tree — reopening D-50 from the other side
+  // and breaking the cardinal rule (I18).
+  approval: "ACTIVITY", // approval requests/steps: work assigned to and raised by people
+  team: "ACTIVITY", // team membership: who works with whom
+  // NB: `bpm_process` / `organization_unit_processes` stay UNMAPPED on purpose — they are
+  // structural catalogues (process templates, OU↔process RACI), not person-level data.
+  // The PERSON-level process axis lives in sys_process_participants (mig 000179), which
+  // feeds functionalScopeUserIds directly.
 };
 
 /** The data class of a resource, or null when the resource carries no person-level data. */

@@ -109,6 +109,10 @@ export const CreateApprovalRequestBodySchema = z
     resourceId: z.uuid().nullable().optional(),
     priority: ApprovalPriorityEnum.optional(),
     decisionPolicy: ApprovalDecisionPolicyEnum.optional(),
+    /** B3 (#34): payload consumed by the apply-effect handler registered for
+     *  `resourceType` (e.g. `{ archetypeKey }` for TENANT_MATERIALIZATION). The row and
+     *  the read schema always had it; only the create path dropped it. */
+    metadata: META.optional(),
     // slice-1 sugar: a single level of approvers. Mutually exclusive with `levels`.
     approverUserIds: z.array(z.uuid()).min(1).max(50).optional(),
     // slice-2: ordered multi-level chain (level 1 first; a level opens only once the prior is satisfied).

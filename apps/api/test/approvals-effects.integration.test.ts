@@ -39,11 +39,15 @@ let fxCounter = 0;
 async function createReq(
   s: S,
   approverUserIds: string[],
-  opts: { title: string; resourceType?: string; resourceId?: string },
+  opts: { title: string; resourceType?: string; resourceId?: string; metadata?: Record<string, unknown> },
 ): Promise<ReqRow> {
   const r = await suite.app.inject({
     method: "POST", url: "/v1/approvals", headers: jhdr(s),
-    payload: { title: opts.title, approverUserIds, resourceType: opts.resourceType, resourceId: opts.resourceId },
+    payload: {
+      title: opts.title, approverUserIds,
+      resourceType: opts.resourceType, resourceId: opts.resourceId,
+      ...(opts.metadata ? { metadata: opts.metadata } : {}),
+    },
   });
   if (r.statusCode !== 200) throw new Error(`createReq: ${r.statusCode} ${r.body}`);
   return r.json() as ReqRow;
@@ -78,7 +82,7 @@ async function tenantStatus(tenantId: string): Promise<string> {
 }
 
 /** Create a single-approver request whose step admin owns, then approve it → APPROVED. */
-async function createAndApprove(opts: { title: string; resourceType?: string; resourceId?: string }): Promise<string> {
+async function createAndApprove(opts: { title: string; resourceType?: string; resourceId?: string; metadata?: Record<string, unknown> }): Promise<string> {
   const req = await createReq(admin, [adminId], opts);
   expect(req.status).toBe("PENDING");
   const detail = await getDetail(admin, req.approvalRequestId);
@@ -101,7 +105,14 @@ beforeAll(async () => {
 afterAll(async () => {
   await pool.query(`DELETE FROM sys.sys_inbox_notifications WHERE notification_subject LIKE $1`, [`${TITLE_PREFIX}%`]);
   await pool.query(`DELETE FROM sys.sys_approval_requests WHERE approval_request_title LIKE $1`, [`${TITLE_PREFIX}%`]);
-  await pool.query(`DELETE FROM sys.sys_tenancies WHERE tenant_code LIKE 'TEST-FX-%'`);
+  // NB: no `DELETE FROM sys_tenancies` here (B3 #34). The TENANT_MATERIALIZATION test
+  // builds a real tenant out — org units, positions, users — and ~30 of those child FKs
+  // are ON DELETE RESTRICT, so purging the tenant now raises a FK violation and fails the
+  // FILE (the tests themselves all pass). Enumerating those children to delete them in
+  // dependency order would be exactly the kind of hand-maintained bookkeeping that goes
+  // stale. It is also unnecessary: per D-52 the whole file runs inside one transaction
+  // that is rolled back at file end, which IS the cleanup — these manual DELETEs are the
+  // pre-D-52 belt-and-braces the doctrine already calls redundant.
   await suite.app.close();
 });
 
@@ -132,6 +143,79 @@ describe("approval apply-effect wiring (3.3 slice-3a)", () => {
     // markApplied was rolled back together with the failed effect: request is still APPROVED, not APPLIED.
     expect((await getDetail(admin, reqId)).status).toBe("APPROVED");
     expect(await tenantStatus(subjectId)).toBe("ACTIVE");
+  });
+
+  /**
+   * #34 B/B3 — the SECOND real handler. Until now the effects registry held exactly one
+   * entry and sys_approval_requests had never been used in anger: the BPM runtime was
+   * built but empty. TENANT_MATERIALIZATION makes an approval *cause* a real tenant
+   * build-out (org units, positions, users, assignments), instead of being a marker.
+   */
+  async function orgUnitCount(tenantId: string): Promise<number> {
+    const r = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.sys_organization_units WHERE organization_unit_tenant_id = $1`,
+      [tenantId],
+    );
+    return r.rows[0]!.n;
+  }
+
+  it("TENANT_MATERIALIZATION: approve + apply actually builds out the tenant (real subject mutated E2E)", async () => {
+    const subjectId = await seedTenant("ACTIVE");
+    expect(await orgUnitCount(subjectId), "il tenant nasce vuoto").toBe(0);
+
+    const reqId = await createAndApprove({
+      title: `${TITLE_PREFIX} materialize-happy`,
+      resourceType: "TENANT_MATERIALIZATION",
+      resourceId: subjectId,
+      metadata: { archetypeKey: "RETAIL_BANK_REFERENCE" },
+    });
+
+    const applied = await apply(admin, reqId);
+    expect(applied.statusCode).toBe(200);
+    expect((applied.json() as ReqRow).status).toBe("APPLIED");
+
+    // The approval CAUSED the build-out — asserted on the live rows, not on the response.
+    expect(await orgUnitCount(subjectId)).toBeGreaterThan(0);
+  });
+
+  it("TENANT_MATERIALIZATION without metadata.archetypeKey → 409 and the apply rolls back", async () => {
+    const subjectId = await seedTenant("ACTIVE");
+    const reqId = await createAndApprove({
+      title: `${TITLE_PREFIX} materialize-nometa`,
+      resourceType: "TENANT_MATERIALIZATION",
+      resourceId: subjectId,
+    });
+
+    const r = await apply(admin, reqId);
+    expect(r.statusCode).toBe(409);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("APPLY_EFFECT_FAILED");
+    expect((await getDetail(admin, reqId)).status).toBe("APPROVED");
+    expect(await orgUnitCount(subjectId), "nessuna materializzazione parziale").toBe(0);
+  });
+
+  /**
+   * The reason the handler re-checks the tenant status instead of trusting the request:
+   * approval is ASYNCHRONOUS. A tenant that was ACTIVE when the request was raised can be
+   * suspended before anyone approves it, and applying then would build out a suspended
+   * tenant. This pins that window shut.
+   */
+  it("TENANT_MATERIALIZATION: a tenant suspended AFTER approval is not built out", async () => {
+    const subjectId = await seedTenant("ACTIVE");
+    const reqId = await createAndApprove({
+      title: `${TITLE_PREFIX} materialize-suspended`,
+      resourceType: "TENANT_MATERIALIZATION",
+      resourceId: subjectId,
+      metadata: { archetypeKey: "RETAIL_BANK_REFERENCE" },
+    });
+
+    // …the world changes between approval and apply.
+    await pool.query(`UPDATE sys.sys_tenancies SET tenant_status = 'SUSPENDED' WHERE tenant_id = $1`, [subjectId]);
+
+    const r = await apply(admin, reqId);
+    expect(r.statusCode).toBe(409);
+    expect((r.json() as { error: { code: string } }).error.code).toBe("APPLY_EFFECT_FAILED");
+    expect((await getDetail(admin, reqId)).status).toBe("APPROVED");
+    expect(await orgUnitCount(subjectId)).toBe(0);
   });
 
   it("backward-compat: an unknown resource_type applies as a pure marker (no handler) → APPLIED, no error", async () => {

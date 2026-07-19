@@ -16,6 +16,30 @@ export type DbConnector = typeof pool | PoolClient;
 export interface ScopeFilter {
   isPlatform: boolean;
   tenantId: string | null;
+  /**
+   * F4 (#24, ADR-0027): the FUNCTIONAL allow-list — creators whose requests this actor may
+   * see (self + the members of the teams/processes they lead). Absent for platform and
+   * HR-mandated actors, who keep the tenant-wide view.
+   *
+   * `actorUserId` is applied ALONGSIDE it, never instead: a request you were asked to
+   * approve is yours to see even when its creator is outside your functional scope —
+   * otherwise the approval inbox would hide the very items awaiting your decision.
+   */
+  visibleCreatorUserIds?: string[];
+  actorUserId?: string;
+}
+
+/** SQL fragment for the F4 functional restriction; empty when the actor is unrestricted. */
+function functionalClause(scope: ScopeFilter, params: unknown[], alias = "r"): string {
+  if (!scope.visibleCreatorUserIds) return "";
+  params.push(scope.visibleCreatorUserIds);
+  const creators = params.length;
+  params.push(scope.actorUserId ?? null);
+  const actor = params.length;
+  return ` AND (${alias}.created_by = ANY($${creators}::uuid[])
+                OR EXISTS (SELECT 1 FROM sys.sys_approval_steps s2
+                            WHERE s2.approval_step_request_id = ${alias}.approval_request_id
+                              AND s2.approval_step_approver_user_id = $${actor}))`;
 }
 
 export interface ApprovalRequestRow {
@@ -142,6 +166,8 @@ export interface InsertRequestInput {
   resourceId: string | null;
   decisionPolicy: string;
   priority: string;
+  /** Free-form payload the apply-effect handler reads (B3 #34). Defaults to {}. */
+  metadata?: Record<string, unknown>;
   createdBy: string | null;
 }
 
@@ -151,10 +177,20 @@ export async function insertRequest(client: PoolClient, input: InsertRequestInpu
     `INSERT INTO sys.sys_approval_requests
        (approval_request_tenant_id, approval_request_title, approval_request_body,
         approval_request_resource_type, approval_request_resource_id,
-        approval_request_decision_policy, approval_request_priority, created_by)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+        approval_request_decision_policy, approval_request_priority,
+        approval_request_metadata, created_by)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
      RETURNING ${REQ_COLS}`,
-    [input.tenantId, input.title, input.body, input.resourceType, input.resourceId, input.decisionPolicy, input.priority, input.createdBy],
+    [
+      input.tenantId, input.title, input.body, input.resourceType, input.resourceId,
+      input.decisionPolicy, input.priority,
+      // B3 (#34): apply-effect handlers read their parameters from here (e.g. the
+      // archetypeKey of a TENANT_MATERIALIZATION). The column and the read schema
+      // already existed; only the write path dropped it, so a request could never
+      // carry the payload its own effect needed.
+      JSON.stringify(input.metadata ?? {}),
+      input.createdBy,
+    ],
   );
   return mapRequest(res.rows[0]!);
 }
@@ -201,7 +237,13 @@ function scopeClause(scope: ScopeFilter, col: string, params: unknown[]): string
 export async function findRequestScoped(q: DbConnector, scope: ScopeFilter, id: string): Promise<ApprovalRequestRow | null> {
   const params: unknown[] = [id];
   const clause = scopeClause(scope, "approval_request_tenant_id", params);
-  const res = await q.query(`SELECT ${REQ_COLS} FROM sys.sys_approval_requests WHERE approval_request_id = $1${clause}`, params);
+  // F4: same functional restriction as the list, so a request that is invisible in the
+  // list cannot be fetched by guessing its id (404, no existence leak).
+  const functional = functionalClause(scope, params, "r");
+  const res = await q.query(
+    `SELECT ${REQ_COLS} FROM sys.sys_approval_requests r WHERE r.approval_request_id = $1${clause}${functional}`,
+    params,
+  );
   return res.rows[0] ? mapRequest(res.rows[0]) : null;
 }
 
@@ -250,6 +292,7 @@ export async function listRequests(q: DbConnector, scope: ScopeFilter, filter: L
   if (!scope.isPlatform) { params.push(scope.tenantId); where += ` AND r.approval_request_tenant_id = $${params.length}`; }
   if (filter.status) { params.push(filter.status); where += ` AND r.approval_request_status = $${params.length}`; }
   if (filter.resourceType) { params.push(filter.resourceType); where += ` AND r.approval_request_resource_type = $${params.length}`; }
+  where += functionalClause(scope, params);
   params.push(filter.limit);
   const limitPos = params.length;
   const res = await q.query(

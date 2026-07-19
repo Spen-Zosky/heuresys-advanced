@@ -367,6 +367,10 @@
       "types": "./dist/schemas/essential-capability.d.ts",
       "default": "./src/schemas/essential-capability.ts"
     },
+    "./schemas/whistleblowing": {
+      "types": "./dist/schemas/whistleblowing.d.ts",
+      "default": "./src/schemas/whistleblowing.ts"
+    },
     "./schemas/reference-sync": {
       "types": "./dist/schemas/reference-sync.d.ts",
       "default": "./src/schemas/reference-sync.ts"

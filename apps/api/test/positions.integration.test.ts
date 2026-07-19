@@ -126,6 +126,47 @@ describe("/v1/positions/* integration", () => {
     expect([...tenants][0]).toBe(rtlTenantId);
   });
 
+  /**
+   * C4 (#42): `search` backs the ESS career-target picker, which used to filter a
+   * `?limit=200` fetch client-side — with 162 positions it was already at 81% of
+   * that ceiling. Expectations derive from the live response, never hardcoded.
+   */
+  it("LIST: `search` filters server-side on title OR code, within tenant scope", async () => {
+    const all = await suite.app.inject({
+      method: "GET", url: "/v1/positions?limit=200",
+      headers: { cookie: cookieHeader(employeeS.cookies) },
+    });
+    expect(all.statusCode).toBe(200);
+    const items = (all.json() as { items: { positionId: string; title: string; code: string }[] }).items;
+    expect(items.length).toBeGreaterThan(0);
+
+    const sample = items.find((p) => p.title.trim().length > 3);
+    expect(sample).toBeDefined();
+    const term = sample!.title.trim().slice(0, 4);
+
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/positions?search=${encodeURIComponent(term)}&limit=200`,
+      headers: { cookie: cookieHeader(employeeS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const found = r.json() as { items: { positionId: string; title: string; code: string }[]; total: number };
+
+    expect(found.total).toBeGreaterThan(0);
+    expect(found.total).toBeLessThanOrEqual(items.length);
+    expect(found.items.map((p) => p.positionId)).toContain(sample!.positionId);
+    const needle = term.toLowerCase();
+    for (const p of found.items) {
+      expect(p.title.toLowerCase().includes(needle) || p.code.toLowerCase().includes(needle)).toBe(true);
+    }
+
+    const none = await suite.app.inject({
+      method: "GET", url: "/v1/positions?search=zzzz-no-such-position-zzzz",
+      headers: { cookie: cookieHeader(employeeS.cookies) },
+    });
+    expect(none.statusCode).toBe(200);
+    expect((none.json() as { total: number }).total).toBe(0);
+  });
+
   it("GET :id reads a position in own tenant", async () => {
     const r = await suite.app.inject({
       method: "GET",

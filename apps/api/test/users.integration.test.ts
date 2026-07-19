@@ -90,6 +90,52 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     expect(body.total).toBeGreaterThanOrEqual(162);
   });
 
+  /**
+   * C4 (#42): `search` lets approver/assignee pickers query the server instead of
+   * filtering a `?limit=200` bulk fetch in the browser (which silently capped the
+   * reachable set). Expectations derive from the live response — a term is taken
+   * from a real row, never hardcoded.
+   */
+  it("LIST: `search` filters server-side on display name OR email, within scope", async () => {
+    const all = await suite.app.inject({
+      method: "GET", url: "/v1/users?limit=200",
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    expect(all.statusCode).toBe(200);
+    const items = (all.json() as { items: { userId: string; email: string; displayName: string | null }[] }).items;
+    expect(items.length).toBeGreaterThan(0);
+
+    // Take a discriminating fragment from a REAL row rather than inventing one.
+    const sample = items.find((u) => (u.displayName ?? "").trim().length > 3);
+    expect(sample).toBeDefined();
+    const term = (sample!.displayName ?? "").trim().slice(0, 4);
+
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/users?search=${encodeURIComponent(term)}&limit=200`,
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const found = r.json() as { items: { userId: string; email: string; displayName: string | null }[]; total: number };
+
+    expect(found.total).toBeGreaterThan(0);
+    expect(found.total).toBeLessThanOrEqual(items.length); // a filter never widens the set
+    expect(found.items.map((u) => u.userId)).toContain(sample!.userId);
+    const needle = term.toLowerCase();
+    for (const u of found.items) {
+      expect(
+        (u.displayName ?? "").toLowerCase().includes(needle) || u.email.toLowerCase().includes(needle),
+      ).toBe(true);
+    }
+
+    // A term that matches nothing yields an honest empty set, not everything.
+    const none = await suite.app.inject({
+      method: "GET", url: "/v1/users?search=zzzz-no-such-user-zzzz",
+      headers: { cookie: cookieHeader(tenantS.cookies) },
+    });
+    expect(none.statusCode).toBe(200);
+    expect((none.json() as { total: number }).total).toBe(0);
+  });
+
   it("LIST: TENANT_ADMIN sees only own-tenant users", async () => {
     const r = await suite.app.inject({
       method: "GET",

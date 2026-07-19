@@ -104,6 +104,9 @@ export const NON_PRIVILEGED_UPDATABLE_FIELDS = [
 export const UserListQuerySchema = z.object({
   status: UserStatusSchema.optional(),
   type: UserTypeSchema.optional(),
+  /** C4 (#42): ILIKE on display name OR email — lets approver/assignee pickers
+   *  search server-side instead of filtering a `?limit=200` bulk fetch. */
+  search: z.string().min(1).max(255).optional(),
   ...paginationFields(200, 50),
 });
 export type UserListQuery = z.infer<typeof UserListQuerySchema>;

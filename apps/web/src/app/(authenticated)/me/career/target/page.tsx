@@ -1,21 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import type { Position } from "@heuresys/shared";
 import { StatusPill } from "@/components/status-pill";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { apiFetch } from "../../../../../lib/api/fetch";
-
-interface Position {
-  positionId: string;
-  code: string;
-  title: string;
-}
 
 const CareerTargetSchema = z.object({
   positionId: z.string().uuid(),
@@ -29,9 +26,15 @@ export default function MeCareerTargetPage() {
   const qc = useQueryClient();
   const [filter, setFilter] = useState("");
 
-  const positions = useQuery({
-    queryKey: ["positions", "list"],
-    queryFn: () => apiFetch<{ items: Position[]; total: number }>("/v1/positions?limit=200"),
+  // C4 (#42): server-side search. The old `?limit=200` + in-browser filter was
+  // already at 81% of its ceiling (162 positions) and would have started hiding
+  // rows silently as the tenant grew.
+  const debouncedFilter = useDebouncedValue(filter, 300);
+  const positions = usePaginatedList<Position>({
+    queryKey: ["positions", "picker"],
+    path: "/v1/positions",
+    params: { search: debouncedFilter },
+    initialPageSize: 50,
   });
 
   const create = useMutation({
@@ -51,12 +54,6 @@ export default function MeCareerTargetPage() {
     });
 
   const onSubmit = handleSubmit(async (vals) => { await create.mutateAsync(vals); });
-
-  const filtered = (positions.data?.items ?? []).filter((p) => {
-    if (!filter) return true;
-    const q = filter.toLowerCase();
-    return p.title.toLowerCase().includes(q) || p.code.toLowerCase().includes(q);
-  });
 
   return (
     <main data-testid="career-target-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
@@ -103,12 +100,20 @@ export default function MeCareerTargetPage() {
                 {...register("positionId")}
               >
                 <option value="">{t("careerTarget.selectPlaceholder")}</option>
-                {filtered.slice(0, 50).map((p) => (
+                {positions.rows.map((p) => (
                   <option key={p.positionId} value={p.positionId}>
                     {p.code} — {p.title}
                   </option>
                 ))}
               </select>
+              {positions.total > positions.rows.length && (
+                <p className="mt-1 text-xs text-muted-foreground" data-testid="career-target-position-more">
+                  {t("careerTarget.moreResults", {
+                    shown: positions.rows.length,
+                    total: positions.total,
+                  })}
+                </p>
+              )}
               {errors.positionId && (
                 <p className="mt-1 text-xs text-danger">{t("careerTarget.positionRequired")}</p>
               )}

@@ -57,6 +57,9 @@ export const PositionListQuerySchema = z.object({
   organizationUnitId: z.uuid().optional(),
   jobRoleId: z.uuid().optional(),
   ownerUserId: z.uuid().optional(),
+  /** C4 (#42): ILIKE on title OR code — lets pickers search server-side instead
+   *  of filtering a `?limit=200` bulk fetch in the browser. */
+  search: z.string().min(1).max(255).optional(),
   ...paginationFields(200, 50),
 });
 export type PositionListQuery = z.infer<typeof PositionListQuerySchema>;

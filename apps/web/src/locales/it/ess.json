@@ -149,6 +149,7 @@
     "filterPlaceholder": "Digita per filtrare…",
     "positionLabel": "Posizione",
     "selectPlaceholder": "— Seleziona —",
+    "moreResults": "Mostrate {{shown}} di {{total}} posizioni — affina la ricerca.",
     "positionRequired": "Posizione richiesta.",
     "dateLabel": "Data target (YYYY-MM-DD)",
     "datePlaceholder": "es. 2027-12-31",

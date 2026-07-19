@@ -99,6 +99,10 @@ export async function listUsers(
     params.push(filter.query.type);
     where.push(`user_type = $${params.length}`);
   }
+  if (filter.query.search) {
+    params.push(`%${filter.query.search}%`);
+    where.push(`(user_display_name ILIKE $${params.length} OR user_email ILIKE $${params.length})`);
+  }
   const whereClause = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
 
   const totalRow = await q.query<{ total: string }>(

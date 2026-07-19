@@ -100,6 +100,10 @@ export async function listPositions(
   if (filter.query.organizationUnitId) add("position_organization_unit_id", filter.query.organizationUnitId);
   if (filter.query.jobRoleId) add("position_job_role_id", filter.query.jobRoleId);
   if (filter.query.ownerUserId) add("position_owner_user_id", filter.query.ownerUserId);
+  if (filter.query.search) {
+    params.push(`%${filter.query.search}%`);
+    where.push(`(position_title ILIKE $${params.length} OR position_code ILIKE $${params.length})`);
+  }
   const whereClause = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
 
   const totalRow = await q.query<{ total: string }>(

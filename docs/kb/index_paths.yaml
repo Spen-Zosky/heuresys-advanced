@@ -1,16 +1,16 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-17T23:26:09Z da docs/kb/tools/build_index.py
+# generato: 2026-07-19T23:55:22Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-17T23:26:09Z"
-  total_files: 2394
+  generated_at: "2026-07-19T23:55:22Z"
+  total_files: 2416
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 26
-    api-core: 24
-    api-module: 304
+    api-core: 25
+    api-module: 308
     ci: 16
     claude-config: 15
     config: 104
@@ -18,9 +18,9 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 172
+    db-migration: 179
     db-other: 1
-    db-script: 26
+    db-script: 27
     db-seed: 107
     doc-canonical: 465
     handoff-state: 1
@@ -28,15 +28,15 @@ meta:
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 92
+    shared-schema: 94
     showcase-source: 13
-    test: 280
+    test: 286
     ux-design-archive: 80
-    web-source: 199
+    web-source: 200
   status_counts:
     archive: 495
     external-archive: 50
-    live: 1849
+    live: 1871
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -278,6 +278,12 @@ files:
     category: api-core
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\functional.ts'
+    root: repo
+    rel: 'apps/api/src/lib/scope/functional.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\gate.ts'
     root: repo
     rel: 'apps/api/src/lib/scope/gate.ts'
@@ -413,6 +419,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-activation.ts'
     root: repo
     rel: 'apps/api/src/modules/approvals/effects/tenant-activation.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-materialization.ts'
+    root: repo
+    rel: 'apps/api/src/modules/approvals/effects/tenant-materialization.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -2159,6 +2171,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\visualization-styles\service.ts'
     root: repo
     rel: 'apps/api/src/modules/visualization-styles/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\whistleblowing\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/whistleblowing/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\whistleblowing\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/whistleblowing/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\whistleblowing\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/whistleblowing/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -6068,6 +6098,48 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000175_esco_skill_catalogue_visibility.sql'
+    root: repo
+    rel: 'db/migrations/000175_esco_skill_catalogue_visibility.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000176_pip_required_kpis_rank.sql'
+    root: repo
+    rel: 'db/migrations/000176_pip_required_kpis_rank.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000177_dedicated_delete_permissions.sql'
+    root: repo
+    rel: 'db/migrations/000177_dedicated_delete_permissions.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000178_rbac_proxy_permissions.sql'
+    root: repo
+    rel: 'db/migrations/000178_rbac_proxy_permissions.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000179_process_participants.sql'
+    root: repo
+    rel: 'db/migrations/000179_process_participants.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000180_user_skills.sql'
+    root: repo
+    rel: 'db/migrations/000180_user_skills.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000181_whistleblowing.sql'
+    root: repo
+    rel: 'db/migrations/000181_whistleblowing.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\migrations\.gitkeep'
     root: repo
     rel: 'db/migrations/.gitkeep'
@@ -6149,6 +6221,12 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\gen-pay-slips-seed.sql'
     root: repo
     rel: 'db/scripts/gen-pay-slips-seed.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\import-d1-user-skills.sh'
+    root: repo
+    rel: 'db/scripts/import-d1-user-skills.sh'
     category: db-script
     status: live
     provenance: git-tracked
@@ -10604,6 +10682,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\essential-capability.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/essential-capability.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\evidence.ts'
     root: repo
     rel: 'packages/shared/src/schemas/evidence.ts'
@@ -10970,6 +11054,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\whistleblowing.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/whistleblowing.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\showcase\.gitignore'
     root: repo
     rel: 'apps/showcase/.gitignore'
@@ -11081,6 +11171,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\approvals-effects.integration.test.ts'
     root: repo
     rel: 'apps/api/test/approvals-effects.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\approvals-functional-scope.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/approvals-functional-scope.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11372,6 +11468,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\essential-capability.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/essential-capability.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\evidence.integration.test.ts'
     root: repo
     rel: 'apps/api/test/evidence.integration.test.ts'
@@ -11618,6 +11720,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\me-skill-possession.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/me-skill-possession.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\me-surveys.integration.test.ts'
     root: repo
     rel: 'apps/api/test/me-surveys.integration.test.ts'
@@ -11852,6 +11960,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\rbac-delete-permissions.test.ts'
+    root: repo
+    rel: 'apps/api/test/rbac-delete-permissions.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\reconciliation-f2-imports.integration.test.ts'
     root: repo
     rel: 'apps/api/test/reconciliation-f2-imports.integration.test.ts'
@@ -11939,6 +12053,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\scope-data-classes.integration.test.ts'
     root: repo
     rel: 'apps/api/test/scope-data-classes.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\scope-functional-axis.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/scope-functional-axis.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -12269,6 +12389,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\webauthn.integration.test.ts'
     root: repo
     rel: 'apps/api/test/webauthn.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\whistleblowing.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/whistleblowing.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -14243,6 +14369,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\lib\api\public-stats.ts'
     root: repo
     rel: 'apps/web/src/lib/api/public-stats.ts'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\lib\hooks\use-debounced-value.ts'
+    root: repo
+    rel: 'apps/web/src/lib/hooks/use-debounced-value.ts'
     category: web-source
     status: live
     provenance: git-tracked

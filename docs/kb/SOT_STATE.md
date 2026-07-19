@@ -8,6 +8,16 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
+## Delta S1021 (2026-07-19/20) — batch "tutto P1" 8/9 + ~10 difetti pre-esistenti + mandato forense
+
+HEAD **`6db1b250`** (16 commit `bae0a7ef..6db1b250`; 15 pushati fino a `bfc346b6`, `6db1b250` = D-58 diagnosi). Migration su disco **179** (`000001..000181`, +7: 000175 ESCO-skill-global · 000176 PIP-rank · 000177 delete-perms · 000178 deproxy-perms · 000179 process-participants · 000180 user-skills · 000181 whistleblowing). RBAC **13 ruoli** (+WHISTLEBLOWING_CUSTODIAN) / **176 perm** / **776 map**. Nuovi moduli/tabelle: `sys_process_participants` (F4), `sys_user_skills` (D1, 905 righe import legacy), `sys_whistleblowing_reports` (E1). Nuovo workspace app: nessuno. Nuovi endpoint: `/v1/capability/composition/essential-ranking` (F1), `/v1/learning-gaps/summary` (C4), `/v1/me/skills/possession` (D1), `/v1/whistleblowing/*` (E1, canale pubblico + console custodian).
+
+- **Batch P1 8/9 shipped DoD-complete** (dettaglio → `.handoff/STATE.md` + `SOT_BACKLOG.md`): #42 C4 · #61 G2 · #24 F4 · #34 B3 · #46 D1 · #47 D2 · #55 F1 · #51 E1. **#4 GTM** = solo pricing page WAIT-INPUT.
+- **~10 difetti pre-esistenti corretti (R3/R17)**: catalogo skill invisibile a ogni tenant (14036/14093 orfane, mig 000175) · PIP view senza `rank` (000176) · N+1 producer notifiche (emitNotificationsBulk dedupe) · `db:validate` rotto su Windows ($ErrorActionPreference+pg_dump) · badge FALSO "FACOLTATIVO" su ogni percorso (drift `isMandatoryDefault` inesistente) · colonna morta seed-runs (`blueprintVariantId`) · fixture E2E `API_BASE` doppio-/v1 · censimento test congelato (registry) · **D-57** grant-a-tappeto TENANT_ADMIN.
+- **Counts verificati**: full API suite **~1394 test / 0 fail** (202 file); typecheck + lint + i18n (1922-1923 chiavi) + state-lint verdi; `db:validate` viste 0 righe + idempotenza twice-run diff vuoto.
+- **CI**: tutti i gate VERDI tranne **Playwright-smoke ROSSO = D-58** (web build Turbopack barrel `.js`, pre-esistente `bae0a7ef` 17-lug, NON dei commit S1021 — diagnosi definitiva + 3 opzioni fix nel register).
+- **Nessun deploy PROD** (D-08 + D-58 bloccherebbe il build web). **Mandato Enzo fine sessione**: la prossima sessione fresca fa PRIMA una review forense dell'intero progetto + gate adversarial + verdetto finance-readiness → `docs/kb/NEXT_SESSION_FORENSIC_KICKOFF.md` + memoria `project_next_session_forensic_mandate`.
+
 ## Delta S1020 (2026-07-18) — Serie-A read-exposure residua CHIUSA (#33 · #32 · #29)
 
 HEAD **`42f4838d`** (3 commit pushati: `a5c8a586` #33 time-off/leave · `c10abc06` #32 comp-read · `42f4838d` #29 talent-review). Chiusa la coda Serie-A che S1018/S1019 avevano lasciato ACTIVE — tutti e 3 read-exposure di dati dormienti già popolati, org-gated (ADR-0027 F3), shipped DoD-complete (API + web + Playwright E2E su login persona reale + dati live). #33 fatto in main context (calibrazione), #32/#29 implementati da subagent con briefing completo + verifica/E2E/commit dal main.

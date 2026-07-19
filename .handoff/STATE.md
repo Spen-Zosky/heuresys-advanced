@@ -1,31 +1,32 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-07-18 (S1020 — Serie-A read-exposure residua CHIUSA: #33/#32/#29 shipped DoD-complete).
+**Updated**: 2026-07-20 (S1021 — batch P1 quasi completo + molti difetti pre-esistenti corretti; Enzo chiede review forense finance-readiness).
 
-> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md` (Delta S1020). Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Piano batch → `docs/kb/PLAN_S1018_BATCH.md` · ripartenza wave → `docs/kb/RESUME_S1018_BATCH.md`.
+> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. **Kickoff forense → `docs/kb/NEXT_SESSION_FORENSIC_KICKOFF.md`**.
 
-## Last session brief (S1020)
+## Last session brief (S1021)
 
-**Serie-A read-exposure residua CHIUSA end-to-end**: i tre item ACTIVE che S1019 segnalava come ripresa #1 sono shipped DoD-complete (API + web + Playwright E2E su login persona reale + dati live): **#33** time-off/leave (+ESS, mig 000173), **#32** comp & reward read (estende il modulo compensation, riuso `compensation_intelligence:read` — nessuna migration), **#29** talent-review 9-box (mig 000174, 9-box derivata da `sys_talent_scores` — il fantasma `sys_nine_box_grid` non esiste). Commit atomici pushati; suite API completa verde (0 fail). Tutto org-gated (PERSONAL/COMPENSATION/EVALUATION via ADR-0027 F3). **Nessun deploy** (D-08: solo a W13) → PROD www ancora pre-batch. **claude-mem disabilitato** (worker crash al boot bloccava le Read; stub reversibile → D-56). Conteggi nel granulare (Delta S1020).
+Batch "tutto P1" (9 item) eseguito in autonomia — **quasi tutti shipped DoD-complete** (uno solo resta WAIT-INPUT), 16 commit `bae0a7ef..6db1b250` (15 pushati, `6db1b250` D-58-diagnosi locale): **#42** C4 fondazioni frontend (FormData + paginazione server-side + search) · **#61** G2 RBAC hygiene (36 route + isolamento auto-riparante) · **#24** F4 asse funzionale (`sys_process_participants` + resolveActivityScope + approvazioni ACTIVITY) · **#34** B3 secondo apply-effect (BPM non più vuoto) · **#46** D1 skill possession (905 righe import + endpoint) · **#47** D2 engagement (flight-risk da 1 a 3 sorgenti) · **#55** F1 capability ranker (API + formula spiegabile) · **#51** E1 whistleblowing (canale anonimo + isolamento custodian). **#4 GTM** = solo pricing page, WAIT-INPUT (numeri solo Enzo). Lungo la strada **~10 difetti pre-esistenti corretti** (catalogo skill invisibile 99,6%, D-57 grant-a-tappeto, dato falso catalogo formativo, N+1 notifiche, db:validate rotto Windows, drift schema↔contratto). **CI**: API + typecheck + lint + i18n + state-lint VERDI; **Playwright-smoke ROSSO = D-58** (pre-esistente bae0a7ef, non dei commit S1021).
 
 ## Top priorities (next session)
 
-1. **W3 Serie B** — #34 approval-handlers (primo flusso approvativo reale, ~2-4h/handler), #37 reward-gate-engine, #36 viz-versioning, #38 inbox-SSE, #35 observability.
-2. **#24 F4** — asse funzionale/attività (ADR-0027, ~1-2 sessioni) per chiudere il modello bi-assiale.
-3. Poi W4-W13 in ordine (RESUME doc). Deploy PROD SOLO a W13 (`vm-deploy.sh` protetto da D-08).
+1. **⚠ MANDATO ENZO — PRIMA DI TUTTO**: review forense INTERO progetto + gate adversarial (avvocato del diavolo) + verdetto finance-readiness (GO/CONDITIONAL/NO-GO). Solo soluzioni professionali/stabili/avanzate, zero workaround. Kickoff completo: `docs/kb/NEXT_SESSION_FORENSIC_KICKOFF.md`. NON aprire il menu azioni prima di questo.
+2. **D-58** — CI web build (Turbopack barrel `.js`): diagnosi definitiva fatta, 3 opzioni A/B/C nel register; Enzo deve scegliere l'approccio (fix professionale, non tampone).
+3. Remediation del debito trovato dall'audit, in batch con vincolo "solo soluzioni professionali".
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **Pricing page** (#4): numeri prezzi/tier — non forniti (pagina resta in attesa).
-- **#8 app-password Outlook** → sblocca #39 EMAIL (WAIT-INPUT). **#52 E2 SSO**: serve client-id/secret IdP.
-- **#16 SuccessFactors**: sandbox esterno (WAIT-INPUT).
-- **claude-mem** (D-56): disabilitato — riattivare quando il plugin è aggiornato/riparato.
+- **Approccio D-58** (A main→dist / B web→subpath / C webpack): non scelto.
+- **Pricing page** (#4): numeri prezzi/tier — non forniti.
+- **#8** app-password Outlook → sblocca #39 EMAIL · **#16** sandbox SuccessFactors · **#52** SSO client-id/secret (tutti WAIT-INPUT).
+- **claude-mem** (D-56): disabilitato — riattivare a plugin riparato.
 
 ## Verification (next session)
 
 ```bash
-git log origin/main..HEAD --oneline               # 0 (tutto pushato)
+git log origin/main..HEAD --oneline               # atteso 0 dopo il push di handoff
 python docs/kb/tools/handoff_lint.py              # OK atteso
-ls db/migrations/*.sql | tail -1                  # 000174 (DB già migrato)
+ls db/migrations/*.sql | tail -1                  # 000181
 python docs/kb/tools/session_start.py             # menu + salute (1 round)
+gh run list --branch main --limit 8               # Playwright-smoke rosso = D-58
 ```

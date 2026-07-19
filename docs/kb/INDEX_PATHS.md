@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-17T23:26:09Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2394**
+**Generato**: 2026-07-19T23:55:22Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2416**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -9,8 +9,8 @@
 | Categoria | File |
 |---|---|
 | ADR | 26 |
-| api-core | 24 |
-| api-module | 304 |
+| api-core | 25 |
+| api-module | 308 |
 | ci | 16 |
 | claude-config | 15 |
 | config | 104 |
@@ -18,9 +18,9 @@
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 172 |
+| db-migration | 179 |
 | db-other | 1 |
-| db-script | 26 |
+| db-script | 27 |
 | db-seed | 107 |
 | doc-canonical | 465 |
 | handoff-state | 1 |
@@ -28,12 +28,12 @@
 | script | 6 |
 | session | 12 |
 | shared-pkg | 4 |
-| shared-schema | 92 |
+| shared-schema | 94 |
 | showcase-source | 13 |
-| test | 280 |
+| test | 286 |
 | ux-design-archive | 80 |
-| web-source | 199 |
-| **TOTALE** | **2394** |
+| web-source | 200 |
+| **TOTALE** | **2416** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 495 |
 | external-archive | 50 |
-| live | 1849 |
+| live | 1871 |
 
 ## File per categoria
 
@@ -91,6 +91,7 @@
 - `D:\heuresys-advanced\apps\api\src\lib\notifications\emit.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\lib\scope\audit.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\lib\scope\data-classes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\lib\scope\functional.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\lib\scope\gate.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\lib\scope\org.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\lib\scope\resolver.ts` · *live* · git-tracked
@@ -117,6 +118,7 @@
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\index.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\registry.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-activation.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-materialization.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\service.ts` · *live* · git-tracked
@@ -408,6 +410,9 @@
 - `D:\heuresys-advanced\apps\api\src\modules\visualization-styles\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\visualization-styles\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\visualization-styles\service.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\whistleblowing\repository.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\whistleblowing\routes.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\whistleblowing\service.ts` · *live* · git-tracked
 
 ### ci
 
@@ -1083,6 +1088,13 @@
 - `D:\heuresys-advanced\db\migrations\000172_evidence_permission_seed.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000173_time_off_leave_permission_seed_and_ui.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000174_talent_review_permission_seed_and_ui.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000175_esco_skill_catalogue_visibility.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000176_pip_required_kpis_rank.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000177_dedicated_delete_permissions.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000178_rbac_proxy_permissions.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000179_process_participants.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000180_user_skills.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000181_whistleblowing.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1103,6 +1115,7 @@
 - `D:\heuresys-advanced\db\scripts\gen-anagraphic-seed.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\gen-contracts-seed.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\gen-pay-slips-seed.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\import-d1-user-skills.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate-if-pending.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\migrate.sh` · *live* · git-tracked
@@ -1869,6 +1882,7 @@
 - `D:\heuresys-advanced\packages\shared\src\schemas\engagement.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\enterprise-size-bands.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\enterprise-typing-profiles.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\essential-capability.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\evidence.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\goals.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\insights.ts` · *live* · git-tracked
@@ -1930,6 +1944,7 @@
 - `D:\heuresys-advanced\packages\shared\src\schemas\visualization-node-layouts.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\visualization-nodes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\visualization-styles.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\whistleblowing.ts` · *live* · git-tracked
 
 ### showcase-source
 
@@ -1955,6 +1970,7 @@
 - `D:\heuresys-advanced\apps\api\test\analytics-export.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\approvals-effects.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\approvals-functional-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\approvals-sla.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\approvals.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\assessment-methods.integration.test.ts` · *live* · git-tracked
@@ -2003,6 +2019,7 @@
 - `D:\heuresys-advanced\apps\api\test\enterprise-typing-profiles.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\enterprise-typing.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\esco-connector.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\essential-capability.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\evidence.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\export-list.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\export-serializers.test.ts` · *live* · git-tracked
@@ -2044,6 +2061,7 @@
 - `D:\heuresys-advanced\apps\api\test\me-preferences.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-profile-full.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-sessions.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\me-skill-possession.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me-surveys.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\me.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\mentorship-data.integration.test.ts` · *live* · git-tracked
@@ -2083,6 +2101,7 @@
 - `D:\heuresys-advanced\apps\api\test\psr-derivation.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\public-stats.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\rbac-cache-boot-retry.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\rbac-delete-permissions.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\reconciliation-f2-imports.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\reconciliation-f3-imports.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\reconciliation-f4-bucketc.integration.test.ts` · *live* · git-tracked
@@ -2098,6 +2117,7 @@
 - `D:\heuresys-advanced\apps\api\test\run-logger.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\scope-audit.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\scope-data-classes.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\scope-functional-axis.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\scope-org.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\scope-peer-isolation.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\scope-resolver.integration.test.ts` · *live* · git-tracked
@@ -2153,6 +2173,7 @@
 - `D:\heuresys-advanced\apps\api\test\wave1-debug-scale-v4.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\wave1-idempotency.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\webauthn.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\whistleblowing.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\a11y.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\admin-catalogues.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\admin-lists.spec.ts` · *live* · git-tracked
@@ -2488,6 +2509,7 @@
 - `D:\heuresys-advanced\apps\web\src\lib\api\fetch.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\api\observability.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\api\public-stats.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\lib\hooks\use-debounced-value.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\hooks\use-paginated-list.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\i18n.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\landing.ts` · *live* · git-tracked

@@ -111,7 +111,7 @@
     "caption": "Pipeline runs",
     "columns": {
       "runId": "Run ID",
-      "variant": "Variant",
+      "code": "Codice",
       "status": "Stato",
       "startedAt": "Inizio",
       "finishedAt": "Fine"

@@ -35,7 +35,7 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { findOwnedPositionIds } from "../dashboard/repository.js";
-import { emitNotification } from "../../lib/notifications/emit.js";
+import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
 import { resolveOrgReadScope, canReadOrgTarget, type OrgReadScope } from "../../lib/scope/resolver.js";
 
 /**
@@ -46,22 +46,31 @@ import { resolveOrgReadScope, canReadOrgTarget, type OrgReadScope } from "../../
  */
 async function notifySkillGaps(toStore: repo.SubjectPositionScoreToStore[]): Promise<void> {
   const top = [...toStore].sort((a, b) => b.value - a.value).slice(0, 50);
-  for (const t of top) {
-    try {
-      await emitNotification(pool, {
-        tenantId: t.tenantId,
+  if (top.length === 0) return;
+  try {
+    // One round-trip instead of 50 sequential emitNotification calls (3 queries
+    // each with dedupe = ~150 serialised round-trips per recompute). This is the
+    // very anti-pattern emitNotificationsBulk was introduced for (QW-B1); the
+    // recompute producer had simply never been moved over, and it was pushing the
+    // "recompute twice + assert dedupe" test past its 20s budget.
+    await emitNotificationsBulk(
+      pool,
+      top.map((t) => ({
         userId: t.userId,
+        tenantId: t.tenantId,
+        body: `È stato rilevato un gap di competenze per la tua posizione (priorità ${t.category}).`,
+      })),
+      {
         type: "GAP_CLOSURE_DUE",
         subject: "Gap di competenze da colmare",
-        body: `È stato rilevato un gap di competenze per la tua posizione (priorità ${t.category}).`,
         priority: "MEDIUM",
         resourceType: "SKILL",
         actionUrl: "/me/gaps",
-        dedupe: true,
-      });
-    } catch {
-      /* best-effort */
-    }
+      },
+      { dedupe: true },
+    );
+  } catch {
+    /* best-effort */
   }
 }
 

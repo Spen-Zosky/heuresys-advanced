@@ -1,22 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, PageHeader } from "@heuresys/ui";
+import type { Skill } from "@heuresys/shared";
 import { StatusPill } from "@/components/status-pill";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { apiFetch } from "../../../../../lib/api/fetch";
-
-interface Skill {
-  skillId: string;
-  code: string;
-  name: string;
-  isGlobal: boolean;
-}
 
 const SelfAssessmentSchema = z.object({
   skillId: z.string().uuid(),
@@ -33,9 +29,17 @@ export default function MeSelfAssessmentPage() {
   const qc = useQueryClient();
   const [filter, setFilter] = useState("");
 
-  const skills = useQuery({
-    queryKey: ["skills", "list", "all"],
-    queryFn: () => apiFetch<{ items: Skill[]; total: number }>("/v1/skills?limit=200"),
+  // C4 (#42): the picker searches SERVER-side. It used to pull `?limit=200` and
+  // filter in the browser, which silently capped the reachable catalogue at the
+  // first 200 rows — unusable now that the ESCO taxonomy is visible to tenants
+  // (migration 000175). The endpoint's `search` does ILIKE on name OR code, the
+  // same match the client filter did.
+  const debouncedFilter = useDebouncedValue(filter, 300);
+  const skills = usePaginatedList<Skill>({
+    queryKey: ["skills", "picker"],
+    path: "/v1/skills",
+    params: { search: debouncedFilter },
+    initialPageSize: 50,
   });
 
   const create = useMutation({
@@ -58,10 +62,6 @@ export default function MeSelfAssessmentPage() {
     });
 
   const onSubmit = handleSubmit(async (vals) => { await create.mutateAsync(vals); });
-
-  const filteredSkills = (skills.data?.items ?? []).filter(
-    (s) => !filter || s.name.toLowerCase().includes(filter.toLowerCase()) || s.code.toLowerCase().includes(filter.toLowerCase()),
-  );
 
   return (
     <main data-testid="self-assessment-page" className="mx-auto max-w-3xl space-y-6 px-6 py-8">
@@ -108,10 +108,18 @@ export default function MeSelfAssessmentPage() {
                 {...register("skillId")}
               >
                 <option value="">{t("selfAssessment.selectPlaceholder")}</option>
-                {filteredSkills.slice(0, 50).map((s) => (
+                {skills.rows.map((s) => (
                   <option key={s.skillId} value={s.skillId}>{s.code} — {s.name}</option>
                 ))}
               </select>
+              {skills.total > skills.rows.length && (
+                <p className="mt-1 text-xs text-muted-foreground" data-testid="self-assessment-skill-more">
+                  {t("selfAssessment.moreResults", {
+                    shown: skills.rows.length,
+                    total: skills.total,
+                  })}
+                </p>
+              )}
               {errors.skillId && (
                 <p className="mt-1 text-xs text-danger">{t("selfAssessment.skillRequired")}</p>
               )}

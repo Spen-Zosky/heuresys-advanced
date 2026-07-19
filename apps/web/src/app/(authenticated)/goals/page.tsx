@@ -1,25 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { Button } from "@heuresys/ui";
-import { apiFetch } from "@/lib/api/fetch";
+import type { Goal } from "@heuresys/shared";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { GoalTimelineDialog } from "@/components/goal-timeline-dialog";
-
-interface GoalRow {
-  goalId: string;
-  title: string;
-  type: string;
-  priority: string;
-  status: string;
-  progressPercent: number;
-  dueDate: string | null;
-}
-interface GoalList { items: GoalRow[]; total: number }
 
 function toneForStatus(s: string): "info" | "success" | "warning" | "danger" | "neutral" {
   if (s === "COMPLETED" || s === "ON_TRACK") return "success";
@@ -29,7 +18,7 @@ function toneForStatus(s: string): "info" | "success" | "warning" | "danger" | "
   return "neutral";
 }
 
-function buildColumns(t: TFunction, onTimeline: (g: GoalRow) => void): DataColumn<GoalRow>[] {
+function buildColumns(t: TFunction, onTimeline: (g: Goal) => void): DataColumn<Goal>[] {
   return [
     { header: t("shared.name"), cell: (g) => <span className="font-medium text-foreground">{g.title}</span> },
     { header: t("goals.cols.type"), cell: (g) => <span className="text-xs text-muted-foreground">{g.type}</span> },
@@ -50,26 +39,25 @@ function buildColumns(t: TFunction, onTimeline: (g: GoalRow) => void): DataColum
 
 export default function GoalsPage() {
   const { t } = useTranslation("hr");
-  const [active, setActive] = useState<GoalRow | null>(null);
+  const [active, setActive] = useState<Goal | null>(null);
   const columns = useMemo(() => buildColumns(t, setActive), [t]);
-  const goals = useQuery({
-    queryKey: ["goals", "list"],
-    queryFn: () => apiFetch<GoalList>("/v1/goals?limit=200"),
-  });
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const goals = usePaginatedList<Goal>({ queryKey: ["goals", "list"], path: "/v1/goals" });
 
   return (
     <>
-      <DataTablePanel<GoalRow>
+      <DataTablePanel<Goal>
         pageTestId="goals-page"
         titleTestId="goals-title"
         countTestId="goals-count"
         title={t("goals.title")}
         description={t("goals.description")}
-        count={goals.data ? t("goals.count", { count: goals.data.total }) : undefined}
-        isLoading={goals.isLoading}
-        isError={goals.isError}
+        count={goals.query.data ? t("goals.count", { count: goals.total }) : undefined}
+        isLoading={goals.query.isLoading}
+        isError={goals.query.isError}
         errorMessage={t("goals.errorMessage")}
-        rows={goals.data?.items ?? []}
+        rows={goals.rows}
+        server={goals.server}
         rowKey={(g) => g.goalId}
         rowTestId="goals-row"
         columns={columns}

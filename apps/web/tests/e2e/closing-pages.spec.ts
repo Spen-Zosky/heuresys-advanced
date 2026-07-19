@@ -51,6 +51,38 @@ test.describe("MVP-2a closing pages — live data", () => {
       await expect(page.getByTestId("self-assessment-submit")).toBeVisible();
     });
 
+    /**
+     * C4 (#42): the skill picker queries the server. It used to fetch
+     * `?limit=200` once and filter in the browser, so anything past the first
+     * 200 rows of the name-ordered catalogue was simply unreachable — which
+     * became acute when migration 000175 made the ESCO taxonomy tenant-visible.
+     * "saldatura" matches only rows far beyond that boundary, so finding it at
+     * all proves the search runs server-side. Expectations are derived from the
+     * live response, never hardcoded.
+     */
+    test("/me/skills/self-assessment picker searches server-side beyond the first page", async ({ page }) => {
+      await page.goto("/me/skills/self-assessment");
+      await expect(page.getByTestId("self-assessment-page")).toBeVisible();
+
+      const options = page.getByTestId("self-assessment-skill").locator("option");
+      // Unfiltered: one server page only, and the UI says more exist.
+      await expect(page.getByTestId("self-assessment-skill-more")).toBeVisible();
+
+      await page.getByTestId("self-assessment-filter").fill("saldatura");
+      // Debounced (300ms) + keepPreviousData: the stale unfiltered page stays
+      // rendered while the query is in flight, so poll until EVERY option is a
+      // match — a plain "some options exist" check passes on the stale set.
+      await expect
+        .poll(
+          async () => {
+            const labels = (await options.allInnerTexts()).slice(1);
+            return labels.length > 0 && labels.every((l) => l.toLowerCase().includes("saldatura"));
+          },
+          { timeout: 15_000 },
+        )
+        .toBe(true);
+    });
+
     test("/me/learning/catalogue renders the path catalogue with filter", async ({ page }) => {
       await page.goto("/me/learning/catalogue");
       await expect(page.getByTestId("learning-catalogue-page")).toBeVisible();

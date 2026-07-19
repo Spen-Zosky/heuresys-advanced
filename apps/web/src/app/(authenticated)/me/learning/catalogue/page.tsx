@@ -1,22 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, Input, PageHeader } from "@heuresys/ui";
+import type { LearningPath } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
+import { useDebouncedValue } from "@/lib/hooks/use-debounced-value";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
-
-interface LearningPath {
-  learningPathId: string;
-  code: string;
-  name: string;
-  description: string | null;
-  isMandatoryDefault: boolean;
-  isGlobal: boolean;
-}
 
 export default function MeLearningCataloguePage() {
   const { t } = useTranslation("ess");
@@ -24,9 +18,14 @@ export default function MeLearningCataloguePage() {
   const [filter, setFilter] = useState("");
   const [lastEnrolled, setLastEnrolled] = useState<string | null>(null);
 
-  const paths = useQuery({
+  // C4 (#42): server-side search + pagination. The catalogue holds ~4.7k paths;
+  // the old `?limit=200` + in-browser filter made everything past the first 200
+  // unreachable. `search` does ILIKE on name OR code — the same match.
+  const debouncedFilter = useDebouncedValue(filter, 300);
+  const paths = usePaginatedList<LearningPath>({
     queryKey: ["learning-paths", "catalogue"],
-    queryFn: () => apiFetch<{ items: LearningPath[]; total: number }>("/v1/learning-paths?limit=200"),
+    path: "/v1/learning-paths",
+    params: { search: debouncedFilter },
   });
 
   const enroll = useMutation({
@@ -39,12 +38,6 @@ export default function MeLearningCataloguePage() {
       setLastEnrolled(learningPathId);
       qc.invalidateQueries({ queryKey: ["me", "learning"] });
     },
-  });
-
-  const filtered = (paths.data?.items ?? []).filter((p) => {
-    if (!filter) return true;
-    const q = filter.toLowerCase();
-    return p.name.toLowerCase().includes(q) || p.code.toLowerCase().includes(q);
   });
 
   const columns: DataColumn<LearningPath>[] = [
@@ -61,14 +54,16 @@ export default function MeLearningCataloguePage() {
     },
     { header: t("catalogue.colCode"), cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
     {
-      header: t("catalogue.colType"),
+      // Was a MANDATORY/OPTIONAL pill driven by `isMandatoryDefault` — a field the
+      // API never returns, so it read `undefined` and rendered "OPTIONAL" on every
+      // row regardless of truth. Mandatory-ness is a property of a POSITION's
+      // learning requirement, not of the path itself, so the honest column here is
+      // the path's scope (C4 #42: local interfaces had drifted from the contract).
+      header: t("catalogue.colScope"),
       cell: (p) => (
-        <div className="flex flex-wrap gap-1">
-          <StatusPill tone={p.isMandatoryDefault ? "warning" : "neutral"}>
-            {p.isMandatoryDefault ? t("catalogue.mandatory") : t("catalogue.optional")}
-          </StatusPill>
-          {p.isGlobal ? <StatusPill tone="info">{t("catalogue.global")}</StatusPill> : null}
-        </div>
+        <StatusPill tone={p.isGlobal ? "info" : "neutral"}>
+          {p.isGlobal ? t("catalogue.global") : t("catalogue.tenant")}
+        </StatusPill>
       ),
     },
     {
@@ -105,7 +100,7 @@ export default function MeLearningCataloguePage() {
         description={t("catalogue.description")}
         badges={
           <Badge variant="secondary" data-testid="learning-catalogue-count">
-            {paths.data ? t("catalogue.count", { count: paths.data.total }) : t("common:loading")}
+            {paths.query.data ? t("catalogue.count", { count: paths.total }) : t("common:loading")}
           </Badge>
         }
       />
@@ -121,10 +116,11 @@ export default function MeLearningCataloguePage() {
 
       <div data-testid="learning-catalogue-list">
         <EntityTable<LearningPath>
-          isLoading={paths.isLoading}
-          isError={paths.isError}
+          isLoading={paths.query.isLoading}
+          isError={paths.query.isError}
           errorMessage={t("catalogue.errorMessage")}
-          rows={filtered}
+          rows={paths.rows}
+          server={paths.server}
           rowKey={(p) => p.learningPathId}
           rowTestId="learning-catalogue-row"
           columns={columns}

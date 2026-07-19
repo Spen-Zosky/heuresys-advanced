@@ -25,11 +25,10 @@ test.describe("MVP-2a admin catalogues — live data", () => {
      * rows == pageSize < total AND that page 2 carries different rows proves the
      * slice comes from the server.
      *
-     * NB the visible total is the tenant-scoped one (global + own tenant). It is
-     * currently far below the 14093-row catalogue because 14036 skills are
-     * orphaned (is_global=false AND tenant_id IS NULL → visible to nobody); that
-     * is a data-integrity issue tracked outside C4, so this test asserts the
-     * pagination contract, not a specific catalogue size.
+     * The visible total is tenant-scoped (global + own tenant). Since migration
+     * 000175 the ESCO reference taxonomy is global, so a tenant sees the whole
+     * catalogue — which is exactly the case the old `?limit=200` could not serve.
+     * The total is read from the live range indicator, never hardcoded.
      */
     test("/skills paginates server-side across the full catalogue", async ({ page }) => {
       await page.goto("/skills");
@@ -44,7 +43,7 @@ test.describe("MVP-2a admin catalogues — live data", () => {
       const total = Number(
         (/di\s+([\d.,\s]+)/.exec(await pagination.innerText())?.[1] ?? "0").replace(/[.,\s]/g, ""),
       );
-      expect(total).toBeGreaterThan(25); // more than one page — paging is exercised
+      expect(total).toBeGreaterThan(200); // beyond the reach of the old `?limit=200`
 
       const firstBefore = await rows.first().innerText();
       await page.getByTestId("pagination-next").click();

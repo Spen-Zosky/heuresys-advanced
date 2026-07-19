@@ -1,30 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { apiFetch } from "@/lib/api/fetch";
+import type { SeedAcquisitionRun } from "@heuresys/shared";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 
-interface SeedRun {
-  seedAcquisitionRunId: string;
-  tenantId: string | null;
-  blueprintVariantId: string | null;
-  status: string;
-  startedAt: string | null;
-  finishedAt: string | null;
-  initiatedBy: string | null;
-  metadata: Record<string, unknown>;
-}
-
-interface SeedRunsList {
-  items: SeedRun[];
-  total: number;
-}
-
-function buildColumns(t: TFunction): DataColumn<SeedRun>[] {
+function buildColumns(t: TFunction): DataColumn<SeedAcquisitionRun>[] {
   const none = t("common:value.none");
   return [
     {
@@ -32,15 +16,16 @@ function buildColumns(t: TFunction): DataColumn<SeedRun>[] {
       cell: (r) => <span className="font-mono text-xs">{r.seedAcquisitionRunId.slice(0, 8)}</span>,
     },
     {
-      header: t("seedRuns.columns.variant"),
-      cell: (r) => (
-        <span className="font-mono text-xs text-muted-foreground">{r.blueprintVariantId?.slice(0, 8) ?? none}</span>
-      ),
+      // Was a `blueprintVariantId` column — a field the API never returned, so it
+      // rendered the "none" dash on every row. Replaced with the run code, which
+      // the contract does expose (C4 #42: local interfaces had drifted).
+      header: t("seedRuns.columns.code"),
+      cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.code}</span>,
     },
     { header: t("seedRuns.columns.status"), cell: (r) => <StatusBadge value={r.status} /> },
     {
       header: t("seedRuns.columns.startedAt"),
-      cell: (r) => <span className="text-xs text-muted-foreground">{r.startedAt?.slice(0, 19) ?? none}</span>,
+      cell: (r) => <span className="text-xs text-muted-foreground">{r.startedAt.slice(0, 19)}</span>,
     },
     {
       header: t("seedRuns.columns.finishedAt"),
@@ -51,25 +36,27 @@ function buildColumns(t: TFunction): DataColumn<SeedRun>[] {
 
 export default function SeedRunsPage() {
   const { t } = useTranslation("blueprints");
-  const runs = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const runs = usePaginatedList<SeedAcquisitionRun>({
     queryKey: ["seed-acquisition-runs", "list"],
-    queryFn: () => apiFetch<SeedRunsList>("/v1/seed-acquisition-runs?limit=200"),
+    path: "/v1/seed-acquisition-runs",
   });
 
   const columns = useMemo(() => buildColumns(t), [t]);
 
   return (
-    <DataTablePanel<SeedRun>
+    <DataTablePanel<SeedAcquisitionRun>
       pageTestId="seed-runs-page"
       titleTestId="seed-runs-title"
       countTestId="seed-runs-count"
       title={t("seedRuns.title")}
       description={t("seedRuns.description")}
-      count={runs.data ? t("seedRuns.count", { count: runs.data.total }) : undefined}
-      isLoading={runs.isLoading}
-      isError={runs.isError}
+      count={runs.query.data ? t("seedRuns.count", { count: runs.total }) : undefined}
+      isLoading={runs.query.isLoading}
+      isError={runs.query.isError}
       errorMessage={t("seedRuns.error")}
-      rows={runs.data?.items ?? []}
+      rows={runs.rows}
+      server={runs.server}
       rowKey={(r) => r.seedAcquisitionRunId}
       rowTestId="seed-runs-row"
       columns={columns}

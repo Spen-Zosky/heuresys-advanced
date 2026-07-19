@@ -130,17 +130,29 @@ New-Item -ItemType Directory -Force -Path $artifactsDir | Out-Null
 $snap1 = Join-Path $artifactsDir "schema_snapshot_before.sql"
 $snap2 = Join-Path $artifactsDir "schema_snapshot_after.sql"
 
+# pg_dump and psql are chatty on stderr even on success (psql NOTICEs from the
+# idempotent migrations, pg_dump progress). Under `$ErrorActionPreference =
+# "Stop"` PowerShell promotes ANY native-executable stderr line to a terminating
+# error, so this step aborted mid-run with exit 1 while the .sh twin passed.
+# Switch to Continue for the native calls and gate on $LASTEXITCODE instead,
+# which is the real success signal.
+$prevEap = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+
 Write-Host ""
 Write-Host "[validate] Capturing schema snapshot BEFORE second migrate run..."
 & $PgDump -h $env:POSTGRES_HOST -p $env:POSTGRES_PORT -U $env:POSTGRES_USER -d $env:POSTGRES_DB --schema-only --no-owner --no-acl --schema=sys --schema=brownfield --schema=staging --schema=audit -f $snap1
-if ($LASTEXITCODE -ne 0) { Write-Error "pg_dump (before) failed."; exit 1 }
+if ($LASTEXITCODE -ne 0) { $ErrorActionPreference = $prevEap; Write-Error "pg_dump (before) failed."; exit 1 }
 
 Write-Host "[validate] Re-applying migrations..."
 & "$PSScriptRoot\migrate.ps1" -EnvFile $EnvFile
+if ($LASTEXITCODE -ne 0) { $ErrorActionPreference = $prevEap; Write-Error "second migrate run failed."; exit 1 }
 
 Write-Host "[validate] Capturing schema snapshot AFTER second migrate run..."
 & $PgDump -h $env:POSTGRES_HOST -p $env:POSTGRES_PORT -U $env:POSTGRES_USER -d $env:POSTGRES_DB --schema-only --no-owner --no-acl --schema=sys --schema=brownfield --schema=staging --schema=audit -f $snap2
-if ($LASTEXITCODE -ne 0) { Write-Error "pg_dump (after) failed."; exit 1 }
+if ($LASTEXITCODE -ne 0) { $ErrorActionPreference = $prevEap; Write-Error "pg_dump (after) failed."; exit 1 }
+
+$ErrorActionPreference = $prevEap
 
 # Filter session-specific `\restrict <random>` / `\unrestrict <random>` lines
 # (these change between pg_dump runs even when the schema is identical).

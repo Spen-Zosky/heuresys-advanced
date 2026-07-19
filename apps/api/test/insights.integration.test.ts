@@ -115,6 +115,50 @@ describe("insights API (cap③ flight-risk)", () => {
     }
   });
 
+  it("#47 D2: the engagement feature draws on ALL THREE sources, not just engagement_survey_responses", async () => {
+    // Before D2 the CTE read only engagement_survey_responses and ignored survey_responses
+    // (3792 rows) + pulse_checks (733) — ~29% of the signal. This asserts, on live data,
+    // that all three now feed the feature: each source contributes rows, and users are
+    // scored on more than one. Counts are read live, never hardcoded.
+    const bySource = await pool.query<{ src: string; users: number }>(
+      `WITH eng_src AS (
+         SELECT DISTINCT r.response_subject_user_id AS uid, 'eng' AS src
+           FROM sys.sys_engagement_survey_responses r
+          WHERE jsonb_typeof(r.response_answers) = 'array'
+         UNION
+         SELECT DISTINCT survey_response_subject_user_id, 'survey'
+           FROM sys.sys_survey_responses WHERE survey_response_rating_value IS NOT NULL
+         UNION
+         SELECT DISTINCT pulse_check_subject_user_id, 'pulse'
+           FROM sys.sys_pulse_checks WHERE pulse_check_mood_score IS NOT NULL
+       )
+       SELECT src, count(*)::int AS users FROM eng_src WHERE uid IS NOT NULL GROUP BY src`,
+    );
+    const sources = new Set(bySource.rows.map((r) => r.src));
+    // All three sources must be present and non-empty — the whole point of D2.
+    expect(sources).toEqual(new Set(["eng", "survey", "pulse"]));
+    for (const r of bySource.rows) expect(r.users).toBeGreaterThan(0);
+
+    // And most scored users genuinely have MORE than one source (so the percentile blend
+    // is real, not a single-source pass-through).
+    const multi = await pool.query<{ multi: number; total: number }>(
+      `WITH eng_src AS (
+         SELECT DISTINCT r.response_subject_user_id AS uid, 'eng' AS src
+           FROM sys.sys_engagement_survey_responses r WHERE jsonb_typeof(r.response_answers) = 'array'
+         UNION
+         SELECT DISTINCT survey_response_subject_user_id, 'survey'
+           FROM sys.sys_survey_responses WHERE survey_response_rating_value IS NOT NULL
+         UNION
+         SELECT DISTINCT pulse_check_subject_user_id, 'pulse'
+           FROM sys.sys_pulse_checks WHERE pulse_check_mood_score IS NOT NULL
+       ), per_user AS (
+         SELECT uid, count(DISTINCT src) AS n FROM eng_src WHERE uid IS NOT NULL GROUP BY uid
+       )
+       SELECT count(*) FILTER (WHERE n > 1)::int AS multi, count(*)::int AS total FROM per_user`,
+    );
+    expect(multi.rows[0]!.multi).toBeGreaterThan(0);
+  });
+
   it("list (admin): valid bands/scores, sorted desc, explainable (weights sum 1.0)", async () => {
     const r = await list(admin);
     expect(r.statusCode).toBe(200);

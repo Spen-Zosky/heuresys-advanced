@@ -129,14 +129,23 @@ export async function extractFlightRiskFeatures(
       WHERE user_kpi_evidence_target_value IS NOT NULL
       GROUP BY 1
     ),
-    eng AS (
-      -- response_answers is jsonb DEFAULT '{}' (an OBJECT) and the surveys module
-      -- documents a dual shape (legacy=array, API-created default={}). Guard the
-      -- LATERAL: a non-array payload yields zero elements (skipped) instead of
-      -- raising "cannot extract elements from an object" — which would abort the
-      -- whole recompute query for the entire scope, not just the offending row.
-      SELECT r.response_subject_user_id AS user_id,
-             avg(COALESCE((e->>'value')::numeric, (e->>'rating')::numeric)) AS engagement_avg
+    -- #47 D2 — engagement feature unified across ALL THREE live sources. Before this the
+    -- CTE read only engagement_survey_responses (862 rows / 158 users) and ignored
+    -- survey_responses.rating (3792) and the pulse checks (733) entirely — the flight-risk
+    -- "engagement leg" ran on ~29% of the available signal. The three carry DIFFERENT scales
+    -- (engagement 1-5, survey rating 1-10 mixed with NPS, pulse 1-5) and NONE declares its
+    -- bounds anywhere (no CHECK, no question options, not in legacy either), so they cannot
+    -- be averaged raw — a 5/10 would weigh as a 5/5. They are made comparable by tenant-wide
+    -- PERCENTILE, the same idiom this query already uses for the comp feature (percent_rank
+    -- OVER PARTITION BY tenant): scale-free, stable regardless of the recompute scope, and
+    -- appropriate for a risk signal that is inherently relative-to-peers. The [0,1] percentile
+    -- is mapped back to [1,5] so the scorer's normEngagement((5-avg)/4) is unchanged.
+    eng_src AS (
+      -- source 1: engagement_survey_responses (native 1-5, jsonb-array shape). The dual-shape
+      -- guard stays: an API-created default '{}' (object) yields zero elements instead of
+      -- aborting the whole recompute with "cannot extract elements from an object".
+      SELECT r.response_subject_user_id AS user_id, 'eng'::text AS src,
+             avg(COALESCE((e->>'value')::numeric, (e->>'rating')::numeric)) AS v
       FROM sys.sys_engagement_survey_responses r
       CROSS JOIN LATERAL jsonb_array_elements(
         CASE WHEN jsonb_typeof(r.response_answers) = 'array'
@@ -144,6 +153,37 @@ export async function extractFlightRiskFeatures(
       ) e
       WHERE ((e->>'question_type') = 'rating' OR (e ? 'rating'))
         AND COALESCE((e->>'value')::numeric, (e->>'rating')::numeric) IS NOT NULL
+      GROUP BY 1
+      UNION ALL
+      -- source 2: survey_responses rating (1-10 rating mixed with NPS, structured column)
+      SELECT survey_response_subject_user_id, 'survey',
+             avg(survey_response_rating_value::numeric)
+      FROM sys.sys_survey_responses
+      WHERE survey_response_rating_value IS NOT NULL
+        AND survey_response_subject_user_id IS NOT NULL
+      GROUP BY 1
+      UNION ALL
+      -- source 3: pulse checks (native 1-5) — mood + satisfaction, averaged per row then per user
+      SELECT pulse_check_subject_user_id, 'pulse',
+             avg(( COALESCE(pulse_check_mood_score, pulse_check_satisfaction_score)
+                 + COALESCE(pulse_check_satisfaction_score, pulse_check_mood_score) )::numeric / 2)
+      FROM sys.sys_pulse_checks
+      WHERE pulse_check_subject_user_id IS NOT NULL
+        AND (pulse_check_mood_score IS NOT NULL OR pulse_check_satisfaction_score IS NOT NULL)
+      GROUP BY 1
+    ),
+    eng_pct AS (
+      -- normalize each source to [0,1] by tenant-wide percentile → cross-scale comparable
+      SELECT es.user_id, es.src,
+             percent_rank() OVER (PARTITION BY es.src, u.user_tenant_id ORDER BY es.v) AS pct
+      FROM eng_src es
+      JOIN sys.sys_users u ON u.user_id = es.user_id
+      WHERE es.v IS NOT NULL
+    ),
+    eng AS (
+      -- average the available sources' percentiles, map back to the [1,5] the scorer expects
+      SELECT user_id, 1 + 4 * avg(pct) AS engagement_avg
+      FROM eng_pct
       GROUP BY 1
     ),
     comp AS (

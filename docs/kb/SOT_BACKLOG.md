@@ -142,8 +142,10 @@
 - **#54 E/E5 — recruiting/ATS (cluster `/recruiting`)** · status: ACTIVE
   - priority: P2 · effort: ~5-7 sessioni (fasi con commit atomici) · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E5
   - note: decisione Enzo S1018 — in coda al batch (wave W11). Concept-porting dal cantiere evo, mai codice (I5: no RLS).
-- **#55 F/F1 — Essential Capability Ranker** · status: ACTIVE
+- **#55 F/F1 — Essential Capability Ranker** · status: ACTIVE (API DONE S1021, UI residua)
   - priority: P1 · effort: ~1.5-2 sessioni · doc: docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md §F1
+  - **API consegnata** (S1021, commit in arrivo): `GET /v1/capability/composition/essential-ranking` — ranking skill per investment-priority = essentiality·(1−maturity), essentiality = 0.4·econ + 0.3·crit + 0.3·scarcity (pesi dichiarati in `@heuresys/shared/schemas/essential-capability`). Componenti drillabili (spiegabilità), scope tenant, orgGate=aggregate. Alimentato dagli input reali incl. sys_user_skills (#46 D1). Test 6/6 (formula riproducibile asserita). Scoperta vs spec: `position_economic_weight` è 0 (valore economico ricavato dalle compensation band); criticality quasi tutta MEDIUM.
+  - **residuo (UI)**: sezione "Capability essenziali" in `/org-director` + drill su `/positions/[positionId]` — non ancora cablata (frontend). L'endpoint e la formula sono la parte a valore ("dove investo"); la UI la consuma.
 - **#56 F/F2 — VRIO scorecard (`/org-director/vrio`)** · status: ACTIVE
   - priority: P2 · effort: ~2-2.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md §F2
 - **#57 F/F3 — OHI org-health scorecard** · status: ACTIVE

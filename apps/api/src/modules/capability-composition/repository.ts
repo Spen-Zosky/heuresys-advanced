@@ -308,3 +308,112 @@ export async function getActiveLineage(
     childLabel: r.child_label,
   }));
 }
+
+/* ------------------------- #55 F1 essential-capability ranker ------------------------- */
+
+export interface EssentialRankRow {
+  skillId: string;
+  skillCode: string;
+  skillName: string;
+  positionsRequiring: number;
+  criticalPositions: number;
+  econPercentile: number; // [0,1] percentile of avg comp-band value across requiring positions
+  critShare: number; // [0,1] weighted share of CRITICAL positions requiring the skill
+  scarcity: number; // [0,1] 1 - coverage(holders/demand)
+  maturity: number; // [0,1] avg held rank of holders / max rank
+  holders: number;
+}
+
+/**
+ * One deterministic query producing the essential-capability inputs per skill, org-wide
+ * (aggregate — no per-person data leaves this). Only skills actually REQUIRED by ≥1 active
+ * position are in play. Every component is measured live:
+ *   - econ: avg comp-band mid_eur of the requiring positions, expressed as a tenant-wide
+ *     percentile across the in-play skills (scale-free, same idiom as the comp/engagement
+ *     features);
+ *   - critShare: share of requiring positions weighted by criticality;
+ *   - scarcity: 1 - clamp(holders / positions_requiring, 0, 1) — under-supply vs demand;
+ *   - maturity: avg held proficiency rank of the holders / 5 (MASTER=6 unused by the data).
+ */
+export async function loadEssentialRankInputs(
+  tenantId: string | null,
+  q: Queryable = pool,
+): Promise<EssentialRankRow[]> {
+  const params: unknown[] = [];
+  let tenantClause = "";
+  if (tenantId) {
+    params.push(tenantId);
+    tenantClause = `AND p.position_tenant_id = $${params.length}`;
+  }
+  const res = await q.query<{
+    skill_id: string; skill_code: string; skill_name: string;
+    positions_requiring: number; critical_positions: number;
+    avg_econ: string | null; crit_share: string; holders: number; avg_held_rank: string | null;
+  }>(
+    `WITH demand AS (
+       SELECT r.skill_id,
+              count(DISTINCT p.position_id) AS positions_requiring,
+              count(DISTINCT p.position_id) FILTER (WHERE p.position_criticality = 'CRITICAL') AS critical_positions,
+              avg(cb.compensation_band_mid_eur) AS avg_econ,
+              avg(CASE p.position_criticality
+                    WHEN 'CRITICAL' THEN 1.0 WHEN 'HIGH' THEN 0.75
+                    WHEN 'MEDIUM' THEN 0.5 WHEN 'LOW' THEN 0.25 ELSE 0.5 END) AS crit_share
+         FROM sys.sys_position_skill_requirements r
+         JOIN sys.sys_positions p ON p.position_id = r.position_id AND p.position_is_active
+         LEFT JOIN sys.sys_position_compensation_profiles pcp ON pcp.position_id = p.position_id
+         LEFT JOIN sys.sys_compensation_bands cb ON cb.compensation_band_id = pcp.compensation_band_id
+        WHERE true ${tenantClause}
+        GROUP BY r.skill_id
+     ),
+     supply AS (
+       SELECT us.user_skill_skill_id AS skill_id,
+              count(DISTINCT us.user_skill_user_id) AS holders,
+              avg(pl.skill_proficiency_level_rank) AS avg_held_rank
+         FROM sys.sys_user_skills us
+         LEFT JOIN sys.sys_skill_proficiency_levels pl
+                ON pl.skill_proficiency_level_code = us.user_skill_proficiency
+        GROUP BY us.user_skill_skill_id
+     )
+     SELECT s.skill_id, s.skill_code, s.skill_name,
+            d.positions_requiring::int, d.critical_positions::int,
+            d.avg_econ, d.crit_share::text,
+            COALESCE(sup.holders, 0)::int AS holders,
+            sup.avg_held_rank::text
+       FROM demand d
+       JOIN sys.sys_skills s ON s.skill_id = d.skill_id
+       LEFT JOIN supply sup ON sup.skill_id = d.skill_id`,
+    params,
+  );
+
+  // econ percentile is computed in JS over the in-play set (small, ≤ few hundred): rank the
+  // non-null econ values, tie-aware, into [0,1]. A skill with no comp-band info gets 0.
+  const econVals = res.rows
+    .map((r) => (r.avg_econ === null ? null : Number(r.avg_econ)))
+    .filter((v): v is number => v !== null)
+    .sort((a, b) => a - b);
+  const econPercentile = (v: number | null): number => {
+    if (v === null || econVals.length <= 1) return v === null ? 0 : 0.5;
+    const below = econVals.filter((x) => x < v).length;
+    return below / (econVals.length - 1);
+  };
+
+  return res.rows.map((r) => {
+    const holders = r.holders;
+    const demand = r.positions_requiring;
+    const coverage = demand > 0 ? Math.min(1, holders / demand) : (holders > 0 ? 1 : 0);
+    const avgEcon = r.avg_econ === null ? null : Number(r.avg_econ);
+    const avgRank = r.avg_held_rank === null ? null : Number(r.avg_held_rank);
+    return {
+      skillId: r.skill_id,
+      skillCode: r.skill_code,
+      skillName: r.skill_name,
+      positionsRequiring: r.positions_requiring,
+      criticalPositions: r.critical_positions,
+      econPercentile: econPercentile(avgEcon),
+      critShare: Math.min(1, Math.max(0, Number(r.crit_share))),
+      scarcity: 1 - coverage,
+      maturity: avgRank === null ? 0 : Math.min(1, avgRank / 5),
+      holders,
+    };
+  });
+}

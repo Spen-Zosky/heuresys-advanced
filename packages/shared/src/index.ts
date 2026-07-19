@@ -88,6 +88,7 @@ export * from "./schemas/semantic-matching.js";
 export * from "./schemas/insights.js";
 export * from "./schemas/capability-composition.js";
 export * from "./schemas/capability-maturity.js";
+export * from "./schemas/essential-capability.js";
 export * from "./schemas/reference-sync.js";
 export * from "./schemas/content.js";
 export * from "./schemas/content-blueprint-links.js";

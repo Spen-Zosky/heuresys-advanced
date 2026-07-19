@@ -16,6 +16,7 @@ import {
   CapabilityCompositionListQuerySchema,
   CapabilitySubjectParamSchema,
   CapabilityRecomputeResponseSchema,
+  EssentialCapabilityRankingSchema,
 } from "@heuresys/shared";
 import { capabilityCompositionService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -29,6 +30,21 @@ export const capabilityCompositionRoutes: FastifyPluginAsyncZod = async (app) =>
       schema: { querystring: CapabilityCompositionListQuerySchema, response: { 200: CapabilityScoreListResponseSchema } },
     },
     async (req) => capabilityCompositionService.composition(actor(req), req.query.subjectType),
+  );
+
+  // #55 F1 — Essential Capability Ranker. Literal path before the /:subjectType/:subjectId
+  // param route so "essential-ranking" is not swallowed as a subjectType.
+  app.get(
+    "/composition/essential-ranking",
+    {
+      // Org-wide aggregate (skill-level, no per-person rows) → `aggregate` gate, like the
+      // sibling capability-maturity endpoints. D-51 requires the declaration because the
+      // `capability` resource is SKILL-sensitive; the ranking never exposes who-holds-what.
+      config: { orgGate: "aggregate" },
+      preHandler: [requirePermission("capability:read")],
+      schema: { response: { 200: EssentialCapabilityRankingSchema } },
+    },
+    async (req) => capabilityCompositionService.essentialRanking(actor(req)),
   );
 
   app.get(

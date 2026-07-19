@@ -22,7 +22,9 @@ import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.
 import type {
   CapabilityScore, CapabilityScoreListResponse, CapabilityRecomputeResponse,
   CapabilitySubjectType, CapabilityScope,
+  EssentialCapabilityRanking, EssentialCapabilityItem,
 } from "@heuresys/shared";
+import { ESSENTIAL_CAPABILITY_WEIGHTS as W } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import type { ScoringInputs, ScoreRow, LineageRow } from "./repository.js";
 
@@ -264,6 +266,44 @@ export const capabilityCompositionService = {
       total: rows.length,
       generatedAt: new Date().toISOString(),
     };
+  },
+
+  /**
+   * #55 F1 — Essential Capability Ranker. Ranks the skills the org depends on by
+   * investment priority = essentiality · (1 − maturity), where essentiality blends the
+   * economic value, criticality and scarcity of the skill's demand (declared weights).
+   * Org-wide aggregate (no per-person data), so tenant scope only — no org-axis gate.
+   */
+  async essentialRanking(actor: ActorContext): Promise<EssentialCapabilityRanking> {
+    const scope = buildScope(actor);
+    const rows = await repo.loadEssentialRankInputs(scope.tenantId);
+    const items: EssentialCapabilityItem[] = rows.map((r) => {
+      const essentiality = W.econ * r.econPercentile + W.crit * r.critShare + W.scarcity * r.scarcity;
+      const essentialityScore = round2(essentiality * 100);
+      const investmentPriority = round2(essentiality * (1 - r.maturity) * 100);
+      return {
+        skillId: r.skillId,
+        skillCode: r.skillCode,
+        skillName: r.skillName,
+        positionsRequiring: r.positionsRequiring,
+        criticalPositions: r.criticalPositions,
+        econ: round4(r.econPercentile),
+        crit: round4(r.critShare),
+        scarcity: round4(r.scarcity),
+        maturity: round4(r.maturity),
+        holders: r.holders,
+        essentialityScore,
+        investmentPriority,
+      };
+    });
+    // Highest investment priority first; ties broken by essentiality then name for a stable order.
+    items.sort(
+      (a, b) =>
+        b.investmentPriority - a.investmentPriority ||
+        b.essentialityScore - a.essentialityScore ||
+        a.skillName.localeCompare(b.skillName),
+    );
+    return { items, total: items.length, weights: { econ: W.econ, crit: W.crit, scarcity: W.scarcity } };
   },
 
   async subject(actor: ActorContext, subjectType: CapabilitySubjectType, subjectId: string): Promise<CapabilityScore> {

@@ -43,7 +43,7 @@ export const skillFamiliesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => skillFamiliesService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:update")],
+    preHandler: [app.verifyCsrf, requirePermission("skill:delete")],
     schema: { params: SkillFamilyIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillFamiliesService.delete(actor(req), req.params.id);

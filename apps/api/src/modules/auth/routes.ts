@@ -280,7 +280,9 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
   app.get(
     "/admin/users/:userId/sessions",
     {
-      preHandler: [requirePermission("auth:revoke_user")],
+      // G2 (#61): reading another user's sessions is not revoking them. Same
+      // audience as before (auth:revoke_user), now stated in the matrix.
+      preHandler: [requirePermission("auth:sessions_read")],
       schema: {
         params: ListActiveSessionsParamsSchema,
         response: { 200: ListActiveSessionsResponseSchema },
@@ -300,13 +302,14 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
   );
 
   /* --- GET /role-permissions (read-only matrix for /admin/roles UI) --- */
-  // Returns the full role × permission seed matrix. PLATFORM_ADMIN-only
-  // (gated by the same perm used for admin-revoke). Pure read of the seed
+  // Returns the full role × permission seed matrix. Pure read of the seed
   // tables; no mutations exposed in MVP-2a — full role CRUD lands in MVP-3.
+  // G2 (#61): was gated by auth:revoke_user — a proxy, since reading the matrix
+  // is not revoking a user. Same audience, now named for what it is.
   app.get(
     "/role-permissions",
     {
-      preHandler: [requirePermission("auth:revoke_user")],
+      preHandler: [requirePermission("role_matrix:read")],
       schema: {
         response: {
           200: RolePermissionsResponseSchema,

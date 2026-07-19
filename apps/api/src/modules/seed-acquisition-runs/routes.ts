@@ -33,7 +33,7 @@ export const seedAcquisitionRunsRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: SeedAcquisitionRunIdParamSchema, body: UpdateSeedAcquisitionRunBodySchema, response: { 200: SeedAcquisitionRunSchema } },
   }, async (req) => seedAcquisitionRunsService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("seed_acquisition:trigger")],
+    preHandler: [app.verifyCsrf, requirePermission("seed_acquisition:delete")],
     schema: { params: SeedAcquisitionRunIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await seedAcquisitionRunsService.delete(actor(req), req.params.id);

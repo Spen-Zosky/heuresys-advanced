@@ -29,7 +29,7 @@ export const visualizationEdgesRoutes: FastifyPluginAsyncZod = async (app) => {
     reply.code(201).send(e);
   });
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("visualization:update_layout")],
+    preHandler: [app.verifyCsrf, requirePermission("visualization:delete")],
     schema: { params: VizEdgeIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await visualizationEdgesService.delete(actor(req), req.params.id);

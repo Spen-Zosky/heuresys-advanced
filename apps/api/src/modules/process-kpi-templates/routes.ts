@@ -27,7 +27,7 @@ export const processKpiTemplatesRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { body: UpsertProcessKpiTemplateBodySchema, response: { 200: ProcessKpiTemplateSchema } },
   }, async (req) => processKpiTemplatesService.upsert(actor(req), req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("bpm_process:update")],
+    preHandler: [app.verifyCsrf, requirePermission("bpm_process:delete")],
     schema: { params: ProcessKpiTemplateIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await processKpiTemplatesService.delete(actor(req), req.params.id);

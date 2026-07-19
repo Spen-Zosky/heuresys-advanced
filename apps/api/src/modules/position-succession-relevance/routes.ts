@@ -37,7 +37,7 @@ export const positionSuccessionRelevanceRoutes: FastifyPluginAsyncZod = async (a
   }, async (req) => positionSuccessionRelevanceService.upsert(actor(req), req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("career_succession:update")],
+    preHandler: [app.verifyCsrf, requirePermission("career_succession:delete")],
     schema: { params: PositionSuccessionRelevanceIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await positionSuccessionRelevanceService.delete(actor(req), req.params.id);

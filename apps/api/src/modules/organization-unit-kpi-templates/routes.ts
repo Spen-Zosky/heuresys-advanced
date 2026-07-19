@@ -26,7 +26,7 @@ export const organizationUnitKpiTemplatesRoutes: FastifyPluginAsyncZod = async (
     schema: { body: UpsertOrganizationUnitKpiTemplateBodySchema, response: { 200: OrganizationUnitKpiTemplateSchema } },
   }, async (req) => organizationUnitKpiTemplatesService.upsert(actor(req), req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("bpm_process:update")],
+    preHandler: [app.verifyCsrf, requirePermission("bpm_process:delete")],
     schema: { params: OrganizationUnitKpiTemplateIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await organizationUnitKpiTemplatesService.delete(actor(req), req.params.id);

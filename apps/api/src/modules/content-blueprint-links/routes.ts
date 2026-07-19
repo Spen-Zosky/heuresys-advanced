@@ -32,7 +32,7 @@ export const contentBlueprintLinksRoutes: FastifyPluginAsyncZod = async (app) =>
   );
   app.delete(
     "/:id",
-    { preHandler: [app.verifyCsrf, requirePermission("content:update")], schema: { params: ContentBlueprintLinkIdParamSchema, response: { 200: DeleteResponse } } },
+    { preHandler: [app.verifyCsrf, requirePermission("content:delete")], schema: { params: ContentBlueprintLinkIdParamSchema, response: { 200: DeleteResponse } } },
     async (req) => { await contentBlueprintLinkService.deleteLink(actor(req), req.params.id); return { deleted: true as const }; },
   );
 

@@ -79,7 +79,7 @@ export const learningGapsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => learningGapsService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("gap_analysis:update")],
+    preHandler: [app.verifyCsrf, requirePermission("gap_analysis:delete")],
     schema: { params: LearningGapIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await learningGapsService.delete(actor(req), req.params.id);

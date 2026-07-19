@@ -33,7 +33,7 @@ export const activityClassificationsRoutes: FastifyPluginAsyncZod = async (app) 
     schema: { params: ActivityClassificationIdParamSchema, body: UpdateActivityClassificationBodySchema, response: { 200: ActivityClassificationSchema } },
   }, async (req) => activityClassificationsService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:update")],
+    preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:delete")],
     schema: { params: ActivityClassificationIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await activityClassificationsService.delete(actor(req), req.params.id);

@@ -41,7 +41,7 @@ export const skillCategoriesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => skillCategoriesService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:update")],
+    preHandler: [app.verifyCsrf, requirePermission("skill:delete")],
     schema: { params: SkillCategoryIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillCategoriesService.delete(actor(req), req.params.id);

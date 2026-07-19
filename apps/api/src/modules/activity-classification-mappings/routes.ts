@@ -29,7 +29,7 @@ export const activityMappingsRoutes: FastifyPluginAsyncZod = async (app) => {
     reply.code(201).send(m);
   });
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:update")],
+    preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:delete")],
     schema: { params: ActivityMappingIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await activityMappingsService.delete(actor(req), req.params.id);

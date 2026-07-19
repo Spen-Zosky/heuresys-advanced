@@ -74,7 +74,18 @@ export function userPermissionCodes(user: { roles: readonly string[] }): string[
   return Array.from(out).sort();
 }
 
-export function requirePermission(permissionCode: string): preHandlerAsyncHookHandler {
+/**
+ * @param deniedCode overrides the error code returned when the actor lacks the
+ *   permission (default `FORBIDDEN`). Needed when a route ALREADY published a
+ *   specific denial code from its service layer: moving the gate up into the
+ *   middleware would otherwise silently change the public error contract, since
+ *   the middleware denies before the service ever runs (#61 G2 —
+ *   tenant-materialization kept TENANT_MATERIALIZE_ADMIN_ONLY this way).
+ */
+export function requirePermission(
+  permissionCode: string,
+  deniedCode?: string,
+): preHandlerAsyncHookHandler {
   const handler: preHandlerAsyncHookHandler = async (req: FastifyRequest, _reply: FastifyReply) => {
     if (!isRolePermissionCacheLoaded()) {
       throw new ForbiddenError(
@@ -84,7 +95,9 @@ export function requirePermission(permissionCode: string): preHandlerAsyncHookHa
     }
     if (!req.user) throw new UnauthorizedError("Authentication required");
     if (!userHasPermission(req.user, permissionCode)) {
-      throw new ForbiddenError(`Missing permission: ${permissionCode}`);
+      throw deniedCode
+        ? new ForbiddenError(`Missing permission: ${permissionCode}`, deniedCode)
+        : new ForbiddenError(`Missing permission: ${permissionCode}`);
     }
   };
   // The permission code rides on the handler so the org-gate boot assertion

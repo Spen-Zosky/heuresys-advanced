@@ -16,7 +16,7 @@ import { requirePermission } from "../../middleware/rbac.js";
 
 export const observabilityRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/system-health", {
-    preHandler: [requirePermission("tenant:create")],
+    preHandler: [requirePermission("observability:read")],
     schema: { response: { 200: SystemHealthResponseSchema } },
   }, async (req) => observabilityService.getSystemHealth(actor(req)));
 };

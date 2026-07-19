@@ -52,7 +52,7 @@ export const successorCandidatesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => successorCandidatesService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("career_succession:update")],
+    preHandler: [app.verifyCsrf, requirePermission("career_succession:delete")],
     schema: { params: SuccessorCandidateIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await successorCandidatesService.delete(actor(req), req.params.id);

@@ -48,7 +48,7 @@ export const visualizationGraphsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => visualizationGraphsService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("visualization:update_layout")],
+    preHandler: [app.verifyCsrf, requirePermission("visualization:delete")],
     schema: { params: VizGraphIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await visualizationGraphsService.delete(actor(req), req.params.id);

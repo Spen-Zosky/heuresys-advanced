@@ -36,7 +36,7 @@ export const skillTaxonomyEdgesRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:update")],
+    preHandler: [app.verifyCsrf, requirePermission("skill:delete")],
     schema: { params: SkillTaxonomyEdgeIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillTaxonomyEdgesService.delete(actor(req), req.params.id);

@@ -32,7 +32,7 @@ export const blueprintVariantsRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: BlueprintVariantIdParamSchema, body: UpdateBlueprintVariantBodySchema, response: { 200: BlueprintVariantSchema } },
   }, async (req) => blueprintVariantsService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("blueprint:override")],
+    preHandler: [app.verifyCsrf, requirePermission("blueprint:delete")],
     schema: { params: BlueprintVariantIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await blueprintVariantsService.delete(actor(req), req.params.id);

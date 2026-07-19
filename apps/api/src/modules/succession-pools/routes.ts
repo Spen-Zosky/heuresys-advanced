@@ -45,7 +45,7 @@ export const successionPoolsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => successionPoolsService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("career_succession:update")],
+    preHandler: [app.verifyCsrf, requirePermission("career_succession:delete")],
     schema: { params: SuccessionPoolIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await successionPoolsService.delete(actor(req), req.params.id);

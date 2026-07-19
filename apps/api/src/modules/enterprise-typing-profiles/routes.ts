@@ -26,7 +26,7 @@ export const enterpriseTypingProfilesRoutes: FastifyPluginAsyncZod = async (app)
     schema: { body: UpsertEnterpriseTypingProfileBodySchema, response: { 200: EnterpriseTypingProfileSchema } },
   }, async (req) => enterpriseTypingProfilesService.upsert(actor(req), req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:update")],
+    preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:delete")],
     schema: { params: EnterpriseTypingProfileIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await enterpriseTypingProfilesService.delete(actor(req), req.params.id);

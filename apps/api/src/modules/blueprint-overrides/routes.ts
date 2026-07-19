@@ -25,7 +25,7 @@ export const blueprintOverridesRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { body: UpsertBlueprintOverrideBodySchema, response: { 200: BlueprintOverrideSchema } },
   }, async (req) => blueprintOverridesService.upsert(actor(req), req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("blueprint:override")],
+    preHandler: [app.verifyCsrf, requirePermission("blueprint:delete")],
     schema: { params: BlueprintOverrideIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await blueprintOverridesService.delete(actor(req), req.params.id);

@@ -25,7 +25,7 @@ export const enterpriseSizeBandsRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { body: UpsertEnterpriseSizeBandBodySchema, response: { 200: EnterpriseSizeBandSchema } },
   }, async (req) => enterpriseSizeBandsService.upsert(actor(req), req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:update")],
+    preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:delete")],
     schema: { params: EnterpriseSizeBandIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await enterpriseSizeBandsService.delete(actor(req), req.params.id);

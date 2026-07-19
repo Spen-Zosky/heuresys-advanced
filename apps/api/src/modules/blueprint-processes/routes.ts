@@ -32,7 +32,7 @@ export const blueprintProcessesRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: BlueprintProcessIdParamSchema, body: UpdateBlueprintProcessBodySchema, response: { 200: BlueprintProcessSchema } },
   }, async (req) => blueprintProcessesService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("blueprint:override")],
+    preHandler: [app.verifyCsrf, requirePermission("blueprint:delete")],
     schema: { params: BlueprintProcessIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await blueprintProcessesService.delete(actor(req), req.params.id);

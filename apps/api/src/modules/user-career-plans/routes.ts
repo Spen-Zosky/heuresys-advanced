@@ -46,7 +46,7 @@ export const userCareerPlansRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => userCareerPlansService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("career_succession:update")],
+    preHandler: [app.verifyCsrf, requirePermission("career_succession:delete")],
     schema: { params: UserCareerPlanIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await userCareerPlansService.delete(actor(req), req.params.id);

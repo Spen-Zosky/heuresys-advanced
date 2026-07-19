@@ -32,7 +32,7 @@ export const blueprintFamiliesRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { params: BlueprintFamilyIdParamSchema, body: UpdateBlueprintFamilyBodySchema, response: { 200: BlueprintFamilySchema } },
   }, async (req) => blueprintFamiliesService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("blueprint:override")],
+    preHandler: [app.verifyCsrf, requirePermission("blueprint:delete")],
     schema: { params: BlueprintFamilyIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await blueprintFamiliesService.delete(actor(req), req.params.id);

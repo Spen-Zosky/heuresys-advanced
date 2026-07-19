@@ -29,7 +29,7 @@ export const visualizationStylesRoutes: FastifyPluginAsyncZod = async (app) => {
     reply.code(201).send(s);
   });
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("visualization:update_layout")],
+    preHandler: [app.verifyCsrf, requirePermission("visualization:delete")],
     schema: { params: VizStyleIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await visualizationStylesService.delete(actor(req), req.params.id);

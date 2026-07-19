@@ -25,7 +25,7 @@ export const operatingModelsRoutes: FastifyPluginAsyncZod = async (app) => {
     schema: { body: UpsertOperatingModelBodySchema, response: { 200: OperatingModelSchema } },
   }, async (req) => operatingModelsService.upsert(actor(req), req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:update")],
+    preHandler: [app.verifyCsrf, requirePermission("enterprise_typing:delete")],
     schema: { params: OperatingModelIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await operatingModelsService.delete(actor(req), req.params.id);

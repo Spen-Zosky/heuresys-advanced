@@ -33,7 +33,7 @@ export const blueprintActivationsRoutes: FastifyPluginAsyncZod = async (app) => 
     schema: { params: BlueprintActivationIdParamSchema, body: UpdateBlueprintActivationBodySchema, response: { 200: BlueprintActivationSchema } },
   }, async (req) => blueprintActivationsService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("blueprint:activate")],
+    preHandler: [app.verifyCsrf, requirePermission("blueprint:delete")],
     schema: { params: BlueprintActivationIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await blueprintActivationsService.delete(actor(req), req.params.id);

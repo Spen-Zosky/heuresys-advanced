@@ -32,7 +32,7 @@ export const visualizationLayoutsRoutes: FastifyPluginAsyncZod = async (app) => 
     schema: { params: VizLayoutIdParamSchema, body: UpdateVizLayoutBodySchema, response: { 200: VizLayoutSchema } },
   }, async (req) => visualizationLayoutsService.update(actor(req), req.params.id, req.body));
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("visualization:update_layout")],
+    preHandler: [app.verifyCsrf, requirePermission("visualization:delete")],
     schema: { params: VizLayoutIdParamSchema, response: { 204: z.null() } },
   }, async (req, reply) => {
     await visualizationLayoutsService.delete(actor(req), req.params.id);

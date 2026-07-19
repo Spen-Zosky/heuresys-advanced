@@ -345,6 +345,31 @@ export const MeSkillsResponseSchema = z.object({
   items: z.array(MeSkillEvidenceSchema), total: z.number().int().min(0),
 });
 
+/**
+ * #46 D1 — CURRENT skill possession (sys_user_skills), distinct from the evidence trail
+ * above: `MeSkillEvidence` is the append-only history of assessments (many rows per skill),
+ * this is the one-row-per-skill snapshot that gap analysis and matching actually consume.
+ */
+export const MeSkillPossessionSchema = z.object({
+  userSkillId: z.uuid(),
+  skillId: z.uuid(),
+  skillCode: z.string(),
+  skillName: z.string(),
+  proficiency: z.string(),
+  proficiencyRank: z.number().int().nullable(),
+  yearsExperience: z.number().nullable(),
+  isPrimary: z.boolean(),
+  isVerified: z.boolean(),
+  source: z.string(),
+  lastUsedOn: z.string().nullable(),
+});
+export type MeSkillPossession = z.infer<typeof MeSkillPossessionSchema>;
+
+export const MeSkillPossessionResponseSchema = z.object({
+  items: z.array(MeSkillPossessionSchema), total: z.number().int().min(0),
+});
+export type MeSkillPossessionResponse = z.infer<typeof MeSkillPossessionResponseSchema>;
+
 export const CreateMeSelfAssessmentBodySchema = z.object({
   skillId: z.uuid(),
   declaredProficiency: z.string().min(1).max(32),

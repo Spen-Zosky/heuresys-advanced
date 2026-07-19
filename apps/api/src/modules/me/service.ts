@@ -208,6 +208,11 @@ export const meService = {
     return repo.listMySkills(pool, actor.userId);
   },
 
+  /** #46 D1 — current skill possession (one row per skill), not the assessment trail. */
+  async listSkillPossession(actor: SelfActor) {
+    return repo.listMySkillPossession(pool, actor.userId);
+  },
+
   async submitSelfAssessment(actor: SelfActor, body: CreateMeSelfAssessmentBody) {
     const tenantId = requireTenant(actor);
     if (!(await repo.skillVisibleToTenant(pool, body.skillId, tenantId))) {

@@ -17,6 +17,7 @@ import {
   MePositionsResponseSchema, MeGoalIdParamSchema, GoalTimelineResponseSchema,
   MeGapClosureResponseSchema, EvidenceSubjectQuerySchema, EvidenceListResponseSchema,
   MeSkillsResponseSchema, MeSkillEvidenceSchema, CreateMeSelfAssessmentBodySchema,
+  MeSkillPossessionResponseSchema,
   MeSurveysResponseSchema, MeSurveyDetailSchema,
   SubmitMeSurveyResponseBodySchema, SubmitMeSurveyResultSchema, MeSurveyIdParamSchema,
   MeLearningResponseSchema, MeLearningAssignmentSchema, CreateMeEnrollmentBodySchema,
@@ -130,6 +131,14 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("skill:read:self")],
     schema: { response: { 200: MeSkillsResponseSchema } },
   }, async (req) => meService.listSkills(selfActor(req)));
+
+  // #46 D1 — current possession (sys_user_skills). Literal path before any /skills/:x.
+  // Self-scope (I17): SKILL is sensitive, so another user's possession is org-gated and
+  // does NOT live here — this endpoint only ever returns the caller's own inventory.
+  app.get("/skills/possession", {
+    preHandler: [requirePermission("skill:read:self")],
+    schema: { response: { 200: MeSkillPossessionResponseSchema } },
+  }, async (req) => meService.listSkillPossession(selfActor(req)));
 
   app.post("/skills/self-assessments", {
     preHandler: [app.verifyCsrf, requirePermission("skill:self_assess")],

@@ -8,7 +8,7 @@ import type { Pool, PoolClient } from "pg";
 import type {
   MeProfile, MeProfileFull, MeContract, MePaySlip, MePerformanceReview, MeAttendanceResponse, UpdateMeProfileBody,
   MeGoal, MeRiskResponse, MeCareerPathsResponse, MeAnalyticsResponse, MeApprovalsResponse,
-  MeSkillEvidenceSchema, CreateMeSelfAssessmentBody,
+  MeSkillEvidenceSchema, CreateMeSelfAssessmentBody, MeSkillPossession,
   CreateMeEnrollmentBody, CreateMeCareerTargetBody,
   MeInboxQuery, PatchMeInboxBody,
   MeKpiTarget, MeCertification, CreateMeCertificationBody, MeDocument,
@@ -694,6 +694,65 @@ export async function listMySkills(q: DbConnector, userId: string): Promise<{ it
     assessedAt: r.user_skill_evidence_assessed_at.toISOString(),
     score: r.user_skill_evidence_score === null ? null : Number(r.user_skill_evidence_score),
     comment: r.user_skill_evidence_comment,
+  }));
+  return { items, total: items.length };
+}
+
+/**
+ * #46 D1 — the CURRENT skill possession of a user (sys_user_skills), one row per skill.
+ *
+ * Distinct from listMySkills above, which returns the append-only EVIDENCE trail: a user
+ * can have many assessments of the same skill over time, but exactly one current level.
+ * Gap analysis and matching consume this snapshot; the trail explains how it got there.
+ *
+ * The proficiency RANK is resolved from sys_skill_proficiency_levels rather than hardcoded,
+ * so a caller can order/compare levels without duplicating the vocabulary (LEFT JOIN: an
+ * unknown code yields a null rank instead of dropping the row).
+ */
+export async function listMySkillPossession(
+  q: DbConnector,
+  userId: string,
+): Promise<{ items: MeSkillPossession[]; total: number }> {
+  const res = await q.query<{
+    user_skill_id: string;
+    user_skill_skill_id: string;
+    skill_code: string;
+    skill_name: string;
+    user_skill_proficiency: string;
+    rank: number | null;
+    user_skill_years_experience: string | null;
+    user_skill_is_primary: boolean;
+    user_skill_is_verified: boolean;
+    user_skill_source: string;
+    user_skill_last_used_on: Date | null;
+  }>(
+    `SELECT us.user_skill_id, us.user_skill_skill_id,
+            s.skill_code, s.skill_name,
+            us.user_skill_proficiency,
+            pl.skill_proficiency_level_rank AS rank,
+            us.user_skill_years_experience,
+            us.user_skill_is_primary, us.user_skill_is_verified,
+            us.user_skill_source, us.user_skill_last_used_on
+       FROM sys.sys_user_skills us
+       JOIN sys.sys_skills s ON s.skill_id = us.user_skill_skill_id
+       LEFT JOIN sys.sys_skill_proficiency_levels pl
+              ON pl.skill_proficiency_level_code = us.user_skill_proficiency
+      WHERE us.user_skill_user_id = $1
+      ORDER BY pl.skill_proficiency_level_rank DESC NULLS LAST, s.skill_name`,
+    [userId],
+  );
+  const items: MeSkillPossession[] = res.rows.map((r) => ({
+    userSkillId: r.user_skill_id,
+    skillId: r.user_skill_skill_id,
+    skillCode: r.skill_code,
+    skillName: r.skill_name,
+    proficiency: r.user_skill_proficiency,
+    proficiencyRank: r.rank === null ? null : Number(r.rank),
+    yearsExperience: r.user_skill_years_experience === null ? null : Number(r.user_skill_years_experience),
+    isPrimary: r.user_skill_is_primary,
+    isVerified: r.user_skill_is_verified,
+    source: r.user_skill_source,
+    lastUsedOn: r.user_skill_last_used_on === null ? null : r.user_skill_last_used_on.toISOString().slice(0, 10),
   }));
   return { items, total: items.length };
 }

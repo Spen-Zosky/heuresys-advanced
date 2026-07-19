@@ -21,9 +21,8 @@
  */
 import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
 import * as OTPAuth from "otpauth";
-import { completeApiLogin, PERSONAS, TEST_PASSWORD } from "./fixtures";
+import { API_BASE, completeApiLogin, PERSONAS, TEST_PASSWORD } from "./fixtures";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 const GATED_EMAIL = "alberto.rossetti@rtl-bank.org"; // R2 READ_ONLY persona
 const ADMIN = PERSONAS.platformAdmin;
 

@@ -10,7 +10,21 @@ import * as OTPAuth from "otpauth";
 import type { APIRequestContext, Page } from "@playwright/test";
 import { FIXTURE_TOTP_SECRETS } from "./mfa-fixture-secrets";
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
+/**
+ * API ORIGIN for direct (non-proxied) test requests. Every caller appends its own
+ * `/v1/...` path, so this must NOT carry the version segment.
+ *
+ * `NEXT_PUBLIC_API_BASE_URL` is the WEB app's base and legitimately ends in `/v1`
+ * (repo .env: http://localhost:3001/v1). playwright.config.ts hydrates the repo
+ * .env into process.env, so locally that value lands here and produced
+ * `.../v1/v1/auth/login` → 404. CI has no repo .env, so the fallback hid the bug.
+ * Normalize by stripping a trailing `/v1`. Single definition — specs import this
+ * instead of re-deriving it (four had drifted copies).
+ */
+export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001").replace(
+  /\/v1\/?$/,
+  "",
+);
 
 // F-001: the persona login password is environment-driven, not committed. playwright.config.ts
 // loads the repo-root .env so TEST_ADMIN_PASSWORD is present here; fail closed if it is missing.

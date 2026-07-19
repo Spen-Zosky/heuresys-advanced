@@ -1,38 +1,21 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { apiFetch } from "@/lib/api/fetch";
+import type { OrganizationUnit } from "@heuresys/shared";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 
-interface OrgUnit {
-  organizationUnitId: string;
-  code: string;
-  name: string;
-  type: string;
-  parentId: string | null;
-  parentName: string | null;
-  managerUserId: string | null;
-  effectiveFrom: string | null;
-  effectiveTo: string | null;
-  isActive: boolean;
-}
-
-interface OrgUnitsList {
-  items: OrgUnit[];
-  total: number;
-}
-
 export default function OrganizationPage() {
   const { t } = useTranslation("admin");
-  const ous = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const ous = usePaginatedList<OrganizationUnit>({
     queryKey: ["organization-units", "list"],
-    queryFn: () => apiFetch<OrgUnitsList>("/v1/organization-units?limit=200"),
+    path: "/v1/organization-units",
   });
 
-  const columns = useMemo<DataColumn<OrgUnit>[]>(
+  const columns = useMemo<DataColumn<OrganizationUnit>[]>(
     () => [
       { header: t("organization.columns.code"), cell: (o) => <span className="font-mono text-xs">{o.code}</span> },
       { header: t("organization.columns.name"), cell: (o) => <span className="font-medium text-foreground">{o.name}</span> },
@@ -50,17 +33,18 @@ export default function OrganizationPage() {
   );
 
   return (
-    <DataTablePanel<OrgUnit>
+    <DataTablePanel<OrganizationUnit>
       pageTestId="organization-page"
       titleTestId="organization-title"
       countTestId="organization-count"
       title={t("organization.title")}
       description={t("organization.description")}
-      count={ous.data ? t("organization.count", { count: ous.data.total }) : undefined}
-      isLoading={ous.isLoading}
-      isError={ous.isError}
+      count={ous.query.data ? t("organization.count", { count: ous.total }) : undefined}
+      isLoading={ous.query.isLoading}
+      isError={ous.query.isError}
       errorMessage={t("organization.errorMessage")}
-      rows={ous.data?.items ?? []}
+      rows={ous.rows}
+      server={ous.server}
       rowKey={(o) => o.organizationUnitId}
       rowTestId="organization-row"
       columns={columns}

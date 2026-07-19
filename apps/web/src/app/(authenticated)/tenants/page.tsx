@@ -1,35 +1,17 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import { apiFetch } from "@/lib/api/fetch";
+import type { Tenant } from "@heuresys/shared";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 
-interface Tenant {
-  tenantId: string;
-  tenantCode: string;
-  tenantName: string;
-  tenantLegalName: string | null;
-  tenantCountryCode: string | null;
-  tenantIndustryCode: string | null;
-  tenantSizeBand: string | null;
-  tenantStatus: string;
-}
-
-interface TenantsList {
-  items: Tenant[];
-  total: number;
-}
-
 export default function TenantsListPage() {
   const { t } = useTranslation("admin");
-  const tenants = useQuery({
-    queryKey: ["tenants", "list"],
-    queryFn: () => apiFetch<TenantsList>("/v1/tenants?limit=200"),
-  });
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const tenants = usePaginatedList<Tenant>({ queryKey: ["tenants", "list"], path: "/v1/tenants" });
 
   const columns = useMemo<DataColumn<Tenant>[]>(
     () => [
@@ -68,12 +50,13 @@ export default function TenantsListPage() {
       countTestId="tenants-count"
       title={t("tenants.title")}
       description={t("tenants.description")}
-      count={tenants.data ? t("tenants.count", { count: tenants.data.total }) : undefined}
-      isLoading={tenants.isLoading}
-      isError={tenants.isError}
+      count={tenants.query.data ? t("tenants.count", { count: tenants.total }) : undefined}
+      isLoading={tenants.query.isLoading}
+      isError={tenants.query.isError}
       errorTestId="tenants-error"
       errorMessage={t("tenants.errorMessage")}
-      rows={tenants.data?.items ?? []}
+      rows={tenants.rows}
+      server={tenants.server}
       rowKey={(row) => row.tenantId}
       rowTestId="tenants-row"
       columns={columns}

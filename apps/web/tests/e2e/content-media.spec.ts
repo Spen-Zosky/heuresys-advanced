@@ -9,9 +9,8 @@
  * delete removes the row. The document is deleted in `finally` (cascade).
  */
 import { test, expect, type APIRequestContext } from "@playwright/test";
-import { PERSONAS, storageStateFor, completeApiLogin } from "./fixtures";
+import { API_BASE, PERSONAS, storageStateFor, completeApiLogin } from "./fixtures";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 const AUTHOR = PERSONAS.tenantAdmin;
 
 const PNG = Buffer.concat([

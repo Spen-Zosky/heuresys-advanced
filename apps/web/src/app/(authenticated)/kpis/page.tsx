@@ -1,29 +1,15 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { apiFetch } from "@/lib/api/fetch";
+import type { KpiDefinition } from "@heuresys/shared";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { KpiMetrologyPanel } from "@/components/kpi-metrology-panel";
 
-interface KpiDef {
-  kpiDefinitionId: string;
-  code: string;
-  name: string;
-  unit: string | null;
-  polarity: string;
-  isGlobal: boolean;
-}
-
-interface KpiList {
-  items: KpiDef[];
-  total: number;
-}
-
-function buildColumns(t: TFunction): DataColumn<KpiDef>[] {
+function buildColumns(t: TFunction): DataColumn<KpiDefinition>[] {
   return [
     { header: t("shared.code"), cell: (k) => <span className="font-mono text-xs">{k.code}</span> },
     { header: t("shared.name"), cell: (k) => <span className="font-medium text-foreground">{k.name}</span> },
@@ -43,23 +29,25 @@ function buildColumns(t: TFunction): DataColumn<KpiDef>[] {
 export default function KpisCataloguePage() {
   const { t } = useTranslation("hr");
   const columns = useMemo(() => buildColumns(t), [t]);
-  const kpis = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const kpis = usePaginatedList<KpiDefinition>({
     queryKey: ["kpi-definitions", "list"],
-    queryFn: () => apiFetch<KpiList>("/v1/kpi-definitions?limit=200"),
+    path: "/v1/kpi-definitions",
   });
 
   return (
-    <DataTablePanel<KpiDef>
+    <DataTablePanel<KpiDefinition>
       pageTestId="kpis-page"
       titleTestId="kpis-title"
       countTestId="kpis-count"
       title={t("kpis.title")}
       description={t("kpis.description")}
-      count={kpis.data ? t("kpis.count", { count: kpis.data.total }) : undefined}
-      isLoading={kpis.isLoading}
-      isError={kpis.isError}
+      count={kpis.query.data ? t("kpis.count", { count: kpis.total }) : undefined}
+      isLoading={kpis.query.isLoading}
+      isError={kpis.query.isError}
       errorMessage={t("kpis.errorMessage")}
-      rows={kpis.data?.items ?? []}
+      rows={kpis.rows}
+      server={kpis.server}
       rowKey={(k) => k.kpiDefinitionId}
       rowTestId="kpis-row"
       columns={columns}

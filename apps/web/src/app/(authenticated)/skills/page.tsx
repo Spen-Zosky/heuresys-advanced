@@ -1,26 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { apiFetch } from "@/lib/api/fetch";
+import type { Skill } from "@heuresys/shared";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { SemanticSearchPanel } from "@/components/semantic-search-panel";
 import { StatusPill } from "@/components/status-pill";
-
-interface Skill {
-  skillId: string;
-  code: string;
-  name: string;
-  isGlobal: boolean;
-  tenantId: string | null;
-}
-
-interface SkillsList {
-  items: Skill[];
-  total: number;
-}
 
 function buildColumns(t: TFunction): DataColumn<Skill>[] {
   return [
@@ -40,10 +27,9 @@ function buildColumns(t: TFunction): DataColumn<Skill>[] {
 export default function SkillsCataloguePage() {
   const { t } = useTranslation("hr");
   const columns = useMemo(() => buildColumns(t), [t]);
-  const skills = useQuery({
-    queryKey: ["skills", "list"],
-    queryFn: () => apiFetch<SkillsList>("/v1/skills?limit=200"),
-  });
+  // C4 (#42): server-side pagination. The catalogue holds ~14k rows — the legacy
+  // `?limit=200` silently truncated it to the first page's worth.
+  const skills = usePaginatedList<Skill>({ queryKey: ["skills", "list"], path: "/v1/skills" });
 
   return (
     <DataTablePanel<Skill>
@@ -52,11 +38,12 @@ export default function SkillsCataloguePage() {
       countTestId="skills-count"
       title={t("skills.title")}
       description={t("skills.description")}
-      count={skills.data ? t("skills.count", { count: skills.data.total }) : undefined}
-      isLoading={skills.isLoading}
-      isError={skills.isError}
+      count={skills.query.data ? t("skills.count", { count: skills.total }) : undefined}
+      isLoading={skills.query.isLoading}
+      isError={skills.query.isError}
       errorMessage={t("skills.errorMessage")}
-      rows={skills.data?.items ?? []}
+      rows={skills.rows}
+      server={skills.server}
       rowKey={(s) => s.skillId}
       rowTestId="skills-row"
       columns={columns}

@@ -1,25 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { apiFetch } from "@/lib/api/fetch";
+import type { LearningModule } from "@heuresys/shared";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
-
-interface LearningModule {
-  learningModuleId: string;
-  code: string;
-  title: string;
-  isGlobal: boolean;
-  durationMinutes: number | null;
-}
-
-interface LearningModulesList {
-  items: LearningModule[];
-  total: number;
-}
 
 function buildColumns(t: TFunction): DataColumn<LearningModule>[] {
   return [
@@ -43,9 +30,10 @@ function buildColumns(t: TFunction): DataColumn<LearningModule>[] {
 export default function LearningCataloguePage() {
   const { t } = useTranslation("hr");
   const columns = useMemo(() => buildColumns(t), [t]);
-  const modules = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const modules = usePaginatedList<LearningModule>({
     queryKey: ["learning-modules", "list"],
-    queryFn: () => apiFetch<LearningModulesList>("/v1/learning-modules?limit=200"),
+    path: "/v1/learning-modules",
   });
 
   return (
@@ -55,11 +43,12 @@ export default function LearningCataloguePage() {
       countTestId="learning-count"
       title={t("learning.title")}
       description={t("learning.description")}
-      count={modules.data ? t("learning.count", { count: modules.data.total }) : undefined}
-      isLoading={modules.isLoading}
-      isError={modules.isError}
+      count={modules.query.data ? t("learning.count", { count: modules.total }) : undefined}
+      isLoading={modules.query.isLoading}
+      isError={modules.query.isError}
       errorMessage={t("learning.errorMessage")}
-      rows={modules.data?.items ?? []}
+      rows={modules.rows}
+      server={modules.server}
       rowKey={(m) => m.learningModuleId}
       rowTestId="learning-row"
       columns={columns}

@@ -3,18 +3,18 @@
 /**
  * ContentMediaPanel — cap④ CMS P3 media attachments for /content/[id].
  * Page-specific composition of @heuresys/ui primitives (no new primitives).
- * Upload goes through a raw fetch (FormData — apiFetch is JSON-only) with the
- * CSRF header from csrfStore; downloads are plain same-origin links through
- * the /api proxy (GET, cookie-authenticated, attachment disposition).
+ * Upload goes through apiFetch with a FormData body (multipart passthrough,
+ * C4) so it inherits CSRF injection, typed errors and the silent 401 refresh;
+ * downloads are plain same-origin links through the /api proxy (GET,
+ * cookie-authenticated, attachment disposition).
  */
 
 import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
-import type { ListContentMediaResponse } from "@heuresys/shared";
+import type { ContentMediaItem, ListContentMediaResponse } from "@heuresys/shared";
 import { apiFetch } from "../lib/api/fetch";
-import { csrfStore } from "../lib/api/csrf-store";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 
@@ -37,26 +37,14 @@ export function ContentMediaPanel({ documentId, canEdit }: { documentId: string;
   });
 
   const upload = useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: (file: File) => {
       if (file.size > MAX_BYTES) throw new Error(t("content.media.tooLarge"));
       const form = new FormData();
       form.append("file", file, file.name);
-      const headers: Record<string, string> = { accept: "application/json" };
-      const csrf = csrfStore.get();
-      if (csrf) headers["x-csrf-token"] = csrf;
-      const res = await fetch(`/api/v1/content/${documentId}/media`, {
+      return apiFetch<ContentMediaItem>(`/v1/content/${documentId}/media`, {
         method: "POST",
-        headers,
-        credentials: "include",
         body: form,
       });
-      if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as
-          | { error?: { message?: string } }
-          | null;
-        throw new Error(body?.error?.message ?? t("content.media.uploadError"));
-      }
-      return res.json();
     },
     onSuccess: () => {
       setError(null);

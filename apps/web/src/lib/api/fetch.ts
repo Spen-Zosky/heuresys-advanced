@@ -9,7 +9,8 @@
  *   - automatic `x-csrf-token` injection on mutations from `csrfStore`,
  *   - silent refresh on 401 (single-flight, one retry via /v1/auth/refresh),
  *   - typed error throw (ApiError / SessionExpiredError / NetworkError),
- *   - optional Zod schema validation on success body.
+ *   - optional Zod schema validation on success body,
+ *   - JSON bodies by default, `FormData` passed through as multipart (C4).
  */
 
 import type { ZodTypeAny } from "zod";
@@ -20,6 +21,7 @@ export type HttpMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 export interface ApiFetchOptions<TSchema extends ZodTypeAny | undefined = undefined> {
   method?: HttpMethod;
+  /** JSON-serialized, EXCEPT a `FormData` which is sent as-is (multipart). */
   body?: unknown;
   schema?: TSchema;
   /** Internal flag — set by the silent-refresh retry to prevent infinite loops. */
@@ -112,8 +114,18 @@ export async function apiFetch<T = unknown>(
 
   let payload: BodyInit | undefined;
   if (body !== undefined && method !== "GET") {
-    headers["content-type"] = "application/json";
-    payload = JSON.stringify(body);
+    if (typeof FormData !== "undefined" && body instanceof FormData) {
+      // Multipart: the browser MUST generate content-type itself so the
+      // multipart boundary matches the serialized body. Setting it by hand
+      // (even to the right mime) yields a boundary-less header the server
+      // cannot parse — so we also strip a caller-supplied one.
+      delete headers["content-type"];
+      delete headers["Content-Type"];
+      payload = body;
+    } else {
+      headers["content-type"] = "application/json";
+      payload = JSON.stringify(body);
+    }
   }
 
   if (!SAFE_METHODS.has(method)) {

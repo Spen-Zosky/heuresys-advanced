@@ -14,11 +14,10 @@
  * Persona: platformAdmin (all permissions → every route reachable).
  */
 import { test, expect, type APIRequestContext } from "@playwright/test";
-import { storageStateFor, PERSONAS, completeApiLogin } from "./fixtures";
+import { API_BASE, storageStateFor, PERSONAS, completeApiLogin } from "./fixtures";
 
 const BASE_URL =
   process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${process.env.PLAYWRIGHT_WEB_PORT ?? "3000"}`;
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 
 async function loginCsrf(request: APIRequestContext): Promise<string> {
   // Dual-mode (S983 WS-E): completes the TOTP step-2 under the live policy.

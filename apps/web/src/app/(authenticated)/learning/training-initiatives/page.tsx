@@ -1,30 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { apiFetch } from "@/lib/api/fetch";
+import type { TrainingInitiative } from "@heuresys/shared";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
-
-interface TrainingInitiative {
-  trainingInitiativeId: string;
-  tenantId: string;
-  moduleId: string;
-  code: string;
-  cohortName: string | null;
-  startDate: string | null;
-  endDate: string | null;
-  facilitatorUserId: string | null;
-  status: string;
-  capacity: number | null;
-}
-
-interface TrainingInitiativesList {
-  items: TrainingInitiative[];
-  total: number;
-}
 
 function buildColumns(t: TFunction): DataColumn<TrainingInitiative>[] {
   return [
@@ -47,9 +29,10 @@ function buildColumns(t: TFunction): DataColumn<TrainingInitiative>[] {
 export default function TrainingInitiativesPage() {
   const { t } = useTranslation("hr");
   const columns = useMemo(() => buildColumns(t), [t]);
-  const inits = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const inits = usePaginatedList<TrainingInitiative>({
     queryKey: ["training-initiatives", "list"],
-    queryFn: () => apiFetch<TrainingInitiativesList>("/v1/training-initiatives?limit=200"),
+    path: "/v1/training-initiatives",
   });
 
   return (
@@ -59,11 +42,12 @@ export default function TrainingInitiativesPage() {
       countTestId="training-count"
       title={t("training.title")}
       description={t("training.description")}
-      count={inits.data ? t("training.count", { count: inits.data.total }) : undefined}
-      isLoading={inits.isLoading}
-      isError={inits.isError}
+      count={inits.query.data ? t("training.count", { count: inits.total }) : undefined}
+      isLoading={inits.query.isLoading}
+      isError={inits.query.isError}
       errorMessage={t("training.errorMessage")}
-      rows={inits.data?.items ?? []}
+      rows={inits.rows}
+      server={inits.server}
       rowKey={(ti) => ti.trainingInitiativeId}
       rowTestId="training-row"
       columns={columns}

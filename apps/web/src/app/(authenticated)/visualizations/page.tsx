@@ -5,24 +5,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { Badge, PageHeader } from "@heuresys/ui";
+import type { VizGraph, VizGraphTypeDistributionItem } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EChartsCard } from "../_charts-client";
 
-// Fields match the real VizGraph schema (graphId/type/isActive), not the stale
-// visualizationGraphId/graphKind/status that this page used before F4.3.
-interface VisualizationGraph {
-  graphId: string;
-  code: string;
-  name: string;
-  type: string;
-  isActive: boolean;
-}
-interface TypeDistItem {
-  type: string;
-  count: number;
-}
+type TypeDistItem = VizGraphTypeDistributionItem;
 
 /** Donut option: type distribution. The series name is passed in already
  *  translated (i18n is a render-time hook), never resolved at module scope. */
@@ -46,9 +36,12 @@ function typeChartOption(items: TypeDistItem[], labels: { series: string }) {
 
 export default function VisualizationsPage() {
   const { t } = useTranslation("admin");
-  const graphs = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`). The donut is fed by the
+  // separate server-side GROUP BY aggregate below, so paging the table never
+  // narrows the distribution.
+  const graphs = usePaginatedList<VizGraph>({
     queryKey: ["visualization-graphs"],
-    queryFn: () => apiFetch<{ items: VisualizationGraph[]; total: number }>("/v1/visualization-graphs?limit=200"),
+    path: "/v1/visualization-graphs",
   });
   // Type distribution — server-side GROUP BY aggregate (API-first, F4.3).
   const summary = useQuery({
@@ -56,7 +49,7 @@ export default function VisualizationsPage() {
     queryFn: () => apiFetch<{ items: TypeDistItem[]; total: number }>("/v1/visualization-graphs/summary"),
   });
 
-  const columns = useMemo<DataColumn<VisualizationGraph>[]>(
+  const columns = useMemo<DataColumn<VizGraph>[]>(
     () => [
       { header: t("visualizations.columns.code"), cell: (g) => <span className="font-mono text-xs">{g.code}</span> },
       {
@@ -85,17 +78,18 @@ export default function VisualizationsPage() {
         description={t("visualizations.description")}
         badges={
           <Badge variant="secondary" data-testid="visualizations-count">
-            {graphs.data ? t("visualizations.count", { count: graphs.data.total }) : t("visualizations.countLoading")}
+            {graphs.query.data ? t("visualizations.count", { count: graphs.total }) : t("visualizations.countLoading")}
           </Badge>
         }
       />
 
       <section className="grid gap-4 lg:grid-cols-[1fr_minmax(280px,360px)]">
-        <EntityTable<VisualizationGraph>
-          isLoading={graphs.isLoading}
-          isError={graphs.isError}
+        <EntityTable<VizGraph>
+          isLoading={graphs.query.isLoading}
+          isError={graphs.query.isError}
           errorMessage={t("visualizations.errorMessage")}
-          rows={graphs.data?.items ?? []}
+          rows={graphs.rows}
+          server={graphs.server}
           rowKey={(g) => g.graphId}
           rowTestId="visualizations-row"
           columns={columns}

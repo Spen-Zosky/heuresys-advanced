@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-20T16:53:19Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2425**
+**Generato**: 2026-07-20T17:46:20Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2427**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -10,7 +10,7 @@
 |---|---|
 | ADR | 26 |
 | api-core | 25 |
-| api-module | 308 |
+| api-module | 309 |
 | ci | 16 |
 | claude-config | 15 |
 | config | 104 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 94 |
 | showcase-source | 13 |
-| test | 286 |
+| test | 287 |
 | ux-design-archive | 80 |
 | web-source | 200 |
-| **TOTALE** | **2425** |
+| **TOTALE** | **2427** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 495 |
 | external-archive | 50 |
-| live | 1880 |
+| live | 1882 |
 
 ## File per categoria
 
@@ -275,6 +275,7 @@
 - `D:\heuresys-advanced\apps\api\src\modules\notifications\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\notifications\service.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\observability\metrics-store.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\observability\prometheus.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\observability\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\observability\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\observability\service.ts` · *live* · git-tracked
@@ -2088,6 +2089,7 @@
 - `D:\heuresys-advanced\apps\api\test\notification-digest.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\notification-preferences.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\notification-producers.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\observability-metrics.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\observability.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\occupation-skill-requirements.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\okrs-scope.integration.test.ts` · *live* · git-tracked

@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-19T23:55:22Z da docs/kb/tools/build_index.py
+# generato: 2026-07-20T15:41:19Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-19T23:55:22Z"
-  total_files: 2416
+  generated_at: "2026-07-20T15:41:19Z"
+  total_files: 2421
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 179
+    db-migration: 181
     db-other: 1
     db-script: 27
     db-seed: 107
-    doc-canonical: 465
+    doc-canonical: 468
     handoff-state: 1
     qa-artifact: 103
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 495
     external-archive: 50
-    live: 1871
+    live: 1876
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -6140,6 +6140,18 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000182_fk_covering_indexes.sql'
+    root: repo
+    rel: 'db/migrations/000182_fk_covering_indexes.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000183_drop_dead_org_hierarchies.sql'
+    root: repo
+    rel: 'db/migrations/000183_drop_dead_org_hierarchies.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\migrations\.gitkeep'
     root: repo
     rel: 'db/migrations/.gitkeep'
@@ -7772,6 +7784,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\NEXT_SESSION_FORENSIC_KICKOFF.md'
+    root: repo
+    rel: 'docs/kb/NEXT_SESSION_FORENSIC_KICKOFF.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\PLAN_S1018_BATCH.md'
     root: repo
     rel: 'docs/kb/PLAN_S1018_BATCH.md'
@@ -7868,9 +7886,21 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\full-forensic-audit\AUDIT_FORENSE_heuresys_2026-07-20_022239.md'
+    root: repo
+    rel: 'docs/kb/full-forensic-audit/AUDIT_FORENSE_heuresys_2026-07-20_022239.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\full-forensic-audit\FINDINGS_2026-07-03_151241.json'
     root: repo
     rel: 'docs/kb/full-forensic-audit/FINDINGS_2026-07-03_151241.json'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\full-forensic-audit\FINDINGS_2026-07-20_022239.json'
+    root: repo
+    rel: 'docs/kb/full-forensic-audit/FINDINGS_2026-07-20_022239.json'
     category: doc-canonical
     status: live
     provenance: git-tracked

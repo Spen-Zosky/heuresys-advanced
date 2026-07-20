@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-19T23:55:22Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2416**
+**Generato**: 2026-07-20T15:41:19Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2421**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 179 |
+| db-migration | 181 |
 | db-other | 1 |
 | db-script | 27 |
 | db-seed | 107 |
-| doc-canonical | 465 |
+| doc-canonical | 468 |
 | handoff-state | 1 |
 | qa-artifact | 103 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 286 |
 | ux-design-archive | 80 |
 | web-source | 200 |
-| **TOTALE** | **2416** |
+| **TOTALE** | **2421** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 495 |
 | external-archive | 50 |
-| live | 1871 |
+| live | 1876 |
 
 ## File per categoria
 
@@ -1095,6 +1095,8 @@
 - `D:\heuresys-advanced\db\migrations\000179_process_participants.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000180_user_skills.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000181_whistleblowing.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000182_fk_covering_indexes.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000183_drop_dead_org_hierarchies.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1379,6 +1381,7 @@
 - `D:\heuresys-advanced\docs\kb\DESIGN_SYSTEM_UI.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\DUMP_ARCHIVAL_RUNBOOK.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\INDEX_PATHS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\NEXT_SESSION_FORENSIC_KICKOFF.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\PLAN_S1018_BATCH.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\POST_V1_ROADMAP_DOSSIER.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\RBAC_UIX_PERSPECTIVES_PLAN.md` · *live* · git-tracked
@@ -1395,7 +1398,9 @@
 - `D:\heuresys-advanced\docs\kb\atlas\ATLAS_CURATED.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\atlas\atlas.yaml` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\AUDIT_FORENSE_heuresys_2026-07-03_151241.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\full-forensic-audit\AUDIT_FORENSE_heuresys_2026-07-20_022239.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\FINDINGS_2026-07-03_151241.json` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\full-forensic-audit\FINDINGS_2026-07-20_022239.json` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\FP_CHECK_VERIFICATION_2026-07-03_151241.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\INDEX.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\improvement\2026-06-13_heuresys-advanced-100x-kickoff-prompt.md` · *live* · git-tracked

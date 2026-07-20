@@ -33,7 +33,13 @@
   - reactivation-trigger: Enzo decide la strategia multi-industry e avvia L2 (pilota EcoNova) o L3
 - **#9/#10/#11 audit forense 100X** · status: ACTIVE
   - priority: P2 · effort: ~1-2 sessioni (WS-L + triage + gate) · doc: docs/kb/improvement/MASTER_PLAN_100X.md + docs/kb/improvement/TODO_100X.md
-  - note: riattivato S1018 (Enzo, trigger sciolto). Scope wave W12: **WS-L** ecosystem design-only (skill claude-ecosystem-optimizer, NO implementazione → WS-L_PLAN.md + WS-L_TODO.md) + fix bug hook claude-mem · **triage D-01..D-14** con esito registrato per dossier secondo le raccomandazioni interne (mandato batch S1018) · epiche GO conservative piccole inline; epiche strutturali GO → branch dedicati successivi (regola MASTER_PLAN) · re-run `/full-forensic-audit` come gate pre-release del batch.
+  - note: **S1022 — audit forense + gate adversarial + verdetto FATTI** (`docs/kb/full-forensic-audit/*_2026-07-20_022239.*`, verdetto **CONDITIONAL-GO**; 8 finding verificati + 4 refutati + 7 asset; scorecard arch 83/sec 85/db 76/test 80). Remediation R1-R4 shipped (D-58 risolto LIVE, R3 FK-index live mig 000182, R4 dead-schema drop mig 000183). **Residuo**: **WS-L** ecosystem design-only + **triage D-01..D-14** + fix bug hook claude-mem (D-56) — richiedono fan-out multi-agente (fallito su session-limit account S1022, reset 6:20am). Vedi anche #64 (R2 data-completeness).
+- **#64 R2 data-completeness (condizione finance-readiness #2)** · status: ACTIVE
+  - priority: P1 · effort: ~1-2 sessioni · doc: docs/kb/full-forensic-audit/AUDIT_FORENSE_heuresys_2026-07-20_022239.md (F-A04)
+  - note: l'audit S1022 ha trovato feature dichiarate "shipped DoD-complete" con backing VUOTO. **F4/#24**: `sys_process_participants` = 0 righe → asse funzionale ADR-0027 non esercitato da dati reali (viola DoD ADR-0026 "solo dimostrazione LIVE su dati reali"). Popolare da sorgente legacy (heuresys-evo) o materializzazione + verifica E2E con login persona reale; poi **audit stesse-condizioni sulle altre 7 P1 S1021**. Richiede fan-out (dopo reset budget account 6:20am).
+- **#65 NACE integrità parent (F-A06)** · status: ACTIVE
+  - priority: P3 · effort: ~0.5-1 sessione · doc: docs/kb/full-forensic-audit/AUDIT_FORENSE_heuresys_2026-07-20_022239.md (F-A06)
+  - note: `sys_activity_classifications` = adjacency `parent_code` (varchar, NON-FK); verifica live S1022 → **920 parent_code orfani** (parent inesistente) su ~6533 righe. Un constraint FK/CHECK fallirebbe. Decisione qualità-dati: pulire i 920 (capire perché orfani — livello non importato?) OPPURE documentare la scelta adjacency-senza-integrità come deliberata.
 - **#8 EMAIL dormiente** · status: WAIT-INPUT
   - input-richiesto: app-password Outlook (`enzo.spenuso@outlook.com`)
   - perche-solo-tuo: credenziale personale → attiva EMAIL_OTP + digest live in 1 mossa (transport già pronto)

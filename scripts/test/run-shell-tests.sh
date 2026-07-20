@@ -172,6 +172,32 @@ else
   fail "$VDR missing"
 fi
 
+# ----------------------- H. ci-gate.sh — deploy gate classification (D-08 F2)
+section "ci-gate.sh — --classify fixtures + bypass (no network)"
+CG=scripts/ci-gate.sh
+if [ -f "$CG" ]; then
+  cgc() { printf '%s' "$1" | bash "$CG" --classify; }
+  R='{"workflow_runs":[{"name":"a","status":"completed","conclusion":"failure"},{"name":"b","status":"completed","conclusion":"success"}]}'
+  [ "$(cgc "$R")" = "RED:a" ] && ok "RED on any failing run (success does not mask it)" || fail "classify RED"
+  P='{"workflow_runs":[{"name":"a","status":"in_progress","conclusion":null},{"name":"b","status":"completed","conclusion":"success"}]}'
+  [ "$(cgc "$P")" = "PENDING:1" ] && ok "PENDING while runs in flight (no premature green)" || fail "classify PENDING"
+  G='{"workflow_runs":[{"name":"a","status":"completed","conclusion":"success"},{"name":"b","status":"completed","conclusion":"skipped"}]}'
+  [ "$(cgc "$G")" = "GREEN:1" ] && ok "GREEN with success (+skipped tolerated)" || fail "classify GREEN"
+  N='{"workflow_runs":[{"name":"a","status":"completed","conclusion":"cancelled"}]}'
+  [ "$(cgc "$N")" = "NOSIGNAL" ] && ok "NOSIGNAL when only cancelled runs (fallback path)" || fail "classify NOSIGNAL"
+  E='{"workflow_runs":[]}'
+  [ "$(cgc "$E")" = "NOSIGNAL" ] && ok "NOSIGNAL on zero runs (docs-only push)" || fail "classify empty"
+  if DEPLOY_REQUIRE_CI=0 bash "$CG" deadbeef >/dev/null 2>&1; then
+    ok "DEPLOY_REQUIRE_CI=0 bypass exits 0 without network"
+  else fail "bypass DEPLOY_REQUIRE_CI=0"; fi
+  # vm-deploy wires the gate BEFORE the first mutating step (pre-deploy snapshot)
+  if awk '/ci-gate.sh/{g=NR} /pre-deploy snapshot \(pg_dump/{s=NR} END{exit !(g && s && g<s)}' scripts/vm-deploy.sh; then
+    ok "vm-deploy calls ci-gate before the first mutation (snapshot step)"
+  else fail "vm-deploy gate ordering (must precede pre-deploy snapshot)"; fi
+else
+  fail "$CG missing"
+fi
+
 # ---------------------------------------------------------------- summary
 printf '\n%d ok, %d failed\n' "$PASS" "$FAIL"
 [ "$FAIL" = 0 ]

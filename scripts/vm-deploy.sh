@@ -71,6 +71,15 @@ if [ -z "${VM_DEPLOY_REEXEC:-}" ]; then
     bash "$REPO_DIR/scripts/vm-deploy.sh"
 fi
 
+# 1c. D-08 F2 — deploy gate: the sha about to go live must be CI-green
+#     (scripts/ci-gate.sh: red run on the sha → abort; CI in flight → wait;
+#     docs-only sha with no runs → latest key workflows on main must be green).
+#     Runs BEFORE any mutation (deps/snapshot/migrate/build) so a red sha
+#     changes nothing on the box. DEPLOY_REQUIRE_CI=0 bypasses (emergency only
+#     — the gate logs the bypass loudly). ADR-0028.
+log "gate: CI must be green for the deployed sha (D-08 F2)"
+bash "$REPO_DIR/scripts/ci-gate.sh" "$(git -C "$REPO_DIR" rev-parse HEAD)"
+
 # 2. Deps (reproducible, exact lockfile match). Clean-reinstall if the Node ABI changed
 #    (native modules argon2/@next/swc/sharp must match NODE_MODULE_VERSION) — a frozen
 #    install over a stale node_modules built for another ABI can crash at runtime.

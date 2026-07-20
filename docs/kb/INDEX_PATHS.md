@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-20T15:41:19Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2421**
+**Generato**: 2026-07-20T16:53:19Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2425**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 181 |
+| db-migration | 182 |
 | db-other | 1 |
 | db-script | 27 |
 | db-seed | 107 |
-| doc-canonical | 468 |
+| doc-canonical | 471 |
 | handoff-state | 1 |
 | qa-artifact | 103 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 286 |
 | ux-design-archive | 80 |
 | web-source | 200 |
-| **TOTALE** | **2421** |
+| **TOTALE** | **2425** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 495 |
 | external-archive | 50 |
-| live | 1876 |
+| live | 1880 |
 
 ## File per categoria
 
@@ -1097,6 +1097,7 @@
 - `D:\heuresys-advanced\db\migrations\000181_whistleblowing.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000182_fk_covering_indexes.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000183_drop_dead_org_hierarchies.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000184_seed_process_participants_ruleb.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1421,6 +1422,7 @@
 - `D:\heuresys-advanced\docs\kb\improvement\DOSSIERS\D-13.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\improvement\DOSSIERS\D-14.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\improvement\DOSSIERS\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\improvement\DOSSIERS_TRIAGE_S1022.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\improvement\FINDINGS\3.2_ASVS_MAPPING.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\improvement\FINDINGS\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\improvement\FINDINGS\S-100X-0_recon.md` · *live* · git-tracked
@@ -1438,6 +1440,8 @@
 - `D:\heuresys-advanced\docs\kb\improvement\INTERVIEW_LOG.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\improvement\MASTER_PLAN_100X.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\improvement\TODO_100X.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\improvement\WS-L_PLAN.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\improvement\WS-L_TODO.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\index_paths.yaml` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\integrations\INTEGRATIONS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\atlas-sweep-templates\atlas-full-sweep.workflow.js` · *live* · git-tracked

@@ -195,6 +195,12 @@ const EnvSchema = z.object({
   // coerce, API_DOCS_ENABLED=false would EXPOSE the full ~407-endpoint Swagger on
   // prod (Boolean("false")===true) — a fail-open. Mirrors the other gate flags.
   API_DOCS_ENABLED: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
+
+  // D-09 observability: expose GET /metrics (Prometheus text format), loopback-only.
+  // Explicit 'true'/'false' string, NOT z.coerce.boolean (the COOKIE_SECURE footgun).
+  // Default OFF = prod-safe: no default-metrics timers, no collection, no exposure.
+  // Enable on the VM so the local systemd collector can scrape 127.0.0.1:<api>/metrics.
+  PROM_METRICS_ENABLED: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
 });
 
 const parsed = EnvSchema.parse(process.env);

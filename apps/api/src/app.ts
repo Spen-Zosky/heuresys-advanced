@@ -31,6 +31,7 @@ import { csrfPlugin } from "./middleware/csrf.js";
 import { isDatabaseReady } from "./db/client.js";
 import { COOKIES } from "./config/constants.js";
 import { metricsStore } from "./modules/observability/metrics-store.js";
+import { observeHttp, enablePrometheus, registry } from "./modules/observability/prometheus.js";
 import { authRoutes } from "./modules/auth/routes.js";
 import { mfaRoutes } from "./modules/auth/mfa-routes.js";
 import { mfaPolicyRoutes } from "./modules/mfa-policy/routes.js";
@@ -234,13 +235,15 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   //     A lifecycle hook is independent of the 13-step plugin order (§3.2); it is
   //     placed here so it wraps every subsequent route. Metrics must never break
   //     the response, so the whole body is guarded.
+  // D-09: turn Prometheus collection ON only when explicitly enabled (prod-safe).
+  if (env.PROM_METRICS_ENABLED) enablePrometheus();
   app.addHook("onResponse", async (req, reply) => {
     try {
-      metricsStore.record(
-        reply.statusCode,
-        reply.elapsedTime ?? 0,
-        (req.routeOptions && req.routeOptions.url) || req.url,
-      );
+      const route = (req.routeOptions && req.routeOptions.url) || req.url;
+      metricsStore.record(reply.statusCode, reply.elapsedTime ?? 0, route);
+      // observeHttp is a no-op unless Prometheus is enabled. route = PATTERN, not
+      // the concrete URL, to keep label cardinality bounded.
+      observeHttp(req.method, route, reply.statusCode, reply.elapsedTime ?? 0);
     } catch {
       /* metrics must never break the response */
     }
@@ -318,6 +321,24 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   // 12. Health endpoints — public, no auth required
   app.get("/healthz", async () => ({ status: "ok" }));
+
+  // D-09: Prometheus scrape endpoint — loopback-only + gated (PROM_METRICS_ENABLED).
+  // Deliberately NOT under /v1 (no auth/RBAC): the local systemd collector scrapes
+  // 127.0.0.1:<api>/metrics directly (bypassing nginx, which has no /metrics
+  // location). Any non-loopback peer, or a disabled flag, gets a plain 404 — the
+  // endpoint is never publicly observable.
+  app.get("/metrics", { schema: { hide: true } }, async (req, reply) => {
+    // Real TCP peer (not spoofable via X-Forwarded). In production req.socket
+    // always exists; the req.ip fallback only matters under test injection.
+    const peer = req.socket?.remoteAddress ?? req.ip ?? "";
+    const isLoopback = peer === "127.0.0.1" || peer === "::1" || peer === "::ffff:127.0.0.1";
+    if (!env.PROM_METRICS_ENABLED || !isLoopback) {
+      reply.code(404);
+      return { error: { code: "NOT_FOUND", message: "Not found" } };
+    }
+    reply.header("Content-Type", registry.contentType);
+    return registry.metrics();
+  });
 
   app.get("/readyz", async () => {
     const dbReady = await isDatabaseReady();

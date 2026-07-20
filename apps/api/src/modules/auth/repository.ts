@@ -12,6 +12,7 @@
 
 import type { Pool, PoolClient } from "pg";
 import type { RoleCode } from "../../config/constants.js";
+import { recordAuthEvent } from "../observability/prometheus.js";
 
 /** Query connector — pool for autocommit, client for in-transaction work. */
 export type DbConnector = Pool | PoolClient;
@@ -386,6 +387,9 @@ export async function insertLoginEvent(
       JSON.stringify(params.details ?? {}),
     ],
   );
+  // D-09: mirror this persisted auth event onto the Prometheus counter
+  // (no-op unless PROM_METRICS_ENABLED; never throws).
+  recordAuthEvent(params.type);
 }
 
 /* === /auth/me lookup ===================================================== */

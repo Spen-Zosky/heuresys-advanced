@@ -44,8 +44,14 @@ jobs:
     runs-on: [self-hosted, oci-vm]
     timeout-minutes: 15
     env:
-      # POSTGRES_* + JWT_PRIVATE_KEY/JWT_PUBLIC_KEY + COOKIE_SECRET +
-      # MFA_ENCRYPTION_KEY come from runner EnvironmentFile, not workflow.
+      # POSTGRES_* (except the DB name) + JWT_PRIVATE_KEY/JWT_PUBLIC_KEY +
+      # COOKIE_SECRET + MFA_ENCRYPTION_KEY come from runner EnvironmentFile.
+      # D-08: CI runs against the ISOLATED database heuresys_ci, NEVER PROD
+      # (heuresys_advanced). This job-level env overrides the runner EnvironmentFile,
+      # so vitest (env.ts -> client.ts) and every psql step point at heuresys_ci.
+      # heuresys_ci is provisioned by db/scripts/setup-ci-database.sh (clone of PROD).
+      POSTGRES_DB: heuresys_ci
+      POSTGRES_DATABASE: heuresys_ci
       NODE_ENV: test
       LOG_LEVEL: warn
     steps:

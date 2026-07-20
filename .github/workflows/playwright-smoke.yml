@@ -34,6 +34,10 @@ jobs:
     runs-on: [self-hosted, oci-vm]
     timeout-minutes: 30
     env:
+      # D-08: CI E2E runs against the ISOLATED heuresys_ci, never PROD
+      # (heuresys_advanced). Overrides the runner EnvironmentFile POSTGRES_DB.
+      POSTGRES_DB: heuresys_ci
+      POSTGRES_DATABASE: heuresys_ci
       NODE_ENV: test
       LOG_LEVEL: warn
       # OCI VM runner already runs Grafana on :3000 (docker-proxy). :3100 was

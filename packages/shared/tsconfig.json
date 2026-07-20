@@ -6,7 +6,7 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
     "composite": false,
     "paths": {}
   },

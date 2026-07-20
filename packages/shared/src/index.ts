@@ -11,6 +11,7 @@ export * from "./schemas/auth.js";
 export * from "./schemas/mfa.js";
 export * from "./schemas/mfa-policy.js";
 export * from "./schemas/tenants.js";
+export * from "./schemas/provisioning.js";
 export * from "./schemas/users.js";
 export * from "./schemas/positions.js";
 export * from "./schemas/organization-units.js";

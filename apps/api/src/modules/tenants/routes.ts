@@ -18,7 +18,9 @@ import {
   TenantIdParamSchema,
 } from "@heuresys/shared";
 import { EmptyResponseSchema } from "@heuresys/shared";
+import { ProvisionTenantBodySchema, ProvisionTenantResponseSchema } from "@heuresys/shared";
 import { tenantsService } from "./service.js";
+import { provisionTenant } from "./provisioning.js";
 import { requirePermission } from "../../middleware/rbac.js";
 
 export const tenantsRoutes: FastifyPluginAsyncZod = async (app) => {
@@ -61,6 +63,22 @@ export const tenantsRoutes: FastifyPluginAsyncZod = async (app) => {
     async (req, reply) => {
       const tenant = await tenantsService.create(actorFromReq(req), req.body);
       reply.code(201).send(tenant);
+    },
+  );
+
+  /* --- POST /v1/tenants/provision (D-14) — zero-to-operational -------- */
+  app.post(
+    "/provision",
+    {
+      preHandler: [app.verifyCsrf, requirePermission("tenant:create")],
+      schema: {
+        body: ProvisionTenantBodySchema,
+        response: { 201: ProvisionTenantResponseSchema },
+      },
+    },
+    async (req, reply) => {
+      const result = await provisionTenant(actorFromReq(req), req.body);
+      reply.code(201).send(result);
     },
   );
 

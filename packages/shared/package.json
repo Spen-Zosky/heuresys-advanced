@@ -42,6 +42,11 @@
       "development": "./src/schemas/tenants.ts",
       "default": "./dist/schemas/tenants.js"
     },
+    "./schemas/provisioning": {
+      "types": "./dist/schemas/provisioning.d.ts",
+      "development": "./src/schemas/provisioning.ts",
+      "default": "./dist/schemas/provisioning.js"
+    },
     "./schemas/tenant-materialization": {
       "types": "./dist/schemas/tenant-materialization.d.ts",
       "development": "./src/schemas/tenant-materialization.ts",

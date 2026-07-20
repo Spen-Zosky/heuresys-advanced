@@ -148,6 +148,19 @@ export async function markAllCredentialsNotCurrentForUser(
   );
 }
 
+/** D-14: create a fresh LOCAL identity for a just-created user. Returns its id. */
+export async function insertIdentity(q: DbConnector, userId: string): Promise<string> {
+  const { rows } = await q.query<{ auth_identity_id: string }>(
+    `INSERT INTO sys.sys_auth_identities
+        (auth_identity_user_id, auth_identity_provider,
+         auth_identity_email_verified, auth_identity_is_active)
+      VALUES ($1, 'LOCAL', true, true)
+      RETURNING auth_identity_id`,
+    [userId],
+  );
+  return rows[0]!.auth_identity_id;
+}
+
 export async function insertCredential(
   q: DbConnector,
   params: { identityId: string; hash: string; mustRotate?: boolean },

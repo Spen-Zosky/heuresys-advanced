@@ -15,6 +15,8 @@ Epiche GO-BRANCH — **fasi autonome ESEGUITE** (`EPICS_SPEC_S1022.md`): **D-09 
 2. **D-14 provisioning**: F2 completezza + **F3-4 GDPR-tooling** (DSR-export / erasure vs legal-hold / retention per data-class — scope tecnico deciso da Claude).
 3. **D-09 F5** collector systemd VM · coda GO-INLINE (D-03/04/11) · **D-59** retention login-events · **#65** NACE 920 orfani · unit-layer.
 
+> **Kickoff prossima sessione** (leggere PRIMA): `docs/kb/NEXT_SESSION_EPICS_KICKOFF.md` — standard operativo (verify-from-code, gate, no-tampone) + stato + spec. Spec: `docs/kb/improvement/EPICS_SPEC_S1022.md`.
+
 ## Open questions (autorità *cosa* = Enzo)
 
 - **R2 sorgente**: da dove popolare `sys_process_participants` (legacy heuresys-evo o materializzazione)?

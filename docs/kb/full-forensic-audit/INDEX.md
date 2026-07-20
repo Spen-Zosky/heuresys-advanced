@@ -24,3 +24,17 @@
   - [Low] [fp-check TP] Self-hosted PROD runner executes dependency install/build lifecycle scripts on same-repo and Dependabot PRs (.github/workflows/build-web.yml:56)
 - Report: AUDIT_FORENSE_heuresys_2026-07-03_151241.md | Findings: FINDINGS_2026-07-03_151241.json | fp-check: FP_CHECK_VERIFICATION_2026-07-03_151241.md
 - Nota: READ-ONLY sul codice; nessuna modifica fuori da full-forensic-audit/, nessun git commit. Promozione NEW debt/fix a cura del CLI owner.
+
+## [AUDIT FORENSE read-only] 2026-07-20 02:22 — scope: intero repo
+- Scanner girati: psql read-only (:5433, pg_stat/pg_constraint/pg_index/information_schema/pg_extension), pnpm audit (0 vuln, exit 0), git grep/ripgrep (injection/secrets/XSS/authz/ORDER-BY-dinamico), Read mirati (app.ts/env.ts/csv.ts/login.tsx/@heuresys-shared/workflows). **fp-check = verifica di persona integrata** (fan-out multi-agente fallito su session-limit account → audit completato in main thread). Falsi positivi scartati/refutati: 4 (XSS themeBootScript, SQL injection→placeholder, env boolean footgun→z.enum, N+1 dashboard→subquery aggregate).
+- Findings: Critical 0 / High 1 / Medium 3 / Low 4 / Info-Asset 7.
+- Scorecard: architettura 83/100, security 85/100, db 76/100, test 80/100 (+ci-cd 66, frontend 80).
+- Top Critical+High (max 10): 1. [HIGH] ci-cd — packages/shared/package.json:7 — D-58 next build/Turbopack fallisce x94 sul barrel .js (main→src TS) → deploy web bloccato — KNOWN(D-58)
+- NEW debt candidato per DEBT_REGISTER (proposta, non applicata):
+  - [Medium] [F-A04] F4 asse funzionale (#24) dichiarato DoD-complete ma sys_process_participants=0 righe → asse funzionale ADR-0027 non esercitato da dati reali (tensione con DoD ADR-0026)
+  - [Low] [F-A06] NACE/ATECO = adjacency parent_code non-FK → parent orfani possibili (ltree assente, il prompt lo assumeva)
+  - [Low] [F-A08] doc-drift: endpoint reali 516 vs doc ~407; tabelle vuote 36 vs atlas 67 (conferma: doc inaffidabile, verita' = codice/DB)
+  - (KNOWN riconfermati: D-58 High; WS-C-1 261/549 FK no-index Medium; WS-C-4 login-events 91k unbounded Medium; D-35 dead schema closure-OU Low; WS-F no-unit-layer Low)
+- Verdetto finance-readiness: **CONDITIONAL-GO** (confidence media) — piattaforma reale e security-solida (516 endpoint, 4 TP storici tutti chiusi con fix strutturali, 0 vuln, SQL param, authz completa); 3 condizioni bloccanti: (1) sciogliere D-58 strutturale, (2) data-completeness feature DoD-complete, (3) igiene DB (FK-index + retention). Competenza esecutiva DIMOSTRATA.
+- Report: AUDIT_FORENSE_heuresys_2026-07-20_022239.md | Findings: FINDINGS_2026-07-20_022239.json
+- Nota: READ-ONLY sul codice; nessuna modifica fuori da full-forensic-audit/, nessun git commit. Fan-out multi-agente + WS-L + triage D-01..D-14 falliti su session-limit account (reset 6:20am) = residuo esplicito. Promozione NEW debt a cura del CLI owner.

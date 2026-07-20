@@ -1,0 +1,123 @@
+{
+  "audit": {
+    "ts": "2026-07-20_022239",
+    "date": "2026-07-20T02:22:39+02:00",
+    "scope": "intero repo heuresys-advanced",
+    "head": "ba2b79e0",
+    "method": "main-thread evidence-based (fan-out multi-agente fallito su session-limit account; audit completato in-thread con verifica diretta = gate fp-check integrato)",
+    "read_only": true,
+    "scanners": [
+      "psql read-only (tunnel :5433) — pg_stat_user_tables, pg_constraint/pg_index, information_schema, pg_extension",
+      "pnpm audit (0 vuln note, exit 0)",
+      "git grep / ripgrep (SQL-injection pattern, secrets, dangerouslySetInnerHTML, requirePermission, ORDER BY dinamico)",
+      "Read mirati (app.ts, env.ts, csv.ts, login/page.tsx, packages/shared, workflows CI)"
+    ],
+    "perimeter_note": "Domini core verificati con evidenza diretta: security (authz/injection/secrets/supply-chain/web-XSS/config), DB (schema/indici/dead-schema/perf), CI/build (D-58/fork-guard), ground-truth funzionalita' (endpoint/tabelle popolate-vs-vuote), docs-drift. Perimetro NON coperto in questo run (residuo, budget account): a11y-tail axe per-pagina, i18n parity chiave-per-chiave, N+1 per-modulo esaustivo, mutation-testing statico completo, WS-L ecosistema, triage D-01..D-14 (delegati falliti su session-limit)."
+  },
+  "counts": { "confirmed": 8, "false_positive_or_refuted": 4, "asset": 7 },
+  "findings": [
+    {
+      "id": "F-A01",
+      "severity": "MEDIUM",
+      "category": "db",
+      "file": "db/migrations/ (schema sys, live DB)",
+      "line": 0,
+      "evidence": "psql: SELECT su pg_constraint/pg_index schema sys -> 549 FK totali, 288 con indice leading-col, 261 SENZA indice sulla leading column.",
+      "impact": "performance: join, cascade-delete e filtri tenant_id su tabelle grandi (sys_auth_login_events 91k, sys_source_lineage_records 71k, sys_occupation_skill_requirements 126k) senza index -> seq scan. QW-C1 (S993) ha coperto solo 6 tabelle >5MB; restano 261 FK scoperte.",
+      "recommendation": "PROPOSTA: indici additivi verify-first (EXPLAIN prima/dopo) sulle FK ad alto traffico, estendendo QW-C1. Non applicato.",
+      "cross_ref": "KNOWN (FINDINGS/WS-C.md F-WS-C-1, mai promosso a D-number; parzialmente mitigato QW-C1)"
+    },
+    {
+      "id": "F-A02",
+      "severity": "MEDIUM",
+      "category": "db",
+      "file": "apps/api/src/modules/auth/ (retention) + db",
+      "line": 0,
+      "evidence": "psql: sys_auth_login_events = 91.341 righe, range 2026-05-18 -> 2026-07-19, nessun pruning. scripts/auth-housekeeping.sh (QW-C2) pruna solo refresh-token revoked/expired, NON i login-events.",
+      "impact": "crescita unbounded ~1.500 righe/giorno; storage + query di audit sempre piu' lente; nessuna retention policy sui security-event.",
+      "recommendation": "PROPOSTA: estendere auth-housekeeping.sh con retention configurabile sui login-events (es. archiviazione >90/180gg), coerente con la policy refresh-token. Non applicato.",
+      "cross_ref": "KNOWN (FINDINGS/WS-C.md F-WS-C-4 class; il pruning login-events non era coperto da QW-C2)"
+    },
+    {
+      "id": "F-A03",
+      "severity": "LOW",
+      "category": "db",
+      "file": "db/migrations/000009 (sys_organization_hierarchies)",
+      "line": 0,
+      "evidence": "psql: sys_organization_hierarchies = 0 righe. git grep 'sys_organization_hierarchies' su apps/api/src/**/*.ts = 0 match. Doppia evidenza: tabella vuota E mai referenziata dal codice.",
+      "impact": "dead schema: closure-table OU creata (mig 000009) mai popolata e mai usata; le query gerarchiche OU usano adjacency (parent_id), non la closure. Confusione strutturale.",
+      "recommendation": "PROPOSTA: drop verify-first (reversibile via 000009) OPPURE popolare+wire se la closure serve per performance gerarchica futura. Non applicato.",
+      "cross_ref": "KNOWN (D-35)"
+    },
+    {
+      "id": "F-A04",
+      "severity": "MEDIUM",
+      "category": "correctness",
+      "file": "apps/api/src/lib/scope/functional.ts (+ sys_process_participants)",
+      "line": 0,
+      "evidence": "psql: sys_process_participants = 0 righe. Il work-item #24 (F4 asse funzionale/attivita' ADR-0027) e' dichiarato 'shipped DoD-complete' nel delta S1021 (SOT_STATE), ma la tabella di backing dell'asse funzionale e' vuota. functional.ts la consuma (git grep conferma). git grep sys_process_participants -> data-classes.ts + functional.ts.",
+      "impact": "l'asse funzionale ADR-0027 (gate delle attivita' via appartenenza a processo/team) NON e' esercitato da alcun dato reale: nessun partecipante di processo popolato. La feature esiste nel codice ma non e' dimostrabile LIVE su dati reali, in tensione con la DoD ADR-0026 di Enzo ('nessuno step si chiude su green-test; solo dimostrazione LIVE su dati reali').",
+      "recommendation": "PROPOSTA: (a) popolare sys_process_participants con dati reali (import legacy dei membri di processo) e verificare l'asse funzionale E2E con login persona reale; oppure (b) declassare lo stato di #24 da 'DoD-complete' a 'shipped-no-data' finche' il backing non e' popolato. Verificare inoltre le altre 7 feature P1 del batch S1021 per lo stesso pattern (data-completeness audit). Non applicato.",
+      "cross_ref": "NEW"
+    },
+    {
+      "id": "F-A05",
+      "severity": "HIGH",
+      "category": "ci-cd",
+      "file": "packages/shared/package.json:7 + packages/shared/src/index.ts",
+      "line": 7,
+      "evidence": "package.json: 'main': 'src/index.ts' e ogni subpath export 'default': './src/schemas/<x>.ts' (sorgente TS). src/index.ts: 'export * from \"./schemas/_pagination.js\"' con estensione .js (94 occorrenze, grep -c) ma i file reali sono .ts. next build (Turbopack) risolve letteralmente ./schemas/_pagination.js sul filesystem -> Module not found x94-96; tsc/vitest riscrivono .js->.ts (moduleResolution) e passano.",
+      "impact": "CI Playwright-smoke ROSSA; il deploy web PROD e' BLOCCATO (nessun next build valido). Divergenza toolchain: verde su typecheck/test, rosso su build. Impatto diretto sulla demo investor (web non deployabile).",
+      "recommendation": "PROPOSTA (soluzione strutturale, non tampone): Opzione B del register (web consuma solo i subpath -> nessun rischio API, ~74 import) o Opzione A (main/default->dist compilato, tocca ~272 import API + full-suite verify). Scelta = decisione tecnica da sciogliere (Enzo non ha ancora scelto). Non applicato.",
+      "cross_ref": "KNOWN (D-58)"
+    },
+    {
+      "id": "F-A06",
+      "severity": "LOW",
+      "category": "db",
+      "file": "db/migrations/ (sys_activity_classifications)",
+      "line": 0,
+      "evidence": "psql pg_extension: ltree NON installato (solo pg_stat_statements, pg_trgm, pgcrypto, plpgsql, uuid-ossp, vector). information_schema: sys_activity_classifications ha activity_classification_parent_code (varchar) + activity_classification_level (smallint) = adjacency-list per-code, NON ltree/materialized-path. parent_code NON e' FK (nessuna integrita' referenziale del parent). Indice sys_activity_classifications_parent_idx presente.",
+      "impact": "il modello NACE/ATECO e' adjacency-list indicizzata (subtree via WITH RECURSIVE, non nace_move_subtree/ltree). parent_code senza FK -> possibili parent orfani (nessuna garanzia che il codice parent esista). Il prompt d'audit assumeva ltree+nace_move_subtree: assunzione non valida sulla codebase reale.",
+      "recommendation": "PROPOSTA: aggiungere integrita' del parent (FK self-referenziale su codice+scheme, o CHECK/trigger di esistenza) OPPURE documentare esplicitamente la scelta adjacency-senza-FK come deliberata. Non applicato.",
+      "cross_ref": "NEW"
+    },
+    {
+      "id": "F-A07",
+      "severity": "LOW",
+      "category": "test-gap",
+      "file": "apps/api/vitest.config.ts + apps/api/test/",
+      "line": 0,
+      "evidence": "struttura test/: ~202 file, ~1394 test, tutti integration hitting il DB VM live via tunnel (build-test-app.ts). vitest singleThread. Nessun layer unit puro per logica pura (scope resolver, rubric, transforms).",
+      "impact": "suite lenta (~29min), coupling forte al tunnel/DB condiviso (hermeticity mitigata da D-52 tx-isolation ma resta la dipendenza dal DB live), nessun fast-feedback su logica pura.",
+      "recommendation": "PROPOSTA: introdurre unit-layer per la logica deterministica (lib/scope/*, capability-maturity/rubric, brownfield transforms) senza DB, per fast-feedback e coverage mirata. Non applicato.",
+      "cross_ref": "KNOWN (FINDINGS/WS-F.md — no-unit-layer)"
+    },
+    {
+      "id": "F-A08",
+      "severity": "LOW",
+      "category": "docs-drift",
+      "file": "docs/ (README.md, CLAUDE.md, docs/kb/atlas/ATLAS_CURATED.md)",
+      "line": 0,
+      "evidence": "ground-truth live vs doc: endpoint reali = 516 route handler (git grep app.(get|post|patch|put|delete) su routes.ts) vs doc '~407'. Tabelle sys vuote reali = 36 (psql) vs ATLAS_CURATED '67 tabelle vuote'. Moduli montati: 101 app.register / 88 dir moduli.",
+      "impact": "la documentazione (specie docs/) sovra/sotto-stima i numeri reali; conferma l'istruzione di Enzo (la doc non e' fonte affidabile, la verita' e' codice/DB). Rischio: decisioni prese su numeri doc stale.",
+      "recommendation": "PROPOSTA: de-hardcodare i counts nella doc verso una fonte generata (endpoint/tabelle derivati live come gia' fatto per migration/RBAC in SOT_STATE), evitando drift ricorrente. Non applicato.",
+      "cross_ref": "NEW (classe D-01 doc-drift)"
+    }
+  ],
+  "refuted_or_false_positive": [
+    { "id": "R-01", "claim": "dangerouslySetInnerHTML -> XSS", "verdict": "FALSE_POSITIVE", "evidence": "2 usi (apps/web + apps/showcase layout.tsx) = themeBootScript costante anti-FOUC (dev-controlled, no user-input); 3o match e' un commento che vieta l'uso. Nessun XSS." },
+    { "id": "R-02", "claim": "SQL injection via interpolazione in query", "verdict": "FALSE_POSITIVE", "evidence": "i match ${COLS}/${where.join}/$${lim}/${tuples.join} costruiscono nomi-colonna costanti e PLACEHOLDER $N, non valori; i valori vanno in params. Zero ORDER BY dinamico da input (git grep vuoto). SQL 100% parametrizzato." },
+    { "id": "R-03", "claim": "env boolean footgun (z.coerce.boolean '=false'->true)", "verdict": "FALSE_POSITIVE", "evidence": "env.ts usa z.enum(['true','false']).transform(v=>v==='true') su TUTTI i flag (COOKIE_SECURE/TRUST_PROXY/MFA/MATCHING_FREETEXT/API_DOCS); footgun esplicitamente evitato e documentato (QW-J1). cookie secure di default in produzione." },
+    { "id": "R-04", "claim": "N+1 in dashboard getDashboardTrends (S1014 MEDIUM)", "verdict": "REFUTED", "evidence": "dashboard/repository.ts:87-114 usa subquery scalari aggregate in UN singolo SELECT (tenant + global snapshot), nessun loop for/await ne' map async per-bucket. Il pattern N+1 citato in S1014 non e' visibile nella struttura attuale." }
+  ],
+  "assets": [
+    "A-01 TP storici tutti chiusi: F-001 (secrets committati) 0 match live; F-002 open-redirect risolto (login/page.tsx:30 blocca // e /\\); F-004 CSV injection risolto (csv.ts:26 neutralizza = + @ TAB/CR); F-012 fork-runner mitigato (fork-guard head.repo.full_name==github.repository su build-web+playwright-smoke)",
+    "A-02 SQL 100% parametrizzato ($1,$2), 0 injection, 0 ORDER BY dinamico da input",
+    "A-03 pnpm audit = 0 vulnerabilita' note (exit 0)",
+    "A-04 authz coverage completa: 558 requirePermission su 491 route handler + gate boot-assertion D-51 (ORG_GATE_MISSING) su risorse sensibili",
+    "A-05 config security robusta: env boolean footgun evitato ovunque (z.enum esplicito), cookie HttpOnly+Secure(prod), CSRF double-submit, LOG_REDACT_PATHS",
+    "A-06 piattaforma reale con dati: 516 endpoint, 163/199 tabelle sys popolate (82%), 905 righe user_skills, 162 utenti, RBAC 13/176/776",
+    "A-07 web XSS-safe: dangerouslySetInnerHTML solo su costante anti-FOUC; live-data doctrine rispettata"
+  ]
+}

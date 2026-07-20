@@ -6,7 +6,7 @@
   "description": "Heuresys Advanced — Fastify 5 API (75 business modules + auth, ~407 /v1 endpoints; v1.0.0 GA + post-v1 ondata-1: reporting/export, notification center, agent-gateway)",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx --conditions development watch src/server.ts",
     "build": "tsup",
     "start": "node dist/server.js",
     "test": "vitest run",

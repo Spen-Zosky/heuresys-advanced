@@ -67,8 +67,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
-      - name: Build @heuresys/shared (consumer of api+web)
-        run: pnpm --filter @heuresys/shared run build || true  # shared may not have build script
+      - name: Build @heuresys/shared (hard prerequisite — web consumes dist/*.js, D-58)
+        run: pnpm --filter @heuresys/shared run build  # must succeed: exports default -> ./dist/*.js; a stale/missing dist reintroduces the Turbopack barrel-resolution failure
 
       - name: Build apps/web
         env:

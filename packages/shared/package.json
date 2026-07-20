@@ -4,388 +4,483 @@
   "private": true,
   "type": "module",
   "description": "Heuresys Advanced — shared Zod schemas + TypeScript types consumed by @heuresys/api and @heuresys/web",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./src/index.ts"
+      "development": "./src/index.ts",
+      "default": "./dist/index.js"
     },
     "./schemas/_pagination": {
       "types": "./dist/schemas/_pagination.d.ts",
-      "default": "./src/schemas/_pagination.ts"
+      "development": "./src/schemas/_pagination.ts",
+      "default": "./dist/schemas/_pagination.js"
     },
     "./schemas/auth": {
       "types": "./dist/schemas/auth.d.ts",
-      "default": "./src/schemas/auth.ts"
+      "development": "./src/schemas/auth.ts",
+      "default": "./dist/schemas/auth.js"
     },
     "./schemas/mfa": {
       "types": "./dist/schemas/mfa.d.ts",
-      "default": "./src/schemas/mfa.ts"
+      "development": "./src/schemas/mfa.ts",
+      "default": "./dist/schemas/mfa.js"
     },
     "./schemas/mfa-policy": {
       "types": "./dist/schemas/mfa-policy.d.ts",
-      "default": "./src/schemas/mfa-policy.ts"
+      "development": "./src/schemas/mfa-policy.ts",
+      "default": "./dist/schemas/mfa-policy.js"
     },
     "./schemas/role-codes": {
       "types": "./dist/schemas/role-codes.d.ts",
-      "default": "./src/schemas/role-codes.ts"
+      "development": "./src/schemas/role-codes.ts",
+      "default": "./dist/schemas/role-codes.js"
     },
     "./schemas/tenants": {
       "types": "./dist/schemas/tenants.d.ts",
-      "default": "./src/schemas/tenants.ts"
+      "development": "./src/schemas/tenants.ts",
+      "default": "./dist/schemas/tenants.js"
     },
     "./schemas/tenant-materialization": {
       "types": "./dist/schemas/tenant-materialization.d.ts",
-      "default": "./src/schemas/tenant-materialization.ts"
+      "development": "./src/schemas/tenant-materialization.ts",
+      "default": "./dist/schemas/tenant-materialization.js"
     },
     "./schemas/users": {
       "types": "./dist/schemas/users.d.ts",
-      "default": "./src/schemas/users.ts"
+      "development": "./src/schemas/users.ts",
+      "default": "./dist/schemas/users.js"
     },
     "./schemas/positions": {
       "types": "./dist/schemas/positions.d.ts",
-      "default": "./src/schemas/positions.ts"
+      "development": "./src/schemas/positions.ts",
+      "default": "./dist/schemas/positions.js"
     },
     "./schemas/organization-units": {
       "types": "./dist/schemas/organization-units.d.ts",
-      "default": "./src/schemas/organization-units.ts"
+      "development": "./src/schemas/organization-units.ts",
+      "default": "./dist/schemas/organization-units.js"
     },
     "./schemas/teams": {
       "types": "./dist/schemas/teams.d.ts",
-      "default": "./src/schemas/teams.ts"
+      "development": "./src/schemas/teams.ts",
+      "default": "./dist/schemas/teams.js"
     },
     "./schemas/skills": {
       "types": "./dist/schemas/skills.d.ts",
-      "default": "./src/schemas/skills.ts"
+      "development": "./src/schemas/skills.ts",
+      "default": "./dist/schemas/skills.js"
     },
     "./schemas/kpi-definitions": {
       "types": "./dist/schemas/kpi-definitions.d.ts",
-      "default": "./src/schemas/kpi-definitions.ts"
+      "development": "./src/schemas/kpi-definitions.ts",
+      "default": "./dist/schemas/kpi-definitions.js"
     },
     "./schemas/job-families": {
       "types": "./dist/schemas/job-families.d.ts",
-      "default": "./src/schemas/job-families.ts"
+      "development": "./src/schemas/job-families.ts",
+      "default": "./dist/schemas/job-families.js"
     },
     "./schemas/job-roles": {
       "types": "./dist/schemas/job-roles.d.ts",
-      "default": "./src/schemas/job-roles.ts"
+      "development": "./src/schemas/job-roles.ts",
+      "default": "./dist/schemas/job-roles.js"
     },
     "./schemas/leads": {
       "types": "./dist/schemas/leads.d.ts",
-      "default": "./src/schemas/leads.ts"
+      "development": "./src/schemas/leads.ts",
+      "default": "./dist/schemas/leads.js"
     },
     "./schemas/public-stats": {
       "types": "./dist/schemas/public-stats.d.ts",
-      "default": "./src/schemas/public-stats.ts"
+      "development": "./src/schemas/public-stats.ts",
+      "default": "./dist/schemas/public-stats.js"
     },
     "./schemas/learning-modules": {
       "types": "./dist/schemas/learning-modules.d.ts",
-      "default": "./src/schemas/learning-modules.ts"
+      "development": "./src/schemas/learning-modules.ts",
+      "default": "./dist/schemas/learning-modules.js"
     },
     "./schemas/skill-families": {
       "types": "./dist/schemas/skill-families.d.ts",
-      "default": "./src/schemas/skill-families.ts"
+      "development": "./src/schemas/skill-families.ts",
+      "default": "./dist/schemas/skill-families.js"
     },
     "./schemas/skill-categories": {
       "types": "./dist/schemas/skill-categories.d.ts",
-      "default": "./src/schemas/skill-categories.ts"
+      "development": "./src/schemas/skill-categories.ts",
+      "default": "./dist/schemas/skill-categories.js"
     },
     "./schemas/skill-taxonomy-edges": {
       "types": "./dist/schemas/skill-taxonomy-edges.d.ts",
-      "default": "./src/schemas/skill-taxonomy-edges.ts"
+      "development": "./src/schemas/skill-taxonomy-edges.ts",
+      "default": "./dist/schemas/skill-taxonomy-edges.js"
     },
     "./schemas/skill-aliases": {
       "types": "./dist/schemas/skill-aliases.d.ts",
-      "default": "./src/schemas/skill-aliases.ts"
+      "development": "./src/schemas/skill-aliases.ts",
+      "default": "./dist/schemas/skill-aliases.js"
     },
     "./schemas/skill-proficiency-levels": {
       "types": "./dist/schemas/skill-proficiency-levels.d.ts",
-      "default": "./src/schemas/skill-proficiency-levels.ts"
+      "development": "./src/schemas/skill-proficiency-levels.ts",
+      "default": "./dist/schemas/skill-proficiency-levels.js"
     },
     "./schemas/training-initiatives": {
       "types": "./dist/schemas/training-initiatives.d.ts",
-      "default": "./src/schemas/training-initiatives.ts"
+      "development": "./src/schemas/training-initiatives.ts",
+      "default": "./dist/schemas/training-initiatives.js"
     },
     "./schemas/assessment-methods": {
       "types": "./dist/schemas/assessment-methods.d.ts",
-      "default": "./src/schemas/assessment-methods.ts"
+      "development": "./src/schemas/assessment-methods.ts",
+      "default": "./dist/schemas/assessment-methods.js"
     },
     "./schemas/assessments": {
       "types": "./dist/schemas/assessments.d.ts",
-      "default": "./src/schemas/assessments.ts"
+      "development": "./src/schemas/assessments.ts",
+      "default": "./dist/schemas/assessments.js"
     },
     "./schemas/assessment-results": {
       "types": "./dist/schemas/assessment-results.d.ts",
-      "default": "./src/schemas/assessment-results.ts"
+      "development": "./src/schemas/assessment-results.ts",
+      "default": "./dist/schemas/assessment-results.js"
     },
     "./schemas/learning-paths": {
       "types": "./dist/schemas/learning-paths.d.ts",
-      "default": "./src/schemas/learning-paths.ts"
+      "development": "./src/schemas/learning-paths.ts",
+      "default": "./dist/schemas/learning-paths.js"
     },
     "./schemas/learning-path-steps": {
       "types": "./dist/schemas/learning-path-steps.d.ts",
-      "default": "./src/schemas/learning-path-steps.ts"
+      "development": "./src/schemas/learning-path-steps.ts",
+      "default": "./dist/schemas/learning-path-steps.js"
     },
     "./schemas/learning-gaps": {
       "types": "./dist/schemas/learning-gaps.d.ts",
-      "default": "./src/schemas/learning-gaps.ts"
+      "development": "./src/schemas/learning-gaps.ts",
+      "default": "./dist/schemas/learning-gaps.js"
     },
     "./schemas/career-paths": {
       "types": "./dist/schemas/career-paths.d.ts",
-      "default": "./src/schemas/career-paths.ts"
+      "development": "./src/schemas/career-paths.ts",
+      "default": "./dist/schemas/career-paths.js"
     },
     "./schemas/career-path-steps": {
       "types": "./dist/schemas/career-path-steps.d.ts",
-      "default": "./src/schemas/career-path-steps.ts"
+      "development": "./src/schemas/career-path-steps.ts",
+      "default": "./dist/schemas/career-path-steps.js"
     },
     "./schemas/user-career-plans": {
       "types": "./dist/schemas/user-career-plans.d.ts",
-      "default": "./src/schemas/user-career-plans.ts"
+      "development": "./src/schemas/user-career-plans.ts",
+      "default": "./dist/schemas/user-career-plans.js"
     },
     "./schemas/succession-pools": {
       "types": "./dist/schemas/succession-pools.d.ts",
-      "default": "./src/schemas/succession-pools.ts"
+      "development": "./src/schemas/succession-pools.ts",
+      "default": "./dist/schemas/succession-pools.js"
     },
     "./schemas/successor-candidates": {
       "types": "./dist/schemas/successor-candidates.d.ts",
-      "default": "./src/schemas/successor-candidates.ts"
+      "development": "./src/schemas/successor-candidates.ts",
+      "default": "./dist/schemas/successor-candidates.js"
     },
     "./schemas/successor-readiness": {
       "types": "./dist/schemas/successor-readiness.d.ts",
-      "default": "./src/schemas/successor-readiness.ts"
+      "development": "./src/schemas/successor-readiness.ts",
+      "default": "./dist/schemas/successor-readiness.js"
     },
     "./schemas/position-career-paths": {
       "types": "./dist/schemas/position-career-paths.d.ts",
-      "default": "./src/schemas/position-career-paths.ts"
+      "development": "./src/schemas/position-career-paths.ts",
+      "default": "./dist/schemas/position-career-paths.js"
     },
     "./schemas/position-succession-relevance": {
       "types": "./dist/schemas/position-succession-relevance.d.ts",
-      "default": "./src/schemas/position-succession-relevance.ts"
+      "development": "./src/schemas/position-succession-relevance.ts",
+      "default": "./dist/schemas/position-succession-relevance.js"
     },
     "./schemas/visualization-graphs": {
       "types": "./dist/schemas/visualization-graphs.d.ts",
-      "default": "./src/schemas/visualization-graphs.ts"
+      "development": "./src/schemas/visualization-graphs.ts",
+      "default": "./dist/schemas/visualization-graphs.js"
     },
     "./schemas/visualization-nodes": {
       "types": "./dist/schemas/visualization-nodes.d.ts",
-      "default": "./src/schemas/visualization-nodes.ts"
+      "development": "./src/schemas/visualization-nodes.ts",
+      "default": "./dist/schemas/visualization-nodes.js"
     },
     "./schemas/visualization-edges": {
       "types": "./dist/schemas/visualization-edges.d.ts",
-      "default": "./src/schemas/visualization-edges.ts"
+      "development": "./src/schemas/visualization-edges.ts",
+      "default": "./dist/schemas/visualization-edges.js"
     },
     "./schemas/visualization-layouts": {
       "types": "./dist/schemas/visualization-layouts.d.ts",
-      "default": "./src/schemas/visualization-layouts.ts"
+      "development": "./src/schemas/visualization-layouts.ts",
+      "default": "./dist/schemas/visualization-layouts.js"
     },
     "./schemas/visualization-node-layouts": {
       "types": "./dist/schemas/visualization-node-layouts.d.ts",
-      "default": "./src/schemas/visualization-node-layouts.ts"
+      "development": "./src/schemas/visualization-node-layouts.ts",
+      "default": "./dist/schemas/visualization-node-layouts.js"
     },
     "./schemas/visualization-styles": {
       "types": "./dist/schemas/visualization-styles.d.ts",
-      "default": "./src/schemas/visualization-styles.ts"
+      "development": "./src/schemas/visualization-styles.ts",
+      "default": "./dist/schemas/visualization-styles.js"
     },
     "./schemas/visualization-exports": {
       "types": "./dist/schemas/visualization-exports.d.ts",
-      "default": "./src/schemas/visualization-exports.ts"
+      "development": "./src/schemas/visualization-exports.ts",
+      "default": "./dist/schemas/visualization-exports.js"
     },
     "./schemas/activity-classifications": {
       "types": "./dist/schemas/activity-classifications.d.ts",
-      "default": "./src/schemas/activity-classifications.ts"
+      "development": "./src/schemas/activity-classifications.ts",
+      "default": "./dist/schemas/activity-classifications.js"
     },
     "./schemas/activity-classification-mappings": {
       "types": "./dist/schemas/activity-classification-mappings.d.ts",
-      "default": "./src/schemas/activity-classification-mappings.ts"
+      "development": "./src/schemas/activity-classification-mappings.ts",
+      "default": "./dist/schemas/activity-classification-mappings.js"
     },
     "./schemas/enterprise-size-bands": {
       "types": "./dist/schemas/enterprise-size-bands.d.ts",
-      "default": "./src/schemas/enterprise-size-bands.ts"
+      "development": "./src/schemas/enterprise-size-bands.ts",
+      "default": "./dist/schemas/enterprise-size-bands.js"
     },
     "./schemas/operating-models": {
       "types": "./dist/schemas/operating-models.d.ts",
-      "default": "./src/schemas/operating-models.ts"
+      "development": "./src/schemas/operating-models.ts",
+      "default": "./dist/schemas/operating-models.js"
     },
     "./schemas/enterprise-typing-profiles": {
       "types": "./dist/schemas/enterprise-typing-profiles.d.ts",
-      "default": "./src/schemas/enterprise-typing-profiles.ts"
+      "development": "./src/schemas/enterprise-typing-profiles.ts",
+      "default": "./dist/schemas/enterprise-typing-profiles.js"
     },
     "./schemas/blueprint-families": {
       "types": "./dist/schemas/blueprint-families.d.ts",
-      "default": "./src/schemas/blueprint-families.ts"
+      "development": "./src/schemas/blueprint-families.ts",
+      "default": "./dist/schemas/blueprint-families.js"
     },
     "./schemas/blueprint-variants": {
       "types": "./dist/schemas/blueprint-variants.d.ts",
-      "default": "./src/schemas/blueprint-variants.ts"
+      "development": "./src/schemas/blueprint-variants.ts",
+      "default": "./dist/schemas/blueprint-variants.js"
     },
     "./schemas/blueprint-processes": {
       "types": "./dist/schemas/blueprint-processes.d.ts",
-      "default": "./src/schemas/blueprint-processes.ts"
+      "development": "./src/schemas/blueprint-processes.ts",
+      "default": "./dist/schemas/blueprint-processes.js"
     },
     "./schemas/blueprint-activations": {
       "types": "./dist/schemas/blueprint-activations.d.ts",
-      "default": "./src/schemas/blueprint-activations.ts"
+      "development": "./src/schemas/blueprint-activations.ts",
+      "default": "./dist/schemas/blueprint-activations.js"
     },
     "./schemas/blueprint-overrides": {
       "types": "./dist/schemas/blueprint-overrides.d.ts",
-      "default": "./src/schemas/blueprint-overrides.ts"
+      "development": "./src/schemas/blueprint-overrides.ts",
+      "default": "./dist/schemas/blueprint-overrides.js"
     },
     "./schemas/process-kpi-templates": {
       "types": "./dist/schemas/process-kpi-templates.d.ts",
-      "default": "./src/schemas/process-kpi-templates.ts"
+      "development": "./src/schemas/process-kpi-templates.ts",
+      "default": "./dist/schemas/process-kpi-templates.js"
     },
     "./schemas/organization-unit-kpi-templates": {
       "types": "./dist/schemas/organization-unit-kpi-templates.d.ts",
-      "default": "./src/schemas/organization-unit-kpi-templates.ts"
+      "development": "./src/schemas/organization-unit-kpi-templates.ts",
+      "default": "./dist/schemas/organization-unit-kpi-templates.js"
     },
     "./schemas/brownfield-source-exports": {
       "types": "./dist/schemas/brownfield-source-exports.d.ts",
-      "default": "./src/schemas/brownfield-source-exports.ts"
+      "development": "./src/schemas/brownfield-source-exports.ts",
+      "default": "./dist/schemas/brownfield-source-exports.js"
     },
     "./schemas/brownfield-import-runs": {
       "types": "./dist/schemas/brownfield-import-runs.d.ts",
-      "default": "./src/schemas/brownfield-import-runs.ts"
+      "development": "./src/schemas/brownfield-import-runs.ts",
+      "default": "./dist/schemas/brownfield-import-runs.js"
     },
     "./schemas/brownfield-table-mappings": {
       "types": "./dist/schemas/brownfield-table-mappings.d.ts",
-      "default": "./src/schemas/brownfield-table-mappings.ts"
+      "development": "./src/schemas/brownfield-table-mappings.ts",
+      "default": "./dist/schemas/brownfield-table-mappings.js"
     },
     "./schemas/brownfield-wave-executor": {
       "types": "./dist/schemas/brownfield-wave-executor.d.ts",
-      "default": "./src/schemas/brownfield-wave-executor.ts"
+      "development": "./src/schemas/brownfield-wave-executor.ts",
+      "default": "./dist/schemas/brownfield-wave-executor.js"
     },
     "./schemas/seed-acquisition-runs": {
       "types": "./dist/schemas/seed-acquisition-runs.d.ts",
-      "default": "./src/schemas/seed-acquisition-runs.ts"
+      "development": "./src/schemas/seed-acquisition-runs.ts",
+      "default": "./dist/schemas/seed-acquisition-runs.js"
     },
     "./schemas/seed-candidate-records": {
       "types": "./dist/schemas/seed-candidate-records.d.ts",
-      "default": "./src/schemas/seed-candidate-records.ts"
+      "development": "./src/schemas/seed-candidate-records.ts",
+      "default": "./dist/schemas/seed-candidate-records.js"
     },
     "./schemas/seed-approval-decisions": {
       "types": "./dist/schemas/seed-approval-decisions.d.ts",
-      "default": "./src/schemas/seed-approval-decisions.ts"
+      "development": "./src/schemas/seed-approval-decisions.ts",
+      "default": "./dist/schemas/seed-approval-decisions.js"
     },
     "./schemas/me": {
       "types": "./dist/schemas/me.d.ts",
-      "default": "./src/schemas/me.ts"
+      "development": "./src/schemas/me.ts",
+      "default": "./dist/schemas/me.js"
     },
     "./schemas/me-preferences": {
       "types": "./dist/schemas/me-preferences.d.ts",
-      "default": "./src/schemas/me-preferences.ts"
+      "development": "./src/schemas/me-preferences.ts",
+      "default": "./dist/schemas/me-preferences.js"
     },
     "./schemas/compensation": {
       "types": "./dist/schemas/compensation.d.ts",
-      "default": "./src/schemas/compensation.ts"
+      "development": "./src/schemas/compensation.ts",
+      "default": "./dist/schemas/compensation.js"
     },
     "./schemas/compensation-read": {
       "types": "./dist/schemas/compensation-read.d.ts",
-      "default": "./src/schemas/compensation-read.ts"
+      "development": "./src/schemas/compensation-read.ts",
+      "default": "./dist/schemas/compensation-read.js"
     },
     "./schemas/dashboard": {
       "types": "./dist/schemas/dashboard.d.ts",
-      "default": "./src/schemas/dashboard.ts"
+      "development": "./src/schemas/dashboard.ts",
+      "default": "./dist/schemas/dashboard.js"
     },
     "./schemas/analytics": {
       "types": "./dist/schemas/analytics.d.ts",
-      "default": "./src/schemas/analytics.ts"
+      "development": "./src/schemas/analytics.ts",
+      "default": "./dist/schemas/analytics.js"
     },
     "./schemas/notifications": {
       "types": "./dist/schemas/notifications.d.ts",
-      "default": "./src/schemas/notifications.ts"
+      "development": "./src/schemas/notifications.ts",
+      "default": "./dist/schemas/notifications.js"
     },
     "./schemas/approvals": {
       "types": "./dist/schemas/approvals.d.ts",
-      "default": "./src/schemas/approvals.ts"
+      "development": "./src/schemas/approvals.ts",
+      "default": "./dist/schemas/approvals.js"
     },
     "./schemas/observability": {
       "types": "./dist/schemas/observability.d.ts",
-      "default": "./src/schemas/observability.ts"
+      "development": "./src/schemas/observability.ts",
+      "default": "./dist/schemas/observability.js"
     },
     "./schemas/mentorship": {
       "types": "./dist/schemas/mentorship.d.ts",
-      "default": "./src/schemas/mentorship.ts"
+      "development": "./src/schemas/mentorship.ts",
+      "default": "./dist/schemas/mentorship.js"
     },
     "./schemas/surveys": {
       "types": "./dist/schemas/surveys.d.ts",
-      "default": "./src/schemas/surveys.ts"
+      "development": "./src/schemas/surveys.ts",
+      "default": "./dist/schemas/surveys.js"
     },
     "./schemas/engagement": {
       "types": "./dist/schemas/engagement.d.ts",
-      "default": "./src/schemas/engagement.ts"
+      "development": "./src/schemas/engagement.ts",
+      "default": "./dist/schemas/engagement.js"
     },
     "./schemas/engagement-feedback": {
       "types": "./dist/schemas/engagement-feedback.d.ts",
-      "default": "./src/schemas/engagement-feedback.ts"
+      "development": "./src/schemas/engagement-feedback.ts",
+      "default": "./dist/schemas/engagement-feedback.js"
     },
     "./schemas/goals": {
       "types": "./dist/schemas/goals.d.ts",
-      "default": "./src/schemas/goals.ts"
+      "development": "./src/schemas/goals.ts",
+      "default": "./dist/schemas/goals.js"
     },
     "./schemas/provenance": {
       "types": "./dist/schemas/provenance.d.ts",
-      "default": "./src/schemas/provenance.ts"
+      "development": "./src/schemas/provenance.ts",
+      "default": "./dist/schemas/provenance.js"
     },
     "./schemas/evidence": {
       "types": "./dist/schemas/evidence.d.ts",
-      "default": "./src/schemas/evidence.ts"
+      "development": "./src/schemas/evidence.ts",
+      "default": "./dist/schemas/evidence.js"
     },
     "./schemas/time-off": {
       "types": "./dist/schemas/time-off.d.ts",
-      "default": "./src/schemas/time-off.ts"
+      "development": "./src/schemas/time-off.ts",
+      "default": "./dist/schemas/time-off.js"
     },
     "./schemas/talent-review": {
       "types": "./dist/schemas/talent-review.d.ts",
-      "default": "./src/schemas/talent-review.ts"
+      "development": "./src/schemas/talent-review.ts",
+      "default": "./dist/schemas/talent-review.js"
     },
     "./schemas/okrs": {
       "types": "./dist/schemas/okrs.d.ts",
-      "default": "./src/schemas/okrs.ts"
+      "development": "./src/schemas/okrs.ts",
+      "default": "./dist/schemas/okrs.js"
     },
     "./schemas/predictions": {
       "types": "./dist/schemas/predictions.d.ts",
-      "default": "./src/schemas/predictions.ts"
+      "development": "./src/schemas/predictions.ts",
+      "default": "./dist/schemas/predictions.js"
     },
     "./schemas/semantic-matching": {
       "types": "./dist/schemas/semantic-matching.d.ts",
-      "default": "./src/schemas/semantic-matching.ts"
+      "development": "./src/schemas/semantic-matching.ts",
+      "default": "./dist/schemas/semantic-matching.js"
     },
     "./schemas/insights": {
       "types": "./dist/schemas/insights.d.ts",
-      "default": "./src/schemas/insights.ts"
+      "development": "./src/schemas/insights.ts",
+      "default": "./dist/schemas/insights.js"
     },
     "./schemas/capability-composition": {
       "types": "./dist/schemas/capability-composition.d.ts",
-      "default": "./src/schemas/capability-composition.ts"
+      "development": "./src/schemas/capability-composition.ts",
+      "default": "./dist/schemas/capability-composition.js"
     },
     "./schemas/capability-maturity": {
       "types": "./dist/schemas/capability-maturity.d.ts",
-      "default": "./src/schemas/capability-maturity.ts"
+      "development": "./src/schemas/capability-maturity.ts",
+      "default": "./dist/schemas/capability-maturity.js"
     },
     "./schemas/essential-capability": {
       "types": "./dist/schemas/essential-capability.d.ts",
-      "default": "./src/schemas/essential-capability.ts"
+      "development": "./src/schemas/essential-capability.ts",
+      "default": "./dist/schemas/essential-capability.js"
     },
     "./schemas/whistleblowing": {
       "types": "./dist/schemas/whistleblowing.d.ts",
-      "default": "./src/schemas/whistleblowing.ts"
+      "development": "./src/schemas/whistleblowing.ts",
+      "default": "./dist/schemas/whistleblowing.js"
     },
     "./schemas/reference-sync": {
       "types": "./dist/schemas/reference-sync.d.ts",
-      "default": "./src/schemas/reference-sync.ts"
+      "development": "./src/schemas/reference-sync.ts",
+      "default": "./dist/schemas/reference-sync.js"
     },
     "./schemas/content": {
       "types": "./dist/schemas/content.d.ts",
-      "default": "./src/schemas/content.ts"
+      "development": "./src/schemas/content.ts",
+      "default": "./dist/schemas/content.js"
     },
     "./schemas/content-blueprint-links": {
       "types": "./dist/schemas/content-blueprint-links.d.ts",
-      "default": "./src/schemas/content-blueprint-links.ts"
+      "development": "./src/schemas/content-blueprint-links.ts",
+      "default": "./dist/schemas/content-blueprint-links.js"
     },
     "./schemas/organization-unit-processes": {
       "types": "./dist/schemas/organization-unit-processes.d.ts",
-      "default": "./src/schemas/organization-unit-processes.ts"
+      "development": "./src/schemas/organization-unit-processes.ts",
+      "default": "./dist/schemas/organization-unit-processes.js"
     }
   },
   "scripts": {

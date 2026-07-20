@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
   reactStrictMode: true,
-  transpilePackages: ["@heuresys/ui", "@heuresys/shared"],
+  // @heuresys/shared is consumed as its compiled dist (exports default -> ./dist/*.js)
+  // so Turbopack resolves real .js files (D-58). Only @heuresys/ui still needs transpiling.
+  transpilePackages: ["@heuresys/ui"],
   experimental: {
     optimizePackageImports: ["lucide-react", "@heuresys/ui"],
   },

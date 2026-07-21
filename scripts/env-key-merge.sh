@@ -36,7 +36,7 @@ merge_env_into() {
   # control, set deliberately by provision-prometheus-vm.sh); TENANT_PROVISION_ENABLED
   # (D-14 F2 kill-switch — same flip-risk class as the QW-J2 gates).
   # Space-padded for whole-word containment match.
-  local denylist=" MFA_ENFORCEMENT_ENABLED MATCHING_FREETEXT_ENABLED API_DOCS_ENABLED COOKIE_SECURE TRUST_PROXY VOYAGE_API_KEY PROM_METRICS_ENABLED TENANT_PROVISION_ENABLED "
+  local denylist=" MFA_ENFORCEMENT_ENABLED MATCHING_FREETEXT_ENABLED API_DOCS_ENABLED COOKIE_SECURE TRUST_PROXY VOYAGE_API_KEY PROM_METRICS_ENABLED TENANT_PROVISION_ENABLED BROWNFIELD_ENGINE_ENABLED "
   while IFS= read -r line || [ -n "$line" ]; do
     line="${line%$'\r'}"
     case "$line" in ''|'#'*) continue ;; esac

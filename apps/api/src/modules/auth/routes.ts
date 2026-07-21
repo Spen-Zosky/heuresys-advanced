@@ -246,9 +246,9 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
   );
 
   /* --- POST /admin/revoke-user/:userId ----------------------------- */
-  // TENANT_ADMIN scope filter (own-tenant target) is enforced post-MVP;
-  // for MVP-1 the permission grant gates access (PLATFORM_ADMIN, TENANT_ADMIN
-  // per matrix). Cross-tenant target check is tracked as a follow-up.
+  // Permission grant gates access (PLATFORM_ADMIN, TENANT_ADMIN per matrix);
+  // the per-target tenant scope (TENANT_ADMIN → own-tenant only) is enforced
+  // in service.adminRevokeUser — see AUTH §6.
   app.post(
     "/admin/revoke-user/:userId",
     {

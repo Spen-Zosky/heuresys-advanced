@@ -1,6 +1,6 @@
 /**
  * apps/api/src/modules/positions/routes.ts
- * 10 endpoints under /v1/positions: core CRUD + PIP read + skill sub-CRUD
+ * 15 endpoints under /v1/positions: core CRUD + PIP read + skill sub-CRUD
  * + KPI sub-resource read. RBAC + CSRF on mutations.
  *
  * Per API_IMPLEMENTATION_PLAN §6.3.

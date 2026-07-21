@@ -296,9 +296,13 @@ def sec_debts():
     for ln in md.splitlines():
         if not ln.lstrip().startswith("|"):
             continue
-        if not re.search(r"\bD-\d+\b", ln):
+        if not re.search(r"^\s*\|\s*\*?\*?D-\d+", ln):
             continue
-        if terminal.search(ln):
+        # Stato = ULTIMA cella della riga: il match whole-line assolveva righe
+        # aperte la cui prosa cita "risolto"/"monitor" (falso-terminale su D-57).
+        cells = [c.strip() for c in re.split(r"(?<!\\)\|", ln) if c.strip()]
+        status = cells[-1] if cells else ""
+        if terminal.search(status):
             continue
         opens.append(ln)
         if "🔴" in ln:

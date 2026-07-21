@@ -44,9 +44,9 @@
 - **#66 PR Dependabot in coda (post-S1023)** · status: ACTIVE
   - priority: P3 · effort: ~0.5h · doc: -
   - note: in S1023 le run CI delle 2 PR Dependabot (actions/checkout-7 + npm minor-and-patch) sono state **cancellate deliberatamente** per dare priorità al critical-path main sul runner condiviso. Ri-eseguire (`gh run rerun` o `@dependabot rebase`) e triage merge secondo la policy defer-major. Nota: i 4 alert HIGH sono GIÀ chiusi via override (S1023) — le PR npm potrebbero risultare ridondanti.
-- **#67 refresh dati twin linux-pc (clone giugno)** · status: ACTIVE
-  - priority: P3 · effort: ~0.5h (rete LAN) · doc: memoria reference_linux_pc_prod_twin
-  - note: il DB del twin data ~giugno (S1023: falso-rosso `me-career-tabs` da flight-risk MEDIUM stale vs PROD LOW — test ora DB-derived, ma i dati CI restano vecchi). Rilanciare `scripts/clone-vm-db.sh` SUL twin + `db/scripts/setup-ci-database.sh` per ri-clonare `heuresys_ci`. Da valutare in Fase-2 kickoff se schedularlo (timer settimanale).
+- **#67 refresh dati twin linux-pc (clone giugno)** · status: DONE
+  - priority: P3 · effort: chiuso · doc: memoria reference_linux_pc_prod_twin
+  - note: ✅ **DONE S1023 (in chiusura)** — `clone-vm-db` rieseguito dal close-propagate (row-counts verificati vs VM) + `heuresys_ci` ri-clonato dalla base fresca (parity gate OK). Residuo di riflessione per Fase-2 kickoff: schedulare il refresh (timer settimanale) invece che on-demand.
 - **#8 EMAIL dormiente** · status: WAIT-INPUT
   - input-richiesto: app-password Outlook (`enzo.spenuso@outlook.com`)
   - perche-solo-tuo: credenziale personale → attiva EMAIL_OTP + digest live in 1 mossa (transport già pronto)

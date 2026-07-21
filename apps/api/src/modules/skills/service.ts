@@ -5,8 +5,16 @@
 
 import { pool } from "../../db/client.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { localize, localizeOne } from "../../lib/i18n/localize.js";
+import type { Locale } from "../../middleware/locale.js";
 
 export type { ActorContext };
+
+// i18n overlay: swap name/description to the requested locale (fallback = IT in-row).
+const SKILL_I18N = {
+  name: (s: Skill, t: string) => { s.name = t; },
+  description: (s: Skill, t: string) => { s.description = t; },
+};
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
 import type {
   Skill,
@@ -23,17 +31,20 @@ function visible(actor: ActorContext, skill: Skill): boolean {
 }
 
 export const skillsService = {
-  async list(actor: ActorContext, query: SkillListQuery) {
+  async list(actor: ActorContext, query: SkillListQuery, locale: Locale = "it") {
     // PLATFORM_ADMIN: no tenant filter. Others: tenant filter limits to
     // (global OR own tenant) at SQL level.
     const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listSkills(pool, { tenantId, query });
+    const res = await repo.listSkills(pool, { tenantId, query });
+    await localize(pool, locale, "sys_skills", res.items, (s) => s.skillId, SKILL_I18N);
+    return res;
   },
 
-  async getById(actor: ActorContext, id: string): Promise<Skill> {
+  async getById(actor: ActorContext, id: string, locale: Locale = "it"): Promise<Skill> {
     const target = await repo.findSkillById(pool, id);
     if (!target) throw new NotFoundError("Skill");
     if (!visible(actor, target)) throw new NotFoundError("Skill");
+    await localizeOne(pool, locale, "sys_skills", target, (s) => s.skillId, SKILL_I18N);
     return target;
   },
 

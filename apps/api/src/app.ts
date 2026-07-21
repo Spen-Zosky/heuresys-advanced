@@ -27,6 +27,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import { requestIdPlugin } from "./middleware/requestId.js";
 import { authPlugin } from "./middleware/auth.js";
 import { tenantContextPlugin } from "./middleware/tenantContext.js";
+import { localePlugin } from "./middleware/locale.js";
 import { csrfPlugin } from "./middleware/csrf.js";
 import { isDatabaseReady } from "./db/client.js";
 import { COOKIES } from "./config/constants.js";
@@ -316,6 +317,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   // 10. Tenant context (depends on req.user from auth plugin)
   await app.register(tenantContextPlugin);
+
+  // 10b. Locale (i18n overlay, ADR-0029): decorates req.locale from
+  // x-locale header / NEXT_LOCALE cookie / 'it'. Depends on @fastify/cookie.
+  await app.register(localePlugin);
 
   // 11. Error handler (catches everything that bubbled up)
   app.setErrorHandler(errorHandler);

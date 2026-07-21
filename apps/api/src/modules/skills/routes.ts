@@ -24,13 +24,13 @@ export const skillsRoutes: FastifyPluginAsyncZod = async (app) => {
     config: { orgGate: "catalog" },
     preHandler: [requirePermission("skill:read")],
     schema: { querystring: SkillListQuerySchema, response: { 200: SkillListResponseSchema } },
-  }, async (req) => skillsService.list(actor(req), req.query));
+  }, async (req) => skillsService.list(actor(req), req.query, req.locale));
 
   app.get("/:id", {
     config: { orgGate: "catalog" },
     preHandler: [requirePermission("skill:read")],
     schema: { params: SkillIdParamSchema, response: { 200: SkillSchema } },
-  }, async (req) => skillsService.getById(actor(req), req.params.id));
+  }, async (req) => skillsService.getById(actor(req), req.params.id, req.locale));
 
   app.post("/", {
     preHandler: [app.verifyCsrf, requirePermission("skill:create")],

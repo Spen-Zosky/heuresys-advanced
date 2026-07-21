@@ -41,6 +41,8 @@ db/seeds/rtl-rebuild/extracted/
 .env.local
 .env.*.local
 .env.production
+# safety-net: manual .env backups (secret copies) must never be committable (S1023)
+.env.bak*
 *.pem
 *.key
 !*.key.example

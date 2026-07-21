@@ -20,7 +20,7 @@ export const MaterializeRequestBodySchema = z.object({
 });
 export type MaterializeRequestBody = z.infer<typeof MaterializeRequestBodySchema>;
 
-const MaterializeCountsSchema = z.object({
+export const MaterializeCountsSchema = z.object({
   orgUnits: z.number().int(),
   positions: z.number().int(),
   users: z.number().int(),

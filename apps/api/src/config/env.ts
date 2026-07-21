@@ -201,6 +201,10 @@ const EnvSchema = z.object({
   // Default OFF = prod-safe: no default-metrics timers, no collection, no exposure.
   // Enable on the VM so the local systemd collector can scrape 127.0.0.1:<api>/metrics.
   PROM_METRICS_ENABLED: z.enum(["true", "false"]).default("false").transform((v) => v === "true"),
+  // D-14 F2: kill-switch for POST /v1/tenants/provision. Default ON (the route
+  // is already PLATFORM_ADMIN-gated + CSRF); set 'false' to disable tenant
+  // self-provisioning entirely (e.g. during an incident or a controlled rollout).
+  TENANT_PROVISION_ENABLED: z.enum(["true", "false"]).default("true").transform((v) => v === "true"),
 });
 
 const parsed = EnvSchema.parse(process.env);

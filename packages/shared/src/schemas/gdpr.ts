@@ -1,0 +1,150 @@
+/**
+ * packages/shared/src/schemas/gdpr.ts
+ * D-14 F3/F4 — GDPR tooling contract.
+ *
+ * Backs the admin surface /v1/gdpr/* (data-map, DSR export, erasure with
+ * legal-hold, retention sweep — perms gdpr:read/export/erase/retention) and
+ * the self-service surface /v1/me/gdpr/export + /v1/me/consents (I17 floor).
+ * The classification registry (sys.sys_gdpr_data_map) is DATA, seeded by
+ * migration 000186 — strategy per table: DELETE / ANONYMIZE (root row) /
+ * RETAIN (legal hold, with basis).
+ */
+import { z } from "zod";
+
+/* --- data map ----------------------------------------------------------- */
+
+export const GdprDataClassEnum = z.enum([
+  "IDENTITY",
+  "PERSONAL",
+  "FINANCIAL_LEGAL",
+  "EVALUATION",
+  "OPERATIONAL",
+  "AUTH_SECURITY",
+  "DERIVED",
+]);
+export type GdprDataClass = z.infer<typeof GdprDataClassEnum>;
+
+export const GdprErasureStrategyEnum = z.enum(["DELETE", "ANONYMIZE", "RETAIN"]);
+export type GdprErasureStrategy = z.infer<typeof GdprErasureStrategyEnum>;
+
+export const GdprDataMapEntrySchema = z.object({
+  tableSchema: z.string(),
+  tableName: z.string(),
+  subjectFkColumn: z.string(),
+  dataClass: GdprDataClassEnum,
+  erasureStrategy: GdprErasureStrategyEnum,
+  retentionDays: z.number().int().positive().nullable(),
+  ageColumn: z.string().nullable(),
+  legalBasis: z.string().nullable(),
+});
+export type GdprDataMapEntry = z.infer<typeof GdprDataMapEntrySchema>;
+
+export const GdprDataMapResponseSchema = z.object({
+  items: z.array(GdprDataMapEntrySchema),
+});
+export type GdprDataMapResponse = z.infer<typeof GdprDataMapResponseSchema>;
+
+/* --- DSR export --------------------------------------------------------- */
+
+export const GdprUserIdParamSchema = z.object({ userId: z.string().uuid() });
+export type GdprUserIdParam = z.infer<typeof GdprUserIdParamSchema>;
+
+const GdprExportTableSchema = z.object({
+  dataClass: GdprDataClassEnum,
+  subjectFkColumn: z.string(),
+  rowCount: z.number().int(),
+  rows: z.array(z.record(z.string(), z.unknown())),
+});
+
+export const GdprExportBundleSchema = z.object({
+  generatedAt: z.string(),
+  subject: z.object({
+    userId: z.string().uuid(),
+    tenantId: z.string().uuid().nullable(),
+    email: z.string(),
+  }),
+  /** keyed by "schema.table[.subject_fk]" — every registry entry, even when 0 rows */
+  tables: z.record(z.string(), GdprExportTableSchema),
+});
+export type GdprExportBundle = z.infer<typeof GdprExportBundleSchema>;
+
+/* --- erasure ------------------------------------------------------------ */
+
+export const GdprErasureBodySchema = z.object({
+  dryRun: z.boolean().default(true),
+});
+export type GdprErasureBody = z.infer<typeof GdprErasureBodySchema>;
+
+const GdprErasureTableReportSchema = z.object({
+  strategy: GdprErasureStrategyEnum,
+  dataClass: GdprDataClassEnum,
+  affectedRows: z.number().int(),
+  legalBasis: z.string().nullable(),
+});
+
+export const GdprErasureReportSchema = z.object({
+  subjectUserId: z.string().uuid(),
+  dryRun: z.boolean(),
+  executedAt: z.string(),
+  /** keyed like the export bundle */
+  tables: z.record(z.string(), GdprErasureTableReportSchema),
+  anonymizedRoot: z.boolean(),
+});
+export type GdprErasureReport = z.infer<typeof GdprErasureReportSchema>;
+
+/* --- retention sweep ---------------------------------------------------- */
+
+export const GdprRetentionBodySchema = z.object({
+  dryRun: z.boolean().default(true),
+});
+export type GdprRetentionBody = z.infer<typeof GdprRetentionBodySchema>;
+
+export const GdprRetentionReportSchema = z.object({
+  dryRun: z.boolean(),
+  executedAt: z.string(),
+  tables: z.record(
+    z.string(),
+    z.object({
+      retentionDays: z.number().int(),
+      ageColumn: z.string(),
+      affectedRows: z.number().int(),
+    }),
+  ),
+});
+export type GdprRetentionReport = z.infer<typeof GdprRetentionReportSchema>;
+
+/* --- consents ----------------------------------------------------------- */
+
+export const ConsentPurposeEnum = z.enum([
+  "ANALYTICS_PROFILING",
+  "MARKETING_COMMUNICATIONS",
+  "INTERNAL_PHOTO_USE",
+  "THIRD_PARTY_SHARING",
+]);
+export type ConsentPurpose = z.infer<typeof ConsentPurposeEnum>;
+
+export const ConsentEventBodySchema = z.object({
+  purpose: ConsentPurposeEnum,
+  action: z.enum(["GRANT", "REVOKE"]),
+  note: z.string().max(500).optional(),
+});
+export type ConsentEventBody = z.infer<typeof ConsentEventBodySchema>;
+
+export const ConsentStateSchema = z.object({
+  purpose: ConsentPurposeEnum,
+  granted: z.boolean(),
+  /** last event timestamp; null when no event ever recorded for the purpose */
+  lastChangedAt: z.string().nullable(),
+});
+
+export const ConsentStateResponseSchema = z.object({
+  items: z.array(ConsentStateSchema),
+});
+export type ConsentStateResponse = z.infer<typeof ConsentStateResponseSchema>;
+
+export const ConsentEventResponseSchema = z.object({
+  purpose: ConsentPurposeEnum,
+  action: z.enum(["GRANT", "REVOKE"]),
+  occurredAt: z.string(),
+});
+export type ConsentEventResponse = z.infer<typeof ConsentEventResponseSchema>;

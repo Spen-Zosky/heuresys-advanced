@@ -22,7 +22,15 @@ import { buildGoalTimeline } from "../goals/service.js";
 import * as gapsRepo from "../learning-gaps/repository.js";
 import * as evidenceRepo from "../evidence/repository.js";
 import * as authRepo from "../auth/repository.js";
-import type { ListActiveSessionsResponse, RevokeOtherSessionsResponse } from "@heuresys/shared";
+import * as gdprRepo from "../gdpr/repository.js";
+import { ConsentPurposeEnum } from "@heuresys/shared";
+import type {
+  ListActiveSessionsResponse,
+  RevokeOtherSessionsResponse,
+  ConsentStateResponse,
+  ConsentEventBody,
+  ConsentEventResponse,
+} from "@heuresys/shared";
 import { userPermissionCodes } from "../../middleware/rbac.js";
 import { emitNotification } from "../../lib/notifications/emit.js";
 
@@ -484,5 +492,33 @@ export const meService = {
   async revokeOtherSessions(actor: SelfActor, currentFamilyId: string | null): Promise<RevokeOtherSessionsResponse> {
     const revokedFamilies = await authRepo.revokeOtherRefreshFamiliesForUser(pool, actor.userId, currentFamilyId, "LOGOUT");
     return { revokedFamilies };
+  },
+
+  /* --- D-14 F3/F4 — GDPR self-service: consent ledger (append-only) ------- */
+
+  /** Current consent state = latest ledger event per purpose; purposes with no
+   *  event ever are reported granted=false (no consent recorded). */
+  async consentState(actor: SelfActor): Promise<ConsentStateResponse> {
+    const state = await gdprRepo.getConsentState(pool, actor.userId);
+    return {
+      items: ConsentPurposeEnum.options.map((purpose) => ({
+        purpose,
+        granted: state.get(purpose)?.granted ?? false,
+        lastChangedAt: state.get(purpose)?.lastChangedAt ?? null,
+      })),
+    };
+  },
+
+  async recordConsent(actor: SelfActor, body: ConsentEventBody): Promise<ConsentEventResponse> {
+    const tenantId = requireTenant(actor);
+    const { occurredAt } = await gdprRepo.insertConsentEvent(pool, {
+      tenantId,
+      userId: actor.userId,
+      purpose: body.purpose,
+      action: body.action,
+      source: "ESS",
+      note: body.note ?? null,
+    });
+    return { purpose: body.purpose, action: body.action, occurredAt };
   },
 };

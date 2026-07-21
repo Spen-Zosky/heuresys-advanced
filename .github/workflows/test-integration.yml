@@ -43,7 +43,10 @@ jobs:
     # churn — DEBT_REGISTER D-09). Push events have no PR context → run.
     if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
     runs-on: [self-hosted, off-prod]
-    timeout-minutes: 15
+    # 25min: the full vitest suite takes ~13-14min on the off-prod twin (2-core
+    # x86) + ~2-4min setup/install — the old 15min budget killed a PASSING run
+    # at the post-steps (S1023, reported as "cancelled" by GitHub).
+    timeout-minutes: 25
     env:
       # POSTGRES_* (except the DB name) + JWT_PRIVATE_KEY/JWT_PUBLIC_KEY +
       # COOKIE_SECRET + MFA_ENCRYPTION_KEY come from runner EnvironmentFile.

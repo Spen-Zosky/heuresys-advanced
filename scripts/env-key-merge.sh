@@ -31,8 +31,12 @@ merge_env_into() {
   # local value would silently flip a PROD control. MFA_ENFORCEMENT_ENABLED (S989);
   # the 4 boolean gate flags added by QW-J2 (WS-J F-J-3) — all now enum-parsed, but a
   # stray dev value must not propagate additively to a PROD host missing the key.
+  # S1023 additions: VOYAGE_API_KEY (D-12 — a per-call-cost API key must never
+  # silently reach a remote); PROM_METRICS_ENABLED (D-09 — per-host observability
+  # control, set deliberately by provision-prometheus-vm.sh); TENANT_PROVISION_ENABLED
+  # (D-14 F2 kill-switch — same flip-risk class as the QW-J2 gates).
   # Space-padded for whole-word containment match.
-  local denylist=" MFA_ENFORCEMENT_ENABLED MATCHING_FREETEXT_ENABLED API_DOCS_ENABLED COOKIE_SECURE TRUST_PROXY "
+  local denylist=" MFA_ENFORCEMENT_ENABLED MATCHING_FREETEXT_ENABLED API_DOCS_ENABLED COOKIE_SECURE TRUST_PROXY VOYAGE_API_KEY PROM_METRICS_ENABLED TENANT_PROVISION_ENABLED "
   while IFS= read -r line || [ -n "$line" ]; do
     line="${line%$'\r'}"
     case "$line" in ''|'#'*) continue ;; esac

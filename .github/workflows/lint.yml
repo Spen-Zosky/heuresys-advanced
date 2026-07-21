@@ -31,7 +31,10 @@ jobs:
     # runner churn — DEBT_REGISTER D-09). Push events have no PR context → run.
     if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
     runs-on: [self-hosted, oci-vm]
-    timeout-minutes: 5
+    # 10min: the D-08 F3 resource slice (CPUQuota=300%) + a fresh-lockfile
+    # install push the web eslint past the old 5min budget (S1023: two runs
+    # killed at 5:12 reported as 'cancelled').
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6

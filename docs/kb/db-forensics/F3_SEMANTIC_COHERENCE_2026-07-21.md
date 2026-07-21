@@ -56,7 +56,10 @@ Ben fatti (preservare): bande retributive (range realistici, monotone), livelli 
 ## §6 Decisioni Enzo (S1024) + stato esecuzione
 
 - **Blocco A** ✅ ESEGUITO (mig 000193): 34 residui brownfield morti rimossi.
-- **Blocco B** (skill banking end-to-end) → esegui (tecnico, Claude decide il mapping ruolo→skill).
+- **Blocco B** ✅ ESEGUITO (seed_banking_skills.sql): 712 requisiti + 576 possessi + 156 gap ricalcolati (position_id popolato); rimosse skill demo + 2 rumore. 23 skill custom banking usate.
+- **Blocco C** ✅ ESEGUITO (seed_comp_dates.sql): salari monotoni per banda (32k→212k, in-bounds), apprendistati fuori-regola 26→0, seniority>hire 152→0, date 2-dic 26→0, coorte 2006 ridistribuita, 8 executive→Dirigente, 468 pay-slip (156/156), cert IVASS+30/MiFID+27, 2 utenti incompleti completati.
+- **Blocco D** ✅ ESEGUITO (seed_org_completion.sql): +2 OU (Tesoreria, Internal Audit) + team, +18 posizioni, OU vuote→0, HR Manager orfano agganciato, 8 dealer→Tesoreria; org integro (1 radice, 0 cicli). Nota: 18 nuove posizioni vacanti senza requisiti skill (Blocco B girato prima) — follow-up minore.
+- **[storico piano sotto]** →
 - **Blocco C** (retribuzioni/date) → **DECISIONE ENZO: correzione COMPLETA realistica** (rimappa banda dal livello, rimodula salari con progressione per ruolo + fascia 54-100k, fix date sintetiche/apprendistati/seniority, Dirigente per executive, pay-slip per tutti, cert IVASS/MiFID, completa i 2 utenti incompleti).
 - **Blocco D** (org) → **DECISIONE ENZO: POPOLA TUTTO** (aggiungi OU Tesoreria + Internal Audit con posizioni; popola Marketing + Legal&Compliance con posizioni reali).
 - **Blocco E** → resta gated su Wave-3 (#17, HOLD).

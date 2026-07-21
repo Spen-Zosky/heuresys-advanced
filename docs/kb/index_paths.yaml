@@ -1,42 +1,42 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-20T23:23:10Z da docs/kb/tools/build_index.py
+# generato: 2026-07-21T11:50:07Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-20T23:23:10Z"
-  total_files: 2432
+  generated_at: "2026-07-21T11:50:07Z"
+  total_files: 2452
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 26
+    ADR: 27
     api-core: 25
-    api-module: 310
+    api-module: 313
     ci: 16
     claude-config: 15
-    config: 104
+    config: 110
     cowork-archive: 14
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 182
+    db-migration: 185
     db-other: 1
     db-script: 28
     db-seed: 107
-    doc-canonical: 472
+    doc-canonical: 475
     handoff-state: 1
     qa-artifact: 103
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 95
+    shared-schema: 96
     showcase-source: 13
-    test: 288
+    test: 291
     ux-design-archive: 80
     web-source: 200
   status_counts:
     archive: 495
     external-archive: 50
-    live: 1887
+    live: 1907
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -191,6 +191,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\0027_two_axis_contextual_authorization.md'
     root: repo
     rel: 'docs/architecture/adr/0027_two_axis_contextual_authorization.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0028_ci_enforcement_at_deploy_gate.md'
+    root: repo
+    rel: 'docs/architecture/adr/0028_ci_enforcement_at_deploy_gate.md'
     category: ADR
     status: live
     provenance: git-tracked
@@ -1097,6 +1103,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\evidence\service.ts'
     root: repo
     rel: 'apps/api/src/modules/evidence/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\gdpr\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/gdpr/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\gdpr\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/gdpr/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\gdpr\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/gdpr/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -2606,6 +2630,18 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\prometheus\prometheus.yml'
+    root: repo
+    rel: 'deploy/prometheus/prometheus.yml'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\actions-runner-resource.dropin.conf'
+    root: repo
+    rel: 'deploy/systemd/actions-runner-resource.dropin.conf'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-api.service'
     root: repo
     rel: 'deploy/systemd/heuresys-advanced-api.service'
@@ -2714,6 +2750,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-prometheus.service'
+    root: repo
+    rel: 'deploy/systemd/heuresys-prometheus.service'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\eslint.config.mjs'
     root: repo
     rel: 'eslint.config.mjs'
@@ -2771,6 +2813,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\bisect-cw-b59-createctx.ps1'
     root: repo
     rel: 'scripts/bisect-cw-b59-createctx.ps1'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\ci-gate.sh'
+    root: repo
+    rel: 'scripts/ci-gate.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -2918,9 +2966,21 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\provision-ci-runner-linuxpc.sh'
+    root: repo
+    rel: 'scripts/provision-ci-runner-linuxpc.sh'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\scripts\provision-linux-pc.sh'
     root: repo
     rel: 'scripts/provision-linux-pc.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\provision-prometheus-vm.sh'
+    root: repo
+    rel: 'scripts/provision-prometheus-vm.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -6170,6 +6230,24 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000185_reconciliation_registry_cleanup.sql'
+    root: repo
+    rel: 'db/migrations/000185_reconciliation_registry_cleanup.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000186_gdpr_tooling.sql'
+    root: repo
+    rel: 'db/migrations/000186_gdpr_tooling.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000187_activity_classification_parent_integrity.sql'
+    root: repo
+    rel: 'db/migrations/000187_activity_classification_parent_integrity.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\migrations\.gitkeep'
     root: repo
     rel: 'db/migrations/.gitkeep'
@@ -7298,6 +7376,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\brownfield\ENGINE_STATUS.md'
+    root: repo
+    rel: 'docs/brownfield/ENGINE_STATUS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\brownfield\WAVE_1_EXECUTION_RUNBOOK.md'
     root: repo
     rel: 'docs/brownfield/WAVE_1_EXECUTION_RUNBOOK.md'
@@ -7805,6 +7889,18 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\INDEX_PATHS.md'
     root: repo
     rel: 'docs/kb/INDEX_PATHS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\NEXT_SESSION_DB_FRONTEND_FORENSICS_KICKOFF.md'
+    root: repo
+    rel: 'docs/kb/NEXT_SESSION_DB_FRONTEND_FORENSICS_KICKOFF.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\NEXT_SESSION_EPICS_KICKOFF.md'
+    root: repo
+    rel: 'docs/kb/NEXT_SESSION_EPICS_KICKOFF.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10772,6 +10868,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\gdpr.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/gdpr.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\goals.ts'
     root: repo
     rel: 'packages/shared/src/schemas/goals.ts'
@@ -11384,6 +11486,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\brownfield-engine-freeze.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/brownfield-engine-freeze.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\brownfield-import-runs.integration.test.ts'
     root: repo
     rel: 'apps/api/test/brownfield-import-runs.integration.test.ts'
@@ -11579,6 +11687,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\gap-closure.integration.test.ts'
     root: repo
     rel: 'apps/api/test/gap-closure.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\gdpr.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/gdpr.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -11885,6 +11999,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\mfa.integration.test.ts'
     root: repo
     rel: 'apps/api/test/mfa.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\nace-parent-integrity.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/nace-parent-integrity.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

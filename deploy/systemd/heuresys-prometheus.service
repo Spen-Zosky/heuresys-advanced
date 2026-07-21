@@ -1,6 +1,8 @@
 # deploy/systemd/heuresys-prometheus.service — D-09 F5: local metrics collector
 # (rendered by vm-deploy.sh: @@placeholders@@ + User=). Loopback-only
-# (127.0.0.1:9090), scrapes the API /metrics gated endpoint; retention 15d/2GB
+# (127.0.0.1:9091 — :9090 is taken by the VM's PRE-EXISTING legacy/base
+# monitoring stack, which stays untouched: one self-contained collector per
+# project, no coupling with the evo infra), scrapes the API /metrics gated endpoint; retention 15d/2GB
 # (OCI free-tier disk budget). Installed by every deploy (unit render loop) but
 # ENABLED only where provisioned (scripts/provision-prometheus-vm.sh) — on the
 # linux-pc twin the binary is absent and the unit stays disabled, by design.
@@ -16,7 +18,7 @@ ExecStart=/opt/prometheus/prometheus \
   --storage.tsdb.path=/var/lib/heuresys-prometheus \
   --storage.tsdb.retention.time=15d \
   --storage.tsdb.retention.size=2GB \
-  --web.listen-address=127.0.0.1:9090
+  --web.listen-address=127.0.0.1:9091
 Restart=on-failure
 RestartSec=10
 # resource slice: the collector must never compete with PROD services

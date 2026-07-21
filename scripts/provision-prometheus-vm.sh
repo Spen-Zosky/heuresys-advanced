@@ -77,9 +77,9 @@ curl -fsS --retry 30 --retry-delay 2 --retry-connrefused -m 5 http://127.0.0.1:8
 curl -fsS -m 5 http://127.0.0.1:8013/metrics | head -1 | grep -q "^#" \
   && log "API /metrics live (loopback)"
 for i in $(seq 1 12); do
-  UP=$(curl -fsS -m 5 "http://127.0.0.1:9090/api/v1/targets" 2>/dev/null \
+  UP=$(curl -fsS -m 5 "http://127.0.0.1:9091/api/v1/targets" 2>/dev/null \
        | python3 -c 'import json,sys;ts=json.load(sys.stdin)["data"]["activeTargets"];print(sum(1 for t in ts if t["labels"].get("job")=="heuresys-api" and t["health"]=="up"))' 2>/dev/null || echo 0)
-  [ "$UP" = "1" ] && { log "OK — prometheus target heuresys-api UP (retention 15d/2GB, 127.0.0.1:9090)"; exit 0; }
+  [ "$UP" = "1" ] && { log "OK — prometheus target heuresys-api UP (retention 15d/2GB, 127.0.0.1:9091)"; exit 0; }
   sleep 5
 done
 log "FATAL: heuresys-api target not up after 60s"; exit 1

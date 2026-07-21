@@ -1,6 +1,7 @@
 # deploy/prometheus/prometheus.yml — D-09 F5: local collector on the OCI VM.
 # Scrapes the API's gated /metrics (loopback-only endpoint, PROM_METRICS_ENABLED)
-# every 30s. Prometheus itself listens on 127.0.0.1:9090 ONLY (unit flag) —
+# every 30s. Prometheus itself listens on 127.0.0.1:9091 ONLY (unit flag;
+# :9090 belongs to the VM's pre-existing legacy monitoring stack) —
 # nothing is publicly exposed; consumption is via SSH tunnel when needed.
 # Retention is set by the systemd unit flags (15d / 2GB — free-tier budget).
 global:
@@ -18,4 +19,4 @@ scrape_configs:
 
   - job_name: prometheus-self
     static_configs:
-      - targets: ["127.0.0.1:9090"]
+      - targets: ["127.0.0.1:9091"]

@@ -95,19 +95,14 @@ DO $trg$ BEGIN
   END IF;
 END $trg$;
 
-CREATE TABLE IF NOT EXISTS sys.sys_organization_hierarchies (
-  ancestor_id         uuid     NOT NULL REFERENCES sys.sys_organization_units(organization_unit_id) ON DELETE CASCADE,
-  descendant_id       uuid     NOT NULL REFERENCES sys.sys_organization_units(organization_unit_id) ON DELETE CASCADE,
-  hierarchy_depth     smallint NOT NULL,
-  hierarchy_tenant_id uuid     NOT NULL REFERENCES sys.sys_tenancies(tenant_id) ON DELETE CASCADE,
-  PRIMARY KEY (ancestor_id, descendant_id)
-);
-
-CREATE INDEX IF NOT EXISTS sys_organization_hierarchies_descendant_idx
-  ON sys.sys_organization_hierarchies (descendant_id);
-
-CREATE INDEX IF NOT EXISTS sys_organization_hierarchies_tenant_depth_idx
-  ON sys.sys_organization_hierarchies (hierarchy_tenant_id, hierarchy_depth);
+-- [S1023 amendment] sys_organization_hierarchies (closure table) REMOVED from
+-- this migration. It was dead schema (never populated, no reader) dropped by
+-- 000183 (R4); leaving the CREATE here made every idempotent full-chain re-run
+-- resurrect it mid-chain, and once 000185 removed its reconciliation-registry
+-- row the 000062 "0 UNCLASSIFIED" assert tripped on the SECOND re-run (the
+-- twice-run invariant broke). Editing this file changes its sha → the chain
+-- re-applies it — everything else in here is IF-NOT-EXISTS idempotent.
+-- 000185 drops any resurrected orphan left by an aborted chain.
 
 CREATE TABLE IF NOT EXISTS sys.sys_organization_unit_history (
   organization_unit_history_id            uuid         PRIMARY KEY DEFAULT gen_random_uuid(),

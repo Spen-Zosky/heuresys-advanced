@@ -1,11 +1,12 @@
 name: Test (api integration)
 
-# S935 phase F — CI gate #4: 41 integration tests via vitest on apps/api,
-# hitting the live OCI PostgreSQL (localhost:5432 from the runner's POV,
-# since the OCI VM is the runner host itself — no SSH tunnel needed in CI).
+# S935 phase F — CI gate #4: integration tests via vitest on apps/api.
+# D-08 F5: runs on the OFF-PROD runner (linux-pc, the x86_64 PROD twin) against
+# the twin's LOCAL PostgreSQL (heuresys_ci) — the OCI PROD host is no longer in
+# the CI path at all (no SSH tunnel needed: localhost:5432 is the twin's own PG).
 #
 # The DB credentials come from runner-level env vars (set in systemd unit
-# EnvironmentFile=/etc/heuresys-runner.env per docs/ci/self-hosted-runners-setup.md §4).
+# EnvironmentFile=/etc/heuresys-runner.env per docs/ci/self-hosted-runners-setup.md §4/§10).
 # Never expose secrets in workflow YAML (R11).
 
 on:
@@ -35,14 +36,17 @@ concurrency:
 
 jobs:
   test-integration:
-    # Security (D-08): the self-hosted runner sits on the PROD host, so a fork PR
+    # Security (D-08): self-hosted runner (off-prod twin on the LAN) — a fork PR
     # must NEVER execute on it. Run only for push/workflow_dispatch or same-repo
     # PRs (Dependabot branches live in this repo); fork PRs are skipped before any
-    # checkout reaches the runner. Plus: skip Dependabot defer-major PRs (single
-    # runner churn — DEBT_REGISTER D-09). Push events have no PR context → run.
+    # checkout reaches the runner. Plus: skip Dependabot defer-major PRs (runner
+    # churn — DEBT_REGISTER D-09). Push events have no PR context → run.
     if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
-    runs-on: [self-hosted, oci-vm]
-    timeout-minutes: 15
+    runs-on: [self-hosted, off-prod]
+    # 25min: the full vitest suite takes ~13-14min on the off-prod twin (2-core
+    # x86) + ~2-4min setup/install — the old 15min budget killed a PASSING run
+    # at the post-steps (S1023, reported as "cancelled" by GitHub).
+    timeout-minutes: 25
     env:
       # POSTGRES_* (except the DB name) + JWT_PRIVATE_KEY/JWT_PUBLIC_KEY +
       # COOKIE_SECRET + MFA_ENCRYPTION_KEY come from runner EnvironmentFile.

@@ -22,6 +22,8 @@ import { ProvisionTenantBodySchema, ProvisionTenantResponseSchema } from "@heure
 import { tenantsService } from "./service.js";
 import { provisionTenant } from "./provisioning.js";
 import { requirePermission } from "../../middleware/rbac.js";
+import { env } from "../../config/env.js";
+import { ForbiddenError } from "../../errors/index.js";
 
 export const tenantsRoutes: FastifyPluginAsyncZod = async (app) => {
   /* --- GET /v1/tenants --------------------------------------------- */
@@ -77,6 +79,11 @@ export const tenantsRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     async (req, reply) => {
+      // D-14 F2: kill-switch (default ON; env TENANT_PROVISION_ENABLED=false
+      // disables the whole endpoint without a deploy).
+      if (!env.TENANT_PROVISION_ENABLED) {
+        throw new ForbiddenError("Tenant provisioning is disabled", "FEATURE_DISABLED");
+      }
       const result = await provisionTenant(actorFromReq(req), req.body);
       reply.code(201).send(result);
     },

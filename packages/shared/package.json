@@ -47,6 +47,11 @@
       "development": "./src/schemas/provisioning.ts",
       "default": "./dist/schemas/provisioning.js"
     },
+    "./schemas/gdpr": {
+      "types": "./dist/schemas/gdpr.d.ts",
+      "development": "./src/schemas/gdpr.ts",
+      "default": "./dist/schemas/gdpr.js"
+    },
     "./schemas/tenant-materialization": {
       "types": "./dist/schemas/tenant-materialization.d.ts",
       "development": "./src/schemas/tenant-materialization.ts",

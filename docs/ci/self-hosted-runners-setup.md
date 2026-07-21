@@ -3,7 +3,7 @@
 **Updated**: 2026-05-26 (S935 phase F)
 **Status**: Procedure SHIPPED; first runner registration deferred to Windows host + SSH session.
 **Runner host**: `oracle-vm-default` (80.225.82.207, Ubuntu 24.04 LTS ARM64, `ubuntu` user).
-**Backup runner**: Windows local (DESKTOP-KH728P2) — deferred to S936+ (scope-defer).
+**2nd runner (ACTIVE, D-08 F5 S1023)**: `linux-pc-runner` on the x86_64 PROD twin — labels `off-prod,linux-pc`, heavy DB gates run there (→ §10). The old "Windows backup runner" idea (§8) is superseded.
 
 ---
 
@@ -131,6 +131,10 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/v1
 MFA_ENCRYPTION_KEY=$MFA
 JWT_PRIVATE_KEY=$PRIV
 JWT_PUBLIC_KEY=$PUB
+# F-001 (added post-S950): the personas' login password — MUST match the value
+# the seeder wrote into the (cloned) DB. Without it 155/206 suites fail at
+# collection (S1023 lesson on the linux-pc runner).
+TEST_ADMIN_PASSWORD=$TESTPW
 LOG_LEVEL=warn
 NODE_ENV=test
 NEXT_TELEMETRY_DISABLED=1
@@ -246,3 +250,35 @@ Decision: backup runner not in critical path; OCI VM has been stable since 2025-
 - `docs/github/dependabot-triage-2026-05-26.md` (uses these workflows as merge gates)
 - `.github/workflows/{typecheck,lint,i18n-parity,test-integration,build-web,playwright-smoke}.yml` (S935 phase F deliverables)
 - CLAUDE.md (R11 secret hygiene — applies to all runner env files)
+
+---
+
+## §10 — OFF-PROD runner: linux-pc (D-08 F5, S1023)
+
+**Host**: `linux-pc` (192.168.1.11, Zorin 17.3 / Ubuntu 22.04 x86_64, user `enzo`) — the PROD twin.
+**Runner**: `linux-pc-runner`, labels `self-hosted,off-prod,linux-pc` (+ auto `Linux,X64`).
+**Why**: the single `oci-vm` runner WAS the PROD host — SPOF, queue contention, CI secrets and CI load on production. The heavy gates now run off-prod on the twin against its **local** PostgreSQL: `heuresys_ci` cloned from the twin's local 1:1 `heuresys_advanced` clone. The OCI PROD host is no longer in the CI path for these jobs.
+
+**Workflow placement** (as of D-08 F5):
+
+| Workflow | runs-on | Rationale |
+|---|---|---|
+| test-integration | `[self-hosted, off-prod]` | DB gate → twin's local `heuresys_ci` |
+| playwright-smoke | `[self-hosted, off-prod]` | DB gate + chromium load off PROD |
+| build-web | `[self-hosted, off-prod]` | heavy next build off PROD |
+| typecheck, lint, i18n-parity, shell-tests | `[self-hosted, oci-vm]` | light (<30s), keep VM redundancy |
+| state-lint | `[self-hosted, oci-vm]` | **must** read the REAL PROD DB (SoT staleness check vs live numbers — the clone would false-drift) |
+| showcase | `ubuntu-latest` | GitHub Pages deploy, no self-hosted need |
+
+**Provisioning** (idempotent, scoped-sudo only): `scripts/provision-ci-runner-linuxpc.sh` — apt chromium libs, checksum-verified runner download, `config.sh` registration, `/etc/heuresys-runner.env` (DB creds from the twin's `.env`, JWT/cookie/MFA generated on-host, double-`\n` PEM escaping per §4), hand-authored systemd unit (`sudo ./svc.sh` is outside the sudoers scope) **with the D-08 F3 resource slice baked in** (`MemoryMax=10G`, `CPUQuota=300%` of 4 cores), EnvironmentFile drop-in, live JWT-unescaping self-check via `/proc/<pid>/environ`, and `db/scripts/setup-ci-database.sh` for `heuresys_ci`.
+
+```bash
+# From the Windows dev host (token via stdin, never echoed — R10):
+scp scripts/provision-ci-runner-linuxpc.sh linux-pc:/tmp/
+gh api -X POST 'repos/{owner}/{repo}/actions/runners/registration-token' --jq .token \
+  | MSYS_NO_PATHCONV=1 ssh linux-pc 'RUNNER_TOKEN=$(cat) bash /tmp/provision-ci-runner-linuxpc.sh'
+```
+
+**heuresys_ci refresh on the twin**: on demand — refresh the twin's base clone first if needed (`scripts/clone-vm-db.sh`), then `bash db/scripts/setup-ci-database.sh` (drops+recreates `heuresys_ci` objects). With D-52 per-file tx rollback the CI DB does not drift between runs.
+
+**Availability trade-off (accepted)**: if linux-pc is off, the three off-prod gates queue until it returns (GitHub holds queued jobs; the deploy gate — D-08 F2 — has an explicit `DEPLOY_REQUIRE_CI=0` bypass for emergencies). The light gates on `oci-vm` keep signalling regardless.

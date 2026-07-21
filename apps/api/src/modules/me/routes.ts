@@ -42,8 +42,12 @@ import {
   RevokeSessionParamsSchema, RevokeSessionResponseSchema,
   RevokeOtherSessionsBodySchema, RevokeOtherSessionsResponseSchema,
   TimeOffRequestListQuerySchema, TimeOffRequestListResponseSchema,
+  GdprExportBundleSchema, ConsentStateResponseSchema,
+  ConsentEventBodySchema, ConsentEventResponseSchema,
 } from "@heuresys/shared";
 import { meService, type SelfActor } from "./service.js";
+import { gdprService } from "../gdpr/service.js";
+import { actorFromRequest } from "../../lib/actor.js";
 import { timeOffService } from "../time-off/service.js";
 import { teamsService } from "../teams/service.js";
 import { contentService } from "../content/service.js";
@@ -403,4 +407,27 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, requirePermission("me:sessions:manage")],
     schema: { body: RevokeOtherSessionsBodySchema, response: { 200: RevokeOtherSessionsResponseSchema } },
   }, async (req) => meService.revokeOtherSessions(selfActor(req), req.body.currentFamilyId));
+
+  // D-14 F3/F4 — GDPR self-service (I17 floor): Art. 15/20 export of one's OWN
+  // data + append-only consent ledger. POST for the export: it writes the
+  // sys_gdpr_requests accountability row.
+  app.post("/gdpr/export", {
+    preHandler: [app.verifyCsrf, requirePermission("gdpr:export:self")],
+    schema: { response: { 200: GdprExportBundleSchema } },
+  }, async (req) => {
+    // full ActorContext (typed roles) — the gdpr service tenant-guard is a
+    // no-op for self, but the signature wants the shared actor shape.
+    const a = actorFromRequest(req);
+    return gdprService.exportSubject(a, a.userId);
+  });
+
+  app.get("/consents", {
+    preHandler: [requirePermission("consent:manage:self")],
+    schema: { response: { 200: ConsentStateResponseSchema } },
+  }, async (req) => meService.consentState(selfActor(req)));
+
+  app.post("/consents", {
+    preHandler: [app.verifyCsrf, requirePermission("consent:manage:self")],
+    schema: { body: ConsentEventBodySchema, response: { 200: ConsentEventResponseSchema } },
+  }, async (req) => meService.recordConsent(selfActor(req), req.body));
 };

@@ -44,6 +44,17 @@
 - **#66 PR Dependabot in coda (post-S1023)** · status: ACTIVE
   - priority: P3 · effort: ~0.5h · doc: -
   - note: in S1023 le run CI delle 2 PR Dependabot (actions/checkout-7 + npm minor-and-patch) sono state **cancellate deliberatamente** per dare priorità al critical-path main sul runner condiviso. Ri-eseguire (`gh run rerun` o `@dependabot rebase`) e triage merge secondo la policy defer-major. Nota: i 4 alert HIGH sono GIÀ chiusi via override (S1023) — le PR npm potrebbero risultare ridondanti.
+- **#68 Fase 4 forense — frontend per-superficie** · status: ACTIVE
+  - priority: P1 · effort: ~1-2 sessioni · doc: docs/kb/NEXT_SESSION_DB_FRONTEND_FORENSICS_KICKOFF.md §4
+  - note: ultima fase del mandato forense S1023 (Fasi 1-3 fatte S1024). Censire per OGNI interfaccia (admin SPA + ESS + showcase) i dati esposti: codici illeggibili dove serve la descrizione, mock/hardcoded residui, **mix IT/EN** (ora che l'overlay i18n c'è, ADR-0029), formati (date/valute), link/navigazioni rotte, dataset poveri dove il DB ha di più. Esito per pagina → piani chirurgici (API-first dove manca il dato). Nota: i dati RTL sono appena cambiati (skill banking, salari, org) → la fotografia frontend è nuova.
+- **#69 Fase 3 Blocco E — chiusura brownfield lato DBMS legacy** · status: GATED
+  - priority: P2 · effort: ~1 sessione · doc: docs/kb/db-forensics/F3_SEMANTIC_COHERENCE_2026-07-21.md §5
+  - blocker: ⛔ decisione Wave-3 (#17, HOLD) — riuserebbe il legacy come sorgente
+  - note: residuo chiusura brownfield gated su Wave-3: drop/archivia `staging.wave1_*` (18), decommission DB legacy sulla VM (`heuresys_platform` + container `heuresys_evo_platform_db`, move-not-delete: snapshot→spegni), rotazione `POSTGRES_PASSWORD` (riusata dallo stack evo, collega D-60). I residui morti (staging.tmp_*/rtl_.../temp_sdbi) già rimossi in Blocco A (mig 000193). `brownfield.*` NON è legacy (reference-sync attiva) — non toccare.
+- **#70 RTL — coprire posizioni di leadership vacanti (opzionale)** · status: WAIT-INPUT
+  - input-richiesto: decisione Enzo se coprire i ruoli vacanti chiave o lasciarli aperti
+  - perche-solo-tuo: è una scelta di narrativa del tenant (RTL ha 20/176 posizioni vacanti dopo il Blocco D, incl. CRO + Capo Tesoreria + capi delle nuove unità); coprirli richiede riassegnare/creare incumbent
+  - note: emerso a fine S1024 (domanda Enzo). Position-centric (I1) → posizioni vacanti sono legittime, ma CRO/Tesoreria scoperti sono un po' innaturali per una banca vigilata. Se coprire: piccolo seed che riassegna dipendenti o crea incumbent per le posizioni Head-of.
 - **#67 refresh dati twin linux-pc (clone giugno)** · status: DONE
   - priority: P3 · effort: chiuso · doc: memoria reference_linux_pc_prod_twin
   - note: ✅ **DONE S1023 (in chiusura)** — `clone-vm-db` rieseguito dal close-propagate (row-counts verificati vs VM) + `heuresys_ci` ri-clonato dalla base fresca (parity gate OK). Residuo di riflessione per Fase-2 kickoff: schedulare il refresh (timer settimanale) invece che on-demand.

@@ -1,22 +1,21 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-07-21 (S1023 — epiche GO-BRANCH COMPLETATE e LIVE in PROD).
+**Updated**: 2026-07-21 (S1024 — mandato forense Fasi 1-3 eseguite; Fase 4 da fare).
 
-> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Kickoff prossima sessione → `docs/kb/NEXT_SESSION_DB_FRONTEND_FORENSICS_KICKOFF.md`.
+> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Diagnosi+piani forensi → `docs/kb/db-forensics/F2_DB_CENSUS_2026-07-21.md` + `F3_SEMANTIC_COHERENCE_2026-07-21.md`.
 
-## Last session brief (S1023)
+## Last session brief (S1024)
 
-Mandato epiche eseguito integralmente, merged e **dimostrato live su PROD**: D-08 F2-F5 (runner off-prod su linux-pc, deploy-gate `ci-gate.sh` ADR-0028 — primo esercizio reale riuscito al deploy, resource-slice su entrambi i runner), D-14 F2-F4 (provision completeness + GDPR tooling mig 000186: export Art. 15/20 provato con login reale federica→export tommaso 54 tabelle/37 con dati + accountability log; erasure legal-hold; consent ledger; retention che risolve D-59), D-09 F5 (Prometheus live su VM :9091 — la :9090 è dello stack legacy pre-esistente, non toccato). Coda: #65 NACE (mig 000187 FK NOT VALID), D-11 freeze brownfield (404 in PROD), 4 Dependabot HIGH, invariante twice-run migration riparato (000009 amendment + 000185 v2), regressione `pnpm dev` (tsx flag) fixata, test hardcoded me-career-tabs portato a derivazione-DB.
+Mandato forense S1023 eseguito su 3 fasi (di 4). **Fase 1** (debiti): ogni riga del register verificata contro codice/DB, D-61..D-73 nuove, fix parser dashboard (D-57 era invisibile) + 8 righe malformate. **Fase 2** (DB capillare): census 7 analisi + mig 000188 (igiene: indice lineage anti-10.9B-tuple, 3 FK, offboarding, 5 indici morti) + 000189 (dedup 24 skill, 573 ref repointate) + **bilinguismo IT/EN COMPLETO** (ADR-0029: mig 000190-000191, tabella `sys_reference_translations` + 29.511 traduzioni — 358 governance + 14k skill + 640 gruppi da dataset **ESCO ufficiale IT+EN** fornito da Enzo, NO fetch live) + **ontologia 100%** (ADR-0030: mig 000192, `sys_skill_groups` 640 nodi gerarchia 4 livelli, 13.647 skill→gruppo, 6.456 IS-A; copertura 99,4%) + **wiring API i18n** (middleware `req.locale` + overlay su skills+cataloghi, test verdi). **Fase 3** (coerenza/seeding/brownfield): mig 000193 (drop 34 residui brownfield morti) + seed banking RTL (792 requisiti + 576 possessi + 156 gap ricalcolati con position_id — sostituito il seed demo) + comp/date (salari monotoni per banda 32k→212k, 8 executive→Dirigente, date sintetiche corrette, 468 pay-slip) + org (Tesoreria + Internal Audit + 18 posizioni, org integro). **16 commit sul branch `forense/f2-db-hygiene`** (merge in main nel handoff). DB condiviso già popolato live.
 
 ## Top priorities (next session)
 
-1. **Mandato S1023 (Enzo)** — forense in 4 fasi SEQUENZIALI: debiti reali → DB capillare (incl. **bilinguismo IT/EN** da progettare) → coerenza semantica dati + seeding + **chiusura definitiva brownfield** → frontend per-superficie. **Leggere PRIMA**: `docs/kb/NEXT_SESSION_DB_FRONTEND_FORENSICS_KICKOFF.md` (standard operativo + regola "nessuna distinzione errori pre-esistenti/nuovi").
-2. Code amministrative: PR Dependabot (run CI cancellate per priorità in S1023 — `gh run rerun` o rebase) · refresh dati twin linux-pc (`clone-vm-db.sh`, clone di giugno — causa del falso-rosso me-career-tabs).
+1. **Fase 4 del mandato forense** (~1-2 sessioni) — forense frontend per-superficie: admin SPA + ESS + showcase; censire dati esposti (codici illeggibili, mock/hardcoded residui, mix IT/EN ora che l'overlay c'è, link rotti, formati). Kickoff §4 in `docs/kb/NEXT_SESSION_DB_FRONTEND_FORENSICS_KICKOFF.md`.
+2. **Blocco E Fase 3** — GATED su decisione Wave-3 (#17, HOLD): drop `staging.wave1_*` (18) + decommission DB legacy sulla VM (`heuresys_platform`) + rotazione `POSTGRES_PASSWORD` (riusata da evo).
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **Doc-tank**: sostituzione `docs/` col clone SOLO su richiesta diretta (regola S1023); tank sincronizzato a ogni sessione (delta S1023 propagato).
-- **NACE 920 orfani**: RISOLTO tecnicamente (FK prospettico + eccezione documentata, mig 000187) — se vorrai il backfill livelli 1-4 dello scheme ATECO legacy è un task dati separato.
+- **Wave-3 (#17)** — sblocca il Blocco E Fase 3 (chiusura definitiva brownfield lato DBMS legacy VM). In HOLD.
 - WAIT-INPUT invariati: **#4** pricing · **#8** app-password Outlook · **#16** SuccessFactors · **#52** SSO IdP.
 
 ## Verification (next session)
@@ -24,7 +23,7 @@ Mandato epiche eseguito integralmente, merged e **dimostrato live su PROD**: D-0
 ```bash
 git log origin/main..HEAD --oneline               # 0 dopo il push handoff
 python docs/kb/tools/handoff_lint.py              # OK atteso
-ls db/migrations/*.sql | tail -1                  # 000187
-curl -s -o /dev/null -w "%{http_code}" https://www.heuresys.com/login   # 200
+ls db/migrations/*.sql | tail -1                  # 000193
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc "SELECT count(*) FROM sys.sys_reference_translations"  # 29511
 python docs/kb/tools/session_start.py             # menu + salute
 ```

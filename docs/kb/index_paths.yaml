@@ -1,15 +1,15 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-21T11:50:07Z da docs/kb/tools/build_index.py
+# generato: 2026-07-21T21:48:41Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-21T11:50:07Z"
-  total_files: 2452
+  generated_at: "2026-07-21T21:48:41Z"
+  total_files: 2474
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 27
-    api-core: 25
+    ADR: 29
+    api-core: 27
     api-module: 313
     ci: 16
     claude-config: 15
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 185
-    db-other: 1
-    db-script: 28
-    db-seed: 107
-    doc-canonical: 475
+    db-migration: 191
+    db-other: 3
+    db-script: 32
+    db-seed: 110
+    doc-canonical: 477
     handoff-state: 1
     qa-artifact: 103
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 96
     showcase-source: 13
-    test: 291
+    test: 292
     ux-design-archive: 80
     web-source: 200
   status_counts:
     archive: 495
     external-archive: 50
-    live: 1907
+    live: 1929
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -200,6 +200,18 @@ files:
     category: ADR
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0029_reference_data_i18n_translations_table.md'
+    root: repo
+    rel: 'docs/architecture/adr/0029_reference_data_i18n_translations_table.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0030_esco_skill_group_ontology.md'
+    root: repo
+    rel: 'docs/architecture/adr/0030_esco_skill_group_ontology.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\app.ts'
     root: repo
     rel: 'apps/api/src/app.ts'
@@ -251,6 +263,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\lib\export\serializers.ts'
     root: repo
     rel: 'apps/api/src/lib/export/serializers.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\i18n\localize.ts'
+    root: repo
+    rel: 'apps/api/src/lib/i18n/localize.ts'
     category: api-core
     status: live
     provenance: git-tracked
@@ -323,6 +341,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\middleware\errorHandler.ts'
     root: repo
     rel: 'apps/api/src/middleware/errorHandler.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\middleware\locale.ts'
+    root: repo
+    rel: 'apps/api/src/middleware/locale.ts'
     category: api-core
     status: live
     provenance: git-tracked
@@ -6248,6 +6272,54 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000188_f2_db_hygiene.sql'
+    root: repo
+    rel: 'db/migrations/000188_f2_db_hygiene.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000189_dedup_skill_names.sql'
+    root: repo
+    rel: 'db/migrations/000189_dedup_skill_names.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000190_reference_translations_i18n.sql'
+    root: repo
+    rel: 'db/migrations/000190_reference_translations_i18n.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000191_cleanup_empty_string_literal.sql'
+    root: repo
+    rel: 'db/migrations/000191_cleanup_empty_string_literal.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000192_skill_group_ontology.sql'
+    root: repo
+    rel: 'db/migrations/000192_skill_group_ontology.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000193_drop_dead_brownfield_staging.sql'
+    root: repo
+    rel: 'db/migrations/000193_drop_dead_brownfield_staging.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\data\esco\README.md'
+    root: repo
+    rel: 'db/data/esco/README.md'
+    category: db-other
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\data\esco\convert-esco-csv-to-tsv.py'
+    root: repo
+    rel: 'db/data/esco/convert-esco-csv-to-tsv.py'
+    category: db-other
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\migrations\.gitkeep'
     root: repo
     rel: 'db/migrations/.gitkeep'
@@ -6353,6 +6425,30 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\migrate.sh'
     root: repo
     rel: 'db/scripts/migrate.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\populate-en-from-esco.sql'
+    root: repo
+    rel: 'db/scripts/populate-en-from-esco.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\populate-reference-translations-governance.sql'
+    root: repo
+    rel: 'db/scripts/populate-reference-translations-governance.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\populate-skill-descriptions-it.sql'
+    root: repo
+    rel: 'db/scripts/populate-skill-descriptions-it.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\populate-skill-ontology-it.sql'
+    root: repo
+    rel: 'db/scripts/populate-skill-ontology-it.sql'
     category: db-script
     status: live
     provenance: git-tracked
@@ -6911,6 +7007,24 @@ files:
   - path: 'D:\heuresys-advanced\db\seeds\reconciliation\_gen_m2b.sql'
     root: repo
     rel: 'db/seeds/reconciliation/_gen_m2b.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_banking_skills.sql'
+    root: repo
+    rel: 'db/seeds/rtl-banking-skills/seed_banking_skills.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_comp_dates.sql'
+    root: repo
+    rel: 'db/seeds/rtl-banking-skills/seed_comp_dates.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_org_completion.sql'
+    root: repo
+    rel: 'db/seeds/rtl-banking-skills/seed_org_completion.sql'
     category: db-seed
     status: live
     provenance: git-tracked
@@ -7997,6 +8111,18 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\atlas\atlas.yaml'
     root: repo
     rel: 'docs/kb/atlas/atlas.yaml'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\db-forensics\F2_DB_CENSUS_2026-07-21.md'
+    root: repo
+    rel: 'docs/kb/db-forensics/F2_DB_CENSUS_2026-07-21.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\db-forensics\F3_SEMANTIC_COHERENCE_2026-07-21.md'
+    root: repo
+    rel: 'docs/kb/db-forensics/F3_SEMANTIC_COHERENCE_2026-07-21.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -12377,6 +12503,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\skill-taxonomy-edges.integration.test.ts'
     root: repo
     rel: 'apps/api/test/skill-taxonomy-edges.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\skills-i18n.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/skills-i18n.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

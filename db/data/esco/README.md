@@ -20,9 +20,14 @@ py db/data/esco/convert-esco-csv-to-tsv.py db/data/esco
 # → skills_it.tsv, skillgroups_it.tsv, broader_it.tsv
 ```
 
+## Lingue
+
+Usiamo **IT** (canonico in-row) + **EN** (in `sys_reference_translations`). Entrambi i dump ufficiali ESCO v1.2.0 servono: `- it - csv.zip` (canonico) e `- en - csv.zip` (traduzioni EN). Rigenerare i TSV EN come per l'IT: `unzip ... skills_en.csv skillGroups_en.csv` → `py convert-esco-csv-to-tsv.py` produce anche `skills_en.tsv`/`skillgroups_en.tsv` (adattare i nomi file). (Il dump `- es -` spagnolo NON è usato.)
+
 ## Loader
 
 - `db/scripts/populate-skill-descriptions-it.sql` — descrizioni competenze IT in-row + EN in `sys_reference_translations` (13.933 skill, idempotente).
-- (ontologia: nodi-gruppo + gerarchia + skill→gruppo — vedi migration/loader dedicati).
+- `db/scripts/populate-skill-ontology-it.sql` — nodi-gruppo + gerarchia + skill→gruppo + edge IS-A (ADR-0030).
+- `db/scripts/populate-en-from-esco.sql` — bilinguismo EN completo: nomi+descrizioni skill EN + gruppi EN (dal dump `- en -`).
 
 I file CSV chiave del dump: `skills_it.csv` (13.939 competenze: uri/label/descrizione), `skillGroups_it.csv` (gruppi), `broaderRelationsSkillPillar_it.csv` (relazioni broader skill→gruppo e gruppo→gruppo), `skillsHierarchy_it.csv` (gerarchia a livelli).

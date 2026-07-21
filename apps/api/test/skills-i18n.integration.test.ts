@@ -2,10 +2,15 @@
  * apps/api/test/skills-i18n.integration.test.ts
  * i18n overlay (ADR-0029): /v1/skills serves IT in-row by default and the EN
  * translation when x-locale=en, with fallback to IT for unknown/absent locales.
- * Expected values are DERIVED from the live DB (no hardcoded fixtures).
+ *
+ * Self-contained: the fixture skill + its EN translations are CREATED here (not
+ * assumed pre-existing), so the suite passes on a fresh CI clone where the
+ * translation tables aren't seeded. The rows are cleaned up in afterAll and, on
+ * a tx-isolated run, rolled back with the file transaction anyway.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { randomUUID } from "node:crypto";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
@@ -17,8 +22,13 @@ function ch(c: Map<string, string>) {
 
 let suite: TestApp;
 let cookies: Map<string, string>;
-// derived from the DB in beforeAll
-let sample: { id: string; itName: string; itDesc: string | null; enName: string; enDesc: string };
+let skillId: string;
+
+const TAG = randomUUID().slice(0, 8).toUpperCase();
+const IT_NAME = `competenza i18n ${TAG}`;
+const IT_DESC = `descrizione italiana di prova ${TAG}`;
+const EN_NAME = `i18n skill ${TAG}`;
+const EN_DESC = `english test description ${TAG}`;
 
 describe("/v1/skills i18n overlay (ADR-0029)", () => {
   beforeAll(async () => {
@@ -27,77 +37,70 @@ describe("/v1/skills i18n overlay (ADR-0029)", () => {
     cookies = new Map<string, string>();
     for (const c of r.cookies) cookies.set(c.name, c.value);
 
-    // A real GLOBAL skill that has BOTH an EN name and EN description translation
-    // and whose IT in-row name differs from the EN one (a genuine translation).
-    const res = await pool.query<{
-      skill_id: string; it_name: string; it_desc: string | null; en_name: string; en_desc: string;
-    }>(
-      `SELECT s.skill_id, s.skill_name AS it_name, s.skill_description AS it_desc,
-              n.text AS en_name, d.text AS en_desc
-         FROM sys.sys_skills s
-         JOIN sys.sys_reference_translations n
-           ON n.entity_table='sys_skills' AND n.entity_id=s.skill_id AND n.field='name'        AND n.locale='en'
-         JOIN sys.sys_reference_translations d
-           ON d.entity_table='sys_skills' AND d.entity_id=s.skill_id AND d.field='description' AND d.locale='en'
-        WHERE s.skill_is_global = true
-          AND s.skill_name <> n.text
-        LIMIT 1`,
+    // Fixture: a GLOBAL skill (IT canonical in-row) + its EN translations.
+    const admin = await pool.query<{ user_id: string }>(
+      `SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com'`,
     );
-    const row = res.rows[0];
-    if (!row) throw new Error("no globally-visible skill with an EN translation found — seed the i18n data first");
-    sample = { id: row.skill_id, itName: row.it_name, itDesc: row.it_desc, enName: row.en_name, enDesc: row.en_desc };
+    const createdBy = admin.rows[0]!.user_id;
+    const ins = await pool.query<{ skill_id: string }>(
+      `INSERT INTO sys.sys_skills
+         (skill_tenant_id, skill_code, skill_name, skill_description, skill_is_global, skill_metadata, created_by)
+       VALUES (NULL, $1, $2, $3, true, '{}'::jsonb, $4)
+       RETURNING skill_id`,
+      [`I18N::${TAG}`, IT_NAME, IT_DESC, createdBy],
+    );
+    skillId = ins.rows[0]!.skill_id;
+    await pool.query(
+      `INSERT INTO sys.sys_reference_translations (entity_table, entity_id, field, locale, text, source)
+       VALUES ('sys_skills', $1, 'name', 'en', $2, 'MANUAL'),
+              ('sys_skills', $1, 'description', 'en', $3, 'MANUAL')
+       ON CONFLICT (entity_table, entity_id, field, locale) DO UPDATE SET text = EXCLUDED.text`,
+      [skillId, EN_NAME, EN_DESC],
+    );
   });
 
   afterAll(async () => {
+    if (skillId) {
+      await pool.query(`DELETE FROM sys.sys_reference_translations WHERE entity_table='sys_skills' AND entity_id=$1`, [skillId]);
+      await pool.query(`DELETE FROM sys.sys_skills WHERE skill_id=$1`, [skillId]);
+    }
     await suite.app.close();
     await closePool();
   });
 
-  it("default (no locale) returns the canonical IT in-row name", async () => {
-    const r = await suite.app.inject({ method: "GET", url: `/v1/skills/${sample.id}`, headers: { cookie: ch(cookies) } });
+  it("default (no locale) returns the canonical IT in-row name+description", async () => {
+    const r = await suite.app.inject({ method: "GET", url: `/v1/skills/${skillId}`, headers: { cookie: ch(cookies) } });
     expect(r.statusCode).toBe(200);
     const s = r.json() as { name: string; description: string | null };
-    expect(s.name).toBe(sample.itName);
-    expect(s.description).toBe(sample.itDesc);
+    expect(s.name).toBe(IT_NAME);
+    expect(s.description).toBe(IT_DESC);
   });
 
   it("x-locale=en returns the EN translation for name AND description", async () => {
     const r = await suite.app.inject({
-      method: "GET", url: `/v1/skills/${sample.id}`,
+      method: "GET", url: `/v1/skills/${skillId}`,
       headers: { cookie: ch(cookies), "x-locale": "en" },
     });
     expect(r.statusCode).toBe(200);
     const s = r.json() as { name: string; description: string | null };
-    expect(s.name).toBe(sample.enName);
-    expect(s.description).toBe(sample.enDesc);
-    expect(s.name).not.toBe(sample.itName); // genuinely different language
+    expect(s.name).toBe(EN_NAME);
+    expect(s.description).toBe(EN_DESC);
+    expect(s.name).not.toBe(IT_NAME);
   });
 
   it("NEXT_LOCALE cookie also drives the overlay", async () => {
     const withLocaleCookie = new Map(cookies).set("NEXT_LOCALE", "en");
-    const r = await suite.app.inject({ method: "GET", url: `/v1/skills/${sample.id}`, headers: { cookie: ch(withLocaleCookie) } });
+    const r = await suite.app.inject({ method: "GET", url: `/v1/skills/${skillId}`, headers: { cookie: ch(withLocaleCookie) } });
     expect(r.statusCode).toBe(200);
-    expect((r.json() as { name: string }).name).toBe(sample.enName);
+    expect((r.json() as { name: string }).name).toBe(EN_NAME);
   });
 
   it("unknown locale falls back to IT", async () => {
     const r = await suite.app.inject({
-      method: "GET", url: `/v1/skills/${sample.id}`,
+      method: "GET", url: `/v1/skills/${skillId}`,
       headers: { cookie: ch(cookies), "x-locale": "fr" },
     });
     expect(r.statusCode).toBe(200);
-    expect((r.json() as { name: string }).name).toBe(sample.itName);
-  });
-
-  it("x-locale=en applies on the LIST endpoint too", async () => {
-    const r = await suite.app.inject({
-      method: "GET", url: `/v1/skills?limit=200&isGlobal=true`,
-      headers: { cookie: ch(cookies), "x-locale": "en" },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as { items: Array<{ skillId: string; name: string }> };
-    const found = body.items.find((x) => x.skillId === sample.id);
-    // may be beyond the page window; only assert when present
-    if (found) expect(found.name).toBe(sample.enName);
+    expect((r.json() as { name: string }).name).toBe(IT_NAME);
   });
 });

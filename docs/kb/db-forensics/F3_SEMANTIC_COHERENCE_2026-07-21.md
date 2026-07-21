@@ -52,3 +52,11 @@ Ben fatti (preservare): bande retributive (range realistici, monotone), livelli 
 **Blocco D — org fine-tuning** (rischio BASSO, ⚠ semi-prodotto): OU Tesoreria + Internal Audit + riposiziona dealer/teller; popola o deprecare OU Marketing/Legal vuote; fix HR Manager orfano. Igiene catalogo globale (PROTO-* fuori dominio) = separato.
 
 **Blocco E — gated Enzo**: Wave-3 (#17) → drop/archivia staging.wave1_* + moduli API + decommission DBMS legacy VM + rotazione POSTGRES_PASSWORD.
+
+## §6 Decisioni Enzo (S1024) + stato esecuzione
+
+- **Blocco A** ✅ ESEGUITO (mig 000193): 34 residui brownfield morti rimossi.
+- **Blocco B** (skill banking end-to-end) → esegui (tecnico, Claude decide il mapping ruolo→skill).
+- **Blocco C** (retribuzioni/date) → **DECISIONE ENZO: correzione COMPLETA realistica** (rimappa banda dal livello, rimodula salari con progressione per ruolo + fascia 54-100k, fix date sintetiche/apprendistati/seniority, Dirigente per executive, pay-slip per tutti, cert IVASS/MiFID, completa i 2 utenti incompleti).
+- **Blocco D** (org) → **DECISIONE ENZO: POPOLA TUTTO** (aggiungi OU Tesoreria + Internal Audit con posizioni; popola Marketing + Legal&Compliance con posizioni reali).
+- **Blocco E** → resta gated su Wave-3 (#17, HOLD).

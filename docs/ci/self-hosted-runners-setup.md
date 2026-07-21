@@ -131,6 +131,10 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/v1
 MFA_ENCRYPTION_KEY=$MFA
 JWT_PRIVATE_KEY=$PRIV
 JWT_PUBLIC_KEY=$PUB
+# F-001 (added post-S950): the personas' login password — MUST match the value
+# the seeder wrote into the (cloned) DB. Without it 155/206 suites fail at
+# collection (S1023 lesson on the linux-pc runner).
+TEST_ADMIN_PASSWORD=$TESTPW
 LOG_LEVEL=warn
 NODE_ENV=test
 NEXT_TELEMETRY_DISABLED=1

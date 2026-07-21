@@ -111,6 +111,12 @@ if [ ! -f "$ENVFILE" ] || [ "${REFRESH_ENV:-0}" = "1" ]; then
   PGUSER_VAL=$(grep -E '^POSTGRES_USER=' "$REPO_DIR/.env" | head -1 | cut -d= -f2-)
   PGPASS_VAL=$(grep -E '^POSTGRES_PASSWORD=' "$REPO_DIR/.env" | head -1 | cut -d= -f2-)
   [ -n "$PGUSER_VAL" ] && [ -n "$PGPASS_VAL" ] || { log "FATAL: POSTGRES_USER/PASSWORD not found in twin .env"; exit 1; }
+  # F-001: the integration/E2E suites log in as the seeded personas whose
+  # Argon2id hashes live in the (cloned) DB — the password is environment-
+  # driven and MUST match. The twin's .env carries the same value as PROD
+  # (align/provision env merge), so source it from there.
+  TESTPW_VAL=$(grep -E '^TEST_ADMIN_PASSWORD=' "$REPO_DIR/.env" | head -1 | cut -d= -f2-)
+  [ -n "$TESTPW_VAL" ] || { log "FATAL: TEST_ADMIN_PASSWORD not found in twin .env (S1023: its absence failed 155/206 CI suites)"; exit 1; }
 
   TMP=$(mktemp -d)
   trap 'rm -rf "$TMP"' EXIT
@@ -139,6 +145,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/v1
 MFA_ENCRYPTION_KEY=$MFA
 JWT_PRIVATE_KEY=$PRIV
 JWT_PUBLIC_KEY=$PUB
+TEST_ADMIN_PASSWORD=$TESTPW_VAL
 LOG_LEVEL=warn
 NODE_ENV=test
 NEXT_TELEMETRY_DISABLED=1
@@ -147,6 +154,31 @@ EOF
   log "$ENVFILE installed (root:root 600)"
 else
   log "$ENVFILE already present — skip (REFRESH_ENV=1 to rebuild)"
+fi
+
+# ----------------------------------------------------------------------------
+# 4b. Stable Node 22 on the SERVICE PATH. pnpm/action-setup runs BEFORE
+#     actions/setup-node, so it executes with the runner service's default
+#     `node` — on Ubuntu 22.04 that is the ancient apt v12 and the pnpm
+#     self-installer dies with "SyntaxError: Unexpected token '.'" (S1023,
+#     first off-prod run). nvm paths are version-pinned, so expose the current
+#     nvm-22 bin dir through a STABLE symlink the unit can reference.
+# ----------------------------------------------------------------------------
+export NVM_DIR="$HOME/.nvm"
+# shellcheck disable=SC1091
+. "$NVM_DIR/nvm.sh" >/dev/null 2>&1 || { log "FATAL: nvm not found"; exit 1; }
+NODE22_BIN="$(dirname "$(nvm which 22)")"
+mkdir -p "$HOME/.local"
+ln -sfn "$NODE22_BIN" "$HOME/.local/node22-bin"
+log "service node: $NODE22_BIN -> ~/.local/node22-bin ($("$HOME/.local/node22-bin/node" --version))"
+
+# CRITICAL: job steps do NOT see the service Environment= PATH — the runner
+# snapshots the job-step PATH into $RUNNER_DIR/.path at config.sh time
+# (S1023: with the default snapshot, pnpm/action-setup found apt node v12 and
+# died on optional chaining). Prepend the stable Node 22 dir, idempotently.
+if [ -f "$RUNNER_DIR/.path" ] && ! grep -q "node22-bin" "$RUNNER_DIR/.path"; then
+  printf '%s:%s\n' "$HOME/.local/node22-bin" "$(cat "$RUNNER_DIR/.path")" > "$RUNNER_DIR/.path"
+  log "patched $RUNNER_DIR/.path — node22-bin now leads the job-step PATH"
 fi
 
 # ----------------------------------------------------------------------------
@@ -165,6 +197,9 @@ After=network.target
 ExecStart=${RUNNER_DIR}/runsvc.sh
 User=${USER}
 WorkingDirectory=${RUNNER_DIR}
+# Node 22 first on PATH: pnpm/action-setup runs before setup-node and needs a
+# modern system node (stable symlink maintained by the provision script §4b).
+Environment=PATH=${HOME}/.local/node22-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 KillMode=process
 KillSignal=SIGTERM
 TimeoutStopSec=5min
@@ -216,10 +251,15 @@ fi
 
 # ----------------------------------------------------------------------------
 # 7. heuresys_ci on the twin's LOCAL PostgreSQL (clone of the local 1:1
-#    heuresys_advanced clone — PROD on the VM is never in the path)
+#    heuresys_advanced clone — PROD on the VM is never in the path).
+#    SETUP_CI_DB=0 skips (e.g. unit-only re-runs; the clone is not cheap).
 # ----------------------------------------------------------------------------
-log "provisioning heuresys_ci from local heuresys_advanced"
-cd "$REPO_DIR"
-bash db/scripts/setup-ci-database.sh
+if [ "${SETUP_CI_DB:-1}" = "1" ]; then
+  log "provisioning heuresys_ci from local heuresys_advanced"
+  cd "$REPO_DIR"
+  bash db/scripts/setup-ci-database.sh
+else
+  log "SETUP_CI_DB=0 — skipping heuresys_ci clone"
+fi
 
 log "DONE — runner '$RUNNER_NAME' (labels: $RUNNER_LABELS) active, heuresys_ci ready"

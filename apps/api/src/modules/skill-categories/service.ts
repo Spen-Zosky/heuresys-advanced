@@ -8,8 +8,16 @@
 
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
+import { localize, localizeOne } from "../../lib/i18n/localize.js";
+import type { Locale } from "../../middleware/locale.js";
 
 export type { ActorContext };
+
+// i18n overlay: swap name/description to the requested locale (fallback = IT in-row).
+const SKILL_CATEGORY_I18N = {
+  name: (s: SkillCategory, t: string) => { s.name = t; },
+  description: (s: SkillCategory, t: string) => { s.description = t; },
+};
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
 import type {
   SkillCategory,
@@ -29,13 +37,16 @@ function ensurePlatformAdmin(actor: ActorContext): void {
 }
 
 export const skillCategoriesService = {
-  async list(_actor: ActorContext, query: SkillCategoryListQuery) {
-    return repo.listSkillCategories(pool, query);
+  async list(_actor: ActorContext, query: SkillCategoryListQuery, locale: Locale = "it") {
+    const res = await repo.listSkillCategories(pool, query);
+    await localize(pool, locale, "sys_skill_categories", res.items, (s) => s.skillCategoryId, SKILL_CATEGORY_I18N);
+    return res;
   },
 
-  async getById(_actor: ActorContext, id: string): Promise<SkillCategory> {
+  async getById(_actor: ActorContext, id: string, locale: Locale = "it"): Promise<SkillCategory> {
     const target = await repo.findSkillCategoryById(pool, id);
     if (!target) throw new NotFoundError("SkillCategory");
+    await localizeOne(pool, locale, "sys_skill_categories", target, (s) => s.skillCategoryId, SKILL_CATEGORY_I18N);
     return target;
   },
 

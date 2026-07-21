@@ -12,5 +12,5 @@ import { skillProficiencyLevelsService } from "./service.js";
 export const skillProficiencyLevelsRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
     schema: { response: { 200: SkillProficiencyLevelListResponseSchema } },
-  }, async (req) => skillProficiencyLevelsService.list(actor(req)));
+  }, async (req) => skillProficiencyLevelsService.list(actor(req), req.locale));
 };

@@ -25,11 +25,11 @@ import { jobFamiliesService } from "./service.js";
 export const jobFamiliesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
     schema: { querystring: JobFamilyListQuerySchema, response: { 200: JobFamilyListResponseSchema } },
-  }, async (req) => jobFamiliesService.list(actor(req), req.query));
+  }, async (req) => jobFamiliesService.list(actor(req), req.query, req.locale));
 
   app.get("/:id", {
     schema: { params: JobFamilyIdParamSchema, response: { 200: JobFamilySchema } },
-  }, async (req) => jobFamiliesService.getById(actor(req), req.params.id));
+  }, async (req) => jobFamiliesService.getById(actor(req), req.params.id, req.locale));
 
   app.post("/", {
     preHandler: [app.verifyCsrf],

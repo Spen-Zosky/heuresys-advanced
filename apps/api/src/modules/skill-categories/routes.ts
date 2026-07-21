@@ -21,11 +21,11 @@ import { requirePermission } from "../../middleware/rbac.js";
 export const skillCategoriesRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/", {
     schema: { querystring: SkillCategoryListQuerySchema, response: { 200: SkillCategoryListResponseSchema } },
-  }, async (req) => skillCategoriesService.list(actor(req), req.query));
+  }, async (req) => skillCategoriesService.list(actor(req), req.query, req.locale));
 
   app.get("/:id", {
     schema: { params: SkillCategoryIdParamSchema, response: { 200: SkillCategorySchema } },
-  }, async (req) => skillCategoriesService.getById(actor(req), req.params.id));
+  }, async (req) => skillCategoriesService.getById(actor(req), req.params.id, req.locale));
 
   app.post("/", {
     preHandler: [app.verifyCsrf, requirePermission("skill:create")],

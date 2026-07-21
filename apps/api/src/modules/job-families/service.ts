@@ -7,8 +7,16 @@
 
 import { pool } from "../../db/client.js";
 import type { ActorContext } from "../../lib/actor.js";
+import { localize, localizeOne } from "../../lib/i18n/localize.js";
+import type { Locale } from "../../middleware/locale.js";
 
 export type { ActorContext };
+
+// i18n overlay (ADR-0029): swap name/description to the requested locale (fallback = IT in-row).
+const JOB_FAMILY_I18N = {
+  name: (r: JobFamily, t: string) => { r.name = t; },
+  description: (r: JobFamily, t: string) => { r.description = t; },
+};
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
 import type {
   JobFamily,
@@ -28,13 +36,16 @@ function ensurePlatformAdmin(actor: ActorContext): void {
 }
 
 export const jobFamiliesService = {
-  async list(_actor: ActorContext, query: JobFamilyListQuery) {
-    return repo.listJobFamilies(pool, query);
+  async list(_actor: ActorContext, query: JobFamilyListQuery, locale: Locale = "it") {
+    const res = await repo.listJobFamilies(pool, query);
+    await localize(pool, locale, "sys_job_families", res.items, (r) => r.jobFamilyId, JOB_FAMILY_I18N);
+    return res;
   },
 
-  async getById(_actor: ActorContext, id: string): Promise<JobFamily> {
+  async getById(_actor: ActorContext, id: string, locale: Locale = "it"): Promise<JobFamily> {
     const target = await repo.findJobFamilyById(pool, id);
     if (!target) throw new NotFoundError("JobFamily");
+    await localizeOne(pool, locale, "sys_job_families", target, (r) => r.jobFamilyId, JOB_FAMILY_I18N);
     return target;
   },
 

@@ -28,7 +28,7 @@ export const kpiDefinitionsRoutes: FastifyPluginAsyncZod = async (app) => {
     config: { orgGate: "catalog" },
     preHandler: [requirePermission("kpi:read")],
     schema: { querystring: KpiDefinitionListQuerySchema, response: { 200: KpiDefinitionListResponseSchema } },
-  }, async (req) => kpiDefinitionsService.list(actor(req), req.query));
+  }, async (req) => kpiDefinitionsService.list(actor(req), req.query, req.locale));
 
   // #31 (S1018) — metrology catalogs (global, 000015 §7-§8): literal routes.
   app.get("/assessment-methods", {
@@ -47,7 +47,7 @@ export const kpiDefinitionsRoutes: FastifyPluginAsyncZod = async (app) => {
     config: { orgGate: "catalog" },
     preHandler: [requirePermission("kpi:read")],
     schema: { params: KpiDefinitionIdParamSchema, response: { 200: KpiDefinitionSchema } },
-  }, async (req) => kpiDefinitionsService.getById(actor(req), req.params.id));
+  }, async (req) => kpiDefinitionsService.getById(actor(req), req.params.id, req.locale));
 
   // #31 (S1018) — per-KPI metrology sub-reads.
   app.get("/:id/metrics", {

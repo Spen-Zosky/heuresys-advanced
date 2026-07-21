@@ -7,8 +7,16 @@
 import { pool, withTransaction } from "../../db/client.js";
 import { deleteInboxNotificationsForResource } from "../../lib/notifications/cleanup.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { localize, localizeOne } from "../../lib/i18n/localize.js";
+import type { Locale } from "../../middleware/locale.js";
 
 export type { ActorContext };
+
+// i18n overlay: swap name/description to the requested locale (fallback = IT in-row).
+const KPI_DEF_I18N = {
+  name: (k: KpiDefinition, t: string) => { k.name = t; },
+  description: (k: KpiDefinition, t: string) => { k.description = t; },
+};
 import { NotFoundError, ConflictError, ForbiddenError } from "../../errors/index.js";
 import type {
   KpiDefinition,
@@ -27,15 +35,18 @@ function visible(actor: ActorContext, k: KpiDefinition): boolean {
 }
 
 export const kpiDefinitionsService = {
-  async list(actor: ActorContext, query: KpiDefinitionListQuery) {
+  async list(actor: ActorContext, query: KpiDefinitionListQuery, locale: Locale = "it") {
     const tenantId = isPlatform(actor) ? undefined : actor.tenantId ?? undefined;
-    return repo.listKpiDefinitions(pool, { tenantId, query });
+    const res = await repo.listKpiDefinitions(pool, { tenantId, query });
+    await localize(pool, locale, "sys_kpi_definitions", res.items, (k) => k.kpiDefinitionId, KPI_DEF_I18N);
+    return res;
   },
 
-  async getById(actor: ActorContext, id: string): Promise<KpiDefinition> {
+  async getById(actor: ActorContext, id: string, locale: Locale = "it"): Promise<KpiDefinition> {
     const target = await repo.findKpiById(pool, id);
     if (!target) throw new NotFoundError("KpiDefinition");
     if (!visible(actor, target)) throw new NotFoundError("KpiDefinition");
+    await localizeOne(pool, locale, "sys_kpi_definitions", target, (k) => k.kpiDefinitionId, KPI_DEF_I18N);
     return target;
   },
 

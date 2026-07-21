@@ -5,14 +5,22 @@
  */
 import { pool } from "../../db/client.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { localize } from "../../lib/i18n/localize.js";
+import type { Locale } from "../../middleware/locale.js";
 export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
 import type {
   Goal, GoalListQuery, CreateGoalBody, UpdateGoalBody,
-  GoalSubListQuery, GoalTemplateListQuery, GoalTimelineEvent, GoalTimelineResponse,
+  GoalSubListQuery, GoalTemplate, GoalTemplateListQuery, GoalTimelineEvent, GoalTimelineResponse,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
+
+// i18n overlay (ADR-0029): swap name/description to the requested locale (fallback = IT in-row).
+const GOAL_TEMPLATE_I18N = {
+  name: (t: GoalTemplate, s: string) => { t.name = s; },
+  description: (t: GoalTemplate, s: string) => { t.description = s; },
+};
 
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
 
@@ -125,8 +133,10 @@ export const goalsService = {
     await loadReadableGoal(a, goalId);
     return repo.listGoalAlignments(pool, goalId, q.limit, q.offset);
   },
-  async listGoalTemplates(a: ActorContext, query: GoalTemplateListQuery) {
-    return repo.listGoalTemplates(pool, listTenantFilter(a), query);
+  async listGoalTemplates(a: ActorContext, query: GoalTemplateListQuery, locale: Locale = "it") {
+    const res = await repo.listGoalTemplates(pool, listTenantFilter(a), query);
+    await localize(pool, locale, "sys_goal_templates", res.items, (t) => t.templateId, GOAL_TEMPLATE_I18N);
+    return res;
   },
   async getGoalTimeline(a: ActorContext, goalId: string) {
     const g = await loadReadableGoal(a, goalId);

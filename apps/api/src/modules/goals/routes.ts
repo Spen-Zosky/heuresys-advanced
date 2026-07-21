@@ -28,7 +28,7 @@ export const goalsRoutes: FastifyPluginAsyncZod = async (app) => {
     config: { orgGate: "catalog" },
     preHandler: [requirePermission("goal:read")],
     schema: { querystring: GoalTemplateListQuerySchema, response: { 200: GoalTemplateListResponseSchema } },
-  }, async (req) => goalsService.listGoalTemplates(actor(req), req.query));
+  }, async (req) => goalsService.listGoalTemplates(actor(req), req.query, req.locale));
 
   app.get("/:id", {
     config: { orgGate: "service" },

@@ -153,7 +153,29 @@ FROM (VALUES
   -- HR Manager
   ('HR Manager','Comunicazione',true ,'PROFICIENT'),
   ('HR Manager','Collaborazione',true ,'PROFICIENT'),
-  ('HR Manager','Adattabilità',true ,'PROFICIENT')
+  ('HR Manager','Adattabilità',true ,'PROFICIENT'),
+  -- Ruoli delle OU aggiunte nel Blocco D (Tesoreria, Audit, Marketing, Legal)
+  ('internal auditor','CUSTOM::INT-AUDIT',false,'PROFICIENT'),
+  ('internal auditor','CUSTOM::AML-OPS',false,'COMPETENT'),
+  ('internal auditor','CUSTOM::BASEL-REG',false,'COMPETENT'),
+  ('internal auditor','Problem solving',true ,'PROFICIENT'),
+  ('tesoriere bancario/tesoriera bancaria','CUSTOM::CASH-MGMT',false,'EXPERT'),
+  ('tesoriere bancario/tesoriera bancaria','CUSTOM::FX-TRADING',false,'PROFICIENT'),
+  ('tesoriere bancario/tesoriera bancaria','CUSTOM::MARKET-RISK',false,'PROFICIENT'),
+  ('tesoriere bancario/tesoriera bancaria','CUSTOM::TRADE-FIN',false,'COMPETENT'),
+  ('tesoriere bancario/tesoriera bancaria','Leadership',true ,'PROFICIENT'),
+  ('trader FX e mercati monetari','CUSTOM::FX-TRADING',false,'PROFICIENT'),
+  ('trader FX e mercati monetari','CUSTOM::MARKET-RISK',false,'PROFICIENT'),
+  ('trader FX e mercati monetari','CUSTOM::TRADE-FIN',false,'COMPETENT'),
+  ('trader FX e mercati monetari','CUSTOM::MIFID-COMP',false,'COMPETENT'),
+  ('specialista marketing bancario','CUSTOM::DIGITAL-PAY',false,'COMPETENT'),
+  ('specialista marketing bancario','Orientamento al cliente',true ,'PROFICIENT'),
+  ('specialista marketing bancario','Comunicazione',true ,'PROFICIENT'),
+  ('specialista marketing bancario','Innovazione',true ,'COMPETENT'),
+  ('Legal Counsel','CUSTOM::MIFID-COMP',false,'PROFICIENT'),
+  ('Legal Counsel','CUSTOM::KYC-DUE',false,'COMPETENT'),
+  ('Legal Counsel','CUSTOM::INT-AUDIT',false,'COMPETENT'),
+  ('Legal Counsel','Problem solving',true ,'PROFICIENT')
 ) AS v(role_name, skill_key, is_soft, required)
 LEFT JOIN sys.sys_skills sc
   ON v.is_soft = false AND sc.skill_code = v.skill_key

@@ -192,3 +192,9 @@ audit/security/
 audit/context-history.json
 audit/_visual-workflow.js
 audit/BLOCKED-LOG.md
+
+# ESCO official dataset (v1.2.0 IT) — large, publicly re-downloadable reference input.
+# Versioned: the loader script + converter + README (provenance). NOT the payload.
+ESCO dataset*.zip
+db/data/esco/*.tsv
+db/data/esco/*.csv

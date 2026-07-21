@@ -275,11 +275,13 @@ describe("D-14 F3/F4 GDPR tooling", () => {
 
     const logged = await pool.query(
       `SELECT gdpr_request_status FROM sys.sys_gdpr_requests
-        WHERE gdpr_request_subject_user_id = $1 AND gdpr_request_type = 'ERASURE'
-        ORDER BY created_at`,
+        WHERE gdpr_request_subject_user_id = $1 AND gdpr_request_type = 'ERASURE'`,
       [subjectId],
     );
-    expect(logged.rows.map((r) => r.gdpr_request_status)).toEqual(["DRY_RUN", "COMPLETED"]);
+    // Both requests exist; order is not asserted — under tx-isolation now() is
+    // frozen per file (D-52), so the two rows share created_at and ORDER BY it
+    // is non-deterministic. Assert set-membership instead.
+    expect(logged.rows.map((r) => r.gdpr_request_status).sort()).toEqual(["COMPLETED", "DRY_RUN"]);
   });
 
   it("consent ledger: GRANT -> state true, REVOKE -> state false, append-only events", async () => {

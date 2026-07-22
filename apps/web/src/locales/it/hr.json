@@ -125,6 +125,26 @@
         "readiness": "Readiness",
         "gapFree": "Assenza gap"
       }
+    },
+    "essential": {
+      "title": "Capability essenziali",
+      "subtitle": "Ranking con formula dichiarata: essenzialità = {{econ}}% valore economico + {{crit}}% criticità + {{scarcity}}% scarsità; priorità d'investimento = essenzialità × (1 − maturità).",
+      "subtitleIdle": "Ranking delle skill da cui l'organizzazione dipende, con formula dichiarata e componenti esplorabili.",
+      "errorMessage": "Impossibile caricare il ranking delle capability.",
+      "emptyTitle": "Nessuna capability classificabile",
+      "emptyDescription": "Il ranking si popola quando le posizioni dichiarano skill richieste.",
+      "caption": "Capability essenziali (priorità d'investimento)",
+      "cols": {
+        "skill": "Skill",
+        "priority": "Priorità invest.",
+        "essentiality": "Essenzialità",
+        "econ": "Econ",
+        "crit": "Criticità",
+        "scarcity": "Scarsità",
+        "maturity": "Maturità",
+        "demand": "Posizioni · critiche",
+        "holders": "Titolari"
+      }
     }
   },
   "processOwner": {

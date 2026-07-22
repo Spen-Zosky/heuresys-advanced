@@ -37,6 +37,14 @@ test.describe("Org-Director console — live capability/maturity", () => {
     // CapabilityRadar renders an SVG from the live maturity dimensions.
     await expect(page.getByTestId("org-director-radar-chart").locator("svg")).toBeVisible();
   });
+
+  // #55 F1 — Essential Capability Ranker: declared-formula ranking rendered live
+  // (weights surfaced in the subtitle, every component drillable per row).
+  test("essential-capability ranking renders live with drillable components", async ({ page }) => {
+    await page.goto("/org-director", { waitUntil: "domcontentloaded", timeout: 60_000 });
+    await expect(page.getByTestId("org-director-essential-title")).toBeVisible({ timeout: 45_000 });
+    await expect(page.getByTestId("org-director-essential-row").first()).toBeVisible({ timeout: 30_000 });
+  });
 });
 
 test.describe("Process-Owner console — live process catalog", () => {

@@ -125,6 +125,26 @@
         "readiness": "Readiness",
         "gapFree": "Gap-freeness"
       }
+    },
+    "essential": {
+      "title": "Essential capabilities",
+      "subtitle": "Declared-formula ranking: essentiality = {{econ}}% economic value + {{crit}}% criticality + {{scarcity}}% scarcity; investment priority = essentiality × (1 − maturity).",
+      "subtitleIdle": "Ranking of the skills the organization depends on, with a declared formula and drillable components.",
+      "errorMessage": "Unable to load the capability ranking.",
+      "emptyTitle": "No rankable capability",
+      "emptyDescription": "The ranking populates when positions declare required skills.",
+      "caption": "Essential capabilities (investment priority)",
+      "cols": {
+        "skill": "Skill",
+        "priority": "Invest. priority",
+        "essentiality": "Essentiality",
+        "econ": "Econ",
+        "crit": "Criticality",
+        "scarcity": "Scarcity",
+        "maturity": "Maturity",
+        "demand": "Positions · critical",
+        "holders": "Holders"
+      }
     }
   },
   "processOwner": {

@@ -4,7 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { Badge, Button, CapabilityRadar, PageHeader } from "@heuresys/ui";
-import type { CapabilityMaturityScore, MaturityCriterion } from "@heuresys/shared";
+import type {
+  CapabilityMaturityScore,
+  EssentialCapabilityItem,
+  EssentialCapabilityRanking,
+  MaturityCriterion,
+} from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
@@ -79,6 +84,11 @@ export default function OrgDirectorPage() {
     queryKey: ["capability", "maturity", "list"],
     queryFn: () => apiFetch<{ items: CapabilityMaturityScore[] }>("/v1/capability/maturity"),
   });
+  // #55 F1 — Essential Capability Ranker: declared-formula ranking (weights in the response)
+  const essential = useQuery({
+    queryKey: ["capability", "essential-ranking"],
+    queryFn: () => apiFetch<EssentialCapabilityRanking>("/v1/capability/composition/essential-ranking"),
+  });
 
   const rows = useMemo<OrgRow[]>(() => {
     const matByOu = new Map((maturity.data?.items ?? []).map((m) => [m.orgUnitId, m]));
@@ -97,6 +107,19 @@ export default function OrgDirectorPage() {
   const columns = useMemo(() => buildColumns(t, setSelected, selected?.ouId ?? null), [t, selected]);
   const isLoading = composition.isLoading || maturity.isLoading;
   const isError = composition.isError || maturity.isError;
+
+  // Drill columns: every score component is shown, never just the blend (no black box).
+  const essentialColumns = useMemo<DataColumn<EssentialCapabilityItem>[]>(() => [
+    { header: t("orgDirector.essential.cols.skill"), cell: (r) => <span className="font-medium text-foreground" title={r.skillCode}>{r.skillName}</span> },
+    { header: t("orgDirector.essential.cols.priority"), align: "right", cell: (r) => <span className="font-semibold tabular-nums text-foreground">{r.investmentPriority.toFixed(1)}</span> },
+    { header: t("orgDirector.essential.cols.essentiality"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{r.essentialityScore.toFixed(1)}</span> },
+    { header: t("orgDirector.essential.cols.econ"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{Math.round(r.econ * 100)}%</span> },
+    { header: t("orgDirector.essential.cols.crit"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{Math.round(r.crit * 100)}%</span> },
+    { header: t("orgDirector.essential.cols.scarcity"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{Math.round(r.scarcity * 100)}%</span> },
+    { header: t("orgDirector.essential.cols.maturity"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{Math.round(r.maturity * 100)}%</span> },
+    { header: t("orgDirector.essential.cols.demand"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{r.positionsRequiring} · {r.criticalPositions}</span> },
+    { header: t("orgDirector.essential.cols.holders"), align: "right", cell: (r) => <span className="tabular-nums text-xs text-muted-foreground">{r.holders}</span> },
+  ], [t]);
 
   const radarAxes = useMemo(() => [
     { id: "composite", label: t("orgDirector.radar.axes.composite") },
@@ -139,6 +162,36 @@ export default function OrgDirectorPage() {
             />
           </div>
         )}
+      </section>
+
+      {/* #55 F1 — Essential Capability Ranker (declared formula, drillable components) */}
+      <section data-testid="org-director-essential" className="space-y-3">
+        <PageHeader
+          data-testid="org-director-essential-title"
+          title={t("orgDirector.essential.title")}
+          description={
+            essential.data
+              ? t("orgDirector.essential.subtitle", {
+                  econ: Math.round(essential.data.weights.econ * 100),
+                  crit: Math.round(essential.data.weights.crit * 100),
+                  scarcity: Math.round(essential.data.weights.scarcity * 100),
+                })
+              : t("orgDirector.essential.subtitleIdle")
+          }
+        />
+        <EntityTable<EssentialCapabilityItem>
+          isLoading={essential.isLoading}
+          isError={essential.isError}
+          errorMessage={t("orgDirector.essential.errorMessage")}
+          rows={essential.data?.items ?? []}
+          rowKey={(r) => r.skillId}
+          rowTestId="org-director-essential-row"
+          columns={essentialColumns}
+          emptyTestId="org-director-essential-empty"
+          emptyTitle={t("orgDirector.essential.emptyTitle")}
+          emptyDescription={t("orgDirector.essential.emptyDescription")}
+          caption={t("orgDirector.essential.caption")}
+        />
       </section>
     </main>
   );

@@ -1,42 +1,42 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-22T18:55:12Z da docs/kb/tools/build_index.py
+# generato: 2026-07-22T23:26:47Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-22T18:55:12Z"
-  total_files: 2505
+  generated_at: "2026-07-22T23:26:47Z"
+  total_files: 2534
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 29
     api-core: 27
-    api-module: 314
+    api-module: 317
     ci: 16
     claude-config: 15
-    config: 110
+    config: 116
     cowork-archive: 14
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 203
-    db-other: 3
-    db-script: 32
+    db-migration: 208
+    db-other: 8
+    db-script: 34
     db-seed: 114
-    doc-canonical: 479
+    doc-canonical: 480
     handoff-state: 1
     qa-artifact: 103
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 96
+    shared-schema: 97
     showcase-source: 13
-    test: 298
+    test: 304
     ux-design-archive: 80
     web-source: 206
   status_counts:
     archive: 495
     external-archive: 50
-    live: 1960
+    live: 1989
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -1442,6 +1442,24 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\occupation-classifications\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/occupation-classifications/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\occupation-classifications\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/occupation-classifications/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\occupation-classifications\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/occupation-classifications/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\okrs\repository.ts'
     root: repo
     rel: 'apps/api/src/modules/okrs/repository.ts'
@@ -2642,6 +2660,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\vitest.unit.config.ts'
+    root: repo
+    rel: 'apps/api/vitest.unit.config.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\audit\_groups.json'
     root: repo
     rel: 'audit/_groups.json'
@@ -2651,6 +2675,12 @@ files:
   - path: 'D:\heuresys-advanced\audit\_visual-confirmed.json'
     root: repo
     rel: 'audit/_visual-confirmed.json'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\cli-next.zip'
+    root: repo
+    rel: 'cli-next.zip'
     category: config
     status: live
     provenance: git-tracked
@@ -2723,6 +2753,18 @@ files:
   - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-dr-drill.timer'
     root: repo
     rel: 'deploy/systemd/heuresys-advanced-dr-drill.timer'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-gdpr-retention.service'
+    root: repo
+    rel: 'deploy/systemd/heuresys-advanced-gdpr-retention.service'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-gdpr-retention.timer'
+    root: repo
+    rel: 'deploy/systemd/heuresys-advanced-gdpr-retention.timer'
     category: config
     status: live
     provenance: git-tracked
@@ -2978,6 +3020,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\gdpr-retention-sweep.sh'
+    root: repo
+    rel: 'scripts/gdpr-retention-sweep.sh'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\scripts\generate_wave1_column_mappings.mjs'
     root: repo
     rel: 'scripts/generate_wave1_column_mappings.mjs'
@@ -2993,6 +3041,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\journal-append.sh'
     root: repo
     rel: 'scripts/journal-append.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\propagate-secret-rotation.sh'
+    root: repo
+    rel: 'scripts/propagate-secret-rotation.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -6386,6 +6440,36 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000206_occupation_classifications.sql'
+    root: repo
+    rel: 'db/migrations/000206_occupation_classifications.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000207_reference_translation_coverage.sql'
+    root: repo
+    rel: 'db/migrations/000207_reference_translation_coverage.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000208_occupation_classification_permissions.sql'
+    root: repo
+    rel: 'db/migrations/000208_occupation_classification_permissions.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000209_auth_permission_names_i18n_conformance.sql'
+    root: repo
+    rel: 'db/migrations/000209_auth_permission_names_i18n_conformance.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000210_tenant_admin_permission_allowlist.sql'
+    root: repo
+    rel: 'db/migrations/000210_tenant_admin_permission_allowlist.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -6395,6 +6479,36 @@ files:
   - path: 'D:\heuresys-advanced\db\data\esco\convert-esco-csv-to-tsv.py'
     root: repo
     rel: 'db/data/esco/convert-esco-csv-to-tsv.py'
+    category: db-other
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\data\i18n\skill_groups_descriptions_it.csv'
+    root: repo
+    rel: 'db/data/i18n/skill_groups_descriptions_it.csv'
+    category: db-other
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\data\i18n\wave1_gap_overlays_en.csv'
+    root: repo
+    rel: 'db/data/i18n/wave1_gap_overlays_en.csv'
+    category: db-other
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\data\occupations\README.md'
+    root: repo
+    rel: 'db/data/occupations/README.md'
+    category: db-other
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\data\occupations\occupation_classifications_seed_it.csv'
+    root: repo
+    rel: 'db/data/occupations/occupation_classifications_seed_it.csv'
+    category: db-other
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\data\occupations\occupation_reference_translations_en.csv'
+    root: repo
+    rel: 'db/data/occupations/occupation_reference_translations_en.csv'
     category: db-other
     status: live
     provenance: git-tracked
@@ -6509,6 +6623,18 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\populate-en-from-esco.sql'
     root: repo
     rel: 'db/scripts/populate-en-from-esco.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\populate-i18n-wave1-gaps.sql'
+    root: repo
+    rel: 'db/scripts/populate-i18n-wave1-gaps.sql'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\populate-occupation-classifications.sql'
+    root: repo
+    rel: 'db/scripts/populate-occupation-classifications.sql'
     category: db-script
     status: live
     provenance: git-tracked
@@ -7316,6 +7442,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\cli-prompt.md'
+    root: repo
+    rel: 'cli-prompt.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\deploy\README.md'
     root: repo
     rel: 'deploy/README.md'
@@ -8042,63 +8174,15 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\AUTONOMY_R23_PROJECT.md'
-    root: repo
-    rel: 'docs/kb/AUTONOMY_R23_PROJECT.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\B50_DEFER_UNBLOCK_PACKAGE.md'
-    root: repo
-    rel: 'docs/kb/B50_DEFER_UNBLOCK_PACKAGE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\COWORK_ARCHIVE_NOTE.md'
-    root: repo
-    rel: 'docs/kb/COWORK_ARCHIVE_NOTE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\COWORK_INBOX.md'
     root: repo
     rel: 'docs/kb/COWORK_INBOX.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\D4_ORG_UNIT_TEMPLATE_DESIGN.md'
-    root: repo
-    rel: 'docs/kb/D4_ORG_UNIT_TEMPLATE_DESIGN.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\D6_SDBI_OPTION_B_DESIGN.md'
-    root: repo
-    rel: 'docs/kb/D6_SDBI_OPTION_B_DESIGN.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\DATA_RECONCILIATION_PLAN.md'
-    root: repo
-    rel: 'docs/kb/DATA_RECONCILIATION_PLAN.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\DEBT_REGISTER.md'
     root: repo
     rel: 'docs/kb/DEBT_REGISTER.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\DESIGN_SYSTEM_UI.md'
-    root: repo
-    rel: 'docs/kb/DESIGN_SYSTEM_UI.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\DUMP_ARCHIVAL_RUNBOOK.md'
-    root: repo
-    rel: 'docs/kb/DUMP_ARCHIVAL_RUNBOOK.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -8126,54 +8210,6 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\PLAN_S1018_BATCH.md'
-    root: repo
-    rel: 'docs/kb/PLAN_S1018_BATCH.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\POST_V1_ROADMAP_DOSSIER.md'
-    root: repo
-    rel: 'docs/kb/POST_V1_ROADMAP_DOSSIER.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\RBAC_UIX_PERSPECTIVES_PLAN.md'
-    root: repo
-    rel: 'docs/kb/RBAC_UIX_PERSPECTIVES_PLAN.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md'
-    root: repo
-    rel: 'docs/kb/RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\RESUME_S1018_BATCH.md'
-    root: repo
-    rel: 'docs/kb/RESUME_S1018_BATCH.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\RTL_STABILIZATION_PLAN.md'
-    root: repo
-    rel: 'docs/kb/RTL_STABILIZATION_PLAN.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\SDBI_PHASE2_CLOSURE.md'
-    root: repo
-    rel: 'docs/kb/SDBI_PHASE2_CLOSURE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\SESSION_START_FORENSICS.md'
-    root: repo
-    rel: 'docs/kb/SESSION_START_FORENSICS.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\SOT_BACKLOG.md'
     root: repo
     rel: 'docs/kb/SOT_BACKLOG.md'
@@ -8183,18 +8219,6 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\SOT_STATE.md'
     root: repo
     rel: 'docs/kb/SOT_STATE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\VISUALIZATION_RENDERERS_CLOSURE.md'
-    root: repo
-    rel: 'docs/kb/VISUALIZATION_RENDERERS_CLOSURE.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\WAVE2_UNBLOCK_PACKAGE.md'
-    root: repo
-    rel: 'docs/kb/WAVE2_UNBLOCK_PACKAGE.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -8741,6 +8765,114 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\sync.sh'
     root: repo
     rel: 'docs/kb/tools/sync.sh'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\AUTONOMY_R23_PROJECT.md'
+    root: repo
+    rel: 'docs/kb/xtras/AUTONOMY_R23_PROJECT.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\B50_DEFER_UNBLOCK_PACKAGE.md'
+    root: repo
+    rel: 'docs/kb/xtras/B50_DEFER_UNBLOCK_PACKAGE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\COWORK_ARCHIVE_NOTE.md'
+    root: repo
+    rel: 'docs/kb/xtras/COWORK_ARCHIVE_NOTE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\D4_ORG_UNIT_TEMPLATE_DESIGN.md'
+    root: repo
+    rel: 'docs/kb/xtras/D4_ORG_UNIT_TEMPLATE_DESIGN.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\D6_SDBI_OPTION_B_DESIGN.md'
+    root: repo
+    rel: 'docs/kb/xtras/D6_SDBI_OPTION_B_DESIGN.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\DATA_RECONCILIATION_PLAN.md'
+    root: repo
+    rel: 'docs/kb/xtras/DATA_RECONCILIATION_PLAN.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\DESIGN_SYSTEM_UI.md'
+    root: repo
+    rel: 'docs/kb/xtras/DESIGN_SYSTEM_UI.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\DUMP_ARCHIVAL_RUNBOOK.md'
+    root: repo
+    rel: 'docs/kb/xtras/DUMP_ARCHIVAL_RUNBOOK.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\PLAN_S1018_BATCH.md'
+    root: repo
+    rel: 'docs/kb/xtras/PLAN_S1018_BATCH.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\POST_V1_ROADMAP_DOSSIER.md'
+    root: repo
+    rel: 'docs/kb/xtras/POST_V1_ROADMAP_DOSSIER.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\RBAC_UIX_PERSPECTIVES_PLAN.md'
+    root: repo
+    rel: 'docs/kb/xtras/RBAC_UIX_PERSPECTIVES_PLAN.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md'
+    root: repo
+    rel: 'docs/kb/xtras/RECONCILIATION_WALLS_AND_AI_DECISION_DOSSIER.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\RESUME_S1018_BATCH.md'
+    root: repo
+    rel: 'docs/kb/xtras/RESUME_S1018_BATCH.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\RTL_STABILIZATION_PLAN.md'
+    root: repo
+    rel: 'docs/kb/xtras/RTL_STABILIZATION_PLAN.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\SDBI_PHASE2_CLOSURE.md'
+    root: repo
+    rel: 'docs/kb/xtras/SDBI_PHASE2_CLOSURE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\SESSION_START_FORENSICS.md'
+    root: repo
+    rel: 'docs/kb/xtras/SESSION_START_FORENSICS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\VISUALIZATION_RENDERERS_CLOSURE.md'
+    root: repo
+    rel: 'docs/kb/xtras/VISUALIZATION_RENDERERS_CLOSURE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\xtras\WAVE2_UNBLOCK_PACKAGE.md'
+    root: repo
+    rel: 'docs/kb/xtras/WAVE2_UNBLOCK_PACKAGE.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11216,6 +11348,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\occupation-classifications.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/occupation-classifications.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\okrs.ts'
     root: repo
     rel: 'packages/shared/src/schemas/okrs.ts'
@@ -12290,6 +12428,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\occupation-classifications.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/occupation-classifications.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\occupation-skill-requirements.integration.test.ts'
     root: repo
     rel: 'apps/api/test/occupation-skill-requirements.integration.test.ts'
@@ -12428,6 +12572,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\rbac-tenant-admin-allowlist.test.ts'
+    root: repo
+    rel: 'apps/api/test/rbac-tenant-admin-allowlist.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\reconciliation-f2-imports.integration.test.ts'
     root: repo
     rel: 'apps/api/test/reconciliation-f2-imports.integration.test.ts'
@@ -12545,6 +12695,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\sdbi-perf-feedback.integration.test.ts'
     root: repo
     rel: 'apps/api/test/sdbi-perf-feedback.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\section-tabs-drift.test.ts'
+    root: repo
+    rel: 'apps/api/test/section-tabs-drift.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -12749,6 +12905,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\two-axis-f4-crosstree.integration.test.ts'
     root: repo
     rel: 'apps/api/test/two-axis-f4-crosstree.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\locale.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/locale.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\scope-data-classes.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/scope-data-classes.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\trust-proxy.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/trust-proxy.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked

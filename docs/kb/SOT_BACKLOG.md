@@ -191,8 +191,9 @@
 - **#60 G/G1 — retention & storage (archive `audit.import_validation_results` 547MB)** · status: ACTIVE
   - priority: P2 · effort: ~1-1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md §G1
   - note: snapshot PRIMA; policy keep failures+90gg; VACUUM FULL = op manuale off-hours documentata.
-- **#61 G/G2 — RBAC hygiene (perm `:delete` dedicati su 27 route; normalizzazione proxy)** · status: ACTIVE
-  - priority: P1 · effort: ~1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md §G2
+- **#61 G/G2 — RBAC hygiene (perm `:delete` dedicati su 27 route; normalizzazione proxy)** · status: DONE
+  - priority: P1 · effort: chiuso · doc: docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md §G2
+  - note: ✅ **DONE S1026** — il grosso era GIÀ chiuso (mig **000177/000178**, S1025: 32 DELETE→`:delete` dedicati + de-proxy observability/role-matrix/sessions/materialization; il register era stale). Residuo censito e chiuso in S1026 con mig **000199** (15 permessi, audience invariata derivata dalle sorgenti + self-healing anti-CROSS-JOIN-000005): `job_family:*` (le mutazioni non avevano ALCUN requirePermission — solo service-gate), `skill_taxonomy:*` (la matrice PROMETTEVA `skill:*` a TENANT_ADMIN/HRMS_MANAGER ma il service li respingeva — matrice ora onesta, PLATFORM_ADMIN-only), `operating_model:*` ← enterprise_typing, `organization_unit_kpi_template:*`/`process_kpi_template:*` ← bpm_process. Denial-code pubblici preservati via `requirePermission(code, deniedCode)`. Guard esteso: `rbac-delete-permissions.test.ts` (+2 invarianti: audience 000199 = sorgente; proxy assenti nei route file). Gate hardcoded nei service mantenuti come difesa in profondità.
 - **#62 G/G3 — integrità preventiva (acyclicity IS_A, warn LIMIT 5000, dual-shape)** · status: ACTIVE
   - priority: P2 · effort: ~1 sessione · doc: docs/product/DEVELOPMENT_LINES_G_PLATFORM_HYGIENE.md §G3
 - **#63 G/G5 — archivio script esausti (move-not-delete)** · status: ACTIVE

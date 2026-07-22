@@ -1,6 +1,9 @@
 /**
  * apps/api/src/modules/skill-categories/routes.ts
- * 5 endpoints under /v1/skill-categories. Read open; write PLATFORM_ADMIN.
+ * 5 endpoints under /v1/skill-categories. Read open; mutations gated by
+ * `skill_taxonomy:*` (000199, #61 G2 — PLATFORM_ADMIN-only, matrix-honest);
+ * service ensurePlatformAdmin kept as defense in depth, denial code stays
+ * SKILL_CATEGORY_ADMIN_ONLY.
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
@@ -28,7 +31,7 @@ export const skillCategoriesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => skillCategoriesService.getById(actor(req), req.params.id, req.locale));
 
   app.post("/", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:create")],
+    preHandler: [app.verifyCsrf, requirePermission("skill_taxonomy:create", "SKILL_CATEGORY_ADMIN_ONLY")],
     schema: { body: CreateSkillCategoryBodySchema, response: { 201: SkillCategorySchema } },
   }, async (req, reply) => {
     const c = await skillCategoriesService.create(actor(req), req.body);
@@ -36,12 +39,12 @@ export const skillCategoriesRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.patch("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:update")],
+    preHandler: [app.verifyCsrf, requirePermission("skill_taxonomy:update", "SKILL_CATEGORY_ADMIN_ONLY")],
     schema: { params: SkillCategoryIdParamSchema, body: UpdateSkillCategoryBodySchema, response: { 200: SkillCategorySchema } },
   }, async (req) => skillCategoriesService.update(actor(req), req.params.id, req.body));
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:delete")],
+    preHandler: [app.verifyCsrf, requirePermission("skill_taxonomy:delete", "SKILL_CATEGORY_ADMIN_ONLY")],
     schema: { params: SkillCategoryIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillCategoriesService.delete(actor(req), req.params.id);

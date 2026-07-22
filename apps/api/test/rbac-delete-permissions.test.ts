@@ -56,6 +56,32 @@ const PROXY_TO_SOURCE: Record<string, string> = {
 };
 
 /**
+ * G2 residuals (000199) → audience source. Same contract again: job_family:*
+ * and skill_taxonomy:* had NO honest route gate (service ensurePlatformAdmin
+ * was the real check, or worse — the route promised `skill:*` holders a power
+ * the service then denied), so their audience is sourced from the
+ * PLATFORM_ADMIN-only `tenant:create`. The kpi-template/operating-model codes
+ * replace cross-area proxies verb-by-verb.
+ */
+const G2_RESIDUAL_TO_SOURCE: Record<string, string> = {
+  "job_family:create": "tenant:create",
+  "job_family:update": "tenant:create",
+  "job_family:delete": "tenant:create",
+  "skill_taxonomy:create": "tenant:create",
+  "skill_taxonomy:update": "tenant:create",
+  "skill_taxonomy:delete": "tenant:create",
+  "operating_model:read": "enterprise_typing:read",
+  "operating_model:update": "enterprise_typing:update",
+  "operating_model:delete": "enterprise_typing:delete",
+  "organization_unit_kpi_template:read": "bpm_process:read",
+  "organization_unit_kpi_template:update": "bpm_process:update",
+  "organization_unit_kpi_template:delete": "bpm_process:delete",
+  "process_kpi_template:read": "bpm_process:read",
+  "process_kpi_template:update": "bpm_process:update",
+  "process_kpi_template:delete": "bpm_process:delete",
+};
+
+/**
  * Root deletes that legitimately do NOT use a `:delete` permission, with why.
  * Anything else must be justified here rather than silently tolerated.
  */
@@ -134,6 +160,44 @@ describe("#61 G2 — DELETE routes carry a dedicated :delete permission", () => 
       expect(sourceRoles.length, `${sourceCode} non ha grant — codice rinominato?`).toBeGreaterThan(0);
       expect(newRoles, `${newCode} deve avere l'audience di ${sourceCode}`).toEqual(sourceRoles);
     }
+  });
+
+  it("each G2-residual permission (000199) keeps the audience of its source", async () => {
+    for (const [newCode, sourceCode] of Object.entries(G2_RESIDUAL_TO_SOURCE)) {
+      const [newRoles, sourceRoles] = await Promise.all([rolesFor(newCode), rolesFor(sourceCode)]);
+
+      expect(sourceRoles.length, `${sourceCode} non ha grant — codice rinominato?`).toBeGreaterThan(0);
+      expect(newRoles, `${newCode} deve avere l'audience di ${sourceCode}`).toEqual(sourceRoles);
+    }
+  });
+
+  it("the G2-residual routes carry their dedicated permissions (old proxies gone)", () => {
+    const read = (mod: string) => readFileSync(join(MODULES_DIR, mod, "routes.ts"), "utf8");
+
+    // job-families: mutations must be matrix-gated (they had NO requirePermission at all)
+    const jobFamilies = read("job-families");
+    expect(jobFamilies).toMatch(/requirePermission\(\s*"job_family:create"/);
+    expect(jobFamilies).toMatch(/requirePermission\(\s*"job_family:update"/);
+    expect(jobFamilies).toMatch(/requirePermission\(\s*"job_family:delete"/);
+
+    // skill-taxonomy structures: the dishonest `skill:*` gate must be gone
+    for (const mod of ["skill-families", "skill-categories", "skill-taxonomy-edges"]) {
+      const src = read(mod);
+      expect(src, `${mod} non deve più usare skill:*`).not.toMatch(/requirePermission\(\s*"skill:(create|update|delete)"/);
+      expect(src, `${mod} deve usare skill_taxonomy:*`).toMatch(/requirePermission\(\s*"skill_taxonomy:/);
+    }
+
+    // operating-models / kpi-templates: cross-area proxies must be gone
+    const operatingModels = read("operating-models");
+    expect(operatingModels).not.toContain('requirePermission("enterprise_typing:');
+    expect(operatingModels).toMatch(/requirePermission\(\s*"operating_model:/);
+
+    for (const mod of ["organization-unit-kpi-templates", "process-kpi-templates"]) {
+      const src = read(mod);
+      expect(src, `${mod} non deve più usare bpm_process:*`).not.toContain('requirePermission("bpm_process:');
+    }
+    expect(read("organization-unit-kpi-templates")).toMatch(/requirePermission\(\s*"organization_unit_kpi_template:/);
+    expect(read("process-kpi-templates")).toMatch(/requirePermission\(\s*"process_kpi_template:/);
   });
 
   it("no route is gated by a permission from an unrelated area (known proxies are gone)", () => {

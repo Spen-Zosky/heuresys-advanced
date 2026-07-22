@@ -1,8 +1,9 @@
 /**
  * apps/api/src/modules/job-families/service.ts
- * Platform-level reference data. Read open to all authenticated; mutation
- * gated to PLATFORM_ADMIN since there's no granular job_family permission
- * in the seed and these are cross-tenant taxonomic anchors.
+ * Platform-level reference data. Read open to all authenticated; mutations
+ * gated by `job_family:*` at the route (000199, #61 G2 — PLATFORM_ADMIN-only
+ * audience); ensurePlatformAdmin below stays as defense in depth on these
+ * cross-tenant taxonomic anchors.
  */
 
 import { pool } from "../../db/client.js";

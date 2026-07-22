@@ -1,7 +1,9 @@
 /**
  * apps/api/src/modules/skill-taxonomy-edges/routes.ts
  * 4 endpoints under /v1/skill-taxonomy-edges (no PATCH — edges are immutable).
- * Read open with visibility filter; write PLATFORM_ADMIN.
+ * Read open with visibility filter; writes gated by `skill_taxonomy:*`
+ * (000199, #61 G2 — PLATFORM_ADMIN-only, matrix-honest); service check kept
+ * as defense in depth, denial code stays SKILL_TAXONOMY_ADMIN_ONLY.
  */
 
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
@@ -28,7 +30,7 @@ export const skillTaxonomyEdgesRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req) => skillTaxonomyEdgesService.getById(actor(req), req.params.id));
 
   app.post("/", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:create")],
+    preHandler: [app.verifyCsrf, requirePermission("skill_taxonomy:create", "SKILL_TAXONOMY_ADMIN_ONLY")],
     schema: { body: CreateSkillTaxonomyEdgeBodySchema, response: { 201: SkillTaxonomyEdgeSchema } },
   }, async (req, reply) => {
     const e = await skillTaxonomyEdgesService.create(actor(req), req.body);
@@ -36,7 +38,7 @@ export const skillTaxonomyEdgesRoutes: FastifyPluginAsyncZod = async (app) => {
   });
 
   app.delete("/:id", {
-    preHandler: [app.verifyCsrf, requirePermission("skill:delete")],
+    preHandler: [app.verifyCsrf, requirePermission("skill_taxonomy:delete", "SKILL_TAXONOMY_ADMIN_ONLY")],
     schema: { params: SkillTaxonomyEdgeIdParamSchema, response: { 204: EmptyResponseSchema } },
   }, async (req, reply) => {
     await skillTaxonomyEdgesService.delete(actor(req), req.params.id);

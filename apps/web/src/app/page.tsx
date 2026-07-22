@@ -52,7 +52,14 @@ export default function HomePage() {
         <LeadForm />
       </section>
 
-      <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">{t("footer.tagline")}</footer>
+      <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
+        <p>{t("footer.tagline")}</p>
+        <p className="mt-2">
+          <Link href="/whistleblowing" data-testid="landing-footer-whistleblowing" className="underline underline-offset-2 hover:text-foreground">
+            {t("footer.whistleblowing")}
+          </Link>
+        </p>
+      </footer>
     </main>
   );
 }

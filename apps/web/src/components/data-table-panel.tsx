@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { useState } from "react";
 import { Badge, Button, DataTableWithCrossHair, EmptyState, ErrorState, PageHeader } from "@heuresys/ui";
 import { Inbox } from "lucide-react";
@@ -37,6 +37,9 @@ export interface EntityTableProps<T> {
   rows: T[];
   rowKey: (row: T) => string;
   rowTestId?: string;
+  /** Optional row-click handler (master-detail pages, e.g. whistleblowing-console). When
+   * set, the `<tr>` becomes keyboard-operable (Enter/Space) and gets a pointer cursor. */
+  onRowClick?: (row: T) => void;
   columns: DataColumn<T>[];
   emptyTestId?: string;
   emptyTitle?: string;
@@ -58,7 +61,7 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
   const { t } = useTranslation();
   const {
     isLoading, isError, errorTestId, errorMessage,
-    rows, rowKey, rowTestId, columns,
+    rows, rowKey, rowTestId, onRowClick, columns,
     emptyTestId, emptyTitle, emptyDescription, caption,
     pageSize: pageSizeProp, server,
   } = props;
@@ -139,7 +142,24 @@ export function EntityTable<T>(props: EntityTableProps<T>) {
         </thead>
         <tbody className="divide-y divide-border">
           {visibleRows.map((row) => (
-            <tr key={rowKey(row)} data-testid={rowTestId} className="transition-colors hover:bg-muted/60">
+            <tr
+              key={rowKey(row)}
+              data-testid={rowTestId}
+              className={`transition-colors hover:bg-muted/60 ${onRowClick ? "cursor-pointer" : ""}`}
+              {...(onRowClick
+                ? {
+                    onClick: () => onRowClick(row),
+                    tabIndex: 0,
+                    role: "button",
+                    onKeyDown: (e: KeyboardEvent<HTMLTableRowElement>) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onRowClick(row);
+                      }
+                    },
+                  }
+                : {})}
+            >
               {columns.map((c, i) => (
                 <td key={i} className={`px-4 py-2 align-middle ${c.align === "right" ? "text-right tabular-nums" : ""} ${c.cellClassName ?? ""}`}>
                   {c.cell(row)}

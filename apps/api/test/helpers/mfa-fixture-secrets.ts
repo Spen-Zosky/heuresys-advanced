@@ -26,6 +26,9 @@ export const FIXTURE_TOTP_SECRETS: Record<string, string> = {
   "tommaso.fiore@rtl-bank.org":       "E2EFIXTOMMASO2RTL2TOTP2DDDDDDDDD",
   "antonio.parisi@rtl-bank.org":      "E2EFIXANTONIO2RTL2TOTP2EEEEEEEEE",
   "marco.rinaldi@rtl-bank.org":       "E2EFIXMARCO2RTL2TOTP2FFFFFFFFFFF",
+  // #51 E1 (S1026): whistleblowing custodian (mig 000205) — must mirror the
+  // web copy (apps/web/tests/e2e/mfa-fixture-secrets.ts), parity-checked.
+  "andrea.martino@rtl-bank.org":      "E2EFIXANDREA2RTL2TOTP2GGGGGGGGGG",
 };
 
 export const FIXTURE_PERSONA_EMAILS = Object.keys(FIXTURE_TOTP_SECRETS);

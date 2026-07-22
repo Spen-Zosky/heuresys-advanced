@@ -55,6 +55,9 @@ const PERSONA_EMAILS: readonly string[] = [
   "tommaso.fiore@rtl-bank.org",
   "antonio.parisi@rtl-bank.org",
   "marco.rinaldi@rtl-bank.org",
+  // #51 E1 (S1026): the designated whistleblowing custodian (Head of Legal &
+  // Compliance, role granted by mig 000205) needs a login to reach the console.
+  "andrea.martino@rtl-bank.org",
 ];
 
 const ARGON2_PARAMS = {

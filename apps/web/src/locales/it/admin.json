@@ -840,5 +840,36 @@
       "status": "Stato",
       "handedOff": "Consegnato"
     }
+  },
+  "whistleblowingConsole": {
+    "title": "Console segnalazioni whistleblowing",
+    "description": "Console riservata al custode designato (D.Lgs 24/2023). Nessun altro ruolo può leggere queste segnalazioni.",
+    "count": "{{count}} segnalazioni",
+    "errorMessage": "Errore di caricamento delle segnalazioni.",
+    "emptyTitle": "Nessuna segnalazione",
+    "emptyDescription": "Non risultano segnalazioni al momento.",
+    "caption": "Elenco segnalazioni whistleblowing",
+    "columns": {
+      "trackingCode": "Codice",
+      "category": "Categoria",
+      "status": "Stato",
+      "subject": "Oggetto",
+      "submittedAt": "Inviata il"
+    },
+    "detail": {
+      "title": "Dettaglio segnalazione",
+      "loadError": "Errore nel caricamento del dettaglio.",
+      "contactLabel": "Contatto",
+      "noContact": "Nessun contatto lasciato",
+      "statusLabel": "Stato",
+      "publicMessageLabel": "Messaggio pubblico per il segnalante",
+      "publicMessageHint": "Visibile al segnalante tramite la verifica stato con codice di tracciamento.",
+      "internalNotesLabel": "Note interne",
+      "internalNotesHint": "Visibili solo al custode — non raggiungono il segnalante.",
+      "save": "Salva",
+      "saving": "Salvataggio…",
+      "savedMsg": "Modifiche salvate.",
+      "errorUnexpected": "Salvataggio non riuscito. Riprova."
+    }
   }
 }

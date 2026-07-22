@@ -20,6 +20,7 @@ const TARGET_PERSONAS = [
   "manager",
   "employee",
   "outsider",
+  "custodian",
 ] as const;
 
 for (const key of TARGET_PERSONAS) {

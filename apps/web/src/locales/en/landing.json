@@ -44,5 +44,47 @@
     "retention": "Data is retained for the time strictly necessary to handle your request and, in any event, no longer than 24 months from collection. You may withdraw consent at any time by writing to the address below.",
     "contact": "Data controller: Heuresys S.r.l. — privacy@heuresys.com"
   },
-  "footer": { "tagline": "Heuresys — EU-native Skills & Org Intelligence." }
+  "whistleblowing": {
+    "title": "Whistleblowing reporting channel",
+    "legalNotice": "This channel is reserved under Italian Legislative Decree 24/2023, handled solely by the designated custodian. No identifying data is stored, except for a contact you choose to leave voluntarily.",
+    "form": {
+      "title": "Submit a report",
+      "subtitle": "The report is anonymous by default — leaving a contact is optional.",
+      "categoryLabel": "Category",
+      "subjectLabel": "Subject",
+      "bodyLabel": "Description of the facts",
+      "contactLabel": "Contact (optional)",
+      "contactHint": "You can stay fully anonymous by leaving this field empty. If you fill it in, the contact is visible only to the designated custodian.",
+      "submit": "Submit report",
+      "submitting": "Sending…",
+      "successTitle": "Report submitted",
+      "successBody": "Your report has been received by the designated custodian.",
+      "trackingCodeHint": "Keep this code: it is the only way to follow the case.",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "error": "Submission failed. Please try again.",
+      "errorRateLimited": "Too many attempts — wait a few minutes and try again.",
+      "validation": {
+        "subjectLength": "The subject must be at least 3 characters long.",
+        "bodyLength": "The description must be at least 10 characters long."
+      }
+    },
+    "status": {
+      "title": "Check your report status",
+      "subtitle": "Enter the tracking code you received when you submitted the report.",
+      "codeLabel": "Tracking code",
+      "codePlaceholder": "e.g. WB-7QF3K9X2M1AB",
+      "check": "Check",
+      "checking": "Checking…",
+      "notFound": "Code not found.",
+      "error": "Check failed. Please try again.",
+      "submittedAt": "Submitted on",
+      "lastUpdateAt": "Last update",
+      "publicMessageLabel": "Message from the handler"
+    }
+  },
+  "footer": {
+    "tagline": "Heuresys — EU-native Skills & Org Intelligence.",
+    "whistleblowing": "Whistleblowing channel"
+  }
 }

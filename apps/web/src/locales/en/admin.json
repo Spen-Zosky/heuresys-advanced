@@ -840,5 +840,36 @@
       "status": "Status",
       "handedOff": "Handed off"
     }
+  },
+  "whistleblowingConsole": {
+    "title": "Whistleblowing reports console",
+    "description": "Console reserved to the designated custodian (Italian Legislative Decree 24/2023). No other role can read these reports.",
+    "count": "{{count}} reports",
+    "errorMessage": "Failed to load reports.",
+    "emptyTitle": "No reports",
+    "emptyDescription": "There are no reports at the moment.",
+    "caption": "Whistleblowing reports list",
+    "columns": {
+      "trackingCode": "Code",
+      "category": "Category",
+      "status": "Status",
+      "subject": "Subject",
+      "submittedAt": "Submitted on"
+    },
+    "detail": {
+      "title": "Report detail",
+      "loadError": "Failed to load the detail.",
+      "contactLabel": "Contact",
+      "noContact": "No contact left",
+      "statusLabel": "Status",
+      "publicMessageLabel": "Public message to the reporter",
+      "publicMessageHint": "Visible to the reporter via the tracking-code status check.",
+      "internalNotesLabel": "Internal notes",
+      "internalNotesHint": "Visible only to the custodian — never reach the reporter.",
+      "save": "Save",
+      "saving": "Saving…",
+      "savedMsg": "Changes saved.",
+      "errorUnexpected": "Save failed. Please try again."
+    }
   }
 }

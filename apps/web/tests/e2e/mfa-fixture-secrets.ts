@@ -16,4 +16,7 @@ export const FIXTURE_TOTP_SECRETS: Record<string, string> = {
   "tommaso.fiore@rtl-bank.org":       "E2EFIXTOMMASO2RTL2TOTP2DDDDDDDDD",
   "antonio.parisi@rtl-bank.org":      "E2EFIXANTONIO2RTL2TOTP2EEEEEEEEE",
   "marco.rinaldi@rtl-bank.org":       "E2EFIXMARCO2RTL2TOTP2FFFFFFFFFFF",
+  // #51 E1 (S1026): whistleblowing custodian (mig 000205), needed for the
+  // whistleblowing-console E2E spec's "custodian" persona.
+  "andrea.martino@rtl-bank.org":      "E2EFIXANDREA2RTL2TOTP2GGGGGGGGGG",
 };

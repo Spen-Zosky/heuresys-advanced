@@ -44,5 +44,47 @@
     "retention": "I dati sono conservati per il tempo strettamente necessario a gestire la tua richiesta e, in ogni caso, non oltre 24 mesi dalla raccolta. Puoi revocare il consenso in qualsiasi momento scrivendo all'indirizzo indicato di seguito.",
     "contact": "Titolare del trattamento: Heuresys S.r.l. — privacy@heuresys.com"
   },
-  "footer": { "tagline": "Heuresys — Skills & Org Intelligence EU-native." }
+  "whistleblowing": {
+    "title": "Canale segnalazioni whistleblowing",
+    "legalNotice": "Canale riservato ai sensi del D.Lgs 24/2023, gestito dal solo custode designato. Nessun dato identificativo viene salvato, salvo il contatto che scegli volontariamente di lasciare.",
+    "form": {
+      "title": "Invia una segnalazione",
+      "subtitle": "La segnalazione è anonima per impostazione predefinita: lasciare un contatto è facoltativo.",
+      "categoryLabel": "Categoria",
+      "subjectLabel": "Oggetto",
+      "bodyLabel": "Descrizione dei fatti",
+      "contactLabel": "Contatto (facoltativo)",
+      "contactHint": "Puoi restare completamente anonimo lasciando questo campo vuoto. Se lo compili, il contatto è visibile solo al custode designato.",
+      "submit": "Invia segnalazione",
+      "submitting": "Invio…",
+      "successTitle": "Segnalazione inviata",
+      "successBody": "La tua segnalazione è stata ricevuta dal custode designato.",
+      "trackingCodeHint": "Conserva questo codice: è l'unico modo per seguire lo stato del caso.",
+      "copy": "Copia",
+      "copied": "Copiato!",
+      "error": "Invio non riuscito. Riprova.",
+      "errorRateLimited": "Troppi tentativi — attendi qualche minuto e riprova.",
+      "validation": {
+        "subjectLength": "L'oggetto deve contenere almeno 3 caratteri.",
+        "bodyLength": "La descrizione deve contenere almeno 10 caratteri."
+      }
+    },
+    "status": {
+      "title": "Verifica lo stato della tua segnalazione",
+      "subtitle": "Inserisci il codice di tracciamento ricevuto al momento dell'invio.",
+      "codeLabel": "Codice di tracciamento",
+      "codePlaceholder": "es. WB-7QF3K9X2M1AB",
+      "check": "Verifica",
+      "checking": "Verifica…",
+      "notFound": "Codice non trovato.",
+      "error": "Verifica non riuscita. Riprova.",
+      "submittedAt": "Inviata il",
+      "lastUpdateAt": "Ultimo aggiornamento",
+      "publicMessageLabel": "Messaggio dal gestore"
+    }
+  },
+  "footer": {
+    "tagline": "Heuresys — Skills & Org Intelligence EU-native.",
+    "whistleblowing": "Segnalazioni whistleblowing"
+  }
 }

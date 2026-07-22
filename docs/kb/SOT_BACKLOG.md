@@ -163,9 +163,9 @@
 - **#50 D/D4 — legacy knowledge graph (kg_nodes/kg_edges 139k)** · status: ACTIVE
   - priority: P3 · effort: ~2-3 sessioni · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D4
   - note: richiede destination design prima dell'import.
-- **#51 E/E1 — whistleblowing (D.Lgs 24/2023) con ruolo custodian dedicato** · status: ACTIVE
-  - priority: P1 · effort: ~2-3 sessioni · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E1
-  - note: **decisione Enzo S1018: sì, compliance-by-design** — ruolo WHISTLEBLOWING_CUSTODIAN fuori catena org (deroga ADR-0027 → nuovo ADR-0028 + proposta invariante I22), canale anche anonimo (access-code), crypto app-level, test negativi TA/HRMS/PA/MANAGER=403. Wave W10.
+- **#51 E/E1 — whistleblowing (D.Lgs 24/2023) con ruolo custodian dedicato** · status: DONE
+  - priority: P1 · effort: chiuso · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E1
+  - note: ✅ **DONE S1026** — il backend era GIÀ completo (modulo + mig 000181: ruolo custodian-only con deroga ADR-0027, canale anonimo con tracking-code, honeypot, rate-limit, 8 test incl. negativi PA/TA=403) ma il ruolo NON era assegnato a nessuno (console irraggiungibile) e NESSUNA UI esisteva. Chiuso: **mig 000205** designa il custode reale (andrea.martino, Head of Legal & Compliance) + voce sidebar Governance gated `whistleblowing:read` (visibile SOLO al custode); **pagina pubblica `/whistleblowing`** (form anonimo con nota legale, honeypot, tracking-code con copia; verifica stato per codice) linkata dal footer landing; **console custode `/whistleblowing-console`** (lista + master-detail + update status/messaggio pubblico/note interne); persona E2E custodian provisionata (seeder + fixture TOTP parity su entrambi i lati). **Residuo esplicito NON implementato** (dal perimetro S1018): crypto app-level del body (oggi plaintext in tabella custodian-only) — se il prodotto la vuole è un item nuovo; la protezione attuale è RBAC-isolation + deroga org-chain.
 - **#52 E/E2 — SSO enterprise (Azure AD / Google OIDC)** · status: WAIT-INPUT
   - input-richiesto: client ID + secret di un IdP reale (app registration Azure AD oppure OAuth client Google OIDC)
   - perche-solo-tuo: la registrazione dell'app su un tenant IdP è una risorsa esterna che solo Enzo può creare; senza IdP reale la DoD live E2E non è dimostrabile

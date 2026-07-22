@@ -106,6 +106,13 @@ export const PERSONAS = {
     email: "antonio.parisi@rtl-bank.org",
     expectedLandingPath: "/me",
   },
+  // #51 E1 (S1026): the WHISTLEBLOWING_CUSTODIAN (mig 000205) — her base roles
+  // (USER, TEAM_MEMBER) are non-admin per lib/landing.ts, so she lands on /me
+  // like any other pure USER; the custodian console is reached via its own URL.
+  custodian: {
+    email: "andrea.martino@rtl-bank.org",
+    expectedLandingPath: "/me",
+  },
 } as const satisfies Record<string, { email: string; expectedLandingPath: string }>;
 
 export type PersonaKey = keyof typeof PERSONAS;

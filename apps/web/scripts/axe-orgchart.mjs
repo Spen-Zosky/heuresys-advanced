@@ -1,3 +1,4 @@
+/* global console, process, document, URL */
 /**
  * apps/web/scripts/axe-orgchart.mjs — one-off F4: diagnosi NODO-SPECIFICA della
  * violazione color-contrast su /organization/org-chart (la a11y.spec salva solo

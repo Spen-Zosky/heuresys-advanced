@@ -88,5 +88,11 @@ Cluster per tipo di intervento (la fonte piena è `qa_artifacts/runs/f4-sweep/`)
 - [x] Sweep meccanica completa e stabilizzata (68 route × 3 personas, spec `f4-sweep` riusabile)
 - [x] 7 fix chirurgici applicati e verificati (F4-01…07), catena 152/152 verde
 - [x] Worklist P2 clusterizzata (4 piani chirurgici sopra)
-- [ ] Esecuzione P2 (label-layer enum → codici tecnici → pagine sottili) + showcase/pubbliche
+- [ ] Esecuzione P2 (label-layer enum → codici tecnici → pagine sottili) + pass qualitativo
+      "a occhio" (formati, realismo dei contenuti) + showcase/pubbliche
 - [ ] Preload i18n `common` (transitorio EN)
+- [x] **Requisito Enzo (S1025): l'ITALIANO è la lingua di default** — verificato live
+      (config `DEFAULT_LOCALE='it'` + fallback IT; 0 flag EN sulle 68 pagine autenticate
+      al census finale; le 5 pubbliche servono `lang="it"` in SSR senza cookie) e reso
+      PERMANENTE con la spec di regressione `tests/e2e/default-locale.spec.ts` (suite
+      normale: contesto vergine → lang=it + copy IT su /login, EN solo da toggle esplicito)

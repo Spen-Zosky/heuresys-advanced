@@ -1,0 +1,2122 @@
+scheme,code,parent_code,level,name
+ISCO_08,1,,1,Dirigenti
+ISCO_08,11,1,2,"Direttori, dirigenti superiori della pubblica amministrazione, membri dell’esecutivo e dei corpi legislativi"
+ISCO_08,111,11,3,"Membri dell’esecutivo e dei corpi legislativi, dirigenti superiori della pubblica amministrazione"
+ISCO_08,1111,111,4,Membri dell’esecutivo e dei corpi legislativi
+ISCO_08,1112,111,4,Dirigenti superiori della pubblica amministrazione
+ISCO_08,1113,111,4,Capi tradizionali e capi villaggio
+ISCO_08,1114,111,4,Dirigenti superiori di organizzazioni specializzate
+ISCO_08,112,11,3,Direttori
+ISCO_08,1120,112,4,Direttori
+ISCO_08,12,1,2,Dirigenti amministrativi e commerciali
+ISCO_08,121,12,3,Dirigenti nei servizi alle imprese e dell’amministrazione
+ISCO_08,1211,121,4,Dirigenti nei servizi finanziari
+ISCO_08,1212,121,4,Dirigenti delle risorse umane
+ISCO_08,1213,121,4,Dirigenti strategie e pianificazione
+ISCO_08,1219,121,4,Dirigenti nei servizi alle imprese e dell’amministrazione non classificati altrove
+ISCO_08,122,12,3,"Dirigenti nei servizi di vendita, commercializzazione e sviluppo"
+ISCO_08,1221,122,4,Dirigenti nei servizi di vendita e commercializzazione
+ISCO_08,1222,122,4,Dirigenti nei servizi di pubblicità e pubbliche relazioni
+ISCO_08,1223,122,4,Dirigenti nel settore ricerca e sviluppo
+ISCO_08,13,1,2,Dirigenti nei servizi di produzione e specializzati
+ISCO_08,131,13,3,"Dirigenti nella produzione agricola, forestale e della pesca"
+ISCO_08,1311,131,4,Dirigenti nella produzione agricola e forestale
+ISCO_08,1312,131,4,Dirigenti nella produzione della pesca e dell’acquacoltura
+ISCO_08,132,13,3,"Dirigenti dell’industria manifatturiera, dell’estrazione, dell’edilizia e della distribuzione"
+ISCO_08,1321,132,4,Dirigenti dell’industria manifatturiera
+ISCO_08,1322,132,4,Dirigenti dell’industria dell’estrazione
+ISCO_08,1323,132,4,Dirigenti dell’edilizia
+ISCO_08,1324,132,4,"Dirigenti nei servizi di approvvigionamento, distribuzione ed assimilati"
+ISCO_08,133,13,3,Dirigenti nei servizi delle tecnologie dell’informazione e della comunicazione
+ISCO_08,1330,133,4,Dirigenti nei servizi delle tecnologie dell’informazione e della comunicazione
+ISCO_08,134,13,3,Dirigenti nei servizi professionali
+ISCO_08,1341,134,4,Dirigenti nei servizi di sorveglianza dei bambini
+ISCO_08,1342,134,4,Dirigenti nei servizi sanitari
+ISCO_08,1343,134,4,Dirigenti nei servizi di assistenza agli anziani
+ISCO_08,1344,134,4,Dirigenti nei servizi sociali
+ISCO_08,1345,134,4,Dirigenti nel settore dell’educazione
+ISCO_08,1346,134,4,Dirigenti di filiale nei servizi finanziari e assicurativi
+ISCO_08,1349,134,4,Dirigenti in servizi professionali non classificati altrove
+ISCO_08,14,1,2,"Dirigenti nei servizi alberghieri, nel commercio ed assimilati"
+ISCO_08,141,14,3,Dirigenti nei servizi alberghieri e nella ristorazione
+ISCO_08,1411,141,4,Dirigenti nei servizi alberghieri
+ISCO_08,1412,141,4,Dirigenti nella ristorazione
+ISCO_08,142,14,3,Dirigenti nel commercio all’ingrosso e al dettaglio
+ISCO_08,1420,142,4,Dirigenti nel commercio all’ingrosso e al dettaglio
+ISCO_08,143,14,3,Dirigenti in altri servizi
+ISCO_08,1431,143,4,"Dirigenti di centri per le attività sportive, ricreative e culturali"
+ISCO_08,1439,143,4,Dirigenti di servizi non classificati altrove
+ISCO_08,2,,1,Professioni intellettuali e scientifiche
+ISCO_08,21,2,2,Specialisti in scienze e ingegneria
+ISCO_08,211,21,3,Specialisti in scienze fisiche e della terra
+ISCO_08,2111,211,4,Fisici e astronomi
+ISCO_08,2112,211,4,Meteorologi
+ISCO_08,2113,211,4,Chimici
+ISCO_08,2114,211,4,Geologi e geofisici
+ISCO_08,212,21,3,"Matematici, attuari e statistici"
+ISCO_08,2120,212,4,"Matematici, attuari e statistici"
+ISCO_08,213,21,3,Specialisti nelle scienze della vita
+ISCO_08,2131,213,4,"Biologi, botanici, zoologi ed assimilati"
+ISCO_08,2132,213,4,"Agronomi, forestali e ittiologi"
+ISCO_08,2133,213,4,Specialisti in protezione ambientale
+ISCO_08,214,21,3,Specialisti in ingegneria (ad eccezione degli elettrotecnici)
+ISCO_08,2141,214,4,Ingegneri industriali e gestionali
+ISCO_08,2142,214,4,Ingegneri civili
+ISCO_08,2143,214,4,Ingegneri ambientali
+ISCO_08,2144,214,4,Ingegneri meccanici
+ISCO_08,2145,214,4,Ingegneri chimici
+ISCO_08,2146,214,4,"Ingegneri minerari, metallurgici ed assimilati"
+ISCO_08,2149,214,4,Specialisti in ingegneria non classificati altrove
+ISCO_08,215,21,3,Ingegneri elettrotecnici
+ISCO_08,2151,215,4,Ingegneri elettrici
+ISCO_08,2152,215,4,Ingegneri elettronici
+ISCO_08,2153,215,4,Ingegneri in telecomunicazioni
+ISCO_08,216,21,3,"Architetti, pianificatori territoriali, agrimensori, disegnatori e progettisti"
+ISCO_08,2161,216,4,Architetti
+ISCO_08,2162,216,4,Paesaggisti
+ISCO_08,2163,216,4,Progettisti di prodotti e disegnatori di moda
+ISCO_08,2164,216,4,Urbanisti e pianificatori del traffico
+ISCO_08,2165,216,4,Cartografi e agrimensori
+ISCO_08,2166,216,4,Grafici e progettisti multimediali
+ISCO_08,22,2,2,Specialisti della salute
+ISCO_08,221,22,3,Medici
+ISCO_08,2211,221,4,Medici generici
+ISCO_08,2212,221,4,Medici specialisti
+ISCO_08,222,22,3,Infermieri e ostetrici professionisti
+ISCO_08,2221,222,4,Specialisti in scienze sanitarie infermieristiche
+ISCO_08,2222,222,4,Specialisti in scienze sanitarie ostetriche
+ISCO_08,223,22,3,Specialisti della medicina tradizionale e complementare
+ISCO_08,2230,223,4,Specialisti della medicina tradizionale e complementare
+ISCO_08,224,22,3,Paramedici
+ISCO_08,2240,224,4,Paramedici
+ISCO_08,225,22,3,Veterinari
+ISCO_08,2250,225,4,Veterinari
+ISCO_08,226,22,3,Altri specialisti della salute
+ISCO_08,2261,226,4,Dentisti
+ISCO_08,2262,226,4,Farmacisti
+ISCO_08,2263,226,4,"Specialisti in medicina ambientale, medicina del lavoro e igiene"
+ISCO_08,2264,226,4,Fisioterapisti
+ISCO_08,2265,226,4,Dietologi e nutrizionisti
+ISCO_08,2266,226,4,Audiologi e logopedisti
+ISCO_08,2267,226,4,Optometristi e oftalmologi
+ISCO_08,2269,226,4,Specialisti della salute non classificati altrove
+ISCO_08,23,2,2,Specialisti dell’educazione
+ISCO_08,231,23,3,Docenti universitari e professori dell’insegnamento superiore
+ISCO_08,2310,231,4,Docenti universitari e professori dell’insegnamento superiore
+ISCO_08,232,23,3,Professori dell’educazione professionale
+ISCO_08,2320,232,4,Professori dell’educazione professionale
+ISCO_08,233,23,3,Professori di scuola secondaria
+ISCO_08,2330,233,4,Professori di scuola secondaria
+ISCO_08,234,23,3,Professori di scuola primaria e pre-primaria
+ISCO_08,2341,234,4,Professori di scuola primaria
+ISCO_08,2342,234,4,Professori di scuola pre-primaria
+ISCO_08,235,23,3,Altri specialisti dell’educazione
+ISCO_08,2351,235,4,Specialisti dei metodi di insegnamento
+ISCO_08,2352,235,4,Professori per l’insegnamento ad alunni con esigenze speciali
+ISCO_08,2353,235,4,Altri professori di lingue
+ISCO_08,2354,235,4,Altri professori di educazione musicale
+ISCO_08,2355,235,4,Altri professori di educazione artistica
+ISCO_08,2356,235,4,Formatori in tecnologie dell’informazione
+ISCO_08,2359,235,4,Specialisti dell’educazione non classificati altrove
+ISCO_08,24,2,2,Specialisti delle scienze commerciali e dell’amministrazione
+ISCO_08,241,24,3,Specialisti finanziari
+ISCO_08,2411,241,4,Contabili
+ISCO_08,2412,241,4,Consulenti finanziari e per gli investimenti
+ISCO_08,2413,241,4,Analisti finanziari
+ISCO_08,242,24,3,Specialisti dell’amministrazione
+ISCO_08,2421,242,4,Analisti della gestione e organizzazione
+ISCO_08,2422,242,4,Specialisti delle politiche di amministrazione
+ISCO_08,2423,242,4,Specialisti di personale e sviluppo di carriera
+ISCO_08,2424,242,4,Specialisti della formazione e dello sviluppo delle risorse umane
+ISCO_08,243,24,3,"Specialisti delle vendite, del marketing e delle pubbliche relazioni"
+ISCO_08,2431,243,4,Specialisti della pubblicità e del marketing
+ISCO_08,2432,243,4,Specialisti delle pubbliche relazioni
+ISCO_08,2433,243,4,Informatori tecnici e scientifici (ad eccezione del settore ICT)
+ISCO_08,2434,243,4,Specialisti delle vendite nel settore delle tecnologie dell’informazione e della comunicazione
+ISCO_08,25,2,2,Specialisti delle tecnologie dell’informazione e della comunicazione
+ISCO_08,251,25,3,Sviluppatori e analisti di software e applicazioni
+ISCO_08,2511,251,4,Analisti di sistema
+ISCO_08,2512,251,4,Sviluppatori di software
+ISCO_08,2513,251,4,Sviluppatori Web e multimediali
+ISCO_08,2514,251,4,Programmatori di applicazioni
+ISCO_08,2519,251,4,Sviluppatori e analisti di software e applicazioni non classificati altrove
+ISCO_08,252,25,3,Specialisti in basi dati e in reti informatiche
+ISCO_08,2521,252,4,Specialisti nella progettazione e amministrazione delle basi dati
+ISCO_08,2522,252,4,Amministratori di sistema
+ISCO_08,2523,252,4,Specialisti in reti informatiche
+ISCO_08,2529,252,4,Specialisti in basi dati e in reti informatiche non classificati altrove
+ISCO_08,26,2,2,"Specialisti in scienze giuridiche, sociali e culturali"
+ISCO_08,261,26,3,Specialisti in scienze giuridiche
+ISCO_08,2611,261,4,Avvocati
+ISCO_08,2612,261,4,Magistrati
+ISCO_08,2619,261,4,Specialisti in scienze giuridiche non classificati altrove
+ISCO_08,262,26,3,"Bibliotecari, archivisti e curatori di musei"
+ISCO_08,2621,262,4,Archivisti e curatori di musei
+ISCO_08,2622,262,4,"Bibliotecari, documentalisti ed assimilati"
+ISCO_08,263,26,3,Specialisti in scienze sociali e in discipline religiose
+ISCO_08,2631,263,4,Economisti
+ISCO_08,2632,263,4,"Sociologi, antropologi ed assimilati"
+ISCO_08,2633,263,4,"Filosofi, storici e specialisti in scienze politiche"
+ISCO_08,2634,263,4,Psicologi
+ISCO_08,2635,263,4,Specialisti nell’assistenza sociale e nell’orientamento
+ISCO_08,2636,263,4,Specialisti in discipline religiose
+ISCO_08,264,26,3,"Specialisti in discipline linguistiche, letterarie e documentali"
+ISCO_08,2641,264,4,Scrittori ed assimilati
+ISCO_08,2642,264,4,Giornalisti
+ISCO_08,2643,264,4,"Traduttori, interpreti e altri linguisti"
+ISCO_08,265,26,3,Specialisti in discipline artistico-espressive
+ISCO_08,2651,265,4,Specialisti delle arti visive
+ISCO_08,2652,265,4,"Musicisti, cantanti e compositori"
+ISCO_08,2653,265,4,Ballerini e coreografi
+ISCO_08,2654,265,4,"Registi, sceneggiatori, produttori ed assimilati"
+ISCO_08,2655,265,4,Attori
+ISCO_08,2656,265,4,Annunciatori della radio e della televisione e di altri media
+ISCO_08,2659,265,4,Specialisti in discipline artistico-espressive non classificati altrove
+ISCO_08,3,,1,Professioni tecniche intermedie
+ISCO_08,31,3,2,Professioni tecniche nelle scienze e nell’ingegneria
+ISCO_08,311,31,3,Tecnici delle scienze fisiche e ingegneristiche
+ISCO_08,3111,311,4,Tecnici delle scienze chimiche e fisiche
+ISCO_08,3112,311,4,Tecnici delle costruzioni civili
+ISCO_08,3113,311,4,Elettrotecnici
+ISCO_08,3114,311,4,Tecnici elettronici
+ISCO_08,3115,311,4,Tecnici meccanici
+ISCO_08,3116,311,4,Tecnici chimici
+ISCO_08,3117,311,4,Tecnici metallurgico-minerari
+ISCO_08,3118,311,4,Disegnatori industriali
+ISCO_08,3119,311,4,Altri tecnici delle scienze fisiche e ingegneristiche non classificati altrove
+ISCO_08,312,31,3,"Supervisori delle attività estrattive, manifatturiere e di costruzione"
+ISCO_08,3121,312,4,Supervisori minerari
+ISCO_08,3122,312,4,Supervisori delle attività manifatturiere
+ISCO_08,3123,312,4,Supervisori edili
+ISCO_08,313,31,3,Tecnici del controllo del processo di produzione
+ISCO_08,3131,313,4,Conduttori di impianti per la produzione di energia elettrica
+ISCO_08,3132,313,4,Conduttori di inceneritori e di impianti del trattamento delle acque
+ISCO_08,3133,313,4,Tecnici del controllo di impianti per il trattamento chimico
+ISCO_08,3134,313,4,Conduttori di impianti per la raffinazione del petrolio e del gas naturale
+ISCO_08,3135,313,4,Tecnici per il controllo del processo di produzione del metallo
+ISCO_08,3139,313,4,Tecnici del controllo del processo di produzione non classificati altrove
+ISCO_08,314,31,3,Tecnici nelle scienze della vita ed assimilati
+ISCO_08,3141,314,4,Tecnici nelle scienze della vita (ad eccezione delle scienze mediche)
+ISCO_08,3142,314,4,Tecnici agronomi
+ISCO_08,3143,314,4,Tecnici forestali
+ISCO_08,315,31,3,Controllori e tecnici del trasporto aereo e navale
+ISCO_08,3151,315,4,Ufficiali di macchina navali
+ISCO_08,3152,315,4,Ufficiali di bordo e piloti navali
+ISCO_08,3153,315,4,Piloti di aeromobili ed assimilati
+ISCO_08,3154,315,4,Controllori del traffico aereo
+ISCO_08,3155,315,4,Tecnici elettronici addetti alla sicurezza del traffico aereo
+ISCO_08,32,3,2,Professioni intermedie nelle scienze della salute
+ISCO_08,321,32,3,Tecnici delle scienze mediche e farmaceutiche
+ISCO_08,3211,321,4,Tecnici radiologi e di apparecchiature mediche
+ISCO_08,3212,321,4,Tecnici di laboratorio medico e patologico
+ISCO_08,3213,321,4,Tecnici e assistenti farmaceutici
+ISCO_08,3214,321,4,Tecnici protesici e odontotecnici
+ISCO_08,322,32,3,Infermieri e ostetrici (livello intermedio)
+ISCO_08,3221,322,4,Infermieri (livello intermedio)
+ISCO_08,3222,322,4,Ostetrici (livello intermedio)
+ISCO_08,323,32,3,Assistenti della medicina tradizionale e complementare
+ISCO_08,3230,323,4,Assistenti della medicina tradizionale e complementare
+ISCO_08,324,32,3,Tecnici e assistenti veterinari
+ISCO_08,3240,324,4,Tecnici e assistenti veterinari
+ISCO_08,325,32,3,Altre professioni intermedie nelle scienze della salute
+ISCO_08,3251,325,4,Assistenti odontoiatri e igienisti dentali
+ISCO_08,3252,325,4,Addetti alle cartelle cliniche e alla documentazione sanitaria
+ISCO_08,3253,325,4,Operatori sanitari della comunità
+ISCO_08,3254,325,4,Ottici
+ISCO_08,3255,325,4,Tecnici e assistenti della riabilitazione
+ISCO_08,3256,325,4,Assistenti medici
+ISCO_08,3257,325,4,Ispettori e tecnici della medicina ambientale e del lavoro
+ISCO_08,3258,325,4,Infermieri di ambulanza
+ISCO_08,3259,325,4,Tecnici delle scienze della salute non classificati altrove
+ISCO_08,33,3,2,Professioni intermedie nelle attività finanziarie e amministrative
+ISCO_08,331,33,3,Tecnici delle attività finanziarie e matematiche
+ISCO_08,3311,331,4,Mediatori di borsa e agenti di cambio
+ISCO_08,3312,331,4,Operatori crediti e prestiti
+ISCO_08,3313,331,4,Contabili (livello intermedio)
+ISCO_08,3314,331,4,Tecnici statistici e matematici ed assimilati
+ISCO_08,3315,331,4,Valutatori di rischio e periti stimatori di danno
+ISCO_08,332,33,3,Agenti di vendita e acquisto e mediatori
+ISCO_08,3321,332,4,Agenti assicurativi
+ISCO_08,3322,332,4,Rappresentanti di commercio
+ISCO_08,3323,332,4,Responsabili degli acquisti
+ISCO_08,3324,332,4,Mediatori commerciali
+ISCO_08,333,33,3,Agenti commerciali
+ISCO_08,3331,333,4,Agenti concessionari
+ISCO_08,3332,333,4,Organizzatori di conferenze e di eventi
+ISCO_08,3333,333,4,Agenti di stesura di contratti di impiego e di reclutamento
+ISCO_08,3334,333,4,Agenti immobiliari e amministratori
+ISCO_08,3339,333,4,Agenti commerciali non classificati altrove
+ISCO_08,334,33,3,Personale di segreteria addetto ad attività amministrative e specializzate
+ISCO_08,3341,334,4,Capiufficio
+ISCO_08,3342,334,4,Segretari di studi legali
+ISCO_08,3343,334,4,Segretari addetti a mansioni amministrative ed esecutive
+ISCO_08,3344,334,4,Segretari di studi medici
+ISCO_08,335,33,3,Membri di organismi di governo con potestà regolamentare (livello intermedio)
+ISCO_08,3351,335,4,Ispettori di dogana e di frontiera
+ISCO_08,3352,335,4,Agenti delle tasse e delle imposte
+ISCO_08,3353,335,4,Agenti dei servizi pubblici di prestazioni sociali
+ISCO_08,3354,335,4,Agenti dei servizi pubblici di permessi e licenze
+ISCO_08,3355,335,4,Ispettori di polizia e detective
+ISCO_08,3359,335,4,Membri di organismi di governo con potestà regolamentare (livello intermedio) non classificati altrove
+ISCO_08,34,3,2,"Professioni intermedie nelle scienze giuridiche, sociali e culturali"
+ISCO_08,341,34,3,"Professioni intermedie delle scienze giuridiche, sociali e delle discipline religiose"
+ISCO_08,3411,341,4,Tecnici delle scienze giuridiche ed assimilati
+ISCO_08,3412,341,4,Tecnici delle scienze sociali
+ISCO_08,3413,341,4,Tecnici delle discipline religiose
+ISCO_08,342,34,3,Professioni dello sport e del fitness
+ISCO_08,3421,342,4,Atleti e sportivi
+ISCO_08,3422,342,4,"Allenatori, istruttori e agenti"
+ISCO_08,3423,342,4,Istruttori di palestra e preparatori atletici
+ISCO_08,343,34,3,"Professioni tecniche artistiche, culturali e culinarie"
+ISCO_08,3431,343,4,Fotografi
+ISCO_08,3432,343,4,Designer di interni e decoratori
+ISCO_08,3433,343,4,"Tecnici delle gallerie, dei musei e delle biblioteche"
+ISCO_08,3434,343,4,Chef
+ISCO_08,3435,343,4,Altre professioni tecniche dei servizi ricreativi e culturali
+ISCO_08,35,3,2,Tecnici dell’informazione e della comunicazione
+ISCO_08,351,35,3,Tecnici per la gestione dell’informazione e della comunicazione e per l’assistenza agli utenti
+ISCO_08,3511,351,4,Tecnici per la gestione dell’informazione e della comunicazione
+ISCO_08,3512,351,4,Tecnici per l’assistenza agli utenti della tecnologia dell’informazione e della comunicazione
+ISCO_08,3513,351,4,Tecnici di rete e sistemi informatici
+ISCO_08,3514,351,4,Tecnici Web
+ISCO_08,352,35,3,Tecnici della trasmissione radiotelevisiva e delle telecomunicazioni
+ISCO_08,3521,352,4,Tecnici della trasmissione radiotelevisiva e degli apparati audio-video
+ISCO_08,3522,352,4,Tecnici dell’ingegneria delle comunicazioni
+ISCO_08,4,,1,Impiegati di ufficio
+ISCO_08,41,4,2,Impiegati con compiti generali e operatori su macchine di ufficio
+ISCO_08,411,41,3,Personale di ufficio con compiti generali
+ISCO_08,4110,411,4,Personale di ufficio con compiti generali
+ISCO_08,412,41,3,Personale di segreteria (compiti generali)
+ISCO_08,4120,412,4,Personale di segreteria (compiti generali)
+ISCO_08,413,41,3,Operatori su macchine di ufficio
+ISCO_08,4131,413,4,Dattilografi e operatori di trattamento testi
+ISCO_08,4132,413,4,Addetti all’inserimento dati
+ISCO_08,42,4,2,Impiegati a contatto diretto con il pubblico
+ISCO_08,421,42,3,"Personale addetto allo sportello, cassieri ed assimilati"
+ISCO_08,4211,421,4,Addetti allo sportello bancario ed assimilati
+ISCO_08,4212,421,4,"Allibratori, croupier ed assimilati"
+ISCO_08,4213,421,4,Addetti ad agenzie di pegno e di prestito
+ISCO_08,4214,421,4,Esattori di crediti ed assimilati
+ISCO_08,422,42,3,Personale addetto all’informazione della clientela
+ISCO_08,4221,422,4,Consulenti turistici e operatori
+ISCO_08,4222,422,4,Tecnici dei centri di informazione
+ISCO_08,4223,422,4,Operatori di centrali telefoniche
+ISCO_08,4224,422,4,Portieri di albergo
+ISCO_08,4225,422,4,Addetti all’informazione
+ISCO_08,4226,422,4,Addetti alla reception (compiti generali)
+ISCO_08,4227,422,4,Addetti alla rilevazione e alle indagini di mercato
+ISCO_08,4229,422,4,Personale addetto all’informazione della clientela non classificato altrove
+ISCO_08,43,4,2,Impiegati addetti ai servizi contabili e finanziari e alla registrazione dei materiali
+ISCO_08,431,43,3,Personale addetto ai servizi contabili e finanziari
+ISCO_08,4311,431,4,Aiuto contabili
+ISCO_08,4312,431,4,"Addetti a servizi statistici, finanziari e assicurativi"
+ISCO_08,4313,431,4,Addetti buste paga
+ISCO_08,432,43,3,Personale addetto alla registrazione dei materiali e alla gestione amministrativa dei trasporti
+ISCO_08,4321,432,4,Addetti alla gestione degli stock
+ISCO_08,4322,432,4,Addetti alla produzione
+ISCO_08,4323,432,4,Addetti alla gestione amministrativa dei trasporti
+ISCO_08,44,4,2,Altri impiegati di ufficio
+ISCO_08,441,44,3,Altri impiegati di ufficio
+ISCO_08,4411,441,4,Addetti a biblioteche
+ISCO_08,4412,441,4,Addetti all’inoltro e allo smistamento di posta e documentazione
+ISCO_08,4413,441,4,"Addetti alla codifica, alla correzione di bozze ed assimilati"
+ISCO_08,4414,441,4,Scrivani ed assimilati
+ISCO_08,4415,441,4,Addetti ad archivi e schedari
+ISCO_08,4416,441,4,Addetti alla gestione del personale
+ISCO_08,4419,441,4,Altri impiegati di ufficio non classificati altrove
+ISCO_08,5,,1,Professioni nelle attività commerciali e nei servizi
+ISCO_08,51,5,2,Professioni nei servizi alle persone
+ISCO_08,511,51,3,"Assistenti di viaggio, accompagnatori e guide"
+ISCO_08,5111,511,4,Assistenti di viaggio e steward
+ISCO_08,5112,511,4,Controllori e bigliettai di trasporti pubblici
+ISCO_08,5113,511,4,Guide
+ISCO_08,512,51,3,Cuochi
+ISCO_08,5120,512,4,Cuochi
+ISCO_08,513,51,3,Camerieri e baristi
+ISCO_08,5131,513,4,Camerieri
+ISCO_08,5132,513,4,Baristi
+ISCO_08,514,51,3,"Parrucchieri, estetisti ed assimilati"
+ISCO_08,5141,514,4,Parrucchieri
+ISCO_08,5142,514,4,Estetisti ed assimilati
+ISCO_08,515,51,3,Supervisori di servizi di manutenzione e pulizia
+ISCO_08,5151,515,4,"Supervisori di servizi di pulizia in uffici, esercizi alberghieri ed altri esercizi"
+ISCO_08,5152,515,4,Collaboratori domestici
+ISCO_08,5153,515,4,Custodi di immobili
+ISCO_08,516,51,3,Altre professioni nei servizi alle persone
+ISCO_08,5161,516,4,"Astrologi, chiromanti ed assimilati"
+ISCO_08,5162,516,4,Personale di compagnia e valletti
+ISCO_08,5163,516,4,Addetti alle pompe funebri e imbalsamatori
+ISCO_08,5164,516,4,Personale addetto alla cura degli animali
+ISCO_08,5165,516,4,Istruttori di guida automobilistica
+ISCO_08,5169,516,4,Professioni nei servizi alle persone non classificati altrove
+ISCO_08,52,5,2,Professioni nelle attività commerciali
+ISCO_08,521,52,3,Commercianti ambulanti
+ISCO_08,5211,521,4,Venditori su bancarelle e mercati
+ISCO_08,5212,521,4,Venditori ambulanti di generi alimentari
+ISCO_08,522,52,3,Esercenti e addetti alle vendite
+ISCO_08,5221,522,4,Esercenti delle vendite
+ISCO_08,5222,522,4,Addetto ai controlli delle vendite
+ISCO_08,5223,522,4,Assistenti alle vendite
+ISCO_08,523,52,3,Cassieri e addetti al registratore di cassa
+ISCO_08,5230,523,4,Cassieri e addetti al registratore di cassa
+ISCO_08,524,52,3,Altre professioni nelle attività commerciali
+ISCO_08,5241,524,4,"Indossatori, modelli e assimilati"
+ISCO_08,5242,524,4,Dimostratori
+ISCO_08,5243,524,4,Venditori a domicilio
+ISCO_08,5244,524,4,Venditori telefonici
+ISCO_08,5245,524,4,Addetti ai distributori di carburanti
+ISCO_08,5246,524,4,Addetti al banco servizi di ristorazione
+ISCO_08,5249,524,4,Professioni nelle attività commerciali non classificate altrove
+ISCO_08,53,5,2,Professioni nell’assistenza alle persone
+ISCO_08,531,53,3,Addetti alla sorveglianza di bambini e assistenti didattici
+ISCO_08,5311,531,4,Addetti alla sorveglianza di bambini
+ISCO_08,5312,531,4,Assistenti didattici
+ISCO_08,532,53,3,Addetti all’assistenza alle persone nei servizi sanitari
+ISCO_08,5321,532,4,Ausiliari sanitari
+ISCO_08,5322,532,4,Addetti all’assistenza personale a domicilio
+ISCO_08,5329,532,4,Addetti all’assistenza alle persone nei servizi sanitari non classificati altrove
+ISCO_08,54,5,2,"Professioni nei servizi di sicurezza, custodia e vigilanza"
+ISCO_08,541,54,3,"Professioni nei servizi di sicurezza, custodia e vigilanza"
+ISCO_08,5411,541,4,Vigili del fuoco
+ISCO_08,5412,541,4,Agenti di polizia
+ISCO_08,5413,541,4,Agenti di custodia carceraria
+ISCO_08,5414,541,4,Agenti di sicurezza
+ISCO_08,5419,541,4,"Professioni nei servizi di sicurezza, custodia e vigilanza non classificati altrove"
+ISCO_08,6,,1,"Personale specializzato addetto all’agricoltura, alle foreste e alla pesca"
+ISCO_08,61,6,2,Agricoltori e operai agricoli specializzati
+ISCO_08,611,61,3,Agricoltori e operai agricoli specializzati nelle coltivazioni e colture in pieno campo
+ISCO_08,6111,611,4,Lavoratori agricoli specializzati di colture in pieno campo e ortive
+ISCO_08,6112,611,4,Lavoratori agricoli specializzati di coltivazioni legnose agrarie
+ISCO_08,6113,611,4,"Lavoratori agricoli specializzati di coltivazioni di fiori e piante ornamentali, di coltivazioni ortive e vivai"
+ISCO_08,6114,611,4,Lavoratori agricoli specializzati di colture miste
+ISCO_08,612,61,3,Allevatori
+ISCO_08,6121,612,4,Lavoratori specializzati nell’allevamento del bestiame e nella produzione del latte
+ISCO_08,6122,612,4,Lavoratori specializzati degli allevamenti avicoli
+ISCO_08,6123,612,4,Apicoltori e sericoltori
+ISCO_08,6129,612,4,Allevatori non classificati altrove
+ISCO_08,613,61,3,Agricoltori di colture miste e allevatori
+ISCO_08,6130,613,4,Agricoltori di colture miste e allevatori
+ISCO_08,62,6,2,"Lavoratori forestali specializzati, pescatori e cacciatori"
+ISCO_08,621,62,3,Lavoratori forestali ed assimilati
+ISCO_08,6210,621,4,Lavoratori forestali ed assimilati
+ISCO_08,622,62,3,Pescatori e cacciatori
+ISCO_08,6221,622,4,Lavoratori dell’acquacoltura
+ISCO_08,6222,622,4,Pescatori della pesca costiera e in acque interne
+ISCO_08,6223,622,4,Pescatori d’alto mare
+ISCO_08,6224,622,4,Cacciatori
+ISCO_08,63,6,2,"Lavoratori dell’agricoltura, della caccia, della pesca e del raccolto di sussistenza"
+ISCO_08,631,63,3,Lavoratori dell’agricoltura di sussistenza
+ISCO_08,6310,631,4,Lavoratori dell’agricoltura di sussistenza
+ISCO_08,632,63,3,Lavoratori dell’allevamento di sussistenza
+ISCO_08,6320,632,4,Lavoratori dell’allevamento di sussistenza
+ISCO_08,633,63,3,Lavoratori delle colture miste e dell’allevamento di sussistenza
+ISCO_08,6330,633,4,Lavoratori delle colture miste e dell’allevamento di sussistenza
+ISCO_08,634,63,3,"Lavoratori della caccia, della pesca e del raccolto di sussistenza"
+ISCO_08,6340,634,4,"Lavoratori della caccia, della pesca e del raccolto di sussistenza"
+ISCO_08,7,,1,Artigiani e operai specializzati
+ISCO_08,71,7,2,"Operai specializzati dell’edilizia ed assimilati, ad eccezione degli elettricisti"
+ISCO_08,711,71,3,Operai addetti alla costruzione di strutture edili ed assimilati
+ISCO_08,7111,711,4,Addetti alla costruzione di edifici
+ISCO_08,7112,711,4,Muratori in mattoni ed assimilati
+ISCO_08,7113,711,4,"Muratori in pietrame, tagliatori di pietre e cesellatori"
+ISCO_08,7114,711,4,"Muratori in cemento armato, rifinitori ed assimilati"
+ISCO_08,7115,711,4,Carpentieri e falegnami edili
+ISCO_08,7119,711,4,Operai addetti alla costruzione di strutture edili ed assimilati non classificati altrove
+ISCO_08,712,71,3,Operai specializzati addetti alle rifiniture delle costruzioni ed assimilati
+ISCO_08,7121,712,4,Copritetti
+ISCO_08,7122,712,4,Pavimentatori e posatori di rivestimenti
+ISCO_08,7123,712,4,Intonacatori
+ISCO_08,7124,712,4,Installatori di impianti di isolamento
+ISCO_08,7125,712,4,Vetrai
+ISCO_08,7126,712,4,Idraulici e posatori di tubazioni
+ISCO_08,7127,712,4,Installatori di impianti di aria condizionata e di raffreddamento
+ISCO_08,713,71,3,Operai specializzati addetti alla pitturazione ed alla pulizia degli esterni degli edifici ed assimilati
+ISCO_08,7131,713,4,Imbianchini ed assimilati
+ISCO_08,7132,713,4,Laccatori e verniciatori
+ISCO_08,7133,713,4,Pulitori di facciate e di esterni
+ISCO_08,72,7,2,Operai metalmeccanici specializzati ed assimilati
+ISCO_08,721,72,3,"Lattonieri, carpentieri, fonditori, saldatori ed assimilati"
+ISCO_08,7211,721,4,Fonditori e animisti di fonderia
+ISCO_08,7212,721,4,Saldatori e tagliatori a fiamma
+ISCO_08,7213,721,4,Lattonieri e calderai
+ISCO_08,7214,721,4,Carpentieri e montatori di carpenteria metallica
+ISCO_08,7215,721,4,Attrezzatori e montatori di cavi metallici
+ISCO_08,722,72,3,"Fabbri, costruttori di utensili ed assimilati"
+ISCO_08,7221,722,4,"Fabbri, maniscalchi e operatori di presse per la forgiatura"
+ISCO_08,7222,722,4,Costruttori di utensili ed assimilati
+ISCO_08,7223,722,4,Modellatori e tracciatori meccanici di macchine utensili
+ISCO_08,7224,722,4,"Lucidatori, levigatori e affilatori"
+ISCO_08,723,72,3,Meccanici e riparatori di macchine
+ISCO_08,7231,723,4,Meccanici e riparatori di veicoli a motore
+ISCO_08,7232,723,4,Meccanici e riparatori di motori di aerei
+ISCO_08,7233,723,4,Meccanici e riparatori di macchinari agricoli e industriali
+ISCO_08,7234,723,4,Meccanici di biciclette e veicoli simili
+ISCO_08,73,7,2,Artigiani e operai specializzati delle attività tipografiche
+ISCO_08,731,73,3,Artigiani
+ISCO_08,7311,731,4,Addetti alla costruzione e riparazione di strumenti di precisione
+ISCO_08,7312,731,4,Addetti alla costruzione e all’accordatura di strumenti musicali
+ISCO_08,7313,731,4,Gioiellieri e orafi
+ISCO_08,7314,731,4,Vasai ed assimilati
+ISCO_08,7315,731,4,"Soffiatori, tagliatori, molatori e levigatori di vetro"
+ISCO_08,7316,731,4,"Pittori di insegne, decoratori, incisori e acquafortisti"
+ISCO_08,7317,731,4,"Artigiani delle lavorazioni del legno, delle ceste e dei materiali affini"
+ISCO_08,7318,731,4,"Artigiani delle lavorazioni dei tessili, del cuoio e simili"
+ISCO_08,7319,731,4,Artigiani non classificati altrove
+ISCO_08,732,73,3,Operai specializzati delle attività tipografiche
+ISCO_08,7321,732,4,Tecnici prestampa
+ISCO_08,7322,732,4,Stampatori
+ISCO_08,7323,732,4,Rilegatori e rifinitori post-stampa
+ISCO_08,74,7,2,Artigiani e operai specializzati delle attrezzature elettriche ed elettroniche
+ISCO_08,741,74,3,Installatori e riparatori di apparati elettrici
+ISCO_08,7411,741,4,Elettricisti dell’edilizia ed assimilati
+ISCO_08,7412,741,4,Installatori e riparatori di apparati elettromeccanici
+ISCO_08,7413,741,4,Installatori e riparatori di linee elettriche
+ISCO_08,742,74,3,Installatori e riparatori elettronici e delle telecomunicazioni
+ISCO_08,7421,742,4,Riparatori e manutentori di apparati elettronici industriali
+ISCO_08,7422,742,4,Installatori e manutentori di attrezzature delle tecnologie dell’informazione e della comunicazione
+ISCO_08,75,7,2,"Artigiani e operai specializzati delle lavorazioni alimentari, del legno, del tessile ed assimilati"
+ISCO_08,751,75,3,Operai specializzati delle lavorazioni alimentari ed assimilati
+ISCO_08,7511,751,4,"Macellai, pesciaioli ed assimilati"
+ISCO_08,7512,751,4,"Panettieri, pastai e pasticcieri"
+ISCO_08,7513,751,4,Confezionatori caseari
+ISCO_08,7514,751,4,"Conservieri di frutta, verdura e simili"
+ISCO_08,7515,751,4,Degustatori e classificatori di prodotti alimentari e bevande
+ISCO_08,7516,751,4,Operai specializzati della preparazione e della lavorazione del tabacco
+ISCO_08,752,75,3,"Artigiani e operai specializzati del trattamento del legno, ebanisti ed assimilati"
+ISCO_08,7521,752,4,Artigiani e operai specializzati del trattamento del legno
+ISCO_08,7522,752,4,Ebanisti ed assimilati
+ISCO_08,7523,752,4,Modellatori e tracciatori meccanici di macchine utensili
+ISCO_08,753,75,3,Artigiani e operai specializzati del tessile
+ISCO_08,7531,753,4,"Sarti, confezionatori di capi di abbigliamento, pellicciai e cappellai"
+ISCO_08,7532,753,4,Modellisti e tagliatori di capi di abbigliamento
+ISCO_08,7533,753,4,"Cucitori, ricamatori ed assimilati"
+ISCO_08,7534,753,4,Tappezzieri ed assimilati
+ISCO_08,7535,753,4,Conciatori di pelli e di pellicce
+ISCO_08,7536,753,4,Confezionatori di calzature ed assimilati
+ISCO_08,754,75,3,Altri artigiani e operai specializzati
+ISCO_08,7541,754,4,Sommozzatori
+ISCO_08,7542,754,4,Brillatori e artificieri
+ISCO_08,7543,754,4,Classificatori e collaudatori di prodotti (ad eccezione dei prodotti alimentari e delle bevande)
+ISCO_08,7544,754,4,"Fumigatori, disinfestatori e diserbatori"
+ISCO_08,7549,754,4,Artigiani e operai specializzati non classificati altrove
+ISCO_08,8,,1,Conduttori di impianti e macchinari e addetti al montaggio
+ISCO_08,81,8,2,Conduttori di impianti e macchinari fissi
+ISCO_08,811,81,3,Conduttori di impianti di miniere e per il trattamento di minerali
+ISCO_08,8111,811,4,Minatori e cavapietre
+ISCO_08,8112,811,4,Conduttori di impianti per il trattamento di minerali e di pietre
+ISCO_08,8113,811,4,"Trivellatori, perforatori di pozzi ed assimilati"
+ISCO_08,8114,811,4,"Conduttori di macchinari per prodotti di cemento, pietra e altri minerali"
+ISCO_08,812,81,3,Conduttori di impianti per la trasformazione e la finitura dei metalli
+ISCO_08,8121,812,4,Conduttori di impianti per la trasformazione dei metalli
+ISCO_08,8122,812,4,"Addetti ai macchinari per finire, rivestire, placcare metalli e oggetti in metallo"
+ISCO_08,813,81,3,Conduttori di impianti e macchinari per la fabbricazione di prodotti derivati dalla chimica e fotografici
+ISCO_08,8131,813,4,Conduttori di impianti e macchinari per la fabbricazione di prodotti derivati dalla chimica
+ISCO_08,8132,813,4,Conduttori di macchinari per la fabbricazione di prodotti fotografici
+ISCO_08,814,81,3,"Conduttori di macchinari per la fabbricazione di articoli in gomma, plastica e carta"
+ISCO_08,8141,814,4,Conduttori di macchinari per la fabbricazione di articoli in gomma
+ISCO_08,8142,814,4,Conduttori di macchinari per la fabbricazione di articoli in plastica
+ISCO_08,8143,814,4,Conduttori di macchinari per la fabbricazione di articoli in carta
+ISCO_08,815,81,3,"Conduttori di macchinari per la confezione di articoli in stoffa, pelliccia e cuoio"
+ISCO_08,8151,815,4,"Conduttori di macchinari per preparare le fibre, per la filatura e la bobinatura"
+ISCO_08,8152,815,4,Conduttori di telai meccanici per la tessitura e la maglieria
+ISCO_08,8153,815,4,Conduttori di macchinari per la cucitura
+ISCO_08,8154,815,4,"Conduttori di macchinari per il candeggio, la tintura e la lavatura di filati e tessuti"
+ISCO_08,8155,815,4,Conduttori di macchinari per la preparazione di pelliccia e cuoio
+ISCO_08,8156,815,4,Conduttori di macchinari per la fabbricazione di calzature ed assimilati
+ISCO_08,8157,815,4,Conduttori di macchinari di lavanderia
+ISCO_08,8159,815,4,"Conduttori di macchinari per la confezione di articoli in stoffa, pelliccia e cuoio non classificati altrove"
+ISCO_08,816,81,3,Conduttori di macchinari per la fabbricazione di alimenti ed assimilati
+ISCO_08,8160,816,4,Conduttori di macchinari per la fabbricazione di alimenti ed assimilati
+ISCO_08,817,81,3,Conduttori di impianti per la trasformazione del legno e la fabbricazione della carta
+ISCO_08,8171,817,4,Conduttori di impianti per la preparazione della pasta di legno e la fabbricazione della carta
+ISCO_08,8172,817,4,Conduttori di impianti per la trasformazione del legno
+ISCO_08,818,81,3,Altri conduttori di impianti e macchinari fissi
+ISCO_08,8181,818,4,Conduttori di impianti per la lavorazione del vetro e della ceramica
+ISCO_08,8182,818,4,Conduttori di caldaie a vapore e motori termici
+ISCO_08,8183,818,4,"Conduttori di macchine confezionatrici, per l’imbottigliamento ed etichettatrici"
+ISCO_08,8189,818,4,Conduttori di impianti e macchinari fissi non classificati altrove
+ISCO_08,82,8,2,Assemblatori
+ISCO_08,821,82,3,Assemblatori
+ISCO_08,8211,821,4,Assemblatori di parti di macchine
+ISCO_08,8212,821,4,Assemblatori di apparecchiature elettriche ed elettroniche
+ISCO_08,8219,821,4,Assemblatori non classificati altrove
+ISCO_08,83,8,2,Conduttori di veicoli e di macchinari mobili
+ISCO_08,831,83,3,Conducenti di locomotive ed assimilati
+ISCO_08,8311,831,4,Conducenti di locomotive
+ISCO_08,8312,831,4,"Frenatori, segnalatori e agenti di manovra ferroviari"
+ISCO_08,832,83,3,"Conducenti di automobili, furgoni e motociclette"
+ISCO_08,8321,832,4,Motociclisti
+ISCO_08,8322,832,4,"Conducenti di automobili, taxi e furgoni"
+ISCO_08,833,83,3,Conducenti di mezzi pesanti e di autobus
+ISCO_08,8331,833,4,Conducenti di autobus e tram
+ISCO_08,8332,833,4,Conducenti di mezzi pesanti e camion
+ISCO_08,834,83,3,Conduttori di impianti mobili
+ISCO_08,8341,834,4,Conduttori di macchinari agricoli e forestali
+ISCO_08,8342,834,4,Conduttori di macchinari per movimento terra ed assimilati
+ISCO_08,8343,834,4,Conduttori di macchinari per la perforazione e il sollevamento
+ISCO_08,8344,834,4,Conduttori di carrelli elevatori
+ISCO_08,835,83,3,Marinai di coperta e operai assimilati
+ISCO_08,8350,835,4,Marinai di coperta e operai assimilati
+ISCO_08,9,,1,Professioni non qualificate
+ISCO_08,91,9,2,Addetti alle pulizie e collaboratori
+ISCO_08,911,91,3,"Addetti alle pulizie domestiche, negli esercizi alberghieri e negli uffici"
+ISCO_08,9111,911,4,Addetti alle pulizie domestiche e collaboratori domestici
+ISCO_08,9112,911,4,"Addetti alle pulizie in uffici, esercizi alberghieri ed altri esercizi"
+ISCO_08,912,91,3,"Pulitori di veicoli, pulitori di vetri, lavandai e altri addetti alla pulizia manuale"
+ISCO_08,9121,912,4,Lavandai e stiratori a mano
+ISCO_08,9122,912,4,Pulitori di veicoli
+ISCO_08,9123,912,4,Pulitori di vetri
+ISCO_08,9129,912,4,Altri addetti alle pulizie
+ISCO_08,92,9,2,"Personale non qualificato addetto all’agricoltura, alle foreste e alla pesca"
+ISCO_08,921,92,3,"Personale non qualificato addetto all’agricoltura, alle foreste e alla pesca"
+ISCO_08,9211,921,4,Braccianti agricoli
+ISCO_08,9212,921,4,Addetti al bestiame
+ISCO_08,9213,921,4,Braccianti agricoli e addetti al bestiame
+ISCO_08,9214,921,4,Operai adetti ai giardini e alle coltivazioni ortive
+ISCO_08,9215,921,4,Operai forestali
+ISCO_08,9216,921,4,Personale non qualificato addetto alla pesca e all’acquacoltura
+ISCO_08,93,9,2,"Personale non qualificato addetto alle miniere, alle costruzioni e ai trasporti"
+ISCO_08,931,93,3,Manovali delle miniere e delle costruzioni
+ISCO_08,9311,931,4,Manovali delle miniere e delle cave
+ISCO_08,9312,931,4,Manovali dell’ingegneria civile
+ISCO_08,9313,931,4,Manovali dell’edilizia
+ISCO_08,932,93,3,Personale non qualificato delle attività manifatturiere
+ISCO_08,9321,932,4,Imballatori a mano
+ISCO_08,9329,932,4,Personale non qualificato delle attività industriali non classificato altrove
+ISCO_08,933,93,3,Personale non qualificato addetto ai trasporti e al magazzinaggio
+ISCO_08,9331,933,4,Conduttori di veicoli a braccia o a pedali
+ISCO_08,9332,933,4,Conduttori di veicoli e macchinari a trazione animale
+ISCO_08,9333,933,4,Addetti allo spostamento e alla spedizione dei materiali o delle merci
+ISCO_08,9334,933,4,Addetti agli scaffali
+ISCO_08,94,9,2,Personale non qualificato addetto alla ristorazione
+ISCO_08,941,94,3,Personale non qualificato addetto alla ristorazione
+ISCO_08,9411,941,4,Addetti di fast food
+ISCO_08,9412,941,4,Garzoni di cucina
+ISCO_08,95,9,2,Commercianti ambulanti di manufatti o di servizi
+ISCO_08,951,95,3,Venditori ambulanti di servizi
+ISCO_08,9510,951,4,Venditori ambulanti di servizi
+ISCO_08,952,95,3,Venditori ambulanti di prodotti non alimentari
+ISCO_08,9520,952,4,Venditori ambulanti di prodotti non alimentari
+ISCO_08,96,9,2,Addetti alla raccolta dei rifiuti e altre professioni non qualificate
+ISCO_08,961,96,3,Addetti alla raccolta dei rifiuti
+ISCO_08,9611,961,4,Addetti alla raccolta di immondizia e materiale riciclabile
+ISCO_08,9612,961,4,Addetti alla selezione dei rifiuti
+ISCO_08,9613,961,4,Spazzini ed assimilati
+ISCO_08,962,96,3,Altre professioni non qualificate
+ISCO_08,9621,962,4,"Corrieri, fattorini, facchini"
+ISCO_08,9622,962,4,Addetti a lavori accessori
+ISCO_08,9623,962,4,Lettori di contatori e collettori di monete (distributori automatici)
+ISCO_08,9624,962,4,Acquaioli e raccoglitori di legna da ardere
+ISCO_08,9629,962,4,Altre professioni non qualificate non classificate altrove
+ISCO_08,0,,1,Forze armate
+ISCO_08,01,0,2,Ufficiali delle forze armate
+ISCO_08,011,01,3,Ufficiali delle forze armate
+ISCO_08,0110,011,4,Ufficiali delle forze armate
+ISCO_08,02,0,2,Sottufficiali delle forze armate
+ISCO_08,021,02,3,Sottufficiali delle forze armate
+ISCO_08,0210,021,4,Sottufficiali delle forze armate
+ISCO_08,03,0,2,"Professioni relative alle forze armate, altri gradi"
+ISCO_08,031,03,3,"Professioni relative alle forze armate, altri gradi"
+ISCO_08,0310,031,4,"Professioni relative alle forze armate, altri gradi"
+CP_2021,1,,1,"LEGISLATORI, IMPRENDITORI E ALTA DIRIGENZA"
+CP_2021,2,,1,"PROFESSIONI INTELLETTUALI, SCIENTIFICHE E DI ELEVATA SPECIALIZZAZIONE"
+CP_2021,3,,1,PROFESSIONI TECNICHE
+CP_2021,4,,1,PROFESSIONI ESECUTIVE NEL LAVORO D'UFFICIO
+CP_2021,5,,1,PROFESSIONI QUALIFICATE NELLE ATTIVITA’ COMMERCIALI E NEI SERVIZI
+CP_2021,6,,1,"ARTIGIANI, OPERAI SPECIALIZZATI E AGRICOLTORI"
+CP_2021,7,,1,"CONDUTTORI DI IMPIANTI, OPERAI DI MACCHINARI FISSI E MOBILI E CONDUCENTI DI VEICOLI"
+CP_2021,8,,1,PROFESSIONI NON QUALIFICATE
+CP_2021,9,,1,FORZE ARMATE
+CP_2021,1.1,1,2,"Membri dei corpi legislativi e di governo, dirigenti ed equiparati dell'amministrazione pubblica, nella magistratura, nei servizi di sanità, istruzione e ricerca e nelle organizzazioni di interesse nazionale e sovranazionale"
+CP_2021,1.2,1,2,"Imprenditori, amministratori e direttori di grandi aziende"
+CP_2021,1.3,1,2,Imprenditori e responsabili di piccole aziende
+CP_2021,2.1,2,2,"Specialisti in scienze matematiche, chimiche, fisiche e naturali"
+CP_2021,2.2,2,2,"Ingegneri, architetti e professioni assimilate"
+CP_2021,2.3,2,2,Specialisti nelle scienze della vita
+CP_2021,2.4,2,2,Specialisti della salute
+CP_2021,2.5,2,2,"Specialisti in scienze umane, sociali, artistiche e gestionali"
+CP_2021,2.6,2,2,Specialisti della formazione e della ricerca
+CP_2021,2.7,2,2,Specialisti nelle tecnologie dell'informazione e della comunicazione (ICT)
+CP_2021,3.1,3,2,"Professioni tecniche in campo scientifico, ingegneristico e della produzione"
+CP_2021,3.2,3,2,Professioni tecniche nelle scienze della salute e della vita
+CP_2021,3.3,3,2,"Professioni tecniche nell’organizzazione, amministrazione e nelle attività finanziarie e commerciali"
+CP_2021,3.4,3,2,Professioni tecniche nei servizi pubblici e alle persone
+CP_2021,4.1,4,2,Addetti alle funzioni di segreteria e alle macchine da ufficio
+CP_2021,4.2,4,2,Addetti ai movimenti di denaro e all'assistenza clienti
+CP_2021,4.3,4,2,"Addetti alla gestione amministrativa, contabile e finanziaria"
+CP_2021,4.4,4,2,"Addetti alla raccolta, controllo, conservazione e recapito della documentazione"
+CP_2021,5.1,5,2,Professioni qualificate nelle attività commerciali
+CP_2021,5.2,5,2,Professioni qualificate nelle attività ricettive e della ristorazione
+CP_2021,5.3,5,2,Professioni qualificate nei servizi sanitari e sociali
+CP_2021,5.4,5,2,Professioni qualificate nei servizi culturali
+CP_2021,5.5,5,2,Professioni qualificate nei servizi alla persona
+CP_2021,5.6,5,2,Professioni qualificate nei servizi di sicurezza
+CP_2021,6.1,6,2,"Artigiani e operai specializzati dell’industria estrattiva, dell’edilizia e della manutenzione degli edifici"
+CP_2021,6.2,6,2,Artigiani ed operai metalmeccanici specializzati e installatori e manutentori di attrezzature elettriche ed elettroniche
+CP_2021,6.3,6,2,"Artigiani ed operai specializzati della meccanica di precisione, dell'artigianato artistico, della stampa ed assimilati"
+CP_2021,6.4,6,2,"Agricoltori e operai specializzati dell’agricoltura, delle foreste, della zootecnia, della pesca e della caccia"
+CP_2021,6.5,6,2,"Artigiani e operai specializzati delle lavorazioni alimentari, del legno, del tessile, dell'abbigliamento, delle pelli, del cuoio e dell'industria dello spettacolo"
+CP_2021,7.1,7,2,Conduttori di impianti industriali
+CP_2021,7.2,7,2,Operai semiqualificati di macchinari fissi per la lavorazione in serie e operai addetti al montaggio
+CP_2021,7.3,7,2,Operatori di macchinari fissi in agricoltura e nella industria alimentare
+CP_2021,7.4,7,2,"Conduttori di veicoli, di macchinari mobili e di sollevamento"
+CP_2021,8.1,8,2,Professioni non qualificate nel commercio e nei servizi
+CP_2021,8.2,8,2,"Professioni non qualificate nelle attività domestiche, ricreative e culturali"
+CP_2021,8.3,8,2,"Professioni non qualificate nell'agricoltura, nella manutenzione del verde, nell'allevamento, nella silvicoltura e nella pesca"
+CP_2021,8.4,8,2,"Professioni non qualificate nella manifattura, nell'estrazione di minerali e nelle costruzioni"
+CP_2021,9.1,9,2,Ufficiali delle forze armate
+CP_2021,9.2,9,2,"Sergenti, sovraintendenti e marescialli delle forze armate"
+CP_2021,9.3,9,2,Truppa delle forze armate
+CP_2021,1.1.1,1.1,3,Membri di organismi di governo e di assemblee con potestà legislativa e regolamentare
+CP_2021,1.1.2,1.1,3,"Direttori, dirigenti ed equiparati dell’amministrazione pubblica e nei servizi di sanità, istruzione e ricerca"
+CP_2021,1.1.3,1.1,3,Dirigenti della magistratura
+CP_2021,1.1.4,1.1,3,Dirigenti di organizzazioni di interesse nazionale e sovranazionale
+CP_2021,1.2.1,1.2,3,Imprenditori e amministratori di grandi aziende
+CP_2021,1.2.2,1.2,3,Direttori e dirigenti generali di aziende
+CP_2021,1.2.3,1.2,3,Direttori e dirigenti dipartimentali di aziende
+CP_2021,1.3.1,1.3,3,Imprenditori e responsabili di piccole aziende
+CP_2021,2.1.1,2.1,3,"Specialisti in scienze matematiche, chimiche, fisiche e naturali"
+CP_2021,2.2.1,2.2,3,Ingegneri e professioni assimilate
+CP_2021,2.2.2,2.2,3,"Architetti, pianificatori, paesaggisti e specialisti del recupero e della conservazione del territorio"
+CP_2021,2.3.1,2.3,3,Specialisti nelle scienze della vita
+CP_2021,2.4.1,2.4,3,Medici
+CP_2021,2.5.1,2.5,3,"Specialisti delle scienze gestionali, commerciali e bancarie"
+CP_2021,2.5.2,2.5,3,Specialisti in scienze giuridiche
+CP_2021,2.5.3,2.5,3,Specialisti in scienze sociali
+CP_2021,2.5.4,2.5,3,"Specialisti in discipline linguistiche, letterarie e documentali"
+CP_2021,2.5.5,2.5,3,Specialisti in discipline artistico-espressive
+CP_2021,2.5.6,2.5,3,Specialisti in discipline religiose e teologiche
+CP_2021,2.6.1,2.6,3,Docenti universitari (ordinari e associati)
+CP_2021,2.6.2,2.6,3,Ricercatori e tecnici laureati nell'università
+CP_2021,2.6.3,2.6,3,"Docenti di scuola secondaria, post-secondaria e professioni assimilate"
+CP_2021,2.6.4,2.6,3,"Docenti di scuola primaria, pre-primaria e professioni assimilate"
+CP_2021,2.6.5,2.6,3,Altri specialisti dell'educazione e della formazione
+CP_2021,2.7.1,2.7,3,Analisiti e specialisti nella progettazione di applicazioni
+CP_2021,2.7.2,2.7,3,Specialisti di reti e di database
+CP_2021,3.1.1,3.1,3,"Tecnici delle scienze quantitative, fisiche e chimiche"
+CP_2021,3.1.2,3.1,3,"Tecnici informatici, telematici e delle telecomunicazioni"
+CP_2021,3.1.3,3.1,3,Tecnici in campo ingegneristico
+CP_2021,3.1.4,3.1,3,Tecnici della conduzione di impianti produttivi in continuo e dell'esercizio di reti idriche ed energetiche
+CP_2021,3.1.5,3.1,3,Tecnici della gestione dei processi produttivi di beni e servizi
+CP_2021,3.1.6,3.1,3,"Tecnici del trasporto aereo, navale e ferroviario"
+CP_2021,3.1.7,3.1,3,Tecnici di apparecchiature ottiche e audio-video
+CP_2021,3.1.8,3.1,3,Tecnici della sicurezza e della protezione ambientale
+CP_2021,3.2.1,3.2,3,Tecnici della salute
+CP_2021,3.2.2,3.2,3,Tecnici nelle scienze della vita
+CP_2021,3.3.1,3.3,3,Tecnici dell’organizzazione e dell’amministrazione delle attività produttive
+CP_2021,3.3.2,3.3,3,Tecnici delle attività finanziarie ed assicurative
+CP_2021,3.3.3,3.3,3,Tecnici dei rapporti con i mercati
+CP_2021,3.3.4,3.3,3,Tecnici della distribuzione commerciale e professioni assimilate
+CP_2021,3.4.1,3.4,3,"Professioni tecniche delle attività turistiche, ricettive ed assimilate"
+CP_2021,3.4.2,3.4,3,"Insegnanti nella formazione professionale, istruttori, allenatori, atleti e professioni assimilate"
+CP_2021,3.4.3,3.4,3,Tecnici dei servizi ricreativi
+CP_2021,3.4.4,3.4,3,Tecnici dei servizi culturali
+CP_2021,3.4.5,3.4,3,Tecnici dei servizi sociali
+CP_2021,3.4.6,3.4,3,Tecnici dei servizi pubblici e di sicurezza
+CP_2021,4.1.1,4.1,3,Addetti alla segreteria e agli affari generali
+CP_2021,4.1.2,4.1,3,Addetti alle macchine d'ufficio
+CP_2021,4.2.1,4.2,3,Addetti agli sportelli e ai movimenti di denaro
+CP_2021,4.2.2,4.2,3,Addetti all'accoglienza e all'informazione della clientela
+CP_2021,4.3.1,4.3,3,Addetti alla gestione amministrativa della logistica
+CP_2021,4.3.2,4.3,3,"Addetti alla gestione economica, contabile e finanziaria"
+CP_2021,4.4.1,4.4,3,Addetti al controllo di documenti e allo smistamento e recapito della posta
+CP_2021,4.4.2,4.4,3,Addetti all'archiviazione e conservazione della documentazione
+CP_2021,5.1.1,5.1,3,Esercenti delle vendite
+CP_2021,5.1.2,5.1,3,Addetti alle vendite
+CP_2021,5.1.3,5.1,3,Altre professioni qualificate nelle attività commerciali
+CP_2021,5.2.1,5.2,3,Esercenti nelle attività ricettive
+CP_2021,5.2.2,5.2,3,Esercenti ed addetti nelle attività di ristorazione
+CP_2021,5.2.3,5.2,3,Assistenti di viaggio e professioni assimilate
+CP_2021,5.3.1,5.3,3,Professioni qualificate nei servizi sanitari e sociali
+CP_2021,5.4.1,5.4,3,"Professioni qualificate nei servizi ricreativi, culturali ed assimilati"
+CP_2021,5.5.1,5.5,3,Operatori della cura estetica
+CP_2021,5.5.2,5.5,3,Professioni qualificate nei servizi personali ed assimilati
+CP_2021,5.5.3,5.5,3,Addestratori e custodi di animali
+CP_2021,5.5.4,5.5,3,Esercenti e addetti di agenzie per il disbrigo di pratiche e professioni assimilate
+CP_2021,5.5.5,5.5,3,Esercenti e addetti di agenzie di pompe funebri
+CP_2021,5.6.1,5.6,3,"Professioni qualificate nei servizi di sicurezza, vigilanza e custodia"
+CP_2021,6.1.1,6.1,3,"Brillatori, tagliatori di pietre, coltivatori di saline e professioni assimilate"
+CP_2021,6.1.2,6.1,3,Artigiani ed operai specializzati addetti alle costruzioni e al mantenimento di strutture edili
+CP_2021,6.1.3,6.1,3,Artigiani ed operai specializzati addetti alle rifiniture delle costruzioni
+CP_2021,6.1.4,6.1,3,Artigiani ed operai specializzati addetti alla pitturazione ed alla pulizia degli esterni degli edifici ed assimilati
+CP_2021,6.1.5,6.1,3,Artigiani ed operai specializzati addetti alla pulizia ed all’igiene degli edifici
+CP_2021,6.2.1,6.2,3,"Fonditori, saldatori, lattonieri, calderai, montatori di carpenteria metallica e professioni assimilate"
+CP_2021,6.2.2,6.2,3,Fabbri ferrai costruttori di utensili ed assimilati
+CP_2021,6.2.3,6.2,3,"Meccanici artigianali, montatori, riparatori e manutentori di macchine fisse e mobili (esclusi gli addetti alle linee di montaggio industriale)"
+CP_2021,6.2.4,6.2,3,Artigiani e operai specializzati dell’installazione e della manutenzione di attrezzature elettriche ed elettroniche
+CP_2021,6.3.1,6.3,3,Artigiani ed operai specializzati della meccanica di precisione su metalli e materiali assimilati
+CP_2021,6.3.2,6.3,3,"Vasai, soffiatori e formatori di vetrerie e professioni assimilate"
+CP_2021,6.3.3,6.3,3,"Artigiani delle lavorazioni artistiche del legno, del tessuto e del cuoio e dei materiali assimilati"
+CP_2021,6.3.4,6.3,3,Artigiani ed operai specializzati delle attività poligrafiche
+CP_2021,6.4.1,6.4,3,Agricoltori e operai agricoli specializzati
+CP_2021,6.4.2,6.4,3,Allevatori e operai specializzati della zootecnia
+CP_2021,6.4.3,6.4,3,Allevatori e agricoltori
+CP_2021,6.4.4,6.4,3,Operai forestali specializzati
+CP_2021,6.4.5,6.4,3,Pescatori e cacciatori
+CP_2021,6.5.1,6.5,3,Artigiani ed operai specializzati delle lavorazioni alimentari
+CP_2021,6.5.2,6.5,3,"Attrezzisti, operai e artigiani del trattamento del legno ed assimilati"
+CP_2021,6.5.3,6.5,3,Artigiani ed operai specializzati del tessile e dell'abbigliamento
+CP_2021,6.5.4,6.5,3,"Artigiani ed operai specializzati della lavorazione del cuoio, delle pelli e delle calzature ed assimilati"
+CP_2021,6.5.5,6.5,3,Artigiani ed operai specializzati dell’industria dello spettacolo
+CP_2021,7.1.1,7.1,3,Conduttori di impianti e macchinari per l'estrazione e il primo trattamento dei minerali
+CP_2021,7.1.2,7.1,3,Operatori di impianti per la trasformazione e lavorazione a caldo dei metalli
+CP_2021,7.1.3,7.1,3,"Conduttori di forni ed altri impianti per la lavorazione del vetro, della ceramica e di materiali assimilati"
+CP_2021,7.1.4,7.1,3,Conduttori di impianti per la trasformazione del legno e la fabbricazione della carta
+CP_2021,7.1.5,7.1,3,"Operatori di macchinari e di impianti per la raffinazione del gas e dei prodotti petroliferi, per la chimica di base e la chimica fine e per la fabbricazione di prodotti derivati dalla chimica"
+CP_2021,7.1.6,7.1,3,"Conduttori di impianti per la produzione di energia termica e di vapore, per il recupero dei rifiuti e per il trattamento e la distribuzione delle acque"
+CP_2021,7.1.7,7.1,3,Operatori di catene di montaggio automatizzate e di robot industriali
+CP_2021,7.1.8,7.1,3,Conduttori di impianti per la trasformazione dei minerali
+CP_2021,7.2.1,7.2,3,Operai addetti a macchine automatiche e semiautomatiche per lavorazioni metalliche e per prodotti minerali
+CP_2021,7.2.2,7.2,3,"Operai dei rivestimenti metallici, della galvanoplastica e per la fabbricazione di prodotti fotografici"
+CP_2021,7.2.3,7.2,3,Conduttori di macchinari per la fabbricazione di articoli in gomma e materie plastiche
+CP_2021,7.2.4,7.2,3,Operai addetti a macchinari in impianti per la produzione in serie di articoli in legno
+CP_2021,7.2.5,7.2,3,Conduttori di macchinari per tipografia e stampa su carta e cartone
+CP_2021,7.2.6,7.2,3,"Operai addetti a macchinari dell'industria tessile, delle confezioni ed assimilati"
+CP_2021,7.2.7,7.2,3,Operai addetti all'assemblaggio di prodotti industriali
+CP_2021,7.2.8,7.2,3,Operai addetti a macchine confezionatrici di prodotti industriali
+CP_2021,7.3.1,7.3,3,Operai addetti a macchinari fissi nell'agricoltura e nella prima trasformazione dei prodotti agricoli
+CP_2021,7.3.2,7.3,3,Operai addetti a macchinari fissi per l'industria alimentare
+CP_2021,7.4.1,7.4,3,Conduttori di convogli ferroviari e altri manovratori di veicoli su rotaie e di impianti a fune
+CP_2021,7.4.2,7.4,3,Conduttori di veicoli a motore e a trazione animale
+CP_2021,7.4.3,7.4,3,Conduttori di macchine agricole
+CP_2021,7.4.4,7.4,3,"Conduttori di macchine per movimento terra, di macchine di sollevamento e di maneggio dei materiali"
+CP_2021,7.4.5,7.4,3,Marinai di coperta e operai assimilati
+CP_2021,8.1.1,8.1,3,Venditori ambulanti
+CP_2021,8.1.2,8.1,3,Personale non qualificato di ufficio
+CP_2021,8.1.3,8.1,3,Personale non qualificato addetto allo spostamento e alla consegna merci
+CP_2021,8.1.4,8.1,3,"Personale non qualificato nei servizi di pulizia di uffici, alberghi, navi, ristoranti, aree pubbliche e veicoli"
+CP_2021,8.1.5,8.1,3,Personale non qualificato nei servizi di istruzione e sanitari
+CP_2021,8.1.6,8.1,3,"Personale non qualificato addetto ai servizi di custodia di edifici, attrezzature e beni"
+CP_2021,8.2.1,8.2,3,Personale non qualificato nei servizi ricreativi e culturali
+CP_2021,8.2.2,8.2,3,Personale non qualificato addetto ai servizi domestici
+CP_2021,8.3.1,8.3,3,Personale non qualificato nell'agricoltura e nella manutenzione del verde
+CP_2021,8.3.2,8.3,3,"Personale non qualificato addetto alle foreste, alla cura degli animali, alla pesca e alla caccia"
+CP_2021,8.4.1,8.4,3,Personale non qualificato delle miniere e delle cave
+CP_2021,8.4.2,8.4,3,Personale non qualificato delle costruzioni e professioni assimilate
+CP_2021,8.4.3,8.4,3,Personale non qualificato nella manifattura
+CP_2021,9.1.1,9.1,3,Ufficiali delle forze armate
+CP_2021,9.2.1,9.2,3,"Sergenti, sovraintendenti e marescialli delle forze armate"
+CP_2021,9.3.1,9.3,3,Truppa delle forze armate
+CP_2021,1.1.1.1,1.1.1,4,Membri di organismi di governo e di assemblee con potestà legislativa e regolamentare a livello nazionale
+CP_2021,1.1.1.2,1.1.1,4,Membri di organismi di governo e di assemblee con potestà legislativa e regolamentare a livello regionale e di Province autonome
+CP_2021,1.1.1.3,1.1.1,4,Membri di organismi di governo e di assemblee con potestà regolamentare a livello provinciale o di città metropolitana
+CP_2021,1.1.1.4,1.1.1,4,Membri di organismi di governo e di assemblee con potestà regolamentare a livello comunale e sub-provinciale
+CP_2021,1.1.2.1,1.1.2,4,"Ambasciatori, ministri plenipotenziari ed alti dirigenti della carriera diplomatica"
+CP_2021,1.1.2.2,1.1.2,4,"Prefetti e vice prefetti, alti funzionari della carriera prefettizia e alti responsabili della sicurezza pubblica"
+CP_2021,1.1.2.3,1.1.2,4,"Direttori generali, dipartimentali ed equiparati delle amministrazioni dello Stato, degli enti pubblici non economici, degli enti locali, delle università, degli enti di ricerca e nella sanità"
+CP_2021,1.1.2.4,1.1.2,4,"Dirigenti ed equiparati delle amministrazioni dello Stato, degli enti pubblici non economici, degli enti locali, della scuola, delle università, degli enti di ricerca e nella sanità"
+CP_2021,1.1.3.1,1.1.3,4,"Magistrati con funzioni direttive superiori, di indirizzo e di coordinamento"
+CP_2021,1.1.4.1,1.1.4,4,"Dirigenti di organizzazioni di interesse nazionale e sovranazionale per la rappresentanza di interessi collettivi (partiti e movimenti politici, sindacati delle imprese e dei lavoratori, associazioni per la tutela dell'ambiente e dei consumatori)"
+CP_2021,1.1.4.2,1.1.4,4,"Dirigenti di associazioni umanitarie, culturali, scientifiche e sportive di interesse nazionale o sovranazionale"
+CP_2021,1.2.1.1,1.2.1,4,"Imprenditori e amministratori di grandi aziende che operano nell'agricoltura, nell'allevamento, nella silvicoltura, nella caccia e nella pesca"
+CP_2021,1.2.1.2,1.2.1,4,"Imprenditori e amministratori di grandi aziende che operano nell'estrazione dei minerali, nella manifattura, nella produzione e distribuzione di energia elettrica, gas, acqua e nelle attività di gestione dei rifiuti"
+CP_2021,1.2.1.3,1.2.1,4,Imprenditori e amministratori di grandi aziende di costruzioni
+CP_2021,1.2.1.4,1.2.1,4,Imprenditori e amministratori di grandi aziende nel commercio
+CP_2021,1.2.1.5,1.2.1,4,Imprenditori e amministratori di grandi aziende nei servizi di alloggio e ristorazione
+CP_2021,1.2.1.6,1.2.1,4,Imprenditori e amministratori di grandi aziende nel settore dei trasporti e magazzinaggio e nei servizi di informazione e comunicazione
+CP_2021,1.2.1.7,1.2.1,4,"Imprenditori e amministratori di grandi banche, assicurazioni, agenzie immobiliari e di intermediazione finanziaria"
+CP_2021,1.2.1.8,1.2.1,4,Imprenditori e amministratori di grandi aziende nei servizi alle imprese e alle persone
+CP_2021,1.2.1.9,1.2.1,4,"Imprenditori e amministratori di grandi aziende private nei servizi di istruzione, sanità, assistenza sociale e nelle attività artistiche, sportive, di intrattenimento e divertimento"
+CP_2021,1.2.2.1,1.2.2,4,"Direttori e dirigenti generali di aziende che operano nell'agricoltura, nell'allevamento, nella silvicoltura, nella caccia e nella pesca"
+CP_2021,1.2.2.2,1.2.2,4,"Direttori e dirigenti generali di aziende che operano nell'estrazione dei minerali, nella manifattura, nella produzione e distribuzione di energia elettrica, gas, acqua e nelle attività di gestione dei rifiuti"
+CP_2021,1.2.2.3,1.2.2,4,Direttori e dirigenti generali di aziende nelle costruzioni
+CP_2021,1.2.2.4,1.2.2,4,Direttori e dirigenti generali di aziende nel commercio
+CP_2021,1.2.2.5,1.2.2,4,Direttori e dirigenti generali di aziende nel settore dei servizi di alloggio e ristorazione
+CP_2021,1.2.2.6,1.2.2,4,Direttori e dirigenti generali di aziende nel settore dei trasporti e magazzinaggio e nei servizi di informazione e comunicazione
+CP_2021,1.2.2.7,1.2.2,4,"Direttori e dirigenti generali di banche, assicurazioni, agenzie immobiliari e di intermediazione finanziaria"
+CP_2021,1.2.2.8,1.2.2,4,Direttori e dirigenti generali di aziende di servizi alle imprese e alle persone
+CP_2021,1.2.2.9,1.2.2,4,"Direttori e dirigenti generali di aziende nel settore delle attività artistiche, sportive, di intrattenimento e di divertimento"
+CP_2021,1.2.3.1,1.2.3,4,Direttori e dirigenti della finanza ed amministrazione
+CP_2021,1.2.3.2,1.2.3,4,"Direttori e dirigenti dell'organizzazione, gestione delle risorse umane e delle relazioni industriali"
+CP_2021,1.2.3.3,1.2.3,4,Direttori e dirigenti delle vendite e commercializzazione
+CP_2021,1.2.3.4,1.2.3,4,"Direttori e dirigenti della comunicazione, pubblicità e pubbliche relazioni"
+CP_2021,1.2.3.5,1.2.3,4,Direttori e dirigenti dell'approvvigionamento e distribuzione
+CP_2021,1.2.3.6,1.2.3,4,Direttori e dirigenti dei servizi informatici
+CP_2021,1.2.3.7,1.2.3,4,Direttori e dirigenti di ricerca e sviluppo
+CP_2021,1.2.3.8,1.2.3,4,Direttori e dirigenti della pianificazione e delle policy
+CP_2021,1.3.1.1,1.3.1,4,"Imprenditori e responsabili di piccole aziende che operano nell'agricoltura, nell'allevamento, nella silvicoltura, nella caccia e nella pesca"
+CP_2021,1.3.1.2,1.3.1,4,"Imprenditori e responsabili di piccole aziende che operano nell'estrazione di minerali, nella manifattura, nella produzione e distribuzione di energia elettrica, gas e acqua e nelle attività di gestione dei rifiuti"
+CP_2021,1.3.1.3,1.3.1,4,Imprenditori e responsabili di piccole aziende nelle costruzioni
+CP_2021,1.3.1.4,1.3.1,4,Imprenditori e responsabili di piccole aziende nel commercio
+CP_2021,1.3.1.5,1.3.1,4,Imprenditori e responsabili di piccole aziende nei servizi di alloggio e ristorazione
+CP_2021,1.3.1.6,1.3.1,4,"Imprenditori e responsabili di piccole aziende nei trasporti, magazzinaggio e nei servizi di informazione e comunicazione"
+CP_2021,1.3.1.7,1.3.1,4,"Imprenditori e responsabili di piccoli istituti di credito e di intermediazione finanziaria, assicurativa e immobiliare"
+CP_2021,1.3.1.8,1.3.1,4,Imprenditori e responsabili di piccole aziende nei servizi alle imprese e alle persone
+CP_2021,1.3.1.9,1.3.1,4,"Imprenditori e responsabili di piccole aziende nei servizi di istruzione, formazione, ricerca, sanità, assistenza sociale e nelle attività artistiche, sportive, di intrattenimento e divertimento"
+CP_2021,2.1.1.1,2.1.1,4,Fisici e astronomi
+CP_2021,2.1.1.2,2.1.1,4,Chimici e professioni assimilate
+CP_2021,2.1.1.3,2.1.1,4,"Matematici, statistici, analisti dei dati e professioni assimilate"
+CP_2021,2.1.1.4,2.1.1,4,"Geologi, meteorologi, geofisici e professioni assimilate"
+CP_2021,2.2.1.1,2.2.1,4,Ingegneri energetici e meccanici
+CP_2021,2.2.1.2,2.2.1,4,Ingegneri metallurgico-minerari
+CP_2021,2.2.1.3,2.2.1,4,Ingegneri elettrotecnici
+CP_2021,2.2.1.4,2.2.1,4,Ingegneri dell’informazione
+CP_2021,2.2.1.5,2.2.1,4,"Ingegneri chimici, petroliferi e dei materiali"
+CP_2021,2.2.1.6,2.2.1,4,Ingegneri civili e professioni assimilate
+CP_2021,2.2.1.7,2.2.1,4,Ingegneri industriali e gestionali
+CP_2021,2.2.1.8,2.2.1,4,Ingegneri biomedici e bioingegneri
+CP_2021,2.2.2.1,2.2.2,4,"Architetti, pianificatori, paesaggisti e specialisti del recupero e della conservazione del territorio"
+CP_2021,2.2.2.2,2.2.2,4,"Cartografi, fotogrammetristi e specialisti nei sistemi informativi geografici"
+CP_2021,2.3.1.1,2.3.1,4,"Biologi, botanici, zoologi e professioni assimilate"
+CP_2021,2.3.1.2,2.3.1,4,"Farmacologi, batteriologi e professioni assimilate"
+CP_2021,2.3.1.3,2.3.1,4,Agronomi e forestali
+CP_2021,2.3.1.4,2.3.1,4,Veterinari
+CP_2021,2.3.1.5,2.3.1,4,Farmacisti
+CP_2021,2.4.1.1,2.4.1,4,Medici generici
+CP_2021,2.4.1.2,2.4.1,4,Specialisti in terapie mediche
+CP_2021,2.4.1.3,2.4.1,4,Specialisti in terapie chirurgiche
+CP_2021,2.4.1.4,2.4.1,4,Laboratoristi e patologi clinici
+CP_2021,2.4.1.5,2.4.1,4,Dentisti e odontostomatologi
+CP_2021,2.4.1.6,2.4.1,4,Specialisti in diagnostica per immagini e radioterapia
+CP_2021,2.4.1.7,2.4.1,4,"Specialisti in igiene, epidemiologia e sanità pubblica"
+CP_2021,2.4.1.8,2.4.1,4,Anestesisti e rianimatori
+CP_2021,2.5.1.1,2.5.1,4,Specialisti della gestione e del controllo nella pubblica amministrazione
+CP_2021,2.5.1.2,2.5.1,4,Specialisti della gestione e del controllo nelle imprese private
+CP_2021,2.5.1.3,2.5.1,4,Specialisti di gestione e sviluppo del personale e dell'organizzazione del lavoro
+CP_2021,2.5.1.4,2.5.1,4,Specialisti in contabilità e problemi finanziari
+CP_2021,2.5.1.5,2.5.1,4,Specialisti nei rapporti con il mercato
+CP_2021,2.5.1.6,2.5.1,4,"Specialisti nelle relazioni pubbliche, dell'immagine e professioni assimilate"
+CP_2021,2.5.2.1,2.5.2,4,Procuratori legali ed avvocati
+CP_2021,2.5.2.2,2.5.2,4,Esperti legali in imprese o enti pubblici
+CP_2021,2.5.2.3,2.5.2,4,Notai
+CP_2021,2.5.2.4,2.5.2,4,Magistrati
+CP_2021,2.5.3.1,2.5.3,4,Specialisti in scienze economiche
+CP_2021,2.5.3.2,2.5.3,4,Specialisti in scienze sociologiche e antropologiche
+CP_2021,2.5.3.3,2.5.3,4,Specialisti in scienze psicologiche e psicoterapeutiche
+CP_2021,2.5.3.4,2.5.3,4,"Specialisti in scienze storiche, artistiche, politiche e filosofiche"
+CP_2021,2.5.3.5,2.5.3,4,Specialisti in scienze pedagogiche
+CP_2021,2.5.4.1,2.5.4,4,Scrittori e professioni assimilate
+CP_2021,2.5.4.2,2.5.4,4,Giornalisti
+CP_2021,2.5.4.3,2.5.4,4,Interpreti e traduttori a livello elevato
+CP_2021,2.5.4.4,2.5.4,4,"Linguisti, filologi e revisori di testi"
+CP_2021,2.5.4.5,2.5.4,4,"Archivisti e conservatori digitali, bibliotecari, conservatori di musei e professioni assimilate"
+CP_2021,2.5.5.1,2.5.5,4,"Pittori, scultori, disegnatori"
+CP_2021,2.5.5.2,2.5.5,4,"Registi, direttori artistici, attori, sceneggiatori e scenografi"
+CP_2021,2.5.5.3,2.5.5,4,Coreografi e ballerini
+CP_2021,2.5.5.4,2.5.5,4,"Compositori, musicisti e cantanti"
+CP_2021,2.5.5.5,2.5.5,4,"Artisti delle forme di cultura popolare, di varietà e acrobati"
+CP_2021,2.5.5.6,2.5.5,4,Restauratori e specialisti nella conservazione dei beni culturali
+CP_2021,2.5.6.1,2.5.6,4,Specialisti in discipline religiose e teologiche
+CP_2021,2.6.1.1,2.6.1,4,"Docenti universitari in scienze matematiche e dell'informazione, fisiche, chimiche e della terra"
+CP_2021,2.6.1.2,2.6.1,4,Docenti universitari in scienze della vita e della salute
+CP_2021,2.6.1.3,2.6.1,4,Docenti universitari in scienze ingegneristiche e dell'architettura
+CP_2021,2.6.1.4,2.6.1,4,"Docenti universitari in scienze dell'antichità, filologico-letterarie e storico-artistiche"
+CP_2021,2.6.1.5,2.6.1,4,"Docenti universitari in scienze storiche, filosofiche, pedagogiche e psicologiche"
+CP_2021,2.6.1.6,2.6.1,4,Docenti universitari in scienze economiche e statistiche
+CP_2021,2.6.1.7,2.6.1,4,"Docenti universitari in scienze giuridiche, politiche e sociali"
+CP_2021,2.6.2.1,2.6.2,4,"Ricercatori e tecnici laureati nelle scienze matematiche e dell'informazione, fisiche, chimiche, della terra"
+CP_2021,2.6.2.2,2.6.2,4,Ricercatori e tecnici laureati nelle scienze della vita e della salute
+CP_2021,2.6.2.3,2.6.2,4,Ricercatori e tecnici laureati nelle scienze ingegneristiche e dell'architettura
+CP_2021,2.6.2.4,2.6.2,4,"Ricercatori e tecnici laureati nelle scienze dell'antichità, filologico-letterarie e storico-artistiche"
+CP_2021,2.6.2.5,2.6.2,4,"Ricercatori e tecnici laureati nelle scienze storiche, filosofiche, pedagogiche e psicologiche"
+CP_2021,2.6.2.6,2.6.2,4,Ricercatori e tecnici laureati nelle scienze economiche e statistiche
+CP_2021,2.6.2.7,2.6.2,4,"Ricercatori e tecnici laureati nelle scienze giuridiche, politiche e sociali"
+CP_2021,2.6.3.1,2.6.3,4,"Docenti delle accademie, dei conservatori e delle istituzioni scolastiche assimilate"
+CP_2021,2.6.3.2,2.6.3,4,Docenti di scuola secondaria superiore
+CP_2021,2.6.3.3,2.6.3,4,Docenti di scuola secondaria inferiore
+CP_2021,2.6.4.1,2.6.4,4,Docenti di scuola primaria
+CP_2021,2.6.4.2,2.6.4,4,Docenti di scuola pre-primaria
+CP_2021,2.6.5.1,2.6.5,4,Specialisti nell'educazione e nella formazione di soggetti diversamente abili
+CP_2021,2.6.5.2,2.6.5,4,Ispettori scolastici e professioni assimilate
+CP_2021,2.6.5.3,2.6.5,4,Docenti ed esperti nella progettazione formativa e curricolare
+CP_2021,2.6.5.4,2.6.5,4,Consiglieri dell'orientamento
+CP_2021,2.6.5.5,2.6.5,4,Insegnanti di discipline artistiche e letterarie
+CP_2021,2.7.1.1,2.7.1,4,Analisti e progettisti di software
+CP_2021,2.7.2.1,2.7.2,4,Progettisti e amministratori di sistemi
+CP_2021,3.1.1.1,3.1.1,4,Tecnici fisici e geologici
+CP_2021,3.1.1.2,3.1.1,4,Tecnici chimici
+CP_2021,3.1.1.3,3.1.1,4,Tecnici statistici
+CP_2021,3.1.2.1,3.1.2,4,Tecnici programmatori
+CP_2021,3.1.2.2,3.1.2,4,Tecnici esperti in applicazioni
+CP_2021,3.1.2.3,3.1.2,4,Tecnici web
+CP_2021,3.1.2.4,3.1.2,4,Tecnici gestori di basi di dati
+CP_2021,3.1.2.5,3.1.2,4,Tecnici gestori di reti e di sistemi telematici
+CP_2021,3.1.2.6,3.1.2,4,Tecnici per la trasmissione radio-televisiva e per le telecomunicazioni
+CP_2021,3.1.2.7,3.1.2,4,Tecnici dei sistemi informativi geografici
+CP_2021,3.1.3.1,3.1.3,4,Tecnici meccanici
+CP_2021,3.1.3.2,3.1.3,4,Tecnici metallurgico-minerari e della ceramica
+CP_2021,3.1.3.3,3.1.3,4,Elettrotecnici
+CP_2021,3.1.3.4,3.1.3,4,Tecnici elettronici
+CP_2021,3.1.3.5,3.1.3,4,Tecnici delle costruzioni civili e professioni assimilate
+CP_2021,3.1.3.6,3.1.3,4,Tecnici del risparmio energetico e delle energie rinnovabili
+CP_2021,3.1.3.7,3.1.3,4,Disegnatori industriali e professioni assimilate
+CP_2021,3.1.4.1,3.1.4,4,Tecnici della conduzione di impianti produttivi in continuo
+CP_2021,3.1.4.2,3.1.4,4,Tecnici dell'esercizio di reti idriche ed energetiche
+CP_2021,3.1.5.1,3.1.5,4,Tecnici di produzione in miniere e cave
+CP_2021,3.1.5.2,3.1.5,4,Tecnici della gestione di cantieri edili
+CP_2021,3.1.5.3,3.1.5,4,Tecnici della produzione manifatturiera
+CP_2021,3.1.5.4,3.1.5,4,Tecnici della produzione e preparazione alimentare
+CP_2021,3.1.5.5,3.1.5,4,Tecnici della produzione di servizi
+CP_2021,3.1.6.1,3.1.6,4,Comandanti e ufficiali di bordo
+CP_2021,3.1.6.2,3.1.6,4,Comandanti e piloti di aereo
+CP_2021,3.1.6.3,3.1.6,4,Tecnici dell'aviazione civile
+CP_2021,3.1.6.4,3.1.6,4,Tecnici dell'organizzazione del traffico ferroviario
+CP_2021,3.1.6.5,3.1.6,4,Tecnici dell'organizzazione del traffico portuale
+CP_2021,3.1.7.1,3.1.7,4,Fotografi e professioni assimilate
+CP_2021,3.1.7.2,3.1.7,4,Operatori di apparecchi per la ripresa e la produzione audio-video
+CP_2021,3.1.7.3,3.1.7,4,Tecnici di apparati medicali e per la diagnostica medica
+CP_2021,3.1.8.1,3.1.8,4,Tecnici della sicurezza di impianti
+CP_2021,3.1.8.2,3.1.8,4,Tecnici della sicurezza sul lavoro
+CP_2021,3.1.8.3,3.1.8,4,Tecnici del controllo e della bonifica ambientale
+CP_2021,3.2.1.1,3.2.1,4,Professioni sanitarie infermieristiche ed ostetriche
+CP_2021,3.2.1.2,3.2.1,4,Professioni sanitarie riabilitative
+CP_2021,3.2.1.3,3.2.1,4,Professioni tecnico sanitarie - area tecnico diagnostica
+CP_2021,3.2.1.4,3.2.1,4,Professioni tecnico sanitarie - area tecnico assistenziale
+CP_2021,3.2.1.5,3.2.1,4,Professioni tecniche della prevenzione
+CP_2021,3.2.1.6,3.2.1,4,Altre professioni tecniche della salute
+CP_2021,3.2.1.7,3.2.1,4,Tecnici della medicina popolare
+CP_2021,3.2.2.1,3.2.2,4,Tecnici agronomi e forestali
+CP_2021,3.2.2.2,3.2.2,4,Zootecnici
+CP_2021,3.2.2.3,3.2.2,4,"Tecnici biologi, biochimici e professioni assimilate"
+CP_2021,3.3.1.1,3.3.1,4,"Segretari amministrativi, archivisti, tecnici degli affari generali e professioni assimilate"
+CP_2021,3.3.1.2,3.3.1,4,Contabili e professioni assimilate
+CP_2021,3.3.1.3,3.3.1,4,Tecnici del trasferimento e del trattamento delle informazioni
+CP_2021,3.3.1.4,3.3.1,4,Corrispondenti in lingue estere e professioni assimilate
+CP_2021,3.3.1.5,3.3.1,4,Tecnici dell'organizzazione e della gestione dei fattori produttivi
+CP_2021,3.3.2.1,3.3.2,4,Tecnici della gestione finanziaria
+CP_2021,3.3.2.2,3.3.2,4,Tecnici del lavoro bancario
+CP_2021,3.3.2.3,3.3.2,4,Agenti assicurativi
+CP_2021,3.3.2.4,3.3.2,4,"Periti, valutatori di rischio, liquidatori e professioni assimilate"
+CP_2021,3.3.2.5,3.3.2,4,"Agenti di borsa e cambio, tecnici dell'intermediazione titoli e professioni assimilate"
+CP_2021,3.3.2.6,3.3.2,4,Tecnici della locazione finanziaria e dei contratti di scambio
+CP_2021,3.3.3.1,3.3.3,4,Approvvigionatori e responsabili acquisti
+CP_2021,3.3.3.2,3.3.3,4,Responsabili di magazzino e della distribuzione interna
+CP_2021,3.3.3.3,3.3.3,4,"Commissari, stimatori e aggiudicatori d'asta commerciali"
+CP_2021,3.3.3.4,3.3.3,4,Tecnici della vendita e della distribuzione
+CP_2021,3.3.3.5,3.3.3,4,Tecnici del marketing
+CP_2021,3.3.3.6,3.3.3,4,Tecnici della pubblicità e delle pubbliche relazioni
+CP_2021,3.3.4.1,3.3.4,4,Spedizionieri e tecnici della distribuzione
+CP_2021,3.3.4.2,3.3.4,4,Agenti di commercio
+CP_2021,3.3.4.3,3.3.4,4,Agenti concessionari
+CP_2021,3.3.4.4,3.3.4,4,Agenti di pubblicità
+CP_2021,3.3.4.5,3.3.4,4,Agenti immobiliari
+CP_2021,3.3.4.6,3.3.4,4,Rappresentanti di commercio
+CP_2021,3.3.4.7,3.3.4,4,Agenti e rappresentanti di artisti ed atleti
+CP_2021,3.4.1.1,3.4.1,4,Tecnici delle attività ricettive e professioni assimilate
+CP_2021,3.4.1.2,3.4.1,4,"Tecnici dell'organizzazione di fiere, convegni ed eventi culturali"
+CP_2021,3.4.1.3,3.4.1,4,Animatori turistici e professioni assimilate
+CP_2021,3.4.1.4,3.4.1,4,Agenti di viaggio
+CP_2021,3.4.1.5,3.4.1,4,Guide ed accompagnatori specializzati
+CP_2021,3.4.2.1,3.4.2,4,Istruttori di guida
+CP_2021,3.4.2.2,3.4.2,4,Insegnanti nella formazione professionale e professioni assimilate
+CP_2021,3.4.2.3,3.4.2,4,Istruttori di tecniche in campo artistico
+CP_2021,3.4.2.4,3.4.2,4,Istruttori di discipline sportive non agonistiche
+CP_2021,3.4.2.5,3.4.2,4,Professioni organizzative nel campo dell'educazione fisica e dello sport
+CP_2021,3.4.2.6,3.4.2,4,Allenatori e tecnici di discipline sportive agonistiche
+CP_2021,3.4.2.7,3.4.2,4,Atleti
+CP_2021,3.4.3.1,3.4.3,4,"Annunciatori e presentatori della radio, della televisione e di altri spettacoli"
+CP_2021,3.4.3.2,3.4.3,4,"Tecnici dell'organizzazione della produzione radiotelevisiva, cinematografica e teatrale"
+CP_2021,3.4.3.3,3.4.3,4,Intrattenitori
+CP_2021,3.4.4.1,3.4.4,4,"Grafici, disegnatori e allestitori di scena"
+CP_2021,3.4.4.2,3.4.4,4,"Tecnici dei musei, delle biblioteche e professioni assimilate"
+CP_2021,3.4.4.3,3.4.4,4,"Periti, stimatori d'arte e professioni assimilate"
+CP_2021,3.4.4.4,3.4.4,4,Tecnici restauratori
+CP_2021,3.4.5.1,3.4.5,4,Assistenti sociali
+CP_2021,3.4.5.2,3.4.5,4,Tecnici del reinserimento e dell'integrazione sociale
+CP_2021,3.4.5.3,3.4.5,4,Tecnici dei servizi per l'impiego
+CP_2021,3.4.5.4,3.4.5,4,Tecnici dei servizi di sicurezza privati e professioni assimilate
+CP_2021,3.4.5.5,3.4.5,4,Tecnici delle attività religiose e di culto
+CP_2021,3.4.6.1,3.4.6,4,Tecnici dei servizi giudiziari
+CP_2021,3.4.6.2,3.4.6,4,Ufficiali della polizia di stato
+CP_2021,3.4.6.3,3.4.6,4,"Tecnici dei servizi di sicurezza dei vigili urbani, dei vigili del fuoco e del corpo forestale"
+CP_2021,3.4.6.4,3.4.6,4,Ufficiali della guardia di finanza
+CP_2021,3.4.6.5,3.4.6,4,Controllori fiscali
+CP_2021,3.4.6.6,3.4.6,4,Tecnici dei servizi pubblici di concessioni licenze e professioni assimilate
+CP_2021,4.1.1.1,4.1.1,4,Addetti a funzioni di segreteria
+CP_2021,4.1.1.2,4.1.1,4,Addetti agli affari generali
+CP_2021,4.1.1.3,4.1.1,4,Addetti al protocollo e allo smistamento di documenti
+CP_2021,4.1.1.4,4.1.1,4,Addetti alla gestione del personale
+CP_2021,4.1.2.1,4.1.2,4,"Addetti alla videoscrittura, dattilografi, stenografi e professioni assimilate"
+CP_2021,4.1.2.2,4.1.2,4,Addetti all'immissione dati
+CP_2021,4.1.2.3,4.1.2,4,Addetti alle macchine per la riproduzione e l'invio di materiali e documenti
+CP_2021,4.2.1.1,4.2.1,4,"Addetti agli sportelli assicurativi, bancari e di altri intermediari finanziari"
+CP_2021,4.2.1.2,4.2.1,4,Addetti agli sportelli dei servizi postali
+CP_2021,4.2.1.3,4.2.1,4,Addetti agli sportelli per l'esazione di imposte e contributi e al recupero crediti
+CP_2021,4.2.1.4,4.2.1,4,Addetti agli sportelli delle agenzie di pegno e professioni assimilate
+CP_2021,4.2.1.5,4.2.1,4,Addetti alla vendita di biglietti
+CP_2021,4.2.1.6,4.2.1,4,Addetti agli sportelli delle agenzie di viaggio
+CP_2021,4.2.2.1,4.2.2,4,Addetti all'accoglienza e all'informazione nelle imprese e negli enti pubblici
+CP_2021,4.2.2.2,4.2.2,4,Addetti all'accoglienza nei servizi di alloggio e ristorazione
+CP_2021,4.2.2.3,4.2.2,4,Centralinisti
+CP_2021,4.2.2.4,4.2.2,4,Addetti all'informazione nei Call Center (senza funzioni di vendita)
+CP_2021,4.3.1.1,4.3.1,4,Addetti alla gestione degli acquisti
+CP_2021,4.3.1.2,4.3.1,4,Addetti alla gestione dei magazzini e professioni assimilate
+CP_2021,4.3.1.3,4.3.1,4,Addetti alla gestione amministrativa dei trasporti merci
+CP_2021,4.3.2.1,4.3.2,4,Addetti alla contabilità
+CP_2021,4.3.2.2,4.3.2,4,Addetti alle buste paga
+CP_2021,4.3.2.3,4.3.2,4,Addetti alle operazioni finanziarie per conto dell'impresa o dell'organizzazione
+CP_2021,4.3.2.4,4.3.2,4,Addetti ai servizi statistici
+CP_2021,4.3.2.5,4.3.2,4,Addetti agli uffici interni di cassa
+CP_2021,4.4.1.1,4.4.1,4,"Personale addetto a compiti di controllo, verifica e professioni assimilate"
+CP_2021,4.4.1.2,4.4.1,4,Addetti al controllo della documentazione di viaggio
+CP_2021,4.4.1.3,4.4.1,4,Addetti allo smistamento e al recapito della posta
+CP_2021,4.4.2.1,4.4.2,4,"Addetti ad archivi, schedari e professioni assimilate"
+CP_2021,4.4.2.2,4.4.2,4,Addetti a biblioteche e professioni assimilate
+CP_2021,5.1.1.1,5.1.1,4,Esercenti delle vendite all'ingrosso
+CP_2021,5.1.1.2,5.1.1,4,Esercenti delle vendite al minuto
+CP_2021,5.1.1.3,5.1.1,4,Esercenti di distributori di carburanti ed assimilati
+CP_2021,5.1.2.1,5.1.2,4,Commessi delle vendite all'ingrosso
+CP_2021,5.1.2.2,5.1.2,4,Commessi delle vendite al minuto
+CP_2021,5.1.2.3,5.1.2,4,Addetti ad attività organizzative delle vendite
+CP_2021,5.1.2.4,5.1.2,4,Cassieri di esercizi commerciali
+CP_2021,5.1.2.5,5.1.2,4,"Venditori a domicilio, a distanza e professioni assimilate"
+CP_2021,5.1.2.6,5.1.2,4,Addetti ai distributori di carburanti ed assimilati
+CP_2021,5.1.3.1,5.1.3,4,"Indossatori, modelli e professioni assimilate"
+CP_2021,5.1.3.2,5.1.3,4,Dimostratori e professioni assimilate
+CP_2021,5.1.3.3,5.1.3,4,Vetrinisti e professioni assimilate
+CP_2021,5.1.3.4,5.1.3,4,Addetti all'informazione e all'assistenza dei clienti
+CP_2021,5.2.1.1,5.2.1,4,Esercenti nelle attività ricettive
+CP_2021,5.2.2.1,5.2.2,4,Cuochi in alberghi e ristoranti
+CP_2021,5.2.2.2,5.2.2,4,"Addetti alla preparazione, alla cottura e alla distribuzione di cibi"
+CP_2021,5.2.2.3,5.2.2,4,Camerieri e professioni assimilate
+CP_2021,5.2.2.4,5.2.2,4,Baristi e professioni assimilate
+CP_2021,5.2.2.5,5.2.2,4,Esercenti nelle attività di ristorazione
+CP_2021,5.2.3.1,5.2.3,4,"Hostess, steward e professioni assimilate"
+CP_2021,5.2.3.2,5.2.3,4,Accompagnatori turistici
+CP_2021,5.3.1.1,5.3.1,4,Professioni qualificate nei servizi sanitari e sociali
+CP_2021,5.4.1.1,5.4.1,4,"Esercenti di cinema, teatri e attività sportive e ricreative"
+CP_2021,5.4.1.2,5.4.1,4,"Allibratori, croupiers e professioni assimilate"
+CP_2021,5.4.1.3,5.4.1,4,"Astrologi, preveggenti, chiromanti e professioni assimilate"
+CP_2021,5.5.1.1,5.5.1,4,Acconciatori
+CP_2021,5.5.1.2,5.5.1,4,Estetisti e truccatori
+CP_2021,5.5.1.3,5.5.1,4,Massaggiatori ed operatori termali
+CP_2021,5.5.2.1,5.5.2,4,Personale di compagnia e personale qualificato di servizio alle famiglie
+CP_2021,5.5.2.2,5.5.2,4,Addetti alla sorveglianza di bambini e professioni assimilate
+CP_2021,5.5.2.3,5.5.2,4,Addetti all'assistenza personale
+CP_2021,5.5.3.1,5.5.3,4,Addestratori di animali
+CP_2021,5.5.3.2,5.5.3,4,Custodi e allevatori di animali domestici e da esposizione
+CP_2021,5.5.4.1,5.5.4,4,Esercenti di agenzie per il disbrigo di pratiche e professioni assimilate
+CP_2021,5.5.4.2,5.5.4,4,Addetti di agenzie per il disbrigo di pratiche e professioni assimilate
+CP_2021,5.5.5.1,5.5.5,4,Esercenti di agenzie di pompe funebri
+CP_2021,5.5.5.2,5.5.5,4,Addetti alle agenzie di pompe funebri
+CP_2021,5.6.1.1,5.6.1,4,Personale di guardiania territoriale
+CP_2021,5.6.1.2,5.6.1,4,Vigili urbani
+CP_2021,5.6.1.3,5.6.1,4,Agenti della polizia di stato e professioni assimilate
+CP_2021,5.6.1.4,5.6.1,4,Vigili del fuoco e professioni assimilate
+CP_2021,5.6.1.5,5.6.1,4,Agenti di istituti di pena e rieducazione
+CP_2021,5.6.1.6,5.6.1,4,Guardie private di sicurezza
+CP_2021,5.6.1.7,5.6.1,4,Bagnini e professioni assimilate
+CP_2021,5.6.1.8,5.6.1,4,Esercenti di garage ed autorimesse
+CP_2021,6.1.1.1,6.1.1,4,Brillatori (addetti alle esplosioni)
+CP_2021,6.1.1.2,6.1.1,4,"Tagliatori di pietre, scalpellini e marmisti"
+CP_2021,6.1.1.3,6.1.1,4,Coltivatori di saline
+CP_2021,6.1.2.1,6.1.2,4,"Muratori in pietra, mattoni, refrattari"
+CP_2021,6.1.2.2,6.1.2,4,Muratori in cemento armato
+CP_2021,6.1.2.3,6.1.2,4,Carpentieri e falegnami nell'edilizia (esclusi i parchettisti)
+CP_2021,6.1.2.4,6.1.2,4,Ponteggiatori
+CP_2021,6.1.2.5,6.1.2,4,"Armatori di gallerie, addetti all'armamento ferroviario e professioni assimilate"
+CP_2021,6.1.2.6,6.1.2,4,Pavimentatori stradali e professioni assimilate
+CP_2021,6.1.2.7,6.1.2,4,Montatori di manufatti prefabbricati e di preformati
+CP_2021,6.1.3.1,6.1.3,4,Copritetti e professioni assimilate
+CP_2021,6.1.3.2,6.1.3,4,Pavimentatori e posatori di rivestimenti
+CP_2021,6.1.3.3,6.1.3,4,Intonacatori
+CP_2021,6.1.3.4,6.1.3,4,Installatori di impianti di isolamento e insonorizzazione
+CP_2021,6.1.3.5,6.1.3,4,Vetrai
+CP_2021,6.1.3.6,6.1.3,4,Idraulici e posatori di tubazioni idrauliche e di gas
+CP_2021,6.1.3.7,6.1.3,4,Elettricisti nelle costruzioni civili e professioni assimilate
+CP_2021,6.1.3.8,6.1.3,4,Installatori di infissi e serramenta
+CP_2021,6.1.4.1,6.1.4,4,"Pittori, stuccatori, laccatori e decoratori"
+CP_2021,6.1.4.2,6.1.4,4,Pulitori di facciate
+CP_2021,6.1.5.1,6.1.5,4,Operai addetti ai servizi di igiene e pulizia
+CP_2021,6.1.5.2,6.1.5,4,Operai addetti alla manutenzione degli impianti fognari e professioni assimilate
+CP_2021,6.2.1.1,6.2.1,4,Fonditori e animisti di fonderia
+CP_2021,6.2.1.2,6.2.1,4,Saldatori e tagliatori a fiamma
+CP_2021,6.2.1.3,6.2.1,4,"Lattonieri e calderai, compresi i tracciatori"
+CP_2021,6.2.1.4,6.2.1,4,Montatori di carpenteria metallica
+CP_2021,6.2.1.5,6.2.1,4,Attrezzatori e montatori di cavi metallici per uso industriale e di trasporto
+CP_2021,6.2.1.6,6.2.1,4,Sommozzatori e lavoratori subacquei
+CP_2021,6.2.1.7,6.2.1,4,Specialisti di saldatura elettrica ed a norme ASME
+CP_2021,6.2.1.8,6.2.1,4,Lastroferratori
+CP_2021,6.2.2.1,6.2.2,4,"Fabbri, lingottai e operatori di presse per forgiare"
+CP_2021,6.2.2.2,6.2.2,4,Costruttori di utensili modellatori e tracciatori meccanici
+CP_2021,6.2.2.3,6.2.2,4,Attrezzisti di macchine utensili e professioni assimilate
+CP_2021,6.2.3.1,6.2.3,4,"Meccanici artigianali, riparatori e manutentori di automobili e professioni assimilate"
+CP_2021,6.2.3.2,6.2.3,4,Meccanici e riparatori di motori di aerei
+CP_2021,6.2.3.3,6.2.3,4,Meccanici e montatori di macchinari industriali ed assimilati
+CP_2021,6.2.3.4,6.2.3,4,Frigoristi
+CP_2021,6.2.3.5,6.2.3,4,"Meccanici e montatori di apparecchi industriali termici, idraulici e di condizionamento"
+CP_2021,6.2.3.6,6.2.3,4,Meccanici collaudatori
+CP_2021,6.2.3.7,6.2.3,4,Verniciatori artigianali ed industriali
+CP_2021,6.2.3.8,6.2.3,4,Meccanici e attrezzisti navali
+CP_2021,6.2.4.1,6.2.4,4,Installatori e riparatori di apparati elettrici ed elettromeccanici
+CP_2021,6.2.4.2,6.2.4,4,Manutentori e riparatori di apparati elettronici industriali e di misura
+CP_2021,6.2.4.3,6.2.4,4,"Riparatori di apparecchi radio, televisivi e assimilati"
+CP_2021,6.2.4.4,6.2.4,4,Installatori e riparatori di apparati di telecomunicazione
+CP_2021,6.2.4.5,6.2.4,4,"Installatori di linee elettriche, riparatori e cavisti"
+CP_2021,6.2.4.6,6.2.4,4,"Installatori, manutentori e riparatori di apparecchiature informatiche"
+CP_2021,6.3.1.1,6.3.1,4,Meccanici di precisione
+CP_2021,6.3.1.2,6.3.1,4,Meccanici e riparatori di protesi (dentali ed ortopediche)
+CP_2021,6.3.1.3,6.3.1,4,"Artigiani ed operai addetti alla costruzione, al montaggio e all'accordatura di strumenti musicali"
+CP_2021,6.3.1.4,6.3.1,4,Addetti alla costruzione e riparazione di orologi
+CP_2021,6.3.1.5,6.3.1,4,Costruttori di strumenti ottici e lenti
+CP_2021,6.3.1.6,6.3.1,4,"Orafi, gioiellieri e professioni assimilate"
+CP_2021,6.3.2.1,6.3.2,4,Vasai e professioni assimilate (prodotti in ceramica ed abrasivi)
+CP_2021,6.3.2.2,6.3.2,4,"Soffiatori, modellatori, tagliatori, molatori e levigatori di vetro"
+CP_2021,6.3.2.3,6.3.2,4,Incisori ed acquafortisti su vetro
+CP_2021,6.3.2.4,6.3.2,4,Pittori e decoratori su vetro e ceramica
+CP_2021,6.3.3.1,6.3.3,4,Artigiani delle lavorazioni artistiche del legno e di materiali assimilati
+CP_2021,6.3.3.2,6.3.3,4,"Artigiani delle lavorazioni artistiche a mano di tessili, cuoio e simili"
+CP_2021,6.3.4.1,6.3.4,4,Operatori delle attività poligrafiche di pre-stampa
+CP_2021,6.3.4.2,6.3.4,4,Stampatori offset e alla rotativa
+CP_2021,6.3.4.3,6.3.4,4,"Zincografi, stereotipisti ed elettrotipisti"
+CP_2021,6.3.4.4,6.3.4,4,"Artigiani incisori, acquafortisti, serigrafisti e professioni assimilate"
+CP_2021,6.3.4.5,6.3.4,4,Rilegatori e professioni assimilate
+CP_2021,6.4.1.1,6.4.1,4,Agricoltori e operai agricoli specializzati di colture in pieno campo
+CP_2021,6.4.1.2,6.4.1,4,"Agricoltori e operai agricoli specializzati di coltivazioni legnose agrarie (vite, olivo, agrumi e alberi da frutta)"
+CP_2021,6.4.1.3,6.4.1,4,"Agricoltori e operai agricoli specializzati di giardini e vivai, di coltivazioni di fiori e piante ornamentali, di ortive protette o di orti stabili"
+CP_2021,6.4.1.4,6.4.1,4,Agricoltori e operai agricoli specializzati di colture miste
+CP_2021,6.4.2.1,6.4.2,4,Allevatori e operai specializzati degli allevamenti di bovini ed equini
+CP_2021,6.4.2.2,6.4.2,4,Allevatori e operai specializzati degli allevamenti di ovini e caprini
+CP_2021,6.4.2.3,6.4.2,4,Allevatori e operai specializzati degli allevamenti di suini
+CP_2021,6.4.2.4,6.4.2,4,Allevatori e operai specializzati degli allevamenti avicoli
+CP_2021,6.4.2.5,6.4.2,4,Allevatori e operai specializzati degli allevamenti misti
+CP_2021,6.4.2.6,6.4.2,4,Allevatori e operai specializzati degli allevamenti di insetti
+CP_2021,6.4.2.9,6.4.2,4,Altri allevatori e operai specializzati della zootecnia
+CP_2021,6.4.3.1,6.4.3,4,Allevatori e agricoltori
+CP_2021,6.4.4.1,6.4.4,4,Lavoratori forestali specializzati
+CP_2021,6.4.5.1,6.4.5,4,Acquacoltori e professioni assimilate
+CP_2021,6.4.5.2,6.4.5,4,Pescatori della pesca costiera ed in acque interne
+CP_2021,6.4.5.3,6.4.5,4,Pescatori d'alto mare
+CP_2021,6.4.5.4,6.4.5,4,Cacciatori
+CP_2021,6.5.1.1,6.5.1,4,"Macellai, pesciaioli e professioni assimilate"
+CP_2021,6.5.1.2,6.5.1,4,Panettieri e pastai artigianali
+CP_2021,6.5.1.3,6.5.1,4,"Pasticcieri, gelatai e conservieri artigianali"
+CP_2021,6.5.1.4,6.5.1,4,Degustatori e classificatori di prodotti alimentari e di bevande
+CP_2021,6.5.1.5,6.5.1,4,Artigiani ed operai specializzati delle lavorazioni artigianali casearie
+CP_2021,6.5.1.6,6.5.1,4,Operai della preparazione e della lavorazione delle foglie di tabacco
+CP_2021,6.5.2.1,6.5.2,4,"Artigiani ed operai specializzati del trattamento del legno (curvature a vapore, stagionatura artificiale, trattamenti chimici)"
+CP_2021,6.5.2.2,6.5.2,4,Falegnami ed attrezzisti di macchine per la lavorazione del legno
+CP_2021,6.5.2.3,6.5.2,4,"Impagliatori, cestai, spazzolai, sugherai e professioni assimilate"
+CP_2021,6.5.3.1,6.5.3,4,Preparatori di fibre
+CP_2021,6.5.3.2,6.5.3,4,Tessitori e maglieristi a mano e su telai manuali
+CP_2021,6.5.3.3,6.5.3,4,"Sarti e tagliatori artigianali, modellisti e cappellai"
+CP_2021,6.5.3.4,6.5.3,4,"Pellicciai, modellatori di pellicceria e professioni assimilate"
+CP_2021,6.5.3.5,6.5.3,4,"Biancheristi, ricamatori a mano e professioni assimilate"
+CP_2021,6.5.3.6,6.5.3,4,Tappezzieri e materassai
+CP_2021,6.5.3.7,6.5.3,4,Artigiani e addetti alle tintolavanderie
+CP_2021,6.5.4.1,6.5.4,4,Conciatori di pelli e di pellicce
+CP_2021,6.5.4.2,6.5.4,4,Artigiani ed operai specializzati delle calzature ed assimilati
+CP_2021,6.5.4.3,6.5.4,4,"Valigiai, borsettieri e professioni assimilate (anche su articoli di similpelle e stoffa)"
+CP_2021,6.5.5.1,6.5.5,4,Macchinisti ed attrezzisti di scena
+CP_2021,7.1.1.1,7.1.1,4,Conduttori di macchinari in miniere e cave
+CP_2021,7.1.1.2,7.1.1,4,Conduttori di impianti per il primo trattamento di minerali e di pietre
+CP_2021,7.1.1.3,7.1.1,4,"Trivellatori e sondatori di pozzi petroliferi, di gas naturale, operatori di prospezione e professioni assimilate"
+CP_2021,7.1.2.1,7.1.2,4,"Fonditori, operatori di altoforno, di convertitori e di forni di raffinazione (siderurgia)"
+CP_2021,7.1.2.2,7.1.2,4,"Operatori di forni di seconda fusione, colatori di metalli e leghe e operatori di laminatoi"
+CP_2021,7.1.2.3,7.1.2,4,Operatori di impianti per il trattamento termico dei metalli
+CP_2021,7.1.2.4,7.1.2,4,Trafilatori ed estrusori di metalli
+CP_2021,7.1.2.5,7.1.2,4,Operatori di impianti per la produzione e la raffinazione di metalli non ferrosi
+CP_2021,7.1.3.1,7.1.3,4,"Conduttori di impianti per dosare, miscelare ed impastare materiali per la produzione del vetro, della ceramica e dei laterizi"
+CP_2021,7.1.3.2,7.1.3,4,Conduttori di forni e di altri impianti per la lavorazione del vetro
+CP_2021,7.1.3.3,7.1.3,4,Conduttori di impianti per la formatura di articoli in ceramica e terracotta
+CP_2021,7.1.3.4,7.1.3,4,"Conduttori di forni e di altri impianti per la produzione di laterizi, tegole e assimilati"
+CP_2021,7.1.4.1,7.1.4,4,"Conduttori di impianti per la fabbricazione in serie di pannelli in legno (compensati, truciolati ed assimilati)"
+CP_2021,7.1.4.2,7.1.4,4,Operatori di impianti per la preparazione della pasta di legno e di altri materiali per cartiera
+CP_2021,7.1.4.3,7.1.4,4,Operatori di impianti per la fabbricazione della carta
+CP_2021,7.1.5.1,7.1.5,4,Conduttori di impianti per la raffinazione dei prodotti petroliferi
+CP_2021,7.1.5.2,7.1.5,4,Operatori di macchinari e di impianti per la chimica di base e la chimica fine
+CP_2021,7.1.5.3,7.1.5,4,Operatori di macchinari per la fabbricazione di prodotti derivati dalla chimica
+CP_2021,7.1.6.1,7.1.6,4,Conduttori di caldaie a vapore e di motori termici in impianti industriali
+CP_2021,7.1.6.2,7.1.6,4,Operatori di impianti di recupero e riciclaggio dei rifiuti e di trattamento e distribuzione delle acque
+CP_2021,7.1.7.1,7.1.7,4,Operatori di catene di montaggio automatizzate
+CP_2021,7.1.8.1,7.1.8,4,Conduttori di mulini e impastatrici
+CP_2021,7.1.8.2,7.1.8,4,Conduttori di forni e di analoghi impianti per il trattamento termico dei minerali
+CP_2021,7.2.1.1,7.2.1,4,Operai addetti a macchine utensili automatiche e semiautomatiche industriali
+CP_2021,7.2.1.2,7.2.1,4,Operai addetti a macchinari per la produzione di manufatti in cemento e assimilati
+CP_2021,7.2.1.3,7.2.1,4,Conduttori di macchinari per la produzione di abrasivi e manufatti abrasivi minerali
+CP_2021,7.2.2.1,7.2.2,4,"Finitori, operai dei rivestimenti metallici, della galvanoplastica e assimilati"
+CP_2021,7.2.2.2,7.2.2,4,"Operai addetti a macchinari per la fabbricazione di prodotti fotografici (film, pellicole e assimilati)"
+CP_2021,7.2.3.1,7.2.3,4,Conduttori di macchinari per la confezione e vulcanizzazione dei pneumatici
+CP_2021,7.2.3.2,7.2.3,4,Conduttori di macchinari per la fabbricazione di altri articoli in gomma
+CP_2021,7.2.3.3,7.2.3,4,Conduttori di macchinari per la fabbricazione di articoli in plastica e assimilati
+CP_2021,7.2.4.1,7.2.4,4,Operai addetti a macchinari in impianti per la produzione in serie di mobili e di articoli in legno
+CP_2021,7.2.5.1,7.2.5,4,Conduttori di macchinari per tipografia e stampa su carta e cartone
+CP_2021,7.2.5.2,7.2.5,4,Conduttori di macchinari per la fabbricazione di prodotti in carta e cartone
+CP_2021,7.2.5.3,7.2.5,4,Conduttori di macchinari per rilegatura di libri e assimilati
+CP_2021,7.2.6.1,7.2.6,4,Operai addetti a macchinari per la filatura e la bobinatura
+CP_2021,7.2.6.2,7.2.6,4,Operai addetti a telai meccanici per la tessitura e la maglieria
+CP_2021,7.2.6.3,7.2.6,4,Operai addetti a macchinari industriali per confezioni di abbigliamento in stoffa e assimilati
+CP_2021,7.2.6.4,7.2.6,4,Operai addetti a macchinari per il trattamento di filati e tessuti industriali
+CP_2021,7.2.6.5,7.2.6,4,Operai addetti a macchinari per la stampa dei tessuti
+CP_2021,7.2.6.6,7.2.6,4,Addetti a macchinari industriali per la preparazione e produzione in serie di articoli in pelli e pellicce
+CP_2021,7.2.6.7,7.2.6,4,Addetti a macchinari per la produzione in serie di calzature
+CP_2021,7.2.6.9,7.2.6,4,"Altri operai addetti a macchinari dell'industria tessile, delle confezioni ed assimilati"
+CP_2021,7.2.7.1,7.2.7,4,Assemblatori in serie di parti di macchine
+CP_2021,7.2.7.2,7.2.7,4,Assemblatori e cablatori di apparecchiature elettriche
+CP_2021,7.2.7.3,7.2.7,4,Assemblatori e cablatori di apparecchiature elettroniche e di telecomunicazioni
+CP_2021,7.2.7.4,7.2.7,4,"Assemblatori in serie di articoli vari in metallo, in gomma e in materie plastiche"
+CP_2021,7.2.7.5,7.2.7,4,Assemblatori in serie di articoli in legno e in materiali assimilati
+CP_2021,7.2.7.6,7.2.7,4,"Assemblatori in serie di articoli in cartone, in tessuto e materie assimilate"
+CP_2021,7.2.7.9,7.2.7,4,Altri operai addetti all’assemblaggio ed alla produzione in serie di articoli industriali
+CP_2021,7.2.8.1,7.2.8,4,Operai addetti a macchine confezionatrici di prodotti industriali
+CP_2021,7.3.1.1,7.3.1,4,Operai addetti agli impianti fissi in agricoltura e nell’allevamento
+CP_2021,7.3.1.2,7.3.1,4,Operai addetti agli impianti per la trasformazione delle olive
+CP_2021,7.3.1.3,7.3.1,4,"Operai addetti alla refrigerazione, trattamento igienico e prima trasformazione del latte"
+CP_2021,7.3.2.1,7.3.2,4,Conduttori di macchinari per la lavorazione e la conservazione della carne e del pesce
+CP_2021,7.3.2.2,7.3.2,4,Conduttori di apparecchi per la lavorazione industriale di prodotti lattiero–caseari
+CP_2021,7.3.2.3,7.3.2,4,Conduttori di macchinari industriali per la lavorazione dei cereali e delle spezie e per prodotti a base di cereali (pasta e assimilati)
+CP_2021,7.3.2.4,7.3.2,4,"Conduttori di macchinari per il trattamento e la conservazione della frutta, delle mandorle, delle verdure, dei legumi e del riso"
+CP_2021,7.3.2.5,7.3.2,4,Conduttori di macchinari per la produzione e la raffinazione dello zucchero
+CP_2021,7.3.2.6,7.3.2,4,"Conduttori di macchinari per la preparazione e la produzione del the, del caffè, del cacao e della cioccolata"
+CP_2021,7.3.2.7,7.3.2,4,Conduttori di macchinari per la lavorazione dei prodotti del tabacco
+CP_2021,7.3.2.8,7.3.2,4,"Vinificatori industriali, birrai ed operai addetti a macchinari per la preparazione di liquori e bevande analcoliche e gassate"
+CP_2021,7.3.2.9,7.3.2,4,Conduttori di macchinari per la produzione di pasticceria e prodotti da forno
+CP_2021,7.4.1.1,7.4.1,4,Conduttori di convogli ferroviari
+CP_2021,7.4.1.2,7.4.1,4,"Operatori di verifica, circolazione e formazione treni"
+CP_2021,7.4.1.3,7.4.1,4,Manovratori di impianti a fune
+CP_2021,7.4.2.1,7.4.2,4,"Autisti di taxi, conduttori di automobili, furgoni e altri veicoli per trasporto di persone"
+CP_2021,7.4.2.2,7.4.2,4,"Conduttori di autobus, di tram e di filobus"
+CP_2021,7.4.2.3,7.4.2,4,Conduttori di mezzi pesanti e camion
+CP_2021,7.4.2.4,7.4.2,4,Conduttori di veicoli a trazione animale
+CP_2021,7.4.3.1,7.4.3,4,Conduttori di trattori agricoli
+CP_2021,7.4.3.2,7.4.3,4,"Conduttori di macchine raccoglitrici, mietitrici, trinciatrici e pressatrici agricole"
+CP_2021,7.4.3.3,7.4.3,4,Conduttori di macchine forestali
+CP_2021,7.4.4.1,7.4.4,4,Conduttori di macchinari per il movimento terra
+CP_2021,7.4.4.2,7.4.4,4,Conduttori di macchinari mobili per la perforazione nelle costruzioni
+CP_2021,7.4.4.3,7.4.4,4,Conduttori di gru e di apparecchi di sollevamento
+CP_2021,7.4.4.4,7.4.4,4,Conduttori di carrelli elevatori
+CP_2021,7.4.5.1,7.4.5,4,Marinai di coperta
+CP_2021,7.4.5.2,7.4.5,4,Conduttori di caldaie ed altre attrezzature navali
+CP_2021,7.4.5.3,7.4.5,4,Conduttori di barche e battelli a motore
+CP_2021,8.1.1.1,8.1.1,4,Venditori ambulanti di beni
+CP_2021,8.1.1.2,8.1.1,4,Venditori ambulanti di servizi
+CP_2021,8.1.2.1,8.1.2,4,Uscieri e professioni assimilate
+CP_2021,8.1.2.2,8.1.2,4,"Lettori di contatori, collettori di monete e professioni assimilate"
+CP_2021,8.1.3.1,8.1.3,4,"Facchini, addetti allo spostamento merci ed assimilati"
+CP_2021,8.1.3.2,8.1.3,4,Personale non qualificato addetto all'imballaggio e al magazzino
+CP_2021,8.1.3.3,8.1.3,4,Addetti alle consegne
+CP_2021,8.1.4.1,8.1.4,4,Personale non qualificato addetto alla pulizia nei servizi di alloggio e nelle navi
+CP_2021,8.1.4.2,8.1.4,4,Personale non qualificato nei servizi di ristorazione
+CP_2021,8.1.4.3,8.1.4,4,Personale non qualificato addetto ai servizi di pulizia di uffici ed esercizi commerciali
+CP_2021,8.1.4.4,8.1.4,4,Addetti al lavaggio veicoli
+CP_2021,8.1.4.5,8.1.4,4,Operatori ecologici e altri raccoglitori e separatori di rifiuti
+CP_2021,8.1.5.1,8.1.5,4,Bidelli e professioni assimilate
+CP_2021,8.1.5.2,8.1.5,4,Portantini e professioni assimilate
+CP_2021,8.1.6.1,8.1.6,4,"Personale non qualificato addetto ai servizi di custodia di edifici, attrezzature e beni"
+CP_2021,8.2.1.1,8.2.1,4,Personale non qualificato nei servizi ricreativi e culturali
+CP_2021,8.2.2.1,8.2.2,4,Collaboratori domestici e professioni assimilate
+CP_2021,8.3.1.1,8.3.1,4,Braccianti agricoli
+CP_2021,8.3.1.2,8.3.1,4,Personale non qualificato addetto alla manutenzione del verde
+CP_2021,8.3.2.1,8.3.2,4,Personale forestale non qualificato
+CP_2021,8.3.2.2,8.3.2,4,Personale non qualificato addetto alla cura degli animali
+CP_2021,8.3.2.3,8.3.2,4,Personale non qualificato addetto alla pesca ed alla caccia
+CP_2021,8.4.1.1,8.4.1,4,Manovali ed altro personale non qualificato delle miniere e delle cave
+CP_2021,8.4.2.1,8.4.2,4,Manovali e personale non qualificato dell’edilizia civile e professioni assimilate
+CP_2021,8.4.2.2,8.4.2,4,"Manovali e personale non qualificato della costruzione e manutenzione di strade, dighe e altre opere pubbliche"
+CP_2021,8.4.3.1,8.4.3,4,Personale non qualificato delle attività industriali e professioni assimilate
+CP_2021,9.1.1.1,9.1.1,4,Ufficiali delle forze armate
+CP_2021,9.2.1.1,9.2.1,4,"Sergenti, sovraintendenti e marescialli delle forze armate"
+CP_2021,9.3.1.1,9.3.1,4,Truppa delle forze armate
+CP_2021,1.1.1.1.1,1.1.1.1,5,Membri di organismi di governo e di assemblee nazionali con potestà legislativa e regolamentare
+CP_2021,1.1.1.1.2,1.1.1.1,5,Membri di autorità indipendenti con potestà regolamentare
+CP_2021,1.1.1.2.0,1.1.1.2,5,Membri di organismi di governo e di assemblee regionali e di Province autonome con potestà legislativa e regolamentare
+CP_2021,1.1.1.3.0,1.1.1.3,5,Membri di organismi di governo e di assemblee provinciali con potestà regolamentare o di città metropolitana
+CP_2021,1.1.1.4.0,1.1.1.4,5,Membri di organismi di governo e di assemblee sub-provinciali e comunali con potestà regolamentare
+CP_2021,1.1.2.1.0,1.1.2.1,5,"Ambasciatori, ministri plenipotenziari ed alti dirigenti della carriera diplomatica"
+CP_2021,1.1.2.2.1,1.1.2.2,5,"Prefetti, vice prefetti e alti dirigenti della carriera prefettizia"
+CP_2021,1.1.2.2.2,1.1.2.2,5,Responsabili della sicurezza pubblica
+CP_2021,1.1.2.3.1,1.1.2.3,5,"Direttori generali, dipartimentali ed equiparati delle amministrazioni dello Stato, degli enti pubblici non economici"
+CP_2021,1.1.2.3.2,1.1.2.3,5,"Rettori di università, direttori di istituzioni dell’Alta Formazione e di enti di ricerca"
+CP_2021,1.1.2.3.3,1.1.2.3,5,Direttori generali ed equiparati nella sanità
+CP_2021,1.1.2.3.4,1.1.2.3,5,"Direttori generali ed equiparati nelle regioni, nelle province autonome e negli enti locali"
+CP_2021,1.1.2.3.5,1.1.2.3,5,Sovrintendenti al patrimonio culturale nazionale
+CP_2021,1.1.2.4.1,1.1.2.4,5,Dirigenti amministrativi
+CP_2021,1.1.2.4.2,1.1.2.4,5,Dirigenti tecnici e professionali
+CP_2021,1.1.2.4.3,1.1.2.4,5,Dirigenti nella sanità
+CP_2021,1.1.2.4.4,1.1.2.4,5,Dirigenti delle professioni sanitarie
+CP_2021,1.1.2.4.5,1.1.2.4,5,Dirigenti scolastici ed equiparati
+CP_2021,1.1.2.4.6,1.1.2.4,5,Segretari comunali e provinciali
+CP_2021,1.1.3.1.0,1.1.3.1,5,"Magistrati con funzioni direttive superiori, di indirizzo e di coordinamento"
+CP_2021,1.1.4.1.1,1.1.4.1,5,Dirigenti di partiti e movimenti politici
+CP_2021,1.1.4.1.2,1.1.4.1,5,Dirigenti di sindacati e altre organizzazioni a tutela di interessi economici e sociali
+CP_2021,1.1.4.2.0,1.1.4.2,5,"Dirigenti di associazioni umanitarie, culturali, scientifiche e sportive di interesse nazionale o sovranazionale"
+CP_2021,1.2.1.1.0,1.2.1.1,5,"Imprenditori e amministratori di grandi aziende che operano nell'agricoltura, nell'allevamento, nella silvicoltura, nella caccia e nella pesca"
+CP_2021,1.2.1.2.1,1.2.1.2,5,Imprenditori e amministratori di grandi aziende che operano nella manifattura e nell'estrazione di minerali
+CP_2021,1.2.1.2.2,1.2.1.2,5,"Imprenditori e amministratori di grandi aziende che operano nella produzione e distribuzione di energia elettrica, gas e acqua e nella gestione dei rifiuti"
+CP_2021,1.2.1.3.0,1.2.1.3,5,Imprenditori e amministratori di grandi aziende di costruzioni
+CP_2021,1.2.1.4.1,1.2.1.4,5,Imprenditori e amministratori di grandi aziende nel commercio e riparazione di autoveicoli e motocicli
+CP_2021,1.2.1.4.2,1.2.1.4,5,Imprenditori e amministratori di grandi aziende nel commercio di beni (esclusi autoveicoli e motocicli)
+CP_2021,1.2.1.5.0,1.2.1.5,5,Imprenditori e amministratori di grandi aziende nei servizi di alloggio e ristorazione
+CP_2021,1.2.1.6.1,1.2.1.6,5,Imprenditori e amministratori di grandi aziende nel settore dei trasporti e magazzinaggio
+CP_2021,1.2.1.6.2,1.2.1.6,5,"Imprenditori e amministratori di grandi aziende nei servizi editoriali, di produzione cinematografica, radiofonica e televisiva"
+CP_2021,1.2.1.6.3,1.2.1.6,5,Imprenditori e amministratori di grandi aziende nei servizi informatici e di telecomunicazione
+CP_2021,1.2.1.7.0,1.2.1.7,5,"Imprenditori e amministratori di grandi banche, assicurazioni, agenzie immobiliari, di intermediazione finanziaria"
+CP_2021,1.2.1.8.0,1.2.1.8,5,Imprenditori e amministratori di grandi aziende nei servizi alle imprese e alle persone
+CP_2021,1.2.1.9.1,1.2.1.9,5,"Imprenditori e amministratori di grandi istituti scolastici, universitari e di ricerca privati"
+CP_2021,1.2.1.9.2,1.2.1.9,5,"Imprenditori e amministratori di grandi ospedali, cliniche private o grandi aziende di assistenza sociale"
+CP_2021,1.2.1.9.3,1.2.1.9,5,"Imprenditori e amministratori di grandi aziende nel settore delle attività sportive, ricreative, di intrattenimento e di divertimento"
+CP_2021,1.2.2.1.0,1.2.2.1,5,"Direttori e dirigenti generali di aziende che operano nell'agricoltura, nell'allevamento, nella silvicoltura, nella caccia e nella pesca"
+CP_2021,1.2.2.2.1,1.2.2.2,5,Direttori e dirigenti generali di aziende che operano nella manifattura e nell'estrazione dei minerali
+CP_2021,1.2.2.2.2,1.2.2.2,5,"Direttori e dirigenti generali di aziende che operano nella produzione e distribuzione di energia elettrica, gas, acqua e nelle attività di gestione dei rifiuti"
+CP_2021,1.2.2.3.0,1.2.2.3,5,Direttori e dirigenti generali di aziende nelle costruzioni
+CP_2021,1.2.2.4.1,1.2.2.4,5,Direttori e dirigenti generali di aziende nel commercio e riparazione di autoveicoli e motocicli
+CP_2021,1.2.2.4.2,1.2.2.4,5,Direttori e dirigenti generali di aziende nel commercio di beni (esclusi autoveicoli e motocicli)
+CP_2021,1.2.2.5.0,1.2.2.5,5,Direttori e dirigenti generali di aziende nel settore dei servizi di alloggio e ristorazione
+CP_2021,1.2.2.6.1,1.2.2.6,5,Direttori e dirigenti generali di aziende nel settore dei trasporti e magazzinaggio
+CP_2021,1.2.2.6.2,1.2.2.6,5,"Direttori e dirigenti generali di aziende nei servizi editoriali, di produzione cinematografica, radiofonica e televisiva"
+CP_2021,1.2.2.6.3,1.2.2.6,5,Direttori e dirigenti generali di aziende nei servizi informatici e di telecomunicazione
+CP_2021,1.2.2.7.0,1.2.2.7,5,"Direttori e dirigenti generali di banche, assicurazioni, agenzie immobiliari e di intermediazione finanziaria"
+CP_2021,1.2.2.8.0,1.2.2.8,5,Direttori e dirigenti generali di aziende di servizi alle imprese e alle persone
+CP_2021,1.2.2.9.0,1.2.2.9,5,"Direttori e dirigenti generali di aziende nel settore delle attività sportive, ricreative, di intrattenimento e divertimento"
+CP_2021,1.2.3.1.0,1.2.3.1,5,Direttori e dirigenti della finanza ed amministrazione
+CP_2021,1.2.3.2.0,1.2.3.2,5,"Direttori e dirigenti dell'organizzazione, gestione delle risorse umane e delle relazioni industriali"
+CP_2021,1.2.3.3.0,1.2.3.3,5,Direttori e dirigenti delle vendite e commercializzazione
+CP_2021,1.2.3.4.0,1.2.3.4,5,"Direttori e dirigenti della comunicazione, pubblicità e pubbliche relazioni"
+CP_2021,1.2.3.5.0,1.2.3.5,5,Direttori e dirigenti dell'approvvigionamento e distribuzione
+CP_2021,1.2.3.6.0,1.2.3.6,5,Direttori e dirigenti dei servizi informatici
+CP_2021,1.2.3.7.0,1.2.3.7,5,Direttori e dirigenti della ricerca e sviluppo
+CP_2021,1.2.3.8.0,1.2.3.8,5,Direttori e dirigenti della pianificazione e delle policy
+CP_2021,1.3.1.1.0,1.3.1.1,5,"Imprenditori e responsabili di piccole aziende che operano nell'agricoltura, nell'allevamento, nella silvicoltura, nella caccia e nella pesca"
+CP_2021,1.3.1.2.1,1.3.1.2,5,Imprenditori e responsabili di piccole aziende che operano nella manifattura e nell'estrazione di minerali
+CP_2021,1.3.1.2.2,1.3.1.2,5,"Imprenditori e responsabili di piccole aziende che operano nella produzione e distribuzione di energia elettrica, gas e acqua e nelle attività di gestione dei rifiuti"
+CP_2021,1.3.1.3.0,1.3.1.3,5,Imprenditori e responsabili di piccole aziende nelle costruzioni
+CP_2021,1.3.1.4.0,1.3.1.4,5,Imprenditori e responsabili di piccole aziende nel commercio
+CP_2021,1.3.1.5.0,1.3.1.5,5,"Imprenditori e responsabili di piccoli alberghi, alloggi o aree di campeggio e di piccoli esercizi di ristorazione"
+CP_2021,1.3.1.6.1,1.3.1.6,5,Imprenditori e responsabili di piccole aziende nei trasporti e magazzinaggio
+CP_2021,1.3.1.6.2,1.3.1.6,5,"Imprenditori e responsabili di piccole aziende nei servizi editoriali, di produzione cinematografica, radiofonica e televisiva"
+CP_2021,1.3.1.6.3,1.3.1.6,5,Imprenditori e responsabili di piccole aziende nei servizi informatici e di telecomunicazione
+CP_2021,1.3.1.7.0,1.3.1.7,5,"Imprenditori e responsabili di piccoli istituti di credito e di intermediazione finanziaria, assicurativa e immobiliare"
+CP_2021,1.3.1.8.0,1.3.1.8,5,Imprenditori e responsabili di piccole aziende nei servizi alle imprese e alle persone
+CP_2021,1.3.1.9.1,1.3.1.9,5,"Imprenditori e responsabili di piccole aziende nei servizi di istruzione, formazione e ricerca"
+CP_2021,1.3.1.9.2,1.3.1.9,5,Imprenditori e responsabili di piccole aziende nei servizi di sanità e assistenza sociale
+CP_2021,1.3.1.9.3,1.3.1.9,5,"Imprenditori e responsabili di piccole aziende nel settore delle attività sportive, ricreative, di intrattenimento e divertimento"
+CP_2021,2.1.1.1.1,2.1.1.1,5,Fisici
+CP_2021,2.1.1.1.2,2.1.1.1,5,Astronomi ed astrofisici
+CP_2021,2.1.1.2.1,2.1.1.2,5,Chimici e professioni assimilate
+CP_2021,2.1.1.2.2,2.1.1.2,5,Chimici informatori e divulgatori
+CP_2021,2.1.1.3.1,2.1.1.3,5,Matematici
+CP_2021,2.1.1.3.2,2.1.1.3,5,Statistici e analisti di dati
+CP_2021,2.1.1.4.1,2.1.1.4,5,Geologi
+CP_2021,2.1.1.4.2,2.1.1.4,5,Paleontologi
+CP_2021,2.1.1.4.3,2.1.1.4,5,Geofisici
+CP_2021,2.1.1.4.4,2.1.1.4,5,Meteorologi
+CP_2021,2.1.1.4.5,2.1.1.4,5,Idrologi
+CP_2021,2.2.1.1.1,2.2.1.1,5,Ingegneri meccanici
+CP_2021,2.2.1.1.2,2.2.1.1,5,Ingegneri navali
+CP_2021,2.2.1.1.3,2.2.1.1,5,Ingegneri aerospaziali e astronautici
+CP_2021,2.2.1.1.4,2.2.1.1,5,Ingegneri energetici e nucleari
+CP_2021,2.2.1.2.1,2.2.1.2,5,Ingegneri metallurgici
+CP_2021,2.2.1.2.2,2.2.1.2,5,Ingegneri minerari
+CP_2021,2.2.1.3.0,2.2.1.3,5,Ingegneri elettrotecnici
+CP_2021,2.2.1.4.1,2.2.1.4,5,Ingegneri elettronici
+CP_2021,2.2.1.4.2,2.2.1.4,5,Ingegneri progettisti di hardware
+CP_2021,2.2.1.4.3,2.2.1.4,5,Ingegneri in telecomunicazioni
+CP_2021,2.2.1.4.4,2.2.1.4,5,ingegneri della automazione
+CP_2021,2.2.1.5.1,2.2.1.5,5,Ingegneri chimici e petroliferi
+CP_2021,2.2.1.5.2,2.2.1.5,5,Ingegneri dei materiali
+CP_2021,2.2.1.6.1,2.2.1.6,5,Ingegneri edili e ambientali
+CP_2021,2.2.1.6.2,2.2.1.6,5,Ingegneri idraulici
+CP_2021,2.2.1.7.0,2.2.1.7,5,Ingegneri industriali e gestionali
+CP_2021,2.2.1.8.0,2.2.1.8,5,Ingegneri biomedici e bioingegneri
+CP_2021,2.2.2.1.1,2.2.2.1,5,Architetti
+CP_2021,2.2.2.1.2,2.2.2.1,5,"Pianificatori, paesaggisti e specialisti del recupero e della conservazione del territorio"
+CP_2021,2.2.2.2.0,2.2.2.2,5,"Cartografi, fotogrammetristi e specialisti nei sistemi informativi geografici"
+CP_2021,2.3.1.1.1,2.3.1.1,5,Biologi e professioni assimilate
+CP_2021,2.3.1.1.2,2.3.1.1,5,Biochimici
+CP_2021,2.3.1.1.3,2.3.1.1,5,Biofisici
+CP_2021,2.3.1.1.4,2.3.1.1,5,Biotecnologi
+CP_2021,2.3.1.1.5,2.3.1.1,5,Botanici
+CP_2021,2.3.1.1.6,2.3.1.1,5,Zoologi
+CP_2021,2.3.1.1.7,2.3.1.1,5,Ecologi
+CP_2021,2.3.1.1.8,2.3.1.1,5,Tecnologi alimentari
+CP_2021,2.3.1.2.1,2.3.1.2,5,Farmacologi e assimilati
+CP_2021,2.3.1.2.2,2.3.1.2,5,Microbiologi
+CP_2021,2.3.1.3.0,2.3.1.3,5,Agronomi e forestali
+CP_2021,2.3.1.4.0,2.3.1.4,5,Medici veterinari
+CP_2021,2.3.1.5.0,2.3.1.5,5,Farmacisti
+CP_2021,2.4.1.1.0,2.4.1.1,5,Medici generici
+CP_2021,2.4.1.2.0,2.4.1.2,5,Specialisti in terapie mediche
+CP_2021,2.4.1.3.0,2.4.1.3,5,Specialisti in terapie chirurgiche
+CP_2021,2.4.1.4.0,2.4.1.4,5,Laboratoristi e patologi clinici
+CP_2021,2.4.1.5.0,2.4.1.5,5,Dentisti e odontostomatologi
+CP_2021,2.4.1.6.0,2.4.1.6,5,Specialisti in diagnostica per immagini e radioterapia
+CP_2021,2.4.1.7.1,2.4.1.7,5,Dietologi e igienisti
+CP_2021,2.4.1.7.2,2.4.1.7,5,Specialisti in medicina sociale e del lavoro
+CP_2021,2.4.1.7.3,2.4.1.7,5,Epidemiologi
+CP_2021,2.4.1.8.0,2.4.1.8,5,Anestesisti e rianimatori
+CP_2021,2.5.1.1.1,2.5.1.1,5,Specialisti della gestione nella Pubblica Amministrazione
+CP_2021,2.5.1.1.2,2.5.1.1,5,Specialisti del controllo nella Pubblica Amministrazione
+CP_2021,2.5.1.1.3,2.5.1.1,5,Specialisti in pubblica sicurezza
+CP_2021,2.5.1.2.0,2.5.1.2,5,Specialisti della gestione e del controllo nelle imprese private
+CP_2021,2.5.1.3.1,2.5.1.3,5,Specialisti in risorse umane
+CP_2021,2.5.1.3.2,2.5.1.3,5,Specialisti dell'organizzazione del lavoro
+CP_2021,2.5.1.4.1,2.5.1.4,5,Specialisti in contabilità
+CP_2021,2.5.1.4.2,2.5.1.4,5,Fiscalisti e tributaristi
+CP_2021,2.5.1.4.3,2.5.1.4,5,Specialisti in attività finanziarie
+CP_2021,2.5.1.5.1,2.5.1.5,5,Specialisti nell'acquisizione di beni e servizi
+CP_2021,2.5.1.5.2,2.5.1.5,5,Specialisti nella commercializzazione di beni e servizi (escluso il settore ICT)
+CP_2021,2.5.1.5.3,2.5.1.5,5,Specialisti nella commercializzazione nel settore delle tecnologie dell'informazione e della comunicazione
+CP_2021,2.5.1.5.4,2.5.1.5,5,Analisti di mercato
+CP_2021,2.5.1.6.0,2.5.1.6,5,"Specialisti delle relazioni pubbliche, dell'immagine e professioni assimilate"
+CP_2021,2.5.2.1.0,2.5.2.1,5,Avvocati
+CP_2021,2.5.2.2.1,2.5.2.2,5,Esperti legali in imprese
+CP_2021,2.5.2.2.2,2.5.2.2,5,Esperi legali in enti pubblici
+CP_2021,2.5.2.3.0,2.5.2.3,5,Notai
+CP_2021,2.5.2.4.0,2.5.2.4,5,Magistrati
+CP_2021,2.5.3.1.1,2.5.3.1,5,Specialisti dei sistemi economici
+CP_2021,2.5.3.1.2,2.5.3.1,5,Specialisti dell'economia aziendale
+CP_2021,2.5.3.2.1,2.5.3.2,5,"Esperti nello studio, nella gestione e nel controllo dei fenomeni sociali"
+CP_2021,2.5.3.2.2,2.5.3.2,5,Antropologi
+CP_2021,2.5.3.2.3,2.5.3.2,5,Geografi
+CP_2021,2.5.3.2.4,2.5.3.2,5,Archeologi
+CP_2021,2.5.3.3.1,2.5.3.3,5,Psicologi clinici e psicoterapeuti
+CP_2021,2.5.3.3.2,2.5.3.3,5,Psicologi dello sviluppo e dell'educazione
+CP_2021,2.5.3.3.3,2.5.3.3,5,Psicologi del lavoro e delle organizzazioni
+CP_2021,2.5.3.4.1,2.5.3.4,5,Storici
+CP_2021,2.5.3.4.2,2.5.3.4,5,Esperti d'arte
+CP_2021,2.5.3.4.3,2.5.3.4,5,Specialisti in scienza politica
+CP_2021,2.5.3.4.4,2.5.3.4,5,Filosofi
+CP_2021,2.5.3.5.0,2.5.3.5,5,Pedagogisti
+CP_2021,2.5.4.1.1,2.5.4.1,5,Scrittori e poeti
+CP_2021,2.5.4.1.2,2.5.4.1,5,Dialoghisti e parolieri
+CP_2021,2.5.4.1.3,2.5.4.1,5,Redattori di testi per la pubblicità
+CP_2021,2.5.4.1.4,2.5.4.1,5,Redattori di testi tecnici
+CP_2021,2.5.4.2.0,2.5.4.2,5,Giornalisti
+CP_2021,2.5.4.3.0,2.5.4.3,5,Interpreti e traduttori di livello elevato
+CP_2021,2.5.4.4.1,2.5.4.4,5,Linguisti e filologi
+CP_2021,2.5.4.4.2,2.5.4.4,5,Revisori di testi
+CP_2021,2.5.4.5.1,2.5.4.5,5,Archivisti e conservatori di documenti digitali
+CP_2021,2.5.4.5.2,2.5.4.5,5,Bibliotecari
+CP_2021,2.5.4.5.3,2.5.4.5,5,Curatori e conservatori di musei
+CP_2021,2.5.5.1.1,2.5.5.1,5,Pittori e scultori
+CP_2021,2.5.5.1.2,2.5.5.1,5,Disegnatori artistici e illustratori
+CP_2021,2.5.5.1.3,2.5.5.1,5,Disegnatori di moda
+CP_2021,2.5.5.1.4,2.5.5.1,5,Creatori artistici a fini commerciali (esclusa la moda)
+CP_2021,2.5.5.2.1,2.5.5.2,5,Registi
+CP_2021,2.5.5.2.2,2.5.5.2,5,Attori
+CP_2021,2.5.5.2.3,2.5.5.2,5,Direttori artistici
+CP_2021,2.5.5.2.4,2.5.5.2,5,Sceneggiatori
+CP_2021,2.5.5.2.5,2.5.5.2,5,Scenografi
+CP_2021,2.5.5.3.1,2.5.5.3,5,Coreografi
+CP_2021,2.5.5.3.2,2.5.5.3,5,Ballerini
+CP_2021,2.5.5.4.1,2.5.5.4,5,Compositori
+CP_2021,2.5.5.4.2,2.5.5.4,5,Direttori d'orchestra e coro
+CP_2021,2.5.5.4.3,2.5.5.4,5,Strumentisti
+CP_2021,2.5.5.4.4,2.5.5.4,5,Cantanti
+CP_2021,2.5.5.5.1,2.5.5.5,5,Artisti delle forme di cultura popolare
+CP_2021,2.5.5.5.2,2.5.5.5,5,Artisti di varietà
+CP_2021,2.5.5.5.3,2.5.5.5,5,Acrobati e artisti circensi
+CP_2021,2.5.5.6.1,2.5.5.6,5,Restauratori dei beni culturali
+CP_2021,2.5.5.6.2,2.5.5.6,5,Specialisti nella conservazione dei beni culturali
+CP_2021,2.5.6.1.0,2.5.6.1,5,Specialisti in discipline religiose e teologiche
+CP_2021,2.6.1.1.1,2.6.1.1,5,Docenti universitari in scienze matematiche e dell'informazione
+CP_2021,2.6.1.1.2,2.6.1.1,5,Docenti universitari in scienze fisiche
+CP_2021,2.6.1.1.3,2.6.1.1,5,Docenti universitari in scienze chimiche e farmaceutiche
+CP_2021,2.6.1.1.4,2.6.1.1,5,Docenti universitari in scienze della terra
+CP_2021,2.6.1.2.1,2.6.1.2,5,Docenti universitari in scienze biologiche
+CP_2021,2.6.1.2.2,2.6.1.2,5,"Docenti universitari in scienze agrarie, zootecniche e della produzione animale"
+CP_2021,2.6.1.2.3,2.6.1.2,5,Docenti universitari in scienze mediche
+CP_2021,2.6.1.3.1,2.6.1.3,5,Docenti universitari in scienze ingegneristiche civili e dell'architettura
+CP_2021,2.6.1.3.2,2.6.1.3,5,Docenti universitari in scienze ingegneristiche industriali e dell'informazione
+CP_2021,2.6.1.4.0,2.6.1.4,5,"Docenti universitari in scienze dell'antichità, filologico-letterarie e storico-artistiche"
+CP_2021,2.6.1.5.1,2.6.1.5,5,Docenti universitari in scienze storiche e filosofiche
+CP_2021,2.6.1.5.2,2.6.1.5,5,Docenti universitari in scienze pedagogiche e psicologiche
+CP_2021,2.6.1.6.0,2.6.1.6,5,Docenti universitari in scienze economiche e statistiche
+CP_2021,2.6.1.7.1,2.6.1.7,5,Docenti universitari in scienze giuridiche
+CP_2021,2.6.1.7.2,2.6.1.7,5,Docenti universitari in scienze politiche e sociali
+CP_2021,2.6.2.1.1,2.6.2.1,5,Ricercatori e tecnici laureati nelle scienze matematiche e dell'informazione
+CP_2021,2.6.2.1.2,2.6.2.1,5,Ricercatori e tecnici laureati nelle scienze fisiche
+CP_2021,2.6.2.1.3,2.6.2.1,5,Ricercatori e tecnici laureati nelle scienze chimiche e farmaceutiche
+CP_2021,2.6.2.1.4,2.6.2.1,5,Ricercatori e tecnici laureati nelle scienze della terra
+CP_2021,2.6.2.2.1,2.6.2.2,5,Ricercatori e tecnici laureati nelle scienze biologiche
+CP_2021,2.6.2.2.2,2.6.2.2,5,"Ricercatori e tecnici laureati nelle scienze agrarie, zootecniche e della produzione animale"
+CP_2021,2.6.2.2.3,2.6.2.2,5,Ricercatori e tecnici laureati nelle scienze mediche
+CP_2021,2.6.2.3.1,2.6.2.3,5,Ricercatori e tecnici laureati nelle scienze ingegneristiche civili e dell'architettura
+CP_2021,2.6.2.3.2,2.6.2.3,5,Ricercatori e tecnici laureati nelle scienze ingegneristiche industriali e dell'informazione
+CP_2021,2.6.2.4.0,2.6.2.4,5,"Ricercatori e tecnici laureati nelle scienze dell'antichità, filologico-letterarie e storico-artistiche"
+CP_2021,2.6.2.5.1,2.6.2.5,5,Ricercatori e tecnici laureati nelle scienze storiche e filosofiche
+CP_2021,2.6.2.5.2,2.6.2.5,5,Ricercatori e tecnici laureati nelle scienze pedagogiche e psicologiche
+CP_2021,2.6.2.6.0,2.6.2.6,5,Ricercatori e tecnici laureati nelle scienze economiche e statistiche
+CP_2021,2.6.2.7.1,2.6.2.7,5,Ricercatori e tecnici laureati nelle scienze giuridiche
+CP_2021,2.6.2.7.2,2.6.2.7,5,Ricercatori e tecnici laureati nelle scienze politiche e sociali
+CP_2021,2.6.3.1.1,2.6.3.1,5,Docenti di discipline artistiche nelle accademie di belle arti e nelle istituzioni scolastiche assimilate
+CP_2021,2.6.3.1.2,2.6.3.1,5,Docenti di discipline musicali nei conservatori e nelle istituzioni scolastiche assimilate
+CP_2021,2.6.3.1.3,2.6.3.1,5,Docenti di arte drammatica e danza nelle accademie e nelle istituzioni scolastiche assimilate
+CP_2021,2.6.3.2.1,2.6.3.2,5,"Docenti di scienze matematiche, fisiche e chimiche nella scuola secondaria superiore"
+CP_2021,2.6.3.2.2,2.6.3.2,5,Docenti di scienze della vita e della salute nella scuola secondaria superiore
+CP_2021,2.6.3.2.3,2.6.3.2,5,Docenti di discipline tecnico-ingegneristiche nella scuola secondaria superiore
+CP_2021,2.6.3.2.4,2.6.3.2,5,Docenti di scienze dell'informazione nella scuola secondaria superiore
+CP_2021,2.6.3.2.5,2.6.3.2,5,"Docenti di scienze letterarie, artistiche, storiche, filosofiche, pedagogiche e psicologiche nella scuola secondaria superiore"
+CP_2021,2.6.3.2.6,2.6.3.2,5,"Docenti di scienze giuridiche, economiche e sociali nella scuola secondaria superiore"
+CP_2021,2.6.3.3.1,2.6.3.3,5,Docenti di discipline umanistiche nella scuola secondaria inferiore
+CP_2021,2.6.3.3.2,2.6.3.3,5,Docenti di discipline tecniche e scientifiche nella scuola secondaria inferiore
+CP_2021,2.6.4.1.0,2.6.4.1,5,Docenti di scuola primaria
+CP_2021,2.6.4.2.0,2.6.4.2,5,Docenti di scuola pre-primaria
+CP_2021,2.6.5.1.0,2.6.5.1,5,Specialisti nell'educazione e nella formazione di soggetti diversamente abili
+CP_2021,2.6.5.2.0,2.6.5.2,5,Ispettori scolastici e professioni assimilate
+CP_2021,2.6.5.3.1,2.6.5.3,5,Docenti della formazione e dell'aggiornamento professionale
+CP_2021,2.6.5.3.2,2.6.5.3,5,Esperti della progettazione formativa e curricolare
+CP_2021,2.6.5.4.0,2.6.5.4,5,Consiglieri dell'orientamento
+CP_2021,2.6.5.5.1,2.6.5.5,5,Insegnanti di arti figurative
+CP_2021,2.6.5.5.2,2.6.5.5,5,Insegnanti di danza
+CP_2021,2.6.5.5.3,2.6.5.5,5,Insegnanti di canto
+CP_2021,2.6.5.5.4,2.6.5.5,5,Insegnanti di strumenti musicali
+CP_2021,2.6.5.5.5,2.6.5.5,5,Insegnanti di lingue
+CP_2021,2.7.1.1.1,2.7.1.1,5,Analisti e progettisti di software
+CP_2021,2.7.1.1.2,2.7.1.1,5,Analisti di sistema
+CP_2021,2.7.1.1.3,2.7.1.1,5,Analisti e progettisti di applicazioni web
+CP_2021,2.7.2.1.1,2.7.2.1,5,Specialisti in reti e comunicazioni informatiche
+CP_2021,2.7.2.1.2,2.7.2.1,5,Analisti e progettisti di basi dati
+CP_2021,2.7.2.1.3,2.7.2.1,5,Amministratori di sistemi
+CP_2021,2.7.2.1.4,2.7.2.1,5,Specialisti in sicurezza informatica
+CP_2021,3.1.1.1.1,3.1.1.1,5,Tecnici geologici
+CP_2021,3.1.1.1.2,3.1.1.1,5,Tecnici fisici e nucleari
+CP_2021,3.1.1.2.0,3.1.1.2,5,Tecnici chimici
+CP_2021,3.1.1.3.0,3.1.1.3,5,Tecnici statistici
+CP_2021,3.1.2.1.0,3.1.2.1,5,Tecnici programmatori
+CP_2021,3.1.2.2.0,3.1.2.2,5,Tecnici esperti in applicazioni
+CP_2021,3.1.2.3.0,3.1.2.3,5,Tecnici web
+CP_2021,3.1.2.4.0,3.1.2.4,5,Tecnici gestori di basi di dati
+CP_2021,3.1.2.5.0,3.1.2.5,5,Tecnici gestori di reti e di sistemi telematici
+CP_2021,3.1.2.6.1,3.1.2.6,5,Tecnici per le telecomunicazioni
+CP_2021,3.1.2.6.2,3.1.2.6,5,Tecnici delle trasmissioni radio-televisive
+CP_2021,3.1.2.7.0,3.1.2.7,5,Tecnici dei sistemi informativi geografici (GIS)
+CP_2021,3.1.3.1.0,3.1.3.1,5,Tecnici meccanici
+CP_2021,3.1.3.2.1,3.1.3.2,5,Tecnici dei prodotti ceramici
+CP_2021,3.1.3.2.2,3.1.3.2,5,Tecnici minerari
+CP_2021,3.1.3.2.3,3.1.3.2,5,Tecnici metallurgici
+CP_2021,3.1.3.3.0,3.1.3.3,5,Elettrotecnici
+CP_2021,3.1.3.4.0,3.1.3.4,5,Tecnici elettronici
+CP_2021,3.1.3.5.0,3.1.3.5,5,Tecnici delle costruzioni civili e professioni assimilate
+CP_2021,3.1.3.6.0,3.1.3.6,5,Tecnici del risparmio energetico e delle energie rinnovabili
+CP_2021,3.1.3.7.1,3.1.3.7,5,Disegnatori tecnici
+CP_2021,3.1.3.7.2,3.1.3.7,5,Disegnatori tessili
+CP_2021,3.1.3.7.3,3.1.3.7,5,Rilevatori e disegnatori di prospezioni
+CP_2021,3.1.4.1.1,3.1.4.1,5,Tecnici della conduzione e del controllo di impianti di produzione dei metalli
+CP_2021,3.1.4.1.2,3.1.4.1,5,Tecnici della conduzione e del controllo di impianti chimici
+CP_2021,3.1.4.1.3,3.1.4.1,5,Tecnici della conduzione e del controllo di impianti di produzione della carta
+CP_2021,3.1.4.1.4,3.1.4.1,5,Tecnici della conduzione e del controllo di impianti di trattamento delle acque
+CP_2021,3.1.4.1.5,3.1.4.1,5,Tecnici della conduzione e del controllo di catene di montaggio automatiche
+CP_2021,3.1.4.2.1,3.1.4.2,5,Tecnici della produzione di energia termica ed elettrica
+CP_2021,3.1.4.2.2,3.1.4.2,5,Tecnici dell'esercizio di reti idriche e di altri fluidi
+CP_2021,3.1.4.2.3,3.1.4.2,5,Tecnici dell'esercizio di reti di distribuzione di energia elettrica
+CP_2021,3.1.5.1.0,3.1.5.1,5,Tecnici di produzione in miniere e cave
+CP_2021,3.1.5.2.0,3.1.5.2,5,Tecnici della gestione di cantieri edili
+CP_2021,3.1.5.3.0,3.1.5.3,5,Tecnici della produzione manifatturiera
+CP_2021,3.1.5.4.1,3.1.5.4,5,Tecnici della preparazione alimentare
+CP_2021,3.1.5.4.2,3.1.5.4,5,Tecnici della produzione alimentare
+CP_2021,3.1.5.5.0,3.1.5.5,5,Tecnici della produzione di servizi
+CP_2021,3.1.6.1.1,3.1.6.1,5,Comandanti navali
+CP_2021,3.1.6.1.2,3.1.6.1,5,Ufficiali e assistenti di bordo
+CP_2021,3.1.6.1.3,3.1.6.1,5,Piloti navali
+CP_2021,3.1.6.2.1,3.1.6.2,5,Piloti e ufficiali di aeromobili
+CP_2021,3.1.6.2.2,3.1.6.2,5,Tecnici avionici
+CP_2021,3.1.6.2.3,3.1.6.2,5,Tecnici aerospaziali
+CP_2021,3.1.6.3.1,3.1.6.3,5,Controllori di volo
+CP_2021,3.1.6.3.2,3.1.6.3,5,Tecnici del traffico aeroportuale
+CP_2021,3.1.6.4.0,3.1.6.4,5,Tecnici dell'organizzazione del traffico ferroviario
+CP_2021,3.1.6.5.0,3.1.6.5,5,Tecnici dell'organizzazione del traffico portuale
+CP_2021,3.1.7.1.0,3.1.7.1,5,Fotografi e professioni assimilate
+CP_2021,3.1.7.2.1,3.1.7.2,5,Tecnici degli apparati audio-video e della ripresa video-cinematografica
+CP_2021,3.1.7.2.2,3.1.7.2,5,Tecnici del suono
+CP_2021,3.1.7.2.3,3.1.7.2,5,Tecnici del montaggio audio-video-cinematografico
+CP_2021,3.1.7.3.0,3.1.7.3,5,Tecnici di apparati medicali e per la diagnostica medica
+CP_2021,3.1.8.1.0,3.1.8.1,5,Tecnici della sicurezza degli impianti
+CP_2021,3.1.8.2.0,3.1.8.2,5,Tecnici della sicurezza sul lavoro
+CP_2021,3.1.8.3.1,3.1.8.3,5,Tecnici del controllo ambientale
+CP_2021,3.1.8.3.2,3.1.8.3,5,Tecnici della raccolta e trattamento dei rifiuti e della bonifica ambientale
+CP_2021,3.2.1.1.1,3.2.1.1,5,Professioni sanitarie infermieristiche
+CP_2021,3.2.1.1.2,3.2.1.1,5,Professioni sanitarie ostetriche
+CP_2021,3.2.1.2.1,3.2.1.2,5,Podologi
+CP_2021,3.2.1.2.2,3.2.1.2,5,Fisioterapisti e assimilati
+CP_2021,3.2.1.2.3,3.2.1.2,5,Logopedisti
+CP_2021,3.2.1.2.4,3.2.1.2,5,Ortottisti - assistenti di oftalmologia
+CP_2021,3.2.1.2.5,3.2.1.2,5,Terapisti della neuro e psicomotricità dell'età evolutiva
+CP_2021,3.2.1.2.6,3.2.1.2,5,Tecnici della riabilitazione psichiatrica
+CP_2021,3.2.1.2.7,3.2.1.2,5,Educatori professionali
+CP_2021,3.2.1.2.8,3.2.1.2,5,Terapisti occupazionali
+CP_2021,3.2.1.3.1,3.2.1.3,5,Tecnici audiometristi
+CP_2021,3.2.1.3.2,3.2.1.3,5,Tecnici sanitari di laboratorio biomedico
+CP_2021,3.2.1.3.3,3.2.1.3,5,Tecnici sanitari di radiologia medica
+CP_2021,3.2.1.3.4,3.2.1.3,5,Tecnici di neurofisiopatologia
+CP_2021,3.2.1.4.1,3.2.1.4,5,Tecnici ortopedici
+CP_2021,3.2.1.4.2,3.2.1.4,5,Tecnici audioprotesisti
+CP_2021,3.2.1.4.3,3.2.1.4,5,Igienisti dentali
+CP_2021,3.2.1.4.4,3.2.1.4,5,Tecnici della fisiopatologia cardiocircolatoria e della perfusione cardiovascolare
+CP_2021,3.2.1.4.5,3.2.1.4,5,Dietisti
+CP_2021,3.2.1.5.1,3.2.1.5,5,Tecnici della prevenzione nell'ambiente e nei luoghi di lavoro
+CP_2021,3.2.1.5.2,3.2.1.5,5,Assistenti sanitari
+CP_2021,3.2.1.5.3,3.2.1.5,5,Ergonomo
+CP_2021,3.2.1.6.1,3.2.1.6,5,Ottici e ottici optometristi
+CP_2021,3.2.1.6.2,3.2.1.6,5,Odontotecnici
+CP_2021,3.2.1.7.0,3.2.1.7,5,Tecnici della medicina popolare
+CP_2021,3.2.2.1.1,3.2.2.1,5,Tecnici agronomi
+CP_2021,3.2.2.1.2,3.2.2.1,5,Tecnici forestali
+CP_2021,3.2.2.2.0,3.2.2.2,5,Zootecnici
+CP_2021,3.2.2.3.1,3.2.2.3,5,Tecnici di laboratorio biochimico
+CP_2021,3.2.2.3.2,3.2.2.3,5,Tecnici dei prodotti alimentari
+CP_2021,3.2.2.3.3,3.2.2.3,5,Tecnici di laboratorio veterinario
+CP_2021,3.2.2.3.4,3.2.2.3,5,Tecnico biologo
+CP_2021,3.3.1.1.1,3.3.1.1,5,Segretari amministrativi e tecnici degli affari generali
+CP_2021,3.3.1.1.2,3.3.1.1,5,Assistenti di archivio e di biblioteca
+CP_2021,3.3.1.2.1,3.3.1.2,5,Contabili
+CP_2021,3.3.1.2.2,3.3.1.2,5,Economi e tesorieri
+CP_2021,3.3.1.2.3,3.3.1.2,5,Amministratore di stabili e condomini
+CP_2021,3.3.1.3.1,3.3.1.3,5,Tecnici dell'acquisizione delle informazioni
+CP_2021,3.3.1.3.2,3.3.1.3,5,Intervistatori e rilevatori professionali
+CP_2021,3.3.1.4.0,3.3.1.4,5,Corrispondenti in lingue estere e professioni assimilate
+CP_2021,3.3.1.5.0,3.3.1.5,5,Tecnici dell'organizzazione e della gestione dei fattori produttivi
+CP_2021,3.3.2.1.0,3.3.2.1,5,Tecnici della gestione finanziaria
+CP_2021,3.3.2.2.0,3.3.2.2,5,Tecnici del lavoro bancario
+CP_2021,3.3.2.3.0,3.3.2.3,5,Agenti assicurativi
+CP_2021,3.3.2.4.0,3.3.2.4,5,"Periti, valutatori di rischio e liquidatori"
+CP_2021,3.3.2.5.0,3.3.2.5,5,"Agenti di borsa e cambio, tecnici dell'intermediazione titoli e professioni assimilate"
+CP_2021,3.3.2.6.1,3.3.2.6,5,"Tecnici dei contratti di scambio, a premi e del recupero crediti"
+CP_2021,3.3.2.6.2,3.3.2.6,5,Tecnici della locazione finanziaria
+CP_2021,3.3.3.1.0,3.3.3.1,5,Approvvigionatori e responsabili acquisti
+CP_2021,3.3.3.2.0,3.3.3.2,5,Responsabili di magazzino e della distribuzione interna
+CP_2021,3.3.3.3.1,3.3.3.3,5,Commissari e aggiudicatori d'asta
+CP_2021,3.3.3.3.2,3.3.3.3,5,Periti commerciali
+CP_2021,3.3.3.4.0,3.3.3.4,5,Tecnici della vendita e della distribuzione
+CP_2021,3.3.3.5.0,3.3.3.5,5,Tecnici del marketing
+CP_2021,3.3.3.6.1,3.3.3.6,5,Tecnici della pubblicità
+CP_2021,3.3.3.6.2,3.3.3.6,5,Tecnici delle pubbliche relazioni
+CP_2021,3.3.4.1.0,3.3.4.1,5,Spedizionieri e tecnici dell'organizzazione commerciale
+CP_2021,3.3.4.2.0,3.3.4.2,5,Agenti di commercio
+CP_2021,3.3.4.3.0,3.3.4.3,5,Agenti concessionari
+CP_2021,3.3.4.4.0,3.3.4.4,5,Agenti di pubblicità
+CP_2021,3.3.4.5.0,3.3.4.5,5,Agenti e periti immobiliari
+CP_2021,3.3.4.6.0,3.3.4.6,5,Rappresentanti di commercio
+CP_2021,3.3.4.7.0,3.3.4.7,5,Agenti e rappresentanti di artisti ed atleti
+CP_2021,3.4.1.1.0,3.4.1.1,5,Tecnici delle attività ricettive e professioni assimilate
+CP_2021,3.4.1.2.1,3.4.1.2,5,"Organizzatori di fiere, esposizioni ed eventi culturali"
+CP_2021,3.4.1.2.2,3.4.1.2,5,Organizzatori di convegni e ricevimenti
+CP_2021,3.4.1.3.0,3.4.1.3,5,Animatori turistici e professioni assimilate
+CP_2021,3.4.1.4.0,3.4.1.4,5,Agenti di viaggio
+CP_2021,3.4.1.5.1,3.4.1.5,5,Guide ed accompagnatori naturalistici e sportivi
+CP_2021,3.4.1.5.2,3.4.1.5,5,Guide turistiche
+CP_2021,3.4.2.1.1,3.4.2.1,5,Istruttori di volo
+CP_2021,3.4.2.1.2,3.4.2.1,5,Istruttori di guida automobilistica
+CP_2021,3.4.2.1.3,3.4.2.1,5,Istruttori di nautica
+CP_2021,3.4.2.2.1,3.4.2.2,5,Insegnanti nella formazione professionale
+CP_2021,3.4.2.2.2,3.4.2.2,5,Maestri di arti e mestieri
+CP_2021,3.4.2.3.0,3.4.2.3,5,Istruttori di tecniche in campo artistico
+CP_2021,3.4.2.4.0,3.4.2.4,5,Istruttori di discipline sportive non agonistiche
+CP_2021,3.4.2.5.1,3.4.2.5,5,Organizzatori di eventi e di strutture sportive
+CP_2021,3.4.2.5.2,3.4.2.5,5,Osservatori sportivi
+CP_2021,3.4.2.6.1,3.4.2.6,5,Allenatori e tecnici sportivi
+CP_2021,3.4.2.6.2,3.4.2.6,5,Arbitri e giudici di gara
+CP_2021,3.4.2.7.0,3.4.2.7,5,Atleti
+CP_2021,3.4.3.1.1,3.4.3.1,5,Annunciatori della radio e della televisione
+CP_2021,3.4.3.1.2,3.4.3.1,5,Presentatori di performance artistiche e ricreative
+CP_2021,3.4.3.2.0,3.4.3.2,5,"Tecnici dell'organizzazione della produzione radiotelevisiva, cinematografica e teatrale"
+CP_2021,3.4.3.3.0,3.4.3.3,5,Intrattenitori
+CP_2021,3.4.4.1.1,3.4.4.1,5,Grafici
+CP_2021,3.4.4.1.2,3.4.4.1,5,Allestitori di scena
+CP_2021,3.4.4.2.1,3.4.4.2,5,Tecnici dei musei
+CP_2021,3.4.4.2.2,3.4.4.2,5,Tecnici delle biblioteche
+CP_2021,3.4.4.3.1,3.4.4.3,5,Stimatori di opere d'arte
+CP_2021,3.4.4.3.2,3.4.4.3,5,Periti filatelici e numismatici
+CP_2021,3.4.4.3.3,3.4.4.3,5,Periti calligrafi
+CP_2021,3.4.4.4.0,3.4.4.4,5,Tecnici del restauro
+CP_2021,3.4.5.1.0,3.4.5.1,5,Assistenti sociali
+CP_2021,3.4.5.2.0,3.4.5.2,5,Tecnici del reinserimento e dell'integrazione sociale
+CP_2021,3.4.5.3.0,3.4.5.3,5,Tecnici dei servizi per l'impiego
+CP_2021,3.4.5.4.0,3.4.5.4,5,Tecnici dei servizi di sicurezza privati e professioni assimilate
+CP_2021,3.4.5.5.0,3.4.5.5,5,Tecnici delle attività religiose e di culto
+CP_2021,3.4.6.1.0,3.4.6.1,5,Tecnici dei servizi giudiziari
+CP_2021,3.4.6.2.0,3.4.6.2,5,Ufficiali della Polizia di Stato
+CP_2021,3.4.6.3.1,3.4.6.3,5,Tecnici dei servizi di sicurezza dei vigili urbani
+CP_2021,3.4.6.3.2,3.4.6.3,5,Tecnici dei servizi di sicurezza dei vigili del fuoco
+CP_2021,3.4.6.3.3,3.4.6.3,5,Tecnici dei servizi di sicurezza del corpo forestale
+CP_2021,3.4.6.4.0,3.4.6.4,5,Ufficiali della guardia di finanza
+CP_2021,3.4.6.5.0,3.4.6.5,5,Controllori fiscali
+CP_2021,3.4.6.6.1,3.4.6.6,5,Tecnici dei servizi pubblici di concessioni licenze
+CP_2021,3.4.6.6.2,3.4.6.6,5,Tecnici dei servizi pubblici per il rilascio di certificazioni e documentazioni personali
+CP_2021,4.1.1.1.0,4.1.1.1,5,Addetti a funzioni di segreteria
+CP_2021,4.1.1.2.0,4.1.1.2,5,Addetti agli affari generali
+CP_2021,4.1.1.3.0,4.1.1.3,5,Addetti al protocollo e allo smistamento di documenti
+CP_2021,4.1.1.4.0,4.1.1.4,5,Addetti alla gestione del personale
+CP_2021,4.1.2.1.0,4.1.2.1,5,"Addetti alla videoscrittura, dattilografi, stenografi e professioni assimilate"
+CP_2021,4.1.2.2.0,4.1.2.2,5,Addetti all'immissione dati
+CP_2021,4.1.2.3.0,4.1.2.3,5,"Addetti alle macchine per la redazione, riproduzione e invio di materiali e documenti"
+CP_2021,4.2.1.1.0,4.2.1.1,5,"Addetti agli sportelli assicurativi, bancari e di altri intermediari finanziari"
+CP_2021,4.2.1.2.0,4.2.1.2,5,Addetti agli sportelli dei servizi postali
+CP_2021,4.2.1.3.0,4.2.1.3,5,Addetti agli sportelli per l'esazione di imposte e contributi e al recupero crediti
+CP_2021,4.2.1.4.0,4.2.1.4,5,Addetti agli sportelli delle agenzie di pegno e professioni assimilate
+CP_2021,4.2.1.5.0,4.2.1.5,5,Addetti alla vendita di biglietti
+CP_2021,4.2.1.6.0,4.2.1.6,5,Addetti agli sportelli delle agenzie di viaggio
+CP_2021,4.2.2.1.0,4.2.2.1,5,Addetti all'accoglienza e all'informazione nelle imprese e negli enti pubblici
+CP_2021,4.2.2.2.0,4.2.2.2,5,Addetti all'accoglienza nei servizi di alloggio e ristorazione
+CP_2021,4.2.2.3.0,4.2.2.3,5,Centralinisti
+CP_2021,4.2.2.4.0,4.2.2.4,5,Addetti all'informazione nei Call Center (senza funzioni di vendita)
+CP_2021,4.3.1.1.0,4.3.1.1,5,Addetti alla gestione degli acquisti di beni e servizi
+CP_2021,4.3.1.2.0,4.3.1.2,5,Addetti alla gestione dei magazzini e professioni assimilate
+CP_2021,4.3.1.3.0,4.3.1.3,5,Addetti alla gestione amministrativa dei trasporti merci
+CP_2021,4.3.2.1.0,4.3.2.1,5,Addetti alla contabilità
+CP_2021,4.3.2.2.0,4.3.2.2,5,Addetti alle buste paga
+CP_2021,4.3.2.3.0,4.3.2.3,5,Addetti alle operazioni finanziarie per conto dell'impresa o dell'organizzazione
+CP_2021,4.3.2.4.0,4.3.2.4,5,Addetti ai servizi statistici
+CP_2021,4.3.2.5.0,4.3.2.5,5,Addetti agli uffici interni di cassa
+CP_2021,4.4.1.1.0,4.4.1.1,5,"Personale addetto a compiti di controllo, verifica e professioni assimilate"
+CP_2021,4.4.1.2.0,4.4.1.2,5,Addetti al controllo della documentazione di viaggio
+CP_2021,4.4.1.3.0,4.4.1.3,5,Addetti allo smistamento e al recapito della posta
+CP_2021,4.4.2.1.0,4.4.2.1,5,"Addetti ad archivi, schedari e professioni assimilate"
+CP_2021,4.4.2.2.0,4.4.2.2,5,Addetti a biblioteche e professioni assimilate
+CP_2021,5.1.1.1.0,5.1.1.1,5,Esercenti delle vendite all'ingrosso
+CP_2021,5.1.1.2.1,5.1.1.2,5,Esercenti delle vendite al minuto in negozi
+CP_2021,5.1.1.2.2,5.1.1.2,5,Esercenti delle vendite al minuto nei mercati e in posti assegnati
+CP_2021,5.1.1.3.0,5.1.1.3,5,Esercenti di distributori di carburanti ed assimilati
+CP_2021,5.1.2.1.0,5.1.2.1,5,Commessi delle vendite all'ingrosso
+CP_2021,5.1.2.2.0,5.1.2.2,5,Commessi delle vendite al minuto
+CP_2021,5.1.2.3.0,5.1.2.3,5,Addetti ad attività organizzative delle vendite
+CP_2021,5.1.2.4.0,5.1.2.4,5,Cassieri di esercizi commerciali
+CP_2021,5.1.2.5.1,5.1.2.5,5,Venditori a domicilio
+CP_2021,5.1.2.5.2,5.1.2.5,5,Venditori a distanza
+CP_2021,5.1.2.6.0,5.1.2.6,5,Addetti ai distributori di carburanti ed assimilati
+CP_2021,5.1.3.1.0,5.1.3.1,5,"Indossatori, modelli e professioni assimilate"
+CP_2021,5.1.3.2.0,5.1.3.2,5,Dimostratori e professioni assimilate
+CP_2021,5.1.3.3.0,5.1.3.3,5,Vetrinisti e professioni assimilate
+CP_2021,5.1.3.4.0,5.1.3.4,5,Addetti all'informazione e all'assistenza dei clienti
+CP_2021,5.2.1.1.0,5.2.1.1,5,Esercenti nelle attività ricettive
+CP_2021,5.2.2.1.0,5.2.2.1,5,Cuochi in alberghi e ristoranti
+CP_2021,5.2.2.2.1,5.2.2.2,5,Addetti alla preparazione e alla cottura di cibi in imprese per la ristorazione collettiva
+CP_2021,5.2.2.2.2,5.2.2.2,5,"Addetti alla preparazione, alla cottura e alla vendita di cibi in fast food, tavole calde, rosticcerie ed esercizi assimilati"
+CP_2021,5.2.2.2.3,5.2.2.2,5,Addetti al banco nei servizi di ristorazione
+CP_2021,5.2.2.3.1,5.2.2.3,5,Camerieri di albergo
+CP_2021,5.2.2.3.2,5.2.2.3,5,Camerieri di ristorante
+CP_2021,5.2.2.4.0,5.2.2.4,5,Baristi e professioni assimilate
+CP_2021,5.2.2.5.1,5.2.2.5,5,"Esercenti di ristoranti, fast food, pizzerie ed esercizi assimilati"
+CP_2021,5.2.2.5.2,5.2.2.5,5,Esercenti di attività di ristorazione nei mercati e in posti assegnati
+CP_2021,5.2.3.1.1,5.2.3.1,5,Assistenti di volo
+CP_2021,5.2.3.1.2,5.2.3.1,5,Assistenti di viaggio e crociera
+CP_2021,5.2.3.1.3,5.2.3.1,5,Assistenti congressuali e fieristici
+CP_2021,5.2.3.2.0,5.2.3.2,5,Accompagnatori turistici
+CP_2021,5.3.1.1.0,5.3.1.1,5,Professioni qualificate nei servizi sanitari e sociali
+CP_2021,5.4.1.1.1,5.4.1.1,5,Esercenti di cinema e teatri
+CP_2021,5.4.1.1.2,5.4.1.1,5,Esercenti di locali notturni
+CP_2021,5.4.1.1.3,5.4.1.1,5,Esercenti di attività ricreative
+CP_2021,5.4.1.1.4,5.4.1.1,5,Esercenti di attività sportive
+CP_2021,5.4.1.1.5,5.4.1.1,5,Esercenti di sale scommesse
+CP_2021,5.4.1.2.1,5.4.1.2,5,Allibratori
+CP_2021,5.4.1.2.2,5.4.1.2,5,Croupiers
+CP_2021,5.4.1.2.3,5.4.1.2,5,Ricevitori
+CP_2021,5.4.1.3.0,5.4.1.3,5,"Astrologi, preveggenti, chiromanti e professioni assimilate"
+CP_2021,5.5.1.1.0,5.5.1.1,5,Acconciatori
+CP_2021,5.5.1.2.0,5.5.1.2,5,Estetisti e truccatori
+CP_2021,5.5.1.3.0,5.5.1.3,5,Massaggiatori ed operatori termali
+CP_2021,5.5.2.1.0,5.5.2.1,5,Personale di compagnia e personale qualificato di servizio alle famiglie
+CP_2021,5.5.2.2.0,5.5.2.2,5,Addetti alla sorveglianza di bambini e professioni assimilate
+CP_2021,5.5.2.3.0,5.5.2.3,5,Addetti all'assistenza personale
+CP_2021,5.5.3.1.0,5.5.3.1,5,Addestratori di animali
+CP_2021,5.5.3.2.0,5.5.3.2,5,Custodi e allevatori di animali domestici e da esposizione
+CP_2021,5.5.4.1.0,5.5.4.1,5,Esercenti di agenzie per il disbrigo di pratiche e professioni assimilate
+CP_2021,5.5.4.2.0,5.5.4.2,5,Addetti di agenzie per il disbrigo di pratiche e professioni assimilate
+CP_2021,5.5.5.1.0,5.5.5.1,5,Esercenti di agenzie di pompe funebri
+CP_2021,5.5.5.2.0,5.5.5.2,5,Addetti alle agenzie di pompe funebri
+CP_2021,5.6.1.1.0,5.6.1.1,5,Personale di guardiania territoriale
+CP_2021,5.6.1.2.0,5.6.1.2,5,Vigili urbani
+CP_2021,5.6.1.3.1,5.6.1.3,5,Agenti della Polizia di Stato
+CP_2021,5.6.1.3.2,5.6.1.3,5,Agenti della Guardia di Finanza
+CP_2021,5.6.1.3.3,5.6.1.3,5,Agenti del Corpo Forestale
+CP_2021,5.6.1.4.1,5.6.1.4,5,Vigili del fuoco
+CP_2021,5.6.1.4.2,5.6.1.4,5,Personale delle squadre antincendio
+CP_2021,5.6.1.5.0,5.6.1.5,5,Agenti di istituti di pena e rieducazione
+CP_2021,5.6.1.6.0,5.6.1.6,5,Guardie private di sicurezza
+CP_2021,5.6.1.7.0,5.6.1.7,5,Bagnini e professioni assimilate
+CP_2021,5.6.1.8.0,5.6.1.8,5,Esercenti di garage ed autorimesse
+CP_2021,6.1.1.1.0,6.1.1.1,5,Brillatori e artificieri in cave e miniere
+CP_2021,6.1.1.2.0,6.1.1.2,5,"Tagliatori e levigatori di pietre, scalpellini e marmisti"
+CP_2021,6.1.1.3.0,6.1.1.3,5,Coltivatori di saline
+CP_2021,6.1.2.1.0,6.1.2.1,5,Muratori in pietra e mattoni
+CP_2021,6.1.2.2.1,6.1.2.2,5,Casseronisti/Cassonisti
+CP_2021,6.1.2.2.2,6.1.2.2,5,Muratori e formatori in calcestruzzo
+CP_2021,6.1.2.3.0,6.1.2.3,5,Carpentieri e falegnami edili
+CP_2021,6.1.2.4.0,6.1.2.4,5,Ponteggiatori
+CP_2021,6.1.2.5.1,6.1.2.5,5,Armatori di gallerie e pozzi
+CP_2021,6.1.2.5.2,6.1.2.5,5,Armatori di ferrovie
+CP_2021,6.1.2.6.1,6.1.2.6,5,Asfaltisti
+CP_2021,6.1.2.6.2,6.1.2.6,5,Lastricatori e pavimentatori stradali
+CP_2021,6.1.2.7.0,6.1.2.7,5,Montatori di manufatti prefabbricati e di preformati
+CP_2021,6.1.3.1.0,6.1.3.1,5,Copritetti e impermeabilizzatori di solai
+CP_2021,6.1.3.2.1,6.1.3.2,5,Posatori di pavimenti
+CP_2021,6.1.3.2.2,6.1.3.2,5,Rifinitori di pavimenti
+CP_2021,6.1.3.2.3,6.1.3.2,5,Piastrellisti e rivestimentisti in pietra e materiali assimilati
+CP_2021,6.1.3.2.4,6.1.3.2,5,Parchettisti e posatori di pavimenti e rivestimenti sintetici e in legno
+CP_2021,6.1.3.3.0,6.1.3.3,5,Intonacatori
+CP_2021,6.1.3.4.0,6.1.3.4,5,Installatori di impianti di isolamento e insonorizzazione
+CP_2021,6.1.3.5.0,6.1.3.5,5,Vetrai
+CP_2021,6.1.3.6.1,6.1.3.6,5,Idraulici nelle costruzioni civili
+CP_2021,6.1.3.6.2,6.1.3.6,5,Installatori di impianti termici nelle costruzioni civili
+CP_2021,6.1.3.7.0,6.1.3.7,5,Elettricisti ed installatori di impianti elettrici nelle costruzioni civili
+CP_2021,6.1.3.8.0,6.1.3.8,5,Installatori di infissi e serramenti
+CP_2021,6.1.4.1.1,6.1.4.1,5,Pittori edili
+CP_2021,6.1.4.1.2,6.1.4.1,5,Decoratori e stuccatori edili
+CP_2021,6.1.4.2.0,6.1.4.2,5,Pulitori di facciate
+CP_2021,6.1.5.1.0,6.1.5.1,5,Operai addetti ai servizi di igiene e pulizia
+CP_2021,6.1.5.2.0,6.1.5.2,5,Operai addetti alla manutenzione degli impianti fognari
+CP_2021,6.2.1.1.1,6.2.1.1,5,Fonditori
+CP_2021,6.2.1.1.2,6.2.1.1,5,Formatori e animisti
+CP_2021,6.2.1.2.0,6.2.1.2,5,Saldatori e tagliatori a fiamma
+CP_2021,6.2.1.3.1,6.2.1.3,5,Lattonieri e calderai
+CP_2021,6.2.1.3.2,6.2.1.3,5,Tracciatori
+CP_2021,6.2.1.4.0,6.2.1.4,5,Carpentieri e montatori di carpenteria metallica
+CP_2021,6.2.1.5.0,6.2.1.5,5,Attrezzatori e montatori di cavi metallici per uso industriale e di trasporto
+CP_2021,6.2.1.6.0,6.2.1.6,5,Sommozzatori e lavoratori subacquei
+CP_2021,6.2.1.7.0,6.2.1.7,5,Saldatori elettrici e a norme ASME
+CP_2021,6.2.1.8.1,6.2.1.8,5,Carrozzieri
+CP_2021,6.2.1.8.2,6.2.1.8,5,Stampatori e piegatori di lamiere
+CP_2021,6.2.2.1.1,6.2.2.1,5,Fabbri
+CP_2021,6.2.2.1.2,6.2.2.1,5,Fucinatori e forgiatori
+CP_2021,6.2.2.2.0,6.2.2.2,5,"Costruttori di utensili, modellatori e tracciatori meccanici"
+CP_2021,6.2.2.3.1,6.2.2.3,5,Attrezzisti di macchine utensili
+CP_2021,6.2.2.3.2,6.2.2.3,5,Aggiustatori meccanici
+CP_2021,6.2.3.1.1,6.2.3.1,5,Meccanici motoristi e riparatori di veicoli a motore
+CP_2021,6.2.3.1.2,6.2.3.1,5,Gommisti
+CP_2021,6.2.3.1.3,6.2.3.1,5,Meccanici di biciclette e veicoli assimilati
+CP_2021,6.2.3.2.0,6.2.3.2,5,"Meccanici, riparatori e manutentori di aerei"
+CP_2021,6.2.3.3.1,6.2.3.3,5,Riparatori e manutentori di macchinari e impianti industriali
+CP_2021,6.2.3.3.2,6.2.3.3,5,Installatori e montatori di macchinari e impianti industriali
+CP_2021,6.2.3.4.1,6.2.3.4,5,Frigoristi industriali
+CP_2021,6.2.3.4.2,6.2.3.4,5,Frigoristi navali
+CP_2021,6.2.3.5.1,6.2.3.5,5,Riparatori e manutentori di apparecchi e impianti termoidraulici industriali
+CP_2021,6.2.3.5.2,6.2.3.5,5,Installatori e montatori di apparecchi e impianti termoidraulici industriali
+CP_2021,6.2.3.6.0,6.2.3.6,5,Meccanici collaudatori
+CP_2021,6.2.3.7.0,6.2.3.7,5,Verniciatori artigianali ed industriali
+CP_2021,6.2.3.8.1,6.2.3.8,5,Attrezzisti navali
+CP_2021,6.2.3.8.2,6.2.3.8,5,Meccanici e motoristi navali
+CP_2021,6.2.4.1.1,6.2.4.1,5,Installatori e riparatori di impianti elettrici industriali
+CP_2021,6.2.4.1.2,6.2.4.1,5,Riparatori di apparecchi elettrici e di elettrodomestici
+CP_2021,6.2.4.1.3,6.2.4.1,5,Elettromeccanici
+CP_2021,6.2.4.1.4,6.2.4.1,5,Installatori e riparatori di apparati di produzione e conservazione dell'energia elettrica
+CP_2021,6.2.4.1.5,6.2.4.1,5,Elettrauto
+CP_2021,6.2.4.2.0,6.2.4.2,5,Manutentori e riparatori di apparati elettronici industriali
+CP_2021,6.2.4.3.0,6.2.4.3,5,Riparatori di apparecchi radio televisivi
+CP_2021,6.2.4.4.0,6.2.4.4,5,Installatori e riparatori di apparati di telecomunicazione
+CP_2021,6.2.4.5.0,6.2.4.5,5,"Installatori, manutentori e riparatori di linee elettriche, cavisti"
+CP_2021,6.2.4.6.0,6.2.4.6,5,"Installatori, manutentori e riparatori di apparecchiature informatiche"
+CP_2021,6.3.1.1.0,6.3.1.1,5,Meccanici di precisione
+CP_2021,6.3.1.2.0,6.3.1.2,5,"Meccanici e riparatori di protesi, di ortesi, di tutori ortopedici e assimilati"
+CP_2021,6.3.1.3.1,6.3.1.3,5,Accordatori di strumenti musicali
+CP_2021,6.3.1.3.2,6.3.1.3,5,Addetti alla costruzione e riparazione di strumenti musicali
+CP_2021,6.3.1.4.0,6.3.1.4,5,Addetti alla costruzione e riparazione di orologi
+CP_2021,6.3.1.5.1,6.3.1.5,5,Addetti alla produzione di lenti e occhiali
+CP_2021,6.3.1.5.2,6.3.1.5,5,Addetti alla produzione di apparecchi ottici
+CP_2021,6.3.1.6.1,6.3.1.6,5,Orafi
+CP_2021,6.3.1.6.2,6.3.1.6,5,Addetti alla lavorazione di pietre preziose e dure
+CP_2021,6.3.1.6.3,6.3.1.6,5,Addetti alla lavorazione di bigiotteria
+CP_2021,6.3.2.1.1,6.3.2.1,5,Vasai e terracottai
+CP_2021,6.3.2.1.2,6.3.2.1,5,Ceramisti
+CP_2021,6.3.2.2.1,6.3.2.2,5,Soffiatori e modellatori del vetro
+CP_2021,6.3.2.2.2,6.3.2.2,5,"Tagliatori, molatori e levigatori del vetro"
+CP_2021,6.3.2.3.0,6.3.2.3,5,Incisori ed acquafortisti su vetro
+CP_2021,6.3.2.4.0,6.3.2.4,5,Pittori e decoratori su vetro e ceramica
+CP_2021,6.3.3.1.1,6.3.3.1,5,Cartapestai
+CP_2021,6.3.3.1.2,6.3.3.1,5,Incisori e intarsiatori su legno
+CP_2021,6.3.3.2.1,6.3.3.2,5,Artigiani di prodotti tessili artistici lavorati a mano
+CP_2021,6.3.3.2.2,6.3.3.2,5,Artigiani di prodotti artistici in pelle e cuoio lavorati a mano
+CP_2021,6.3.4.1.0,6.3.4.1,5,Operatori delle attività poligrafiche di pre-stampa
+CP_2021,6.3.4.2.0,6.3.4.2,5,Stampatori offset e alla rotativa
+CP_2021,6.3.4.3.0,6.3.4.3,5,"Zincografi, stereotipisti ed elettrotipisti"
+CP_2021,6.3.4.4.1,6.3.4.4,5,Artigiani acquafortisti
+CP_2021,6.3.4.4.2,6.3.4.4,5,"Litografi, serigrafisti e incisori tipografici"
+CP_2021,6.3.4.5.0,6.3.4.5,5,Rilegatori e rifinitori post stampa
+CP_2021,6.4.1.1.0,6.4.1.1,5,Agricoltori e operai agricoli specializzati di colture in pieno campo
+CP_2021,6.4.1.2.0,6.4.1.2,5,Agricoltori e operai agricoli specializzati di coltivazioni legnose agrarie
+CP_2021,6.4.1.3.1,6.4.1.3,5,"Agricoltori e operai agricoli specializzati di giardini e vivai, di coltivazioni di fiori e piante ornamentali"
+CP_2021,6.4.1.3.2,6.4.1.3,5,"Agricoltori e operai agricoli specializzati di coltivazioni ortive in serra, di ortive protette o di orti stabili"
+CP_2021,6.4.1.4.0,6.4.1.4,5,Agricoltori e operai agricoli specializzati di colture miste
+CP_2021,6.4.2.1.0,6.4.2.1,5,Allevatori e operai specializzati degli allevamenti di bovini ed equini
+CP_2021,6.4.2.2.0,6.4.2.2,5,Allevatori e operai specializzati degli allevamenti di ovini e caprini
+CP_2021,6.4.2.3.0,6.4.2.3,5,Allevatori e operai specializzati degli allevamenti di suini
+CP_2021,6.4.2.4.0,6.4.2.4,5,Allevatori e operai specializzati degli allevamenti avicoli
+CP_2021,6.4.2.5.0,6.4.2.5,5,Allevatore di bestiame misto
+CP_2021,6.4.2.6.0,6.4.2.6,5,Allevatori e operai specializzati degli allevamenti di insetti
+CP_2021,6.4.2.9.0,6.4.2.9,5,Altri allevatori e operai specializzati della zootecnia
+CP_2021,6.4.3.1.0,6.4.3.1,5,Allevatori e agricoltori
+CP_2021,6.4.4.1.1,6.4.4.1,5,Abbattitori di alberi e rimboschitori
+CP_2021,6.4.4.1.2,6.4.4.1,5,Sugherai e raccoglitori di resine
+CP_2021,6.4.5.1.0,6.4.5.1,5,Acquacoltori
+CP_2021,6.4.5.2.0,6.4.5.2,5,Pescatori della pesca costiera e in acque interne
+CP_2021,6.4.5.3.0,6.4.5.3,5,Pescatori d'alto mare
+CP_2021,6.4.5.4.0,6.4.5.4,5,Cacciatori
+CP_2021,6.5.1.1.1,6.5.1.1,5,Macellai e abbattitori di animali
+CP_2021,6.5.1.1.2,6.5.1.1,5,Norcini
+CP_2021,6.5.1.1.3,6.5.1.1,5,Pesciaioli
+CP_2021,6.5.1.1.4,6.5.1.1,5,Addetti alla conservazione di carni e pesci
+CP_2021,6.5.1.2.1,6.5.1.2,5,Panettieri
+CP_2021,6.5.1.2.2,6.5.1.2,5,Pastai
+CP_2021,6.5.1.3.1,6.5.1.3,5,Pasticcieri e cioccolatai
+CP_2021,6.5.1.3.2,6.5.1.3,5,Gelatai
+CP_2021,6.5.1.3.3,6.5.1.3,5,Conservieri
+CP_2021,6.5.1.4.0,6.5.1.4,5,Degustatori e classificatori di prodotti alimentari e bevande
+CP_2021,6.5.1.5.0,6.5.1.5,5,Artigiani ed operai specializzati delle lavorazioni artigianali casearie
+CP_2021,6.5.1.6.0,6.5.1.6,5,Operai specializzati della preparazione e della lavorazione delle foglie di tabacco
+CP_2021,6.5.2.1.1,6.5.2.1,5,Stagionatori ed operai specializzati del primo trattamento del legno
+CP_2021,6.5.2.1.2,6.5.2.1,5,"Curvatori, sagomatori ed operai specializzati della prima lavorazione del legno"
+CP_2021,6.5.2.2.1,6.5.2.2,5,Attrezzisti di falegnameria
+CP_2021,6.5.2.2.2,6.5.2.2,5,Falegnami
+CP_2021,6.5.2.2.3,6.5.2.2,5,Montatori di mobili
+CP_2021,6.5.2.3.1,6.5.2.3,5,Impagliatori e lavoranti in vimini e setole
+CP_2021,6.5.2.3.2,6.5.2.3,5,Cordai e intrecciatori di fibre
+CP_2021,6.5.2.3.3,6.5.2.3,5,Lavoranti in giunco e canna
+CP_2021,6.5.2.3.4,6.5.2.3,5,Lavoranti in sughero e spugna
+CP_2021,6.5.3.1.0,6.5.3.1,5,Preparatori di fibre
+CP_2021,6.5.3.2.1,6.5.3.2,5,Tessitori
+CP_2021,6.5.3.2.2,6.5.3.2,5,Maglieristi
+CP_2021,6.5.3.2.3,6.5.3.2,5,Tintori e addetti al trattamento chimico dei tessuti
+CP_2021,6.5.3.3.1,6.5.3.3,5,Modellisti di capi di abbigliamento
+CP_2021,6.5.3.3.2,6.5.3.3,5,Tagliatori di capi di abbigliamento
+CP_2021,6.5.3.3.3,6.5.3.3,5,Confezionatori di capi di abbigliamento
+CP_2021,6.5.3.3.4,6.5.3.3,5,Sarti
+CP_2021,6.5.3.3.5,6.5.3.3,5,Cappellai
+CP_2021,6.5.3.4.1,6.5.3.4,5,Modellisti di pellicceria e di capi in pelle
+CP_2021,6.5.3.4.2,6.5.3.4,5,Tagliatori di pellicceria e di capi in pelle
+CP_2021,6.5.3.4.3,6.5.3.4,5,Confezionatori di pellicceria e di capi in pelle
+CP_2021,6.5.3.4.4,6.5.3.4,5,Pellicciai e sarti in pelle
+CP_2021,6.5.3.5.1,6.5.3.5,5,Confezionatori e rifinitori di biancheria intima
+CP_2021,6.5.3.5.2,6.5.3.5,5,Confezionatori e rifinitori di biancheria per la casa
+CP_2021,6.5.3.5.3,6.5.3.5,5,Merlettai e ricamatrici a mano
+CP_2021,6.5.3.5.4,6.5.3.5,5,Bottonai
+CP_2021,6.5.3.6.1,6.5.3.6,5,Confezionatori di tende e drappeggi
+CP_2021,6.5.3.6.2,6.5.3.6,5,Modellisti di poltrone e divani
+CP_2021,6.5.3.6.3,6.5.3.6,5,Tagliatori di imbottiture e rivestimenti di poltrone e divani
+CP_2021,6.5.3.6.4,6.5.3.6,5,Confezionatori di poltrone e divani
+CP_2021,6.5.3.6.5,6.5.3.6,5,"Tappezzieri di poltrone, divani e assimilati"
+CP_2021,6.5.3.6.6,6.5.3.6,5,Materassai
+CP_2021,6.5.3.7.0,6.5.3.7,5,Artigiani e addetti alle tintolavanderie
+CP_2021,6.5.4.1.0,6.5.4.1,5,Conciatori di pelli e di pellicce
+CP_2021,6.5.4.2.1,6.5.4.2,5,Modellisti di calzature
+CP_2021,6.5.4.2.2,6.5.4.2,5,Tagliatori di calzature
+CP_2021,6.5.4.2.3,6.5.4.2,5,Confezionatori di calzature
+CP_2021,6.5.4.2.4,6.5.4.2,5,"Calzolai, sellai e cuoiai"
+CP_2021,6.5.4.3.1,6.5.4.3,5,Modellisti di pelletteria
+CP_2021,6.5.4.3.2,6.5.4.3,5,Tagliatori di pelletteria
+CP_2021,6.5.4.3.3,6.5.4.3,5,Confezionatori di pelletteria
+CP_2021,6.5.4.3.4,6.5.4.3,5,Pellettieri
+CP_2021,6.5.5.1.0,6.5.5.1,5,Macchinisti ed attrezzisti di scena
+CP_2021,7.1.1.1.0,7.1.1.1,5,Conduttori di macchinari in miniere e cave
+CP_2021,7.1.1.2.0,7.1.1.2,5,Conduttori di impianti per il primo trattamento di minerali e di pietre
+CP_2021,7.1.1.3.1,7.1.1.3,5,Trivellatori di pozzi
+CP_2021,7.1.1.3.2,7.1.1.3,5,Conduttori di sonde e perforatrici da prospezione
+CP_2021,7.1.2.1.1,7.1.2.1,5,Operatori di altoforno
+CP_2021,7.1.2.1.2,7.1.2.1,5,Operatori di colata
+CP_2021,7.1.2.2.1,7.1.2.2,5,Operatori di forni di seconda fusione
+CP_2021,7.1.2.2.2,7.1.2.2,5,Operatori di laminatoi
+CP_2021,7.1.2.3.0,7.1.2.3,5,Operatori di impianti per il trattamento termico dei metalli
+CP_2021,7.1.2.4.1,7.1.2.4,5,Conduttori di macchine per la trafila di metalli
+CP_2021,7.1.2.4.2,7.1.2.4,5,Conduttori di macchine per l’estrusione e la profilatura di metalli
+CP_2021,7.1.2.5.1,7.1.2.5,5,Operatori di impianti termici per la produzione di metalli non ferrosi
+CP_2021,7.1.2.5.2,7.1.2.5,5,Operatori di impianti elettrochimici per la produzione di metalli non ferrosi
+CP_2021,7.1.3.1.0,7.1.3.1,5,"Conduttori di impianti per dosare, miscelare ed impastare materiali per la produzione del vetro, della ceramica e dei laterizi"
+CP_2021,7.1.3.2.1,7.1.3.2,5,Conduttori di forni per la produzione del vetro
+CP_2021,7.1.3.2.2,7.1.3.2,5,Conduttori di impianti per la lavorazione del vetro
+CP_2021,7.1.3.3.1,7.1.3.3,5,Conduttori di impianti per la formatura di articoli in ceramica e terracotta
+CP_2021,7.1.3.3.2,7.1.3.3,5,Conduttori di forni per la produzione di articoli in ceramica e terracotta
+CP_2021,7.1.3.4.1,7.1.3.4,5,Conduttori di impianti per la formatura di laterizi
+CP_2021,7.1.3.4.2,7.1.3.4,5,Conduttori di forni per la produzione di laterizi
+CP_2021,7.1.4.1.0,7.1.4.1,5,Conduttori di impianti per la fabbricazione in serie di pannelli in legno
+CP_2021,7.1.4.2.0,7.1.4.2,5,Operatori di impianti per la preparazione della pasta di legno e di altri materiali per cartiera
+CP_2021,7.1.4.3.0,7.1.4.3,5,Operatori di impianti per la fabbricazione della carta
+CP_2021,7.1.5.1.1,7.1.5.1,5,Conduttori di impianti per la raffinazione del gas e dei prodotti petroliferi
+CP_2021,7.1.5.1.2,7.1.5.1,5,Conduttori di impianti per la stazzatura di prodotti petroliferi
+CP_2021,7.1.5.2.0,7.1.5.2,5,Operatori di macchinari e di impianti per la chimica di base e la chimica fine
+CP_2021,7.1.5.3.1,7.1.5.3,5,Operatori di macchinari per la produzione di farmaci
+CP_2021,7.1.5.3.2,7.1.5.3,5,Operatori di macchinari per la produzione di prodotti derivati dalla chimica (farmaci esclusi)
+CP_2021,7.1.6.1.0,7.1.6.1,5,Conduttori di caldaie a vapore e di motori termici in impianti industriali
+CP_2021,7.1.6.2.1,7.1.6.2,5,Operatori di impianti di recupero e riciclaggio dei rifiuti
+CP_2021,7.1.6.2.2,7.1.6.2,5,"Operatori di impianti per la depurazione, la potabilizzazione e la distribuzione delle acque"
+CP_2021,7.1.7.1.0,7.1.7.1,5,Operatori di catene di montaggio automatizzate
+CP_2021,7.1.8.1.0,7.1.8.1,5,Conduttori di mulini e impastatrici
+CP_2021,7.1.8.2.0,7.1.8.2,5,Conduttori di forni e di impianti per il trattamento termico dei minerali
+CP_2021,7.2.1.1.0,7.2.1.1,5,Conduttori di macchine utensili automatiche e semiautomatiche industriali
+CP_2021,7.2.1.2.0,7.2.1.2,5,Conduttori di macchinari per la produzione di manufatti in cemento e assimilati
+CP_2021,7.2.1.3.0,7.2.1.3,5,Conduttori di macchinari per la produzione di abrasivi e manufatti abrasivi minerali
+CP_2021,7.2.2.1.0,7.2.2.1,5,"Finitori di metalli e conduttori di impianti per finire, rivestire, placcare metalli e oggetti in metallo"
+CP_2021,7.2.2.2.0,7.2.2.2,5,Conduttori di macchinari per la fabbricazione di prodotti fotografici e assimilati
+CP_2021,7.2.3.1.0,7.2.3.1,5,Conduttori di macchinari per la confezione e vulcanizzazione dei pneumatici
+CP_2021,7.2.3.2.0,7.2.3.2,5,Conduttori di macchinari per la fabbricazione di altri articoli in gomma
+CP_2021,7.2.3.3.0,7.2.3.3,5,Conduttori di macchinari per la fabbricazione di articoli in plastica e assimilati
+CP_2021,7.2.4.1.0,7.2.4.1,5,Addetti a macchinari per la produzione in serie di mobili e di articoli in legno
+CP_2021,7.2.5.1.0,7.2.5.1,5,Conduttori di macchinari per tipografia e stampa su carta e cartone
+CP_2021,7.2.5.2.0,7.2.5.2,5,Conduttori di macchinari per la fabbricazione di prodotti in carta e cartone
+CP_2021,7.2.5.3.0,7.2.5.3,5,Conduttori di macchinari per rilegatura di libri e assimilati
+CP_2021,7.2.6.1.0,7.2.6.1,5,Addetti a macchinari per la filatura e la bobinatura
+CP_2021,7.2.6.2.0,7.2.6.2,5,Addetti a telai meccanici e a macchinari per la tessitura e la maglieria
+CP_2021,7.2.6.3.0,7.2.6.3,5,Operai addetti a macchinari industriali per confezioni di abbigliamento in stoffa e assimilati
+CP_2021,7.2.6.4.0,7.2.6.4,5,"Addetti ai macchinari per il trattamento di pulitura a secco, candeggio e tintura di filati e tessuti industriali"
+CP_2021,7.2.6.5.0,7.2.6.5,5,Addetti a macchinari per la stampa dei tessuti
+CP_2021,7.2.6.6.1,7.2.6.6,5,Addetti a macchinari industriali per la preparazione di pelli e pellicce
+CP_2021,7.2.6.6.2,7.2.6.6,5,Addetti a macchinari per la produzione in serie di articoli in pelle e pelliccia
+CP_2021,7.2.6.7.0,7.2.6.7,5,Addetti a macchinari per la produzione in serie di calzature
+CP_2021,7.2.6.9.0,7.2.6.9,5,Altri operai addetti a macchinari dell'industria tessile e delle confezioni ed assimilati
+CP_2021,7.2.7.1.0,7.2.7.1,5,Assemblatori in serie di parti di macchine
+CP_2021,7.2.7.2.0,7.2.7.2,5,Assemblatori e cablatori di apparecchiature elettriche
+CP_2021,7.2.7.3.0,7.2.7.3,5,Assemblatori e cablatori di apparecchiature elettroniche e di telecomunicazioni
+CP_2021,7.2.7.4.0,7.2.7.4,5,"Assemblatori in serie di articoli in metallo, in gomma e in materie plastiche"
+CP_2021,7.2.7.5.0,7.2.7.5,5,Assemblatori in serie di articoli in legno e in materiali assimilati
+CP_2021,7.2.7.6.0,7.2.7.6,5,"Assemblatori in serie di articoli in cartone, in tessuto e materie assimilate"
+CP_2021,7.2.7.9.0,7.2.7.9,5,Assemblatori in serie di articoli industriali compositi
+CP_2021,7.2.8.1.0,7.2.8.1,5,Addetti a macchine confezionatrici e al confezionamento di prodotti industriali
+CP_2021,7.3.1.1.0,7.3.1.1,5,Addetti agli impianti fissi in agricoltura e nell'allevamento
+CP_2021,7.3.1.2.0,7.3.1.2,5,Addetti agli impianti per la trasformazione delle olive
+CP_2021,7.3.1.3.0,7.3.1.3,5,"Addetti alla refrigerazione, trattamento igienico e prima trasformazione del latte"
+CP_2021,7.3.2.1.0,7.3.2.1,5,Conduttori di macchinari per la lavorazione e la conservazione della carne e del pesce
+CP_2021,7.3.2.2.0,7.3.2.2,5,Conduttori di apparecchi per la lavorazione industriale di prodotti lattiero – caseari
+CP_2021,7.3.2.3.1,7.3.2.3,5,Conduttori di macchinari industriali per la lavorazione dei cereali
+CP_2021,7.3.2.3.2,7.3.2.3,5,Conduttori di macchinari industriali per la lavorazione delle spezie
+CP_2021,7.3.2.3.3,7.3.2.3,5,Conduttori di macchinari industriali per la lavorazione di prodotti a base di cereali
+CP_2021,7.3.2.4.1,7.3.2.4,5,Conduttori di macchinari per la cernita e la calibratura di prodotti ortofrutticoli
+CP_2021,7.3.2.4.2,7.3.2.4,5,Conduttori di macchinari per la conservazione di frutta e verdura
+CP_2021,7.3.2.4.3,7.3.2.4,5,Conduttori di macchinari per la conservazione di legumi e riso
+CP_2021,7.3.2.4.4,7.3.2.4,5,Conduttori di macchinari per la produzione di oli di semi
+CP_2021,7.3.2.5.0,7.3.2.5,5,Conduttori di macchinari per la produzione e la raffinazione dello zucchero
+CP_2021,7.3.2.6.1,7.3.2.6,5,"Conduttori di macchinari per la preparazione e la produzione del the, del caffè e del cacao"
+CP_2021,7.3.2.6.2,7.3.2.6,5,Conduttori di macchinari per la preparazione e la produzione della cioccolata
+CP_2021,7.3.2.7.0,7.3.2.7,5,Conduttori di macchinari per la lavorazione dei prodotti del tabacco
+CP_2021,7.3.2.8.1,7.3.2.8,5,Addetti a macchinari industriali per la vinificazione
+CP_2021,7.3.2.8.2,7.3.2.8,5,Addetti a macchinari industriali per la produzione di birra
+CP_2021,7.3.2.8.3,7.3.2.8,5,"Addetti a macchinari industriali per la produzione di liquori, di distillati e di bevande alcoliche"
+CP_2021,7.3.2.8.4,7.3.2.8,5,Addetti a macchinari industriali per la produzione di bevande analcoliche e gassate
+CP_2021,7.3.2.9.0,7.3.2.9,5,Conduttori di macchinari per la produzione di pasticceria e prodotti da forno
+CP_2021,7.4.1.1.0,7.4.1.1,5,Conduttori di convogli ferroviari
+CP_2021,7.4.1.2.0,7.4.1.2,5,"Operatori di verifica, circolazione e formazione treni"
+CP_2021,7.4.1.3.0,7.4.1.3,5,Manovratori di impianti a fune
+CP_2021,7.4.2.1.0,7.4.2.1,5,"Autisti di taxi, conduttori di automobili, furgoni e altri veicoli per trasporto di persone"
+CP_2021,7.4.2.2.0,7.4.2.2,5,"Conduttori di autobus, di tram e di filobus"
+CP_2021,7.4.2.3.0,7.4.2.3,5,Conduttori di mezzi pesanti e camion
+CP_2021,7.4.2.4.0,7.4.2.4,5,Conduttori di veicoli a trazione animale
+CP_2021,7.4.3.1.0,7.4.3.1,5,Conduttori di trattori agricoli
+CP_2021,7.4.3.2.1,7.4.3.2,5,"Conduttori di macchine raccoglitrici, trinciatrici e pressatrici agricole"
+CP_2021,7.4.3.2.2,7.4.3.2,5,Conduttori di mietitrebbiatrici
+CP_2021,7.4.3.2.3,7.4.3.2,5,"Conduttori di macchine per la raccolta di prodotti agricoli (barbabietole, patate, frutta, uva e ortive)"
+CP_2021,7.4.3.3.0,7.4.3.3,5,Conduttori di macchine forestali
+CP_2021,7.4.4.1.0,7.4.4.1,5,Conduttori di macchinari per il movimento terra
+CP_2021,7.4.4.2.1,7.4.4.2,5,Conduttori di macchinari mobili per la perforazione in edilizia
+CP_2021,7.4.4.2.2,7.4.4.2,5,Conduttori di macchinari mobili per la perforazione di gallerie
+CP_2021,7.4.4.3.0,7.4.4.3,5,Conduttori di gru e di apparecchi di sollevamento
+CP_2021,7.4.4.4.0,7.4.4.4,5,Conduttori di carrelli elevatori
+CP_2021,7.4.5.1.0,7.4.5.1,5,Marinai di coperta
+CP_2021,7.4.5.2.0,7.4.5.2,5,Conduttori di caldaie ed altre attrezzature navali
+CP_2021,7.4.5.3.0,7.4.5.3,5,Conduttori di barche e battelli a motore
+CP_2021,8.1.1.1.0,8.1.1.1,5,Venditori ambulanti di beni
+CP_2021,8.1.1.2.0,8.1.1.2,5,Venditori ambulanti di servizi
+CP_2021,8.1.2.1.0,8.1.2.1,5,Uscieri e professioni assimilate
+CP_2021,8.1.2.2.0,8.1.2.2,5,"Lettori di contatori, collettori di monete e professioni assimilate"
+CP_2021,8.1.3.1.0,8.1.3.1,5,"Facchini, addetti allo spostamento merci ed assimilati"
+CP_2021,8.1.3.2.0,8.1.3.2,5,Personale non qualificato addetto all'imballaggio e al magazzino
+CP_2021,8.1.3.3.0,8.1.3.3,5,Addetti alle consegne di merci
+CP_2021,8.1.4.1.0,8.1.4.1,5,Personale non qualificato addetto alla pulizia nei servizi di alloggio e nelle navi
+CP_2021,8.1.4.2.0,8.1.4.2,5,Personale non qualificato nei servizi di ristorazione
+CP_2021,8.1.4.3.0,8.1.4.3,5,Personale non qualificato addetto ai servizi di pulizia di uffici ed esercizi commerciali
+CP_2021,8.1.4.4.0,8.1.4.4,5,Addetti al lavaggio veicoli
+CP_2021,8.1.4.5.0,8.1.4.5,5,Operatori ecologici e altri raccoglitori e separatori di rifiuti
+CP_2021,8.1.5.1.0,8.1.5.1,5,Bidelli e professioni assimilate
+CP_2021,8.1.5.2.0,8.1.5.2,5,Portantini e professioni assimilate
+CP_2021,8.1.6.1.1,8.1.6.1,5,Personale non qualificato addetto ai servizi di custodia di edifici
+CP_2021,8.1.6.1.2,8.1.6.1,5,Personale non qualificato addetto ai servizi di custodia di impianti
+CP_2021,8.1.6.1.3,8.1.6.1,5,Personale non qualificato addetto ai servizi di custodia di attrezzature e beni
+CP_2021,8.2.1.1.0,8.2.1.1,5,Personale non qualificato nei servizi ricreativi e culturali
+CP_2021,8.2.2.1.0,8.2.2.1,5,Collaboratori domestici e professioni assimilate
+CP_2021,8.3.1.1.0,8.3.1.1,5,Braccianti agricoli
+CP_2021,8.3.1.2.0,8.3.1.2,5,Personale non qualificato addetto alla manutenzione del verde
+CP_2021,8.3.2.1.0,8.3.2.1,5,Personale forestale non qualificato
+CP_2021,8.3.2.2.0,8.3.2.2,5,Personale non qualificato addetto alla cura degli animali
+CP_2021,8.3.2.3.0,8.3.2.3,5,Personale non qualificato addetto alla pesca ed alla caccia
+CP_2021,8.4.1.1.0,8.4.1.1,5,Manovali ed altro personale non qualificato delle miniere e delle cave
+CP_2021,8.4.2.1.0,8.4.2.1,5,Manovali e personale non qualificato dell’edilizia civile e professioni assimilate
+CP_2021,8.4.2.2.0,8.4.2.2,5,"Manovali e personale non qualificato della costruzione e manutenzione di strade, dighe e altre opere pubbliche"
+CP_2021,8.4.3.1.0,8.4.3.1,5,Personale non qualificato delle attività industriali e professioni assimilate
+CP_2021,9.1.1.1.0,9.1.1.1,5,Ufficiali delle forze armate
+CP_2021,9.2.1.1.0,9.2.1.1,5,"Sergenti, sovraintendenti e marescialli delle forze armate"
+CP_2021,9.3.1.1.0,9.3.1.1,5,Truppa delle forze armate

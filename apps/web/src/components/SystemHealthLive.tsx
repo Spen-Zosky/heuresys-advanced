@@ -33,6 +33,7 @@ import {
   RBACMatrix,
 } from "@heuresys/ui";
 import { Activity, Database, Lock, ShieldCheck, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   useRolePermissions,
   useSystemHealth,
@@ -135,6 +136,7 @@ function buildMatrix(items: ReadonlyArray<RolePermissionItem>) {
 /* ---------- component ---------------------------------------------------- */
 
 export function SystemHealthLive() {
+  const { t } = useTranslation();
   const health = useSystemHealth();
   const rolePerms = useRolePermissions();
 
@@ -144,7 +146,7 @@ export function SystemHealthLive() {
         data-testid="system-health-loading"
         className="mx-auto max-w-7xl px-6 py-8"
       >
-        <span className="text-sm text-muted-foreground">Loading system health…</span>
+        <span className="text-sm text-muted-foreground">{t("common:loading")}</span>
       </main>
     );
   }

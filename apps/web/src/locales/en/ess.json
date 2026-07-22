@@ -604,7 +604,14 @@
     "errorSubmit": "Error during submission.",
     "success": "Self-assessment recorded.",
     "submit": "Submit self-assessment",
-    "submitting": "Submitting…"
+    "submitting": "Submitting…",
+    "levels": {
+      "NOVICE": "Novice",
+      "ADVANCED_BEGINNER": "Advanced beginner",
+      "COMPETENT": "Competent",
+      "PROFICIENT": "Proficient",
+      "EXPERT": "Expert"
+    }
   },
   "team": {
     "title": "Il mio team",

@@ -163,10 +163,13 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       ? user.displayName.trim().split(/\s+/).map((w) => w.charAt(0)).join("").slice(0, 2)
       : user.email.slice(0, 2)
   ).toUpperCase();
+  const primaryRole = roles[0] ?? "USER";
   const identity: UserIdentity = {
     initials,
     username: displayName,
-    role: roles[0] ?? "USER",
+    // label umana, mai il codice RBAC raw (census F4 S1025: 'PLATFORM_ADMIN'
+    // renderizzato su ogni pagina admin)
+    role: t(`shell:roles.${primaryRole}`, { defaultValue: primaryRole }),
     roleTone: hasAdminRole ? "info" : "warning",
   };
 

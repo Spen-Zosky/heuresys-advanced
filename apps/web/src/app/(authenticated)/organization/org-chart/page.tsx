@@ -99,7 +99,10 @@ export default function OrgChartPage() {
             onClick={() => setActiveGraphId(g.graphId)}
             className={`rounded-card border px-3 py-1 text-xs transition-colors ${
               effectiveGraphId === g.graphId
-                ? "border-transparent bg-primary text-white"
+                ? // token, non text-white: in dark il primary è #5E9DF5 e il bianco
+                  // scende a 2.75:1 (axe serious) — --color-primary-fg è l'ink
+                  // per-modo già ritarato in S982 (light 5.2:1, dark 6.5:1).
+                  "border-transparent bg-primary text-[color:var(--color-primary-fg)]"
                 : "border-border bg-card text-foreground hover:bg-muted"
             }`}
             data-testid="org-chart-picker-btn"
@@ -117,7 +120,6 @@ export default function OrgChartPage() {
           {!effectiveGraphId ? (
             <div className="p-6 text-sm text-muted-foreground" data-testid="org-chart-empty">
               {t("orgChart.emptyPrefix")}
-              <code className="mx-1 font-mono">{t("orgChart.seedFile")}</code>.
             </div>
           ) : render.isLoading ? (
             <div className="p-6 text-sm text-muted-foreground">{t("common:loading")}</div>

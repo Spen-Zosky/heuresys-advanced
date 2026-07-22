@@ -604,7 +604,14 @@
     "errorSubmit": "Errore durante l'invio.",
     "success": "Auto-valutazione registrata.",
     "submit": "Invia auto-valutazione",
-    "submitting": "Invio…"
+    "submitting": "Invio…",
+    "levels": {
+      "NOVICE": "Novizio",
+      "ADVANCED_BEGINNER": "Principiante avanzato",
+      "COMPETENT": "Competente",
+      "PROFICIENT": "Avanzato",
+      "EXPERT": "Esperto"
+    }
   },
   "team": {
     "title": "Il mio team",

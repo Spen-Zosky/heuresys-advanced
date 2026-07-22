@@ -133,7 +133,9 @@ export default function MeSelfAssessmentPage() {
                 className="w-full rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 {...register("declaredProficiency")}
               >
-                {PROFICIENCY_LEVELS.map((l) => <option key={l} value={l}>{l}</option>)}
+                {PROFICIENCY_LEVELS.map((l) => (
+                  <option key={l} value={l}>{t(`selfAssessment.levels.${l}`, { defaultValue: l })}</option>
+                ))}
               </select>
             </div>
 

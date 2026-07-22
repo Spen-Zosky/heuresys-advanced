@@ -229,14 +229,13 @@
     "activeNo": "no"
   },
   "orgChart": {
-    "title": "Org chart",
-    "back": "← Organization",
-    "count": "{{count}} grafici ORG_CHART disponibili",
+    "title": "Organigramma",
+    "back": "← Organizzazione",
+    "count": "{{count}} organigrammi disponibili",
     "cardTitle": "Organigramma ({{label}})",
     "nodeCount": "{{count}} posizioni",
     "dash": "—",
-    "emptyPrefix": "Nessun grafo ORG_CHART registrato per il tenant. Generarlo con",
-    "seedFile": "db/seeds/org_chart_rtl_demo.sql",
+    "emptyPrefix": "Nessun organigramma disponibile per questo tenant.",
     "noNodes": "Il grafo non ha nodi.",
     "error": "Impossibile caricare l'organigramma.",
     "graphAria": "Organigramma interattivo delle posizioni",

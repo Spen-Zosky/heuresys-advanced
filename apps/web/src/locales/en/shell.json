@@ -13,12 +13,34 @@
   },
   "tabs": {
     "label": "Section navigation",
-    "org": { "overview": "Organization", "network": "Org network" },
-    "attendance": { "main": "Attendance", "overtime": "Overtime" },
-    "skill": { "coverage": "Coverage", "category": "By category", "group": "By group", "catalog": "Catalog", "gap": "Gap", "skillGap": "Skill gap" },
-    "comp": { "analytics": "Analytics", "intelligence": "Compensation" },
-    "kpi": { "analytics": "Analytics", "catalog": "KPI catalog" },
-    "career": { "main": "Career", "readiness": "Succession readiness" }
+    "org": {
+      "overview": "Organization",
+      "network": "Org network"
+    },
+    "attendance": {
+      "main": "Attendance",
+      "overtime": "Overtime"
+    },
+    "skill": {
+      "coverage": "Coverage",
+      "category": "By category",
+      "group": "By group",
+      "catalog": "Catalog",
+      "gap": "Gap",
+      "skillGap": "Skill gap"
+    },
+    "comp": {
+      "analytics": "Analytics",
+      "intelligence": "Compensation"
+    },
+    "kpi": {
+      "analytics": "Analytics",
+      "catalog": "KPI catalog"
+    },
+    "career": {
+      "main": "Career",
+      "readiness": "Succession readiness"
+    }
   },
   "session": {
     "error": "Session error"
@@ -32,5 +54,19 @@
   "brand": {
     "badge": "advanced",
     "version": "v5 · heuresys-advanced"
+  },
+  "roles": {
+    "PLATFORM_ADMIN": "Platform admin",
+    "TENANT_ADMIN": "Tenant admin",
+    "BLUEPRINT_MANAGER": "Blueprint manager",
+    "HRMS_MANAGER": "HRMS manager",
+    "PROCESS_OWNER": "Process owner",
+    "MANAGER": "Manager",
+    "USER": "Employee",
+    "READ_ONLY": "Read-only",
+    "CEO": "CEO",
+    "TEAM_LEADER": "Team leader",
+    "TEAM_MEMBER": "Team member",
+    "ORG_DIRECTOR": "Organization director"
   }
 }

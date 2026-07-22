@@ -101,7 +101,27 @@ async function sweepRoute(page: Page, persona: string, route: string): Promise<v
   const landed = new URL(page.url()).pathname;
   expect(landed, `dead session: requested ${route}, landed ${landed}`).toBe(route);
 
+  // hydration wait (same doctrine as a11y.spec) + anti-vacuity: a blank body
+  // (dev-server 500 / not hydrated) must FAIL the census, not record 0-metrics.
+  await page
+    .waitForFunction(() => document.documentElement.getAttribute("lang") != null, undefined, { timeout: 5000 })
+    .catch(() => {});
+  await page
+    .waitForFunction(() => (document.body?.innerText ?? "").length > 50, undefined, { timeout: 15_000 })
+    .catch(() => {});
+  // settle: il testo deve STABILIZZARSI (2 letture uguali a 700ms) — la sola
+  // soglia >50ch fotografa la shell prima che i dati TanStack arrivino e
+  // marca "scarna" ogni pagina ESS (falso positivo del primo run S1025).
+  let prev = -1;
+  for (let i = 0; i < 12; i++) {
+    const len = await page.evaluate(() => (document.body?.innerText ?? "").length);
+    if (len === prev && len > 50) break;
+    prev = len;
+    await page.waitForTimeout(700);
+  }
+
   const text = await page.evaluate(() => document.body?.innerText ?? "");
+  expect(text.length, `blank page on ${route} (server error o mancata idratazione)`).toBeGreaterThan(50);
   const h1 = await page.locator("h1").first().textContent().catch(() => null);
 
   const uniq = (xs: RegExpMatchArray | string[] | null): string[] =>

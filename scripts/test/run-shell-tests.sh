@@ -80,6 +80,41 @@ else
   fail "denylist (added=$added)"
 fi
 
+# ---------------- C6. propagate-secret-rotation.sh rotate core (fixtures, D-60)
+section "propagate-secret-rotation.sh — rotate_keys_into fixtures (ENV_ROTATE_LOCAL)"
+
+# C6a: rotazione esplicita — SOLO la chiave nominata cambia, le altre restano
+printf 'A=1\nSECRET=old\nB=2\n' > "$T/r1"
+printf 'SECRET=new\nA=999\n' > "$T/rs1"
+rotated="$(ENV_ROTATE_LOCAL=1 bash scripts/propagate-secret-rotation.sh "$T/r1" "$T/rs1" SECRET)"
+if [ "$rotated" = "1" ] && grep -q '^SECRET=new$' "$T/r1" && grep -q '^A=1$' "$T/r1" && grep -q '^B=2$' "$T/r1"; then
+  ok "rotation: only the named key is overwritten (A untouched despite local A=999)"
+else
+  fail "rotation core (rotated=$rotated)"
+fi
+
+# C6b: refuse-list — la topologia per-macchina NON è ruotabile
+printf 'POSTGRES_HOST=remotehost\n' > "$T/r2"
+printf 'POSTGRES_HOST=localhost\n' > "$T/rs2"
+if ENV_ROTATE_LOCAL=1 bash scripts/propagate-secret-rotation.sh "$T/r2" "$T/rs2" POSTGRES_HOST >/dev/null 2>&1; then
+  fail "refuse-list: POSTGRES_HOST rotation should be refused"
+else
+  if grep -q '^POSTGRES_HOST=remotehost$' "$T/r2"; then
+    ok "refuse-list: POSTGRES_HOST refused, remote topology intact"
+  else
+    fail "refuse-list: target mutated despite refusal"
+  fi
+fi
+
+# C6c: chiave assente sul target → errore esplicito (rotazione ≠ canale additivo)
+printf 'A=1\n' > "$T/r3"
+printf 'NEWKEY=x\n' > "$T/rs3"
+if ENV_ROTATE_LOCAL=1 bash scripts/propagate-secret-rotation.sh "$T/r3" "$T/rs3" NEWKEY >/dev/null 2>&1; then
+  fail "missing-remote: NEWKEY rotation should fail (additive channel's job)"
+else
+  ok "missing-remote: refused (rotation only replaces existing keys)"
+fi
+
 # --------------------- D. align-clones.sh auto-deploy gate (production regex)
 section "align-clones.sh — DEPLOY_PATHS_RE auto-deploy gate"
 RE_LINE="$(grep -m1 '^DEPLOY_PATHS_RE=' scripts/align-clones.sh)"

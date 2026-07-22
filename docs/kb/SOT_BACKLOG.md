@@ -114,9 +114,9 @@
 - **#33 A/L8 — time-off/leave consultivo (read-only)** · status: ✅ DONE
   - priority: P3 · effort: ~2-4h · doc: docs/product/DEVELOPMENT_LINES_A_EXPOSE_DORMANT_DATA.md §L8
   - note: ✅ DONE S1020 (`a5c8a586`) — modulo `time-off` 3 GET (requests/accrual-rules/balance-transactions) + ESS `GET /v1/me/time-off/requests`. `leave` = PERSONAL org-gated (service per requests/transactions + catalog per accrual rules). mig 000173 (`leave:read` + `:self` + sidebar `/time-off`). Pagina admin `/time-off`. Integration 8/8 + E2E verde. (Submission ferie ESS resta fuori — Serie E-E3.)
-- **#34 B/B3 — approval effects: nuovi handler (primo flusso approvativo reale)** · status: ACTIVE
-  - priority: P1 · effort: ~2-4h per handler · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B3
-  - note: registry con 1 solo handler; candidato TENANT_MATERIALIZATION (seam pronto). `sys_approval_requests`=0 oggi: il BPM smette di essere vuoto.
+- **#34 B/B3 — approval effects: nuovi handler (primo flusso approvativo reale)** · status: DONE
+  - priority: P1 · effort: chiuso · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B3
+  - note: ✅ **DONE S1026** — (la nota era stale: TENANT_MATERIALIZATION era GIÀ registrato). Shipped il **primo flusso approvativo BUSINESS**: richiesta ferie ESS. `POST /v1/me/time-off/requests` (perm `leave:request:self`, mig **000202**, self-floor 13 ruoli) crea una approval request `TIME_OFF_REQUEST` verso il **manager diretto reale** (reports-to) con notifica APPROVAL_REQUEST; l'effect handler (`effects/time-off-request.ts`, 3° nel registry) all'apply scrive ATOMICAMENTE la riga `sys_time_off_requests` APPROVED-at-birth (natural key = approval id → double-apply impossibile), muove il balance (guardato race-safe) e registra la transazione USAGE. Design chiave: la sottomissione NON scrive nulla nelle tabelle leave — lo stato pending vive nel runtime approvals, il reject non richiede compensazioni. Pagina ESS **`/me/time-off`** (saldi live, form, storico; sidebar mig **000203**) + spec E2E non-persistente. 5 test integrazione col flusso reale tommaso→paolo verdi. Residuo B3 opzionale (futuri handler: goal/comp change) = eventuale item nuovo.
 - **#35 B/B7 — observability completa (/metrics Prometheus + slow-query + 4 sezioni system-health)** · status: ACTIVE
   - priority: P2 · effort: ~4-6h · doc: docs/product/DEVELOPMENT_LINES_B_ACTIVATE_DORMANT_CODE.md §B7
   - note: `pg_stat_statements` già installato; riaccende le 4 sezioni droppate di `/system-health`.

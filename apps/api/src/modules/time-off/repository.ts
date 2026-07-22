@@ -327,3 +327,156 @@ export async function listBalanceTransactions(
   );
   return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toTxn) };
 }
+
+// ── B3 (#34): write path — ESS submission support + apply-effect primitives ──
+// The submission itself writes ONLY an approval request (TIME_OFF_REQUEST);
+// everything below the approval boundary (the APPROVED time-off row, the
+// balance move, the USAGE transaction) is written by the apply-effect handler
+// inside the apply transaction (approvals/effects/time-off-request.ts).
+
+/** The subject's direct manager: ACTIVE PRIMARY position → reports-to → its ACTIVE holder. */
+export async function findDirectManagerUserId(q: DbConnector, userId: string): Promise<string | null> {
+  const res = await q.query<{ manager_user_id: string }>(
+    `SELECT mgr.user_position_assignment_user_id AS manager_user_id
+       FROM sys.sys_user_position_assignments upa
+       JOIN sys.sys_positions p ON p.position_id = upa.user_position_assignment_position_id
+       JOIN sys.sys_user_position_assignments mgr
+         ON mgr.user_position_assignment_position_id = p.position_reports_to_position_id
+        AND mgr.user_position_assignment_status = 'ACTIVE'
+      WHERE upa.user_position_assignment_user_id = $1
+        AND upa.user_position_assignment_status = 'ACTIVE'
+        AND upa.user_position_assignment_kind = 'PRIMARY'
+        AND mgr.user_position_assignment_user_id <> $1
+      ORDER BY (mgr.user_position_assignment_kind = 'PRIMARY') DESC
+      LIMIT 1`,
+    [userId],
+  );
+  return res.rows[0]?.manager_user_id ?? null;
+}
+
+export interface LeaveBalanceAvailability {
+  balanceId: string;
+  availableDays: number;
+}
+
+/**
+ * Availability = total + carryover + adjustment − used. `pending_days` is NOT
+ * consumed by this flow: the pending state lives in the approvals runtime, not
+ * as balance bookkeeping (single write point at apply).
+ */
+export async function findBalanceAvailability(
+  q: DbConnector,
+  tenantId: string,
+  userId: string,
+  leaveType: string,
+  year: number,
+  forUpdate = false,
+): Promise<LeaveBalanceAvailability | null> {
+  const res = await q.query<{ balance_id: string; available: string }>(
+    `SELECT balance_id,
+            (balance_total_days + balance_carryover_days + balance_adjustment_days - balance_used_days)::text AS available
+       FROM sys.sys_time_off_balances
+      WHERE balance_tenant_id = $1 AND balance_subject_user_id = $2
+        AND balance_leave_type = $3 AND balance_year = $4
+      ${forUpdate ? "FOR UPDATE" : ""}`,
+    [tenantId, userId, leaveType, year],
+  );
+  const row = res.rows[0];
+  return row ? { balanceId: row.balance_id, availableDays: Number(row.available) } : null;
+}
+
+export interface InsertApprovedRequestInput {
+  tenantId: string;
+  subjectUserId: string;
+  leaveType: string;
+  startDate: string;
+  endDate: string;
+  daysRequested: number;
+  halfDayStart: boolean;
+  halfDayEnd: boolean;
+  reason: string | null;
+  approverUserId: string | null;
+  approvalRequestId: string;
+}
+
+/** Written APPROVED-at-birth by the apply-effect handler (natural key = approval id → idempotent). */
+export async function insertApprovedTimeOffRequest(
+  client: PoolClient,
+  input: InsertApprovedRequestInput,
+): Promise<string> {
+  const res = await client.query<{ request_id: string }>(
+    `INSERT INTO sys.sys_time_off_requests
+       (request_tenant_id, request_natural_key, request_subject_user_id, request_leave_type,
+        request_start_date, request_end_date, request_days_requested,
+        request_half_day_start, request_half_day_end, request_reason,
+        request_status, request_approver_user_id, request_approved_at, request_metadata)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'APPROVED', $11, now(),
+             jsonb_build_object('approvalRequestId', $12::text))
+     RETURNING request_id`,
+    [
+      input.tenantId,
+      `TOR::APPROVAL::${input.approvalRequestId}`,
+      input.subjectUserId,
+      input.leaveType,
+      input.startDate,
+      input.endDate,
+      input.daysRequested,
+      input.halfDayStart,
+      input.halfDayEnd,
+      input.reason,
+      input.approverUserId,
+      input.approvalRequestId,
+    ],
+  );
+  return res.rows[0]!.request_id;
+}
+
+/** Guarded balance move: used += days, only while availability still covers the days. */
+export async function applyUsageToBalance(
+  client: PoolClient,
+  balanceId: string,
+  days: number,
+): Promise<boolean> {
+  const res = await client.query(
+    `UPDATE sys.sys_time_off_balances
+        SET balance_used_days = balance_used_days + $2,
+            updated_at = now()
+      WHERE balance_id = $1
+        AND balance_total_days + balance_carryover_days + balance_adjustment_days - balance_used_days >= $2`,
+    [balanceId, days],
+  );
+  return (res.rowCount ?? 0) > 0;
+}
+
+export interface InsertUsageTransactionInput {
+  tenantId: string;
+  balanceId: string;
+  daysAmount: number;
+  timeOffRequestId: string;
+  approvalRequestId: string;
+  performedByUserId: string | null;
+  description: string;
+}
+
+/** USAGE amounts are positive — the type carries the direction (the legacy seed rows are not a convention). */
+export async function insertUsageTransaction(
+  client: PoolClient,
+  input: InsertUsageTransactionInput,
+): Promise<void> {
+  await client.query(
+    `INSERT INTO sys.sys_leave_balance_transactions
+       (transaction_tenant_id, transaction_natural_key, transaction_balance_id,
+        transaction_type, transaction_days_amount, transaction_reference_type,
+        transaction_reference_id, transaction_description, transaction_performed_by_user_id)
+     VALUES ($1, $2, $3, 'USAGE', $4, 'TIME_OFF_REQUEST', $5, $6, $7)`,
+    [
+      input.tenantId,
+      `LBT::APPROVAL::${input.approvalRequestId}`,
+      input.balanceId,
+      input.daysAmount,
+      input.timeOffRequestId,
+      input.description,
+      input.performedByUserId,
+    ],
+  );
+}

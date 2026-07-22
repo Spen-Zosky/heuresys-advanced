@@ -42,6 +42,7 @@ import {
   RevokeSessionParamsSchema, RevokeSessionResponseSchema,
   RevokeOtherSessionsBodySchema, RevokeOtherSessionsResponseSchema,
   TimeOffRequestListQuerySchema, TimeOffRequestListResponseSchema,
+  CreateMeTimeOffRequestBodySchema, MeTimeOffRequestSubmittedSchema,
   GdprExportBundleSchema, ConsentStateResponseSchema,
   ConsentEventBodySchema, ConsentEventResponseSchema,
 } from "@heuresys/shared";
@@ -125,6 +126,14 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("leave:read:self")],
     schema: { querystring: TimeOffRequestListQuerySchema, response: { 200: TimeOffRequestListResponseSchema } },
   }, async (req) => timeOffService.listOwnRequests(selfActor(req), req.query));
+
+  // B3 (#34): ESS submission — creates a TIME_OFF_REQUEST approval (approver =
+  // direct org manager); the leave tables are written only by the apply-effect
+  // once approved. Full ActorContext (not SelfActor): createRequest applies I5.
+  app.post("/time-off/requests", {
+    preHandler: [app.verifyCsrf, requirePermission("leave:request:self")],
+    schema: { body: CreateMeTimeOffRequestBodySchema, response: { 200: MeTimeOffRequestSubmittedSchema } },
+  }, async (req) => timeOffService.submitOwnRequest(actorFromRequest(req), req.body));
 
   app.get("/positions", {
     preHandler: [requirePermission("user_position_assignment:read:self")],

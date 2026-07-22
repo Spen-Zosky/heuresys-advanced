@@ -32,7 +32,8 @@ test.describe("MVP-2a closing pages — live data", () => {
     test("/organization/org-chart renders the seeded ORG_CHART force graph", async ({ page }) => {
       await page.goto("/organization/org-chart");
       await expect(page.getByTestId("org-chart-page")).toBeVisible();
-      await expect(page.getByTestId("org-chart-count")).toContainText(/\d+\s+grafici/);
+      // F4-06 (S1025) rewrote the IT copy: "grafici ORG_CHART" → "organigrammi".
+      await expect(page.getByTestId("org-chart-count")).toContainText(/\d+\s+organigrammi/);
       // F4.4: RTL_ORG_CHART is seeded (db/seeds/org_chart_rtl_demo.sql) → the
       // interactive echarts force graph renders, not the empty-state.
       await expect(page.getByTestId("org-chart-graph")).toBeVisible({ timeout: 15_000 });

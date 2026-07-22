@@ -94,6 +94,16 @@ test.describe("MVP-3 Tappa E-UI /me/security — TOTP enrollment flow", () => {
       ),
       page.getByTestId("me-security-emailotp-enroll-button").click(),
     ]);
+    // #8 WAIT-INPUT: without a production-capable mailer the API answers
+    // 404 EMAIL_NOT_CONFIGURED by design — the flow is untestable on this
+    // env until the SMTP app-password lands. Skip honestly, never fake it.
+    if (enrollResp.status() === 404) {
+      const body = (await enrollResp.json()) as { error?: { code?: string } };
+      test.skip(
+        body.error?.code === "EMAIL_NOT_CONFIGURED",
+        "EMAIL transport non configurato (#8 WAIT-INPUT app-password Outlook)",
+      );
+    }
     expect(enrollResp.status()).toBe(201);
 
     // SECURITY assertion: the enroll response body must NOT carry the OTP code.
@@ -112,9 +122,10 @@ test.describe("MVP-3 Tappa E-UI /me/security — TOTP enrollment flow", () => {
     await expect(page.getByTestId("me-security-emailotp-cancel")).toBeVisible();
 
     // The pending factor appears in the list as EMAIL_OTP (unverified).
+    // #68 F4: the kind renders as its translated label ("Codice via email").
     const rows = page.getByTestId("me-security-factor-row");
     await expect(
-      rows.filter({ has: page.getByText("EMAIL_OTP") }).first(),
+      rows.filter({ has: page.getByText("Codice via email") }).first(),
     ).toBeVisible();
 
     // Cancel restores the enroll buttons.

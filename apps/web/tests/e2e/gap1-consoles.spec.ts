@@ -64,7 +64,9 @@ test.describe("Process-Owner console — live process catalog", () => {
     await expect(page.getByTestId("raci-drill-hint")).toBeVisible();
     await page
       .getByTestId("process-owner-row")
-      .filter({ hasText: "Human Capital Management" })
+      // ADR-0029 (S1024) localized the catalog in-row: the process is named in
+      // Italian on the default locale ("Human Capital Management" pre-dated it).
+      .filter({ hasText: "Gestione del capitale umano" })
       .getByTestId("process-owner-raci-btn")
       .click();
     // Live data from the by-process endpoint: a non-empty count + at least one OU row.

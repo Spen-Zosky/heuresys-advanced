@@ -54,7 +54,7 @@ test.describe("MVP-4 §2.5 WebAuthn passkey enroll — live data", () => {
     expect(verifyResp.status()).toBe(200);
 
     // a verified WEBAUTHN factor now shows in the list.
-    const passkeyRow = page.getByTestId("me-security-factor-row").filter({ hasText: "WEBAUTHN" });
+    const passkeyRow = page.getByTestId("me-security-factor-row").filter({ hasText: "Passkey" });
     await expect(passkeyRow.first()).toBeVisible({ timeout: 10_000 });
 
     // cleanup: delete the passkey factor (the row's delete uses a confirm dialog).

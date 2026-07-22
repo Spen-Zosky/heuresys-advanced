@@ -76,7 +76,10 @@ test.describe("MVP-2a ESS pages — live data", () => {
   test("/me/career renders", async ({ page }) => {
     await page.goto("/me/career");
     await expect(page.getByTestId("me-career-page")).toBeVisible();
-    await expect(page.getByTestId("me-career-count")).toContainText(/\d+\s+obiettivi/);
+    // S1011 F3b turned the page into sub-tabs (no count badge since then) —
+    // assert the current contract: the Obiettivi tab renders real goal data.
+    await expect(page.getByTestId("career-tab-obiettivi")).toBeVisible();
+    await expect(page.getByTestId("career-goal-status")).toBeVisible({ timeout: 15_000 });
   });
 
   test("/me/certifications renders", async ({ page }) => {

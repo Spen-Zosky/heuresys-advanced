@@ -13,7 +13,9 @@ const REFRESH_COOKIE = "hrx_refresh";
 // `/showcase` is gated independently in apps/web/src/app/showcase/layout.tsx
 // (env flag + non-production check). It must be public at the middleware level
 // so Product Owner brand review does not require a login.
-const PUBLIC_PATHS = ["/login", "/_next", "/api", "/showcase", "/privacy", "/investors", "/demo"];
+// `/whistleblowing` MUST stay public: the D.Lgs 24/2023 channel is anonymous
+// by law — forcing a login would defeat it (#51 E1).
+const PUBLIC_PATHS = ["/login", "/_next", "/api", "/showcase", "/privacy", "/investors", "/demo", "/whistleblowing"];
 
 function isPublic(pathname: string): boolean {
   if (pathname === "/") return true; // public marketing landing (front door)

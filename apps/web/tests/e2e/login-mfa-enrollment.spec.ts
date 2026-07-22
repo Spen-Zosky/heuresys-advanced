@@ -245,7 +245,7 @@ test.describe("MVP-4 par.2.5 #4 /login — mandatory-MFA enrollment gate", () =>
           await page.getByTestId("login-mfa-passkey").click().catch(() => {});
           await page.goto("/me/security", { waitUntil: "domcontentloaded", timeout: 60_000 }).catch(() => {});
         }
-        const passkeyRow = page.getByTestId("me-security-factor-row").filter({ hasText: "WEBAUTHN" });
+        const passkeyRow = page.getByTestId("me-security-factor-row").filter({ hasText: "Passkey" });
         await expect(passkeyRow.first()).toBeVisible({ timeout: 30_000 });
         page.on("dialog", (d) => void d.accept());
         const [delResp] = await Promise.all([

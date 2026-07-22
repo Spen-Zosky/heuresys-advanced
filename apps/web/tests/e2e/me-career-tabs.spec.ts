@@ -34,7 +34,9 @@ test.describe("/me/career sub-tabs — live data (F3b)", () => {
     // Rischio & Successione — own flight-risk band is LOW (real score)
     await page.getByTestId("career-tab-rischio").click();
     await expect(page.getByTestId("career-flight-risk")).toBeVisible();
-    await expect(page.getByTestId("career-flight-band")).toContainText("LOW");
+    // #68 F4: the band renders as a TRANSLATED label now (enum label layer),
+    // and the live band follows the real score — assert a valid IT label, not a raw code.
+    await expect(page.getByTestId("career-flight-band")).toContainText(/Basso|Medio|Alto|Critico/);
     await expect(page.getByTestId("career-succession")).toBeVisible();
   });
 });

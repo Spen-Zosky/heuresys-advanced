@@ -68,6 +68,10 @@ export default function ProcessOwnerPage() {
   const processes = usePaginatedList<ProcessRow>({
     queryKey: ["blueprint-processes", "list"],
     path: "/v1/blueprint-processes",
+    // The blueprint process catalog is a bounded reference set (~40 rows) and the
+    // console sorts it by ordinal client-side — a 25-row first page would hide the
+    // tail processes (and their RACI drill) behind the pager for no gain.
+    initialPageSize: 100,
   });
   const rows = useMemo<ProcessRow[]>(
     () => [...processes.rows].sort((a, b) => a.ordinal - b.ordinal),

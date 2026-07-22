@@ -1,0 +1,773 @@
+entity_table,entity_id,field,locale,text,source
+sys_kpi_definitions,7789dc5b-e271-4728-9279-3ee97425b54d,name,en,AML alert resolution rate,LLM
+sys_kpi_definitions,c21a28ca-9aae-49f0-92a9-bd4e5713e028,name,en,AUM growth rate,LLM
+sys_kpi_definitions,b5013ad7-885b-414e-88ef-5b79e368041c,name,en,Average disbursement time,LLM
+sys_kpi_definitions,93dda465-08fa-4e36-b4f5-a33943bac4b3,name,en,Default rate,LLM
+sys_kpi_definitions,9a66d974-aa96-42f3-b62c-f5adf5efea8d,name,en,NPL ratio,LLM
+sys_kpi_definitions,8b2a59e6-fbf3-4935-ae1a-bfd10562e2ad,name,en,Disbursed volume,LLM
+sys_kpi_definitions,dd6429f9-87c6-49c4-8767-e522328c8015,name,en,Processing time,LLM
+sys_kpi_definitions,afbe8314-ce3c-49cd-814f-e12c8804b459,name,en,Error rate,LLM
+sys_kpi_definitions,7cc4e980-514a-4890-b47c-aec60d40aeb0,name,en,Transaction volume,LLM
+sys_kpi_definitions,64d0e624-a3a4-4877-ac5e-241f67fb29ab,name,en,STR reports,LLM
+sys_kpi_definitions,951d06ae-39cf-4ac9-b392-94d99a8b6bbc,name,en,Audit response time,LLM
+sys_kpi_definitions,34098885-9a78-444d-87ef-8f2d7fc2f5d8,name,en,Compliance rate,LLM
+sys_kpi_definitions,efd9b2ae-4410-477a-a877-e3e9ea9b42eb,name,en,Training completed,LLM
+sys_kpi_definitions,8e8708f7-d76f-48e8-b56f-819c5c7b5738,name,en,Time-to-hire,LLM
+sys_kpi_definitions,d8ecc957-4500-4037-8a4e-fcfbc8216b5e,name,en,Retention rate,LLM
+sys_kpi_definitions,524a98cd-8aa5-4d24-b94e-347ac6147a07,name,en,Engagement score,LLM
+sys_kpi_definitions,2269f0f6-7431-4646-a7d4-5e4180da3ce5,name,en,Days to close,LLM
+sys_kpi_definitions,10e3e33f-67f1-4296-bb1a-1d4707938eab,name,en,Accuracy rate,LLM
+sys_kpi_definitions,92ec0157-a4f2-40bd-bd40-0efce63002ee,name,en,Cost per transaction,LLM
+sys_kpi_definitions,7ebb9bb3-bbc2-4e9f-83f3-6057dd5e0690,name,en,VaR,LLM
+sys_kpi_definitions,f9e4c4a8-3315-455f-92fd-7f8530a8f6bf,name,en,Expected Loss,LLM
+sys_kpi_definitions,4f808cce-0e6e-4922-bd22-7745f4c4f030,name,en,Risk-weighted assets,LLM
+sys_kpi_definitions,20e2eb52-d904-4377-b0c4-05faed60efdb,name,en,Stress test coverage,LLM
+sys_kpi_definitions,563ca428-ec74-4f5b-8af0-a6e30b77d09c,name,en,AUM growth,LLM
+sys_kpi_definitions,2a9db81b-e705-421d-a91e-01e9ea29c4e5,name,en,Client satisfaction,LLM
+sys_kpi_definitions,3af00155-9e6e-43be-b393-a11143bdd3d8,name,en,Revenue per advisor,LLM
+sys_kpi_definitions,75122757-e244-47b8-ab27-b0764720c266,name,en,Uptime,LLM
+sys_kpi_definitions,92dd9c41-32cf-4170-b537-b7521dbb82ab,name,en,Mean time to resolve,LLM
+sys_kpi_definitions,79c0ba59-48c5-441e-a247-1a0503534502,name,en,Change success rate,LLM
+sys_kpi_definitions,eb3b467d-58a2-4564-b586-ab6b80bfe51f,name,en,KYC verification time,LLM
+sys_kpi_definitions,a85def34-951f-4174-8933-7ade83e57a8a,name,en,AML alert resolution time,LLM
+sys_kpi_definitions,baebe8af-e417-44f4-baba-ba755a1a77cd,name,en,Customer activation rate,LLM
+sys_kpi_definitions,dfe3c511-cb2a-4dee-934f-842870710f4c,name,en,Onboarding NPS,LLM
+sys_kpi_definitions,c94df0af-8ba6-4b70-a0f0-65d8700ee215,name,en,Liquidity Coverage Ratio (LCR),LLM
+sys_kpi_definitions,dc5e379f-a18e-4096-9fc7-22316e139bcc,name,en,Net Stable Funding Ratio (NSFR),LLM
+sys_kpi_definitions,8cf636b1-2818-4c5c-8e1b-9fab9ab27a4d,name,en,FX trading P&L variance,LLM
+sys_kpi_definitions,8375a18c-db1b-45d0-ac7d-68f33cda2efa,name,en,Liquidity buffer days,LLM
+sys_kpi_definitions,c21c5d65-dc30-4f86-89ae-049a2144163d,name,en,High-severity audit findings,LLM
+sys_kpi_definitions,928056e6-adc6-4e6c-8913-afd54a50eabe,name,en,Audit plan completion rate,LLM
+sys_kpi_definitions,9087f6fd-c340-4675-8f82-78c02bc45008,name,en,Findings closure time,LLM
+sys_kpi_definitions,dacf1ecc-b265-4340-a0af-ab53fb9bdbd8,name,en,Repeat findings rate,LLM
+sys_kpi_definitions,e9a51b1a-0a63-4d3b-acda-c0686ef056ed,name,en,Authorization time,LLM
+sys_kpi_definitions,244ef50b-9554-4ea1-87ab-051c82762485,name,en,Production estimate accuracy,LLM
+sys_kpi_definitions,689366a4-d9ca-4ef9-a8ef-daaaeedfd879,name,en,Design cost to CAPEX ratio,LLM
+sys_kpi_definitions,9441132e-8f6e-4bd6-8c1a-d4d45742e3c4,name,en,Schedule adherence,LLM
+sys_kpi_definitions,4c85f34e-287f-44c7-ac73-d1e53bdf943a,name,en,Construction site injuries,LLM
+sys_kpi_definitions,cdc09eb4-c1a9-4495-9a99-b00c4049966c,name,en,Budget variance,LLM
+sys_kpi_definitions,2f1751dc-aed7-43f4-ac3f-f928eb2a2add,name,en,Plant availability,LLM
+sys_kpi_definitions,0e600380-a0fe-46e2-a08a-e2a96bdc84b8,name,en,MTTR (Mean Time To Repair),LLM
+sys_kpi_definitions,c07acb9b-9b9e-47db-946d-854fecb7d8cd,name,en,Unplanned failures,LLM
+sys_kpi_definitions,8a996cea-28da-49b3-b99e-9d68e5cc9980,name,en,Performance Ratio,LLM
+sys_kpi_definitions,cb11a79e-c24d-47cf-b660-d2f3aae73a9e,name,en,Anomaly detection time,LLM
+sys_kpi_definitions,3b7e818b-ccea-407d-af17-d0f5c08e6f0f,name,en,Specific yield,LLM
+sys_kpi_definitions,8da26685-5dae-4cf3-9040-475d92b8d055,name,en,Churn rate,LLM
+sys_kpi_definitions,e0e79f5a-0efc-4f9b-b4a6-7e4ece641f62,name,en,Customer NPS,LLM
+sys_kpi_definitions,ce7b9565-7167-4bfc-a15f-5344e55b159a,name,en,Average ticket resolution time,LLM
+sys_kpi_definitions,f14f7d62-a7f9-4d8f-846e-9e52f313aceb,name,en,CO2 reduction,LLM
+sys_kpi_definitions,38f2ef9d-bd8b-45cd-a794-2b5e036bc93c,name,en,Regulatory compliance,LLM
+sys_kpi_definitions,a6126154-6406-4204-9408-c78604714415,name,en,ESG rating,LLM
+sys_kpi_definitions,8da94cb9-6fab-4c8f-8405-d0b6045b0345,name,en,Average sales spread,LLM
+sys_kpi_definitions,4f13c8a1-ace8-43ea-aca1-287671a314f3,name,en,Production forecast error,LLM
+sys_kpi_definitions,1717b371-777d-46d5-a24b-1cfe7b56589c,name,en,Imbalance penalties,LLM
+sys_kpi_definitions,7757e534-a6a8-45eb-af6b-08271b19a998,name,en,Procurement lead time,LLM
+sys_kpi_definitions,6c0fae05-3e5c-44d3-a3cb-d15399e56067,name,en,Supply compliance rate,LLM
+sys_kpi_definitions,b9fc9a8b-e640-44b0-b455-5077938d88a4,name,en,Negotiation savings,LLM
+sys_kpi_definitions,1c1a6818-fe0b-44af-8ab6-2f8d8c03c354,name,en,OEE (Overall Equipment Effectiveness),LLM
+sys_kpi_definitions,53c2b55a-34f4-46ec-b7c1-e0ab3344f8a7,name,en,Production scrap,LLM
+sys_kpi_definitions,c0f7c924-c25d-4e16-815e-cd384629b7ef,name,en,Production plan adherence,LLM
+sys_kpi_definitions,ffd80cad-193d-4239-9ef5-c040755bb903,name,en,Critical non-conformities,LLM
+sys_kpi_definitions,518510ae-905e-4a63-8f93-f5a7590ce68c,name,en,NC closure time,LLM
+sys_kpi_definitions,3b8ba215-e46f-47e4-be5f-2819caddbf4b,name,en,Microbiological test compliance,LLM
+sys_kpi_definitions,7d4c403b-909c-45b3-8ff9-0136c25e11cf,name,en,OTIF (On Time In Full),LLM
+sys_kpi_definitions,d8ec09ab-0603-44ca-b5d1-560c5bd5128c,name,en,Inventory turnover,LLM
+sys_kpi_definitions,9dbd6d8c-a363-4e72-9f51-ea64418bd771,name,en,Logistics cost to revenue ratio,LLM
+sys_kpi_definitions,18eb2a25-5404-448c-8a4b-24c72be7189e,name,en,Revenue per customer,LLM
+sys_kpi_definitions,81f05640-4205-4779-beed-beec438bd456,name,en,Trade promotion ROI,LLM
+sys_kpi_definitions,8932cdfd-84b8-40c7-b401-964c6cc44b4d,name,en,Distribution penetration,LLM
+sys_kpi_definitions,43e87c50-4618-489d-bf49-793a82130c80,name,en,Time to market,LLM
+sys_kpi_definitions,349d4bea-07a2-4ad9-817f-edc8d45f515a,name,en,Launch success rate,LLM
+sys_kpi_definitions,b03101e4-11bc-416c-89b1-0cf3905631ef,name,en,Revenue from innovation,LLM
+sys_kpi_definitions,9c0ed0b7-0d5a-4e24-9928-5b3dde06806a,name,en,BRC/IFS audit score,LLM
+sys_kpi_definitions,d8819294-3450-448c-9ae5-8f46e27fbc28,name,en,Open NCs from audits,LLM
+sys_kpi_definitions,5421bd44-ea20-483c-82e0-b2fa2fead114,name,en,HACCP training completed,LLM
+sys_kpi_definitions,8c7837c4-c710-4f1b-8dbd-1687ec7e2c89,name,en,Environmental Compliance Score,LLM
+sys_kpi_definitions,96cf54f0-7e2a-4aed-b386-3a8ac81d700c,name,en,Customer satisfaction,LLM
+sys_kpi_definitions,7934f51c-78da-452f-a64b-2b86b6033219,name,en,Customer satisfaction,LLM
+sys_kpi_definitions,ce181145-6e26-4c2f-859b-98e945f7f537,name,en,Customer satisfaction,LLM
+sys_kpi_definitions,2d561108-c532-4787-833b-f2640ec11600,name,en,Customer satisfaction,LLM
+sys_kpi_definitions,9e3039b4-5ea1-4dee-9b53-a3c3a52df80c,name,en,Customer satisfaction,LLM
+sys_kpi_definitions,d7f4b7d7-866c-4a73-a124-47745443db43,name,en,Customer satisfaction,LLM
+sys_kpi_definitions,c74d1585-f153-49e0-a370-281a88ad6433,name,en,Customer satisfaction,LLM
+sys_kpi_definitions,e6319d12-9d21-452e-bb45-75cfd260812a,name,en,Customer satisfaction,LLM
+sys_kpi_definitions,4f11b640-8d2d-4cc0-b907-3f37e123a25d,name,en,Customer satisfaction,LLM
+sys_kpi_definitions,66dfa535-75ab-440b-bcd1-9d7252233712,name,en,Product Defect Rate,LLM
+sys_kpi_definitions,bab2ea09-f789-457e-a5df-4fa3e3fd18af,name,en,Energy Savings Achieved (MWh),LLM
+sys_kpi_definitions,ac327ac8-314a-40f4-b45f-138026e23002,name,en,GHG Reduction Target %,LLM
+sys_kpi_definitions,5323434a-800f-4360-b75c-2d8683540291,name,en,HACCP Compliance Score,LLM
+sys_kpi_definitions,50f7f9ba-bd5c-44bf-a812-095df99023e7,name,en,Development and innovation,LLM
+sys_kpi_definitions,6b01580c-a2a4-430e-a678-04e50ed01e18,name,en,Development and innovation,LLM
+sys_kpi_definitions,826afa69-fdac-4dd7-a635-0b3863d59966,name,en,Development and innovation,LLM
+sys_kpi_definitions,41d1574d-a537-4ac5-b510-3a014eca3afc,name,en,Development and innovation,LLM
+sys_kpi_definitions,b2e2a3c0-6114-4eec-98d6-01de1a53b5c9,name,en,Development and innovation,LLM
+sys_kpi_definitions,33c3b8b6-b38f-407d-8f77-2bf0e469a016,name,en,Development and innovation,LLM
+sys_kpi_definitions,391134f4-5e64-45b6-8ef9-5aa5401335d7,name,en,Development and innovation,LLM
+sys_kpi_definitions,00f2cac4-7e40-41d3-9c7d-64fdea9968e7,name,en,Development and innovation,LLM
+sys_kpi_definitions,26e13aa5-5395-497e-9691-7d102a8097a2,name,en,Development and innovation,LLM
+sys_kpi_definitions,4f35bf99-fd95-4f67-977f-5011f70b0667,name,en,Retail customer NPS 1,LLM
+sys_kpi_definitions,c3c98d24-7311-42a6-a542-469b64cc3d20,name,en,Average account opening time 1,LLM
+sys_kpi_definitions,aacba42e-c1e8-401c-8303-c0fa2924d6d3,name,en,Digital transaction volumes 1,LLM
+sys_kpi_definitions,9c2ee389-ae43-47b9-8f37-87dc3e3dd564,name,en,Customer satisfaction index 1,LLM
+sys_kpi_definitions,63c8ef10-50d5-403c-8fd8-c8f1db7b92b6,name,en,Customer retention rate 1,LLM
+sys_kpi_definitions,08d60b05-98c6-4812-8ca1-bc6529e8cd56,name,en,Number of cases handled 1,LLM
+sys_kpi_definitions,40f2175a-8a43-44c8-af84-4197b212ba8c,name,en,Cost per acquisition 1,LLM
+sys_kpi_definitions,37ff5721-77de-40dd-8af1-6c84cc1a9d4c,name,en,Revenue per FTE 1,LLM
+sys_kpi_definitions,3e0e4f43-b873-4f75-af98-65ecf5b8c4e3,name,en,Operational error rate 1,LLM
+sys_kpi_definitions,95bcbd6f-6f22-46f3-b3a0-857d65fd7cbb,name,en,Turnover Rate,LLM
+sys_kpi_definitions,d6eda197-23ba-460d-8fb5-416163bc6416,name,en,AML/KYC compliance score 1,LLM
+sys_kpi_definitions,bb76d9fd-1a35-4466-b87a-1a28937c38a5,name,en,Average complaint resolution time 1,LLM
+sys_kpi_definitions,8c658150-3b92-41f7-ad3e-6985239299b5,name,en,Cross-selling ratio 1,LLM
+sys_kpi_definitions,ca23879c-0eb6-4d9e-9ffd-dee6b7b9098e,name,en,Intermediation margin 1,LLM
+sys_kpi_definitions,ab0ea716-67c9-413e-89c3-8baf6d1e1849,name,en,Loan coverage ratio 1,LLM
+sys_kpi_definitions,ff4d5037-3f38-4c96-87d7-c30e45818434,name,en,Lead conversion rate 2,LLM
+sys_kpi_definitions,a87e076b-511b-4fa2-a0ad-66e9c03418d8,name,en,Retail customer NPS 2,LLM
+sys_kpi_definitions,d06267a8-27ff-4491-9da5-2ee1fc82a58e,name,en,Average account opening time 2,LLM
+sys_kpi_definitions,8990c542-3c8e-48a3-867d-e806886cb898,name,en,Digital transaction volumes 2,LLM
+sys_kpi_definitions,13311071-bad0-49a3-8403-aa25b440e943,name,en,Customer satisfaction index 2,LLM
+sys_kpi_definitions,158aa25b-c4d5-4fd0-8731-45c6d1d8db51,name,en,Employee Satisfaction,LLM
+sys_kpi_definitions,f4d9b080-5871-464b-9cc3-89c4898a98a3,name,en,Customer retention rate 2,LLM
+sys_kpi_definitions,b585c3e0-ab4a-4ee9-8a7b-0648d61239ca,name,en,Number of cases handled 2,LLM
+sys_kpi_definitions,7f5fa177-0463-4d1c-a1cb-4eb9eed2d819,name,en,Cost per acquisition 2,LLM
+sys_kpi_definitions,f3a19afb-8eff-45f5-9bcf-36a966b3b973,name,en,Revenue per FTE 2,LLM
+sys_kpi_definitions,a2d43b11-2356-418a-9e1d-ad59f84fd557,name,en,Operational error rate 2,LLM
+sys_kpi_definitions,665de2a5-9f49-46e3-b17e-11a2b9c8d267,name,en,AML/KYC compliance score 2,LLM
+sys_kpi_definitions,49444935-fe17-437f-9127-c61931463454,name,en,Average complaint resolution time 2,LLM
+sys_kpi_definitions,e50233c6-9943-4e41-aef9-f91380a5728e,name,en,Cross-selling ratio 2,LLM
+sys_kpi_definitions,0137b6fb-4fb4-4cc0-ac30-b3ab85f8b708,name,en,Intermediation margin 2,LLM
+sys_kpi_definitions,f7879d76-bb21-41e4-a4d6-44af4066fb4c,name,en,Loan coverage ratio 2,LLM
+sys_kpi_definitions,b301c2dc-7c2a-4bdc-abda-1c55b32bcd17,name,en,Training Hours,LLM
+sys_kpi_definitions,8c7a9513-8baf-4792-9212-95921b52f782,name,en,Lead conversion rate 3,LLM
+sys_kpi_definitions,5beb2353-bd67-4a33-9d17-ecf94c881283,name,en,Retail customer NPS 3,LLM
+sys_kpi_definitions,42315326-7d4b-4a0c-adb6-6812bfe17298,name,en,Average account opening time 3,LLM
+sys_kpi_definitions,55ea9af2-a21f-434e-a37d-c593146b60da,name,en,Digital transaction volumes 3,LLM
+sys_kpi_definitions,a2e1e206-c705-4e6c-b8c2-817dcb63d1b4,name,en,Customer satisfaction index 3,LLM
+sys_kpi_definitions,64a6d1b5-7d3c-403c-901c-4b8fae5b39f1,name,en,Customer retention rate 3,LLM
+sys_kpi_definitions,075d8a6f-626f-4a2d-bcfa-7d3d8f49b364,name,en,Number of cases handled 3,LLM
+sys_kpi_definitions,2cf7219d-035c-479b-99b0-a2c5c1f267b2,name,en,Cost per acquisition 3,LLM
+sys_kpi_definitions,7f8116ba-feb3-472c-8ba8-b63325bdf49f,name,en,Revenue per FTE 3,LLM
+sys_kpi_definitions,22ad21da-4d3d-41fd-9336-243fa8fd99d5,name,en,Operational error rate 3,LLM
+sys_kpi_definitions,4c640d55-8960-4a64-93dc-07e257f1c07d,name,en,Goal Completion,LLM
+sys_kpi_definitions,a480cdb8-4332-4438-967d-c3b551f70d6c,name,en,AML/KYC compliance score 3,LLM
+sys_kpi_definitions,5846f7c9-865b-420a-9b56-59d595ab6107,name,en,Average complaint resolution time 3,LLM
+sys_kpi_definitions,08d0f891-7a70-4266-82c6-c3fd262ff1a9,name,en,Cross-selling ratio 3,LLM
+sys_kpi_definitions,0cf0a429-7b93-4088-a96a-27db01af6117,name,en,Intermediation margin 3,LLM
+sys_kpi_definitions,1292e91c-629f-4ba7-b3a0-6537e2694512,name,en,Loan coverage ratio 3,LLM
+sys_kpi_definitions,855b6149-ceac-45bd-9ac4-b92ea5d8bb85,name,en,Lead conversion rate 4,LLM
+sys_kpi_definitions,c0e6253b-1783-47c6-9971-e33fe9ab82d7,name,en,Retail customer NPS 4,LLM
+sys_kpi_definitions,96e820f8-d5e4-4798-81a9-6edfb1ba308c,name,en,Average account opening time 4,LLM
+sys_kpi_definitions,7cd759a6-9497-4af3-99fd-d1a84d044c31,name,en,Digital transaction volumes 4,LLM
+sys_kpi_definitions,e57a0f71-ca11-4649-bacb-5e0c8a79d53a,name,en,Customer satisfaction index 4,LLM
+sys_kpi_definitions,f78fbe0d-05f1-4d35-b61a-9087138d3560,name,en,NPL Ratio,LLM
+sys_kpi_definitions,8e1feece-13ac-4e14-a197-b503fc294b2b,name,en,Customer retention rate 4,LLM
+sys_kpi_definitions,fc2948ef-e325-4eb0-b71d-29c520f42628,name,en,Number of cases handled 4,LLM
+sys_kpi_definitions,dc3e4ff2-3daa-444b-ae78-43d22c1aa622,name,en,Cost per acquisition 4,LLM
+sys_kpi_definitions,4add9438-3d53-42cf-86e1-d094632ea82e,name,en,Revenue per FTE 4,LLM
+sys_kpi_definitions,7cf3e8af-192e-4c84-8c06-b66f03688b41,name,en,Operational error rate 4,LLM
+sys_kpi_definitions,6c451520-702c-46e5-9c07-cb64b96aa6bd,name,en,AML/KYC compliance score 4,LLM
+sys_kpi_definitions,b994b384-ff67-4ac9-98b5-6d463491fe36,name,en,Average complaint resolution time 4,LLM
+sys_kpi_definitions,3a53b23e-4063-47bb-ac86-3c50d05a606c,name,en,Cross-selling ratio 4,LLM
+sys_kpi_definitions,155aed3f-76cf-4a83-8680-4822ac88e7ae,name,en,Intermediation margin 4,LLM
+sys_kpi_definitions,4da21f50-a17d-4ec2-8571-8b9f07c1aea6,name,en,Loan coverage ratio 4,LLM
+sys_kpi_definitions,1e79b4bc-6b92-4080-b54b-d03580a38f31,name,en,Cost-Income Ratio,LLM
+sys_kpi_definitions,6653292f-d0a9-44fc-b571-9e0e686ea5a2,name,en,Lead conversion rate 5,LLM
+sys_kpi_definitions,ccdd618e-b09e-4fb9-b38d-7f26d7d244a8,name,en,Retail customer NPS 5,LLM
+sys_kpi_definitions,25dcd288-2549-43fe-aa22-deaec71f3dd8,name,en,Average account opening time 5,LLM
+sys_kpi_definitions,7338451c-dcaa-4ff3-bae6-8396f9985f4b,name,en,Digital transaction volumes 5,LLM
+sys_kpi_definitions,eb917760-1172-4c14-880b-36cad969db0c,name,en,Customer satisfaction index 5,LLM
+sys_kpi_definitions,14fd79a2-f46e-4462-8de4-1a2ea949e6e3,name,en,Customer retention rate 5,LLM
+sys_kpi_definitions,0af4c629-9b0f-4e21-9788-565b4073fa31,name,en,Number of cases handled 5,LLM
+sys_kpi_definitions,3837b337-9adb-4d81-afc6-a2a7894a05e7,name,en,Cost per acquisition 5,LLM
+sys_kpi_definitions,674da608-e9d9-4797-9f54-eff83731fdb7,name,en,Revenue per FTE 5,LLM
+sys_kpi_definitions,03cb6b20-5fe5-40ab-a51e-eae57528dbbc,name,en,Operational error rate 5,LLM
+sys_kpi_definitions,d05477b8-537a-4221-9137-eac905685cad,name,en,Customer NPS,LLM
+sys_kpi_definitions,8713af9b-fe8e-4c70-83b1-5606b15122ec,name,en,AML/KYC compliance score 5,LLM
+sys_kpi_definitions,56e6cc6b-f7eb-4829-a3f7-c94230e749fa,name,en,Average complaint resolution time 5,LLM
+sys_kpi_definitions,baf7d25d-88a2-4476-a6b0-3c1663a2f2da,name,en,Cross-selling ratio 5,LLM
+sys_kpi_definitions,47a6e316-a47f-4dc2-bde6-00c385fa1770,name,en,Intermediation margin 5,LLM
+sys_kpi_definitions,871b9601-5690-4377-a738-2113038ce329,name,en,Loan coverage ratio 5,LLM
+sys_kpi_definitions,ccbdca3c-3779-4d93-8c18-6b5fe9202c44,name,en,Lead conversion rate 6,LLM
+sys_kpi_definitions,fa241fac-cc52-4125-aa99-35a8643c6bd9,name,en,Retail customer NPS 6,LLM
+sys_kpi_definitions,111718e8-345c-4f4d-b75d-55baf19867d2,name,en,Average account opening time 6,LLM
+sys_kpi_definitions,2543c518-5ea2-4276-9e49-23d21a143b58,name,en,Digital transaction volumes 6,LLM
+sys_kpi_definitions,3a45067f-058c-4664-9cb5-3ed783331859,name,en,Customer satisfaction index 6,LLM
+sys_kpi_definitions,f2a19342-1a9c-4a11-acc2-12704f20eb57,name,en,Cross-Selling Ratio,LLM
+sys_kpi_definitions,f2d037a0-d25f-4f24-b99a-342b9fc2e384,name,en,Customer retention rate 6,LLM
+sys_kpi_definitions,fb5615b1-f504-4790-86fd-781e70a4f8b8,name,en,Number of cases handled 6,LLM
+sys_kpi_definitions,d13166c3-60ae-4b37-8235-0f4a47b00b6d,name,en,Cost per acquisition 6,LLM
+sys_kpi_definitions,ef237e08-726d-43fe-8ac6-d445ffd9b6a5,name,en,Revenue per FTE 6,LLM
+sys_kpi_definitions,056d3b74-fd19-407d-8b03-942102e98c47,name,en,Operational error rate 6,LLM
+sys_kpi_definitions,a956bc8c-d64f-4379-9ef0-ed43ecf91cd5,name,en,AML/KYC compliance score 6,LLM
+sys_kpi_definitions,8519b8a7-9f83-447a-a2aa-ac1141b314a3,name,en,IT Uptime,LLM
+sys_kpi_definitions,daffd79a-204e-44e3-9ddc-4809b4cb2ecf,name,en,Security Incidents,LLM
+sys_kpi_definitions,590443ac-261d-4d29-ac77-93af0777996c,name,en,Compliance Score,LLM
+sys_kpi_definitions,88d82622-7c50-48ef-a529-df551e02f029,name,en,Audit Findings,LLM
+sys_kpi_definitions,5ff6d1ba-2cf1-465e-851f-066b342413a6,name,en,Time to Hire,LLM
+sys_kpi_definitions,559d5c59-cadf-4cda-8c10-8d80f48c6668,name,en,Revenue per Employee,LLM
+sys_kpi_definitions,9c51a914-a552-49b1-8e57-de595ed0d07d,name,en,Process Automation,LLM
+sys_kpi_definitions,2319ee0d-8ad8-448f-875f-e6467d02837c,name,en,Productivity,LLM
+sys_kpi_definitions,7df4588d-d836-42d8-bdc0-f90660290790,name,en,Quality,LLM
+sys_kpi_definitions,bea71ff9-9d41-47ce-ad6f-1cd87e091384,name,en,Deadlines,LLM
+sys_kpi_definitions,033a9432-3069-4830-8d2d-2486ee1c9898,name,en,Customers,LLM
+sys_kpi_definitions,f3868368-7add-442f-94c3-da86395594a0,name,en,New Product Success Rate,LLM
+sys_kpi_definitions,cb594fe3-a942-4c11-8158-7be88968e9a5,name,en,Overall Equipment Effectiveness,LLM
+sys_kpi_definitions,2bde9584-2611-48dd-a0f4-b9e5d072fd02,name,en,Operational efficiency,LLM
+sys_kpi_definitions,a0117bc8-ec23-415c-9403-456a1a9dce7e,name,en,Operational efficiency,LLM
+sys_kpi_definitions,1f8a5f20-a607-4fcd-a979-9ded2fe07e33,name,en,Operational efficiency,LLM
+sys_kpi_definitions,c32585ba-24fa-48ab-9850-a469a82041b2,name,en,Operational efficiency,LLM
+sys_kpi_definitions,8646b09f-0cbb-417d-a87e-9357ba55cf00,name,en,Operational efficiency,LLM
+sys_kpi_definitions,75c6abb7-4774-4167-9a65-a8c0abf09803,name,en,Operational efficiency,LLM
+sys_kpi_definitions,52552ca4-3005-4378-a4a0-605f2d2ce37e,name,en,Operational efficiency,LLM
+sys_kpi_definitions,a79a986a-3029-434b-82dc-ec3b1583e1c8,name,en,Operational efficiency,LLM
+sys_kpi_definitions,68a932b0-4ec4-4705-8dc5-d8d39fed124c,name,en,Operational efficiency,LLM
+sys_kpi_definitions,4a1d7265-3c58-4594-b00f-57a03b5eb438,name,en,Team collaboration,LLM
+sys_kpi_definitions,544a4456-3229-4d34-b01a-86e7c8d16f6a,name,en,Team collaboration,LLM
+sys_kpi_definitions,67dd45fd-adc1-4242-9a94-ae9bab5ab8b3,name,en,Team collaboration,LLM
+sys_kpi_definitions,942dc5eb-16b1-4ec3-9e89-7c36b92b82f4,name,en,Team collaboration,LLM
+sys_kpi_definitions,d3aff16f-8140-4f61-a3b3-c8958d27aa35,name,en,Team collaboration,LLM
+sys_kpi_definitions,05910e14-b7d2-4d69-8c09-417861287fbd,name,en,Team collaboration,LLM
+sys_kpi_definitions,961a2e7f-8806-49d3-b615-03e77eb0659c,name,en,Team collaboration,LLM
+sys_kpi_definitions,b12a0e3b-02b9-4e1d-bec7-7157fbd5eee2,name,en,Team collaboration,LLM
+sys_kpi_definitions,8e3173f2-535f-499c-b38c-867a8e4fd6f4,name,en,Team collaboration,LLM
+sys_kpi_definitions,f7d35067-7086-4a2b-b5c3-4a2be4b482d1,name,en,Work quality,LLM
+sys_kpi_definitions,ed0e9374-9fd4-44bb-b9a3-2bfcd2735443,name,en,Work quality,LLM
+sys_kpi_definitions,8eb06f5c-a200-4ad5-888b-af9787e3f5a1,name,en,Work quality,LLM
+sys_kpi_definitions,ae28575d-587d-49ce-bb42-9c9dd9026abb,name,en,Work quality,LLM
+sys_kpi_definitions,15fb56ff-38c2-43ca-b9e9-4cb73ced1336,name,en,Work quality,LLM
+sys_kpi_definitions,4cd57afa-7c61-4c01-951e-dbd5f130e486,name,en,Work quality,LLM
+sys_kpi_definitions,b06689f5-3420-4f1e-9d16-4fb9a945e2e5,name,en,Work quality,LLM
+sys_kpi_definitions,4dc57958-10e0-4940-905a-7f53eaca1628,name,en,Work quality,LLM
+sys_kpi_definitions,f66a5313-349a-4c3c-bddf-e68ad32834d1,name,en,Work quality,LLM
+sys_kpi_definitions,f0ed1bcd-104c-489b-a588-11eb8109f856,name,en,Reporting accuracy,LLM
+sys_kpi_definitions,daad6327-44a4-4d8b-a3dc-03eefd5cffff,name,en,Risk assessment accuracy,LLM
+sys_kpi_definitions,2435d5ad-3e5e-4d54-8671-207e639301a8,name,en,Transaction accuracy rate,LLM
+sys_kpi_definitions,fe2b857a-66a5-449c-85f8-ad57b4550cb9,name,en,Plant Uptime %,LLM
+sys_kpi_definitions,b5013ad7-885b-414e-88ef-5b79e368041c,description,en,Average time from application to credit disbursement,LLM
+sys_kpi_definitions,93dda465-08fa-4e36-b4f5-a33943bac4b3,description,en,Percentage of defaulted loans over the disbursed portfolio,LLM
+sys_kpi_definitions,9a66d974-aa96-42f3-b62c-f5adf5efea8d,description,en,Non-Performing Loans ratio over total loans,LLM
+sys_kpi_definitions,8b2a59e6-fbf3-4935-ae1a-bfd10562e2ad,description,en,Total volume of loans disbursed in the period,LLM
+sys_kpi_definitions,dd6429f9-87c6-49c4-8767-e522328c8015,description,en,Average processing time of a payment order,LLM
+sys_kpi_definitions,afbe8314-ce3c-49cd-814f-e12c8804b459,description,en,Percentage of transactions with reconciliation errors,LLM
+sys_kpi_definitions,7cc4e980-514a-4890-b47c-aec60d40aeb0,description,en,Number of transactions processed monthly,LLM
+sys_kpi_definitions,64d0e624-a3a4-4877-ac5e-241f67fb29ab,description,en,Number of Suspicious Transaction Reports filed,LLM
+sys_kpi_definitions,951d06ae-39cf-4ac9-b392-94d99a8b6bbc,description,en,Average response time to internal/external audit requests,LLM
+sys_kpi_definitions,34098885-9a78-444d-87ef-8f2d7fc2f5d8,description,en,Percentage of compliance with applicable regulations,LLM
+sys_kpi_definitions,efd9b2ae-4410-477a-a877-e3e9ea9b42eb,description,en,Percentage of staff who have completed AML training,LLM
+sys_kpi_definitions,8e8708f7-d76f-48e8-b56f-819c5c7b5738,description,en,Average time from job posting to hire,LLM
+sys_kpi_definitions,d8ecc957-4500-4037-8a4e-fcfbc8216b5e,description,en,Percentage of employees retained after 12 months,LLM
+sys_kpi_definitions,524a98cd-8aa5-4d24-b94e-347ac6147a07,description,en,Employee engagement and satisfaction index,LLM
+sys_kpi_definitions,2269f0f6-7431-4646-a7d4-5e4180da3ce5,description,en,Business days required for the monthly close,LLM
+sys_kpi_definitions,10e3e33f-67f1-4296-bb1a-1d4707938eab,description,en,Percentage of correct accounting entries,LLM
+sys_kpi_definitions,92ec0157-a4f2-40bd-bd40-0efce63002ee,description,en,Average processing cost per single accounting transaction,LLM
+sys_kpi_definitions,7ebb9bb3-bbc2-4e9f-83f3-6057dd5e0690,description,en,Daily Value at Risk at 99% confidence level,LLM
+sys_kpi_definitions,f9e4c4a8-3315-455f-92fd-7f8530a8f6bf,description,en,Annualized expected loss on the loan portfolio,LLM
+sys_kpi_definitions,4f808cce-0e6e-4922-bd22-7745f4c4f030,description,en,Total Risk-Weighted Assets (RWA),LLM
+sys_kpi_definitions,20e2eb52-d904-4377-b0c4-05faed60efdb,description,en,Percentage of portfolio covered by periodic stress tests,LLM
+sys_kpi_definitions,563ca428-ec74-4f5b-8af0-a6e30b77d09c,description,en,Annual growth of Assets Under Management,LLM
+sys_kpi_definitions,2a9db81b-e705-421d-a91e-01e9ea29c4e5,description,en,Wealth management client satisfaction index,LLM
+sys_kpi_definitions,3af00155-9e6e-43be-b393-a11143bdd3d8,description,en,Revenue generated per financial advisor,LLM
+sys_kpi_definitions,75122757-e244-47b8-ab27-b0764720c266,description,en,Availability of critical IT systems,LLM
+sys_kpi_definitions,92dd9c41-32cf-4170-b537-b7521dbb82ab,description,en,Average incident resolution time,LLM
+sys_kpi_definitions,79c0ba59-48c5-441e-a247-1a0503534502,description,en,Percentage of changes implemented without incidents,LLM
+sys_kpi_definitions,eb3b467d-58a2-4564-b586-ab6b80bfe51f,description,en,Average KYC completion time from docs received to client onboarded,LLM
+sys_kpi_definitions,a85def34-951f-4174-8933-7ade83e57a8a,description,en,Average AML alert resolution time (blocked transaction → cleared or STR),LLM
+sys_kpi_definitions,baebe8af-e417-44f4-baba-ba755a1a77cd,description,en,Share of new clients activating at least 1 product within 30 days of account opening,LLM
+sys_kpi_definitions,dfe3c511-cb2a-4dee-934f-842870710f4c,description,en,Net Promoter Score from the post-onboarding survey (-100..+100 scale),LLM
+sys_kpi_definitions,c94df0af-8ba6-4b70-a0f0-65d8700ee215,description,en,"Basel III LCR: HQLA stock / net cash outflow 30d (Basel target >=100%, prudent bank >=120%)",LLM
+sys_kpi_definitions,dc5e379f-a18e-4096-9fc7-22316e139bcc,description,en,Basel III NSFR: available stable funding / required stable funding (target >=100%),LLM
+sys_kpi_definitions,8cf636b1-2818-4c5c-8e1b-9fab9ab27a4d,description,en,"Daily FX desk P&L deviation vs forecast (zero target, +/- 50k EUR band)",LLM
+sys_kpi_definitions,8375a18c-db1b-45d0-ac7d-68f33cda2efa,description,en,Number of days of liquidity coverage with current HQLA stock (stress scenario),LLM
+sys_kpi_definitions,c21c5d65-dc30-4f86-89ae-049a2144163d,description,en,"H-severity findings per year (Banca d'Italia relevant). Target zero, maximum tolerated 3/year",LLM
+sys_kpi_definitions,928056e6-adc6-4e6c-8913-afd54a50eabe,description,en,Share of planned audits completed within the fiscal year (audit universe coverage),LLM
+sys_kpi_definitions,9087f6fd-c340-4675-8f82-78c02bc45008,description,en,Average time to close findings with verified remediation (SLA target 90 days for H/M),LLM
+sys_kpi_definitions,dacf1ecc-b265-4340-a0af-ab53fb9bdbd8,description,en,"Share of repeated findings (same area, same root cause) year-over-year. Target <=5%",LLM
+sys_kpi_definitions,e9a51b1a-0a63-4d3b-acda-c0686ef056ed,description,en,Average time to obtain permits,LLM
+sys_kpi_definitions,244ef50b-9554-4ea1-87ab-051c82762485,description,en,Forecast vs actual deviation in the first year,LLM
+sys_kpi_definitions,689366a4-d9ca-4ef9-a8ef-daaaeedfd879,description,en,Incidence of engineering costs,LLM
+sys_kpi_definitions,9441132e-8f6e-4bd6-8c1a-d4d45742e3c4,description,en,Adherence to construction site schedule,LLM
+sys_kpi_definitions,4c85f34e-287f-44c7-ac73-d1e53bdf943a,description,en,Lost-time incidents,LLM
+sys_kpi_definitions,cdc09eb4-c1a9-4495-9a99-b00c4049966c,description,en,Cost variance vs budget estimate,LLM
+sys_kpi_definitions,2f1751dc-aed7-43f4-ac3f-f928eb2a2add,description,en,Average uptime of the plant portfolio,LLM
+sys_kpi_definitions,0e600380-a0fe-46e2-a08a-e2a96bdc84b8,description,en,Average time to restore,LLM
+sys_kpi_definitions,c07acb9b-9b9e-47db-946d-854fecb7d8cd,description,en,Failures not caught by predictive maintenance,LLM
+sys_kpi_definitions,8a996cea-28da-49b3-b99e-9d68e5cc9980,description,en,Ratio of actual vs theoretical energy,LLM
+sys_kpi_definitions,cb11a79e-c24d-47cf-b660-d2f3aae73a9e,description,en,Average anomaly detection time,LLM
+sys_kpi_definitions,3b7e818b-ccea-407d-af17-d0f5c08e6f0f,description,en,Annual yield per installed kWp,LLM
+sys_kpi_definitions,8da26685-5dae-4cf3-9040-475d92b8d055,description,en,Annual customer churn rate,LLM
+sys_kpi_definitions,e0e79f5a-0efc-4f9b-b4a6-7e4ece641f62,description,en,Net Promoter Score,LLM
+sys_kpi_definitions,ce7b9565-7167-4bfc-a15f-5344e55b159a,description,en,Request resolution SLA,LLM
+sys_kpi_definitions,f14f7d62-a7f9-4d8f-846e-9e52f313aceb,description,en,CO2 avoided through renewable generation,LLM
+sys_kpi_definitions,38f2ef9d-bd8b-45cd-a794-2b5e036bc93c,description,en,Adherence to ARERA requirements and EU directives,LLM
+sys_kpi_definitions,a6126154-6406-4204-9408-c78604714415,description,en,ESG score from rating provider,LLM
+sys_kpi_definitions,8da94cb9-6fab-4c8f-8405-d0b6045b0345,description,en,Average margin over market price,LLM
+sys_kpi_definitions,4f13c8a1-ace8-43ea-aca1-287671a314f3,description,en,Forecast vs actual deviation,LLM
+sys_kpi_definitions,1717b371-777d-46d5-a24b-1cfe7b56589c,description,en,Penalty costs for grid imbalance,LLM
+sys_kpi_definitions,7757e534-a6a8-45eb-af6b-08271b19a998,description,en,Average time from order to delivery,LLM
+sys_kpi_definitions,6c0fae05-3e5c-44d3-a3cb-d15399e56067,description,en,Percentage of supplies conforming to specification,LLM
+sys_kpi_definitions,b9fc9a8b-e640-44b0-b455-5077938d88a4,description,en,Average savings achieved on list price,LLM
+sys_kpi_definitions,1c1a6818-fe0b-44af-8ab6-2f8d8c03c354,description,en,Overall plant efficiency,LLM
+sys_kpi_definitions,53c2b55a-34f4-46ec-b7c1-e0ab3344f8a7,description,en,Scrap percentage over total production,LLM
+sys_kpi_definitions,c0f7c924-c25d-4e16-815e-cd384629b7ef,description,en,Adherence to weekly scheduling,LLM
+sys_kpi_definitions,ffd80cad-193d-4239-9ef5-c040755bb903,description,en,Critical NCs detected per month,LLM
+sys_kpi_definitions,518510ae-905e-4a63-8f93-f5a7590ce68c,description,en,Average time to close non-conformities,LLM
+sys_kpi_definitions,3b8ba215-e46f-47e4-be5f-2819caddbf4b,description,en,Percentage of conforming samples,LLM
+sys_kpi_definitions,7d4c403b-909c-45b3-8ff9-0136c25e11cf,description,en,On-time and in-full deliveries,LLM
+sys_kpi_definitions,d8ec09ab-0603-44ca-b5d1-560c5bd5128c,description,en,Stock turnover frequency,LLM
+sys_kpi_definitions,9dbd6d8c-a363-4e72-9f51-ea64418bd771,description,en,Incidence of logistics costs,LLM
+sys_kpi_definitions,18eb2a25-5404-448c-8a4b-24c72be7189e,description,en,Average revenue per active customer,LLM
+sys_kpi_definitions,81f05640-4205-4779-beed-beec438bd456,description,en,Return on promotional investment,LLM
+sys_kpi_definitions,8932cdfd-84b8-40c7-b401-964c6cc44b4d,description,en,Numeric distribution coverage,LLM
+sys_kpi_definitions,43e87c50-4618-489d-bf49-793a82130c80,description,en,Time from concept to launch,LLM
+sys_kpi_definitions,349d4bea-07a2-4ad9-817f-edc8d45f515a,description,en,Percentage of new products reaching target,LLM
+sys_kpi_definitions,b03101e4-11bc-416c-89b1-0cf3905631ef,description,en,Percentage of revenue from products < 3 years old,LLM
+sys_kpi_definitions,9c0ed0b7-0d5a-4e24-9928-5b3dde06806a,description,en,Score of the latest certification audit,LLM
+sys_kpi_definitions,d8819294-3450-448c-9ae5-8f46e27fbc28,description,en,Residual open non-conformities,LLM
+sys_kpi_definitions,5421bd44-ea20-483c-82e0-b2fa2fead114,description,en,Mandatory training coverage,LLM
+sys_kpi_definitions,96cf54f0-7e2a-4aed-b386-3a8ac81d700c,description,en,Stakeholder feedback,LLM
+sys_kpi_definitions,7934f51c-78da-452f-a64b-2b86b6033219,description,en,Stakeholder feedback,LLM
+sys_kpi_definitions,ce181145-6e26-4c2f-859b-98e945f7f537,description,en,Stakeholder feedback,LLM
+sys_kpi_definitions,2d561108-c532-4787-833b-f2640ec11600,description,en,Stakeholder feedback,LLM
+sys_kpi_definitions,9e3039b4-5ea1-4dee-9b53-a3c3a52df80c,description,en,Stakeholder feedback,LLM
+sys_kpi_definitions,d7f4b7d7-866c-4a73-a124-47745443db43,description,en,Stakeholder feedback,LLM
+sys_kpi_definitions,c74d1585-f153-49e0-a370-281a88ad6433,description,en,Stakeholder feedback,LLM
+sys_kpi_definitions,e6319d12-9d21-452e-bb45-75cfd260812a,description,en,Stakeholder feedback,LLM
+sys_kpi_definitions,4f11b640-8d2d-4cc0-b907-3f37e123a25d,description,en,Stakeholder feedback,LLM
+sys_kpi_definitions,50f7f9ba-bd5c-44bf-a812-095df99023e7,description,en,Professional growth,LLM
+sys_kpi_definitions,6b01580c-a2a4-430e-a678-04e50ed01e18,description,en,Professional growth,LLM
+sys_kpi_definitions,826afa69-fdac-4dd7-a635-0b3863d59966,description,en,Professional growth,LLM
+sys_kpi_definitions,41d1574d-a537-4ac5-b510-3a014eca3afc,description,en,Professional growth,LLM
+sys_kpi_definitions,b2e2a3c0-6114-4eec-98d6-01de1a53b5c9,description,en,Professional growth,LLM
+sys_kpi_definitions,33c3b8b6-b38f-407d-8f77-2bf0e469a016,description,en,Professional growth,LLM
+sys_kpi_definitions,391134f4-5e64-45b6-8ef9-5aa5401335d7,description,en,Professional growth,LLM
+sys_kpi_definitions,00f2cac4-7e40-41d3-9c7d-64fdea9968e7,description,en,Professional growth,LLM
+sys_kpi_definitions,26e13aa5-5395-497e-9691-7d102a8097a2,description,en,Professional growth,LLM
+sys_kpi_definitions,2bde9584-2611-48dd-a0f4-b9e5d072fd02,description,en,Output against target,LLM
+sys_kpi_definitions,a0117bc8-ec23-415c-9403-456a1a9dce7e,description,en,Output against target,LLM
+sys_kpi_definitions,1f8a5f20-a607-4fcd-a979-9ded2fe07e33,description,en,Output against target,LLM
+sys_kpi_definitions,c32585ba-24fa-48ab-9850-a469a82041b2,description,en,Output against target,LLM
+sys_kpi_definitions,8646b09f-0cbb-417d-a87e-9357ba55cf00,description,en,Output against target,LLM
+sys_kpi_definitions,75c6abb7-4774-4167-9a65-a8c0abf09803,description,en,Output against target,LLM
+sys_kpi_definitions,52552ca4-3005-4378-a4a0-605f2d2ce37e,description,en,Output against target,LLM
+sys_kpi_definitions,a79a986a-3029-434b-82dc-ec3b1583e1c8,description,en,Output against target,LLM
+sys_kpi_definitions,68a932b0-4ec4-4705-8dc5-d8d39fed124c,description,en,Output against target,LLM
+sys_kpi_definitions,4a1d7265-3c58-4594-b00f-57a03b5eb438,description,en,Teamwork effectiveness,LLM
+sys_kpi_definitions,544a4456-3229-4d34-b01a-86e7c8d16f6a,description,en,Teamwork effectiveness,LLM
+sys_kpi_definitions,67dd45fd-adc1-4242-9a94-ae9bab5ab8b3,description,en,Teamwork effectiveness,LLM
+sys_kpi_definitions,942dc5eb-16b1-4ec3-9e89-7c36b92b82f4,description,en,Teamwork effectiveness,LLM
+sys_kpi_definitions,d3aff16f-8140-4f61-a3b3-c8958d27aa35,description,en,Teamwork effectiveness,LLM
+sys_kpi_definitions,05910e14-b7d2-4d69-8c09-417861287fbd,description,en,Teamwork effectiveness,LLM
+sys_kpi_definitions,961a2e7f-8806-49d3-b615-03e77eb0659c,description,en,Teamwork effectiveness,LLM
+sys_kpi_definitions,b12a0e3b-02b9-4e1d-bec7-7157fbd5eee2,description,en,Teamwork effectiveness,LLM
+sys_kpi_definitions,8e3173f2-535f-499c-b38c-867a8e4fd6f4,description,en,Teamwork effectiveness,LLM
+sys_kpi_definitions,f7d35067-7086-4a2b-b5c3-4a2be4b482d1,description,en,Output quality assessment,LLM
+sys_kpi_definitions,ed0e9374-9fd4-44bb-b9a3-2bfcd2735443,description,en,Output quality assessment,LLM
+sys_kpi_definitions,8eb06f5c-a200-4ad5-888b-af9787e3f5a1,description,en,Output quality assessment,LLM
+sys_kpi_definitions,ae28575d-587d-49ce-bb42-9c9dd9026abb,description,en,Output quality assessment,LLM
+sys_kpi_definitions,15fb56ff-38c2-43ca-b9e9-4cb73ced1336,description,en,Output quality assessment,LLM
+sys_kpi_definitions,4cd57afa-7c61-4c01-951e-dbd5f130e486,description,en,Output quality assessment,LLM
+sys_kpi_definitions,b06689f5-3420-4f1e-9d16-4fb9a945e2e5,description,en,Output quality assessment,LLM
+sys_kpi_definitions,4dc57958-10e0-4940-905a-7f53eaca1628,description,en,Output quality assessment,LLM
+sys_kpi_definitions,f66a5313-349a-4c3c-bddf-e68ad32834d1,description,en,Output quality assessment,LLM
+sys_job_roles,1f541b30-9b29-44b6-bb95-3877e56d1a84,name,en,Chief Executive Officer,LLM
+sys_job_roles,81780ad2-74e0-429e-bf9c-aa44e4f53f58,name,en,Manager,LLM
+sys_job_roles,9fd1b021-2e1e-467b-a994-3171a2faf10d,name,en,Senior Manager,LLM
+sys_job_roles,770316c8-efaf-4146-97ad-546e848a6759,name,en,Manager,LLM
+sys_job_roles,2dc48538-5ea5-4bfc-9aca-cb2dff204145,name,en,Senior Manager,LLM
+sys_job_roles,785341f2-8c6d-42db-824b-94bb132fe95d,name,en,Manager,LLM
+sys_job_roles,44195408-029e-4f06-859b-fe30b3c00b47,name,en,Senior Manager,LLM
+sys_job_roles,d80e2697-91d9-4bce-ab3e-0ed8c52734d7,name,en,Manager,LLM
+sys_job_roles,6f62fb52-6099-4304-9f3f-8c1eb86b9c96,name,en,Senior Manager,LLM
+sys_job_roles,3732e9cf-7237-4760-a83d-9cfc7cad103e,name,en,Manager,LLM
+sys_job_roles,88bdcf6b-c73a-469e-a72f-2d21ca8301e0,name,en,Senior Manager,LLM
+sys_job_roles,e977c1af-0753-4bd0-a58a-fd29bfc7876f,name,en,Manager,LLM
+sys_job_roles,eccb47b5-2918-4237-8bf6-2ae6398d0677,name,en,Senior Manager,LLM
+sys_job_roles,85b0dbb2-a181-417e-b0ea-a02f695c1171,name,en,Manager,LLM
+sys_job_roles,fa748e73-c4c8-4076-b741-861f50efac83,name,en,Senior Manager,LLM
+sys_job_roles,5ebb5f54-3a7d-4f0d-ae30-45139a04ab1b,name,en,Manager,LLM
+sys_job_roles,9d5bba35-d19a-41d4-bf74-b33d28918fc8,name,en,Senior Manager,LLM
+sys_job_roles,97f3a3a2-11b5-49d5-b000-b7c86ec5a119,name,en,Manager,LLM
+sys_job_roles,883c3f5f-0fdf-4063-86e0-7a67d71d88a1,name,en,Senior Manager,LLM
+sys_job_roles,ab402946-86d5-44e3-ada4-1d6cdb1d197c,name,en,Manager,LLM
+sys_job_roles,dd4cbd71-b373-435d-a8dd-ff9b14d818bc,name,en,Senior Manager,LLM
+sys_job_roles,24221249-e09b-4082-99ed-5dc4284012f5,name,en,Manager,LLM
+sys_job_roles,83281f07-0ec6-4341-86b5-1953199180aa,name,en,Senior Manager,LLM
+sys_job_roles,b26f6c70-7b0a-4752-a90d-28a37d199fb4,name,en,Manager,LLM
+sys_job_roles,770692ae-4a33-42a0-893c-d285360a3337,name,en,Senior Manager,LLM
+sys_job_roles,8285f2fb-628a-47a4-b464-7226eb92d79e,name,en,Manager,LLM
+sys_job_roles,a4206803-d803-4e90-82f3-1d24490b29e2,name,en,Senior Manager,LLM
+sys_job_roles,45da149d-6853-455e-9060-3fb934e12eed,name,en,Manager,LLM
+sys_job_roles,0eb26d5b-5a2c-4d7a-b78c-0294c1ce782f,name,en,Senior Manager,LLM
+sys_job_roles,0a6840a9-4852-43f7-b108-0524361faa75,name,en,Manager,LLM
+sys_job_roles,a5d30fa6-c9fc-4b0d-9cdb-4f46dd12f633,name,en,Senior Manager,LLM
+sys_job_roles,9ae449ef-3e87-4d34-a6c5-f33c6b98f804,name,en,Manager,LLM
+sys_job_roles,392f8910-600f-4edb-99df-9f0e2d6b1817,name,en,Senior Manager,LLM
+sys_job_roles,5556af19-75c3-4d5b-b836-73f5ccd0f25e,name,en,Director,LLM
+sys_job_roles,70cf8a95-e867-41f0-ae4a-1572b5b93931,name,en,Deputy Director,LLM
+sys_job_roles,4f4c3e55-667e-463a-ac4e-3c3beb2ece70,name,en,Director,LLM
+sys_job_roles,6964ff8a-8a44-4f7d-b44c-e8c948db5f5a,name,en,Deputy Director,LLM
+sys_job_roles,60ad96aa-f704-4578-8710-2bac7af11495,name,en,Director,LLM
+sys_job_roles,ddf75bb7-b3d4-4e3d-9a1d-4251113f582f,name,en,Deputy Director,LLM
+sys_job_roles,92767c25-4c75-4b80-8f52-6bf7e4e42d9f,name,en,Director,LLM
+sys_job_roles,cd3284f2-bb1d-4ab8-ab37-f6d89fbe0adb,name,en,Deputy Director,LLM
+sys_job_roles,ca16f70b-b7de-49e0-8040-7587c02eeaa1,name,en,Director,LLM
+sys_job_roles,b9dcc7f6-8c4a-437f-9913-021ab10465f3,name,en,Deputy Director,LLM
+sys_job_roles,41506270-8d82-4212-9aa9-16f72bf7cb2d,name,en,Director,LLM
+sys_job_roles,cf19901f-6e7b-409d-baa0-7055703dced9,name,en,Deputy Director,LLM
+sys_job_roles,9f1e2ece-bab8-4d54-ab80-1816f14add45,name,en,Director,LLM
+sys_job_roles,eb3c01e2-b1f1-48a6-b541-856062ca89f0,name,en,Deputy Director,LLM
+sys_job_roles,2af5d327-5dd5-4069-9a5a-e0c901e8f533,name,en,Director,LLM
+sys_job_roles,a65949c6-29ba-44fe-ba6e-706f80ab50d3,name,en,Deputy Director,LLM
+sys_job_roles,01390879-883b-4af3-8fb0-8ca462edd8f8,name,en,Industrial Cook,LLM
+sys_job_roles,619e060e-3311-4ded-b5b2-96486dcb58de,name,en,Power Production Engineer,LLM
+sys_job_roles,9987d404-87f7-4ddd-87f1-de611c1916a6,name,en,Geothermal Engineer,LLM
+sys_job_roles,bd3e4903-07f1-4d16-a8e9-0fb9a473bfe4,name,en,Offshore Renewable Energy Engineer,LLM
+sys_job_roles,51397acc-652c-4f10-b2e4-b6fdbb87a83e,name,en,Food Industry Nutritionist,LLM
+sys_job_roles,60da9d82-8597-4fc2-ac98-3dba65e80715,name,en,Economic Advisor,LLM
+sys_job_roles,b13494d3-a7e2-4838-b26c-ab42c5dc287b,name,en,Employer Branding Manager,LLM
+sys_job_roles,0386ba5a-5600-4082-aef9-174bee5e6351,name,en,Financial Analyst,LLM
+sys_job_roles,e25e8391-a72d-4516-918d-0aa2744f173e,name,en,Financial Controller,LLM
+sys_job_roles,3966e441-f4ed-4912-a68e-ab7db1125ef2,name,en,Corporate Financial Advisor,LLM
+sys_job_roles,140c7b31-bb5a-4495-865c-590512d5fc29,name,en,Financial Planner,LLM
+sys_job_roles,ae73a07e-73db-463f-a688-ccbf56dbf66c,name,en,Financial Advisor,LLM
+sys_job_roles,0abde82b-7e24-4e03-8352-aa2283d0d8df,name,en,Business Development Specialist,LLM
+sys_job_roles,16b1e42f-ae42-490b-9052-acc845650918,name,en,Business Intelligence Manager,LLM
+sys_job_roles,f9f6c090-3cec-4ed1-a95c-0445be3079fe,name,en,Banking Relationship Manager,LLM
+sys_job_roles,b4e25125-83d8-4555-96d7-c462e0874b96,name,en,Corporate Financial Advisor,LLM
+sys_job_roles,ea359f3f-84ff-424b-bd37-ff43d2e405f4,name,en,Cost Analyst,LLM
+sys_job_roles,044abdb4-c006-40d7-8611-741a6b6e4c73,name,en,Chocolatier,LLM
+sys_job_roles,94945c62-32fb-49da-b013-506899121c63,name,en,Nuclear Reactor Operator,LLM
+sys_job_roles,52931086-a8d6-4023-8c14-85d851774eaa,name,en,Confectioner,LLM
+sys_job_roles,e6f9cddf-7d3d-4000-9dc9-c5f41b2f4500,name,en,Power Production Plant Operator,LLM
+sys_job_roles,c796376b-858b-4cf1-87cc-8b3072438d23,name,en,Biogas Technician,LLM
+sys_job_roles,1648430b-226e-4e9a-8c04-7f6c3854d4fd,name,en,Electric Power Distribution Technician,LLM
+sys_job_roles,1bec522c-7326-4b8f-b18f-f16fc43f15ef,name,en,Peeling and Blanching Operator,LLM
+sys_job_roles,030c297a-95d6-46f7-ae89-5149aaf4e2bd,name,en,Financial Manager,LLM
+sys_job_roles,9bae10ee-b75e-405d-9920-92e4905c967a,name,en,Cocoa Press Operator,LLM
+sys_job_roles,09b8d21d-9ec7-4785-8702-746a9c2eacac,name,en,Coffee Grinder Operator,LLM
+sys_job_roles,889d14b2-bb4e-491d-8c4c-1ff3a774a76c,name,en,Coffee Roaster,LLM
+sys_job_roles,f028a5ae-d46b-4429-9018-486d9786946d,name,en,Bottling Machine Operator,LLM
+sys_job_roles,7af05a32-a517-44ec-b16b-08e3d65eb311,name,en,Honey Extraction Machine Operator,LLM
+sys_job_roles,4b94048d-2fd7-4245-87a3-2e08e7999118,name,en,Corporate Treasurer,LLM
+sys_job_roles,683e164e-7841-40fa-bf34-d8d69aaffd6a,name,en,Cocoa Bean Roaster,LLM
+sys_job_roles,5cbc24c6-7587-41b3-a6a1-b71fd542e261,name,en,Corporate Volunteering Program Coordinator,LLM
+sys_job_roles,ce9bd574-7c23-4654-bbd6-9c3d1c7a4c66,name,en,Energy Manager,LLM
+sys_job_roles,c164d123-6115-45c7-857c-4e57a56b15ff,name,en,Environmental Protection Manager,LLM
+sys_job_roles,37b59693-19a6-4952-8554-d020c36ca174,name,en,Diversity Manager,LLM
+sys_job_roles,c7b7301c-8716-408a-b457-9eeed51c8877,name,en,Green Coffee Coordinator,LLM
+sys_job_roles,b0292822-9f13-4158-87de-8eb2a3d98187,name,en,Bank Account Manager,LLM
+sys_job_roles,bb12a12d-9eaf-463d-a5a6-6372385c4f82,name,en,Credit Advisor,LLM
+sys_job_roles,f93d9ceb-c987-4560-a208-fd04b95442cf,name,en,Credit Analyst,LLM
+sys_job_roles,05b09220-65d1-40f9-9b34-461e76b0f9de,name,en,Credit Manager,LLM
+sys_job_roles,fa4025e5-3a8f-41a3-82e9-c9dd81ef6f21,name,en,Loan Officer,LLM
+sys_job_roles,66132e48-cec9-4c5b-96a3-55680d887add,name,en,Banking Products Manager,LLM
+sys_job_roles,02fc0214-077c-4239-95ed-176498447b03,name,en,Bank Manager,LLM
+sys_job_roles,ab0c4391-033d-4eee-bccb-5e4e4f17cec0,name,en,Bank Treasurer,LLM
+sys_job_roles,58c797a1-71c7-430f-9582-cba2a834fb03,name,en,Credit Union Manager,LLM
+sys_job_roles,68294dbd-3e33-471c-9054-af5ebc57a37d,name,en,Bank Teller,LLM
+sys_job_roles,71cb5dcb-e3a2-43c9-ab57-843382d087c2,name,en,Anti-Money Laundering Specialist,LLM
+sys_job_roles,067e3232-ea51-427a-981c-adc9b278ee07,name,en,Internal Auditor,LLM
+sys_job_roles,51b1a5cc-9aaa-4c7e-9838-f9bd2d576e12,name,en,Banking Back Office Operator,LLM
+sys_job_roles,147ecb9d-dd6c-442d-9689-f5c66473f0a9,name,en,Contact Center Customer Care Agent,LLM
+sys_job_roles,a643edab-e11a-4283-b31c-f6d52ffc2bf7,name,en,Chief Executive Officer,LLM
+sys_job_roles,8ded799b-81ca-4a64-b196-9549b23e77bb,name,en,Compliance Officer,LLM
+sys_job_roles,66681337-649e-47d2-977c-379459593e20,name,en,Chief Risk Officer,LLM
+sys_job_roles,8930a77f-503d-4566-a46c-e75c19631322,name,en,Cybersecurity Analyst,LLM
+sys_job_roles,a1efe9c2-8d2d-4cf7-afad-df0d9e7265a6,name,en,Financial Reporting Analyst,LLM
+sys_job_roles,d9b03772-a905-46ac-ab49-fe7875005457,name,en,FX and Money Markets Trader,LLM
+sys_job_roles,e1de93a0-c7d9-4dd3-b895-0d85989f99b1,name,en,Human Resources Manager,LLM
+sys_job_roles,260bed62-ea7d-420f-8651-57ff7aa46587,name,en,HR Business Partner,LLM
+sys_job_roles,38cb08db-3638-414b-8801-194af09c9909,name,en,IT Application Developer,LLM
+sys_job_roles,f4cd0592-67e0-51b5-b8e8-3e412eb2e526,name,en,Legal Counsel,LLM
+sys_job_roles,4c671585-ccb8-4b67-9f65-358c00a2e585,name,en,Banking Marketing Specialist,LLM
+sys_job_roles,b3de39a7-b9e7-4ebd-8ecc-8a4d77edc0ee,name,en,Banking Operations Manager,LLM
+sys_job_roles,2191b448-d160-40c4-a3dd-50426dba4ed2,name,en,Back Office Specialist,LLM
+sys_job_roles,ad55ad24-0a83-4f33-8287-e671d3119401,name,en,Bank Manager,LLM
+sys_job_roles,180c1851-808d-4211-8cc7-8f03c5458eb9,name,en,Bank Teller,LLM
+sys_job_roles,ca1ac555-2382-43b9-bb4a-eb31fad244d9,name,en,CEO,LLM
+sys_job_roles,0c2cd98a-9119-4818-adc0-ee9a147d4e16,name,en,CEO & Founder,LLM
+sys_job_roles,6d04f724-bbe6-456d-b4a3-c3b9f26146fb,name,en,Chief Risk Officer,LLM
+sys_job_roles,02ac068d-e821-45ff-a6b6-cddde7790a5b,name,en,Compliance Officer,LLM
+sys_job_roles,6f457bad-5328-48d0-bb9b-ffa5384b23b1,name,en,COO,LLM
+sys_job_roles,b5536f71-a21f-469c-bd4e-0a4db896c88e,name,en,Finance Director,LLM
+sys_job_roles,0e7d2f30-de98-441e-b2d4-ca05d3fb70ee,name,en,Financial Analyst,LLM
+sys_job_roles,2cb05936-f04c-46fa-8e51-b66dea01989f,name,en,Head of Commercial Banking,LLM
+sys_job_roles,88299e6d-d50b-43ac-ae2d-522728e98cc5,name,en,Head of Product,LLM
+sys_job_roles,a0c8ee81-f473-451c-92df-256d9db1a446,name,en,HR Director,LLM
+sys_job_roles,163a63a0-e29c-4ad5-8b29-183a5817ace0,name,en,HR Manager,LLM
+sys_job_roles,89125dac-9fa7-49ed-af7d-6072d662606b,name,en,Investment Advisor,LLM
+sys_job_roles,0ee3aa9a-4db1-494b-8103-8ef11a71ec3a,name,en,IT Director,LLM
+sys_job_roles,be1c2341-0c84-4552-a327-bc7a5a201717,name,en,Line Manager - Operations,LLM
+sys_job_roles,81818377-eb33-4b0e-a67d-73797a109cd1,name,en,Operations Director,LLM
+sys_job_roles,1032df49-89c1-4af2-94c9-473be4d9a17b,name,en,Payment Specialist,LLM
+sys_job_roles,1e908c54-e17b-480c-8b6e-97d55d93267a,name,en,Retail Director,LLM
+sys_job_roles,28885781-3696-45e7-a93d-d5934a776021,name,en,Risk Analyst,LLM
+sys_job_roles,41f6cd67-03ef-4989-b4ef-11864a87a30b,name,en,Securities Dealer,LLM
+sys_job_roles,309aef33-0471-455b-8460-fdbdf741e796,name,en,Software Developer,LLM
+sys_job_roles,94994d60-e279-4bbd-9add-9dcccee172cd,name,en,System Administrator,LLM
+sys_job_roles,f736bbef-1dd8-4d50-b3c4-d52c4f70ea6e,name,en,Tenant Owner,LLM
+sys_job_roles,1f541b30-9b29-44b6-bb95-3877e56d1a84,description,en,Executive leadership role,LLM
+sys_job_roles,81780ad2-74e0-429e-bf9c-aa44e4f53f58,description,en,Department manager,LLM
+sys_job_roles,9fd1b021-2e1e-467b-a994-3171a2faf10d,description,en,Senior department manager,LLM
+sys_job_roles,770316c8-efaf-4146-97ad-546e848a6759,description,en,Department manager,LLM
+sys_job_roles,2dc48538-5ea5-4bfc-9aca-cb2dff204145,description,en,Senior department manager,LLM
+sys_job_roles,785341f2-8c6d-42db-824b-94bb132fe95d,description,en,Department manager,LLM
+sys_job_roles,44195408-029e-4f06-859b-fe30b3c00b47,description,en,Senior department manager,LLM
+sys_job_roles,d80e2697-91d9-4bce-ab3e-0ed8c52734d7,description,en,Department manager,LLM
+sys_job_roles,6f62fb52-6099-4304-9f3f-8c1eb86b9c96,description,en,Senior department manager,LLM
+sys_job_roles,3732e9cf-7237-4760-a83d-9cfc7cad103e,description,en,Department manager,LLM
+sys_job_roles,88bdcf6b-c73a-469e-a72f-2d21ca8301e0,description,en,Senior department manager,LLM
+sys_job_roles,e977c1af-0753-4bd0-a58a-fd29bfc7876f,description,en,Department manager,LLM
+sys_job_roles,eccb47b5-2918-4237-8bf6-2ae6398d0677,description,en,Senior department manager,LLM
+sys_job_roles,85b0dbb2-a181-417e-b0ea-a02f695c1171,description,en,Department manager,LLM
+sys_job_roles,fa748e73-c4c8-4076-b741-861f50efac83,description,en,Senior department manager,LLM
+sys_job_roles,5ebb5f54-3a7d-4f0d-ae30-45139a04ab1b,description,en,Department manager,LLM
+sys_job_roles,9d5bba35-d19a-41d4-bf74-b33d28918fc8,description,en,Senior department manager,LLM
+sys_job_roles,97f3a3a2-11b5-49d5-b000-b7c86ec5a119,description,en,Department manager,LLM
+sys_job_roles,883c3f5f-0fdf-4063-86e0-7a67d71d88a1,description,en,Senior department manager,LLM
+sys_job_roles,ab402946-86d5-44e3-ada4-1d6cdb1d197c,description,en,Department manager,LLM
+sys_job_roles,dd4cbd71-b373-435d-a8dd-ff9b14d818bc,description,en,Senior department manager,LLM
+sys_job_roles,24221249-e09b-4082-99ed-5dc4284012f5,description,en,Department manager,LLM
+sys_job_roles,83281f07-0ec6-4341-86b5-1953199180aa,description,en,Senior department manager,LLM
+sys_job_roles,b26f6c70-7b0a-4752-a90d-28a37d199fb4,description,en,Department manager,LLM
+sys_job_roles,770692ae-4a33-42a0-893c-d285360a3337,description,en,Senior department manager,LLM
+sys_job_roles,8285f2fb-628a-47a4-b464-7226eb92d79e,description,en,Department manager,LLM
+sys_job_roles,a4206803-d803-4e90-82f3-1d24490b29e2,description,en,Senior department manager,LLM
+sys_job_roles,45da149d-6853-455e-9060-3fb934e12eed,description,en,Department manager,LLM
+sys_job_roles,0eb26d5b-5a2c-4d7a-b78c-0294c1ce782f,description,en,Senior department manager,LLM
+sys_job_roles,0a6840a9-4852-43f7-b108-0524361faa75,description,en,Department manager,LLM
+sys_job_roles,a5d30fa6-c9fc-4b0d-9cdb-4f46dd12f633,description,en,Senior department manager,LLM
+sys_job_roles,9ae449ef-3e87-4d34-a6c5-f33c6b98f804,description,en,Department manager,LLM
+sys_job_roles,392f8910-600f-4edb-99df-9f0e2d6b1817,description,en,Senior department manager,LLM
+sys_job_roles,5556af19-75c3-4d5b-b836-73f5ccd0f25e,description,en,Division director role,LLM
+sys_job_roles,70cf8a95-e867-41f0-ae4a-1572b5b93931,description,en,Deputy division director,LLM
+sys_job_roles,4f4c3e55-667e-463a-ac4e-3c3beb2ece70,description,en,Division director role,LLM
+sys_job_roles,6964ff8a-8a44-4f7d-b44c-e8c948db5f5a,description,en,Deputy division director,LLM
+sys_job_roles,60ad96aa-f704-4578-8710-2bac7af11495,description,en,Division director role,LLM
+sys_job_roles,ddf75bb7-b3d4-4e3d-9a1d-4251113f582f,description,en,Deputy division director,LLM
+sys_job_roles,92767c25-4c75-4b80-8f52-6bf7e4e42d9f,description,en,Division director role,LLM
+sys_job_roles,cd3284f2-bb1d-4ab8-ab37-f6d89fbe0adb,description,en,Deputy division director,LLM
+sys_job_roles,ca16f70b-b7de-49e0-8040-7587c02eeaa1,description,en,Division director role,LLM
+sys_job_roles,b9dcc7f6-8c4a-437f-9913-021ab10465f3,description,en,Deputy division director,LLM
+sys_job_roles,41506270-8d82-4212-9aa9-16f72bf7cb2d,description,en,Division director role,LLM
+sys_job_roles,cf19901f-6e7b-409d-baa0-7055703dced9,description,en,Deputy division director,LLM
+sys_job_roles,9f1e2ece-bab8-4d54-ab80-1816f14add45,description,en,Division director role,LLM
+sys_job_roles,eb3c01e2-b1f1-48a6-b541-856062ca89f0,description,en,Deputy division director,LLM
+sys_job_roles,2af5d327-5dd5-4069-9a5a-e0c901e8f533,description,en,Division director role,LLM
+sys_job_roles,a65949c6-29ba-44fe-ba6e-706f80ab50d3,description,en,Deputy division director,LLM
+sys_job_roles,f4cd0592-67e0-51b5-b8e8-3e412eb2e526,description,en,"In-house legal counsel — contracts, corporate & regulatory law, litigation support.",LLM
+sys_skills,76e14ee6-be48-4d14-9fef-2a5a41cc9904,name,en,leadership,LLM
+sys_skills,76e14ee6-be48-4d14-9fef-2a5a41cc9904,description,en,Inspires and guides others toward achieving goals,LLM
+sys_skills,01e88dfb-b757-4928-b984-bd9d4953ce03,name,en,leadership,LLM
+sys_skills,01e88dfb-b757-4928-b984-bd9d4953ce03,description,en,Inspires and guides others toward achieving goals,LLM
+sys_skills,fd070df8-49b3-4384-b938-af378db6375e,name,en,communication,LLM
+sys_skills,fd070df8-49b3-4384-b938-af378db6375e,description,en,Effectively conveys information and ideas through various channels,LLM
+sys_skills,0c6a06f3-5473-429a-bade-73c17bac1c90,name,en,results orientation,LLM
+sys_skills,0c6a06f3-5473-429a-bade-73c17bac1c90,description,en,Focuses on achieving objectives and delivering outcomes,LLM
+sys_skills,a0804e8f-0022-4336-a8d2-2650db33dfd4,name,en,collaboration,LLM
+sys_skills,a0804e8f-0022-4336-a8d2-2650db33dfd4,description,en,Works effectively with others to achieve shared goals,LLM
+sys_skills,5b68c4d3-05c4-4d73-93a4-0f6d8e312a23,name,en,problem solving,LLM
+sys_skills,5b68c4d3-05c4-4d73-93a4-0f6d8e312a23,description,en,Identifies issues and develops effective solutions,LLM
+sys_skills,38d66d8a-bd37-4da6-998a-d5a0b71f1900,name,en,adaptability,LLM
+sys_skills,38d66d8a-bd37-4da6-998a-d5a0b71f1900,description,en,Adjusts effectively to changing circumstances and priorities,LLM
+sys_skills,e1c4bd78-f25e-45f7-b141-749a6f8554fa,name,en,results orientation,LLM
+sys_skills,e1c4bd78-f25e-45f7-b141-749a6f8554fa,description,en,Focuses on achieving objectives and delivering outcomes,LLM
+sys_skills,1f3fa3c8-2f30-4533-bc1e-9cad59b92113,name,en,innovation,LLM
+sys_skills,1f3fa3c8-2f30-4533-bc1e-9cad59b92113,description,en,Generates creative ideas and implements improvements,LLM
+sys_skills,72e005bd-b38f-4a56-ba07-7e993341fac1,name,en,innovation,LLM
+sys_skills,72e005bd-b38f-4a56-ba07-7e993341fac1,description,en,Generates creative ideas and implements improvements,LLM
+sys_skills,c0a3bd29-3371-4b6f-9130-1bb01cbc7006,name,en,customer orientation,LLM
+sys_skills,c0a3bd29-3371-4b6f-9130-1bb01cbc7006,description,en,Prioritizes customer needs and delivers value,LLM
+sys_skills,538fd2d3-a357-49bd-bdcd-789c33faea3b,name,en,collaboration,LLM
+sys_skills,538fd2d3-a357-49bd-bdcd-789c33faea3b,description,en,Works effectively with others to achieve shared goals,LLM
+sys_skills,f6da2dea-fed2-4f53-8603-c217a4056926,name,en,customer orientation,LLM
+sys_skills,f6da2dea-fed2-4f53-8603-c217a4056926,description,en,Prioritizes customer needs and delivers value,LLM
+sys_skills,234580da-837d-4739-9d3f-d50d635a6ac0,name,en,anti-money laundering operations,LLM
+sys_skills,234580da-837d-4739-9d3f-d50d635a6ac0,description,en,"Operational execution of AML controls, STR filing, and transaction monitoring",LLM
+sys_skills,f31bf281-3d1a-4dd4-be7e-0191fd7188e8,name,en,bancassurance,LLM
+sys_skills,f31bf281-3d1a-4dd4-be7e-0191fd7188e8,description,en,Insurance product distribution through banking channels,LLM
+sys_skills,7a60abe5-aa67-4f14-920b-07f73397bca0,name,en,Basel III/IV regulatory framework,LLM
+sys_skills,7a60abe5-aa67-4f14-920b-07f73397bca0,description,en,"Capital adequacy, leverage ratios, liquidity coverage per Basel framework",LLM
+sys_skills,19203616-7be7-44ad-abc6-f4f4072baaeb,name,en,corporate cash management,LLM
+sys_skills,19203616-7be7-44ad-abc6-f4f4072baaeb,description,en,"Treasury operations, cash pooling, payment processing",LLM
+sys_skills,398b00e3-82b2-4cfd-9eb4-aaf72d43a06f,name,en,core banking systems,LLM
+sys_skills,398b00e3-82b2-4cfd-9eb4-aaf72d43a06f,description,en,"Proficiency with core banking platforms (T24, Flexcube, SAP Banking)",LLM
+sys_skills,ae7a8e79-dc6b-4ea0-b839-1a2983058a0c,name,en,credit scoring models,LLM
+sys_skills,ae7a8e79-dc6b-4ea0-b839-1a2983058a0c,description,en,Development and validation of internal credit scoring and rating models,LLM
+sys_skills,c3a50649-4626-46fd-b275-c78de25382a6,name,en,financial cybersecurity,LLM
+sys_skills,c3a50649-4626-46fd-b275-c78de25382a6,description,en,"Banking-specific security controls, SWIFT CSP, secure transaction protocols",LLM
+sys_skills,74950e6c-e10a-4ba1-adba-54cc5da3fd3d,name,en,digital payments and fintech,LLM
+sys_skills,74950e6c-e10a-4ba1-adba-54cc5da3fd3d,description,en,"Mobile payments, digital wallets, blockchain-based transactions",LLM
+sys_skills,fc33f3a5-1548-4c13-a086-5d241ccf3312,name,en,fraud detection and prevention,LLM
+sys_skills,fc33f3a5-1548-4c13-a086-5d241ccf3312,description,en,"Transaction fraud monitoring, pattern detection, fraud investigation",LLM
+sys_skills,a77b028c-3763-4f76-9325-4a436c9bdea7,name,en,foreign exchange trading,LLM
+sys_skills,a77b028c-3763-4f76-9325-4a436c9bdea7,description,en,"Spot and forward FX transactions, hedging strategies",LLM
+sys_skills,ee71f2e2-de14-4af6-b463-b34dcf707d6b,name,en,IFRS 9 – financial instruments,LLM
+sys_skills,ee71f2e2-de14-4af6-b463-b34dcf707d6b,description,en,"Expected credit loss models, hedge accounting, financial instrument classification",LLM
+sys_skills,07a330e7-0e50-4d62-8878-b1649a76b26b,name,en,banking internal audit,LLM
+sys_skills,07a330e7-0e50-4d62-8878-b1649a76b26b,description,en,"Banking audit methodologies, regulatory examination preparation, control testing",LLM
+sys_skills,9ab43c61-127d-46fe-aa65-15c189541e6f,name,en,KYC due diligence,LLM
+sys_skills,9ab43c61-127d-46fe-aa65-15c189541e6f,description,en,"Customer identification and verification, enhanced due diligence for high-risk clients",LLM
+sys_skills,edd3f0d8-f550-4164-82c1-346d67412d75,name,en,loan origination,LLM
+sys_skills,edd3f0d8-f550-4164-82c1-346d67412d75,description,en,"Mortgage and consumer loan processing, credit analysis, approval workflows",LLM
+sys_skills,fb22513c-b754-43d3-8492-af60ef9c21ab,name,en,market risk management,LLM
+sys_skills,fb22513c-b754-43d3-8492-af60ef9c21ab,description,en,"VaR calculations, market risk models, trading book risk assessment",LLM
+sys_skills,70eac109-a3cf-49c6-8e56-27258d7ccd9f,name,en,MiFID II compliance,LLM
+sys_skills,70eac109-a3cf-49c6-8e56-27258d7ccd9f,description,en,Markets in Financial Instruments Directive compliance for investment services,LLM
+sys_skills,f8bb70cb-6b59-440a-9029-43ce346b5846,name,en,NPL management,LLM
+sys_skills,f8bb70cb-6b59-440a-9029-43ce346b5846,description,en,"Non-performing loan classification, provisioning, workout strategies",LLM
+sys_skills,1baa71b3-3c9b-447b-9dec-2f25dd106792,name,en,operational risk management,LLM
+sys_skills,1baa71b3-3c9b-447b-9dec-2f25dd106792,description,en,"RCSA, loss event collection, key risk indicators, operational risk capital",LLM
+sys_skills,0608d51d-c406-4f5b-95db-a8f12943eda8,name,en,private banking,LLM
+sys_skills,0608d51d-c406-4f5b-95db-a8f12943eda8,description,en,"HNW client advisory, portfolio management, estate planning",LLM
+sys_skills,05da8307-95ac-49a6-aa71-1d1facf8ee41,name,en,PSD2 and open banking,LLM
+sys_skills,05da8307-95ac-49a6-aa71-1d1facf8ee41,description,en,"Payment Services Directive 2, API banking, third-party provider integration",LLM
+sys_skills,ff887132-c4e2-485f-b1ff-fa0eea56b860,name,en,relationship banking,LLM
+sys_skills,ff887132-c4e2-485f-b1ff-fa0eea56b860,description,en,"Client relationship development, cross-selling, client retention strategies",LLM
+sys_skills,97f08876-72ae-4239-a20b-b33a8f546efb,name,en,stress testing and scenario analysis,LLM
+sys_skills,97f08876-72ae-4239-a20b-b33a8f546efb,description,en,"Regulatory stress tests, scenario design, capital impact assessment",LLM
+sys_skills,84cb18be-414e-4569-aab2-270410e1b3f9,name,en,sustainable finance and ESG,LLM
+sys_skills,84cb18be-414e-4569-aab2-270410e1b3f9,description,en,"ESG criteria integration, green bonds, sustainable lending frameworks",LLM
+sys_skills,02ed6f70-f054-4be1-80a7-029a80e933bc,name,en,trade finance,LLM
+sys_skills,02ed6f70-f054-4be1-80a7-029a80e933bc,description,en,"Letters of credit, documentary collections, trade guarantees",LLM
+sys_skills,92765fe4-f8f6-4339-b824-4d218f69d929,name,en,wealth management advisory,LLM
+sys_skills,92765fe4-f8f6-4339-b824-4d218f69d929,description,en,"Comprehensive wealth planning, portfolio construction, and client advisory",LLM
+sys_skills,5d73363d-3ed7-424e-8b22-b849e111d550,name,en,React framework,LLM
+sys_skills,5d73363d-3ed7-424e-8b22-b849e111d550,description,en,JavaScript library for building user interfaces,LLM
+sys_skills,82278484-33f7-4106-9f67-c0f1836313f0,name,en,UI/UX design,LLM
+sys_skills,82278484-33f7-4106-9f67-c0f1836313f0,description,en,User interface and experience design,LLM
+sys_skills,f2f2ebbf-ede3-4708-b7ae-9329caced6fb,name,en,Azure cloud services,LLM
+sys_skills,f2f2ebbf-ede3-4708-b7ae-9329caced6fb,description,en,Microsoft cloud computing platform,LLM
+sys_skills,9e8c4a79-887d-4725-8103-f0e931076c61,name,en,adaptability,LLM
+sys_skills,9e8c4a79-887d-4725-8103-f0e931076c61,description,en,Adjust to new conditions,LLM
+sys_skills,32266c28-2521-4b33-9905-91af1eb1af24,name,en,Scrum Master,LLM
+sys_skills,32266c28-2521-4b33-9905-91af1eb1af24,description,en,Leading Scrum ceremonies,LLM
+sys_skills,e0cdffc3-6b61-4691-8c2e-34a6928ed1b1,name,en,Jenkins,LLM
+sys_skills,e0cdffc3-6b61-4691-8c2e-34a6928ed1b1,description,en,CI/CD pipeline tool,LLM
+sys_skills,4ca8c1ac-2de2-49cc-a339-c6b045608826,name,en,Windows Server administration,LLM
+sys_skills,4ca8c1ac-2de2-49cc-a339-c6b045608826,description,en,Windows server management,LLM
+sys_skills,e551f28f-96d5-40b4-8474-c5fb96224a3f,name,en,supplier negotiation,LLM
+sys_skills,e551f28f-96d5-40b4-8474-c5fb96224a3f,description,en,Negotiating with vendors,LLM
+sys_skills,8657c1dc-4957-4732-8393-055c6465c808,name,en,BPMN,LLM
+sys_skills,8657c1dc-4957-4732-8393-055c6465c808,description,en,Business Process Model Notation,LLM
+sys_skills,9c591e8e-11aa-4743-954c-f1fccaa4c51e,name,en,microservices architecture,LLM
+sys_skills,9c591e8e-11aa-4743-954c-f1fccaa4c51e,description,en,Designing microservice-based applications,LLM
+sys_skills,2a5ba236-6606-41e5-af06-52ded001c048,name,en,Scrum framework,LLM
+sys_skills,2a5ba236-6606-41e5-af06-52ded001c048,description,en,Scrum project management methodology,LLM
+sys_skills,4d751d4a-4e0d-41af-8ede-f0bce2595963,name,en,Android development,LLM
+sys_skills,4d751d4a-4e0d-41af-8ede-f0bce2595963,description,en,Google mobile platform development,LLM
+sys_skills,a9f66442-fca1-4a9b-9ec7-a05ecba0604b,name,en,Kafka,LLM
+sys_skills,a9f66442-fca1-4a9b-9ec7-a05ecba0604b,description,en,Apache Kafka expertise,LLM
+sys_skills,aba8b410-c504-4f42-8831-f645b76a42ef,name,en,German language,LLM
+sys_skills,aba8b410-c504-4f42-8831-f645b76a42ef,description,en,German language proficiency,LLM
+sys_skills,3c650f06-3749-4ce9-818a-f5c8436e33a4,name,en,anti-money laundering,LLM
+sys_skills,3c650f06-3749-4ce9-818a-f5c8436e33a4,description,en,Detect and prevent financial crimes,LLM
+sys_skills,529690d9-b4c4-4205-9e5d-50d2f0e367ed,name,en,negotiation skills,LLM
+sys_skills,529690d9-b4c4-4205-9e5d-50d2f0e367ed,description,en,Business negotiation,LLM
+sys_skills,e91720fd-be73-44ab-b582-374de66c0844,name,en,critical thinking,LLM
+sys_skills,e91720fd-be73-44ab-b582-374de66c0844,description,en,Analyze information objectively,LLM
+sys_skills,06c2b5b1-3642-4f42-b661-7d89da29cff9,name,en,usability testing,LLM
+sys_skills,06c2b5b1-3642-4f42-b661-7d89da29cff9,description,en,Testing user experience,LLM
+sys_skills,e9d27a75-ddc3-45ad-bceb-8946b515e62a,name,en,Kubernetes orchestration,LLM
+sys_skills,e9d27a75-ddc3-45ad-bceb-8946b515e62a,description,en,Container orchestration platform,LLM
+sys_skills,80593e55-184a-4292-b3da-539ef79de142,name,en,time management,LLM
+sys_skills,80593e55-184a-4292-b3da-539ef79de142,description,en,Organize and prioritize tasks effectively,LLM
+sys_skills,de18be78-1eb9-4b6b-89d7-a53708cae725,name,en,graphic design,LLM
+sys_skills,de18be78-1eb9-4b6b-89d7-a53708cae725,description,en,Creating visual designs,LLM
+sys_skills,3672b3fb-d8c2-41fa-86b6-763af8d8ee69,name,en,Linux administration,LLM
+sys_skills,3672b3fb-d8c2-41fa-86b6-763af8d8ee69,description,en,Linux server management,LLM
+sys_skills,45c3fb48-5d76-4d23-8885-2174636c9821,name,en,GDPR compliance,LLM
+sys_skills,45c3fb48-5d76-4d23-8885-2174636c9821,description,en,Data protection regulations,LLM
+sys_skills,7cb5446d-3193-45b0-b407-5acd73cfb527,name,en,frontend development,LLM
+sys_skills,7cb5446d-3193-45b0-b407-5acd73cfb527,description,en,Client-side web development,LLM
+sys_skills,ba879ce8-45a2-41fb-a777-e6cfbb0a37fd,name,en,data analysis,LLM
+sys_skills,ba879ce8-45a2-41fb-a777-e6cfbb0a37fd,description,en,Analyze and interpret complex data,LLM
+sys_skills,c2e5ca5c-351e-4d02-ac8c-3b23033c3361,name,en,blockchain development,LLM
+sys_skills,c2e5ca5c-351e-4d02-ac8c-3b23033c3361,description,en,Distributed ledger technology development,LLM
+sys_skills,cc454dde-de87-4e2e-a33d-925533db0f99,name,en,virtual team management,LLM
+sys_skills,cc454dde-de87-4e2e-a33d-925533db0f99,description,en,Managing remote teams,LLM
+sys_skills,574cbc2d-a5f6-4600-b703-36c65c5a5836,name,en,Google Cloud Platform,LLM
+sys_skills,574cbc2d-a5f6-4600-b703-36c65c5a5836,description,en,Google cloud computing services,LLM
+sys_skills,738eef0a-b969-404c-9a97-42ab3b666eb0,name,en,mentoring,LLM
+sys_skills,738eef0a-b969-404c-9a97-42ab3b666eb0,description,en,Mentoring others,LLM
+sys_skills,6a4609b9-e047-45ac-b40e-5173ff4ce280,name,en,brand strategy,LLM
+sys_skills,6a4609b9-e047-45ac-b40e-5173ff4ce280,description,en,Develop brand identities,LLM
+sys_skills,fdf73ac8-9f71-4103-8d1b-e64b0b1efcea,name,en,wireframing,LLM
+sys_skills,fdf73ac8-9f71-4103-8d1b-e64b0b1efcea,description,en,Creating UI wireframes,LLM
+sys_skills,c3a90c04-655c-44ee-9f0a-47e8609dbf9d,name,en,French language,LLM
+sys_skills,c3a90c04-655c-44ee-9f0a-47e8609dbf9d,description,en,French language proficiency,LLM
+sys_skills,064ed40e-6b9b-4903-a63a-7aa301b6c3a4,name,en,iOS development,LLM
+sys_skills,064ed40e-6b9b-4903-a63a-7aa301b6c3a4,description,en,Apple mobile platform development,LLM
+sys_skills,7a6c822a-e7a1-4283-931a-4bc5f1c433a4,name,en,Redis caching,LLM
+sys_skills,7a6c822a-e7a1-4283-931a-4bc5f1c433a4,description,en,In-memory data structure store,LLM
+sys_skills,4e00c6e8-1450-4ab4-a07c-3fc6fe7d2472,name,en,Elasticsearch,LLM
+sys_skills,4e00c6e8-1450-4ab4-a07c-3fc6fe7d2472,description,en,Search engine expertise,LLM
+sys_skills,5c9a6827-c5f1-4456-bd79-d61e05eb770c,name,en,project management,LLM
+sys_skills,5c9a6827-c5f1-4456-bd79-d61e05eb770c,description,en,Planning and executing projects,LLM
+sys_skills,2901aca9-3bad-415b-aa09-b97359766b77,name,en,backend development,LLM
+sys_skills,2901aca9-3bad-415b-aa09-b97359766b77,description,en,Server-side application development,LLM
+sys_skills,057cb530-dc3d-4eaa-9941-a599f1c41bc5,name,en,GitHub Actions,LLM
+sys_skills,057cb530-dc3d-4eaa-9941-a599f1c41bc5,description,en,GitHub CI/CD,LLM
+sys_skills,f742edbe-e686-4efc-b886-f67cdcf2a280,name,en,help desk,LLM
+sys_skills,f742edbe-e686-4efc-b886-f67cdcf2a280,description,en,IT support services,LLM
+sys_skills,e511c50b-314a-461e-b663-540a8d53c328,name,en,system administration,LLM
+sys_skills,e511c50b-314a-461e-b663-540a8d53c328,description,en,Managing and maintaining IT systems,LLM
+sys_skills,7a3cf833-28a8-4c23-84f2-c99f82bd2aa7,name,en,Grafana,LLM
+sys_skills,7a3cf833-28a8-4c23-84f2-c99f82bd2aa7,description,en,Visualization dashboards,LLM
+sys_skills,80d054a9-00fa-4be8-9899-134e0bf4e882,name,en,Angular framework,LLM
+sys_skills,80d054a9-00fa-4be8-9899-134e0bf4e882,description,en,TypeScript-based web application framework,LLM
+sys_skills,59c79ab6-397b-4a08-a4c9-dcac3e1f0b56,name,en,predictive analytics,LLM
+sys_skills,59c79ab6-397b-4a08-a4c9-dcac3e1f0b56,description,en,Forecasting with data,LLM
+sys_skills,111d92b0-ebc1-4a8e-b290-4da4409548f9,name,en,UML,LLM
+sys_skills,111d92b0-ebc1-4a8e-b290-4da4409548f9,description,en,Unified Modeling Language,LLM
+sys_skills,c60d4a53-b233-401a-9905-724a247f1a34,name,en,Node.js backend development,LLM
+sys_skills,c60d4a53-b233-401a-9905-724a247f1a34,description,en,JavaScript runtime for server-side development,LLM
+sys_skills,9d799c0a-a559-4470-8641-8d081872c287,name,en,quality control,LLM
+sys_skills,9d799c0a-a559-4470-8641-8d081872c287,description,en,Test and verify product quality,LLM
+sys_skills,1e6f34a6-6da3-40a6-9c3f-322b0c25f443,name,en,Terraform,LLM
+sys_skills,1e6f34a6-6da3-40a6-9c3f-322b0c25f443,description,en,Infrastructure as code,LLM
+sys_skills,f1d7eea9-ff40-457a-90b3-e11450ccd171,name,en,DevOps engineering,LLM
+sys_skills,f1d7eea9-ff40-457a-90b3-e11450ccd171,description,en,Development and operations practices,LLM
+sys_skills,150b60ea-3172-4ceb-b5d1-f2368559494a,name,en,GraphQL APIs,LLM
+sys_skills,150b60ea-3172-4ceb-b5d1-f2368559494a,description,en,Query language for APIs,LLM
+sys_skills,c42516b1-4caf-484b-973e-db8774173bab,name,en,cross-functional collaboration,LLM
+sys_skills,c42516b1-4caf-484b-973e-db8774173bab,description,en,Working across departments,LLM
+sys_skills,d8a93d88-4552-44c5-b1f2-43bda5365dfb,name,en,SQL database management,LLM
+sys_skills,d8a93d88-4552-44c5-b1f2-43bda5365dfb,description,en,Structured Query Language for database management,LLM
+sys_skills,60aa8a4b-d20c-43f1-ac87-8a85fc4cc7f8,name,en,patent management,LLM
+sys_skills,60aa8a4b-d20c-43f1-ac87-8a85fc4cc7f8,description,en,Managing intellectual property,LLM
+sys_skills,3ae84ed7-4d21-4e78-a9db-98bc9552e9f6,name,en,problem solving,LLM
+sys_skills,3ae84ed7-4d21-4e78-a9db-98bc9552e9f6,description,en,Finding solutions to challenges,LLM
+sys_skills,418f26c0-da0e-470a-ae6b-43a14143142a,name,en,risk management,LLM
+sys_skills,418f26c0-da0e-470a-ae6b-43a14143142a,description,en,Identify and mitigate financial risks,LLM
+sys_skills,55fa2deb-d2a1-442a-90ab-d54340bd6a98,name,en,Prometheus,LLM
+sys_skills,55fa2deb-d2a1-442a-90ab-d54340bd6a98,description,en,Monitoring systems,LLM
+sys_skills,78598055-192c-4d31-8190-15564d1592cb,name,en,machine learning,LLM
+sys_skills,78598055-192c-4d31-8190-15564d1592cb,description,en,Building and training ML models,LLM
+sys_skills,17d1dcbb-0b87-4d0a-abb7-83e9576099c4,name,en,Power BI,LLM
+sys_skills,17d1dcbb-0b87-4d0a-abb7-83e9576099c4,description,en,Microsoft Power BI expertise,LLM
+sys_skills,e25bbd45-237f-4eb6-9031-9b545d3be73f,name,en,TOGAF,LLM
+sys_skills,e25bbd45-237f-4eb6-9031-9b545d3be73f,description,en,Architecture framework,LLM
+sys_skills,2223994b-be54-42c9-96b3-c7495075bae4,name,en,network administration,LLM
+sys_skills,2223994b-be54-42c9-96b3-c7495075bae4,description,en,Managing computer networks,LLM
+sys_skills,f5589de6-1dcb-49c6-872a-9d37ac939885,name,en,Kanban method,LLM
+sys_skills,f5589de6-1dcb-49c6-872a-9d37ac939885,description,en,Visual workflow management,LLM
+sys_skills,6eeb488a-ce46-4cff-8550-1c16c199941e,name,en,community management,LLM
+sys_skills,6eeb488a-ce46-4cff-8550-1c16c199941e,description,en,Building online communities,LLM
+sys_skills,b989ea8f-df04-4046-ba47-27d06eb826e8,name,en,UX/UI design,LLM
+sys_skills,b989ea8f-df04-4046-ba47-27d06eb826e8,description,en,Design user interfaces,LLM
+sys_skills,5a2d08bb-cf35-483a-94c8-8430065475f0,name,en,ISO 27001,LLM
+sys_skills,5a2d08bb-cf35-483a-94c8-8430065475f0,description,en,Information security standard,LLM
+sys_skills,aa4c1951-af13-485a-923a-4e520caa79d7,name,en,compliance management,LLM
+sys_skills,aa4c1951-af13-485a-923a-4e520caa79d7,description,en,Managing regulatory compliance,LLM
+sys_skills,b994ebe2-00e1-47e0-8507-6dd035db920e,name,en,Tableau,LLM
+sys_skills,b994ebe2-00e1-47e0-8507-6dd035db920e,description,en,Tableau visualization tool,LLM
+sys_skills,f319989e-ea70-4f53-a9c7-edd3335da027,name,en,message queuing,LLM
+sys_skills,f319989e-ea70-4f53-a9c7-edd3335da027,description,en,Message queue systems,LLM
+sys_skills,204c7cf6-72c2-4855-8efe-e287acbd3993,name,en,goal setting,LLM
+sys_skills,204c7cf6-72c2-4855-8efe-e287acbd3993,description,en,Setting SMART goals,LLM
+sys_skills,d43a3430-ef45-44aa-8301-eb2c6cd0073a,name,en,Vue.js framework,LLM
+sys_skills,d43a3430-ef45-44aa-8301-eb2c6cd0073a,description,en,Progressive JavaScript framework for UIs,LLM
+sys_skills,717485a4-054d-442a-ad83-1a42a26417a5,name,en,Docker containerization,LLM
+sys_skills,717485a4-054d-442a-ad83-1a42a26417a5,description,en,Platform for containerized application development,LLM
+sys_skills,60df481c-d55e-4e04-b85c-3faf7c8d2579,name,en,customer journey mapping,LLM
+sys_skills,60df481c-d55e-4e04-b85c-3faf7c8d2579,description,en,Mapping customer experiences,LLM

@@ -78,6 +78,13 @@ COUNTS_SQL = (
 )
 INTEGRITY_SQL = "SELECT coalesce(sum(n),0) FROM (" + " UNION ALL ".join(
     f"SELECT (SELECT count(*) FROM {v}) n" for v in STRUCTURAL_VIEWS) + ") t;"
+# i18n dati (ADR-0029): completezza EN (vista 000207) + anomalie + orfani (000190).
+# NB: gate del DB reale — heuresys_ci non carica i dataset (stessa ragione di 000195).
+I18N_SQL = (
+    "SELECT (SELECT count(*) FROM sys.v_reference_translation_coverage WHERE missing > 0),"
+    " (SELECT count(*) FROM sys.v_reference_translation_coverage WHERE missing < 0),"
+    " (SELECT count(*) FROM sys.v_reference_translation_orphans);"
+)
 
 # Glyphs (ASCII — safe on any console). OK=green, BAD=red, DOT=neutral count, UNK=unknown.
 OK, BAD, DOT, UNK = "[OK]", "[!!]", "[..]", "[? ]"
@@ -223,6 +230,16 @@ def sec_db(no_db):
         nviol = int(re.search(r"-?\d+", integ).group(0))
         s.add(OK if nviol == 0 else BAD,
               f"integrità   6 viste strutturali = {nviol} righe in violazione")
+    i18n = q(I18N_SQL)
+    if i18n is None:
+        s.add(UNK, "i18n dati non valutabile (viste 000190/000207 assenti?)")
+    else:
+        try:
+            gaps, anoms, orphans = (int(v) for v in i18n.replace("\n", "|").split("|")[:3])
+            s.add(OK if gaps == 0 and anoms == 0 and orphans == 0 else BAD,
+                  f"i18n dati   coverage EN: {gaps} campi con gap · {anoms} anomalie · {orphans} orfani")
+        except (ValueError, IndexError):
+            s.add(UNK, f"i18n dati: output psql inatteso: {i18n!r}")
     s.add(DOT, f"utenti {users} · posizioni {positions} · OU {ou} · team {teams} · tenant ACTIVE {tenants}")
     s.add(DOT, f"RBAC {roles} ruoli · {perms} permessi · {maps} mapping · skill {skills}")
     return s, live

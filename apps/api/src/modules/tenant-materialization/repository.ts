@@ -133,10 +133,17 @@ export async function materialize(
   const skillCodeToId = new Map<string, string>();
   let skillsCreated = 0;
   for (const sk of archetype.skills) {
+    // The natural-key unique index (mig 000189/000196) is on (tenant, lower(trim(name))):
+    // post-dedup the surviving row for a name can carry a DIFFERENT code (ESCO:: winner),
+    // so the lookup must match by code OR name, and the insert must tolerate a conflict.
     if (mode === "apply") {
       const ex = await client.query<{ skill_id: string }>(
-        `SELECT skill_id FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_code = $2`,
-        [tenantId, sk.code],
+        `SELECT skill_id FROM sys.sys_skills
+          WHERE skill_tenant_id = $1
+            AND (skill_code = $2 OR lower(trim(skill_name)) = lower(trim($3)))
+          ORDER BY (skill_code = $2) DESC
+          LIMIT 1`,
+        [tenantId, sk.code, sk.name],
       );
       if (ex.rows[0]) {
         skillCodeToId.set(sk.code, ex.rows[0].skill_id);
@@ -144,14 +151,29 @@ export async function materialize(
         const ins = await client.query<{ skill_id: string }>(
           `INSERT INTO sys.sys_skills (skill_tenant_id, skill_code, skill_name, skill_kind, skill_is_global, skill_metadata)
            VALUES ($1, $2, $3, $4, false, jsonb_build_object('materialized_from', $5::text))
+           ON CONFLICT DO NOTHING
            RETURNING skill_id`,
           [tenantId, sk.code, sk.name, sk.kind, archetype.key],
         );
-        skillCodeToId.set(sk.code, ins.rows[0]!.skill_id);
-        skillsCreated++;
+        if (ins.rows[0]) {
+          skillCodeToId.set(sk.code, ins.rows[0].skill_id);
+          skillsCreated++;
+        } else {
+          const again = await client.query<{ skill_id: string }>(
+            `SELECT skill_id FROM sys.sys_skills
+              WHERE skill_tenant_id = $1 AND lower(trim(skill_name)) = lower(trim($2))`,
+            [tenantId, sk.name],
+          );
+          skillCodeToId.set(sk.code, again.rows[0]!.skill_id);
+        }
       }
     } else {
-      const ex = await client.query(`SELECT 1 FROM sys.sys_skills WHERE skill_tenant_id = $1 AND skill_code = $2`, [tenantId, sk.code]);
+      const ex = await client.query(
+        `SELECT 1 FROM sys.sys_skills
+          WHERE skill_tenant_id = $1
+            AND (skill_code = $2 OR lower(trim(skill_name)) = lower(trim($3)))`,
+        [tenantId, sk.code, sk.name],
+      );
       if (ex.rowCount === 0) skillsCreated++;
     }
   }

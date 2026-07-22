@@ -78,6 +78,13 @@ export const skillsService = {
         "SKILL_CODE_CONFLICT",
       );
     }
+    const nameDup = await repo.findSkillByNameInScope(pool, tenantId, body.name);
+    if (nameDup) {
+      throw new ConflictError(
+        `Skill name '${body.name}' already exists in this scope`,
+        "SKILL_NAME_CONFLICT",
+      );
+    }
     return repo.insertSkill(pool, tenantId, { ...body, isGlobal }, actor.userId);
   },
 
@@ -95,6 +102,15 @@ export const skillsService = {
     if (!target.isGlobal && !isPlatform(actor)) {
       if (!actor.tenantId || target.tenantId !== actor.tenantId) {
         throw new NotFoundError("Skill");
+      }
+    }
+    if (patch.name !== undefined) {
+      const nameDup = await repo.findSkillByNameInScope(pool, target.tenantId, patch.name);
+      if (nameDup && nameDup.skillId !== target.skillId) {
+        throw new ConflictError(
+          `Skill name '${patch.name}' already exists in this scope`,
+          "SKILL_NAME_CONFLICT",
+        );
       }
     }
     const updated = await repo.updateSkillPartial(pool, id, patch, actor.userId);

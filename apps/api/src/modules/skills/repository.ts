@@ -126,6 +126,24 @@ export async function findSkillByCodeInScope(
   return res.rows[0] ? toSkill(res.rows[0]) : null;
 }
 
+export async function findSkillByNameInScope(
+  q: DbConnector,
+  tenantId: string | null,
+  name: string,
+): Promise<Skill | null> {
+  // Mirrors the natural-key unique index (COALESCE(skill_tenant_id, zero-uuid),
+  // lower(trim(skill_name))) — mig 000189/000196 — so we can produce a clean
+  // 409 before the DB throws.
+  const res = await q.query<Row>(
+    `SELECT ${COLS} FROM sys.sys_skills
+      WHERE COALESCE(skill_tenant_id, '00000000-0000-0000-0000-000000000000'::uuid)
+            = COALESCE($1::uuid, '00000000-0000-0000-0000-000000000000'::uuid)
+        AND lower(trim(skill_name)) = lower(trim($2))`,
+    [tenantId, name],
+  );
+  return res.rows[0] ? toSkill(res.rows[0]) : null;
+}
+
 export async function insertSkill(
   q: DbConnector,
   tenantId: string | null,

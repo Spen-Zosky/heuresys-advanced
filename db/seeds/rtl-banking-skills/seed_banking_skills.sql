@@ -218,7 +218,7 @@ DELETE FROM sys.sys_gap_analysis_results
 -- ----------------------------------------------------------------------------
 INSERT INTO sys.sys_position_skill_requirements
   (position_skill_requirement_id, position_id, position_skill_requirement_tenant_id,
-   skill_id, required_proficiency, weight, criticality, created_by)
+   skill_id, required_proficiency, weight, criticality, position_skill_requirement_metadata, created_by)
 SELECT
   uuid_generate_v5(uuid_ns_url(), p.position_id::text || ':' || m.skill_id::text),
   p.position_id,
@@ -233,6 +233,9 @@ SELECT
        WHEN 'COMPETENT'  THEN 'MEDIUM'
        ELSE 'LOW'
   END,
+  -- provenance esplicita (come il marker 'peer-group-prevalence-v1' di mig
+  -- 000096): ogni riga PSR deve dichiarare il proprio motore di derivazione.
+  jsonb_build_object('derived_by', 'banking-seed-v1'),
   (SELECT admin_id FROM _cfg)
 FROM sys.sys_positions p
 JOIN sys.sys_job_roles jr ON jr.job_role_id = p.position_job_role_id
@@ -337,7 +340,11 @@ SELECT
   g.uid,
   ua.pos_id,
   'SKILL',
-  jsonb_agg(
+  -- shape canonica: OGGETTO con chiave 'skill_gaps' (lo schema Zod condiviso
+  -- dichiara payload z.record(...) — un array nudo rompe la serializzazione
+  -- della risposta /v1/learning-gaps/analysis-results con un 500; regressione
+  -- S1024→S1025).
+  jsonb_build_object('skill_gaps', jsonb_agg(
     jsonb_build_object(
       'skill_id',   g.skill_id,
       'skill_name', g.skill_name,
@@ -345,7 +352,7 @@ SELECT
       'held',       COALESCE(g.held, 'NONE'),
       'gap_levels', GREATEST(0, g.req_rank - g.held_rank)
     ) ORDER BY g.skill_name
-  ),
+  )),
   round(100.0 * count(*) FILTER (WHERE g.held_rank >= g.req_rank) / count(*), 1),
   now()
 FROM gap_src g

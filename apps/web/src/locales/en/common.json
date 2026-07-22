@@ -217,6 +217,13 @@
       "SELF_ASSESSMENT": "Self-assessment",
       "MANAGER_ASSESSMENT": "Manager assessment"
     },
+    "skillSource": {
+      "SELF_ASSESSMENT": "Self-assessment",
+      "SELF_DECLARATION": "Self-declared",
+      "MANAGER_OVERRIDE": "Manager assignment",
+      "MANAGER_ASSESSMENT": "Manager assessment",
+      "MANUAL+AUTO_LINKED": "Manual + auto-linked"
+    },
     "kpiPolarity": {
       "HIGHER_IS_BETTER": "Higher is better",
       "LOWER_IS_BETTER": "Lower is better",
@@ -485,6 +492,23 @@
       "STUDY": "Study",
       "SABBATICAL": "Sabbatical",
       "UNPAID": "Unpaid",
+      "OTHER": "Other"
+    },
+    "whistleblowingStatus": {
+      "NEW": "New",
+      "UNDER_REVIEW": "Under review",
+      "MORE_INFO_REQUESTED": "More info requested",
+      "SUBSTANTIATED": "Substantiated",
+      "UNSUBSTANTIATED": "Unsubstantiated",
+      "CLOSED": "Closed"
+    },
+    "whistleblowingCategory": {
+      "CORRUPTION": "Corruption",
+      "FRAUD": "Fraud",
+      "HARASSMENT": "Harassment",
+      "SAFETY": "Safety",
+      "DISCRIMINATION": "Discrimination",
+      "DATA_PRIVACY": "Data privacy",
       "OTHER": "Other"
     }
   }

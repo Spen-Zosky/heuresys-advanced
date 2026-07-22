@@ -51,7 +51,8 @@ test.describe("MVP-2a ESS pages — live data", () => {
   test("/me/skills renders (empty state OK if no evidence yet)", async ({ page }) => {
     await page.goto("/me/skills");
     await expect(page.getByTestId("me-skills-page")).toBeVisible();
-    await expect(page.getByTestId("me-skills-count")).toContainText(/\d+\s+evidenze/);
+    // #46 D1: the count badge now counts POSSESSION rows (sys_user_skills), not evidence
+    await expect(page.getByTestId("me-skills-count")).toContainText(/\d+\s+skill/);
   });
 
   test("/me/learning renders (empty or with rows)", async ({ page }) => {

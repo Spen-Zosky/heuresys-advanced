@@ -217,6 +217,13 @@
       "SELF_ASSESSMENT": "Auto-valutazione",
       "MANAGER_ASSESSMENT": "Valutazione del manager"
     },
+    "skillSource": {
+      "SELF_ASSESSMENT": "Auto-valutazione",
+      "SELF_DECLARATION": "Auto-dichiarata",
+      "MANAGER_OVERRIDE": "Assegnazione del manager",
+      "MANAGER_ASSESSMENT": "Valutazione del manager",
+      "MANUAL+AUTO_LINKED": "Manuale + auto-collegata"
+    },
     "kpiPolarity": {
       "HIGHER_IS_BETTER": "Più alto è meglio",
       "LOWER_IS_BETTER": "Più basso è meglio",
@@ -485,6 +492,23 @@
       "STUDY": "Studio",
       "SABBATICAL": "Aspettativa",
       "UNPAID": "Non retribuito",
+      "OTHER": "Altro"
+    },
+    "whistleblowingStatus": {
+      "NEW": "Nuova",
+      "UNDER_REVIEW": "In esame",
+      "MORE_INFO_REQUESTED": "Richieste informazioni",
+      "SUBSTANTIATED": "Fondata",
+      "UNSUBSTANTIATED": "Non fondata",
+      "CLOSED": "Chiusa"
+    },
+    "whistleblowingCategory": {
+      "CORRUPTION": "Corruzione",
+      "FRAUD": "Frode",
+      "HARASSMENT": "Molestie",
+      "SAFETY": "Sicurezza",
+      "DISCRIMINATION": "Discriminazione",
+      "DATA_PRIVACY": "Privacy dei dati",
       "OTHER": "Altro"
     }
   }

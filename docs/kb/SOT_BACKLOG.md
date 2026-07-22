@@ -141,19 +141,20 @@
 ### Serie C+D+E+F+G (S1018 — selezione Enzo "includile tutte", dossier `docs/product/DEVELOPMENT_LINES_{C,D,E,F,G}_*.md`)
 
 - **#42 C/C4 — fondazioni frontend (paginazione server-side, refactor shared-types, apiFetch FormData)** · status: ACTIVE
-  - priority: P1 · effort: ~1.5-2 sessioni · doc: docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md §C4
-  - note: il pattern list-query nasce in W0 (C4-mini) e vale per tutte le pagine NUOVE del batch; qui il retrofit delle ~20 pagine esistenti + refactor dei 62/87 shared schemas senza consumer tipizzato.
+  - priority: P1 · effort: ~1 sessione (residuo misurato) · doc: docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md §C4
+  - note: **audit codice S1026 — ~55-60% GIÀ FATTO** (hook `use-paginated-list.ts` maturo e usato da 18 pagine; FormData multipart live con 1 consumer `ContentMediaPanel`; 57/105 page.tsx già su shared-types). **Residuo misurato**: (a) 11 pagine + 3 componenti ancora su `?limit=200/500` hardcoded — admin/mfa-policy:194, approvals:61, blueprints:52+[variantId]:66, brownfield-adaptation:66-76, career-succession:86-96, content/[id]:81, me/handbook:23, positions/[id]/learning:52, process-owner:68, tenants/[id]/enterprise-typing:46-58, visualizations/[graphId]:53-61 + evidence-drawer:47, gap-closure-panel:34, okr-checkins-dialog:26; 2 pagine a metà (compensation-intelligence reward-gates:124, talent-review nine-box:96); (b) interfacce locali duplicate di tipi già in shared su ~9 file (career-succession, blueprints×2, tenants×2, users×2, positions×2). Retrofit meccanico, delegabile.
 - **#43 C/C2 — editing cataloghi (skills/KPI/learning/job) + nuova `/job-catalog`** · status: ACTIVE
   - priority: P2 · effort: ~2-2.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md §C2
 - **#44 C/C1 — editing People & Org (users/positions/org-units)** · status: ACTIVE
   - priority: P2 · effort: ~2 sessioni · doc: docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md §C1
 - **#45 C/C3 — editing tenant & platform** · status: ACTIVE
   - priority: P3 · effort: ~1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_C_ADMIN_EDITING_UI.md §C3
-- **#46 D/D1 — skill possession per-employee (import wave-2)** · status: ACTIVE
-  - priority: P1 · effort: ~1.5-2 sessioni · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D1
+- **#46 D/D1 — skill possession per-employee (import wave-2)** · status: DONE
+  - priority: P1 · effort: chiuso · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D1
+  - note: ✅ **DONE S1026** — il backend era GIÀ pronto (mig 000180 `sys_user_skills`, endpoint `/v1/me/skills/possession` testato, script `import-d1-user-skills.sh`) ma l'import legacy NON era MAI girato (0/583 righe con external_code — le 583 erano override manager da seed) e NESSUNA UI consumava l'endpoint. Chiuso: **import wave-2 ESEGUITO live** (1445 righe legacy → 1355 in `sys_user_skills`, 158 utenti / 58 skill, idempotente su external_code) + `/me/skills` riscritta con la POSSESSION come vista primaria (proficiency, verifica, anzianità, fonte tradotta — dominio i18n `skillSource` con i valori legacy reali) e il trail evidenze come storico sotto. Spec E2E aggiornata (badge = conteggio possession).
 - **#47 D/D2 — engagement/PULSAR history (sblocca flight-risk pieno + fix dual-shape)** · status: ACTIVE
-  - priority: P1 · effort: ~1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D2
-  - note: regression obbligatoria — recompute flight-risk before/after diffabile su `sys_flight_risk_scores`.
+  - priority: P1 · effort: ~1 sessione (residuo misurato) · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D2
+  - note: **audit codice S1026 — ~40-50% fatto**: il fix dual-shape `response_answers` è GIÀ RISOLTO (`insights/repository.ts:144-152`, guardia jsonb_typeof — la nota doc era stale) e flight-risk legge GIÀ 3 fonti cablate (engagement_survey_responses + survey_responses + sys_pulse_checks 733 righe) con score persistiti in `sys_flight_risk_scores`. **Residuo reale**: import STORICO legacy multi-dominio (survey_responses/check_ins 2495/wellbeing_checkins 1142/engagement 862 — oggi solo seed sintetici) sul modello dello script D1 (`import-d1-user-skills.sh`) + registrazione wave-2 in `brownfield.table_mappings` (oggi 0 righe). Regression obbligatoria: recompute flight-risk before/after diffabile.
 - **#48 D/D3 — goal history GOKMER (gemello di #26)** · status: ACTIVE
   - priority: P2 · effort: ~1 sessione · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D3
   - note: a valle ri-eseguire l'E2E di #26 come regression.
@@ -174,7 +175,8 @@
 - **#54 E/E5 — recruiting/ATS (cluster `/recruiting`)** · status: ACTIVE
   - priority: P2 · effort: ~5-7 sessioni (fasi con commit atomici) · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E5
   - note: decisione Enzo S1018 — in coda al batch (wave W11). Concept-porting dal cantiere evo, mai codice (I5: no RLS).
-- **#55 F/F1 — Essential Capability Ranker** · status: ACTIVE (API DONE S1021, UI residua)
+- **#55 F/F1 — Essential Capability Ranker** · status: DONE
+  - note-chiusura: ✅ **DONE S1026** — residuo UI cablato: sezione "Capability essenziali" su `/org-director` consuma `essential-ranking` con formula e pesi dichiarati nel sottotitolo (dalla response) e TUTTI i componenti drillabili per riga (econ/crit/scarsità/maturità/domanda·critiche/titolari — mai solo il blend); spec E2E `gap1-consoles` estesa. Il ranking ora poggia sul possesso skill REALE post-import D1 (#46). Drill su `/positions/[id]`: il ranking è org-wide by design (aggregate, mai who-holds-what) — nessun contratto per-position esposto; se il prodotto lo vorrà è un item nuovo.
   - priority: P1 · effort: ~1.5-2 sessioni · doc: docs/product/DEVELOPMENT_LINES_F_PRESCRIPTIVE_INTELLIGENCE.md §F1
   - **API consegnata** (S1021, commit in arrivo): `GET /v1/capability/composition/essential-ranking` — ranking skill per investment-priority = essentiality·(1−maturity), essentiality = 0.4·econ + 0.3·crit + 0.3·scarcity (pesi dichiarati in `@heuresys/shared/schemas/essential-capability`). Componenti drillabili (spiegabilità), scope tenant, orgGate=aggregate. Alimentato dagli input reali incl. sys_user_skills (#46 D1). Test 6/6 (formula riproducibile asserita). Scoperta vs spec: `position_economic_weight` è 0 (valore economico ricavato dalle compensation band); criticality quasi tutta MEDIUM.
   - **residuo (UI)**: sezione "Capability essenziali" in `/org-director` + drill su `/positions/[positionId]` — non ancora cablata (frontend). L'endpoint e la formula sono la parte a valore ("dove investo"); la UI la consuma.

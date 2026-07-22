@@ -48,15 +48,19 @@ describe("/v1/me/permissions", () => {
 
   it("a USER persona gets self-scoped grants and a strictly narrower set than an admin", async () => {
     // NOTE: in the current v5 seed the USER role holds broad :read grants (tenant/user/position/
-    // org/skill/blueprint/... — 12 non-self reads + self perms = 35). So we assert the self grants
-    // and that the set is materially smaller than PLATFORM_ADMIN (99), NOT the absence of :read.
+    // org/skill/blueprint/... — non-self reads + self perms). So we assert the self grants and
+    // that the set is MATERIALLY smaller than PLATFORM_ADMIN's — derived from the live matrix,
+    // not a hardcoded count (every new self-floor permission used to break a magic "< 50").
     const r = await suite.app.inject({ method: "GET", url: "/v1/me/permissions", headers: { cookie: ch(employeeC) } });
     expect(r.statusCode).toBe(200);
     const b = r.json() as { roles: string[]; permissions: string[] };
     expect(b.roles).toContain("USER");
     expect(b.permissions).toContain("assessment:read:self");   // self-service grants present
     expect(b.permissions.length).toBeGreaterThan(0);
-    expect(b.permissions.length).toBeLessThan(50);              // narrower than PLATFORM_ADMIN (99)
+
+    const a = await suite.app.inject({ method: "GET", url: "/v1/me/permissions", headers: { cookie: ch(adminC) } });
+    const adminPerms = (a.json() as { permissions: string[] }).permissions;
+    expect(b.permissions.length).toBeLessThan(adminPerms.length * 0.75); // materially narrower
   });
 
   it("unauthenticated → 401", async () => {

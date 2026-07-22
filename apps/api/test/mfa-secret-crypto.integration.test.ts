@@ -59,7 +59,6 @@ describe("QW-SEC6 MFA secret crypto (AES-256-GCM encryption-at-rest)", () => {
   beforeAll(() => {
     if (!keyOn) {
       // Loud, not silent (R5): the suite is meant to run with the key present.
-      // eslint-disable-next-line no-console
       console.warn(
         "[mfa-secret-crypto] MFA_ENCRYPTION_KEY is NOT set — encryption assertions will be skipped.",
       );

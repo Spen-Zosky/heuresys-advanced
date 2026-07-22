@@ -1,11 +1,15 @@
 /**
  * apps/api/test/analytics.integration.test.ts
- * Integration tests for the BI analytics Phase 1 endpoints (role-gated):
- *   GET /v1/analytics/workforce — headcount distribution
- *   GET /v1/analytics/kpi       — KPI achievement rollup
+ * Integration tests for the BI analytics endpoints (role-gated):
+ *   GET /v1/analytics/workforce · /kpi · /attendance · /compensation · /skills
+ *   /skills-by-category · /org-network · /overtime · /skills-group-share
  *
- * Hits the live OCI VM DB through the tunnel (no mocks). The aggregate numbers
- * (headcount 162 — 161 post-collapse + chiara.spenuso imported S988 #8b; kpi targets 248) are pinned against the live seed.
+ * Hits the live OCI VM DB through the tunnel (no mocks). DATA-DERIVED doctrine
+ * (S1025, D-74): no pinned live counts — every expected scalar is derived from
+ * the same source tables the endpoint aggregates, and the rest is asserted as
+ * INVARIANTS (rollups reconcile, ordering, scope semantics, no '(unassigned)'
+ * fallthrough). TENANT-scope tests compare against the PLATFORM body fetched in
+ * the same test, gated on live-derived single-tenancy of the source.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -29,12 +33,42 @@ async function login(t: TestApp, email: string): Promise<S> {
   return { cookies };
 }
 
+/** Scalar derivation helper: first column aliased n, numeric. */
+async function num(sql: string): Promise<number> {
+  const { rows } = await pool.query<{ n: string }>(sql);
+  return Number(rows[0]?.n ?? 0);
+}
+/** First-row text derivation helper: first column aliased v. */
+async function txt(sql: string): Promise<string> {
+  const { rows } = await pool.query<{ v: string }>(sql);
+  return rows[0]?.v ?? "";
+}
+
+// The user → PRIMARY/ACTIVE assignment → position → OU chain, as the analytics
+// repository resolves the org-unit dimension.
+const OU_CHAIN = `
+  JOIN sys.sys_user_position_assignments a
+    ON a.user_position_assignment_user_id = u_id
+   AND a.user_position_assignment_kind = 'PRIMARY'
+   AND a.user_position_assignment_status = 'ACTIVE'
+  JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+  JOIN sys.sys_organization_units ou ON ou.organization_unit_id = p.position_organization_unit_id`;
+
+// Canonical proficiency rank (design contract, not data).
+const PROFICIENCY_RANK = ["NOVICE", "BASIC", "COMPETENT", "PROFICIENT", "EXPERT", "MASTER"];
+
 let suite: TestApp;
 let platformS: S;
 let tenantS: S;
 let employeeS: S;
 
-describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
+async function getJson<T>(url: string, s: S): Promise<T> {
+  const r = await suite.app.inject({ method: "GET", url, headers: { cookie: ch(s.cookies) } });
+  expect(r.statusCode).toBe(200);
+  return r.json() as T;
+}
+
+describe("GET /v1/analytics/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     platformS = await login(suite, "admin@heuresys.com");
@@ -62,76 +96,60 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
-  it("workforce: PLATFORM_ADMIN sees full headcount (162)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/workforce",
-      headers: { cookie: ch(platformS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as {
-      scope: { kind: string; tenantId: string | null };
-      totalHeadcount: number;
-      byOrgUnit: Array<{ dimension: string; headcount: number }>;
-      byJobRole: Array<{ dimension: string; headcount: number }>;
-      generatedAt: string;
-    };
+  interface WorkforceBody {
+    scope: { kind: string; tenantId: string | null };
+    totalHeadcount: number;
+    byOrgUnit: Array<{ dimension: string; headcount: number }>;
+    byJobRole: Array<{ dimension: string; headcount: number }>;
+    generatedAt: string;
+  }
+
+  it("workforce: PLATFORM_ADMIN sees the full headcount (derived live)", async () => {
+    const body = await getJson<WorkforceBody>("/v1/analytics/workforce", platformS);
     expect(body.scope.kind).toBe("PLATFORM");
     expect(body.scope.tenantId).toBeNull();
-    expect(body.totalHeadcount).toBe(162);
+    const expectedHeadcount = await num(`SELECT count(*)::text AS n FROM sys.sys_users`);
+    expect(body.totalHeadcount).toBe(expectedHeadcount);
     expect(body.byOrgUnit.length).toBeGreaterThan(0);
     expect(body.byJobRole.length).toBeGreaterThan(0);
-    // The OU rollup must sum to the total: position-less users (e.g. chiara.spenuso,
-    // imported S988 #8b with no assignment) fall into the COALESCE '(unassigned)' bucket,
-    // so total == ouSum still holds.
+    // The OU rollup must sum to the total: position-less users fall into the
+    // COALESCE '(unassigned)' bucket, so total == ouSum still holds.
     const ouSum = body.byOrgUnit.reduce((acc, r2) => acc + r2.headcount, 0);
-    expect(ouSum).toBe(162);
+    expect(ouSum).toBe(body.totalHeadcount);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
   it("workforce: TENANT_ADMIN sees TENANT scope filtered to own tenant", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/workforce",
-      headers: { cookie: ch(tenantS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as {
-      scope: { kind: string; tenantId: string | null };
-      totalHeadcount: number;
-    };
+    const body = await getJson<WorkforceBody>("/v1/analytics/workforce", tenantS);
     expect(body.scope.kind).toBe("TENANT");
     expect(body.scope.tenantId).not.toBeNull();
-    // Own-tenant headcount is a strict subset of the platform total.
+    // Own-tenant headcount equals the live per-tenant user count.
+    const { rows } = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_users WHERE user_tenant_id = $1::uuid`,
+      [body.scope.tenantId],
+    );
+    expect(body.totalHeadcount).toBe(Number(rows[0]?.n ?? 0));
     expect(body.totalHeadcount).toBeGreaterThan(0);
-    expect(body.totalHeadcount).toBeLessThanOrEqual(162);
   });
 
-  it("kpi: PLATFORM_ADMIN sees the kpi rollup (248 targets)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/kpi",
-      headers: { cookie: ch(platformS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as {
-      scope: { kind: string; tenantId: string | null };
-      totalTargets: number;
-      distinctKpis: number;
-      byKpi: Array<{
-        kpiCode: string;
-        kpiName: string;
-        targetsCount: number;
-        avgAchievementPct: number | null;
-      }>;
-    };
+  interface KpiBody {
+    scope: { kind: string; tenantId: string | null };
+    totalTargets: number;
+    distinctKpis: number;
+    byKpi: Array<{ kpiCode: string; kpiName: string; targetsCount: number; avgAchievementPct: number | null }>;
+  }
+
+  it("kpi: PLATFORM_ADMIN sees the kpi rollup (derived live)", async () => {
+    const body = await getJson<KpiBody>("/v1/analytics/kpi", platformS);
     expect(body.scope.kind).toBe("PLATFORM");
-    expect(body.totalTargets).toBe(248);
-    expect(body.distinctKpis).toBeGreaterThan(0);
+    const expectedTargets = await num(`SELECT count(*)::text AS n FROM sys.sys_kpi_targets`);
+    const expectedKpis = await num(`SELECT count(DISTINCT kpi_target_kpi_id)::text AS n FROM sys.sys_kpi_targets`);
+    expect(body.totalTargets).toBe(expectedTargets);
+    expect(body.distinctKpis).toBe(expectedKpis);
     expect(body.byKpi.length).toBeGreaterThan(0);
     // targetsCount across distinct KPIs sums to the total.
     const cntSum = body.byKpi.reduce((acc, k) => acc + k.targetsCount, 0);
-    expect(cntSum).toBe(248);
+    expect(cntSum).toBe(body.totalTargets);
   });
 
   it("kpi: USER (employee) lacks analytics:view → 403", async () => {
@@ -143,9 +161,7 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect(r.statusCode).toBe(403);
   });
 
-  // --- Attendance (P2) — deterministic anchors pinned against the live seed
-  // (S961/S958): 3180 attendance rows, single tenant (RTL Bank). Overtime is
-  // sourced from attendance_hours_overtime (sys_overtime excluded by design).
+  // --- Attendance — anchors derived live from sys.sys_attendance.
 
   interface AttendanceBody {
     scope: { kind: string; tenantId: string | null };
@@ -172,55 +188,66 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
-  it("attendance: PLATFORM_ADMIN sees full worked-hours rollup (deterministic seed anchors)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/attendance",
-      headers: { cookie: ch(platformS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as AttendanceBody;
+  it("attendance: PLATFORM_ADMIN sees the full worked-hours rollup (derived live)", async () => {
+    const body = await getJson<AttendanceBody>("/v1/analytics/attendance", platformS);
     expect(body.scope.kind).toBe("PLATFORM");
     expect(body.scope.tenantId).toBeNull();
-    // Grand totals (round to 2 dp, summed over the static 3180-row seed).
-    expect(body.totalRegularHours).toBeCloseTo(28347.3, 1);
-    expect(body.totalOvertimeHours).toBeCloseTo(3011.6, 1);
-    expect(body.totalHours).toBeCloseTo(31358.9, 1);
-    // 15 monthly buckets; the monthly totals reconcile to the grand total.
-    expect(body.monthly.length).toBe(15);
+    // Grand totals derived from the source table (endpoint rounds buckets to 2dp).
+    const reg = await num(`SELECT round(sum(attendance_hours_regular), 2)::text AS n FROM sys.sys_attendance`);
+    const ot = await num(`SELECT round(sum(attendance_hours_overtime), 2)::text AS n FROM sys.sys_attendance`);
+    const tot = await num(`SELECT round(sum(attendance_hours_total), 2)::text AS n FROM sys.sys_attendance`);
+    expect(body.totalRegularHours).toBeCloseTo(reg, 1);
+    expect(body.totalOvertimeHours).toBeCloseTo(ot, 1);
+    expect(body.totalHours).toBeCloseTo(tot, 1);
+    // Monthly buckets: count + first/last month derived; totals reconcile.
+    const monthCount = await num(
+      `SELECT count(DISTINCT date_trunc('month', attendance_date))::text AS n FROM sys.sys_attendance`,
+    );
+    expect(body.monthly.length).toBe(monthCount);
+    expect(body.monthly[0]?.month).toBe(
+      await txt(`SELECT to_char(min(attendance_date), 'YYYY-MM') AS v FROM sys.sys_attendance`),
+    );
+    expect(body.monthly[body.monthly.length - 1]?.month).toBe(
+      await txt(`SELECT to_char(max(attendance_date), 'YYYY-MM') AS v FROM sys.sys_attendance`),
+    );
     const monthlySum = body.monthly.reduce((acc, m) => acc + m.totalHours, 0);
     expect(monthlySum).toBeCloseTo(body.totalHours, 0);
-    // Months come back chronological (YYYY-MM string order).
-    expect(body.monthly[0]?.month).toBe("2024-10");
-    expect(body.monthly[body.monthly.length - 1]?.month).toBe("2025-12");
-    // 22 OUs, every attendance row resolves to a real OU (no '(unassigned)').
-    expect(body.byOrgUnit.length).toBe(22);
+    // Every attendance row resolves to a real OU (no '(unassigned)') and the OU
+    // dimension count matches the live chain.
     expect(body.byOrgUnit.some((o) => o.dimension === "(unassigned)")).toBe(false);
-    // Top OU by total hours (byOrgUnit is total-desc ordered).
-    expect(body.byOrgUnit[0]?.dimension).toBe("Divisione Risk & Compliance");
-    expect(body.byOrgUnit[0]?.totalHours).toBeCloseTo(7120, 1);
+    const ouCount = await num(
+      `SELECT count(DISTINCT ou.organization_unit_id)::text AS n
+         FROM (SELECT DISTINCT attendance_subject_user_id AS u_id FROM sys.sys_attendance) att
+         ${OU_CHAIN}`,
+    );
+    expect(body.byOrgUnit.length).toBe(ouCount);
+    // byOrgUnit is total-desc ordered.
+    for (let i = 1; i < body.byOrgUnit.length; i++) {
+      expect(body.byOrgUnit[i]!.totalHours).toBeLessThanOrEqual(body.byOrgUnit[i - 1]!.totalHours);
+    }
+    const ouSum = body.byOrgUnit.reduce((acc, o) => acc + o.totalHours, 0);
+    expect(ouSum).toBeCloseTo(body.totalHours, 0);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
-  it("attendance: TENANT_ADMIN sees TENANT scope (RTL is the only attendance tenant → equals platform totals)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/attendance",
-      headers: { cookie: ch(tenantS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as AttendanceBody;
+  it("attendance: TENANT_ADMIN sees TENANT scope (equals platform when the source is single-tenant)", async () => {
+    const platformBody = await getJson<AttendanceBody>("/v1/analytics/attendance", platformS);
+    const body = await getJson<AttendanceBody>("/v1/analytics/attendance", tenantS);
     expect(body.scope.kind).toBe("TENANT");
     expect(body.scope.tenantId).not.toBeNull();
-    // All 3180 attendance rows belong to RTL Bank, so the RTL tenant scope
-    // returns the same totals as the platform aggregate.
-    expect(body.totalHours).toBeCloseTo(31358.9, 1);
-    expect(body.byOrgUnit.length).toBe(22);
+    const tenants = await num(
+      `SELECT count(DISTINCT u.user_tenant_id)::text AS n
+         FROM sys.sys_attendance at JOIN sys.sys_users u ON u.user_id = at.attendance_subject_user_id`,
+    );
+    if (tenants === 1) {
+      expect(body.totalHours).toBeCloseTo(platformBody.totalHours, 1);
+      expect(body.byOrgUnit.length).toBe(platformBody.byOrgUnit.length);
+    } else {
+      expect(body.totalHours).toBeLessThanOrEqual(platformBody.totalHours);
+    }
   });
 
-  // --- Compensation equity (P2) — deterministic anchors: 155 banded profiles
-  // across 21 OUs, mid €28k–80k, all in tenant RTL Bank (the other tenant's
-  // profiles are unbanded → dropped by the inner JOIN to compensation_bands).
+  // --- Compensation equity — anchors derived live from the banded-profile join.
 
   interface CompensationBody {
     scope: { kind: string; tenantId: string | null };
@@ -234,6 +261,9 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     generatedAt: string;
   }
 
+  const BANDED_JOIN = `FROM sys.sys_position_compensation_profiles pcp
+    JOIN sys.sys_compensation_bands b ON b.compensation_band_id = pcp.compensation_band_id`;
+
   it("compensation: USER (employee) lacks analytics:view → 403", async () => {
     const r = await suite.app.inject({
       method: "GET",
@@ -244,51 +274,50 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
-  it("compensation: PLATFORM_ADMIN sees banded equity rollup (deterministic seed anchors)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/compensation",
-      headers: { cookie: ch(platformS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as CompensationBody;
+  it("compensation: PLATFORM_ADMIN sees the banded equity rollup (derived live)", async () => {
+    const body = await getJson<CompensationBody>("/v1/analytics/compensation", platformS);
     expect(body.scope.kind).toBe("PLATFORM");
     expect(body.scope.tenantId).toBeNull();
-    expect(body.totalProfiles).toBe(155);
-    expect(body.ouCount).toBe(21);
-    expect(body.bandingByOu.length).toBe(21);
+    const expectedProfiles = await num(`SELECT count(*)::text AS n ${BANDED_JOIN}`);
+    expect(body.totalProfiles).toBe(expectedProfiles);
+    expect(body.ouCount).toBe(body.bandingByOu.length);
     // One scatter point per banded profile.
-    expect(body.scatter.length).toBe(155);
     expect(body.scatter.length).toBe(body.totalProfiles);
-    // Overall mid-€ range across all banded positions.
-    expect(body.overallMinMidEur).toBe(28000);
-    expect(body.overallMaxMidEur).toBe(80000);
-    // Largest OU cell (Risk & Compliance, 38 banded positions).
-    const rc = body.bandingByOu.find((b) => b.ou === "Divisione Risk & Compliance");
-    expect(rc?.count).toBe(38);
-    expect(rc?.min).toBe(34000);
-    expect(rc?.max).toBe(80000);
-    expect(rc?.median).toBeCloseTo(45000, 0);
+    // Overall mid-€ range across all banded positions, derived live.
+    expect(body.overallMinMidEur).toBe(await num(`SELECT min(b.compensation_band_mid_eur)::text AS n ${BANDED_JOIN}`));
+    expect(body.overallMaxMidEur).toBe(await num(`SELECT max(b.compensation_band_mid_eur)::text AS n ${BANDED_JOIN}`));
+    // Every OU cell is internally consistent (min ≤ q1 ≤ median ≤ q3 ≤ max, count > 0).
+    for (const cell of body.bandingByOu) {
+      expect(cell.count).toBeGreaterThan(0);
+      expect(cell.min).toBeLessThanOrEqual(cell.q1);
+      expect(cell.q1).toBeLessThanOrEqual(cell.median);
+      expect(cell.median).toBeLessThanOrEqual(cell.q3);
+      expect(cell.q3).toBeLessThanOrEqual(cell.max);
+    }
+    // OU cell counts reconcile to the total.
+    const cellSum = body.bandingByOu.reduce((acc, c) => acc + c.count, 0);
+    expect(cellSum).toBe(body.totalProfiles);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
-  it("compensation: TENANT_ADMIN sees TENANT scope (RTL holds all banded profiles → equals platform)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/compensation",
-      headers: { cookie: ch(tenantS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as CompensationBody;
+  it("compensation: TENANT_ADMIN sees TENANT scope (equals platform when single-tenant)", async () => {
+    const platformBody = await getJson<CompensationBody>("/v1/analytics/compensation", platformS);
+    const body = await getJson<CompensationBody>("/v1/analytics/compensation", tenantS);
     expect(body.scope.kind).toBe("TENANT");
     expect(body.scope.tenantId).not.toBeNull();
-    expect(body.totalProfiles).toBe(155);
-    expect(body.bandingByOu.length).toBe(21);
+    const tenants = await num(
+      `SELECT count(DISTINCT pcp.position_compensation_profile_tenant_id)::text AS n ${BANDED_JOIN}`,
+    );
+    if (tenants === 1) {
+      expect(body.totalProfiles).toBe(platformBody.totalProfiles);
+      expect(body.bandingByOu.length).toBe(platformBody.bandingByOu.length);
+    } else {
+      expect(body.totalProfiles).toBeLessThanOrEqual(platformBody.totalProfiles);
+    }
   });
 
-  // --- Skills coverage (P2) — deterministic anchors: 902 evidences, 156 users,
-  // 21 OUs, 47 OU×proficiency cells, 5 proficiency levels (MASTER absent). All
-  // single-tenant (RTL). This is COVERAGE, not a held-vs-required gap.
+  // --- Skills coverage — anchors derived live from sys_user_skill_evidence.
+  // This is COVERAGE, not a held-vs-required gap.
 
   interface SkillsBody {
     scope: { kind: string; tenantId: string | null };
@@ -312,66 +341,67 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
-  it("skills: PLATFORM_ADMIN sees coverage heatmap rollup (deterministic seed anchors)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/skills",
-      headers: { cookie: ch(platformS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as SkillsBody;
+  it("skills: PLATFORM_ADMIN sees the coverage heatmap rollup (derived live)", async () => {
+    const body = await getJson<SkillsBody>("/v1/analytics/skills", platformS);
     expect(body.scope.kind).toBe("PLATFORM");
     expect(body.scope.tenantId).toBeNull();
-    expect(body.totalEvidence).toBe(902);
-    expect(body.distinctUsers).toBe(156);
-    expect(body.distinctOrgUnits).toBe(21);
-    expect(body.orgUnits.length).toBe(21);
-    // 5 levels present, rank-ordered; MASTER absent in the seed.
-    expect(body.proficiencyLevels).toEqual(["NOVICE", "BASIC", "COMPETENT", "PROFICIENT", "EXPERT"]);
-    // 47 populated OU×proficiency cells, none falling through to '(unassigned)'.
-    expect(body.cells.length).toBe(47);
+    expect(body.totalEvidence).toBe(await num(`SELECT count(*)::text AS n FROM sys.sys_user_skill_evidence`));
+    expect(body.distinctUsers).toBe(
+      await num(`SELECT count(DISTINCT user_skill_evidence_user_id)::text AS n FROM sys.sys_user_skill_evidence`),
+    );
+    expect(body.distinctOrgUnits).toBe(body.orgUnits.length);
+    // Proficiency levels present = live DISTINCT set, canonical-rank ordered.
+    const { rows: lvlRows } = await pool.query<{ p: string }>(
+      `SELECT DISTINCT user_skill_evidence_declared_proficiency AS p FROM sys.sys_user_skill_evidence`,
+    );
+    const expectedLevels = PROFICIENCY_RANK.filter((l) => lvlRows.some((r2) => r2.p === l));
+    expect(body.proficiencyLevels).toEqual(expectedLevels);
+    // No '(unassigned)' fallthrough in the heatmap.
     expect(body.cells.some((c) => c.orgUnit === "(unassigned)")).toBe(false);
-    // Per-proficiency column rollup.
-    const byp = (p: string) => body.byProficiency.find((b) => b.proficiency === p);
-    expect(byp("EXPERT")).toMatchObject({ evidenceCount: 691, distinctUsers: 147 });
-    expect(byp("PROFICIENT")).toMatchObject({ evidenceCount: 166, distinctUsers: 48 });
-    expect(byp("COMPETENT")).toMatchObject({ evidenceCount: 35, distinctUsers: 10 });
-    expect(byp("BASIC")).toMatchObject({ evidenceCount: 9, distinctUsers: 3 });
-    expect(byp("NOVICE")).toMatchObject({ evidenceCount: 1, distinctUsers: 1 });
+    expect(body.cells.length).toBeGreaterThan(0);
+    // Per-proficiency column rollup derived live from the single source table.
+    const { rows: bypRows } = await pool.query<{ p: string; ev: string; us: string }>(
+      `SELECT user_skill_evidence_declared_proficiency AS p,
+              count(*)::text AS ev,
+              count(DISTINCT user_skill_evidence_user_id)::text AS us
+         FROM sys.sys_user_skill_evidence GROUP BY 1`,
+    );
+    for (const row of bypRows) {
+      const bucket = body.byProficiency.find((b) => b.proficiency === row.p);
+      expect(bucket).toMatchObject({ evidenceCount: Number(row.ev), distinctUsers: Number(row.us) });
+    }
+    expect(body.byProficiency.length).toBe(bypRows.length);
     // Column totals sum to the grand total of evidences.
     const colSum = body.byProficiency.reduce((acc, b) => acc + b.evidenceCount, 0);
-    expect(colSum).toBe(902);
-    // distinctUsers is NON-additive: per-bucket user counts exceed the grand total
-    // (a user has evidence at multiple proficiency levels).
+    expect(colSum).toBe(body.totalEvidence);
+    // distinctUsers is NON-additive across buckets (>= grand total).
     const bucketUserSum = body.byProficiency.reduce((acc, b) => acc + b.distinctUsers, 0);
-    expect(bucketUserSum).toBeGreaterThan(body.distinctUsers);
-    // Largest heatmap cell.
-    const maxCell = body.cells.find(
-      (c) => c.orgUnit === "Divisione Risk & Compliance" && c.proficiency === "EXPERT",
-    );
-    expect(maxCell).toMatchObject({ evidenceCount: 170, distinctUsers: 35 });
+    expect(bucketUserSum).toBeGreaterThanOrEqual(body.distinctUsers);
+    // Heatmap cells reconcile to the grand total too.
+    const cellSum = body.cells.reduce((acc, c) => acc + c.evidenceCount, 0);
+    expect(cellSum).toBe(body.totalEvidence);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
-  it("skills: TENANT_ADMIN sees TENANT scope (all evidence is single-tenant RTL → equals platform)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/skills",
-      headers: { cookie: ch(tenantS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as SkillsBody;
+  it("skills: TENANT_ADMIN sees TENANT scope (equals platform when single-tenant)", async () => {
+    const platformBody = await getJson<SkillsBody>("/v1/analytics/skills", platformS);
+    const body = await getJson<SkillsBody>("/v1/analytics/skills", tenantS);
     expect(body.scope.kind).toBe("TENANT");
     expect(body.scope.tenantId).not.toBeNull();
-    expect(body.totalEvidence).toBe(902);
-    expect(body.distinctOrgUnits).toBe(21);
+    const tenants = await num(
+      `SELECT count(DISTINCT user_skill_evidence_tenant_id)::text AS n FROM sys.sys_user_skill_evidence`,
+    );
+    if (tenants === 1) {
+      expect(body.totalEvidence).toBe(platformBody.totalEvidence);
+      expect(body.distinctOrgUnits).toBe(platformBody.distinctOrgUnits);
+    } else {
+      expect(body.totalEvidence).toBeLessThanOrEqual(platformBody.totalEvidence);
+    }
   });
 
-  // --- Skills coverage by CATEGORY (BI ①·#8b) — same 902 evidences re-pivoted on
-  // skill_category (y-axis) instead of OU. Deterministic anchors: 902 evidences,
-  // 156 users, 7 categories, 27 category×proficiency cells, 5 proficiency levels
-  // (MASTER absent). DENSE: every evidence resolves to a category (skill_category_id
-  // wired S970). All single-tenant (RTL) → TENANT == PLATFORM.
+  // --- Skills coverage by CATEGORY — the same evidence re-pivoted on
+  // skill_category. DENSE: every evidence resolves to a category (invariant
+  // enforced by mig 000196) → the by-category total equals the evidence total.
 
   interface SkillsByCategoryBody {
     scope: { kind: string; tenantId: string | null };
@@ -384,6 +414,10 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     distinctCategories: number;
     generatedAt: string;
   }
+
+  const CAT_JOIN = `FROM sys.sys_user_skill_evidence e
+    JOIN sys.sys_skills sk ON sk.skill_id = e.user_skill_evidence_skill_id
+    JOIN sys.sys_skill_categories sc ON sc.skill_category_id = sk.skill_category_id`;
 
   it("skills-by-category: unauthenticated → 401", async () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/analytics/skills-by-category" });
@@ -400,68 +434,65 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
-  it("skills-by-category: PLATFORM_ADMIN sees category heatmap rollup (deterministic seed anchors)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/skills-by-category",
-      headers: { cookie: ch(platformS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as SkillsByCategoryBody;
+  it("skills-by-category: PLATFORM_ADMIN sees the category heatmap rollup (derived live, DENSE)", async () => {
+    const body = await getJson<SkillsByCategoryBody>("/v1/analytics/skills-by-category", platformS);
     expect(body.scope.kind).toBe("PLATFORM");
     expect(body.scope.tenantId).toBeNull();
-    expect(body.totalEvidence).toBe(902);
-    expect(body.distinctUsers).toBe(156);
-    expect(body.distinctCategories).toBe(7);
-    expect(body.categories.length).toBe(7);
-    // 5 levels present, rank-ordered; MASTER absent in the seed.
-    expect(body.proficiencyLevels).toEqual(["NOVICE", "BASIC", "COMPETENT", "PROFICIENT", "EXPERT"]);
-    // 27 populated category×proficiency cells; DENSE (every evidence has a category).
-    expect(body.cells.length).toBe(27);
-    // Per-category row rollup (evidence-desc): the 7 categories with their real counts.
-    const byCat = (c: string) => body.byCategory.find((b) => b.category === c);
-    expect(byCat("Results Orientation")).toMatchObject({ evidenceCount: 261, distinctUsers: 97 });
-    expect(byCat("Leadership")).toMatchObject({ evidenceCount: 194, distinctUsers: 84 });
-    expect(byCat("Innovation")).toMatchObject({ evidenceCount: 150, distinctUsers: 122 });
-    expect(byCat("Technical / Domain Expertise")).toMatchObject({ evidenceCount: 117, distinctUsers: 80 });
-    expect(byCat("Customer Focus")).toMatchObject({ evidenceCount: 100, distinctUsers: 73 });
-    expect(byCat("Collaboration")).toMatchObject({ evidenceCount: 50, distinctUsers: 50 });
-    expect(byCat("Adaptability")).toMatchObject({ evidenceCount: 30, distinctUsers: 30 });
-    // byCategory is server-ordered evidence-desc → first row is the largest category.
-    expect(body.byCategory[0]?.category).toBe("Results Orientation");
-    // categories axis (y) is evidence-desc too → identical head.
-    expect(body.categories[0]).toBe("Results Orientation");
-    // Row totals sum to the grand total of evidences.
-    const rowSum = body.byCategory.reduce((acc, b) => acc + b.evidenceCount, 0);
-    expect(rowSum).toBe(902);
-    // distinctUsers is NON-additive: per-category user counts exceed the grand total
-    // (a user has evidence in multiple categories).
-    const bucketUserSum = body.byCategory.reduce((acc, b) => acc + b.distinctUsers, 0);
-    expect(bucketUserSum).toBeGreaterThan(body.distinctUsers);
-    // Largest heatmap cell: Results Orientation × EXPERT.
-    const maxCell = body.cells.find(
-      (c) => c.category === "Results Orientation" && c.proficiency === "EXPERT",
+    const categorized = await num(`SELECT count(*)::text AS n ${CAT_JOIN}`);
+    const allEvidence = await num(`SELECT count(*)::text AS n FROM sys.sys_user_skill_evidence`);
+    // DENSE invariant: every evidence row resolves to a category.
+    expect(categorized).toBe(allEvidence);
+    expect(body.totalEvidence).toBe(categorized);
+    expect(body.distinctUsers).toBe(
+      await num(`SELECT count(DISTINCT e.user_skill_evidence_user_id)::text AS n ${CAT_JOIN}`),
     );
-    expect(maxCell).toMatchObject({ evidenceCount: 205, distinctUsers: 89 });
+    expect(body.distinctCategories).toBe(
+      await num(`SELECT count(DISTINCT sc.skill_category_id)::text AS n ${CAT_JOIN}`),
+    );
+    expect(body.categories.length).toBe(body.distinctCategories);
+    // Per-category row rollup derived live (category display name).
+    const { rows: catRows } = await pool.query<{ c: string; ev: string; us: string }>(
+      `SELECT sc.skill_category_name AS c,
+              count(*)::text AS ev,
+              count(DISTINCT e.user_skill_evidence_user_id)::text AS us
+         ${CAT_JOIN} GROUP BY 1 ORDER BY count(*) DESC`,
+    );
+    expect(body.byCategory.length).toBe(catRows.length);
+    for (const row of catRows) {
+      const bucket = body.byCategory.find((b) => b.category === row.c);
+      expect(bucket).toMatchObject({ evidenceCount: Number(row.ev), distinctUsers: Number(row.us) });
+    }
+    // byCategory is evidence-desc ordered and the axis head matches.
+    for (let i = 1; i < body.byCategory.length; i++) {
+      expect(body.byCategory[i]!.evidenceCount).toBeLessThanOrEqual(body.byCategory[i - 1]!.evidenceCount);
+    }
+    expect(body.categories[0]).toBe(body.byCategory[0]?.category);
+    // Row totals sum to the grand total.
+    const rowSum = body.byCategory.reduce((acc, b) => acc + b.evidenceCount, 0);
+    expect(rowSum).toBe(body.totalEvidence);
+    // Cells reconcile too.
+    const cellSum = body.cells.reduce((acc, c) => acc + c.evidenceCount, 0);
+    expect(cellSum).toBe(body.totalEvidence);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
-  it("skills-by-category: TENANT_ADMIN sees TENANT scope (all evidence single-tenant RTL → equals platform)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/skills-by-category",
-      headers: { cookie: ch(tenantS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as SkillsByCategoryBody;
+  it("skills-by-category: TENANT_ADMIN sees TENANT scope (equals platform when single-tenant)", async () => {
+    const platformBody = await getJson<SkillsByCategoryBody>("/v1/analytics/skills-by-category", platformS);
+    const body = await getJson<SkillsByCategoryBody>("/v1/analytics/skills-by-category", tenantS);
     expect(body.scope.kind).toBe("TENANT");
     expect(body.scope.tenantId).not.toBeNull();
-    expect(body.totalEvidence).toBe(902);
-    expect(body.distinctCategories).toBe(7);
+    const tenants = await num(
+      `SELECT count(DISTINCT user_skill_evidence_tenant_id)::text AS n FROM sys.sys_user_skill_evidence`,
+    );
+    if (tenants === 1) {
+      expect(body.totalEvidence).toBe(platformBody.totalEvidence);
+      expect(body.distinctCategories).toBe(platformBody.distinctCategories);
+    } else {
+      expect(body.totalEvidence).toBeLessThanOrEqual(platformBody.totalEvidence);
+    }
   });
 
-  // --- Org-network metrics (P3) — structural metrics over the position reports-to
-  // graph. The full org chart (~158 positions, is_active not filtered) is the graph.
+  // --- Org-network metrics — structural metrics over the position reports-to graph.
 
   interface OrgNetworkBody {
     scope: { kind: string; tenantId: string | null };
@@ -492,13 +523,7 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
   });
 
   it("org-network: PLATFORM_ADMIN sees the full org-graph metrics", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/org-network",
-      headers: { cookie: ch(platformS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as OrgNetworkBody;
+    const body = await getJson<OrgNetworkBody>("/v1/analytics/org-network", platformS);
     expect(body.scope.kind).toBe("PLATFORM");
     expect(body.scope.tenantId).toBeNull();
 
@@ -549,22 +574,14 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
   });
 
   it("org-network: TENANT_ADMIN sees TENANT scope (positions filtered to own tenant)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/org-network",
-      headers: { cookie: ch(tenantS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as OrgNetworkBody;
+    const body = await getJson<OrgNetworkBody>("/v1/analytics/org-network", tenantS);
     expect(body.scope.kind).toBe("TENANT");
     expect(body.scope.tenantId).not.toBeNull();
     expect(body.totalPositions).toBeGreaterThan(0);
   });
 
-  // --- Overtime requests (P2 ext) — deterministic anchors pinned against the live
-  // seed: 221 overtime REQUESTS (distinct from attendance worked hours), 676.00 h,
-  // €34,267.09, all PENDING, all single-tenant RTL Bank. 4 types present (of 7), 4
-  // months, 22 OUs (every request resolves to a real OU).
+  // --- Overtime requests — anchors derived live from sys.sys_overtime
+  // (distinct from attendance worked hours).
 
   interface OvertimeBody {
     scope: { kind: string; tenantId: string | null };
@@ -593,75 +610,87 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
-  it("overtime: PLATFORM_ADMIN sees the request rollup (deterministic seed anchors)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/overtime",
-      headers: { cookie: ch(platformS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as OvertimeBody;
+  it("overtime: PLATFORM_ADMIN sees the request rollup (derived live)", async () => {
+    const body = await getJson<OvertimeBody>("/v1/analytics/overtime", platformS);
     expect(body.scope.kind).toBe("PLATFORM");
     expect(body.scope.tenantId).toBeNull();
-    // Grand totals.
-    expect(body.totalRequests).toBe(221);
-    expect(body.totalHours).toBeCloseTo(676.0, 1);
-    expect(body.totalCompensationEur).toBeCloseTo(34267.09, 1);
-    // byStatus: every request is PENDING in the seed → single bucket reconciling to the total.
-    expect(body.byStatus.length).toBe(1);
-    expect(body.byStatus[0]?.status).toBe("PENDING");
-    expect(body.byStatus[0]?.count).toBe(221);
-    expect(body.byStatus[0]?.hours).toBeCloseTo(676.0, 1);
+    // Grand totals derived from the source table.
+    expect(body.totalRequests).toBe(await num(`SELECT count(*)::text AS n FROM sys.sys_overtime`));
+    expect(body.totalHours).toBeCloseTo(
+      await num(`SELECT round(sum(overtime_hours), 2)::text AS n FROM sys.sys_overtime`),
+      1,
+    );
+    // byStatus derived live; counts reconcile.
+    const { rows: stRows } = await pool.query<{ s: string; c: string }>(
+      `SELECT overtime_status AS s, count(*)::text AS c FROM sys.sys_overtime GROUP BY 1`,
+    );
+    expect(body.byStatus.length).toBe(stRows.length);
+    for (const row of stRows) {
+      const bucket = body.byStatus.find((b) => b.status === row.s);
+      expect(bucket?.count).toBe(Number(row.c));
+    }
     const statusCountSum = body.byStatus.reduce((acc, s) => acc + s.count, 0);
-    expect(statusCountSum).toBe(221);
-    // byType: 4 of the 7 CHECK types present; counts reconcile; count-desc ordered.
-    expect(body.byType.length).toBe(4);
+    expect(statusCountSum).toBe(body.totalRequests);
+    // byType derived live; count-desc ordered; counts reconcile.
+    const { rows: tyRows } = await pool.query<{ t: string; c: string }>(
+      `SELECT overtime_type AS t, count(*)::text AS c FROM sys.sys_overtime GROUP BY 1`,
+    );
+    expect(body.byType.length).toBe(tyRows.length);
+    for (const row of tyRows) {
+      const bucket = body.byType.find((b) => b.type === row.t);
+      expect(bucket?.count).toBe(Number(row.c));
+    }
     const typeCountSum = body.byType.reduce((acc, t) => acc + t.count, 0);
-    expect(typeCountSum).toBe(221);
-    expect(body.byType[0]?.type).toBe("NIGHT");
-    expect(body.byType[0]?.count).toBe(62);
+    expect(typeCountSum).toBe(body.totalRequests);
     for (let i = 1; i < body.byType.length; i++) {
       expect(body.byType[i]!.count).toBeLessThanOrEqual(body.byType[i - 1]!.count);
     }
-    // monthly: 4 chronological buckets reconciling to the grand total.
-    expect(body.monthly.length).toBe(4);
-    expect(body.monthly[0]?.month).toBe("2025-09");
-    expect(body.monthly[body.monthly.length - 1]?.month).toBe("2025-12");
-    const monthlyHourSum = body.monthly.reduce((acc, m) => acc + m.hours, 0);
-    expect(monthlyHourSum).toBeCloseTo(676.0, 0);
+    // monthly: chronological, first/last derived, totals reconcile.
+    expect(body.monthly.length).toBe(
+      await num(`SELECT count(DISTINCT date_trunc('month', overtime_date))::text AS n FROM sys.sys_overtime`),
+    );
+    expect(body.monthly[0]?.month).toBe(
+      await txt(`SELECT to_char(min(overtime_date), 'YYYY-MM') AS v FROM sys.sys_overtime`),
+    );
+    expect(body.monthly[body.monthly.length - 1]?.month).toBe(
+      await txt(`SELECT to_char(max(overtime_date), 'YYYY-MM') AS v FROM sys.sys_overtime`),
+    );
     const monthlyCountSum = body.monthly.reduce((acc, m) => acc + m.count, 0);
-    expect(monthlyCountSum).toBe(221);
-    // byOrgUnit: 22 OUs, every request resolves (no '(unassigned)'), hours-desc ordered.
-    expect(body.byOrgUnit.length).toBe(22);
+    expect(monthlyCountSum).toBe(body.totalRequests);
+    // byOrgUnit: every request resolves (no '(unassigned)'), hours-desc ordered,
+    // and the OU dimension count matches the live chain.
     expect(body.byOrgUnit.some((o) => o.dimension === "(unassigned)")).toBe(false);
-    expect(body.byOrgUnit[0]?.dimension).toBe("Divisione Risk & Compliance");
-    expect(body.byOrgUnit[0]?.hours).toBeCloseTo(162.8, 1);
+    const ouCount = await num(
+      `SELECT count(DISTINCT ou.organization_unit_id)::text AS n
+         FROM (SELECT DISTINCT overtime_subject_user_id AS u_id FROM sys.sys_overtime) ot
+         ${OU_CHAIN}`,
+    );
+    expect(body.byOrgUnit.length).toBe(ouCount);
+    for (let i = 1; i < body.byOrgUnit.length; i++) {
+      expect(body.byOrgUnit[i]!.hours).toBeLessThanOrEqual(body.byOrgUnit[i - 1]!.hours);
+    }
     const ouCountSum = body.byOrgUnit.reduce((acc, o) => acc + o.count, 0);
-    expect(ouCountSum).toBe(221);
+    expect(ouCountSum).toBe(body.totalRequests);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
-  it("overtime: TENANT_ADMIN sees TENANT scope (RTL is the only overtime tenant → equals platform)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/overtime",
-      headers: { cookie: ch(tenantS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as OvertimeBody;
+  it("overtime: TENANT_ADMIN sees TENANT scope (equals platform when single-tenant)", async () => {
+    const platformBody = await getJson<OvertimeBody>("/v1/analytics/overtime", platformS);
+    const body = await getJson<OvertimeBody>("/v1/analytics/overtime", tenantS);
     expect(body.scope.kind).toBe("TENANT");
     expect(body.scope.tenantId).not.toBeNull();
-    // All 221 overtime requests belong to RTL Bank → TENANT equals the platform aggregate.
-    expect(body.totalRequests).toBe(221);
-    expect(body.byOrgUnit.length).toBe(22);
+    const tenants = await num(`SELECT count(DISTINCT overtime_tenant_id)::text AS n FROM sys.sys_overtime`);
+    if (tenants === 1) {
+      expect(body.totalRequests).toBe(platformBody.totalRequests);
+      expect(body.byOrgUnit.length).toBe(platformBody.byOrgUnit.length);
+    } else {
+      expect(body.totalRequests).toBeLessThanOrEqual(platformBody.totalRequests);
+    }
   });
 
-  // --- Skills-group share (T3.8 chart + T2.6 clustering) — ESCO skill GROUPS.
-  // Catalogue-global rollup (ESCO skills are platform-global, tenantId=null).
-  // Deterministic anchors pinned against the live backfill: 12892 grouped across
-  // 400 distinct groups; largest group = skill/S2.8.1 (314). The catalogue total
-  // (totalSkills) is derived live from sys.sys_skills so the test survives catalogue
-  // cleans (e.g. the S1006 junk purge that took it 21939 → 14093, mig 000160).
+  // --- Skills-group share — ESCO skill GROUPS, catalogue-global rollup
+  // (skill_metadata->>'skill_group_uri'). All anchors derived live.
+
   interface SkillsGroupShareBody {
     scope: { kind: string; tenantId: string | null };
     groups: Array<{ groupCode: string; groupUri: string; skillCount: number; sharePct: number }>;
@@ -689,33 +718,35 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("FORBIDDEN");
   });
 
-  it("skills-group-share: PLATFORM_ADMIN sees the ESCO group distribution (live backfill anchors)", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/skills-group-share",
-      headers: { cookie: ch(platformS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as SkillsGroupShareBody;
-    // Catalogue-global anchors. totalSkills is derived live (catalogue size changes
-    // with cleans); the ESCO-grouped subset (12892 / 400 groups) is stable backfill.
-    const { rows: skillRows } = await pool.query<{ n: string }>(
-      "SELECT count(*)::text AS n FROM sys.sys_skills",
+  it("skills-group-share: PLATFORM_ADMIN sees the ESCO group distribution (derived live)", async () => {
+    const body = await getJson<SkillsGroupShareBody>("/v1/analytics/skills-group-share", platformS);
+    const totalSkills = await num(`SELECT count(*)::text AS n FROM sys.sys_skills`);
+    const totalGrouped = await num(
+      `SELECT count(skill_metadata->>'skill_group_uri')::text AS n FROM sys.sys_skills`,
     );
-    const expectedTotalSkills = Number(skillRows[0]!.n);
-    expect(body.totalSkills).toBe(expectedTotalSkills);
-    expect(body.totalGrouped).toBe(12892);
-    expect(body.distinctGroups).toBe(400);
-    expect(body.ungroupedSkills).toBe(expectedTotalSkills - body.totalGrouped);
-    // top-N groups, skillCount-desc, capped at 25; "other" holds the remaining 375.
-    expect(body.groups.length).toBe(25);
-    expect(body.otherGroupsCount).toBe(400 - 25);
+    const distinctGroups = await num(
+      `SELECT count(DISTINCT skill_metadata->>'skill_group_uri')::text AS n FROM sys.sys_skills`,
+    );
+    expect(body.totalSkills).toBe(totalSkills);
+    expect(body.totalGrouped).toBe(totalGrouped);
+    expect(body.distinctGroups).toBe(distinctGroups);
+    expect(body.ungroupedSkills).toBe(totalSkills - totalGrouped);
+    // top-N groups (capped at 25), skillCount-desc; "other" holds the remainder.
+    expect(body.groups.length).toBe(Math.min(25, distinctGroups));
+    expect(body.otherGroupsCount).toBe(distinctGroups - body.groups.length);
     for (let i = 1; i < body.groups.length; i++) {
       expect(body.groups[i]!.skillCount).toBeLessThanOrEqual(body.groups[i - 1]!.skillCount);
     }
-    // Largest ESCO group in the live backfill = skill/S2.8.1 (314 skills).
-    expect(body.groups[0]!.groupCode).toBe("skill/S2.8.1");
-    expect(body.groups[0]!.skillCount).toBe(314);
+    // Largest group derived live (count + share).
+    const { rows: topRows } = await pool.query<{ uri: string; c: string }>(
+      `SELECT skill_metadata->>'skill_group_uri' AS uri, count(*)::text AS c
+         FROM sys.sys_skills
+        WHERE skill_metadata->>'skill_group_uri' IS NOT NULL
+        GROUP BY 1 ORDER BY count(*) DESC, 1 LIMIT 1`,
+    );
+    expect(body.groups[0]!.groupUri).toBe(topRows[0]!.uri);
+    expect(body.groups[0]!.skillCount).toBe(Number(topRows[0]!.c));
+    expect(body.groups[0]!.sharePct).toBeCloseTo((Number(topRows[0]!.c) / totalGrouped) * 100, 1);
     // groupCode is the readable vocabulary segment (skill/… or isced-f/…), NOT the API path.
     for (const g of body.groups) {
       expect(g.groupCode).toMatch(/^(skill|isced-f|occupation)\//);
@@ -726,22 +757,15 @@ describe("GET /v1/analytics/workforce + /v1/analytics/kpi integration", () => {
     // top-N + the "other" bucket reconcile to the grand grouped total.
     const topSum = body.groups.reduce((acc, g) => acc + g.skillCount, 0);
     expect(topSum + body.otherSkillCount).toBe(body.totalGrouped);
-    // sharePct self-consistent (314/12892 ≈ 2.44%).
-    expect(body.groups[0]!.sharePct).toBeCloseTo((314 / 12892) * 100, 1);
     expect(new Date(body.generatedAt).getTime()).toBeGreaterThan(0);
   });
 
   it("skills-group-share: TENANT_ADMIN sees TENANT scope tag but the same global catalogue", async () => {
-    const r = await suite.app.inject({
-      method: "GET",
-      url: "/v1/analytics/skills-group-share",
-      headers: { cookie: ch(tenantS.cookies) },
-    });
-    expect(r.statusCode).toBe(200);
-    const body = r.json() as SkillsGroupShareBody;
+    const platformBody = await getJson<SkillsGroupShareBody>("/v1/analytics/skills-group-share", platformS);
+    const body = await getJson<SkillsGroupShareBody>("/v1/analytics/skills-group-share", tenantS);
     expect(body.scope.kind).toBe("TENANT");
     // The ESCO catalogue is global → TENANT sees the same totals as PLATFORM.
-    expect(body.totalGrouped).toBe(12892);
-    expect(body.distinctGroups).toBe(400);
+    expect(body.totalGrouped).toBe(platformBody.totalGrouped);
+    expect(body.distinctGroups).toBe(platformBody.distinctGroups);
   });
 });

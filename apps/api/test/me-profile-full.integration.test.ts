@@ -8,7 +8,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import type { MeProfileFull } from "@heuresys/shared";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
-import { closePool } from "../src/db/client.js";
+import { closePool, pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
@@ -60,11 +60,19 @@ describe("GET /v1/me/profile/full", () => {
     expect(b.addresses.length).toBeGreaterThanOrEqual(1);
     expect(b.addresses.some((a) => a.kind === "PERMANENT")).toBe(true);
 
-    // employment (compensation + SAP) imported, salary coerced to number
+    // employment (compensation + SAP) imported, salary coerced to number.
+    // payScaleLevel derived live (it legitimately changes with CCNL re-leveling
+    // seeds — S1024/S1025); pernr is the stable SAP identity.
     expect(b.employment).not.toBeNull();
     const emp = b.employment!;
     expect(typeof emp.salary).toBe("number");
-    expect(emp.payScaleLevel).toBe("3A3L");
+    const { rows: lvlRows } = await pool.query<{ lvl: string | null }>(
+      `SELECT e.user_employment_pay_scale_level AS lvl
+         FROM sys.sys_user_employment e
+         JOIN sys.sys_users u ON u.user_id = e.user_employment_user_id
+        WHERE u.user_email = 'tommaso.fiore@rtl-bank.org'`,
+    );
+    expect(emp.payScaleLevel).toBe(lvlRows[0]?.lvl ?? null);
     expect(emp.pernr).toBe("00000390");
 
     // banking imported

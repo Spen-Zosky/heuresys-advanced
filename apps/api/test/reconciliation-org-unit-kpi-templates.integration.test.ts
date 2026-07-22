@@ -114,11 +114,20 @@ describe('reconciliation D4 — org-unit KPI template layer (W2)', () => {
     });
   });
 
-  describe('regression — the instance org model is untouched', () => {
-    it('26 instance org units / 162 positions / 24 teams unchanged', async () => {
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_organization_units`)).toBe(26);
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_positions`)).toBe(162);
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_teams`)).toBe(24);
+  describe('regression — the instance org model is untouched by the template layer', () => {
+    // Invariant-based (no pinned live counts — the org model legitimately grows):
+    // the template layer is tenant-LESS by design, so any tenant-less row leaking
+    // into the instance org tables would be a W2 regression.
+    it('instance org rows all stay tenant-scoped (0 tenant-less leakage)', async () => {
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_organization_units WHERE organization_unit_tenant_id IS NULL`,
+      )).toBe(0);
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_positions WHERE position_tenant_id IS NULL`,
+      )).toBe(0);
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_teams WHERE team_tenant_id IS NULL`,
+      )).toBe(0);
     });
   });
 

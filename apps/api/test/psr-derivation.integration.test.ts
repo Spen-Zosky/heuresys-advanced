@@ -1,11 +1,12 @@
 import { describe, it, expect, afterAll } from "vitest";
 import { pool, closePool } from "../src/db/client.js";
 
-// ② Fase 3 — PSR-population (mig 000096): sys.sys_position_skill_requirements derived via
-// peer-group-prevalence-v1 (job_role→skill, tenant-local). These assertions lock the
-// derivation invariants so a future schema/data change can't silently empty or corrupt it.
+// ② Fase 3 — PSR-population invariants. The rows were first derived by mig 000096
+// (peer-group-prevalence-v1); the RTL set was later REPLACED by the banking-domain
+// seed (banking-seed-v1, S1024/S1025). The durable invariant: every PSR row declares
+// its derivation engine via metadata->>'derived_by' from the known-marker set.
 
-const MARKER = "peer-group-prevalence-v1";
+const MARKERS = ["peer-group-prevalence-v1", "banking-seed-v1"];
 const PROFS = ["NOVICE", "BASIC", "COMPETENT", "PROFICIENT", "EXPERT", "MASTER"];
 const CRITS = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
 
@@ -13,20 +14,20 @@ afterAll(async () => {
   await closePool();
 });
 
-describe("② Fase 3 PSR derivation (mig 000096)", () => {
-  it("derived requirement rows exist and all carry the provenance marker", async () => {
+describe("② Fase 3 PSR derivation invariants", () => {
+  it("requirement rows exist and every row carries a known provenance marker", async () => {
     const { rows } = await pool.query<{ derived: string; total: string }>(
-      `SELECT count(*) FILTER (WHERE position_skill_requirement_metadata->>'derived_by' = $1)::text AS derived,
+      `SELECT count(*) FILTER (WHERE position_skill_requirement_metadata->>'derived_by' = ANY($1))::text AS derived,
               count(*)::text AS total
          FROM sys.sys_position_skill_requirements`,
-      [MARKER],
+      [MARKERS],
     );
     expect(Number(rows[0]!.derived)).toBeGreaterThan(0);
-    // in this DB every PSR row is derived (no manual authoring yet); allow manual rows in future.
-    expect(Number(rows[0]!.total)).toBeGreaterThanOrEqual(Number(rows[0]!.derived));
+    // every row must declare its derivation engine (no silently-unprovenanced rows).
+    expect(Number(rows[0]!.total)).toBe(Number(rows[0]!.derived));
   });
 
-  it("every derived row has a valid proficiency, criticality, weight and >=2 holders", async () => {
+  it("every derived row has a valid proficiency, criticality, weight and (peer-group) >=2 holders", async () => {
     const { rows } = await pool.query<{
       bad_prof: string; bad_crit: string; bad_weight: string; bad_holders: string;
     }>(
@@ -36,8 +37,8 @@ describe("② Fase 3 PSR derivation (mig 000096)", () => {
          count(*) FILTER (WHERE weight < 0.34 OR weight > 1)::text AS bad_weight,
          count(*) FILTER (WHERE (position_skill_requirement_metadata->>'holders')::int < 2)::text AS bad_holders
        FROM sys.sys_position_skill_requirements
-       WHERE position_skill_requirement_metadata->>'derived_by' = $1`,
-      [MARKER, PROFS, CRITS],
+       WHERE position_skill_requirement_metadata->>'derived_by' = ANY($1)`,
+      [MARKERS, PROFS, CRITS],
     );
     expect(Number(rows[0]!.bad_prof)).toBe(0);
     expect(Number(rows[0]!.bad_crit)).toBe(0);
@@ -45,14 +46,15 @@ describe("② Fase 3 PSR derivation (mig 000096)", () => {
     expect(Number(rows[0]!.bad_holders)).toBe(0);
   });
 
-  it("criticality band matches the weight (prevalence) it was derived from", async () => {
+  it("criticality band matches the weight (prevalence) it was derived from (peer-group rows only)", async () => {
+    // the weight→criticality rule is specific to the peer-group engine; the
+    // banking engine derives criticality from the required proficiency instead.
     const { rows } = await pool.query<{ mismatched: string }>(
       `SELECT count(*)::text AS mismatched
          FROM sys.sys_position_skill_requirements
-         WHERE position_skill_requirement_metadata->>'derived_by' = $1
+         WHERE position_skill_requirement_metadata->>'derived_by' = 'peer-group-prevalence-v1'
            AND criticality <> CASE WHEN weight >= 0.8 THEN 'CRITICAL' WHEN weight >= 0.6 THEN 'HIGH'
                                    WHEN weight >= 0.4 THEN 'MEDIUM' ELSE 'LOW' END`,
-      [MARKER],
     );
     expect(Number(rows[0]!.mismatched)).toBe(0);
   });

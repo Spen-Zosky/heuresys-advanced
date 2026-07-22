@@ -13,19 +13,25 @@ const count = async (sql: string): Promise<number> => {
 
 describe('reconciliation F2 imports', () => {
   describe('career_paths (#1)', () => {
-    it('imported 28 RTL rows with deterministic legacy code, valid kind, single tenant', async () => {
-      const { rows } = await pool.query<{ n: number; bad_code: number; bad_kind: number; tenants: number }>(
+    // The original 28-row import carried 21 test-residue rows that existed IN the
+    // legacy source ("Test Auth Path"/"test") — purged by mig 000198 (archived in
+    // audit.career_paths_junk_archive). The durable invariants: real tracks exist,
+    // all legacy-coded, valid kind, single tenant, no test residue.
+    it('real legacy-coded tracks, valid kind, single tenant, no test residue', async () => {
+      const { rows } = await pool.query<{ n: number; bad_code: number; bad_kind: number; tenants: number; residue: number }>(
         `SELECT count(*)::int AS n,
                 count(*) FILTER (WHERE career_path_code NOT LIKE 'LEGACY_CP::%')::int AS bad_code,
                 count(*) FILTER (WHERE career_path_kind NOT IN
                   ('VERTICAL','LATERAL','SPECIALIST','MANAGERIAL','CROSS_FUNCTIONAL'))::int AS bad_kind,
-                count(DISTINCT career_path_tenant_id)::int AS tenants
+                count(DISTINCT career_path_tenant_id)::int AS tenants,
+                count(*) FILTER (WHERE career_path_name IN ('Test Auth Path','test'))::int AS residue
            FROM sys.sys_career_paths`,
       );
-      expect(rows[0]?.n).toBe(28);
+      expect(rows[0]!.n).toBeGreaterThan(0);
       expect(rows[0]?.bad_code).toBe(0);
       expect(rows[0]?.bad_kind).toBe(0);
       expect(rows[0]?.tenants).toBe(1);
+      expect(rows[0]?.residue).toBe(0);
     });
     it('shows POPULATED in the reconciliation view', async () => {
       const { rows } = await pool.query<{ s: string }>(
@@ -80,15 +86,32 @@ describe('reconciliation F2 imports', () => {
     });
   });
 
-  describe('gap_analysis_results (#4) — semantic import', () => {
-    it('imported 270 rows, kind=SKILL, all scored, payload carries the gap composition', async () => {
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_gap_analysis_results`)).toBe(270);
+  describe('gap_analysis_results (#4) — recalculated per-user gaps (S1024 Blocco B, F6 closed)', () => {
+    // The 270-row legacy textual import was REPLACED by the deterministic
+    // per-user recalculation (one SKILL row per active-assigned user, with
+    // position_id populated). Derived live — no pinned row count.
+    it('one row per active-assigned user, kind=SKILL, all scored, position_id wired', async () => {
+      const expected = await count(
+        `SELECT count(DISTINCT a.user_position_assignment_user_id)::int AS n
+           FROM sys.sys_user_position_assignments a
+           JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
+           JOIN sys.sys_tenancies t ON t.tenant_id = u.user_tenant_id
+          WHERE t.tenant_code = 'RTL_BANK'
+            AND a.user_position_assignment_kind = 'PRIMARY'
+            AND a.user_position_assignment_status = 'ACTIVE'`,
+      );
+      expect(expected).toBeGreaterThan(0);
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_gap_analysis_results`)).toBe(expected);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_gap_analysis_results WHERE gap_analysis_result_kind <> 'SKILL'`,
       )).toBe(0);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_gap_analysis_results
           WHERE NOT (gap_analysis_result_payload ? 'skill_gaps') OR gap_analysis_result_overall_score IS NULL`,
+      )).toBe(0);
+      // F6 closure invariant: the position↔gap chain is wired.
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_gap_analysis_results WHERE gap_analysis_result_position_id IS NULL`,
       )).toBe(0);
     });
   });

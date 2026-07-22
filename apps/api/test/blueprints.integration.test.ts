@@ -71,7 +71,6 @@ describe("/v1/blueprint-* pipeline", () => {
       payload: { variantId, code: "PROC_A", name: "Process A", ordinal: 1 },
     });
     expect(pA.statusCode).toBe(201);
-    (pA.json() as { blueprintProcessId: string }).blueprintProcessId;
 
     const pB = await suite.app.inject({
       method: "POST", url: "/v1/blueprint-processes",

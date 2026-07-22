@@ -5,13 +5,13 @@
  *
  * Hits the live OCI VM DB through the tunnel (no mocks). Asserts the same RBAC
  * gate as the views, the multi-section CSV shape, the JSON download envelope,
- * and Zod 400s on bad slug/format. Headcount 162 is pinned against the live seed.
+ * and Zod 400s on bad slug/format. The headcount is derived live (no pinned counts).
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
-import { closePool } from "../src/db/client.js";
+import { closePool, pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
@@ -93,14 +93,15 @@ describe("GET /v1/analytics/:view/export integration", () => {
     expect(body).toContain("# summary");
     expect(body).toContain("key,value");
     expect(body).toContain("scope.kind,PLATFORM");
-    expect(body).toContain("totalHeadcount,162");
+    const { rows } = await pool.query<{ n: string }>(`SELECT count(*)::text AS n FROM sys.sys_users`);
+    expect(body).toContain(`totalHeadcount,${rows[0]!.n}`);
     // breakdown arrays become their own sections.
     expect(body).toContain("# byOrgUnit");
     expect(body).toContain("# byJobRole");
     expect(body).toContain("dimension,headcount");
   });
 
-  it("workforce JSON: download envelope + parseable payload (162)", async () => {
+  it("workforce JSON: download envelope + parseable payload (headcount derived live)", async () => {
     const r = await suite.app.inject({
       method: "GET",
       url: "/v1/analytics/workforce/export?format=json",
@@ -111,7 +112,8 @@ describe("GET /v1/analytics/:view/export integration", () => {
     expect(r.headers["content-disposition"]).toContain('analytics-workforce-');
     expect(r.headers["content-disposition"]).toContain('.json"');
     const parsed = JSON.parse(r.body) as { totalHeadcount: number; scope: { kind: string } };
-    expect(parsed.totalHeadcount).toBe(162);
+    const { rows } = await pool.query<{ n: string }>(`SELECT count(*)::text AS n FROM sys.sys_users`);
+    expect(parsed.totalHeadcount).toBe(Number(rows[0]!.n));
     expect(parsed.scope.kind).toBe("PLATFORM");
   });
 

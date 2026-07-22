@@ -3,11 +3,15 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { getArchetype, archetypeUsers } from "../src/modules/tenant-materialization/blueprints.js";
 
 // #4 WI-C — tenant materialization generator (/v1/tenant-materialization). Real login + live DB.
 // PLATFORM_ADMIN-only; the target tenant must exist + be ACTIVE (M-1). Archetype codes are
 // RBR-* (own namespace) so they never collide with a tenant's real seed data. Writes touch
 // only the validated target tenant (I5). afterAll purges every RBR-* row + the temp tenant.
+// Expected counts are DERIVED from the blueprint (the SoT of what materialize creates) plus
+// the live pre-state: a tenant skill matching an archetype skill by natural key (code OR
+// lower(trim(name)) — mig 000189/000196 unique index) is REUSED, not re-created.
 
 const PWD = TEST_PERSONA_PASSWORD;
 const RTL = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
@@ -123,12 +127,37 @@ async function countEvidence(tenantId: string): Promise<{ skillEvidence: number;
   return { skillEvidence: Number(se.rows[0]!.c), kpiEvidence: Number(ke.rows[0]!.c) };
 }
 
+// Blueprint-derived expected set + live pre-state (skills already present in the
+// target tenant by natural key are reused by materialize, not created).
+const arche = getArchetype(ARCHETYPE)!;
+const A = {
+  ou: arche.orgUnits.length,
+  pos: arche.positions.length,
+  users: archetypeUsers(arche).length,
+  skills: arche.skills.length,
+  kpis: arche.kpis.length,
+};
+let preexistingSkills = 0;
+const FULL = () =>
+  C(A.ou, A.pos, A.users, A.pos, A.skills, A.kpis, A.users * A.skills, A.users * A.kpis);
+const CREATED_FIRST = () =>
+  C(A.ou, A.pos, A.users, A.pos, A.skills - preexistingSkills, A.kpis, A.users * A.skills, A.users * A.kpis);
+const SKIPPED_FIRST = () =>
+  C(0, 0, 0, 0, preexistingSkills, 0, 0, 0);
+
 beforeAll(async () => {
   suite = await buildTestApp();
   admin = await login(suite, "admin@heuresys.com");
   federica = await login(suite, "federica.marchetti@rtl-bank.org");
   await purgeRbr(RTL);
   await purgeRbr(HEU);
+  const pre = await pool.query<{ c: string }>(
+    `SELECT count(*) AS c FROM sys.sys_skills
+      WHERE skill_tenant_id = $1
+        AND (skill_code = ANY($2::text[]) OR lower(trim(skill_name)) = ANY($3::text[]))`,
+    [RTL, arche.skills.map((s) => s.code), arche.skills.map((s) => s.name.trim().toLowerCase())],
+  );
+  preexistingSkills = Number(pre.rows[0]!.c);
   // A non-ACTIVE tenant for the M-1 status guard.
   const t = await pool.query<{ tenant_id: string }>(
     `INSERT INTO sys.sys_tenancies (tenant_code, tenant_name, tenant_status)
@@ -151,8 +180,8 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     expect(r.statusCode).toBe(200);
     const b = r.json() as { items: { key: string; orgUnitCount: number; positionCount: number }[] };
     const a = b.items.find((x) => x.key === ARCHETYPE)!;
-    expect(a.orgUnitCount).toBe(7);
-    expect(a.positionCount).toBe(11);
+    expect(a.orgUnitCount).toBe(A.ou);
+    expect(a.positionCount).toBe(A.pos);
   });
 
   it("plan mode writes nothing and reports the full would-create set", async () => {
@@ -161,8 +190,8 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     const r = await materialize(admin, RTL, "plan");
     expect(r.statusCode).toBe(200);
     const b = r.json() as Result;
-    expect(b.created).toEqual(C(7, 11, 11, 11, 8, 4, 88, 44));
-    expect(b.total).toEqual(C(7, 11, 11, 11, 8, 4, 88, 44));
+    expect(b.created).toEqual(CREATED_FIRST());
+    expect(b.total).toEqual(FULL());
     // No writes happened.
     expect(await countRbr(RTL)).toEqual({ ou: 0, pos: 0 });
     expect(await countSyn(RTL)).toEqual({ users: 0, assignments: 0 });
@@ -175,25 +204,26 @@ describe("tenant materialization generator (#4 WI-C)", () => {
     expect(r.statusCode).toBe(200);
     const b = r.json() as Result;
     expect(b.tenantId).toBe(RTL);
-    expect(b.created).toEqual(C(7, 11, 11, 11, 8, 4, 88, 44));
-    expect(b.skipped).toEqual(C(0, 0, 0, 0, 0, 0, 0, 0));
-    expect(await countRbr(RTL)).toEqual({ ou: 7, pos: 11 });
+    expect(b.created).toEqual(CREATED_FIRST());
+    expect(b.skipped).toEqual(SKIPPED_FIRST());
+    expect(await countRbr(RTL)).toEqual({ ou: A.ou, pos: A.pos });
     // slice-2a: each position now has a GENERATED_INCUMBENT incumbent + a PRIMARY ACTIVE assignment.
-    expect(await countSyn(RTL)).toEqual({ users: 11, assignments: 11 });
-    // slice-2b: tenant skill/KPI catalog (8 skills + 4 KPIs) + per-incumbent evidence (11×8 skill, 11×4 KPI).
-    expect(await countCatalog(RTL)).toEqual({ skills: 8, kpis: 4 });
-    expect(await countEvidence(RTL)).toEqual({ skillEvidence: 88, kpiEvidence: 44 });
+    expect(await countSyn(RTL)).toEqual({ users: A.users, assignments: A.pos });
+    // slice-2b: tenant skill/KPI catalog + per-incumbent evidence. Only the RBR-coded
+    // skills are NEW rows (natural-key matches are reused); evidence covers ALL skills.
+    expect(await countCatalog(RTL)).toEqual({ skills: A.skills - preexistingSkills, kpis: A.kpis });
+    expect(await countEvidence(RTL)).toEqual({ skillEvidence: A.users * A.skills, kpiEvidence: A.users * A.kpis });
   });
 
   it("re-apply is idempotent (0 created, all skipped)", async () => {
     const r = await materialize(admin, RTL, "apply");
     const b = r.json() as Result;
     expect(b.created).toEqual(C(0, 0, 0, 0, 0, 0, 0, 0));
-    expect(b.skipped).toEqual(C(7, 11, 11, 11, 8, 4, 88, 44));
-    expect(await countRbr(RTL)).toEqual({ ou: 7, pos: 11 });
-    expect(await countSyn(RTL)).toEqual({ users: 11, assignments: 11 });
-    expect(await countCatalog(RTL)).toEqual({ skills: 8, kpis: 4 });
-    expect(await countEvidence(RTL)).toEqual({ skillEvidence: 88, kpiEvidence: 44 });
+    expect(b.skipped).toEqual(FULL());
+    expect(await countRbr(RTL)).toEqual({ ou: A.ou, pos: A.pos });
+    expect(await countSyn(RTL)).toEqual({ users: A.users, assignments: A.pos });
+    expect(await countCatalog(RTL)).toEqual({ skills: A.skills - preexistingSkills, kpis: A.kpis });
+    expect(await countEvidence(RTL)).toEqual({ skillEvidence: A.users * A.skills, kpiEvidence: A.users * A.kpis });
   });
 
   it("M-1 tenant isolation: a RTL materialization never touches HEURESYS", async () => {

@@ -44,9 +44,9 @@ const STATUS_TONE: Record<(typeof STATUSES)[number], KpiCardData["iconTone"]> = 
 
 // Explicit chart palette (echarts can't read CSS tokens) — kept in step with STATUS_TONE.
 const STATUS_COLOR: Record<string, string> = {
-  PASSED: "#10b981",
-  WARNING: "#f59e0b",
-  BLOCKED: "#ef4444",
+  PASSED: "hsl(var(--success))",
+  WARNING: "hsl(var(--warning))",
+  BLOCKED: "hsl(var(--danger))",
   ESCALATED: "#dc2626",
   OVERRIDDEN_WITH_REASON: "#8b5cf6",
   PENDING: "#3b82f6",
@@ -170,7 +170,7 @@ export default function CompensationIntelligencePage() {
     legend: {
       type: "scroll" as const,
       bottom: 0,
-      textStyle: { color: "#94a3b8", fontSize: 11 },
+      textStyle: { color: "hsl(var(--muted-foreground))", fontSize: 11 },
     },
     series: [
       {

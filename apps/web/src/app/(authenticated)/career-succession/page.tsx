@@ -104,20 +104,20 @@ export default function CareerSuccessionPage() {
     xAxis: {
       type: "category" as const,
       data: (readinessDist.data?.items ?? []).map((i) => i.readinessLevel.replace(/_/g, " ")),
-      axisLabel: { color: "#94a3b8", fontSize: 11, interval: 0, rotate: 20 },
+      axisLabel: { color: "hsl(var(--muted-foreground))", fontSize: 11, interval: 0, rotate: 20 },
       axisLine: { lineStyle: { color: "#334155" } },
     },
     yAxis: {
       type: "value" as const,
       minInterval: 1,
-      axisLabel: { color: "#94a3b8", fontSize: 11 },
+      axisLabel: { color: "hsl(var(--muted-foreground))", fontSize: 11 },
       splitLine: { lineStyle: { color: "#1e293b" } },
     },
     series: [
       {
         type: "bar" as const,
         data: (readinessDist.data?.items ?? []).map((i) => i.count),
-        itemStyle: { color: "#6366f1", borderRadius: [4, 4, 0, 0] as [number, number, number, number] },
+        itemStyle: { color: "hsl(var(--palette-1))", borderRadius: [4, 4, 0, 0] as [number, number, number, number] },
         barMaxWidth: 48,
       },
     ],

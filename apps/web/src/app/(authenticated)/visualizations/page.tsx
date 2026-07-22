@@ -20,7 +20,7 @@ type TypeDistItem = VizGraphTypeDistributionItem;
 function typeChartOption(items: TypeDistItem[], labels: { series: string }) {
   return {
     tooltip: { trigger: "item" as const, formatter: "{b}: {c} ({d}%)" },
-    legend: { type: "scroll" as const, bottom: 0, textStyle: { color: "#94a3b8", fontSize: 11 } },
+    legend: { type: "scroll" as const, bottom: 0, textStyle: { color: "hsl(var(--muted-foreground))", fontSize: 11 } },
     series: [
       {
         name: labels.series,

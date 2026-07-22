@@ -18,13 +18,13 @@ export default function MeAnalyticsPage() {
   const trend = q.data?.attendanceTrend ?? [];
   const trendOption = {
     tooltip: { trigger: "axis" as const },
-    legend: { data: [t("analytics.regular"), t("analytics.overtime")], textStyle: { color: "#94a3b8" } },
+    legend: { data: [t("analytics.regular"), t("analytics.overtime")], textStyle: { color: "hsl(var(--muted-foreground))" } },
     grid: { left: 48, right: 16, top: 32, bottom: 28 },
-    xAxis: { type: "category" as const, data: trend.map((m) => m.month), axisLabel: { color: "#94a3b8" } },
-    yAxis: { type: "value" as const, axisLabel: { color: "#94a3b8" } },
+    xAxis: { type: "category" as const, data: trend.map((m) => m.month), axisLabel: { color: "hsl(var(--muted-foreground))" } },
+    yAxis: { type: "value" as const, axisLabel: { color: "hsl(var(--muted-foreground))" } },
     series: [
-      { name: t("analytics.regular"), type: "bar" as const, stack: "h", data: trend.map((m) => m.regularHours), itemStyle: { color: "#6366f1" } },
-      { name: t("analytics.overtime"), type: "bar" as const, stack: "h", data: trend.map((m) => m.overtimeHours), itemStyle: { color: "#f59e0b" } },
+      { name: t("analytics.regular"), type: "bar" as const, stack: "h", data: trend.map((m) => m.regularHours), itemStyle: { color: "hsl(var(--palette-1))" } },
+      { name: t("analytics.overtime"), type: "bar" as const, stack: "h", data: trend.map((m) => m.overtimeHours), itemStyle: { color: "hsl(var(--palette-4))" } },
     ],
   };
 

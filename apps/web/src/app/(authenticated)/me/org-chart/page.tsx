@@ -41,7 +41,7 @@ export default function MeOrgChartPage() {
         type: "graph" as const,
         layout: "force" as const,
         roam: true,
-        label: { show: true, position: "right" as const, fontSize: 11, color: "#e2e8f0" },
+        label: { show: true, position: "right" as const, fontSize: 11, color: "hsl(var(--foreground))" },
         force: { repulsion: 60, edgeLength: 80, gravity: 0.08 },
         data: nodes.map((n) => {
           // nodeId is the visualization node's own UUID — the position lives in
@@ -50,11 +50,11 @@ export default function MeOrgChartPage() {
           return {
             id: n.nodeId, name: n.label,
             symbolSize: mine ? 30 : 14,
-            itemStyle: { color: mine ? "#f59e0b" : "#6366f1", borderColor: mine ? "#fbbf24" : undefined, borderWidth: mine ? 3 : 0 },
+            itemStyle: { color: mine ? "hsl(var(--palette-4))" : "hsl(var(--palette-1))", borderColor: mine ? "hsl(var(--foreground))" : undefined, borderWidth: mine ? 3 : 0 },
           };
         }),
         links: (render.data?.edges ?? []).map((e) => ({ source: e.sourceNodeId, target: e.targetNodeId })),
-        lineStyle: { color: "#6366f1", opacity: 0.6, curveness: 0.1 },
+        lineStyle: { color: "hsl(var(--palette-1))", opacity: 0.6, curveness: 0.1 },
         emphasis: { focus: "adjacency" as const },
       },
     ],

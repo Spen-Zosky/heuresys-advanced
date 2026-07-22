@@ -10,6 +10,9 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     include: ["test/**/*.test.ts"],
+    // D-64: gli unit test (test/unit/*.unit.test.ts) hanno la loro config
+    // (vitest.unit.config.ts, no DB/setup) — esclusi qui per non girare due volte.
+    exclude: ["test/unit/**", "**/node_modules/**"],
     environment: "node",
     testTimeout: 20_000,
     hookTimeout: 30_000,

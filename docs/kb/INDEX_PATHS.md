@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-21T21:48:41Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2474**
+**Generato**: 2026-07-22T12:42:32Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2488**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 191 |
+| db-migration | 196 |
 | db-other | 3 |
 | db-script | 32 |
-| db-seed | 110 |
-| doc-canonical | 477 |
+| db-seed | 114 |
+| doc-canonical | 479 |
 | handoff-state | 1 |
 | qa-artifact | 103 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 96 |
 | showcase-source | 13 |
-| test | 292 |
+| test | 294 |
 | ux-design-archive | 80 |
-| web-source | 200 |
-| **TOTALE** | **2474** |
+| web-source | 201 |
+| **TOTALE** | **2488** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 495 |
 | external-archive | 50 |
-| live | 1929 |
+| live | 1943 |
 
 ## File per categoria
 
@@ -1123,6 +1123,11 @@
 - `D:\heuresys-advanced\db\migrations\000191_cleanup_empty_string_literal.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000192_skill_group_ontology.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000193_drop_dead_brownfield_staging.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000194_drop_skill_natural_key_uq.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000195_register_i18n_ontology_reconciliation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000196_restore_skill_natural_key_uq.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000197_learning_catalog_junk_purge.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000198_career_paths_test_residue_purge.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1249,9 +1254,13 @@
 - `D:\heuresys-advanced\db\seeds\reconciliation\54_raci_demo_rtl_s994.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\55_survey_templates.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\reconciliation\_gen_m2b.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_banking_learning_catalog.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_banking_skills.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_ccnl_floors.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_comp_dates.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_key_roles_coverage.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_org_completion.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_user_role_coherence.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\00_extract_legacy_subset.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\01_tenancies.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\02_organization_units.sql` · *live* · git-tracked
@@ -1438,6 +1447,8 @@
 - `D:\heuresys-advanced\docs\kb\atlas\atlas.yaml` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\db-forensics\F2_DB_CENSUS_2026-07-21.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\db-forensics\F3_SEMANTIC_COHERENCE_2026-07-21.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\db-forensics\USER_ROLE_COHERENCE_2026-07-22.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\frontend-forensics\F4_SURFACE_CENSUS_2026-07-22.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\AUDIT_FORENSE_heuresys_2026-07-03_151241.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\AUDIT_FORENSE_heuresys_2026-07-20_022239.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\full-forensic-audit\FINDINGS_2026-07-03_151241.json` · *live* · git-tracked
@@ -2259,9 +2270,11 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\content-search.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\content-workflow.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\content.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\default-locale.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\demo.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\ess-certifications-upload.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\evidence-drawer.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\f4-sweep.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\fixtures.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\gap1-consoles.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\global-teardown.ts` · *live* · git-tracked
@@ -2413,6 +2426,7 @@
 - `D:\heuresys-advanced\apps\web\public\demo\08-matching.png` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\public\demo\09-team.png` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\public\demo\10-dashboard.png` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\scripts\axe-orgchart.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\scripts\check-i18n-parity.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\scripts\e2e-node22.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\scripts\generate-favicons.mjs` · *live* · git-tracked

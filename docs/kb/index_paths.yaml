@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-21T21:48:41Z da docs/kb/tools/build_index.py
+# generato: 2026-07-22T12:42:32Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-21T21:48:41Z"
-  total_files: 2474
+  generated_at: "2026-07-22T12:42:32Z"
+  total_files: 2488
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 191
+    db-migration: 196
     db-other: 3
     db-script: 32
-    db-seed: 110
-    doc-canonical: 477
+    db-seed: 114
+    doc-canonical: 479
     handoff-state: 1
     qa-artifact: 103
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 96
     showcase-source: 13
-    test: 292
+    test: 294
     ux-design-archive: 80
-    web-source: 200
+    web-source: 201
   status_counts:
     archive: 495
     external-archive: 50
-    live: 1929
+    live: 1943
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -6308,6 +6308,36 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000194_drop_skill_natural_key_uq.sql'
+    root: repo
+    rel: 'db/migrations/000194_drop_skill_natural_key_uq.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000195_register_i18n_ontology_reconciliation.sql'
+    root: repo
+    rel: 'db/migrations/000195_register_i18n_ontology_reconciliation.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000196_restore_skill_natural_key_uq.sql'
+    root: repo
+    rel: 'db/migrations/000196_restore_skill_natural_key_uq.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000197_learning_catalog_junk_purge.sql'
+    root: repo
+    rel: 'db/migrations/000197_learning_catalog_junk_purge.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000198_career_paths_test_residue_purge.sql'
+    root: repo
+    rel: 'db/migrations/000198_career_paths_test_residue_purge.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -7010,9 +7040,21 @@ files:
     category: db-seed
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_banking_learning_catalog.sql'
+    root: repo
+    rel: 'db/seeds/rtl-banking-skills/seed_banking_learning_catalog.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_banking_skills.sql'
     root: repo
     rel: 'db/seeds/rtl-banking-skills/seed_banking_skills.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_ccnl_floors.sql'
+    root: repo
+    rel: 'db/seeds/rtl-banking-skills/seed_ccnl_floors.sql'
     category: db-seed
     status: live
     provenance: git-tracked
@@ -7022,9 +7064,21 @@ files:
     category: db-seed
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_key_roles_coverage.sql'
+    root: repo
+    rel: 'db/seeds/rtl-banking-skills/seed_key_roles_coverage.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_org_completion.sql'
     root: repo
     rel: 'db/seeds/rtl-banking-skills/seed_org_completion.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_user_role_coherence.sql'
+    root: repo
+    rel: 'db/seeds/rtl-banking-skills/seed_user_role_coherence.sql'
     category: db-seed
     status: live
     provenance: git-tracked
@@ -8123,6 +8177,18 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\db-forensics\F3_SEMANTIC_COHERENCE_2026-07-21.md'
     root: repo
     rel: 'docs/kb/db-forensics/F3_SEMANTIC_COHERENCE_2026-07-21.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\db-forensics\USER_ROLE_COHERENCE_2026-07-22.md'
+    root: repo
+    rel: 'docs/kb/db-forensics/USER_ROLE_COHERENCE_2026-07-22.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\frontend-forensics\F4_SURFACE_CENSUS_2026-07-22.md'
+    root: repo
+    rel: 'docs/kb/frontend-forensics/F4_SURFACE_CENSUS_2026-07-22.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -12908,6 +12974,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\default-locale.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/default-locale.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\demo.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/demo.spec.ts'
@@ -12923,6 +12995,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\evidence-drawer.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/evidence-drawer.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\f4-sweep.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/f4-sweep.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -13793,6 +13871,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\public\demo\10-dashboard.png'
     root: repo
     rel: 'apps/web/public/demo/10-dashboard.png'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\scripts\axe-orgchart.mjs'
+    root: repo
+    rel: 'apps/web/scripts/axe-orgchart.mjs'
     category: web-source
     status: live
     provenance: git-tracked

@@ -4,22 +4,11 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
+import type { Position } from "@heuresys/shared";
 import { apiFetch } from "../../../lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "../../../components/data-table-panel";
 import { StatusBadge, StatusPill } from "../../../components/status-pill";
 
-interface Position {
-  positionId: string;
-  code: string;
-  title: string;
-  tenantId: string;
-  organizationUnitId: string | null;
-  jobRoleId: string | null;
-  reportsToPositionId: string | null;
-  ownerUserId: string | null;
-  criticality: string | null;
-  isActive: boolean;
-}
 interface PositionsList {
   items: Position[];
   total: number;

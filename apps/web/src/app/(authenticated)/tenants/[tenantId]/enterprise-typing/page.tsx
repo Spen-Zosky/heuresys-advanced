@@ -9,22 +9,18 @@ import { z } from "zod";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import type {
+  BlueprintFamily, BlueprintVariant, OperatingModel, EnterpriseSizeBand, EnterpriseTypingProfile,
+} from "@heuresys/shared";
 import { apiFetch } from "../../../../../lib/api/fetch";
 
-interface BlueprintFamily { blueprintFamilyId: string; code: string; name: string; industryCode: string | null }
-interface BlueprintVariant { blueprintVariantId: string; familyId: string; code: string; name: string }
-interface OperatingModel { operatingModelId: string; code: string; name: string }
-interface EnterpriseSizeBand { enterpriseSizeBandId: string; code: string; name: string }
-
-interface EnterpriseProfile {
-  enterpriseTypingProfileId: string;
-  tenantId: string;
-  blueprintFamilyId: string | null;
-  blueprintVariantId: string | null;
-  operatingModelId: string | null;
-  enterpriseSizeBandId: string | null;
-  status: string;
-}
+// B-xx (#42 part B): the 5 local interfaces this page used to declare (BlueprintFamily/
+// BlueprintVariant/OperatingModel/EnterpriseSizeBand/EnterpriseProfile) are gone —
+// deduped to @heuresys/shared. Verified field-by-field: every field this page actually
+// READS (option-list id+name for 4 <select>s; EnterpriseProfile is write-only, its
+// mutation result is never destructured) is present with a compatible type on the
+// shared schemas. `industryCode` (BlueprintFamily) is unused HERE (unlike
+// blueprints/page.tsx, where it IS rendered and stays local — see that file).
 
 const TypingFormSchema = z.object({
   blueprintFamilyId: z.string().uuid(),
@@ -65,7 +61,7 @@ export default function EnterpriseTypingWizardPage() {
 
   const create = useMutation({
     mutationFn: (body: TypingFormValues) =>
-      apiFetch<EnterpriseProfile>("/v1/enterprise-typing-profiles", {
+      apiFetch<EnterpriseTypingProfile>("/v1/enterprise-typing-profiles", {
         method: "POST",
         body: { tenantId, ...body },
       }),

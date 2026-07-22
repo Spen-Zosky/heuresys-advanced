@@ -10,6 +10,7 @@ import type {
   PositionLearningModule,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
@@ -45,18 +46,17 @@ export default function PositionLearningPage() {
       ),
     enabled: !!positionId,
   });
-  const gaps = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const gaps = usePaginatedList<LearningGap>({
     queryKey: ["learning-gaps", "by-position", positionId],
-    queryFn: () =>
-      apiFetch<{ items: LearningGap[]; total: number }>(
-        `/v1/learning-gaps?positionId=${positionId}&limit=200`,
-      ),
+    path: "/v1/learning-gaps",
+    params: { positionId },
     enabled: !!positionId,
   });
 
   const reqItems = requirements.data?.items ?? [];
   const moduleItems = modules.data?.items ?? [];
-  const gapItems = gaps.data?.items ?? [];
+  const gapItems = gaps.rows;
 
   return (
     <main data-testid="position-learning-page" className="mx-auto max-w-5xl space-y-6 px-6 py-8">
@@ -181,9 +181,10 @@ export default function PositionLearningPage() {
         </CardHeader>
         <CardContent className="p-0">
           <EntityTable<LearningGap>
-            isLoading={gaps.isLoading}
-            isError={gaps.isError}
+            isLoading={gaps.query.isLoading}
+            isError={gaps.query.isError}
             rows={gapItems}
+            server={gaps.server}
             rowKey={(g) => g.learningGapId}
             rowTestId="position-learning-row"
             emptyTestId="position-learning-empty"

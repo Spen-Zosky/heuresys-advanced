@@ -1,11 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { PageHeader } from "@heuresys/ui";
-import { apiFetch } from "@/lib/api/fetch";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import type { BrownfieldSourceExport } from "@heuresys/shared/schemas/brownfield-source-exports";
@@ -61,19 +60,20 @@ function buildRunsCols(t: TFunction): DataColumn<BrownfieldRun>[] {
 export default function BrownfieldAdaptationPage() {
   const { t } = useTranslation("blueprints");
   const [tab, setTab] = useState<Tab>("inventory");
-  const exports = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const exports = usePaginatedList<BrownfieldExport>({
     queryKey: ["brownfield-source-exports"],
-    queryFn: () => apiFetch<{ items: BrownfieldExport[]; total: number }>("/v1/brownfield-source-exports?limit=200"),
+    path: "/v1/brownfield-source-exports",
     enabled: tab === "inventory",
   });
-  const mappings = useQuery({
+  const mappings = usePaginatedList<BrownfieldMapping>({
     queryKey: ["brownfield-table-mappings"],
-    queryFn: () => apiFetch<{ items: BrownfieldMapping[]; total: number }>("/v1/brownfield-table-mappings?limit=200"),
+    path: "/v1/brownfield-table-mappings",
     enabled: tab === "mapping",
   });
-  const runs = useQuery({
+  const runs = usePaginatedList<BrownfieldRun>({
     queryKey: ["brownfield-import-runs"],
-    queryFn: () => apiFetch<{ items: BrownfieldRun[]; total: number }>("/v1/brownfield-import-runs?limit=200"),
+    path: "/v1/brownfield-import-runs",
     enabled: tab === "runs",
   });
 
@@ -102,9 +102,10 @@ export default function BrownfieldAdaptationPage() {
       {tab === "inventory" && (
         <div data-testid="brownfield-content-inventory">
           <EntityTable<BrownfieldExport>
-            isLoading={exports.isLoading}
-            isError={exports.isError}
-            rows={exports.data?.items ?? []}
+            isLoading={exports.query.isLoading}
+            isError={exports.query.isError}
+            rows={exports.rows}
+            server={exports.server}
             rowKey={(e) => e.sourceExportId}
             rowTestId="brownfield-inventory-row"
             columns={inventoryCols}
@@ -117,9 +118,10 @@ export default function BrownfieldAdaptationPage() {
       {tab === "mapping" && (
         <div data-testid="brownfield-content-mapping">
           <EntityTable<BrownfieldMapping>
-            isLoading={mappings.isLoading}
-            isError={mappings.isError}
-            rows={mappings.data?.items ?? []}
+            isLoading={mappings.query.isLoading}
+            isError={mappings.query.isError}
+            rows={mappings.rows}
+            server={mappings.server}
             rowKey={(m) => m.tableMappingId}
             rowTestId="brownfield-mapping-row"
             columns={mappingCols}
@@ -132,9 +134,10 @@ export default function BrownfieldAdaptationPage() {
       {tab === "runs" && (
         <div data-testid="brownfield-content-runs">
           <EntityTable<BrownfieldRun>
-            isLoading={runs.isLoading}
-            isError={runs.isError}
-            rows={runs.data?.items ?? []}
+            isLoading={runs.query.isLoading}
+            isError={runs.query.isError}
+            rows={runs.rows}
+            server={runs.server}
             rowKey={(r) => r.importRunId}
             rowTestId="brownfield-runs-row"
             columns={runsCols}

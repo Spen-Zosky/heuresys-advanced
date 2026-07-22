@@ -4,19 +4,12 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
+import type { User } from "@heuresys/shared";
 import { apiFetch } from "../../../lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "../../../components/data-table-panel";
 import { EnumStatusBadge } from "../../../components/enum-badge";
 import { useEnumLabel } from "../../../lib/enum-labels";
 
-interface User {
-  userId: string;
-  email: string;
-  displayName: string | null;
-  tenantId: string | null;
-  status: string;
-  type: string;
-}
 interface UsersList {
   items: User[];
   total: number;

@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { useQuery } from "@tanstack/react-query";
 import {
   Badge, Card, CardContent, CardHeader, CardTitle, KPIStrip, PageHeader, type KpiCardData,
 } from "@heuresys/ui";
@@ -13,7 +12,6 @@ import type {
 } from "@heuresys/shared";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
-import { apiFetch } from "@/lib/api/fetch";
 import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 
 /**
@@ -23,8 +21,6 @@ import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
  * critical-positions / critical-role-coverage catalog panels (tenant-scoped).
  * READ-only consultation. Sidebar row gated on talent:read (no self-view).
  */
-
-interface NineBoxResponse { items: NineBoxRow[]; total: number }
 
 // grid axes: potential HIGH→LOW top-to-bottom (rows); performance LOW→HIGH left-to-right (cols)
 const POTENTIAL_ROWS: TalentBand[] = ["HIGH", "MEDIUM", "LOW"];
@@ -91,9 +87,14 @@ export default function TalentReviewPage() {
   const { t } = useTranslation("admin");
   const enumLabel = useEnumLabel();
 
-  const nineBox = useQuery({
+  // C4 (#42): server-side pagination. `initialPageSize: 200` is an HONEST cap (matches
+  // both the schema's max and the previous hardcoded `?limit=200`) — the 3×3 grid needs
+  // the full assessed set as ONE coherent snapshot (bucketed by potential×performance),
+  // not incremental pages; there is no pager UI on a grid, unlike the row-list panels below.
+  const nineBox = usePaginatedList<NineBoxRow>({
     queryKey: ["talent-review", "nine-box"],
-    queryFn: () => apiFetch<NineBoxResponse>("/v1/talent-review/nine-box?limit=200"),
+    path: "/v1/talent-review/nine-box",
+    initialPageSize: 200,
   });
 
   const fit = usePaginatedList<FitScore>({ queryKey: ["talent-review", "fit"], path: "/v1/talent-review/fit" });
@@ -111,22 +112,22 @@ export default function TalentReviewPage() {
   // group the 9-box rows into the 3×3 cells (potentialBand × performanceBand)
   const cells = useMemo(() => {
     const map = new Map<string, NineBoxRow[]>();
-    for (const row of nineBox.data?.items ?? []) {
+    for (const row of nineBox.rows) {
       const key = cellKey(row.potentialBand, row.performanceBand);
       const bucket = map.get(key);
       if (bucket) bucket.push(row);
       else map.set(key, [row]);
     }
     return map;
-  }, [nineBox.data]);
+  }, [nineBox.rows]);
 
   const kpis: KpiCardData[] = useMemo(() => [
-    { label: t("talentReview.kpi.assessed"), value: (nineBox.data?.total ?? 0).toLocaleString() },
+    { label: t("talentReview.kpi.assessed"), value: nineBox.total.toLocaleString() },
     { label: t("talentReview.kpi.fit"), value: fit.total.toLocaleString() },
     { label: t("talentReview.kpi.readiness"), value: readiness.total.toLocaleString() },
     { label: t("talentReview.kpi.succession"), value: succession.total.toLocaleString() },
     { label: t("talentReview.kpi.criticalPositions"), value: criticalPositions.total.toLocaleString() },
-  ], [nineBox.data?.total, fit.total, readiness.total, succession.total, criticalPositions.total, t]);
+  ], [nineBox.total, fit.total, readiness.total, succession.total, criticalPositions.total, t]);
 
   return (
     <main data-testid="talent-review-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">

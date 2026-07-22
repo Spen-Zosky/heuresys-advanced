@@ -6,26 +6,18 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import type { BlueprintVariant, BlueprintProcess, ContentLinkForProcess } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 
-interface BlueprintVariant {
-  blueprintVariantId: string;
-  familyId: string;
-  code: string;
-  name: string;
-  description: string | null;
-}
-interface BlueprintProcess {
-  blueprintProcessId: string;
-  code: string;
-  name: string;
-  ordinal: number;
-  isOptional: boolean;
-}
+// B-xx: BlueprintActivation stays a LOCAL interface (NOT deduped) — the shared
+// `BlueprintActivation` schema has no `activatedAt` field (it has effectiveFrom/
+// effectiveTo instead), but the "Activated at" column below renders `a.activatedAt`.
+// Flagged, not touched (C4/#42 REGOLA CRITICA: used field missing from shared = STOP).
 interface BlueprintActivation {
   blueprintActivationId: string;
   tenantId: string;
@@ -34,15 +26,9 @@ interface BlueprintActivation {
   activatedAt: string | null;
 }
 
-interface LinkedDoc {
-  linkId: string;
-  role: string;
-  documentId: string;
-  documentTitle: string;
-  documentKind: string;
-  documentStatus: string;
-  blueprintProcessName: string;
-}
+// LinkedDoc === the shared `ContentLinkForProcess` row shape (linkId/role/documentId/
+// documentTitle/documentKind/documentStatus/blueprintProcessName + a few unused extras).
+type LinkedDoc = ContentLinkForProcess;
 
 type Tab = "processes" | "activations" | "documentation";
 
@@ -59,20 +45,17 @@ export default function BlueprintVariantDetailPage() {
     queryFn: () => apiFetch<BlueprintVariant>(`/v1/blueprint-variants/${variantId}`),
     enabled: !!variantId,
   });
-  const processes = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const processes = usePaginatedList<BlueprintProcess>({
     queryKey: ["blueprint-processes", variantId],
-    queryFn: () =>
-      apiFetch<{ items: BlueprintProcess[]; total: number }>(
-        `/v1/blueprint-processes?variantId=${variantId}&limit=200`,
-      ),
+    path: "/v1/blueprint-processes",
+    params: { variantId },
     enabled: !!variantId && tab === "processes",
   });
-  const activations = useQuery({
+  const activations = usePaginatedList<BlueprintActivation>({
     queryKey: ["blueprint-activations", variantId],
-    queryFn: () =>
-      apiFetch<{ items: BlueprintActivation[]; total: number }>(
-        `/v1/blueprint-activations?variantId=${variantId}&limit=200`,
-      ),
+    path: "/v1/blueprint-activations",
+    params: { variantId },
     enabled: !!variantId && tab === "activations",
   });
   // cap④ P3: content documents cross-linked to ANY process of this variant.
@@ -146,9 +129,10 @@ export default function BlueprintVariantDetailPage() {
           <CardHeader><CardTitle>{t("detail.processesTitle")}</CardTitle></CardHeader>
           <CardContent className="p-0">
             <EntityTable<BlueprintProcess>
-              isLoading={processes.isLoading}
-              isError={processes.isError}
-              rows={processes.data?.items ?? []}
+              isLoading={processes.query.isLoading}
+              isError={processes.query.isError}
+              rows={processes.rows}
+              server={processes.server}
               rowKey={(p) => p.blueprintProcessId}
               rowTestId="blueprint-process-row"
               emptyTestId="blueprint-processes-empty"
@@ -177,9 +161,10 @@ export default function BlueprintVariantDetailPage() {
           <CardHeader><CardTitle>{t("detail.activationsTitle")}</CardTitle></CardHeader>
           <CardContent className="p-0">
             <EntityTable<BlueprintActivation>
-              isLoading={activations.isLoading}
-              isError={activations.isError}
-              rows={activations.data?.items ?? []}
+              isLoading={activations.query.isLoading}
+              isError={activations.query.isError}
+              rows={activations.rows}
+              server={activations.server}
               rowKey={(a) => a.blueprintActivationId}
               rowTestId="blueprint-activation-row"
               emptyTestId="blueprint-activations-empty"

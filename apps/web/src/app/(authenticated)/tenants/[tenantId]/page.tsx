@@ -6,26 +6,18 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import type { Tenant } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 
-interface Tenant {
-  tenantId: string;
-  tenantCode: string;
-  tenantName: string;
-  tenantLegalName: string | null;
-  tenantCountryCode: string | null;
-  tenantIndustryCode: string | null;
-  tenantSizeBand: string | null;
-  tenantStatus: string;
-  tenantMetadata: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-}
-
+// B-xx: EnterpriseProfile stays a LOCAL interface (NOT deduped) — the shared
+// `EnterpriseTypingProfile` schema has no `status` field at all (nor blueprintFamilyId/
+// blueprintVariantId/activityClassificationId/decidedAt by those names), but the
+// "typing" tab renders `p.status` via StatusBadge. Flagged, not touched (C4/#42 REGOLA
+// CRITICA: used field missing from the shared type = STOP).
 interface EnterpriseProfile {
   enterpriseTypingProfileId: string;
   tenantId: string;

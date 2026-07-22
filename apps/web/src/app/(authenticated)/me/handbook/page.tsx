@@ -2,11 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Input } from "@heuresys/ui";
-import type { ContentDocument, ContentDocumentListResponse } from "@heuresys/shared";
-import { apiFetch } from "@/lib/api/fetch";
+import type { ContentDocument } from "@heuresys/shared";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 
 /**
@@ -18,9 +17,11 @@ export default function MeHandbookPage() {
   const { t } = useTranslation("ess");
   const [q, setQ] = useState("");
 
-  const docs = useQuery({
-    queryKey: ["me", "handbook", "list", q],
-    queryFn: () => apiFetch<ContentDocumentListResponse>(`/v1/me/content?limit=200${q ? `&q=${encodeURIComponent(q)}` : ""}`),
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const docs = usePaginatedList<ContentDocument>({
+    queryKey: ["me", "handbook", "list"],
+    path: "/v1/me/content",
+    params: { q },
   });
 
   const columns: DataColumn<ContentDocument>[] = useMemo(
@@ -46,7 +47,7 @@ export default function MeHandbookPage() {
       countTestId="handbook-count"
       title={t("handbook.title")}
       description={t("handbook.description")}
-      count={docs.data ? t("handbook.count", { count: docs.data.total }) : t("common:loading")}
+      count={docs.query.data ? t("handbook.count", { count: docs.total }) : t("common:loading")}
       actions={
         <Input
           data-testid="handbook-search"
@@ -56,10 +57,11 @@ export default function MeHandbookPage() {
           className="w-64"
         />
       }
-      isLoading={docs.isLoading}
-      isError={docs.isError}
+      isLoading={docs.query.isLoading}
+      isError={docs.query.isError}
       errorMessage={t("handbook.errorMessage")}
-      rows={docs.data?.items ?? []}
+      rows={docs.rows}
+      server={docs.server}
       rowKey={(d) => d.documentId}
       rowTestId="handbook-row"
       columns={columns}

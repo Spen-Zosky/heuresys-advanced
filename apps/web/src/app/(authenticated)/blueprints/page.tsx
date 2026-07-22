@@ -5,16 +5,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import Link from "next/link";
+import type { BlueprintVariant } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 
-interface BlueprintVariant {
-  blueprintVariantId: string;
-  familyId: string;
-  code: string;
-  name: string;
-  description: string | null;
-}
+// B-xx: BlueprintFamily stays a LOCAL interface (NOT deduped to @heuresys/shared) —
+// the shared `BlueprintFamily` schema has no `industryCode` field at all, but the
+// "Industry" column below renders `f.industryCode`. Flagged, not touched (C4/#42
+// REGOLA CRITICA: used field missing from the shared type = STOP on this type).
 interface BlueprintFamily {
   blueprintFamilyId: string;
   code: string;
@@ -47,17 +46,20 @@ function buildColumns(t: TFunction): DataColumn<VariantRow>[] {
 
 export default function BlueprintsPage() {
   const { t } = useTranslation("blueprints");
+  // families: complete-lookup join (resolves family name/industry for EVERY variant
+  // row across all pages) — not itself an EntityTable list, left as a full fetch.
   const families = useQuery({
     queryKey: ["blueprint-families", "list"],
     queryFn: () => apiFetch<{ items: BlueprintFamily[]; total: number }>("/v1/blueprint-families?limit=200"),
   });
-  const variants = useQuery({
+  // C4 (#42): server-side pagination for the variants table (was `?limit=200`).
+  const variants = usePaginatedList<BlueprintVariant>({
     queryKey: ["blueprint-variants", "list"],
-    queryFn: () => apiFetch<{ items: BlueprintVariant[]; total: number }>("/v1/blueprint-variants?limit=200"),
+    path: "/v1/blueprint-variants",
   });
   const familyById = new Map(families.data?.items.map((f) => [f.blueprintFamilyId, f]) ?? []);
 
-  const rows: VariantRow[] = (variants.data?.items ?? []).map((v) => {
+  const rows: VariantRow[] = variants.rows.map((v) => {
     const fam = familyById.get(v.familyId);
     return { ...v, famName: fam?.name ?? null, industry: fam?.industryCode ?? null };
   });
@@ -71,12 +73,13 @@ export default function BlueprintsPage() {
       countTestId="blueprints-count"
       title={t("list.title")}
       description={t("list.description")}
-      count={variants.data ? t("list.count", { count: variants.data.total }) : undefined}
-      isLoading={variants.isLoading || families.isLoading}
-      isError={variants.isError}
+      count={variants.query.data ? t("list.count", { count: variants.total }) : undefined}
+      isLoading={variants.query.isLoading || families.isLoading}
+      isError={variants.query.isError}
       errorTestId="blueprints-error"
       errorMessage={t("list.error")}
       rows={rows}
+      server={variants.server}
       rowKey={(v) => v.blueprintVariantId}
       rowTestId="blueprints-row"
       columns={columns}

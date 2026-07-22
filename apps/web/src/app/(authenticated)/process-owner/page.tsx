@@ -6,6 +6,7 @@ import type { TFunction } from "i18next";
 import { Badge, Button, PageHeader } from "@heuresys/ui";
 import type { OrgUnitProcessForProcess, OrgUnitProcessesForProcessResponse, OrgUnitProcessRole } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 
@@ -16,7 +17,6 @@ import { StatusPill } from "@/components/status-pill";
 // RACI role per assignment). Graph navigation of the process layer (NOT BPM runtime,
 // which is Gap #2). No mock data: a real empty-state at each level.
 interface ProcessRow { blueprintProcessId: string; code: string; name: string; ordinal: number; isOptional: boolean }
-interface ProcessList { items: ProcessRow[]; total: number }
 
 interface SelectedProcess { id: string; name: string }
 
@@ -63,13 +63,15 @@ export default function ProcessOwnerPage() {
   const { t } = useTranslation("hr");
   const [selected, setSelected] = useState<SelectedProcess | null>(null);
 
-  const processes = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`). The API already ORDERs
+  // BY (variant_id, ordinal) — the client sort is defensive, over the current page only.
+  const processes = usePaginatedList<ProcessRow>({
     queryKey: ["blueprint-processes", "list"],
-    queryFn: () => apiFetch<ProcessList>("/v1/blueprint-processes?limit=200"),
+    path: "/v1/blueprint-processes",
   });
   const rows = useMemo<ProcessRow[]>(
-    () => [...(processes.data?.items ?? [])].sort((a, b) => a.ordinal - b.ordinal),
-    [processes.data],
+    () => [...processes.rows].sort((a, b) => a.ordinal - b.ordinal),
+    [processes.rows],
   );
 
   const raci = useQuery({
@@ -88,11 +90,11 @@ export default function ProcessOwnerPage() {
         data-testid="process-owner-title"
         title={t("processOwner.title")}
         description={t("processOwner.description")}
-        badges={processes.data ? <Badge variant="secondary" data-testid="process-owner-count">{t("processOwner.count", { count: processes.data.total })}</Badge> : undefined}
+        badges={processes.query.data ? <Badge variant="secondary" data-testid="process-owner-count">{t("processOwner.count", { count: processes.total })}</Badge> : undefined}
       />
       <EntityTable<ProcessRow>
-        isLoading={processes.isLoading} isError={processes.isError} errorMessage={t("processOwner.errorMessage")}
-        rows={rows} rowKey={(p) => p.blueprintProcessId} rowTestId="process-owner-row" columns={processColumns}
+        isLoading={processes.query.isLoading} isError={processes.query.isError} errorMessage={t("processOwner.errorMessage")}
+        rows={rows} server={processes.server} rowKey={(p) => p.blueprintProcessId} rowTestId="process-owner-row" columns={processColumns}
         emptyTestId="process-owner-empty" emptyTitle={t("processOwner.emptyTitle")} emptyDescription={t("processOwner.emptyDescription")} caption={t("processOwner.caption")}
       />
 

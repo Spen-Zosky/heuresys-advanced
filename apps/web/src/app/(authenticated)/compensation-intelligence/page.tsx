@@ -4,8 +4,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Badge, DataTableWithCrossHair, EmptyState, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
-import { Inbox } from "lucide-react";
+import { Badge, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
 import type {
   VariablePayCalculation, CompensationRecommendationRow, BonusPool,
   ObjectiveRewardRule, PositionEconomicWeight, PayrollHandoffRecord,
@@ -116,33 +115,55 @@ function buildHandoffColumns(t: TFunction): DataColumn<PayrollHandoffRecord>[] {
   ];
 }
 
+// C4 (#42): the reward-gates table — was a hand-rolled <table> (pre-dating the
+// EntityTable migration of the six panels below). Converted to EntityTable for the
+// same server-pagination + loading/error/empty states as everything else on this page.
+function buildRewardGateColumns(t: TFunction): DataColumn<RewardGate>[] {
+  return [
+    { header: t("compensation.cols.user"), cell: (g) => <span className="font-mono text-xs text-muted-foreground">{g.userId?.slice(0, 8) ?? "—"}</span> },
+    {
+      header: t("compensation.cols.gate"),
+      cell: (g) => (
+        <span>
+          <span className="font-mono text-xs">{g.catalogCode}</span>
+          <span className="block text-xs text-muted-foreground">{g.catalogName}</span>
+        </span>
+      ),
+    },
+    { header: t("compensation.cols.period"), cell: (g) => <span className="text-xs">{g.periodStart} → {g.periodEnd}</span> },
+    {
+      header: t("compensation.cols.blocking"),
+      cell: (g) => <StatusPill tone={g.isBlocking ? "warning" : "neutral"}>{g.isBlocking ? t("compensation.blockingYes") : t("compensation.blockingNo")}</StatusPill>,
+    },
+    { header: t("compensation.cols.status"), cell: (g) => <StatusBadge value={g.latestResult?.status ?? "PENDING"} /> },
+  ];
+}
+
 export default function CompensationIntelligencePage() {
   const { t } = useTranslation("hr");
   const { t: tA } = useTranslation("admin");
-  const gates = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const gates = usePaginatedList<RewardGate>({
     queryKey: ["compensation", "reward-gates"],
-    queryFn: () => apiFetch<{ items: RewardGate[]; total: number }>("/v1/compensation/reward-gates?limit=200"),
+    path: "/v1/compensation/reward-gates",
   });
 
-  const items = gates.data?.items ?? [];
-  const counts = items.reduce<Record<string, number>>((acc, g) => {
-    const k = g.latestResult?.status ?? "PENDING";
-    acc[k] = (acc[k] ?? 0) + 1;
-    return acc;
-  }, {});
-
-  const statusItems: KpiCardData[] = STATUSES.map((s) => ({
-    label: s.replace(/_/g, " "),
-    value: <span data-testid={`compensation-status-${s}`}>{counts[s] ?? 0}</span>,
-    iconTone: STATUS_TONE[s],
-  }));
-
-  // Distribution chart — server-side GROUP BY aggregate (API-first, F4).
+  // Distribution chart — server-side GROUP BY aggregate over the FULL table (API-first,
+  // F4). Also the KPI-strip counts source below: now that `gates` is paginated, a client
+  // `.reduce` over `gates.rows` would only count the current page — `dist` already
+  // aggregates every reward gate (same COALESCE(...,'PENDING') semantics) unbounded.
   const dist = useQuery({
     queryKey: ["compensation", "distribution"],
     queryFn: () =>
       apiFetch<{ items: DistributionItem[]; total: number }>("/v1/compensation/distribution"),
   });
+
+  const distByStatus = new Map((dist.data?.items ?? []).map((i) => [i.status, i.count]));
+  const statusItems: KpiCardData[] = STATUSES.map((s) => ({
+    label: s.replace(/_/g, " "),
+    value: <span data-testid={`compensation-status-${s}`}>{distByStatus.get(s) ?? 0}</span>,
+    iconTone: STATUS_TONE[s],
+  }));
 
   const chartOption = {
     tooltip: { trigger: "item" as const, formatter: "{b}: {c} ({d}%)" },
@@ -188,6 +209,7 @@ export default function CompensationIntelligencePage() {
     queryKey: ["compensation", "handoff-records"], path: "/v1/compensation/handoff-records",
   });
 
+  const rewardGateColumns = useMemo(() => buildRewardGateColumns(t), [t]);
   const variablePayColumns = useMemo(() => buildVariablePayColumns(tA), [tA]);
   const recommendationColumns = useMemo(() => buildRecommendationColumns(tA), [tA]);
   const bonusPoolColumns = useMemo(() => buildBonusPoolColumns(tA), [tA]);
@@ -203,7 +225,7 @@ export default function CompensationIntelligencePage() {
         description={t("compensation.description")}
         badges={
           <Badge variant="secondary" data-testid="compensation-count">
-            {gates.data ? t("compensation.count", { count: gates.data.total }) : "…"}
+            {gates.query.data ? t("compensation.count", { count: gates.total }) : "…"}
           </Badge>
         }
       />
@@ -232,48 +254,21 @@ export default function CompensationIntelligencePage() {
         </div>
       </section>
 
-      {gates.isLoading ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-muted-foreground">{t("common:loading")}</div>
-      ) : gates.isError ? (
-        <div className="rounded-card border border-border bg-card p-6 text-sm text-danger" data-testid="compensation-error">
-          {t("compensation.error")}
-        </div>
-      ) : items.length === 0 ? (
-        <EmptyState
-          data-testid="compensation-empty"
-          icon={<Inbox className="h-6 w-6" />}
-          title={t("compensation.emptyTitle")}
-          description={t("compensation.emptyDescription")}
-        />
-      ) : (
-        <div className="overflow-hidden rounded-card border border-border bg-card shadow-card">
-          <DataTableWithCrossHair caption={t("compensation.caption")} className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                <th className="px-4 py-2">{t("compensation.cols.user")}</th>
-                <th className="px-4 py-2">{t("compensation.cols.gate")}</th>
-                <th className="px-4 py-2">{t("compensation.cols.period")}</th>
-                <th className="px-4 py-2">{t("compensation.cols.blocking")}</th>
-                <th className="px-4 py-2">{t("compensation.cols.status")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {items.map((g) => (
-                <tr key={g.rewardGateId} data-testid="compensation-row" className="transition-colors hover:bg-muted/60">
-                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{g.userId?.slice(0, 8) ?? "—"}</td>
-                  <td className="px-4 py-2">
-                    <span className="font-mono text-xs">{g.catalogCode}</span>
-                    <span className="block text-xs text-muted-foreground">{g.catalogName}</span>
-                  </td>
-                  <td className="px-4 py-2 text-xs">{g.periodStart} → {g.periodEnd}</td>
-                  <td className="px-4 py-2"><StatusPill tone={g.isBlocking ? "warning" : "neutral"}>{g.isBlocking ? t("compensation.blockingYes") : t("compensation.blockingNo")}</StatusPill></td>
-                  <td className="px-4 py-2"><StatusBadge value={g.latestResult?.status ?? "PENDING"} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </DataTableWithCrossHair>
-        </div>
-      )}
+      <EntityTable<RewardGate>
+        isLoading={gates.query.isLoading}
+        isError={gates.query.isError}
+        errorTestId="compensation-error"
+        errorMessage={t("compensation.error")}
+        rows={gates.rows}
+        server={gates.server}
+        rowKey={(g) => g.rewardGateId}
+        rowTestId="compensation-row"
+        columns={rewardGateColumns}
+        emptyTestId="compensation-empty"
+        emptyTitle={t("compensation.emptyTitle")}
+        emptyDescription={t("compensation.emptyDescription")}
+        caption={t("compensation.caption")}
+      />
 
       {/* A/L7 (#32) — read panels over the six dormant compensation & reward tables. */}
       <section data-testid="comp-variable-pay-panel" className="space-y-3">

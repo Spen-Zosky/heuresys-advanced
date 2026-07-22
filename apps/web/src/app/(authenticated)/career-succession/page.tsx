@@ -5,12 +5,19 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { PageHeader } from "@heuresys/ui";
+import type { SuccessionPool, SuccessorCandidate } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { EChartsCard } from "../_charts-client";
 
+// B-xx: CareerPath stays a LOCAL interface (NOT deduped) — the shared `CareerPath`
+// schema has no fromJobRoleId/toJobRoleId/difficulty fields at all (it has
+// tenantId/description/kind/isGlobal/metadata instead), but the "Difficulty" column
+// below renders `p.difficulty`. Flagged, not touched (C4/#42 REGOLA CRITICA: used
+// field missing from the shared type = STOP).
 interface CareerPath {
   careerPathId: string;
   code: string;
@@ -18,22 +25,6 @@ interface CareerPath {
   fromJobRoleId: string | null;
   toJobRoleId: string | null;
   difficulty: string | null;
-}
-interface SuccessionPool {
-  successionPoolId: string;
-  code: string;
-  name: string;
-  targetPositionId: string | null;
-  status: string;
-}
-interface SuccessorCandidate {
-  successorCandidateId: string;
-  poolId: string;
-  poolName: string | null;
-  userId: string;
-  userName: string | null;
-  readinessLevel: string | null;
-  status: string;
 }
 interface ReadinessDistItem {
   readinessLevel: string;
@@ -81,19 +72,20 @@ export default function CareerSuccessionPage() {
   const candidatesCols = useMemo(() => buildCandidatesCols(t), [t]);
   const [tab, setTab] = useState<Tab>("paths");
 
-  const paths = useQuery({
+  // C4 (#42): server-side pagination (was `?limit=200`).
+  const paths = usePaginatedList<CareerPath>({
     queryKey: ["career-paths"],
-    queryFn: () => apiFetch<{ items: CareerPath[]; total: number }>("/v1/career-paths?limit=200"),
+    path: "/v1/career-paths",
     enabled: tab === "paths",
   });
-  const pools = useQuery({
+  const pools = usePaginatedList<SuccessionPool>({
     queryKey: ["succession-pools"],
-    queryFn: () => apiFetch<{ items: SuccessionPool[]; total: number }>("/v1/succession-pools?limit=200"),
+    path: "/v1/succession-pools",
     enabled: tab === "pools",
   });
-  const candidates = useQuery({
+  const candidates = usePaginatedList<SuccessorCandidate>({
     queryKey: ["successor-candidates"],
-    queryFn: () => apiFetch<{ items: SuccessorCandidate[]; total: number }>("/v1/successor-candidates?limit=200"),
+    path: "/v1/successor-candidates",
     enabled: tab === "candidates",
   });
   // Readiness pipeline — server-side GROUP BY aggregate (API-first, F4).
@@ -152,9 +144,10 @@ export default function CareerSuccessionPage() {
       {tab === "paths" && (
         <div data-testid="career-content-paths">
           <EntityTable<CareerPath>
-            isLoading={paths.isLoading}
-            isError={paths.isError}
-            rows={paths.data?.items ?? []}
+            isLoading={paths.query.isLoading}
+            isError={paths.query.isError}
+            rows={paths.rows}
+            server={paths.server}
             rowKey={(p) => p.careerPathId}
             rowTestId="career-paths-row"
             columns={pathsCols}
@@ -167,9 +160,10 @@ export default function CareerSuccessionPage() {
       {tab === "pools" && (
         <div data-testid="career-content-pools">
           <EntityTable<SuccessionPool>
-            isLoading={pools.isLoading}
-            isError={pools.isError}
-            rows={pools.data?.items ?? []}
+            isLoading={pools.query.isLoading}
+            isError={pools.query.isError}
+            rows={pools.rows}
+            server={pools.server}
             rowKey={(p) => p.successionPoolId}
             rowTestId="career-pools-row"
             columns={poolsCols}
@@ -199,9 +193,10 @@ export default function CareerSuccessionPage() {
             )}
           </div>
           <EntityTable<SuccessorCandidate>
-            isLoading={candidates.isLoading}
-            isError={candidates.isError}
-            rows={candidates.data?.items ?? []}
+            isLoading={candidates.query.isLoading}
+            isError={candidates.query.isError}
+            rows={candidates.rows}
+            server={candidates.server}
             rowKey={(c) => c.successorCandidateId}
             rowTestId="career-candidates-row"
             columns={candidatesCols}

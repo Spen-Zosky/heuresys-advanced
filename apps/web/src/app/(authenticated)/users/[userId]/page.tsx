@@ -5,27 +5,12 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import type { User } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
-
-interface UserDetail {
-  userId: string;
-  email: string;
-  displayName: string | null;
-  firstName: string | null;
-  lastName: string | null;
-  tenantId: string | null;
-  status: string;
-  type: string;
-  locale: string | null;
-  timezone: string | null;
-  metadata: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export default function UserDetailPage() {
   const { t } = useTranslation("admin");
@@ -34,7 +19,7 @@ export default function UserDetailPage() {
   const userId = params.userId;
   const user = useQuery({
     queryKey: ["users", userId],
-    queryFn: () => apiFetch<UserDetail>(`/v1/users/${userId}`),
+    queryFn: () => apiFetch<User>(`/v1/users/${userId}`),
     enabled: !!userId,
   });
 

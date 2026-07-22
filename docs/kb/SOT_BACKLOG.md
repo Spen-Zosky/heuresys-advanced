@@ -61,8 +61,18 @@
 - **#72 Audit coerenza per-user — dimensioni residue (education↔ruolo, KPI/OKR per ruolo, attendance-pattern, anagrafiche satellite)** · status: ACTIVE
   - priority: P1 · effort: ~1 sessione · doc: docs/kb/db-forensics/USER_ROLE_COHERENCE_2026-07-22.md §4
   - note: **MANDATO ENZO (S1025)** — completare il mandato per-user oltre le dimensioni già chiuse in S1025 (ruolo per tutti i 163, CCNL floors, età/anzianità, titoli, employment-sync, skill/gap/formazione per ruolo — vedi report §3). Residuo con lo stesso metodo (ricerca web → regola per archetipo → seed idempotente + post-condition permanente): (1) **titoli di studio ↔ ruolo** (mappa campo-di-studio→famiglia-ruolo, correggere combo insolite tipo "LUISS Lettere" su profili bancari); (2) **KPI/OKR per-utente vs KPI standard del ruolo** in banca retail (ogni utente deve avere i KPI tipici del SUO ruolo); (3) **pattern attendance/straordinari coerenti col ruolo** (es. niente overtime notturno da dealer per un teller); (4) **anagrafiche satellite** (indirizzi/familiari/documenti identità: realismo mai auditato); (5) lead/manager di **DIR-RISKM** (candidata: martina.gentile, Risk Analyst più senior della direzione — decidere se promuoverla).
+- **#67 linux-pc gemello PROD — refresh DB clone (post-S1023)** · status: DONE
   - priority: P3 · effort: chiuso · doc: memoria reference_linux_pc_prod_twin
   - note: ✅ **DONE S1023 (in chiusura)** — `clone-vm-db` rieseguito dal close-propagate (row-counts verificati vs VM) + `heuresys_ci` ri-clonato dalla base fresca (parity gate OK). Residuo di riflessione per Fase-2 kickoff: schedulare il refresh (timer settimanale) invece che on-demand.
+- **#73 NACE legacy — verifica currency vs Rev 2.1 o deprecazione controllata** · status: ACTIVE
+  - priority: P3 · effort: ~0.5 sessione · doc: docs/kb/COWORK_INBOX.md (entry 2026-07-22 "Asse professione", gap C)
+  - note: item collaterale della proposta Cowork asse professione (S1027, punto §7.7 di cli-prompt): lo scheme base `NACE` legacy espone L2/L3 = 88/305 — confermare la currency contro NACE Rev 2.1 ufficiale (Eurostat/RAMON) oppure deprecare i due scheme base legacy (`ATECO`/`NACE`) a favore di `ATECO_2025` canonico (mig 000119). La VERIFICA è eseguibile in autonomia (WebFetch conteggi ufficiali); l'eventuale DEPRECAZIONE è decisione di prodotto (Enzo). Contesto: mig 000187 ha già blindato l'integrità parent (FK NOT VALID + tripwire 920).
+- **#74 notifications — GET amministrativa per audit dei broadcast (da D-70)** · status: ACTIVE
+  - priority: P3 · effort: ~0.5 sessione · doc: docs/kb/DEBT_REGISTER.md (D-70)
+  - note: smistato dal DEBT_REGISTER S1027 (era D-70, gap funzionale non debito): `/v1/notifications` è write-only (solo POST broadcast, perm `notification:create`) — manca una GET amministrativa per l'audit dei broadcast inviati. Modulo 7-step: list paginata + filtro data/tipo, perm dedicata `notification:read` (audience esplicita — policy D-57).
+- **#75 teams — lifecycle API (create/update/membership) (da D-71)** · status: ACTIVE
+  - priority: P3 · effort: ~1 sessione · doc: docs/kb/DEBT_REGISTER.md (D-71)
+  - note: smistato dal DEBT_REGISTER S1027 (era D-71, gap funzionale non debito): `teams` è GET-only (list/detail); i team correnti derivano dai seed. Serve lifecycle completo (create/update/membership add-remove) con RBAC funzionale coerente (TEAM_LEADER/I16) — la serie C (#42-#45) non li copre.
 - **#8 EMAIL dormiente** · status: WAIT-INPUT
   - input-richiesto: app-password Outlook (`enzo.spenuso@outlook.com`)
   - perche-solo-tuo: credenziale personale → attiva EMAIL_OTP + digest live in 1 mossa (transport già pronto)

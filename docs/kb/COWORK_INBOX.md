@@ -169,7 +169,7 @@ Anti-duplicazione: NON re-importare ATECO/NACE/crosswalk (già completi); NON cr
 
 Deliverable Cowork (consegnato a Enzo via chat, NON scritto nel repo): `heuresys_classificazioni_reconciliation_2026-07-22.md` (riconciliazione + audit + gap + design completo con ER Mermaid). Nessuna migration creata/applicata; nulla scritto in `docs/kb/*` fuori da questo inbox.
 
-stato: pending
+stato: [RICONCILIATA 16ce9cd4+5f615d49 S1027] — CLI: proposta IMPLEMENTATA con deviazioni deliberate. (a) Numerazione reale **000206** (catalogo+crosswalk shell+VIEW `sys_esco_isco_resolved`+registry bucket-D+i18n reg — il max era 000205, non 000199) / **000207** (coverage gate) / **000208** (RBAC `occupation_classification:*`, matrice veritiera: read←enterprise_typing:read, write←tenant:create PLATFORM-only, i18n conforme nativa). (b) CHECK **strict** ISCO_08/CP_2021 senza 'ESCO' (anti-duplicazione, le occupazioni ESCO restano in `sys_esco_occupation_mappings`; aggancio = VIEW, no FK — ADR-0016). (c) WI-2/WI-3 connettori HTTP sostituiti da **seed CSV committati** (`db/data/occupations/` + loader idempotente fail-loud, watermark ISCO_08/ISTAT_CP2021): i deliverable curati non sono ri-scaricabili as-is. (d) WI-4 crosswalk ISCO↔CP2021 **deferred** (serve la corrispondenza ufficiale Istat; tabella pronta). (e) WI-6 NACE → item di backlog **#73**. Verifiche §6 tutte PASS: 619 (10/43/130/436) + 1502 (9/40/130/510/813), overlay EN 2121, view ESCO 3070/3070 risolti su 426 unit-group, gate missing=0, orfani 0. Modulo API `/v1/occupation-classifications` (5 endpoint, localize x-locale, 8 test verdi su login reali). DoD live dimostrata.
 
 
 ### 2026-07-22 | proposta-backlog | i18n: gate di COPERTURA (completezza EN) + conformità tabelle nuove (incl. occupation_classifications)
@@ -186,7 +186,7 @@ Proposta (DDL PROPOSED, DO-NOT-APPLY):
 5. Sanare i gap wave-1 (kpi_definitions 369, job_roles 187, permissions.name 15, skills 216) + investigare l'anomalia skill_groups.description (477).
 
 Nessuna migration creata/applicata; nulla scritto in `docs/kb/*` fuori da questo inbox. Deliverable Cowork consegnato a Enzo via chat: framework + tabella copertura live + SQL della vista.
-stato: pending
+stato: [RICONCILIATA ec25637b S1027] — CLI: gate ADOTTATO (mig **000207**, rinumerata dal PROPOSED 000202) + integrato in `status_dashboard.py` sezione DB (riga "i18n dati"; NON gate hard in CI — heuresys_ci non carica i dataset, stessa ragione di 000195). Gap wave-1 TUTTI SANATI: kpi 243+126 · job_roles 137+50 · skills custom 108+108 (772 overlay EN source=LLM, CSV committati `db/data/i18n/`) · 16 permessi EN-in-row conformati via mig **000209** (IT in-row + overlay EN — erano 000199/000202, il live ne contava 16 non 15). Anomalia `skill_groups.description` (-477) DIAGNOSTICATA e risolta: descrizioni EN ufficiali ESCO senza IT-canonico → 477 IT generate da EN, UPDATE in-row heal-only. Esito live: **25 campi registrati, tutti missing=0, 0 anomalie, 0 orfani** (twice-run proven). Conformità tabelle nuove: applicata nativamente a 000206/000208. Residuo dichiarato: alcune description in-row di job_roles/skills sono prosa EN pre-esistente (semantica in-row, non copertura) → mandato forense S1023.
 
 
 ### 2026-07-22 | nota | ISCO-08 titoli IT procurati (ESCO API) — seed occupation IT-canonico completo + overlay EN pronti
@@ -194,7 +194,7 @@ stato: pending
 Avanzamento delle proposte "Asse professione" e "i18n" sopra. Titoli ISCO-08 in italiano ottenuti dall'**ESCO API** (`ec.europa.eu/esco/api`, walk dell'albero ISCO in `language=it`): **619/619, 0 errori, livelli 10/43/130/436**, coerenti con la struttura ILO EN. Seed occupation ora **IT-canonico completo**: 2121/2121 righe con `name` IT in-row (ISCO ← ESCO, CP2021 ← Istat/INAIL). Overlay EN ISCO pronti per `sys_reference_translations` (619 righe, field=name, locale=en, source=HARVEST, keyed `ISCO_08:<code>`). Vista di copertura i18n (`fn/v_reference_translation_coverage`, registry-driven) consegnata come `.sql` PROPOSED.
 
 Deliverable Cowork consegnati a Enzo via chat (NON scritti nel repo): `occupation_classifications_seed_IT_2026-07-22.csv`, `occupation_reference_translations_EN_2026-07-22.csv`, `occupation_classifications_bilingual_2026-07-22.csv`, `000202_reference_translation_coverage_PROPOSED.sql`. Resta da generare (decisione Enzo): overlay EN per CP_2021 (1502 righe, pipeline LLM, source='LLM'). Nessuna migration creata/applicata; nulla scritto in `docs/kb/*` fuori da questo inbox.
-stato: pending
+stato: [RICONCILIATA 16ce9cd4 S1027] — CLI: assorbita dall'entry "Asse professione" (sopra). Seed validato pre-load (0 dup, 0 orfani gerarchici, radici 10+9, match seed↔overlay 1:1) e caricato; CSV versionati in `db/data/occupations/` con provenance README.
 
 
 ### 2026-07-22 | nota | CP2021 overlay EN generati (LLM) — asse professione COMPLETAMENTE bilingue
@@ -202,4 +202,4 @@ stato: pending
 Chiusura del gap i18n dell'asse professione. Overlay EN per CP2021 generati via LLM (8 subagent paralleli, traduzione IT→EN dei titoli occupazionali), assemblati e verificati: **1502/1502 tradotti, 0 mancanti / 0 extra / 0 vuoti / 0 duplicati** (match esatto sui codici del seed). Overlay EN TOTALE dell'asse professione = **2121 righe** per `sys_reference_translations`: 619 ISCO (`source=HARVEST`, da ESCO/ILO) + 1502 CP2021 (`source=LLM`), field=name, locale=en, keyed `entity_ref = <scheme>:<code>`.
 
 Stato asse professione: IT canonico in-row **2121/2121** (ISCO←ESCO, CP←Istat) + overlay EN **2121/2121** → bilinguismo dati completo. Applicando le migration `000200/000201` (catalogo+crosswalk occupazioni) e `000202` (vista coverage), registrando (`sys_occupation_classifications`,'name') in `sys_translatable_field`, e caricando seed+overlay, il gate `v_reference_translation_coverage WHERE missing>0` sull'asse professione sarà **vuoto**. Deliverable Cowork consegnati a Enzo via chat (NON nel repo): seed IT, overlay EN FULL + CP, vista bilingue, vista coverage SQL. Go migration/apply = Enzo. Nessuna migration applicata; nulla scritto in `docs/kb/*` fuori da questo inbox.
-stato: pending
+stato: [RICONCILIATA 16ce9cd4 S1027] — CLI: assorbita dall'entry "Asse professione". Go di Enzo ricevuto in-sessione ("agisci di conseguenza" su cli-prompt.md); overlay EN CP2021 validati 1502/1502 e caricati (source=LLM); gate sull'asse professione VERIFICATO VUOTO live.

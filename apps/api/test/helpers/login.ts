@@ -32,6 +32,7 @@ interface InjectResponse {
   statusCode: number;
   body: string;
   cookies: Array<{ name: string; value: string }>;
+  headers: Record<string, string | string[] | number | undefined>;
   json(): unknown;
 }
 
@@ -73,7 +74,13 @@ export async function loginRaw<A extends Injectable>(
     });
     const b2 = r2.json() as { status?: string };
     if (r2.statusCode !== 200 || b2.status !== "success") {
-      throw new Error(`login ${email}: TOTP step-2 failed (${r2.statusCode} ${JSON.stringify(b2)})`);
+      // D-55 instrumentation: il flake intermittente è un 500 INTERNAL_ERROR il
+      // cui stack VIVE nel log server (`errorHandler` → "Unhandled error"). Il
+      // request-id collega questo throw alla riga di log giusta nel run.
+      const reqId = r2.headers["x-request-id"];
+      throw new Error(
+        `login ${email}: TOTP step-2 failed (${r2.statusCode} ${JSON.stringify(b2)}; x-request-id=${String(reqId)} — per il 500 intermittente D-55 cerca "Unhandled error" con questo reqId nel log del run)`,
+      );
     }
     return r2 as Awaited<ReturnType<A["inject"]>>;
   }

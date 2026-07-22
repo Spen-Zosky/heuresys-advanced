@@ -77,6 +77,7 @@ import { visualizationStylesRoutes } from "./modules/visualization-styles/routes
 import { visualizationExportsRoutes } from "./modules/visualization-exports/routes.js";
 import { activityClassificationsRoutes } from "./modules/activity-classifications/routes.js";
 import { activityMappingsRoutes } from "./modules/activity-classification-mappings/routes.js";
+import { occupationClassificationsRoutes } from "./modules/occupation-classifications/routes.js";
 import { enterpriseSizeBandsRoutes } from "./modules/enterprise-size-bands/routes.js";
 import { operatingModelsRoutes } from "./modules/operating-models/routes.js";
 import { enterpriseTypingProfilesRoutes } from "./modules/enterprise-typing-profiles/routes.js";
@@ -425,6 +426,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(visualizationExportsRoutes, { prefix: "/v1/visualization-exports" });
   await app.register(activityClassificationsRoutes, { prefix: "/v1/activity-classifications" });
   await app.register(activityMappingsRoutes, { prefix: "/v1/activity-classification-mappings" });
+  await app.register(occupationClassificationsRoutes, { prefix: "/v1/occupation-classifications" });
   await app.register(enterpriseSizeBandsRoutes, { prefix: "/v1/enterprise-size-bands" });
   await app.register(operatingModelsRoutes, { prefix: "/v1/operating-models" });
   await app.register(enterpriseTypingProfilesRoutes, { prefix: "/v1/enterprise-typing-profiles" });

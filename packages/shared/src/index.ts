@@ -53,6 +53,7 @@ export * from "./schemas/visualization-styles.js";
 export * from "./schemas/visualization-exports.js";
 export * from "./schemas/activity-classifications.js";
 export * from "./schemas/activity-classification-mappings.js";
+export * from "./schemas/occupation-classifications.js";
 export * from "./schemas/enterprise-size-bands.js";
 export * from "./schemas/operating-models.js";
 export * from "./schemas/enterprise-typing-profiles.js";

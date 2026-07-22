@@ -257,6 +257,11 @@
       "development": "./src/schemas/activity-classification-mappings.ts",
       "default": "./dist/schemas/activity-classification-mappings.js"
     },
+    "./schemas/occupation-classifications": {
+      "types": "./dist/schemas/occupation-classifications.d.ts",
+      "development": "./src/schemas/occupation-classifications.ts",
+      "default": "./dist/schemas/occupation-classifications.js"
+    },
     "./schemas/enterprise-size-bands": {
       "types": "./dist/schemas/enterprise-size-bands.d.ts",
       "development": "./src/schemas/enterprise-size-bands.ts",

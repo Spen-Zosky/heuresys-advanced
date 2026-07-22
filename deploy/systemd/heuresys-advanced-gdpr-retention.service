@@ -1,0 +1,17 @@
+# Rendered/installed verbatim by scripts/vm-bootstrap.sh / vm-deploy.sh (§3c —
+# @@REPO_DIR@@ / @@SERVICE_USER@@ sono i placeholder standard).
+#
+# D-63: ONE-SHOT che esegue scripts/gdpr-retention-sweep.sh — sweep
+# registry-driven delle finestre di retention dichiarate in
+# sys.sys_gdpr_data_map (es. auth_login_events 400gg). Gemello batch di
+# POST /v1/gdpr/retention/run (che resta per l'invocazione manuale PLATFORM).
+[Unit]
+Description=Heuresys Advanced — daily GDPR retention sweep (D-63)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=@@SERVICE_USER@@
+WorkingDirectory=@@REPO_DIR@@
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/gdpr-retention-sweep.sh

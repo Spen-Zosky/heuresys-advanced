@@ -1,0 +1,18 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh / vm-deploy.sh.
+#
+# D-63: sweep GDPR giornaliero alle 03:00 locali — DOPO il backup (01:30, il
+# dump cattura lo stato pre-sweep), l'auth-housekeeping (02:00), l'insights
+# recompute (02:15) e il digest (02:45): i one-shot notturni non si sovrappongono.
+[Unit]
+Description=Heuresys Advanced — daily GDPR retention sweep (D-63)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+RandomizedDelaySec=120
+# Run a missed occurrence after downtime (the free-tier VM is not always up at 03:00).
+Persistent=true
+Unit=heuresys-advanced-gdpr-retention.service
+
+[Install]
+WantedBy=timers.target

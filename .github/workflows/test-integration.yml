@@ -83,6 +83,20 @@ jobs:
           psql -h localhost -p 5432 -U $POSTGRES_USER -d $POSTGRES_DATABASE -c "SELECT 1" || \
             { echo "DB connectivity failed"; exit 1; }
 
+      # heuresys_ci is a PROD clone frozen at provisioning time: without this
+      # step every migration born after the clone is invisible to CI (S1026:
+      # 000199-000205 missing → RBAC-audience tests red across the suite).
+      # The full set is idempotent + twice-run proven, so re-running is free.
+      - name: Apply migrations (idempotent, brings the clone to HEAD)
+        run: |
+          # migrate.sh insists on an env FILE (arg 1); synthesize it from the
+          # job env (runner EnvironmentFile + the heuresys_ci override above)
+          # so the script cannot accidentally source a PROD-pointing .env.
+          printf 'POSTGRES_HOST=%s\nPOSTGRES_PORT=%s\nPOSTGRES_DB=%s\nPOSTGRES_USER=%s\nPOSTGRES_PASSWORD=%s\n' \
+            "${POSTGRES_HOST:-localhost}" "${POSTGRES_PORT:-5432}" "$POSTGRES_DB" "$POSTGRES_USER" "$POSTGRES_PASSWORD" > /tmp/ci-migrate.env
+          bash db/scripts/migrate.sh /tmp/ci-migrate.env
+          rm -f /tmp/ci-migrate.env
+
       - name: Run vitest integration suite
         working-directory: apps/api
         run: pnpm exec vitest run --reporter=verbose --no-coverage

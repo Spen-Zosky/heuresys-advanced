@@ -148,3 +148,58 @@ stato: [RICONCILIATA 2026-06-19 S997] — CLI: decisione Enzo recepita su tutti 
 ## 2026-07-06 | Cowork (Fable 5) — battle plan wargame depositati in docs/wargames/
 
 Aggiunti (untracked) 7 battle plan eseguibili + 7 review adversariali + README in `docs/wargames/`. Mappa: 11→#27, 12→#26, 13→#24(F4), 14→#28, 15→#4(pricing), 16→#34, 17→#17. Ognuno = execution-spec del rispettivo item (mosse, fork con trigger, abort, verification). Proposta: commit dei file e uso come spec quando l'item viene aperto. Decisioni WAIT-INPUT elencate nel README (pricing Q1-Q8, F4 A/B, Wave-3 A/B, H-1 authz).
+
+
+### 2026-07-22 | proposta-backlog | Asse professione — chiusura gap ISCO-08 standalone + CP2021 (design + DDL PROPOSED)
+
+Contesto: verifica live dell'asse classificazioni (Cowork read-only). L'asse **attività economica** è COMPLETO (verified-by `psql localhost:5433/heuresys_advanced` 2026-07-22): `sys_activity_classifications` ATECO_2025=3257 (L1-6 = 22/87/287/651/920/1290, = totale ufficiale Istat), ATECO legacy=2210, NACE legacy=1066; crosswalk `sys_activity_classification_mappings`=5730 (NARROWER 2865 + BROADER 2865). L'asse **professione** è coperto solo lato ESCO: `sys_esco_occupation_mappings`=7675 (3070 con ISCO, 3000 ISCO distinti), ma l'ISCO è **solo attributo** `esco_occupation_mapping_isco_code varchar(16)` (mig 000010) — nessun catalogo gerarchico. CP2021: **assente** (0 tabelle; il watermark `ISTAT_CP2021` era solo un esempio in commento a mig 000095, mai istanziato — live: solo ATECO_2025/ESCO/ESCO_SKILL_HIERARCHY).
+
+Gap reali: (A) manca catalogo ISCO-08 gerarchico standalone (10/43/130/436 = 619 nodi, ILO); (B) manca CP2021 (5 livelli, 813 unità professionali, Istat — richiesto INPS/Uniemens da 05/2025, abbinato ad ATECO 2025); (C) minore — qualità dati NACE legacy (L2/L3 = 88/305; confermare currency vs NACE Rev 2.1 su RAMON, oppure deprecare i base a favore di ATECO_2025 canonico ex mig 000119). Nota: l'ipotesi iniziale "ATECO_2025 incompleto (1945)" è FALSA — 1945 = solo codici crosswalk-eligible; catalogo completo a 3257.
+
+Design (DDL PROPOSED, DO-NOT-APPLY; rispecchia il pattern `activity_classifications`, invarianti onorati: naming `sys.*`, unique `(scheme,code)`, parent index parziale, trigger `set_updated_at`, no-PII ADR-0023, catalogo indipendente da `job_role` ADR-0016):
+- mig 000200 `sys.sys_occupation_classifications` — scheme ISCO_08/CP_2021/ESCO; `code`/`parent_code`/`level`/`name`/`metadata jsonb`; CHECK scheme; unique `(scheme,code)`; parent idx; trigger.
+- mig 000201 `sys.sys_occupation_classification_mappings` — `source_id`/`target_id` FK self-referencing; kind EXACT/NARROWER/BROADER/RELATED/APPROXIMATE; confidence; unique pair. Gemello di 000007 §2.
+- aggancio ESCO additivo non-breaking: VIEW `sys_esco_isco_resolved` (LEFT JOIN su `split_part(esco_occupation_mapping_isco_code,'.',1)`) e/o colonna FK nullable opzionale su `sys_esco_occupation_mappings`.
+
+Work items (CLI): WI-1 DDL 000200/000201 (default-safe, idempotente, tabelle vuote=zero impatto); WI-2 connettore ILO ISCO-08 + seed 619 + test + watermark `ISCO_08` (pattern `istat-ateco-connector.ts`, fail-loud, fixtures CI); WI-3 connettore Istat CP2021 + seed 813 + watermark `ISTAT_CP2021`; WI-4 crosswalk ISCO↔ESCO deterministico (self-join da `isco_code`, pattern 000112) + ISCO↔CP2021 (corrispondenza Istat); WI-5 VIEW risolutiva (+ FK additiva opz.); WI-6 (prodotto) currency/deprecazione NACE legacy.
+
+DoD live-E2E (regola Enzo): chiusura SOLO con dimostrazione live su dati reali — es. `GET /v1/occupation-classifications?scheme=ISCO_08` su albero reale + risoluzione live `job_role → ESCO → ISCO → CP2021` su tenant di test. Go migration + eventuale sorgente CP2021 = autorità Enzo (`blocked-on-Enzo` altrimenti).
+
+Anti-duplicazione: NON re-importare ATECO/NACE/crosswalk (già completi); NON creare schemi `isco_*`/`cp_*` separati (riuso pattern `sys.*`); NON toccare `sys_esco_occupation_mappings` in modo breaking (aggancio additivo).
+
+Deliverable Cowork (consegnato a Enzo via chat, NON scritto nel repo): `heuresys_classificazioni_reconciliation_2026-07-22.md` (riconciliazione + audit + gap + design completo con ER Mermaid). Nessuna migration creata/applicata; nulla scritto in `docs/kb/*` fuori da questo inbox.
+
+stato: pending
+
+
+### 2026-07-22 | proposta-backlog | i18n: gate di COPERTURA (completezza EN) + conformità tabelle nuove (incl. occupation_classifications)
+
+Contesto: verifica live del bilinguismo dei dati (ADR-0029 wave-1, mig 000190, S1024). Framework solido — IT canonico in-row + overlay EN in `sys_reference_translations`; registro `sys_translatable_field` (22 campi + skill_groups); vista integrità `v_reference_translation_orphans` = 0; fallback runtime sempre a IT (mai vuoto). **MANCA un gate di COMPLETEZZA**: la vista orfani prova l'integrità (nessuna traduzione pendente), NON la copertura EN riga-per-riga.
+
+Copertura live (verified-by `psql localhost:5433/heuresys_advanced` 2026-07-22, DO block registry-driven read-only): `sys_reference_translations` = 29013 ESCO + 498 HARVEST (solo locale 'en'; IT è in-row). Completi ✅: auth_roles, goal_templates, job_families, skill_categories, skill_families, operating_model_catalog, skill_proficiency_levels, skill_groups.name. GAP ❌: `sys_kpi_definitions` (name 243 + descr 126, en=0 → 369 mancanti), `sys_job_roles` (name 137 + descr 50, en=0 → 187), `sys_auth_permissions.name` (197 vs 182 → 15), `sys_skills` (name+descr 14041 vs 13933 → 108+108 ≈ 0.8%). ANOMALIA ⚠️: `sys_skill_groups.description` en=507 > base=30 (477 overlay EN su descrizioni IT vuote/blank → o IT-in-row da riempire o overlay stale — da investigare).
+
+Proposta (DDL PROPOSED, DO-NOT-APPLY):
+1. `sys.fn_reference_translation_coverage()` + vista `sys.v_reference_translation_coverage` (gemella di fn/vista orfani in 000190, registry-driven): per ogni `sys_translatable_field` → base_rows (colonna in-row non vuota) vs en_overlays → missing. Gate: `SELECT * FROM sys.v_reference_translation_coverage WHERE missing > 0` deve essere vuoto (pura lettura, idempotente).
+2. Gate in CI + `docs/kb/tools/status_dashboard.py`, accanto a `pnpm i18n:check` (statico) e alla vista orfani (integrità): fallisce se missing > 0 (o soglia concordata). Rende il bilinguismo DATI verificabile come già lo è la UI statica.
+3. Conformità tabelle nuove — rendere OBBLIGATORIA la regola ADR-0029 già vigente ("migration future DEVONO fornire IT canonico, POSSONO fornire EN"): ogni nuova reference table (a) IT in-row, (b) registra i campi in `sys_translatable_field`, (c) fornisce overlay EN → coperta automaticamente dal gate registry-driven.
+4. Applicazione ai deliverable occupation_classifications: registrare (`sys_occupation_classifications`, 'name'/'description'). **ISCO_08**: il seed prodotto è EN → FLIP a IT canonico in-row (titoli ISCO-08 IT da Istat/ESCO) + overlay EN (già disponibile dall'XLSX ILO). **CP_2021**: IT canonico ✓ → overlay EN da generare (pipeline source='LLM', come le 14k descrizioni skill).
+5. Sanare i gap wave-1 (kpi_definitions 369, job_roles 187, permissions.name 15, skills 216) + investigare l'anomalia skill_groups.description (477).
+
+Nessuna migration creata/applicata; nulla scritto in `docs/kb/*` fuori da questo inbox. Deliverable Cowork consegnato a Enzo via chat: framework + tabella copertura live + SQL della vista.
+stato: pending
+
+
+### 2026-07-22 | nota | ISCO-08 titoli IT procurati (ESCO API) — seed occupation IT-canonico completo + overlay EN pronti
+
+Avanzamento delle proposte "Asse professione" e "i18n" sopra. Titoli ISCO-08 in italiano ottenuti dall'**ESCO API** (`ec.europa.eu/esco/api`, walk dell'albero ISCO in `language=it`): **619/619, 0 errori, livelli 10/43/130/436**, coerenti con la struttura ILO EN. Seed occupation ora **IT-canonico completo**: 2121/2121 righe con `name` IT in-row (ISCO ← ESCO, CP2021 ← Istat/INAIL). Overlay EN ISCO pronti per `sys_reference_translations` (619 righe, field=name, locale=en, source=HARVEST, keyed `ISCO_08:<code>`). Vista di copertura i18n (`fn/v_reference_translation_coverage`, registry-driven) consegnata come `.sql` PROPOSED.
+
+Deliverable Cowork consegnati a Enzo via chat (NON scritti nel repo): `occupation_classifications_seed_IT_2026-07-22.csv`, `occupation_reference_translations_EN_2026-07-22.csv`, `occupation_classifications_bilingual_2026-07-22.csv`, `000202_reference_translation_coverage_PROPOSED.sql`. Resta da generare (decisione Enzo): overlay EN per CP_2021 (1502 righe, pipeline LLM, source='LLM'). Nessuna migration creata/applicata; nulla scritto in `docs/kb/*` fuori da questo inbox.
+stato: pending
+
+
+### 2026-07-22 | nota | CP2021 overlay EN generati (LLM) — asse professione COMPLETAMENTE bilingue
+
+Chiusura del gap i18n dell'asse professione. Overlay EN per CP2021 generati via LLM (8 subagent paralleli, traduzione IT→EN dei titoli occupazionali), assemblati e verificati: **1502/1502 tradotti, 0 mancanti / 0 extra / 0 vuoti / 0 duplicati** (match esatto sui codici del seed). Overlay EN TOTALE dell'asse professione = **2121 righe** per `sys_reference_translations`: 619 ISCO (`source=HARVEST`, da ESCO/ILO) + 1502 CP2021 (`source=LLM`), field=name, locale=en, keyed `entity_ref = <scheme>:<code>`.
+
+Stato asse professione: IT canonico in-row **2121/2121** (ISCO←ESCO, CP←Istat) + overlay EN **2121/2121** → bilinguismo dati completo. Applicando le migration `000200/000201` (catalogo+crosswalk occupazioni) e `000202` (vista coverage), registrando (`sys_occupation_classifications`,'name') in `sys_translatable_field`, e caricando seed+overlay, il gate `v_reference_translation_coverage WHERE missing>0` sull'asse professione sarà **vuoto**. Deliverable Cowork consegnati a Enzo via chat (NON nel repo): seed IT, overlay EN FULL + CP, vista bilingue, vista coverage SQL. Go migration/apply = Enzo. Nessuna migration applicata; nulla scritto in `docs/kb/*` fuori da questo inbox.
+stato: pending

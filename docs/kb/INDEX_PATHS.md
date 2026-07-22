@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-22T12:42:32Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2488**
+**Generato**: 2026-07-22T18:55:12Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2505**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -10,7 +10,7 @@
 |---|---|
 | ADR | 29 |
 | api-core | 27 |
-| api-module | 313 |
+| api-module | 314 |
 | ci | 16 |
 | claude-config | 15 |
 | config | 110 |
@@ -18,7 +18,7 @@
 | cowork-exchange | 203 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 196 |
+| db-migration | 203 |
 | db-other | 3 |
 | db-script | 32 |
 | db-seed | 114 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 96 |
 | showcase-source | 13 |
-| test | 294 |
+| test | 298 |
 | ux-design-archive | 80 |
-| web-source | 201 |
-| **TOTALE** | **2488** |
+| web-source | 206 |
+| **TOTALE** | **2505** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 495 |
 | external-archive | 50 |
-| live | 1943 |
+| live | 1960 |
 
 ## File per categoria
 
@@ -124,6 +124,7 @@
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\registry.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-activation.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\tenant-materialization.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\src\modules\approvals\effects\time-off-request.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\approvals\service.ts` · *live* · git-tracked
@@ -1128,6 +1129,13 @@
 - `D:\heuresys-advanced\db\migrations\000196_restore_skill_natural_key_uq.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000197_learning_catalog_junk_purge.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000198_career_paths_test_residue_purge.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000199_rbac_g2_residual_permissions.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000200_training_initiatives_test_residue_purge.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000201_team_leader_operational_approvals.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000202_leave_request_self_permission.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000203_me_time_off_interface.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000204_key_roles_reactivation_integrity.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000205_whistleblowing_custodian_and_console.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -2047,6 +2055,7 @@
 - `D:\heuresys-advanced\apps\api\test\auth-mfa.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\auth-refresh-cookie.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\auth.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\b3-time-off-approval.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\blueprint-activations.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\blueprint-families.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\blueprint-overrides.integration.test.ts` · *live* · git-tracked
@@ -2223,6 +2232,7 @@
 - `D:\heuresys-advanced\apps\api\test\transform-compiler.lookup-fk-2hop.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\transform-compiler.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\trust-proxy.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\two-axis-f4-crosstree.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b34-nullable-nk.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b60-a-silent-skip.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\upsert-sql-type-coerce.test.ts` · *live* · git-tracked
@@ -2300,6 +2310,7 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\me-profile-tabs.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\me-sessions.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\me-team.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\me-time-off.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\mfa-enroll.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\mfa-fixture-secrets.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\mfa-policy-admin.spec.ts` · *live* · git-tracked
@@ -2318,6 +2329,7 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\time-off.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\visualizations.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\webauthn.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\whistleblowing.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\tests\api\.gitkeep` · *live* · git-tracked
 - `D:\heuresys-advanced\tests\db\.gitkeep` · *live* · git-tracked
 - `D:\heuresys-advanced\tests\e2e\.gitkeep` · *live* · git-tracked
@@ -2502,6 +2514,7 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\surveys\[surveyId]\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\surveys\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\team\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\time-off\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\okrs\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\org-director\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\organization\org-chart\page.tsx` · *live* · git-tracked
@@ -2527,6 +2540,7 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\users\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\visualizations\[graphId]\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\visualizations\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\whistleblowing-console\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\app\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\demo\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\error.tsx` · *live* · git-tracked
@@ -2558,11 +2572,13 @@
 - `D:\heuresys-advanced\apps\web\src\app\showcase\system-health\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\showcase\tables\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\showcase\typography\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\whistleblowing\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\ContentMediaPanel.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\SystemHealthDashboard.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\SystemHealthLive.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\data-table-panel.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\detail-panel.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\components\enum-badge.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\evidence-drawer.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\gap-closure-panel.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\components\goal-timeline-dialog.tsx` · *live* · git-tracked
@@ -2581,6 +2597,7 @@
 - `D:\heuresys-advanced\apps\web\src\lib\api\fetch.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\api\observability.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\api\public-stats.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\lib\enum-labels.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\hooks\use-debounced-value.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\hooks\use-paginated-list.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\lib\i18n.ts` · *live* · git-tracked

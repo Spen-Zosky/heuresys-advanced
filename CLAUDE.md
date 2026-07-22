@@ -32,7 +32,7 @@ Historical records live in `docs/archive/` and are **not** SoT. When state chang
 
 ## Session start (do this first, every session)
 
-After the infra hooks (tunnel/db/branch), **before** asking what to do or starting work, build the **action menu** from all live sources so the user picks from a complete list — never from memory. Do it with ONE command, in ONE model round — this replaces the old two-script, N-round boot that was the dominant cost of a slow "avvia sessione" (forensics: `docs/kb/SESSION_START_FORENSICS.md`):
+After the infra hooks (tunnel/db/branch), **before** asking what to do or starting work, build the **action menu** from all live sources so the user picks from a complete list — never from memory. Do it with ONE command, in ONE model round — this replaces the old two-script, N-round boot that was the dominant cost of a slow "avvia sessione" (forensics: `docs/kb/xtras/SESSION_START_FORENSICS.md`):
 
 1. **Run `python docs/kb/tools/session_start.py`** (pass `--no-db` if the tunnel is down). One process that prints the register-driven action menu (`build_menu`) **plus** the live health dashboard (`status_dashboard`), which **at boot runs offline-fast** (`--no-net`): the git-fetch / CI / PROD probes are monitoring data, not inputs to the menu, and the boot hook already established tunnel + DB + branch/dirty/unpushed. **Do NOT read `SOT_BACKLOG.md` / `SOT_STATE.md` / `DEBT_REGISTER.md` raw at boot** (156KB + 206KB + 65KB — mostly historical archive the script already distills into menu + debts + decisions + drift). Open a source raw **only in drill-down, for the item the user chooses**. You may read the small `.handoff/STATE.md` (~3KB — priorities + open-questions prose) if you want the narrative.
 2. **Aggregate**: the menu is generated exhaustively from the canonical Action register (ACTIVE tiers + GATED + WAIT-INPUT tray + HOLD count + INTERRUPTED top, with P3 trigger-eval flagging unblockable parked items + P9 age — design §11.2). Present it and **ADD only what the register doesn't yet cover**: debts not-`RISOLTO` (already in the dashboard's debt section) + SOT roadmap/gated items — with judgment on impact/unblocking (**P1** high-impact/unblocking · **P2** quality/debt · **P3** roadmap/gated).
@@ -118,7 +118,7 @@ heuresys-advanced/
 
 ## Design System — `@heuresys/ui` (npm-published, post-migrazione X18)
 
-Reusable UI/UX components live in **`@heuresys/ui`** — an npm-published versioned lib derived from `ux-design-shared` (ex-`heuresys-evo`), consumed as a normal dep (not `link:`) since migration X18 (2026-05). Import: `import { Button, Card, DataTable } from "@heuresys/ui"`. UI runtime deps (Radix, Tailwind 4, framer-motion, d3, echarts, three.js, …) are declared inside the lib and arrive as transitive deps. **Full setup (Tailwind `content` path, `transpilePackages`), the modify-a-component workflow (Storybook → npm release → bump here), maintenance and the X18 migration history → `docs/kb/DESIGN_SYSTEM_UI.md`.**
+Reusable UI/UX components live in **`@heuresys/ui`** — an npm-published versioned lib derived from `ux-design-shared` (ex-`heuresys-evo`), consumed as a normal dep (not `link:`) since migration X18 (2026-05). Import: `import { Button, Card, DataTable } from "@heuresys/ui"`. UI runtime deps (Radix, Tailwind 4, framer-motion, d3, echarts, three.js, …) are declared inside the lib and arrive as transitive deps. **Full setup (Tailwind `content` path, `transpilePackages`), the modify-a-component workflow (Storybook → npm release → bump here), maintenance and the X18 migration history → `docs/kb/xtras/DESIGN_SYSTEM_UI.md`.**
 
 **Rules** (non-negotiable):
 - **NEVER** create reusable UI components in `apps/web`, `apps/showcase` o `packages/*` di questo repo. Vanno nel repo `ux-design-shared` (sorgente di `@heuresys/ui`).
@@ -218,7 +218,7 @@ Numbered SQL files in `db/migrations/000001_*.sql..` (the `000035` gap is cosmet
 
 ## Autonomia operativa cross-tool (R23 globale — project enforcement)
 
-Global rule **R23** (`~/.claude/CLAUDE.md`) applies: zero avoidable delegation + proactive tool loading + self-diagnose fallback + no user-executable instructions when autonomously executable + evidence-not-suggestion. **Project-level specifics — preferred tools per task, self-hosted CI runner, tunnel handling, test-verification level → `docs/kb/AUTONOMY_R23_PROJECT.md`.** Two rules to keep top-of-mind:
+Global rule **R23** (`~/.claude/CLAUDE.md`) applies: zero avoidable delegation + proactive tool loading + self-diagnose fallback + no user-executable instructions when autonomously executable + evidence-not-suggestion. **Project-level specifics — preferred tools per task, self-hosted CI runner, tunnel handling, test-verification level → `docs/kb/xtras/AUTONOMY_R23_PROJECT.md`.** Two rules to keep top-of-mind:
 - **Push authorization is session-scoped**: the historical "never `git push` without explicit ask" is the default; once you authorize autonomous push in a session it holds until revoked, and a **new session resets to "ask"**.
 - **A red CI is an error Claude MUST fix** (R3), never hand back to the user — consult `gh run list`/`gh run watch` as evidence (R23/e).
 

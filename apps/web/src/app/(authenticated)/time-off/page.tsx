@@ -11,6 +11,8 @@ import type {
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { StatusPill } from "@/components/status-pill";
+import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
+import { EnumStatusPill } from "@/components/enum-badge";
 
 /**
  * A/L8 (#33) — Time-off & leave admin page. Live over /v1/time-off/*:
@@ -32,7 +34,7 @@ function buildRequestColumns(t: TFunction): DataColumn<TimeOffRequest>[] {
     { header: t("timeOff.cols.leaveType"), cell: (r) => <span className="font-mono text-xs">{r.leaveType}</span> },
     { header: t("timeOff.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.startDate} → {r.endDate}</span> },
     { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{r.daysRequested}</span> },
-    { header: t("timeOff.cols.status"), cell: (r) => <StatusPill tone={toneForRequestStatus(r.status)}>{r.status}</StatusPill> },
+    { header: t("timeOff.cols.status"), cell: (r) => <EnumStatusPill domain="timeOffStatus" value={r.status} tone={toneForRequestStatus(r.status)} /> },
   ];
 }
 
@@ -47,9 +49,9 @@ function buildRuleColumns(t: TFunction): DataColumn<LeaveAccrualRule>[] {
   ];
 }
 
-function buildTxnColumns(t: TFunction): DataColumn<LeaveBalanceTransaction>[] {
+function buildTxnColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<LeaveBalanceTransaction>[] {
   return [
-    { header: t("timeOff.cols.txnType"), cell: (r) => <span className="font-mono text-xs">{r.type}</span> },
+    { header: t("timeOff.cols.txnType"), cell: (r) => <span className="font-mono text-xs">{enumLabel("timeOffTxnType", r.type)}</span> },
     { header: t("timeOff.cols.days"), align: "right", cell: (r) => <span className="tabular-nums">{r.daysAmount}</span> },
     { header: t("timeOff.cols.description"), cell: (r) => <span className="text-xs text-muted-foreground">{r.description ?? "—"}</span> },
     { header: t("timeOff.cols.reference"), cell: (r) => <span className="text-xs">{r.referenceType ?? "—"}</span> },
@@ -61,6 +63,7 @@ const REQUEST_STATUSES = TimeOffRequestStatusEnum.options;
 
 export default function TimeOffPage() {
   const { t } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
   const [status, setStatus] = useState<string>("");
 
   const requests = usePaginatedList<TimeOffRequest>({
@@ -79,7 +82,7 @@ export default function TimeOffPage() {
 
   const requestColumns = useMemo(() => buildRequestColumns(t), [t]);
   const ruleColumns = useMemo(() => buildRuleColumns(t), [t]);
-  const txnColumns = useMemo(() => buildTxnColumns(t), [t]);
+  const txnColumns = useMemo(() => buildTxnColumns(t, enumLabel), [t, enumLabel]);
 
   const kpis: KpiCardData[] = useMemo(() => [
     { label: t("timeOff.kpi.requests"), value: requests.total.toLocaleString() },

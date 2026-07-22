@@ -109,5 +109,383 @@
     "colSkill": "Competenza",
     "emptyTitle": "Nessun risultato",
     "emptyDesc": "Nessun risultato per questa query — prova una formulazione diversa."
+  },
+  "enums": {
+    "goalStatus": {
+      "NOT_STARTED": "Non avviato",
+      "IN_PROGRESS": "In corso",
+      "ON_TRACK": "In linea",
+      "AT_RISK": "A rischio",
+      "BLOCKED": "Bloccato",
+      "COMPLETED": "Completato",
+      "CANCELLED": "Annullato"
+    },
+    "goalPriority": {
+      "LOW": "Bassa",
+      "MEDIUM": "Media",
+      "HIGH": "Alta",
+      "CRITICAL": "Critica"
+    },
+    "goalType": {
+      "OBJECTIVE": "Obiettivo",
+      "INDIVIDUAL": "Individuale",
+      "TECHNICAL": "Tecnico",
+      "SALES": "Vendite",
+      "CUSTOMER": "Cliente",
+      "PERFORMANCE": "Performance",
+      "PROJECT": "Progetto",
+      "FINANCIAL": "Finanziario",
+      "SECURITY": "Sicurezza",
+      "LEADERSHIP": "Leadership",
+      "DEVELOPMENT": "Sviluppo",
+      "EFFICIENCY": "Efficienza",
+      "COMPLIANCE": "Conformità"
+    },
+    "goalUpdateType": {
+      "PROGRESS": "Avanzamento",
+      "STATUS_CHANGE": "Cambio stato",
+      "MILESTONE": "Milestone",
+      "BLOCKER": "Blocco",
+      "NOTE": "Nota"
+    },
+    "goalCheckInStatus": {
+      "ON_TRACK": "In linea",
+      "AHEAD": "In anticipo",
+      "AT_RISK": "A rischio",
+      "BLOCKED": "Bloccato",
+      "COMPLETED": "Completato"
+    },
+    "goalMilestoneStatus": {
+      "PENDING": "In attesa",
+      "IN_PROGRESS": "In corso",
+      "COMPLETED": "Completata",
+      "MISSED": "Mancata",
+      "CANCELLED": "Annullata"
+    },
+    "okrStatus": {
+      "DRAFT": "Bozza",
+      "ACTIVE": "Attivo",
+      "ACHIEVED": "Raggiunto",
+      "MISSED": "Mancato",
+      "CANCELLED": "Annullato",
+      "ARCHIVED": "Archiviato"
+    },
+    "keyResultStatus": {
+      "ON_TRACK": "In linea",
+      "AT_RISK": "A rischio",
+      "BEHIND": "In ritardo",
+      "COMPLETED": "Completato",
+      "ABANDONED": "Abbandonato"
+    },
+    "timeOffStatus": {
+      "PENDING": "In attesa",
+      "APPROVED": "Approvata",
+      "REJECTED": "Respinta",
+      "CANCELLED": "Annullata",
+      "EXPIRED": "Scaduta"
+    },
+    "timeOffTxnType": {
+      "ACCRUAL": "Maturazione",
+      "USAGE": "Utilizzo",
+      "ADJUSTMENT": "Rettifica",
+      "CARRYOVER": "Riporto"
+    },
+    "severity": {
+      "LOW": "Bassa",
+      "MEDIUM": "Media",
+      "HIGH": "Alta",
+      "CRITICAL": "Critica"
+    },
+    "documentKind": {
+      "CV": "Curriculum",
+      "CERTIFICATE": "Certificato",
+      "CONTRACT_REFERENCE": "Riferimento contrattuale",
+      "TRAINING_RECORD": "Registro formazione",
+      "EVIDENCE_PROOF": "Evidenza",
+      "OTHER": "Altro"
+    },
+    "proficiency": {
+      "NOVICE": "Principiante",
+      "ADVANCED_BEGINNER": "Principiante avanzato",
+      "BASIC": "Base",
+      "COMPETENT": "Competente",
+      "PROFICIENT": "Avanzato",
+      "EXPERT": "Esperto",
+      "MASTER": "Maestro"
+    },
+    "skillEvidenceSource": {
+      "SELF_ASSESSMENT": "Auto-valutazione",
+      "MANAGER_ASSESSMENT": "Valutazione del manager"
+    },
+    "kpiPolarity": {
+      "HIGHER_IS_BETTER": "Più alto è meglio",
+      "LOWER_IS_BETTER": "Più basso è meglio",
+      "TARGET_RANGE": "Intervallo obiettivo"
+    },
+    "kpiMethodCode": {
+      "DELTA_VS_TARGET": "Scostamento dal target",
+      "PERCENTILE": "Percentile",
+      "BANDED": "A fasce",
+      "LINEAR_SCORE": "Punteggio lineare",
+      "STEPPED": "A gradini"
+    },
+    "kpiRuleCode": {
+      "LINEAR_DEFAULT": "Lineare (default)",
+      "CAPPED_120": "Con tetto al 120%",
+      "STEP_25_50_75": "A gradini 25/50/75"
+    },
+    "kpiRuleKind": {
+      "LINEAR": "Lineare",
+      "CAPPED": "Con tetto",
+      "STEP": "A gradini"
+    },
+    "horizon": {
+      "READY_NOW": "Pronto ora",
+      "READY_6_MONTHS": "Pronto in 6 mesi",
+      "READY_1_YEAR": "Pronto in 1 anno",
+      "READY_2_YEARS": "Pronto in 2 anni",
+      "NOT_READY": "Non pronto"
+    },
+    "userStatus": {
+      "ACTIVE": "Attivo",
+      "INACTIVE": "Inattivo",
+      "SUSPENDED": "Sospeso",
+      "PENDING_VERIFICATION": "In attesa di verifica",
+      "DEACTIVATED": "Disattivato"
+    },
+    "userType": {
+      "STANDARD": "Standard",
+      "GENERATED_INCUMBENT": "Incumbent generato",
+      "SERVICE": "Di servizio"
+    },
+    "contractType": {
+      "permanent": "Tempo indeterminato",
+      "fixed_term": "Tempo determinato"
+    },
+    "contractStatus": {
+      "ACTIVE": "Attivo",
+      "ENDED": "Concluso",
+      "TERMINATED": "Cessato"
+    },
+    "paySlipStatus": {
+      "available": "Disponibile",
+      "paid": "Pagato"
+    },
+    "perfReviewType": {
+      "ANNUAL": "Annuale",
+      "MID_YEAR": "Semestrale"
+    },
+    "perfReviewStatus": {
+      "IN_PROGRESS": "In corso",
+      "COMPLETED": "Completata"
+    },
+    "flightRiskBand": {
+      "LOW": "Basso",
+      "MEDIUM": "Medio",
+      "HIGH": "Alto",
+      "CRITICAL": "Critico"
+    },
+    "careerPathKind": {
+      "VERTICAL": "Verticale",
+      "LATERAL": "Laterale",
+      "SPECIALIST": "Specialistico",
+      "MANAGERIAL": "Manageriale",
+      "CROSS_FUNCTIONAL": "Trasversale"
+    },
+    "careerPlanStatus": {
+      "ACTIVE": "Attivo",
+      "COMPLETED": "Completato",
+      "PAUSED": "In pausa",
+      "CANCELLED": "Annullato"
+    },
+    "orgUnitType": {
+      "HEADQUARTERS": "Sede centrale",
+      "DIVISION": "Divisione",
+      "DEPARTMENT": "Dipartimento",
+      "OFFICE": "Ufficio",
+      "TEAM": "Team"
+    },
+    "vizGraphType": {
+      "ORG_CHART": "Organigramma",
+      "PROCESS_FLOW": "Flusso di processo",
+      "CAREER_PATH": "Percorso di carriera",
+      "LEARNING_PATH": "Percorso formativo",
+      "SKILL_GAP_MAP": "Mappa gap di skill",
+      "SUCCESSION_MAP": "Mappa successioni",
+      "KPI_CASCADE": "Cascata KPI",
+      "POSITION_INTELLIGENCE_MAP": "Mappa position intelligence",
+      "ENTERPRISE_BLUEPRINT_MAP": "Mappa blueprint aziendale"
+    },
+    "vizEdgeType": {
+      "REPORTS_TO": "Riporta a",
+      "REQUIRES_SKILL": "Richiede skill",
+      "NEXT_STEP": "Passo successivo",
+      "SUCCESSOR_OF": "Successore di",
+      "PART_OF": "Parte di",
+      "INFLUENCES": "Influenza",
+      "ESCALATES_TO": "Escalation verso",
+      "GENERIC": "Generico"
+    },
+    "tenantStatus": {
+      "ACTIVE": "Attivo",
+      "SUSPENDED": "Sospeso",
+      "ARCHIVED": "Archiviato",
+      "PENDING_ACTIVATION": "In attivazione"
+    },
+    "seedRunStatus": {
+      "RUNNING": "In esecuzione",
+      "COMPLETED": "Completato",
+      "FAILED": "Fallito",
+      "CANCELLED": "Annullato"
+    },
+    "blueprintActivationStatus": {
+      "PROPOSED": "Proposta",
+      "ACTIVE": "Attiva",
+      "SUSPENDED": "Sospesa",
+      "RETIRED": "Ritirata"
+    },
+    "trainingInitiativeStatus": {
+      "PLANNED": "Pianificata",
+      "OPEN": "Aperta",
+      "IN_PROGRESS": "In corso",
+      "COMPLETED": "Completata",
+      "CANCELLED": "Annullata"
+    },
+    "mfaKind": {
+      "TOTP": "App di autenticazione (TOTP)",
+      "WEBAUTHN": "Passkey / chiave di sicurezza",
+      "EMAIL_OTP": "Codice via email",
+      "SMS_OTP": "Codice via SMS"
+    },
+    "notificationPriority": {
+      "INFO": "Info",
+      "MEDIUM": "Media",
+      "HIGH": "Alta",
+      "CRITICAL": "Critica"
+    },
+    "notificationStatus": {
+      "UNREAD": "Non letta",
+      "READ": "Letta",
+      "DISMISSED": "Archiviata"
+    },
+    "gapClosurePlanStatus": {
+      "PROPOSED": "Proposto",
+      "ACTIVE": "Attivo",
+      "COMPLETED": "Completato",
+      "CANCELLED": "Annullato",
+      "ON_HOLD": "In pausa"
+    },
+    "gapClosureActionKind": {
+      "TRAINING_ASSIGNMENT": "Assegnazione formativa",
+      "CERTIFICATION_REQUIRED": "Certificazione richiesta",
+      "MANAGER_INTERVENTION": "Intervento del manager",
+      "PEER_COACHING": "Coaching tra pari",
+      "ON_THE_JOB_EXPOSURE": "Esperienza sul campo",
+      "MENTORING": "Mentoring"
+    },
+    "approvalStatus": {
+      "PENDING": "In attesa",
+      "APPROVED": "Approvata",
+      "REJECTED": "Respinta",
+      "APPLIED": "Applicata"
+    },
+    "approvalStepStatus": {
+      "PENDING": "In attesa",
+      "APPROVED": "Approvato",
+      "REJECTED": "Respinto",
+      "SKIPPED": "Saltato"
+    },
+    "surveyStatus": {
+      "draft": "Bozza",
+      "active": "Attivo",
+      "closed": "Chiuso"
+    },
+    "surveyCategory": {
+      "engagement": "Engagement",
+      "wellbeing": "Benessere",
+      "exit": "Uscita",
+      "onboarding": "Onboarding",
+      "custom": "Personalizzato"
+    },
+    "questionType": {
+      "rating": "Valutazione",
+      "nps": "NPS",
+      "text": "Testo libero"
+    },
+    "assignmentStatus": {
+      "ACTIVE": "Attiva",
+      "ENDED": "Conclusa"
+    },
+    "assignmentKind": {
+      "PRIMARY": "Primaria",
+      "SECONDARY": "Secondaria"
+    },
+    "learningAssignStatus": {
+      "ASSIGNED": "Assegnato",
+      "IN_PROGRESS": "In corso",
+      "COMPLETED": "Completato"
+    },
+    "skillGapSegment": {
+      "ALIGNED": "Allineato",
+      "MINOR_GAP": "Gap lieve",
+      "MODERATE_GAP": "Gap moderato",
+      "MAJOR_GAP": "Gap rilevante"
+    },
+    "nineBoxBand": {
+      "LOW": "Basso",
+      "MEDIUM": "Medio",
+      "HIGH": "Alto",
+      "CORE": "Core",
+      "STAR": "Star",
+      "HIGH_PERFORMER": "High performer"
+    },
+    "successorCandidateStatus": {
+      "CANDIDATE": "Candidato",
+      "CONFIRMED": "Confermato",
+      "WITHDRAWN": "Ritirato",
+      "NOT_READY": "Non pronto"
+    },
+    "contentStatus": {
+      "draft": "Bozza",
+      "in_review": "In revisione",
+      "published": "Pubblicato",
+      "archived": "Archiviato"
+    },
+    "contentKind": {
+      "article": "Articolo",
+      "policy": "Policy",
+      "announcement": "Annuncio",
+      "handbook": "Manuale",
+      "process_doc": "Documento di processo"
+    },
+    "okrType": {
+      "COMPANY": "Aziendale",
+      "DEPARTMENT": "Di dipartimento",
+      "TEAM": "Di team",
+      "INDIVIDUAL": "Individuale"
+    },
+    "successionPoolStatus": {
+      "PROPOSED": "Proposto",
+      "ACTIVE": "Attivo",
+      "ARCHIVED": "Archiviato"
+    },
+    "payrollHandoffStatus": {
+      "PENDING": "In attesa",
+      "SENT": "Inviato",
+      "ACKNOWLEDGED": "Confermato",
+      "REJECTED": "Respinto"
+    },
+    "leaveType": {
+      "VACATION": "Ferie",
+      "SICK": "Malattia",
+      "PERSONAL": "Permesso personale",
+      "MATERNITY": "Maternità",
+      "PATERNITY": "Paternità",
+      "BEREAVEMENT": "Lutto",
+      "STUDY": "Studio",
+      "SABBATICAL": "Aspettativa",
+      "UNPAID": "Non retribuito",
+      "OTHER": "Altro"
+    }
   }
 }

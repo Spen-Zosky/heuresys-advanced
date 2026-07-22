@@ -38,6 +38,7 @@ import {
 } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
 import { isApiError } from "../../../../lib/api/errors";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 // Stable no-op subscribe for useSyncExternalStore reads of immutable browser capabilities.
 const subscribeNever = () => () => {};
@@ -52,6 +53,7 @@ type VerifyCodeFormValues = z.infer<ReturnType<typeof buildVerifyCodeSchema>>;
 
 export default function MeSecurityPage() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; msg: string } | null>(null);
   const [pendingFactor, setPendingFactor] = useState<EnrollMfaResponse | null>(null);
@@ -451,7 +453,7 @@ export default function MeSecurityPage() {
                       className="font-medium text-foreground"
                       data-testid="me-security-factor-kind"
                     >
-                      {f.kind}
+                      {enumLabel("mfaKind", f.kind)}
                     </div>
                     <div className="font-mono text-xs text-muted-foreground">
                       {f.verified ? t("security.verified") : t("security.pendingVerification")} ·{" "}
@@ -464,7 +466,7 @@ export default function MeSecurityPage() {
                     className="text-danger"
                     data-testid="me-security-factor-delete"
                     onClick={() => {
-                      if (confirm(t("security.removeConfirm", { kind: f.kind }))) {
+                      if (confirm(t("security.removeConfirm", { kind: enumLabel("mfaKind", f.kind) }))) {
                         remove.mutate(f.factorId);
                       }
                     }}

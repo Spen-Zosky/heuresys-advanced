@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import type { DashboardTrendKey, DashboardWidgetsResponse } from "@heuresys/shared";
 import { apiFetch } from "../../../lib/api/fetch";
+import { useEnumLabel } from "../../../lib/enum-labels";
 
 /** Map a free-text activity kind to a branded icon + tone (no fabricated data —
  *  purely a presentation choice over the real `kind` string). */
@@ -50,6 +51,7 @@ const ICON_CLS = "h-4 w-4";
 
 export default function DashboardPage() {
   const { t } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
   const widgets = useQuery({
     queryKey: ["dashboard", "widgets"],
     queryFn: () => apiFetch<DashboardWidgetsResponse>("/v1/dashboard/widgets"),
@@ -111,7 +113,7 @@ export default function DashboardPage() {
         description={t("dashboard.description")}
         badges={
           <Badge variant="secondary" data-testid="dashboard-scope">
-            {t("dashboard.scope", { kind: w.scope.kind, role: w.role })}
+            {t("dashboard.scope", { kind: w.scope.kind, role: t(`shell:roles.${w.role}`, { defaultValue: w.role }) })}
           </Badge>
         }
       />
@@ -157,7 +159,7 @@ export default function DashboardPage() {
                     {d.userDisplayName} — {d.skillName ?? t("dashboard.gapGeneral")}
                   </span>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${SEVERITY_CLASS[d.severity] ?? "bg-muted text-muted-foreground"}`}>
-                    {d.severity}
+                    {enumLabel("severity", d.severity)}
                   </span>
                 </li>
               ))}

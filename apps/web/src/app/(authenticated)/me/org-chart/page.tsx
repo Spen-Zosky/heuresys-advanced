@@ -7,7 +7,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { EChartsCard } from "../../_charts-client";
 
 interface VizGraph { graphId: string; name: string; type: string; isActive: boolean }
-interface RenderNode { nodeId: string; label: string }
+interface RenderNode { nodeId: string; label: string; sourceEntityId: string | null }
 interface RenderEdge { sourceNodeId: string; targetNodeId: string }
 interface RenderPayload { graph: { graphId: string; name: string }; nodes: RenderNode[]; edges: RenderEdge[] }
 interface MePositions { items: Array<{ positionId: string; isPrimary: boolean }>; total: number }
@@ -44,7 +44,9 @@ export default function MeOrgChartPage() {
         label: { show: true, position: "right" as const, fontSize: 11, color: "#e2e8f0" },
         force: { repulsion: 60, edgeLength: 80, gravity: 0.08 },
         data: nodes.map((n) => {
-          const mine = n.nodeId === ownPositionId;
+          // nodeId is the visualization node's own UUID — the position lives in
+          // sourceEntityId (census F4 S1026: the highlight never fired on nodeId)
+          const mine = n.sourceEntityId !== null && n.sourceEntityId === ownPositionId;
           return {
             id: n.nodeId, name: n.label,
             symbolSize: mine ? 30 : 14,

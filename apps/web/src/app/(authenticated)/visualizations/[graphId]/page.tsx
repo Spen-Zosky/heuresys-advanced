@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/
 import { MermaidDiagram } from "../../_charts-client";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
-import { StatusPill } from "@/components/status-pill";
+import { EnumStatusPill } from "@/components/enum-badge";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 // Fields match the real schemas (visualization-graphs/nodes/edges): graphId/type,
 // nodeId/sourceEntityType/label, edgeId/sourceNodeId/targetNodeId/type. The previous
@@ -37,6 +38,7 @@ interface GraphEdge {
 
 export default function VisualizationDetailPage() {
   const { t } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
   const params = useParams<{ graphId: string }>();
   const graphId = params.graphId;
   const graph = useQuery({
@@ -118,7 +120,7 @@ export default function VisualizationDetailPage() {
         badges={
           <>
             <span data-testid="visualization-code" className="font-mono text-sm text-muted-foreground">{g.code}</span>
-            <StatusPill tone="info">{g.type}</StatusPill>
+            <EnumStatusPill domain="vizGraphType" value={g.type} tone="info" />
           </>
         }
       />
@@ -179,7 +181,7 @@ export default function VisualizationDetailPage() {
                 {edges.data!.items.slice(0, 20).map((e) => (
                   <li key={e.edgeId} className="px-4 py-2 font-mono text-xs text-foreground" data-testid="visualization-edge-item">
                     {e.sourceNodeId.slice(0, 6)}{t("visualizations.detail.edgeArrow")}{e.targetNodeId.slice(0, 6)}
-                    <span className="ml-2 uppercase text-muted-foreground">{e.type}</span>
+                    <span className="ml-2 uppercase text-muted-foreground">{enumLabel("vizEdgeType", e.type)}</span>
                   </li>
                 ))}
               </ul>

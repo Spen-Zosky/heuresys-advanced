@@ -8,6 +8,7 @@ import { PageHeader } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 import { EChartsCard } from "../_charts-client";
 
 interface CareerPath {
@@ -60,7 +61,7 @@ function buildPoolsCols(t: TFunction): DataColumn<SuccessionPool>[] {
   return [
     { header: t("career.poolsCols.code"), cell: (p) => <span className="font-mono text-xs text-muted-foreground">{p.code}</span> },
     { header: t("career.poolsCols.name"), cell: (p) => <span className="font-medium text-foreground">{p.name}</span> },
-    { header: t("career.poolsCols.status"), cell: (p) => <StatusBadge value={p.status} /> },
+    { header: t("career.poolsCols.status"), cell: (p) => <EnumStatusBadge domain="successionPoolStatus" value={p.status} /> },
   ];
 }
 function buildCandidatesCols(t: TFunction): DataColumn<SuccessorCandidate>[] {
@@ -68,7 +69,7 @@ function buildCandidatesCols(t: TFunction): DataColumn<SuccessorCandidate>[] {
     { header: t("career.candidatesCols.user"), cell: (c) => <span className="text-xs text-foreground">{c.userName ?? c.userId.slice(0, 8)}</span> },
     { header: t("career.candidatesCols.pool"), cell: (c) => <span className="text-xs text-muted-foreground">{c.poolName ?? c.poolId.slice(0, 8)}</span> },
     { header: t("career.candidatesCols.readiness"), cell: (c) => <StatusBadge value={c.readinessLevel} /> },
-    { header: t("career.candidatesCols.status"), cell: (c) => <StatusBadge value={c.status} /> },
+    { header: t("career.candidatesCols.status"), cell: (c) => <EnumStatusBadge domain="successorCandidateStatus" value={c.status} /> },
   ];
 }
 

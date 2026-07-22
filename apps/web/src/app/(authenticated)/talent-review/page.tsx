@@ -14,6 +14,7 @@ import type {
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { apiFetch } from "@/lib/api/fetch";
+import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 
 /**
  * A/L3 (#29) — Talent review admin page. Live over /v1/talent-review/*:
@@ -47,22 +48,22 @@ function buildFitColumns(t: TFunction): DataColumn<FitScore>[] {
   ];
 }
 
-function buildReadinessColumns(t: TFunction): DataColumn<ReadinessScore>[] {
+function buildReadinessColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<ReadinessScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
     { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
-    { header: t("talentReview.cols.horizon"), cell: (r) => <span className="font-mono text-xs">{r.horizon}</span> },
+    { header: t("talentReview.cols.horizon"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("horizon", r.horizon)}</span> },
     { header: t("talentReview.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value ?? "—"}</span> },
     { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{r.computedAt.slice(0, 10)}</span> },
   ];
 }
 
-function buildSuccessionColumns(t: TFunction): DataColumn<SuccessionScore>[] {
+function buildSuccessionColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<SuccessionScore>[] {
   return [
     { header: t("talentReview.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
     { header: t("talentReview.cols.position"), cell: (r) => <span className="font-mono text-xs">{shortId(r.positionId)}</span> },
     { header: t("talentReview.cols.value"), align: "right", cell: (r) => <span className="tabular-nums">{r.value ?? "—"}</span> },
-    { header: t("talentReview.cols.horizon"), cell: (r) => <span className="font-mono text-xs">{r.horizon ?? "—"}</span> },
+    { header: t("talentReview.cols.horizon"), cell: (r) => <span className="text-xs text-muted-foreground">{enumLabel("horizon", r.horizon)}</span> },
     { header: t("talentReview.cols.computedAt"), cell: (r) => <span className="tabular-nums text-xs">{r.computedAt.slice(0, 10)}</span> },
   ];
 }
@@ -88,6 +89,7 @@ function buildCoverageColumns(t: TFunction): DataColumn<CriticalCoverage>[] {
 
 export default function TalentReviewPage() {
   const { t } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
 
   const nineBox = useQuery({
     queryKey: ["talent-review", "nine-box"],
@@ -101,8 +103,8 @@ export default function TalentReviewPage() {
   const coverage = usePaginatedList<CriticalCoverage>({ queryKey: ["talent-review", "critical-coverage"], path: "/v1/talent-review/critical-coverage" });
 
   const fitColumns = useMemo(() => buildFitColumns(t), [t]);
-  const readinessColumns = useMemo(() => buildReadinessColumns(t), [t]);
-  const successionColumns = useMemo(() => buildSuccessionColumns(t), [t]);
+  const readinessColumns = useMemo(() => buildReadinessColumns(t, enumLabel), [t, enumLabel]);
+  const successionColumns = useMemo(() => buildSuccessionColumns(t, enumLabel), [t, enumLabel]);
   const criticalPositionColumns = useMemo(() => buildCriticalPositionColumns(t), [t]);
   const coverageColumns = useMemo(() => buildCoverageColumns(t), [t]);
 

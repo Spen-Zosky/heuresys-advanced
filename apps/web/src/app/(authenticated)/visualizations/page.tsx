@@ -10,6 +10,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
+import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../_charts-client";
 
 type TypeDistItem = VizGraphTypeDistributionItem;
@@ -36,6 +37,7 @@ function typeChartOption(items: TypeDistItem[], labels: { series: string }) {
 
 export default function VisualizationsPage() {
   const { t } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
   // C4 (#42): server-side pagination (was `?limit=200`). The donut is fed by the
   // separate server-side GROUP BY aggregate below, so paging the table never
   // narrows the distribution.
@@ -64,10 +66,10 @@ export default function VisualizationsPage() {
           </Link>
         ),
       },
-      { header: t("visualizations.columns.type"), cell: (g) => <span className="text-xs uppercase text-muted-foreground">{g.type.replace(/_/g, " ")}</span> },
+      { header: t("visualizations.columns.type"), cell: (g) => <span className="text-xs uppercase text-muted-foreground">{enumLabel("vizGraphType", g.type)}</span> },
       { header: t("visualizations.columns.status"), cell: (g) => <StatusBadge value={g.isActive ? "ACTIVE" : "INACTIVE"} /> },
     ],
-    [t],
+    [t, enumLabel],
   );
 
   return (

@@ -6,7 +6,8 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { apiFetch } from "../../../lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "../../../components/data-table-panel";
-import { StatusBadge } from "../../../components/status-pill";
+import { EnumStatusBadge } from "../../../components/enum-badge";
+import { useEnumLabel } from "../../../lib/enum-labels";
 
 interface User {
   userId: string;
@@ -23,6 +24,7 @@ interface UsersList {
 
 export default function UsersListPage() {
   const { t } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
   const users = useQuery({
     queryKey: ["users", "list"],
     queryFn: () => apiFetch<UsersList>("/v1/users"),
@@ -39,10 +41,10 @@ export default function UsersListPage() {
         ),
       },
       { header: t("users.columns.email"), cell: (u) => <span data-testid="user-email" className="text-muted-foreground">{u.email}</span> },
-      { header: t("users.columns.status"), cell: (u) => <StatusBadge value={u.status} /> },
-      { header: t("users.columns.type"), cell: (u) => <span className="text-xs uppercase text-muted-foreground">{u.type}</span> },
+      { header: t("users.columns.status"), cell: (u) => <EnumStatusBadge domain="userStatus" value={u.status} /> },
+      { header: t("users.columns.type"), cell: (u) => <span className="text-xs uppercase text-muted-foreground">{enumLabel("userType", u.type)}</span> },
     ],
-    [t],
+    [t, enumLabel],
   );
 
   return (

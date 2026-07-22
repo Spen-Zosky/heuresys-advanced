@@ -7,14 +7,15 @@ import type { KpiDefinition } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 import { KpiMetrologyPanel } from "@/components/kpi-metrology-panel";
 
-function buildColumns(t: TFunction): DataColumn<KpiDefinition>[] {
+function buildColumns(t: TFunction, enumLabel: EnumLabelFn): DataColumn<KpiDefinition>[] {
   return [
     { header: t("shared.code"), cell: (k) => <span className="font-mono text-xs">{k.code}</span> },
     { header: t("shared.name"), cell: (k) => <span className="font-medium text-foreground">{k.name}</span> },
     { header: t("kpis.cols.unit"), cell: (k) => <span className="text-xs text-muted-foreground">{k.unit ?? "—"}</span> },
-    { header: t("kpis.cols.polarity"), cell: (k) => <span className="text-xs text-muted-foreground">{k.polarity}</span> },
+    { header: t("kpis.cols.polarity"), cell: (k) => <span className="text-xs text-muted-foreground">{enumLabel("kpiPolarity", k.polarity)}</span> },
     {
       header: t("shared.scope"),
       cell: (k) => (
@@ -28,7 +29,8 @@ function buildColumns(t: TFunction): DataColumn<KpiDefinition>[] {
 
 export default function KpisCataloguePage() {
   const { t } = useTranslation("hr");
-  const columns = useMemo(() => buildColumns(t), [t]);
+  const enumLabel = useEnumLabel();
+  const columns = useMemo(() => buildColumns(t, enumLabel), [t, enumLabel]);
   // C4 (#42): server-side pagination (was `?limit=200`).
   const kpis = usePaginatedList<KpiDefinition>({
     queryKey: ["kpi-definitions", "list"],

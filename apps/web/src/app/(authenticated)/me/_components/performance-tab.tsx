@@ -4,11 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { MePerformanceResponse } from "@heuresys/shared";
 import { apiFetch } from "../../../../lib/api/fetch";
+import { useEnumLabel } from "@/lib/enum-labels";
 import { Field, ProfileSection, fmtDate } from "../profile/_components/field";
 
 /** Performance — review history (read-only consultation), lazy on tab open. */
 export function MePerformanceTab() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "performance"],
     queryFn: () => apiFetch<MePerformanceResponse>("/v1/me/performance"),
@@ -24,10 +26,10 @@ export function MePerformanceTab() {
       {items.map((r, i) => (
         <ProfileSection
           key={`rev-${i}`}
-          title={`${r.type ?? t("landing.perf.review")}${r.periodEnd ? ` · ${fmtDate(r.periodEnd)}` : ""}`}
+          title={`${r.type ? enumLabel("perfReviewType", r.type) : t("landing.perf.review")}${r.periodEnd ? ` · ${fmtDate(r.periodEnd)}` : ""}`}
           testId={i === 0 ? "perf-primary" : undefined}
         >
-          <Field label={t("landing.perf.status")} value={r.status} />
+          <Field label={t("landing.perf.status")} value={enumLabel("perfReviewStatus", r.status)} />
           <Field label={t("landing.perf.overall")} value={r.overallRating != null ? r.overallRating.toFixed(1) : null} testId={i === 0 ? "perf-overall" : undefined} />
           <Field label={t("landing.perf.goal")} value={r.goalRating != null ? r.goalRating.toFixed(1) : null} />
           <Field label={t("landing.perf.competency")} value={r.competencyRating != null ? r.competencyRating.toFixed(1) : null} />

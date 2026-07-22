@@ -87,8 +87,9 @@ export default function AdminRolesPage() {
                       key={r}
                       className="px-3 py-2 text-center font-medium text-foreground"
                       data-testid="admin-roles-role-col"
+                      title={r}
                     >
-                      {r}
+                      {t(`shell:roles.${r}`, { defaultValue: r })}
                     </th>
                   ))}
                 </tr>

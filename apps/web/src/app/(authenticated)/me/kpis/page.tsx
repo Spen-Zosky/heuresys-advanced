@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 interface MeKpi {
   positionKpiRequirementId: string;
@@ -25,6 +26,7 @@ interface MeKpisList {
 
 export default function MeKpisPage() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const kpis = useQuery({
     queryKey: ["me", "kpis"],
     queryFn: () => apiFetch<MeKpisList>("/v1/me/kpis"),
@@ -34,7 +36,7 @@ export default function MeKpisPage() {
     () => [
       { header: t("kpis.colKpi"), cell: (k) => <span className="font-medium text-foreground">{k.kpiName}</span> },
       { header: t("kpis.colCode"), cell: (k) => <span className="font-mono text-xs">{k.kpiCode}</span> },
-      { header: t("kpis.colDirection"), cell: (k) => <span className="text-xs text-muted-foreground">{k.polarity}</span> },
+      { header: t("kpis.colDirection"), cell: (k) => <span className="text-xs text-muted-foreground">{enumLabel("kpiPolarity", k.polarity)}</span> },
       { header: t("kpis.colWeight"), cell: (k) => <span className="text-xs text-muted-foreground">{k.weight}</span> },
       {
         header: t("kpis.colLatest"),
@@ -53,7 +55,7 @@ export default function MeKpisPage() {
         ),
       },
     ],
-    [t],
+    [t, enumLabel],
   );
 
   return (

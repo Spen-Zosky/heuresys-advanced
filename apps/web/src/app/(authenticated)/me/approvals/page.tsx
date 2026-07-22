@@ -6,11 +6,13 @@ import { Card, CardContent, EmptyState, PageHeader } from "@heuresys/ui";
 import { CheckSquare } from "lucide-react";
 import type { MeApprovalsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
-import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 /** Le mie approvazioni (S1011 F5.3) — track-only view of the caller's own approval requests. */
 export default function MeApprovalsPage() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "approvals"],
     queryFn: () => apiFetch<MeApprovalsResponse>("/v1/me/approvals"),
@@ -66,8 +68,8 @@ export default function MeApprovalsPage() {
                   {items.map((a, i) => (
                     <tr key={`appr-${i}`} data-testid="me-approvals-row" className="transition-colors hover:bg-muted/60">
                       <td className="px-4 py-2 align-middle font-medium text-foreground">{a.title ?? "—"}</td>
-                      <td className="px-4 py-2 align-middle"><StatusBadge value={a.status ?? "—"} /></td>
-                      <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{a.priority ?? "—"}</td>
+                      <td className="px-4 py-2 align-middle"><EnumStatusBadge domain="approvalStatus" value={a.status} /></td>
+                      <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{enumLabel("notificationPriority", a.priority)}</td>
                       <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{a.createdAt ? a.createdAt.slice(0, 10) : "—"}</td>
                     </tr>
                   ))}

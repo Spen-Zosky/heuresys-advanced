@@ -6,9 +6,11 @@ import type { OrganizationUnit } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 export default function OrganizationPage() {
   const { t } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
   // C4 (#42): server-side pagination (was `?limit=200`).
   const ous = usePaginatedList<OrganizationUnit>({
     queryKey: ["organization-units", "list"],
@@ -19,7 +21,7 @@ export default function OrganizationPage() {
     () => [
       { header: t("organization.columns.code"), cell: (o) => <span className="font-mono text-xs">{o.code}</span> },
       { header: t("organization.columns.name"), cell: (o) => <span className="font-medium text-foreground">{o.name}</span> },
-      { header: t("organization.columns.type"), cell: (o) => <span className="text-xs uppercase text-muted-foreground">{o.type}</span> },
+      { header: t("organization.columns.type"), cell: (o) => <span className="text-xs uppercase text-muted-foreground">{enumLabel("orgUnitType", o.type)}</span> },
       {
         header: t("organization.columns.parent"),
         cell: (o) => <span className="text-xs text-muted-foreground">{o.parentName ?? (o.parentId ? o.parentId.slice(0, 8) : t("organization.dash"))}</span>,
@@ -29,7 +31,7 @@ export default function OrganizationPage() {
         cell: (o) => <StatusPill tone={o.isActive ? "success" : "neutral"}>{o.isActive ? t("organization.activeYes") : t("organization.activeNo")}</StatusPill>,
       },
     ],
-    [t],
+    [t, enumLabel],
   );
 
   return (

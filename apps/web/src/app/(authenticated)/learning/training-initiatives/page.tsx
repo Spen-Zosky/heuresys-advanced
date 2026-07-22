@@ -6,7 +6,7 @@ import type { TFunction } from "i18next";
 import type { TrainingInitiative } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
-import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 
 function buildColumns(t: TFunction): DataColumn<TrainingInitiative>[] {
   return [
@@ -19,7 +19,7 @@ function buildColumns(t: TFunction): DataColumn<TrainingInitiative>[] {
         </div>
       ),
     },
-    { header: t("training.cols.status"), cell: (ti) => <StatusBadge value={ti.status} /> },
+    { header: t("training.cols.status"), cell: (ti) => <EnumStatusBadge domain="trainingInitiativeStatus" value={ti.status} /> },
     { header: t("training.cols.start"), cell: (ti) => <span className="text-xs text-muted-foreground">{ti.startDate ?? "—"}</span> },
     { header: t("training.cols.end"), cell: (ti) => <span className="text-xs text-muted-foreground">{ti.endDate ?? "—"}</span> },
     { header: t("training.cols.seats"), cell: (ti) => <span className="text-xs text-muted-foreground">{ti.capacity ?? "—"}</span> },

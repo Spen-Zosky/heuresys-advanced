@@ -10,6 +10,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 
 interface BlueprintVariant {
   blueprintVariantId: string;
@@ -186,7 +187,7 @@ export default function BlueprintVariantDetailPage() {
               caption={t("detail.activationsCaption")}
               columns={[
                 { header: t("detail.activationColumns.tenantId"), cell: (a) => <span className="font-mono text-xs">{a.tenantId.slice(0, 8)}</span> },
-                { header: t("detail.activationColumns.status"), cell: (a) => <StatusBadge value={a.status} /> },
+                { header: t("detail.activationColumns.status"), cell: (a) => <EnumStatusBadge domain="blueprintActivationStatus" value={a.status} /> },
                 { header: t("detail.activationColumns.activatedAt"), cell: (a) => <span className="text-xs">{a.activatedAt ?? t("common:value.none")}</span> },
               ]}
             />

@@ -4,8 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Badge, EmptyState, PageHeader } from "@heuresys/ui";
 import { Inbox } from "lucide-react";
-import { StatusPill } from "@/components/status-pill";
+import { EnumStatusPill } from "@/components/enum-badge";
 import { apiFetch } from "@/lib/api/fetch";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 interface MeSkillEvidence {
   userSkillEvidenceId: string;
@@ -20,6 +21,7 @@ interface MeSkillEvidence {
 
 export default function MeSkillsPage() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const skills = useQuery({
     queryKey: ["me", "skills"],
     queryFn: () => apiFetch<{ items: MeSkillEvidence[]; total: number }>("/v1/me/skills"),
@@ -59,7 +61,6 @@ export default function MeSkillsPage() {
             <thead>
               <tr className="border-b border-border bg-muted text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                 <th className="px-4 py-2">{t("skills.colSkill")}</th>
-                <th className="px-4 py-2">{t("skills.colCode")}</th>
                 <th className="px-4 py-2">{t("skills.colLevel")}</th>
                 <th className="px-4 py-2">{t("skills.colSource")}</th>
                 <th className="px-4 py-2">{t("skills.colScore")}</th>
@@ -73,12 +74,11 @@ export default function MeSkillsPage() {
                   data-testid="me-skill-row"
                   className="transition-colors hover:bg-muted/60"
                 >
-                  <td className="px-4 py-2 align-middle font-medium text-foreground">{s.skillName}</td>
-                  <td className="px-4 py-2 align-middle font-mono text-xs text-muted-foreground">{s.skillCode}</td>
+                  <td className="px-4 py-2 align-middle font-medium text-foreground" title={s.skillCode}>{s.skillName}</td>
                   <td className="px-4 py-2 align-middle">
-                    <StatusPill tone="info">{s.declaredProficiency}</StatusPill>
+                    <EnumStatusPill domain="proficiency" value={s.declaredProficiency} tone="info" />
                   </td>
-                  <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{s.source}</td>
+                  <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{enumLabel("skillEvidenceSource", s.source)}</td>
                   <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{s.score ?? "—"}</td>
                   <td className="px-4 py-2 align-middle text-xs text-muted-foreground">{s.assessedAt.slice(0, 10)}</td>
                 </tr>

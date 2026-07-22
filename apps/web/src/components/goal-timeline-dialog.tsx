@@ -20,6 +20,7 @@ import {
 } from "@heuresys/ui";
 import { Lock } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
+import { useEnumLabel, type EnumLabelFn } from "@/lib/enum-labels";
 
 /**
  * GoalTimelineDialog (#26) — merged activity timeline (updates ∪ check-ins ∪
@@ -45,7 +46,7 @@ function toneForMilestone(status: string): TimelineEvent["tone"] {
   return "muted";
 }
 
-function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: string): TimelineEvent[] {
+function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: string, enumLabel: EnumLabelFn): TimelineEvent[] {
   return events.map((e) => {
     const time = formatDateTime(e.at, locale);
     if (e.kind === "UPDATE") {
@@ -57,7 +58,7 @@ function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: str
       return {
         id: u.updateId,
         time,
-        title: `${t("goals.timeline.update")} · ${u.type}${delta}`,
+        title: `${t("goals.timeline.update")} · ${enumLabel("goalUpdateType", u.type)}${delta}`,
         description: u.content ?? undefined,
         tone: "primary",
       };
@@ -73,7 +74,7 @@ function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: str
       return {
         id: c.checkInId,
         time,
-        title: `${t("goals.timeline.checkIn")}${c.statusUpdate ? ` · ${c.statusUpdate}` : ""} · ${c.newProgress}%`,
+        title: `${t("goals.timeline.checkIn")}${c.statusUpdate ? ` · ${enumLabel("goalCheckInStatus", c.statusUpdate)}` : ""} · ${c.newProgress}%`,
         description: description || undefined,
         tone: toneForCheckIn(c.statusUpdate),
       };
@@ -82,7 +83,7 @@ function toTimelineEvents(events: GoalTimelineEvent[], t: TFunction, locale: str
     return {
       id: m.milestoneId,
       time,
-      title: `${t("goals.timeline.milestone")} · ${m.title} · ${m.status}`,
+      title: `${t("goals.timeline.milestone")} · ${m.title} · ${enumLabel("goalMilestoneStatus", m.status)}`,
       description: m.targetDate ? `${t("goals.timeline.target")}: ${m.targetDate}` : undefined,
       tone: toneForMilestone(m.status),
     };
@@ -103,6 +104,7 @@ export function GoalTimelineDialog({
   self?: boolean;
 }) {
   const { t, i18n } = useTranslation("hr");
+  const enumLabel = useEnumLabel();
 
   const timeline = useQuery({
     queryKey: ["goal-timeline", goalId, self ? "self" : "admin"],
@@ -118,8 +120,8 @@ export function GoalTimelineDialog({
   });
 
   const events = useMemo(
-    () => (timeline.data ? toTimelineEvents(timeline.data.events, t, i18n.language) : []),
-    [timeline.data, t, i18n.language],
+    () => (timeline.data ? toTimelineEvents(timeline.data.events, t, i18n.language, enumLabel) : []),
+    [timeline.data, t, i18n.language, enumLabel],
   );
 
   return (

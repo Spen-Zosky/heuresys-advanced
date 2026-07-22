@@ -7,6 +7,7 @@ import type { KpiAssessmentMethod, KpiWeightingRule } from "@heuresys/shared";
 import { Badge } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 /**
  * KpiMetrologyPanel (#31) — the "how KPIs are measured/weighted" surface: the
@@ -19,6 +20,7 @@ interface RuleList { items: KpiWeightingRule[]; total: number }
 
 export function KpiMetrologyPanel() {
   const { t } = useTranslation("hr");
+  const enumLabel = useEnumLabel();
   const methods = useQuery({
     queryKey: ["kpi-metrology", "methods"],
     queryFn: () => apiFetch<MethodList>("/v1/kpi-definitions/assessment-methods"),
@@ -29,17 +31,17 @@ export function KpiMetrologyPanel() {
   });
 
   const methodCols = useMemo<DataColumn<KpiAssessmentMethod>[]>(() => [
-    { header: t("kpis.metrology.code"), cell: (m) => <Badge variant="secondary">{m.code}</Badge> },
+    { header: t("kpis.metrology.code"), cell: (m) => <Badge variant="secondary">{enumLabel("kpiMethodCode", m.code)}</Badge> },
     { header: t("shared.name"), cell: (m) => <span className="font-medium text-foreground">{m.name}</span> },
     { header: t("kpis.metrology.description"), cell: (m) => <span className="text-xs text-muted-foreground">{m.description ?? "—"}</span> },
-  ], [t]);
+  ], [t, enumLabel]);
 
   const ruleCols = useMemo<DataColumn<KpiWeightingRule>[]>(() => [
-    { header: t("kpis.metrology.code"), cell: (r) => <span className="font-mono text-xs">{r.code}</span> },
+    { header: t("kpis.metrology.code"), cell: (r) => <span className="font-mono text-xs">{enumLabel("kpiRuleCode", r.code)}</span> },
     { header: t("shared.name"), cell: (r) => <span className="font-medium text-foreground">{r.name}</span> },
-    { header: t("kpis.metrology.kind"), cell: (r) => <Badge variant="secondary">{r.kind}</Badge> },
+    { header: t("kpis.metrology.kind"), cell: (r) => <Badge variant="secondary">{enumLabel("kpiRuleKind", r.kind)}</Badge> },
     { header: t("kpis.metrology.description"), cell: (r) => <span className="text-xs text-muted-foreground">{r.description ?? "—"}</span> },
-  ], [t]);
+  ], [t, enumLabel]);
 
   return (
     <section data-testid="kpi-metrology" className="space-y-6 rounded-card border border-border bg-card p-4 shadow-card">

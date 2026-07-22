@@ -271,6 +271,37 @@ export const MeAttendanceResponseSchema = z.object({
 });
 export type MeAttendanceResponse = z.infer<typeof MeAttendanceResponseSchema>;
 
+/* --- time-off request submission (B3 #34 — the first real approval flow) --- */
+
+/** Mirrors the sys_time_off_requests leave_type CHECK (10 values). */
+export const ME_LEAVE_TYPES = [
+  "VACATION", "SICK", "PERSONAL", "MATERNITY", "PATERNITY",
+  "BEREAVEMENT", "STUDY", "SABBATICAL", "UNPAID", "OTHER",
+] as const;
+export const MeLeaveTypeSchema = z.enum(ME_LEAVE_TYPES);
+export type MeLeaveType = z.infer<typeof MeLeaveTypeSchema>;
+
+export const CreateMeTimeOffRequestBodySchema = z.object({
+  leaveType: MeLeaveTypeSchema,
+  startDate: z.iso.date(),
+  endDate: z.iso.date(),
+  halfDayStart: z.boolean().optional(),
+  halfDayEnd: z.boolean().optional(),
+  reason: z.string().max(2000).nullable().optional(),
+});
+export type CreateMeTimeOffRequestBody = z.infer<typeof CreateMeTimeOffRequestBodySchema>;
+
+/** The submission creates an APPROVAL request (TIME_OFF_REQUEST); the time-off
+ *  row is written by the apply-effect handler only once the manager approves. */
+export const MeTimeOffRequestSubmittedSchema = z.object({
+  approvalRequestId: z.uuid(),
+  title: z.string(),
+  status: z.string(),
+  daysRequested: z.number(),
+  approverUserId: z.uuid(),
+});
+export type MeTimeOffRequestSubmitted = z.infer<typeof MeTimeOffRequestSubmittedSchema>;
+
 /* --- permissions (RBAC -> UI gating; reflects the caller's OWN grants) ---- */
 
 export const MePermissionsResponseSchema = z.object({
@@ -477,6 +508,8 @@ export const MeGapSchema = z.object({
 export const MeGapsResponseSchema = z.object({
   items: z.array(MeGapSchema), total: z.number().int().min(0),
 });
+export type MeGap = z.infer<typeof MeGapSchema>;
+export type MeGapsResponse = z.infer<typeof MeGapsResponseSchema>;
 
 export const MeAssessmentSchema = z.object({
   assessmentId: z.uuid(),

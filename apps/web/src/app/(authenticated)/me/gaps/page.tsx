@@ -5,42 +5,26 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
-import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 
-interface MeGap {
-  learningGapId: string;
-  skillId: string | null;
-  skillName: string | null;
-  positionId: string | null;
-  severity: string;
-  requiredProficiency: string | null;
-  currentProficiency: string | null;
-  detectedAt: string;
-}
-
-interface MeGapsList {
-  items: MeGap[];
-  total: number;
-}
+import type { MeGap, MeGapsResponse } from "@heuresys/shared";
 
 export default function MeGapsPage() {
   const { t } = useTranslation("ess");
   const gaps = useQuery({
     queryKey: ["me", "gaps"],
-    queryFn: () => apiFetch<MeGapsList>("/v1/me/gaps"),
+    queryFn: () => apiFetch<MeGapsResponse>("/v1/me/gaps"),
   });
 
+  // Columns mirror the real MeGapSchema contract (census F4 S1026: the page
+  // used to render 3 phantom fields and dropped the real `score`).
   const columns = useMemo<DataColumn<MeGap>[]>(
     () => [
-      { header: t("gaps.colSkill"), cell: (g) => <span className="font-medium text-foreground">{g.skillName ?? t("gaps.skillFallback")}</span> },
-      { header: t("gaps.colSeverity"), cell: (g) => <StatusBadge value={g.severity} /> },
+      { header: t("gaps.colSkill"), cell: (g) => <span className="font-medium text-foreground">{g.skillId ? g.skillId.slice(0, 8) : t("gaps.skillFallback")}</span> },
+      { header: t("gaps.colSeverity"), cell: (g) => <EnumStatusBadge domain="severity" value={g.severity} /> },
       {
-        header: t("gaps.colRequired"),
-        cell: (g) => <span className="text-xs text-muted-foreground">{g.requiredProficiency ?? "—"}</span>,
-      },
-      {
-        header: t("gaps.colCurrent"),
-        cell: (g) => <span className="text-xs text-muted-foreground">{g.currentProficiency ?? "—"}</span>,
+        header: t("gaps.colScore"),
+        cell: (g) => <span className="text-xs text-muted-foreground">{g.score !== null ? g.score.toFixed(1) : "—"}</span>,
       },
       { header: t("gaps.colDetected"), cell: (g) => <span className="text-xs text-muted-foreground">{g.detectedAt.slice(0, 10)}</span> },
     ],

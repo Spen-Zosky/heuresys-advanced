@@ -5,10 +5,12 @@ import { useTranslation } from "react-i18next";
 import type { MeCareerPathsResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { Field, ProfileSection } from "../../profile/_components/field";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 /** Percorsi — career paths from the PRIMARY position + the caller's own plans. */
 export function PathsTab() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "career-paths"],
     queryFn: () => apiFetch<MeCareerPathsResponse>("/v1/me/career-paths"),
@@ -32,7 +34,7 @@ export function PathsTab() {
         <div className="space-y-4">
           {paths.map((p) => (
             <ProfileSection key={p.careerPathId} title={p.name ?? p.code ?? t("career.paths.untitled")}>
-              <Field label={t("career.paths.kind")} value={p.kind} />
+              <Field label={t("career.paths.kind")} value={enumLabel("careerPathKind", p.kind)} />
               <Field
                 label={t("career.paths.steps")}
                 value={
@@ -56,7 +58,7 @@ export function PathsTab() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2" data-testid="career-plans">
             {plans.map((pl, i) => (
               <ProfileSection key={`plan-${i}`} title={pl.targetPositionTitle ?? t("career.paths.planTarget")}>
-                <Field label={t("career.paths.planStatus")} value={pl.status} />
+                <Field label={t("career.paths.planStatus")} value={enumLabel("careerPlanStatus", pl.status)} />
                 <Field label={t("career.paths.planHorizon")} value={pl.horizonMonths != null ? t("career.paths.months", { n: pl.horizonMonths }) : null} />
               </ProfileSection>
             ))}

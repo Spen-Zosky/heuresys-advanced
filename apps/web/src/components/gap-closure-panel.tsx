@@ -7,7 +7,8 @@ import type { GapClosurePlan, GapAnalysisResult } from "@heuresys/shared";
 import { Badge } from "@heuresys/ui";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
-import { StatusPill } from "@/components/status-pill";
+import { EnumStatusPill } from "@/components/enum-badge";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 /**
  * GapClosurePanel (#30) — the closure layer under learning gaps: remediation
@@ -27,6 +28,7 @@ function planTone(s: string): "success" | "info" | "warning" | "neutral" {
 
 export function GapClosurePanel() {
   const { t } = useTranslation("hr");
+  const enumLabel = useEnumLabel();
   const plans = useQuery({
     queryKey: ["gap-closure", "plans"],
     queryFn: () => apiFetch<PlanList>("/v1/learning-gaps/closure-plans?limit=200"),
@@ -40,14 +42,14 @@ export function GapClosurePanel() {
     { header: t("gaps.closure.subject"), cell: (p) => <span className="font-mono text-xs">{p.userId.slice(0, 8)}</span> },
     { header: t("gaps.closure.milestones"), align: "right", cell: (p) => <span className="tabular-nums">{p.milestones.length}</span> },
     { header: t("gaps.closure.target"), cell: (p) => <span className="text-xs text-muted-foreground">{p.targetCompletionDate ?? "—"}</span> },
-    { header: t("shared.status"), cell: (p) => <StatusPill tone={planTone(p.status)}>{p.status}</StatusPill> },
+    { header: t("shared.status"), cell: (p) => <EnumStatusPill domain="gapClosurePlanStatus" value={p.status} tone={planTone(p.status)} /> },
   ], [t]);
 
   const resultCols = useMemo<DataColumn<GapAnalysisResult>[]>(() => [
     { header: t("gaps.closure.subject"), cell: (r) => <span className="font-mono text-xs">{r.userId.slice(0, 8)}</span> },
-    { header: t("gaps.closure.kind"), cell: (r) => <Badge variant="secondary">{r.kind}</Badge> },
+    { header: t("gaps.closure.kind"), cell: (r) => <Badge variant="secondary">{enumLabel("gapClosureActionKind", r.kind)}</Badge> },
     { header: t("gaps.closure.score"), align: "right", cell: (r) => <span className="tabular-nums">{r.overallScore != null ? r.overallScore.toFixed(1) : "—"}</span> },
-  ], [t]);
+  ], [t, enumLabel]);
 
   return (
     <section data-testid="gap-closure" className="space-y-6">

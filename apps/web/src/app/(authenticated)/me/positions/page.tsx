@@ -5,7 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
-import { StatusBadge, StatusPill } from "@/components/status-pill";
+import { StatusPill } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 
 interface MePositionAssignment {
   userPositionAssignmentId: string;
@@ -40,7 +41,7 @@ export default function MePositionsPage() {
           <StatusPill tone={p.isPrimary ? "info" : "neutral"}>{p.isPrimary ? t("positions.primary") : t("positions.alt")}</StatusPill>
         ),
       },
-      { header: t("positions.colStatus"), cell: (p) => <StatusBadge value={p.status} /> },
+      { header: t("positions.colStatus"), cell: (p) => <EnumStatusBadge domain="assignmentStatus" value={p.status} /> },
       { header: t("positions.colStart"), cell: (p) => <span className="text-xs text-muted-foreground">{p.startDate ?? "—"}</span> },
       { header: t("positions.colEnd"), cell: (p) => <span className="text-xs text-muted-foreground">{p.endDate ?? "—"}</span> },
     ],

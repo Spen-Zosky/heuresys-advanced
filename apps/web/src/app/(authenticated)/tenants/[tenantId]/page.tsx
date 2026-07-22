@@ -10,6 +10,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
 import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 
 interface Tenant {
   tenantId: string;
@@ -105,7 +106,7 @@ export default function TenantDetailPage() {
         badges={
           <>
             <span data-testid="tenant-code" className="font-mono text-sm text-muted-foreground">{tn.tenantCode}</span>
-            <StatusBadge value={tn.tenantStatus} />
+            <EnumStatusBadge domain="tenantStatus" value={tn.tenantStatus} />
           </>
         }
       />
@@ -138,7 +139,7 @@ export default function TenantDetailPage() {
                 { label: t("tenants.detail.fields.country"), value: tn.tenantCountryCode ?? t("tenants.detail.dash") },
                 { label: t("tenants.detail.fields.industry"), value: tn.tenantIndustryCode ?? t("tenants.detail.dash") },
                 { label: t("tenants.detail.fields.sizeBand"), value: tn.tenantSizeBand ?? t("tenants.detail.dash") },
-                { label: t("tenants.detail.fields.status"), value: <StatusBadge value={tn.tenantStatus} /> },
+                { label: t("tenants.detail.fields.status"), value: <EnumStatusBadge domain="tenantStatus" value={tn.tenantStatus} /> },
                 { label: t("tenants.detail.fields.tenantId"), value: tn.tenantId, mono: true },
                 { label: t("tenants.detail.fields.createdAt"), value: tn.createdAt, mono: true },
               ]}

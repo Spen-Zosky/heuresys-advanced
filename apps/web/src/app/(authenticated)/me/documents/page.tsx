@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
-import { StatusPill } from "@/components/status-pill";
+import { EnumStatusPill } from "@/components/enum-badge";
 
 interface MeDocument {
   userDocumentId: string;
@@ -32,12 +32,14 @@ export default function MeDocumentsPage() {
     () => [
       {
         header: t("documents.colKind"),
-        cell: (d) => (d.kind ? <StatusPill tone="info">{d.kind}</StatusPill> : <span className="text-muted-foreground">—</span>),
+        cell: (d) => <EnumStatusPill domain="documentKind" value={d.kind} tone="info" />,
       },
       { header: t("documents.colTitle"), cell: (d) => <span className="font-medium text-foreground">{d.title}</span> },
       {
+        // basename only — the full URI is an internal storage path (census F4
+        // S1026: it embedded the owner's UUID in an end-user page)
         header: t("documents.colUri"),
-        cell: (d) => <span className="font-mono text-xs break-all text-muted-foreground">{d.uri}</span>,
+        cell: (d) => <span className="font-mono text-xs break-all text-muted-foreground">{d.uri.split("/").pop() ?? d.uri}</span>,
       },
       {
         header: t("documents.colMime"),

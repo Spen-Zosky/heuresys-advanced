@@ -109,7 +109,7 @@ export default function MeSelfAssessmentPage() {
               >
                 <option value="">{t("selfAssessment.selectPlaceholder")}</option>
                 {skills.rows.map((s) => (
-                  <option key={s.skillId} value={s.skillId}>{s.code} — {s.name}</option>
+                  <option key={s.skillId} value={s.skillId}>{s.name}</option>
                 ))}
               </select>
               {skills.total > skills.rows.length && (

@@ -4,11 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { MePaySlipsResponse } from "@heuresys/shared";
 import { apiFetch } from "../../../../../lib/api/fetch";
+import { useEnumLabel } from "@/lib/enum-labels";
 import { Field, ProfileSection, fmtDate, fmtMoney } from "./field";
 
 /** Cedolini — pay-slip history (mig 000167, read-only consultation), lazy on tab open. */
 export function PaySlipsTab() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "pay-slips"],
     queryFn: () => apiFetch<MePaySlipsResponse>("/v1/me/pay-slips"),
@@ -33,7 +35,7 @@ export function PaySlipsTab() {
           title={s.period ?? t("profile.full.paySlips.title")}
           testId={i === 0 ? "section-payslip-primary" : undefined}
         >
-          <Field label={t("profile.full.paySlips.status")} value={s.status} />
+          <Field label={t("profile.full.paySlips.status")} value={enumLabel("paySlipStatus", s.status)} />
           <Field label={t("profile.full.paySlips.gross")} value={fmtMoney(s.grossPay, "EUR")} testId={i === 0 ? "ps-gross" : undefined} />
           <Field label={t("profile.full.paySlips.net")} value={fmtMoney(s.netPay, "EUR")} />
           <Field label={t("profile.full.paySlips.paymentDate")} value={fmtDate(s.paymentDate)} />

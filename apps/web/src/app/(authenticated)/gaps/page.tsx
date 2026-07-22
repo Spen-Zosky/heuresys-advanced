@@ -8,7 +8,7 @@ import type { LearningGap, LearningGapSummaryResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
-import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 import { GapClosurePanel } from "@/components/gap-closure-panel";
 
 const SEVERITIES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const;
@@ -70,7 +70,7 @@ export default function AdminGapsPage() {
           </span>
         ),
       },
-      { header: t("gaps.cols.severity"), cell: (g) => <StatusBadge value={g.severity} /> },
+      { header: t("gaps.cols.severity"), cell: (g) => <EnumStatusBadge domain="severity" value={g.severity} /> },
       { header: t("gaps.cols.required"), cell: (g) => <span className="text-xs">{g.requiredProficiency ?? "—"}</span> },
       { header: t("gaps.cols.current"), cell: (g) => <span className="text-xs">{g.currentProficiency ?? "—"}</span> },
     ],

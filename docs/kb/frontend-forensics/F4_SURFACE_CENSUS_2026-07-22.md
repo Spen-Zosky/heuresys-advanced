@@ -88,9 +88,32 @@ Cluster per tipo di intervento (la fonte piena è `qa_artifacts/runs/f4-sweep/`)
 - [x] Sweep meccanica completa e stabilizzata (68 route × 3 personas, spec `f4-sweep` riusabile)
 - [x] 7 fix chirurgici applicati e verificati (F4-01…07), catena 152/152 verde
 - [x] Worklist P2 clusterizzata (4 piani chirurgici sopra)
-- [ ] Esecuzione P2 (label-layer enum → codici tecnici → pagine sottili) + pass qualitativo
-      "a occhio" (formati, realismo dei contenuti) + showcase/pubbliche
-- [ ] Preload i18n `common` (transitorio EN)
+- [x] **Esecuzione P2 (S1026)** — i 4 cluster chiusi:
+      **(1) label-layer enum**: `lib/enum-labels.ts` (`useEnumLabel`) + `components/enum-badge.tsx`
+      (`EnumStatusBadge`/`EnumStatusPill` — tone dal valore raw, testo tradotto) + ~55 domini
+      IT/EN in `common.json:enums` (valori derivati dalle Zod schema + DISTINCT live su DB);
+      retrofit su ~40 file (admin + ESS), incluse le code F4: matrice `/admin/roles` con label
+      umane (codice in tooltip), `dashboard.scope` col ruolo tradotto, ruolo
+      `WHISTLEBLOWING_CUSTODIAN` aggiunto a `shell:roles.*`. Residuo consapevole: `signal`
+      (compensation), `documentStatus` (blueprint links), enterprise-profile status — string
+      libere senza dominio; fallback = raw.
+      **(2) codici tecnici**: `/me/gaps` riallineata al vero `MeGapSchema` (via import
+      `@heuresys/shared`, +colonna Score, campi fantasma rimossi) · `/me/org-chart` highlight
+      riparato (`sourceEntityId`, non `nodeId`) · `/positions/[id]/learning` recupera `skillName`
+      (il contratto lo forniva già) · picker self-assessment senza codice ESCO 44-char ·
+      `/me/skills` colonna Codice rimossa (code in tooltip sul nome) · `/me/documents` URI →
+      basename (lo storage path conteneva lo UUID dell'utente).
+      **(3) codici piattaforma**: matrice ruoli con colonna label (fatto, cluster 1);
+      RTL_BANK/ATECO/ESCO su pagine tecniche platform-only: lasciati (semi-legittimi, come da piano).
+      **(4) pagine ESS sottili**: diagnosi per-pagina completata — analytics/positions/surveys =
+      dati reali corretti (artefatto canvas del census); gaps/org-chart = bug UI, fixati (sopra);
+      approvals/handbook/kpis = empty-state legittimi (0 approval_requests nell'intero DB → si
+      aggancia a #34 B3; 0 content `published` su RTL; posizione "Securities Dealer" senza KPI
+      requirements — backlog dati, non bug). Residuo-test `IT_TI_A00EDC19_*` PURGATO dalla
+      migration 000200 (archivio reversibile in `audit.*`; era debris pre-D-52).
+- [x] Preload i18n `common` — chiuso con evidenza: le risorse i18n sono importate staticamente
+      e bundlate (`lib/i18n.ts` righe 4-23), non c'è fetch asincrono da precaricare; il flash EN
+      osservato era un artefatto di hydration per-frame, non risorse mancanti. Nessun fix necessario.
 - [x] **Requisito Enzo (S1025): l'ITALIANO è la lingua di default** — verificato live
       (config `DEFAULT_LOCALE='it'` + fallback IT; 0 flag EN sulle 68 pagine autenticate
       al census finale; le 5 pubbliche servono `lang="it"` in SSR senza cookie) e reso

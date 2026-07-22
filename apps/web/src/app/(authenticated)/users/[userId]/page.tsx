@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
-import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 interface UserDetail {
   userId: string;
@@ -28,6 +29,7 @@ interface UserDetail {
 
 export default function UserDetailPage() {
   const { t } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
   const params = useParams<{ userId: string }>();
   const userId = params.userId;
   const user = useQuery({
@@ -66,7 +68,7 @@ export default function UserDetailPage() {
         badges={
           <>
             <span data-testid="user-email-detail" className="text-sm text-muted-foreground">{u.email}</span>
-            <StatusBadge value={u.status} />
+            <EnumStatusBadge domain="userStatus" value={u.status} />
           </>
         }
       />
@@ -79,8 +81,8 @@ export default function UserDetailPage() {
             fields={[
               { label: t("users.detail.fields.userId"), value: u.userId, mono: true, testId: "field-userId" },
               { label: t("users.detail.fields.tenantId"), value: u.tenantId ?? t("users.detail.dash"), mono: true },
-              { label: t("users.detail.fields.status"), value: <StatusBadge value={u.status} /> },
-              { label: t("users.detail.fields.type"), value: u.type },
+              { label: t("users.detail.fields.status"), value: <EnumStatusBadge domain="userStatus" value={u.status} /> },
+              { label: t("users.detail.fields.type"), value: enumLabel("userType", u.type) },
               { label: t("users.detail.fields.locale"), value: u.locale ?? t("users.detail.dash") },
               { label: t("users.detail.fields.timezone"), value: u.timezone ?? t("users.detail.dash") },
               { label: t("users.detail.fields.createdAt"), value: u.createdAt },

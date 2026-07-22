@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@heuresys/ui";
 import { apiFetch } from "../../../../../lib/api/fetch";
+import { useEnumLabel } from "@/lib/enum-labels";
 import { fmtDate } from "./field";
 
 interface MeDoc {
@@ -18,6 +19,7 @@ interface MeDoc {
 /** Documenti — personal documents from /v1/me/documents (existing endpoint), lazy on tab open. */
 export function DocumentsTab() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "documents", "profileTab"],
     queryFn: () => apiFetch<{ items: MeDoc[]; total: number }>("/v1/me/documents"),
@@ -45,7 +47,7 @@ export function DocumentsTab() {
               <li key={d.userDocumentId} className="flex items-center justify-between gap-4 py-2">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-foreground">{d.title}</p>
-                  <p className="text-xs text-muted-foreground">{d.kind}{d.mimeType ? ` · ${d.mimeType}` : ""}</p>
+                  <p className="text-xs text-muted-foreground">{enumLabel("documentKind", d.kind)}{d.mimeType ? ` · ${d.mimeType}` : ""}</p>
                 </div>
                 <span className="shrink-0 text-xs text-muted-foreground">
                   {fmtDate(d.createdAt ? d.createdAt.slice(0, 10) : null)}

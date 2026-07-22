@@ -12,6 +12,7 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
+import { useEnumLabel } from "@/lib/enum-labels";
 import { EChartsCard } from "../_charts-client";
 
 function statusVariant(s: string): "success" | "secondary" {
@@ -36,6 +37,7 @@ function pulseOption(items: EngagementPulseResponse["items"], lbl: { mood: strin
 
 export default function EngagementPage() {
   const { t } = useTranslation("admin");
+  const enumLabel = useEnumLabel();
 
   const surveys = useQuery({
     queryKey: ["engagement", "surveys"],
@@ -57,12 +59,12 @@ export default function EngagementPage() {
         ),
       },
       { header: t("engagement.columns.status"), cell: (s) => <Badge variant={statusVariant(s.status)}>{t(`engagement.status.${s.status}`, s.status)}</Badge> },
-      { header: t("engagement.columns.type"), cell: (s) => <span className="text-muted-foreground">{s.type}</span> },
+      { header: t("engagement.columns.type"), cell: (s) => <span className="text-muted-foreground">{enumLabel("surveyCategory", s.type)}</span> },
       { header: t("engagement.columns.responses"), cell: (s) => <span className="text-muted-foreground">{s.responseCount}</span> },
       { header: t("engagement.columns.questions"), cell: (s) => <span className="text-muted-foreground">{s.questionCount}</span> },
       { header: t("engagement.columns.invitations"), cell: (s) => <span className="text-muted-foreground">{s.totalInvitations}</span> },
     ],
-    [t],
+    [t, enumLabel],
   );
 
   const pulseLabels = { mood: t("engagement.pulse.mood"), workload: t("engagement.pulse.workload"), satisfaction: t("engagement.pulse.satisfaction") };

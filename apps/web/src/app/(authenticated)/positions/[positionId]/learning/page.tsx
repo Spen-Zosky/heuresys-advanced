@@ -12,11 +12,13 @@ import type {
 import { apiFetch } from "@/lib/api/fetch";
 import { EntityTable } from "@/components/data-table-panel";
 import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 
 interface LearningGap {
   learningGapId: string;
   userId: string;
   skillId: string | null;
+  skillName: string | null;
   severity: string;
   detectedAt: string;
 }
@@ -189,8 +191,8 @@ export default function PositionLearningPage() {
             caption={t("positions.learning.gaps.caption")}
             columns={[
               { header: t("positions.learning.gaps.columns.user"), cell: (g) => <span className="font-mono text-xs">{g.userId.slice(0, 8)}</span> },
-              { header: t("positions.learning.gaps.columns.skill"), cell: (g) => <span className="font-mono text-xs">{g.skillId?.slice(0, 8) ?? t("positions.learning.dash")}</span> },
-              { header: t("positions.learning.gaps.columns.severity"), cell: (g) => <StatusBadge value={g.severity} /> },
+              { header: t("positions.learning.gaps.columns.skill"), cell: (g) => g.skillName ? <span className="text-xs">{g.skillName}</span> : <span className="font-mono text-xs">{g.skillId?.slice(0, 8) ?? t("positions.learning.dash")}</span> },
+              { header: t("positions.learning.gaps.columns.severity"), cell: (g) => <EnumStatusBadge domain="severity" value={g.severity} /> },
               { header: t("positions.learning.gaps.columns.detected"), cell: (g) => <span className="text-xs">{g.detectedAt.slice(0, 10)}</span> },
             ]}
           />

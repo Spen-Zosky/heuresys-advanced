@@ -5,7 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { apiFetch } from "@/lib/api/fetch";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
-import { StatusBadge, StatusPill } from "@/components/status-pill";
+import { StatusPill } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 
 interface MeLearningAssignment {
   learningPathId: string;
@@ -31,7 +32,7 @@ export default function MeLearningPage() {
   const columns = useMemo<DataColumn<MeLearningAssignment>[]>(
     () => [
       { header: t("learning.colPath"), cell: (l) => <span className="font-medium text-foreground">{l.learningPathName}</span> },
-      { header: t("learning.colStatus"), cell: (l) => <StatusBadge value={l.status} /> },
+      { header: t("learning.colStatus"), cell: (l) => <EnumStatusBadge domain="learningAssignStatus" value={l.status} /> },
       {
         header: t("learning.colMandatory"),
         cell: (l) => (

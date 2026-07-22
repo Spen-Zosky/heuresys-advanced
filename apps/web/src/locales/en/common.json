@@ -109,5 +109,383 @@
     "colSkill": "Skill",
     "emptyTitle": "No matches",
     "emptyDesc": "No results for this query — try different wording."
+  },
+  "enums": {
+    "goalStatus": {
+      "NOT_STARTED": "Not started",
+      "IN_PROGRESS": "In progress",
+      "ON_TRACK": "On track",
+      "AT_RISK": "At risk",
+      "BLOCKED": "Blocked",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "goalPriority": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    },
+    "goalType": {
+      "OBJECTIVE": "Objective",
+      "INDIVIDUAL": "Individual",
+      "TECHNICAL": "Technical",
+      "SALES": "Sales",
+      "CUSTOMER": "Customer",
+      "PERFORMANCE": "Performance",
+      "PROJECT": "Project",
+      "FINANCIAL": "Financial",
+      "SECURITY": "Security",
+      "LEADERSHIP": "Leadership",
+      "DEVELOPMENT": "Development",
+      "EFFICIENCY": "Efficiency",
+      "COMPLIANCE": "Compliance"
+    },
+    "goalUpdateType": {
+      "PROGRESS": "Progress",
+      "STATUS_CHANGE": "Status change",
+      "MILESTONE": "Milestone",
+      "BLOCKER": "Blocker",
+      "NOTE": "Note"
+    },
+    "goalCheckInStatus": {
+      "ON_TRACK": "On track",
+      "AHEAD": "Ahead",
+      "AT_RISK": "At risk",
+      "BLOCKED": "Blocked",
+      "COMPLETED": "Completed"
+    },
+    "goalMilestoneStatus": {
+      "PENDING": "Pending",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "MISSED": "Missed",
+      "CANCELLED": "Cancelled"
+    },
+    "okrStatus": {
+      "DRAFT": "Draft",
+      "ACTIVE": "Active",
+      "ACHIEVED": "Achieved",
+      "MISSED": "Missed",
+      "CANCELLED": "Cancelled",
+      "ARCHIVED": "Archived"
+    },
+    "keyResultStatus": {
+      "ON_TRACK": "On track",
+      "AT_RISK": "At risk",
+      "BEHIND": "Behind",
+      "COMPLETED": "Completed",
+      "ABANDONED": "Abandoned"
+    },
+    "timeOffStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Expired"
+    },
+    "timeOffTxnType": {
+      "ACCRUAL": "Accrual",
+      "USAGE": "Usage",
+      "ADJUSTMENT": "Adjustment",
+      "CARRYOVER": "Carryover"
+    },
+    "severity": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    },
+    "documentKind": {
+      "CV": "Resume",
+      "CERTIFICATE": "Certificate",
+      "CONTRACT_REFERENCE": "Contract reference",
+      "TRAINING_RECORD": "Training record",
+      "EVIDENCE_PROOF": "Evidence",
+      "OTHER": "Other"
+    },
+    "proficiency": {
+      "NOVICE": "Novice",
+      "ADVANCED_BEGINNER": "Advanced beginner",
+      "BASIC": "Basic",
+      "COMPETENT": "Competent",
+      "PROFICIENT": "Proficient",
+      "EXPERT": "Expert",
+      "MASTER": "Master"
+    },
+    "skillEvidenceSource": {
+      "SELF_ASSESSMENT": "Self-assessment",
+      "MANAGER_ASSESSMENT": "Manager assessment"
+    },
+    "kpiPolarity": {
+      "HIGHER_IS_BETTER": "Higher is better",
+      "LOWER_IS_BETTER": "Lower is better",
+      "TARGET_RANGE": "Target range"
+    },
+    "kpiMethodCode": {
+      "DELTA_VS_TARGET": "Delta vs target",
+      "PERCENTILE": "Percentile",
+      "BANDED": "Banded",
+      "LINEAR_SCORE": "Linear score",
+      "STEPPED": "Stepped"
+    },
+    "kpiRuleCode": {
+      "LINEAR_DEFAULT": "Linear (default)",
+      "CAPPED_120": "Capped at 120%",
+      "STEP_25_50_75": "Stepped 25/50/75"
+    },
+    "kpiRuleKind": {
+      "LINEAR": "Linear",
+      "CAPPED": "Capped",
+      "STEP": "Stepped"
+    },
+    "horizon": {
+      "READY_NOW": "Ready now",
+      "READY_6_MONTHS": "Ready in 6 months",
+      "READY_1_YEAR": "Ready in 1 year",
+      "READY_2_YEARS": "Ready in 2 years",
+      "NOT_READY": "Not ready"
+    },
+    "userStatus": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "SUSPENDED": "Suspended",
+      "PENDING_VERIFICATION": "Pending verification",
+      "DEACTIVATED": "Deactivated"
+    },
+    "userType": {
+      "STANDARD": "Standard",
+      "GENERATED_INCUMBENT": "Generated incumbent",
+      "SERVICE": "Service"
+    },
+    "contractType": {
+      "permanent": "Permanent",
+      "fixed_term": "Fixed-term"
+    },
+    "contractStatus": {
+      "ACTIVE": "Active",
+      "ENDED": "Ended",
+      "TERMINATED": "Terminated"
+    },
+    "paySlipStatus": {
+      "available": "Available",
+      "paid": "Paid"
+    },
+    "perfReviewType": {
+      "ANNUAL": "Annual",
+      "MID_YEAR": "Mid-year"
+    },
+    "perfReviewStatus": {
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed"
+    },
+    "flightRiskBand": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    },
+    "careerPathKind": {
+      "VERTICAL": "Vertical",
+      "LATERAL": "Lateral",
+      "SPECIALIST": "Specialist",
+      "MANAGERIAL": "Managerial",
+      "CROSS_FUNCTIONAL": "Cross-functional"
+    },
+    "careerPlanStatus": {
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "PAUSED": "Paused",
+      "CANCELLED": "Cancelled"
+    },
+    "orgUnitType": {
+      "HEADQUARTERS": "Headquarters",
+      "DIVISION": "Division",
+      "DEPARTMENT": "Department",
+      "OFFICE": "Office",
+      "TEAM": "Team"
+    },
+    "vizGraphType": {
+      "ORG_CHART": "Org chart",
+      "PROCESS_FLOW": "Process flow",
+      "CAREER_PATH": "Career path",
+      "LEARNING_PATH": "Learning path",
+      "SKILL_GAP_MAP": "Skill gap map",
+      "SUCCESSION_MAP": "Succession map",
+      "KPI_CASCADE": "KPI cascade",
+      "POSITION_INTELLIGENCE_MAP": "Position intelligence map",
+      "ENTERPRISE_BLUEPRINT_MAP": "Enterprise blueprint map"
+    },
+    "vizEdgeType": {
+      "REPORTS_TO": "Reports to",
+      "REQUIRES_SKILL": "Requires skill",
+      "NEXT_STEP": "Next step",
+      "SUCCESSOR_OF": "Successor of",
+      "PART_OF": "Part of",
+      "INFLUENCES": "Influences",
+      "ESCALATES_TO": "Escalates to",
+      "GENERIC": "Generic"
+    },
+    "tenantStatus": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "ARCHIVED": "Archived",
+      "PENDING_ACTIVATION": "Pending activation"
+    },
+    "seedRunStatus": {
+      "RUNNING": "Running",
+      "COMPLETED": "Completed",
+      "FAILED": "Failed",
+      "CANCELLED": "Cancelled"
+    },
+    "blueprintActivationStatus": {
+      "PROPOSED": "Proposed",
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended",
+      "RETIRED": "Retired"
+    },
+    "trainingInitiativeStatus": {
+      "PLANNED": "Planned",
+      "OPEN": "Open",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "mfaKind": {
+      "TOTP": "Authenticator app (TOTP)",
+      "WEBAUTHN": "Passkey / security key",
+      "EMAIL_OTP": "Email code",
+      "SMS_OTP": "SMS code"
+    },
+    "notificationPriority": {
+      "INFO": "Info",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CRITICAL": "Critical"
+    },
+    "notificationStatus": {
+      "UNREAD": "Unread",
+      "READ": "Read",
+      "DISMISSED": "Dismissed"
+    },
+    "gapClosurePlanStatus": {
+      "PROPOSED": "Proposed",
+      "ACTIVE": "Active",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "ON_HOLD": "On hold"
+    },
+    "gapClosureActionKind": {
+      "TRAINING_ASSIGNMENT": "Training assignment",
+      "CERTIFICATION_REQUIRED": "Certification required",
+      "MANAGER_INTERVENTION": "Manager intervention",
+      "PEER_COACHING": "Peer coaching",
+      "ON_THE_JOB_EXPOSURE": "On-the-job exposure",
+      "MENTORING": "Mentoring"
+    },
+    "approvalStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "APPLIED": "Applied"
+    },
+    "approvalStepStatus": {
+      "PENDING": "Pending",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected",
+      "SKIPPED": "Skipped"
+    },
+    "surveyStatus": {
+      "draft": "Draft",
+      "active": "Active",
+      "closed": "Closed"
+    },
+    "surveyCategory": {
+      "engagement": "Engagement",
+      "wellbeing": "Wellbeing",
+      "exit": "Exit",
+      "onboarding": "Onboarding",
+      "custom": "Custom"
+    },
+    "questionType": {
+      "rating": "Rating",
+      "nps": "NPS",
+      "text": "Free text"
+    },
+    "assignmentStatus": {
+      "ACTIVE": "Active",
+      "ENDED": "Ended"
+    },
+    "assignmentKind": {
+      "PRIMARY": "Primary",
+      "SECONDARY": "Secondary"
+    },
+    "learningAssignStatus": {
+      "ASSIGNED": "Assigned",
+      "IN_PROGRESS": "In progress",
+      "COMPLETED": "Completed"
+    },
+    "skillGapSegment": {
+      "ALIGNED": "Aligned",
+      "MINOR_GAP": "Minor gap",
+      "MODERATE_GAP": "Moderate gap",
+      "MAJOR_GAP": "Major gap"
+    },
+    "nineBoxBand": {
+      "LOW": "Low",
+      "MEDIUM": "Medium",
+      "HIGH": "High",
+      "CORE": "Core",
+      "STAR": "Star",
+      "HIGH_PERFORMER": "High performer"
+    },
+    "successorCandidateStatus": {
+      "CANDIDATE": "Candidate",
+      "CONFIRMED": "Confirmed",
+      "WITHDRAWN": "Withdrawn",
+      "NOT_READY": "Not ready"
+    },
+    "contentStatus": {
+      "draft": "Draft",
+      "in_review": "In review",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "contentKind": {
+      "article": "Article",
+      "policy": "Policy",
+      "announcement": "Announcement",
+      "handbook": "Handbook",
+      "process_doc": "Process document"
+    },
+    "okrType": {
+      "COMPANY": "Company",
+      "DEPARTMENT": "Department",
+      "TEAM": "Team",
+      "INDIVIDUAL": "Individual"
+    },
+    "successionPoolStatus": {
+      "PROPOSED": "Proposed",
+      "ACTIVE": "Active",
+      "ARCHIVED": "Archived"
+    },
+    "payrollHandoffStatus": {
+      "PENDING": "Pending",
+      "SENT": "Sent",
+      "ACKNOWLEDGED": "Acknowledged",
+      "REJECTED": "Rejected"
+    },
+    "leaveType": {
+      "VACATION": "Vacation",
+      "SICK": "Sick leave",
+      "PERSONAL": "Personal leave",
+      "MATERNITY": "Maternity",
+      "PATERNITY": "Paternity",
+      "BEREAVEMENT": "Bereavement",
+      "STUDY": "Study",
+      "SABBATICAL": "Sabbatical",
+      "UNPAID": "Unpaid",
+      "OTHER": "Other"
+    }
   }
 }

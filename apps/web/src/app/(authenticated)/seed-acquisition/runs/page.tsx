@@ -6,7 +6,7 @@ import type { TFunction } from "i18next";
 import type { SeedAcquisitionRun } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
-import { StatusBadge } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 
 function buildColumns(t: TFunction): DataColumn<SeedAcquisitionRun>[] {
   const none = t("common:value.none");
@@ -22,7 +22,7 @@ function buildColumns(t: TFunction): DataColumn<SeedAcquisitionRun>[] {
       header: t("seedRuns.columns.code"),
       cell: (r) => <span className="font-mono text-xs text-muted-foreground">{r.code}</span>,
     },
-    { header: t("seedRuns.columns.status"), cell: (r) => <StatusBadge value={r.status} /> },
+    { header: t("seedRuns.columns.status"), cell: (r) => <EnumStatusBadge domain="seedRunStatus" value={r.status} /> },
     {
       header: t("seedRuns.columns.startedAt"),
       cell: (r) => <span className="text-xs text-muted-foreground">{r.startedAt.slice(0, 19)}</span>,

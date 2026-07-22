@@ -4,11 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { MeContract } from "@heuresys/shared";
 import { apiFetch } from "../../../../../lib/api/fetch";
+import { useEnumLabel } from "@/lib/enum-labels";
 import { Field, ProfileSection, fmtDate, fmtMoney } from "./field";
 
 /** Contratti — employment contract history (mig 000165), fetched lazily on tab open. */
 export function ContractsTab() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const q = useQuery({
     queryKey: ["me", "contracts"],
     queryFn: () => apiFetch<{ items: MeContract[]; total: number }>("/v1/me/contracts"),
@@ -30,11 +32,11 @@ export function ContractsTab() {
       {items.map((c, i) => (
         <ProfileSection
           key={`contract-${i}`}
-          title={`${c.type ?? t("profile.full.contracts.title")}${c.code ? ` · ${c.code}` : ""}`}
+          title={`${c.type ? enumLabel("contractType", c.type) : t("profile.full.contracts.title")}${c.code ? ` · ${c.code}` : ""}`}
           testId={i === 0 ? "section-contract-primary" : undefined}
         >
-          <Field label={t("profile.full.contracts.type")} value={c.type} testId={i === 0 ? "ct-type" : undefined} />
-          <Field label={t("profile.full.contracts.status")} value={c.status} />
+          <Field label={t("profile.full.contracts.type")} value={enumLabel("contractType", c.type)} testId={i === 0 ? "ct-type" : undefined} />
+          <Field label={t("profile.full.contracts.status")} value={enumLabel("contractStatus", c.status)} />
           <Field label={t("profile.full.contracts.ccnlType")} value={c.ccnlType} />
           <Field label={t("profile.full.contracts.ccnlLevel")} value={c.ccnlLevel} />
           <Field

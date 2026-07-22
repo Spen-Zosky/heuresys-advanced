@@ -24,6 +24,7 @@ import {
   Info,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
+import { useEnumLabel } from "@/lib/enum-labels";
 
 interface MeNotification {
   notificationId: string;
@@ -74,6 +75,7 @@ function approvalRequestId(actionUrl: string | null): string | null {
 
 export default function MeInboxPage() {
   const { t } = useTranslation("ess");
+  const enumLabel = useEnumLabel();
   const qc = useQueryClient();
   const inbox = useQuery({
     queryKey: ["me", "inbox"],
@@ -107,7 +109,7 @@ export default function MeInboxPage() {
       tone: v.tone,
       title: n.subject,
       description: n.body ?? undefined,
-      meta: `${formatRelativeTime(n.createdAt)} · ${n.priority} · ${n.status}`,
+      meta: `${formatRelativeTime(n.createdAt)} · ${enumLabel("notificationPriority", n.priority)} · ${enumLabel("notificationStatus", n.status)}`,
     };
   });
 

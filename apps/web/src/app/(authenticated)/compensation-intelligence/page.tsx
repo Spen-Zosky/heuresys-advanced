@@ -12,6 +12,7 @@ import type {
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
+import { EnumStatusBadge } from "@/components/enum-badge";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { EChartsCard } from "../_charts-client";
@@ -110,7 +111,7 @@ function buildHandoffColumns(t: TFunction): DataColumn<PayrollHandoffRecord>[] {
   return [
     { header: t("compReward.cols.recipient"), cell: (r) => <span className="font-mono text-xs">{r.recipientSystem}</span> },
     { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.periodStart} → {r.periodEnd}</span> },
-    { header: t("compReward.cols.status"), cell: (r) => <StatusBadge value={r.status} /> },
+    { header: t("compReward.cols.status"), cell: (r) => <EnumStatusBadge domain="payrollHandoffStatus" value={r.status} /> },
     { header: t("compReward.cols.handedOff"), cell: (r) => <span className="tabular-nums text-xs">{r.handedOffAt.slice(0, 10)}</span> },
   ];
 }

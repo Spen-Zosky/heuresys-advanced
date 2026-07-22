@@ -402,6 +402,9 @@ export const insightsService = {
       };
     });
     const scored = await repo.upsertFlightRiskScores(pool, toStore);
+    if (s.kind === "PLATFORM" && toStore.length > 0) {
+      await repo.pruneFlightRiskScoresNotIn(pool, toStore.map((r) => r.userId));
+    }
     return { accepted: true, scored, modelVersion: MODEL_VERSION, computedAt };
   },
 
@@ -460,6 +463,9 @@ export const insightsService = {
       };
     });
     const scored = await repo.upsertSkillGapScores(pool, toStore);
+    if (s.kind === "PLATFORM" && toStore.length > 0) {
+      await repo.pruneSkillGapScoresNotIn(pool, toStore.map((r) => r.userId));
+    }
     await notifySkillGaps(toStore); // 3.4 GAP_CLOSURE_DUE (best-effort, dedupe)
     return { accepted: true, scored, modelVersion: SKILL_GAP_MODEL_VERSION, computedAt };
   },

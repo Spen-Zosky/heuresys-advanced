@@ -270,6 +270,36 @@ export async function upsertFlightRiskScores(
   return rows.length;
 }
 
+/**
+ * PLATFORM-scope recompute is authoritative for the whole table: a subject that
+ * left the scoring cohort (assignments/features changed) would otherwise keep a
+ * stale row forever. Called only after a PLATFORM recompute (a TEAM/TENANT
+ * recompute must never delete another scope's rows — see upsert above).
+ */
+export async function pruneFlightRiskScoresNotIn(
+  q: DbConnector,
+  userIds: string[],
+): Promise<number> {
+  if (userIds.length === 0) return 0;
+  const res = await q.query(
+    `DELETE FROM sys.sys_flight_risk_scores WHERE flight_risk_score_user_id <> ALL($1::uuid[])`,
+    [userIds],
+  );
+  return res.rowCount ?? 0;
+}
+
+export async function pruneSkillGapScoresNotIn(
+  q: DbConnector,
+  userIds: string[],
+): Promise<number> {
+  if (userIds.length === 0) return 0;
+  const res = await q.query(
+    `DELETE FROM sys.sys_skill_gap_scores WHERE skill_gap_score_user_id <> ALL($1::uuid[])`,
+    [userIds],
+  );
+  return res.rowCount ?? 0;
+}
+
 const ACTIVE_SCORE_JOIN_SELECT = `
   SELECT DISTINCT ON (fr.flight_risk_score_user_id)
          fr.flight_risk_score_user_id   AS user_id,

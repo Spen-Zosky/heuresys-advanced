@@ -121,13 +121,34 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/pnpm-lock.yaml') }}-
 
+      # heuresys_ci is a PROD clone frozen at provisioning time (D-08). Bring it
+      # to HEAD (idempotent, twice-run proven — same step as test-integration,
+      # S1026) so role grants born after the clone exist here too.
+      - name: Apply migrations (idempotent, brings the clone to HEAD)
+        run: |
+          # migrate.sh insists on an env FILE (arg 1); synthesize it from the
+          # job env so the script cannot accidentally source a PROD-pointing .env.
+          printf 'POSTGRES_HOST=%s\nPOSTGRES_PORT=%s\nPOSTGRES_DB=%s\nPOSTGRES_USER=%s\nPOSTGRES_PASSWORD=%s\n' \
+            "${POSTGRES_HOST:-localhost}" "${POSTGRES_PORT:-5432}" "$POSTGRES_DB" "$POSTGRES_USER" "$POSTGRES_PASSWORD" > /tmp/ci-migrate.env
+          bash db/scripts/migrate.sh /tmp/ci-migrate.env
+          rm -f /tmp/ci-migrate.env
+
+      # S1027 root-cause of the red smoke (21c7e9b7+): migrations carry ROLES,
+      # but persona AUTH (identity + ARGON2ID credential + fixture TOTP factor)
+      # was seeded on PROD only — a persona added AFTER the clone (S1026: the
+      # whistleblowing custodian) could not log in on heuresys_ci: no challenge,
+      # no navigation, setup timeout. Seed IN-WORKFLOW (idempotent, login-only;
+      # TEST_ADMIN_PASSWORD from the runner EnvironmentFile) so the class is dead.
+      - name: Seed test personas (idempotent, login-only)
+        run: pnpm db:seed-test-admin
+
       - name: Verify test admin + personas seeded
         run: |
           psql -h localhost -p 5432 -U $POSTGRES_USER -d $POSTGRES_DATABASE \
-            -c "SELECT user_email FROM sys.sys_users WHERE user_email IN ('admin@heuresys.com','federica.marchetti@rtl-bank.org','paolo.caputo@rtl-bank.org','tommaso.fiore@rtl-bank.org','antonio.parisi@rtl-bank.org')" \
+            -c "SELECT user_email FROM sys.sys_users WHERE user_email IN ('admin@heuresys.com','federica.marchetti@rtl-bank.org','paolo.caputo@rtl-bank.org','tommaso.fiore@rtl-bank.org','antonio.parisi@rtl-bank.org','marco.rinaldi@rtl-bank.org','andrea.martino@rtl-bank.org')" \
             -tA | sort > /tmp/seeded.txt
-          test $(wc -l < /tmp/seeded.txt) -eq 5 || \
-            { echo "test personas not seeded — run pnpm db:seed-test-admin first"; exit 1; }
+          test $(wc -l < /tmp/seeded.txt) -eq 7 || \
+            { echo "test personas not seeded — pnpm db:seed-test-admin failed?"; exit 1; }
 
       - name: Boot API server (background)
         working-directory: apps/api

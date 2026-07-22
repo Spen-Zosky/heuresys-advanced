@@ -97,6 +97,13 @@ jobs:
           bash db/scripts/migrate.sh /tmp/ci-migrate.env
           rm -f /tmp/ci-migrate.env
 
+      # S1027 (same class as the smoke fix): persona AUTH lives outside the
+      # migrations — a persona added after the clone (S1026 custodian) has no
+      # credential/TOTP factor on heuresys_ci and every loginRaw for it 401s.
+      # Idempotent, login-only; TEST_ADMIN_PASSWORD from the runner env.
+      - name: Seed test personas (idempotent, login-only)
+        run: pnpm db:seed-test-admin
+
       - name: Run vitest integration suite
         working-directory: apps/api
         run: pnpm exec vitest run --reporter=verbose --no-coverage

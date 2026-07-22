@@ -28,19 +28,23 @@ export function GoalsTab() {
     <>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2" data-testid="career-goals">
         {items.map((g, i) => (
-          <ProfileSection key={g.goalId} title={g.title ?? t("career.goals.untitled")} testId={i === 0 ? "career-goal-primary" : undefined}>
+          <ProfileSection
+            key={g.goalId}
+            title={g.title ?? t("career.goals.untitled")}
+            testId={i === 0 ? "career-goal-primary" : undefined}
+            footer={
+              <Button variant="outline" size="sm" data-testid="me-goal-timeline-open"
+                      onClick={() => setActive({ goalId: g.goalId, title: g.title ?? t("career.goals.untitled") })}>
+                {tHr("goals.timeline.open")}
+              </Button>
+            }
+          >
             <Field label={t("career.goals.status")} value={g.status} testId={i === 0 ? "career-goal-status" : undefined} />
             <Field label={t("career.goals.progress")} value={g.progressPercent != null ? `${g.progressPercent}%` : null} />
             <Field label={t("career.goals.priority")} value={g.priority} />
             <Field label={t("career.goals.weight")} value={g.weight != null ? String(g.weight) : null} />
             <Field label={t("career.goals.type")} value={g.type ?? g.category} />
             <Field label={t("career.goals.due")} value={fmtDate(g.dueDate)} />
-            <div className="pt-2">
-              <Button variant="outline" size="sm" data-testid="me-goal-timeline-open"
-                      onClick={() => setActive({ goalId: g.goalId, title: g.title ?? t("career.goals.untitled") })}>
-                {tHr("goals.timeline.open")}
-              </Button>
-            </div>
           </ProfileSection>
         ))}
       </div>

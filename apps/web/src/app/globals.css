@@ -86,14 +86,17 @@
   --palette-2: #06B6D4;
   --palette-3: #7C3AED;
   --palette-4: #F59E0B;
-  /* Semantic */
+  /* Semantic. a11y AA (S1025, axe-measured on /me/inbox with a real MEDIUM
+     notification — data-triggered, never exercised before): warning #F59E0B on
+     white/card is 2.15:1 → amber-700 #B45309 = 4.7:1 (AA text + 3:1 graphics).
+     Dark mode restores #F59E0B (8.3:1 on --card) via the .dark override. */
   --success: #16A34A;
-  --warning: #F59E0B;
+  --warning: #B45309;
   --danger: #DC2626;
   --info: #2563EB;
   --color-icon-info: #2563EB;
   --color-icon-success: #16A34A;
-  --color-icon-warning: #F59E0B;
+  --color-icon-warning: #B45309;
   --color-icon-danger: #DC2626;
   /* Logo body + accent (legacy Y-accent treatment, UXIX-0007 candidate D) */
   --logo-body: #3B82F6;
@@ -129,6 +132,10 @@
   --info: #60A5FA !important;
   --danger: #F87171 !important;
   --success: #22C55E !important;
+  /* S1025: the light default darkened to #B45309 for AA on white — on the dark
+     card that would be ~4.0:1; the original amber is 8.3:1 here. */
+  --warning: #F59E0B !important;
+  --color-icon-warning: #F59E0B !important;
   /* a11y AA (S982): the lib pins --color-primary-fg near-white; on the dark
      primary #5E9DF5 that is 2.68:1. Dark ink flips it to 6.5:1 while keeping
      the brand blue chip intact (light mode stays white-on-#2563EB, 5.2:1). */

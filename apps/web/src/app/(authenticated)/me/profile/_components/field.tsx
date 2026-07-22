@@ -14,13 +14,26 @@ export function Field({ label, value, testId }: { label: string; value: ReactNod
   );
 }
 
-/** A titled card wrapping a 2-column definition list of Fields. */
-export function ProfileSection({ title, children, testId }: { title: string; children: ReactNode; testId?: string }) {
+/** A titled card wrapping a 2-column definition list of Fields. Interactive
+ *  extras (buttons, links) go in `footer` — rendered OUTSIDE the <dl>, whose
+ *  direct children must be dt/dd groups (axe `definition-list`, serious). */
+export function ProfileSection({
+  title,
+  children,
+  footer,
+  testId,
+}: {
+  title: string;
+  children: ReactNode;
+  footer?: ReactNode;
+  testId?: string;
+}) {
   return (
     <Card data-testid={testId}>
       <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
       <CardContent>
         <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">{children}</dl>
+        {footer ? <div className="pt-2">{footer}</div> : null}
       </CardContent>
     </Card>
   );

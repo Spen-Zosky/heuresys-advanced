@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
+import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 // B-10b m2b — normalized engagement read-model (/v1/engagement/*). Real login + live DB.
@@ -69,13 +70,26 @@ describe("engagement normalized read-model (m2b)", () => {
     expect(r.statusCode).toBe(404);
   });
 
-  it("pulse aggregation buckets by week with averages (RTL = 733 checks)", async () => {
+  it("pulse aggregation buckets by week with averages (RTL, expected derived live)", async () => {
+    // no-hardcoded-test-data: the expected total is derived from the same live
+    // table the endpoint reads (733 native LEGACY_PC:: + the #47 D2 history —
+    // LEGACY_CI:: check-in moods and LEGACY_WB:: wellbeing moods — and any
+    // future ingest), scoped to the tenant admin's tenant like the service.
+    const expected = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.sys_pulse_checks
+        WHERE pulse_check_tenant_id =
+              (SELECT user_tenant_id FROM sys.sys_users
+                WHERE user_email = 'federica.marchetti@rtl-bank.org')`,
+    );
+    const n = expected.rows[0]!.n;
+    expect(n).toBeGreaterThan(0);
+
     const r = await get("/v1/engagement/pulse", tenantAdmin);
     expect(r.statusCode).toBe(200);
     const b = r.json() as { items: { weekNumber: number | null; count: number; avgMood: number | null }[]; totalChecks: number };
-    expect(b.totalChecks).toBe(733);
+    expect(b.totalChecks).toBe(n);
     expect(b.items.length).toBeGreaterThan(0);
-    expect(b.items.reduce((s, x) => s + x.count, 0)).toBe(733);
+    expect(b.items.reduce((s, x) => s + x.count, 0)).toBe(n);
     expect(b.items.some((x) => x.avgMood !== null)).toBe(true);
   });
 

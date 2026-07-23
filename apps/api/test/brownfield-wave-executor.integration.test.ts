@@ -92,10 +92,16 @@ describe("/v1/brownfield/wave-executor", () => {
     expect(r.statusCode).toBe(403);
   });
 
-  it("POST run with wave=2 (no mappings yet) → 201, completes as an empty no-op (WS-2 wave-agnostic)", async () => {
+  it("POST run on an EMPTY wave → 201, completes as an empty no-op (WS-2 wave-agnostic)", async () => {
     // WS-2 removed the hard wave!=1 guard: the engine is data-driven from brownfield.table_mappings.
-    // Wave 2 has no mapping rows yet (source-discovery-gated), so a DRY_RUN run is accepted and
-    // completes with 0 staged/upserted rows — no WAVE_NOT_IMPLEMENTED, no Wave-1 side effects.
+    // The empty wave is DERIVED (max registered + 1) instead of hardcoding 2: since #47 D2 (S1028)
+    // wave 2 HAS 8 registered mappings (imported via dedicated scripts, not this engine — their
+    // execution belongs to the Fase-3 brownfield closure, #69), so the no-op path needs the first
+    // genuinely-unregistered wave.
+    const empty = await pool.query<{ w: number }>(
+      `SELECT COALESCE(max(table_mapping_wave), 1) + 1 AS w FROM brownfield.table_mappings`,
+    );
+    const emptyWave = empty.rows[0]!.w;
     const r = await suite.app.inject({
       method: "POST", url: "/v1/brownfield/wave-executor/runs",
       headers: {
@@ -103,11 +109,11 @@ describe("/v1/brownfield/wave-executor", () => {
         "x-csrf-token": platformS.csrfToken,
         "content-type": "application/json",
       },
-      payload: { wave: 2, mode: "DRY_RUN" },
+      payload: { wave: emptyWave, mode: "DRY_RUN" },
     });
     expect(r.statusCode).toBe(201);
     const run = r.json() as { wave: number; state: string };
-    expect(run.wave).toBe(2);
+    expect(run.wave).toBe(emptyWave);
     expect(run.state).toBe("COMPLETE");
   });
 

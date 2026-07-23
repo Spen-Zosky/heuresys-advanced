@@ -1,28 +1,28 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-22T23:26:47Z da docs/kb/tools/build_index.py
+# generato: 2026-07-23T15:42:46Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-22T23:26:47Z"
-  total_files: 2534
+  generated_at: "2026-07-23T15:42:46Z"
+  total_files: 2546
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 29
-    api-core: 27
-    api-module: 317
+    ADR: 30
+    api-core: 28
+    api-module: 318
     ci: 16
     claude-config: 15
-    config: 116
+    config: 101
     cowork-archive: 14
     cowork-exchange: 203
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 208
+    db-migration: 212
     db-other: 8
-    db-script: 34
-    db-seed: 114
-    doc-canonical: 480
+    db-script: 35
+    db-seed: 115
+    doc-canonical: 496
     handoff-state: 1
     qa-artifact: 103
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 97
     showcase-source: 13
-    test: 304
+    test: 306
     ux-design-archive: 80
     web-source: 206
   status_counts:
     archive: 495
     external-archive: 50
-    live: 1989
+    live: 2001
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -212,6 +212,12 @@ files:
     category: ADR
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0031_ess_self_view_computed_intelligence.md'
+    root: repo
+    rel: 'docs/architecture/adr/0031_ess_self_view_computed_intelligence.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\app.ts'
     root: repo
     rel: 'apps/api/src/app.ts'
@@ -287,6 +293,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\lib\notifications\emit.ts'
     root: repo
     rel: 'apps/api/src/lib/notifications/emit.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\result-cap.ts'
+    root: repo
+    rel: 'apps/api/src/lib/result-cap.ts'
     category: api-core
     status: live
     provenance: git-tracked
@@ -1397,6 +1409,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\notifications\digest-cli.ts'
     root: repo
     rel: 'apps/api/src/modules/notifications/digest-cli.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\notifications\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/notifications/repository.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -2882,12 +2900,6 @@ files:
     category: config
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\bisect-cw-b59-createctx.ps1'
-    root: repo
-    rel: 'scripts/bisect-cw-b59-createctx.ps1'
-    category: config
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\scripts\ci-gate.sh'
     root: repo
     rel: 'scripts/ci-gate.sh'
@@ -2909,84 +2921,6 @@ files:
   - path: 'D:\heuresys-advanced\scripts\close-propagate.sh'
     root: repo
     rel: 'scripts/close-propagate.sh'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\codemods\s983-mfa-loginraw.mjs'
-    root: repo
-    rel: 'scripts/codemods/s983-mfa-loginraw.mjs'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\apply-pending.mjs'
-    root: repo
-    rel: 'scripts/cowork-exchange/apply-pending.mjs'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\finalize-session-2026-05-19.ps1'
-    root: repo
-    rel: 'scripts/cowork-exchange/finalize-session-2026-05-19.ps1'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\hooks\pre-commit'
-    root: repo
-    rel: 'scripts/cowork-exchange/hooks/pre-commit'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\inbox.mjs'
-    root: repo
-    rel: 'scripts/cowork-exchange/inbox.mjs'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\install-hooks.mjs'
-    root: repo
-    rel: 'scripts/cowork-exchange/install-hooks.mjs'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\locks.mjs'
-    root: repo
-    rel: 'scripts/cowork-exchange/locks.mjs'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\new-goal.mjs'
-    root: repo
-    rel: 'scripts/cowork-exchange/new-goal.mjs'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\notify.mjs'
-    root: repo
-    rel: 'scripts/cowork-exchange/notify.mjs'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\session-end.mjs'
-    root: repo
-    rel: 'scripts/cowork-exchange/session-end.mjs'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\session-start.mjs'
-    root: repo
-    rel: 'scripts/cowork-exchange/session-start.mjs'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\status.mjs'
-    root: repo
-    rel: 'scripts/cowork-exchange/status.mjs'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\cowork-exchange\validate-naming.mjs'
-    root: repo
-    rel: 'scripts/cowork-exchange/validate-naming.mjs'
     category: config
     status: live
     provenance: git-tracked
@@ -3065,12 +2999,6 @@ files:
   - path: 'D:\heuresys-advanced\scripts\provision-prometheus-vm.sh'
     root: repo
     rel: 'scripts/provision-prometheus-vm.sh'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\restore-showcase-routes.ps1'
-    root: repo
-    rel: 'scripts/restore-showcase-routes.ps1'
     category: config
     status: live
     provenance: git-tracked
@@ -6470,6 +6398,30 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000211_deprecate_legacy_activity_schemes.sql'
+    root: repo
+    rel: 'db/migrations/000211_deprecate_legacy_activity_schemes.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000212_team_manage_permission.sql'
+    root: repo
+    rel: 'db/migrations/000212_team_manage_permission.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000213_retention_import_validation_archive.sql'
+    root: repo
+    rel: 'db/migrations/000213_retention_import_validation_archive.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000214_insight_read_self_permission.sql'
+    root: repo
+    rel: 'db/migrations/000214_insight_read_self_permission.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -6599,6 +6551,12 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\import-d1-user-skills.sh'
     root: repo
     rel: 'db/scripts/import-d1-user-skills.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\import-d2-engagement.sh'
+    root: repo
+    rel: 'db/scripts/import-d2-engagement.sh'
     category: db-script
     status: live
     provenance: git-tracked
@@ -7250,6 +7208,12 @@ files:
     category: db-seed
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_residual_user_coherence.sql'
+    root: repo
+    rel: 'db/seeds/rtl-banking-skills/seed_residual_user_coherence.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\seeds\rtl-banking-skills\seed_user_role_coherence.sql'
     root: repo
     rel: 'db/seeds/rtl-banking-skills/seed_user_role_coherence.sql'
@@ -7685,6 +7649,102 @@ files:
   - path: 'D:\heuresys-advanced\docs\archive\NEXT_SESSION_MVP_CLOSURE.md'
     root: repo
     rel: 'docs/archive/NEXT_SESSION_MVP_CLOSURE.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\README.md'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\bisect-cw-b59-createctx.ps1'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/bisect-cw-b59-createctx.ps1'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\apply-pending.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/apply-pending.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\finalize-session-2026-05-19.ps1'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/finalize-session-2026-05-19.ps1'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\hooks\pre-commit'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/hooks/pre-commit'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\inbox.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/inbox.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\install-hooks.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/install-hooks.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\locks.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/locks.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\new-goal.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/new-goal.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\notify.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/notify.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\session-end.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/session-end.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\session-start.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/session-start.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\status.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/status.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\cowork-exchange\validate-naming.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/cowork-exchange/validate-naming.mjs'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\restore-showcase-routes.ps1'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/restore-showcase-routes.ps1'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\s983-mfa-loginraw.mjs'
+    root: repo
+    rel: 'docs/archive/scripts-exhausted/s983-mfa-loginraw.mjs'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -12254,6 +12314,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\me-development.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/me-development.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\me-ess-extensions.integration.test.ts'
     root: repo
     rel: 'apps/api/test/me-ess-extensions.integration.test.ts'
@@ -12647,6 +12713,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\reference-sync.integration.test.ts'
     root: repo
     rel: 'apps/api/test/reference-sync.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\result-cap.test.ts'
+    root: repo
+    rel: 'apps/api/test/result-cap.test.ts'
     category: test
     status: live
     provenance: git-tracked

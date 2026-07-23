@@ -1,10 +1,14 @@
 /**
  * apps/api/src/modules/teams/repository.ts
  * Raw parameterized SQL against sys.sys_teams + sys.sys_team_members.
- * Read-only in R1b (teams are derived from the org by the seed; no API mutations yet).
+ * Reads (R1b) + the #75 lifecycle mutations (S1028, ex D-71): create/update
+ * team, membership upsert/remove. Multi-statement mutations receive a
+ * PoolClient from the service's withTransaction (auth repository pattern).
  */
-import type { Pool } from "pg";
-import type { Team, TeamDetail, TeamMember } from "@heuresys/shared";
+import type { Pool, PoolClient } from "pg";
+import type { Team, TeamDetail, TeamMember, TeamMemberRole } from "@heuresys/shared";
+
+type Db = Pool | PoolClient;
 
 interface TeamRow {
   team_id: string;
@@ -155,6 +159,127 @@ export async function findTeamsForUser(pool: Pool, userId: string): Promise<Team
     ...mapTeam(row),
     members: membersByTeam.get(row.team_id) ?? [],
   }));
+}
+
+/* --- #75 lifecycle mutations (S1028) ------------------------------------- */
+
+/** Team code uniqueness probe within a tenant (mirror of sys_teams_code_uq). */
+export async function findTeamByCode(db: Db, tenantId: string, code: string): Promise<{ teamId: string } | null> {
+  const res = await db.query<{ team_id: string }>(
+    `SELECT team_id FROM sys.sys_teams WHERE team_tenant_id = $1 AND team_code = $2`,
+    [tenantId, code],
+  );
+  return res.rows[0] ? { teamId: res.rows[0].team_id } : null;
+}
+
+/** Users' tenants for same-tenant guards (lead/member must belong to the team's tenant). */
+export async function findUserTenant(db: Db, userId: string): Promise<string | null> {
+  const res = await db.query<{ t: string | null }>(
+    `SELECT user_tenant_id AS t FROM sys.sys_users WHERE user_id = $1 AND user_status = 'ACTIVE'`,
+    [userId],
+  );
+  return res.rows[0]?.t ?? null;
+}
+
+export interface InsertTeamArgs {
+  tenantId: string;
+  code: string;
+  name: string;
+  organizationUnitId: string | null;
+  leadUserId: string | null;
+  isActive: boolean;
+  actorUserId: string;
+}
+
+export async function insertTeam(db: Db, a: InsertTeamArgs): Promise<string> {
+  const res = await db.query<{ team_id: string }>(
+    `INSERT INTO sys.sys_teams
+       (team_tenant_id, team_code, team_name, team_organization_unit_id,
+        team_lead_user_id, team_is_active, team_metadata, created_by)
+     VALUES ($1, $2, $3, $4, $5, $6, '{}'::jsonb, $7)
+     RETURNING team_id`,
+    [a.tenantId, a.code, a.name, a.organizationUnitId, a.leadUserId, a.isActive, a.actorUserId],
+  );
+  return res.rows[0]!.team_id;
+}
+
+export interface UpdateTeamArgs {
+  name?: string;
+  organizationUnitId?: string | null;
+  leadUserId?: string | null;
+  isActive?: boolean;
+  actorUserId: string;
+}
+
+export async function updateTeam(db: Db, teamId: string, a: UpdateTeamArgs): Promise<void> {
+  await db.query(
+    `UPDATE sys.sys_teams SET
+       team_name                 = COALESCE($2, team_name),
+       team_organization_unit_id = CASE WHEN $3::boolean THEN $4::uuid ELSE team_organization_unit_id END,
+       team_lead_user_id         = CASE WHEN $5::boolean THEN $6::uuid ELSE team_lead_user_id END,
+       team_is_active            = COALESCE($7, team_is_active),
+       updated_by = $8, updated_at = now()
+     WHERE team_id = $1`,
+    [
+      teamId,
+      a.name ?? null,
+      a.organizationUnitId !== undefined, a.organizationUnitId ?? null,
+      a.leadUserId !== undefined, a.leadUserId ?? null,
+      a.isActive ?? null,
+      a.actorUserId,
+    ],
+  );
+}
+
+/** Membership upsert (unique (team, user)); returns the resulting role. */
+export async function upsertMember(
+  db: Db,
+  teamId: string,
+  userId: string,
+  role: TeamMemberRole,
+  isActive: boolean,
+  actorUserId: string,
+): Promise<void> {
+  await db.query(
+    `INSERT INTO sys.sys_team_members
+       (team_member_team_id, team_member_user_id, team_member_role, team_member_is_active, created_by)
+     VALUES ($1, $2, $3, $4, $5)
+     ON CONFLICT (team_member_team_id, team_member_user_id) DO UPDATE
+       SET team_member_role = EXCLUDED.team_member_role,
+           team_member_is_active = EXCLUDED.team_member_is_active,
+           updated_by = $5, updated_at = now()`,
+    [teamId, userId, role, isActive, actorUserId],
+  );
+}
+
+/** Demote every LEAD membership row except (optionally) the given user — the
+ *  single-lead model: team_lead_user_id and the LEAD row move together. */
+export async function demoteOtherLeads(db: Db, teamId: string, keepUserId: string | null, actorUserId: string): Promise<void> {
+  await db.query(
+    `UPDATE sys.sys_team_members
+        SET team_member_role = 'MEMBER', updated_by = $3, updated_at = now()
+      WHERE team_member_team_id = $1
+        AND team_member_role = 'LEAD'
+        AND ($2::uuid IS NULL OR team_member_user_id <> $2)`,
+    [teamId, keepUserId, actorUserId],
+  );
+}
+
+export async function removeMember(db: Db, teamId: string, userId: string): Promise<boolean> {
+  const res = await db.query(
+    `DELETE FROM sys.sys_team_members WHERE team_member_team_id = $1 AND team_member_user_id = $2`,
+    [teamId, userId],
+  );
+  return (res.rowCount ?? 0) === 1;
+}
+
+/** Clears the team lead pointer when the lead's membership is removed. */
+export async function clearLeadIfUser(db: Db, teamId: string, userId: string, actorUserId: string): Promise<void> {
+  await db.query(
+    `UPDATE sys.sys_teams SET team_lead_user_id = NULL, updated_by = $3, updated_at = now()
+      WHERE team_id = $1 AND team_lead_user_id = $2`,
+    [teamId, userId, actorUserId],
+  );
 }
 
 /**

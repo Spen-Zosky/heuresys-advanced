@@ -63,3 +63,42 @@ export const MyTeamsResponseSchema = z.object({
   teams: z.array(TeamDetailSchema),
 });
 export type MyTeamsResponse = z.infer<typeof MyTeamsResponseSchema>;
+
+/* --- #75 lifecycle (ex D-71): the module was read-only; teams came from seeds. */
+
+/** POST /v1/teams — create (team:manage). Non-platform actors create in their
+ *  own tenant; PLATFORM_ADMIN may pass tenantId. Lead (optional) must belong to
+ *  the team's tenant and is mirrored as a LEAD membership row (seed invariant
+ *  "lead team = LEAD member" is preserved by the service). */
+export const TeamCreateBodySchema = z.object({
+  code: z.string().min(2).max(64).regex(/^[A-Z0-9][A-Z0-9_-]*$/, "Uppercase code, digits, '-' '_'"),
+  name: z.string().min(2).max(255),
+  organizationUnitId: z.uuid().nullable().optional(),
+  leadUserId: z.uuid().nullable().optional(),
+  isActive: z.boolean().optional(),
+  tenantId: z.uuid().optional(),
+});
+export type TeamCreateBody = z.infer<typeof TeamCreateBodySchema>;
+
+/** PATCH /v1/teams/:id — partial update (team:manage). `leadUserId: null` clears
+ *  the lead (the old LEAD membership row is demoted to MEMBER). */
+export const TeamUpdateBodySchema = z
+  .object({
+    name: z.string().min(2).max(255).optional(),
+    organizationUnitId: z.uuid().nullable().optional(),
+    leadUserId: z.uuid().nullable().optional(),
+    isActive: z.boolean().optional(),
+  })
+  .refine((b) => Object.keys(b).length > 0, { error: "At least one field must be provided" });
+export type TeamUpdateBody = z.infer<typeof TeamUpdateBodySchema>;
+
+/** PUT /v1/teams/:id/members/:userId — upsert a membership (team:manage).
+ *  Promoting to LEAD also sets the team's lead (single-lead model). */
+export const TeamMemberUpsertBodySchema = z.object({
+  role: TeamMemberRoleSchema.optional(),
+  isActive: z.boolean().optional(),
+});
+export type TeamMemberUpsertBody = z.infer<typeof TeamMemberUpsertBodySchema>;
+
+export const TeamMemberParamSchema = z.object({ id: z.uuid(), userId: z.uuid() });
+export type TeamMemberParam = z.infer<typeof TeamMemberParamSchema>;

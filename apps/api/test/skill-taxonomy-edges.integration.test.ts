@@ -120,6 +120,42 @@ describe("/v1/skill-taxonomy-edges/* integration", () => {
     expect((r2.json() as { error: { code: string } }).error.code).toBe("SKILL_TAXONOMY_EDGE_CONFLICT");
   });
 
+  it("#62 G3 — multi-hop cycle (A→B, B→C, C→A) → 409 SKILL_TAXONOMY_EDGE_CYCLE", async () => {
+    // third node C: parent→child already exists (IS_A, test 1); add child→C, then C→parent must close the loop
+    const s3 = await suite.app.inject({
+      method: "POST", url: "/v1/skills",
+      headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },
+      payload: { code: `${SUITE_PREFIX}_GRANDCHILD`, name: "Grandchild Skill", isGlobal: true },
+    });
+    const grandchildId = (s3.json() as { skillId: string }).skillId;
+    createdSkillIds.push(grandchildId);
+
+    const e2 = await suite.app.inject({
+      method: "POST", url: "/v1/skill-taxonomy-edges",
+      headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },
+      payload: { parentSkillId: childSkillId, childSkillId: grandchildId, kind: "IS_A" },
+    });
+    expect(e2.statusCode).toBe(201);
+    createdEdgeIds.push((e2.json() as { edgeId: string }).edgeId);
+
+    const closing = await suite.app.inject({
+      method: "POST", url: "/v1/skill-taxonomy-edges",
+      headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },
+      payload: { parentSkillId: grandchildId, childSkillId: parentSkillId, kind: "IS_A" },
+    });
+    expect(closing.statusCode).toBe(409);
+    expect((closing.json() as { error: { code: string } }).error.code).toBe("SKILL_TAXONOMY_EDGE_CYCLE");
+
+    // a DIFFERENT kind must not be blocked by the IS_A chain (kind-scoped walk)
+    const otherKind = await suite.app.inject({
+      method: "POST", url: "/v1/skill-taxonomy-edges",
+      headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },
+      payload: { parentSkillId: grandchildId, childSkillId: parentSkillId, kind: "RELATED" },
+    });
+    expect(otherKind.statusCode).toBe(201);
+    createdEdgeIds.push((otherKind.json() as { edgeId: string }).edgeId);
+  });
+
   it("TENANT_ADMIN cannot create edge → 403 SKILL_TAXONOMY_ADMIN_ONLY", async () => {
     const r = await suite.app.inject({
       method: "POST", url: "/v1/skill-taxonomy-edges",

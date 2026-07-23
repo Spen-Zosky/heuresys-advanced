@@ -4,6 +4,7 @@
  * admin GET /v1/leads (leads:read). Zod v4 API.
  */
 import { z } from "zod";
+import { paginationFields } from "./_pagination.js";
 
 export const LeadCompanySizeEnum = z.enum(["LT_50", "50_250", "250_2000", "GT_2000"]);
 export type LeadCompanySize = z.infer<typeof LeadCompanySizeEnum>;
@@ -49,3 +50,18 @@ export const LeadListResponseSchema = z.object({
   total: z.number().int().min(0),
 });
 export type LeadListResponse = z.infer<typeof LeadListResponseSchema>;
+
+/** GET /v1/leads filters + pagination (#62 G3 — the list was unpaginated/unfiltered).
+ *  All optional → fully backward-compatible; `total` becomes the FILTERED count. */
+export const LeadStatusEnum = z.enum(["NEW", "CONTACTED", "QUALIFIED", "CLOSED"]);
+export type LeadStatus = z.infer<typeof LeadStatusEnum>;
+
+export const LeadListQuerySchema = z.object({
+  status: LeadStatusEnum.optional(),
+  source: LeadSourceEnum.optional(),
+  q: z.string().min(1).max(200).optional(), // matches name / company / email (ILIKE)
+  from: z.iso.date().optional(),
+  to: z.iso.date().optional(),
+  ...paginationFields(500, 100),
+});
+export type LeadListQuery = z.infer<typeof LeadListQuerySchema>;

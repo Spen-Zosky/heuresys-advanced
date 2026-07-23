@@ -9,6 +9,7 @@ import { actorFromRequest as actor } from "../../lib/actor.js";
 import {
   LeadCreateSchema,
   LeadCreateResponseSchema,
+  LeadListQuerySchema,
   LeadListResponseSchema,
 } from "@heuresys/shared";
 import { leadsService } from "./service.js";
@@ -26,7 +27,10 @@ export const leadsRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.get(
     "/",
-    { preHandler: [requirePermission("leads:read")], schema: { response: { 200: LeadListResponseSchema } } },
-    async (req) => leadsService.list(actor(req)),
+    {
+      preHandler: [requirePermission("leads:read")],
+      schema: { querystring: LeadListQuerySchema, response: { 200: LeadListResponseSchema } },
+    },
+    async (req) => leadsService.list(actor(req), req.query),
   );
 };

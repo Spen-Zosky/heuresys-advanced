@@ -17,6 +17,7 @@
  * Column names verified live against the seed (S974).
  */
 import type { Pool, PoolClient } from "pg";
+import { ANALYTICS_ROW_CAP, guardResultCap } from "../../lib/result-cap.js";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -356,10 +357,10 @@ export async function readFlightRiskScores(
     `${ACTIVE_SCORE_JOIN_SELECT}
       WHERE ${sc.sql}
       ORDER BY fr.flight_risk_score_user_id, fr.flight_risk_score_computed_at DESC
-      LIMIT 5000`,
+      LIMIT ${ANALYTICS_ROW_CAP + 1}`,
     sc.params,
   );
-  return res.rows.map(mapStored);
+  return guardResultCap(res.rows, "flight-risk stored scores").map(mapStored);
 }
 
 export async function readUserFlightRiskScore(
@@ -648,10 +649,10 @@ export async function readReadinessScores(q: DbConnector, scope: ScopeFilter): P
       AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'
      WHERE ${where}
      ORDER BY sr.succession_readiness_score_user_id, sr.succession_readiness_score_position_id, sr.succession_readiness_score_computed_at DESC
-     LIMIT 5000`,
+     LIMIT ${ANALYTICS_ROW_CAP + 1}`,
     params,
   );
-  return res.rows.map(mapSubjectPosition);
+  return guardResultCap(res.rows, "succession-readiness stored scores").map(mapSubjectPosition);
 }
 
 export async function readSkillGapScores(q: DbConnector, scope: ScopeFilter): Promise<StoredSubjectPositionRow[]> {
@@ -690,8 +691,8 @@ export async function readSkillGapScores(q: DbConnector, scope: ScopeFilter): Pr
       AND a.user_position_assignment_kind = 'PRIMARY' AND a.user_position_assignment_status = 'ACTIVE'
      WHERE ${where}
      ORDER BY sg.skill_gap_score_user_id, sg.skill_gap_score_computed_at DESC
-     LIMIT 5000`,
+     LIMIT ${ANALYTICS_ROW_CAP + 1}`,
     params,
   );
-  return res.rows.map(mapSubjectPosition);
+  return guardResultCap(res.rows, "skill-gap stored scores").map(mapSubjectPosition);
 }

@@ -3,7 +3,7 @@
  * The honeypot + consent checks live here; the route is a thin public POST.
  */
 import type { ActorContext } from "../../lib/actor.js";
-import type { LeadCreate, LeadListResponse } from "@heuresys/shared";
+import type { LeadCreate, LeadListQuery, LeadListResponse } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
 export type { ActorContext };
@@ -29,8 +29,7 @@ export const leadsService = {
     return { ok: true };
   },
 
-  async list(_actor: ActorContext): Promise<LeadListResponse> {
-    const items = await repo.listLeads();
-    return { items, total: items.length };
+  async list(_actor: ActorContext, query: LeadListQuery): Promise<LeadListResponse> {
+    return repo.listLeads(query); // #62 G3: total = filtered count, not page size
   },
 };

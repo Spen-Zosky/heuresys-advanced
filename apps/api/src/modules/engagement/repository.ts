@@ -5,6 +5,7 @@
  * Tenant scoping is applied by the service (PLATFORM_ADMIN unfiltered; others own tenant).
  */
 import type { Pool } from "pg";
+import { ANALYTICS_ROW_CAP, guardResultCap } from "../../lib/result-cap.js";
 import type {
   EngagementSurvey,
   EngagementSurveyTemplate,
@@ -27,10 +28,10 @@ export async function listSurveys(pool: Pool, tenantId: string | undefined): Pro
        FROM sys.sys_surveys s
       WHERE ($1::uuid IS NULL OR s.survey_tenant_id = $1)
       ORDER BY s.survey_start_date DESC NULLS LAST, s.survey_title
-      LIMIT 5000`,
+      LIMIT ${ANALYTICS_ROW_CAP + 1}`,
     [tenantId ?? null],
   );
-  return res.rows.map((r) => ({
+  return guardResultCap(res.rows, "engagement surveys list").map((r) => ({
     surveyId: r.survey_id,
     tenantId: r.survey_tenant_id,
     title: r.survey_title,
@@ -56,10 +57,10 @@ export async function listTemplates(pool: Pool, tenantId: string | undefined): P
        FROM sys.sys_survey_templates
       WHERE ($1::uuid IS NULL OR survey_template_tenant_id = $1)
       ORDER BY survey_template_name
-      LIMIT 5000`,
+      LIMIT ${ANALYTICS_ROW_CAP + 1}`,
     [tenantId ?? null],
   );
-  return res.rows.map((r) => ({
+  return guardResultCap(res.rows, "engagement survey templates list").map((r) => ({
     templateId: r.survey_template_id,
     tenantId: r.survey_template_tenant_id,
     naturalKey: r.survey_template_natural_key,

@@ -63,6 +63,14 @@ export const skillTaxonomyEdgesService = {
         "SKILL_TAXONOMY_EDGE_CONFLICT",
       );
     }
+    // #62 G3 — the self-loop guard above only blocked 1-cycles; longer cycles
+    // (A→B→…→A) were creatable and would break every downward taxonomy walk.
+    if (await repo.wouldCreateCycle(pool, body.parentSkillId, body.childSkillId, kind)) {
+      throw new ConflictError(
+        `Edge ${body.parentSkillId} → ${body.childSkillId} (${kind}) would create a cycle`,
+        "SKILL_TAXONOMY_EDGE_CYCLE",
+      );
+    }
     return repo.insertEdge(pool, body);
   },
 

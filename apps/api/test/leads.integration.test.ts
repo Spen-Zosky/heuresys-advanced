@@ -66,6 +66,50 @@ describe("/v1/leads (GTM lead capture)", () => {
     expect(body.items.some((x) => x.email === `mario${E2E_DOMAIN}`)).toBe(true);
   });
 
+  it("#62 G3 — GET filters (source, q) narrow the list; total = filtered count", async () => {
+    // second lead with a distinct source to filter on
+    const inv = await suite.app.inject({
+      method: "POST", url: "/v1/leads",
+      payload: { name: "Investor Lead", company: "Fund Y", email: `fund${E2E_DOMAIN}`, consent: true, source: "INVESTOR" },
+    });
+    expect(inv.statusCode).toBe(200);
+
+    const bySource = await suite.app.inject({
+      method: "GET", url: `/v1/leads?source=INVESTOR&q=${encodeURIComponent(E2E_DOMAIN)}`,
+      headers: { cookie: adminCookies, "x-csrf-token": adminCsrf },
+    });
+    expect(bySource.statusCode).toBe(200);
+    const b1 = bySource.json() as { items: { email: string; source: string }[]; total: number };
+    expect(b1.items).toHaveLength(1);
+    expect(b1.items[0]!.email).toBe(`fund${E2E_DOMAIN}`);
+    expect(b1.total).toBe(1);
+
+    // q alone matches both suite leads (mario + fund), any status
+    const byQ = await suite.app.inject({
+      method: "GET", url: `/v1/leads?q=${encodeURIComponent(E2E_DOMAIN)}`,
+      headers: { cookie: adminCookies, "x-csrf-token": adminCsrf },
+    });
+    const b2 = byQ.json() as { items: unknown[]; total: number };
+    expect(b2.total).toBe(2);
+  });
+
+  it("#62 G3 — GET pagination: limit slices, total stays the filtered count", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: `/v1/leads?q=${encodeURIComponent(E2E_DOMAIN)}&limit=1&offset=0`,
+      headers: { cookie: adminCookies, "x-csrf-token": adminCsrf },
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as { items: unknown[]; total: number };
+    expect(body.items).toHaveLength(1);
+    expect(body.total).toBe(2); // filtered count, NOT page size
+
+    const page2 = await suite.app.inject({
+      method: "GET", url: `/v1/leads?q=${encodeURIComponent(E2E_DOMAIN)}&limit=1&offset=1`,
+      headers: { cookie: adminCookies, "x-csrf-token": adminCsrf },
+    });
+    expect((page2.json() as { items: unknown[] }).items).toHaveLength(1);
+  });
+
   it("GET without auth → 401", async () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/leads" });
     expect(r.statusCode).toBe(401);

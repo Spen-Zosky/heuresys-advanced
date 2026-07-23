@@ -142,6 +142,34 @@ export async function skillExists(q: DbConnector, skillId: string): Promise<bool
   return res.rows.length > 0;
 }
 
+/** #62 G3 — acyclicity guard. Adding parent→child creates a cycle iff `parent`
+ *  is already reachable FROM `child` walking existing same-kind edges downward
+ *  (child→…→parent would close the loop). Recursive CTE, cycle-safe walk. */
+export async function wouldCreateCycle(
+  q: DbConnector,
+  parentSkillId: string,
+  childSkillId: string,
+  kind: string,
+): Promise<boolean> {
+  const res = await q.query<{ found: boolean }>(
+    `WITH RECURSIVE walk AS (
+        SELECT e.skill_taxonomy_edge_child_id AS node,
+               ARRAY[e.skill_taxonomy_edge_parent_id, e.skill_taxonomy_edge_child_id] AS path
+          FROM sys.sys_skill_taxonomy_edges e
+         WHERE e.skill_taxonomy_edge_parent_id = $2 AND e.skill_taxonomy_edge_kind = $3
+        UNION ALL
+        SELECT e.skill_taxonomy_edge_child_id, w.path || e.skill_taxonomy_edge_child_id
+          FROM sys.sys_skill_taxonomy_edges e
+          JOIN walk w ON w.node = e.skill_taxonomy_edge_parent_id
+         WHERE e.skill_taxonomy_edge_kind = $3
+           AND NOT e.skill_taxonomy_edge_child_id = ANY(w.path)
+     )
+     SELECT true AS found FROM walk WHERE node = $1 LIMIT 1`,
+    [parentSkillId, childSkillId, kind],
+  );
+  return res.rows.length > 0;
+}
+
 export async function insertEdge(
   q: DbConnector,
   body: CreateSkillTaxonomyEdgeBody,

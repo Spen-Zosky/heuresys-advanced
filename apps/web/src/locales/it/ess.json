@@ -680,6 +680,29 @@
       "skills": "Competenze",
       "performance": "Valutazione recente",
       "leave": "Giorni ferie residui"
+    },
+    "development": {
+      "title": "Il mio sviluppo",
+      "description": "Come la piattaforma legge il tuo percorso — punteggi calcolati su di te, con le evidenze che li compongono.",
+      "capabilityTitle": "Indice di capacità",
+      "capabilityCoverage": "copertura dati",
+      "flightTitle": "Indice di stabilità del percorso",
+      "flightHint": "Un punteggio più basso indica un percorso più stabile. È calcolato dalle evidenze qui sotto: se un dato ti sembra errato, segnalalo al tuo HR.",
+      "factors": "Le evidenze del punteggio",
+      "factorFeature": "Fattore",
+      "factorWeight": "Peso",
+      "factorValue": "Valore normalizzato",
+      "factorContribution": "Contributo",
+      "empty": "Nessun punteggio calcolato per te al momento.",
+      "computedAt": "calcolato",
+      "feature": {
+        "tenure": "Anzianità",
+        "attendance": "Presenze",
+        "kpi": "Risultati KPI",
+        "engagement": "Coinvolgimento",
+        "comp": "Retribuzione",
+        "promotion": "Crescita di ruolo"
+      }
     }
   },
   "orgChart": {

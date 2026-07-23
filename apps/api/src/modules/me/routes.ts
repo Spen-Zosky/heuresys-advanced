@@ -28,6 +28,7 @@ import {
   MeInboxResponseSchema, MeInboxNotificationSchema, MeInboxQuerySchema,
   PatchMeInboxBodySchema, NotificationIdParamSchema,
   NotificationPreferencesResponseSchema, UpdateNotificationPreferenceBodySchema,
+  MeDevelopmentResponseSchema,
   MeKpisResponseSchema,
   MeCertificationsResponseSchema, MeCertificationSchema, CreateMeCertificationBodySchema,
   MeDocumentsResponseSchema,
@@ -300,6 +301,13 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("kpi:read:self")],
     schema: { response: { 200: MeKpisResponseSchema } },
   }, async (req) => meService.listKpis(selfActor(req)));
+
+  // #59 F/F5 (ADR-0031, supersedes D-6): the caller's OWN computed scores with
+  // evidence — coach framing lives in the web copy, the API is neutral data.
+  app.get("/development", {
+    preHandler: [requirePermission("insight:read:self")],
+    schema: { response: { 200: MeDevelopmentResponseSchema } },
+  }, async (req) => meService.getDevelopment(selfActor(req)));
 
   app.get("/certifications", {
     preHandler: [requirePermission("certification:read:self")],

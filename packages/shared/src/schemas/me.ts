@@ -768,3 +768,42 @@ export const MeDocumentsResponseSchema = z.object({
 
 /** #26 (S1018): param for GET /v1/me/goals/:goalId/timeline. */
 export const MeGoalIdParamSchema = z.object({ goalId: z.uuid() });
+
+/* --- #59 F/F5 (ADR-0031, S1028): il mio sviluppo — score calcolati self ----- */
+
+/** One scoring feature with its evidence (from the model's own derivation). */
+export const MeScoreFactorSchema = z.object({
+  feature: z.string(),
+  weight: z.number(),
+  raw: z.number().nullable(),
+  normalized: z.number().nullable(),
+  contribution: z.number(),
+});
+export type MeScoreFactor = z.infer<typeof MeScoreFactorSchema>;
+
+export const MeFlightRiskSelfSchema = z.object({
+  value: z.number(),
+  band: z.enum(["LOW", "MEDIUM", "HIGH"]),
+  modelVersion: z.string(),
+  computedAt: z.iso.datetime(),
+  factors: z.array(MeScoreFactorSchema),
+});
+export type MeFlightRiskSelf = z.infer<typeof MeFlightRiskSelfSchema>;
+
+export const MeCapabilitySelfSchema = z.object({
+  value: z.number(),
+  coverage: z.number().nullable(),
+  modelVersion: z.string(),
+  computedAt: z.iso.datetime(),
+});
+export type MeCapabilitySelf = z.infer<typeof MeCapabilitySelfSchema>;
+
+/** GET /v1/me/development — the caller's OWN computed intelligence, coach
+ *  framing (ADR-0031 supersedes D-6). Either block is null when the platform
+ *  has not computed a score for the caller yet (real empty-state). */
+export const MeDevelopmentResponseSchema = z.object({
+  flightRisk: MeFlightRiskSelfSchema.nullable(),
+  capability: MeCapabilitySelfSchema.nullable(),
+  generatedAt: z.iso.datetime(),
+});
+export type MeDevelopmentResponse = z.infer<typeof MeDevelopmentResponseSchema>;

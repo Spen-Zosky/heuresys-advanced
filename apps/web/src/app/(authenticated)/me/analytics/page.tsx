@@ -2,17 +2,23 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
-import type { MeAnalyticsResponse } from "@heuresys/shared";
+import { Badge, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import type { MeAnalyticsResponse, MeDevelopmentResponse } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { EChartsCard } from "../../_charts-client";
 
-/** Le mie analisi (S1011 F5.1) — own attendance trend + summary KPIs. */
+/** Le mie analisi (S1011 F5.1) — own attendance trend + summary KPIs.
+ *  #59 F/F5 (ADR-0031): + "Il mio sviluppo" — own computed scores with
+ *  evidence, coach framing (supersedes D-6). */
 export default function MeAnalyticsPage() {
   const { t } = useTranslation("ess");
   const q = useQuery({
     queryKey: ["me", "analytics"],
     queryFn: () => apiFetch<MeAnalyticsResponse>("/v1/me/analytics"),
+  });
+  const dev = useQuery({
+    queryKey: ["me", "development"],
+    queryFn: () => apiFetch<MeDevelopmentResponse>("/v1/me/development"),
   });
 
   const trend = q.data?.attendanceTrend ?? [];
@@ -69,6 +75,80 @@ export default function MeAnalyticsPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* #59 F/F5 (ADR-0031) — il mio sviluppo: score calcolati + evidenze */}
+          <section data-testid="me-development" className="space-y-4">
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">{t("analytics.development.title")}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{t("analytics.development.description")}</p>
+            </div>
+            {dev.isLoading ? (
+              <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+            ) : !dev.data || (!dev.data.flightRisk && !dev.data.capability) ? (
+              <p className="text-sm text-muted-foreground" data-testid="me-development-empty">
+                {t("analytics.development.empty")}
+              </p>
+            ) : (
+              <div className="grid gap-4 lg:grid-cols-2">
+                {dev.data.capability && (
+                  <Card data-testid="me-development-capability">
+                    <CardHeader><CardTitle>{t("analytics.development.capabilityTitle")}</CardTitle></CardHeader>
+                    <CardContent className="p-5 pt-0">
+                      <div className="text-3xl font-semibold tabular-nums">
+                        {dev.data.capability.value.toFixed(1)}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {dev.data.capability.coverage != null &&
+                          `${(dev.data.capability.coverage * 100).toFixed(0)}% ${t("analytics.development.capabilityCoverage")} · `}
+                        {t("analytics.development.computedAt")}{" "}
+                        {new Date(dev.data.capability.computedAt).toLocaleDateString()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+                {dev.data.flightRisk && (
+                  <Card data-testid="me-development-stability">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        {t("analytics.development.flightTitle")}
+                        <Badge variant={dev.data.flightRisk.band === "HIGH" ? "destructive" : "secondary"}>
+                          {dev.data.flightRisk.value.toFixed(1)}
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-5 pt-0 space-y-3">
+                      <p className="text-xs text-muted-foreground">{t("analytics.development.flightHint")}</p>
+                      <div>
+                        <h3 className="text-sm font-medium text-foreground">{t("analytics.development.factors")}</h3>
+                        <table className="mt-2 w-full text-sm">
+                          <thead>
+                            <tr className="text-left text-xs text-muted-foreground">
+                              <th className="py-1 font-medium">{t("analytics.development.factorFeature")}</th>
+                              <th className="py-1 font-medium">{t("analytics.development.factorWeight")}</th>
+                              <th className="py-1 font-medium">{t("analytics.development.factorValue")}</th>
+                              <th className="py-1 font-medium">{t("analytics.development.factorContribution")}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {dev.data.flightRisk.factors.map((f) => (
+                              <tr key={f.feature} className="border-t border-border">
+                                <td className="py-1.5">
+                                  {t(`analytics.development.feature.${f.feature}`, { defaultValue: f.feature })}
+                                </td>
+                                <td className="py-1.5 tabular-nums">{(f.weight * 100).toFixed(0)}%</td>
+                                <td className="py-1.5 tabular-nums">{f.normalized ?? "—"}</td>
+                                <td className="py-1.5 tabular-nums">{f.contribution.toFixed(1)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+          </section>
         </>
       )}
     </main>

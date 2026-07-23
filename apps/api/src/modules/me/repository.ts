@@ -1540,3 +1540,86 @@ export async function upsertPreferences(
     locale: r.user_preference_locale,
   };
 }
+
+/* --- #59 F/F5 (ADR-0031): il mio sviluppo — score calcolati self ------------ */
+
+interface FlightRiskFeatureRow {
+  feature?: unknown;
+  weight?: unknown;
+  raw?: unknown;
+  normalized?: unknown;
+  contribution?: unknown;
+}
+
+/** The caller's OWN flight-risk score + capability (EMPLOYEE) score, evidence
+ *  included (the model's derivation payload). Self-scope by construction. */
+export async function readMyDevelopment(
+  q: DbConnector,
+  userId: string,
+): Promise<{
+  flightRisk: {
+    value: number; band: "LOW" | "MEDIUM" | "HIGH"; modelVersion: string; computedAt: string;
+    factors: Array<{ feature: string; weight: number; raw: number | null; normalized: number | null; contribution: number }>;
+  } | null;
+  capability: { value: number; coverage: number | null; modelVersion: string; computedAt: string } | null;
+}> {
+  const fr = await q.query<{
+    value: string; band: string; model_version: string; computed_at: Date;
+    payload: { derivation?: { features?: FlightRiskFeatureRow[] } } | null;
+  }>(
+    `SELECT flight_risk_score_value AS value, flight_risk_score_band AS band,
+            flight_risk_score_model_version AS model_version,
+            flight_risk_score_computed_at   AS computed_at,
+            flight_risk_score_payload       AS payload
+       FROM sys.sys_flight_risk_scores
+      WHERE flight_risk_score_user_id = $1
+      ORDER BY flight_risk_score_computed_at DESC
+      LIMIT 1`,
+    [userId],
+  );
+  const cap = await q.query<{
+    value: string; coverage: string | null; model_version: string; computed_at: Date;
+  }>(
+    `SELECT capability_score_value AS value, capability_score_coverage AS coverage,
+            capability_score_model_version AS model_version,
+            capability_score_computed_at   AS computed_at
+       FROM sys.sys_capability_scores
+      WHERE capability_score_subject_type = 'EMPLOYEE'
+        AND capability_score_subject_id = $1
+      ORDER BY capability_score_computed_at DESC
+      LIMIT 1`,
+    [userId],
+  );
+
+  const frRow = fr.rows[0];
+  const capRow = cap.rows[0];
+  const num = (v: unknown): number | null =>
+    typeof v === "number" && Number.isFinite(v) ? v : null;
+
+  return {
+    flightRisk: frRow
+      ? {
+          value: Number(frRow.value),
+          // CHECK-constrained column (RD-08) — the union is the live domain
+          band: frRow.band as "LOW" | "MEDIUM" | "HIGH",
+          modelVersion: frRow.model_version,
+          computedAt: frRow.computed_at.toISOString(),
+          factors: (frRow.payload?.derivation?.features ?? []).map((f) => ({
+            feature: String(f.feature ?? "unknown"),
+            weight: num(f.weight) ?? 0,
+            raw: num(f.raw),
+            normalized: num(f.normalized),
+            contribution: num(f.contribution) ?? 0,
+          })),
+        }
+      : null,
+    capability: capRow
+      ? {
+          value: Number(capRow.value),
+          coverage: capRow.coverage == null ? null : Number(capRow.coverage),
+          modelVersion: capRow.model_version,
+          computedAt: capRow.computed_at.toISOString(),
+        }
+      : null,
+  };
+}

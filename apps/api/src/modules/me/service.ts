@@ -434,6 +434,13 @@ export const meService = {
     return repo.listMyKpis(pool, actor.userId);
   },
 
+  /** #59 F/F5 (ADR-0031) — the caller's OWN computed intelligence, evidence
+   *  included. Self-scope by construction (filters on actor.userId only). */
+  async getDevelopment(actor: SelfActor) {
+    const { flightRisk, capability } = await repo.readMyDevelopment(pool, actor.userId);
+    return { flightRisk, capability, generatedAt: new Date().toISOString() };
+  },
+
   async listCertifications(actor: SelfActor) {
     return repo.listMyCertifications(pool, actor.userId);
   },

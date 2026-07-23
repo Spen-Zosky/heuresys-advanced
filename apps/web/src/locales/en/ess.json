@@ -680,6 +680,29 @@
       "skills": "Skills",
       "performance": "Latest rating",
       "leave": "Leave days left"
+    },
+    "development": {
+      "title": "My development",
+      "description": "How the platform reads your journey — scores computed about you, with the evidence behind them.",
+      "capabilityTitle": "Capability index",
+      "capabilityCoverage": "data coverage",
+      "flightTitle": "Journey stability index",
+      "flightHint": "A lower score means a more stable journey. It is computed from the evidence below: if a value looks wrong, flag it to your HR.",
+      "factors": "Score evidence",
+      "factorFeature": "Factor",
+      "factorWeight": "Weight",
+      "factorValue": "Normalized value",
+      "factorContribution": "Contribution",
+      "empty": "No score has been computed for you yet.",
+      "computedAt": "computed",
+      "feature": {
+        "tenure": "Tenure",
+        "attendance": "Attendance",
+        "kpi": "KPI results",
+        "engagement": "Engagement",
+        "comp": "Compensation",
+        "promotion": "Role growth"
+      }
     }
   },
   "orgChart": {

@@ -167,9 +167,9 @@
 - **#47 D/D2 — engagement/PULSAR history (sblocca flight-risk pieno + fix dual-shape)** · status: DONE
   - priority: P1 · effort: chiuso · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D2
   - note: ✅ **DONE S1028** (`db/scripts/import-d2-engagement.sh`, upsert su natural key — re-run 0 duplicati). Misura preliminare: i 3 domini core erano GIÀ importati e COMPLETI vs crosswalk I14 (survey_responses 3792=matchable · engagement 862 · pulse 733 — la nota "seed sintetici" era stale). Residuo reale importato: **check_ins → 1621 pulse rows `LEGACY_CI::`** (mood 3-5; fatti meeting in metadata) + **wellbeing_checkins → 480 rows `LEGACY_WB::`** (mood + energy/stress/wlb/sleep in metadata, no force-fit semantico). Registry sanato: export `legacy-live-wave2-D` + 8 source_tables + **8 table_mappings wave=2** (prima: 0). Regression LIVE eseguita: login reale federica (password+TOTP) → `POST /v1/insights/recompute` 200 `{scored:158}`; diff before/after: avg 39.64→38.38, 158/162 rescored, avg|Δ| 2.68, 25 band flip (87M/75L→74M/88L) — la gamba engagement ora pesa 2.101 segnali mood in più.
-- **#48 D/D3 — goal history GOKMER (gemello di #26)** · status: ACTIVE
-  - priority: P2 · effort: ~1 sessione · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D3
-  - note: a valle ri-eseguire l'E2E di #26 come regression.
+- **#48 D/D3 — goal history GOKMER (gemello di #26)** · status: DONE
+  - priority: P2 · effort: chiuso (verifica) · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D3
+  - note: ✅ **DONE S1028 (verificato già-importato — nota register stale, stesso pattern di #47)**: `sys_goals` 1067/1067 legacy (natural key `GOAL::`, il backfill S1011 da 632 era stato completato da sessioni successive) + `sys_goal_updates` **1811/1811** (`GOAL_UPDATE::`). Esposizione API già viva (Serie A-L1, #26 DONE). Residuo reale sanato: registrazione **wave-2 nel registry brownfield** (goals + goal_updates → 10 table_mappings wave-2 totali, dentro `import-d2-engagement.sh` sezione D-series).
 - **#49 D/D5 — employee timeline** · status: ACTIVE
   - priority: P2 · effort: ~1-1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_D_WAVE2_LEGACY_DATA.md §D5
 - **#50 D/D4 — legacy knowledge graph (kg_nodes/kg_edges 139k)** · status: ACTIVE

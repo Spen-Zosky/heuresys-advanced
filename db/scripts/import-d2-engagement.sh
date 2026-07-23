@@ -205,7 +205,9 @@ FROM (VALUES
   ('engagement_survey_responses', 1327, 'ENGAGEMENT', 'D2'),
   ('pulse_checks',                1145, 'ENGAGEMENT', 'D2'),
   ('check_ins',                   2495, 'ENGAGEMENT', 'D2'),
-  ('wellbeing_checkins',          1142, 'ENGAGEMENT', 'D2')
+  ('wellbeing_checkins',          1142, 'ENGAGEMENT', 'D2'),
+  ('goals',                       1067, 'GOALS',      'D3'),
+  ('goal_updates',                1811, 'GOALS',      'D3')
 ) v(name, rows, domain, series)
 ON CONFLICT (source_table_id) DO NOTHING;
 
@@ -235,7 +237,11 @@ FROM (VALUES
   ('check_ins', 'sys_pulse_checks', 'D2',
    '#47 D/D2 S1028: 1:1 check-in mood signal → pulse rows LEGACY_CI:: (meeting facts in metadata; employee_engagement is all NULL in the legacy).'),
   ('wellbeing_checkins', 'sys_pulse_checks', 'D2',
-   '#47 D/D2 S1028: wellbeing mood → pulse rows LEGACY_WB:: (energy/stress/wlb/sleep preserved in metadata, no semantic force-fit).')
+   '#47 D/D2 S1028: wellbeing mood → pulse rows LEGACY_WB:: (energy/stress/wlb/sleep preserved in metadata, no semantic force-fit).'),
+  ('goals', 'sys_goals', 'D3',
+   '#48 D/D3: goal history GOKMER — 1067/1067 imported pre-S1028 (GOAL:: natural keys; S1011 backfill completed by later sessions). Registry healed S1028.'),
+  ('goal_updates', 'sys_goal_updates', 'D3',
+   '#48 D/D3: goal updates — 1811/1811 imported pre-S1028 (GOAL_UPDATE:: natural keys). Registry healed S1028.')
 ) v(src, tgt, series, rationale)
 ON CONFLICT (table_mapping_id) DO NOTHING;
 

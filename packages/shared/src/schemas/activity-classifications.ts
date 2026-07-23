@@ -6,9 +6,10 @@ import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
 // Must mirror the DB CHECK on sys.sys_activity_classifications.activity_classification_scheme
-// (RD-08: varchar+CHECK is the structural authority). The brownfield Wave-1 ingestion populates
-// the unversioned "ATECO"/"NACE" scheme codes (3276 rows); omitting them here caused the
-// GET /v1/activity-classifications LIST to 500 on response serialization (caught by WS-5).
+// (RD-08: varchar+CHECK is the structural authority). The unversioned "ATECO"/"NACE" codes are
+// RETIRED as data since #73 (mig 000211, S1028 — legacy schemes archived to audit.* and deleted)
+// but stay in the enum: the CHECK still allows them and dropping response-enum values for
+// historically-valid data would turn any straggler row into a 500 on serialization (WS-5 lesson).
 export const ACTIVITY_CLASS_SCHEME_VALUES = [
   "ATECO_2025", "NACE_REV_2_1", "ATECO_2007", "NACE_REV_2", "ATECO", "NACE",
 ] as const;

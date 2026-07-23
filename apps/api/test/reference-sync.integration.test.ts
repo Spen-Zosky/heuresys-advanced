@@ -268,15 +268,16 @@ describe("reference-sync API (cap⑤ ATECO_2025, 2nd source)", () => {
     expect(b.updated).toBe(0);
   });
 
-  it("the legacy ATECO/NACE generations are untouched by the ATECO_2025 ingest", async () => {
-    const { rows } = await pool.query<{ scheme: string; n: string }>(
-      `SELECT activity_classification_scheme AS scheme, count(*)::text AS n
+  it("#73 — the legacy ATECO/NACE schemes stay DEPRECATED (mig 000211): zero rows", async () => {
+    // The legacy schemes were archived to audit.* and deleted in S1028 (Rev-2
+    // hybrid, zero business references). The ATECO_2025 ingest must never
+    // resurrect them.
+    const { rows } = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n
          FROM sys.sys_activity_classifications
-        WHERE activity_classification_scheme IN ('ATECO', 'NACE') GROUP BY 1 ORDER BY 1`,
+        WHERE activity_classification_scheme IN ('ATECO', 'NACE')`,
     );
-    // Brownfield baselines (RTL rebuild): ATECO 2210 + NACE 1066 — never deleted/mutated.
-    expect(rows.find((x) => x.scheme === "ATECO")?.n).toBe("2210");
-    expect(rows.find((x) => x.scheme === "NACE")?.n).toBe("1066");
+    expect(rows[0]!.n).toBe("0");
   });
 
   it("GET /sources now lists BOTH sources (ESCO + ATECO_2025) with per-source watermark", async () => {

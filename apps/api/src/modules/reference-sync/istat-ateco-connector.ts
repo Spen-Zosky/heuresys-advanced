@@ -9,10 +9,11 @@
  * the `AtecoFetcher` seam so the integration suite injects plain fixture rows
  * (NO live HTTP in CI, scraping spec §7 — same doctrine as the ESCO connector).
  *
- * Target: sys.sys_activity_classifications under scheme 'ATECO_2025' — a NEW
- * parallel generation. The legacy 'ATECO'/'NACE' rows (brownfield import) stay
- * untouched: provenance preserved, FK-by-id consumers unaffected (decision
- * S983, plan WS-C §4). Scheme already whitelisted in the CHECK (mig 000032).
+ * Target: sys.sys_activity_classifications under scheme 'ATECO_2025' — the
+ * SOLE base scheme since #73 (mig 000211, S1028): the legacy 'ATECO'/'NACE'
+ * rows (brownfield import, Rev-2 hybrid) were archived to audit.* and deleted
+ * — this connector must never resurrect them. Scheme already whitelisted in
+ * the CHECK (mig 000032).
  *
  * Fail-loud guards (no silent partial ingest, mirrors esco-connector):
  *   - header drift: the sheet header must match the known column layout;

@@ -33,21 +33,7 @@
     "db:encrypt-totp": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/encrypt-totp-secrets.ts",
     "embeddings:backfill": "pnpm --filter @heuresys/api exec tsx src/modules/semantic-matching/backfill.ts",
     "i18n:check": "pnpm --filter @heuresys/web run i18n:check",
-    "status": "python docs/kb/tools/status_dashboard.py",
-    "cowork:status": "node scripts/cowork-exchange/status.mjs",
-    "cowork:validate": "node scripts/cowork-exchange/validate-naming.mjs",
-    "cowork:validate:strict": "node scripts/cowork-exchange/validate-naming.mjs --strict",
-    "cowork:new-goal": "node scripts/cowork-exchange/new-goal.mjs",
-    "cowork:install-hooks": "node scripts/cowork-exchange/install-hooks.mjs",
-    "cowork:session-start": "node scripts/cowork-exchange/session-start.mjs",
-    "cowork:session-end": "node scripts/cowork-exchange/session-end.mjs",
-    "cowork:inbox": "node scripts/cowork-exchange/inbox.mjs",
-    "cowork:inbox:rebuild": "node scripts/cowork-exchange/inbox.mjs --rebuild-index",
-    "cowork:notify": "node scripts/cowork-exchange/notify.mjs",
-    "cowork:acquire-lock": "node scripts/cowork-exchange/locks.mjs acquire",
-    "cowork:release-lock": "node scripts/cowork-exchange/locks.mjs release",
-    "cowork:check-locks": "node scripts/cowork-exchange/locks.mjs check",
-    "cowork:apply-pending": "node scripts/cowork-exchange/apply-pending.mjs"
+    "status": "python docs/kb/tools/status_dashboard.py"
   },
   "dependencies": {
     "@heuresys/ui": "^0.1.9"

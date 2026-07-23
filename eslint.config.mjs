@@ -16,7 +16,6 @@ export default tseslint.config(
       "**/*.config.mjs",
       ".claude/worktrees/**",
       "cowork_code_exchange/**",
-      "scripts/cowork-exchange/**",
       "docs/**",
       "db/**",
       "qa_artifacts/**",

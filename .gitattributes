@@ -13,7 +13,7 @@
 
 # Cowork exchange channel — strict LF (Cowork sandbox writes LF; CLI must commit LF)
 cowork_code_exchange/** text eol=lf
-scripts/cowork-exchange/** text eol=lf
+docs/archive/scripts-exhausted/cowork-exchange/** text eol=lf
 
 # DB migrations — strict LF (cross-platform shell + sh + psql consumption)
 db/migrations/** text eol=lf

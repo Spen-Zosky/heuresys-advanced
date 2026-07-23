@@ -364,11 +364,22 @@ rollback_host() {  # $1 = kind, $2 = stamp
     [ -f \"\$HOME/.claude-mem/settings.json.bak-$stamp\" ] && cp -a \"\$HOME/.claude-mem/settings.json.bak-$stamp\" \"\$HOME/.claude-mem/settings.json\" || true"
 }
 
+# #60 G1 (S1028): retention N-ultimi sui report locali (gitignored) — la dir
+# accumulava senza policy (108 file al momento del fix). Tiene i 20 più recenti.
+prune_reports() {
+  local keep=20
+  [ -d "$REPORTS_DIR" ] || return 0
+  ls -1t "$REPORTS_DIR" 2>/dev/null | tail -n +$((keep + 1)) | while IFS= read -r f; do
+    rm -f "$REPORTS_DIR/$f"
+  done
+}
+
 # --- verify ---------------------------------------------------------------------------------
 verify_host() {  # $1 = kind ; returns 0 if clean — writes drift report
   local kind="$1"; "${kind}_cfg"
   build_stage "$RHOME"
   mkdir -p "$REPORTS_DIR"
+  prune_reports
   local report="$REPORTS_DIR/drift-$kind-$STAMP.md" issues=0 mem_drift=0
   {
     echo "# Drift report — $kind ($HOST) — $STAMP"

@@ -8,6 +8,7 @@
  * sys_notification_preferences CHECK domains — RD-08, never ENUM).
  */
 import { z } from "zod";
+import { paginationFields } from "./_pagination.js";
 
 export const NotificationTypeSchema = z.enum([
   "TRAINING_DEADLINE",
@@ -70,3 +71,36 @@ export const BroadcastNotificationResponseSchema = z.object({
   emitted: z.number().int(),
 });
 export type BroadcastNotificationResponse = z.infer<typeof BroadcastNotificationResponseSchema>;
+
+/** GET /v1/notifications/broadcasts — administrative audit of sent SYSTEM
+ *  broadcasts (#74, ex D-70: the module was write-only). One audit row per
+ *  broadcast EVENT: the bulk emit writes every recipient row in a single
+ *  INSERT, so (created_by, subject, created_at) reconstructs the event
+ *  exactly; recipients/readCount aggregate its per-user rows. Non-platform
+ *  actors see only broadcasts that reached their own tenant (I5). */
+export const ListBroadcastsQuerySchema = z.object({
+  from: z.iso.date().optional(),
+  to: z.iso.date().optional(),
+  ...paginationFields(100, 50),
+});
+export type ListBroadcastsQuery = z.infer<typeof ListBroadcastsQuerySchema>;
+
+export const BroadcastAuditItemSchema = z.object({
+  subject: z.string(),
+  body: z.string().nullable(),
+  priority: NotificationPrioritySchema,
+  actionUrl: z.string().nullable(),
+  createdByUserId: z.uuid().nullable(),
+  createdByEmail: z.string().nullable(),
+  emittedAt: z.iso.datetime({ offset: true }),
+  recipients: z.number().int().min(0),
+  readCount: z.number().int().min(0),
+  tenants: z.number().int().min(0),
+});
+export type BroadcastAuditItem = z.infer<typeof BroadcastAuditItemSchema>;
+
+export const ListBroadcastsResponseSchema = z.object({
+  items: z.array(BroadcastAuditItemSchema),
+  total: z.number().int().min(0),
+});
+export type ListBroadcastsResponse = z.infer<typeof ListBroadcastsResponseSchema>;

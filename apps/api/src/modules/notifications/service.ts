@@ -9,7 +9,13 @@ import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
 import { emitNotificationsBulk } from "../../lib/notifications/emit.js";
-import type { BroadcastNotificationBody, BroadcastNotificationResponse } from "@heuresys/shared";
+import { listBroadcastAudit } from "./repository.js";
+import type {
+  BroadcastNotificationBody,
+  BroadcastNotificationResponse,
+  ListBroadcastsQuery,
+  ListBroadcastsResponse,
+} from "@heuresys/shared";
 
 const isPlatform = (a: ActorContext): boolean => a.roles.includes("PLATFORM_ADMIN");
 
@@ -40,5 +46,14 @@ export const notificationsService = {
       },
     );
     return { requested: body.userIds.length, emitted };
+  },
+
+  /** #74 (ex D-70) — audit of sent SYSTEM broadcasts, one row per event.
+   *  I5: non-platform actors see only broadcasts that reached their tenant. */
+  async listBroadcasts(actor: ActorContext, query: ListBroadcastsQuery): Promise<ListBroadcastsResponse> {
+    return listBroadcastAudit(pool, query, {
+      tenantId: actor.tenantId,
+      isPlatform: isPlatform(actor),
+    });
   },
 };

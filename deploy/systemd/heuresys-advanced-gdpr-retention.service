@@ -1,5 +1,5 @@
-# Rendered/installed verbatim by scripts/vm-bootstrap.sh / vm-deploy.sh (§3c —
-# @@REPO_DIR@@ / @@SERVICE_USER@@ sono i placeholder standard).
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh / vm-deploy.sh;
+# User= is rewritten per-host by the deploy (ubuntu on the VM, enzo on the twin — D-39).
 #
 # D-63: ONE-SHOT che esegue scripts/gdpr-retention-sweep.sh — sweep
 # registry-driven delle finestre di retention dichiarate in
@@ -12,6 +12,6 @@ After=network-online.target
 
 [Service]
 Type=oneshot
-User=@@SERVICE_USER@@
+User=ubuntu
 WorkingDirectory=@@REPO_DIR@@
 ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/gdpr-retention-sweep.sh

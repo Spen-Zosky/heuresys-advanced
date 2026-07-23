@@ -44,7 +44,7 @@ jobs:
           version: 9.15.0
 
       - name: Setup Node
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
         with:
           # 22, not 20: a transitive dep (camera-controls@3.1.2 via three.js in
           # @heuresys/ui) requires Node >=22, so `pnpm install --frozen-lockfile`

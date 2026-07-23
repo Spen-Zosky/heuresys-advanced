@@ -104,6 +104,15 @@ jobs:
       - name: Seed test personas (idempotent, login-only)
         run: pnpm db:seed-test-admin
 
+      # S1027: the occupation axis (mig 000206) ships its dataset as VERSIONED
+      # CSVs + an idempotent fail-loud loader (db/data/occupations/) — unlike
+      # the gitignored ESCO dump, heuresys_ci can carry the real catalog, so
+      # the occupation tests run full instead of failing on an empty clone.
+      - name: Load occupation-classifications dataset (idempotent)
+        run: |
+          psql -h localhost -p 5432 -U $POSTGRES_USER -d $POSTGRES_DATABASE \
+            -v ON_ERROR_STOP=1 -f db/scripts/populate-occupation-classifications.sql
+
       - name: Run vitest integration suite
         working-directory: apps/api
         run: pnpm exec vitest run --reporter=verbose --no-coverage

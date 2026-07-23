@@ -33,7 +33,7 @@ jobs:
       # declares it as a normal semver dep (`"@heuresys/ui": "^0.1.x"`) resolved by
       # pnpm from the registry — no sister-repo checkout or local `link:` is needed.
       - name: Checkout heuresys-advanced
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           path: heuresys-advanced
           fetch-depth: 1

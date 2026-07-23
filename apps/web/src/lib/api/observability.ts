@@ -42,3 +42,37 @@ export function useRolePermissions() {
     retry: 0,
   });
 }
+
+/* --- #35 B7 (S1028): slow queries + request time-series -------------------- */
+
+export type { SlowQueriesResponse, RequestSeriesResponse } from "@heuresys/shared";
+import type { SlowQueriesResponse, RequestSeriesResponse } from "@heuresys/shared";
+
+export const SLOW_QUERIES_QUERY_KEY = ["observability", "slow-queries"] as const;
+
+/** GET /v1/observability/slow-queries — live pg_stat_statements top-N. */
+export function useSlowQueries(limit = 10) {
+  return useQuery({
+    queryKey: [...SLOW_QUERIES_QUERY_KEY, limit],
+    queryFn: ({ signal }) =>
+      apiFetch<SlowQueriesResponse>(`/v1/observability/slow-queries?limit=${limit}`, { signal }),
+    staleTime: 30_000,
+    retry: 0,
+  });
+}
+
+export const REQUEST_SERIES_QUERY_KEY = ["observability", "request-series"] as const;
+
+/** GET /v1/observability/request-series — in-RAM 24h ring, sparkline-ready. */
+export function useRequestSeries(windowMinutes = 180, stepMinutes = 5) {
+  return useQuery({
+    queryKey: [...REQUEST_SERIES_QUERY_KEY, windowMinutes, stepMinutes],
+    queryFn: ({ signal }) =>
+      apiFetch<RequestSeriesResponse>(
+        `/v1/observability/request-series?windowMinutes=${windowMinutes}&stepMinutes=${stepMinutes}`,
+        { signal },
+      ),
+    staleTime: 30_000,
+    retry: 0,
+  });
+}

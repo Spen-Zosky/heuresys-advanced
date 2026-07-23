@@ -11,7 +11,13 @@ import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
 import { rbacCacheStats } from "../../middleware/rbac.js";
-import type { SystemHealthResponse } from "@heuresys/shared";
+import type {
+  RequestSeriesQuery,
+  RequestSeriesResponse,
+  SlowQueriesQuery,
+  SlowQueriesResponse,
+  SystemHealthResponse,
+} from "@heuresys/shared";
 import * as repo from "./repository.js";
 import { metricsStore } from "./metrics-store.js";
 
@@ -84,6 +90,48 @@ export const observabilityService = {
         avgDurationMs: metrics.avgDurationMs,
         recentErrors,
       },
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  /* --- #35 B7 (S1028) ----------------------------------------------------- */
+
+  /** Top statements by mean exec time from pg_stat_statements (platform-only). */
+  async getSlowQueries(_actor: ActorContext, q: SlowQueriesQuery): Promise<SlowQueriesResponse> {
+    const { rows, totalTracked, statsSince } = await repo.readSlowQueries(pool, q.limit, q.minCalls);
+    return {
+      items: rows.map((r, i) => ({
+        rank: i + 1,
+        query: r.query,
+        calls: Number(r.calls),
+        meanMs: r.mean_ms,
+        stddevMs: r.stddev_ms,
+        maxMs: r.max_ms,
+        totalMs: r.total_ms,
+        rowsReturned: Number(r.rows_returned),
+        sharedBlksHit: Number(r.shared_blks_hit),
+        sharedBlksRead: Number(r.shared_blks_read),
+      })),
+      totalTracked,
+      statsSince,
+      generatedAt: new Date().toISOString(),
+    };
+  },
+
+  /** Request time-series from the in-RAM 24h ring (B7 sparklines backend). */
+  getRequestSeries(_actor: ActorContext, q: RequestSeriesQuery): RequestSeriesResponse {
+    const points = metricsStore.series(q.windowMinutes, q.stepMinutes);
+    return {
+      points: points.map((p) => ({
+        ts: new Date(p.minute * 60000).toISOString(),
+        total: p.total,
+        xx2: p.xx2,
+        xx4: p.xx4,
+        xx5: p.xx5,
+        avgDurationMs: p.avgDurationMs,
+      })),
+      windowMinutes: q.windowMinutes,
+      stepMinutes: q.stepMinutes,
       generatedAt: new Date().toISOString(),
     };
   },

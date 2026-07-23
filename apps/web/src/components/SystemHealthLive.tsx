@@ -13,12 +13,12 @@
  * by /showcase/system-health (a documented demo artifact). This component is the
  * production-route renderer and contains NO fabricated values.
  *
- * Sections WITHOUT a /v1 backend were intentionally dropped from production (the
- * mock kept them as demo narrative): live LogStream (log tail = systemd/journalctl
- * infra, not app data), SQLSlowQueryTable (no pg_stat_statements read endpoint),
- * IncidentTimeline/AlertBanner (no incident module shipped), and KPI sparklines
- * (no time-series endpoint — point-in-time counters only). The live request-metrics
- * error rate already surfaces real degradation signals.
+ * #35 B7 (S1028) re-lit two of the four dropped sections with REAL backends:
+ * SQLSlowQueryTable (GET /v1/observability/slow-queries — live pg_stat_statements)
+ * and the request sparklines (GET /v1/observability/request-series — the in-RAM
+ * 24h minute ring). Still intentionally absent (no honest backend): live
+ * LogStream (log tail = systemd/journalctl infra, not app data) and
+ * IncidentTimeline/AlertBanner (no incident module shipped).
  *
  * Composed from @heuresys/ui primitives. English copy (this lives in components/,
  * outside the apps/web/src/app/** i18n guardrail — same as the showcase mock).
@@ -31,11 +31,15 @@ import {
   ErrorRateBreakdown,
   KPIStrip,
   RBACMatrix,
+  Sparkline,
+  SQLSlowQueryTable,
 } from "@heuresys/ui";
-import { Activity, Database, Lock, ShieldCheck, Users } from "lucide-react";
+import { Activity, Database, Gauge, Lock, ShieldCheck, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
+  useRequestSeries,
   useRolePermissions,
+  useSlowQueries,
   useSystemHealth,
   type RolePermissionsResponse,
 } from "@/lib/api/observability";
@@ -139,6 +143,8 @@ export function SystemHealthLive() {
   const { t } = useTranslation();
   const health = useSystemHealth();
   const rolePerms = useRolePermissions();
+  const slowQueries = useSlowQueries(10);           // #35 B7 — live pg_stat_statements
+  const requestSeries = useRequestSeries(180, 5);   // #35 B7 — in-RAM 24h ring
 
   if (health.isLoading) {
     return (
@@ -351,6 +357,90 @@ export function SystemHealthLive() {
           sparklineTone: e.status >= 500 ? ("danger" as const) : ("warning" as const),
         }))}
       />
+
+      {/* --- #35 B7: request time-series sparklines (in-RAM 24h ring, live) --- */}
+      {requestSeries.data && requestSeries.data.points.length > 0 ? (
+        <section
+          data-testid="system-health-request-series"
+          className="grid gap-3 md:grid-cols-3"
+        >
+          {(() => {
+            const pts = requestSeries.data.points;
+            const cards = [
+              {
+                label: "Requests / 5min · 3h",
+                data: pts.map((p) => p.total),
+                foot: `${pts.reduce((s, p) => s + p.total, 0).toLocaleString()} req in window`,
+              },
+              {
+                label: "5xx errors / 5min · 3h",
+                data: pts.map((p) => p.xx5),
+                foot: `${pts.reduce((s, p) => s + p.xx5, 0)} server errors`,
+              },
+              {
+                label: "Avg latency ms / 5min · 3h",
+                data: pts.map((p) => p.avgDurationMs),
+                foot: `${Math.max(...pts.map((p) => p.avgDurationMs)).toFixed(0)}ms peak`,
+              },
+            ];
+            return cards.map((c) => (
+              <div key={c.label} className="rounded-xl border border-border bg-card p-4">
+                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                  <Gauge className="h-3.5 w-3.5" aria-hidden="true" />
+                  {c.label}
+                </div>
+                <div className="mt-3">
+                  <Sparkline data={c.data} width={280} height={48} ariaLabel={c.label} />
+                </div>
+                <div className="mt-2 text-[11px] text-muted-foreground num">{c.foot}</div>
+              </div>
+            ));
+          })()}
+        </section>
+      ) : null}
+
+      {/* --- #35 B7: SQL slow queries (live pg_stat_statements, app-db scope) --- */}
+      {slowQueries.data && slowQueries.data.items.length > 0 ? (
+        <div data-testid="system-health-slow-queries">
+          <SQLSlowQueryTable
+            rows={(() => {
+              const items = slowQueries.data.items;
+              const maxTotal = Math.max(...items.map((q) => q.totalMs), 1);
+              return items.map((q) => ({
+                rank: q.rank,
+                query: (
+                  <code className="font-mono text-xs">
+                    {q.query.length > 120 ? `${q.query.slice(0, 120)}…` : q.query}
+                  </code>
+                ),
+                tenant: "app-db",
+                tenantTone: "muted" as const,
+                calls: q.calls,
+                // p95 estimated as μ+1.645σ — pg_stat_statements has no percentiles
+                p95Ms: Math.max(0, Math.round(q.meanMs + 1.645 * q.stddevMs)),
+                meanMs: Math.round(q.meanMs * 100) / 100,
+                totalTimeBarPct: Math.round((q.totalMs / maxTotal) * 100),
+                totalTimeTone:
+                  q.meanMs > 250 ? ("danger" as const) : q.meanMs > 50 ? ("warning" as const) : ("palette-2" as const),
+                totalTimeLabel: `${(q.totalMs / 1000).toFixed(1)}s`,
+                lastSeen: "cumulative",
+              }));
+            })()}
+            totalTracked={slowQueries.data.totalTracked}
+            sampleSince={
+              slowQueries.data.statsSince ? formatRelative(slowQueries.data.statsSince) : undefined
+            }
+            totalCaptured="p95 ≈ μ+1.645σ (estimated — pg_stat_statements has no percentiles)"
+          />
+        </div>
+      ) : (
+        <EmptyState
+          data-testid="system-health-slow-queries-empty"
+          icon={<Database className="h-6 w-6" />}
+          title="No tracked statements yet"
+          description="pg_stat_statements has no rows for the app database in the current stats window."
+        />
+      )}
 
       {matrix && matrix.rows.length > 0 ? (
         <RBACMatrix

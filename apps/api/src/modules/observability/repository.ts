@@ -193,3 +193,60 @@ export async function getAuditFeed(
     userDisplayName: row.user_display_name,
   }));
 }
+
+/* --- #35 B7 (S1028): slow queries from pg_stat_statements ------------------ */
+
+export interface SlowQueryRow {
+  query: string;
+  calls: string;
+  mean_ms: number;
+  stddev_ms: number;
+  max_ms: number;
+  total_ms: number;
+  rows_returned: string;
+  shared_blks_hit: string;
+  shared_blks_read: string;
+}
+
+/**
+ * Top statements by mean execution time, app-database scope. The app user sees
+ * its own statements (all API traffic); rows it cannot read surface as
+ * "<insufficient privilege>" and are filtered out. The normalized query text
+ * is $n-parameterized by pg_stat_statements — no literal values ever leave.
+ */
+export async function readSlowQueries(
+  pool: Pool,
+  limit: number,
+  minCalls: number,
+): Promise<{ rows: SlowQueryRow[]; totalTracked: number; statsSince: string | null }> {
+  const items = await pool.query<SlowQueryRow>(
+    `SELECT s.query,
+            s.calls::text AS calls,
+            round(s.mean_exec_time::numeric, 2)::float8   AS mean_ms,
+            round(s.stddev_exec_time::numeric, 2)::float8 AS stddev_ms,
+            round(s.max_exec_time::numeric, 2)::float8    AS max_ms,
+            round(s.total_exec_time::numeric, 2)::float8  AS total_ms,
+            s.rows::text AS rows_returned,
+            s.shared_blks_hit::text  AS shared_blks_hit,
+            s.shared_blks_read::text AS shared_blks_read
+       FROM pg_stat_statements s
+      WHERE s.dbid = (SELECT oid FROM pg_database WHERE datname = current_database())
+        AND s.calls >= $2
+        AND s.query NOT LIKE '<insufficient privilege>%'
+        AND s.query NOT ILIKE '%pg_stat_statements%'
+        AND s.toplevel
+      ORDER BY s.mean_exec_time DESC
+      LIMIT $1`,
+    [limit, minCalls],
+  );
+  const meta = await pool.query<{ n: string; since: Date | null }>(
+    `SELECT (SELECT count(*)::text FROM pg_stat_statements
+              WHERE dbid = (SELECT oid FROM pg_database WHERE datname = current_database())) AS n,
+            (SELECT stats_reset FROM pg_stat_statements_info) AS since`,
+  );
+  return {
+    rows: items.rows,
+    totalTracked: Number(meta.rows[0]?.n ?? 0),
+    statsSince: meta.rows[0]?.since ? meta.rows[0].since.toISOString() : null,
+  };
+}

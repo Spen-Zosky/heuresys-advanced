@@ -187,4 +187,57 @@ describe("GET /v1/observability/system-health integration", () => {
     });
     expect(r.statusCode).toBe(401);
   });
+
+  /* --- #35 B7 (S1028): slow-queries + request-series ---------------------- */
+
+  it("#35 GET /slow-queries — live pg_stat_statements rows, ordered by meanMs", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/observability/slow-queries?limit=10&minCalls=1",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as {
+      items: Array<{ rank: number; query: string; calls: number; meanMs: number; totalMs: number }>;
+      totalTracked: number;
+      generatedAt: string;
+    };
+    // the live DB serves this suite's own traffic — statements are tracked
+    expect(b.totalTracked).toBeGreaterThan(0);
+    expect(b.items.length).toBeGreaterThan(0);
+    expect(b.items[0]!.rank).toBe(1);
+    for (let i = 1; i < b.items.length; i++) {
+      expect(b.items[i]!.meanMs).toBeLessThanOrEqual(b.items[i - 1]!.meanMs); // ordered desc
+    }
+    // normalized text only — no literal values, no privilege leak rows
+    expect(b.items.some((x) => x.query.startsWith("<insufficient privilege>"))).toBe(false);
+  });
+
+  it("#35 GET /request-series — the suite's own traffic appears in the ring", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/observability/request-series?windowMinutes=30&stepMinutes=5",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const b = r.json() as {
+      points: Array<{ ts: string; total: number; xx2: number; avgDurationMs: number }>;
+      windowMinutes: number;
+      stepMinutes: number;
+    };
+    expect(b.windowMinutes).toBe(30);
+    expect(b.stepMinutes).toBe(5);
+    expect(b.points.length).toBeGreaterThan(0);
+    // this very request (and the logins above) landed in the current window
+    expect(b.points.reduce((s, p) => s + p.total, 0)).toBeGreaterThan(0);
+    // continuous axis: timestamps strictly increasing
+    for (let i = 1; i < b.points.length; i++) {
+      expect(new Date(b.points[i]!.ts).getTime()).toBeGreaterThan(new Date(b.points[i - 1]!.ts).getTime());
+    }
+  });
+
+  it("#35 both B7 endpoints are platform-gated (TENANT_ADMIN → 403)", async () => {
+    for (const url of ["/v1/observability/slow-queries", "/v1/observability/request-series"]) {
+      const r = await suite.app.inject({ method: "GET", url, headers: { cookie: ch(tenantS.cookies) } });
+      expect(r.statusCode).toBe(403);
+    }
+  });
 });

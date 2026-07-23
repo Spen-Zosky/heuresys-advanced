@@ -150,3 +150,60 @@ export const SystemHealthResponseSchema = z.object({
   generatedAt: z.iso.datetime(),
 });
 export type SystemHealthResponse = z.infer<typeof SystemHealthResponseSchema>;
+
+/* --- #35 B7 (S1028): slow-query + request time-series ---------------------- */
+
+/** One normalized statement from pg_stat_statements (app-user scope). The
+ *  text is the $n-parameterized normalized form — no literal values. */
+export const SlowQueryItemSchema = z.object({
+  rank: z.number().int().min(1),
+  query: z.string(),
+  calls: z.number().int().min(0),
+  meanMs: z.number(),
+  stddevMs: z.number(),
+  maxMs: z.number(),
+  totalMs: z.number(),
+  rowsReturned: z.number().int().min(0),
+  sharedBlksHit: z.number().int().min(0),
+  sharedBlksRead: z.number().int().min(0),
+});
+export type SlowQueryItem = z.infer<typeof SlowQueryItemSchema>;
+
+export const SlowQueriesQuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(100).optional().default(25),
+  minCalls: z.coerce.number().int().min(1).optional().default(3),
+});
+export type SlowQueriesQuery = z.infer<typeof SlowQueriesQuerySchema>;
+
+export const SlowQueriesResponseSchema = z.object({
+  items: z.array(SlowQueryItemSchema),
+  totalTracked: z.number().int().min(0),
+  statsSince: z.iso.datetime().nullable(),
+  generatedAt: z.iso.datetime(),
+});
+export type SlowQueriesResponse = z.infer<typeof SlowQueriesResponseSchema>;
+
+/** Request time-series from the in-RAM 24h minute ring (B7: KPI sparklines). */
+export const RequestSeriesQuerySchema = z.object({
+  windowMinutes: z.coerce.number().int().min(5).max(1440).optional().default(180),
+  stepMinutes: z.coerce.number().int().min(1).max(60).optional().default(5),
+});
+export type RequestSeriesQuery = z.infer<typeof RequestSeriesQuerySchema>;
+
+export const RequestSeriesPointSchema = z.object({
+  ts: z.iso.datetime(),
+  total: z.number().int().min(0),
+  xx2: z.number().int().min(0),
+  xx4: z.number().int().min(0),
+  xx5: z.number().int().min(0),
+  avgDurationMs: z.number(),
+});
+export type RequestSeriesPoint = z.infer<typeof RequestSeriesPointSchema>;
+
+export const RequestSeriesResponseSchema = z.object({
+  points: z.array(RequestSeriesPointSchema),
+  windowMinutes: z.number().int(),
+  stepMinutes: z.number().int(),
+  generatedAt: z.iso.datetime(),
+});
+export type RequestSeriesResponse = z.infer<typeof RequestSeriesResponseSchema>;

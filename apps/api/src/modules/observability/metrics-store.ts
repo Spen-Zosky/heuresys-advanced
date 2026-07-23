@@ -170,6 +170,43 @@ class RequestMetricsStore {
   recentErrors(): RecentError[] {
     return this.recent.map((e) => ({ ...e }));
   }
+
+  /**
+   * #35 B7 — time-series read of the ring: the trailing `windowMinutes`,
+   * aggregated in `stepMinutes` buckets, oldest-first. Empty steps are emitted
+   * with zero counts so sparklines keep a continuous time axis. Never throws.
+   */
+  series(
+    windowMinutes: number,
+    stepMinutes: number,
+  ): Array<{ minute: number; total: number; xx2: number; xx4: number; xx5: number; avgDurationMs: number }> {
+    const window = Math.max(1, Math.min(windowMinutes, RING_SIZE));
+    const step = Math.max(1, Math.min(stepMinutes, window));
+    const now = RequestMetricsStore.currentMinute();
+    const start = now - window + 1;
+
+    // index the live buckets by their epoch-minute for O(1) lookups
+    const byMinute = new Map<number, MinuteBucket>();
+    for (const bucket of this.ring) {
+      if (bucket !== undefined && bucket.minute >= start) byMinute.set(bucket.minute, bucket);
+    }
+
+    const points: Array<{ minute: number; total: number; xx2: number; xx4: number; xx5: number; avgDurationMs: number }> = [];
+    for (let m = start; m <= now; m += step) {
+      let total = 0, xx2 = 0, xx4 = 0, xx5 = 0, sum = 0;
+      for (let i = m; i < Math.min(m + step, now + 1); i++) {
+        const b = byMinute.get(i);
+        if (!b) continue;
+        total += b.total; xx2 += b.c2xx; xx4 += b.c4xx; xx5 += b.c5xx; sum += b.sumDurationMs;
+      }
+      points.push({
+        minute: m,
+        total, xx2, xx4, xx5,
+        avgDurationMs: total > 0 ? round2(sum / total) : 0,
+      });
+    }
+    return points;
+  }
 }
 
 /** Singleton store shared by the onResponse hook and the observability service. */

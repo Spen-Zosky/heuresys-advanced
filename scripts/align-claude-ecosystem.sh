@@ -60,6 +60,14 @@ MARKETPLACES=(
   "gmickel-claude-marketplace=gmickel/gmickel-claude-marketplace"
   "thedotmack=thedotmack/claude-mem"
 )
+# INSTALLATO != ABILITATO. Questa lista governa l'INSTALLAZIONE sui cloni; quali plugin
+# siano poi ATTIVI lo decide `enabledPlugins` dentro settings.json, che questo stesso script
+# propaga (MANAGED_REMOTE_PATHS + transform_settings). Dal S1030 sei di questi sono `false`
+# sul SoT Windows — plugin-dev, hookify, agent-sdk-dev, skill-creator, claude-code-setup,
+# ralph-loop (cluster Z-029: authoring/meta, servono a costruire plugin e skill, non a
+# lavorare su heuresys-advanced; ~25 fra skill, agent e comandi sempre nel prompt). Restano
+# in questa lista di proposito: cosi' un `/plugin` li riaccende all'istante ovunque, invece
+# di richiedere un'installazione a freddo sull'host in cui servono.
 PLUGINS_TO_INSTALL=(
   commit-commands@claude-plugins-official feature-dev@claude-plugins-official
   pr-review-toolkit@claude-plugins-official code-simplifier@claude-plugins-official

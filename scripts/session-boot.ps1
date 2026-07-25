@@ -94,6 +94,16 @@ try {
 # 6. State coherence reality-check (P7, design §11.7): run the handoff lint READ-ONLY and surface
 #    its verdict, so the action menu is not built on already-drifted state (a concurrent session
 #    may have left it incoherent before this one started).
+#
+#    DUPLICAZIONE DELIBERATA (Z-030, misurata S1030). status_dashboard.sec_drift() ri-esegue gli
+#    stessi check in-process, quindi al boot il lint gira due volte. Misurato prima di decidere:
+#    handoff_lint.py --warn-only = 375/395/815 ms su tre run; session_start.py completo = 4.2 s.
+#    Il costo della duplicazione e' ~0.4 s — NON e' il collo di bottiglia del boot (quello erano
+#    i round del modello, chiusi dal consolidamento in session_start.py). Condividere il verdetto
+#    via cache su file introdurrebbe una possibile bugia sul guardiano della coerenza dello stato
+#    per risparmiare quei 0.4 s: rapporto rischio/beneficio sbagliato. Le due invocazioni restano
+#    indipendenti di proposito — questa vale anche se la sessione non apre mai il menu, quella del
+#    dashboard vale anche in uso stand-alone (`pnpm status`) dopo modifiche ai file di stato.
 $lintMsg = '[--]   handoff-lint not run (python/script absent)'
 try {
     $lintPy = Join-Path $ProjectRoot 'docs\kb\tools\handoff_lint.py'

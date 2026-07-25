@@ -316,6 +316,11 @@ def sec_drift(no_db, live, sot_md, state_md):
             s.add(OK if dmax == live["migration_max"] else BAD,
                   f"migration max: live 000{live['migration_max']:03d}  vs  §0 000{dmax:03d}")
     # Authoritative #2 — run the project's own coherence engine in-process.
+    # NB (Z-030, misurato S1030): al boot questo e' il SECONDO passaggio del lint — il primo lo fa
+    # scripts/session-boot.ps1 come hook. La duplicazione e' voluta e costa ~0.4 s (handoff_lint
+    # --warn-only: 375/395/815 ms; session_start.py completo: 4.2 s). In-process qui e' obbligatorio:
+    # `pnpm status` gira anche senza hook, e dopo un'edit ai file di stato un verdetto in cache
+    # sarebbe stale proprio quando serve fresco. Vedi il commento gemello in session-boot.ps1.
     hl.FAILS.clear(); hl.WARNS.clear(); hl.SKIPS.clear()
     try:
         with contextlib.redirect_stdout(io.StringIO()):  # check_register prints a summary — mute it

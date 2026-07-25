@@ -35,7 +35,10 @@ decisioni tecniche sono di Claude; a Enzo vanno solo le voci che dipendono da un
 `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — **254 cluster, 42 chiusi**.
 Le caselle spuntate portano la nota di chiusura con l'evidenza; il resto è aperto.
 
-- **W0 sblocco — COMPLETA**. **W1 igiene** — in corso, oltre un terzo chiuso.
+- **W0 sblocco — NON completa**: resta `Z-034` (segreti TOTP — fixture in chiaro nel repo,
+  7 secret plaintext su 19 a DB, `MFA_ENCRYPTION_KEY` da garantire su VM e linux-pc).
+  Tocca segreti in produzione: **serve la tua autorizzazione**, non parte da solo.
+- **W1 igiene** — in corso, oltre un terzo chiuso.
 - **W2-W5** non iniziate. **W6** dipende da input di Enzo.
 
 ## ⚠ Top priorities (next session)

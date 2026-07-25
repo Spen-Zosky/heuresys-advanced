@@ -9,7 +9,7 @@ Dieci agenti indipendenti hanno censito, ciascuno, una fonte diversa di pendenze
 Il risultato grezzo — 497 voci — è stato consolidato da un agente con visione globale e poi sottoposto a **tre verificatori adversarial** su lenti distinte (perdita di informazione, merge indebiti, realismo delle stime). Esito della verifica: **497 id in ingresso, 497 mappati, 0 persi, 0 inventati, 0 rilievi**.
 
 ```
-497 item grezzi in ingresso (10 finder: gapfill 166, mandates 68, state 55, backlog 44, p100x 42, code 39, product 29, runtime 23, ci 20, debt 11) -> 248 cluster canonici in uscita -> 249 id assorbiti come duplicati (50,1% di ridondanza). Verifica automatica di copertura: 497 id usati, 497 unici, 0 mancanti, 0 duplicati, 0 estranei; tutti i 17 riferimenti dependsOn risolvono a zid esistenti. Ripartizione per area: db-data 46, infra-ci 33, product 33, frontend 32, doc-sot 29, security 25, test-qa 23, debt-code 19, business-dd 8. blocking=HARD su 11 cluster (2 rossi CI attivi + 1 ombrello, 5 alert di sicurezza dipendenze, 4 rischi operativi PROD su backup/retention/dump-archivio/disco, AIDE failed, alerting assente, segreti TOTP). needsEnzo: 218 NO (incluse tutte le decisioni tecniche), 19 DECISIONE-BUSINESS, 9 ESTERNO, 2 SEGRETO (app-password Outlook #8, client secret IdP per SSO). Effort consolidato ~1.370 ore (~228 sessioni da 6h), di cui ~1.086h su cluster senza blocco su Enzo. Merge piu' densi: Dependabot 15 id, doc-drift batch 12 id, brownfield-closure 8 id, tabelle-vuote-per-famiglia spezzate in 12 cluster distinti anziche' uno solo (lavoro non unico).
+497 item grezzi in ingresso (10 finder: gapfill 166, mandates 68, state 55, backlog 44, p100x 42, code 39, product 29, runtime 23, ci 20, debt 11) -> 248 cluster canonici in uscita (oggi 254: vedi la nota in «Il numero») -> 249 id assorbiti come duplicati (50,1% di ridondanza). Verifica automatica di copertura: 497 id usati, 497 unici, 0 mancanti, 0 duplicati, 0 estranei; tutti i 17 riferimenti dependsOn risolvono a zid esistenti. Ripartizione per area: db-data 46, infra-ci 33, product 33, frontend 32, doc-sot 29, security 25, test-qa 23, debt-code 19, business-dd 8. blocking=HARD su 11 cluster (2 rossi CI attivi + 1 ombrello, 5 alert di sicurezza dipendenze, 4 rischi operativi PROD su backup/retention/dump-archivio/disco, AIDE failed, alerting assente, segreti TOTP). needsEnzo: 218 NO (incluse tutte le decisioni tecniche), 19 DECISIONE-BUSINESS, 9 ESTERNO, 2 SEGRETO (app-password Outlook #8, client secret IdP per SSO). Effort consolidato ~1.370 ore (~228 sessioni da 6h), di cui ~1.086h su cluster senza blocco su Enzo. Merge piu' densi: Dependabot 15 id, doc-drift batch 12 id, brownfield-closure 8 id, tabelle-vuote-per-famiglia spezzate in 12 cluster distinti anziche' uno solo (lavoro non unico).
 ```
 
 
@@ -26,7 +26,14 @@ Le caselle spuntate qui sotto portano la nota di chiusura con l'evidenza. Il res
 
 | | Cluster | Ore | Sessioni (6h) |
 |---|---:|---:|---:|
-| **Totale** | 248 | 1370 | 228 |
+| **Totale** | 254 | ~1.385 | ~231 |
+
+> ⚠️ **Il totale cresce quando l'esecuzione scopre lavoro nuovo.** Partenza 248 (censimento
+> S1029); +6 in S1030, tutti emersi *dai fatti*, non da un secondo censimento: 3 dall'esecuzione
+> (Z-249, Z-250, Z-251) e 3 dalla review adversarial (Z-252, Z-253, Z-254). Le righe qui sotto
+> restano ai valori del censimento originale — servono a leggere la ripartizione iniziale, non
+> lo stato corrente. **Lo stato corrente si conta con un comando**:
+> `grep -cE '^- \[[ x]\] \*\*Z-' <questo file>` (tutte) · `grep -c '^- \[x\]'` (chiuse).
 | di cui eseguibile in autonomia | 218 | 924 | 154 |
 | bloccato su: decisione-business | 19 | 257 | 43 |
 | bloccato su: segreto | 2 | 14 | 2 |
@@ -38,8 +45,8 @@ Le stime sono per-cluster e consolidate dalla fonte più motivata fra quelle dis
 
 | Ondata | Tema | Cluster | Ore |
 |---|---|---:|---:|
-| **W0** | Sblocco | 11 | 24 |
-| **W1** | Igiene rapida | 75 | 102 |
+| **W0** | Sblocco | 11 (10 chiusi, **1 aperto: Z-034**) | 24 |
+| **W1** | Igiene rapida | 81 (32 chiusi) | 102 |
 | **W2** | Debito tecnico, test e CI | 37 | 203 |
 | **W3** | Dati e DB | 36 | 168 |
 | **W4** | Frontend e sicurezza | 39 | 213 |

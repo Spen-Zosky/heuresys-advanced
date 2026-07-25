@@ -87,10 +87,26 @@ ssh "${SSH_HOST}" "sudo -n -u postgres psql -v ON_ERROR_STOP=1 -d ${POSTGRES_DB}
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS \\\"uuid-ossp\\\";
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 \""
 
+# Step 4b: pg_stat_statements also needs the library preloaded at CLUSTER level.
+# Idempotent and APPENDING: overwriting shared_preload_libraries would silently
+# unload anything else already preloaded. Restart only when the value changed.
+echo "[setup_oci_vm_database] Ensuring pg_stat_statements is preloaded (cluster-level)..."
+ssh "${SSH_HOST}" "
+  cur=\$(sudo -n -u postgres psql -tAc \"SHOW shared_preload_libraries\" | tr -d ' ')
+  case \",\$cur,\" in
+    *,pg_stat_statements,*) echo '  already preloaded: '\"\$cur\" ;;
+    *) sudo -n -u postgres psql -v ON_ERROR_STOP=1 -c \"ALTER SYSTEM SET shared_preload_libraries = '\${cur:+\$cur,}pg_stat_statements'\" &&
+       sudo -n systemctl restart postgresql &&
+       sleep 4 &&
+       echo '  preloaded now: '\"\$(sudo -n -u postgres psql -tAc 'SHOW shared_preload_libraries')\" ;;
+  esac
+"
+
 echo ""
-echo "OK: VM=${SSH_HOST}, role=${POSTGRES_USER}, database=${POSTGRES_DB}, schemas=(sys, staging, brownfield, audit), extensions=(pgcrypto, uuid-ossp, pg_trgm)"
+echo "OK: VM=${SSH_HOST}, role=${POSTGRES_USER}, database=${POSTGRES_DB}, schemas=(sys, staging, brownfield, audit), extensions=(pgcrypto, uuid-ossp, pg_trgm, pg_stat_statements)"
 echo ""
 echo "Next steps from your local machine:"
 echo "  1. Open SSH tunnel:  ssh -L 5433:localhost:5432 ${SSH_HOST}"

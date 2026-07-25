@@ -78,6 +78,16 @@ jobs:
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile --prefer-offline
 
+      # The unit layer lives in a SEPARATE vitest config, excluded from the
+      # integration one — so the `vitest run` below never executed it and until
+      # S1029 the unit tests were dead weight in CI. Placed here because it needs
+      # no database: a pure-logic regression surfaces in seconds, before the four
+      # DB setup steps and the ~14min suite. `pnpm test:unit` (not an inlined
+      # vitest invocation) so the command has ONE definition, in package.json.
+      - name: Run vitest unit suite (no DB)
+        working-directory: apps/api
+        run: pnpm test:unit
+
       - name: Verify DB connectivity
         run: |
           psql -h localhost -p 5432 -U $POSTGRES_USER -d $POSTGRES_DATABASE -c "SELECT 1" || \

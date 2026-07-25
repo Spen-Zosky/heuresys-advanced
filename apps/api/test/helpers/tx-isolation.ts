@@ -37,8 +37,13 @@
  *    triple's statements — harmless: ROLLBACK TO only undoes the triple's own write.
  * The `withTransaction` facade path needs none of this: a failure aborts up to the app's own
  * savepoint and the app's ROLLBACK (→ ROLLBACK TO SAVEPOINT) clears the aborted state, exactly
- * like a real transaction. Residual known hole: an intentionally-failing SELECT would still
- * abort the file tx — no such test exists today; extend the write-detector if one appears.
+ * like a real transaction. Residual known hole: a bare `pool.query` SELECT that fails would
+ * abort the file tx — the write-detector does not savepoint reads. Since S1029 that is no
+ * longer hypothetical: `readSlowQueries` (observability) issues a read that legitimately
+ * fails with SQLSTATE 55000 when pg_stat_statements is not preloaded. It protects ITSELF by
+ * taking a dedicated `pool.connect()` and wrapping the read in BEGIN/COMMIT — which the
+ * facade above maps to a savepoint. That is the canonical mitigation: production code whose
+ * read can fail by design opens its own transaction rather than relying on the detector.
  *
  * Escape hatch: TEST_TX_ISOLATION=0 runs the suite in the legacy autocommit mode.
  */

@@ -437,8 +437,16 @@ export function SystemHealthLive() {
         <EmptyState
           data-testid="system-health-slow-queries-empty"
           icon={<Database className="h-6 w-6" />}
-          title="No tracked statements yet"
-          description="pg_stat_statements has no rows for the app database in the current stats window."
+          title={
+            slowQueries.data && !slowQueries.data.extensionAvailable
+              ? "Statement statistics unavailable"
+              : "No tracked statements yet"
+          }
+          description={
+            slowQueries.data && !slowQueries.data.extensionAvailable
+              ? "The pg_stat_statements extension is not loaded on this database, so per-statement timings cannot be collected."
+              : "pg_stat_statements has no rows for the app database in the current stats window."
+          }
         />
       )}
 

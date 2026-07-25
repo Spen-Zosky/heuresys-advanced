@@ -126,12 +126,18 @@ Write-Host "[create_local_database] Ensuring schemas sys/staging/brownfield/audi
 Invoke-PsqlSuper $schemaSql -Database $db
 
 # -----------------------------------------------------------------------------
-# 4. Extensions (pgcrypto + uuid-ossp + pg_trgm)
+# 4. Extensions (pgcrypto + uuid-ossp + pg_trgm + pg_stat_statements)
+#    pg_stat_statements backs the B7 slow-queries endpoint. It needs the library in
+#    shared_preload_libraries too (cluster-level, restart required, never carried by a
+#    dump); without it the view exists but every read fails with SQLSTATE 55000 — the
+#    exact failure that turned CI red in S1029. The endpoint degrades instead of 500ing,
+#    so a missing preload costs the panel, not the page.
 # -----------------------------------------------------------------------------
 $extSql = @"
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 "@
 Write-Host "[create_local_database] Ensuring extensions..."
 Invoke-PsqlSuper $extSql -Database $db

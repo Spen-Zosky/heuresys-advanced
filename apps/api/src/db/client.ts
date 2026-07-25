@@ -66,24 +66,78 @@ export async function closePool(): Promise<void> {
 /* === Transaction helper ================================================== */
 
 /**
+ * SQLSTATEs a transaction can hit through no fault of its own, where the only
+ * correct response is to run it again:
+ *   40P01 deadlock_detected      — Postgres picked this transaction as the victim
+ *                                  of a lock cycle; the other side committed fine.
+ *   40001 serialization_failure  — concurrent update under a stricter isolation.
+ * Both are rolled back COMPLETELY by the server before the error surfaces, so a
+ * retry starts from a clean state — it is not a partial re-application.
+ */
+const RETRYABLE_TX_CODES = new Set(["40P01", "40001"]);
+
+/** Retries with a little jitter so two victims of the same cycle don't collide again. */
+function retryDelayMs(attempt: number): number {
+  return 25 * attempt + Math.floor(Math.random() * 25);
+}
+
+/**
  * Runs the callback inside a single transaction. Auto-commits on success,
  * rolls back on any thrown error. The callback receives the PoolClient and
  * passes it to the repository functions to ensure all queries share the
  * same transaction.
+ *
+ * **Deadlock retry (D-55, S1029).** The shared database serves the API, the test
+ * suite and the scheduled jobs at the same time, so lock cycles happen: the login
+ * MFA second step surfaced them as an intermittent `500 INTERNAL_ERROR` that
+ * aborted a whole test file — misdiagnosed for nine sessions as connection jitter,
+ * until a full-run log showed `deadlock detected` with the two blocked backends.
+ * A deadlock is transient BY CONSTRUCTION (the server aborts one side precisely so
+ * the other can proceed), so failing the request is the wrong answer: we re-run the
+ * transaction. Retries are logged by the caller only if they exhaust — silence here
+ * would hide a database that deadlocks constantly, so the count is surfaced on the
+ * error message when it does.
  */
 export async function withTransaction<T>(
   fn: (client: PoolClient) => Promise<T>,
+  opts: { retries?: number } = {},
 ): Promise<T> {
-  const client = await pool.connect();
-  try {
-    await client.query("BEGIN");
-    const result = await fn(client);
-    await client.query("COMMIT");
-    return result;
-  } catch (err) {
-    await client.query("ROLLBACK");
-    throw err;
-  } finally {
-    client.release();
+  const maxAttempts = Math.max(1, (opts.retries ?? 2) + 1);
+  let lastErr: unknown;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const result = await fn(client);
+      await client.query("COMMIT");
+      return result;
+    } catch (err) {
+      // A failed ROLLBACK (connection already gone) must not replace the error that
+      // explains the failure — the retry decision is made on `err`.
+      try {
+        await client.query("ROLLBACK");
+      } catch {
+        /* connection unusable; `err` is the diagnostic that matters */
+      }
+      lastErr = err;
+      const code = (err as { code?: unknown } | null)?.code;
+      const retryable = typeof code === "string" && RETRYABLE_TX_CODES.has(code);
+      if (!retryable || attempt === maxAttempts) {
+        if (retryable) {
+          // Exhausted: say so, otherwise the caller sees a bare deadlock and cannot
+          // tell it was already retried.
+          (err as { message?: string }).message =
+            `${(err as { message?: string }).message ?? "transaction failed"} (after ${maxAttempts} attempts)`;
+        }
+        throw err;
+      }
+      await new Promise((r) => setTimeout(r, retryDelayMs(attempt)));
+    } finally {
+      client.release();
+    }
   }
+
+  /* istanbul ignore next — the loop either returns or throws */
+  throw lastErr;
 }

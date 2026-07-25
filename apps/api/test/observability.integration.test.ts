@@ -190,17 +190,25 @@ describe("GET /v1/observability/system-health integration", () => {
 
   /* --- #35 B7 (S1028): slow-queries + request-series ---------------------- */
 
-  it("#35 GET /slow-queries — live pg_stat_statements rows, ordered by meanMs", async () => {
+  it("#35 GET /slow-queries — always 200; rows ordered by meanMs when the extension is loaded", async () => {
     const r = await suite.app.inject({
       method: "GET", url: "/v1/observability/slow-queries?limit=10&minCalls=1",
       headers: { cookie: ch(platformS.cookies) },
     });
+    // contract: pg_stat_statements is OPTIONAL — the endpoint degrades, never 500s
     expect(r.statusCode).toBe(200);
     const b = r.json() as {
       items: Array<{ rank: number; query: string; calls: number; meanMs: number; totalMs: number }>;
       totalTracked: number;
+      extensionAvailable: boolean;
       generatedAt: string;
     };
+    if (!b.extensionAvailable) {
+      // degraded shape is fully specified: no rows, no counters, no partial payload
+      expect(b.items).toEqual([]);
+      expect(b.totalTracked).toBe(0);
+      return;
+    }
     // the live DB serves this suite's own traffic — statements are tracked
     expect(b.totalTracked).toBeGreaterThan(0);
     expect(b.items.length).toBeGreaterThan(0);
@@ -210,6 +218,23 @@ describe("GET /v1/observability/system-health integration", () => {
     }
     // normalized text only — no literal values, no privilege leak rows
     expect(b.items.some((x) => x.query.startsWith("<insufficient privilege>"))).toBe(false);
+  });
+
+  it("#35 environment gate — pg_stat_statements IS loaded on the database under test", async () => {
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/observability/slow-queries?limit=1&minCalls=1",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    const b = r.json() as { extensionAvailable: boolean };
+    // Separate from the contract test above on purpose: the contract must hold
+    // everywhere, but THIS database is expected to observe itself. If this is the
+    // only red test, the fix is infrastructural, not a code regression:
+    //   ALTER SYSTEM SET shared_preload_libraries = 'pg_stat_statements';  + restart
+    //   CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+    expect(
+      b.extensionAvailable,
+      "pg_stat_statements is not loaded on this database — see the remediation in this test",
+    ).toBe(true);
   });
 
   it("#35 GET /request-series — the suite's own traffic appears in the ring", async () => {

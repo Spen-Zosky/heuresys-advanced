@@ -97,8 +97,12 @@ export const observabilityService = {
   /* --- #35 B7 (S1028) ----------------------------------------------------- */
 
   /** Top statements by mean exec time from pg_stat_statements (platform-only). */
-  async getSlowQueries(_actor: ActorContext, q: SlowQueriesQuery): Promise<SlowQueriesResponse> {
-    const { rows, totalTracked, statsSince } = await repo.readSlowQueries(pool, q.limit, q.minCalls);
+  async getSlowQueries(
+    _actor: ActorContext,
+    q: SlowQueriesQuery,
+  ): Promise<SlowQueriesResponse & { degradedReason?: string }> {
+    const { rows, totalTracked, statsSince, extensionAvailable, degradedReason } =
+      await repo.readSlowQueries(pool, q.limit, q.minCalls);
     return {
       items: rows.map((r, i) => ({
         rank: i + 1,
@@ -114,6 +118,10 @@ export const observabilityService = {
       })),
       totalTracked,
       statsSince,
+      extensionAvailable,
+      // Carried out of the service so the route can log it; the Zod response
+      // schema does not declare it, so it never reaches the wire.
+      ...(degradedReason ? { degradedReason } : {}),
       generatedAt: new Date().toISOString(),
     };
   },

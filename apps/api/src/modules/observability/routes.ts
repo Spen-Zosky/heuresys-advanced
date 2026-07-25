@@ -32,7 +32,19 @@ export const observabilityRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get("/slow-queries", {
     preHandler: [requirePermission("observability:read")],
     schema: { querystring: SlowQueriesQuerySchema, response: { 200: SlowQueriesResponseSchema } },
-  }, async (req) => observabilityService.getSlowQueries(actor(req), req.query));
+  }, async (req) => {
+    const res = await observabilityService.getSlowQueries(actor(req), req.query);
+    // A degraded read returns 200 with an empty panel, which on screen is
+    // indistinguishable from "healthy database, no traffic yet". Without this
+    // line the loss of pg_stat_statements in PROD would be invisible.
+    if (!res.extensionAvailable) {
+      req.log.warn(
+        { reason: res.degradedReason },
+        "pg_stat_statements unavailable — slow-queries degraded to an empty result",
+      );
+    }
+    return res;
+  });
 
   app.get("/request-series", {
     preHandler: [requirePermission("observability:read")],

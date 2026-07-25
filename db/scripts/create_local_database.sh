@@ -75,8 +75,21 @@ echo "[create_local_database] Ensuring extensions..."
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 "
 
+# pg_stat_statements needs BOTH the extension (above) and the library preloaded at
+# cluster level — otherwise the view exists but every read fails with SQLSTATE 55000,
+# which is exactly how GET /v1/observability/slow-queries turned CI red in S1029.
+# shared_preload_libraries is cluster-wide, requires a restart, and is NEVER carried
+# by a dump — so it can only be checked here, not inherited from a clone.
+if ! "${PSQL[@]}" -d "${POSTGRES_DB}" -tAc "SELECT 1 FROM pg_stat_statements LIMIT 1" >/dev/null 2>&1; then
+  echo "[create_local_database] WARNING: pg_stat_statements is installed but NOT preloaded."
+  echo "  The B7 slow-queries endpoint will degrade to an empty panel until you run, as superuser:"
+  echo "    ALTER SYSTEM SET shared_preload_libraries = 'pg_stat_statements';   # append, do not overwrite"
+  echo "    <restart postgresql>"
+fi
+
 echo ""
-echo "OK: role=${POSTGRES_USER}, database=${POSTGRES_DB}, schemas=(sys, staging, brownfield, audit), extensions=(pgcrypto, uuid-ossp, pg_trgm)"
+echo "OK: role=${POSTGRES_USER}, database=${POSTGRES_DB}, schemas=(sys, staging, brownfield, audit), extensions=(pgcrypto, uuid-ossp, pg_trgm, pg_stat_statements)"
 echo "Next step: ./db/scripts/migrate.sh"

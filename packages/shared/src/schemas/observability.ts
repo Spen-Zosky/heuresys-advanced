@@ -179,6 +179,13 @@ export const SlowQueriesResponseSchema = z.object({
   items: z.array(SlowQueryItemSchema),
   totalTracked: z.number().int().min(0),
   statsSince: z.iso.datetime().nullable(),
+  /**
+   * False when the `pg_stat_statements` extension is not installed on the app
+   * database, or is installed but not loaded via `shared_preload_libraries`.
+   * The endpoint then degrades to an empty result instead of failing: an
+   * optional extension must never take the health page down.
+   */
+  extensionAvailable: z.boolean(),
   generatedAt: z.iso.datetime(),
 });
 export type SlowQueriesResponse = z.infer<typeof SlowQueriesResponseSchema>;

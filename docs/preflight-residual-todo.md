@@ -1,7 +1,10 @@
 # Pre-flight residual TODO (post-S935 phase D)
 
-**Updated**: 2026-05-26
-**Status**: tracker for residual pre-flight cleanup items not closed in S935 phase D.
+**Updated**: 2026-07-25 (S1030 — riconciliazione Z-224)
+**Status**: **CHIUSO**. I due item "Deferred" del §2 risultano chiusi sul reale (evidenza sotto);
+l'unico residuo del §3 (CODE-6) è tracciato altrove come `Z-173` nel piano «zero pendenze».
+Documento storico: non riaprire item da qui, la SoT del residuo è
+`docs/superpowers/specs/2026-07-25-zero-pending-plan.md`.
 
 ---
 
@@ -15,7 +18,15 @@
 
 ---
 
-## §2 — Deferred (S936+ candidates)
+## §2 — ~~Deferred (S936+ candidates)~~ → **entrambi CHIUSI** (verificato S1030)
+
+| ID | Stato reale | Evidenza (comando + esito, 2026-07-25) |
+|---|---|---|
+| **CODE-5** | ✅ CHIUSO | `ls apps/web/src/_disabled_showcase_X18` → *No such file or directory*. La directory è stata **spostata** (non copiata) in `apps/web/src/app/showcase/` dal commit `7f6e174e` (2026-05-27, «fix(web): CW-B59 — re-enable /showcase via ssr:false client boundary»); le route showcase sono live (`ls apps/web/src/app/showcase` → charts, dashboard-cards, footer, forms, header, icons, landing-page, login-page, layout.tsx, `_ui-client.tsx`). Nessun hard-delete è servito: ha funzionato lo scenario "Path C ship" previsto qui sotto. |
+| **CODE-10** | ✅ CHIUSO | `pnpm i18n:check` → `✓ Parity OK (2349 keys × 2 locales × 10 namespaces)`. I namespace sono 10 (`common, shell, analytics, admin, blueprints, hr, ess, landing, investors, demo` — `apps/web/scripts/check-i18n-parity.ts`), non più i ~23 key di allora, e il check è **in CI**: `.github/workflows/i18n-parity.yml:60`. La struttura è `apps/web/src/locales/<locale>/<ns>.json` (il path `src/i18n/{it,en}.json` citato sotto non esiste più). |
+
+<details>
+<summary>Testo originale del §2 (storico, superato)</summary>
 
 ### CODE-5 — Coordinated with S935 phase C ship outcome
 
@@ -40,13 +51,13 @@ If S935 phase C ship reveals Path G insufficient → bisect runs → Path F spli
 
 **Effort**: ~2-4h once UI surface stabilizes post-MVP-4 streams.
 
+</details>
+
 ---
 
-## §3 — Out of scope this iteration
+## §3 — Out of scope this iteration → **tracciato come `Z-173`**
 
-Items intentionally NOT touched in S935:
-
-- **CODE-6** queries.ts 47 routes refactor — Phase 4 in original plan, ~10-15h, architectural refactor (extract `apiFetch + useQuery` into per-page `queries.ts`). Deferred to a dedicated S936+ session because (a) doctrine is already respected without it, (b) refactor benefits primarily testability not user-facing behavior, (c) high risk of regression touching 47 page.tsx files in one batch.
+- **CODE-6** queries.ts refactor (extract `apiFetch + useQuery` into per-page `queries.ts`) — **ancora non eseguito** e ri-scopato: `find apps/web/src -name queries.ts` = 0 file, la superficie è cresciuta da 47 a **107** `page.tsx` (di cui 64 con `useQuery` inline). Non è più un item di questo tracker: vive come **`Z-173` (12h, W2)** in `docs/superpowers/specs/2026-07-25-zero-pending-plan.md`. Le motivazioni del rinvio (doctrine già rispettata, beneficio su testabilità, rischio di regressione in un batch unico) restano valide.
 
 ---
 

@@ -1,7 +1,14 @@
 # CW-B59 — True root cause analysis (S935 Path A bisect outcome)
 
-**Updated**: 2026-05-26 Cowork session S935 phase C
-**Status**: Root cause identified; Path A bisect HALT-022-06 reframed as **narrative-bias** (CW-B58 lesson applied retroactively).
+> **STORICO — RISOLTO il 2026-05-27** (verificato S1030, cluster `Z-225`).
+> **Fix effettivo**: commit **`7f6e174e`** — *«fix(web): CW-B59 — re-enable /showcase via ssr:false client boundary»*.
+> Non è servito né il bisect §4, né lo split di `@heuresys/ui` (Path F, §6). Le route `/showcase`
+> sono live in `apps/web/src/app/showcase/` e `apps/web/src/_disabled_showcase_X18/` non esiste più.
+> Le 3 open question del §8 sono chiuse — vedi **§9** in fondo. Da qui in poi il documento è
+> **cronaca dell'analisi**, non un piano da eseguire.
+
+**Updated**: 2026-07-25 (chiusura formale; analisi originale 2026-05-26 Cowork S935 phase C)
+**Status**: **RESOLVED** — root cause identificata e corretta (client boundary `ssr:false`).
 **Author**: Cowork forensic post-S934.
 
 ---
@@ -140,8 +147,39 @@ Total worst-case: ~8h. Best case (Path G works): 10 min + lockfile refresh.
 
 ---
 
-## §8 — Open questions
+## §8 — ~~Open questions~~ → chiuse, vedi §9
 
-- Does `@heuresys/ui@0.1.1` declare React as `peerDependency` or `dependency`? Check `node_modules/@heuresys/ui/package.json` after `pnpm install`. If `dependency` → confirms peer-dep mismatch hypothesis (#1).
-- Are there Radix-UI components in `@heuresys/ui` source files **without** `'use client'` directive? Audit `ux-design-shared/ui/src/**/*.tsx` for `createContext`/`useContext` outside client modules.
-- Does the bisect from §4 converge on a commit that touched tsup config? If yes → hypothesis #3 (CJS/ESM drift).
+- ~~Does `@heuresys/ui@0.1.1` declare React as `peerDependency` or `dependency`?~~
+- ~~Are there Radix-UI components in `@heuresys/ui` source files **without** `'use client'` directive?~~
+- ~~Does the bisect from §4 converge on a commit that touched tsup config?~~
+
+---
+
+## §9 — Esito reale (chiusura, verificata 2026-07-25)
+
+**Come è stato risolto.** Nessuno dei tre percorsi ipotizzati nel §7. La correzione (commit `7f6e174e`,
+2026-05-27) sposta l'import del barrel `@heuresys/ui` **fuori dall'esecuzione server-side**: un modulo
+client dedicato `apps/web/src/app/showcase/_ui-client.tsx` ri-esporta ogni componente showcase via
+`next/dynamic(..., { ssr: false })`, e `apps/web/src/app/showcase/layout.tsx` importa solo da lì. Con il
+barrel mai valutato durante la page-data collection, `d.createContext is not a function` non può più
+presentarsi. Lo stesso pattern è applicato alle pagine chart autenticate
+(`apps/web/src/app/(authenticated)/_charts-client.tsx`). Vincolo scoperto e annotato nel codice: le
+opzioni di `next/dynamic` devono essere un **oggetto letterale inline** — una costante estratta non viene
+riconosciuta dal transform.
+
+**Risposte alle 3 open question** (misurate sul reale, non dedotte):
+
+| Domanda §8 | Risposta | Evidenza |
+|---|---|---|
+| React è `peerDependency` o `dependency` in `@heuresys/ui`? | **peerDependency** — l'ipotesi #1 (due istanze React) è rimossa alla radice a monte | `node_modules/@heuresys/ui/package.json` v**0.1.9**: `peerDependencies: {react ^19.2.0, react-dom ^19.2.0, @types/react ^19.2.0, @types/react-dom ^19.2.0}`; `react` **assente** da `dependencies` |
+| Radix senza `'use client'` nei sorgenti upstream? | **Domanda superata**: il boundary `ssr:false` rende irrilevante la direttiva sui singoli moduli per questo failure mode | `apps/web/src/app/showcase/_ui-client.tsx`, `apps/web/src/app/showcase/layout.tsx:9` |
+| Il bisect §4 converge su tsup? | **Mai eseguito, non serve** — il fix ha preceduto il bisect. Lo script `bisect-cw-b59-createctx.ps1` è archiviato in `docs/archive/scripts-exhausted/` | `git log --oneline --all -- apps/web/src/_disabled_showcase_X18` → ultimo commit `7f6e174e` (rimozione) |
+
+**Path G (§5) — stato**: adottato e tuttora vivo, ma come **igiene**, non come fix: `package.json`
+`pnpm.overrides` pinna oggi `react`/`react-dom` a **19.2.7** e `@types/react` a 19.2.17 (le versioni
+del §5 sono superate). Nessun ADR-0021 «CW-B59» è stato creato — ADR-0021 nel repo è un altro
+argomento (SSH tunnel automation); la decisione vive nel commit e in questo documento.
+
+**Path F (§6) — non necessario**: `@heuresys/ui` non è stato splittato. La granularità è arrivata
+invece dai **subpath exports** (`.`, `./charts`, `./markdown`, `./styles`, `./brand/candidates`,
+`./assets/brand/*`), che ottengono lo stesso beneficio sul grafo di bundle senza tre pacchetti.

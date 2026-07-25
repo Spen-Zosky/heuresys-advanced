@@ -33,7 +33,12 @@ Applica i filtri in quest'ordine e prendi il primo cluster che sopravvive. L'ord
 5. **Classe ammessa dalla corsia** — vedi `blast-radius.md`. Un cluster di classe non ammessa non
    viene «rinviato»: va accodato nel lotto presidiato e riportato a Enzo.
 6. **Effort che sta nel budget residuo dell'iterazione** — meglio un cluster chiuso che due a
-   metta'. Se nessun cluster ci sta, il modo giusto e' `close`, non iniziare e troncare.
+   metta'. Se nessun cluster ci sta, il modo giusto e' `close`, non iniziare e troncare. Il tetto
+   non e' una valutazione tua: il driver passa `--budget-ore` con
+   `budget.max_effort_hours_per_cluster` (oggi 4) e i cluster piu' grandi non compaiono fra i
+   candidati. Prima che fosse passato davvero, la coda conteneva cluster da 18 ore contro un
+   budget di 12 dollari a iterazione — cioe' troncamento garantito, che e' il modo di fallire
+   piu' costoso. Un lavoro piu' grande del tetto va spezzato nel piano, o fatto presidiato.
 
 A parita' di tutto, prendi l'effort minore: libera caselle, riduce il rumore nel piano, e rende il `PROGRESS.md` piu' informativo per chi legge da fuori.
 

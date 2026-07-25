@@ -9,7 +9,7 @@ git diff --name-only HEAD
 git status --short
 ```
 
-Due ragioni per non lanciare sempre tutta la suite. La prima e' il costo: la suite E2E completa richiede un build di produzione, e su 218 cluster e' una spesa che non compra informazione. La seconda e' peggiore — quando lanci tutto, nessuno sa piu' quale controllo stava proteggendo cosa, e un gate che nessuno capisce e' un gate che verra' disattivato la prima volta che rompe.
+Due ragioni per non lanciare sempre tutta la suite. La prima e' il costo: la suite E2E completa richiede un build di produzione, e ripetuta su tutta la fila di cluster che il piano contiene e' una spesa che non compra informazione. La seconda e' peggiore — quando lanci tutto, nessuno sa piu' quale controllo stava proteggendo cosa, e un gate che nessuno capisce e' un gate che verra' disattivato la prima volta che rompe.
 
 `zp_gate.py` fa la derivazione e l'esecuzione. Se il diff tocca un'area **senza** gate mappato in `zp.config.yaml`, si ferma con errore: e' un'area di cui nessuno ha deciso come verificare le modifiche, e proseguire significherebbe committare senza sapere cosa si e' rotto.
 

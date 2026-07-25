@@ -7,10 +7,11 @@ Due lavori distinti.
    controlli servono. Un'area toccata e non mappata in zp.config.yaml e' un errore
    bloccante: significa che nessuno ha deciso come verificare quelle modifiche.
 
-2) COPPIA DI PROVE. Verifica che le due prove dichiarate per chiudere un cluster siano
-   di natura diversa. Chi scrive il codice ha un punto cieco su cio' che il codice fa:
-   due prove della stessa natura lo condividono, due di natura diversa no. Il rifiuto
-   e' meccanico apposta - se fosse una raccomandazione, sotto pressione verrebbe aggirata.
+2) COPPIA DI PROVE. Verifica che le due prove dichiarate per chiudere un cluster stiano
+   su LIVELLI diversi del sistema. Chi scrive il codice ha un punto cieco su cio' che il
+   codice fa: due prove che guardano lo stesso livello lo condividono, due che guardano
+   livelli diversi no. Il rifiuto e' meccanico apposta - se fosse una raccomandazione,
+   sotto pressione verrebbe aggirata.
 
 Sottocomandi
     aree                     quali aree tocca il diff, e quali controlli servono
@@ -29,23 +30,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from zp_state import RADICE, carica_config  # noqa: E402
 
-# Ogni tipo di prova ha una NATURA. Due prove sono ammesse se le nature differiscono,
-# perche' e' la diversita' di natura che rompe il punto cieco condiviso.
-NATURA = {
-    'integration': 'automatica',      # test d'integrazione sul DB reale
-    'unit':        'automatica',      # unit test
-    'e2e':         'automatica',      # Playwright con login reale
-    'staticcheck': 'statica',         # typecheck + lint
-    'live':        'osservazione',    # prova live: comando, output, path, timestamp
-    'psql':        'osservazione',    # query sul DB che conferma la mutazione
-    'runtime':     'osservazione',    # comportamento verificato a runtime
-    'migrate2':    'idempotenza',     # migrazione applicata due volte, diff pg_dump vuoto
-    'dbvalidate':  'struttura',       # pnpm db:validate, le 7 viste: coerenza dello schema
-}
-
 # RIDISEGNO S1030 — la domanda era sbagliata, quindi lo erano le risposte.
 #
-# `NATURA` raggruppa per TIPO DI STRUMENTO: integration, unit ed e2e sono tutte
+# Fino a S1030 ogni tipo di prova portava una NATURA (automatica · statica · osservazione ·
+# idempotenza · struttura) e la regola era «ammesse se le nature differiscono». Quella
+# tabella raggruppava per TIPO DI STRUMENTO: integration, unit ed e2e erano tutte
 # «automatica». Ne seguiva che il gate rifiutava meccanicamente `integration + e2e` e
 # `psql + runtime` — cioe' proprio le due coppie che la Definition of Done di questo
 # progetto IMPONE (CLAUDE.md §MVP-2a/2b: «integration test verde + Playwright E2E verde»;
@@ -172,11 +161,16 @@ def main() -> int:
     a = ap.parse_args()
 
     if a.cmd == 'tipi':
-        print('tipo         natura         cosa e')
-        for t, n in NATURA.items():
-            print(f'{t:12} {n:14} {DESCRIZIONE[t]}')
-        print('\nDue prove sono ammesse se le nature differiscono.')
-        print('Unica eccezione: integration + unit (raggiungibilita diversa).')
+        print('tipo         livello         cosa e')
+        for t in DESCRIZIONE:
+            liv = LIVELLO[t] + (' *' if t in NON_CONTANO else '')
+            print(f'{t:12} {liv:15} {DESCRIZIONE[t]}')
+        print('\nDue prove sono ammesse se guardano LIVELLI diversi: allora il punto cieco')
+        print("dell'una e' coperto dall'altra. Non conta di che strumento si tratti.")
+        print(f"\n* {', '.join(sorted(NON_CONTANO))}: non conta MAI come una delle due prove.")
+        print("  E' la soglia d'ingresso, non una dimostrazione che il lavoro faccia cio' che promette.")
+        print('\nUna coppia si verifica cosi`, senza fidarsi di questa tabella:')
+        print('    python docs/kb/tools/zp_gate.py prove <A> <B>    # esce 1 se rifiutata')
         return 0
 
     if a.cmd == 'prove':

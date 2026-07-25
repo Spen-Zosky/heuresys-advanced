@@ -188,7 +188,8 @@ interrupt_resume:
   refuse_on_unpushed_foreign: true  # commit locali non tuoi in volo: non partire
   max_failures_per_cluster: 2       # al terzo tentativo nella stessa direzione si cambia oggetto
 
-# Classificazione dei 248 cluster. La compila T1, sullo stato reale a sessione CLI chiusa.
+# Classificazione dei cluster aperti (quanti siano lo dice `zp_state.py piano`: il numero
+# cresce a ogni sessione che scopre pendenze nuove). La rigenera `zp_classify.py scrivi`.
 # Formato: <id>: {classe: A|B|C|D|E, perche: "<una riga>", paths: [...]}
 clusters:
   Z-004: {classe: B, perche: "codice: test, typecheck"}

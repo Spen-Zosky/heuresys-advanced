@@ -9,7 +9,7 @@ a memoria un blocco che questo script non ha generato: l'output e' quello vero.
 Sottocomandi
     registra   esegue un comando e registra la prova per un cluster
     mostra     stampa le prove registrate per un cluster
-    valida     verifica che il cluster abbia due prove di natura diversa
+    valida     verifica che il cluster abbia due prove su livelli diversi
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from zp_state import RADICE, ZPDIR  # noqa: E402
-from zp_gate import NATURA, coppia_ammessa  # noqa: E402
+from zp_gate import LIVELLO, coppia_ammessa  # noqa: E402
 
 PROVE = ZPDIR / 'prove'
 MAX_OUTPUT = 2000
@@ -67,7 +67,7 @@ def _impronta_ok(tipo: str, comando: str) -> tuple[bool, str]:
 
 
 def registra(cluster: str, tipo: str, comando: str, path_rif: str, cwd: str | None) -> int:
-    if tipo not in NATURA:
+    if tipo not in LIVELLO:
         print(f'tipo di prova sconosciuto: {tipo}. Vedi `zp_gate.py tipi`', file=sys.stderr)
         return 2
     ok, perche = _impronta_ok(tipo, comando)
@@ -93,7 +93,7 @@ def registra(cluster: str, tipo: str, comando: str, path_rif: str, cwd: str | No
 
     prova = {
         'tipo': tipo,
-        'natura': NATURA[tipo],
+        'livello': LIVELLO[tipo],
         'comando': comando,
         'cwd': str(dove),
         'path': str(Path(path_rif).resolve()) if path_rif else '',
@@ -117,7 +117,7 @@ def registra(cluster: str, tipo: str, comando: str, path_rif: str, cwd: str | No
 
 def blocco(p: dict) -> str:
     righe = ['verified-by:',
-             f"  tipo:      {p['tipo']} ({p['natura']})",
+             f"  tipo:      {p['tipo']} (livello: {p.get('livello', '?')})",
              f"  comando:   {p['comando']}",
              f"  cwd:       {p['cwd']}"]
     if p.get('path'):
@@ -164,7 +164,7 @@ def main() -> int:
 
     prove = dati['prove']
     if len(prove) < 2:
-        print(f'{a.cluster}: solo {len(prove)} prova. Ne servono due, di natura diversa.')
+        print(f'{a.cluster}: solo {len(prove)} prova. Ne servono due, su livelli diversi.')
         return 1
     rosse = [p for p in prove if p['exit'] != 0]
     if rosse:
@@ -178,7 +178,7 @@ def main() -> int:
                 print(f'{a.cluster}: coppia valida - {motivo}')
                 print(f"prove registrate: {', '.join(tipi)}")
                 return 0
-    print(f"{a.cluster}: RIFIUTATO - nessuna coppia di natura diversa fra {', '.join(tipi)}")
+    print(f"{a.cluster}: RIFIUTATO - nessuna coppia su livelli diversi fra {', '.join(tipi)}")
     return 1
 
 

@@ -42,7 +42,7 @@ Riprendere da `resume` dopo tre giorni significherebbe lavorare su una fotografi
 
 `--window 22:00-07:00` trasforma l'interruzione da eccezione a routine. A fine finestra il driver non tronca: chiude pulito ed esce. La ripartenza la fa l'attivita' pianificata di Windows, la notte dopo, e trova esattamente lo stato che la notte prima ha lasciato.
 
-E' il modo consigliato di far girare le ~154 sessioni che il piano richiede: non una maratona da lanciare e sperare, ma tante finestre brevi con una chiusura verificata ciascuna.
+E' il modo consigliato di far girare le molte sessioni che il piano richiede — quante siano lo dice `zp_state.py piano`, un cluster per iterazione, e il numero cresce a ogni censimento: non una maratona da lanciare e sperare, ma tante finestre brevi con una chiusura verificata ciascuna.
 
 ## Guard-rail all'avvio — quando il driver si rifiuta di partire
 
@@ -50,13 +50,16 @@ Ognuno di questi ferma il driver **prima** di aprire una sessione, perche' parti
 
 | Condizione | Perche' ferma |
 |---|---|
-| `.zp/STOP` presente | il freno e' tirato: non si parte, si dice che c'e' il file |
-| **working tree sporco** all'avvio | qualcuno sta lavorando in quel repo — tu, o una sessione CLI. Due writer sullo stesso working tree e' il modo piu' rapido di perdere lavoro |
+| **`meta.autorizzato_non_presidiato: false`** (exit 3) | **il freno di sicurezza, oggi inserito.** L'impianto e' versionato e ispezionabile ma non parte. Si toglie per decisione di Enzo, non perche' i test sono verdi |
+| `.zp/STOP` presente (exit 0) | il freno e' tirato: non si parte, si dice che c'e' il file |
+| **working tree sporco** all'avvio (exit 4, con la lista dei file) | qualcuno sta lavorando in quel repo — tu, o una sessione CLI. Due writer sullo stesso working tree e' il modo piu' rapido di perdere lavoro |
 | `HEAD` diverso da `origin/main` con commit non pushati non suoi | stessa ragione: c'e' lavoro di qualcun altro in volo |
-| lock presente con PID **vivo** | c'e' gia' un driver in esecuzione |
+| lock presente con PID **vivo** (exit 5) | c'e' gia' un driver in esecuzione. Esce **senza toccare il lock**: rinunciare cancellando il lock altrui e' il bug che apriva la concorrenza invece di chiuderla |
 | lock presente con PID morto da < `lock_stale_after_hours` | possibile morte recente: entra in `recover`, non in `resume` |
-| `clusters_classified: false` in config | la classificazione per raggio d'impatto e' la precondizione di sicurezza dell'impianto |
-| `zp_gate.py` o `zp_zero_check.py` assenti | senza i controlli meccanici la skill non ha le sue garanzie |
+| `clusters_classified: false` in config (exit 3) | la classificazione per raggio d'impatto e' la precondizione di sicurezza dell'impianto |
+| `zp_gate.py` o `zp_zero_check.py` assenti (exit 3) | senza i controlli meccanici la skill non ha le sue garanzie |
+
+Il freno e la guardia sulla classificazione escono con lo stesso codice ma non sono la stessa cosa: la seconda dice «non so ancora quali cluster possono spegnere la produzione», il primo dice «lo so, e comunque non sei autorizzato a partire».
 
 Il guard-rail sul working tree sporco e' quello che ti protegge dal caso concreto piu' probabile: tu apri una sessione CLI per fare una cosa a mano, ti dimentichi che il driver e' pianificato, e a mezzanotte partirebbe sopra il tuo lavoro. Non parte.
 

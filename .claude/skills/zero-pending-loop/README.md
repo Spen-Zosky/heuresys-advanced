@@ -20,7 +20,7 @@ Un impianto che porta heuresys-advanced verso zero pendenze lavorando da solo, d
 
 ## 1. Che cos'è, in tre frasi
 
-Il progetto ha un piano di pendenze: 248 pezzi di lavoro censiti, raggruppati in ondate, ognuno con una condizione di chiusura verificabile con un comando.
+Il progetto ha un piano di pendenze: alcune centinaia di pezzi di lavoro censiti — quanti esattamente lo dice `python docs/kb/tools/zp_state.py piano`, e il numero cresce a ogni sessione che ne scopre di nuovi — raggruppati in ondate, ognuno con una condizione di chiusura verificabile con un comando.
 
 Questo impianto prende quel piano e lo esegue: sceglie il prossimo pezzo, lo implementa, lo verifica, lo fa criticare, lo corregge, lo committa, aggiorna lo stato e ricomincia — finché non resta niente che possa fare da solo.
 
@@ -303,11 +303,13 @@ Nel repo, versionati, viaggiano con git e con `align-clones`:
         trigger-eval.json  20 frasi: 10 devono attivarla, 10 no
         evals.json         6 casi di prova sul comportamento
 
-scripts/zero-pending-driver.sh    il loop                  DA SCRIVERE (T3)
-docs/kb/tools/zp_state.py         cursore e selezione      DA SCRIVERE (T3)
-docs/kb/tools/zp_gate.py          controlli e prove        DA SCRIVERE (T3)
-docs/kb/tools/zp_evidence.py      blocco di evidenza       DA SCRIVERE (T3)
-docs/kb/tools/zp_zero_check.py    la condizione di fine    DA SCRIVERE (T3)
+scripts/zero-pending-driver.sh    il loop
+docs/kb/tools/zp_state.py         cursore e selezione
+docs/kb/tools/zp_gate.py          controlli e prove
+docs/kb/tools/zp_evidence.py      blocco di evidenza
+docs/kb/tools/zp_zero_check.py    la condizione di fine
+docs/kb/tools/zp_classify.py      la classe di rischio di ogni pezzo
+docs/kb/tools/zp_selftest.py      i test dell'impianto
 
 docs/superpowers/specs/2026-07-25-zero-pending-loop-design.md
                                   il perche' di ogni scelta
@@ -336,7 +338,8 @@ Stanno in `references/zp.config.yaml`. Nessuna soglia, nessun path, nessun perim
 
 | Sezione | Cosa governa |
 |---|---|
-| `meta.clusters_classified` | **la guardia principale**. Finché è `false`, non esegue nulla |
+| `meta.autorizzato_non_presidiato` | **il freno, ed è quello che oggi tiene fermo tutto.** È `false`: il driver esce senza aprire nessuna sessione, e la skill si ferma con esito `blocked`. Toglierlo è una tua decisione — significa autorizzare l'impianto a lavorare di notte senza nessuno che guardi, e va fatto dopo una prima corsa presidiata, non perché i test sono verdi |
+| `meta.clusters_classified` | una **precondizione, già soddisfatta**: dice che ogni pezzo aperto ha una classe di rischio. Se tornasse `false` — piano ri-censito, classificazione da rifare — il driver si fermerebbe di nuovo. Non è il freno: è ciò che deve essere vero *prima* che il freno abbia senso di essere tolto |
 | `lanes` | quali classi entrano in `safe` e in `full` |
 | `budget` | un pezzo per giro, 12 dollari per giro, 120 dollari in tutto |
 | `runtime` | i path assoluti di Git Bash e di `claude` |
@@ -347,7 +350,7 @@ Stanno in `references/zp.config.yaml`. Nessuna soglia, nessun path, nessun perim
 | `hosts` | VM e gemello. Il Mac non è un target, ritirato in S1007 |
 | `paths` | dove vive ogni file di stato |
 | `interrupt_resume` | soglia di rientro da `bootstrap`, finestra oraria, guard-rail |
-| `clusters` | la classificazione dei 248 pezzi. **La compila T1** |
+| `clusters` | la classe di rischio di ogni pezzo aperto, con la ragione che l'ha decisa. La rigenera `zp_classify.py scrivi` |
 | `adaptive` | parametri auto-appresi. Azzerabile in blocco |
 
 ---
@@ -367,6 +370,8 @@ Stanno in `references/zp.config.yaml`. Nessuna soglia, nessun path, nessun perim
 **Non parte se il repo è sporco.** Se hai modifiche non salvate — perché stavi lavorando tu, o perché una sessione CLI è aperta — il driver si rifiuta e ti stampa i file coinvolti.
 
 **Non parte se i pezzi non sono classificati per rischio**, o se mancano gli script di controllo.
+
+**Oggi non parte affatto, e questo è il freno vero.** In `zp.config.yaml` la chiave `meta.autorizzato_non_presidiato` è `false`: il driver esce senza aprire nessuna sessione e la skill si ferma dicendo perché. Non è una precauzione temporanea in attesa di un test verde — i test ci sono e passano. È la separazione fra «l'impianto funziona» e «l'impianto è autorizzato a lavorare mentre dormi», e la seconda cosa la decidi tu. Prima di toglierlo restano da fare i quattro controlli che richiedono una sessione viva, in una **prima corsa presidiata** (§9).
 
 **Non rifà il censimento da solo**, mai, nemmeno dal turno di notte: è l'operazione più cara e la decisione di pagarla è tua.
 
@@ -388,9 +393,9 @@ Ogni riga qui sotto è stata verificata sul campo il 2026-07-25, non assunta. Se
 
 **Il costo non cresce in proporzione al contesto, ma molto più in fretta.** Ogni turno rimanda tutto il contesto accumulato, quindi il totale va grosso modo col quadrato della lunghezza finale. È la ragione economica, oltre che tecnica, per cui le sessioni restano corte.
 
-**Il piano zero-pendenze esisteva già** quando questo impianto è nato: censimento del 2026-07-25, 497 voci grezze da 10 ricognitori ridotte a 248 pezzi, con 3 verificatori adversarial e zero voci perse o inventate. Per questo il modo `bootstrap` verifica il piano invece di rifarlo. Rifarlo è un atto deliberato che costa.
+**Il piano zero-pendenze esisteva già** quando questo impianto è nato: il censimento del 2026-07-25 ridusse 497 voci grezze da 10 ricognitori a 248 pezzi, con 3 verificatori adversarial e zero voci perse o inventate. Quel 248 è un dato storico di quel giorno, non il totale di oggi: il piano cresce, e il totale corrente si conta con `zp_state.py piano`. Per questo il modo `bootstrap` verifica il piano invece di rifarlo. Rifarlo è un atto deliberato che costa.
 
-**Non tutte le pendenze sono chiudibili da un agente.** Dei 248 pezzi, 218 sono autonomi (circa 924 ore) e 30 no: 19 decisioni di business, 9 dipendenze esterne, 2 segreti. Quindi «zero pendenze» non è una condizione raggiungibile in autonomia. La condizione vera è: zero pezzi autonomi aperti, più un vassoio esplicito di ciò che aspetta te.
+**Non tutte le pendenze sono chiudibili da un agente.** Una parte dei pezzi aperti aspetta te — decisioni di business, dipendenze esterne, segreti — e la ripartizione esatta fra autonomi e non la stampa `zp_state.py piano`, che è il posto giusto dove leggerla invece che qui. Quindi «zero pendenze» non è una condizione raggiungibile in autonomia, e non lo diventerà: la condizione vera è zero pezzi autonomi aperti, più un vassoio esplicito di ciò che aspetta te.
 
 **Esiste un solo ambiente ed è produzione**, per l'invariante I15 e l'ADR-0026. Non c'è un ambiente di test dove sbagliare. La rete di sicurezza sono i backup notturni verificati su linux-pc e il fatto che linux-pc sia un gemello con un clone del database. Da qui nascono le classi di rischio e la corsia presidiata.
 
@@ -406,35 +411,52 @@ Ogni riga qui sotto è stata verificata sul campo il 2026-07-25, non assunta. Se
 | CLI `zp` e comando nel profilo | scritta e **provata**: 13 verbi, tutti verificati a mano |
 | **T3** — i quattro `zp_*.py` e il driver | **fatti e provati** (2026-07-25) |
 | Riga `.zp/` in `.gitignore` | fatta e verificata: runtime ignorato, `PROGRESS.md` no |
-| **T1** — classificazione dei 212 pezzi aperti | **fatta**: A=15 B=76 C=81 D=10 E=30. La guardia è aperta |
-| **T4** — test di accettazione | **10 su 10 automatici passano**; 4 richiedono una sessione viva |
+| **T1** — classificazione dei cluster aperti | fatta, poi **rifatta dal CLI su basi diverse** (vedi sotto) |
+| **T4** — test di accettazione | **15 automatici, 0 falliti**; 4 richiedono una sessione viva |
+| **Freno di sicurezza** | **inserito**: `meta.autorizzato_non_presidiato: false`. L'impianto non parte |
 
-La classificazione non è una lista scritta a mano ma un classificatore — `docs/kb/tools/zp_classify.py` — che deriva la classe dal testo di ogni cluster e porta con sé la parola che l'ha decisa, quindi è contestabile. I 24 pezzi proposti come classe D sono stati riletti uno per uno: **14 erano falsi positivi** (la regola agganciava «deploy», «PROD» o «disco» dove comparivano per ragioni innocue, tipo `test:e2e:prod`) e sono registrati come override espliciti, con il motivo, così restano validi anche quando la regola girerà su un piano nuovo.
+### Come questa sezione è cambiata, e perché conta
 
-I test si rilanciano quando vuoi con `python docs/kb/tools/zp_selftest.py`. I quattro che restano — bootstrap che non ri-censisce, freno a metà lavoro, troncamento da budget, frontiere della description — sono elencati come `[a mano]` invece di essere finti verdi: un test che non gira e non lo dice è peggio di un test assente.
+La prima versione di questo paragrafo diceva «T1 fatta» e «10 su 10 automatici passano», e presentava quel dieci su dieci come prova di qualità. **Era il difetto che questo stesso documento descrive**: uno zero in cui si crede. Quei dieci test passavano e non vedevano quattro regressioni su cinque; la classificazione era stata dedotta dalla *descrizione* dei cluster invece che dal loro criterio di chiusura, che è dove sta l'azione. Il testo qui sotto è la versione verificata da una review indipendente, non da chi ha scritto il codice.
 
-Il piano è cresciuto: **253 cluster**, non i 248 dichiarati nella sua intestazione. 41 chiusi, 212 aperti, di cui **182 eseguibili da solo** (circa 896 ore) e **30 che aspettano Enzo** — 19 decisioni di business, 9 dipendenze esterne, 2 segreti. La ripartizione combacia esattamente con quella dichiarata dal censimento.
+**Cosa ha trovato la review del CLI** (due revisori ostili su lenti diverse, ~25 rilievi verificati eseguendo). I quattro gravi: il lock non era un lock — il secondo driver, rinunciando, cancellava quello del primo, e `kill` non fermava il driver ma gli faceva mollare il lock, cioè il tentativo di fermarlo era ciò che apriva la concorrenza; **il rito di chiusura deployava la produzione a ogni ciclo**, perché il filtro per classe governa la *selezione del lavoro* e non la chiusura; il tetto di spesa era inerte (due sessioni da 11,87 dollari contabilizzate zero); e «zero pendenze» era dichiarabile con lavoro dentro, perché il parser scartava in silenzio le righe non conformi.
 
-Finché T1 manca, la guardia `meta.clusters_classified: false` ferma tutto: il driver esce con codice 3 e la skill si ferma con esito `blocked`. È voluto — nessun lavoro autonomo su produzione senza sapere quali pezzi possono spegnerla.
+**Cosa è stato poi chiuso**, tutto con prova eseguita: la classe ora ha un **pavimento imposto da ciò che il criterio di chiusura fa**, e il pavimento vince sugli override scritti a mano — sette cluster che toccavano la produzione sono usciti dalla corsia non presidiata, quattordici alzati, **zero abbassati**; le precondizioni di classe C sono lette dal codice invece di essere prosa, e senza rete la classe C resta esclusa perché *non verificate significa assenti*; il tipo di prova è confrontato col comando, quindi `echo` non chiude più un cluster e una prova vuota viene rifiutata; il gate ragiona per livelli invece che per tipo di strumento, così le coppie che la Definition of Done impone sono ammesse; le scritture di stato sono atomiche.
 
-### Cosa è stato verificato davvero, e come
+**Una correzione mia in particolare va nominata.** Fra i quattordici override che avevo scritto a mano c'era `Z-153`, che avevo abbassato a classe B leggendone la descrizione — «favicon, webmanifest, apple-touch-icon». Il suo *chiuso quando* è `curl -sI https://www.heuresys.com/favicon.ico` che deve tornare 200: si chiude solo **deployando il sito pubblico**. Il pavimento del CLI l'ha rimesso a D. È l'esempio esatto del perché una classificazione di sicurezza non si deduce dalla prosa.
+
+**Il freno resta inserito**, e toglierlo è una decisione di Enzo, non tecnica: il design è ancora una bozza in attesa di approvazione, e restano i quattro test che richiedono una sessione viva — bootstrap, freno a metà lavoro, troncamento da budget, frontiere della description. Vanno fatti in una **prima corsa presidiata**, non di notte.
+
+I test si rilanciano con `python docs/kb/tools/zp_selftest.py`. Il criterio con cui sono stati riscritti non è «coprono le funzioni» ma «rompendo di proposito una cosa, il test diventa rosso?»: le quattro regressioni sono state iniettate una per una e ognuna fallisce dal test giusto.
+
+### I numeri, alla data di questo documento
+
+Il piano cresce a ogni sessione che scopre pendenze nuove, quindi **i numeri qui sotto invecchiano**: il comando che li ridà è `python docs/kb/tools/zp_state.py piano`, e va preferito a questa tabella ogni volta che c'è un dubbio.
+
+Al 2026-07-26: **255 cluster**, 42 chiusi, 213 aperti — di cui **183 eseguibili in autonomia** (circa 895 ore) e **30 che aspettano Enzo**: 19 decisioni di business, 9 dipendenze esterne, 2 segreti. Contando solo gli aperti che il loop potrebbe fare da solo: W0 1 pezzo, W1 50, W2 37, W3 36, W4 39, W5 20 — i 30 che aspettano Enzo stanno tutti in W6.
+
+L'unico cluster ancora aperto in W0 è `Z-034` — segreti TOTP in chiaro nel repo, 7 secret su 19 in plaintext a database. È il più urgente del piano ed è classe D, quindi il loop non lo toccherebbe comunque da solo: aspetta una decisione. Vale la pena sapere come è saltato fuori: S1029 aveva dichiarato W0 chiusa 11 su 11, S1030 l'ha ereditata senza rimisurarla, e il parser l'ha contraddetta contando le voci.
+
+### Cosa è stato verificato, e come
 
 | Cosa | Prova |
 |---|---|
-| il parser legge il piano | 253 cluster, 30 su Enzo ripartiti 9/19/2 come da intestazione |
-| l'integrità del piano regge | zero rilievi: dipendenze tutte risolte, ogni aperto ha il suo *chiuso quando*, ogni chiuso la sua nota |
-| il rifiuto delle prove omogenee funziona | 10 coppie provate: `integration+integration`, `integration+e2e`, `unit+e2e`, `live+psql` rifiutate; `integration+psql`, `integration+unit`, `staticcheck+runtime`, `e2e+psql`, `migrate2+dbvalidate`, `staticcheck+integration` ammesse |
-| l'evidenza è vera, non scritta a memoria | prova registrata eseguendo un comando reale e catturandone l'output; con una sola prova la validazione rifiuta |
-| la condizione di fine funziona | esce 1 elencando cosa manca; salta correttamente i criteri di rete con `--no-net` |
-| la guardia sulla classificazione | driver esce **3** e lo dice |
-| la guardia sul repo sporco | driver esce **4** ed elenca i file coinvolti |
-| il freno | con `.zp/STOP` presente non parte |
+| il piano è letto per intero | criterio esplicito nella condizione di fine: una riga non conforme è un errore, non un silenzio. `Z-110` era stato letto 253 su 254 per giorni |
+| l'integrità del piano regge | zero rilievi: dipendenze risolte, ogni aperto ha il suo *chiuso quando*, ogni chiuso la sua nota |
+| la classe non si deduce dalla prosa | pavimento derivato da ciò che il criterio di chiusura fa; vince sugli override manuali. Rispetto alla classificazione registrata prima: **14 alzati** — 13 dal pavimento, 1 dalla regola sul testo — e **0 abbassati** |
+| le precondizioni di classe C sono codice | dump più recente di 24h + host di prova raggiungibile. Senza rete la classe C è esclusa: 159 candidati con rete, 78 senza |
+| le prove non si autodichiarano | il tipo è confrontato col comando; `echo`, `printf`, `true` rifiutati con qualunque etichetta; output vuoto = prova rifiutata |
+| il costo è contabilizzato davvero | tornava zero (stderr dentro il JSON, argv oltre il limite di Windows): misurato su due sessioni da 11,87 dollari lette come 0,00. Che il tetto **fermi** la corsa è uno dei quattro test da fare a mano |
+| il deploy di produzione è filtrato | veto imposto dal codice di `close-propagate.sh`, non dalle istruzioni |
+| il lock è un lock | verificata la proprietà prima di rilasciarlo; `kill` non apre più la concorrenza |
+| i test vedono le regressioni | 4 regressioni iniettate una per una: ognuna fallisce, dal test giusto. 15 test, 0 falliti |
+| le guardie del driver | freno inserito → exit 3 · classificazione mancante → exit 3 · working tree sporco → exit 4 con la lista · `.zp/STOP` → non parte · un secondo driver → exit 5 senza toccare il lock del primo |
 
 ---
 
 ## 10. Glossario
 
-**Cluster**, o «pezzo di lavoro» — un'unità di lavoro coerente che si chiude in una volta sola. Ne esistono 248, censiti nel piano. Ognuno ha un effort stimato, una condizione di chiusura eseguibile con un comando, eventuali dipendenze, e un flag che dice se serve Enzo.
+**Cluster**, o «pezzo di lavoro» — un'unità di lavoro coerente che si chiude in una volta sola. Il numero cresce a ogni sessione che scopre pendenze nuove: si conta con `zp_state.py piano`, non si cita a memoria. Ognuno ha un effort stimato, una condizione di chiusura eseguibile con un comando, eventuali dipendenze, e un flag che dice se serve Enzo.
 
 **Ondata**, da W0 a W6 — l'ordine di attacco. W0 ciò che è rotto adesso, W1 cose rapide che tolgono rumore, W2 la rete di sicurezza fatta di test e CI, W3 dati e database, W4 frontend e sicurezza, W5 prodotto, W6 ciò che dipende da Enzo. La logica è: prima ti metti in sicurezza, poi costruisci.
 

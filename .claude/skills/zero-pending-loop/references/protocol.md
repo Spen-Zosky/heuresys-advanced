@@ -16,13 +16,14 @@ L'esempio che rende la cosa concreta: un endpoint nuovo. Prova A = test d'integr
 
 `zp_gate.py` conosce le coppie ammesse e **rifiuta** una coppia omogenea. Se la rifiuta, il modo corretto non e' aggirarla: e' produrre la seconda prova.
 
-| Prova A | Prova B ammessa |
-|---|---|
-| integration test su DB reale (tunnel :5433) | prova live con evidenza: comando + output + path assoluto + timestamp |
-| test automatico | unit test sul ramo che l'integrazione non raggiunge |
-| Playwright E2E con login di una persona reale | query `psql` che conferma la mutazione lato DB |
-| migrazione applicata due volte con diff `pg_dump` vuoto | `pnpm db:validate` (7 viste) verde |
-| `typecheck` + `lint` verdi | comportamento verificato a runtime sull'endpoint o sulla pagina |
+La regola non e' «due strumenti diversi» ma **due livelli diversi del sistema** (ridisegno S1030): `unit` guarda il codice isolato, `integration` l'API contro il DB reale, `e2e` l'interfaccia come la vedrebbe una persona, `psql` e `dbvalidate` cio' che e' rimasto scritto, `live` e `runtime` il sistema in esecuzione, `migrate2` la ripetibilita'. Due prove sullo stesso livello condividono il punto cieco, qualunque strumento usino. E **`staticcheck` non conta mai** come una delle due: typecheck e lint sono la soglia d'ingresso. La regola precedente li ammetteva come meta' evidenza — l'esatto contrario di «nessun cluster si chiude su un test verde».
+
+Qui non c'e' l'elenco delle coppie, ed e' voluto: una lista ricopiata a mano invecchia e comincia a mentire. Si interroga il codice, che e' l'unico posto dove la regola e' applicata davvero.
+
+```bash
+python docs/kb/tools/zp_gate.py tipi         # i tipi riconosciuti e il livello di ciascuno
+python docs/kb/tools/zp_gate.py prove A B    # questa coppia e' ammessa? esce 1 se rifiutata
+```
 
 I test che scrivi restano nel repo: sono parte del cluster, non impalcatura da buttare. Un cluster che chiude con due prove e nessun test aggiunto ha verificato, non protetto.
 

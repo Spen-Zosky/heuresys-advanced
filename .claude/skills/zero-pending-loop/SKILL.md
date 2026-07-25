@@ -3,7 +3,7 @@ name: zero-pending-loop
 description: >-
   Esegue UNA iterazione del loop autonomo non presidiato che porta heuresys-advanced verso
   zero pendenze: seleziona il prossimo cluster dal piano zero-pendenze, lo implementa, lo
-  verifica con due prove di natura diversa, lo sottopone a tre revisori adversarial, corregge
+  verifica con due prove su livelli diversi, lo sottopone a tre revisori adversarial, corregge
   i rilievi confermati, committa con evidenza live — poi decide se continuare o chiudere la
   sessione perche' il driver esterno ne apra una nuova con contesto pulito.
   USA QUESTA SKILL quando Enzo dice: "zero pendenze", "azzera le pendenze", "lavora in
@@ -35,6 +35,8 @@ Il motivo per cui il confine e' disegnato cosi': se domani la skill viene rimoss
 ## Pre-condizione: non lavorare senza i gate
 
 Prima di qualsiasi cosa, verifica che esistano `docs/kb/tools/zp_zero_check.py` e `docs/kb/tools/zp_gate.py`. Se manca uno dei due, **fermati e dillo**: senza i controlli meccanici questa skill non ha le garanzie che la rendono sicura in non presidiato, e girare comunque significherebbe fare lavoro autonomo su produzione con la rete di sicurezza staccata. Lo stesso vale per `references/zp.config.yaml`: se i cluster non sono classificati per raggio d'impatto, nessuna corsia e' autorizzata.
+
+**E poi il freno, che oggi e' inserito.** Leggi `meta.autorizzato_non_presidiato` (`python docs/kb/tools/zp_state.py config meta.autorizzato_non_presidiato`). Se e' `false`, **non eseguire nessun cluster**: scrivi `.zp/last-outcome.json` con `{"outcome": "blocked", "reason": "freno inserito: meta.autorizzato_non_presidiato=false", "next": "stop"}` e fermati, dicendo perche'. Il driver ha lo stesso controllo (exit 3), ma il driver non e' l'unica via d'ingresso: senza questa verifica una invocazione a mano scavalcherebbe il freno, e la frase «l'impianto non parte» sarebbe falsa. Togliere il freno e' una decisione di Enzo, mai una deduzione tua: se e' lui a chiederti esplicitamente di procedere in questa sessione, allora la corsa e' **presidiata** — dillo, e trattala come tale.
 
 ## I cinque modi
 
@@ -68,7 +70,7 @@ Se l'invocazione viene troncata dall'esterno — tetto `--max-budget-usd` raggiu
 
 Sono poche perche' ognuna copre un modo specifico in cui il lavoro autonomo degenera.
 
-**Due prove di natura diversa, non due esecuzioni della stessa.** Chi scrive il codice ha un punto cieco su cio' che il codice fa, e un test scritto dalla stessa mano verifica il comportamento osservato, non quello desiderato. La seconda prova deve arrivare da un angolo diverso — l'esempio canonico e' un test d'integrazione verde accanto a una query `psql` che mostra che la riga non e' stata scritta. `zp_gate.py` rifiuta una coppia omogenea; se la rifiuta, non e' un ostacolo da aggirare, e' il suo lavoro. Coppie ammesse: `references/protocol.md`.
+**Due prove su livelli diversi del sistema, non due esecuzioni della stessa cosa.** Chi scrive il codice ha un punto cieco su cio' che il codice fa, e un test scritto dalla stessa mano verifica il comportamento osservato, non quello desiderato. La seconda prova deve guardare da un altro livello — l'esempio canonico e' un test d'integrazione verde accanto a una query `psql` che mostra che la riga non e' stata scritta. `zp_gate.py` rifiuta una coppia omogenea; se la rifiuta, non e' un ostacolo da aggirare, e' il suo lavoro. La regola vive nel codice, non in una lista da ricopiare: `zp_gate.py tipi` e `zp_gate.py prove A B` la dicono. Perche' sia quella: `references/protocol.md`.
 
 **Tre revisori istruiti a demolire.** Contesto vuoto, vedono solo il diff e il cluster, un mandato negativo ciascuno su lenti distinte. Un rilievo cade solo se almeno due lo smontano. Il mandato e' negativo perche' un revisore premiato per il «va bene» non e' un revisore. `references/adversarial.md`.
 

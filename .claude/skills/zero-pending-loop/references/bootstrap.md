@@ -19,7 +19,7 @@ psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "\dt sys.sys_auth*
 
 ## 2. Verifica l'integrita' del piano — non rifarlo
 
-Il censimento esiste gia': `docs/superpowers/specs/2026-07-25-zero-pending-plan.md`, costruito da dieci finder indipendenti su fonti disgiunte, consolidato e verificato da tre verificatori adversarial (497 voci grezze → 248 cluster, 0 perse, 0 inventate). Rifarlo da zero butterebbe la cosa piu' costosa che il progetto possiede. Quindi si **verifica**:
+Il censimento esiste gia': `docs/superpowers/specs/2026-07-25-zero-pending-plan.md`, costruito da dieci finder indipendenti su fonti disgiunte, consolidato e verificato da tre verificatori adversarial (497 voci grezze → 248 cluster **alla data del 2026-07-25**, 0 perse, 0 inventate; il totale e' cresciuto da allora — si legge con `zp_state.py piano`, non si cita a memoria). Rifarlo da zero butterebbe la cosa piu' costosa che il progetto possiede. Quindi si **verifica**:
 
 - il conteggio dei cluster corrisponde a quello dichiarato nell'intestazione del piano;
 - ogni riferimento `dependsOn` risolve a un cluster esistente;

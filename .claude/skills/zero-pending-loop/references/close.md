@@ -28,7 +28,9 @@ Prima di invocarla, assicurati che `.zp/PROGRESS.md` sia aggiornato: viene commi
 
 **4. Propagazione.** `handoff` esegue lo Step 4b, cioe' `scripts/close-propagate.sh --delta --resilient --auto-deploy`: repo e payload gitignored, ecosistema Claude, deploy della VM, clone del DB su linux-pc. **Non prefissare `MSYS_NO_PATHCONV=1`** — lo script lo gestisce per singola chiamata ssh, e un export globale rompe lo staging dei path locali di `align-claude-ecosystem`.
 
-Se il deploy tocca la produzione e la sessione ha lavorato solo su cluster di classe A o B, il deploy e' parte del ciclo normale e va fatto. Se in sessione e' finito qualcosa di classe C, verifica dopo il deploy che le migrazioni siano allineate fra locale e remoto prima di dichiarare chiuso.
+**In non presidiato il deploy e' vietato, e il divieto non e' questa frase.** `--auto-deploy` significa `git reset --hard` piu' restart dei systemd `api`/`web` su `www.heuresys.com`: eseguito a ogni chiusura di ciclo, di notte, e' la cosa piu' pericolosa dell'intero impianto — e per un giro era esattamente cio' che accadeva, perche' il filtro per classe governa la *selezione* del cluster e non il rito di chiusura. Adesso il driver esporta `HEURESYS_CLOSE_NODEPLOY=1` e il veto e' applicato dentro `close-propagate.sh`, dove **vince sui flag**: se qualcuno passasse `--auto-deploy` lo script lo disattiva e lo scrive su stderr. Non rimuovere quell'export dal driver per «far arrivare il lavoro in produzione»: il deploy di cio' che il loop ha chiuso e' un'operazione presidiata, e si fa quando c'e' qualcuno che guarda.
+
+In una corsa **presidiata** il deploy resta parte del ciclo normale. Se in sessione e' finito qualcosa di classe C, verifica dopo il deploy che le migrazioni siano allineate fra locale e remoto prima di dichiarare chiuso.
 
 **5. Verifica live.** Non fidarti dell'uscita degli script: controlla.
 

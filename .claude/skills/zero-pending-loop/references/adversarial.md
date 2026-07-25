@@ -38,12 +38,12 @@ Un rilievo senza `come_si_riproduce` non e' un rilievo: e' un sospetto. Scartalo
 
 Un rilievo **cade** se almeno due revisori lo smontano esplicitamente. Un rilievo che resta va corretto, e dopo la correzione si ri-esegue il passo 2 del protocollo — una correzione non verificata e' solo una nuova ipotesi.
 
-La maggioranza serve a non farsi bloccare da un singolo revisore paranoico, che in una fila di 218 cluster e' statisticamente garantito. Ma vale in una sola direzione: un rilievo di severita' alta sull'isolamento tenant o sui segreti si tratta come vero anche da solo, perche' il costo dello sbaglio non e' simmetrico.
+La maggioranza serve a non farsi bloccare da un singolo revisore paranoico, che su una fila di cluster lunga come quella del piano e' statisticamente garantito. Ma vale in una sola direzione: un rilievo di severita' alta sull'isolamento tenant o sui segreti si tratta come vero anche da solo, perche' il costo dello sbaglio non e' simmetrico.
 
 Se i rilievi confermati sono piu' di tre o toccano il disegno e non l'implementazione, il cluster era mal inquadrato: non accumulare correzioni sopra correzioni. `INTERRUPTED`, con i rilievi allegati come materiale per il giro successivo.
 
 ## Costo, e perche' vale
 
-Tre agenti in piu' per cluster. Su 218 cluster e' la voce di spesa piu' grande dopo l'implementazione, ed e' anche l'unica che sostituisce Enzo che guarda. Non si taglia per risparmiare: se il budget non basta per l'adversarial, non basta per il cluster — chiudi la sessione e lascia il cluster al giro successivo.
+Tre agenti in piu' per cluster. Su tutto il piano e' la voce di spesa piu' grande dopo l'implementazione, ed e' anche l'unica che sostituisce Enzo che guarda. Non si taglia per risparmiare: se il budget non basta per l'adversarial, non basta per il cluster — chiudi la sessione e lascia il cluster al giro successivo.
 
 Il modello dei revisori non si abbassa mai sotto quello di sessione: il giudizio e' esattamente la cosa che non si delega verso il basso (vedi `operations.md`).

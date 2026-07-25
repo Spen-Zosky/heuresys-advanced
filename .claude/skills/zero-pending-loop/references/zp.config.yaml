@@ -52,10 +52,12 @@ meta:
   #       dipendenze (chiuso solo se TUTTE le occorrenze lo sono); `--budget-ore` e' passato
   #       dal driver (tetto: budget.max_effort_hours_per_cluster).
   #
-  # RESTA: il freno non si toglie da solo. E' una decisione di Enzo, non tecnica — e il
-  # design e' ancora «BOZZA in attesa di approvazione». Restano inoltre i 4 test che
-  # richiedono una sessione viva (bootstrap, freno a meta' lavoro, troncamento da budget,
-  # frontiere della description): vanno fatti in una prima corsa presidiata.
+  # RESTA: il freno non si toglie da solo. E' una decisione di Enzo, non tecnica. Cio' che
+  # aspetta il suo via non e' l'approvazione del disegno (il design e' passato a stato
+  # «IMPLEMENTATO» il 2026-07-26: l'impianto e' costruito e committato) ma l'autorizzazione
+  # a lavorare non presidiato. Restano inoltre i 4 test che richiedono una sessione viva
+  # (bootstrap, freno a meta' lavoro, troncamento da budget, frontiere della description):
+  # vanno fatti in una prima corsa presidiata.
   #
   # Referto completo: nell'entry di riconciliazione in docs/kb/COWORK_INBOX.md.
   autorizzato_non_presidiato: false

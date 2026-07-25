@@ -405,11 +405,11 @@ Ogni riga qui sotto è stata verificata sul campo il 2026-07-25, non assunta. Se
 
 | Pezzo | Stato |
 |---|---|
-| Design completo | fatto |
+| Design completo | fatto, e **non più una bozza in attesa di approvazione**: descrive un impianto costruito. I punti che la review ha invalidato sono segnati dentro, e dove diverge dal repo vale il repo |
 | `SKILL.md` più 10 file di reference | fatti |
 | Set di prova, trigger e comportamento | scritti, **non ancora eseguiti** |
 | CLI `zp` e comando nel profilo | scritta e **provata**: 13 verbi, tutti verificati a mano |
-| **T3** — i quattro `zp_*.py` e il driver | **fatti e provati** (2026-07-25) |
+| **T3** — i sei `zp_*.py` e il driver | scritti il 2026-07-25 e dichiarati provati; la review del 2026-07-26 ci ha poi trovato **quattro difetti gravi**, chiusi con prova (sotto). Erano loro il difetto peggiore del documento: «provati» descriveva chi li aveva scritti, non cosa reggevano |
 | Riga `.zp/` in `.gitignore` | fatta e verificata: runtime ignorato, `PROGRESS.md` no |
 | **T1** — classificazione dei cluster aperti | fatta, poi **rifatta dal CLI su basi diverse** (vedi sotto) |
 | **T4** — test di accettazione | **15 automatici, 0 falliti**; 4 richiedono una sessione viva |
@@ -425,7 +425,7 @@ La prima versione di questo paragrafo diceva «T1 fatta» e «10 su 10 automatic
 
 **Una correzione mia in particolare va nominata.** Fra i quattordici override che avevo scritto a mano c'era `Z-153`, che avevo abbassato a classe B leggendone la descrizione — «favicon, webmanifest, apple-touch-icon». Il suo *chiuso quando* è `curl -sI https://www.heuresys.com/favicon.ico` che deve tornare 200: si chiude solo **deployando il sito pubblico**. Il pavimento del CLI l'ha rimesso a D. È l'esempio esatto del perché una classificazione di sicurezza non si deduce dalla prosa.
 
-**Il freno resta inserito**, e toglierlo è una decisione di Enzo, non tecnica: il design è ancora una bozza in attesa di approvazione, e restano i quattro test che richiedono una sessione viva — bootstrap, freno a metà lavoro, troncamento da budget, frontiere della description. Vanno fatti in una **prima corsa presidiata**, non di notte.
+**Il freno resta inserito**, e toglierlo è una decisione di Enzo, non tecnica. Ciò che aspetta il suo via non è più l'approvazione del disegno — quello è stato costruito — ma l'autorizzazione a far lavorare l'impianto senza nessuno che guardi. Restano inoltre i quattro test che richiedono una sessione viva — bootstrap, freno a metà lavoro, troncamento da budget, frontiere della description. Vanno fatti in una **prima corsa presidiata**, non di notte.
 
 I test si rilanciano con `python docs/kb/tools/zp_selftest.py`. Il criterio con cui sono stati riscritti non è «coprono le funzioni» ma «rompendo di proposito una cosa, il test diventa rosso?»: le quattro regressioni sono state iniettate una per una e ognuna fallisce dal test giusto.
 

@@ -1,0 +1,20 @@
+# Unit statico (nessun placeholder) — installato verbatim dallo step "backup-pull" di
+# scripts/provision-linux-pc.sh.
+#
+# Alle 02:30: il backup sulla VM parte all'01:30 (+ RandomizedDelaySec=300) e un pg_dump
+# dura pochi minuti, quindi a quest'ora il dump del giorno è chiuso e integro. Non prima:
+# rsyncare un file ancora in scrittura produrrebbe un archivio corrotto (che lo script
+# scarterebbe comunque con pg_restore --list, ma sprecando un giro).
+[Unit]
+Description=Heuresys — pull giornaliero dei backup PROD verso l'archivio off-host
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+RandomizedDelaySec=600
+# L'host di archivio è un PC domestico: se era spento all'ora prevista, recupera al boot.
+Persistent=true
+Unit=heuresys-backup-pull.service
+
+[Install]
+WantedBy=timers.target

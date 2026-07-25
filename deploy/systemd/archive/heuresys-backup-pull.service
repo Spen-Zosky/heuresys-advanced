@@ -1,0 +1,25 @@
+# Template — @@REPO_DIR@@ è reso dallo step "backup-pull" di scripts/provision-linux-pc.sh.
+#
+# PERCHE' VIVE QUI E NON IN deploy/systemd/. `scripts/vm-deploy.sh` installa e ABILITA
+# ogni *.service/*.timer trovato in deploy/systemd/ su OGNI host che deploya — VM inclusa.
+# Questo one-shot invece ha senso su un SOLO tipo di host: l'archivio off-host (oggi
+# linux-pc), che scarica i dump DALLA VM. Sulla VM sarebbe un no-op fallito (proverebbe
+# a rsyncare da se stessa). La sottodirectory `archive/` lo tiene fuori da quel glob:
+# ci finisce solo per installazione esplicita.
+[Unit]
+Description=Heuresys — pull off-host dei backup di produzione (W0.2)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@
+# rsync + ssh + pg_restore (verifica del TOC): nessun Node necessario.
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/pull-prod-backups.sh
+# Un pull completo di ~600 MB su LAN sta ampiamente dentro; il primo giro (archivio
+# vuoto) è il più lento.
+TimeoutStartSec=1800

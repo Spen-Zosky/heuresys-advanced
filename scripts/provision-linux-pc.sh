@@ -81,6 +81,47 @@ ssh -o BatchMode=yes "$HOST" "cd '$REPO'
   systemctl is-active heuresys-advanced-api heuresys-advanced-web heuresys-advanced-scraping.timer heuresys-advanced-insights.timer
 "
 
+log "[2.2b] pg_stat_statements preloaded a livello di CLUSTER (prerequisito CI)"
+# `shared_preload_libraries` è cluster-level, richiede un restart e NON viaggia in
+# nessun dump: clonare il DB dalla VM porta l'extension ma non il preload. Senza di
+# esso la view esiste e ogni lettura fallisce con SQLSTATE 55000 — è così che la CI
+# è diventata rossa in S1029 (GET /v1/observability/slow-queries → 500). Qui è reso
+# idempotente e APPENDING: sovrascrivere il parametro scaricherebbe in silenzio
+# eventuali altre librerie preloadate.
+ssh -o BatchMode=yes "$HOST" "
+  cur=\$(sudo -n -u postgres psql -tAc 'SHOW shared_preload_libraries' | tr -d ' ')
+  case \",\$cur,\" in
+    *,pg_stat_statements,*) echo '  già preloaded: '\"\$cur\" ;;
+    *) sudo -n -u postgres psql -v ON_ERROR_STOP=1 -c \"ALTER SYSTEM SET shared_preload_libraries = '\${cur:+\$cur,}pg_stat_statements'\" &&
+       sudo -n systemctl restart postgresql && sleep 4 &&
+       echo '  preloaded ora: '\"\$(sudo -n -u postgres psql -tAc 'SHOW shared_preload_libraries')\" ;;
+  esac
+  # l'extension va creata in OGNI database usato: PROD gemello + database della CI
+  for db in heuresys_advanced heuresys_ci; do
+    sudo -n -u postgres psql -d \"\$db\" -c 'CREATE EXTENSION IF NOT EXISTS pg_stat_statements' >/dev/null 2>&1 \
+      && echo \"  extension ok su \$db\" || echo \"  (db \$db assente — salto)\"
+  done
+"
+
+log "[2.3] archivio off-host dei backup PROD (W0.2) — unit fuori da deploy/systemd/"
+# I dump prodotti da backup-db.sh vivono sullo STESSO disco del DB che proteggono: la
+# perdita del volume porta via DB e backup insieme. linux-pc è l'unico host di archivio
+# disponibile (LAN, dietro NAT), quindi la copia va in PULL: è lui a scaricare, e la VM
+# non riceve alcuna credenziale verso di lui. Gli unit stanno in deploy/systemd/archive/
+# perché vm-deploy.sh abiliterebbe qualunque timer trovato in deploy/systemd/ ANCHE sulla
+# VM, dove questo one-shot non ha senso.
+ssh -o BatchMode=yes "$HOST" "cd '$REPO'
+  tmp=\$(mktemp -d)
+  sed -e \"s#@@REPO_DIR@@#$REPO#g\" -e 's#^User=ubuntu#User=enzo#g' -e 's#^Group=ubuntu#Group=enzo#g' \
+      \"$REPO/deploy/systemd/archive/heuresys-backup-pull.service\" > \"\$tmp/heuresys-backup-pull.service\"
+  sudo install -m 644 -o root -g root \"\$tmp/heuresys-backup-pull.service\" /etc/systemd/system/heuresys-backup-pull.service
+  sudo install -m 644 -o root -g root \"$REPO/deploy/systemd/archive/heuresys-backup-pull.timer\" /etc/systemd/system/heuresys-backup-pull.timer
+  rm -rf \"\$tmp\"
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now heuresys-backup-pull.timer >/dev/null 2>&1
+  systemctl is-active heuresys-backup-pull.timer
+"
+
 log "[verify] autonomous PROD on the LAN"
 echo -n "  api /readyz: "; curl -s -o /dev/null -w '%{http_code}\n' -m 10 "http://$LAN_HOST:$API_PORT/readyz" || echo ERR
 echo -n "  web /login:  "; curl -s -o /dev/null -w '%{http_code} %{time_total}s\n' -m 20 "http://$LAN_HOST:$WEB_PORT/login" || echo ERR

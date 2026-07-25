@@ -18,6 +18,7 @@ Il risultato grezzo — 497 voci — è stato consolidato da un agente con visio
 | Sessione | Chiusi | Note |
 |---|---:|---|
 | **S1029** | **34** | Wave 0 completa (11/11 HARD) + 23 cluster di W1. Un cluster chiuso come WON'T-DO motivato (Z-110). Un alert non chiudibile registrato come debito D-75 con rischio accettato. |
+| **S1030** | **9** (+1 rettifica, +3 nuovi) | W1: Z-022 · Z-029 · Z-030 · Z-125 · Z-156 · Z-178 · Z-224 · Z-225 · Z-234. **Rettificato Z-139**: la premessa era falsa e quel fix aveva spento i colori d'errore sul sito pubblico (riparato dentro Z-156). Emersi 3 cluster nuovi — **Z-249** due rossi semantici, **Z-250** skill `zero-pending-loop` incompleta, **Z-251** la suite non regge la contesa sul DB. Totale: **251 cluster**. |
 
 Le caselle spuntate qui sotto portano la nota di chiusura con l'evidenza. Il resto è aperto.
 
@@ -135,7 +136,8 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-172** (2.0h) — Provider di embedding con un solo concreto e vincolo dimensionale 1024 non documentato a livello schema
   - *chiuso quando*: il seam Embedder e' selezionabile via env e il vincolo 1024 e' documentato nella migration pgvector e nel client
   - *assorbe*: `gapfill:GAP2-41`
-- [ ] **Z-178** (1.0h) — Sorgente delle release @heuresys/ui 0.1.8 e 0.1.9 mai pushata upstream: npm avanti di 2 versioni rispetto a GitHub, dist fermo alla 0.1.7
+- [x] **Z-178** (1.0h) — Sorgente delle release @heuresys/ui 0.1.8 e 0.1.9 mai pushata upstream: npm avanti di 2 versioni rispetto a GitHub, dist fermo alla 0.1.7
+  - ✅ **CHIUSO S1030** — 0.1.8 e 0.1.9 pushate su GitHub; verificato via API che il sorgente pubblicato coincide con npm (0.1.9, subpath ./charts e ./markdown)
   - *chiuso quando*: nel repo ux-design-shared git log origin/main contiene i commit 0.1.8 e 0.1.9, ui/package.json dichiara 0.1.9 e le subpath ./charts e ./markdown sono negli exports
   - *assorbe*: `gapfill:GAP3-1`, `gapfill:GAP3-8`
 - [x] **Z-166** (0.5h) — 29 skeleton con 'TODO: Development Team must implement' ancora tracciati in docs/source_bundle
@@ -221,7 +223,8 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-230** (0.8h) — Doc di triage Dependabot stale (zod/next superati, script mai implementato, riferimento a un file inesistente)
   - *chiuso quando*: il doc riporta l'ultimo triage reale con data e le righe defer-major coincidono con gh pr list; i riferimenti a file inesistenti sono rimossi
   - *assorbe*: `gapfill:GAP1-46`
-- [ ] **Z-234** (0.8h) — Metadati e doc del repo upstream stale su 5 fronti (reactflow rimosso ma elencato, README con lo scope di heuresys-evo, marker TODO, descrizione GitHub con link:, SETUP con npm)
+- [x] **Z-234** (0.8h) — Metadati e doc del repo upstream stale su 5 fronti (reactflow rimosso ma elencato, README con lo scope di heuresys-evo, marker TODO, descrizione GitHub con link:, SETUP con npm)
+  - ✅ **CHIUSO S1030** — 5 fronti chiusi + lockfile committato; i due «TODO» erano lavoro vero (Z-152/Z-153), annotati non cancellati
   - *chiuso quando*: grep reactflow su MANIFEST.md e SETUP.md = 0, il README cita i consumer attuali e la descrizione GitHub non menziona il protocollo link:
   - *assorbe*: `gapfill:GAP3-6`
 - [x] **Z-216** (0.5h) — I due kickoff (NEXT_SESSION_FORENSIC + DB_FRONTEND_FORENSICS) non sono marcati ESEGUITO: rischio di ri-esecuzione
@@ -240,10 +243,12 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
   - ✅ **CHIUSO S1029** — entry inbox priva di stato riconciliata
   - *chiuso quando*: grep -c 'RICONCILIATA' docs/kb/COWORK_INBOX.md copre tutte le entry (nessuna entry senza riga stato)
   - *assorbe*: `mandates:MAN-9`
-- [ ] **Z-224** (0.2h) — preflight-residual-todo.md: CODE-5 e CODE-10 risultano 'Deferred' ma sono chiusi sul reale
+- [x] **Z-224** (0.2h) — preflight-residual-todo.md: CODE-5 e CODE-10 risultano 'Deferred' ma sono chiusi sul reale
+  - ✅ **CHIUSO S1030** — CODE-5 e CODE-10 chiusi sul reale (showcase live dal 7f6e174e; i18n 2349 chiavi × 10 namespace con check in CI); il refactor residuo rimandato a Z-173
   - *chiuso quando*: le due voci sono marcate chiuse con l'evidenza (assenza di _disabled_showcase_X18 e i18n a 10 namespace con check in CI)
   - *assorbe*: `gapfill:GAP1-9`
-- [ ] **Z-225** (0.2h) — cw-b59-true-root-cause: doc fermo a 'Root cause identified' con 3 open question superate dal 2026-05-27
+- [x] **Z-225** (0.2h) — cw-b59-true-root-cause: doc fermo a 'Root cause identified' con 3 open question superate dal 2026-05-27
+  - ✅ **CHIUSO S1030** — intestazione RESOLVED + le 3 open question chiuse con misure (React è peerDependency, subpath al posto dello split, bisect mai servito)
   - *chiuso quando*: il file porta l'intestazione storico/RESOLVED con riferimento al fix client boundary ssr:false
   - *assorbe*: `gapfill:GAP1-20`
 - [x] **Z-227** (0.2h) — AUTH_SECURITY_PLAN §13: 13 voci di acceptance non spuntate benche' coperte dalla suite da MVP-1
@@ -275,11 +280,13 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-153** (1.0h) — Brand v1: favicon set multi-res, site.webmanifest, apple-touch-icon, browserconfig assenti (il sito in PROD non ha favicon ne' manifest PWA)
   - *chiuso quando*: curl -sI https://www.heuresys.com/favicon.ico restituisce 200 e /site.webmanifest e' servito con contenuto valido
   - *assorbe*: `gapfill:GAP1-11`
-- [ ] **Z-156** (1.0h) — Drift dei token a11y fra apps/web e apps/showcase: i fix contrasto S982 vivono solo in apps/web, il sito pubblico ne e' privo
+- [x] **Z-156** (1.0h) — Drift dei token a11y fra apps/web e apps/showcase: i fix contrasto S982 vivono solo in apps/web, il sito pubblico ne e' privo
+  - ✅ **CHIUSO S1030** — token estratti in `_theme-tokens.css` (fonte unica copiata dal sync). Scoperto che Z-139 aveva SPENTO i colori d'errore sullo showcase: vedi la rettifica sotto
   - *chiuso quando*: diff dei blocchi di override fra apps/web/src/app/globals.css e apps/showcase/src/app/globals.css = vuoto e la run axe sullo static export non mostra i color-contrast serious
   - *assorbe*: `gapfill:GAP3-17`
 - [x] **Z-139** (0.5h) — Token colore non valido text-destructive residuo (6-12 occorrenze nelle pagine showcase)
   - ✅ **CHIUSO S1029** — token colore inesistente corretto in 17 file — non solo showcase: anche approvals, insights, me/*
+  - ⚠️ **RETTIFICA S1030 — la premessa era falsa e il fix ha introdotto una regressione.** `text-destructive` **era una utility valida**: `--color-destructive` arriva da `@import "@heuresys/ui/styles"`, dichiarato in un blocco `@theme`. Misurato sul CSS emesso del build showcase **del 21 giugno**, un mese prima del fix: `.text-destructive{color:var(--color-destructive)}` presente, `--color-destructive:#e6293f` definito, mentre `.text-inventato` è assente (controprova che Tailwind non emette utility fantasma). L'errore fu leggere il solo `:root` di `apps/web/src/app/globals.css` senza seguire l'`@import` in cima. **Conseguenza**: in `apps/web` è cambiata solo la tinta, ma in `apps/showcase` — che non aveva i token semantici dell'app — `text-danger`/`bg-danger` non generavano più **nessuna** utility (build fresco: `.text-danger` ASSENTE, `--danger` non definito). Il difetto denunciato è stato creato dal fix, sul sito pubblico. Chiuso in Z-156 estraendo i token in `apps/web/src/app/_theme-tokens.css`. Il criterio di chiusura qui sopra (`grep text-destructive = 0`) resta soddisfatto ma **non era il criterio giusto**: misurava i sorgenti, non il CSS emesso.
   - *chiuso quando*: grep -rc 'text-destructive' apps/web/src apps/showcase/src = 0
   - *assorbe*: `p100x:QW-E1`, `mandates:MAN-57`
 
@@ -300,7 +307,8 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-033** (2.0h) — Upstream design system: nessuna CI di qualita' (unico workflow = deploy Storybook, no typecheck/lint/test, lockfile ignorato)
   - *chiuso quando*: nel repo ux-design-shared esiste quality.yml che esegue typecheck+lint+test e gh run list mostra un run success
   - *assorbe*: `gapfill:GAP3-2`
-- [ ] **Z-022** (1.0h) — linux-pc: schedulare il refresh del DB clone (timer settimanale) invece che on-demand
+- [x] **Z-022** (1.0h) — linux-pc: schedulare il refresh del DB clone (timer settimanale) invece che on-demand
+  - ✅ **CHIUSO S1030** — timer settimanale live su linux-pc (NEXT domenica 05:08) + run reale verificata sui dati (163/181/908/14041, servizi ripartiti)
   - *chiuso quando*: ssh linux-pc: systemctl list-timers heuresys-advanced-clonedb.timer mostra NEXT valorizzato e un'esecuzione success in journalctl
   - *assorbe*: `backlog:#67-timer`, `mandates:MAN-66`
 - [ ] **Z-031** (1.0h) — Monitor di non-regressione dell'ecosistema (5 asset WS-L senza check automatico)
@@ -321,10 +329,12 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
   - ✅ **CHIUSO S1029** — CodeQL attivato (workflow nuovo, primo run success)
   - *chiuso quando*: ls .github/workflows/codeql.yml esiste e gh api repos/Spen-Zosky/heuresys-advanced/code-scanning/alerts risponde 200 con il primo run completato
   - *assorbe*: `gapfill:GAP1-44`
-- [ ] **Z-029** (0.5h) — Ecosistema Claude: plugin always-on da rendere lazy (chrome-devtools-mcp, 4 plugin authoring) + hook npx-bypass da rivalutare
+- [x] **Z-029** (0.5h) — Ecosistema Claude: plugin always-on da rendere lazy (chrome-devtools-mcp, 4 plugin authoring) + hook npx-bypass da rivalutare
+  - ✅ **CHIUSO S1030** — 6 plugin di authoring spenti (16→10 attivi), boot verde, nessun automatismo del repo li usava
   - *chiuso quando*: grep -c '": true' ~/.claude/settings.json enabledPlugins scende ai soli plugin necessari e il boot resta funzionante (session_start.py verde)
   - *assorbe*: `p100x:QW-L2`, `p100x:QW-L3`, `p100x:N-L2`
-- [ ] **Z-030** (0.5h) — Boot di sessione: handoff_lint eseguito due volte + effort xhigh come default sul boot
+- [x] **Z-030** (0.5h) — Boot di sessione: handoff_lint eseguito due volte + effort xhigh come default sul boot
+  - ✅ **CHIUSO S1030** — misurato: la doppia esecuzione costa 0.4s, non è il collo di bottiglia. Duplicazione mantenuta e documentata; nessuna cache sul guardiano dello stato
   - *chiuso quando*: una run di scripts/session-boot.ps1 mostra una sola invocazione di handoff_lint.py nei log e il menu resta identico
   - *assorbe*: `p100x:N-L1`, `p100x:N-L4`
 
@@ -362,6 +372,16 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
   - *chiuso quando*: grep -c 'Admin#PassW0rd' docs/kb/SOT_STATE.md = 0 e le personas elencate sono quelle reali @rtl-bank.org
   - *assorbe*: `state:DRIFT-PERS`
 
+### nuovi — emersi in S1030 (3)
+
+- [ ] **Z-249** (1.5h) — Due rossi semantici per lo stesso significato: `StatusIcon` di `@heuresys/ui` emette `text-destructive` (`--color-destructive` #e6293f / dark #f93f4e), le pagine usano `text-danger` (`--danger` #DC2626 / dark #F87171). Convivono nella stessa schermata. Decisione di design system: allineare i due token, oppure far emettere alla lib il token semantico dell'app
+  - *chiuso quando*: nel CSS emesso di apps/web e apps/showcase le utility d'errore risolvono a un solo valore per modalità (grep dei due token sul bundle), e la scelta è scritta in un ADR upstream
+- [ ] **Z-250** (4.0h) — La skill `zero-pending-loop` è un cantiere aperto e non versionato: `.claude/skills/zero-pending-loop/` ha SKILL.md + 2 reference su 9 (mancano protocol, adversarial, blast-radius, gates, operations, close, LEARNINGS, zp.config.yaml), nessuno dei tool che la SKILL dichiara obbligatori (`zp_zero_check.py`, `zp_gate.py`), nessun `scripts/zero-pending-driver.sh`, e il design è ancora «BOZZA — in attesa di approvazione Enzo». La skill si auto-blocca correttamente («fermati e dillo»), ma resta un artefatto che promette un protocollo inesistente
+  - *chiuso quando*: o i file mancanti esistono e `git ls-files .claude/skills/zero-pending-loop/` non è vuoto, oppure la directory è rimossa e il design marcato non-implementato
+  - *nota*: l'autonomia non presidiata che il design abilita è una decisione di Enzo, non tecnica
+- [ ] **Z-251** (2.0h) — La suite d'integrazione non regge la contesa sul DB condiviso: durante il clone settimanale (pg_dump sulla stessa VM) 14 file su 217 sono falliti con `Hook timed out in 30000ms` nel `beforeAll` e un `Connection terminated unexpectedly`. I test non distinguono «il codice è rotto» da «il DB era occupato»
+  - *chiuso quando*: due run consecutive della suite mentre gira un `pg_dump` sulla VM finiscono senza fallimenti d'infrastruttura (hookTimeout adeguato o retry sulla connessione), con l'evidenza dei due esiti allegata
+
 ### test-qa (6)
 
 - [ ] **Z-111** (2.0h) — Contratto pool/isolate fragile: 134 file referenziano closePool, nessun globalTeardown
@@ -379,7 +399,8 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [x] **Z-110** ~~Costo Argon2id non abbassato in ambiente test~~ — **WON'T-DO, motivato (S1029)**. Il cluster prometteva ~60-70s di wall per run, ma la premessa e' sbagliata su due fronti, entrambi verificati: **(1) inefficace** — nessun test chiama `hashPassword` (0 file), mentre 147 file fanno login, cioe' `argon2.verify`; e verify usa i parametri INCISI NELL'HASH memorizzato, non `ARGON2_PARAMS`. Abbassare i parametri non toccherebbe il costo di una sola verifica. **(2) pericoloso** — `service.ts:312-333` auto-ruota l'hash quando `needsRehash` e' vero. Con parametri di test piu' deboli, needsRehash sarebbe vero a OGNI login e la suite, che gira contro il database condiviso con la produzione, riscriverebbe hash reali con parametri indeboliti. Il risparmio ipotetico non vale un degrado silenzioso delle credenziali di produzione.
   - *chiuso quando*: il wall-clock di pnpm test scende di >=60s misurato prima/dopo e i test di hashing restano verdi
   - *assorbe*: `p100x:QW-F1`
-- [ ] **Z-125** (0.5h) — Convenzione di naming test: il modulo notifications risulta scoperto a ogni censimento automatico (falso positivo)
+- [x] **Z-125** (0.5h) — Convenzione di naming test: il modulo notifications risulta scoperto a ogni censimento automatico (falso positivo)
+  - ✅ **CHIUSO S1030** — `check_module_test_coverage.py`: 90 moduli, 0 scoperti, più un test negativo che dimostra che sa dire di no
   - *chiuso quando*: uno script che incrocia moduli e file di test non segnala falsi positivi (esce 0 su tutti e ~90 i moduli)
   - *assorbe*: `runtime:RT-21`
 

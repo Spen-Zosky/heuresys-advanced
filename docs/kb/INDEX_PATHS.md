@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-25T13:32:39Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2558**
+**Generato**: 2026-07-25T17:46:18Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2578**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -12,8 +12,8 @@
 | api-core | 28 |
 | api-module | 318 |
 | ci | 17 |
-| claude-config | 15 |
-| config | 107 |
+| claude-config | 29 |
+| config | 109 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 35 |
 | db-seed | 115 |
-| doc-canonical | 497 |
+| doc-canonical | 500 |
 | handoff-state | 1 |
 | qa-artifact | 103 |
 | script | 6 |
@@ -32,8 +32,8 @@
 | showcase-source | 14 |
 | test | 306 |
 | ux-design-archive | 80 |
-| web-source | 206 |
-| **TOTALE** | **2558** |
+| web-source | 207 |
+| **TOTALE** | **2578** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 497 |
 | external-archive | 50 |
-| live | 2011 |
+| live | 2031 |
 
 ## File per categoria
 
@@ -468,6 +468,20 @@
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\model-map.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\planner.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\sweep-prompts.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\SKILL.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\evals\evals.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\evals\trigger-eval.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\LEARNINGS.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\adversarial.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\blast-radius.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\bootstrap.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\close.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\driver.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\gates.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\operations.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\protocol.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\selection.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\zp.config.yaml` · *live* · git-tracked
 
 ### config
 
@@ -513,6 +527,8 @@
 - `D:\heuresys-advanced\deploy\prometheus\alerts.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\prometheus\prometheus.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\actions-runner-resource.dropin.conf` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\archive\heuresys-advanced-clonedb.service` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\archive\heuresys-advanced-clonedb.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-api.service` · *live* · git-tracked
@@ -1555,6 +1571,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\build_index.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_linked_manifest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\build_menu.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\check_module_test_coverage.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\handoff_lint.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-commit` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-merge` · *live* · git-tracked
@@ -1790,6 +1807,8 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-30-two-axis-authorization-model-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-01-f3-sensitive-modules-map.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-06-project-atlas-skill-design.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-delivery-loop-skill-design.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-zero-pending-loop-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-zero-pending-plan.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
@@ -2594,12 +2613,12 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\visualizations\[graphId]\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\visualizations\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\whistleblowing-console\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\_theme-tokens.css` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\app\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\demo\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\error.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\global-error.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\globals.css` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\web\src\app\_theme-tokens.css` · *live* · git-tracked — FONTE UNICA dei token di tema (@theme inline + :root + .dark); `scripts/sync-showcase.sh` ne copia una replica in apps/showcase/src/app/ (gitignored). S1030
 - `D:\heuresys-advanced\apps\web\src\app\investors\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\layout.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\login\page.tsx` · *live* · git-tracked

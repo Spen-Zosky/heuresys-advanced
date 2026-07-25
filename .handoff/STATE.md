@@ -1,25 +1,24 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-07-25 (S1029 — piano «zero pendenze»: Wave 0 chiusa, W1 avviata).
+**Updated**: 2026-07-25 (S1030 — W1 avanzata, coda Dependabot azzerata, CI tutta verde).
 
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-## Last session brief (S1029)
+## Last session brief (S1030)
 
-Sessione lunga in autonomia non presidiata. Prima metà: censimento esaustivo del residuo
-(14 agenti su 13 fonti) consolidato in un piano a ondate, poi Wave 0 — CI di nuovo verde
-dopo due giorni di rosso, root cause di D-55 trovata (un deadlock, non il "jitter di pool"
-registrato per nove sessioni), 10 alert di sicurezza chiusi, backup di produzione portati
-off-host con restore verificato. Seconda metà: chiusa Wave 0 con l'alerting (prima nessun
-job schedulato aveva un `OnFailure`: AIDE falliva ogni notte da settimane senza che
-nessuno lo sapesse, e il suo database non era mai stato inizializzato) e avviata W1.
+Chiusa la corsia W1 di questo giro e l'intera coda Dependabot (nessuna PR resta aperta).
+Poi tre revisori istruiti a demolire hanno smontato metà delle prove della sessione stessa,
+e le correzioni che ne sono seguite valgono più dei cluster: lo script del clone usciva con
+successo anche a database mezzo vuoto, il suo controllo di coerenza stampava «OK» proprio
+quando fallivano entrambi i lati del confronto, e gli orari dei timer erano sfasati di due
+ore perché la VM lavora in UTC e il PC Linux in ora locale — il pull dei backup partiva
+prima che il dump esistesse.
 
-Il filo conduttore, ricorrente al punto da essere una regola: **le ipotesi registrate nei
-debiti vanno rimisurate, non ereditate**. Sbagliate o superate: la causa di D-55, la
-retention dei backup, un gate di lint che passava verde senza lintare nulla, la
-strumentazione di S1027 che correlava due id diversi, il conteggio degli alert (10, non
-5), l'ampiezza del token colore rotto (molto più ampia del previsto), e due cluster che a verifica
-si sono rivelati inefficaci o dannosi (Z-110, Z-018).
+Il caso che riassume la sessione: un fix di ieri, dato per chiuso, aveva **spento i colori
+d'errore sul sito pubblico**. La premessa («quel token colore non esiste») era falsa, e lo
+si poteva vedere solo guardando il CSS realmente emesso, non il sorgente. Da qui la regola:
+**una prova vale solo se avrebbe potuto fallire** — e si misura l'artefatto prodotto, non
+la dichiarazione.
 
 ## Obiettivo permanente (mandato Enzo, S1029 — vale per OGNI sessione futura)
 
@@ -36,27 +35,30 @@ decisioni tecniche sono di Claude; a Enzo vanno solo le voci che dipendono da un
 `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — **254 cluster, 42 chiusi**.
 Le caselle spuntate portano la nota di chiusura con l'evidenza; il resto è aperto.
 
-- **W0 sblocco — COMPLETA** (tutti i blocchi HARD).
-- **W1 igiene** — 22 chiusi, ~53 aperti (~70h).
-- **W2-W5** — non ancora iniziate. **W6** — dipende da input di Enzo.
+- **W0 sblocco — COMPLETA**. **W1 igiene** — in corso, oltre un terzo chiuso.
+- **W2-W5** non iniziate. **W6** dipende da input di Enzo.
 
 ## ⚠ Top priorities (next session)
 
-1. **Proseguire W1** (~53 cluster ≤2h): è la corsia a massimo rapporto chiusure/ora.
-   Prossimi già istruiti: `Z-224`/`Z-225` (doc superati), `Z-125` (naming test
-   notifications), `Z-230`/`Z-234` (doc Dependabot e upstream stale), `Z-022` (timer di
-   refresh del clone DB su linux-pc), `Z-029`/`Z-030`/`Z-031` (ecosistema Claude).
-2. **Z-004 Dependabot** (~6h): 8 PR aperte, da **rebasare sul main di S1029** perché parte
-   del contenuto è già assorbita dagli override di sicurezza. 3 major di GitHub Actions +
-   4 major runtime + 1 gruppo minor-and-patch.
-3. **W2 debito/test** (~203h): il pezzo più utile è il gate E2E in CI — oggi gira **1 spec
-   Playwright su 72**, quindi 71 non sono monitorate cross-sessione.
+1. **Proseguire W1**, la corsia col miglior rapporto chiusure/ora. Prossimi già istruiti:
+   `Z-213`/`Z-214` (riconciliazione dei tracker 100X), `Z-219` (atlas stale), `Z-221`/
+   `Z-223` (roadmap e wave ferme in DRAFT), `Z-230` (doc di triage Dependabot — ora
+   scrivibile sul triage reale appena eseguito), `Z-239` (indice memorie), `Z-031`
+   (monitor di non-regressione dell'ecosistema).
+2. **I 6 cluster nati oggi**: `Z-249` due rossi semantici che convivono · `Z-250` la skill
+   `zero-pending-loop` senza i suoi 3 file eseguibili · `Z-251` la suite che non regge la
+   contesa sul DB · `Z-252` PaletteDropdown inerte · `Z-253` `heuresys_ci` mai rinfrescato
+   (è il DB su cui girano davvero i gate CI) · `Z-254` disciplina di rilascio upstream.
+3. **W2 debito/test**: il pezzo più utile resta il gate E2E in CI — oggi la copertura
+   Playwright monitorata cross-sessione è una frazione minima delle spec esistenti.
 
 ## Open questions (autorità *cosa* = Enzo)
 
 - **Contraddizione GDPR**: il design SuccessFactors afferma «nessuna governance PII/GDPR
   richiesta», la due diligence elenca RoPA/DPIA/DPA fra i requisiti mancanti. Posizione
   sul profilo legale, non scelta tecnica.
+- **Autonomia non presidiata**: il design di `zero-pending-loop` è ancora «BOZZA — in
+  attesa di approvazione». Serve il tuo via prima di costruirne i pezzi eseguibili (Z-250).
 - **Wave-3 (#17)** — sblocca il Blocco E Fase 3 (#69). In HOLD.
 - WAIT-INPUT invariati: **#4** pricing · **#8** app-password Outlook · **#16**
   SuccessFactors · **#52** SSO IdP.
@@ -66,9 +68,10 @@ Le caselle spuntate portano la nota di chiusura con l'evidenza; il resto è aper
 ```bash
 git log origin/main..HEAD --oneline               # 0 dopo il push handoff
 python docs/kb/tools/handoff_lint.py              # OK atteso
-gh run list --branch main --workflow=test-integration.yml --limit 1   # success
-gh api repos/Spen-Zosky/heuresys-advanced/dependabot/alerts --paginate --jq '[.[]|select(.state=="open")]|length'  # 1 = solo D-75 (rischio accettato)
-grep -c '^- \[x\]' docs/superpowers/specs/2026-07-25-zero-pending-plan.md   # 33 chiusi
-ssh oracle-vm-default "curl -s localhost:9091/api/v1/rules | head -c 80"    # regole di alert attive
+python docs/kb/tools/check_module_test_coverage.py --self-test   # 8/8 passati
+gh run list --branch main --limit 7               # 7/7 success sull'ultimo commit
+gh pr list --state open                           # vuota
+grep -c '^- \[x\]' docs/superpowers/specs/2026-07-25-zero-pending-plan.md   # 42
+ssh linux-pc "systemctl list-timers heuresys-advanced-clonedb.timer"        # NEXT domenica
 python docs/kb/tools/session_start.py             # menu + salute
 ```

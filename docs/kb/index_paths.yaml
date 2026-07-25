@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-25T13:32:39Z da docs/kb/tools/build_index.py
+# generato: 2026-07-25T17:46:18Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-25T13:32:39Z"
-  total_files: 2558
+  generated_at: "2026-07-25T17:46:18Z"
+  total_files: 2578
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -12,8 +12,8 @@ meta:
     api-core: 28
     api-module: 318
     ci: 17
-    claude-config: 15
-    config: 107
+    claude-config: 29
+    config: 109
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -22,7 +22,7 @@ meta:
     db-other: 8
     db-script: 35
     db-seed: 115
-    doc-canonical: 497
+    doc-canonical: 500
     handoff-state: 1
     qa-artifact: 103
     script: 6
@@ -32,11 +32,11 @@ meta:
     showcase-source: 14
     test: 306
     ux-design-archive: 80
-    web-source: 206
+    web-source: 207
   status_counts:
     archive: 497
     external-archive: 50
-    live: 2011
+    live: 2031
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2486,6 +2486,90 @@ files:
     category: claude-config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\SKILL.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/SKILL.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\evals\evals.json'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/evals/evals.json'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\evals\trigger-eval.json'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/evals/trigger-eval.json'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\LEARNINGS.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/LEARNINGS.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\adversarial.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/adversarial.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\blast-radius.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/blast-radius.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\bootstrap.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/bootstrap.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\close.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/close.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\driver.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/driver.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\gates.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/gates.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\operations.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/operations.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\protocol.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/protocol.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\selection.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/selection.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\references\zp.config.yaml'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/references/zp.config.yaml'
+    category: claude-config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.env.example'
     root: repo
     rel: '.env.example'
@@ -2735,6 +2819,18 @@ files:
   - path: 'D:\heuresys-advanced\deploy\systemd\actions-runner-resource.dropin.conf'
     root: repo
     rel: 'deploy/systemd/actions-runner-resource.dropin.conf'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\archive\heuresys-advanced-clonedb.service'
+    root: repo
+    rel: 'deploy/systemd/archive/heuresys-advanced-clonedb.service'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\archive\heuresys-advanced-clonedb.timer'
+    root: repo
+    rel: 'deploy/systemd/archive/heuresys-advanced-clonedb.timer'
     category: config
     status: live
     provenance: git-tracked
@@ -8828,6 +8924,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\check_module_test_coverage.py'
+    root: repo
+    rel: 'docs/kb/tools/check_module_test_coverage.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\handoff_lint.py'
     root: repo
     rel: 'docs/kb/tools/handoff_lint.py'
@@ -10235,6 +10337,18 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-06-project-atlas-skill-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-07-06-project-atlas-skill-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-delivery-loop-skill-design.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-07-25-delivery-loop-skill-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-zero-pending-loop-design.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-07-25-zero-pending-loop-design.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -14879,6 +14993,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\whistleblowing-console\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/whistleblowing-console/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\_theme-tokens.css'
+    root: repo
+    rel: 'apps/web/src/app/_theme-tokens.css'
     category: web-source
     status: live
     provenance: git-tracked

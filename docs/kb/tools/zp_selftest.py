@@ -17,7 +17,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from zp_state import RADICE, ZPDIR, carica_config, carica_piano, candidati, verifica  # noqa: E402
+from zp_state import (RADICE, ZPDIR, carica_config, carica_piano, candidati,  # noqa: E402
+                      verifica, precondizioni_classe_c)
 from zp_gate import coppia_ammessa  # noqa: E402
 
 ESITI = []
@@ -29,6 +30,75 @@ def prova(nome: str, condizione: bool, dettaglio: str = '') -> None:
 
 def da_fare_a_mano(nome: str, come: str) -> None:
     ESITI.append((nome, None, come))
+
+
+def prove_su_fixture() -> list:
+    """Comportamenti verificati su un piano SINTETICO, con l'atteso deciso a mano.
+
+    Serve perche' i test sui dati vivi non possono fallire: se `effort` smettesse di essere
+    letto, o il budget di filtrare, l'esito resterebbe verde. Dimostrato in review — quattro
+    regressioni iniettate su cinque non venivano rilevate.
+    """
+    import shutil
+    esiti = []
+    base = ZPDIR / 'selftest'
+    base.mkdir(parents=True, exist_ok=True)
+    piano = base / 'piano-finto.md'
+    piano.write_text("""# finto
+
+## W1 — igiene (3)
+
+### test (3)
+
+- [ ] **Z-801** (3.0h) — cluster grosso
+  - *chiuso quando*: comando
+- [ ] **Z-802** (0.5h) — cluster piccolo
+  - *chiuso quando*: comando
+- [ ] **Z-803** (1.0h · **esterno**) — bloccato su un input esterno
+  - *chiuso quando*: comando
+""", encoding='utf-8')
+    rel = piano.relative_to(RADICE).as_posix()
+    cfg = {'meta': {'plan': rel},
+           'lanes': {'safe': ['A', 'B'], 'full': ['A', 'B', 'C']},
+           'clusters': {'Z-801': {'classe': 'B'}, 'Z-802': {'classe': 'B'},
+                        'Z-803': {'classe': 'E'}},
+           'interrupt_resume': {'max_failures_per_cluster': 2}}
+    cl = carica_piano(cfg)
+    per_id = {c.id: c for c in cl}
+
+    # 11 - l'effort viene letto davvero dal piano
+    ok = per_id['Z-801'].effort == 3.0 and per_id['Z-802'].effort == 0.5
+    esiti.append(('11 effort letto dal piano', ok,
+                  f"Z-801={per_id['Z-801'].effort}h Z-802={per_id['Z-802'].effort}h (attesi 3.0 e 0.5)"))
+
+    # 12 - il tetto di effort per giro filtra
+    con_budget = {c.id for c in candidati(cl, cfg, 'safe', budget_ore=1.0)}
+    ok = 'Z-802' in con_budget and 'Z-801' not in con_budget
+    esiti.append(('12 budget-ore filtra', ok,
+                  f'con budget 1.0h resta {sorted(con_budget)} (atteso solo Z-802)'))
+
+    # 13 - il marcatore di blocco su Enzo e' riconosciuto dal PIANO (non dalla config)
+    ok = per_id['Z-803'].bloccato_su_enzo == 'esterno' and not per_id['Z-803'].eseguibile_da_solo
+    tutti = {c.id for c in candidati(cl, cfg, 'full')}
+    esiti.append(('13 blocco su Enzo dal piano', ok and 'Z-803' not in tutti,
+                  f"marcatore='{per_id['Z-803'].bloccato_su_enzo}', eleggibile={'Z-803' in tutti}"))
+
+    # 14 - il contatore dei fallimenti ferma il cluster
+    interrotti = ZPDIR / 'interrupted.json'
+    salvato = interrotti.read_text(encoding='utf-8') if interrotti.is_file() else None
+    try:
+        interrotti.write_text(json.dumps({'Z-802': {'fallimenti': 2}}), encoding='utf-8')
+        dopo = {c.id for c in candidati(cl, cfg, 'safe')}
+        ok = 'Z-802' not in dopo
+        esiti.append(('14 contatore fallimenti ferma', ok,
+                      f'dopo 2 fallimenti resta {sorted(dopo)} (atteso senza Z-802)'))
+    finally:
+        if salvato is not None:
+            interrotti.write_text(salvato, encoding='utf-8')
+        elif interrotti.is_file():
+            interrotti.unlink()
+    shutil.rmtree(base, ignore_errors=True)
+    return esiti
 
 
 def main() -> int:
@@ -47,9 +117,18 @@ def main() -> int:
           'tutti' if not senza else f'{len(senza)} senza classe: {senza[:3]}')
 
     # 3 - il rifiuto delle prove omogenee
-    casi = [(('integration', 'integration'), False), (('integration', 'e2e'), False),
-            (('live', 'psql'), False), (('integration', 'psql'), True),
-            (('integration', 'unit'), True), (('migrate2', 'dbvalidate'), True)]
+    # Aspettative riscritte sulla Definition of Done del progetto (S1030): le prime due
+    # coppie sono quelle che CLAUDE.md e ADR-0026 impongono, e la vecchia regola le
+    # rifiutava; `staticcheck` non vale come meta' prova.
+    casi = [(('integration', 'e2e'), True),          # DoD: integration verde + Playwright verde
+            (('psql', 'runtime'), True),             # ADR-0026: mutazione confermata + comportamento
+            (('integration', 'unit'), True),
+            (('migrate2', 'dbvalidate'), True),
+            (('integration', 'integration'), False), # la stessa prova due volte
+            (('psql', 'dbvalidate'), False),         # stesso livello: stesso punto cieco
+            (('live', 'runtime'), False),
+            (('staticcheck', 'e2e'), False),         # un typecheck non e' meta' evidenza
+            (('staticcheck', 'integration'), False)]
     sbagliati = [c for c, atteso in casi if coppia_ammessa(*c)[0] != atteso]
     prova('3 coppie di prove', not sbagliati,
           f'{len(casi)} casi, tutti corretti' if not sbagliati else f'sbagliati: {sbagliati}')
@@ -62,13 +141,27 @@ def main() -> int:
           f'{len(d_aperti)} cluster D, nessuno eleggibile' if not intrusi
           else f'INTRUSI: {intrusi}')
 
-    # 5 - la classe C entra in full ma non in safe
+    # 5 - la classe C: mai in safe, e in full SOLO con le precondizioni soddisfatte.
+    # La seconda meta' e' la regola introdotta col punto 2 della review S1030: dump recente
+    # verificato + host di prova raggiungibile. Non verificate = assenti, quindi C esclusa.
     c_aperti = [c for c in aperti if c.classe == 'C']
-    in_full = {x.id for x in candidati(clusters, cfg, 'full')}
+    in_full = {x.id for x in candidati(clusters, cfg, 'full')}          # offline: C fuori
     fuori_safe = all(c.id not in scelti for c in c_aperti)
-    dentro_full = any(c.id in in_full for c in c_aperti) if c_aperti else True
-    prova('5 classe C solo in full', fuori_safe and dentro_full,
-          f'{len(c_aperti)} cluster C: fuori da safe={fuori_safe}, dentro full={dentro_full}')
+    fuori_full_offline = all(c.id not in in_full for c in c_aperti)
+    prova('5a classe C fuori da safe e da full-offline', fuori_safe and fuori_full_offline,
+          f'{len(c_aperti)} cluster C: fuori da safe={fuori_safe}, '
+          f'esclusi offline dalla full={fuori_full_offline}')
+
+    pre_ok, dettagli = precondizioni_classe_c(cfg, offline=False)
+    if pre_ok:
+        in_full_rete = {x.id for x in candidati(clusters, cfg, 'full', offline=False)}
+        dentro = any(c.id in in_full_rete for c in c_aperti) if c_aperti else True
+        prova('5b classe C entra in full con le precondizioni ok', dentro,
+              f'precondizioni soddisfatte, {len(in_full_rete)} candidati in full')
+    else:
+        da_fare_a_mano('5b classe C in full',
+                       'precondizioni non soddisfatte ora: ' +
+                       '; '.join(f'{n}: {d}' for n, ok, d in dettagli if not ok))
 
     # 6 - la corsia safe produce candidati veri, tutti A o B
     classi_scelte = {c.classe for c in candidati(clusters, cfg, 'safe')}
@@ -101,6 +194,12 @@ def main() -> int:
                        cwd=RADICE, capture_output=True, text=True)
     prova('10 condizione di fine non raggiunta', r.returncode == 1,
           f'exit {r.returncode} (1 = c\'e ancora lavoro, corretto)')
+
+    # 11-14 - le quattro regressioni che la suite NON vedeva (review S1030): i test 4-9
+    # girano sui dati vivi e sono tautologici — verificano che la funzione faccia cio' che
+    # fa, non che faccia la cosa giusta. Qui l'atteso e' scritto a mano su un piano finto.
+    for nome, esito, dett in prove_su_fixture():
+        ESITI.append((nome, esito, dett))
 
     da_fare_a_mano('bootstrap non ri-censisce', 'serve una sessione viva: /zero-pending-loop bootstrap')
     da_fare_a_mano('freno a meta lavoro', 'serve una corsa vera: zp ferma mentre gira')

@@ -59,6 +59,7 @@ muori(){ log "STOP: $*"; rm -f "$LOCK"; exit "${2:-1}"; }
 BUDGET_GIRO="$(cfg budget.max_budget_usd_per_iteration)"; [[ -z "$BUDGET_GIRO" ]] && BUDGET_GIRO=12
 TETTO_TOT="$(cfg budget.hard_stop_usd_total)";            [[ -z "$TETTO_TOT" ]] && TETTO_TOT=120
 STALE_H="$(cfg interrupt_resume.resume_stale_after_hours)"; [[ -z "$STALE_H" ]] && STALE_H=24
+ORE_MAX="$(cfg budget.max_effort_hours_per_cluster)"; [[ -z "$ORE_MAX" ]] && ORE_MAX=4
 CLASSIFICATI="$(cfg meta.clusters_classified)"
 
 mkdir -p "$ZP"
@@ -212,7 +213,7 @@ while (( GIRO < MAX_ITER )); do
   log "giro $GIRO/$MAX_ITER  modo=$MODO  speso finora \$$SPESA"
 
   if [[ $DRY -eq 1 ]]; then
-    "$PY" docs/kb/tools/zp_state.py todo --lane "$CORSIA" || true
+    "$PY" docs/kb/tools/zp_state.py todo --lane "$CORSIA" --budget-ore "$ORE_MAX" || true
     log "dry-run: mi fermo dopo aver mostrato i candidati"
     break
   fi
@@ -224,7 +225,7 @@ while (( GIRO < MAX_ITER )); do
   # misurato, due sessioni da $11.87 contabilizzate $0.00. Il prompt porta anche la
   # CORSIA, che prima non arrivava alla sessione (B5): la sessione sceglieva da sola il
   # default `safe` — una speranza, non una garanzia.
-  claude -p "/zero-pending-loop $MODO --lane $CORSIA" \
+  claude -p "/zero-pending-loop $MODO --lane $CORSIA --budget-ore $ORE_MAX" \
       --output-format json \
       --max-budget-usd "$BUDGET_GIRO" \
       --permission-mode "$PERMESSI" \

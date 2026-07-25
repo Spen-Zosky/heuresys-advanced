@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime
@@ -33,15 +34,59 @@ def _file_cluster(cluster: str) -> Path:
     return PROVE / f'{cluster}.json'
 
 
+# Il tipo di prova deve corrispondere a cio' che il comando FA (review S1030). Prima era
+# autodichiarato e mai confrontato: `--tipo e2e --comando "echo login reale: OK"` veniva
+# accettato, e due `echo` bastavano a soddisfare la Definition of Done. Il docstring
+# prometteva l'opposto («non si puo' scrivere a memoria un blocco che questo script non ha
+# generato»): era vero per l'output, falso per l'etichetta.
+IMPRONTE = {
+    'e2e':         r'playwright|test:e2e|\bcypress\b',
+    'integration': r'vitest|pnpm\s+test|jest|--run\b.*test',
+    'unit':        r'vitest|pnpm\s+test|jest|unittest|pytest',
+    'staticcheck': r'typecheck|tsc\b|eslint|\blint\b|mypy|ruff',
+    'psql':        r'\bpsql\b|\bpg_dump\b|\bpsql\.exe\b',
+    'live':        r'\bcurl\b|\bhttp\b|\bgh\b\s|\bssh\b|\bsystemctl\b|\bjournalctl\b',
+    'runtime':     r'\bcurl\b|\bssh\b|\bsystemctl\b|\bjournalctl\b|\bdocker\b|\bps\b\s',
+    'build':       r'\bbuild\b|\bnext build\b|\btsup\b|\bpnpm\s+build\b',
+}
+# `echo`, `printf`, `true`, `:` non sono prove di nulla, con nessuna etichetta.
+FINTE = r'^\s*(echo|printf|true|:|cat\s+<<)\b'
+
+
+def _impronta_ok(tipo: str, comando: str) -> tuple[bool, str]:
+    if re.search(FINTE, comando.strip(), flags=re.IGNORECASE):
+        return False, ('il comando non esegue niente (echo/printf/true): '
+                       'non e una prova, con nessuna etichetta')
+    attesa = IMPRONTE.get(tipo)
+    if not attesa:
+        return True, ''
+    if re.search(attesa, comando, flags=re.IGNORECASE):
+        return True, ''
+    return False, (f'il comando non somiglia a una prova di tipo "{tipo}" '
+                   f'(attesi indizi: {attesa}). Usa il tipo giusto o il comando giusto.')
+
+
 def registra(cluster: str, tipo: str, comando: str, path_rif: str, cwd: str | None) -> int:
     if tipo not in NATURA:
         print(f'tipo di prova sconosciuto: {tipo}. Vedi `zp_gate.py tipi`', file=sys.stderr)
         return 2
+    ok, perche = _impronta_ok(tipo, comando)
+    if not ok:
+        print(f'PROVA RIFIUTATA: {perche}', file=sys.stderr)
+        return 2
     dove = Path(cwd).resolve() if cwd else RADICE
     inizio = datetime.now()
-    esito = subprocess.run(comando, cwd=dove, shell=True, capture_output=True, text=True)
+    # encoding esplicito: senza, i sottoprocessi ereditano cp1252 su Windows e un semplice
+    # apice tipografico nell'output di pnpm/vitest/psql faceva morire il reader-thread —
+    # la prova finiva registrata VERDE e VUOTA, che e' il peggior esito possibile.
+    esito = subprocess.run(comando, cwd=dove, shell=True, capture_output=True,
+                           text=True, encoding='utf-8', errors='replace')
     uscita = (esito.stdout or '') + (('\n[stderr]\n' + esito.stderr) if esito.stderr else '')
     uscita = uscita.strip()
+    if not uscita:
+        print('PROVA RIFIUTATA: il comando non ha prodotto output. '
+              'Una prova senza output non dimostra nulla.', file=sys.stderr)
+        return 2
     troncato = len(uscita) > MAX_OUTPUT
     if troncato:
         uscita = uscita[:MAX_OUTPUT] + f'\n... [troncato, {len(uscita)} caratteri in tutto]'

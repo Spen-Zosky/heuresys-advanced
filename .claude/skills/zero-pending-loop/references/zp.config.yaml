@@ -26,22 +26,36 @@ meta:
   #   «verde» con zero workflow valutati · API di produzione ferma vista come sana ·
   #   alert di sicurezza «accettati» per una parola trovata nella prosa del registro.
   #
-  #   APERTI, da chiudere prima di togliere il freno:
-  #   (a) la classificazione mette in corsia non presidiata cluster che toccano la
-  #       produzione — Z-153 (deploy sul sito pubblico), Z-070 (backfill di ~14k skill sul
-  #       DB reale), Z-186 (import di 139k archi), Z-048 (PATCH reali su /v1/me/*),
-  #       Z-167, Z-108, Z-209. La regola guarda la descrizione e non il *chiuso quando*,
-  #       che e' dove sta l'azione;
-  #   (b) `class_c_preconditions` non e' letto da nessuna riga di codice: dump verificato,
-  #       prova su linux-pc e doppia esecuzione sono prosa;
-  #   (c) il tipo di prova e' autodichiarato — due `echo` chiudono un cluster — e con
-  #       output UTF-8 la prova viene registrata verde e VUOTA (encoding cp1252 nei
-  #       sottoprocessi);
-  #   (d) il gate delle prove rifiuta le coppie che la Definition of Done del progetto
-  #       impone (integration+e2e, psql+runtime) e accetta un typecheck come mezza prova;
-  #   (e) `zp_selftest` non rileva 4 regressioni su 5 (effort, budget, contatore
-  #       fallimenti, marcatore di blocco su Enzo non sono coperti);
-  #   (f) scritture di stato non atomiche e id duplicato che sblocca le dipendenze.
+  #   CHIUSI il 2026-07-26, tutti e sei, con prova eseguita:
+  #   (a) la classe ora ha un PAVIMENTO imposto da cio' che il criterio di chiusura FA, non
+  #       da come il lavoro e' descritto — e il pavimento vince sugli override manuali. I 7
+  #       cluster che toccavano la produzione sono usciti dalla corsia non presidiata
+  #       (Z-153 e Z-209 -> D, Z-070/Z-186/Z-048/Z-167/Z-108 -> C); in tutto 14 alzati,
+  #       ZERO abbassati, coda safe da 89 a 78;
+  #   (b) `class_c_preconditions` e' verificato da zp_state.precondizioni_classe_c(): dump
+  #       piu' recente di 24h sull'archivio off-host + host di prova raggiungibile. Senza
+  #       rete la classe C resta esclusa (159 candidati con rete, 78 senza): non verificate
+  #       significa assenti;
+  #   (c) il tipo di prova e' confrontato col comando (IMPRONTE) e `echo/printf/true` sono
+  #       rifiutati con qualunque etichetta; output vuoto = prova rifiutata; encoding utf-8
+  #       esplicito nei sottoprocessi, cosi' un apice tipografico non svuota piu' la prova;
+  #   (d) il gate ragiona per LIVELLI (codice-isolato · sistema-api · sistema-ui · stato ·
+  #       produzione · ripetibilita') invece che per tipo di strumento: `integration+e2e` e
+  #       `psql+runtime` — che la Definition of Done impone — sono ammesse, e `staticcheck`
+  #       non conta piu' come meta' prova. Coppie ammesse 26 su 36, era 31;
+  #   (e) `zp_selftest` copre le quattro regressioni che non vedeva (effort, budget-ore,
+  #       contatore fallimenti, marcatore di blocco su Enzo) con fixture sintetiche e atteso
+  #       scritto a mano: iniettandole una per una, ora falliscono tutte e quattro, ognuna
+  #       dal test giusto. 15 test, 0 falliti;
+  #   (f) scritture di stato atomiche (tmp + rename) e letture che mettono da parte un file
+  #       corrotto invece di degradare in silenzio; un id duplicato non sblocca piu' le
+  #       dipendenze (chiuso solo se TUTTE le occorrenze lo sono); `--budget-ore` e' passato
+  #       dal driver (tetto: budget.max_effort_hours_per_cluster).
+  #
+  # RESTA: il freno non si toglie da solo. E' una decisione di Enzo, non tecnica — e il
+  # design e' ancora «BOZZA in attesa di approvazione». Restano inoltre i 4 test che
+  # richiedono una sessione viva (bootstrap, freno a meta' lavoro, troncamento da budget,
+  # frontiere della description): vanno fatti in una prima corsa presidiata.
   #
   # Referto completo: nell'entry di riconciliazione in docs/kb/COWORK_INBOX.md.
   autorizzato_non_presidiato: false
@@ -57,6 +71,11 @@ budget:
   # accessibile al modello, /context non invocabile in headless, hook senza dati di token,
   # compaction senza segnale). Quindi il consumo non si misura: si limita il lavoro.
   clusters_per_iteration: 1       # chiuso il cluster, si chiude la sessione e il driver riparte
+  # Tetto di EFFORT per cluster in corsia non presidiata (S1030). `--budget-ore` esisteva
+  # in zp_state ma non era passato da nessuno: la coda conteneva cluster fino a 18h contro
+  # un budget di 12 USD per iterazione, e il troncamento a meta' cluster e' il modo di
+  # fallire piu' costoso. Un lavoro piu' grande va spezzato nel piano o fatto presidiato.
+  max_effort_hours_per_cluster: 4
   # VERIFICATO su claude 2.1.220 (`claude --help`): `--max-turns` NON esiste come flag CLI.
   # L'unico tetto quantitativo per invocazione e' `--max-budget-usd`. Il limite ai turni si
   # ottiene dalla clausola `or stop after N turns` dentro /goal, non da un flag.
@@ -122,8 +141,11 @@ gates:
     - python docs/kb/tools/handoff_lint.py
 
 class_c_preconditions:
+  # Dal S1030 queste righe sono VERIFICATE da zp_state.precondizioni_classe_c(), non piu'
+  # solo dichiarate: un cluster di classe C non e' candidabile finche' non sono soddisfatte.
   verified_dump_max_age_hours: 24
   rehearsal_host: linux-pc          # gemello prod con DB clone locale
+  archive_dir: ~/heuresys-backups/prod   # dove pull-prod-backups.sh deposita i dump
   require_idempotent_twice: true
   require_empty_pgdump_diff: true
 
@@ -192,22 +214,22 @@ clusters:
   Z-036: {classe: C, perche: "schema e dati: sys_auth"}
   Z-037: {classe: D, perche: "produzione viva: JWT (JWT_PRIVATE_KEY_PREVIOUS + grace period) un test verifica che un token firmato con la chiav, Rotazion"}
   Z-038: {classe: B, perche: "codice: route, test"}
-  Z-039: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-039: {classe: D, perche: "D per azione (il criterio interroga il dominio pubblico); il testo suggeriva C", rivisto: false}
   Z-040: {classe: B, perche: "codice: api, apps/api, test"}
   Z-041: {classe: B, perche: "codice: route"}
   Z-042: {classe: A, perche: "inerte: DEBT_REGISTER"}
   Z-045: {classe: E, perche: "bloccato su Enzo: segreto"}
   Z-046: {classe: C, perche: "schema e dati: sys_auth"}
   Z-047: {classe: C, perche: "schema e dati: sys_auth"}
-  Z-048: {classe: B, perche: "codice: API, test"}
+  Z-048: {classe: C, perche: "C per azione (il criterio esegue una query sul database); il testo suggeriva B"}
   Z-049: {classe: D, perche: "produzione viva: rotazion"}
   Z-050: {classe: C, perche: "schema e dati: sys_auth, tabelle"}
   Z-052: {classe: E, perche: "bloccato su Enzo: esterno"}
   Z-054: {classe: C, perche: "schema e dati: DDL"}
   Z-055: {classe: B, perche: "rivisto a mano: store condiviso per il rate-limit: codice applicativo"}
   Z-056: {classe: B, perche: "codice: test"}
-  Z-057: {classe: B, perche: "rivisto a mano: tocca .env.example versionato, non il .env reale"}
-  Z-059: {classe: C, perche: "rivisto a mano: drop delle staging.wave1_*: schema e dati"}
+  Z-057: {classe: D, perche: "D per azione (il criterio tocca segreti o configurazione di macchina); override \"tocca .env.example versionato, non il .env reale\" respinto: guardava la descrizione"}
+  Z-059: {classe: D, perche: "D per azione (il criterio si misura sulla VM di produzione); override \"drop delle staging.wave1_*: schema e dati\" respinto: guardava la descrizione"}
   Z-060: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-061: {classe: C, perche: "schema e dati: tabelle"}
   Z-062: {classe: C, perche: "schema e dati: sys_approval"}
@@ -218,7 +240,7 @@ clusters:
   Z-067: {classe: C, perche: "schema e dati: sys_goal"}
   Z-068: {classe: C, perche: "schema e dati: sys_source"}
   Z-069: {classe: C, perche: "schema e dati: Seed, brownfield"}
-  Z-070: {classe: B, perche: "codice: codice"}
+  Z-070: {classe: C, perche: "C per azione (il criterio esegue una query sul database); il testo suggeriva B"}
   Z-071: {classe: B, perche: "codice: test"}
   Z-072: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-073: {classe: C, perche: "schema e dati: brownfield"}
@@ -256,7 +278,7 @@ clusters:
   Z-105: {classe: B, perche: "rivisto a mano: unit test: \"secret\" agganciato da una parola nel done-when"}
   Z-106: {classe: B, perche: "codice: Playwright, apps/web, component"}
   Z-107: {classe: C, perche: "schema e dati: seed"}
-  Z-108: {classe: B, perche: "codice: test"}
+  Z-108: {classe: C, perche: "C per azione (il criterio installa o provisiona software di sistema); il testo suggeriva B"}
   Z-109: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-111: {classe: B, perche: "codice: api, apps/api, vitest"}
   Z-112: {classe: A, perche: "inerte: DEBT_REGISTER"}
@@ -296,9 +318,9 @@ clusters:
   Z-148: {classe: B, perche: "codice: i18n"}
   Z-149: {classe: C, perche: "schema e dati: migration", rivisto: false}
   Z-150: {classe: C, perche: "rivisto a mano: scrive righe in sys_leads: e un lavoro sui dati, non sul runtime"}
-  Z-151: {classe: B, perche: "codice: UI, pagina"}
+  Z-151: {classe: C, perche: "C per azione (il criterio esegue scritture via API); il testo suggeriva B"}
   Z-152: {classe: B, perche: "codice: apps/web"}
-  Z-153: {classe: B, perche: "rivisto a mano: asset statici dello showcase (favicon, webmanifest)"}
+  Z-153: {classe: D, perche: "D per azione (il criterio interroga il dominio pubblico); override \"asset statici dello showcase (favicon, webmanifest)\" respinto: guardava la descrizione"}
   Z-154: {classe: B, perche: "codice: Playwright"}
   Z-155: {classe: B, perche: "codice: codice, pagina"}
   Z-157: {classe: C, perche: "schema e dati: sys_auth"}
@@ -310,8 +332,8 @@ clusters:
   Z-163: {classe: B, perche: "codice: api, apps/api, test"}
   Z-164: {classe: B, perche: "codice: api, apps/api, apps/web"}
   Z-165: {classe: B, perche: "codice: apps/showcase, lint"}
-  Z-167: {classe: B, perche: "codice: Refactor"}
-  Z-168: {classe: B, perche: "codice: repository, test"}
+  Z-167: {classe: C, perche: "C per azione (il criterio esercita un volume dell ordine delle migliaia); il testo suggeriva B"}
+  Z-168: {classe: C, perche: "C per azione (il criterio conta migliaia di righe: e un carico sui dati); il testo suggeriva B"}
   Z-169: {classe: B, perche: "codice: endpoint"}
   Z-172: {classe: C, perche: "schema e dati: migration, schema"}
   Z-173: {classe: B, perche: "codice: Refactor, apps/web, hook"}
@@ -324,7 +346,7 @@ clusters:
   Z-183: {classe: C, perche: "schema e dati: sys_visualization"}
   Z-184: {classe: C, perche: "schema e dati: sys_reward"}
   Z-185: {classe: C, perche: "schema e dati: tabella"}
-  Z-186: {classe: B, perche: "codice: component, pagina"}
+  Z-186: {classe: C, perche: "C per azione (il criterio esegue una query sul database); il testo suggeriva B"}
   Z-187: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-188: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-189: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
@@ -347,7 +369,7 @@ clusters:
   Z-206: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-207: {classe: B, perche: "codice: codice, test"}
   Z-208: {classe: A, perche: "inerte: piano"}
-  Z-209: {classe: B, perche: "codice: API, servizio"}
+  Z-209: {classe: D, perche: "D per azione (il criterio si misura sulla VM di produzione); il testo suggeriva B"}
   Z-210: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-211: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-212: {classe: C, perche: "schema e dati: migration", rivisto: false}
@@ -376,11 +398,12 @@ clusters:
   Z-247: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-248: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-249: {classe: B, perche: "codice: apps/showcase, apps/web, ui"}
-  Z-250: {classe: A, perche: "inerte: docs/"}
-  Z-251: {classe: C, perche: "schema e dati: pg_dump", rivisto: false}
+  Z-250: {classe: D, perche: "produzione viva: deploy, produzione", rivisto: false}
+  Z-251: {classe: D, perche: "D per azione (il criterio si misura sulla VM di produzione); il testo suggeriva C", rivisto: false}
   Z-252: {classe: B, perche: "codice: pagina"}
   Z-253: {classe: D, perche: "produzione viva: PROD", rivisto: false}
   Z-254: {classe: B, perche: "rivisto a mano: tag e versioning della lib: \"deploy\" e nel discorso, non nel lavoro"}
+  Z-255: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
 
 
 # Override auto-appresi. Azzerabile in blocco senza toccare il resto della config.

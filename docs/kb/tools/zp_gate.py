@@ -43,9 +43,35 @@ NATURA = {
     'dbvalidate':  'struttura',       # pnpm db:validate, le 7 viste: coerenza dello schema
 }
 
-# L'unica coppia di pari natura ammessa, e per una ragione precisa: non differiscono per
-# natura ma per RAGGIUNGIBILITA' - l'unit test copre il ramo che l'integrazione non tocca.
-ECCEZIONI = {frozenset({'integration', 'unit'})}
+# RIDISEGNO S1030 — la domanda era sbagliata, quindi lo erano le risposte.
+#
+# `NATURA` raggruppa per TIPO DI STRUMENTO: integration, unit ed e2e sono tutte
+# «automatica». Ne seguiva che il gate rifiutava meccanicamente `integration + e2e` e
+# `psql + runtime` — cioe' proprio le due coppie che la Definition of Done di questo
+# progetto IMPONE (CLAUDE.md §MVP-2a/2b: «integration test verde + Playwright E2E verde»;
+# ADR-0026: la query che conferma la mutazione accanto al comportamento osservato). E nel
+# frattempo ammetteva `staticcheck` con qualunque cosa, cioe' un typecheck valeva come
+# meta' evidenza: l'esatto contrario di «nessuno step si chiude su green-test».
+#
+# La domanda giusta non e' «che strumento e'» ma: **queste due prove possono sbagliare
+# insieme?** Due prove servono se guardano il sistema da punti in cui un difetto si
+# manifesta in modo indipendente. Da qui i LIVELLI: due prove sono ammesse quando stanno
+# su livelli diversi, perche' allora il punto cieco dell'una e' coperto dall'altra.
+LIVELLO = {
+    'unit':        'codice-isolato',   # esegue una funzione senza il resto del mondo
+    'integration': 'sistema-api',      # esercita l'API contro il DB reale
+    'e2e':         'sistema-ui',       # esercita l'interfaccia come farebbe una persona
+    'psql':        'stato',            # guarda cosa e' rimasto scritto
+    'dbvalidate':  'stato',            # guarda la coerenza strutturale di cio' che e' scritto
+    'live':        'produzione',       # osserva il sistema vero, in esecuzione
+    'runtime':     'produzione',
+    'migrate2':    'ripetibilita',     # la stessa operazione due volte da lo stesso esito
+    'staticcheck': 'nessuno',          # non esegue niente: e' un prerequisito, non una prova
+}
+
+# `staticcheck` non conta MAI come una delle due prove. Typecheck e lint devono essere verdi
+# — sono la soglia d'ingresso — ma non dimostrano che il lavoro faccia cio' che promette.
+NON_CONTANO = {'staticcheck'}
 
 DESCRIZIONE = {
     'integration': "test d'integrazione contro il DB reale via tunnel",
@@ -114,20 +140,23 @@ def esegui_controlli(controlli: list, dry: bool) -> tuple[int, list]:
 
 
 def coppia_ammessa(a: str, b: str) -> tuple[bool, str]:
-    if a not in NATURA:
+    if a not in LIVELLO:
         return False, f"tipo di prova sconosciuto: {a}. Usa `zp_gate.py tipi`"
-    if b not in NATURA:
+    if b not in LIVELLO:
         return False, f"tipo di prova sconosciuto: {b}. Usa `zp_gate.py tipi`"
     if a == b:
-        return False, (f'coppia omogenea: due volte {a}. Servono due prove di natura '
-                       f'diversa - non due esecuzioni della stessa.')
-    if frozenset({a, b}) in ECCEZIONI:
-        return True, (f'{a} + {b}: stessa natura ma raggiungibilita diversa, '
-                      f'ammessa esplicitamente')
-    if NATURA[a] == NATURA[b]:
-        return False, (f'coppia omogenea: {a} e {b} sono entrambe di natura '
-                       f'"{NATURA[a]}". Condividono lo stesso punto cieco.')
-    return True, f'{a} ({NATURA[a]}) + {b} ({NATURA[b]}): nature diverse, ammessa'
+        return False, (f'due volte {a}: e la stessa prova eseguita due volte, '
+                       f'non due prove.')
+    for t in (a, b):
+        if t in NON_CONTANO:
+            return False, (f'{t} non conta come prova: non esegue il sistema, verifica il '
+                           f'codice fermo. Deve essere verde comunque, ma le due prove '
+                           f'devono guardare il lavoro in funzione.')
+    if LIVELLO[a] == LIVELLO[b]:
+        return False, (f'{a} e {b} guardano lo stesso livello ("{LIVELLO[a]}"): un difetto '
+                       f'che sfugge alla prima sfugge anche alla seconda.')
+    return True, (f'{a} ({LIVELLO[a]}) + {b} ({LIVELLO[b]}): livelli diversi, '
+                  f'i punti ciechi non coincidono')
 
 
 def main() -> int:

@@ -89,6 +89,70 @@ OVERRIDE = {
 }
 
 
+# ---------------------------------------------------------------- pavimento per AZIONE
+#
+# Il difetto che questi pattern chiudono (review S1030): la classe si decideva sul testo
+# complessivo, e gli OVERRIDE a mano vincevano su tutto — ma erano stati scelti leggendo la
+# DESCRIZIONE, che dice di cosa parla il lavoro, non cosa fa. L'azione sta nel *chiuso
+# quando*, che e' l'unica riga verificabile con un comando. Cosi' `Z-153` era marcato B
+# («asset statici dello showcase») mentre si chiude con `curl -sI https://www.heuresys.com/
+# favicon.ico` — cioe' pretende un deploy sul sito pubblico. Con lui finivano in corsia non
+# presidiata un backfill di ~14k skill sul DB reale (Z-070), un import di 139k archi
+# (Z-186), PATCH reali su /v1/me/* (Z-048).
+#
+# Questi segnali cercano nel SOLO done-when e impongono un PAVIMENTO: la classe finale non
+# puo' scendere sotto, nemmeno con un override. Un override resta libero di correggere un
+# falso positivo lessicale (alzare, o abbassare entro il pavimento); non puo' dichiarare
+# innocuo cio' che si chiude toccando la produzione.
+AZIONE_D = [
+    (r'curl\s[^\n]*https?://(www\.)?heuresys\.com', 'il criterio interroga il dominio pubblico'),
+    (r'\bssh\s+(oracle-vm|linux-pc|vm\b)', 'il criterio esegue comandi su un host reale'),
+    (r'\bsystemctl\b', 'il criterio ispeziona o muove unita di sistema'),
+    (r'vm-deploy|close-propagate|align-clones', 'il criterio passa da un deploy'),
+    (r'\bgh-pages\b|GitHub Pages', 'il criterio riguarda il sito pubblicato'),
+    (r'\bwww\.heuresys\.com\b', 'il criterio nomina la produzione'),
+    (r'\.env\b|\.secrets/', 'il criterio tocca segreti o configurazione di macchina'),
+    (r'\b(della|sulla|nella|su)\s+VM\b|\bVM\s+OCI\b',
+     'il criterio si misura sulla VM di produzione'),
+    (r'\bheadroom\b.*\b(RAM|CPU)\b', 'il criterio consuma risorse di un host reale'),
+]
+AZIONE_C = [
+    (r'\bpsql\b', 'il criterio esegue una query sul database'),
+    (r'\b(INSERT|UPDATE|DELETE|TRUNCATE|DROP|ALTER)\b', 'il criterio scrive nello schema o nei dati'),
+    (r'\bpg_dump\b|\bpg_restore\b', 'il criterio passa da dump o restore'),
+    (r'\bmigration\b|db/migrations', 'il criterio introduce o applica una migration'),
+    (r'\b\d{3,}(\.\d{3})*\s*(righe|record|nodi|archi|skill|utenti|voci)\b',
+     'il criterio conta migliaia di righe: e un carico sui dati'),
+    (r'\bbackfill\b|\bimport(a|ati|are)?\b.*\b\d{3,}', 'il criterio importa in massa'),
+    (r'\bPATCH\b|\bPOST\b.*/v1/', 'il criterio esegue scritture via API'),
+    # «a scala 47k», «full-scale 139k»: la taglia si scrive spesso abbreviata, senza la
+    # parola «righe» accanto. Un run a quella scala e' un carico sui dati, non un test.
+    (r'\b(a scala|scala|full[- ]scale)\s*\d+\s*k\b|\b\d+\s*k\b\s*(righe|record|nodi)?',
+     'il criterio esercita un volume dell ordine delle migliaia'),
+    (r'\bPostgreSQL\s*\d+\s*(nativo|locale)|\bprovisioning\b|\binstalla(re|zione)?\b',
+     'il criterio installa o provisiona software di sistema'),
+]
+
+
+def pavimento_azione(chiuso_quando: str) -> tuple[str, str]:
+    """Classe MINIMA imposta da cio' che il criterio di chiusura fa davvero.
+
+    Restituisce ('', '') se il criterio non descrive nessuna azione riconosciuta.
+    """
+    if not chiuso_quando:
+        return '', ''
+    for pattern, perche in AZIONE_D:
+        if re.search(pattern, chiuso_quando, flags=re.IGNORECASE):
+            return 'D', perche
+    for pattern, perche in AZIONE_C:
+        if re.search(pattern, chiuso_quando, flags=re.IGNORECASE):
+            return 'C', perche
+    return '', ''
+
+
+ORDINE = {'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4}
+
+
 def _agganci(testo: str, segnali: list) -> list:
     trovati = []
     for s in segnali:
@@ -102,8 +166,15 @@ def classifica(c) -> tuple[str, str, bool]:
     """Restituisce (classe, motivo, dubbio)."""
     if c.bloccato_su_enzo:
         return 'E', f'bloccato su Enzo: {c.bloccato_su_enzo}', False
+
+    # Il pavimento imposto dall'AZIONE viene prima di tutto il resto, override inclusi.
+    minimo, perche = pavimento_azione(c.chiuso_quando)
+
     if c.id in OVERRIDE:
         classe, motivo = OVERRIDE[c.id]
+        if minimo and ORDINE[minimo] > ORDINE[classe]:
+            return minimo, (f'{minimo} per azione ({perche}); '
+                            f'override "{motivo}" respinto: guardava la descrizione'), False
         return classe, f'rivisto a mano: {motivo}', False
 
     testo = f'{c.descrizione} {c.chiuso_quando}'
@@ -112,21 +183,27 @@ def classifica(c) -> tuple[str, str, bool]:
     b = _agganci(testo, SEGNALI_B)
     a = _agganci(testo, SEGNALI_A)
 
+    def esito(classe: str, motivo: str, dubbio: bool) -> tuple[str, str, bool]:
+        """Applica il pavimento dell'azione a qualunque classe dedotta dal testo."""
+        if minimo and ORDINE[minimo] > ORDINE[classe]:
+            return minimo, f'{minimo} per azione ({perche}); il testo suggeriva {classe}', dubbio
+        return classe, motivo, dubbio
+
     if d:
         # dubbio se anche segnali piu' bassi sono forti: potrebbe essere un B che
         # semplicemente NOMINA la produzione invece di toccarla
         dubbio = len(b) + len(a) > 2 * len(d)
-        return 'D', 'produzione viva: ' + ', '.join(sorted(set(d))[:3]), dubbio
+        return esito('D', 'produzione viva: ' + ', '.join(sorted(set(d))[:3]), dubbio)
     if cc:
         dubbio = len(b) + len(a) > 2 * len(cc)
-        return 'C', 'schema e dati: ' + ', '.join(sorted(set(cc))[:3]), dubbio
+        return esito('C', 'schema e dati: ' + ', '.join(sorted(set(cc))[:3]), dubbio)
     if b:
         dubbio = bool(a) and len(a) > len(b)
-        return 'B', 'codice: ' + ', '.join(sorted(set(b))[:3]), dubbio
+        return esito('B', 'codice: ' + ', '.join(sorted(set(b))[:3]), dubbio)
     if a:
-        return 'A', 'inerte: ' + ', '.join(sorted(set(a))[:3]), False
+        return esito('A', 'inerte: ' + ', '.join(sorted(set(a))[:3]), False)
     # Nessun segnale: non si indovina. Si dichiara il dubbio e si alza la classe.
-    return 'C', 'nessun segnale riconosciuto - alzata per prudenza', True
+    return esito('C', 'nessun segnale riconosciuto - alzata per prudenza', True)
 
 
 def main() -> int:

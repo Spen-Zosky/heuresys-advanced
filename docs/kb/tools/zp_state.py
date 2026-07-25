@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -227,16 +228,92 @@ def classi_ammesse(cfg: dict, corsia: str) -> list:
     return [c.upper() for c in lanes[corsia]]
 
 
-def candidati(clusters: list, cfg: dict, corsia: str, budget_ore: float | None = None) -> list:
+def precondizioni_classe_c(cfg: dict, offline: bool = False) -> tuple[bool, list]:
+    """Le precondizioni che `class_c_preconditions` DICHIARA, finalmente verificate.
+
+    Erano scritte in zp.config.yaml e non lette da nessuna riga di codice (review S1030):
+    dump verificato di fresco, host di prova raggiungibile, doppia esecuzione, diff pg_dump
+    vuoto erano prosa. Un cluster di classe C tocca schema e dati — se qualcosa va storto si
+    torna indietro solo da un dump, quindi il dump deve ESISTERE ed essere recente.
+
+    Le prime due si verificano qui (sono fatti sul mondo); le ultime due sono proprieta' del
+    lavoro e restano in carico al gate delle prove. Restituisce (tutte_ok, dettagli).
+    """
+    pre = cfg.get('class_c_preconditions') or {}
+    esiti = []
+    # `bash` nudo su Windows risolve allo stub WSL senza distribuzioni: la config dichiara
+    # il Git Bash reale, e va usato quello (stessa trappola gia' annotata in runtime.bash).
+    shell = ((cfg.get('runtime') or {}).get('bash')) or 'bash'
+    archivio = pre.get('archive_dir') or '~/heuresys-backups/prod'
+    if not pre:
+        return True, [('nessuna precondizione dichiarata', True, 'sezione assente in config')]
+
+    max_ore = pre.get('verified_dump_max_age_hours')
+    host = pre.get('rehearsal_host')
+
+    if offline:
+        esiti.append(('verifica saltata (offline)', False,
+                      'senza rete non si puo dire che il dump esista: la classe C resta esclusa'))
+        return False, esiti
+
+    if max_ore:
+        # Il dump piu' recente sull'archivio off-host, in ore.
+        cmd = (f"MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes -o ConnectTimeout=10 {host} "
+               f"'ls -t {archivio}/*.dump 2>/dev/null | head -1 | xargs -r stat -c %Y'")
+        try:
+            r = subprocess.run([shell, '-lc', cmd], capture_output=True, text=True,
+                               encoding='utf-8', errors='replace', timeout=45, cwd=RADICE)
+            ts = (r.stdout or '').strip()
+            if ts.isdigit():
+                import time
+                eta = (time.time() - int(ts)) / 3600
+                ok = eta <= float(max_ore)
+                esiti.append((f'dump verificato piu recente di {max_ore}h', ok,
+                              f'ultimo dump: {eta:.1f}h fa'))
+            else:
+                esiti.append((f'dump verificato piu recente di {max_ore}h', False,
+                              'nessun dump trovato sull archivio off-host'))
+        except (OSError, subprocess.SubprocessError) as err:
+            esiti.append(('dump verificato', False, f'controllo non eseguibile: {err}'))
+
+    if host:
+        try:
+            r = subprocess.run([shell, '-lc',
+                                f'MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes -o ConnectTimeout=10 {host} true'],
+                               capture_output=True, text=True, encoding='utf-8',
+                               errors='replace', timeout=30, cwd=RADICE)
+            esiti.append((f'host di prova ({host}) raggiungibile', r.returncode == 0,
+                          'ok' if r.returncode == 0 else 'non risponde'))
+        except (OSError, subprocess.SubprocessError) as err:
+            esiti.append((f'host di prova ({host})', False, str(err)))
+
+    return all(ok for _, ok, _ in esiti), esiti
+
+
+def candidati(clusters: list, cfg: dict, corsia: str, budget_ore: float | None = None,
+              offline: bool = True) -> list:
     """I 6 filtri di references/selection.md, applicati in ordine.
 
     Restituisce la lista ordinata: il primo elemento e' il prossimo da fare.
+    `offline=True` (default) non interroga la rete: in quel caso la classe C e' esclusa,
+    perche' le sue precondizioni non sono verificabili — e non verificate significa assenti.
     """
     ammesse = classi_ammesse(cfg, corsia)
     autorizzati = leggi_autorizzazioni()
     interrotti = leggi_interrotti()
     max_fall = ((cfg.get('interrupt_resume') or {}).get('max_failures_per_cluster')) or 2
-    chiusi = {c.id for c in clusters if c.chiuso}
+    # Un id e' «chiuso» solo se lo sono TUTTE le sue occorrenze. Con un id duplicato — una
+    # riga spuntata e una no — il set costruito sui soli chiusi sbloccava le dipendenze di
+    # chi aspettava il lavoro NON fatto (review S1030). `verifica` segnala il duplicato, ma
+    # nessuno la esegue prima di selezionare.
+    aperti_per_id = {c.id for c in clusters if not c.chiuso}
+    chiusi = {c.id for c in clusters if c.chiuso} - aperti_per_id
+
+    # Se la corsia ammette la classe C, le sue precondizioni vanno soddisfatte: e' la
+    # differenza fra «posso tornare indietro» e «spero di non doverlo fare».
+    c_ok, c_dettagli = (True, [])
+    if 'C' in ammesse:
+        c_ok, c_dettagli = precondizioni_classe_c(cfg, offline=offline)
 
     def ammesso(c: Cluster) -> tuple[bool, str]:
         if c.chiuso:
@@ -247,6 +324,9 @@ def candidati(clusters: list, cfg: dict, corsia: str, budget_ore: float | None =
             return False, 'senza classe in zp.config.yaml'
         if c.classe not in ammesse and c.id not in autorizzati:
             return False, f'classe {c.classe} fuori dalla corsia {corsia}'
+        if c.classe == 'C' and not c_ok and c.id not in autorizzati:
+            manca = '; '.join(f'{n}: {d}' for n, ok, d in c_dettagli if not ok)
+            return False, f'precondizioni di classe C non soddisfatte ({manca})'
         mancanti = [d for d in c.dipende_da if d not in chiusi]
         if mancanti:
             return False, 'dipendenze aperte: ' + ', '.join(mancanti)

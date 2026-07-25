@@ -20,7 +20,7 @@ export const pool = new pg.Pool({
   user: env.POSTGRES_USER,
   password: env.POSTGRES_PASSWORD,
   ssl: env.POSTGRES_SSL === "require" ? { rejectUnauthorized: true } : undefined,
-  max: 20,
+  max: env.POSTGRES_POOL_MAX,
   idleTimeoutMillis: 30_000,
   connectionTimeoutMillis: 5_000,
 });

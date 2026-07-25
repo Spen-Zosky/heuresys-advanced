@@ -47,11 +47,47 @@ function readKeyMaterial(envVar: string, defaultPath: string): string {
   );
 }
 
+/**
+ * Budget di login per finestra di 5 minuti (guardia brute-force). Estratto come
+ * schema a se' perche' serve in due momenti diversi: alla validazione del boot
+ * (dentro EnvSchema, cosi' un valore malformato ferma il processo) e a OGNI
+ * costruzione dell'app (`loginRateLimitMax()`), perche' la suite lo pilota
+ * per-app — il test del limitatore lo fissa a 10 mentre il resto della suite
+ * lavora con un budget alto.
+ */
+const LoginRateLimitSchema = z.coerce.number().int().min(1).max(100_000).default(10);
+
+/**
+ * Rilegge e RI-VALIDA il budget di login al momento in cui la route viene
+ * registrata. Fino a S1029 la route faceva `Number(process.env.X) || 10`: un
+ * refuso diventava 10 in silenzio e un valore assurdo passava — su un parametro
+ * di sicurezza. Qui un valore non valido non degrada di nascosto: fallisce.
+ */
+export function loginRateLimitMax(): number {
+  return LoginRateLimitSchema.parse(process.env.AUTH_LOGIN_RATELIMIT_MAX);
+}
+
 const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   HOST: z.string().default("0.0.0.0"),
   PORT: z.coerce.number().int().positive().default(3001),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
+  // Login brute-force budget per 5-minute window. Consumed by modules/auth/routes.ts,
+  // which until S1029 read it straight from process.env with a `|| 10` fallback: a typo
+  // (`AUTH_LOGIN_RATELIMIT_MAX=abc`) silently became 10, and a hostile-looking value
+  // (`=100000`) was accepted without a word. It is a SECURITY parameter, so it belongs
+  // here, validated and bounded, like every other one. The E2E suites raise it because
+  // five persona logins plus retries legitimately exceed the production budget.
+  // Il tetto e' alto di proposito: `test/helpers/setup.ts` alza il budget a 10000
+  // perche' l'intera suite condivide una finestra di 5 minuti. Serve a fermare i
+  // refusi (0, negativi, 1e9), non a imporre una policy — quella e' il default 10.
+  // Vedi anche `loginRateLimitMax()` in fondo: il valore va RI-letto a ogni
+  // costruzione dell'app, non congelato qui.
+  AUTH_LOGIN_RATELIMIT_MAX: LoginRateLimitSchema,
+  // Connection ceiling of the singleton pg pool. Was hardcoded to 20 in db/client.ts,
+  // which is fine for one API process and wrong the moment PROD runs more than one:
+  // N processes x 20 silently exceeds Postgres max_connections.
+  POSTGRES_POOL_MAX: z.coerce.number().int().min(1).max(200).default(20),
   // Reverse-proxy trust for req.ip (drives per-IP rate-limiting). Parsed via parseTrustProxy,
   // NOT z.coerce.boolean — that turns "false" into true (the same footgun COOKIE_SECURE avoids,
   // see below). D-28 / S-100X-A2 F-WS-H-1: PROD behind the nginx TLS proxy MUST set TRUST_PROXY=1

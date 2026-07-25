@@ -31,7 +31,7 @@ import { createAuthService, type AuthService } from "./service.js";
 import { ConsoleMailer, type IMailer } from "./mailer.js";
 import { setAuthCookies, clearAuthCookies, setEnrollmentCookies } from "./tokens.js";
 import { COOKIES } from "../../config/constants.js";
-import { env } from "../../config/env.js";
+import { env, loginRateLimitMax } from "../../config/env.js";
 import { requirePermission } from "../../middleware/rbac.js";
 import { UnauthorizedError } from "../../errors/index.js";
 
@@ -88,7 +88,11 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
       // Login brute-force guard: prod-secure default 10/5min. Raise via
       // AUTH_LOGIN_RATELIMIT_MAX for E2E suites, where auth.setup (5 personas) +
       // login-mfa (direct logins, no storageState) would otherwise trip the 10 cap.
-      config: { rateLimit: { max: Number(process.env.AUTH_LOGIN_RATELIMIT_MAX) || 10, timeWindow: 5 * 60 * 1000 } },
+      // Validated through the same Zod schema as the boot check (S1029): straight
+      // off process.env a typo silently collapsed to 10 and an absurd value was
+      // accepted — on a security budget. Re-read per app build, so a test that
+      // pins its own limit still works.
+      config: { rateLimit: { max: loginRateLimitMax(), timeWindow: 5 * 60 * 1000 } },
     },
     async (req, reply) => {
       const result = await service.login({

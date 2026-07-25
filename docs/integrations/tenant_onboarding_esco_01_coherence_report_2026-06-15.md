@@ -1,5 +1,8 @@
 # Coherence Report — "ESCO multi-pilastro + Skills Group Share" & "Tenant Onboarding (HEU-FLOW-001)" vs repository reale
 
+> **Stato aggiornato S1029 (2026-07-25).** L'asse professione descritto qui è **in produzione**: migration `000206_occupation_classifications` applicata, catalogo popolato e verificato live — `ISCO_08` **619** nodi (il totale ILO previsto dal design) e `CP_2021` **1502**. L'header di stato originale («PLAN / TODO / per esecuzione successiva») è quindi storico. I conteggi vivi restano in `docs/kb/SOT_STATE.md`, non qui.
+
+
 > **Status**: ANALYSIS — read-only, no repo change. Staging non committato (decisione Enzo 2026-06-15).
 > **Sessione**: verifica design · **Data**: 2026-06-15 · **Repo**: `D:\heuresys-advanced` @ `main fffb1d7`
 > **DB**: `heuresys_advanced` live via tunnel `localhost:5433` (psql 16, schema `sys`, 176 tabelle base).

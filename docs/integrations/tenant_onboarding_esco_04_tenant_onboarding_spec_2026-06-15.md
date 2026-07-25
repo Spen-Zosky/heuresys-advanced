@@ -1,5 +1,8 @@
 # SPEC — Tenant Onboarding (legame tenant→NACE/size + OU↔processi + motore generativo)
 
+> **Stato aggiornato S1029 (2026-07-25).** L'asse professione descritto qui è **in produzione**: migration `000206_occupation_classifications` applicata, catalogo popolato e verificato live — `ISCO_08` **619** nodi (il totale ILO previsto dal design) e `CP_2021` **1502**. L'header di stato originale («PLAN / TODO / per esecuzione successiva») è quindi storico. I conteggi vivi restano in `docs/kb/SOT_STATE.md`, non qui.
+
+
 > **Status**: DESIGN — PROPOSED. Nessuna migration creata/applicata. DDL = proposta da validare.
 > **Data**: 2026-06-15 · **Copre**: TODO T1.3, T2.5, T2.6, T3.7 + FASE 2 mancante · **Deriva da**: File 2 HEU-FLOW-001 + report `01` §3.
 > **Invarianti**: I1 (position-centric), I3/I4, I5 (tenant filter no-RLS), RD-08, I9 (PIP = VIEW), I12/ADR-0023. Migration next = `000118`.

@@ -29,6 +29,8 @@ Il design web proponeva tre schemi nuovi `sf_raw / sf_stg / sf_sync` e un target
 > [!warning] Un flag invariante da confermare (regola §9 "fermarsi e chiedere")
 > - **I3/I4 naming.** Il buffer va in `staging.sf_*` (schema `staging` ammesso), **non** in uno schema `sf_*` nuovo (vedi §8.1).
 >
+> ⚠️ **CONTRADDIZIONE APERTA, rilevata S1029 (2026-07-25) — non risolta qui.** Il ragionamento di questo paragrafo («case-study sintetico → nessuna governance PII/GDPR richiesta») confligge con tre posizioni successive: la **OUTPUT RULE S1011** in `CLAUDE.md`, che ritira il qualificatore «no-PII / synthetic» come descrittore; **ADR-0026 / invariante I15**, per cui i due tenant sono di produzione e il dato va **trattato come reale**; e la **condizione C5 della due diligence**, che elenca lo strato GDPR documentale (RoPA, DPIA, basi giuridiche, informativa, DPA con i sub-processor) fra i requisiti **mancanti** — cioè lo considera dovuto. Non è un refuso di linguaggio: è una posizione sul profilo legale del prodotto, e come tale **non è una decisione tecnica**. Registrata come voce che richiede una decisione di Enzo nel piano `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` (area *business-dd*). Fino ad allora il testo sotto resta com'era, per non far sembrare risolta una questione che non lo è.
+
 > **PII/GDPR — NON è un blocco** (aggiornato 2026-05-31, ADR-0023). La dottrina data-source stabilisce che questo prodotto è un **case-study sintetico** e **non ingerisce mai PII reale di clienti veri**: il no-PII è globale e incondizionato. Anche un eventuale connettore SF opererebbe su dati sintetici → nessun conflitto I12, nessuna governance PII/GDPR richiesta. Il vecchio framing "I12 = blocco perché SF live porta PII reale" è **ritirato** (vedi §8.2).
 
 ---

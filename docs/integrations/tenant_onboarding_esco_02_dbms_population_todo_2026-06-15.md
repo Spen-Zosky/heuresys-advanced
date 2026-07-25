@@ -1,8 +1,11 @@
 # TODO — Miglior popolamento del DBMS (Tier 1-3)
 
+> **Stato aggiornato S1029 (2026-07-25).** L'asse professione descritto qui è **in produzione**: migration `000206_occupation_classifications` applicata, catalogo popolato e verificato live — `ISCO_08` **619** nodi (il totale ILO previsto dal design) e `CP_2021` **1502**. L'header di stato originale («PLAN / TODO / per esecuzione successiva») è quindi storico. I conteggi vivi restano in `docs/kb/SOT_STATE.md`, non qui.
+
+
 > **Status**: PLAN — per esecuzione successiva su go di Enzo. Read-only doc (nessuna migration creata/applicata qui).
 > **Data**: 2026-06-15 · **Deriva da**: `01_coherence_report_2026-06-15.md` · **Spec dettagliate**: file `03` (ESCO) + `04` (tenant onboarding).
-> **Vincoli trasversali (tutti gli item)**: conformi invarianti `CLAUDE.md` (I1 position-centric · I3/I4 `sys.sys_<plural>` · I5 tenant filter no-RLS · RD-08 varchar+CHECK no-ENUM · RD-09 date/timestamptz · I12/ADR-0023 dati synthetic no-PII) · migration idempotente next-number da **`000118`** (ultima su disco = `000117`) · **DoD LIVE**: ogni item chiude SOLO con dimostrazione live su dati reali su **tenant di TEST** (output reale allegato: comando + output + path + timestamp). Mai mock/green-test. Secret/approval mancante → `blocked-on-Enzo`.
+> **Vincoli trasversali (tutti gli item)**: conformi invarianti `CLAUDE.md` (I1 position-centric · I3/I4 `sys.sys_<plural>` · I5 tenant filter no-RLS · RD-08 varchar+CHECK no-ENUM · RD-09 date/timestamptz · I12/ADR-0023 dottrina della sorgente dati) · migration idempotente next-number da **`000118`** (ultima su disco = `000117`) · **DoD LIVE**: ogni item chiude SOLO con dimostrazione live su dati reali su **RTL Bank** (tenant di produzione, ADR-0026) (output reale allegato: comando + output + path + timestamp). Mai mock/green-test. Secret/approval mancante → `blocked-on-Enzo`.
 
 ---
 

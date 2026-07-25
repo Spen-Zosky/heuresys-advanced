@@ -1,5 +1,8 @@
 # SPEC — Popolamento ESCO (backfill gerarchia skill + import occupation→skill + classificazione)
 
+> **Stato aggiornato S1029 (2026-07-25).** L'asse professione descritto qui è **in produzione**: migration `000206_occupation_classifications` applicata, catalogo popolato e verificato live — `ISCO_08` **619** nodi (il totale ILO previsto dal design) e `CP_2021` **1502**. L'header di stato originale («PLAN / TODO / per esecuzione successiva») è quindi storico. I conteggi vivi restano in `docs/kb/SOT_STATE.md`, non qui.
+
+
 > **Status**: DESIGN — PROPOSED. Nessuna migration creata/applicata. DDL = proposta da validare prima dell'esecuzione.
 > **Data**: 2026-06-15 · **Copre**: TODO T1.1, T1.2, T2.4, T3.8 · **Deriva da**: File 1 (ESCO) + report `01` §1/§5.
 > **Invarianti**: I3/I4 (`sys.sys_<plural>`), I5 (tenant filter), RD-08 (varchar+CHECK), I12/ADR-0023 (no-PII synthetic). Migration next = `000118`.

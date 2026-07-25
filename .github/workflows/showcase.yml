@@ -11,6 +11,11 @@ on:
       - "apps/web/src/lib/theme/**"
       - "apps/web/src/components/**"
       - "apps/web/src/app/globals.css"
+      # S1030: i token di tema vivono qui, non più dentro globals.css. Senza questa riga una
+      # modifica ai soli token (es. un ritocco di contrasto AA) non farebbe ripartire il
+      # deploy, e gh-pages continuerebbe a servire il CSS vecchio a tempo indefinito — lo
+      # stesso drift di prima, solo spostato dall'umano che dimentica alla CI che non parte.
+      - "apps/web/src/app/_theme-tokens.css"
       - "apps/web/src/app/layout.tsx"
       - "apps/showcase/**"
       - "scripts/sync-showcase.sh"
@@ -33,7 +38,7 @@ jobs:
       # declares it as a normal semver dep (`"@heuresys/ui": "^0.1.x"`) resolved by
       # pnpm from the registry — no sister-repo checkout or local `link:` is needed.
       - name: Checkout heuresys-advanced
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           path: heuresys-advanced
           fetch-depth: 1
@@ -44,7 +49,7 @@ jobs:
           version: 9.15.0
 
       - name: Setup Node
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           # 22, not 20: a transitive dep (camera-controls@3.1.2 via three.js in
           # @heuresys/ui) requires Node >=22, so `pnpm install --frozen-lockfile`
@@ -66,6 +71,39 @@ jobs:
         run: |
           ls heuresys-advanced/apps/showcase/out
           test -f heuresys-advanced/apps/showcase/out/showcase/index.html
+
+      # Gate anti-classe-orfana (S1030). `next build` NON fallisce su una utility Tailwind
+      # inesistente: non emette la regola, il testo resta del colore ereditato, e il deploy
+      # esce verde con i colori spenti. E' successo davvero: b57f12f5 ha pubblicato 6 pagine
+      # che usavano `text-danger`/`bg-danger` mentre nel CSS servito quelle regole non
+      # c'erano affatto (lo showcase non aveva i token semantici). Questo step confronta le
+      # classi realmente usate nell'HTML pubblicato con le regole presenti nel CSS
+      # pubblicato: se una classe di stato non ha regola, il deploy si ferma qui.
+      - name: Verify semantic color utilities are actually emitted
+        working-directory: heuresys-advanced/apps/showcase/out
+        run: |
+          set -euo pipefail
+          css=$(find . -name '*.css' | tr '\n' ' ')
+          [ -n "$css" ] || { echo "::error::nessun CSS emesso"; exit 1; }
+          fail=0
+          # classi di stato usate nell'HTML generato (con o senza modificatore di opacità)
+          used=$(grep -rhoE 'class="[^"]*"' --include='*.html' . \
+                 | grep -oE '\b(text|bg|border)-(danger|success|warning|info|destructive)(/[0-9]+)?\b' \
+                 | sort -u)
+          [ -n "$used" ] || { echo "nessuna classe di stato nell'HTML — niente da verificare"; exit 0; }
+          for u in $used; do
+            base=${u%%/*}                       # bg-danger/10 -> bg-danger
+            if ! grep -qF ".$base" $css; then
+              echo "::error::classe orfana: '$u' è usata nell'HTML ma '.$base' non ha regola nel CSS pubblicato"
+              fail=1
+            fi
+          done
+          # i token dietro le utility devono esistere, altrimenti la regola c'è ma è inerte
+          for t in --danger --success --warning --info; do
+            grep -qE -- "$t:" $css || { echo "::error::token $t non definito nel CSS pubblicato"; fail=1; }
+          done
+          [ "$fail" -eq 0 ] && echo "OK — ogni classe di stato usata ha regola e token"
+          exit $fail
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4

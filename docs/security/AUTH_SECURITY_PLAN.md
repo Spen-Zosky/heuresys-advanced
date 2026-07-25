@@ -833,19 +833,19 @@ Audit log retention: indefinite (legal/compliance). Volume mitigation: partition
 
 ## 13. Acceptance Checklist (for MVP‑1 auth module)
 
-- [ ] All 11 `sys.sys_auth_*` tables created idempotently in migration 000005.
-- [ ] 8 canonical roles seeded; ~100 permissions seeded (≈ 81 admin + 19 ESS `*:self`); role‑permission matrix from §6 + §6.1 applied.
-- [ ] `POST /auth/login` accepts `{email, password}`, returns **200** + sets `hrx_access` + `hrx_refresh` + `hrx_csrf` cookies, plus body `{user, roles, csrfToken}`. *(Earlier drafts said 204; HTTP forbids a body on 204 and Fastify strips it, so login + refresh return 200 with body. Logout + password-reset endpoints remain 204 — they have no body.)*
-- [ ] `POST /auth/refresh` reads `hrx_refresh` cookie + `X-CSRF-Token` header; rotates; returns **200** + sets new cookies; or returns 401 on replay.
-- [ ] `POST /auth/logout` revokes family + clears cookies.
-- [ ] `GET /auth/me` returns the current user payload (no hash leaked).
-- [ ] CSRF middleware blocks state‑changing requests without `X-CSRF-Token`.
-- [ ] Refresh replay test: present the same refresh token twice → family revoked, `REFRESH_REPLAY_DETECTED` logged.
-- [ ] Rate limit test: 11 logins in 5 min from same IP → 429.
-- [ ] Pino redaction test: log a request body containing `password` → log shows `[REDACTED]`.
-- [ ] Tenant isolation test: user from tenant A cannot GET `/positions/{id}` belonging to tenant B (404).
-- [ ] Validation view (000023) `sys.v_canonical_outside_sys` returns 0 rows. (NB: `sys.v_synthetic_user_flag_consistency` was retired by 000154/ADR-0026.)
-- [ ] Argon2id parameters match §3 baseline; `needsRehash` triggers re‑hash on login when params change.
+- [x] All 11 `sys.sys_auth_*` tables created idempotently in migration 000005. — `db/migrations/000005_auth_foundation.sql`; idempotenza provata dal doppio run del set completo (diff `pg_dump` vuoto).
+- [x] Ruoli e permessi seeded; matrice role×permission applicata. — i conteggi vivi (oggi **13 ruoli / 204 permessi / 908 mapping**, cresciuti oltre gli 8+~100 di piano con i 3 ruoli funzionali della mig 000049 e le successive) stanno in `docs/kb/SOT_STATE.md`, non qui; il caricamento è asserito a ogni boot dei test (`rolesLoaded`/`mappingsLoaded` in `test/helpers/build-test-app.ts`).
+- [x] `POST /auth/login` accepts `{email, password}`, returns **200** + sets `hrx_access` + `hrx_refresh` + `hrx_csrf` cookies, plus body `{user, roles, csrfToken}`. — `test/auth.integration.test.ts` (asserzioni su cookie e `csrfToken`). *(Earlier drafts said 204; HTTP forbids a body on 204 and Fastify strips it, so login + refresh return 200 with body. Logout + password-reset endpoints remain 204 — they have no body.)*
+- [x] `POST /auth/refresh` ruota e risponde 200, oppure 401 al replay. — `test/auth.integration.test.ts:212` (`REFRESH_REPLAY_DETECTED`).
+- [x] `POST /auth/logout` revoca la famiglia e azzera i cookie. — `test/auth.integration.test.ts`.
+- [x] `GET /auth/me` restituisce il payload utente senza esporre l'hash. — `test/auth.integration.test.ts`.
+- [x] Il middleware CSRF blocca le richieste di stato senza `X-CSRF-Token`. — asserito su OGNI modulo: il pattern «without x-csrf-token → 403 CSRF_FAIL» ricorre in tutta la suite di integrazione.
+- [x] Refresh replay: stesso token due volte → famiglia revocata + `REFRESH_REPLAY_DETECTED`. — `test/auth.integration.test.ts:212`.
+- [x] Rate limit sul login → 429 con `Retry-After`. — `test/auth.integration.test.ts:499`; il gate implementato è **per-email** (6° tentativo fallito), più stretto del solo per-IP previsto in piano.
+- [x] Redaction del logger: un body con `password` finisce a `[REDACTED]`. — `test/auth.integration.test.ts` (contro `LOG_REDACT_PATHS` esportato da `app.ts`).
+- [x] Isolamento tenant: un utente del tenant A non legge risorse del tenant B. — coperto in più moduli, fra cui `test/employee-centric-doctrine.integration.test.ts` e `test/me-content-media.integration.test.ts`.
+- [x] La vista di validazione `sys.v_canonical_outside_sys` non restituisce righe. — verificata da `db/scripts/validate_database.sh` (`pnpm db:validate`), non da un test vitest. (NB: `sys.v_synthetic_user_flag_consistency` was retired by 000154/ADR-0026.)
+- [x] Parametri Argon2id come da §3 e `needsRehash` che ri-hasha al login. — `apps/api/src/modules/auth/password.ts:17-18` (memoryCost 65536 = 64 MiB, timeCost 3, parallelism 4).
 
 ---
 

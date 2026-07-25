@@ -1,5 +1,30 @@
 # 07.1 · Stato corrente dei due repo (snapshot)
 
+> ⚠️ **Il corpo di questa pagina è lo snapshot del 2026-05-17**, tenuto apposta come *punto zero* contro cui misurare la crescita. **Non è più lo stato corrente** e non va letto come tale: sotto trovi il rilievo aggiornato. Il titolo del file resta per stabilità dei link.
+
+## Stato live (rilevato il 2026-07-25, S1029)
+
+Tutti i valori da `gh repo view` / `gh workflow list` / `gh release list` / `git rev-list --count`, riproducibili con i comandi in fondo alla pagina.
+
+| Campo | Punto zero (2026-05-17) | **Live (2026-07-25)** |
+|---|---|---|
+| Commit su `main` | 88 | **1.270** |
+| Ultimo push | 2026-05-17 | **2026-07-23** |
+| Workflow CI attivi | 0 | **11** (build-web, i18n-parity, lint, playwright-smoke, shell-tests, showcase-pages, state-lint, test-integration, typecheck, dependabot, pages-build) |
+| Release pubblicate | 0 | **5** — l'ultima è `v1.0.0` (GA baseline, 2026-06-02) |
+| Topics | _(vuoti)_ | **13** (hrms, bpm, fastify, nextjs-15, postgresql, monorepo, pnpm-workspace, typescript, zod, saas, design-system, workforce-intelligence, position-centric) |
+| License | _(assente)_ | presente (`other`) |
+| Disk usage | ~2 MB | **~19,8 MB** |
+| Stars / Forks | 0 / 0 | 0 / 0 |
+
+**Nota di drift ancora aperta**: la `description` del repo su GitHub dichiara «Fastify 4» mentre il progetto gira su **Fastify 5**, e riporta conteggi di endpoint/test non più attuali. I numeri vivi stanno in `docs/kb/SOT_STATE.md`, non qui né nella description.
+
+**`Spen-Zosky/ux-design-shared`** (upstream del design system): ultimo push 2026-06-18, ~856 KB, **1 solo workflow** (deploy Storybook) — nessun gate di qualità, e la sua description parla ancora del protocollo `link:`, superato dalla pubblicazione npm (migrazione X18). Entrambe le cose sono cluster aperti del piano `docs/superpowers/specs/2026-07-25-zero-pending-plan.md`.
+
+---
+
+## Snapshot storico — 2026-05-17 (punto zero)
+
 > Snapshot misurabile al **2026-05-17** dello stato GitHub di entrambi i repo. Funge da "punto zero" verificabile contro cui calibrare i prossimi batch del curriculum. Tutti i dati riportati provengono da `gh api` su endpoint pubblici e sono riproducibili con i comandi a fondo pagina.
 
 ---

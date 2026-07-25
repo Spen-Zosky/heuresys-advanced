@@ -1,5 +1,16 @@
 # RESUME — Batch autonomo S1018 (fresh session restart point)
 
+> **✅ SEQUENZA CHIUSA — non è più un punto di ripartenza (S1029, 2026-07-25).** Il batch a 13 wave non va ripreso da dove si era fermato: le sessioni S1019-S1028 hanno superato la sua struttura, e le tre wave mai dichiarate chiuse hanno oggi una collocazione diversa.
+>
+> | Wave | Esito |
+> |---|---|
+> | **W1-W10** | assorbite dalle sessioni successive (Serie C/D/F, #24 F4, E1 whistleblowing + ADR-0028, E4) |
+> | **W11** — E5 ATS | **non fatta**: vive come item `#54` del register (~5-7 sessioni), area *product* del piano `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` |
+> | **W12** — audit 100X | **non fatta**: vive come `#9/#10/#11` (WS-L + triage + gate) |
+> | **W13** — deploy finale | **superata dai fatti**: il vincolo «deploy PROD solo a fine batch» è decaduto, i deploy sono avvenuti nelle sessioni successive. Verificato il 2026-07-25: la VM è su `1ae237cf`, api+web `active`, `https://www.heuresys.com/login` → 200 e `/api/readyz` → 200 |
+>
+> Le *decisioni* di Enzo elencate sotto restano vincolanti e non vanno ri-chieste. Il resto del file è storico.
+
 > **Scopo**: ripartire dal punto esatto di interruzione del batch full-scope S1018 senza ripetere azioni fatte né perdere azioni da fare. Congelato 2026-07-16 su richiesta di Enzo (fresh session).
 > **Piano completo (autoritativo)**: `docs/kb/PLAN_S1018_BATCH.md` (versionato nel repo — origine: piano di sessione VM S1018) — leggilo per intero all'avvio. **Register**: `docs/kb/SOT_BACKLOG.md` (item #4-#63). Questo file è l'indice di stato del batch.
 

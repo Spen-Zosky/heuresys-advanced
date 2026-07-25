@@ -165,7 +165,14 @@ sudo systemctl is-active "$UNIT"    # expected: active
 
 ---
 
-## §5 — Pre-Playwright DB seeding
+## §5 — Pre-Playwright DB seeding (SUPERSEDED — never implemented, and the recipe below is now harmful)
+
+> **Do not implement the script below.** It was a proposal, never deployed: no `pre-job-seed-check.sh` exists on either runner and no `heuresys-pre-job-seed.timer` is registered (verified S1029 on both hosts). Two reasons it must stay unimplemented:
+>
+> 1. **The personas it checks were deleted.** `tenant_admin_test@rtl-bank.test` and siblings were removed by the RTL rebuild (S950); today's personas are real `@rtl-bank.org` users. The `count(*) < 5` condition would therefore be true forever, and the timer would re-run `db:seed-test-admin` **every 5 minutes**, indefinitely.
+> 2. **The need is already met, better.** Both `test-integration.yml` and `playwright-smoke.yml` run `pnpm db:seed-test-admin` as an explicit, idempotent, login-only step inside the job — seeding exactly when it matters, with the failure visible in that job's log instead of in a background timer nobody reads.
+>
+> The recipe is kept below for the record of the original S935 design.
 
 The Playwright smoke workflow expects 5 test personas seeded. Add a cron or runner-pre-job script:
 
@@ -230,7 +237,9 @@ Expected: typecheck + lint + i18n-parity + test-integration + build-web + playwr
 
 ---
 
-## §8 — Backup runner: Windows host (DEFERRED to S936+)
+## §8 — Backup runner: Windows host (SUPERSEDED by §10 — linux-pc, S1023)
+
+> **Superseded.** The redundancy this section was deferring is now provided by the **linux-pc off-prod runner** (§10), which took over the heavy gates in D-08 F5 and is a full x86_64 PROD twin — strictly better than a Windows backup for this purpose (same OS as PROD, own PostgreSQL, no Task Scheduler divergence). A Windows runner is no longer planned; the text below is kept for the record of the original S935 decision.
 
 Out of S935 scope. When implemented:
 
@@ -282,3 +291,25 @@ gh api -X POST 'repos/{owner}/{repo}/actions/runners/registration-token' --jq .t
 **heuresys_ci refresh on the twin**: on demand — refresh the twin's base clone first if needed (`scripts/clone-vm-db.sh`), then `bash db/scripts/setup-ci-database.sh` (drops+recreates `heuresys_ci` objects). With D-52 per-file tx rollback the CI DB does not drift between runs.
 
 **Availability trade-off (accepted)**: if linux-pc is off, the three off-prod gates queue until it returns (GitHub holds queued jobs; the deploy gate — D-08 F2 — has an explicit `DEPLOY_REQUIRE_CI=0` bypass for emergencies). The light gates on `oci-vm` keep signalling regardless.
+
+### §10.1 — DB prerequisites of the runner (cluster-level, NOT carried by a clone)
+
+Everything the test suite needs from the database arrives by clone **except one thing**: `shared_preload_libraries`. It is a *cluster* parameter, it requires a PostgreSQL restart, and it appears in no dump — so a freshly reprovisioned twin can have every table, every extension and still fail the suite.
+
+| Prerequisite | Scope | Carried by a clone? | Fixed by |
+|---|---|---|---|
+| `pg_stat_statements` extension | per-database | yes (`setup-ci-database.sh` pre-creates every extension present on the source) | `db/scripts/create_local_database.sh`, `setup_oci_vm_database.sh` |
+| `pg_stat_statements` in `shared_preload_libraries` | **cluster** | **no — never** | `scripts/provision-linux-pc.sh` step 2.2b (idempotent, appends) |
+
+Without the preload the view exists but every read fails with SQLSTATE `55000` (*"must be loaded via shared_preload_libraries"*). This is what turned CI red on 2026-07-23: `GET /v1/observability/slow-queries` answered 500 and `Test (api integration)` stayed red on `main` until S1029. The endpoint now degrades to an empty panel instead of 500ing, and `observability.integration.test.ts` carries an explicit *environment gate* test that fails loudly — with the remediation in its own message — if the preload is missing.
+
+```bash
+# Verify (from the dev host). Expected: the setting lists pg_stat_statements,
+# and the count query answers instead of erroring.
+MSYS_NO_PATHCONV=1 ssh linux-pc "sudo -n -u postgres psql -tAc \"SHOW shared_preload_libraries\""
+MSYS_NO_PATHCONV=1 ssh linux-pc "sudo -n -u postgres psql -d heuresys_ci -tAc 'SELECT count(*) FROM pg_stat_statements'"
+
+# Remediate by hand if ever needed (APPEND — never overwrite the current value):
+#   sudo -u postgres psql -c "ALTER SYSTEM SET shared_preload_libraries = '<current>,pg_stat_statements'"
+#   sudo systemctl restart postgresql
+```

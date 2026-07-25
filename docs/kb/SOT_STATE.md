@@ -8,6 +8,20 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
+## Delta S1031 (2026-07-26) — i documenti dell'impianto zero-pendenze allineati a ciò che l'impianto fa
+
+HEAD **`a6fe1584`** (3 commit S1031, di cui 2 di correzione documentale + questo handoff). **Nessuna modifica a runtime, schema o API**: counts invariati e ri-derivati oggi (sotto).
+
+**Cosa è stato corretto, e perché conta.** La §9 del README della skill `zero-pending-loop` — riscritta da Enzo dopo la review di S1030 — è stata verificata contro la riconciliazione in `docs/kb/COWORK_INBOX.md` e la sezione `meta` di `zp.config.yaml`: il testo regge, con sette imprecisioni corrette rimisurando. I test automatici sono **15** e il documento ne dichiarava 14; il «pavimento di classe ha alzato 14 cluster» non dichiarava la base di misura (rispetto alla classificazione registrata prima del fix sono 14, ricalcolando il solo pavimento sono 13 — il quattordicesimo, `Z-250`, l'ha alzato la regola sul testo); «il tetto di spesa è reale» diceva più del provato (provata è la *contabilizzazione*: che il tetto fermi la corsa è uno dei 4 controlli che richiedono una sessione viva); le guardie del driver erano elencate come tre e mancava proprio il freno, l'unica oggi attiva.
+
+**Il difetto di fondo non era aritmetico.** Cinque affermazioni promettevano garanzie inesistenti, e due stavano nel codice: **`zp_gate.py tipi` stampava una regola diversa da quella che applica** (raggruppava per «natura» dello strumento mentre il gate decide per livelli dal ridisegno S1030 — chi leggeva concludeva che `staticcheck` + altro chiudesse un cluster, mentre è rifiutato), e `zp_evidence` registrava `natura` nel blocco di evidenza (ora `livello`). Nei documenti: `SKILL.md` non conosceva il freno — il driver esce 3, ma il driver non è l'unica via d'ingresso, quindi una invocazione a mano l'avrebbe scavalcato e «l'impianto non parte» era falso (ora è precondizione della skill, con outcome `blocked`); `blast-radius.md` insegnava a dedurre la classe di rischio dai path dichiarati, cioè il metodo che aveva mandato in corsia non presidiata `Z-153`, che si chiude con un `curl` sul dominio pubblico; `close.md` diceva che il deploy in chiusura «va fatto», mentre in non presidiato è vietato da `HEURESYS_CLOSE_NODEPLOY=1`, veto applicato dentro `close-propagate.sh` dove vince sui flag.
+
+**Design promosso di stato**: da «BOZZA — in attesa di approvazione» a **«IMPLEMENTATO — esercizio non presidiato NON autorizzato»**, con regola di precedenza esplicita (dove il documento diverge dal repo, vale il repo). Il riquadro V6, che è la premessa aritmetica della condizione di fine, è stato **rigenerato dai dati veri** invece che ritoccato: porta entrambe le misure datate (2026-07-25: 218 autonomi/~924h · 30 su Enzo/~446h → 2026-07-26: **183 autonomi/895h · 30 su Enzo/446,5h**) più il comando che le rimisura. Gli autonomi calano perché vengono chiusi, i bloccati su Enzo no.
+
+**Metodo applicato a se stesso**: il primo comando che era stato scritto in `blast-radius.md` (`zp_state.py precondizioni`) non esisteva — scoperto eseguendolo prima di committarlo, e sostituito con i test 5a/5b del self-test, che quel comportamento lo mostrano davvero.
+
+Counts ri-derivati 2026-07-26 (S1031), **invariati rispetto a S1030**: migration **213** (max **000215**) · moduli `src/modules` **90** · API test file **217** · utenti **163** · posizioni **181** · OU **28** · team **26** · tenant ACTIVE **2**. Piano zero-pendenze: **255 cluster, 42 chiusi, 213 aperti** (183 autonomi / 895h · 30 su Enzo / 446,5h).
+
 ## Delta S1030 (2026-07-25) — W1 avanzata, la coda Dependabot azzerata, e un fix di ieri che aveva spento i colori in produzione
 
 HEAD **`7881c400`** (12 commit S1030) — **CI 7/7 verde** (typecheck · lint · build-web · test-integration · playwright-smoke · CodeQL · deploy showcase). **Zero PR aperte** (erano 8).

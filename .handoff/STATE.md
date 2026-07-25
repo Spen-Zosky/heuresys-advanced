@@ -1,84 +1,61 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-07-25 (S1030 — W1 avanzata, coda Dependabot azzerata, CI tutta verde).
-
+**Updated**: 2026-07-26 (S1031 — i documenti dell'impianto zero-pendenze allineati a ciò che l'impianto fa davvero).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`.
 
-## Last session brief (S1030)
+## Last session brief (S1031)
 
-Chiusa la corsia W1 di questo giro e l'intera coda Dependabot (nessuna PR resta aperta).
-Poi tre revisori istruiti a demolire hanno smontato metà delle prove della sessione stessa,
-e le correzioni che ne sono seguite valgono più dei cluster: lo script del clone usciva con
-successo anche a database mezzo vuoto, il suo controllo di coerenza stampava «OK» proprio
-quando fallivano entrambi i lati del confronto, e gli orari dei timer erano sfasati di due
-ore perché la VM lavora in UTC e il PC Linux in ora locale — il pull dei backup partiva
-prima che il dump esistesse.
-
-Il caso che riassume la sessione: un fix di ieri, dato per chiuso, aveva **spento i colori
-d'errore sul sito pubblico**. La premessa («quel token colore non esiste») era falsa, e lo
-si poteva vedere solo guardando il CSS realmente emesso, non il sorgente. Da qui la regola:
-**una prova vale solo se avrebbe potuto fallire** — e si misura l'artefatto prodotto, non
-la dichiarazione.
-
-In coda alla sessione è arrivata una consegna da una sessione Cowork: l'impianto che
-esegue il piano in autonomia. Rivisto prima del commit da due revisori ostili — il lock
-non era un lock (fermare il driver era proprio ciò che creava due driver), e la chiusura
-di ogni ciclo deployava la produzione fuori da ogni filtro. Corretti quelli e poi anche i
-sei punti di ridisegno che restavano: l'impianto e' completo e verificato, ma **il freno
-resta inserito** — accenderlo e' una decisione di Enzo, non tecnica.
+I documenti dell'impianto zero-pendenze descrivevano com'era prima della review che l'ha
+corretto. La sezione «stato attuale» del README, riscritta da Enzo, regge alla verifica:
+sette imprecisioni corrette rimisurando (i test automatici sono quindici, il documento ne
+dichiarava quattordici). Ma il difetto di fondo non era aritmetico: cinque affermazioni
+promettevano garanzie inesistenti, due delle quali nel codice. `zp_gate.py tipi` **stampava
+una regola diversa da quella che applica**; `SKILL.md` non conosceva il freno, quindi una
+invocazione a mano l'avrebbe scavalcato e «l'impianto non parte» era falso; `blast-radius.md`
+insegnava a dedurre la classe di rischio dalla descrizione del cluster, il metodo che aveva
+mandato in corsia non presidiata un lavoro che si chiude deployando il sito pubblico. Dove
+un numero invecchia ora c'è il comando che lo conta, e il design non è più una bozza in
+attesa di approvazione: è implementato, e aspetta solo il tuo via a lavorare non sorvegliato.
 
 ## Obiettivo permanente (mandato Enzo, S1029 — vale per OGNI sessione futura)
 
 **Portare heuresys-advanced a una fresh session senza pendenze**: zero debiti, zero task
-incompleti, zero pending, zero errori aperti. Il censimento è fatto; ora è esecuzione.
-Ogni sessione: avvio → identificazione azioni sul piano → esecuzione con **doppia verifica
-e review adversarial per ogni task** → quando conviene ripartire puliti, chiusura completa
-(SoT + commit + push + deploy + allineamento macchine e DB) e fresh session. Tutte le
-decisioni tecniche sono di Claude; a Enzo vanno solo le voci che dipendono da un suo input.
-**Il tracciamento del piano è responsabilità di Claude**, non di Enzo.
+incompleti, zero pending, zero errori aperti. Il censimento è fatto; ora è esecuzione, con
+**doppia verifica e review adversarial per ogni task**, e chiusura completa quando conviene
+ripartire puliti. Tutte le decisioni tecniche sono di Claude, il tracciamento del piano
+pure; a Enzo vanno solo le voci che dipendono da un suo input.
 
 ## Stato del piano
 
-`docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — **255 cluster, 42 chiusi**.
-Le caselle spuntate portano la nota di chiusura con l'evidenza; il resto è aperto.
+`docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — si conta con `zp_state.py piano`.
 
-- **W0 sblocco — NON completa**: resta `Z-034` (segreti TOTP — fixture in chiaro nel repo,
-  7 secret plaintext su 19 a DB, `MFA_ENCRYPTION_KEY` da garantire su VM e linux-pc).
-  Tocca segreti in produzione: **serve la tua autorizzazione**, non parte da solo.
-- **W1 igiene** — in corso, oltre un terzo chiuso.
-- **W2-W5** non iniziate. **W6** dipende da input di Enzo.
+- **W0 — NON completa**: resta `Z-034` (segreti TOTP in chiaro nel repo e in plaintext a DB,
+  `MFA_ENCRYPTION_KEY` su VM e linux-pc). Tocca segreti in produzione: **serve la tua
+  autorizzazione**, non parte da solo.
+- **W1** in corso · **W2-W5** non iniziate · **W6** tutta su di te.
 
 ## ⚠ Top priorities (next session)
 
-1. **Proseguire W1**, la corsia col miglior rapporto chiusure/ora. Prossimi già istruiti:
-   `Z-213`/`Z-214` (riconciliazione dei tracker 100X), `Z-219` (atlas stale), `Z-221`/
-   `Z-223` (roadmap e wave ferme in DRAFT), `Z-230` (doc di triage Dependabot — ora
-   scrivibile sul triage reale appena eseguito), `Z-239` (indice memorie), `Z-031`
-   (monitor di non-regressione dell'ecosistema).
-2. **`Z-250` — la prima corsa presidiata dell'impianto zero-pendenze.** I sei punti di
-   ridisegno sono **chiusi** (classe dedotta dall'azione e non dalla descrizione,
-   precondizioni verificate davvero, prove non piu' autodichiarate, gate allineato alla
-   Definition of Done, self-test che vede le regressioni, stato scritto in modo atomico).
-   Il freno resta inserito **per decisione tua**. Il passo che manca non e' codice: e' una
-   corsa vera, presidiata, su un paio di cluster innocui — serve anche a chiudere i 4 test
-   che richiedono una sessione viva (freno tirato a meta' lavoro, troncamento da budget,
-   bootstrap che non ri-censisce, frontiere della description).
-3. **Gli altri 5 cluster nati oggi**: `Z-249` due rossi semantici che convivono · `Z-251`
-   la suite che non regge la contesa sul DB · `Z-252` PaletteDropdown inerte · `Z-253`
-   `heuresys_ci` mai rinfrescato (è il DB su cui girano davvero i gate CI) · `Z-254`
-   disciplina di rilascio upstream.
-4. **W2 debito/test**: il pezzo più utile resta il gate E2E in CI — oggi la copertura
-   Playwright monitorata cross-sessione è una frazione minima delle spec esistenti.
+1. **Proseguire W1**, la corsia col miglior rapporto chiusure/ora: `Z-213`/`Z-214` (tracker
+   100X), `Z-219` (atlas), `Z-221`/`Z-223` (roadmap e wave in DRAFT), `Z-230`, `Z-239`, `Z-031`.
+2. **`Z-250` — la prima corsa presidiata dell'impianto.** Codice e documenti sono a posto;
+   manca una corsa vera su un paio di cluster innocui, che chiude anche i quattro controlli
+   che richiedono una sessione viva (freno a metà lavoro, troncamento da budget, bootstrap
+   che non ri-censisce, frontiere della description).
+3. **Gli altri cluster nati in S1030**: `Z-249` due rossi semantici · `Z-251` suite fragile
+   alla contesa sul DB · `Z-252` PaletteDropdown inerte · `Z-253` `heuresys_ci` mai
+   rinfrescato (è il DB dei gate CI) · `Z-254` disciplina di rilascio upstream.
+4. **W2 debito/test**: il pezzo più utile resta il gate E2E in CI.
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **Contraddizione GDPR**: il design SuccessFactors afferma «nessuna governance PII/GDPR
-  richiesta», la due diligence elenca RoPA/DPIA/DPA fra i requisiti mancanti. Posizione
-  sul profilo legale, non scelta tecnica.
-- **Autonomia non presidiata**: l'impianto ora esiste ed è pubblicato, ma il freno è
-  inserito (`meta.autorizzato_non_presidiato: false`) e il design resta «BOZZA — in attesa
-  di approvazione». Il freno non si toglie senza il tuo via, nemmeno a rilievi chiusi.
-- **Wave-3 (#17)** — sblocca il Blocco E Fase 3 (#69). In HOLD.
+- **Autonomia non presidiata**: l'impianto esiste, è pubblicato, i documenti sono allineati
+  e il freno resta inserito (`meta.autorizzato_non_presidiato: false`). Ciò che aspetta il
+  tuo via **non è approvare il design** — è costruito — ma autorizzarlo a lavorare senza
+  sorveglianza. Prima la corsa presidiata (priorità 2).
+- **Contraddizione GDPR**: il design SuccessFactors dice «nessuna governance PII/GDPR
+  richiesta», la due diligence elenca RoPA/DPIA/DPA fra i mancanti. **Wave-3 (#17)**: in
+  HOLD, sblocca il Blocco E Fase 3 (#69).
 - WAIT-INPUT invariati: **#4** pricing · **#8** app-password Outlook · **#16**
   SuccessFactors · **#52** SSO IdP.
 
@@ -87,10 +64,7 @@ Le caselle spuntate portano la nota di chiusura con l'evidenza; il resto è aper
 ```bash
 git log origin/main..HEAD --oneline               # 0 dopo il push handoff
 python docs/kb/tools/handoff_lint.py              # OK atteso
-python docs/kb/tools/check_module_test_coverage.py --self-test   # 8/8 passati
+python docs/kb/tools/zp_state.py piano            # 255 cluster, 42 chiusi, 183 autonomi
+python docs/kb/tools/zp_selftest.py               # 15 passati, 0 falliti, 4 a mano
 gh run list --branch main --limit 7               # 7/7 success sull'ultimo commit
-gh pr list --state open                           # vuota
-grep -c '^- \[x\]' docs/superpowers/specs/2026-07-25-zero-pending-plan.md   # 42
-ssh linux-pc "systemctl list-timers heuresys-advanced-clonedb.timer"        # NEXT domenica
-python docs/kb/tools/session_start.py             # menu + salute
 ```

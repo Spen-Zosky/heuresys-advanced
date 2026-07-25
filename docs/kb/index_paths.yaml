@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-25T17:46:18Z da docs/kb/tools/build_index.py
+# generato: 2026-07-25T23:33:02Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-25T17:46:18Z"
-  total_files: 2578
+  generated_at: "2026-07-25T23:33:02Z"
+  total_files: 2586
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -12,8 +12,8 @@ meta:
     api-core: 28
     api-module: 318
     ci: 17
-    claude-config: 29
-    config: 109
+    claude-config: 30
+    config: 110
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -22,7 +22,7 @@ meta:
     db-other: 8
     db-script: 35
     db-seed: 115
-    doc-canonical: 500
+    doc-canonical: 506
     handoff-state: 1
     qa-artifact: 103
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 497
     external-archive: 50
-    live: 2031
+    live: 2039
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2486,6 +2486,12 @@ files:
     category: claude-config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\README.md'
+    root: repo
+    rel: '.claude/skills/zero-pending-loop/README.md'
+    category: claude-config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.claude\skills\zero-pending-loop\SKILL.md'
     root: repo
     rel: '.claude/skills/zero-pending-loop/SKILL.md'
@@ -3215,6 +3221,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\vm-rollback.sh'
     root: repo
     rel: 'scripts/vm-rollback.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\zero-pending-driver.sh'
+    root: repo
+    rel: 'scripts/zero-pending-driver.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -8981,6 +8993,42 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\sync.sh'
     root: repo
     rel: 'docs/kb/tools/sync.sh'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\zp_classify.py'
+    root: repo
+    rel: 'docs/kb/tools/zp_classify.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\zp_evidence.py'
+    root: repo
+    rel: 'docs/kb/tools/zp_evidence.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\zp_gate.py'
+    root: repo
+    rel: 'docs/kb/tools/zp_gate.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\zp_selftest.py'
+    root: repo
+    rel: 'docs/kb/tools/zp_selftest.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\zp_state.py'
+    root: repo
+    rel: 'docs/kb/tools/zp_state.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\zp_zero_check.py'
+    root: repo
+    rel: 'docs/kb/tools/zp_zero_check.py'
     category: doc-canonical
     status: live
     provenance: git-tracked

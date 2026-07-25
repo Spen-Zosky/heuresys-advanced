@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-25T17:46:18Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2578**
+**Generato**: 2026-07-25T23:33:02Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2586**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -12,8 +12,8 @@
 | api-core | 28 |
 | api-module | 318 |
 | ci | 17 |
-| claude-config | 29 |
-| config | 109 |
+| claude-config | 30 |
+| config | 110 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 35 |
 | db-seed | 115 |
-| doc-canonical | 500 |
+| doc-canonical | 506 |
 | handoff-state | 1 |
 | qa-artifact | 103 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 306 |
 | ux-design-archive | 80 |
 | web-source | 207 |
-| **TOTALE** | **2578** |
+| **TOTALE** | **2586** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 497 |
 | external-archive | 50 |
-| live | 2031 |
+| live | 2039 |
 
 ## File per categoria
 
@@ -468,6 +468,7 @@
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\model-map.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\planner.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\sweep-prompts.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\zero-pending-loop\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\zero-pending-loop\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\zero-pending-loop\evals\evals.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\zero-pending-loop\evals\trigger-eval.json` · *live* · git-tracked
@@ -593,6 +594,7 @@
 - `D:\heuresys-advanced\scripts\vm-deploy-remote.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vm-deploy.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vm-rollback.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\zero-pending-driver.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\tsconfig.base.json` · *live* · git-tracked
 
 ### cowork-archive
@@ -1581,6 +1583,12 @@
 - `D:\heuresys-advanced\docs\kb\tools\status_dashboard.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\sync.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\sync.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\zp_classify.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\zp_evidence.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\zp_gate.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\zp_selftest.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\zp_state.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\zp_zero_check.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\AUTONOMY_R23_PROJECT.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\B50_DEFER_UNBLOCK_PACKAGE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\COWORK_ARCHIVE_NOTE.md` · *live* · git-tracked

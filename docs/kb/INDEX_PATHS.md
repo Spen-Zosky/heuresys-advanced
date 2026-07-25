@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-23T15:42:46Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2546**
+**Generato**: 2026-07-25T04:33:11Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2552**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -11,14 +11,14 @@
 | ADR | 30 |
 | api-core | 28 |
 | api-module | 318 |
-| ci | 16 |
+| ci | 17 |
 | claude-config | 15 |
-| config | 101 |
+| config | 103 |
 | cowork-archive | 14 |
-| cowork-exchange | 203 |
+| cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 212 |
+| db-migration | 213 |
 | db-other | 8 |
 | db-script | 35 |
 | db-seed | 115 |
@@ -33,15 +33,15 @@
 | test | 306 |
 | ux-design-archive | 80 |
 | web-source | 206 |
-| **TOTALE** | **2546** |
+| **TOTALE** | **2552** |
 
 ## Conteggi per status
 
 | Status | File |
 |---|---|
-| archive | 495 |
+| archive | 497 |
 | external-archive | 50 |
-| live | 2001 |
+| live | 2005 |
 
 ## File per categoria
 
@@ -441,6 +441,7 @@
 - `D:\heuresys-advanced\.github\SECURITY.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\dependabot.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\build-web.yml` · *live* · git-tracked
+- `D:\heuresys-advanced\.github\workflows\codeql.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\i18n-parity.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\lint.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\.github\workflows\playwright-smoke.yml` · *live* · git-tracked
@@ -506,10 +507,11 @@
 - `D:\heuresys-advanced\apps\api\vitest.unit.config.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\_groups.json` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\_visual-confirmed.json` · *live* · git-tracked
-- `cowork_code_exchange/cli-next.zip` · *live* · git-tracked — pacchetto di consegna Cowork 2026-07-22 (asse ISCO-08/CP2021), già recepito in mig 000206-000208
 - `D:\heuresys-advanced\deploy\nginx\www.heuresys.com.conf` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\prometheus\prometheus.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\actions-runner-resource.dropin.conf` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.service` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-api.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-approvals-sla.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-approvals-sla.timer` · *live* · git-tracked
@@ -557,6 +559,7 @@
 - `D:\heuresys-advanced\scripts\provision-ci-runner-linuxpc.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\provision-linux-pc.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\provision-prometheus-vm.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\pull-prod-backups.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\run-wave1-fullscale.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\session-boot.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\setup-local-pg.sh` · *live* · git-tracked
@@ -775,6 +778,8 @@
 - `D:\heuresys-advanced\cowork_code_exchange\baselines\B4_audit_lineage_state_20260518_180107.txt` · *archive* · git-tracked
 - `D:\heuresys-advanced\cowork_code_exchange\baselines\B6_explain_baseline_20260518_180301.txt` · *archive* · git-tracked
 - `D:\heuresys-advanced\cowork_code_exchange\baselines\INDEX.md` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\cli-next.zip` · *archive* · git-tracked
+- `D:\heuresys-advanced\cowork_code_exchange\cli-prompt.md` · *archive* · git-tracked
 - `C:\Users\enzospenuso\Claude Desktop\outputs\GOAL_B_REPORT_2026-05-18.md` · *external-archive* · claude-desktop:outputs
 - `C:\Users\enzospenuso\Claude Desktop\outputs\_00_DISCOVERY_002_json-extract-lineage-fullscale.md` · *external-archive* · claude-desktop:outputs
 - `C:\Users\enzospenuso\Claude Desktop\outputs\_00_SESSION_HANDOFF_2026-05-18.md` · *external-archive* · claude-desktop:outputs
@@ -1142,6 +1147,7 @@
 - `D:\heuresys-advanced\db\migrations\000212_team_manage_permission.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000213_retention_import_validation_archive.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000214_insight_read_self_permission.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000215_restore_sdbi_consolidation_markers.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1318,7 +1324,6 @@
 - `D:\heuresys-advanced\apps\agent-gateway\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\FINDINGS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\FORENSIC-NOTES-S1006-cli.md` · *live* · git-tracked
-- `cowork_code_exchange/cli-prompt.md` · *live* · git-tracked — PROMPT Cowork→CLI dello stesso pacchetto
 - `D:\heuresys-advanced\deploy\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\A11Y_AUDIT_TIER7_2026-05-20.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\BOOTSTRAP_EXECUTION_PLAN.md` · *live* · git-tracked
@@ -1780,6 +1785,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-06-30-two-axis-authorization-model-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-01-f3-sensitive-modules-map.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-06-project-atlas-skill-design.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-zero-pending-plan.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked
@@ -2272,8 +2278,11 @@
 - `D:\heuresys-advanced\apps\api\test\trust-proxy.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\two-axis-f4-crosstree.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\locale.unit.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\unit\login-rate-limit.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\scope-data-classes.unit.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\unit\slow-queries-degradation.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\trust-proxy.unit.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\unit\with-transaction-retry.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b34-nullable-nk.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b60-a-silent-skip.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\upsert-sql-type-coerce.test.ts` · *live* · git-tracked
@@ -2371,9 +2380,6 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\visualizations.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\webauthn.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\whistleblowing.spec.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\tests\api\.gitkeep` · *live* · git-tracked
-- `D:\heuresys-advanced\tests\db\.gitkeep` · *live* · git-tracked
-- `D:\heuresys-advanced\tests\e2e\.gitkeep` · *live* · git-tracked
 
 ### ux-design-archive
 

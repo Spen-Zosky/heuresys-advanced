@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-23T15:42:46Z da docs/kb/tools/build_index.py
+# generato: 2026-07-25T04:33:11Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-23T15:42:46Z"
-  total_files: 2546
+  generated_at: "2026-07-25T04:33:11Z"
+  total_files: 2552
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -11,14 +11,14 @@ meta:
     ADR: 30
     api-core: 28
     api-module: 318
-    ci: 16
+    ci: 17
     claude-config: 15
-    config: 101
+    config: 103
     cowork-archive: 14
-    cowork-exchange: 203
+    cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 212
+    db-migration: 213
     db-other: 8
     db-script: 35
     db-seed: 115
@@ -34,9 +34,9 @@ meta:
     ux-design-archive: 80
     web-source: 206
   status_counts:
-    archive: 495
+    archive: 497
     external-archive: 50
-    live: 2001
+    live: 2005
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2342,6 +2342,12 @@ files:
     category: ci
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.github\workflows\codeql.yml'
+    root: repo
+    rel: '.github/workflows/codeql.yml'
+    category: ci
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\.github\workflows\i18n-parity.yml'
     root: repo
     rel: '.github/workflows/i18n-parity.yml'
@@ -2696,12 +2702,6 @@ files:
     category: config
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\cli-next.zip'
-    root: repo
-    rel: 'cli-next.zip'
-    category: config
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\deploy\nginx\www.heuresys.com.conf'
     root: repo
     rel: 'deploy/nginx/www.heuresys.com.conf'
@@ -2717,6 +2717,18 @@ files:
   - path: 'D:\heuresys-advanced\deploy\systemd\actions-runner-resource.dropin.conf'
     root: repo
     rel: 'deploy/systemd/actions-runner-resource.dropin.conf'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.service'
+    root: repo
+    rel: 'deploy/systemd/archive/heuresys-backup-pull.service'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.timer'
+    root: repo
+    rel: 'deploy/systemd/archive/heuresys-backup-pull.timer'
     category: config
     status: live
     provenance: git-tracked
@@ -2999,6 +3011,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\provision-prometheus-vm.sh'
     root: repo
     rel: 'scripts/provision-prometheus-vm.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\pull-prod-backups.sh'
+    root: repo
+    rel: 'scripts/pull-prod-backups.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -4271,6 +4289,18 @@ files:
   - path: 'D:\heuresys-advanced\cowork_code_exchange\baselines\INDEX.md'
     root: repo
     rel: 'cowork_code_exchange/baselines/INDEX.md'
+    category: cowork-exchange
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\cowork_code_exchange\cli-next.zip'
+    root: repo
+    rel: 'cowork_code_exchange/cli-next.zip'
+    category: cowork-exchange
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\cowork_code_exchange\cli-prompt.md'
+    root: repo
+    rel: 'cowork_code_exchange/cli-prompt.md'
     category: cowork-exchange
     status: archive
     provenance: git-tracked
@@ -6422,6 +6452,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000215_restore_sdbi_consolidation_markers.sql'
+    root: repo
+    rel: 'db/migrations/000215_restore_sdbi_consolidation_markers.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -7403,12 +7439,6 @@ files:
   - path: 'D:\heuresys-advanced\audit\FORENSIC-NOTES-S1006-cli.md'
     root: repo
     rel: 'audit/FORENSIC-NOTES-S1006-cli.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\cli-prompt.md'
-    root: repo
-    rel: 'cli-prompt.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10175,6 +10205,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-06-project-atlas-skill-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-07-06-project-atlas-skill-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-zero-pending-plan.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-07-25-zero-pending-plan.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -12986,15 +13022,33 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\login-rate-limit.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/login-rate-limit.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\unit\scope-data-classes.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/scope-data-classes.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\slow-queries-degradation.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/slow-queries-degradation.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\unit\trust-proxy.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/trust-proxy.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\with-transaction-retry.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/with-transaction-retry.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -13577,24 +13631,6 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\whistleblowing.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/whistleblowing.spec.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\tests\api\.gitkeep'
-    root: repo
-    rel: 'tests/api/.gitkeep'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\tests\db\.gitkeep'
-    root: repo
-    rel: 'tests/db/.gitkeep'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\tests\e2e\.gitkeep'
-    root: repo
-    rel: 'tests/e2e/.gitkeep'
     category: test
     status: live
     provenance: git-tracked

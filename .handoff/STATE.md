@@ -23,8 +23,9 @@ la dichiarazione.
 In coda alla sessione è arrivata una consegna da una sessione Cowork: l'impianto che
 esegue il piano in autonomia. Rivisto prima del commit da due revisori ostili — il lock
 non era un lock (fermare il driver era proprio ciò che creava due driver), e la chiusura
-di ogni ciclo deployava la produzione fuori da ogni filtro. Corretti quelli, ne restano
-altri che chiedono un ridisegno: committato **con il freno inserito**, non parte.
+di ogni ciclo deployava la produzione fuori da ogni filtro. Corretti quelli e poi anche i
+sei punti di ridisegno che restavano: l'impianto e' completo e verificato, ma **il freno
+resta inserito** — accenderlo e' una decisione di Enzo, non tecnica.
 
 ## Obiettivo permanente (mandato Enzo, S1029 — vale per OGNI sessione futura)
 
@@ -54,12 +55,14 @@ Le caselle spuntate portano la nota di chiusura con l'evidenza; il resto è aper
    `Z-223` (roadmap e wave ferme in DRAFT), `Z-230` (doc di triage Dependabot — ora
    scrivibile sul triage reale appena eseguito), `Z-239` (indice memorie), `Z-031`
    (monitor di non-regressione dell'ecosistema).
-2. **`Z-250` — togliere il freno all'impianto zero-pendenze**, che ora è versionato ma
-   **fermo per scelta**: due revisioni ostili hanno chiuso i difetti pericolosi, ma restano
-   6 punti di ridisegno (classificazione che guarda la descrizione invece del criterio di
-   chiusura, precondizioni di classe C che nessun codice legge, prove autodichiarate, gate
-   che contraddice la Definition of Done, self-test cieco a 4 regressioni su 5). Elenco
-   puntuale nel cluster e in `zp.config.yaml`.
+2. **`Z-250` — la prima corsa presidiata dell'impianto zero-pendenze.** I sei punti di
+   ridisegno sono **chiusi** (classe dedotta dall'azione e non dalla descrizione,
+   precondizioni verificate davvero, prove non piu' autodichiarate, gate allineato alla
+   Definition of Done, self-test che vede le regressioni, stato scritto in modo atomico).
+   Il freno resta inserito **per decisione tua**. Il passo che manca non e' codice: e' una
+   corsa vera, presidiata, su un paio di cluster innocui — serve anche a chiudere i 4 test
+   che richiedono una sessione viva (freno tirato a meta' lavoro, troncamento da budget,
+   bootstrap che non ri-censisce, frontiere della description).
 3. **Gli altri 5 cluster nati oggi**: `Z-249` due rossi semantici che convivono · `Z-251`
    la suite che non regge la contesa sul DB · `Z-252` PaletteDropdown inerte · `Z-253`
    `heuresys_ci` mai rinfrescato (è il DB su cui girano davvero i gate CI) · `Z-254`

@@ -23,6 +23,15 @@ updates:
         update-types:
           - "minor"
           - "patch"
+    ignore:
+      # @types/node must track the MAJOR of the runtime, not the latest published
+      # major. The runtime is pinned to Node 22 (package.json engines ">=22.0.0",
+      # .nvmrc 22, nvm "use 22" on VM + linux-pc). Typing against @types/node 26
+      # would surface APIs that do not exist at runtime — a silent footgun.
+      # Minor/patch of the 22.x line stay in scope via the group above.
+      # Revisit when the runtime itself moves to the next LTS (S1030, cluster Z-004).
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     labels:
       - "dependencies"
       - "area/deps"

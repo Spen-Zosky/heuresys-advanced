@@ -59,7 +59,7 @@ Dominant residual category: `color-contrast` (serious) on:
 | A11Y-2 | Adjust `--color-destructive` lightness for higher contrast on light theme `bg-card` (current oklch(0.55..0.60) — push to ~0.50 to clear AA on small text) | ~10 min | 2 nodes serious -> 0 on /showcase/forms |
 | A11Y-3 | Move the axe runtime pass into CI (GitHub Actions step in showcase.yml or new a11y.yml) — pin baseline JSONs as artifacts + diff on PR | ~30 min | Regression prevention |
 
-**Where to pick up**: `D:\ux-design-shared\ui\src\styles\tokens.css` for color
+**Where to pick up**: `ux-design-shared/ui/src/styles/tokens.css` for color
 adjustments; `.github/workflows/` for CI integration.
 
 ## Showcase chrome polish
@@ -111,6 +111,6 @@ None are blockers. Brand v1.0 + v1.1 is shippable as-is.
 - `docs/SHOWCASE_AUDIT_2026-05-20.md` (Tier 1-3 source audit)
 - `docs/A11Y_AUDIT_TIER7_2026-05-20.md` (Tier 7 source audit)
 - `docs/a11y-baseline/showcase/` (18 axe baseline JSONs)
-- `D:\ux-design-shared\governance\DECISION_REGISTER.md` (12/12 ADR
+- `ux-design-shared/governance/DECISION_REGISTER.md` (12/12 ADR
   Accepted)
 - Tag `v0.4.0-brand-v1` (both repos)

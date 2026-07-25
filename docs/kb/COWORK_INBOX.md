@@ -149,6 +149,8 @@ stato: [RICONCILIATA 2026-06-19 S997] — CLI: decisione Enzo recepita su tutti 
 
 Aggiunti (untracked) 7 battle plan eseguibili + 7 review adversariali + README in `docs/wargames/`. Mappa: 11→#27, 12→#26, 13→#24(F4), 14→#28, 15→#4(pricing), 16→#34, 17→#17. Ognuno = execution-spec del rispettivo item (mosse, fork con trigger, abort, verification). Proposta: commit dei file e uso come spec quando l'item viene aperto. Decisioni WAIT-INPUT elencate nel README (pricing Q1-Q8, F4 A/B, Wave-3 A/B, H-1 authz).
 
+stato: [RICONCILIATA 4fc901de] — CLI S1029 (2026-07-25): la proposta è stata accolta, i file sono committati e tracciati in `docs/wargames/` (14 documenti + README). Restano aperte le sole **decisioni** elencate nel README di quella cartella (pricing Q1-Q8, rotta Wave-3 A/B), che vivono come cluster `needsEnzo` nel piano `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` §W6. Entry marcata a posteriori: era l'unica dell'inbox priva della riga di stato richiesta dal protocollo (riga 10 di questo file).
+
 
 ### 2026-07-22 | proposta-backlog | Asse professione — chiusura gap ISCO-08 standalone + CP2021 (design + DDL PROPOSED)
 

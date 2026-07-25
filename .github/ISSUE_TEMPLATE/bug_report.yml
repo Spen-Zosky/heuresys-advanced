@@ -41,7 +41,7 @@ body:
       description: Minimal, deterministic reproduction. Include commands, request payloads, persona used.
       placeholder: |
         1. `pnpm dev` on api + web
-        2. Login as `tenant_admin_test@rtl-bank.test` / `Admin#PassW0rd!`
+        2. Login as `federica.marchetti@rtl-bank.org` (TENANT_ADMIN), password from `TEST_ADMIN_PASSWORD`
         3. Navigate to `/positions`
         4. Click ...
     validations:

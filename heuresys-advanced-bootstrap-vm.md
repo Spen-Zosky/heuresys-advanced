@@ -48,7 +48,7 @@
 | Aspetto | Windows (corrente) | VM OCI (target) |
 |---|---|---|
 | Path repo principale | `D:\heuresys-advanced` | `~/heuresys-advanced` |
-| Path UI shared (sibling) | `D:\ux-design-shared` | `~/ux-design-shared` |
+| Path UI shared (sibling) | `ux-design-shared` | `~/ux-design-shared` |
 | PostgreSQL endpoint | `localhost:5433` (via tunnel SSH a OCI) | `localhost:5432` (nativo, no tunnel) |
 | Script DB | `*.ps1` (PowerShell) | varianti `*.sh` (`pnpm db:*:sh`) |
 | Symlink `@heuresys/ui` | junction NTFS | symlink POSIX (più robusto) |
@@ -103,7 +103,7 @@ Aprire un secondo terminale o un file `.bootstrap-vars` (gitignored) per annotar
 | `COOKIE_SECRET` | auto-generato da `openssl rand -base64 48` | 48 byte base64, va in `.env` |
 | `JWT_PRIVATE_KEY_FILE` | `.secrets/jwt_private.pem` | RSA 2048 bit, auto-generato |
 | `JWT_PUBLIC_KEY_FILE` | `.secrets/jwt_public.pem` | derivato dalla private |
-| `TEST_ADMIN_PASSWORD` | `Admin#PassW0rd!` (default OK per dev) | usato dai test integrati |
+| `TEST_ADMIN_PASSWORD` | `<TEST_ADMIN_PASSWORD>` (default OK per dev) | usato dai test integrati |
 | `API_PORT` | `3001` | porta dev server API |
 | `WEB_PORT` | `3000` | porta Next.js (quando MVP-2a partirà) |
 | Hostname API exposed | `0.0.0.0:3001` o `127.0.0.1:3001` | se vuoi esporre verso fuori, fix anche security list OCI |
@@ -288,7 +288,7 @@ curl -s http://localhost:3001/readyz | jq
 # Login test (cookie scartato, è solo smoke):
 curl -s -X POST http://localhost:3001/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@heuresys.com","password":"Admin#PassW0rd!"}' | jq .user
+  -d '{"email":"admin@heuresys.com","password":"<TEST_ADMIN_PASSWORD>"}' | jq .user
 # Atteso: { "userId": "...", "email": "admin@heuresys.com" }
 ```
 
@@ -535,7 +535,7 @@ curl -sf http://localhost:3001/readyz  && echo "OK readyz"
 # Login flow E2E
 LOGIN_RESP=$(curl -s -X POST http://localhost:3001/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@heuresys.com","password":"Admin#PassW0rd!"}')
+  -d '{"email":"admin@heuresys.com","password":"<TEST_ADMIN_PASSWORD>"}')
 echo "$LOGIN_RESP" | jq -e '.user.email == "admin@heuresys.com"' && echo "OK login"
 
 kill %1 2>/dev/null                         # ferma il dev server

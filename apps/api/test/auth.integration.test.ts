@@ -4,7 +4,7 @@
  * (no socket) so tests run fast and deterministically.
  *
  * Live DB dependency: tests assume the test-admin (admin@heuresys.com /
- * Admin#PassW0rd!) has been seeded via `pnpm db:seed-test-admin`.
+ * <TEST_ADMIN_PASSWORD>) has been seeded via `pnpm db:seed-test-admin`.
  */
 
 import { describe, it, expect, beforeAll, afterAll, afterEach } from "vitest";

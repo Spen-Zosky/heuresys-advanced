@@ -21,7 +21,7 @@
  * get-by-id blocked), never hardcoded data counts (Enzo's rule) — every user id is taken
  * from the live login response and every subject row is a fixture created + cleaned up here.
  *
- * Real RTL personas (password Admin#PassW0rd!) + their real org relationships (verified live
+ * Real RTL personas (password <TEST_ADMIN_PASSWORD>) + their real org relationships (verified live
  * against the reports-to chain in sys.sys_positions / sys.sys_user_position_assignments):
  *   - paolo.caputo@rtl-bank.org       MANAGER       → org sub-tree; tommaso is his report
  *   - tommaso.fiore@rtl-bank.org      USER          → IN paolo's sub-tree (report)

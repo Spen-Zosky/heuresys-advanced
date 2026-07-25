@@ -158,7 +158,7 @@ Following `CLAUDE.md` "The module pattern (mandatory for every new API module)".
 
 ## 5. Playwright live-data E2E (real personas, no mock)
 
-Per the MVP-2a/2b "LIVE DATA E2E ONLY" doctrine (`CLAUDE.md`). Run via `pnpm test:e2e:prod` (or `:node22` wrapper on Node ≥23 — D-36). Personas are the real seeded RTL_BANK users (`db:seed-test-admin`, password `Admin#PassW0rd!`).
+Per the MVP-2a/2b "LIVE DATA E2E ONLY" doctrine (`CLAUDE.md`). Run via `pnpm test:e2e:prod` (or `:node22` wrapper on Node ≥23 — D-36). Personas are the real seeded RTL_BANK users (`db:seed-test-admin`, password `<TEST_ADMIN_PASSWORD>`).
 
 **(A) admin E2E** (`apps/web/e2e/engagement-admin.spec.ts`):
 - Login `admin@heuresys.com` (PLATFORM_ADMIN) → navigate to `/engagement` → assert the surveys table shows ≥1 row whose `responseCount` matches the live aggregate (data came from the 3792-row seed, not a fixture) → open a survey with responses → assert per-question `avgRating` rows render → assert the pulse chart renders with `totalChecks` > 0.

@@ -27,7 +27,7 @@
  * get-by-id blocked), never hardcoded data counts — every user id is taken from the live
  * login response and every fixture id is created here and cleaned up.
  *
- * Real RTL personas (password Admin#PassW0rd!) + their real org relationships:
+ * Real RTL personas (password <TEST_ADMIN_PASSWORD>) + their real org relationships:
  *   - paolo.caputo@rtl-bank.org       MANAGER      → org sub-tree; tommaso is his report
  *   - tommaso.fiore@rtl-bank.org      USER         → IN paolo's sub-tree (report)
  *   - antonio.parisi@rtl-bank.org     USER         → OUTSIDER (peer, I19 — not in the sub-tree)

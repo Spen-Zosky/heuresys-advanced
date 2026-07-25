@@ -9,7 +9,7 @@
  * authenticator and is covered by a separate Playwright E2E — we do NOT forge a
  * full attestation blob here.
  *
- * Live DB: assumes seeded admin (admin@heuresys.com / Admin#PassW0rd!). Each
+ * Live DB: assumes seeded admin (admin@heuresys.com / <TEST_ADMIN_PASSWORD>). Each
  * test cleans the user's MFA factors so re-runs are deterministic; the
  * credential rows cascade via the FK ON DELETE CASCADE.
  */

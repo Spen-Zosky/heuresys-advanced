@@ -770,7 +770,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool } from "../src/db/client.js";
 import { toVectorLiteral } from "../src/modules/semantic-matching/repository.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = "<TEST_ADMIN_PASSWORD>";
 interface S { cookies: Map<string, string>; csrfToken: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
 async function login(t: TestApp, email: string): Promise<S> {

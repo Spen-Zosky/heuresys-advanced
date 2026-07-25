@@ -3930,7 +3930,7 @@ Running 125 tests using 1 worker
       navigated to "http://localhost:3000/login?email=manager_test%40rtl-bank.test&password=Admin%23PassW0rd%21"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^
@@ -3963,7 +3963,7 @@ Running 125 tests using 1 worker
       navigated to "http://localhost:3000/login?email=employee_test%40rtl-bank.test&password=Admin%23PassW0rd%21"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^

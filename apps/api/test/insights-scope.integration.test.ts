@@ -32,7 +32,7 @@
  * from the live login response; no data count is hardcoded — assertions are INVARIANTS
  * (outsider rows absent / outsider get-by-id blocked), per Enzo's rule.
  *
- * Real RTL personas (password Admin#PassW0rd!) + their real org relationships:
+ * Real RTL personas (password <TEST_ADMIN_PASSWORD>) + their real org relationships:
  *   - paolo.caputo@rtl-bank.org       MANAGER (+PROCESS_OWNER fixture) → org sub-tree; tommaso is his report
  *   - tommaso.fiore@rtl-bank.org      USER          → IN paolo's sub-tree (report); no insights:view
  *   - antonio.parisi@rtl-bank.org     USER          → OUTSIDER (peer, I19 — not in the sub-tree)

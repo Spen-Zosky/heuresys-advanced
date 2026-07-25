@@ -1,7 +1,9 @@
 # NEXT SESSION — Forensic Review + Finance-Readiness Verdict (KICKOFF)
 
+> **✅ ESEGUITO S1022 (2026-07-20/21)** — audit forense dell'intero progetto completato, verdetto **CONDITIONAL-GO**. Documento storico: **non ri-eseguirlo**. Kickoff successivo: `NEXT_SESSION_EPICS_KICKOFF.md` (a sua volta eseguito in S1023). Le condizioni del verdetto e i finding residui vivono nel piano `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` (area business-dd) e nel register di `SOT_BACKLOG.md`.
+
 **Autorità del mandato**: Enzo, chiusura S1021 (2026-07-20).
-**Priorità**: PRIMA DI OGNI ALTRA COSA nella prossima sessione fresca. Non aprire il menu azioni, non riprendere il batch: esegui questo.
+**Priorità** *(storica, assolta)*: era «PRIMA DI OGNI ALTRA COSA nella prossima sessione fresca». Assolta in S1022 — la riga resta per fedeltà al mandato originale, non come istruzione viva.
 
 ---
 

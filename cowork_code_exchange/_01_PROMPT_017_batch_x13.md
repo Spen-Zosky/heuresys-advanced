@@ -128,7 +128,7 @@ Da Block A, lista routes con coverage `NONE` o `SMOKE-only`. Priorità:
 Pattern canonico (NEXT_SESSION_MVP_2A.md §4.2):
 - import auth helper (`storageState`)
 - `test.describe('<route>', () => {...})`
-- ≥1 happy path con persona seeded (`admin@heuresys.com` / `Admin#PassW0rd!` o appropriate persona)
+- ≥1 happy path con persona seeded (`admin@heuresys.com` / `<TEST_ADMIN_PASSWORD>` o appropriate persona)
 - ≥1 data assertion (no smoke-only)
 - NO mock data, dati live via API real
 

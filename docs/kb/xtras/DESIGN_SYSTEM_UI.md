@@ -28,7 +28,7 @@ All reusable UI/UX components live in **`@heuresys/ui`**, una libreria condivisa
 **Maintenance / evolution**:
 - Bump versione: `pnpm update @heuresys/ui` (segue il range `^0.1.1`) oppure pinning esplicito a una versione specifica nel `package.json`.
 - Aggiungere un nuovo componente o nuova dep: lavoro nel repo `ux-design-shared` → release npm → bump qui.
-- Storybook: `cd D:\ux-design-shared && npm run storybook` → `http://localhost:6006` (51 componenti, 16 tier — count storico, verificare allo state corrente del repo).
+- Storybook: `cd ux-design-shared && npm run storybook` → `http://localhost:6006` (51 componenti, 16 tier — count storico, verificare allo state corrente del repo).
 - Re-validation post-`pnpm install`: il check storico `readlink -f node_modules/@heuresys/ui → /d/ux-design-shared/ui` è **obsoleto** (era valido pre-X18). Oggi `readlink -f node_modules/@heuresys/ui` ritorna un path dentro `node_modules/.pnpm/@heuresys+ui@<ver>/node_modules/@heuresys/ui` — è il pattern pnpm standard.
 
 **Apps che consumano `@heuresys/ui`** (allo stato corrente):

@@ -72,7 +72,7 @@ Servono quando aggiungerai `.github/workflows/ci.yml` + test integration con DB.
 | `JWT_PRIVATE_KEY` | repo | RSA private key per JWT signing nei test | Mai (test-only, può essere generato per run) |
 | `JWT_PUBLIC_KEY` | repo | Idem, public | Idem |
 | `COOKIE_SECRET` | repo | 48-byte base64 random | Mai (test-only) |
-| `TEST_ADMIN_PASSWORD` | repo | Override default `Admin#PassW0rd!` | Mai (test-only) |
+| `TEST_ADMIN_PASSWORD` | repo | Override default `<TEST_ADMIN_PASSWORD>` | Mai (test-only) |
 
 Per il deploy production (se mai):
 | Secret | Scope | Note |

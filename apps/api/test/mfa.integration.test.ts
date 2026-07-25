@@ -3,7 +3,7 @@
  *
  * MVP-3 Tappa E — TOTP MFA backend integration tests.
  *
- * Live DB: tests assume seeded admin (admin@heuresys.com / Admin#PassW0rd!).
+ * Live DB: tests assume seeded admin (admin@heuresys.com / <TEST_ADMIN_PASSWORD>).
  * Each test cleans the user's MFA factors at start so re-runs are deterministic.
  */
 

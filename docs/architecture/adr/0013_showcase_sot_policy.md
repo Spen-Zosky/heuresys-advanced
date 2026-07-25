@@ -1,13 +1,15 @@
 # ADR‑0013 — Showcase SoT Policy: 4‑Level Source‑of‑Truth Layering
 
-- **Status:** Accepted
+- **Status:** Accepted — *con emendamento sul solo meccanismo di dipendenza (vedi sotto)*
 - **Date:** 2026‑05‑20
+
+> **Emendamento (S1029, 2026‑07‑25).** La stratificazione a 4 livelli decisa qui è tuttora in vigore e non è toccata. È superata **solo** la descrizione di *come* `@heuresys/ui` entra in questo repo: al momento della decisione era collegata con il protocollo `link:` a una copia di lavoro locale; dalla migrazione **X18** (2026‑05) è una **libreria npm pubblicata e versionata**, consumata come dipendenza normale (`"@heuresys/ui": "^0.1.x"`), e le sue dipendenze UI arrivano come transitive. Il repo sorgente resta `ux-design-shared`, ma non è più un percorso di macchina: i riferimenti assoluti Windows presenti nel testo originale sono stati resi relativi al repo. Setup, workflow di modifica di un componente e storia della migrazione: `docs/kb/xtras/DESIGN_SYSTEM_UI.md`.
 
 ## Context
 
 Brand identity v1 has produced a three‑surface deploy pipeline that is easy to confuse:
 
-1. `@heuresys/ui` — design system library at `D:\ux-design-shared\ui` linked via the `link:` protocol from this repo's root `package.json`.
+1. `@heuresys/ui` — design system library at `ux-design-shared/ui` linked via the `link:` protocol from this repo's root `package.json`.
 2. `apps/web` — Next.js 15 admin SPA + ESS portal; hosts `src/app/showcase/<route>/page.tsx` (the brand showcase routes) and business code side by side.
 3. `apps/showcase` — minimal Next.js workspace whose only purpose is to produce a static export of the showcase routes for GitHub Pages. Its `src/app/showcase/`, `src/lib/theme/`, and `src/components/` are populated at build time by `scripts/sync-showcase.sh`.
 
@@ -27,7 +29,7 @@ Adopt a 4‑level Source‑of‑Truth hierarchy with explicit edit semantics and
 
 | Level | Location | Role | Editable? |
 |------|----------|------|-----------|
-| **L1** | `D:\ux-design-shared\ui` (`@heuresys/ui`) | SoT for UI primitives, brand tokens, brand assets, Storybook | Yes |
+| **L1** | `ux-design-shared/ui` (`@heuresys/ui`) | SoT for UI primitives, brand tokens, brand assets, Storybook | Yes |
 | **L2** | `apps/web` | SoT for showcase route wrappers + business app code | Yes |
 | **L3** | `apps/showcase` | Mirror / export target for static GH Pages deploy | **No** for sync‑copied paths; Yes for shell only |
 | **L4** | `gh-pages` branch / GitHub Pages | Deploy artifact, force‑orphan reset on each workflow run | **No** |
@@ -80,4 +82,4 @@ For every npm package referenced (directly or transitively) by a Level 2 file th
 - First misalignment symptom + emergency hotfix: commit `75d726b` (`fix(showcase): drop lucide-react dep — inline SVG icons in SystemHealthDashboard`)
 - Proper remediation: same commit as this ADR (`lucide-react` added as direct dep to both `apps/web` and `apps/showcase`; inline SVG removed; lucide imports restored)
 - Related ADRs: [ADR‑0007](0007_frontend_next15_app_router.md) (frontend stack), [ADR‑0011](0011_ess_scope_inclusion.md) (scope of `apps/web` routes)
-- Companion docs: `CLAUDE.md` §"Design System — CENTRALIZZATO in D:\ux-design-shared" (consumer‑side rules already in place; this ADR codifies the producer side)
+- Companion docs: `CLAUDE.md` §"Design System — CENTRALIZZATO in ux-design-shared" (consumer‑side rules already in place; this ADR codifies the producer side)

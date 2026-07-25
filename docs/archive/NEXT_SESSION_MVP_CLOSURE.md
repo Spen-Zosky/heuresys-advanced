@@ -199,7 +199,7 @@ Verifica umana che ogni delle 5 personas seedate accede correttamente, viene red
 
 | Persona | Email | Password | Landing attesa | Navigazione di prova |
 |---|---|---|---|---|
-| PLATFORM_ADMIN | `admin@heuresys.com` | `Admin#PassW0rd!` | `/dashboard` | → `/tenants` → `/admin/roles` |
+| PLATFORM_ADMIN | `admin@heuresys.com` | `<TEST_ADMIN_PASSWORD>` | `/dashboard` | → `/tenants` → `/admin/roles` |
 | TENANT_ADMIN | `tenant_admin_test@rtl-bank.test` | idem | `/dashboard` | → `/users` → `/positions` |
 | MANAGER | `manager_test@rtl-bank.test` | idem | `/dashboard` | → `/gaps` → `/me` (Switch to My HR) |
 | USER (employee) | `employee_test@rtl-bank.test` | idem | `/me` | → `/me/profile` → `/me/learning/catalogue` |

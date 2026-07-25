@@ -25,7 +25,7 @@
  * cleaned up here (real RTL predictions already exist for these subjects; the fixtures give
  * the suite deterministic, self-contained ids to assert on).
  *
- * Real RTL personas (password Admin#PassW0rd!) + their real org relationships (the same
+ * Real RTL personas (password <TEST_ADMIN_PASSWORD>) + their real org relationships (the same
  * reports-to chain the sibling F3 suites verify — paolo's transitive sub-tree contains
  * tommaso and NOT antonio):
  *   - paolo.caputo@rtl-bank.org       MANAGER       → org sub-tree; tommaso is his report

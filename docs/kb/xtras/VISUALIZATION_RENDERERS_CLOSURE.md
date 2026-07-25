@@ -22,7 +22,7 @@ Il framing storico ("tappa B gated, da costruire, in attesa del brand") è **sup
 | Org-chart node-graph | `apps/web/.../organization/org-chart/page.tsx` | ECharts `series type:'graph' layout:'force'` (roam/drag) | `/v1/visualization-graphs/:id/render` (filtra `?type=ORG_CHART`) |
 | Org-network analytics | `apps/web/.../analytics/org-network/page.tsx` | ECharts **bars** (distribuzioni) | `/v1/analytics/org-network` (metriche aggregate — **non** topologia) |
 
-**Primitive lib** (@heuresys/ui@0.1.3, sorgente `D:\ux-design-shared`): `MermaidDiagram` (Tier 10, SVG hardened), `NetworkGraph` (Cytoscape force/drag), `KGGraphCanvas` (adjacency). Tutte `graph_type`-agnostiche. **Regola architetturale rispettata**: `apps/web` dichiara solo `@heuresys/ui` per la viz (nessuna dep diretta reactflow/mermaid/echarts/cytoscape).
+**Primitive lib** (@heuresys/ui@0.1.3, sorgente `ux-design-shared`): `MermaidDiagram` (Tier 10, SVG hardened), `NetworkGraph` (Cytoscape force/drag), `KGGraphCanvas` (adjacency). Tutte `graph_type`-agnostiche. **Regola architetturale rispettata**: `apps/web` dichiara solo `@heuresys/ui` per la viz (nessuna dep diretta reactflow/mermaid/echarts/cytoscape).
 
 ## Bucket-map terminale dei 9 `graph_type`
 
@@ -46,7 +46,7 @@ I 6 "RENDERER-READY / seed-deferred" **non sono un gap di renderer**: sono **dat
 
 - **org-network resta analytics-bars**: complementare a org-chart, non duplicato. Rifiutata la conversione a node-graph (perdita distribuzioni + duplicazione).
 - **NO nuovo renderer React Flow**: lo stack ECharts force-graph + Mermaid + Cytoscape NetworkGraph copre già force-layout + drag interattivo + diagrammi. Un 4° renderer React Flow aggiungerebbe superficie di manutenzione senza capability nuova → rifiutato (manufacturing work).
-- **`reactflow` dead-weight**: dichiarato in `D:\ux-design-shared\ui\package.json` ma **0 import** in `ui/src`. Rimozione = mossa zero-residuo, ma cross-repo + **npm publish** 0.1.3→0.1.4 + bump qui (azione outward-facing/irreversibile) → **gated su ok Enzo** (vedi nota in `SOT_BACKLOG.md`).
+- **`reactflow` dead-weight**: dichiarato in `ux-design-shared/ui/package.json` ma **0 import** in `ui/src`. Rimozione = mossa zero-residuo, ma cross-repo + **npm publish** 0.1.3→0.1.4 + bump qui (azione outward-facing/irreversibile) → **gated su ok Enzo** (vedi nota in `SOT_BACKLOG.md`).
 
 ## Brand-gate
 

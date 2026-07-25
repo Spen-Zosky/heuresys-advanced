@@ -103,7 +103,7 @@ D:\heuresys-advanced\                                  (monorepo pnpm @ Windows 
 
 **Auth client doctrine implementata**: `src/lib/api/fetch.ts` (`apiFetch<T>` wrapper con credentials include + CSRF auto + silent refresh 401 + Zod parse opzionale + error tipato), `csrf-store.ts` (in-memory + cookie `hrx_csrf` + `BroadcastChannel` cross-tab sync), `auth.ts` (TanStack hooks `useCurrentUser`, `useLogin` con ramo MFA, `useLogout` + clear), `landing.ts` (`landingForRoles` → `/dashboard` se admin, `/me` altrimenti), `errors.ts` (`ApiError`, `SessionExpiredError`, `NetworkError`). Middleware `src/middleware.ts` redirect `/login` se cookie `hrx_access` assente; public paths `/login`, `/_next`, `/api`, `/showcase`.
 
-**E2E Playwright**: 20 spec file, **61 `test(` totali** (+ 5 setup persona). Pattern: `tests/.auth/<persona>.json` storageState evita rate-limit `/v1/auth/login` 10/5m. 5 personas seedate con password unica `Admin#PassW0rd!` (`admin@heuresys.com`, `tenant_admin_test@rtl-bank.test`, `manager_test@rtl-bank.test`, `employee_test@rtl-bank.test`, `outsider_test@rtl-bank.test`).
+**E2E Playwright**: 20 spec file, **61 `test(` totali** (+ 5 setup persona). Pattern: `tests/.auth/<persona>.json` storageState evita rate-limit `/v1/auth/login` 10/5m. 5 personas seedate con password unica `<TEST_ADMIN_PASSWORD>` (`admin@heuresys.com`, `tenant_admin_test@rtl-bank.test`, `manager_test@rtl-bank.test`, `employee_test@rtl-bank.test`, `outsider_test@rtl-bank.test`).
 
 **i18n parity**: `it/common.json` = `en/common.json` = **23 leaf keys** ciascuno → parity OK. **Caveat**: 23 chiavi totali su 47 pagine sono pochissime — gran parte delle stringhe UI vengono da `@heuresys/ui` o sono hardcoded in italiano nei `.tsx`. **Possibile debito i18n nascosto** (verificare grep literal strings IT/EN).
 
@@ -166,7 +166,7 @@ Post-migrazione **X18** (2026-05-24/25, batch X18 con 5 amendment cascade): npm-
 
 **Scripts (11 totali)**: 5 PS1/SH twin (create / migrate / reset / validate / brownfield-wave-1-preflight), 2 standalone TS (seed-reference-bank + seed-test-admin), 4 bash-only (setup_oci_vm_database + extract-wave1-legacy + extract_users_employees_legacy + cross_os_pipeline.sh library).
 
-**5 test personas** (idempotenti via `seed-test-admin.ts`, password `Admin#PassW0rd!`):
+**5 test personas** (idempotenti via `seed-test-admin.ts`, password `<TEST_ADMIN_PASSWORD>`):
 - `admin@heuresys.com` → PLATFORM_ADMIN (tenant NULL)
 - `tenant_admin_test@rtl-bank.test` → TENANT_ADMIN (RTL)
 - `manager_test@rtl-bank.test` → MANAGER (incumbent + owner TEST_MGR_POS)
@@ -655,7 +655,7 @@ pnpm db:seed-test-admin         # 5 test personas
 # Test smoke
 curl -s http://localhost:3001/healthz   # 200
 curl -s -X POST http://localhost:3001/v1/auth/login -H "Content-Type: application/json" \
-  -d '{"email":"admin@heuresys.com","password":"Admin#PassW0rd!"}'
+  -d '{"email":"admin@heuresys.com","password":"<TEST_ADMIN_PASSWORD>"}'
 ```
 
 ---

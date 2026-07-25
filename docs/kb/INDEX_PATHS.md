@@ -506,7 +506,7 @@
 - `D:\heuresys-advanced\apps\api\vitest.unit.config.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\_groups.json` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\_visual-confirmed.json` · *live* · git-tracked
-- `D:\heuresys-advanced\cli-next.zip` · *live* · git-tracked
+- `cowork_code_exchange/cli-next.zip` · *live* · git-tracked — pacchetto di consegna Cowork 2026-07-22 (asse ISCO-08/CP2021), già recepito in mig 000206-000208
 - `D:\heuresys-advanced\deploy\nginx\www.heuresys.com.conf` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\prometheus\prometheus.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\actions-runner-resource.dropin.conf` · *live* · git-tracked
@@ -1318,7 +1318,7 @@
 - `D:\heuresys-advanced\apps\agent-gateway\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\FINDINGS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\FORENSIC-NOTES-S1006-cli.md` · *live* · git-tracked
-- `D:\heuresys-advanced\cli-prompt.md` · *live* · git-tracked
+- `cowork_code_exchange/cli-prompt.md` · *live* · git-tracked — PROMPT Cowork→CLI dello stesso pacchetto
 - `D:\heuresys-advanced\deploy\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\A11Y_AUDIT_TIER7_2026-05-20.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\BOOTSTRAP_EXECUTION_PLAN.md` · *live* · git-tracked

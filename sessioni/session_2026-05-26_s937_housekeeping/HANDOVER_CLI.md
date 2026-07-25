@@ -321,7 +321,7 @@ Connection params (`.env` Option B, attivo):
 
 ### Seed personas (test admin + 5 personas)
 
-Password unica per tutte: **`Admin#PassW0rd!`**
+Password unica per tutte: **`<TEST_ADMIN_PASSWORD>`**
 
 | Email | Ruolo | Tenant |
 |---|---|---|

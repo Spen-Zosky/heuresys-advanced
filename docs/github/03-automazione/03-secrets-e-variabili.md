@@ -132,7 +132,7 @@ Quando attiverai il workflow `ci.yml` con test integration contro DB:
 | `POSTGRES_PASSWORD` | repo | Password per il Postgres CI (service container) |
 | `JWT_PRIVATE_KEY` | repo | RSA key per generare JWT nei test (oppure si rigenera per run) |
 | `COOKIE_SECRET` | repo | Secret 48-byte per i cookie session |
-| `TEST_ADMIN_PASSWORD` | repo | Override del default `Admin#PassW0rd!` se diverso in CI |
+| `TEST_ADMIN_PASSWORD` | repo | Override del default `<TEST_ADMIN_PASSWORD>` se diverso in CI |
 
 Per ora **nessuno** è in CI perché `.env` locale + tunnel SSH coprono lo sviluppo. Quando il CI partirà, va deciso se replicare la VM OCI o usare Postgres service container con seed locale.
 

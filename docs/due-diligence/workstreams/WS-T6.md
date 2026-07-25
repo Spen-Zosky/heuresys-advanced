@@ -11,7 +11,7 @@
 
 Il core di sicurezza applicativa è **solido e materialmente corretto**. Le affermazioni del venditore su Argon2id, RS256 JWT, refresh single-use con replay detection, CSRF double-submit, SQL 100% parametrico e log redaction sono tutte **confermate con evidenza file:line**. Il codebase mostra una cura insolita per un prodotto pre-revenue: un bug di footgun `z.coerce.boolean()` sul flag `TRUST_PROXY` (avrebbe trasformato `"false"` in `true`, rendendo il rate-limit spoofabile via XFF forgiato) è stato identificato e risolto con un parser dedicato; TOTP at-rest con AES-256-GCM è stato implementato (D-30, commit `00a6d7b`); HSTS è presente in nginx da S993 (`deploy/nginx/www.heuresys.com.conf:39`).
 
-I gap residui identificati da questo audit indipendente sono tutti **classificati Medium o inferiore**, nessuno è un showstopper. Il più rilevante in ottica investor-grade è la **hardcoded test credential** `Admin#PassW0rd!` presente in 20+ file TS committati (incluso lo script live-acceptance di agent-gateway), che — pur essendo credenziale di dati sintetici — rappresenta una bad-practice di secret hygiene inconsistente con i controlli altrimenti forti del progetto. Un secondo gap riguarda `admin/revoke-user` che non scopa il tenant target per i TENANT_ADMIN (perm-gated, non un bypass live, ma un follow-up esplicito documentato nel codice). Il terzo è la mancanza di test adversariali sistematici (injection, brute-force, fuzz) — solo 4 file su 148 toccano queste categorie.
+I gap residui identificati da questo audit indipendente sono tutti **classificati Medium o inferiore**, nessuno è un showstopper. Il più rilevante in ottica investor-grade è la **hardcoded test credential** `<TEST_ADMIN_PASSWORD>` presente in 20+ file TS committati (incluso lo script live-acceptance di agent-gateway), che — pur essendo credenziale di dati sintetici — rappresenta una bad-practice di secret hygiene inconsistente con i controlli altrimenti forti del progetto. Un secondo gap riguarda `admin/revoke-user` che non scopa il tenant target per i TENANT_ADMIN (perm-gated, non un bypass live, ma un follow-up esplicito documentato nel codice). Il terzo è la mancanza di test adversariali sistematici (injection, brute-force, fuzz) — solo 4 file su 148 toccano queste categorie.
 
 Per un prodotto in fase pre-revenue con dati 100% sintetici (ADR-0023) il rischio operativo è basso. Per la transizione al primo tenant pagante reale, T6-001 (credential hygiene) e T6-002 (revoke-user scope) diventano prerequisiti P1.
 
@@ -35,13 +35,13 @@ Per un prodotto in fase pre-revenue con dati 100% sintetici (ADR-0023) il rischi
 
 ## Finding
 
-### T6-001 — Hardcoded test credential `Admin#PassW0rd!` in 20+ file committati (incluso agent-gateway live-acceptance)
+### T6-001 — Hardcoded test credential `<TEST_ADMIN_PASSWORD>` in 20+ file committati (incluso agent-gateway live-acceptance)
 - **Severità**: Medium
 - **Tipo**: Secret Hygiene / Credential Exposure
 - **Evidenza**:
-  - `apps/agent-gateway/scripts/live-read-acceptance.ts:24` — `const PASSWORD = process.env.ACC_PASSWORD ?? "Admin#PassW0rd!";` — fallback hardcoded in script di acceptance che gira contro PROD
+  - `apps/agent-gateway/scripts/live-read-acceptance.ts:24` — `const PASSWORD = process.env.ACC_PASSWORD ?? "<TEST_ADMIN_PASSWORD>";` — fallback hardcoded in script di acceptance che gira contro PROD
   - Stessa pattern: `live-skills-acceptance.ts:37`, `live-write-acceptance.ts:32`
-  - `apps/api/test/auth-mfa.integration.test.ts:24`, `apps/api/test/auth-refresh-cookie.integration.test.ts:29`, e 17+ altri file di test: `const PWD = "Admin#PassW0rd!"`
+  - `apps/api/test/auth-mfa.integration.test.ts:24`, `apps/api/test/auth-refresh-cookie.integration.test.ts:29`, e 17+ altri file di test: `const PWD = "<TEST_ADMIN_PASSWORD>"`
 - **Impatto**: Con dati sintetici (ADR-0023) il rischio operativo è contenuto. Il vettore reale è il pattern: uno sviluppatore futuro (o un processo automatizzato) potrebbe riusare la credential in un tenant reale; gli script agent-gateway sono live-acceptance che puntano a PROD. La credential è visibile nel tree a chiunque abbia accesso al repo.
 - **GA-blocker**: No (dati sintetici oggi), ma **prerequisito commerciale** al primo tenant reale
 - **Remediation**: (a) Agent-gateway scripts: rimuovere il fallback hardcoded — l'script deve fallire loudly se `ACC_PASSWORD` non è set; (b) Test suite: centralizzare in `test/helpers/test-constants.ts` che legge da env (con `.env.test` gitignored); (c) Rotare la credential dei seeded test-persona in ambienti non-dev. Effort ~2h.

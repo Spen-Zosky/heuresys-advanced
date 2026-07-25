@@ -1,5 +1,7 @@
 # NEXT SESSION — Forense DB + dati + frontend (KICKOFF)
 
+> **✅ ESEGUITO S1024-S1028** — le 4 fasi del mandato sono state completate (censimento DB, superfici, bilinguismo dati chiuso in S1027 con coverage 0 gap). Documento storico: **non ri-eseguirlo**. I residui non chiusi sono confluiti nel register di `SOT_BACKLOG.md` (#72, #73) e nel piano `docs/superpowers/specs/2026-07-25-zero-pending-plan.md`.
+
 **Autorità del mandato**: Enzo, chiusura S1023 (2026-07-21).
 **Contesto**: S1023 ha chiuso il residuo epiche GO-BRANCH (D-08 F2-F5 · D-14 F2-F4 GDPR · D-09 F5) + coda (D-59, #65, D-11, Dependabot). Il prossimo salto di qualità è una verifica forense di **dati e superfici**, con piani di intervento chirurgici.
 

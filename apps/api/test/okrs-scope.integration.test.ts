@@ -24,7 +24,7 @@
  * from the live login response and every subject OKR is a fixture created + cleaned up here
  * (the 20 real RTL OKRs all have owner NULL, so a per-person fixture is mandatory).
  *
- * Real RTL personas (password Admin#PassW0rd!) + their real org relationships (verified live
+ * Real RTL personas (password <TEST_ADMIN_PASSWORD>) + their real org relationships (verified live
  * against the reports-to chain in sys.sys_positions / sys.sys_user_position_assignments —
  * paolo's transitive sub-tree contains tommaso and NOT antonio):
  *   - paolo.caputo@rtl-bank.org       MANAGER       → org sub-tree; tommaso is his report

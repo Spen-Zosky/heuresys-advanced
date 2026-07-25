@@ -18,7 +18,7 @@
 - **node-pg type quirk** — colonne `numeric` tornano come **string** → `Number(...)` nel mapper; colonne `date` → cast `::text AS col` nel SELECT (verbatim 'YYYY-MM-DD'); `integer` torna number; `timestamptz` → `.toISOString()`.
 - **TS strict** — `noUncheckedIndexedAccess`, `noUnusedLocals/Parameters` (prefissa `_`), `exactOptionalPropertyTypes` OFF.
 - **RBAC cache** si ricarica a boot server / primo `buildTestApp()`: le permission goal/okr devono essere **applicate al DB reale** (`pnpm db:migrate:sh`) prima che i test passino.
-- **Personas di test** (password `Admin#PassW0rd!`): `admin@heuresys.com` (PLATFORM_ADMIN), `federica.marchetti@rtl-bank.org` (TENANT_ADMIN), `tommaso.fiore@rtl-bank.org` (USER).
+- **Personas di test** (password `<TEST_ADMIN_PASSWORD>`): `admin@heuresys.com` (PLATFORM_ADMIN), `federica.marchetti@rtl-bank.org` (TENANT_ADMIN), `tommaso.fiore@rtl-bank.org` (USER).
 - **Commit prefix**: `feat(api): goals — ...`, `feat(web): goals — ...`, `feat(db): goals — ...`. Commit locali su `main`, **mai push** senza richiesta esplicita.
 - **Run dei test web E2E su Windows Node ≥23**: usare `pnpm --filter @heuresys/web test:e2e:prod:node22` (D-36).
 
@@ -580,7 +580,7 @@ import { pool } from "../src/db/client.js";
 // Goals API (/v1/goals/*). Real login + live DB (SSH tunnel). Reads need goal:read (6 roles);
 // writes need goal:{create,update,delete}. Live baseline: sys_goals ~1067 (RTL tenant).
 
-const PWD = "Admin#PassW0rd!";
+const PWD = "<TEST_ADMIN_PASSWORD>";
 interface S { cookies: Map<string, string>; csrfToken: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {
@@ -816,7 +816,7 @@ git commit -m "feat(web): goals — read-only list page + i18n"
 > Confirm the e2e dir/config: `ls apps/web/tests/e2e/ 2>/dev/null || ls apps/web/e2e/`. Mirror the structure/imports of an existing spec (`grep -l "test.describe" apps/web/**/e2e/*.spec.ts`). The spec below uses the data-testids set by `DataTablePanel` in Task 6.
 
 **Interfaces:**
-- Consumes: the `/goals` page (Task 6) + live `/v1/goals` (Task 3). Login persona `federica.marchetti@rtl-bank.org` / `Admin#PassW0rd!`.
+- Consumes: the `/goals` page (Task 6) + live `/v1/goals` (Task 3). Login persona `federica.marchetti@rtl-bank.org` / `<TEST_ADMIN_PASSWORD>`.
 
 - [ ] **Step 1: Write the E2E spec**
 
@@ -827,7 +827,7 @@ import { loginAs } from "./helpers/login"; // adapt to the actual helper used by
 
 test.describe("Goals page", () => {
   test("TENANT_ADMIN sees the goals list populated from live data", async ({ page }) => {
-    await loginAs(page, "federica.marchetti@rtl-bank.org", "Admin#PassW0rd!");
+    await loginAs(page, "federica.marchetti@rtl-bank.org", "<TEST_ADMIN_PASSWORD>");
     await page.goto("/goals");
     await expect(page.getByTestId("goals-title")).toBeVisible();
     // count badge reflects the live total (non-empty)
@@ -1291,7 +1291,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = "<TEST_ADMIN_PASSWORD>";
 interface S { cookies: Map<string, string>; csrfToken: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
 async function login(t: TestApp, email: string): Promise<S> {
@@ -1434,7 +1434,7 @@ export default function OkrsPage() {
 - [ ] **Step 3: Append OKR E2E assertion** to `apps/web/tests/e2e/goals.spec.ts`:
 ```ts
   test("TENANT_ADMIN sees the OKR list populated from live data", async ({ page }) => {
-    await loginAs(page, "federica.marchetti@rtl-bank.org", "Admin#PassW0rd!");
+    await loginAs(page, "federica.marchetti@rtl-bank.org", "<TEST_ADMIN_PASSWORD>");
     await page.goto("/okrs");
     await expect(page.getByTestId("okrs-title")).toBeVisible();
     await expect(page.getByTestId("okrs-row").first()).toBeVisible();

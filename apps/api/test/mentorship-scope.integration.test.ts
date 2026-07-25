@@ -25,7 +25,7 @@
  * every user id comes from the live login response and every subject row is a fixture created
  * + cleaned up here (keyed on a unique suitePrefix in metadata).
  *
- * Real RTL personas (password Admin#PassW0rd!) + their real org relationships — verified live
+ * Real RTL personas (password <TEST_ADMIN_PASSWORD>) + their real org relationships — verified live
  * against the reports-to chain (paolo's transitive sub-tree contains tommaso and NOT antonio;
  * MANAGER holds mentorship:read; USER/TEAM_MEMBER do NOT):
  *   - paolo.caputo@rtl-bank.org       MANAGER       → org sub-tree; tommaso is his report

@@ -110,7 +110,6 @@ heuresys-advanced/
 │   ├── seeds/       CSV + INSERT for RTL_BANK_REFERENCE tenant
 │   └── scripts/     PS1 + SH twins: create/migrate/reset/validate/seed
 ├── docs/         CANONICAL planning + ADR + brownfield (8 priming docs — read on session start). Path index: docs/kb/INDEX_PATHS.md
-├── tests/        vitest + playwright (top-level, currently unused; tests live per-app)
 └── qa_artifacts/ acceptance outputs + Mermaid diagrams (runs/ is gitignored)
 ```
 

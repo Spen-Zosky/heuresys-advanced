@@ -33,7 +33,7 @@
  * per-target endpoints return an honest 200 empty-state when the target has no embedding, so the
  * invariant is asserted purely on HTTP status (200-allowed vs 404-blocked), driven by the org gate.
  *
- * Real RTL personas (password Admin#PassW0rd!) + their real org relationships (verified live against
+ * Real RTL personas (password <TEST_ADMIN_PASSWORD>) + their real org relationships (verified live against
  * the reports-to chain in sys.sys_positions / sys.sys_user_position_assignments):
  *   - paolo.caputo@rtl-bank.org       MANAGER        → org sub-tree; tommaso IS in his sub-tree
  *   - tommaso.fiore@rtl-bank.org      USER           → IN paolo's sub-tree (report); self-only role

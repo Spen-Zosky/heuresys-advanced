@@ -587,7 +587,7 @@ API runtime:
   - 267 endpoints live (7 auth + 258 business + 13 ESS + 2 health) + 182/182 integration tests verdi
   - 5 test personas seeded (PLATFORM_ADMIN/TENANT_ADMIN/MANAGER/USER×2) +
     3 test positions con hierarchy (TEST_MGR_POS ← TEST_SUB_POS + TEST_OUTSIDER_POS)
-  - Tutti i password: Admin#PassW0rd! (override via TEST_ADMIN_PASSWORD env)
+  - Tutti i password: <TEST_ADMIN_PASSWORD> (override via TEST_ADMIN_PASSWORD env)
 
 Tunnel SSH e processi background:
   - `ssh -fN -L 5433:localhost:5432 oracle-vm-default` (potrebbe essere chiuso dal logout)
@@ -787,7 +787,7 @@ complessi che richiedono più decisioni architetturali.
   6. (Opzionale) Test admin login smoke:
        Invoke-RestMethod -Uri http://localhost:3001/v1/auth/login -Method POST \
          -ContentType "application/json" \
-         -Body '{"email":"admin@heuresys.com","password":"Admin#PassW0rd!"}'
+         -Body '{"email":"admin@heuresys.com","password":"<TEST_ADMIN_PASSWORD>"}'
   7. Conferma di aver capito lo stato e di essere pronto per MVP-1 step 5.1.4
      (o quale altro step l'utente sceglie).
   8. Inizia con il piano dettagliato + chiedi conferma per partire.

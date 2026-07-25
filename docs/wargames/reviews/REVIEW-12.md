@@ -102,9 +102,9 @@ E aggiungere a F6:
 
 ### L3 (LOW) — Il gold-pattern da clonare contiene una password stantia nel commento
 
-`goals-scope.integration.test.ts:26` (e altri 9+ file scope) recita nel header `(password Admin#PassW0rd!)` — residuo pre-F-001 (la password è stata ruotata, il valore è morto, ma è un pattern che non deve replicarsi). Il piano dice di creare sibling "mirroring S1014 style": un esecutore che copia il header replica la riga.
+`goals-scope.integration.test.ts:26` (e altri 9+ file scope) recita nel header `(password <TEST_ADMIN_PASSWORD>)` — residuo pre-F-001 (la password è stata ruotata, il valore è morto, ma è un pattern che non deve replicarsi). Il piano dice di creare sibling "mirroring S1014 style": un esecutore che copia il header replica la riga.
 **Patch (M6, una riga)**:
-> `When cloning the scope-suite header comment, DROP the literal "(password Admin#PassW0rd!)" fragment — stale pre-F-001 residue; write "(password env-driven, F-001)". Flag the residue in the 10 existing files to Enzo in the report (cleanup candidate, not this mission).`
+> `When cloning the scope-suite header comment, DROP the literal "(password <TEST_ADMIN_PASSWORD>)" fragment — stale pre-F-001 residue; write "(password env-driven, F-001)". Flag the residue in the 10 existing files to Enzo in the report (cleanup candidate, not this mission).`
 
 ### INFO
 - **I1**: il file `000037_*.sql` si auto-intitola "Migration 000035" nel header (il gap 000035 è documentato come cosmetico in CLAUDE.md) — nessun impatto su A2.

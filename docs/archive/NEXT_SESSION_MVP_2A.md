@@ -167,7 +167,7 @@ Pattern da implementare per intero **prima** della prima pagina (riferimento `FR
 - `src/lib/api/fetch.ts` — `fetchApi()` wrapper che attaches il cookie automaticamente (è HttpOnly, lato browser passa solo per same-origin → Next.js proxy `/api/v1/*` → `http://localhost:3001/v1/*`), legge il CSRF token da un cookie/header non-HttpOnly e lo iniettata in `x-csrf-token` su tutte le mutation.
 - `src/lib/api/session.ts` — `getSession()` server-side via `GET /v1/auth/me` chiamato in `RootLayout` per pre-popolare il client.
 - `src/lib/api/mutations.ts` — `useLogin()`, `useLogout()`, gestione del 401 con redirect a `/login`.
-- **E2E test obbligatorio** prima di scrivere altre pagine: Playwright fa login reale come `admin@heuresys.com` / `Admin#PassW0rd!`, verifica che cookie sia settato, che chiamata a `/v1/auth/me` ritorni l'utente, che logout azzeri la sessione.
+- **E2E test obbligatorio** prima di scrivere altre pagine: Playwright fa login reale come `admin@heuresys.com` / `<TEST_ADMIN_PASSWORD>`, verifica che cookie sia settato, che chiamata a `/v1/auth/me` ritorni l'utente, che logout azzeri la sessione.
 
 ### 3.4 — Acceptance Fase 1
 
@@ -179,7 +179,7 @@ Pattern da implementare per intero **prima** della prima pagina (riferimento `FR
 - [ ] Pagina `/login` fatta E funzionante con dato reale (no stub)
 - [ ] Playwright E2E `tests/e2e/auth.spec.ts` verde:
   1. Apre `/login`
-  2. Compila form con `admin@heuresys.com` + `Admin#PassW0rd!`
+  2. Compila form con `admin@heuresys.com` + `<TEST_ADMIN_PASSWORD>`
   3. Submit → redirect a `/dashboard`
   4. Verifica via XHR intercept che `POST /v1/auth/login` sia stato chiamato e abbia ritornato 200 con body `{ user: { email: "admin@heuresys.com" }, csrfToken: "...", roles: [...] }`
   5. Verifica che cookie `heuresys_access_token` sia HttpOnly+Secure
@@ -286,7 +286,7 @@ Per la prossima sessione, ricordare che:
 - **Shared schemas**: 256+ Zod schemas in `@heuresys/shared`. Riusare, mai ridichiarare.
 - **Design system**: 51 componenti in `@heuresys/ui` (linked live). Riusare, mai duplicare.
 - **Auth/CSRF/RBAC**: complete. La UI consuma cookie + CSRF token via il pattern già documentato.
-- **DB seed**: `RTL_BANK_REFERENCE` (158 personas + 158 positions + assignments) + 5 test personas con password nota `Admin#PassW0rd!`. Tutti i Playwright login usano queste credenziali.
+- **DB seed**: `RTL_BANK_REFERENCE` (158 personas + 158 positions + assignments) + 5 test personas con password nota `<TEST_ADMIN_PASSWORD>`. Tutti i Playwright login usano queste credenziali.
 - **Tunnel SSH a OCI**: necessario per ogni `pnpm dev`, `pnpm test`, `pnpm test:e2e`. Riaprire se chiuso.
 - **GitHub remote**: `Spen-Zosky/heuresys-advanced` (public) + `Spen-Zosky/ux-design-shared` (public). Push richiede sempre autorizzazione esplicita di Enzo.
 - **CLAUDE.md sezione Design System**: regole non-negotiable per evitare duplicazione UI.
@@ -321,7 +321,7 @@ il file per intero):
      /v1/* che colpisce PostgreSQL sulla VM OCI via tunnel 5433.
   3. ZERO commit di pagina senza Playwright E2E test verde che esegue
      login reale + asserzioni su dati seed reali (RTL_BANK_REFERENCE +
-     5 test personas, password Admin#PassW0rd!).
+     5 test personas, password <TEST_ADMIN_PASSWORD>).
   4. Ordine OBBLIGATORIO: API-first → audit gap → fill gap (TDD style) →
      scaffold web + auth client → page-by-page con E2E live-data.
   5. Wiring completo a TUTTI i livelli prima del merge di una pagina:

@@ -406,7 +406,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 
-const PWD = "Admin#PassW0rd!";
+const PWD = "<TEST_ADMIN_PASSWORD>";
 const E2E_DOMAIN = "@leads-it.test";
 
 function cookieHeader(cookies: { name: string; value: string }[]) {

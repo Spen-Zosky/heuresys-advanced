@@ -40,7 +40,7 @@ Running 128 tests using 1 worker
     waiting for navigation to "**/dashboard" until "load"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^
@@ -72,7 +72,7 @@ Running 128 tests using 1 worker
     waiting for navigation to "**/dashboard" until "load"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^
@@ -104,7 +104,7 @@ Running 128 tests using 1 worker
     waiting for navigation to "**/dashboard" until "load"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^
@@ -136,7 +136,7 @@ Running 128 tests using 1 worker
     waiting for navigation to "**/dashboard" until "load"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^
@@ -168,7 +168,7 @@ Running 128 tests using 1 worker
     waiting for navigation to "**/dashboard" until "load"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^
@@ -200,7 +200,7 @@ Running 128 tests using 1 worker
     waiting for navigation to "**/dashboard" until "load"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^
@@ -232,7 +232,7 @@ Running 128 tests using 1 worker
     waiting for navigation to "**/me" until "load"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^
@@ -264,7 +264,7 @@ Running 128 tests using 1 worker
     waiting for navigation to "**/me" until "load"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^
@@ -296,7 +296,7 @@ Running 128 tests using 1 worker
     waiting for navigation to "**/me" until "load"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^
@@ -328,7 +328,7 @@ Running 128 tests using 1 worker
     waiting for navigation to "**/me" until "load"
     ============================================================
 
-      35 |     await fillLoginForm(page, persona.email, "Admin#PassW0rd!");
+      35 |     await fillLoginForm(page, persona.email, "<TEST_ADMIN_PASSWORD>");
       36 |     await page.getByTestId("login-submit").click();
     > 37 |     await page.waitForURL(`**${persona.expectedLandingPath}`);
          |                ^

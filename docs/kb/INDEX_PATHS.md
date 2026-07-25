@@ -2599,6 +2599,7 @@
 - `D:\heuresys-advanced\apps\web\src\app\error.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\global-error.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\globals.css` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\_theme-tokens.css` · *live* · git-tracked — FONTE UNICA dei token di tema (@theme inline + :root + .dark); `scripts/sync-showcase.sh` ne copia una replica in apps/showcase/src/app/ (gitignored). S1030
 - `D:\heuresys-advanced\apps\web\src\app\investors\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\layout.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\login\page.tsx` · *live* · git-tracked

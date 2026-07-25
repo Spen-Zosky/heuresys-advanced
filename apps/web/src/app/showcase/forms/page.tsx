@@ -11,7 +11,7 @@ function FieldGroup({ children }: { children: React.ReactNode }) {
 function Label({ children, required = false, htmlFor }: { children: React.ReactNode; required?: boolean; htmlFor?: string }) {
   return (
     <label htmlFor={htmlFor} className="block text-xs font-medium text-[var(--card-foreground)]">
-      {children} {required ? <span className="text-destructive">*</span> : null}
+      {children} {required ? <span className="text-danger">*</span> : null}
     </label>
   );
 }
@@ -21,7 +21,7 @@ function HelpText({ children }: { children: React.ReactNode }) {
 }
 
 function ErrorText({ children }: { children: React.ReactNode }) {
-  return <p className="text-[11px] text-destructive">{children}</p>;
+  return <p className="text-[11px] text-danger">{children}</p>;
 }
 
 export default function FormsShowcasePage() {
@@ -79,7 +79,7 @@ export default function FormsShowcasePage() {
 
           <FieldGroup>
             <Label htmlFor="evidence">Evidence link</Label>
-            <input id="evidence" type="url" placeholder="https://confluence.heuresys.com/..." className="w-full rounded border border-destructive bg-destructive/10 px-3 py-2 text-sm" defaultValue="not a valid url" />
+            <input id="evidence" type="url" placeholder="https://confluence.heuresys.com/..." className="w-full rounded border border-destructive bg-danger/10 px-3 py-2 text-sm" defaultValue="not a valid url" />
             <ErrorText>Enter a fully-qualified URL (https://…).</ErrorText>
           </FieldGroup>
 
@@ -133,7 +133,7 @@ export default function FormsShowcasePage() {
           </FieldGroup>
           <FieldGroup>
             <Label htmlFor="state-error">Error</Label>
-            <input id="state-error" className="w-full rounded border border-destructive bg-destructive/10 px-3 py-2 text-sm" defaultValue="invalid" />
+            <input id="state-error" className="w-full rounded border border-destructive bg-danger/10 px-3 py-2 text-sm" defaultValue="invalid" />
             <ErrorText>Must be unique across the tenant.</ErrorText>
           </FieldGroup>
           <FieldGroup>

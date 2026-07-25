@@ -335,7 +335,7 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-123** (1.0h) — Nessun test asserisce che il boot usi loadRolePermissionCacheWithRetry (i test iniettano un loader finto)
   - *chiuso quando*: un test fallisce se server.ts torna al loader non-retrying (spy sull'export o start() con loader failing-then-recovering)
   - *assorbe*: `gapfill:GAP2-15`
-- [ ] **Z-110** (0.5h) — Costo Argon2id non abbassato in ambiente test (~60-70s di wall per run)
+- [x] **Z-110** ~~Costo Argon2id non abbassato in ambiente test~~ — **WON'T-DO, motivato (S1029)**. Il cluster prometteva ~60-70s di wall per run, ma la premessa e' sbagliata su due fronti, entrambi verificati: **(1) inefficace** — nessun test chiama `hashPassword` (0 file), mentre 147 file fanno login, cioe' `argon2.verify`; e verify usa i parametri INCISI NELL'HASH memorizzato, non `ARGON2_PARAMS`. Abbassare i parametri non toccherebbe il costo di una sola verifica. **(2) pericoloso** — `service.ts:312-333` auto-ruota l'hash quando `needsRehash` e' vero. Con parametri di test piu' deboli, needsRehash sarebbe vero a OGNI login e la suite, che gira contro il database condiviso con la produzione, riscriverebbe hash reali con parametri indeboliti. Il risparmio ipotetico non vale un degrado silenzioso delle credenziali di produzione.
   - *chiuso quando*: il wall-clock di pnpm test scende di >=60s misurato prima/dopo e i test di hashing restano verdi
   - *assorbe*: `p100x:QW-F1`
 - [ ] **Z-125** (0.5h) — Convenzione di naming test: il modulo notifications risulta scoperto a ogni censimento automatico (falso positivo)

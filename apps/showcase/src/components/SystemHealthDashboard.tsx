@@ -11,9 +11,17 @@
 /**
  * SUPERUSER System Health & Observability — canonical reference dashboard.
  *
- * Shared component, consumed by BOTH:
- *   - apps/web/src/app/showcase/system-health/page.tsx        (brand showcase, dev-only)
- *   - apps/web/src/app/(authenticated)/system-health/page.tsx (production, PLATFORM_ADMIN gated)
+ * BRAND SHOWCASE ONLY. Every figure below is a hardcoded design fixture
+ * (fake tenants, invented error rates); it exists to render the visual
+ * pattern, not to report system state.
+ *
+ * Sole consumer:
+ *   - apps/web/src/app/showcase/system-health/page.tsx (brand showcase, dev-only)
+ *
+ * The PRODUCTION route apps/web/src/app/(authenticated)/system-health/ renders
+ * <SystemHealthLive> against real /v1/* endpoints — never this component.
+ * (This header used to claim production consumed it too; that was stale and
+ * read as if fixtures were shipped to users.)
  *
  * Source of truth: ux-design/prototypes/superuser-system-health.html
  * Composed entirely from @heuresys/ui dashboard pattern components.

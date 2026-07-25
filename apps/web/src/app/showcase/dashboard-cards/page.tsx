@@ -80,7 +80,7 @@ export default function DashboardCardsShowcasePage() {
           items={[
             { label: "Active positions", value: "1,284", iconTone: "palette-1", footerLeft: "+12 this week", footerRight: <span className="text-success">▲ 0.9%</span> },
             { label: "Open skill gaps", value: "342", iconTone: "warning", footerLeft: "−18 vs last month", footerRight: <span className="text-success">▼ 5%</span> },
-            { label: "Certifications expiring", value: "27", iconTone: "danger", footerLeft: "next 30 days", footerRight: <span className="text-destructive">▲ 22%</span> },
+            { label: "Certifications expiring", value: "27", iconTone: "danger", footerLeft: "next 30 days", footerRight: <span className="text-danger">▲ 22%</span> },
             { label: "Tenants live", value: "23", iconTone: "palette-3", footerLeft: "+1 (RTL_BANK_REFERENCE)" },
           ]}
         />

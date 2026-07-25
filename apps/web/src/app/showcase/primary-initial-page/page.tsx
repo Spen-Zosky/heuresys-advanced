@@ -68,7 +68,7 @@ const SIDEBAR_GROUPS = [
 
 function QuickKpiCard({ label, value, tone }: { label: string; value: string; tone: "primary" | "destructive" | "warning" | "neutral" }) {
   const cls =
-    tone === "destructive" ? "text-destructive" :
+    tone === "destructive" ? "text-danger" :
     tone === "warning" ? "text-warning" :
     tone === "primary" ? "text-primary" : "text-foreground";
   return (

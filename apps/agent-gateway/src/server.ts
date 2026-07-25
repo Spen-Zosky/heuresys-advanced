@@ -14,6 +14,9 @@
  *
  * Node http only (no framework dep). HEURESYS_API defaults to the dev API on :3001.
  */
+// DEVE restare il primo import: neutralizza le credenziali API prima che
+// qualunque altro modulo del grafo (incl. l'SDK) possa leggerle.
+import "./subscription-auth.js";
 import { createServer, type IncomingMessage } from "node:http";
 import { ApprovalRegistry, type ApprovalDecision } from "./approval-bridge.js";
 import { FileAuditSink } from "./audit-sink.js";
@@ -40,10 +43,9 @@ const auditSink = new FileAuditSink();
 // A real ANTHROPIC_API_KEY (or AWS Bedrock / GCP Vertex) would only be needed IF a
 // customer-facing production serving is ever added. Verified live (S990): query()
 // → "PONG" via the MAX subscription, is_error=false, no out_of_credits.
-if (process.env.AGENT_GATEWAY_SUBSCRIPTION_AUTH === "1") {
-  delete process.env.ANTHROPIC_API_KEY;
-  delete process.env.ANTHROPIC_AUTH_TOKEN;
-}
+// La neutralizzazione vive in ./subscription-auth.js, importato PER PRIMO in cima a
+// questo file: qui sarebbe troppo tardi, perche' gli import ESM sono hoisted e l'SDK
+// risulterebbe gia' caricato (S1029).
 
 function parseCookies(header: string | undefined): Record<string, string> {
   const out: Record<string, string> = {};

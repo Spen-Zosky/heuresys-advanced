@@ -8,9 +8,43 @@ meta:
   # GUARDIA: finche' e' false la skill NON esegue nessun cluster e si fermta con
   # outcome "blocked". La classificazione per raggio d'impatto e' la precondizione
   # di sicurezza dell'intero impianto: senza di essa nessuna corsia e' autorizzata.
-  clusters_classified: false
-  classified_at: null
-  classified_against_sha: null
+  clusters_classified: true
+  classified_at: 2026-07-25
+  classified_against_sha: 7798df59
+
+  # FRENO DI SICUREZZA — inserito dalla review CLI del 2026-07-25 (S1030).
+  # Finche' e' false il driver rifiuta di aprire sessioni: l'impianto e' versionato e
+  # ispezionabile, ma non parte. Non e' sfiducia nel lavoro, e' il risultato di due
+  # revisioni ostili che hanno trovato difetti reali, alcuni gia' corretti e altri che
+  # richiedono un ridisegno, non una patch:
+  #
+  #   CORRETTI in questa review — lock non atomico e cancellato dal driver sbagliato ·
+  #   `kill` che non fermava il driver ma gli faceva mollare il lock · tetto di spesa
+  #   inerte (stderr nel JSON + argv oltre 32k) · deploy di produzione non filtrato dalla
+  #   classe di rischio (ora veto imposto da close-propagate.sh) · corsia che non arrivava
+  #   alla sessione · «zero pendenze» dichiarabile con righe di piano non lette · CI
+  #   «verde» con zero workflow valutati · API di produzione ferma vista come sana ·
+  #   alert di sicurezza «accettati» per una parola trovata nella prosa del registro.
+  #
+  #   APERTI, da chiudere prima di togliere il freno:
+  #   (a) la classificazione mette in corsia non presidiata cluster che toccano la
+  #       produzione — Z-153 (deploy sul sito pubblico), Z-070 (backfill di ~14k skill sul
+  #       DB reale), Z-186 (import di 139k archi), Z-048 (PATCH reali su /v1/me/*),
+  #       Z-167, Z-108, Z-209. La regola guarda la descrizione e non il *chiuso quando*,
+  #       che e' dove sta l'azione;
+  #   (b) `class_c_preconditions` non e' letto da nessuna riga di codice: dump verificato,
+  #       prova su linux-pc e doppia esecuzione sono prosa;
+  #   (c) il tipo di prova e' autodichiarato — due `echo` chiudono un cluster — e con
+  #       output UTF-8 la prova viene registrata verde e VUOTA (encoding cp1252 nei
+  #       sottoprocessi);
+  #   (d) il gate delle prove rifiuta le coppie che la Definition of Done del progetto
+  #       impone (integration+e2e, psql+runtime) e accetta un typecheck come mezza prova;
+  #   (e) `zp_selftest` non rileva 4 regressioni su 5 (effort, budget, contatore
+  #       fallimenti, marcatore di blocco su Enzo non sono coperti);
+  #   (f) scritture di stato non atomiche e id duplicato che sblocca le dipendenze.
+  #
+  # Referto completo: nell'entry di riconciliazione in docs/kb/COWORK_INBOX.md.
+  autorizzato_non_presidiato: false
 
 lanes:
   safe: [A, B]
@@ -26,11 +60,19 @@ budget:
   # VERIFICATO su claude 2.1.220 (`claude --help`): `--max-turns` NON esiste come flag CLI.
   # L'unico tetto quantitativo per invocazione e' `--max-budget-usd`. Il limite ai turni si
   # ottiene dalla clausola `or stop after N turns` dentro /goal, non da un flag.
-  max_budget_usd_per_iteration: 8 # -> claude -p --max-budget-usd
-  goal_turn_bound: 25             # -> clausola "or stop after N turns" nella riga /goal
-  max_iterations_default: 12      # tetto del driver
-  hard_stop_usd_total: 120        # tetto globale cumulato, misurato dal driver fra le iterazioni
-                                  # leggendo total_cost_usd da --output-format json
+  # Calibrazione 2026-07-25, primo dato reale disponibile: una sessione Cowork complessa
+  # (135 min, +957/-239 righe, ~1200 righe cambiate) e' costata 73,62 USD. Un cluster tipico
+  # vale ~1/10 di quel lavoro (~6-7 USD), piu' due prove eterogenee e tre revisori adversarial
+  # che quella sessione non aveva. Da qui 12, non 8: meglio generoso per iterazione e severo
+  # sul totale, perche' il troncamento a meta' cluster e' il modo di fallire piu' costoso.
+  # RESTA UNA STIMA finche' non gira il primo cluster vero: `zp avvia -Iterazioni 1` la valida.
+  max_budget_usd_per_iteration: 12  # -> claude -p --max-budget-usd
+  goal_turn_bound: 25               # -> clausola "or stop after N turns" nella riga /goal
+  max_iterations_default: 12        # tetto del driver
+  hard_stop_usd_total: 120          # tetto globale cumulato, misurato dal driver fra le
+                                    # iterazioni leggendo total_cost_usd da --output-format json.
+                                    # E' il tetto che vincola per primo: 120/12 = 10 iterazioni,
+                                    # meno delle 12 nominali. Voluto: il totale e' la guardia vera.
 
 runtime:
   # VERIFICATO: `bash` nel PATH di Windows risolve allo stub WSL
@@ -126,7 +168,220 @@ interrupt_resume:
 
 # Classificazione dei 248 cluster. La compila T1, sullo stato reale a sessione CLI chiusa.
 # Formato: <id>: {classe: A|B|C|D|E, perche: "<una riga>", paths: [...]}
-clusters: {}
+clusters:
+  Z-004: {classe: B, perche: "codice: test, typecheck"}
+  Z-006: {classe: B, perche: "codice: playwright, test"}
+  Z-007: {classe: B, perche: "rivisto a mano: gate E2E in CI: \"prod\" veniva da test:e2e:prod"}
+  Z-008: {classe: B, perche: "rivisto a mano: spec axe/smoke in CI: \"prod\" veniva da test:e2e:prod"}
+  Z-009: {classe: D, perche: "produzione viva: produzione", rivisto: false}
+  Z-011: {classe: B, perche: "codice: CI, api, apps/web"}
+  Z-014: {classe: B, perche: "codice: api"}
+  Z-016: {classe: B, perche: "codice: api, apps/api"}
+  Z-021: {classe: D, perche: "produzione viva: produzione, retention"}
+  Z-023: {classe: D, perche: "produzione viva: PROD"}
+  Z-024: {classe: D, perche: "produzione viva: deploy, scripts/vm-, systemd"}
+  Z-025: {classe: D, perche: "produzione viva: deploy"}
+  Z-026: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-027: {classe: C, perche: "schema e dati: seed"}
+  Z-028: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-031: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-032: {classe: B, perche: "codice: hook"}
+  Z-033: {classe: B, perche: "rivisto a mano: CI di qualita del design system upstream"}
+  Z-034: {classe: D, perche: "produzione viva: MFA_ENCRYPTION_KEY, Segreti, TOTP"}
+  Z-035: {classe: C, perche: "schema e dati: sys_whistleblowing, tabella"}
+  Z-036: {classe: C, perche: "schema e dati: sys_auth"}
+  Z-037: {classe: D, perche: "produzione viva: JWT (JWT_PRIVATE_KEY_PREVIOUS + grace period) un test verifica che un token firmato con la chiav, Rotazion"}
+  Z-038: {classe: B, perche: "codice: route, test"}
+  Z-039: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-040: {classe: B, perche: "codice: api, apps/api, test"}
+  Z-041: {classe: B, perche: "codice: route"}
+  Z-042: {classe: A, perche: "inerte: DEBT_REGISTER"}
+  Z-045: {classe: E, perche: "bloccato su Enzo: segreto"}
+  Z-046: {classe: C, perche: "schema e dati: sys_auth"}
+  Z-047: {classe: C, perche: "schema e dati: sys_auth"}
+  Z-048: {classe: B, perche: "codice: API, test"}
+  Z-049: {classe: D, perche: "produzione viva: rotazion"}
+  Z-050: {classe: C, perche: "schema e dati: sys_auth, tabelle"}
+  Z-052: {classe: E, perche: "bloccato su Enzo: esterno"}
+  Z-054: {classe: C, perche: "schema e dati: DDL"}
+  Z-055: {classe: B, perche: "rivisto a mano: store condiviso per il rate-limit: codice applicativo"}
+  Z-056: {classe: B, perche: "codice: test"}
+  Z-057: {classe: B, perche: "rivisto a mano: tocca .env.example versionato, non il .env reale"}
+  Z-059: {classe: C, perche: "rivisto a mano: drop delle staging.wave1_*: schema e dati"}
+  Z-060: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-061: {classe: C, perche: "schema e dati: tabelle"}
+  Z-062: {classe: C, perche: "schema e dati: sys_approval"}
+  Z-063: {classe: C, perche: "schema e dati: migration, seed, sys_seed"}
+  Z-064: {classe: C, perche: "schema e dati: sys_blueprint"}
+  Z-065: {classe: C, perche: "schema e dati: Tabelle, migration, sys_organization"}
+  Z-066: {classe: C, perche: "schema e dati: sys_auth, tabella"}
+  Z-067: {classe: C, perche: "schema e dati: sys_goal"}
+  Z-068: {classe: C, perche: "schema e dati: sys_source"}
+  Z-069: {classe: C, perche: "schema e dati: Seed, brownfield"}
+  Z-070: {classe: B, perche: "codice: codice"}
+  Z-071: {classe: B, perche: "codice: test"}
+  Z-072: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-073: {classe: C, perche: "schema e dati: brownfield"}
+  Z-074: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-075: {classe: C, perche: "schema e dati: sys_gap"}
+  Z-076: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-077: {classe: C, perche: "schema e dati: sys_bonus"}
+  Z-078: {classe: C, perche: "schema e dati: tabella"}
+  Z-079: {classe: C, perche: "schema e dati: FK"}
+  Z-080: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-081: {classe: C, perche: "schema e dati: sys_succession"}
+  Z-082: {classe: A, perche: "inerte: ADR"}
+  Z-083: {classe: C, perche: "schema e dati: Brownfield"}
+  Z-084: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-085: {classe: C, perche: "schema e dati: FK, indice"}
+  Z-086: {classe: C, perche: "schema e dati: indici"}
+  Z-087: {classe: C, perche: "schema e dati: colonne, migration"}
+  Z-088: {classe: C, perche: "schema e dati: indici"}
+  Z-089: {classe: C, perche: "rivisto a mano: partitioning di una tabella: schema, non runtime di produzione"}
+  Z-090: {classe: D, perche: "produzione viva: retention"}
+  Z-091: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-092: {classe: C, perche: "schema e dati: FK"}
+  Z-093: {classe: C, perche: "schema e dati: sys_esco"}
+  Z-094: {classe: C, perche: "schema e dati: sys_job"}
+  Z-095: {classe: C, perche: "schema e dati: seed"}
+  Z-096: {classe: B, perche: "codice: endpoint, test"}
+  Z-097: {classe: B, perche: "codice: endpoint, servizio, test"}
+  Z-098: {classe: C, perche: "schema e dati: schema, sys_user, tabella"}
+  Z-099: {classe: C, perche: "schema e dati: tabella"}
+  Z-100: {classe: C, perche: "schema e dati: tabella"}
+  Z-101: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-102: {classe: C, perche: "schema e dati: sys_positions"}
+  Z-103: {classe: E, perche: "bloccato su Enzo: esterno"}
+  Z-104: {classe: B, perche: "codice: endpoint"}
+  Z-105: {classe: B, perche: "rivisto a mano: unit test: \"secret\" agganciato da una parola nel done-when"}
+  Z-106: {classe: B, perche: "codice: Playwright, apps/web, component"}
+  Z-107: {classe: C, perche: "schema e dati: seed"}
+  Z-108: {classe: B, perche: "codice: test"}
+  Z-109: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-111: {classe: B, perche: "codice: api, apps/api, vitest"}
+  Z-112: {classe: A, perche: "inerte: DEBT_REGISTER"}
+  Z-113: {classe: B, perche: "rivisto a mano: spec E2E mancanti: codice di test"}
+  Z-114: {classe: B, perche: "codice: Playwright, route"}
+  Z-115: {classe: A, perche: "inerte: docs/"}
+  Z-116: {classe: B, perche: "codice: i18n, route"}
+  Z-117: {classe: A, perche: "inerte: docs/, spec"}
+  Z-118: {classe: E, perche: "bloccato su Enzo: esterno"}
+  Z-119: {classe: B, perche: "rivisto a mano: test per apps/showcase: \"deploy\" e contesto, non azione"}
+  Z-120: {classe: B, perche: "codice: test"}
+  Z-121: {classe: B, perche: "codice: test"}
+  Z-122: {classe: B, perche: "codice: API, test"}
+  Z-123: {classe: B, perche: "codice: test"}
+  Z-124: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-126: {classe: C, perche: "schema e dati: tabella"}
+  Z-127: {classe: B, perche: "codice: CI, component, test"}
+  Z-128: {classe: B, perche: "codice: apps/web, pagina, route"}
+  Z-129: {classe: B, perche: "codice: API, UI, test"}
+  Z-130: {classe: B, perche: "codice: Playwright"}
+  Z-131: {classe: B, perche: "codice: apps/web, pagina"}
+  Z-132: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-133: {classe: B, perche: "codice: apps/web"}
+  Z-134: {classe: B, perche: "codice: endpoint"}
+  Z-135: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-136: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-137: {classe: C, perche: "schema e dati: sys_position"}
+  Z-138: {classe: A, perche: "inerte: ADR"}
+  Z-140: {classe: B, perche: "codice: UI, apps/showcase, apps/web"}
+  Z-141: {classe: B, perche: "codice: apps/web, component, i18n"}
+  Z-142: {classe: B, perche: "codice: endpoint, pagina, test"}
+  Z-143: {classe: C, perche: "schema e dati: sys_ui", rivisto: false}
+  Z-144: {classe: B, perche: "codice: apps/web, component, ui"}
+  Z-145: {classe: B, perche: "codice: API, CODICE, frontend"}
+  Z-146: {classe: C, perche: "schema e dati: sys_ui"}
+  Z-147: {classe: B, perche: "codice: apps/showcase, apps/web"}
+  Z-148: {classe: B, perche: "codice: i18n"}
+  Z-149: {classe: C, perche: "schema e dati: migration", rivisto: false}
+  Z-150: {classe: C, perche: "rivisto a mano: scrive righe in sys_leads: e un lavoro sui dati, non sul runtime"}
+  Z-151: {classe: B, perche: "codice: UI, pagina"}
+  Z-152: {classe: B, perche: "codice: apps/web"}
+  Z-153: {classe: B, perche: "rivisto a mano: asset statici dello showcase (favicon, webmanifest)"}
+  Z-154: {classe: B, perche: "codice: Playwright"}
+  Z-155: {classe: B, perche: "codice: codice, pagina"}
+  Z-157: {classe: C, perche: "schema e dati: sys_auth"}
+  Z-158: {classe: C, perche: "schema e dati: brownfield"}
+  Z-159: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-160: {classe: B, perche: "codice: packages/, typecheck"}
+  Z-161: {classe: B, perche: "codice: api, apps/api, packages/"}
+  Z-162: {classe: C, perche: "schema e dati: schema", rivisto: false}
+  Z-163: {classe: B, perche: "codice: api, apps/api, test"}
+  Z-164: {classe: B, perche: "codice: api, apps/api, apps/web"}
+  Z-165: {classe: B, perche: "codice: apps/showcase, lint"}
+  Z-167: {classe: B, perche: "codice: Refactor"}
+  Z-168: {classe: B, perche: "codice: repository, test"}
+  Z-169: {classe: B, perche: "codice: endpoint"}
+  Z-172: {classe: C, perche: "schema e dati: migration, schema"}
+  Z-173: {classe: B, perche: "codice: Refactor, apps/web, hook"}
+  Z-175: {classe: C, perche: "schema e dati: schema", rivisto: false}
+  Z-177: {classe: B, perche: "codice: i18n"}
+  Z-179: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-180: {classe: E, perche: "bloccato su Enzo: segreto"}
+  Z-181: {classe: C, perche: "schema e dati: sys_notification"}
+  Z-182: {classe: E, perche: "bloccato su Enzo: esterno"}
+  Z-183: {classe: C, perche: "schema e dati: sys_visualization"}
+  Z-184: {classe: C, perche: "schema e dati: sys_reward"}
+  Z-185: {classe: C, perche: "schema e dati: tabella"}
+  Z-186: {classe: B, perche: "codice: component, pagina"}
+  Z-187: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-188: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-189: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-190: {classe: C, perche: "schema e dati: indice"}
+  Z-191: {classe: C, perche: "schema e dati: sys_advisor"}
+  Z-192: {classe: B, perche: "codice: apps/web"}
+  Z-193: {classe: B, perche: "codice: handler, test"}
+  Z-194: {classe: C, perche: "schema e dati: sys_content"}
+  Z-195: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-196: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-197: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-198: {classe: B, perche: "codice: test"}
+  Z-199: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-200: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-201: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-202: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-203: {classe: B, perche: "codice: test"}
+  Z-204: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-205: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-206: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-207: {classe: B, perche: "codice: codice, test"}
+  Z-208: {classe: A, perche: "inerte: piano"}
+  Z-209: {classe: B, perche: "codice: API, servizio"}
+  Z-210: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-211: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-212: {classe: C, perche: "schema e dati: migration", rivisto: false}
+  Z-213: {classe: C, perche: "schema e dati: db/migrations", rivisto: false}
+  Z-214: {classe: A, perche: "inerte: README, docs/"}
+  Z-215: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-218: {classe: B, perche: "codice: CI, test"}
+  Z-219: {classe: C, perche: "schema e dati: tabelle", rivisto: false}
+  Z-220: {classe: A, perche: "inerte: SOT_BACKLOG"}
+  Z-221: {classe: A, perche: "inerte: docs/"}
+  Z-222: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-223: {classe: A, perche: "inerte: ADR"}
+  Z-230: {classe: B, perche: "codice: zod"}
+  Z-231: {classe: B, perche: "codice: CI, api, apps/api"}
+  Z-233: {classe: A, perche: "inerte: ADR"}
+  Z-237: {classe: B, perche: "codice: test"}
+  Z-238: {classe: A, perche: "inerte: ADR"}
+  Z-239: {classe: A, perche: "rivisto a mano: indice della memoria Claude: \"disco\" era 55 nodi su disco"}
+  Z-240: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-241: {classe: E, perche: "bloccato su Enzo: esterno"}
+  Z-242: {classe: E, perche: "bloccato su Enzo: esterno"}
+  Z-243: {classe: E, perche: "bloccato su Enzo: esterno"}
+  Z-244: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-245: {classe: E, perche: "bloccato su Enzo: esterno"}
+  Z-246: {classe: E, perche: "bloccato su Enzo: esterno"}
+  Z-247: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-248: {classe: E, perche: "bloccato su Enzo: decisione-business"}
+  Z-249: {classe: B, perche: "codice: apps/showcase, apps/web, ui"}
+  Z-250: {classe: A, perche: "inerte: docs/"}
+  Z-251: {classe: C, perche: "schema e dati: pg_dump", rivisto: false}
+  Z-252: {classe: B, perche: "codice: pagina"}
+  Z-253: {classe: D, perche: "produzione viva: PROD", rivisto: false}
+  Z-254: {classe: B, perche: "rivisto a mano: tag e versioning della lib: \"deploy\" e nel discorso, non nel lavoro"}
+
 
 # Override auto-appresi. Azzerabile in blocco senza toccare il resto della config.
 adaptive: {}

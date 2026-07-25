@@ -47,6 +47,22 @@ for a in "$@"; do
   esac
 done
 
+# HEURESYS_CLOSE_NODEPLOY=1 — veto sul deploy che VINCE sui flag (S1030).
+# Nasce da un rilievo di review sull'orchestratore `zero-pending-loop`: la sua chiusura
+# di ciclo invoca questo script con `--auto-deploy`, e il filtro per classe di rischio
+# governa la SELEZIONE del cluster, non il rito di chiusura — quindi il deploy non era
+# filtrato da nulla. In corsia non presidiata significava: alle 03:00 ciò che una sessione
+# ha pushato arriva su www.heuresys.com con `git reset --hard` + restart systemd, senza
+# nessuno che guardi. Un chiamante non presidiato ora esporta questa variabile e il divieto
+# è imposto QUI, dal codice, invece che chiesto in prosa alla skill. Il flag esplicito da
+# riga di comando non può scavalcarla: è un veto, non un default.
+if [ "${HEURESYS_CLOSE_NODEPLOY:-0}" = "1" ]; then
+  if [ "$DEPLOY" != "--no-deploy" ]; then
+    echo "[veto] HEURESYS_CLOSE_NODEPLOY=1 -> deploy disabilitato (era $DEPLOY)" >&2
+  fi
+  DEPLOY="--no-deploy"
+fi
+
 log()  { printf '\n\033[1m=== %s ===\033[0m\n' "$*"; }
 warn() { printf '\033[33m[warn]\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[31m[FATAL]\033[0m %s\n' "$*" >&2; exit 1; }

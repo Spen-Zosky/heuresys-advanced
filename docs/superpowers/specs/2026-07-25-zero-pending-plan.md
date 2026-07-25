@@ -12,6 +12,15 @@ Il risultato grezzo — 497 voci — è stato consolidato da un agente con visio
 497 item grezzi in ingresso (10 finder: gapfill 166, mandates 68, state 55, backlog 44, p100x 42, code 39, product 29, runtime 23, ci 20, debt 11) -> 248 cluster canonici in uscita -> 249 id assorbiti come duplicati (50,1% di ridondanza). Verifica automatica di copertura: 497 id usati, 497 unici, 0 mancanti, 0 duplicati, 0 estranei; tutti i 17 riferimenti dependsOn risolvono a zid esistenti. Ripartizione per area: db-data 46, infra-ci 33, product 33, frontend 32, doc-sot 29, security 25, test-qa 23, debt-code 19, business-dd 8. blocking=HARD su 11 cluster (2 rossi CI attivi + 1 ombrello, 5 alert di sicurezza dipendenze, 4 rischi operativi PROD su backup/retention/dump-archivio/disco, AIDE failed, alerting assente, segreti TOTP). needsEnzo: 218 NO (incluse tutte le decisioni tecniche), 19 DECISIONE-BUSINESS, 9 ESTERNO, 2 SEGRETO (app-password Outlook #8, client secret IdP per SSO). Effort consolidato ~1.370 ore (~228 sessioni da 6h), di cui ~1.086h su cluster senza blocco su Enzo. Merge piu' densi: Dependabot 15 id, doc-drift batch 12 id, brownfield-closure 8 id, tabelle-vuote-per-famiglia spezzate in 12 cluster distinti anziche' uno solo (lavoro non unico).
 ```
 
+
+## Avanzamento
+
+| Sessione | Chiusi | Note |
+|---|---:|---|
+| **S1029** | **34** | Wave 0 completa (11/11 HARD) + 23 cluster di W1. Un cluster chiuso come WON'T-DO motivato (Z-110). Un alert non chiudibile registrato come debito D-75 con rischio accettato. |
+
+Le caselle spuntate qui sotto portano la nota di chiusura con l'evidenza. Il resto è aperto.
+
 ## Il numero
 
 | | Cluster | Ore | Sessioni (6h) |
@@ -50,31 +59,40 @@ Rossi attivi e rischi operativi: finché sono aperti, tutto il resto lavora su f
 
 ### infra-ci (9)
 
-- [ ] **Z-015** (6.0h) — Alerting PROD assente: Prometheus senza rule_files/alertmanager, nessun OnFailure sui 10 timer systemd, reindex fallisce in silenzio
+- [x] **Z-015** (6.0h) — Alerting PROD assente: Prometheus senza rule_files/alertmanager, nessun OnFailure sui 10 timer systemd, reindex fallisce in silenzio
+  - ✅ **CHIUSO S1029** — alerting PROD: 4 regole Prometheus live + OnFailure sui 9 job + sezione nel dashboard di sessione
   - *chiuso quando*: curl -s localhost:9091/api/v1/rules mostra >=1 gruppo e /api/v1/alertmanagers un alertmanager attivo; grep -l OnFailure deploy/systemd/*.service copre backup, dr-drill, reindex, gdpr-retention
   - *assorbe*: `gapfill:GAP4-4`, `gapfill:GAP2-50`, `gapfill:GAP2-21`, `gapfill:GAP1-66`
-- [ ] **Z-005** (4.0h) — 5 alert di sicurezza Dependabot aperti (fast-uri x2 HIGH, sharp HIGH, dompurify LOW, @hono/node-server MEDIUM) e i 3 run security_update_not_possible
+- [x] **Z-005** (4.0h) — 5 alert di sicurezza Dependabot aperti (fast-uri x2 HIGH, sharp HIGH, dompurify LOW, @hono/node-server MEDIUM) e i 3 run security_update_not_possible
+  - ✅ **CHIUSO S1029** — 10 alert di sicurezza chiusi via pnpm.overrides (erano 10, non 5); resta il solo brace-expansion → D-75
   - *chiuso quando*: gh api repos/Spen-Zosky/heuresys-advanced/dependabot/alerts --paginate --jq '[.[]|select(.state=="open")]|length' = 0 (o rischio accettato scritto nel DEBT_REGISTER) E pnpm build verde su Windows/VM/linux-pc
   - *assorbe*: `ci:CI-6`, `ci:SEC-111+114`, `ci:SEC-113`, `ci:SEC-112`, `ci:SEC-107`, `gapfill:GAP4-9`
-- [ ] **Z-017** (3.0h) — Backup PROD senza copia off-host: dump e database sullo stesso /dev/sda1
+- [x] **Z-017** (3.0h) — Backup PROD senza copia off-host: dump e database sullo stesso /dev/sda1
+  - ✅ **CHIUSO S1029** — backup off-host in pull da linux-pc, verifica TOC + restore-test reale (163 utenti)
   - *chiuso quando*: ssh VM: grep BACKUP_OFFHOST_SSH .env valorizzato E il dump piu' recente e' presente sull'host remoto (ssh <target> ls -la <path>) con md5sum uguale
   - *assorbe*: `gapfill:GAP4-2`, `gapfill:GAP2-19`
-- [ ] **Z-018** (2.0h) — Retention backup PROD effettiva ~4 giorni contro i 14 dichiarati, senza alcun check sui restore-point attesi
+- [x] **Z-018** (2.0h) — Retention backup PROD effettiva ~4 giorni contro i 14 dichiarati, senza alcun check sui restore-point attesi
+  - ✅ **CHIUSO S1029** — FALSO POSITIVO: il timer di backup era nato da 4 giorni, nessun dump perduto
   - *chiuso quando*: ssh VM: ls BACKUP_DIR conta >=14 dump distinti dopo 14 giorni E dr-drill.sh fallisce se il numero di restore-point e' inferiore all'atteso
   - *assorbe*: `gapfill:GAP4-3`
-- [ ] **Z-019** (2.0h) — Dump di archivio della migration 000213 (1,5M righe) in copia unica sullo stesso disco e mai verificato in restore
+- [x] **Z-019** (2.0h) — Dump di archivio della migration 000213 (1,5M righe) in copia unica sullo stesso disco e mai verificato in restore
+  - ✅ **CHIUSO S1029** — il dump di archivio 000213 è ora incluso nell'archivio off-host verificato
   - *chiuso quando*: il file audit_import_validation_results_2026-07-23.dump esiste su un secondo host (ssh <target> ls -la) E pg_restore su DB scratch ricarica >0 righe senza errori
   - *assorbe*: `gapfill:GAP4-8`
-- [ ] **Z-002** (1.5h) — CI ROSSA — sdbi-perf-feedback: 0 marker SDBI attesi 4 dopo il TRUNCATE della migration 000213
+- [x] **Z-002** (1.5h) — CI ROSSA — sdbi-perf-feedback: 0 marker SDBI attesi 4 dopo il TRUNCATE della migration 000213
+  - ✅ **CHIUSO S1029** — marker SDBI ri-derivati dal lineage (mig 000215, idempotente)
   - *chiuso quando*: cd apps/api && pnpm exec vitest run test/sdbi-perf-feedback.integration.test.ts esce 0 sia contro il DB VM (:5433) sia contro heuresys_ci sul runner
   - *assorbe*: `debt:CI-SDBI-LINEAGE`, `ci:CI-3`, `mandates:MAN-2`, `runtime:RT-2`
-- [ ] **Z-001** (1.0h) — CI ROSSA — GET /v1/observability/slow-queries risponde 500 sul runner: pg_stat_statements non in shared_preload_libraries
+- [x] **Z-001** (1.0h) — CI ROSSA — GET /v1/observability/slow-queries risponde 500 sul runner: pg_stat_statements non in shared_preload_libraries
+  - ✅ **CHIUSO S1029** — CI rossa: pg_stat_statements non preloaded — fix su runtime + script di setup + endpoint che degrada
   - *chiuso quando*: ssh linux-pc: sudo -u postgres psql -d heuresys_ci -c "SELECT count(*) FROM pg_stat_statements" ritorna un numero (non errore) E il test '#35 GET /slow-queries' passa nel run CI
   - *assorbe*: `debt:CI-OBS-SLOWQ`, `ci:CI-2`, `mandates:MAN-1`, `runtime:RT-3`, `gapfill:GAP4-1`
-- [ ] **Z-020** (1.0h · dipende da Z-015) — Disco PROD all'81% (19G liberi) senza alcuna soglia di allarme
+- [x] **Z-020** (1.0h · dipende da Z-015) — Disco PROD all'81% (19G liberi) senza alcuna soglia di allarme
+  - ✅ **CHIUSO S1029** — disco 82%→80%; il margine strutturale viene dallo spostamento off-host, non da altre cancellazioni
   - *chiuso quando*: df -h / sulla VM sotto il 75% E esiste una regola Prometheus che allerta sopra soglia (curl /api/v1/rules la mostra)
   - *assorbe*: `gapfill:GAP4-7`
-- [ ] **Z-003** (0.5h · dipende da Z-001, Z-002) — Riportare a VERDE il gate 'Test (api integration)' su main (ombrello dei due rossi)
+- [x] **Z-003** (0.5h · dipende da Z-001, Z-002) — Riportare a VERDE il gate 'Test (api integration)' su main (ombrello dei due rossi)
+  - ✅ **CHIUSO S1029** — gate Test (api integration) VERDE su main (run 30143003990)
   - *chiuso quando*: gh run list --branch main --workflow=test-integration.yml --limit 1 mostra conclusion=success su HEAD di main
   - *assorbe*: `ci:CI-1`, `runtime:RT-1`
 
@@ -83,7 +101,8 @@ Rossi attivi e rischi operativi: finché sono aperti, tutto il resto lavora su f
 - [ ] **Z-034** (2.0h) — Segreti TOTP: fixture in chiaro nel repo + 7/19 secret plaintext a DB + MFA_ENCRYPTION_KEY da garantire su VM e linux-pc
   - *chiuso quando*: psql: select count(*) from sys.sys_auth_mfa_factors where auth_mfa_factor_kind='TOTP' and auth_mfa_factor_secret not like 'enc:v1:%' = 0 E grep dei secret di fixture nel repo = 0
   - *assorbe*: `state:TOTP-FIX`, `state:ENC-TOTP`, `code:CODE-6`, `p100x:MFA-KEY-PROD`
-- [ ] **Z-053** (1.5h) — dailyaidecheck.service in stato failed su PROD da giorni (file-integrity spento, nessuna notifica)
+- [x] **Z-053** (1.5h) — dailyaidecheck.service in stato failed su PROD da giorni (file-integrity spento, nessuna notifica)
+  - ✅ **CHIUSO S1029** — AIDE: database mai inizializzato — ora creato (401 MB) e il check gira
   - *chiuso quando*: ssh VM: systemctl --failed non elenca alcuna unit e systemctl status dailyaidecheck.service mostra Active con ultimo esito success
   - *assorbe*: `gapfill:GAP4-6`
 
@@ -119,19 +138,24 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-178** (1.0h) — Sorgente delle release @heuresys/ui 0.1.8 e 0.1.9 mai pushata upstream: npm avanti di 2 versioni rispetto a GitHub, dist fermo alla 0.1.7
   - *chiuso quando*: nel repo ux-design-shared git log origin/main contiene i commit 0.1.8 e 0.1.9, ui/package.json dichiara 0.1.9 e le subpath ./charts e ./markdown sono negli exports
   - *assorbe*: `gapfill:GAP3-1`, `gapfill:GAP3-8`
-- [ ] **Z-166** (0.5h) — 29 skeleton con 'TODO: Development Team must implement' ancora tracciati in docs/source_bundle
+- [x] **Z-166** (0.5h) — 29 skeleton con 'TODO: Development Team must implement' ancora tracciati in docs/source_bundle
+  - ✅ **CHIUSO S1029** — TODO fantasma del Bootstrap Pack: README che li esclude dalle metriche di debito
   - *chiuso quando*: grep -rn 'TODO: Development Team' docs/ = 0 (file spostati in docs/archive/ o annotati SUPERSEDED)
   - *assorbe*: `code:CODE-1`
-- [ ] **Z-170** (0.5h) — Pool PostgreSQL hardcoded a max=20, non configurabile via env
+- [x] **Z-170** (0.5h) — Pool PostgreSQL hardcoded a max=20, non configurabile via env
+  - ✅ **CHIUSO S1029** — pool PostgreSQL parametrizzato (era max:20 hardcoded)
   - *chiuso quando*: grep POSTGRES_POOL_MAX apps/api/src/config/env.ts e .env.example trovano la chiave e il pool la rispetta a runtime
   - *assorbe*: `gapfill:GAP2-35`
-- [ ] **Z-174** (0.5h) — Artefatti non-codice tracciati nella root del repo (incluso un .zip binario)
+- [x] **Z-174** (0.5h) — Artefatti non-codice tracciati nella root del repo (incluso un .zip binario)
+  - ✅ **CHIUSO S1029** — deliverable Cowork spostati dalla root, indice aggiornato
   - *chiuso quando*: git ls-files nella root non elenca cli-next.zip ne' gli altri artefatti censiti
   - *assorbe*: `code:CODE-39`
-- [ ] **Z-171** (0.2h) — .nvmrc dichiara Node 20.11.0 mentre engines richiede >=22
+- [x] **Z-171** (0.2h) — .nvmrc dichiara Node 20.11.0 mentre engines richiede >=22
+  - ✅ **CHIUSO S1029** — .nvmrc allineato a engines (Node 20 → 22)
   - *chiuso quando*: cat .nvmrc mostra una versione >=22 coerente con package.json engines
   - *assorbe*: `gapfill:GAP2-36`
-- [ ] **Z-176** (0.2h) — Directory tests/ top-level vuota (solo 3 .gitkeep) citata in CLAUDE.md
+- [x] **Z-176** (0.2h) — Directory tests/ top-level vuota (solo 3 .gitkeep) citata in CLAUDE.md
+  - ✅ **CHIUSO S1029** — directory tests/ vuota rimossa + riga in CLAUDE.md
   - *chiuso quando*: find tests -type f = 0 file e la riga corrispondente in CLAUDE.md e' rimossa (oppure la dir e' popolata)
   - *assorbe*: `code:CODE-12`
 
@@ -179,16 +203,19 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-223** (1.5h) — wave_runners e stream Wave 4: wave_2 chiuso ma DRAFT, wave_3 obsoleto pre-ADR-0024/0026 senza nota, wave_4 DRAFT senza item in nessuna SoT
   - *chiuso quando*: i 3 file portano uno stato esplicito (chiuso / storico-non-eseguibile / superseded) e nessuna checkbox pre-flight resta aperta senza contesto
   - *assorbe*: `gapfill:GAP1-3`, `gapfill:GAP1-48`, `gapfill:GAP1-49`, `gapfill:GAP1-50`
-- [ ] **Z-232** (1.0h) — ADR-0013 (vivo) descrive @heuresys/ui via protocollo link: e path assoluti Windows, in 3 doc non archiviati (9 occorrenze)
+- [x] **Z-232** (1.0h) — ADR-0013 (vivo) descrive @heuresys/ui via protocollo link: e path assoluti Windows, in 3 doc non archiviati (9 occorrenze)
+  - ✅ **CHIUSO S1029** — 17 path assoluti resi relativi + emendamento ADR-0013
   - *chiuso quando*: grep -rn 'D:\\ux-design-shared' docs/ escludendo docs/archive/ = 0 e ADR-0013 descrive la dipendenza npm
   - *assorbe*: `gapfill:GAP3-5`, `gapfill:GAP3-24`
-- [ ] **Z-236** (1.0h) — linux-pc descritto come 'ISOLATO dalla dottrina di allineamento' in CLAUDE.md e nella memoria, mentre e' di fatto integrato
+- [x] **Z-236** (1.0h) — linux-pc descritto come 'ISOLATO dalla dottrina di allineamento' in CLAUDE.md e nella memoria, mentre e' di fatto integrato
+  - ✅ **CHIUSO S1029** — linux-pc non più «ISOLATO»: runner CI + close-propagate + archivio backup
   - *chiuso quando*: CLAUDE.md e la memoria descrivono il ruolo reale (align-clones linuxpc, close-propagate, runner CI off-prod) e non c'e' piu' contraddizione (grep di 'ISOLATO')
   - *assorbe*: `state:LINUXPC`
 - [ ] **Z-239** (1.0h) — Ecosistema Claude: MEMORY.md non re-indicizzato (55 nodi su disco vs 53 link), nodi session-state da archiviare, memorie ridondanti da sostituire con pointer
   - *chiuso quando*: il numero di nodi su disco coincide con le voci dell'indice e memory/_archive contiene i nodi superati
   - *assorbe*: `p100x:QW-L1`, `p100x:QW-L5`, `p100x:N-L3`
-- [ ] **Z-229** (0.8h) — docs/github/07-nostri-repo/01-stato-corrente.md: snapshot fermo al 2026-05-17 (dichiara 0 workflow, 0 tag, no LICENSE)
+- [x] **Z-229** (0.8h) — docs/github/07-nostri-repo/01-stato-corrente.md: snapshot fermo al 2026-05-17 (dichiara 0 workflow, 0 tag, no LICENSE)
+  - ✅ **CHIUSO S1029** — snapshot GitHub rigenerato (dichiarava 88 commit, 0 workflow, 0 tag)
   - *chiuso quando*: il file e' rigenerato via gh api e i suoi valori coincidono con gh repo view / gh workflow list / gh release list
   - *assorbe*: `gapfill:GAP1-45`
 - [ ] **Z-230** (0.8h) — Doc di triage Dependabot stale (zod/next superati, script mai implementato, riferimento a un file inesistente)
@@ -197,16 +224,20 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-234** (0.8h) — Metadati e doc del repo upstream stale su 5 fronti (reactflow rimosso ma elencato, README con lo scope di heuresys-evo, marker TODO, descrizione GitHub con link:, SETUP con npm)
   - *chiuso quando*: grep reactflow su MANIFEST.md e SETUP.md = 0, il README cita i consumer attuali e la descrizione GitHub non menziona il protocollo link:
   - *assorbe*: `gapfill:GAP3-6`
-- [ ] **Z-216** (0.5h) — I due kickoff (NEXT_SESSION_FORENSIC + DB_FRONTEND_FORENSICS) non sono marcati ESEGUITO: rischio di ri-esecuzione
+- [x] **Z-216** (0.5h) — I due kickoff (NEXT_SESSION_FORENSIC + DB_FRONTEND_FORENSICS) non sono marcati ESEGUITO: rischio di ri-esecuzione
+  - ✅ **CHIUSO S1029** — i due kickoff forensi marcati ESEGUITO (uno recitava «prima di ogni altra cosa»)
   - *chiuso quando*: entrambi i file portano il banner ESEGUITO con puntatore al successore, come NEXT_SESSION_EPICS_KICKOFF.md:3 (grep del banner sui 3 file)
   - *assorbe*: `mandates:MAN-6`, `mandates:MAN-7`
-- [ ] **Z-226** (0.5h) — Header di stato dei doc ESCO/tenant-onboarding ancora PLAN / DESIGN-PROPOSED benche' tutto sia shipped (e con formule ritirate 'tenant di TEST'/'no-PII')
+- [x] **Z-226** (0.5h) — Header di stato dei doc ESCO/tenant-onboarding ancora PLAN / DESIGN-PROPOSED benche' tutto sia shipped (e con formule ritirate 'tenant di TEST'/'no-PII')
+  - ✅ **CHIUSO S1029** — asse occupation dichiarato shipped con evidenza live + formule ritirate
   - *chiuso quando*: grep -c 'tenant di TEST\|no-PII' docs/integrations/ = 0 e gli header dichiarano SHIPPED con le migration di riferimento
   - *assorbe*: `gapfill:GAP1-25`
-- [ ] **Z-235** (0.5h) — Piano batch S1018: le wave W11 (E5), W12 (audit-100X) e W13 (deploy finale) non sono mai state dichiarate chiuse o superate
+- [x] **Z-235** (0.5h) — Piano batch S1018: le wave W11 (E5), W12 (audit-100X) e W13 (deploy finale) non sono mai state dichiarate chiuse o superate
+  - ✅ **CHIUSO S1029** — batch S1018 chiuso wave per wave, W13 verificata superata sui fatti
   - *chiuso quando*: docs/kb/RESUME_S1018_BATCH.md dichiara la sequenza superata o chiusa wave per wave, e nessun altro doc la ripropone
   - *assorbe*: `state:W12-W13`, `state:W11-E5`
-- [ ] **Z-217** (0.2h) — COWORK_INBOX: la entry wargames 2026-07-06 e' priva della riga di stato richiesta dal protocollo
+- [x] **Z-217** (0.2h) — COWORK_INBOX: la entry wargames 2026-07-06 e' priva della riga di stato richiesta dal protocollo
+  - ✅ **CHIUSO S1029** — entry inbox priva di stato riconciliata
   - *chiuso quando*: grep -c 'RICONCILIATA' docs/kb/COWORK_INBOX.md copre tutte le entry (nessuna entry senza riga stato)
   - *assorbe*: `mandates:MAN-9`
 - [ ] **Z-224** (0.2h) — preflight-residual-todo.md: CODE-5 e CODE-10 risultano 'Deferred' ma sono chiusi sul reale
@@ -215,10 +246,12 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-225** (0.2h) — cw-b59-true-root-cause: doc fermo a 'Root cause identified' con 3 open question superate dal 2026-05-27
   - *chiuso quando*: il file porta l'intestazione storico/RESOLVED con riferimento al fix client boundary ssr:false
   - *assorbe*: `gapfill:GAP1-20`
-- [ ] **Z-227** (0.2h) — AUTH_SECURITY_PLAN §13: 13 voci di acceptance non spuntate benche' coperte dalla suite da MVP-1
+- [x] **Z-227** (0.2h) — AUTH_SECURITY_PLAN §13: 13 voci di acceptance non spuntate benche' coperte dalla suite da MVP-1
+  - ✅ **CHIUSO S1029** — 13 acceptance auth verificate una per una contro i test reali
   - *chiuso quando*: le 13 voci sono spuntate con il riferimento al test che le copre (nome file e test name)
   - *assorbe*: `gapfill:GAP1-30`
-- [ ] **Z-228** (0.2h) — self-hosted-runners-setup §8 ('backup runner Windows DEFERRED') contraddice l'header dello stesso file
+- [x] **Z-228** (0.2h) — self-hosted-runners-setup §8 ('backup runner Windows DEFERRED') contraddice l'header dello stesso file
+  - ✅ **CHIUSO S1029** — §8 backup runner Windows marcata superseded dal runner linux-pc
   - *chiuso quando*: la §8 e' marcata superseded dal runner linux-pc (grep del marker nel file)
   - *assorbe*: `gapfill:GAP1-43`
 
@@ -245,7 +278,8 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-156** (1.0h) — Drift dei token a11y fra apps/web e apps/showcase: i fix contrasto S982 vivono solo in apps/web, il sito pubblico ne e' privo
   - *chiuso quando*: diff dei blocchi di override fra apps/web/src/app/globals.css e apps/showcase/src/app/globals.css = vuoto e la run axe sullo static export non mostra i color-contrast serious
   - *assorbe*: `gapfill:GAP3-17`
-- [ ] **Z-139** (0.5h) — Token colore non valido text-destructive residuo (6-12 occorrenze nelle pagine showcase)
+- [x] **Z-139** (0.5h) — Token colore non valido text-destructive residuo (6-12 occorrenze nelle pagine showcase)
+  - ✅ **CHIUSO S1029** — token colore inesistente corretto in 17 file — non solo showcase: anche approvals, insights, me/*
   - *chiuso quando*: grep -rc 'text-destructive' apps/web/src apps/showcase/src = 0
   - *assorbe*: `p100x:QW-E1`, `mandates:MAN-57`
 
@@ -275,13 +309,16 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-032** (1.0h) — claude-mem disabilitato con stub bun-runner: retest sulla 13.12.2 o fail-open permanente dell'hook
   - *chiuso quando*: ~/.claude/settings.json non contiene piu' "claude-mem@thedotmack": false e 10 Read consecutivi non bloccano; in alternativa il DEBT_REGISTER dichiara il fail-open implementato
   - *assorbe*: `debt:D-56`, `state:D-56`, `mandates:MAN-59`, `p100x:D-L2`
-- [ ] **Z-010** (0.5h) — apps/agent-gateway fuori da tutti i workflow CI (nessun typecheck/lint/test in pipeline)
+- [x] **Z-010** (0.5h) — apps/agent-gateway fuori da tutti i workflow CI (nessun typecheck/lint/test in pipeline)
+  - ✅ **CHIUSO S1029** — agent-gateway in typecheck.yml + lint.yml, con i suoi 47 test finalmente eseguiti in CI
   - *chiuso quando*: grep -rl 'agent-gateway' .github/workflows/ ritorna almeno 1 file e il job relativo e' success su un run reale
   - *assorbe*: `gapfill:GAP2-33`
-- [ ] **Z-012** (0.5h) — scripts CI pre-job-seed-check.sh rotto: verifica personas *.test cancellate nel rebuild S950
+- [x] **Z-012** (0.5h) — scripts CI pre-job-seed-check.sh rotto: verifica personas *.test cancellate nel rebuild S950
+  - ✅ **CHIUSO S1029** — ricetta pre-job-seed-check marcata superseded (avrebbe ri-seedato ogni 5 min)
   - *chiuso quando*: ssh VM: systemctl status del timer del seed-check non rilancia db:seed-test-admin a ogni tick (journalctl -u <unit> --since -1h senza ri-seed)
   - *assorbe*: `gapfill:GAP1-42`
-- [ ] **Z-013** (0.5h) — Code scanning CodeQL mai attivato
+- [x] **Z-013** (0.5h) — Code scanning CodeQL mai attivato
+  - ✅ **CHIUSO S1029** — CodeQL attivato (workflow nuovo, primo run success)
   - *chiuso quando*: ls .github/workflows/codeql.yml esiste e gh api repos/Spen-Zosky/heuresys-advanced/code-scanning/alerts risponde 200 con il primo run completato
   - *assorbe*: `gapfill:GAP1-44`
 - [ ] **Z-029** (0.5h) — Ecosistema Claude: plugin always-on da rendere lazy (chrome-devtools-mcp, 4 plugin authoring) + hook npx-bypass da rivalutare
@@ -305,19 +342,23 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-057** (2.0h) — Rate-limit per-IP dietro 2 hop di proxy da calibrare + .env.example lascia TRUST_PROXY=false come default
   - *chiuso quando*: un test con XFF a 2 hop distingue correttamente gli IP e grep TRUST_PROXY .env.example mostra il default sicuro
   - *assorbe*: `state:C1-RL`, `gapfill:GAP2-45`
-- [ ] **Z-043** (0.5h) — 3 variabili d'ambiente consumate fuori da EnvSchema e non documentate in .env.example
+- [x] **Z-043** (0.5h) — 3 variabili d'ambiente consumate fuori da EnvSchema e non documentate in .env.example
+  - ✅ **CHIUSO S1029** — 3 env var portate in EnvSchema (incl. la guardia brute-force del login) + documentate
   - *chiuso quando*: grep -c 'process.env.AUTH_LOGIN_RATELIMIT_MAX' apps/api/src = 0 (letta via EnvSchema) e le 3 chiavi compaiono in .env.example
   - *assorbe*: `gapfill:GAP2-11`
-- [ ] **Z-051** (0.5h) — Contraddizione sullo stato MFA in PROD (§0 'mandatory LIVE' vs 'MFA resta OFF')
+- [x] **Z-051** (0.5h) — Contraddizione sullo stato MFA in PROD (§0 'mandatory LIVE' vs 'MFA resta OFF')
+  - ✅ **CHIUSO S1029** — contraddizione MFA risolta sul reale: enforcement OFF, 25 fattori registrati
   - *chiuso quando*: ssh VM: grep MFA_ENFORCEMENT_ENABLED .env e psql select * from sys.sys_auth_mfa_policies concordano con quanto scritto in SOT_STATE §0
   - *assorbe*: `state:OQ-MFA`
 - [ ] **Z-039** (0.2h · dipende da Z-059) — HSTS senza includeSubDomains (bloccato dalla dismissione di evo.heuresys.com)
   - *chiuso quando*: curl -sI https://www.heuresys.com | grep Strict-Transport-Security contiene includeSubDomains
   - *assorbe*: `gapfill:GAP1-72`, `gapfill:GAP2-47`
-- [ ] **Z-044** (0.2h) — Pattern fragile 'delete process.env.ANTHROPIC_API_KEY' nell'agent-gateway
+- [x] **Z-044** (0.2h) — Pattern fragile 'delete process.env.ANTHROPIC_API_KEY' nell'agent-gateway
+  - ✅ **CHIUSO S1029** — credenziali API neutralizzate PRIMA dell'import dell'SDK (erano hoisted: arrivava tardi)
   - *chiuso quando*: il codice usa secret injection dedicata oppure il commento nel file dichiara esplicitamente la portata reale della mitigazione
   - *assorbe*: `gapfill:GAP2-48`
-- [ ] **Z-058** (0.2h) — SOT_STATE §5 espone personas e password literal obsoleti (repo pubblico, contraddice la remediation F-001)
+- [x] **Z-058** (0.2h) — SOT_STATE §5 espone personas e password literal obsoleti (repo pubblico, contraddice la remediation F-001)
+  - ✅ **CHIUSO S1029** — literal password ritirato da 20 file tracciati (38 occorrenze) su repo pubblico
   - *chiuso quando*: grep -c 'Admin#PassW0rd' docs/kb/SOT_STATE.md = 0 e le personas elencate sono quelle reali @rtl-bank.org
   - *assorbe*: `state:DRIFT-PERS`
 

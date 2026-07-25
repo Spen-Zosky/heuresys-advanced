@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-25T04:33:11Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2552**
+**Generato**: 2026-07-25T13:32:39Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2558**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,7 +13,7 @@
 | api-module | 318 |
 | ci | 17 |
 | claude-config | 15 |
-| config | 103 |
+| config | 107 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -22,18 +22,18 @@
 | db-other | 8 |
 | db-script | 35 |
 | db-seed | 115 |
-| doc-canonical | 496 |
+| doc-canonical | 497 |
 | handoff-state | 1 |
 | qa-artifact | 103 |
 | script | 6 |
 | session | 12 |
 | shared-pkg | 4 |
 | shared-schema | 97 |
-| showcase-source | 13 |
+| showcase-source | 14 |
 | test | 306 |
 | ux-design-archive | 80 |
 | web-source | 206 |
-| **TOTALE** | **2552** |
+| **TOTALE** | **2558** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 497 |
 | external-archive | 50 |
-| live | 2005 |
+| live | 2011 |
 
 ## File per categoria
 
@@ -491,11 +491,13 @@
 - `D:\heuresys-advanced\apps\agent-gateway\src\redact.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\sdk-agent.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\server.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\src\subscription-auth.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\src\write-gate.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\approval-bridge.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\audit-sink.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\heuresys-client.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\redact.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\agent-gateway\test\subscription-auth.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\test\write-gate.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\tsconfig.json` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\vitest.config.ts` · *live* · git-tracked
@@ -508,6 +510,7 @@
 - `D:\heuresys-advanced\audit\_groups.json` · *live* · git-tracked
 - `D:\heuresys-advanced\audit\_visual-confirmed.json` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\nginx\www.heuresys.com.conf` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\prometheus\alerts.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\prometheus\prometheus.yml` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\actions-runner-resource.dropin.conf` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\archive\heuresys-backup-pull.service` · *live* · git-tracked
@@ -533,6 +536,7 @@
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-scraping.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-web.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-prometheus.service` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\heuresys-unit-failure@.service` · *live* · git-tracked
 - `D:\heuresys-advanced\eslint.config.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\package.json` · *live* · git-tracked
 - `D:\heuresys-advanced\pnpm-lock.yaml` · *live* · git-tracked
@@ -1672,6 +1676,7 @@
 - `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000024_brownfield_import_staging.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000025_brownfield_lineage_and_mapping.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\000026_brownfield_import_validation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\kpi_catalog.csv` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\learning_modules.csv` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\learning_path_steps.csv` · *live* · git-tracked
@@ -2069,6 +2074,7 @@
 - `D:\heuresys-advanced\apps\showcase\src\app\providers.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\showcase\src\components\SystemHealthDashboard.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\showcase\src\components\detail-panel.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\showcase\src\components\profile-tabs.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\showcase\src\components\status-pill.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\showcase\tsconfig.json` · *live* · git-tracked
 

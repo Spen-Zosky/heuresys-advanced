@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-25T04:33:11Z da docs/kb/tools/build_index.py
+# generato: 2026-07-25T13:32:39Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-25T04:33:11Z"
-  total_files: 2552
+  generated_at: "2026-07-25T13:32:39Z"
+  total_files: 2558
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,7 +13,7 @@ meta:
     api-module: 318
     ci: 17
     claude-config: 15
-    config: 103
+    config: 107
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -22,21 +22,21 @@ meta:
     db-other: 8
     db-script: 35
     db-seed: 115
-    doc-canonical: 496
+    doc-canonical: 497
     handoff-state: 1
     qa-artifact: 103
     script: 6
     session: 12
     shared-pkg: 4
     shared-schema: 97
-    showcase-source: 13
+    showcase-source: 14
     test: 306
     ux-design-archive: 80
     web-source: 206
   status_counts:
     archive: 497
     external-archive: 50
-    live: 2005
+    live: 2011
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2606,6 +2606,12 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\src\subscription-auth.ts'
+    root: repo
+    rel: 'apps/agent-gateway/src/subscription-auth.ts'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\agent-gateway\src\write-gate.ts'
     root: repo
     rel: 'apps/agent-gateway/src/write-gate.ts'
@@ -2633,6 +2639,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\agent-gateway\test\redact.test.ts'
     root: repo
     rel: 'apps/agent-gateway/test/redact.test.ts'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\agent-gateway\test\subscription-auth.test.ts'
+    root: repo
+    rel: 'apps/agent-gateway/test/subscription-auth.test.ts'
     category: config
     status: live
     provenance: git-tracked
@@ -2705,6 +2717,12 @@ files:
   - path: 'D:\heuresys-advanced\deploy\nginx\www.heuresys.com.conf'
     root: repo
     rel: 'deploy/nginx/www.heuresys.com.conf'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\prometheus\alerts.yml'
+    root: repo
+    rel: 'deploy/prometheus/alerts.yml'
     category: config
     status: live
     provenance: git-tracked
@@ -2855,6 +2873,12 @@ files:
   - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-prometheus.service'
     root: repo
     rel: 'deploy/systemd/heuresys-prometheus.service'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-unit-failure@.service'
+    root: repo
+    rel: 'deploy/systemd/heuresys-unit-failure@.service'
     category: config
     status: live
     provenance: git-tracked
@@ -9530,6 +9554,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\migration_skeletons\README.md'
+    root: repo
+    rel: 'docs/source_bundle/extracted_bootstrap/db/migration_skeletons/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\db\seed_templates\kpi_catalog.csv'
     root: repo
     rel: 'docs/source_bundle/extracted_bootstrap/db/seed_templates/kpi_catalog.csv'
@@ -11783,6 +11813,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\showcase\src\components\detail-panel.tsx'
     root: repo
     rel: 'apps/showcase/src/components/detail-panel.tsx'
+    category: showcase-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\showcase\src\components\profile-tabs.tsx'
+    root: repo
+    rel: 'apps/showcase/src/components/profile-tabs.tsx'
     category: showcase-source
     status: live
     provenance: git-tracked

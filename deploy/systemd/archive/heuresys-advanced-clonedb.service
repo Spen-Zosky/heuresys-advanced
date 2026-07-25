@@ -1,0 +1,44 @@
+# Template — @@REPO_DIR@@ è reso dallo step "clone-db" di scripts/provision-linux-pc.sh.
+#
+# PERCHE' VIVE IN archive/ E NON IN deploy/systemd/. `scripts/vm-deploy.sh` installa e
+# ABILITA ogni *.service/*.timer trovato in deploy/systemd/ su OGNI host che deploya, VM
+# inclusa. Questo one-shot ha senso su un SOLO tipo di host: il gemello PROD off-prod
+# (oggi linux-pc), che clona il DB DALLA VM. Sulla VM sarebbe un no-op distruttivo:
+# proverebbe a clonare il database di produzione sopra sé stesso. La sottodirectory
+# archive/ lo tiene fuori da quel glob — ci finisce solo per installazione esplicita.
+# Stessa ragione di heuresys-backup-pull.service, che sta qui accanto.
+#
+# COSA FA. Riallinea il DB locale di linux-pc alla fotografia corrente della VM
+# (scripts/clone-vm-db.sh: pg_dump -Fc via SSH -> pg_restore --clean --if-exists). Finora
+# il refresh era solo on-demand: fra un lancio manuale e il successivo il "gemello" e i
+# suoi 3 gate CI pesanti giravano contro dati sempre più vecchi della produzione, e la
+# divergenza non era visibile da nessuna parte (cluster Z-022).
+#
+# PERCHE' FERMA api E web. pg_restore --clean droppa e ricrea gli oggetti: farlo sotto
+# un'API che serve traffico significa errori transitori e una cache RBAC che resta
+# appesa a righe non più esistenti. Si fermano prima e si riavviano dopo — con
+# ExecStopPost, che systemd esegue SEMPRE, anche quando il clone fallisce: un refresh
+# andato male non deve lasciare il gemello spento.
+[Unit]
+Description=Heuresys Advanced — refresh settimanale del DB clone dalla VM (Z-022)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+# Senza questo un fallimento notturno resterebbe invisibile fino al prossimo sguardo
+# casuale a `systemctl --failed` (stessa lezione di S1029 sui 10 timer senza OnFailure).
+OnFailure=heuresys-unit-failure@%n.service
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@
+# pg_dump/pg_restore + ssh + rsync: nessun Node necessario per questo one-shot.
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
+ExecStartPre=-/usr/bin/sudo -n /usr/bin/systemctl stop heuresys-advanced-web.service heuresys-advanced-api.service
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/clone-vm-db.sh
+ExecStopPost=-/usr/bin/sudo -n /usr/bin/systemctl start heuresys-advanced-api.service heuresys-advanced-web.service
+# Un dump+restore completo del DB reale sta abbondantemente dentro la mezz'ora sulla LAN;
+# il collo di bottiglia è il pg_dump sulla VM free-tier, non il trasferimento.
+TimeoutStartSec=2700

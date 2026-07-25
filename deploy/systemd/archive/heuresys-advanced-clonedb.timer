@@ -1,0 +1,24 @@
+# Unit statico (nessun placeholder) — installato verbatim dallo step "clone-db" di
+# scripts/provision-linux-pc.sh.
+#
+# Domenica alle 05:00: dopo l'intera finestra notturna dei job schedulati (l'ultimo è il
+# reindex delle 04:30) e dopo il pull dei backup delle 02:30, così il clone parte da una
+# VM quiescente e non contende I/O con nient'altro. Settimanale e non giornaliero perché
+# il gemello serve a due cose — i 3 gate CI pesanti e le prove off-prod — e nessuna delle
+# due chiede dati freschi di giornata: chiede dati *reali*, che dopo una settimana lo sono
+# ancora. Un refresh quotidiano costerebbe un pg_dump completo alla VM free-tier ogni
+# notte per un guadagno che nessuno misura.
+[Unit]
+Description=Heuresys Advanced — refresh settimanale del DB clone dalla VM
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=Sun *-*-* 05:00:00
+RandomizedDelaySec=900
+# linux-pc è un PC domestico: se era spento domenica notte, recupera al primo boot utile
+# invece di saltare la settimana.
+Persistent=true
+Unit=heuresys-advanced-clonedb.service
+
+[Install]
+WantedBy=timers.target

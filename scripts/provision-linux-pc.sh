@@ -122,6 +122,24 @@ ssh -o BatchMode=yes "$HOST" "cd '$REPO'
   systemctl is-active heuresys-backup-pull.timer
 "
 
+log "[2.4] refresh schedulato del DB clone (Z-022) — unit fuori da deploy/systemd/"
+# Il clone del DB della VM era solo on-demand: fra due lanci manuali il gemello e i suoi
+# 3 gate CI giravano contro dati via via più vecchi della produzione, senza che la
+# divergenza fosse visibile. Timer settimanale (domenica 05:00, Persistent). Gli unit
+# stanno in deploy/systemd/archive/ per la stessa ragione del backup-pull: su la VM
+# vm-deploy.sh li abiliterebbe, e lì un clone-da-sé-stesso sarebbe distruttivo.
+ssh -o BatchMode=yes "$HOST" "cd '$REPO'
+  tmp=\$(mktemp -d)
+  sed -e \"s#@@REPO_DIR@@#$REPO#g\" -e 's#^User=ubuntu#User=enzo#g' -e 's#^Group=ubuntu#Group=enzo#g' \
+      \"$REPO/deploy/systemd/archive/heuresys-advanced-clonedb.service\" > \"\$tmp/heuresys-advanced-clonedb.service\"
+  sudo install -m 644 -o root -g root \"\$tmp/heuresys-advanced-clonedb.service\" /etc/systemd/system/heuresys-advanced-clonedb.service
+  sudo install -m 644 -o root -g root \"$REPO/deploy/systemd/archive/heuresys-advanced-clonedb.timer\" /etc/systemd/system/heuresys-advanced-clonedb.timer
+  rm -rf \"\$tmp\"
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now heuresys-advanced-clonedb.timer >/dev/null 2>&1
+  systemctl is-active heuresys-advanced-clonedb.timer
+"
+
 log "[verify] autonomous PROD on the LAN"
 echo -n "  api /readyz: "; curl -s -o /dev/null -w '%{http_code}\n' -m 10 "http://$LAN_HOST:$API_PORT/readyz" || echo ERR
 echo -n "  web /login:  "; curl -s -o /dev/null -w '%{http_code} %{time_total}s\n' -m 20 "http://$LAN_HOST:$WEB_PORT/login" || echo ERR

@@ -18,7 +18,7 @@ Il risultato grezzo — 497 voci — è stato consolidato da un agente con visio
 | Sessione | Chiusi | Note |
 |---|---:|---|
 | **S1029** | **34** | Wave 0 completa (11/11 HARD) + 23 cluster di W1. Un cluster chiuso come WON'T-DO motivato (Z-110). Un alert non chiudibile registrato come debito D-75 con rischio accettato. |
-| **S1030** | **9** (+2 rettifiche, +6 nuovi) | W1: Z-022 · Z-029 · Z-030 · Z-125 · Z-156 · Z-178 · Z-224 · Z-225 · Z-234. **Rettificato Z-139**: la premessa era falsa e quel fix aveva spento i colori d'errore sul sito pubblico (riparato dentro Z-156). Emersi 3 cluster nuovi — **Z-249** due rossi semantici, **Z-250** skill `zero-pending-loop` incompleta, **Z-251** la suite non regge la contesa sul DB. Emersi anche dalla review adversarial: **Z-252** (PaletteDropdown inerte, font aspirazionale) e **Z-253** (`heuresys_ci` mai rinfrescato). Piu' **Z-254** (disciplina di rilascio upstream). Totale: **254 cluster**. |
+| **S1030** | **9** (+2 rettifiche, +6 nuovi) | W1: Z-022 · Z-029 · Z-030 · Z-125 · Z-156 · Z-178 · Z-224 · Z-225 · Z-234. **Rettificato Z-139**: la premessa era falsa e quel fix aveva spento i colori d'errore sul sito pubblico (riparato dentro Z-156). Emersi 3 cluster nuovi — **Z-249** due rossi semantici, **Z-250** skill `zero-pending-loop` incompleta, **Z-251** la suite non regge la contesa sul DB. Emersi anche dalla review adversarial: **Z-252** (PaletteDropdown inerte, font aspirazionale) e **Z-253** (`heuresys_ci` mai rinfrescato). Piu' **Z-254** (disciplina di rilascio upstream) e **Z-255** (git senza `core.longpaths` su Windows). Totale: **255 cluster**. |
 
 Le caselle spuntate qui sotto portano la nota di chiusura con l'evidenza. Il resto è aperto.
 
@@ -26,7 +26,7 @@ Le caselle spuntate qui sotto portano la nota di chiusura con l'evidenza. Il res
 
 | | Cluster | Ore | Sessioni (6h) |
 |---|---:|---:|---:|
-| **Totale** | 254 | ~1.385 | ~231 |
+| **Totale** | 255 | ~1.386 | ~231 |
 
 > ⚠️ **Il totale cresce quando l'esecuzione scopre lavoro nuovo.** Partenza 248 (censimento
 > S1029); +6 in S1030, tutti emersi *dai fatti*, non da un secondo censimento: 3 dall'esecuzione
@@ -46,7 +46,7 @@ Le stime sono per-cluster e consolidate dalla fonte più motivata fra quelle dis
 | Ondata | Tema | Cluster | Ore |
 |---|---|---:|---:|
 | **W0** | Sblocco | 11 (10 chiusi, **1 aperto: Z-034**) | 24 |
-| **W1** | Igiene rapida | 81 (32 chiusi) | 102 |
+| **W1** | Igiene rapida | 82 (32 chiusi) | 102 |
 | **W2** | Debito tecnico, test e CI | 37 | 203 |
 | **W3** | Dati e DB | 36 | 168 |
 | **W4** | Frontend e sicurezza | 39 | 213 |
@@ -302,6 +302,9 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 
 ### infra-ci (13)
 
+- [ ] **Z-255** (0.5h) — Git su Windows non legge i percorsi lunghi: `git status` rinuncia a ispezionare 6 directory dentro `node_modules/.pnpm/next@16.2.11_.../next-devtools/...` con «Filename too long». Il sistema operativo è già pronto (`HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem\LongPathsEnabled = 1`), è **git** a non esserlo: `core.longpaths` non è impostato né a livello locale né di sistema, quindi vale il default `false` e il limite resta 260 caratteri. Oggi non tocca nulla di versionato — quei percorsi stanno in `node_modules`, che è gitignored — ma è la classe di difetto che fa fallire un `git clean -xfd` o una reinstallazione a metà, lasciando un albero di dipendenze monco senza un errore chiaro
+  - *chiuso quando*: `git config --get core.longpaths` risponde `true` e `git status --porcelain --ignored` non emette più alcuna riga «Filename too long» (oggi: 6)
+  - *nota*: la configurazione è per-macchina, non versionabile nel repo — va messa su Windows e verificata anche sui cloni se mai dovessero girare su un filesystem con lo stesso limite
 - [ ] **Z-006** (2.0h) — Runner self-hosted instabile: shutdown signal a meta' job + PNPM_HOME v10/v11 che reinstalla pnpm a ogni run
   - *chiuso quando*: 10 run consecutivi di playwright-smoke e test-integration senza 'runner has received a shutdown signal' nei log (gh run list --limit 10 --json conclusion)
   - *assorbe*: `ci:CI-4`

@@ -38,7 +38,7 @@ decisioni tecniche sono di Claude; a Enzo vanno solo le voci che dipendono da un
 
 ## Stato del piano
 
-`docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — **254 cluster, 42 chiusi**.
+`docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — **255 cluster, 42 chiusi**.
 Le caselle spuntate portano la nota di chiusura con l'evidenza; il resto è aperto.
 
 - **W0 sblocco — NON completa**: resta `Z-034` (segreti TOTP — fixture in chiaro nel repo,

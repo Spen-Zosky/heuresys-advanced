@@ -20,6 +20,12 @@ si poteva vedere solo guardando il CSS realmente emesso, non il sorgente. Da qui
 **una prova vale solo se avrebbe potuto fallire** — e si misura l'artefatto prodotto, non
 la dichiarazione.
 
+In coda alla sessione è arrivata una consegna da una sessione Cowork: l'impianto che
+esegue il piano in autonomia. Rivisto prima del commit da due revisori ostili — il lock
+non era un lock (fermare il driver era proprio ciò che creava due driver), e la chiusura
+di ogni ciclo deployava la produzione fuori da ogni filtro. Corretti quelli, ne restano
+altri che chiedono un ridisegno: committato **con il freno inserito**, non parte.
+
 ## Obiettivo permanente (mandato Enzo, S1029 — vale per OGNI sessione futura)
 
 **Portare heuresys-advanced a una fresh session senza pendenze**: zero debiti, zero task
@@ -48,11 +54,17 @@ Le caselle spuntate portano la nota di chiusura con l'evidenza; il resto è aper
    `Z-223` (roadmap e wave ferme in DRAFT), `Z-230` (doc di triage Dependabot — ora
    scrivibile sul triage reale appena eseguito), `Z-239` (indice memorie), `Z-031`
    (monitor di non-regressione dell'ecosistema).
-2. **I 6 cluster nati oggi**: `Z-249` due rossi semantici che convivono · `Z-250` la skill
-   `zero-pending-loop` senza i suoi 3 file eseguibili · `Z-251` la suite che non regge la
-   contesa sul DB · `Z-252` PaletteDropdown inerte · `Z-253` `heuresys_ci` mai rinfrescato
-   (è il DB su cui girano davvero i gate CI) · `Z-254` disciplina di rilascio upstream.
-3. **W2 debito/test**: il pezzo più utile resta il gate E2E in CI — oggi la copertura
+2. **`Z-250` — togliere il freno all'impianto zero-pendenze**, che ora è versionato ma
+   **fermo per scelta**: due revisioni ostili hanno chiuso i difetti pericolosi, ma restano
+   6 punti di ridisegno (classificazione che guarda la descrizione invece del criterio di
+   chiusura, precondizioni di classe C che nessun codice legge, prove autodichiarate, gate
+   che contraddice la Definition of Done, self-test cieco a 4 regressioni su 5). Elenco
+   puntuale nel cluster e in `zp.config.yaml`.
+3. **Gli altri 5 cluster nati oggi**: `Z-249` due rossi semantici che convivono · `Z-251`
+   la suite che non regge la contesa sul DB · `Z-252` PaletteDropdown inerte · `Z-253`
+   `heuresys_ci` mai rinfrescato (è il DB su cui girano davvero i gate CI) · `Z-254`
+   disciplina di rilascio upstream.
+4. **W2 debito/test**: il pezzo più utile resta il gate E2E in CI — oggi la copertura
    Playwright monitorata cross-sessione è una frazione minima delle spec esistenti.
 
 ## Open questions (autorità *cosa* = Enzo)
@@ -60,8 +72,9 @@ Le caselle spuntate portano la nota di chiusura con l'evidenza; il resto è aper
 - **Contraddizione GDPR**: il design SuccessFactors afferma «nessuna governance PII/GDPR
   richiesta», la due diligence elenca RoPA/DPIA/DPA fra i requisiti mancanti. Posizione
   sul profilo legale, non scelta tecnica.
-- **Autonomia non presidiata**: il design di `zero-pending-loop` è ancora «BOZZA — in
-  attesa di approvazione». Serve il tuo via prima di costruirne i pezzi eseguibili (Z-250).
+- **Autonomia non presidiata**: l'impianto ora esiste ed è pubblicato, ma il freno è
+  inserito (`meta.autorizzato_non_presidiato: false`) e il design resta «BOZZA — in attesa
+  di approvazione». Il freno non si toglie senza il tuo via, nemmeno a rilievi chiusi.
 - **Wave-3 (#17)** — sblocca il Blocco E Fase 3 (#69). In HOLD.
 - WAIT-INPUT invariati: **#4** pricing · **#8** app-password Outlook · **#16**
   SuccessFactors · **#52** SSO IdP.

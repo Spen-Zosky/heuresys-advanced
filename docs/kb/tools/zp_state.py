@@ -258,7 +258,10 @@ def precondizioni_classe_c(cfg: dict, offline: bool = False) -> tuple[bool, list
 
     if max_ore:
         # Il dump piu' recente sull'archivio off-host, in ore.
-        cmd = (f"MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes -o ConnectTimeout=10 {host} "
+        # `-n` (stdin da /dev/null) non e' cosmetico: senza, ssh eredita lo stdin del padre
+        # e se il padre muore per timeout il figlio resta appeso. Visto sul campo — un
+        # `ssh linux-pc true` orfano per 20 minuti con la sua catena di shell.
+        cmd = (f"MSYS_NO_PATHCONV=1 ssh -n -o BatchMode=yes -o ConnectTimeout=10 {host} "
                f"'ls -t {archivio}/*.dump 2>/dev/null | head -1 | xargs -r stat -c %Y'")
         try:
             r = subprocess.run([shell, '-lc', cmd], capture_output=True, text=True,
@@ -279,7 +282,7 @@ def precondizioni_classe_c(cfg: dict, offline: bool = False) -> tuple[bool, list
     if host:
         try:
             r = subprocess.run([shell, '-lc',
-                                f'MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes -o ConnectTimeout=10 {host} true'],
+                                f'MSYS_NO_PATHCONV=1 ssh -n -o BatchMode=yes -o ConnectTimeout=10 {host} true'],
                                capture_output=True, text=True, encoding='utf-8',
                                errors='replace', timeout=30, cwd=RADICE)
             esiti.append((f'host di prova ({host}) raggiungibile', r.returncode == 0,

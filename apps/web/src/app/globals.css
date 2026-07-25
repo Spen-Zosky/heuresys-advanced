@@ -13,6 +13,12 @@
  */
 
 @import "@heuresys/ui/styles";
+/* Token di tema (@theme inline + :root + .dark): FONTE UNICA, condivisa con
+   apps/showcase — scripts/sync-showcase.sh ne copia lì una replica insieme alle
+   pagine. Sta qui in cima, accanto all'altro @import, perché gli @import CSS
+   devono precedere le regole. Vedi il file per il perché: il vecchio mirror
+   manuale nello showcase aveva divergiato in silenzio. */
+@import "./_theme-tokens.css";
 /* Markdown rendering (MarkdownView prose classes) - cap4 CMS P3 rich-text. */
 @plugin "@tailwindcss/typography";
 /* Universal hover affordance is included in @heuresys/ui globals.css */
@@ -28,119 +34,6 @@
    The dist output is tsup-compiled; class strings are preserved verbatim in
    those files so Tailwind's source-resolver picks them up. */
 @source "../../node_modules/@heuresys/ui/dist/**/*.{js,mjs}";
-
-/* ============================================================
-   Tailwind v4 @theme inline — map CSS custom properties to the
-   color/radius/shadow tokens consumed by @heuresys/ui/dashboard/*
-   utility classes (bg-card, bg-palette-1, border-border, rounded-card,
-   shadow-card, etc.).
-   ============================================================ */
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
-  --color-accent: var(--accent);
-  --color-primary: var(--primary);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-palette-1: var(--palette-1);
-  --color-palette-2: var(--palette-2);
-  --color-palette-3: var(--palette-3);
-  --color-palette-4: var(--palette-4);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--danger);
-  --color-info: var(--info);
-
-  --radius-card: 1rem;
-  --radius-control: 0.5rem;
-  --shadow-card: 0 1px 2px hsl(220 20% 10% / 0.06), 0 8px 24px hsl(220 20% 10% / 0.04);
-
-  --font-sans: "Exo 2", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-:root {
-  /* Surface — Blue Primary, light mode (default).
-     Light-mode accent is intentionally darker than the prior #EEF2F8 so the
-     selection / row-hover state has enough delta against --background (#FAFBFD)
-     for cross-hair / hover affordance to be visibly distinguishable. Same
-     reasoning for --border darkness — see brand default rule on light theme
-     selection visibility. */
-  --background: #FAFBFD;
-  --foreground: #0F1828;
-  --card: #FFFFFF;
-  --card-foreground: #0F1828;
-  --muted: #E8ECF3;
-  --muted-foreground: #475569;
-  --border: #D6DCE7;
-  --accent: #D9E1EF;
-  --primary: #2563EB;
-  --sidebar: #FFFFFF;
-  --sidebar-foreground: #0F1828;
-  /* Brand 4-box */
-  --palette-1: #2563EB;
-  --palette-2: #06B6D4;
-  --palette-3: #7C3AED;
-  --palette-4: #F59E0B;
-  /* Semantic. a11y AA (S1025, axe-measured on /me/inbox with a real MEDIUM
-     notification — data-triggered, never exercised before): warning #F59E0B on
-     white/card is 2.15:1 → amber-700 #B45309 = 4.7:1 (AA text + 3:1 graphics).
-     Dark mode restores #F59E0B (8.3:1 on --card) via the .dark override. */
-  --success: #16A34A;
-  --warning: #B45309;
-  --danger: #DC2626;
-  --info: #2563EB;
-  --color-icon-info: #2563EB;
-  --color-icon-success: #16A34A;
-  --color-icon-warning: #B45309;
-  --color-icon-danger: #DC2626;
-  /* Logo body + accent (legacy Y-accent treatment, UXIX-0007 candidate D) */
-  --logo-body: #3B82F6;
-  --logo-accent: #A855F7;
-  /* Mode marker for CSS to react */
-  --theme-mode: "light";
-}
-
-.dark {
-  /* Dark mode token overrides — match the prototype/canonical references.
-     !important is required to beat the inline `<html style="…">` injection
-     performed by `PaletteProvider` (which sets light-mode values when no
-     palette decision has been activated for the surface). */
-  --background: #0D1017 !important;
-  --foreground: #F2F4F8 !important;
-  --card: #131720 !important;
-  --card-foreground: #F2F4F8 !important;
-  --muted: #1A1F2B !important;
-  --muted-foreground: #9CA3AF !important;
-  --border: #232936 !important;
-  --accent: #2E3342 !important;
-  --primary: #5E9DF5 !important;
-  --sidebar: #0B0E15 !important;
-  --sidebar-foreground: #F2F4F8 !important;
-  --palette-1: #5E9DF5 !important;
-  --palette-2: #34D3DC !important;
-  --palette-3: #B07BFA !important;
-  --palette-4: #F8BD55 !important;
-  /* a11y AA retune (S982, axe-measured): the light-mode semantic text colors
-     were NOT dark-adjusted — e.g. info #2563EB on card #131720 = 3.46:1
-     (needs 4.5). Same hue, lighter step (tailwind 400-ramp): info 7.0:1,
-     danger 6.4:1, success 7.8:1 on --card. --warning #F59E0B already 8.3:1. */
-  --info: #60A5FA !important;
-  --danger: #F87171 !important;
-  --success: #22C55E !important;
-  /* S1025: the light default darkened to #B45309 for AA on white — on the dark
-     card that would be ~4.0:1; the original amber is 8.3:1 here. */
-  --warning: #F59E0B !important;
-  --color-icon-warning: #F59E0B !important;
-  /* a11y AA (S982): the lib pins --color-primary-fg near-white; on the dark
-     primary #5E9DF5 that is 2.68:1. Dark ink flips it to 6.5:1 while keeping
-     the brand blue chip intact (light mode stays white-on-#2563EB, 5.2:1). */
-  --color-primary-fg: #0B1220 !important;
-}
 
 /* a11y AA retune (S982, axe-measured): the lib sidebar group labels use
    text-muted-foreground/70 — the 30% dilution lands at 4.23:1 on the dark

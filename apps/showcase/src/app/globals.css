@@ -1,16 +1,22 @@
 /* apps/showcase/src/app/globals.css
  *
- * Mirrors apps/web/src/app/globals.css. CSS-var defaults for Blue Primary
- * (light) so first paint is correct before PaletteProvider hydrates.
- * Defines hx-* motion classes used throughout the showcase.
+ * Contiene SOLO ciò che è specifico dello showcase: gli @source per le directory
+ * generate dal sync e le animazioni hx-*. I token di tema NON stanno più qui.
  *
- * IMPORTANT: this file is a mirror, not a junction. Any change to the apps/web
- * counterpart must be reflected here. The sync-showcase.sh script does NOT
- * copy this file (it sources `@heuresys/ui/styles` which lives in the shared
- * library, so we keep this thin and stable).
+ * S1030 — perché è cambiato. Questo file era un "mirror" manuale del gemello in
+ * apps/web, con l'avvertenza di replicare a mano ogni modifica. Non è successo, e
+ * il drift è arrivato fino al sito pubblico: qui mancavano sia il blocco
+ * `@theme inline` sia i token semantici (--success/--warning/--danger/--info),
+ * quindi le classi `text-danger`/`bg-danger` non generavano NESSUNA utility
+ * (verificato sul CSS emesso: `.text-danger` assente, `--danger` non definito) e
+ * i fix di contrasto AA di S982/S1025 non arrivavano allo showcase. Ora i token
+ * hanno una fonte sola — `apps/web/src/app/_theme-tokens.css` — che
+ * scripts/sync-showcase.sh copia qui accanto come `_theme-tokens.css`, insieme
+ * alle pagine. Il file copiato è gitignored come il resto dell'output del sync.
  */
 
 @import "@heuresys/ui/styles";
+@import "./_theme-tokens.css";
 
 /*
  * Tailwind 4 honors .gitignore for content discovery. The src/app/showcase/
@@ -28,26 +34,11 @@
    bg-green-100, …) survive purge now that the primitive is published (was a local file before). */
 @source "../../node_modules/@heuresys/ui/dist/**/*.{js,mjs}";
 
-:root {
-  --background: #FAFBFD;
-  --foreground: #0F1828;
-  --card: #FFFFFF;
-  --card-foreground: #0F1828;
-  --muted: #F1F4F9;
-  --muted-foreground: #475569;
-  --border: #E2E6EE;
-  --palette-1: #2563EB;
-  --palette-2: #06B6D4;
-  --palette-3: #7C3AED;
-  --palette-4: #F59E0B;
-  --color-icon-info: #2563EB;
-  --color-icon-success: #16A34A;
-  --color-icon-warning: #F59E0B;
-  --color-icon-danger: #DC2626;
-  --logo-body: #3B82F6;
-  --logo-accent: #A855F7;
-  --theme-mode: "light";
-}
+/* NB: il blocco `:root` con i valori light stava qui e ora arriva da
+   _theme-tokens.css. I valori locali erano anche più vecchi di quelli di
+   apps/web: --muted #F1F4F9 vs #E8ECF3, --border #E2E6EE vs #D6DCE7 (il
+   ritocco di contrasto per la visibilità della selezione), --color-icon-warning
+   #F59E0B vs #B45309 (la correzione AA di S1025). */
 
 html,
 body {

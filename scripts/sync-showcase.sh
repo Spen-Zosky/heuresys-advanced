@@ -29,6 +29,15 @@ echo "sync-showcase: copying $SHOWCASE_SRC -> $SHOWCASE/app/showcase"
 mkdir -p "$SHOWCASE/app/showcase"
 cp -r "$SHOWCASE_SRC/." "$SHOWCASE/app/showcase/"
 
+# Token di tema: fonte unica in apps/web, copiata qui (S1030). Prima erano
+# duplicati a mano nei due globals.css con l'avvertenza "replicare ogni modifica";
+# non e' successo, e lo showcase e' rimasto senza il blocco @theme inline e senza
+# i token semantici — `text-danger` non generava alcuna utility sul sito pubblico,
+# e i fix di contrasto AA di S982/S1025 non ci arrivavano. Copiarli e' l'unico
+# modo per cui il drift non puo' ripresentarsi.
+echo "sync-showcase: copying _theme-tokens.css -> apps/showcase/src/app/"
+cp "$WEB/app/_theme-tokens.css" "$SHOWCASE/app/_theme-tokens.css"
+
 # apps/web/src/lib is intentionally NOT synced. Showcase pages must remain
 # portable — only deps allowed are @heuresys/ui + react + lucide-react (per
 # ADR-0013 R2 portability invariant). The legacy lib/theme bundle was retired

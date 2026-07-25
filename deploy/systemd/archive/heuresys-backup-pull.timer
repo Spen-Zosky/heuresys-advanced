@@ -1,16 +1,24 @@
 # Unit statico (nessun placeholder) — installato verbatim dallo step "backup-pull" di
 # scripts/provision-linux-pc.sh.
 #
-# Alle 02:30: il backup sulla VM parte all'01:30 (+ RandomizedDelaySec=300) e un pg_dump
-# dura pochi minuti, quindi a quest'ora il dump del giorno è chiuso e integro. Non prima:
-# rsyncare un file ancora in scrittura produrrebbe un archivio corrotto (che lo script
-# scarterebbe comunque con pg_restore --list, ma sprecando un giro).
+# CORRETTO S1030 — l'orario precedente era sbagliato di due ore, nella direzione peggiore.
+# `OnCalendar` usa l'ora locale di linux-pc (Europe/Rome, CEST +2); la VM e' **Etc/UTC**.
+# Il vecchio "02:30, dopo il backup dell'01:30" confrontava un orario locale con un orario
+# UTC: 02:30 CEST = **00:30 UTC**, cioe' UN'ORA PRIMA che il dump del giorno esistesse.
+# I dump reali sulla VM (ls -la, 2026-07-25) nascono all'01:31-01:35 UTC. Il pull avrebbe
+# preso ogni notte il dump del giorno prima: nessuna corruzione (i file sono immutabili e
+# rsync usa --ignore-existing), ma un RPO peggiore di 24h rispetto a quello progettato.
+# Il timer non era ancora mai scattato, quindi il difetto non si era visto.
+#
+# 04:00 locale = **02:00 UTC** d'estate / 03:00 UTC d'inverno: dopo che il dump e' chiuso
+# (01:35 UTC) e prima o sopra gdpr-retention (03:00 UTC), che pero' non tocca i file di
+# backup — un rsync di archivi gia' scritti non contende niente di significativo.
 [Unit]
 Description=Heuresys — pull giornaliero dei backup PROD verso l'archivio off-host
 Documentation=https://github.com/Spen-Zosky/heuresys-advanced
 
 [Timer]
-OnCalendar=*-*-* 02:30:00
+OnCalendar=*-*-* 04:00:00
 RandomizedDelaySec=600
 # L'host di archivio è un PC domestico: se era spento all'ora prevista, recupera al boot.
 Persistent=true

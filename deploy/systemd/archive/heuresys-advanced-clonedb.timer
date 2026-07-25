@@ -1,19 +1,32 @@
 # Unit statico (nessun placeholder) — installato verbatim dallo step "clone-db" di
 # scripts/provision-linux-pc.sh.
 #
-# Domenica alle 05:00: dopo l'intera finestra notturna dei job schedulati (l'ultimo è il
-# reindex delle 04:30) e dopo il pull dei backup delle 02:30, così il clone parte da una
-# VM quiescente e non contende I/O con nient'altro. Settimanale e non giornaliero perché
-# il gemello serve a due cose — i 3 gate CI pesanti e le prove off-prod — e nessuna delle
-# due chiede dati freschi di giornata: chiede dati *reali*, che dopo una settimana lo sono
-# ancora. Un refresh quotidiano costerebbe un pg_dump completo alla VM free-tier ogni
-# notte per un guadagno che nessuno misura.
+# ATTENZIONE AL FUSO — e' il dettaglio che rende giusto o inutile questo orario.
+# `OnCalendar` usa l'ora LOCALE dell'host che ospita il timer: linux-pc e' Europe/Rome
+# (CEST +2 d'estate, CET +1 d'inverno). La VM da cui si clona e' **Etc/UTC**. systemd 249
+# di linux-pc non supporta il suffisso di timezone in OnCalendar (arrivato in v252), quindi
+# l'orario si scrive in locale e si converte a mano.
+#
+# Timeline reale dei job SULLA VM, in UTC (systemctl list-timers, 2026-07-25):
+#   01:34 backup (pg_dump) · 02:01 auth-housekeeping · 02:23 insights · 02:52 digest
+#   03:00 gdpr-retention · 03:17 AIDE · 04:00 mat-views · 04:02 dr-drill · 04:30 reindex
+# La finestra davvero quiescente comincia dopo le ~04:40 UTC.
+#
+# Domenica 08:00 locale = **06:00 UTC** d'estate / 07:00 UTC d'inverno: in entrambi i casi
+# dopo l'ultimo job (reindex) e dopo il pull dei backup. La prima versione di questo file
+# diceva 05:00 locale "dopo il reindex delle 04:30": era 03:00 UTC, cioe' **sopra**
+# gdpr-retention e AIDE, e per giunta prima del reindex — il clone avrebbe portato
+# embeddings vecchi di una settimana. Errore trovato in review adversarial (S1030).
+#
+# Settimanale e non giornaliero perche' al gemello servono dati *reali*, non freschi di
+# giornata: dopo una settimana lo sono ancora. Un pg_dump completo ogni notte lo pagherebbe
+# la VM free-tier per un guadagno che nessuno misura.
 [Unit]
 Description=Heuresys Advanced — refresh settimanale del DB clone dalla VM
 Documentation=https://github.com/Spen-Zosky/heuresys-advanced
 
 [Timer]
-OnCalendar=Sun *-*-* 05:00:00
+OnCalendar=Sun *-*-* 08:00:00
 RandomizedDelaySec=900
 # linux-pc è un PC domestico: se era spento domenica notte, recupera al primo boot utile
 # invece di saltare la settimana.

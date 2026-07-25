@@ -8,11 +8,21 @@
 # archive/ lo tiene fuori da quel glob — ci finisce solo per installazione esplicita.
 # Stessa ragione di heuresys-backup-pull.service, che sta qui accanto.
 #
-# COSA FA. Riallinea il DB locale di linux-pc alla fotografia corrente della VM
-# (scripts/clone-vm-db.sh: pg_dump -Fc via SSH -> pg_restore --clean --if-exists). Finora
-# il refresh era solo on-demand: fra un lancio manuale e il successivo il "gemello" e i
-# suoi 3 gate CI pesanti giravano contro dati sempre più vecchi della produzione, e la
-# divergenza non era visibile da nessuna parte (cluster Z-022).
+# COSA FA. Riallinea il DB locale `heuresys_advanced` di linux-pc alla fotografia corrente
+# della VM (scripts/clone-vm-db.sh: pg_dump -Fc via SSH -> pg_restore --clean --if-exists).
+# Finora il refresh era solo on-demand: fra un lancio manuale e il successivo il gemello
+# PROD serviva sulla LAN dati sempre piu' vecchi della produzione, e la divergenza non era
+# visibile da nessuna parte (cluster Z-022).
+#
+# COSA **NON** FA (rettifica S1030). La prima stesura di questo commento diceva che il
+# refresh serviva "ai 3 gate CI pesanti". Falso, verificato: `test-integration.yml:57` e
+# `playwright-smoke.yml:39` impostano `POSTGRES_DB: heuresys_ci`, un database DISTINTO che
+# questo unit non tocca. `heuresys_ci` viene creato da `db/scripts/setup-ci-database.sh`,
+# invocato solo dal provisioning manuale — resta congelato al momento in cui e' stato
+# creato. Non lo si e' accodato qui perche' quello script fa `dropdb --force` e il suo
+# stesso header avverte di non eseguirlo durante un job CI: servirebbe prima una guardia di
+# idle sul runner, altrimenti si crea una collisione che oggi non esiste. Lo staleness di
+# `heuresys_ci` resta aperto come voce a se' nel piano zero-pendenze.
 #
 # PERCHE' FERMA api E web. pg_restore --clean droppa e ricrea gli oggetti: farlo sotto
 # un'API che serve traffico significa errori transitori e una cache RBAC che resta
@@ -36,9 +46,21 @@ WorkingDirectory=@@REPO_DIR@@
 # pg_dump/pg_restore + ssh + rsync: nessun Node necessario per questo one-shot.
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
 Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
-ExecStartPre=-/usr/bin/sudo -n /usr/bin/systemctl stop heuresys-advanced-web.service heuresys-advanced-api.service
+# SENZA il trattino, di proposito: se fermare i servizi non riesce, il restore NON deve
+# partire. `pg_restore --clean` emette DROP che chiedono ACCESS EXCLUSIVE; con l'API
+# connessa il DROP si mette in coda e trascina ogni lock successivo, e l'unico limite
+# sarebbe TimeoutStartSec -> SIGTERM a meta' restore = database danneggiato. Meglio non
+# cominciare. (La prima stesura aveva `-`, cioe' precondizione best-effort: rilievo della
+# review adversarial S1030.)
+ExecStartPre=/usr/bin/sudo -n /usr/bin/systemctl stop heuresys-advanced-web.service heuresys-advanced-api.service
+# lock_timeout: se malgrado tutto un lock e' conteso, si fallisce in 30s invece di restare
+# appesi fino al timeout dell'unit.
+Environment=PGOPTIONS=-c lock_timeout=30s
 ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/clone-vm-db.sh
+# QUI il trattino serve: ExecStopPost deve girare SEMPRE, anche quando il clone fallisce —
+# un refresh andato male non deve lasciare spento il gemello.
 ExecStopPost=-/usr/bin/sudo -n /usr/bin/systemctl start heuresys-advanced-api.service heuresys-advanced-web.service
-# Un dump+restore completo del DB reale sta abbondantemente dentro la mezz'ora sulla LAN;
-# il collo di bottiglia è il pg_dump sulla VM free-tier, non il trasferimento.
-TimeoutStartSec=2700
+# Il clone reale misurato: 62 s (16:31:31 -> 16:32:33, 6.4 s di CPU). 900 s lasciano un
+# fattore 14 di margine; i 2700 s iniziali erano un'attesa in cui il gemello sarebbe
+# rimasto spento 45 minuti prima che qualcuno se ne accorgesse.
+TimeoutStartSec=900

@@ -73,3 +73,8 @@ jobs:
       - name: Typecheck — @heuresys/showcase
         run: pnpm --filter @heuresys/showcase run typecheck
         continue-on-error: false
+
+      # S1029: agent-gateway era l'unico workspace fuori da questo gate — un errore di
+      # tipo al suo interno non sarebbe stato visto da nessuna pipeline.
+      - name: Typecheck — @heuresys/agent-gateway
+        run: pnpm --filter @heuresys/agent-gateway run typecheck

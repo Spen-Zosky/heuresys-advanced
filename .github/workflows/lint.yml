@@ -64,5 +64,19 @@ jobs:
       - name: Lint — @heuresys/web
         run: pnpm --filter @heuresys/web run lint
 
-      - name: Lint — @heuresys/showcase
-        run: pnpm --filter @heuresys/showcase run lint
+      # apps/showcase NON ha uno script `lint`: fino a S1029 questo step invocava uno
+      # script inesistente e passava sempre verde — un gate che non gatea nulla è
+      # peggio di nessun gate, perché produce fiducia infondata. Reso esplicito con
+      # --if-present in attesa del cluster che gli dà un ESLint vero (W2), così lo
+      # stato "non lintato" è dichiarato invece che mascherato.
+      - name: Lint — @heuresys/showcase (nessun ESLint ancora — vedi W2)
+        run: pnpm --filter @heuresys/showcase run --if-present lint
+
+      # agent-gateway era fuori da ogni workflow: i suoi 5 file di test non giravano
+      # mai in CI. Il suo `lint` è oggi `tsc --noEmit` (nessun ESLint) — anch'esso in
+      # carico al cluster W2; qui almeno il typecheck e i test entrano nella pipeline.
+      - name: Lint — @heuresys/agent-gateway
+        run: pnpm --filter @heuresys/agent-gateway run lint
+
+      - name: Test — @heuresys/agent-gateway (vitest, nessun DB)
+        run: pnpm --filter @heuresys/agent-gateway run test

@@ -1,0 +1,68 @@
+name: CodeQL (security scanning)
+
+# S1029 — Tier 2 della roadmap GitHub, mai attivato prima: il repo è pubblico e
+# internet-facing (www.heuresys.com) ma nessuna analisi statica di sicurezza girava.
+# CodeQL copre la classe che ESLint non vede: injection, path traversal, flussi di dati
+# da input non fidato verso sink pericolosi.
+#
+# Gira su runner GitHub-hosted (non self-hosted): l'analisi è pesante e non deve
+# competere con i gate su linux-pc, e per un repo pubblico i minuti sono gratuiti.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - ".github/workflows/codeql.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "packages/**"
+  schedule:
+    # Lunedì 04:17 UTC — un orario "dispari" per non finire nella coda di punta di
+    # GitHub, e comunque fuori dalle finestre dei job notturni del progetto.
+    - cron: "17 4 * * 1"
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      # security-events:write è ciò che permette il caricamento dei risultati nella
+      # tab Security; senza, l'analisi gira e il suo esito si perde.
+      security-events: write
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["javascript-typescript"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          language: ${{ matrix.language }}
+          # security-and-quality aggiunge le query di qualità a quelle di sicurezza:
+          # su un monorepo con un solo manutentore il costo del rumore è accettabile
+          # rispetto al rischio di non vedere un difetto.
+          queries: security-and-quality
+
+      # Nessuno step di build: per JS/TS CodeQL analizza direttamente i sorgenti.
+      # Un build qui richiederebbe il DB e i secret — che su un runner pubblico non
+      # devono esistere.
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"

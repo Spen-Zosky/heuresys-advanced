@@ -198,3 +198,8 @@ audit/BLOCKED-LOG.md
 ESCO dataset*.zip
 db/data/esco/*.tsv
 db/data/esco/*.csv
+
+# zero-pending-loop: stato di runtime. PROGRESS.md invece e versionato,
+# cosi Enzo lo legge su GitHub dal telefono.
+.zp/*
+!.zp/PROGRESS.md

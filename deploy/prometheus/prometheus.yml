@@ -8,6 +8,16 @@ global:
   scrape_interval: 30s
   evaluation_interval: 30s
 
+# S1029 (Z-015): prima di questa riga Prometheus raccoglieva metriche senza mai trarne
+# una conclusione. Le regole vivono in alerts.yml, accanto a questo file: il percorso è
+# relativo alla config, quindi funziona identico su VM e su linux-pc.
+# Nessun `alerting:`/alertmanager per ora, ed è una scelta: senza un canale di consegna
+# (SMTP bloccato su #8) un alertmanager sarebbe un'altra dashboard che nessuno apre. Gli
+# alert sono interrogabili via /api/v1/rules e /api/v1/alerts; la consegna dei fallimenti
+# schedulati passa dall'handler OnFailure al dashboard di sessione, che viene letto.
+rule_files:
+  - alerts.yml
+
 scrape_configs:
   - job_name: heuresys-api
     metrics_path: /metrics

@@ -1,0 +1,40 @@
+# Template — istanziato da `OnFailure=heuresys-unit-failure@%n.service` sui one-shot
+# schedulati. `%i` è il nome dell'unit fallita (passato da %n).
+#
+# PERCHE'. Fino a S1029 nessuno dei 9 timer aveva un OnFailure: un job poteva fallire
+# ogni notte per settimane senza che nessuno lo sapesse. Non è teoria — `dailyaidecheck`
+# ha fallito ogni singolo giorno da quando esiste, e se ne è accorto solo un censimento.
+#
+# COSA FA. Due scritture, entrambe pensate per essere LETTE:
+#   1. journal a priorità `err`, con il nome dell'unit e il suo esito — così
+#      `journalctl -p err` e `systemctl --failed` raccontano la stessa storia;
+#   2. una riga JSON in append su un registro persistente che il dashboard di sessione
+#      legge all'avvio (`status_dashboard.py --net`). Questo è il vero canale di
+#      notifica del progetto: non c'è SMTP (bloccato su #8) e un alert che nessuno
+#      apre non è un alert. La sessione, invece, viene aperta.
+#
+# Deliberatamente NON fallisce mai: un handler di fallimento che fallisce a sua volta
+# produrrebbe solo rumore ricorsivo.
+[Unit]
+Description=Heuresys — registra il fallimento di %i (handler OnFailure)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+# `systemctl show` dà l'esito reale (exit-code, signal, timestamp) senza doverlo
+# ricostruire: è la fonte autorevole, non il testo del journal.
+ExecStart=/bin/bash -c '\
+  set +e; \
+  U="%i"; \
+  RES="$(systemctl show -p Result --value "$U" 2>/dev/null)"; \
+  ST="$(systemctl show -p ExecMainStatus --value "$U" 2>/dev/null)"; \
+  TS="$(date -u +%%Y-%%m-%%dT%%H:%%M:%%SZ)"; \
+  echo "unit=$U result=${RES:-unknown} exit=${ST:-?} — fallimento registrato" | systemd-cat -t heuresys-unit-failure -p err; \
+  mkdir -p /var/lib/heuresys; \
+  printf "{\\"ts\\":\\"%%s\\",\\"unit\\":\\"%%s\\",\\"result\\":\\"%%s\\",\\"exit\\":\\"%%s\\"}\\n" "$TS" "$U" "${RES:-unknown}" "${ST:-?}" >> /var/lib/heuresys/unit-failures.jsonl; \
+  chmod 644 /var/lib/heuresys/unit-failures.jsonl 2>/dev/null; \
+  exit 0'
+TimeoutStartSec=60

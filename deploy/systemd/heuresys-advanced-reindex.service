@@ -13,6 +13,10 @@
 [Unit]
 Description=Heuresys Advanced — weekly embeddings reindex (R7, semantic-matching substrate)
 Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+# S1029: senza questo, un fallimento notturno resta invisibile finche' qualcuno
+# non guarda `systemctl --failed` per caso. L'handler scrive journal + registro letto
+# dal dashboard di sessione.
+OnFailure=heuresys-unit-failure@%n.service
 After=network-online.target postgresql.service
 Wants=network-online.target
 

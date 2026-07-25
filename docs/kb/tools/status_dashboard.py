@@ -92,8 +92,14 @@ OK, BAD, DOT, UNK = "[OK]", "[!!]", "[..]", "[? ]"
 
 # --- low-level helpers --------------------------------------------------------------------
 def sh(*args, timeout=20):
+    # encoding esplicito: senza, Python su Windows decodifica con cp1252 e QUALUNQUE
+    # output non-ASCII fa fallire la chiamata con UnicodeDecodeError — che qui viene
+    # inghiottito dall'except e riportato come "comando non riuscito". È così che la
+    # sezione job-schedulati diceva "VM non raggiungibile" mentre la VM rispondeva
+    # benissimo: `systemctl --failed` stampa un pallino U+25CF (S1029).
     try:
-        return subprocess.check_output(list(args), text=True, stderr=subprocess.DEVNULL,
+        return subprocess.check_output(list(args), text=True, encoding="utf-8",
+                                       errors="replace", stderr=subprocess.DEVNULL,
                                        timeout=timeout).strip()
     except Exception:
         return None
@@ -199,6 +205,53 @@ def sec_prod(no_net):
     ready = code == 200 and ('"ready"' in body or '"ok"' in body or body == "")
     detail = "ready" if code == 200 else (code if code else "timeout")
     s.add(OK if ready else (UNK if code is None else BAD), f"/api/readyz   {detail}")
+    return s
+
+
+def sec_scheduled_jobs(no_net):
+    """Esito dei job schedulati su PROD — il canale di consegna degli alert (Z-015).
+
+    Prometheus non può scrapare un one-shot: un timer che fallisce ogni notte non
+    compare in nessuna metrica. Dal S1029 ogni unit schedulata ha
+    `OnFailure=heuresys-unit-failure@%n.service`, che scrive un registro persistente;
+    qui lo leggiamo. È il punto in cui un guasto notturno incontra finalmente un
+    lettore: la sessione viene aperta, una dashboard no. Prima di questo,
+    `dailyaidecheck` ha fallito ogni giorno per settimane senza che nessuno lo sapesse.
+    """
+    s = Section("JOB SCHEDULATI PROD (registro OnFailure)")
+    if no_net:
+        s.add(UNK, "--no-net")
+        return s
+    # `--plain` toglie il pallino U+25CF davanti al nome: senza, il primo token della
+    # riga è il glifo e il nome dell'unit non arriva mai a schermo.
+    failed = sh("ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8",
+                "oracle-vm-default", "systemctl --failed --no-legend --plain | head -5", timeout=25)
+    if failed is None:
+        s.add(UNK, "VM non raggiungibile")
+        return s
+    failed = failed.strip()
+    if failed:
+        for ln in failed.splitlines()[:5]:
+            unit = next((t for t in ln.split() if t.endswith((".service", ".timer", ".mount"))), ln[:60])
+            s.add(BAD, f"unit in stato failed: {unit}")
+    else:
+        s.add(OK, "nessuna unit in stato failed")
+
+    recent = sh("ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8", "oracle-vm-default",
+                "tail -3 /var/lib/heuresys/unit-failures.jsonl 2>/dev/null", timeout=25)
+    if recent and recent.strip():
+        for ln in recent.strip().splitlines():
+            s.add(BAD, f"fallimento registrato: {ln[:110]}")
+    else:
+        s.add(OK, "registro fallimenti vuoto")
+
+    rules = sh("ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=8", "oracle-vm-default",
+               "curl -s --max-time 5 localhost:9091/api/v1/rules "
+               "| python3 -c \"import sys,json;d=json.load(sys.stdin);"
+               "print(sum(len(g['rules']) for g in d['data']['groups']))\" 2>/dev/null", timeout=25)
+    n = (rules or "").strip()
+    s.add(OK if n.isdigit() and int(n) > 0 else BAD,
+          f"regole di alert caricate in Prometheus: {n if n.isdigit() else 'nessuna'}")
     return s
 
 
@@ -403,6 +456,7 @@ def main():
         sec_git(args.no_net),
         sec_ci(args.no_net),
         sec_prod(args.no_net),
+        sec_scheduled_jobs(args.no_net),
         db_sec,
         sec_drift(args.no_db, live, sot_md, state_md),
         sec_backlog(args.no_db),

@@ -1,0 +1,72 @@
+# deploy/prometheus/alerts.yml — S1029, cluster Z-015.
+#
+# Prima di questo file Prometheus raccoglieva metriche e non ne traeva MAI una
+# conclusione: nessun `rule_files`, nessun alertmanager. Osservabilità senza
+# notifica — si vedeva tutto solo andandolo a cercare, cioè mai.
+#
+# Scopo deliberatamente ristretto: qui stanno solo le condizioni che Prometheus può
+# davvero osservare da sé (l'API è su scrape, Prometheus stesso è su scrape). Lo
+# stato dei job schedulati NON è scrapeabile — arriva dall'handler
+# `heuresys-unit-failure@.service` al dashboard di sessione, che è il canale di
+# consegna reale del progetto finché non c'è un SMTP (bloccato su #8).
+#
+# Le soglie sono tarate sul comportamento noto: scrape ogni 30s, i `for:` sono
+# abbastanza lunghi da non allarmare su un restart di deploy (che dura ~10s).
+groups:
+  - name: heuresys-api
+    interval: 30s
+    rules:
+      - alert: HeuresysApiDown
+        # 2 minuti: un restart da vm-deploy.sh rientra ampiamente, un processo morto no.
+        expr: up{job="heuresys-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: heuresys-advanced-api
+        annotations:
+          summary: "API di produzione non raggiungibile dallo scrape"
+          description: "Il target heuresys-api non risponde da oltre 2 minuti. Se non è in corso un deploy, il servizio è giù: `systemctl status heuresys-advanced-api` sulla VM."
+
+      - alert: HeuresysApiErrorRateHigh
+        # Il tasso di 5xx sul totale: una soglia relativa non si tara sul volume.
+        expr: |
+          (
+            sum(rate(http_requests_total{job="heuresys-api",status=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(http_requests_total{job="heuresys-api"}[5m])), 0.001)
+          ) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          service: heuresys-advanced-api
+        annotations:
+          summary: "Oltre il 5% delle richieste risponde 5xx"
+          description: "Tasso di errore server sostenuto per 10 minuti. Cercare `Unhandled error` nel journal dell'API con il reqId della finestra."
+
+      - alert: HeuresysApiLatencyDegraded
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket{job="heuresys-api"}[5m])) by (le)
+          ) > 2
+        for: 15m
+        labels:
+          severity: warning
+          service: heuresys-advanced-api
+        annotations:
+          summary: "p95 di latenza sopra i 2s"
+          description: "Degrado sostenuto. Il pannello slow-queries di /system-health mostra le statement più lente (richiede pg_stat_statements preloaded)."
+
+  - name: heuresys-monitoring-self
+    interval: 30s
+    rules:
+      - alert: PrometheusTargetMissing
+        # Un target che sparisce dallo scrape è un guasto di configurazione o di rete:
+        # senza questa regola l'assenza di dati verrebbe letta come "tutto tranquillo".
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Target {{ $labels.job }} assente dallo scrape da 5 minuti"
+          description: "Nessun dato da {{ $labels.instance }}. Attenzione: l'assenza di metriche NON è un sistema sano, è un sistema che non stiamo guardando."

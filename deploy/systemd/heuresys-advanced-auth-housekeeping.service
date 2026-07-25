@@ -7,6 +7,10 @@
 [Unit]
 Description=Heuresys Advanced — auth-audit housekeeping (QW-C2 refresh-token/login-event prune)
 Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+# S1029: senza questo, un fallimento notturno resta invisibile finche' qualcuno
+# non guarda `systemctl --failed` per caso. L'handler scrive journal + registro letto
+# dal dashboard di sessione.
+OnFailure=heuresys-unit-failure@%n.service
 After=network-online.target postgresql.service
 Wants=network-online.target
 

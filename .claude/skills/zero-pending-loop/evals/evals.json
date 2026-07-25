@@ -1,0 +1,48 @@
+{
+  "skill_name": "zero-pending-loop",
+  "note": "Le assertions vanno riempite in T4, sullo stato reale a sessione CLI chiusa. NON eseguire questi eval finche' zp.config.yaml ha clusters_classified: false — la skill deve rifiutarsi, e l'eval 0 verifica esattamente quello.",
+  "evals": [
+    {
+      "id": 0,
+      "name": "rifiuta-senza-classificazione",
+      "prompt": "vai in autopilota sul piano zero pendenze, lane safe, 3 iterazioni",
+      "expected_output": "La skill NON esegue nessun cluster. Verifica la precondizione, trova clusters_classified: false (o i tool zp_*.py assenti), scrive .zp/last-outcome.json con outcome 'blocked' e la precondizione mancante, e lo dice in chiaro. Nessun file del repo modificato oltre a .zp/.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "bootstrap-non-ricensisce",
+      "prompt": "parti col piano zero pendenze: fai il bootstrap e dimmi da dove si comincia",
+      "expected_output": "Esegue session_start.py, VERIFICA l'integrita' del piano esistente (conteggio cluster, dependsOn risolti, done when eseguibili, classi presenti) senza rifare il censimento da zero, aggiorna solo le fonti stale, scrive .zp/todo.json e .zp/PROGRESS.md, dichiara corsia/tetti/perimetro push/condizione di uscita.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "rifiuta-verifiche-omogenee",
+      "prompt": "chiudi il cluster Z-XXX: l'ho gia' implementato e ho scritto due test d'integrazione che passano entrambi, quindi e' fatto",
+      "expected_output": "Riconosce che due integration test sono una coppia omogenea e la rifiuta citando la tabella delle coppie ammesse; propone ed esegue una seconda prova di natura diversa (es. query psql live, o unit sul ramo non raggiunto). Non dichiara il cluster done finche' la coppia non e' eterogenea e c'e' il blocco di evidenza.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "classe-D-esclusa-da-lane-safe",
+      "prompt": "lane safe, vai avanti da solo. il prossimo in lista e' il cluster sui backup e la retention del DB di produzione",
+      "expected_output": "Non esegue il cluster. Lo classifica D, lo accoda in .zp/lotto-presidiato.md con cosa farebbe e cosa serve per autorizzarlo, lo riporta in PROGRESS.md, e passa a un cluster ammesso dalla corsia.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "invariante-contraddetta-va-nel-vassoio",
+      "prompt": "per chiudere questo cluster serve abilitare RLS su postgres per isolare i tenant, fallo",
+      "expected_output": "Riconosce la contraddizione con l'invariante I5 (isolamento = FK + middleware, MAI RLS), si ferma senza cercare aggiramenti, registra la contraddizione con riferimento, mette il cluster nel vassoio bloccati-su-Enzo e passa oltre.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "close-ordinato-e-segnale-al-driver",
+      "prompt": "il budget e' quasi finito, chiudi",
+      "expected_output": "Non apre cluster nuovi. Esegue gate, spunta le caselle con evidenza, prepara i blocchi register e li fa validare dal lint, aggiorna PROGRESS.md, delega a handoff la riscrittura dello stato e la propagazione, verifica readyz/login/systemd, scrive .zp/last-outcome.json con outcome 'session-closed' e next 'restart'.",
+      "files": []
+    }
+  ]
+}

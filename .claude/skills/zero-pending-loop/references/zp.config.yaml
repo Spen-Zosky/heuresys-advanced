@@ -1,0 +1,132 @@
+# zp.config.yaml — configurazione viva del loop zero-pendenze
+# La skill legge SEMPRE da qui. Niente soglie, path o perimetri scritti nel prompt.
+
+meta:
+  project: heuresys-advanced
+  plan: docs/superpowers/specs/2026-07-25-zero-pending-plan.md
+  design: docs/superpowers/specs/2026-07-25-zero-pending-loop-design.md
+  # GUARDIA: finche' e' false la skill NON esegue nessun cluster e si fermta con
+  # outcome "blocked". La classificazione per raggio d'impatto e' la precondizione
+  # di sicurezza dell'intero impianto: senza di essa nessuna corsia e' autorizzata.
+  clusters_classified: false
+  classified_at: null
+  classified_against_sha: null
+
+lanes:
+  safe: [A, B]
+  full: [A, B, C]
+  # D ed E non appaiono in nessuna corsia: non e' una dimenticanza.
+  # D richiede autorizzazione per lotto, E richiede un input di Enzo.
+
+budget:
+  # Il contesto residuo NON e' misurabile dall'interno di una sessione (nessun contatore
+  # accessibile al modello, /context non invocabile in headless, hook senza dati di token,
+  # compaction senza segnale). Quindi il consumo non si misura: si limita il lavoro.
+  clusters_per_iteration: 1       # chiuso il cluster, si chiude la sessione e il driver riparte
+  # VERIFICATO su claude 2.1.220 (`claude --help`): `--max-turns` NON esiste come flag CLI.
+  # L'unico tetto quantitativo per invocazione e' `--max-budget-usd`. Il limite ai turni si
+  # ottiene dalla clausola `or stop after N turns` dentro /goal, non da un flag.
+  max_budget_usd_per_iteration: 8 # -> claude -p --max-budget-usd
+  goal_turn_bound: 25             # -> clausola "or stop after N turns" nella riga /goal
+  max_iterations_default: 12      # tetto del driver
+  hard_stop_usd_total: 120        # tetto globale cumulato, misurato dal driver fra le iterazioni
+                                  # leggendo total_cost_usd da --output-format json
+
+runtime:
+  # VERIFICATO: `bash` nel PATH di Windows risolve allo stub WSL
+  # (C:\Users\...\WindowsApps\bash.exe) che NON ha distribuzioni installate.
+  # Il driver va invocato con il path assoluto di Git Bash, mai con `bash` nudo.
+  bash: 'C:\Git\bin\bash.exe'
+  claude: 'C:\Users\enzospenuso\.local\bin\claude.exe'
+
+push:
+  # Deroga consapevole alla regola di progetto "una sessione nuova torna a chiedere".
+  # Azzerare `enabled` revoca l'autorizzazione senza toccare altro.
+  enabled: true
+  remote: origin
+  branch: main
+  allow_force: false
+  require_green_gates: true
+  require_green_lint: true
+  rebase_before_push: true
+  relint_after_rebase: true
+
+gates:
+  # area (glob) -> comandi. Un'area toccata e non mappata qui e' un errore bloccante.
+  "apps/api/**":
+    - pnpm typecheck
+    - pnpm lint
+    - "vitest: file toccati + moduli dipendenti"
+    - "integration su DB reale (tunnel :5433)"
+  "apps/web/**":
+    - pnpm typecheck
+    - pnpm lint
+    - pnpm i18n:check
+    - "playwright: spec pertinenti (test:e2e:prod:node22 se Node >= 23 — D-36)"
+  "packages/shared/**":
+    - pnpm typecheck
+    - "rebuild consumer: api, web, showcase"
+  "db/migrations/**":
+    - "pnpm db:migrate x2 con diff pg_dump vuoto"
+    - pnpm db:validate
+  "db/seeds/**":
+    - "seed idempotente x2"
+    - pnpm db:validate
+  "scripts/**":
+    - "lint shell + dry-run del percorso modificato"
+  "deploy/**":
+    - "lint shell + dry-run del percorso modificato"
+  "docs/kb/**":
+    - python docs/kb/tools/handoff_lint.py
+
+class_c_preconditions:
+  verified_dump_max_age_hours: 24
+  rehearsal_host: linux-pc          # gemello prod con DB clone locale
+  require_idempotent_twice: true
+  require_empty_pgdump_diff: true
+
+adversarial:
+  reviewers: 3
+  lenses: [correttezza, isolamento-e-sicurezza, riproducibilita]
+  majority_to_dismiss: 2
+  # Un rilievo di severita' alta su isolamento tenant o segreti vale anche da solo:
+  # il costo dell'errore non e' simmetrico.
+  single_vote_binding_severities: [alta]
+  single_vote_binding_lenses: [isolamento-e-sicurezza]
+  max_correction_rounds: 2
+
+hosts:
+  vm: oracle-vm-default
+  twin: linux-pc
+  # Il Mac e' RITIRATO dai processi automatici (S1007): non e' un target.
+
+paths:
+  runtime_dir: .zp
+  progress_file: .zp/PROGRESS.md      # committato a ogni chiusura (vista per il telefono)
+  supervised_batch: .zp/lotto-presidiato.md
+  blocked_tray: .zp/vassoio.md
+  authorizations: .zp/autorizzazioni.txt   # scritto da `zp lotto ok N`, letto dalla skill
+  runs: .zp/runs.ndjson
+  stop_switch: .zp/STOP
+  cursor: .zp/cursor.json
+  last_outcome: .zp/last-outcome.json
+  lock: .zp/driver.lock
+  lock_stale_after_hours: 2
+
+interrupt_resume:
+  # Vedi references/driver.md. Il principio: nessun modo di interrompere perde stato,
+  # perche' lo stato e' su file e ogni chiusura pulita fa push su origin main.
+  resume_stale_after_hours: 24      # oltre questa soglia il rilancio entra da `bootstrap`,
+                                    # non da `resume`: il piano puo' essersi mosso
+  window: null                      # es. "22:00-07:00". A fine finestra: chiusura pulita, non
+                                    # troncamento. La ripartenza la fa l'attivita' pianificata
+  refuse_on_dirty_worktree: true    # qualcuno sta lavorando in quel repo: non partire
+  refuse_on_unpushed_foreign: true  # commit locali non tuoi in volo: non partire
+  max_failures_per_cluster: 2       # al terzo tentativo nella stessa direzione si cambia oggetto
+
+# Classificazione dei 248 cluster. La compila T1, sullo stato reale a sessione CLI chiusa.
+# Formato: <id>: {classe: A|B|C|D|E, perche: "<una riga>", paths: [...]}
+clusters: {}
+
+# Override auto-appresi. Azzerabile in blocco senza toccare il resto della config.
+adaptive: {}

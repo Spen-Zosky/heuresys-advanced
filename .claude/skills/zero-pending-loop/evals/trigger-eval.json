@@ -1,0 +1,23 @@
+[
+  {"query": "vai in autopilota sul piano zero pendenze, lane safe, massimo 3 iterazioni e poi ti fermi", "should_trigger": true},
+  {"query": "riprendi il piano da dove eravate rimasti e prendi il prossimo cluster", "should_trigger": true},
+  {"query": "voglio azzerare le pendenze di heuresys-advanced. parti tu, decidi tu le cose tecniche e vai avanti da solo fino a dove riesci", "should_trigger": true},
+  {"query": "prossima ondata", "should_trigger": true},
+  {"query": "continua senza di me, stanotte lascio il pc accesso. domani mattina guardo PROGRESS.md dal telefono", "should_trigger": true},
+  {"query": "/zero-pending-loop resume", "should_trigger": true},
+  {"query": "lavora in autonomia sui cluster di W1 che restano, non chiedermi niente a meno che non sia bloccato su un segreto", "should_trigger": true},
+  {"query": "chiudi tutti i debiti aperti che puoi chiudere da solo, e alla fine dimmi cosa resta bloccato su di me e perche", "should_trigger": true},
+  {"query": "prendi Z-042 e portalo a termine col protocollo completo — doppia verifica di natura diversa e i tre revisori adversarial", "should_trigger": true},
+  {"query": "prima di lanciare il driver fammi vedere cosa farebbe: quali cluster prenderebbe e in che ordine", "should_trigger": true},
+
+  {"query": "chiudi la sessione e allinea i cloni, per stasera ho finito", "should_trigger": false},
+  {"query": "aggiorna l'atlas, voglio capire cosa abbiamo e cosa manca per il performance management", "should_trigger": false},
+  {"query": "fai un audit forense del frontend, sono sicuro che ci sono bug nelle pagine ESS", "should_trigger": false},
+  {"query": "devo presentare il progetto a un investitore la settimana prossima, quanto vale e dove sono i buchi", "should_trigger": false},
+  {"query": "mappami il grafo delle dipendenze fra i moduli api, voglio vedere chi chiama chi", "should_trigger": false},
+  {"query": "consolida la pagina /me/goals nel grafo ruoli-dashboard-pagine, deve comparire nella sidebar del portale", "should_trigger": false},
+  {"query": "prepara un prompt per CLI e spezzalo in fasi con la queue, poi mandaglielo sulla VM", "should_trigger": false},
+  {"query": "sto aprendo la sessione, generami il menu delle azioni", "should_trigger": false},
+  {"query": "quanti debiti aperti ci sono nel DEBT_REGISTER adesso? mi serve solo il numero", "should_trigger": false},
+  {"query": "il debito D-75 nel register, quello dell'alert non chiudibile — spiegami di cosa si tratta e perche il rischio e stato accettato", "should_trigger": false}
+]

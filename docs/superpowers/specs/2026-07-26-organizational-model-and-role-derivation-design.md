@@ -17,8 +17,10 @@ Tutti ri-derivabili con i comandi in §7; nessun numero qui è citato a memoria.
 | Persone con riporti diretti senza ruolo manageriale | 22 su 29 |
 | Titolari del ruolo `MANAGER` che non dirigono nulla | 1 su 6 |
 | `TEAM_LEADER`: lo è nei dati ma non ha il ruolo / ha il ruolo ma non lo è | 5 / 1 |
-| Processi **senza** titolare | 75 su 105 |
-| Processi con **più di un** titolare (max 7) | 17 |
+| Processi (registro) / legami processo-unità | 23 / 105 |
+| Unità titolari per processo — **il modello per unità è SANO** | 23 legami `OWNER`, **0** processi con più di un'unità titolare |
+| Processi **senza persona titolare** | **20 su 23** |
+| Marcature persona-`OWNER` su legami dove l'unità **non** è titolare | **117 su 120** |
 | Tipo unità `BRANCH` (= Filiale) usato da una banca | **0 unità** |
 | Campo per l'inquadramento contrattuale (dirigente / QD / area prof.) | **non esiste** |
 
@@ -93,12 +95,20 @@ manifatturieri); aggiungere i ranghi bancari mancanti.
 - *chiuso quando*: `psql` — ogni unità dei due tenant ha un tipo applicabile al settore del proprio tenant, e la vista di validazione dei tipi non applicabili è vuota
 - ⛔ **input Enzo**: l'elenco dei ranghi bancari reali e quali di essi hanno un manager al vertice
 
-### F1 — Inquadramento contrattuale sulla persona
-Catalogo di riferimento degli inquadramenti (CCNL credito: Dirigente, QD1-QD4, Aree Professionali),
-settoriale come F0, e legame sulla persona/posizione. È il fatto che oggi manca e senza il quale la
-derivazione dei ruoli organizzativi non è calcolabile.
+### F1 — Inquadramento contrattuale sulla persona ✅ *input ricevuto*
+Catalogo di riferimento degli inquadramenti, **settoriale come F0** — e la ricerca conferma che deve
+esserlo, perché le due scale sono incompatibili:
+
+| Tenant | Settore | CCNL | Scala |
+|---|---|---|---|
+| RTL Bank | credito | CCNL ABI | Dirigente · **QD1-QD4** · Aree Professionali |
+| Heuresys System | consulenza direzionale | **CCNL Terziario Distribuzione e Servizi** (Confcommercio) | Dirigente *(CCNL separato)* · **Quadro** · 1°-7° livello |
+
+Un `QD3` non significa nulla per Heuresys, un `1° livello` non significa nulla per RTL Bank: è la
+stessa logica del catalogo unità e delle skill. Nel CCNL Terziario il 1° livello comprende capi
+servizio, analisti sistemisti, responsabili marketing, product manager; i dirigenti stanno fuori.
 - *chiuso quando*: `psql` — ogni utente ACTIVE dei due tenant ha un inquadramento valido per il CCNL del proprio settore; zero righe senza
-- ⛔ **input Enzo**: conferma del CCNL credito come riferimento per RTL Bank, e cosa si applica a Heuresys System
+- residuo: `tenant_industry_code` di Heuresys System è **vuoto**, va valorizzato
 
 ### F2 — Derivazione dei ruoli organizzativi *(dipende da F0, F1)*
 `MANAGER`/`CEO` calcolati da (rango unità × inquadramento del responsabile). La derivazione è una
@@ -106,12 +116,26 @@ funzione, non un'assegnazione a mano. Il ramo `isOrgUnitManager` del resolver sm
 scorciatoia compensativa e diventa **asserzione di coerenza**: se diverge, è un errore che esplode.
 - *chiuso quando*: `vitest` — un test deriva i ruoli attesi dalla struttura e verifica che coincidano con `sys_user_auth_roles`, zero differenze in entrambe le direzioni
 
-### F3 — Ruoli funzionali derivati + titolare unico di processo
+### F3 — Ruoli funzionali derivati + titolare unico di processo ✅ *input ricevuto*
 `TEAM_LEADER`/`TEAM_MEMBER` da `sys_team_members`, `PROCESS_OWNER` da `sys_process_participants`.
-**Vincolo di unicità del titolare** imposto dal database (indice unico parziale), non dalla prosa:
-oggi 17 processi hanno più titolari e 75 non ne hanno.
-- *chiuso quando*: `psql` — indice unico attivo; `INSERT` di un secondo OWNER sullo stesso processo fallisce; zero processi senza titolare
-- ⛔ **input Enzo**: chi è il titolare dei 75 processi scoperti, o la regola per dedurlo
+
+**Regola (Enzo, 2026-07-26): un titolare PER PROCESSO. Le altre istanze sono partecipazioni.**
+Il modello *per unità* la rispetta già: 23 processi, 23 unità titolari, zero doppioni, e i restanti
+82 legami sono `CONTRIBUTOR`/`CONSULTED`/`INFORMED` — un RACI corretto. Il difetto è tutto al livello
+**persona**: solo 3 delle 120 marcature `OWNER` stanno sul legame la cui unità è davvero titolare;
+le altre 117 stanno su legami di sola partecipazione, e 20 processi su 23 restano senza titolare.
+
+Quindi la riparazione **non richiede di indovinare nomi**: il titolare di un processo è il
+responsabile dell'unità che lo possiede — le 18 unità che ospitano processi hanno tutte un
+responsabile. Cinque titolarità sono però **imposte dalla vigilanza** (Circolare 285 Banca d'Italia,
+funzioni aziendali di controllo) e vanno verificate contro la funzione, non solo dedotte:
+`02` KYC/AML → Antiriciclaggio · `10` → Risk Management · `11` → Compliance · `12` → Internal Audit
+(terzo livello) · `16` → ICT e sicurezza.
+
+**Vincolo di indipendenza**: il titolare dell'audit interno non può coincidere con quello di rischio
+o conformità, né possedere processi che poi audita. È l'unico caso in cui la deduzione dall'unità va
+bloccata se produce sovrapposizione.
+- *chiuso quando*: `psql` — indice unico parziale attivo (un solo `OWNER`-persona per processo); `INSERT` di un secondo titolare fallisce; zero processi senza titolare; zero marcature `OWNER` su legami di sola partecipazione; il controllo di indipendenza dell'audit è vuoto
 
 ### F4 — Guardie di non-regressione *(dopo ogni fase)*
 Viste di validazione accanto alle sette esistenti, eseguite da `db:validate`: responsabile senza ruolo

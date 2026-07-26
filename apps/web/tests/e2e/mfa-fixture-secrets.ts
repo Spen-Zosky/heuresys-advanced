@@ -1,22 +1,45 @@
 /**
  * apps/web/tests/e2e/mfa-fixture-secrets.ts
- * S983 WS-E — web-side COPY of the fixture TOTP secrets (the API-side single
- * source is apps/api/test/helpers/mfa-fixture-secrets.ts; Playwright cannot
- * import across the workspace boundary cleanly). A parity test in the API
- * suite (mfa-fixture-parity.test.ts) asserts the two maps never drift.
- * Demo-grade TEST FIXTURES, not secrets — committed by design.
+ * Segreti TOTP lato web (Playwright).
+ *
+ * Z-262 (2026-07-26) — QUESTO FILE NON CONTIENE PIÙ VALORI. Prima ne conteneva
+ * sette in chiaro, gemelli di quelli lato API, e il repository è pubblico: erano
+ * scaricabili da chiunque senza autenticazione, e a quei segreti corrispondevano
+ * fattori MFA attivi in produzione.
+ *
+ * Ora il segreto si deriva dalla chiave madre (.secrets/dev-access-master.key,
+ * gitignored). Playwright non può importare attraverso il confine di workspace
+ * con un import di pacchetto, ma può farlo con un percorso relativo esplicito
+ * verso un modulo .mjs: così la derivazione resta UNA SOLA implementazione,
+ * invece di una copia da tenere allineata a mano.
  */
+import { readMaster, deriveTotpSecret } from "../../../api/scripts/derive-access.mjs";
 
-export const E2E_FIXTURE_LABEL = "e2e-fixture";
+/** Etichetta dei fattori creati dal provisioning derivato (Z-262). */
+export const E2E_FIXTURE_LABEL = "derived-access";
 
-export const FIXTURE_TOTP_SECRETS: Record<string, string> = {
-  "admin@heuresys.com":               "E2EFIXADMIN2HEURESYS2TOTP2AAAAAA",
-  "federica.marchetti@rtl-bank.org":  "E2EFIXFEDERICA2RTL2TOTP2BBBBBBBB",
-  "paolo.caputo@rtl-bank.org":        "E2EFIXPAOLO2RTL2TOTP2CCCCCCCCCCC",
-  "tommaso.fiore@rtl-bank.org":       "E2EFIXTOMMASO2RTL2TOTP2DDDDDDDDD",
-  "antonio.parisi@rtl-bank.org":      "E2EFIXANTONIO2RTL2TOTP2EEEEEEEEE",
-  "marco.rinaldi@rtl-bank.org":       "E2EFIXMARCO2RTL2TOTP2FFFFFFFFFFF",
-  // #51 E1 (S1026): whistleblowing custodian (mig 000205), needed for the
-  // whistleblowing-console E2E spec's "custodian" persona.
-  "andrea.martino@rtl-bank.org":      "E2EFIXANDREA2RTL2TOTP2GGGGGGGGGG",
-};
+let masterCache: Buffer | null = null;
+function master(): Buffer {
+  masterCache ??= readMaster();
+  return masterCache;
+}
+
+/** Il segreto TOTP di QUALUNQUE utente impersonabile, ricalcolato al momento. */
+export function totpSecretFor(email: string): string {
+  return deriveTotpSecret(master(), email);
+}
+
+/** La password di QUALUNQUE utente impersonabile, ricalcolata al momento. */
+export { derivePassword } from "../../../api/scripts/derive-access.mjs";
+
+/**
+ * @deprecated Z-262 — i segreti non sono più una tabella di valori. Resta per i
+ * chiamanti non ancora migrati; nel codice nuovo usa `totpSecretFor(email)`.
+ */
+export const FIXTURE_TOTP_SECRETS: Record<string, string> = new Proxy(
+  {},
+  {
+    get: (_t, prop: string) => (typeof prop === "string" ? totpSecretFor(prop) : undefined),
+    has: () => true,
+  },
+) as Record<string, string>;

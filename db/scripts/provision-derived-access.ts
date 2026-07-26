@@ -13,7 +13,7 @@
  * (nslookup → Non-existent domain), quindi 158 indirizzi su 162 non sono
  * recapitabili. L'invito non è una strada, non un'alternativa più lenta.
  *
- * NON tocca i domini di persone reali (REAL_PERSON_DOMAINS): le loro password
+ * NON tocca i domini di persone reali (REAL_PERSON_EMAILS): le loro password
  * le scelgono loro. Decisione di Enzo, S1032.
  *
  * Idempotente: ri-eseguibile: crea ciò che manca, riallinea ciò che c'è.
@@ -30,7 +30,7 @@ import {
   derivePassword,
   deriveTotpSecret,
   isRealPerson,
-  REAL_PERSON_DOMAINS,
+  REAL_PERSON_EMAILS,
 } from "../../apps/api/scripts/derive-access.mjs";
 import { encryptSecret } from "../../apps/api/src/modules/auth/secret-crypto.js";
 
@@ -48,6 +48,10 @@ const ARGON2_PARAMS = {
 
 const FIXTURE_LABEL = "derived-access";
 const DRY = process.argv.includes("--dry-run");
+/** Riscrive la password anche di chi ne ha gia' una. Serve per i 13 utenti
+ *  preesistenti, la cui credenziale veniva da TEST_ADMIN_PASSWORD: senza questo
+ *  i test che derivano la password fallirebbero proprio sulle vecchie personas. */
+const REALIGN = process.argv.includes("--realign");
 
 interface Row {
   user_id: string;
@@ -121,11 +125,17 @@ async function main(): Promise<void> {
             WHERE auth_credential_identity_id = $1 AND auth_credential_is_current`,
           [identityId],
         );
-        if (cred.rows[0]!.n === "0") {
+        if (cred.rows[0]!.n === "0" || REALIGN) {
           stats.credenziali++;
           touched = true;
           if (!DRY) {
             const hash = await argon2.hash(password, ARGON2_PARAMS);
+            // La credenziale corrente e' UNA: le precedenti restano come storia.
+            await db.query(
+              `UPDATE sys.sys_auth_credentials SET auth_credential_is_current = false, rotated_at = now()
+                WHERE auth_credential_identity_id = $1 AND auth_credential_is_current`,
+              [identityId],
+            );
             await db.query(
               `INSERT INTO sys.sys_auth_credentials
                  (auth_credential_identity_id, auth_credential_algorithm, auth_credential_hash,
@@ -169,7 +179,7 @@ async function main(): Promise<void> {
   console.log(`
 ${mode}
   utenti ACTIVE esaminati ....... ${stats.visti}
-  esclusi (persone reali) ....... ${stats.esclusi}   [${REAL_PERSON_DOMAINS.join(", ")}]
+  esclusi (persone reali) ....... ${stats.esclusi}   [${REAL_PERSON_EMAILS.join(", ")}]
   identita' create .............. ${stats.identita}
   credenziali create ............ ${stats.credenziali}
   fattori TOTP creati ........... ${stats.fattori}

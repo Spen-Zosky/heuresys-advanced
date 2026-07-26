@@ -19,6 +19,7 @@
 import * as OTPAuth from "otpauth";
 import type { Pool } from "pg";
 import { E2E_FIXTURE_LABEL, FIXTURE_TOTP_SECRETS } from "./mfa-fixture-secrets.js";
+import { passwordFor, TEST_PERSONA_PASSWORD } from "./personas.js";
 
 /** Anything with a Fastify-style inject() (the TestApp's instance). */
 interface Injectable {
@@ -58,9 +59,18 @@ export function totpFor(email: string): string {
 export async function loginRaw<A extends Injectable>(
   app: A,
   email: string,
-  password: string,
+  // Z-262: la password non è più UNA condivisa da variabile d'ambiente. Se il
+  // chiamante non la passa, si deriva DALL'EMAIL — è ciò che permette ai 161
+  // file che passano di qui di impersonare qualunque utente senza cambiare una
+  // riga. Passarne una esplicita resta possibile (test di password errata).
+  password?: string,
 ): Promise<Awaited<ReturnType<A["inject"]>>> {
-  const r1 = await app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password } });
+  // Z-262: assente o segnaposto → si deriva dall'email dell'utente che stiamo
+  // autenticando. Una password esplicita e diversa passa invariata: i test che
+  // verificano il RIFIUTO di una password sbagliata devono continuare a farlo.
+  const pw =
+    password === undefined || password === TEST_PERSONA_PASSWORD ? passwordFor(email) : password;
+  const r1 = await app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password: pw } });
   if (r1.statusCode !== 200) throw new Error(`login ${email}: ${r1.statusCode}`);
   const b1 = r1.json() as { status?: string; challengeToken?: string };
   if (b1.status === "success" || b1.status === undefined) {
@@ -70,7 +80,7 @@ export async function loginRaw<A extends Injectable>(
     const r2 = await app.inject({
       method: "POST",
       url: "/v1/auth/login",
-      payload: { email, password, challengeToken: b1.challengeToken, mfaCode: totpFor(email) },
+      payload: { email, password: pw, challengeToken: b1.challengeToken, mfaCode: totpFor(email) },
     });
     const b2 = r2.json() as { status?: string };
     if (r2.statusCode !== 200 || b2.status !== "success") {

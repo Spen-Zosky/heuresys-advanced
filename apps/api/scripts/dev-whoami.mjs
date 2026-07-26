@@ -19,7 +19,7 @@
  */
 import { join } from "node:path";
 import * as OTPAuth from "otpauth";
-import { REPO, REAL_PERSON_DOMAINS, isRealPerson, readMaster, derivePassword, deriveTotpSecret } from "./derive-access.mjs";
+import { REPO, REAL_PERSON_EMAILS, isRealPerson, readMaster, derivePassword, deriveTotpSecret } from "./derive-access.mjs";
 import pg from "pg";
 import dotenv from "dotenv";
 
@@ -96,7 +96,7 @@ function render(row, email, password, totp, firstTime) {
     else {
       lines.push(`${pad("Password")}<scelta dalla persona — non derivabile>`);
       lines.push("");
-      lines.push(`Questo indirizzo appartiene a una persona reale (${REAL_PERSON_DOMAINS.join(", ")}).`);
+      lines.push(`Questo indirizzo appartiene a una persona reale (${REAL_PERSON_EMAILS.join(", ")}).`);
       lines.push(`La sua password non e' derivata dalla chiave madre by design: nessuno,`);
       lines.push(`nemmeno chi ha la chiave, deve poter entrare al posto suo.`);
     }

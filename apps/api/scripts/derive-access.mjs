@@ -13,13 +13,22 @@ import { dirname, join } from "node:path";
 export const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 export const MASTER_PATH = join(REPO, ".secrets", "dev-access-master.key");
 
-/** Domini le cui persone sono REALI: password scelte da loro, mai derivate
- *  (decisione di Enzo, S1032). Nessuno, nemmeno chi ha la chiave madre, deve
- *  poter entrare al posto loro. */
-export const REAL_PERSON_DOMAINS = ["heuresys.com"];
+/** Le PERSONE FISICHE: password scelte da loro, mai derivate (decisione di
+ *  Enzo, S1032). Nessuno, nemmeno chi ha la chiave madre, deve poter entrare
+ *  al posto loro.
+ *
+ *  L'elenco e' per indirizzo e non per dominio: `admin@heuresys.com` sta sullo
+ *  stesso dominio ma NON e' una persona — e' l'account di servizio da cui
+ *  passano 133 file fra test e script. Escluderlo lo lascerebbe senza secondo
+ *  fattore nel momento in cui si rimuovono quelli con i segreti pubblicati. */
+export const REAL_PERSON_EMAILS = [
+  "enzo.spenuso@heuresys.com",
+  "chiara.spenuso@heuresys.com",
+  "andrea.spenuso@heuresys.com",
+];
 
 export function isRealPerson(email) {
-  return REAL_PERSON_DOMAINS.includes(email.split("@")[1]?.toLowerCase() ?? "");
+  return REAL_PERSON_EMAILS.includes(email.toLowerCase());
 }
 
 const B32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";

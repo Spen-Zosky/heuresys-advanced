@@ -17,67 +17,12 @@
  * ripetono: tre copie della stessa crittografia divergono, e il giorno in cui
  * divergono producono password che il server rifiuta senza spiegare perche'.
  */
-import { createHmac } from "node:crypto";
-import { readFileSync, existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import * as OTPAuth from "otpauth";
+import { REPO, REAL_PERSON_DOMAINS, isRealPerson, readMaster, derivePassword, deriveTotpSecret } from "./derive-access.mjs";
 import pg from "pg";
 import dotenv from "dotenv";
 
-const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
-const MASTER_PATH = join(REPO, ".secrets", "dev-access-master.key");
-
-/** Domini le cui persone sono REALI: password scelte da loro, mai derivate. */
-const REAL_PERSON_DOMAINS = ["heuresys.com"];
-
-const B32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-function toBase32(buf) {
-  let bits = 0, value = 0, out = "";
-  for (const byte of buf) {
-    value = (value << 8) | byte;
-    bits += 8;
-    while (bits >= 5) {
-      out += B32[(value >>> (bits - 5)) & 31];
-      bits -= 5;
-    }
-  }
-  if (bits > 0) out += B32[(value << (5 - bits)) & 31];
-  return out;
-}
-
-function readMaster() {
-  if (!existsSync(MASTER_PATH)) {
-    console.error(
-      `\nChiave madre assente: .secrets/dev-access-master.key\n\n` +
-        `Non e' un errore da aggirare: senza quella chiave nessuna credenziale e'\n` +
-        `derivabile, ed e' esattamente cio' che deve succedere su una macchina che\n` +
-        `non deve poter entrare come chiunque.\n\n` +
-        `Se questa macchina DEVE averla, arriva dagli script di allineamento\n` +
-        `(scripts/sync-gitignored-to-vm.sh, scripts/align-clones.sh) — non si\n` +
-        `rigenera, altrimenti tutte le password cambiano.\n`,
-    );
-    process.exit(2);
-  }
-  const raw = readFileSync(MASTER_PATH);
-  if (raw.length < 32) {
-    console.error("Chiave madre troppo corta (<32 byte): rifiuto di derivare da un segreto debole.");
-    process.exit(2);
-  }
-  return raw;
-}
-
-/** Password leggibile: 20 caratteri base32 in gruppi di 4. ~100 bit di entropia. */
-export function derivePassword(master, email) {
-  const h = createHmac("sha256", master).update(`pwd:v1:${email.toLowerCase()}`).digest();
-  return (toBase32(h.subarray(0, 13)).slice(0, 20).match(/.{1,4}/g) ?? []).join("-");
-}
-
-/** Segreto TOTP standard: 160 bit, base32, come lo vuole qualunque authenticator. */
-export function deriveTotpSecret(master, email) {
-  const h = createHmac("sha256", master).update(`totp:v1:${email.toLowerCase()}`).digest();
-  return toBase32(h.subarray(0, 20));
-}
 
 function totpNow(secretB32) {
   const totp = new OTPAuth.TOTP({
@@ -177,9 +122,18 @@ async function main() {
     process.exit(3);
   }
 
-  const domain = email.split("@")[1]?.toLowerCase() ?? "";
-  const isRealPerson = REAL_PERSON_DOMAINS.includes(domain);
-  const master = isRealPerson ? null : readMaster();
+    const realPerson = isRealPerson(email);
+  let master = null;
+  if (!realPerson) {
+    try {
+      master = readMaster();
+    } catch (e) {
+      console.error(`
+${e instanceof Error ? e.message : String(e)}
+`);
+      process.exit(2);
+    }
+  }
   const password = master ? derivePassword(master, email) : null;
   const secret = master ? deriveTotpSecret(master, email) : null;
 

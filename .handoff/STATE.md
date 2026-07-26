@@ -41,8 +41,14 @@ Piani operativi nuovi: `2026-07-26-z261-mfa-fixture-secret-rotation.md` (superat
    stati eliminati perché `mfa-enroll-confirm` resta rosso: manipola i fattori di `paolo.caputo` e
    li ripristina nella forma vecchia. Sistemare quel file, poi eliminarli (serve il via di Enzo:
    il sistema blocca le cancellazioni su produzione). **È l'unica cosa aperta verso l'esterno.**
-2. **Chiave madre non ancora su VM e linux-pc.** Finché `align-clones` non l'ha propagata, i test
-   là non partono: cercano `.secrets/dev-access-master.key`.
+2. **CI ROSSA e deploy BLOCCATO** (`Playwright smoke` + `Test (api integration)`). Il gate
+   `DEPLOY_REQUIRE_CI` ha correttamente impedito il deploy su PROD: **la VM è ferma al commit
+   precedente**. Causa accertata: il database della CI su linux-pc (`heuresys_ci`) **non ha le
+   credenziali derivate** — il provisioning è stato fatto sulla produzione, e quel DB non è
+   rinfrescato da nessun timer (è `Z-253`). La chiave madre è stata propagata a mano su linux-pc
+   (presente, 600) e c'era già sulla VM. **Prossimo passo**: rigenerare `heuresys_ci` dalla PROD
+   (`db/scripts/setup-ci-database.sh`, attenzione: fa `dropdb --force`, mai a job in corso),
+   poi rilanciare la CI e ripetere `close-propagate --auto-deploy`.
 3. **`Z-259` da riprendere** con i 16 rilievi in `.zp/prove/Z-259-verdetti-adversarial.json`: la
    proiezione deve guardare dentro i valori annidati, e il test deve girare su più soggetti — con
    uno solo era verde su un export bucato.

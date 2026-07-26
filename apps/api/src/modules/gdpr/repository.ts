@@ -30,6 +30,7 @@ interface RawMapRow {
   gdpr_map_subject_fk: string;
   gdpr_map_data_class: GdprDataMapEntry["dataClass"];
   gdpr_map_erasure_strategy: GdprDataMapEntry["erasureStrategy"];
+  gdpr_map_reference_kind: GdprDataMapEntry["referenceKind"];
   gdpr_map_retention_days: number | null;
   gdpr_map_age_column: string | null;
   gdpr_map_legal_basis: string | null;
@@ -38,7 +39,7 @@ interface RawMapRow {
 export async function listDataMap(q: DbConnector): Promise<GdprDataMapEntry[]> {
   const res = await q.query<RawMapRow>(
     `SELECT gdpr_map_table_schema, gdpr_map_table_name, gdpr_map_subject_fk,
-            gdpr_map_data_class, gdpr_map_erasure_strategy,
+            gdpr_map_data_class, gdpr_map_erasure_strategy, gdpr_map_reference_kind,
             gdpr_map_retention_days, gdpr_map_age_column, gdpr_map_legal_basis
        FROM sys.sys_gdpr_data_map
       ORDER BY gdpr_map_table_name, gdpr_map_subject_fk`,
@@ -49,10 +50,48 @@ export async function listDataMap(q: DbConnector): Promise<GdprDataMapEntry[]> {
     subjectFkColumn: r.gdpr_map_subject_fk,
     dataClass: r.gdpr_map_data_class,
     erasureStrategy: r.gdpr_map_erasure_strategy,
+    referenceKind: r.gdpr_map_reference_kind,
     retentionDays: r.gdpr_map_retention_days,
     ageColumn: r.gdpr_map_age_column,
     legalBasis: r.gdpr_map_legal_basis,
   }));
+}
+
+/** Z-259 — every person id in the system. The export needs it because the fk
+ *  graph is NOT a complete account of which columns name a person: some carry a
+ *  user id with no foreign key declared at all (measured: sys_user_skills.
+ *  created_by leaked past the structural projection precisely this way). Values
+ *  are the only source that has no blind spot here. */
+async function allPersonIds(q: DbConnector): Promise<Set<string>> {
+  const res = await q.query<{ user_id: string }>(`SELECT user_id FROM sys.sys_users`);
+  return new Set(res.rows.map((r) => r.user_id));
+}
+
+/** Z-259 — every column that points at ANOTHER person, per table, derived LIVE
+ *  from the fk graph (never a name pattern: that is anti-pattern AP-03).
+ *  Keyed "schema.table" → set of column names referencing sys_users.
+ *  Structural half of the projection: it withholds a person-column even when
+ *  its value is NULL, keeping the bundle's shape uniform. */
+async function personColumnsByTable(q: DbConnector): Promise<Map<string, Set<string>>> {
+  const res = await q.query<{ tbl: string; col: string }>(
+    `SELECT n.nspname || '.' || c.relname AS tbl, a.attname AS col
+       FROM pg_constraint k
+       JOIN pg_class c ON c.oid = k.conrelid
+       JOIN pg_namespace n ON n.oid = c.relnamespace
+       JOIN LATERAL unnest(k.conkey) ck ON true
+       JOIN pg_attribute a ON a.attrelid = k.conrelid AND a.attnum = ck
+      WHERE k.contype = 'f' AND k.confrelid = 'sys.sys_users'::regclass`,
+  );
+  const out = new Map<string, Set<string>>();
+  for (const r of res.rows) {
+    let s = out.get(r.tbl);
+    if (!s) {
+      s = new Set<string>();
+      out.set(r.tbl, s);
+    }
+    s.add(r.col);
+  }
+  return out;
 }
 
 /** Registry rows whose (schema, table, columns) all exist in information_schema.
@@ -88,16 +127,41 @@ export interface ExportedTable {
   subjectFkColumn: string;
   rowCount: number;
   rows: Record<string, unknown>[];
+  /** Columns withheld because they identify another person (Art. 15(4)). */
+  omittedColumns?: string[];
 }
 
-/** Art. 15/20 export: every registry table, SELECT * WHERE subject = $1. */
+/** Art. 15/20 export: every registry table, SELECT * WHERE subject = $1.
+ *
+ *  Z-259 — two distinct guards keep third parties out of the bundle, because
+ *  "the requester appears in this row" and "this row is about the requester"
+ *  are not the same statement:
+ *
+ *  (a) SELECTION. Registry rows marked ACTOR are skipped entirely: there the
+ *      person is the author of someone else's record. Measured before the fix:
+ *      a plain USER got 8 whole 360-feedback rows about 8 different colleagues,
+ *      plus 4 continuous-feedback rows, simply by asking for their own data.
+ *
+ *  (b) PROJECTION. Even a legitimately-exported row may carry OTHER columns
+ *      pointing at sys_users, and those name a third party. The 360 case is the
+ *      sharp one: exporting a review to its subject would disclose WHO wrote
+ *      it, defeating reviewer confidentiality. Such columns are dropped from
+ *      the payload and listed in `omittedColumns`, so the withholding is
+ *      declared to the data subject rather than silent.
+ *
+ *  The set of person-columns is derived from the fk graph, never from a naming
+ *  convention — a name-anchored predicate is exactly what made the coverage
+ *  gate blind (AP-03). */
 export async function exportSubjectData(
   q: DbConnector,
   entries: GdprDataMapEntry[],
   userId: string,
 ): Promise<Record<string, ExportedTable>> {
   const out: Record<string, ExportedTable> = {};
+  const personCols = await personColumnsByTable(q);
+  const personIds = await allPersonIds(q);
   for (const e of entries) {
+    if (e.referenceKind === "ACTOR") continue; // (a) not the subject's data
     const schema = assertSafeIdent(e.tableSchema);
     const table = assertSafeIdent(e.tableName);
     const col = assertSafeIdent(e.subjectFkColumn);
@@ -105,11 +169,32 @@ export async function exportSubjectData(
       `SELECT * FROM "${schema}"."${table}" WHERE "${col}" = $1`,
       [userId],
     );
+    // (b) projection, in two layers because neither alone is complete:
+    //   structural — every fk-to-person column of this table bar the one we
+    //   selected on, withheld even when NULL so the shape stays uniform;
+    //   by value  — any cell holding SOMEONE ELSE's user id, which catches the
+    //   columns that carry a person without declaring a foreign key.
+    const structural = [...(personCols.get(`${schema}.${table}`) ?? [])].filter((c) => c !== col);
+    const omitted = new Set<string>(structural);
+    const rows = res.rows.map((r) => {
+      const copy: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(r)) {
+        if (structural.includes(k)) continue;
+        if (typeof v === "string" && v !== userId && personIds.has(v)) {
+          omitted.add(k);
+          continue;
+        }
+        copy[k] = v;
+      }
+      return copy;
+    });
+    const omit = [...omitted].sort();
     out[entryKey(e)] = {
       dataClass: e.dataClass,
       subjectFkColumn: e.subjectFkColumn,
       rowCount: res.rowCount ?? res.rows.length,
-      rows: res.rows,
+      rows,
+      ...(omit.length > 0 ? { omittedColumns: omit } : {}),
     };
   }
   return out;

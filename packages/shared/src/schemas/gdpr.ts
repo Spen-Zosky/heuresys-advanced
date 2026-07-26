@@ -27,12 +27,21 @@ export type GdprDataClass = z.infer<typeof GdprDataClassEnum>;
 export const GdprErasureStrategyEnum = z.enum(["DELETE", "ANONYMIZE", "RETAIN"]);
 export type GdprErasureStrategy = z.infer<typeof GdprErasureStrategyEnum>;
 
+/** Z-259 — SUBJECT: the row holds data OF the person, and belongs in the Art. 15
+ *  export. ACTOR: the person is the author/reviewer of someone ELSE's record —
+ *  the row describes a third party and is withheld (Art. 15(4)). Held as data in
+ *  sys_gdpr_data_map, as an explicit closed list: deriving it from a naming
+ *  convention is the anti-pattern that blinded the coverage gate (AP-03). */
+export const GdprReferenceKindEnum = z.enum(["SUBJECT", "ACTOR"]);
+export type GdprReferenceKind = z.infer<typeof GdprReferenceKindEnum>;
+
 export const GdprDataMapEntrySchema = z.object({
   tableSchema: z.string(),
   tableName: z.string(),
   subjectFkColumn: z.string(),
   dataClass: GdprDataClassEnum,
   erasureStrategy: GdprErasureStrategyEnum,
+  referenceKind: GdprReferenceKindEnum,
   retentionDays: z.number().int().positive().nullable(),
   ageColumn: z.string().nullable(),
   legalBasis: z.string().nullable(),
@@ -54,6 +63,9 @@ const GdprExportTableSchema = z.object({
   subjectFkColumn: z.string(),
   rowCount: z.number().int(),
   rows: z.array(z.record(z.string(), z.unknown())),
+  /** Columns withheld from `rows` because they identify another person
+   *  (Art. 15(4)) — declared to the subject rather than silently dropped. */
+  omittedColumns: z.array(z.string()).optional(),
 });
 
 export const GdprExportBundleSchema = z.object({

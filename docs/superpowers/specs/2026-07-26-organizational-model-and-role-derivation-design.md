@@ -22,7 +22,8 @@ Tutti ri-derivabili con i comandi in §7; nessun numero qui è citato a memoria.
 | Processi **senza persona titolare** | **20 su 23** |
 | Marcature persona-`OWNER` su legami dove l'unità **non** è titolare | **117 su 120** |
 | Tipo unità `BRANCH` (= Filiale) usato da una banca | **0 unità** |
-| Campo per l'inquadramento contrattuale (dirigente / QD / area prof.) | **non esiste** |
+| Campo per l'inquadramento contrattuale (dirigente / QD / area prof.) | ~~non esiste~~ → **esiste ed è popolato**: `sys_user_contracts`, 160/162 utenti attivi (rettifica, §F1) |
+| Dirigenti che sono vertici di unità / che portano un ruolo RBAC manageriale | **9 su 10** / **5 su 9** |
 
 Il difetto comune: **ogni fatto organizzativo è dichiarato due volte** — una nella struttura, una nel
 ruolo RBAC — e niente obbliga le due dichiarazioni ad accordarsi. Da lì nascono sia la divergenza di
@@ -95,9 +96,33 @@ manifatturieri); aggiungere i ranghi bancari mancanti.
 - *chiuso quando*: `psql` — ogni unità dei due tenant ha un tipo applicabile al settore del proprio tenant, e la vista di validazione dei tipi non applicabili è vuota
 - ⛔ **input Enzo**: l'elenco dei ranghi bancari reali e quali di essi hanno un manager al vertice
 
-### F1 — Inquadramento contrattuale sulla persona ✅ *input ricevuto*
-Catalogo di riferimento degli inquadramenti, **settoriale come F0** — e la ricerca conferma che deve
-esserlo, perché le due scale sono incompatibili:
+### F1 — Inquadramento contrattuale sulla persona — **RIDIMENSIONATA: il dato ESISTE GIÀ**
+
+> **Rettifica 2026-07-26.** Questa fase nasceva dall'affermazione «l'inquadramento non esiste da
+> nessuna parte». **Era falsa**: la ricerca aveva guardato `sys_users`, `sys_positions`,
+> `sys_organization_units`, `sys_job_roles` — e non i **satelliti persona**. Il dato sta in
+> `sys.sys_user_contracts` (`user_contract_ccnl_type`, `user_contract_ccnl_level`), **160 righe su
+> 162 utenti attivi**, con le scale giuste e coerenti col settore del tenant:
+>
+> | Tenant | CCNL registrato | Livelli |
+> |---|---|---|
+> | RTL Bank (158) | `CCNL Credito 2024` | Dirigente 9 · QD4 5 · QD3 18 · 3A1L-3A4L 126 |
+> | Heuresys System (2) | `CCNL Commercio` | Dirigente 1 · Quadro 1 |
+>
+> Coincide con quanto la ricerca web indicava come corretto. Senza contratto restano **2 utenti**,
+> entrambi account di piattaforma di Heuresys System (`admin@`, `enzo.spenuso@`), non dipendenti.
+>
+> **E il dato è coerente con la struttura**: 9 Dirigenti su 10 sono vertici di unità organizzativa.
+> A non seguire è di nuovo lo strato RBAC — di quei 9, solo **5** portano un ruolo manageriale.
+> Quindi la derivazione di F2 è **già calcolabile oggi**: `Dirigente` + vertice di unità → `MANAGER`.
+
+Resta di questa fase, molto ridotto: **promuovere il dato a catalogo di riferimento settoriale** —
+oggi `ccnl_type`/`ccnl_level` sono testo libero sul satellite, senza catalogo né vincolo, quindi
+niente impedisce a un `QD3` di comparire su un tenant che applica il CCNL Commercio.
+- *chiuso quando*: `psql` — i due campi puntano a un catalogo, esiste il vincolo che lega la scala al settore del tenant, e zero righe violano
+- residuo: `tenant_industry_code` di Heuresys System è **vuoto**, va valorizzato
+
+**Scale di riferimento (dalla ricerca, per il catalogo):**
 
 | Tenant | Settore | CCNL | Scala |
 |---|---|---|---|

@@ -104,6 +104,19 @@
   - priority: P1 · effort: ~4h · doc: docs/kb/SOT_STATE.md §"Delta S1009"
   - note: ✅ DONE S1009 — richiesta diretta Enzo. 3 prospettive PET → **5 sezioni** collassabili (Panoramica/Governance/Forza lavoro/Intelligence/Area personale, mig **000163**); **Dashboard prima** (req 1); **lingua IT/EN nell'header** persistita su `sys_user_preferences`, ereditabile come il tema (req 2); **selettore prospettiva ritirato** (req 3, stato gruppi in localStorage); **6 voci-merge con TabNav** (`section-tabs.tsx`, 9 pagine `is_active=false` route-vive) — merge=navigazione per decisione Enzo; rinomine (Analisi Organizzativa/Skill/Obiettivi/OKR) + `/content`→Intelligence. Gate typecheck 5/5 + me-interfaces 5/5 + a11y E2E 40 + **CI 7/7** + deploy VM verde + **verifica LIVE www** (login `admin@`: 5 sezioni in ordine, dashboard prima, lingua persiste it→en, TabNav 6 tab). Intoppo CHECK-idempotenza-chain risolto → **D-46**.
 
+### Z-261 · esposizione MFA in repository pubblico
+- status: ACTIVE
+- priorita: P1
+- note: **S1032** — il repo e' PUBBLICO e pubblicava 7 segreti TOTP corrispondenti ad altrettanti fattori ATTIVI in produzione (PLATFORM_ADMIN, TENANT_ADMIN/CEO, custode whistleblowing). I segreti sono usciti dai due file `mfa-fixture-secrets.ts` (ora derivano dalla chiave madre gitignored) e il parity test fallisce se qualcuno li reintroduce. **Ma i 7 fattori `e2e-fixture` sono ANCORA ATTIVI**: non eliminabili finche' `mfa-enroll-confirm.integration.test.ts` resta rosso. Backup in `.secrets/backup-fattori-e2e-fixture-20260726.txt`.
+- chiuso-quando: zero fattori con label `e2e-fixture` in produzione e suite auth verde
+
+### Z-262 · accesso derivato per tutti gli utenti
+- status: ACTIVE
+- priorita: P2
+- note: **S1032 passi 1-4 ESEGUITI** — 158 utenti su 158 con identita', password e secondo fattore derivati da `.secrets/dev-access-master.key`; login reale provato col caso negativo; `pnpm dev:whoami` + `pnpm db:provision-access`; `.secrets/accessi.csv`. **Residuo**: `mfa-enroll-confirm` rosso · chiave madre da propagare a VM e linux-pc (senza, la CI non parte) · ritiro delle costanti-persona a favore di interrogazioni al DB.
+- chiuso-quando: suite auth verde, chiave madre presente su VM e linux-pc, nessuna costante-persona nei test di scope
+
+
 ### Serie A+B (S1016 — selezione Enzo "procedi con B + A", dossier `docs/product/DEVELOPMENT_LINES_{A,B}_*.md`)
 
 - **#25 A/L5 — ponte posizione→learning (accende `positions/[id]/learning`)** · status: DONE

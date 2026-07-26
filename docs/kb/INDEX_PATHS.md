@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-26T04:31:21Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2589**
+**Generato**: 2026-07-26T21:07:25Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2600**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,16 +13,16 @@
 | api-module | 318 |
 | ci | 17 |
 | claude-config | 30 |
-| config | 110 |
+| config | 117 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 213 |
+| db-migration | 214 |
 | db-other | 8 |
-| db-script | 35 |
+| db-script | 36 |
 | db-seed | 115 |
-| doc-canonical | 508 |
+| doc-canonical | 510 |
 | handoff-state | 1 |
 | qa-artifact | 103 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 307 |
 | ux-design-archive | 80 |
 | web-source | 207 |
-| **TOTALE** | **2589** |
+| **TOTALE** | **2600** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 497 |
 | external-archive | 50 |
-| live | 2042 |
+| live | 2053 |
 
 ## File per categoria
 
@@ -517,6 +517,11 @@
 - `D:\heuresys-advanced\apps\agent-gateway\tsconfig.json` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\agent-gateway\vitest.config.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\package.json` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\derive-access.d.mts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\derive-access.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\dev-whoami.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\export-accessi-csv.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\scripts\verify-derived-login.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\tsconfig.json` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\tsconfig.test.json` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\tsup.config.ts` · *live* · git-tracked
@@ -570,6 +575,8 @@
 - `D:\heuresys-advanced\scripts\db-health-graph.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\dev-bootstrap.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\dev-bootstrap.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\dev-whoami.ps1` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\dev-whoami.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\dr-drill.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\env-key-merge.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\gdpr-retention-sweep.sh` · *live* · git-tracked
@@ -1170,6 +1177,7 @@
 - `D:\heuresys-advanced\db\migrations\000213_retention_import_validation_archive.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000214_insight_read_self_permission.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000215_restore_sdbi_consolidation_markers.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000216_gdpr_export_actor_references.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1208,6 +1216,7 @@
 - `D:\heuresys-advanced\db\scripts\populate-reference-translations-governance.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\populate-skill-descriptions-it.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\populate-skill-ontology-it.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\provision-derived-access.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\reset_local_database.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\reset_local_database.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\seed-r1b-personas.ts` · *live* · git-tracked
@@ -1792,6 +1801,8 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-06-21-gtm-front-door-landing-lead-capture.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-06-22-gtm-investor-onepager-and-guided-demo.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-07-06-project-atlas-skill.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-07-26-z261-mfa-fixture-secret-rotation.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-07-26-z262-accesso-derivato-tutti-gli-utenti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-28-cross-os-bootstrap-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-30-rtl-tenant-rebuild-import-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-30-rtl-tenant-rebuild.md` · *live* · git-tracked

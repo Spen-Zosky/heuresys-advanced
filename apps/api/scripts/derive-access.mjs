@@ -47,11 +47,24 @@ export function toBase32(buf) {
 }
 
 export function readMaster() {
+  // In CI il repository viene clonato in un'area di lavoro del runner, dove
+  // `.secrets/` NON arriva (è gitignored, quindi il checkout non lo porta).
+  // Là la chiave viaggia come variabile d'ambiente, per la stessa via degli
+  // altri segreti del runner — copiare il file in una cartella che il runner
+  // può ripulire sarebbe una soluzione che si rompe da sola.
+  const fromEnv = process.env.DEV_ACCESS_MASTER_KEY_B64;
+  if (fromEnv && fromEnv.length > 0) {
+    const buf = Buffer.from(fromEnv, "base64");
+    if (buf.length < 32) {
+      throw new Error("DEV_ACCESS_MASTER_KEY_B64 decodifica a meno di 32 byte: segreto debole, rifiutato.");
+    }
+    return buf;
+  }
   if (!existsSync(MASTER_PATH)) {
     throw new Error(
-      "Chiave madre assente: .secrets/dev-access-master.key\n" +
-        "Non si rigenera: rigenerarla cambierebbe TUTTE le password. Arriva dagli " +
-        "script di allineamento (sync-gitignored-to-vm.sh, align-clones.sh).",
+      "Chiave madre assente: né .secrets/dev-access-master.key né DEV_ACCESS_MASTER_KEY_B64.\n" +
+        "Non si rigenera: rigenerarla cambierebbe TUTTE le password. Sulle macchine di sviluppo " +
+        "arriva dagli script di allineamento; in CI dalla variabile d'ambiente del runner.",
     );
   }
   const raw = readFileSync(MASTER_PATH);

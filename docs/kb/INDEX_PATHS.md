@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-25T23:33:02Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2586**
+**Generato**: 2026-07-26T04:31:21Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2589**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 35 |
 | db-seed | 115 |
-| doc-canonical | 506 |
+| doc-canonical | 508 |
 | handoff-state | 1 |
 | qa-artifact | 103 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 97 |
 | showcase-source | 14 |
-| test | 306 |
+| test | 307 |
 | ux-design-archive | 80 |
 | web-source | 207 |
-| **TOTALE** | **2586** |
+| **TOTALE** | **2589** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 497 |
 | external-archive | 50 |
-| live | 2039 |
+| live | 2042 |
 
 ## File per categoria
 
@@ -1484,6 +1484,7 @@
 - `D:\heuresys-advanced\docs\integrations\tenant_onboarding_esco_03_esco_population_spec_2026-06-15.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\integrations\tenant_onboarding_esco_04_tenant_onboarding_spec_2026-06-15.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\COWORK_INBOX.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\DATA_PATTERNS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\DEBT_REGISTER.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\INDEX_PATHS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\NEXT_SESSION_DB_FRONTEND_FORENSICS_KICKOFF.md` · *live* · git-tracked
@@ -1818,6 +1819,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-delivery-loop-skill-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-zero-pending-loop-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-zero-pending-plan.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-07-26-organizational-model-and-role-derivation-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked
@@ -2282,6 +2284,7 @@
 - `D:\heuresys-advanced\apps\api\test\seed-candidate-records.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\semantic-matching-backfill.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\semantic-matching-scope.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\semantic-matching-self-only.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\semantic-matching-substrate.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\semantic-matching.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\skill-aliases.integration.test.ts` · *live* · git-tracked

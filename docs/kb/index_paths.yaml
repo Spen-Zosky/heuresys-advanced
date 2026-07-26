@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-25T23:33:02Z da docs/kb/tools/build_index.py
+# generato: 2026-07-26T04:31:21Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-25T23:33:02Z"
-  total_files: 2586
+  generated_at: "2026-07-26T04:31:21Z"
+  total_files: 2589
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -22,7 +22,7 @@ meta:
     db-other: 8
     db-script: 35
     db-seed: 115
-    doc-canonical: 506
+    doc-canonical: 508
     handoff-state: 1
     qa-artifact: 103
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 97
     showcase-source: 14
-    test: 306
+    test: 307
     ux-design-archive: 80
     web-source: 207
   status_counts:
     archive: 497
     external-archive: 50
-    live: 2039
+    live: 2042
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -8402,6 +8402,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\DATA_PATTERNS.md'
+    root: repo
+    rel: 'docs/kb/DATA_PATTERNS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\DEBT_REGISTER.md'
     root: repo
     rel: 'docs/kb/DEBT_REGISTER.md'
@@ -10403,6 +10409,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-zero-pending-plan.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-07-25-zero-pending-plan.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-26-organizational-model-and-role-derivation-design.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-07-26-organizational-model-and-role-derivation-design.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -13043,6 +13055,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\semantic-matching-scope.integration.test.ts'
     root: repo
     rel: 'apps/api/test/semantic-matching-scope.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\semantic-matching-self-only.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/semantic-matching-self-only.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

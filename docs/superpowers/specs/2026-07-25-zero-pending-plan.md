@@ -356,12 +356,17 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
 - [ ] **Z-211** (2.0h) — E6 pattern portabili dal cantiere evo: metodo a11y sistematico + catalogo anti-pattern (linea orfana, nessun id nel register)
   - *chiuso quando*: esiste il catalogo anti-pattern committato e il metodo a11y e' referenziato dalle altre linee, oppure la linea e' marcata WON'T-DO
   - *assorbe*: `product:E6`
-- [ ] **Z-203** (0.5h) — Semantic matching: confermare il role-set self-only per il peer occupation-fit
+- [x] **Z-203** (0.5h) — Semantic matching: confermare il role-set self-only per il peer occupation-fit
+  - ✅ **CHIUSO S1032** (2026-07-26) — risposta: **il set non esiste e non deve esistere**. L'accesso al peer lo decide `canReadOrgTarget` e nient'altro; la lista locale (`USER`/`TEAM_MEMBER`/`READ_ONLY`) duplicava quella decisione e la contraddiceva, perché la managerialità è anche un fatto di DATO (`isOrgUnitManager`), non solo di ruolo. Rimossa dai tre metodi per-bersaglio; sopravvive solo come gate di *capacità* su `similarPeople`, rinominata `BROWSE_SELF_ONLY_ROLES`. Decisione in **ADR-0027 §F1-bis**. Misurato: 6 responsabili di OU erano bloccati dalla lista (inclusi quelli con **zero ruoli**: `[].some()` = false), 2 con riporti reali — `benedetta.cattaneo` (7), `enzo.spenuso` (2). **È un allargamento delimitato, non solo una chiusura di falso diniego**: `matching:read` è l'unico permesso F3 concesso a `USER`, quindi questa diventa l'unica superficie F3 dove un rank-and-file legge il fit di un altro, dentro il proprio sotto-albero. Tre revisori adversarial hanno demolito la prima evidenza (test tautologico, fixture non deterministico, due metodi su tre scoperti, narrativa di rischio invertita): tutto corretto e ri-verificato. Emerso e registrato a parte: **Z-256**
+  - *verified-by*: `vitest test/semantic-matching-self-only.integration.test.ts` 9/9 + suite modulo 59/59 · `psql` sui responsabili senza ruoli peer-capable · **falsificabilità provata**: reintroducendo il fast-path in ciascuno dei tre metodi il test diventa rosso (2 falliti per metodo)
   - *chiuso quando*: un test asserisce il set di ruoli self-only effettivo e la decisione e' scritta nel register o in ADR-0027
   - *assorbe*: `backlog:OQ-4`
 
-### security (6)
+### security (7)
 
+- [ ] **Z-256** (1.5h) — `similarPeople` applica l'asse organizzativo al BERSAGLIO ma non alle RIGHE restituite: `GET /v1/matching/users/:id/similar` passa da `canReadOrgTarget` per decidere se la richiesta è ammessa, poi `knnSimilarUsers` costruisce la lista filtrando per `tenant_id` e non per sotto-albero — quindi un attore autorizzato a interrogare un bersaglio riceve persone che stanno fuori dal proprio asse organizzativo, che è la classe di perdita chiusa da D-50 su tutti gli altri moduli F3. **Perdita preesistente**, rilevata dalla review adversarial di `Z-203` (2026-07-26) e non introdotta da esso; nessun altro test la copre perché la suite di scope asserisce solo lo status della richiesta, mai l'appartenenza delle righe
+  - *chiuso quando*: un test d'integrazione con una persona reale fuori dal sotto-albero dell'attore verifica che quella persona NON compaia fra le righe restituite, e fallisce se si rimuove il filtro
+  - *nota*: stessa forma del rilievo D-50 ma sul contenuto invece che sull'accesso — vale la pena cercarla anche negli altri endpoint che restituiscono liste di persone
 - [ ] **Z-057** (2.0h) — Rate-limit per-IP dietro 2 hop di proxy da calibrare + .env.example lascia TRUST_PROXY=false come default
   - *chiuso quando*: un test con XFF a 2 hop distingue correttamente gli IP e grep TRUST_PROXY .env.example mostra il default sicuro
   - *assorbe*: `state:C1-RL`, `gapfill:GAP2-45`

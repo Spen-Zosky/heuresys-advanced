@@ -401,12 +401,13 @@ clusters:
   Z-247: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-248: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-249: {classe: B, perche: "codice: apps/showcase, apps/web, ui"}
-  Z-250: {classe: D, perche: "produzione viva: deploy, produzione", rivisto: false}
+  Z-250: {classe: D, perche: "produzione viva: produzione"}
   Z-251: {classe: D, perche: "D per azione (il criterio si misura sulla VM di produzione); il testo suggeriva C", rivisto: false}
   Z-252: {classe: B, perche: "codice: pagina"}
   Z-253: {classe: D, perche: "produzione viva: PROD", rivisto: false}
   Z-254: {classe: B, perche: "rivisto a mano: tag e versioning della lib: \"deploy\" e nel discorso, non nel lavoro"}
   Z-255: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
+  Z-256: {classe: B, perche: "codice: test"}
 
 
 # Override auto-appresi. Azzerabile in blocco senza toccare il resto della config.

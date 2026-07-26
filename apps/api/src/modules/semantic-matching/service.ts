@@ -19,11 +19,24 @@ import { makeEmbedder, type Embedder } from "./voyage-client.js";
 const isPlatform = (a: ActorContext): boolean => a.roles.includes("PLATFORM_ADMIN");
 // A non-platform actor with no tenant sees only global skills → match no real tenant.
 const ZERO_UUID = "00000000-0000-0000-0000-000000000000";
-// Rank-and-file roles see only their OWN occupation matches via /users/:id (ESS self = /me).
-// Any leadership/HR/admin/process role may view in-tenant peers. (Enzo option (b), S971.)
-const SELF_ONLY_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["USER", "TEAM_MEMBER", "READ_ONLY"]);
-// An actor may browse peers iff it holds at least one role beyond the self-only set.
-const isElevated = (a: ActorContext): boolean => a.roles.some((r) => !SELF_ONLY_ROLES.has(r));
+/**
+ * BROWSE capability only — NOT target access (Z-203, ADR-0027 §F1-bis).
+ *
+ * This set governs one question: may the actor *browse* "people similar to X" at all? That is a
+ * leadership tool, not an ESS surface, so a rank-and-file actor gets 403 even on its own profile.
+ *
+ * It must NOT be used to decide whether a peer's data is readable. That decision belongs to
+ * `canReadOrgTarget` alone (self I17 · HR mandate I20 · managerial + org sub-tree I18 · tenant),
+ * and duplicating it here produced a real divergence: an actor whose only RBAC role is `USER` but
+ * who *manages an org unit* is managerial for the resolver, while this list called it self-only —
+ * so peer reads that every other F3 module grants were 404 here. Measured 2026-07-26: 5 real
+ * org-unit managers were in that state, of whom 1 actually had reports (7) — for the other 4 the
+ * denial was inert, not absent. Removing the list cannot widen access: it was an EXTRA filter in
+ * front of a gate that ran anyway, so dropping it can only remove denials, never add one.
+ */
+const BROWSE_SELF_ONLY_ROLES: ReadonlySet<RoleCode> = new Set<RoleCode>(["USER", "TEAM_MEMBER", "READ_ONLY"]);
+/** May the actor browse peer-similarity at all? Capability gate, not a per-target gate. */
+const canBrowsePeers = (a: ActorContext): boolean => a.roles.some((r) => !BROWSE_SELF_ONLY_ROLES.has(r));
 
 /**
  * Free-text feature is OFF → 404 with the precise code MATCHING_FREETEXT_DISABLED (the route is
@@ -55,12 +68,11 @@ export const semanticMatchingService = {
 
   /**
    * Any user in the actor's scope → top-N occupations (admin/manager surface). 404 outside scope.
-   * A plain USER (no role beyond USER) may only target itself — the ESS self path is /me/occupations;
-   * viewing a peer's occupation-fit requires a manager/HR/admin role. 404 (not 403) avoids enumeration.
+   * Who may read a peer is decided by `canReadOrgTarget` and by nothing else (Z-203): self (I17),
+   * HR mandate (I20), managerial role OR org-unit manager + org sub-tree (I18), same tenant (I5).
+   * 404 (not 403) avoids an enumeration oracle. The ESS self path stays /me/occupations.
    */
   async userOccupations(a: ActorContext, userId: string, q: MatchQuery) {
-    const canViewOthers = a.roles.some((r) => !SELF_ONLY_ROLES.has(r));
-    if (!canViewOthers && userId !== a.userId) throw new NotFoundError("User");
     const tenant = await repo.findUserTenant(pool, userId);
     if (tenant === null) throw new NotFoundError("User");
     if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");
@@ -87,13 +99,11 @@ export const semanticMatchingService = {
 
   /**
    * Any user in the actor's scope → top-N position matches (admin/manager surface). 404 outside scope.
-   * Same gating as userOccupations: a self-only role (USER/TEAM_MEMBER/READ_ONLY) may only target
-   * itself, and a cross-tenant or out-of-scope target is a 404 (no enumeration oracle). Positions are
-   * scoped to the TARGET user's tenant (I5), so a manager sees the peer's matches within that tenant.
+   * Same gating as userOccupations: `canReadOrgTarget` is the only authority on peer access, and a
+   * cross-tenant or out-of-scope target is a 404 (no enumeration oracle). Positions are scoped to the
+   * TARGET user's tenant (I5), so a manager sees the peer's matches within that tenant.
    */
   async userPositions(a: ActorContext, userId: string, q: MatchQuery) {
-    const canViewOthers = a.roles.some((r) => !SELF_ONLY_ROLES.has(r));
-    if (!canViewOthers && userId !== a.userId) throw new NotFoundError("User");
     const tenant = await repo.findUserTenant(pool, userId);
     if (tenant === null) throw new NotFoundError("User");
     if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");
@@ -112,11 +122,10 @@ export const semanticMatchingService = {
 
   /**
    * Any user in the actor's scope → top-N job-role matches (admin/manager surface). 404 outside scope.
-   * Same option-b gating as occupations/positions: a self-only role may only target itself; a cross-tenant
-   * or out-of-scope target is a 404 (no enumeration oracle). Roles scoped to the TARGET user's tenant (I5).
+   * Same gating as occupations/positions: `canReadOrgTarget` decides peer access; a cross-tenant or
+   * out-of-scope target is a 404 (no enumeration oracle). Roles scoped to the TARGET user's tenant (I5).
    */
   async userJobRoles(a: ActorContext, userId: string, q: MatchQuery) {
-    if (!isElevated(a) && userId !== a.userId) throw new NotFoundError("User");
     const tenant = await repo.findUserTenant(pool, userId);
     if (tenant === null) throw new NotFoundError("User");
     if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");
@@ -132,7 +141,7 @@ export const semanticMatchingService = {
    * actor's scope (cross-tenant → 404). Results are self-excluded + tenant-scoped (I5).
    */
   async similarPeople(a: ActorContext, userId: string, q: MatchQuery) {
-    if (!isElevated(a)) throw new ForbiddenError("Browsing similar people requires an elevated role", "PERMISSION_DENIED");
+    if (!canBrowsePeers(a)) throw new ForbiddenError("Browsing similar people requires an elevated role", "PERMISSION_DENIED");
     const tenant = await repo.findUserTenant(pool, userId);
     if (tenant === null) throw new NotFoundError("User");
     if (!isPlatform(a) && (a.tenantId === null || tenant !== a.tenantId)) throw new NotFoundError("User");

@@ -31,6 +31,7 @@
     "db:seed-r1b": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-r1b-personas.ts",
     "db:seed-service-user": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/seed-service-user.ts",
     "db:encrypt-totp": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/encrypt-totp-secrets.ts",
+    "dev:whoami": "pnpm --filter @heuresys/api exec node scripts/dev-whoami.mjs",
     "embeddings:backfill": "pnpm --filter @heuresys/api exec tsx src/modules/semantic-matching/backfill.ts",
     "i18n:check": "pnpm --filter @heuresys/web run i18n:check",
     "status": "python docs/kb/tools/status_dashboard.py"

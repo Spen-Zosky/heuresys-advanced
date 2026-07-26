@@ -41,14 +41,19 @@ Piani operativi nuovi: `2026-07-26-z261-mfa-fixture-secret-rotation.md` (superat
    stati eliminati perché `mfa-enroll-confirm` resta rosso: manipola i fattori di `paolo.caputo` e
    li ripristina nella forma vecchia. Sistemare quel file, poi eliminarli (serve il via di Enzo:
    il sistema blocca le cancellazioni su produzione). **È l'unica cosa aperta verso l'esterno.**
-2. **CI ROSSA e deploy BLOCCATO** (`Playwright smoke` + `Test (api integration)`). Il gate
-   `DEPLOY_REQUIRE_CI` ha correttamente impedito il deploy su PROD: **la VM è ferma al commit
-   precedente**. Causa accertata: il database della CI su linux-pc (`heuresys_ci`) **non ha le
-   credenziali derivate** — il provisioning è stato fatto sulla produzione, e quel DB non è
-   rinfrescato da nessun timer (è `Z-253`). La chiave madre è stata propagata a mano su linux-pc
-   (presente, 600) e c'era già sulla VM. **Prossimo passo**: rigenerare `heuresys_ci` dalla PROD
-   (`db/scripts/setup-ci-database.sh`, attenzione: fa `dropdb --force`, mai a job in corso),
-   poi rilanciare la CI e ripetere `close-propagate --auto-deploy`.
+2. 🔴 **CI ROSSA — 158 file su 218 — e deploy BLOCCATO.** È il danno di questa sessione, non un
+   guasto preesistente: prima erano 2 workflow, ora è la suite. Il passaggio alle credenziali
+   derivate è stato validato su **un campione** (GDPR 9/9 + 5 file auth) e da lì dichiarato valido
+   per tutti i 162 file — una generalizzazione da un caso, lo stesso errore che i revisori avevano
+   contestato due volte lo stesso giorno. **Cosa è già stato sistemato**: `heuresys_ci` rigenerato
+   dalla PROD (160 credenziali / 159 fattori, era 13/0) e la chiave madre raggiungibile in CI via
+   `DEV_ACCESS_MASTER_KEY_B64` nell'env del runner (il checkout non porta `.secrets/`, che è
+   gitignored — copiare il file nell'area di lavoro del runner si sarebbe rotto da solo).
+   **Diagnosi NON confermata**: fra i fallimenti c'è `expected 'e2e-fixture' to be 'derived-access'`
+   (un test asserisce l'etichetta vecchia) e `db:seed-test-admin` ora scrive con l'etichetta nuova
+   su un DB che porta entrambe. **Da verificare prima di toccare**: eseguire in locale
+   `pnpm exec vitest run` sull'intera suite — cosa che questa sessione NON ha fatto, ed è la ragione
+   per cui il problema è emerso solo in CI. La VM è ferma a `a13cdb1e`; PROD non è stata toccata.
 3. **`Z-259` da riprendere** con i 16 rilievi in `.zp/prove/Z-259-verdetti-adversarial.json`: la
    proiezione deve guardare dentro i valori annidati, e il test deve girare su più soggetti — con
    uno solo era verde su un export bucato.

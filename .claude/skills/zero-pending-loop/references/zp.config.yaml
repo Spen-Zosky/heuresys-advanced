@@ -366,7 +366,6 @@ clusters:
   Z-200: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-201: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-202: {classe: E, perche: "bloccato su Enzo: decisione-business"}
-  Z-203: {classe: B, perche: "codice: test"}
   Z-204: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-205: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-206: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
@@ -408,6 +407,8 @@ clusters:
   Z-254: {classe: B, perche: "rivisto a mano: tag e versioning della lib: \"deploy\" e nel discorso, non nel lavoro"}
   Z-255: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-256: {classe: B, perche: "codice: test"}
+  Z-257: {classe: C, perche: "schema e dati: fk, sys_user, tabelle"}
+  Z-258: {classe: C, perche: "schema e dati: FK, colonna, sys_tenancies"}
 
 
 # Override auto-appresi. Azzerabile in blocco senza toccare il resto della config.

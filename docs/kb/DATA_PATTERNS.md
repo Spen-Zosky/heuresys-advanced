@@ -126,9 +126,97 @@ correggere il dato una volta.
 
 ---
 
-## In attesa di verifica — dal team di scoperta
+---
 
-Il workflow `dbms-pattern-discovery` (2026-07-26) analizza il DBMS su sei lenti: grafo delle chiavi
-esterne, famiglie di satelliti, cataloghi e crosswalk, storicizzazione, dati dormienti, invarianti
-non imposte. I pattern che ne emergono entrano qui **dopo verifica**, con la loro prova — non come
-elenco separato, altrimenti il registro si biforca e ricade in AP-01.
+# Dal team di scoperta (2026-07-26)
+
+Workflow `dbms-pattern-discovery`: sei lenti indipendenti + sintesi, 7 agenti, ~49 min. Le voci qui
+sotto sono quelle **ri-verificate a mano** dopo la consegna; le altre restano nel referto del run
+finché non passano la stessa verifica. Prova propria = ho eseguito io la query indicata.
+
+## AP-03 · Anti-pattern — predicato di copertura ancorato al NOME invece che al grafo
+
+**Forma da NON reggere**: un controllo di copertura deriva correttamente l'insieme dal catalogo di
+sistema (`pg_constraint`) e poi lo **restringe con un `LIKE` sul nome della tabella**. La convenzione
+di naming diventa un surrogato della semantica, e tutto ciò che sta fuori dal prefisso non viene mai
+controllato — senza che nessuno se ne accorga, perché il test resta verde.
+
+**Occorrenza (severità ALTA)**: `apps/api/test/gdpr.integration.test.ts`. Il commento dichiara
+*«LIVE fk graph — the SoT is pg_constraint, never a hardcoded list»* e la query subito sotto aggiunge
+`AND c.conrelid::regclass::text LIKE 'sys.sys_user\_%'`.
+*Prova propria (2026-07-26)*: le FK verso `sys_users` sono **248 su 135 tabelle distinte**; dentro il
+filtro del test ne cadono **74**. Il team ha misurato il seguito: 51 tabelle con FK-soggetto sono
+assenti dal registro GDPR e contengono dati veri (`sys_survey_responses` 3.792, `sys_goals` 1.067,
+`sys_performance_reviews` 161, `sys_time_off_requests` 69…). Il gate resta verde perché nessuna di
+quelle tabelle inizia per `sys_user_`. In più l'asserzione è `toBeGreaterThan(20)`: soglia che passa
+comunque.
+
+**Perché in questo schema è particolarmente insidioso**: vale il pattern P-04 qui sotto — il naming
+NON può fare da indice semantico, perché ogni colonna porta il prefisso della propria entità. Quindi
+qualunque regola trasversale ancorata al nome è strutturalmente incompleta.
+
+**Come si chiude**: il predicato di appartenenza a una classe si calcola come **raggiungibilità nel
+grafo FK** verso l'entità radice della classe (`sys_users` per il dato personale, `sys_tenancies` per
+l'ambito tenant), mai come pattern sul nome. → cluster `Z-257`.
+
+---
+
+## P-04 · Prefisso d'entità universale: il naming non è un indice semantico
+
+**Forma**: ogni colonna porta il prefisso della propria entità — 205 chiavi primarie su 205 sono
+`<entità>_id`, **zero** sono `id` nudo; la FK verso `sys_tenancies` viaggia sotto **137 nomi di
+colonna diversi** su 142 tabelle.
+
+**Conseguenza operativa, che è il vero contenuto del pattern**: nessuna logica trasversale può essere
+scritta per nome di colonna. Filtro tenant, dato personale, campi traducibili, colonne di audit —
+tutto va derivato dal grafo. È la giustificazione formale di AP-03 e di P-05.
+
+---
+
+## P-05 · Ambito tenant in TRE classi, non due
+
+**Forma**: le tabelle non si dividono in «tenant-scoped» e «globali», ma in tre: **diretta** (FK a
+`sys_tenancies`), **transitiva** (ambito ereditato dall'aggregato padre, nessuna colonna tenant
+propria), **globale** (nessun percorso). Ogni classe richiede una forma di filtro diversa.
+
+**Misura (chiusura transitiva sul grafo, max 6 hop)**: 142 dirette · **34 transitive** (30 a 1 hop,
+4 a 2 hop) · 29 globali, su 206 tabelle `sys`.
+
+**Dove NON è applicato**: il tier transitivo non ha alcun riscontro nel codice — il filtro tenant su
+quelle tabelle esiste solo se il singolo repository si ricorda di fare la join. Esempio verificato dal
+team: `sys_team_members` (173 righe, zero colonne tenant) e `teams/repository.ts:270` che cancella
+per `team_id + user_id` senza filtro tenant, affidandosi alla guardia sull'aggregato a monte.
+
+**Riusabile per**: un test dell'invariante I5 che calcoli il tier dalla topologia e pretenda la forma
+di filtro corrispondente; e per decidere quali tabelle un export o una cancellazione per-tenant deve
+toccare. → cluster `Z-258`.
+
+---
+
+## P-06 · La politica `ON DELETE` codifica il ruolo semantico dell'arco
+
+**Forma**: su tutte le FK verso `sys_users`, `ON DELETE` distingue **senza eccezioni** l'arco
+«attore che ha scritto il record» dall'arco «soggetto di cui il record parla». Si può classificare la
+semantica di un arco leggendo `confdeltype`, senza guardare il nome della colonna.
+
+**Misura**: 118 archi attore (`created_by`/`updated_by`/`deleted_by`) → **118 su 118 `SET NULL`**,
+zero eccezioni. Archi soggetto: 58 `CASCADE`, 44 `SET NULL`, 7 `RESTRICT`, 1 `NO ACTION`.
+`ON UPDATE` è `NO ACTION` su tutti i 596 vincoli dello schema.
+
+**Riusabile per**: derivare automaticamente la distinzione attore/soggetto che oggi è una **regex
+duplicata** nel test GDPR e nella dottrina della migration 000186 — cioè un'occorrenza di AP-01. E
+per validare in CI che ogni nuova colonna `created_by`/`updated_by` nasca `SET NULL`.
+
+---
+
+## Restano da verificare
+
+Nel referto del run, non ancora promossi qui: registro dei bersagli polimorfici con funzione dinamica
+anti-orfano (1 sede su 9 lo implementa) · politica di cancellazione del tenant con intenzioni
+contraddittorie sullo stesso hub · tre forme incompatibili di storicizzazione · slot di attestazione
+sui satelliti (15 sedi, 1 popolata) · **zero vincoli `EXCLUDE` in tutto lo schema** a fronte di
+satelliti con finestre temporali sovrapponibili · stato dichiarato e finestra temporale che dicono la
+stessa cosa senza accordarsi · tenant ripetuto sul satellite senza vincolo composito con l'hub.
+
+Le ultime due sono specializzazioni di **AP-01** su forme diverse: la conferma che quell'anti-pattern
+è la forma dominante di questo schema, non un incidente.

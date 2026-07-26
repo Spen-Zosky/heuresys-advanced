@@ -123,6 +123,71 @@ describe("D-14 F3/F4 GDPR tooling", () => {
     expect(logged.rows.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("Z-259 — the export bundle carries NO identifier of any other person (Art. 15(4))", { timeout: 60_000 }, async () => {
+    const me = await login(suite, EMPLOYEE);
+    const r = await suite.app.inject({
+      method: "POST",
+      url: "/v1/me/gdpr/export",
+      headers: headers(me),
+      payload: {},
+    });
+    expect(r.statusCode).toBe(200);
+    const bundle = r.json() as {
+      subject: { userId: string };
+      tables: Record<string, { rows: Record<string, unknown>[]; omittedColumns?: string[] }>;
+    };
+    const meId = bundle.subject.userId;
+
+    // Every OTHER person's id, from the live table — not a hand-written list:
+    // the assertion must notice a leak of anyone, not of a chosen few.
+    const others = await pool.query<{ user_id: string }>(
+      `SELECT user_id FROM sys.sys_users WHERE user_id <> $1`,
+      [meId],
+    );
+    const otherIds = new Set(others.rows.map((x) => x.user_id));
+    expect(otherIds.size).toBeGreaterThan(0); // guard: an empty set would pass vacuously
+
+    // Scan the payload for any value that IS another person's id. This checks
+    // the data actually handed over, not the shape of the response — dropping
+    // either guard in exportSubjectData turns it red: without the ACTOR skip
+    // the 360/continuous-feedback rows come back with their counterpart's id,
+    // without the projection the reviewer's id rides along in the subject's own
+    // rows.
+    const leaks: string[] = [];
+    for (const [tableKey, t] of Object.entries(bundle.tables)) {
+      for (const row of t.rows) {
+        for (const [col, val] of Object.entries(row)) {
+          if (typeof val === "string" && otherIds.has(val)) leaks.push(`${tableKey} -> ${col}`);
+        }
+      }
+    }
+    expect(
+      [...new Set(leaks)].sort(),
+      "l'export consegna al richiedente identificativi di ALTRE persone",
+    ).toEqual([]);
+
+    // The id scan above is NOT sufficient on its own, and the falsifiability
+    // probe proved it: with the ACTOR skip disabled the bundle still passed it,
+    // because the projection had stripped the ids — while the rows themselves,
+    // carrying the TEXT of appraisals written about other people, were being
+    // handed over. Identifier-free is not third-party-free. So assert the
+    // stronger property: an ACTOR entry must not appear in the bundle at all.
+    const actorEntries = await pool.query<{ k: string }>(
+      `SELECT gdpr_map_table_schema || '.' || gdpr_map_table_name || '.' || gdpr_map_subject_fk AS k
+         FROM sys.sys_gdpr_data_map WHERE gdpr_map_reference_kind = 'ACTOR'`,
+    );
+    expect(actorEntries.rows.length).toBeGreaterThan(0); // guard against a vacuous pass
+    const present = actorEntries.rows.map((x) => x.k).filter((k) => k in bundle.tables);
+    expect(
+      present.sort(),
+      "il bundle contiene voci ACTOR: sono record di cui il richiedente e' autore, non soggetto",
+    ).toEqual([]);
+
+    // and the withholding is declared, not silent
+    const declared = Object.values(bundle.tables).some((t) => (t.omittedColumns?.length ?? 0) > 0);
+    expect(declared, "nessuna colonna dichiarata come omessa: la proiezione non sta girando").toBe(true);
+  });
+
   it("admin export: TENANT_ADMIN exports an in-tenant subject; MANAGER (no gdpr perm) gets 403", { timeout: 60_000 }, async () => {
     const subj = await pool.query<{ user_id: string }>(
       `SELECT user_id FROM sys.sys_users WHERE lower(user_email) = lower($1)`,

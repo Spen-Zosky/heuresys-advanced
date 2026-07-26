@@ -19,10 +19,10 @@ import { pool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
 import { sharedMfaService } from "../src/modules/auth/mfa-service.js";
 import * as mfaRepo from "../src/modules/auth/mfa-repository.js";
-import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { passwordFor } from "./helpers/personas.js";
 
 const MFA_EMAIL = "antonio.parisi@rtl-bank.org";
-const MFA_PASSWORD = TEST_PERSONA_PASSWORD;
+const MFA_PASSWORD = passwordFor(MFA_EMAIL);
 
 /** Generate the current 6-digit code from a base32 secret (matches mfa-service params). */
 function genTotp(secretBase32: string): string {
@@ -84,7 +84,7 @@ describe("/v1/auth/login MFA gating (X20)", () => {
     // Repurposed from "no-MFA account logs in directly": with the e2e-fixture
     // TOTP factor live there IS no factor-less admin — the invariant under
     // test is that the login always completes to a FULL session.
-    const resp = await loginRaw(app.app, "admin@heuresys.com", TEST_PERSONA_PASSWORD);
+    const resp = await loginRaw(app.app, "admin@heuresys.com");
     expect(resp.statusCode).toBe(200);
     const json = resp.json();
     expect(json.status).toBe("success");
@@ -183,7 +183,7 @@ describe("/v1/auth/login MFA gating (X20)", () => {
  * =================================================================== */
 
 const OTP_EMAIL = "tommaso.fiore@rtl-bank.org";
-const OTP_PASSWORD = TEST_PERSONA_PASSWORD;
+const OTP_PASSWORD = passwordFor(OTP_EMAIL);
 
 function ch(c: Map<string, string>): string {
   return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");

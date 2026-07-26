@@ -19,10 +19,10 @@ import * as OTPAuth from "otpauth";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
-import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { passwordFor } from "./helpers/personas.js";
 
-const PASSWORD = TEST_PERSONA_PASSWORD;
 const READONLY = "alberto.rossetti@rtl-bank.org"; // R2 persona, READ_ONLY
+const PASSWORD = passwordFor(READONLY);
 
 function genTotp(secretBase32: string): string {
   return new OTPAuth.TOTP({

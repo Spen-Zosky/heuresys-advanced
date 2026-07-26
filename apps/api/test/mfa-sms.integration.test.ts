@@ -10,10 +10,10 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { InMemorySms } from "../src/modules/auth/sms-sender.js";
 import { pool } from "../src/db/client.js";
-import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { passwordFor } from "./helpers/personas.js";
 
 const EMAIL = "antonio.parisi@rtl-bank.org";
-const PWD = TEST_PERSONA_PASSWORD;
+const PWD = passwordFor(EMAIL);
 const PHONE = "+393331234567";
 
 interface Session { cookies: Map<string, string>; csrf: string; userId: string }

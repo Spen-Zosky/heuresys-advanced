@@ -18,10 +18,10 @@ import argon2 from "argon2";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
-import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { passwordFor } from "./helpers/personas.js";
 
-const PASSWORD = TEST_PERSONA_PASSWORD;
 const ADMIN = "admin@heuresys.com"; // human PLATFORM_ADMIN -> NOT exemptable (M-8b)
+const PASSWORD = passwordFor(ADMIN);
 const SVC_EMAIL = "wi-a-svc-test@heuresys.local"; // throwaway SERVICE -> exemptable
 
 const ARGON2 = { type: argon2.argon2id, memoryCost: 65536, timeCost: 3, parallelism: 4, hashLength: 32 } as const;

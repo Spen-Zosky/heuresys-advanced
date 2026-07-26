@@ -155,6 +155,23 @@ comunque.
 NON può fare da indice semantico, perché ogni colonna porta il prefisso della propria entità. Quindi
 qualunque regola trasversale ancorata al nome è strutturalmente incompleta.
 
+**Due varianti scoperte tentando di chiuderlo** (Z-257, S1032 — tentativo *interrotto*, rollback
+eseguito; verdetti in `.zp/prove/Z-257-verdetti-adversarial.json`). Sono la ragione per cui il
+rimedio a un AP-03 non è «togliere il filtro» e basta:
+
+- **AP-03a · il gate che si ri-arma da solo.** Se la copertura mancante viene colmata da una
+  migrazione che *ri-deriva* l'insieme (`INSERT … SELECT` su `pg_constraint` con `ON CONFLICT DO
+  NOTHING`), e il runner ri-applica tutti i file a ogni esecuzione (`db/scripts/migrate.sh` fa
+  esattamente questo), allora un elemento nuovo viene **auto-classificato al primo deploy** e il
+  test non diventa mai rosso. Il gate sembra chiuso e non gatea: è l'AP-03 originale in forma nuova.
+  Un popolamento che alimenta un gate dev'essere uno **snapshot scritto**, non una query viva.
+- **AP-03b · allargare il perimetro senza guardare chi lo consuma.** `sys_gdpr_data_map` non pilota
+  solo il controllo di copertura: pilota anche export DSR, cancellazione e retention. Portarlo da 54
+  a 249 righe per far gateare il test ha fatto sì che `exportSubjectData` — che cammina ogni riga con
+  `SELECT *` — restituisse a un utente righe intere di **fatti altrui** (verificato live). Prima di
+  estendere un registro, va deciso come **ogni** suo consumatore tratta le righe nuove: l'ordine
+  inverso trasforma un buco di copertura in una fuga di dati.
+
 **Come si chiude**: il predicato di appartenenza a una classe si calcola come **raggiungibilità nel
 grafo FK** verso l'entità radice della classe (`sys_users` per il dato personale, `sys_tenancies` per
 l'ambito tenant), mai come pattern sul nome. → cluster `Z-257`.

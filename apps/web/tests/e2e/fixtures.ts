@@ -26,19 +26,15 @@ export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localho
   "",
 );
 
-// F-001: the persona login password is environment-driven, not committed. playwright.config.ts
-// loads the repo-root .env so TEST_ADMIN_PASSWORD is present here; fail closed if it is missing.
-function requireTestPassword(): string {
-  const v = process.env.TEST_ADMIN_PASSWORD;
-  if (!v) {
-    throw new Error(
-      "TEST_ADMIN_PASSWORD is not set — add it to the repo-root .env (loaded by playwright.config.ts). F-001.",
-    );
-  }
-  return v;
-}
-
-export const TEST_PASSWORD = requireTestPassword();
+// Z-262: non esiste piu' UNA password condivisa — ogni utente ha la propria,
+// derivata dalla chiave madre. La costante unica che stava qui e' rimasta dopo
+// quel cambiamento e ha fatto fallire il login di ogni persona: i sei setup di
+// autenticazione andavano in timeout e con loro l'intera suite. Si deriva
+// dall'email di chi si sta autenticando, come lato API.
+// Importata E ri-esportata: il solo `export ... from` la renderebbe visibile a
+// chi importa questo modulo ma NON al modulo stesso, che la usa qui sotto.
+import { passwordFor } from "./mfa-fixture-secrets";
+export { passwordFor };
 
 /** Current TOTP code for a fixture persona (S983 WS-E mandatory-MFA). */
 export function totpFor(email: string): string {
@@ -127,7 +123,7 @@ export async function fillLoginForm(page: Page, email: string, password: string)
 export async function loginAs(page: Page, persona: PersonaKey) {
   const { email, expectedLandingPath } = PERSONAS[persona];
   await page.goto("/login");
-  await fillLoginForm(page, email, TEST_PASSWORD);
+  await fillLoginForm(page, email, passwordFor(email));
   await page.getByTestId("login-submit").click();
   await completeMfaIfChallenged(page, email);
   await page.waitForURL(`**${expectedLandingPath}`);
@@ -142,9 +138,12 @@ export async function loginAs(page: Page, persona: PersonaKey) {
 export async function completeApiLogin(
   request: APIRequestContext,
   email: string,
-  password: string = TEST_PASSWORD,
+  // Z-262: la password si deriva DALL'email di chi si autentica; una
+  // costante unica autenticherebbe la persona sbagliata (401).
+  password?: string,
 ): Promise<{ csrfToken: string; user: { userId: string } }> {
-  const step1 = await request.post(`${API_BASE}/v1/auth/login`, { data: { email, password } });
+  const pw = password ?? passwordFor(email);
+  const step1 = await request.post(`${API_BASE}/v1/auth/login`, { data: { email, password: pw } });
   if (step1.status() !== 200) throw new Error(`API login ${email}: ${step1.status()}`);
   const b1 = (await step1.json()) as { status?: string; challengeToken?: string; csrfToken?: string; user?: { userId: string } };
   if (b1.status === "success" || b1.status === undefined) {
@@ -152,7 +151,9 @@ export async function completeApiLogin(
   }
   if (b1.status === "mfa_required") {
     const step2 = await request.post(`${API_BASE}/v1/auth/login`, {
-      data: { email, password, challengeToken: b1.challengeToken, mfaCode: totpFor(email) },
+      // `pw`, non `password`: quest'ultimo e' opzionale e resta undefined quando
+      // il chiamante non lo passa, sparendo dal JSON — il server rifiuta il body.
+      data: { email, password: pw, challengeToken: b1.challengeToken, mfaCode: totpFor(email) },
     });
     const b2 = (await step2.json()) as { status?: string; csrfToken?: string; user?: { userId: string } };
     if (step2.status() !== 200 || b2.status !== "success") {

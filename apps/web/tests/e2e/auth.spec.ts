@@ -12,14 +12,14 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { PERSONAS, TEST_PASSWORD, completeMfaIfChallenged, fillLoginForm } from "./fixtures";
+import { PERSONAS, passwordFor, completeMfaIfChallenged, fillLoginForm } from "./fixtures";
 
 test.describe("MVP-2a /login pilot — live data", () => {
   test("PLATFORM_ADMIN login lands on /dashboard, sets HttpOnly access cookie", async ({ page, context }) => {
     await page.goto("/login");
     await expect(page.getByTestId("login-title")).toBeVisible();
 
-    await fillLoginForm(page, PERSONAS.platformAdmin.email, TEST_PASSWORD);
+    await fillLoginForm(page, PERSONAS.platformAdmin.email, passwordFor(PERSONAS.platformAdmin.email));
 
     const [loginResp] = await Promise.all([
       page.waitForResponse(
@@ -59,7 +59,7 @@ test.describe("MVP-2a /login pilot — live data", () => {
 
   test("USER (employee_test) login lands on /me", async ({ page }) => {
     await page.goto("/login");
-    await fillLoginForm(page, PERSONAS.employee.email, TEST_PASSWORD);
+    await fillLoginForm(page, PERSONAS.employee.email, passwordFor(PERSONAS.employee.email));
     await page.getByTestId("login-submit").click();
     await completeMfaIfChallenged(page, PERSONAS.employee.email);
     await page.waitForURL("**/me");

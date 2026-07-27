@@ -13,7 +13,7 @@
  * verso un modulo .mjs: così la derivazione resta UNA SOLA implementazione,
  * invece di una copia da tenere allineata a mano.
  */
-import { readMaster, deriveTotpSecret } from "../../../api/scripts/derive-access.mjs";
+import { readMaster, deriveTotpSecret, derivePassword } from "../../../api/scripts/derive-access.mjs";
 
 /** Etichetta dei fattori creati dal provisioning derivato (Z-262). */
 export const E2E_FIXTURE_LABEL = "derived-access";
@@ -29,8 +29,18 @@ export function totpSecretFor(email: string): string {
   return deriveTotpSecret(master(), email);
 }
 
-/** La password di QUALUNQUE utente impersonabile, ricalcolata al momento. */
-export { derivePassword } from "../../../api/scripts/derive-access.mjs";
+/**
+ * La password di QUALUNQUE utente impersonabile, ricalcolata al momento.
+ *
+ * Z-262 ha spostato le credenziali su una password PER UTENTE, ma lato Playwright
+ * era rimasta una costante unica (`TEST_ADMIN_PASSWORD`): il login E2E falliva per
+ * ogni persona e i sei setup di autenticazione andavano in timeout, con la suite
+ * intera a cascata. La derivazione è la stessa del lato API — una sola
+ * implementazione, non una copia da tenere allineata.
+ */
+export function passwordFor(email: string): string {
+  return derivePassword(master(), email);
+}
 
 /**
  * @deprecated Z-262 — i segreti non sono più una tabella di valori. Resta per i

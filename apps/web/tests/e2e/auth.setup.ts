@@ -12,7 +12,7 @@
  */
 
 import { test as setup } from "@playwright/test";
-import { API_BASE, completeMfaIfChallenged, fillLoginForm, PERSONAS, TEST_PASSWORD } from "./fixtures";
+import { API_BASE, completeMfaIfChallenged, fillLoginForm, PERSONAS, passwordFor } from "./fixtures";
 
 const TARGET_PERSONAS = [
   "platformAdmin",
@@ -33,7 +33,7 @@ for (const key of TARGET_PERSONAS) {
     // marks chunks-loaded + React-bound; a generous timeout absorbs cold dev compile.
     await page.waitForLoadState("networkidle", { timeout: 60_000 });
     await page.getByTestId("login-submit").waitFor({ state: "visible", timeout: 30_000 });
-    await fillLoginForm(page, persona.email, TEST_PASSWORD);
+    await fillLoginForm(page, persona.email, passwordFor(persona.email));
     await page.getByTestId("login-submit").click();
     // S983 WS-E: under the live mandatory policy the submit lands on the TOTP
     // step — complete it with the fixture secret; pre-flip this is a no-op.

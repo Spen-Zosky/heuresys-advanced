@@ -18,7 +18,7 @@
  */
 import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
 import * as OTPAuth from "otpauth";
-import { API_BASE, completeApiLogin, completeMfaIfChallenged, PERSONAS, TEST_PASSWORD } from "./fixtures";
+import { API_BASE, completeApiLogin, completeMfaIfChallenged, PERSONAS, passwordFor } from "./fixtures";
 
 const MFA_EMAIL = PERSONAS.outsider.email;
 const NO_MFA = PERSONAS.manager; // lands on /dashboard, never MFA-enrolled
@@ -68,7 +68,7 @@ async function deleteFactor(request: APIRequestContext, factorId: string, csrfTo
 
 async function submitPassword(page: Page, email: string) {
   await page.getByTestId("login-email").fill(email);
-  await page.getByTestId("login-password").fill(TEST_PASSWORD);
+  await page.getByTestId("login-password").fill(passwordFor(email));
   await page.getByTestId("login-submit").click();
 }
 

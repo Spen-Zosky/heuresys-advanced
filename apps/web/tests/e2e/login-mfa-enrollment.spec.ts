@@ -21,7 +21,8 @@
  */
 import { test, expect, type APIRequestContext, type Page } from "@playwright/test";
 import * as OTPAuth from "otpauth";
-import { API_BASE, completeApiLogin, PERSONAS, TEST_PASSWORD } from "./fixtures";
+import { API_BASE, completeApiLogin, PERSONAS, passwordFor } from "./fixtures";
+import { totpSecretFor } from "./mfa-fixture-secrets";
 
 const GATED_EMAIL = "alberto.rossetti@rtl-bank.org"; // R2 READ_ONLY persona
 const ADMIN = PERSONAS.platformAdmin;
@@ -64,14 +65,14 @@ async function setPolicy(request: APIRequestContext, csrf: string, tenantId: str
  *  then delete every MFA factor (cleanup that works once a factor exists). */
 async function cleanupFactorsViaTotp(request: APIRequestContext, secret: string) {
   const step1 = await request.post(`${API_BASE}/v1/auth/login`, {
-    data: { email: GATED_EMAIL, password: TEST_PASSWORD },
+    data: { email: GATED_EMAIL, password: passwordFor(GATED_EMAIL) },
   });
   const j1 = (await step1.json()) as { status: string; challengeToken?: string };
   if (j1.status !== "mfa_required" || !j1.challengeToken) return; // nothing to clean
   const step2 = await request.post(`${API_BASE}/v1/auth/login`, {
     data: {
       email: GATED_EMAIL,
-      password: TEST_PASSWORD,
+      password: passwordFor(GATED_EMAIL),
       challengeToken: j1.challengeToken,
       mfaCode: genTotp(secret),
     },
@@ -89,7 +90,7 @@ async function cleanupFactorsViaTotp(request: APIRequestContext, secret: string)
 
 async function submitPassword(page: Page, email: string) {
   await page.getByTestId("login-email").fill(email);
-  await page.getByTestId("login-password").fill(TEST_PASSWORD);
+  await page.getByTestId("login-password").fill(passwordFor(GATED_EMAIL));
   await page.getByTestId("login-submit").click();
 }
 
@@ -109,7 +110,7 @@ test.describe("MVP-4 par.2.5 #4 /login — mandatory-MFA enrollment gate", () =>
     // factor cannot be removed via API (the assertion key died with the CDP
     // virtual authenticator). Fail with the recovery SQL instead of timing out.
     const probe = await request.post(`${API_BASE}/v1/auth/login`, {
-      data: { email: GATED_EMAIL, password: TEST_PASSWORD },
+      data: { email: GATED_EMAIL, password: passwordFor(GATED_EMAIL) },
     });
     const pj = (await probe.json()) as { status: string; availableKinds?: string[] };
     if (pj.status === "mfa_required" && !(pj.availableKinds ?? []).includes("TOTP")) {
@@ -118,6 +119,14 @@ test.describe("MVP-4 par.2.5 #4 /login — mandatory-MFA enrollment gate", () =>
           "Recover with: DELETE FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = " +
           `(SELECT user_id FROM sys.sys_users WHERE user_email = '${GATED_EMAIL}');`,
       );
+    }
+    // Z-262: il provisioning derivato ha assegnato un fattore TOTP a OGNI utente,
+    // compreso questo. Ma il gate di enrollment esiste per definizione solo per chi
+    // un secondo fattore NON ce l'ha: con il fattore presente il pannello non
+    // compare e il test scade su un'attesa. La precondizione va GARANTITA, non
+    // sperata — si rimuove per la stessa via API usata dal cleanup finale.
+    if (pj.status === "mfa_required") {
+      await cleanupFactorsViaTotp(request, totpSecretFor(GATED_EMAIL));
     }
     const csrf = await adminCsrf(request);
     tenantId = await rtlTenantId(request);

@@ -148,6 +148,30 @@ SELECT staging.storia36_assert_dossier_completeness();
 -- (trasversale: ogni riga di ogni dossier dentro il perimetro I5; unica
 --  esclusione motivata: sys_blueprint_process_registry, registro globale)
 
+-- I5 su sys_attendance (C1): il tenant della riga = il tenant del soggetto.
+-- (La vista v_tenant_boundary_violations copre solo le position assignments —
+--  scoperta della review adversarial 2026-07-27: 18 righe cross-tenant mai
+--  viste da nessuna batteria. C12 generalizza a ogni tabella (tenant, subject).)
+CREATE OR REPLACE FUNCTION staging.storia36_assert_attendance_tenant()
+RETURNS void
+LANGUAGE plpgsql
+AS $fn$
+DECLARE
+  v_cnt bigint;
+BEGIN
+  SELECT count(*) INTO v_cnt
+  FROM sys.sys_attendance a
+  JOIN sys.sys_users u ON u.user_id = a.attendance_subject_user_id
+  WHERE a.attendance_tenant_id IS DISTINCT FROM u.user_tenant_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'TENANT/attendance: % righe con tenant diverso dal tenant del soggetto (I5)', v_cnt;
+  END IF;
+END;
+$fn$;
+
+SELECT staging.storia36_assert_attendance_tenant();
+\echo '[OK] dossier TENANT: attendance dentro il perimetro I5 (tenant riga = tenant soggetto)'
+
 -- ============================================================================
 -- SELFTEST (eseguito con -v selftest=1): la falsificabilità del check.
 -- Inietta una tabella orfana in transazione → il check DEVE scattare → cleanup.
@@ -169,5 +193,28 @@ BEGIN
     RAISE EXCEPTION 'SELFTEST FALLITO: il check di completezza dossier NON è scattato sulla tabella orfana iniettata';
   END IF;
   RAISE NOTICE '[OK] SELFTEST dossier-completezza: violazione iniettata rilevata e ripulita';
+END $$;
+
+-- SELFTEST I5/attendance: una riga spostata sull'altro tenant deve far scattare
+-- il check (iniezione in subtransazione, rollback dall'eccezione)
+DO $$
+DECLARE
+  v_scattato boolean := false;
+BEGIN
+  BEGIN
+    UPDATE sys.sys_attendance
+       SET attendance_tenant_id = '8bc5bc59-f2d2-4a8a-882a-ea26ac367858'  -- Heuresys System
+     WHERE ctid = (SELECT ctid FROM sys.sys_attendance LIMIT 1);
+    PERFORM staging.storia36_assert_attendance_tenant();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'TENANT/attendance:%' THEN v_scattato := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_scattato THEN
+    RAISE EXCEPTION 'SELFTEST FALLITO: il check I5/attendance NON è scattato sulla riga cross-tenant iniettata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST I5/attendance: violazione iniettata rilevata, rollback';
 END $$;
 \endif

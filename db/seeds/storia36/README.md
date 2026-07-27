@@ -16,6 +16,16 @@ Piano: `docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md` · stato vivo: 
 |---|---|---|
 | `00_foundation.sql` | C0 | registro provenance `staging.storia36_runs` + calendario lavorativo IT `staging.storia36_calendar` (2023-08-01..2026-07-31, patrono Sant'Ambrogio — sede Milano dal dato) |
 | `00_repair_g4_contracts.sql` | C0 | riparazione puntuale (triage esito c) di 3 contratti con `end < start`; valori derivati dalle righe sane |
+| `01_attendance_timeoff.sql` | C1 | presenze/assenze/ferie su 36 mesi (112.969 righe attendance, 2.009 richieste con timeline storica, balances 2023-25 con entitlement CCNL, buste 2026-07); estate a 5 turni, malattia stagionale, cap PERSONAL; riallinea SOLO le proprie righe |
 
-I cluster C1..C11 aggiungono qui i loro seed (`01_attendance_timeoff.sql`, `02_performance.sql`, …
+## repair/ — one-shot FUORI dal glob custodia
+
+`repair/*.sql` NON viene eseguito da `storia36.sh` (né costruzione né custodia):
+sono riparazioni **one-shot sul dato legacy** decise da un triage (esito c),
+lanciate A MANO dal cluster che le decide — il principio «mai riparazione
+automatica di righe organiche/modificate» resta intatto. Ogni file è comunque
+guardato e registrato in `staging.storia36_runs` (G6 li esclude dalla proprietà
+twice-run: un reset ri-eseguito dopo la ri-semina cancellerebbe il lavoro).
+
+I cluster C2..C11 aggiungono qui i loro seed (`02_performance.sql`, …
 secondo il piano). Le batterie di verifica vivono in `db/scripts/verify-storia36*.sql`.

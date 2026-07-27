@@ -93,6 +93,37 @@ Nel ciclo dei cluster, questi assi entrano così: lo Step "post-condizioni" di o
 le asserzioni per-persona pertinenti + il self-test; dopo lo step "live" e PRIMA del commit si
 esegue la review adversarial (passo 7 implicito di ogni Task). PROGRESS registra i rilievi.
 
+## Ripetibilità: tre modi (richiesta di Enzo, S1033 — il processo non è una tantum)
+
+Il DBMS evolve: il processo deve poter essere RI-lanciato in sessioni successive per verificare se
+tutto regge ancora e riparare le rotture. Tre modi, un solo punto d'ingresso:
+
+- **`bash db/scripts/storia36.sh costruzione`** — l'esecuzione C0→C12 di questo piano (una tantum;
+  internamente = i seed dei cluster nell'ordine, ognuno già idempotente).
+- **`bash db/scripts/storia36.sh custodia [--repair-missing]`** — ri-esegue TUTTE le batterie
+  (globale + dossier + persona + aggregati) sul DB com'è OGGI e produce un report
+  (`qa_artifacts/storia36/custodia-<data>.md`) con **triage obbligatorio a tre esiti** per ogni
+  check rosso: (a) **dato mancante** → `--repair-missing` ri-esegue il seed pertinente (idempotente:
+  ricrea SOLO ciò che manca, `ON CONFLICT DO NOTHING`); (b) **asserzione troppo rigida** smentita
+  da un'evoluzione legittima → si corregge il CHECK, non il dato (con nota nel report); (c)
+  **rottura vera** → item di riparazione nel register. MAI riparazione automatica di righe
+  modificate: il registro di provenienza `staging.storia36_runs` + le chiavi `STORIA36::` dicono al
+  triage cosa era seminato e cosa è organico.
+- **`bash db/scripts/storia36.sh avanzamento`** (opzionale, mensile) — estende la storia al mese
+  corrente (presenze, buste, handoff payroll, approvazioni del mese nuovo, pulse) così la demo non
+  invecchia: la finestra diventa MOBILE (start fisso 2023-08-01, end = fine mese precedente).
+
+**Vincolo di progettazione che ne discende (vale da C0 in poi):** ogni check è un'ASSERZIONE DI
+PROPRIETÀ, mai una fotografia — niente conteggi esatti attesi, e la fine-finestra è un PARAMETRO
+(`psql -v window_end=...`, default = fine mese precedente), non una costante nei check: altrimenti
+la prima custodia su un DB vivo segnalerebbe come rottura l'evoluzione legittima. Il check G1
+("nessun record oltre la finestra") in custodia usa il parametro corrente.
+
+**Schedulazione (deliverable C12):** la custodia entra nel pattern operativo esistente — timer
+systemd sul linux-pc (dopo il refresh settimanale del clone, rif. Z-022/Z-253) con `OnFailure` nel
+registro dei job che il dashboard di sessione già legge (pattern Z-015, oggi 9 job): una rottura
+della storia si presenta al boot della sessione successiva, non quando qualcuno se ne accorge in demo.
+
 ## Bootstrap della fresh session (ogni sessione del programma)
 
 ```bash
@@ -158,7 +189,8 @@ CREATE TABLE IF NOT EXISTS staging.storia36_calendar (
 -- G6: staging.storia36_runs: ogni cluster chiuso ha run con twice_run_delta=0
 ```
 - [ ] **Step 0.5: esegui foundation due volte + verify** — `psql -v ON_ERROR_STOP=1 -f db/seeds/storia36/00_foundation.sql` ×2, poi `-f db/scripts/verify-storia36.sql`: G1-G6 devono già passare sul dato attuale **tranne G3** (l'incoerenza nota buste/presenze): G3 va scritto e lasciato ROSSO — è la prima post-condizione che C1 farà diventare verde.
-- [ ] **Step 0.6: commit** `feat(db): storia36 C0 — fondazioni (registro, calendario, batteria di coerenza)` + spunta C0 in PROGRESS.
+- [ ] **Step 0.5b: entrypoint `db/scripts/storia36.sh`** — nasce SUBITO con i tre modi (costruzione/custodia/avanzamento; i modi non ancora implementati falliscono ESPLICITI con "non ancora disponibile — cluster X richiesto", mai in silenzio). La custodia funziona da subito sui check esistenti: ogni cluster successivo la arricchisce senza toccarne l'interfaccia. Finestra SEMPRE via parametro (`-v window_end=`), default = fine mese precedente.
+- [ ] **Step 0.6: commit** `feat(db): storia36 C0 — fondazioni (registro, calendario, batteria di coerenza, entrypoint)` + spunta C0 in PROGRESS.
 
 ### Task C1: Coerenza dell'esistente — presenze, assenze, ferie (backfill + forward-fill)
 
@@ -297,6 +329,7 @@ CREATE TABLE IF NOT EXISTS staging.storia36_calendar (
 - [ ] **Step 12.3: rete di sicurezza intera** — vitest completa + Playwright `test:e2e:prod:node22` + guardia attori 9/9.
 - [ ] **Step 12.4: demo live** — percorso investitore/cliente: login federica.marchetti (TENANT_ADMIN) → dashboard con trend 36 mesi → un utente con storia completa (carriera, comp, formazione, valutazioni) → inbox approvazioni → engagement. Screenshot in `qa_artifacts/`.
 - [ ] **Step 12.5: manutenzione ecosistema** — rigenera `heuresys_ci` (clone PROD per la CI — `db/scripts/setup-ci-database.sh` sul linux-pc, rif. Z-253) + `bash scripts/align-clones.sh all --deploy` + CI verde su main.
+- [ ] **Step 12.5b: custodia schedulata** — timer systemd sul linux-pc (settimanale, DOPO il refresh del clone) che esegue `storia36.sh custodia` con `OnFailure=heuresys-unit-failure@` e report in `qa_artifacts/storia36/`; registrato fra i job che il dashboard legge. Prova: farlo scattare una volta con una violazione iniettata (unit di prova, come Z-015) e vederla nel registro.
 - [ ] **Step 12.6: chiusura** — AUDIT_FINALE.md completo, PROGRESS tutto spuntato, register #77 → DONE al handoff, eventuali cluster Z-* del piano zero-pendenze (W3 dati) chiusi da questo lavoro annotati per il prossimo handoff.
 
 ---

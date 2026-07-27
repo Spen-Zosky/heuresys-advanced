@@ -1,26 +1,21 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-07-26 (S1032 — l'accesso smette di passare da sette personas, e un segreto pubblico viene a galla).
+**Updated**: 2026-07-27 (S1033 — la CI torna verde, i segreti pubblicati muoiono davvero, nasce il mandato storia36).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md` · pattern di dati → `docs/kb/DATA_PATTERNS.md`.
 
-## Last session brief (S1032)
+## Last session brief (S1033)
 
-Due cluster tentati e **interrotti** dai revisori adversarial, e un terzo lavoro — non
-previsto — che ha cambiato il modello di accesso del progetto.
-
-`Z-257` (il gate GDPR che guardava 74 riferimenti su 248) è stato corretto e reso falsificabile,
-ma tre revisori su tre hanno dimostrato che allargare il registro **senza toccare chi lo consuma**
-apriva una fuga: l'export self-service consegnava righe intere di fatti altrui. Rollback eseguito,
-produzione riportata allo stato di partenza. `Z-259`, nato per chiudere la fuga preesistente sui
-riferimenti-attore, ha chiuso due casi misurati ma è caduto su un terzo che nessuna delle sue due
-guardie vede — un id dentro una colonna jsonb — e su un test che ereditava lo stesso punto cieco
-del codice che sorvegliava.
-
-Cercando come rendere più agile il login di sviluppo è emerso che il repository è **pubblico** e
-pubblicava sette segreti TOTP corrispondenti ad altrettanti fattori attivi in produzione. Da lì la
-decisione di Enzo: via le personas, accesso per tutti gli utenti. Fatto — 158 su 158 hanno ora
-identità, password e secondo fattore **derivati** da una chiave madre gitignored; i segreti sono
-usciti dai due file del repo; i file di test non sono stati toccati, grazie a un segnaposto risolto al momento del login.
+La CI rossa lasciata da S1032 è stata diagnosticata **riproducendo il login contro il DB della CI**
+(i log mentivano): la chiave di cifratura MFA del runner non era quella con cui i segreti sono
+cifrati, e la chiave madre non era mai arrivata all'ambiente del runner. Sistemate entrambe via
+drop-in systemd, più il sintomo che aveva sviato tutti — un guasto di decifratura usciva come
+richiesta malformata del client, ora è un errore interno tipizzato col suo codice. **Tutti i gate
+sono verdi**, Playwright compreso (aveva due cause proprie: un modulo che non compilava una volta
+transpilato e la password unica rimasta lato web dopo Z-262). **`Z-261` CHIUSO** con l'ok di Enzo:
+i fattori coi segreti pubblicati eliminati dai tre database, nessun utente rimasto senza secondo
+fattore. Gli attori dei test si scelgono ora **per caratteristica** (`test/helpers/actors.ts` +
+guardia falsificabile; profili estesi agli invarianti I18/I20). Audit di completezza del DBMS
+eseguito live → **mandato Enzo: storia RTL su trentasei mesi (#77)**, piano scritto e committato.
 
 ## Obiettivo permanente (mandato Enzo, S1029 — vale per OGNI sessione futura)
 
@@ -29,57 +24,38 @@ zero pending, zero errori aperti. Il censimento è fatto; ora è esecuzione, con
 review adversarial per ogni task**. Tutte le decisioni tecniche sono di Claude, il tracciamento del
 piano pure; a Enzo vanno solo le voci che dipendono da un suo input.
 
-## Stato del piano
+## Stato dei piani
 
-`docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — si conta con `zp_state.py piano`.
-Piani operativi nuovi: `2026-07-26-z261-mfa-fixture-secret-rotation.md` (superato dai fatti, vedi
-`Z-261`) e `2026-07-26-z262-accesso-derivato-tutti-gli-utenti.md` (eseguito nei passi 1-4).
+- Zero-pendenze: `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — si conta con `zp_state.py piano`.
+- **Storia RTL (nuovo, S1033)**: `docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md` — stato vivo in `.storia36/PROGRESS.md`.
 
 ## ⚠ Top priorities (next session)
 
-1. **`Z-261` — i sette segreti pubblicati sono ANCORA attivi.** I fattori `e2e-fixture` non sono
-   stati eliminati perché `mfa-enroll-confirm` resta rosso: manipola i fattori di `paolo.caputo` e
-   li ripristina nella forma vecchia. Sistemare quel file, poi eliminarli (serve il via di Enzo:
-   il sistema blocca le cancellazioni su produzione). **È l'unica cosa aperta verso l'esterno.**
-2. 🔴 **CI ROSSA — 158 file su 218 — e deploy BLOCCATO.** È il danno di questa sessione, non un
-   guasto preesistente: prima erano 2 workflow, ora è la suite. Il passaggio alle credenziali
-   derivate è stato validato su **un campione** (GDPR 9/9 + 5 file auth) e da lì dichiarato valido
-   per tutti i 162 file — una generalizzazione da un caso, lo stesso errore che i revisori avevano
-   contestato due volte lo stesso giorno. **Cosa è già stato sistemato**: `heuresys_ci` rigenerato
-   dalla PROD (160 credenziali / 159 fattori, era 13/0) e la chiave madre raggiungibile in CI via
-   `DEV_ACCESS_MASTER_KEY_B64` nell'env del runner (il checkout non porta `.secrets/`, che è
-   gitignored — copiare il file nell'area di lavoro del runner si sarebbe rotto da solo).
-   **Diagnosi NON confermata**: fra i fallimenti c'è `expected 'e2e-fixture' to be 'derived-access'`
-   (un test asserisce l'etichetta vecchia) e `db:seed-test-admin` ora scrive con l'etichetta nuova
-   su un DB che porta entrambe. **Da verificare prima di toccare**: eseguire in locale
-   `pnpm exec vitest run` sull'intera suite — cosa che questa sessione NON ha fatto, ed è la ragione
-   per cui il problema è emerso solo in CI. La VM è ferma a `a13cdb1e`; PROD non è stata toccata.
-3. **`Z-259` da riprendere** con i 16 rilievi in `.zp/prove/Z-259-verdetti-adversarial.json`: la
-   proiezione deve guardare dentro i valori annidati, e il test deve girare su più soggetti — con
-   uno solo era verde su un export bucato.
-4. `Z-260` (dossier per i revisori, chiesto da Enzo) · `Z-258` (ambito tenant in tre classi).
+1. **#77 storia36 — eseguire da C0** (il PRIMO atto è il dump completo, prima di ogni scrittura).
+   Piano autosufficiente + decisioni di Enzo già vincolate dentro; riprendere sempre dal primo
+   cluster non spuntato in `.storia36/PROGRESS.md`. Effort: dettagliato per cluster nel piano.
+2. **`Z-259` da riprendere** con i rilievi in `.zp/prove/Z-259-verdetti-adversarial.json`: la
+   proiezione deve guardare dentro i valori annidati, e il test deve girare su più soggetti.
+3. `Z-260` (dossier per i revisori, chiesto da Enzo) · `Z-258` (ambito tenant in tre classi).
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **Ridisegno delle personas**: la direzione è presa (utenti reali al posto delle 7 fisse) e
-  l'accesso c'è. Resta da decidere se sostituire le costanti `MANAGER = "paolo.caputo@…"` con
-  interrogazioni al DB, e con quale ordine di ondate procedere.
-- **`admin@heuresys.com`**: mantenuto come account di servizio (deciso S1032), ora derivato.
-  Le sue funzioni dovevano passare a `enzo.spenuso@heuresys.com`, che però **non ha alcun accesso**
-  (zero identità, zero credenziali, nessun ruolo): da decidere se e quando.
-- **Autonomia non presidiata**: freno inserito. Dopo S1032 restano da fare i controlli su sessione
-  viva; il registro delle corse (`.zp/runs.ndjson`) non esiste ancora.
-- WAIT-INPUT invariati: **#4** pricing · **#8** app-password Outlook (NON è il cancello
-  dell'onboarding: `rtl-bank.org` non esiste come dominio) · **#16** SuccessFactors · **#52** SSO IdP.
+- **`admin@heuresys.com`**: account di servizio (deciso S1032), derivato, senza posizione (unico).
+  Le sue funzioni dovevano passare a `enzo.spenuso@heuresys.com`, che però **non ha alcun accesso**:
+  da decidere se e quando.
+- **Autonomia non presidiata**: freno inserito. Restano i controlli su sessione viva; il registro
+  delle corse (`.zp/runs.ndjson`) non esiste ancora.
+- WAIT-INPUT invariati: **#4** pricing · **#8** app-password Outlook · **#16** SuccessFactors ·
+  **#52** SSO IdP.
 
 ## Verification (next session)
 
 ```bash
 git log origin/main..HEAD --oneline               # 0 dopo il push handoff
 python docs/kb/tools/handoff_lint.py              # OK atteso
-python docs/kb/tools/zp_state.py piano            # cluster totali/chiusi
-pnpm dev:whoami luca.conti@rtl-bank.org           # credenziali di chiunque, ricalcolate
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c \
+gh run list --limit 8                             # tutti i gate verdi attesi
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc \
   "SELECT count(*) FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_metadata->>'label'='e2e-fixture'"
-                                                  # 7 = Z-261 ancora aperto · 0 = chiuso
+                                                  # 0 = Z-261 resta chiuso
+cat .storia36/PROGRESS.md                         # C0 = primo cluster da eseguire
 ```

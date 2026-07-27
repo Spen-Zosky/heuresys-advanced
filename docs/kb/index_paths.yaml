@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-26T21:07:25Z da docs/kb/tools/build_index.py
+# generato: 2026-07-27T13:20:19Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-26T21:07:25Z"
-  total_files: 2600
+  generated_at: "2026-07-27T13:20:19Z"
+  total_files: 2606
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -22,7 +22,7 @@ meta:
     db-other: 8
     db-script: 36
     db-seed: 115
-    doc-canonical: 510
+    doc-canonical: 513
     handoff-state: 1
     qa-artifact: 103
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 97
     showcase-source: 14
-    test: 307
+    test: 310
     ux-design-archive: 80
     web-source: 207
   status_counts:
     archive: 497
     external-archive: 50
-    live: 2053
+    live: 2059
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -7592,6 +7592,12 @@ files:
     category: db-seed
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.storia36\PROGRESS.md'
+    root: repo
+    rel: '.storia36/PROGRESS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\CLAUDE.md'
     root: repo
     rel: 'CLAUDE.md'
@@ -10316,6 +10322,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-07-27-rtl-storia-36-mesi.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-05-28-cross-os-bootstrap-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-05-28-cross-os-bootstrap-design.md'
@@ -10481,6 +10493,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-26-organizational-model-and-role-derivation-design.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-07-26-organizational-model-and-role-derivation-design.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-07-27-claude-ecosystem-harmonization-plan.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-07-27-claude-ecosystem-harmonization-plan.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -12086,6 +12104,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\actors-profile.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/actors-profile.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\analytics-csv.test.ts'
     root: repo
     rel: 'apps/api/test/analytics-csv.test.ts'
@@ -12467,6 +12491,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\goals.integration.test.ts'
     root: repo
     rel: 'apps/api/test/goals.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\helpers\actors.ts'
+    root: repo
+    rel: 'apps/api/test/helpers/actors.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -13307,6 +13337,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\unit\login-rate-limit.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/login-rate-limit.unit.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\unit\mfa-crypto-fault-status.unit.test.ts'
+    root: repo
+    rel: 'apps/api/test/unit/mfa-crypto-fault-status.unit.test.ts'
     category: test
     status: live
     provenance: git-tracked

@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-26T21:07:25Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2600**
+**Generato**: 2026-07-27T13:20:19Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2606**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 36 |
 | db-seed | 115 |
-| doc-canonical | 510 |
+| doc-canonical | 513 |
 | handoff-state | 1 |
 | qa-artifact | 103 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 97 |
 | showcase-source | 14 |
-| test | 307 |
+| test | 310 |
 | ux-design-archive | 80 |
 | web-source | 207 |
-| **TOTALE** | **2600** |
+| **TOTALE** | **2606** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 497 |
 | external-archive | 50 |
-| live | 2053 |
+| live | 2059 |
 
 ## File per categoria
 
@@ -1349,6 +1349,7 @@
 
 ### doc-canonical
 
+- `D:\heuresys-advanced\.storia36\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\CLAUDE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\START_HERE.md` · *live* · git-tracked
@@ -1803,6 +1804,7 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-07-06-project-atlas-skill.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-07-26-z261-mfa-fixture-secret-rotation.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-07-26-z262-accesso-derivato-tutti-gli-utenti.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-07-27-rtl-storia-36-mesi.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-28-cross-os-bootstrap-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-30-rtl-tenant-rebuild-import-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-30-rtl-tenant-rebuild.md` · *live* · git-tracked
@@ -1831,6 +1833,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-zero-pending-loop-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-25-zero-pending-plan.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-26-organizational-model-and-role-derivation-design.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-07-27-claude-ecosystem-harmonization-plan.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked
@@ -2122,6 +2125,7 @@
 
 - `D:\heuresys-advanced\apps\api\test\activity-classification-mappings.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\activity-classifications.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\actors-profile.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics-csv.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics-export.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\analytics.integration.test.ts` · *live* · git-tracked
@@ -2186,6 +2190,7 @@
 - `D:\heuresys-advanced\apps\api\test\goals-life.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\goals-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\goals.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\helpers\actors.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\build-test-app.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\login.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\mfa-fixture-secrets.ts` · *live* · git-tracked
@@ -2326,6 +2331,7 @@
 - `D:\heuresys-advanced\apps\api\test\two-axis-f4-crosstree.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\locale.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\login-rate-limit.unit.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\unit\mfa-crypto-fault-status.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\scope-data-classes.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\slow-queries-degradation.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\trust-proxy.unit.test.ts` · *live* · git-tracked

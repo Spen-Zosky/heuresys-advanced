@@ -6,6 +6,7 @@
 
 ## Decisioni vincolanti (Enzo, S1033)
 - Finestra: **2023-08-01 → 2026-07-31** · riorg **2025-03-01** · crescita moderata · aree delicate a volumi bassi · dump prima di tutto · popolazione chiusa (nessun utente nuovo).
+- **Verifica su 4 assi per OGNI cluster** (piano, sezione dedicata): dossier per-persona 162/162 · review adversarial (3 revisori, rilievi qui sotto nel diario) · self-test di ogni check (iniezione violazione → deve scattare) · riconciliazione aggregati.
 
 ## Cluster
 

@@ -40,6 +40,39 @@ Mandato di Enzo (S1033, 2026-07-27): il DBMS deve rappresentare dati che la piat
 - **Test**: la suite non deve MAI dipendere da conteggi esatti pre-storia (feedback `no_hardcoded_test_data`); la guardia `actors-profile.integration.test.ts` (9 profili) deve restare verde dopo ogni cluster.
 - **`docs/kb/DATA_PATTERNS.md`**: ogni cluster vi registra i pattern riusabili scoperti (registro nato S1032).
 
+## Verifica su quattro assi (vincolante per OGNI cluster — aggiunto su domanda di Enzo, S1033)
+
+I tre strati originari (post-condizioni per cluster · batteria globale G1-G6 · audit C12) sono
+**verticali**: provano che ogni ciclo sia coerente al suo interno. Non bastano. Quattro assi:
+
+1. **Asse orizzontale — dossier per-persona** (`db/scripts/verify-storia36-person.sql`, nasce al C0
+   e cresce col programma): batteria cross-cluster eseguita su **TUTTI i 162 utenti**, mai a
+   campione. Asserzioni tipo (parametri DALLA RICERCA di dominio per famiglia di ruolo, mai
+   inventati): età alla nomina >= minimo del ruolo · fine studi <= inizio prima esperienza ·
+   progressione di carriera senza salti implausibili · retribuzione dentro la banda
+   dell'inquadramento CCNL **e** coerente con la seniority del ruolo · skill possedute ⊇ requisiti
+   della posizione con proficiency plausibile · certificazioni obbligatorie del ruolo presenti e
+   in corso di validità · valutazioni presenti per ogni anno di presenza. Esempio-guida (di Enzo):
+   il Direttore Crediti deve reggere il dossier INTERO — età, bio, titoli, esperienze, skill,
+   retribuzione, formazione — letto come una storia unica.
+2. **Review adversarial a fine cluster**: TRE revisori indipendenti col mandato di DEMOLIRE
+   l'evidenza (modello zero-pending, che ha già demolito evidenze in S1030/S1032/S1033), lenti
+   distinte: (a) coerenza temporale · (b) realismo di dominio bancario (con la ricerca in mano) ·
+   (c) integrazione cross-cluster + dossier di K persone estratte a caso lette per intero.
+   Rilievi confermati = si correggono PRIMA di chiudere il cluster.
+3. **Self-test di ogni check** (feedback `evidence_must_be_falsifiable`): per ogni post-condizione
+   nuova, iniettare in transazione una violazione deliberata → il check DEVE scattare → rollback.
+   Un check mai visto fallire non prova nulla. Il self-test vive in coda a `verify-storia36.sql`
+   (sezione `-- SELFTEST`, eseguita con flag psql `-v selftest=1`).
+4. **Riconciliazione degli aggregati** (C8 per engagement, C12 per tutto): i numeri che le
+   dashboard/analytics servono via API vengono RICALCOLATI dalle righe sottostanti e confrontati
+   (headcount per trimestre, media engagement per ciclo, distribuzione comp per banda): un
+   aggregato che non torna con le proprie righe è il primo posto dove un occhio attento scava.
+
+Nel ciclo dei cluster, questi assi entrano così: lo Step "post-condizioni" di ogni cluster include
+le asserzioni per-persona pertinenti + il self-test; dopo lo step "live" e PRIMA del commit si
+esegue la review adversarial (passo 7 implicito di ogni Task). PROGRESS registra i rilievi.
+
 ## Bootstrap della fresh session (ogni sessione del programma)
 
 ```bash
@@ -238,7 +271,7 @@ CREATE TABLE IF NOT EXISTS staging.storia36_calendar (
 
 **Files:** Create: `docs/kb/storia36/AUDIT_FINALE.md` · Modify: `db/scripts/verify-storia36.sql` (consolidato)
 
-- [ ] **Step 12.1: batteria completa** — `verify-storia36.sql` intero VERDE + `pnpm db:validate` + le 6 viste = 0.
+- [ ] **Step 12.1: batteria completa** — `verify-storia36.sql` intero VERDE (self-test inclusi) + `verify-storia36-person.sql` su 162/162 + riconciliazione aggregati (API vs righe) + `pnpm db:validate` + le 6 viste = 0.
 - [ ] **Step 12.2: audit semantico su TUTTE le 206 tabelle** (mandato Enzo: "il secondo passaggio va fatto su tutte") — per ogni tabella: regola di dominio applicabile (range plausibili, date, correlazioni) eseguita e verbalizzata in AUDIT_FINALE con esito; le tabelle senza regola sensata dichiarate esplicitamente con il perché. Fan-out con agenti Explore per gruppi di tabelle se il contesto lo richiede.
 - [ ] **Step 12.3: rete di sicurezza intera** — vitest completa + Playwright `test:e2e:prod:node22` + guardia attori 9/9.
 - [ ] **Step 12.4: demo live** — percorso investitore/cliente: login federica.marchetti (TENANT_ADMIN) → dashboard con trend 36 mesi → un utente con storia completa (carriera, comp, formazione, valutazioni) → inbox approvazioni → engagement. Screenshot in `qa_artifacts/`.

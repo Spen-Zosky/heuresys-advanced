@@ -16,7 +16,6 @@ import { passwordFor } from "./helpers/personas.js";
 
 const TOTP_USER = "paolo.caputo@rtl-bank.org";
 const EMAIL_USER = "tommaso.fiore@rtl-bank.org";
-const PWD = passwordFor(EMAIL_USER);
 
 interface Session { cookies: Map<string, string>; csrf: string; userId: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
@@ -28,7 +27,15 @@ async function login(t: TestApp, email: string): Promise<Session> {
   // exercises: the /v1/auth/mfa/* self-service routes are allowlisted for it.
   // Pre-flip (policy off / out-of-scope) it is a plain full session. Both
   // sessions carry the CSRF cookie + csrfToken needed below.
-  const r = await t.app.inject({ method: "POST", url: "/v1/auth/login", payload: { email, password: PWD } });
+  // La password si deriva DALL'UTENTE che stiamo autenticando. Prima di Z-262
+  // ne esisteva una sola, condivisa, e questo file la calcolava una volta da
+  // EMAIL_USER usandola anche per TOTP_USER: con una password per utente quel
+  // riuso autentica la persona sbagliata e restituisce 401.
+  const r = await t.app.inject({
+    method: "POST",
+    url: "/v1/auth/login",
+    payload: { email, password: passwordFor(email) },
+  });
   if (r.statusCode !== 200) throw new Error(`login ${email}: ${r.statusCode} ${r.body}`);
   const body = r.json() as { status?: string; csrfToken: string; user?: { userId: string } };
   if (body.status !== "success" && body.status !== "mfa_enrollment_required") {

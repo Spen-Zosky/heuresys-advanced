@@ -75,3 +75,30 @@ export class TooManyRequestsError extends ApiError {
     super(code, message);
   }
 }
+
+/**
+ * 500 — guasto interno TIPIZZATO: la richiesta è legittima, è il server (o un
+ * dato che custodisce) a non essere in condizione di servirla — chiave di
+ * cifratura sbagliata, segreto corrotto, dipendenza mal configurata.
+ *
+ * Perché esiste (S1033): l'errorHandler declassa a 400 ogni `ApiError` privo di
+ * statusCode. Un guasto di configurazione arrivava quindi al chiamante come
+ * «Invalid request payload», cioè come colpa sua. Costo misurato: la CI rossa di
+ * S1032 (158 file su 218) si presentava come `login <persona>: 400` e la chiave
+ * di cifratura divergente sul runner è emersa solo riproducendo il login contro
+ * il database della CI.
+ *
+ * `message` è per il log (può nominare variabili e dettagli interni);
+ * `publicMessage` è ciò che esce nella risposta — il codice invece viaggia in
+ * chiaro, perché è l'aggancio di chi diagnostica e non rivela nulla.
+ */
+export class InternalError extends ApiError {
+  readonly statusCode = 500;
+  constructor(
+    code: string,
+    message: string,
+    public readonly publicMessage = "Unexpected server error",
+  ) {
+    super(code, message);
+  }
+}

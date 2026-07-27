@@ -46,7 +46,7 @@
  */
 
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "node:crypto";
-import { ApiError } from "../../errors/index.js";
+import { InternalError } from "../../errors/index.js";
 import { env } from "../../config/env.js";
 
 /** Marks a stored secret as AES-256-GCM ciphertext (vs legacy plaintext). */
@@ -59,20 +59,29 @@ const KEY_BYTES = 32; // AES-256
  *  entropy is MFA_ENCRYPTION_KEY itself). Stable so derivation is deterministic. */
 const SCRYPT_SALT = "heuresys.mfa.totp.secret.v1";
 
-/** Raised when a value is ciphertext but the env key needed to decrypt is absent. */
-export class MfaEncryptionKeyMissingError extends ApiError {
+/** Raised when a value is ciphertext but the env key needed to decrypt is absent.
+ *  `InternalError` (500), non ApiError generico: è un guasto di configurazione
+ *  del server, e come 400 appariva come una richiesta malformata del client. */
+export class MfaEncryptionKeyMissingError extends InternalError {
   constructor() {
     super(
       "MFA_ENCRYPTION_KEY_MISSING",
       "Stored MFA secret is encrypted (enc:v1:) but MFA_ENCRYPTION_KEY is not set — cannot decrypt.",
+      "MFA secret unavailable",
     );
   }
 }
 
-/** Raised when a stored enc:v1: value is structurally malformed (tampered/truncated). */
-export class MfaCiphertextMalformedError extends ApiError {
+/** Raised when a stored enc:v1: value is structurally malformed (tampered/truncated),
+ *  o quando la chiave configurata NON è quella con cui il dato è stato cifrato —
+ *  il caso che ha reso rossa la CI in S1032 (chiave del runner divergente). */
+export class MfaCiphertextMalformedError extends InternalError {
   constructor() {
-    super("MFA_CIPHERTEXT_MALFORMED", "Stored MFA secret ciphertext is malformed.");
+    super(
+      "MFA_CIPHERTEXT_MALFORMED",
+      "Stored MFA secret ciphertext is malformed, or the configured MFA_ENCRYPTION_KEY is not the one it was encrypted with.",
+      "MFA secret unavailable",
+    );
   }
 }
 

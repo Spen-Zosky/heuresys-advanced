@@ -77,11 +77,20 @@ describe("QW-SEC6 MFA secret crypto (AES-256-GCM encryption-at-rest)", () => {
     expect(decryptSecret("ABC123-legacy-plain")).toBe("ABC123-legacy-plain");
   });
 
-  it("(e) the lazy-reencrypt fixture-skip label matches the committed fixture label (no drift)", () => {
-    // The service skips lazy re-encryption for factors carrying this label so
-    // the committed e2e-fixture rows stay plaintext for PROD/CI/Playwright.
-    // A literal mismatch would silently re-enable upgrading them → assert parity.
-    expect(MFA_INTERNAL.FIXTURE_FACTOR_LABEL).toBe(E2E_FIXTURE_LABEL);
+  it("(e) lo skip della ri-cifratura NON copre i fattori derivati (restano cifrati a riposo)", () => {
+    // Fino a Z-262 le due etichette coincidevano, e la parità era l'invariante
+    // giusta: i fattori dei test avevano segreti COMMITTATI, dovevano restare in
+    // chiaro, e lo skip serviva a non "aggiornarli" alle spalle di PROD/CI.
+    //
+    // Z-262 ha sciolto quel legame: i segreti pubblicati sono stati ritirati dal
+    // repository e i fattori dei test ora nascono DERIVATI dalla chiave madre e
+    // cifrati. Da qui l'invariante si capovolge — se lo skip arrivasse a coprire
+    // anche l'etichetta nuova, i segreti derivati tornerebbero in chiaro a
+    // riposo: sarebbe una regressione di sicurezza, non una differenza di forma.
+    expect(MFA_INTERNAL.FIXTURE_FACTOR_LABEL).not.toBe(E2E_FIXTURE_LABEL);
+    // Lo skip resta ancorato ai vecchi fattori a segreto pubblicato, che sono in
+    // chiaro nel dato e vanno dismessi, non ri-cifrati.
+    expect(MFA_INTERNAL.FIXTURE_FACTOR_LABEL).toBe("e2e-fixture");
   });
 
   it("(c) ciphertext differs from plaintext and carries the enc:v1: prefix (key ON)", () => {

@@ -21,6 +21,7 @@ import {
   RefreshReplayDetected,
   CsrfFailedError,
   TooManyRequestsError,
+  InternalError,
 } from "../errors/index.js";
 
 export async function errorHandler(
@@ -86,6 +87,15 @@ export async function errorHandler(
       reply.header("Retry-After", String(err.retryAfterSeconds));
     }
     reply.code(429).send({ error: { code: err.code, message: err.message } });
+    return;
+  }
+  if (err instanceof InternalError) {
+    // Guasto del server, non del chiamante: 500 + log a livello error (il
+    // `message` interno può nominare variabili d'ambiente, quindi resta nel
+    // log). Il CODICE esce nella risposta: senza di esso un guasto di
+    // configurazione è indistinguibile da un qualunque errore generico.
+    req.log.error({ err, code: err.code }, "Internal fault");
+    reply.code(500).send({ error: { code: err.code, message: err.publicMessage } });
     return;
   }
   if (err instanceof ApiError) {

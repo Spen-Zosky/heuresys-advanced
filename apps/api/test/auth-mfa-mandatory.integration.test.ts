@@ -81,6 +81,17 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
     if (!row) throw new Error(`R2 persona not seeded: ${READONLY} (run pnpm db:seed-r2)`);
     albertoUserId = row.user_id;
     rtlTenantId = row.user_tenant_id;
+    // La precondizione di TUTTO il file è che questa persona sia SENZA secondo
+    // fattore: è ciò che distingue `mfa_enrollment_required` da `mfa_required`.
+    // Fino a S1032 la si dava per scontata (ripulendo solo in afterAll) e Z-262
+    // l'ha smentita assegnando un fattore TOTP derivato a ogni utente: i cinque
+    // test qui sotto sono diventati rossi non per una regressione del gate, ma
+    // perché il dato di partenza era cambiato sotto di loro. Garantirla qui
+    // rende il file indipendente da quali fattori il DB porti; l'isolamento
+    // transazionale (D-52) fa rollback a fine file, quindi non tocca il dato reale.
+    await pool.query(`DELETE FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`, [
+      albertoUserId,
+    ]);
     // Snapshot the pre-suite RTL policy (restored in afterAll — the live DB may
     // carry a REAL activation that a blanket delete would silently wipe, S982).
     savedPolicy =
@@ -141,7 +152,9 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
   });
 
   it("policy ON: a user whose roles are OUT of scope (TENANT_ADMIN) is never ENROLLMENT-gated by it", async () => {
-    const resp = await login({ email: TENANT_ADMIN, password: PASSWORD });
+    // `PASSWORD` è quella di READONLY: dopo Z-262 ogni utente ha la propria, e
+    // riusarla qui autenticava la persona sbagliata (401 invece del 200 atteso).
+    const resp = await login({ email: TENANT_ADMIN, password: passwordFor(TENANT_ADMIN) });
     expect(resp.statusCode).toBe(200);
     const status = (resp.json() as { status: string }).status;
     // Out-of-scope ⇒ this suite's ['READ_ONLY'] policy adds NOTHING for her:

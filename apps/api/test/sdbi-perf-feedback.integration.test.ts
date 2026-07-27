@@ -19,11 +19,20 @@ const count = async (sql: string, params: unknown[] = []): Promise<number> => {
 };
 
 describe('SDBI Option-B — perf reviews + feedback360', () => {
-  it('the 4 sys.* tables hold exactly the RTL-resolvable counts', async () => {
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_reviews`)).toBe(161);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_review_competency_ratings`)).toBe(465);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_feedback_360_responses`)).toBe(390);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback`)).toBe(474);
+  it('the 4 sys.* tables hold exactly the RTL-resolvable IMPORT counts', async () => {
+    // Scoped to SDBI-import provenance: the storia36 backfill (natural keys
+    // STORIA36::*) legitimately grows these tables — asserting bare totals
+    // would re-introduce the banned photograph-count anti-pattern.
+    // 159 (era 161): 2 review cross-tenant (subject HEURESYS in tenant RTL)
+    // eliminate dal repair storia36 C2 del 2026-07-28 (violazione I5).
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_reviews
+      WHERE review_natural_key NOT LIKE 'STORIA36%'`)).toBe(159);
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_review_competency_ratings
+      WHERE rating_natural_key NOT LIKE 'STORIA36%'`)).toBe(465);
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_feedback_360_responses
+      WHERE response_natural_key NOT LIKE 'STORIA36%'`)).toBe(390);
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback
+      WHERE feedback_natural_key NOT LIKE 'STORIA36%'`)).toBe(474);
   });
 
   it('I5 — every row belongs to the single canonical RTL tenant (FK + middleware, never RLS)', async () => {
@@ -103,15 +112,21 @@ describe('SDBI Option-B — perf reviews + feedback360', () => {
         WHERE feedback_from_user_id IS NULL AND feedback_metadata ? 'unresolved_from'`)).toBe(1);
   });
 
-  it('resolved FK counts match the measured RTL crosswalk', async () => {
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_reviews WHERE review_subject_user_id IS NOT NULL`)).toBe(159);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_reviews WHERE review_reviewer_user_id IS NOT NULL`)).toBe(157);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback WHERE feedback_to_user_id IS NOT NULL`)).toBe(474);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback WHERE feedback_from_user_id IS NOT NULL`)).toBe(473);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback WHERE feedback_related_goal_id IS NOT NULL`)).toBe(146);
+  it('resolved FK counts match the measured RTL crosswalk (import rows)', async () => {
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_reviews
+      WHERE review_natural_key NOT LIKE 'STORIA36%' AND review_subject_user_id IS NOT NULL`)).toBe(157);
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_reviews
+      WHERE review_natural_key NOT LIKE 'STORIA36%' AND review_reviewer_user_id IS NOT NULL`)).toBe(157);
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback
+      WHERE feedback_natural_key NOT LIKE 'STORIA36%' AND feedback_to_user_id IS NOT NULL`)).toBe(474);
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback
+      WHERE feedback_natural_key NOT LIKE 'STORIA36%' AND feedback_from_user_id IS NOT NULL`)).toBe(473);
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback
+      WHERE feedback_natural_key NOT LIKE 'STORIA36%' AND feedback_related_goal_id IS NOT NULL`)).toBe(146);
     expect(await count(
       `SELECT count(*)::int AS n FROM sys.sys_feedback_360_responses
-        WHERE response_target_user_id IS NOT NULL AND response_reviewer_user_id IS NOT NULL`)).toBe(390);
+        WHERE response_natural_key NOT LIKE 'STORIA36%'
+          AND response_target_user_id IS NOT NULL AND response_reviewer_user_id IS NOT NULL`)).toBe(390);
   });
 
   it('I9 — sys_nine_box_grid is a VIEW returning only COMPLETED reviews with both box coords', async () => {
@@ -119,8 +134,13 @@ describe('SDBI Option-B — perf reviews + feedback360', () => {
     expect(await count(
       `SELECT count(*)::int AS n FROM pg_class c JOIN pg_namespace nsp ON nsp.oid = c.relnamespace
         WHERE nsp.nspname='sys' AND c.relname='sys_nine_box_grid' AND c.relkind='v'`)).toBe(1);
-    // exactly the 159 completed-both-box PR rows
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_nine_box_grid`)).toBe(159);
+    // the grid mirrors its source EXACTLY: expected derived live, never photographed
+    const qualifying = await count(
+      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews
+        WHERE review_status='COMPLETED'
+          AND review_performance_box IS NOT NULL AND review_potential_box IS NOT NULL`);
+    expect(qualifying).toBeGreaterThanOrEqual(159);
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_nine_box_grid`)).toBe(qualifying);
     // every grid row's underlying PR is COMPLETED with both boxes set
     expect(await count(
       `SELECT count(*)::int AS n FROM sys.sys_nine_box_grid g

@@ -536,6 +536,256 @@ BEGIN
   END IF;
 END $fn$;
 
+-- ----------------------------------------------------------------------------
+-- C2a — ogni utente RTL ATTIVO assunto entro il 1° ottobre dell'anno Y ha
+-- almeno una review con periodo che si chiude in Y, per ogni anno pieno della
+-- storia (2023..anno-frontiera-1; il 2026 è in corso). Eligibility min-tenure:
+-- assunti dopo il 1/10 entrano nel ciclo successivo (rilievo C1-review).
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c2a()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  WITH years AS (
+    SELECT y FROM generate_series(2023,
+      LEAST(2025, extract(year FROM (SELECT max(attendance_date) FROM sys.sys_attendance))::int - 1
+            + CASE WHEN extract(month FROM (SELECT max(attendance_date) FROM sys.sys_attendance)) = 12 THEN 1 ELSE 0 END)) AS y
+  ),
+  missing AS (
+    SELECT u.user_email, y.y
+    FROM sys.sys_users u
+    JOIN sys.sys_user_employment e ON e.user_employment_user_id = u.user_id
+    CROSS JOIN years y
+    WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+      AND u.user_status = 'ACTIVE'
+      AND e.user_employment_hire_date <= make_date(y.y, 10, 1)
+      AND NOT EXISTS (
+        SELECT 1 FROM sys.sys_performance_reviews r
+        WHERE r.review_subject_user_id = u.user_id
+          AND extract(year FROM r.review_period_end)::int = y.y)
+  )
+  SELECT count(*), min(user_email || ' ' || y) INTO v_cnt, v_sample FROM missing;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C2a: % coppie (utente eleggibile, anno pieno) senza review (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C2b — ogni review ANNUAL COMPLETED con periodo chiuso in Y >= 2024 ha almeno
+-- 2 check-in del soggetto datati Y; per il 2023 (innesto a metà finestra) ne
+-- basta 1. I check-in misurano che il ciclo goal→check-in→review sia reale.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c2b()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email || ' ' || extract(year FROM r.review_period_end))
+    INTO v_cnt, v_sample
+  FROM sys.sys_performance_reviews r
+  JOIN sys.sys_users u ON u.user_id = r.review_subject_user_id
+  JOIN sys.sys_user_employment e ON e.user_employment_user_id = u.user_id
+  WHERE r.review_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND r.review_type = 'ANNUAL'
+    AND r.review_status = 'COMPLETED'
+    -- stessa eligibility min-tenure di C2a: gli assunti dopo il 1/10 hanno una
+    -- review legacy "di cortesia" senza ciclo goal sottostante (registrato)
+    AND e.user_employment_hire_date <= make_date(extract(year FROM r.review_period_end)::int, 10, 1)
+    AND extract(year FROM r.review_period_end)::int BETWEEN 2023 AND 2025
+    AND (SELECT count(*) FROM sys.sys_goal_check_ins c
+         WHERE c.check_in_subject_user_id = r.review_subject_user_id
+           AND extract(year FROM c.check_in_date)::int = extract(year FROM r.review_period_end)::int)
+        < CASE WHEN extract(year FROM r.review_period_end)::int = 2023 THEN 1 ELSE 2 END;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C2b: % review annuali senza i check-in minimi nell''anno (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C2c — il reviewer è il manager gerarchico reale del soggetto (catena
+-- assignment PRIMARY ACTIVE → position → reports_to → assignment PRIMARY
+-- ACTIVE); per il vertice senza manager il fallback legittimo è il service
+-- account admin@heuresys.com. («alla data» arriverà con la history di C6.)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c2c()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email || ' ' || to_char(r.review_period_end, 'YYYY'))
+    INTO v_cnt, v_sample
+  FROM sys.sys_performance_reviews r
+  JOIN sys.sys_users u ON u.user_id = r.review_subject_user_id
+  LEFT JOIN LATERAL (
+    SELECT a2.user_position_assignment_user_id AS mgr
+    FROM sys.sys_user_position_assignments a1
+    JOIN sys.sys_positions p1 ON p1.position_id = a1.user_position_assignment_position_id
+    JOIN sys.sys_user_position_assignments a2
+         ON a2.user_position_assignment_position_id = p1.position_reports_to_position_id
+        AND a2.user_position_assignment_kind = 'PRIMARY'
+        AND a2.user_position_assignment_status = 'ACTIVE'
+    WHERE a1.user_position_assignment_user_id = r.review_subject_user_id
+      AND a1.user_position_assignment_kind = 'PRIMARY'
+      AND a1.user_position_assignment_status = 'ACTIVE'
+    LIMIT 1
+  ) m ON true
+  WHERE r.review_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND r.review_subject_user_id IS NOT NULL
+    AND r.review_reviewer_user_id IS DISTINCT FROM COALESCE(
+          NULLIF(m.mgr, r.review_subject_user_id),
+          (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com'));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C2c: % review con reviewer diverso dal manager gerarchico (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C2d — nessuna risposta 360 MANAGER/PEER con reviewer == target
+-- (il SELF è per definizione self e resta fuori).
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c2d()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+BEGIN
+  SELECT count(*) INTO v_cnt
+  FROM sys.sys_feedback_360_responses
+  WHERE response_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND response_relationship_type IN ('MANAGER','PEER')
+    AND response_reviewer_user_id = response_target_user_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C2d: % risposte 360 MANAGER/PEER con reviewer = target', v_cnt;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C2e — coerenza goal↔check-in↔stato: (i) goal non terminale con check-in ha
+-- progress = new_progress dell'ultimo check-in; (ii) goal COMPLETED ha
+-- progress = 100 (invariante legacy); (iii) riconciliazione d'aggregato: la
+-- quota di performance_box=1 sulle review COMPLETED non supera il 25%
+-- (la curva dichiarata è ~10/70/20).
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c2e()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_share numeric;
+BEGIN
+  SELECT count(*) INTO v_cnt
+  FROM sys.sys_goals g
+  JOIN LATERAL (
+    SELECT c.check_in_new_progress AS np
+    FROM sys.sys_goal_check_ins c
+    WHERE c.check_in_goal_id = g.goal_id
+    ORDER BY c.check_in_date DESC, c.created_at DESC LIMIT 1
+  ) lc ON true
+  WHERE g.goal_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND g.goal_status NOT IN ('COMPLETED','CANCELLED')
+    AND g.goal_progress_percent IS DISTINCT FROM lc.np;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C2e: % goal non terminali con progress diverso dall''ultimo check-in', v_cnt;
+  END IF;
+
+  SELECT count(*) INTO v_cnt
+  FROM sys.sys_goals
+  WHERE goal_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND goal_status = 'COMPLETED' AND goal_progress_percent <> 100;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C2e: % goal COMPLETED con progress diverso da 100', v_cnt;
+  END IF;
+
+  SELECT avg((review_performance_box = 1)::int) INTO v_share
+  FROM sys.sys_performance_reviews
+  WHERE review_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND review_status = 'COMPLETED' AND review_performance_box IS NOT NULL;
+  IF v_share > 0.25 THEN
+    RAISE EXCEPTION 'C2e: quota box-basso % oltre il 25%% (curva 10/70/20 violata)', round(v_share, 3);
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C2f — perimetro I5 sul ciclo performance: il tenant di review/goal/check-in/
+-- f360 coincide col tenant del soggetto/target (generalizza il check attendance
+-- del C1; scoperta della review C2: 2 review + 6 goal cross-tenant invisibili).
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c2f()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_bad text := '';
+  v_cnt bigint;
+BEGIN
+  SELECT count(*) INTO v_cnt FROM sys.sys_performance_reviews r
+  JOIN sys.sys_users u ON u.user_id = r.review_subject_user_id
+  WHERE r.review_tenant_id IS DISTINCT FROM u.user_tenant_id;
+  IF v_cnt > 0 THEN v_bad := v_bad || format(' reviews=%s', v_cnt); END IF;
+
+  SELECT count(*) INTO v_cnt FROM sys.sys_goals g
+  JOIN sys.sys_users u ON u.user_id = g.goal_subject_user_id
+  WHERE g.goal_tenant_id IS DISTINCT FROM u.user_tenant_id;
+  IF v_cnt > 0 THEN v_bad := v_bad || format(' goals=%s', v_cnt); END IF;
+
+  SELECT count(*) INTO v_cnt FROM sys.sys_goal_check_ins c
+  JOIN sys.sys_users u ON u.user_id = c.check_in_subject_user_id
+  WHERE c.check_in_tenant_id IS DISTINCT FROM u.user_tenant_id;
+  IF v_cnt > 0 THEN v_bad := v_bad || format(' check_ins=%s', v_cnt); END IF;
+
+  SELECT count(*) INTO v_cnt FROM sys.sys_feedback_360_responses f
+  JOIN sys.sys_users u ON u.user_id = f.response_target_user_id
+  WHERE f.response_tenant_id IS DISTINCT FROM u.user_tenant_id;
+  IF v_cnt > 0 THEN v_bad := v_bad || format(' f360=%s', v_cnt); END IF;
+
+  IF v_bad <> '' THEN
+    RAISE EXCEPTION 'C2f: righe del ciclo performance fuori dal perimetro tenant (I5):%', v_bad;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C2g — gli eventi del ciclo performance cadono in giorni LAVORATIVI del
+-- calendario storia36 (submitted/acknowledged, goal_completed_at, f360
+-- completed_at, check_in_date): una banca non prende atto delle valutazioni
+-- a Natale (rilievo review C2: 106 ack nel weekend, 94 completamenti su
+-- Natale/S.Stefano).
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c2g()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_bad text := '';
+  v_cnt bigint;
+BEGIN
+  SELECT count(*) INTO v_cnt FROM sys.sys_performance_reviews r
+  JOIN staging.storia36_calendar c ON c.cal_date = r.review_submitted_at::date
+  WHERE r.review_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND NOT c.is_workday;
+  IF v_cnt > 0 THEN v_bad := v_bad || format(' submitted=%s', v_cnt); END IF;
+
+  SELECT count(*) INTO v_cnt FROM sys.sys_performance_reviews r
+  JOIN staging.storia36_calendar c ON c.cal_date = r.review_acknowledged_at::date
+  WHERE r.review_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND NOT c.is_workday;
+  IF v_cnt > 0 THEN v_bad := v_bad || format(' acknowledged=%s', v_cnt); END IF;
+
+  SELECT count(*) INTO v_cnt FROM sys.sys_goals g
+  JOIN staging.storia36_calendar c ON c.cal_date = g.goal_completed_at::date
+  WHERE g.goal_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND NOT c.is_workday;
+  IF v_cnt > 0 THEN v_bad := v_bad || format(' goal_completed=%s', v_cnt); END IF;
+
+  SELECT count(*) INTO v_cnt FROM sys.sys_feedback_360_responses f
+  JOIN staging.storia36_calendar c ON c.cal_date = f.response_completed_at::date
+  WHERE f.response_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND NOT c.is_workday;
+  IF v_cnt > 0 THEN v_bad := v_bad || format(' f360=%s', v_cnt); END IF;
+
+  SELECT count(*) INTO v_cnt FROM sys.sys_goal_check_ins k
+  JOIN staging.storia36_calendar c ON c.cal_date = k.check_in_date
+  WHERE k.check_in_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' AND NOT c.is_workday;
+  IF v_cnt > 0 THEN v_bad := v_bad || format(' check_in=%s', v_cnt); END IF;
+
+  IF v_bad <> '' THEN
+    RAISE EXCEPTION 'C2g: eventi del ciclo performance in giorni non lavorativi:%', v_bad;
+  END IF;
+END $fn$;
+
 -- ============================================================================
 -- SELFTEST (con -v selftest=1) — la falsificabilità: per ogni check nuovo si
 -- inietta una violazione in SUBTRANSAZIONE (rollback garantito dal pattern
@@ -697,6 +947,144 @@ BEGIN
     RAISE EXCEPTION 'SELFTEST C1d FALLITO: violazione iniettata non rilevata';
   END IF;
   RAISE NOTICE '[OK] SELFTEST C1d (violazione iniettata rilevata, rollback)';
+
+  -- ST-C2a: cancellare le review 2024 di un utente eleggibile deve far scattare C2a
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_performance_reviews
+     WHERE review_subject_user_id = (
+             SELECT review_subject_user_id FROM sys.sys_performance_reviews
+             WHERE review_subject_user_id IS NOT NULL
+               AND extract(year FROM review_period_end) = 2024 LIMIT 1);
+    PERFORM staging.storia36_check_c2a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C2a:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C2a FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C2a (violazione iniettata rilevata, rollback)';
+
+  -- ST-C2c: una review col reviewer = soggetto stesso deve far scattare C2c
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_performance_reviews
+       SET review_reviewer_user_id = review_subject_user_id
+     WHERE ctid = (SELECT ctid FROM sys.sys_performance_reviews
+                   WHERE review_subject_user_id IS NOT NULL LIMIT 1);
+    PERFORM staging.storia36_check_c2c();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C2c:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C2c FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C2c (violazione iniettata rilevata, rollback)';
+
+  -- ST-C2d: una risposta PEER resa self deve far scattare C2d
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_feedback_360_responses
+       SET response_reviewer_user_id = response_target_user_id
+     WHERE ctid = (SELECT ctid FROM sys.sys_feedback_360_responses
+                   WHERE response_relationship_type = 'PEER' LIMIT 1);
+    PERFORM staging.storia36_check_c2d();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C2d:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C2d FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C2d (violazione iniettata rilevata, rollback)';
+
+  -- ST-C2b: spostare fuori anno i check-in di un soggetto con review annuale
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_goal_check_ins SET check_in_date = check_in_date - interval '3 years'
+     WHERE check_in_subject_user_id = (
+             SELECT r.review_subject_user_id FROM sys.sys_performance_reviews r
+             JOIN sys.sys_user_employment e ON e.user_employment_user_id = r.review_subject_user_id
+             WHERE r.review_type = 'ANNUAL' AND r.review_status = 'COMPLETED'
+               AND extract(year FROM r.review_period_end) = 2024
+               AND e.user_employment_hire_date <= DATE '2024-10-01'
+             LIMIT 1);
+    PERFORM staging.storia36_check_c2b();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C2b:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C2b FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C2b (violazione iniettata rilevata, rollback)';
+
+  -- ST-C2e: un goal non terminale col progress scollegato dall'ultimo check-in
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_goals SET goal_progress_percent = LEAST(goal_progress_percent + 17, 99)
+     WHERE ctid = (SELECT g.ctid FROM sys.sys_goals g
+                   WHERE g.goal_status NOT IN ('COMPLETED','CANCELLED')
+                     AND EXISTS (SELECT 1 FROM sys.sys_goal_check_ins c WHERE c.check_in_goal_id = g.goal_id)
+                   LIMIT 1);
+    PERFORM staging.storia36_check_c2e();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C2e:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C2e FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C2e (violazione iniettata rilevata, rollback)';
+
+  -- ST-C2f: una review spostata su un soggetto dell'altro tenant
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_performance_reviews
+       SET review_subject_user_id = (SELECT user_id FROM sys.sys_users
+                                     WHERE user_tenant_id <> '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1)
+     WHERE ctid = (SELECT ctid FROM sys.sys_performance_reviews
+                   WHERE review_subject_user_id IS NOT NULL LIMIT 1);
+    PERFORM staging.storia36_check_c2f();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C2f:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C2f FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C2f (violazione iniettata rilevata, rollback)';
+
+  -- ST-C2g: un check-in spostato a domenica
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_goal_check_ins SET check_in_date = DATE '2025-11-02'
+     WHERE ctid = (SELECT ctid FROM sys.sys_goal_check_ins LIMIT 1);
+    PERFORM staging.storia36_check_c2g();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C2g:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C2g FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C2g (violazione iniettata rilevata, rollback)';
 END $$;
 \endif
 
@@ -791,6 +1179,62 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C1d'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c2a();
+    RAISE NOTICE '[OK] C2a review per ogni utente eleggibile per ogni anno pieno';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C2a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c2b();
+    RAISE NOTICE '[OK] C2b check-in minimi nell''anno di ogni review annuale';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C2b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c2c();
+    RAISE NOTICE '[OK] C2c reviewer = manager gerarchico reale';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C2c'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c2d();
+    RAISE NOTICE '[OK] C2d nessun 360 MANAGER/PEER con reviewer = target';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C2d'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c2e();
+    RAISE NOTICE '[OK] C2e goal↔check-in↔stato coerenti + curva box';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C2e'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c2f();
+    RAISE NOTICE '[OK] C2f perimetro tenant I5 sul ciclo performance';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C2f'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c2g();
+    RAISE NOTICE '[OK] C2g eventi performance solo in giorni lavorativi';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C2g'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   BEGIN

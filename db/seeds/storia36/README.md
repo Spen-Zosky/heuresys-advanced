@@ -17,6 +17,7 @@ Piano: `docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md` · stato vivo: 
 | `00_foundation.sql` | C0 | registro provenance `staging.storia36_runs` + calendario lavorativo IT `staging.storia36_calendar` (2023-08-01..2026-07-31, patrono Sant'Ambrogio — sede Milano dal dato) |
 | `00_repair_g4_contracts.sql` | C0 | riparazione puntuale (triage esito c) di 3 contratti con `end < start`; valori derivati dalle righe sane |
 | `01_attendance_timeoff.sql` | C1 | presenze/assenze/ferie su 36 mesi (112.969 righe attendance, 2.009 richieste con timeline storica, balances 2023-25 con entitlement CCNL, buste 2026-07); estate a 5 turni, malattia stagionale, cap PERSONAL; riallinea SOLO le proprie righe |
+| `02_performance.sql` | C2 | tre cicli performance + 2026 in corso (1.563 goals MBO pesati per famiglia di ruolo, 6.567 check-in su 3 passi snappati a workday-non-assente, 391 review forma-import con rating ANCORATI al ciclo legacy 2024, 1.173 competency KSABA, 386 risposte 360 H2-2024 agganciate alle review) |
 
 ## repair/ — one-shot FUORI dal glob custodia
 

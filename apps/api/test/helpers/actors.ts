@@ -207,6 +207,129 @@ export async function distinctActorsWithoutMfaFactor(count: number): Promise<Act
   return actors;
 }
 
+/**
+ * Due colleghi dello STESSO team fra cui NON esiste alcun legame gerarchico, in
+ * nessuna delle due direzioni e a nessuna profondità.
+ *
+ * È il profilo che prova l'invariante I18 — l'appartenenza funzionale non
+ * sblocca MAI dati sensibili — e finora nessun attore lo rappresentava: la
+ * verifica poggiava su coppie legate anche gerarchicamente, dove un permesso
+ * concesso dall'asse organizzativo può mascherare un asse funzionale troppo
+ * generoso. L'esclusione è transitiva di proposito: un legame di secondo
+ * livello renderebbe il caso non probante.
+ */
+export async function functionalPeers(): Promise<{ a: Actor; b: Actor }> {
+  const { rows } = await pool.query<Row & { b_id: string; b_email: string; b_tenant: string }>(
+    `WITH RECURSIVE membri AS (
+       SELECT team_member_team_id AS team, team_member_user_id AS uid
+         FROM sys.sys_team_members WHERE team_member_is_active
+     ),
+     sottoalbero AS (
+       SELECT p.position_owner_user_id AS radice, p.position_id
+         FROM sys.sys_positions p WHERE p.position_owner_user_id IS NOT NULL
+       UNION ALL
+       SELECT s.radice, c.position_id
+         FROM sys.sys_positions c JOIN sottoalbero s ON c.position_reports_to_position_id = s.position_id
+     )
+     SELECT u1.user_id, u1.user_email, u1.user_tenant_id,
+            u2.user_id AS b_id, u2.user_email AS b_email, u2.user_tenant_id AS b_tenant
+       FROM membri m1
+       JOIN membri m2 ON m1.team = m2.team AND m1.uid < m2.uid
+       JOIN sys.sys_users u1 ON u1.user_id = m1.uid AND u1.user_status = 'ACTIVE'
+       JOIN sys.sys_users u2 ON u2.user_id = m2.uid AND u2.user_status = 'ACTIVE'
+      WHERE NOT EXISTS (
+              SELECT 1 FROM sottoalbero s JOIN sys.sys_positions p ON p.position_id = s.position_id
+               WHERE s.radice = m1.uid AND p.position_owner_user_id = m2.uid)
+        AND NOT EXISTS (
+              SELECT 1 FROM sottoalbero s JOIN sys.sys_positions p ON p.position_id = s.position_id
+               WHERE s.radice = m2.uid AND p.position_owner_user_id = m1.uid)
+      ORDER BY u1.user_email, u2.user_email`,
+  );
+  const pair = rows.find((r) => !isRealPerson(r.user_email) && !isRealPerson(r.b_email));
+  if (!pair) {
+    throw new Error(
+      "Nessuna coppia di colleghi di team priva di legame gerarchico.\n" +
+        "Serve un team con almeno due membri attivi che non riportino l'uno all'altro.",
+    );
+  }
+  return {
+    a: toActor(pair),
+    b: { userId: pair.b_id, email: pair.b_email, tenantId: pair.b_tenant },
+  };
+}
+
+/**
+ * Una catena gerarchica di TRE livelli: chi sta in cima, chi sta in mezzo, chi
+ * sta sotto. Serve a provare la transitività che I20 dichiara (`reports-to`
+ * transitivo): con la sola coppia diretta, una risalita che si ferma al primo
+ * livello — o che al contrario abbraccia troppo — passa inosservata.
+ */
+export async function hierarchyChain(): Promise<{ top: Actor; middle: Actor; bottom: Actor }> {
+  const { rows } = await pool.query<{
+    t_id: string; t_email: string; t_tenant: string;
+    m_id: string; m_email: string; m_tenant: string;
+    b_id: string; b_email: string; b_tenant: string;
+  }>(
+    `SELECT tu.user_id AS t_id, tu.user_email AS t_email, tu.user_tenant_id AS t_tenant,
+            mu.user_id AS m_id, mu.user_email AS m_email, mu.user_tenant_id AS m_tenant,
+            bu.user_id AS b_id, bu.user_email AS b_email, bu.user_tenant_id AS b_tenant
+       FROM sys.sys_positions a
+       JOIN sys.sys_positions b ON b.position_reports_to_position_id = a.position_id
+       JOIN sys.sys_positions c ON c.position_reports_to_position_id = b.position_id
+       JOIN sys.sys_users tu ON tu.user_id = a.position_owner_user_id AND tu.user_status='ACTIVE'
+       JOIN sys.sys_users mu ON mu.user_id = b.position_owner_user_id AND mu.user_status='ACTIVE'
+       JOIN sys.sys_users bu ON bu.user_id = c.position_owner_user_id AND bu.user_status='ACTIVE'
+      WHERE tu.user_id <> mu.user_id AND mu.user_id <> bu.user_id AND tu.user_id <> bu.user_id
+        -- Una persona puo' possedere piu' posizioni: se chi sta in fondo riporta
+        -- ANCHE direttamente al vertice, la catena non prova piu' la
+        -- transitivita' (il legame sarebbe spiegabile senza risalire). Si scarta.
+        AND NOT EXISTS (
+          SELECT 1 FROM sys.sys_positions dc
+            JOIN sys.sys_positions dp ON dc.position_reports_to_position_id = dp.position_id
+           WHERE dp.position_owner_user_id = tu.user_id AND dc.position_owner_user_id = bu.user_id)
+      ORDER BY tu.user_email, mu.user_email, bu.user_email`,
+  );
+  const chain = rows.find(
+    (r) => !isRealPerson(r.t_email) && !isRealPerson(r.m_email) && !isRealPerson(r.b_email),
+  );
+  if (!chain) {
+    throw new Error(
+      "Nessuna catena gerarchica di tre livelli con titolari attivi distinti.\n" +
+        "Serve una posizione con una subordinata che a sua volta ne abbia una.",
+    );
+  }
+  return {
+    top: { userId: chain.t_id, email: chain.t_email, tenantId: chain.t_tenant },
+    middle: { userId: chain.m_id, email: chain.m_email, tenantId: chain.m_tenant },
+    bottom: { userId: chain.b_id, email: chain.b_email, tenantId: chain.b_tenant },
+  };
+}
+
+/**
+ * Un utente SENZA alcuna posizione assegnata.
+ *
+ * Non è la popolazione normale — è un caso singolo (l'account di servizio), e
+ * proprio per questo non era rappresentato. Serve perché il codice non deve
+ * dare per scontato che ogni utente stia nell'organigramma: chi non ha
+ * posizione non ha asse organizzativo, e gli resta il solo piano ESS (I17).
+ */
+export async function actorWithoutPosition(): Promise<Actor> {
+  const { rows } = await pool.query<Row>(
+    `SELECT u.user_id, u.user_email, u.user_tenant_id
+       FROM sys.sys_users u
+      WHERE ${IMPERSONABLE}
+        AND NOT EXISTS (
+          SELECT 1 FROM sys.sys_user_position_assignments a
+           WHERE a.user_position_assignment_user_id = u.user_id)
+      ORDER BY u.user_email`,
+  );
+  return requireRow(
+    rows,
+    "utente senza alcuna posizione assegnata",
+    "Se ogni utente ha ricevuto una posizione, questo caso non esiste più: il test va aggiornato, non il dato.",
+  );
+}
+
 /** Solo per i test che devono ripartire da capo (la cache è per-file). */
 export function resetActorCache(): void {
   cache.clear();

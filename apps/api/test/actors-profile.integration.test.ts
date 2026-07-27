@@ -25,6 +25,9 @@ import {
   managerAndReport,
   outsiderOf,
   actorWithoutMfaFactor,
+  functionalPeers,
+  hierarchyChain,
+  actorWithoutPosition,
 } from "./helpers/actors.js";
 import { pool } from "../src/db/client.js";
 
@@ -86,6 +89,71 @@ describe("profili degli attori (guardia sul dato reale)", () => {
     const { rows } = await pool.query<{ n: string }>(
       `SELECT count(*) AS n FROM sys.sys_auth_mfa_factors
         WHERE auth_mfa_factor_user_id = $1 AND auth_mfa_factor_verified`,
+      [a.userId],
+    );
+    expect(Number(rows[0]?.n ?? 0)).toBe(0);
+  });
+
+  it("i colleghi funzionali condividono un team e NON un legame gerarchico (I18)", async () => {
+    const { a, b } = await functionalPeers();
+    expect(a.userId).not.toBe(b.userId);
+    // Il team condiviso e' la meta' del profilo...
+    const team = await pool.query<{ n: string }>(
+      `SELECT count(*) AS n FROM sys.sys_team_members m1
+         JOIN sys.sys_team_members m2 ON m1.team_member_team_id = m2.team_member_team_id
+        WHERE m1.team_member_user_id = $1 AND m2.team_member_user_id = $2
+          AND m1.team_member_is_active AND m2.team_member_is_active`,
+      [a.userId, b.userId],
+    );
+    expect(Number(team.rows[0]?.n ?? 0)).toBeGreaterThan(0);
+    // ...l'altra meta' e' l'ASSENZA di gerarchia, in entrambe le direzioni e a
+    // qualunque profondita': e' cio' che rende il caso probante per I18.
+    const gerarchia = await pool.query<{ n: string }>(
+      `WITH RECURSIVE sub AS (
+         SELECT position_id FROM sys.sys_positions WHERE position_owner_user_id = $1
+         UNION ALL
+         SELECT p.position_id FROM sys.sys_positions p JOIN sub s ON p.position_reports_to_position_id = s.position_id
+       ), sub2 AS (
+         SELECT position_id FROM sys.sys_positions WHERE position_owner_user_id = $2
+         UNION ALL
+         SELECT p.position_id FROM sys.sys_positions p JOIN sub2 s ON p.position_reports_to_position_id = s.position_id
+       )
+       SELECT count(*) AS n FROM sys.sys_positions p
+        WHERE (p.position_owner_user_id = $2 AND p.position_id IN (SELECT position_id FROM sub))
+           OR (p.position_owner_user_id = $1 AND p.position_id IN (SELECT position_id FROM sub2))`,
+      [a.userId, b.userId],
+    );
+    expect(Number(gerarchia.rows[0]?.n ?? 0)).toBe(0);
+  });
+
+  it("la catena gerarchica ha tre livelli REALI e transitivi (I20)", async () => {
+    const { top, middle, bottom } = await hierarchyChain();
+    expect(new Set([top.userId, middle.userId, bottom.userId]).size).toBe(3);
+    // bottom deve stare nel sotto-albero di top SENZA riportargli direttamente:
+    // e' esattamente la differenza che la sola coppia diretta non sa esprimere.
+    const r = await pool.query<{ diretto: string; transitivo: string }>(
+      `WITH RECURSIVE sub AS (
+         SELECT position_id FROM sys.sys_positions WHERE position_owner_user_id = $1
+         UNION ALL
+         SELECT p.position_id FROM sys.sys_positions p JOIN sub s ON p.position_reports_to_position_id = s.position_id
+       )
+       SELECT
+         (SELECT count(*) FROM sys.sys_positions c
+            JOIN sys.sys_positions pa ON c.position_reports_to_position_id = pa.position_id
+           WHERE pa.position_owner_user_id = $1 AND c.position_owner_user_id = $2) AS diretto,
+         (SELECT count(*) FROM sys.sys_positions p
+           WHERE p.position_owner_user_id = $2 AND p.position_id IN (SELECT position_id FROM sub)) AS transitivo`,
+      [top.userId, bottom.userId],
+    );
+    expect(Number(r.rows[0]?.diretto ?? 0)).toBe(0);
+    expect(Number(r.rows[0]?.transitivo ?? 0)).toBeGreaterThan(0);
+  });
+
+  it("esiste un utente senza posizione assegnata (il codice non deve presumerla)", async () => {
+    const a = await actorWithoutPosition();
+    const { rows } = await pool.query<{ n: string }>(
+      `SELECT count(*) AS n FROM sys.sys_user_position_assignments
+        WHERE user_position_assignment_user_id = $1`,
       [a.userId],
     );
     expect(Number(rows[0]?.n ?? 0)).toBe(0);

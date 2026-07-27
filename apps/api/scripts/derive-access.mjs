@@ -7,10 +7,32 @@
  */
 import { createHmac } from "node:crypto";
 import { readFileSync, existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-export const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
+/**
+ * La radice del repository, trovata risalendo da cwd fino al marker del
+ * workspace.
+ *
+ * Non si usa `import.meta.url`: questo modulo è importato anche dalla suite
+ * Playwright, che lo transpila in CommonJS — e lì `import.meta` è un errore di
+ * SINTASSI, quindi non è un ramo evitabile a runtime. Z-262 ha aggiunto quella
+ * dipendenza e la suite E2E ha smesso di caricarsi ("No tests found", che
+ * sembra un problema di filtri e invece è un modulo che non compila).
+ * Test e script girano sempre dentro il repository, quindi la risalita è
+ * affidabile quanto il percorso calcolato dal file.
+ */
+function findRepoRoot() {
+  let dir = process.cwd();
+  for (let i = 0; i < 10; i++) {
+    if (existsSync(join(dir, "pnpm-workspace.yaml"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return process.cwd();
+}
+
+export const REPO = findRepoRoot();
 export const MASTER_PATH = join(REPO, ".secrets", "dev-access-master.key");
 
 /** Le PERSONE FISICHE: password scelte da loro, mai derivate (decisione di

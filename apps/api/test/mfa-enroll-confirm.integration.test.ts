@@ -13,9 +13,13 @@ import { ensureFixtureTotpFactor } from "./helpers/login.js";
 import { E2E_FIXTURE_LABEL } from "./helpers/mfa-fixture-secrets.js";
 import { pool } from "../src/db/client.js";
 import { passwordFor } from "./helpers/personas.js";
+import { distinctImpersonableActors } from "./helpers/actors.js";
 
-const TOTP_USER = "paolo.caputo@rtl-bank.org";
-const EMAIL_USER = "tommaso.fiore@rtl-bank.org";
+// Due identità DISTINTE, scelte dal dato invece che nominate: a questo file non
+// serve una persona in particolare — serve che siano due, impersonabili e senza
+// secondo fattore (TOFU parte da zero fattori, il wipe è qui sotto).
+let TOTP_USER: string;
+let EMAIL_USER: string;
 
 interface Session { cookies: Map<string, string>; csrf: string; userId: string }
 const ch = (c: Map<string, string>) => [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; ");
@@ -102,6 +106,9 @@ describe("MFA enroll-confirm (TOFU v2, mode ON)", () => {
 
   beforeAll(async () => {
     suite = await buildTestApp({ enrollConfirm: "on" });
+    const [a, b] = await distinctImpersonableActors(2);
+    TOTP_USER = a!.email;
+    EMAIL_USER = b!.email;
     for (const email of [TOTP_USER, EMAIL_USER]) {
       hadFixture[email] = await hasFixtureFactor(email);
       await cleanupFactors(email);

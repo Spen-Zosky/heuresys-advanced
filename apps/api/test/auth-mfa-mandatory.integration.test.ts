@@ -13,10 +13,10 @@
  *   enroll TOTP via enr session   -> re-login becomes the regular mfa_required
  *                                    challenge -> full session
  *
- * Isolation: the policy is scoped to roleCodes ["READ_ONLY"] on the RTL tenant
- * and the gated persona is alberto.rossetti (R2 READ_ONLY — used by no other
- * test file), so a mid-run crash cannot gate the personas other files log in
- * with. Cleanup in afterAll removes the policy row + the throwaway factor.
+ * Isolation: the policy is scoped to roleCodes ["READ_ONLY"] on the gated
+ * actor's own tenant, and READ_ONLY is a role no other test file logs in with,
+ * so a mid-run crash cannot gate the actors other files depend on. Cleanup in
+ * afterAll removes the policy row + the throwaway factor.
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import * as OTPAuth from "otpauth";
@@ -24,10 +24,13 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { pool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
 import { passwordFor } from "./helpers/personas.js";
+import { actorWithoutMfaFactor, tenantAdmin, type Actor } from "./helpers/actors.js";
 
-const READONLY = "alberto.rossetti@rtl-bank.org"; // R2 persona, READ_ONLY
-const PASSWORD = passwordFor(READONLY);
-const TENANT_ADMIN = "federica.marchetti@rtl-bank.org"; // RTL, NOT in ["READ_ONLY"] scope
+// Gli attori si scelgono per CARATTERISTICA (test/helpers/actors.ts), non per
+// nome: a questo file serve "un utente col ruolo su cui la policy è scoped e
+// senza secondo fattore" e "un utente dello STESSO tenant con un ruolo fuori
+// scope". Nominarli fissava anche premesse mai verificate — ed è così che
+// Z-262, assegnando un fattore MFA a tutti, ha reso rossi cinque test qui.
 
 function genTotp(secretBase32: string): string {
   const totp = new OTPAuth.TOTP({
@@ -43,7 +46,11 @@ function genTotp(secretBase32: string): string {
 describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
   let app: TestApp;
   let rtlTenantId: string;
-  let albertoUserId: string;
+  let gatedUserId: string;
+  /** L'utente su cui la policy è scoped (ruolo READ_ONLY), senza secondo fattore. */
+  let gated: Actor;
+  /** Stesso tenant, ruolo NON incluso nello scope della policy. */
+  let outOfScope: Actor;
 
   async function login(payload: Record<string, unknown>) {
     return app.app.inject({ method: "POST", url: "/v1/auth/login", payload });
@@ -73,25 +80,16 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
 
   beforeAll(async () => {
     app = await buildTestApp();
-    const u = await pool.query<{ user_id: string; user_tenant_id: string }>(
-      `SELECT user_id, user_tenant_id FROM sys.sys_users WHERE lower(user_email) = lower($1)`,
-      [READONLY],
-    );
-    const row = u.rows[0];
-    if (!row) throw new Error(`R2 persona not seeded: ${READONLY} (run pnpm db:seed-r2)`);
-    albertoUserId = row.user_id;
-    rtlTenantId = row.user_tenant_id;
-    // La precondizione di TUTTO il file è che questa persona sia SENZA secondo
+    // La precondizione di TUTTO il file è che l'utente gated sia SENZA secondo
     // fattore: è ciò che distingue `mfa_enrollment_required` da `mfa_required`.
-    // Fino a S1032 la si dava per scontata (ripulendo solo in afterAll) e Z-262
-    // l'ha smentita assegnando un fattore TOTP derivato a ogni utente: i cinque
-    // test qui sotto sono diventati rossi non per una regressione del gate, ma
-    // perché il dato di partenza era cambiato sotto di loro. Garantirla qui
-    // rende il file indipendente da quali fattori il DB porti; l'isolamento
-    // transazionale (D-52) fa rollback a fine file, quindi non tocca il dato reale.
-    await pool.query(`DELETE FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`, [
-      albertoUserId,
-    ]);
+    // `actorWithoutMfaFactor` la GARANTISCE invece di sperare che il dato la
+    // offra (l'isolamento transazionale D-52 annulla la rimozione a fine file).
+    gated = await actorWithoutMfaFactor("READ_ONLY");
+    gatedUserId = gated.userId;
+    rtlTenantId = gated.tenantId;
+    // Stesso tenant: un ruolo fuori scope preso altrove proverebbe l'isolamento
+    // fra tenant, non lo scoping per ruolo della policy.
+    outOfScope = await tenantAdmin({ tenantId: rtlTenantId });
     // Snapshot the pre-suite RTL policy (restored in afterAll — the live DB may
     // carry a REAL activation that a blanket delete would silently wipe, S982).
     savedPolicy =
@@ -119,7 +117,7 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
       );
     }
     await pool.query(`DELETE FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_user_id = $1`, [
-      albertoUserId,
+      gatedUserId,
     ]);
     await app.app.close();
   });
@@ -129,14 +127,14 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
     // (S982) the ambient policy is ON — this test must not depend on it.
     // The pre-suite state is snapshot-restored in afterAll regardless.
     await setPolicy(false);
-    const resp = await login({ email: READONLY, password: PASSWORD });
+    const resp = await login({ email: gated.email, password: passwordFor(gated.email) });
     expect(resp.statusCode).toBe(200);
     expect((resp.json() as { status: string }).status).toBe("success");
   });
 
   it("policy ON: factor-less in-scope user gets mfa_enrollment_required — ACCESS+CSRF cookies, NO refresh", async () => {
     await setPolicy(true);
-    const resp = await login({ email: READONLY, password: PASSWORD });
+    const resp = await login({ email: gated.email, password: passwordFor(gated.email) });
     expect(resp.statusCode).toBe(200);
     const json = resp.json() as { status: string; csrfToken: string; allowedKinds: string[] };
     expect(json.status).toBe("mfa_enrollment_required");
@@ -152,9 +150,9 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
   });
 
   it("policy ON: a user whose roles are OUT of scope (TENANT_ADMIN) is never ENROLLMENT-gated by it", async () => {
-    // `PASSWORD` è quella di READONLY: dopo Z-262 ogni utente ha la propria, e
-    // riusarla qui autenticava la persona sbagliata (401 invece del 200 atteso).
-    const resp = await login({ email: TENANT_ADMIN, password: passwordFor(TENANT_ADMIN) });
+    // La password si deriva dall'attore che stiamo autenticando: dopo Z-262 ogni
+    // utente ha la propria, e riusare quella di un altro dà 401.
+    const resp = await login({ email: outOfScope.email, password: passwordFor(outOfScope.email) });
     expect(resp.statusCode).toBe(200);
     const status = (resp.json() as { status: string }).status;
     // Out-of-scope ⇒ this suite's ['READ_ONLY'] policy adds NOTHING for her:
@@ -165,7 +163,7 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
   });
 
   it("the enr session is CONTAINED by the allowlist guard: everything outside mfa+login+logout is 401 MFA_ENROLLMENT_ONLY", async () => {
-    const gate = await login({ email: READONLY, password: PASSWORD });
+    const gate = await login({ email: gated.email, password: passwordFor(gated.email) });
     const cookies = cookieHeader(gate);
     const csrf = (gate.json() as { csrfToken: string }).csrfToken;
 
@@ -205,7 +203,7 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
 
   it("full loop: enroll+verify TOTP through the enr session, then re-login -> mfa_required -> success", async () => {
     // 1. Gate response = restricted session.
-    const gate = await login({ email: READONLY, password: PASSWORD });
+    const gate = await login({ email: gated.email, password: passwordFor(gated.email) });
     expect((gate.json() as { status: string }).status).toBe("mfa_enrollment_required");
     const cookies = cookieHeader(gate);
     const csrf = (gate.json() as { csrfToken: string }).csrfToken;
@@ -230,20 +228,20 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
     expect((verify.json() as { verified: boolean }).verified).toBe(true);
 
     // 3. Re-login from scratch: the user now HAS a verified factor -> regular challenge.
-    const step1 = await login({ email: READONLY, password: PASSWORD });
+    const step1 = await login({ email: gated.email, password: passwordFor(gated.email) });
     expect((step1.json() as { status: string }).status).toBe("mfa_required");
     const challengeToken = (step1.json() as { challengeToken: string }).challengeToken;
 
     const step2 = await login({
-      email: READONLY,
-      password: PASSWORD,
+      email: gated.email,
+      password: passwordFor(gated.email),
       challengeToken,
       mfaCode: genTotp(secret),
     });
     expect(step2.statusCode).toBe(200);
     const done = step2.json() as { status: string; user: { userId: string } };
     expect(done.status).toBe("success");
-    expect(done.user.userId).toBe(albertoUserId);
+    expect(done.user.userId).toBe(gatedUserId);
     const names = step2.cookies.map((c) => c.name);
     expect(names).toContain(COOKIES.ACCESS);
     expect(names).toContain(COOKIES.REFRESH);
@@ -254,7 +252,7 @@ describe("/v1/auth/login mandatory-MFA gate (#4)", () => {
       `SELECT count(*)::text AS n FROM sys.sys_auth_login_events
         WHERE auth_login_event_user_id = $1
           AND auth_login_event_type = 'LOGIN_MFA_ENROLLMENT_REQUIRED'`,
-      [albertoUserId],
+      [gatedUserId],
     );
     expect(Number(ev.rows[0]!.n)).toBeGreaterThanOrEqual(1);
   });

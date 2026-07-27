@@ -226,6 +226,47 @@ per validare in CI che ogni nuova colonna `created_by`/`updated_by` nasca `SET N
 
 ---
 
+## P-07 · Registro di copertura DERIVATO dal grafo FK, con residuo in allowlist falsificabile
+
+**Forma** (l'antidoto ad AP-03): un registro che deve coprire TUTTI gli oggetti di schema non si
+elenca a mano — si **deriva** con chiusura ricorsiva su `pg_constraint` dagli hub misurati; il
+residuo che la derivazione non cattura vive in una **allowlist esplicita giustificata riga per
+riga**; il check di completezza (`derivati ∪ allowlist = tutti`) va in ECCEZIONE su ogni oggetto
+nuovo non classificato, e ha un **selftest** che inietta un oggetto orfano in transazione e pretende
+lo scatto. Discriminatore attore/soggetto: esclusione per nome (`_by$`/`_actor`) — P-06 mostra che
+`confdeltype` NON basta da solo (44 archi soggetto sono anch'essi `SET NULL`).
+
+**Prova** (2026-07-27, storia36 C0): `staging.storia36_assert_dossier_completeness()` in
+`db/scripts/verify-storia36-dossier.sql` — 7 dossier derivati (173 membri) + CATALOGO derivato (16)
++ allowlist PIATTAFORMA (17) = 206/206; selftest verde (tabella orfana iniettata → eccezione →
+cleanup). Registro: `docs/kb/storia36/DOSSIER_REGISTRY.md`.
+
+**Dove NON è applicata pur potendo**: il gate GDPR dei test (la regex attore è duplicata — AP-01) e
+ogni futura mappa di copertura per-tabella (audit semantico C12, i18n dati, RACI).
+
+---
+
+## P-08 · Batteria di proprietà parametrica con selftest a iniezione in subtransazione
+
+**Forma**: ogni post-condizione di dati è una FUNZIONE (`staging.storia36_check_*`) che solleva
+eccezione sulla violazione — mai una fotografia: la finestra temporale arriva da `set_config`/GUC
+(default calcolato, override via `psql -v`); un **runner** esegue TUTTI i check raccogliendo gli
+esiti (`[OK]`/`[ROSSO]` per check) e fallisce alla fine, così l'entrypoint vede il quadro intero e
+non il primo errore. Ogni check nuovo ha il **selftest**: in un blocco `BEGIN…EXCEPTION` si inietta
+la violazione (`UPDATE … WHERE ctid = (SELECT ctid … LIMIT 1)` — nessuna conoscenza della PK), si
+pretende lo scatto e l'eccezione stessa garantisce il rollback dell'iniezione. Un check mai visto
+fallire non prova nulla (feedback `evidence_must_be_falsifiable`).
+
+**Prova** (2026-07-27, storia36 C0): `db/scripts/verify-storia36.sql` — G1 (70 colonne derivate
+dalla classificazione delle 513), G2-G6; selftest G1/G2/G4/G6 verdi con rollback provato; G3 rosso
+di progetto rilevato senza mascherare gli altri esiti.
+
+**Dove NON è applicata pur potendo**: le post-condition inline dei seed S1025-S1028 (fail-loud ma
+senza selftest né finestra parametrica); le 6 viste strutturali di `db:validate` (statiche, senza
+prova di falsificabilità).
+
+---
+
 ## Restano da verificare
 
 Nel referto del run, non ancora promossi qui: registro dei bersagli polimorfici con funzione dinamica

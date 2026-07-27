@@ -6,7 +6,7 @@
 
 ## Decisioni vincolanti (Enzo, S1033)
 - Finestra: **2023-08-01 → 2026-07-31** · riorg **2025-03-01** · crescita moderata · aree delicate a volumi bassi · dump prima di tutto · popolazione chiusa (nessun utente nuovo).
-- **Verifica su 4 assi per OGNI cluster** (piano, sezione dedicata): dossier per-persona 162/162 · review adversarial (3 revisori, rilievi qui sotto nel diario) · self-test di ogni check (iniezione violazione → deve scattare) · riconciliazione aggregati.
+- **Verifica su 4 assi per OGNI cluster** (piano, sezione dedicata): **DOSSIER per-entità** (registro DERIVATO dal grafo FK, completezza 206/206 tabelle mappate; persona/processo/OU/posizione/team/cascata-KPI/tenant — la persona è solo un'istanza) · review adversarial (3 revisori, rilievi qui sotto nel diario) · self-test di ogni check (iniezione violazione → deve scattare) · riconciliazione aggregati. La riorg (C6) ri-esegue i dossier di TUTTE le entità toccate.
 
 ## Cluster
 

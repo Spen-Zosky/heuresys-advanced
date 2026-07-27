@@ -45,16 +45,36 @@ Mandato di Enzo (S1033, 2026-07-27): il DBMS deve rappresentare dati che la piat
 I tre strati originari (post-condizioni per cluster · batteria globale G1-G6 · audit C12) sono
 **verticali**: provano che ogni ciclo sia coerente al suo interno. Non bastano. Quattro assi:
 
-1. **Asse orizzontale — dossier per-persona** (`db/scripts/verify-storia36-person.sql`, nasce al C0
-   e cresce col programma): batteria cross-cluster eseguita su **TUTTI i 162 utenti**, mai a
-   campione. Asserzioni tipo (parametri DALLA RICERCA di dominio per famiglia di ruolo, mai
-   inventati): età alla nomina >= minimo del ruolo · fine studi <= inizio prima esperienza ·
-   progressione di carriera senza salti implausibili · retribuzione dentro la banda
-   dell'inquadramento CCNL **e** coerente con la seniority del ruolo · skill possedute ⊇ requisiti
-   della posizione con proficiency plausibile · certificazioni obbligatorie del ruolo presenti e
-   in corso di validità · valutazioni presenti per ogni anno di presenza. Esempio-guida (di Enzo):
-   il Direttore Crediti deve reggere il dossier INTERO — età, bio, titoli, esperienze, skill,
-   retribuzione, formazione — letto come una storia unica.
+1. **Asse orizzontale — i DOSSIER per-entità** (precisazione di Enzo, S1033: la persona è UNA
+   istanza di una classe generale). Ogni entità che AGGREGA altre entità è un dossier che deve
+   reggere letto per intero. Il registro dei dossier **non si elenca a mano: si DERIVA dal grafo
+   delle FK** (`pg_constraint` — le entità-hub sono quelle su cui convergono famiglie di
+   riferimenti), perché un elenco a mano vale quanto la fantasia di chi lo scrive — è l'anti-pattern
+   AP-03 già pagato dal progetto (il gate GDPR che guardava 74 FK su 248 filtrando per nome).
+   Deliverable C0: `docs/kb/storia36/DOSSIER_REGISTRY.md` + query di derivazione + **check di
+   completezza falsificabile**: ogni tabella `sys.*` appartiene ad ALMENO un dossier — una tabella
+   non mappata = registro ROSSO. Dossier attesi dalla derivazione (verificare, non assumere):
+   - **Persona** (`verify-storia36-person.sql`, 162/162 mai a campione): età alla nomina >= minimo
+     del ruolo · fine studi <= inizio prima esperienza · progressione senza salti implausibili ·
+     retribuzione nella banda dell'inquadramento CCNL E coerente con la seniority · skill ⊇
+     requisiti posizione · certificazioni obbligatorie valide · valutazioni per ogni anno di
+     presenza. Esempio-guida: il Direttore Crediti regge il dossier INTERO come una storia unica.
+   - **Processo di business** (esempio-guida di Enzo): il processo definisce le OU responsabili e i
+     ruoli aggregati attorno → ogni OU referenziata ESISTE ed è nella struttura corrente · ogni
+     ruolo/responsabilità del processo è assegnato a uno user ATTIVO · il tutto si rispecchia
+     nell'organigramma (l'owner sta in una OU responsabile del processo) · KPI template del
+     processo → requisiti delle posizioni coinvolte.
+   - **Unità organizzativa**: manager definito · posizioni afferenti con titolare o vacancy
+     dichiarata · responsabilità di processo · history continua (C6).
+   - **Posizione**: requisiti (skill/KPI/learning) · comp profile · incumbent · riporto · rilevanza
+     successoria · il PIP (vista) coerente con le sue sorgenti.
+   - **Team**: lead singolo in sync con la membership · membri = utenti attivi · derivazione da OU.
+   - **Cascata KPI** (dossier di catena): definizione → template processo/OU → requisito posizione
+     → target utente → misurazioni, coerenti a ogni gradino della discesa.
+   - **Tenant**: ogni riga di ogni dossier dentro il perimetro (I5).
+   Le batterie vivono in `db/scripts/verify-storia36-dossier.sql` (una sezione per dossier); ogni
+   cluster esegue le batterie dei dossier che TOCCA, e il C6 (riorg) ri-esegue i dossier di TUTTE
+   le entità toccate dalla trasformazione — le rotture da cascade nascono lì.
 2. **Review adversarial a fine cluster**: TRE revisori indipendenti col mandato di DEMOLIRE
    l'evidenza (modello zero-pending, che ha già demolito evidenze in S1030/S1032/S1033), lenti
    distinte: (a) coerenza temporale · (b) realismo di dominio bancario (con la ricerca in mano) ·
@@ -124,6 +144,7 @@ CREATE TABLE IF NOT EXISTS staging.storia36_calendar (
 --  15/8, 1/11, 8/12, 25/12, 26/12) + patrono della sede RTL (deciderlo dal
 --  dato: città sede legale in sys_tenancies/OU — verificare al C0, non assumere).
 ```
+- [ ] **Step 0.4a: registro dei dossier** — deriva le entità-hub dal grafo FK (`pg_constraint`: conta per ogni tabella le famiglie di tabelle che la referenziano), scrivi `docs/kb/storia36/DOSSIER_REGISTRY.md` (dossier → tabelle afferenti) e il check di completezza in `verify-storia36-dossier.sql`: `ogni tabella sys.* ∈ almeno un dossier`, ROSSO se una resta fuori. Confronta l'esito della derivazione con l'elenco atteso nella sezione "Verifica su quattro assi": ogni differenza va capita, non zittita.
 - [ ] **Step 0.4: `verify-storia36.sql` v1** — la batteria globale (fallisce = `RAISE EXCEPTION` in blocchi `DO`). Checks iniziali, tutti scrivibili ORA:
 ```sql
 -- G1: nessun record oltre la finestra (per ogni tabella con colonna data nota)
@@ -271,7 +292,7 @@ CREATE TABLE IF NOT EXISTS staging.storia36_calendar (
 
 **Files:** Create: `docs/kb/storia36/AUDIT_FINALE.md` · Modify: `db/scripts/verify-storia36.sql` (consolidato)
 
-- [ ] **Step 12.1: batteria completa** — `verify-storia36.sql` intero VERDE (self-test inclusi) + `verify-storia36-person.sql` su 162/162 + riconciliazione aggregati (API vs righe) + `pnpm db:validate` + le 6 viste = 0.
+- [ ] **Step 12.1: batteria completa** — `verify-storia36.sql` intero VERDE (self-test inclusi) + TUTTI i dossier di `verify-storia36-dossier.sql` (persona 162/162, processi, OU, posizioni, team, cascata KPI, tenant — col check di completezza 206/206 tabelle mappate) + riconciliazione aggregati (API vs righe) + `pnpm db:validate` + le 6 viste = 0.
 - [ ] **Step 12.2: audit semantico su TUTTE le 206 tabelle** (mandato Enzo: "il secondo passaggio va fatto su tutte") — per ogni tabella: regola di dominio applicabile (range plausibili, date, correlazioni) eseguita e verbalizzata in AUDIT_FINALE con esito; le tabelle senza regola sensata dichiarate esplicitamente con il perché. Fan-out con agenti Explore per gruppi di tabelle se il contesto lo richiede.
 - [ ] **Step 12.3: rete di sicurezza intera** — vitest completa + Playwright `test:e2e:prod:node22` + guardia attori 9/9.
 - [ ] **Step 12.4: demo live** — percorso investitore/cliente: login federica.marchetti (TENANT_ADMIN) → dashboard con trend 36 mesi → un utente con storia completa (carriera, comp, formazione, valutazioni) → inbox approvazioni → engagement. Screenshot in `qa_artifacts/`.

@@ -56,6 +56,15 @@ test.describe("/me/profile navtab — live anagraphic data", () => {
     await expect(page.getByTestId("ct-gross")).toContainText("€");
     await expect(page).toHaveURL(/[?&]tab=contratti/);
 
+    // Esperienze — la carriera precedente all'ingresso in azienda. Nasce dal
+    // cancello di esposizione: le righe c'erano nel database e nessun endpoint
+    // le leggeva, quindi il curriculum non era visibile da nessuna parte.
+    await page.getByTestId("profile-tab-esperienze").click();
+    await expect(page.getByTestId("profile-experiences")).toBeVisible();
+    await expect(page.getByTestId("section-experience-latest")).toBeVisible();
+    await expect(page.getByTestId("exp-employer")).not.toBeEmpty();
+    await expect(page).toHaveURL(/[?&]tab=esperienze/);
+
     await page.getByTestId("profile-tab-documenti").click();
     await expect(page.getByTestId("profile-documents")).toBeVisible();
     await expect(page.getByTestId("profile-documents-list")).toBeVisible();

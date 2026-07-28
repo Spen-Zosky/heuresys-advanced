@@ -18,6 +18,7 @@ import type {
   PositionIntelligenceProfile,
   PositionLearningRequirement,
   PositionLearningModule,
+  PositionSkillRequirementHistory,
 } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
@@ -670,4 +671,58 @@ export async function listLearningModuleCoverage(
       r.learning_module_duration_minutes === null ? null : Number(r.learning_module_duration_minutes),
     targetProficiency: r.target_proficiency as PositionLearningModule["targetProficiency"],
   }));
+}
+
+/**
+ * Come sono cambiati nel tempo i requisiti di competenza di una posizione.
+ * La tabella era popolata e nessun endpoint la leggeva: il profilo di ruolo
+ * sembrava non essere mai cambiato.
+ */
+export async function listSkillRequirementHistory(
+  q: DbConnector,
+  positionId: string,
+  tenantId: string | undefined,
+): Promise<{ items: PositionSkillRequirementHistory[]; total: number }> {
+  const res = await q.query<{
+    h_id: string; position_id: string; skill_id: string; skill_name: string | null;
+    old_prof: string | null; new_prof: string;
+    old_weight: string | null; new_weight: string | null;
+    reason: string | null; actor_id: string | null; actor_name: string | null;
+    effective_at: Date;
+  }>(
+    `SELECT h.position_skill_requirement_history_id        AS h_id,
+            h.position_skill_requirement_history_position_id AS position_id,
+            h.position_skill_requirement_history_skill_id  AS skill_id,
+            s.skill_name                                   AS skill_name,
+            h.position_skill_requirement_history_old_proficiency AS old_prof,
+            h.position_skill_requirement_history_new_proficiency AS new_prof,
+            h.position_skill_requirement_history_old_weight AS old_weight,
+            h.position_skill_requirement_history_new_weight AS new_weight,
+            h.position_skill_requirement_history_change_reason AS reason,
+            h.position_skill_requirement_history_actor_user_id AS actor_id,
+            u.user_display_name                            AS actor_name,
+            h.position_skill_requirement_history_effective_at AS effective_at
+       FROM sys.sys_position_skill_requirement_history h
+       LEFT JOIN sys.sys_skills s ON s.skill_id = h.position_skill_requirement_history_skill_id
+       LEFT JOIN sys.sys_users  u ON u.user_id  = h.position_skill_requirement_history_actor_user_id
+      WHERE h.position_skill_requirement_history_position_id = $1
+        AND ($2::uuid IS NULL OR h.position_skill_requirement_history_tenant_id = $2)
+      ORDER BY h.position_skill_requirement_history_effective_at DESC`,
+    [positionId, tenantId ?? null],
+  );
+  const items = res.rows.map((r) => ({
+    historyId: r.h_id,
+    positionId: r.position_id,
+    skillId: r.skill_id,
+    skillName: r.skill_name,
+    oldProficiency: r.old_prof,
+    newProficiency: r.new_prof,
+    oldWeight: r.old_weight === null ? null : Number(r.old_weight),
+    newWeight: r.new_weight === null ? null : Number(r.new_weight),
+    changeReason: r.reason,
+    actorUserId: r.actor_id,
+    actorDisplayName: r.actor_name,
+    effectiveAt: r.effective_at.toISOString(),
+  }));
+  return { items, total: items.length };
 }

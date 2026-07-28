@@ -11,6 +11,7 @@ import type {
   CompensationRecommendation,
   CreateCompensationRecommendationBody,
   PayrollHandoffRecord,
+  PayoutCurve,
   CreatePayrollHandoffRecordBody,
   RewardGatesListQuery,
   VariablePayCalculation,
@@ -927,4 +928,40 @@ export async function listPayrollHandoffRecords(
     params,
   );
   return { total: Number(totalRow.rows[0]?.total ?? 0), items: res.rows.map(toHandoff) };
+}
+
+/**
+ * Le curve di payout del motore del premio variabile. Erano scritte e mai lette:
+ * chi guardava un premio non poteva vedere la regola con cui era stato calcolato.
+ * Visibilità: le curve globali più quelle del proprio tenant (stesso modello dei
+ * cataloghi condivisi).
+ */
+export async function listPayoutCurves(
+  q: DbConnector,
+  tenantId: string | undefined,
+): Promise<{ items: PayoutCurve[]; total: number }> {
+  const res = await q.query<{
+    payout_curve_id: string; payout_curve_tenant_id: string | null;
+    payout_curve_code: string; payout_curve_name: string; payout_curve_kind: string;
+    payout_curve_payload: Record<string, unknown>; payout_curve_is_global: boolean;
+    created_at: Date;
+  }>(
+    `SELECT payout_curve_id, payout_curve_tenant_id, payout_curve_code, payout_curve_name,
+            payout_curve_kind, payout_curve_payload, payout_curve_is_global, created_at
+       FROM sys.sys_payout_curves
+      WHERE ($1::uuid IS NULL OR payout_curve_is_global = true OR payout_curve_tenant_id = $1)
+      ORDER BY payout_curve_is_global DESC, payout_curve_code`,
+    [tenantId ?? null],
+  );
+  const items = res.rows.map((r) => ({
+    payoutCurveId: r.payout_curve_id,
+    tenantId: r.payout_curve_tenant_id,
+    code: r.payout_curve_code,
+    name: r.payout_curve_name,
+    kind: r.payout_curve_kind,
+    payload: r.payout_curve_payload ?? {},
+    isGlobal: r.payout_curve_is_global,
+    createdAt: r.created_at.toISOString(),
+  }));
+  return { items, total: items.length };
 }

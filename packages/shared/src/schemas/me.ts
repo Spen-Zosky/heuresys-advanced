@@ -818,3 +818,30 @@ export const MeDevelopmentResponseSchema = z.object({
   generatedAt: z.iso.datetime(),
 });
 export type MeDevelopmentResponse = z.infer<typeof MeDevelopmentResponseSchema>;
+
+/* --- esperienze professionali precedenti (esposizione C5-gate) --------- */
+
+/**
+ * Il curriculum di chi chiama: le esperienze precedenti all'ingresso in azienda.
+ * Erano scritte nel database ma nessun endpoint le leggeva, quindi la carriera
+ * di una persona restava invisibile nel portale.
+ */
+export const MeProfessionalExperienceSchema = z.object({
+  professionalExperienceId: z.uuid(),
+  employer: z.string(),
+  roleTitle: z.string(),
+  industry: z.string().nullable(),
+  startDate: z.string(),
+  endDate: z.string().nullable(),
+  description: z.string().nullable(),
+  /** Durata in mesi, derivata: quello che un curriculum mostra davvero. */
+  durationMonths: z.number().int().nullable(),
+});
+export type MeProfessionalExperience = z.infer<typeof MeProfessionalExperienceSchema>;
+
+export const MeProfessionalExperiencesResponseSchema = z.object({
+  items: z.array(MeProfessionalExperienceSchema),
+  total: z.number().int().min(0),
+});
+export type MeProfessionalExperiencesResponse =
+  z.infer<typeof MeProfessionalExperiencesResponseSchema>;

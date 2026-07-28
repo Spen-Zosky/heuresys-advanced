@@ -23,6 +23,7 @@ import {
   PositionSkillIdParamSchema,
   PositionKpiListResponseSchema,
   PositionLearningRequirementListResponseSchema,
+  PositionSkillRequirementHistoryResponseSchema,
   PositionLearningModuleListResponseSchema,
   PositionKpiRequirementSchema,
   AddPositionKpiBodySchema,
@@ -155,6 +156,19 @@ export const positionsRoutes: FastifyPluginAsyncZod = async (app) => {
       );
       reply.code(204).send({});
     },
+  );
+
+  /* --- storia dei requisiti di competenza (cancello di esposizione) --- */
+  app.get(
+    "/:id/skill-requirements/history",
+    {
+      preHandler: [requirePermission("position:read")],
+      schema: {
+        params: PositionIdParamSchema,
+        response: { 200: PositionSkillRequirementHistoryResponseSchema },
+      },
+    },
+    async (req) => positionsService.listSkillRequirementHistory(actorFromReq(req), req.params.id),
   );
 
   /* --- learning bridge (#25 A/L5: read-only) ------------------------ */

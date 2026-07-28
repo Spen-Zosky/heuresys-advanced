@@ -404,7 +404,8 @@
         "contracts": "Contratti",
         "documents": "Documenti",
         "aria": "Sezioni del profilo",
-        "paySlips": "Cedolini"
+        "paySlips": "Cedolini",
+        "experiences": "Esperienze"
       },
       "identity": {
         "title": "Identità",
@@ -536,6 +537,17 @@
         "net": "Netto",
         "paymentDate": "Data pagamento",
         "totalDeductions": "Totale trattenute"
+      },
+      "experiences": {
+        "none": "Nessuna esperienza precedente registrata.",
+        "employer": "Datore di lavoro",
+        "role": "Ruolo",
+        "industry": "Settore",
+        "from": "Dal",
+        "to": "Al",
+        "duration": "Durata",
+        "years": "{{count}} anni",
+        "months": "{{count}} mesi"
       }
     }
   },

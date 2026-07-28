@@ -12,6 +12,7 @@ import {
   RewardGatesListQuerySchema,
   RewardGatesListResponseSchema,
   CompensationDistributionResponseSchema,
+  PayoutCurveListResponseSchema,
   CompensationRecommendationSchema,
   CreateCompensationRecommendationBodySchema,
   PayrollHandoffRecordSchema,
@@ -44,6 +45,12 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: { querystring: RewardGatesListQuerySchema, response: { 200: RewardGatesListResponseSchema } },
   }, async (req) => compensationService.listRewardGates(actor(req), req.query));
+
+  app.get("/payout-curves", {
+    config: { orgGate: "catalog" },
+    preHandler: [requirePermission("compensation_intelligence:read")],
+    schema: { response: { 200: PayoutCurveListResponseSchema } },
+  }, async (req) => compensationService.listPayoutCurves(actor(req)));
 
   app.get("/distribution", {
     config: { orgGate: "aggregate" },

@@ -197,6 +197,12 @@ export const positionsService = {
 
   /* -------------------------------------------------- learning bridge (#25 A/L5, read-only) */
 
+  /** Come sono cambiati nel tempo i requisiti di competenza della posizione. */
+  async listSkillRequirementHistory(actor: ActorContext, positionId: string) {
+    const pos = await this.getById(actor, positionId); // riusa il controllo di visibilita'
+    return repo.listSkillRequirementHistory(pool, pos.positionId, pos.tenantId ?? undefined);
+  },
+
   async listLearningRequirements(
     actor: ActorContext,
     positionId: string,

@@ -1674,3 +1674,43 @@ export async function readMyDevelopment(
       : null,
   };
 }
+
+/* --- esperienze professionali precedenti ------------------------------ */
+
+/**
+ * Il curriculum di chi chiama. Erano righe scritte e mai lette: la carriera di
+ * una persona prima dell'ingresso in azienda restava invisibile nel portale.
+ * La durata in mesi si calcola qui perche' e' quello che un curriculum mostra —
+ * non l'aritmetica fra due date lasciata al client.
+ */
+export async function listMyProfessionalExperiences(q: DbConnector, userId: string) {
+  const res = await q.query<{
+    user_prof_exp_id: string; user_prof_exp_employer: string;
+    user_prof_exp_role_title: string; user_prof_exp_industry: string | null;
+    user_prof_exp_start_date: Date; user_prof_exp_end_date: Date | null;
+    user_prof_exp_description: string | null; mesi: string | null;
+  }>(
+    `SELECT user_prof_exp_id, user_prof_exp_employer, user_prof_exp_role_title,
+            user_prof_exp_industry, user_prof_exp_start_date, user_prof_exp_end_date,
+            user_prof_exp_description,
+            CASE WHEN user_prof_exp_end_date IS NULL THEN NULL
+                 ELSE (extract(year  FROM age(user_prof_exp_end_date, user_prof_exp_start_date)) * 12
+                     + extract(month FROM age(user_prof_exp_end_date, user_prof_exp_start_date)))::text
+            END AS mesi
+       FROM sys.sys_user_professional_experiences
+      WHERE user_prof_exp_user_id = $1
+      ORDER BY user_prof_exp_start_date DESC`,
+    [userId],
+  );
+  const items = res.rows.map((r) => ({
+    professionalExperienceId: r.user_prof_exp_id,
+    employer: r.user_prof_exp_employer,
+    roleTitle: r.user_prof_exp_role_title,
+    industry: r.user_prof_exp_industry,
+    startDate: toDateOnly(r.user_prof_exp_start_date)!,
+    endDate: toDateOnly(r.user_prof_exp_end_date),
+    description: r.user_prof_exp_description,
+    durationMonths: r.mesi === null ? null : Number(r.mesi),
+  }));
+  return { items, total: items.length };
+}

@@ -21,6 +21,7 @@ import {
   MeSurveysResponseSchema, MeSurveyDetailSchema,
   SubmitMeSurveyResponseBodySchema, SubmitMeSurveyResultSchema, MeSurveyIdParamSchema,
   MeLearningResponseSchema, MeLearningAssignmentSchema, CreateMeEnrollmentBodySchema,
+  MeProfessionalExperiencesResponseSchema,
   MeGapsResponseSchema, MeAssessmentsResponseSchema,
   MeCareerResponseSchema, MeCareerTargetSchema, CreateMeCareerTargetBodySchema,
   MeGoalsResponseSchema, MeRiskResponseSchema, MeCareerPathsResponseSchema,
@@ -191,6 +192,11 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     const result = await meService.submitSurvey(selfActor(req), req.params.surveyId, req.body);
     reply.code(201).send(result);
   });
+
+  app.get("/professional-experiences", {
+    preHandler: [requirePermission("user_profile:read:self")],
+    schema: { response: { 200: MeProfessionalExperiencesResponseSchema } },
+  }, async (req) => meService.listProfessionalExperiences(selfActor(req)));
 
   app.get("/learning", {
     preHandler: [requirePermission("learning:read:self")],

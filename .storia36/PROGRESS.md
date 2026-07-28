@@ -8,6 +8,16 @@
 - Finestra: **2023-08-01 → 2026-07-31** · riorg **2025-03-01** · crescita moderata · aree delicate a volumi bassi · dump prima di tutto · popolazione chiusa (nessun utente nuovo).
 - **Verifica su 4 assi per OGNI cluster** (piano, sezione dedicata): **DOSSIER per-entità** (registro DERIVATO dal grafo FK, completezza 206/206 tabelle mappate; persona/processo/OU/posizione/team/cascata-KPI/tenant — la persona è solo un'istanza) · review adversarial (3 revisori, rilievi qui sotto nel diario) · self-test di ogni check (iniezione violazione → deve scattare) · riconciliazione aggregati. La riorg (C6) ri-esegue i dossier di TUTTE le entità toccate.
 - **Ripetibilità** (piano, sezione "tre modi"): entrypoint `db/scripts/storia36.sh` {costruzione·custodia·avanzamento} dal C0; check = asserzioni di proprietà con finestra a PARAMETRO, mai fotografie; custodia = report + triage a 3 esiti (mancante→repair · check troppo rigido→correggi il check · rottura→item), MAI riparazione automatica di righe modificate; schedulazione settimanale al C12.
+- **CANCELLO DI ESPOSIZIONE** (Enzo, 2026-07-28 — vincolante e **retroattivo su tutti i cluster**):
+  *un dato che nessuna API espone non e' nel prodotto, e' solo nel database*. Nessun cluster si
+  chiude finche' cio' che ha scritto non e' raggiungibile: **endpoint, schema condiviso, query,
+  wiring** (e la pagina, dove il dato ha un lettore umano). Il cancello e' automatico e
+  falsificabile: `python docs/kb/tools/check_exposure.py` deriva dai seed le tabelle scritte, dal
+  sorgente dell'API quelle lette, e fallisce (exit 1) se ne resta una scoperta. Una tabella puo'
+  restare non esposta solo con una deroga MOTIVATA in `docs/kb/tools/exposure_waivers.txt` — una
+  deroga senza motivo non e' una deroga. Prima applicazione: C3 `sys_payout_curves`, C5
+  `sys_user_professional_experiences` e `sys_position_skill_requirement_history` (30 tabelle
+  scritte, 27 esposte, 3 scoperte → 30 su 30).
 
 ## Cluster
 

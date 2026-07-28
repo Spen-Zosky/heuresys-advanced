@@ -88,6 +88,12 @@ export const compensationService = {
     return repo.listRewardGates(pool, { tenantId, userIdAllowList, query });
   },
 
+  /** Le curve di payout visibili al chiamante: globali + quelle del proprio tenant. */
+  async listPayoutCurves(actor: ActorContext) {
+    const tenantId = isPlatform(actor) ? undefined : requireTenant(actor);
+    return repo.listPayoutCurves(pool, tenantId);
+  },
+
   async getRewardGateDistribution(actor: ActorContext): Promise<CompensationDistributionResponse> {
     const tenantId = isPlatform(actor) ? undefined : requireTenant(actor);
     return repo.getRewardGateStatusDistribution(pool, tenantId);

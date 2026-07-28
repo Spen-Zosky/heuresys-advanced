@@ -404,7 +404,8 @@
         "contracts": "Contracts",
         "documents": "Documents",
         "aria": "Profile sections",
-        "paySlips": "Payroll"
+        "paySlips": "Payroll",
+        "experiences": "Experience"
       },
       "identity": {
         "title": "Identity",
@@ -536,6 +537,17 @@
         "net": "Net",
         "paymentDate": "Payment date",
         "totalDeductions": "Total deductions"
+      },
+      "experiences": {
+        "none": "No previous experience on record.",
+        "employer": "Employer",
+        "role": "Role",
+        "industry": "Industry",
+        "from": "From",
+        "to": "To",
+        "duration": "Duration",
+        "years": "{{count}} years",
+        "months": "{{count}} months"
       }
     }
   },

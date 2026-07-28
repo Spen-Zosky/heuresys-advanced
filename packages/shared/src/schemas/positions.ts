@@ -281,3 +281,33 @@ export const PositionLearningModuleListResponseSchema = z.object({
 export type PositionLearningModuleListResponse = z.infer<
   typeof PositionLearningModuleListResponseSchema
 >;
+
+/* --- storia dei requisiti di competenza (esposizione C5-gate) ---------- */
+
+/**
+ * Come sono cambiati nel tempo i requisiti di competenza di una posizione.
+ * La tabella era popolata ma nessun endpoint la leggeva: il profilo di ruolo
+ * sembrava non essere mai cambiato.
+ */
+export const PositionSkillRequirementHistorySchema = z.object({
+  historyId: z.uuid(),
+  positionId: z.uuid(),
+  skillId: z.uuid(),
+  skillName: z.string().nullable(),
+  oldProficiency: z.string().nullable(),
+  newProficiency: z.string(),
+  oldWeight: z.number().nullable(),
+  newWeight: z.number().nullable(),
+  changeReason: z.string().nullable(),
+  actorUserId: z.uuid().nullable(),
+  actorDisplayName: z.string().nullable(),
+  effectiveAt: z.iso.datetime(),
+});
+export type PositionSkillRequirementHistory = z.infer<typeof PositionSkillRequirementHistorySchema>;
+
+export const PositionSkillRequirementHistoryResponseSchema = z.object({
+  items: z.array(PositionSkillRequirementHistorySchema),
+  total: z.number().int().min(0),
+});
+export type PositionSkillRequirementHistoryResponse =
+  z.infer<typeof PositionSkillRequirementHistoryResponseSchema>;

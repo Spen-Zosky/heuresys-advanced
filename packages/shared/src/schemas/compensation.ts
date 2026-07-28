@@ -198,3 +198,28 @@ export const CreatePayrollHandoffRecordBodySchema = z.object({
 export type CreatePayrollHandoffRecordBody = z.infer<
   typeof CreatePayrollHandoffRecordBodySchema
 >;
+
+/* --- curve di payout (esposizione C5-gate) ---------------------------- */
+
+/**
+ * Le curve che traducono il raggiungimento in importo. Erano scritte dal motore
+ * del premio variabile ma nessun endpoint le leggeva: chi guardava un premio non
+ * poteva vedere la regola con cui era stato calcolato.
+ */
+export const PayoutCurveSchema = z.object({
+  payoutCurveId: z.uuid(),
+  tenantId: z.uuid().nullable(),
+  code: z.string(),
+  name: z.string(),
+  kind: z.string(),
+  payload: z.record(z.string(), z.unknown()),
+  isGlobal: z.boolean(),
+  createdAt: z.iso.datetime(),
+});
+export type PayoutCurve = z.infer<typeof PayoutCurveSchema>;
+
+export const PayoutCurveListResponseSchema = z.object({
+  items: z.array(PayoutCurveSchema),
+  total: z.number().int().min(0),
+});
+export type PayoutCurveListResponse = z.infer<typeof PayoutCurveListResponseSchema>;

@@ -317,6 +317,11 @@ export const meService = {
     return { submitted: body.answers.length, completedAt };
   },
 
+  /** Il curriculum di chi chiama: le esperienze precedenti all'ingresso. */
+  async listProfessionalExperiences(actor: SelfActor) {
+    return repo.listMyProfessionalExperiences(pool, actor.userId);
+  },
+
   async listLearning(actor: SelfActor) {
     return repo.listMyLearning(pool, actor.userId);
   },

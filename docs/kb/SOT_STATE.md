@@ -8,6 +8,79 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
+## Delta S1034 (2026-07-28) — la storia RTL arriva alla carriera, e nasce il cancello di esposizione
+
+HEAD **`b045872f`** (14 commit S1034 + handoff). **Nessuna migration nuova**: counts di schema invariati
+(214 file, max `000216`; RBAC 13 ruoli / 204 perm / **908** map; skill **14041**; tenant ACTIVE **2**;
+utenti ACTIVE **162**). Il delta è tutto nel **dato di storia** e in tre esposizioni nuove.
+
+**storia36 C4 «formazione» — ripreso dal congelamento e chiuso in v2** (3.832 righe, twice-run 0). Il
+seed ereditato non era eseguibile (puntava a `learning_module_name`, che non esiste) e copriva 5 dei
+7 buchi censiti. Riscritto: **15 corsi d'aula** `BANK-CL-*` INSTRUCTOR_LED (il catalogo non aveva
+nulla di erogabile in presenza), **62 edizioni mensili** con capienza dichiarata di 25 posti e aule
+parallele, **1.180 tracce di frequenza** (una per ogni giornata TRAINING del C1 — erano 7 su 1.180),
+**1.071 iscrizioni** che valorizzano per la prima volta `initiative_id` e `deadline` (vuote su 1.990
+righe legacy), **1.254 corsi a distanza** di cui 794 coprono gli obblighi di CONTENUTO, **77 rinnovi**
+di abilitazioni senza scoperture, ciclo lacuna→azione chiuso. **Review adversarial 3 lenti: FAIL×3**,
+4 BLOCKER assorbiti — il fuso orario (99,6% delle lezioni chiuse dopo l'uscita timbrata: il server
+gira a `Etc/UTC`, le timbrature sono `time` naive locali), l'obbligo di contenuto non presidiato
+(146 attivi su 158 senza antiriciclaggio nel 2026), la finestra legata al mese corrente (la batteria
+sarebbe diventata rossa da sola il 1° agosto), i rinnovi ottenuti DOPO la scadenza (75 catene su 78
+con 1-11 giorni scoperti). Batteria estesa a **C4a-C4g** con 11 selftest.
+
+**storia36 C4/sicurezza** (`04b_safety.sql`, 362 righe): la cornice D.Lgs 81/08 completa — 116
+lavoratori attivi non avevano ALCUN record su un obbligo che l'art. 37 pone per ognuno. Cinque
+platee **derivate** (lavoratori 158 · preposti 32 = chi ha riporti diretti · dirigenti 9 =
+inquadramento · datore di lavoro 1 = vertice · squadre di emergenza 2+2 per sede via la nuova vista
+`staging.storia36_sede_personale`, che mappa tutte e 158 le persone a MI-HQ/MI-OPS/MI-CEN). Cadenze
+fissate dalla **norma** e non dalla mediana del dato (`storia36_cert_validity_di_legge`). Check
+**C4h** su cinque predicati + 2 selftest.
+
+**storia36 C5 «carriera»** (854 righe, twice-run 0): **255 esperienze precedenti** con le date
+vincolate da nascita, fine studi e assunzione · **145 obiettivi di carriera** · **24 candidati** per
+le 8 posizioni critiche · **141 valutazioni di prontezza** · **289 variazioni di requisito** di
+posizione. Tre riparazioni legacy: 156 titoli di studio senza data d'inizio + 50 date di
+conseguimento impossibili ancorate all'età · percorsi di carriera ricostruiti per famiglia
+professionale (177 posizioni collegate, erano 40) · 9 bacini di successione che erano gusci vuoti.
+**Review adversarial 3 lenti: FAIL×3, 42 rilievi con 8 BLOCKER** — i critici assorbiti in v2: la
+**direzione della carriera era invertita** (misuravo la verticalità dalla rarità della posizione e
+il minimo di titolari è zero → 150 obiettivi su 150 su una scrivania vuota, 22 direttori di filiale
+«aspiranti cassieri», il vertice con obiettivo approvato di diventare cassiere; ora la direzione
+viene dalla profondità della catena `reports_to`, con nuovo **C5c(iv)**) e la **norma sorteggiata**
+(240 righe su 289 citavano una fonte estranea alla competenza; ora deriva dalla materia). Riparato
+anche il danno che la mia prima riparazione aveva fatto: cancellava le 40 righe dell'import senza
+filtro di tenant, rompendo un test e lasciando incoerenti 92 piani di carriera — righe recuperate
+dal dump pre-storia36, riparazione resa **additiva**. Batteria **C5a-C5e** + 5 selftest.
+
+**⚠ CANCELLO DI ESPOSIZIONE — regola nuova di Enzo, vincolante e RETROATTIVA.** Un dato che nessuna
+API espone non è nel prodotto. Strumento: **`docs/kb/tools/check_exposure.py`** — deriva dai seed le
+tabelle scritte, dal sorgente dell'API quelle lette, incrocia coi conteggi live e **fallisce (exit 1)**
+se ne resta una scoperta; deroghe solo in `exposure_waivers.txt` e solo con motivo. Prima misura:
+**30 tabelle scritte, 27 esposte, 3 scoperte** → tre endpoint nuovi: `GET /v1/me/professional-experiences`
+(+ scheda «Esperienze» in `/me/profile`), `GET /v1/positions/:id/skill-requirements/history`,
+`GET /v1/compensation/payout-curves`. Tutti su permessi RBAC esistenti (nessuna migrazione). Ora **30/30**.
+
+**Difetto sistemico corretto — date senza orario**: le colonne `date` (RD-09) tornano da `pg` come
+`Date` a mezzanotte locale, e `toISOString()` le spostava al **giorno precedente** fuori da UTC. Era
+in **19 punti di 9 moduli** (compensation, me, positions, organization-units, mentorship, engagement,
+training-initiatives, analytics, export) e in uno era perfino documentato in un commento («ignoring
+TZ drift»). Ora una sola funzione condivisa `src/lib/date-only.ts`; il test **impone il fuso a
+runtime** e pretende che la lettura vecchia e la nuova divergano, così prova qualcosa anche in CI a UTC.
+
+**Difetto di prodotto corretto — `/me/learning`**: quattro colonne su cinque erano vuote (la pagina
+leggeva campi mai esistiti nella risposta). L'endpoint ora risolve il NOME di ciò che è assegnato
+(`kind`/`title`/`enrolledAt`), la pagina importa il tipo da `@heuresys/shared` e l'E2E asserisce il
+contenuto, non la sola visibilità.
+
+**Codex — canale di audit in sola lettura**: identità DB **verificata** (`codex_auditor`: login sì,
+superuser/CREATEDB/CREATEROLE/BYPASSRLS **no**; `default_transaction_read_only=on` a livello di
+ruolo; timeout 30s/2s/60s; unico privilegio **SELECT** su `sys` 223 tabelle e `audit` 14).
+`.codex/`, `.codex-review/` e `AGENTS.md` restano untracked per disegno e non sono di Claude.
+
+Counts di dato ri-derivati 2026-07-28 (S1034): attendance **116.015** · evidenze formative **3.868**
+· certificazioni **916** · iniziative formative **62** · esperienze professionali **255** · obiettivi
+di carriera **145** · API test file **221**.
+
 ## Delta S1033 (2026-07-27) — la CI verde per diagnosi, Z-261 chiuso, gli attori per caratteristica, il mandato storia36
 
 HEAD **`17ac7aca`** (6 commit S1033 + handoff). **CI: da 158 file rossi su 218 a TUTTI i gate verdi** — e la causa non era il codice. Diagnosi per riproduzione (i log dicevano `login <persona>: 400`, cioè «richiesta malformata», e mentivano): sul runner off-prod **`MFA_ENCRYPTION_KEY` non era la chiave con cui i 159 fattori `derived-access` sono cifrati** (hash divergente misurato) e **`DEV_ACCESS_MASTER_KEY_B64` non era mai stata aggiunta all'ambiente** (il fix di S1032 aveva preparato il codice, non il runner). Fix senza toccare `/etc/heuresys-runner.env` (root-only): env file dedicato `/etc/heuresys-runner-crypto.env` + drop-in systemd `zz-heuresys-crypto.conf` (il prefisso `zz-` vince sull'`override.conf` esistente che ricaricava il file principale). **Il sintomo mascherato è ora un difetto risolto**: `MfaCiphertextMalformedError`/`MfaEncryptionKeyMissingError` estendevano `ApiError` generico → l'errorHandler li declassava a **400**; nuova classe **`InternalError` (500)** con `publicMessage` separato dal log (il codice esce nella risposta, il dettaglio che nomina le env var resta nel log), 5 unit test nuovi rossi-prima-verdi-dopo. Sei test residui di Z-262 corretti (password di UN utente riusata per un altro in 2 file · precondizione «senza fattore» ora GARANTITA nel beforeAll · parity-label capovolta: lo skip di ri-cifratura NON deve coprire i fattori derivati).

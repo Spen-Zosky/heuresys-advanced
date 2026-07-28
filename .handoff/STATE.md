@@ -1,50 +1,62 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-07-27 (S1033 — la CI torna verde, i segreti pubblicati muoiono davvero, nasce il mandato storia36).
+**Updated**: 2026-07-28 (S1034 — la storia RTL arriva alla carriera, e nasce il cancello di esposizione).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md` · pattern di dati → `docs/kb/DATA_PATTERNS.md`.
 
-## Last session brief (S1033)
+## Last session brief (S1034)
 
-La CI rossa lasciata da S1032 è stata diagnosticata **riproducendo il login contro il DB della CI**
-(i log mentivano): la chiave di cifratura MFA del runner non era quella con cui i segreti sono
-cifrati, e la chiave madre non era mai arrivata all'ambiente del runner. Sistemate entrambe via
-drop-in systemd, più il sintomo che aveva sviato tutti — un guasto di decifratura usciva come
-richiesta malformata del client, ora è un errore interno tipizzato col suo codice. **Tutti i gate
-sono verdi**, Playwright compreso (aveva due cause proprie: un modulo che non compilava una volta
-transpilato e la password unica rimasta lato web dopo Z-262). **`Z-261` CHIUSO** con l'ok di Enzo:
-i fattori coi segreti pubblicati eliminati dai tre database, nessun utente rimasto senza secondo
-fattore. Gli attori dei test si scelgono ora **per caratteristica** (`test/helpers/actors.ts` +
-guardia falsificabile; profili estesi agli invarianti I18/I20). Audit di completezza del DBMS
-eseguito live → **mandato Enzo: storia RTL su trentasei mesi (#77)**, piano scritto e committato.
+Ripreso il **C4 congelato al passo 4.3** e chiuso, poi eseguito il **C5**. Entrambi i cluster sono
+passati sotto review adversarial a tre lenti e **entrambi sono stati bocciati**: il C4 con quattro
+rilievi bloccanti (gli orari scritti in un fuso sbagliato facevano chiudere le lezioni dopo
+l'uscita timbrata; l'obbligo di antiriciclaggio non era presidiato da nulla; la batteria sarebbe
+diventata rossa da sola al cambio di mese), il C5 con otto (il criterio di «più in alto» era
+degenerato in «scrivania vuota»: 150 obiettivi su 150 puntavano a una posizione senza titolari, e
+il vertice aveva approvato di diventare cassiere). Entrambe le v2 sono state riseminate e sono
+verdi. Chiusa anche la lacuna dichiarata sulla **sicurezza sul lavoro** (cinque figure, platee
+derivate dall'organigramma).
 
-## Obiettivo permanente (mandato Enzo, S1029 — vale per OGNI sessione futura)
+Da una domanda di Enzo è nata una **regola nuova e retroattiva**: un dato che nessuna API espone
+non è nel prodotto. Il cancello è automatico e ha trovato tre tabelle scoperte su trenta — fra cui
+il curriculum di ogni persona, invisibile ovunque. Corretto infine un difetto **sistemico** delle
+date senza orario, che l'API restituiva spostate di un giorno fuori da UTC.
 
-**Portare heuresys-advanced a una fresh session senza pendenze**: zero debiti, zero task incompleti,
-zero pending, zero errori aperti. Il censimento è fatto; ora è esecuzione, con **doppia verifica e
-review adversarial per ogni task**. Tutte le decisioni tecniche sono di Claude, il tracciamento del
-piano pure; a Enzo vanno solo le voci che dipendono da un suo input.
+Codex convive ora sul progetto in sola lettura: la sua identità nel database è stata verificata
+(solo `SELECT`, transazioni read-only forzate) e documentata.
+
+## Obiettivo permanente (mandato Enzo, S1029)
+
+**Fresh session senza pendenze**: zero debiti, task incompleti, pending, errori aperti. Doppia
+verifica e review adversarial per ogni task; le decisioni tecniche sono di Claude.
+
+## ⚠ Regola nuova, vincolante e retroattiva (Enzo, S1034)
+
+**CANCELLO DI ESPOSIZIONE** — nessun cluster (né alcun lavoro che popoli tabelle) si chiude finché
+ciò che ha scritto non è raggiungibile: endpoint, schema condiviso, query, wiring, e la pagina dove
+il dato ha un lettore umano. Il cancello è **automatico**: `python docs/kb/tools/check_exposure.py`
+deriva dai seed le tabelle scritte, dal sorgente dell'API quelle lette, e fallisce se ne resta una
+scoperta. Deroghe solo in `docs/kb/tools/exposure_waivers.txt` **e solo con motivo**.
 
 ## Stato dei piani
 
-- Zero-pendenze: `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — si conta con `zp_state.py piano`.
-- **Storia RTL (nuovo, S1033)**: `docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md` — stato vivo in `.storia36/PROGRESS.md`.
+- **Storia RTL 36 mesi** (#77): `docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md` — stato vivo
+  in `.storia36/PROGRESS.md`. **C0→C5 chiusi**; prossimo **C6** (riorganizzazione 2025-03).
+- Zero-pendenze (#76): `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — si conta con `zp_state.py piano`.
 
 ## ⚠ Top priorities (next session)
 
-1. **#77 storia36 — eseguire da C0** (il PRIMO atto è il dump completo, prima di ogni scrittura).
-   Piano autosufficiente + decisioni di Enzo già vincolate dentro; riprendere sempre dal primo
-   cluster non spuntato in `.storia36/PROGRESS.md`. Effort: dettagliato per cluster nel piano.
-2. **`Z-259` da riprendere** con i rilievi in `.zp/prove/Z-259-verdetti-adversarial.json`: la
-   proiezione deve guardare dentro i valori annidati, e il test deve girare su più soggetti.
-3. `Z-260` (dossier per i revisori, chiesto da Enzo) · `Z-258` (ambito tenant in tre classi).
+1. **#77 storia36 — eseguire il C6** (riorganizzazione 2025-03: storia delle unità organizzative
+   all'indietro, il presente resta INVARIATO). Il piano è autosufficiente e il diario
+   `.storia36/PROGRESS.md` contiene il metodo dei cluster già chiusi. Effort: 1 sessione.
+2. **Coda dei rilievi C5 non assorbiti** — registrati nel diario con numeri e query: selezione dei
+   successori col criterio del riporto diretto · `sys_career_path_steps` ancora guscio vuoto ·
+   nessuna mobilità interna in 36 mesi · `sys_critical_positions` non riconciliata con
+   `position_criticality`. Effort: ~0,5 sessione.
+3. **`Z-259` da riprendere** con i rilievi in `.zp/prove/Z-259-verdetti-adversarial.json`.
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **`admin@heuresys.com`**: account di servizio (deciso S1032), derivato, senza posizione (unico).
-  Le sue funzioni dovevano passare a `enzo.spenuso@heuresys.com`, che però **non ha alcun accesso**:
-  da decidere se e quando.
-- **Autonomia non presidiata**: freno inserito. Restano i controlli su sessione viva; il registro
-  delle corse (`.zp/runs.ndjson`) non esiste ancora.
+- **`admin@heuresys.com`**: account di servizio, derivato, senza posizione. Le sue funzioni dovevano
+  passare a `enzo.spenuso@heuresys.com`, che però **non ha alcun accesso**: da decidere se e quando.
 - WAIT-INPUT invariati: **#4** pricing · **#8** app-password Outlook · **#16** SuccessFactors ·
   **#52** SSO IdP.
 
@@ -53,9 +65,8 @@ piano pure; a Enzo vanno solo le voci che dipendono da un suo input.
 ```bash
 git log origin/main..HEAD --oneline               # 0 dopo il push handoff
 python docs/kb/tools/handoff_lint.py              # OK atteso
-gh run list --limit 8                             # tutti i gate verdi attesi
-psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -tAc \
-  "SELECT count(*) FROM sys.sys_auth_mfa_factors WHERE auth_mfa_factor_metadata->>'label'='e2e-fixture'"
-                                                  # 0 = Z-261 resta chiuso
-cat .storia36/PROGRESS.md                         # C0 = primo cluster da eseguire
+python docs/kb/tools/check_exposure.py            # 0 tabelle scoperte atteso
+psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -X -v selftest=1 \
+  -f db/scripts/verify-storia36.sql | tail -1     # "batteria globale tutta VERDE"
+cat .storia36/PROGRESS.md                         # C6 = primo cluster da eseguire
 ```

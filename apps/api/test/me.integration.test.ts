@@ -158,6 +158,57 @@ describe("/v1/me/* ESS endpoints", () => {
     assignmentId = a.userLearningAssignmentId;
   });
 
+  it("GET /v1/me/learning risolve il NOME di cio' che e' assegnato, non solo gli identificativi", async () => {
+    // Il contratto portava soltanto tre uuid (modulo/iniziativa/percorso): la
+    // pagina ESS mostrava quattro colonne su cinque vuote perche' non c'era
+    // nulla da leggere. Qui si pretende il nome risolto — e l'atteso si DERIVA
+    // dalla sorgente, mai da una lista scritta a mano.
+    const res = await suite.app.inject({
+      method: "GET", url: "/v1/me/learning",
+      headers: { cookie: ch(employeeS.cookies) },
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json() as {
+      total: number;
+      items: Array<{
+        userLearningAssignmentId: string; kind: string; title: string | null;
+        enrolledAt: string | null; isMandatory: boolean;
+      }>;
+    };
+    expect(body.total).toBeGreaterThan(0);
+
+    const src = await pool.query<{ id: string; titolo: string | null; kind: string }>(
+      `SELECT a.user_learning_assignment_id AS id,
+              COALESCE(ti.training_initiative_cohort_name, ti.training_initiative_code,
+                       m.learning_module_title, p.learning_path_name) AS titolo,
+              CASE WHEN a.user_learning_assignment_initiative_id IS NOT NULL THEN 'INITIATIVE'
+                   WHEN a.user_learning_assignment_module_id     IS NOT NULL THEN 'MODULE'
+                   ELSE 'PATH' END AS kind
+         FROM sys.sys_user_learning_assignments a
+         LEFT JOIN sys.sys_learning_modules m
+                ON m.learning_module_id = a.user_learning_assignment_module_id
+         LEFT JOIN sys.sys_training_initiatives ti
+                ON ti.training_initiative_id = a.user_learning_assignment_initiative_id
+         LEFT JOIN sys.sys_learning_paths p
+                ON p.learning_path_id = a.user_learning_assignment_path_id
+        WHERE a.user_learning_assignment_user_id = $1`,
+      [employeeS.userId],
+    );
+    const attesi = new Map(src.rows.map((r) => [r.id, r]));
+    expect(body.items).toHaveLength(attesi.size);
+    for (const item of body.items) {
+      const atteso = attesi.get(item.userLearningAssignmentId);
+      expect(atteso, `assegnazione ${item.userLearningAssignmentId} non trovata alla fonte`).toBeDefined();
+      expect(item.kind).toBe(atteso!.kind);
+      expect(item.title).toBe(atteso!.titolo);
+    }
+
+    // la proprieta' che il difetto violava: ogni riga ha un nome leggibile
+    expect(body.items.filter((i) => i.title === null)).toHaveLength(0);
+    // e la data di iscrizione, che nel contratto non esisteva affatto
+    expect(body.items.every((i) => typeof i.enrolledAt === "string")).toBe(true);
+  });
+
   it("GET /v1/me/gaps and /v1/me/assessments return tenant-scoped lists", async () => {
     const g = await suite.app.inject({
       method: "GET", url: "/v1/me/gaps",

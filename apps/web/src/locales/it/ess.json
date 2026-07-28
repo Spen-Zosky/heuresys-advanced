@@ -288,20 +288,20 @@
     "caption": "Obiettivi attivi"
   },
   "learning": {
-    "title": "I miei percorsi",
-    "description": "I percorsi formativi a te assegnati.",
-    "count": "{{count}} percorsi",
-    "colPath": "Percorso",
+    "title": "La mia formazione",
+    "description": "I corsi, le edizioni d'aula e i percorsi formativi a te assegnati.",
+    "count": "{{count}} assegnazioni",
+    "colTitle": "Corso o percorso",
     "colStatus": "Stato",
     "colMandatory": "Obbligatorio",
     "mandatoryYes": "SÌ",
     "mandatoryNo": "NO",
     "colEnrolled": "Iscrizione",
-    "colCompleted": "Completato",
-    "errorMessage": "Impossibile caricare i percorsi.",
-    "emptyTitle": "Nessun percorso assegnato",
-    "emptyDesc": "Non hai percorsi formativi assegnati.",
-    "caption": "Percorsi assegnati"
+    "colDeadline": "Scadenza",
+    "errorMessage": "Impossibile caricare la formazione.",
+    "emptyTitle": "Nessuna formazione assegnata",
+    "emptyDesc": "Non hai corsi o percorsi formativi assegnati.",
+    "caption": "Formazione assegnata"
   },
   "catalogue": {
     "back": "← I miei percorsi",

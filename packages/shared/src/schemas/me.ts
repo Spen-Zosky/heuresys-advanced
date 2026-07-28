@@ -480,10 +480,21 @@ export const MeLearningAssignmentSchema = z.object({
   isMandatory: z.boolean(),
   status: z.string(),
   deadline: z.string().nullable(),
+  /** Quale delle tre gambe è valorizzata (CHECK `sys_ula_scope_check`). */
+  kind: z.enum(["MODULE", "INITIATIVE", "PATH"]),
+  /** Il nome leggibile della cosa assegnata: chi la consulta ha bisogno di questo, non di un uuid. */
+  title: z.string().nullable(),
+  moduleTitle: z.string().nullable(),
+  initiativeCode: z.string().nullable(),
+  pathName: z.string().nullable(),
+  /** Quando l'assegnazione è nata: è la data di iscrizione mostrata nel portale. */
+  enrolledAt: z.string().nullable(),
 });
+export type MeLearningAssignment = z.infer<typeof MeLearningAssignmentSchema>;
 export const MeLearningResponseSchema = z.object({
   items: z.array(MeLearningAssignmentSchema), total: z.number().int().min(0),
 });
+export type MeLearningResponse = z.infer<typeof MeLearningResponseSchema>;
 
 export const CreateMeEnrollmentBodySchema = z.object({
   moduleId: z.uuid().nullable().optional(),

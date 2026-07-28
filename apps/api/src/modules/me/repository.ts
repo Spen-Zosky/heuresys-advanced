@@ -1002,9 +1002,27 @@ interface LearningRow {
   user_learning_assignment_is_mandatory: boolean;
   user_learning_assignment_status: string;
   user_learning_assignment_deadline: Date | null;
+  created_at: Date;
+  module_title: string | null;
+  initiative_code: string | null;
+  initiative_cohort_name: string | null;
+  path_name: string | null;
 }
 
+/**
+ * La riga porta tre gambe alternative (modulo / iniziativa / percorso) e il
+ * CHECK `sys_ula_scope_check` garantisce che almeno una sia valorizzata: il
+ * titolo da mostrare è quello della gamba che c'è. Senza questa risoluzione la
+ * pagina ESS avrebbe solo tre uuid e nessun nome da leggere.
+ */
 function toAssignment(r: LearningRow) {
+  const kind = r.user_learning_assignment_initiative_id
+    ? "INITIATIVE" as const
+    : r.user_learning_assignment_module_id
+      ? "MODULE" as const
+      : "PATH" as const;
+  const title =
+    r.initiative_cohort_name ?? r.initiative_code ?? r.module_title ?? r.path_name ?? null;
   return {
     userLearningAssignmentId: r.user_learning_assignment_id,
     moduleId: r.user_learning_assignment_module_id,
@@ -1014,18 +1032,34 @@ function toAssignment(r: LearningRow) {
     status: r.user_learning_assignment_status,
     deadline: r.user_learning_assignment_deadline
       ? toDateOnly(r.user_learning_assignment_deadline) : null,
+    kind,
+    title,
+    moduleTitle: r.module_title,
+    initiativeCode: r.initiative_code,
+    pathName: r.path_name,
+    enrolledAt: r.created_at.toISOString(),
   };
 }
 
 export async function listMyLearning(q: DbConnector, userId: string) {
   const res = await q.query<LearningRow>(
-    `SELECT user_learning_assignment_id, user_learning_assignment_module_id,
-            user_learning_assignment_initiative_id, user_learning_assignment_path_id,
-            user_learning_assignment_is_mandatory, user_learning_assignment_status,
-            user_learning_assignment_deadline
-       FROM sys.sys_user_learning_assignments
-      WHERE user_learning_assignment_user_id = $1
-      ORDER BY user_learning_assignment_deadline NULLS LAST, created_at DESC`,
+    `SELECT a.user_learning_assignment_id, a.user_learning_assignment_module_id,
+            a.user_learning_assignment_initiative_id, a.user_learning_assignment_path_id,
+            a.user_learning_assignment_is_mandatory, a.user_learning_assignment_status,
+            a.user_learning_assignment_deadline, a.created_at,
+            m.learning_module_title    AS module_title,
+            ti.training_initiative_code        AS initiative_code,
+            ti.training_initiative_cohort_name AS initiative_cohort_name,
+            p.learning_path_name       AS path_name
+       FROM sys.sys_user_learning_assignments a
+       LEFT JOIN sys.sys_learning_modules m
+              ON m.learning_module_id = a.user_learning_assignment_module_id
+       LEFT JOIN sys.sys_training_initiatives ti
+              ON ti.training_initiative_id = a.user_learning_assignment_initiative_id
+       LEFT JOIN sys.sys_learning_paths p
+              ON p.learning_path_id = a.user_learning_assignment_path_id
+      WHERE a.user_learning_assignment_user_id = $1
+      ORDER BY a.user_learning_assignment_deadline NULLS LAST, a.created_at DESC`,
     [userId],
   );
   const items = res.rows.map(toAssignment);
@@ -1035,17 +1069,33 @@ export async function listMyLearning(q: DbConnector, userId: string) {
 export async function insertEnrollment(
   q: DbConnector, userId: string, tenantId: string, body: CreateMeEnrollmentBody,
 ) {
+  // la riga si rilegge risolvendo i nomi con la STESSA query della lista: due
+  // forme diverse per la stessa entita' sono il difetto da cui nasce questo fix
   const res = await q.query<LearningRow>(
-    `INSERT INTO sys.sys_user_learning_assignments (
-        user_learning_assignment_tenant_id, user_learning_assignment_user_id,
-        user_learning_assignment_module_id, user_learning_assignment_path_id,
-        user_learning_assignment_initiative_id, user_learning_assignment_is_mandatory,
-        user_learning_assignment_status, user_learning_assignment_assigned_by
-      ) VALUES ($1, $2, $3, $4, $5, false, 'ASSIGNED', $2)
-      RETURNING user_learning_assignment_id, user_learning_assignment_module_id,
-                user_learning_assignment_initiative_id, user_learning_assignment_path_id,
-                user_learning_assignment_is_mandatory, user_learning_assignment_status,
-                user_learning_assignment_deadline`,
+    `WITH nuova AS (
+       INSERT INTO sys.sys_user_learning_assignments (
+         user_learning_assignment_tenant_id, user_learning_assignment_user_id,
+         user_learning_assignment_module_id, user_learning_assignment_path_id,
+         user_learning_assignment_initiative_id, user_learning_assignment_is_mandatory,
+         user_learning_assignment_status, user_learning_assignment_assigned_by
+       ) VALUES ($1, $2, $3, $4, $5, false, 'ASSIGNED', $2)
+       RETURNING *
+     )
+     SELECT a.user_learning_assignment_id, a.user_learning_assignment_module_id,
+            a.user_learning_assignment_initiative_id, a.user_learning_assignment_path_id,
+            a.user_learning_assignment_is_mandatory, a.user_learning_assignment_status,
+            a.user_learning_assignment_deadline, a.created_at,
+            m.learning_module_title    AS module_title,
+            ti.training_initiative_code        AS initiative_code,
+            ti.training_initiative_cohort_name AS initiative_cohort_name,
+            p.learning_path_name       AS path_name
+       FROM nuova a
+       LEFT JOIN sys.sys_learning_modules m
+              ON m.learning_module_id = a.user_learning_assignment_module_id
+       LEFT JOIN sys.sys_training_initiatives ti
+              ON ti.training_initiative_id = a.user_learning_assignment_initiative_id
+       LEFT JOIN sys.sys_learning_paths p
+              ON p.learning_path_id = a.user_learning_assignment_path_id`,
     [tenantId, userId, body.moduleId ?? null, body.pathId ?? null, body.initiativeId ?? null],
   );
   return toAssignment(res.rows[0]!);

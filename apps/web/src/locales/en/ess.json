@@ -288,20 +288,20 @@
     "caption": "Active targets"
   },
   "learning": {
-    "title": "My paths",
-    "description": "The learning paths assigned to you.",
-    "count": "{{count}} paths",
-    "colPath": "Path",
+    "title": "My learning",
+    "description": "The courses, classroom editions and learning paths assigned to you.",
+    "count": "{{count}} assignments",
+    "colTitle": "Course or path",
     "colStatus": "Status",
     "colMandatory": "Mandatory",
     "mandatoryYes": "YES",
     "mandatoryNo": "NO",
     "colEnrolled": "Enrollment",
-    "colCompleted": "Completed",
-    "errorMessage": "Unable to load the paths.",
-    "emptyTitle": "No path assigned",
-    "emptyDesc": "You have no learning paths assigned.",
-    "caption": "Assigned paths"
+    "colDeadline": "Due date",
+    "errorMessage": "Unable to load your learning.",
+    "emptyTitle": "No learning assigned",
+    "emptyDesc": "You have no courses or learning paths assigned.",
+    "caption": "Assigned learning"
   },
   "catalogue": {
     "back": "← My paths",

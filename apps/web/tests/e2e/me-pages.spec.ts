@@ -58,7 +58,18 @@ test.describe("MVP-2a ESS pages — live data", () => {
   test("/me/learning renders (empty or with rows)", async ({ page }) => {
     await page.goto("/me/learning");
     await expect(page.getByTestId("me-learning-page")).toBeVisible();
-    await expect(page.getByTestId("me-learning-count")).toContainText(/\d+\s+percorsi/);
+    await expect(page.getByTestId("me-learning-count")).toContainText(/\d+\s+assegnazioni/);
+
+    // La pagina mostrava quattro colonne su cinque vuote perche' leggeva campi
+    // che l'API non ha mai restituito, e nessuno se ne accorgeva: asserire solo
+    // "la pagina si vede" non prova che ci sia scritto qualcosa. Qui si pretende
+    // che la prima riga porti davvero un NOME di corso e una data di iscrizione.
+    const righe = page.getByTestId("me-learning-row");
+    if ((await righe.count()) > 0) {
+      const prima = righe.first();
+      await expect(prima.locator("td").first()).not.toHaveText(/^\s*(—)?\s*$/);
+      await expect(prima.locator("td").nth(3)).toHaveText(/\d{4}-\d{2}-\d{2}/);
+    }
   });
 
   test("/me/gaps renders", async ({ page }) => {

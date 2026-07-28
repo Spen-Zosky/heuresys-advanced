@@ -18,5 +18,10 @@
       "Bash(pnpm typecheck:test)",
       "Bash(psql *)"
     ]
+  },
+  "skillOverrides": {
+    "consolida-pagina": "off",
+    "dashboards-jobs": "off",
+    "multi-tenant-validator": "off"
   }
 }

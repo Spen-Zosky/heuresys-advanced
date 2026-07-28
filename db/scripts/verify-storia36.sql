@@ -1014,6 +1014,663 @@ BEGIN
   END IF;
 END $fn$;
 
+-- ############################################################################
+-- C4 — FORMAZIONE. Ogni soglia numerica di questa sezione cita una riga di
+-- docs/kb/storia36/DOMINIO_FORMAZIONE_OBBLIGATORIA.md: qui non esistono numeri
+-- di comodo. Le due funzioni helper sotto sono usate SIA dai check SIA dal seed
+-- 04_learning.sql — una sola definizione, mai due copie che divergono.
+-- ############################################################################
+
+-- ----------------------------------------------------------------------------
+-- Helper C4/1 — quali schemi sono ABILITANTI: il possesso in corso di validità
+-- è condizione per svolgere l'attività, quindi la catena di rinnovi non può
+-- interrompersi. È l'UNICA parte del C4 che non si può derivare dal dato — viene
+-- dalla norma (DOMINIO §2, §4, §5). Tutto il resto (CFA, FRM, CAMS, ABA, DPO,
+-- titoli interni) è volontario: lasciarlo decadere è un fatto della vita, non un
+-- difetto — ed è la ragione per cui C4b non pretende «zero scadute».
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_cert_is_abilitante(p_issuer text)
+RETURNS boolean LANGUAGE sql IMMUTABLE AS $fn$
+  SELECT p_issuer IN (
+    'IVASS',        -- DOMINIO §2 · iscrizione al RUI, Reg. IVASS 40/2018
+    'EFPA Italia',  -- DOMINIO §4 · certificazione MiFID II soggetta a mantenimento
+    'INAIL')        -- DOMINIO §5 · sicurezza sul lavoro, D.Lgs 81/08
+$fn$;
+
+-- ----------------------------------------------------------------------------
+-- Helper C4/2 — durata di validità di uno schema, DERIVATA dal dato esistente
+-- (mediana delle righe non generate da storia36), mai da una tabella di comodo.
+-- In RTL il RUI e l'EFPA sono modellati a 5 anni: è quella la cadenza con cui la
+-- catena va estesa. L'obbligo ANNUALE che la norma pone (30 ore IVASS,
+-- mantenimento EFPA, aggiornamento MiFID) è sulle ORE — e vive in C4a — non sul
+-- certificato: confondere le due cose farebbe scadere ogni anno un titolo che il
+-- dato dichiara quinquennale.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_cert_validity_years(p_name text, p_issuer text)
+RETURNS numeric LANGUAGE sql STABLE AS $fn$
+  SELECT COALESCE(
+           percentile_cont(0.5) WITHIN GROUP (
+             ORDER BY (c.user_certification_expires_date - c.user_certification_issued_date) / 365.0),
+           3.0)
+    FROM sys.sys_user_certifications c
+   WHERE c.user_certification_name = p_name
+     AND c.user_certification_issuer = p_issuer
+     AND c.user_certification_issued_date IS NOT NULL
+     AND c.user_certification_expires_date IS NOT NULL
+     AND c.user_certification_metadata->>'storia36' IS NULL
+$fn$;
+
+-- ----------------------------------------------------------------------------
+-- Helper C4/2 — ore di formazione di (utente, anno). Due addendi, mai
+-- sovrapposti: la GIORNATA D'AULA vale l'orario contrattuale pieno (7,5 h —
+-- stesso envelope del C1, CCNL 37,5 h/sett su 5 giorni), la formazione FUORI
+-- AULA vale la durata dichiarata del modulo. Un'evidenza che cade su un giorno
+-- TRAINING è la prova di quella giornata d'aula: contarla di nuovo a durata
+-- sarebbe doppio conteggio.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_c4_hours(p_user uuid, p_year int)
+RETURNS numeric LANGUAGE sql STABLE AS $fn$
+  SELECT
+    (SELECT count(*) * 7.5 FROM sys.sys_attendance a
+      WHERE a.attendance_subject_user_id = p_user
+        AND a.attendance_status = 'TRAINING'
+        AND extract(year FROM a.attendance_date) = p_year)
+  + (SELECT COALESCE(sum(COALESCE(m.learning_module_duration_minutes, 60)) / 60.0, 0)
+       FROM sys.sys_user_learning_evidence e
+       JOIN sys.sys_learning_modules m ON m.learning_module_id = e.user_learning_evidence_module_id
+      WHERE e.user_learning_evidence_user_id = p_user
+        AND extract(year FROM e.user_learning_evidence_completed_at) = p_year
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_attendance a2
+                         WHERE a2.attendance_subject_user_id = p_user
+                           AND a2.attendance_date = e.user_learning_evidence_completed_at::date
+                           AND a2.attendance_status = 'TRAINING'))
+$fn$;
+
+-- ----------------------------------------------------------------------------
+-- Helper C4/3 — FRONTIERA DELLA STORIA: l'ultimo giorno per cui esiste una
+-- presenza. È diversa dalla fine della finestra dei check (fine mese corrente):
+-- senza questa distinzione, il primo di ogni mese il pavimento di monte-ore
+-- crescerebbe da solo e C4a tornerebbe rosso per il semplice passare del tempo,
+-- pretendendo formazione per mesi in cui la storia non ha nemmeno le presenze.
+-- La finestra si sposta quando la STORIA avanza (cluster C12), non quando
+-- avanza il calendario.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_c4_frontier()
+RETURNS date LANGUAGE sql STABLE AS $fn$
+  SELECT max(attendance_date) FROM sys.sys_attendance
+   WHERE attendance_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+$fn$;
+
+-- ----------------------------------------------------------------------------
+-- Helper C4/4 — pavimento di monte-ore annuo, PRO-RATA sui mesi effettivamente
+-- coperti dalla STORIA e dal rapporto di lavoro (il 2023 entra da agosto, il
+-- 2026 si ferma alla frontiera, l'assunto in corso d'anno non deve un anno
+-- intero). Base 24 h (CCNL Credito 23/11/2023 — DOMINIO §1); 30 h per gli
+-- iscritti al RUI sez. D e per i titolari EFPA (DOMINIO §2 e §4).
+-- L'antiriciclaggio sta DENTRO il monte-ore, non si somma (Reg. IVASS 44/2019).
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_c4_hours_floor(p_user uuid, p_year int, p_start date, p_end date)
+RETURNS numeric LANGUAGE sql STABLE AS $fn$
+  WITH lim AS (SELECT LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end)) AS fine),
+  b AS (
+    SELECT CASE WHEN EXISTS (
+             SELECT 1 FROM sys.sys_user_certifications c
+              WHERE c.user_certification_user_id = p_user
+                AND c.user_certification_issuer IN ('IVASS','EFPA Italia')) THEN 30 ELSE 24 END AS base,
+           (SELECT min(e.user_employment_hire_date) FROM sys.sys_user_employment e
+             WHERE e.user_employment_user_id = p_user) AS hire
+  ), m AS (
+    SELECT count(*) AS covered
+      FROM b, lim, generate_series(1, 12) AS g(mm)
+     WHERE make_date(p_year, g.mm, 1) <= lim.fine
+       AND (make_date(p_year, g.mm, 1) + interval '1 month - 1 day')::date
+           >= GREATEST(p_start, COALESCE(b.hire, p_start))
+  )
+  SELECT round(b.base * m.covered / 12.0, 2) FROM b, m
+$fn$;
+
+-- ----------------------------------------------------------------------------
+-- Helper C4/5 — l'ARGOMENTO obbligatorio di un modulo, riconosciuto dal testo
+-- del catalogo (codice o titolo) e non da una lista di uuid: così il check vale
+-- anche sui moduli legacy (`AML-102`, `MIFID2-001`, `Antiriciclaggio AML`) e non
+-- solo su quelli che il seed conosce. Serve a C4a(iii): l'obbligo di ORE non
+-- implica l'obbligo di CONTENUTO — si possono fare 40 ore di trade finance e
+-- restare inadempienti sull'antiriciclaggio.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_c4_module_topic(p_code text, p_title text)
+RETURNS text LANGUAGE sql IMMUTABLE AS $fn$
+  SELECT CASE
+    WHEN p_code ILIKE '%AML%' OR p_title ILIKE '%antiricicl%'
+      OR p_title ILIKE '%money laundering%' OR p_title ILIKE '%riciclaggio%'   THEN 'AML'
+    WHEN p_code ILIKE '%MIFID%' OR p_title ILIKE '%mifid%'                      THEN 'MIFID'
+    ELSE NULL
+  END
+$fn$;
+
+-- ----------------------------------------------------------------------------
+-- C4a — monte-ore di formazione: (i) nessun utente ATTIVO sotto il pavimento
+-- pro-rata del proprio anno; (ii) la media aziendale dell'anno resta dentro una
+-- banda plausibile [pavimento medio, 5× pavimento medio] — sotto il pavimento
+-- l'azienda è inadempiente, oltre 5× (≈16 giornate piene) il dato non descrive
+-- più una banca ma una scuola.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c4a(p_start date, p_end date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  WITH ore AS (
+    SELECT u.user_email,
+           y.y,
+           staging.storia36_c4_hours(u.user_id, y.y) AS h,
+           staging.storia36_c4_hours_floor(u.user_id, y.y, p_start, p_end) AS floor_h
+      FROM sys.sys_users u
+      CROSS JOIN generate_series(extract(year FROM p_start)::int,
+                                 extract(year FROM p_end)::int) AS y(y)
+     WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND u.user_status = 'ACTIVE'
+  )
+  SELECT count(*), min(user_email || ' ' || y || ': ' || round(h,1) || 'h < ' || floor_h || 'h dovute')
+    INTO v_cnt, v_sample
+    FROM ore WHERE floor_h > 0 AND h < floor_h - 0.01;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4a: % anni-utente sotto il pavimento di monte-ore CCNL/IVASS (es. %)', v_cnt, v_sample;
+  END IF;
+
+  WITH ore AS (
+    SELECT y.y,
+           staging.storia36_c4_hours(u.user_id, y.y) AS h,
+           staging.storia36_c4_hours_floor(u.user_id, y.y, p_start, p_end) AS floor_h
+      FROM sys.sys_users u
+      CROSS JOIN generate_series(extract(year FROM p_start)::int,
+                                 extract(year FROM p_end)::int) AS y(y)
+     WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND u.user_status = 'ACTIVE'
+  ), agg AS (
+    SELECT y, avg(h) AS media, avg(floor_h) AS media_floor FROM ore WHERE floor_h > 0 GROUP BY y
+  )
+  SELECT count(*), min(y || ': media ' || round(media,1) || 'h vs banda [' ||
+                       round(media_floor,1) || ', ' || round(5*media_floor,1) || ']')
+    INTO v_cnt, v_sample
+    FROM agg WHERE media < media_floor OR media > 5 * media_floor;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4a(ii): % anni con media aziendale fuori banda (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (iii) COPERTURA DI CONTENUTO — le ore non bastano: l'antiriciclaggio è
+  -- annuale per tutti (Reg. IVASS 44/2019) e l'aggiornamento MiFID è annuale per
+  -- chi distribuisce prodotti assicurativi/finanziari (CONSOB 20307/2018,
+  -- mantenimento EFPA). Un anno pieno di trade finance non assolve nessuno dei due.
+  WITH platea AS (
+    SELECT u.user_id, u.user_email, y.y,
+           staging.storia36_c4_hours_floor(u.user_id, y.y, p_start, p_end) AS floor_h,
+           EXISTS (SELECT 1 FROM sys.sys_user_certifications c
+                    WHERE c.user_certification_user_id = u.user_id
+                      AND c.user_certification_issuer IN ('IVASS','EFPA Italia')) AS distributore
+      FROM sys.sys_users u
+      CROSS JOIN generate_series(extract(year FROM p_start)::int,
+                                 extract(year FROM p_end)::int) AS y(y)
+     WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND u.user_status = 'ACTIVE'
+  ), mancanti AS (
+    SELECT p.user_email, p.y, t.argomento
+      FROM platea p
+      CROSS JOIN (VALUES ('AML'), ('MIFID')) AS t(argomento)
+     WHERE p.floor_h > 0
+       AND (t.argomento = 'AML' OR p.distributore)
+       AND NOT EXISTS (
+         SELECT 1 FROM sys.sys_user_learning_evidence e
+         JOIN sys.sys_learning_modules m ON m.learning_module_id = e.user_learning_evidence_module_id
+          WHERE e.user_learning_evidence_user_id = p.user_id
+            AND extract(year FROM e.user_learning_evidence_completed_at) = p.y
+            AND staging.storia36_c4_module_topic(m.learning_module_code, m.learning_module_title)
+                = t.argomento)
+  )
+  SELECT count(*), min(user_email || ' ' || y || ': manca ' || argomento)
+    INTO v_cnt, v_sample FROM mancanti;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4a(iii): % anni-utente senza la formazione obbligatoria di contenuto (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C4b — certificazioni ABILITANTI sempre in corso di validità: (i) per ogni
+-- utente ATTIVO e ogni schema con cadenza di rinnovo (helper C4/1), l'ultima
+-- scadenza copre la frontiera; (ii) monotonia della catena — un rinnovo non può
+-- scadere PRIMA di quello che sostituisce; (iii) coerenza elementare
+-- rilascio ≤ scadenza. I titoli volontari (CFA, FRM, …) sono fuori: lasciarli
+-- decadere è un fatto della vita, non un difetto del dato.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c4b(p_end date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  -- la storia si valuta alla PROPRIA frontiera, non all'orologio: senza questo
+  -- allineamento il check diventa rosso da solo al passare dei giorni.
+  p_end := LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end));
+  SELECT count(*), min(x.user_email || ' — ' || x.nome || ' scaduta il ' || x.ultima_scadenza)
+    INTO v_cnt, v_sample
+  FROM (
+    SELECT u.user_email, c.user_certification_name AS nome,
+           max(c.user_certification_expires_date) AS ultima_scadenza
+      FROM sys.sys_user_certifications c
+      JOIN sys.sys_users u ON u.user_id = c.user_certification_user_id
+     WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND u.user_status = 'ACTIVE'
+       AND staging.storia36_cert_is_abilitante(c.user_certification_issuer)
+     GROUP BY 1, 2, c.user_certification_issuer
+  ) x
+  WHERE x.ultima_scadenza < p_end;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4b: % certificazioni abilitanti scadute e mai rinnovate su utenti attivi (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email || ' — ' || ch.nome || ': rinnovo del ' || ch.d_iss ||
+                       ' scade ' || ch.d_exp || ' < precedente ' || ch.prev_exp)
+    INTO v_cnt, v_sample
+  FROM (
+    SELECT c.user_certification_user_id AS uid, c.user_certification_name AS nome,
+           c.user_certification_issued_date AS d_iss, c.user_certification_expires_date AS d_exp,
+           lag(c.user_certification_expires_date) OVER (
+             PARTITION BY c.user_certification_user_id, c.user_certification_name,
+                          c.user_certification_issuer
+             ORDER BY c.user_certification_issued_date) AS prev_exp
+      FROM sys.sys_user_certifications c
+     WHERE c.user_certification_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+  ) ch
+  JOIN sys.sys_users u ON u.user_id = ch.uid
+  WHERE ch.prev_exp IS NOT NULL AND ch.d_exp < ch.prev_exp;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4b(ii): % rinnovi che scadono prima del titolo sostituito (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email || ' — ' || c.user_certification_name)
+    INTO v_cnt, v_sample
+  FROM sys.sys_user_certifications c
+  JOIN sys.sys_users u ON u.user_id = c.user_certification_user_id
+  WHERE c.user_certification_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND c.user_certification_issued_date IS NOT NULL
+    AND c.user_certification_expires_date IS NOT NULL
+    AND c.user_certification_expires_date < c.user_certification_issued_date;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4b(iii): % certificazioni che scadono prima di essere rilasciate (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (iv) CONTINUITÀ della catena: uno schema abilitante non ammette scoperture.
+  -- Non basta che l'ultimo anello copra la frontiera (i) né che le scadenze
+  -- crescano (ii): fra un anello e il successivo ci può essere un buco in cui la
+  -- persona ha operato senza titolo. Il rinnovo si chiede PRIMA della scadenza.
+  SELECT count(*), min(u.user_email || ' — ' || ch.nome || ': scoperto dal ' ||
+                       ch.prev_exp || ' al ' || ch.d_iss)
+    INTO v_cnt, v_sample
+  FROM (
+    SELECT c.user_certification_user_id AS uid, c.user_certification_name AS nome,
+           c.user_certification_issued_date AS d_iss,
+           lag(c.user_certification_expires_date) OVER (
+             PARTITION BY c.user_certification_user_id, c.user_certification_name,
+                          c.user_certification_issuer
+             ORDER BY c.user_certification_issued_date) AS prev_exp
+      FROM sys.sys_user_certifications c
+     WHERE c.user_certification_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND staging.storia36_cert_is_abilitante(c.user_certification_issuer)
+  ) ch
+  JOIN sys.sys_users u ON u.user_id = ch.uid
+  WHERE ch.prev_exp IS NOT NULL AND ch.d_iss > ch.prev_exp;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4b(iv): % rinnovi ottenuti DOPO la scadenza del titolo precedente (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C4c — l'aula tiene insieme i suoi tre pezzi: (i) l'evidenza d'aula cade
+-- DENTRO il periodo della sua iniziativa; (ii) chi ha un'evidenza d'aula ha
+-- anche l'iscrizione a quella iniziativa (non si frequenta un corso a cui non
+-- si è iscritti); (iii) i partecipanti non superano la capienza dichiarata.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c4c(p_end date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  -- la storia si valuta alla PROPRIA frontiera, non all'orologio: senza questo
+  -- allineamento il check diventa rosso da solo al passare dei giorni.
+  p_end := LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end));
+  -- (0) il LEGAME deve esistere prima di poter essere verificato: i predicati
+  -- successivi partono da un JOIN sul codice iniziativa scritto nel metadata, e
+  -- un JOIN interno che non risolve non produce righe — cioè tacerebbe proprio
+  -- nel caso peggiore (legame perso). Questo predicato è l'anti-join che lo impedisce.
+  SELECT count(*), min(u.user_email || ' il ' || e.user_learning_evidence_completed_at::date)
+    INTO v_cnt, v_sample
+  FROM sys.sys_user_learning_evidence e
+  JOIN sys.sys_users u ON u.user_id = e.user_learning_evidence_user_id
+  WHERE e.user_learning_evidence_metadata->>'kind' = 'AULA'
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_training_initiatives ti
+       WHERE ti.training_initiative_code = e.user_learning_evidence_metadata->>'initiative'
+         AND ti.training_initiative_tenant_id = e.user_learning_evidence_tenant_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4c(0): % evidenze d''aula il cui codice iniziativa non risolve (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email || ' — ' || ti.training_initiative_code || ' il ' ||
+                       e.user_learning_evidence_completed_at::date)
+    INTO v_cnt, v_sample
+  FROM sys.sys_user_learning_evidence e
+  JOIN sys.sys_users u ON u.user_id = e.user_learning_evidence_user_id
+  JOIN sys.sys_training_initiatives ti
+    ON ti.training_initiative_code = e.user_learning_evidence_metadata->>'initiative'
+   AND ti.training_initiative_tenant_id = e.user_learning_evidence_tenant_id
+  WHERE e.user_learning_evidence_metadata->>'kind' = 'AULA'
+    AND (e.user_learning_evidence_completed_at::date < ti.training_initiative_start_date
+      OR e.user_learning_evidence_completed_at::date
+         > COALESCE(ti.training_initiative_end_date, p_end));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4c: % evidenze d''aula fuori dal periodo della loro iniziativa (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email || ' — ' || ti.training_initiative_code)
+    INTO v_cnt, v_sample
+  FROM (SELECT DISTINCT e.user_learning_evidence_user_id AS uid,
+                        e.user_learning_evidence_tenant_id AS tid,
+                        e.user_learning_evidence_metadata->>'initiative' AS code
+          FROM sys.sys_user_learning_evidence e
+         WHERE e.user_learning_evidence_metadata->>'kind' = 'AULA') d
+  JOIN sys.sys_users u ON u.user_id = d.uid
+  JOIN sys.sys_training_initiatives ti
+    ON ti.training_initiative_code = d.code AND ti.training_initiative_tenant_id = d.tid
+  WHERE NOT EXISTS (
+    SELECT 1 FROM sys.sys_user_learning_assignments a
+     WHERE a.user_learning_assignment_user_id = d.uid
+       AND a.user_learning_assignment_initiative_id = ti.training_initiative_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4c(ii): % frequenze d''aula senza iscrizione all''iniziativa (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(ti.training_initiative_code || ': ' || x.n || ' partecipanti > capienza ' ||
+                       ti.training_initiative_capacity)
+    INTO v_cnt, v_sample
+  FROM sys.sys_training_initiatives ti
+  JOIN LATERAL (
+    SELECT count(DISTINCT a.user_learning_assignment_user_id) AS n
+      FROM sys.sys_user_learning_assignments a
+     WHERE a.user_learning_assignment_initiative_id = ti.training_initiative_id) x ON true
+  WHERE ti.training_initiative_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND ti.training_initiative_capacity IS NOT NULL
+    AND x.n > ti.training_initiative_capacity;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4c(iii): % iniziative con più partecipanti della capienza (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (iv) si è frequentato IL corso di quell'edizione, non un altro: il modulo
+  -- dell'evidenza deve coincidere con quello dell'iniziativa che la ospita.
+  SELECT count(*), min(u.user_email || ' — ' || ti.training_initiative_code)
+    INTO v_cnt, v_sample
+  FROM sys.sys_user_learning_evidence e
+  JOIN sys.sys_users u ON u.user_id = e.user_learning_evidence_user_id
+  JOIN sys.sys_training_initiatives ti
+    ON ti.training_initiative_code = e.user_learning_evidence_metadata->>'initiative'
+   AND ti.training_initiative_tenant_id = e.user_learning_evidence_tenant_id
+  WHERE e.user_learning_evidence_metadata->>'kind' = 'AULA'
+    AND e.user_learning_evidence_module_id IS DISTINCT FROM ti.training_initiative_module_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4c(iv): % evidenze d''aula su un corso diverso da quello della loro edizione (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C4d — ogni iniziativa è GIUSTIFICATA e legale: (i) il suo modulo è mappato ad
+-- almeno una competenza (è la giustificazione: si fa formazione per una skill
+-- che serve, non per riempire un calendario); (ii) il modulo è utilizzabile nel
+-- tenant e (iii) il docente appartiene al tenant — le stesse due regole che il
+-- service `training-initiatives` impone via API, qui pretese anche sul dato;
+-- (iv) se c'è un docente, il modulo non può essere in autoapprendimento;
+-- (v) coerenza del periodo e dello stato.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c4d(p_end date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  -- la storia si valuta alla PROPRIA frontiera, non all'orologio: senza questo
+  -- allineamento il check diventa rosso da solo al passare dei giorni.
+  p_end := LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end));
+  SELECT count(*), min(ti.training_initiative_code) INTO v_cnt, v_sample
+  FROM sys.sys_training_initiatives ti
+  WHERE ti.training_initiative_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_skill_learning_mappings sm
+                     WHERE sm.skill_learning_mapping_module_id = ti.training_initiative_module_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4d: % iniziative su moduli non mappati ad alcuna competenza (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(ti.training_initiative_code) INTO v_cnt, v_sample
+  FROM sys.sys_training_initiatives ti
+  JOIN sys.sys_learning_modules m ON m.learning_module_id = ti.training_initiative_module_id
+  WHERE ti.training_initiative_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND m.learning_module_is_global IS NOT TRUE
+    AND m.learning_module_tenant_id IS DISTINCT FROM ti.training_initiative_tenant_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4d(ii): % iniziative su moduli di un altro tenant (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(ti.training_initiative_code) INTO v_cnt, v_sample
+  FROM sys.sys_training_initiatives ti
+  JOIN sys.sys_users f ON f.user_id = ti.training_initiative_facilitator_user_id
+  WHERE ti.training_initiative_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND f.user_tenant_id IS DISTINCT FROM ti.training_initiative_tenant_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4d(iii): % iniziative con docente di un altro tenant (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(ti.training_initiative_code || ' → ' || m.learning_module_code ||
+                       ' (' || m.learning_module_delivery || ')')
+    INTO v_cnt, v_sample
+  FROM sys.sys_training_initiatives ti
+  JOIN sys.sys_learning_modules m ON m.learning_module_id = ti.training_initiative_module_id
+  WHERE ti.training_initiative_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND ti.training_initiative_facilitator_user_id IS NOT NULL
+    AND m.learning_module_delivery = 'SELF_PACED';
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4d(iv): % iniziative con docente su moduli in autoapprendimento (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (v) periodo e stato: fine dopo inizio; COMPLETED esige una fine avvenuta;
+  -- IN_PROGRESS non può avere il periodo già concluso (un corso «in corso» che è
+  -- finito tre mesi fa è uno stato dimenticato, ed è il caso che il seed rischia
+  -- di produrre al passare del tempo).
+  SELECT count(*), min(ti.training_initiative_code || ' [' || ti.training_initiative_status || ']')
+    INTO v_cnt, v_sample
+  FROM sys.sys_training_initiatives ti
+  WHERE ti.training_initiative_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND ((ti.training_initiative_end_date IS NOT NULL
+          AND ti.training_initiative_end_date < ti.training_initiative_start_date)
+      OR (ti.training_initiative_status = 'COMPLETED'
+          AND (ti.training_initiative_end_date IS NULL OR ti.training_initiative_end_date > p_end))
+      OR (ti.training_initiative_status = 'IN_PROGRESS'
+          AND ti.training_initiative_start_date > p_end)
+      OR (ti.training_initiative_status = 'IN_PROGRESS'
+          AND ti.training_initiative_end_date IS NOT NULL
+          AND ti.training_initiative_end_date < p_end));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4d(v): % iniziative con periodo o stato incoerenti (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C4e — QUADRATURA aula ↔ presenze: i giorni TRAINING dell'attendance sono un
+-- fatto già scritto dal C1 e non si toccano (UNIQUE tenant,utente,data). Ogni
+-- giorno d'aula deve avere la sua traccia formativa nello stesso giorno,
+-- altrimenti l'azienda ha registrato una giornata di formazione che non risulta
+-- da nessuna parte.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c4e()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email || ' il ' || a.attendance_date) INTO v_cnt, v_sample
+  FROM sys.sys_attendance a
+  JOIN sys.sys_users u ON u.user_id = a.attendance_subject_user_id
+  WHERE a.attendance_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND a.attendance_status = 'TRAINING'
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_learning_evidence e
+       WHERE e.user_learning_evidence_user_id = a.attendance_subject_user_id
+         AND e.user_learning_evidence_completed_at::date = a.attendance_date
+         -- la traccia dev'essere di AULA: un completamento in autoapprendimento
+         -- capitato nello stesso giorno non è la prova di quella giornata d'aula
+         AND e.user_learning_evidence_metadata->>'kind' = 'AULA');
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4e: % giornate d''aula senza traccia di frequenza in quel giorno (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C4f — il ciclo si chiude: lacuna → azione → formazione. (i) un'azione
+-- formativa su una lacuna MATURA (rilevata da almeno 90 giorni) non può essere
+-- ancora «proposta» — o è partita, o è stata chiusa, o è stata annullata; le
+-- lacune recenti restano legittimamente proposte; (ii) un'azione CHIUSA esige
+-- formazione davvero erogata dopo la rilevazione; (iii) un'azione che non è più
+-- una proposta ha un responsabile e una scadenza; (iv) un piano di chiusura
+-- attivo ha una data obiettivo.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c4f(p_end date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email || ' — lacuna del ' || g.learning_gap_detected_at::date)
+    INTO v_cnt, v_sample
+  FROM sys.sys_gap_closure_actions a
+  JOIN sys.sys_learning_gaps g ON g.learning_gap_id = a.gap_closure_action_gap_id
+  JOIN sys.sys_users u ON u.user_id = g.learning_gap_user_id
+  WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND a.gap_closure_action_kind = 'TRAINING_ASSIGNMENT'
+    AND a.gap_closure_action_status = 'PROPOSED'
+    -- maturità misurata sulla frontiera della STORIA, non sul calendario: una
+    -- lacuna non «invecchia» perché è passato un mese di orologio reale
+    AND g.learning_gap_detected_at::date
+        <= LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end)) - 90;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4f: % azioni formative ancora «proposte» su lacune mature (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email || ' — lacuna del ' || g.learning_gap_detected_at::date)
+    INTO v_cnt, v_sample
+  FROM sys.sys_gap_closure_actions a
+  JOIN sys.sys_learning_gaps g ON g.learning_gap_id = a.gap_closure_action_gap_id
+  JOIN sys.sys_users u ON u.user_id = g.learning_gap_user_id
+  WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND a.gap_closure_action_kind = 'TRAINING_ASSIGNMENT'
+    AND a.gap_closure_action_status = 'COMPLETED'
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_learning_evidence e
+       WHERE e.user_learning_evidence_user_id = g.learning_gap_user_id
+         AND e.user_learning_evidence_completed_at > g.learning_gap_detected_at);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4f(ii): % azioni chiuse senza formazione successiva alla rilevazione (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(a.gap_closure_action_id::text || ' [' || a.gap_closure_action_status || ']')
+    INTO v_cnt, v_sample
+  FROM sys.sys_gap_closure_actions a
+  WHERE a.gap_closure_action_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND a.gap_closure_action_status <> 'PROPOSED'
+    AND (a.gap_closure_action_due_date IS NULL OR a.gap_closure_action_owner_user_id IS NULL);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4f(iii): % azioni avviate senza responsabile o senza scadenza (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(p.gap_closure_plan_id::text || ' [' || p.gap_closure_plan_status || ']')
+    INTO v_cnt, v_sample
+  FROM sys.sys_gap_closure_plans p
+  WHERE p.gap_closure_plan_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND p.gap_closure_plan_status IN ('ACTIVE','COMPLETED')
+    AND p.gap_closure_plan_target_completion_date IS NULL;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4f(iv): % piani di chiusura attivi senza data obiettivo (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C4g — PLAUSIBILITÀ TEMPORALE della formazione. I sei check precedenti guardano
+-- giorni, mai orari e mai forme di distribuzione: sono ciechi proprio dove un
+-- generatore lascia le sue impronte. (i) una giornata d'aula non si chiude dopo
+-- che la persona ha timbrato l'uscita; (ii) su 36 mesi di storia nessun mese
+-- dell'anno può restare a zero corsi a distanza — gennaio vuoto quattro anni di
+-- fila è la firma di una formula, non un fatto aziendale; (iii) un corso «in
+-- autoapprendimento» non lo completano dieci persone lo stesso pomeriggio.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c4g()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+  v_tot bigint;
+BEGIN
+  SELECT count(*), min(u.user_email || ' il ' || a.attendance_date || ': corso chiuso alle ' ||
+                       to_char(e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome', 'HH24:MI') ||
+                       ', uscita timbrata alle ' || to_char(a.attendance_clock_out, 'HH24:MI'))
+    INTO v_cnt, v_sample
+  FROM sys.sys_user_learning_evidence e
+  JOIN sys.sys_users u ON u.user_id = e.user_learning_evidence_user_id
+  JOIN sys.sys_attendance a
+    ON a.attendance_subject_user_id = e.user_learning_evidence_user_id
+   AND a.attendance_date = (e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date
+  WHERE e.user_learning_evidence_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND e.user_learning_evidence_metadata->>'storia36' = 'C4'
+    AND a.attendance_clock_out IS NOT NULL
+    AND (e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::time > a.attendance_clock_out;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4g: % completamenti registrati dopo l''uscita timbrata dello stesso giorno (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*) INTO v_tot FROM sys.sys_user_learning_evidence
+   WHERE user_learning_evidence_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+     AND user_learning_evidence_metadata->>'kind' = 'SELF_PACED';
+  IF v_tot > 200 THEN
+    SELECT count(*), min('mese ' || mm::text) INTO v_cnt, v_sample
+    FROM generate_series(1, 12) AS g(mm)
+    WHERE NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_learning_evidence e
+       WHERE e.user_learning_evidence_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+         AND e.user_learning_evidence_metadata->>'kind' = 'SELF_PACED'
+         AND extract(month FROM e.user_learning_evidence_completed_at) = g.mm);
+    IF v_cnt > 0 THEN
+      RAISE EXCEPTION 'C4g(ii): % mesi dell''anno senza un solo corso a distanza su % righe (es. %)', v_cnt, v_tot, v_sample;
+    END IF;
+  END IF;
+
+  -- (iii) la soglia è sull'ORA, non sul giorno. Che sei persone chiudano lo
+  -- stesso corso online lo stesso giorno è normale (effetto scadenza: la
+  -- campagna obbligatoria si chiude tutta insieme). Che lo chiudano nella stessa
+  -- ORA no: quella è la firma di un generatore, non di sei persone che studiano.
+  SELECT count(*), min(m.learning_module_code || ' il ' || to_char(x.ora, 'YYYY-MM-DD HH24:00') ||
+                       ': ' || x.n || ' completamenti nella stessa ora')
+    INTO v_cnt, v_sample
+  FROM (
+    SELECT e.user_learning_evidence_module_id AS mid,
+           date_trunc('hour', e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome') AS ora,
+           count(DISTINCT e.user_learning_evidence_user_id) AS n
+      FROM sys.sys_user_learning_evidence e
+     WHERE e.user_learning_evidence_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND e.user_learning_evidence_metadata->>'kind' = 'SELF_PACED'
+     GROUP BY 1, 2
+  ) x
+  JOIN sys.sys_learning_modules m ON m.learning_module_id = x.mid
+  WHERE x.n > 3;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4g(iii): % ore con più di 3 persone che chiudono lo stesso corso in autoapprendimento (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
 -- ============================================================================
 -- SELFTEST (con -v selftest=1) — la falsificabilità: per ogni check nuovo si
 -- inietta una violazione in SUBTRANSAZIONE (rollback garantito dal pattern
@@ -1029,6 +1686,7 @@ DO $$
 DECLARE
   v_end date := current_setting('storia36.window_end')::date;
   v_fired boolean;
+  v_u     uuid;    -- soggetto scelto per le iniezioni puntuali (C4)
 BEGIN
   -- ST-G1: una presenza spostata oltre la finestra deve far scattare G1
   v_fired := false;
@@ -1407,6 +2065,249 @@ BEGIN
     RAISE EXCEPTION 'SELFTEST C3e FALLITO: violazione iniettata non rilevata';
   END IF;
   RAISE NOTICE '[OK] SELFTEST C3e (violazione iniettata rilevata, rollback)';
+
+  -- ST-C4a: azzerare aula ed evidenze di un utente deve far scattare il pavimento
+  v_fired := false;
+  BEGIN
+    SELECT a.attendance_subject_user_id INTO v_u FROM sys.sys_attendance a
+      JOIN sys.sys_users u ON u.user_id = a.attendance_subject_user_id
+     WHERE a.attendance_status = 'TRAINING' AND u.user_status = 'ACTIVE'
+       AND a.attendance_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1;
+    DELETE FROM sys.sys_attendance
+     WHERE attendance_status = 'TRAINING' AND attendance_subject_user_id = v_u;
+    DELETE FROM sys.sys_user_learning_evidence WHERE user_learning_evidence_user_id = v_u;
+    PERFORM staging.storia36_check_c4a(current_setting('storia36.window_start')::date, v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4a%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4a FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4a (violazione iniettata rilevata, rollback)';
+
+  -- ST-C4b: far scadere l'intera catena RUI di un utente deve far scattare C4b
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_certifications SET user_certification_expires_date = v_end - 400
+     WHERE user_certification_issuer = 'IVASS'
+       AND user_certification_user_id = (
+             SELECT c.user_certification_user_id FROM sys.sys_user_certifications c
+              JOIN sys.sys_users u ON u.user_id = c.user_certification_user_id
+              WHERE c.user_certification_issuer = 'IVASS' AND u.user_status = 'ACTIVE' LIMIT 1);
+    PERFORM staging.storia36_check_c4b(v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4b%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4b FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4b (violazione iniettata rilevata, rollback)';
+
+  -- ST-C4c: spostare un'evidenza d'aula fuori dal periodo della sua iniziativa
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_learning_evidence
+       SET user_learning_evidence_completed_at = user_learning_evidence_completed_at - interval '400 days'
+     WHERE ctid = (SELECT e.ctid FROM sys.sys_user_learning_evidence e
+                    WHERE e.user_learning_evidence_metadata->>'kind' = 'AULA' LIMIT 1);
+    PERFORM staging.storia36_check_c4c(v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4c%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4c FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4c (violazione iniettata rilevata, rollback)';
+
+  -- ST-C4d: puntare un'iniziativa a un modulo non mappato ad alcuna competenza
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_training_initiatives
+       SET training_initiative_module_id = (
+             SELECT m.learning_module_id FROM sys.sys_learning_modules m
+              WHERE NOT EXISTS (SELECT 1 FROM sys.sys_skill_learning_mappings sm
+                                 WHERE sm.skill_learning_mapping_module_id = m.learning_module_id)
+                AND (m.learning_module_is_global OR m.learning_module_tenant_id
+                     = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0')
+              LIMIT 1)
+     WHERE ctid = (SELECT ti.ctid FROM sys.sys_training_initiatives ti LIMIT 1);
+    PERFORM staging.storia36_check_c4d(v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4d%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4d FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4d (violazione iniettata rilevata, rollback)';
+
+  -- ST-C4e: togliere la traccia formativa di una giornata d'aula deve scoprirla
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_user_learning_evidence e
+     USING sys.sys_attendance a
+     WHERE a.attendance_status = 'TRAINING'
+       AND a.attendance_subject_user_id = e.user_learning_evidence_user_id
+       AND a.attendance_date = e.user_learning_evidence_completed_at::date
+       AND a.ctid = (SELECT a2.ctid FROM sys.sys_attendance a2
+                      WHERE a2.attendance_status = 'TRAINING'
+                        AND a2.attendance_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                        AND EXISTS (SELECT 1 FROM sys.sys_user_learning_evidence e2
+                                     WHERE e2.user_learning_evidence_user_id = a2.attendance_subject_user_id
+                                       AND e2.user_learning_evidence_completed_at::date = a2.attendance_date)
+                      LIMIT 1);
+    PERFORM staging.storia36_check_c4e();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4e%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4e FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4e (violazione iniettata rilevata, rollback)';
+
+  -- ST-C4f: riportare a «proposta» un'azione su una lacuna matura
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_gap_closure_actions SET gap_closure_action_status = 'PROPOSED'
+     WHERE ctid = (SELECT a.ctid FROM sys.sys_gap_closure_actions a
+                    JOIN sys.sys_learning_gaps g ON g.learning_gap_id = a.gap_closure_action_gap_id
+                   WHERE a.gap_closure_action_kind = 'TRAINING_ASSIGNMENT'
+                     AND g.learning_gap_detected_at::date <= v_end - 90 LIMIT 1);
+    PERFORM staging.storia36_check_c4f(v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4f%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4f FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4f (violazione iniettata rilevata, rollback)';
+
+  -- ST-C4d(v): un'edizione conclusa ma lasciata «in corso» deve far scattare C4d
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_training_initiatives SET training_initiative_status = 'IN_PROGRESS'
+     WHERE ctid = (SELECT ti.ctid FROM sys.sys_training_initiatives ti
+                    WHERE ti.training_initiative_status = 'COMPLETED'
+                      AND ti.training_initiative_end_date IS NOT NULL
+                      AND ti.training_initiative_end_date < v_end LIMIT 1);
+    PERFORM staging.storia36_check_c4d(v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4d%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4d(v) FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4d(v) (edizione conclusa ma «in corso» rilevata, rollback)';
+
+  -- ST-C4c(0): spezzare il legame evidenza→edizione deve far scattare C4c
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_learning_evidence
+       SET user_learning_evidence_metadata =
+             user_learning_evidence_metadata || jsonb_build_object('initiative', 'RTL-INESISTENTE')
+     WHERE ctid = (SELECT e.ctid FROM sys.sys_user_learning_evidence e
+                    WHERE e.user_learning_evidence_metadata->>'kind' = 'AULA' LIMIT 1);
+    PERFORM staging.storia36_check_c4c(v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4c%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4c(0) FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4c(0) (legame edizione perso rilevato, rollback)';
+
+  -- ST-C4b(iv): rinviare un rinnovo dopo la scadenza del titolo precedente
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_certifications
+       SET user_certification_issued_date = user_certification_issued_date + 400
+     WHERE ctid = (SELECT c.ctid FROM sys.sys_user_certifications c
+                    WHERE c.user_certification_metadata->>'storia36' = 'C4'
+                      AND staging.storia36_cert_is_abilitante(c.user_certification_issuer) LIMIT 1);
+    PERFORM staging.storia36_check_c4b(v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4b%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4b(iv) FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4b(iv) (scopertura di abilitazione rilevata, rollback)';
+
+  -- ST-C4g: spostare un completamento a tarda sera deve far scattare C4g
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_learning_evidence
+       SET user_learning_evidence_completed_at =
+             ((user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date
+               + time '23:30') AT TIME ZONE 'Europe/Rome'
+     WHERE ctid = (SELECT e.ctid FROM sys.sys_user_learning_evidence e
+                    JOIN sys.sys_attendance a
+                      ON a.attendance_subject_user_id = e.user_learning_evidence_user_id
+                     AND a.attendance_date = (e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::date
+                   WHERE e.user_learning_evidence_metadata->>'storia36' = 'C4'
+                     AND a.attendance_clock_out IS NOT NULL LIMIT 1);
+    PERFORM staging.storia36_check_c4g();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4g%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4g FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4g (completamento fuori orario rilevato, rollback)';
+
+  -- ST-C4a(iii): togliere l'antiriciclaggio di un anno deve far scattare C4a
+  v_fired := false;
+  BEGIN
+    SELECT e.user_learning_evidence_user_id INTO v_u
+      FROM sys.sys_user_learning_evidence e
+      JOIN sys.sys_learning_modules m ON m.learning_module_id = e.user_learning_evidence_module_id
+     WHERE staging.storia36_c4_module_topic(m.learning_module_code, m.learning_module_title) = 'AML'
+       AND e.user_learning_evidence_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1;
+    DELETE FROM sys.sys_user_learning_evidence e
+     USING sys.sys_learning_modules m
+     WHERE m.learning_module_id = e.user_learning_evidence_module_id
+       AND e.user_learning_evidence_user_id = v_u
+       AND staging.storia36_c4_module_topic(m.learning_module_code, m.learning_module_title) = 'AML';
+    PERFORM staging.storia36_check_c4a(current_setting('storia36.window_start')::date, v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4a%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4a(iii) FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4a(iii) (obbligo di contenuto scoperto rilevato, rollback)';
 END $$;
 \endif
 
@@ -1605,6 +2506,62 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C3S'); RAISE WARNING '[ROSSO] % (SPEC per C3 — triage: dato mancante)', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c4a(v_start, v_end);
+    RAISE NOTICE '[OK] C4a monte-ore annuo sopra il pavimento CCNL/IVASS, media in banda';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C4a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c4b(v_end);
+    RAISE NOTICE '[OK] C4b certificazioni abilitanti valide alla frontiera, catene monotone';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C4b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c4c(v_end);
+    RAISE NOTICE '[OK] C4c aula: evidenza nel periodo, iscrizione presente, capienza rispettata';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C4c'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c4d(v_end);
+    RAISE NOTICE '[OK] C4d ogni iniziativa giustificata da una competenza e legale nel tenant';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C4d'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c4e();
+    RAISE NOTICE '[OK] C4e quadratura: ogni giornata d''aula ha la sua traccia formativa';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C4e'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c4f(v_end);
+    RAISE NOTICE '[OK] C4f ciclo lacuna → azione → formazione chiuso sulle lacune mature';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C4f'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c4g();
+    RAISE NOTICE '[OK] C4g formazione dentro l''orario, dispersa nell''anno, mai in massa';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C4g'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   IF array_length(v_failed, 1) > 0 THEN

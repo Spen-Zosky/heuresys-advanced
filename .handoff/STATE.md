@@ -36,6 +36,26 @@ il dato ha un lettore umano. Il cancello è **automatico**: `python docs/kb/tool
 deriva dai seed le tabelle scritte, dal sorgente dell'API quelle lette, e fallisce se ne resta una
 scoperta. Deroghe solo in `docs/kb/tools/exposure_waivers.txt` **e solo con motivo**.
 
+## ⚠ Pendenza aperta dalla chiusura S1034 — VERIFICARE PER PRIMA COSA
+
+**Il deploy sulla VM di produzione NON è stato eseguito**, e non per un guasto: il cancello D-08 F2
+pretende la CI verde sullo sha deployato, e alla chiusura la suite «Test (api integration)» era
+ancora in corso su `9baeae8f` (gli altri 7 gate: verdi). `close-propagate` ha quindi chiuso
+**NOT clean** — il canale `align-clones` ha fallito sulla VM per questo motivo.
+
+- **linux-pc: allineato** (repo + payload + ecosistema + clone DB; deriva memorie 58≠56 risolta a mano).
+- **VM: repo sincronizzato, PROD ancora sul build precedente.**
+
+Primo controllo della prossima sessione:
+```bash
+gh run list --limit 8                                  # la CI su 9baeae8f dev'essere tutta verde
+MSYS_NO_PATHCONV=1 ssh oracle-vm-default 'cd ~/heuresys-advanced && bash scripts/vm-deploy.sh'
+curl -s -o /dev/null -w '%s' https://www.heuresys.com/api/readyz   # 200 atteso
+```
+Oppure semplicemente ri-eseguire `bash scripts/close-propagate.sh --delta --resilient --auto-deploy`
+(idempotente). **Deriva nota e non-bloccante**: 5 marketplace di plugin con SHA divergente →
+aggiornamento manuale di Enzo, per macchina (non è un verdetto di fallimento).
+
 ## Stato dei piani
 
 - **Storia RTL 36 mesi** (#77): `docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md` — stato vivo

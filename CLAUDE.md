@@ -91,6 +91,31 @@ cd apps/api && pnpm dev
 
 The `.env` file is **gitignored** but real; `.env.example` has three runtime blocks (A localhost / B OCI VM / C OCI Managed). **Option B (OCI VM, tunnel 5433) is the active runtime** (RD-25, ADR-0010). Do not commit `.env`, `.secrets/`, or `*.pem`.
 
+### Codex read-only audit channel
+
+Codex has a separate, least-privilege audit channel for this repository and the
+OCI PostgreSQL database. Its broker, non-sensitive access map and operating
+notes live under `.codex-review/service/access/`; the dedicated DB identity is
+`codex_auditor` and defaults to read-only transactions. Claude remains
+autonomous: do not reuse, rotate or copy the Codex credential and do not treat
+`.codex-review` as product source or project state SoT. Coordination details:
+`.codex-review/service/access/CLAUDE_INTEGRATION.md`.
+
+**The least-privilege claim is verified, not asserted** (re-check with
+`SELECT * FROM pg_roles WHERE rolname='codex_auditor'` +
+`information_schema.role_table_grants`; measured 2026-07-28, S1034): the role has
+login but is **not** superuser and has **no** `CREATEDB` / `CREATEROLE` /
+`BYPASSRLS`; it carries `default_transaction_read_only=on` pinned at role level,
+plus `statement_timeout=30s`, `lock_timeout=2s`,
+`idle_in_transaction_session_timeout=60s`; its only grant is **`SELECT`**, on
+`sys` (223 tables) and `audit` (14).
+
+**Working-tree consequence**: `.codex/`, `.codex-review/` and the root
+`AGENTS.md` (Codex's own equivalent of this file) legitimately appear as
+untracked. They are **not** stray files to clean up, they are **not** Claude's to
+maintain, and `align-clones` / `close-propagate` do not carry them — the two
+channels stay separate by design.
+
 ## Full alignment & deploy doctrine
 
 "**Allinea i cloni**" (VM + linux-pc) means making the remotes **true clones** of the local PC repo (idempotency, modulo OS/arch) — including the gitignored payload `git pull` never carries. Canonical entrypoint: **`bash scripts/align-clones.sh <vm|linuxpc|all> [--deploy]`** (push local commits first; remotes `reset --hard origin/main`). **The Mac (2012 MBP) is RETIRED from `all`/`close-propagate` (S1007 — dead weight: its Claude CLI SIGILLs on the Ivy Bridge CPU, the ecosystem channel kept failing 16 plugins + drift). It remains an on-demand-only target (`align-clones.sh mac`) if ever revived.** Per target it composes: hard git sync → `pnpm install --frozen-lockfile -r` → `.secrets/` + gitignored data (`sync-gitignored-to-vm.sh`) → **`.env` additive key-merge** (`env-key-merge.sh`, never overwrites per-machine topology) → Claude memory tree (`sync-memory-tree.sh`) → (VM `--deploy`) `vm-deploy.sh`. **`vm-deploy.sh`** guarantees a fully-updated PROD (exact lockfile versions + clean-reinstall on Node-ABI change + self-modify-buffer re-exec + `db:migrate:sh` + shared→api→web rebuild + restart). Full rationale: `memory/feedback_full_alignment_doctrine.md`; ops detail: `deploy/README.md` §"Full alignment". **At session close** the canonical orchestrator is **`scripts/close-propagate.sh`** (invoked by the `handoff` skill Step 4b): it runs BOTH channels — `align-clones` (repo + payload + project memories + PROD deploy) **and** `align-claude-ecosystem` (CLAUDE.md/skills/commands/settings/SDK + plugin SHA-verify) — plus the conditional linux-pc clone-DB; **fail-loud** on a reachable host, **skip+warn** on a host that's off (design 2026-06-20 §12-§13).

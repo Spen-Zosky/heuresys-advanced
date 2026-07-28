@@ -85,10 +85,21 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
       // posizioni critiche hanno i loro candidati, ed e' un fatto voluto. Si
       // riconoscono dalla provenienza (`legacy_plan_id`), che l'import scrive
       // e la storia no — le invarianti restano invece su TUTTE le righe.
-      expect(await count(
+      // Quanti siano i candidati importati NON è un invariante: la storia C5
+      // rimuove chi non soddisfa il criterio di successione (coda #4/#5), e un
+      // numero fisso qui misurerebbe lo stato, non la regola. L'invariante è
+      // che la provenienza sia sempre completa — nessun candidato «mezzo
+      // legacy» — e che ce ne sia ancora almeno uno da controllare.
+      const legacyCount = await count(
         `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
           WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL`,
-      )).toBe(25);
+      );
+      expect(legacyCount).toBeGreaterThan(0);
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
+          WHERE (successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL)
+             <> (successor_candidate_metadata->>'legacy_candidate_id' IS NOT NULL)`,
+      )).toBe(0);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_successor_candidates c
            JOIN sys.sys_succession_pools sp ON sp.succession_pool_id = c.successor_candidate_pool_id
@@ -103,14 +114,32 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
       )).toBe(0);
     });
 
-    it('readiness mapping (D2): READY_1_YEAR=6, READY_2_YEARS=6, NOT_READY=13; raw legacy value preserved', async () => {
-      const { rows } = await pool.query<{ readiness: string | null; n: number }>(
-        `SELECT successor_candidate_readiness_level AS readiness, count(*)::int AS n
+    it('readiness mapping (D2): ogni riga rispetta la mappa legacy→dominio; raw legacy value preserved', async () => {
+      // La REGOLA della decisione D2 (db/seeds/reconciliation/49_*.sql), non la
+      // fotografia dei conteggi: quelli cambiano quando la storia C5 rimuove i
+      // successori scelti senza criterio, la mappa no. Si verifica riga per
+      // riga, così vale su qualunque popolazione residua.
+      const MAPPA: Record<string, string> = {
+        ready_now: 'READY_NOW',
+        ready_1_year: 'READY_1_YEAR',
+        ready_2_years: 'READY_2_YEARS',
+        ready_3_years: 'NOT_READY',
+        ready_3_5_years: 'NOT_READY',
+        development_needed: 'NOT_READY',
+      };
+      const { rows } = await pool.query<{ grezzo: string; mappato: string | null; n: number }>(
+        `SELECT successor_candidate_metadata->>'legacy_readiness' AS grezzo,
+                successor_candidate_readiness_level AS mappato, count(*)::int AS n
            FROM sys.sys_successor_candidates
-          WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL GROUP BY 1`,
+          WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL
+          GROUP BY 1, 2`,
       );
-      const m = Object.fromEntries(rows.map((r) => [r.readiness ?? 'NULL', r.n]));
-      expect(m).toEqual({ READY_1_YEAR: 6, READY_2_YEARS: 6, NOT_READY: 13 });
+      expect(rows.length).toBeGreaterThan(0);
+      for (const r of rows) {
+        // nessun valore legacy fuori dal vocabolario dichiarato dalla decisione D2
+        expect(Object.keys(MAPPA)).toContain(r.grezzo);
+        expect(r.mappato).toBe(MAPPA[r.grezzo]);
+      }
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
           WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL

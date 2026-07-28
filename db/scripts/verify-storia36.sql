@@ -2140,6 +2140,537 @@ BEGIN
   END IF;
 END $fn$;
 
+-- ----------------------------------------------------------------------------
+-- C5f — LA CRITICITÀ SI DICE IN UN MODO SOLO (rilievo #18).
+-- Il database teneva tre registri di posizioni critiche — sys_critical_positions,
+-- positions.position_criticality e relevance.is_critical — e i tre non avevano
+-- NEMMENO UNA posizione in comune: un ruolo era critico per la successione e
+-- ordinario nell'anagrafica, un altro il contrario. La fonte è il registro
+-- esplicito (l'unico che porta motivazione e impatto di business); gli altri due
+-- lo seguono.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5f()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(p.position_title) INTO v_cnt, v_sample
+  FROM sys.sys_critical_positions cp
+  JOIN sys.sys_positions p ON p.position_id = cp.critical_position_position_id
+  WHERE cp.critical_position_tenant_id = c_rtl
+    AND p.position_criticality IS DISTINCT FROM 'CRITICAL';
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5f: % posizioni nel registro delle critiche che l''anagrafica non dice critiche (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(p.position_title) INTO v_cnt, v_sample
+  FROM sys.sys_positions p
+  WHERE p.position_tenant_id = c_rtl
+    AND p.position_criticality = 'CRITICAL'
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_critical_positions cp
+                     WHERE cp.critical_position_position_id = p.position_id
+                       AND cp.critical_position_tenant_id = c_rtl);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5f(ii): % posizioni dette critiche in anagrafica ma assenti dal registro (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(p.position_title) INTO v_cnt, v_sample
+  FROM sys.sys_critical_positions cp
+  JOIN sys.sys_positions p ON p.position_id = cp.critical_position_position_id
+  WHERE cp.critical_position_tenant_id = c_rtl
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_position_succession_relevance r
+                     WHERE r.position_id = cp.critical_position_position_id
+                       AND r.position_succession_relevance_tenant_id = c_rtl
+                       AND r.is_critical);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5f(iii): % posizioni critiche che la vista successione non segnala (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(p.position_title) INTO v_cnt, v_sample
+  FROM sys.sys_position_succession_relevance r
+  JOIN sys.sys_positions p ON p.position_id = r.position_id
+  WHERE r.position_succession_relevance_tenant_id = c_rtl
+    AND r.is_critical
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_critical_positions cp
+                     WHERE cp.critical_position_position_id = r.position_id
+                       AND cp.critical_position_tenant_id = c_rtl);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5f(iv): % posizioni segnalate critiche dalla successione ma assenti dal registro (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- l'orizzonte di copertura è un derivato del bacino: se il bacino ha
+  -- candidati, la posizione deve dire entro quando è coperta
+  SELECT count(*), min(p.position_title) INTO v_cnt, v_sample
+  FROM sys.sys_position_succession_relevance r
+  JOIN sys.sys_positions p ON p.position_id = r.position_id
+  WHERE r.position_succession_relevance_tenant_id = c_rtl
+    AND r.readiness_horizon IS NULL
+    AND EXISTS (SELECT 1 FROM sys.sys_succession_pools sp
+                 JOIN sys.sys_successor_candidates sc
+                   ON sc.successor_candidate_pool_id = sp.succession_pool_id
+                WHERE sp.succession_pool_position_id = r.position_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5f(v): % posizioni con un bacino popolato e nessun orizzonte di copertura (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5g — UN SUCCESSORE NON È UN NOME (rilievo #4/#5).
+-- Su 49 candidati, 22 non erano né un riporto diretto della posizione né
+-- qualcuno che quel mestiere lo fa già altrove: erano stati messi lì e basta.
+-- Chi sta in un bacino ci sta per uno dei due motivi.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5g()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email || ' → ' || COALESCE(pp.position_title, '?')) INTO v_cnt, v_sample
+  FROM sys.sys_successor_candidates sc
+  JOIN sys.sys_succession_pools sp ON sp.succession_pool_id = sc.successor_candidate_pool_id
+  JOIN sys.sys_users u ON u.user_id = sc.successor_candidate_user_id
+  LEFT JOIN sys.sys_positions pp ON pp.position_id = sp.succession_pool_position_id
+  WHERE sc.successor_candidate_tenant_id = c_rtl
+    -- chi la posizione la occupa già ha il suo ramo, il (ii): i due casi
+    -- restano disgiunti, così ciascuno si può falsificare da solo
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_position_assignments a0
+       WHERE a0.user_position_assignment_user_id = sc.successor_candidate_user_id
+         AND a0.user_position_assignment_status = 'ACTIVE'
+         AND a0.user_position_assignment_position_id = sp.succession_pool_position_id)
+    AND NOT EXISTS (
+      SELECT 1
+        FROM sys.sys_user_position_assignments a
+        JOIN sys.sys_positions cpz ON cpz.position_id = a.user_position_assignment_position_id
+       WHERE a.user_position_assignment_user_id = sc.successor_candidate_user_id
+         AND a.user_position_assignment_status = 'ACTIVE'
+         AND (cpz.position_reports_to_position_id = sp.succession_pool_position_id
+           OR (cpz.position_title = pp.position_title AND cpz.position_id <> pp.position_id)));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5g: % successori che non riportano alla posizione né ne fanno il mestiere altrove (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_successor_candidates sc
+  JOIN sys.sys_succession_pools sp ON sp.succession_pool_id = sc.successor_candidate_pool_id
+  JOIN sys.sys_users u ON u.user_id = sc.successor_candidate_user_id
+  WHERE sc.successor_candidate_tenant_id = c_rtl
+    AND EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                 WHERE a.user_position_assignment_user_id = sc.successor_candidate_user_id
+                   AND a.user_position_assignment_status = 'ACTIVE'
+                   AND a.user_position_assignment_position_id = sp.succession_pool_position_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5g(ii): % persone candidate a succedere a se stesse (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5h — UN PERCORSO DICE DA DOVE A DOVE (rilievo #27).
+-- I 35 passi dei sette percorsi di carriera erano gusci: nessuno aveva una
+-- posizione di partenza né una di arrivo. Un percorso senza posizioni è un
+-- titolo, e nessuno può percorrerlo.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5h()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(cp.career_path_name || ' passo ' || s.career_path_step_ordinal)
+    INTO v_cnt, v_sample
+  FROM sys.sys_career_path_steps s
+  JOIN sys.sys_career_paths cp ON cp.career_path_id = s.career_path_step_path_id
+  WHERE s.career_path_step_target_position_id IS NULL;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5h: % passi di carriera che non portano a nessuna posizione (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(cp.career_path_name || ' passo ' || s.career_path_step_ordinal)
+    INTO v_cnt, v_sample
+  FROM sys.sys_career_path_steps s
+  JOIN sys.sys_career_paths cp ON cp.career_path_id = s.career_path_step_path_id
+  WHERE s.career_path_step_ordinal > 1
+    AND s.career_path_step_origin_position_id IS NULL;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5h(ii): % passi oltre il primo che non partono da nessuna posizione (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- la catena è continua: si riparte da dove si è arrivati
+  SELECT count(*), min(cp.career_path_name || ' passo ' || s.career_path_step_ordinal)
+    INTO v_cnt, v_sample
+  FROM sys.sys_career_path_steps s
+  JOIN sys.sys_career_paths cp ON cp.career_path_id = s.career_path_step_path_id
+  JOIN sys.sys_career_path_steps prec
+    ON prec.career_path_step_path_id = s.career_path_step_path_id
+   AND prec.career_path_step_ordinal = s.career_path_step_ordinal - 1
+  WHERE s.career_path_step_origin_position_id
+        IS DISTINCT FROM prec.career_path_step_target_position_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5h(iii): % passi che non ripartono da dove finisce il precedente (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(cp.career_path_name || ' passo ' || s.career_path_step_ordinal)
+    INTO v_cnt, v_sample
+  FROM sys.sys_career_path_steps s
+  JOIN sys.sys_career_paths cp ON cp.career_path_id = s.career_path_step_path_id
+  WHERE s.career_path_step_origin_position_id = s.career_path_step_target_position_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5h(iv): % passi che partono e arrivano alla stessa posizione (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5i — IL DATORE E IL SETTORE SONO LO STESSO FATTO (rilievo #30/#33).
+-- I due campi venivano estratti separatamente: «Banca Popolare del Verbano»
+-- risultava insieme banca, assicurazione e società di consulenza ICT. Tutti e
+-- nove i datori erano incoerenti.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5i()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(datore || ': ' || settori) INTO v_cnt, v_sample
+  FROM (
+    SELECT user_prof_exp_employer AS datore,
+           string_agg(DISTINCT user_prof_exp_industry, ' / ') AS settori
+      FROM sys.sys_user_professional_experiences
+     WHERE user_prof_exp_tenant_id = c_rtl
+     GROUP BY 1
+    HAVING count(DISTINCT user_prof_exp_industry) > 1) x;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5i: % datori di lavoro attribuiti a più settori diversi (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5j — LE DATE NON SEGUONO IL CALENDARIO SCOLASTICO (rilievo #13/#20).
+-- L'inizio di ogni esperienza coincideva con la fine degli studi: 85 date su
+-- 255 cadevano il primo del mese e 104 a gennaio. Era il calendario delle
+-- lauree, non quello delle assunzioni. Soglie larghe di proposito: il check
+-- deve cogliere l'artefatto, non la casualità.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5j()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_pct numeric;
+  v_sample text;
+BEGIN
+  SELECT max(pct), min(etichetta) INTO v_pct, v_sample FROM (
+    SELECT round(100.0 * count(*) / sum(count(*)) OVER (), 1) AS pct,
+           'giorno ' || extract(day FROM user_prof_exp_start_date)::text AS etichetta
+      FROM sys.sys_user_professional_experiences
+     WHERE user_prof_exp_tenant_id = c_rtl
+     GROUP BY extract(day FROM user_prof_exp_start_date)) x
+   WHERE pct > 15;
+  IF v_pct IS NOT NULL THEN
+    RAISE EXCEPTION 'C5j: un solo giorno del mese concentra il %%% delle date d''inizio (%)', v_pct, v_sample;
+  END IF;
+
+  SELECT max(pct), min(etichetta) INTO v_pct, v_sample FROM (
+    SELECT round(100.0 * count(*) / sum(count(*)) OVER (), 1) AS pct,
+           'mese ' || extract(month FROM user_prof_exp_start_date)::text AS etichetta
+      FROM sys.sys_user_professional_experiences
+     WHERE user_prof_exp_tenant_id = c_rtl
+     GROUP BY extract(month FROM user_prof_exp_start_date)) x
+   WHERE pct > 20;
+  IF v_pct IS NOT NULL THEN
+    RAISE EXCEPTION 'C5j(ii): un solo mese concentra il %%% delle date d''inizio (%)', v_pct, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5k — DENTRO LA BANCA CI SI MUOVE (rilievo #23).
+-- In 36 mesi, su 162 persone, i cambi di posizione registrati erano cinque: la
+-- banca risultava un posto dove la carriera comincia e finisce sulla stessa
+-- scrivania. E dove c'è un movimento, i due incarichi non si sovrappongono.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5k()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(DISTINCT user_position_assignment_user_id) INTO v_cnt
+  FROM sys.sys_user_position_assignments
+  WHERE user_position_assignment_tenant_id = c_rtl
+    AND user_position_assignment_status = 'ENDED';
+  IF v_cnt < 20 THEN
+    RAISE EXCEPTION 'C5k: solo % persone hanno un incarico precedente in tre anni: la mobilità interna non è rappresentata', v_cnt;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_user_position_assignments prec
+  JOIN sys.sys_user_position_assignments att
+    ON att.user_position_assignment_user_id = prec.user_position_assignment_user_id
+   AND att.user_position_assignment_status = 'ACTIVE'
+  JOIN sys.sys_users u ON u.user_id = prec.user_position_assignment_user_id
+  WHERE prec.user_position_assignment_tenant_id = c_rtl
+    AND prec.user_position_assignment_status = 'ENDED'
+    AND prec.user_position_assignment_end_date >= att.user_position_assignment_start_date;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5k(ii): % incarichi precedenti che si sovrappongono a quello in corso (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_user_position_assignments a
+  JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
+  WHERE a.user_position_assignment_tenant_id = c_rtl
+    AND a.user_position_assignment_metadata->>'storia36' = 'C5'
+    AND a.user_position_assignment_start_date < (
+      SELECT min(em.user_employment_hire_date) FROM sys.sys_user_employment em
+       WHERE em.user_employment_user_id = a.user_position_assignment_user_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5k(iii): % incarichi che cominciano prima dell''assunzione (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5l — IL BACINO DICE QUALE POSTO COPRE (rilievo #19).
+-- La stessa carica compariva come «Chief Executive Officer» e come «CEO /
+-- Amministratore Delegato», «Head of Human Resources» e «Head of HR»: due
+-- convenzioni legacy mescolate, e nessun modo di sapere se erano due bacini o
+-- lo stesso. Il nome deriva dal titolo della posizione servita.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5l()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(sp.succession_pool_name || ' ≠ ' || p.position_title)
+    INTO v_cnt, v_sample
+  FROM sys.sys_succession_pools sp
+  JOIN sys.sys_positions p ON p.position_id = sp.succession_pool_position_id
+  WHERE sp.succession_pool_tenant_id = c_rtl
+    AND sp.succession_pool_name IS DISTINCT FROM 'Successione — ' || p.position_title;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5l: % bacini il cui nome non è quello della posizione servita (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C6a — LA RIORGANIZZAZIONE HA LASCIATO TRACCIA, E LA TRACCIA È DATATA.
+-- L'organigramma risultava esistere da sempre, identico a sé stesso: la
+-- discontinuità del marzo 2025 non aveva prodotto una sola riga di storia.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c6a(p_reorg date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*) INTO v_cnt
+  FROM sys.sys_organization_unit_history h
+  WHERE h.organization_unit_history_tenant_id = c_rtl;
+  IF v_cnt < 5 THEN
+    RAISE EXCEPTION 'C6a: solo % eventi di storia organizzativa: la riorganizzazione non è raccontata', v_cnt;
+  END IF;
+
+  SELECT count(*), min(o.organization_unit_code || ' @ ' ||
+                       h.organization_unit_history_effective_at::date)
+    INTO v_cnt, v_sample
+  FROM sys.sys_organization_unit_history h
+  JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
+  WHERE h.organization_unit_history_tenant_id = c_rtl
+    AND h.organization_unit_history_effective_at::date <> p_reorg;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6a(ii): % eventi datati fuori dal giorno del riordino (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
+  FROM sys.sys_organization_unit_history h
+  JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
+  LEFT JOIN sys.sys_users u ON u.user_id = h.organization_unit_history_actor_user_id
+  WHERE h.organization_unit_history_tenant_id = c_rtl
+    AND (u.user_id IS NULL OR u.user_tenant_id IS DISTINCT FROM h.organization_unit_history_tenant_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6a(iii): % eventi organizzativi senza un autore del tenant (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- un «cambiamento» che non cambia nulla è rumore, non storia
+  SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
+  FROM sys.sys_organization_unit_history h
+  JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
+  WHERE h.organization_unit_history_tenant_id = c_rtl
+    AND h.organization_unit_history_old_value IS NOT NULL
+    AND h.organization_unit_history_old_value = h.organization_unit_history_new_value;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6a(iv): % eventi in cui il prima e il dopo coincidono (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C6b — L'ALBERO REGGE ATTRAVERSO IL RIORDINO.
+-- Qui NON si ricontrolla ciò che le chiavi esterne già impediscono: una
+-- posizione appesa a un'unità inesistente, o un'assegnazione verso una
+-- posizione che non c'è, sono difetti che il database rifiuta da sé — un check
+-- che non può mai fallire non prova nulla, e infatti il suo selftest non
+-- riusciva nemmeno a iniettare la violazione. Restano i due modi in cui una
+-- riorganizzazione rompe davvero l'albero, e che nessun vincolo intercetta:
+-- un'assegnazione che scavalca il tenant, e un ciclo nella gerarchia.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c6b()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_user_position_assignments a
+  JOIN sys.sys_users u ON u.user_id = a.user_position_assignment_user_id
+  JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+  WHERE a.user_position_assignment_tenant_id = c_rtl
+    AND a.user_position_assignment_status = 'ACTIVE'
+    AND p.position_tenant_id IS DISTINCT FROM a.user_position_assignment_tenant_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6b: % persone assegnate a una posizione di un altro tenant (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- il genitore esiste (FK), ma nulla impedisce che l'albero si chiuda su sé
+  -- stesso: è così che una riorganizzazione mal registrata produce un ciclo
+  WITH RECURSIVE risalita AS (
+    SELECT o.organization_unit_id AS partenza, o.organization_unit_parent_id AS corrente, 1 AS passi
+      FROM sys.sys_organization_units o
+     WHERE o.organization_unit_tenant_id = c_rtl AND o.organization_unit_parent_id IS NOT NULL
+    UNION ALL
+    SELECT r.partenza, p.organization_unit_parent_id, r.passi + 1
+      FROM risalita r
+      JOIN sys.sys_organization_units p ON p.organization_unit_id = r.corrente
+     WHERE r.passi < 30 AND p.organization_unit_parent_id IS NOT NULL
+  )
+  SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
+  FROM risalita r
+  JOIN sys.sys_organization_units o ON o.organization_unit_id = r.partenza
+  WHERE r.corrente = r.partenza;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6b(ii): % unità che risalendo la gerarchia tornano su sé stesse (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- e ogni unità del tenant appartiene a un genitore dello STESSO tenant
+  SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
+  FROM sys.sys_organization_units o
+  JOIN sys.sys_organization_units p ON p.organization_unit_id = o.organization_unit_parent_id
+  WHERE o.organization_unit_tenant_id = c_rtl
+    AND p.organization_unit_tenant_id IS DISTINCT FROM o.organization_unit_tenant_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6b(iii): % unità appese a un genitore di un altro tenant (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C6c — IL RACCONTO ARRIVA AL PRESENTE, E IL PRESENTE NON È STATO TOCCATO.
+-- È la post-condizione che rende onesto tutto il cluster: il seed scrive SOLO
+-- storia, e ogni esito che la storia dichiara deve coincidere con l'organigramma
+-- di oggi. Se qualcuno inventasse un passato che non porta qui, questo check
+-- diventa rosso.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c6c()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(o.organization_unit_code || ': storia «' ||
+                       (h.organization_unit_history_new_value->>'name') || '» ≠ oggi «' ||
+                       o.organization_unit_name || '»')
+    INTO v_cnt, v_sample
+  FROM sys.sys_organization_unit_history h
+  JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
+  WHERE h.organization_unit_history_tenant_id = c_rtl
+    AND h.organization_unit_history_new_value ? 'name'
+    AND (h.organization_unit_history_new_value->>'name') IS DISTINCT FROM o.organization_unit_name;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6c: % eventi il cui esito non è il nome che l''unità porta oggi (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
+  FROM sys.sys_organization_unit_history h
+  JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
+  LEFT JOIN sys.sys_organization_units par ON par.organization_unit_id = o.organization_unit_parent_id
+  WHERE h.organization_unit_history_tenant_id = c_rtl
+    AND h.organization_unit_history_new_value ? 'parent_name'
+    AND (h.organization_unit_history_new_value->>'parent_name')
+        IS DISTINCT FROM par.organization_unit_name;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6c(ii): % spostamenti che non finiscono dove l''unità sta oggi (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
+  FROM sys.sys_organization_unit_history h
+  JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
+  WHERE h.organization_unit_history_tenant_id = c_rtl
+    AND h.organization_unit_history_change_type = 'MOVED'
+    AND (h.organization_unit_history_old_value->>'parent_name')
+        IS NOT DISTINCT FROM (h.organization_unit_history_new_value->>'parent_name');
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6c(iii): % spostamenti che partono e arrivano sotto lo stesso genitore (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C6d — IL MODELLO ADOTTATO DICE QUALCOSA.
+-- Un blueprint attivato senza deroghe motivate è un'etichetta: non dice quali
+-- processi la banca presidia davvero, e quali no.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c6d()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*) INTO v_cnt FROM sys.sys_blueprint_activations
+  WHERE blueprint_activation_tenant_id = c_rtl AND blueprint_activation_status = 'ACTIVE';
+  IF v_cnt = 0 THEN
+    RAISE EXCEPTION 'C6d: nessun blueprint attivo: il modello organizzativo non è adottato';
+  END IF;
+
+  SELECT count(*), min(a.blueprint_activation_id::text) INTO v_cnt, v_sample
+  FROM sys.sys_blueprint_activations a
+  WHERE a.blueprint_activation_tenant_id = c_rtl
+    AND a.blueprint_activation_status = 'ACTIVE'
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_blueprint_overrides o
+                     WHERE o.blueprint_override_activation_id = a.blueprint_activation_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6d(ii): % attivazioni senza una sola deroga: il modello è adottato in blocco (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(r.blueprint_process_code) INTO v_cnt, v_sample
+  FROM sys.sys_blueprint_overrides o
+  JOIN sys.sys_blueprint_activations a ON a.blueprint_activation_id = o.blueprint_override_activation_id
+  LEFT JOIN sys.sys_blueprint_process_registry r ON r.blueprint_process_id = o.blueprint_override_process_id
+  WHERE a.blueprint_activation_tenant_id = c_rtl
+    AND (r.blueprint_process_id IS NULL
+      OR o.blueprint_override_rationale IS NULL
+      OR length(trim(o.blueprint_override_rationale)) < 10);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6d(iii): % deroghe orfane o senza motivazione (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*) INTO v_cnt FROM (
+    SELECT o.blueprint_override_activation_id, o.blueprint_override_process_id
+      FROM sys.sys_blueprint_overrides o
+      JOIN sys.sys_blueprint_activations a ON a.blueprint_activation_id = o.blueprint_override_activation_id
+     WHERE a.blueprint_activation_tenant_id = c_rtl
+     GROUP BY 1, 2 HAVING count(*) > 1) x;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C6d(iv): % processi con più di una deroga sulla stessa attivazione', v_cnt;
+  END IF;
+END $fn$;
+
 -- ============================================================================
 -- SELFTEST (con -v selftest=1) — la falsificabilità: per ogni check nuovo si
 -- inietta una violazione in SUBTRANSAZIONE (rollback garantito dal pattern
@@ -2909,6 +3440,763 @@ BEGIN
   END;
   IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5e FALLITO: violazione iniettata non rilevata'; END IF;
   RAISE NOTICE '[OK] SELFTEST C5e (titolo senza durata rilevato, rollback)';
+
+  -- ==========================================================================
+  -- I RAMI SECONDARI (rilievo #22 della coda C5)
+  -- Ogni funzione di check ha più rami, ma il selftest ne provava UNO solo: gli
+  -- altri nove non erano mai stati visti fallire, e un check mai visto fallire
+  -- non prova nulla. Qui ogni ramo ha la sua iniezione, e il confronto è sul
+  -- messaggio ESATTO del ramo — così un'iniezione che fa scattare il ramo
+  -- sbagliato viene contata come selftest fallito, non come successo.
+  -- ==========================================================================
+
+  -- ST-C5a(ii): far finire un'esperienza precedente dopo l'ingresso in RTL
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_professional_experiences x
+       SET user_prof_exp_end_date = (
+             SELECT max(em.user_employment_hire_date) + 30 FROM sys.sys_user_employment em
+              WHERE em.user_employment_user_id = x.user_prof_exp_user_id)
+     WHERE ctid = (SELECT x2.ctid FROM sys.sys_user_professional_experiences x2
+                    WHERE x2.user_prof_exp_metadata->>'tratto' = x2.user_prof_exp_metadata->>'su'
+                    LIMIT 1);
+    PERFORM staging.storia36_check_c5a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5a(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5a(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5a(ii) (esperienza che sconfina nell''impiego attuale, rollback)';
+
+  -- ST-C5a(iii): sovrapporre due esperienze consecutive della stessa persona
+  v_fired := false;
+  BEGIN
+    -- 120 giorni: lo stacco fra un impiego e il successivo arriva a 87, quindi
+    -- un salto più corto non basta a sovrapporli
+    UPDATE sys.sys_user_professional_experiences
+       SET user_prof_exp_start_date = user_prof_exp_start_date - 120
+     WHERE ctid = (SELECT x2.ctid FROM sys.sys_user_professional_experiences x2
+                    WHERE (x2.user_prof_exp_metadata->>'tratto')::int > 1 LIMIT 1);
+    PERFORM staging.storia36_check_c5a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5a(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5a(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5a(iii) (due impieghi sovrapposti, rollback)';
+
+  -- ST-C5a(iv): far finire un'esperienza prima di cominciare
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_professional_experiences
+       SET user_prof_exp_end_date = user_prof_exp_start_date - 1
+     WHERE ctid = (SELECT x2.ctid FROM sys.sys_user_professional_experiences x2
+                    WHERE x2.user_prof_exp_metadata->>'tratto' = x2.user_prof_exp_metadata->>'su'
+                    LIMIT 1);
+    PERFORM staging.storia36_check_c5a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5a(iv)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5a(iv) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5a(iv) (esperienza che finisce prima di iniziare, rollback)';
+
+  -- ST-C5b(ii): togliere a un successore tutte le valutazioni di prontezza
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_successor_readiness
+     WHERE successor_readiness_candidate_id = (
+       SELECT sc.successor_candidate_id FROM sys.sys_successor_candidates sc
+        WHERE sc.successor_candidate_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c5b();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5b(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5b(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5b(ii) (successore mai valutato, rollback)';
+
+  -- ST-C5b(iii): dichiarare un livello di prontezza che nessuno ha misurato
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_successor_candidates sc
+       SET successor_candidate_readiness_level =
+             CASE WHEN sc.successor_candidate_readiness_level = 'READY_NOW'
+                  THEN 'NOT_READY' ELSE 'READY_NOW' END
+     WHERE sc.ctid = (SELECT s2.ctid FROM sys.sys_successor_candidates s2
+                       WHERE s2.successor_candidate_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                         AND EXISTS (SELECT 1 FROM sys.sys_successor_readiness r
+                                      WHERE r.successor_readiness_candidate_id = s2.successor_candidate_id)
+                       LIMIT 1);
+    PERFORM staging.storia36_check_c5b();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5b(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5b(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5b(iii) (prontezza dichiarata e mai misurata, rollback)';
+
+  -- ST-C5c: puntare un obiettivo a una posizione di un altro tenant
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_target_positions
+       SET user_target_position_position_id = (
+             SELECT p.position_id FROM sys.sys_positions p
+              WHERE p.position_tenant_id <> '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1)
+     WHERE ctid = (SELECT t2.ctid FROM sys.sys_user_target_positions t2
+                    WHERE t2.user_target_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                    LIMIT 1);
+    PERFORM staging.storia36_check_c5c();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5c:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5c FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5c (obiettivo fuori dal tenant, rollback)';
+
+  -- ST-C5c(iii): staccare l'obiettivo da ogni percorso di carriera
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_position_career_paths pcp
+     WHERE pcp.position_id IN (
+       SELECT t.user_target_position_position_id FROM sys.sys_user_target_positions t
+        WHERE t.user_target_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+          AND t.user_target_position_review_status <> 'REJECTED' LIMIT 1);
+    PERFORM staging.storia36_check_c5c();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5c(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5c(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5c(iii) (obiettivo irraggiungibile da ogni percorso, rollback)';
+
+  -- ST-C5c(iv): rendere l'obiettivo lo STESSO mestiere che si fa già — la
+  -- degenerazione che la prima versione produceva (22 direttori di filiale che
+  -- «aspiravano» a fare i cassieri). Si inietta sul titolo e non svuotando la
+  -- posizione, perché togliere i titolari fa scattare prima il ramo (iii).
+  v_fired := false;
+  BEGIN
+    WITH scelto AS (
+      SELECT t.user_target_position_position_id AS meta, p_ora.position_title AS titolo
+        FROM sys.sys_user_target_positions t
+        JOIN sys.sys_user_position_assignments a
+          ON a.user_position_assignment_user_id = t.user_target_position_user_id
+         AND a.user_position_assignment_kind = 'PRIMARY'
+         AND a.user_position_assignment_status = 'ACTIVE'
+        JOIN sys.sys_positions p_ora ON p_ora.position_id = a.user_position_assignment_position_id
+       WHERE t.user_target_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+         AND t.user_target_position_review_status <> 'REJECTED'
+       LIMIT 1)
+    UPDATE sys.sys_positions p SET position_title = s.titolo
+      FROM scelto s WHERE p.position_id = s.meta;
+    PERFORM staging.storia36_check_c5c();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5c(iv)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5c(iv) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5c(iv) (obiettivo su una scrivania vuota, rollback)';
+
+  -- ST-C5d(ii): attribuire una variazione di requisito a un autore inesistente
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_position_skill_requirement_history
+       SET position_skill_requirement_history_actor_user_id = NULL
+     WHERE ctid = (SELECT h2.ctid FROM sys.sys_position_skill_requirement_history h2 LIMIT 1);
+    PERFORM staging.storia36_check_c5d(current_setting('storia36.window_start')::date, v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5d(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5d(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5d(ii) (variazione senza autore, rollback)';
+
+  -- ==========================================================================
+  -- I CHECK NUOVI DELLA CODA (#18 #4/#5 #27 #30/#33 #13/#20 #23 #19)
+  -- ==========================================================================
+
+  -- ST-C5f: togliere la criticità in anagrafica a una posizione del registro
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_positions SET position_criticality = 'MEDIUM'
+     WHERE position_id = (SELECT cp.critical_position_position_id FROM sys.sys_critical_positions cp
+                           WHERE cp.critical_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c5f();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5f:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5f FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5f (posizione critica che l''anagrafica non dice critica, rollback)';
+
+  -- ST-C5f(ii): dichiarare critica in anagrafica una posizione fuori registro
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_positions SET position_criticality = 'CRITICAL'
+     WHERE position_id = (SELECT p.position_id FROM sys.sys_positions p
+                           WHERE p.position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                             AND NOT EXISTS (SELECT 1 FROM sys.sys_critical_positions cp
+                                              WHERE cp.critical_position_position_id = p.position_id)
+                           LIMIT 1);
+    PERFORM staging.storia36_check_c5f();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5f(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5f(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5f(ii) (criticità dichiarata fuori dal registro, rollback)';
+
+  -- ST-C5f(iii): spegnere la segnalazione di criticità sulla vista successione
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_position_succession_relevance SET is_critical = false
+     WHERE position_id = (SELECT cp.critical_position_position_id FROM sys.sys_critical_positions cp
+                           WHERE cp.critical_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c5f();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5f(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5f(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5f(iii) (criticità spenta sulla vista successione, rollback)';
+
+  -- ST-C5f(iv): segnalare critica una posizione che il registro non conosce
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_position_succession_relevance SET is_critical = true
+     WHERE position_id = (SELECT r.position_id FROM sys.sys_position_succession_relevance r
+                           WHERE r.position_succession_relevance_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                             AND NOT r.is_critical LIMIT 1);
+    PERFORM staging.storia36_check_c5f();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5f(iv)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5f(iv) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5f(iv) (criticità segnalata fuori dal registro, rollback)';
+
+  -- ST-C5f(v): cancellare l'orizzonte di copertura di una posizione con bacino
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_position_succession_relevance SET readiness_horizon = NULL
+     WHERE position_succession_relevance_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND readiness_horizon IS NOT NULL;
+    PERFORM staging.storia36_check_c5f();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5f(v)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5f(v) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5f(v) (bacino popolato senza orizzonte di copertura, rollback)';
+
+  -- ST-C5g: mettere in un bacino qualcuno che non c'entra con quella posizione
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_successor_candidates sc
+       SET successor_candidate_user_id = (
+             -- qualcuno che di quella posizione non è né il riporto né il pari
+             SELECT a.user_position_assignment_user_id
+               FROM sys.sys_user_position_assignments a
+               JOIN sys.sys_positions cpz ON cpz.position_id = a.user_position_assignment_position_id
+               JOIN sys.sys_succession_pools sp ON sp.succession_pool_id = sc.successor_candidate_pool_id
+               JOIN sys.sys_positions pp ON pp.position_id = sp.succession_pool_position_id
+              WHERE a.user_position_assignment_status = 'ACTIVE'
+                AND cpz.position_reports_to_position_id IS DISTINCT FROM sp.succession_pool_position_id
+                AND cpz.position_title <> pp.position_title
+                AND NOT EXISTS (SELECT 1 FROM sys.sys_successor_candidates s3
+                                 WHERE s3.successor_candidate_pool_id = sc.successor_candidate_pool_id
+                                   AND s3.successor_candidate_user_id = a.user_position_assignment_user_id)
+              LIMIT 1)
+     WHERE sc.ctid = (SELECT s2.ctid FROM sys.sys_successor_candidates s2
+                       WHERE s2.successor_candidate_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c5g();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5g:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5g FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5g (successore senza rapporto con la posizione, rollback)';
+
+  -- ST-C5g(ii): candidare a succedere chi quella posizione già la occupa
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_successor_candidates sc
+       SET successor_candidate_user_id = (
+             SELECT a.user_position_assignment_user_id
+               FROM sys.sys_user_position_assignments a
+               JOIN sys.sys_succession_pools sp2
+                 ON sp2.succession_pool_position_id = a.user_position_assignment_position_id
+              WHERE sp2.succession_pool_id = sc.successor_candidate_pool_id
+                AND a.user_position_assignment_status = 'ACTIVE' LIMIT 1)
+     WHERE sc.ctid = (SELECT s2.ctid FROM sys.sys_successor_candidates s2
+                       JOIN sys.sys_succession_pools sp3 ON sp3.succession_pool_id = s2.successor_candidate_pool_id
+                       JOIN sys.sys_user_position_assignments a3
+                         ON a3.user_position_assignment_position_id = sp3.succession_pool_position_id
+                        AND a3.user_position_assignment_status = 'ACTIVE'
+                      WHERE s2.successor_candidate_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c5g();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5g(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5g(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5g(ii) (candidato a succedere a se stesso, rollback)';
+
+  -- ST-C5h: togliere la destinazione a un passo di carriera
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_career_path_steps SET career_path_step_target_position_id = NULL
+     WHERE ctid = (SELECT s2.ctid FROM sys.sys_career_path_steps s2 LIMIT 1);
+    PERFORM staging.storia36_check_c5h();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5h:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5h FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5h (passo che non porta da nessuna parte, rollback)';
+
+  -- ST-C5h(ii): togliere l'origine a un passo intermedio
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_career_path_steps SET career_path_step_origin_position_id = NULL
+     WHERE ctid = (SELECT s2.ctid FROM sys.sys_career_path_steps s2
+                    WHERE s2.career_path_step_ordinal > 1 LIMIT 1);
+    PERFORM staging.storia36_check_c5h();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5h(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5h(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5h(ii) (passo intermedio senza partenza, rollback)';
+
+  -- ST-C5h(iii): spezzare la catena — ripartire da un'altra posizione
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_career_path_steps s
+       SET career_path_step_origin_position_id = (
+             SELECT p.position_id FROM sys.sys_positions p
+              WHERE p.position_id <> s.career_path_step_origin_position_id
+                AND p.position_id <> s.career_path_step_target_position_id LIMIT 1)
+     WHERE s.ctid = (SELECT s2.ctid FROM sys.sys_career_path_steps s2
+                      WHERE s2.career_path_step_ordinal > 1
+                        AND s2.career_path_step_origin_position_id IS NOT NULL LIMIT 1);
+    PERFORM staging.storia36_check_c5h();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5h(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5h(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5h(iii) (catena del percorso spezzata, rollback)';
+
+  -- ST-C5h(iv): un passo che parte e arriva allo stesso posto
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_career_path_steps s
+       SET career_path_step_origin_position_id = s.career_path_step_target_position_id
+     WHERE s.ctid = (SELECT s2.ctid FROM sys.sys_career_path_steps s2
+                      WHERE s2.career_path_step_ordinal = 1 LIMIT 1);
+    PERFORM staging.storia36_check_c5h();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5h(iv)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5h(iv) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5h(iv) (passo che gira a vuoto, rollback)';
+
+  -- ST-C5i: attribuire allo stesso datore un secondo settore
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_professional_experiences x
+       SET user_prof_exp_industry = 'Tutt''altro settore'
+     WHERE x.ctid = (SELECT x2.ctid FROM sys.sys_user_professional_experiences x2
+                      WHERE x2.user_prof_exp_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                        AND x2.user_prof_exp_employer IN (
+                          SELECT user_prof_exp_employer FROM sys.sys_user_professional_experiences
+                           GROUP BY 1 HAVING count(*) > 1)
+                      LIMIT 1);
+    PERFORM staging.storia36_check_c5i();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5i:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5i FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5i (stesso datore in due settori, rollback)';
+
+  -- ST-C5j: riportare tutte le date d'inizio al primo del mese — l'artefatto
+  -- che il rilievo #13/#20 aveva trovato
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_professional_experiences
+       SET user_prof_exp_start_date = date_trunc('month', user_prof_exp_start_date)::date
+     WHERE user_prof_exp_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+    PERFORM staging.storia36_check_c5j();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5j:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5j FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5j (tutte le date al primo del mese, rollback)';
+
+  -- ST-C5j(ii): ammassare tutte le date d'inizio in gennaio
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_professional_experiences
+       SET user_prof_exp_start_date =
+             make_date(extract(year FROM user_prof_exp_start_date)::int, 1,
+                       LEAST(28, GREATEST(1, extract(day FROM user_prof_exp_start_date)::int)))
+     WHERE user_prof_exp_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+    PERFORM staging.storia36_check_c5j();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5j(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5j(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5j(ii) (tutte le assunzioni a gennaio, rollback)';
+
+  -- ST-C5k: cancellare la mobilità interna — la banca dove non ci si muove mai
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_user_position_assignments
+     WHERE user_position_assignment_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND user_position_assignment_status = 'ENDED';
+    PERFORM staging.storia36_check_c5k();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5k:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5k FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5k (nessun cambio di posizione in tre anni, rollback)';
+
+  -- ST-C5k(ii): far durare l'incarico precedente oltre l'inizio di quello nuovo
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_position_assignments
+       SET user_position_assignment_end_date = user_position_assignment_end_date + 400
+     WHERE user_position_assignment_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND user_position_assignment_status = 'ENDED';
+    PERFORM staging.storia36_check_c5k();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5k(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5k(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5k(ii) (due posizioni occupate insieme, rollback)';
+
+  -- ST-C5k(iii): far cominciare un incarico prima dell'assunzione
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_position_assignments
+       SET user_position_assignment_start_date = user_position_assignment_start_date - 4000
+     WHERE ctid = (SELECT a2.ctid FROM sys.sys_user_position_assignments a2
+                    WHERE a2.user_position_assignment_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                      AND a2.user_position_assignment_metadata->>'storia36' = 'C5' LIMIT 1);
+    PERFORM staging.storia36_check_c5k();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5k(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5k(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5k(iii) (incarico iniziato prima dell''assunzione, rollback)';
+
+  -- ST-C5l: rimettere a un bacino il nome di un'altra carica
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_succession_pools
+       SET succession_pool_name = 'CEO / Amministratore Delegato'
+     WHERE ctid = (SELECT sp2.ctid FROM sys.sys_succession_pools sp2
+                    WHERE sp2.succession_pool_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c5l();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5l:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5l FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5l (bacino con il nome di un''altra carica, rollback)';
+
+  -- ==========================================================================
+  -- C6 — LA RIORGANIZZAZIONE DEL MARZO 2025
+  -- ==========================================================================
+
+  -- ST-C6a: cancellare la storia organizzativa — l'organigramma che risulta
+  -- esistere da sempre, che è lo stato da cui il cluster è partito
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_organization_unit_history
+     WHERE organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+    PERFORM staging.storia36_check_c6a(DATE '2025-03-01');
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6a:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6a FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6a (riorganizzazione senza traccia rilevata, rollback)';
+
+  -- ST-C6a(ii): spostare un evento fuori dal giorno del riordino
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_organization_unit_history
+       SET organization_unit_history_effective_at = organization_unit_history_effective_at + interval '200 days'
+     WHERE ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
+                    WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c6a(DATE '2025-03-01');
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6a(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6a(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6a(ii) (evento fuori dal giorno del riordino, rollback)';
+
+  -- ST-C6a(iii): togliere l'autore a un evento organizzativo
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_organization_unit_history
+       SET organization_unit_history_actor_user_id = NULL
+     WHERE ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
+                    WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c6a(DATE '2025-03-01');
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6a(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6a(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6a(iii) (evento organizzativo senza autore, rollback)';
+
+  -- ST-C6a(iv): un «cambiamento» in cui il prima è identico al dopo
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_organization_unit_history
+       SET organization_unit_history_old_value = organization_unit_history_new_value
+     WHERE ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
+                    WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                      AND h2.organization_unit_history_old_value IS NOT NULL LIMIT 1);
+    PERFORM staging.storia36_check_c6a(DATE '2025-03-01');
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6a(iv)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6a(iv) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6a(iv) (cambiamento che non cambia nulla, rollback)';
+
+  -- ST-C6b: assegnare qualcuno a una posizione di un altro tenant
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_position_assignments a
+       SET user_position_assignment_position_id = (
+             SELECT p.position_id FROM sys.sys_positions p
+              WHERE p.position_tenant_id <> '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1)
+     WHERE a.ctid = (SELECT a2.ctid FROM sys.sys_user_position_assignments a2
+                      WHERE a2.user_position_assignment_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                        AND a2.user_position_assignment_status = 'ACTIVE' LIMIT 1);
+    PERFORM staging.storia36_check_c6b();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6b:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6b FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6b (assegnazione che scavalca il tenant, rollback)';
+
+  -- ST-C6b(ii): chiudere l'albero su sé stesso — l'unità che riporta a sé
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_organization_units o
+       SET organization_unit_parent_id = o.organization_unit_id
+     WHERE o.ctid = (SELECT o2.ctid FROM sys.sys_organization_units o2
+                      WHERE o2.organization_unit_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                        AND o2.organization_unit_parent_id IS NOT NULL LIMIT 1);
+    PERFORM staging.storia36_check_c6b();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6b(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6b(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6b(ii) (ciclo nella gerarchia, rollback)';
+
+  -- ST-C6b(iii): appendere un'unità a un genitore di un altro tenant
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_organization_units o
+       SET organization_unit_parent_id = (
+             SELECT o3.organization_unit_id FROM sys.sys_organization_units o3
+              WHERE o3.organization_unit_tenant_id <> '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1)
+     WHERE o.ctid = (SELECT o2.ctid FROM sys.sys_organization_units o2
+                      WHERE o2.organization_unit_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                        AND o2.organization_unit_parent_id IS NOT NULL LIMIT 1);
+    PERFORM staging.storia36_check_c6b();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6b(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6b(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6b(iii) (unità sotto un genitore di un altro tenant, rollback)';
+
+  -- ST-C6c: far dichiarare alla storia un esito diverso dall'organigramma di oggi
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_organization_unit_history
+       SET organization_unit_history_new_value = jsonb_build_object('name', 'Divisione Che Non Esiste')
+     WHERE ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
+                    WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                      AND h2.organization_unit_history_new_value ? 'name' LIMIT 1);
+    PERFORM staging.storia36_check_c6c();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6c:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6c FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6c (passato che non porta al presente, rollback)';
+
+  -- ST-C6c(ii): far finire uno spostamento sotto un genitore che non è quello di oggi
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_organization_unit_history
+       SET organization_unit_history_new_value = jsonb_build_object('parent_name', 'Divisione Marketing')
+     WHERE ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
+                    WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                      AND h2.organization_unit_history_change_type = 'MOVED' LIMIT 1);
+    PERFORM staging.storia36_check_c6c();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6c(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6c(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6c(ii) (spostamento che non finisce dove l''unità sta oggi, rollback)';
+
+  -- ST-C6c(iii): uno spostamento che parte e arriva sotto lo stesso genitore
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_organization_unit_history h
+       SET organization_unit_history_old_value = h.organization_unit_history_new_value
+     WHERE h.ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
+                      WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                        AND h2.organization_unit_history_change_type = 'MOVED' LIMIT 1);
+    PERFORM staging.storia36_check_c6c();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6c(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6c(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6c(iii) (spostamento immobile, rollback)';
+
+  -- ST-C6d: togliere il blueprint attivo
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_blueprint_activations SET blueprint_activation_status = 'RETIRED'
+     WHERE blueprint_activation_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+    PERFORM staging.storia36_check_c6d();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6d:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6d FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6d (nessun modello organizzativo adottato, rollback)';
+
+  -- ST-C6d(ii): adottare il modello in blocco, senza una sola deroga
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_blueprint_overrides o
+     USING sys.sys_blueprint_activations a
+     WHERE a.blueprint_activation_id = o.blueprint_override_activation_id
+       AND a.blueprint_activation_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+    PERFORM staging.storia36_check_c6d();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6d(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6d(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6d(ii) (modello adottato in blocco, rollback)';
+
+  -- ST-C6d(iii): una deroga senza motivazione
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_blueprint_overrides SET blueprint_override_rationale = ' '
+     WHERE ctid = (SELECT o2.ctid FROM sys.sys_blueprint_overrides o2 LIMIT 1);
+    PERFORM staging.storia36_check_c6d();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C6d(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6d(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C6d(iii) (deroga senza motivo, rollback)';
 END $$;
 \endif
 
@@ -3211,6 +4499,94 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C5e'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5f();
+    RAISE NOTICE '[OK] C5f criticità: registro, anagrafica e successione dicono la stessa cosa';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5f'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5g();
+    RAISE NOTICE '[OK] C5g successori scelti con un criterio (riporto diretto o stesso mestiere)';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5g'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5h();
+    RAISE NOTICE '[OK] C5h i percorsi di carriera dicono da quale posizione a quale';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5h'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5i();
+    RAISE NOTICE '[OK] C5i datore e settore delle esperienze precedenti concordano';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5i'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5j();
+    RAISE NOTICE '[OK] C5j nessun artefatto di calendario nelle date di inizio';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5j'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5k();
+    RAISE NOTICE '[OK] C5k mobilità interna rappresentata e senza incarichi sovrapposti';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5k'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5l();
+    RAISE NOTICE '[OK] C5l il nome del bacino è quello della posizione servita';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5l'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c6a(DATE '2025-03-01');
+    RAISE NOTICE '[OK] C6a la riorganizzazione ha lasciato traccia, datata e attribuita';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C6a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c6b();
+    RAISE NOTICE '[OK] C6b nessuna posizione o persona appesa al nulla attraverso il riordino';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C6b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c6c();
+    RAISE NOTICE '[OK] C6c il racconto del passato arriva esattamente all''organigramma di oggi';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C6c'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c6d();
+    RAISE NOTICE '[OK] C6d il blueprint adottato porta deroghe motivate';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C6d'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   IF array_length(v_failed, 1) > 0 THEN

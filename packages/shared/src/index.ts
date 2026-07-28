@@ -39,6 +39,8 @@ export * from "./schemas/learning-gaps.js";
 export * from "./schemas/career-paths.js";
 export * from "./schemas/career-path-steps.js";
 export * from "./schemas/user-career-plans.js";
+export * from "./schemas/user-target-positions.js";
+export * from "./schemas/organization-unit-history.js";
 export * from "./schemas/succession-pools.js";
 export * from "./schemas/successor-candidates.js";
 export * from "./schemas/successor-readiness.js";

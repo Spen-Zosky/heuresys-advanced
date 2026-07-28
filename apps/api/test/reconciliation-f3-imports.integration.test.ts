@@ -47,10 +47,16 @@ describe('reconciliation F3 imports', () => {
     it('populated by seed 49: the pool dependency was resolved by the incumbent-anchor import', async () => {
       // F3 (S960) measured this as BLOCKED (NOT NULL pool_id on empty pools). The Wave-2
       // close (mig 000106 + seed 49, PM decisions D2/D3) imported 17 pools + 25 candidates.
-      expect(await count(
+      // Il numero esatto dei candidati NON è più un invariante: la storia C5 rimuove chi
+      // non ha titolo a stare in un bacino (né riporto diretto né stesso mestiere — coda
+      // #4/#5), quindi il conteggio scende per costruzione. Resta invariante che l'import
+      // non abbia prodotto più di quanto dichiarato, e che qualcosa sia arrivato.
+      const importati = await count(
         `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
           WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL`,
-      )).toBe(25);
+      );
+      expect(importati).toBeGreaterThan(0);
+      expect(importati).toBeLessThanOrEqual(25);
       expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(17);
     });
   });
@@ -59,7 +65,13 @@ describe('reconciliation F3 imports', () => {
     it('career_path_steps 35, critical_positions 8, position_succession_relevance 9, user_learning_assignments 1990', async () => {
       expect(await count(`SELECT count(*)::int AS n FROM sys.sys_career_path_steps`)).toBe(35);
       expect(await count(`SELECT count(*)::int AS n FROM sys.sys_critical_positions`)).toBe(8);
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_position_succession_relevance`)).toBe(9);
+      // vincolato alla provenienza dell'import: la storia C5 aggiunge una riga di
+      // rilevanza per ogni posizione critica che ne era scoperta (coda #18), e quelle
+      // righe portano il marchio del programma
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_position_succession_relevance
+          WHERE position_succession_relevance_metadata->>'storia36' IS NULL`,
+      )).toBe(9);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_user_learning_assignments
           WHERE user_learning_assignment_metadata->>'storia36' IS NULL`,

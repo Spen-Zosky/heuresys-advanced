@@ -63,6 +63,8 @@ import { learningGapsRoutes } from "./modules/learning-gaps/routes.js";
 import { careerPathsRoutes } from "./modules/career-paths/routes.js";
 import { careerPathStepsRoutes } from "./modules/career-path-steps/routes.js";
 import { userCareerPlansRoutes } from "./modules/user-career-plans/routes.js";
+import { userTargetPositionsRoutes } from "./modules/user-target-positions/routes.js";
+import { organizationUnitHistoryRoutes } from "./modules/organization-unit-history/routes.js";
 import { successionPoolsRoutes } from "./modules/succession-pools/routes.js";
 import { successorCandidatesRoutes } from "./modules/successor-candidates/routes.js";
 import { successorReadinessRoutes } from "./modules/successor-readiness/routes.js";
@@ -412,6 +414,8 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(careerPathsRoutes, { prefix: "/v1/career-paths" });
   await app.register(careerPathStepsRoutes, { prefix: "/v1/career-path-steps" });
   await app.register(userCareerPlansRoutes, { prefix: "/v1/user-career-plans" });
+  await app.register(userTargetPositionsRoutes, { prefix: "/v1/user-target-positions" });
+  await app.register(organizationUnitHistoryRoutes, { prefix: "/v1/organization-unit-history" });
   await app.register(successionPoolsRoutes, { prefix: "/v1/succession-pools" });
   await app.register(successorCandidatesRoutes, { prefix: "/v1/successor-candidates" });
   await app.register(successorReadinessRoutes, { prefix: "/v1/successor-readiness" });

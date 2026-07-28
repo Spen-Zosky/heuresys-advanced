@@ -7,6 +7,7 @@ import type { Pool, PoolClient } from "pg";
 import type {
   SuccessorReadiness,
   SuccessorReadinessListQuery,
+  SuccessorReadinessHorizon,
   CreateSuccessorReadinessBody,
 } from "@heuresys/shared";
 
@@ -17,7 +18,7 @@ interface Row {
   successor_readiness_candidate_id: string;
   successor_readiness_tenant_id: string;
   successor_readiness_score: string | null;
-  successor_readiness_horizon: string | null;
+  successor_readiness_horizon: SuccessorReadinessHorizon | null;
   successor_readiness_payload: Record<string, unknown>;
   successor_readiness_assessed_at: Date;
   created_at: Date;

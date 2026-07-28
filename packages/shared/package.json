@@ -187,6 +187,16 @@
       "development": "./src/schemas/user-career-plans.ts",
       "default": "./dist/schemas/user-career-plans.js"
     },
+    "./schemas/user-target-positions": {
+      "types": "./dist/schemas/user-target-positions.d.ts",
+      "development": "./src/schemas/user-target-positions.ts",
+      "default": "./dist/schemas/user-target-positions.js"
+    },
+    "./schemas/organization-unit-history": {
+      "types": "./dist/schemas/organization-unit-history.d.ts",
+      "development": "./src/schemas/organization-unit-history.ts",
+      "default": "./dist/schemas/organization-unit-history.js"
+    },
     "./schemas/succession-pools": {
       "types": "./dist/schemas/succession-pools.d.ts",
       "development": "./src/schemas/succession-pools.ts",

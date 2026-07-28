@@ -110,7 +110,7 @@ async function seedReadiness(candidateId: string, tenantId: string): Promise<str
         successor_readiness_score, successor_readiness_horizon, successor_readiness_payload
       ) VALUES ($1, $2, $3, $4, $5::jsonb)
       RETURNING successor_readiness_id`,
-    [candidateId, tenantId, 72.5, "6_MONTHS", JSON.stringify({ suitePrefix: SUITE_PREFIX })],
+    [candidateId, tenantId, 72.5, "READY_6_MONTHS", JSON.stringify({ suitePrefix: SUITE_PREFIX })],
   );
   return res.rows[0]!.successor_readiness_id;
 }

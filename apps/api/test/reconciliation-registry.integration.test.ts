@@ -275,11 +275,19 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
     const expectedImported: Record<string, number> = {
       sys_branches: 6,
       sys_succession_pools: 17,
-      sys_successor_candidates: 25,
     };
     for (const [t, n] of Object.entries(expectedImported)) {
       expect(await countAuthored(t, false), `sys.${t}: attese ${n} righe d'import`).toBe(n);
     }
+    // I candidati fanno eccezione, e la ragione è nel dominio: la storia C5 rimuove dai
+    // bacini chi non è né il riporto diretto della posizione né qualcuno che quel mestiere
+    // lo fa già altrove (coda #4/#5). Un conteggio fisso qui misurerebbe lo stato e
+    // cadrebbe a ogni ripulitura; il vincolo di provenienza da solo non basta più, perché
+    // la rimozione tocca proprio le righe importate. Resta l'invariante: l'import non ha
+    // prodotto più di quanto dichiarato, e qualcosa è arrivato.
+    const candidatiImportati = await countAuthored('sys_successor_candidates', false);
+    expect(candidatiImportati).toBeGreaterThan(0);
+    expect(candidatiImportati).toBeLessThanOrEqual(25);
   });
 
   it('sys_successor_readiness keeps NO_SOURCE with both S972 and WAVE2 markers (cascade branch decayed)', async () => {

@@ -84,6 +84,13 @@ BEGIN
   CREATE TEMP TABLE _tratti ON COMMIT DROP AS
   SELECT s.user_id, s.hire, s.inizio, s.pos,
          p.position_title AS titolo_attuale,
+         -- Lo sfasamento stacca l'inizio della carriera dalla fine degli studi.
+         -- Senza, la prima esperienza cominciava il giorno esatto della laurea:
+         -- 85 date su 255 cadevano il giorno 1 del mese e 104 a gennaio, che è
+         -- il calendario dei titoli di studio, non quello delle assunzioni
+         -- (rilievo #13/#20). Il cap a un quarto dell'intervallo tiene fermo il
+         -- vincolo: nessuno inizia prima di poter lavorare.
+         (pg_temp.h(s.user_id::text || 'OFF') % (1 + LEAST(270, (s.hire - s.inizio) / 4))) AS off,
          (s.hire - s.inizio) AS giorni,
          LEAST(3, GREATEST(1, round((s.hire - s.inizio) / 1600.0)::int)) AS n_tratti
     FROM _scope s
@@ -99,12 +106,12 @@ BEGIN
     user_prof_exp_description, user_prof_exp_metadata)
   SELECT uuid_generate_v5(c_ns, 'STORIA36::C5::EXP::' || t.user_id || '::' || g.i),
          t.user_id, c_rtl,
-         -- datori di fantasia, dichiarati come tali
-         (ARRAY['Banca Popolare del Verbano','Credito Lombardo SpA','Istituto di Credito Adriatico',
-                'Banca di Credito Cooperativo Brianza','Nuova Cassa di Risparmio Padana',
-                'Finanziaria Ticinese SpA','Assicurazioni Riunite del Nord',
-                'Consorzio Servizi Bancari Italia','Mediocredito Insubria'])
-           [1 + (pg_temp.h(t.user_id::text || g.i || 'EMP') % 9)],
+         -- Datori di fantasia, dichiarati come tali — ma il datore si sceglie
+         -- DENTRO il settore, non accanto: la v2 sorteggiava i due campi
+         -- separatamente e la stessa «Banca Popolare del Verbano» risultava
+         -- insieme banca, assicurazione e società di consulenza ICT, su 9 datori
+         -- su 9 (rilievo #30/#33). La distribuzione fra settori resta 70/20/10.
+         sett.datori[1 + (pg_temp.h(t.user_id::text || g.i || 'EMP') % array_length(sett.datori, 1))],
          -- il ruolo sale verso quello attuale: l'ultimo tratto è il piu' vicino
          CASE
            WHEN t.titolo_attuale IN ('Bank Teller','Back Office Specialist','Payment Specialist')
@@ -121,18 +128,30 @@ BEGIN
              THEN (ARRAY['Addetto alla clientela','Gestore imprese','Vice direttore di filiale'])[LEAST(3, g.i)]
            ELSE (ARRAY['Impiegato amministrativo','Specialista di funzione','Coordinatore di area'])[LEAST(3, g.i)]
          END,
-         CASE WHEN pg_temp.h(t.user_id::text || g.i || 'IND') % 10 < 7 THEN 'Banche e servizi finanziari'
-              WHEN pg_temp.h(t.user_id::text || g.i || 'IND') % 10 < 9 THEN 'Assicurazioni'
-              ELSE 'Consulenza e servizi ICT' END,
-         -- tratto i-esimo dell'intervallo, con qualche settimana di stacco alla fine
-         (t.inizio + ((g.i - 1) * t.giorni / t.n_tratti))::date,
-         (t.inizio + (g.i * t.giorni / t.n_tratti)
+         sett.settore,
+         -- tratto i-esimo dell'intervallo, con qualche settimana di stacco alla
+         -- fine; l'intervallo parte dallo sfasamento, non dalla fine degli studi
+         ((t.inizio + t.off) + ((g.i - 1) * (t.giorni - t.off) / t.n_tratti))::date,
+         ((t.inizio + t.off) + (g.i * (t.giorni - t.off) / t.n_tratti)
                    - (7 + pg_temp.h(t.user_id::text || g.i || 'GAP') % 80))::date,
          'Esperienza precedente all''ingresso in RTL Bank.',
          jsonb_build_object('storia36', 'C5', 'tratto', g.i, 'su', t.n_tratti,
                             'datore', 'nome di fantasia — il dato non porta il datore reale')
     FROM _tratti t
     CROSS JOIN LATERAL generate_series(1, t.n_tratti) AS g(i)
+    CROSS JOIN LATERAL (
+      SELECT CASE WHEN pg_temp.h(t.user_id::text || g.i || 'IND') % 10 < 7 THEN 'Banche e servizi finanziari'
+                  WHEN pg_temp.h(t.user_id::text || g.i || 'IND') % 10 < 9 THEN 'Assicurazioni'
+                  ELSE 'Consulenza e servizi ICT' END AS settore,
+             CASE WHEN pg_temp.h(t.user_id::text || g.i || 'IND') % 10 < 7
+                    THEN ARRAY['Banca Popolare del Verbano','Credito Lombardo SpA',
+                               'Istituto di Credito Adriatico','Banca di Credito Cooperativo Brianza',
+                               'Nuova Cassa di Risparmio Padana','Mediocredito Insubria']
+                  WHEN pg_temp.h(t.user_id::text || g.i || 'IND') % 10 < 9
+                    THEN ARRAY['Assicurazioni Riunite del Nord','Compagnia Assicurativa Lariana',
+                               'Mutua Assicuratrice Padana']
+                  ELSE ARRAY['Consorzio Servizi Bancari Italia','Sistemi Informativi Bancari Srl',
+                             'Finanziaria Ticinese SpA'] END AS datori) sett
   ON CONFLICT DO NOTHING;
   GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
   RAISE NOTICE 'storia36 C5: esperienze precedenti inserite %', v_n;
@@ -260,12 +279,16 @@ BEGIN
            [1 + (pg_temp.h(x.user_id::text || x.pool_id::text || 'RL') % 4)],
          jsonb_build_object('storia36', 'C5')
     FROM (
-      -- I bacini delle posizioni critiche che oggi non hanno NESSUN candidato:
-      -- otto esistevano gia' ma erano gusci vuoti, ed e' quello il difetto.
-      -- Queste posizioni NON stanno su un percorso di carriera (verificato), quindi
-      -- i successori si cercano dove la successione avviene davvero: fra chi
-      -- RIPORTA a quella posizione — il successore naturale — e fra chi ricopre
-      -- lo STESSO ruolo altrove, che il mestiere lo fa gia'.
+      -- I successori delle posizioni critiche. Queste posizioni NON stanno su un
+      -- percorso di carriera (verificato), quindi i candidati si cercano dove la
+      -- successione avviene davvero: fra chi RIPORTA a quella posizione — il
+      -- successore naturale — e fra chi ricopre lo STESSO ruolo altrove, che il
+      -- mestiere lo fa gia'.
+      -- La v2 si fermava ai bacini «senza NESSUN candidato», e così i bacini che
+      -- ne avevano già uno qualsiasi restavano com'erano: su 49 candidati, 22 non
+      -- soddisfacevano nessuno dei due criteri — erano nomi (rilievo #4/#5). Ora
+      -- il criterio vale per tutti i bacini critici; i primi tre per rango sono
+      -- deterministici, quindi la seconda corsa non aggiunge nulla.
       SELECT sp.succession_pool_id AS pool_id, s.user_id,
              row_number() OVER (PARTITION BY sp.succession_pool_id
                                 ORDER BY x.priorita,
@@ -288,8 +311,6 @@ BEGIN
         ) x ON true
         JOIN _scope s ON s.pos = x.position_id
        WHERE sp.succession_pool_tenant_id = c_rtl
-         AND NOT EXISTS (SELECT 1 FROM sys.sys_successor_candidates sc2
-                          WHERE sc2.successor_candidate_pool_id = sp.succession_pool_id)
     ) x
    WHERE x.rango <= 3
   ON CONFLICT DO NOTHING;
@@ -342,6 +363,31 @@ BEGIN
   ON CONFLICT DO NOTHING;
   GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
   RAISE NOTICE 'storia36 C5: valutazioni di prontezza %', v_n;
+
+  -- L'orizzonte di copertura della posizione non è un'etichetta libera: è quello
+  -- del candidato più pronto del suo bacino. Era NULL su tutte e nove le righe
+  -- di rilevanza — il campo esisteva, con tanto di vocabolario, e non lo
+  -- riempiva nessuno. Sta qui e non nella riparazione perché è un DERIVATO dei
+  -- successori: va ricalcolato ogni volta che il bacino cambia.
+  UPDATE sys.sys_position_succession_relevance r
+     SET readiness_horizon = migliore.h, updated_at = now()
+    FROM (
+      SELECT sp.succession_pool_position_id AS position_id,
+             (ARRAY['READY_NOW','READY_6_MONTHS','READY_1_YEAR','READY_2_YEARS','NOT_READY'])[
+               min(array_position(
+                 ARRAY['READY_NOW','READY_6_MONTHS','READY_1_YEAR','READY_2_YEARS','NOT_READY'],
+                 sc.successor_candidate_readiness_level))] AS h
+        FROM sys.sys_succession_pools sp
+        JOIN sys.sys_successor_candidates sc
+          ON sc.successor_candidate_pool_id = sp.succession_pool_id
+       WHERE sp.succession_pool_tenant_id = c_rtl
+       GROUP BY 1) migliore
+   WHERE migliore.position_id = r.position_id
+     AND r.position_succession_relevance_tenant_id = c_rtl
+     AND migliore.h IS NOT NULL
+     AND r.readiness_horizon IS DISTINCT FROM migliore.h;
+  GET DIAGNOSTICS v_n = ROW_COUNT;
+  RAISE NOTICE 'storia36 C5: orizzonti di copertura derivati dal bacino %', v_n;
 
   -- ==========================================================================
   -- 5. L'EVOLUZIONE DEI REQUISITI DI POSIZIONE
@@ -412,7 +458,77 @@ BEGIN
   RAISE NOTICE 'storia36 C5: variazioni di requisito %', v_n;
 
   -- ==========================================================================
-  -- 6. REGISTRO + POST-CONDIZIONI
+  -- 6. LA MOBILITÀ INTERNA
+  --    In 36 mesi 162 persone e cinque soli cambi di posizione: la banca
+  --    risultava un posto dove non ci si muove mai, e ogni carriera cominciava
+  --    e finiva sulla stessa scrivania (rilievo #23). Chi oggi ha una
+  --    responsabilità ci è arrivato: la provenienza è un riporto diretto della
+  --    posizione attuale — una promozione — o una posizione sorella sotto lo
+  --    stesso capo — un movimento laterale.
+  --    Il PRESENTE non si tocca: posizione e stato di oggi restano identici,
+  --    cambia solo da quando la persona la occupa.
+  -- ==========================================================================
+  CREATE TEMP TABLE _mobilita ON COMMIT DROP AS
+  SELECT s.user_id, s.hire, s.pos AS pos_oggi, q.position_id AS pos_prima, q.genere,
+         -- il movimento cade fra il primo anno di anzianità e tre mesi fa
+         (s.hire + 365
+            + (pg_temp.h(s.user_id::text || 'MOV')
+               % GREATEST(1, (c_to - 90 - (s.hire + 365)))))::date AS quando
+    FROM _scope s
+    CROSS JOIN LATERAL (
+      SELECT p2.position_id, 'promozione' AS genere, 1 AS priorita
+        FROM sys.sys_positions p2
+       WHERE p2.position_reports_to_position_id = s.pos
+         AND p2.position_tenant_id = c_rtl
+      UNION ALL
+      SELECT p3.position_id, 'movimento laterale', 2
+        FROM sys.sys_positions p3
+        JOIN sys.sys_positions p_ora ON p_ora.position_id = s.pos
+       WHERE p3.position_reports_to_position_id = p_ora.position_reports_to_position_id
+         AND p3.position_id <> s.pos
+         AND p3.position_title <> p_ora.position_title
+         AND p3.position_tenant_id = c_rtl
+       ORDER BY priorita, 1 LIMIT 1) q
+   WHERE s.pos IS NOT NULL
+     -- una persona su sei circa, e solo con almeno due anni di anzianità:
+     -- ~6% di mobilità l'anno, che per una banca di questa taglia è la norma
+     AND pg_temp.h(s.user_id::text || 'MOB') % 100 < 18
+     AND s.hire <= c_to - 730;
+
+  -- il tratto precedente: la posizione da cui si è arrivati, chiusa il giorno prima
+  INSERT INTO sys.sys_user_position_assignments (
+    user_position_assignment_id, user_position_assignment_tenant_id,
+    user_position_assignment_user_id, user_position_assignment_position_id,
+    user_position_assignment_kind, user_position_assignment_fte,
+    user_position_assignment_start_date, user_position_assignment_end_date,
+    user_position_assignment_status, user_position_assignment_notes,
+    user_position_assignment_metadata)
+  SELECT uuid_generate_v5(c_ns, 'STORIA36::C5::MOB::' || m.user_id || '::' || m.pos_prima),
+         c_rtl, m.user_id, m.pos_prima, 'PRIMARY', 1.0,
+         m.hire, (m.quando - 1), 'ENDED',
+         CASE m.genere WHEN 'promozione' THEN 'Incarico precedente, chiuso con la promozione.'
+                       ELSE 'Incarico precedente, chiuso con il passaggio ad altra funzione.' END,
+         jsonb_build_object('storia36', 'C5', 'genere', m.genere)
+    FROM _mobilita m
+   WHERE m.quando - 1 >= m.hire
+  ON CONFLICT DO NOTHING;
+  GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
+  RAISE NOTICE 'storia36 C5: incarichi precedenti (mobilità interna) %', v_n;
+
+  -- e l'incarico di oggi comincia il giorno del movimento, non dell'assunzione
+  UPDATE sys.sys_user_position_assignments a
+     SET user_position_assignment_start_date = m.quando, updated_at = now()
+    FROM _mobilita m
+   WHERE a.user_position_assignment_user_id = m.user_id
+     AND a.user_position_assignment_position_id = m.pos_oggi
+     AND a.user_position_assignment_status = 'ACTIVE'
+     AND a.user_position_assignment_start_date IS DISTINCT FROM m.quando
+     AND m.quando - 1 >= m.hire;
+  GET DIAGNOSTICS v_n = ROW_COUNT;
+  RAISE NOTICE 'storia36 C5: incarichi correnti ridatati al movimento %', v_n;
+
+  -- ==========================================================================
+  -- 7. REGISTRO + POST-CONDIZIONI
   -- ==========================================================================
   INSERT INTO staging.storia36_runs (cluster_code, seed_file, rows_written, twice_run_delta)
   VALUES ('C5', '05_career.sql', v_tot, v_tot);
@@ -422,6 +538,13 @@ BEGIN
   PERFORM staging.storia36_check_c5c();
   PERFORM staging.storia36_check_c5d(c_start, c_to);
   PERFORM staging.storia36_check_c5e();
+  PERFORM staging.storia36_check_c5f();
+  PERFORM staging.storia36_check_c5g();
+  PERFORM staging.storia36_check_c5h();
+  PERFORM staging.storia36_check_c5i();
+  PERFORM staging.storia36_check_c5j();
+  PERFORM staging.storia36_check_c5k();
+  PERFORM staging.storia36_check_c5l();
 
   RAISE NOTICE 'storia36 C5 OK: % righe scritte (delta atteso 0 alla seconda corsa)', v_tot;
 END $$;

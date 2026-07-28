@@ -76,12 +76,12 @@ describe("/v1/successor-readiness integration", () => {
     const c = await suite.app.inject({
       method: "POST", url: "/v1/successor-readiness",
       headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
-      payload: { candidateId, score: 75.0, horizon: "6_MONTHS", payload: { dimension: "leadership" } },
+      payload: { candidateId, score: 75.0, horizon: "READY_6_MONTHS", payload: { dimension: "leadership" } },
     });
     expect(c.statusCode).toBe(201);
     const r = c.json() as { successorReadinessId: string; score: number | null; horizon: string | null };
     expect(r.score).toBe(75.0);
-    expect(r.horizon).toBe("6_MONTHS");
+    expect(r.horizon).toBe("READY_6_MONTHS");
     createdReadinessIds.push(r.successorReadinessId);
 
     const list = await suite.app.inject({

@@ -93,11 +93,17 @@ describe('reconciliation registry (F1)', () => {
 // the 3 ex-DEFER tables (branches / succession pools / successor candidates) were IMPORTED
 // under PM decisions D1-D3 (Enzo 2026-06-10) and resolve POPULATED via has_rows.
 describe('reconciliation registry — B-50 residual-wall terminal close (S972) + Wave-2 close (S982)', () => {
+  // storia36 C3 (2026-07-28) authored the human-authored derivation the B-50
+  // rationale itself called for: curves + gate results are now POPULATED by
+  // seed (declared_status stays NO_SOURCE = no LEGACY source; the rationale
+  // carries the storia36 marker). They follow the Wave-2 resolution pattern.
   const TERMINAL_NO_SOURCE = [
-    'sys_payout_curves',
-    'sys_reward_gate_results',
     'sys_successor_readiness',
     'sys_user_target_positions',
+  ] as const;
+  const STORIA36_AUTHORED = [
+    'sys_payout_curves',
+    'sys_reward_gate_results',
   ] as const;
   const WAVE2_IMPORTED = [
     'sys_branches',
@@ -112,7 +118,7 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
     expect(rows[0]?.n).toBe(0);
   });
 
-  it('the 4 terminal tables resolve to NO_SOURCE in the view', async () => {
+  it('the terminal tables resolve to NO_SOURCE in the view', async () => {
     const { rows } = await pool.query<{ table_name: string; resolved_status: string }>(
       `SELECT table_name, resolved_status FROM sys.v_reconciliation_status
         WHERE table_name = ANY($1::text[]) ORDER BY table_name`,
@@ -122,6 +128,25 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
     expect(rows.every((r) => r.resolved_status === 'NO_SOURCE')).toBe(true);
   });
 
+  it('the storia36-authored tables resolve POPULATED and carry BOTH markers', async () => {
+    const { rows } = await pool.query<{ table_name: string; resolved_status: string }>(
+      `SELECT table_name, resolved_status FROM sys.v_reconciliation_status
+        WHERE table_name = ANY($1::text[]) ORDER BY table_name`,
+      [STORIA36_AUTHORED as unknown as string[]],
+    );
+    expect(rows.map((r) => r.table_name).sort()).toEqual([...STORIA36_AUTHORED].sort());
+    expect(rows.every((r) => r.resolved_status === 'POPULATED')).toBe(true);
+    const { rows: reg } = await pool.query<{ marked: boolean }>(
+      `SELECT (reconciliation_registry_rationale LIKE '%[storia36 C3%'
+               AND reconciliation_registry_rationale LIKE '%[B-50 TERMINAL S972]%') AS marked
+         FROM sys.sys_reconciliation_registry
+        WHERE reconciliation_registry_table_name = ANY($1::text[])`,
+      [STORIA36_AUTHORED as unknown as string[]],
+    );
+    expect(reg).toHaveLength(2);
+    expect(reg.every((r) => r.marked === true)).toBe(true);
+  });
+
   it('the 4 terminal tables carry declared_status NO_SOURCE + a B-50 TERMINAL rationale', async () => {
     const { rows } = await pool.query<{ table_name: string; declared: string; marked: boolean }>(
       `SELECT reconciliation_registry_table_name AS table_name,
@@ -129,7 +154,7 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
               (reconciliation_registry_rationale LIKE '%[B-50 TERMINAL S972]%') AS marked
          FROM sys.sys_reconciliation_registry
         WHERE reconciliation_registry_table_name = ANY($1::text[])`,
-      [TERMINAL_NO_SOURCE as unknown as string[]],
+      [[...TERMINAL_NO_SOURCE, ...STORIA36_AUTHORED] as unknown as string[]],
     );
     expect(rows).toHaveLength(4);
     expect(rows.every((r) => r.declared === 'NO_SOURCE')).toBe(true);
@@ -160,7 +185,7 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
     expect(rows.every((r) => r.marked === true)).toBe(true);
   });
 
-  it('the 4 NO_SOURCE tables remain EMPTY; the 3 Wave-2 tables carry the imported counts', async () => {
+  it('the terminal NO_SOURCE tables remain EMPTY; the 3 Wave-2 tables carry the imported counts', async () => {
     for (const t of TERMINAL_NO_SOURCE) {
       const { rows } = await pool.query<{ n: number }>(
         `SELECT count(*)::int AS n FROM sys.${t}`,

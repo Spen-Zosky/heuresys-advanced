@@ -149,7 +149,10 @@ BEGIN
   FOR r IN
     SELECT * FROM (VALUES
       ('sys_attendance','attendance_subject_user_id','attendance_date'),
-      ('sys_user_pay_slips','user_pay_slip_user_id','user_pay_slip_period_start'),
+      -- buste: il periodo e' il MESE intero; l'assunto a meta' mese ha la busta
+      -- pro-rata del mese di assunzione (period_start=1 del mese < hire e' prassi
+      -- paghe, non violazione) -> la proprieta' giusta e' period_END >= hire
+      ('sys_user_pay_slips','user_pay_slip_user_id','user_pay_slip_period_end'),
       ('sys_goals','goal_subject_user_id','goal_start_date'),
       ('sys_goal_check_ins','check_in_subject_user_id','check_in_date'),
       -- reviews: il periodo è il CICLO di calendario (157/161 review = anno solare),
@@ -786,6 +789,231 @@ BEGIN
   END IF;
 END $fn$;
 
+-- ----------------------------------------------------------------------------
+-- C3a — payroll handoff: ogni mese della finestra (dal 2023-08 alla frontiera
+-- delle buste) ha un record di handoff con stato valido.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c3a(p_start date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  WITH months AS (
+    SELECT generate_series(date_trunc('month', p_start),
+             date_trunc('month', (SELECT max(user_pay_slip_period_start) FROM sys.sys_user_pay_slips)),
+             interval '1 month')::date AS m
+  )
+  SELECT count(*), min(to_char(m, 'YYYY-MM')) INTO v_cnt, v_sample
+  FROM months
+  WHERE NOT EXISTS (
+    SELECT 1 FROM sys.sys_payroll_handoff_records h
+    WHERE h.payroll_handoff_record_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+      AND h.payroll_handoff_record_period_start = months.m);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C3a: % mesi senza record di payroll handoff (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C3b — copertura buste: ogni utente RTL ATTIVO ha una busta per OGNI mese da
+-- GREATEST(hire, inizio finestra) al mese di frontiera delle buste.
+-- (Supera e ingloba la spec C3S nata al C1.)
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c3b(p_start date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  WITH frontier AS (
+    SELECT date_trunc('month', max(user_pay_slip_period_start))::date AS fm
+    FROM sys.sys_user_pay_slips
+  )
+  SELECT count(*), min(u.user_email || ' ' || to_char(gm.m, 'YYYY-MM'))
+    INTO v_cnt, v_sample
+  FROM sys.sys_users u
+  JOIN sys.sys_user_employment e ON e.user_employment_user_id = u.user_id
+  CROSS JOIN frontier f
+  CROSS JOIN LATERAL generate_series(
+    GREATEST(date_trunc('month', e.user_employment_hire_date)::date,
+             date_trunc('month', p_start)::date),
+    f.fm, interval '1 month') AS gm(m)
+  WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND u.user_status = 'ACTIVE'
+    AND e.user_employment_hire_date IS NOT NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_pay_slips p
+      WHERE p.user_pay_slip_user_id = u.user_id
+        AND date_trunc('month', p.user_pay_slip_period_start) = gm.m);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C3b: % coppie (utente, mese) senza busta paga (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C3c — floor CCNL alla data: gross×13 >= floor del livello al mese della
+-- busta, col modello a tranches del rinnovo 23/11/2023 (+250 dal 2023-12,
+-- +100 dal 2024-09, +50 dal 2025-06, +35 dal 2026-03, figura media 3A4L,
+-- scalate per parametro livello). Dirigente escluso (CCNL separato).
+-- Fonti: docs/kb/storia36/DOMINIO_PREMIO_VARIABILE.md + seed_ccnl_floors.sql.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_floor_at(lvl text, m date)
+RETURNS numeric LANGUAGE sql IMMUTABLE AS $fn$
+  WITH f(l, fl) AS (VALUES
+    ('QD4',67081::numeric),('QD3',57159),('QD2',51551),('QD1',48662),
+    ('3A4L',43445),('3A3L',39773),('3A2L',37575),('3A1L',35650),('AU',32233),
+    ('Quadro',57159))
+  SELECT (fl - 13 * (fl / 43445.0) * (
+           CASE WHEN m < DATE '2023-12-01' THEN 250 ELSE 0 END +
+           CASE WHEN m < DATE '2024-09-01' THEN 100 ELSE 0 END +
+           CASE WHEN m < DATE '2025-06-01' THEN 50  ELSE 0 END +
+           CASE WHEN m < DATE '2026-03-01' THEN 35  ELSE 0 END))
+  FROM f WHERE l = lvl
+$fn$;
+
+CREATE OR REPLACE FUNCTION staging.storia36_check_c3c(p_start date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email || ' ' || p.user_pay_slip_period)
+    INTO v_cnt, v_sample
+  FROM sys.sys_user_pay_slips p
+  JOIN sys.sys_users u ON u.user_id = p.user_pay_slip_user_id
+  JOIN sys.sys_user_contracts c ON c.user_contract_user_id = u.user_id
+  JOIN sys.sys_user_employment e ON e.user_employment_user_id = u.user_id
+  WHERE p.user_pay_slip_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND p.user_pay_slip_period_start >= p_start
+    -- il mese di assunzione è PRO-RATA (giorni dalla hire): il floor mensile
+    -- pieno non si applica alla prima busta parziale
+    AND date_trunc('month', e.user_employment_hire_date) <> date_trunc('month', p.user_pay_slip_period_start)
+    AND c.user_contract_ccnl_level IS NOT NULL
+    AND c.user_contract_ccnl_level <> 'Dirigente'
+    -- dicembre = 13a mensilita' (gross doppio): si confronta la mensilita' base
+    AND (p.user_pay_slip_gross_pay
+         / CASE WHEN extract(month FROM p.user_pay_slip_period_start) = 12 THEN 2 ELSE 1 END) * 13
+        < staging.storia36_floor_at(c.user_contract_ccnl_level, p.user_pay_slip_period_start) - 1;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C3c: % buste sotto il floor CCNL alla data (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C3d — motore variabile coerente: ogni variable_pay ha (i) i 7 gates
+-- dell'esercizio TUTTI con esito non-bloccante, (ii) amount <= 30% della RAL
+-- (DOMINIO §2), (iii) importo > 0.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c3d()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email || ' FY' || extract(year FROM v.variable_pay_calculation_period_start))
+    INTO v_cnt, v_sample
+  FROM sys.sys_variable_pay_calculations v
+  JOIN sys.sys_users u ON u.user_id = v.variable_pay_calculation_user_id
+  LEFT JOIN sys.sys_user_contracts c ON c.user_contract_user_id = u.user_id
+  WHERE v.variable_pay_calculation_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND (
+      v.variable_pay_calculation_amount_eur <= 0
+      OR (c.user_contract_gross_annual_salary IS NOT NULL
+          AND v.variable_pay_calculation_amount_eur > 0.30 * c.user_contract_gross_annual_salary + 1)
+      -- i gates valgono per l'ESERCIZIO: il legacy ha anche premi trimestrali/
+      -- semestrali (Q4, giu-nov) che ricadono sotto i gates dell'anno
+      OR (SELECT count(*) FROM sys.sys_reward_gates g
+           JOIN sys.sys_reward_gate_results r ON r.reward_gate_result_gate_id = g.reward_gate_id
+          WHERE g.reward_gate_user_id = v.variable_pay_calculation_user_id
+            AND extract(year FROM g.reward_gate_period_start)
+                = extract(year FROM v.variable_pay_calculation_period_start)
+            AND r.reward_gate_result_status IN ('PASSED','WARNING','OVERRIDDEN_WITH_REASON')) < 7
+    );
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C3d: % variable-pay senza i 7 gates superati o fuori cap 30%% RAL (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (iv) le righe storia36: amount = curva(attainment) ±1€ (payout ∈ curva)
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_variable_pay_calculations v
+  JOIN sys.sys_users u ON u.user_id = v.variable_pay_calculation_user_id
+  JOIN sys.sys_user_contracts c ON c.user_contract_user_id = u.user_id
+  WHERE v.variable_pay_calculation_payload->>'storia36' = 'C3'
+    AND abs(v.variable_pay_calculation_amount_eur - round(LEAST(
+          staging.storia36_ral_at(c.user_contract_gross_annual_salary, c.user_contract_ccnl_level,
+            make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1))
+          * CASE WHEN c.user_contract_ccnl_level = 'Dirigente' THEN 0.15
+                 WHEN c.user_contract_ccnl_level LIKE 'QD%' OR c.user_contract_ccnl_level = 'Quadro' THEN 0.12
+                 WHEN c.user_contract_ccnl_level = '3A4L' THEN 0.08
+                 WHEN c.user_contract_ccnl_level = '3A3L' THEN 0.07
+                 ELSE 0.05 END
+          * LEAST(0.5 + ((v.variable_pay_calculation_payload->>'attainment')::numeric - 0.8) * 2.5, 1.5),
+          staging.storia36_ral_at(c.user_contract_gross_annual_salary, c.user_contract_ccnl_level,
+            make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1)) * 0.30), 2)) > 1;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C3d(iv): % variable-pay storia36 con amount fuori dalla curva ±1€ (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (v) aggregato per (utente, esercizio) <= 100%% della RAL (vigilanza BdI:
+  -- oltre il 100%% scatta la notifica — una banca media resta sotto; il cap 30%%
+  -- e' PER SINGOLO premio, DOMINIO §2-§3)
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM (
+    SELECT variable_pay_calculation_user_id AS uid,
+           extract(year FROM variable_pay_calculation_period_start) AS fy,
+           sum(variable_pay_calculation_amount_eur) AS tot
+    FROM sys.sys_variable_pay_calculations
+    WHERE variable_pay_calculation_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    GROUP BY 1, 2
+  ) agg
+  JOIN sys.sys_users u ON u.user_id = agg.uid
+  JOIN sys.sys_user_contracts c ON c.user_contract_user_id = agg.uid
+  WHERE agg.tot > c.user_contract_gross_annual_salary;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C3d(v): % aggregati (utente, esercizio) oltre il 100%% della RAL (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C3e — erogazione: il variabile dell'esercizio N è nella busta di giugno N+1
+-- (gross giugno >= mensilità base + amount - 1€). Scoped a FY2023/FY2024: la
+-- busta 2026-06 è legacy (flat) e la mancata evidenza del FY2025 è una
+-- DEVIAZIONE DICHIARATA (diario C3), non un buco silenzioso.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c3e()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email || ' FY' || extract(year FROM v.variable_pay_calculation_period_start))
+    INTO v_cnt, v_sample
+  FROM sys.sys_variable_pay_calculations v
+  JOIN sys.sys_users u ON u.user_id = v.variable_pay_calculation_user_id
+  WHERE v.variable_pay_calculation_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND extract(year FROM v.variable_pay_calculation_period_start)::int IN (2023, 2024)
+    -- 34 righe legacy hanno amount NULL (allocazioni mai quantificate): non si
+    -- puo' pretendere evidenza in busta di un importo inesistente — registrate
+    -- nel diario per il triage (quantificare o marcare declinate)
+    AND v.variable_pay_calculation_amount_eur IS NOT NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_pay_slips p
+      JOIN sys.sys_user_contracts c2 ON c2.user_contract_user_id = p.user_pay_slip_user_id
+      WHERE p.user_pay_slip_user_id = v.variable_pay_calculation_user_id
+        AND p.user_pay_slip_period = (extract(year FROM v.variable_pay_calculation_period_start)::int + 1) || '-06'
+        -- il VAP deve stare SOPRA la mensilita' base del mese (non basta
+        -- gross >= amount: sarebbe vacuo quando base > amount)
+        AND p.user_pay_slip_gross_pay >=
+            round(staging.storia36_ral_at(c2.user_contract_gross_annual_salary,
+                                          c2.user_contract_ccnl_level,
+                                          p.user_pay_slip_period_start) / 13.0, 2)
+            + v.variable_pay_calculation_amount_eur - 1);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C3e: % variable-pay FY23/24 senza evidenza nella busta di giugno N+1 (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
 -- ============================================================================
 -- SELFTEST (con -v selftest=1) — la falsificabilità: per ogni check nuovo si
 -- inietta una violazione in SUBTRANSAZIONE (rollback garantito dal pattern
@@ -1085,6 +1313,100 @@ BEGIN
     RAISE EXCEPTION 'SELFTEST C2g FALLITO: violazione iniettata non rilevata';
   END IF;
   RAISE NOTICE '[OK] SELFTEST C2g (violazione iniettata rilevata, rollback)';
+
+  -- ST-C3b: cancellare le buste di un mese a un utente deve far scattare C3b
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_user_pay_slips
+     WHERE ctid = (SELECT ctid FROM sys.sys_user_pay_slips LIMIT 1);
+    PERFORM staging.storia36_check_c3b(current_setting('storia36.window_start')::date);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C3b:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C3b FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C3b (violazione iniettata rilevata, rollback)';
+
+  -- ST-C3c: una busta col gross azzerato deve far scattare C3c
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_pay_slips SET user_pay_slip_gross_pay = 100
+     WHERE ctid = (SELECT p.ctid FROM sys.sys_user_pay_slips p
+                   JOIN sys.sys_user_contracts c ON c.user_contract_user_id = p.user_pay_slip_user_id
+                   WHERE c.user_contract_ccnl_level LIKE '3A%' LIMIT 1);
+    PERFORM staging.storia36_check_c3c(current_setting('storia36.window_start')::date);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C3c:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C3c FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C3c (violazione iniettata rilevata, rollback)';
+
+  -- ST-C3d: un variable-pay gonfiato oltre il cap deve far scattare C3d
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_variable_pay_calculations
+       SET variable_pay_calculation_amount_eur = 999999
+     WHERE ctid = (SELECT ctid FROM sys.sys_variable_pay_calculations LIMIT 1);
+    PERFORM staging.storia36_check_c3d();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C3d:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C3d FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C3d (violazione iniettata rilevata, rollback)';
+
+  -- ST-C3a: cancellare un handoff deve far scattare C3a
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_payroll_handoff_records
+     WHERE ctid = (SELECT ctid FROM sys.sys_payroll_handoff_records LIMIT 1);
+    PERFORM staging.storia36_check_c3a(current_setting('storia36.window_start')::date);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C3a:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C3a FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C3a (violazione iniettata rilevata, rollback)';
+
+  -- ST-C3e: azzerare la busta di giugno di un percettore deve far scattare C3e
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_pay_slips SET user_pay_slip_gross_pay = 10
+     WHERE ctid = (SELECT p.ctid FROM sys.sys_user_pay_slips p
+                   JOIN sys.sys_variable_pay_calculations v
+                     ON v.variable_pay_calculation_user_id = p.user_pay_slip_user_id
+                    AND v.variable_pay_calculation_amount_eur IS NOT NULL
+                    AND extract(year FROM v.variable_pay_calculation_period_start)::int IN (2023, 2024)
+                    AND p.user_pay_slip_period = (extract(year FROM v.variable_pay_calculation_period_start)::int + 1) || '-06'
+                   LIMIT 1);
+    PERFORM staging.storia36_check_c3e();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C3e:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C3e FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C3e (violazione iniettata rilevata, rollback)';
 END $$;
 \endif
 
@@ -1235,6 +1557,46 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C2g'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c3a(v_start);
+    RAISE NOTICE '[OK] C3a payroll handoff per ogni mese della finestra';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C3a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c3b(v_start);
+    RAISE NOTICE '[OK] C3b busta paga per ogni (utente, mese dalla hire)';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C3b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c3c(v_start);
+    RAISE NOTICE '[OK] C3c nessuna busta sotto il floor CCNL alla data';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C3c'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c3d();
+    RAISE NOTICE '[OK] C3d variable-pay con 7 gates superati e cap 30%% RAL';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C3d'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c3e();
+    RAISE NOTICE '[OK] C3e variabile FY23/24 erogato nella busta di giugno N+1';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C3e'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   BEGIN

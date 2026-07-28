@@ -71,3 +71,23 @@ Aperture da chiudere in C3 con le shape reali dei moduli (`sys_reward_gates`,
 `sys_payout_curves`, `sys_reward_gate_results`, `sys_payroll_handoff_records`):
 la curva soglia/target/cap (es. 80%/100%/150%) citata dal piano va ancorata a
 una fonte o dichiarata convenzione aziendale RTL nel seed.
+
+## 5. Rinnovo CCNL Credito 23/11/2023 (adeguamenti retributivi)
+
+- Aumento medio a regime **435 EUR mensili** (figura media 3A4L) in tranches:
+  **+250 dal 1/12/2023, +100 dal 1/9/2024, +50 dal 1/6/2025, +35 dal 1/3/2026**
+  (rinnovo 2023; il rinnovo successivo da 518 EUR e' del 2026 —
+  [pmi.it](https://www.pmi.it/professioni/regole-e-compensi/425869/contratto-bancari-aumento-di-stipendio.html),
+  [ccnlbancari.it](https://www.ccnlbancari.it/)). Scala per parametro di livello
+  (floor livello / floor 3A4L); i Dirigenti sono su CCNL separato (RAL flat).
+
+## 6. Convenzioni RTL dichiarate (scelte aziendali del seed, non sorgentabili)
+
+| Convenzione | Valore | Perche' |
+|---|---|---|
+| Curva MBO_STANDARD | CAPPED {soglia 0,8 - payout min 0,5 - target 1,0 - cap 1,5} | modella la curva payout tipica (§2); nessuna fonte pubblica con la curva esatta |
+| Target % per livello | Dirigente 15% - QD/Quadro 12% - 3A4L 8% - 3A3L 7% - altri 5% | coerente col cap 30% (§2) e con gli importi legacy FY2024 |
+| Attainment | rating C2 / 3,45 (media MID = 1,0) | aggancia il variabile alla storia di performance |
+| Attrito platea | -5%/anno via hash + uscite CAUSALI da gate BLOCKED | persistenza dei percettori FY2024 (68 utenti su 121 righe legacy) |
+| Cap 30% | PER SINGOLO premio (§2 "singolarmente"); aggregato per esercizio <= 100% RAL (§3) | multi-premio legacy (annual+Q4+semestrale) legittimo |
+| Range 1.500-6.000 (§1) | riferimento del VAP; l'MBO dei livelli alti puo' superarlo (code ~7,6k su 3A4L) | il "tipicamente" della fonte tollera code |

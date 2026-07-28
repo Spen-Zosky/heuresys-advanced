@@ -13,8 +13,9 @@ import type {
   EngagementPulseWeek,
 } from "@heuresys/shared";
 
-const toDate = (d: Date | string | null): string | null =>
-  d == null ? null : d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10);
+import { toDateOnly } from "../../lib/date-only.js";
+
+const toDate = (d: Date | string | null): string | null => toDateOnly(d);
 const numOrNull = (v: unknown): number | null => (v == null ? null : Number(v));
 
 /** Surveys + derived question/response counts. `tenantId` undefined = no filter (PLATFORM_ADMIN). */

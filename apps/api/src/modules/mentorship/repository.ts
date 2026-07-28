@@ -16,8 +16,9 @@ export type DbConnector = Pool | PoolClient;
 
 const num = (v: string | null): number | null => (v === null ? null : Number(v));
 // node-pg returns `date` columns as Date objects; the API contract is 'YYYY-MM-DD' (z.iso.date()).
-const dateOnly = (v: Date | string | null): string | null =>
-  v === null ? null : v instanceof Date ? v.toISOString().slice(0, 10) : String(v);
+import { toDateOnly } from "../../lib/date-only.js";
+
+const dateOnly = (v: Date | string | null): string | null => toDateOnly(v);
 
 // ─────────────────────────── Programs ───────────────────────────
 interface ProgramRow {

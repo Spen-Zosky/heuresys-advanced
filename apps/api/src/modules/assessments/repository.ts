@@ -34,14 +34,7 @@ const COLS = `assessment_id, assessment_tenant_id, assessment_subject_user_id,
   assessment_period_end, assessment_status, assessment_metadata,
   created_at, updated_at`;
 
-function toDateOnly(d: Date | string | null): string | null {
-  if (d === null || d === undefined) return null;
-  if (typeof d === "string") return d.slice(0, 10);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
+import { toDateOnly } from "../../lib/date-only.js";
 
 function toAssessment(r: Row): Assessment {
   return {

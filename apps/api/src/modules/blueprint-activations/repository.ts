@@ -20,11 +20,7 @@ interface Row {
   created_at: Date; updated_at: Date;
 }
 
-function toDateOnly(d: Date | string | null): string | null {
-  if (d === null || d === undefined) return null;
-  if (typeof d === "string") return d.slice(0, 10);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+import { toDateOnly } from "../../lib/date-only.js";
 
 const COLS = `blueprint_activation_id, blueprint_activation_tenant_id,
   blueprint_activation_variant_id, blueprint_activation_status,

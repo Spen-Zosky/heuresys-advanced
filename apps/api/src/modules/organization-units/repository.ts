@@ -39,8 +39,10 @@ const COLS = `organization_unit_id, organization_unit_tenant_id,
   organization_unit_is_active, organization_unit_metadata,
   created_at, updated_at`;
 
+import { toDateOnly } from "../../lib/date-only.js";
+
 function dateOnly(d: Date | null): string | null {
-  return d ? d.toISOString().slice(0, 10) : null;
+  return toDateOnly(d);
 }
 
 function toOu(r: Row): OrganizationUnit {

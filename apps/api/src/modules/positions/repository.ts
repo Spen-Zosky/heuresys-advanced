@@ -43,9 +43,10 @@ interface RawPositionRow {
   updated_at: Date;
 }
 
+import { toDateOnly } from "../../lib/date-only.js";
+
 function dateOnly(d: Date | null): string | null {
-  if (!d) return null;
-  return d.toISOString().slice(0, 10);
+  return toDateOnly(d);
 }
 
 function rowToPosition(r: RawPositionRow): Position {

@@ -24,11 +24,12 @@ import {
 import { analyticsService } from "./service.js";
 import { toCsv } from "./csv.js";
 import { requirePermission } from "../../middleware/rbac.js";
+import { todayDateOnly } from "../../lib/date-only.js";
 
 /** Date stamp (YYYY-MM-DD) for the download filename, taken from the payload's generatedAt. */
 function stampFrom(payload: Record<string, unknown>): string {
   const g = payload.generatedAt;
-  return typeof g === "string" ? g.slice(0, 10) : new Date().toISOString().slice(0, 10);
+  return typeof g === "string" ? g.slice(0, 10) : todayDateOnly();
 }
 
 export const analyticsRoutes: FastifyPluginAsyncZod = async (app) => {

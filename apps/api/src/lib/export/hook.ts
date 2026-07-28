@@ -15,6 +15,7 @@
  */
 import type { FastifyInstance } from "fastify";
 import { listToCsv, listToXlsx, listToPdf } from "./serializers.js";
+import { todayDateOnly } from "../date-only.js";
 
 const FORMATS = new Set(["csv", "xlsx", "pdf"]);
 
@@ -72,7 +73,7 @@ export function addExportHook(app: FastifyInstance): void {
     const items = (parsed as { items: Record<string, unknown>[] }).items;
 
     const resource = resourceName(request.raw.url);
-    const stamp = new Date().toISOString().slice(0, 10);
+    const stamp = todayDateOnly();
     const filename = `${resource}-${stamp}.${fmt}`;
 
     let body: string | Buffer;

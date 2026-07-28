@@ -25,6 +25,7 @@ import type {
   PositionEconomicWeightListQuery,
   PayrollHandoffRecordListQuery,
 } from "@heuresys/shared";
+import { toDateOnly } from "../../lib/date-only.js";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -158,8 +159,8 @@ function toGate(r: GateRow): RewardGate {
     catalogCode: r.catalog_code,
     catalogName: r.catalog_name,
     isBlocking: r.catalog_is_blocking,
-    periodStart: r.reward_gate_period_start.toISOString().slice(0, 10),
-    periodEnd: r.reward_gate_period_end.toISOString().slice(0, 10),
+    periodStart: toDateOnly(r.reward_gate_period_start)!,
+    periodEnd: toDateOnly(r.reward_gate_period_end)!,
     payload: r.reward_gate_payload,
     latestResult,
     createdAt: r.created_at.toISOString(),
@@ -322,8 +323,8 @@ function toRec(r: RecRow): CompensationRecommendation {
     tenantId: r.compensation_recommendation_tenant_id,
     userId: r.compensation_recommendation_user_id,
     positionId: r.compensation_recommendation_position_id,
-    periodStart: r.compensation_recommendation_period_start.toISOString().slice(0, 10),
-    periodEnd: r.compensation_recommendation_period_end.toISOString().slice(0, 10),
+    periodStart: toDateOnly(r.compensation_recommendation_period_start)!,
+    periodEnd: toDateOnly(r.compensation_recommendation_period_end)!,
     signal: r.compensation_recommendation_signal as CompensationRecommendation["signal"],
     amountEur: r.compensation_recommendation_amount_eur,
     narrative: r.compensation_recommendation_narrative,
@@ -398,8 +399,8 @@ function toHandoff(r: HandoffRow): PayrollHandoffRecord {
   return {
     payrollHandoffRecordId: r.payroll_handoff_record_id,
     tenantId: r.payroll_handoff_record_tenant_id,
-    periodStart: r.payroll_handoff_record_period_start.toISOString().slice(0, 10),
-    periodEnd: r.payroll_handoff_record_period_end.toISOString().slice(0, 10),
+    periodStart: toDateOnly(r.payroll_handoff_record_period_start)!,
+    periodEnd: toDateOnly(r.payroll_handoff_record_period_end)!,
     recipientSystem: r.payroll_handoff_record_recipient_system,
     payload: r.payroll_handoff_record_payload,
     handedOffAt: r.payroll_handoff_record_handed_off_at.toISOString(),

@@ -16,6 +16,7 @@ import type {
 } from "@heuresys/shared";
 import { ME_PREFERENCE_DEFAULTS } from "@heuresys/shared";
 import type { z } from "zod";
+import { toDateOnly } from "../../lib/date-only.js";
 
 export type DbConnector = Pool | PoolClient;
 type SkillEvidence = z.infer<typeof MeSkillEvidenceSchema>;
@@ -651,9 +652,9 @@ export async function listMyPositions(q: DbConnector, userId: string): Promise<{
     isPrimary: r.is_primary,
     status: r.user_position_assignment_status,
     startDate: r.user_position_assignment_start_date
-      ? r.user_position_assignment_start_date.toISOString().slice(0, 10) : null,
+      ? toDateOnly(r.user_position_assignment_start_date) : null,
     endDate: r.user_position_assignment_end_date
-      ? r.user_position_assignment_end_date.toISOString().slice(0, 10) : null,
+      ? toDateOnly(r.user_position_assignment_end_date) : null,
   }));
   return { items, total: items.length };
 }
@@ -752,7 +753,7 @@ export async function listMySkillPossession(
     isPrimary: r.user_skill_is_primary,
     isVerified: r.user_skill_is_verified,
     source: r.user_skill_source,
-    lastUsedOn: r.user_skill_last_used_on === null ? null : r.user_skill_last_used_on.toISOString().slice(0, 10),
+    lastUsedOn: r.user_skill_last_used_on === null ? null : toDateOnly(r.user_skill_last_used_on),
   }));
   return { items, total: items.length };
 }
@@ -1012,7 +1013,7 @@ function toAssignment(r: LearningRow) {
     isMandatory: r.user_learning_assignment_is_mandatory,
     status: r.user_learning_assignment_status,
     deadline: r.user_learning_assignment_deadline
-      ? r.user_learning_assignment_deadline.toISOString().slice(0, 10) : null,
+      ? toDateOnly(r.user_learning_assignment_deadline) : null,
   };
 }
 
@@ -1092,9 +1093,9 @@ export async function listMyAssessments(q: DbConnector, userId: string) {
     assessmentId: r.assessment_id,
     kind: r.assessment_kind, status: r.assessment_status,
     periodStart: r.assessment_period_start
-      ? `${r.assessment_period_start.getFullYear()}-${String(r.assessment_period_start.getMonth() + 1).padStart(2, "0")}-${String(r.assessment_period_start.getDate()).padStart(2, "0")}` : null,
+      ? toDateOnly(r.assessment_period_start)! : null,
     periodEnd: r.assessment_period_end
-      ? `${r.assessment_period_end.getFullYear()}-${String(r.assessment_period_end.getMonth() + 1).padStart(2, "0")}-${String(r.assessment_period_end.getDate()).padStart(2, "0")}` : null,
+      ? toDateOnly(r.assessment_period_end)! : null,
     createdAt: r.created_at.toISOString(),
   }));
   return { items, total: items.length };
@@ -1367,8 +1368,8 @@ function toCert(r: CertRow): MeCertification {
     userCertificationId: r.user_certification_id,
     name: r.user_certification_name,
     issuer: r.user_certification_issuer,
-    issuedDate: r.user_certification_issued_date ? r.user_certification_issued_date.toISOString().slice(0, 10) : null,
-    expiresDate: r.user_certification_expires_date ? r.user_certification_expires_date.toISOString().slice(0, 10) : null,
+    issuedDate: r.user_certification_issued_date ? toDateOnly(r.user_certification_issued_date) : null,
+    expiresDate: r.user_certification_expires_date ? toDateOnly(r.user_certification_expires_date) : null,
     credentialId: r.user_certification_credential_id,
     documentUri: r.user_certification_document_uri,
     metadata: r.user_certification_metadata,

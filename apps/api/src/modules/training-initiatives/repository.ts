@@ -37,11 +37,10 @@ const COLS = `training_initiative_id, training_initiative_tenant_id,
   training_initiative_status, training_initiative_capacity,
   training_initiative_metadata, created_at, updated_at`;
 
+import { toDateOnly as dateOnlyLocale } from "../../lib/date-only.js";
+
 function toDateOnly(d: Date | null): string | null {
-  if (!d) return null;
-  // pg returns Date with time = 00:00 local; emit as YYYY-MM-DD in UTC ignoring TZ drift.
-  const iso = d.toISOString();
-  return iso.slice(0, 10);
+  return dateOnlyLocale(d);
 }
 
 function toTi(r: Row): TrainingInitiative {

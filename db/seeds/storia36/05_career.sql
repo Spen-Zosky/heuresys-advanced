@@ -22,9 +22,11 @@
 --    attribuire a persone reali un impiego presso banche reali sarebbe
 --    un'affermazione su terzi che il dato non sostiene).
 --  · OBIETTIVI DI CARRIERA — non un salto qualsiasi: la posizione obiettivo sta
---    su un percorso di carriera che passa per quella attuale (i 5 percorsi con
---    8 posizioni ciascuno già presenti), ed è più in alto — misurato dal numero
---    di titolari, che nel dato è l'unico indicatore di verticalità disponibile.
+--    su un percorso di carriera che passa per quella attuale ed è più in alto
+--    NELL'ORGANIGRAMMA (profondità della catena reports-to), ha un titolo diverso
+--    dal proprio e qualcuno che ci lavora. La v1 misurava la verticalità dalla
+--    rarità della posizione e degenerava in «scrivania vuota»: 150 obiettivi su
+--    150 puntavano a un posto senza titolari.
 --  · SUCCESSIONE — le 8 posizioni critiche ricevono un bacino con i loro
 --    candidati, scelti fra chi condivide il percorso di carriera e non occupa
 --    già la posizione; i 25 candidati che già esistevano ricevono la storia
@@ -141,25 +143,51 @@ BEGIN
   --    piu' in alto: nel dato l'unica misura di verticalita' disponibile e' la
   --    rarita' (quante persone occupano quella posizione).
   -- ==========================================================================
+  -- La v1 misurava la verticalita' dalla RARITA' della posizione (meno titolari
+  -- = piu' in alto): degenerava sistematicamente in "nessuno ci lavora", perche'
+  -- il minimo di titolari e' zero. Risultato: 150 obiettivi su 150 puntavano a
+  -- una scrivania vuota, 22 direttori di filiale avevano come obiettivo di
+  -- crescita diventare cassieri, e il vertice aveva approvato di diventare
+  -- cassiere. La verticalita' vera e' nell'organigramma, ed era li' inutilizzata.
+  CREATE TEMP TABLE _profondita ON COMMIT DROP AS
+  WITH RECURSIVE disc AS (
+    SELECT p.position_id, 0 AS livello
+      FROM sys.sys_positions p
+     WHERE p.position_tenant_id = c_rtl AND p.position_reports_to_position_id IS NULL
+    UNION ALL
+    SELECT p.position_id, d.livello + 1
+      FROM sys.sys_positions p
+      JOIN disc d ON d.position_id = p.position_reports_to_position_id
+     WHERE p.position_tenant_id = c_rtl
+  )
+  SELECT position_id, min(livello) AS livello FROM disc GROUP BY 1;
+
   CREATE TEMP TABLE _obiettivo ON COMMIT DROP AS
-  WITH titolari AS (
-    SELECT p.position_id,
-           (SELECT count(*) FROM sys.sys_user_position_assignments a
-             WHERE a.user_position_assignment_position_id = p.position_id
-               AND a.user_position_assignment_status = 'ACTIVE') AS n
-      FROM sys.sys_positions p WHERE p.position_tenant_id = c_rtl
-  ), candidate AS (
+  WITH candidate AS (
     SELECT s.user_id, s.pos, pcp_meta.position_id AS target,
-           row_number() OVER (PARTITION BY s.user_id
-                              ORDER BY tm.n, pg_temp.h(s.user_id::text || pcp_meta.position_id::text)) AS rango
+           row_number() OVER (
+             PARTITION BY s.user_id
+             -- il gradino IMMEDIATAMENTE superiore, non il vertice: un cassiere
+             -- non aspira all'amministratore delegato
+             ORDER BY lm.livello DESC,
+                      pg_temp.h(s.user_id::text || pcp_meta.position_id::text)) AS rango
       FROM _scope s
-      JOIN sys.sys_position_career_paths pcp_ora ON pcp_ora.position_id = s.pos
+      JOIN _profondita l_ora ON l_ora.position_id = s.pos
+      JOIN sys.sys_position_career_paths pcp_ora
+        ON pcp_ora.position_id = s.pos
+       AND pcp_ora.position_career_path_metadata->>'storia36' = 'C5'
       JOIN sys.sys_position_career_paths pcp_meta
         ON pcp_meta.career_path_id = pcp_ora.career_path_id
        AND pcp_meta.position_id <> s.pos
-      JOIN titolari tm ON tm.position_id = pcp_meta.position_id
-      JOIN titolari t_ora ON t_ora.position_id = s.pos
-     WHERE tm.n < t_ora.n   -- piu' rara della propria = piu' in alto
+       AND pcp_meta.position_career_path_metadata->>'storia36' = 'C5'
+      JOIN _profondita lm ON lm.position_id = pcp_meta.position_id
+      JOIN sys.sys_positions p_meta ON p_meta.position_id = pcp_meta.position_id
+      JOIN sys.sys_positions p_ora ON p_ora.position_id = s.pos
+     WHERE lm.livello < l_ora.livello                     -- piu' in alto DAVVERO
+       AND p_meta.position_title <> p_ora.position_title  -- non lo stesso mestiere
+       AND EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a  -- qualcuno ci lavora
+                    WHERE a.user_position_assignment_position_id = pcp_meta.position_id
+                      AND a.user_position_assignment_status = 'ACTIVE')
   )
   SELECT user_id, pos, target FROM candidate WHERE rango = 1;
 
@@ -298,13 +326,19 @@ BEGIN
     -- le valutazioni degli anni precedenti sono piu' prudenti; l'ultima (2025)
     -- coincide con il livello dichiarato oggi
     CROSS JOIN LATERAL (
-      SELECT CASE WHEN y.anno = 2025 THEN sc.successor_candidate_readiness_level
-                  WHEN sc.successor_candidate_readiness_level = 'READY_NOW' THEN 'READY_6_MONTHS'
-                  WHEN sc.successor_candidate_readiness_level = 'READY_6_MONTHS' THEN 'READY_1_YEAR'
-                  WHEN sc.successor_candidate_readiness_level = 'READY_1_YEAR' THEN 'READY_2_YEARS'
-                  ELSE 'NOT_READY' END AS h) AS orizzonte
+      -- una traiettoria, non due anni identici: ogni anno che passa avvicina di un
+      -- gradino il livello dichiarato oggi
+      SELECT (ARRAY['NOT_READY','READY_2_YEARS','READY_1_YEAR','READY_6_MONTHS','READY_NOW'])[
+               GREATEST(1,
+                 COALESCE(array_position(
+                   ARRAY['NOT_READY','READY_2_YEARS','READY_1_YEAR','READY_6_MONTHS','READY_NOW'],
+                   sc.successor_candidate_readiness_level), 1) - (2025 - y.anno))] AS h) AS orizzonte
    WHERE sc.successor_candidate_tenant_id = c_rtl
      AND make_date(y.anno, 11, 15) <= c_to
+     -- nessuno viene valutato come successore prima di essere stato assunto
+     AND make_date(y.anno, 11, 15) >= (
+           SELECT min(em.user_employment_hire_date) FROM sys.sys_user_employment em
+            WHERE em.user_employment_user_id = sc.successor_candidate_user_id)
   ON CONFLICT DO NOTHING;
   GET DIAGNOSTICS v_n = ROW_COUNT; v_tot := v_tot + v_n;
   RAISE NOTICE 'storia36 C5: valutazioni di prontezza %', v_n;
@@ -336,23 +370,36 @@ BEGIN
          jsonb_build_object('storia36', 'C5', 'fonte', ev.fonte)
     FROM sys.sys_position_skill_requirements r
     JOIN sys.sys_skills sk ON sk.skill_id = r.skill_id
+    -- La v1 sorteggiava la norma con un hash, slegata dalla competenza: 240 righe
+    -- su 289 citavano una fonte estranea — "Conformita' MiFID II" innalzata per
+    -- l'Accordo Stato-Regioni, che disciplina la sicurezza sul lavoro. Qui la
+    -- fonte DERIVA dalla materia, che e' l'unico modo perche' la motivazione
+    -- significhi qualcosa. E la data si disperde nei 90 giorni di attuazione:
+    -- una banca non riscrive tutti i profili di ruolo lo stesso giorno.
     CROSS JOIN LATERAL (
-      SELECT * FROM (VALUES
-        (TIMESTAMP '2024-01-15 09:00',
-         'Innalzamento del requisito dopo l''aggiornamento dei presidi antiriciclaggio.',
-         'Reg. IVASS 44/2019 — formazione e presidi AML'),
-        (TIMESTAMP '2025-05-19 09:00',
-         'Revisione dei requisiti di sicurezza dopo il nuovo Accordo Stato-Regioni.',
-         'Accordo Stato-Regioni 17/04/2025'),
-        (TIMESTAMP '2026-02-02 09:00',
-         'Adeguamento dei requisiti di conoscenza e competenza per la clientela.',
-         'MiFID II — CONSOB 20307/2018, aggiornamento annuale')
-      ) AS e(quando, motivo, fonte)
-       WHERE e.quando::date BETWEEN c_start AND c_to
-         -- una sola revisione per requisito, scelta in modo stabile
-         AND e.quando = (ARRAY[TIMESTAMP '2024-01-15 09:00', TIMESTAMP '2025-05-19 09:00',
-                               TIMESTAMP '2026-02-02 09:00'])
-                        [1 + (pg_temp.h(r.position_skill_requirement_id::text || 'EV') % 3)]
+      SELECT (m.base
+              + ((pg_temp.h(r.position_skill_requirement_id::text || 'GG') % 90) || ' days')::interval
+              + ((9 + pg_temp.h(r.position_skill_requirement_id::text || 'HH') % 8) || ' hours')::interval) AS quando,
+             m.motivo, m.fonte
+        FROM (SELECT
+          CASE WHEN sk.skill_name ILIKE '%antiricicl%' OR sk.skill_name ILIKE '%KYC%'
+                 THEN TIMESTAMP '2024-01-15 00:00'
+               WHEN sk.skill_name ILIKE '%MiFID%' OR sk.skill_name ILIKE '%complian%'
+                 THEN TIMESTAMP '2026-02-02 00:00'
+               ELSE TIMESTAMP '2025-01-09 00:00' END AS base,
+          CASE WHEN sk.skill_name ILIKE '%antiricicl%' OR sk.skill_name ILIKE '%KYC%'
+                 THEN 'Innalzamento del presidio antiriciclaggio richiesto al ruolo.'
+               WHEN sk.skill_name ILIKE '%MiFID%' OR sk.skill_name ILIKE '%complian%'
+                 THEN 'Adeguamento dei requisiti di conoscenza e competenza verso la clientela.'
+               ELSE 'Revisione del profilo di rischio richiesto al ruolo.' END AS motivo,
+          CASE WHEN sk.skill_name ILIKE '%antiricicl%' OR sk.skill_name ILIKE '%KYC%'
+                 THEN 'D.Lgs 231/2007 e Provvedimento Banca d''Italia sull''adeguata verifica'
+               WHEN sk.skill_name ILIKE '%MiFID%' OR sk.skill_name ILIKE '%complian%'
+                 THEN 'MiFID II — Delibera CONSOB 20307/2018, conoscenza e competenza'
+               ELSE 'Circolare Banca d''Italia 285 — vigilanza prudenziale' END AS fonte
+        ) AS m
+       WHERE (m.base + ((pg_temp.h(r.position_skill_requirement_id::text || 'GG') % 90) || ' days')::interval)::date
+             BETWEEN c_start AND c_to
     ) ev
    WHERE r.position_skill_requirement_tenant_id = c_rtl
      AND r.required_proficiency IS NOT NULL

@@ -2037,6 +2037,48 @@ BEGIN
   IF v_cnt > 0 THEN
     RAISE EXCEPTION 'C5c(iii): % obiettivi non raggiungibili da alcun percorso di carriera (es. %)', v_cnt, v_sample;
   END IF;
+
+  -- (iv) L'obiettivo e' una CRESCITA, e questo e' il predicato che mancava: la
+  -- prima versione misurava la verticalita' dalla rarita' della posizione e
+  -- degenerava in «scrivania vuota» — 150 obiettivi su 150 puntavano a un posto
+  -- dove non lavorava nessuno, e 22 direttori di filiale «aspiravano» a fare i
+  -- cassieri. Un check che guarda solo l'appartenenza al percorso non lo vede.
+  -- Qui si pretendono le tre cose che rendono un obiettivo un obiettivo: sta piu'
+  -- in alto nell'organigramma, ha un mestiere diverso, e qualcuno ci lavora.
+  WITH RECURSIVE disc AS (
+    SELECT p.position_id, 0 AS livello
+      FROM sys.sys_positions p
+     WHERE p.position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND p.position_reports_to_position_id IS NULL
+    UNION ALL
+    SELECT p.position_id, d.livello + 1
+      FROM sys.sys_positions p
+      JOIN disc d ON d.position_id = p.position_reports_to_position_id
+     WHERE p.position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+  ), liv AS (SELECT position_id, min(livello) AS livello FROM disc GROUP BY 1)
+  SELECT count(*), min(u.user_email || ': ' || p_ora.position_title || ' → ' || p_meta.position_title)
+    INTO v_cnt, v_sample
+  FROM sys.sys_user_target_positions t
+  JOIN sys.sys_users u ON u.user_id = t.user_target_position_user_id
+  JOIN sys.sys_user_position_assignments a
+    ON a.user_position_assignment_user_id = t.user_target_position_user_id
+   AND a.user_position_assignment_kind = 'PRIMARY'
+   AND a.user_position_assignment_status = 'ACTIVE'
+  JOIN sys.sys_positions p_ora  ON p_ora.position_id  = a.user_position_assignment_position_id
+  JOIN sys.sys_positions p_meta ON p_meta.position_id = t.user_target_position_position_id
+  LEFT JOIN liv l_ora  ON l_ora.position_id  = p_ora.position_id
+  LEFT JOIN liv l_meta ON l_meta.position_id = p_meta.position_id
+  WHERE t.user_target_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND t.user_target_position_review_status <> 'REJECTED'
+    AND (l_meta.livello IS NULL OR l_ora.livello IS NULL
+      OR l_meta.livello >= l_ora.livello                  -- non e' piu' in alto
+      OR p_meta.position_title = p_ora.position_title     -- e' lo stesso mestiere
+      OR NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a2
+                      WHERE a2.user_position_assignment_position_id = p_meta.position_id
+                        AND a2.user_position_assignment_status = 'ACTIVE'));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5c(iv): % obiettivi che non sono una crescita (stesso livello o piu'' in basso, stesso mestiere, o posizione senza titolari) (es. %)', v_cnt, v_sample;
+  END IF;
 END $fn$;
 
 -- ----------------------------------------------------------------------------

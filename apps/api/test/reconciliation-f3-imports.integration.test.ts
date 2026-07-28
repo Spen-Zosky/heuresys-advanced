@@ -14,7 +14,13 @@ const count = async (sql: string): Promise<number> => {
 describe('reconciliation F3 imports', () => {
   describe('position_career_paths (#1) — employee bridge', () => {
     it('imported 40 rows, tenant-coherent, all FKs resolved', async () => {
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_position_career_paths`)).toBe(40);
+      // I 40 sono il risultato dell'IMPORT. Il cluster storia36 C5 ha poi
+      // ricostruito la giunzione per famiglia professionale (177 posizioni):
+      // qui si verifica l'import, quindi si guarda la sua provenienza.
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_position_career_paths
+          WHERE position_career_path_metadata->>'storia36' IS NULL`,
+      )).toBe(40);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_position_career_paths pcp
            JOIN sys.sys_positions p ON p.position_id = pcp.position_id
@@ -41,7 +47,10 @@ describe('reconciliation F3 imports', () => {
     it('populated by seed 49: the pool dependency was resolved by the incumbent-anchor import', async () => {
       // F3 (S960) measured this as BLOCKED (NOT NULL pool_id on empty pools). The Wave-2
       // close (mig 000106 + seed 49, PM decisions D2/D3) imported 17 pools + 25 candidates.
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_successor_candidates`)).toBe(25);
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
+          WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL`,
+      )).toBe(25);
       expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(17);
     });
   });
@@ -51,13 +60,17 @@ describe('reconciliation F3 imports', () => {
       expect(await count(`SELECT count(*)::int AS n FROM sys.sys_career_path_steps`)).toBe(35);
       expect(await count(`SELECT count(*)::int AS n FROM sys.sys_critical_positions`)).toBe(8);
       expect(await count(`SELECT count(*)::int AS n FROM sys.sys_position_succession_relevance`)).toBe(9);
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_user_learning_assignments`)).toBe(1990);
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_user_learning_assignments
+          WHERE user_learning_assignment_metadata->>'storia36' IS NULL`,
+      )).toBe(1990);
     });
     it('user_learning_assignments all resolve a real learning_path + valid status', async () => {
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_user_learning_assignments a
-          WHERE a.user_learning_assignment_path_id IS NULL
-             OR a.user_learning_assignment_status NOT IN ('ASSIGNED','IN_PROGRESS','COMPLETED','OVERDUE','WAIVED','CANCELLED')`,
+          WHERE a.user_learning_assignment_metadata->>'storia36' IS NULL
+            AND (a.user_learning_assignment_path_id IS NULL
+             OR a.user_learning_assignment_status NOT IN ('ASSIGNED','IN_PROGRESS','COMPLETED','OVERDUE','WAIVED','CANCELLED'))`,
       )).toBe(0);
     });
   });

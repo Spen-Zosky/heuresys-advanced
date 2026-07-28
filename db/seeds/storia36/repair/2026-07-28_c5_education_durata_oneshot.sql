@@ -28,6 +28,28 @@ DO $$
 DECLARE
   v_n bigint;
 BEGIN
+  -- (0) prima le date di FINE impossibili: alcune righe legacy dichiarano un
+  -- titolo conseguito a un'età che la persona non aveva. Sottrarre la durata a
+  -- una fine sbagliata produceva percorsi iniziati PRIMA della nascita (11 casi,
+  -- fino a 12 anni prima). Si àncora la fine all'età tipica di conseguimento.
+  UPDATE sys.sys_user_education_records e
+     SET user_education_end_date =
+           (d.user_demographics_birth_date + (CASE upper(e.user_education_degree)
+              WHEN 'DIP' THEN 19 WHEN 'BSC' THEN 22 WHEN 'MSC' THEN 24
+              WHEN 'MBA' THEN 27 WHEN 'PHD' THEN 28 END || ' years')::interval)::date,
+         user_education_metadata = e.user_education_metadata
+           || jsonb_build_object('storia36_repair', 'C5-fine-impossibile')
+    FROM sys.sys_user_demographics d
+   WHERE d.user_demographics_user_id = e.user_education_record_user_id
+     AND e.user_education_end_date IS NOT NULL
+     AND upper(e.user_education_degree) IN ('DIP','BSC','MSC','MBA','PHD')
+     AND (e.user_education_end_date - (CASE upper(e.user_education_degree)
+            WHEN 'DIP' THEN 5 WHEN 'BSC' THEN 3 WHEN 'MSC' THEN 2
+            WHEN 'MBA' THEN 2 WHEN 'PHD' THEN 3 END * 365))
+         < (d.user_demographics_birth_date + interval '14 years');
+  GET DIAGNOSTICS v_n = ROW_COUNT;
+  RAISE NOTICE 'storia36 C5 repair: % date di conseguimento impossibili ancorate all''età', v_n;
+
   UPDATE sys.sys_user_education_records e
      SET user_education_start_date =
            (e.user_education_end_date - (CASE upper(e.user_education_degree)
@@ -37,7 +59,16 @@ BEGIN
            || jsonb_build_object('storia36_repair', 'C5-durata-titolo')
    WHERE e.user_education_start_date IS NULL
      AND e.user_education_end_date IS NOT NULL
-     AND upper(e.user_education_degree) IN ('DIP','BSC','MSC','MBA','PHD');
+     AND upper(e.user_education_degree) IN ('DIP','BSC','MSC','MBA','PHD')
+     -- e un percorso di studi non puo' iniziare prima dei 14 anni della persona:
+     -- la durata ordinamentale, sottratta a una data di fine sbagliata nel legacy,
+     -- produceva 11 percorsi iniziati PRIMA della nascita
+     AND (e.user_education_end_date - (CASE upper(e.user_education_degree)
+            WHEN 'DIP' THEN 5 WHEN 'BSC' THEN 3 WHEN 'MSC' THEN 2
+            WHEN 'MBA' THEN 2 WHEN 'PHD' THEN 3 END * 365))
+         >= (SELECT d.user_demographics_birth_date + interval '14 years'
+               FROM sys.sys_user_demographics d
+              WHERE d.user_demographics_user_id = e.user_education_record_user_id);
   GET DIAGNOSTICS v_n = ROW_COUNT;
   RAISE NOTICE 'storia36 C5 repair: % titoli di studio con la durata ordinamentale', v_n;
 

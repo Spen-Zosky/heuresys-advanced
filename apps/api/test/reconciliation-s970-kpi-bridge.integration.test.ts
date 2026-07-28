@@ -44,7 +44,10 @@ describe('reconciliation S970 KPI bridge', () => {
     // seed 49): incumbent-anchor + CEO/CFO title-match imported both tables. The S970
     // rationale marker survives (rationale updates are prepend-only).
     expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(17);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_successor_candidates`)).toBe(25);
+    expect(await count(
+      `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
+        WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL`,
+    )).toBe(25);
     expect(await count(`SELECT count(*)::int AS n FROM sys.sys_reconciliation_registry
       WHERE reconciliation_registry_table_name IN ('sys_succession_pools','sys_successor_candidates')
         AND reconciliation_registry_rationale LIKE '%DEFER S970%'

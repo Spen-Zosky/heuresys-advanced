@@ -17,10 +17,10 @@
 -- Inoltre i legami coprivano 40 posizioni su 177: 120 persone su 158 non
 -- avevano alcun percorso su cui muoversi.
 --
--- Riparazione (triage esito c): i 40 legami incoerenti vengono sostituiti da una
--- mappatura per TITOLO, che e' l'unico criterio disponibile nel dato e l'unico
--- che descriva un mestiere. La tabella e' una pura giunzione: nessuna altra
--- entita' vi fa riferimento.
+-- Riparazione (triage esito c): alla mappatura incoerente se ne AFFIANCA una
+-- per TITOLO, che e' l'unico criterio disponibile nel dato e l'unico
+-- che descriva un mestiere. Le righe dell'import restano: le usa un test di
+-- riconciliazione e vi si appoggiano 113 piani di carriera.
 --
 -- Idempotente: alla seconda corsa non trova legami da rifare.
 -- ============================================================================
@@ -36,10 +36,13 @@ DECLARE
   c_ns  constant uuid := '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
   v_n   bigint;
 BEGIN
-  DELETE FROM sys.sys_position_career_paths x
-   WHERE x.position_career_path_metadata->>'storia36' IS NULL;
-  GET DIAGNOSTICS v_n = ROW_COUNT;
-  RAISE NOTICE 'storia36 C5 repair: % legami incoerenti rimossi', v_n;
+  -- ADDITIVA, non distruttiva. La v1 di questa riparazione cancellava i legami
+  -- dell'import: sbagliato due volte — cancellava senza filtro di tenant, e
+  -- soprattutto quelle 40 righe sono il RISULTATO di un'importazione che un test
+  -- di riconciliazione verifica, e 113 piani di carriera vi facevano riferimento
+  -- (92 sono rimasti incoerenti). Le righe dell'import restano dove sono: la
+  -- mappatura coerente si AGGIUNGE, e chi ha bisogno di direzione (gli obiettivi
+  -- di carriera, il check C5c) usa solo quella, riconoscibile dal marcatore.
 
   INSERT INTO sys.sys_position_career_paths (
     position_career_path_id, position_id, position_career_path_tenant_id,

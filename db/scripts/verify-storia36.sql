@@ -2671,6 +2671,206 @@ BEGIN
   END IF;
 END $fn$;
 
+-- ----------------------------------------------------------------------------
+-- C7a — LE APPROVAZIONI RISPETTANO LA MACCHINA A STATI DEL MOTORE.
+-- Il motore esisteva, era testato, e non aveva mai deciso niente: le due
+-- tabelle erano vuote. Ora che contengono decisioni, quelle decisioni devono
+-- essere quelle che il codice avrebbe prodotto — altrimenti il registro
+-- racconta una storia che il prodotto non sa rileggere.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c7a()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  -- una richiesta chiusa non lascia passi indecisi al livello che l'ha chiusa
+  SELECT count(*), min(r.approval_request_title) INTO v_cnt, v_sample
+  FROM sys.sys_approval_requests r
+  WHERE r.approval_request_tenant_id = c_rtl
+    AND r.approval_request_status IN ('APPROVED', 'APPLIED')
+    AND EXISTS (SELECT 1 FROM sys.sys_approval_steps s
+                 WHERE s.approval_step_request_id = r.approval_request_id
+                   AND s.approval_step_status = 'PENDING');
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C7a: % richieste approvate con passi ancora in attesa (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- una richiesta respinta porta il rifiuto che l'ha causata
+  SELECT count(*), min(r.approval_request_title) INTO v_cnt, v_sample
+  FROM sys.sys_approval_requests r
+  WHERE r.approval_request_tenant_id = c_rtl
+    AND r.approval_request_status = 'REJECTED'
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_approval_steps s
+                     WHERE s.approval_step_request_id = r.approval_request_id
+                       AND s.approval_step_status = 'REJECTED');
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C7a(ii): % richieste respinte senza un passo di rifiuto (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- ogni decisione ha un autore e una data, e non precede la richiesta
+  SELECT count(*), min(r.approval_request_title) INTO v_cnt, v_sample
+  FROM sys.sys_approval_steps s
+  JOIN sys.sys_approval_requests r ON r.approval_request_id = s.approval_step_request_id
+  WHERE s.approval_step_tenant_id = c_rtl
+    AND s.approval_step_status IN ('APPROVED', 'REJECTED')
+    AND (s.approval_step_decided_at IS NULL
+      OR s.approval_step_decided_by IS NULL
+      OR s.approval_step_decided_at < r.created_at);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C7a(iii): % decisioni senza autore, senza data o anteriori alla richiesta (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- una richiesta ancora aperta ha qualcosa da decidere
+  SELECT count(*), min(r.approval_request_title) INTO v_cnt, v_sample
+  FROM sys.sys_approval_requests r
+  WHERE r.approval_request_tenant_id = c_rtl
+    AND r.approval_request_status = 'PENDING'
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_approval_steps s
+                     WHERE s.approval_step_request_id = r.approval_request_id
+                       AND s.approval_step_status = 'PENDING');
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C7a(iv): % richieste in attesa senza un solo passo da decidere (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- ogni richiesta ha almeno un passo: un'approvazione senza approvatori non
+  -- è un'approvazione
+  SELECT count(*), min(r.approval_request_title) INTO v_cnt, v_sample
+  FROM sys.sys_approval_requests r
+  WHERE r.approval_request_tenant_id = c_rtl
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_approval_steps s
+                     WHERE s.approval_step_request_id = r.approval_request_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C7a(v): % richieste senza alcun approvatore (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- i livelli sono una catena: 1, 2, 3… senza buchi. Il motore materializza
+  -- ordinali consecutivi, e un buco significa che un livello è stato perso per
+  -- strada — è così che il secondo passo di sei richieste retributive spariva
+  -- in silenzio quando il capo coincideva con chi doveva controfirmare.
+  SELECT count(*), min(r.approval_request_title) INTO v_cnt, v_sample
+  FROM sys.sys_approval_requests r
+  JOIN LATERAL (
+    SELECT min(s.approval_step_ordinal) AS primo,
+           max(s.approval_step_ordinal) AS ultimo,
+           count(DISTINCT s.approval_step_ordinal) AS livelli
+      FROM sys.sys_approval_steps s
+     WHERE s.approval_step_request_id = r.approval_request_id) g ON true
+  WHERE r.approval_request_tenant_id = c_rtl
+    AND g.livelli > 0
+    AND (g.primo <> 1 OR g.ultimo <> g.livelli);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C7a(vi): % richieste con i livelli non consecutivi da 1 (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C7b — OGNI APPROVAZIONE PUNTA A QUALCOSA CHE ESISTE, E NON LA CONTRADDICE.
+-- `resource_id` non ha una chiave esterna (il tipo è polimorfo): la coerenza
+-- va verificata a mano, o il registro si riempie di decisioni su nulla.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c7b()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(r.approval_request_resource_type || ' ' || r.approval_request_resource_id)
+    INTO v_cnt, v_sample
+  FROM sys.sys_approval_requests r
+  WHERE r.approval_request_tenant_id = c_rtl
+    AND (
+      (r.approval_request_resource_type = 'TIME_OFF_REQUEST'
+       AND NOT EXISTS (SELECT 1 FROM sys.sys_time_off_requests t
+                        WHERE t.request_id = r.approval_request_resource_id))
+      OR (r.approval_request_resource_type = 'COMPENSATION_RECOMMENDATION'
+       AND NOT EXISTS (SELECT 1 FROM sys.sys_compensation_recommendations c
+                        WHERE c.compensation_recommendation_id = r.approval_request_resource_id))
+      OR (r.approval_request_resource_type = 'TRAINING_INITIATIVE'
+       AND NOT EXISTS (SELECT 1 FROM sys.sys_training_initiatives i
+                        WHERE i.training_initiative_id = r.approval_request_resource_id))
+    );
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C7b: % approvazioni che puntano a una risorsa inesistente (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- per le assenze, chi ha firmato nel registro è chi risulta averle approvate:
+  -- due verità sullo stesso fatto sarebbero una di troppo
+  SELECT count(*), min(r.approval_request_title) INTO v_cnt, v_sample
+  FROM sys.sys_approval_requests r
+  JOIN sys.sys_approval_steps s ON s.approval_step_request_id = r.approval_request_id
+  JOIN sys.sys_time_off_requests t ON t.request_id = r.approval_request_resource_id
+  WHERE r.approval_request_tenant_id = c_rtl
+    AND r.approval_request_resource_type = 'TIME_OFF_REQUEST'
+    AND s.approval_step_approver_user_id IS DISTINCT FROM t.request_approver_user_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C7b(ii): % approvazioni di assenza firmate da chi non risulta averle approvate (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- e lo stato concorda: un''assenza approvata non può avere una richiesta respinta
+  SELECT count(*), min(r.approval_request_title) INTO v_cnt, v_sample
+  FROM sys.sys_approval_requests r
+  JOIN sys.sys_time_off_requests t ON t.request_id = r.approval_request_resource_id
+  WHERE r.approval_request_tenant_id = c_rtl
+    AND r.approval_request_resource_type = 'TIME_OFF_REQUEST'
+    AND ((t.request_status = 'APPROVED' AND r.approval_request_status NOT IN ('APPROVED', 'APPLIED'))
+      OR (t.request_status = 'PENDING'  AND r.approval_request_status <> 'PENDING'));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C7b(iii): % approvazioni il cui esito contraddice lo stato dell''assenza (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C7c — I VOLUMI SONO QUELLI DI UN'AZIENDA, NON DI UNA DEMO.
+-- Ferie che passano dal workflow formale, preferenze di notifica per tutti,
+-- template KPI solo dove la corrispondenza è giustificata.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c7c(p_start date, p_end date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_rate numeric;
+  v_sample text;
+BEGIN
+  SELECT round(count(*)::numeric
+               / GREATEST(1, (SELECT count(*) FROM sys.sys_users u
+                               WHERE u.user_tenant_id = c_rtl AND u.user_status = 'ACTIVE'))
+               / GREATEST(1, (p_end - p_start) / 365.0), 2)
+    INTO v_rate
+  FROM sys.sys_approval_requests r
+  WHERE r.approval_request_tenant_id = c_rtl
+    AND r.approval_request_resource_type = 'TIME_OFF_REQUEST';
+  IF v_rate < 0.3 OR v_rate > 2.0 THEN
+    RAISE EXCEPTION 'C7c: % richieste di ferie per persona all''anno: fuori da un volume credibile (0,3-2,0)', v_rate;
+  END IF;
+
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C7d — IL GATE DI ENZO: il programma non decide il RACI.
+-- `sys_process_participants` NON è vuota (1.104 righe dal lavoro F4/#24,
+-- migration 000179, chiuso a luglio) — la nota che la dava per vuota era già
+-- inesatta quando è stata scritta. Ciò che il gate protegge però resta: chi
+-- partecipa a quale processo lo decide Enzo, e il programma non ne scrive una
+-- riga. Il check verifica QUESTO, che è verificabile, invece di un conteggio
+-- che sarebbe falso.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c7d()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+BEGIN
+  SELECT count(*) INTO v_cnt
+  FROM sys.sys_process_participants
+  WHERE process_participant_metadata->>'storia36' IS NOT NULL;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C7d: % righe di RACI scritte dal programma: la partecipazione ai processi non è sua da decidere', v_cnt;
+  END IF;
+END $fn$;
+
 -- ============================================================================
 -- SELFTEST (con -v selftest=1) — la falsificabilità: per ogni check nuovo si
 -- inietta una violazione in SUBTRANSAZIONE (rollback garantito dal pattern
@@ -4197,6 +4397,207 @@ BEGIN
   END;
   IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6d(iii) FALLITO: violazione iniettata non rilevata'; END IF;
   RAISE NOTICE '[OK] SELFTEST C6d(iii) (deroga senza motivo, rollback)';
+
+  -- ==========================================================================
+  -- C7 — APPROVAZIONI E WORKFLOW
+  -- ==========================================================================
+
+  -- ST-C7a: chiudere una richiesta lasciando un approvatore in attesa
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_approval_requests SET approval_request_status = 'APPROVED'
+     WHERE approval_request_id = (
+       SELECT s.approval_step_request_id FROM sys.sys_approval_steps s
+        WHERE s.approval_step_status = 'PENDING'
+          AND s.approval_step_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c7a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7a:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7a FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7a (richiesta chiusa con un approvatore ancora in attesa, rollback)';
+
+  -- ST-C7a(ii): respingere una richiesta senza che nessuno l'abbia respinta
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_approval_requests SET approval_request_status = 'REJECTED'
+     WHERE ctid = (SELECT r2.ctid FROM sys.sys_approval_requests r2
+                    WHERE r2.approval_request_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                      AND r2.approval_request_status IN ('APPROVED', 'APPLIED') LIMIT 1);
+    PERFORM staging.storia36_check_c7a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7a(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7a(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7a(ii) (richiesta respinta che nessuno ha respinto, rollback)';
+
+  -- ST-C7a(iii): una decisione senza chi l'ha presa
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_approval_steps SET approval_step_decided_by = NULL
+     WHERE ctid = (SELECT s2.ctid FROM sys.sys_approval_steps s2
+                    WHERE s2.approval_step_status = 'APPROVED'
+                      AND s2.approval_step_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c7a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7a(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7a(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7a(iii) (decisione senza autore, rollback)';
+
+  -- ST-C7a(iv): lasciare aperta una richiesta che nessuno deve più decidere
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_approval_requests SET approval_request_status = 'PENDING'
+     WHERE ctid = (SELECT r2.ctid FROM sys.sys_approval_requests r2
+                    WHERE r2.approval_request_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                      AND r2.approval_request_status = 'APPLIED' LIMIT 1);
+    PERFORM staging.storia36_check_c7a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7a(iv)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7a(iv) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7a(iv) (richiesta aperta senza nulla da decidere, rollback)';
+
+  -- ST-C7a(v): un'approvazione senza approvatori
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_approval_steps
+     WHERE approval_step_request_id = (
+       SELECT r2.approval_request_id FROM sys.sys_approval_requests r2
+        WHERE r2.approval_request_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c7a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7a(v)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7a(v) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7a(v) (approvazione senza approvatori, rollback)';
+
+  -- ST-C7a(vi): togliere il primo livello e lasciare solo il secondo — il buco
+  -- nella catena che spariva in silenzio
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_approval_steps s
+     WHERE s.approval_step_ordinal = 1
+       AND s.approval_step_request_id = (
+         SELECT s2.approval_step_request_id FROM sys.sys_approval_steps s2
+          WHERE s2.approval_step_ordinal = 2
+            AND s2.approval_step_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
+    PERFORM staging.storia36_check_c7a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7a(vi)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7a(vi) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7a(vi) (livelli con un buco nella catena, rollback)';
+
+  -- ST-C7b: far puntare un'approvazione a una risorsa che non esiste
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_approval_requests
+       SET approval_request_resource_id = '00000000-0000-0000-0000-0000000000fe'
+     WHERE ctid = (SELECT r2.ctid FROM sys.sys_approval_requests r2
+                    WHERE r2.approval_request_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                      AND r2.approval_request_resource_type = 'TIME_OFF_REQUEST' LIMIT 1);
+    PERFORM staging.storia36_check_c7b();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7b:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7b FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7b (approvazione su una risorsa inesistente, rollback)';
+
+  -- ST-C7b(ii): far firmare l'assenza a qualcuno che non l'ha approvata
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_approval_steps s
+       SET approval_step_approver_user_id = (
+             SELECT u.user_id FROM sys.sys_users u
+              WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                AND u.user_id <> s.approval_step_approver_user_id LIMIT 1)
+     WHERE s.ctid = (SELECT s2.ctid FROM sys.sys_approval_steps s2
+                      JOIN sys.sys_approval_requests r2 ON r2.approval_request_id = s2.approval_step_request_id
+                     WHERE r2.approval_request_resource_type = 'TIME_OFF_REQUEST' LIMIT 1);
+    PERFORM staging.storia36_check_c7b();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7b(ii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7b(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7b(ii) (assenza firmata da chi non l''ha approvata, rollback)';
+
+  -- ST-C7b(iii): un'assenza approvata la cui richiesta risulta respinta
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_approval_requests
+       SET approval_request_status = 'REJECTED'
+     WHERE ctid = (SELECT r2.ctid FROM sys.sys_approval_requests r2
+                    JOIN sys.sys_time_off_requests t2 ON t2.request_id = r2.approval_request_resource_id
+                   WHERE r2.approval_request_resource_type = 'TIME_OFF_REQUEST'
+                     AND t2.request_status = 'APPROVED' LIMIT 1);
+    PERFORM staging.storia36_check_c7b();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7b(iii)%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7b(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7b(iii) (esito che contraddice l''assenza, rollback)';
+
+  -- ST-C7c: svuotare le richieste di ferie — il workflow che non ha mai deciso
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_approval_requests
+     WHERE approval_request_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND approval_request_resource_type = 'TIME_OFF_REQUEST';
+    PERFORM staging.storia36_check_c7c(current_setting('storia36.window_start')::date, v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7c:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7c FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7c (nessuna richiesta di ferie in tre anni, rollback)';
+
+  -- ST-C7d: il programma che si mette a decidere il RACI — il gate di Enzo
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_process_participants
+       SET process_participant_metadata =
+             COALESCE(process_participant_metadata, '{}'::jsonb) || jsonb_build_object('storia36', 'C7')
+     WHERE ctid = (SELECT p2.ctid FROM sys.sys_process_participants p2 LIMIT 1);
+    PERFORM staging.storia36_check_c7d();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C7d:%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7d FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C7d (il programma che scrive nel RACI, rollback)';
 END $$;
 \endif
 
@@ -4587,6 +4988,38 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C6d'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c7a();
+    RAISE NOTICE '[OK] C7a le approvazioni rispettano la macchina a stati del motore';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C7a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c7b();
+    RAISE NOTICE '[OK] C7b ogni approvazione punta a una risorsa vera e non la contraddice';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C7b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c7c(v_start, v_end);
+    RAISE NOTICE '[OK] C7c volumi credibili, preferenze per tutti, cascata KPI giustificata';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C7c'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c7d();
+    RAISE NOTICE '[OK] C7d il programma non ha scritto una riga di RACI (gate)';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C7d'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   IF array_length(v_failed, 1) > 0 THEN

@@ -18,15 +18,42 @@ const count = async (sql: string, params: unknown[] = []): Promise<number> => {
   return rows[0]?.n ?? -1;
 };
 
+// The "RTL-resolvable IMPORT" population of sys_performance_reviews (alias `p`),
+// defined by the TWO clauses the reconciliation baseline has always assumed:
+//   1. PROVENANCE — the row was not written by the storia36 backfill (natural
+//      keys STORIA36::*), which legitimately grows the table over time;
+//   2. I5 COHERENCE — the subject is either a kept-unresolved NULL (S950
+//      collapse) or resolves to a user of the review's OWN tenant. A review
+//      whose subject lives in another tenant is by definition NOT
+//      "RTL-resolvable", and it is exactly the defect the C2 repair deletes
+//      (db/seeds/storia36/repair/2026-07-28_c2_fixups_oneshot.sql, block F1).
+// Clause 2 is what makes the baseline hold on BOTH a repaired DB (0 such rows)
+// and on the frozen pre-repair heuresys_ci clone (2 such rows) — the number is
+// anchored to the population's definition, never to a snapshot of the table.
+const PR_IMPORT = `p.review_natural_key NOT LIKE 'STORIA36%'
+  AND NOT EXISTS (SELECT 1 FROM sys.sys_users u
+                   WHERE u.user_id = p.review_subject_user_id
+                     AND u.user_tenant_id <> p.review_tenant_id)`;
+
 describe('SDBI Option-B — perf reviews + feedback360', () => {
   it('the 4 sys.* tables hold exactly the RTL-resolvable IMPORT counts', async () => {
     // Scoped to SDBI-import provenance: the storia36 backfill (natural keys
     // STORIA36::*) legitimately grows these tables — asserting bare totals
     // would re-introduce the banned photograph-count anti-pattern.
-    // 159 (era 161): 2 review cross-tenant (subject HEURESYS in tenant RTL)
-    // eliminate dal repair storia36 C2 del 2026-07-28 (violazione I5).
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_reviews
-      WHERE review_natural_key NOT LIKE 'STORIA36%'`)).toBe(159);
+    // 159 (era 161): 2 review cross-tenant (subject HEURESYS in tenant RTL),
+    // violazione I5, fuori dalla popolazione RTL-resolvable per definizione
+    // (PR_IMPORT clausola 2) — eliminate dal repair storia36 C2 del 2026-07-28.
+    expect(await count(
+      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews p WHERE ${PR_IMPORT}`)).toBe(159);
+    // the I5-coherence clause may only ever exclude LEGACY import rows: the
+    // storia36 backfill never writes a cross-tenant subject. Without this the
+    // clause could silently swallow a real defect introduced by the backfill.
+    expect(await count(
+      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews p
+        WHERE p.review_natural_key LIKE 'STORIA36%'
+          AND EXISTS (SELECT 1 FROM sys.sys_users u
+                       WHERE u.user_id = p.review_subject_user_id
+                         AND u.user_tenant_id <> p.review_tenant_id)`)).toBe(0);
     expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_review_competency_ratings
       WHERE rating_natural_key NOT LIKE 'STORIA36%'`)).toBe(465);
     expect(await count(`SELECT count(*)::int AS n FROM sys.sys_feedback_360_responses
@@ -113,10 +140,15 @@ describe('SDBI Option-B — perf reviews + feedback360', () => {
   });
 
   it('resolved FK counts match the measured RTL crosswalk (import rows)', async () => {
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_reviews
-      WHERE review_natural_key NOT LIKE 'STORIA36%' AND review_subject_user_id IS NOT NULL`)).toBe(157);
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_performance_reviews
-      WHERE review_natural_key NOT LIKE 'STORIA36%' AND review_reviewer_user_id IS NOT NULL`)).toBe(157);
+    // 157 = the 159 import rows minus the 2 kept-unresolved subjects (S950).
+    // Same population as the count test above: PR_IMPORT excludes the 2
+    // cross-tenant reviews, so the pair 159/157 holds pre- and post-repair.
+    expect(await count(
+      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews p
+        WHERE ${PR_IMPORT} AND p.review_subject_user_id IS NOT NULL`)).toBe(157);
+    expect(await count(
+      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews p
+        WHERE ${PR_IMPORT} AND p.review_reviewer_user_id IS NOT NULL`)).toBe(157);
     expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback
       WHERE feedback_natural_key NOT LIKE 'STORIA36%' AND feedback_to_user_id IS NOT NULL`)).toBe(474);
     expect(await count(`SELECT count(*)::int AS n FROM sys.sys_continuous_feedback

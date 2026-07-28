@@ -93,23 +93,55 @@ describe('reconciliation registry (F1)', () => {
 // the 3 ex-DEFER tables (branches / succession pools / successor candidates) were IMPORTED
 // under PM decisions D1-D3 (Enzo 2026-06-10) and resolve POPULATED via has_rows.
 describe('reconciliation registry — B-50 residual-wall terminal close (S972) + Wave-2 close (S982)', () => {
-  // storia36 C3 (2026-07-28) authored the human-authored derivation the B-50
-  // rationale itself called for: curves + gate results are now POPULATED by
-  // seed (declared_status stays NO_SOURCE = no LEGACY source; the rationale
-  // carries the storia36 marker). They follow the Wave-2 resolution pattern.
+  // ANCHORING (S1035). `resolved_status` is a PURE FUNCTION of has_rows
+  // (sys.fn_reconciliation_status: `WHEN v_has THEN 'POPULATED' … ELSE declared_status`),
+  // so a literal 'NO_SOURCE'/'POPULATED' expectation asserts the PRESENCE OF A SEED, not an
+  // invariant of the registry. The two environments legitimately differ: PROD/local carries
+  // the storia36 authored derivations (C3 on the reward pair, C5 on the succession/target
+  // pair), while heuresys_ci is a PROD clone frozen before them and re-hydrated with
+  // migrations only — no db/seeds/storia36/* step exists in .github/workflows/test-integration.yml.
+  // Measured 2026-07-28: PROD 4/4 POPULATED, heuresys_ci 4/4 empty+NO_SOURCE.
+  // The assertions below are therefore anchored to PROVENANCE and to view COHERENCE, both
+  // of which hold with or without the storia36 history.
+  //
+  // declared_status = NO_SOURCE is a verdict on the LEGACY provenance ("no importable 1:1
+  // source"); it does NOT decay when the table is later filled by a human-authored
+  // derivation. That is why these tables can be both terminal and populated.
   const TERMINAL_NO_SOURCE = [
     'sys_successor_readiness',
     'sys_user_target_positions',
   ] as const;
-  const STORIA36_AUTHORED = [
+  const STORIA36_C3_AUTHORED = [
     'sys_payout_curves',
     'sys_reward_gate_results',
   ] as const;
+  const TERMINAL_TABLES = [...TERMINAL_NO_SOURCE, ...STORIA36_C3_AUTHORED];
   const WAVE2_IMPORTED = [
     'sys_branches',
     'sys_succession_pools',
     'sys_successor_candidates',
   ] as const;
+  // The jsonb column that carries the storia36 provenance marker on each table
+  // (`->>'storia36'` = 'C3'/'C5' for the authored rows, NULL for the imported ones).
+  // Verified live against information_schema, 2026-07-28.
+  const PROVENANCE_COLUMN: Record<string, string> = {
+    sys_payout_curves: 'payout_curve_payload',
+    sys_reward_gate_results: 'reward_gate_result_payload',
+    sys_successor_readiness: 'successor_readiness_payload',
+    sys_user_target_positions: 'user_target_position_metadata',
+    sys_branches: 'branch_metadata',
+    sys_succession_pools: 'succession_pool_metadata',
+    sys_successor_candidates: 'successor_candidate_metadata',
+  };
+  const countAuthored = async (table: string, authored: boolean): Promise<number> => {
+    const col = PROVENANCE_COLUMN[table];
+    if (!col) throw new Error(`no provenance column declared for sys.${table}`);
+    const { rows } = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.${table}
+        WHERE ${col}->>'storia36' IS ${authored ? 'NOT NULL' : 'NULL'}`,
+    );
+    return rows[0]?.n ?? -1;
+  };
 
   it('view-wide NEEDS_DECISION dropped to exactly 0 (was 3 after S972, 7 before B-50)', async () => {
     const { rows } = await pool.query<{ n: number }>(
@@ -118,33 +150,83 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
     expect(rows[0]?.n).toBe(0);
   });
 
-  it('the terminal tables resolve to NO_SOURCE in the view', async () => {
-    const { rows } = await pool.query<{ table_name: string; resolved_status: string }>(
-      `SELECT table_name, resolved_status FROM sys.v_reconciliation_status
+  // The terminal declaration must survive both states. When the table is EMPTY the view has
+  // to fall back to the registry's NO_SOURCE — this is NOT tautological: the fallback chain
+  // consults brownfield.table_mappings FIRST, so an IMPORT/REFERENCE_ONLY mapping silently
+  // added for one of these tables would shadow the terminal verdict and turn this red.
+  // When the table is POPULATED it must resolve POPULATED and nothing else.
+  it('the 4 terminal tables resolve coherently with has_rows and never lose the NO_SOURCE fallback', async () => {
+    const { rows } = await pool.query<{
+      table_name: string;
+      has_rows: boolean;
+      resolved_status: string;
+      declared_status: string;
+    }>(
+      `SELECT table_name, has_rows, resolved_status, declared_status
+         FROM sys.v_reconciliation_status
         WHERE table_name = ANY($1::text[]) ORDER BY table_name`,
-      [TERMINAL_NO_SOURCE as unknown as string[]],
+      [TERMINAL_TABLES],
     );
-    expect(rows.map((r) => r.table_name).sort()).toEqual([...TERMINAL_NO_SOURCE].sort());
-    expect(rows.every((r) => r.resolved_status === 'NO_SOURCE')).toBe(true);
+    expect(rows.map((r) => r.table_name)).toEqual([...TERMINAL_TABLES].sort());
+    for (const r of rows) {
+      expect(r.declared_status, `${r.table_name}: declared_status`).toBe('NO_SOURCE');
+      expect(
+        r.resolved_status,
+        `${r.table_name}: risoluzione incoerente con has_rows=${r.has_rows} ` +
+          `(una table_mapping brownfield sta oscurando il verdetto terminale?)`,
+      ).toBe(r.has_rows ? 'POPULATED' : 'NO_SOURCE');
+    }
   });
 
-  it('the storia36-authored tables resolve POPULATED and carry BOTH markers', async () => {
-    const { rows } = await pool.query<{ table_name: string; resolved_status: string }>(
-      `SELECT table_name, resolved_status FROM sys.v_reconciliation_status
-        WHERE table_name = ANY($1::text[]) ORDER BY table_name`,
-      [STORIA36_AUTHORED as unknown as string[]],
+  // The real content of the retired "terminal tables must remain EMPTY" assertion: no LEGACY
+  // import may fabricate rows into a table declared NO_SOURCE. Rows authored by storia36 are
+  // legitimate (the B-50 rationale for the C3 pair explicitly called for a human-authored
+  // derivation); rows WITHOUT a provenance marker in one of these tables are not.
+  // Holds in both environments: heuresys_ci has 0 rows, PROD has 0 non-authored rows.
+  it('no terminal NO_SOURCE table holds a row of unauthored (legacy-import) provenance', async () => {
+    for (const t of TERMINAL_TABLES) {
+      expect(
+        await countAuthored(t, false),
+        `sys.${t}: righe prive del marcatore storia36 — un import ha invaso una tabella dichiarata NO_SOURCE`,
+      ).toBe(0);
+    }
+  });
+
+  // Data and registry annotation are coupled BOTH WAYS: the storia36 C3 seed pair writes the
+  // rows (03_compensation.sql) and the annotation (repair/2026-07-28_c3_fixups_oneshot.sql).
+  // Rows without the annotation = the registry lying about a table it declares terminal;
+  // annotation without rows = a claim of a derivation that was never produced. Either is red.
+  // In heuresys_ci neither ran (both sides false) — the equality still holds and still bites.
+  it('the storia36 C3 authored pair: rows and registry annotation move together', async () => {
+    const authored = await Promise.all(
+      STORIA36_C3_AUTHORED.map(async (t) => ({ t, n: await countAuthored(t, true) })),
     );
-    expect(rows.map((r) => r.table_name).sort()).toEqual([...STORIA36_AUTHORED].sort());
-    expect(rows.every((r) => r.resolved_status === 'POPULATED')).toBe(true);
-    const { rows: reg } = await pool.query<{ marked: boolean }>(
-      `SELECT (reconciliation_registry_rationale LIKE '%[storia36 C3%'
-               AND reconciliation_registry_rationale LIKE '%[B-50 TERMINAL S972]%') AS marked
+    const populated = authored.filter((a) => a.n > 0).map((a) => a.t);
+    // 03_compensation.sql writes curves and gate results in one run: a half-populated pair
+    // means the seed died mid-way and the registry state can no longer be trusted.
+    expect(
+      populated.length === 0 || populated.length === STORIA36_C3_AUTHORED.length,
+      `coppia C3 popolata a meta': ${JSON.stringify(authored)}`,
+    ).toBe(true);
+
+    const { rows: reg } = await pool.query<{ table_name: string; marked_c3: boolean; marked_b50: boolean }>(
+      `SELECT reconciliation_registry_table_name AS table_name,
+              (reconciliation_registry_rationale LIKE '%[storia36 C3%') AS marked_c3,
+              (reconciliation_registry_rationale LIKE '%[B-50 TERMINAL S972]%') AS marked_b50
          FROM sys.sys_reconciliation_registry
         WHERE reconciliation_registry_table_name = ANY($1::text[])`,
-      [STORIA36_AUTHORED as unknown as string[]],
+      [STORIA36_C3_AUTHORED as unknown as string[]],
     );
     expect(reg).toHaveLength(2);
-    expect(reg.every((r) => r.marked === true)).toBe(true);
+    // the B-50 terminal marker ships with migration 000076 → present in every environment.
+    expect(reg.every((r) => r.marked_b50 === true), 'marcatore [B-50 TERMINAL S972] mancante').toBe(true);
+    for (const r of reg) {
+      expect(
+        r.marked_c3,
+        `${r.table_name}: annotazione [storia36 C3] e dati devono coesistere ` +
+          `(righe autorate presenti: ${populated.length > 0})`,
+      ).toBe(populated.length > 0);
+    }
   });
 
   it('the 4 terminal tables carry declared_status NO_SOURCE + a B-50 TERMINAL rationale', async () => {
@@ -154,7 +236,7 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
               (reconciliation_registry_rationale LIKE '%[B-50 TERMINAL S972]%') AS marked
          FROM sys.sys_reconciliation_registry
         WHERE reconciliation_registry_table_name = ANY($1::text[])`,
-      [[...TERMINAL_NO_SOURCE, ...STORIA36_AUTHORED] as unknown as string[]],
+      [TERMINAL_TABLES],
     );
     expect(rows).toHaveLength(4);
     expect(rows.every((r) => r.declared === 'NO_SOURCE')).toBe(true);
@@ -185,23 +267,18 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
     expect(rows.every((r) => r.marked === true)).toBe(true);
   });
 
-  it('the terminal NO_SOURCE tables remain EMPTY; the 3 Wave-2 tables carry the imported counts', async () => {
-    for (const t of TERMINAL_NO_SOURCE) {
-      const { rows } = await pool.query<{ n: number }>(
-        `SELECT count(*)::int AS n FROM sys.${t}`,
-      );
-      expect(rows[0]?.n, `${t} must be empty`).toBe(0);
-    }
-    const expected: Record<string, number> = {
+  // The Wave-2 census verifies the IMPORT (seeds 49-50), so it must count the IMPORTED rows.
+  // A raw count(*) drifted the moment storia36 C5 added 24 authored candidates on top of the
+  // 25 imported ones (measured 2026-07-28: PROD 49 total = 25 import + 24 C5; heuresys_ci 25).
+  // Constraining the count to the import provenance restores the original meaning in both.
+  it('the 3 Wave-2 tables carry exactly their imported counts (provenance-constrained)', async () => {
+    const expectedImported: Record<string, number> = {
       sys_branches: 6,
       sys_succession_pools: 17,
       sys_successor_candidates: 25,
     };
-    for (const [t, n] of Object.entries(expected)) {
-      const { rows } = await pool.query<{ n: number }>(
-        `SELECT count(*)::int AS n FROM sys.${t}`,
-      );
-      expect(rows[0]?.n, `${t} expected ${n} imported rows`).toBe(n);
+    for (const [t, n] of Object.entries(expectedImported)) {
+      expect(await countAuthored(t, false), `sys.${t}: attese ${n} righe d'import`).toBe(n);
     }
   });
 

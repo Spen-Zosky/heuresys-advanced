@@ -36,43 +36,21 @@ il dato ha un lettore umano. Il cancello è **automatico**: `python docs/kb/tool
 deriva dai seed le tabelle scritte, dal sorgente dell'API quelle lette, e fallisce se ne resta una
 scoperta. Deroghe solo in `docs/kb/tools/exposure_waivers.txt` **e solo con motivo**.
 
-## ⚠ Pendenza aperta dalla chiusura S1034 — VERIFICARE PER PRIMA COSA
+## ✅ Chiusura S1034 completa — nessuna pendenza
 
-**La CI è ROSSA su `9baeae8f` e il deploy sulla VM NON è stato eseguito.** Il cancello D-08 F2
-pretende la CI verde sullo sha deployato e ha fatto il suo mestiere; `close-propagate` ha chiuso
-**NOT clean**. Gli altri 7 gate sono verdi: rossa è solo **«Test (api integration)»** — run
-`30380601098`, **5 test falliti su 3 file, 1494 passati**.
+CI **verde** su `85f06f4e`, **deploy in produzione eseguito e verificato**: servizi e timer attivi,
+`/readyz` OK, `/login` 200 in 33 ms, `LAST_GOOD` = `85f06f4e`. linux-pc allineato (repo, dati,
+ecosistema, clone del database).
 
-**I tre file, e l'ipotesi da verificare per prima**:
-- `test/sdbi-perf-feedback.integration.test.ts:117` — `expected 159 to be 157`. Il test esclude le
-  righe storia36 con `review_natural_key NOT LIKE 'STORIA36%'` e trova comunque 2 righe in più:
-  **o il filtro per chiave naturale non copre tutto ciò che i cluster hanno scritto, o il database
-  della CI (`heuresys_ci`) è stato rinfrescato da uno che contiene già la storia**. È lo stesso
-  difetto di classe corretto tre volte in S1034 (conteggi fotografati vs dato che cresce): la
-  correzione giusta è vincolare l'atteso alla **provenienza**, non ritoccare il numero.
-- `test/reconciliation-registry.integration.test.ts` — stessa famiglia, da leggere.
-- `test/exposure-gate.integration.test.ts` — **è mio, nato in S1034**: probabile che sul DB della CI
-  le tre tabelle nuove siano vuote (il seed storia36 non gira lì), quindi gli attesi derivati dalla
-  sorgente sono 0 e un `toBeGreaterThan(0)` cade. Da rendere tollerante al DB senza storia.
+**Lezione da portare avanti**: `heuresys_ci` è un clone di produzione **congelato al provisioning**
+(D-08) e non viene mai rinfrescato — i due mondi divergono e devono **convivere**, non riallinearsi.
+Ogni test che fotografa un conteggio è quindi destinato a rompersi appena il dato reale cresce. La
+correzione giusta non è ritoccare il numero: è **definire la popolazione** in modo che valga in
+entrambi gli stati (fatto sui 3 file in `85f06f4e`, con lo scenario CI eseguito e non ipotizzato).
 
-⚠️ **Nota di metodo**: in S1034 la suite è stata verificata **a lotti** sul DB di sviluppo, mai
-interamente e mai sul DB della CI. È così che questi tre sono sfuggiti. Prima di ripushare:
-`cd apps/api && pnpm exec vitest run` per intero.
-
-- **linux-pc: allineato** (repo + payload + ecosistema + clone DB; deriva memorie 58≠56 risolta a mano).
-- **VM: repo sincronizzato, PROD ancora sul build precedente.**
-
-Primo lavoro della prossima sessione (in quest'ordine):
-```bash
-gh run view 30380601098 --log-failed | head -60        # i 5 fallimenti, per esteso
-cd apps/api && pnpm exec vitest run                    # suite INTERA, non a lotti
-# poi, solo a CI verde:
-MSYS_NO_PATHCONV=1 ssh oracle-vm-default 'cd ~/heuresys-advanced && bash scripts/vm-deploy.sh'
-curl -s -o /dev/null -w '%s' https://www.heuresys.com/api/readyz   # 200 atteso
-```
-Oppure semplicemente ri-eseguire `bash scripts/close-propagate.sh --delta --resilient --auto-deploy`
-(idempotente). **Deriva nota e non-bloccante**: 5 marketplace di plugin con SHA divergente →
-aggiornamento manuale di Enzo, per macchina (non è un verdetto di fallimento).
+**Deriva nota, non bloccante**: 5 marketplace di plugin con SHA divergente → aggiornamento manuale
+di Enzo, per macchina. **Debito confermato**: D-55, 500 intermittente al passo TOTP — riproducibile
+sotto la suite intera (5 file caduti in avvio), assente in lotti ridotti, verde in CI.
 
 ## Stato dei piani
 

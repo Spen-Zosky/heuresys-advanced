@@ -1046,18 +1046,46 @@ $fn$;
 -- certificato: confondere le due cose farebbe scadere ogni anno un titolo che il
 -- dato dichiara quinquennale.
 -- ----------------------------------------------------------------------------
+-- ----------------------------------------------------------------------------
+-- Helper C4/2-bis — le cadenze che NON si derivano dal dato perche' le fissa la
+-- norma. Fonti riga per riga in DOMINIO §5.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_cert_validity_di_legge(p_name text)
+RETURNS numeric LANGUAGE sql IMMUTABLE AS $fn$
+  SELECT CASE
+    -- Accordo Stato-Regioni 17/04/2025: lavoratori 6 h ogni 5 anni
+    WHEN p_name ILIKE '%Sicurezza Base%'             THEN 5
+    -- preposti: aggiornamento BIENNALE, minimo 6 h (la sola cadenza accorciata)
+    WHEN p_name ILIKE '%preposti%'                   THEN 2
+    -- dirigenti per la sicurezza: base 12 h, aggiornamento quinquennale
+    WHEN p_name ILIKE '%dirigenti per la sicurezza%' THEN 5
+    -- datore di lavoro: corso 16 h, aggiornamento quinquennale 6 h
+    WHEN p_name ILIKE '%datore di lavoro%'           THEN 5
+    -- addetto antincendio livello 1 (rischio basso), DM 02/09/2021: 2 h ogni 5 anni
+    WHEN p_name ILIKE '%antincendio%'                THEN 5
+    -- addetto primo soccorso gruppo B/C, DM 388/2003: 4 h ogni 3 anni
+    WHEN p_name ILIKE '%primo soccorso%'             THEN 3
+    ELSE NULL
+  END::numeric
+$fn$;
+
 CREATE OR REPLACE FUNCTION staging.storia36_cert_validity_years(p_name text, p_issuer text)
 RETURNS numeric LANGUAGE sql STABLE AS $fn$
   SELECT COALESCE(
-           percentile_cont(0.5) WITHIN GROUP (
-             ORDER BY (c.user_certification_expires_date - c.user_certification_issued_date) / 365.0),
-           3.0)
-    FROM sys.sys_user_certifications c
-   WHERE c.user_certification_name = p_name
-     AND c.user_certification_issuer = p_issuer
-     AND c.user_certification_issued_date IS NOT NULL
-     AND c.user_certification_expires_date IS NOT NULL
-     AND c.user_certification_metadata->>'storia36' IS NULL
+    -- (1) dove la cadenza la fissa la LEGGE, la legge vince sul dato: non ha
+    -- senso derivare dalla mediana una periodicita' che il D.Lgs 81/08 e i suoi
+    -- decreti attuativi stabiliscono in modo puntuale (DOMINIO §5).
+    staging.storia36_cert_validity_di_legge(p_name),
+    -- (2) altrimenti: la validita' mediana osservata per quello schema
+    (SELECT percentile_cont(0.5) WITHIN GROUP (
+              ORDER BY (c.user_certification_expires_date - c.user_certification_issued_date) / 365.0)
+       FROM sys.sys_user_certifications c
+      WHERE c.user_certification_name = p_name
+        AND c.user_certification_issuer = p_issuer
+        AND c.user_certification_issued_date IS NOT NULL
+        AND c.user_certification_expires_date IS NOT NULL
+        AND c.user_certification_metadata->>'storia36' IS NULL),
+    3.0)
 $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -1668,6 +1696,146 @@ BEGIN
   WHERE x.n > 3;
   IF v_cnt > 0 THEN
     RAISE EXCEPTION 'C4g(iii): % ore con più di 3 persone che chiudono lo stesso corso in autoapprendimento (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- Helper C4/6 — dove lavora ciascuno. Le squadre di emergenza si designano per
+-- SEDE, non per organigramma: la sede di una persona si ricava risalendo l'albero
+-- delle unità organizzative fino alla prima che è una filiale — la PIÙ VICINA,
+-- perché chi sta sotto una filiale sta anche, più in alto, sotto la sede centrale.
+-- Senza questo aggancio la designazione degli addetti sarebbe un'invenzione.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW staging.storia36_sede_personale AS
+WITH RECURSIVE risalita AS (
+  SELECT u.user_id, p.position_organization_unit_id AS ou_id, 0 AS distanza
+    FROM sys.sys_users u
+    JOIN sys.sys_user_position_assignments a
+      ON a.user_position_assignment_user_id = u.user_id
+     AND a.user_position_assignment_kind = 'PRIMARY'
+     AND a.user_position_assignment_status = 'ACTIVE'
+    JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+   WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+     AND u.user_status = 'ACTIVE'
+     AND p.position_organization_unit_id IS NOT NULL
+  UNION ALL
+  SELECT r.user_id, o.organization_unit_parent_id, r.distanza + 1
+    FROM risalita r
+    JOIN sys.sys_organization_units o ON o.organization_unit_id = r.ou_id
+   WHERE o.organization_unit_parent_id IS NOT NULL
+)
+SELECT DISTINCT ON (r.user_id)
+       r.user_id, b.branch_code, b.branch_city, r.distanza
+  FROM risalita r
+  JOIN sys.sys_branches b ON b.branch_organization_unit_id = r.ou_id
+ WHERE b.branch_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+ ORDER BY r.user_id, r.distanza;
+
+-- ----------------------------------------------------------------------------
+-- C4h — SICUREZZA SUL LAVORO: l'obbligo non è uno solo e non è uguale per tutti.
+-- C4b verifica che le abilitazioni possedute non scadano; qui si verifica il
+-- passo prima, cioè che chi DEVE averle le abbia — ed è il predicato che vede
+-- chi non ha alcun record, l'unico invisibile a un controllo sulle scadenze.
+-- Le platee non sono elenchi scritti a mano: si derivano dall'organigramma
+-- (preposto = ha riporti diretti), dal contratto (dirigente = inquadramento) e
+-- dalla struttura (datore di lavoro = vertice; squadre di emergenza = per
+-- filiale). Cadenze e destinatari: DOMINIO §5.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c4h(p_end date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  p_end := LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end));
+
+  -- (i) formazione lavoratori: obbligo di OGNI lavoratore, senza eccezioni
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_users u
+  WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND u.user_status = 'ACTIVE'
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_certifications c
+       WHERE c.user_certification_user_id = u.user_id
+         AND c.user_certification_name ILIKE '%Sicurezza Base%'
+         AND c.user_certification_expires_date >= p_end);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4h: % lavoratori attivi senza formazione sicurezza valida (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (ii) preposti: chi ha riporti diretti nell'organigramma
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_users u
+  JOIN sys.sys_user_position_assignments a
+    ON a.user_position_assignment_user_id = u.user_id
+   AND a.user_position_assignment_kind = 'PRIMARY'
+   AND a.user_position_assignment_status = 'ACTIVE'
+  WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND u.user_status = 'ACTIVE'
+    AND EXISTS (SELECT 1 FROM sys.sys_positions p
+                 WHERE p.position_reports_to_position_id = a.user_position_assignment_position_id)
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_certifications c
+       WHERE c.user_certification_user_id = u.user_id
+         AND c.user_certification_name ILIKE '%preposti%'
+         AND c.user_certification_expires_date >= p_end);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4h(ii): % preposti senza aggiornamento valido (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (iii) dirigenti per la sicurezza: l'inquadramento contrattuale li identifica
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_users u
+  JOIN sys.sys_user_contracts ct ON ct.user_contract_user_id = u.user_id
+  WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND u.user_status = 'ACTIVE'
+    AND ct.user_contract_ccnl_level = 'Dirigente'
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_certifications c
+       WHERE c.user_certification_user_id = u.user_id
+         AND c.user_certification_name ILIKE '%dirigenti per la sicurezza%'
+         AND c.user_certification_expires_date >= p_end);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4h(iii): % dirigenti senza formazione sicurezza valida (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (iv) datore di lavoro: chi occupa la posizione al vertice dell'organigramma
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_users u
+  JOIN sys.sys_user_position_assignments a
+    ON a.user_position_assignment_user_id = u.user_id
+   AND a.user_position_assignment_kind = 'PRIMARY'
+   AND a.user_position_assignment_status = 'ACTIVE'
+  JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+  WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND u.user_status = 'ACTIVE'
+    AND p.position_reports_to_position_id IS NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_certifications c
+       WHERE c.user_certification_user_id = u.user_id
+         AND c.user_certification_name ILIKE '%datore di lavoro%'
+         AND c.user_certification_expires_date >= p_end);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4h(iv): % al vertice senza formazione da datore di lavoro (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (v) squadre di emergenza: ogni sede con personale ha almeno un addetto
+  -- antincendio e uno di primo soccorso in corso di validità
+  SELECT count(*), min(x.sede || ': manca ' || x.figura) INTO v_cnt, v_sample
+  FROM (
+    SELECT s.branch_code AS sede, f.figura
+      FROM staging.storia36_sede_personale s
+      CROSS JOIN (VALUES ('%antincendio%'), ('%primo soccorso%')) AS f(figura)
+     WHERE NOT EXISTS (
+       SELECT 1 FROM staging.storia36_sede_personale s2
+        JOIN sys.sys_user_certifications c ON c.user_certification_user_id = s2.user_id
+       WHERE s2.branch_code = s.branch_code
+         AND c.user_certification_name ILIKE f.figura
+         AND c.user_certification_expires_date >= p_end)
+     GROUP BY 1, 2
+  ) x;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C4h(v): % sedi senza squadra di emergenza in regola (es. %)', v_cnt, v_sample;
   END IF;
 END $fn$;
 
@@ -2308,6 +2476,47 @@ BEGIN
     RAISE EXCEPTION 'SELFTEST C4a(iii) FALLITO: violazione iniettata non rilevata';
   END IF;
   RAISE NOTICE '[OK] SELFTEST C4a(iii) (obbligo di contenuto scoperto rilevato, rollback)';
+
+  -- ST-C4h: togliere la formazione sicurezza a un lavoratore deve far scattare C4h
+  v_fired := false;
+  BEGIN
+    SELECT u.user_id INTO v_u FROM sys.sys_users u
+     WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+       AND u.user_status = 'ACTIVE' LIMIT 1;
+    DELETE FROM sys.sys_user_certifications
+     WHERE user_certification_user_id = v_u
+       AND user_certification_name ILIKE '%Sicurezza Base%';
+    PERFORM staging.storia36_check_c4h(v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4h%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4h FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4h (lavoratore senza formazione sicurezza rilevato, rollback)';
+
+  -- ST-C4h(v): sciogliere la squadra di emergenza di una sede deve far scattare C4h
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_user_certifications c
+     USING staging.storia36_sede_personale s
+     WHERE s.user_id = c.user_certification_user_id
+       AND s.branch_code = (SELECT min(branch_code) FROM staging.storia36_sede_personale)
+       AND c.user_certification_name ILIKE '%antincendio%';
+    PERFORM staging.storia36_check_c4h(v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C4h%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN
+    RAISE EXCEPTION 'SELFTEST C4h(v) FALLITO: violazione iniettata non rilevata';
+  END IF;
+  RAISE NOTICE '[OK] SELFTEST C4h(v) (sede senza squadra di emergenza rilevata, rollback)';
 END $$;
 \endif
 
@@ -2562,6 +2771,14 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C4g'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c4h(v_end);
+    RAISE NOTICE '[OK] C4h sicurezza: lavoratori, preposti, dirigenti, datore di lavoro, squadre';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C4h'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   IF array_length(v_failed, 1) > 0 THEN

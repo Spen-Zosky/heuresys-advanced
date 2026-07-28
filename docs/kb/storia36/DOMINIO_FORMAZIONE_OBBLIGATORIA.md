@@ -86,20 +86,41 @@ di 30 h/anno, e **rinnovo annuale** del certificato.
   in G.U. il 24 maggio 2025), che sostituisce e coordina gli Accordi 2011/2012/2016
   ([Consultlario — aggiornamento quinquennale 6 ore](https://www.consultlario.com/pages/blog/aggiornamento-formazione-lavoratori-6-ore-2026.html),
   [ADVANT Nctm — nuovo Accordo Stato-Regioni](https://www.advant-nctm.com/en/news/sicurezza-sul-lavoro-il-nuovo-accordo-stato-regioni-sulla-formazione-in-materia-di-salute-e-sicurezza-dei-lavoratori)).
-- L'aggiornamento del **lavoratore** resta **quinquennale, minimo 6 ore**, per tutti i
-  livelli di rischio (stessa fonte).
-- L'obbligo però **non si esaurisce nel lavoratore**: l'Accordo distingue lavoratori,
-  **preposti** (aggiornamento più frequente), **dirigenti**, **datore di lavoro** e le
-  figure di emergenza (**antincendio**, **primo soccorso**).
+- L'obbligo **non si esaurisce nel lavoratore**: l'Accordo distingue lavoratori,
+  **preposti**, **dirigenti** e **datore di lavoro**; a parte, i decreti attuativi
+  regolano le **squadre di emergenza**.
 
-> **Perimetro dichiarato**: il dataset RTL porta un solo schema di sicurezza
-> («Sicurezza Base D.Lgs 81/08», INAIL, 42 persone) e il C4 modella soltanto quello.
-> Gli obblighi di preposto, dirigente, datore di lavoro e addetti alle emergenze
-> **non sono rappresentati** — non perché non esistano, ma perché il dato non li porta
-> e assegnarli richiederebbe di inventare una designazione (chi è l'addetto
-> antincendio di quale unità?) senza alcun ancoraggio nella sorgente. È una lacuna
-> **nota e registrata**, non una svista: chiuderla è materiale per un cluster
-> successivo, insieme alla designazione delle figure sull'organigramma.
+| Figura | Cadenza dell'aggiornamento | Fonte |
+|---|---|---|
+| Lavoratore | **5 anni**, minimo 6 ore | Accordo Stato-Regioni 17/04/2025 ([Consultlario](https://www.consultlario.com/pages/blog/aggiornamento-formazione-lavoratori-6-ore-2026.html)) |
+| **Preposto** | **2 anni**, minimo 6 ore — l'unica cadenza accorciata | Accordo 2025 ([AiFOS](https://aifos.org/home/news/normativa/leggi_e_norme/accordo-unico-stato-regioni-17-aprile-2025), [Vega Formazione](https://www.vegaformazione.it/PB/nuovo-accordo-stato-regioni-formazione-p409.html)) |
+| Dirigente per la sicurezza | corso base ridotto a **12 ore** (era 16), aggiornamento quinquennale | Accordo 2025 (stesse fonti) |
+| Datore di lavoro | corso **16 ore**, aggiornamento **quinquennale** 6 ore, obbligo entro il 24/05/2026 | Accordo 2025 ([Vega — datore di lavoro](https://www.vegaformazione.it/PB/formazione-sicurezza-datore-lavoro-accordo-stato-regioni-2025-p539.html)) |
+| Addetto **antincendio** (livello 1, rischio basso) | **5 anni**, 2 ore | DM 02/09/2021 ([Progetto81](https://www.progetto81.it/blog/26/formazione-antincendio-dm-02-settembre-2021)) |
+| Addetto **primo soccorso** (gruppo B/C) | **3 anni**, 4 ore | DM 388/2003 ([AS.CO. Formazione](https://www.ascoformazione.it/2025/09/04/antincendio-e-primo-soccorso-obblighi-formativi/)) |
+
+### 5.1 Come si individuano le platee (dal dato, non a mano)
+
+Il dataset non ha un campo «è preposto». Le platee si **derivano** da fatti già presenti,
+ed è questo che rende il controllo C4h falsificabile invece che tautologico:
+
+| Figura | Ancoraggio nel dato | Persone in RTL |
+|---|---|---|
+| Lavoratore | essere un dipendente attivo (l'obbligo non ha eccezioni) | 158 |
+| Preposto | avere almeno **un riporto diretto** in `sys_positions.position_reports_to_position_id` | 32 |
+| Dirigente per la sicurezza | inquadramento contrattuale `Dirigente` | 9 |
+| Datore di lavoro | occupare la posizione **al vertice** (nessun riporto verso l'alto) | 1 |
+| Squadre di emergenza | **due addetti per SEDE**, dove la sede si ottiene risalendo l'albero delle unità fino alla filiale più vicina (`staging.storia36_sede_personale`) | 2+2 × 3 sedi |
+
+Le sedi con personale sono tre: **MI-HQ** (137 persone), **MI-OPS** (11), **MI-CEN** (10).
+La designazione degli addetti alle emergenze richiede di sapere *chi lavora dove*: senza
+quell'aggancio sarebbe stata un'invenzione, ed è la ragione per cui la vista che lo
+ricostruisce è parte del controllo e non un dettaglio del seed.
+
+> **Perimetro dichiarato**: qui si scrive l'**abilitazione**, non le ore. In banca la
+> formazione sicurezza è tenuta dal servizio di prevenzione e protezione, non dal
+> catalogo formativo: le sue ore **non** concorrono al monte-ore di C4a e non generano
+> evidenze nel registro dei corsi. È una scelta, non una dimenticanza.
 
 ## 6. Rinnovi: la norma dice **quali**, il dato dice **ogni quanto**
 

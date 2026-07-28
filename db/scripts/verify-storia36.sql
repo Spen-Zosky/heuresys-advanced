@@ -1839,6 +1839,265 @@ BEGIN
   END IF;
 END $fn$;
 
+-- ############################################################################
+-- C5 — CARRIERA. Il profilo di ognuno, oggi, comincia il giorno dell'assunzione
+-- in RTL: prima c'è il vuoto, anche per chi è entrato a quarant'anni. E guarda
+-- solo all'indietro — nessuno ha un obiettivo dichiarato. Questo cluster
+-- costruisce il PRIMA (esperienze precedenti, ancorate a nascita e titoli di
+-- studio reali) e il DOPO (posizioni obiettivo, prontezza dei successori,
+-- evoluzione dei requisiti).
+-- ############################################################################
+
+-- ----------------------------------------------------------------------------
+-- Helper C5/1 — il momento in cui una persona ha potuto iniziare a lavorare:
+-- non prima dei 19 anni e non prima di aver finito il primo titolo di studio —
+-- ma nemmeno dopo l'ingresso in RTL, perché chi si è laureato da dipendente ha
+-- studiato lavorando. È l'ancora di tutta la carriera precedente: senza, le date
+-- sarebbero inventate invece che vincolate.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_c5_inizio_carriera(p_user uuid)
+RETURNS date LANGUAGE sql STABLE AS $fn$
+  SELECT GREATEST(
+           (SELECT (d.user_demographics_birth_date + interval '19 years')::date
+              FROM sys.sys_user_demographics d
+             WHERE d.user_demographics_user_id = p_user),
+           LEAST(
+             (SELECT min(e.user_education_end_date) FROM sys.sys_user_education_records e
+               WHERE e.user_education_record_user_id = p_user
+                 AND e.user_education_end_date IS NOT NULL),
+             (SELECT min(em.user_employment_hire_date) FROM sys.sys_user_employment em
+               WHERE em.user_employment_user_id = p_user)))
+$fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5a — la carriera precedente regge come racconto: (i) nessuna esperienza
+-- iniziata prima dei 19 anni o della fine degli studi; (ii) l'ultima finisce
+-- entro l'ingresso in RTL; (iii) le esperienze di una persona non si
+-- sovrappongono; (iv) fra una e l'altra non restano buchi oltre 18 mesi;
+-- (v) fine dopo inizio.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5a()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email || ': ' || x.user_prof_exp_start_date ||
+                       ' prima di ' || staging.storia36_c5_inizio_carriera(x.user_prof_exp_user_id))
+    INTO v_cnt, v_sample
+  FROM sys.sys_user_professional_experiences x
+  JOIN sys.sys_users u ON u.user_id = x.user_prof_exp_user_id
+  WHERE x.user_prof_exp_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND x.user_prof_exp_start_date < staging.storia36_c5_inizio_carriera(x.user_prof_exp_user_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5a: % esperienze iniziate prima che la persona potesse lavorare (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_user_professional_experiences x
+  JOIN sys.sys_users u ON u.user_id = x.user_prof_exp_user_id
+  JOIN sys.sys_user_employment em ON em.user_employment_user_id = x.user_prof_exp_user_id
+  WHERE x.user_prof_exp_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND (x.user_prof_exp_end_date IS NULL
+      OR x.user_prof_exp_end_date > em.user_employment_hire_date);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5a(ii): % esperienze precedenti che non finiscono prima dell''ingresso in RTL (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM (
+    SELECT x.user_prof_exp_user_id AS uid, x.user_prof_exp_start_date AS d_ini,
+           lag(x.user_prof_exp_end_date) OVER (PARTITION BY x.user_prof_exp_user_id
+                                               ORDER BY x.user_prof_exp_start_date) AS prec_fine
+      FROM sys.sys_user_professional_experiences x
+     WHERE x.user_prof_exp_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+  ) c
+  JOIN sys.sys_users u ON u.user_id = c.uid
+  WHERE c.prec_fine IS NOT NULL AND (c.d_ini < c.prec_fine OR c.d_ini - c.prec_fine > 548);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5a(iii): % esperienze sovrapposte o separate da oltre 18 mesi (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_user_professional_experiences x
+  JOIN sys.sys_users u ON u.user_id = x.user_prof_exp_user_id
+  WHERE x.user_prof_exp_end_date IS NOT NULL
+    AND x.user_prof_exp_end_date < x.user_prof_exp_start_date;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5a(iv): % esperienze che finiscono prima di iniziare (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5b — la successione non è un elenco di nomi: ogni posizione dichiarata
+-- critica ha almeno un candidato, e ogni candidato ha una valutazione di
+-- prontezza; l'ultima valutazione concorda col livello dichiarato sul candidato
+-- (altrimenti il livello è un'etichetta che nessuno ha misurato).
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5b()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(COALESCE(p.position_title, cp.critical_position_id::text))
+    INTO v_cnt, v_sample
+  FROM sys.sys_critical_positions cp
+  LEFT JOIN sys.sys_positions p ON p.position_id = cp.critical_position_position_id
+  WHERE cp.critical_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_succession_pools sp
+       JOIN sys.sys_successor_candidates sc ON sc.successor_candidate_pool_id = sp.succession_pool_id
+      WHERE sp.succession_pool_position_id = cp.critical_position_position_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5b: % posizioni critiche senza alcun successore individuato (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_successor_candidates sc
+  JOIN sys.sys_users u ON u.user_id = sc.successor_candidate_user_id
+  WHERE sc.successor_candidate_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_successor_readiness r
+       WHERE r.successor_readiness_candidate_id = sc.successor_candidate_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5b(ii): % successori senza alcuna valutazione di prontezza (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email || ': dichiarato ' || sc.successor_candidate_readiness_level ||
+                       ', valutato ' || ult.successor_readiness_horizon)
+    INTO v_cnt, v_sample
+  FROM sys.sys_successor_candidates sc
+  JOIN sys.sys_users u ON u.user_id = sc.successor_candidate_user_id
+  JOIN LATERAL (
+    SELECT r.successor_readiness_horizon
+      FROM sys.sys_successor_readiness r
+     WHERE r.successor_readiness_candidate_id = sc.successor_candidate_id
+     ORDER BY r.successor_readiness_assessed_at DESC LIMIT 1) ult ON true
+  WHERE sc.successor_candidate_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND ult.successor_readiness_horizon IS DISTINCT FROM sc.successor_candidate_readiness_level;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5b(iii): % successori il cui livello dichiarato non corrisponde all''ultima valutazione (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5c — l'obiettivo di carriera è un obiettivo: sta nello stesso tenant, non è
+-- la posizione che già si occupa, e non è un salto arbitrario — deve essere
+-- raggiungibile da un percorso di carriera che passa per la posizione attuale.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5c()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_user_target_positions t
+  JOIN sys.sys_users u ON u.user_id = t.user_target_position_user_id
+  JOIN sys.sys_positions p ON p.position_id = t.user_target_position_position_id
+  WHERE t.user_target_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND (p.position_tenant_id IS DISTINCT FROM t.user_target_position_tenant_id
+      OR u.user_tenant_id IS DISTINCT FROM t.user_target_position_tenant_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5c: % obiettivi di carriera fuori dal perimetro del tenant (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_user_target_positions t
+  JOIN sys.sys_users u ON u.user_id = t.user_target_position_user_id
+  WHERE t.user_target_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND EXISTS (
+      SELECT 1 FROM sys.sys_user_position_assignments a
+       WHERE a.user_position_assignment_user_id = t.user_target_position_user_id
+         AND a.user_position_assignment_kind = 'PRIMARY'
+         AND a.user_position_assignment_status = 'ACTIVE'
+         AND a.user_position_assignment_position_id = t.user_target_position_position_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5c(ii): % persone che hanno come obiettivo la posizione che già occupano (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_user_target_positions t
+  JOIN sys.sys_users u ON u.user_id = t.user_target_position_user_id
+  WHERE t.user_target_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND t.user_target_position_review_status <> 'REJECTED'
+    AND NOT EXISTS (
+      -- un percorso di carriera che tocca sia la posizione attuale sia l'obiettivo
+      SELECT 1
+        FROM sys.sys_user_position_assignments a
+        JOIN sys.sys_position_career_paths pcp_ora
+          ON pcp_ora.position_id = a.user_position_assignment_position_id
+        JOIN sys.sys_position_career_paths pcp_meta
+          ON pcp_meta.career_path_id = pcp_ora.career_path_id
+         AND pcp_meta.position_id = t.user_target_position_position_id
+       WHERE a.user_position_assignment_user_id = t.user_target_position_user_id
+         AND a.user_position_assignment_kind = 'PRIMARY'
+         AND a.user_position_assignment_status = 'ACTIVE');
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5c(iii): % obiettivi non raggiungibili da alcun percorso di carriera (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5d — l'evoluzione dei requisiti di posizione è una storia di cambiamenti
+-- veri: ogni riga punta a un requisito che esiste, il livello nuovo è diverso
+-- dal vecchio (registrare un «cambiamento» che non cambia nulla è rumore),
+-- l'autore appartiene al tenant e la data cade dentro la finestra.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5d(p_start date, p_end date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  p_end := LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end));
+
+  SELECT count(*), min(h.position_skill_requirement_history_id::text) INTO v_cnt, v_sample
+  FROM sys.sys_position_skill_requirement_history h
+  WHERE h.position_skill_requirement_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND (NOT EXISTS (SELECT 1 FROM sys.sys_position_skill_requirements r
+                      WHERE r.position_skill_requirement_id = h.position_skill_requirement_history_psr_id)
+      OR h.position_skill_requirement_history_new_proficiency
+         IS NOT DISTINCT FROM h.position_skill_requirement_history_old_proficiency
+      OR h.position_skill_requirement_history_effective_at::date NOT BETWEEN p_start AND p_end);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5d: % variazioni di requisito orfane, nulle o fuori finestra (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(h.position_skill_requirement_history_id::text) INTO v_cnt, v_sample
+  FROM sys.sys_position_skill_requirement_history h
+  LEFT JOIN sys.sys_users u ON u.user_id = h.position_skill_requirement_history_actor_user_id
+  WHERE h.position_skill_requirement_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND (u.user_id IS NULL
+      OR u.user_tenant_id IS DISTINCT FROM h.position_skill_requirement_history_tenant_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5d(ii): % variazioni senza un autore del tenant (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C5e — i titoli di studio hanno una durata: un percorso senza data d'inizio
+-- non dice quanto è durato, e un inizio dopo la fine non è un percorso.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c5e()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email || ': ' || e.user_education_degree) INTO v_cnt, v_sample
+  FROM sys.sys_user_education_records e
+  JOIN sys.sys_users u ON u.user_id = e.user_education_record_user_id
+  WHERE u.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+    AND e.user_education_end_date IS NOT NULL
+    AND (e.user_education_start_date IS NULL
+      OR e.user_education_start_date > e.user_education_end_date);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C5e: % titoli di studio senza inizio o con inizio dopo la fine (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
 -- ============================================================================
 -- SELFTEST (con -v selftest=1) — la falsificabilità: per ogni check nuovo si
 -- inietta una violazione in SUBTRANSAZIONE (rollback garantito dal pattern
@@ -2517,6 +2776,97 @@ BEGIN
     RAISE EXCEPTION 'SELFTEST C4h(v) FALLITO: violazione iniettata non rilevata';
   END IF;
   RAISE NOTICE '[OK] SELFTEST C4h(v) (sede senza squadra di emergenza rilevata, rollback)';
+
+  -- ST-C5a: retrodatare un'esperienza all'adolescenza del soggetto
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_professional_experiences
+       SET user_prof_exp_start_date = user_prof_exp_start_date - 4000
+     WHERE ctid = (SELECT x.ctid FROM sys.sys_user_professional_experiences x LIMIT 1);
+    PERFORM staging.storia36_check_c5a();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5a%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5a FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5a (esperienza impossibile rilevata, rollback)';
+
+  -- ST-C5b: svuotare il bacino di una posizione critica
+  v_fired := false;
+  BEGIN
+    DELETE FROM sys.sys_successor_candidates sc
+     USING sys.sys_succession_pools sp, sys.sys_critical_positions cp
+     WHERE sc.successor_candidate_pool_id = sp.succession_pool_id
+       AND cp.critical_position_position_id = sp.succession_pool_position_id
+       AND cp.critical_position_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+    PERFORM staging.storia36_check_c5b();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5b%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5b FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5b (posizione critica scoperta rilevata, rollback)';
+
+  -- ST-C5c: puntare un obiettivo alla posizione che si occupa gia'
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_target_positions t
+       SET user_target_position_position_id = (
+             SELECT a.user_position_assignment_position_id
+               FROM sys.sys_user_position_assignments a
+              WHERE a.user_position_assignment_user_id = t.user_target_position_user_id
+                AND a.user_position_assignment_kind = 'PRIMARY'
+                AND a.user_position_assignment_status = 'ACTIVE' LIMIT 1)
+     WHERE ctid = (SELECT t2.ctid FROM sys.sys_user_target_positions t2 LIMIT 1);
+    PERFORM staging.storia36_check_c5c();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5c%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5c FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5c (obiettivo = posizione attuale rilevato, rollback)';
+
+  -- ST-C5d: registrare un «cambiamento» di requisito che non cambia nulla
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_position_skill_requirement_history
+       SET position_skill_requirement_history_old_proficiency =
+             position_skill_requirement_history_new_proficiency
+     WHERE ctid = (SELECT hh.ctid FROM sys.sys_position_skill_requirement_history hh LIMIT 1);
+    PERFORM staging.storia36_check_c5d(current_setting('storia36.window_start')::date, v_end);
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5d%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5d FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5d (variazione nulla rilevata, rollback)';
+
+  -- ST-C5e: togliere la data d'inizio a un titolo di studio
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_user_education_records
+       SET user_education_start_date = NULL
+     WHERE ctid = (SELECT e2.ctid FROM sys.sys_user_education_records e2
+                    JOIN sys.sys_users u2 ON u2.user_id = e2.user_education_record_user_id
+                   WHERE u2.user_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
+                     AND e2.user_education_end_date IS NOT NULL LIMIT 1);
+    PERFORM staging.storia36_check_c5e();
+    RAISE EXCEPTION 'ST_NOT_FIRED';
+  EXCEPTION WHEN OTHERS THEN
+    IF SQLERRM LIKE 'C5e%' THEN v_fired := true;
+    ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+    END IF;
+  END;
+  IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C5e FALLITO: violazione iniettata non rilevata'; END IF;
+  RAISE NOTICE '[OK] SELFTEST C5e (titolo senza durata rilevato, rollback)';
 END $$;
 \endif
 
@@ -2779,6 +3129,46 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C4h'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5a();
+    RAISE NOTICE '[OK] C5a carriera precedente: età, studi, continuità, fine entro l''ingresso';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5b();
+    RAISE NOTICE '[OK] C5b successione: ogni posizione critica ha successori valutati';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5c();
+    RAISE NOTICE '[OK] C5c obiettivi di carriera raggiungibili da un percorso reale';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5c'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5d(v_start, v_end);
+    RAISE NOTICE '[OK] C5d evoluzione dei requisiti di posizione tracciata e attribuita';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5d'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c5e();
+    RAISE NOTICE '[OK] C5e ogni titolo di studio ha una durata';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C5e'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   IF array_length(v_failed, 1) > 0 THEN

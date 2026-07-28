@@ -79,8 +79,16 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
   });
 
   describe('sys_successor_candidates (seed 49, plan-cascade via corrected false friend)', () => {
-    it('25 candidates, tenant = pool tenant, UNIQUE(pool,user), all CANDIDATE', async () => {
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_successor_candidates`)).toBe(25);
+    it('25 candidati dall import (+ quelli della storia), tenant = pool tenant, UNIQUE(pool,user), all CANDIDATE', async () => {
+      // Le tre asserzioni di questo blocco riguardano il RISULTATO DELL'IMPORT
+      // Wave-2, non l'intera tabella: dal cluster storia36 C5 i bacini delle
+      // posizioni critiche hanno i loro candidati, ed e' un fatto voluto. Si
+      // riconoscono dalla provenienza (`legacy_plan_id`), che l'import scrive
+      // e la storia no — le invarianti restano invece su TUTTE le righe.
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
+          WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL`,
+      )).toBe(25);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_successor_candidates c
            JOIN sys.sys_succession_pools sp ON sp.succession_pool_id = c.successor_candidate_pool_id
@@ -98,15 +106,16 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
     it('readiness mapping (D2): READY_1_YEAR=6, READY_2_YEARS=6, NOT_READY=13; raw legacy value preserved', async () => {
       const { rows } = await pool.query<{ readiness: string | null; n: number }>(
         `SELECT successor_candidate_readiness_level AS readiness, count(*)::int AS n
-           FROM sys.sys_successor_candidates GROUP BY 1`,
+           FROM sys.sys_successor_candidates
+          WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL GROUP BY 1`,
       );
       const m = Object.fromEntries(rows.map((r) => [r.readiness ?? 'NULL', r.n]));
       expect(m).toEqual({ READY_1_YEAR: 6, READY_2_YEARS: 6, NOT_READY: 13 });
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
-          WHERE successor_candidate_metadata->>'legacy_readiness' IS NULL
-             OR successor_candidate_metadata->>'legacy_plan_id' IS NULL
-             OR successor_candidate_metadata->>'legacy_employee_id' IS NULL`,
+          WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL
+            AND (successor_candidate_metadata->>'legacy_readiness' IS NULL
+              OR successor_candidate_metadata->>'legacy_employee_id' IS NULL)`,
       )).toBe(0);
     });
 
@@ -114,7 +123,8 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_successor_candidates c
            JOIN sys.sys_succession_pools sp ON sp.succession_pool_id = c.successor_candidate_pool_id
-          WHERE sp.succession_pool_code NOT LIKE 'LEGACY_SPLAN::%'`,
+          WHERE c.successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL
+            AND sp.succession_pool_code NOT LIKE 'LEGACY_SPLAN::%'`,
       )).toBe(0);
     });
   });

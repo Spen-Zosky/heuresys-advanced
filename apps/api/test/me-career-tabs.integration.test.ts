@@ -105,10 +105,14 @@ describe("/v1/me/{goals,risk,career-paths} — F3b career sub-tabs", () => {
     expect((await get(suite, outsider, "/v1/me/goals")).statusCode).toBe(200);
     expect(mine.total).not.toBe(undefined);
     expect(theirs.total).not.toBe(undefined);
-    // tommaso's first goal title must not appear in antonio's set (distinct subjects)
-    if (mine.items[0]?.title) {
-      expect(theirs.items.some((g) => g.title === mine.items[0]!.title && mine.total !== theirs.total)).toBe(false);
-    }
+    // La proprieta' di self-scope e' che i due insiemi non condividono NESSUNA
+    // riga — non che non condividano un titolo: due persone possono avere lo
+    // stesso obiettivo («Ridurre i crediti deteriorati») e da quando il ciclo di
+    // performance e' popolato lo hanno davvero. Confrontare i titoli faceva
+    // fallire il test per un fatto legittimo del dato, e soprattutto non provava
+    // l'isolamento: si verifica sull'identificativo.
+    const miei = new Set(mine.items.map((g) => g.goalId));
+    expect(theirs.items.filter((g) => miei.has(g.goalId))).toHaveLength(0);
   });
 
   it("rejects unauthenticated access", async () => {

@@ -38,17 +38,35 @@ scoperta. Deroghe solo in `docs/kb/tools/exposure_waivers.txt` **e solo con moti
 
 ## ⚠ Pendenza aperta dalla chiusura S1034 — VERIFICARE PER PRIMA COSA
 
-**Il deploy sulla VM di produzione NON è stato eseguito**, e non per un guasto: il cancello D-08 F2
-pretende la CI verde sullo sha deployato, e alla chiusura la suite «Test (api integration)» era
-ancora in corso su `9baeae8f` (gli altri 7 gate: verdi). `close-propagate` ha quindi chiuso
-**NOT clean** — il canale `align-clones` ha fallito sulla VM per questo motivo.
+**La CI è ROSSA su `9baeae8f` e il deploy sulla VM NON è stato eseguito.** Il cancello D-08 F2
+pretende la CI verde sullo sha deployato e ha fatto il suo mestiere; `close-propagate` ha chiuso
+**NOT clean**. Gli altri 7 gate sono verdi: rossa è solo **«Test (api integration)»** — run
+`30380601098`, **5 test falliti su 3 file, 1494 passati**.
+
+**I tre file, e l'ipotesi da verificare per prima**:
+- `test/sdbi-perf-feedback.integration.test.ts:117` — `expected 159 to be 157`. Il test esclude le
+  righe storia36 con `review_natural_key NOT LIKE 'STORIA36%'` e trova comunque 2 righe in più:
+  **o il filtro per chiave naturale non copre tutto ciò che i cluster hanno scritto, o il database
+  della CI (`heuresys_ci`) è stato rinfrescato da uno che contiene già la storia**. È lo stesso
+  difetto di classe corretto tre volte in S1034 (conteggi fotografati vs dato che cresce): la
+  correzione giusta è vincolare l'atteso alla **provenienza**, non ritoccare il numero.
+- `test/reconciliation-registry.integration.test.ts` — stessa famiglia, da leggere.
+- `test/exposure-gate.integration.test.ts` — **è mio, nato in S1034**: probabile che sul DB della CI
+  le tre tabelle nuove siano vuote (il seed storia36 non gira lì), quindi gli attesi derivati dalla
+  sorgente sono 0 e un `toBeGreaterThan(0)` cade. Da rendere tollerante al DB senza storia.
+
+⚠️ **Nota di metodo**: in S1034 la suite è stata verificata **a lotti** sul DB di sviluppo, mai
+interamente e mai sul DB della CI. È così che questi tre sono sfuggiti. Prima di ripushare:
+`cd apps/api && pnpm exec vitest run` per intero.
 
 - **linux-pc: allineato** (repo + payload + ecosistema + clone DB; deriva memorie 58≠56 risolta a mano).
 - **VM: repo sincronizzato, PROD ancora sul build precedente.**
 
-Primo controllo della prossima sessione:
+Primo lavoro della prossima sessione (in quest'ordine):
 ```bash
-gh run list --limit 8                                  # la CI su 9baeae8f dev'essere tutta verde
+gh run view 30380601098 --log-failed | head -60        # i 5 fallimenti, per esteso
+cd apps/api && pnpm exec vitest run                    # suite INTERA, non a lotti
+# poi, solo a CI verde:
 MSYS_NO_PATHCONV=1 ssh oracle-vm-default 'cd ~/heuresys-advanced && bash scripts/vm-deploy.sh'
 curl -s -o /dev/null -w '%s' https://www.heuresys.com/api/readyz   # 200 atteso
 ```

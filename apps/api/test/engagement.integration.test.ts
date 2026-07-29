@@ -42,21 +42,44 @@ describe("engagement normalized read-model (m2b)", () => {
     const r = await get("/v1/engagement/surveys", tenantAdmin);
     expect(r.statusCode).toBe(200);
     const b = r.json() as { items: { surveyId: string; tenantId: string; questionCount: number; responseCount: number }[]; total: number };
-    expect(b.total).toBe(8);
-    expect(b.items.length).toBe(8);
-    // counts are real (the cluster has 21 questions / 3792 responses across the 8 surveys)
-    expect(b.items.reduce((s, x) => s + x.responseCount, 0)).toBe(3792);
-    expect(b.items.reduce((s, x) => s + x.questionCount, 0)).toBe(21);
+    // Quante rilevazioni ci siano non è un invariante — la storia C8 ne
+    // aggiunge una per semestre. L'invariante è che l'elenco le porti tutte.
+    const atteso = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_surveys s
+        JOIN sys.sys_users u ON u.user_tenant_id = s.survey_tenant_id
+       WHERE u.user_email = 'federica.marchetti@rtl-bank.org'`,
+    );
+    expect(b.total).toBe(Number(atteso.rows[0]!.n));
+    expect(b.items.length).toBe(b.total);
+    // i conteggi sono veri: si confrontano con la fonte, non con una fotografia
+    const somme = await pool.query<{ risposte: string; domande: string }>(
+      `SELECT (SELECT count(*) FROM sys.sys_survey_responses r
+                JOIN sys.sys_surveys s2 ON s2.survey_id = r.survey_response_survey_id
+               WHERE s2.survey_tenant_id = u.user_tenant_id)::text AS risposte,
+              (SELECT count(*) FROM sys.sys_survey_questions q
+                JOIN sys.sys_surveys s3 ON s3.survey_id = q.survey_question_survey_id
+               WHERE s3.survey_tenant_id = u.user_tenant_id)::text AS domande
+         FROM sys.sys_users u WHERE u.user_email = 'federica.marchetti@rtl-bank.org'`,
+    );
+    expect(b.items.reduce((s, x) => s + x.responseCount, 0)).toBe(Number(somme.rows[0]!.risposte));
+    expect(b.items.reduce((s, x) => s + x.questionCount, 0)).toBe(Number(somme.rows[0]!.domande));
   });
 
   it("PLATFORM_ADMIN sees the same RTL surveys (only tenant with data)", async () => {
     const b = (await get("/v1/engagement/surveys", admin)).json() as { total: number };
-    expect(b.total).toBeGreaterThanOrEqual(8);
+    expect(b.total).toBeGreaterThanOrEqual(8);  // almeno quelle originarie
   });
 
   it("per-survey results aggregate by question (count + avg rating)", async () => {
-    const list = (await get("/v1/engagement/surveys", tenantAdmin)).json() as { items: { surveyId: string }[] };
-    const id = list.items[0]!.surveyId;
+    const list = (await get("/v1/engagement/surveys", tenantAdmin)).json() as {
+      items: { surveyId: string; responseCount: number }[];
+    };
+    // una rilevazione CHE HA RISPOSTE: la prima dell'elenco può essere una
+    // archiviata perché non si è mai svolta, e su quella non c'è niente da
+    // aggregare — l'invariante riguarda le rilevazioni che hanno raccolto voti
+    const conRisposte = list.items.find((x) => x.responseCount > 0);
+    expect(conRisposte, "nessuna rilevazione con risposte").toBeDefined();
+    const id = conRisposte!.surveyId;
     const r = await get(`/v1/engagement/surveys/${id}/results`, tenantAdmin);
     expect(r.statusCode).toBe(200);
     const b = r.json() as { surveyId: string; questions: { responseCount: number; avgRating: number | null }[] };

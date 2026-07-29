@@ -19,9 +19,15 @@ import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 
-// Seeded fixture (verified live): "Q4 2025 Pulse Survey" assigned to tommaso, 3 questions
-// (1 nps + 2 rating — all three take a ratingValue per the type↔column rule).
-const Q4_SURVEY_ID = "78145194-fdae-409d-8b15-deba4b0146c6";
+// La rilevazione su cui gira questo test si RICAVA dal database: è quella
+// aperta e assegnata alla persona. Prima era un UUID scritto a mano — quello
+// della "Q4 2025 Pulse Survey", che però risultava «attiva» con la finestra di
+// risposta chiusa da otto mesi. Quando la storia C8 ha chiuso i cicli scaduti,
+// il test è caduto: non perché il prodotto fosse rotto, ma perché si appoggiava
+// a uno stato incoerente. Derivarla dalla fonte lo rende indipendente da quale
+// rilevazione sia aperta oggi.
+let ACTIVE_SURVEY_ID = "";
+let ACTIVE_SURVEY_QUESTIONS = 0;
 
 interface S { cookies: Map<string, string>; csrfToken: string; userId: string }
 function ch(c: Map<string, string>) { return [...c.entries()].map(([n, v]) => `${n}=${v}`).join("; "); }
@@ -40,6 +46,28 @@ describe("/v1/me/surveys ESS self-response (Surveys-M2)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
+    const { rows } = await pool.query<{ id: string }>(
+      `SELECT s.survey_id AS id
+         FROM sys.sys_surveys s
+         JOIN sys.sys_survey_assignments a ON a.survey_assignment_survey_id = s.survey_id
+         JOIN sys.sys_survey_questions q ON q.survey_question_survey_id = s.survey_id
+        WHERE a.survey_assignment_user_id = $1
+          AND s.survey_status = 'active'
+          AND q.survey_question_type IN ('rating', 'nps')
+        GROUP BY s.survey_id
+        ORDER BY min(s.survey_start_date) DESC
+        LIMIT 1`,
+      [employeeS.userId],
+    );
+    const row = rows[0];
+    if (!row) throw new Error("nessuna rilevazione aperta e assegnata alla persona di prova");
+    ACTIVE_SURVEY_ID = row.id;
+    const qc = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_survey_questions
+        WHERE survey_question_survey_id = $1`,
+      [ACTIVE_SURVEY_ID],
+    );
+    ACTIVE_SURVEY_QUESTIONS = Number(qc.rows[0]?.n ?? 0);
   });
 
   afterAll(async () => {
@@ -49,7 +77,7 @@ describe("/v1/me/surveys ESS self-response (Surveys-M2)", () => {
         `DELETE FROM sys.sys_survey_responses
           WHERE survey_response_subject_user_id = $1
             AND survey_response_natural_key LIKE 'ESS::' || $2 || '::%'`,
-        [employeeS.userId, Q4_SURVEY_ID],
+        [employeeS.userId, ACTIVE_SURVEY_ID],
       );
     } catch { /* ignore */ }
     try {
@@ -58,14 +86,14 @@ describe("/v1/me/surveys ESS self-response (Surveys-M2)", () => {
             SET survey_assignment_completed_at = NULL
           WHERE survey_assignment_user_id = $1
             AND survey_assignment_survey_id = $2`,
-        [employeeS.userId, Q4_SURVEY_ID],
+        [employeeS.userId, ACTIVE_SURVEY_ID],
       );
     } catch { /* ignore */ }
     await suite.app.close();
     await closePool();
   });
 
-  it("GET /v1/me/surveys lists the assigned active surveys incl. the Q4 Pulse one", async () => {
+  it("GET /v1/me/surveys elenca le rilevazioni aperte assegnate alla persona", async () => {
     const r = await suite.app.inject({
       method: "GET", url: "/v1/me/surveys",
       headers: { cookie: ch(employeeS.cookies) },
@@ -76,16 +104,16 @@ describe("/v1/me/surveys ESS self-response (Surveys-M2)", () => {
       total: number;
     };
     expect(body.total).toBeGreaterThanOrEqual(1);
-    const q4 = body.items.find((s) => s.surveyId === Q4_SURVEY_ID);
+    const q4 = body.items.find((s) => s.surveyId === ACTIVE_SURVEY_ID);
     expect(q4).toBeDefined();
     expect(q4!.status).toBe("active");
-    expect(q4!.questionCount).toBe(3);
+    expect(q4!.questionCount).toBe(ACTIVE_SURVEY_QUESTIONS);
     expect(q4!.completedAt).toBeNull();
   });
 
-  it("GET /v1/me/surveys/:id returns 3 questions and (initially) empty myAnswers", async () => {
+  it("GET /v1/me/surveys/:id restituisce le domande della rilevazione e nessuna risposta propria", async () => {
     const r = await suite.app.inject({
-      method: "GET", url: `/v1/me/surveys/${Q4_SURVEY_ID}`,
+      method: "GET", url: `/v1/me/surveys/${ACTIVE_SURVEY_ID}`,
       headers: { cookie: ch(employeeS.cookies) },
     });
     expect(r.statusCode).toBe(200);
@@ -94,10 +122,12 @@ describe("/v1/me/surveys ESS self-response (Surveys-M2)", () => {
       questions: Array<{ questionId: string; type: string; displayOrder: number | null }>;
       myAnswers: Array<unknown>;
     };
-    expect(body.surveyId).toBe(Q4_SURVEY_ID);
-    expect(body.questions).toHaveLength(3);
+    expect(body.surveyId).toBe(ACTIVE_SURVEY_ID);
+    expect(body.questions).toHaveLength(ACTIVE_SURVEY_QUESTIONS);
     // ordered by display_order
-    expect(body.questions.map((q) => q.displayOrder)).toEqual([1, 2, 3]);
+    // gli ordini sono una sequenza consecutiva da 1, quante che siano le domande
+    expect(body.questions.map((q) => q.displayOrder))
+      .toEqual(Array.from({ length: ACTIVE_SURVEY_QUESTIONS }, (_, i) => i + 1));
     expect(body.myAnswers).toHaveLength(0);
   });
 
@@ -106,7 +136,7 @@ describe("/v1/me/surveys ESS self-response (Surveys-M2)", () => {
     // guard (which runs AFTER the already-answered guard), and it persists nothing / leaves the
     // assignment un-completed (it throws before the transaction). Q4 has nps+rating questions.
     const detail = await suite.app.inject({
-      method: "GET", url: `/v1/me/surveys/${Q4_SURVEY_ID}`,
+      method: "GET", url: `/v1/me/surveys/${ACTIVE_SURVEY_ID}`,
       headers: { cookie: ch(employeeS.cookies) },
     });
     const questions = (detail.json() as {
@@ -116,7 +146,7 @@ describe("/v1/me/surveys ESS self-response (Surveys-M2)", () => {
     expect(ratingQ).toBeDefined();
 
     const post = await suite.app.inject({
-      method: "POST", url: `/v1/me/surveys/${Q4_SURVEY_ID}/responses`,
+      method: "POST", url: `/v1/me/surveys/${ACTIVE_SURVEY_ID}/responses`,
       headers: {
         cookie: ch(employeeS.cookies), "x-csrf-token": employeeS.csrfToken,
         "content-type": "application/json",
@@ -131,25 +161,27 @@ describe("/v1/me/surveys ESS self-response (Surveys-M2)", () => {
     const dbRows = await pool.query<{ n: string }>(
       `SELECT count(*)::text AS n FROM sys.sys_survey_responses
         WHERE survey_response_subject_user_id = $1 AND survey_response_survey_id = $2`,
-      [employeeS.userId, Q4_SURVEY_ID],
+      [employeeS.userId, ACTIVE_SURVEY_ID],
     );
     expect(Number(dbRows.rows[0]!.n)).toBe(0);
   });
 
-  it("POST /v1/me/surveys/:id/responses submits 3 rating answers → 201 + persists", async () => {
+  it("POST /v1/me/surveys/:id/responses invia una risposta per ogni domanda → 201 + persiste", async () => {
     // Read the real question ids/types from the detail (no hard-coded question ids beyond the survey).
     const detail = await suite.app.inject({
-      method: "GET", url: `/v1/me/surveys/${Q4_SURVEY_ID}`,
+      method: "GET", url: `/v1/me/surveys/${ACTIVE_SURVEY_ID}`,
       headers: { cookie: ch(employeeS.cookies) },
     });
     const questions = (detail.json() as {
       questions: Array<{ questionId: string; type: string }>;
     }).questions;
-    // Q4's 3 questions are nps/rating — all take a ratingValue.
-    const answers = questions.map((q, i) => ({ questionId: q.questionId, ratingValue: 7 + i }));
+    // tutte le domande sono nps/rating e prendono un voto. Il voto resta nella
+    // scala 1-10 qualunque sia il numero di domande: prima era `7 + indice`, che
+    // con otto domande arrivava a 14 e faceva rifiutare la richiesta.
+    const answers = questions.map((q, i) => ({ questionId: q.questionId, ratingValue: 6 + (i % 4) }));
 
     const post = await suite.app.inject({
-      method: "POST", url: `/v1/me/surveys/${Q4_SURVEY_ID}/responses`,
+      method: "POST", url: `/v1/me/surveys/${ACTIVE_SURVEY_ID}/responses`,
       headers: {
         cookie: ch(employeeS.cookies), "x-csrf-token": employeeS.csrfToken,
         "content-type": "application/json",
@@ -158,20 +190,20 @@ describe("/v1/me/surveys ESS self-response (Surveys-M2)", () => {
     });
     expect(post.statusCode).toBe(201);
     const result = post.json() as { submitted: number; completedAt: string };
-    expect(result.submitted).toBe(3);
+    expect(result.submitted).toBe(ACTIVE_SURVEY_QUESTIONS);
     expect(result.completedAt).toBeTruthy();
 
     // Prove persistence directly against the DB.
     const dbRows = await pool.query<{ n: string }>(
       `SELECT count(*)::text AS n FROM sys.sys_survey_responses
         WHERE survey_response_subject_user_id = $1 AND survey_response_survey_id = $2`,
-      [employeeS.userId, Q4_SURVEY_ID],
+      [employeeS.userId, ACTIVE_SURVEY_ID],
     );
-    expect(Number(dbRows.rows[0]!.n)).toBe(3);
+    expect(Number(dbRows.rows[0]!.n)).toBe(ACTIVE_SURVEY_QUESTIONS);
 
     // And via the detail endpoint: myAnswers now populated + completedAt set.
     const after = await suite.app.inject({
-      method: "GET", url: `/v1/me/surveys/${Q4_SURVEY_ID}`,
+      method: "GET", url: `/v1/me/surveys/${ACTIVE_SURVEY_ID}`,
       headers: { cookie: ch(employeeS.cookies) },
     });
     const afterBody = after.json() as {
@@ -179,20 +211,20 @@ describe("/v1/me/surveys ESS self-response (Surveys-M2)", () => {
       myAnswers: Array<{ questionId: string; ratingValue: number | null }>;
     };
     expect(afterBody.completedAt).not.toBeNull();
-    expect(afterBody.myAnswers).toHaveLength(3);
+    expect(afterBody.myAnswers).toHaveLength(ACTIVE_SURVEY_QUESTIONS);
     expect(afterBody.myAnswers.every((a) => a.ratingValue !== null)).toBe(true);
   });
 
   it("re-submitting the same survey → 409 SURVEY_ALREADY_ANSWERED", async () => {
     const detail = await suite.app.inject({
-      method: "GET", url: `/v1/me/surveys/${Q4_SURVEY_ID}`,
+      method: "GET", url: `/v1/me/surveys/${ACTIVE_SURVEY_ID}`,
       headers: { cookie: ch(employeeS.cookies) },
     });
     const questions = (detail.json() as { questions: Array<{ questionId: string }> }).questions;
     const answers = questions.map((q) => ({ questionId: q.questionId, ratingValue: 5 }));
 
     const post = await suite.app.inject({
-      method: "POST", url: `/v1/me/surveys/${Q4_SURVEY_ID}/responses`,
+      method: "POST", url: `/v1/me/surveys/${ACTIVE_SURVEY_ID}/responses`,
       headers: {
         cookie: ch(employeeS.cookies), "x-csrf-token": employeeS.csrfToken,
         "content-type": "application/json",

@@ -2871,6 +2871,176 @@ BEGIN
   END IF;
 END $fn$;
 
+-- ----------------------------------------------------------------------------
+-- C8a — SI ASCOLTA CON REGOLARITÀ, E NON RISPONDONO TUTTI.
+-- Prima: quattro cicli «chiusi» con 156 inviti dichiarati, zero domande e zero
+-- risposte (gusci), due fermi in stato «attivo» da otto mesi, e nell'altra
+-- famiglia un tasso di risposta del 92-96% che nessuna azienda ottiene.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c8a(p_end date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  -- un ciclo chiuso senza domande non si è svolto: o è archiviato, o mente
+  SELECT count(*), min(s.survey_title) INTO v_cnt, v_sample
+  FROM sys.sys_surveys s
+  WHERE s.survey_tenant_id = c_rtl
+    AND s.survey_status = 'closed'
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_survey_questions q
+                     WHERE q.survey_question_survey_id = s.survey_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C8a: % rilevazioni chiuse senza una sola domanda (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- e nessuno resta «in corso» quando la sua finestra è chiusa da un mese
+  SELECT count(*), min(s.survey_title) INTO v_cnt, v_sample
+  FROM sys.sys_surveys s
+  WHERE s.survey_tenant_id = c_rtl
+    AND s.survey_status = 'active'
+    AND s.survey_end_date IS NOT NULL
+    AND s.survey_end_date::date < p_end - 30;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C8a(ii): % rilevazioni ancora aperte oltre la loro scadenza (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- nessun ciclo può avere più rispondenti che invitati: è impossibile, e
+  -- vale per TUTTI i cicli, non solo per quelli scritti dal programma
+  SELECT count(*), min(x.titolo || ': ' || x.tasso || '%') INTO v_cnt, v_sample
+  FROM (
+    SELECT s.survey_title AS titolo,
+           round(100.0 * count(DISTINCT r.survey_response_subject_user_id)
+                 / NULLIF(s.survey_total_invitations, 0), 1) AS tasso
+      FROM sys.sys_surveys s
+      JOIN sys.sys_survey_responses r ON r.survey_response_survey_id = s.survey_id
+     WHERE s.survey_tenant_id = c_rtl
+     GROUP BY s.survey_id, s.survey_title, s.survey_total_invitations
+  ) x
+  WHERE x.tasso > 100;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C8a(iii): % rilevazioni con più rispondenti che invitati (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- il tasso di risposta è quello di un'azienda vera: fra il 55% e il 90%
+  SELECT count(*), min(x.titolo || ': ' || x.tasso || '%') INTO v_cnt, v_sample
+  FROM (
+    SELECT s.survey_title AS titolo,
+           round(100.0 * count(DISTINCT r.survey_response_subject_user_id)
+                 / NULLIF(s.survey_total_invitations, 0), 1) AS tasso
+      FROM sys.sys_surveys s
+      JOIN sys.sys_survey_responses r ON r.survey_response_survey_id = s.survey_id
+     WHERE s.survey_tenant_id = c_rtl AND s.survey_status = 'closed'
+       AND s.survey_metadata->>'storia36' = 'C8'
+     GROUP BY s.survey_id, s.survey_title, s.survey_total_invitations
+  ) x
+  WHERE x.tasso IS NULL OR x.tasso < 55 OR x.tasso > 90;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C8a(iv): % rilevazioni con un tasso di risposta fuori dal credibile 55-90%% (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- si ascolta almeno due volte l'anno
+  SELECT count(*), min(x.anno::text) INTO v_cnt, v_sample
+  FROM (
+    SELECT extract(year FROM s.survey_start_date)::int AS anno, count(*) AS cicli
+      FROM sys.sys_surveys s
+     WHERE s.survey_tenant_id = c_rtl AND s.survey_status = 'closed'
+       AND s.survey_start_date IS NOT NULL
+       AND extract(year FROM s.survey_start_date) BETWEEN 2024 AND extract(year FROM p_end)
+     GROUP BY 1
+  ) x
+  WHERE x.cicli < 2;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C8a(v): % anni con meno di due rilevazioni (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C8b — IL CLIMA RACCONTA LA RIORGANIZZAZIONE.
+-- Non è un vezzo narrativo: se il clima fosse piatto attorno a una
+-- riorganizzazione che ha accorpato due divisioni e spostato tre direzioni,
+-- il dato direbbe che la riorganizzazione non è successa. Una riorganizzazione
+-- costa circa mezzo punto e il recupero richiede due-quattro trimestri.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c8b()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_prima numeric;
+  v_dopo  numeric;
+  v_fine  numeric;
+BEGIN
+  SELECT round(avg(r.survey_response_rating_value), 2) INTO v_prima
+  FROM sys.sys_survey_responses r
+  JOIN sys.sys_surveys s ON s.survey_id = r.survey_response_survey_id
+  WHERE s.survey_tenant_id = c_rtl AND s.survey_start_date::date < DATE '2025-03-01';
+
+  SELECT round(avg(r.survey_response_rating_value), 2) INTO v_dopo
+  FROM sys.sys_survey_responses r
+  JOIN sys.sys_surveys s ON s.survey_id = r.survey_response_survey_id
+  WHERE s.survey_tenant_id = c_rtl
+    AND s.survey_start_date::date BETWEEN DATE '2025-03-01' AND DATE '2025-06-30';
+
+  SELECT round(avg(r.survey_response_rating_value), 2) INTO v_fine
+  FROM sys.sys_survey_responses r
+  JOIN sys.sys_surveys s ON s.survey_id = r.survey_response_survey_id
+  WHERE s.survey_tenant_id = c_rtl AND s.survey_start_date::date >= DATE '2026-01-01';
+
+  IF v_prima IS NULL OR v_dopo IS NULL OR v_fine IS NULL THEN
+    RAISE EXCEPTION 'C8b: manca la misura del clima prima (%), subito dopo (%) o a distanza (%) dalla riorganizzazione',
+      v_prima, v_dopo, v_fine;
+  END IF;
+  IF v_prima - v_dopo < 0.30 THEN
+    RAISE EXCEPTION 'C8b(ii): il clima non registra la riorganizzazione: prima %, subito dopo % (flessione attesa >= 0,30)',
+      v_prima, v_dopo;
+  END IF;
+  IF v_fine - v_dopo < 0.30 THEN
+    RAISE EXCEPTION 'C8b(iii): dopo la flessione non c''è recupero: subito dopo %, a distanza % (ripresa attesa >= 0,30)',
+      v_dopo, v_fine;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C8c — A UN CLIMA CHE SCENDE SEGUE QUALCOSA.
+-- Un risultato sotto soglia senza un piano d'azione è una misurazione che non
+-- ha prodotto nulla — e quella è la ragione per cui le rilevazioni smettono di
+-- funzionare: la gente risponde finché vede che serve.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c8c()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(x.titolo) INTO v_cnt, v_sample
+  FROM (
+    SELECT s.survey_id, s.survey_title AS titolo,
+           avg(r.survey_response_rating_value) AS media
+      FROM sys.sys_surveys s
+      JOIN sys.sys_survey_responses r ON r.survey_response_survey_id = s.survey_id
+     WHERE s.survey_tenant_id = c_rtl AND s.survey_status = 'closed'
+     GROUP BY 1, 2
+  ) x
+  WHERE x.media < 7.2
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_engagement_action_plans p
+                     WHERE p.action_plan_source_id = x.survey_id
+                       AND p.action_plan_tenant_id = c_rtl);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C8c: % rilevazioni sotto soglia senza un solo piano d''azione (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- e un piano senza responsabile o senza scadenza non è un piano
+  SELECT count(*), min(p.action_plan_title) INTO v_cnt, v_sample
+  FROM sys.sys_engagement_action_plans p
+  WHERE p.action_plan_tenant_id = c_rtl
+    AND (p.action_plan_owner_user_id IS NULL OR p.action_plan_due_date IS NULL);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C8c(ii): % piani d''azione senza responsabile o senza scadenza (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
 -- ============================================================================
 -- SELFTEST (con -v selftest=1) — la falsificabilità: per ogni check nuovo si
 -- inietta una violazione in SUBTRANSAZIONE (rollback garantito dal pattern
@@ -4598,6 +4768,145 @@ BEGIN
   END;
   IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C7d FALLITO: violazione iniettata non rilevata'; END IF;
   RAISE NOTICE '[OK] SELFTEST C7d (il programma che scrive nel RACI, rollback)';
+
+  -- ==========================================================================
+  -- C8 — ENGAGEMENT E CLIMA
+  -- ==========================================================================
+  DECLARE c_rtl8 constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  BEGIN
+    -- ST-C8a: chiudere una rilevazione togliendole le domande — il «guscio»
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_survey_questions q
+       USING sys.sys_surveys s
+       WHERE q.survey_question_survey_id = s.survey_id
+         AND s.survey_tenant_id = c_rtl8 AND s.survey_status = 'closed';
+      PERFORM staging.storia36_check_c8a(v_end);
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C8a:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C8a FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C8a (rilevazione chiusa senza domande, rollback)';
+
+    -- ST-C8a(ii): lasciare aperta una rilevazione scaduta da un anno
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_surveys SET survey_status = 'active'
+       WHERE ctid = (SELECT s2.ctid FROM sys.sys_surveys s2
+                      WHERE s2.survey_tenant_id = c_rtl8 AND s2.survey_status = 'closed'
+                        AND s2.survey_end_date IS NOT NULL LIMIT 1);
+      PERFORM staging.storia36_check_c8a(v_end);
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C8a(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C8a(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C8a(ii) (rilevazione aperta oltre la scadenza, rollback)';
+
+    -- ST-C8a(iii): più rispondenti che invitati
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_surveys SET survey_total_invitations = 1
+       WHERE ctid = (SELECT s2.ctid FROM sys.sys_surveys s2
+                      WHERE s2.survey_tenant_id = c_rtl8
+                        AND s2.survey_metadata->>'storia36' = 'C8' LIMIT 1);
+      PERFORM staging.storia36_check_c8a(v_end);
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C8a(iii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C8a(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C8a(iii) (più rispondenti che invitati, rollback)';
+
+    -- ST-C8a(iv): un tasso di risposta da plebiscito
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_surveys s SET survey_total_invitations = (
+        SELECT count(DISTINCT r.survey_response_subject_user_id)
+          FROM sys.sys_survey_responses r WHERE r.survey_response_survey_id = s.survey_id)
+       WHERE s.survey_tenant_id = c_rtl8 AND s.survey_metadata->>'storia36' = 'C8';
+      PERFORM staging.storia36_check_c8a(v_end);
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C8a(iv)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C8a(iv) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C8a(iv) (hanno risposto tutti, rollback)';
+
+    -- ST-C8b: appiattire il clima — la riorganizzazione che non si vede
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_survey_responses r SET survey_response_rating_value = 8
+       FROM sys.sys_surveys s
+       WHERE s.survey_id = r.survey_response_survey_id
+         AND s.survey_tenant_id = c_rtl8
+         AND s.survey_start_date::date BETWEEN DATE '2025-03-01' AND DATE '2025-06-30';
+      PERFORM staging.storia36_check_c8b();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C8b(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C8b FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C8b (clima piatto attraverso la riorganizzazione, rollback)';
+
+    -- ST-C8b(iii): nessun recupero dopo la flessione
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_survey_responses r SET survey_response_rating_value = 6
+       FROM sys.sys_surveys s
+       WHERE s.survey_id = r.survey_response_survey_id
+         AND s.survey_tenant_id = c_rtl8
+         AND s.survey_start_date::date >= DATE '2026-01-01';
+      PERFORM staging.storia36_check_c8b();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C8b(iii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C8b(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C8b(iii) (flessione senza recupero, rollback)';
+
+    -- ST-C8c: togliere i piani d'azione al ciclo andato male
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_engagement_action_plans WHERE action_plan_tenant_id = c_rtl8;
+      PERFORM staging.storia36_check_c8c();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C8c:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C8c FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C8c (clima sotto soglia e nessuna azione, rollback)';
+
+    -- ST-C8c(ii): un piano senza responsabile
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_engagement_action_plans SET action_plan_owner_user_id = NULL
+       WHERE ctid = (SELECT p2.ctid FROM sys.sys_engagement_action_plans p2 LIMIT 1);
+      PERFORM staging.storia36_check_c8c();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C8c(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C8c(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C8c(ii) (piano d''azione senza responsabile, rollback)';
+  END;
 END $$;
 \endif
 
@@ -5020,6 +5329,30 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C7d'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c8a(v_end);
+    RAISE NOTICE '[OK] C8a si ascolta con regolarità e non rispondono tutti';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C8a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c8b();
+    RAISE NOTICE '[OK] C8b il clima registra la riorganizzazione e il recupero';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C8b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c8c();
+    RAISE NOTICE '[OK] C8c a un clima sotto soglia seguono piani d''azione';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C8c'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   IF array_length(v_failed, 1) > 0 THEN

@@ -78,11 +78,21 @@ describe("engagement-feedback API", () => {
     expect(reviewed.length).toBeGreaterThan(0);
   });
 
-  it("GET /action-plans — admin lists the 6 imported RTL action plans", async () => {
+  it("GET /action-plans — l'amministratore vede tutti i piani d'azione del tenant", async () => {
     const r = await suite.app.inject({ method: "GET", url: "/v1/engagement-feedback/action-plans?limit=50", headers: { cookie: ch(admin.cookies) } });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { items: { ownerUserId: string | null }[]; total: number };
-    expect(body.total).toBe(6);
+    // Il numero non è un invariante: la storia C8 aggiunge un piano per ogni
+    // rilevazione andata sotto soglia. L'invariante è che l'elenco contenga
+    // esattamente i piani del tenant, contati alla fonte.
+    const atteso = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_engagement_action_plans
+        WHERE action_plan_tenant_id = $1`,
+      [(await pool.query<{ t: string }>(
+        `SELECT user_tenant_id AS t FROM sys.sys_users WHERE user_email = 'federica.marchetti@rtl-bank.org'`,
+      )).rows[0]!.t],
+    );
+    expect(body.total).toBe(Number(atteso.rows[0]!.n));
     // owners/creators resolved (0 unresolved on the RTL slice)
     expect(body.items.every((x) => x.ownerUserId !== null)).toBe(true);
   });

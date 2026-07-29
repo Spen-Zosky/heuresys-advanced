@@ -32,9 +32,18 @@ test.describe("ESS surveys (live)", () => {
     await gotoAuthenticated(page, "/me/surveys");
     await expect(page.getByTestId("me-surveys-page")).toBeVisible({ timeout: 30_000 });
 
-    // The seeded Q4 Pulse survey is assigned + pending → open it.
-    const row = page.getByTestId("me-survey-row").filter({ hasText: "Q4" });
-    await expect(row).toHaveCount(1);
+    // Apri LA rilevazione aperta assegnata a questa persona, qualunque sia.
+    //
+    // Prima questo test cercava la stringa "Q4": un fixture con un nome dentro
+    // il codice. Il cluster C8 ha poi rinnovato i cicli di ascolto — la Q4 2025
+    // si e' chiusa il 30 novembre e l'elenco ESS mostra solo le rilevazioni
+    // APERTE (`survey_status = 'active'`), quindi il test ha smesso di trovarla.
+    // Il difetto non era nel dato ma nell'atteso: l'invariante da verificare e'
+    // «una persona con una rilevazione aperta la compila e il risultato si
+    // rilegge dall'endpoint», non «esiste una survey che si chiama Q4».
+    const row = page.getByTestId("me-survey-row").first();
+    await expect(row).toBeVisible({ timeout: 15_000 });
+    const titolo = ((await row.textContent()) ?? "").trim();
     await row.getByTestId("me-survey-open").click();
 
     await expect(page.getByTestId("me-survey-answer-page")).toBeVisible({ timeout: 30_000 });
@@ -53,10 +62,12 @@ test.describe("ESS surveys (live)", () => {
     expect([200, 201]).toContain(res.status());
     await expect(page.getByTestId("me-survey-success")).toBeVisible();
 
-    // Re-fetch the list → the Q4 row now shows the completed badge (state from the real endpoint).
+    // Rileggi l'elenco → la riga appena compilata porta il segno di completata
+    // (stato che arriva dall'endpoint reale, non dallo stato locale della pagina).
     await gotoAuthenticated(page, "/me/surveys");
-    await expect(
-      page.getByTestId("me-survey-row").filter({ hasText: "Q4" }).getByTestId("me-survey-completed"),
-    ).toBeVisible({ timeout: 15_000 });
+    const riga = titolo
+      ? page.getByTestId("me-survey-row").filter({ hasText: titolo.slice(0, 24) })
+      : page.getByTestId("me-survey-row").first();
+    await expect(riga.getByTestId("me-survey-completed").first()).toBeVisible({ timeout: 15_000 });
   });
 });

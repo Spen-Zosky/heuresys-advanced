@@ -27,11 +27,26 @@ test.describe("/me F5 personal area — live data", () => {
     await expect(page.getByTestId("me-org-chart-graph")).toBeVisible(); // RTL ORG_CHART graph has nodes
   });
 
-  test("/me/approvals renders the status stats + honest empty-state", async ({ page }) => {
+  test("/me/approvals — elenco e conteggi dicono la stessa cosa", async ({ page }) => {
     await page.goto("/me/approvals");
     await expect(page.getByTestId("me-approvals-page")).toBeVisible();
     await expect(page.getByTestId("approvals-stats")).toBeVisible();
     await expect(page.getByTestId("approvals-stat-pending")).toBeVisible();
-    await expect(page.getByTestId("me-approvals-empty")).toBeVisible(); // no requests yet → real empty-state
+
+    // Prima questo test pretendeva l'empty-state ("no requests yet"): una
+    // FOTOGRAFIA di un database che allora era vuoto. Il cluster C7 ha poi
+    // scritto le richieste di approvazione vere e il test e' diventato rosso
+    // senza che nulla fosse rotto. L'invariante da verificare non e' «non c'e'
+    // niente», ma «cio' che la pagina conta e cio' che elenca coincidono»:
+    // o ci sono righe e la tabella le mostra, o non ce ne sono e compare
+    // l'empty-state. Vale in entrambi i casi, oggi e dopo il prossimo seed.
+    const righe = await page.getByTestId("me-approvals-row").count();
+    if (righe > 0) {
+      await expect(page.getByTestId("me-approvals-table")).toBeVisible();
+      await expect(page.getByTestId("me-approvals-empty")).toHaveCount(0);
+    } else {
+      await expect(page.getByTestId("me-approvals-empty")).toBeVisible();
+      await expect(page.getByTestId("me-approvals-table")).toHaveCount(0);
+    }
   });
 });

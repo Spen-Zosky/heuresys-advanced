@@ -160,19 +160,31 @@ $trg$;
 -- 3. Widen the inbox CHECK domains so an approval task delivers via the 3.4
 --    notification center (the REUSE SEAM). Additive + idempotent (drop+re-add).
 -- -----------------------------------------------------------------------------
-ALTER TABLE sys.sys_inbox_notifications
-  DROP CONSTRAINT IF EXISTS sys_inbox_notification_type_check;
-ALTER TABLE sys.sys_inbox_notifications
-  ADD CONSTRAINT sys_inbox_notification_type_check
-  CHECK (notification_type IN ('TRAINING_DEADLINE', 'ASSESSMENT_REQUEST', 'MANAGER_FEEDBACK_READY',
+-- Aggiunta ADDITIVA: se il vincolo esiste già non lo si tocca. Il pattern
+-- DROP+ADD riportava indietro un vocabolario che una migration successiva
+-- ha allargato, e su un database con righe che usano i valori nuovi la
+-- riesecuzione falliva («is violated by some row»).
+DO $mig$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_inbox_notification_type_check') THEN
+    ALTER TABLE sys.sys_inbox_notifications ADD CONSTRAINT sys_inbox_notification_type_check
+      CHECK (notification_type IN ('TRAINING_DEADLINE', 'ASSESSMENT_REQUEST', 'MANAGER_FEEDBACK_READY',
     'CAREER_TARGET_STATUS', 'GAP_CLOSURE_DUE', 'SYSTEM', 'APPROVAL_REQUEST'));
+  END IF;
+END $mig$;
 
-ALTER TABLE sys.sys_inbox_notifications
-  DROP CONSTRAINT IF EXISTS sys_inbox_notification_resource_type_check;
-ALTER TABLE sys.sys_inbox_notifications
-  ADD CONSTRAINT sys_inbox_notification_resource_type_check
-  CHECK (notification_resource_type IS NULL OR notification_resource_type IN
+-- Aggiunta ADDITIVA: se il vincolo esiste già non lo si tocca. Il pattern
+-- DROP+ADD riportava indietro un vocabolario che una migration successiva
+-- ha allargato, e su un database con righe che usano i valori nuovi la
+-- riesecuzione falliva («is violated by some row»).
+DO $mig$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_inbox_notification_resource_type_check') THEN
+    ALTER TABLE sys.sys_inbox_notifications ADD CONSTRAINT sys_inbox_notification_resource_type_check
+      CHECK (notification_resource_type IS NULL OR notification_resource_type IN
     ('POSITION', 'LEARNING_MODULE', 'ASSESSMENT', 'CAREER_TARGET', 'KPI', 'SKILL', 'APPROVAL_STEP'));
+  END IF;
+END $mig$;
 
 -- Extend the polymorphic-consistency VIEW with an APPROVAL_STEP arm (a deleted
 -- step row is flagged). CREATE OR REPLACE keeps the same output columns.

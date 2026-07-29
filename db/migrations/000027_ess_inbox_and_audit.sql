@@ -37,11 +37,17 @@ CREATE TABLE IF NOT EXISTS sys.sys_inbox_notifications (
   created_by                 uuid         REFERENCES sys.sys_users(user_id) ON DELETE SET NULL
 );
 
-ALTER TABLE sys.sys_inbox_notifications
-  DROP CONSTRAINT IF EXISTS sys_inbox_notification_type_check;
-ALTER TABLE sys.sys_inbox_notifications
-  ADD CONSTRAINT sys_inbox_notification_type_check
-  CHECK (notification_type IN ('TRAINING_DEADLINE', 'ASSESSMENT_REQUEST', 'MANAGER_FEEDBACK_READY', 'CAREER_TARGET_STATUS', 'GAP_CLOSURE_DUE', 'SYSTEM'));
+-- Aggiunta ADDITIVA: se il vincolo esiste già non lo si tocca. Il pattern
+-- DROP+ADD riportava indietro un vocabolario che una migration successiva
+-- ha allargato, e su un database con righe che usano i valori nuovi la
+-- riesecuzione falliva («is violated by some row»).
+DO $mig$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_inbox_notification_type_check') THEN
+    ALTER TABLE sys.sys_inbox_notifications ADD CONSTRAINT sys_inbox_notification_type_check
+      CHECK (notification_type IN ('TRAINING_DEADLINE', 'ASSESSMENT_REQUEST', 'MANAGER_FEEDBACK_READY', 'CAREER_TARGET_STATUS', 'GAP_CLOSURE_DUE', 'SYSTEM'));
+  END IF;
+END $mig$;
 
 ALTER TABLE sys.sys_inbox_notifications
   DROP CONSTRAINT IF EXISTS sys_inbox_notification_priority_check;
@@ -55,12 +61,18 @@ ALTER TABLE sys.sys_inbox_notifications
   ADD CONSTRAINT sys_inbox_notification_status_check
   CHECK (notification_status IN ('UNREAD', 'READ', 'DISMISSED', 'ARCHIVED'));
 
-ALTER TABLE sys.sys_inbox_notifications
-  DROP CONSTRAINT IF EXISTS sys_inbox_notification_resource_type_check;
-ALTER TABLE sys.sys_inbox_notifications
-  ADD CONSTRAINT sys_inbox_notification_resource_type_check
-  CHECK (notification_resource_type IS NULL OR notification_resource_type IN
+-- Aggiunta ADDITIVA: se il vincolo esiste già non lo si tocca. Il pattern
+-- DROP+ADD riportava indietro un vocabolario che una migration successiva
+-- ha allargato, e su un database con righe che usano i valori nuovi la
+-- riesecuzione falliva («is violated by some row»).
+DO $mig$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_inbox_notification_resource_type_check') THEN
+    ALTER TABLE sys.sys_inbox_notifications ADD CONSTRAINT sys_inbox_notification_resource_type_check
+      CHECK (notification_resource_type IS NULL OR notification_resource_type IN
     ('POSITION', 'LEARNING_MODULE', 'ASSESSMENT', 'CAREER_TARGET', 'KPI', 'SKILL'));
+  END IF;
+END $mig$;
 
 CREATE INDEX IF NOT EXISTS sys_inbox_user_unread_idx
   ON sys.sys_inbox_notifications (notification_user_id, created_at DESC)

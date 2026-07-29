@@ -90,9 +90,15 @@ BEGIN
   IF n > 0 THEN
     RAISE EXCEPTION '000200: % righe residuo-test ancora presenti', n;
   END IF;
+  -- EXCLUDE *oppure* POPULATED: la decisione dice che questa tabella è fuori
+  -- dalla riconciliazione col legacy, e resta vera adesso che il programma
+  -- storia36 l'ha riempita — i dati non vengono dal legacy. Pretendere EXCLUDE
+  -- significherebbe pretendere che resti vuota, e la migration fallirebbe alla
+  -- riesecuzione su un database vivo.
   IF NOT EXISTS (SELECT 1 FROM sys.v_reconciliation_status
-                  WHERE table_name = 'sys_training_initiatives' AND resolved_status = 'EXCLUDE') THEN
-    RAISE EXCEPTION '000200: sys_training_initiatives non risolve EXCLUDE nel census';
+                  WHERE table_name = 'sys_training_initiatives'
+                    AND resolved_status IN ('EXCLUDE', 'POPULATED')) THEN
+    RAISE EXCEPTION '000200: sys_training_initiatives non risolve EXCLUDE/POPULATED nel census';
   END IF;
   RAISE NOTICE '000200: residuo-test rimosso (archivio audit.*) + registry EXCLUDE/D dichiarato.';
 END $$;

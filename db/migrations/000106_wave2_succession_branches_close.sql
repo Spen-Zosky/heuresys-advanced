@@ -136,12 +136,20 @@ BEGIN
   -- on a fresh rebuild (migrations run before seeds) emit a WARNING instead.
   SELECT count(*) INTO v_branches FROM sys.sys_branches;
   SELECT count(*) INTO v_pools    FROM sys.sys_succession_pools;
-  SELECT count(*) INTO v_cands    FROM sys.sys_successor_candidates;
+  -- I candidati IMPORTATI, non tutti quelli presenti: la storia ne aggiunge
+  -- (scelti col criterio di successione) e ne toglie (quelli senza criterio),
+  -- e un conteggio totale qui fotograferebbe uno stato invece di verificare
+  -- l'import. Si riconoscono dalla provenienza, che solo l'import scrive.
+  SELECT count(*) INTO v_cands    FROM sys.sys_successor_candidates
+   WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL;
   IF v_branches = 0 AND v_pools = 0 AND v_cands = 0 THEN
     RAISE WARNING 'WAVE2 close: targets empty — fresh rebuild detected; run db/seeds/reconciliation/49 + 50 after migrations.';
   ELSE
-    IF v_branches <> 6 OR v_pools <> 17 OR v_cands <> 25 THEN
-      RAISE EXCEPTION 'WAVE2 assert: imported counts wrong branches=% pools=% candidates=% (exp 6/17/25)', v_branches, v_pools, v_cands;
+    -- l'import ha portato 25 candidati; la storia può averne rimossi alcuni
+    -- (quelli che non erano né il riporto diretto della posizione né qualcuno
+    -- che ne fa il mestiere altrove), mai aggiunti con quella provenienza
+    IF v_branches <> 6 OR v_pools <> 17 OR v_cands > 25 OR v_cands = 0 THEN
+      RAISE EXCEPTION 'WAVE2 assert: imported counts wrong branches=% pools=% candidates=% (exp 6/17/1..25)', v_branches, v_pools, v_cands;
     END IF;
     SELECT count(*) INTO v_populated3
       FROM sys.v_reconciliation_status

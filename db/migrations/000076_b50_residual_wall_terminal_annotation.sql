@@ -133,7 +133,14 @@ BEGIN
     FROM sys.v_reconciliation_status
    WHERE table_name IN
          ('sys_payout_curves','sys_reward_gate_results','sys_successor_readiness','sys_user_target_positions')
-     AND resolved_status = 'NO_SOURCE';
+     -- NO_SOURCE *oppure* POPULATED: la decisione B-50 dice che queste quattro
+     -- tabelle non hanno una sorgente nel legacy, e resta vera anche adesso che
+     -- il programma storia36 le ha riempite — i dati non vengono dal legacy,
+     -- vengono da lì. Pretendere NO_SOURCE significherebbe pretendere che
+     -- restino vuote per sempre, e questa migration fallirebbe alla prima
+     -- riesecuzione su un database vivo (è successo: `pnpm db:validate` si
+     -- fermava qui).
+     AND resolved_status IN ('NO_SOURCE', 'POPULATED');
 
   -- 3 defer tables: valid in BOTH worlds (NEEDS_DECISION pre-Wave-2, POPULATED post-S982)
   SELECT count(*) INTO v_defer_closed
@@ -164,7 +171,7 @@ BEGIN
     v_terminal_no_source, v_defer_closed, v_defer_still_nd, v_view_needs_dec, v_terminal_marked, v_defer_marked;
 
   IF v_terminal_no_source <> 4 THEN
-    RAISE EXCEPTION 'B-50 assert: expected 4 terminal tables resolve NO_SOURCE in view, got %', v_terminal_no_source;
+    RAISE EXCEPTION 'B-50 assert: expected 4 terminal tables resolve NO_SOURCE-or-POPULATED in view, got %', v_terminal_no_source;
   END IF;
   IF v_defer_closed <> 3 THEN
     RAISE EXCEPTION 'B-50 assert: expected 3 defer tables NEEDS_DECISION-or-POPULATED with rationale in view, got %', v_defer_closed;

@@ -10,7 +10,7 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 ## Delta S1035 (2026-07-29) — la storia arriva in fondo, e il database torna ricostruibile
 
-HEAD **`31b3625e`** (8 commit). **Una migration nuova**: `000217` (vocabolari chiusi sulle tre
+HEAD **`d8a45832`** (10 commit; CI verde 5/5 e deploy verificato su VM + linux-pc). **Una migration nuova**: `000217` (vocabolari chiusi sulle tre
 colonne «orizzonte» della successione — RD-08). Counts: **215 file migration** `000001..000217`
 (gap 000035+000139) · utenti ACTIVE **162** · posizioni **181** · RBAC **13 ruoli / 204 permessi /
 908 mappature** · skill **14041** · tenant ACTIVE **2** · moduli API **92** (+`user-target-positions`

@@ -5,24 +5,27 @@
 
 ## Last session brief (S1035)
 
-Chiusa la **coda dei rilievi C5** (#78) e sei cluster di seguito — **C6 riorganizzazione, C7
-approvazioni, C8 engagement, C9 contenuti, C10 coda sensibile, C11 configurazione**. Ogni cluster è
-entrato con almeno un controllo **nato rosso** e ne è uscito verde; la batteria conta ora **119
-prove di falsificazione** che scattano tutte.
+Chiusa la **coda dei rilievi C5** (#78) e sei cluster di seguito (**C6→C11**). Ogni cluster è
+entrato con almeno un controllo **nato rosso** e ne è uscito verde.
 
-Il filo che tiene insieme la sessione è uno solo: **il dato che nessuno può leggere non è nel
-prodotto, e il numero che fotografa uno stato non è un invariante**. Il cancello di esposizione ha
-trovato cinque tabelle scritte e mai lette (storia organizzativa, registro GDPR, istruttoria e fonti
-della pipeline) — colmate con endpoint veri; e ha fatto scartare una tabella morta in cui avevo
-scritto per sbaglio. Sul fronte opposto, undici test e **sei asserzioni dentro le migration**
-misuravano fotografie: le migration sono state riportate a essere **rieseguibili**, cosa che non
-erano più da mesi.
+Il filo della sessione è uno: **il dato che nessuno può leggere non è nel prodotto, e il numero che
+fotografa uno stato non è un invariante**. Il cancello ha trovato cinque tabelle scritte e mai
+lette; undici test e **sei asserzioni dentro le migration** misuravano fotografie — le migration
+sono tornate **rieseguibili**, cosa che non erano da mesi. Tre pezzi di piano **non** eseguiti, con
+motivo scritto (dettaglio nel Delta S1035 del granulare).
 
-Tre pezzi del piano **non** sono stati eseguiti, con motivo scritto: le preferenze di notifica per
-tutti (una preferenza è una scelta della persona, non un dato da inventare), la cascata KPI sui
-processi (decisione EXCLUDE riconfermata due volte) e il crosswalk fra classificazioni delle
-professioni — dove la scorciatoia strutturale mapperebbe **il mestiere sbagliato su quattro grandi
-gruppi su nove**.
+## ✅ Chiusura S1035 completa
+
+**CI verde su tutti i controlli** (`d8a45832`) e **deploy verificato** su entrambe le macchine (`/api/readyz` ready,
+`/login` 200 in 0,20 s, `LAST_GOOD` registrato). Il gate si era **giustamente rifiutato** di
+deployare su CI rossa: due test di questa sessione valevano solo dove c'è la storia (in produzione
+sì, nella copia congelata della CI no) — corretti sul contratto dell'API. Il cancello ha pescato
+l'errore di chi lo aveva appena installato.
+
+**Database della CI** (domanda di Enzo): è una copia perché i test non tocchino la produzione, ed è
+ferma perché nessuno la rinfresca — lo strumento c'è (`db/scripts/setup-ci-database.sh`), manca la
+schedulazione (annotata da S1023, ora in coda a C12). La risposta strutturale però resta scrivere
+test che valgono in entrambi i mondi, non rinfrescare la copia.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -31,9 +34,9 @@ verifica e review adversarial per ogni task; le decisioni tecniche sono di Claud
 
 ## Stato dei piani
 
-- **Storia RTL 36 mesi** (#77): `docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md` — stato vivo
-  in `.storia36/PROGRESS.md`. **C0→C11 chiusi**; resta **C12** (audit finale e chiusura), iniziato.
-- Zero-pendenze (#76): `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` — si conta con `zp_state.py piano`.
+- **Storia RTL** (#77): `docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md` — stato vivo
+  in `.storia36/PROGRESS.md`. **C0→C11 chiusi**; resta **C12** (audit finale), iniziato.
+- Zero-pendenze (#76): `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` (`zp_state.py piano`).
 
 ## ⚠ Top priorities (next session)
 

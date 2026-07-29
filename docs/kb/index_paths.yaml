@@ -1,16 +1,16 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-28T16:55:27Z da docs/kb/tools/build_index.py
+# generato: 2026-07-29T09:23:03Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-28T16:55:27Z"
-  total_files: 2655
+  generated_at: "2026-07-29T09:23:03Z"
+  total_files: 2673
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 30
     api-core: 29
-    api-module: 318
+    api-module: 324
     ci: 17
     claude-config: 30
     config: 122
@@ -18,25 +18,25 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 214
+    db-migration: 215
     db-other: 8
     db-script: 39
-    db-seed: 138
+    db-seed: 145
     doc-canonical: 525
     handoff-state: 1
     qa-artifact: 105
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 97
+    shared-schema: 99
     showcase-source: 14
-    test: 312
+    test: 314
     ux-design-archive: 80
     web-source: 208
   status_counts:
     archive: 499
     external-archive: 50
-    live: 2106
+    live: 2124
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -1520,6 +1520,24 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\organization-unit-history\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/organization-unit-history/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\organization-unit-history\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/organization-unit-history/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\organization-unit-history\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/organization-unit-history/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\organization-unit-kpi-templates\repository.ts'
     root: repo
     rel: 'apps/api/src/modules/organization-unit-kpi-templates/repository.ts'
@@ -2135,6 +2153,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\user-career-plans\service.ts'
     root: repo
     rel: 'apps/api/src/modules/user-career-plans/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\user-target-positions\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/user-target-positions/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\user-target-positions\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/user-target-positions/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\user-target-positions\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/user-target-positions/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -6674,6 +6710,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000217_succession_horizon_vocabularies.sql'
+    root: repo
+    rel: 'db/migrations/000217_succession_horizon_vocabularies.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -7688,6 +7730,42 @@ files:
     category: db-seed
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\storia36\06_reorg.sql'
+    root: repo
+    rel: 'db/seeds/storia36/06_reorg.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\storia36\07_approvals.sql'
+    root: repo
+    rel: 'db/seeds/storia36/07_approvals.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\storia36\08_engagement.sql'
+    root: repo
+    rel: 'db/seeds/storia36/08_engagement.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\storia36\09_content.sql'
+    root: repo
+    rel: 'db/seeds/storia36/09_content.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\storia36\10_security_privacy.sql'
+    root: repo
+    rel: 'db/seeds/storia36/10_security_privacy.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\storia36\11_platform_config.sql'
+    root: repo
+    rel: 'db/seeds/storia36/11_platform_config.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\seeds\storia36\README.md'
     root: repo
     rel: 'db/seeds/storia36/README.md'
@@ -7763,6 +7841,12 @@ files:
   - path: 'D:\heuresys-advanced\db\seeds\storia36\repair\2026-07-28_c4_rui_sezione_d_oneshot.sql'
     root: repo
     rel: 'db/seeds/storia36/repair/2026-07-28_c4_rui_sezione_d_oneshot.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\storia36\repair\2026-07-28_c5_coda_rilievi_oneshot.sql'
+    root: repo
+    rel: 'db/seeds/storia36/repair/2026-07-28_c5_coda_rilievi_oneshot.sql'
     category: db-seed
     status: live
     provenance: git-tracked
@@ -12026,6 +12110,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\organization-unit-history.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/organization-unit-history.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\organization-unit-kpi-templates.ts'
     root: repo
     rel: 'packages/shared/src/schemas/organization-unit-kpi-templates.ts'
@@ -12227,6 +12317,12 @@ files:
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\user-career-plans.ts'
     root: repo
     rel: 'packages/shared/src/schemas/user-career-plans.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\user-target-positions.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/user-target-positions.ts'
     category: shared-schema
     status: live
     provenance: git-tracked
@@ -13154,6 +13250,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\organization-unit-history.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/organization-unit-history.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\organization-unit-kpi-templates.integration.test.ts'
     root: repo
     rel: 'apps/api/test/organization-unit-kpi-templates.integration.test.ts'
@@ -13691,6 +13793,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\user-career-plans.integration.test.ts'
     root: repo
     rel: 'apps/api/test/user-career-plans.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\user-target-positions.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/user-target-positions.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

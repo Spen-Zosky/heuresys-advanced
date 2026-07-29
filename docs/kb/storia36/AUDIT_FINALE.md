@@ -7,9 +7,9 @@
 | | |
 |---|---|
 | tabelle esaminate | **206** |
-| righe coperte | **598.283** |
-| rilievi **aperti** (nessuna spiegazione) | **282** |
-| rilievi **spiegati** (classe dichiarata legittima) | **181** |
+| righe coperte | **598.683** |
+| rilievi **aperti** (nessuna spiegazione) | **263** |
+| rilievi **spiegati** (classe dichiarata legittima) | **196** |
 | tabelle vuote | **10** (dichiarate: 10) |
 
 ## Le regole e il loro criterio di applicabilità
@@ -91,15 +91,10 @@ Rilievi per cui nessuna classe di `db/scripts/audit-storia36-explanations.txt` d
 | `sys_goals` | 2.624 | S1 | `goal_template_id`: colonna interamente NULL su 2624 righe |
 | `sys_goals` | 2.624 | S2 | `goal_tags`: un solo valore distinto su 2624 righe |
 | `sys_goals` | 2.624 | S2 | `goal_custom_fields`: un solo valore distinto su 2624 righe |
-| `sys_kpi_measurements` | 248 | S1 | `kpi_measurement_position_id`: colonna interamente NULL su 248 righe |
-| `sys_kpi_measurements` | 248 | S1 | `kpi_measurement_unit`: colonna interamente NULL su 248 righe |
-| `sys_kpi_measurements` | 248 | S2 | `kpi_measurement_source`: un solo valore distinto su 248 righe |
-| `sys_kpi_measurements` | 248 | C1 | `kpi_measurement_recorded_at`: giorno del mese «07» concentra 37% delle 248 date |
-| `sys_kpi_measurements` | 248 | C1 | `kpi_measurement_recorded_at`: mese «01» concentra 100% delle 248 date |
-| `sys_content_documents` | 173 | S2 | `document_body_format`: un solo valore distinto su 173 righe |
-| `sys_content_documents` | 173 | S2 | `document_author_user_id`: un solo valore distinto su 173 righe |
-| `sys_content_documents` | 173 | S1 | `document_expires_date`: colonna interamente NULL su 173 righe |
-| `sys_content_documents` | 173 | C1 | `document_published_at`: mese «06» concentra 86% delle 161 date |
+| `sys_auth_refresh_tokens` | 6.963 | C1 | `auth_refresh_token_used_at`: giorno del mese «30» concentra 26% delle 31 date |
+| `sys_auth_refresh_tokens` | 6.963 | C1 | `auth_refresh_token_used_at`: mese «07» concentra 65% delle 31 date |
+| `sys_auth_refresh_tokens` | 6.963 | C1 | `auth_refresh_token_revoked_at`: giorno del mese «29» concentra 100% delle 46 date |
+| `sys_auth_refresh_tokens` | 6.963 | C1 | `auth_refresh_token_revoked_at`: mese «07» concentra 100% delle 46 date |
 | `sys_learning_gaps` | 270 | S1 | `learning_gap_position_id`: colonna interamente NULL su 270 righe |
 | `sys_learning_gaps` | 270 | S1 | `learning_gap_skill_id`: colonna interamente NULL su 270 righe |
 | `sys_learning_gaps` | 270 | S1 | `learning_gap_required_proficiency`: colonna interamente NULL su 270 righe |
@@ -120,45 +115,28 @@ Rilievi per cui nessuna classe di `db/scripts/audit-storia36-explanations.txt` d
 | `sys_time_off_balances` | 1.886 | S1 | `balance_carryover_expires_at`: colonna interamente NULL su 1886 righe |
 | `sys_time_off_balances` | 1.886 | S2 | `balance_adjustment_days`: un solo valore distinto su 1886 righe |
 | `sys_time_off_balances` | 1.886 | S1 | `balance_adjustment_reason`: colonna interamente NULL su 1886 righe |
-| `sys_user_education_records` | 160 | S1 | `user_education_grade`: colonna interamente NULL su 160 righe |
-| `sys_user_education_records` | 160 | S1 | `user_education_esco_qualification_uri`: colonna interamente NULL su 160 righe |
-| `sys_user_education_records` | 160 | C1 | `user_education_start_date`: giorno del mese «02» concentra 43% delle 159 date |
-| `sys_user_education_records` | 160 | C1 | `user_education_start_date`: mese «01» concentra 72% delle 159 date |
-| `sys_user_skill_evidence` | 902 | S2 | `user_skill_evidence_assessed_at`: un solo valore distinto su 902 righe |
-| `sys_user_skill_evidence` | 902 | S1 | `user_skill_evidence_assessor_user_id`: colonna interamente NULL su 902 righe |
-| `sys_user_skill_evidence` | 902 | C1 | `user_skill_evidence_assessed_at`: giorno del mese «30» concentra 100% delle 902 date |
-| `sys_user_skill_evidence` | 902 | C1 | `user_skill_evidence_assessed_at`: mese «05» concentra 100% delle 902 date |
 | `sys_visualization_edges` | 157 | S2 | `edge_graph_id`: un solo valore distinto su 157 righe |
 | `sys_visualization_edges` | 157 | S2 | `edge_type`: un solo valore distinto su 157 righe |
 | `sys_visualization_edges` | 157 | S1 | `edge_weight`: colonna interamente NULL su 157 righe |
 | `sys_visualization_edges` | 157 | S2 | `edge_metadata`: un solo valore distinto su 157 righe |
-| `sys_approval_requests` | 642 | S2 | `approval_request_decision_policy`: un solo valore distinto su 642 righe |
-| `sys_approval_requests` | 642 | C1 | `approval_request_resolved_at`: mese «08» concentra 72% delle 630 date |
-| `sys_approval_requests` | 642 | C1 | `approval_request_applied_at`: mese «08» concentra 95% delle 467 date |
-| `sys_approval_steps` | 751 | S2 | `approval_step_metadata`: un solo valore distinto su 751 righe |
-| `sys_approval_steps` | 751 | S1 | `approval_step_level_policy`: colonna interamente NULL su 751 righe |
-| `sys_approval_steps` | 751 | C1 | `approval_step_decided_at`: mese «08» concentra 63% delle 715 date |
 | `sys_auth_password_reset_tokens` | 27 | S2 | `auth_password_reset_user_id`: un solo valore distinto su 27 righe |
 | `sys_auth_password_reset_tokens` | 27 | S1 | `auth_password_reset_used_at`: colonna interamente NULL su 27 righe |
 | `sys_auth_password_reset_tokens` | 27 | S2 | `auth_password_reset_requester_ip`: un solo valore distinto su 27 righe |
-| `sys_auth_refresh_tokens` | 6.776 | S1 | `auth_refresh_token_revoke_reason`: colonna interamente NULL su 6776 righe |
-| `sys_auth_refresh_tokens` | 6.776 | C1 | `auth_refresh_token_issued_at`: giorno del mese «30» concentra 29% delle 6776 date |
-| `sys_auth_refresh_tokens` | 6.776 | C1 | `auth_refresh_token_issued_at`: mese «07» concentra 61% delle 6776 date |
 | `sys_capability_maturity_scores` | 20 | S2 | `capability_maturity_score_capability_ref`: un solo valore distinto su 20 righe |
 | `sys_capability_maturity_scores` | 20 | S2 | `capability_maturity_score_rubric_version`: un solo valore distinto su 20 righe |
 | `sys_capability_maturity_scores` | 20 | S2 | `capability_maturity_score_computed_at`: un solo valore distinto su 20 righe |
+| `sys_content_documents` | 175 | S2 | `document_body_format`: un solo valore distinto su 175 righe |
+| `sys_content_documents` | 175 | S2 | `document_author_user_id`: un solo valore distinto su 175 righe |
+| `sys_content_documents` | 175 | S1 | `document_expires_date`: colonna interamente NULL su 175 righe |
 | `sys_continuous_feedback` | 474 | S1 | `feedback_category`: colonna interamente NULL su 474 righe |
 | `sys_continuous_feedback` | 474 | S2 | `feedback_visibility`: un solo valore distinto su 474 righe |
 | `sys_continuous_feedback` | 474 | S1 | `feedback_acknowledged_at`: colonna interamente NULL su 474 righe |
-| `sys_feedback_360_responses` | 776 | S1 | `response_sentiment_score`: colonna interamente NULL su 776 righe |
-| `sys_feedback_360_responses` | 776 | S1 | `response_submission_time_seconds`: colonna interamente NULL su 776 righe |
-| `sys_feedback_360_responses` | 776 | C1 | `response_completed_at`: mese «10» concentra 52% delle 776 date |
 | `sys_inbox_notifications` | 76 | S1 | `notification_read_at`: colonna interamente NULL su 76 righe |
 | `sys_inbox_notifications` | 76 | S1 | `notification_dismissed_at`: colonna interamente NULL su 76 righe |
 | `sys_inbox_notifications` | 76 | S1 | `notification_expires_at`: colonna interamente NULL su 76 righe |
-| `sys_kpi_assessment_results` | 248 | S1 | `kpi_assessment_result_position_id`: colonna interamente NULL su 248 righe |
-| `sys_kpi_assessment_results` | 248 | S1 | `kpi_assessment_result_method_id`: colonna interamente NULL su 248 righe |
-| `sys_kpi_assessment_results` | 248 | C1 | `kpi_assessment_result_computed_at`: mese «01» concentra 100% delle 248 date |
+| `sys_kpi_measurements` | 248 | S1 | `kpi_measurement_position_id`: colonna interamente NULL su 248 righe |
+| `sys_kpi_measurements` | 248 | S1 | `kpi_measurement_unit`: colonna interamente NULL su 248 righe |
+| `sys_kpi_measurements` | 248 | S2 | `kpi_measurement_source`: un solo valore distinto su 248 righe |
 | `sys_leave_balance_transactions` | 20 | S2 | `transaction_reference_type`: un solo valore distinto su 20 righe |
 | `sys_leave_balance_transactions` | 20 | S1 | `transaction_reference_id`: colonna interamente NULL su 20 righe |
 | `sys_leave_balance_transactions` | 20 | S1 | `transaction_performed_by_user_id`: colonna interamente NULL su 20 righe |
@@ -174,30 +152,23 @@ Rilievi per cui nessuna classe di `db/scripts/audit-storia36-explanations.txt` d
 | `sys_position_kpi_requirements` | 172 | S2 | `weight`: un solo valore distinto su 172 righe |
 | `sys_position_kpi_requirements` | 172 | S2 | `position_kpi_requirement_metadata`: un solo valore distinto su 172 righe |
 | `sys_position_kpi_requirements` | 172 | S1 | `rank`: colonna interamente NULL su 172 righe |
-| `sys_position_skill_requirement_history` | 211 | S2 | `position_skill_requirement_history_old_weight`: un solo valore distinto su 211 righe |
-| `sys_position_skill_requirement_history` | 211 | S2 | `position_skill_requirement_history_new_weight`: un solo valore distinto su 211 righe |
-| `sys_position_skill_requirement_history` | 211 | C1 | `position_skill_requirement_history_effective_at`: mese «03» concentra 33% delle 211 date |
-| `sys_survey_assignments` | 948 | C1 | `survey_assignment_assigned_at`: giorno del mese «08» concentra 33% delle 948 date |
-| `sys_survey_assignments` | 948 | C1 | `survey_assignment_assigned_at`: mese «04» concentra 33% delle 948 date |
-| `sys_survey_assignments` | 948 | C1 | `survey_assignment_completed_at`: mese «04» concentra 37% delle 562 date |
+| `sys_user_education_records` | 160 | S1 | `user_education_grade`: colonna interamente NULL su 160 righe |
+| `sys_user_education_records` | 160 | S1 | `user_education_esco_qualification_uri`: colonna interamente NULL su 160 righe |
+| `sys_user_education_records` | 160 | C1 | `user_education_start_date`: mese «10» concentra 64% delle 159 date |
 | `sys_user_employment` | 161 | S1 | `user_employment_termination_date`: colonna interamente NULL su 161 righe |
 | `sys_user_employment` | 161 | S1 | `user_employment_termination_reason`: colonna interamente NULL su 161 righe |
 | `sys_user_employment` | 161 | S2 | `user_employment_metadata`: un solo valore distinto su 161 righe |
-| `sys_user_kpi_evidence` | 248 | S1 | `user_kpi_evidence_unit`: colonna interamente NULL su 248 righe |
-| `sys_user_kpi_evidence` | 248 | C1 | `user_kpi_evidence_recorded_at`: giorno del mese «07» concentra 33% delle 248 date |
-| `sys_user_kpi_evidence` | 248 | C1 | `user_kpi_evidence_recorded_at`: mese «01» concentra 100% delle 248 date |
 | `sys_user_profiles` | 157 | S1 | `user_profile_picture_uri`: colonna interamente NULL su 157 righe |
 | `sys_user_profiles` | 157 | S1 | `user_profile_linkedin_uri`: colonna interamente NULL su 157 righe |
 | `sys_user_profiles` | 157 | S2 | `user_profile_contact_prefs`: un solo valore distinto su 157 righe |
-| `sys_user_skills` | 1.355 | S1 | `user_skill_last_used_on`: colonna interamente NULL su 1355 righe |
-| `sys_user_skills` | 1.355 | C1 | `user_skill_verified_at`: giorno del mese «22» concentra 100% delle 356 date |
-| `sys_user_skills` | 1.355 | C1 | `user_skill_verified_at`: mese «07» concentra 100% delle 356 date |
 | `sys_variable_pay_calculations` | 182 | S1 | `variable_pay_calculation_position_id`: colonna interamente NULL su 182 righe |
 | `sys_variable_pay_calculations` | 182 | S1 | `variable_pay_calculation_signal_score`: colonna interamente NULL su 182 righe |
 | `sys_variable_pay_calculations` | 182 | C1 | `variable_pay_calculation_computed_at`: mese «01» concentra 89% delle 182 date |
 | `sys_visualization_nodes` | 158 | S2 | `node_graph_id`: un solo valore distinto su 158 righe |
 | `sys_visualization_nodes` | 158 | S2 | `node_source_entity_type`: un solo valore distinto su 158 righe |
 | `sys_visualization_nodes` | 158 | S2 | `node_metadata`: un solo valore distinto su 158 righe |
+| `sys_approval_steps` | 751 | S2 | `approval_step_metadata`: un solo valore distinto su 751 righe |
+| `sys_approval_steps` | 751 | S1 | `approval_step_level_policy`: colonna interamente NULL su 751 righe |
 | `sys_assessment_results` | 1.560 | S1 | `assessment_result_assessor_user_id`: colonna interamente NULL su 1560 righe |
 | `sys_assessment_results` | 1.560 | S2 | `assessment_result_metadata`: un solo valore distinto su 1560 righe |
 | `sys_assessments` | 615 | S1 | `assessment_method_id`: colonna interamente NULL su 615 righe |
@@ -214,10 +185,12 @@ Rilievi per cui nessuna classe di `db/scripts/audit-storia36-explanations.txt` d
 | `sys_capability_scores` | 317 | S2 | `capability_score_computed_at`: un solo valore distinto su 317 righe |
 | `sys_compensation_recommendations` | 116 | S1 | `compensation_recommendation_position_id`: colonna interamente NULL su 116 righe |
 | `sys_compensation_recommendations` | 116 | C1 | `compensation_recommendation_computed_at`: mese «04» concentra 68% delle 116 date |
-| `sys_content_versions` | 200 | S2 | `version_body_format`: un solo valore distinto su 200 righe |
-| `sys_content_versions` | 200 | S2 | `version_author_user_id`: un solo valore distinto su 200 righe |
+| `sys_content_versions` | 204 | S2 | `version_body_format`: un solo valore distinto su 204 righe |
+| `sys_content_versions` | 204 | S2 | `version_author_user_id`: un solo valore distinto su 204 righe |
 | `sys_enterprise_size_bands` | 5 | S1 | `enterprise_size_band_min_revenue_eur`: colonna interamente NULL su 5 righe |
 | `sys_enterprise_size_bands` | 5 | S1 | `enterprise_size_band_max_revenue_eur`: colonna interamente NULL su 5 righe |
+| `sys_feedback_360_responses` | 776 | S1 | `response_sentiment_score`: colonna interamente NULL su 776 righe |
+| `sys_feedback_360_responses` | 776 | S1 | `response_submission_time_seconds`: colonna interamente NULL su 776 righe |
 | `sys_gap_analysis_results` | 158 | S2 | `gap_analysis_result_kind`: un solo valore distinto su 158 righe |
 | `sys_gap_analysis_results` | 158 | S2 | `gap_analysis_result_computed_at`: un solo valore distinto su 158 righe |
 | `sys_gap_closure_plans` | 36 | S1 | `gap_closure_plan_position_id`: colonna interamente NULL su 36 righe |
@@ -226,12 +199,16 @@ Rilievi per cui nessuna classe di `db/scripts/audit-storia36-explanations.txt` d
 | `sys_goal_comments` | 849 | S1 | `comment_parent_comment_id`: colonna interamente NULL su 849 righe |
 | `sys_goal_updates` | 1.798 | S1 | `update_author_user_id`: colonna interamente NULL su 1798 righe |
 | `sys_goal_updates` | 1.798 | S2 | `update_attachments`: un solo valore distinto su 1798 righe |
+| `sys_kpi_assessment_results` | 248 | S1 | `kpi_assessment_result_position_id`: colonna interamente NULL su 248 righe |
+| `sys_kpi_assessment_results` | 248 | S1 | `kpi_assessment_result_method_id`: colonna interamente NULL su 248 righe |
 | `sys_kpi_definitions` | 243 | S1 | `kpi_definition_tenant_id`: colonna interamente NULL su 243 righe |
 | `sys_kpi_definitions` | 243 | S1 | `kpi_definition_formula`: colonna interamente NULL su 243 righe |
 | `sys_payroll_handoff_records` | 36 | S2 | `payroll_handoff_record_recipient_system`: un solo valore distinto su 36 righe |
 | `sys_payroll_handoff_records` | 36 | C1 | `payroll_handoff_record_handed_off_at`: giorno del mese «23» concentra 72% delle 36 date |
 | `sys_position_economic_weight` | 24 | S1 | `position_economic_weight_period_start`: colonna interamente NULL su 24 righe |
 | `sys_position_economic_weight` | 24 | S1 | `position_economic_weight_period_end`: colonna interamente NULL su 24 righe |
+| `sys_position_skill_requirement_history` | 211 | S2 | `position_skill_requirement_history_old_weight`: un solo valore distinto su 211 righe |
+| `sys_position_skill_requirement_history` | 211 | S2 | `position_skill_requirement_history_new_weight`: un solo valore distinto su 211 righe |
 | `sys_reconciliation_registry` | 125 | C1 | `reconciliation_registry_decided_at`: giorno del mese «03» concentra 49% delle 125 date |
 | `sys_reconciliation_registry` | 125 | C1 | `reconciliation_registry_decided_at`: mese «06» concentra 86% delle 125 date |
 | `sys_reward_gate_results` | 3.283 | S2 | `reward_gate_result_payload`: un solo valore distinto su 3283 righe |
@@ -259,6 +236,7 @@ Rilievi per cui nessuna classe di `db/scripts/audit-storia36-explanations.txt` d
 | `sys_visualization_node_layouts` | 158 | S2 | `layout_id`: un solo valore distinto su 158 righe |
 | `sys_visualization_node_layouts` | 158 | S2 | `z`: un solo valore distinto su 158 righe |
 | `sys_activity_classifications` | 3.257 | S2 | `activity_classification_scheme`: un solo valore distinto su 3257 righe |
+| `sys_approval_requests` | 642 | S2 | `approval_request_decision_policy`: un solo valore distinto su 642 righe |
 | `sys_auth_identities` | 160 | S2 | `auth_identity_provider`: un solo valore distinto su 160 righe |
 | `sys_behavioral_assessments` | 465 | S2 | `behavioral_assessment_recorded_at`: un solo valore distinto su 465 righe |
 | `sys_blueprint_activations` | 1 | S1 | `blueprint_activation_effective_to`: colonna interamente NULL su 1 righe |
@@ -313,9 +291,12 @@ Rilievi per cui nessuna classe di `db/scripts/audit-storia36-explanations.txt` d
 | `sys_user_documents` | 657 | S2 | `user_document_mime_type`: un solo valore distinto su 657 righe |
 | `sys_user_family_members` | 150 | S2 | `user_family_member_metadata`: un solo valore distinto su 150 righe |
 | `sys_user_identity_documents` | 332 | S2 | `user_identity_document_metadata`: un solo valore distinto su 332 righe |
+| `sys_user_kpi_evidence` | 248 | S1 | `user_kpi_evidence_unit`: colonna interamente NULL su 248 righe |
 | `sys_user_learning_evidence` | 3.868 | S1 | `user_learning_evidence_certificate_uri`: colonna interamente NULL su 3868 righe |
 | `sys_user_pay_slips` | 5.641 | C1 | `user_pay_slip_payment_date`: giorno del mese «27» concentra 72% delle 5641 date |
 | `sys_user_professional_experiences` | 255 | S2 | `user_prof_exp_description`: un solo valore distinto su 255 righe |
+| `sys_user_skill_evidence` | 902 | S1 | `user_skill_evidence_assessor_user_id`: colonna interamente NULL su 902 righe |
+| `sys_user_skills` | 1.355 | S1 | `user_skill_last_used_on`: colonna interamente NULL su 1355 righe |
 | `sys_user_target_positions` | 164 | S2 | `user_target_position_metadata`: un solo valore distinto su 164 righe |
 | `sys_users` | 163 | S2 | `user_type`: un solo valore distinto su 163 righe |
 | `sys_whistleblowing_reports` | 2 | S1 | `whistleblowing_report_contact`: colonna interamente NULL su 2 righe |
@@ -328,7 +309,10 @@ Esiti che una regola segnala ma che sono corretti nel dominio. La classe e il mo
 |---|---|---|---|
 | `sys_activity_classifications` | S1 | `activity_classification_description`: colonna interamente NULL su 3257 righe | Campo descrittivo LIBERO: si compila quando chi lavora ha qualcosa da aggiungere, e nella maggior parte dei casi non ce l'ha. Vuoto e' lo stato normale, non un dato mancante. |
 | `sys_approval_requests` | S2 | `approval_request_tenant_id`: un solo valore distinto su 642 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
+| `sys_approval_requests` | C1 | `approval_request_resolved_at`: mese «08» concentra 72% delle 630 date | Verificato sui dati: la concentrazione e' su AGOSTO DI OGNI ANNO (150 nel 2023, 148 nel 2024, 153 nel 2025) — sono le richieste di assenza estiva e la loro approvazione. E' il calendario feriale italiano, non un artefatto di generazione. |
+| `sys_approval_requests` | C1 | `approval_request_applied_at`: mese «08» concentra 95% delle 467 date | Verificato sui dati: la concentrazione e' su AGOSTO DI OGNI ANNO (150 nel 2023, 148 nel 2024, 153 nel 2025) — sono le richieste di assenza estiva e la loro approvazione. E' il calendario feriale italiano, non un artefatto di generazione. |
 | `sys_approval_steps` | S2 | `approval_step_tenant_id`: un solo valore distinto su 751 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
+| `sys_approval_steps` | C1 | `approval_step_decided_at`: mese «08» concentra 63% delle 715 date | Verificato sui dati: la concentrazione e' su AGOSTO DI OGNI ANNO (150 nel 2023, 148 nel 2024, 153 nel 2025) — sono le richieste di assenza estiva e la loro approvazione. E' il calendario feriale italiano, non un artefatto di generazione. |
 | `sys_assessment_methods` | S1 | `assessment_method_description`: colonna interamente NULL su 5 righe | Campo descrittivo LIBERO: si compila quando chi lavora ha qualcosa da aggiungere, e nella maggior parte dei casi non ce l'ha. Vuoto e' lo stato normale, non un dato mancante. |
 | `sys_assessment_results` | S2 | `assessment_result_tenant_id`: un solo valore distinto su 1560 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_assessment_results` | S1 | `assessment_result_narrative`: colonna interamente NULL su 1560 righe | Campo descrittivo LIBERO: si compila quando chi lavora ha qualcosa da aggiungere, e nella maggior parte dei casi non ce l'ha. Vuoto e' lo stato normale, non un dato mancante. |
@@ -339,7 +323,8 @@ Esiti che una regola segnala ma che sono corretti nel dominio. La classe e il mo
 | `sys_auth_credentials` | S2 | `auth_credential_algorithm`: un solo valore distinto su 496 righe | Versione del motore che ha prodotto il dato: una sola perche' il calcolo e' stato eseguito da una sola versione. Diventera' varia al primo aggiornamento del modello. |
 | `sys_auth_mfa_policies` | S1 | `auth_mfa_policy_role_codes`: colonna interamente NULL su 2 righe | Secondo fattore: la funzione esiste ma non e' in uso su questi profili, e le credenziali non si inventano (stessa ragione per cui le tabelle MFA restano vuote). |
 | `sys_auth_mfa_webauthn_credentials` | S1 | `auth_webauthn_cred_last_used_at`: colonna interamente NULL su 6 righe | Secondo fattore: la funzione esiste ma non e' in uso su questi profili, e le credenziali non si inventano (stessa ragione per cui le tabelle MFA restano vuote). |
-| `sys_auth_refresh_tokens` | S1 | `auth_refresh_token_revoked_at`: colonna interamente NULL su 6776 righe | Traccia di una CANCELLAZIONE o revoca: vuota perche' nulla e' stato cancellato o revocato. E' esattamente lo stato che si vuole. |
+| `sys_auth_refresh_tokens` | C1 | `auth_refresh_token_issued_at`: giorno del mese «30» concentra 28% delle 6963 date | Traffico di accesso REALE, non storia costruita: si concentra nel periodo in cui il sistema e' stato effettivamente usato. Ridistribuirlo significherebbe falsificare i log di sicurezza. |
+| `sys_auth_refresh_tokens` | C1 | `auth_refresh_token_issued_at`: mese «07» concentra 62% delle 6963 date | Traffico di accesso REALE, non storia costruita: si concentra nel periodo in cui il sistema e' stato effettivamente usato. Ridistribuirlo significherebbe falsificare i log di sicurezza. |
 | `sys_behavioral_assessments` | S2 | `behavioral_assessment_tenant_id`: un solo valore distinto su 465 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_behavioral_assessments` | C1 | `behavioral_assessment_recorded_at`: giorno del mese «03» concentra 100% delle 465 date | ISTANTANEA dello stato corrente (verificato: righe = soggetti distinti, o moltiplicate da un discriminante di contenuto e non dal tempo). L'ultimo ricalcolo avviene in un batch: e' corretto che sia datato uguale per tutti. |
 | `sys_behavioral_assessments` | C1 | `behavioral_assessment_recorded_at`: mese «06» concentra 100% delle 465 date | ISTANTANEA dello stato corrente (verificato: righe = soggetti distinti, o moltiplicate da un discriminante di contenuto e non dal tempo). L'ultimo ricalcolo avviene in un batch: e' corretto che sia datato uguale per tutti. |
@@ -359,8 +344,9 @@ Esiti che una regola segnala ma che sono corretti nel dominio. La classe e il mo
 | `sys_compensation_recommendations` | C1 | `compensation_recommendation_period_start`: giorno del mese «01» concentra 100% delle 116 date | Delimitatore di PERIODO, non un fatto puntuale: un esercizio annuale inizia il 1 gennaio e finisce il 31 dicembre per tutti. La concentrazione E' il calendario. |
 | `sys_compensation_recommendations` | C1 | `compensation_recommendation_period_start`: mese «04» concentra 68% delle 116 date | Delimitatore di PERIODO, non un fatto puntuale: un esercizio annuale inizia il 1 gennaio e finisce il 31 dicembre per tutti. La concentrazione E' il calendario. |
 | `sys_content_blueprint_links` | S1 | `link_note`: colonna interamente NULL su 1 righe | Campo descrittivo LIBERO: si compila quando chi lavora ha qualcosa da aggiungere, e nella maggior parte dei casi non ce l'ha. Vuoto e' lo stato normale, non un dato mancante. |
-| `sys_content_documents` | S2 | `document_tenant_id`: un solo valore distinto su 173 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
-| `sys_content_versions` | S2 | `version_tenant_id`: un solo valore distinto su 200 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
+| `sys_content_documents` | S2 | `document_tenant_id`: un solo valore distinto su 175 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
+| `sys_content_documents` | C1 | `document_published_at`: mese «06» concentra 85% delle 163 date | Pubblicazione INIZIALE del corpus documentale: quando un'azienda adotta il portale, i documenti vigenti entrano in un atto solo. Le revisioni successive sono invece datate sui fatti (le policy organizzative il 2025-03-17, due settimane dopo il riordino). |
+| `sys_content_versions` | S2 | `version_tenant_id`: un solo valore distinto su 204 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_continuous_feedback` | S2 | `feedback_tenant_id`: un solo valore distinto su 474 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_continuous_feedback` | S1 | `feedback_tags`: colonna interamente NULL su 474 righe | Etichettatura facoltativa, a discrezione di chi inserisce. Non fa parte del dato minimo di nessun processo. |
 | `sys_critical_positions` | S1 | `critical_position_rationale`: colonna interamente NULL su 8 righe | Campo descrittivo LIBERO: si compila quando chi lavora ha qualcosa da aggiungere, e nella maggior parte dei casi non ce l'ha. Vuoto e' lo stato normale, non un dato mancante. |
@@ -372,6 +358,7 @@ Esiti che una regola segnala ma che sono corretti nel dominio. La classe e il mo
 | `sys_enterprise_size_bands` | S1 | `enterprise_size_band_description`: colonna interamente NULL su 5 righe | Campo descrittivo LIBERO: si compila quando chi lavora ha qualcosa da aggiungere, e nella maggior parte dei casi non ce l'ha. Vuoto e' lo stato normale, non un dato mancante. |
 | `sys_feedback_360_responses` | S2 | `response_tenant_id`: un solo valore distinto su 776 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_feedback_360_responses` | S2 | `response_status`: un solo valore distinto su 776 righe | Stato uniforme su tutte le righe: legittimo quando la tabella contiene solo record che hanno raggiunto lo stesso punto del ciclo (es. tutti attivi, tutti pubblicati). Dove NON lo era — code di approvazione ferme — e' stato riparato (vedi C12b). |
+| `sys_feedback_360_responses` | C1 | `response_completed_at`: mese «10» concentra 52% delle 776 date | Le campagne di ascolto sono EVENTI PUNTUALI: gli inviti partono tutti insieme il giorno di apertura del ciclo e le risposte arrivano nelle settimane seguenti. La concentrazione e' la campagna. |
 | `sys_flight_risk_scores` | S2 | `flight_risk_score_model_version`: un solo valore distinto su 162 righe | Versione del motore che ha prodotto il dato: una sola perche' il calcolo e' stato eseguito da una sola versione. Diventera' varia al primo aggiornamento del modello. |
 | `sys_flight_risk_scores` | C1 | `flight_risk_score_computed_at`: giorno del mese «29» concentra 100% delle 162 date | ISTANTANEA dello stato corrente (verificato: righe = soggetti distinti, o moltiplicate da un discriminante di contenuto e non dal tempo). L'ultimo ricalcolo avviene in un batch: e' corretto che sia datato uguale per tutti. |
 | `sys_flight_risk_scores` | C1 | `flight_risk_score_computed_at`: mese «07» concentra 100% delle 162 date | ISTANTANEA dello stato corrente (verificato: righe = soggetti distinti, o moltiplicate da un discriminante di contenuto e non dal tempo). L'ultimo ricalcolo avviene in un batch: e' corretto che sia datato uguale per tutti. |
@@ -398,9 +385,12 @@ Esiti che una regola segnala ma che sono corretti nel dominio. La classe e il mo
 | `sys_kpi_assessment_results` | S2 | `kpi_assessment_result_tenant_id`: un solo valore distinto su 248 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_kpi_assessment_results` | C1 | `kpi_assessment_result_period_start`: giorno del mese «01» concentra 100% delle 248 date | Delimitatore di PERIODO, non un fatto puntuale: un esercizio annuale inizia il 1 gennaio e finisce il 31 dicembre per tutti. La concentrazione E' il calendario. |
 | `sys_kpi_assessment_results` | C1 | `kpi_assessment_result_period_start`: mese «01» concentra 100% delle 248 date | Delimitatore di PERIODO, non un fatto puntuale: un esercizio annuale inizia il 1 gennaio e finisce il 31 dicembre per tutti. La concentrazione E' il calendario. |
+| `sys_kpi_assessment_results` | C1 | `kpi_assessment_result_computed_at`: mese «01» concentra 100% delle 248 date | E' l'esito della riparazione C12: la misura di un esercizio ANNUALE si registra alla chiusura del periodo, quindi a gennaio. La concentrazione sul mese e' voluta; quella sul singolo GIORNO e' sparita (era 100%, ora ~35% distribuito su tre settimane). |
 | `sys_kpi_measurements` | S2 | `kpi_measurement_tenant_id`: un solo valore distinto su 248 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_kpi_measurements` | C1 | `kpi_measurement_period_start`: giorno del mese «01» concentra 100% delle 248 date | Delimitatore di PERIODO, non un fatto puntuale: un esercizio annuale inizia il 1 gennaio e finisce il 31 dicembre per tutti. La concentrazione E' il calendario. |
 | `sys_kpi_measurements` | C1 | `kpi_measurement_period_start`: mese «01» concentra 100% delle 248 date | Delimitatore di PERIODO, non un fatto puntuale: un esercizio annuale inizia il 1 gennaio e finisce il 31 dicembre per tutti. La concentrazione E' il calendario. |
+| `sys_kpi_measurements` | C1 | `kpi_measurement_recorded_at`: giorno del mese «07» concentra 37% delle 248 date | E' l'esito della riparazione C12: la misura di un esercizio ANNUALE si registra alla chiusura del periodo, quindi a gennaio. La concentrazione sul mese e' voluta; quella sul singolo GIORNO e' sparita (era 100%, ora ~35% distribuito su tre settimane). |
+| `sys_kpi_measurements` | C1 | `kpi_measurement_recorded_at`: mese «01» concentra 100% delle 248 date | E' l'esito della riparazione C12: la misura di un esercizio ANNUALE si registra alla chiusura del periodo, quindi a gennaio. La concentrazione sul mese e' voluta; quella sul singolo GIORNO e' sparita (era 100%, ora ~35% distribuito su tre settimane). |
 | `sys_kpi_targets` | S2 | `kpi_target_tenant_id`: un solo valore distinto su 301 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_kpi_weighting_rules` | S1 | `kpi_weighting_rule_description`: colonna interamente NULL su 3 righe | Campo descrittivo LIBERO: si compila quando chi lavora ha qualcosa da aggiungere, e nella maggior parte dei casi non ce l'ha. Vuoto e' lo stato normale, non un dato mancante. |
 | `sys_learning_gaps` | S2 | `learning_gap_tenant_id`: un solo valore distinto su 270 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
@@ -442,6 +432,7 @@ Esiti che una regola segnala ma che sono corretti nel dominio. La classe e il mo
 | `sys_position_kpi_requirements` | S2 | `position_kpi_requirement_tenant_id`: un solo valore distinto su 172 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_position_learning_requirements` | S2 | `position_learning_requirement_tenant_id`: un solo valore distinto su 1791 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_position_skill_requirement_history` | S2 | `position_skill_requirement_history_tenant_id`: un solo valore distinto su 211 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
+| `sys_position_skill_requirement_history` | C1 | `position_skill_requirement_history_effective_at`: mese «03» concentra 33% delle 211 date | Le revisioni dei requisiti di ruolo decorrono dalla riorganizzazione (marzo 2025) e dai rinnovi contrattuali: hanno una data di efficacia comune per costruzione organizzativa. |
 | `sys_position_skill_requirements` | S2 | `position_skill_requirement_tenant_id`: un solo valore distinto su 1678 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_process_participants` | S2 | `process_participant_tenant_id`: un solo valore distinto su 1104 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_readiness_scores` | C1 | `readiness_score_computed_at`: giorno del mese «03» concentra 100% delle 90 date | ISTANTANEA dello stato corrente (verificato: righe = soggetti distinti, o moltiplicate da un discriminante di contenuto e non dal tempo). L'ultimo ricalcolo avviene in un batch: e' corretto che sia datato uguale per tutti. |
@@ -468,6 +459,9 @@ Esiti che una regola segnala ma che sono corretti nel dominio. La classe e il mo
 | `sys_successor_candidates` | S2 | `successor_candidate_status`: un solo valore distinto su 28 righe | Stato uniforme su tutte le righe: legittimo quando la tabella contiene solo record che hanno raggiunto lo stesso punto del ciclo (es. tutti attivi, tutti pubblicati). Dove NON lo era — code di approvazione ferme — e' stato riparato (vedi C12b). |
 | `sys_successor_readiness` | S2 | `successor_readiness_tenant_id`: un solo valore distinto su 79 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_survey_assignments` | S2 | `survey_assignment_tenant_id`: un solo valore distinto su 948 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
+| `sys_survey_assignments` | C1 | `survey_assignment_assigned_at`: giorno del mese «08» concentra 33% delle 948 date | Le campagne di ascolto sono EVENTI PUNTUALI: gli inviti partono tutti insieme il giorno di apertura del ciclo e le risposte arrivano nelle settimane seguenti. La concentrazione e' la campagna. |
+| `sys_survey_assignments` | C1 | `survey_assignment_assigned_at`: mese «04» concentra 33% delle 948 date | Le campagne di ascolto sono EVENTI PUNTUALI: gli inviti partono tutti insieme il giorno di apertura del ciclo e le risposte arrivano nelle settimane seguenti. La concentrazione e' la campagna. |
+| `sys_survey_assignments` | C1 | `survey_assignment_completed_at`: mese «04» concentra 37% delle 558 date | Le campagne di ascolto sono EVENTI PUNTUALI: gli inviti partono tutti insieme il giorno di apertura del ciclo e le risposte arrivano nelle settimane seguenti. La concentrazione e' la campagna. |
 | `sys_survey_questions` | S2 | `survey_question_tenant_id`: un solo valore distinto su 69 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_survey_responses` | S2 | `survey_response_tenant_id`: un solo valore distinto su 8288 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_talent_scores` | C1 | `talent_score_computed_at`: giorno del mese «03» concentra 100% delle 154 date | ISTANTANEA dello stato corrente (verificato: righe = soggetti distinti, o moltiplicate da un discriminante di contenuto e non dal tempo). L'ultimo ricalcolo avviene in un batch: e' corretto che sia datato uguale per tutti. |
@@ -495,6 +489,8 @@ Esiti che una regola segnala ma che sono corretti nel dominio. La classe e il mo
 | `sys_user_kpi_evidence` | S2 | `user_kpi_evidence_tenant_id`: un solo valore distinto su 248 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_user_kpi_evidence` | C1 | `user_kpi_evidence_period_start`: giorno del mese «01» concentra 100% delle 248 date | Delimitatore di PERIODO, non un fatto puntuale: un esercizio annuale inizia il 1 gennaio e finisce il 31 dicembre per tutti. La concentrazione E' il calendario. |
 | `sys_user_kpi_evidence` | C1 | `user_kpi_evidence_period_start`: mese «01» concentra 100% delle 248 date | Delimitatore di PERIODO, non un fatto puntuale: un esercizio annuale inizia il 1 gennaio e finisce il 31 dicembre per tutti. La concentrazione E' il calendario. |
+| `sys_user_kpi_evidence` | C1 | `user_kpi_evidence_recorded_at`: giorno del mese «07» concentra 33% delle 248 date | E' l'esito della riparazione C12: la misura di un esercizio ANNUALE si registra alla chiusura del periodo, quindi a gennaio. La concentrazione sul mese e' voluta; quella sul singolo GIORNO e' sparita (era 100%, ora ~35% distribuito su tre settimane). |
+| `sys_user_kpi_evidence` | C1 | `user_kpi_evidence_recorded_at`: mese «01» concentra 100% delle 248 date | E' l'esito della riparazione C12: la misura di un esercizio ANNUALE si registra alla chiusura del periodo, quindi a gennaio. La concentrazione sul mese e' voluta; quella sul singolo GIORNO e' sparita (era 100%, ora ~35% distribuito su tre settimane). |
 | `sys_user_learning_assignments` | S2 | `user_learning_assignment_tenant_id`: un solo valore distinto su 3061 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
 | `sys_user_pay_slips` | C1 | `user_pay_slip_period_start`: giorno del mese «01» concentra 100% delle 5641 date | Delimitatore di PERIODO, non un fatto puntuale: un esercizio annuale inizia il 1 gennaio e finisce il 31 dicembre per tutti. La concentrazione E' il calendario. |
 | `sys_user_professional_experiences` | S2 | `user_prof_exp_tenant_id`: un solo valore distinto su 255 righe | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante. |
@@ -531,25 +527,25 @@ Esito di ogni tabella del perimetro, con le regole effettivamente eseguite su di
 |---|---|---|---|
 | `sys_activity_classification_mappings` | 0 | V1 | vuota → V1 |
 | `sys_activity_classifications` | 3.257 | N2 S1 S2 X1 | **1 aperti** · 1 spiegati |
-| `sys_approval_requests` | 642 | C1 D1 D2 N2 S1 S2 X1 | **3 aperti** · 1 spiegati |
-| `sys_approval_steps` | 751 | C1 D1 D2 N2 S1 S2 X1 | **3 aperti** · 1 spiegati |
+| `sys_approval_requests` | 642 | C1 D1 D2 N2 S1 S2 X1 | **1 aperti** · 3 spiegati |
+| `sys_approval_steps` | 751 | C1 D1 D2 N2 S1 S2 X1 | **2 aperti** · 2 spiegati |
 | `sys_assessment_methods` | 5 | S1 X1 | verde (1 spiegati) |
 | `sys_assessment_results` | 1.560 | C1 D1 D2 N2 S1 S2 X1 | **2 aperti** · 2 spiegati |
 | `sys_assessments` | 615 | D1 D2 D3 S1 S2 X1 | **2 aperti** · 1 spiegati |
 | `sys_attendance` | 116.015 | D1 D2 N2 S1 S2 | **5 aperti** · 3 spiegati |
 | `sys_auth_credentials` | 496 | C1 D1 D2 S1 S2 X1 | **2 aperti** · 1 spiegati |
 | `sys_auth_identities` | 160 | S1 S2 X1 | **1 aperti** |
-| `sys_auth_login_events` | 92.709 | S1 X1 | verde |
+| `sys_auth_login_events` | 92.913 | S1 X1 | verde |
 | `sys_auth_mfa_exemption_audit` | 0 | V1 | vuota → V1 |
 | `sys_auth_mfa_exemptions` | 0 | V1 | vuota → V1 |
-| `sys_auth_mfa_factors` | 177 | D1 D2 S1 X1 | verde |
+| `sys_auth_mfa_factors` | 180 | D1 D2 S1 X1 | verde |
 | `sys_auth_mfa_otp_challenges` | 0 | V1 | vuota → V1 |
 | `sys_auth_mfa_policies` | 2 | S1 X1 | verde (1 spiegati) |
 | `sys_auth_mfa_recovery_codes` | 0 | V1 | vuota → V1 |
 | `sys_auth_mfa_webauthn_credentials` | 6 | D1 D2 N2 S1 X1 | verde (1 spiegati) |
 | `sys_auth_password_reset_tokens` | 27 | D1 D2 S1 S2 X1 | **3 aperti** |
 | `sys_auth_permissions` | 204 | S1 X1 | verde |
-| `sys_auth_refresh_tokens` | 6.776 | C1 D1 D2 D3 S1 X1 | **3 aperti** · 1 spiegati |
+| `sys_auth_refresh_tokens` | 6.963 | C1 D1 D2 D3 S1 X1 | **4 aperti** · 2 spiegati |
 | `sys_auth_role_permissions` | 908 | C1 D1 D2 S1 X1 | **2 aperti** |
 | `sys_auth_roles` | 13 | S1 X1 | verde |
 | `sys_auth_sessions` | 0 | V1 | vuota → V1 |
@@ -570,9 +566,9 @@ Esito di ogni tabella del perimetro, con le regole effettivamente eseguite su di
 | `sys_compensation_recommendations` | 116 | C1 D1 D2 D3 N2 S1 S2 X1 | **2 aperti** · 4 spiegati |
 | `sys_content_blueprint_links` | 1 | S1 X1 | verde (1 spiegati) |
 | `sys_content_categories` | 6 | S1 X1 | **1 aperti** |
-| `sys_content_documents` | 173 | C1 D1 D2 S1 S2 X1 | **4 aperti** · 1 spiegati |
+| `sys_content_documents` | 175 | C1 D1 D2 S1 S2 X1 | **3 aperti** · 2 spiegati |
 | `sys_content_media` | 0 | V1 | vuota → V1 |
-| `sys_content_versions` | 200 | N2 S1 S2 X1 | **2 aperti** · 1 spiegati |
+| `sys_content_versions` | 204 | N2 S1 S2 X1 | **2 aperti** · 1 spiegati |
 | `sys_continuous_feedback` | 474 | D1 D2 N2 S1 S2 X1 | **3 aperti** · 2 spiegati |
 | `sys_critical_positions` | 8 | D1 D2 S1 X1 | **1 aperti** · 1 spiegati |
 | `sys_critical_role_coverage_status` | 8 | D1 D2 N1 N2 S1 X1 | verde |
@@ -586,7 +582,7 @@ Esito di ogni tabella del perimetro, con le regole effettivamente eseguite su di
 | `sys_enterprise_typing_profiles` | 2 | D1 D2 N2 S1 X1 | **1 aperti** |
 | `sys_esco_occupation_embeddings` | 3.045 | S1 S2 X1 | **1 aperti** |
 | `sys_esco_occupation_mappings` | 7.675 | S1 X1 | verde |
-| `sys_feedback_360_responses` | 776 | C1 D1 D2 N2 S1 S2 X1 | **3 aperti** · 2 spiegati |
+| `sys_feedback_360_responses` | 776 | C1 D1 D2 N2 S1 S2 X1 | **2 aperti** · 3 spiegati |
 | `sys_flight_risk_scores` | 162 | C1 D1 D2 N2 S1 S2 X1 | **1 aperti** · 3 spiegati |
 | `sys_gap_analysis_results` | 158 | C1 D1 D2 N2 S1 S2 X1 | **2 aperti** · 3 spiegati |
 | `sys_gap_closure_actions` | 440 | D2 S1 S2 X1 | **1 aperti** · 1 spiegati |
@@ -605,9 +601,9 @@ Esito di ogni tabella del perimetro, con le regole effettivamente eseguite su di
 | `sys_job_role_embeddings` | 137 | S1 S2 X1 | **1 aperti** |
 | `sys_job_roles` | 137 | S1 X1 | verde |
 | `sys_kpi_assessment_methods` | 5 | S1 X1 | verde (1 spiegati) |
-| `sys_kpi_assessment_results` | 248 | C1 D1 D2 D3 N2 S1 S2 X1 | **3 aperti** · 3 spiegati |
+| `sys_kpi_assessment_results` | 248 | C1 D1 D2 D3 N2 S1 S2 X1 | **2 aperti** · 4 spiegati |
 | `sys_kpi_definitions` | 243 | S1 X1 | **2 aperti** |
-| `sys_kpi_measurements` | 248 | C1 D1 D2 D3 S1 S2 X1 | **5 aperti** · 3 spiegati |
+| `sys_kpi_measurements` | 248 | C1 D1 D2 D3 S1 S2 X1 | **3 aperti** · 5 spiegati |
 | `sys_kpi_metric_definitions` | 243 | S1 S2 X1 | **1 aperti** |
 | `sys_kpi_targets` | 301 | D2 D3 S1 S2 X1 | **1 aperti** · 1 spiegati |
 | `sys_kpi_weighting_rules` | 3 | S1 X1 | verde (1 spiegati) |
@@ -649,7 +645,7 @@ Esito di ogni tabella del perimetro, con le regole effettivamente eseguite su di
 | `sys_position_economic_weight` | 24 | D1 D2 D3 N2 S1 S2 X1 | **2 aperti** · 1 spiegati |
 | `sys_position_kpi_requirements` | 172 | N2 S1 S2 X1 | **3 aperti** · 1 spiegati |
 | `sys_position_learning_requirements` | 1.791 | S1 S2 X1 | **1 aperti** · 1 spiegati |
-| `sys_position_skill_requirement_history` | 211 | C1 D1 D2 N2 S1 S2 X1 | **3 aperti** · 1 spiegati |
+| `sys_position_skill_requirement_history` | 211 | C1 D1 D2 N2 S1 S2 X1 | **2 aperti** · 2 spiegati |
 | `sys_position_skill_requirements` | 1.678 | N2 S1 S2 X1 | verde (1 spiegati) |
 | `sys_position_succession_relevance` | 17 | S1 X1 | verde |
 | `sys_positions` | 181 | C1 D1 D2 D3 S1 S2 X1 | **4 aperti** |
@@ -685,7 +681,7 @@ Esito di ogni tabella del perimetro, con le regole effettivamente eseguite su di
 | `sys_succession_scores` | 90 | C1 D1 D2 N2 S1 S2 X1 | **1 aperti** · 2 spiegati |
 | `sys_successor_candidates` | 28 | S1 S2 X1 | verde (1 spiegati) |
 | `sys_successor_readiness` | 79 | C1 D1 D2 N2 S1 S2 X1 | **1 aperti** · 1 spiegati |
-| `sys_survey_assignments` | 948 | C1 D1 D2 S1 S2 X1 | **3 aperti** · 1 spiegati |
+| `sys_survey_assignments` | 948 | C1 D1 D2 S1 S2 X1 | verde (4 spiegati) |
 | `sys_survey_questions` | 69 | S1 S2 X1 | **1 aperti** · 1 spiegati |
 | `sys_survey_responses` | 8.288 | N2 S1 S2 X1 | **2 aperti** · 1 spiegati |
 | `sys_survey_templates` | 2 | S1 X1 | verde |
@@ -709,11 +705,11 @@ Esito di ogni tabella del perimetro, con le regole effettivamente eseguite su di
 | `sys_user_contracts` | 160 | C1 D1 D2 D3 N2 S1 S2 X1 | **7 aperti** · 3 spiegati |
 | `sys_user_demographics` | 161 | C1 D1 D2 S1 S2 X1 | **1 aperti** |
 | `sys_user_documents` | 657 | S1 S2 X1 | **1 aperti** · 1 spiegati |
-| `sys_user_education_records` | 160 | C1 D1 D2 D3 S1 X1 | **4 aperti** |
+| `sys_user_education_records` | 160 | C1 D1 D2 D3 S1 X1 | **3 aperti** |
 | `sys_user_employment` | 161 | C1 D1 D2 D3 N1 N2 S1 S2 X1 | **3 aperti** · 2 spiegati |
 | `sys_user_family_members` | 150 | C1 D1 D2 S1 S2 X1 | **1 aperti** · 1 spiegati |
 | `sys_user_identity_documents` | 332 | D2 S1 S2 X1 | **1 aperti** |
-| `sys_user_kpi_evidence` | 248 | C1 D1 D2 D3 S1 S2 X1 | **3 aperti** · 3 spiegati |
+| `sys_user_kpi_evidence` | 248 | C1 D1 D2 D3 S1 S2 X1 | **1 aperti** · 5 spiegati |
 | `sys_user_learning_assignments` | 3.061 | D2 S1 S2 X1 | verde (1 spiegati) |
 | `sys_user_learning_evidence` | 3.868 | C1 D1 D2 N2 S1 X1 | **1 aperti** |
 | `sys_user_pay_slips` | 5.641 | C1 D1 D2 D3 N2 S1 X1 | **1 aperti** · 1 spiegati |
@@ -722,8 +718,8 @@ Esito di ogni tabella del perimetro, con le regole effettivamente eseguite su di
 | `sys_user_professional_experiences` | 255 | C1 D1 D2 D3 S1 S2 X1 | **1 aperti** · 1 spiegati |
 | `sys_user_profile_embeddings` | 156 | N2 S1 S2 X1 | **2 aperti** |
 | `sys_user_profiles` | 157 | S1 S2 X1 | **3 aperti** |
-| `sys_user_skill_evidence` | 902 | C1 D1 D2 N2 S1 S2 X1 | **4 aperti** · 2 spiegati |
-| `sys_user_skills` | 1.355 | C1 D1 D2 S1 S2 X1 | **3 aperti** · 2 spiegati |
+| `sys_user_skill_evidence` | 902 | C1 D1 D2 N2 S1 S2 X1 | **1 aperti** · 2 spiegati |
+| `sys_user_skills` | 1.355 | C1 D1 D2 S1 S2 X1 | **1 aperti** · 2 spiegati |
 | `sys_user_target_positions` | 164 | S1 S2 X1 | **1 aperti** · 1 spiegati |
 | `sys_users` | 163 | S1 S2 X1 | **1 aperti** |
 | `sys_variable_pay_calculations` | 182 | C1 D1 D2 D3 N2 S1 S2 X1 | **3 aperti** · 3 spiegati |

@@ -54,7 +54,13 @@ describe("/v1/organization-unit-history integration", () => {
     await closePool();
   });
 
-  it("LIST: la riorganizzazione del marzo 2025 è leggibile dall'API", async () => {
+  it("LIST: la storia organizzativa è leggibile dall'API, e ciò che c'è è coerente", async () => {
+    // Il database della CI è un clone di produzione CONGELATO al provisioning
+    // (D-08): non contiene la storia scritta dopo. Un test che pretendesse gli
+    // eventi del marzo 2025 sarebbe verde qui e rosso lì — e sarebbe il test a
+    // sbagliare, non il prodotto. Quindi: il CONTRATTO dell'API si verifica
+    // sempre, le proprietà del dato solo dove il dato esiste. Che gli eventi
+    // ci siano è già sorvegliato dalla batteria SQL, che gira sul database vero.
     const r = await suite.app.inject({
       method: "GET",
       url: "/v1/organization-unit-history?effectiveFrom=2025-03-01&effectiveTo=2025-03-01",
@@ -65,8 +71,19 @@ describe("/v1/organization-unit-history integration", () => {
       items: Array<{ changeType: string; oldValue: Record<string, unknown>; newValue: Record<string, unknown> }>;
       total: number;
     };
-    // il cluster C6 ha scritto quel giorno: l'API deve restituirlo davvero
-    expect(body.total).toBeGreaterThan(0);
+    // la risposta è coerente con sé stessa, con o senza storia in tabella
+    expect(Array.isArray(body.items)).toBe(true);
+    expect(body.items.length).toBeLessThanOrEqual(body.total);
+
+    const presenti = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_organization_unit_history h
+        JOIN sys.sys_users u ON u.user_tenant_id = h.organization_unit_history_tenant_id
+       WHERE u.user_email = 'federica.marchetti@rtl-bank.org'
+         AND h.organization_unit_history_effective_at::date = DATE '2025-03-01'`,
+    );
+    expect(body.total).toBe(Number(presenti.rows[0]!.n));
+
+    // dove ci sono eventi, ognuno cambia davvero qualcosa
     for (const e of body.items) {
       expect(JSON.stringify(e.oldValue)).not.toBe(JSON.stringify(e.newValue));
     }

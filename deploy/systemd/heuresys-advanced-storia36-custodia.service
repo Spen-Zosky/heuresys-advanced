@@ -1,0 +1,31 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-bootstrap.sh / vm-deploy.sh;
+# User= is rewritten per-host by the deploy (ubuntu on the VM, enzo on the twin — D-39).
+#
+# storia36 C12 (Step 12.5b): CUSTODIA SETTIMANALE della storia a 36 mesi.
+# Esegue `db/scripts/storia36.sh custodia`, che ri-esegue TUTTE le batterie di
+# controllo sul database com'e' oggi (piu' i selftest, che verificano che i
+# controlli sappiano ancora fallire) e scrive un report con triage a tre esiti.
+#
+# Perche' serve: la storia non e' un artefatto congelato — il database e'
+# produzione viva. Un import, una migration o una modifica da interfaccia
+# possono incrinare un invariante mesi dopo che e' stato stabilito. Senza un
+# presidio periodico, il primo a scoprirlo sarebbe chi guarda la dimostrazione.
+[Unit]
+Description=Heuresys Advanced — custodia settimanale della storia RTL 36 mesi (storia36 C12)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+# Un fallimento notturno resta invisibile finche' qualcuno non guarda
+# `systemctl --failed` per caso: l'handler scrive journal + registro letto dal
+# dashboard di sessione (S1029).
+OnFailure=heuresys-unit-failure@%n.service
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+WorkingDirectory=@@REPO_DIR@@
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/db/scripts/storia36.sh custodia
+# La batteria e' lunga (206 tabelle, ~120 selftest): meglio un tetto generoso
+# che un falso fallimento per timeout.
+TimeoutStartSec=1800
+Nice=10
+IOSchedulingClass=idle

@@ -1,0 +1,61 @@
+# storia36 — SPIEGAZIONI dei rilievi dell'audit semantico
+# (`db/scripts/audit-storia36-semantic.py`)
+#
+# Un rilievo dell'audit e' una DOMANDA, non una condanna: "questa colonna e'
+# sempre vuota / ha un solo valore / e' concentrata su un giorno — perche'?".
+# Ci sono tre risposte possibili e tutte e tre sono legittime PURCHE' esplicite:
+#   1. e' un difetto  → si ripara (e nasce un check che lo impedisce in futuro)
+#   2. e' corretto    → si spiega QUI, con il motivo
+#   3. e' vero ma fuori perimetro → si registra come voce di lavoro
+# Quello che non e' ammesso e' la quarta: lasciarlo li' senza dire niente.
+#
+# Ogni riga classifica una CLASSE di rilievi, non il singolo caso: le classi
+# sono definite per ruolo semantico della colonna, cosi' una tabella nuova con
+# le stesse caratteristiche eredita la spiegazione invece di generare rumore.
+#
+# formato:  <regola> | <regex tabella> | <regex colonna> | <motivo>
+
+# ---------------------------------------------------------------------------
+# S1 — colonne sempre vuote
+# ---------------------------------------------------------------------------
+S1 | .* | _(description|descrizione|notes|note|comment|commento|narrative|rationale|remarks)$ | Campo descrittivo LIBERO: si compila quando chi lavora ha qualcosa da aggiungere, e nella maggior parte dei casi non ce l'ha. Vuoto e' lo stato normale, non un dato mancante.
+S1 | .* | _(rejection_reason|cancellation_reason|override_reason|failure_reason|error_message)$ | Motivazione di un esito NEGATIVO: si valorizza solo quando quell'esito si verifica. Vuota significa che il caso non si e' presentato — riempirla creerebbe rifiuti che non ci sono stati.
+S1 | .* | _(tags|labels|keywords|aliases|synonyms)$ | Etichettatura facoltativa, a discrezione di chi inserisce. Non fa parte del dato minimo di nessun processo.
+S1 | .* | _(deleted_at|deleted_by|archived_at|revoked_at|revoked_by)$ | Traccia di una CANCELLAZIONE o revoca: vuota perche' nulla e' stato cancellato o revocato. E' esattamente lo stato che si vuole.
+S1 | .* | _(external_ref|external_id|source_reference|source_query|integration_.*|sync_.*)$ | Aggancio a un sistema ESTERNO non ancora collegato (nessuna integrazione attiva oggi). Si valorizzera' quando l'integrazione esistera'.
+S1 | .* | _(webauthn|mfa|otp|totp|recovery)_ | Secondo fattore: la funzione esiste ma non e' in uso su questi profili, e le credenziali non si inventano (stessa ragione per cui le tabelle MFA restano vuote).
+S1 | sys_(model_predictions|.*_embeddings|.*_lineage) | _(payload|details|metadata|explanation)$ | Campo di dettaglio del motore analitico: si popola quando il modello produce una spiegazione strutturata. Il punteggio c'e', il dettaglio e' facoltativo.
+
+# ---------------------------------------------------------------------------
+# S2 — un solo valore distinto
+# ---------------------------------------------------------------------------
+S2 | .* | _(tenant_id)$ | Un solo tenant per tabella e' l'atteso: i dati di questo perimetro sono di RTL Bank. E' l'isolamento fra clienti che funziona, non varianza mancante.
+S2 | .* | _(is_|has_|can_|allow_|enable) | Interruttore booleano-simile con lo stesso valore ovunque: significa che la configurazione e' uniforme, che e' cio' che ci si aspetta da un'impostazione di piattaforma.
+S2 | .* | _(status|state)$ | Stato uniforme su tutte le righe: legittimo quando la tabella contiene solo record che hanno raggiunto lo stesso punto del ciclo (es. tutti attivi, tutti pubblicati). Dove NON lo era — code di approvazione ferme — e' stato riparato (vedi C12b).
+S2 | .* | _(currency|valuta|unit|unita|locale|language|country|nazione)$ | Dimensione costante per costruzione: una banca italiana paga in euro, opera in Italia e lavora in italiano. La varianza arrivera' con un cliente estero, non prima.
+S2 | .* | _(model_version|schema_version|algorithm|engine|method_version)$ | Versione del motore che ha prodotto il dato: una sola perche' il calcolo e' stato eseguito da una sola versione. Diventera' varia al primo aggiornamento del modello.
+S2 | sys_(tenancies|tenant_.*|platform_.*) | .* | Tabella di configurazione della piattaforma: pochi record, per definizione omogenei.
+
+# ---------------------------------------------------------------------------
+# C1 — concentrazione di calendario
+# ---------------------------------------------------------------------------
+C1 | .* | _(period_start|period_end|periodo_inizio|periodo_fine|cycle_start|cycle_end|fiscal_.*)$ | Delimitatore di PERIODO, non un fatto puntuale: un esercizio annuale inizia il 1 gennaio e finisce il 31 dicembre per tutti. La concentrazione E' il calendario.
+C1 | sys_(capability_scores|capability_score_lineage|flight_risk_scores|gap_analysis_results|skill_gap_scores|talent_scores|employee_position_fit_scores|readiness_scores|succession_scores|model_predictions|succession_readiness_scores|behavioral_assessments) | .* | ISTANTANEA dello stato corrente (verificato: righe = soggetti distinti, o moltiplicate da un discriminante di contenuto e non dal tempo). L'ultimo ricalcolo avviene in un batch: e' corretto che sia datato uguale per tutti.
+C1 | sys_performance_reviews | review_(submitted_at|acknowledged_at)$ | Le valutazioni annuali si consegnano e si controfirmano nella finestra di chiusura dell'esercizio: la concentrazione a gennaio e' il processo, non un artefatto.
+C1 | sys_goals | goal_(start_date|completed_at)$ | Gli obiettivi annuali partono a inizio anno e si chiudono a dicembre. Concentrazione attesa.
+C1 | sys_(kpi_measurements|user_kpi_evidence|kpi_assessment_results) | _(recorded_at|computed_at)$ | E' l'esito della riparazione C12: la misura di un esercizio ANNUALE si registra alla chiusura del periodo, quindi a gennaio. La concentrazione sul mese e' voluta; quella sul singolo GIORNO e' sparita (era 100%, ora ~35% distribuito su tre settimane).
+C1 | sys_(approval_requests|approval_steps) | _(resolved_at|applied_at|decided_at)$ | Verificato sui dati: la concentrazione e' su AGOSTO DI OGNI ANNO (150 nel 2023, 148 nel 2024, 153 nel 2025) — sono le richieste di assenza estiva e la loro approvazione. E' il calendario feriale italiano, non un artefatto di generazione.
+C1 | sys_(survey_assignments|feedback_360_responses|survey_.*) | _(assigned_at|completed_at|sent_at)$ | Le campagne di ascolto sono EVENTI PUNTUALI: gli inviti partono tutti insieme il giorno di apertura del ciclo e le risposte arrivano nelle settimane seguenti. La concentrazione e' la campagna.
+C1 | sys_auth_.* | _(issued_at|created_at|last_used_at)$ | Traffico di accesso REALE, non storia costruita: si concentra nel periodo in cui il sistema e' stato effettivamente usato. Ridistribuirlo significherebbe falsificare i log di sicurezza.
+C1 | sys_content_documents | document_published_at$ | Pubblicazione INIZIALE del corpus documentale: quando un'azienda adotta il portale, i documenti vigenti entrano in un atto solo. Le revisioni successive sono invece datate sui fatti (le policy organizzative il 2025-03-17, due settimane dopo il riordino).
+C1 | sys_position_skill_requirement_history | _effective_at$ | Le revisioni dei requisiti di ruolo decorrono dalla riorganizzazione (marzo 2025) e dai rinnovi contrattuali: hanno una data di efficacia comune per costruzione organizzativa.
+
+# ---------------------------------------------------------------------------
+# D1 — date oltre la finestra
+# ---------------------------------------------------------------------------
+D1 | sys_goals | goal_start_date$ | Obiettivi PIANIFICATI per il trimestre successivo: fissare in anticipo un obiettivo che parte a settembre e' gestione normale, non una data sbagliata.
+
+# ---------------------------------------------------------------------------
+# N2 — valori negativi
+# ---------------------------------------------------------------------------
+N2 | sys_leave_balance_transactions | transaction_days_amount$ | E' un MOVIMENTO contabile, non una quantita': il segno distingue la maturazione (+) dall'utilizzo (-). Un saldo ferie senza valori negativi sarebbe il difetto.

@@ -1,0 +1,23 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-bootstrap.sh / vm-deploy.sh.
+#
+# storia36 C12 (Step 12.5b): custodia SETTIMANALE, lunedi' alle 04:30 locali.
+#
+# L'orario non e' casuale: viene DOPO tutti i one-shot notturni gia' in
+# calendario — backup 01:30, auth-housekeeping 02:00, insights 02:15, digest
+# 02:45, sweep GDPR 03:00 — cosi' la custodia misura il database nello stato in
+# cui i lavori notturni lo lasciano, che e' lo stato che si vede al mattino.
+# Sul gemello di produzione (linux-pc) cade dopo il rinfresco del clone.
+[Unit]
+Description=Heuresys Advanced — custodia settimanale della storia RTL 36 mesi
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=Mon *-*-* 04:30:00
+RandomizedDelaySec=300
+# Recupera l'esecuzione persa se la macchina era spenta (free tier: non e'
+# sempre accesa all'orario previsto).
+Persistent=true
+Unit=heuresys-advanced-storia36-custodia.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,20 @@
+# storia36 — motivazione delle tabelle sys.* legittimamente VUOTE (regola V1 dell'audit
+# semantico, `db/scripts/audit-storia36-semantic.py`).
+#
+# Una tabella vuota non e' di per se' un difetto: lo diventa se nessuno sa dire PERCHE'.
+# Ogni riga qui dichiara il motivo e la sua fonte; una tabella vuota NON dichiarata
+# rende l'audit rosso in modalita' --strict. Il motivo deve essere verificabile: rimanda
+# al cluster che ha deciso, alla dipendenza che blocca o al gate che esclude.
+#
+# formato:  <nome_tabella> | <motivo>
+
+sys_activity_classification_mappings | Il crosswalk fra classificazioni delle attivita' non e' derivabile per calcolo (C11): una sola classificazione e' caricata, e la scorciatoia strutturale mapperebbe il mestiere sbagliato. Richiede la tavola ufficiale ISTAT importata, non dedotta.
+sys_occupation_classification_mappings | Stesso motivo del precedente (C11): CP2021 e ISCO-08 non si mappano togliendo i punti dal codice — la CP mette le Forze Armate al grande gruppo 9 e la ISCO allo 0, e 4 grandi gruppi su 9 finirebbero sul mestiere sbagliato.
+sys_auth_mfa_otp_challenges | Gate dichiarato nel piano (#77) e nel register: le sfide OTP via email restano vuote finche' non arriva la credenziale di posta (#8, WAIT-INPUT). Il trasporto e' pronto, manca solo l'input di Enzo.
+sys_auth_mfa_recovery_codes | I codici di recupero sono CREDENZIALI: popolarli con valori inventati creerebbe segreti falsi in un ambiente trattato come produzione (decisione C10).
+sys_auth_mfa_exemptions | Tabella di eccezione: e' vuota perche' nessuna esenzione dal secondo fattore e' stata concessa. Lo stato corretto di un registro di deroghe senza deroghe e' zero righe.
+sys_auth_mfa_exemption_audit | Conseguenza della precedente: nessuna esenzione concessa, quindi nessuna modifica di esenzione da tracciare.
+sys_auth_sessions | Tabella MORTA, verificata al C10: il prodotto non la usa (le sessioni vere sono i token di rinnovo, `sys_auth_refresh_tokens`). Le 71 righe scritte per sbaglio sono state RIMOSSE anziche' derogate — una deroga serve per dati legittimi non ancora esposti, non per dati che non dovevano esserci.
+sys_content_media | Allegare file ai documenti significherebbe inventarli (C9): i 10 documenti pubblicati hanno testo e revisioni reali, ma non esiste un allegato binario che non sia finto.
+sys_notification_preferences | Le preferenze di notifica sono SCELTE PERSONALI di ciascuno, non storia dell'azienda (C7): precompilarle significherebbe attribuire alle persone decisioni che non hanno preso. Restano vuote finche' un utente vero non le imposta (il default e' nel codice).
+sys_process_kpi_templates | Gate EXCLUDE gia' in vigore (S970/S994), rispettato dal C7: i template KPI di processo sono esclusi dal perimetro di popolamento.

@@ -3070,6 +3070,174 @@ BEGIN
 END $fn$;
 
 -- ----------------------------------------------------------------------------
+-- C12a — LA DATA DI REGISTRAZIONE SEGUE IL FATTO, E NON E' LA STESSA PER TUTTI.
+--
+-- Nato dall'audit semantico del C12 (regola C1): otto tabelle registravano
+-- fatti distribuiti su anni diversi con un timestamp identico per tutte le
+-- righe — il giorno del popolamento. E' la firma del dato generato, e si vede
+-- nel prodotto (ordinamenti per recente, filtri per data, "ultimo aggiornamento").
+--
+-- Il check ha DUE parti, per non degenerare in una lista da tenere aggiornata:
+--   (i)  sulle colonne di registrazione dichiarate qui sotto — ognuna con il
+--        fatto che deve seguire — nessun singolo giorno di calendario può
+--        concentrare piu' del 40% delle righe;
+--   (ii) COMPLETEZZA: qualunque ALTRA colonna `*_recorded_at` / `*_computed_at`
+--        / `*_requested_at` / `*_detected_at` su una tabella `sys.*` popolata
+--        deve essere o coperta da (i) o esente con motivo. Una tabella nuova
+--        che nasce con date tutte uguali rende ROSSO il check da sola.
+--
+-- ESENTI CON MOTIVO, e il motivo e' MISURATO, non asserito. Due famiglie:
+--
+--  (a) ISTANTANEE PURE — righe = soggetti distinti, verificato riga per riga:
+--      capability_scores 317/317 · flight_risk_scores 162/162 ·
+--      gap_analysis_results 158/158 · skill_gap_scores 156/156 ·
+--      talent_scores 154/154 · employee_position_fit_scores 146/146 ·
+--      readiness_scores 90/90 · succession_scores 90/90.
+--      Tengono lo STATO CORRENTE, non la storia dei calcoli: che l'ultimo
+--      ricalcolo sia avvenuto in un batch e' corretto, non artefatto.
+--      + capability_score_lineage: e' la derivazione del punteggio, segue il padre.
+--
+--  (b) ISTANTANEE PER DIMENSIONE — piu' righe per soggetto, ma il moltiplicatore
+--      NON e' il tempo: e' un discriminante di contenuto, verificato:
+--      model_predictions (3 per persona = `prediction_type`) ·
+--      succession_readiness_scores (3 = `..._horizon`) ·
+--      behavioral_assessments (3 = `..._dimension`).
+--
+--  (c) sys_person_evidence_records — ridatata dal C12, ma non ha un fatto
+--      proprio da seguire (nessun periodo): sta fuori dalla parte (i), che
+--      misura l'aderenza a un fatto, non la sola dispersione.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c12a()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  -- (tabella, colonna di registrazione, colonna del fatto che deve seguire)
+  c_reg constant text[][] := ARRAY[
+    ['sys_kpi_measurements',           'kpi_measurement_recorded_at',            'kpi_measurement_period_end'],
+    ['sys_user_kpi_evidence',          'user_kpi_evidence_recorded_at',          'user_kpi_evidence_period_end'],
+    ['sys_kpi_assessment_results',     'kpi_assessment_result_computed_at',      'kpi_assessment_result_period_end'],
+    ['sys_compensation_recommendations','compensation_recommendation_computed_at','compensation_recommendation_period_end'],
+    ['sys_overtime',                   'overtime_requested_at',                  'overtime_date'],
+    ['sys_variable_pay_calculations',  'variable_pay_calculation_computed_at',   'variable_pay_calculation_period_end'],
+    ['sys_learning_gaps',              'learning_gap_detected_at',               NULL],
+    ['sys_assessment_results',         'assessment_result_recorded_at',          NULL],
+    ['sys_user_assessment_evidence',   'user_assessment_evidence_recorded_at',   NULL],
+    ['sys_reward_gate_results',        'reward_gate_result_recorded_at',         NULL]
+  ];
+  -- esenti dalla parte (iii), con il motivo MISURATO nel commento sopra
+  c_exempt constant text[] := ARRAY[
+    'sys_capability_scores', 'sys_capability_score_lineage', 'sys_person_evidence_records',
+    'sys_flight_risk_scores', 'sys_gap_analysis_results', 'sys_skill_gap_scores',
+    'sys_talent_scores', 'sys_employee_position_fit_scores', 'sys_readiness_scores',
+    'sys_succession_scores', 'sys_model_predictions', 'sys_succession_readiness_scores',
+    'sys_behavioral_assessments'];
+  v_i     int;
+  v_tab   text;
+  v_col   text;
+  v_fact  text;
+  v_n     bigint;
+  v_top   bigint;
+  v_day   text;
+  v_bad   bigint;
+  v_smpl  text;
+BEGIN
+  -- (i) nessun giorno domina le registrazioni
+  FOR v_i IN 1 .. array_length(c_reg, 1) LOOP
+    v_tab := c_reg[v_i][1]; v_col := c_reg[v_i][2]; v_fact := c_reg[v_i][3];
+
+    EXECUTE format(
+      'SELECT count(*) FROM sys.%I WHERE %I IS NOT NULL', v_tab, v_col) INTO v_n;
+    EXECUTE format(
+      'SELECT coalesce(max(z.c), 0), to_char(max(z.d) FILTER (WHERE z.c = (
+         SELECT max(c2) FROM (SELECT count(*) AS c2 FROM sys.%I WHERE %I IS NOT NULL
+                               GROUP BY %I::date) y)), ''YYYY-MM-DD'')
+         FROM (SELECT %I::date AS d, count(*) AS c FROM sys.%I WHERE %I IS NOT NULL
+                GROUP BY 1) z',
+      v_tab, v_col, v_col, v_col, v_tab, v_col) INTO v_top, v_day;
+
+    IF v_n >= 30 AND v_top::numeric / v_n > 0.40 THEN
+      RAISE EXCEPTION 'C12a: %.% concentra % delle % registrazioni in un solo giorno (%): e'' la data del popolamento, non quella del fatto',
+        v_tab, v_col, round(v_top::numeric / v_n * 100) || '%', v_n, v_day;
+    END IF;
+
+    -- la registrazione non puo' precedere di piu' di un anno il fatto che segue
+    IF v_fact IS NOT NULL THEN
+      EXECUTE format(
+        'SELECT count(*) FROM sys.%I WHERE %I IS NOT NULL AND %I IS NOT NULL
+           AND %I < (%I::timestamptz - interval ''1 year'')',
+        v_tab, v_col, v_fact, v_col, v_fact) INTO v_bad;
+      IF v_bad > 0 THEN
+        RAISE EXCEPTION 'C12a(ii): %.%: % righe registrate piu'' di un anno PRIMA del fatto (%)',
+          v_tab, v_col, v_bad, v_fact;
+      END IF;
+    END IF;
+  END LOOP;
+
+  -- (iii) completezza: nessuna colonna di registrazione fuori dal perimetro.
+  --
+  -- Il conteggio delle righe e' REALE, non preso da `pg_stat_user_tables`: le
+  -- statistiche sono asincrone e una tabella nuova (o mai analizzata) risulta a
+  -- zero righe anche quando ne ha migliaia — sfuggirebbe al controllo proprio
+  -- nel caso che conta. Scoperto dal selftest C12a(iii), che con le statistiche
+  -- non scattava.
+  SELECT count(*), min(c.table_name || '.' || c.column_name) INTO v_bad, v_smpl
+  FROM information_schema.columns c
+  WHERE c.table_schema = 'sys'
+    AND c.column_name ~ '_(recorded|computed|requested|detected)_at$'
+    AND NOT (c.table_name = ANY (c_exempt))
+    AND NOT EXISTS (
+      SELECT 1 FROM generate_subscripts(c_reg, 1) i
+       WHERE c_reg[i][1] = c.table_name AND c_reg[i][2] = c.column_name)
+    AND (xpath('/row/n/text()',
+          query_to_xml(format('SELECT count(*) AS n FROM sys.%I', c.table_name),
+                       false, true, '')))[1]::text::bigint >= 30;
+  IF v_bad > 0 THEN
+    RAISE EXCEPTION 'C12a(iii): % colonne di registrazione fuori dal perimetro del check (es. %): vanno sorvegliate o esentate con motivo',
+      v_bad, v_smpl;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C12b — NESSUNA CODA DI APPROVAZIONE RESTA FERMA PER SEMPRE.
+--
+-- L'audit del C12 ha trovato 178 straordinari TUTTI in stato «in attesa», il
+-- piu' recente di sette mesi prima: una coda che nessuno ha mai lavorato. Una
+-- richiesta si autorizza o si respinge; quello che non fa e' restare pendente
+-- per sempre. La soglia e' 60 giorni — oltre, l'attesa non e' piu' spiegabile
+-- come lavorazione in corso.
+--
+-- Il check guarda anche la coerenza dell'atto: chi risulta autorizzato deve
+-- avere un autorizzatore e una data (il vincolo di tabella lo impone, qui si
+-- verifica che l'autorizzatore non sia la persona stessa — nessuno si approva
+-- lo straordinario da solo).
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c12b()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_old text;
+BEGIN
+  SELECT count(*), min(overtime_date)::text INTO v_cnt, v_old
+  FROM sys.sys_overtime
+  WHERE overtime_tenant_id = c_rtl
+    AND overtime_status = 'PENDING'
+    AND overtime_date < (current_date - 60);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C12b: % straordinari in attesa da oltre 60 giorni (il piu'' vecchio del %): la coda non e'' mai stata lavorata',
+      v_cnt, v_old;
+  END IF;
+
+  SELECT count(*) INTO v_cnt
+  FROM sys.sys_overtime
+  WHERE overtime_tenant_id = c_rtl
+    AND overtime_approved_by_user_id = overtime_subject_user_id;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C12b(ii): % straordinari autorizzati dalla persona stessa', v_cnt;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
 -- C10a — OGNUNO HA ESPRESSO UNA SCELTA SU OGNI TRATTAMENTO FACOLTATIVO.
 -- Non «tutti hanno acconsentito»: i quattro scopi sono facoltativi e una
 -- scelta può benissimo essere «no». Quello che non può mancare è la scelta —
@@ -5670,6 +5838,51 @@ BEGIN
     IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C11b(v) FALLITO: violazione iniettata non rilevata'; END IF;
     RAISE NOTICE '[OK] SELFTEST C11b(v) (record senza la fonte da cui viene, rollback)';
 
+    -- ST-C12a: riportare tutte le misure KPI allo stesso giorno di registrazione
+    -- (e' esattamente lo stato che l'audit ha trovato: la data del popolamento)
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_kpi_measurements SET kpi_measurement_recorded_at = '2026-06-03 10:00:00+02';
+      PERFORM staging.storia36_check_c12a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C12a:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C12a FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C12a (registrazioni tutte nello stesso giorno, rollback)';
+
+    -- ST-C12a(iii): una colonna di registrazione nuova, non sorvegliata e non esentata
+    v_fired := false;
+    BEGIN
+      EXECUTE 'CREATE TABLE sys.sys_st_c12a_fake (id int, fake_recorded_at timestamptz)';
+      EXECUTE 'INSERT INTO sys.sys_st_c12a_fake SELECT g, now() FROM generate_series(1,40) g';
+      EXECUTE 'ANALYZE sys.sys_st_c12a_fake';
+      PERFORM staging.storia36_check_c12a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C12a(iii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C12a(iii) FALLITO: una tabella nuova con date di registrazione e'' passata inosservata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C12a(iii) (colonna di registrazione fuori perimetro, rollback)';
+
+    -- ST-C12b: rimettere in attesa una coda vecchia
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_overtime SET overtime_status = 'PENDING',
+             overtime_approved_by_user_id = NULL, overtime_approved_at = NULL;
+      PERFORM staging.storia36_check_c12b();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C12b:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C12b FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C12b (coda di approvazione ferma da mesi, rollback)';
 
   END;
 END $$;
@@ -6182,6 +6395,22 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C8c'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c12a();
+    RAISE NOTICE '[OK] C12a la data di registrazione segue il fatto e non e'' la stessa per tutti';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C12a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c12b();
+    RAISE NOTICE '[OK] C12b nessuna coda di approvazione resta ferma per sempre';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C12b'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   IF array_length(v_failed, 1) > 0 THEN

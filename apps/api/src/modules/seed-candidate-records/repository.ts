@@ -5,7 +5,7 @@
 import type { Pool, PoolClient } from "pg";
 import type {
   SeedCandidateRecord, SeedCandidateValidationStatus,
-  SeedCandidateRecordListQuery,
+  SeedCandidateRecordListQuery, SeedValidationResult, SeedSourceEvidence,
 } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
@@ -66,4 +66,69 @@ export async function listCandidates(
 export async function findCandidateById(q: DbConnector, id: string): Promise<SeedCandidateRecord | null> {
   const res = await q.query<Row>(`SELECT ${COLS} FROM sys.sys_seed_candidate_records WHERE seed_candidate_record_id = $1`, [id]);
   return res.rows[0] ? toRow(res.rows[0]) : null;
+}
+
+/** Le validazioni di un record candidato: prima non le leggeva nessuno. */
+export async function listValidations(
+  q: DbConnector, candidateId: string,
+): Promise<SeedValidationResult[]> {
+  const res = await q.query<{
+    seed_validation_result_id: string;
+    seed_validation_result_candidate_id: string;
+    seed_validation_result_rule_code: string;
+    seed_validation_result_status: string;
+    seed_validation_result_message: string | null;
+    seed_validation_result_payload: Record<string, unknown> | null;
+    created_at: Date;
+  }>(
+    `SELECT seed_validation_result_id, seed_validation_result_candidate_id,
+            seed_validation_result_rule_code, seed_validation_result_status,
+            seed_validation_result_message, seed_validation_result_payload, created_at
+       FROM sys.sys_seed_validation_results
+      WHERE seed_validation_result_candidate_id = $1
+      ORDER BY seed_validation_result_rule_code`,
+    [candidateId],
+  );
+  return res.rows.map((r): SeedValidationResult => ({
+    seedValidationResultId: r.seed_validation_result_id,
+    candidateId: r.seed_validation_result_candidate_id,
+    ruleCode: r.seed_validation_result_rule_code,
+    status: r.seed_validation_result_status as SeedValidationResult["status"],
+    message: r.seed_validation_result_message,
+    payload: r.seed_validation_result_payload ?? {},
+    createdAt: r.created_at.toISOString(),
+  }));
+}
+
+/** Le fonti da cui un record candidato viene. */
+export async function listEvidence(
+  q: DbConnector, candidateId: string,
+): Promise<SeedSourceEvidence[]> {
+  const res = await q.query<{
+    seed_source_evidence_id: string;
+    seed_source_evidence_candidate_id: string;
+    seed_source_evidence_url: string | null;
+    seed_source_evidence_retrieved_at: Date | null;
+    seed_source_evidence_content_hash: string | null;
+    seed_source_evidence_payload: Record<string, unknown> | null;
+    created_at: Date;
+  }>(
+    `SELECT seed_source_evidence_id, seed_source_evidence_candidate_id,
+            seed_source_evidence_url, seed_source_evidence_retrieved_at,
+            seed_source_evidence_content_hash, seed_source_evidence_payload, created_at
+       FROM sys.sys_seed_source_evidence
+      WHERE seed_source_evidence_candidate_id = $1
+      ORDER BY created_at`,
+    [candidateId],
+  );
+  return res.rows.map((r): SeedSourceEvidence => ({
+    seedSourceEvidenceId: r.seed_source_evidence_id,
+    candidateId: r.seed_source_evidence_candidate_id,
+    url: r.seed_source_evidence_url,
+    retrievedAt: r.seed_source_evidence_retrieved_at
+      ? r.seed_source_evidence_retrieved_at.toISOString() : null,
+    contentHash: r.seed_source_evidence_content_hash,
+    payload: r.seed_source_evidence_payload ?? {},
+    createdAt: r.created_at.toISOString(),
+  }));
 }

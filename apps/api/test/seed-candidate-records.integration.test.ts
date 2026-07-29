@@ -149,6 +149,54 @@ describe("/v1/seed-candidate-records/* integration (read-only)", () => {
     expect(typeof got.validationStatus).toBe("string");
   });
 
+  it("l'ISTRUTTORIA di un record si può leggere (prima non la leggeva nessuno)", async () => {
+    // `sys_seed_validation_results` e `sys_seed_source_evidence` si scrivevano
+    // e nessuna API le leggeva: sono la parte che dà valore probatorio alla
+    // pipeline — senza, l'approvazione di un record è una firma senza
+    // istruttoria. Il cluster C11 le ha popolate con le validazioni VERE del
+    // programma (doppia esecuzione a zero righe, batteria, cancello).
+    const lista = await suite.app.inject({
+      method: "GET", url: "/v1/seed-candidate-records?limit=1",
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    const items = (lista.json() as { items: SeedCandidateRecord[] }).items;
+    expect(items.length).toBeGreaterThan(0);
+    const id = items[0]!.seedCandidateRecordId;
+
+    const val = await suite.app.inject({
+      method: "GET", url: `/v1/seed-candidate-records/${id}/validations`,
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(val.statusCode).toBe(200);
+    const vb = val.json() as { items: Array<{ ruleCode: string; status: string }>; total: number };
+    expect(vb.total).toBeGreaterThan(0);
+    // le regole sono quelle vere del programma, non etichette generiche
+    expect(vb.items.some((i) => i.ruleCode === "TWICE_RUN_ZERO")).toBe(true);
+
+    const ev = await suite.app.inject({
+      method: "GET", url: `/v1/seed-candidate-records/${id}/evidence`,
+      headers: { cookie: ch(platformS.cookies) },
+    });
+    expect(ev.statusCode).toBe(200);
+    const eb = ev.json() as { items: Array<{ url: string | null }>; total: number };
+    expect(eb.total).toBeGreaterThan(0);
+    // la fonte è il seed stesso, versionato nel repository
+    expect(eb.items[0]!.url).toMatch(/^repo:\/\/db\/seeds\//);
+  });
+
+  it("istruttoria e fonti di un record inesistente → 404", async () => {
+    // un UUID formalmente valido (v4) che non corrisponde a nessun record: con uno
+    // non conforme allo schema la richiesta si fermerebbe prima, con un 400
+    const finto = "123e4567-e89b-42d3-a456-426614174000";
+    for (const coda of ["validations", "evidence"]) {
+      const r = await suite.app.inject({
+        method: "GET", url: `/v1/seed-candidate-records/${finto}/${coda}`,
+        headers: { cookie: ch(platformS.cookies) },
+      });
+      expect(r.statusCode).toBe(404);
+    }
+  });
+
   it("GET /:id with a malformed (non-uuid) id → 400 validation error", async () => {
     const r = await suite.app.inject({
       method: "GET", url: "/v1/seed-candidate-records/not-a-uuid",

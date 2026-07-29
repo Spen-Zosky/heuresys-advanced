@@ -24,4 +24,20 @@ export const seedCandidateRecordsService = {
     if (!t || !visible(actor, t)) throw new NotFoundError("SeedCandidateRecord");
     return t;
   },
+
+  /** L'istruttoria: che cosa è stato verificato su questo record. */
+  async validations(actor: ActorContext, id: string) {
+    const t = await repo.findCandidateById(pool, id);
+    if (!t || !visible(actor, t)) throw new NotFoundError("SeedCandidateRecord");
+    const items = await repo.listValidations(pool, id);
+    return { items, total: items.length };
+  },
+
+  /** Le fonti: da dove viene questo record. */
+  async evidence(actor: ActorContext, id: string) {
+    const t = await repo.findCandidateById(pool, id);
+    if (!t || !visible(actor, t)) throw new NotFoundError("SeedCandidateRecord");
+    const items = await repo.listEvidence(pool, id);
+    return { items, total: items.length };
+  },
 };

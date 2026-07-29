@@ -2957,6 +2957,119 @@ BEGIN
 END $fn$;
 
 -- ----------------------------------------------------------------------------
+-- C11a — UN GRAFO ATTIVO HA UNA DISPOSIZIONE, E OGNI NODO STA DA QUALCHE PARTE.
+-- Prima: 158 nodi, 157 archi e ZERO layout — il grafo si ricalcolava a ogni
+-- apertura e nessuno poteva conservare la propria vista. E i nodi erano tutti
+-- senza tipo, mentre gli stili si applicano per tipo: nessuno stile poteva
+-- funzionare.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c11a()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(g.graph_code) INTO v_cnt, v_sample
+  FROM sys.sys_visualization_graphs g
+  WHERE g.graph_tenant_id = c_rtl AND g.graph_is_active
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_visualization_layouts l
+                     WHERE l.layout_graph_id = g.graph_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C11a: % grafi attivi senza una disposizione salvata (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(g.graph_code) INTO v_cnt, v_sample
+  FROM sys.sys_visualization_graphs g
+  JOIN sys.sys_visualization_layouts l ON l.layout_graph_id = g.graph_id AND l.is_default
+  JOIN sys.sys_visualization_nodes n ON n.node_graph_id = g.graph_id
+  WHERE g.graph_tenant_id = c_rtl AND g.graph_is_active
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_visualization_node_layouts nl
+                     WHERE nl.layout_id = l.layout_id AND nl.node_id = n.node_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C11a(ii): % nodi senza posizione nella disposizione predefinita (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(n.node_label) INTO v_cnt, v_sample
+  FROM sys.sys_visualization_nodes n
+  JOIN sys.sys_visualization_graphs g ON g.graph_id = n.node_graph_id
+  WHERE g.graph_tenant_id = c_rtl AND n.node_type IS NULL;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C11a(iii): % nodi senza tipo: nessuno stile può applicarsi (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(DISTINCT n.node_type) INTO v_cnt
+  FROM sys.sys_visualization_nodes n
+  JOIN sys.sys_visualization_graphs g ON g.graph_id = n.node_graph_id
+  WHERE g.graph_tenant_id = c_rtl
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_visualization_styles s
+                     WHERE s.style_graph_id = g.graph_id AND s.style_node_type = n.node_type);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C11a(iv): % tipi di nodo senza uno stile definito', v_cnt;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C11b — LA PIPELINE DI ACQUISIZIONE RACCONTA COSE VERE.
+-- Le cinque tabelle registrano le corse di QUESTO programma: ogni cluster una
+-- corsa, ogni seed un record candidato, e le validazioni sono quelle vere. Il
+-- vantaggio è che non si può barare: se un cluster non è passato dalla doppia
+-- esecuzione a zero righe, la sua validazione risulta FALLITA e si vede.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c11b()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*) INTO v_cnt FROM sys.sys_seed_acquisition_runs
+  WHERE seed_acquisition_run_tenant_id = c_rtl;
+  IF v_cnt < 5 THEN
+    RAISE EXCEPTION 'C11b: solo % corse di acquisizione registrate: la pipeline non documenta il programma', v_cnt;
+  END IF;
+
+  SELECT count(*), min(r.seed_acquisition_run_code) INTO v_cnt, v_sample
+  FROM sys.sys_seed_acquisition_runs r
+  WHERE r.seed_acquisition_run_tenant_id = c_rtl
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_seed_candidate_records c
+                     WHERE c.seed_candidate_record_run_id = r.seed_acquisition_run_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C11b(ii): % corse senza un solo record candidato (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(c.seed_candidate_record_natural_key) INTO v_cnt, v_sample
+  FROM sys.sys_seed_candidate_records c
+  WHERE c.seed_candidate_record_tenant_id = c_rtl
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_seed_validation_results v
+                     WHERE v.seed_validation_result_candidate_id = c.seed_candidate_record_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C11b(iii): % record candidati senza una sola validazione (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(c.seed_candidate_record_natural_key) INTO v_cnt, v_sample
+  FROM sys.sys_seed_candidate_records c
+  WHERE c.seed_candidate_record_tenant_id = c_rtl
+    AND c.seed_candidate_record_validation_status = 'APPLIED'
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_seed_approval_decisions d
+                     WHERE d.seed_approval_decision_candidate_id = c.seed_candidate_record_id
+                       AND d.seed_approval_decision_status = 'APPROVED');
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C11b(iv): % record applicati senza approvazione (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- e ogni corsa dichiara la fonte da cui i dati vengono
+  SELECT count(*), min(c.seed_candidate_record_natural_key) INTO v_cnt, v_sample
+  FROM sys.sys_seed_candidate_records c
+  WHERE c.seed_candidate_record_tenant_id = c_rtl
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_seed_source_evidence e
+                     WHERE e.seed_source_evidence_candidate_id = c.seed_candidate_record_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C11b(v): % record senza la fonte da cui vengono (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
 -- C10a — OGNUNO HA ESPRESSO UNA SCELTA SU OGNI TRATTAMENTO FACOLTATIVO.
 -- Non «tutti hanno acconsentito»: i quattro scopi sono facoltativi e una
 -- scelta può benissimo essere «no». Quello che non può mancare è la scelta —
@@ -5433,6 +5546,131 @@ BEGIN
     IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C10d(ii) FALLITO: violazione iniettata non rilevata'; END IF;
     RAISE NOTICE '[OK] SELFTEST C10d(ii) (sistema usato da una dozzina di persone, rollback)';
 
+    -- ==========================================================================
+    -- C11 — CONFIGURAZIONE DELLA PIATTAFORMA
+    -- ==========================================================================
+
+    -- ST-C11a: togliere la disposizione all'organigramma
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_visualization_layouts l
+       USING sys.sys_visualization_graphs g
+       WHERE g.graph_id = l.layout_graph_id AND g.graph_tenant_id = c_rtl8;
+      PERFORM staging.storia36_check_c11a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C11a:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C11a FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C11a (grafo attivo senza disposizione, rollback)';
+
+    -- ST-C11a(ii): togliere la posizione a un nodo
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_visualization_node_layouts
+       WHERE ctid = (SELECT nl.ctid FROM sys.sys_visualization_node_layouts nl LIMIT 1);
+      PERFORM staging.storia36_check_c11a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C11a(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C11a(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C11a(ii) (nodo senza posizione nella disposizione, rollback)';
+
+    -- ST-C11a(iii): togliere il tipo ai nodi — nessuno stile può applicarsi
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_visualization_nodes n SET node_type = NULL
+       FROM sys.sys_visualization_graphs g
+       WHERE g.graph_id = n.node_graph_id AND g.graph_tenant_id = c_rtl8;
+      PERFORM staging.storia36_check_c11a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C11a(iii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C11a(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C11a(iii) (nodi senza tipo, rollback)';
+
+    -- ST-C11a(iv): togliere gli stili
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_visualization_styles s
+       USING sys.sys_visualization_graphs g
+       WHERE g.graph_id = s.style_graph_id AND g.graph_tenant_id = c_rtl8;
+      PERFORM staging.storia36_check_c11a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C11a(iv)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C11a(iv) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C11a(iv) (tipi di nodo senza stile, rollback)';
+
+    -- ST-C11b: svuotare la pipeline che documenta il programma
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_seed_acquisition_runs
+       WHERE seed_acquisition_run_tenant_id = c_rtl8;
+      PERFORM staging.storia36_check_c11b();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C11b:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C11b FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C11b (pipeline che non documenta il programma, rollback)';
+
+    -- ST-C11b(iii): togliere l'istruttoria a un record candidato
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_seed_validation_results;
+      PERFORM staging.storia36_check_c11b();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C11b(iii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C11b(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C11b(iii) (record candidato senza istruttoria, rollback)';
+
+    -- ST-C11b(iv): applicare un record senza averlo approvato
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_seed_approval_decisions;
+      PERFORM staging.storia36_check_c11b();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C11b(iv)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C11b(iv) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C11b(iv) (record applicato senza approvazione, rollback)';
+
+    -- ST-C11b(v): togliere la fonte da cui i dati vengono
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_seed_source_evidence;
+      PERFORM staging.storia36_check_c11b();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C11b(v)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C11b(v) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C11b(v) (record senza la fonte da cui viene, rollback)';
+
+
   END;
 END $$;
 \endif
@@ -5872,6 +6110,22 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C8b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c11a();
+    RAISE NOTICE '[OK] C11a il grafo attivo ha una disposizione e ogni nodo un tipo';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C11a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c11b();
+    RAISE NOTICE '[OK] C11b la pipeline di acquisizione documenta le corse del programma';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C11b'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   BEGIN

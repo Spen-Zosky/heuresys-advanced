@@ -39,3 +39,41 @@ export const SeedCandidateRecordListResponseSchema = z.object({
 });
 
 export const SeedCandidateRecordIdParamSchema = z.object({ id: z.uuid() });
+
+/**
+ * L'istruttoria di un record candidato: le VALIDAZIONI che ha superato (o non
+ * superato) e le FONTI da cui viene. Erano due tabelle che si scrivevano e che
+ * nessuna API leggeva — e sono proprio la parte che dà valore probatorio alla
+ * pipeline: senza, l'approvazione è una firma senza istruttoria.
+ */
+export const SeedValidationResultSchema = z.object({
+  seedValidationResultId: z.uuid(),
+  candidateId: z.uuid(),
+  ruleCode: z.string(),
+  status: z.enum(["PASSED", "FAILED", "WARNING", "SKIPPED"]),
+  message: z.string().nullable(),
+  payload: z.record(z.string(), z.unknown()),
+  createdAt: z.iso.datetime(),
+});
+export type SeedValidationResult = z.infer<typeof SeedValidationResultSchema>;
+
+export const SeedValidationResultListResponseSchema = z.object({
+  items: z.array(SeedValidationResultSchema),
+  total: z.number().int().min(0),
+});
+
+export const SeedSourceEvidenceSchema = z.object({
+  seedSourceEvidenceId: z.uuid(),
+  candidateId: z.uuid(),
+  url: z.string().nullable(),
+  retrievedAt: z.iso.datetime().nullable(),
+  contentHash: z.string().nullable(),
+  payload: z.record(z.string(), z.unknown()),
+  createdAt: z.iso.datetime(),
+});
+export type SeedSourceEvidence = z.infer<typeof SeedSourceEvidenceSchema>;
+
+export const SeedSourceEvidenceListResponseSchema = z.object({
+  items: z.array(SeedSourceEvidenceSchema),
+  total: z.number().int().min(0),
+});

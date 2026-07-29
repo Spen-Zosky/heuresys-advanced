@@ -86,6 +86,49 @@ describe("D-14 F3/F4 GDPR tooling", () => {
     expect(missing, "subject FKs senza classificazione GDPR (aggiorna sys_gdpr_data_map)").toEqual([]);
   });
 
+  it("il registro delle richieste si può RILEGGERE (prima si scriveva soltanto)", async () => {
+    // Fino al cluster C10 non esisteva una sola SELECT su sys_gdpr_requests in
+    // tutto il sorgente dell'API: ogni export/erasure lasciava la sua riga di
+    // accountability e nessuno poteva consultarla. Un registro che nessuno
+    // legge non dimostra la conformità a nessuno.
+    const tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/gdpr/requests?limit=200",
+      headers: headers(tenantAdmin),
+    });
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as {
+      items: Array<{ gdprRequestId: string; type: string; status: string; report: Record<string, unknown> }>;
+      total: number;
+    };
+    // il conteggio si confronta con la fonte, non con una fotografia
+    const atteso = await pool.query<{ n: string }>(
+      `SELECT count(*)::text AS n FROM sys.sys_gdpr_requests g
+        JOIN sys.sys_users u ON u.user_tenant_id = g.gdpr_request_tenant_id
+       WHERE u.user_email = 'federica.marchetti@rtl-bank.org'`,
+    );
+    expect(body.total).toBe(Number(atteso.rows[0]!.n));
+    expect(body.items.length).toBeGreaterThan(0);
+
+    // il filtro per tipo funziona e non allarga il perimetro
+    const soloExport = await suite.app.inject({
+      method: "GET", url: "/v1/gdpr/requests?type=EXPORT",
+      headers: headers(tenantAdmin),
+    });
+    expect(soloExport.statusCode).toBe(200);
+    const be = soloExport.json() as { items: Array<{ type: string }> };
+    expect(be.items.every((i) => i.type === "EXPORT")).toBe(true);
+  });
+
+  it("il registro delle richieste non è visibile a chi non ha il permesso", async () => {
+    const manager = await login(suite, "paolo.caputo@rtl-bank.org");
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/gdpr/requests",
+      headers: headers(manager),
+    });
+    expect(r.statusCode).toBe(403);
+  });
+
   it("data-map consistency: every registry entry points at an existing column", async () => {
     const rows = await pool.query<{ s: string; t: string; c: string; ok: boolean }>(
       `SELECT m.gdpr_map_table_schema AS s, m.gdpr_map_table_name AS t, m.gdpr_map_subject_fk AS c,
@@ -383,13 +426,21 @@ describe("D-14 F3/F4 GDPR tooling", () => {
     items = (state.json() as { items: { purpose: string; granted: boolean }[] }).items;
     expect(items.find((i) => i.purpose === "MARKETING_COMMUNICATIONS")?.granted).toBe(false);
 
+    // Il registro è APPEND-ONLY: quello che questo test ha appena scritto sono
+    // gli ULTIMI due eventi, non tutta la storia. La persona ha già espresso la
+    // sua scelta iniziale su questo trattamento quando è entrata in azienda
+    // (storia36 C10), e pretendere che il registro contenga solo due righe
+    // significherebbe pretendere che la persona non abbia un passato.
     const events = await pool.query(
       `SELECT consent_action FROM sys.sys_user_consents
         WHERE consent_user_id = $1 AND consent_purpose = 'MARKETING_COMMUNICATIONS'
         ORDER BY consent_seq`,
       [myId],
     );
-    expect(events.rows.map((r) => r.consent_action)).toEqual(["GRANT", "REVOKE"]);
+    const azioni = events.rows.map((r) => r.consent_action);
+    expect(azioni.slice(-2)).toEqual(["GRANT", "REVOKE"]);
+    // e nulla è stato sovrascritto: la storia precedente è ancora lì
+    expect(azioni.length).toBeGreaterThanOrEqual(2);
   });
 
   it("retention sweep: platform-only, dry-run reports every registry window (incl. login-events 400d — D-59)", async () => {

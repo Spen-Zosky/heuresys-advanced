@@ -3,6 +3,7 @@
  * D-14 F3/F4 — admin GDPR surface (/v1/gdpr/*).
  *
  *   GET  /v1/gdpr/data-map               gdpr:read       classification registry
+ *   GET  /v1/gdpr/requests               gdpr:read       registro delle richieste
  *   POST /v1/gdpr/users/:userId/export   gdpr:export     Art. 15/20 DSR bundle
  *   POST /v1/gdpr/users/:userId/erasure  gdpr:erase      Art. 17 (dryRun default true)
  *   POST /v1/gdpr/retention/run          gdpr:retention  registry-window sweep
@@ -21,6 +22,8 @@ import {
   GdprErasureReportSchema,
   GdprRetentionBodySchema,
   GdprRetentionReportSchema,
+  GdprRequestListQuerySchema,
+  GdprRequestListResponseSchema,
 } from "@heuresys/shared";
 import { gdprService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -33,6 +36,21 @@ export const gdprRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: { response: { 200: GdprDataMapResponseSchema } },
     },
     async (req) => gdprService.dataMap(actorFromReq(req)),
+  );
+
+  // Il REGISTRO delle richieste: si scriveva e non si poteva rileggere —
+  // nessuna SELECT su sys_gdpr_requests in tutto il sorgente dell'API. Un
+  // registro di accountability che nessuno consulta non dimostra niente.
+  app.get(
+    "/requests",
+    {
+      preHandler: [requirePermission("gdpr:read")],
+      schema: {
+        querystring: GdprRequestListQuerySchema,
+        response: { 200: GdprRequestListResponseSchema },
+      },
+    },
+    async (req) => gdprService.listRequests(actorFromReq(req), req.query),
   );
 
   app.post(

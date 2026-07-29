@@ -10,6 +10,7 @@
  * RETAIN (legal hold, with basis).
  */
 import { z } from "zod";
+import { paginationFields } from "./_pagination.js";
 
 /* --- data map ----------------------------------------------------------- */
 
@@ -160,3 +161,35 @@ export const ConsentEventResponseSchema = z.object({
   occurredAt: z.string(),
 });
 export type ConsentEventResponse = z.infer<typeof ConsentEventResponseSchema>;
+
+/**
+ * Il REGISTRO delle richieste dell'interessato. Le richieste si scrivevano
+ * (ogni export/erasure/retention lascia la sua riga di accountability) e non si
+ * potevano rileggere: nessun endpoint le elencava. Un registro che nessuno può
+ * consultare non dimostra la conformità a nessuno — è esattamente la lacuna che
+ * il cancello di esposizione ha segnalato al cluster C10.
+ */
+export const GdprRequestSchema = z.object({
+  gdprRequestId: z.uuid(),
+  tenantId: z.uuid(),
+  subjectUserId: z.uuid().nullable(),
+  type: z.enum(["EXPORT", "ERASURE", "RETENTION_RUN"]),
+  status: z.enum(["COMPLETED", "DRY_RUN"]),
+  requestedBy: z.uuid().nullable(),
+  report: z.record(z.string(), z.unknown()),
+  createdAt: z.iso.datetime(),
+});
+export type GdprRequest = z.infer<typeof GdprRequestSchema>;
+
+export const GdprRequestListQuerySchema = z.object({
+  subjectUserId: z.uuid().optional(),
+  type: z.enum(["EXPORT", "ERASURE", "RETENTION_RUN"]).optional(),
+  status: z.enum(["COMPLETED", "DRY_RUN"]).optional(),
+  ...paginationFields(200, 50),
+});
+export type GdprRequestListQuery = z.infer<typeof GdprRequestListQuerySchema>;
+
+export const GdprRequestListResponseSchema = z.object({
+  items: z.array(GdprRequestSchema),
+  total: z.number().int().min(0),
+});

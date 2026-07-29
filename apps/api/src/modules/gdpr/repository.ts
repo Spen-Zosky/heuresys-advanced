@@ -11,7 +11,7 @@
  * this is the defence for the dynamic part. All VALUES remain $n-parameterized.
  */
 import type { Pool, PoolClient } from "pg";
-import type { GdprDataMapEntry } from "@heuresys/shared";
+import type { GdprDataMapEntry, GdprRequest } from "@heuresys/shared";
 
 export type DbConnector = Pool | PoolClient;
 
@@ -372,4 +372,79 @@ export async function getConsentState(
     });
   }
   return out;
+}
+
+/**
+ * Il registro delle richieste dell'interessato, in lettura. Prima si scriveva
+ * soltanto: `INSERT INTO sys.sys_gdpr_requests` senza alcuna SELECT in tutto
+ * il sorgente dell'API.
+ */
+export async function listGdprRequests(
+  q: DbConnector,
+  tenantId: string,
+  query: {
+    subjectUserId?: string | undefined;
+    type?: string | undefined;
+    status?: string | undefined;
+    limit: number;
+    offset: number;
+  },
+): Promise<{ items: GdprRequest[]; total: number }> {
+  const where: string[] = ["gdpr_request_tenant_id = $1"];
+  const params: unknown[] = [tenantId];
+  if (query.subjectUserId) {
+    params.push(query.subjectUserId);
+    where.push(`gdpr_request_subject_user_id = $${params.length}`);
+  }
+  if (query.type) {
+    params.push(query.type);
+    where.push(`gdpr_request_type = $${params.length}`);
+  }
+  if (query.status) {
+    params.push(query.status);
+    where.push(`gdpr_request_status = $${params.length}`);
+  }
+  const whereClause = `WHERE ${where.join(" AND ")}`;
+
+  const totalRow = await q.query<{ total: string }>(
+    `SELECT count(*)::text AS total FROM sys.sys_gdpr_requests ${whereClause}`,
+    params,
+  );
+  const total = Number(totalRow.rows[0]?.total ?? 0);
+
+  params.push(query.limit);
+  const lim = params.length;
+  params.push(query.offset);
+  const off = params.length;
+  const res = await q.query<{
+    gdpr_request_id: string;
+    gdpr_request_tenant_id: string;
+    gdpr_request_subject_user_id: string | null;
+    gdpr_request_type: string;
+    gdpr_request_status: string;
+    gdpr_request_requested_by: string | null;
+    gdpr_request_report: Record<string, unknown> | null;
+    created_at: Date;
+  }>(
+    `SELECT gdpr_request_id, gdpr_request_tenant_id, gdpr_request_subject_user_id,
+            gdpr_request_type, gdpr_request_status, gdpr_request_requested_by,
+            gdpr_request_report, created_at
+       FROM sys.sys_gdpr_requests ${whereClause}
+      ORDER BY created_at DESC, gdpr_request_id
+      LIMIT $${lim} OFFSET $${off}`,
+    params,
+  );
+  return {
+    items: res.rows.map((r): GdprRequest => ({
+      gdprRequestId: r.gdpr_request_id,
+      tenantId: r.gdpr_request_tenant_id,
+      subjectUserId: r.gdpr_request_subject_user_id,
+      type: r.gdpr_request_type as GdprRequest["type"],
+      status: r.gdpr_request_status as GdprRequest["status"],
+      requestedBy: r.gdpr_request_requested_by,
+      report: r.gdpr_request_report ?? {},
+      createdAt: r.created_at.toISOString(),
+    })),
+    total,
+  };
 }

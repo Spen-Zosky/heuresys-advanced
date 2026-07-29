@@ -2957,6 +2957,172 @@ BEGIN
 END $fn$;
 
 -- ----------------------------------------------------------------------------
+-- C10a — OGNUNO HA ESPRESSO UNA SCELTA SU OGNI TRATTAMENTO FACOLTATIVO.
+-- Non «tutti hanno acconsentito»: i quattro scopi sono facoltativi e una
+-- scelta può benissimo essere «no». Quello che non può mancare è la scelta —
+-- e prima la tabella era vuota per tutte e 162 le persone.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c10a()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_users u
+  WHERE u.user_tenant_id = c_rtl AND u.user_status = 'ACTIVE'
+    AND (SELECT count(DISTINCT c.consent_purpose) FROM sys.sys_user_consents c
+          WHERE c.consent_user_id = u.user_id) < 4;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C10a: % persone che non hanno espresso una scelta su tutti e quattro i trattamenti (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_user_consents c
+  JOIN sys.sys_users u ON u.user_id = c.consent_user_id
+  WHERE c.consent_tenant_id = c_rtl
+    AND c.consent_occurred_at::date < (
+      SELECT min(e.user_employment_hire_date) FROM sys.sys_user_employment e
+       WHERE e.user_employment_user_id = c.consent_user_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C10a(ii): % scelte espresse prima dell''ingresso in azienda (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_user_consents c
+  JOIN sys.sys_users u ON u.user_id = c.consent_user_id
+  WHERE c.consent_tenant_id = c_rtl
+    AND c.consent_source = 'ESS' AND c.consent_action = 'REVOKE'
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_user_consents c2
+                     WHERE c2.consent_user_id = c.consent_user_id
+                       AND c2.consent_purpose = c.consent_purpose
+                       AND c2.consent_action = 'GRANT'
+                       AND c2.consent_occurred_at < c.consent_occurred_at);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C10a(iii): % revoche di un consenso che non era mai stato dato (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C10b — LE RICHIESTE SULL'INTERESSATO SI CHIUDONO NEI TERMINI DI LEGGE.
+-- Trenta giorni: è il termine, e una richiesta chiusa fuori termine è un
+-- inadempimento, non un ritardo.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c10b(p_end date)
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*) INTO v_cnt FROM sys.sys_gdpr_requests
+  WHERE gdpr_request_tenant_id = c_rtl;
+  IF v_cnt = 0 THEN
+    RAISE EXCEPTION 'C10b: nessuna richiesta dell''interessato in tre anni: il canale non è mai stato usato';
+  END IF;
+
+  SELECT count(*), min(g.gdpr_request_id::text) INTO v_cnt, v_sample
+  FROM sys.sys_gdpr_requests g
+  WHERE g.gdpr_request_tenant_id = c_rtl
+    AND g.gdpr_request_report->>'giorni_impiegati' IS NOT NULL
+    AND (g.gdpr_request_report->>'giorni_impiegati')::int > 30;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C10b(ii): % richieste chiuse oltre i trenta giorni di legge (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(g.gdpr_request_id::text) INTO v_cnt, v_sample
+  FROM sys.sys_gdpr_requests g
+  LEFT JOIN sys.sys_users u ON u.user_id = g.gdpr_request_subject_user_id
+  WHERE g.gdpr_request_tenant_id = c_rtl
+    AND (u.user_id IS NULL OR u.user_tenant_id IS DISTINCT FROM g.gdpr_request_tenant_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C10b(iii): % richieste su una persona che non appartiene al tenant (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C10c — LE SEGNALAZIONI LE TIENE IL CUSTODE, E RIGUARDANO IL PROCESSO.
+-- Il custode non è «un amministratore»: è chi ha il ruolo. E una segnalazione
+-- chiusa deve avere il riscontro che è stato dato a chi l'ha fatta — senza,
+-- il canale è una cassetta postale che non risponde.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c10c()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(w.whistleblowing_report_tracking_code) INTO v_cnt, v_sample
+  FROM sys.sys_whistleblowing_reports w
+  WHERE w.whistleblowing_report_tenant_id = c_rtl
+    AND NOT EXISTS (
+      SELECT 1 FROM sys.sys_user_auth_roles ur
+       JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+      WHERE ur.user_auth_role_user_id = w.whistleblowing_report_assignee_user_id
+        AND r.auth_role_code = 'WHISTLEBLOWING_CUSTODIAN');
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C10c: % segnalazioni affidate a chi non è il custode (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*), min(w.whistleblowing_report_tracking_code) INTO v_cnt, v_sample
+  FROM sys.sys_whistleblowing_reports w
+  WHERE w.whistleblowing_report_tenant_id = c_rtl
+    AND w.whistleblowing_report_status IN ('SUBSTANTIATED', 'UNSUBSTANTIATED', 'CLOSED')
+    AND (w.whistleblowing_report_public_message IS NULL
+      OR length(trim(w.whistleblowing_report_public_message)) < 20);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C10c(ii): % segnalazioni chiuse senza un riscontro a chi le ha fatte (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(*) INTO v_cnt FROM (
+    SELECT whistleblowing_report_tracking_code FROM sys.sys_whistleblowing_reports
+     WHERE whistleblowing_report_tenant_id = c_rtl
+       AND (whistleblowing_report_tracking_code IS NULL
+         OR length(whistleblowing_report_tracking_code) < 6)
+    UNION ALL
+    SELECT whistleblowing_report_tracking_code FROM sys.sys_whistleblowing_reports
+     WHERE whistleblowing_report_tenant_id = c_rtl
+     GROUP BY 1 HAVING count(*) > 1) x;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C10c(iii): % segnalazioni con codice di riscontro assente o ripetuto', v_cnt;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C10d — GLI ACCESSI DICONO CHI USA IL SISTEMA, E DA QUANDO.
+-- Prima: 91.761 eventi, ma dodici persone in due mesi — il traffico dei
+-- collaudi. Nessuno può risultare entrato prima di essere stato assunto.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c10d()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
+  FROM sys.sys_auth_login_events le
+  JOIN sys.sys_users u ON u.user_id = le.auth_login_event_user_id
+  WHERE le.auth_login_event_details->>'storia36' = 'C10'
+    AND le.created_at::date < (
+      SELECT min(e.user_employment_hire_date) FROM sys.sys_user_employment e
+       WHERE e.user_employment_user_id = le.auth_login_event_user_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C10d: % accessi registrati prima dell''assunzione (es. %)', v_cnt, v_sample;
+  END IF;
+
+  SELECT count(DISTINCT le.auth_login_event_user_id) INTO v_cnt
+  FROM sys.sys_auth_login_events le
+  JOIN sys.sys_users u ON u.user_id = le.auth_login_event_user_id
+  WHERE u.user_tenant_id = c_rtl AND u.user_status = 'ACTIVE';
+  IF v_cnt < 100 THEN
+    RAISE EXCEPTION 'C10d(ii): solo % persone risultano avere mai usato il sistema', v_cnt;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
 -- C9a — UN DOCUMENTO PUBBLICATO HA UNA STORIA, E LA STORIA VA AVANTI.
 -- Prima: 163 documenti e NESSUNO pubblicato — il portale del dipendente aveva
 -- una sezione documenti che non mostrava niente. E un documento «pubblicato
@@ -5135,6 +5301,138 @@ BEGIN
     END;
     IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C9b(iii) FALLITO: violazione iniettata non rilevata'; END IF;
     RAISE NOTICE '[OK] SELFTEST C9b(iii) (categorie rimaste vuote, rollback)';
+
+    -- ==========================================================================
+    -- C10 — CONSENSI, GDPR, SEGNALAZIONI, ACCESSI
+    -- ==========================================================================
+
+    -- ST-C10a: togliere a qualcuno la scelta su un trattamento
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_user_consents
+       WHERE consent_user_id = (SELECT c2.consent_user_id FROM sys.sys_user_consents c2 LIMIT 1);
+      PERFORM staging.storia36_check_c10a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C10a:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C10a FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C10a (persona senza scelta sui trattamenti, rollback)';
+
+    -- ST-C10a(ii): una scelta espressa prima di essere stati assunti
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_user_consents SET consent_occurred_at = consent_occurred_at - interval '4000 days'
+       WHERE ctid = (SELECT c2.ctid FROM sys.sys_user_consents c2 LIMIT 1);
+      PERFORM staging.storia36_check_c10a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C10a(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C10a(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C10a(ii) (scelta espressa prima dell''assunzione, rollback)';
+
+    -- ST-C10a(iii): revocare un consenso che non era mai stato dato
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_user_consents SET consent_source = 'ESS', consent_action = 'REVOKE'
+       WHERE ctid = (SELECT c2.ctid FROM sys.sys_user_consents c2
+                      WHERE c2.consent_source = 'IMPORT' AND c2.consent_action = 'REVOKE' LIMIT 1);
+      PERFORM staging.storia36_check_c10a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C10a(iii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C10a(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C10a(iii) (revoca di un consenso mai dato, rollback)';
+
+    -- ST-C10b: chiudere una richiesta oltre i trenta giorni di legge
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_gdpr_requests
+         SET gdpr_request_report = gdpr_request_report || jsonb_build_object('giorni_impiegati', 47)
+       WHERE ctid = (SELECT g2.ctid FROM sys.sys_gdpr_requests g2
+                      WHERE g2.gdpr_request_report->>'storia36' = 'C10' LIMIT 1);
+      PERFORM staging.storia36_check_c10b(v_end);
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C10b(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C10b FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C10b (richiesta chiusa fuori termine, rollback)';
+
+    -- ST-C10c: affidare una segnalazione a chi non è il custode
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_whistleblowing_reports
+         SET whistleblowing_report_assignee_user_id = (
+               SELECT u.user_id FROM sys.sys_users u
+                WHERE u.user_email = 'federica.marchetti@rtl-bank.org')
+       WHERE whistleblowing_report_tenant_id = c_rtl8;
+      PERFORM staging.storia36_check_c10c();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C10c:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C10c FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C10c (segnalazione affidata a chi non è il custode, rollback)';
+
+    -- ST-C10c(ii): chiudere una segnalazione senza rispondere a chi l'ha fatta
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_whistleblowing_reports SET whistleblowing_report_public_message = NULL
+       WHERE whistleblowing_report_tenant_id = c_rtl8;
+      PERFORM staging.storia36_check_c10c();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C10c(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C10c(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C10c(ii) (segnalazione chiusa senza riscontro, rollback)';
+
+    -- ST-C10d: un accesso registrato prima dell'assunzione
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_auth_login_events SET created_at = created_at - interval '4000 days'
+       WHERE ctid = (SELECT le2.ctid FROM sys.sys_auth_login_events le2
+                      WHERE le2.auth_login_event_details->>'storia36' = 'C10' LIMIT 1);
+      PERFORM staging.storia36_check_c10d();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C10d:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C10d FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C10d (accesso precedente all''assunzione, rollback)';
+
+    -- ST-C10d(ii): riportare il sistema a essere usato da una dozzina di persone
+    v_fired := false;
+    BEGIN
+      DELETE FROM sys.sys_auth_login_events
+       WHERE auth_login_event_details->>'storia36' = 'C10';
+      PERFORM staging.storia36_check_c10d();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C10d(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C10d(ii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C10d(ii) (sistema usato da una dozzina di persone, rollback)';
+
   END;
 END $$;
 \endif
@@ -5574,6 +5872,38 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C8b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c10a();
+    RAISE NOTICE '[OK] C10a ognuno ha espresso una scelta su ogni trattamento facoltativo';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C10a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c10b(v_end);
+    RAISE NOTICE '[OK] C10b le richieste dell''interessato si chiudono nei termini di legge';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C10b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c10c();
+    RAISE NOTICE '[OK] C10c le segnalazioni le tiene il custode e hanno un riscontro';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C10c'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c10d();
+    RAISE NOTICE '[OK] C10d gli accessi dicono chi usa il sistema e da quando';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C10d'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   BEGIN

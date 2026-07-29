@@ -51,6 +51,27 @@ export const gdprService = {
     return { items: await repo.listDataMap(pool) };
   },
 
+  /**
+   * Il registro delle richieste dell'interessato, in lettura. Le richieste si
+   * scrivevano e non si potevano rileggere: un registro di accountability che
+   * nessuno può consultare non dimostra la conformità a nessuno.
+   */
+  async listRequests(
+    actor: ActorContext,
+    query: {
+      subjectUserId?: string | undefined;
+      type?: string | undefined;
+      status?: string | undefined;
+      limit: number;
+      offset: number;
+    },
+  ) {
+    if (!actor.tenantId) {
+      throw new ForbiddenError("Tenant context required", "TENANT_ID_REQUIRED");
+    }
+    return repo.listGdprRequests(pool, actor.tenantId, query);
+  },
+
   /** Art. 15/20 export — used by the admin surface AND the ME self-service
    *  surface (subjectUserId = actor.userId in that case). */
   async exportSubject(actor: ActorContext, subjectUserId: string): Promise<GdprExportBundle> {

@@ -2957,6 +2957,124 @@ BEGIN
 END $fn$;
 
 -- ----------------------------------------------------------------------------
+-- C9a — UN DOCUMENTO PUBBLICATO HA UNA STORIA, E LA STORIA VA AVANTI.
+-- Prima: 163 documenti e NESSUNO pubblicato — il portale del dipendente aveva
+-- una sezione documenti che non mostrava niente. E un documento «pubblicato
+-- nel 2021» che è stato rivisto tre volte porta comunque la data del 2021, se
+-- nessuno lo riallinea alla sua ultima revisione.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c9a()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*) INTO v_cnt
+  FROM sys.sys_content_documents d
+  WHERE d.document_tenant_id = c_rtl AND d.document_status = 'published';
+  IF v_cnt < 5 THEN
+    RAISE EXCEPTION 'C9a: solo % documenti pubblicati: il manuale del dipendente è vuoto', v_cnt;
+  END IF;
+
+  -- ogni documento pubblicato ha almeno una versione
+  SELECT count(*), min(d.document_title) INTO v_cnt, v_sample
+  FROM sys.sys_content_documents d
+  WHERE d.document_tenant_id = c_rtl AND d.document_status = 'published'
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_content_versions v
+                     WHERE v.version_document_id = d.document_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C9a(ii): % documenti pubblicati senza una sola versione (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- i numeri di versione sono consecutivi da 1 e le date crescono con loro
+  SELECT count(*), min(d.document_title) INTO v_cnt, v_sample
+  FROM sys.sys_content_documents d
+  JOIN LATERAL (
+    SELECT min(v.version_number) AS primo, max(v.version_number) AS ultimo,
+           count(*) AS quante,
+           bool_or(v.created_at < prec.created_at) AS fuori_ordine
+      FROM sys.sys_content_versions v
+      LEFT JOIN LATERAL (
+        SELECT v2.created_at FROM sys.sys_content_versions v2
+         WHERE v2.version_document_id = v.version_document_id
+           AND v2.version_number = v.version_number - 1) prec ON true
+     WHERE v.version_document_id = d.document_id) g ON true
+  WHERE d.document_tenant_id = c_rtl AND d.document_status = 'published'
+    AND g.quante > 0
+    AND (g.primo <> 1 OR g.ultimo <> g.quante OR COALESCE(g.fuori_ordine, false));
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C9a(iii): % documenti con versioni non consecutive o con date che tornano indietro (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- ogni revisione dice che cosa è cambiato
+  SELECT count(*), min(d.document_title) INTO v_cnt, v_sample
+  FROM sys.sys_content_versions v
+  JOIN sys.sys_content_documents d ON d.document_id = v.version_document_id
+  WHERE v.version_tenant_id = c_rtl
+    -- solo i documenti VIVI: la nota di revisione serve a chi legge il
+    -- documento oggi. Gli archiviati sono storia chiusa (e fra loro ci sono 13
+    -- revisioni senza nota, residui di collaudo E2E: dichiarati, non nascosti)
+    AND d.document_status = 'published'
+    AND (v.version_change_note IS NULL OR length(trim(v.version_change_note)) < 10);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C9a(iv): % revisioni che non dicono che cosa è cambiato (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- e il documento è allineato alla sua ultima revisione
+  SELECT count(*), min(d.document_title) INTO v_cnt, v_sample
+  FROM sys.sys_content_documents d
+  JOIN LATERAL (
+    SELECT v.version_id, v.created_at FROM sys.sys_content_versions v
+     WHERE v.version_document_id = d.document_id
+     ORDER BY v.version_number DESC LIMIT 1) ult ON true
+  WHERE d.document_tenant_id = c_rtl AND d.document_status = 'published'
+    AND (d.document_current_version_id IS DISTINCT FROM ult.version_id
+      OR d.document_effective_date IS DISTINCT FROM ult.created_at::date);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C9a(v): % documenti che non puntano alla loro ultima revisione (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
+-- C9b — OGNI DOCUMENTO STA DA QUALCHE PARTE.
+-- Prima: zero categorie in tutto il sistema, e quindi 163 documenti su 163
+-- senza collocazione. Un manuale senza indice è un mucchio di file.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c9b()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+  v_cnt bigint;
+  v_sample text;
+BEGIN
+  SELECT count(*) INTO v_cnt FROM sys.sys_content_categories
+  WHERE category_tenant_id = c_rtl;
+  IF v_cnt = 0 THEN
+    RAISE EXCEPTION 'C9b: nessuna categoria di contenuto: i documenti non hanno dove stare';
+  END IF;
+
+  SELECT count(*), min(d.document_title) INTO v_cnt, v_sample
+  FROM sys.sys_content_documents d
+  WHERE d.document_tenant_id = c_rtl AND d.document_status = 'published'
+    AND d.document_category_id IS NULL;
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C9b(ii): % documenti pubblicati senza categoria (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- una categoria che non contiene niente non serve a nessuno
+  SELECT count(*), min(c.category_name) INTO v_cnt, v_sample
+  FROM sys.sys_content_categories c
+  WHERE c.category_tenant_id = c_rtl
+    AND c.category_metadata->>'storia36' = 'C9'
+    AND NOT EXISTS (SELECT 1 FROM sys.sys_content_documents d
+                     WHERE d.document_category_id = c.category_id);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C9b(iii): % categorie senza un solo documento (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
 -- C8b — IL CLIMA RACCONTA LA RIORGANIZZAZIONE.
 -- Non è un vezzo narrativo: se il clima fosse piatto attorno a una
 -- riorganizzazione che ha accorpato due divisioni e spostato tre direzioni,
@@ -4906,6 +5024,117 @@ BEGIN
     END;
     IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C8c(ii) FALLITO: violazione iniettata non rilevata'; END IF;
     RAISE NOTICE '[OK] SELFTEST C8c(ii) (piano d''azione senza responsabile, rollback)';
+
+    -- ==========================================================================
+    -- C9 — CONTENUTI
+    -- ==========================================================================
+
+    -- ST-C9a: spubblicare tutto — il manuale del dipendente che non mostra niente
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_content_documents SET document_status = 'archived'
+       WHERE document_tenant_id = c_rtl8 AND document_status = 'published';
+      PERFORM staging.storia36_check_c9a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C9a:%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C9a FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C9a (manuale del dipendente vuoto, rollback)';
+
+    -- ST-C9a(iii): far tornare indietro la data di una revisione
+    v_fired := false;
+    BEGIN
+      -- si porta la PRIMA revisione DOPO l'ultima: così il disordine è certo,
+      -- mentre spostare indietro l'ultima di qualche mese non bastava a
+      -- scavalcare la precedente e faceva scattare un altro ramo
+      UPDATE sys.sys_content_versions v
+         SET created_at = (SELECT max(v3.created_at) + interval '10 days'
+                             FROM sys.sys_content_versions v3
+                            WHERE v3.version_document_id = v.version_document_id)
+       WHERE v.ctid = (SELECT v2.ctid FROM sys.sys_content_versions v2
+                        JOIN sys.sys_content_documents d2 ON d2.document_id = v2.version_document_id
+                       WHERE d2.document_status = 'published' AND v2.version_number = 1
+                         AND (SELECT count(*) FROM sys.sys_content_versions v4
+                               WHERE v4.version_document_id = v2.version_document_id) > 1
+                       LIMIT 1);
+      PERFORM staging.storia36_check_c9a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C9a(iii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C9a(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C9a(iii) (revisione con la data che torna indietro, rollback)';
+
+    -- ST-C9a(iv): una revisione che non dice che cosa è cambiato
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_content_versions v SET version_change_note = NULL
+       WHERE v.ctid = (SELECT v2.ctid FROM sys.sys_content_versions v2
+                        JOIN sys.sys_content_documents d2 ON d2.document_id = v2.version_document_id
+                       WHERE d2.document_status = 'published' LIMIT 1);
+      PERFORM staging.storia36_check_c9a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C9a(iv)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C9a(iv) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C9a(iv) (revisione muta, rollback)';
+
+    -- ST-C9a(v): lasciare il documento fermo a una revisione vecchia
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_content_documents SET document_current_version_id = NULL
+       WHERE ctid = (SELECT d2.ctid FROM sys.sys_content_documents d2
+                      WHERE d2.document_tenant_id = c_rtl8 AND d2.document_status = 'published' LIMIT 1);
+      PERFORM staging.storia36_check_c9a();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C9a(v)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C9a(v) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C9a(v) (documento fermo a una revisione superata, rollback)';
+
+    -- ST-C9b: togliere la categoria a un documento pubblicato
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_content_documents SET document_category_id = NULL
+       WHERE ctid = (SELECT d2.ctid FROM sys.sys_content_documents d2
+                      WHERE d2.document_tenant_id = c_rtl8 AND d2.document_status = 'published' LIMIT 1);
+      PERFORM staging.storia36_check_c9b();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C9b(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C9b FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C9b (documento pubblicato senza categoria, rollback)';
+
+    -- ST-C9b(iii): una categoria che non contiene niente
+    v_fired := false;
+    BEGIN
+      UPDATE sys.sys_content_documents SET document_category_id = (
+        SELECT c2.category_id FROM sys.sys_content_categories c2
+         WHERE c2.category_tenant_id = c_rtl8 LIMIT 1)
+       WHERE document_tenant_id = c_rtl8 AND document_status = 'published';
+      PERFORM staging.storia36_check_c9b();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C9b(iii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C9b(iii) FALLITO: violazione iniettata non rilevata'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C9b(iii) (categorie rimaste vuote, rollback)';
   END;
 END $$;
 \endif
@@ -5345,6 +5574,22 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C8b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c9a();
+    RAISE NOTICE '[OK] C9a i documenti pubblicati hanno una storia di revisioni che va avanti';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C9a'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c9b();
+    RAISE NOTICE '[OK] C9b ogni documento pubblicato sta in una categoria che esiste';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C9b'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   BEGIN

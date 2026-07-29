@@ -40,6 +40,7 @@ import { useTranslation } from "react-i18next";
 import { useCurrentUser, useLogout, useMyInterfaces, useUpdateMyPreferences, type MyInterface } from "../../lib/api/auth";
 import { isApiError, SessionExpiredError } from "../../lib/api/errors";
 import { setLocale } from "../../lib/i18n";
+import { primaryRoleOf } from "../../lib/role-precedence";
 import { PreferencesApplier } from "../../components/preferences-applier";
 import { SectionTabs } from "../../components/section-tabs";
 
@@ -163,7 +164,10 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       ? user.displayName.trim().split(/\s+/).map((w) => w.charAt(0)).join("").slice(0, 2)
       : user.email.slice(0, 2)
   ).toUpperCase();
-  const primaryRole = roles[0] ?? "USER";
+  // Non `roles[0]`: l'ordine con cui l'API restituisce i ruoli e' arbitrario, e
+  // con l'invariante I17 (chiunque e' almeno USER) un'amministratrice di tenant
+  // finiva presentata come «Dipendente» — vedi lib/role-precedence.ts.
+  const primaryRole = primaryRoleOf(roles);
   const identity: UserIdentity = {
     initials,
     username: displayName,

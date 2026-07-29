@@ -36,6 +36,7 @@ import {
 } from "@heuresys/ui";
 import { Activity, Database, Gauge, Lock, ShieldCheck, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { ROLE_PRECEDENCE } from "../lib/role-precedence";
 import {
   useRequestSeries,
   useRolePermissions,
@@ -101,7 +102,11 @@ const ROLE_TONE: Record<
   USER: "muted-foreground",
   READ_ONLY: "muted-foreground",
 };
-const ROLE_ORDER = Object.keys(ROLE_TONE);
+// L'ordine di visualizzazione non vive piu' qui: e' quello canonico di
+// `lib/role-precedence.ts`, la stessa fonte che decide il ruolo mostrato
+// nell'intestazione. Una sola lista, un solo posto da aggiornare quando nasce
+// un ruolo nuovo. (ROLE_TONE resta locale: e' il colore, non l'ordine.)
+const ROLE_ORDER = ROLE_PRECEDENCE;
 
 /**
  * Pivot the flat [{roleCode, permissionCode, ...}] list into the RBACMatrix shape.

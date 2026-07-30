@@ -14,6 +14,7 @@ export * from "./schemas/tenants.js";
 export * from "./schemas/provisioning.js";
 export * from "./schemas/gdpr.js";
 export * from "./schemas/users.js";
+export * from "./schemas/user-dossier.js";
 export * from "./schemas/positions.js";
 export * from "./schemas/organization-units.js";
 export * from "./schemas/teams.js";

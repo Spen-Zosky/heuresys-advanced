@@ -18,6 +18,7 @@ import {
 import type { RoleCode } from "../../config/constants.js";
 import type {
   User,
+  UserDossier,
   UserListQuery,
   UserListResponse,
   CreateUserBody,
@@ -26,6 +27,11 @@ import type {
 } from "@heuresys/shared";
 import { NON_PRIVILEGED_UPDATABLE_FIELDS } from "@heuresys/shared";
 import * as repo from "./repository.js";
+// #81 — il dossier non riscrive le letture per-persona: riusa QUELLE del portale
+// personale, che sono gia' parametrizzate sull'utente. Una sola implementazione
+// per ogni dimensione, cosi' la vista di se' e quella di chi ha titolo non
+// possono divergere.
+import * as meRepo from "../me/repository.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 const NON_PRIVILEGED_FIELDS = new Set<string>(NON_PRIVILEGED_UPDATABLE_FIELDS);
@@ -105,6 +111,59 @@ export const usersService = {
       throw new NotFoundError("User");
     }
     return target;
+  },
+
+  /**
+   * #81 — il DOSSIER della persona: cio' che la scheda deve saper raccontare.
+   *
+   * Stesso cancello della lettura anagrafica (`canActOnTarget(read)` →
+   * `canReadOrgTarget`): sono dati SENSIBILI e passano dalla catena
+   * ORGANIZZATIVA, mai dall'appartenenza a un team (I18, regola cardinale).
+   * Come per `getById`, un soggetto fuori portata risponde 404 e non 403: un
+   * 403 confermerebbe che quella persona esiste.
+   *
+   * Le sezioni si caricano in parallelo perche' sono indipendenti fra loro.
+   */
+  async getDossier(actor: ActorContext, id: string): Promise<UserDossier> {
+    const target = await repo.findUserById(pool, id);
+    if (!target) throw new NotFoundError("User");
+    if (!(await canActOnTarget(actor, target, "read"))) {
+      throw new NotFoundError("User");
+    }
+
+    // I ruoli che contano per la vista sono quelli del SOGGETTO (loadProfileFull
+    // li usa per decidere cosa il profilo espone di se'), non quelli di chi guarda.
+    const targetRoles = (await repo.listRoleGrantsForUser(pool, id)).map((g) => g.roleCode);
+
+    // alcune letture rendono gia' {items,total}, altre l'array nudo: si
+    // normalizza qui, una volta sola, invece di piegare lo schema
+    const [
+      profile, positionsRes, contracts, paySlips, performance,
+      attendance, skillsRes, learningRes, certificationsRes, goals, careerTargetsRes,
+    ] = await Promise.all([
+      meRepo.loadProfileFull(pool, id, targetRoles),
+      meRepo.listMyPositions(pool, id),
+      meRepo.loadContracts(pool, id),
+      meRepo.loadPaySlips(pool, id),
+      meRepo.loadPerformance(pool, id),
+      meRepo.loadAttendance(pool, id),
+      meRepo.listMySkills(pool, id),
+      meRepo.listMyLearning(pool, id),
+      meRepo.listMyCertifications(pool, id),
+      meRepo.loadMyGoals(pool, id),
+      meRepo.listMyCareerTargets(pool, id),
+    ]);
+    const positions = positionsRes.items;
+    const skills = skillsRes.items;
+    const learning = learningRes.items;
+    const certifications = certificationsRes.items;
+    const careerTargets = careerTargetsRes.items;
+    if (!profile) throw new NotFoundError("User");
+
+    return {
+      profile, positions, contracts, paySlips, performance,
+      attendance, skills, learning, certifications, goals, careerTargets,
+    };
   },
 
   async create(actor: ActorContext, body: CreateUserBody): Promise<User> {

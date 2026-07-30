@@ -62,6 +62,11 @@
       "development": "./src/schemas/users.ts",
       "default": "./dist/schemas/users.js"
     },
+    "./schemas/user-dossier": {
+      "types": "./dist/schemas/user-dossier.d.ts",
+      "development": "./src/schemas/user-dossier.ts",
+      "default": "./dist/schemas/user-dossier.js"
+    },
     "./schemas/positions": {
       "types": "./dist/schemas/positions.d.ts",
       "development": "./src/schemas/positions.ts",

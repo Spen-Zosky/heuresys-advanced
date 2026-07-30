@@ -22,6 +22,7 @@ import {
   GrantIdParamSchema,
   EmptyResponseSchema,
 } from "@heuresys/shared";
+import { UserDossierParamSchema, UserDossierSchema } from "@heuresys/shared";
 import { usersService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
 
@@ -49,6 +50,20 @@ export const usersRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: { params: UserIdParamSchema, response: { 200: UserSchema } },
     },
     async (req) => usersService.getById(actorFromReq(req), req.params.id),
+  );
+
+  /* --- GET /v1/users/:userId/dossier (#81) --------------------------
+     La scheda di una persona raccontata: posizione, contratto, retribuzione,
+     presenze, formazione, competenze, valutazioni, obiettivi, carriera.
+     Dati SENSIBILI → cancello organizzativo nel service (ADR-0027, I18). */
+  app.get(
+    "/:userId/dossier",
+    {
+      config: { orgGate: "service" },
+      preHandler: [requirePermission("user:read")],
+      schema: { params: UserDossierParamSchema, response: { 200: UserDossierSchema } },
+    },
+    async (req) => usersService.getDossier(actorFromReq(req), req.params.userId),
   );
 
   /* --- POST /v1/users ---------------------------------------------- */

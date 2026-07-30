@@ -78,6 +78,12 @@ coverage/
 playwright-report/
 test-results/
 qa_artifacts/runs/
+# storia36 (S1036): il presidio settimanale riscrive questo report a ogni esecuzione —
+# su tre macchine. Tracciarlo produrrebbe rumore ogni lunedi senza valore: l'esito che
+# conta finisce nel registro degli allarmi (/var/lib/heuresys/unit-failures.jsonl) e nel
+# journal. Le SCHERMATE della dimostrazione restano invece versionate: sono prove
+# referenziate dal register (#81).
+qa_artifacts/storia36/custodia-*.md
 qa_artifacts/schema_snapshot_*.sql
 qa_artifacts/schema_snapshot_*.sql.filtered
 qa_artifacts/db_snapshots/

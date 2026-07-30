@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-29T09:23:03Z da docs/kb/tools/build_index.py
+# generato: 2026-07-30T00:04:06Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-29T09:23:03Z"
-  total_files: 2673
+  generated_at: "2026-07-30T00:04:06Z"
+  total_files: 2692
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,30 +13,30 @@ meta:
     api-module: 324
     ci: 17
     claude-config: 30
-    config: 122
+    config: 124
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
     db-migration: 215
     db-other: 8
-    db-script: 39
-    db-seed: 145
-    doc-canonical: 525
+    db-script: 42
+    db-seed: 146
+    doc-canonical: 526
     handoff-state: 1
-    qa-artifact: 105
+    qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
     shared-schema: 99
     showcase-source: 14
-    test: 314
+    test: 316
     ux-design-archive: 80
-    web-source: 208
+    web-source: 209
   status_counts:
-    archive: 499
+    archive: 508
     external-archive: 50
-    live: 2124
+    live: 2134
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3065,6 +3065,18 @@ files:
   - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-scraping.timer'
     root: repo
     rel: 'deploy/systemd/heuresys-advanced-scraping.timer'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-storia36-custodia.service'
+    root: repo
+    rel: 'deploy/systemd/heuresys-advanced-storia36-custodia.service'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-storia36-custodia.timer'
+    root: repo
+    rel: 'deploy/systemd/heuresys-advanced-storia36-custodia.timer'
     category: config
     status: live
     provenance: git-tracked
@@ -6782,6 +6794,24 @@ files:
     category: db-script
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\audit-storia36-empty-tables.txt'
+    root: repo
+    rel: 'db/scripts/audit-storia36-empty-tables.txt'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\audit-storia36-explanations.txt'
+    root: repo
+    rel: 'db/scripts/audit-storia36-explanations.txt'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\audit-storia36-semantic.py'
+    root: repo
+    rel: 'db/scripts/audit-storia36-semantic.py'
+    category: db-script
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\brownfield-wave-1-preflight.ps1'
     root: repo
     rel: 'db/scripts/brownfield-wave-1-preflight.ps1'
@@ -7763,6 +7793,12 @@ files:
   - path: 'D:\heuresys-advanced\db\seeds\storia36\11_platform_config.sql'
     root: repo
     rel: 'db/seeds/storia36/11_platform_config.sql'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\storia36\12_registration_dates.sql'
+    root: repo
+    rel: 'db/seeds/storia36/12_registration_dates.sql'
     category: db-seed
     status: live
     provenance: git-tracked
@@ -9155,6 +9191,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\integrations\INTEGRATIONS.md'
     root: repo
     rel: 'docs/kb/integrations/INTEGRATIONS.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\storia36\AUDIT_FINALE.md'
+    root: repo
+    rel: 'docs/kb/storia36/AUDIT_FINALE.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11375,6 +11417,60 @@ files:
   - path: 'D:\heuresys-advanced\qa_artifacts\storia36\custodia-2026-07-28.md'
     root: repo
     rel: 'qa_artifacts/storia36/custodia-2026-07-28.md'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\storia36\demo\01-cruscotto.png'
+    root: repo
+    rel: 'qa_artifacts/storia36/demo/01-cruscotto.png'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\storia36\demo\02-andamento-presenze-36-mesi.png'
+    root: repo
+    rel: 'qa_artifacts/storia36/demo/02-andamento-presenze-36-mesi.png'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\storia36\demo\03-elenco-persone.png'
+    root: repo
+    rel: 'qa_artifacts/storia36/demo/03-elenco-persone.png'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\storia36\demo\04-scheda-persona.png'
+    root: repo
+    rel: 'qa_artifacts/storia36/demo/04-scheda-persona.png'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\storia36\demo\05-approvazioni.png'
+    root: repo
+    rel: 'qa_artifacts/storia36/demo/05-approvazioni.png'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\storia36\demo\06-clima-aziendale.png'
+    root: repo
+    rel: 'qa_artifacts/storia36/demo/06-clima-aziendale.png'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\storia36\demo\07-retribuzioni.png'
+    root: repo
+    rel: 'qa_artifacts/storia36/demo/07-retribuzioni.png'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\storia36\demo\08-portale-persona.png'
+    root: repo
+    rel: 'qa_artifacts/storia36/demo/08-portale-persona.png'
+    category: qa-artifact
+    status: archive
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\qa_artifacts\storia36\demo\09-portale-andamento-personale.png'
+    root: repo
+    rel: 'qa_artifacts/storia36/demo/09-portale-andamento-personale.png'
     category: qa-artifact
     status: archive
     provenance: git-tracked
@@ -14270,6 +14366,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\role-badge.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/role-badge.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\serie-a-panels.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/serie-a-panels.spec.ts'
@@ -14297,6 +14399,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\smoke-5-personas.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/smoke-5-personas.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\storia36-demo.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/storia36-demo.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -15935,6 +16043,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\lib\landing.ts'
     root: repo
     rel: 'apps/web/src/lib/landing.ts'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\lib\role-precedence.ts'
+    root: repo
+    rel: 'apps/web/src/lib/role-precedence.ts'
     category: web-source
     status: live
     provenance: git-tracked

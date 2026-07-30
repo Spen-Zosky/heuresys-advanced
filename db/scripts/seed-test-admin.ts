@@ -25,7 +25,8 @@
  * scope matrix tests assert against authentic hierarchy, not a synthetic TEST_ scaffold.
  *
  * Idempotent: identity/credential are checked before insert; re-run reports EXISTS.
- * Set TEST_ADMIN_RESET_PASSWORD=1 to rotate the credential to the (default/env) password.
+ * Set TEST_ADMIN_RESET_PASSWORD=1 to rotate the credential to the DERIVED password (Z-262).
+ * Per l'intera popolazione (159 utenti, non solo le 7 personas): pnpm db:provision-access
  *
  * Run: pnpm db:seed-test-admin
  */
@@ -36,6 +37,8 @@ import {
   E2E_FIXTURE_LABEL,
   FIXTURE_TOTP_SECRETS,
 } from "../../apps/api/test/helpers/mfa-fixture-secrets.js";
+// Z-262: una sola implementazione della derivazione, importata — mai una copia
+import { readMaster, derivePassword } from "../../apps/api/scripts/derive-access.mjs";
 import { config as dotenvConfig } from "dotenv";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -177,15 +180,18 @@ async function ensureAuth(
 }
 
 async function main() {
-  // F-001: no committed default — the persona password is environment-driven and the seeder
-  // fails closed if it is unset, so a public/default password can never be written to the DB.
-  const password = process.env.TEST_ADMIN_PASSWORD;
-  if (!password) {
-    console.error(
-      "TEST_ADMIN_PASSWORD is not set — set it in the repo-root .env and re-run (F-001, no committed default).",
-    );
-    process.exit(1);
-  }
+  // Z-262 (2026-07-26): la password di una persona NON è più una costante condivisa,
+  // è DERIVATA per-utente dalla chiave madre (.secrets/dev-access-master.key) — la
+  // stessa derivazione che usano il provisioner (db/scripts/provision-derived-access.ts),
+  // i test API e Playwright.
+  //
+  // Questo seeder era rimasto indietro e scriveva ancora $TEST_ADMIN_PASSWORD grezza:
+  // con TEST_ADMIN_RESET_PASSWORD=1 sovrascriveva le credenziali derivate e faceva
+  // fallire il login di TUTTE le personas (misurato 2026-07-31 con
+  // `node apps/api/scripts/verify-derived-login.mjs <email>` → FALLITO; riparato con
+  // `pnpm db:provision-access --realign`). Due scrittori della stessa credenziale che
+  // non concordano sono il difetto: ora la derivazione è UNA SOLA, importata.
+  const master = readMaster();
   const wantsReset = process.env.TEST_ADMIN_RESET_PASSWORD === "1";
 
   const client = new Client({
@@ -205,7 +211,7 @@ async function main() {
 
     const report: Array<{ email: string } & EnsureResult> = [];
     for (const email of PERSONA_EMAILS) {
-      const r = await ensureAuth(client, email, password, wantsReset);
+      const r = await ensureAuth(client, email, derivePassword(master, email), wantsReset);
       r.totpFactorCreated = await ensureTotpFactor(client, r.userId, email);
       report.push({ email, ...r });
     }
@@ -222,7 +228,7 @@ async function main() {
       ];
       console.log(`  ${r.email.padEnd(34)} ${flags.join(" ")}`);
     }
-    console.log(`  password : (from $TEST_ADMIN_PASSWORD, ${password.length} chars — value never logged)`);
+    console.log("  password : DERIVATA per-utente dalla chiave madre (Z-262) — mai registrata");
     console.log("─".repeat(76));
   } catch (err) {
     await client.query("ROLLBACK");

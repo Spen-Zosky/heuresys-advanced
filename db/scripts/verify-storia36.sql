@@ -3238,6 +3238,59 @@ BEGIN
 END $fn$;
 
 -- ----------------------------------------------------------------------------
+-- C12c — IL CALENDARIO REGGE ANCHE QUANDO LA STORIA AVANZA.
+-- La finestra di costruzione ha una lista di festività scritta a mano; il modo
+-- `avanzamento` estende il calendario ad anni che quella lista non conosce, e
+-- lo fa CALCOLANDO le festività (Pasqua compresa). Le due fonti devono dire la
+-- stessa cosa dove si sovrappongono: è questo a rendere il calcolo falsificabile
+-- invece che creduto. In più il calendario dev'essere DENSO (nessun giorno
+-- mancante: un buco toglierebbe silenziosamente un giorno lavorativo dalla
+-- storia) e coerente (mai lavorativo di sabato, domenica o in festività).
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION staging.storia36_check_c12c()
+RETURNS void LANGUAGE plpgsql AS $fn$
+DECLARE
+  v_cnt bigint;
+  v_min date;
+  v_max date;
+  v_sample text;
+BEGIN
+  SELECT count(*), min(cal_date), max(cal_date) INTO v_cnt, v_min, v_max
+    FROM staging.storia36_calendar;
+
+  -- (i) copertura e densità: proprietà, non fotografia (il massimo può crescere)
+  IF v_min <> DATE '2023-08-01' OR v_max < DATE '2026-07-31' THEN
+    RAISE EXCEPTION 'C12c(i): il calendario non copre la finestra di costruzione (min=%, max=%)', v_min, v_max;
+  END IF;
+  IF v_cnt <> (v_max - v_min) + 1 THEN
+    RAISE EXCEPTION 'C12c(i): calendario con buchi — % giorni presenti su % fra % e %',
+      v_cnt, (v_max - v_min) + 1, v_min, v_max;
+  END IF;
+
+  -- (ii) il calcolo delle festività coincide con la lista scritta a mano su
+  --      TUTTA la finestra di costruzione. Se il calcolo della Pasqua fosse
+  --      sbagliato, qui salterebbero fuori i Lunedì dell'Angelo.
+  SELECT count(*), min(c.cal_date || ': tabella=' || COALESCE(c.holiday_name, '—')
+                       || ' calcolo=' || COALESCE(staging.storia36_holiday_it(c.cal_date), '—'))
+    INTO v_cnt, v_sample
+    FROM staging.storia36_calendar c
+   WHERE c.cal_date BETWEEN DATE '2023-08-01' AND DATE '2026-07-31'
+     AND c.holiday_name IS DISTINCT FROM staging.storia36_holiday_it(c.cal_date);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C12c(ii): % giorni in cui la festività calcolata non coincide con quella scritta (es. %)', v_cnt, v_sample;
+  END IF;
+
+  -- (iii) coerenza is_workday su TUTTO il calendario, estensione compresa
+  SELECT count(*), min(cal_date::text) INTO v_cnt, v_sample
+    FROM staging.storia36_calendar
+   WHERE is_workday
+     AND (extract(isodow FROM cal_date) IN (6, 7) OR holiday_name IS NOT NULL);
+  IF v_cnt > 0 THEN
+    RAISE EXCEPTION 'C12c(iii): % giorni marcati lavorativi che sono weekend o festivi (es. %)', v_cnt, v_sample;
+  END IF;
+END $fn$;
+
+-- ----------------------------------------------------------------------------
 -- C10a — OGNUNO HA ESPRESSO UNA SCELTA SU OGNI TRATTAMENTO FACOLTATIVO.
 -- Non «tutti hanno acconsentito»: i quattro scopi sono facoltativi e una
 -- scelta può benissimo essere «no». Quello che non può mancare è la scelta —
@@ -5884,6 +5937,51 @@ BEGIN
     IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C12b FALLITO: violazione iniettata non rilevata'; END IF;
     RAISE NOTICE '[OK] SELFTEST C12b (coda di approvazione ferma da mesi, rollback)';
 
+    -- ST-C12c(i): togliere un giorno al calendario deve farlo vedere come buco
+    v_fired := false;
+    BEGIN
+      DELETE FROM staging.storia36_calendar WHERE cal_date = DATE '2025-06-11';
+      PERFORM staging.storia36_check_c12c();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C12c(i)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C12c(i) FALLITO: un giorno mancante nel calendario è passato inosservato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C12c(i) (buco nel calendario, rollback)';
+
+    -- ST-C12c(ii): spostare il Lunedì dell'Angelo è esattamente l'errore che il
+    -- calcolo della Pasqua può fare — deve emergere dal confronto con la lista
+    v_fired := false;
+    BEGIN
+      UPDATE staging.storia36_calendar
+         SET holiday_name = NULL, is_workday = true
+       WHERE cal_date = DATE '2025-04-21';
+      PERFORM staging.storia36_check_c12c();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C12c(ii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C12c(ii) FALLITO: festività calcolata e scritta divergenti non rilevate'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C12c(ii) (Lunedì dell''Angelo cancellato, rollback)';
+
+    -- ST-C12c(iii): un Natale marcato lavorativo
+    v_fired := false;
+    BEGIN
+      UPDATE staging.storia36_calendar SET is_workday = true WHERE cal_date = DATE '2025-12-25';
+      PERFORM staging.storia36_check_c12c();
+      RAISE EXCEPTION 'ST_NOT_FIRED';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM LIKE 'C12c(iii)%' THEN v_fired := true;
+      ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
+      END IF;
+    END;
+    IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C12c(iii) FALLITO: un festivo marcato lavorativo è passato'; END IF;
+    RAISE NOTICE '[OK] SELFTEST C12c(iii) (Natale marcato lavorativo, rollback)';
+
   END;
 END $$;
 \endif
@@ -6411,6 +6509,14 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
     v_failed := array_append(v_failed, 'C12b'); RAISE WARNING '[ROSSO] %', v_msg;
+  END;
+
+  BEGIN
+    PERFORM staging.storia36_check_c12c();
+    RAISE NOTICE '[OK] C12c il calendario e'' denso, coerente, e le festivita'' calcolate coincidono con quelle scritte';
+  EXCEPTION WHEN OTHERS THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;
+    v_failed := array_append(v_failed, 'C12c'); RAISE WARNING '[ROSSO] %', v_msg;
   END;
 
   IF array_length(v_failed, 1) > 0 THEN

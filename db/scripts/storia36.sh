@@ -13,8 +13,14 @@
 #                                     con triage a 3 esiti da compilare per ogni rosso.
 #                                     --repair-missing: ri-esegue prima i seed (idempotenti:
 #                                     ricreano SOLO ciò che manca), poi verifica.
-#   avanzamento                     — estende la storia al mese corrente (finestra MOBILE).
-#                                     NON ANCORA DISPONIBILE — arriva col C12.
+#   avanzamento [--window-end=...]  — estende la storia dalle punte in cui si è
+#                                     fermata fino a IERI (o alla data data), con
+#                                     le stesse regole e le stesse chiavi naturali
+#                                     della costruzione: presenze, assenze, buste
+#                                     paga e handoff dei mesi interi; poi ri-esegue
+#                                     07_approvals.sql, che DERIVA le approvazioni
+#                                     dai fatti nuovi; poi la custodia.
+#                                     Idempotente: due corse di fila = 0 righe.
 #
 # Flag comuni: --window-end=YYYY-MM-DD (default: calcolato nel SQL = FINE MESE
 #   CORRENTE — il DB è produzione viva, i dati organici del mese in corso non
@@ -31,7 +37,7 @@ log()  { echo "[storia36] $*"; }
 err()  { echo "[storia36] ERRORE: $*" >&2; }
 
 usage() {
-  grep '^#' "$0" | sed -n '2,25p' | sed 's/^# \{0,1\}//'
+  grep '^#' "$0" | sed -n '2,31p' | sed 's/^# \{0,1\}//'
 }
 
 [[ -f "$ENV_FILE" ]] || { err ".env non trovato: $ENV_FILE"; exit 1; }
@@ -60,15 +66,48 @@ done
 WFLAG=()
 [[ -n "$WINDOW_END" ]] && WFLAG=(-v "window_end=$WINDOW_END")
 
+ADV_SEED="13_avanzamento.sql"
+
 run_seeds() {
   local n=0
   for f in "$REPO_ROOT"/db/seeds/storia36/*.sql; do
     [[ -e "$f" ]] || { err "nessun seed in db/seeds/storia36/"; exit 1; }
+    # l'avanzamento è un MODO a sé (finestra mobile), non un passo della
+    # costruzione: la costruzione produce la finestra storica progettata,
+    # l'avanzamento la porta a ieri quando lo si chiede.
+    [[ "$(basename "$f")" == "$ADV_SEED" ]] && continue
     log "seed: $(basename "$f")"
     "${PSQL[@]}" -f "$f"
     n=$((n+1))
   done
   log "seed eseguiti: $n (tutti idempotenti — ri-esecuzione = delta 0)"
+  log "nota: $ADV_SEED non fa parte della costruzione — usare 'storia36.sh avanzamento'"
+}
+
+# Estende la storia fino a ieri (o a --window-end) e ri-deriva ciò che dipende
+# dai fatti nuovi. Ogni passo è idempotente: una seconda corsa scrive 0 righe.
+avanzamento() {
+  local adv="$REPO_ROOT/db/seeds/storia36/$ADV_SEED"
+  local appr="$REPO_ROOT/db/seeds/storia36/07_approvals.sql"
+  [[ -f "$adv" ]] || { err "$ADV_SEED non trovato"; exit 1; }
+
+  log "avanzamento: estendo la storia (finestra: ${WINDOW_END:-ieri})"
+  "${PSQL[@]}" "${WFLAG[@]}" -f "$adv"
+
+  # Ciò che è DERIVATO dai fatti non si riscrive qui: si ri-esegue il seed che
+  # possiede la regola (tutti idempotenti — sui fatti vecchi scrivono 0 righe).
+  # Regola anti-drift AP-01: una regola, un posto solo.
+  #   01 → i saldi ferie seguono le presenze nuove
+  #   07 → le approvazioni nascono dalle richieste nuove
+  local derived=("$REPO_ROOT/db/seeds/storia36/01_attendance_timeoff.sql" "$appr")
+  for d in "${derived[@]}"; do
+    [[ -f "$d" ]] || continue
+    log "avanzamento: ri-derivo da $(basename "$d")"
+    "${PSQL[@]}" -f "$d"
+  done
+
+  log "avanzamento: verifico con la custodia"
+  custodia
 }
 
 # Esegue una batteria di verifica SENZA abortire lo script; ritorna l'exit psql.
@@ -171,8 +210,7 @@ case "$MODE" in
     custodia
     ;;
   avanzamento)
-    err "avanzamento: non ancora disponibile — cluster C12 richiesto (estensione mensile della storia, finestra mobile)"
-    exit 2
+    avanzamento
     ;;
   *)
     usage

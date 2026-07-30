@@ -21,12 +21,27 @@ CREATE TABLE IF NOT EXISTS staging.storia36_runs (
   run_id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
   cluster_code    varchar(8)  NOT NULL
                   CONSTRAINT storia36_runs_cluster_code_check
-                  CHECK (cluster_code ~ '^C([0-9]|1[0-2])$'),
+                  CHECK (cluster_code ~ '^(C([0-9]|1[0-2])|ADV)$'),
   seed_file       text        NOT NULL,
   rows_written    bigint      NOT NULL,
   executed_at     timestamptz NOT NULL DEFAULT now(),
   twice_run_delta bigint      NOT NULL
 );
+
+-- Il vocabolario si è allargato quando è nato il modo `avanzamento` (ADV, che
+-- non è un cluster ma una corsa di estensione). CREATE TABLE IF NOT EXISTS non
+-- tocca un vincolo già esistente: qui lo si riallinea, idempotente.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint
+              WHERE conname = 'storia36_runs_cluster_code_check'
+                AND pg_get_constraintdef(oid) !~ 'ADV') THEN
+    ALTER TABLE staging.storia36_runs DROP CONSTRAINT storia36_runs_cluster_code_check;
+    ALTER TABLE staging.storia36_runs ADD CONSTRAINT storia36_runs_cluster_code_check
+      CHECK (cluster_code ~ '^(C([0-9]|1[0-2])|ADV)$');
+    RAISE NOTICE 'storia36 C0: vocabolario cluster_code esteso ad ADV';
+  END IF;
+END $$;
 
 -- ----------------------------------------------------------------------------
 -- 2. Calendario lavorativo IT per la finestra: lun-ven MENO festività nazionali
@@ -38,6 +53,49 @@ CREATE TABLE IF NOT EXISTS staging.storia36_calendar (
   is_workday   boolean NOT NULL,
   holiday_name text
 );
+
+-- La finestra di costruzione ha una lista di festività scritta a mano (sotto).
+-- Il modo `avanzamento` però estende il calendario ad anni che quella lista non
+-- conosce: servono le stesse festività CALCOLATE. Le due fonti convivono e si
+-- controllano a vicenda — il check C12c pretende che coincidano su ogni giorno
+-- della finestra di costruzione, così un errore nel calcolo si vede subito.
+CREATE OR REPLACE FUNCTION staging.storia36_easter(y int) RETURNS date
+LANGUAGE plpgsql IMMUTABLE AS $fn$
+-- Meeus/Butcher, calendario gregoriano. La Pasqua è l'unica radice mobile del
+-- calendario italiano: da lei dipende il Lunedì dell'Angelo.
+DECLARE a int; b int; c int; d int; e int; f int; g int; hh int; i int; k int;
+        l int; m int; mo int; da int;
+BEGIN
+  a := y % 19;  b := y / 100;  c := y % 100;
+  d := b / 4;   e := b % 4;
+  f := (b + 8) / 25;
+  g := (b - f + 1) / 3;
+  hh := (19*a + b - d - g + 15) % 30;
+  i := c / 4;   k := c % 4;
+  l := (32 + 2*e + 2*i - hh - k) % 7;
+  m := (a + 11*hh + 22*l) / 451;
+  mo := (hh + l - 7*m + 114) / 31;
+  da := ((hh + l - 7*m + 114) % 31) + 1;
+  RETURN make_date(y, mo, da);
+END $fn$;
+
+CREATE OR REPLACE FUNCTION staging.storia36_holiday_it(d date) RETURNS text
+LANGUAGE sql IMMUTABLE AS $fn$
+  SELECT CASE
+    WHEN to_char(d, 'MM-DD') = '01-01' THEN 'Capodanno'
+    WHEN to_char(d, 'MM-DD') = '01-06' THEN 'Epifania'
+    WHEN d = staging.storia36_easter(extract(year FROM d)::int) + 1 THEN 'Lunedì dell''Angelo'
+    WHEN to_char(d, 'MM-DD') = '04-25' THEN 'Festa della Liberazione'
+    WHEN to_char(d, 'MM-DD') = '05-01' THEN 'Festa del Lavoro'
+    WHEN to_char(d, 'MM-DD') = '06-02' THEN 'Festa della Repubblica'
+    WHEN to_char(d, 'MM-DD') = '08-15' THEN 'Ferragosto'
+    WHEN to_char(d, 'MM-DD') = '11-01' THEN 'Ognissanti'
+    WHEN to_char(d, 'MM-DD') = '12-07' THEN 'Sant''Ambrogio (patrono Milano)'
+    WHEN to_char(d, 'MM-DD') = '12-08' THEN 'Immacolata Concezione'
+    WHEN to_char(d, 'MM-DD') = '12-25' THEN 'Natale'
+    WHEN to_char(d, 'MM-DD') = '12-26' THEN 'Santo Stefano'
+  END
+$fn$;
 
 DO $$
 DECLARE
@@ -113,13 +171,15 @@ BEGIN
     INTO v_cnt, v_min, v_max
     FROM staging.storia36_calendar;
 
-  v_expected := ('2026-07-31'::date - '2023-08-01'::date) + 1;
-  IF v_cnt <> v_expected OR v_min <> '2023-08-01' OR v_max <> '2026-07-31' THEN
-    RAISE EXCEPTION 'storia36_calendar: copertura errata (cnt=% atteso=%, min=%, max=%)',
+  -- PROPRIETÀ, non fotografia: il calendario deve COPRIRE la finestra di
+  -- costruzione ed essere DENSO. Può legittimamente arrivare più avanti —
+  -- il modo `avanzamento` lo estende quando la storia si porta a ieri —
+  -- e un limite superiore fisso qui renderebbe rosso proprio quel caso.
+  v_expected := (v_max - v_min) + 1;
+  IF v_cnt <> v_expected OR v_min <> '2023-08-01' OR v_max < '2026-07-31' THEN
+    RAISE EXCEPTION 'storia36_calendar: copertura errata (cnt=% densità attesa=%, min=% atteso 2023-08-01, max=% atteso >= 2026-07-31)',
       v_cnt, v_expected, v_min, v_max;
   END IF;
-
-  -- nessun buco: PK garantisce unicità, il conteggio sul range garantisce densità.
 
   -- coerenza is_workday: mai true nel weekend o in festività
   SELECT count(*) INTO v_bad

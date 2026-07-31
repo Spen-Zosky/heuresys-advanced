@@ -33,6 +33,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -295,6 +296,26 @@ def sec_db(no_db):
             s.add(UNK, f"i18n dati: output psql inatteso: {i18n!r}")
     s.add(DOT, f"utenti {users} · posizioni {positions} · OU {ou} · team {teams} · tenant ACTIVE {tenants}")
     s.add(DOT, f"RBAC {roles} ruoli · {perms} permessi · {maps} mapping · skill {skills}")
+    # Scarto d'orologio fra QUESTA macchina e il database.
+    # Perché è qui (S1037): il PC era indietro di 10 ore e 21 minuti e nessuno se
+    # n'era accorto. Il sintomo è arrivato molto dopo e travestito — 14 test rossi
+    # su MFA, con una scadenza «precedente» alla creazione, perché l'applicazione
+    # calcola le scadenze con l'orologio locale e il database registra col proprio.
+    # Un dato scritto con un orologio sbagliato non si riconosce guardandolo.
+    skew = q("SELECT round(extract(epoch FROM now()) - extract(epoch FROM %s))::text"
+             % f"to_timestamp({time.time():.3f})")
+    if skew is None:
+        s.add(UNK, "scarto d'orologio non valutabile")
+    else:
+        try:
+            d = int(float(skew.strip()))
+            if abs(d) <= 5:
+                s.add(OK, f"orologio   allineato col database (scarto {d:+d}s)")
+            else:
+                s.add(BAD, f"orologio   QUESTA macchina è fuori di {abs(d)}s ({d:+d}) rispetto al database "
+                           f"— le scadenze calcolate qui saranno sbagliate; su Windows: Start-Service W32Time; w32tm /resync")
+        except ValueError:
+            s.add(UNK, f"scarto d'orologio: output psql inatteso: {skew!r}")
     return s, live
 
 

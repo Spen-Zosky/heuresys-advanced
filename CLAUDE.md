@@ -68,6 +68,7 @@ All run from repo root unless noted. Use the project's pnpm package manager (pin
 | Seed test admin/personas | `pnpm db:seed-test-admin` |
 | i18n parity check (web) | `pnpm i18n:check` |
 | Typecheck test files separately | `cd apps/api && pnpm typecheck:test` (uses `tsconfig.test.json`) |
+| Storia RTL 36 mesi — custodia / avanzamento | `bash db/scripts/storia36.sh custodia` (regge ancora?) · `... avanzamento` (portala a ieri) · `... custodia --repair-missing`. Il triage a tre esiti e le trappole stanno nella skill `storia36-custodia`; lo stato del programma in `.storia36/PROGRESS.md`. Un timer settimanale la esegue su VM e linux-pc |
 | **Session start (menu + health, ONE round)** | `python docs/kb/tools/session_start.py` — register-driven action menu **+** offline-fast health in one process; `--no-db` (tunnel down), `--show-hold`, `--net` (add CI/PROD/git-fetch probes). This is the canonical boot command |
 | Status dashboard (FULL live health, on demand) | `python docs/kb/tools/status_dashboard.py` (or `pnpm status`) — re-derives git/CI/PROD/DB/backlog/debts/drift live; flags `--no-db` `--no-net` `--md` `--strict`. NOT run at boot (network cost) — the boot view (`session_start.py`) already carries DB/backlog/debts/drift |
 

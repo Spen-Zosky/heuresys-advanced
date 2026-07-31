@@ -28,6 +28,8 @@ import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { IdentityEditor } from "./_components/identity-editor";
+import { RolesEditor } from "./_components/roles-editor";
 
 /* --- formattazione: mai una data ISO o un numero nudo davanti a una persona --- */
 const fmtDate = (v: string | null | undefined): string =>
@@ -302,6 +304,13 @@ export default function UserDetailPage() {
           ])}
         />
       </Section>
+
+      {/* Fin qui la scheda RACCONTA. Da qui si GOVERNA: anagrafica e ruoli
+          sono le due cose che un amministratore deve poter cambiare senza
+          passare dal database (#44). Entrambe si nascondono da sole a chi non
+          ha il permesso — l'autorità resta comunque l'API. */}
+      <IdentityEditor userId={userId} />
+      <RolesEditor userId={userId} />
 
       {/* L'anagrafica tecnica resta, ma in fondo: serve a chi la cerca, non è
           il modo di presentare una persona. */}

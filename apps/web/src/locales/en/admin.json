@@ -218,6 +218,40 @@
           "career": "No career targets."
         },
         "location": "Location"
+      },
+      "edit": {
+        "cardTitle": "Identity — edit",
+        "readOnly": "You do not have permission to edit this identity.",
+        "displayName": "Display name",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "externalCode": "External code",
+        "status": "Status",
+        "type": "Type",
+        "locale": "Locale",
+        "timezone": "Timezone",
+        "save": "Save",
+        "saved": "Saved",
+        "required": "Required field",
+        "saveError": "Save failed.",
+        "forbidden": "You do not have permission to edit these fields."
+      },
+      "roles": {
+        "cardTitle": "Roles",
+        "empty": "No role assigned.",
+        "colRole": "Role",
+        "colScope": "Scope",
+        "colGrantedAt": "Granted on",
+        "scopeTenant": "Tenant",
+        "scopePlatform": "Platform",
+        "grant": "Grant",
+        "grantLabel": "Role to grant",
+        "revoke": "Revoke",
+        "readOnly": "You do not have permission to grant or revoke roles.",
+        "error": "Operation failed.",
+        "forbidden": "You do not have permission to grant or revoke roles.",
+        "duplicate": "This role is already granted."
       }
     }
   },

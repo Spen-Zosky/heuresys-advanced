@@ -218,6 +218,40 @@
           "career": "Nessun obiettivo di carriera."
         },
         "location": "Sede"
+      },
+      "edit": {
+        "cardTitle": "Anagrafica — modifica",
+        "readOnly": "Non hai i permessi per modificare questa anagrafica.",
+        "displayName": "Nome visualizzato",
+        "firstName": "Nome",
+        "lastName": "Cognome",
+        "email": "Email",
+        "externalCode": "Codice esterno",
+        "status": "Stato",
+        "type": "Tipo",
+        "locale": "Lingua",
+        "timezone": "Fuso orario",
+        "save": "Salva",
+        "saved": "Salvato",
+        "required": "Campo obbligatorio",
+        "saveError": "Salvataggio non riuscito.",
+        "forbidden": "Non hai i permessi per modificare questi campi."
+      },
+      "roles": {
+        "cardTitle": "Ruoli",
+        "empty": "Nessun ruolo assegnato.",
+        "colRole": "Ruolo",
+        "colScope": "Ambito",
+        "colGrantedAt": "Assegnato il",
+        "scopeTenant": "Cliente",
+        "scopePlatform": "Piattaforma",
+        "grant": "Assegna",
+        "grantLabel": "Ruolo da assegnare",
+        "revoke": "Revoca",
+        "readOnly": "Non hai i permessi per assegnare o revocare ruoli.",
+        "error": "Operazione non riuscita.",
+        "forbidden": "Non hai i permessi per assegnare o revocare ruoli.",
+        "duplicate": "Questo ruolo è già assegnato."
       }
     }
   },

@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-30T00:04:06Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2692**
+**Generato**: 2026-07-31T12:00:57Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2698**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -12,28 +12,28 @@
 | api-core | 29 |
 | api-module | 324 |
 | ci | 17 |
-| claude-config | 30 |
+| claude-config | 31 |
 | config | 124 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 215 |
+| db-migration | 216 |
 | db-other | 8 |
 | db-script | 42 |
-| db-seed | 146 |
+| db-seed | 147 |
 | doc-canonical | 526 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
 | session | 12 |
 | shared-pkg | 4 |
-| shared-schema | 99 |
+| shared-schema | 100 |
 | showcase-source | 14 |
-| test | 316 |
+| test | 318 |
 | ux-design-archive | 80 |
 | web-source | 209 |
-| **TOTALE** | **2692** |
+| **TOTALE** | **2698** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2134 |
+| live | 2140 |
 
 ## File per categoria
 
@@ -475,6 +475,7 @@
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\model-map.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\planner.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\sweep-prompts.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\storia36-custodia\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\zero-pending-loop\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\zero-pending-loop\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\zero-pending-loop\evals\evals.json` · *live* · git-tracked
@@ -1193,6 +1194,7 @@
 - `D:\heuresys-advanced\db\migrations\000215_restore_sdbi_consolidation_markers.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000216_gdpr_export_actor_references.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000217_succession_horizon_vocabularies.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000218_person_display_name_placeholder.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1381,6 +1383,7 @@
 - `D:\heuresys-advanced\db\seeds\storia36\10_security_privacy.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\storia36\11_platform_config.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\storia36\12_registration_dates.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\storia36\13_avanzamento.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\storia36\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\storia36\repair\2026-07-27_c1_legacy_oneshot.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\storia36\repair\2026-07-27_c1_realign_legacy_to_story.sql` · *live* · git-tracked
@@ -2171,6 +2174,7 @@
 - `D:\heuresys-advanced\packages\shared\src\schemas\time-off.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\training-initiatives.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\user-career-plans.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\packages\shared\src\schemas\user-dossier.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\user-target-positions.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\users.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\visualization-edges.ts` · *live* · git-tracked
@@ -2423,6 +2427,7 @@
 - `D:\heuresys-advanced\apps\api\test\upsert-sql.cw-b49-coalesce-conflict.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\user-career-plans-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\user-career-plans.integration.test.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\user-dossier.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\user-target-positions.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\users.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\visualization-edges.integration.test.ts` · *live* · git-tracked
@@ -2514,6 +2519,7 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\talent-review.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\theme-propagation.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\time-off.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\user-dossier.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\visualizations.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\webauthn.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\whistleblowing.spec.ts` · *live* · git-tracked

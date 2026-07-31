@@ -8,9 +8,65 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
+## Delta S1037 (2026-07-31) — la storia si chiude e impara ad andare avanti da sola, la scheda di una persona smette di essere un elenco di codici
+
+HEAD **`f7de70aa`** (9 commit). Counts ri-derivati: **216 file migration** `000001..000218`
+(gap 000035+000139) = 216 applicate · utenti **163** · posizioni **181** · OU **28** · team **26** ·
+tenant ACTIVE **2** · RBAC **13 ruoli / 204 permessi / 908 mappature** · skill **14041** ·
+moduli API **92** · file di test API **223** · spec E2E **75** · suite API **1524 verdi / 0 rossi** ·
+E2E su build di produzione **93 verdi** · parità i18n **2428 × 2**.
+
+**storia36 CHIUSO — 13 cluster su 13** (#77 e #80). Lo Step 12.6 aveva una precondizione dichiarata
+dal piano («la skill codifica il procedimento ESERCITATO, non quello sperato») che **non era
+soddisfatta**: il modo `avanzamento` non esisteva, falliva esplicito con exit 2. Prima il modo, poi
+la skill.
+
+- **`db/seeds/storia36/13_avanzamento.sql`** — finestra MOBILE, stesse regole e **stesse chiavi
+  naturali** dei cluster di costruzione, così le batterie esistenti coprono da sole le righe nuove
+  (anti-drift AP-01). Ciò che è DERIVATO non viene riscritto: si ri-esegue il seed che possiede la
+  regola (01 per i saldi ferie, 07 per le approvazioni). **Prova reale**: presenze ferme al 24
+  luglio → estese al 30 (624 presenze, 2 richieste di ferie, 1 rinnovo di abilitazione); terza corsa
+  **0 righe**. Guardia provata nei due versi: `--window-end=oggi` → rifiutato, exit 3.
+- **La custodia ha prodotto 4 rossi, tutti triagati**: 2 difetti miei (un episodio nuovo che
+  reclamava giorni già decisi dalla costruzione; un giorno d'aula sorteggiato senza un corso dietro)
+  · 1 lacuna vera dell'avanzamento — i check leggono la **frontiera della storia**, non l'orologio,
+  quindi spostandola un'abilitazione obbligatoria è risultata scaduta e mai rinnovata, **non per un
+  errore ma perché è passato il tempo** · 1 saldo derivato non riallineato.
+- **Check nuovo C12c** — calendario denso e coerente, e festività **calcolate** (Pasqua,
+  Meeus/Butcher, per gli anni che la lista scritta a mano non conosce) che devono **coincidere** con
+  quelle scritte a mano sulla finestra di costruzione. 3 selftest, tutti scattati. Custodia **254
+  selftest**.
+- **Skill `storia36-custodia`** (`.claude/skills/`): solo ciò che ricorre — custodia, avanzamento,
+  triage a tre esiti; la costruzione esclusa. Punta agli strumenti invece di duplicarli; ogni path
+  citato verificato esistente. **Limite dichiarato**: non testata con subagenti sotto pressione.
+
+**#81 CHIUSO — la scheda di una persona.** La nota del register diceva «gli endpoint esistono già»:
+**misurato dal vivo, non era vero** — molti ignorano il filtro per utente e restituiscono l'intera
+popolazione (competenze 14.036, esiti di valutazione 1.560, rischio-uscita 158). Nuovo
+**`GET /v1/users/:userId/dossier`** (11 sezioni) che **riusa** le letture del portale personale
+invece di riscriverle — una sola implementazione per dimensione. Cancello organizzativo ADR-0027: un
+**pari** riceve **404**, non 403 (un 403 confermerebbe che quella persona esiste). 7 test col
+negativo. Pagina ricomposta + i due difetti di Fase 4 su di essa chiusi (date formattate, importi in
+valuta). **Migration `000218`**: il titolo mostrava `IT_ME_FFDEECF5-name`, residuo pre-D-52 sfuggito
+alla bonifica della 000200 (altra famiglia di prefissi).
+
+**Due difetti trovati sbattendoci contro.** (1) **`seed-test-admin.ts` era rimasto indietro rispetto
+a Z-262**: scriveva la password grezza invece di quella derivata per-utente e, con
+`TEST_ADMIN_RESET_PASSWORD=1`, **rompeva il login di tutte le personas** (misurato:
+`verify-derived-login.mjs` → FALLITO; riparato con `db:provision-access --realign`, 159 credenziali).
+Ora la derivazione è una sola implementazione, importata. (2) **L'orologio del PC era indietro di 10
+ore e 21 minuti**: 14 test MFA rossi con una scadenza «precedente» alla creazione — l'applicazione
+gira in locale, il database registra col proprio orologio. La VM aveva ragione (accertato con due
+sorgenti indipendenti). Lasciati due presidi: controllo dello scarto in `status_dashboard.py` e
+attività pianificata sul PC. **Il solo servizio Windows non basta — misurato**: iniettato uno scarto
+di 6 minuti e atteso 3 minuti, non si è corretto; con l'attività pianificata, da −6 min a −1 s.
+
+**Nuovo item #82**: la prova a11y su `/me/inbox` è passata, fallita e poi risultata flaky nella
+stessa mezz'ora a codice invariato.
+
 ## Delta S1036 (2026-07-29/30) — l'audit di merito su tutte le tabelle, e le date che tornano a raccontare la verità
 
-**Stato ri-derivato**: 206 tabelle `sys.*` · 163 utenti · 181 posizioni · 28 OU · 26 team · 2 tenant ACTIVE · RBAC 13 ruoli / 204 permessi / 908 mapping · 14.041 skill · 216 file migration (max `000218`) = 216 applicate · 6 viste strutturali a 0 violazioni · coverage i18n dati 0 gap · HEAD `0766b1f5` · tag `v1.0.0`.
+**Stato ri-derivato**: 206 tabelle `sys.*` · 163 utenti · 181 posizioni · 28 OU · 26 team · 2 tenant ACTIVE · RBAC 13 ruoli / 204 permessi / 908 mapping · 14.041 skill · 216 file migration (max `000218`) = 216 applicate · 6 viste strutturali a 0 violazioni · coverage i18n dati 0 gap · HEAD `f7de70aa` · tag `v1.0.0`.
 
 **#80 storia36 C12 — Step 12.1→12.5b CHIUSI** (restano 12.6 gated + 12.7).
 

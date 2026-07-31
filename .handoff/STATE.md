@@ -1,25 +1,30 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-07-30 (S1036 — l'audit di merito su tutte le tabelle, e le date che tornano a raccontare la verità).
+**Updated**: 2026-07-31 (S1037 — il programma storia36 è chiuso, e la scheda di una persona ha smesso di essere un elenco di codici).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md` · pattern di dati → `docs/kb/DATA_PATTERNS.md`.
 
-## Last session brief (S1036)
+## Last session brief (S1037)
 
-Chiuso il **C12 quasi per intero** (#80). Il filo: **una data di registrazione uguale per tutti è la
-firma del dato caricato in blocco** — otto tabelle registravano fatti di anni diversi col giorno del
-popolamento. Riparato, con due controlli permanenti che lo impediscono. Le riparazioni hanno aperto
-due catene di coerenza (lauree → esperienze antecedenti; lacune invecchiate → azioni mai prese in
-carico), chiuse **portando a coerenza il fatto, mai allargando il controllo**. Un mio difetto di
-misura l'ha smascherato il mio stesso selftest.
+**Storia RTL chiusa, 13 cluster su 13** (#77 + #80). L'ultimo passo aveva una precondizione che
+**non era vera**: il piano diceva di scrivere la procedura di manutenzione solo dopo averla
+esercitata, ma il terzo modo — quello che porta la storia a ieri — non era mai stato costruito.
+Prima il modo, poi la skill. Ed è servito subito: la storia era ferma al 24 luglio.
 
-La **dimostrazione dal vivo** ha trovato ciò che 1.771 prove non vedevano: l'intestazione presentava
-un'amministratrice come «Dipendente». Due **falsi indizi** evitati guardando gli artefatti invece
-del verde (animazione dei contatori, schermata in caricamento).
+Il filo della sessione: **spostare la frontiera in avanti scopre ciò che il tempo rompe da solo**.
+Appena la storia è avanzata, un'abilitazione obbligatoria è risultata scaduta e mai rinnovata —
+nessuno aveva sbagliato, era passato il tempo. I check leggono la frontiera della storia, non
+l'orologio.
 
-Produzione aggiornata; **presidio settimanale provato nei due versi** (verde, e fatto fallire di
-proposito l'allarme è comparso nel registro che prima era vuoto). Avvisi di sicurezza aperti: **0**
-(caso brace-expansion in **D-77**, con la misura del perché non sia chiudibile per versione).
-**Nuova regola di Enzo**: nel deploy la VM va per prima e fino in fondo, poi il linux-pc.
+**#81 chiuso lo stesso giorno in cui la sua nota è stata smentita dalla misura**: diceva «gli
+endpoint esistono già», il sondaggio dal vivo ha mostrato che molti ignoravano il filtro per utente
+e restituivano l'intera popolazione. Una nota non misurata vale quanto un'opinione.
+
+**Due difetti trovati sbattendoci contro**, non cercati: un seeder rimasto indietro rispetto a
+Z-262 che, se rieseguito, **rompeva il login di tutte le personas**; e l'orologio di questo PC
+**indietro di oltre dieci ore**, che ha fatto fallire una manciata di prove con un sintomo
+travestito (una scadenza «precedente» alla propria creazione). Il
+secondo ha lasciato due presidi: un controllo dello scarto nel cruscotto d'avvio e un'attività
+pianificata sul PC (il solo servizio Windows **non basta** — misurato).
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -28,29 +33,26 @@ verifica e review adversarial; le decisioni tecniche sono di Claude.
 
 ## Stato dei piani
 
-- **Storia RTL** (#77): `docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md` — stato vivo in
-  `.storia36/PROGRESS.md`. **C0→C11 chiusi**; del **C12** restano solo 12.6 e 12.7.
+- **Storia RTL** (#77): **CHIUSA**. Il piano si archivia; ciò che resta è ricorrente e vive nella
+  skill `storia36-custodia` + `.storia36/PROGRESS.md`. Presidio settimanale attivo su VM e linux-pc.
 - Zero-pendenze (#76): `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` (`zp_state.py piano`).
 
 ## ⚠ Top priorities (next session)
 
-1. **#81 la scheda di una persona non racconta la persona** — `/users/[id]` mostra solo anagrafica
-   tecnica (identificativi grezzi, fuso, data in formato macchina) e nulla dei 36 mesi. I dati ci
-   sono tutti, è la pagina che non li compone: è quella che si apre davanti a un cliente. Prova
-   visiva in `qa_artifacts/storia36/demo/04-scheda-persona.png`. Effort: ~1-1,5 sessioni.
-2. **#80 chiudere il C12** — resta **12.6** (skill `storia36-custodia`, **gated**: per decisione di
-   Enzo la skill codifica il procedimento *esercitato*, e l'avanzamento mensile non è ancora
-   implementato in `storia36.sh`) + **12.7** (chiusura, `#77` → DONE). Effort: ~0,5-1 sessione più
-   il lavoro dell'avanzamento.
-3. **#79 cancello di esposizione** — continuo, a ogni lavoro che popola tabelle.
-4. **`Z-259` da riprendere** con i rilievi in `.zp/prove/Z-259-verdetti-adversarial.json`.
+1. **#76 zero-pendenze, prossima ondata** — è il piano che assorbe il resto; conta le pendenze con
+   `python docs/kb/tools/zp_state.py piano`, non citando un totale vecchio.
+2. **#9/#10/#11 audit forense 100X** — ~1-2 sessioni (WS-L + triage + gate).
+3. **#82 la prova a11y su `/me/inbox` è instabile** — passata, fallita e poi flaky nella stessa
+   mezz'ora a codice invariato. Una prova instabile insegna a ignorare il rosso: va sistemata.
+   Effort ~1-2h.
+4. **#79 cancello di esposizione** — continuo, a ogni lavoro che popola tabelle.
 
 ## Open questions (autorità *cosa* = Enzo)
 
 - **`admin@heuresys.com`**: account di servizio, derivato, senza posizione. Le sue funzioni dovevano
   passare a `enzo.spenuso@heuresys.com`, che però **non ha alcun accesso**: da decidere se e quando.
-  *(Nota da S1036: l'audit ha rilevato che il suo `user_type` è `STANDARD` come tutti, mentre il
-  vocabolario prevede `SERVICE` — correggerlo tocca login e permessi, va deciso a parte.)*
+  *(Il suo `user_type` è `STANDARD` come tutti, mentre il vocabolario prevede `SERVICE` —
+  correggerlo tocca login e permessi, va deciso a parte.)*
 - WAIT-INPUT invariati: **#4** pricing · **#8** app-password Outlook · **#16** SuccessFactors ·
   **#52** SSO IdP.
 
@@ -59,8 +61,8 @@ verifica e review adversarial; le decisioni tecniche sono di Claude.
 ```bash
 git log origin/main..HEAD --oneline               # 0 dopo il push handoff
 python docs/kb/tools/handoff_lint.py              # OK atteso
-python db/scripts/audit-storia36-semantic.py      # ri-esegue l'audit; 0 tabelle vuote non dichiarate
+python docs/kb/tools/session_start.py             # incluso "orologio allineato col database"
 bash db/scripts/storia36.sh custodia              # "custodia VERDE" atteso
+bash db/scripts/storia36.sh avanzamento           # 0 righe se la storia è già a ieri
 pnpm db:validate                                  # "twice-run idempotency proven" atteso
-cat .storia36/PROGRESS.md                         # C12 = unico cluster non spuntato (12.6/12.7)
 ```

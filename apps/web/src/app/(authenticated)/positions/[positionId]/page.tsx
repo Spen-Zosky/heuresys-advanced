@@ -9,6 +9,7 @@ import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { FieldGrid } from "@/components/detail-panel";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
+import { PositionEditor } from "./_components/position-editor";
 
 interface PositionDetail {
   positionId: string;
@@ -95,6 +96,10 @@ export default function PositionDetailPage() {
           />
         </CardContent>
       </Card>
+
+      {/* Sopra si LEGGE la posizione, qui la si RIDISEGNA: legami scelti per
+          nome da elenchi veri, non incollando identificativi (#44). */}
+      <PositionEditor positionId={positionId} />
     </main>
   );
 }

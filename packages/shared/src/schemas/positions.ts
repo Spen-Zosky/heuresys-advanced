@@ -10,6 +10,9 @@ import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
 export const POSITION_CRITICALITY_VALUES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"] as const;
+/** Esportato come i pari in `users.ts` (UserStatus/UserType): apps/web importa
+ *  TIPI, non valori, e senza questo dovrebbe riscriversi l'unione a mano. */
+export type PositionCriticality = (typeof POSITION_CRITICALITY_VALUES)[number];
 export const PositionCriticalitySchema = z.enum(POSITION_CRITICALITY_VALUES);
 
 export const SKILL_PROFICIENCY_VALUES = [

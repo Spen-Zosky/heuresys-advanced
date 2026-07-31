@@ -510,6 +510,12 @@
       "DISCRIMINATION": "Discrimination",
       "DATA_PRIVACY": "Data privacy",
       "OTHER": "Other"
+    },
+    "positionCriticality": {
+      "CRITICAL": "Critical",
+      "HIGH": "High",
+      "MEDIUM": "Medium",
+      "LOW": "Low"
     }
   }
 }

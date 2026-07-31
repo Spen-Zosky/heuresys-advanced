@@ -385,7 +385,28 @@
         "effectiveFrom": "Effective from",
         "effectiveTo": "Effective to"
       },
-      "dash": "—"
+      "dash": "—",
+      "edit": {
+        "cardTitle": "Position — edit",
+        "readOnly": "You do not have permission to edit this position.",
+        "title": "Title",
+        "orgUnit": "Organization unit",
+        "jobRole": "Job role",
+        "reportsTo": "Reports to",
+        "owner": "Owner",
+        "criticality": "Criticality",
+        "economicWeight": "Economic weight (0-1)",
+        "effectiveFrom": "Effective from",
+        "effectiveTo": "Effective to",
+        "isActive": "Active position",
+        "none": "— none —",
+        "save": "Save",
+        "saved": "Saved",
+        "required": "Required field",
+        "saveError": "Save failed.",
+        "forbidden": "You do not have permission to edit this position.",
+        "conflict": "Change conflicts with the current state of the position."
+      }
     },
     "kpis": {
       "title": "Required KPIs",

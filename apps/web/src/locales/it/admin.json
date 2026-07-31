@@ -385,7 +385,28 @@
         "effectiveFrom": "In vigore dal",
         "effectiveTo": "In vigore al"
       },
-      "dash": "—"
+      "dash": "—",
+      "edit": {
+        "cardTitle": "Posizione — modifica",
+        "readOnly": "Non hai i permessi per modificare questa posizione.",
+        "title": "Titolo",
+        "orgUnit": "Unità organizzativa",
+        "jobRole": "Ruolo professionale",
+        "reportsTo": "Riporta a",
+        "owner": "Titolare",
+        "criticality": "Criticità",
+        "economicWeight": "Peso economico (0-1)",
+        "effectiveFrom": "In vigore dal",
+        "effectiveTo": "In vigore fino al",
+        "isActive": "Posizione attiva",
+        "none": "— nessuno —",
+        "save": "Salva",
+        "saved": "Salvato",
+        "required": "Campo obbligatorio",
+        "saveError": "Salvataggio non riuscito.",
+        "forbidden": "Non hai i permessi per modificare questa posizione.",
+        "conflict": "Modifica in conflitto con lo stato attuale della posizione."
+      }
     },
     "kpis": {
       "title": "KPI richiesti",

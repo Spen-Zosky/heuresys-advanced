@@ -11,9 +11,21 @@
  * (vitest.config.ts) così nessun file gira due volte.
  */
 
+import { fileURLToPath } from "node:url";
+
 import { defineConfig } from "vitest/config";
 
+// Stessa ragione (e stessa cautela) della config integration: alias esplicito ai
+// sorgenti di @heuresys/shared, mai export conditions — vedi vitest.config.ts (D-76).
+const sharedSrc = fileURLToPath(new URL("../../packages/shared/src/", import.meta.url));
+
 export default defineConfig({
+  resolve: {
+    alias: [
+      { find: /^@heuresys\/shared$/, replacement: `${sharedSrc}index.ts` },
+      { find: /^@heuresys\/shared\/(.*)$/, replacement: `${sharedSrc}$1.ts` },
+    ],
+  },
   test: {
     include: ["test/unit/**/*.unit.test.ts"],
     environment: "node",

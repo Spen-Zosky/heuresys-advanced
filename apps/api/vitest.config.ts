@@ -5,9 +5,26 @@
  * uses. To run only fast unit tests, filter by name pattern.
  */
 
+import { fileURLToPath } from "node:url";
+
 import { defineConfig } from "vitest/config";
 
+// @heuresys/shared è "source-first": il bundle di produzione (tsup) lo compila dai
+// sorgenti tramite la condition custom "heuresys-source" (D-76), quindi anche i test
+// devono esercitare i SORGENTI — non un ./dist/*.js che potrebbe essere stantio.
+// Si usa un alias esplicito e NON le export conditions: `resolve.conditions` non basta
+// (i pacchetti esterni li risolve il layer ssr) e sovrascrivere `ssr.resolve.conditions`
+// rompe la risoluzione delle dipendenze esterne — misurato: @opentelemetry/api finiva
+// sulla propria build ESM con import senza estensione e 175 file di test andavano rossi.
+const sharedSrc = fileURLToPath(new URL("../../packages/shared/src/", import.meta.url));
+
 export default defineConfig({
+  resolve: {
+    alias: [
+      { find: /^@heuresys\/shared$/, replacement: `${sharedSrc}index.ts` },
+      { find: /^@heuresys\/shared\/(.*)$/, replacement: `${sharedSrc}$1.ts` },
+    ],
+  },
   test: {
     include: ["test/**/*.test.ts"],
     // D-64: gli unit test (test/unit/*.unit.test.ts) hanno la loro config

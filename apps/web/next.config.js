@@ -2,7 +2,11 @@
 module.exports = {
   reactStrictMode: true,
   // @heuresys/shared is consumed as its compiled dist (exports default -> ./dist/*.js)
-  // so Turbopack resolves real .js files (D-58). Only @heuresys/ui still needs transpiling.
+  // so Turbopack resolves real .js files (D-58). The source-first branch of those exports
+  // is gated behind the CUSTOM "heuresys-source" condition, which no bundler applies on
+  // its own — only apps/api opts in explicitly (tsx + tsup). Using the standard
+  // "development" name made `next dev` silently pick the .ts sources and fail on their
+  // NodeNext ".js" specifiers (D-76). Only @heuresys/ui still needs transpiling.
   transpilePackages: ["@heuresys/ui"],
   experimental: {
     optimizePackageImports: ["lucide-react", "@heuresys/ui"],

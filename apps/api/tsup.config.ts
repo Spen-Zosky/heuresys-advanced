@@ -34,11 +34,14 @@ export default defineConfig({
     js: "import { createRequire as __cr } from 'module'; const require = __cr(import.meta.url);",
   },
   // @heuresys/shared is bundled from its TS source (noExternal above). Activate the
-  // "development" export condition so esbuild resolves the workspace package to ./src/*.ts
-  // (the same path tsx uses in dev) instead of ./dist/*.js. Keeps the prod API bundle
-  // source-first and independent of a prebuilt shared/dist — D-58's conditional exports
-  // (default -> ./dist/*.js) are consumed ONLY by the Next.js web build (Turbopack).
+  // "heuresys-source" export condition so esbuild resolves the workspace package to
+  // ./src/*.ts (the same path tsx uses in dev) instead of ./dist/*.js. Keeps the prod API
+  // bundle source-first and independent of a prebuilt shared/dist — D-58's conditional
+  // exports (default -> ./dist/*.js) are consumed ONLY by the Next.js web build.
+  // The condition is deliberately CUSTOM, not the standard "development": bundlers apply
+  // that one on their own, so `next dev` used to pick the .ts sources and choke on their
+  // NodeNext ".js" specifiers (D-76). Source-first is opt-in, never automatic.
   esbuildOptions(options) {
-    options.conditions = ["development"];
+    options.conditions = ["heuresys-source"];
   },
 });

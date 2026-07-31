@@ -9,507 +9,507 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "development": "./src/index.ts",
+      "heuresys-source": "./src/index.ts",
       "default": "./dist/index.js"
     },
     "./schemas/_pagination": {
       "types": "./dist/schemas/_pagination.d.ts",
-      "development": "./src/schemas/_pagination.ts",
+      "heuresys-source": "./src/schemas/_pagination.ts",
       "default": "./dist/schemas/_pagination.js"
     },
     "./schemas/auth": {
       "types": "./dist/schemas/auth.d.ts",
-      "development": "./src/schemas/auth.ts",
+      "heuresys-source": "./src/schemas/auth.ts",
       "default": "./dist/schemas/auth.js"
     },
     "./schemas/mfa": {
       "types": "./dist/schemas/mfa.d.ts",
-      "development": "./src/schemas/mfa.ts",
+      "heuresys-source": "./src/schemas/mfa.ts",
       "default": "./dist/schemas/mfa.js"
     },
     "./schemas/mfa-policy": {
       "types": "./dist/schemas/mfa-policy.d.ts",
-      "development": "./src/schemas/mfa-policy.ts",
+      "heuresys-source": "./src/schemas/mfa-policy.ts",
       "default": "./dist/schemas/mfa-policy.js"
     },
     "./schemas/role-codes": {
       "types": "./dist/schemas/role-codes.d.ts",
-      "development": "./src/schemas/role-codes.ts",
+      "heuresys-source": "./src/schemas/role-codes.ts",
       "default": "./dist/schemas/role-codes.js"
     },
     "./schemas/tenants": {
       "types": "./dist/schemas/tenants.d.ts",
-      "development": "./src/schemas/tenants.ts",
+      "heuresys-source": "./src/schemas/tenants.ts",
       "default": "./dist/schemas/tenants.js"
     },
     "./schemas/provisioning": {
       "types": "./dist/schemas/provisioning.d.ts",
-      "development": "./src/schemas/provisioning.ts",
+      "heuresys-source": "./src/schemas/provisioning.ts",
       "default": "./dist/schemas/provisioning.js"
     },
     "./schemas/gdpr": {
       "types": "./dist/schemas/gdpr.d.ts",
-      "development": "./src/schemas/gdpr.ts",
+      "heuresys-source": "./src/schemas/gdpr.ts",
       "default": "./dist/schemas/gdpr.js"
     },
     "./schemas/tenant-materialization": {
       "types": "./dist/schemas/tenant-materialization.d.ts",
-      "development": "./src/schemas/tenant-materialization.ts",
+      "heuresys-source": "./src/schemas/tenant-materialization.ts",
       "default": "./dist/schemas/tenant-materialization.js"
     },
     "./schemas/users": {
       "types": "./dist/schemas/users.d.ts",
-      "development": "./src/schemas/users.ts",
+      "heuresys-source": "./src/schemas/users.ts",
       "default": "./dist/schemas/users.js"
     },
     "./schemas/user-dossier": {
       "types": "./dist/schemas/user-dossier.d.ts",
-      "development": "./src/schemas/user-dossier.ts",
+      "heuresys-source": "./src/schemas/user-dossier.ts",
       "default": "./dist/schemas/user-dossier.js"
     },
     "./schemas/positions": {
       "types": "./dist/schemas/positions.d.ts",
-      "development": "./src/schemas/positions.ts",
+      "heuresys-source": "./src/schemas/positions.ts",
       "default": "./dist/schemas/positions.js"
     },
     "./schemas/organization-units": {
       "types": "./dist/schemas/organization-units.d.ts",
-      "development": "./src/schemas/organization-units.ts",
+      "heuresys-source": "./src/schemas/organization-units.ts",
       "default": "./dist/schemas/organization-units.js"
     },
     "./schemas/teams": {
       "types": "./dist/schemas/teams.d.ts",
-      "development": "./src/schemas/teams.ts",
+      "heuresys-source": "./src/schemas/teams.ts",
       "default": "./dist/schemas/teams.js"
     },
     "./schemas/skills": {
       "types": "./dist/schemas/skills.d.ts",
-      "development": "./src/schemas/skills.ts",
+      "heuresys-source": "./src/schemas/skills.ts",
       "default": "./dist/schemas/skills.js"
     },
     "./schemas/kpi-definitions": {
       "types": "./dist/schemas/kpi-definitions.d.ts",
-      "development": "./src/schemas/kpi-definitions.ts",
+      "heuresys-source": "./src/schemas/kpi-definitions.ts",
       "default": "./dist/schemas/kpi-definitions.js"
     },
     "./schemas/job-families": {
       "types": "./dist/schemas/job-families.d.ts",
-      "development": "./src/schemas/job-families.ts",
+      "heuresys-source": "./src/schemas/job-families.ts",
       "default": "./dist/schemas/job-families.js"
     },
     "./schemas/job-roles": {
       "types": "./dist/schemas/job-roles.d.ts",
-      "development": "./src/schemas/job-roles.ts",
+      "heuresys-source": "./src/schemas/job-roles.ts",
       "default": "./dist/schemas/job-roles.js"
     },
     "./schemas/leads": {
       "types": "./dist/schemas/leads.d.ts",
-      "development": "./src/schemas/leads.ts",
+      "heuresys-source": "./src/schemas/leads.ts",
       "default": "./dist/schemas/leads.js"
     },
     "./schemas/public-stats": {
       "types": "./dist/schemas/public-stats.d.ts",
-      "development": "./src/schemas/public-stats.ts",
+      "heuresys-source": "./src/schemas/public-stats.ts",
       "default": "./dist/schemas/public-stats.js"
     },
     "./schemas/learning-modules": {
       "types": "./dist/schemas/learning-modules.d.ts",
-      "development": "./src/schemas/learning-modules.ts",
+      "heuresys-source": "./src/schemas/learning-modules.ts",
       "default": "./dist/schemas/learning-modules.js"
     },
     "./schemas/skill-families": {
       "types": "./dist/schemas/skill-families.d.ts",
-      "development": "./src/schemas/skill-families.ts",
+      "heuresys-source": "./src/schemas/skill-families.ts",
       "default": "./dist/schemas/skill-families.js"
     },
     "./schemas/skill-categories": {
       "types": "./dist/schemas/skill-categories.d.ts",
-      "development": "./src/schemas/skill-categories.ts",
+      "heuresys-source": "./src/schemas/skill-categories.ts",
       "default": "./dist/schemas/skill-categories.js"
     },
     "./schemas/skill-taxonomy-edges": {
       "types": "./dist/schemas/skill-taxonomy-edges.d.ts",
-      "development": "./src/schemas/skill-taxonomy-edges.ts",
+      "heuresys-source": "./src/schemas/skill-taxonomy-edges.ts",
       "default": "./dist/schemas/skill-taxonomy-edges.js"
     },
     "./schemas/skill-aliases": {
       "types": "./dist/schemas/skill-aliases.d.ts",
-      "development": "./src/schemas/skill-aliases.ts",
+      "heuresys-source": "./src/schemas/skill-aliases.ts",
       "default": "./dist/schemas/skill-aliases.js"
     },
     "./schemas/skill-proficiency-levels": {
       "types": "./dist/schemas/skill-proficiency-levels.d.ts",
-      "development": "./src/schemas/skill-proficiency-levels.ts",
+      "heuresys-source": "./src/schemas/skill-proficiency-levels.ts",
       "default": "./dist/schemas/skill-proficiency-levels.js"
     },
     "./schemas/training-initiatives": {
       "types": "./dist/schemas/training-initiatives.d.ts",
-      "development": "./src/schemas/training-initiatives.ts",
+      "heuresys-source": "./src/schemas/training-initiatives.ts",
       "default": "./dist/schemas/training-initiatives.js"
     },
     "./schemas/assessment-methods": {
       "types": "./dist/schemas/assessment-methods.d.ts",
-      "development": "./src/schemas/assessment-methods.ts",
+      "heuresys-source": "./src/schemas/assessment-methods.ts",
       "default": "./dist/schemas/assessment-methods.js"
     },
     "./schemas/assessments": {
       "types": "./dist/schemas/assessments.d.ts",
-      "development": "./src/schemas/assessments.ts",
+      "heuresys-source": "./src/schemas/assessments.ts",
       "default": "./dist/schemas/assessments.js"
     },
     "./schemas/assessment-results": {
       "types": "./dist/schemas/assessment-results.d.ts",
-      "development": "./src/schemas/assessment-results.ts",
+      "heuresys-source": "./src/schemas/assessment-results.ts",
       "default": "./dist/schemas/assessment-results.js"
     },
     "./schemas/learning-paths": {
       "types": "./dist/schemas/learning-paths.d.ts",
-      "development": "./src/schemas/learning-paths.ts",
+      "heuresys-source": "./src/schemas/learning-paths.ts",
       "default": "./dist/schemas/learning-paths.js"
     },
     "./schemas/learning-path-steps": {
       "types": "./dist/schemas/learning-path-steps.d.ts",
-      "development": "./src/schemas/learning-path-steps.ts",
+      "heuresys-source": "./src/schemas/learning-path-steps.ts",
       "default": "./dist/schemas/learning-path-steps.js"
     },
     "./schemas/learning-gaps": {
       "types": "./dist/schemas/learning-gaps.d.ts",
-      "development": "./src/schemas/learning-gaps.ts",
+      "heuresys-source": "./src/schemas/learning-gaps.ts",
       "default": "./dist/schemas/learning-gaps.js"
     },
     "./schemas/career-paths": {
       "types": "./dist/schemas/career-paths.d.ts",
-      "development": "./src/schemas/career-paths.ts",
+      "heuresys-source": "./src/schemas/career-paths.ts",
       "default": "./dist/schemas/career-paths.js"
     },
     "./schemas/career-path-steps": {
       "types": "./dist/schemas/career-path-steps.d.ts",
-      "development": "./src/schemas/career-path-steps.ts",
+      "heuresys-source": "./src/schemas/career-path-steps.ts",
       "default": "./dist/schemas/career-path-steps.js"
     },
     "./schemas/user-career-plans": {
       "types": "./dist/schemas/user-career-plans.d.ts",
-      "development": "./src/schemas/user-career-plans.ts",
+      "heuresys-source": "./src/schemas/user-career-plans.ts",
       "default": "./dist/schemas/user-career-plans.js"
     },
     "./schemas/user-target-positions": {
       "types": "./dist/schemas/user-target-positions.d.ts",
-      "development": "./src/schemas/user-target-positions.ts",
+      "heuresys-source": "./src/schemas/user-target-positions.ts",
       "default": "./dist/schemas/user-target-positions.js"
     },
     "./schemas/organization-unit-history": {
       "types": "./dist/schemas/organization-unit-history.d.ts",
-      "development": "./src/schemas/organization-unit-history.ts",
+      "heuresys-source": "./src/schemas/organization-unit-history.ts",
       "default": "./dist/schemas/organization-unit-history.js"
     },
     "./schemas/succession-pools": {
       "types": "./dist/schemas/succession-pools.d.ts",
-      "development": "./src/schemas/succession-pools.ts",
+      "heuresys-source": "./src/schemas/succession-pools.ts",
       "default": "./dist/schemas/succession-pools.js"
     },
     "./schemas/successor-candidates": {
       "types": "./dist/schemas/successor-candidates.d.ts",
-      "development": "./src/schemas/successor-candidates.ts",
+      "heuresys-source": "./src/schemas/successor-candidates.ts",
       "default": "./dist/schemas/successor-candidates.js"
     },
     "./schemas/successor-readiness": {
       "types": "./dist/schemas/successor-readiness.d.ts",
-      "development": "./src/schemas/successor-readiness.ts",
+      "heuresys-source": "./src/schemas/successor-readiness.ts",
       "default": "./dist/schemas/successor-readiness.js"
     },
     "./schemas/position-career-paths": {
       "types": "./dist/schemas/position-career-paths.d.ts",
-      "development": "./src/schemas/position-career-paths.ts",
+      "heuresys-source": "./src/schemas/position-career-paths.ts",
       "default": "./dist/schemas/position-career-paths.js"
     },
     "./schemas/position-succession-relevance": {
       "types": "./dist/schemas/position-succession-relevance.d.ts",
-      "development": "./src/schemas/position-succession-relevance.ts",
+      "heuresys-source": "./src/schemas/position-succession-relevance.ts",
       "default": "./dist/schemas/position-succession-relevance.js"
     },
     "./schemas/visualization-graphs": {
       "types": "./dist/schemas/visualization-graphs.d.ts",
-      "development": "./src/schemas/visualization-graphs.ts",
+      "heuresys-source": "./src/schemas/visualization-graphs.ts",
       "default": "./dist/schemas/visualization-graphs.js"
     },
     "./schemas/visualization-nodes": {
       "types": "./dist/schemas/visualization-nodes.d.ts",
-      "development": "./src/schemas/visualization-nodes.ts",
+      "heuresys-source": "./src/schemas/visualization-nodes.ts",
       "default": "./dist/schemas/visualization-nodes.js"
     },
     "./schemas/visualization-edges": {
       "types": "./dist/schemas/visualization-edges.d.ts",
-      "development": "./src/schemas/visualization-edges.ts",
+      "heuresys-source": "./src/schemas/visualization-edges.ts",
       "default": "./dist/schemas/visualization-edges.js"
     },
     "./schemas/visualization-layouts": {
       "types": "./dist/schemas/visualization-layouts.d.ts",
-      "development": "./src/schemas/visualization-layouts.ts",
+      "heuresys-source": "./src/schemas/visualization-layouts.ts",
       "default": "./dist/schemas/visualization-layouts.js"
     },
     "./schemas/visualization-node-layouts": {
       "types": "./dist/schemas/visualization-node-layouts.d.ts",
-      "development": "./src/schemas/visualization-node-layouts.ts",
+      "heuresys-source": "./src/schemas/visualization-node-layouts.ts",
       "default": "./dist/schemas/visualization-node-layouts.js"
     },
     "./schemas/visualization-styles": {
       "types": "./dist/schemas/visualization-styles.d.ts",
-      "development": "./src/schemas/visualization-styles.ts",
+      "heuresys-source": "./src/schemas/visualization-styles.ts",
       "default": "./dist/schemas/visualization-styles.js"
     },
     "./schemas/visualization-exports": {
       "types": "./dist/schemas/visualization-exports.d.ts",
-      "development": "./src/schemas/visualization-exports.ts",
+      "heuresys-source": "./src/schemas/visualization-exports.ts",
       "default": "./dist/schemas/visualization-exports.js"
     },
     "./schemas/activity-classifications": {
       "types": "./dist/schemas/activity-classifications.d.ts",
-      "development": "./src/schemas/activity-classifications.ts",
+      "heuresys-source": "./src/schemas/activity-classifications.ts",
       "default": "./dist/schemas/activity-classifications.js"
     },
     "./schemas/activity-classification-mappings": {
       "types": "./dist/schemas/activity-classification-mappings.d.ts",
-      "development": "./src/schemas/activity-classification-mappings.ts",
+      "heuresys-source": "./src/schemas/activity-classification-mappings.ts",
       "default": "./dist/schemas/activity-classification-mappings.js"
     },
     "./schemas/occupation-classifications": {
       "types": "./dist/schemas/occupation-classifications.d.ts",
-      "development": "./src/schemas/occupation-classifications.ts",
+      "heuresys-source": "./src/schemas/occupation-classifications.ts",
       "default": "./dist/schemas/occupation-classifications.js"
     },
     "./schemas/enterprise-size-bands": {
       "types": "./dist/schemas/enterprise-size-bands.d.ts",
-      "development": "./src/schemas/enterprise-size-bands.ts",
+      "heuresys-source": "./src/schemas/enterprise-size-bands.ts",
       "default": "./dist/schemas/enterprise-size-bands.js"
     },
     "./schemas/operating-models": {
       "types": "./dist/schemas/operating-models.d.ts",
-      "development": "./src/schemas/operating-models.ts",
+      "heuresys-source": "./src/schemas/operating-models.ts",
       "default": "./dist/schemas/operating-models.js"
     },
     "./schemas/enterprise-typing-profiles": {
       "types": "./dist/schemas/enterprise-typing-profiles.d.ts",
-      "development": "./src/schemas/enterprise-typing-profiles.ts",
+      "heuresys-source": "./src/schemas/enterprise-typing-profiles.ts",
       "default": "./dist/schemas/enterprise-typing-profiles.js"
     },
     "./schemas/blueprint-families": {
       "types": "./dist/schemas/blueprint-families.d.ts",
-      "development": "./src/schemas/blueprint-families.ts",
+      "heuresys-source": "./src/schemas/blueprint-families.ts",
       "default": "./dist/schemas/blueprint-families.js"
     },
     "./schemas/blueprint-variants": {
       "types": "./dist/schemas/blueprint-variants.d.ts",
-      "development": "./src/schemas/blueprint-variants.ts",
+      "heuresys-source": "./src/schemas/blueprint-variants.ts",
       "default": "./dist/schemas/blueprint-variants.js"
     },
     "./schemas/blueprint-processes": {
       "types": "./dist/schemas/blueprint-processes.d.ts",
-      "development": "./src/schemas/blueprint-processes.ts",
+      "heuresys-source": "./src/schemas/blueprint-processes.ts",
       "default": "./dist/schemas/blueprint-processes.js"
     },
     "./schemas/blueprint-activations": {
       "types": "./dist/schemas/blueprint-activations.d.ts",
-      "development": "./src/schemas/blueprint-activations.ts",
+      "heuresys-source": "./src/schemas/blueprint-activations.ts",
       "default": "./dist/schemas/blueprint-activations.js"
     },
     "./schemas/blueprint-overrides": {
       "types": "./dist/schemas/blueprint-overrides.d.ts",
-      "development": "./src/schemas/blueprint-overrides.ts",
+      "heuresys-source": "./src/schemas/blueprint-overrides.ts",
       "default": "./dist/schemas/blueprint-overrides.js"
     },
     "./schemas/process-kpi-templates": {
       "types": "./dist/schemas/process-kpi-templates.d.ts",
-      "development": "./src/schemas/process-kpi-templates.ts",
+      "heuresys-source": "./src/schemas/process-kpi-templates.ts",
       "default": "./dist/schemas/process-kpi-templates.js"
     },
     "./schemas/organization-unit-kpi-templates": {
       "types": "./dist/schemas/organization-unit-kpi-templates.d.ts",
-      "development": "./src/schemas/organization-unit-kpi-templates.ts",
+      "heuresys-source": "./src/schemas/organization-unit-kpi-templates.ts",
       "default": "./dist/schemas/organization-unit-kpi-templates.js"
     },
     "./schemas/brownfield-source-exports": {
       "types": "./dist/schemas/brownfield-source-exports.d.ts",
-      "development": "./src/schemas/brownfield-source-exports.ts",
+      "heuresys-source": "./src/schemas/brownfield-source-exports.ts",
       "default": "./dist/schemas/brownfield-source-exports.js"
     },
     "./schemas/brownfield-import-runs": {
       "types": "./dist/schemas/brownfield-import-runs.d.ts",
-      "development": "./src/schemas/brownfield-import-runs.ts",
+      "heuresys-source": "./src/schemas/brownfield-import-runs.ts",
       "default": "./dist/schemas/brownfield-import-runs.js"
     },
     "./schemas/brownfield-table-mappings": {
       "types": "./dist/schemas/brownfield-table-mappings.d.ts",
-      "development": "./src/schemas/brownfield-table-mappings.ts",
+      "heuresys-source": "./src/schemas/brownfield-table-mappings.ts",
       "default": "./dist/schemas/brownfield-table-mappings.js"
     },
     "./schemas/brownfield-wave-executor": {
       "types": "./dist/schemas/brownfield-wave-executor.d.ts",
-      "development": "./src/schemas/brownfield-wave-executor.ts",
+      "heuresys-source": "./src/schemas/brownfield-wave-executor.ts",
       "default": "./dist/schemas/brownfield-wave-executor.js"
     },
     "./schemas/seed-acquisition-runs": {
       "types": "./dist/schemas/seed-acquisition-runs.d.ts",
-      "development": "./src/schemas/seed-acquisition-runs.ts",
+      "heuresys-source": "./src/schemas/seed-acquisition-runs.ts",
       "default": "./dist/schemas/seed-acquisition-runs.js"
     },
     "./schemas/seed-candidate-records": {
       "types": "./dist/schemas/seed-candidate-records.d.ts",
-      "development": "./src/schemas/seed-candidate-records.ts",
+      "heuresys-source": "./src/schemas/seed-candidate-records.ts",
       "default": "./dist/schemas/seed-candidate-records.js"
     },
     "./schemas/seed-approval-decisions": {
       "types": "./dist/schemas/seed-approval-decisions.d.ts",
-      "development": "./src/schemas/seed-approval-decisions.ts",
+      "heuresys-source": "./src/schemas/seed-approval-decisions.ts",
       "default": "./dist/schemas/seed-approval-decisions.js"
     },
     "./schemas/me": {
       "types": "./dist/schemas/me.d.ts",
-      "development": "./src/schemas/me.ts",
+      "heuresys-source": "./src/schemas/me.ts",
       "default": "./dist/schemas/me.js"
     },
     "./schemas/me-preferences": {
       "types": "./dist/schemas/me-preferences.d.ts",
-      "development": "./src/schemas/me-preferences.ts",
+      "heuresys-source": "./src/schemas/me-preferences.ts",
       "default": "./dist/schemas/me-preferences.js"
     },
     "./schemas/compensation": {
       "types": "./dist/schemas/compensation.d.ts",
-      "development": "./src/schemas/compensation.ts",
+      "heuresys-source": "./src/schemas/compensation.ts",
       "default": "./dist/schemas/compensation.js"
     },
     "./schemas/compensation-read": {
       "types": "./dist/schemas/compensation-read.d.ts",
-      "development": "./src/schemas/compensation-read.ts",
+      "heuresys-source": "./src/schemas/compensation-read.ts",
       "default": "./dist/schemas/compensation-read.js"
     },
     "./schemas/dashboard": {
       "types": "./dist/schemas/dashboard.d.ts",
-      "development": "./src/schemas/dashboard.ts",
+      "heuresys-source": "./src/schemas/dashboard.ts",
       "default": "./dist/schemas/dashboard.js"
     },
     "./schemas/analytics": {
       "types": "./dist/schemas/analytics.d.ts",
-      "development": "./src/schemas/analytics.ts",
+      "heuresys-source": "./src/schemas/analytics.ts",
       "default": "./dist/schemas/analytics.js"
     },
     "./schemas/notifications": {
       "types": "./dist/schemas/notifications.d.ts",
-      "development": "./src/schemas/notifications.ts",
+      "heuresys-source": "./src/schemas/notifications.ts",
       "default": "./dist/schemas/notifications.js"
     },
     "./schemas/approvals": {
       "types": "./dist/schemas/approvals.d.ts",
-      "development": "./src/schemas/approvals.ts",
+      "heuresys-source": "./src/schemas/approvals.ts",
       "default": "./dist/schemas/approvals.js"
     },
     "./schemas/observability": {
       "types": "./dist/schemas/observability.d.ts",
-      "development": "./src/schemas/observability.ts",
+      "heuresys-source": "./src/schemas/observability.ts",
       "default": "./dist/schemas/observability.js"
     },
     "./schemas/mentorship": {
       "types": "./dist/schemas/mentorship.d.ts",
-      "development": "./src/schemas/mentorship.ts",
+      "heuresys-source": "./src/schemas/mentorship.ts",
       "default": "./dist/schemas/mentorship.js"
     },
     "./schemas/surveys": {
       "types": "./dist/schemas/surveys.d.ts",
-      "development": "./src/schemas/surveys.ts",
+      "heuresys-source": "./src/schemas/surveys.ts",
       "default": "./dist/schemas/surveys.js"
     },
     "./schemas/engagement": {
       "types": "./dist/schemas/engagement.d.ts",
-      "development": "./src/schemas/engagement.ts",
+      "heuresys-source": "./src/schemas/engagement.ts",
       "default": "./dist/schemas/engagement.js"
     },
     "./schemas/engagement-feedback": {
       "types": "./dist/schemas/engagement-feedback.d.ts",
-      "development": "./src/schemas/engagement-feedback.ts",
+      "heuresys-source": "./src/schemas/engagement-feedback.ts",
       "default": "./dist/schemas/engagement-feedback.js"
     },
     "./schemas/goals": {
       "types": "./dist/schemas/goals.d.ts",
-      "development": "./src/schemas/goals.ts",
+      "heuresys-source": "./src/schemas/goals.ts",
       "default": "./dist/schemas/goals.js"
     },
     "./schemas/provenance": {
       "types": "./dist/schemas/provenance.d.ts",
-      "development": "./src/schemas/provenance.ts",
+      "heuresys-source": "./src/schemas/provenance.ts",
       "default": "./dist/schemas/provenance.js"
     },
     "./schemas/evidence": {
       "types": "./dist/schemas/evidence.d.ts",
-      "development": "./src/schemas/evidence.ts",
+      "heuresys-source": "./src/schemas/evidence.ts",
       "default": "./dist/schemas/evidence.js"
     },
     "./schemas/time-off": {
       "types": "./dist/schemas/time-off.d.ts",
-      "development": "./src/schemas/time-off.ts",
+      "heuresys-source": "./src/schemas/time-off.ts",
       "default": "./dist/schemas/time-off.js"
     },
     "./schemas/talent-review": {
       "types": "./dist/schemas/talent-review.d.ts",
-      "development": "./src/schemas/talent-review.ts",
+      "heuresys-source": "./src/schemas/talent-review.ts",
       "default": "./dist/schemas/talent-review.js"
     },
     "./schemas/okrs": {
       "types": "./dist/schemas/okrs.d.ts",
-      "development": "./src/schemas/okrs.ts",
+      "heuresys-source": "./src/schemas/okrs.ts",
       "default": "./dist/schemas/okrs.js"
     },
     "./schemas/predictions": {
       "types": "./dist/schemas/predictions.d.ts",
-      "development": "./src/schemas/predictions.ts",
+      "heuresys-source": "./src/schemas/predictions.ts",
       "default": "./dist/schemas/predictions.js"
     },
     "./schemas/semantic-matching": {
       "types": "./dist/schemas/semantic-matching.d.ts",
-      "development": "./src/schemas/semantic-matching.ts",
+      "heuresys-source": "./src/schemas/semantic-matching.ts",
       "default": "./dist/schemas/semantic-matching.js"
     },
     "./schemas/insights": {
       "types": "./dist/schemas/insights.d.ts",
-      "development": "./src/schemas/insights.ts",
+      "heuresys-source": "./src/schemas/insights.ts",
       "default": "./dist/schemas/insights.js"
     },
     "./schemas/capability-composition": {
       "types": "./dist/schemas/capability-composition.d.ts",
-      "development": "./src/schemas/capability-composition.ts",
+      "heuresys-source": "./src/schemas/capability-composition.ts",
       "default": "./dist/schemas/capability-composition.js"
     },
     "./schemas/capability-maturity": {
       "types": "./dist/schemas/capability-maturity.d.ts",
-      "development": "./src/schemas/capability-maturity.ts",
+      "heuresys-source": "./src/schemas/capability-maturity.ts",
       "default": "./dist/schemas/capability-maturity.js"
     },
     "./schemas/essential-capability": {
       "types": "./dist/schemas/essential-capability.d.ts",
-      "development": "./src/schemas/essential-capability.ts",
+      "heuresys-source": "./src/schemas/essential-capability.ts",
       "default": "./dist/schemas/essential-capability.js"
     },
     "./schemas/whistleblowing": {
       "types": "./dist/schemas/whistleblowing.d.ts",
-      "development": "./src/schemas/whistleblowing.ts",
+      "heuresys-source": "./src/schemas/whistleblowing.ts",
       "default": "./dist/schemas/whistleblowing.js"
     },
     "./schemas/reference-sync": {
       "types": "./dist/schemas/reference-sync.d.ts",
-      "development": "./src/schemas/reference-sync.ts",
+      "heuresys-source": "./src/schemas/reference-sync.ts",
       "default": "./dist/schemas/reference-sync.js"
     },
     "./schemas/content": {
       "types": "./dist/schemas/content.d.ts",
-      "development": "./src/schemas/content.ts",
+      "heuresys-source": "./src/schemas/content.ts",
       "default": "./dist/schemas/content.js"
     },
     "./schemas/content-blueprint-links": {
       "types": "./dist/schemas/content-blueprint-links.d.ts",
-      "development": "./src/schemas/content-blueprint-links.ts",
+      "heuresys-source": "./src/schemas/content-blueprint-links.ts",
       "default": "./dist/schemas/content-blueprint-links.js"
     },
     "./schemas/organization-unit-processes": {
       "types": "./dist/schemas/organization-unit-processes.d.ts",
-      "development": "./src/schemas/organization-unit-processes.ts",
+      "heuresys-source": "./src/schemas/organization-unit-processes.ts",
       "default": "./dist/schemas/organization-unit-processes.js"
     }
   },

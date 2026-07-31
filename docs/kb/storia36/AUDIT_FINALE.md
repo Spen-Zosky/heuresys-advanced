@@ -2,6 +2,29 @@
 
 > Generato da `db/scripts/audit-storia36-semantic.py` — **ri-eseguibile**. Data: 2026-07-29 · finestra della storia: `2023-08-01` → `2026-07-31` (fine calcolata, mai costante).
 
+> **Aggiornamento 2026-07-31 — il programma è chiuso, e la finestra ora è MOBILE.**
+> Con lo Step 12.6 è nato il terzo modo, `bash db/scripts/storia36.sh avanzamento`:
+> la storia non si ferma più alla data in cui è stata costruita, si porta a **ieri**
+> con le stesse regole e le stesse chiavi naturali dei cluster di costruzione.
+> Prima corsa reale: la storia era invecchiata di una settimana (presenze ferme al
+> 24 luglio), estesa al 30 — 624 presenze, 2 richieste di ferie, 1 rinnovo di
+> abilitazione; terza corsa 0 righe. **Perciò i conteggi qui sotto sono quelli del
+> 29 luglio e cresceranno**: sono un verbale datato, non lo stato corrente. Lo stato
+> corrente si ri-deriva ri-eseguendo lo strumento.
+>
+> Un effetto che vale la pena registrare: **spostando la frontiera si scopre ciò che
+> il tempo rompe da solo**. Il check C4b legge la frontiera della storia (la punta
+> delle presenze), non l'orologio: appena la punta è avanzata, un'abilitazione
+> obbligatoria scaduta il 28 luglio è risultata mai rinnovata — non per un errore di
+> qualcuno, ma perché il tempo era passato. L'avanzamento ora estende anche la catena
+> dei rinnovi, con la regola del C4 (rinnovo nei 30 giorni PRIMA, mai dopo).
+>
+> Nuovo check permanente **C12c**: il calendario dev'essere denso e coerente, e le
+> festività **calcolate** (Pasqua con Meeus/Butcher, che serve per gli anni che la
+> lista scritta a mano non conosce) devono **coincidere** con quelle scritte a mano
+> sulla finestra di costruzione. Tre selftest: buco nel calendario, Lunedì dell'Angelo
+> cancellato, Natale marcato lavorativo — tutti scattati.
+
 **Perimetro**: tutte le tabelle `sys.*` lette dal catalogo di sistema a ogni esecuzione (AP-03: nessun elenco scritto a mano — una tabella nuova entra nell'audit da sola).
 
 | | |

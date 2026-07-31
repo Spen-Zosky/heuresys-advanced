@@ -43,6 +43,17 @@ async function writeHeaders(page: Page): Promise<Record<string, string>> {
   };
 }
 
+/** Cookie + token CSRF SENZA content-type: per DELETE, che non ha corpo.
+ *  Dichiarare `application/json` su una richiesta senza corpo fa rispondere
+ *  400 a Fastify ("body cannot be empty") — misurato, non supposto. */
+async function deleteHeaders(page: Page): Promise<Record<string, string>> {
+  const cookies = await page.context().cookies();
+  return {
+    cookie: cookies.map((c) => `${c.name}=${c.value}`).join("; "),
+    "x-csrf-token": cookies.find((c) => c.name === "hrx_csrf")?.value ?? "",
+  };
+}
+
 test.describe("scheda persona — anagrafica e ruoli si modificano dall'interfaccia", () => {
   test.use({ storageState: storageStateFor("tenantAdmin") });
 
@@ -164,7 +175,7 @@ test.describe("scheda persona — anagrafica e ruoli si modificano dall'interfac
         for (const g of (await finali.json()).items as Array<{ grantId: string; roleCode: string }>) {
           if (g.roleCode === ruolo && !attuali.includes(ruolo)) {
             await request.delete(`${API_BASE}/v1/users/${userId}/roles/${g.grantId}`, {
-              headers: await writeHeaders(page),
+              headers: await deleteHeaders(page),
             });
           }
         }

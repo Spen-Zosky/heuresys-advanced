@@ -335,7 +335,30 @@
     },
     "dash": "—",
     "activeYes": "sì",
-    "activeNo": "no"
+    "activeNo": "no",
+    "form": {
+      "createTitle": "Nuova unità organizzativa",
+      "editTitle": "Unità organizzativa — modifica",
+      "code": "Codice",
+      "name": "Nome",
+      "type": "Tipo",
+      "parent": "Unità superiore",
+      "manager": "Responsabile",
+      "isActive": "Unità attiva",
+      "none": "— nessuno —",
+      "noParent": "— nessuna (radice) —",
+      "parentHint": "L'unità stessa e le sue discendenti non compaiono: sposterebbero un ramo dentro sé stesso.",
+      "create": "Crea",
+      "edit": "Modifica",
+      "save": "Salva",
+      "saved": "Salvato",
+      "close": "Chiudi",
+      "required": "Campo obbligatorio",
+      "saveError": "Salvataggio non riuscito.",
+      "forbidden": "Non hai i permessi per questa operazione.",
+      "duplicate": "Esiste già un'unità con questo codice.",
+      "readOnly": "Non hai i permessi per modificare questa unità."
+    }
   },
   "orgChart": {
     "title": "Organigramma",

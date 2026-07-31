@@ -1,16 +1,21 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Button } from "@heuresys/ui";
 import type { OrganizationUnit } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { useEnumLabel } from "@/lib/enum-labels";
+import { OrgUnitCreator, OrgUnitEditor } from "./_components/org-unit-forms";
 
 export default function OrganizationPage() {
   const { t } = useTranslation("admin");
   const enumLabel = useEnumLabel();
+  // L'unità in lavorazione: la tabella resta l'indice, il pannello di modifica
+  // si apre sopra di essa (#44). Nessuna rotta di dettaglio da inventare.
+  const [editingId, setEditingId] = useState<string | null>(null);
   // C4 (#42): server-side pagination (was `?limit=200`).
   const ous = usePaginatedList<OrganizationUnit>({
     queryKey: ["organization-units", "list"],
@@ -29,6 +34,19 @@ export default function OrganizationPage() {
       {
         header: t("organization.columns.active"),
         cell: (o) => <StatusPill tone={o.isActive ? "success" : "neutral"}>{o.isActive ? t("organization.activeYes") : t("organization.activeNo")}</StatusPill>,
+      },
+      {
+        header: t("common:actions"),
+        cell: (o) => (
+          <Button
+            type="button"
+            variant="outline"
+            data-testid={`organization-edit-${o.code}`}
+            onClick={() => setEditingId(o.organizationUnitId)}
+          >
+            {t("organization.form.edit")}
+          </Button>
+        ),
       },
     ],
     [t, enumLabel],
@@ -54,6 +72,11 @@ export default function OrganizationPage() {
       emptyTitle={t("organization.emptyTitle")}
       emptyDescription={t("organization.emptyDescription")}
       caption={t("organization.caption")}
-    />
+    >
+      {/* Fra l'intestazione e la tabella: creare una nuova unità, e — quando
+          una riga è selezionata — modificarla o spostarla nell'albero (#44). */}
+      <OrgUnitCreator />
+      {editingId && <OrgUnitEditor ouId={editingId} onClose={() => setEditingId(null)} />}
+    </DataTablePanel>
   );
 }

@@ -92,6 +92,27 @@ export default async function globalTeardown(): Promise<void> {
     console.warn("[e2e teardown] GTM lead cleanup skipped:", (err as Error).message);
   }
 
+  // #44 C1: organization-editing.spec.ts crea un'unità per corsa e la
+  // DISATTIVA (l'API espone solo la cancellazione logica). Senza questa
+  // spazzata le unità spente si accumulerebbero nell'organigramma reale.
+  // Best-effort, stesse regole di igiene dei segreti.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH d AS (DELETE FROM sys.sys_organization_units WHERE organization_unit_code LIKE 'E2E-OU-%' RETURNING 1) SELECT count(*) FROM d",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] C1: deleted ${out} E2E org-unit row(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] C1 org-unit cleanup skipped:", (err as Error).message);
+  }
+
   // Surveys-M2: the ESS spec answers an assigned survey (tommaso → Q4 Pulse),
   // which inserts ESS responses + flips the assignment to completed. Reset both
   // so the spec is re-runnable (the survey must be pending again next run).

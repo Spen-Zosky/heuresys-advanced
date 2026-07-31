@@ -335,7 +335,30 @@
     },
     "dash": "—",
     "activeYes": "yes",
-    "activeNo": "no"
+    "activeNo": "no",
+    "form": {
+      "createTitle": "New organization unit",
+      "editTitle": "Organization unit — edit",
+      "code": "Code",
+      "name": "Name",
+      "type": "Type",
+      "parent": "Parent unit",
+      "manager": "Manager",
+      "isActive": "Active unit",
+      "none": "— none —",
+      "noParent": "— none (root) —",
+      "parentHint": "The unit itself and its descendants are not listed: they would move a branch inside itself.",
+      "create": "Create",
+      "edit": "Edit",
+      "save": "Save",
+      "saved": "Saved",
+      "close": "Close",
+      "required": "Required field",
+      "saveError": "Save failed.",
+      "forbidden": "You do not have permission for this operation.",
+      "duplicate": "A unit with this code already exists.",
+      "readOnly": "You do not have permission to edit this unit."
+    }
   },
   "orgChart": {
     "title": "Org chart",

@@ -516,6 +516,14 @@
       "HIGH": "High",
       "MEDIUM": "Medium",
       "LOW": "Low"
+    },
+    "jobRoleSeniority": {
+      "ENTRY": "Entry",
+      "JUNIOR": "Junior",
+      "MID": "Mid",
+      "SENIOR": "Senior",
+      "LEAD": "Lead",
+      "EXECUTIVE": "Executive"
     }
   }
 }

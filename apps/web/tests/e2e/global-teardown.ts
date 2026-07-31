@@ -113,6 +113,30 @@ export default async function globalTeardown(): Promise<void> {
     console.warn("[e2e teardown] C1 org-unit cleanup skipped:", (err as Error).message);
   }
 
+  // #43 C2: job-catalog.spec.ts crea una famiglia professionale e un ruolo che
+  // vi appartiene. Ordine OBBLIGATO: prima i ruoli, poi le famiglie — una
+  // famiglia referenziata da un ruolo non si cancella. I ruoli non hanno una
+  // DELETE sull'API, quindi la pulizia vive per forza qui.
+  // Best-effort, stesse regole di igiene dei segreti.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH r AS (DELETE FROM sys.sys_job_roles WHERE job_role_code LIKE 'E2E-JOBROLE-%' RETURNING 1), " +
+          "f AS (DELETE FROM sys.sys_job_families WHERE job_family_code LIKE 'E2E-JOBFAM-%' RETURNING 1) " +
+          "SELECT (SELECT count(*) FROM r) || '/' || (SELECT count(*) FROM f)",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] C2: deleted ${out} E2E job role/family row(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] C2 job-catalog cleanup skipped:", (err as Error).message);
+  }
+
   // Surveys-M2: the ESS spec answers an assigned survey (tommaso → Q4 Pulse),
   // which inserts ESS responses + flips the assignment to completed. Reset both
   // so the spec is re-runnable (the survey must be pending again next run).

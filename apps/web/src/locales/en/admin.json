@@ -1024,5 +1024,43 @@
       "savedMsg": "Changes saved.",
       "errorUnexpected": "Save failed. Please try again."
     }
+  },
+  "jobCatalog": {
+    "title": "Job Catalogue",
+    "description": "Job families and roles: the job architecture positions are built on.",
+    "dash": "—",
+    "none": "— none —",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "codeImmutable": "The code cannot be changed after creation.",
+    "loadError": "Loading failed.",
+    "saveError": "Save failed.",
+    "forbidden": "You do not have permission for this operation.",
+    "duplicate": "An entry with this code already exists.",
+    "family": {
+      "title": "Job families",
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "create": "Create family",
+      "emptyTitle": "No job family",
+      "caption": "List of job families"
+    },
+    "role": {
+      "title": "Job roles",
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "family": "Family",
+      "seniority": "Level",
+      "create": "Create role",
+      "familyHint": "Left empty the family stays unset: the API allows assigning it, not removing it.",
+      "emptyTitle": "No job role",
+      "caption": "List of job roles"
+    },
+    "search": "Search",
+    "searchPlaceholder": "code or name…",
+    "allFamilies": "All families"
   }
 }

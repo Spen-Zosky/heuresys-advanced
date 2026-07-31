@@ -15,6 +15,9 @@ export const JOB_ROLE_SENIORITY_VALUES = [
   "LEAD",
   "EXECUTIVE",
 ] as const;
+/** Esportato come i pari (UserStatus, PositionCriticality): apps/web importa
+ *  TIPI, non valori, e senza questo dovrebbe riscrivere l'unione a mano. */
+export type JobRoleSeniority = (typeof JOB_ROLE_SENIORITY_VALUES)[number];
 export const JobRoleSenioritySchema = z.enum(JOB_ROLE_SENIORITY_VALUES);
 
 export const JobRoleSchema = z.object({

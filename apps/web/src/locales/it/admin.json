@@ -1024,5 +1024,43 @@
       "savedMsg": "Modifiche salvate.",
       "errorUnexpected": "Salvataggio non riuscito. Riprova."
     }
+  },
+  "jobCatalog": {
+    "title": "Catalogo Mansioni",
+    "description": "Famiglie professionali e ruoli: l'architettura delle mansioni su cui poggiano le posizioni.",
+    "dash": "—",
+    "none": "— nessuna —",
+    "edit": "Modifica",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "codeImmutable": "Il codice non si può cambiare dopo la creazione.",
+    "loadError": "Caricamento non riuscito.",
+    "saveError": "Salvataggio non riuscito.",
+    "forbidden": "Non hai i permessi per questa operazione.",
+    "duplicate": "Esiste già una voce con questo codice.",
+    "family": {
+      "title": "Famiglie professionali",
+      "code": "Codice",
+      "name": "Nome",
+      "description": "Descrizione",
+      "create": "Crea famiglia",
+      "emptyTitle": "Nessuna famiglia professionale",
+      "caption": "Elenco delle famiglie professionali"
+    },
+    "role": {
+      "title": "Ruoli professionali",
+      "code": "Codice",
+      "name": "Nome",
+      "description": "Descrizione",
+      "family": "Famiglia",
+      "seniority": "Livello",
+      "create": "Crea ruolo",
+      "familyHint": "Lasciando vuoto la famiglia resta non impostata: l'API non permette di rimuoverla, solo di assegnarla.",
+      "emptyTitle": "Nessun ruolo professionale",
+      "caption": "Elenco dei ruoli professionali"
+    },
+    "search": "Cerca",
+    "searchPlaceholder": "codice o nome…",
+    "allFamilies": "Tutte le famiglie"
   }
 }

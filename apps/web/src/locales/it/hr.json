@@ -370,6 +370,38 @@
       "forbidden": "Non hai i permessi per questa operazione.",
       "duplicate": "Esiste già un modulo con questo codice.",
       "readOnly": "Non hai i permessi per modificare questo modulo."
+    },
+    "paths": {
+      "title": "Percorsi formativi",
+      "create": "Nuovo percorso",
+      "open": "Apri",
+      "close": "Chiudi",
+      "save": "Salva",
+      "dash": "—",
+      "targetOutcome": "Risultato atteso",
+      "isGlobal": "Percorso globale (valido per tutti i clienti)",
+      "search": "Cerca fra i percorsi",
+      "searchPlaceholder": "codice o nome…",
+      "emptyTitle": "Nessun percorso formativo",
+      "caption": "Elenco dei percorsi formativi",
+      "loadError": "Caricamento non riuscito.",
+      "saveError": "Salvataggio non riuscito.",
+      "forbidden": "Non hai i permessi per questa operazione.",
+      "duplicate": "Esiste già un percorso con questo codice.",
+      "tenantRequired": "Come amministratore di piattaforma puoi creare solo percorsi globali: spunta «Percorso globale»."
+    },
+    "steps": {
+      "title": "Passi del percorso",
+      "empty": "Nessun passo: il percorso è vuoto.",
+      "module": "Modulo formativo",
+      "pickModule": "— scegli un modulo —",
+      "ordinal": "Ordine",
+      "ordinalAuto": "in coda",
+      "add": "Aggiungi",
+      "remove": "Elimina",
+      "moveUp": "Su",
+      "searchModule": "Cerca un modulo",
+      "searchModulePlaceholder": "almeno 2 caratteri…"
     }
   },
   "training": {

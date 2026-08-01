@@ -370,6 +370,38 @@
       "forbidden": "You do not have permission for this operation.",
       "duplicate": "A module with this code already exists.",
       "readOnly": "You do not have permission to edit this module."
+    },
+    "paths": {
+      "title": "Learning paths",
+      "create": "New path",
+      "open": "Open",
+      "close": "Close",
+      "save": "Save",
+      "dash": "—",
+      "targetOutcome": "Target outcome",
+      "isGlobal": "Global path (valid for every tenant)",
+      "search": "Search paths",
+      "searchPlaceholder": "code or name…",
+      "emptyTitle": "No learning path",
+      "caption": "List of learning paths",
+      "loadError": "Loading failed.",
+      "saveError": "Save failed.",
+      "forbidden": "You do not have permission for this operation.",
+      "duplicate": "A path with this code already exists.",
+      "tenantRequired": "As a platform administrator you can only create global paths: tick “Global path”."
+    },
+    "steps": {
+      "title": "Path steps",
+      "empty": "No step: the path is empty.",
+      "module": "Learning module",
+      "pickModule": "— pick a module —",
+      "ordinal": "Order",
+      "ordinalAuto": "at the end",
+      "add": "Add",
+      "remove": "Delete",
+      "moveUp": "Up",
+      "searchModule": "Search a module",
+      "searchModulePlaceholder": "at least 2 characters…"
     }
   },
   "training": {

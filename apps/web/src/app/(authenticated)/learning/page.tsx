@@ -9,6 +9,7 @@ import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
 import { LearningModuleCreator, LearningModuleEditor } from "./_components/learning-forms";
+import { LearningPathsPanel } from "./_components/learning-paths";
 
 function buildColumns(t: TFunction, onEdit: (id: string) => void): DataColumn<LearningModule>[] {
   return [
@@ -87,6 +88,9 @@ export default function LearningCataloguePage() {
       {/* #43: il catalogo si LEGGEVA soltanto; qui si inserisce e si corregge. */}
       <LearningModuleCreator />
       {editingId && <LearningModuleEditor moduleId={editingId} onClose={() => setEditingId(null)} />}
+      {/* I percorsi compongono i moduli in una sequenza che porta a un
+          risultato: stanno sotto il catalogo che li alimenta (#43). */}
+      <LearningPathsPanel />
     </DataTablePanel>
   );
 }

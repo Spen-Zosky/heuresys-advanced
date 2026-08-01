@@ -23,6 +23,9 @@ export const LEARNING_DELIVERY_VALUES = [
   "BLENDED",
   "ON_THE_JOB",
 ] as const;
+/** Esportati come i pari (UserStatus, KpiPolarity, …): apps/web importa TIPI. */
+export type LearningKind = (typeof LEARNING_KIND_VALUES)[number];
+export type LearningDelivery = (typeof LEARNING_DELIVERY_VALUES)[number];
 export const LearningDeliverySchema = z.enum(LEARNING_DELIVERY_VALUES);
 
 export const LearningModuleSchema = z.object({

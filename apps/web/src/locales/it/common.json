@@ -524,6 +524,20 @@
       "SENIOR": "Senior",
       "LEAD": "Lead",
       "EXECUTIVE": "Dirigenziale"
+    },
+    "learningKind": {
+      "COURSE": "Corso",
+      "MICRO_LESSON": "Microlezione",
+      "LAB": "Laboratorio",
+      "WORKSHOP": "Workshop",
+      "CERTIFICATION_PREP": "Preparazione a certificazione",
+      "COACHING": "Coaching"
+    },
+    "learningDelivery": {
+      "SELF_PACED": "Autonoma",
+      "INSTRUCTOR_LED": "Con docente",
+      "BLENDED": "Mista",
+      "ON_THE_JOB": "Sul campo"
     }
   }
 }

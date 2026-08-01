@@ -321,6 +321,26 @@
     "caption": "Elenco moduli formativi",
     "cols": {
       "duration": "Durata (min)"
+    },
+    "form": {
+      "createTitle": "Nuovo modulo formativo",
+      "editTitle": "Modulo formativo — modifica",
+      "description": "Descrizione",
+      "kind": "Tipo",
+      "delivery": "Erogazione",
+      "isGlobal": "Modulo globale (valido per tutti i clienti)",
+      "create": "Crea modulo",
+      "edit": "Modifica",
+      "save": "Salva",
+      "saved": "Salvato",
+      "close": "Chiudi",
+      "search": "Cerca nel catalogo",
+      "searchPlaceholder": "codice o titolo…",
+      "codeImmutable": "Il codice non si può cambiare dopo la creazione.",
+      "saveError": "Salvataggio non riuscito.",
+      "forbidden": "Non hai i permessi per questa operazione.",
+      "duplicate": "Esiste già un modulo con questo codice.",
+      "readOnly": "Non hai i permessi per modificare questo modulo."
     }
   },
   "training": {

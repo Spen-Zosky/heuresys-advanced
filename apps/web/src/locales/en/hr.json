@@ -321,6 +321,26 @@
     "caption": "Learning module list",
     "cols": {
       "duration": "Duration (min)"
+    },
+    "form": {
+      "createTitle": "New learning module",
+      "editTitle": "Learning module — edit",
+      "description": "Description",
+      "kind": "Kind",
+      "delivery": "Delivery",
+      "isGlobal": "Global module (valid for every tenant)",
+      "create": "Create module",
+      "edit": "Edit",
+      "save": "Save",
+      "saved": "Saved",
+      "close": "Close",
+      "search": "Search the catalogue",
+      "searchPlaceholder": "code or title…",
+      "codeImmutable": "The code cannot be changed after creation.",
+      "saveError": "Save failed.",
+      "forbidden": "You do not have permission for this operation.",
+      "duplicate": "A module with this code already exists.",
+      "readOnly": "You do not have permission to edit this module."
     }
   },
   "training": {

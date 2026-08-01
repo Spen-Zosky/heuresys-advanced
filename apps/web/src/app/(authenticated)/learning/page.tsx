@@ -1,14 +1,16 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
+import { Button, Input } from "@heuresys/ui";
 import type { LearningModule } from "@heuresys/shared";
 import { usePaginatedList } from "@/lib/hooks/use-paginated-list";
 import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { StatusPill } from "@/components/status-pill";
+import { LearningModuleCreator, LearningModuleEditor } from "./_components/learning-forms";
 
-function buildColumns(t: TFunction): DataColumn<LearningModule>[] {
+function buildColumns(t: TFunction, onEdit: (id: string) => void): DataColumn<LearningModule>[] {
   return [
     { header: t("shared.code"), cell: (m) => <span className="font-mono text-xs">{m.code}</span> },
     { header: t("shared.name"), cell: (m) => <span className="font-medium text-foreground">{m.title}</span> },
@@ -24,16 +26,29 @@ function buildColumns(t: TFunction): DataColumn<LearningModule>[] {
         </StatusPill>
       ),
     },
+    {
+      header: t("common:actions"),
+      cell: (m) => (
+        <Button type="button" variant="outline" data-testid={`learning-edit-${m.code}`} onClick={() => onEdit(m.learningModuleId)}>
+          {t("learning.form.edit")}
+        </Button>
+      ),
+    },
   ];
 }
 
 export default function LearningCataloguePage() {
   const { t } = useTranslation("hr");
-  const columns = useMemo(() => buildColumns(t), [t]);
+  // Il modulo in lavorazione + il filtro testuale: senza cercare, un corso
+  // appena inserito finisce oltre la prima pagina e non si puo' correggere (#43).
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [cerca, setCerca] = useState("");
+  const columns = useMemo(() => buildColumns(t, setEditingId), [t]);
   // C4 (#42): server-side pagination (was `?limit=200`).
   const modules = usePaginatedList<LearningModule>({
     queryKey: ["learning-modules", "list"],
     path: "/v1/learning-modules",
+    params: { search: cerca.trim() },
   });
 
   return (
@@ -56,6 +71,22 @@ export default function LearningCataloguePage() {
       emptyTitle={t("learning.emptyTitle")}
       emptyDescription={t("learning.emptyDescription")}
       caption={t("learning.caption")}
-    />
+    >
+      <div className="max-w-sm">
+        <label htmlFor="learning-search" className="mb-1 block text-sm font-medium text-foreground">
+          {t("learning.form.search")}
+        </label>
+        <Input
+          id="learning-search"
+          data-testid="learning-search"
+          value={cerca}
+          onChange={(e) => setCerca(e.target.value)}
+          placeholder={t("learning.form.searchPlaceholder")}
+        />
+      </div>
+      {/* #43: il catalogo si LEGGEVA soltanto; qui si inserisce e si corregge. */}
+      <LearningModuleCreator />
+      {editingId && <LearningModuleEditor moduleId={editingId} onClose={() => setEditingId(null)} />}
+    </DataTablePanel>
   );
 }

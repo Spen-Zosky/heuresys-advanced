@@ -524,6 +524,20 @@
       "SENIOR": "Senior",
       "LEAD": "Lead",
       "EXECUTIVE": "Executive"
+    },
+    "learningKind": {
+      "COURSE": "Course",
+      "MICRO_LESSON": "Micro-lesson",
+      "LAB": "Lab",
+      "WORKSHOP": "Workshop",
+      "CERTIFICATION_PREP": "Certification prep",
+      "COACHING": "Coaching"
+    },
+    "learningDelivery": {
+      "SELF_PACED": "Self-paced",
+      "INSTRUCTOR_LED": "Instructor-led",
+      "BLENDED": "Blended",
+      "ON_THE_JOB": "On the job"
     }
   }
 }

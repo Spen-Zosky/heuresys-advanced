@@ -209,3 +209,7 @@ db/data/esco/*.csv
 # cosi Enzo lo legge su GitHub dal telefono.
 .zp/*
 !.zp/PROGRESS.md
+
+# verification gate (W10)
+.zp/verify-verdict.json
+.zp/verify-off

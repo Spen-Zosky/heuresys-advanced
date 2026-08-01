@@ -22,5 +22,29 @@
     "consolida-pagina": "off",
     "dashboards-jobs": "off",
     "multi-tenant-validator": "off"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && python docs/kb/tools/verify_gate.py check --hook",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"${CLAUDE_PROJECT_DIR:-.}\" && python docs/kb/tools/verify_gate.py check --hook",
+            "timeout": 20
+          }
+        ]
+      }
+    ]
   }
 }

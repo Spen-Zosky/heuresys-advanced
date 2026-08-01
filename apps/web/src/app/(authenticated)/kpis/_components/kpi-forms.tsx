@@ -13,6 +13,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
@@ -57,6 +58,9 @@ export function KpiCreator() {
   const perms = new Set(useCurrentUserPermissions().data?.permissions ?? []);
   const canCreate = perms.has("kpi:create");
   const canGlobal = perms.has("tenant:create") || perms.has("platform:manage");
+  // Chiuso di default, come gli altri cataloghi: la pagina si apre per
+  // consultare, non per inserire.
+  const [aperto, setAperto] = useState(false);
 
   const { register, handleSubmit, reset } = useForm<KpiForm>({
     defaultValues: {
@@ -90,9 +94,14 @@ export function KpiCreator() {
   return (
     <Card data-testid="kpi-creator">
       <CardHeader>
-        <CardTitle>{t("kpis.form.createTitle")}</CardTitle>
+        <CardTitle className="flex items-center justify-between gap-3">
+          <span>{t("kpis.form.createTitle")}</span>
+          <Button type="button" variant="outline" data-testid="kpi-create-toggle" onClick={() => setAperto((v) => !v)}>
+            {aperto ? t("kpis.form.close") : t("kpis.form.create")}
+          </Button>
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent hidden={!aperto}>
         <form
           data-testid="kpi-create-form"
           className="grid grid-cols-1 gap-3 md:grid-cols-3"

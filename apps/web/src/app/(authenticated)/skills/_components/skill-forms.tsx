@@ -16,6 +16,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
@@ -79,7 +80,12 @@ export function SkillCreator() {
   // Solo chi amministra la piattaforma può creare una competenza globale: il
   // service lo impone comunque, qui si evita di mostrare una leva finta.
   const canGlobal = perms.has("tenant:create") || perms.has("platform:manage");
-  const categorie = useCategorie(canCreate);
+  // Chiuso di default: una pagina-catalogo si apre per CONSULTARE, e cosi' il
+  // montaggio non paga la chiamata alle categorie finche' non serve davvero
+  // (il pannello sempre aperto rendeva piu' lento il primo disegno della
+  // pagina — misurato su una prova che e' diventata instabile).
+  const [aperto, setAperto] = useState(false);
+  const categorie = useCategorie(canCreate && aperto);
 
   const { register, handleSubmit, reset } = useForm<SkillForm>({
     defaultValues: { code: "", name: "", description: "", categoryId: "", escoUri: "", isGlobal: false },
@@ -109,9 +115,14 @@ export function SkillCreator() {
   return (
     <Card data-testid="skill-creator">
       <CardHeader>
-        <CardTitle>{t("skills.form.createTitle")}</CardTitle>
+        <CardTitle className="flex items-center justify-between gap-3">
+          <span>{t("skills.form.createTitle")}</span>
+          <Button type="button" variant="outline" data-testid="skill-create-toggle" onClick={() => setAperto((v) => !v)}>
+            {aperto ? t("skills.form.close") : t("skills.form.create")}
+          </Button>
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent hidden={!aperto}>
         <form
           data-testid="skill-create-form"
           className="grid grid-cols-1 gap-3 md:grid-cols-3"

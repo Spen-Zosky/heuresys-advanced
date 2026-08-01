@@ -12,6 +12,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "@heuresys/ui";
@@ -63,6 +64,8 @@ export function LearningModuleCreator() {
   const perms = new Set(useCurrentUserPermissions().data?.permissions ?? []);
   const canCreate = perms.has("learning:create");
   const canGlobal = perms.has("tenant:create") || perms.has("platform:manage");
+  // Chiuso di default, come gli altri cataloghi.
+  const [aperto, setAperto] = useState(false);
 
   const { register, handleSubmit, reset } = useForm<ModuleForm>({
     defaultValues: {
@@ -96,9 +99,14 @@ export function LearningModuleCreator() {
   return (
     <Card data-testid="learning-creator">
       <CardHeader>
-        <CardTitle>{t("learning.form.createTitle")}</CardTitle>
+        <CardTitle className="flex items-center justify-between gap-3">
+          <span>{t("learning.form.createTitle")}</span>
+          <Button type="button" variant="outline" data-testid="learning-create-toggle" onClick={() => setAperto((v) => !v)}>
+            {aperto ? t("learning.form.close") : t("learning.form.create")}
+          </Button>
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent hidden={!aperto}>
         <form
           data-testid="learning-create-form"
           className="grid grid-cols-1 gap-3 md:grid-cols-3"

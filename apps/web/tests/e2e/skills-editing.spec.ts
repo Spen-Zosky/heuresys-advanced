@@ -38,6 +38,7 @@ test.describe("catalogo competenze — creazione e correzione", () => {
     await expect(page.getByTestId("skill-creator")).toBeVisible();
 
     // --- creazione dall'interfaccia ---
+    await page.getByTestId("skill-create-toggle").click();
     await page.getByTestId("skill-create-code").fill(codice);
     await page.getByTestId("skill-create-name").fill(`Competenza di collaudo ${marca}`);
     const [post] = await Promise.all([

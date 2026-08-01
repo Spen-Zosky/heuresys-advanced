@@ -14,7 +14,6 @@
       "Bash(echo \"EXIT=$?\")",
       "Bash(MSYS_NO_PATHCONV=1 ssh oracle-vm-default:*)",
       "Read(//tmp/**)",
-      "Bash(grep ❯ C:/Users/enzospenuso/.claude/jobs/d784cbb1/tmp/d52_full_suite_v2.log)",
       "Bash(pnpm typecheck:test)",
       "Bash(psql *)"
     ]

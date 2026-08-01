@@ -10,6 +10,7 @@ import { DataTablePanel, type DataColumn } from "@/components/data-table-panel";
 import { SemanticSearchPanel } from "@/components/semantic-search-panel";
 import { StatusPill } from "@/components/status-pill";
 import { SkillCreator, SkillEditor } from "./_components/skill-forms";
+import { SkillAliasesPanel, SkillEdgesPanel } from "./_components/skill-relations";
 
 function buildColumns(t: TFunction, onEdit: (id: string) => void): DataColumn<Skill>[] {
   return [
@@ -89,7 +90,15 @@ export default function SkillsCataloguePage() {
       </div>
       {/* #43: il catalogo si LEGGEVA soltanto; qui si crea e si corregge. */}
       <SkillCreator />
-      {editingId && <SkillEditor skillId={editingId} onClose={() => setEditingId(null)} />}
+      {editingId && (
+        <>
+          <SkillEditor skillId={editingId} onClose={() => setEditingId(null)} />
+          {/* Sinonimi e legami sono attributi della competenza aperta: stanno
+              qui, non su una pagina da cercare altrove (#43). */}
+          <SkillAliasesPanel skillId={editingId} />
+          <SkillEdgesPanel skillId={editingId} />
+        </>
+      )}
     </DataTablePanel>
   );
 }

@@ -43,6 +43,11 @@ const orNull = (v: string): string | null => (v.trim() === "" ? null : v.trim())
 
 function messaggioErrore(err: unknown, t: (k: string) => string): string {
   if (isApiError(err)) {
+    // Non tutti i 403 sono "non hai i permessi": l'API risponde
+    // TENANT_ID_REQUIRED a un amministratore di piattaforma che crea una
+    // competenza NON globale senza indicare il cliente. Dirgli che non ha i
+    // permessi sarebbe falso e non gli farebbe capire cosa fare.
+    if (err.code === "TENANT_ID_REQUIRED") return t("skills.form.tenantRequired");
     if (err.status === 403) return t("skills.form.forbidden");
     if (err.status === 409) return t("skills.form.duplicate");
   }

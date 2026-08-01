@@ -36,7 +36,36 @@
       "duplicate": "Esiste già una competenza con questo nome o codice.",
       "readOnly": "Non hai i permessi per modificare questa competenza.",
       "search": "Cerca nel catalogo",
-      "searchPlaceholder": "codice o nome…"
+      "searchPlaceholder": "codice o nome…",
+      "tenantRequired": "Come amministratore di piattaforma puoi creare solo competenze globali: spunta «Competenza globale», oppure crea la competenza dal profilo di un cliente."
+    },
+    "relations": {
+      "aliasesTitle": "Sinonimi",
+      "aliasesEmpty": "Nessun sinonimo.",
+      "aliasLabel": "Sinonimo",
+      "aliasLocale": "Lingua",
+      "edgesTitle": "Legami nella tassonomia",
+      "edgesEmpty": "Nessun legame.",
+      "edgesImmutableNote": "I legami non si modificano: l'API prevede solo creazione ed eliminazione. Per cambiarne uno, eliminalo e ricrealo.",
+      "otherSkill": "Cerca l'altra competenza",
+      "otherSkillPlaceholder": "almeno 2 caratteri…",
+      "pick": "Competenza collegata",
+      "pickNone": "— scegli —",
+      "edgeKind": "Tipo di legame",
+      "direction": "Verso",
+      "towardsChild": "questa è la più generale",
+      "towardsParent": "questa è la più specifica",
+      "add": "Aggiungi",
+      "remove": "Elimina",
+      "saveError": "Operazione non riuscita.",
+      "forbidden": "Non hai i permessi per questa operazione.",
+      "duplicate": "Questo legame o sinonimo esiste già.",
+      "kind": {
+        "IS_A": "è un tipo di",
+        "PART_OF": "fa parte di",
+        "RELATED": "è collegata a",
+        "PREREQUISITE_OF": "è prerequisito di"
+      }
     }
   },
   "kpis": {

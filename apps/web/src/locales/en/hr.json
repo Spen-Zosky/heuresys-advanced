@@ -36,7 +36,36 @@
       "duplicate": "A skill with this name or code already exists.",
       "readOnly": "You do not have permission to edit this skill.",
       "search": "Search the catalogue",
-      "searchPlaceholder": "code or name…"
+      "searchPlaceholder": "code or name…",
+      "tenantRequired": "As a platform administrator you can only create global skills: tick “Global skill”, or create the skill from within a tenant."
+    },
+    "relations": {
+      "aliasesTitle": "Synonyms",
+      "aliasesEmpty": "No synonym.",
+      "aliasLabel": "Synonym",
+      "aliasLocale": "Locale",
+      "edgesTitle": "Taxonomy links",
+      "edgesEmpty": "No link.",
+      "edgesImmutableNote": "Links cannot be edited: the API only supports create and delete. To change one, delete it and create it again.",
+      "otherSkill": "Search the other skill",
+      "otherSkillPlaceholder": "at least 2 characters…",
+      "pick": "Linked skill",
+      "pickNone": "— pick —",
+      "edgeKind": "Link kind",
+      "direction": "Direction",
+      "towardsChild": "this one is broader",
+      "towardsParent": "this one is narrower",
+      "add": "Add",
+      "remove": "Delete",
+      "saveError": "Operation failed.",
+      "forbidden": "You do not have permission for this operation.",
+      "duplicate": "This link or synonym already exists.",
+      "kind": {
+        "IS_A": "is a kind of",
+        "PART_OF": "is part of",
+        "RELATED": "is related to",
+        "PREREQUISITE_OF": "is a prerequisite of"
+      }
     }
   },
   "kpis": {

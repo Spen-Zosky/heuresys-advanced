@@ -60,6 +60,25 @@
       "kind": "Tipo",
       "description": "Descrizione",
       "empty": "Nessuna voce."
+    },
+    "form": {
+      "createTitle": "Nuovo indicatore",
+      "editTitle": "Indicatore — modifica",
+      "description": "Descrizione",
+      "formula": "Formula",
+      "isGlobal": "Indicatore globale (valido per tutti i clienti)",
+      "create": "Crea indicatore",
+      "edit": "Modifica",
+      "save": "Salva",
+      "saved": "Salvato",
+      "close": "Chiudi",
+      "search": "Cerca nel catalogo",
+      "searchPlaceholder": "codice o nome…",
+      "codeImmutable": "Il codice non si può cambiare dopo la creazione.",
+      "saveError": "Salvataggio non riuscito.",
+      "forbidden": "Non hai i permessi per questa operazione.",
+      "duplicate": "Esiste già un indicatore con questo codice.",
+      "readOnly": "Non hai i permessi per modificare questo indicatore."
     }
   },
   "goals": {

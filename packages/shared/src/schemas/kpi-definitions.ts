@@ -8,6 +8,9 @@ import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
 export const KPI_POLARITY_VALUES = ["HIGHER_IS_BETTER", "LOWER_IS_BETTER", "TARGET_RANGE"] as const;
+/** Esportato come i pari (UserStatus, PositionCriticality, JobRoleSeniority):
+ *  apps/web importa TIPI, non valori. */
+export type KpiPolarity = (typeof KPI_POLARITY_VALUES)[number];
 export const KpiPolaritySchema = z.enum(KPI_POLARITY_VALUES);
 
 export const KpiDefinitionSchema = z.object({

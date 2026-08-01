@@ -60,6 +60,25 @@
       "kind": "Kind",
       "description": "Description",
       "empty": "No entries."
+    },
+    "form": {
+      "createTitle": "New KPI",
+      "editTitle": "KPI — edit",
+      "description": "Description",
+      "formula": "Formula",
+      "isGlobal": "Global KPI (valid for every tenant)",
+      "create": "Create KPI",
+      "edit": "Edit",
+      "save": "Save",
+      "saved": "Saved",
+      "close": "Close",
+      "search": "Search the catalogue",
+      "searchPlaceholder": "code or name…",
+      "codeImmutable": "The code cannot be changed after creation.",
+      "saveError": "Save failed.",
+      "forbidden": "You do not have permission for this operation.",
+      "duplicate": "A KPI with this code already exists.",
+      "readOnly": "You do not have permission to edit this KPI."
     }
   },
   "goals": {

@@ -43,10 +43,13 @@ MARKER="$ROOT/.session-align.marker"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 
 # --- the portable catalog -----------------------------------------------------------
-PORTABLE_PATHS=( CLAUDE.md skills commands statusline-command.sh )
+# reference/ (2026-08-01): il CLAUDE.md rifattorizzato per Opus 5 istruisce a leggere
+# ~/.claude/reference/*.md prima di lavorare su PowerShell o di connettersi a una macchina
+# remota. Senza questa voce i cloni riceverebbero un CLAUDE.md che punta a file assenti.
+PORTABLE_PATHS=( CLAUDE.md skills commands reference statusline-command.sh )
 # wiped on the remote before extract (what makes the clone PURE — the divergent
 # mac/VM lineage dirs agents/ hooks/ output-styles/ are removed, archived in backup):
-MANAGED_REMOTE_PATHS=( CLAUDE.md skills commands agents hooks output-styles statusline-command.sh settings.json scripts )
+MANAGED_REMOTE_PATHS=( CLAUDE.md skills commands reference rules agents hooks output-styles statusline-command.sh settings.json scripts )
 # restored from the remote's own backup after a first-run full move:
 PRESERVE_FROM_REMOTE=( .credentials.json projects settings.local.json history.jsonl todos plans tasks )
 # staging blocklist — none of these may ever appear in the payload:
@@ -133,6 +136,7 @@ preflight_local() {
   [ -f "$SRC/statusline-command.sh" ] || die "statusline-command.sh missing"
   [ -d "$SRC/skills" ]            || die "$SRC/skills missing"
   [ -d "$SRC/commands" ]          || die "$SRC/commands missing"
+  [ -d "$SRC/reference" ]         || die "$SRC/reference missing (atteso dal CLAUDE.md post-Opus5)"
   [ -f "$BOOTSTRAP_SRC" ]         || die "session-bootstrap.sh missing at: $BOOTSTRAP_SRC"
   [ -f "$CLAUDE_MEM_SRC" ]        || die "claude-mem settings missing at: $CLAUDE_MEM_SRC"
   resolve_sdk_specs

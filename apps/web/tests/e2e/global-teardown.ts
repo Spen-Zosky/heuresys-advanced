@@ -157,6 +157,34 @@ export default async function globalTeardown(): Promise<void> {
     console.warn("[e2e teardown] C2 skill cleanup skipped:", (err as Error).message);
   }
 
+  // #43 C2: learning-paths.spec.ts e learning-editing.spec.ts creano moduli e
+  // percorsi. Ordine OBBLIGATO: passi -> percorsi -> moduli (un passo
+  // referenzia entrambi). Serve qui perche' una corsa interrotta a meta' non
+  // arriva al proprio smontaggio.
+  // Best-effort, stesse regole di igiene dei segreti.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH s AS (DELETE FROM sys.sys_learning_path_steps WHERE learning_path_step_path_id IN " +
+          "(SELECT learning_path_id FROM sys.sys_learning_paths WHERE learning_path_code LIKE 'E2E-%') " +
+          "OR learning_path_step_module_id IN " +
+          "(SELECT learning_module_id FROM sys.sys_learning_modules WHERE learning_module_code LIKE 'E2E-%')), " +
+          "p AS (DELETE FROM sys.sys_learning_paths WHERE learning_path_code LIKE 'E2E-%' RETURNING 1), " +
+          "m AS (DELETE FROM sys.sys_learning_modules WHERE learning_module_code LIKE 'E2E-%' RETURNING 1) " +
+          "SELECT (SELECT count(*) FROM p) || '/' || (SELECT count(*) FROM m)",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] C2-learning: deleted ${out} E2E path/module row(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] C2 learning cleanup skipped:", (err as Error).message);
+  }
+
   // Surveys-M2: the ESS spec answers an assigned survey (tommaso → Q4 Pulse),
   // which inserts ESS responses + flips the assignment to completed. Reset both
   // so the spec is re-runnable (the survey must be pending again next run).

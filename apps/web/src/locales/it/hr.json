@@ -379,5 +379,45 @@
       "KPI_RESULT": "Risultati KPI",
       "PERSON_RECORD": "Record"
     }
+  },
+  "taxonomy": {
+    "title": "Tassonomia Competenze",
+    "description_page": "Famiglie, categorie e livelli di padronanza: la forma su cui poggia il catalogo delle competenze.",
+    "description": "Descrizione",
+    "dash": "—",
+    "edit": "Modifica",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "close": "Chiudi",
+    "delete": "Elimina",
+    "codeImmutable": "Il codice non si può cambiare dopo la creazione.",
+    "loadError": "Caricamento non riuscito.",
+    "saveError": "Salvataggio non riuscito.",
+    "forbidden": "Non hai i permessi per questa operazione.",
+    "conflict": "Operazione in conflitto: la voce è già presente o è ancora referenziata.",
+    "families": {
+      "title": "Famiglie",
+      "create": "Nuova famiglia",
+      "emptyTitle": "Nessuna famiglia",
+      "caption": "Elenco delle famiglie di competenze"
+    },
+    "categories": {
+      "title": "Categorie",
+      "create": "Nuova categoria",
+      "family": "Famiglia",
+      "allFamilies": "Tutte le famiglie",
+      "pickFamily": "— scegli una famiglia —",
+      "emptyTitle": "Nessuna categoria",
+      "caption": "Elenco delle categorie di competenze"
+    },
+    "levels": {
+      "title": "Livelli di padronanza",
+      "rank": "Grado",
+      "readOnlyNote": "Riferimento in sola lettura: l'API espone solo l'elenco di questi livelli.",
+      "emptyTitle": "Nessun livello",
+      "caption": "Scala dei livelli di padronanza"
+    },
+    "search": "Cerca",
+    "searchPlaceholder": "codice o nome…"
   }
 }

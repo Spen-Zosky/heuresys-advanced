@@ -379,5 +379,45 @@
       "KPI_RESULT": "KPI results",
       "PERSON_RECORD": "Records"
     }
+  },
+  "taxonomy": {
+    "title": "Skill Taxonomy",
+    "description_page": "Families, categories and proficiency levels: the shape the skill catalogue rests on.",
+    "description": "Description",
+    "dash": "—",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "codeImmutable": "The code cannot be changed after creation.",
+    "loadError": "Loading failed.",
+    "saveError": "Save failed.",
+    "forbidden": "You do not have permission for this operation.",
+    "conflict": "Conflicting operation: the entry already exists or is still referenced.",
+    "families": {
+      "title": "Families",
+      "create": "New family",
+      "emptyTitle": "No family",
+      "caption": "List of skill families"
+    },
+    "categories": {
+      "title": "Categories",
+      "create": "New category",
+      "family": "Family",
+      "allFamilies": "All families",
+      "pickFamily": "— pick a family —",
+      "emptyTitle": "No category",
+      "caption": "List of skill categories"
+    },
+    "levels": {
+      "title": "Proficiency levels",
+      "rank": "Rank",
+      "readOnlyNote": "Read-only reference: the API only exposes the list of these levels.",
+      "emptyTitle": "No level",
+      "caption": "Proficiency level scale"
+    },
+    "search": "Search",
+    "searchPlaceholder": "code or name…"
   }
 }

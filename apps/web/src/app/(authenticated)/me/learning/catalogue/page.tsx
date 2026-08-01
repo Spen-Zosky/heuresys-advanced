@@ -132,12 +132,12 @@ export default function MeLearningCataloguePage() {
       </div>
 
       {enroll.isError ? (
-        <Badge variant="destructive" data-testid="learning-catalogue-error">
+        <Badge variant="outline" className="border-danger text-danger" data-testid="learning-catalogue-error">
           {t("catalogue.errorEnroll")}
         </Badge>
       ) : null}
       {lastEnrolled ? (
-        <Badge variant="success" data-testid="learning-catalogue-enrolled">
+        <Badge variant="outline" className="border-success text-success" data-testid="learning-catalogue-enrolled">
           {t("catalogue.enrolledConfirm", { path: lastEnrolled })}
         </Badge>
       ) : null}

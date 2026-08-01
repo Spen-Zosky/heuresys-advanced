@@ -126,7 +126,13 @@ export default function MeInboxPage() {
             </Badge>
             {unreadCount > 0 && (
               <Badge
-                variant="destructive"
+                variant="outline"
+                /* a11y: le varianti PIENE del badge di @heuresys/ui non reggono il contrasto
+                   a 12px (misurato da axe: bianco su verde 2.22, bianco su rosso 3.49,
+                   contro il 4.5 richiesto) e i due token cambiano fra tema chiaro e
+                   scuro, quindi nessun riempimento e' sicuro in entrambi. Si usano
+                   quindi come TESTO e BORDO — che e' come sono stati tarati (S982). */
+                className="border-danger text-danger"
                 data-testid="me-inbox-unread-badge"
                 aria-label={t("inbox.unreadAria", { count: unreadCount })}
               >

@@ -152,6 +152,14 @@ async function runAxeOnRoute(page: Page, route: string, testInfo: TestInfo) {
           nodes: v.nodes.length,
           help: v.help,
           helpUrl: v.helpUrl,
+          // QUALI nodi, non solo quanti: senza selettore e motivo, ogni
+          // violazione richiede una caccia manuale nel DOM — ed e' uno dei
+          // motivi per cui #82 e' rimasta aperta a lungo.
+          targets: v.nodes.map((n) => ({
+            target: n.target,
+            html: n.html.slice(0, 300),
+            why: n.failureSummary ?? null,
+          })),
         })),
       },
       null,

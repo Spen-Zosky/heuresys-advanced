@@ -72,7 +72,7 @@ export default function MeSurveyAnswerPage() {
           <PageHeader
             data-testid="me-survey-detail-title"
             title={d.title}
-            badges={completed ? <Badge variant="success" data-testid="me-survey-detail-completed">{t("surveys.completed")}</Badge> : undefined}
+            badges={completed ? <Badge variant="outline" className="border-success text-success" data-testid="me-survey-detail-completed">{t("surveys.completed")}</Badge> : undefined}
           />
 
           <Card>

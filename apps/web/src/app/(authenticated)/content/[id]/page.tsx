@@ -185,7 +185,7 @@ export default function ContentEditPage() {
           <span className="flex items-center gap-2">
             <span className="font-mono text-foreground">{t("content.detail.vCols.versionValue", { n: v.versionNumber })}</span>
             {v.versionId === currentVersionId && (
-              <Badge variant="success" data-testid="content-version-current">
+              <Badge variant="outline" className="border-success text-success" data-testid="content-version-current">
                 {t("content.detail.currentBadge")}
               </Badge>
             )}

@@ -866,7 +866,7 @@ export default function MeSecurityPage() {
                       <div>
                         <div className="flex items-center gap-2 font-medium text-foreground">
                           <span>{s.ip ?? t("security.sessions.unknownDevice")}</span>
-                          {isCurrent && <Badge variant="success" data-testid="me-security-session-current-badge">{t("security.sessions.thisDevice")}</Badge>}
+                          {isCurrent && <Badge variant="outline" className="border-success text-success" data-testid="me-security-session-current-badge">{t("security.sessions.thisDevice")}</Badge>}
                         </div>
                         <div className="font-mono text-xs text-muted-foreground">
                           {(s.userAgent ?? t("security.sessions.unknownDevice")).slice(0, 60)} · {t("security.sessions.lastSeen", { date: new Date(s.lastIssuedAt).toLocaleString() })}

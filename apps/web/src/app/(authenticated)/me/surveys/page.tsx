@@ -53,7 +53,7 @@ export default function MeSurveysPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     {s.completedAt ? (
-                      <Badge variant="success" data-testid="me-survey-completed">{t("surveys.completed")}</Badge>
+                      <Badge variant="outline" className="border-success text-success" data-testid="me-survey-completed">{t("surveys.completed")}</Badge>
                     ) : (
                       <Badge variant="secondary" data-testid="me-survey-pending">{t("surveys.pending")}</Badge>
                     )}

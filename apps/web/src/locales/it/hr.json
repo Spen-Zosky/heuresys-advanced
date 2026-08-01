@@ -16,7 +16,28 @@
     "errorMessage": "Impossibile caricare le skill.",
     "emptyTitle": "Nessuna skill",
     "emptyDescription": "Non ci sono skill nel catalogo.",
-    "caption": "Elenco skill"
+    "caption": "Elenco skill",
+    "form": {
+      "createTitle": "Nuova competenza",
+      "editTitle": "Competenza — modifica",
+      "category": "Categoria",
+      "description": "Descrizione",
+      "escoUri": "URI ESCO",
+      "isGlobal": "Competenza globale (valida per tutti i clienti)",
+      "none": "— nessuna —",
+      "create": "Crea competenza",
+      "edit": "Modifica",
+      "save": "Salva",
+      "saved": "Salvato",
+      "close": "Chiudi",
+      "codeImmutable": "Il codice non si può cambiare dopo la creazione.",
+      "saveError": "Salvataggio non riuscito.",
+      "forbidden": "Non hai i permessi per questa operazione.",
+      "duplicate": "Esiste già una competenza con questo nome o codice.",
+      "readOnly": "Non hai i permessi per modificare questa competenza.",
+      "search": "Cerca nel catalogo",
+      "searchPlaceholder": "codice o nome…"
+    }
   },
   "kpis": {
     "title": "Catalogo KPI",

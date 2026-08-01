@@ -137,6 +137,26 @@ export default async function globalTeardown(): Promise<void> {
     console.warn("[e2e teardown] C2 job-catalog cleanup skipped:", (err as Error).message);
   }
 
+  // #43 C2: skills-editing.spec.ts crea una competenza per corsa. Le
+  // competenze non hanno una DELETE sull'API, quindi la pulizia vive qui.
+  // Best-effort, stesse regole di igiene dei segreti.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH d AS (DELETE FROM sys.sys_skills WHERE skill_code LIKE 'E2E-SKILL-%' RETURNING 1) SELECT count(*) FROM d",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] C2-skills: deleted ${out} E2E skill row(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] C2 skill cleanup skipped:", (err as Error).message);
+  }
+
   // Surveys-M2: the ESS spec answers an assigned survey (tommaso → Q4 Pulse),
   // which inserts ESS responses + flips the assignment to completed. Reset both
   // so the spec is re-runnable (the survey must be pending again next run).

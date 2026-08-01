@@ -16,7 +16,28 @@
     "errorMessage": "Unable to load the skills.",
     "emptyTitle": "No skills",
     "emptyDescription": "There are no skills in the catalogue.",
-    "caption": "Skill list"
+    "caption": "Skill list",
+    "form": {
+      "createTitle": "New skill",
+      "editTitle": "Skill — edit",
+      "category": "Category",
+      "description": "Description",
+      "escoUri": "ESCO URI",
+      "isGlobal": "Global skill (valid for every tenant)",
+      "none": "— none —",
+      "create": "Create skill",
+      "edit": "Edit",
+      "save": "Save",
+      "saved": "Saved",
+      "close": "Close",
+      "codeImmutable": "The code cannot be changed after creation.",
+      "saveError": "Save failed.",
+      "forbidden": "You do not have permission for this operation.",
+      "duplicate": "A skill with this name or code already exists.",
+      "readOnly": "You do not have permission to edit this skill.",
+      "search": "Search the catalogue",
+      "searchPlaceholder": "code or name…"
+    }
   },
   "kpis": {
     "title": "KPI Catalogue",

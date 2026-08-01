@@ -52,6 +52,7 @@ ROUTES: list[tuple[str, list[str]]] = [
     # solo i file di stato governati dall'handoff, non i tool sotto docs/kb/tools/
     ("docs/kb/SOT_",     ["handoff-lint"]),
     ("docs/kb/DEBT_",    ["handoff-lint"]),
+    ("docs/kb/tools/handoff_lint.py", ["handoff-lint"]),
     (".handoff/",        ["handoff-lint"]),
 ]
 

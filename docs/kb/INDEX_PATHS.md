@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-07-31T12:00:57Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2698**
+**Generato**: 2026-08-01T15:34:43Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2724**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,7 +18,7 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 216 |
+| db-migration | 218 |
 | db-other | 8 |
 | db-script | 42 |
 | db-seed | 147 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 100 |
 | showcase-source | 14 |
-| test | 318 |
+| test | 328 |
 | ux-design-archive | 80 |
-| web-source | 209 |
-| **TOTALE** | **2698** |
+| web-source | 223 |
+| **TOTALE** | **2724** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2140 |
+| live | 2166 |
 
 ## File per categoria
 
@@ -1195,6 +1195,8 @@
 - `D:\heuresys-advanced\db\migrations\000216_gdpr_export_actor_references.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000217_succession_horizon_vocabularies.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000218_person_display_name_placeholder.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000219_ui_interface_job_catalog.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000220_ui_interface_skill_taxonomy.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -2486,8 +2488,12 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\insights-succession-readiness.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\insights.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\investors.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\job-catalog.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\kpis-editing.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\landing-pages.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\landing.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\learning-editing.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\learning-paths.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\login-mfa-enrollment.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\login-mfa.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\matching-freetext.spec.ts` · *live* · git-tracked
@@ -2504,7 +2510,9 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\mfa-enroll.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\mfa-fixture-secrets.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\mfa-policy-admin.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\organization-editing.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\position-sub.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\positions-editing.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\provenance.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\rbac-route-matrix.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\role-badge.spec.ts` · *live* · git-tracked
@@ -2512,6 +2520,9 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\session-refresh.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\showcase-a11y.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\skill-relations.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\skill-taxonomy.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\skills-editing.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\smoke-5-personas.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\storia36-demo.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\surveys-m2.spec.ts` · *live* · git-tracked
@@ -2520,6 +2531,7 @@
 - `D:\heuresys-advanced\apps\web\tests\e2e\theme-propagation.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\time-off.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\user-dossier.spec.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\tests\e2e\users-editing.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\visualizations.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\webauthn.spec.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\whistleblowing.spec.ts` · *live* · git-tracked
@@ -2664,8 +2676,14 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\insights\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\insights\skill-gap\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\insights\succession-readiness\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\job-catalog\_components\job-families-panel.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\job-catalog\_components\job-roles-panel.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\job-catalog\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\kpis\_components\kpi-forms.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\kpis\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\layout.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\learning\_components\learning-forms.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\learning\_components\learning-paths.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\learning\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\learning\training-initiatives\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\_components\attendance-tab.tsx` · *live* · git-tracked
@@ -2708,8 +2726,10 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\me\time-off\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\okrs\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\org-director\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\organization\_components\org-unit-forms.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\organization\org-chart\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\organization\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\[positionId]\_components\position-editor.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\[positionId]\kpis\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\[positionId]\learning\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\[positionId]\page.tsx` · *live* · git-tracked
@@ -2719,6 +2739,10 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\processes\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\provenance\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\seed-acquisition\runs\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\skill-taxonomy\_components\taxonomy-panels.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\skill-taxonomy\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\skills\_components\skill-forms.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\skills\_components\skill-relations.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\skills\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\system-health\layout.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\system-health\page.tsx` · *live* · git-tracked
@@ -2727,6 +2751,8 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\tenants\[tenantId]\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\tenants\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\time-off\page.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\users\[userId]\_components\identity-editor.tsx` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\users\[userId]\_components\roles-editor.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\users\[userId]\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\users\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\visualizations\[graphId]\page.tsx` · *live* · git-tracked

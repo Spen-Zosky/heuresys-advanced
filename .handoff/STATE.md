@@ -1,30 +1,31 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-07-31 (S1037 — il programma storia36 è chiuso, e la scheda di una persona ha smesso di essere un elenco di codici).
+**Updated**: 2026-08-01 (S1038 — l'applicazione ha smesso di essere solo consultabile: ora si governa dall'interfaccia).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md` · pattern di dati → `docs/kb/DATA_PATTERNS.md`.
 
-## Last session brief (S1037)
+## Last session brief (S1038)
 
-**Storia RTL chiusa, 13 cluster su 13** (#77 + #80). L'ultimo passo aveva una precondizione che
-**non era vera**: il piano diceva di scrivere la procedura di manutenzione solo dopo averla
-esercitata, ma il terzo modo — quello che porta la storia a ieri — non era mai stato costruito.
-Prima il modo, poi la skill. Ed è servito subito: la storia era ferma al 24 luglio.
+**#44 e #43 chiusi**: la piattaforma mostrava l'organizzazione ma non permetteva di cambiarla.
+Ora persone (anagrafica + ruoli), posizioni, organigramma, e tutti i cataloghi — mansioni,
+tassonomia competenze, competenze con sinonimi e legami, KPI, formazione con percorsi — si
+governano dal browser. Due pagine sono NUOVE (`/job-catalog`, `/skill-taxonomy`): erano gli ultimi
+moduli con API complete e nessuna interfaccia. Ogni pagina nuova porta la sua migrazione, perché
+il menù vive nel database: una rotta senza la sua riga esiste e non la raggiunge nessuno.
 
-Il filo della sessione: **spostare la frontiera in avanti scopre ciò che il tempo rompe da solo**.
-Appena la storia è avanzata, un'abilitazione obbligatoria è risultata scaduta e mai rinnovata —
-nessuno aveva sbagliato, era passato il tempo. I check leggono la frontiera della storia, non
-l'orologio.
+**Il filo della sessione: lo stesso difetto scoperto quattro volte, sempre da un collaudo rosso.**
+Elenchi troncati su cataloghi grandi: l'elemento appena creato finiva oltre la prima pagina della
+tabella e non si riusciva più a correggerlo. Ogni volta l'ha trovato una prova che falliva, mai una
+supposizione. Ora ogni catalogo filtra lato server.
 
-**#81 chiuso lo stesso giorno in cui la sua nota è stata smentita dalla misura**: diceva «gli
-endpoint esistono già», il sondaggio dal vivo ha mostrato che molti ignoravano il filtro per utente
-e restituivano l'intera popolazione. Una nota non misurata vale quanto un'opinione.
+**#82 non era instabilità, era un difetto vero.** La prova a11y falliva solo quando l'elemento
+compariva — il contatore delle notifiche non lette esiste solo se ce ne sono. Contrasto misurato
+2,2-3,5 contro il 4,5 richiesto, su varianti PIENE del badge che vengono dal design system a monte
+e cambiano colore fra tema chiaro e scuro: nessun riempimento era sicuro in entrambi. Sette badge
+convertiti a contorno. **Nota di sistema**: la suite principale DIPENDE dai progetti a11y, quindi
+quel rosso bloccava l'esecuzione di tutto il resto.
 
-**Due difetti trovati sbattendoci contro**, non cercati: un seeder rimasto indietro rispetto a
-Z-262 che, se rieseguito, **rompeva il login di tutte le personas**; e l'orologio di questo PC
-**indietro di oltre dieci ore**, che ha fatto fallire una manciata di prove con un sintomo
-travestito (una scadenza «precedente» alla propria creazione). Il
-secondo ha lasciato due presidi: un controllo dello scarto nel cruscotto d'avvio e un'attività
-pianificata sul PC (il solo servizio Windows **non basta** — misurato).
+**Tre debiti chiusi misurando, non ereditando la narrativa scritta** (D-76, D-75, D-69: dettaglio
+in `SOT_STATE` Delta S1038). Il registro debiti passa da quattro aperti a uno.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -33,26 +34,28 @@ verifica e review adversarial; le decisioni tecniche sono di Claude.
 
 ## Stato dei piani
 
-- **Storia RTL** (#77): **CHIUSA**. Il piano si archivia; ciò che resta è ricorrente e vive nella
-  skill `storia36-custodia` + `.storia36/PROGRESS.md`. Presidio settimanale attivo su VM e linux-pc.
+- **Serie C (editing amministrativo)**: **#44 e #43 CHIUSI**. Resta **#45** (tenant & piattaforma)
+  per completare la linea — stessi schemi già collaudati qui.
 - Zero-pendenze (#76): `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` (`zp_state.py piano`).
+- Storia RTL (#77): chiusa, presidio settimanale su VM e linux-pc.
 
 ## ⚠ Top priorities (next session)
 
-1. **#76 zero-pendenze, prossima ondata** — è il piano che assorbe il resto; conta le pendenze con
+1. **#45 C/C3 — editing tenant & piattaforma** — chiude la serie C aperta in questa sessione; il
+   metodo è già collaudato (pannello + ricerca lato server + prova live dall'interfaccia). ~1,5 sessioni.
+2. **#76 zero-pendenze, prossima ondata** — conta le pendenze con
    `python docs/kb/tools/zp_state.py piano`, non citando un totale vecchio.
-2. **#9/#10/#11 audit forense 100X** — ~1-2 sessioni (WS-L + triage + gate).
-3. **#82 la prova a11y su `/me/inbox` è instabile** — passata, fallita e poi flaky nella stessa
-   mezz'ora a codice invariato. Una prova instabile insegna a ignorare il rosso: va sistemata.
-   Effort ~1-2h.
-4. **#79 cancello di esposizione** — continuo, a ogni lavoro che popola tabelle.
+3. **#83 l'API non impedisce i cicli nell'organigramma** — la difesa oggi vive solo
+   nell'interfaccia; un chiamante diretto può ancora spezzare l'albero. ~1h.
+4. **#9/#10/#11 audit forense 100X** — ~1-2 sessioni (WS-L + triage + gate).
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **`admin@heuresys.com`**: account di servizio, derivato, senza posizione. Le sue funzioni dovevano
-  passare a `enzo.spenuso@heuresys.com`, che però **non ha alcun accesso**: da decidere se e quando.
-  *(Il suo `user_type` è `STANDARD` come tutti, mentre il vocabolario prevede `SERVICE` —
-  correggerlo tocca login e permessi, va deciso a parte.)*
+- **Badge pieni del design system**: le varianti `success`/`destructive` di `@heuresys/ui` non
+  reggono il contrasto AA a 12px. Qui sono state aggirate (contorno invece di riempimento), ma la
+  correzione vera sta in `ux-design-shared`: da decidere se aprirla lì.
+- **`admin@heuresys.com`**: le sue funzioni dovevano passare a `enzo.spenuso@heuresys.com`, che
+  però **non ha alcun accesso** — da decidere se e quando (tocca login e permessi).
 - WAIT-INPUT invariati: **#4** pricing · **#8** app-password Outlook · **#16** SuccessFactors ·
   **#52** SSO IdP.
 
@@ -61,8 +64,7 @@ verifica e review adversarial; le decisioni tecniche sono di Claude.
 ```bash
 git log origin/main..HEAD --oneline               # 0 dopo il push handoff
 python docs/kb/tools/handoff_lint.py              # OK atteso
-python docs/kb/tools/session_start.py             # incluso "orologio allineato col database"
-bash db/scripts/storia36.sh custodia              # "custodia VERDE" atteso
-bash db/scripts/storia36.sh avanzamento           # 0 righe se la storia è già a ieri
+python docs/kb/tools/session_start.py             # menu + salute in un round
+cd apps/web && node scripts/e2e-node22.mjs test --config=playwright.prod.config.ts   # 274 passati / 0 falliti attesi
 pnpm db:validate                                  # "twice-run idempotency proven" atteso
 ```

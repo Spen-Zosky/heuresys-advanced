@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-07-31T12:00:57Z da docs/kb/tools/build_index.py
+# generato: 2026-08-01T15:34:43Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-07-31T12:00:57Z"
-  total_files: 2698
+  generated_at: "2026-08-01T15:34:43Z"
+  total_files: 2724
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,7 +18,7 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 216
+    db-migration: 218
     db-other: 8
     db-script: 42
     db-seed: 147
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 100
     showcase-source: 14
-    test: 318
+    test: 328
     ux-design-archive: 80
-    web-source: 209
+    web-source: 223
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2140
+    live: 2166
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -6737,6 +6737,18 @@ files:
   - path: 'D:\heuresys-advanced\db\migrations\000218_person_display_name_placeholder.sql'
     root: repo
     rel: 'db/migrations/000218_person_display_name_placeholder.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000219_ui_interface_job_catalog.sql'
+    root: repo
+    rel: 'db/migrations/000219_ui_interface_job_catalog.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000220_ui_interface_skill_taxonomy.sql'
+    root: repo
+    rel: 'db/migrations/000220_ui_interface_skill_taxonomy.sql'
     category: db-migration
     status: live
     provenance: git-tracked
@@ -14270,6 +14282,18 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\job-catalog.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/job-catalog.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\kpis-editing.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/kpis-editing.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\landing-pages.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/landing-pages.spec.ts'
@@ -14279,6 +14303,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\landing.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/landing.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\learning-editing.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/learning-editing.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\learning-paths.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/learning-paths.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -14378,9 +14414,21 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\organization-editing.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/organization-editing.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\position-sub.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/position-sub.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\positions-editing.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/positions-editing.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -14423,6 +14471,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\showcase-smoke.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/showcase-smoke.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\skill-relations.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/skill-relations.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\skill-taxonomy.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/skill-taxonomy.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\skills-editing.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/skills-editing.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -14471,6 +14537,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\user-dossier.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/user-dossier.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\users-editing.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/users-editing.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -15302,6 +15374,30 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\job-catalog\_components\job-families-panel.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/job-catalog/_components/job-families-panel.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\job-catalog\_components\job-roles-panel.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/job-catalog/_components/job-roles-panel.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\job-catalog\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/job-catalog/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\kpis\_components\kpi-forms.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/kpis/_components/kpi-forms.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\kpis\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/kpis/page.tsx'
@@ -15311,6 +15407,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\layout.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/layout.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\learning\_components\learning-forms.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/learning/_components/learning-forms.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\learning\_components\learning-paths.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/learning/_components/learning-paths.tsx'
     category: web-source
     status: live
     provenance: git-tracked
@@ -15566,6 +15674,12 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\organization\_components\org-unit-forms.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/organization/_components/org-unit-forms.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\organization\org-chart\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/organization/org-chart/page.tsx'
@@ -15575,6 +15689,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\organization\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/organization/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\positions\[positionId]\_components\position-editor.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/positions/[positionId]/_components/position-editor.tsx'
     category: web-source
     status: live
     provenance: git-tracked
@@ -15632,6 +15752,30 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\skill-taxonomy\_components\taxonomy-panels.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/skill-taxonomy/_components/taxonomy-panels.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\skill-taxonomy\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/skill-taxonomy/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\skills\_components\skill-forms.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/skills/_components/skill-forms.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\skills\_components\skill-relations.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/skills/_components/skill-relations.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\skills\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/skills/page.tsx'
@@ -15677,6 +15821,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\time-off\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/time-off/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\users\[userId]\_components\identity-editor.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/users/[userId]/_components/identity-editor.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\users\[userId]\_components\roles-editor.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/users/[userId]/_components/roles-editor.tsx'
     category: web-source
     status: live
     provenance: git-tracked

@@ -18,8 +18,8 @@ Dal rischio-integrità più alto e costo minore verso il costo maggiore; F2/F3 p
 |---|---|---|---|---|
 | **P2-01** | **#83** — l'API non impedisce i cicli nell'organigramma | Claude | Guardia ricorsiva nel service (o vincolo DB) + integration test che tenta il ciclo e attende errore tipizzato + prova LIVE su :5433 | ✅ **DONE** — vedi esito sotto |
 | **P2-02** | **#36** — B5 visualization: versioning + export engine | Claude | Endpoint versioning + export reali, test integrazione, pagina che li usa, E2E verde, `check_exposure.py` verde | ✅ **DONE** (`3dfbbc5f`) |
-| **P2-03** | **#37** — B2 reward-gate engine sui variable-pay | Claude | Engine reale sui record live, API + test, UI, E2E, esposizione verificata | 🟡 **PARZIALE** (`2a78c40c`) — motore + API + prove LIVE fatti; **manca il pannello** su `/compensation-intelligence` e il suo E2E |
-| **P2-04** | **#49** — D5 employee timeline | Claude | Timeline alimentata da dati reali multi-sorgente, API+test+pagina+E2E | `TODO` |
+| **P2-03** | **#37** — B2 reward-gate engine sui variable-pay | Claude | Engine reale sui record live, API + test, UI, E2E, esposizione verificata | ✅ **DONE** (`2a78c40c` + `de7b3002`) |
+| **P2-04** | **#49** — D5 employee timeline | Claude | Timeline alimentata da dati reali, API+test+pagina+E2E | ✅ **DONE** (`66c12f64` + `daad5cad` + `37002011`) |
 | **P2-05** | **#56** — F2 VRIO scorecard (`/org-director/vrio`) | Claude | Scorecard calcolata su dati reali, non euristica inventata; API+test+pagina+E2E | `TODO` |
 | **P2-06** | **#57** — F3 OHI org-health scorecard | Claude | Come sopra | `TODO` |
 | **P2-07** | **#58** — F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie) | Claude | Ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte | `TODO` |
@@ -71,7 +71,13 @@ Versionamento dei grafi + motore di export. Dettaglio nel messaggio di commit. P
 
 Fatto: `reward-engine.ts` (curve LINEAR/CAPPED/STEPPED/SIGMOID + aggregazione dei cancelli, funzioni pure), endpoint `GET /v1/compensation/variable-pay/:id/evaluation`, 17 test unitari + 4 di integrazione che derivano l'atteso dalla curva letta dal DB. LIVE su 182 calcoli reali; prova falsificabile su Roberta Gallo / CONDUCT_GATE (ALLOW 0.55 → BLOCKED → fattore 0 → deroga → 0.55 → ripristino identico).
 
-**Manca**: il pannello su `/compensation-intelligence` con gli esiti per calcolo (parte "Webapp" della linea B2) e il suo E2E. È il primo lavoro della prossima sessione.
+Completata con `de7b3002`: pannello "Valuta" su `/compensation-intelligence` (curva + spiegazione, cancelli, deroghe, fattore finale; motivo esplicito quando il calcolo è importato senza curva) + 2 prove E2E con login reale. La seconda è andata **rossa alla prima esecuzione** e ha fatto bene: leggeva il pannello ancora in caricamento e concludeva a torto che nessun calcolo avesse una curva (i dati dicono 49 su 50 nella prima pagina).
+
+### P2-04 (#49) — ✅ DONE 2026-08-02
+
+Tre commit, uno per fase. **Dati** (`66c12f64`): mig 000222 `sys.sys_user_timeline_events` + `import-d5-timeline.sh` sul modello di D2 — 4641 righe legacy → **2683 importate su 161 persone**, dal 2005-09-13 al 2026-04-15; le 1958 non importate sono di dipendenti che in v5 non esistono (atteso, dottrina D1/D2); ri-eseguito senza duplicati. Registrato nel registry brownfield come wave-2. **API** (`daad5cad`): modulo `user-timeline` + `/v1/me/timeline`, org-gated (I18) perché la storia contiene variazioni retributive e valutazioni; 9 test con attese derivate dal DB vivo. **Interfaccia** (`37002011`): un pannello per due superfici + 3 E2E, inclusa la controprova che il dipendente riceve 403 sulla superficie amministrativa.
+
+Scoperta registrata nel test: `occurredAt` esce in ISO 8601 (millisecondi) mentre PostgreSQL tiene i microsecondi — rimandare indietro `lastEventAt` tale e quale come estremo superiore taglia 10 righe su 2664.
 
 ---
 

@@ -17,8 +17,8 @@ Dal rischio-integrità più alto e costo minore verso il costo maggiore; F2/F3 p
 | id | cosa | chi | cosa significa fatto | stato |
 |---|---|---|---|---|
 | **P2-01** | **#83** — l'API non impedisce i cicli nell'organigramma | Claude | Guardia ricorsiva nel service (o vincolo DB) + integration test che tenta il ciclo e attende errore tipizzato + prova LIVE su :5433 | ✅ **DONE** — vedi esito sotto |
-| **P2-02** | **#36** — B5 visualization: versioning + export engine | Claude | Endpoint versioning + export reali, test integrazione, pagina che li usa, E2E verde, `check_exposure.py` verde | `TODO` |
-| **P2-03** | **#37** — B2 reward-gate engine sui 121 variable-pay | Claude | Engine reale sui 121 record live, API + test, UI, E2E, esposizione verificata | `TODO` |
+| **P2-02** | **#36** — B5 visualization: versioning + export engine | Claude | Endpoint versioning + export reali, test integrazione, pagina che li usa, E2E verde, `check_exposure.py` verde | ✅ **DONE** (`3dfbbc5f`) |
+| **P2-03** | **#37** — B2 reward-gate engine sui variable-pay | Claude | Engine reale sui record live, API + test, UI, E2E, esposizione verificata | 🟡 **PARZIALE** (`2a78c40c`) — motore + API + prove LIVE fatti; **manca il pannello** su `/compensation-intelligence` e il suo E2E |
 | **P2-04** | **#49** — D5 employee timeline | Claude | Timeline alimentata da dati reali multi-sorgente, API+test+pagina+E2E | `TODO` |
 | **P2-05** | **#56** — F2 VRIO scorecard (`/org-director/vrio`) | Claude | Scorecard calcolata su dati reali, non euristica inventata; API+test+pagina+E2E | `TODO` |
 | **P2-06** | **#57** — F3 OHI org-health scorecard | Claude | Come sopra | `TODO` |
@@ -60,6 +60,18 @@ Dal rischio-integrità più alto e costo minore verso il costo maggiore; F2/F3 p
 **Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
 1. La FK sul genitore **non impone lo stesso tenant**: un `parentId` di un altro tenant sarebbe accettato. È un buco di isolamento diverso dal ciclo, non incluso nello scope di #83.
 2. `create` non valida affatto il `parentId` (nessun ciclo possibile alla nascita, ma vale il punto 1).
+
+### P2-02 (#36) — ✅ DONE 2026-08-02 (`3dfbbc5f`)
+
+Versionamento dei grafi + motore di export. Dettaglio nel messaggio di commit. Prova LIVE sull'organigramma RTL (158 nodi): v2 creata copiando 158 nodi / 157 archi / 1 layout / 158 posizioni, **0** archi che puntano fuori dalla nuova versione, **0** nodi condivisi con la v1; export SVG 29.836 byte, Mermaid 10.658, ReactFlow 71.932 scaricati via HTTP; PNG → 409 onesto. E2E con download verificato sul file scaricato. `check_exposure.py`: 73/73, 0 lacune.
+
+### P2-03 (#37) — 🟡 PARZIALE 2026-08-02 (`2a78c40c`)
+
+**Il dossier era stale**: dava `reward_gates`/`gate_results`/`payout_curves` a 0; il database vivo ne ha **3283 / 3283 / 3**. Le tabelle c'erano, mancava il motore.
+
+Fatto: `reward-engine.ts` (curve LINEAR/CAPPED/STEPPED/SIGMOID + aggregazione dei cancelli, funzioni pure), endpoint `GET /v1/compensation/variable-pay/:id/evaluation`, 17 test unitari + 4 di integrazione che derivano l'atteso dalla curva letta dal DB. LIVE su 182 calcoli reali; prova falsificabile su Roberta Gallo / CONDUCT_GATE (ALLOW 0.55 → BLOCKED → fattore 0 → deroga → 0.55 → ripristino identico).
+
+**Manca**: il pannello su `/compensation-intelligence` con gli esiti per calcolo (parte "Webapp" della linea B2) e il suo E2E. È il primo lavoro della prossima sessione.
 
 ---
 

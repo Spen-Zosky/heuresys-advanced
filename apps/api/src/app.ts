@@ -121,6 +121,7 @@ import { semanticMatchingRoutes } from "./modules/semantic-matching/routes.js";
 import { insightsRoutes } from "./modules/insights/routes.js";
 import { capabilityCompositionRoutes } from "./modules/capability-composition/routes.js";
 import { orgHealthRoutes } from "./modules/org-health/routes.js";
+import { advisorRoutes } from "./modules/advisor/routes.js";
 import { capabilityMaturityRoutes } from "./modules/capability-maturity/routes.js";
 import { referenceSyncRoutes } from "./modules/reference-sync/routes.js";
 import type { ReferenceSyncDeps } from "./modules/reference-sync/service.js";
@@ -479,6 +480,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(insightsRoutes, { prefix: "/v1/insights" });
   await app.register(capabilityCompositionRoutes, { prefix: "/v1/capability" });
   await app.register(orgHealthRoutes, { prefix: "/v1/org-health" });
+  await app.register(advisorRoutes, { prefix: "/v1/advisor" });
   await app.register(capabilityMaturityRoutes, { prefix: "/v1/capability" });
   await app.register(referenceSyncRoutes, { prefix: "/v1/reference-sync", deps: options.referenceSyncDeps });
   await app.register(contentRoutes, { prefix: "/v1/content" });

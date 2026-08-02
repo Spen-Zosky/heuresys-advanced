@@ -473,6 +473,7 @@ export const capabilityCompositionService = {
         skillId: r.skillId,
         skillCode: r.skillCode,
         skillName: r.skillName,
+        skillGroupId: r.skillGroupId,
         positionsRequiring: r.positionsRequiring,
         criticalPositions: r.criticalPositions,
         econ: round4(r.econPercentile),

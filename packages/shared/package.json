@@ -502,6 +502,11 @@
       "heuresys-source": "./src/schemas/org-health.ts",
       "default": "./dist/schemas/org-health.js"
     },
+    "./schemas/advisor-suggestions": {
+      "types": "./dist/schemas/advisor-suggestions.d.ts",
+      "heuresys-source": "./src/schemas/advisor-suggestions.ts",
+      "default": "./dist/schemas/advisor-suggestions.js"
+    },
     "./schemas/whistleblowing": {
       "types": "./dist/schemas/whistleblowing.d.ts",
       "heuresys-source": "./src/schemas/whistleblowing.ts",

@@ -24,7 +24,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | **P2-04** | **#49** — D5 employee timeline | Claude | Timeline alimentata da dati reali, API+test+pagina+E2E | ✅ **DONE** (`66c12f64` + `daad5cad` + `37002011`) |
 | **P2-05** | **#56** — F2 VRIO scorecard (`/org-director/vrio`) | Claude | Scorecard calcolata su dati reali, non euristica inventata; API+test+pagina+E2E | ✅ **DONE** — vedi esito sotto |
 | **P2-06** | **#57** — F3 OHI org-health scorecard | Claude | Come sopra | ✅ **DONE** — vedi esito sotto |
-| **P2-07** | **#58** — F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie) | Claude | Ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte | `IN CORSO` — simulazione compilata, implementazione da avviare |
+| **P2-07** | **#58** — F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie) | Claude | Ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte | 🟡 **FASE A CHIUSA** (motore + API + audit + test + prova live). Resta la **fase B**: pannello in `/org-director`, chiavi i18n `advisor.rule.*`, E2E con login reale |
 | **P2-08** | **#54** — E5 recruiting/ATS (cluster `/recruiting`) | Claude | A fasi con commit atomici; ogni fase chiude con prova LIVE | `TODO` |
 | **P2-09** | **#9/#10/#11** — audit forense 100X (WS-L + triage + gate) | Claude | WS-L eseguito, triage deciso per riga, gate meccanico verde | `TODO` |
 | **P2-10** | **#4** — GTM v1-deferrals (follow-up del primo deliverable) | Claude (parte non-pricing) | Deliverable follow-up chiuso; i numeri prezzi/tier restano `WAIT-INPUT` su Enzo (item #4 WAIT-INPUT, distinto) | `TODO` |
@@ -292,6 +292,39 @@ Il quarto test era verde da prima, ed è giusto così: non era quello il difetto
 **Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
 1. Le altre due sedi restano popolate a metà ed esposte in lettura dal modulo `compensation`. Non alimentano calcoli, quindi non rientravano in questa voce; ma `sys_position_compensation_profiles.economic_weight` (13 su 172) è un candidato naturale al ritiro con lo stesso ragionamento.
 2. Gli score di capability in tabella possono restare **stale a lungo** senza che nulla lo segnali: non c'è un `computed_at` confrontato con l'ultima modifica dei dati sorgente, né un job che ricalcoli. Chi apre la pagina non ha modo di sapere se sta guardando ieri o due mesi fa.
+
+### P2-07 (#58 · F4 AI Advisor) — 🟡 FASE A CHIUSA 2026-08-02
+
+**Costruito**: schema condiviso `advisor-suggestions.ts` (regole, citazioni, soglie esportate), motore puro `engine.ts` a **5 regole** sopra F1/F2/F3, validatore, modulo API `advisor` con `GET /v1/advisor/suggestions` (deriva → **registra** → risponde) e `GET /v1/advisor/audit` (rilegge la traccia), migration **000228** per `sys.sys_advisor_suggestions`.
+
+**Il vincolo è nel tipo, non in un test**: `citations` ha `.min(1)` nello schema Zod **e** un `CHECK` sul database — un suggerimento senza fonte non è un caso da testare, è un valore che non esiste. Le fonti si leggono **attraverso i service** delle tre scorecard, non con query proprie: l'advisor deve citare esattamente ciò che l'utente vede, e una seconda query diventerebbe una seconda verità alla prima modifica.
+
+**I test sanno fallire — provato con due sabotaggi indipendenti**:
+
+| sabotaggio | chi lo intercetta | esito |
+|---|---|---|
+| una citazione con valore falsato (`holders + 1`) | il **validatore** del motore lo scarta | rosso sul caso di controllo: il buco di capability non riceve più raccomandazione |
+| valore falsato **dopo** la validazione (aggira il primo strato) | il **test**, che rilegge dall'endpoint HTTP citato | rosso: «expected 7 to be less than or equal to 0.011» |
+
+I due strati sono indipendenti per costruzione: il validatore rilegge dagli oggetti in memoria, il test dalla risposta HTTP.
+
+**La prova live ha trovato un difetto che i test verdi non mostravano.** Primo giro: 9 raccomandazioni, **8 dalla stessa regola**, e tre regole su cinque mute. Invece di accettarlo, ho misurato perché:
+
+1. **`ESSENTIAL_MASTERY_FRAGILE` non poteva scattare mai**: agganciava F1 a F2 **per nome**, ma F1 elenca skill («Leadership», «Innovazione») e F2 gruppi («contabilità e fiscalità») — **0 coincidenze su 10** sui dati veri. Codice che sembrava scritto e non era raggiungibile. Corretto col legame reale `sys_skills.skill_group_id`, portato da F1 fino all'advisor (campo nuovo `skillGroupId`, additivo).
+2. **`UNUSED_ADVANTAGE_DEPLOY` aveva una soglia che contraddiceva la sua stessa fonte**: filtravo per quota assoluta di requisiti coperti (<0,6), ma l'unico caso reale ne ha **17 su 20 (0,85)** ed è comunque `UNUSED_ADVANTAGE`, perché F2 giudica per **percentile** fra le capability del tenant. Due verità sullo stesso dato. Soglia **ritirata**: il criterio è il verdetto di F2.
+3. **`INSUFFICIENT_COVERAGE_INSTRUMENT`** è corretta e inerte: copertura minima osservata **0,90** contro soglia 0,50. Nessun caso oggi, precondizione verificabilmente assente.
+
+Dopo le correzioni: **10 raccomandazioni, 3 regole attive**, 0 scartate.
+
+**Perché la quinta regola tace ancora, misurato e non presunto**: **40 delle 62 skill richieste dalle posizioni non hanno un gruppo** (`skill_group_id` nullo). Il ponte ora è corretto — un test lo dimostra — ma le capability essenziali del tenant sono in larga parte non classificate, e l'unica classificata ha 0 possessori (è un buco, che copre l'altra regola). È una lacuna di **dati**, non di codice.
+
+**Prove**: **12 test verdi**, fra cui «ogni citazione è verificabile» (rilegge ogni valore dall'endpoint che la citazione dichiara, con un contatore che impedisce al test di passare senza aver controllato nulla), «la traccia è registrata prima di essere mostrata», «ri-derivare non fa crescere la tabella», «ogni regola o produce, o ha la precondizione dimostrabilmente assente» — quest'ultimo è la guardia contro il codice morto travestito da capability. **44/44** sulle quattro suite delle fonti. **LIVE** su :3001 con login reale: 10 raccomandazioni con le loro fonti, `/audit` rilegge 10 righe. Migration 000228 applicata due volte, idempotente. `typecheck`, `typecheck:test`, `lint` puliti.
+
+**Cosa manca per chiudere #58** (fase B): pannello dentro `/org-director`, chiavi i18n `advisor.rule.*` IT/EN, E2E Playwright con login reale.
+
+**Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
+1. **Il cancello di esposizione non vede le tabelle scritte dal runtime**: `check_exposure.py` deriva le «tabelle scritte» dai soli **seed SQL** (`INSERT INTO sys.…` nei file di `db/seeds/`). `sys_advisor_suggestions` è scritta dal codice applicativo, quindi resta fuori dal suo perimetro — qui è esposta da `/v1/advisor/audit`, ma il cancello non l'avrebbe segnalata se non lo fosse stata.
+2. **40 su 62 skill richieste senza gruppo**: limita F2 e rende inerte una regola dell'advisor. Si lega alla scoperta di P2-05 (metà delle skill in gioco senza categoria).
 
 ---
 

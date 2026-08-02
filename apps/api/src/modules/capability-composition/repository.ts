@@ -324,6 +324,8 @@ export interface EssentialRankRow {
   skillId: string;
   skillCode: string;
   skillName: string;
+  /** Gruppo della skill: e' il ponte verso F2, che aggrega per gruppo (S1041, #58). */
+  skillGroupId: string | null;
   positionsRequiring: number;
   criticalPositions: number;
   econPercentile: number; // [0,1] percentile of avg comp-band value across requiring positions
@@ -355,7 +357,7 @@ export async function loadEssentialRankInputs(
     tenantClause = `AND p.position_tenant_id = $${params.length}`;
   }
   const res = await q.query<{
-    skill_id: string; skill_code: string; skill_name: string;
+    skill_id: string; skill_code: string; skill_name: string; skill_group_id: string | null;
     positions_requiring: number; critical_positions: number;
     avg_econ: string | null; crit_share: string; holders: number; avg_held_rank: string | null;
   }>(
@@ -383,7 +385,7 @@ export async function loadEssentialRankInputs(
                 ON pl.skill_proficiency_level_code = us.user_skill_proficiency
         GROUP BY us.user_skill_skill_id
      )
-     SELECT s.skill_id, s.skill_code, s.skill_name,
+     SELECT s.skill_id, s.skill_code, s.skill_name, s.skill_group_id,
             d.positions_requiring::int, d.critical_positions::int,
             d.avg_econ, d.crit_share::text,
             COALESCE(sup.holders, 0)::int AS holders,
@@ -416,6 +418,7 @@ export async function loadEssentialRankInputs(
       skillId: r.skill_id,
       skillCode: r.skill_code,
       skillName: r.skill_name,
+      skillGroupId: r.skill_group_id,
       positionsRequiring: r.positions_requiring,
       criticalPositions: r.critical_positions,
       econPercentile: econPercentile(avgEcon),

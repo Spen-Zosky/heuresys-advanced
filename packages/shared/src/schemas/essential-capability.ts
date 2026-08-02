@@ -20,6 +20,13 @@ export const EssentialCapabilityItemSchema = z.object({
   skillId: z.uuid(),
   skillCode: z.string(),
   skillName: z.string(),
+  /**
+   * Il gruppo a cui la skill appartiene — il ponte verso la scorecard VRIO, che ragiona per
+   * gruppo e non per skill. Aggiunto S1041: senza di esso l'unico aggancio possibile era il
+   * NOME, e nome-skill contro nome-gruppo non coincide mai (misurato: 0 su 10). Nullable
+   * perche' non tutte le skill del catalogo sono classificate.
+   */
+  skillGroupId: z.uuid().nullable(),
   // demand side
   positionsRequiring: z.number().int().min(0),
   criticalPositions: z.number().int().min(0),

@@ -51,7 +51,56 @@ describe("/v1/user-timeline + /v1/me/timeline (D5 #49)", () => {
       ["paolo.caputo@rtl-bank.org"],
     );
     paoloSubtree = await orgSubtreeUserIds(pool, p.rows[0]!.id);
+
+    await ensureTimelineFixture();
   });
+
+/**
+ * La storia e' popolata da `db/scripts/import-d5-timeline.sh`, che gira dove vivono i dati
+ * legacy. Sul clone di CI la tabella esiste (mig 000222) ma e' VUOTA, e questi test
+ * fallivano su `toBeGreaterThan(0)` — verdi in locale, rossi in CI, che e' il modo peggiore
+ * di sbagliare (scoperto S1041).
+ *
+ * Qui si semina il minimo indispensabile SOLO quando la tabella e' vuota per il tenant, cosi'
+ * la suite prova la stessa meccanica ovunque: dove la storia reale c'e' si verifica su quella,
+ * dove non c'e' si verifica su un innesto deterministico. L'isolamento transazionale per-file
+ * (D-52) rollbacka l'innesto a fine file: nessun residuo sul DB condiviso.
+ */
+async function ensureTimelineFixture(): Promise<void> {
+  const { rows } = await pool.query<{ n: string }>(
+    `SELECT count(*)::text AS n
+       FROM sys.sys_user_timeline_events t
+       JOIN sys.sys_users u ON u.user_id = t.user_timeline_event_user_id
+      WHERE u.user_tenant_id = (SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1)`,
+    [tommasoUserId],
+  );
+  if (Number(rows[0]!.n) > 0) return; // storia reale presente: non si tocca nulla
+
+  // Due persone (una nel sotto-albero di paolo, una no), tre tipi, date decrescenti:
+  // abbastanza da esercitare ordinamento, filtro per tipo, finestra temporale e org-gate.
+  const subjectInSubtree = paoloSubtree[0] ?? tommasoUserId;
+  await pool.query(
+    `INSERT INTO sys.sys_user_timeline_events (
+       user_timeline_event_tenant_id, user_timeline_event_user_id, user_timeline_event_type,
+       user_timeline_event_occurred_at, user_timeline_event_summary, user_timeline_event_payload,
+       user_timeline_event_external_code)
+     SELECT u.user_tenant_id, v.uid, v.etype, v.occurred::timestamptz, v.summary,
+            jsonb_build_object('legacy_event_type', v.legacy), v.code
+       FROM (VALUES
+         ($1::uuid, 'HIRE',             '2019-03-01', 'Assunzione',            'hire',   'TESTFIX::TL::1'),
+         ($1::uuid, 'LEVEL_CHANGE',     '2022-06-15', 'Passaggio di livello',  'level',  'TESTFIX::TL::2'),
+         ($1::uuid, 'REVIEW_COMPLETED', '2024-11-20', 'Valutazione conclusa',  'review', 'TESTFIX::TL::3'),
+         ($2::uuid, 'HIRE',             '2020-09-10', 'Assunzione',            'hire',   'TESTFIX::TL::4'),
+         ($2::uuid, 'SALARY_CHANGE',    '2023-04-05', 'Variazione retributiva','salary', 'TESTFIX::TL::5')
+       ) AS v(uid, etype, occurred, summary, legacy, code)
+       JOIN sys.sys_users u ON u.user_id = v.uid
+     -- l'indice unico e' PARZIALE (WHERE ... IS NOT NULL): l'ON CONFLICT deve ripetere
+     -- la stessa clausola, altrimenti PG non trova il vincolo corrispondente
+     ON CONFLICT (user_timeline_event_external_code)
+       WHERE user_timeline_event_external_code IS NOT NULL DO NOTHING`,
+    [tommasoUserId, subjectInSubtree],
+  );
+}
 
   afterAll(async () => {
     await suite.app.close();

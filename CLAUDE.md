@@ -35,6 +35,16 @@ Historical records live in `docs/archive/` and are **not** SoT. When state chang
 
 ## Session start
 
+**Two modes, declared by the user's first message** (`docs/kb/xtras/SESSION_MODES.md`):
+
+- **`avvia sessione`** → `canonical`. Everything below applies unchanged.
+- **`avvia sessione lab`** → `lab`. Read-only analysis session, meant to run **in parallel** to a development one: verify gate skipped for that session alone, writes blocked at the tool layer, artifacts go to `<parent of repo>/heuresys-design-lab/`. Reading is unrestricted — a blocked read is a guard defect. Authenticated browsing is allowed (Chrome first). **Do not present the action menu**: it is not a development session.
+- Anything else → `canonical`. Fail-safe: forgetting the command never opens a hole.
+
+The mode is state on disk keyed by `session_id`, written by a `UserPromptSubmit` hook before the model sees the message — it does not depend on remembering to activate it.
+
+---
+
 After the infra hooks (tunnel/db/branch), **before** asking what to do or starting work, build the action menu from all live sources — never from memory. ONE command, ONE model round:
 
 ```bash
@@ -63,6 +73,7 @@ Standard workspace scripts (`install`, `dev`, `build`, `typecheck`, `lint`, `tes
 | Storia RTL 36 mesi | `bash db/scripts/storia36.sh custodia` (regge ancora?) · `... avanzamento` (portala a ieri) · `... custodia --repair-missing`. Triage e trappole nella skill `storia36-custodia`; stato in `.storia36/PROGRESS.md`. Un timer settimanale la esegue su VM e linux-pc |
 | **Session start** (menu + health, ONE round) | `python docs/kb/tools/session_start.py` — canonical boot command |
 | Status dashboard (full live health, on demand) | `python docs/kb/tools/status_dashboard.py` / `pnpm status` |
+| Session mode — diagnostica e autodiagnosi | `sh scripts/hooks/hook.sh mode <session_id>` · `... selftest` · `... gc` (→ `docs/kb/xtras/SESSION_MODES.md`) |
 
 PowerShell scripts are the Windows canonical; `.sh` siblings exist for bash/SSH-to-VM use. Every `db/scripts/*.{ps1,sh}` is idempotent and safe to re-run.
 

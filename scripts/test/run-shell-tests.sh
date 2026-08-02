@@ -20,7 +20,7 @@ section() { printf '\n\033[1m== %s ==\033[0m\n' "$*"; }
 section "bash -n syntax gate (scripts/ + db/scripts/)"
 while IFS= read -r f; do
   if bash -n "$f" 2>/dev/null; then ok "bash -n $f"; else fail "bash -n $f"; fi
-done < <(ls scripts/*.sh scripts/test/*.sh db/scripts/*.sh db/scripts/_lib/*.sh 2>/dev/null)
+done < <(ls scripts/*.sh scripts/hooks/*.sh scripts/test/*.sh db/scripts/*.sh db/scripts/_lib/*.sh 2>/dev/null)
 
 # ------------------------------------------------------------ B. shellcheck
 section "shellcheck (severity=error)"
@@ -231,6 +231,95 @@ if [ -f "$CG" ]; then
   else fail "vm-deploy gate ordering (must precede pre-deploy snapshot)"; fi
 else
   fail "$CG missing"
+fi
+
+# -------------------------------------------- N. session modes (canonical|lab)
+# Two sessions can run on this working tree at once: one developing, one doing
+# read-only analysis. The mode is state on disk keyed by session_id, so the
+# hooks can treat them differently AT THE SAME MOMENT. These tests assert the
+# two treatments are OPPOSITE — a fix that simply silences the gate for
+# everyone would pass a naive check and fail here.
+section "session modes — scripts/hooks/"
+HK="scripts/hooks/hook.sh"
+if [ -f "$HK" ]; then
+  if sh "$HK" selftest >/dev/null 2>&1; then
+    ok "session_mode selftest (guard decisions + registry fail-safe + parser)"
+  else
+    sh "$HK" selftest 2>&1 | sed 's/^/      /'
+    fail "session_mode selftest"
+  fi
+
+  SL='__shelltest_lab__'; SC='__shelltest_canon__'
+  pay() { printf '{"session_id":"%s","tool_name":"%s","tool_input":%s}' "$1" "$2" "$3"; }
+
+  sh "$HK" set "$SL" lab       >/dev/null 2>&1
+  sh "$HK" set "$SC" canonical >/dev/null 2>&1
+  [ "$(sh "$HK" mode "$SL")" = "lab" ]       && ok "marker: lab session reads back as lab" \
+                                             || fail "marker lab"
+  [ "$(sh "$HK" mode "$SC")" = "canonical" ] && ok "marker: canonical session reads back as canonical" \
+                                             || fail "marker canonical"
+  [ "$(sh "$HK" mode "__never_marked__")" = "canonical" ] \
+      && ok "fail-safe: unmarked session defaults to canonical (never permissive)" \
+      || fail "fail-safe default"
+
+  # --- guard: writes denied in lab, allowed in canonical, reads ALWAYS allowed
+  W="$(pay "$SL" Write '{"file_path":"'"$ROOT"'/apps/api/src/x.ts"}')"
+  printf '%s' "$W" | sh "$HK" lab-guard >/dev/null 2>&1
+  [ $? -eq 2 ] && ok "guard: lab session cannot write inside the repo" || fail "guard lab write"
+
+  W="$(pay "$SC" Write '{"file_path":"'"$ROOT"'/apps/api/src/x.ts"}')"
+  if printf '%s' "$W" | sh "$HK" lab-guard >/dev/null 2>&1; then
+    ok "guard: canonical session writes freely (guard is inert outside lab)"
+  else fail "guard must not touch canonical sessions"; fi
+
+  GUARD_READ_FAIL=0
+  for R in \
+    'Read {"file_path":"'"$ROOT"'/apps/api/src/server.ts"}' \
+    'Read {"file_path":"'"$ROOT"'/.env"}' \
+    'Grep {"pattern":"x","path":"'"$ROOT"'"}' \
+    'Bash {"command":"git log --oneline -3"}' \
+    'Bash {"command":"psql -c \"SELECT 1;\""}' \
+    'Bash {"command":"pnpm status"}' \
+    'Bash {"command":"ssh linux-pc systemctl is-active heuresys-api"}' \
+    'Bash {"command":"cat apps/api/package.json"}' ; do
+    T="${R%% *}"; I="${R#* }"
+    printf '%s' "$(pay "$SL" "$T" "$I")" | sh "$HK" lab-guard >/dev/null 2>&1 \
+      || GUARD_READ_FAIL=$((GUARD_READ_FAIL+1))
+  done
+  [ "$GUARD_READ_FAIL" = 0 ] \
+      && ok "guard: 8/8 read categories pass in lab (a blocked read is a defect)" \
+      || fail "guard blocks $GUARD_READ_FAIL read(s) in lab mode"
+
+  # --- stop gate: opposite treatment for the two sessions, same working tree
+  LABOUT="$(printf '{"session_id":"%s","hook_event_name":"Stop"}' "$SL" | sh "$HK" stop-gate 2>/dev/null)"
+  [ -z "$LABOUT" ] && ok "stop gate: silent for a lab session (turn can close)" \
+                   || fail "stop gate must not block lab: $LABOUT"
+
+  # Equivalence, not a hardcoded verdict: whatever the gate says today, a
+  # canonical session must say exactly the same thing it said before this change.
+  CANOUT="$(printf '{"session_id":"%s","hook_event_name":"Stop"}' "$SC" | sh "$HK" stop-gate 2>/dev/null)"
+  DIRECT="$(python docs/kb/tools/verify_gate.py check --hook 2>/dev/null || true)"
+  [ "$CANOUT" = "$DIRECT" ] \
+      && ok "stop gate: canonical session gets verify_gate verbatim (no behaviour drift)" \
+      || fail "stop gate drift — wrapper='$CANOUT' direct='$DIRECT'"
+
+  # --- prompt parsing writes the marker deterministically (not model-dependent)
+  SP='__shelltest_prompt__'
+  printf '{"session_id":"%s","prompt":"avvia sessione lab"}' "$SP" | sh "$HK" prompt-hook >/dev/null 2>&1
+  [ "$(sh "$HK" mode "$SP")" = "lab" ] && ok "'avvia sessione lab' marks the session lab" \
+                                       || fail "prompt-hook lab"
+  printf '{"session_id":"%s","prompt":"avvia sessione"}' "$SP" | sh "$HK" prompt-hook >/dev/null 2>&1
+  [ "$(sh "$HK" mode "$SP")" = "canonical" ] && ok "'avvia sessione' marks the session canonical" \
+                                             || fail "prompt-hook canonical"
+  printf '{"session_id":"%s","prompt":"che ne pensi di avvia sessione lab?"}' "$SP" | sh "$HK" prompt-hook >/dev/null 2>&1
+  [ "$(sh "$HK" mode "$SP")" = "canonical" ] && ok "a mention inside a sentence does not switch mode" \
+                                             || fail "prompt-hook false positive"
+
+  MDIR="$(cd "$ROOT/.." && pwd)/.heuresys-session-mode"
+  rm -f "$MDIR/__shelltest_lab__.json" "$MDIR/__shelltest_canon__.json" \
+        "$MDIR/__shelltest_prompt__.json" "$MDIR/__selftest__.json" 2>/dev/null
+else
+  fail "$HK missing"
 fi
 
 # ---------------------------------------------------------------- summary

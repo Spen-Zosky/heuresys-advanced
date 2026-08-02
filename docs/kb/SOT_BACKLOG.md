@@ -12,6 +12,19 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
+- **#84 Le rules path-scoped si caricano quando servono?** · status: ACTIVE
+  - priority: P3 · effort: ~10 min (verifica sul campo) · doc: claude_service_workspace/[Plans]/PIANO-adeguamento-ecosistema-claude-opus5-fable5_2026-08-01.md
+  - note: S1039 ha spostato pattern-moduli-API, sicurezza/auth, migrazioni DB e test da CLAUDE.md a `.claude/rules/*.md` con frontmatter `paths`. **Meta' verificata**: all'avvio non si caricano (misurato con `/context`: i memory files sono 3, nessuna rule) → il `paths` e' onorato. **Da verificare**: che si carichino QUANDO servono. Prova: leggere un file sotto `apps/api/`, poi `/context` — se compare `api-module-pattern.md` fra i memory files, chiuso. Se non compare mai, il contenuto va spostato in una skill invocabile (nessuna informazione persa, solo un meccanismo diverso).
+- **#85 AGENTS.md divergente dal CLAUDE.md rifattorizzato** · status: WAIT-INPUT
+  - input-richiesto: se e quando rigenerare `AGENTS.md` dal `CLAUDE.md` nuovo
+  - perche-solo-tuo: `AGENTS.md` e' il file del canale Codex; il CLAUDE.md stabilisce che **non e' di Claude da mantenere** e che i due canali restano separati by design. La rigenerazione passa dal canale Codex, non da qui.
+  - priority: P3 · effort: n/a (decisione) · doc: CLAUDE.md §"Codex read-only audit channel"
+  - note: S1039 ha portato `CLAUDE.md` da 38.393 a 20.990 caratteri. `AGENTS.md` e' fermo a 36.602 e untracked: prima del refactor i due file erano identici per 158 righe su 186, ora divergono davvero. Non toccato di proposito (invariante di progetto). Nessun impatto sul lavoro CLI.
+- **#86 claude login su VM e linux-pc** · status: WAIT-INPUT
+  - input-richiesto: eseguire `claude login` su `oracle-vm-default` e su `linux-pc`
+  - perche-solo-tuo: e' un flusso OAuth interattivo (browser + conferma umana), non eseguibile via SSH non presidiato
+  - priority: P3 · effort: ~5 min · doc: memoria `ref_claude_ecosystem_alignment`
+  - note: rilevato in S1039 durante l'allineamento dell'ecosistema: lo smoke test headless (`claude -p`) fallisce l'autenticazione su **entrambi** i cloni — i file di credenziali sono presenti ma i token non sono validi (coerente con "credenziali OAuth forward-only"). **L'allineamento e' riuscito** e viene mantenuto; e' solo la sessione di prova che non parte. Finche' non fai il login, la CLI su quelle macchine non e' utilizzabile. Stato pre-esistente, non causato dall'adeguamento.
 - **#4 go-to-market** · status: WAIT-INPUT (pricing page — numeri prezzi/tier solo da Enzo)
   - input-richiesto: i numeri prezzi/tier della pricing page (importi, nomi piani, feature per tier)
   - perche-solo-tuo: decisione commerciale/di prodotto; la DoD vieta di chiudere la pagina con placeholder

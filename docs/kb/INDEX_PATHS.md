@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-01T15:34:43Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2724**
+**Generato**: 2026-08-02T00:26:02Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2730**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -12,7 +12,7 @@
 | api-core | 29 |
 | api-module | 324 |
 | ci | 17 |
-| claude-config | 31 |
+| claude-config | 36 |
 | config | 124 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 42 |
 | db-seed | 147 |
-| doc-canonical | 526 |
+| doc-canonical | 527 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 328 |
 | ux-design-archive | 80 |
 | web-source | 223 |
-| **TOTALE** | **2724** |
+| **TOTALE** | **2730** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2166 |
+| live | 2172 |
 
 ## File per categoria
 
@@ -461,10 +461,15 @@
 ### claude-config
 
 - `D:\heuresys-advanced\.claude\launch.json` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\rules\api-module-pattern.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\rules\db-migrations.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\rules\security-auth.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\rules\tests.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\settings.local.json` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\consolida-pagina\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\consolida-pagina\references\functional_areas.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\dashboards-jobs\SKILL.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.claude\skills\full-alignment-deploy\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\multi-tenant-validator\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\SKILL.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.claude\skills\project-atlas\references\LEARNINGS.md` · *live* · git-tracked
@@ -1664,6 +1669,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\status_dashboard.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\sync.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\sync.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\verify_gate.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\zp_classify.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\zp_evidence.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\zp_gate.py` · *live* · git-tracked

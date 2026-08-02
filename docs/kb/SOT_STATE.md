@@ -8,6 +8,73 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
+## Delta S1039 (2026-08-01) — adeguamento dell'ecosistema Claude a Opus 5 / Fable 5 + cancello di verifica
+
+HEAD **`40f05555`** (7 commit da S1038). **Sessione di ecosistema, non di prodotto**: nessun file
+sotto `apps/`, `packages/` o `db/` toccato. Counts **ri-derivati e IDENTICI a S1038**: 218 file
+migration `000001..000220` · utenti **163** · posizioni **181** · RBAC **13 ruoli / 204 permessi /
+908 mappature** · **206** tabelle `sys.*` (BASE TABLE) · voci sidebar attive **48** · file di test
+API **223** · spec E2E **85**.
+
+**`CLAUDE.md` di progetto: 38.393 → 20.990 caratteri**, 261 → ~160 righe (sotto la soglia di 200
+raccomandata dalla documentazione Claude Code). Verificato uno per uno che i **17 invarianti non
+negoziabili** (I1..I20, RD-08/09, ADR-0011) siano sopravvissuti **verbatim**, insieme alla
+Definition of Done ADR-0026, alla OUTPUT RULE S1011, a "What NOT to touch", alle regole `NEVER` del
+Design System e alla dottrina LIVE DATA E2E ONLY.
+
+**Nasce `.claude/rules/`** (4 file, caricati solo sul percorso corrispondente): `api-module-pattern`
+(`apps/api/**`, `packages/shared/**` — entry split, catena 13 plugin, pattern moduli in 7 passi),
+`security-auth` (auth/middleware/plugins — Argon2id, JWT, refresh rotation, CSRF, 11 ruoli,
+personas), `db-migrations` (`db/**`), `tests` (test e spec — Vitest singleThread, isolamento
+transazionale D-52, wrapper Node 22 per Playwright D-36). Più la skill `full-alignment-deploy` per
+la dottrina di allineamento cloni. **Verificato con `/context`**: all'avvio nessuna rule compare fra
+i memory files → il frontmatter `paths` è onorato (se fosse malformato avrebbero aggiunto ~5k token).
+
+**Tagliato perché derivabile o duplicato**: l'albero delle directory (lo mostra `ls`) e la sezione
+"Required infrastructure at session start", che ridescriveva ciò che `scripts/session-boot.ps1` già
+verifica e stampa a ogni avvio (tunnel, pgpass, DB, branch, dirty, unpushed, lint).
+
+**Cancello di verifica — `docs/kb/tools/verify_gate.py` + hook `Stop`/`SubagentStop`** in
+`.claude/settings.local.json`. Chiude un buco strutturale: i tool di verifica esistevano
+(`zp_gate`, `zp_zero_check`, `zp_evidence`, `ci-gate.sh`, 10 workflow CI) ma **nessun hook li
+chiamava** — erano un'istruzione, non un meccanismo. Principio: il verdetto è funzione dello stato
+osservabile, mai della conversazione — `input_hash = sha256(HEAD + git status --porcelain + git diff
+HEAD)`; se lo stato cambia il verdetto scade da solo, e rieseguire è idempotente. Sottocomandi
+`route` / `run` / `check` (`--hook` emette il JSON di blocco). Routing dal `git diff` che **riusa i
+trigger dei workflow CI** perché cancello locale e CI non divergano: `apps/api/`+`packages/shared/`
+→ typecheck+test-api · `apps/web/`+`apps/showcase/` → typecheck+lint · `db/migrations/` → migrate +
+ri-esecuzione per idempotenza · `scripts/` → shell-tests · `docs/kb/SOT_`/`DEBT_`/`.handoff/` +
+`handoff_lint.py` → handoff-lint. Playwright **non** instradato automaticamente (costa minuti): si
+chiede con `run --with-e2e`; la prova live resta obbligatoria per chiudere un work-item, ma non è il
+cancello di fine turno. Il `check` è istantaneo (confronta hash, non esegue le suite); per
+`stop_hook_active` blocca **una volta per turno** — un ciclo di correzione forzato in sessione,
+mentre i cicli multipli restano appannaggio del driver esterno. Freno: `.zp/verify-off`. Provato sul
+campo su tutte e quattro le vie: routing, verdetto scaduto, freno, ritorno a verde.
+
+**Regola di convivenza Cowork/CLI scritta dove mancava** (§Source of Truth): l'unico writer e
+committer di `docs/kb/` è Claude Code CLI; Cowork e Desktop sono read-only e propongono con un
+append a `docs/kb/COWORK_INBOX.md`; `cowork_code_exchange/` e `cowork_reserved/` restano archivio
+read-only. Il vincolo esisteva **solo** nelle preferenze globali di claude.ai — verificato che il
+`CLAUDE.md` non l'avesse mai contenuto, nemmeno prima del refactor.
+
+**Correzione a `scripts/align-claude-ecosystem.sh`**: `PORTABLE_PATHS` non conteneva `reference/`,
+la directory nuova a cui il `CLAUDE.md` globale rimanda. Propagare senza la correzione avrebbe messo
+sui cloni un file che punta a percorsi inesistenti. Aggiunte `reference` e `rules` al catalogo e al
+wipe gestito, più un preflight che fallisce forte.
+
+**Fuori da questo repo, per contesto**: `~/.claude/CLAUDE.md` 29.950 → 8.953 caratteri; plugin
+`human-resources-plus` disabilitato (48 skill + 6 agenti mai usati in 50 sessioni); `effortLevel`
+`xhigh` → `high` (default Opus 5); nuova regola **R24** (pianificazione, simulazione, chiusura) con
+guard-rail negli script di bootstrap che ne verifica la presenza a ogni avvio su tutte e tre le
+macchine. Misura `/context`: contesto residente in una sessione su questo progetto **−25.600 token**
+(da ~47.500 a ~21.900). Piano completo e paracadute:
+`claude_service_workspace/[Plans]/PIANO-adeguamento-ecosistema-claude-opus5-fable5_2026-08-01.md`.
+
+**Nuovi item**: **#84** (verificare che le rules si carichino quando servono) · **#85** WAIT-INPUT
+(`AGENTS.md` ora divergente — rigenerazione di competenza del canale Codex) · **#86** WAIT-INPUT
+(`claude login` su VM e linux-pc: lo smoke headless fallisce l'autenticazione su entrambi, stato
+pre-esistente non causato dall'adeguamento; l'allineamento invece è riuscito ed è mantenuto).
+
 ## Delta S1038 (2026-08-01) — l'applicazione smette di essere solo consultabile: si governa dall'interfaccia
 
 HEAD **`26535ec8`** (18 commit). Counts ri-derivati: **218 file migration** `000001..000220`

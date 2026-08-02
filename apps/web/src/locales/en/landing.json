@@ -1,5 +1,8 @@
 {
-  "nav": { "login": "Sign in", "cta": "Book a demo" },
+  "nav": {
+    "login": "Sign in",
+    "cta": "Book a demo"
+  },
   "hero": {
     "title": "The EU-native, ESCO-based, explainable Skills & Org Intelligence platform for the regulated mid-market",
     "subtitle": "Govern skills, positions and organizational capability on a European public standard (ESCO) with auditable, AI-Act-ready recommendations.",
@@ -7,9 +10,18 @@
   },
   "wedges": {
     "title": "Why Heuresys",
-    "esco": { "title": "ESCO-native, open", "body": "An EU public standard: no proprietary lock-in, cross-country benchmarking, interoperability." },
-    "explain": { "title": "Explainable = AI-Act compliance", "body": "Every recommendation (succession, flight-risk, gap) is deterministic and auditable before a regulator. No black-box." },
-    "position": { "title": "Position-centric model", "body": "The position is a first-class entity: org-design and the structure↔process↔skill link that ERPs charge a fortune for." }
+    "esco": {
+      "title": "ESCO-native, open",
+      "body": "An EU public standard: no proprietary lock-in, cross-country benchmarking, interoperability."
+    },
+    "explain": {
+      "title": "Explainable = AI-Act compliance",
+      "body": "Every recommendation (succession, flight-risk, gap) is deterministic and auditable before a regulator. No black-box."
+    },
+    "position": {
+      "title": "Position-centric model",
+      "body": "The position is a first-class entity: org-design and the structure↔process↔skill link that ERPs charge a fortune for."
+    }
   },
   "icp": {
     "title": "Who it's for",
@@ -27,7 +39,12 @@
     "email": "Work email",
     "role": "Role (optional)",
     "companySize": "Company size",
-    "sizes": { "LT_50": "Under 50", "50_250": "50–250", "250_2000": "250–2000", "GT_2000": "Over 2000" },
+    "sizes": {
+      "LT_50": "Under 50",
+      "50_250": "50–250",
+      "250_2000": "250–2000",
+      "GT_2000": "Over 2000"
+    },
     "message": "Message (optional)",
     "consent": "I consent to my data being processed so you can contact me (see <privacy>privacy notice</privacy>).",
     "submit": "Send request",
@@ -36,13 +53,29 @@
     "error": "Submission failed. Please try again."
   },
   "privacy": {
-    "title": "Privacy Notice",
-    "intro": "Pursuant to Art. 13 of Regulation (EU) 2016/679 (GDPR), we provide the following information.",
-    "dataCollected": "We collect the data you submit via the contact form: full name, company, work email and, optionally, role and message.",
-    "purpose": "Your data is processed solely to respond to your demo request and to contact you about Heuresys services.",
-    "legalBasis": "The legal basis for processing is your explicit consent (Art. 6(1)(a) GDPR).",
-    "retention": "Data is retained for the time strictly necessary to handle your request and, in any event, no longer than 24 months from collection. You may withdraw consent at any time by writing to the address below.",
-    "contact": "Data controller: Heuresys S.r.l. — privacy@heuresys.com"
+    "title": "Privacy notice",
+    "updated": "Last updated: 3 August 2026",
+    "intro": "Under Article 13 of Regulation (EU) 2016/679 (GDPR), this notice explains how we process the data you provide through the forms on this site.",
+    "controllerTitle": "Data controller",
+    "controller": "Heuresys S.r.l. — for any request concerning your data, write to privacy@heuresys.com.",
+    "dataTitle": "What we collect",
+    "data": "Through the contact form we collect: your name, company and e-mail address; optionally your role, your company's size and a free-text message. We also record which page the request came from (site, investors page or demo page), the date of your consent and the version of the notice you accepted.",
+    "requiredTitle": "What is required",
+    "required": "Name, company and e-mail address are needed in order to reply to you: without them the request cannot be submitted. Role, company size and message are optional, and leaving them out has no consequence.",
+    "purposeTitle": "Why we process them",
+    "purpose": "Your data is used solely to respond to your request and to contact you about Heuresys services. We do not use it for profiling, we do not subject it to automated decision-making, and we do not send unsolicited marketing.",
+    "legalBasisTitle": "Legal basis",
+    "legalBasis": "The explicit consent you give by submitting the form (Article 6(1)(a) GDPR). Consent is recorded with its date and the version of this notice, so you always know what you agreed to.",
+    "recipientsTitle": "Who we share them with",
+    "recipients": "No one. Your data stays in our systems and is neither disclosed nor sold to third parties, except where required by law or by a judicial authority.",
+    "retentionTitle": "How long we keep them",
+    "retention": "No longer than 24 months from collection. Deletion does not depend on someone remembering: the window is registered in the retention system, which removes expired data. You may withdraw consent earlier, in which case the data is deleted on request.",
+    "rightsTitle": "Your rights",
+    "rights": "You may at any time request access to your data, its rectification or erasure, restriction of processing and portability; you may object to processing and withdraw consent, without affecting the lawfulness of processing carried out before withdrawal (Articles 15-22 GDPR). To exercise them, write to privacy@heuresys.com.",
+    "complaintTitle": "Complaints",
+    "complaint": "If you believe the processing of your data infringes the Regulation, you have the right to lodge a complaint with the Italian Data Protection Authority (www.garanteprivacy.it) or with the supervisory authority of the country where you reside.",
+    "securityTitle": "Security",
+    "security": "Access to the data is limited to authorised staff through authentication and named permissions; every administrative access is logged."
   },
   "whistleblowing": {
     "title": "Whistleblowing reporting channel",

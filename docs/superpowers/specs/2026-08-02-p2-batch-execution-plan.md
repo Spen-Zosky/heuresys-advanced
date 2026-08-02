@@ -27,7 +27,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | **P2-07** | **#58** — F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie) | Claude | Ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte | ✅ **DONE** — fase A (motore + API + audit) e fase B (pagina + i18n + E2E) |
 | **P2-08** | **#54** — E5 recruiting/ATS (cluster `/recruiting`) | Claude | A fasi con commit atomici; ogni fase chiude con prova LIVE | `TODO` |
 | **P2-09** | **#9/#10/#11** — audit forense 100X (WS-L + triage + gate) | Claude | WS-L eseguito, triage deciso per riga, gate meccanico verde | `TODO` |
-| **P2-10** | **#4** — GTM v1-deferrals (follow-up del primo deliverable) | Claude (parte non-pricing) | Deliverable follow-up chiuso; i numeri prezzi/tier restano `WAIT-INPUT` su Enzo (item #4 WAIT-INPUT, distinto) | `TODO` |
+| **P2-10** | **#4** — GTM v1-deferrals (follow-up del primo deliverable) | Claude (parte non-pricing) | Deliverable follow-up chiuso; i numeri prezzi/tier restano `WAIT-INPUT` su Enzo (item #4 WAIT-INPUT, distinto) | ✅ **DONE** — vedi esito sotto |
 | **P2-11** | **#79** — cancello di esposizione | Claude | **Non è una voce discreta**: `check_exposure.py` gira come gate su OGNI voce sopra che popola tabelle. Chiude quando chiude il batch. | `CONTINUO` |
 | **P2-12** | **#87** — il genitore di un'unità organizzativa può stare in un altro tenant | Claude | Guardia nel service su create **e** update + test che tenta l'aggancio cross-tenant e attende errore tipizzato + prova LIVE | ✅ **DONE** — vedi esito sotto |
 
@@ -358,6 +358,37 @@ Tre scelte che meritano il perché:
 Il primo fallimento dei test era invece un difetto **del test**, non del codice: usavo una priorità (`NORMAL`) che il `CHECK` non ammette, l'inserimento falliva e il timeout somigliava a un push rotto. I valori sono ora derivati dai dati reali.
 
 Il teardown E2E è stato esteso: la notifica inviata a ogni corsa non ha una cancellazione lato prodotto (la posta si legge e si archivia, non si elimina), quindi senza pulizia le righe si accumulerebbero di una per corsa.
+
+### P2-10 (#4 · GTM W4) — ✅ DONE 2026-08-03
+
+Quattro deliverable, tutti misurati prima di pianificare invece che presunti dal register.
+
+**1. Le richieste di contatto si possono lavorare.** `lead_status` esisteva dal primo deliverable GTM e **nessuna superficie sapeva cambiarlo**: ogni richiesta restava `NEW` per sempre — un archivio, non una pipeline. Ora: permesso `leads:update` (mig **000232**) dato agli stessi ruoli che già leggono i lead, **ri-derivati con una sotto-query invece che elencati** (se domani `leads:read` va a un altro ruolo, la migration non resta indietro); `PATCH /v1/leads/:leadId`; pagina `/leads` con filtro per stato e voce nel registry UI.
+
+**Solo lo stato è modificabile.** Nome, azienda, e-mail e messaggio sono ciò che la persona ha dichiarato di sé, e il consenso raccolto vale su *quei* valori: una superficie che potesse riscriverli renderebbe il consenso una dichiarazione su un dato non più verificabile. Un test lo fissa — si passano anche `email` e `name`, e restano quelli di prima.
+
+**2. L'honeypot non è più muto.** La trappola anti-bot scattava e non lasciava traccia. Ora un contatore Prometheus `honeypot_trips_total{surface}` — **un contatore e non un log**: su un sito esposto il valore informativo non è il singolo evento ma l'andamento, e un log per tentativo è rumore che nessuno rilegge. La risposta al bot resta identica; l'osservabilità è per noi. Coperte **entrambe** le superfici pubbliche (lead e whistleblowing): lasciarne una muta darebbe una lettura parziale di quanto il sito viene sondato.
+
+**3. L'informativa privacy dichiarava una cosa che il sistema non faceva.** È la scoperta della voce. Il testo pubblico prometteva, dal primo deliverable GTM, conservazione «non oltre 24 mesi» — ma **`sys_leads` non era nel registro `sys_gdpr_data_map`**, quindi la sweep di conservazione non l'ha mai toccata. Non era ancora una violazione solo perché il lead più vecchio risale a pochi mesi fa.
+
+Nessun cancello automatico poteva coglierlo: **nessuno confronta ciò che un'informativa dichiara con ciò che il registro applica**. È emerso leggendo il testo pubblico e chiedendosi se fosse vero. Corretto con la mig **000233**: finestra di 730 giorni — *non* una scelta nuova, esattamente quella già promessa al pubblico. Provato LIVE: `POST /v1/gdpr/retention/run` in simulazione ora riporta `sys.sys_leads` fra le tabelle spazzate (`retentionDays: 730`, 0 righe scadute oggi).
+
+L'informativa è stata poi riscritta **completa** (art. 13 GDPR: titolare, dati, natura del conferimento, finalità, base giuridica, destinatari, conservazione, diritti, reclamo al Garante, sicurezza) e ogni affermazione è verificata contro il sistema: l'elenco dei dati corrisponde ai campi di `LeadCreateSchema`; «a nessuno» sui destinatari è vero perché il modulo lead **non invia e-mail né chiama servizi esterni** (verificato, non presunto).
+
+**Un elemento resta fuori, dichiarato**: l'eventuale trasferimento dei dati fuori dallo SEE dipende dalla regione dell'infrastruttura, che **non è confermabile dal repository**. Non l'ho dichiarato né in un senso né nell'altro: in un documento legale, un'affermazione comoda e non verificata è peggio di un'omissione. → **`blocked-on-Enzo`: la regione OCI del runtime di produzione.**
+
+**4. Accessibilità delle pagine pubbliche.** Erano l'unica parte del sito senza controllo, ed è la parte che vede chi non ci conosce ancora. Il register chiedeva «Lighthouse ≥95»; ho usato **axe-core**, già in casa e base del punteggio di accessibilità di Lighthouse: dà le violazioni per nome invece di un numero, è deterministico e non aggiunge dipendenze. **L'asticella è più alta, non più bassa**: zero violazioni `critical` *e* `serious`. Il blocco gira con stato di autenticazione **vuoto** — con la sessione di un'altra persona si misurerebbe la versione autenticata del sito.
+
+**Prove**: 17/17 sulla suite lead (25/25 con whistleblowing) · **E2E 4/4** gestione lead, incluso quello che conta — il cambio di stato **sopravvive a un ricaricamento**, perché una `select` che aggiorna solo lo stato del componente è indistinguibile da una che funziona finché qualcuno non ricarica; lo stato iniziale viene ripristinato, quelle righe sono richieste reali · **E2E 5/5 a11y pubbliche**, tutte pulite · **E2E 3/3 informativa** (tutte le sezioni rese, nessuna chiave non risolta, i 24 mesi e il reclamo presenti) · `i18n:check` **2874 × 2** in parità · typecheck ×3 · `lint` · `check_exposure` 73/73 · migration 000232 e 000233 applicate due volte, idempotenti.
+
+**Tre difetti erano nei TEST, non nel codice** — vale la pena registrarli perché sono modi tipici di sbagliare:
+1. sei fixture create dal form pubblico facevano scattare il rate-limit (5/minuto, giustamente) e il test falliva con **429**, raccontando un difetto inesistente;
+2. mi aspettavo **401** senza sessione, ma nella catena il CSRF viene prima del permesso: risponde **403**;
+3. il controllo «nessuna chiave di traduzione non risolta» usava un pattern approssimativo che intercettava la citazione legittima **`www.garanteprivacy.it`**.
+
+**Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
+1. `.next/dev/types/routes.d.ts` era **corrotto** (voci del tipo senza separatori) perché il server di sviluppo è stato interrotto a metà scrittura durante i run E2E: il typecheck falliva su un file generato. Rigenerato. Se ricapita, è quello.
+2. Nessuno verifica che le **dichiarazioni pubbliche** (informativa, termini) siano sostenute dal comportamento del sistema. Qui è emerso a mano; un controllo automatico non esiste.
 
 ---
 

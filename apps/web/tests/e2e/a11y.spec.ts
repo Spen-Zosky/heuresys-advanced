@@ -207,3 +207,29 @@ for (const [persona, pages] of Object.entries(PAGES_PER_PERSONA)) {
     }
   });
 }
+
+/**
+ * #4 GTM W4 — le pagine PUBBLICHE, sottoposte alla stessa asticella di quelle interne.
+ *
+ * Erano l'unica parte del sito senza controllo di accessibilità, ed è la parte che vede
+ * chi non ci conosce ancora: un investitore, un potenziale cliente, chi arriva da una
+ * ricerca. Sono anche le uniche pagine che si visitano SENZA sessione, quindi il blocco
+ * gira con uno stato di autenticazione vuoto — con lo storageState di un'altra persona
+ * si starebbe misurando la versione autenticata del sito.
+ *
+ * Il register chiedeva «Lighthouse ≥95». Qui si usa axe-core, che era già in casa e su
+ * cui il punteggio di accessibilità di Lighthouse è in larga parte costruito: dà le
+ * violazioni per nome invece di un numero, è deterministico e non aggiunge dipendenze.
+ * L'asticella è più alta di ≥95, non più bassa: ZERO violazioni critical e serious.
+ */
+const PUBLIC_PAGES = ["/", "/investors", "/demo", "/login", "/privacy"] as const;
+
+test.describe("a11y delle pagine pubbliche", () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  for (const route of PUBLIC_PAGES) {
+    test(`${route} has no critical a11y violations`, async ({ page }, testInfo) => {
+      await runAxeOnRoute(page, route, testInfo);
+    });
+  }
+});

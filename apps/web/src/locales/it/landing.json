@@ -1,5 +1,8 @@
 {
-  "nav": { "login": "Accedi", "cta": "Prenota una demo" },
+  "nav": {
+    "login": "Accedi",
+    "cta": "Prenota una demo"
+  },
   "hero": {
     "title": "La piattaforma Skills & Org Intelligence EU-native, ESCO-based e spiegabile per il mid-market regolato",
     "subtitle": "Governa competenze, posizioni e capacità organizzativa con uno standard pubblico europeo (ESCO) e raccomandazioni auditabili, compliant con l'AI Act.",
@@ -7,9 +10,18 @@
   },
   "wedges": {
     "title": "Perché Heuresys",
-    "esco": { "title": "ESCO-native, aperta", "body": "Standard pubblico EU: nessun lock-in proprietario, benchmarking cross-country, interoperabilità." },
-    "explain": { "title": "Spiegabile = compliance AI Act", "body": "Ogni raccomandazione (successione, flight-risk, gap) è deterministica e auditabile davanti a un regolatore. Niente black-box." },
-    "position": { "title": "Modello position-centric", "body": "La posizione è entità prima: org-design e legame struttura↔processo↔competenza che gli ERP servono a costi proibitivi." }
+    "esco": {
+      "title": "ESCO-native, aperta",
+      "body": "Standard pubblico EU: nessun lock-in proprietario, benchmarking cross-country, interoperabilità."
+    },
+    "explain": {
+      "title": "Spiegabile = compliance AI Act",
+      "body": "Ogni raccomandazione (successione, flight-risk, gap) è deterministica e auditabile davanti a un regolatore. Niente black-box."
+    },
+    "position": {
+      "title": "Modello position-centric",
+      "body": "La posizione è entità prima: org-design e legame struttura↔processo↔competenza che gli ERP servono a costi proibitivi."
+    }
   },
   "icp": {
     "title": "Per chi",
@@ -27,7 +39,12 @@
     "email": "Email di lavoro",
     "role": "Ruolo (facoltativo)",
     "companySize": "Dimensione azienda",
-    "sizes": { "LT_50": "Meno di 50", "50_250": "50–250", "250_2000": "250–2000", "GT_2000": "Oltre 2000" },
+    "sizes": {
+      "LT_50": "Meno di 50",
+      "50_250": "50–250",
+      "250_2000": "250–2000",
+      "GT_2000": "Oltre 2000"
+    },
     "message": "Messaggio (facoltativo)",
     "consent": "Acconsento al trattamento dei miei dati per essere ricontattato (vedi <privacy>informativa privacy</privacy>).",
     "submit": "Invia richiesta",
@@ -37,12 +54,28 @@
   },
   "privacy": {
     "title": "Informativa sulla privacy",
-    "intro": "Ai sensi dell'art. 13 del Regolamento (UE) 2016/679 (GDPR), ti forniamo le seguenti informazioni.",
-    "dataCollected": "Raccogliamo i dati che fornisci tramite il modulo di contatto: nome e cognome, azienda, indirizzo e-mail e, facoltativamente, ruolo e messaggio.",
-    "purpose": "I dati sono trattati al solo scopo di darti riscontro sulla richiesta di demo e di contattarti per illustrare i servizi Heuresys.",
-    "legalBasis": "La base giuridica del trattamento è il consenso esplicito da te prestato (art. 6, par. 1, lett. a GDPR).",
-    "retention": "I dati sono conservati per il tempo strettamente necessario a gestire la tua richiesta e, in ogni caso, non oltre 24 mesi dalla raccolta. Puoi revocare il consenso in qualsiasi momento scrivendo all'indirizzo indicato di seguito.",
-    "contact": "Titolare del trattamento: Heuresys S.r.l. — privacy@heuresys.com"
+    "updated": "Ultimo aggiornamento: 3 agosto 2026",
+    "intro": "Ai sensi dell'art. 13 del Regolamento (UE) 2016/679 (GDPR), ti forniamo le informazioni sul trattamento dei dati che ci fornisci attraverso i moduli di questo sito.",
+    "controllerTitle": "Titolare del trattamento",
+    "controller": "Heuresys S.r.l. — per ogni richiesta relativa ai tuoi dati puoi scrivere a privacy@heuresys.com.",
+    "dataTitle": "Quali dati raccogliamo",
+    "data": "Attraverso il modulo di contatto raccogliamo: nome e cognome, azienda e indirizzo e-mail; facoltativamente il tuo ruolo, la dimensione dell'azienda e un messaggio libero. Registriamo inoltre da quale pagina è arrivata la richiesta (sito, pagina investitori o pagina demo), la data del consenso e la versione dell'informativa che hai accettato.",
+    "requiredTitle": "Cosa è obbligatorio",
+    "required": "Nome, azienda e indirizzo e-mail sono necessari per poterti rispondere: senza, la richiesta non può essere inviata. Ruolo, dimensione dell'azienda e messaggio sono facoltativi e la loro assenza non ha alcuna conseguenza.",
+    "purposeTitle": "Perché li trattiamo",
+    "purpose": "I dati sono trattati unicamente per darti riscontro sulla tua richiesta e per contattarti in merito ai servizi Heuresys. Non li usiamo per profilazione, non li impieghiamo per processi decisionali automatizzati e non inviamo comunicazioni commerciali non richieste.",
+    "legalBasisTitle": "Base giuridica",
+    "legalBasis": "Il consenso esplicito che presti inviando il modulo (art. 6, par. 1, lett. a GDPR). Il consenso è registrato con data e versione dell'informativa, così sai sempre a cosa hai acconsentito.",
+    "recipientsTitle": "A chi li comunichiamo",
+    "recipients": "A nessuno. I dati restano nei nostri sistemi e non sono comunicati né ceduti a terzi, salvo un obbligo di legge o una richiesta dell'autorità giudiziaria.",
+    "retentionTitle": "Per quanto li conserviamo",
+    "retention": "Non oltre 24 mesi dalla raccolta. La cancellazione non dipende da un'azione manuale: la finestra è registrata nel sistema di conservazione, che rimuove i dati scaduti. Puoi comunque revocare il consenso prima, e in quel caso i dati sono cancellati su richiesta.",
+    "rightsTitle": "I tuoi diritti",
+    "rights": "Puoi chiederci in ogni momento l'accesso ai tuoi dati, la loro rettifica o cancellazione, la limitazione del trattamento e la portabilità; puoi opporti al trattamento e revocare il consenso, senza che ciò pregiudichi la liceità del trattamento svolto prima della revoca (artt. 15-22 GDPR). Per esercitarli scrivi a privacy@heuresys.com.",
+    "complaintTitle": "Reclamo",
+    "complaint": "Se ritieni che il trattamento dei tuoi dati violi il Regolamento, hai diritto di proporre reclamo al Garante per la protezione dei dati personali (www.garanteprivacy.it) o all'autorità di controllo dello Stato in cui risiedi.",
+    "securityTitle": "Sicurezza",
+    "security": "L'accesso ai dati è limitato al personale autorizzato attraverso autenticazione e permessi nominali; ogni accesso amministrativo è tracciato."
   },
   "whistleblowing": {
     "title": "Canale segnalazioni whistleblowing",

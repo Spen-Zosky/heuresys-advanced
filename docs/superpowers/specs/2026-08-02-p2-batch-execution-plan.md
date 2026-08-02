@@ -40,7 +40,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | **P3-03** | **#53** — E4 payroll ops read-extended | Claude | API+test+pagina+E2E su dati payroll reali | `TODO` |
 | **P3-04** | **#45** — C3 editing tenant & piattaforma (chiude la serie C) | Claude | CRUD reale su tenant/piattaforma, test, UI, E2E, `check_exposure.py` verde | `TODO` |
 | **P3-05** | **#50** — D4 legacy knowledge graph (`kg_nodes`/`kg_edges`, 139k) | Claude | Ingestione verificata sul volume reale + superficie che lo espone; nessun conteggio citato a memoria | `TODO` |
-| **P3-06** | **#88** — il peso economico delle posizioni è un campo vuoto | Claude | Indagine con misura, poi **decisione tecnica presa ed eseguita** (popolare o ritirare): nessuno progetta più su un campo vuoto | `TODO` |
+| **P3-06** | **#88** — il peso economico delle posizioni è un campo vuoto | Claude | Indagine con misura, poi **decisione tecnica presa ed eseguita** (popolare o ritirare): nessuno progetta più su un campo vuoto | ✅ **DONE** — vedi esito sotto |
 
 > **Voci aggiunte in S1041** (P2-12, P3-06): non sono scoperte nuove, sono item già `ACTIVE` nel register (#87 P2, #88 P3) che il mandato *«esegui i batch P2 e P3»* include e che questa tabella non mappava ancora.
 
@@ -252,6 +252,46 @@ Distribuzione dopo la correzione, sugli stessi dati: **2 sostenibili · 1 inutil
 - Le righe create dalla prova live sono state rimosse (residuo verificato: **0**).
 - `typecheck`, `typecheck:test`, `pnpm lint` puliti · `check_exposure.py` **73/73, 0 lacune**.
 - Dato reale controllato: **0 unità con genitore fuori tenant** oggi — come per #83, la guardia previene, non ripara.
+
+### P3-06 (#88) — ✅ DONE 2026-08-02
+
+**L'indagine ha trovato più di quanto il register dichiarasse: le sedi sono TRE**, con nomi quasi identici e semantiche incompatibili.
+
+| sede | copertura misurata | scala | cos'è davvero |
+|---|---|---|---|
+| `sys_positions.position_economic_weight` | **0 su 181** | — | mai popolata, eppure letta come massa di aggregazione |
+| `sys_position_compensation_profiles.economic_weight` | 13 su 172 | 0,5–1,0 | un fattore di peso, sulla scala giusta ma quasi vuoto |
+| `sys_position_economic_weight` (tabella) | 24 posizioni | **333–568** | **punti di job evaluation legacy** (`metadata.legacy.source_table = job_evaluations`) |
+
+**La trappola**: l'azione che sembrava ovvia — *«popola la colonna dalla tabella dedicata, che i dati ce li ha»* — era la peggiore possibile. Quei valori sono punti di job evaluation, **due ordini di grandezza** sopra la scala 0,5–2,0 del fattore di criticità che la colonna affianca. Sarebbero entrati senza errori, senza test rossi, e avrebbero distorto ogni aggregato di unità organizzativa. Il nome comune fra le tre sedi è ciò che rende l'errore naturale.
+
+**Il danno che c'era già**: `COALESCE(economic_weight, criticalityFactor, 1)` cadeva **sempre** sul ripiego, e la criticità è `MEDIUM` su **160 posizioni su 181** — quindi il roll-up per unità era una media **non pesata** travestita da media pesata. Misurato sul database vivo prima di toccare nulla: **2 sole masse distinte** su tutte le posizioni.
+
+**Decisione tecnica (Claude, come da mandato)**: la base economica è la **fascia retributiva** — `sys_position_compensation_profiles` → `sys_compensation_bands`, **169 su 177** posizioni RTL, 9 fasce da 34.000 a 220.000 EUR. È la stessa fonte già usata da F1 (essential ranking) e F2 (VRIO): la piattaforma resta con **una sola** nozione di valore economico invece di tre. Normalizzata per **percentile dentro il tenant**, non su scala assoluta in EUR — un valore di fascia non significa nulla da solo, e il percentile è ciò che rende il peso confrontabile fra tenant con livelli retributivi diversi (stesso ragionamento della correzione di P2-05). Una posizione senza fascia ricade sulla criticità, **mai su zero**, che la cancellerebbe in silenzio dalla media della sua unità.
+
+**La colonna non è stata eliminata**: un `DROP` è irreversibile e non serviva. La migration **000227** la lascia in schema con un `COMMENT` che dice a chi la incontra di non progettarci sopra, e ne mette uno anche sulla tabella dei punti di job evaluation — perché il prossimo a passare di lì merita di trovare la trappola già disinnescata invece di riscoprirla.
+
+**Prove (falsificabili)** — i 4 test girati **prima** della correzione, con il sorgente messo da parte e i test lasciati al loro posto: **3 rossi su 4**.
+
+| controllo | contro il codice precedente | dopo |
+|---|---|---|
+| la massa assume più dei 4 valori che la criticità può produrre | **3 distinti** (impossibile superare 4) | 10 distinti |
+| due posizioni `MEDIUM` in fasce diverse hanno massa diversa | 9 fasce → **1 sola massa** | 9 fasce → 9 masse |
+| la massa cresce con la fascia (ordine preservato) | max = min | ordinamento rispettato |
+| chi non ha fascia ricade sulla criticità, mai su zero | già verde | resta verde |
+
+Il quarto test era verde da prima, ed è giusto così: non era quello il difetto.
+
+- **LIVE** su :3001 con login reale `federica.marchetti@rtl-bank.org`, ricalcolo vero (`POST /v1/capability/composition/recompute` → 200, 340 score: 158 employee, 158 posizioni, 23 unità, 1 organizzazione).
+- **Il confronto è controllato, non impressionistico**: gli score che stavano in tabella erano *stale* e leggerli come "prima" avrebbe raccontato un cambiamento enorme e falso. Ho quindi ricalcolato **due volte sullo stesso dataset**, prima col sorgente precedente e poi con quello nuovo: mediana per unità **61,38 → 59,00**, massimo **78,49 → 78,88**, masse distinte **3 → 10**. L'effetto reale è contenuto e spiegabile; il salto apparente era un artefatto.
+- Caso che mostra il modello al lavoro: in «Direzione Back Office» la posizione scoperta (valore 0,00) è anche la più pagata e ora pesa **0,316** contro lo 0,137 delle altre cinque — prima pesava quanto loro. Un buco costoso adesso si vede.
+- Un'unità a 0,00 (`Divisione Legal & Compliance`) **non** è un effetto del cambiamento: ha una sola posizione figlia, che vale 0 per copertura di competenze dell'incumbent. Verificato sul lineage prima di attribuirlo al peso.
+- 15/15 sulla suite del modulo · **46/46** sulle cinque suite che condividono queste fondamenta (scope, F1, F2, F3, maturity) · migration 000227 applicata **due volte**, idempotente · `typecheck`, `typecheck:test`, `lint` puliti · `check_exposure.py` 73/73.
+- Registrazione della migration: il runner canonico ri-applica tutte e 225 le migration a ogni giro (>7 min, va oltre il tempo massimo di un comando), quindi l'ho registrata con la **stessa semantica del runner** — applicazione in transazione singola + upsert con `sha256`. Disco e database restano allineati: **225 file, 225 applicate**, ultima `000227`.
+
+**Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
+1. Le altre due sedi restano popolate a metà ed esposte in lettura dal modulo `compensation`. Non alimentano calcoli, quindi non rientravano in questa voce; ma `sys_position_compensation_profiles.economic_weight` (13 su 172) è un candidato naturale al ritiro con lo stesso ragionamento.
+2. Gli score di capability in tabella possono restare **stale a lungo** senza che nulla lo segnali: non c'è un `computed_at` confrontato con l'ultima modifica dei dati sorgente, né un job che ricalcoli. Chi apre la pagina non ha modo di sapere se sta guardando ieri o due mesi fa.
 
 ---
 

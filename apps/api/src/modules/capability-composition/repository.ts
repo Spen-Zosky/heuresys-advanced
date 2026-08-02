@@ -22,7 +22,8 @@ export interface PositionInput {
   ouId: string | null;
   title: string | null;
   criticality: string | null;
-  economicWeight: number | null;
+  /** Mid-point of the position's compensation band, in EUR. Null when the position has no band. */
+  economicBaseEur: number | null;
 }
 export interface OrgUnitInput {
   id: string;
@@ -69,11 +70,19 @@ export async function loadScoringInputs(tenantId: string, q: Queryable = pool): 
   const [tenant, positions, orgUnits, assignments, requirements, held, users] = await Promise.all([
     q.query<{ tenant_name: string | null }>(
       `SELECT tenant_name FROM sys.sys_tenancies WHERE tenant_id = $1`, [tenantId]),
-    q.query<{ position_id: string; ou_id: string | null; title: string | null; criticality: string | null; economic_weight: string | null }>(
-      `SELECT position_id, position_organization_unit_id AS ou_id, position_title AS title,
-              position_criticality AS criticality, position_economic_weight AS economic_weight
-         FROM sys.sys_positions
-        WHERE position_tenant_id = $1 AND position_is_active`, [tenantId]),
+    // #88 — the economic base is the compensation band, as in F1 and F2.
+    // `sys_positions.position_economic_weight` is NOT read: it is NULL on every row, so the
+    // COALESCE below it always fell through to the criticality factor, and 160 of 181 positions
+    // are MEDIUM — the org-unit roll-up was effectively an unweighted mean.
+    q.query<{ position_id: string; ou_id: string | null; title: string | null; criticality: string | null; economic_base_eur: string | null }>(
+      `SELECT p.position_id, p.position_organization_unit_id AS ou_id, p.position_title AS title,
+              p.position_criticality AS criticality,
+              avg(cb.compensation_band_mid_eur)::text AS economic_base_eur
+         FROM sys.sys_positions p
+         LEFT JOIN sys.sys_position_compensation_profiles pcp ON pcp.position_id = p.position_id
+         LEFT JOIN sys.sys_compensation_bands cb ON cb.compensation_band_id = pcp.compensation_band_id
+        WHERE p.position_tenant_id = $1 AND p.position_is_active
+        GROUP BY p.position_id, p.position_organization_unit_id, p.position_title, p.position_criticality`, [tenantId]),
     q.query<{ id: string; parent_id: string | null; name: string | null }>(
       `SELECT organization_unit_id AS id, organization_unit_parent_id AS parent_id, organization_unit_name AS name
          FROM sys.sys_organization_units
@@ -108,7 +117,7 @@ export async function loadScoringInputs(tenantId: string, q: Queryable = pool): 
     tenantName: tenant.rows[0]?.tenant_name ?? null,
     positions: positions.rows.map((p) => ({
       positionId: p.position_id, ouId: p.ou_id, title: p.title, criticality: p.criticality,
-      economicWeight: p.economic_weight === null ? null : Number(p.economic_weight),
+      economicBaseEur: p.economic_base_eur === null ? null : Number(p.economic_base_eur),
     })),
     orgUnits: orgUnits.rows.map((o) => ({ id: o.id, parentId: o.parent_id, name: o.name })),
     assignments: assignments.rows.map((a) => ({

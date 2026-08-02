@@ -7,7 +7,7 @@
  *   criticalityFactor; value = 100·Σ(effW·s)/Σ(effW); coverage = % required skills held.
  * POSITION: FTE-weighted mean of its incumbents' employee scores.
  * ORG_UNIT: hierarchical weighted mean of its DIRECT positions (weight =
- *   COALESCE(economic_weight, criticalityFactor, 1)) + its DIRECT child OUs
+ *   compensation-band percentile, falling back to criticalityFactor) + its DIRECT child OUs
  *   (weight = the child's subtree weight-mass) — mathematically the flat
  *   subtree-weighted mean, computed via post-order DFS for clean lineage.
  * ORG: weight-mass-weighted mean of the tenant's root OUs.
@@ -52,6 +52,44 @@ function criticalityFactor(c: string | null): number {
     case "LOW": return 0.5;
     default: return 1.0;
   }
+}
+
+/** Same span as criticalityFactor, so the two bases stay interchangeable in the roll-up. */
+const ECONOMIC_WEIGHT_MIN = 0.5;
+const ECONOMIC_WEIGHT_MAX = 2.0;
+
+/**
+ * Aggregation mass per position, derived from the compensation band (#88).
+ *
+ * The band is the SAME economic base already used by F1 (essential ranking) and F2 (VRIO), so
+ * the platform keeps one notion of economic value instead of three. It replaces
+ * `sys_positions.position_economic_weight`, which is NULL on every row: the old
+ * `COALESCE(economicWeight, criticalityFactor, 1)` therefore always fell through to criticality,
+ * and criticality is MEDIUM on 160 of 181 positions — so the org-unit roll-up was an unweighted
+ * mean wearing the clothes of a weighted one.
+ *
+ * Normalized by PERCENTILE within the tenant rather than by an absolute EUR scale: a band mid-point
+ * means nothing on its own (34k and 220k are both "normal" in their own market), and the percentile
+ * is what makes the weight comparable across tenants with different pay levels. Same reasoning as
+ * the F2 correction, where absolute thresholds collapsed the whole scorecard onto one dimension.
+ *
+ * A position with no band falls back to its criticality factor — never to zero, which would silently
+ * delete it from its unit's average.
+ */
+function economicWeightScale(positions: Array<{ economicBaseEur: number | null }>) {
+  const bases = positions
+    .map((p) => p.economicBaseEur)
+    .filter((b): b is number => b !== null)
+    .sort((a, b) => a - b);
+  return (position: { economicBaseEur: number | null; criticality: string | null }): number => {
+    const base = position.economicBaseEur;
+    if (base === null || bases.length === 0) return criticalityFactor(position.criticality);
+    if (bases.length === 1) return (ECONOMIC_WEIGHT_MIN + ECONOMIC_WEIGHT_MAX) / 2;
+    const below = bases.filter((b) => b < base).length;
+    const percentile = below / (bases.length - 1);
+    const clamped = percentile > 1 ? 1 : percentile;
+    return ECONOMIC_WEIGHT_MIN + (ECONOMIC_WEIGHT_MAX - ECONOMIC_WEIGHT_MIN) * clamped;
+  };
 }
 
 function buildScope(actor: ActorContext): CapabilityScope {
@@ -133,6 +171,9 @@ export function computeTenant(inputs: ScoringInputs): { scores: ScoreRow[]; line
   }
 
   // ---- POSITION scores (FTE-weighted over incumbents that have an employee score) ----
+  // The scale is built over ALL active positions of the tenant, not only the scoreable ones:
+  // a vacant position still says something about where the money sits in this organization.
+  const weightOf = economicWeightScale(inputs.positions);
   const positionValue = new Map<string, Aggregate>();
   for (const p of [...inputs.positions].sort((x, y) => (x.positionId < y.positionId ? -1 : 1))) {
     const incumbents = (incumbentsByPosition.get(p.positionId) ?? [])
@@ -150,7 +191,7 @@ export function computeTenant(inputs: ScoringInputs): { scores: ScoreRow[]; line
     }
     const value = round2(clamp(v / denom, 0, 100));
     const coverage = round2(clamp(c / denom, 0, 100));
-    const wMass = p.economicWeight ?? criticalityFactor(p.criticality);
+    const wMass = weightOf(p);
     positionValue.set(p.positionId, { value, coverage, weightMass: wMass });
     scores.push({
       tenantId, subjectType: "POSITION", subjectId: p.positionId, value, coverage,

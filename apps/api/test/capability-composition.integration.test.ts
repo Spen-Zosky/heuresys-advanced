@@ -159,6 +159,78 @@ describe("capability-composition API (Gap#1 MLCE)", () => {
     expect(s2.rows).toBe(s2.subjects);
   });
 
+  // #88 — the aggregation mass used to be COALESCE(position_economic_weight, criticalityFactor).
+  // That column is NULL on every row, so the mass was always the criticality factor, which takes
+  // exactly four values (0.5/1.0/1.5/2.0) and is MEDIUM on 160 of 181 positions. These tests fail
+  // against that implementation: it cannot produce more than four distinct masses, and it cannot
+  // separate two MEDIUM positions that sit in different pay bands.
+  describe("aggregation mass comes from the compensation band (#88)", () => {
+    interface MassRow { subject_id: string; mass: string; criticality: string | null; base: string | null }
+
+    async function massesWithBands(): Promise<MassRow[]> {
+      expect((await recompute(admin)).statusCode).toBe(200);
+      const r = await pool.query<MassRow>(
+        `WITH latest AS (
+           SELECT DISTINCT ON (capability_score_subject_id)
+                  capability_score_subject_id AS subject_id,
+                  capability_score_payload->'derivation'->>'weightMass' AS mass
+             FROM sys.sys_capability_scores
+            WHERE capability_score_subject_type = 'POSITION'
+            ORDER BY capability_score_subject_id, capability_score_computed_at DESC
+         )
+         SELECT l.subject_id, l.mass, p.position_criticality AS criticality,
+                avg(cb.compensation_band_mid_eur)::text AS base
+           FROM latest l
+           JOIN sys.sys_positions p ON p.position_id = l.subject_id
+           LEFT JOIN sys.sys_position_compensation_profiles pcp ON pcp.position_id = p.position_id
+           LEFT JOIN sys.sys_compensation_bands cb ON cb.compensation_band_id = pcp.compensation_band_id
+          GROUP BY 1, 2, 3`,
+      );
+      return r.rows;
+    }
+
+    it("the mass takes more values than the four the criticality factor can produce", async () => {
+      const rows = await massesWithBands();
+      expect(rows.length).toBeGreaterThan(0);
+      const distinct = new Set(rows.map((r) => r.mass));
+      expect(distinct.size).toBeGreaterThan(4);
+    });
+
+    it("two positions with the same criticality but different bands get different mass", async () => {
+      const rows = (await massesWithBands()).filter((r) => r.criticality === "MEDIUM" && r.base !== null);
+      const byBand = new Map<string, string>();
+      for (const r of rows) byBand.set(String(Number(r.base)), r.mass!);
+      expect(byBand.size).toBeGreaterThan(1); // the fixture must actually contain the contrast
+      const masses = new Set(byBand.values());
+      expect(masses.size).toBe(byBand.size);
+    });
+
+    it("mass rises with the band — the ordering is preserved, not merely scattered", async () => {
+      const rows = (await massesWithBands())
+        .filter((r) => r.base !== null)
+        .sort((a, b) => Number(a.base) - Number(b.base));
+      expect(rows.length).toBeGreaterThan(2);
+      const first = rows[0]!, last = rows[rows.length - 1]!;
+      expect(Number(last.mass)).toBeGreaterThan(Number(first.mass));
+      for (let i = 1; i < rows.length; i++) {
+        const prev = rows[i - 1]!, cur = rows[i]!;
+        if (Number(cur.base) > Number(prev.base)) {
+          expect(Number(cur.mass)).toBeGreaterThanOrEqual(Number(prev.mass));
+        }
+      }
+    });
+
+    it("a position without a band falls back to criticality, never to zero", async () => {
+      const rows = (await massesWithBands()).filter((r) => r.base === null);
+      for (const r of rows) expect(Number(r.mass)).toBeGreaterThan(0);
+      // And the mass stays inside the same span as the criticality factor it replaces.
+      for (const r of await massesWithBands()) {
+        expect(Number(r.mass)).toBeGreaterThanOrEqual(0.5);
+        expect(Number(r.mass)).toBeLessThanOrEqual(2.0);
+      }
+    });
+  });
+
   it("single subject: 404 for an unknown id", async () => {
     const r = await single(admin, "ORG_UNIT", "00000000-0000-0000-0000-000000000000");
     expect(r.statusCode).toBe(404);

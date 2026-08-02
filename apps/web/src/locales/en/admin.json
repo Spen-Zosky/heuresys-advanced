@@ -553,6 +553,13 @@
       "status": "Status"
     },
     "chartSeries": "Graphs",
+    "exports": {
+      "title": "Generated exports",
+      "empty": "No export generated yet.",
+      "size": "{{bytes}} bytes",
+      "noContent": "no content",
+      "openGraph": "Open graph"
+    },
     "distributionTitle": "Distribution by type",
     "chartAria": "Graph distribution by type",
     "noData": "No data.",
@@ -568,7 +575,23 @@
       "nodesEmpty": "No nodes.",
       "edgesEmpty": "No edges.",
       "edgeArrow": " → ",
-      "note": "Mermaid renderer active (max 50 nodes · 200 edges). Full node/edge lists above (max 20 + 20 visible)."
+      "note": "Mermaid renderer active (max 50 nodes · 200 edges). Full node/edge lists above (max 20 + 20 visible).",
+      "versionBadge": "version {{version}}",
+      "versionsTitle": "Versions",
+      "versionSelectLabel": "Version to view",
+      "versionOption": "v{{version}} — {{name}}",
+      "versionCreate": "Create a new version",
+      "versionCreating": "Creating…",
+      "versionNote": "A new version is an independent copy: nodes, edges and positions are duplicated, and the version you start from stays exactly as it is.",
+      "exportTitle": "Export",
+      "exportFormatLabel": "Format",
+      "exportRun": "Generate and download",
+      "exportRunning": "Generating…",
+      "exportDownload": "Download",
+      "exportEmpty": "No export for this version yet.",
+      "exportSize": "{{bytes}} bytes",
+      "exportNoContent": "no content",
+      "exportError": "Export failed ({{code}})."
     }
   },
   "content": {

@@ -133,6 +133,112 @@ describe("/v1/visualization-graphs/* integration", () => {
     expect((dup.json() as { error: { code: string } }).error.code).toBe("VIZ_GRAPH_CODE_CONFLICT");
   });
 
+  // #36 (B5) — versionamento. graph_version esisteva a schema ma nessun
+  // endpoint la incrementava: ogni grafo restava a v1 per sempre.
+  describe("versioning (#36)", () => {
+    let graphId: string;
+    let nodeA: string, nodeB: string;
+
+    async function post(url: string, payload: unknown) {
+      return suite.app.inject({
+        method: "POST", url,
+        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+        payload: payload as Record<string, unknown>,
+      });
+    }
+
+    beforeAll(async () => {
+      const g = await post("/v1/visualization-graphs", {
+        code: `${SUITE_PREFIX}_VER`, type: "ORG_CHART", name: "Grafo da versionare",
+      });
+      graphId = (g.json() as { graphId: string }).graphId;
+      createdGraphIds.push(graphId);
+
+      const a = await post("/v1/visualization-nodes", { graphId, sourceEntityType: "UNIT", label: "Radice" });
+      const b = await post("/v1/visualization-nodes", { graphId, sourceEntityType: "UNIT", label: "Figlia" });
+      nodeA = (a.json() as { nodeId: string }).nodeId;
+      nodeB = (b.json() as { nodeId: string }).nodeId;
+      await post("/v1/visualization-edges", {
+        graphId, sourceNodeId: nodeA, targetNodeId: nodeB, type: "REPORTS_TO",
+      });
+    });
+
+    it("creates version 2 as an independent copy of nodes and edges", async () => {
+      const r = await post(`/v1/visualization-graphs/${graphId}/versions`, {});
+      expect(r.statusCode).toBe(201);
+      const body = r.json() as {
+        graph: { graphId: string; version: number; code: string };
+        copiedNodes: number; copiedEdges: number;
+      };
+      createdGraphIds.push(body.graph.graphId);
+
+      expect(body.graph.version).toBe(2);
+      expect(body.graph.graphId).not.toBe(graphId);
+      expect(body.copiedNodes).toBe(2);
+      expect(body.copiedEdges).toBe(1);
+
+      // Il punto che conta: l'arco della v2 deve puntare ai nodi DELLA v2.
+      // Se puntasse a quelli della v1 le due versioni sarebbero intrecciate e
+      // modificare l'una cambierebbe l'altra.
+      const render = await suite.app.inject({
+        method: "GET", url: `/v1/visualization-graphs/${body.graph.graphId}/render`,
+        headers: { cookie: ch(tenantS.cookies) },
+      });
+      const r2 = render.json() as {
+        nodes: Array<{ nodeId: string; label: string }>;
+        edges: Array<{ sourceNodeId: string; targetNodeId: string }>;
+      };
+      const newIds = new Set(r2.nodes.map((n) => n.nodeId));
+      expect(newIds.has(nodeA)).toBe(false);
+      expect(newIds.has(nodeB)).toBe(false);
+      expect(r2.edges).toHaveLength(1);
+      expect(newIds.has(r2.edges[0]!.sourceNodeId)).toBe(true);
+      expect(newIds.has(r2.edges[0]!.targetNodeId)).toBe(true);
+      // e le etichette sono state conservate
+      expect(r2.nodes.map((n) => n.label).sort()).toEqual(["Figlia", "Radice"]);
+    });
+
+    it("the source version is left untouched", async () => {
+      const render = await suite.app.inject({
+        method: "GET", url: `/v1/visualization-graphs/${graphId}/render`,
+        headers: { cookie: ch(tenantS.cookies) },
+      });
+      const r1 = render.json() as { graph: { version: number }; nodes: unknown[]; edges: unknown[] };
+      expect(r1.graph.version).toBe(1);
+      expect(r1.nodes).toHaveLength(2);
+      expect(r1.edges).toHaveLength(1);
+    });
+
+    it("lists every version sharing the code, newest first", async () => {
+      const r = await suite.app.inject({
+        method: "GET", url: `/v1/visualization-graphs/${graphId}/versions`,
+        headers: { cookie: ch(tenantS.cookies) },
+      });
+      expect(r.statusCode).toBe(200);
+      const body = r.json() as { items: Array<{ version: number }>; total: number };
+      expect(body.total).toBeGreaterThanOrEqual(2);
+      expect(body.items[0]!.version).toBeGreaterThan(body.items[1]!.version);
+    });
+
+    it("copyContent=false yields an empty version, and versions keep incrementing", async () => {
+      const r = await post(`/v1/visualization-graphs/${graphId}/versions`, { copyContent: false });
+      expect(r.statusCode).toBe(201);
+      const body = r.json() as { graph: { graphId: string; version: number }; copiedNodes: number };
+      createdGraphIds.push(body.graph.graphId);
+      expect(body.graph.version).toBe(3);
+      expect(body.copiedNodes).toBe(0);
+    });
+
+    it("MANAGER cannot create a version (needs visualization:create)", async () => {
+      const r = await suite.app.inject({
+        method: "POST", url: `/v1/visualization-graphs/${graphId}/versions`,
+        headers: { cookie: ch(managerS.cookies), "x-csrf-token": managerS.csrfToken, "content-type": "application/json" },
+        payload: {},
+      });
+      expect(r.statusCode).toBe(403);
+    });
+  });
+
   it("POST without x-csrf-token header → 403 (CSRF)", async () => {
     const r = await suite.app.inject({
       method: "POST", url: "/v1/visualization-graphs",

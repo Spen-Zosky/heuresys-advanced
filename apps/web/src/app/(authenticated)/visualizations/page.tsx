@@ -15,6 +15,14 @@ import { EChartsCard } from "../_charts-client";
 
 type TypeDistItem = VizGraphTypeDistributionItem;
 
+interface RecentExport {
+  exportId: string;
+  graphId: string;
+  format: string;
+  byteSize: number | null;
+  generatedAt: string;
+}
+
 /** Donut option: type distribution. The series name is passed in already
  *  translated (i18n is a render-time hook), never resolved at module scope. */
 function typeChartOption(items: TypeDistItem[], labels: { series: string }) {
@@ -49,6 +57,12 @@ export default function VisualizationsPage() {
   const summary = useQuery({
     queryKey: ["visualization-graphs", "summary"],
     queryFn: () => apiFetch<{ items: TypeDistItem[]; total: number }>("/v1/visualization-graphs/summary"),
+  });
+  // #36 (B5) — gli export più recenti del tenant.
+  const recentExports = useQuery({
+    queryKey: ["visualization-exports", "recent"],
+    queryFn: () =>
+      apiFetch<{ items: RecentExport[]; total: number }>("/v1/visualization-exports?limit=10"),
   });
 
   const columns = useMemo<DataColumn<VizGraph>[]>(
@@ -113,6 +127,47 @@ export default function VisualizationsPage() {
             </p>
           )}
         </div>
+      </section>
+
+      {/* #36 (B5) — gli export prodotti, con il loro peso reale e il download.
+          Prima erano righe invisibili da qualunque pagina. */}
+      <section
+        data-testid="visualizations-exports-section"
+        className="rounded-card border border-border bg-card p-4 shadow-card"
+      >
+        <h2 className="mb-3 text-sm font-medium text-foreground">{t("visualizations.exports.title")}</h2>
+        {recentExports.isLoading ? (
+          <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+        ) : recentExports.data && recentExports.data.items.length > 0 ? (
+          <ul className="divide-y divide-border" data-testid="visualizations-exports-list">
+            {recentExports.data.items.map((e) => (
+              <li key={e.exportId} className="flex flex-wrap items-center justify-between gap-3 py-2 text-sm">
+                <span className="flex items-center gap-3">
+                  <span className="font-mono text-xs text-muted-foreground">{e.format}</span>
+                  <span className="text-muted-foreground">
+                    {e.byteSize === null
+                      ? t("visualizations.exports.noContent")
+                      : t("visualizations.exports.size", { bytes: e.byteSize })}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {new Date(e.generatedAt).toLocaleDateString()}
+                  </span>
+                </span>
+                <Link
+                  href={`/visualizations/${e.graphId}`}
+                  data-testid="visualizations-export-graph-link"
+                  className="text-xs underline-offset-2 hover:underline"
+                >
+                  {t("visualizations.exports.openGraph")}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground" data-testid="visualizations-exports-empty">
+            {t("visualizations.exports.empty")}
+          </p>
+        )}
       </section>
     </main>
   );

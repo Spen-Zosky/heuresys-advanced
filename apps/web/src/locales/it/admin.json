@@ -553,6 +553,13 @@
       "status": "Stato"
     },
     "chartSeries": "Grafici",
+    "exports": {
+      "title": "Export prodotti",
+      "empty": "Nessun export prodotto finora.",
+      "size": "{{bytes}} byte",
+      "noContent": "senza contenuto",
+      "openGraph": "Apri il grafo"
+    },
     "distributionTitle": "Distribuzione per tipo",
     "chartAria": "Distribuzione grafici per tipo",
     "noData": "Nessun dato.",
@@ -568,7 +575,23 @@
       "nodesEmpty": "Nessun nodo.",
       "edgesEmpty": "Nessun edge.",
       "edgeArrow": " → ",
-      "note": "Renderer Mermaid attivato (max 50 nodi · 200 edge). Liste nodi/edge complete sopra (max 20 + 20 visibili)."
+      "note": "Renderer Mermaid attivato (max 50 nodi · 200 edge). Liste nodi/edge complete sopra (max 20 + 20 visibili).",
+      "versionBadge": "versione {{version}}",
+      "versionsTitle": "Versioni",
+      "versionSelectLabel": "Versione da consultare",
+      "versionOption": "v{{version}} — {{name}}",
+      "versionCreate": "Crea una nuova versione",
+      "versionCreating": "Creazione in corso…",
+      "versionNote": "Una nuova versione è una copia indipendente: nodi, collegamenti e posizioni vengono duplicati, e la versione da cui parti resta consultabile com'è.",
+      "exportTitle": "Esporta",
+      "exportFormatLabel": "Formato",
+      "exportRun": "Genera e scarica",
+      "exportRunning": "Generazione in corso…",
+      "exportDownload": "Scarica",
+      "exportEmpty": "Nessun export per questa versione.",
+      "exportSize": "{{bytes}} byte",
+      "exportNoContent": "senza contenuto",
+      "exportError": "Export non riuscito ({{code}})."
     }
   },
   "content": {

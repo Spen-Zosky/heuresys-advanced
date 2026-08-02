@@ -86,3 +86,36 @@ export const UpdateVizGraphBodySchema = z.object({
 export type UpdateVizGraphBody = z.infer<typeof UpdateVizGraphBodySchema>;
 
 export const VizGraphIdParamSchema = z.object({ id: z.uuid() });
+
+// #36 (B5) — versionamento. `graph_version` esisteva a schema con un vincolo di
+// unicità su (tenant, code, version), ma nessun endpoint creava mai una
+// versione oltre la 1: il campo era una promessa non mantenuta. Una nuova
+// versione è una COPIA indipendente del grafo (nodi, archi e, a richiesta, i
+// layout con le posizioni), così la precedente resta consultabile com'era.
+export const CreateVizGraphVersionBodySchema = z.object({
+  name: z.string().min(1).max(255).optional(),
+  description: z.string().max(4096).nullable().optional(),
+  /** Copia nodi e archi nella nuova versione (default sì: una versione vuota non è una versione). */
+  copyContent: z.boolean().optional().default(true),
+  /** Copia anche i layout e le posizioni dei nodi. */
+  copyLayouts: z.boolean().optional().default(true),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+});
+export type CreateVizGraphVersionBody = z.infer<typeof CreateVizGraphVersionBodySchema>;
+
+/** Il grafo nuovo più il conteggio di ciò che è stato copiato — verificabile dal chiamante. */
+export const VizGraphVersionResponseSchema = z.object({
+  graph: VizGraphSchema,
+  copiedNodes: z.number().int().min(0),
+  copiedEdges: z.number().int().min(0),
+  copiedLayouts: z.number().int().min(0),
+  copiedNodePositions: z.number().int().min(0),
+});
+export type VizGraphVersionResponse = z.infer<typeof VizGraphVersionResponseSchema>;
+
+/** Tutte le versioni che condividono un `code` — alimenta il selettore di versione. */
+export const VizGraphVersionListResponseSchema = z.object({
+  items: z.array(VizGraphSchema),
+  total: z.number().int().min(0),
+});
+export type VizGraphVersionListResponse = z.infer<typeof VizGraphVersionListResponseSchema>;

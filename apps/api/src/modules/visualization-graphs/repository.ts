@@ -1,6 +1,7 @@
 /**
  * apps/api/src/modules/visualization-graphs/repository.ts
  */
+import { randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import type {
   VizGraph, VizGraphType, VizGraphListQuery, CreateVizGraphBody, UpdateVizGraphBody,
@@ -161,6 +162,156 @@ export async function updateGraphPartial(
       WHERE graph_id = $${params.length} RETURNING ${COLS}`, params,
   );
   return res.rows[0] ? toGraph(res.rows[0]) : null;
+}
+
+// ----------------------------------------------------- versionamento (#36 B5)
+
+/** Tutte le versioni che condividono lo stesso codice, dalla più recente. */
+export async function listGraphVersions(
+  q: DbConnector, tenantId: string, code: string,
+): Promise<VizGraph[]> {
+  const res = await q.query<Row>(
+    `SELECT ${COLS} FROM sys.sys_visualization_graphs
+      WHERE graph_tenant_id = $1 AND graph_code = $2
+      ORDER BY graph_version DESC`,
+    [tenantId, code],
+  );
+  return res.rows.map(toGraph);
+}
+
+export async function maxGraphVersion(
+  q: DbConnector, tenantId: string, code: string,
+): Promise<number> {
+  const res = await q.query<{ max: number | null }>(
+    `SELECT max(graph_version) AS max FROM sys.sys_visualization_graphs
+      WHERE graph_tenant_id = $1 AND graph_code = $2`,
+    [tenantId, code],
+  );
+  return res.rows[0]?.max ?? 0;
+}
+
+/**
+ * Inserisce la riga della nuova versione, copiando gli attributi dal grafo di
+ * partenza. Il codice resta lo stesso: è ciò che lega le versioni fra loro.
+ */
+export async function insertGraphVersion(
+  q: DbConnector,
+  source: VizGraph,
+  version: number,
+  override: { name?: string; description?: string | null; metadata?: Record<string, unknown> },
+  createdBy: string,
+): Promise<VizGraph> {
+  const res = await q.query<Row>(
+    `INSERT INTO sys.sys_visualization_graphs (
+        graph_tenant_id, graph_code, graph_type, graph_name, graph_description,
+        graph_source_query, graph_version, graph_is_active, graph_metadata, created_by
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10) RETURNING ${COLS}`,
+    [
+      source.tenantId, source.code, source.type,
+      override.name ?? source.name,
+      override.description !== undefined ? override.description : source.description,
+      source.sourceQuery, version, source.isActive,
+      JSON.stringify(override.metadata ?? source.metadata),
+      createdBy,
+    ],
+  );
+  return toGraph(res.rows[0]!);
+}
+
+/**
+ * Copia nodi e archi dal grafo di partenza a quello nuovo.
+ *
+ * Gli archi puntano a id di nodo: dopo la copia i nodi hanno id nuovi, quindi
+ * la corrispondenza vecchio→nuovo si ricava dall'INSERT ... RETURNING e si usa
+ * per rimappare le estremità. Senza questo passaggio gli archi della nuova
+ * versione punterebbero ai nodi della vecchia — due versioni intrecciate.
+ */
+export async function copyGraphContent(
+  q: DbConnector, sourceGraphId: string, targetGraphId: string,
+): Promise<{ nodeIdMap: Map<string, string>; copiedNodes: number; copiedEdges: number }> {
+  // Gli id della copia si generano QUI, non si lasciano al default della
+  // tabella: è l'unico modo di conoscere la corrispondenza vecchio→nuovo senza
+  // dedurla da un join su etichetta/entità, che accoppierebbe a caso due nodi
+  // omonimi riferiti alla stessa entità.
+  const existing = await q.query<{ node_id: string }>(
+    `SELECT node_id FROM sys.sys_visualization_nodes WHERE node_graph_id = $1 ORDER BY node_id`,
+    [sourceGraphId],
+  );
+  const nodeIdMap = new Map<string, string>(
+    existing.rows.map((r) => [r.node_id, randomUUID()]),
+  );
+  const nodes = await q.query(
+    `INSERT INTO sys.sys_visualization_nodes (
+        node_id, node_graph_id, node_source_entity_type, node_source_entity_id,
+        node_label, node_type, node_group_key, node_metadata)
+     SELECT m.new_id, $2, n.node_source_entity_type, n.node_source_entity_id,
+            n.node_label, n.node_type, n.node_group_key, n.node_metadata
+       FROM sys.sys_visualization_nodes n
+       JOIN unnest($3::uuid[], $4::uuid[]) AS m(old_id, new_id) ON m.old_id = n.node_id
+      WHERE n.node_graph_id = $1`,
+    [sourceGraphId, targetGraphId, [...nodeIdMap.keys()], [...nodeIdMap.values()]],
+  );
+
+  const edges = await q.query(
+    `INSERT INTO sys.sys_visualization_edges (
+        edge_graph_id, edge_source_node_id, edge_target_node_id,
+        edge_type, edge_weight, edge_metadata)
+     SELECT $2, m_src.new_id, m_tgt.new_id, e.edge_type, e.edge_weight, e.edge_metadata
+       FROM sys.sys_visualization_edges e
+       JOIN unnest($3::uuid[], $4::uuid[]) AS m_src(old_id, new_id)
+         ON m_src.old_id = e.edge_source_node_id
+       JOIN unnest($3::uuid[], $4::uuid[]) AS m_tgt(old_id, new_id)
+         ON m_tgt.old_id = e.edge_target_node_id
+      WHERE e.edge_graph_id = $1`,
+    [sourceGraphId, targetGraphId, [...nodeIdMap.keys()], [...nodeIdMap.values()]],
+  );
+
+  return { nodeIdMap, copiedNodes: nodes.rowCount ?? 0, copiedEdges: edges.rowCount ?? 0 };
+}
+
+/**
+ * Copia i layout del grafo e le posizioni dei nodi, rimappate sugli id nuovi.
+ * Il vincolo "un solo layout predefinito per grafo" regge perché il grafo di
+ * destinazione è nuovo e non ne ha ancora.
+ */
+export async function copyGraphLayouts(
+  q: DbConnector, sourceGraphId: string, targetGraphId: string, nodeIdMap: Map<string, string>,
+): Promise<{ copiedLayouts: number; copiedNodePositions: number }> {
+  // Stessa ragione dei nodi: gli id nuovi si generano qui.
+  const existing = await q.query<{ layout_id: string }>(
+    `SELECT layout_id FROM sys.sys_visualization_layouts WHERE layout_graph_id = $1 ORDER BY layout_id`,
+    [sourceGraphId],
+  );
+  if (existing.rowCount === 0) return { copiedLayouts: 0, copiedNodePositions: 0 };
+  const layoutIdMap = new Map<string, string>(
+    existing.rows.map((r) => [r.layout_id, randomUUID()]),
+  );
+
+  const layouts = await q.query(
+    `INSERT INTO sys.sys_visualization_layouts (
+        layout_id, layout_graph_id, layout_engine, layout_version, is_default, layout_metadata)
+     SELECT m.new_id, $2, l.layout_engine, l.layout_version, l.is_default, l.layout_metadata
+       FROM sys.sys_visualization_layouts l
+       JOIN unnest($3::uuid[], $4::uuid[]) AS m(old_id, new_id) ON m.old_id = l.layout_id
+      WHERE l.layout_graph_id = $1`,
+    [sourceGraphId, targetGraphId, [...layoutIdMap.keys()], [...layoutIdMap.values()]],
+  );
+  if (nodeIdMap.size === 0) {
+    return { copiedLayouts: layouts.rowCount ?? 0, copiedNodePositions: 0 };
+  }
+
+  const positions = await q.query(
+    `INSERT INTO sys.sys_visualization_node_layouts (layout_id, node_id, x, y, z, locked, node_layout_metadata)
+     SELECT ml.new_id, mn.new_id, nl.x, nl.y, nl.z, nl.locked, nl.node_layout_metadata
+       FROM sys.sys_visualization_node_layouts nl
+       JOIN unnest($1::uuid[], $2::uuid[]) AS ml(old_id, new_id) ON ml.old_id = nl.layout_id
+       JOIN unnest($3::uuid[], $4::uuid[]) AS mn(old_id, new_id) ON mn.old_id = nl.node_id`,
+    [
+      [...layoutIdMap.keys()], [...layoutIdMap.values()],
+      [...nodeIdMap.keys()], [...nodeIdMap.values()],
+    ],
+  );
+  return { copiedLayouts: layouts.rowCount ?? 0, copiedNodePositions: positions.rowCount ?? 0 };
 }
 
 export async function deleteGraph(q: DbConnector, id: string): Promise<boolean> {

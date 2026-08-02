@@ -27,4 +27,18 @@ export const visualizationExportsRoutes: FastifyPluginAsyncZod = async (app) => 
     const e = await visualizationExportsService.create(actor(req), req.body);
     reply.code(201).send(e);
   });
+
+  // #36 (B5) — il download vero. Non ha schema di risposta perché il corpo NON
+  // è JSON: è il documento (SVG, Mermaid o JSON) servito col proprio MIME e un
+  // nome file, così il browser lo salva invece di mostrarlo.
+  app.get("/:id/download", {
+    preHandler: [requirePermission("visualization:read")],
+    schema: { params: VizExportIdParamSchema },
+  }, async (req, reply) => {
+    const doc = await visualizationExportsService.getContent(actor(req), req.params.id);
+    reply
+      .header("content-type", doc.contentType)
+      .header("content-disposition", `attachment; filename="${doc.filename}"`)
+      .send(doc.content);
+  });
 };

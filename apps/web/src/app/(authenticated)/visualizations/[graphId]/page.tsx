@@ -1,15 +1,27 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { useParams, useRouter } from "next/navigation";
+import { Button, Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
 import { MermaidDiagram } from "../../_charts-client";
 import { apiFetch } from "@/lib/api/fetch";
+import { apiDownload } from "@/lib/api/download";
 import { isApiError } from "@/lib/api/errors";
+import { useCurrentUserPermissions } from "@/lib/api/auth";
 import { EnumStatusPill } from "@/components/enum-badge";
 import { useEnumLabel } from "@/lib/enum-labels";
+
+const SELECT_CLASS =
+  "rounded-control border border-border bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+// I formati che il motore produce davvero (apps/api .../visualization-exports/render.ts).
+// PNG e PDF restano fuori: richiedono un rasterizzatore che l'API non ha, e
+// l'endpoint li rifiuta con EXPORT_FORMAT_NOT_RENDERABLE.
+const EXPORT_FORMATS = ["SVG", "MERMAID", "GENERIC_JSON", "REACT_FLOW_JSON"] as const;
+type ExportFormat = (typeof EXPORT_FORMATS)[number];
 
 // Fields match the real schemas (visualization-graphs/nodes/edges): graphId/type,
 // nodeId/sourceEntityType/label, edgeId/sourceNodeId/targetNodeId/type. The previous
@@ -20,8 +32,16 @@ interface Graph {
   code: string;
   name: string;
   type: string;
+  version: number;
   description: string | null;
   metadata: Record<string, unknown>;
+}
+interface VizExport {
+  exportId: string;
+  graphId: string;
+  format: string;
+  byteSize: number | null;
+  generatedAt: string;
 }
 interface GraphNode {
   nodeId: string;
@@ -61,6 +81,70 @@ export default function VisualizationDetailPage() {
         `/v1/visualization-edges?graphId=${graphId}&limit=500`,
       ),
     enabled: !!graphId,
+  });
+
+  // ---- #36 (B5): versioni ed export -------------------------------------
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const perms = useCurrentUserPermissions();
+  const canCreate = perms.data?.permissions.includes("visualization:create") ?? false;
+  const [format, setFormat] = useState<ExportFormat>("SVG");
+  const [exportError, setExportError] = useState<string | null>(null);
+
+  const versions = useQuery({
+    queryKey: ["visualization-graph-versions", graphId],
+    queryFn: () =>
+      apiFetch<{ items: Graph[]; total: number }>(`/v1/visualization-graphs/${graphId}/versions`),
+    enabled: !!graphId,
+  });
+
+  const graphExports = useQuery({
+    queryKey: ["visualization-exports", graphId],
+    queryFn: () =>
+      apiFetch<{ items: VizExport[]; total: number }>(
+        `/v1/visualization-exports?graphId=${graphId}&limit=50`,
+      ),
+    enabled: !!graphId,
+  });
+
+  const createVersion = useMutation({
+    mutationFn: () =>
+      apiFetch<{ graph: Graph; copiedNodes: number; copiedEdges: number }>(
+        `/v1/visualization-graphs/${graphId}/versions`,
+        { method: "POST", body: {} },
+      ),
+    onSuccess: (r) => {
+      void queryClient.invalidateQueries({ queryKey: ["visualization-graph-versions"] });
+      // La nuova versione è un grafo a sé: si va a vederla.
+      router.push(`/visualizations/${r.graph.graphId}`);
+    },
+  });
+
+  // Genera l'export E lo scarica: due passi che per chi guarda sono un gesto solo.
+  const exportNow = useMutation({
+    mutationFn: async () => {
+      setExportError(null);
+      const created = await apiFetch<VizExport>("/v1/visualization-exports", {
+        method: "POST",
+        body: { graphId, format },
+      });
+      return apiDownload(
+        `/v1/visualization-exports/${created.exportId}/download`,
+        `${graph.data?.code ?? "export"}.txt`,
+      );
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["visualization-exports", graphId] });
+    },
+    onError: (e) => setExportError(e instanceof Error ? e.message : String(e)),
+  });
+
+  const downloadExisting = useMutation({
+    mutationFn: (e: VizExport) => {
+      setExportError(null);
+      return apiDownload(`/v1/visualization-exports/${e.exportId}/download`, `${graph.data?.code ?? "export"}.txt`);
+    },
+    onError: (e) => setExportError(e instanceof Error ? e.message : String(e)),
   });
 
   if (graph.isLoading) {
@@ -121,9 +205,125 @@ export default function VisualizationDetailPage() {
           <>
             <span data-testid="visualization-code" className="font-mono text-sm text-muted-foreground">{g.code}</span>
             <EnumStatusPill domain="vizGraphType" value={g.type} tone="info" />
+            <span data-testid="visualization-version" className="text-sm text-muted-foreground">
+              {t("visualizations.detail.versionBadge", { version: g.version })}
+            </span>
           </>
         }
       />
+
+      {/* #36 (B5) — versioni ed export. Prima di questa sezione il grafo era
+          bloccato a v1 e gli export erano righe di registro senza documento. */}
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Card data-testid="visualization-versions-card">
+          <CardHeader>
+            <CardTitle>{t("visualizations.detail.versionsTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {versions.isLoading ? (
+              <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+            ) : (
+              <>
+                <label htmlFor="viz-version" className="block text-sm text-muted-foreground">
+                  {t("visualizations.detail.versionSelectLabel")}
+                </label>
+                <select
+                  id="viz-version"
+                  data-testid="visualization-version-select"
+                  className={SELECT_CLASS}
+                  value={graphId}
+                  onChange={(e) => router.push(`/visualizations/${e.target.value}`)}
+                >
+                  {(versions.data?.items ?? []).map((v) => (
+                    <option key={v.graphId} value={v.graphId}>
+                      {t("visualizations.detail.versionOption", { version: v.version, name: v.name })}
+                    </option>
+                  ))}
+                </select>
+                {canCreate ? (
+                  <Button
+                    data-testid="visualization-create-version"
+                    onClick={() => createVersion.mutate()}
+                    disabled={createVersion.isPending}
+                  >
+                    {createVersion.isPending
+                      ? t("visualizations.detail.versionCreating")
+                      : t("visualizations.detail.versionCreate")}
+                  </Button>
+                ) : null}
+                <p className="text-xs text-muted-foreground">{t("visualizations.detail.versionNote")}</p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card data-testid="visualization-export-card">
+          <CardHeader>
+            <CardTitle>{t("visualizations.detail.exportTitle")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <label htmlFor="viz-format" className="block text-sm text-muted-foreground">
+              {t("visualizations.detail.exportFormatLabel")}
+            </label>
+            <select
+              id="viz-format"
+              data-testid="visualization-export-format"
+              className={SELECT_CLASS}
+              value={format}
+              onChange={(e) => setFormat(e.target.value as ExportFormat)}
+            >
+              {EXPORT_FORMATS.map((f) => (
+                <option key={f} value={f}>{f}</option>
+              ))}
+            </select>
+            {canCreate ? (
+              <Button
+                data-testid="visualization-export-run"
+                onClick={() => exportNow.mutate()}
+                disabled={exportNow.isPending}
+              >
+                {exportNow.isPending
+                  ? t("visualizations.detail.exportRunning")
+                  : t("visualizations.detail.exportRun")}
+              </Button>
+            ) : null}
+            {exportError ? (
+              <p className="text-sm text-danger" data-testid="visualization-export-error">
+                {t("visualizations.detail.exportError", { code: exportError })}
+              </p>
+            ) : null}
+
+            {graphExports.data && graphExports.data.items.length > 0 ? (
+              <ul className="divide-y divide-border" data-testid="visualization-export-list">
+                {graphExports.data.items.map((e) => (
+                  <li key={e.exportId} className="flex items-center justify-between gap-3 py-2 text-sm">
+                    <span>
+                      <span className="font-mono text-xs text-muted-foreground">{e.format}</span>
+                      <span className="ml-2 text-muted-foreground">
+                        {e.byteSize === null
+                          ? t("visualizations.detail.exportNoContent")
+                          : t("visualizations.detail.exportSize", { bytes: e.byteSize })}
+                      </span>
+                    </span>
+                    <Button
+                      variant="outline"
+                      data-testid="visualization-export-download"
+                      disabled={e.byteSize === null || downloadExisting.isPending}
+                      onClick={() => downloadExisting.mutate(e)}
+                    >
+                      {t("visualizations.detail.exportDownload")}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground" data-testid="visualization-export-empty">
+                {t("visualizations.detail.exportEmpty")}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </section>
 
       {mermaidSource ? (
         <Card data-testid="visualization-renderer-card">

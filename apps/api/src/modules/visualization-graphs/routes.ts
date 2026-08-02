@@ -9,6 +9,7 @@ import {
   VizGraphSchema, VizGraphListQuerySchema, VizGraphListResponseSchema,
   VizGraphSummaryResponseSchema, VizGraphRenderResponseSchema,
   CreateVizGraphBodySchema, UpdateVizGraphBodySchema, VizGraphIdParamSchema,
+  CreateVizGraphVersionBodySchema, VizGraphVersionResponseSchema, VizGraphVersionListResponseSchema,
 } from "@heuresys/shared";
 import { visualizationGraphsService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -40,6 +41,24 @@ export const visualizationGraphsRoutes: FastifyPluginAsyncZod = async (app) => {
   }, async (req, reply) => {
     const g = await visualizationGraphsService.create(actor(req), req.body);
     reply.code(201).send(g);
+  });
+
+  // #36 (B5) — versionamento.
+  app.get("/:id/versions", {
+    preHandler: [requirePermission("visualization:read")],
+    schema: { params: VizGraphIdParamSchema, response: { 200: VizGraphVersionListResponseSchema } },
+  }, async (req) => visualizationGraphsService.listVersions(actor(req), req.params.id));
+
+  app.post("/:id/versions", {
+    preHandler: [app.verifyCsrf, requirePermission("visualization:create")],
+    schema: {
+      params: VizGraphIdParamSchema,
+      body: CreateVizGraphVersionBodySchema,
+      response: { 201: VizGraphVersionResponseSchema },
+    },
+  }, async (req, reply) => {
+    const r = await visualizationGraphsService.createVersion(actor(req), req.params.id, req.body);
+    reply.code(201).send(r);
   });
 
   app.patch("/:id", {

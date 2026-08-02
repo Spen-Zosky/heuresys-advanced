@@ -52,6 +52,21 @@ export async function listNodeLayouts(
   return { items: res.rows.map(toNl), total: Number(tr.rows[0]?.total ?? 0) };
 }
 
+/**
+ * Tutte le posizioni di un layout, senza paginazione — serve al motore di
+ * export (#36 B5), che deve disegnare il grafo intero: una pagina di posizioni
+ * produrrebbe un documento con i nodi mancanti, non un documento più corto.
+ */
+export async function listAllPositionsForLayout(
+  q: DbConnector, layoutId: string,
+): Promise<Array<{ nodeId: string; x: number; y: number }>> {
+  const res = await q.query<{ node_id: string; x: string; y: string }>(
+    `SELECT node_id, x::text, y::text FROM sys.sys_visualization_node_layouts WHERE layout_id = $1`,
+    [layoutId],
+  );
+  return res.rows.map((r) => ({ nodeId: r.node_id, x: Number(r.x), y: Number(r.y) }));
+}
+
 export async function findNodeLayoutById(q: DbConnector, id: string): Promise<VizNodeLayout | null> {
   const res = await q.query<Row>(`SELECT ${COLS} FROM sys.sys_visualization_node_layouts WHERE node_layout_id = $1`, [id]);
   return res.rows[0] ? toNl(res.rows[0]) : null;

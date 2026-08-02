@@ -19,6 +19,11 @@ export const VizExportSchema = z.object({
   generatedAt: z.iso.datetime(),
   metadata: z.record(z.string(), z.unknown()),
   createdAt: z.iso.datetime(),
+  // #36 (B5) — il documento generato. `contentType` e `byteSize` sono null
+  // finché il formato non è producibile (oggi PNG e PDF, che richiedono un
+  // rasterizzatore assente da questo servizio).
+  contentType: z.string().nullable(),
+  byteSize: z.number().int().min(0).nullable(),
 });
 export type VizExport = z.infer<typeof VizExportSchema>;
 

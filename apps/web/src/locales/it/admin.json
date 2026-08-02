@@ -1104,5 +1104,31 @@
     "empty": "Nessun fatto registrato.",
     "error": "Impossibile caricare la storia.",
     "more": "Mostra altri ({{shown}} di {{total}})"
+  },
+  "leads": {
+    "title": "Richieste di contatto",
+    "description": "Le richieste arrivate dal sito pubblico. Lo stato segue la lavorazione commerciale; i dati della persona sono quelli che ha dichiarato e non si modificano da qui.",
+    "count": "{{count}} richieste",
+    "caption": "Richieste di contatto, dalla più recente.",
+    "emptyTitle": "Nessuna richiesta",
+    "emptyDescription": "Non è ancora arrivata nessuna richiesta con questi criteri.",
+    "errorMessage": "Non è stato possibile leggere le richieste di contatto.",
+    "filterAll": "Tutti gli stati",
+    "filterLabel": "Stato",
+    "cols": {
+      "person": "Persona",
+      "company": "Azienda",
+      "source": "Provenienza",
+      "received": "Ricevuta",
+      "status": "Stato"
+    },
+    "statuses": {
+      "NEW": "Nuova",
+      "CONTACTED": "Contattata",
+      "QUALIFIED": "Qualificata",
+      "CLOSED": "Chiusa"
+    },
+    "updateError": "Non è stato possibile aggiornare lo stato.",
+    "consentNote": "Consenso raccolto il {{date}} (versione {{version}})."
   }
 }

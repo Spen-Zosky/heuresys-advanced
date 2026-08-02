@@ -3,7 +3,9 @@
  * The honeypot + consent checks live here; the route is a thin public POST.
  */
 import type { ActorContext } from "../../lib/actor.js";
-import type { LeadCreate, LeadListQuery, LeadListResponse } from "@heuresys/shared";
+import type { LeadCreate, LeadListQuery, LeadListResponse, LeadUpdate, LeadResponse } from "@heuresys/shared";
+import { NotFoundError } from "../../errors/index.js";
+import { recordHoneypotTrip } from "../observability/prometheus.js";
 import * as repo from "./repository.js";
 
 export type { ActorContext };
@@ -15,7 +17,14 @@ export const leadsService = {
   /** Public. Honeypot-filled submissions are silently accepted but NOT stored
    *  (don't tip off bots). Consent is enforced by the Zod literal(true) upstream. */
   async create(input: LeadCreate): Promise<{ ok: true }> {
-    if (input.website && input.website.length > 0) return { ok: true }; // honeypot trip
+    if (input.website && input.website.length > 0) {
+      // Trappola scattata: la risposta resta identica a quella di un invio valido —
+      // dire al bot che è stato riconosciuto significa aiutarlo a migliorare. Ma da
+      // qui in avanti il fatto è CONTATO: prima era invisibile, e una difesa di cui
+      // nessuno vede l'andamento non si sa se stia funzionando.
+      recordHoneypotTrip("leads");
+      return { ok: true };
+    }
     await repo.insertLead({
       name: input.name,
       company: input.company,
@@ -31,5 +40,13 @@ export const leadsService = {
 
   async list(_actor: ActorContext, query: LeadListQuery): Promise<LeadListResponse> {
     return repo.listLeads(query); // #62 G3: total = filtered count, not page size
+  },
+
+  /** #4 W4 — avanzamento dello stato. Senza, `lead_status` era una colonna che nessuna
+   *  superficie sapeva cambiare: ogni lead restava `NEW` per sempre. */
+  async updateStatus(_actor: ActorContext, leadId: string, patch: LeadUpdate): Promise<LeadResponse> {
+    const updated = await repo.updateLeadStatus(leadId, patch.status);
+    if (!updated) throw new NotFoundError("Lead");
+    return updated;
   },
 };

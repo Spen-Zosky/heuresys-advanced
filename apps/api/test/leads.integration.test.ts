@@ -156,4 +156,109 @@ describe("/v1/leads (GTM lead capture)", () => {
     });
     expect(r.statusCode).toBe(400);
   });
+
+  // #4 W4 — avanzamento dello stato. Prima esisteva la colonna e nessuna superficie
+  // sapeva cambiarla: ogni lead restava NEW per sempre.
+  describe("PATCH /v1/leads/:leadId — avanzamento dello stato", () => {
+    // Le fixture nascono con una INSERT diretta, non dal form pubblico: quello ha un
+    // limite di 5 invii al minuto per IP (giustamente), e sei fixture di fila lo
+    // farebbero scattare — il test fallirebbe per 429 raccontando un difetto che non c'è.
+    async function createLead(email: string): Promise<string> {
+      const { rows } = await pool.query<{ lead_id: string }>(
+        `INSERT INTO sys.sys_leads
+           (lead_name, lead_company, lead_email, lead_source, lead_status,
+            lead_consent_at, lead_consent_version)
+         VALUES ('Stato Test', 'Banca Y', $1, 'WEBSITE', 'NEW', now(), '2026-06-21-v1')
+         RETURNING lead_id`,
+        [email],
+      );
+      return rows[0]!.lead_id;
+    }
+
+    it("un amministratore fa avanzare lo stato e la lettura successiva lo conferma", async () => {
+      const id = await createLead(`patch${E2E_DOMAIN}`);
+      const before = await pool.query<{ s: string }>(
+        `SELECT lead_status AS s FROM sys.sys_leads WHERE lead_id = $1`, [id],
+      );
+      expect(before.rows[0]!.s).toBe("NEW"); // il valore di partenza è quello del prodotto
+
+      const r = await suite.app.inject({
+        method: "PATCH", url: `/v1/leads/${id}`,
+        headers: { cookie: adminCookies, "x-csrf-token": adminCsrf, "content-type": "application/json" },
+        payload: { status: "CONTACTED" },
+      });
+      expect(r.statusCode).toBe(200);
+      expect((r.json() as { status: string }).status).toBe("CONTACTED");
+
+      // Ri-letto dal database, non creduto sulla parola della risposta.
+      const after = await pool.query<{ s: string }>(
+        `SELECT lead_status AS s FROM sys.sys_leads WHERE lead_id = $1`, [id],
+      );
+      expect(after.rows[0]!.s).toBe("CONTACTED");
+    });
+
+    it("i dati dichiarati dalla persona non sono modificabili da questa superficie", async () => {
+      const id = await createLead(`immutable${E2E_DOMAIN}`);
+      const r = await suite.app.inject({
+        method: "PATCH", url: `/v1/leads/${id}`,
+        headers: { cookie: adminCookies, "x-csrf-token": adminCsrf, "content-type": "application/json" },
+        payload: { status: "QUALIFIED", email: "altro@esempio.test", name: "Nome Riscritto" },
+      });
+      expect(r.statusCode).toBe(200);
+      // Il consenso raccolto vale su quei valori: riscriverli lo renderebbe una
+      // dichiarazione su un dato non più verificabile.
+      const { rows } = await pool.query<{ e: string; n: string }>(
+        `SELECT lead_email AS e, lead_name AS n FROM sys.sys_leads WHERE lead_id = $1`, [id],
+      );
+      expect(rows[0]!.e).toBe(`immutable${E2E_DOMAIN}`);
+      expect(rows[0]!.n).toBe("Stato Test");
+    });
+
+    it("uno stato fuori dall'insieme ammesso → 400", async () => {
+      const id = await createLead(`badstatus${E2E_DOMAIN}`);
+      const r = await suite.app.inject({
+        method: "PATCH", url: `/v1/leads/${id}`,
+        headers: { cookie: adminCookies, "x-csrf-token": adminCsrf, "content-type": "application/json" },
+        payload: { status: "IN_TRATTATIVA" },
+      });
+      expect(r.statusCode).toBe(400);
+    });
+
+    it("un id inesistente → 404, non un successo silenzioso", async () => {
+      const r = await suite.app.inject({
+        method: "PATCH", url: "/v1/leads/00000000-0000-4000-8000-000000000000",
+        headers: { cookie: adminCookies, "x-csrf-token": adminCsrf, "content-type": "application/json" },
+        payload: { status: "CLOSED" },
+      });
+      expect(r.statusCode).toBe(404);
+    });
+
+    it("senza CSRF → 403, come ogni mutazione", async () => {
+      const id = await createLead(`nocsrf${E2E_DOMAIN}`);
+      const r = await suite.app.inject({
+        method: "PATCH", url: `/v1/leads/${id}`,
+        headers: { cookie: adminCookies, "content-type": "application/json" },
+        payload: { status: "CLOSED" },
+      });
+      expect(r.statusCode).toBe(403);
+    });
+
+    it("una richiesta senza sessione è respinta prima di toccare i dati", async () => {
+      const r = await suite.app.inject({
+        method: "PATCH", url: "/v1/leads/00000000-0000-4000-8000-000000000000",
+        headers: { "content-type": "application/json" },
+        payload: { status: "CLOSED" },
+      });
+      // 403 e non 401: nella catena il controllo CSRF viene PRIMA del permesso, quindi
+      // senza cookie è quello a rifiutare. Verificato, non presunto — l'aspettativa
+      // opposta era sbagliata e questo test la fissa nella forma reale.
+      expect(r.statusCode).toBe(403);
+      // e nessuno stato è cambiato: la richiesta non ha raggiunto il livello dati
+      const { rows } = await pool.query(
+        `SELECT 1 FROM sys.sys_leads WHERE lead_id = '00000000-0000-4000-8000-000000000000'`,
+      );
+      expect(rows.length).toBe(0);
+    });
+  });
+
 });

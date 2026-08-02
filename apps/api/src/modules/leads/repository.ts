@@ -73,3 +73,38 @@ export async function listLeads(q: LeadListQuery): Promise<{ items: LeadResponse
     createdAt: (x.created_at as Date).toISOString(),
   })) };
 }
+
+/**
+ * Avanza lo stato di una richiesta di contatto (#4 W4). Ritorna null se l'id non esiste,
+ * così il service può distinguere «non trovato» da «aggiornato».
+ *
+ * Solo `lead_status`: gli altri campi sono ciò che la persona ha dichiarato di sé, e il
+ * consenso raccolto vale su quei valori.
+ */
+export async function updateLeadStatus(leadId: string, status: string): Promise<LeadResponse | null> {
+  const res = await pool.query(
+    `UPDATE sys.sys_leads
+        SET lead_status = $2
+      WHERE lead_id = $1
+      RETURNING lead_id, lead_name, lead_company, lead_email, lead_role, lead_company_size,
+                lead_message, lead_source, lead_status, lead_consent_at, lead_consent_version,
+                created_at`,
+    [leadId, status],
+  );
+  const x = res.rows[0] as Record<string, unknown> | undefined;
+  if (!x) return null;
+  return {
+    leadId: x.lead_id as string,
+    name: x.lead_name as string,
+    company: x.lead_company as string,
+    email: x.lead_email as string,
+    role: x.lead_role as string | null,
+    companySize: x.lead_company_size as LeadCompanySize | null,
+    message: x.lead_message as string | null,
+    source: x.lead_source as string,
+    status: x.lead_status as LeadResponse["status"],
+    consentAt: (x.lead_consent_at as Date).toISOString(),
+    consentVersion: x.lead_consent_version as string,
+    createdAt: (x.created_at as Date).toISOString(),
+  };
+}

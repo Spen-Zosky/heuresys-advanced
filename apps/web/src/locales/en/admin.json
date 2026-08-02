@@ -1104,5 +1104,31 @@
     "empty": "No recorded facts.",
     "error": "Could not load the history.",
     "more": "Show more ({{shown}} of {{total}})"
+  },
+  "leads": {
+    "title": "Contact requests",
+    "description": "Requests submitted from the public website. The status follows the sales workflow; the person's own details are what they declared and are not editable here.",
+    "count": "{{count}} requests",
+    "caption": "Contact requests, most recent first.",
+    "emptyTitle": "No requests",
+    "emptyDescription": "No request has arrived matching these criteria yet.",
+    "errorMessage": "The contact requests could not be loaded.",
+    "filterAll": "All statuses",
+    "filterLabel": "Status",
+    "cols": {
+      "person": "Person",
+      "company": "Company",
+      "source": "Source",
+      "received": "Received",
+      "status": "Status"
+    },
+    "statuses": {
+      "NEW": "New",
+      "CONTACTED": "Contacted",
+      "QUALIFIED": "Qualified",
+      "CLOSED": "Closed"
+    },
+    "updateError": "The status could not be updated.",
+    "consentNote": "Consent recorded on {{date}} (version {{version}})."
   }
 }

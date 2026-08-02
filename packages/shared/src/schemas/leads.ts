@@ -56,6 +56,21 @@ export type LeadListResponse = z.infer<typeof LeadListResponseSchema>;
 export const LeadStatusEnum = z.enum(["NEW", "CONTACTED", "QUALIFIED", "CLOSED"]);
 export type LeadStatus = z.infer<typeof LeadStatusEnum>;
 
+/**
+ * PATCH /v1/leads/:leadId — avanzamento dello stato di una richiesta di contatto (#4 W4).
+ *
+ * Solo lo stato è modificabile: nome, azienda, email e messaggio sono ciò che la persona
+ * ha scritto di sé, e una superficie amministrativa che potesse riscriverli renderebbe il
+ * consenso raccolto una dichiarazione su un dato non più verificabile.
+ */
+export const LeadUpdateSchema = z.object({
+  status: LeadStatusEnum,
+});
+export type LeadUpdate = z.infer<typeof LeadUpdateSchema>;
+
+export const LeadIdParamSchema = z.object({ leadId: z.uuid() });
+export type LeadIdParam = z.infer<typeof LeadIdParamSchema>;
+
 export const LeadListQuerySchema = z.object({
   status: LeadStatusEnum.optional(),
   source: LeadSourceEnum.optional(),

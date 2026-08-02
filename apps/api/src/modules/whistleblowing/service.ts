@@ -19,6 +19,7 @@ import type {
   WhistleblowingListResponse, WhistleblowingReport, WhistleblowingUpdate,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import { recordHoneypotTrip } from "../observability/prometheus.js";
 
 export type { ActorContext };
 
@@ -37,7 +38,10 @@ export const whistleblowingService = {
   async submit(input: WhistleblowingSubmit): Promise<WhistleblowingSubmitResponse> {
     const trackingCode = generateTrackingCode();
     if (input.website && input.website.length > 0) {
-      // honeypot trip — return a plausible code without persisting anything
+      // honeypot trip — return a plausible code without persisting anything.
+      // Contato come per i lead (#4 W4): lasciare visibile una trappola su due
+      // darebbe una lettura parziale di quanto il sito viene sondato.
+      recordHoneypotTrip("whistleblowing");
       return { trackingCode };
     }
     await repo.insertReport(pool, {

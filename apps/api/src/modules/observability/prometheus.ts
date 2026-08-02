@@ -32,6 +32,25 @@ export const authEventCounter = new Counter({
   registers: [registry],
 });
 
+/**
+ * #4 W4 — trappole anti-bot scattate, per superficie pubblica.
+ *
+ * Perché un contatore e non un log: la trappola scatta di continuo su un sito
+ * esposto, e il valore informativo non è il singolo evento ma l'ANDAMENTO — un
+ * picco dice che qualcuno sta insistendo. Un log per ogni tentativo produrrebbe
+ * rumore che nessuno rilegge, e un evento senza serie storica non si sa se sia
+ * normale o anomalo.
+ *
+ * La risposta al bot resta identica (accettata e non memorizzata): l'osservabilità
+ * è per noi, non per lui.
+ */
+export const honeypotTripCounter = new Counter({
+  name: "honeypot_trips_total",
+  help: "Anti-bot honeypot trips on public forms, by surface (leads, whistleblowing)",
+  labelNames: ["surface"] as const,
+  registers: [registry],
+});
+
 let enabled = false;
 
 /** Idempotent. Turns collection ON (default process metrics + our custom ones). */
@@ -60,6 +79,16 @@ export function observeHttp(method: string, route: string, status: number, elaps
     );
   } catch {
     /* metrics must never break the response */
+  }
+}
+
+/** Registra una trappola scattata. No-op se le metriche sono spente; non lancia mai. */
+export function recordHoneypotTrip(surface: string): void {
+  if (!enabled) return;
+  try {
+    honeypotTripCounter.inc({ surface });
+  } catch {
+    /* never throw */
   }
 }
 

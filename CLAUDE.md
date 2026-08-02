@@ -29,6 +29,10 @@ At **`v1.0.0` GA baseline** (S957, 2026-06-02). MVP-0→4 and the RBAC/UIX/Persp
 
 Historical records live in `docs/archive/` and are **not** SoT. When state changes, update the relevant SoT above — never spawn a new file.
 
+**Chi può scrivere la SoT di stato** (freeze 2026-05-27, S939 — CLI takeover). L'unico writer e committer di `docs/kb/` è **Claude Code CLI**. Cowork e Claude Desktop sono **read-only** su questi file: per proporre un cambiamento di stato fanno append **solo** a `docs/kb/COWORK_INBOX.md`, che la CLI riconcilia e committa. Nessun altro `docs/kb/`, nessun `git commit`/`push` su questo progetto senza coordinamento CLI.
+
+`cowork_code_exchange/` e `cowork_reserved/` sono **archivio read-only**: niente nuovi cicli PROMPT/PLAN/EXEC/REPORT/REVIEW qui, non sono stato vivo. Il protocollo Cowork↔CLI resta valido negli altri progetti (skill `cowork-cli-protocol`), è congelato solo per questo.
+
 ## Session start
 
 After the infra hooks (tunnel/db/branch), **before** asking what to do or starting work, build the action menu from all live sources — never from memory. ONE command, ONE model round:

@@ -480,5 +480,35 @@
     },
     "search": "Cerca",
     "searchPlaceholder": "codice o nome…"
+  },
+  "vrio": {
+    "title": "Scorecard VRIO",
+    "description": "Le capability che l'organizzazione usa davvero, classificate con il modello VRIO su {{headcount}} persone. Valore = {{value}}% peso economico + {{crit}}% criticità; una dimensione conta come presente dal {{threshold}}° percentile delle nostre capability.",
+    "descriptionIdle": "Le capability che l'organizzazione usa davvero, classificate con il modello VRIO.",
+    "count": "{{count}} capability",
+    "errorMessage": "Impossibile caricare la scorecard VRIO",
+    "emptyTitle": "Nessuna capability in gioco",
+    "emptyDescription": "Nessun gruppo di competenze risulta richiesto da una posizione o posseduto da una persona in questo tenant.",
+    "caption": "Scorecard VRIO per capability",
+    "method": "Le quattro colonne sono percentili calcolati sull'insieme delle capability di questo tenant, con sotto la misura grezza. Si usano i percentili perché le scale grezze non sono calibrate: sui dati reali rarità, imitabilità e organizzazione stanno quasi tutte sopra 0,50, e una soglia assoluta le darebbe presenti ovunque facendo collassare il verdetto sul solo valore. Il verdetto è la classificazione di Barney, mai una media delle quattro dimensioni.",
+    "cols": {
+      "capability": "Capability",
+      "skillCount": "{{count}} competenze",
+      "value": "Valore",
+      "rarity": "Rarità",
+      "inimitability": "Inimitabilità",
+      "organization": "Organizzazione",
+      "verdict": "Verdetto",
+      "evidence": "Evidenza",
+      "evidenceValue": "{{positions}} posizioni · {{holders}}/{{headcount}} persone · {{covered}}/{{required}} coperte"
+    },
+    "verdicts": {
+      "SUSTAINED_ADVANTAGE": "Vantaggio sostenibile",
+      "UNUSED_ADVANTAGE": "Vantaggio inutilizzato",
+      "TEMPORARY_ADVANTAGE": "Vantaggio temporaneo",
+      "PARITY": "Parità competitiva",
+      "DISADVANTAGE": "Svantaggio competitivo",
+      "CAPABILITY_GAP": "Capability mancante"
+    }
   }
 }

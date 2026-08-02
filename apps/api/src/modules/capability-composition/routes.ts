@@ -17,6 +17,7 @@ import {
   CapabilitySubjectParamSchema,
   CapabilityRecomputeResponseSchema,
   EssentialCapabilityRankingSchema,
+  VrioScorecardSchema,
 } from "@heuresys/shared";
 import { capabilityCompositionService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -45,6 +46,20 @@ export const capabilityCompositionRoutes: FastifyPluginAsyncZod = async (app) =>
       schema: { response: { 200: EssentialCapabilityRankingSchema } },
     },
     async (req) => capabilityCompositionService.essentialRanking(actor(req)),
+  );
+
+  // #56 F2 — VRIO scorecard. Same literal-before-param ordering as essential-ranking.
+  app.get(
+    "/composition/vrio",
+    {
+      // Org-wide aggregate over skill-group totals; no per-person row is ever emitted, so the
+      // `aggregate` gate applies exactly as for F1 (D-51 requires the explicit declaration
+      // because the `capability` resource is SKILL-sensitive).
+      config: { orgGate: "aggregate" },
+      preHandler: [requirePermission("capability:read")],
+      schema: { response: { 200: VrioScorecardSchema } },
+    },
+    async (req) => capabilityCompositionService.vrioScorecard(actor(req)),
   );
 
   app.get(

@@ -417,3 +417,164 @@ export async function loadEssentialRankInputs(
     };
   });
 }
+
+/* --------------------- read: #56 F2 VRIO scorecard inputs --------------------- */
+
+export interface VrioGroupRow {
+  skillGroupId: string;
+  skillGroupName: string;
+  skillCount: number;
+  // demand / value
+  positionsRequiring: number;
+  criticalPositions: number;
+  totalRequirements: number;
+  avgEcon: number | null;
+  critShare: number;
+  // supply / rarity + inimitability
+  holders: number;
+  avgHeldRank: number | null;
+  verifiedShare: number;
+  evidenceShare: number;
+  // organization
+  coveredRequirements: number;
+}
+
+export interface VrioInputs {
+  headcount: number;
+  groups: VrioGroupRow[];
+}
+
+/**
+ * Gathers the VRIO scorecard inputs for one tenant, aggregated at SKILL GROUP level.
+ * Only groups that are actually in play (demanded by a position or held by someone) come
+ * back — a taxonomy group nobody uses is not a capability of this organization.
+ *
+ * The economic base is the position compensation band (as in F1), not
+ * sys_positions.position_economic_weight: that column is NULL on every row today.
+ */
+export async function loadVrioInputs(tenantId: string | null, q: Queryable = pool): Promise<VrioInputs> {
+  const params: unknown[] = [];
+  let posTenant = "";
+  let usrTenant = "";
+  if (tenantId) {
+    params.push(tenantId);
+    posTenant = `AND p.position_tenant_id = $${params.length}`;
+    usrTenant = `AND us.user_skill_tenant_id = $${params.length}`;
+  }
+
+  const headcountRes = await q.query<{ headcount: string }>(
+    `SELECT count(*)::text AS headcount FROM sys.sys_users u
+      WHERE ($1::uuid IS NULL OR u.user_tenant_id = $1::uuid)`,
+    [tenantId],
+  );
+  const headcount = Number(headcountRes.rows[0]?.headcount ?? 0);
+
+  const res = await q.query<{
+    skill_group_id: string; skill_group_name: string; skill_count: string;
+    positions_requiring: string; critical_positions: string; total_requirements: string;
+    avg_econ: string | null; crit_share: string | null;
+    holders: string; avg_held_rank: string | null; verified_share: string | null; evidence_share: string | null;
+    covered_requirements: string;
+  }>(
+    `WITH demand AS (
+       SELECT s.skill_group_id,
+              count(DISTINCT r.position_id)                                          AS positions_requiring,
+              count(*)                                                               AS total_requirements,
+              count(DISTINCT r.position_id) FILTER (WHERE p.position_criticality = 'CRITICAL') AS critical_positions,
+              avg(cb.compensation_band_mid_eur)                                      AS avg_econ,
+              avg(CASE p.position_criticality
+                    WHEN 'CRITICAL' THEN 1.0 WHEN 'HIGH' THEN 0.75
+                    WHEN 'MEDIUM' THEN 0.5  WHEN 'LOW'  THEN 0.25 ELSE 0.5 END)      AS crit_share
+         FROM sys.sys_position_skill_requirements r
+         JOIN sys.sys_positions p ON p.position_id = r.position_id AND p.position_is_active
+         JOIN sys.sys_skills s    ON s.skill_id = r.skill_id AND s.skill_group_id IS NOT NULL
+         LEFT JOIN sys.sys_position_compensation_profiles pcp ON pcp.position_id = p.position_id
+         LEFT JOIN sys.sys_compensation_bands cb ON cb.compensation_band_id = pcp.compensation_band_id
+        WHERE true ${posTenant}
+        GROUP BY s.skill_group_id
+     ),
+     covered AS (
+       SELECT s.skill_group_id, count(*) AS covered_requirements
+         FROM sys.sys_position_skill_requirements r
+         JOIN sys.sys_positions p ON p.position_id = r.position_id AND p.position_is_active
+         JOIN sys.sys_skills s    ON s.skill_id = r.skill_id AND s.skill_group_id IS NOT NULL
+         JOIN sys.sys_user_position_assignments a
+              ON a.user_position_assignment_position_id = p.position_id
+             AND a.user_position_assignment_kind = 'PRIMARY'
+             AND a.user_position_assignment_status = 'ACTIVE'
+         JOIN sys.sys_user_skills us
+              ON us.user_skill_user_id = a.user_position_assignment_user_id
+             AND us.user_skill_skill_id = r.skill_id
+        WHERE true ${posTenant}
+        GROUP BY s.skill_group_id
+     ),
+     supply AS (
+       SELECT s.skill_group_id,
+              count(DISTINCT us.user_skill_user_id)                          AS holders,
+              avg(pl.skill_proficiency_level_rank)                           AS avg_held_rank,
+              avg(CASE WHEN us.user_skill_is_verified THEN 1.0 ELSE 0.0 END) AS verified_share,
+              avg(CASE WHEN ev.cnt > 0 THEN 1.0 ELSE 0.0 END)                AS evidence_share
+         FROM sys.sys_user_skills us
+         JOIN sys.sys_skills s ON s.skill_id = us.user_skill_skill_id AND s.skill_group_id IS NOT NULL
+         LEFT JOIN sys.sys_skill_proficiency_levels pl
+                ON pl.skill_proficiency_level_code = us.user_skill_proficiency
+         LEFT JOIN LATERAL (
+                SELECT count(*) AS cnt FROM sys.sys_user_skill_evidence e
+                 WHERE e.user_skill_evidence_user_id = us.user_skill_user_id
+                   AND e.user_skill_evidence_skill_id = us.user_skill_skill_id
+              ) ev ON true
+        WHERE true ${usrTenant}
+        GROUP BY s.skill_group_id
+     ),
+     in_play AS (
+       SELECT skill_group_id, count(DISTINCT skill_id) AS skill_count FROM (
+         SELECT s.skill_group_id, s.skill_id
+           FROM sys.sys_position_skill_requirements r
+           JOIN sys.sys_positions p ON p.position_id = r.position_id AND p.position_is_active
+           JOIN sys.sys_skills s    ON s.skill_id = r.skill_id AND s.skill_group_id IS NOT NULL
+          WHERE true ${posTenant}
+         UNION
+         SELECT s.skill_group_id, s.skill_id
+           FROM sys.sys_user_skills us
+           JOIN sys.sys_skills s ON s.skill_id = us.user_skill_skill_id AND s.skill_group_id IS NOT NULL
+          WHERE true ${usrTenant}
+       ) z GROUP BY skill_group_id
+     )
+     SELECT g.skill_group_id, g.skill_group_name,
+            ip.skill_count::text,
+            COALESCE(d.positions_requiring, 0)::text  AS positions_requiring,
+            COALESCE(d.critical_positions, 0)::text   AS critical_positions,
+            COALESCE(d.total_requirements, 0)::text   AS total_requirements,
+            d.avg_econ::text, d.crit_share::text,
+            COALESCE(sup.holders, 0)::text            AS holders,
+            sup.avg_held_rank::text, sup.verified_share::text, sup.evidence_share::text,
+            COALESCE(c.covered_requirements, 0)::text AS covered_requirements
+       FROM in_play ip
+       JOIN sys.sys_skill_groups g ON g.skill_group_id = ip.skill_group_id
+       LEFT JOIN demand  d   ON d.skill_group_id = ip.skill_group_id
+       LEFT JOIN supply  sup ON sup.skill_group_id = ip.skill_group_id
+       LEFT JOIN covered c   ON c.skill_group_id = ip.skill_group_id
+      ORDER BY g.skill_group_name`,
+    params,
+  );
+
+  const num = (v: string | null): number | null => (v === null ? null : Number(v));
+  return {
+    headcount,
+    groups: res.rows.map((r) => ({
+      skillGroupId: r.skill_group_id,
+      skillGroupName: r.skill_group_name,
+      skillCount: Number(r.skill_count),
+      positionsRequiring: Number(r.positions_requiring),
+      criticalPositions: Number(r.critical_positions),
+      totalRequirements: Number(r.total_requirements),
+      avgEcon: num(r.avg_econ),
+      critShare: Number(r.crit_share ?? 0),
+      holders: Number(r.holders),
+      avgHeldRank: num(r.avg_held_rank),
+      verifiedShare: Number(r.verified_share ?? 0),
+      evidenceShare: Number(r.evidence_share ?? 0),
+      coveredRequirements: Number(r.covered_requirements),
+    })),
+  };
+}

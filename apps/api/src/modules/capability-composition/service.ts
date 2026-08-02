@@ -23,8 +23,15 @@ import type {
   CapabilityScore, CapabilityScoreListResponse, CapabilityRecomputeResponse,
   CapabilitySubjectType, CapabilityScope,
   EssentialCapabilityRanking, EssentialCapabilityItem,
+  VrioScorecard, VrioCapabilityItem, VrioVerdict,
 } from "@heuresys/shared";
-import { ESSENTIAL_CAPABILITY_WEIGHTS as W } from "@heuresys/shared";
+import {
+  ESSENTIAL_CAPABILITY_WEIGHTS as W,
+  VRIO_VALUE_WEIGHTS as VW,
+  VRIO_INIMITABILITY_WEIGHTS as IW,
+  VRIO_THRESHOLDS as VT,
+  VRIO_MAX_PROFICIENCY_RANK,
+} from "@heuresys/shared";
 import * as repo from "./repository.js";
 import type { ScoringInputs, ScoreRow, LineageRow } from "./repository.js";
 
@@ -213,6 +220,146 @@ export function computeTenant(inputs: ScoringInputs): { scores: ScoreRow[]; line
   return { scores, lineage };
 }
 
+/* --------------------- #56 F2 — VRIO pure compute --------------------- */
+
+/** Rank used only to order the scorecard: strongest strategic position first, gaps last. */
+const VERDICT_RANK: Record<VrioVerdict, number> = {
+  SUSTAINED_ADVANTAGE: 6,
+  UNUSED_ADVANTAGE: 5,
+  TEMPORARY_ADVANTAGE: 4,
+  PARITY: 3,
+  DISADVANTAGE: 2,
+  CAPABILITY_GAP: 1,
+};
+
+/**
+ * Tie-aware percentile of v within xs, in [0,1]. Same construction already used for the
+ * economic component in F1, lifted here to every dimension.
+ */
+function percentileIn(xs: number[], v: number): number {
+  if (xs.length <= 1) return 0.5;
+  const below = xs.filter((x) => x < v).length;
+  return below / (xs.length - 1);
+}
+
+/**
+ * Classifies every in-play capability. Pure and deterministic: no I/O, no clock.
+ * Each dimension lands in [0,1]; the verdict is the Barney lattice read over the
+ * thresholds, never an average of the four.
+ */
+export function computeVrio(inputs: repo.VrioInputs): VrioCapabilityItem[] {
+  const { headcount, groups } = inputs;
+
+  // Economic percentile over the in-play set (tie-aware), same construction as F1.
+  const econVals = groups
+    .map((g) => g.avgEcon)
+    .filter((v): v is number => v !== null)
+    .sort((a, b) => a - b);
+  const econPercentile = (v: number | null): number => {
+    if (v === null) return 0; // no band on any requiring position -> no economic evidence
+    if (econVals.length <= 1) return 0.5;
+    const below = econVals.filter((x) => x < v).length;
+    return below / (econVals.length - 1);
+  };
+
+  // ---- pass 1: the raw measures ----
+  const raw = groups.map((g) => {
+    const econ = econPercentile(g.avgEcon);
+    const crit = clamp(g.critShare, 0, 1);
+    const depth = g.avgHeldRank === null ? 0 : clamp(g.avgHeldRank / VRIO_MAX_PROFICIENCY_RANK, 0, 1);
+    return {
+      g,
+      econ,
+      crit,
+      // Valuable = the org pays well for the positions that demand it, and they are critical.
+      value: clamp(VW.econ * econ + VW.crit * crit, 0, 1),
+      // Rare = few people hold it relative to the workforce.
+      rarity: headcount > 0 ? clamp(1 - g.holders / headcount, 0, 1) : 0,
+      // Hard to imitate = deep mastery, verified, backed by documented evidence.
+      inimitability: clamp(
+        IW.depth * depth + IW.verified * clamp(g.verifiedShare, 0, 1) + IW.evidence * clamp(g.evidenceShare, 0, 1),
+        0, 1,
+      ),
+      // Organized = the demand is actually met by the people sitting in those positions.
+      organization: g.totalRequirements > 0 ? clamp(g.coveredRequirements / g.totalRequirements, 0, 1) : 0,
+    };
+  });
+
+  // ---- pass 2: rank each dimension across the org's own capability set ----
+  // Absolute cuts do not work here: measured on live data three of the four raw scales sit
+  // entirely above 0.5, which would mark them "present" everywhere and collapse the verdict
+  // onto Value alone. Percentiles give four axes that actually separate.
+  const sortedAsc = (pick: (r: (typeof raw)[number]) => number) => raw.map(pick).sort((a, b) => a - b);
+  const dist = {
+    value: sortedAsc((r) => r.value),
+    rarity: sortedAsc((r) => r.rarity),
+    inimitability: sortedAsc((r) => r.inimitability),
+    organization: sortedAsc((r) => r.organization),
+  };
+
+  const items = raw.map(({ g, econ, crit, ...m }): VrioCapabilityItem => {
+    const value = percentileIn(dist.value, m.value);
+    const rarity = percentileIn(dist.rarity, m.rarity);
+    const inimitability = percentileIn(dist.inimitability, m.inimitability);
+    const organization = percentileIn(dist.organization, m.organization);
+
+    const isValuable = value >= VT.value;
+    const isRare = rarity >= VT.rarity;
+    const isInimitable = inimitability >= VT.inimitability;
+    const isOrganized = organization >= VT.organization;
+
+    // A capability the organization demands but nobody holds is an absence, not a rare asset:
+    // raw rarity would read 1.0 and flatter it into an "advantage". Classify it as the gap it is.
+    const isGap = g.holders === 0 && g.positionsRequiring > 0;
+
+    const verdict: VrioVerdict =
+      isGap ? "CAPABILITY_GAP"
+      : !isValuable ? "DISADVANTAGE"
+      : !isRare ? "PARITY"
+      : !isInimitable ? "TEMPORARY_ADVANTAGE"
+      : !isOrganized ? "UNUSED_ADVANTAGE"
+      : "SUSTAINED_ADVANTAGE";
+
+    return {
+      skillGroupId: g.skillGroupId,
+      skillGroupName: g.skillGroupName,
+      skillCount: g.skillCount,
+      value: round4(value),
+      rarity: round4(rarity),
+      inimitability: round4(inimitability),
+      organization: round4(organization),
+      isValuable, isRare, isInimitable, isOrganized, verdict,
+      evidence: {
+        valueRaw: round4(m.value),
+        rarityRaw: round4(m.rarity),
+        inimitabilityRaw: round4(m.inimitability),
+        organizationRaw: round4(m.organization),
+        positionsRequiring: g.positionsRequiring,
+        criticalPositions: g.criticalPositions,
+        avgCompensationBandEur: g.avgEcon === null ? null : round2(g.avgEcon),
+        econPercentile: round4(econ),
+        criticalityShare: round4(crit),
+        holders: g.holders,
+        headcount,
+        avgHeldRank: g.avgHeldRank === null ? null : round2(g.avgHeldRank),
+        verifiedShare: round4(clamp(g.verifiedShare, 0, 1)),
+        evidenceShare: round4(clamp(g.evidenceShare, 0, 1)),
+        totalRequirements: g.totalRequirements,
+        coveredRequirements: g.coveredRequirements,
+      },
+    };
+  });
+
+  // Strongest strategic position first; ties by value, then name for a stable order.
+  items.sort(
+    (a, b) =>
+      VERDICT_RANK[b.verdict] - VERDICT_RANK[a.verdict] ||
+      b.value - a.value ||
+      a.skillGroupName.localeCompare(b.skillGroupName),
+  );
+  return items;
+}
+
 /* ------------------------------- service API ------------------------------- */
 
 function toScore(row: repo.ActiveScoreRow, lineage: repo.ActiveLineageRow[]): CapabilityScore {
@@ -304,6 +451,31 @@ export const capabilityCompositionService = {
         a.skillName.localeCompare(b.skillName),
     );
     return { items, total: items.length, weights: { econ: W.econ, crit: W.crit, scarcity: W.scarcity } };
+  },
+
+  /**
+   * #56 F2 — VRIO scorecard. Classifies each capability (skill group) the organization
+   * actually uses into Barney's lattice. Org-wide aggregate over skill-group totals — no
+   * per-person figure is exposed, so tenant scope alone gates it (no org-axis narrowing).
+   */
+  async vrioScorecard(actor: ActorContext): Promise<VrioScorecard> {
+    const scope = buildScope(actor);
+    const inputs = await repo.loadVrioInputs(scope.tenantId);
+    const items = computeVrio(inputs);
+    const summary: VrioScorecard["summary"] = {
+      CAPABILITY_GAP: 0, DISADVANTAGE: 0, PARITY: 0, TEMPORARY_ADVANTAGE: 0, UNUSED_ADVANTAGE: 0,
+      SUSTAINED_ADVANTAGE: 0,
+    };
+    for (const i of items) summary[i.verdict] += 1;
+    return {
+      items,
+      total: items.length,
+      headcount: inputs.headcount,
+      summary,
+      thresholds: { ...VT },
+      weights: { value: { ...VW }, inimitability: { ...IW } },
+      generatedAt: new Date().toISOString(),
+    };
   },
 
   async subject(actor: ActorContext, subjectType: CapabilitySubjectType, subjectId: string): Promise<CapabilityScore> {

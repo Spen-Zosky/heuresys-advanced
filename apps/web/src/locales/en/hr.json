@@ -480,5 +480,35 @@
     },
     "search": "Search",
     "searchPlaceholder": "code or name…"
+  },
+  "vrio": {
+    "title": "VRIO scorecard",
+    "description": "The capabilities the organization actually uses, classified with the VRIO frame across {{headcount}} people. Value = {{value}}% economic weight + {{crit}}% criticality; a dimension counts as present from the {{threshold}}th percentile of our own capabilities.",
+    "descriptionIdle": "The capabilities the organization actually uses, classified with the VRIO frame.",
+    "count": "{{count}} capabilities",
+    "errorMessage": "Could not load the VRIO scorecard",
+    "emptyTitle": "No capability in play",
+    "emptyDescription": "No skill group is required by a position or held by a person in this tenant.",
+    "caption": "VRIO scorecard by capability",
+    "method": "The four columns are percentiles across this tenant's own capability set, with the raw measure beneath. Percentiles are used because the raw scales are not calibrated: on live data rarity, inimitability and organization nearly all sit above 0.50, so an absolute cut would mark them present everywhere and collapse the verdict onto Value alone. The verdict is Barney's classification, never an average of the four dimensions.",
+    "cols": {
+      "capability": "Capability",
+      "skillCount": "{{count}} skills",
+      "value": "Value",
+      "rarity": "Rarity",
+      "inimitability": "Inimitability",
+      "organization": "Organization",
+      "verdict": "Verdict",
+      "evidence": "Evidence",
+      "evidenceValue": "{{positions}} positions · {{holders}}/{{headcount}} people · {{covered}}/{{required}} covered"
+    },
+    "verdicts": {
+      "SUSTAINED_ADVANTAGE": "Sustained advantage",
+      "UNUSED_ADVANTAGE": "Unused advantage",
+      "TEMPORARY_ADVANTAGE": "Temporary advantage",
+      "PARITY": "Competitive parity",
+      "DISADVANTAGE": "Competitive disadvantage",
+      "CAPABILITY_GAP": "Missing capability"
+    }
   }
 }

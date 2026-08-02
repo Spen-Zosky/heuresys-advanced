@@ -492,6 +492,11 @@
       "heuresys-source": "./src/schemas/essential-capability.ts",
       "default": "./dist/schemas/essential-capability.js"
     },
+    "./schemas/vrio-scorecard": {
+      "types": "./dist/schemas/vrio-scorecard.d.ts",
+      "heuresys-source": "./src/schemas/vrio-scorecard.ts",
+      "default": "./dist/schemas/vrio-scorecard.js"
+    },
     "./schemas/whistleblowing": {
       "types": "./dist/schemas/whistleblowing.d.ts",
       "heuresys-source": "./src/schemas/whistleblowing.ts",

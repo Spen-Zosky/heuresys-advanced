@@ -95,6 +95,7 @@ export * from "./schemas/insights.js";
 export * from "./schemas/capability-composition.js";
 export * from "./schemas/capability-maturity.js";
 export * from "./schemas/essential-capability.js";
+export * from "./schemas/vrio-scorecard.js";
 export * from "./schemas/whistleblowing.js";
 export * from "./schemas/reference-sync.js";
 export * from "./schemas/content.js";

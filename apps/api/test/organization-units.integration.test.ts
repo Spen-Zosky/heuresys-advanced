@@ -111,6 +111,70 @@ describe("/v1/organization-units/* integration", () => {
     expect((dup.json() as { error: { code: string } }).error.code).toBe("OU_CODE_CONFLICT");
   });
 
+  describe("PATCH parentId: the tree must stay a tree (#83)", () => {
+    // A ← B ← C, built once for the whole block.
+    let a: string, b: string, c: string;
+
+    async function createOu(code: string, parentId?: string): Promise<string> {
+      const r = await suite.app.inject({
+        method: "POST", url: "/v1/organization-units",
+        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+        payload: { code, name: code, ...(parentId ? { parentId } : {}) },
+      });
+      expect(r.statusCode).toBe(201);
+      const id = (r.json() as { organizationUnitId: string }).organizationUnitId;
+      createdIds.push(id);
+      return id;
+    }
+
+    async function reparent(id: string, parentId: string) {
+      return suite.app.inject({
+        method: "PATCH", url: `/v1/organization-units/${id}`,
+        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+        payload: { parentId },
+      });
+    }
+
+    beforeAll(async () => {
+      a = await createOu(`${SUITE_PREFIX}_CYC_A`);
+      b = await createOu(`${SUITE_PREFIX}_CYC_B`, a);
+      c = await createOu(`${SUITE_PREFIX}_CYC_C`, b);
+    });
+
+    it("a unit cannot become its own parent", async () => {
+      const r = await reparent(a, a);
+      expect(r.statusCode).toBe(409);
+      expect((r.json() as { error: { code: string } }).error.code).toBe("OU_PARENT_CYCLE");
+    });
+
+    it("a unit cannot be moved under its direct child", async () => {
+      const r = await reparent(a, b);
+      expect(r.statusCode).toBe(409);
+      expect((r.json() as { error: { code: string } }).error.code).toBe("OU_PARENT_CYCLE");
+    });
+
+    it("a unit cannot be moved under a deeper descendant", async () => {
+      const r = await reparent(a, c);
+      expect(r.statusCode).toBe(409);
+      expect((r.json() as { error: { code: string } }).error.code).toBe("OU_PARENT_CYCLE");
+    });
+
+    it("the rejected move leaves the tree untouched", async () => {
+      const r = await suite.app.inject({
+        method: "GET", url: `/v1/organization-units/${a}`,
+        headers: { cookie: ch(tenantS.cookies) },
+      });
+      expect((r.json() as { parentId: string | null }).parentId).toBeNull();
+    });
+
+    // Counter-proof: the guard must reject cycles, not every reparent.
+    it("a legitimate move up the tree still succeeds", async () => {
+      const r = await reparent(c, a);
+      expect(r.statusCode).toBe(200);
+      expect((r.json() as { parentId: string | null }).parentId).toBe(a);
+    });
+  });
+
   it("USER cannot create (no permission)", async () => {
     const r = await suite.app.inject({
       method: "POST", url: "/v1/organization-units",

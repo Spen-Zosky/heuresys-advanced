@@ -60,6 +60,15 @@ export const organizationUnitsService = {
     const target = await repo.findOuById(pool, id);
     if (!target) throw new NotFoundError("OrganizationUnit");
     await ensureSameTenant(actor, target);
+    if (patch.parentId) {
+      const cycle = await repo.parentWouldCreateCycle(pool, id, patch.parentId);
+      if (cycle) {
+        throw new ConflictError(
+          "An organization unit cannot be moved under itself or one of its descendants",
+          "OU_PARENT_CYCLE",
+        );
+      }
+    }
     const updated = await repo.updateOuPartial(pool, id, patch, actor.userId);
     if (!updated) throw new NotFoundError("OrganizationUnit");
     return updated;

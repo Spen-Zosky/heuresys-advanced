@@ -196,6 +196,35 @@ export async function updateOuPartial(
   return res.rows[0] ? toOu(res.rows[0]) : null;
 }
 
+/**
+ * True when re-parenting `id` under `candidateParentId` would close a loop —
+ * i.e. the candidate is `id` itself or one of its descendants.
+ *
+ * Walks ancestors upward from the candidate: if we reach `id`, the candidate sits
+ * below it. The CYCLE clause keeps the walk finite even if the stored tree is
+ * already corrupt (rows written before this guard existed).
+ */
+export async function parentWouldCreateCycle(
+  q: DbConnector,
+  id: string,
+  candidateParentId: string,
+): Promise<boolean> {
+  const res = await q.query(
+    `WITH RECURSIVE ancestors AS (
+         SELECT organization_unit_id, organization_unit_parent_id
+           FROM sys.sys_organization_units
+          WHERE organization_unit_id = $1
+       UNION ALL
+         SELECT o.organization_unit_id, o.organization_unit_parent_id
+           FROM sys.sys_organization_units o
+           JOIN ancestors a ON o.organization_unit_id = a.organization_unit_parent_id
+     ) CYCLE organization_unit_id SET is_cycle USING path
+     SELECT 1 FROM ancestors WHERE organization_unit_id = $2 LIMIT 1`,
+    [candidateParentId, id],
+  );
+  return (res.rowCount ?? 0) > 0;
+}
+
 export async function softDeleteOu(q: DbConnector, id: string): Promise<boolean> {
   const res = await q.query(
     `UPDATE sys.sys_organization_units

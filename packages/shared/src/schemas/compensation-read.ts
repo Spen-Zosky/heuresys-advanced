@@ -47,6 +47,46 @@ export const VariablePayCalculationListResponseSchema = z.object({
   items: z.array(VariablePayCalculationSchema),
   total: z.number().int().min(0),
 });
+
+// ── #37 (B2) — valutazione: la curva dice quanto spetterebbe, i cancelli se spetta ──
+
+export const RewardGateOutcomeSchema = z.object({
+  gateCode: z.string(),
+  gateName: z.string(),
+  isBlocking: z.boolean(),
+  status: z.enum(["PASSED", "WARNING", "BLOCKED", "OVERRIDDEN_WITH_REASON"]),
+  overrideReason: z.string().nullable(),
+});
+export type RewardGateOutcome = z.infer<typeof RewardGateOutcomeSchema>;
+
+export const VariablePayEvaluationSchema = z.object({
+  variablePayCalculationId: z.uuid(),
+  userId: z.uuid(),
+  periodStart: z.string(),
+  periodEnd: z.string(),
+  /** L'importo gia' registrato sul calcolo, per confronto. */
+  recordedAmountEur: z.number().nullable(),
+
+  /** Il raggiungimento letto dal calcolo (`payload.attainment`), se dichiarato. */
+  attainment: z.number().nullable(),
+  /** La curva citata dal calcolo (`payload.curve`), risolta sul catalogo. */
+  curveCode: z.string().nullable(),
+  curveKind: z.string().nullable(),
+  /** Il fattore che la curva produce per quel raggiungimento. */
+  curveFactor: z.number().nullable(),
+  curveExplanation: z.string().nullable(),
+
+  /** I cancelli che insistono sullo stesso periodo della persona. */
+  gates: z.array(RewardGateOutcomeSchema),
+  gateDecision: z.enum(["ALLOW", "ALLOW_WITH_WARNING", "BLOCK"]),
+  gateExplanation: z.string(),
+
+  /** Il fattore dopo i cancelli: un blocco lo porta a zero. */
+  finalFactor: z.number().nullable(),
+  /** Perché la valutazione non è calcolabile, quando non lo è. */
+  notEvaluable: z.string().nullable(),
+});
+export type VariablePayEvaluation = z.infer<typeof VariablePayEvaluationSchema>;
 export type VariablePayCalculationListResponse = z.infer<
   typeof VariablePayCalculationListResponseSchema
 >;

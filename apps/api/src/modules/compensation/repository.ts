@@ -965,3 +965,100 @@ export async function listPayoutCurves(
   }));
   return { items, total: items.length };
 }
+
+// ---------------------------------------------------------------------------
+// #37 (B2) — dati per la valutazione di un singolo calcolo
+// ---------------------------------------------------------------------------
+
+export interface VariablePayCalcRow {
+  variablePayCalculationId: string;
+  tenantId: string;
+  userId: string;
+  periodStart: string;
+  periodEnd: string;
+  amountEur: number | null;
+  payload: Record<string, unknown>;
+}
+
+/** Il calcolo da valutare, senza filtri di visibilità (li applica il service). */
+export async function findVariablePayCalculationById(
+  q: DbConnector,
+  id: string,
+): Promise<VariablePayCalcRow | null> {
+  const res = await q.query<{
+    variable_pay_calculation_id: string; variable_pay_calculation_tenant_id: string;
+    variable_pay_calculation_user_id: string; period_start: string; period_end: string;
+    amount: string | null; variable_pay_calculation_payload: Record<string, unknown>;
+  }>(
+    `SELECT variable_pay_calculation_id, variable_pay_calculation_tenant_id,
+            variable_pay_calculation_user_id,
+            variable_pay_calculation_period_start::text AS period_start,
+            variable_pay_calculation_period_end::text   AS period_end,
+            variable_pay_calculation_amount_eur::text   AS amount,
+            variable_pay_calculation_payload
+       FROM sys.sys_variable_pay_calculations
+      WHERE variable_pay_calculation_id = $1`,
+    [id],
+  );
+  const r = res.rows[0];
+  if (!r) return null;
+  return {
+    variablePayCalculationId: r.variable_pay_calculation_id,
+    tenantId: r.variable_pay_calculation_tenant_id,
+    userId: r.variable_pay_calculation_user_id,
+    periodStart: r.period_start,
+    periodEnd: r.period_end,
+    amountEur: r.amount === null ? null : Number(r.amount),
+    payload: r.variable_pay_calculation_payload ?? {},
+  };
+}
+
+export interface GateOutcomeRow {
+  gateCode: string;
+  gateName: string;
+  isBlocking: boolean;
+  status: string;
+  overrideReason: string | null;
+}
+
+/**
+ * Gli esiti dei cancelli che insistono sullo stesso periodo della persona.
+ *
+ * Di ogni cancello conta l'esito PIÙ RECENTE: un cancello rivalutato dopo una
+ * deroga non deve continuare a comparire come bloccato. DISTINCT ON fa
+ * esattamente questo, ordinando per data di registrazione decrescente.
+ */
+export async function listGateOutcomesForPeriod(
+  q: DbConnector,
+  userId: string,
+  periodStart: string,
+  periodEnd: string,
+): Promise<GateOutcomeRow[]> {
+  const res = await q.query<{
+    code: string; name: string; blocking: boolean; status: string; reason: string | null;
+  }>(
+    `SELECT DISTINCT ON (g.reward_gate_id)
+            c.reward_gate_catalog_code       AS code,
+            c.reward_gate_catalog_name       AS name,
+            c.reward_gate_catalog_is_blocking AS blocking,
+            r.reward_gate_result_status      AS status,
+            r.reward_gate_result_override_reason AS reason
+       FROM sys.sys_reward_gates g
+       JOIN sys.sys_reward_gate_catalog c
+         ON c.reward_gate_catalog_id = g.reward_gate_catalog_id
+       JOIN sys.sys_reward_gate_results r
+         ON r.reward_gate_result_gate_id = g.reward_gate_id
+      WHERE g.reward_gate_user_id = $1
+        AND g.reward_gate_period_start <= $3::date
+        AND g.reward_gate_period_end   >= $2::date
+      ORDER BY g.reward_gate_id, r.reward_gate_result_recorded_at DESC`,
+    [userId, periodStart, periodEnd],
+  );
+  return res.rows.map((r) => ({
+    gateCode: r.code,
+    gateName: r.name,
+    isBlocking: r.blocking,
+    status: r.status,
+    overrideReason: r.reason,
+  }));
+}

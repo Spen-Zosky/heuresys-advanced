@@ -27,6 +27,7 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { orgSubtreeUserIds } from "../src/lib/scope/org.js";
+import { payoutFactor } from "../src/modules/compensation/reward-engine.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const PAOLO_EMAIL = "paolo.caputo@rtl-bank.org";
@@ -209,4 +210,117 @@ describe("#32 A/L7 compensation & reward read", () => {
     });
     expect(r.statusCode).toBe(403);
   });
+
+  // ── #37 (B2) — la valutazione: curva + cancelli sui calcoli REALI ───────────
+  describe("variable-pay evaluation (#37)", () => {
+    it("evaluates a real calculation that declares a curve, and the factor matches the curve read from the DB", async () => {
+      // Si sceglie un calcolo VERO che dichiara curva e raggiungimento: nessun
+      // dato inventato, nessun conteggio scritto a mano.
+      const picked = await pool.query<{ id: string; curve: string; attainment: string }>(
+        `SELECT variable_pay_calculation_id AS id,
+                variable_pay_calculation_payload->>'curve' AS curve,
+                variable_pay_calculation_payload->>'attainment' AS attainment
+           FROM sys.sys_variable_pay_calculations
+          WHERE variable_pay_calculation_payload ? 'curve'
+            AND variable_pay_calculation_payload ? 'attainment'
+            AND variable_pay_calculation_tenant_id = $1
+          LIMIT 1`,
+        [rtlTenantId],
+      );
+      if (picked.rowCount === 0) {
+        throw new Error("Nessun calcolo con curva e raggiungimento: la premessa del test non regge piu'");
+      }
+      const row = picked.rows[0]!;
+
+      const r = await suite.app.inject({
+        method: "GET", url: `/v1/compensation/variable-pay/${row.id}/evaluation`,
+        headers: { cookie: ch(federica.cookies) },
+      });
+      expect(r.statusCode).toBe(200);
+      const ev = r.json() as {
+        curveCode: string; curveKind: string; curveFactor: number; attainment: number;
+        gateDecision: string; finalFactor: number; notEvaluable: string | null;
+        gates: Array<{ gateCode: string; status: string; isBlocking: boolean }>;
+      };
+
+      expect(ev.notEvaluable).toBeNull();
+      expect(ev.curveCode).toBe(row.curve);
+      expect(ev.attainment).toBeCloseTo(Number(row.attainment), 4);
+
+      // L'atteso si ricalcola dalla CURVA VERA letta dal database, non da una
+      // costante nel test: se qualcuno cambia i parametri della curva, questo
+      // test cambia con lei invece di diventare una bugia verde.
+      const curveRow = await pool.query<{ kind: string; payload: Record<string, unknown> }>(
+        `SELECT payout_curve_kind AS kind, payout_curve_payload AS payload
+           FROM sys.sys_payout_curves WHERE payout_curve_code = $1 LIMIT 1`,
+        [row.curve],
+      );
+      const c = curveRow.rows[0]!;
+      expect(ev.curveKind).toBe(c.kind);
+      const atteso = payoutFactor(
+        { code: row.curve, kind: c.kind as "LINEAR" | "CAPPED" | "STEPPED" | "SIGMOID", payload: c.payload },
+        Number(row.attainment),
+      );
+      expect(ev.curveFactor).toBeCloseTo(atteso.factor, 6);
+
+      // I cancelli arrivano dai dati reali, e la decisione e' coerente con essi.
+      const bloccanti = ev.gates.filter((g) => g.isBlocking && g.status === "BLOCKED");
+      if (bloccanti.length > 0) {
+        expect(ev.gateDecision).toBe("BLOCK");
+        expect(ev.finalFactor).toBe(0);
+      } else {
+        expect(["ALLOW", "ALLOW_WITH_WARNING"]).toContain(ev.gateDecision);
+        expect(ev.finalFactor).toBeCloseTo(ev.curveFactor, 6);
+      }
+    });
+
+    it("a legacy calculation without a curve is declared not evaluable instead of being guessed", async () => {
+      const legacy = await pool.query<{ id: string }>(
+        `SELECT variable_pay_calculation_id AS id
+           FROM sys.sys_variable_pay_calculations
+          WHERE NOT (variable_pay_calculation_payload ? 'curve')
+            AND variable_pay_calculation_tenant_id = $1
+          LIMIT 1`,
+        [rtlTenantId],
+      );
+      if (legacy.rowCount === 0) return; // nessuna riga importata: niente da verificare
+      const r = await suite.app.inject({
+        method: "GET", url: `/v1/compensation/variable-pay/${legacy.rows[0]!.id}/evaluation`,
+        headers: { cookie: ch(federica.cookies) },
+      });
+      expect(r.statusCode).toBe(200);
+      const ev = r.json() as { notEvaluable: string | null; curveFactor: number | null; finalFactor: number | null };
+      expect(ev.notEvaluable).toBeTruthy();
+      expect(ev.curveFactor).toBeNull();
+      expect(ev.finalFactor).toBeNull();
+    });
+
+    it("USER without compensation_intelligence:read cannot evaluate", async () => {
+      const any = await pool.query<{ id: string }>(
+        `SELECT variable_pay_calculation_id AS id FROM sys.sys_variable_pay_calculations LIMIT 1`,
+      );
+      const r = await suite.app.inject({
+        method: "GET", url: `/v1/compensation/variable-pay/${any.rows[0]!.id}/evaluation`,
+        headers: { cookie: ch(tommaso.cookies) },
+      });
+      expect(r.statusCode).toBe(403);
+    });
+
+    it("a calculation outside the actor's org sub-tree is not found", async () => {
+      const outside = await pool.query<{ id: string }>(
+        `SELECT variable_pay_calculation_id AS id
+           FROM sys.sys_variable_pay_calculations
+          WHERE NOT (variable_pay_calculation_user_id = ANY($1::uuid[]))
+          LIMIT 1`,
+        [paoloSubtree],
+      );
+      if (outside.rowCount === 0) return;
+      const r = await suite.app.inject({
+        method: "GET", url: `/v1/compensation/variable-pay/${outside.rows[0]!.id}/evaluation`,
+        headers: { cookie: ch(paolo.cookies) },
+      });
+      expect(r.statusCode).toBe(404);
+    });
+  });
+
 });

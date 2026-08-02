@@ -24,8 +24,13 @@ import type {
   ObjectiveRewardRuleListQuery,
   PositionEconomicWeightListQuery,
   PayrollHandoffRecordListQuery,
+  VariablePayEvaluation,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
+import {
+  aggregateGates, payoutFactor, finalFactor,
+  type GateOutcome, type PayoutCurveKind,
+} from "./reward-engine.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
 
 function requireTenant(a: ActorContext): string {
@@ -151,6 +156,104 @@ export const compensationService = {
   /** Org-gated per-person compensation recommendations (I18). */
   async listRecommendations(actor: ActorContext, query: CompensationRecommendationListQuery) {
     return repo.listRecommendations(pool, { ...(await orgFilter(actor)), query });
+  },
+
+  /**
+   * #37 (B2) — la valutazione di un calcolo: la curva dice quanto spetterebbe,
+   * i cancelli dicono se spetta.
+   *
+   * È una LETTURA: non riscrive l'importo registrato. Espone il ragionamento
+   * accanto al numero già in archivio, così i due si possono confrontare —
+   * che è il primo motivo per cui un motore del genere serve.
+   *
+   * Il dato è COMPENSATION per-persona: passa dallo stesso cancello
+   * organizzativo delle altre letture per-persona (I18).
+   */
+  async evaluateVariablePay(actor: ActorContext, id: string): Promise<VariablePayEvaluation> {
+    const calc = await repo.findVariablePayCalculationById(pool, id);
+    if (!calc) throw new NotFoundError("VariablePayCalculation");
+
+    // Cancello organizzativo: si riusa la lista già filtrata invece di
+    // duplicare la logica di visibilità. Se il calcolo non compare fra quelli
+    // visibili all'attore, per lui non esiste.
+    const visible = await repo.listVariablePay(pool, {
+      ...(await orgFilter(actor)),
+      query: { userId: calc.userId, limit: 200, offset: 0 },
+    });
+    if (!visible.items.some((c) => c.variablePayCalculationId === id)) {
+      throw new NotFoundError("VariablePayCalculation");
+    }
+
+    const outcomes = await repo.listGateOutcomesForPeriod(
+      pool, calc.userId, calc.periodStart, calc.periodEnd,
+    );
+    const gates: GateOutcome[] = outcomes.map((o) => ({
+      gateCode: o.gateCode,
+      gateName: o.gateName,
+      isBlocking: o.isBlocking,
+      status: o.status as GateOutcome["status"],
+      overrideReason: o.overrideReason,
+    }));
+    const aggregate = aggregateGates(gates);
+
+    // La curva e il raggiungimento vivono nel payload del calcolo. Quando non
+    // ci sono — è il caso delle righe importate dal sistema precedente — la
+    // parte "curva" non si inventa: si dichiara non calcolabile.
+    const curveCode = typeof calc.payload["curve"] === "string" ? (calc.payload["curve"] as string) : null;
+    const rawAttainment = calc.payload["attainment"];
+    const attainment =
+      typeof rawAttainment === "number" ? rawAttainment
+      : typeof rawAttainment === "string" && rawAttainment.trim() !== "" && Number.isFinite(Number(rawAttainment))
+        ? Number(rawAttainment)
+        : null;
+
+    const base = {
+      variablePayCalculationId: calc.variablePayCalculationId,
+      userId: calc.userId,
+      periodStart: calc.periodStart,
+      periodEnd: calc.periodEnd,
+      recordedAmountEur: calc.amountEur,
+      gates,
+      gateDecision: aggregate.decision,
+      gateExplanation: aggregate.explanation,
+    };
+
+    if (curveCode === null || attainment === null) {
+      return {
+        ...base,
+        attainment, curveCode, curveKind: null, curveFactor: null, curveExplanation: null,
+        finalFactor: null,
+        notEvaluable: curveCode === null
+          ? "Il calcolo non dichiara una curva di erogazione (riga importata dal sistema precedente)"
+          : "Il calcolo non dichiara un raggiungimento",
+      };
+    }
+
+    const curves = await repo.listPayoutCurves(pool, catalogTenant(actor));
+    const curve = curves.items.find((c) => c.code === curveCode);
+    if (!curve) {
+      return {
+        ...base,
+        attainment, curveCode, curveKind: null, curveFactor: null, curveExplanation: null,
+        finalFactor: null,
+        notEvaluable: `La curva '${curveCode}' citata dal calcolo non esiste nel catalogo`,
+      };
+    }
+
+    const factor = payoutFactor(
+      { code: curve.code, kind: curve.kind as PayoutCurveKind, payload: curve.payload },
+      attainment,
+    );
+    return {
+      ...base,
+      attainment,
+      curveCode: curve.code,
+      curveKind: curve.kind,
+      curveFactor: factor.factor,
+      curveExplanation: factor.explanation,
+      finalFactor: finalFactor(factor.factor, aggregate.decision),
+      notEvaluable: null,
+    };
   },
 
   /** Tenant/OU bonus pools (no person rows) — tenant-scoped only. */

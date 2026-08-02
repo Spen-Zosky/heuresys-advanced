@@ -6,6 +6,7 @@
 import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { actorFromRequest as actor } from "../../lib/actor.js";
 
+import { z } from "zod";
 import {
   CompensationProfileSchema,
   CompensationProfilePositionParamSchema,
@@ -19,6 +20,7 @@ import {
   CreatePayrollHandoffRecordBodySchema,
   VariablePayCalculationListQuerySchema,
   VariablePayCalculationListResponseSchema,
+  VariablePayEvaluationSchema,
   CompensationRecommendationListQuerySchema,
   CompensationRecommendationListResponseSchema,
   BonusPoolListQuerySchema,
@@ -86,6 +88,16 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
       response: { 200: VariablePayCalculationListResponseSchema },
     },
   }, async (req) => compensationService.listVariablePay(actor(req), req.query));
+
+  // #37 (B2) — la valutazione di un singolo calcolo: curva + cancelli.
+  app.get("/variable-pay/:id/evaluation", {
+    config: { orgGate: "service" },
+    preHandler: [requirePermission("compensation_intelligence:read")],
+    schema: {
+      params: z.object({ id: z.uuid() }),
+      response: { 200: VariablePayEvaluationSchema },
+    },
+  }, async (req) => compensationService.evaluateVariablePay(actor(req), req.params.id));
 
   app.get("/recommendations", {
     config: { orgGate: "service" },

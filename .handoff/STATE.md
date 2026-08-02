@@ -1,26 +1,24 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-01 (S1039 — l'ecosistema Claude si adegua a Opus 5, e il progetto guadagna un cancello che impedisce di chiudere un turno senza prove).
+**Updated**: 2026-08-02 (S1040 — batch P2 avviato: quattro voci chiuse su undici, ognuna con la sua prova live).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md` · pattern di dati → `docs/kb/DATA_PATTERNS.md`.
 
-## Last session brief (S1039)
+## Last session brief (S1040)
 
-**Sessione di ecosistema, non di prodotto**: nessun codice applicativo, nessuna migrazione, nessun
-test toccato — i conteggi restano quelli di S1038, ri-derivati e identici.
+**Enzo ha delegato l'intero P2** («procedi con tutti i punti di P2»). Il batch vale ~15-20 sessioni:
+il piano-file `docs/superpowers/specs/2026-08-02-p2-batch-execution-plan.md` tiene lo stato riga per
+riga ed è l'autorità da cui riprendere. **Le prime voci sono chiuse, nessuna lasciata a metà.**
 
-**`CLAUDE.md` da 38.393 a 20.990 caratteri senza perdere nulla.** I 17 invarianti, la Definition of
-Done e "What NOT to touch" restano verbatim; ciò che serve solo su un'area è finito in quattro
-`.claude/rules/` che si caricano sul percorso e in una skill. Tagliato il derivabile: l'albero delle
-directory e la sezione che ridescriveva quello che l'hook di avvio già esegue.
+**L'organigramma non può più chiudersi ad anello** (#83): la difesa viveva solo nell'interfaccia,
+ora è nel motore. **Le visualizzazioni si versionano e si esportano davvero** (#36): prima il numero
+di versione non saliva mai e gli "export" rimandavano a un archivio inesistente. **Il premio
+variabile ha il suo motore** (#37): curve e cancelli, con la spiegazione in chiaro accanto
+all'importo. **La storia delle persone è entrata in casa** (#49): 2.683 fatti su 161 persone, dal
+2005 a oggi, visibili nel profilo e nella propria area.
 
-**Nasce il cancello di verifica** (`verify_gate.py` + hook `Stop`). Il verdetto è funzione dello
-stato osservabile, non della conversazione: se il working tree cambia, scade da solo. **Da ora, se
-modifichi codice e non lanci `verify_gate.py run`, a fine turno il cancello blocca una volta e dice
-cosa manca.** Freno: `touch .zp/verify-off`.
-
-**Scritta la regola di convivenza che mancava**: unico writer di `docs/kb/` è la CLI; Cowork e
-Desktop sono read-only e propongono via `COWORK_INBOX.md`. Viveva solo nelle preferenze globali di
-claude.ai, per un vincolo che riguarda questo progetto soltanto.
+**Due dossier di linea si sono rivelati stale** e lo erano in modo che contava: B2 dava a zero
+tabelle che ne contengono 3.283, B5 dava a zero layout ed export che esistevano. Misurare prima di
+progettare ha cambiato il lavoro, non solo la stima.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -29,28 +27,30 @@ verifica e review adversarial; le decisioni tecniche sono di Claude.
 
 ## Stato dei piani
 
-- **Serie C (editing amministrativo)**: #44 e #43 chiusi in S1038. Resta **#45** (tenant &
-  piattaforma) per completare la linea — stessi schemi già collaudati.
+- **Batch P2 (mandato S1040)**: in corso. Lo stato per riga sta nel piano-file; si riprende dalla prima voce non chiusa, **P2-05**.
+- **Serie C (editing amministrativo)**: resta **#45** (tenant & piattaforma) per completare la linea.
 - Zero-pendenze (#76): `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` (`zp_state.py piano`).
 - Storia RTL (#77): chiusa, presidio settimanale su VM e linux-pc.
 
 ## ⚠ Top priorities (next session)
 
-1. **#45 C/C3 — editing tenant & piattaforma** — chiude la serie C; il metodo è già collaudato
-   (pannello + ricerca lato server + prova live dall'interfaccia). ~1,5 sessioni.
-2. **#76 zero-pendenze, prossima ondata** — conta le pendenze con
-   `python docs/kb/tools/zp_state.py piano`, non citando un totale vecchio.
-3. **#83 l'API non impedisce i cicli nell'organigramma** — la difesa vive solo nell'interfaccia;
-   un chiamante diretto può ancora spezzare l'albero. ~1h.
-4. **#9/#10/#11 audit forense 100X** — ~1-2 sessioni (WS-L + triage + gate).
+1. **P2-05 → #56 F2 VRIO scorecard** — prima voce non iniziata del batch P2. Vincolo dichiarato nel
+   piano: scorecard **calcolata su dati reali**, non un'euristica inventata. ~2-2,5 sessioni.
+2. **#57 OHI org-health, poi #58 AI Advisor** — in quest'ordine, perché l'Advisor cita le due scorecard.
+3. **P2-08 → #54 recruiting/ATS** — la voce più grossa del batch (~5-7 sessioni, a fasi con commit
+   atomici).
+4. **#45 C/C3 — editing tenant & piattaforma** — fuori dal batch P2, chiude la serie C. ~1,5 sessioni.
 
 ## Open questions (autorità *cosa* = Enzo)
 
 - **Badge pieni del design system**: le varianti `success`/`destructive` di `@heuresys/ui` non
-  reggono il contrasto AA a 12px. Qui aggirate con il contorno; la correzione vera sta in
-  `ux-design-shared`: da decidere se aprirla lì.
+  reggono il contrasto AA a 12px. La correzione vera sta in `ux-design-shared`: da decidere se
+  aprirla lì.
 - **`admin@heuresys.com`**: le sue funzioni dovevano passare a `enzo.spenuso@heuresys.com`, che
   però **non ha alcun accesso** — da decidere se e quando (tocca login e permessi).
+- **Genitore di un'unità fra tenant diversi** (emersa lavorando su #83): la FK sul genitore non
+  impone lo stesso tenant, e `create` non valida affatto il `parentId`. È un buco di isolamento
+  diverso dal ciclo, fuori dallo scope di #83 → registrato come voce di backlog, non come pendenza.
 - WAIT-INPUT: **#4** pricing · **#8** app-password Outlook · **#16** SuccessFactors · **#52** SSO
   IdP · **#85** rigenerare `AGENTS.md`, ora divergente · **#86** `claude login` su VM e linux-pc.
 
@@ -61,6 +61,6 @@ git log origin/main..HEAD --oneline               # 0 dopo il push handoff
 python docs/kb/tools/handoff_lint.py              # OK atteso
 python docs/kb/tools/verify_gate.py check         # "VERDE" atteso su tree pulito
 python docs/kb/tools/session_start.py             # menu + salute in un round
-cd apps/web && node scripts/e2e-node22.mjs test --config=playwright.prod.config.ts   # 274 passati / 0 falliti attesi
+bash db/scripts/import-d5-timeline.sh --dry-run   # 4641 righe attese dalla sorgente legacy
 pnpm db:validate                                  # "twice-run idempotency proven" atteso
 ```

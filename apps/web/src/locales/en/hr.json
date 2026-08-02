@@ -510,5 +510,48 @@
       "DISADVANTAGE": "Competitive disadvantage",
       "CAPABILITY_GAP": "Missing capability"
     }
+  },
+  "orgHealth": {
+    "title": "Organizational health",
+    "description": "Health index per org-unit, computed from engagement, goals, flight risk, attendance, reviews and capability maturity.",
+    "count": "{{count}} units",
+    "organizationIndex": "Organization index",
+    "errorMessage": "Could not load the health index",
+    "emptyTitle": "No unit to score",
+    "emptyDescription": "No org-unit has people assigned in this tenant.",
+    "caption": "Health index by org-unit",
+    "noData": "No data for this dimension: it leaves the calculation instead of counting as zero.",
+    "method": "The index runs from {{min}} to {{max}} (median {{median}}, spread {{spread}} points). Two readings side by side: STATUS says whether the unit is healthy in absolute terms, STANDING says where to look first relative to the others. Both are needed — with a narrow range, status alone would report \"no problem anywhere\", while standing alone would brand a merely last-placed unit as failing. A dimension without data leaves the calculation and lowers coverage, not the score.",
+    "methodIdle": "Status says whether the unit is healthy in absolute terms, standing says where to look first relative to the others. A dimension without data leaves the calculation and lowers coverage, not the score.",
+    "cols": {
+      "unit": "Org-unit",
+      "headcount": "{{count}} people",
+      "index": "Index",
+      "status": "Status",
+      "standing": "Standing",
+      "coverage": "Coverage"
+    },
+    "dims": {
+      "engagement": "Engagement",
+      "execution": "Execution",
+      "retention": "Retention",
+      "stability": "Attendance",
+      "performance": "Performance",
+      "maturity": "Maturity"
+    },
+    "statuses": {
+      "STRONG": "Strong",
+      "HEALTHY": "Healthy",
+      "WATCH": "Watch",
+      "CRITICAL": "Critical",
+      "INSUFFICIENT_DATA": "Insufficient data"
+    },
+    "standings": {
+      "LEADING": "Leading",
+      "MIDDLE": "Middle",
+      "LAGGING": "Lagging",
+      "UNRANKED": "Unranked"
+    },
+    "sample": "n={{count}}"
   }
 }

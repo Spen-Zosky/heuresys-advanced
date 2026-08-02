@@ -23,7 +23,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | **P2-03** | **#37** — B2 reward-gate engine sui variable-pay | Claude | Engine reale sui record live, API + test, UI, E2E, esposizione verificata | ✅ **DONE** (`2a78c40c` + `de7b3002`) |
 | **P2-04** | **#49** — D5 employee timeline | Claude | Timeline alimentata da dati reali, API+test+pagina+E2E | ✅ **DONE** (`66c12f64` + `daad5cad` + `37002011`) |
 | **P2-05** | **#56** — F2 VRIO scorecard (`/org-director/vrio`) | Claude | Scorecard calcolata su dati reali, non euristica inventata; API+test+pagina+E2E | ✅ **DONE** — vedi esito sotto |
-| **P2-06** | **#57** — F3 OHI org-health scorecard | Claude | Come sopra | `TODO` |
+| **P2-06** | **#57** — F3 OHI org-health scorecard | Claude | Come sopra | ✅ **DONE** — vedi esito sotto |
 | **P2-07** | **#58** — F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie) | Claude | Ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte | `TODO` |
 | **P2-08** | **#54** — E5 recruiting/ATS (cluster `/recruiting`) | Claude | A fasi con commit atomici; ogni fase chiude con prova LIVE | `TODO` |
 | **P2-09** | **#9/#10/#11** — audit forense 100X (WS-L + triage + gate) | Claude | WS-L eseguito, triage deciso per riga, gate meccanico verde | `TODO` |
@@ -73,6 +73,33 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 - **Chi**: Claude, interamente. Nessun input di Enzo — le soglie sono decisione tecnica, non di business.
 - **Guardia**: la scorecard è **read-only**, quindi il rischio non è distruttivo ma di *falso segnale*. La prova deve poter fallire: il caso di controllo è **«banca, finanza e assicurazioni»**, richiesto da **77 posizioni** e posseduto da **0 persone** — deve uscire con R alta, O = 0 e verdetto **non** sostenibile. Se uscisse "vantaggio sostenibile", il calcolo è sbagliato. Secondo controllo: ogni dimensione espone i propri numeri grezzi, così un valore si può ricalcolare a mano dalla riga.
 
+### P2-06 (#57 · F3 OHI) — compilata 2026-08-02, **dopo** aver misurato il database
+
+**Copertura misurata per unità organizzativa** (26 OU con persone assegnate, 161 persone):
+
+| fonte | OU coperte | volume |
+|---|---|---|
+| flight-risk | **26 / 26** | 162 score, valori 0,00–83,33 (media 35,0) |
+| engagement | 23 / 26 | 862 risposte, **796 complete** |
+| goal | 23 / 26 | 2.624 goal (1.060 COMPLETED · 860 IN_PROGRESS · 350 ON_TRACK · 235 AT_RISK · 118 CANCELLED) |
+| presenze | 23 / 26 | 116.639 righe (PRESENT 94.995 · REMOTE 10.539 · VACATION 6.349 · SICK 2.659 · ABSENT 17) |
+| performance review | 23 / 26 | 550 review con rating continuo |
+| maturità capability | 20 / 26 | già calcolata dal motore Maturity |
+
+L'indice è quindi **calcolabile su dati veri**, non su una gamba muta come temeva il dossier (che consigliava di aspettare D2 — non serve).
+
+**Trappola trovata nei dati, da gestire esplicitamente**: `sys_engagement_survey_responses.response_answers` contiene **due forme JSON diverse** nello stesso campo:
+- forma A — `{"value": 4, "question_id": "q1", "question_type": "rating"}` → 1.015 elementi;
+- forma B — `{"rating": 2, …}` / `{"nps": 6, …}` / `{"text": "…", …}` → 1.779 rating + 593 nps + 593 testi.
+
+Leggere solo `value` catturerebbe **1.015 valutazioni su 2.794 (36%)** e produrrebbe un engagement falsamente basato su un terzo del campione. Peggio: le **scale non coincidono** — in forma A anche `question_type:'nps'` porta `value` su **1–5**, mentre in forma B `nps` sta su **0–10**. Vanno normalizzate separatamente, e gli item `text` esclusi dalla media (in forma A portano un `value` numerico residuo che non è una misura).
+
+- **Precondizioni**: tunnel :5433 up; motore Maturity già popolato (20 OU); modulo `capability-composition` come sede naturale o modulo nuovo `org-health` — da decidere leggendo l'ingombro, non a priori.
+- **Meccanismo**: indice composito per OU su **6 dimensioni** (engagement · esecuzione dei goal · ritenzione da flight-risk · stabilità dalle presenze · performance · maturità), pesi dichiarati ed esportati da `@heuresys/shared`. Ogni dimensione che manca per un'OU **esce dal denominatore** e la copertura lo dichiara: mai un valore inventato al posto di un dato assente.
+- **Propagazione**: se la pagina è nuova serve una riga nel registry UI (`sys_ui_interfaces`) come per il VRIO — la sidebar è DB-driven, senza quella riga la pagina non è raggiungibile.
+- **Chi**: Claude, interamente.
+- **Guardia**: la lezione di P2-05 va applicata **in anticipo, non a posteriori**. Il test di dispersione entra nella suite dal primo colpo: l'indice deve **variare fra le OU** e ogni dimensione deve avere varianza non nulla; un indice che dà a tutte le unità lo stesso punteggio non misura niente. Secondo controllo: un'OU con dati mancanti deve mostrare copertura ridotta, **non** un punteggio pieno.
+
 ---
 
 ## Esiti
@@ -113,6 +140,33 @@ Completata con `de7b3002`: pannello "Valuta" su `/compensation-intelligence` (cu
 Tre commit, uno per fase. **Dati** (`66c12f64`): mig 000222 `sys.sys_user_timeline_events` + `import-d5-timeline.sh` sul modello di D2 — 4641 righe legacy → **2683 importate su 161 persone**, dal 2005-09-13 al 2026-04-15; le 1958 non importate sono di dipendenti che in v5 non esistono (atteso, dottrina D1/D2); ri-eseguito senza duplicati. Registrato nel registry brownfield come wave-2. **API** (`daad5cad`): modulo `user-timeline` + `/v1/me/timeline`, org-gated (I18) perché la storia contiene variazioni retributive e valutazioni; 9 test con attese derivate dal DB vivo. **Interfaccia** (`37002011`): un pannello per due superfici + 3 E2E, inclusa la controprova che il dipendente riceve 403 sulla superficie amministrativa.
 
 Scoperta registrata nel test: `occurredAt` esce in ISO 8601 (millisecondi) mentre PostgreSQL tiene i microsecondi — rimandare indietro `lastEventAt` tale e quale come estremo superiore taglia 10 righe su 2664.
+
+### P2-06 (#57 · F3 OHI) — ✅ DONE 2026-08-02
+
+**Cosa è stato costruito**: modulo API nuovo `org-health` (repository + service + routes), `GET /v1/org-health` (`org_director:read`, `orgGate: aggregate` — l'aggregato è per unità, nessuna cifra per-persona esce), pagina `/org-director/health`, migration **000225** per il registry UI. Indice composito su **6 dimensioni** (coinvolgimento · esecuzione · ritenzione · presenza · performance · maturità) con pesi dichiarati ed esportati.
+
+**Regola di onestà nel calcolo**: una dimensione senza dati **esce dal denominatore** invece di valere zero — contarla zero punirebbe un'unità per una lacuna nella strumentazione, non nella salute. Quanto del modello era disponibile si legge in `coverage`, e sotto il 50% l'unità non riceve alcuna fascia: un indice calcolato su una scheggia del modello non è un punteggio basso, è un punteggio ignoto.
+
+**Trappola nei dati, trovata misurando**: `response_answers` contiene **due forme JSON** nello stesso campo. Leggere solo `value` avrebbe raccolto **1.015 valutazioni su 2.794 (36%)**, e le scale non coincidono (in forma A anche `nps` sta su 1–5, in forma B su 0–10). Le due forme sono normalizzate separatamente e le risposte testuali escluse — in forma A portano un `value` numerico che è un residuo, non una misura.
+
+**La prova LIVE ha fatto emergere un secondo difetto, più sottile di quello di P2-05.** Il test di dispersione passava (i valori variano), ma l'indice vive **tutto fra 70,8 e 81,7**: ogni unità risultava STRONG o HEALTHY, **zero WATCH, zero CRITICAL**. Mediare sei dimensioni poco correlate comprime la varianza, e le fasce assolute (75/60/45) tagliano fuori dall'intervallo utile. Un consiglio avrebbe letto «nessun problema da nessuna parte» — rassicurazione senza contenuto.
+
+**Correzione**: non spostare le soglie, ma riconoscere che *«siamo sani?»* e *«dove intervengo per primo?»* sono **due domande diverse**. Accanto alla fascia assoluta ora c'è il **posizionamento relativo** per terzili (`LEADING`/`MIDDLE`/`LAGGING`) più il percentile, e la risposta pubblica la **dispersione osservata** (min/mediana/max/ampiezza) perché senza conoscere il range si sovra-interpreta mezzo punto di differenza. Nessuna delle due letture sostituisce l'altra: la sola fascia non è azionabile, il solo rango bollerebbe come critica un'unità semplicemente ultima.
+
+Distribuzione dopo la correzione: **8 LAGGING · 7 MIDDLE · 8 LEADING** su 23 unità. «Direzione Infrastrutture» emerge come prima da guardare (indice 70,8, performance 0,41, ritenzione 0,56) — informazione che la sola fascia non dava.
+
+**Prove (falsificabili)**:
+- **12 test di integrazione verdi**, fra cui il test di dispersione **scritto prima di vedere i risultati** (era la guardia dichiarata nella simulazione) e quello che pretende che i tre terzili non collassino in un solo bucket.
+- Il composito è verificato **contro la sua stessa formula** riga per riga, e i pesi efficaci delle dimensioni presenti devono rinormalizzare a 1.
+- Verifica esplicita che una dimensione assente abbia `sampleSize = 0` **e** `effectiveWeight = 0` — cioè che non pesi affatto, invece di pesare per zero.
+- **LIVE** su :3001 con login reale `federica.marchetti@rtl-bank.org`: HTTP 200, 23 unità, indice di organizzazione **75,38**.
+- **E2E 11/11** con login reale, fra cui la prova che **entrambe** le letture arrivano in pagina (un'unità `LAGGING` con fascia assoluta sana — il caso che la fascia da sola non sa esprimere) e che una dimensione mancante si rende come assenza, non come zero.
+- Migration 000225 applicata due volte: una sola riga. `typecheck`, `typecheck:test`, `lint`, `i18n:check` (2809 chiavi × 2 locale) puliti · `check_exposure.py` **73/73, 0 lacune**.
+- Il lint ha colto una stringa non tradotta (`n={sample}`) prima del commit: corretta, non aggirata.
+
+**Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
+1. Il dossier F3 consigliava di aspettare **D2 (engagement storico)** per non calcolare «su gamba muta». La misura dice il contrario: 23 OU su 26 hanno già engagement, obiettivi, presenze e valutazioni; 26 su 26 hanno il rischio di uscita. La dipendenza non serviva.
+2. La compressione della varianza è **strutturale** in ogni indice composito di questo tipo: vale per qualunque scorecard futura che medi molte dimensioni: la fascia assoluta va sempre affiancata da una lettura relativa.
 
 ### P2-05 (#56 · F2 VRIO) — ✅ DONE 2026-08-02
 

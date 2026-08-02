@@ -497,6 +497,11 @@
       "heuresys-source": "./src/schemas/vrio-scorecard.ts",
       "default": "./dist/schemas/vrio-scorecard.js"
     },
+    "./schemas/org-health": {
+      "types": "./dist/schemas/org-health.d.ts",
+      "heuresys-source": "./src/schemas/org-health.ts",
+      "default": "./dist/schemas/org-health.js"
+    },
     "./schemas/whistleblowing": {
       "types": "./dist/schemas/whistleblowing.d.ts",
       "heuresys-source": "./src/schemas/whistleblowing.ts",

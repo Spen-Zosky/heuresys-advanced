@@ -510,5 +510,48 @@
       "DISADVANTAGE": "Svantaggio competitivo",
       "CAPABILITY_GAP": "Capability mancante"
     }
+  },
+  "orgHealth": {
+    "title": "Salute organizzativa",
+    "description": "Indice di salute per unità organizzativa, calcolato su engagement, obiettivi, rischio di uscita, presenze, valutazioni e maturità delle competenze.",
+    "count": "{{count}} unità",
+    "organizationIndex": "Indice dell'organizzazione",
+    "errorMessage": "Impossibile caricare l'indice di salute",
+    "emptyTitle": "Nessuna unità valutabile",
+    "emptyDescription": "Nessuna unità organizzativa ha persone assegnate in questo tenant.",
+    "caption": "Indice di salute per unità organizzativa",
+    "noData": "Nessun dato per questa dimensione: non entra nel calcolo, invece di contare come zero.",
+    "method": "L'indice va da {{min}} a {{max}} (mediana {{median}}, ampiezza {{spread}} punti). Due letture affiancate: lo STATO dice se l'unità è sana in assoluto, la POSIZIONE dice dove guardare per prima rispetto alle altre. Servono entrambe — con un intervallo stretto lo stato da solo direbbe «nessun problema da nessuna parte», mentre la sola posizione farebbe passare per critica un'unità semplicemente ultima. Una dimensione senza dati esce dal calcolo e abbassa la copertura, non il punteggio.",
+    "methodIdle": "Lo stato dice se l'unità è sana in assoluto, la posizione dice dove guardare per prima rispetto alle altre. Una dimensione senza dati esce dal calcolo e abbassa la copertura, non il punteggio.",
+    "cols": {
+      "unit": "Unità organizzativa",
+      "headcount": "{{count}} persone",
+      "index": "Indice",
+      "status": "Stato",
+      "standing": "Posizione",
+      "coverage": "Copertura"
+    },
+    "dims": {
+      "engagement": "Coinvolgimento",
+      "execution": "Esecuzione",
+      "retention": "Ritenzione",
+      "stability": "Presenza",
+      "performance": "Performance",
+      "maturity": "Maturità"
+    },
+    "statuses": {
+      "STRONG": "Forte",
+      "HEALTHY": "Sana",
+      "WATCH": "Da osservare",
+      "CRITICAL": "Critica",
+      "INSUFFICIENT_DATA": "Dati insufficienti"
+    },
+    "standings": {
+      "LEADING": "In testa",
+      "MIDDLE": "Intermedia",
+      "LAGGING": "In coda",
+      "UNRANKED": "Non in classifica"
+    },
+    "sample": "n={{count}}"
   }
 }

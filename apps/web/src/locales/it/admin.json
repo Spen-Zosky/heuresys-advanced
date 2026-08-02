@@ -1096,5 +1096,13 @@
     "search": "Cerca",
     "searchPlaceholder": "codice o nome…",
     "allFamilies": "Tutte le famiglie"
+  },
+  "timeline": {
+    "title": "Storia",
+    "range": "{{count}} fatti registrati, dal {{from}} al {{to}}",
+    "all": "Tutti ({{count}})",
+    "empty": "Nessun fatto registrato.",
+    "error": "Impossibile caricare la storia.",
+    "more": "Mostra altri ({{shown}} di {{total}})"
   }
 }

@@ -1096,5 +1096,13 @@
     "search": "Search",
     "searchPlaceholder": "code or name…",
     "allFamilies": "All families"
+  },
+  "timeline": {
+    "title": "History",
+    "range": "{{count}} recorded facts, from {{from}} to {{to}}",
+    "all": "All ({{count}})",
+    "empty": "No recorded facts.",
+    "error": "Could not load the history.",
+    "more": "Show more ({{shown}} of {{total}})"
   }
 }

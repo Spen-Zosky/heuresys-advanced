@@ -538,6 +538,34 @@
       "INSTRUCTOR_LED": "Instructor-led",
       "BLENDED": "Blended",
       "ON_THE_JOB": "On the job"
+    },
+    "timelineEventType": {
+      "HIRE": "Hire",
+      "PROMOTION": "Promotion",
+      "LEVEL_CHANGE": "Level change",
+      "SALARY_CHANGE": "Salary change",
+      "COURSE_COMPLETED": "Course completed",
+      "COURSE_ENROLLED": "Course enrolled",
+      "SKILL_VALIDATED": "Skill validated",
+      "SKILL_UPDATED": "Skill updated",
+      "REVIEW_COMPLETED": "Review completed",
+      "MANAGER_CHANGE": "Manager change",
+      "CERTIFICATION_EARNED": "Certification earned",
+      "CERTIFICATION_EXPIRED": "Certification expired",
+      "GOAL_ACHIEVED": "Goal achieved",
+      "GOAL_ASSIGNED": "Goal assigned",
+      "ROLE_CHANGE": "Role change",
+      "LOCATION_CHANGE": "Location change",
+      "CONTRACT_RENEWED": "Contract renewed",
+      "CONTRACT_SIGNED": "Contract signed",
+      "WELLBEING_ALERT": "Wellbeing alert",
+      "FEEDBACK_RECEIVED": "Feedback received",
+      "TIME_OFF_TAKEN": "Time off taken",
+      "ABSENCE_RECORDED": "Absence recorded",
+      "SUCCESSION_NOMINATION": "Succession nomination",
+      "TALENT_POOL_INCLUSION": "Talent pool inclusion",
+      "DISCIPLINARY_ACTION": "Disciplinary action",
+      "OTHER": "Other"
     }
   }
 }

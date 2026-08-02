@@ -60,7 +60,8 @@
       "summary": "Riepilogo",
       "performance": "Performance",
       "attendance": "Presenze",
-      "aria": "Sezioni My HR"
+      "aria": "Sezioni My HR",
+      "history": "Storia"
     },
     "perf": {
       "error": "Impossibile caricare le valutazioni.",

@@ -39,7 +39,8 @@
       "summary": "Summary",
       "performance": "Performance",
       "attendance": "Attendance",
-      "aria": "My HR sections"
+      "aria": "My HR sections",
+      "history": "History"
     },
     "perf": {
       "error": "Unable to load reviews.",

@@ -538,6 +538,34 @@
       "INSTRUCTOR_LED": "Con docente",
       "BLENDED": "Mista",
       "ON_THE_JOB": "Sul campo"
+    },
+    "timelineEventType": {
+      "HIRE": "Assunzione",
+      "PROMOTION": "Promozione",
+      "LEVEL_CHANGE": "Cambio di livello",
+      "SALARY_CHANGE": "Variazione retributiva",
+      "COURSE_COMPLETED": "Corso concluso",
+      "COURSE_ENROLLED": "Iscrizione a un corso",
+      "SKILL_VALIDATED": "Competenza convalidata",
+      "SKILL_UPDATED": "Competenza aggiornata",
+      "REVIEW_COMPLETED": "Valutazione conclusa",
+      "MANAGER_CHANGE": "Cambio di responsabile",
+      "CERTIFICATION_EARNED": "Certificazione ottenuta",
+      "CERTIFICATION_EXPIRED": "Certificazione scaduta",
+      "GOAL_ACHIEVED": "Obiettivo raggiunto",
+      "GOAL_ASSIGNED": "Obiettivo assegnato",
+      "ROLE_CHANGE": "Cambio di ruolo",
+      "LOCATION_CHANGE": "Cambio di sede",
+      "CONTRACT_RENEWED": "Contratto rinnovato",
+      "CONTRACT_SIGNED": "Contratto firmato",
+      "WELLBEING_ALERT": "Segnalazione di benessere",
+      "FEEDBACK_RECEIVED": "Riscontro ricevuto",
+      "TIME_OFF_TAKEN": "Assenza fruita",
+      "ABSENCE_RECORDED": "Assenza registrata",
+      "SUCCESSION_NOMINATION": "Candidatura di successione",
+      "TALENT_POOL_INCLUSION": "Inserimento nel bacino talenti",
+      "DISCIPLINARY_ACTION": "Provvedimento disciplinare",
+      "OTHER": "Altro"
     }
   }
 }

@@ -22,6 +22,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle, PageHeader } from "@heuresys/ui";
+import { TimelinePanel } from "@/components/timeline-panel";
 import type { UserDossier } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
@@ -304,6 +305,11 @@ export default function UserDetailPage() {
           ])}
         />
       </Section>
+
+      {/* D5 (#49): il percorso della persona, non solo il suo presente.
+          L'API decide chi puo' vederla (asse organizzativo, I18): qui si
+          mostra e basta. */}
+      <TimelinePanel basePath="/v1/user-timeline" userId={userId} testId="user-timeline-panel" />
 
       {/* Fin qui la scheda RACCONTA. Da qui si GOVERNA: anagrafica e ruoli
           sono le due cose che un amministratore deve poter cambiare senza

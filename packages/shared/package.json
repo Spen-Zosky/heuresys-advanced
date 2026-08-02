@@ -447,6 +447,11 @@
       "heuresys-source": "./src/schemas/time-off.ts",
       "default": "./dist/schemas/time-off.js"
     },
+    "./schemas/user-timeline": {
+      "types": "./dist/schemas/user-timeline.d.ts",
+      "heuresys-source": "./src/schemas/user-timeline.ts",
+      "default": "./dist/schemas/user-timeline.js"
+    },
     "./schemas/talent-review": {
       "types": "./dist/schemas/talent-review.d.ts",
       "heuresys-source": "./src/schemas/talent-review.ts",

@@ -44,6 +44,7 @@ import {
   RevokeSessionParamsSchema, RevokeSessionResponseSchema,
   RevokeOtherSessionsBodySchema, RevokeOtherSessionsResponseSchema,
   TimeOffRequestListQuerySchema, TimeOffRequestListResponseSchema,
+  UserTimelineListQuerySchema, UserTimelineListResponseSchema, UserTimelineSummaryResponseSchema,
   CreateMeTimeOffRequestBodySchema, MeTimeOffRequestSubmittedSchema,
   GdprExportBundleSchema, ConsentStateResponseSchema,
   ConsentEventBodySchema, ConsentEventResponseSchema,
@@ -52,6 +53,7 @@ import { meService, type SelfActor } from "./service.js";
 import { gdprService } from "../gdpr/service.js";
 import { actorFromRequest } from "../../lib/actor.js";
 import { timeOffService } from "../time-off/service.js";
+import { userTimelineService } from "../user-timeline/service.js";
 import { teamsService } from "../teams/service.js";
 import { contentService } from "../content/service.js";
 import { createMediaService } from "../content/media-service.js";
@@ -136,6 +138,18 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, requirePermission("leave:request:self")],
     schema: { body: CreateMeTimeOffRequestBodySchema, response: { 200: MeTimeOffRequestSubmittedSchema } },
   }, async (req) => timeOffService.submitOwnRequest(actorFromRequest(req), req.body));
+
+  // D5 (#49): la propria storia. Pavimento I17 — il filtro e' l'identita' di
+  // chi chiede, non il suo posto nell'organigramma.
+  app.get("/timeline", {
+    preHandler: [requirePermission("timeline:read:self")],
+    schema: { querystring: UserTimelineListQuerySchema, response: { 200: UserTimelineListResponseSchema } },
+  }, async (req) => userTimelineService.listOwn(actorFromRequest(req), req.query));
+
+  app.get("/timeline/summary", {
+    preHandler: [requirePermission("timeline:read:self")],
+    schema: { querystring: UserTimelineListQuerySchema, response: { 200: UserTimelineSummaryResponseSchema } },
+  }, async (req) => userTimelineService.summarizeOwn(actorFromRequest(req), req.query));
 
   app.get("/positions", {
     preHandler: [requirePermission("user_position_assignment:read:self")],

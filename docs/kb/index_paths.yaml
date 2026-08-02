@@ -1,16 +1,16 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-02T11:35:49Z da docs/kb/tools/build_index.py
+# generato: 2026-08-02T14:30:01Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-02T11:35:49Z"
-  total_files: 2746
+  generated_at: "2026-08-02T14:30:01Z"
+  total_files: 2759
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 30
     api-core: 29
-    api-module: 329
+    api-module: 332
     ci: 17
     claude-config: 36
     config: 124
@@ -18,7 +18,7 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 221
+    db-migration: 223
     db-other: 8
     db-script: 43
     db-seed: 147
@@ -28,15 +28,15 @@ meta:
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 101
+    shared-schema: 103
     showcase-source: 14
-    test: 331
+    test: 335
     ux-design-archive: 80
-    web-source: 225
+    web-source: 227
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2188
+    live: 2201
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -1523,6 +1523,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\operating-models\service.ts'
     root: repo
     rel: 'apps/api/src/modules/operating-models/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\org-health\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/org-health/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\org-health\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/org-health/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\org-health\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/org-health/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -6827,6 +6845,18 @@ files:
   - path: 'D:\heuresys-advanced\db\migrations\000223_user_timeline_permissions.sql'
     root: repo
     rel: 'db/migrations/000223_user_timeline_permissions.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000224_vrio_scorecard_interface.sql'
+    root: repo
+    rel: 'db/migrations/000224_vrio_scorecard_interface.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000225_org_health_interface.sql'
+    root: repo
+    rel: 'db/migrations/000225_org_health_interface.sql'
     category: db-migration
     status: live
     provenance: git-tracked
@@ -12332,6 +12362,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\org-health.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/org-health.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\organization-unit-history.ts'
     root: repo
     rel: 'packages/shared/src/schemas/organization-unit-history.ts'
@@ -12605,6 +12641,12 @@ files:
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\visualization-styles.ts'
     root: repo
     rel: 'packages/shared/src/schemas/visualization-styles.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\vrio-scorecard.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/vrio-scorecard.ts'
     category: shared-schema
     status: live
     provenance: git-tracked
@@ -13484,6 +13526,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\org-health.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/org-health.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\organization-unit-history.integration.test.ts'
     root: repo
     rel: 'apps/api/test/organization-unit-history.integration.test.ts'
@@ -14108,6 +14156,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\vrio-scorecard.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/vrio-scorecard.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\wave1-cw-b60-tractable-targets.integration.test.ts'
     root: repo
     rel: 'apps/api/test/wave1-cw-b60-tractable-targets.integration.test.ts'
@@ -14528,6 +14582,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\org-health.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/org-health.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\organization-editing.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/organization-editing.spec.ts'
@@ -14669,6 +14729,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\visualizations.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/visualizations.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\vrio-scorecard.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/vrio-scorecard.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -15788,9 +15854,21 @@ files:
     category: web-source
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\org-director\health\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/org-director/health/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\org-director\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/org-director/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\org-director\vrio\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/org-director/vrio/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked

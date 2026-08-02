@@ -1,16 +1,18 @@
-# Piano di esecuzione — batch P2 (S1040 →)
+# Piano di esecuzione — batch P2 + P3 (S1040 →)
 
-**Mandato**: Enzo, 2026-08-02 — *"procedi con tutti i punti di P2"*.
+**Mandato**: Enzo, 2026-08-02 — *"procedi con tutti i punti di P2"* (S1040), **esteso in S1041 a *"esegui i batch P2 e P3"***.
 **Regime**: batch-delegation (esecuzione end-to-end autonoma; commit a ogni voce chiusa, si apre la successiva senza chiedere).
-**Autorità di stato**: questa tabella. Lo stato si legge da qui, non dalla memoria di sessione.
+**Autorità di stato**: le due tabelle sotto. Lo stato si legge da qui, non dalla memoria di sessione.
 
 ## Confine dichiarato
 
-Effort sommato dal register: **~15-20 sessioni**. Il batch **non** è completabile in una sessione. Ogni voce è però indipendente e chiude con un commit atomico + prova LIVE: una sessione che si interrompe lascia N voci chiuse e la prima aperta identificata da questa tabella.
+Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~21-28 sessioni complessive**. Il batch **non** è completabile in una sessione, né in poche. Ogni voce è però indipendente e chiude con un commit atomico + prova LIVE: una sessione che si interrompe lascia N voci chiuse e la prima aperta identificata da queste tabelle.
 
 ## Ordine adottato (decisione tecnica)
 
-Dal rischio-integrità più alto e costo minore verso il costo maggiore; F2/F3 prima di F4 perché l'AI Advisor cita le loro scorecard; audit 100X e GTM in coda perché sono trasversali e beneficiano del lavoro sopra.
+**P2**: dal rischio-integrità più alto e costo minore verso il costo maggiore; F2/F3 prima di F4 perché l'AI Advisor cita le loro scorecard; audit 100X e GTM in coda perché sono trasversali e beneficiano del lavoro sopra.
+
+**P3 interleaved, non accodato**: `P3-01` (#84, ~10 min, pura verifica) va **subito**, prima di P2-05, perché costa quanto un caffè e riguarda l'affidabilità del mio stesso setup — rimandarlo di venti sessioni sarebbe assurdo. Le altre P3 vanno **dopo** il grosso di P2, perché #45/#50/#53 toccano superfici che P2-08 (recruiting) e P2-09 (audit 100X) possono modificare: farle prima significherebbe rifarle.
 
 ## Tabella delle voci
 
@@ -27,6 +29,16 @@ Dal rischio-integrità più alto e costo minore verso il costo maggiore; F2/F3 p
 | **P2-09** | **#9/#10/#11** — audit forense 100X (WS-L + triage + gate) | Claude | WS-L eseguito, triage deciso per riga, gate meccanico verde | `TODO` |
 | **P2-10** | **#4** — GTM v1-deferrals (follow-up del primo deliverable) | Claude (parte non-pricing) | Deliverable follow-up chiuso; i numeri prezzi/tier restano `WAIT-INPUT` su Enzo (item #4 WAIT-INPUT, distinto) | `TODO` |
 | **P2-11** | **#79** — cancello di esposizione | Claude | **Non è una voce discreta**: `check_exposure.py` gira come gate su OGNI voce sopra che popola tabelle. Chiude quando chiude il batch. | `CONTINUO` |
+
+## Tabella delle voci — P3 (aggiunta S1041)
+
+| id | cosa | chi | cosa significa fatto | stato |
+|---|---|---|---|---|
+| **P3-01** | **#84** — le rules path-scoped si caricano quando servono? | Claude | Verifica **sul campo**, non a memoria: prova falsificabile che apra un file sotto un path governato da una rule e misuri se la rule è entrata in contesto. Esito scritto, positivo o negativo | ✅ **DONE** — esito positivo, vedi sotto |
+| **P3-02** | **#38** — B6 inbox push SSE (da polling 30s) | Claude | Endpoint SSE reale + client che lo consuma al posto del polling, test, prova LIVE con evento che arriva senza refresh | `TODO` |
+| **P3-03** | **#53** — E4 payroll ops read-extended | Claude | API+test+pagina+E2E su dati payroll reali | `TODO` |
+| **P3-04** | **#45** — C3 editing tenant & piattaforma (chiude la serie C) | Claude | CRUD reale su tenant/piattaforma, test, UI, E2E, `check_exposure.py` verde | `TODO` |
+| **P3-05** | **#50** — D4 legacy knowledge graph (`kg_nodes`/`kg_edges`, 139k) | Claude | Ingestione verificata sul volume reale + superficie che lo espone; nessun conteggio citato a memoria | `TODO` |
 
 ## Simulazione a 5 domande — compilata prima di ogni voce
 
@@ -78,6 +90,23 @@ Completata con `de7b3002`: pannello "Valuta" su `/compensation-intelligence` (cu
 Tre commit, uno per fase. **Dati** (`66c12f64`): mig 000222 `sys.sys_user_timeline_events` + `import-d5-timeline.sh` sul modello di D2 — 4641 righe legacy → **2683 importate su 161 persone**, dal 2005-09-13 al 2026-04-15; le 1958 non importate sono di dipendenti che in v5 non esistono (atteso, dottrina D1/D2); ri-eseguito senza duplicati. Registrato nel registry brownfield come wave-2. **API** (`daad5cad`): modulo `user-timeline` + `/v1/me/timeline`, org-gated (I18) perché la storia contiene variazioni retributive e valutazioni; 9 test con attese derivate dal DB vivo. **Interfaccia** (`37002011`): un pannello per due superfici + 3 E2E, inclusa la controprova che il dipendente riceve 403 sulla superficie amministrativa.
 
 Scoperta registrata nel test: `occurredAt` esce in ISO 8601 (millisecondi) mentre PostgreSQL tiene i microsecondi — rimandare indietro `lastEventAt` tale e quale come estremo superiore taglia 10 righe su 2664.
+
+### P3-01 (#84) — ✅ DONE 2026-08-02 · esito **POSITIVO**
+
+**Domanda**: le rules spostate da `CLAUDE.md` a `.claude/rules/*.md` con frontmatter `paths` (S1039) si caricano quando servono? Metà era già misurata: al boot **non** si caricano (`/context` in S1039 → 3 memory file, nessuna rule), quindi `paths` è onorato *in negativo*. Mancava la prova *in positivo*.
+
+**Prova eseguita in S1041** (osservazione diretta del contesto, non `/context` che è interattivo):
+
+| accesso | rule entrata | controllo negativo |
+|---|---|---|
+| `Read apps/api/src/modules/organization-units/service.ts` | `api-module-pattern.md` (`paths: apps/api/**`) | `db-migrations.md` **non** è entrata |
+| `Read db/migrations/…` | `db-migrations.md` (`paths: db/**`) | le altre tre **non** sono entrate |
+
+**Falsificabilità**: se il meccanismo non funzionasse, dopo il primo Read non sarebbe comparso nulla — ed è esattamente ciò che si osserva al boot. Il caricamento è quindi *lazy e selettivo*, non "tutto o niente".
+
+**Conclusione**: nessuna azione. L'ipotesi di ripiego del register (*"se non compare mai, spostare il contenuto in una skill invocabile"*) **decade**. Le 4 rules restano dove sono.
+
+**Dettaglio minore emerso**: il match scatta sul **path richiesto**, non sull'esistenza del file — un Read verso un path inesistente sotto `db/` ha comunque caricato `db-migrations.md`. Innocuo, ma spiega perché una rule può comparire senza che il file sia stato letto davvero.
 
 ---
 

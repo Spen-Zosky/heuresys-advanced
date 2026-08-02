@@ -92,6 +92,27 @@ export default async function globalTeardown(): Promise<void> {
     console.warn("[e2e teardown] GTM lead cleanup skipped:", (err as Error).message);
   }
 
+  // #38 B6: inbox-realtime.spec.ts fa inviare una notifica reale per corsa (POST
+  // /v1/notifications) per provare che arrivi senza ricaricare la pagina. Non esiste una
+  // cancellazione lato prodotto — la posta in arrivo si legge e si archivia, non si elimina —
+  // quindi senza questa pulizia le righe si accumulano di una per corsa.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH d AS (DELETE FROM sys.sys_inbox_notifications WHERE notification_subject LIKE 'E2E SSE %' RETURNING 1) SELECT count(*) FROM d",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] B6: deleted ${out} E2E inbox notification(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] B6 inbox cleanup skipped:", (err as Error).message);
+  }
+
   // #44 C1: organization-editing.spec.ts crea un'unità per corsa e la
   // DISATTIVA (l'API espone solo la cancellazione logica). Senza questa
   // spazzata le unità spente si accumulerebbero nell'organigramma reale.

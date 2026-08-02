@@ -9,6 +9,7 @@
 import { buildApp } from "./app.js";
 import { env } from "./config/env.js";
 import { closePool } from "./db/client.js";
+import { closeInboxListener } from "./lib/inbox-stream.js";
 import { loadRolePermissionCacheWithRetry } from "./modules/auth/cache-loader.js";
 
 async function start() {
@@ -19,6 +20,9 @@ async function start() {
     app.log.info({ signal }, "Shutting down API");
     try {
       await app.close();
+      // #38 B6: la connessione dedicata in LISTEN non appartiene al pool, quindi
+      // closePool() non la tocca — senza questa riga resterebbe aperta a ogni riavvio.
+      await closeInboxListener();
       await closePool();
       process.exit(0);
     } catch (err) {

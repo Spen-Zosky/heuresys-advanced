@@ -24,6 +24,7 @@ import {
   Info,
 } from "lucide-react";
 import { apiFetch } from "@/lib/api/fetch";
+import { useInboxStream } from "@/lib/use-inbox-stream";
 import { useEnumLabel } from "@/lib/enum-labels";
 
 interface MeNotification {
@@ -39,12 +40,14 @@ interface MeNotification {
   resourceId: string | null;
 }
 
-// Polling cadence — chosen so the inbox feels reactive without hammering the
-// API: 30s when the tab is visible (refetchInterval), and refetchOnWindowFocus
-// for the immediate refresh when the user returns to the tab. Server-sent
-// events / websocket push is a post-MVP-3 enhancement; polling is the safe
-// and simple baseline.
-const INBOX_POLL_MS = 30_000;
+// #38 B6 — la posta in arrivo NON si sonda più ogni 30s: il database avvisa alla
+// scrittura (trigger NOTIFY, mig 000231), l'API inoltra sul flusso SSE e qui si rilegge.
+//
+// Il sondaggio resta come RIPIEGO dichiarato, a cadenza ridotta e attivo solo quando il
+// flusso non è aperto: un proxy che accumula o una rete che taglia le connessioni lunghe
+// lascerebbero altrimenti la posta ferma senza alcun segnale, che è peggio del sondaggio
+// che il flusso sostituisce.
+const INBOX_FALLBACK_POLL_MS = 60_000;
 
 const ICON_CLS = "h-3.5 w-3.5";
 
@@ -77,10 +80,15 @@ export default function MeInboxPage() {
   const { t } = useTranslation("ess");
   const enumLabel = useEnumLabel();
   const qc = useQueryClient();
+  const { connected: streaming } = useInboxStream(() => {
+    void qc.invalidateQueries({ queryKey: ["me", "inbox"] });
+  });
+
   const inbox = useQuery({
     queryKey: ["me", "inbox"],
     queryFn: () => apiFetch<{ items: MeNotification[]; total: number }>("/v1/me/inbox"),
-    refetchInterval: INBOX_POLL_MS,
+    // Spento finché il flusso è aperto: è il punto della voce.
+    refetchInterval: streaming ? false : INBOX_FALLBACK_POLL_MS,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: true,
     staleTime: 10_000,

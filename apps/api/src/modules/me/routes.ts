@@ -61,6 +61,13 @@ import { LocalDiskStore } from "../content/media-store.js";
 import { env } from "../../config/env.js";
 import { requirePermission, userPermissionCodes } from "../../middleware/rbac.js";
 import { ForbiddenError, UnauthorizedError } from "../../errors/index.js";
+import { subscribeInbox, type InboxEvent } from "../../lib/inbox-stream.js";
+
+/**
+ * Cadenza del battito sul flusso SSE. Sotto il minuto perché i proxy che chiudono le
+ * connessioni inattive lo fanno tipicamente a 60s.
+ */
+const INBOX_HEARTBEAT_MS = 25_000;
 
 function selfActor(req: FastifyRequest): SelfActor {
   if (!req.user) throw new UnauthorizedError("Authentication required");
@@ -304,6 +311,59 @@ export const meRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [app.verifyCsrf, requirePermission("notification:mark_read:self")],
     schema: { params: NotificationIdParamSchema, body: PatchMeInboxBodySchema, response: { 200: MeInboxNotificationSchema } },
   }, async (req) => meService.patchInbox(selfActor(req), req.params.notificationId, req.body));
+
+  /**
+   * #38 B6 — flusso di avvisi della posta in arrivo (SSE). Sostituisce il sondaggio a 30s.
+   *
+   * Non manda MAI il contenuto della notifica: manda un segnale, e il client rilegge da
+   * `GET /v1/me/inbox`, dove valgono permessi, filtro per tenant e schema. Un canale che
+   * trasportasse il contenuto sarebbe una seconda superficie di lettura da proteggere.
+   *
+   * Lo schema di risposta è volutamente assente: la risposta è un flusso, non un corpo, e
+   * la scrittura passa da `reply.raw` — dichiarare uno schema qui farebbe serializzare a
+   * Fastify una risposta che non arriverà mai.
+   */
+  app.get("/inbox/stream", {
+    preHandler: [requirePermission("notification:read:self")],
+  }, async (req, reply) => {
+    const userId = req.user!.userId;
+
+    // Senza hijack Fastify considera la risposta conclusa al ritorno dell'handler e
+    // chiude il socket: il client vedrebbe «other side closed» invece del flusso.
+    // Da qui in poi il ciclo di vita della risposta è nostro.
+    reply.hijack();
+
+    reply.raw.writeHead(200, {
+      "content-type": "text/event-stream",
+      "cache-control": "no-cache, no-transform",
+      connection: "keep-alive",
+      // Senza questo, un reverse proxy accumula la risposta in un buffer e il flusso
+      // arriva a blocchi o non arriva: è il modo tipico in cui SSE funziona in locale
+      // e tace in produzione.
+      "x-accel-buffering": "no",
+    });
+    // Commento iniziale: apre subito il flusso lato client (onopen) invece di lasciarlo
+    // in attesa del primo evento reale, che potrebbe non arrivare mai.
+    reply.raw.write(": connesso\n\n");
+
+    const send = (event: InboxEvent): void => {
+      reply.raw.write(`event: inbox\ndata: ${JSON.stringify({ op: event.op })}\n\n`);
+    };
+    const unsubscribe = await subscribeInbox(userId, send, req.log);
+
+    // Battito periodico: tiene viva la connessione attraverso proxy e NAT che chiudono
+    // le connessioni inattive, e fa accorgere il client di una caduta.
+    const heartbeat = setInterval(() => reply.raw.write(": battito\n\n"), INBOX_HEARTBEAT_MS);
+
+    const close = (): void => {
+      clearInterval(heartbeat);
+      unsubscribe();
+    };
+    req.raw.on("close", close);
+    req.raw.on("error", close);
+    // Nessun return di corpo: dopo hijack la risposta resta aperta finché il client
+    // non chiude.
+  });
 
   // 3.4 notification center — per-user delivery preferences (self). GET+PATCH both
   // under notification:read:self (self preference management, no separate write perm).

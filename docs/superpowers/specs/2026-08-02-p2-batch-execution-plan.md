@@ -36,7 +36,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | id | cosa | chi | cosa significa fatto | stato |
 |---|---|---|---|---|
 | **P3-01** | **#84** — le rules path-scoped si caricano quando servono? | Claude | Verifica **sul campo**, non a memoria: prova falsificabile che apra un file sotto un path governato da una rule e misuri se la rule è entrata in contesto. Esito scritto, positivo o negativo | ✅ **DONE** — esito positivo, vedi sotto |
-| **P3-02** | **#38** — B6 inbox push SSE (da polling 30s) | Claude | Endpoint SSE reale + client che lo consuma al posto del polling, test, prova LIVE con evento che arriva senza refresh | `TODO` |
+| **P3-02** | **#38** — B6 inbox push SSE (da polling 30s) | Claude | Endpoint SSE reale + client che lo consuma al posto del polling, test, prova LIVE con evento che arriva senza refresh | ✅ **DONE** — vedi esito sotto |
 | **P3-03** | **#53** — E4 payroll ops read-extended | Claude | API+test+pagina+E2E su dati payroll reali | `TODO` |
 | **P3-04** | **#45** — C3 editing tenant & piattaforma (chiude la serie C) | Claude | CRUD reale su tenant/piattaforma, test, UI, E2E, `check_exposure.py` verde | `TODO` |
 | **P3-05** | **#50** — D4 legacy knowledge graph (`kg_nodes`/`kg_edges`, 139k) | Claude | Ingestione verificata sul volume reale + superficie che lo espone; nessun conteggio citato a memoria | `TODO` |
@@ -333,6 +333,31 @@ Una chiave i18n rimasta orfana dopo la prova di sabotaggio (`citationsToggle`) �
 **Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
 1. **Il cancello di esposizione non vede le tabelle scritte dal runtime**: `check_exposure.py` deriva le «tabelle scritte» dai soli **seed SQL** (`INSERT INTO sys.…` nei file di `db/seeds/`). `sys_advisor_suggestions` è scritta dal codice applicativo, quindi resta fuori dal suo perimetro — qui è esposta da `/v1/advisor/audit`, ma il cancello non l'avrebbe segnalata se non lo fosse stata.
 2. **40 su 62 skill richieste senza gruppo**: limita F2 e rende inerte una regola dell'advisor. Si lega alla scoperta di P2-05 (metà delle skill in gioco senza categoria).
+
+### P3-02 (#38 · B6 posta in arrivo in tempo reale) — ✅ DONE 2026-08-02
+
+**Decisione tecnica: il push nasce dal DATABASE, non dal server.** Il trigger `NOTIFY` (mig **000231**) avvisa alla scrittura; l'API ha **un solo** client dedicato in `LISTEN` per processo e inoltra agli stream SSE aperti. L'alternativa — far interrogare il database all'API ogni pochi secondi — avrebbe soltanto **spostato** il sondaggio dal browser al server, moltiplicandolo per il numero di processi invece che di schede.
+
+Tre scelte che meritano il perché:
+- **Un canale unico con il destinatario nel payload**, non un canale per utente: `LISTEN` per sessione farebbe crescere le connessioni al database con gli utenti collegati.
+- **Client dedicato, mai dal pool**: una connessione in `LISTEN` resta occupata per definizione; restituirla al pool la renderebbe disponibile ad altre query che poi la rilascerebbero, **perdendo l'ascolto in silenzio**. Ed è chiusa allo spegnimento del processo, perché `closePool()` non la tocca.
+- **L'evento non porta il contenuto della notifica**, solo il fatto che qualcosa è cambiato: chi riceve rilegge da `/v1/me/inbox`, dove valgono permessi e filtro per tenant. Un canale che trasportasse il contenuto sarebbe una seconda superficie di lettura da proteggere.
+
+**Il ripiego è dichiarato, non implicito**: finché il flusso è aperto il sondaggio è spento; se il flusso non si apre o cade, riparte a 60s. Senza, un ambiente in cui SSE non passa lascerebbe la posta ferma **senza alcun segnale** — peggio del sondaggio che sostituisce.
+
+**Prove (falsificabili)**:
+- **5 test di integrazione**. Il principale misura il tempo fra la scrittura e l'arrivo dell'evento: **sotto i 5 secondi**, dove il vecchio sondaggio ne prendeva fino a 30. **Rimuovendo i due trigger dal database il test va in timeout a 15s** — cioè misura davvero il push e non un caricamento qualsiasi. Trigger ripristinati e riverificati (2 attivi, 5/5 verdi).
+- Coperti anche: l'evento all'aggiornamento (il conteggio dei non letti non resta indietro), **l'isolamento fra utenti** (il flusso di uno non riceve gli eventi di un altro), il **rilascio della sottoscrizione alla chiusura** (senza, ogni scheda chiusa lascerebbe un ascoltatore morto: una perdita che cresce con l'uso e si vede solo dopo giorni), e il 401 per chi non è autenticato.
+- **E2E 2/2 con login reale**: un amministratore invia davvero (`POST /v1/notifications`), e la notifica compare nella pagina del dipendente **senza alcun reload**. Il secondo E2E verifica che il flusso attraversi il **proxy Next** leggendo il primo pezzo del corpo — un proxy che accumula consegna gli header e poi tace, ed è il modo tipico in cui SSE funziona nei test di integrazione e muore in produzione. Nessun test lato API può accorgersene, perché lì il proxy non c'è.
+- 18/18 sulle quattro suite di posta in arrivo e notifiche · `typecheck` × 3 · `lint` · `check_exposure` 73/73 · mig 000231 applicata due volte, idempotente.
+
+**Due difetti trovati durante il lavoro, entrambi corretti**:
+1. Senza `reply.hijack()` Fastify considera la risposta conclusa al ritorno dell'handler e **chiude il socket**: il client vedeva `other side closed` invece del flusso.
+2. Il lint ha colto una scrittura su un `ref` **durante il render** nell'hook client — una scrittura in una fase che React può ripetere o interrompere. Spostata in un effetto.
+
+Il primo fallimento dei test era invece un difetto **del test**, non del codice: usavo una priorità (`NORMAL`) che il `CHECK` non ammette, l'inserimento falliva e il timeout somigliava a un push rotto. I valori sono ora derivati dai dati reali.
+
+Il teardown E2E è stato esteso: la notifica inviata a ogni corsa non ha una cancellazione lato prodotto (la posta si legge e si archivia, non si elimina), quindi senza pulizia le righe si accumulerebbero di una per corsa.
 
 ---
 

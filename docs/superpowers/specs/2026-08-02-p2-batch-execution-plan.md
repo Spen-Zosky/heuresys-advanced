@@ -29,6 +29,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | **P2-09** | **#9/#10/#11** — audit forense 100X (WS-L + triage + gate) | Claude | WS-L eseguito, triage deciso per riga, gate meccanico verde | `TODO` |
 | **P2-10** | **#4** — GTM v1-deferrals (follow-up del primo deliverable) | Claude (parte non-pricing) | Deliverable follow-up chiuso; i numeri prezzi/tier restano `WAIT-INPUT` su Enzo (item #4 WAIT-INPUT, distinto) | `TODO` |
 | **P2-11** | **#79** — cancello di esposizione | Claude | **Non è una voce discreta**: `check_exposure.py` gira come gate su OGNI voce sopra che popola tabelle. Chiude quando chiude il batch. | `CONTINUO` |
+| **P2-12** | **#87** — il genitore di un'unità organizzativa può stare in un altro tenant | Claude | Guardia nel service su create **e** update + test che tenta l'aggancio cross-tenant e attende errore tipizzato + prova LIVE | ✅ **DONE** — vedi esito sotto |
 
 ## Tabella delle voci — P3 (aggiunta S1041)
 
@@ -39,6 +40,9 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | **P3-03** | **#53** — E4 payroll ops read-extended | Claude | API+test+pagina+E2E su dati payroll reali | `TODO` |
 | **P3-04** | **#45** — C3 editing tenant & piattaforma (chiude la serie C) | Claude | CRUD reale su tenant/piattaforma, test, UI, E2E, `check_exposure.py` verde | `TODO` |
 | **P3-05** | **#50** — D4 legacy knowledge graph (`kg_nodes`/`kg_edges`, 139k) | Claude | Ingestione verificata sul volume reale + superficie che lo espone; nessun conteggio citato a memoria | `TODO` |
+| **P3-06** | **#88** — il peso economico delle posizioni è un campo vuoto | Claude | Indagine con misura, poi **decisione tecnica presa ed eseguita** (popolare o ritirare): nessuno progetta più su un campo vuoto | `TODO` |
+
+> **Voci aggiunte in S1041** (P2-12, P3-06): non sono scoperte nuove, sono item già `ACTIVE` nel register (#87 P2, #88 P3) che il mandato *«esegui i batch P2 e P3»* include e che questa tabella non mappava ancora.
 
 ## Simulazione a 5 domande — compilata prima di ogni voce
 
@@ -224,6 +228,30 @@ Distribuzione dopo la correzione, sugli stessi dati: **2 sostenibili · 1 inutil
 **Conclusione**: nessuna azione. L'ipotesi di ripiego del register (*"se non compare mai, spostare il contenuto in una skill invocabile"*) **decade**. Le 4 rules restano dove sono.
 
 **Dettaglio minore emerso**: il match scatta sul **path richiesto**, non sull'esistenza del file — un Read verso un path inesistente sotto `db/` ha comunque caricato `db-migrations.md`. Innocuo, ma spiega perché una rule può comparire senza che il file sia stato letto davvero.
+
+### P2-12 (#87) — ✅ DONE 2026-08-02
+
+**Simulazione compilata prima di scrivere** (precondizioni misurate, non presunte): il tenant HEURESYS ha **3 unità reali** (`HS-CORP`/`HS-MGMT`/`HS-PROD`), quindi l'aggancio cross-tenant è provabile su dati veri invece che su una fixture costruita per l'occasione. Nessuna migration: la correzione è applicativa, coerente con **I5** (isolamento = FK + filtro applicativo, mai RLS).
+
+**Cosa c'era**: la FK sul genitore garantisce che la riga *esista*, non che appartenga allo stesso tenant. `create` non validava `parentId` **affatto**; `update` validava solo il ciclo (#83). Un `parentId` di un altro tenant veniva quindi accettato da entrambi, innestando l'albero di un tenant su quello di un altro.
+
+**Decisione tecnica — due forme dello stesso rifiuto, di proposito**: un attore tenant-scoped riceve **404 `OU_PARENT_NOT_FOUND`**, identico alla risposta per un genitore inesistente, perché un'unità fuori dal proprio tenant non deve diventare osservabile attraverso un codice d'errore. Un `PLATFORM_ADMIN`, che vede già cross-tenant, riceve **409 `OU_PARENT_TENANT_MISMATCH`**: mascherare gli costerebbe la diagnosi senza nascondergli nulla. Il confronto è contro il tenant **dell'unità**, non dell'attore, così regge anche quando il platform admin opera su un tenant terzo.
+
+**Prove (falsificabili)**: i 5 test sono stati eseguiti **prima** della correzione — **4 rossi su 14**, ognuno con la sua forma di danno:
+
+| caso | prima | dopo |
+|---|---|---|
+| CREATE sotto un genitore di un altro tenant | **201 creata** | 404 `OU_PARENT_NOT_FOUND` |
+| PATCH verso un genitore di un altro tenant | **200 applicata** | 404 `OU_PARENT_NOT_FOUND` |
+| CREATE sotto un genitore inesistente | **500** (violazione FK nuda) | 404 `OU_PARENT_NOT_FOUND` |
+| PLATFORM_ADMIN, stesso tentativo | **200 applicata** | 409 `OU_PARENT_TENANT_MISMATCH` |
+| controprova: genitore nello stesso tenant | 201 | 201 (invariata) |
+
+- Il genitore estraneo è **risolto dal database dentro il test** (`tenant <> quello dell'attore`), non scritto come UUID: se un giorno il secondo tenant sparisse, la fixture fallisce a voce alta invece di passare a vuoto.
+- **LIVE** su :3001 con login reale `federica.marchetti@rtl-bank.org` (password derivata + TOTP), contro `HS-CORP` reale: CREATE **404**, PATCH **404**, genitore inesistente **404**, controprova nel proprio tenant **201**, e `parentId` ancora `null` dopo il rifiuto — il rifiuto non lascia la riga scritta a metà.
+- Le righe create dalla prova live sono state rimosse (residuo verificato: **0**).
+- `typecheck`, `typecheck:test`, `pnpm lint` puliti · `check_exposure.py` **73/73, 0 lacune**.
+- Dato reale controllato: **0 unità con genitore fuori tenant** oggi — come per #83, la guardia previene, non ripara.
 
 ---
 

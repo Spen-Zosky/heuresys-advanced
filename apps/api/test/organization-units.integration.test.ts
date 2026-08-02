@@ -175,6 +175,109 @@ describe("/v1/organization-units/* integration", () => {
     });
   });
 
+  describe("parentId: the parent must live in the same tenant (#87)", () => {
+    // The FK guarantees the parent EXISTS, not that it belongs to this tenant.
+    // Both ids are resolved from the live DB — no UUID is written into the test.
+    let foreignOuId: string;
+
+    beforeAll(async () => {
+      const r = await pool.query<{ organization_unit_id: string }>(
+        `SELECT organization_unit_id
+           FROM sys.sys_organization_units
+          WHERE organization_unit_tenant_id <> (SELECT user_tenant_id FROM sys.sys_users WHERE user_email = $1)
+          LIMIT 1`,
+        ["federica.marchetti@rtl-bank.org"],
+      );
+      const row = r.rows[0];
+      if (!row) throw new Error("fixture: no organization unit outside the actor tenant — test cannot falsify");
+      foreignOuId = row.organization_unit_id;
+    });
+
+    async function create(code: string, parentId: string) {
+      return suite.app.inject({
+        method: "POST", url: "/v1/organization-units",
+        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+        payload: { code, name: code, parentId },
+      });
+    }
+
+    it("CREATE under a parent from another tenant → 404 OU_PARENT_NOT_FOUND", async () => {
+      const r = await create(`${SUITE_PREFIX}_XT_CREATE`, foreignOuId);
+      expect(r.statusCode).toBe(404);
+      expect((r.json() as { error: { code: string } }).error.code).toBe("OU_PARENT_NOT_FOUND");
+    });
+
+    it("PATCH onto a parent from another tenant → 404 OU_PARENT_NOT_FOUND", async () => {
+      const own = await suite.app.inject({
+        method: "POST", url: "/v1/organization-units",
+        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+        payload: { code: `${SUITE_PREFIX}_XT_PATCH`, name: "XT patch target" },
+      });
+      expect(own.statusCode).toBe(201);
+      const id = (own.json() as { organizationUnitId: string }).organizationUnitId;
+      createdIds.push(id);
+
+      const r = await suite.app.inject({
+        method: "PATCH", url: `/v1/organization-units/${id}`,
+        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+        payload: { parentId: foreignOuId },
+      });
+      expect(r.statusCode).toBe(404);
+      expect((r.json() as { error: { code: string } }).error.code).toBe("OU_PARENT_NOT_FOUND");
+
+      // The rejected move must leave the row untouched — not half-written.
+      const after = await suite.app.inject({
+        method: "GET", url: `/v1/organization-units/${id}`,
+        headers: { cookie: ch(tenantS.cookies) },
+      });
+      expect((after.json() as { parentId: string | null }).parentId).toBeNull();
+    });
+
+    it("CREATE under a parent that does not exist at all → 404, not a database error", async () => {
+      const r = await create(`${SUITE_PREFIX}_XT_GHOST`, randomUUID());
+      expect(r.statusCode).toBe(404);
+      expect((r.json() as { error: { code: string } }).error.code).toBe("OU_PARENT_NOT_FOUND");
+    });
+
+    // Counter-proof: the guard must reject foreign parents, not every parent.
+    it("CREATE under a parent in the same tenant still succeeds", async () => {
+      const parent = await suite.app.inject({
+        method: "POST", url: "/v1/organization-units",
+        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+        payload: { code: `${SUITE_PREFIX}_XT_OKPARENT`, name: "Legit parent" },
+      });
+      expect(parent.statusCode).toBe(201);
+      const parentId = (parent.json() as { organizationUnitId: string }).organizationUnitId;
+      createdIds.push(parentId);
+
+      const r = await create(`${SUITE_PREFIX}_XT_OKCHILD`, parentId);
+      expect(r.statusCode).toBe(201);
+      const child = r.json() as { organizationUnitId: string; parentId: string | null };
+      createdIds.push(child.organizationUnitId);
+      expect(child.parentId).toBe(parentId);
+    });
+
+    it("PLATFORM_ADMIN gets a diagnostic 409, not a masked 404", async () => {
+      const platformS = await login(suite, "admin@heuresys.com");
+      const own = await suite.app.inject({
+        method: "POST", url: "/v1/organization-units",
+        headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+        payload: { code: `${SUITE_PREFIX}_XT_PLAT`, name: "Platform patch target" },
+      });
+      expect(own.statusCode).toBe(201);
+      const id = (own.json() as { organizationUnitId: string }).organizationUnitId;
+      createdIds.push(id);
+
+      const r = await suite.app.inject({
+        method: "PATCH", url: `/v1/organization-units/${id}`,
+        headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },
+        payload: { parentId: foreignOuId },
+      });
+      expect(r.statusCode).toBe(409);
+      expect((r.json() as { error: { code: string } }).error.code).toBe("OU_PARENT_TENANT_MISMATCH");
+    });
+  });
+
   it("USER cannot create (no permission)", async () => {
     const r = await suite.app.inject({
       method: "POST", url: "/v1/organization-units",

@@ -34,7 +34,9 @@ VALUES
   ('sys_user_profile_embeddings', 'D', 'EXCLUDE', NULL,
    '[sign-off: EXCLUDE — app-generated AI infra (D7-P0, mig 000060). Mean-pooled vector(1024) per user derived from skill-evidence (never a Voyage call); not a legacy-reconciliation target.]'),
   ('sys_auth_mfa_factors', 'D', 'EXCLUDE', NULL,
-   '[S982] App-generated auth data: user-enrolled MFA factors (TOTP/WEBAUTHN/EMAIL_OTP/SMS_OTP secrets+metadata). No legacy source (legacy heuresys-evo has no MFA). Registered late via S982 amendment: the table (mig 000005) predates the registry and resolved POPULATED via test-leftover rows until the strict S982 cleanup exposed the missing row.')
+   '[S982] App-generated auth data: user-enrolled MFA factors (TOTP/WEBAUTHN/EMAIL_OTP/SMS_OTP secrets+metadata). No legacy source (legacy heuresys-evo has no MFA). Registered late via S982 amendment: the table (mig 000005) predates the registry and resolved POPULATED via test-leftover rows until the strict S982 cleanup exposed the missing row.'),
+  ('sys_user_timeline_events', 'A', 'IMPORT', 'employee_timeline',
+   '[S1041] D5 (#49) — consultive person history imported from legacy employee_timeline (wave-2). Registered here, in the same amendment pattern as sys_auth_mfa_factors above, because the table classification was originally written ONLY by db/scripts/import-d5-timeline.sh into brownfield.table_mappings. That script runs where the legacy data lives; on the CI clone the table exists (mig 000222) but stays EMPTY and unmapped, so this very DO block raised "expected 0 UNCLASSIFIED, found 1" and reddened Test (api integration) from e4acd6d7 onward. A structural classification must not depend on an import having run. Amending 000062 rather than adding a later migration is required: this check runs before any higher-numbered file could register the table.')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

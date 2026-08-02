@@ -24,7 +24,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | **P2-04** | **#49** — D5 employee timeline | Claude | Timeline alimentata da dati reali, API+test+pagina+E2E | ✅ **DONE** (`66c12f64` + `daad5cad` + `37002011`) |
 | **P2-05** | **#56** — F2 VRIO scorecard (`/org-director/vrio`) | Claude | Scorecard calcolata su dati reali, non euristica inventata; API+test+pagina+E2E | ✅ **DONE** — vedi esito sotto |
 | **P2-06** | **#57** — F3 OHI org-health scorecard | Claude | Come sopra | ✅ **DONE** — vedi esito sotto |
-| **P2-07** | **#58** — F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie) | Claude | Ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte | 🟡 **FASE A CHIUSA** (motore + API + audit + test + prova live). Resta la **fase B**: pannello in `/org-director`, chiavi i18n `advisor.rule.*`, E2E con login reale |
+| **P2-07** | **#58** — F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie) | Claude | Ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte | ✅ **DONE** — fase A (motore + API + audit) e fase B (pagina + i18n + E2E) |
 | **P2-08** | **#54** — E5 recruiting/ATS (cluster `/recruiting`) | Claude | A fasi con commit atomici; ogni fase chiude con prova LIVE | `TODO` |
 | **P2-09** | **#9/#10/#11** — audit forense 100X (WS-L + triage + gate) | Claude | WS-L eseguito, triage deciso per riga, gate meccanico verde | `TODO` |
 | **P2-10** | **#4** — GTM v1-deferrals (follow-up del primo deliverable) | Claude (parte non-pricing) | Deliverable follow-up chiuso; i numeri prezzi/tier restano `WAIT-INPUT` su Enzo (item #4 WAIT-INPUT, distinto) | `TODO` |
@@ -320,7 +320,15 @@ Dopo le correzioni: **10 raccomandazioni, 3 regole attive**, 0 scartate.
 
 **Prove**: **12 test verdi**, fra cui «ogni citazione è verificabile» (rilegge ogni valore dall'endpoint che la citazione dichiara, con un contatore che impedisce al test di passare senza aver controllato nulla), «la traccia è registrata prima di essere mostrata», «ri-derivare non fa crescere la tabella», «ogni regola o produce, o ha la precondizione dimostrabilmente assente» — quest'ultimo è la guardia contro il codice morto travestito da capability. **44/44** sulle quattro suite delle fonti. **LIVE** su :3001 con login reale: 10 raccomandazioni con le loro fonti, `/audit` rilegge 10 righe. Migration 000228 applicata due volte, idempotente. `typecheck`, `typecheck:test`, `lint` puliti.
 
-**Cosa manca per chiudere #58** (fase B): pannello dentro `/org-director`, chiavi i18n `advisor.rule.*` IT/EN, E2E Playwright con login reale.
+**FASE B — chiusa 2026-08-02.** Pagina `/org-director/advisor` (stessa struttura di VRIO e Salute organizzativa), 29 chiavi i18n IT/EN in parità, migration **000230** per il registry UI — la sidebar è guidata dal database, senza quella riga la pagina esisterebbe ma non sarebbe raggiungibile.
+
+**Le fonti sono rese in pagina, non riassunte**: ogni raccomandazione mostra le sue citazioni con endpoint, soggetto, campo e valore. È la proprietà per cui la capability esiste, quindi è quella che l'E2E protegge — e anche qui la prova sa fallire: sostituendo l'elenco delle fonti con il loro **conteggio** (il modo più naturale in cui una UI «pulisce» una tabella densa) il test diventa rosso, `locator resolved to 0 elements`. Una pagina che riassume le fonti passerebbe qualunque test di rendering e avrebbe perso il senso della funzione.
+
+Gli altri due E2E coprono difetti che un test di rendering non vede: che il consiglio sia una **frase leggibile** e non una chiave di traduzione non risolta (`advisor.rule.xxx`) né un segnaposto non interpolato (`{{...}}`), e che un dipendente senza `org_director:read` **non** ottenga una tabella vuota — che si leggerebbe come «non c'è nulla da fare in questa organizzazione», una conclusione falsa e rassicurante.
+
+**E2E 12/12 verdi** con login reale (`test:e2e:node22`, D-36 su Node 24) · `i18n:check` **2838 chiavi × 2 locale** in parità · typecheck web + `lint` puliti · migration 000230 applicata due volte, idempotente.
+
+Una chiave i18n rimasta orfana dopo la prova di sabotaggio (`citationsToggle`) è stata rimossa da entrambi i locale invece di essere lasciata lì.
 
 **Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
 1. **Il cancello di esposizione non vede le tabelle scritte dal runtime**: `check_exposure.py` deriva le «tabelle scritte» dai soli **seed SQL** (`INSERT INTO sys.…` nei file di `db/seeds/`). `sys_advisor_suggestions` è scritta dal codice applicativo, quindi resta fuori dal suo perimetro — qui è esposta da `/v1/advisor/audit`, ma il cancello non l'avrebbe segnalata se non lo fosse stata.

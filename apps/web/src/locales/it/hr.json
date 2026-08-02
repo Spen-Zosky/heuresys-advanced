@@ -553,5 +553,46 @@
       "UNRANKED": "Non in classifica"
     },
     "sample": "n={{count}}"
+  },
+  "advisor": {
+    "title": "Consigli operativi",
+    "description": "Raccomandazioni derivate dalle scorecard di capability, VRIO e salute organizzativa. Ogni consiglio nasce da un dato reale e ne porta la fonte: niente è generato da un modello linguistico.",
+    "count": "{{count}} raccomandazioni",
+    "caption": "Raccomandazioni in ordine di priorità, con le fonti da cui ciascuna deriva.",
+    "emptyTitle": "Nessuna raccomandazione",
+    "emptyDescription": "Sui dati attuali nessuna regola ha trovato una situazione su cui intervenire. Non è un errore: è l'assenza di casi.",
+    "errorMessage": "Non è stato possibile calcolare le raccomandazioni.",
+    "cols": {
+      "priority": "Priorità",
+      "rule": "Tipo",
+      "subject": "Riguarda",
+      "action": "Cosa fare",
+      "citations": "Da dove viene"
+    },
+    "subjectTypes": {
+      "CAPABILITY": "Competenza",
+      "ORG_UNIT": "Unità organizzativa"
+    },
+    "rules": {
+      "CAPABILITY_GAP_ACQUIRE": "Competenza scoperta",
+      "UNUSED_ADVANTAGE_DEPLOY": "Vantaggio non sfruttato",
+      "ESSENTIAL_MASTERY_FRAGILE": "Padronanza fragile",
+      "LAGGING_UNIT_INTERVENE": "Unità in coda",
+      "INSUFFICIENT_COVERAGE_INSTRUMENT": "Dati insufficienti"
+    },
+    "rule": {
+      "capabilityGapAcquire": "«{{capability}}» è richiesta da {{positions}} posizioni ({{critical}} critiche) e non la possiede nessuno: va acquisita con selezione o formazione.",
+      "unusedAdvantageDeploy": "«{{capability}}» è un vantaggio che l'organizzazione non sta sfruttando: {{holders}} persone la possiedono, ma solo {{covered}} requisiti su {{required}} sono coperti. È un problema di assegnazione, non di reclutamento.",
+      "essentialMasteryFragile": "«{{capability}}» è essenziale ma la padronanza è fragile: {{holders}} possessori, livello medio {{heldRank}} su 6, verificata sul {{verifiedShare}}%. Va consolidata e messa alla prova.",
+      "laggingUnitIntervene": "«{{unit}}» è fra le unità in coda (indice {{index}}): la dimensione che la tiene indietro è {{dimension}}, a {{dimensionScore}} su 100.",
+      "insufficientCoverageInstrument": "Su «{{unit}}» il modello dispone solo del {{coverage}}% dei dati ({{missing}} assenti): l'indice non è una diagnosi, è una misura mancante."
+    },
+    "sources": {
+      "ESSENTIAL_RANKING": "Competenze essenziali",
+      "VRIO": "Scorecard VRIO",
+      "ORG_HEALTH": "Salute organizzativa"
+    },
+    "method": "{{count}} raccomandazioni da {{rules}} regole. Scartate dal controllo delle fonti: {{discarded}}. Modello {{model}}.",
+    "methodIdle": "Nessuna derivazione disponibile."
   }
 }

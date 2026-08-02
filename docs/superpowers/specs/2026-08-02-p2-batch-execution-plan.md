@@ -24,7 +24,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | **P2-04** | **#49** — D5 employee timeline | Claude | Timeline alimentata da dati reali, API+test+pagina+E2E | ✅ **DONE** (`66c12f64` + `daad5cad` + `37002011`) |
 | **P2-05** | **#56** — F2 VRIO scorecard (`/org-director/vrio`) | Claude | Scorecard calcolata su dati reali, non euristica inventata; API+test+pagina+E2E | ✅ **DONE** — vedi esito sotto |
 | **P2-06** | **#57** — F3 OHI org-health scorecard | Claude | Come sopra | ✅ **DONE** — vedi esito sotto |
-| **P2-07** | **#58** — F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie) | Claude | Ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte | `TODO` |
+| **P2-07** | **#58** — F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie) | Claude | Ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte | `IN CORSO` — simulazione compilata, implementazione da avviare |
 | **P2-08** | **#54** — E5 recruiting/ATS (cluster `/recruiting`) | Claude | A fasi con commit atomici; ogni fase chiude con prova LIVE | `TODO` |
 | **P2-09** | **#9/#10/#11** — audit forense 100X (WS-L + triage + gate) | Claude | WS-L eseguito, triage deciso per riga, gate meccanico verde | `TODO` |
 | **P2-10** | **#4** — GTM v1-deferrals (follow-up del primo deliverable) | Claude (parte non-pricing) | Deliverable follow-up chiuso; i numeri prezzi/tier restano `WAIT-INPUT` su Enzo (item #4 WAIT-INPUT, distinto) | `TODO` |
@@ -49,6 +49,20 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 - **Propagazione**: se serve una migration (vincolo/trigger DB) va nel flusso migration normale e arriva sui cloni col deploy. Se la guardia è solo applicativa, nessun artefatto da propagare oltre al commit.
 - **Chi**: Claude, interamente. Nessun input di Enzo.
 - **Guardia**: il test deve essere *falsificabile* — deve fallire contro il codice attuale (che permette il ciclo) e passare dopo. Caso limite da coprire: self-parent (A→A) e ciclo indiretto profondo (A→B→C, poi A sotto C).
+
+### P2-07 (#58 · F4 AI Advisor) — compilata 2026-08-02
+
+**Decisione tecnica presa prima di scrivere codice: la fase 1 è un motore prescrittivo DETERMINISTICO, non un LLM.**
+
+Il criterio di chiusura della voce è *«ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte»*. Un modello linguistico non può **garantire** quella proprietà: può citare, ma può anche inventare, e non esiste test che lo escluda in modo stabile. Un motore a regole che deriva le raccomandazioni dalle scorecard F1/F2/F3 la garantisce **per costruzione** — la citazione non è un'aggiunta al testo, è l'input da cui la raccomandazione nasce, e un test può verificare che ogni riga citata esista davvero e porti il valore dichiarato.
+
+L'agent-gateway resta dov'è (già live, non gated): la formulazione in linguaggio naturale è **fase 2**, e vale solo se costruita *sopra* raccomandazioni già tracciabili. Invertire l'ordine — LLM prima, tracciabilità poi — è il modo tipico in cui un "advisor" diventa un generatore di frasi plausibili.
+
+- **Precondizioni**: F1 `essential-ranking` (#55, già spedito), **F2 VRIO** e **F3 org-health** (chiusi in questa sessione, P2-05/P2-06) — le tre fonti che l'advisor cita. Tutte e tre espongono già evidenza per riga, il che rende le citazioni possibili senza toccarle.
+- **Meccanismo**: regole esplicite sopra le tre scorecard, ognuna con precondizione e citazioni. Esempi che i dati reali già producono: una capability `CAPABILITY_GAP` con N posizioni scoperte → azione di reclutamento/formazione, citando VRIO (`holders=0`, `positionsRequiring=77`) e F1 (priorità di investimento della skill); un'unità `LAGGING` con `retention` bassa → azione di ritenzione, citando OHI (indice, dimensione, `sampleSize`). Ogni raccomandazione porta: regola applicata, entità, fonte (endpoint + campo + valore letto), priorità derivata. **Nessuna prosa generata.**
+- **Propagazione**: nuova pagina o pannelli dentro `/org-director` → serve la riga nel registry UI come per 000224/000225, se pagina nuova.
+- **Chi**: Claude, interamente.
+- **Guardia**: il test che deve poter fallire non è «l'advisor produce suggerimenti» ma **«ogni citazione è verificabile»**: per ogni raccomandazione, il test ri-legge la fonte citata dall'API e confronta il valore dichiarato con quello vero. Una citazione a un'entità inesistente, o con un valore diverso, è un fallimento. Secondo controllo: **zero raccomandazioni senza citazioni** — un output senza fonte non deve poter esistere nemmeno come caso limite.
 
 ### P2-05 (#56 · F2 VRIO) — compilata 2026-08-02, **dopo** aver misurato il database
 

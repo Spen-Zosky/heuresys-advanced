@@ -76,9 +76,27 @@ async function ensureTimelineFixture(): Promise<void> {
   );
   if (Number(rows[0]!.n) > 0) return; // storia reale presente: non si tocca nulla
 
-  // Due persone (una nel sotto-albero di paolo, una no), tre tipi, date decrescenti:
-  // abbastanza da esercitare ordinamento, filtro per tipo, finestra temporale e org-gate.
+  // Servono DUE soggetti in posizione organizzativa diversa: uno dentro il sotto-albero di
+  // paolo e uno FUORI. Senza quello fuori il manager vedrebbe l'intero innesto e il test
+  // dell'org-gate ("vede meno di chi ha il mandato sul tenant") non potrebbe passare — non
+  // perche' il cancello sia rotto, ma perche' non ci sarebbe niente da tagliare.
   const subjectInSubtree = paoloSubtree[0] ?? tommasoUserId;
+  const outside = await pool.query<{ id: string }>(
+    `SELECT u.user_id AS id
+       FROM sys.sys_users u
+      WHERE u.user_tenant_id = (SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1)
+        AND NOT (u.user_id = ANY($2::uuid[]))
+      ORDER BY u.user_id
+      LIMIT 1`,
+    [tommasoUserId, paoloSubtree],
+  );
+  const subjectOutside = outside.rows[0]?.id;
+  if (!subjectOutside) {
+    throw new Error(
+      "fixture timeline: nessuna persona fuori dal sotto-albero di paolo.caputo — " +
+        "l'org-gate non sarebbe verificabile su questo dataset.",
+    );
+  }
   await pool.query(
     `INSERT INTO sys.sys_user_timeline_events (
        user_timeline_event_tenant_id, user_timeline_event_user_id, user_timeline_event_type,
@@ -91,14 +109,17 @@ async function ensureTimelineFixture(): Promise<void> {
          ($1::uuid, 'LEVEL_CHANGE',     '2022-06-15', 'Passaggio di livello',  'level',  'TESTFIX::TL::2'),
          ($1::uuid, 'REVIEW_COMPLETED', '2024-11-20', 'Valutazione conclusa',  'review', 'TESTFIX::TL::3'),
          ($2::uuid, 'HIRE',             '2020-09-10', 'Assunzione',            'hire',   'TESTFIX::TL::4'),
-         ($2::uuid, 'SALARY_CHANGE',    '2023-04-05', 'Variazione retributiva','salary', 'TESTFIX::TL::5')
+         ($2::uuid, 'SALARY_CHANGE',    '2023-04-05', 'Variazione retributiva','salary', 'TESTFIX::TL::5'),
+         -- fuori dal sotto-albero: e' cio' che il manager NON deve vedere
+         ($3::uuid, 'HIRE',             '2018-02-01', 'Assunzione',            'hire',   'TESTFIX::TL::6'),
+         ($3::uuid, 'PROMOTION',        '2021-07-01', 'Promozione',            'promo',  'TESTFIX::TL::7')
        ) AS v(uid, etype, occurred, summary, legacy, code)
        JOIN sys.sys_users u ON u.user_id = v.uid
      -- l'indice unico e' PARZIALE (WHERE ... IS NOT NULL): l'ON CONFLICT deve ripetere
      -- la stessa clausola, altrimenti PG non trova il vincolo corrispondente
      ON CONFLICT (user_timeline_event_external_code)
        WHERE user_timeline_event_external_code IS NOT NULL DO NOTHING`,
-    [tommasoUserId, subjectInSubtree],
+    [tommasoUserId, subjectInSubtree, subjectOutside],
   );
 }
 

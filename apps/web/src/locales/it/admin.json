@@ -990,6 +990,17 @@
     }
   },
   "compReward": {
+    "evaluation": {
+      "column": "Valutazione",
+      "open": "Valuta",
+      "close": "Chiudi",
+      "title": "Come si arriva a questo premio",
+      "period": "Periodo {{from}} → {{to}}",
+      "recorded": "importo in archivio {{amount}} EUR",
+      "curve": "Curva applicata: {{code}} ({{kind}})",
+      "nonBlocking": "(non vincolante)",
+      "finalFactor": "Fattore di erogazione finale: {{factor}}"
+    },
     "variablePay": "Retribuzione variabile",
     "recommendations": "Raccomandazioni retributive",
     "bonusPools": "Pool bonus",

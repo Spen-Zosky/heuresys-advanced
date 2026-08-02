@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
-import { Badge, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
+import { Badge, Button, KPIStrip, PageHeader, type KpiCardData } from "@heuresys/ui";
 import type {
   VariablePayCalculation, CompensationRecommendationRow, BonusPool,
   ObjectiveRewardRule, PositionEconomicWeight, PayrollHandoffRecord,
@@ -63,13 +63,143 @@ function money(v: number | null): string {
   return v === null ? "—" : v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function buildVariablePayColumns(t: TFunction): DataColumn<VariablePayCalculation>[] {
+function buildVariablePayColumns(
+  t: TFunction,
+  onEvaluate: (id: string) => void,
+): DataColumn<VariablePayCalculation>[] {
   return [
     { header: t("compReward.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
     { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.periodStart} → {r.periodEnd}</span> },
     { header: t("compReward.cols.signalScore"), align: "right", cell: (r) => <span className="tabular-nums">{r.signalScore ?? "—"}</span> },
     { header: t("compReward.cols.amount"), align: "right", cell: (r) => <span className="tabular-nums">{money(r.amountEur)}</span> },
+    {
+      // #37 (B2): l'importo da solo non dice se il premio sia erogabile né come
+      // ci si è arrivati. Da qui si apre il ragionamento.
+      header: t("compReward.evaluation.column"),
+      cell: (r) => (
+        <Button
+          variant="outline"
+          data-testid="comp-evaluate-button"
+          onClick={() => onEvaluate(r.variablePayCalculationId)}
+        >
+          {t("compReward.evaluation.open")}
+        </Button>
+      ),
+    },
   ];
+}
+
+/** Esiti dei cancelli e curva applicata a un singolo calcolo (#37 B2). */
+interface VariablePayEvaluationView {
+  variablePayCalculationId: string;
+  periodStart: string;
+  periodEnd: string;
+  recordedAmountEur: number | null;
+  attainment: number | null;
+  curveCode: string | null;
+  curveKind: string | null;
+  curveFactor: number | null;
+  curveExplanation: string | null;
+  gates: Array<{ gateCode: string; gateName: string; isBlocking: boolean; status: string; overrideReason: string | null }>;
+  gateDecision: "ALLOW" | "ALLOW_WITH_WARNING" | "BLOCK";
+  gateExplanation: string;
+  finalFactor: number | null;
+  notEvaluable: string | null;
+}
+
+function EvaluationPanel({ calculationId, onClose }: { calculationId: string; onClose: () => void }) {
+  const { t } = useTranslation("admin");
+  const q = useQuery({
+    queryKey: ["compensation", "variable-pay", calculationId, "evaluation"],
+    queryFn: () =>
+      apiFetch<VariablePayEvaluationView>(`/v1/compensation/variable-pay/${calculationId}/evaluation`),
+  });
+
+  const decisionTone: Record<string, string> = {
+    ALLOW: "text-success",
+    ALLOW_WITH_WARNING: "text-warning",
+    BLOCK: "text-danger",
+  };
+
+  return (
+    <div
+      data-testid="comp-evaluation-panel"
+      className="rounded-card border border-border bg-card p-4 shadow-card"
+    >
+      <div className="mb-3 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-foreground">{t("compReward.evaluation.title")}</h3>
+        <Button variant="ghost" data-testid="comp-evaluation-close" onClick={onClose}>
+          {t("compReward.evaluation.close")}
+        </Button>
+      </div>
+
+      {q.isLoading ? (
+        <p className="text-sm text-muted-foreground">{t("common:loading")}</p>
+      ) : q.isError ? (
+        <p className="text-sm text-danger" data-testid="comp-evaluation-error">
+          {t("compReward.error")}
+        </p>
+      ) : q.data ? (
+        <div className="space-y-4 text-sm">
+          <p className="text-muted-foreground">
+            {t("compReward.evaluation.period", { from: q.data.periodStart, to: q.data.periodEnd })}
+            {" · "}
+            {t("compReward.evaluation.recorded", { amount: money(q.data.recordedAmountEur) })}
+          </p>
+
+          {q.data.notEvaluable ? (
+            <p data-testid="comp-evaluation-not-evaluable" className="text-muted-foreground">
+              {q.data.notEvaluable}
+            </p>
+          ) : (
+            <div data-testid="comp-evaluation-curve" className="space-y-1">
+              <p className="font-medium text-foreground">
+                {t("compReward.evaluation.curve", { code: q.data.curveCode, kind: q.data.curveKind })}
+              </p>
+              {/* La spiegazione arriva dal motore: la stessa frase che un
+                  destinatario può usare per rifare il conto. */}
+              <p className="text-muted-foreground">{q.data.curveExplanation}</p>
+            </div>
+          )}
+
+          <div data-testid="comp-evaluation-gates" className="space-y-2">
+            <p className={`font-medium ${decisionTone[q.data.gateDecision] ?? ""}`}>
+              {q.data.gateExplanation}
+            </p>
+            {q.data.gates.length > 0 ? (
+              <ul className="divide-y divide-border">
+                {q.data.gates.map((g) => (
+                  <li key={g.gateCode} className="flex items-center justify-between gap-3 py-1">
+                    <span>
+                      <span className="font-mono text-xs text-muted-foreground">{g.gateCode}</span>
+                      <span className="ml-2">{g.gateName}</span>
+                      {!g.isBlocking ? (
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {t("compReward.evaluation.nonBlocking")}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      {g.overrideReason ? (
+                        <span className="text-xs text-muted-foreground">{g.overrideReason}</span>
+                      ) : null}
+                      <StatusBadge value={g.status} />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+
+          {q.data.finalFactor !== null ? (
+            <p data-testid="comp-evaluation-final" className="font-medium text-foreground">
+              {t("compReward.evaluation.finalFactor", { factor: q.data.finalFactor.toFixed(4) })}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function buildRecommendationColumns(t: TFunction): DataColumn<CompensationRecommendationRow>[] {
@@ -210,7 +340,11 @@ export default function CompensationIntelligencePage() {
   });
 
   const rewardGateColumns = useMemo(() => buildRewardGateColumns(t), [t]);
-  const variablePayColumns = useMemo(() => buildVariablePayColumns(tA), [tA]);
+  const [evaluatingId, setEvaluatingId] = useState<string | null>(null);
+  const variablePayColumns = useMemo(
+    () => buildVariablePayColumns(tA, setEvaluatingId),
+    [tA],
+  );
   const recommendationColumns = useMemo(() => buildRecommendationColumns(tA), [tA]);
   const bonusPoolColumns = useMemo(() => buildBonusPoolColumns(tA), [tA]);
   const objectiveRuleColumns = useMemo(() => buildObjectiveRuleColumns(tA), [tA]);
@@ -285,6 +419,9 @@ export default function CompensationIntelligencePage() {
           emptyTitle={tA("compReward.empty")}
           caption={tA("compReward.variablePay")}
         />
+        {evaluatingId ? (
+          <EvaluationPanel calculationId={evaluatingId} onClose={() => setEvaluatingId(null)} />
+        ) : null}
       </section>
 
       <section data-testid="comp-recommendation-panel" className="space-y-3">

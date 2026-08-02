@@ -990,6 +990,17 @@
     }
   },
   "compReward": {
+    "evaluation": {
+      "column": "Evaluation",
+      "open": "Evaluate",
+      "close": "Close",
+      "title": "How this payout is reached",
+      "period": "Period {{from}} → {{to}}",
+      "recorded": "recorded amount {{amount}} EUR",
+      "curve": "Curve applied: {{code}} ({{kind}})",
+      "nonBlocking": "(non-blocking)",
+      "finalFactor": "Final payout factor: {{factor}}"
+    },
     "variablePay": "Variable pay",
     "recommendations": "Compensation recommendations",
     "bonusPools": "Bonus pools",

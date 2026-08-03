@@ -37,7 +37,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 |---|---|---|---|---|
 | **P3-01** | **#84** — le rules path-scoped si caricano quando servono? | Claude | Verifica **sul campo**, non a memoria: prova falsificabile che apra un file sotto un path governato da una rule e misuri se la rule è entrata in contesto. Esito scritto, positivo o negativo | ✅ **DONE** — esito positivo, vedi sotto |
 | **P3-02** | **#38** — B6 inbox push SSE (da polling 30s) | Claude | Endpoint SSE reale + client che lo consuma al posto del polling, test, prova LIVE con evento che arriva senza refresh | ✅ **DONE** — vedi esito sotto |
-| **P3-03** | **#53** — E4 payroll ops read-extended | Claude | API+test+pagina+E2E su dati payroll reali | `TODO` |
+| **P3-03** | **#53** — E4 payroll ops read-extended | Claude | API+test+pagina+E2E su dati payroll reali | ✅ **DONE** — vedi esito sotto |
 | **P3-04** | **#45** — C3 editing tenant & piattaforma (chiude la serie C) | Claude | CRUD reale su tenant/piattaforma, test, UI, E2E, `check_exposure.py` verde | `TODO` |
 | **P3-05** | **#50** — D4 legacy knowledge graph (`kg_nodes`/`kg_edges`, 139k) | Claude | Ingestione verificata sul volume reale + superficie che lo espone; nessun conteggio citato a memoria | `TODO` |
 | **P3-06** | **#88** — il peso economico delle posizioni è un campo vuoto | Claude | Indagine con misura, poi **decisione tecnica presa ed eseguita** (popolare o ritirare): nessuno progetta più su un campo vuoto | ✅ **DONE** — vedi esito sotto |
@@ -413,6 +413,28 @@ Corretto con **due file**, non centotredici: `(authenticated)/error.tsx` e `(aut
 **Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
 1. Un rilievo d'audit può invecchiare male: D-03 descriveva un fatto vero (l'85% dei subpath non è importato) e ne traeva una conclusione sbagliata (spreco da potare). Vale la pena, per i rilievi ereditati, ri-misurare *la premessa* e non solo eseguire l'azione proposta.
 2. Le pagine restano tutte client-side con TanStack Query: `loading.tsx` copre la navigazione fra segmenti, non l'attesa dei dati dentro la pagina, che resta gestita dagli stati di caricamento dei componenti.
+
+### P3-03 (#53 · E4 fasce retributive) — ✅ DONE 2026-08-03
+
+**La scoperta viene prima del lavoro.** `sys_compensation_bands` conteneva **87 righe di cui 75 senza alcun valore economico** e 43 col nome uguale al codice (`OLDDB::ccnl_levels::<uuid>`): un import precedente aveva portato le chiavi e non i dati. Solo 12 erano utilizzabili e **9 davvero usate** dalle posizioni — ed è la stessa tabella che P3-06 (#88) aveva appena reso base economica del modello di aggregazione.
+
+**Dati.** Il legacy ha 41 fasce **complete al 100%**. Importate le **19 che appartengono a un tenant realmente esistente** in v5 (RTL Bank 12, Heuresys 7); le altre 22 sono di EcoNova e SmartFood, **tenant mai migrati**, e importarle avrebbe creato righe senza titolare — la stessa contaminazione che il progetto ha già dovuto bonificare altrove. Lo script conta le escluse e le dichiara invece di ignorarle in silenzio. Il crosswalk dei tenant **esisteva già** in `tenant_metadata->>'legacy_tenant_id'`: nessun UUID scritto a mano.
+
+Esito misurato: le 75 righe prive di importi **non appartengono a nessun tenant** (né sono marcate globali), quindi restano fuori da qualunque lettura per costruzione; RTL Bank ha ora 24 fasce tutte con importi, Heuresys 7. Le righe non sono state cancellate: rimuoverle è distruttivo su dati di produzione e richiede una decisione esplicita.
+
+**API.** `GET /v1/compensation/bands`. Le fasce esistevano e nessuna API le elencava: si vedevano solo di riflesso, risolte per una singola posizione. `withValueOnly` è **true di default** — una fascia senza importi non è una fascia, e mostrarla si legge come «esiste ma non so quanto vale» — ma la risposta pubblica `totalIncludingValueless`, così le escluse sono dichiarate.
+
+**Pagina.** Pannello in `/compensation-intelligence` con minimo, centro, massimo e **ampiezza in percentuale**: due fasce con lo stesso centro e ampiezze diverse si governano in modo diverso.
+
+**Prove**: 17/17 su `compensation-read` (5 nuovi), 15/15 sulle altre due suite del modulo, **E2E 3/3** con login reale. I test che contano: nessuna riga priva di importi entra nel catalogo, e **in pagina non compaiono mai i prefissi tecnici** `LEGACY_BAND::` / `OLDDB::` — il difetto delle 87 righe preesistenti era esattamente il nome uguale al codice, che sarebbe finito a schermo. Import ri-eseguito: 19 su 106 invariate, 0 righe nuove nel registro brownfield (dove il dominio entra come wave-2 accanto a D1/D2/D5). `i18n:check` 2885×2 · typecheck ×3 · lint · `check_exposure` 73/73.
+
+**Due errori miei, corretti**:
+1. Ho scritto una migration per aggiungere un vincolo di unicità cercandolo in `pg_constraint` e non trovandolo — ma l'unicità **c'era già** dalla migration 000019 come `CREATE UNIQUE INDEX`, che in `pg_constraint` non compare. Migration rimossa prima del commit; disco e registro restano allineati.
+2. Avevo dimenticato la dichiarazione `orgGate` sulla rotta nuova, e **l'applicazione si è rifiutata di avviarsi** (`ORG_GATE_MISSING`, guardia D-51) invece di esporre in silenzio una risorsa di classe sensibile. È il tipo di guardia che ripaga il giorno in cui distrae chi la incontra.
+
+**Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
+1. **75 fasce orfane** restano in tabella: nessun tenant, nessun importo, nessun uso. La rimozione è distruttiva e aspetta una decisione.
+2. Il legacy ha anche `merit_cycles` (53), `merit_recommendations` (208), `salary_history` (317), `employee_benefits` (24) e `market_salary_data` (84): materiale per un'estensione di E4 che questa voce non copriva.
 
 ---
 

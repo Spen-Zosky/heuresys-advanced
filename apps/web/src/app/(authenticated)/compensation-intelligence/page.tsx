@@ -362,10 +362,12 @@ export default function CompensationIntelligencePage() {
     () => new Intl.NumberFormat(i18n.language, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
     [i18n.language],
   );
-  const money = (v: string | null) => (v === null ? "—" : eur.format(Number(v)));
-
   const bandColumns = useMemo<DataColumn<CompensationBandRow>[]>(
-    () => [
+    () => {
+      // Dentro il memo, non fuori: definita nel corpo del componente si ricreerebbe a
+      // ogni render, e il memo la userebbe senza poterla dichiarare fra le dipendenze.
+      const money = (v: string | null) => (v === null ? "—" : eur.format(Number(v)));
+      return [
       { header: t("compensation.bands.colBand"), cell: (r) => <span className="font-medium text-foreground">{r.name}</span> },
       { header: t("compensation.bands.colMin"), align: "right", cell: (r) => <span className="tabular-nums">{money(r.minEur)}</span> },
       { header: t("compensation.bands.colMid"), align: "right", cell: (r) => <span className="font-semibold tabular-nums text-foreground">{money(r.midEur)}</span> },
@@ -380,7 +382,8 @@ export default function CompensationIntelligencePage() {
           return <span className="tabular-nums text-muted-foreground">{pct}%</span>;
         },
       },
-    ],
+      ];
+    },
     [t, eur],
   );
 

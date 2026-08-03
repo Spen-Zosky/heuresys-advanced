@@ -277,9 +277,10 @@
 - **#52 E/E2 — SSO enterprise (Azure AD / Google OIDC)** · status: WAIT-INPUT
   - input-richiesto: client ID + secret di un IdP reale (app registration Azure AD oppure OAuth client Google OIDC)
   - perche-solo-tuo: la registrazione dell'app su un tenant IdP è una risorsa esterna che solo Enzo può creare; senza IdP reale la DoD live E2E non è dimostrabile
-- **#53 E/E4 — payroll ops read-extended** · status: ACTIVE
+- **#53 E/E4 — payroll ops read-extended** · status: DONE
   - priority: P3 · effort: ~1-1.5 sessioni · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E4
   - note: self-contained (import comp in W7 + read); payroll EXECUTION resta non-goal.
+  - closed: S1041 (2026-08-03) — **la scoperta viene prima del lavoro**: `sys_compensation_bands` aveva **87 righe di cui 75 senza valore economico** e 43 col nome uguale al codice (`OLDDB::…`), cioe' un import che porto' le chiavi e non i dati — sulla stessa tabella che #88 aveva appena reso base economica del modello. Importate dal legacy le **19 fasce complete** dei due tenant realmente esistenti (RTL 12, Heuresys 7); escluse le 22 di EcoNova/SmartFood, **mai migrati**, per non creare righe senza titolare. Crosswalk tenant gia' esistente in `tenant_metadata`. Nuovo `GET /v1/compensation/bands` (`withValueOnly` true di default, ma le escluse sono dichiarate) + pannello in `/compensation-intelligence` con l'ampiezza percentuale. Le 75 orfane **non appartengono a nessun tenant** → fuori da ogni lettura per costruzione; **non cancellate** (distruttivo, serve decisione). 17/17 + 15/15 + **E2E 3/3**; i test che contano impediscono righe senza importi nel catalogo e i prefissi tecnici a schermo. Due errori miei corretti: una migration inutile (l'unicita' c'era gia' come UNIQUE INDEX, invisibile in `pg_constraint`) e un `orgGate` dimenticato che ha fatto **rifiutare l'avvio** all'applicazione (guardia D-51). Esito: `docs/superpowers/specs/2026-08-02-p2-batch-execution-plan.md` §P3-03.
 - **#54 E/E5 — recruiting/ATS (cluster `/recruiting`)** · status: ACTIVE
   - priority: P2 · effort: ~5-7 sessioni (fasi con commit atomici) · doc: docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md §E5
   - note: decisione Enzo S1018 — in coda al batch (wave W11). Concept-porting dal cantiere evo, mai codice (I5: no RLS).

@@ -17,7 +17,7 @@ resta a register con `resume-from`.
 | V0 | 5 blocchi #89-#93 nell'Action register | Claude | `handoff_lint.py` verde + i 5 item compaiono in `build_menu.py` | **FATTO** |
 | V1 | #90 cruscotto: promuovere 3 script + cablare in `session_start.py` | Claude | `python docs/kb/tools/db_health.py` gira dal repo e l'esito compare al boot | **FATTO** |
 | V2 | #93 rimozione validazione presenze | Claude | mig `000234` applicata, 5 file `db/` ripuliti, riesecuzione seed verde | **FATTO** |
-| V3 | #89 bonifica contaminazione, 7 fasi | Claude | query di censimento a zero per classe + F7 verificato con login reale | **FATTO tranne la prova live di F7** (deploy da autorizzare) |
+| V3 | #89 bonifica contaminazione, 7 fasi | Claude | query di censimento a zero per classe + F7 verificato con login reale | **FATTO** (prova live inclusa) |
 | V4 | #91 bonifica strutturale blocchi A, C, D | Claude | `db_health.py` non segnala più «vincoli FK non validati» né «tabelle mai analizzate» | **FATTO** |
 | V5 | #91 blocco E (UNIQUE) — dopo V3 | Claude | i 3 `ALTER TABLE … UNIQUE` passano, duplicati a 0 nel cruscotto | **FATTO** |
 | V6 | #92 ciclo di valutazione (7 passi) | Claude | dichiarata fuori sessione all'apertura (~2-3 sessioni) | **NON INIZIATA** — come dichiarato |
@@ -132,7 +132,10 @@ Il quinto **era rosso da prima di questa sessione**: 3 righe `{"prova": "verific
 del 2026-08-02 01:35 in `sys_reward_gate_results`, tabella che il registro dichiara terminale
 `NO_SOURCE`. Residui di una verifica manuale mai ripulita. Rimosse (mig `000240`) per assenza
 del marcatore, non per elenco di id: «pre-esistente» non è una ragione per lasciare un test rosso.
-| prova live F7 con login reale | **non fatta** — richiede il deploy, da autorizzare |
+| CI su GitHub (commit di codice) | **8 workflow su 9 verdi**; il 9° (`State lint`) era rosso per un conteggio migrazioni disallineato in `SOT_STATE`, corretto → verde |
+| deploy VM + linux-pc | **OK su entrambi** (`align-clones.sh all --deploy`, exit 0) |
+| **prova live F7 con login reale** | **FATTA** — `www.heuresys.com/learning` come `federica.marchetti@rtl-bank.org`: intestazione `… · Azioni`, nessuna stringa d'errore i18n |
+| **prova live della bonifica** | **FATTA** — `/learning`: percorsi 200→74, moduli 721→127, nessuno slug di tenant inesistente; `/goals`: 2.624→2.189 |
 
 ## Registro delle scoperte fuori ciclo (R24 §5)
 

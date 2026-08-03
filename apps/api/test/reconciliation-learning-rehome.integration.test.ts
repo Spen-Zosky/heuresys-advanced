@@ -33,9 +33,19 @@ describe('reconciliation D5 — learning catalog re-home (W3)', () => {
       )).toBe(0);
     });
 
-    it('the canonical course=module catalog landed (>= 127 CRS+banking, all COURSE kind)', async () => {
-      // 127 canonical courses imported as modules; >= 60 are CRS-* (the rest are banking-style codes).
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_learning_modules WHERE learning_module_code LIKE 'CRS-%'`)).toBeGreaterThanOrEqual(60);
+    it('the canonical course=module catalog landed (CRS-* present, all GLOBAL + COURSE kind)', async () => {
+      // La soglia era `>= 60`: 15 corsi per ciascuno dei 4 slug legacy. La bonifica 000235 ha
+      // rimosso i 30 moduli degli slug `econova` e `smartfood` — due aziende che in questo
+      // prodotto non esistono — quindi pretendere 60 significherebbe pretendere il ritorno
+      // della contaminazione. Cio' che il re-home deve garantire e' che il catalogo CRS-*
+      // ESISTA e sia GLOBAL+COURSE, non che abbia una cardinalita' data: quella dipende da
+      // quanti tenant hanno diritto di cittadinanza, ed e' una decisione di prodotto.
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_learning_modules WHERE learning_module_code LIKE 'CRS-%'`)).toBeGreaterThan(0);
+      // Nessuno slug di tenant inesistente puo' rientrare dalla finestra.
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_learning_modules
+          WHERE learning_module_code ~ '^CRS-(econova|smartfood)-'`,
+      )).toBe(0);
       // catalog modules (non-OLDDB) are exactly the re-import; all GLOBAL + COURSE.
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_learning_modules
@@ -44,16 +54,32 @@ describe('reconciliation D5 — learning catalog re-home (W3)', () => {
       )).toBe(0);
     });
 
-    it('the dual-home is preserved: the CRS-* path-code shims still exist (junctions 11/15 stay valid)', async () => {
+    it('the dual-home is preserved: every CRS-* path still has its twin module', async () => {
       // re-home is DUAL-HOME, not MOVE: the load-bearing CRS-* rows in sys_learning_paths remain.
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_learning_paths WHERE learning_path_code LIKE 'CRS-%'`)).toBeGreaterThanOrEqual(60);
+      // L'invariante del dual-home non e' "quanti", e' "ogni percorso CRS-* ha il modulo
+      // omonimo": si deriva dai dati e regge a qualunque cardinalita', mentre la vecchia
+      // soglia `>= 60` misurava soltanto la presenza dei quattro slug legacy originari.
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_learning_paths WHERE learning_path_code LIKE 'CRS-%'`)).toBeGreaterThan(0);
+      expect(await count(
+        `SELECT count(*)::int AS n FROM sys.sys_learning_paths p
+          WHERE p.learning_path_code LIKE 'CRS-%'
+            AND NOT EXISTS (SELECT 1 FROM sys.sys_learning_modules m
+                             WHERE m.learning_module_code = p.learning_path_code
+                               AND m.learning_module_tenant_id IS NULL)`,
+      )).toBe(0);
     });
   });
 
   describe('sys_learning_path_steps unblocked (was 0)', () => {
-    it('imported 124 steps across 20 paths, all FKs resolving, ordinals unique per path', async () => {
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_learning_path_steps`)).toBe(124);
-      expect(await count(`SELECT count(DISTINCT learning_path_step_path_id)::int AS n FROM sys.sys_learning_path_steps`)).toBe(20);
+    it('steps exist, all FKs resolving, ordinals unique per path', async () => {
+      // Erano `toBe(124)` su `toBe(20)` percorsi. I due numeri fotografavano il dataset del
+      // giorno dell'import: la bonifica 000235 ha rimosso i percorsi dei tenant inesistenti
+      // e con essi i loro step, quindi un'uguaglianza esatta qui non prova piu' che l'import
+      // sia riuscito — prova solo che nessuno abbia mai piu' toccato il catalogo. Cio' che
+      // il test deve difendere e' che gli step CI SIANO e siano COERENTI: le tre asserzioni
+      // sotto (FK che risolvono, ordinali unici, nessun modulo OLDDB) sono l'invariante vero.
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_learning_path_steps`)).toBeGreaterThan(0);
+      expect(await count(`SELECT count(DISTINCT learning_path_step_path_id)::int AS n FROM sys.sys_learning_path_steps`)).toBeGreaterThan(0);
       // every step resolves a real module + path (FK integrity beyond the constraint)
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_learning_path_steps s

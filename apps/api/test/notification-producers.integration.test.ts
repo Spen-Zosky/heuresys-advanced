@@ -24,7 +24,11 @@ const SUBJECTS = [
 const RTL_TENANT = "86ba7a65-217f-48ba-8ce5-5c09b40a66b0";
 const ANTONIO = "6e815bb9-81f3-46b5-b234-0d807fdbe518"; // antonio.parisi@rtl-bank.org
 const TOMMASO = "a5e1d8ab-192a-414d-9294-ccb69aeca7d3"; // tommaso.fiore@rtl-bank.org
-const RTL_MODULE = "669cb874-f010-4496-abe6-ee0876089cd9";
+// Il modulo si DERIVA dal catalogo a runtime, non si scrive qui. L'UUID fisso che
+// stava in questa riga puntava a un modulo `OLDDB::course_modules::*` rimosso dalla
+// bonifica 000235: il test moriva per un dato scritto a mano che duplicava il
+// database, non per un difetto del produttore di notifiche che deve verificare.
+let rtlModuleId: string;
 const RTL_POSITION = "0e51c0bb-f0df-4752-b003-b75a8607ea88";
 
 const ADMIN = (id: string) => ({ userId: id, tenantId: null, roles: ["PLATFORM_ADMIN" as const] });
@@ -96,7 +100,14 @@ describe("3.4 notification producers (live)", () => {
   });
 
   it("me.enrollLearning → TRAINING_DEADLINE (self)", async () => {
-    const created = await meService.enrollLearning(EMP, { moduleId: RTL_MODULE });
+    const m = await pool.query<{ id: string }>(
+      `SELECT learning_module_id AS id FROM sys.sys_learning_modules
+        WHERE learning_module_tenant_id IS NULL OR learning_module_tenant_id = $1
+        ORDER BY learning_module_code LIMIT 1`,
+      [RTL_TENANT],
+    );
+    rtlModuleId = m.rows[0]!.id;
+    const created = await meService.enrollLearning(EMP, { moduleId: rtlModuleId });
     createdLearningId = created.userLearningAssignmentId;
     expect(await countFor("TRAINING_DEADLINE", "Percorso formativo in agenda", TOMMASO)).toBeGreaterThan(0);
   });

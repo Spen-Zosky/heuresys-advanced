@@ -112,7 +112,26 @@ resta a register con `resume-from`.
 | `pnpm typecheck` · `pnpm lint` | **verdi** |
 | `handoff_lint.py` | **OK** (0 fail) |
 | suite unit API | **10 file / 67 test verdi** |
-| suite integration API | in corso a fine sessione — nessun fallimento fino all'interruzione del monitoraggio |
+| suite integration API (1ª esecuzione) | **5 rossi su 1619** — 4 causati dalla bonifica, 1 rosso da prima |
+| suite integration API (riesecuzione mirata dei 3 file) | **31/31 verdi** |
+| suite integration API (conferma completa) | rilanciata a fine sessione |
+
+### I 5 test rossi e come sono stati chiusi
+
+Quattro codificavano la **cardinalità** del catalogo pre-bonifica (`>= 60` moduli e percorsi
+`CRS-*`, `124` step su `20` percorsi) e un UUID di modulo scritto a mano, puntato a un
+`OLDDB::course_modules::*` rimosso. Non ho abbassato le soglie: le ho sostituite con
+l'**invariante** che il re-home deve garantire — il catalogo `CRS-*` esiste, è GLOBAL+COURSE,
+nessuno slug di tenant inesistente può rientrare, e **ogni** percorso `CRS-*` ha il modulo
+omonimo (è così che si misura il dual-home, non contando le righe). Un'uguaglianza esatta a 124
+non provava più che l'import fosse riuscito: provava che nessuno avesse mai più toccato il
+catalogo. L'UUID ora si deriva a runtime — era il difetto che la regola «niente dati fissi nei
+test» esiste per prevenire.
+
+Il quinto **era rosso da prima di questa sessione**: 3 righe `{"prova": "verifica motore #37"}`
+del 2026-08-02 01:35 in `sys_reward_gate_results`, tabella che il registro dichiara terminale
+`NO_SOURCE`. Residui di una verifica manuale mai ripulita. Rimosse (mig `000240`) per assenza
+del marcatore, non per elenco di id: «pre-esistente» non è una ragione per lasciare un test rosso.
 | prova live F7 con login reale | **non fatta** — richiede il deploy, da autorizzare |
 
 ## Registro delle scoperte fuori ciclo (R24 §5)

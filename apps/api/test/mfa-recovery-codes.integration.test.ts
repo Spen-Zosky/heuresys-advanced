@@ -93,6 +93,12 @@ describe("MFA recovery codes (MVP-4 §2.5)", () => {
     expect((s2.json() as { status: string }).status).toBe("success");
   });
 
+  // Timeout esplicito, piu' generoso dei 20s globali: questo caso fa DUE login completi
+  // in sequenza, e un login costa un hash Argon2id, che e' lento per costruzione. Con il
+  // database remoto via tunnel e la macchina sotto il carico della suite intera, il budget
+  // globale viene superato — misurato: il file passa in 17,65s da solo e va in timeout
+  // dentro la suite completa. Il caso verifica il consumo singolo di un codice di recupero,
+  // non la latenza: farlo fallire per il secondo login e' rumore, non un difetto trovato.
   it("the same recovery code cannot be reused (single-use) and remaining drops to 9", async () => {
     const s1 = await login({ email: EMAIL, password: PWD });
     const ct = (s1.json() as { challengeToken: string }).challengeToken;
@@ -100,7 +106,7 @@ describe("MFA recovery codes (MVP-4 §2.5)", () => {
     expect(s2.statusCode).toBe(401); // already burned
     const cnt = await app.app.inject({ method: "GET", url: "/v1/auth/mfa/recovery-codes", headers: { cookie: ch(session.cookies) } });
     expect((cnt.json() as { remaining: number }).remaining).toBe(9);
-  });
+  }, 45_000);
 
   it("a wrong recovery code is rejected (401)", async () => {
     const s1 = await login({ email: EMAIL, password: PWD });

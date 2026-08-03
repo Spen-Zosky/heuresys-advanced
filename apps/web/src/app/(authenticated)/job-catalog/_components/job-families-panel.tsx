@@ -102,7 +102,7 @@ export function JobFamiliesPanel() {
     ...(canUpdate
       ? [
           {
-            header: t("common:actions"),
+            header: t("common:table.actions"),
             cell: (f: JobFamily) => (
               <Button type="button" variant="outline" data-testid={`family-edit-${f.code}`} onClick={() => setEditing(f)}>
                 {t("jobCatalog.edit")}

@@ -36,7 +36,7 @@ export default function OrganizationPage() {
         cell: (o) => <StatusPill tone={o.isActive ? "success" : "neutral"}>{o.isActive ? t("organization.activeYes") : t("organization.activeNo")}</StatusPill>,
       },
       {
-        header: t("common:actions"),
+        header: t("common:table.actions"),
         cell: (o) => (
           <Button
             type="button"

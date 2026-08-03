@@ -26,7 +26,8 @@
   "table": {
     "name": "Nome",
     "code": "Codice",
-    "status": "Stato"
+    "status": "Stato",
+    "actions": "Azioni"
   },
   "empty": {
     "none": "Nessun risultato"

@@ -125,7 +125,7 @@ export function SkillFamiliesPanel() {
     ...(canUpdate || canDelete
       ? [
           {
-            header: t("common:actions"),
+            header: t("common:table.actions"),
             cell: (f: SkillFamily) => (
               <div className="flex gap-2">
                 {canUpdate && (
@@ -378,7 +378,7 @@ export function SkillCategoriesPanel() {
     ...(canUpdate
       ? [
           {
-            header: t("common:actions"),
+            header: t("common:table.actions"),
             cell: (c: SkillCategory) => (
               <Button type="button" variant="outline" data-testid={`category-edit-${c.code}`} onClick={() => setEditing(c)}>
                 {t("taxonomy.edit")}

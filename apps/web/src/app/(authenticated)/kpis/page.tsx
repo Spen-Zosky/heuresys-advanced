@@ -31,7 +31,7 @@ function buildColumns(
       ),
     },
     {
-      header: t("common:actions"),
+      header: t("common:table.actions"),
       cell: (k) => (
         <Button type="button" variant="outline" data-testid={`kpi-edit-${k.code}`} onClick={() => onEdit(k.kpiDefinitionId)}>
           {t("kpis.form.edit")}

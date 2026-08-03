@@ -125,7 +125,7 @@ export function LearningPathsPanel() {
       cell: (p) => <span className="text-sm text-muted-foreground">{p.targetOutcome ?? t("learning.paths.dash")}</span>,
     },
     {
-      header: t("common:actions"),
+      header: t("common:table.actions"),
       cell: (p) => (
         <Button type="button" variant="outline" data-testid={`path-open-${p.code}`} onClick={() => setEditing(p)}>
           {t("learning.paths.open")}

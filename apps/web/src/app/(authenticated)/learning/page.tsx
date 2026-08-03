@@ -28,7 +28,7 @@ function buildColumns(t: TFunction, onEdit: (id: string) => void): DataColumn<Le
       ),
     },
     {
-      header: t("common:actions"),
+      header: t("common:table.actions"),
       cell: (m) => (
         <Button type="button" variant="outline" data-testid={`learning-edit-${m.code}`} onClick={() => onEdit(m.learningModuleId)}>
           {t("learning.form.edit")}

@@ -152,7 +152,7 @@ export function JobRolesPanel() {
     ...(canUpdate
       ? [
           {
-            header: t("common:actions"),
+            header: t("common:table.actions"),
             cell: (r: JobRole) => (
               <Button type="button" variant="outline" data-testid={`role-edit-${r.code}`} onClick={() => setEditing(r)}>
                 {t("jobCatalog.edit")}

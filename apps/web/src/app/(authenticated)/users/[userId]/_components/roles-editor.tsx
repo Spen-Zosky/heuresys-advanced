@@ -109,7 +109,7 @@ export function RolesEditor({ userId }: { userId: string }) {
                   <th className="py-2 pr-4 font-medium">{t("users.detail.roles.colRole")}</th>
                   <th className="py-2 pr-4 font-medium">{t("users.detail.roles.colScope")}</th>
                   <th className="py-2 pr-4 font-medium">{t("users.detail.roles.colGrantedAt")}</th>
-                  {canAssign && <th className="py-2 pr-4 font-medium">{t("common:actions")}</th>}
+                  {canAssign && <th className="py-2 pr-4 font-medium">{t("common:table.actions")}</th>}
                 </tr>
               </thead>
               <tbody>

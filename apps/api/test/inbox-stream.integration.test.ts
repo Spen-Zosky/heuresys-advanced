@@ -75,6 +75,13 @@ async function waitForEvent(timeoutMs: number): Promise<{ opened: number; event:
     }
   } finally {
     clearTimeout(timer);
+    // `cancel()` prima di `abort()`: interrompere il fetch mentre una `read()` è in
+    // volo la fa RIGETTARE con AbortError, e quella rejection non ha nessuno che la
+    // attenda. Vitest la vede come errore non gestito e fa fallire il RUN anche con
+    // tutti i test verdi — è esattamente ciò che è successo in CI (1613 passati,
+    // job rosso). `cancel()` chiude il lettore in modo ordinato; `catch` copre il
+    // caso in cui la corsa sia già persa.
+    await reader.cancel().catch(() => {});
     ac.abort();
   }
 }
@@ -193,12 +200,15 @@ describe("#38 B6 — la posta in arrivo arriva da sola", () => {
     const deadline = Date.now() + 3_000;
     while (Date.now() < deadline) {
       const chunk = await Promise.race([
-        reader.read(),
+        // `catch` sulla read: quando il ciclo esce e si chiude il lettore, la read
+        // rimasta in volo rigetta e nessuno la attende più.
+        reader.read().catch(() => ({ value: undefined, done: false as const })),
         new Promise<{ value: undefined; done: false }>((r) => setTimeout(() => r({ value: undefined, done: false }), 500)),
       ]);
       if (chunk.value) buffer += decoder.decode(chunk.value, { stream: true });
       if (buffer.includes("event: inbox")) break;
     }
+    await reader.cancel().catch(() => {});
     ac.abort();
     expect(buffer).not.toContain("event: inbox");
   }, 30_000);
@@ -221,9 +231,13 @@ describe("#38 B6 — la posta in arrivo arriva da sola", () => {
 
     const ac = new AbortController();
     const res = await fetch(`${baseUrl}/v1/me/inbox/stream`, { headers: { cookie }, signal: ac.signal });
-    void res.body!.getReader().read();
+    const reader = res.body!.getReader();
+    // `void read()` non basta: la promise resta e rigetta all'abort, senza nessuno
+    // che la attenda. Il `catch` la assorbe.
+    void reader.read().catch(() => {});
     expect(await settle(() => subscriberCount(userId) > before)).toBe(true);
 
+    await reader.cancel().catch(() => {});
     ac.abort();
     // Senza il rilascio, ogni scheda chiusa lascerebbe un sottoscrittore morto: la
     // perdita cresce con l'uso e si vede solo dopo giorni.

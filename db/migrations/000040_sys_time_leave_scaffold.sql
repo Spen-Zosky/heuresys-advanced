@@ -377,7 +377,17 @@ BEGIN
       attendance_clock_out IS NULL OR attendance_clock_in IS NULL OR attendance_clock_out >= attendance_clock_in
     );
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_attendance_validation_coherent') THEN
+  -- La 000234 rimuove le colonne di validazione (decisione di prodotto: la
+  -- validazione delle presenze non fa parte del prodotto). Il set di migrazioni
+  -- viene rieseguito per intero a ogni `db:migrate`, quindi da qui in avanti
+  -- questo vincolo si aggiunge solo se le colonne esistono ancora: su un
+  -- database vergine la 000040 le crea poche righe sopra e il CHECK si applica
+  -- come sempre; su uno gia' bonificato il blocco diventa un no-op invece di
+  -- interrompere l'intera catena.
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_attendance_validation_coherent')
+     AND EXISTS (SELECT 1 FROM information_schema.columns
+                  WHERE table_schema='sys' AND table_name='sys_attendance'
+                    AND column_name='attendance_is_validated') THEN
     ALTER TABLE sys.sys_attendance ADD CONSTRAINT sys_attendance_validation_coherent CHECK (
       (attendance_is_validated = false)
       OR (attendance_is_validated = true AND attendance_validated_by_user_id IS NOT NULL AND attendance_validated_at IS NOT NULL)
@@ -389,7 +399,10 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_attendance_subject_user_fk') THEN
     ALTER TABLE sys.sys_attendance ADD CONSTRAINT sys_attendance_subject_user_fk FOREIGN KEY (attendance_subject_user_id) REFERENCES sys.sys_users(user_id) ON DELETE RESTRICT;
   END IF;
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_attendance_validated_by_fk') THEN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_attendance_validated_by_fk')
+     AND EXISTS (SELECT 1 FROM information_schema.columns
+                  WHERE table_schema='sys' AND table_name='sys_attendance'
+                    AND column_name='attendance_validated_by_user_id') THEN
     ALTER TABLE sys.sys_attendance ADD CONSTRAINT sys_attendance_validated_by_fk FOREIGN KEY (attendance_validated_by_user_id) REFERENCES sys.sys_users(user_id) ON DELETE SET NULL;
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'sys_attendance_created_by_fk') THEN
@@ -406,7 +419,18 @@ CREATE UNIQUE INDEX IF NOT EXISTS sys_attendance_business_uq    ON sys.sys_atten
 CREATE INDEX IF NOT EXISTS sys_attendance_user_date_idx          ON sys.sys_attendance (attendance_subject_user_id, attendance_date);
 CREATE INDEX IF NOT EXISTS sys_attendance_status_idx             ON sys.sys_attendance (attendance_tenant_id, attendance_status);
 CREATE INDEX IF NOT EXISTS sys_attendance_date_idx               ON sys.sys_attendance (attendance_tenant_id, attendance_date);
-CREATE INDEX IF NOT EXISTS sys_attendance_unvalidated_idx        ON sys.sys_attendance (attendance_tenant_id) WHERE attendance_is_validated = false;
+-- Indice parziale sulla validazione: rimosso dalla 000188 e privo di oggetto
+-- dopo la 000234, che elimina la colonna. Condizionato per la stessa ragione
+-- del CHECK sopra — il set gira per intero a ogni migrazione.
+DO $ix$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns
+              WHERE table_schema='sys' AND table_name='sys_attendance'
+                AND column_name='attendance_is_validated') THEN
+    CREATE INDEX IF NOT EXISTS sys_attendance_unvalidated_idx ON sys.sys_attendance (attendance_tenant_id) WHERE attendance_is_validated = false;
+  END IF;
+END;
+$ix$;
 
 DO $trg$
 BEGIN

@@ -53,7 +53,7 @@ INSERT INTO sys.sys_attendance (
   attendance_tenant_id, attendance_natural_key, attendance_subject_user_id, attendance_date,
   attendance_clock_in, attendance_clock_out, attendance_break_start, attendance_break_end,
   attendance_hours_regular, attendance_hours_overtime, attendance_hours_night, attendance_hours_holiday,
-  attendance_status, attendance_source, attendance_is_validated, attendance_metadata)  -- B8: hours_total is GENERATED, omitted
+  attendance_status, attendance_source, attendance_metadata)  -- B8: hours_total is GENERATED, omitted
 SELECT
   eu.v5_tenant_id,
   'ATTEND::RTL_BANK_REFERENCE::' || a.id,          -- VERIFY: keep existing prefix scheme so dedup matches the 237 already imported
@@ -69,7 +69,9 @@ SELECT
     WHEN 'absent'  THEN 'ABSENT'
     ELSE 'PRESENT' END,                              -- map legacy lowercase onto the attendance_status CHECK
   'IMPORT',
-  false,                                             -- is_validated=false: no validator identity (validated_by/at CHECK)
+  -- attendance_is_validated rimossa dalla migrazione 000234 (la validazione delle
+  -- presenze non fa parte del prodotto). Il flag legacy resta nei metadata sotto,
+  -- come tracciabilita' della sorgente.
   jsonb_build_object('legacy_attendance_id', a.id, 'rebuild_source', 'rtl-rebuild',
                      'legacy_is_validated', NULLIF(a.is_validated,''), 'legacy_status', NULLIF(a.status,''))
 FROM staging.rtl_employee_attendance a
@@ -93,7 +95,6 @@ ON CONFLICT (attendance_tenant_id, attendance_subject_user_id, attendance_date) 
   attendance_hours_holiday  = EXCLUDED.attendance_hours_holiday,
   attendance_status         = EXCLUDED.attendance_status,
   attendance_source         = 'IMPORT',
-  attendance_is_validated   = false,
   attendance_metadata       = sys_attendance.attendance_metadata || EXCLUDED.attendance_metadata,
   updated_at                = now()
 WHERE sys_attendance.attendance_source = 'SYSTEM';

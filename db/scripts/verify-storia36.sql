@@ -54,7 +54,6 @@ BEGIN
     SELECT * FROM (VALUES
       ('sys_assessments','assessment_period_start'),
       ('sys_attendance','attendance_date'),
-      ('sys_attendance','attendance_validated_at'),
       ('sys_blueprint_activations','blueprint_activation_effective_from'),
       ('sys_bonus_pools','bonus_pool_period_start'),
       ('sys_compensation_recommendations','compensation_recommendation_period_start'),

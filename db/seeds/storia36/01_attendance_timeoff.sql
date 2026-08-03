@@ -267,7 +267,7 @@ BEGIN
     attendance_break_start, attendance_break_end,
     attendance_hours_regular, attendance_hours_overtime,
     attendance_hours_night, attendance_hours_holiday,
-    attendance_status, attendance_source, attendance_is_validated)
+    attendance_status, attendance_source)
   SELECT
     uuid_generate_v5(c_ns, 'STORIA36::C1::ATTEND::' || s.user_id || '::' || c.cal_date),
     c_rtl,
@@ -281,7 +281,7 @@ BEGIN
     CASE WHEN st.status IN ('PRESENT','REMOTE','TRAINING') THEN TIME '14:00' END,
     CASE WHEN st.status IN ('PRESENT','REMOTE','TRAINING') THEN 7.5 ELSE 0 END,
     ot.ot_hours, 0, 0,
-    st.status, 'IMPORT', false
+    st.status, 'IMPORT'          -- attendance_is_validated rimossa dalla migrazione 000234
   FROM _scope s
   JOIN staging.storia36_calendar c
     ON c.is_workday

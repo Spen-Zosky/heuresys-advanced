@@ -70,6 +70,8 @@
     "recipients": "No one. Your data stays in our systems and is neither disclosed nor sold to third parties, except where required by law or by a judicial authority.",
     "retentionTitle": "How long we keep them",
     "retention": "No longer than 24 months from collection. Deletion does not depend on someone remembering: the window is registered in the retention system, which removes expired data. You may withdraw consent earlier, in which case the data is deleted on request.",
+    "locationTitle": "Data location and transfers",
+    "location": "Your data resides on Oracle Cloud infrastructure in the Milan region (Italy) — verified from the instance metadata: `eu-milan-1`. Processing therefore takes place entirely within the European Union, and no transfers to third countries are envisaged. Backups also remain in Italy.",
     "rightsTitle": "Your rights",
     "rights": "You may at any time request access to your data, its rectification or erasure, restriction of processing and portability; you may object to processing and withdraw consent, without affecting the lawfulness of processing carried out before withdrawal (Articles 15-22 GDPR). To exercise them, write to privacy@heuresys.com.",
     "complaintTitle": "Complaints",

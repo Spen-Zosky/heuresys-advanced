@@ -23,6 +23,7 @@ const SECTIONS = [
   "legalBasis",
   "recipients",
   "retention",
+  "location",
   "rights",
   "complaint",
   "security",
@@ -63,6 +64,10 @@ test.describe("#4 W4 — informativa privacy", () => {
     await expect(page.getByTestId("privacy-section-complaint")).toContainText(/garante|authority/i);
     // Il titolare e un canale di contatto devono essere identificabili.
     await expect(page.getByTestId("privacy-section-controller")).toContainText("@");
+    // L'ubicazione dei dati non è una frase di cortesia: è verificata sui metadati
+    // dell'istanza (eu-milan-1) e deve restare dichiarata con la sua regione.
+    await expect(page.getByTestId("privacy-section-location")).toContainText("eu-milan-1");
+    await expect(page.getByTestId("privacy-section-location")).toContainText(/Milano|Milan/);
   });
 
   test("esiste in entrambe le lingue e non resta in italiano", async ({ page }) => {

@@ -23,6 +23,7 @@ const SECTIONS = [
   "legalBasis",
   "recipients",
   "retention",
+  "location",
   "rights",
   "complaint",
   "security",

@@ -70,6 +70,8 @@
     "recipients": "A nessuno. I dati restano nei nostri sistemi e non sono comunicati né ceduti a terzi, salvo un obbligo di legge o una richiesta dell'autorità giudiziaria.",
     "retentionTitle": "Per quanto li conserviamo",
     "retention": "Non oltre 24 mesi dalla raccolta. La cancellazione non dipende da un'azione manuale: la finestra è registrata nel sistema di conservazione, che rimuove i dati scaduti. Puoi comunque revocare il consenso prima, e in quel caso i dati sono cancellati su richiesta.",
+    "locationTitle": "Ubicazione dei dati e trasferimenti",
+    "location": "I dati risiedono su infrastruttura Oracle Cloud nella regione di Milano (Italia) — verificato sui metadati dell'istanza: `eu-milan-1`. Il trattamento avviene quindi interamente all'interno dell'Unione Europea e non sono previsti trasferimenti verso Paesi terzi. Le copie di sicurezza restano anch'esse in Italia.",
     "rightsTitle": "I tuoi diritti",
     "rights": "Puoi chiederci in ogni momento l'accesso ai tuoi dati, la loro rettifica o cancellazione, la limitazione del trattamento e la portabilità; puoi opporti al trattamento e revocare il consenso, senza che ciò pregiudichi la liceità del trattamento svolto prima della revoca (artt. 15-22 GDPR). Per esercitarli scrivi a privacy@heuresys.com.",
     "complaintTitle": "Reclamo",

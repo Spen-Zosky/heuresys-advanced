@@ -51,6 +51,18 @@ CENSIMENTO: list[tuple[str, str, str]] = [
     ("A", "moduli con slug di tenant inesistente",
      "SELECT count(*) FROM sys.sys_learning_modules "
      "WHERE learning_module_code ~ '^CRS-(econova|smartfood)-'"),
+    # La 000235 cercava la chiave-macchina nel CODICE e mancava le righe che ce
+    # l'hanno nel NOME: dieci `PATH-econova-*`/`PATH-smartfood-*` avevano codice
+    # pulito e nome `OLDDB::learning_paths::<uuid>`. Trovate solo quando Enzo ha
+    # chiesto di rimuovere il catalogo alimentare/energetico (000241). Una guardia
+    # che guarda una colonna sola non e' una guardia: qui si controllano entrambe.
+    ("A", "percorsi con slug di tenant inesistente nel codice PATH-",
+     "SELECT count(*) FROM sys.sys_learning_paths "
+     "WHERE learning_path_code ~ '^PATH-(econova|smartfood)-'"),
+    ("B", "percorsi con chiave macchina nel NOME anziche' nel codice",
+     "SELECT count(*) FROM sys.sys_learning_paths p "
+     "WHERE p.learning_path_name LIKE 'OLDDB::%' "
+     "  AND p.learning_path_code ~ '^PATH-(econova|smartfood)-'"),
     ("A", "percorsi Heuresys rimasti nel tenant RTL",
      "SELECT count(*) FROM sys.sys_learning_paths p JOIN sys.sys_tenancies t "
      "ON t.tenant_id = p.learning_path_tenant_id "

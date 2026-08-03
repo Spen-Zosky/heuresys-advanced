@@ -47,9 +47,18 @@ resta a register con `resume-from`.
 
 ### V2 — rimozione validazione presenze
 - **Precondizioni**: le 3 colonne devono essere ancora vuote **adesso** (il lab ha misurato ieri);
-  `000234` libero. → **da rimisurare prima del DROP**.
+  `000234` libero. → **da rimisurare prima del DROP**. ✔ rimisurato: 116.639 righe, 0 non-NULL su tutte e tre.
 - **Meccanismo**: migrazione SQL + `db:migrate`. I 5 file `db/` che citano le colonne vanno corretti
   nello stesso commit, altrimenti il prossimo `db:reset` fallisce.
+- **CORREZIONE IN CORSO D'OPERA**: avevo deciso di non toccare `000040` perché è storia già applicata.
+  Sbagliato **in questo progetto**: `migrate.sh` riesegue l'**intero set** a ogni `db:migrate` (è così
+  che si dimostra l'idempotenza dichiarata), quindi una migrazione a monte che ricrea un CHECK, una FK
+  e un indice parziale su una colonna rimossa a valle **interrompe l'intera catena**. Misurato, non
+  supposto: il primo `db:migrate` dopo la 000234 è fallito con
+  `ERROR: column "attendance_is_validated" does not exist` su `000040:402`. `000040` è stata resa
+  tollerante (i tre blocchi si applicano solo se la colonna esiste): su un database vergine si comporta
+  esattamente come prima, su uno bonificato diventa un no-op. `migrate.sh` fa upsert sullo sha256, non
+  c'è un controllo di drift che la modifica violi.
 - **Propagazione**: la migrazione gira sui cloni al deploy; i seed corretti sono versionati.
 - **Chi**: Claude.
 - **Guardia**: `DROP COLUMN` è **distruttivo e irreversibile**. Guard = conteggio dei non-NULL prima
@@ -69,6 +78,16 @@ resta a register con `resume-from`.
 
 ### V4/V5 — bonifica strutturale
 - **Precondizioni**: V5 richiede che V3 sia chiusa (i `UNIQUE` oggi fallirebbero su 1.373 duplicati).
+- **SCOPERTA che cambia V5**: i 1.373 duplicati non erano tutti contaminazione. Scomposti per origine:
+  1.284 chiavi-macchina `OLDDB::`, 30 percorsi `CRS-` di tenant inesistenti (entrambi rimossi dalla
+  bonifica) e **59 copie esatte** — stesso codice, stesso tenant, stesso nome — che la bonifica non
+  tocca. Il piano del lab le dava per copie inerti; **hanno invece 199 assegnazioni a persone reali**.
+  Misurate le due copie separatamente: la più vecchia porta 63 step e tutte e 199 le assegnazioni, la
+  più recente 61 step e **zero** assegnazioni. Quindi si rimuove la recente e non si ripunta nulla —
+  se il rapporto fosse stato inverso avrebbe richiesto un re-pointing con gestione delle collisioni.
+- **Il sigillo `UNIQUE` copre 2 tabelle su 3**: `sys_skills` conserva 2 codici duplicati su 14.041,
+  referenziati da 12 FK in 11 tabelle. Il loro dedup è un work-item a sé; il vincolo non è stato
+  applicato lì e la migrazione lo dichiara invece di ometterlo in silenzio.
 - **Meccanismo**: `psql` senza `-1` per il blocco A (`CREATE INDEX CONCURRENTLY` non gira in transazione).
 - **Propagazione**: gli indici vanno anche nelle migrazioni versionate, altrimenti un `db:reset` li perde.
   **Questo il doc del lab non lo dice**: lo aggiungo io come migrazione.
@@ -96,3 +115,12 @@ Le voci scoperte durante l'esecuzione vanno **qui**, non in «cosa resta».
   Trattata dentro V3-F5 col vaglio voce-per-voce.
 - **Nomi propri di persone reali nei dati di calibrazione legacy** — l'ingestione V6-passo-2 li porta
   in advanced: è dato di produzione, trattato come tale (ADR-0026).
+- **Corsi food/energy con codice di dominio** — i 59 percorsi duplicati sono `ALLERG-001` (allergeni),
+  `BRC-001` / `FSSC22000-001` (sicurezza alimentare), `BLDG-EE-001` / `EE-AUDIT-001` / `ESG-ENERGY-001`
+  (efficienza energetica): stesso dominio di SmartFood ed EcoNova, ma **senza slug di tenant nel
+  codice**, quindi fuori dal criterio di taglio della bonifica. Qui è stata rimossa solo la
+  **duplicazione** (che serviva al sigillo `UNIQUE`), non il materiale: 59 corsi restano, con 199
+  assegnazioni a persone di RTL Bank. Se siano da rimuovere per provenienza è una domanda diversa —
+  e va posta sapendo che oggi 199 assegnazioni reali ci puntano.
+- **2 skill con codice duplicato** (`COMP::02c2f3c8…`, `COMP::7780f0ba…`) su 14.041 — 12 FK da 11
+  tabelle. Blocca il terzo `UNIQUE` del sigillo.

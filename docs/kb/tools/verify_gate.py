@@ -46,8 +46,8 @@ ROUTES: list[tuple[str, list[str]]] = [
     ("packages/shared/", ["typecheck", "test-api"]),
     ("apps/web/",        ["typecheck", "lint"]),
     ("apps/showcase/",   ["typecheck", "lint"]),
-    ("db/migrations/",   ["migrate-idempotent"]),
-    ("db/",              ["typecheck"]),
+    ("db/migrations/",   ["migrate-idempotent", "db-health", "no-contamination"]),
+    ("db/",              ["typecheck", "db-health", "no-contamination"]),
     ("scripts/",         ["shell-tests"]),
     # solo i file di stato governati dall'handoff, non i tool sotto docs/kb/tools/
     ("docs/kb/SOT_",     ["handoff-lint"]),
@@ -65,10 +65,11 @@ SUITES: dict[str, tuple[str, str]] = {
     "migrate-idempotent": ("L2", "pnpm db:migrate:sh && pnpm db:migrate:sh"),
     "shell-tests":        ("L1", "bash scripts/test/run-shell-tests.sh"),
     "handoff-lint":       ("L1", "python docs/kb/tools/handoff_lint.py"),
-    # Cruscotto DBMS: definito qui, instradato su db/** solo quando l'esito e'
-    # verde (fine della bonifica #89/#91). Un gate che nasce rosso insegna solo
-    # ad aggirarlo: si accende quando puo' passare.
+    # Cruscotto DBMS e guardia anti-contaminazione: instradati su db/** dal
+    # momento in cui il loro esito e' verde (2026-08-03, chiusura #89/#91).
+    # Un gate che nasce rosso insegna soltanto ad aggirarlo.
     "db-health":          ("L2", "python docs/kb/tools/db_health.py"),
+    "no-contamination":   ("L2", "python docs/kb/tools/check_tenant_contamination.py"),
 }
 
 # L3 (Playwright) NON e' instradato automaticamente: costa minuti e va

@@ -100,7 +100,7 @@ WHERE r.reconciliation_registry_table_name = d.tbl
   AND r.reconciliation_registry_rationale NOT LIKE '[RE-HOMED%';
 
 DO $$
-DECLARE v_modules int; v_crs_modules int; v_annotated int;
+DECLARE v_modules int; v_crs_modules int; v_annotated int; v_floor int;
 BEGIN
   SELECT count(*) INTO v_modules FROM sys.sys_learning_modules;
   SELECT count(*) INTO v_crs_modules FROM sys.sys_learning_modules WHERE learning_module_code LIKE 'CRS-%';
@@ -109,7 +109,23 @@ BEGIN
   RAISE NOTICE '000061: % learning_modules total, % CRS-* re-homed, % registry rows annotated',
     v_modules, v_crs_modules, v_annotated;
   -- The 60 mis-placed CRS-* codes must now exist as modules (idempotent floor; seed 37 adds the 67 more).
-  IF v_crs_modules < 60 THEN
-    RAISE EXCEPTION '000061: expected >=60 CRS-* re-homed modules, found %', v_crs_modules;
+  --
+  -- Il pavimento vale finche' il catalogo e' quello di allora. La 000235 rimuove
+  -- i moduli CRS-econova/smartfood (tenant che in questo prodotto non esistono),
+  -- portandone 30 dei 60: da quel momento pretendere 60 e' pretendere il ritorno
+  -- della contaminazione, e il set di migrazioni si interrompe per tutti al
+  -- successivo `db:migrate`, che li riesegue per intero. Su un database vergine
+  -- la 000235 non e' ancora stata applicata quando questa gira, quindi il
+  -- pavimento originale continua a proteggere il re-home come prima.
+  IF EXISTS (SELECT 1 FROM sys.sys_schema_migrations
+              WHERE file_name = '000235_purge_legacy_tenant_contamination.sql') THEN
+    v_floor := 30;
+  ELSE
+    v_floor := 60;
+  END IF;
+
+  IF v_crs_modules < v_floor THEN
+    RAISE EXCEPTION '000061: expected >=% CRS-* re-homed modules, found %',
+      v_floor, v_crs_modules;
   END IF;
 END $$;

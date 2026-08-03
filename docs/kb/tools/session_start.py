@@ -31,6 +31,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_menu  # noqa: E402
+import db_health  # noqa: E402
 import status_dashboard  # noqa: E402
 
 try:
@@ -61,6 +62,14 @@ def main():
                     + ([] if args.net else ["--no-net"])
                     + (["--no-db"] if args.no_db else []))
         status_dashboard.main()
+        # Le 14 viste sentinella `v_*` di sys esistevano da tempo e nessuno le
+        # interrogava (misurato in lab 2026-08-03). Qui si accendono a ogni boot,
+        # in forma compatta: una riga se sono a zero, una riga per allarme se no.
+        # Vista, non gate: l'esito si stampa e session_start esce comunque 0.
+        if not args.no_db:
+            print("\nSENTINELLE DBMS (viste v_* — db_health.py)")
+            sys.argv = ["db_health", "--sentinelle", "--compatto"]
+            db_health.main()
     finally:
         sys.argv = saved_argv
     return 0

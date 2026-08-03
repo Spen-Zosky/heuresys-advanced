@@ -65,6 +65,10 @@ SUITES: dict[str, tuple[str, str]] = {
     "migrate-idempotent": ("L2", "pnpm db:migrate:sh && pnpm db:migrate:sh"),
     "shell-tests":        ("L1", "bash scripts/test/run-shell-tests.sh"),
     "handoff-lint":       ("L1", "python docs/kb/tools/handoff_lint.py"),
+    # Cruscotto DBMS: definito qui, instradato su db/** solo quando l'esito e'
+    # verde (fine della bonifica #89/#91). Un gate che nasce rosso insegna solo
+    # ad aggirarlo: si accende quando puo' passare.
+    "db-health":          ("L2", "python docs/kb/tools/db_health.py"),
 }
 
 # L3 (Playwright) NON e' instradato automaticamente: costa minuti e va

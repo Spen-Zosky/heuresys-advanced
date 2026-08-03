@@ -26,7 +26,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | **P2-06** | **#57** — F3 OHI org-health scorecard | Claude | Come sopra | ✅ **DONE** — vedi esito sotto |
 | **P2-07** | **#58** — F4 AI Advisor prescrittivo fase-1 (read-only, citations obbligatorie) | Claude | Ogni raccomandazione porta una citazione verificabile a un dato reale; nessun output senza fonte | ✅ **DONE** — fase A (motore + API + audit) e fase B (pagina + i18n + E2E) |
 | **P2-08** | **#54** — E5 recruiting/ATS (cluster `/recruiting`) | Claude | A fasi con commit atomici; ogni fase chiude con prova LIVE | `TODO` |
-| **P2-09** | **#9/#10/#11** — audit forense 100X (WS-L + triage + gate) | Claude | WS-L eseguito, triage deciso per riga, gate meccanico verde | `TODO` |
+| **P2-09** | **#9/#10/#11** — audit forense 100X (WS-L + triage + gate) | Claude | WS-L eseguito, triage deciso per riga, gate meccanico verde | ✅ **DONE** — vedi esito sotto |
 | **P2-10** | **#4** — GTM v1-deferrals (follow-up del primo deliverable) | Claude (parte non-pricing) | Deliverable follow-up chiuso; i numeri prezzi/tier restano `WAIT-INPUT` su Enzo (item #4 WAIT-INPUT, distinto) | ✅ **DONE** — vedi esito sotto |
 | **P2-11** | **#79** — cancello di esposizione | Claude | **Non è una voce discreta**: `check_exposure.py` gira come gate su OGNI voce sopra che popola tabelle. Chiude quando chiude il batch. | `CONTINUO` |
 | **P2-12** | **#87** — il genitore di un'unità organizzativa può stare in un altro tenant | Claude | Guardia nel service su create **e** update + test che tenta l'aggancio cross-tenant e attende errore tipizzato + prova LIVE | ✅ **DONE** — vedi esito sotto |
@@ -389,6 +389,30 @@ L'informativa è stata poi riscritta **completa** (art. 13 GDPR: titolare, dati,
 **Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
 1. `.next/dev/types/routes.d.ts` era **corrotto** (voci del tipo senza separatori) perché il server di sviluppo è stato interrotto a metà scrittura durante i run E2E: il typecheck falliva su un file generato. Rigenerato. Se ricapita, è quello.
 2. Nessuno verifica che le **dichiarazioni pubbliche** (informativa, termini) siano sostenute dal comportamento del sistema. Qui è emerso a mano; un controllo automatico non esiste.
+
+### P2-09 (#9/#10/#11 · residuo audit 100X) — ✅ DONE 2026-08-03
+
+Il residuo era **D-03 + D-04 + unit-layer F-A07**. Misurato ogni rilievo prima di eseguirlo, e il primo si è rivelato **falso**.
+
+**D-03 — la premessa non regge alla verifica.** Il rilievo diceva «81/96 subpath export inutilizzati» e proponeva di rimuoverli. Misura reale: **104 export su 104 file, zero rotti, zero mancanti, ognuno punta al proprio file**. Il pattern scritto a mano non ha prodotto una sola deriva in tutta la storia del repository, e un export non importato non costa niente — non entra nei bundle, non allunga la compilazione, non crea rischio. Rimuovere 88 righe sane avrebbe reso incoerente il pattern dei moduli (il CLAUDE.md prescrive di aggiungere il subpath a *ogni* modulo nuovo) in cambio di nulla di misurabile.
+
+**Il rischio vero era l'opposto**: non che ce ne siano troppi, ma che uno resti indietro. Una rinomina o un modulo aggiunto senza export produce una rottura che **nessun typecheck vede**, perché il subpath è una stringa dentro un JSON. Oggi la deriva è zero; niente la impediva domani. Ho quindi scritto il gate che la rende impossibile — `test/unit/shared-exports-integrity.unit.test.ts`, nell'unit layer (nessun DB, millisecondi, gira in CI prima della suite lenta). Falsificabilità provata: aggiungendo uno schema senza dichiararne l'export **2 test diventano rossi**, e il messaggio nomina il file colpevole. Rimosso il file di prova, 67/67 verdi.
+
+Il secondo pezzo di D-03 — «paginationSchema factory» — era **già fatto**: `paginationFields` esiste ed è usata da **74 schemi**. I 4 punti che dichiarano `limit` a mano hanno `limit` **senza** `offset`: non sono paginazione ma «quanti me ne dai» (top-N, query lente, match). Usare la factory lì aggiungerebbe un parametro che quegli endpoint non implementano.
+
+**D-04 — qui il difetto era reale e grosso.** Misura: **113 pagine, 1 solo confine d'errore (alla radice), 0 stati di caricamento**. Il confine radice cattura tutto e proprio per questo **sostituisce l'intera applicazione**: un guasto su una singola pagina faceva sparire barra laterale e intestazione, lasciando l'utente su una schermata la cui unica uscita è il tasto «indietro» del browser.
+
+Corretto con **due file**, non centotredici: `(authenticated)/error.tsx` e `(authenticated)/loading.tsx`. Stando sotto il layout autenticato, il guasto resta confinato all'area di contenuto e la navigazione sopravvive — un `error.tsx` per rotta sarebbe lo stesso comportamento ripetuto 113 volte. Lo stato di caricamento è uno **scheletro** e non un centrifugatore: occupa lo spazio che il contenuto occuperà, così la pagina non salta quando arriva; `aria-busy` più testo per i lettori di schermo, perché un'animazione muta non comunica nulla a chi non la vede.
+
+**Prove**: E2E 2/2 (8/8 col setup) su server caldo — con l'endpoint della pagina che risponde 500, la barra laterale **resta visibile**, il guasto è dichiarato invece di apparire come una lista vuota, e **da lì si naviga altrove e l'applicazione funziona**: è la prova che il guasto è confinato. Il primo run è fallito sul compile-on-demand del server appena avviato, non sul codice (comportamento già noto e documentato in `a11y.spec.ts`).
+
+**Limite dichiarato**: il confine di React scatta su errori di *render*, che non so forzare dall'esterno in modo affidabile senza piazzare codice di prova nel prodotto. L'E2E inietta quindi il guasto dove è realistico (l'API che fallisce) e misura l'effetto osservabile; la posizione del file garantisce il resto, ed è deterministica — Next usa sempre il confine più vicino.
+
+**F-A07 (= D-64)**: la fondazione dell'unit layer era **già risolta in S1027**, con «estensione naturale: migrare qui la logica pura man mano». Il gate di integrità aggiunto sopra è esattamente quella estensione: unit layer da 9 a 10 file, da 63 a 67 test.
+
+**Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
+1. Un rilievo d'audit può invecchiare male: D-03 descriveva un fatto vero (l'85% dei subpath non è importato) e ne traeva una conclusione sbagliata (spreco da potare). Vale la pena, per i rilievi ereditati, ri-misurare *la premessa* e non solo eseguire l'azione proposta.
+2. Le pagine restano tutte client-side con TanStack Query: `loading.tsx` copre la navigazione fra segmenti, non l'attesa dei dati dentro la pagina, che resta gestita dagli stati di caricamento dei componenti.
 
 ---
 

@@ -338,6 +338,19 @@
       "period": "Period",
       "blocking": "Blocking",
       "status": "Status"
+    },
+    "bands": {
+      "title": "Salary bands",
+      "caption": "The tenant's bands, highest first. Amounts are the annual gross minimum, midpoint and maximum.",
+      "empty": "No band has defined amounts.",
+      "error": "The salary bands could not be loaded.",
+      "count": "{{count}} bands",
+      "colBand": "Band",
+      "colMin": "Minimum",
+      "colMid": "Midpoint",
+      "colMax": "Maximum",
+      "colSpread": "Spread",
+      "valuelessNote": "{{count}} of the tenant's bands have no defined amounts and are not shown here."
     }
   },
   "learning": {

@@ -338,6 +338,19 @@
       "period": "Periodo",
       "blocking": "Blocking",
       "status": "Stato"
+    },
+    "bands": {
+      "title": "Fasce retributive",
+      "caption": "Le fasce del tenant, dalla più alta. Gli importi sono il minimo, il valore centrale e il massimo annui lordi.",
+      "empty": "Nessuna fascia con importi definiti.",
+      "error": "Non è stato possibile leggere le fasce retributive.",
+      "count": "{{count}} fasce",
+      "colBand": "Fascia",
+      "colMin": "Minimo",
+      "colMid": "Centro",
+      "colMax": "Massimo",
+      "colSpread": "Ampiezza",
+      "valuelessNote": "{{count}} fasce del tenant non hanno importi definiti e non compaiono qui."
     }
   },
   "learning": {

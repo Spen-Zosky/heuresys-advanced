@@ -10,6 +10,7 @@ import type {
   ObjectiveRewardRule, PositionEconomicWeight, PayrollHandoffRecord,
 } from "@heuresys/shared";
 import { apiFetch } from "@/lib/api/fetch";
+import type { CompensationBandListResponse, CompensationBand as CompensationBandRow } from "@heuresys/shared";
 import { StatusBadge, StatusPill } from "@/components/status-pill";
 import { EnumStatusBadge } from "@/components/enum-badge";
 import { EntityTable, type DataColumn } from "@/components/data-table-panel";
@@ -270,7 +271,7 @@ function buildRewardGateColumns(t: TFunction): DataColumn<RewardGate>[] {
 }
 
 export default function CompensationIntelligencePage() {
-  const { t } = useTranslation("hr");
+  const { t, i18n } = useTranslation("hr");
   const { t: tA } = useTranslation("admin");
   // C4 (#42): server-side pagination (was `?limit=200`).
   const gates = usePaginatedList<RewardGate>({
@@ -350,6 +351,38 @@ export default function CompensationIntelligencePage() {
   const objectiveRuleColumns = useMemo(() => buildObjectiveRuleColumns(tA), [tA]);
   const positionWeightColumns = useMemo(() => buildPositionWeightColumns(tA), [tA]);
   const handoffColumns = useMemo(() => buildHandoffColumns(tA), [tA]);
+
+  // #53 E4 — catalogo delle fasce del tenant.
+  const bands = useQuery({
+    queryKey: ["compensation", "bands"],
+    queryFn: () => apiFetch<CompensationBandListResponse>("/v1/compensation/bands?limit=200"),
+  });
+
+  const eur = useMemo(
+    () => new Intl.NumberFormat(i18n.language, { style: "currency", currency: "EUR", maximumFractionDigits: 0 }),
+    [i18n.language],
+  );
+  const money = (v: string | null) => (v === null ? "—" : eur.format(Number(v)));
+
+  const bandColumns = useMemo<DataColumn<CompensationBandRow>[]>(
+    () => [
+      { header: t("compensation.bands.colBand"), cell: (r) => <span className="font-medium text-foreground">{r.name}</span> },
+      { header: t("compensation.bands.colMin"), align: "right", cell: (r) => <span className="tabular-nums">{money(r.minEur)}</span> },
+      { header: t("compensation.bands.colMid"), align: "right", cell: (r) => <span className="font-semibold tabular-nums text-foreground">{money(r.midEur)}</span> },
+      { header: t("compensation.bands.colMax"), align: "right", cell: (r) => <span className="tabular-nums">{money(r.maxEur)}</span> },
+      {
+        header: t("compensation.bands.colSpread"), align: "right",
+        cell: (r) => {
+          // L'ampiezza dice quanto margine ha una fascia: due fasce con lo stesso centro
+          // e ampiezze diverse si governano in modo diverso.
+          if (r.minEur === null || r.maxEur === null || Number(r.minEur) === 0) return <span>—</span>;
+          const pct = Math.round(((Number(r.maxEur) - Number(r.minEur)) / Number(r.minEur)) * 100);
+          return <span className="tabular-nums text-muted-foreground">{pct}%</span>;
+        },
+      },
+    ],
+    [t, eur],
+  );
 
   return (
     <main data-testid="compensation-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
@@ -502,6 +535,32 @@ export default function CompensationIntelligencePage() {
           emptyTitle={tA("compReward.empty")}
           caption={tA("compReward.handoffRecords")}
         />
+      </section>
+
+      {/* #53 E4 — le fasce retributive erano leggibili solo di riflesso, risolte per una
+          singola posizione: qui c'è il catalogo del tenant. Le fasce senza importi NON
+          entrano (una fascia senza importi non è una fascia) ma vengono dichiarate. */}
+      <section data-testid="compensation-bands" className="space-y-2">
+        <h2 className="text-base font-semibold text-foreground">{t("compensation.bands.title")}</h2>
+        <EntityTable<CompensationBandRow>
+          isLoading={bands.isLoading}
+          isError={bands.isError}
+          errorMessage={t("compensation.bands.error")}
+          rows={bands.data?.items ?? []}
+          rowKey={(r) => r.compensationBandId}
+          rowTestId="comp-band-row"
+          columns={bandColumns}
+          emptyTestId="comp-bands-empty"
+          emptyTitle={t("compensation.bands.empty")}
+          caption={t("compensation.bands.caption")}
+        />
+        {bands.data && bands.data.totalIncludingValueless > bands.data.total ? (
+          <p data-testid="comp-bands-valueless" className="text-xs text-muted-foreground">
+            {t("compensation.bands.valuelessNote", {
+              count: bands.data.totalIncludingValueless - bands.data.total,
+            })}
+          </p>
+        ) : null}
       </section>
     </main>
   );

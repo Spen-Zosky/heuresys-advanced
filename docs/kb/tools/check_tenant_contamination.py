@@ -76,6 +76,18 @@ CENSIMENTO: list[tuple[str, str, str]] = [
      "SELECT count(*) FROM sys.sys_job_families WHERE job_family_code ~ '^JF-(SMA|ECO)-'"),
     ("D", "definizioni KPI di aziende inesistenti",
      "SELECT count(*) FROM sys.sys_kpi_definitions WHERE kpi_definition_code ~ '^BP-(SF|EN)-'"),
+    # I21: «globale» non basta a giustificare una riga. Le tassonomie ufficiali
+    # (ESCO, ISCO, NACE, ATECO, CCNL) restano aperte a ogni industry perche' senza
+    # di esse non si creano nuovi blueprint; ma un KPI e' CONTENUTO di prodotto,
+    # non una classificazione, e un indicatore HACCP non serve ne' a una banca ne'
+    # a una societa' di consulenza. La distinzione non e' tenant-id: e' se la
+    # tabella definisca una classificazione o dei contenuti.
+    ("D", "KPI di industry estranea nel catalogo globale",
+     "SELECT count(*) FROM sys.sys_kpi_definitions "
+     "WHERE kpi_definition_tenant_id IS NULL "
+     "  AND (kpi_definition_name ~* '(haccp|allerg|aliment|packaging|cold chain|MWh|"
+     "renewable|biogas|smart grid|manifattur)' "
+     "   OR kpi_definition_code ~* '^(HACCP|FOOD|ENERGY)')"),
     ("E", "record di provenienza verso utenti rimossi",
      "SELECT count(*) FROM sys.sys_source_lineage_records "
      "WHERE source_lineage_metadata::text ~* '(smartfood|econova)'"),

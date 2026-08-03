@@ -101,6 +101,20 @@ resta a register con `resume-from`.
 - **Chi**: Claude.
 - **Guardia**: non distruttiva (tabelle nuove).
 
+## Verifiche eseguite
+
+| Verifica | Esito |
+|---|---|
+| `check_tenant_contamination.py` (11 classi) | **0 residuo** (era 6.746) |
+| `db_health.py` (14 sentinelle + 14 sonde) | **tutto nei limiti** (erano 5 allarmi) |
+| `pnpm db:migrate:sh` — set completo rieseguito | **237 file, 235→237 applicate, 0 errori** |
+| `pnpm i18n:check` | **parità OK**, 2917 chiavi × 2 locali × 10 namespace |
+| `pnpm typecheck` · `pnpm lint` | **verdi** |
+| `handoff_lint.py` | **OK** (0 fail) |
+| suite unit API | **10 file / 67 test verdi** |
+| suite integration API | in corso a fine sessione — nessun fallimento fino all'interruzione del monitoraggio |
+| prova live F7 con login reale | **non fatta** — richiede il deploy, da autorizzare |
+
 ## Registro delle scoperte fuori ciclo (R24 §5)
 
 Le voci scoperte durante l'esecuzione vanno **qui**, non in «cosa resta».

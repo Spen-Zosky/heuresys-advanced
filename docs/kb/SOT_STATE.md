@@ -10,7 +10,7 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 ## Delta S1041 (2026-08-02) — batch P2+P3: tre voci chiuse (rules path-scoped · scorecard VRIO · salute organizzativa)
 
-HEAD **`6c9da1ae`** (in corso S1041). Counts ri-derivati: **231 file migration** `000001..000233`
+HEAD **`054b61a0`** (in corso S1041). Counts ri-derivati: **231 file migration** `000001..000233`
 (+3: `000224` voce sidebar VRIO, `000225` voce sidebar salute organizzativa, `000226` governance timeline, `000227` ritiro del peso economico di posizione, `000228` traccia di audit dell'advisor, `000229` i18n dei permessi timeline, `000230` voce sidebar consigli operativi, `000231` trigger NOTIFY posta in arrivo, `000232` permesso e nav gestione lead, `000233` conservazione GDPR dei lead) · utenti **163** ·
 posizioni **181** · OU **28** · team **26** · 2 tenant ACTIVE · RBAC **13 ruoli / 206 permessi /
 922 mappature** (invariato: entrambe le rotte nuove riusano permessi esistenti — `capability:read`

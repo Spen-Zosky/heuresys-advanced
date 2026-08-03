@@ -92,6 +92,27 @@ export default async function globalTeardown(): Promise<void> {
     console.warn("[e2e teardown] GTM lead cleanup skipped:", (err as Error).message);
   }
 
+  // #45 C3: blueprint-activation.spec.ts propone un'attivazione per corsa. Resta come
+  // fatto registrato — corretto nel prodotto, ma qui va rimossa perché altrimenti cresce
+  // di una per corsa. Si cancellano SOLO quelle senza note, create dal test: le
+  // attivazioni reali portano metadati.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH d AS (DELETE FROM sys.sys_blueprint_activations WHERE blueprint_activation_status = 'PROPOSED' AND blueprint_activation_metadata = '{}'::jsonb RETURNING 1) SELECT count(*) FROM d",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] C3: deleted ${out} E2E blueprint activation(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] C3 activation cleanup skipped:", (err as Error).message);
+  }
+
   // #45 C3: tenants-editing.spec.ts crea un'azienda cliente per corsa e la archivia.
   // L'archiviazione dal prodotto è volutamente soft (stato ARCHIVED), quindi la riga
   // resterebbe: qui si rimuove davvero. Il filtro sul prefisso non può toccare le due

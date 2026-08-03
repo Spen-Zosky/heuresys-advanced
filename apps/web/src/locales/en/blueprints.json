@@ -116,5 +116,21 @@
       "startedAt": "Started",
       "finishedAt": "Finished"
     }
+  },
+  "activations": {
+    "title": "Activations",
+    "hint": "Activating a variant makes it the reference model for the company. It starts as “proposed”: real activation is a second, deliberate step.",
+    "variantLabel": "Variant",
+    "activate": "Propose activation",
+    "activating": "Sending…",
+    "activated": "Activation proposed.",
+    "error": "The activation could not be created.",
+    "statusError": "The status could not be changed.",
+    "colVariant": "Variant",
+    "colStatus": "Status",
+    "colFrom": "Effective from",
+    "empty": "No activation recorded.",
+    "loadError": "The activations could not be loaded.",
+    "caption": "Activations recorded for this company."
   }
 }

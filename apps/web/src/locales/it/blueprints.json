@@ -116,5 +116,21 @@
       "startedAt": "Inizio",
       "finishedAt": "Fine"
     }
+  },
+  "activations": {
+    "title": "Attivazioni",
+    "hint": "Attivare una variante la rende il modello di riferimento per l'azienda. Si parte da «proposta»: l'attivazione vera è un secondo passo, deliberato.",
+    "variantLabel": "Variante",
+    "activate": "Proponi attivazione",
+    "activating": "Invio…",
+    "activated": "Attivazione proposta.",
+    "error": "Non è stato possibile creare l'attivazione.",
+    "statusError": "Non è stato possibile cambiare lo stato.",
+    "colVariant": "Variante",
+    "colStatus": "Stato",
+    "colFrom": "In vigore dal",
+    "empty": "Nessuna attivazione registrata.",
+    "loadError": "Non è stato possibile leggere le attivazioni.",
+    "caption": "Le attivazioni registrate per questa azienda."
   }
 }

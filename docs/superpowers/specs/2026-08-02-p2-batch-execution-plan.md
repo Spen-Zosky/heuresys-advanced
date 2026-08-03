@@ -38,7 +38,7 @@ Effort sommato dal register: **~15-20 sessioni per P2**, **~6-8 per P3** → **~
 | **P3-01** | **#84** — le rules path-scoped si caricano quando servono? | Claude | Verifica **sul campo**, non a memoria: prova falsificabile che apra un file sotto un path governato da una rule e misuri se la rule è entrata in contesto. Esito scritto, positivo o negativo | ✅ **DONE** — esito positivo, vedi sotto |
 | **P3-02** | **#38** — B6 inbox push SSE (da polling 30s) | Claude | Endpoint SSE reale + client che lo consuma al posto del polling, test, prova LIVE con evento che arriva senza refresh | ✅ **DONE** — vedi esito sotto |
 | **P3-03** | **#53** — E4 payroll ops read-extended | Claude | API+test+pagina+E2E su dati payroll reali | ✅ **DONE** — vedi esito sotto |
-| **P3-04** | **#45** — C3 editing tenant & piattaforma (chiude la serie C) | Claude | CRUD reale su tenant/piattaforma, test, UI, E2E, `check_exposure.py` verde | `TODO` |
+| **P3-04** | **#45** — C3 editing tenant & piattaforma (chiude la serie C) | Claude | CRUD reale su tenant/piattaforma, test, UI, E2E, `check_exposure.py` verde | ✅ **DONE** — vedi esito sotto |
 | **P3-05** | **#50** — D4 legacy knowledge graph (`kg_nodes`/`kg_edges`, 139k) | Claude | Ingestione verificata sul volume reale + superficie che lo espone; nessun conteggio citato a memoria | `TODO` |
 | **P3-06** | **#88** — il peso economico delle posizioni è un campo vuoto | Claude | Indagine con misura, poi **decisione tecnica presa ed eseguita** (popolare o ritirare): nessuno progetta più su un campo vuoto | ✅ **DONE** — vedi esito sotto |
 
@@ -435,6 +435,25 @@ Esito misurato: le 75 righe prive di importi **non appartengono a nessun tenant*
 **Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
 1. **75 fasce orfane** restano in tabella: nessun tenant, nessun importo, nessun uso. La rimozione è distruttiva e aspetta una decisione.
 2. Il legacy ha anche `merit_cycles` (53), `merit_recommendations` (208), `salary_history` (317), `employee_benefits` (24) e `market_salary_data` (84): materiale per un'estensione di E4 che questa voce non copriva.
+
+### P3-04 (#45 · C3 tenant & piattaforma) — ✅ DONE 2026-08-03
+
+Stessa diagnosi di C1 (#44), su un'altra superficie: **le API di scrittura esistevano da MVP-1 e nessuna pagina le chiamava**. Aprire un'azienda cliente, archiviarla o proporre un blueprint voleva dire passare dal database.
+
+**Aziende clienti** (`/tenants`): pannello di creazione (codice, nome, ragione sociale, paese) e comando di archiviazione con conferma che nomina l'azienda — archiviare la toglie dall'operatività, e un clic per sbaglio sulla riga sbagliata non deve poterlo fare. Il codice è dichiarato immutabile nel testo del pannello, perché lo è nel contratto.
+
+**Blueprint** (`/blueprints`): proposta di attivazione di una variante, con l'elenco delle attivazioni registrate. L'attivazione nasce **`PROPOSED`, mai `ACTIVE`**: rendere una variante il modello di riferimento di un'azienda è una decisione, non l'effetto collaterale di un clic su un elenco. È la parte che un'implementazione frettolosa sbaglierebbe, e un test la fissa.
+
+**Cancello doppio**, come in C1: i pannelli si nascondono a chi non ha il permesso, ma l'autorità resta il service — e due test lo **dimostrano** invece di darlo per scontato, chiamando `POST /v1/tenants` e `POST /v1/blueprint-activations` da una sessione senza permessi e attendendo 401/403. Nascondere un pulsante non è una protezione, è cortesia verso chi non potrebbe usarlo.
+
+**Prove**: **E2E 8/8** (19/19 coi setup). Le scritture sono **reali su un ambiente di produzione**: l'azienda di prova viene creata, verificata dopo un **ricaricamento** (un form che aggiorna solo lo stato del componente sembra funzionare finché nessuno ricarica), archiviata, riverificata `ARCHIVED`. Il teardown globale rimuove sia l'azienda sia l'attivazione proposta: la cancellazione dal prodotto è volutamente soft, quindi il residuo non sparirebbe da solo. Verificato dopo il run: **0 aziende di prova residue** (le due reali intatte e `ACTIVE`) e **1 sola attivazione**, quella vera. Il filtro del teardown è mirato (`PROPOSED` + metadati vuoti) e non può toccare l'attivazione reale, che porta metadati.
+
+`i18n:check` 2916×2 · typecheck ×3 · lint.
+
+Un difetto colto dal typecheck: l'import di `DataColumn` era duplicato dopo l'innesto del pannello, perché la pagina importava già `DataTablePanel` dallo stesso modulo.
+
+**Fuori da questo ciclo (registro delle scoperte, non pendenze)**:
+1. Il dossier C3 nominava anche il **wizard di materializzazione da archetipo** (`tenant-materialization`, oggi solo API/MCP): non è stato costruito. È una procedura guidata a più passi, non un pannello, e merita una voce propria.
 
 ---
 

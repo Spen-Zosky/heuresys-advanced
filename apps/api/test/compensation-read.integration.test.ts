@@ -357,9 +357,19 @@ describe("#32 A/L7 compensation & reward read", () => {
       const r = await bands(federica, "?limit=200");
       const items = (r.json() as { items: Array<{ code: string; name: string; minEur: string | null; maxEur: string | null }> }).items;
       const legacy = items.filter((b) => b.code.startsWith("LEGACY_BAND::"));
-      // L'import di questa voce deve aver prodotto righe utilizzabili, non chiavi vuote:
-      // è esattamente il difetto trovato sulle 87 righe preesistenti.
-      expect(legacy.length).toBeGreaterThan(0);
+
+      // La proprietà vale per TUTTO il catalogo, non solo per le righe importate: una
+      // fascia mostrata deve avere un nome leggibile e non il proprio codice tecnico.
+      // È il difetto misurato sulle 87 righe preesistenti, dove 43 avevano il nome
+      // uguale al codice `OLDDB::ccnl_levels::<uuid>`.
+      expect(items.length).toBeGreaterThan(0);
+      for (const b of items) expect(b.name).not.toBe(b.code);
+
+      // Le righe `LEGACY_BAND::` le scrive `db/scripts/import-e4-salary-bands.sh`, che
+      // gira dove vivono i dati legacy: sul clone di CI NON esistono. Pretenderle qui
+      // renderebbe il test verde in locale e rosso in CI — la trappola già registrata
+      // come pattern del progetto. Si verifica quindi «se ci sono, sono ben formate»;
+      // che l'import abbia prodotto righe è materia della prova live dello script.
       for (const b of legacy) {
         expect(b.name).not.toBe(b.code);           // nome leggibile, non il codice
         expect(Number(b.minEur)).toBeGreaterThan(0);

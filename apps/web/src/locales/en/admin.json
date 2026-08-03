@@ -297,6 +297,23 @@
       "typingEmpty": "No typing profile registered.",
       "usersHint": "The full user list is managed on its dedicated page.",
       "usersLink": "Open /users →"
+    },
+    "editing": {
+      "createTitle": "New client company",
+      "createHint": "The code identifies the company in the system and cannot be changed later: choose it carefully.",
+      "codeLabel": "Code",
+      "nameLabel": "Name",
+      "legalNameLabel": "Legal name",
+      "countryLabel": "Country (2 letters)",
+      "submit": "Create",
+      "creating": "Creating…",
+      "created": "Company created.",
+      "createError": "The company could not be created.",
+      "archiveAction": "Archive",
+      "archiveConfirm": "Archive “{{name}}”? The company will no longer appear among the active ones.",
+      "archived": "Company archived.",
+      "archiveError": "The company could not be archived.",
+      "noPermission": "You do not have permission to modify client companies."
     }
   },
   "enterpriseTyping": {

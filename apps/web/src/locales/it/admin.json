@@ -297,6 +297,23 @@
       "typingEmpty": "Nessun profilo di tipizzazione registrato.",
       "usersHint": "La lista utenti completa è gestita nella pagina dedicata.",
       "usersLink": "Apri /users →"
+    },
+    "editing": {
+      "createTitle": "Nuova azienda cliente",
+      "createHint": "Il codice identifica l'azienda nel sistema e non si può più cambiare: sceglilo con cura.",
+      "codeLabel": "Codice",
+      "nameLabel": "Nome",
+      "legalNameLabel": "Ragione sociale",
+      "countryLabel": "Paese (2 lettere)",
+      "submit": "Crea",
+      "creating": "Creazione…",
+      "created": "Azienda creata.",
+      "createError": "Non è stato possibile creare l'azienda.",
+      "archiveAction": "Archivia",
+      "archiveConfirm": "Archiviare «{{name}}»? L'azienda non comparirà più fra quelle attive.",
+      "archived": "Azienda archiviata.",
+      "archiveError": "Non è stato possibile archiviare l'azienda.",
+      "noPermission": "Non hai i permessi per modificare le aziende clienti."
     }
   },
   "enterpriseTyping": {

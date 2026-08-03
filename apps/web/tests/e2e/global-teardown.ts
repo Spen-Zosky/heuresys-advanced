@@ -92,6 +92,27 @@ export default async function globalTeardown(): Promise<void> {
     console.warn("[e2e teardown] GTM lead cleanup skipped:", (err as Error).message);
   }
 
+  // #45 C3: tenants-editing.spec.ts crea un'azienda cliente per corsa e la archivia.
+  // L'archiviazione dal prodotto è volutamente soft (stato ARCHIVED), quindi la riga
+  // resterebbe: qui si rimuove davvero. Il filtro sul prefisso non può toccare le due
+  // aziende reali, che non hanno un codice E2E_TENANT_.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH d AS (DELETE FROM sys.sys_tenancies WHERE tenant_code LIKE 'E2E_TENANT_%' RETURNING 1) SELECT count(*) FROM d",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] C3: deleted ${out} E2E tenant row(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] C3 tenant cleanup skipped:", (err as Error).message);
+  }
+
   // #38 B6: inbox-realtime.spec.ts fa inviare una notifica reale per corsa (POST
   // /v1/notifications) per provare che arrivi senza ricaricare la pagina. Non esiste una
   // cancellazione lato prodotto — la posta in arrivo si legge e si archivia, non si elimina —

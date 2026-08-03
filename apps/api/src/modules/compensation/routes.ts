@@ -31,6 +31,8 @@ import {
   PositionEconomicWeightListResponseSchema,
   PayrollHandoffRecordListQuerySchema,
   PayrollHandoffRecordListResponseSchema,
+  CompensationBandListQuerySchema,
+  CompensationBandListResponseSchema,
 } from "@heuresys/shared";
 import { compensationService } from "./service.js";
 import { requirePermission } from "../../middleware/rbac.js";
@@ -41,6 +43,21 @@ export const compensationRoutes: FastifyPluginAsyncZod = async (app) => {
     preHandler: [requirePermission("compensation_intelligence:read")],
     schema: { params: CompensationProfilePositionParamSchema, response: { 200: CompensationProfileSchema } },
   }, async (req) => compensationService.getProfileByPosition(actor(req), req.params.positionId));
+
+  // #53 E4 — catalogo delle fasce retributive. Stessa porta delle altre letture
+  // compensation: chi vede i profili vede le fasce su cui sono costruiti.
+  app.get("/bands", {
+    // `catalog` come le altre letture di catalogo del modulo: il listato è per fascia,
+    // non per persona — nessuna riga riferita a un individuo esce da qui. La guardia
+    // prescrittiva di D-51 rifiuta l'avvio se questa dichiarazione manca, e ha fatto
+    // esattamente il suo mestiere quando l'avevo dimenticata.
+    config: { orgGate: "catalog" },
+    preHandler: [requirePermission("compensation_intelligence:read")],
+    schema: {
+      querystring: CompensationBandListQuerySchema,
+      response: { 200: CompensationBandListResponseSchema },
+    },
+  }, async (req) => compensationService.listCompensationBands(actor(req), req.query));
 
   app.get("/reward-gates", {
     config: { orgGate: "service" },

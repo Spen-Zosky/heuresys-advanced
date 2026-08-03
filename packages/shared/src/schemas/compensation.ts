@@ -28,6 +28,32 @@ export const CompensationBandSchema = z.object({
 });
 export type CompensationBand = z.infer<typeof CompensationBandSchema>;
 
+/**
+ * GET /v1/compensation/bands — catalogo delle fasce retributive del tenant (#53 E4).
+ *
+ * Le fasce esistevano in tabella e nessuna API le elencava: si vedevano solo di riflesso,
+ * risolte per una singola posizione. Chi deve confrontare l'inquadramento di un ruolo con
+ * la fascia che gli compete non aveva una superficie dove farlo.
+ *
+ * `withValueOnly` di default è true: la tabella contiene ancora righe importate senza
+ * valore economico, e una fascia senza importi non è una fascia — mostrarla in un catalogo
+ * significa far leggere «esiste ma non so quanto vale». Chi vuole vederle tutte lo chiede.
+ */
+export const CompensationBandListQuerySchema = z.object({
+  withValueOnly: z.coerce.boolean().optional().default(true),
+  q: z.string().min(1).max(200).optional(),
+  ...paginationFields(200, 100),
+});
+export type CompensationBandListQuery = z.infer<typeof CompensationBandListQuerySchema>;
+
+export const CompensationBandListResponseSchema = z.object({
+  items: z.array(CompensationBandSchema),
+  total: z.number().int().min(0),
+  /** Quante fasce il tenant possiede in tutto, comprese quelle prive di importi. */
+  totalIncludingValueless: z.number().int().min(0),
+});
+export type CompensationBandListResponse = z.infer<typeof CompensationBandListResponseSchema>;
+
 export const CompensationProfileSchema = z.object({
   positionCompensationProfileId: z.uuid(),
   positionId: z.uuid(),

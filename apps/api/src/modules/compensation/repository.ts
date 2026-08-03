@@ -25,6 +25,7 @@ import type {
   PositionEconomicWeight,
   PositionEconomicWeightListQuery,
   PayrollHandoffRecordListQuery,
+  CompensationBand,
 } from "@heuresys/shared";
 import { toDateOnly } from "../../lib/date-only.js";
 
@@ -1061,4 +1062,62 @@ export async function listGateOutcomesForPeriod(
     status: r.status,
     overrideReason: r.reason,
   }));
+}
+
+/**
+ * Catalogo delle fasce retributive del tenant (#53 E4).
+ *
+ * `withValueOnly` filtra le righe prive di importi: la tabella ne contiene ancora molte,
+ * arrivate da un import che portò le chiavi e non i dati. `totalIncludingValueless` le
+ * conta comunque, così chi legge sa che esistono invece di crederle inesistenti.
+ */
+export async function listCompensationBands(
+  db: DbConnector,
+  tenantId: string | null,
+  q: { withValueOnly: boolean; q?: string; limit: number; offset: number },
+): Promise<{ items: CompensationBand[]; total: number; totalIncludingValueless: number }> {
+  const params: unknown[] = [tenantId];
+  const where: string[] = ["($1::uuid IS NULL OR compensation_band_tenant_id = $1::uuid)"];
+  if (q.withValueOnly) where.push("compensation_band_mid_eur IS NOT NULL");
+  if (q.q) {
+    params.push(`%${q.q}%`);
+    where.push(`(compensation_band_name ILIKE $${params.length} OR compensation_band_code ILIKE $${params.length})`);
+  }
+  const whereSql = where.join(" AND ");
+
+  const totals = await db.query<{ filtrate: string; tutte: string }>(
+    `SELECT count(*) FILTER (WHERE ${whereSql})::text AS filtrate,
+            count(*) FILTER (WHERE ($1::uuid IS NULL OR compensation_band_tenant_id = $1::uuid))::text AS tutte
+       FROM sys.sys_compensation_bands`,
+    params,
+  );
+
+  params.push(q.limit, q.offset);
+  const res = await db.query<Record<string, unknown>>(
+    `SELECT compensation_band_id, compensation_band_tenant_id, compensation_band_code,
+            compensation_band_name, compensation_band_min_eur::text AS min_eur,
+            compensation_band_mid_eur::text AS mid_eur, compensation_band_max_eur::text AS max_eur,
+            compensation_band_is_global, compensation_band_metadata
+       FROM sys.sys_compensation_bands
+      WHERE ${whereSql}
+      ORDER BY compensation_band_mid_eur DESC NULLS LAST, compensation_band_name
+      LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    params,
+  );
+
+  return {
+    total: Number(totals.rows[0]?.filtrate ?? 0),
+    totalIncludingValueless: Number(totals.rows[0]?.tutte ?? 0),
+    items: res.rows.map((r) => ({
+      compensationBandId: r.compensation_band_id as string,
+      tenantId: r.compensation_band_tenant_id as string | null,
+      code: r.compensation_band_code as string,
+      name: r.compensation_band_name as string,
+      minEur: (r.min_eur as string | null) ?? null,
+      midEur: (r.mid_eur as string | null) ?? null,
+      maxEur: (r.max_eur as string | null) ?? null,
+      isGlobal: (r.compensation_band_is_global as boolean) ?? false,
+      metadata: (r.compensation_band_metadata as Record<string, unknown>) ?? {},
+    })),
+  };
 }

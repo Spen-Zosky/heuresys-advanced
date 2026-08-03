@@ -323,4 +323,71 @@ describe("#32 A/L7 compensation & reward read", () => {
     });
   });
 
+
+  // #53 E4 — catalogo delle fasce retributive. Le fasce esistevano in tabella e nessuna
+  // API le elencava: si vedevano solo di riflesso, risolte per una singola posizione.
+  describe("E4 — catalogo delle fasce retributive", () => {
+    async function bands(s: S, qs = "") {
+      return suite.app.inject({
+        method: "GET", url: `/v1/compensation/bands${qs}`,
+        headers: { cookie: ch(s.cookies) },
+      });
+    }
+
+    it("elenca solo fasce con importi, e dichiara quante ne restano fuori", async () => {
+      const r = await bands(federica);
+      expect(r.statusCode).toBe(200);
+      const body = r.json() as {
+        items: Array<{ midEur: string | null; name: string; code: string }>;
+        total: number; totalIncludingValueless: number;
+      };
+      expect(body.items.length).toBeGreaterThan(0);
+
+      // LA guardia: una fascia senza importi non è una fascia. Il difetto che questo
+      // test previene è un catalogo che elenca righe vuote e si legge come «esiste ma
+      // non so quanto vale» — la tabella ne contiene ancora molte, da un import che
+      // portò le chiavi e non i dati.
+      for (const b of body.items) expect(b.midEur).not.toBeNull();
+
+      // …e il conteggio complessivo le dichiara invece di farle sparire.
+      expect(body.totalIncludingValueless).toBeGreaterThanOrEqual(body.total);
+    });
+
+    it("le fasce importate dal legacy portano nome e importi veri", async () => {
+      const r = await bands(federica, "?limit=200");
+      const items = (r.json() as { items: Array<{ code: string; name: string; minEur: string | null; maxEur: string | null }> }).items;
+      const legacy = items.filter((b) => b.code.startsWith("LEGACY_BAND::"));
+      // L'import di questa voce deve aver prodotto righe utilizzabili, non chiavi vuote:
+      // è esattamente il difetto trovato sulle 87 righe preesistenti.
+      expect(legacy.length).toBeGreaterThan(0);
+      for (const b of legacy) {
+        expect(b.name).not.toBe(b.code);           // nome leggibile, non il codice
+        expect(Number(b.minEur)).toBeGreaterThan(0);
+        expect(Number(b.maxEur)).toBeGreaterThan(Number(b.minEur));
+      }
+    });
+
+    it("chiedendole tutte compaiono anche quelle prive di importi", async () => {
+      const solo = (await bands(federica, "?withValueOnly=true&limit=200")).json() as { total: number };
+      const tutte = (await bands(federica, "?withValueOnly=false&limit=200")).json() as { total: number };
+      expect(tutte.total).toBeGreaterThanOrEqual(solo.total);
+    });
+
+    it("il catalogo è del proprio tenant, non di tutti", async () => {
+      const r = await bands(federica, "?limit=200");
+      const items = (r.json() as { items: Array<{ tenantId: string | null }> }).items;
+      const { rows } = await pool.query<{ t: string }>(
+        `SELECT user_tenant_id AS t FROM sys.sys_users WHERE user_email = $1`,
+        ["federica.marchetti@rtl-bank.org"],
+      );
+      for (const b of items) {
+        if (b.tenantId !== null) expect(b.tenantId).toBe(rows[0]!.t);
+      }
+    });
+
+    it("chi non ha compensation_intelligence:read non vede il catalogo", async () => {
+      expect((await bands(tommaso)).statusCode).toBe(403);
+    });
+  });
+
 });

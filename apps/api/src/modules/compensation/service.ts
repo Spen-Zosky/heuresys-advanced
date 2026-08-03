@@ -25,6 +25,7 @@ import type {
   PositionEconomicWeightListQuery,
   PayrollHandoffRecordListQuery,
   VariablePayEvaluation,
+  CompensationBandListQuery,
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 import {
@@ -259,6 +260,22 @@ export const compensationService = {
   /** Tenant/OU bonus pools (no person rows) — tenant-scoped only. */
   async listBonusPools(actor: ActorContext, query: BonusPoolListQuery) {
     return repo.listBonusPools(pool, catalogTenant(actor), query);
+  },
+
+  /**
+   * #53 E4 — catalogo delle fasce retributive del tenant.
+   *
+   * Le fasce esistevano in tabella e nessuna API le elencava: si vedevano solo di
+   * riflesso, risolte per una singola posizione. Chi deve confrontare l'inquadramento
+   * di un ruolo con la fascia che gli compete non aveva dove farlo.
+   */
+  async listCompensationBands(actor: ActorContext, query: CompensationBandListQuery) {
+    return repo.listCompensationBands(pool, catalogTenant(actor) ?? null, {
+      withValueOnly: query.withValueOnly,
+      ...(query.q ? { q: query.q } : {}),
+      limit: query.limit,
+      offset: query.offset,
+    });
   },
 
   /** Tenant objective reward-rule catalog — tenant-scoped only. */

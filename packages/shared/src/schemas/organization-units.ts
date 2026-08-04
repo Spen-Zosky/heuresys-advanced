@@ -13,6 +13,13 @@ export const OrganizationUnitSchema = z.object({
   name: z.string(),
   typeId: z.uuid().nullable(),
   type: z.string().nullable(),
+  // Il tipo di legame col padre: LINEA (catena di comando) o STAFF (funzione che
+  // riporta al vertice senza essere nella linea). Introdotto dalla migrazione 000244
+  // e popolato su tutte le unita; esposto qui perche' il cancello di esposizione
+  // (#79) ha misurato che nessun modulo API lo leggeva — un dato che nessuna API
+  // espone non e' nel prodotto. Serve all'asse organizzativo di ADR-0027: e' il
+  // legame che dice dove il perimetro di un responsabile si ferma.
+  relation: z.enum(["LINEA", "STAFF"]).nullable(),
   parentId: z.uuid().nullable(),
   parentName: z.string().nullable(), // G-02: parent OU name, resolved on the list endpoint
   managerUserId: z.uuid().nullable(),

@@ -278,6 +278,39 @@ describe("/v1/organization-units/* integration", () => {
     });
   });
 
+  // Il legame LINEA/STAFF esiste nel database dalla migrazione 000244 ed e' popolato su
+  // ogni unita, ma nessun modulo API lo leggeva: lo ha misurato il cancello di esposizione
+  // (#79). Questo test difende l'esposizione. L'atteso NON e' scritto qui: si legge dal
+  // database e si confronta con cio' che l'API restituisce per la stessa unita — se un
+  // giorno il campo sparisse dalla SELECT, il confronto fallirebbe invece di passare su
+  // due `undefined`.
+  it("LIST espone il legame LINEA/STAFF, e coincide con il database", async () => {
+    const atteso = await pool.query<{ id: string; relation: string | null }>(
+      `SELECT organization_unit_id AS id, organization_unit_relation AS relation
+         FROM sys.sys_organization_units
+        WHERE organization_unit_is_active AND organization_unit_relation IS NOT NULL
+        ORDER BY organization_unit_relation DESC, organization_unit_code
+        LIMIT 20`,
+    );
+    // universo dichiarato: se il database non ha righe col legame valorizzato, questa
+    // verifica non puo' fallire e va detto invece di contarla fra quelle superate
+    expect(atteso.rowCount, "nessuna unita col legame valorizzato: verifica cieca").toBeGreaterThan(0);
+    // e deve esserci almeno un STAFF, altrimenti si sta confrontando un valore solo
+    expect(atteso.rows.some((r) => r.relation === "STAFF")).toBe(true);
+
+    const r = await suite.app.inject({
+      method: "GET", url: "/v1/organization-units?limit=200",
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
+    const items = (r.json() as { items: { organizationUnitId: string; relation: string | null }[] }).items;
+    const perId = new Map(items.map((i) => [i.organizationUnitId, i.relation]));
+    for (const riga of atteso.rows) {
+      if (!perId.has(riga.id)) continue;   // fuori dal tenant dell'attore: non e' un difetto
+      expect(perId.get(riga.id), `legame divergente per l'unita ${riga.id}`).toBe(riga.relation);
+    }
+  });
+
   it("USER cannot create (no permission)", async () => {
     const r = await suite.app.inject({
       method: "POST", url: "/v1/organization-units",

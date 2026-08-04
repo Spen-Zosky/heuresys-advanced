@@ -20,6 +20,7 @@ interface Row {
   organization_unit_name: string;
   organization_unit_type_id: string | null;
   organization_unit_type: string | null;
+  organization_unit_relation: "LINEA" | "STAFF" | null;
   organization_unit_parent_id: string | null;
   organization_unit_manager_user_id: string | null;
   organization_unit_effective_from: Date;
@@ -33,7 +34,7 @@ interface Row {
 
 const COLS = `organization_unit_id, organization_unit_tenant_id,
   organization_unit_code, organization_unit_name,
-  organization_unit_type_id, organization_unit_type,
+  organization_unit_type_id, organization_unit_type, organization_unit_relation,
   organization_unit_parent_id, organization_unit_manager_user_id,
   organization_unit_effective_from, organization_unit_effective_to,
   organization_unit_is_active, organization_unit_metadata,
@@ -53,6 +54,7 @@ function toOu(r: Row): OrganizationUnit {
     name: r.organization_unit_name,
     typeId: r.organization_unit_type_id,
     type: r.organization_unit_type,
+    relation: r.organization_unit_relation,
     parentId: r.organization_unit_parent_id,
     parentName: r.parent_name ?? null,
     managerUserId: r.organization_unit_manager_user_id,

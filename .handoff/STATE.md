@@ -1,29 +1,29 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-04 (S1042 — consegna dalla sessione lab eseguita, bonifica dati chiusa e in produzione).
+**Updated**: 2026-08-04 (S1043 — organigramma ricostruito, prestazioni degli strumenti, test di perimetro sospesi).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md` · pattern di dati → `docs/kb/DATA_PATTERNS.md`.
 
-## Last session brief (S1042)
+## Last session brief (S1043)
 
-**Enzo ha consegnato un ordine di lavoro preparato in sessione lab e ha detto «eseguila».** Sei voci,
-cinque chiuse; la sesta (ciclo di valutazione, #92) era dichiarata fuori sessione fin dall'apertura.
-Piano-file: `docs/superpowers/specs/2026-08-03-consegna-lab-esecuzione.md`, lo stato si legge per riga da lì.
+**Sessione lunghissima, chiusa in modo minimale su richiesta di Enzo.** Tre blocchi: il canale
+lab→canonica installato e subito produttivo, la ricostruzione dell'organigramma di RTL Bank portata
+in produzione, e un lavoro di prestazioni nato da una domanda di Enzo sul perché le chiusure fossero
+lente.
 
-**Il filo conduttore: i numeri di ieri non sono i numeri di oggi.** Quasi ogni voce ha cambiato forma
-appena misurata sul campo — le chiavi esterne «da indicizzare» erano una frazione di quelle dichiarate
-(molte su colonne vuote); i percorsi duplicati «inerti» avevano assegnazioni di persone reali; la
-contaminazione era più ampia del censito e con una classe che il criterio non catturava. Su un dato
-**avevo riportato male io**, sovrapponendo due misure che venivano da query diverse, e ha rischiato di
-far decidere Enzo su un rischio inesistente.
+**Il filo conduttore è un difetto di forma che si ripete**: *asserire un numero invece di un
+principio*. Sei migrazioni si rompevano su un ri-percorso completo perché dicevano «esattamente 25
+mansioni», «esattamente 10 Direzioni», «i totali valgono 1678» — e **cinque le aveva scritte questa
+sessione**. Un'uguaglianza esatta sembra il controllo più rigoroso possibile e invece non dimostra
+«il lavoro è riuscito»: dimostra «nessuno ha più toccato niente».
 
-**Le sentinelle hanno ripagato il giorno stesso in cui sono state accese**: viste scritte in sessioni
-passate che nessuno interrogava. Una si è accesa subito dopo la bonifica e ha scoperto un danno che
-avevo appena fatto (traduzioni orfane) — cosa che nessuna rilettura del codice avrebbe trovato.
+**Quattro volte una spia ha scoperto un danno appena fatto**: le 133 posizioni nuove nascevano senza
+mansione, lo scioglimento di due unità lasciava appese due squadre con 41 persone dentro, i 39
+mestieri nuovi esistevano solo in italiano, e l'albero delle posizioni si era spezzato in quindici
+tronconi (perimetro della CEO da 157 persone a 17). Nessuna sarebbe emersa rileggendo il lavoro.
 
-**Enzo ha corretto un criterio, non solo un dato**: «globale» non basta a giustificare una riga. Le
-tassonomie ufficiali (ESCO/ISCO/NACE/ATECO/CCNL) restano aperte a ogni industry perché senza di esse
-non si creano nuovi blueprint; ma un KPI è **contenuto**, e un indicatore HACCP non serve né a una
-banca né a una società di consulenza. Recepito come invariante **I21** nel CLAUDE.md.
+**Un errore di metodo, dichiarato**: per riprodurre la CI ho rieseguito le migrazioni **sul database
+di produzione** invece che su un clone. Il filo ha retto (161 assegnazioni, nessuna persona persa) ma
+ha lasciato tracce, tutte richiuse.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -32,39 +32,36 @@ verifica e review adversarial; le decisioni tecniche sono di Claude.
 
 ## Stato dei piani
 
-- **Consegna lab (S1042)**: chiusa e verificata live in produzione tranne **#92** (ciclo di
-  valutazione), dichiarato fuori sessione fin dall'apertura — decisione già presa da Enzo.
-- **Batch P2+P3 (S1040-S1041)**: restano **#54 recruiting** e **#50 knowledge graph**.
-- Zero-pendenze (#76): `docs/superpowers/specs/2026-07-25-zero-pending-plan.md` (`zp_state.py piano`).
+- **Organigramma RTL**: ricostruito e in produzione. Sette regole strutturali su sette a zero.
+- **#92 ciclo di valutazione**: passi **2 su 7** chiusi (schema+permessi, ingestione calibrazioni).
+- **#115 — perimetri nei test**: **SOSPESO da Enzo**, consegnato a sessione dedicata.
+- Zero-pendenze (#76): `docs/superpowers/specs/2026-07-25-zero-pending-plan.md`.
 
 ## ⚠ Top priorities (next session)
 
-1. **#92 ciclo di valutazione completo** — decisione di Enzo già presa, specifica pronta in sette
-   passi: tabelle nuove (alcune da ingerire dal legacy, dove le sessioni di calibrazione sono reali),
-   permessi, macchina a stati, ESS + superficie manageriale · doc §V6 del piano di consegna.
-2. **#54 recruiting/ATS** — la voce più grossa rimasta, dominio nuovo completo ·
-   `docs/product/DEVELOPMENT_LINES_E_EVO_VERTICALS.md` §E5.
-3. **#50 knowledge graph legacy** — richiede il disegno della destinazione prima dell'import,
-   non è un travaso.
+1. **#115 — i test di perimetro** descrivono l'organigramma di ieri. Il prodotto NON è rotto: i ruoli
+   delle persone nominate a mano si sono invertiti. Soluzione già scritta e provata su nove file ·
+   `docs/superpowers/specs/2026-08-04-perimetri-test-dopo-ricostruzione.md`.
+2. **#116** — 28 persone su 45 atterrano su un cruscotto che non possono vedere, e 27 sono i
+   responsabili nominati ieri: è uno strascico diretto del lavoro di questa sessione.
+3. **#92 passi 3-7** — da qui in avanti è codice applicativo (API lettura, scrittura, ESS, frontend, E2E).
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **Cinque percorsi di RTL Bank hanno per nome una chiave-macchina** invece di un titolo leggibile
-  (`OLDDB::learning_paths::<uuid>`), e **199 assegnazioni di 124 persone** ci puntano. Non vanno
-  cancellati: va dato loro un nome. Apriamo la voce?
-- **Wizard di materializzazione da archetipo**: C3 lo nominava, non è stato costruito — procedura
-  guidata a più passi, non un pannello. La apriamo?
-- **Badge pieni del design system**: `success`/`destructive` di `@heuresys/ui` non reggono il
-  contrasto AA; la correzione vera sta in `ux-design-shared`.
-- **`admin@heuresys.com`**: le sue funzioni dovevano passare a `enzo.spenuso@heuresys.com`, che però **non ha alcun accesso**.
+- **La CI è rossa** e i commit locali NON sono pushati: la sessione è stata chiusa senza push su
+  richiesta. Il rosso è quello di #115, diagnosticato e non un difetto di prodotto.
+- **Due cataloghi tacciono**: 8 posizioni apicali senza requisiti formativi, 119 su 161 senza
+  indicatori. Riempirli significa decidere contenuto di prodotto.
+- **Quattro OKR nominano un reparto inesistente**, fra cui `Supply Chain` in una banca (tocca I21).
+- **`admin@heuresys.com`**: utenza di servizio, unica persona attiva senza posizione.
 - WAIT-INPUT: **#8** Outlook · **#16** SuccessFactors · **#52** SSO IdP · **#85** `AGENTS.md` ·
   **#86** `claude login` su VM e linux-pc.
 
 ## Verification (next session)
 
 ```bash
-git log origin/main..HEAD --oneline                # 0 dopo il push handoff
 python docs/kb/tools/session_start.py              # menu + salute + sentinelle in un round
 python docs/kb/tools/db_health.py                  # atteso: "tutto nei limiti"
-python docs/kb/tools/check_tenant_contamination.py # atteso: "nessuna contaminazione residua"
+python docs/kb/tools/verifica_incrociata.py        # ora 3,4s invece di 46
+git log --oneline origin/main..HEAD                # 4 commit locali da valutare
 ```

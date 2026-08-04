@@ -60,6 +60,13 @@ SOGLIE = {
     "righe_minime_per_bloat": 1000,
     "tabelle_mai_analizzate": 0,
     "giorni_senza_dato_fresco": 7,
+    # Misurato dopo il ri-aggancio dei cataloghi (mig 000260, S1043): 214 requisiti
+    # restano su posizioni disattivate, e sono spiegati — appartengono alle 20 posizioni
+    # gia' vacanti PRIMA della ricostruzione (nessuno le occupava, quindi non hanno una
+    # posizione successore) piu' i casi in cui la posizione nuova dichiarava gia' lo
+    # stesso requisito. La soglia e' il valore reale e non una cifra tonda piu' larga:
+    # se cresce, qualcuno ha disattivato posizioni lasciandosi dietro il loro catalogo.
+    "requisiti_su_posizioni_spente": 214,
 }
 
 
@@ -129,6 +136,23 @@ def sonde() -> list[tuple[str, str, bool]]:
         out.append(("violazioni strutturali dell'organigramma", n_strutt, int(n_strutt) != 0))
     else:
         out.append(("violazioni strutturali dell'organigramma", "n/d (funzione assente)", False))
+
+    # La guardia che e' mancata alla ricostruzione dell'organigramma. Le otto migrazioni
+    # avevano 64 auto-verifiche e nessuna guardava i cataloghi agganciati per
+    # `position_id`: 1521 requisiti di competenza su 1678 sono rimasti appesi a posizioni
+    # disattivate, e l'effetto peggiore non era il rumore ma la CECITA' — la verifica dei
+    # divari di competenza e' scesa da 635 a 53 perche' l'universo era crollato, non
+    # perche' i divari fossero stati colmati. Un numero che migliora perche' ha perso i
+    # dati e' peggio di un numero rosso.
+    orfani_req = uno("""
+        SELECT (SELECT count(*) FROM sys.sys_position_skill_requirements r
+                 JOIN sys.sys_positions p ON p.position_id=r.position_id WHERE NOT p.position_is_active)
+             + (SELECT count(*) FROM sys.sys_position_learning_requirements r
+                 JOIN sys.sys_positions p ON p.position_id=r.position_id WHERE NOT p.position_is_active)
+             + (SELECT count(*) FROM sys.sys_position_kpi_requirements r
+                 JOIN sys.sys_positions p ON p.position_id=r.position_id WHERE NOT p.position_is_active)""")
+    out.append(("requisiti agganciati a posizioni disattivate", orfani_req,
+                int(orfani_req) > SOGLIE["requisiti_su_posizioni_spente"]))
 
     morte = uno("SELECT count(*) FROM pg_stats WHERE schemaname='sys' AND null_frac=1")
     out.append(("colonne dichiarate e mai riempite", morte, False))  # da triage, non blocca

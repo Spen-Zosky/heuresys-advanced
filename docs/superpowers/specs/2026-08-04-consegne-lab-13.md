@@ -43,7 +43,7 @@ stanno 17.000 e 19.000 € sotto. **Decisione di Enzo: applicare entrambi come p
 | **#123** | leggere `organigramma-bis.html` ed eseguirne le situazioni | io | `verifica_incrociata.py` con universi ≠ zero | da fare |
 | **#121** | la guardia lab smette di rifiutare letture legittime | io | `hook.sh selftest` verde coi 6 casi nuovi come regressione | da fare |
 | **#128** | registro sessioni completo, niente cancellazione automatica | io | `hook.sh selftest` verde + `hook.sh storico` che elenca le sessioni | da fare |
-| **#122** | `HS-MGMT` doppio e `HS-PROD` ri-tipizzata | io | 0 unità attive di tipo `TEAM`; nessun codice condiviso fra assi | 🟡 **META'** — Heuresys fatto (mig `000265`-`000268`); le 23 squadre di RTL → **WAIT-INPUT**, decisione di Enzo |
+| **#122** | `HS-MGMT` doppio e `HS-PROD` ri-tipizzata | io | 0 unità attive di tipo `TEAM`; nessun codice condiviso fra assi | ✅ **FATTO** — mig `000265`-`000269` |
 | **#125** | 22 pagine orfane + 52 etichette senza traduzione | io | nessuna pagina senza voce né motivazione; parità i18n verde | da fare |
 | **#126** | predizioni e mentore visibili all'interessato | io | login reale che apre il proprio portale e vede le proprie predizioni | da fare |
 | **#117** | completezza del portale derivata meccanicamente | io | strumento ri-eseguibile, zero tabelle «scoperte», conteggio che cambia | da fare |

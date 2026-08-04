@@ -15,7 +15,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
-import { closePool } from "../src/db/client.js";
+import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
@@ -34,8 +34,20 @@ interface TeamLite { teamId: string; code: string; tenantId: string; memberCount
 let suite: TestApp;
 let adminS: S;     // PLATFORM_ADMIN
 let tenantS: S;    // TENANT_ADMIN (RTL)
-let leaderS: S;    // TEAM_LEADER (marco — DIV-CFO)
-let memberS: S;    // TEAM_MEMBER (antonio — DIV-CFO)
+let leaderS: S;    // TEAM_LEADER (marco)
+let memberS: S;    // TEAM_MEMBER (antonio)
+
+/**
+ * I codici delle squadre si DERIVANO dal dato, non si scrivono qui.
+ *
+ * Erano cablati (`DIV-CFO`, `DIR-INFRA`) e la #122 li ha rinominati — le squadre
+ * portavano lo stesso codice dell'unita' organizzativa omonima, il che annullava
+ * l'ortogonalita' fra i due assi. Il test cadeva non perche' il comportamento
+ * fosse cambiato, ma perche' asseriva un nome invece di una relazione: «la
+ * squadra che marco guida» e' cio' che interessa, come si chiami non lo e'.
+ */
+let ledCode: string;          // la squadra che il leader guida
+let leaderTeamCodes: string[]; // tutte quelle che guida o a cui appartiene, ordinate
 
 describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
   beforeAll(async () => {
@@ -44,6 +56,25 @@ describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
     leaderS = await login(suite, "marco.rinaldi@rtl-bank.org");
     memberS = await login(suite, "antonio.parisi@rtl-bank.org");
+
+    const led = await pool.query<{ team_code: string }>(
+      `SELECT t.team_code FROM sys.sys_teams t
+         JOIN sys.sys_users u ON u.user_id = t.team_lead_user_id
+        WHERE lower(u.user_email) = 'marco.rinaldi@rtl-bank.org'`,
+    );
+    expect(led.rows.length, "marco non guida alcuna squadra: fixture impossibile").toBe(1);
+    ledCode = led.rows[0]!.team_code;
+
+    const all = await pool.query<{ team_code: string }>(
+      `SELECT DISTINCT t.team_code FROM sys.sys_teams t
+         JOIN sys.sys_users u ON lower(u.user_email) = 'marco.rinaldi@rtl-bank.org'
+        WHERE t.team_lead_user_id = u.user_id
+           OR EXISTS (SELECT 1 FROM sys.sys_team_members m
+                       WHERE m.team_member_team_id = t.team_id AND m.team_member_user_id = u.user_id)
+        ORDER BY t.team_code`,
+    );
+    leaderTeamCodes = all.rows.map((r) => r.team_code);
+    expect(leaderTeamCodes.length, "marco non ha alcuna squadra: fixture impossibile").toBeGreaterThan(0);
   });
 
   afterAll(async () => {
@@ -51,7 +82,7 @@ describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
     await closePool();
   });
 
-  it("TENANT_ADMIN lists all teams in tenant (incl. DIV-CFO), all same tenant", async () => {
+  it("TENANT_ADMIN lists all teams in tenant (incl. quella del leader), all same tenant", async () => {
     const r = await suite.app.inject({
       method: "GET", url: "/v1/teams?limit=200", headers: { cookie: ch(tenantS.cookies) },
     });
@@ -59,7 +90,7 @@ describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
     const body = r.json() as { items: TeamLite[]; total: number };
     expect(body.total).toBeGreaterThanOrEqual(20);
     const codes = body.items.map((t) => t.code);
-    expect(codes).toContain("DIV-CFO");
+    expect(codes).toContain(ledCode);
     // tenant isolation: every team belongs to the admin's single tenant
     const tenants = new Set(body.items.map((t) => t.tenantId));
     expect(tenants.size).toBe(1);
@@ -72,8 +103,8 @@ describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
     expect(r.statusCode).toBe(200);
     const body = r.json() as { items: TeamLite[]; total: number };
     const codes = body.items.map((t) => t.code).sort();
-    // marco leads DIV-CFO and is a member of DIR-INFRA — and nothing else
-    expect(codes).toEqual(["DIR-INFRA", "DIV-CFO"]);
+    // marco guida una squadra e appartiene a un'altra — e nient'altro
+    expect(codes).toEqual(leaderTeamCodes);
     expect(body.total).toBe(2);
   });
 
@@ -98,7 +129,7 @@ describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { teams: Array<{ code: string; members: Array<{ email: string | null; role: string }> }> };
-    const cfo = body.teams.find((t) => t.code === "DIV-CFO");
+    const cfo = body.teams.find((t) => t.code === ledCode);
     expect(cfo).toBeDefined();
     const lead = cfo!.members.find((m) => m.role === "LEAD");
     expect(lead?.email).toBe("marco.rinaldi@rtl-bank.org");
@@ -111,25 +142,25 @@ describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { teams: Array<{ code: string }> };
-    expect(body.teams.map((t) => t.code).sort()).toEqual(["DIR-INFRA", "DIV-CFO"]);
+    expect(body.teams.map((t) => t.code).sort()).toEqual(leaderTeamCodes);
   });
 
   it("GET /v1/teams/:id of an in-scope team works for the TEAM_LEADER (members + count)", async () => {
     const list = await suite.app.inject({ method: "GET", url: "/v1/teams?limit=200", headers: { cookie: ch(tenantS.cookies) } });
-    const cfo = (list.json() as { items: TeamLite[] }).items.find((t) => t.code === "DIV-CFO")!;
+    const cfo = (list.json() as { items: TeamLite[] }).items.find((t) => t.code === ledCode)!;
     const r = await suite.app.inject({
       method: "GET", url: `/v1/teams/${cfo.teamId}`, headers: { cookie: ch(leaderS.cookies) },
     });
     expect(r.statusCode).toBe(200);
     const body = r.json() as { code: string; members: unknown[]; memberCount: number };
-    expect(body.code).toBe("DIV-CFO");
+    expect(body.code).toBe(ledCode);
     expect(body.members.length).toBe(body.memberCount);
     expect(body.memberCount).toBeGreaterThanOrEqual(2);
   });
 
   it("TEAM_LEADER gets 404 reading an out-of-scope team (scope axis, not a 403)", async () => {
     const list = await suite.app.inject({ method: "GET", url: "/v1/teams?limit=200", headers: { cookie: ch(tenantS.cookies) } });
-    const other = (list.json() as { items: TeamLite[] }).items.find((t) => t.code !== "DIV-CFO" && t.code !== "DIR-INFRA")!;
+    const other = (list.json() as { items: TeamLite[] }).items.find((t) => !leaderTeamCodes.includes(t.code))!;
     const r = await suite.app.inject({
       method: "GET", url: `/v1/teams/${other.teamId}`, headers: { cookie: ch(leaderS.cookies) },
     });
@@ -138,7 +169,7 @@ describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
 
   it("TEAM_MEMBER lacks team:read → 403 on GET /v1/teams/:id", async () => {
     const list = await suite.app.inject({ method: "GET", url: "/v1/teams?limit=200", headers: { cookie: ch(tenantS.cookies) } });
-    const cfo = (list.json() as { items: TeamLite[] }).items.find((t) => t.code === "DIV-CFO")!;
+    const cfo = (list.json() as { items: TeamLite[] }).items.find((t) => t.code === ledCode)!;
     const r = await suite.app.inject({
       method: "GET", url: `/v1/teams/${cfo.teamId}`, headers: { cookie: ch(memberS.cookies) },
     });

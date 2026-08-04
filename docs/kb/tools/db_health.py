@@ -48,6 +48,9 @@ INFORMATIVE = {
     "v_reconciliation_status": "registro delle decisioni di riconciliazione, non un difetto",
     "v_reference_translation_coverage": "copertura traduzioni per entita', metrica",
     "v_pip_completeness": "elenca i PIP incompleti: informativa, ha una soglia propria",
+    "v_organization_unit_integrity":
+        "una riga per unita' con le bandiere di violazione, non una riga per violazione: "
+        "l'allarme dell'organigramma e' la sonda su fn_organization_integrity_violations()",
 }
 
 # Soglie: superate = allarme. Derivano dalla misura del 2026-08-03, non da teoria.
@@ -110,6 +113,22 @@ def sonde() -> list[tuple[str, str, bool]]:
     for chiave, n in dup:
         out.append((f"duplicati su {chiave}", n,
                     int(n) != SOGLIE["duplicati_chiave_naturale"]))
+
+    # L'organigramma. La funzione la crea la migrazione 000251 e restituisce una riga
+    # per regola col numero di violazioni aperte. Sei regole sono strutturali e devono
+    # stare a zero; la settima — «persone attive senza posizione» — e' una misura, e vale
+    # 1 perche' admin@heuresys.com e' un'utenza di servizio, non una persona
+    # dell'organigramma. Qui si sorveglia il gruppo strutturale: se una sola di quelle
+    # sei si accende, l'organigramma ha ricominciato a derivare.
+    if uno("""SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
+              WHERE n.nspname='sys' AND p.proname='fn_organization_integrity_violations'""") != "0":
+        strutt = q("""SELECT coalesce(sum(violazioni),0)
+                        FROM sys.fn_organization_integrity_violations()
+                       WHERE regola <> 'persone attive senza posizione'""")
+        n_strutt = strutt[0][0] if strutt and strutt[0] else "0"
+        out.append(("violazioni strutturali dell'organigramma", n_strutt, int(n_strutt) != 0))
+    else:
+        out.append(("violazioni strutturali dell'organigramma", "n/d (funzione assente)", False))
 
     morte = uno("SELECT count(*) FROM pg_stats WHERE schemaname='sys' AND null_frac=1")
     out.append(("colonne dichiarate e mai riempite", morte, False))  # da triage, non blocca

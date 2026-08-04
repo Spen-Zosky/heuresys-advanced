@@ -19,8 +19,34 @@ sessione. Nessuna è dichiarata fuori.
 |---|---|---|---|---|
 | **V1** | `lab_inbox` installato + cablato al boot + check nel lint | Claude | boot canonico che stampa la sezione LAB INBOX con le consegne reali; `handoff_lint` verde | ✅ |
 | **V2** | 13 consegne ingerite nel registro | Claude | 13 blocchi `#99`…`#111` nel registro con `lab-id`, 13 file spostati in `inbox/ingerite/`, lint verde | ✅ |
-| **V3** | 8 migrazioni `000244`→`000251` applicate | Claude | ledger `sys_schema_migrations` con le 8 righe; il filo delle 161 assegnazioni attive intatto dopo ognuna | ⬜ |
-| **V4** | Verdetto finale dell'organigramma | Claude | `sys.fn_organization_integrity_violations()` tutte a zero + `verifica_incrociata.py` ri-eseguita e confrontata con la baseline | ⬜ |
+| **V3** | 8 migrazioni `000244`→`000251` applicate | Claude | ledger `sys_schema_migrations` con le 8 righe; il filo delle 161 assegnazioni attive intatto dopo ognuna | ✅ |
+| **V4** | Verdetto finale dell'organigramma | Claude | `sys.fn_organization_integrity_violations()` tutte a zero + `verifica_incrociata.py` ri-eseguita e confrontata con la baseline | ✅ |
+| **V5** | *(emersa applicando)* Le due conseguenze misurate delle 8 migrazioni | Claude | `000252` ruoli professionali delle 133 posizioni nuove · `000253` asse funzionale dopo lo scioglimento; sentinelle di nuovo 11/11 a zero | ✅ |
+
+## Che cosa e' successo davvero applicando (S1043)
+
+Le otto migrazioni erano state scritte in **sessione lab, che legge e non scrive**. Applicandole per la
+prima volta, **cinque si sono fermate da sole** sulle proprie asserzioni — cioe' i controlli che
+portavano con se' hanno funzionato. Nessuna ha lasciato il database a meta'.
+
+| # | Dove si e' fermata | Che cosa era davvero |
+|---|---|---|
+| `000244` | `CHECK` del catalogo tipi | il vincolo elencava gli 8 codici esistenti e rifiutava i 2 nuovi: aggiungere un tipo vuol dire anche allargare l'elenco chiuso |
+| `000245` | «7 unita non-sede senza padre» | le 7 filiali il cui padre (`AREA-MI`/`AREA-BSBG`) nasceva **nello stesso `INSERT`**: una `INSERT … SELECT` non vede le righe che sta inserendo → spezzata in due, prima le aree poi le filiali |
+| `000249` | «posizioni di rete: attese 54, trovate 60» + «filiali con organico 5-8: 9 su 10» | il criterio contava per prefisso `POS-FIL-%`, che cattura anche 6 posizioni preesistenti non sue → legato a `rete_pos`. E Milano Centro ha **9** persone, non 8: la nona e' `roberta.gallo`, gia' in filiale e fuori dalla mappa |
+| `000250` | «riporti fuori dalla propria unita: 155» | `position_code LIKE 'POS-%'` non seleziona «le posizioni nuove», seleziona quasi tutte quelle del database |
+| `000251` | «R4 con 5 violazioni», poi «persone senza posizione: 1» | 3 erano i direttori di divisione che riportano alla CEO (che regge societa **e** Direzione Generale): la **regola** non sapeva leggerlo. 2 erano il difetto vero — un Back Office Specialist e uno Sviluppatore che riportavano a un *System Administrator* che non dirige nulla. L'ultima e' `admin@heuresys.com`, utenza di servizio |
+
+**Difetto trasversale corretto in tutte e quattro le migrazioni che spostano persone**: l'`INSERT`
+delle assegnazioni non aveva guardia di riesecuzione, e `migrate.sh` **ri-applica ogni file a ogni
+deploy** — al secondo giro avrebbero chiuso l'assegnazione appena creata e ne avrebbero inserita una
+copia, riscrivendo la storia delle persone a ogni deploy. Tutte e dieci ora ri-eseguite a vuoto.
+
+**Due conseguenze misurate dopo, non previste dal piano** (→ `000252` e `000253`):
+le 133 posizioni nuove nascevano **senza ruolo professionale** (la sentinella
+`v_positions_without_job_role`, verde da sempre, e' passata a 133 — esattamente il numero creato), e
+lo scioglimento delle 2 unita lasciava **18 legami penzolanti sull'asse funzionale**: 2 squadre con
+36 e 5 persone dentro, e 16 attaccamenti di processo.
 
 ---
 

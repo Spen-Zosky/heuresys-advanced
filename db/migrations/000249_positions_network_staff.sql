@@ -248,8 +248,14 @@ BEGIN
       ON a.user_position_assignment_position_id = p.position_id
      AND a.user_position_assignment_status = 'ACTIVE'
    WHERE ou.organization_unit_code = 'FIL-MI-CEN';
-  IF n_mi_cen <> 9 THEN
-    RAISE EXCEPTION 'Milano Centro: atteso organico 9 (7 della mappa + direttore + roberta.gallo), trovato %', n_mi_cen;
+  -- [S1043] Otto oppure nove, e la differenza ha un nome: roberta.gallo. Alla prima
+  -- applicazione e la nona persona di Milano Centro (gia in filiale, fuori dalla mappa
+  -- di questa fase); la FASE 6 poi la sposta a Porta Romana, dove il target la vuole.
+  -- Quindi su un ri-percorso completo della catena questa filiale ne ha otto, ed e
+  -- corretto. L asserzione dice entrambi i valori e perche, invece di descrivere solo
+  -- il momento in cui e stata scritta.
+  IF n_mi_cen NOT IN (8, 9) THEN
+    RAISE EXCEPTION 'Milano Centro: atteso organico 9 (prima passata) oppure 8 (dopo che la fase 6 sposta roberta.gallo), trovato %', n_mi_cen;
   END IF;
 
   RAISE NOTICE 'FASE 5b OK — 54 posizioni di rete create, 10 filiali popolate (9 con 5-8 persone, Milano Centro 9: la nona e'' roberta.gallo, gia'' in filiale e fuori dalla mappa), tutti i riporti dentro la propria filiale, 161 assegnazioni attive invariate.';

@@ -36,7 +36,19 @@ UPDATE sys.sys_user_position_assignments upa
    AND u.user_email IN ('alice.esposito@rtl-bank.org', 'alberto.colombo@rtl-bank.org')
    AND p.position_code IN ('POS-00000396', 'POS-00000350')
    AND upa.user_position_assignment_kind = 'PRIMARY'
-   AND upa.user_position_assignment_status = 'ENDED';
+   AND upa.user_position_assignment_status = 'ENDED'
+   -- [S1043] Si riattiva la vecchia assegnazione SOLO se la persona non ne ha gia'
+   -- una attiva. L'intento di questa migrazione era rimettere in piedi due catene
+   -- rimaste vuote; la ricostruzione dell'organigramma ha ricollocato entrambe le
+   -- persone su posizioni NUOVE, quindi al ri-percorrere la catena completa questa
+   -- riattivazione creava una SECONDA primaria attiva e sbatteva contro l'indice
+   -- unico `sys_upa_one_primary_active_per_user`. Con questa condizione l'intento
+   -- resta identico dove serviva e diventa un no-op dove e' gia' soddisfatto.
+   AND NOT EXISTS (
+     SELECT 1 FROM sys.sys_user_position_assignments alt
+      WHERE alt.user_position_assignment_user_id = upa.user_position_assignment_user_id
+        AND alt.user_position_assignment_kind = 'PRIMARY'
+        AND alt.user_position_assignment_status = 'ACTIVE');
 
 DO $$
 DECLARE n_active int; n_viol int;

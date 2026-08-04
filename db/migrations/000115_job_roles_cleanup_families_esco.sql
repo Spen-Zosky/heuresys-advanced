@@ -120,6 +120,29 @@ BEGIN
   RAISE NOTICE '000115: OLDDB-remaining=% RTL-family-wired=% RTL-seniority=% RTL-esco-mapped=% (of which low-confidence=%) — expect 0/25/25/25/~11',
     n_oldb, n_fam, n_sen, n_esco, n_low;
   IF n_oldb <> 0 THEN RAISE EXCEPTION '000115: % OLDDB roles still present (expected 0)', n_oldb; END IF;
-  IF n_fam <> 25 OR n_sen <> 25 THEN RAISE EXCEPTION '000115: RTL family/seniority wiring incomplete (fam=% sen=%)', n_fam, n_sen; END IF;
-  IF n_esco <> 25 THEN RAISE EXCEPTION '000115: expected 25 RTL ESCO mappings, found %', n_esco; END IF;
+
+  -- [S1043] L'asserzione era `n_fam = 25 AND n_sen = 25`: una CARDINALITA', non un
+  -- invariante. Ha retto finche' il catalogo `RTL-ROLE-*` e' rimasto quello di allora,
+  -- e si e' rotta appena la mig 000252 ne ha aggiunti 39 per dare una mansione alle
+  -- posizioni della ricostruzione dell'organigramma — su una ri-esecuzione della
+  -- catena completa contava 64 e falliva. Ma 64 non e' un difetto: e' un catalogo
+  -- cresciuto. Un'uguaglianza esatta non provava «il cablaggio e' completo», provava
+  -- «nessuno ha piu' toccato il catalogo», che e' un'altra cosa.
+  --
+  -- Sostituita con cio' che questa migrazione deve davvero garantire: NESSUN ruolo
+  -- `RTL-ROLE-*` resta senza famiglia o senza seniority. E' piu' forte (vale su
+  -- tutti, non su 25) e non invecchia. Stesso trattamento gia' dato in S1042 alle
+  -- quattro asserzioni che codificavano la cardinalita' del catalogo formativo.
+  SELECT count(*) INTO n_fam FROM sys.sys_job_roles
+   WHERE job_role_code LIKE 'RTL-ROLE-%' AND job_role_family_id IS NULL;
+  SELECT count(*) INTO n_sen FROM sys.sys_job_roles
+   WHERE job_role_code LIKE 'RTL-ROLE-%' AND job_role_seniority_level IS NULL;
+  IF n_fam <> 0 OR n_sen <> 0 THEN
+    RAISE EXCEPTION '000115: RTL roles without family/seniority (senza-famiglia=% senza-seniority=%)', n_fam, n_sen;
+  END IF;
+
+  -- Le 25 mappature ESCO che questa migrazione crea devono esserci ancora. Il
+  -- confronto e' `<` e non `<>`: i ruoli aggiunti dopo possono portarne altre, e
+  -- questo controllo deve accorgersi di una mappatura PERDUTA, non di una in piu'.
+  IF n_esco < 25 THEN RAISE EXCEPTION '000115: expected at least 25 RTL ESCO mappings, found %', n_esco; END IF;
 END $$;

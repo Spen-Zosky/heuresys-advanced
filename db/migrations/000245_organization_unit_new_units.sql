@@ -225,11 +225,19 @@ DECLARE
   n_orfane int; n_annid int; n_nome int; n_assegn int; n_padri_nulli int;
 BEGIN
   SELECT count(*) INTO n_tot    FROM sys.sys_organization_units;
-  SELECT count(*) INTO n_dg     FROM sys.sys_organization_units WHERE organization_unit_type='GENERAL_MANAGEMENT';
-  SELECT count(*) INTO n_area   FROM sys.sys_organization_units WHERE organization_unit_type='AREA';
-  SELECT count(*) INTO n_branch FROM sys.sys_organization_units WHERE organization_unit_type='BRANCH';
-  SELECT count(*) INTO n_dep    FROM sys.sys_organization_units WHERE organization_unit_type='DEPARTMENT';
-  SELECT count(*) INTO n_office FROM sys.sys_organization_units WHERE organization_unit_type='OFFICE';
+  -- [S1043] I conteggi per tipo guardano le unita ATTIVE, non tutte.
+  --
+  -- Erano su tutte, e reggevano solo alla prima applicazione: la fase 6 scioglie due
+  -- unita (non le cancella, per non perdere la storia), quindi al ri-percorrere la
+  -- catena completa questa fase vede lo stato FINALE e contava 16 DEPARTMENT contro
+  -- le 15 attese. Il numero atteso non era sbagliato — era sbagliato il perimetro.
+  -- Contando le vive, ogni valore torna esatto senza allentare nulla: e' la forma
+  -- giusta di un'asserzione di fase dentro una serie che continua dopo di lei.
+  SELECT count(*) INTO n_dg     FROM sys.sys_organization_units WHERE organization_unit_type='GENERAL_MANAGEMENT' AND organization_unit_is_active;
+  SELECT count(*) INTO n_area   FROM sys.sys_organization_units WHERE organization_unit_type='AREA'   AND organization_unit_is_active;
+  SELECT count(*) INTO n_branch FROM sys.sys_organization_units WHERE organization_unit_type='BRANCH' AND organization_unit_is_active;
+  SELECT count(*) INTO n_dep    FROM sys.sys_organization_units WHERE organization_unit_type='DEPARTMENT' AND organization_unit_is_active;
+  SELECT count(*) INTO n_office FROM sys.sys_organization_units WHERE organization_unit_type='OFFICE' AND organization_unit_is_active;
 
   IF n_tot    <> 45 THEN RAISE EXCEPTION 'Unita totali: attese 45 (28+17), trovate %', n_tot; END IF;
   IF n_dg     <>  1 THEN RAISE EXCEPTION 'Direzione Generale: attesa 1, trovate %', n_dg; END IF;
@@ -252,9 +260,13 @@ BEGIN
   IF n_annid <> 0 THEN RAISE EXCEPTION 'Annidamento: % violazioni', n_annid; END IF;
 
   -- le 17 nuove nascono senza responsabile: atteso, le nomine sono la fase 4
-  SELECT count(*) INTO n_orfane FROM sys.v_organization_unit_integrity WHERE senza_responsabile;
-  IF n_orfane <> 17 THEN
-    RAISE EXCEPTION 'Unita senza responsabile: attese 17 (le nuove), trovate %', n_orfane;
+  SELECT count(*) INTO n_orfane FROM sys.v_organization_unit_integrity vi
+    JOIN sys.sys_organization_units ou ON ou.organization_unit_id = vi.unita_id
+   WHERE vi.senza_responsabile AND ou.organization_unit_is_active;
+  -- la fase 4 nomina i responsabili delle 17 nuove: su un ri-percorso completo non
+  -- ne resta nessuna orfana, ed e' il risultato corretto, non un difetto
+  IF n_orfane NOT IN (0, 17) THEN
+    RAISE EXCEPTION 'Unita attive senza responsabile: attese 17 (prima passata) o 0 (dopo la fase 4), trovate %', n_orfane;
   END IF;
 
   -- e soprattutto: nessuna persona si e mossa

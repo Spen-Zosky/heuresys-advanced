@@ -69,6 +69,18 @@ SELECT DISTINCT ON (vecchia.pos_id)
    AND nuova.position_is_active
  ORDER BY vecchia.pos_id, nuova.position_id;
 
+-- Fotografia dei totali PRIMA di muovere qualsiasi cosa: l'invariante di questa
+-- migrazione non e' «i totali valgono 1678/1791/172» ma «i totali non cambiano PER
+-- COLPA MIA». La differenza si e' vista ri-percorrendo la catena completa: la
+-- migrazione 000096 ri-DERIVA i requisiti di competenza dai titolari correnti
+-- (cancella i propri e li ricalcola), e dopo la ricostruzione i titolari sono altri
+-- — quindi il totale scende legittimamente da 1678 a 1597 senza che nulla vada
+-- perduto. Un numero scritto qui misurava lo stato del mondo, non il mio effetto.
+CREATE TEMP TABLE totali_prima ON COMMIT DROP AS
+SELECT (SELECT count(*) FROM sys.sys_position_skill_requirements)    AS sk,
+       (SELECT count(*) FROM sys.sys_position_learning_requirements) AS le,
+       (SELECT count(*) FROM sys.sys_position_kpi_requirements)      AS kp;
+
 -- ───────────────────────────────────────────────────────────────────────────────
 -- 2. COMPETENZE
 -- ───────────────────────────────────────────────────────────────────────────────
@@ -108,16 +120,36 @@ ANALYZE sys.sys_position_kpi_requirements;
 -- ───────────────────────────────────────────────────────────────────────────────
 DO $$
 DECLARE
-  n_map int; n_sk int; n_le int; n_kp int; n_tot_sk int; n_tot_le int; n_tot_kp int;
+  n_map int; n_sk int; n_le int; n_kp int;
+  n_tot_sk bigint; n_tot_le bigint; n_tot_kp bigint;
+  p_sk bigint; p_le bigint; p_kp bigint;
   n_pos_con_skill int;
 BEGIN
+  SELECT sk, le, kp INTO p_sk, p_le, p_kp FROM totali_prima;
+
   SELECT count(*) INTO n_map FROM mappa_pos;
   IF n_map < 100 THEN
     RAISE EXCEPTION 'Mappa vecchia->nuova: solo % coppie, attese ~133 — la nota della ricostruzione non e stata trovata', n_map;
   END IF;
 
-  -- Quante righe di catalogo stanno su posizioni RICOPERTE: e' la misura che era
-  -- crollata, ed e' quella che deve risalire. I totali non cambiano: si sposta.
+  SELECT count(*) INTO n_tot_sk FROM sys.sys_position_skill_requirements;
+  SELECT count(*) INTO n_tot_le FROM sys.sys_position_learning_requirements;
+  SELECT count(*) INTO n_tot_kp FROM sys.sys_position_kpi_requirements;
+
+  -- L'INVARIANTE E' IL PROPRIO EFFETTO, non lo stato del mondo: questa migrazione
+  -- sposta righe e non deve crearne ne cancellarne. Confrontare con un totale
+  -- scritto a mano (1678/1791/172) misurava invece che nessun ALTRO avesse toccato
+  -- quelle tabelle — falso appena la 000096 ri-deriva i requisiti dai titolari
+  -- correnti, cosa che fa per costruzione e che dopo la ricostruzione produce
+  -- legittimamente un insieme diverso.
+  IF n_tot_sk <> p_sk OR n_tot_le <> p_le OR n_tot_kp <> p_kp THEN
+    RAISE EXCEPTION 'Totali cambiati DENTRO questa migrazione: competenze %->%, formazione %->%, kpi %->% — qui si SPOSTA soltanto',
+                    p_sk, n_tot_sk, p_le, n_tot_le, p_kp, n_tot_kp;
+  END IF;
+
+  -- Il grosso del catalogo deve stare sulle posizioni VIVE: e' la misura che era
+  -- crollata (157 su 1678) ed e' quella che deve risalire. La soglia e' relativa al
+  -- totale reale, non a un numero fisso che invecchia col catalogo.
   SELECT count(*) INTO n_sk FROM sys.sys_position_skill_requirements r
     JOIN sys.sys_positions p ON p.position_id = r.position_id WHERE p.position_is_active;
   SELECT count(*) INTO n_le FROM sys.sys_position_learning_requirements r
@@ -125,22 +157,17 @@ BEGIN
   SELECT count(*) INTO n_kp FROM sys.sys_position_kpi_requirements r
     JOIN sys.sys_positions p ON p.position_id = r.position_id WHERE p.position_is_active;
 
-  IF n_sk < 1000 THEN RAISE EXCEPTION 'Requisiti di competenza su posizioni attive: % (erano 157, attesi >1000)', n_sk; END IF;
-  IF n_le < 1000 THEN RAISE EXCEPTION 'Requisiti formativi su posizioni attive: % (erano 199, attesi >1000)', n_le; END IF;
-  IF n_kp <   80 THEN RAISE EXCEPTION 'Requisiti KPI su posizioni attive: % (erano 28, attesi >80)', n_kp; END IF;
-
-  -- e nulla si e' perso: i totali restano quelli di prima
-  SELECT count(*) INTO n_tot_sk FROM sys.sys_position_skill_requirements;
-  SELECT count(*) INTO n_tot_le FROM sys.sys_position_learning_requirements;
-  SELECT count(*) INTO n_tot_kp FROM sys.sys_position_kpi_requirements;
-  IF n_tot_sk <> 1678 OR n_tot_le <> 1791 OR n_tot_kp <> 172 THEN
-    RAISE EXCEPTION 'I totali sono cambiati: competenze % (1678), formazione % (1791), kpi % (172) — questa migrazione SPOSTA, non crea ne cancella',
-                    n_tot_sk, n_tot_le, n_tot_kp;
+  IF n_sk * 2 < n_tot_sk THEN
+    RAISE EXCEPTION 'Requisiti di competenza su posizioni attive: % su % — il grosso deve stare sulle posizioni vive', n_sk, n_tot_sk;
+  END IF;
+  IF n_le * 2 < n_tot_le THEN
+    RAISE EXCEPTION 'Requisiti formativi su posizioni attive: % su %', n_le, n_tot_le;
+  END IF;
+  IF n_kp * 2 < n_tot_kp THEN
+    RAISE EXCEPTION 'Requisiti KPI su posizioni attive: % su %', n_kp, n_tot_kp;
   END IF;
 
-  -- La prova che serve davvero: quante POSIZIONI RICOPERTE dichiarano un atteso.
-  -- Erano poche decine; se restassero tali, avremmo spostato righe senza rimettere
-  -- in piedi la misura.
+  -- E la prova che serve davvero: quante POSIZIONI RICOPERTE dichiarano un atteso.
   SELECT count(DISTINCT r.position_id) INTO n_pos_con_skill
     FROM sys.sys_position_skill_requirements r
     JOIN sys.sys_positions p ON p.position_id = r.position_id AND p.position_is_active;
@@ -148,8 +175,8 @@ BEGIN
     RAISE EXCEPTION 'Solo % posizioni attive dichiarano un requisito di competenza', n_pos_con_skill;
   END IF;
 
-  RAISE NOTICE 'CATALOGHI RIAGGANCIATI — % coppie vecchia->nuova; su posizioni ricoperte: % requisiti di competenza (erano 157), % formativi (erano 199), % KPI (erano 28); % posizioni attive dichiarano un atteso di competenza; totali invariati.',
-               n_map, n_sk, n_le, n_kp, n_pos_con_skill;
+  RAISE NOTICE 'CATALOGHI RIAGGANCIATI — % coppie vecchia->nuova; su posizioni ricoperte: % requisiti di competenza su %, % formativi su %, % KPI su %; % posizioni attive dichiarano un atteso; totali invariati da questa migrazione.',
+               n_map, n_sk, n_tot_sk, n_le, n_tot_le, n_kp, n_tot_kp, n_pos_con_skill;
 END $$;
 
 COMMIT;

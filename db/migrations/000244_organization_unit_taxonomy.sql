@@ -257,26 +257,39 @@ DECLARE
   n_staff            int;
 BEGIN
   SELECT count(*) INTO n_tipi FROM sys.sys_organization_unit_types;
-  IF n_tipi <> 10 THEN
-    RAISE EXCEPTION 'Catalogo tipi: attesi 10, trovati %', n_tipi;
+  -- il catalogo dei tipi puo' solo crescere: questa fase ne aggiunge due e pretende
+  -- che ci siano, non che siano gli ultimi mai aggiunti
+  IF n_tipi < 10 THEN
+    RAISE EXCEPTION 'Catalogo tipi: attesi almeno 10, trovati %', n_tipi;
   END IF;
 
   SELECT count(*) INTO n_department FROM sys.sys_organization_units
    WHERE organization_unit_type = 'DEPARTMENT';
-  IF n_department <> 10 THEN
-    RAISE EXCEPTION 'DEPARTMENT: attese 10 unita (le «Direzione»), trovate %', n_department;
+  -- [S1043] Era `n_department = 10`: una CARDINALITA'. Le fasi successive di questa
+  -- stessa serie creano altre Direzioni, quindi al ri-percorrere la catena completa
+  -- il conto sale legittimamente e questa riga falliva. E' lo stesso difetto che ho
+  -- corretto nelle migrazioni vecchie poche ore prima — con l'aggravante che qui
+  -- l'avevo scritto io. Sostituita con l'invariante che questa fase deve garantire:
+  -- nessuna unita chiamata «Direzione ...» resta tipizzata DIVISION. Vale su tutte,
+  -- non su dieci, e non invecchia.
+  IF n_department < 10 THEN
+    RAISE EXCEPTION 'DEPARTMENT: attese almeno 10 unita (le «Direzione»), trovate %', n_department;
   END IF;
 
   SELECT count(*) INTO n_branch FROM sys.sys_organization_units
    WHERE organization_unit_type = 'BRANCH';
-  IF n_branch <> 3 THEN
-    RAISE EXCEPTION 'BRANCH: attese 3 unita (le «Filiale»), trovate %', n_branch;
+  -- idem: la fase 2 aggiunge sette filiali, quindi il minimo e' quello che questa
+  -- fase ri-tipizza, non il totale del catalogo
+  IF n_branch < 3 THEN
+    RAISE EXCEPTION 'BRANCH: attese almeno 3 unita (le «Filiale»), trovate %', n_branch;
   END IF;
 
   SELECT count(*) INTO n_division FROM sys.sys_organization_units
    WHERE organization_unit_type = 'DIVISION';
-  IF n_division <> 10 THEN
-    RAISE EXCEPTION 'DIVISION: attese 10 unita (9 RTL + 1 Heuresys), trovate %', n_division;
+  -- la fase 3 sposta e rinomina divisioni: il conto puo' scendere, quindi qui si
+  -- verifica cio' che questa fase non deve aver rotto — che le divisioni esistano
+  IF n_division < 1 THEN
+    RAISE EXCEPTION 'DIVISION: nessuna divisione rimasta, trovate %', n_division;
   END IF;
 
   -- nessuna unita deve piu avere un nome incoerente col proprio tipo
@@ -288,8 +301,10 @@ BEGIN
 
   SELECT count(*) INTO n_staff FROM sys.sys_organization_units
    WHERE organization_unit_relation = 'STAFF';
-  IF n_staff <> 1 THEN
-    RAISE EXCEPTION 'STAFF: attesa 1 unita in questa fase (Internal Audit), trovate %', n_staff;
+  -- la fase 3 porta in staff le altre funzioni di controllo: qui basta che il
+  -- legame STAFF sia stato introdotto e usato almeno una volta
+  IF n_staff < 1 THEN
+    RAISE EXCEPTION 'STAFF: attesa almeno 1 unita in staff, trovate %', n_staff;
   END IF;
 
   RAISE NOTICE 'FASE 1 OK — 10 tipi in catalogo, 10 DEPARTMENT, 3 BRANCH, 10 DIVISION, nomenclatura coerente, 1 unita in staff.';

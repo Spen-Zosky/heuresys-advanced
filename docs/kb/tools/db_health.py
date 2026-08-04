@@ -60,13 +60,13 @@ SOGLIE = {
     "righe_minime_per_bloat": 1000,
     "tabelle_mai_analizzate": 0,
     "giorni_senza_dato_fresco": 7,
-    # Misurato dopo il ri-aggancio dei cataloghi (mig 000260, S1043): 214 requisiti
-    # restano su posizioni disattivate, e sono spiegati — appartengono alle 20 posizioni
-    # gia' vacanti PRIMA della ricostruzione (nessuno le occupava, quindi non hanno una
-    # posizione successore) piu' i casi in cui la posizione nuova dichiarava gia' lo
-    # stesso requisito. La soglia e' il valore reale e non una cifra tonda piu' larga:
-    # se cresce, qualcuno ha disattivato posizioni lasciandosi dietro il loro catalogo.
-    "requisiti_su_posizioni_spente": 214,
+    # Misurato dopo il ri-aggancio dei QUATTRO cataloghi (mig 000260 e 000261, S1043):
+    # 226 righe restano su posizioni disattivate, e sono spiegate — appartengono alle 20
+    # posizioni gia' vacanti PRIMA della ricostruzione (nessuno le occupava, quindi non
+    # hanno una posizione successore) piu' i casi in cui la posizione nuova dichiarava
+    # gia' lo stesso requisito. La soglia e' il valore REALE e non una cifra tonda piu'
+    # larga: se cresce, qualcuno ha disattivato posizioni lasciandosi dietro il catalogo.
+    "requisiti_su_posizioni_spente": 226,
 }
 
 
@@ -150,6 +150,8 @@ def sonde() -> list[tuple[str, str, bool]]:
              + (SELECT count(*) FROM sys.sys_position_learning_requirements r
                  JOIN sys.sys_positions p ON p.position_id=r.position_id WHERE NOT p.position_is_active)
              + (SELECT count(*) FROM sys.sys_position_kpi_requirements r
+                 JOIN sys.sys_positions p ON p.position_id=r.position_id WHERE NOT p.position_is_active)
+             + (SELECT count(*) FROM sys.sys_position_compensation_profiles r
                  JOIN sys.sys_positions p ON p.position_id=r.position_id WHERE NOT p.position_is_active)""")
     out.append(("requisiti agganciati a posizioni disattivate", orfani_req,
                 int(orfani_req) > SOGLIE["requisiti_su_posizioni_spente"]))

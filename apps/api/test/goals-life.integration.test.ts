@@ -15,6 +15,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { idDi, unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const PFX = `IT_GL_${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -46,9 +47,15 @@ describe("#26 goal/OKR life sub-resources", () => {
     suite = await buildTestApp();
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
     paolo = await login(suite, "paolo.caputo@rtl-bank.org");
-    tommaso = await login(suite, "tommaso.fiore@rtl-bank.org");
-    tommasoId = await userId("tommaso.fiore@rtl-bank.org");
-    antonioId = await userId("antonio.parisi@rtl-bank.org");
+    // [S1043] Sottoposto ed estraneo derivati dall'albero delle UNITA': la
+    // ricostruzione dell'organigramma ha invertito i ruoli dei due indirizzi che
+    // stavano qui. Vedi helpers/org-actors.ts.
+    const paoloOrg = await idDi(pool, "paolo.caputo@rtl-bank.org");
+    const sottoposto = await unSottopostoOrganizzativo(pool, paoloOrg);
+    const estraneo = await unEstraneoOrganizzativo(pool, paoloOrg);
+    tommaso = await login(suite, sottoposto.email);
+    tommasoId = sottoposto.userId;
+    antonioId = estraneo.userId;
     paoloId = await userId("paolo.caputo@rtl-bank.org");
     federicaId = await userId("federica.marchetti@rtl-bank.org");
     const t = await pool.query<{ user_tenant_id: string }>(

@@ -38,6 +38,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { idDi, unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const SUITE_PREFIX = `IT_ASCOPE_${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -92,8 +93,15 @@ describe("/v1/assessments — F3 org-axis isolation (ADR-0027, D-50)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     paolo = await login(suite, "paolo.caputo@rtl-bank.org");
-    tommaso = await login(suite, "tommaso.fiore@rtl-bank.org");
-    antonio = await login(suite, "antonio.parisi@rtl-bank.org");
+    // [S1043] Il sottoposto e l'estraneo si derivano dall'albero delle UNITA', non
+    // dai due indirizzi che stavano qui: la ricostruzione dell'organigramma ha
+    // invertito quei ruoli (tommaso.fiore dirige oggi un'altra filiale, antonio.parisi
+    // e' finito dentro la divisione di paolo). Vedi helpers/org-actors.ts.
+    const paoloId = await idDi(pool, "paolo.caputo@rtl-bank.org");
+    const sottoposto = await unSottopostoOrganizzativo(pool, paoloId);
+    const estraneo = await unEstraneoOrganizzativo(pool, paoloId);
+    tommaso = await login(suite, sottoposto.email);
+    antonio = await login(suite, estraneo.email);
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
     admin = await login(suite, "admin@heuresys.com");
 

@@ -31,6 +31,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { idDi, unMembroDiSquadra, unFuoriSquadra } from "./helpers/org-actors.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const TAG = `FXSCOPE-${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -51,14 +52,6 @@ let federica: S; // TENANT_ADMIN → HR mandate
 let tommasoId: string; // member of paolo's team → inside the functional scope
 let antonioId: string; // member of another team → outside it
 let rtlTenantId: string;
-
-async function userId(email: string): Promise<{ id: string; tenantId: string }> {
-  const r = await pool.query<{ user_id: string; user_tenant_id: string }>(
-    `SELECT user_id, user_tenant_id FROM sys.sys_users WHERE user_email = $1`,
-    [email],
-  );
-  return { id: r.rows[0]!.user_id, tenantId: r.rows[0]!.user_tenant_id };
-}
 
 /** Insert a PENDING request authored by `createdBy`, optionally with an approver step. */
 async function seedRequest(title: string, createdBy: string, approverUserId?: string): Promise<string> {
@@ -99,11 +92,20 @@ describe("ADR-0027 F4 — approvals are gated by the FUNCTIONAL axis", () => {
     suite = await buildTestApp();
     paolo = await login(suite, "paolo.caputo@rtl-bank.org");
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
-    const t = await userId("tommaso.fiore@rtl-bank.org");
-    const a = await userId("antonio.parisi@rtl-bank.org");
-    tommasoId = t.id;
-    antonioId = a.id;
-    rtlTenantId = t.tenantId;
+    // [S1043] Sottoposto ed estraneo derivati dall'albero delle UNITA': la
+    // ricostruzione dell'organigramma ha invertito i ruoli dei due indirizzi che
+    // stavano qui. Vedi helpers/org-actors.ts.
+    // ASSE FUNZIONALE, non organizzativo: qui «dentro» e «fuori» si misurano
+    // sull'appartenenza a una SQUADRA guidata da paolo. Al primo tentativo avevo
+    // usato l'asse gerarchico e il test falliva per la ragione sbagliata.
+    const paoloOrg = await idDi(pool, "paolo.caputo@rtl-bank.org");
+    const sottoposto = await unMembroDiSquadra(pool, paoloOrg);
+    const estraneo = await unFuoriSquadra(pool, paoloOrg);
+    tommasoId = sottoposto.userId;
+    antonioId = estraneo.userId;
+    const tt = await pool.query<{ user_tenant_id: string }>(
+      `SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1`, [tommasoId]);
+    rtlTenantId = tt.rows[0]!.user_tenant_id;
 
     inScope = await seedRequest(`${TAG} in-scope`, tommasoId);
     outOfScope = await seedRequest(`${TAG} out-of-scope`, antonioId);

@@ -12,6 +12,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { idDi, unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const PFX = `IT_EV_${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -34,14 +35,20 @@ describe("#27 evidence layer", () => {
     suite = await buildTestApp();
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
     paolo = await login(suite, "paolo.caputo@rtl-bank.org");
-    tommaso = await login(suite, "tommaso.fiore@rtl-bank.org");
-    const u = await pool.query<{ user_id: string; user_email: string; user_tenant_id: string }>(
-      `SELECT user_id, user_email, user_tenant_id FROM sys.sys_users WHERE user_email = ANY($1)`,
-      [["tommaso.fiore@rtl-bank.org", "antonio.parisi@rtl-bank.org"]]);
-    for (const row of u.rows) {
-      if (row.user_email.startsWith("tommaso")) { tommasoId = row.user_id; rtlTenantId = row.user_tenant_id; }
-      else antonioId = row.user_id;
-    }
+    // [S1043] Il sottoposto e l'estraneo NON sono piu' due indirizzi scritti qui: la
+    // ricostruzione dell'organigramma ha invertito quei ruoli (tommaso.fiore dirige
+    // oggi la Filiale di Varese, antonio.parisi e' finito DENTRO la divisione di
+    // paolo). Si derivano dall'albero delle unita, che e' indipendente da quello che
+    // il resolver percorre — vedi helpers/org-actors.ts.
+    const paoloId = await idDi(pool, "paolo.caputo@rtl-bank.org");
+    const sottoposto = await unSottopostoOrganizzativo(pool, paoloId);
+    const estraneo = await unEstraneoOrganizzativo(pool, paoloId);
+    tommaso = await login(suite, sottoposto.email);
+    tommasoId = sottoposto.userId;
+    antonioId = estraneo.userId;
+    const t = await pool.query<{ user_tenant_id: string }>(
+      `SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1`, [tommasoId]);
+    rtlTenantId = t.rows[0]!.user_tenant_id;
     // Deterministic evidence on tommaso: 1 assessment + 1 anonymous 360.
     // assessment_id is NOT NULL — reuse any real assessment in the tenant.
     const anyAssess = await pool.query<{ id: string }>(

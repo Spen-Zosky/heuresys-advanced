@@ -30,6 +30,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const FIXTURE_MODEL_VERSION = "f3-scope-fixture"; // marker → precise afterAll cleanup
@@ -121,6 +122,7 @@ let federica: Session; // TENANT_ADMIN (RTL) — HR-mandated, tenant-wide
 let paolo: Session; // MANAGER + ORG_DIRECTOR(fixture) — sub-tree
 let tommaso: Session; // USER + ORG_DIRECTOR(fixture) — self only
 const ids = {} as Record<keyof typeof EMAILS, string>;
+let emailSottoposto: string;
 let rtlTenantId: string;
 let orgDirectorRoleId: string;
 let paoloSubtree: Set<string>;
@@ -140,6 +142,19 @@ beforeAll(async () => {
     ids[key] = row.user_id;
   }
   rtlTenantId = byEmail.get(EMAILS.paolo)!.user_tenant_id;
+
+  // [S1043] Sottoposto ed estraneo NON sono piu' i due indirizzi della mappa qui
+  // sopra: la ricostruzione dell'organigramma ha invertito quei ruoli. Si derivano
+  // dall'albero delle UNITA', che e' indipendente da quello che il resolver percorre
+  // — vedi helpers/org-actors.ts. Le chiavi `tommaso`/`antonio` restano solo come
+  // nomi di comodo per non riscrivere ogni asserzione.
+  {
+    const sottoposto = await unSottopostoOrganizzativo(pool, ids.paolo);
+    const estraneo = await unEstraneoOrganizzativo(pool, ids.paolo);
+    ids.tommaso = sottoposto.userId;
+    ids.antonio = estraneo.userId;
+    emailSottoposto = sottoposto.email;
+  }
 
   const roleRes = await pool.query<{ auth_role_id: string }>(
     `SELECT auth_role_id FROM sys.sys_auth_roles WHERE auth_role_code = 'ORG_DIRECTOR'`,
@@ -178,7 +193,7 @@ beforeAll(async () => {
   admin = await login(suite, EMAILS.admin);
   federica = await login(suite, EMAILS.federica);
   paolo = await login(suite, EMAILS.paolo);
-  tommaso = await login(suite, EMAILS.tommaso);
+  tommaso = await login(suite, emailSottoposto);
 
   // FIXTURE 2 — deterministic EMPLOYEE score rows for tommaso (in paolo's sub-tree) and antonio
   // (outsider). computed_at in the future wins the DISTINCT-ON latest-cohort pick, so both are

@@ -23,6 +23,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { pool } from "../src/db/client.js";
 import { orgSubtreeUserIds, orgAncestorUserIds, isInOrgSubtree } from "../src/lib/scope/org.js";
+import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 
 async function uid(email: string): Promise<string> {
   const r = await pool.query<{ id: string }>(
@@ -31,57 +32,6 @@ async function uid(email: string): Promise<string> {
   );
   const id = r.rows[0]?.id;
   if (!id) throw new Error(`fixture user not found: ${email}`);
-  return id;
-}
-
-/** Una persona che, SECONDO L'ALBERO DELLE UNITA', lavora dentro l'unita diretta da
- *  `manager` (o in una sua discendente) — e non e' il manager stesso. Derivata dal
- *  vivo: e' l'atteso indipendente contro cui si misura il resolver. */
-async function unSottopostoOrganizzativo(manager: string): Promise<string> {
-  const r = await pool.query<{ id: string }>(
-    `WITH RECURSIVE sue(unita) AS (
-       SELECT organization_unit_id FROM sys.sys_organization_units
-        WHERE organization_unit_manager_user_id = $1 AND organization_unit_is_active
-       UNION
-       SELECT o.organization_unit_id FROM sys.sys_organization_units o
-         JOIN sue ON o.organization_unit_parent_id = sue.unita
-        WHERE o.organization_unit_is_active)
-     SELECT a.user_position_assignment_user_id AS id
-       FROM sue
-       JOIN sys.sys_positions p ON p.position_organization_unit_id = sue.unita
-       JOIN sys.sys_user_position_assignments a
-         ON a.user_position_assignment_position_id = p.position_id
-        AND a.user_position_assignment_status = 'ACTIVE'
-      WHERE a.user_position_assignment_user_id <> $1
-      ORDER BY a.user_position_assignment_user_id LIMIT 1`,
-    [manager],
-  );
-  const id = r.rows[0]?.id;
-  if (!id) throw new Error("nessun sottoposto organizzativo: verifica cieca");
-  return id;
-}
-
-/** Una persona che, secondo l'albero delle UNITA', NON lavora sotto `manager`. */
-async function unEstraneoOrganizzativo(manager: string): Promise<string> {
-  const r = await pool.query<{ id: string }>(
-    `WITH RECURSIVE sue(unita) AS (
-       SELECT organization_unit_id FROM sys.sys_organization_units
-        WHERE organization_unit_manager_user_id = $1 AND organization_unit_is_active
-       UNION
-       SELECT o.organization_unit_id FROM sys.sys_organization_units o
-         JOIN sue ON o.organization_unit_parent_id = sue.unita
-        WHERE o.organization_unit_is_active)
-     SELECT a.user_position_assignment_user_id AS id
-       FROM sys.sys_user_position_assignments a
-       JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
-      WHERE a.user_position_assignment_status = 'ACTIVE'
-        AND a.user_position_assignment_user_id <> $1
-        AND p.position_organization_unit_id NOT IN (SELECT unita FROM sue)
-      ORDER BY a.user_position_assignment_user_id LIMIT 1`,
-    [manager],
-  );
-  const id = r.rows[0]?.id;
-  if (!id) throw new Error("nessun estraneo organizzativo: verifica cieca");
   return id;
 }
 
@@ -99,8 +49,8 @@ describe("scope/org — organizational axis (F0, ADR-0027)", () => {
     // `tommaso` = un sottoposto vero, `antonio` = un estraneo vero. I nomi delle
     // variabili restano per non riscrivere ogni asserzione, ma le persone non sono
     // piu' scelte a mano: le sceglie l'organigramma di oggi.
-    tommaso = await unSottopostoOrganizzativo(paolo);
-    antonio = await unEstraneoOrganizzativo(paolo);
+    tommaso = (await unSottopostoOrganizzativo(pool, paolo)).userId;
+    antonio = (await unEstraneoOrganizzativo(pool, paolo)).userId;
     expect(tommaso).not.toBe(antonio);
   });
 

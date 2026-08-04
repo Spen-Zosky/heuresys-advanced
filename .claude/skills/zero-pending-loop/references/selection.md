@@ -23,6 +23,21 @@ Questo e' anche cio' che rende il loop robusto a interruzioni brutali: corrente 
 
 Applica i filtri in quest'ordine e prendi il primo cluster che sopravvive. L'ordine non e' arbitrario: ogni gradino evita un modo specifico di sprecare lavoro.
 
+0. **Il criterio e' gia' soddisfatto?** Prima di lavorare un cluster, **riesegui il suo criterio di
+   chiusura**. Se passa gia', il cluster si chiude come **«risolto per altra via»** citando
+   l'evidenza (comando + output + data) e si passa al successivo. Costa secondi; l'alternativa e'
+   spendere ore su un problema che non esiste piu'. Se il criterio non e' rieseguibile con un
+   comando, il cluster va **prima riscritto perche' lo sia** — un criterio che nessun comando puo'
+   verificare non e' un criterio, e' un'opinione.
+
+   *Perche' e' il passo zero e non un dettaglio*: il piano e' stato censito una volta e la sessione
+   canonica continua a lavorare in parallelo, quindi lo scarto fra «aperto nel piano» e «aperto
+   nella realta'» cresce ogni giorno. Misurato in lab il 2026-08-03 su un campione mirato di 8
+   cluster aperti: **8 su 8** erano gia' risolti, a premessa mutata, o con l'effort da riscrivere.
+   La sessione di prova di quello stesso impianto ha perfino proposto **Z-203**, chiuso in S1032
+   con la casella mai spuntata. Senza questo gradino il loop lavora sulla fotografia invece che
+   sulla realta'.
+
 1. **`INTERRUPTED` con `resume-from`** — priorita' assoluta. Un lavoro a metta' e' la cosa piu'
    fragile che esiste nel repo: piu' resta aperto, piu' il contesto che lo giustificava svanisce.
 2. **`blocking: HARD`** — cluster che tengono fermo altro lavoro. Chiuderne uno sblocca N.

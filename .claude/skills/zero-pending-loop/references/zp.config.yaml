@@ -409,6 +409,10 @@ clusters:
   Z-256: {classe: B, perche: "codice: test"}
   Z-257: {classe: C, perche: "schema e dati: fk, sys_user, tabelle"}
   Z-258: {classe: C, perche: "schema e dati: FK, colonna, sys_tenancies"}
+  Z-259: {classe: C, perche: "schema e dati: sys_feedback"}
+  Z-260: {classe: C, perche: "schema e dati: FK, migrazion, schema"}
+  Z-261: {classe: D, perche: "produzione viva: .env, TOTP, produzione"}
+  Z-262: {classe: D, perche: "produzione viva: TOTP, produzione, rotazion"}
 
 
 # Override auto-appresi. Azzerabile in blocco senza toccare il resto della config.

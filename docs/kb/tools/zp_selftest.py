@@ -113,8 +113,14 @@ def main() -> int:
 
     # 2 - ogni cluster aperto ha una classe
     senza = [c.id for c in aperti if not c.classe]
+    # L'elenco era troncato a 3 SENZA dirlo, accanto a un conteggio che diceva 4:
+    # chi leggeva «4 senza classe: [tre id]» andava a classificarne tre e restava col
+    # test rosso. Un taglio che non si dichiara fa sembrare completo un elenco che non
+    # lo e'. Ora si mostra fino a 8 e, se ce ne sono altri, lo si scrive.
     prova('2 tutti classificati', not senza,
-          'tutti' if not senza else f'{len(senza)} senza classe: {senza[:3]}')
+          'tutti' if not senza
+          else f'{len(senza)} senza classe: {senza[:8]}'
+               + (f' e altri {len(senza) - 8}' if len(senza) > 8 else ''))
 
     # 3 - il rifiuto delle prove omogenee
     # Aspettative riscritte sulla Definition of Done del progetto (S1030): le prime due
@@ -204,7 +210,18 @@ def main() -> int:
     da_fare_a_mano('bootstrap non ri-censisce', 'serve una sessione viva: /zero-pending-loop bootstrap')
     da_fare_a_mano('freno a meta lavoro', 'serve una corsa vera: zp ferma mentre gira')
     da_fare_a_mano('troncamento da budget', 'serve una corsa vera con --max-budget-usd basso')
-    da_fare_a_mano('frontiere della description', 'servono le 8 esche di evals/trigger-eval.json')
+    # Il numero delle esche si CONTA dal file invece di essere scritto qui: diceva «8»
+    # mentre il file ne porta 20 (10 che devono innescare, 10 che non devono). Un numero
+    # scritto a mano accanto a un file che cresce mente appena qualcuno aggiunge una riga.
+    try:
+        _f = Path(RADICE) / '.claude' / 'skills' / 'zero-pending-loop' / 'evals' / 'trigger-eval.json'
+        _esche = json.loads(_f.read_text(encoding='utf-8'))
+        _no = sum(1 for e in _esche if not e.get('should_trigger'))
+        _det = (f'servono le {len(_esche)} righe di evals/trigger-eval.json '
+                f'({_no} che NON devono innescare)')
+    except Exception as _e:
+        _det = f'evals/trigger-eval.json non leggibile ({_e})'
+    da_fare_a_mano('frontiere della description', _det)
 
     larghezza = max(len(n) for n, _, _ in ESITI)
     passati = falliti = 0
@@ -217,7 +234,11 @@ def main() -> int:
         else:
             falliti += 1
             print(f'[FALLISCE] {nome:<{larghezza}}  {dett}')
-    print(f'\n{passati} passati, {falliti} falliti, 4 da fare a mano con una sessione viva')
+    # anche questo si conta invece di essere scritto: aggiungere una prova presidiata
+    # senza toccare il letterale avrebbe prodotto un riepilogo che contraddice l'elenco
+    # stampato due righe sopra.
+    a_mano = sum(1 for _, e, _ in ESITI if e is None)
+    print(f'\n{passati} passati, {falliti} falliti, {a_mano} da fare a mano con una sessione viva')
     return 1 if falliti else 0
 
 

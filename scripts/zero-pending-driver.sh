@@ -111,6 +111,22 @@ CLASSIFICATI="$(cfg meta.clusters_classified)"
 
 mkdir -p "$ZP"
 
+# --- autenticazione: si toglie di mezzo SOLO la chiave API utente ---------------------
+# Sul PC Windows di Enzo esiste una ANTHROPIC_API_KEY a livello UTENTE, stantia e non
+# piu' valida. Scavalca il login ad abbonamento: ogni `claude -p` la eredita e muore con
+# «401 API key is invalid». Scoperto dal primo collaudo presidiato dell'impianto
+# (2026-08-03) — avrebbe rotto la corsa notturna al primo giro vero, e in modo muto,
+# perche' il driver avrebbe solo visto sessioni che falliscono.
+#
+# La plancia si difende gia' da sola; questa e' la stessa difesa nel driver, che si
+# lancia anche a mano. Politica decisa da Enzo: si spoglia SOLO la API key e si PRESERVA
+# ANTHROPIC_AUTH_TOKEN, che e' la via dell'abbonamento; in sua assenza vale il login
+# claude.ai della CLI.
+if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
+  log "trovata ANTHROPIC_API_KEY nell'ambiente: la tolgo per questa corsa (scavalca il login ad abbonamento)"
+  unset ANTHROPIC_API_KEY
+fi
+
 # ---------------------------------------------------------------- guard-rail
 
 [[ -f "$STOP" ]] && { log "il freno e' tirato ($STOP). Togli il file e rilancia."; exit 0; }

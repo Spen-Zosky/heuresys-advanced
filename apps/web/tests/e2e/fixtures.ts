@@ -94,9 +94,23 @@ export const PERSONAS = {
     email: "paolo.caputo@rtl-bank.org",
     expectedLandingPath: "/dashboard",
   },
+  // S1043: `tommaso.fiore` ATTERRA ORA SUL CRUSCOTTO, non piu' su /me. Non e' una
+  // regressione mascherata: la ricostruzione dell'organigramma lo ha nominato
+  // responsabile della Filiale di Varese, e la 000259 gli ha dato il `TEAM_LEADER`
+  // che quel comando comporta. `landingForRoles` manda su /me solo chi ha
+  // esclusivamente ruoli self-service (USER/READ_ONLY/TEAM_MEMBER), quindi un capo
+  // filiale va sul cruscotto — ed e' giusto.
+  //
+  // NON e' stato sostituito con un'altra persona: 34 spec lo nominano e dipendono
+  // dai suoi dati seminati (carriera, My HR, embedding del profilo). Cambiare
+  // persona avrebbe rotto molto piu' di quanto riparasse.
+  //
+  // La copertura dell'atterraggio su /me NON si perde: la garantisce `outsider`,
+  // che e' rimasto rank-and-file (TEAM_MEMBER+USER, non regge unita ne' squadre) —
+  // verificato sul database, non supposto.
   employee: {
     email: "tommaso.fiore@rtl-bank.org",
-    expectedLandingPath: "/me",
+    expectedLandingPath: "/dashboard",
   },
   outsider: {
     email: "antonio.parisi@rtl-bank.org",

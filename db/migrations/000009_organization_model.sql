@@ -15,11 +15,32 @@ CREATE TABLE IF NOT EXISTS sys.sys_organization_unit_types (
   updated_at                         timestamptz  NOT NULL DEFAULT now()
 );
 
-ALTER TABLE sys.sys_organization_unit_types
-  DROP CONSTRAINT IF EXISTS sys_organization_unit_type_code_check;
-ALTER TABLE sys.sys_organization_unit_types
-  ADD CONSTRAINT sys_organization_unit_type_code_check
-  CHECK (organization_unit_type_code IN ('HEADQUARTERS', 'DIVISION', 'DEPARTMENT', 'TEAM', 'BRANCH', 'OFFICE', 'PLANT', 'WAREHOUSE'));
+-- Il vincolo si (ri)crea SOLO se nessuna riga presente lo violerebbe.
+--
+-- Serve perche' `migrate.sh` ri-applica OGNI file a ogni corsa, quindi una
+-- migrazione vecchia puo' disfare una nuova: la `000244` allarga questo elenco con
+-- `GENERAL_MANAGEMENT` e `AREA`, e senza questa guardia la ri-esecuzione di questo
+-- file lo restringerebbe di nuovo — fallendo proprio sulle righe che la 000244 ha
+-- inserito. E' cosi' che la CI si e' fermata qui in S1043, mentre in locale tutto
+-- era verde: in locale le migrazioni si applicano UNA volta, in CI si ri-applicano
+-- tutte dalla 000001.
+--
+-- Su un database nuovo la tabella e' vuota, la condizione e' vera e il vincolo nasce
+-- con gli otto codici originali: il comportamento di partenza non cambia.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM sys.sys_organization_unit_types
+     WHERE organization_unit_type_code NOT IN
+           ('HEADQUARTERS','DIVISION','DEPARTMENT','TEAM','BRANCH','OFFICE','PLANT','WAREHOUSE')
+  ) THEN
+    ALTER TABLE sys.sys_organization_unit_types
+      DROP CONSTRAINT IF EXISTS sys_organization_unit_type_code_check;
+    ALTER TABLE sys.sys_organization_unit_types
+      ADD CONSTRAINT sys_organization_unit_type_code_check
+      CHECK (organization_unit_type_code IN ('HEADQUARTERS', 'DIVISION', 'DEPARTMENT', 'TEAM', 'BRANCH', 'OFFICE', 'PLANT', 'WAREHOUSE'));
+  END IF;
+END $$;
 
 CREATE UNIQUE INDEX IF NOT EXISTS sys_organization_unit_types_code_uq
   ON sys.sys_organization_unit_types (organization_unit_type_code);

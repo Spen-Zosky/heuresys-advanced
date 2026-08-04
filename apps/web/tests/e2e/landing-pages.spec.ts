@@ -10,10 +10,15 @@ import { test, expect } from "@playwright/test";
 import { storageStateFor } from "./fixtures";
 
 test.describe("MVP-2a landing pages — live data", () => {
-  test.describe("as employee (pure USER)", () => {
+  // S1043: la persona `employee` e' oggi responsabile di filiale (TEAM_LEADER), quindi
+  // ATTERRA sul cruscotto. Continua pero' a non vedere la navigazione di
+  // amministrazione, perche' quella e' riservata a un insieme piu' stretto
+  // (PLATFORM_ADMIN/TENANT_ADMIN/MANAGER/…), e TEAM_LEADER non vi appartiene. Le due
+  // cose non coincidono, ed e' proprio questa distinzione che il test difende.
+  test.describe("as employee (TEAM_LEADER, senza navigazione di amministrazione)", () => {
     test.use({ storageState: storageStateFor("employee") });
 
-    test("/me renders with role + greeting + cards + pure-USER nav", async ({ page }) => {
+    test("/me renders with role + greeting + cards + no admin nav", async ({ page }) => {
       await page.goto("/me");
       await expect(page).toHaveURL(/\/me$/);
 
@@ -26,7 +31,7 @@ test.describe("MVP-2a landing pages — live data", () => {
       await expect(page.getByTestId("me-learning-count")).toContainText(/\d+\s+assegnati/);
       await expect(page.getByTestId("me-gaps-count")).toContainText(/\d+\s+aperti/);
 
-      // Pure USER must NOT see admin nav links.
+      // Non vede la navigazione di amministrazione: TEAM_LEADER non e un ruolo di classe admin.
       await expect(page.getByTestId("nav-me")).toBeVisible();
       await expect(page.getByTestId("nav-dashboard")).toHaveCount(0);
       await expect(page.getByTestId("nav-users")).toHaveCount(0);

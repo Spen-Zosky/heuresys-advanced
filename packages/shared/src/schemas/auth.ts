@@ -56,9 +56,44 @@ export const LoginResponseSchema = z.object({
     email: z.email(),
   }),
   roles: z.array(RoleCodeSchema),
+  /**
+   * The caller's flattened RBAC permission codes, resolved server-side from the
+   * boot-loaded role×permission cache. Present so the client can derive what it
+   * may do from what it MAY DO, not from an enumeration of role names: the
+   * landing decision (#116) reads `dashboard:view` here instead of guessing from
+   * `roles`. Same payload as GET /v1/me/permissions, delivered with the login so
+   * the redirect costs no extra round-trip.
+   */
+  permissions: z.array(z.string()),
   csrfToken: z.string().min(1),
 });
 export type LoginResponse = z.infer<typeof LoginResponseSchema>;
+
+/* --- Where a successful login lands (#116) -------------------------------- */
+
+/** The permission the API enforces on the dashboard surface itself. */
+export const DASHBOARD_PERMISSION = "dashboard:view";
+
+/**
+ * The landing rule, derived from grants rather than enumerated from role names:
+ * **you land on the dashboard if you may view the dashboard.**
+ *
+ * It lives beside `LoginResponseSchema` because it consumes that contract's
+ * `permissions` field, and because the regression test that must fail when
+ * someone re-hardcodes a role list needs to read this rule and the live RBAC map
+ * in the same process (`apps/api/test/landing-derivation.integration.test.ts`).
+ *
+ * History — both earlier shapes decided from the SET OF ROLE NAMES: an
+ * ADMIN_ROLES allowlist, then (D-68) its inversion. The inversion closed a
+ * fall-through and opened the mirror defect: every role outside the self-service
+ * set was sent to /dashboard WITHOUT checking it could see it. Measured
+ * 2026-08-04 on the live map: 6 of 13 roles hold `dashboard:view`, so CEO,
+ * ORG_DIRECTOR, TEAM_LEADER and WHISTLEBLOWING_CUSTODIAN landed on a page they
+ * are denied — 28 of the 45 people who land there.
+ */
+export function landingForPermissions(permissions: readonly string[]): string {
+  return permissions.includes(DASHBOARD_PERMISSION) ? "/dashboard" : "/me";
+}
 
 /**
  * First-step response when the account has a verified MFA factor: no tokens

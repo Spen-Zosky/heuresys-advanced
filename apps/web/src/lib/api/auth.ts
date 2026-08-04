@@ -29,6 +29,8 @@ export interface LoginSuccessResponse {
   status: "success";
   user: AuthMeUser;
   roles: string[];
+  /** #116: resolved RBAC permission codes — the landing decision reads these. */
+  permissions: string[];
   csrfToken: string;
 }
 

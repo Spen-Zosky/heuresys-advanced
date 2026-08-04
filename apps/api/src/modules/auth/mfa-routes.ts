@@ -55,6 +55,7 @@ import type {
   AuthenticationResponseJSON,
 } from "@simplewebauthn/server";
 import { UnauthorizedError } from "../../errors/index.js";
+import { userPermissionCodes } from "../../middleware/rbac.js";
 import {
   type MfaService,
   sharedMfaService,
@@ -582,6 +583,7 @@ export const mfaRoutes: FastifyPluginAsyncZod<MfaRoutesOptions> = async (app, op
         status: "success" as const,
         user: result.user,
         roles: result.roles,
+        permissions: userPermissionCodes({ roles: result.roles }),
         csrfToken: result.csrfToken,
       };
     },

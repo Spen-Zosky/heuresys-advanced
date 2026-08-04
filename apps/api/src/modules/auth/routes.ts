@@ -32,7 +32,7 @@ import { ConsoleMailer, type IMailer } from "./mailer.js";
 import { setAuthCookies, clearAuthCookies, setEnrollmentCookies } from "./tokens.js";
 import { COOKIES } from "../../config/constants.js";
 import { env, loginRateLimitMax } from "../../config/env.js";
-import { requirePermission } from "../../middleware/rbac.js";
+import { requirePermission, userPermissionCodes } from "../../middleware/rbac.js";
 import { UnauthorizedError } from "../../errors/index.js";
 
 export interface AuthRoutesOptions {
@@ -135,6 +135,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         status: "success" as const,
         user: result.user,
         roles: result.roles,
+        permissions: userPermissionCodes({ roles: result.roles }),
         csrfToken: result.csrfToken,
       };
     },
@@ -170,6 +171,7 @@ export const authRoutes: FastifyPluginAsyncZod<AuthRoutesOptions> = async (app, 
         status: "success" as const,
         user: result.user,
         roles: result.roles,
+        permissions: userPermissionCodes({ roles: result.roles }),
         csrfToken: result.csrfToken,
       };
     },

@@ -13,7 +13,7 @@ import { useLogin, type LoginSuccessResponse } from "../../lib/api/auth";
 import { apiFetch } from "../../lib/api/fetch";
 import { csrfStore } from "../../lib/api/csrf-store";
 import { isApiError } from "../../lib/api/errors";
-import { landingForRoles } from "../../lib/landing";
+import { landingForPermissions } from "../../lib/landing";
 
 const LoginFormSchema = z.object({
   email: z.string().email(),
@@ -94,8 +94,11 @@ export default function LoginPage() {
     defaultValues: { email: "", password: "" },
   });
 
-  function redirectFor(roles: string[]) {
-    const dest = readNextParam() ?? landingForRoles(roles);
+  // #116: the destination is derived from what the caller may DO, never from
+  // which roles they hold — the login response carries the resolved permission
+  // codes precisely so this decision needs no second round-trip.
+  function redirectFor(permissions: string[]) {
+    const dest = readNextParam() ?? landingForPermissions(permissions);
     router.replace(dest);
   }
 
@@ -147,7 +150,7 @@ export default function LoginPage() {
         });
         return;
       }
-      redirectFor(res.roles);
+      redirectFor(res.permissions);
     } catch (e) {
       handleError(e);
     }
@@ -165,7 +168,7 @@ export default function LoginPage() {
         mfaCode,
       });
       if (res.status === "success") {
-        redirectFor(res.roles);
+        redirectFor(res.permissions);
         return;
       }
       if (res.status === "mfa_required") {
@@ -196,7 +199,7 @@ export default function LoginPage() {
       // Review fix S981: the verify rotated the CSRF cookie — seed the store like
       // useLogin does, or the first SPA mutation after a passkey login 403s.
       csrfStore.set(res.csrfToken);
-      redirectFor(res.roles);
+      redirectFor(res.permissions);
     } catch {
       // A failed/aborted ceremony consumed the challenge token — re-mint it by
       // re-running step 1 so the user can retry (code OR passkey).
@@ -206,7 +209,7 @@ export default function LoginPage() {
           setMfa({ ...mfa, challengeToken: fresh.challengeToken, availableKinds: fresh.availableKinds });
         } else if (fresh.status === "success") {
           // Factor removed in the window — the re-login succeeded outright.
-          redirectFor(fresh.roles);
+          redirectFor(fresh.permissions);
           return;
         } else {
           // Back to the enrollment gate (factor gone + policy still on).
@@ -350,7 +353,7 @@ export default function LoginPage() {
       return;
     }
     if (res.status === "success") {
-      redirectFor(res.roles);
+      redirectFor(res.permissions);
       return;
     }
     // Factor vanished in the window (concurrent session / admin op) — restart

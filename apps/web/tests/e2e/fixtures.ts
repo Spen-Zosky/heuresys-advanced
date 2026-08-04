@@ -94,36 +94,35 @@ export const PERSONAS = {
     email: "paolo.caputo@rtl-bank.org",
     expectedLandingPath: "/dashboard",
   },
-  // S1043: `tommaso.fiore` ATTERRA ORA SUL CRUSCOTTO, non piu' su /me. Non e' una
-  // regressione mascherata: la ricostruzione dell'organigramma lo ha nominato
-  // responsabile della Filiale di Varese, e la 000259 gli ha dato il `TEAM_LEADER`
-  // che quel comando comporta. `landingForRoles` manda su /me solo chi ha
-  // esclusivamente ruoli self-service (USER/READ_ONLY/TEAM_MEMBER), quindi un capo
-  // filiale va sul cruscotto — ed e' giusto.
+  // S1044 (#116): `tommaso.fiore` TORNA su /me. La riga S1043 che lo mandava sul
+  // cruscotto descriveva il difetto, non una scelta: `landingForRoles` mandava li'
+  // chiunque avesse un ruolo fuori dal set self-service SENZA verificare che quel
+  // ruolo potesse vedere la pagina. Misurato sul DB: lui ha TEAM_LEADER+TEAM_MEMBER
+  // +USER, e nessuno dei tre concede `dashboard:view` — atterrava su una pagina che
+  // gli e' negata. Ora l'atterraggio si deriva dal permesso, quindi va su /me.
+  //
+  // Se si decide che un capo filiale DEBBA vedere il cruscotto, la correzione e'
+  // dargli `dashboard:view` nella mappa RBAC: questa riga seguira' da sola.
   //
   // NON e' stato sostituito con un'altra persona: 34 spec lo nominano e dipendono
-  // dai suoi dati seminati (carriera, My HR, embedding del profilo). Cambiare
-  // persona avrebbe rotto molto piu' di quanto riparasse.
-  //
-  // La copertura dell'atterraggio su /me NON si perde: la garantisce `outsider`,
-  // che e' rimasto rank-and-file (TEAM_MEMBER+USER, non regge unita ne' squadre) —
-  // verificato sul database, non supposto.
+  // dai suoi dati seminati (carriera, My HR, embedding del profilo).
   employee: {
     email: "tommaso.fiore@rtl-bank.org",
-    expectedLandingPath: "/dashboard",
+    expectedLandingPath: "/me",
   },
   outsider: {
     email: "antonio.parisi@rtl-bank.org",
     expectedLandingPath: "/me",
   },
-  // #51 E1 (S1026) + D-68 (S1027): the WHISTLEBLOWING_CUSTODIAN (mig 000205)
-  // is a functional/custodial role — under the D-68 inverted landing logic
-  // (lib/landing.ts: closed SELF_SERVICE set, every other role → admin) the
-  // custodian lands on /dashboard, where the Governance sidebar hosts the
-  // custodian-only console entry.
+  // #51 E1 (S1026) + D-68 (S1027) + #116 (S1044): il WHISTLEBLOWING_CUSTODIAN
+  // (mig 000205) e' un ruolo funzionale/custodiale e NON ha `dashboard:view`
+  // (verificato sul DB: TEAM_LEADER+TEAM_MEMBER+USER+WHISTLEBLOWING_CUSTODIAN,
+  // nessuno lo concede). Atterra quindi su /me — che e' l'esito voluto: la sua
+  // console e' un'altra cosa dal cruscotto, e resta raggiungibile perche' /me vive
+  // sotto lo stesso layout autenticato che monta la sidebar.
   custodian: {
     email: "andrea.martino@rtl-bank.org",
-    expectedLandingPath: "/dashboard",
+    expectedLandingPath: "/me",
   },
 } as const satisfies Record<string, { email: string; expectedLandingPath: string }>;
 

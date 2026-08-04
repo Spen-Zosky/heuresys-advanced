@@ -1,28 +1,28 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-04T00:50:46Z da docs/kb/tools/build_index.py
+# generato: 2026-08-04T21:08:30Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-04T00:50:46Z"
-  total_files: 2808
+  generated_at: "2026-08-04T21:08:30Z"
+  total_files: 2848
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 30
-    api-core: 30
+    ADR: 31
+    api-core: 32
     api-module: 336
     ci: 17
     claude-config: 36
-    config: 126
+    config: 127
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 241
+    db-migration: 267
     db-other: 8
     db-script: 44
     db-seed: 147
-    doc-canonical: 534
+    doc-canonical: 539
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 104
     showcase-source: 14
-    test: 346
+    test: 351
     ux-design-archive: 80
     web-source: 232
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2250
+    live: 2290
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -218,6 +218,12 @@ files:
     category: ADR
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0032_platform_mandate_masks_pay_and_evaluation.md'
+    root: repo
+    rel: 'docs/architecture/adr/0032_platform_mandate_masks_pay_and_evaluation.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\app.ts'
     root: repo
     rel: 'apps/api/src/app.ts'
@@ -326,6 +332,12 @@ files:
     category: api-core
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\domains.ts'
+    root: repo
+    rel: 'apps/api/src/lib/scope/domains.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\functional.ts'
     root: repo
     rel: 'apps/api/src/lib/scope/functional.ts'
@@ -335,6 +347,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\gate.ts'
     root: repo
     rel: 'apps/api/src/lib/scope/gate.ts'
+    category: api-core
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\lib\scope\mask.ts'
+    root: repo
+    rel: 'apps/api/src/lib/scope/mask.ts'
     category: api-core
     status: live
     provenance: git-tracked
@@ -3479,6 +3497,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\zero-pending-driver.sh'
     root: repo
     rel: 'scripts/zero-pending-driver.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\zp_panel.py'
+    root: repo
+    rel: 'scripts/zp_panel.py'
     category: config
     status: live
     provenance: git-tracked
@@ -7010,6 +7034,162 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000244_organization_unit_taxonomy.sql'
+    root: repo
+    rel: 'db/migrations/000244_organization_unit_taxonomy.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000245_organization_unit_new_units.sql'
+    root: repo
+    rel: 'db/migrations/000245_organization_unit_new_units.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000246_organization_unit_restructure.sql'
+    root: repo
+    rel: 'db/migrations/000246_organization_unit_restructure.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000247_organization_unit_managers.sql'
+    root: repo
+    rel: 'db/migrations/000247_organization_unit_managers.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000248_positions_command_roles.sql'
+    root: repo
+    rel: 'db/migrations/000248_positions_command_roles.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000249_positions_network_staff.sql'
+    root: repo
+    rel: 'db/migrations/000249_positions_network_staff.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000250_positions_central_staff.sql'
+    root: repo
+    rel: 'db/migrations/000250_positions_central_staff.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000251_organization_closure_and_gates.sql'
+    root: repo
+    rel: 'db/migrations/000251_organization_closure_and_gates.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000252_job_roles_for_reconstructed_positions.sql'
+    root: repo
+    rel: 'db/migrations/000252_job_roles_for_reconstructed_positions.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000253_functional_axis_after_dissolution.sql'
+    root: repo
+    rel: 'db/migrations/000253_functional_axis_after_dissolution.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000254_name_learning_paths_in_use.sql'
+    root: repo
+    rel: 'db/migrations/000254_name_learning_paths_in_use.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000255_english_names_for_new_job_roles.sql'
+    root: repo
+    rel: 'db/migrations/000255_english_names_for_new_job_roles.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000256_review_cycle_and_calibration_ddl.sql'
+    root: repo
+    rel: 'db/migrations/000256_review_cycle_and_calibration_ddl.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000257_ingest_legacy_calibration.sql'
+    root: repo
+    rel: 'db/migrations/000257_ingest_legacy_calibration.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000258_reconnect_position_tree.sql'
+    root: repo
+    rel: 'db/migrations/000258_reconnect_position_tree.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000259_command_roles_for_unit_managers.sql'
+    root: repo
+    rel: 'db/migrations/000259_command_roles_for_unit_managers.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000260_reattach_position_requirement_catalogs.sql'
+    root: repo
+    rel: 'db/migrations/000260_reattach_position_requirement_catalogs.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000261_compensation_profiles_and_band_twins.sql'
+    root: repo
+    rel: 'db/migrations/000261_compensation_profiles_and_band_twins.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000262_band_profile_and_twin_assignment.sql'
+    root: repo
+    rel: 'db/migrations/000262_band_profile_and_twin_assignment.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000263_empty_review_shell_and_history_decision.sql'
+    root: repo
+    rel: 'db/migrations/000263_empty_review_shell_and_history_decision.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000264_ten_unit_managers_to_qd3_and_mg2.sql'
+    root: repo
+    rel: 'db/migrations/000264_ten_unit_managers_to_qd3_and_mg2.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000265_heuresys_two_axes_disentangled.sql'
+    root: repo
+    rel: 'db/migrations/000265_heuresys_two_axes_disentangled.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000266_drop_stale_unit_type_check.sql'
+    root: repo
+    rel: 'db/migrations/000266_drop_stale_unit_type_check.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000267_hs_prod_becomes_a_division.sql'
+    root: repo
+    rel: 'db/migrations/000267_hs_prod_becomes_a_division.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000268_heuresys_gets_a_real_team.sql'
+    root: repo
+    rel: 'db/migrations/000268_heuresys_gets_a_real_team.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000269_rtl_teams_get_their_own_names.sql'
+    root: repo
+    rel: 'db/migrations/000269_rtl_teams_get_their_own_names.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9746,6 +9926,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\lab_inbox.py'
+    root: repo
+    rel: 'docs/kb/tools/lab_inbox.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\reconstruct_linked_manifest.py'
     root: repo
     rel: 'docs/kb/tools/reconstruct_linked_manifest.py'
@@ -9773,6 +9959,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\sync.sh'
     root: repo
     rel: 'docs/kb/tools/sync.sh'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\verifica_incrociata.py'
+    root: repo
+    rel: 'docs/kb/tools/verifica_incrociata.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11237,6 +11429,24 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-03-consegna-lab-esecuzione.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-08-03-consegna-lab-esecuzione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-04-consegne-lab-13.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-08-04-consegne-lab-13.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-04-esecuzione-lab-inbox-e-organigramma.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-08-04-esecuzione-lab-inbox-e-organigramma.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-04-perimetri-test-dopo-ricostruzione.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-08-04-perimetri-test-dopo-ricostruzione.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -13004,6 +13214,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\assessment-mask.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/assessment-mask.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\assessment-methods.integration.test.ts'
     root: repo
     rel: 'apps/api/test/assessment-methods.integration.test.ts'
@@ -13190,6 +13406,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\compensation-mask.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/compensation-mask.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\compensation-read.integration.test.ts'
     root: repo
     rel: 'apps/api/test/compensation-read.integration.test.ts'
@@ -13247,6 +13469,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\dashboard.integration.test.ts'
     root: repo
     rel: 'apps/api/test/dashboard.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\domain-derived-sections.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/domain-derived-sections.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -13376,6 +13604,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\helpers\org-actors.ts'
+    root: repo
+    rel: 'apps/api/test/helpers/org-actors.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\helpers\personas.ts'
     root: repo
     rel: 'apps/api/test/helpers/personas.ts'
@@ -13469,6 +13703,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\kpi-metrology.integration.test.ts'
     root: repo
     rel: 'apps/api/test/kpi-metrology.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\landing-derivation.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/landing-derivation.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

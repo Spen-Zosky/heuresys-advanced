@@ -10,6 +10,8 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 ## Delta S1044 (2026-08-04) — le 13 consegne del lab: l'atterraggio si deriva, la maschera esiste, dieci responsabili diventano quadri
 
+HEAD **`e04ede2c`** (8 commit). Counts ri-derivati live: **163 utenti** (162 attivi) · 161 posizioni attive · 43 OU attive · **26 team** · 2 tenant ACTIVE · RBAC **13 ruoli / 211 permessi / 947 mappature** · **267 file migration** `000001..000269`.
+
 Piano di ciclo: `docs/superpowers/specs/2026-08-04-consegne-lab-13.md` (13 righe, stato per riga).
 
 **#116 — l'atterraggio dopo il login si deriva dal permesso** (`0f619e85`). `landingForPermissions`

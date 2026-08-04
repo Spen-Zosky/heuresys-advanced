@@ -35,7 +35,7 @@ stanno 17.000 e 19.000 € sotto. **Decisione di Enzo: applicare entrambi come p
 | id | consegna | chi | fatto quando | stato |
 |---|---|---|---|---|
 | **#116** | atterraggio derivato dal permesso, non dall'elenco di ruoli | io | nessuno atterra dove non ha il permesso + test che fallisce se si ricabla la lista | ✅ **FATTO** — `0f619e85` |
-| **#124** | mascheratura nel contratto dati | io | risposta HTTP reale con importo assente e campo `masked` che lo dichiara | ⏸ **INTERROTTA** — meccanismo fatto e provato (`ADR-0032`), resta applicarlo a `EVALUATION` + aggregati + strato 1 |
+| **#124** | mascheratura nel contratto dati | io | risposta HTTP reale con importo assente e campo `masked` che lo dichiara | ⏸ **INTERROTTA** — `ADR-0032`; **entrambe** le classi che la decisione nomina (pay + valutazioni) mascherate e provate live; resta strato 1 + aggregati + frontend |
 | **#118** | dieci responsabili a `QD3` + `martina.gentile` registrata | io | `verifica_incrociata.py --famiglia X1 --famiglia X2`, X2a/X2b a zero | ✅ **FATTO** — mig `000264` |
 | **#120** | dieci posizioni a `MG-2` + collocazione retributiva | io | `X3a` a zero su universo ≠ zero; nessuno sotto 65.000 € | ✅ **FATTO** — mig `000264` |
 | **#119** | `UI_ADMIN_ROLES` e i tre `return "TEAM"` derivati dai domini | io | `CEO` vede le sezioni senza comparire in alcuna lista | ✅ **FATTO** |
@@ -43,7 +43,7 @@ stanno 17.000 e 19.000 € sotto. **Decisione di Enzo: applicare entrambi come p
 | **#123** | leggere `organigramma-bis.html` ed eseguirne le situazioni | io | `verifica_incrociata.py` con universi ≠ zero | da fare |
 | **#121** | la guardia lab smette di rifiutare letture legittime | io | `hook.sh selftest` verde coi 6 casi nuovi come regressione | da fare |
 | **#128** | registro sessioni completo, niente cancellazione automatica | io | `hook.sh selftest` verde + `hook.sh storico` che elenca le sessioni | da fare |
-| **#122** | `HS-MGMT` doppio e `HS-PROD` ri-tipizzata | io | 0 unità attive di tipo `TEAM`; nessun codice condiviso fra assi | da fare |
+| **#122** | `HS-MGMT` doppio e `HS-PROD` ri-tipizzata | io | 0 unità attive di tipo `TEAM`; nessun codice condiviso fra assi | 🟡 **META'** — Heuresys fatto (mig `000265`-`000268`); le 23 squadre di RTL → **WAIT-INPUT**, decisione di Enzo |
 | **#125** | 22 pagine orfane + 52 etichette senza traduzione | io | nessuna pagina senza voce né motivazione; parità i18n verde | da fare |
 | **#126** | predizioni e mentore visibili all'interessato | io | login reale che apre il proprio portale e vede le proprie predizioni | da fare |
 | **#117** | completezza del portale derivata meccanicamente | io | strumento ri-eseguibile, zero tabelle «scoperte», conteggio che cambia | da fare |

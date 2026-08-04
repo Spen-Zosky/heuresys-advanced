@@ -44,6 +44,27 @@ Riprendere da `resume` dopo tre giorni significherebbe lavorare su una fotografi
 
 E' il modo consigliato di far girare le molte sessioni che il piano richiede — quante siano lo dice `zp_state.py piano`, un cluster per iterazione, e il numero cresce a ogni censimento: non una maratona da lanciare e sperare, ma tante finestre brevi con una chiusura verificata ciascuna.
 
+## La spesa: la config e' un soffitto, la corsa puo' solo stare sotto
+
+`zp.config.yaml` fissa `budget.max_budget_usd_per_iteration` e `budget.hard_stop_usd_total`. Due flag permettono di scendere sotto quei valori **per una singola corsa**:
+
+```bash
+bash scripts/zero-pending-driver.sh --lane safe --budget-usd 5 --tetto-usd 30
+```
+
+`--budget-usd` e' la spesa massima di **un giro** (finisce nel `--max-budget-usd` di `claude -p`), `--tetto-usd` quella **cumulata** della corsa, confrontata con la spesa totale a ogni iterazione.
+
+Il clamp e' **non negoziabile e in una sola direzione**: un valore oltre il soffitto non fa fallire il lancio, viene ridotto e lo si dice.
+
+```
+richiesti $99 di budget per giro, la config ne ammette $12: uso $12
+spesa concessa a questa corsa: $12 per giro, $120 di tetto
+```
+
+La riga «spesa concessa» compare **prima dei guard-rail**: se una guardia ferma la corsa, chi l'ha lanciata vede comunque quale spesa era stata concessa. Un valore non numerico non e' un errore fatale: si logga e si usa il soffitto.
+
+Per alzare davvero il tetto si modifica `zp.config.yaml` — cioe' e' una decisione che resta scritta, non un flag di una notte.
+
 ## Guard-rail all'avvio — quando il driver si rifiuta di partire
 
 Ognuno di questi ferma il driver **prima** di aprire una sessione, perche' partire comunque significherebbe collidere con qualcuno.

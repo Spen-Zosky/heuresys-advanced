@@ -8,6 +8,18 @@
 # quello il /clear, ottenuto per costruzione invece che per comando, e per questo lo
 # stato deve stare su file e non in conversazione.
 #
+# Opzioni
+#   --lane <corsia>        quale corsia di lavoro
+#   --max-iterations <n>   quanti giri al massimo
+#   --window <finestra>    finestra oraria in cui e' ammesso lavorare
+#   --permission-mode <m>  modalita' permessi di claude -p
+#   --budget-usd <n>       spesa massima per GIRO, in dollari
+#   --tetto-usd <n>        spesa massima CUMULATA della corsa, in dollari
+#   --dry-run              stampa cosa farebbe e si ferma
+#
+# I due flag di spesa possono solo ABBASSARE i valori di zp.config.yaml, mai alzarli:
+# la config e' il soffitto. Un valore piu' alto viene accettato e ridotto, dicendolo.
+#
 # Vedi .claude/skills/zero-pending-loop/references/driver.md
 set -uo pipefail
 
@@ -31,8 +43,10 @@ while [[ $# -gt 0 ]]; do
     --max-iterations)  MAX_ITER="$2"; shift 2 ;;
     --window)          FINESTRA="$2"; shift 2 ;;
     --permission-mode) PERMESSI="$2"; shift 2 ;;
+    --budget-usd)      BUDGET_CHIESTO="$2"; shift 2 ;;
+    --tetto-usd)       TETTO_CHIESTO="$2"; shift 2 ;;
     --dry-run)         DRY=1; shift ;;
-    -h|--help)         sed -n '2,12p' "$0"; exit 0 ;;
+    -h|--help)         sed -n '2,23p' "$0"; exit 0 ;;
     *) echo "opzione sconosciuta: $1" >&2; exit 2 ;;
   esac
 done
@@ -58,6 +72,39 @@ muori(){ log "STOP: $*"; rm -f "$LOCK"; exit "${2:-1}"; }
 [[ -z "$PERMESSI" ]] && PERMESSI="acceptEdits"
 BUDGET_GIRO="$(cfg budget.max_budget_usd_per_iteration)"; [[ -z "$BUDGET_GIRO" ]] && BUDGET_GIRO=12
 TETTO_TOT="$(cfg budget.hard_stop_usd_total)";            [[ -z "$TETTO_TOT" ]] && TETTO_TOT=120
+
+# --- budget per-corsa: la config e' un SOFFITTO, non un valore predefinito ------------
+# `--budget-usd` e `--tetto-usd` permettono di spendere MENO per una corsa specifica.
+# Non permettono di spendere di piu': un valore oltre il soffitto viene accettato e
+# ridotto, con una riga di log che lo dice. Cosi' chi lancia non si trova una corsa
+# rifiutata per un numero sbagliato, ma nemmeno un tetto scavalcato di nascosto.
+# Il confronto e' in centesimi interi perche' bash non sa confrontare i decimali.
+# Il messaggio va su STDERR, non su stdout: questa funzione viene chiamata dentro
+# `$( )`, e tutto cio' che scrive su stdout FINISCE NEL VALORE. Con `log` normale il
+# budget diventava la stringa «04:38:27 richiesti $99 ... 12». Verificato applicando.
+clamp_usd() {                     # clamp_usd <chiesto> <soffitto> <etichetta> -> valore
+  local chiesto="$1" soffitto="$2" etichetta="$3"
+  case "$chiesto" in
+    ''|*[!0-9.]*|*.*.*) log "ATTENZIONE: $etichetta '$chiesto' non e' un numero: uso il soffitto \$$soffitto" >&2
+                        echo "$soffitto"; return ;;
+  esac
+  local c s
+  c=$(awk -v v="$chiesto"  'BEGIN{printf "%d", v*100 + 0.5}')
+  s=$(awk -v v="$soffitto" 'BEGIN{printf "%d", v*100 + 0.5}')
+  if (( c > s )); then
+    log "richiesti \$$chiesto di $etichetta, la config ne ammette \$$soffitto: uso \$$soffitto" >&2
+    echo "$soffitto"
+  else
+    echo "$chiesto"
+  fi
+}
+[[ -n "${BUDGET_CHIESTO:-}" ]] && BUDGET_GIRO="$(clamp_usd "$BUDGET_CHIESTO" "$BUDGET_GIRO" 'budget per giro')"
+[[ -n "${TETTO_CHIESTO:-}"  ]] && TETTO_TOT="$(clamp_usd  "$TETTO_CHIESTO"  "$TETTO_TOT"  'tetto della corsa')"
+# I valori risolti si dichiarano QUI, prima dei guard-rail: se una guardia ferma la
+# corsa, chi l'ha lanciata deve comunque vedere che spesa era stata concessa. Prima
+# comparivano solo nella riga di riepilogo, che con il freno inserito non si raggiunge.
+[[ -n "${BUDGET_CHIESTO:-}${TETTO_CHIESTO:-}" ]] &&
+  log "spesa concessa a questa corsa: \$$BUDGET_GIRO per giro, \$$TETTO_TOT di tetto"
 STALE_H="$(cfg interrupt_resume.resume_stale_after_hours)"; [[ -z "$STALE_H" ]] && STALE_H=24
 ORE_MAX="$(cfg budget.max_effort_hours_per_cluster)"; [[ -z "$ORE_MAX" ]] && ORE_MAX=4
 CLASSIFICATI="$(cfg meta.clusters_classified)"

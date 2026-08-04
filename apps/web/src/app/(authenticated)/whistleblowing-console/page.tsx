@@ -25,6 +25,7 @@ import {
   type WhistleblowingStatus,
   type WhistleblowingUpdate,
 } from "@heuresys/shared/schemas/whistleblowing";
+import { useMyInterfaces } from "@/lib/api/auth";
 import { apiFetch } from "@/lib/api/fetch";
 import { isApiError } from "@/lib/api/errors";
 import { EnumStatusBadge } from "@/components/enum-badge";
@@ -120,6 +121,35 @@ export default function WhistleblowingConsolePage() {
     [t],
   );
 
+  // GATE CLIENT — il commento in testa a questo file dichiarava da sempre che la console
+  // e' del solo custode designato, ma il codice non lo faceva: chi arrivava qui per URL
+  // diretto vedeva la pagina intera e un errore che sembrava un guasto di rete. Il
+  // permesso non viaggia al browser, ma il registro della sidebar si': se la voce non e'
+  // fra quelle che il server ha concesso a questa persona, la console non le spetta.
+  // Non sostituisce il controllo del server (l'API risponde 403 comunque): evita che
+  // l'interfaccia mostri un guscio di funzione a chi non puo' usarla.
+  const registro = useMyInterfaces();
+  const puoEntrare = registro.data === undefined
+    || registro.data.perspectives.some((p) => p.interfaces.some((i) => i.code === "whistleblowing-console"));
+  if (!puoEntrare) {
+    return (
+      <main data-testid="wb-console-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
+        <PageHeader
+          data-testid="whistleblowing-console-title"
+          title={t("whistleblowingConsole.title")}
+          description={t("whistleblowingConsole.description")}
+        />
+        <Card>
+          <CardContent className="py-8">
+            <p className="text-sm text-danger" data-testid="wb-console-forbidden">
+              {t("whistleblowingConsole.forbiddenMessage")}
+            </p>
+          </CardContent>
+        </Card>
+      </main>
+    );
+  }
+
   return (
     <main data-testid="wb-console-page" className="mx-auto max-w-7xl space-y-6 px-6 py-8">
       <PageHeader
@@ -136,7 +166,16 @@ export default function WhistleblowingConsolePage() {
       <EntityTable<WhistleblowingListItem>
         isLoading={reports.isLoading}
         isError={reports.isError}
-        errorMessage={t("whistleblowingConsole.errorMessage")}
+        // Un diniego di autorizzazione non e' un guasto. Prima il 403 veniva reso come
+        // «Errore di caricamento delle segnalazioni. Riprova piu' tardi o verifica la
+        // connessione»: chi non ha diritto di leggere veniva invitato a insistere, e chi
+        // il diritto ce l'ha non avrebbe saputo distinguere un vero problema di rete.
+        // `ApiError` porta lo status, quindi la distinzione si fa sul fatto, non sul testo.
+        errorMessage={
+          isApiError(reports.error) && reports.error.status === 403
+            ? t("whistleblowingConsole.forbiddenMessage")
+            : t("whistleblowingConsole.errorMessage")
+        }
         rows={reports.data?.items ?? []}
         rowKey={(r) => r.reportId}
         rowTestId="wb-console-row"

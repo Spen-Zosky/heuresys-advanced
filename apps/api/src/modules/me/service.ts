@@ -109,10 +109,19 @@ export const meService = {
     const hasAdminRole = actor.roles.some((r) => UI_ADMIN_ROLES.has(r));
     const rows = await repo.loadActiveInterfaces(pool);
     const visible = rows.filter((i) => {
+      // Una coppia permesso DICHIARATA si valuta SEMPRE, admin o no. La stesura
+      // precedente usciva su `if (!i.requiresAdmin) return true` e non arrivava mai
+      // a leggerla: la console delle segnalazioni, che ha `whistleblowing:read` e
+      // `requires_admin=false`, finiva nel menu di TUTTI i 163 utenti mentre il
+      // permesso lo detiene un ruolo solo. Verificato con tre login reali; l'API
+      // poi rispondeva 403, quindi nessun dato e' mai uscito — ma un menu che offre
+      // una funzione che appartiene a un'altra persona e' comunque una bugia.
+      // Nella stessa condizione erano `me-surveys` e `me-time-off`: la loro coppia
+      // permesso era inerte per la stessa ragione.
+      if (i.requiredResource !== null && i.requiredAction !== null
+          && !permSet.has(`${i.requiredResource}:${i.requiredAction}`)) return false;
       if (!i.requiresAdmin) return true; // ESS / always-visible
-      if (!hasAdminRole) return false; // admin section gated to admin-class roles
-      if (i.requiredResource === null || i.requiredAction === null) return true; // e.g. dashboard
-      return permSet.has(`${i.requiredResource}:${i.requiredAction}`);
+      return hasAdminRole; // la sezione admin resta riservata ai ruoli di classe admin
     });
     return {
       perspectives: UI_PERSPECTIVES.map((p) => ({

@@ -1050,6 +1050,7 @@
     "description": "Console riservata al custode designato (D.Lgs 24/2023). Nessun altro ruolo può leggere queste segnalazioni.",
     "count": "{{count}} segnalazioni",
     "errorMessage": "Errore di caricamento delle segnalazioni.",
+    "forbiddenMessage": "Non hai accesso a questa console: le segnalazioni sono leggibili dal solo custode designato (D.Lgs 24/2023).",
     "emptyTitle": "Nessuna segnalazione",
     "emptyDescription": "Non risultano segnalazioni al momento.",
     "caption": "Elenco segnalazioni whistleblowing",

@@ -121,11 +121,20 @@ describe("/v1/me/interfaces", () => {
     expect(b.perspectives.map((p) => p.code)).toEqual([...SECTIONS]);
   });
 
-  it("PLATFORM_ADMIN sees the WHOLE active registry (holds every permission)", async () => {
+  it("PLATFORM_ADMIN sees every entry whose permission it holds — and NOT the ones it doesn't", async () => {
     const b = await interfaces(suite, adminC);
-    // Derived: PLATFORM_ADMIN holds every required permission, so it sees the entire active
-    // registry — no hardcoded code list to drift.
-    expect(allCodes(b).sort()).toEqual(registry.map((r) => r.code).sort());
+    // The old title said "holds every permission", and that premise is FALSE: the
+    // whistleblowing console requires `whistleblowing:read`, which by design belongs to the
+    // designated custodian alone (D.Lgs 24/2023) and NOT to PLATFORM_ADMIN. The assertion
+    // passed only because the gate never evaluated that permission. Now the expectation is
+    // derived from the permissions the role actually holds — which also makes this test the
+    // guard for "the platform admin cannot read the whistleblowing reports either".
+    const adminPerms = await permsForEmail("admin@heuresys.com");
+    const atteso = registry.filter((r) => r.reqPair === null || adminPerms.has(r.reqPair));
+    expect(allCodes(b).sort()).toEqual(atteso.map((r) => r.code).sort());
+    // e il caso che rende la verifica non cieca: c'e' almeno una voce che l'admin NON vede
+    expect(registry.some((r) => r.reqPair !== null && !adminPerms.has(r.reqPair))).toBe(true);
+    expect(allCodes(b)).not.toContain("whistleblowing-console");
     // Design contract: dashboard is the first item of the first section (Enzo req 1).
     expect(codes(b, "OVERVIEW")[0]).toBe("dashboard");
     // Inactive ("absorbed") pages stay out of the sidebar — derived from is_active=false.
@@ -140,13 +149,34 @@ describe("/v1/me/interfaces", () => {
     // admin-gated interface, in any section.
     const adminGated = new Set(registry.filter((r) => r.requiresAdmin).map((r) => r.code));
     for (const c of allCodes(b)) expect(adminGated.has(c)).toBe(false);
-    // COMPLETENESS (derived): a pure USER sees EXACTLY the non-admin (ESS) interfaces, each in
-    // its declared section. A new /me page lands here automatically — no test edit needed.
-    const ess = registry.filter((r) => !r.requiresAdmin);
+    // COMPLETENESS (derived): a pure USER sees EXACTLY the non-admin interfaces WHOSE DECLARED
+    // PERMISSION THEY HOLD (or which declare none), each in its declared section. A new /me page
+    // lands here automatically — no test edit needed.
+    //
+    // The previous expectation was `every non-admin row`, full stop, and that CODIFIED A DEFECT:
+    // `whistleblowing-console` carries `whistleblowing:read` — held by ONE role — with
+    // requires_admin=false, so the old rule declared it correct for all 163 users to see it in
+    // their menu. The test was green precisely because the service was wrong in the same way.
+    // A declared permission pair is now always evaluated; the expectation says so too.
+    const userPerms = await permsForEmail("tommaso.fiore@rtl-bank.org");
+    const ess = registry.filter((r) => !r.requiresAdmin && (r.reqPair === null || userPerms.has(r.reqPair)));
     for (const section of SECTIONS) {
       const expected = ess.filter((r) => r.perspective === section).map((r) => r.code).sort();
       expect(codes(b, section).sort()).toEqual(expected);
     }
+  });
+
+  // La regressione ha un test suo, che nomina il caso invece di dedurlo: se un domani
+  // qualcuno rimettesse il ritorno anticipato nel gate, questo diventa rosso subito e
+  // col nome della voce, senza far scavare in un confronto di insiemi.
+  it("la console delle segnalazioni NON compare a chi non ha whistleblowing:read", async () => {
+    const riga = registry.find((r) => r.code === "whistleblowing-console");
+    expect(riga, "la voce non e' nel registro attivo: verifica cieca").toBeTruthy();
+    expect(riga!.reqPair).toBe("whistleblowing:read");
+    const userPerms = await permsForEmail("tommaso.fiore@rtl-bank.org");
+    expect(userPerms.has("whistleblowing:read")).toBe(false); // universo dichiarato
+    const b = await interfaces(suite, userC);
+    expect(allCodes(b)).not.toContain("whistleblowing-console");
   });
 
   it("MANAGER (admin-class) is per-permission filtered WITHIN the admin sections", async () => {

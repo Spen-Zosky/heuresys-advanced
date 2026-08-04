@@ -1050,6 +1050,7 @@
     "description": "Console reserved to the designated custodian (Italian Legislative Decree 24/2023). No other role can read these reports.",
     "count": "{{count}} reports",
     "errorMessage": "Failed to load reports.",
+    "forbiddenMessage": "You do not have access to this console: reports are readable only by the designated custodian (Legislative Decree 24/2023).",
     "emptyTitle": "No reports",
     "emptyDescription": "There are no reports at the moment.",
     "caption": "Whistleblowing reports list",

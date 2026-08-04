@@ -15,7 +15,9 @@
       "Bash(MSYS_NO_PATHCONV=1 ssh oracle-vm-default:*)",
       "Read(//tmp/**)",
       "Bash(pnpm typecheck:test)",
-      "Bash(psql *)"
+      "Bash(psql *)",
+      "Bash(mkdir -p \"D:/heuresys-design-lab/artefatti/domini\")",
+      "Bash(psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -t -A -c \"SELECT DISTINCT c.table_name FROM information_schema.columns c JOIN information_schema.tables t ON t.table_schema=c.table_schema AND t.table_name=c.table_name AND t.table_type='BASE TABLE' WHERE c.table_schema='sys' AND \\(c.column_name LIKE '%user_id' OR c.column_name LIKE '%employee_id' OR c.column_name LIKE '%person_id'\\) ORDER BY 1;\")"
     ]
   },
   "skillOverrides": {

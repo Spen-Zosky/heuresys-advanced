@@ -944,15 +944,77 @@ check("X12b", "X12", "Unita' in staff senza un vertice a cui essere in staff",
              "la introduce la migrazione 000244")
 
 
-def q(sql: str) -> list[list[str]]:
-    # encoding esplicito: il database e' UTF-8 e su Windows il default della
-    # console non lo e' — senza questo i nomi delle competenze arrivano storpiati
-    # e finiscono storpiati anche nel referto.
+# ── UNA CONNESSIONE SOLA, NON SETTANTADUE ─────────────────────────────────────
+# Le 36 verifiche fanno due domande ciascuna (i casi + l'universo). Con una `psql`
+# per domanda erano ~72 connessioni, e sul tunnel SSH aprirne una costa ~1,12 s
+# contro gli ~0,08 di una query su canale gia' aperto (misurato in S1043): oltre
+# un minuto di sola attesa, per uno strumento che si lancia spesso.
+#
+# Ogni domanda finisce con un marcatore stampato da \echo, che dice dove finisce
+# una risposta. Se la sessione persistente non parte o muore, si torna da soli a
+# una psql per query: uno strumento di misura non deve smettere di misurare
+# perche' l'ottimizzazione non ha funzionato.
+_FINE = "§FINE§"
+_sessione = None
+_ko = False
+
+
+def _sessione_aperta():
+    global _sessione, _ko
+    if _ko:
+        return None
+    if _sessione is not None and _sessione.poll() is None:
+        return _sessione
+    try:
+        _sessione = subprocess.Popen(
+            PSQL + ["-q"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, text=True, bufsize=1,
+            encoding="utf-8", errors="replace")
+        _sessione.stdin.write(chr(92) + "set ON_ERROR_STOP off" + chr(10))
+        _sessione.stdin.flush()
+        return _sessione
+    except Exception:
+        _ko = True
+        return None
+
+
+def _una_tantum(sql):
     e = subprocess.run(PSQL + ["-c", sql], capture_output=True, text=True,
                        encoding="utf-8", errors="replace")
     if e.returncode != 0:
         return [["__ERRORE__", e.stderr.strip().splitlines()[0] if e.stderr.strip() else "?"]]
-    return [r.split("\t") for r in e.stdout.strip().splitlines() if r]
+    return [r.split("	") for r in e.stdout.strip().splitlines() if r]
+
+
+def q(sql: str) -> list[list[str]]:
+    # encoding esplicito: il database e' UTF-8 e su Windows il default della
+    # console non lo e' — senza questo i nomi delle competenze arrivano storpiati
+    # e finiscono storpiati anche nel referto.
+    global _ko
+    ses = _sessione_aperta()
+    if ses is None:
+        return _una_tantum(sql)
+    try:
+        ses.stdin.write(sql.rstrip().rstrip(";") + ";" + chr(10))
+        ses.stdin.write(chr(92) + "echo " + _FINE + chr(10))
+        ses.stdin.flush()
+        out = []
+        while True:
+            riga = ses.stdout.readline()
+            if riga == "":
+                _ko = True
+                return _una_tantum(sql)
+            riga = riga.rstrip(chr(10))
+            if riga == _FINE:
+                break
+            out.append(riga)
+    except (BrokenPipeError, OSError):
+        _ko = True
+        return _una_tantum(sql)
+    for r in out:
+        if r.startswith("ERROR:") or r.startswith("ERRORE:"):
+            return [["__ERRORE__", r]]
+    return [r.split("	") for r in out if r]
 
 
 def scalare(sql: str) -> int:

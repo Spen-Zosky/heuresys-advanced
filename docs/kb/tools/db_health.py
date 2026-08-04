@@ -76,11 +76,81 @@ class DbNonRaggiungibile(RuntimeError):
     morire quando il tunnel e' giu'."""
 
 
-def q(sql: str) -> list[list[str]]:
-    e = subprocess.run(PSQL + ["-c", sql], capture_output=True, text=True)
+# ── UNA CONNESSIONE SOLA, NON QUINDICI ────────────────────────────────────────
+# Misurato sul tunnel SSH (S1043): APRIRE una connessione costa ~1,12 s, mentre
+# eseguire una query su una connessione gia' aperta ne costa ~0,08 — quattordici
+# volte meno. Questo modulo faceva 15 chiamate, ognuna con la sua `psql`: ~22
+# secondi di sola apertura di canale, pagati A OGNI AVVIO DI SESSIONE, per un
+# lavoro che ne vale meno di due.
+#
+# Ora le query passano tutte da UNA psql tenuta aperta. Ogni domanda termina con
+# un marcatore stampato da \echo: e' cosi' che si sa dove finisce una risposta e
+# comincia la successiva, senza chiudere il canale.
+#
+# Se la sessione persistente non si apre o si rompe, si torna da soli al vecchio
+# comportamento (una psql per query): uno strumento di diagnosi non deve smettere
+# di funzionare per colpa dell'ottimizzazione che lo rende veloce.
+_FINE = "\u00a7FINE-RISPOSTA\u00a7"
+_sessione = None
+_persistente_ko = False
+
+
+def _sessione_aperta():
+    global _sessione, _persistente_ko
+    if _persistente_ko:
+        return None
+    if _sessione is not None and _sessione.poll() is None:
+        return _sessione
+    try:
+        _sessione = subprocess.Popen(
+            PSQL + ["-q"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, text=True, bufsize=1,
+            encoding="utf-8", errors="replace")
+        _sessione.stdin.write(chr(92) + "set ON_ERROR_STOP off" + chr(10))
+        _sessione.stdin.flush()
+        return _sessione
+    except Exception:
+        _persistente_ko = True
+        return None
+
+
+def _una_tantum(sql):
+    """Il vecchio comportamento: una psql per query. Riserva, non strada maestra."""
+    e = subprocess.run(PSQL + ["-c", sql], capture_output=True, text=True,
+                       encoding="utf-8", errors="replace")
     if e.returncode != 0:
         raise DbNonRaggiungibile(e.stderr.strip() or "psql ha fallito senza messaggio")
     return [r.split("\t") for r in e.stdout.strip().splitlines() if r]
+
+
+def q(sql: str) -> list[list[str]]:
+    global _persistente_ko
+    ses = _sessione_aperta()
+    if ses is None:
+        return _una_tantum(sql)
+    try:
+        ses.stdin.write(sql.rstrip().rstrip(";") + ";\n")
+        ses.stdin.write(chr(92) + "echo " + _FINE + chr(10))
+        ses.stdin.flush()
+        righe = []
+        while True:
+            riga = ses.stdout.readline()
+            if riga == "":                      # la sessione e' morta a meta' domanda
+                _persistente_ko = True
+                return _una_tantum(sql)
+            riga = riga.rstrip("\n")
+            if riga == _FINE:
+                break
+            righe.append(riga)
+    except (BrokenPipeError, OSError):
+        _persistente_ko = True
+        return _una_tantum(sql)
+    # Gli errori arrivano su stdout (stderr e' unito): un errore SQL continua a
+    # sollevare come prima, cosi' chi chiama non si accorge del cambio.
+    for r in righe:
+        if r.startswith("ERROR:") or r.startswith("ERRORE:"):
+            raise DbNonRaggiungibile(r)
+    return [r.split("\t") for r in righe if r]
 
 
 def uno(sql: str) -> str:

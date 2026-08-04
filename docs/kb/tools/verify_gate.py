@@ -131,7 +131,14 @@ def run_suites(names: list[str], with_e2e: bool) -> dict:
         t0 = time.time()
         proc = subprocess.run(cmd, shell=True, cwd=REPO,
                               capture_output=True, text=True)
-        tail = (proc.stdout + proc.stderr).strip().splitlines()[-15:]
+        # `capture_output` puo' restituire None se il processo muore in modo anomalo
+        # (ucciso dall'esterno, pipe chiusa): sommare due None faceva esplodere il
+        # cancello con un TypeError invece di riportare la suite come fallita.
+        # Un cancello che CRASHA non dice «rosso», non dice niente — ed e' il modo
+        # peggiore di fallire per uno strumento il cui mestiere e' dare un verdetto.
+        tail = ((proc.stdout or "") + (proc.stderr or "")).strip().splitlines()[-15:]
+        if not tail and proc.returncode != 0:
+            tail = [f"(nessun output catturato; il processo e' uscito con {proc.returncode})"]
         results.append({
             "suite": name,
             "level": level,

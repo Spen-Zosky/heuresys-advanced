@@ -24,6 +24,16 @@ import * as repo from "./repository.js";
 import { findAssessmentById } from "../assessments/repository.js";
 import { getUserTenant } from "../assessments/repository.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
+import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
+
+/**
+ * #124 / ADR-0032 — what goes when an evaluation is read under the platform
+ * mandate. The judgment itself (`score`), the free text written about it
+ * (`narrative`) and the untyped `metadata` record, which cannot be verified
+ * field by field. What STAYS: the dimension, the assessor, the date — the
+ * technical administrator keeps knowing that the evaluation exists.
+ */
+const EVALUATION_JUDGMENT_FIELDS = ["score", "narrative", "metadata"] as const;
 
 export const assessmentResultsService = {
   async list(actor: ActorContext, query: AssessmentResultListQuery) {
@@ -33,7 +43,21 @@ export const assessmentResultsService = {
     const tenantId = scope.kind === "all" ? undefined : scope.tenantId;
     const userIdAllowList =
       scope.kind === "subtree" || scope.kind === "self" ? scope.userIdAllowList : undefined;
-    return repo.listResults(pool, { tenantId, userIdAllowList, query });
+    const page = await repo.listResults(pool, { tenantId, userIdAllowList, query });
+
+    // #124 — cheap pre-check: with a null subject this answers "is this actor a
+    // platform-mandate-only reader at all", so a normal caller never pays for
+    // the subject lookup below.
+    if (!masksUnderPlatformMandate(actor, "EVALUATION", null)) return page;
+    const subjects = await repo.subjectsOfAssessments(pool, page.items.map((i) => i.assessmentId));
+    return {
+      ...page,
+      items: page.items.map((r) =>
+        masksUnderPlatformMandate(actor, "EVALUATION", subjects.get(r.assessmentId) ?? null)
+          ? maskFields(r, EVALUATION_JUDGMENT_FIELDS)
+          : r,
+      ),
+    };
   },
 
   async getById(actor: ActorContext, id: string): Promise<AssessmentResult> {
@@ -46,7 +70,11 @@ export const assessmentResultsService = {
     if (!(await canReadOrgTarget(pool, actor, parent.subjectUserId, target.tenantId))) {
       throw new NotFoundError("AssessmentResult");
     }
-    return target;
+    // #124 — the parent was already fetched for the org gate, so the subject is
+    // in hand and I17 costs nothing here.
+    return masksUnderPlatformMandate(actor, "EVALUATION", parent.subjectUserId)
+      ? maskFields(target, EVALUATION_JUDGMENT_FIELDS)
+      : target;
   },
 
   async create(actor: ActorContext, body: CreateAssessmentResultBody): Promise<AssessmentResult> {

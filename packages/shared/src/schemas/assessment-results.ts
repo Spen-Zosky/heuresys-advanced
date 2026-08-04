@@ -6,17 +6,26 @@
 import { z } from "zod";
 
 import { paginationFields } from "./_pagination.js";
+/**
+ * #124 — the judgment fields are OPTIONAL, so they can be ABSENT rather than
+ * nulled when the caller reads under the platform mandate alone (ADR-0032).
+ * The dimension, the assessor and the date stay: the technical administrator
+ * still sees that the evaluation exists and when it was recorded, which is what
+ * "sa che esistono" means. See `apps/api/src/lib/scope/mask.ts`.
+ */
 export const AssessmentResultSchema = z.object({
   assessmentResultId: z.uuid(),
   assessmentId: z.uuid(),
   tenantId: z.uuid(),
   dimension: z.string(),
-  score: z.number().nullable(),
-  narrative: z.string().nullable(),
+  score: z.number().nullable().optional(),
+  narrative: z.string().nullable().optional(),
   assessorUserId: z.uuid().nullable(),
   recordedAt: z.iso.datetime(),
-  metadata: z.record(z.string(), z.unknown()),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   createdAt: z.iso.datetime(),
+  /** Names of the fields withheld from THIS row. Absent when nothing was withheld. */
+  masked: z.array(z.string()).optional(),
 });
 export type AssessmentResult = z.infer<typeof AssessmentResultSchema>;
 

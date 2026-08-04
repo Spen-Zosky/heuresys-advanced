@@ -138,3 +138,25 @@ export async function insertResult(
   );
   return toResult(res.rows[0]!);
 }
+
+/**
+ * #124 — the subject of each parent assessment, for the masking decision.
+ *
+ * A result does not carry its own subject: it hangs off an assessment, and the
+ * assessment names the person. The mask needs that person for one reason only —
+ * **I17**, so an actor never has their OWN evaluation withheld from them.
+ * Queried separately, and only when a mask is actually in play, so the ordinary
+ * read pays nothing for it.
+ */
+export async function subjectsOfAssessments(
+  q: DbConnector,
+  assessmentIds: readonly string[],
+): Promise<Map<string, string>> {
+  if (assessmentIds.length === 0) return new Map();
+  const res = await q.query<{ assessment_id: string; assessment_subject_user_id: string }>(
+    `SELECT assessment_id, assessment_subject_user_id
+       FROM sys.sys_assessments WHERE assessment_id = ANY($1::uuid[])`,
+    [[...assessmentIds]],
+  );
+  return new Map(res.rows.map((r) => [r.assessment_id, r.assessment_subject_user_id]));
+}

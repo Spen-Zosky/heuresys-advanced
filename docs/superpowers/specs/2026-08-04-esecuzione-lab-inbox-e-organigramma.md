@@ -18,7 +18,7 @@ sessione. Nessuna è dichiarata fuori.
 | id | Cosa | Chi | Cosa significa fatto | Stato |
 |---|---|---|---|---|
 | **V1** | `lab_inbox` installato + cablato al boot + check nel lint | Claude | boot canonico che stampa la sezione LAB INBOX con le consegne reali; `handoff_lint` verde | ✅ |
-| **V2** | 13 consegne ingerite nel registro | Claude | 13 blocchi `#99`…`#111` nel registro con `lab-id`, 13 file spostati in `inbox/ingerite/`, lint verde | ⬜ |
+| **V2** | 13 consegne ingerite nel registro | Claude | 13 blocchi `#99`…`#111` nel registro con `lab-id`, 13 file spostati in `inbox/ingerite/`, lint verde | ✅ |
 | **V3** | 8 migrazioni `000244`→`000251` applicate | Claude | ledger `sys_schema_migrations` con le 8 righe; il filo delle 161 assegnazioni attive intatto dopo ognuna | ⬜ |
 | **V4** | Verdetto finale dell'organigramma | Claude | `sys.fn_organization_integrity_violations()` tutte a zero + `verifica_incrociata.py` ri-eseguita e confrontata con la baseline | ⬜ |
 

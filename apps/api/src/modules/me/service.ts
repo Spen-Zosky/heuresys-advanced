@@ -4,6 +4,8 @@
  * from req.user.userId. No method accepts userId from user input.
  */
 import { pool, withTransaction } from "../../db/client.js";
+import { hasAnyDomain } from "../../lib/scope/domains.js";
+import type { RoleCode } from "../../config/constants.js";
 import { NotFoundError, ForbiddenError, ConflictError, UnprocessableEntityError } from "../../errors/index.js";
 import type {
   MeProfile, MeProfileFull, UpdateMeProfileBody, CreateMeSelfAssessmentBody,
@@ -34,12 +36,17 @@ import type {
 import { userPermissionCodes } from "../../middleware/rbac.js";
 import { emitNotification } from "../../lib/notifications/emit.js";
 
-/** Web layout's ADMIN_ROLES (hybrid gate): the admin sidebar section requires one of these roles
- *  AND the per-item permission. Mirrors apps/web (authenticated)/layout.tsx so the DB-driven
- *  sidebar does not leak admin nav to a pure USER (who holds several *:read codes for ESS). */
-const UI_ADMIN_ROLES = new Set([
-  "PLATFORM_ADMIN", "TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER", "MANAGER", "ORG_DIRECTOR",
-]);
+// #119 — `UI_ADMIN_ROLES` lived here: a hand-written set of 7 role names that
+// gated the administrative sidebar sections. It omitted `CEO`, so the person
+// running the whole company saw no administrative section at all — and nothing
+// failed when the role was added to the RBAC map and to nobody's list.
+//
+// The gate is now `hasAnyDomain` (lib/scope/domains.ts): you are offered the
+// administrative sections if you hold a standing reason to look beyond your own
+// record — you manage an org unit, lead a team, own a process, or carry a
+// mandate. Three of those four are facts in the data, so a nomination made today
+// takes effect today. The hybrid gate is unchanged: the per-item permission pair
+// is still checked first, and an item is offered only if BOTH agree.
 // Sidebar sections (S1009 IA redesign) — 5 always-returned collapsible groups, in display
 // order. Replaces the 3 PET perspectives. An empty section renders an honest empty-state in
 // the UI, so a non-admin (e.g. ESS-only) still gets a coherent sidebar.
@@ -106,7 +113,11 @@ export const meService = {
    *  returned (an empty one renders an honest empty-state in the UI). */
   async getInterfaces(actor: SelfActor): Promise<MeInterfacesResponse> {
     const permSet = new Set(userPermissionCodes({ roles: actor.roles }));
-    const hasAdminRole = actor.roles.some((r) => UI_ADMIN_ROLES.has(r));
+    const hasAdminRole = await hasAnyDomain(pool, {
+      userId: actor.userId,
+      tenantId: actor.tenantId,
+      roles: actor.roles as RoleCode[],
+    });
     const rows = await repo.loadActiveInterfaces(pool);
     const visible = rows.filter((i) => {
       // Una coppia permesso DICHIARATA si valuta SEMPRE, admin o no. La stesura

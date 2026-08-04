@@ -14,10 +14,10 @@
  * is sensitive → admin/manager-only (D-6); RBAC gates the routes to insights:view.
  */
 import { pool } from "../../db/client.js";
+import { scopeTierOf } from "../../lib/scope/domains.js";
 import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
-import type { RoleCode } from "../../config/constants.js";
 import { NotFoundError } from "../../errors/index.js";
 import type {
   FlightRiskBand,
@@ -88,22 +88,18 @@ export const FLIGHT_RISK_WEIGHTS = {
 } as const;
 
 /* --- scope (mirror analytics/service.ts) --------------------------------- */
-const PLATFORM_ROLES: RoleCode[] = ["PLATFORM_ADMIN"];
-const TENANT_ROLES: RoleCode[] = ["TENANT_ADMIN", "BLUEPRINT_MANAGER", "HRMS_MANAGER", "PROCESS_OWNER"];
-const TEAM_ROLES: RoleCode[] = ["MANAGER"];
-
-function scopeKind(a: ActorContext): InsightsScopeKind {
-  if (a.roles.some((r) => PLATFORM_ROLES.includes(r))) return "PLATFORM";
-  if (a.roles.some((r) => TENANT_ROLES.includes(r))) return "TENANT";
-  if (a.roles.some((r) => TEAM_ROLES.includes(r))) return "TEAM";
-  // RBAC gates the routes to insights:view (the 6 non-leaf roles); USER/READ_ONLY never reach here.
-  return "TEAM";
+// #119 — le tre costanti di fascia stavano qui, identiche in tre moduli.
+// La definizione unica vive in lib/scope/domains.ts.
+/** #119 — one definition (lib/scope/domains.ts), and a loud failure instead of
+ *  the silent `return "TEAM"` that used to render an empty page. */
+function scopeKind(a: ActorContext): Promise<InsightsScopeKind> {
+  return scopeTierOf(pool, a, "insights");
 }
 
 async function buildScope(
   a: ActorContext,
 ): Promise<{ kind: InsightsScopeKind; filter: repo.ScopeFilter; tenantId: string | null }> {
-  const kind = scopeKind(a);
+  const kind = await scopeKind(a);
   const isPlatform = kind === "PLATFORM";
   const teamPositionIds = kind === "TEAM" ? await findOwnedPositionIds(pool, a.userId) : [];
   const tenantId = isPlatform ? null : a.tenantId;

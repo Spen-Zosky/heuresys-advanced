@@ -6,10 +6,10 @@
  */
 
 import { pool } from "../../db/client.js";
+import { scopeTierOf } from "../../lib/scope/domains.js";
 import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
-import type { RoleCode } from "../../config/constants.js";
 import type {
   WorkforceAnalyticsResponse,
   KpiAnalyticsResponse,
@@ -31,28 +31,21 @@ import { findOwnedPositionIds } from "../dashboard/repository.js";
 
 type ScopeKind = "PLATFORM" | "TENANT" | "TEAM";
 
-const PLATFORM_ROLES: RoleCode[] = ["PLATFORM_ADMIN"];
-const TENANT_ROLES: RoleCode[] = [
-  "TENANT_ADMIN",
-  "BLUEPRINT_MANAGER",
-  "HRMS_MANAGER",
-  "PROCESS_OWNER",
-];
-const TEAM_ROLES: RoleCode[] = ["MANAGER"];
-
-/** Highest scope tier the actor can see — mirrors dashboard/service.ts. */
-function scopeKind(a: ActorContext): ScopeKind {
-  if (a.roles.some((r) => PLATFORM_ROLES.includes(r))) return "PLATFORM";
-  if (a.roles.some((r) => TENANT_ROLES.includes(r))) return "TENANT";
-  if (a.roles.some((r) => TEAM_ROLES.includes(r))) return "TEAM";
-  // RBAC gates this route to analytics:view; USER/READ_ONLY never reach here.
-  return "TEAM";
+// #119 — le tre costanti di fascia stavano qui, identiche in tre moduli.
+// La definizione unica vive in lib/scope/domains.ts.
+/**
+ * #119 — one definition, no fallback. This ladder was copy-pasted here, into
+ * dashboard/service.ts and into insights/service.ts, and each copy ended in a
+ * silent `return "TEAM"` that showed an empty page to anyone unmatched.
+ */
+function scopeKind(a: ActorContext): Promise<ScopeKind> {
+  return scopeTierOf(pool, a, "analytics");
 }
 
 async function buildScope(
   a: ActorContext,
 ): Promise<{ kind: ScopeKind; filter: repo.ScopeFilter; tenantId: string | null }> {
-  const kind = scopeKind(a);
+  const kind = await scopeKind(a);
   const isPlatform = kind === "PLATFORM";
   const teamPositionIds =
     kind === "TEAM" ? await findOwnedPositionIds(pool, a.userId) : [];

@@ -5,6 +5,7 @@
  */
 
 import { pool } from "../../db/client.js";
+import { scopeTierOf } from "../../lib/scope/domains.js";
 import type { ActorContext } from "../../lib/actor.js";
 
 export type { ActorContext };
@@ -15,25 +16,21 @@ import type {
 } from "@heuresys/shared";
 import * as repo from "./repository.js";
 
-const PLATFORM_ROLES: RoleCode[] = ["PLATFORM_ADMIN"];
-const TENANT_ROLES: RoleCode[] = [
-  "TENANT_ADMIN",
-  "BLUEPRINT_MANAGER",
-  "HRMS_MANAGER",
-  "PROCESS_OWNER",
-];
-const TEAM_ROLES: RoleCode[] = ["MANAGER"];
+// #119 — the PLATFORM/TENANT/TEAM ladder used to be declared HERE, and identically
+// in analytics/service.ts and insights/service.ts. Three copies of one rule drift
+// independently; the single definition now lives in lib/scope/domains.ts.
 
 /** Number of weekly buckets in the StatsCard sparkline series. */
 const DASHBOARD_TREND_WEEKS = 8;
 
-function highestScope(actor: ActorContext): DashboardScopeKind {
-  if (actor.roles.some((r) => PLATFORM_ROLES.includes(r))) return "PLATFORM";
-  if (actor.roles.some((r) => TENANT_ROLES.includes(r))) return "TENANT";
-  if (actor.roles.some((r) => TEAM_ROLES.includes(r))) return "TEAM";
-  // Fallback — caller is gated by RBAC `dashboard:view` so USER/READ_ONLY
-  // should never reach here; map to TEAM-empty just in case.
-  return "TEAM";
+/**
+ * #119 — no fallback. The old shape ended in `return "TEAM"`, which rendered an
+ * empty dashboard to anyone the hand-written tiers did not match: the page said
+ * "you have no data" when the truth was "we could not place you".
+ * `scopeTierOf` throws instead, so the condition is visible rather than silent.
+ */
+function highestScope(actor: ActorContext): Promise<DashboardScopeKind> {
+  return scopeTierOf(pool, actor, "dashboard");
 }
 
 function highestRoleLabel(actor: ActorContext): string {
@@ -55,7 +52,7 @@ function highestRoleLabel(actor: ActorContext): string {
 
 export const dashboardService = {
   async getWidgets(actor: ActorContext): Promise<DashboardWidgetsResponse> {
-    const scopeKind = highestScope(actor);
+    const scopeKind = await highestScope(actor);
     const isPlatform = scopeKind === "PLATFORM";
     const isTeamScope = scopeKind === "TEAM" && !isPlatform;
 

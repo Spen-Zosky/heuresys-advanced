@@ -15,7 +15,8 @@
  * hardcoded ESS array that broke CI whenever a /me page was added (S1011 F5 mig 000168).
  *
  * Personas are the seed-test-admin set ONLY (login-capable in CI): admin (PLATFORM_ADMIN),
- * paolo.caputo (MANAGER), tommaso.fiore (pure USER). R2-seeded users are NOT used (their
+ * paolo.caputo (MANAGER), e una persona SENZA DELEGHE derivata dal dato (#119 —
+ * non piu' cablata per nome). R2-seeded users are NOT used (their
  * logins are provisioned by seed-r2-personas.ts, which CI does not run).
  */
 
@@ -104,14 +105,57 @@ let suite: TestApp;
 let adminC: Map<string, string>;
 let managerC: Map<string, string>;
 let userC: Map<string, string>;
+let userEmail: string;
 let registry: Reg[];
+
+/**
+ * #119 — la persona "senza deleghe" si DERIVA, non si sceglie per nome.
+ *
+ * Qui era cablato `tommaso.fiore`, che la ricostruzione dell'organigramma ha
+ * nominato Direttore della Filiale di Varese: da allora regge un'unita', quindi
+ * il gate amministrativo lo ammette e il test leggeva quella promozione come una
+ * fuga. Non lo era. Il difetto era la premessa: un test che nomina una persona
+ * asserisce implicitamente che quella persona non cambiera' mai ruolo.
+ *
+ * Ora si cerca chiunque non abbia ALCUN dominio attivo — nessuna unita' retta,
+ * nessuna squadra guidata, nessun processo posseduto, nessun mandato — che e'
+ * esattamente la condizione che il gate verifica.
+ */
+async function emailSenzaDeleghe(): Promise<string> {
+  const r = await pool.query<{ user_email: string }>(
+    `SELECT u.user_email
+       FROM sys.sys_users u
+      WHERE u.user_status = 'ACTIVE'
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_organization_units o
+                         WHERE o.organization_unit_manager_user_id = u.user_id
+                           AND o.organization_unit_is_active)
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_teams t WHERE t.team_lead_user_id = u.user_id)
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_process_participants p
+                         WHERE p.process_participant_user_id = u.user_id
+                           AND p.process_participant_role = 'OWNER'
+                           AND p.process_participant_is_active)
+        AND NOT EXISTS (SELECT 1 FROM sys.sys_user_auth_roles ur
+                          JOIN sys.sys_auth_roles rr ON rr.auth_role_id = ur.user_auth_role_role_id
+                         WHERE ur.user_auth_role_user_id = u.user_id
+                           AND ur.user_auth_role_revoked_at IS NULL
+                           AND rr.auth_role_code IN ('PLATFORM_ADMIN','TENANT_ADMIN','HRMS_MANAGER'))
+        AND EXISTS (SELECT 1 FROM sys.sys_auth_identities i
+                     WHERE i.auth_identity_user_id = u.user_id AND i.auth_identity_is_active)
+      ORDER BY u.user_email
+      LIMIT 1`,
+  );
+  const email = r.rows[0]?.user_email;
+  if (!email) throw new Error("nessuna persona senza deleghe nel dato: il test non puo' misurare la meta' negativa della regola");
+  return email;
+}
 
 describe("/v1/me/interfaces", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     adminC = await login(suite, "admin@heuresys.com");
     managerC = await login(suite, "paolo.caputo@rtl-bank.org");
-    userC = await login(suite, "tommaso.fiore@rtl-bank.org");
+    userEmail = await emailSenzaDeleghe();
+    userC = await login(suite, userEmail);
     registry = await loadActiveRegistry();
   });
   afterAll(async () => { await suite.app.close(); });
@@ -158,7 +202,7 @@ describe("/v1/me/interfaces", () => {
     // requires_admin=false, so the old rule declared it correct for all 163 users to see it in
     // their menu. The test was green precisely because the service was wrong in the same way.
     // A declared permission pair is now always evaluated; the expectation says so too.
-    const userPerms = await permsForEmail("tommaso.fiore@rtl-bank.org");
+    const userPerms = await permsForEmail(userEmail);
     const ess = registry.filter((r) => !r.requiresAdmin && (r.reqPair === null || userPerms.has(r.reqPair)));
     for (const section of SECTIONS) {
       const expected = ess.filter((r) => r.perspective === section).map((r) => r.code).sort();
@@ -173,7 +217,7 @@ describe("/v1/me/interfaces", () => {
     const riga = registry.find((r) => r.code === "whistleblowing-console");
     expect(riga, "la voce non e' nel registro attivo: verifica cieca").toBeTruthy();
     expect(riga!.reqPair).toBe("whistleblowing:read");
-    const userPerms = await permsForEmail("tommaso.fiore@rtl-bank.org");
+    const userPerms = await permsForEmail(userEmail);
     expect(userPerms.has("whistleblowing:read")).toBe(false); // universo dichiarato
     const b = await interfaces(suite, userC);
     expect(allCodes(b)).not.toContain("whistleblowing-console");

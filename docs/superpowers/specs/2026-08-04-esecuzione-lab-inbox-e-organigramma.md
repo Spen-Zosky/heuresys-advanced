@@ -23,6 +23,36 @@ sessione. Nessuna è dichiarata fuori.
 | **V4** | Verdetto finale dell'organigramma | Claude | `sys.fn_organization_integrity_violations()` tutte a zero + `verifica_incrociata.py` ri-eseguita e confrontata con la baseline | ✅ |
 | **V5** | *(emersa applicando)* Le due conseguenze misurate delle 8 migrazioni | Claude | `000252` ruoli professionali delle 133 posizioni nuove · `000253` asse funzionale dopo lo scioglimento; sentinelle di nuovo 11/11 a zero | ✅ |
 
+## Batch successivo (Enzo, stessa sessione): 92+98+95+97+94+54+79+50
+
+| id | Voce | Stato |
+|---|---|---|
+| **#94** | budget per corsa nel driver zp | ✅ |
+| **#97** | plancia zp promossa in `scripts/` | ✅ |
+| **#95** | igiene zp — i tre reperti + passo zero del selettore | ✅ |
+| **#98** | i cinque percorsi formativi con la chiave-macchina | ✅ |
+| **#79** | cancello di esposizione (regola continua) | ✅ applicato al lavoro di oggi |
+| **#92** | ciclo di valutazione — **7 passi** | 🔵 **2/7 chiusi** (schema+permessi · ingestione calibrazioni) |
+| **#54** | recruiting/ATS | ⬜ non iniziata (~5-7 sessioni) |
+| **#50** | knowledge graph legacy | ⬜ non iniziata (~2-3 sessioni) |
+
+### #92 — dove siamo
+
+| Passo | Cosa | Stato |
+|---|---|---|
+| 1 | migrazione DDL: 4 tabelle, FK `review_cycle_id`, 4 permessi + RBAC | ✅ `000256` |
+| 2 | ingestione calibrazioni legacy (35 · 20 · 40) + provenienza | ✅ `000257` |
+| 3 | API di lettura: Zod condiviso, repository/service/routes, integration test | ⬜ prossimo |
+| 4 | API di scrittura + macchina a stati (transizioni validate lato servizio) | ⬜ |
+| 5 | ESS `/v1/me/performance-reviews/*` self-scope | ⬜ |
+| 6 | frontend manageriale + ESS, i18n in parità | ⬜ |
+| 7 | Playwright E2E con login reale | ⬜ |
+
+**Precondizione del passo 2, verificata e diversa dal dichiarato**: il legacy ha **86** sessioni di
+calibrazione, non 35. Le 35 sono quelle di RTL Bank; le altre 51 sono SmartFood, EcoNova — le due
+aziende bonificate in S1042 — e Heuresys System. Senza filtro per tenant l'ingestione avrebbe
+riportato dentro la contaminazione.
+
 ## Che cosa e' successo davvero applicando (S1043)
 
 Le otto migrazioni erano state scritte in **sessione lab, che legge e non scrive**. Applicandole per la

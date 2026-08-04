@@ -129,8 +129,14 @@ def run_suites(names: list[str], with_e2e: bool) -> dict:
         plan.append(("e2e", *E2E))
     for name, level, cmd in plan:
         t0 = time.time()
+        # encoding esplicito: senza, su Windows `text=True` usa il codec di sistema
+        # (cp1252) e su un output UTF-8 solleva UnicodeDecodeError. L'effetto non era
+        # un errore visibile ma una PERDITA: stdout e stderr restavano None e il
+        # cancello riportava «nessun output catturato» proprio quando l'output
+        # serviva — cioe' quando una suite falliva. Misurato in S1043 su test-api.
         proc = subprocess.run(cmd, shell=True, cwd=REPO,
-                              capture_output=True, text=True)
+                              capture_output=True, text=True,
+                              encoding="utf-8", errors="replace")
         # `capture_output` puo' restituire None se il processo muore in modo anomalo
         # (ucciso dall'esterno, pipe chiusa): sommare due None faceva esplodere il
         # cancello con un TypeError invece di riportare la suite come fallita.

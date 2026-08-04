@@ -241,6 +241,17 @@ SELECT t.tenant_id, 'heuresys_platform', q.src, q.rec_id::uuid, q.nat, q.tgt, q.
       AND x.source_lineage_target_table_name = q.tgt);
 
 -- ───────────────────────────────────────────────────────────────────────────────
+-- 4-bis. STATISTICHE — una tabella appena riempita e' invisibile al planner
+--    Il cruscotto di salute ha una sonda «tabelle popolate mai analizzate», e dopo
+--    questo import si e' accesa su tutte e tre: righe dentro, statistiche zero.
+--    ANALYZE qui dentro invece che a mano, cosi' una applicazione da zero non
+--    ripropone lo stesso buco.
+-- ───────────────────────────────────────────────────────────────────────────────
+ANALYZE sys.sys_calibration_sessions;
+ANALYZE sys.sys_calibration_participants;
+ANALYZE sys.sys_calibration_discussions;
+
+-- ───────────────────────────────────────────────────────────────────────────────
 -- 5. AUTO-VERIFICA
 -- ───────────────────────────────────────────────────────────────────────────────
 DO $$

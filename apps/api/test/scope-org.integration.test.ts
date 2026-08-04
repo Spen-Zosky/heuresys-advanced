@@ -2,11 +2,22 @@
  * apps/api/test/scope-org.integration.test.ts — F0 of ADR-0027 (organizational axis).
  *
  * Verifies the recursive org-chart helpers against the REAL RTL hierarchy (no mocks, no
- * hardcoded counts — only invariants derived from real reporting edges):
- *   federica.marchetti ← paolo.caputo ← tommaso.fiore   (a real 2-level chain)
- *   antonio.parisi reports into a DIFFERENT branch (claudia.serra)
- * The transitive assertions (2-hop) are what distinguishes the new chain from the old
- * one-hop `getManagerTeamUserIds` walk.
+ * hardcoded counts — only invariants derived from real reporting edges).
+ *
+ * [S1043] I TRE PROTAGONISTI NON SONO PIU' NOMINATI. La stesura precedente fissava
+ * `paolo.caputo` come capo, `tommaso.fiore` come suo sottoposto e `antonio.parisi`
+ * come estraneo. La ricostruzione dell'organigramma ha INVERTITO due di quei ruoli:
+ * tommaso oggi dirige la Filiale di Varese (ramo Retail) e non e' piu' sotto paolo,
+ * mentre antonio e' Analista Crediti nell'Ufficio Crediti Retail — che sta DENTRO la
+ * Divisione Crediti che paolo dirige. Nessuno dei due era un difetto: erano ruoli
+ * scritti a mano che l'azienda ha cambiato.
+ *
+ * Ora il sottoposto e l'estraneo si DERIVANO dall'albero delle UNITA' organizzative,
+ * che e' una struttura INDIPENDENTE da quella che il resolver percorre (l'albero
+ * delle posizioni). Il test non e' tautologico proprio per questo: non chiede al
+ * resolver di confermare se stesso, gli chiede di concordare con l'organigramma. E'
+ * un confronto che puo' fallire — e falliva, prima che la mig 000258 riconnettesse
+ * l'albero delle posizioni.
  */
 
 import { describe, it, expect, beforeAll } from "vitest";
@@ -23,6 +34,57 @@ async function uid(email: string): Promise<string> {
   return id;
 }
 
+/** Una persona che, SECONDO L'ALBERO DELLE UNITA', lavora dentro l'unita diretta da
+ *  `manager` (o in una sua discendente) — e non e' il manager stesso. Derivata dal
+ *  vivo: e' l'atteso indipendente contro cui si misura il resolver. */
+async function unSottopostoOrganizzativo(manager: string): Promise<string> {
+  const r = await pool.query<{ id: string }>(
+    `WITH RECURSIVE sue(unita) AS (
+       SELECT organization_unit_id FROM sys.sys_organization_units
+        WHERE organization_unit_manager_user_id = $1 AND organization_unit_is_active
+       UNION
+       SELECT o.organization_unit_id FROM sys.sys_organization_units o
+         JOIN sue ON o.organization_unit_parent_id = sue.unita
+        WHERE o.organization_unit_is_active)
+     SELECT a.user_position_assignment_user_id AS id
+       FROM sue
+       JOIN sys.sys_positions p ON p.position_organization_unit_id = sue.unita
+       JOIN sys.sys_user_position_assignments a
+         ON a.user_position_assignment_position_id = p.position_id
+        AND a.user_position_assignment_status = 'ACTIVE'
+      WHERE a.user_position_assignment_user_id <> $1
+      ORDER BY a.user_position_assignment_user_id LIMIT 1`,
+    [manager],
+  );
+  const id = r.rows[0]?.id;
+  if (!id) throw new Error("nessun sottoposto organizzativo: verifica cieca");
+  return id;
+}
+
+/** Una persona che, secondo l'albero delle UNITA', NON lavora sotto `manager`. */
+async function unEstraneoOrganizzativo(manager: string): Promise<string> {
+  const r = await pool.query<{ id: string }>(
+    `WITH RECURSIVE sue(unita) AS (
+       SELECT organization_unit_id FROM sys.sys_organization_units
+        WHERE organization_unit_manager_user_id = $1 AND organization_unit_is_active
+       UNION
+       SELECT o.organization_unit_id FROM sys.sys_organization_units o
+         JOIN sue ON o.organization_unit_parent_id = sue.unita
+        WHERE o.organization_unit_is_active)
+     SELECT a.user_position_assignment_user_id AS id
+       FROM sys.sys_user_position_assignments a
+       JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+      WHERE a.user_position_assignment_status = 'ACTIVE'
+        AND a.user_position_assignment_user_id <> $1
+        AND p.position_organization_unit_id NOT IN (SELECT unita FROM sue)
+      ORDER BY a.user_position_assignment_user_id LIMIT 1`,
+    [manager],
+  );
+  const id = r.rows[0]?.id;
+  if (!id) throw new Error("nessun estraneo organizzativo: verifica cieca");
+  return id;
+}
+
 describe("scope/org — organizational axis (F0, ADR-0027)", () => {
   let federica: string;
   let paolo: string;
@@ -30,12 +92,16 @@ describe("scope/org — organizational axis (F0, ADR-0027)", () => {
   let antonio: string;
 
   beforeAll(async () => {
-    [federica, paolo, tommaso, antonio] = await Promise.all([
+    [federica, paolo] = await Promise.all([
       uid("federica.marchetti@rtl-bank.org"),
       uid("paolo.caputo@rtl-bank.org"),
-      uid("tommaso.fiore@rtl-bank.org"),
-      uid("antonio.parisi@rtl-bank.org"),
     ]);
+    // `tommaso` = un sottoposto vero, `antonio` = un estraneo vero. I nomi delle
+    // variabili restano per non riscrivere ogni asserzione, ma le persone non sono
+    // piu' scelte a mano: le sceglie l'organigramma di oggi.
+    tommaso = await unSottopostoOrganizzativo(paolo);
+    antonio = await unEstraneoOrganizzativo(paolo);
+    expect(tommaso).not.toBe(antonio);
   });
 
   it("sub-tree includes self + a direct report, excludes an outsider", async () => {

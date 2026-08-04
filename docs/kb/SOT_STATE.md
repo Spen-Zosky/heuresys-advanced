@@ -10,15 +10,15 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 
 ## Delta S1041 (2026-08-02 → 03) — batch P2+P3 eseguito: dieci voci chiuse
 
-HEAD **`78adddf4`** (16 commit di lavoro + chiusura). Counts **ri-derivati live**: **238 file
+HEAD **`421d1b32`** (13 commit di lavoro + chiusura). Counts **ri-derivati live**: **241 file
 migration** `000001..000243` = **241 applicate** · utenti **163** · posizioni **181** · 2 tenant
 ACTIVE · RBAC **13 ruoli / 207 permessi / 923 mappature** (+1 `leads:update`) · tabelle `sys.*`
 **208** (+1 `sys_advisor_suggestions`) · voci sidebar **61**, di cui **52 attive** (+3: VRIO,
 salute organizzativa, consigli operativi, richieste di contatto) · file di test API **228** ·
 spec E2E **96** · test unit **10** (+1).
 
-**Delta S1042** (2026-08-03, esecuzione della consegna dalla sessione lab): **237 file migration**
-`000001..000243` = **241 applicate** (le 7 nuove: `000234` rimozione validazione presenze ·
+**Delta S1042** (2026-08-03/04, esecuzione della consegna dalla sessione lab): **241 file migration**
+`000001..000243` = **241 applicate** (le 10 nuove: `000234` rimozione validazione presenze ·
 `000235` purga della contaminazione da tenant legacy · `000236` indici, vincolo validato e
 statistiche · `000237` dedup dei codici percorso + sigillo `UNIQUE` · `000238` traduzioni KPI
 orfane · `000239` dedup dei codici competenza + terzo sigillo · `000240` rimozione di 3 righe
@@ -27,8 +27,22 @@ alimentare/energetico + 10 percorsi con slug di tenant inesistente nel codice `P
 `000242` dichiarazione dell'industry dei due tenant, ancorata ad ATECO ·
 `000243` rimozione dei 2 KPI di industry estranea dal catalogo globale). Conteggi che **cambiano per
 effetto della bonifica**: percorsi formativi **72** (erano 4.638), moduli **92** (erano 1.032),
-obiettivi **2.189** (erano 2.624), skill **14.039** (erano 14.041). Utenti, posizioni, tenant e
-RBAC invariati: la bonifica non ha toccato persone né autorizzazioni.
+obiettivi **2.189** (erano 2.624), skill **14.039** (erano 14.041), KPI **199** (erano 243).
+Utenti, posizioni, tenant e RBAC invariati, e **assegnazioni formative 3.061 invariate**: la
+bonifica non ha tolto un corso a nessuno.
+
+**Invariante nuovo — I21** (CLAUDE.md): i dati che derivano dall'industry del tenant devono
+esserle coerenti (**Heuresys = `MGMT_CONSULTING`/ATECO 70.20 · RTL Bank = `FIN_BANKING`/ATECO
+64.19**, dichiarati in `sys_tenancies` da `000242`), mentre le **tassonomie e ontologie** restano
+aperte a ogni industry — senza di esse non si creano più blueprint, tenant, strutture o processi.
+Il test ha due domande in ordine: la tabella definisce una **classificazione** o dei **contenuti**?
+Essere globale non dà diritto di cittadinanza a un contenuto. Tassonomie intatte a valle di tutta
+la bonifica: **14.039 competenze ESCO** (incluse le 37 alimentari/energetiche) e **3.257
+classificazioni ATECO**.
+
+**Strumenti nuovi in `docs/kb/tools/`**: `db_health.py` (accende le 14 viste sentinella + 14 sonde,
+cablato al boot di `session_start` e in `verify_gate` su `db/**`), `check_tenant_contamination.py`
+(13 classi, guardia anti-regressione), `exposure_columns.py` e `dead_columns.py`.
 
 **Migration della sessione**: `000224` VRIO · `000225` salute organizzativa · `000226` governance
 timeline · `000227` ritiro del peso economico di posizione · `000228` traccia di audit

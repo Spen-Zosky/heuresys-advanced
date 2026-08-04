@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-03T08:42:27Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2793**
+**Generato**: 2026-08-04T00:50:46Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2808**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 231 |
+| db-migration | 241 |
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 147 |
-| doc-canonical | 529 |
+| doc-canonical | 534 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 346 |
 | ux-design-archive | 80 |
 | web-source | 232 |
-| **TOTALE** | **2793** |
+| **TOTALE** | **2808** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2235 |
+| live | 2250 |
 
 ## File per categoria
 
@@ -1230,6 +1230,16 @@
 - `D:\heuresys-advanced\db\migrations\000231_inbox_notify_trigger.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000232_leads_update_permission.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000233_leads_gdpr_retention.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000234_drop_attendance_validation.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000235_purge_legacy_tenant_contamination.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000236_structural_indexes_and_stats.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000237_dedup_learning_codes_and_unique_seal.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000238_purge_orphan_kpi_translations.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000239_dedup_skill_codes_and_seal.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000240_remove_probe_rows_from_terminal_table.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000241_remove_food_energy_catalog.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000242_declare_tenant_industries.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000243_remove_foreign_industry_kpis.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1690,6 +1700,10 @@
 - `D:\heuresys-advanced\docs\kb\tools\build_menu.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_exposure.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\check_module_test_coverage.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\check_tenant_contamination.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\db_health.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\dead_columns.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\exposure_columns.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\handoff_lint.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-commit` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-merge` · *live* · git-tracked
@@ -1942,6 +1956,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-26-organizational-model-and-role-derivation-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-07-27-claude-ecosystem-harmonization-plan.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-02-p2-batch-execution-plan.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-08-03-consegna-lab-esecuzione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked

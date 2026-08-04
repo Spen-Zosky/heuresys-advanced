@@ -150,15 +150,29 @@ describe("ADR-0027 F4 — functional (team/process) axis", () => {
    * scope to its participants — the same way leading a team does — without touching the org axis.
    */
   it("owning a process extends the functional scope to its participants", async () => {
+    // Il processo si SCEGLIE, non si prende a caso. La stesura precedente usava
+    // `LIMIT 1` senza ordinamento e inseriva i due attori come partecipanti: se
+    // il processo estratto ne aveva gia' uno nel dato reale, l'insert violava
+    // `sys_process_participants_process_user_uq` e il test moriva su una
+    // collisione invece che su cio' che voleva misurare. Con dati reali che
+    // cambiano, "il primo che capita" e' una fixture che decade da sola.
     const proc = await pool.query<{ id: string }>(
-      `SELECT organization_unit_process_id AS id
-         FROM sys.sys_organization_unit_processes
-        WHERE org_unit_process_tenant_id = $1
+      `SELECT p.organization_unit_process_id AS id
+         FROM sys.sys_organization_unit_processes p
+        WHERE p.org_unit_process_tenant_id = $1
+          AND NOT EXISTS (
+            SELECT 1 FROM sys.sys_process_participants pp
+             WHERE pp.process_participant_org_unit_process_id = p.organization_unit_process_id
+               AND pp.process_participant_user_id = ANY($2::uuid[]))
+        ORDER BY p.organization_unit_process_id
         LIMIT 1`,
-      [rtlTenantId],
+      [rtlTenantId, [ids.paolo, ids.antonio]],
     );
     const processId = proc.rows[0]?.id;
-    expect(processId, "nessun processo org-unit su RTL: fixture impossibile").toBeDefined();
+    expect(
+      processId,
+      "nessun processo org-unit su RTL libero da entrambi gli attori: fixture impossibile",
+    ).toBeDefined();
 
     // antonio is deliberately OUTSIDE paolo's team and org sub-tree — so any grant here can
     // only come from the process membership under test.

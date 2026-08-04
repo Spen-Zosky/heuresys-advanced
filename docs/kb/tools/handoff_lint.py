@@ -22,6 +22,8 @@ The handoff skill runs this and must not push on a red gate (like a red CI — R
                             resolves to the backlog (no dangling/partial handoff)
   A2  loop closed         — every #id STATE marks as closed/done is terminal in the backlog
                             (not still listed as an active item)
+  L1  lab inbox drained   — no design-lab delivery left un-ingested (warn; silent where no lab)
+  L2  lab trace intact    — every `lab-id:` in the register has its twin in inbox/ingerite/
 
 Exit: 0 = pass | 1 = at least one FAIL (default: blocking gate) | 2 = internal error.
 Usage:
@@ -404,6 +406,55 @@ def check_loop_closed(state_md, backlog_md):
                    f"item (loop not closed — mark it DONE/terminal in the backlog)")
 
 
+def check_lab_inbox():
+    """L1/L2 — the lab->canonica channel is drained and its tracking is intact.
+
+    L1  a delivery the design-lab deposited in <lab>/inbox/ is still NOT in the register: the
+        session would close leaving work invisible to the next boot (that is the very drift
+        lab_inbox exists to remove).
+    L2  a `lab-id:` in the register has no twin file in <lab>/inbox/ingerite/: the trace is
+        broken — either the file was deleted by hand or the id was typed instead of ingested.
+
+    WARN, never FAIL, and by design: the lab lives OUTSIDE the repo. On the clones and in CI
+    (state-lint.yml, self-hosted OCI runner) there is no lab at all — `riassunto()` returns ""
+    and this check is silent. A directory outside the repo must not be able to block a push.
+    """
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import lab_inbox
+    except Exception as exc:
+        warn("L1", f"lab_inbox not importable ({exc}) — lab->canonica channel unverified")
+        return
+    if not os.path.isdir(lab_inbox.INBOX):
+        return                       # no lab on this machine: total silence (clones, CI)
+    registro = read(lab_inbox.REGISTRO) or ""
+    pendenti, rotte = [], []
+    for c in lab_inbox.consegne():
+        if not c["valida"]:
+            rotte.append(c["file"])
+        elif lab_inbox.stato_nel_registro(c["lab_id"], registro) is None:
+            pendenti.append(c["lab_id"])
+    if pendenti:
+        warn("L1", f"{len(pendenti)} lab deliveries not yet in the register ({', '.join(pendenti[:3])}"
+                   f"{'…' if len(pendenti) > 3 else ''}) — run "
+                   f"`python docs/kb/tools/lab_inbox.py --ingest` before closing")
+    if rotte:
+        warn("L1", f"malformed lab deliveries (no lab-id or no ```markdown block): {', '.join(rotte)}")
+    # L2 — every lab-id claimed by the register must have its twin among the ingested files
+    ingerite = set(os.listdir(lab_inbox.INGERITE)) if os.path.isdir(lab_inbox.INGERITE) else set()
+    testi = {f: "" for f in ingerite}
+    for f in list(testi):
+        try:
+            testi[f] = lab_inbox._leggi(os.path.join(lab_inbox.INGERITE, f))
+        except OSError:
+            pass
+    orfani = [lid for lid in set(re.findall(r"^\s*-\s*lab-id:\s*(\S+)", registro, re.M))
+              if not any(f"lab-id: {lid}" in t for t in testi.values())]
+    if orfani:
+        warn("L2", f"{len(orfani)} lab-id(s) in the register have no twin in inbox/ingerite/: "
+                   f"{', '.join(sorted(orfani)[:3])}{'…' if len(orfani) > 3 else ''}")
+
+
 def main():
     ap = argparse.ArgumentParser(description="Deterministic gate for the handoff/SoT system.")
     ap.add_argument("--warn-only", action="store_true",
@@ -424,6 +475,7 @@ def main():
         check_backlog_defer(backlog)
         check_atomicity(state, backlog, sot)
         check_loop_closed(state, backlog)
+        check_lab_inbox()
     except Exception as exc:  # never let the lint itself crash the handoff silently
         print(f"handoff-lint INTERNAL ERROR: {exc}", file=sys.stderr)
         return 2

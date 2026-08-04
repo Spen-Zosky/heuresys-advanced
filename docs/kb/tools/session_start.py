@@ -2,6 +2,11 @@
 """
 session_start.py — ONE consolidated session-start view for heuresys-advanced.
 
+Prints, in one round: the action menu (build_menu) · the deliveries the design-lab has left in
+its inbox and that are NOT yet in the register (lab_inbox — silent when there is nothing, and on
+the clones, where the lab does not exist) · the live health dashboard (status_dashboard) · the
+`v_*` sentinels (db_health).
+
 Collapses the two-step boot (build_menu.py + status_dashboard.py) into a SINGLE process
 and a SINGLE model round: it prints the action menu (from build_menu) followed by the live
 health dashboard (from status_dashboard), which AT BOOT runs OFFLINE-FAST (--no-net). The
@@ -32,6 +37,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_menu  # noqa: E402
 import db_health  # noqa: E402
+import lab_inbox  # noqa: E402
 import status_dashboard  # noqa: E402
 
 try:
@@ -57,6 +63,16 @@ def main():
                     + (["--no-db"] if args.no_db else [])
                     + (["--show-hold"] if args.show_hold else []))
         build_menu.main()
+        # Il design-lab sta fuori dal repo (sessioni parallele senza collisioni), e questo
+        # rendeva le sue consegne un ponte MANUALE. Qui la canonica le scopre da sola: la
+        # sezione compare solo se c'e' qualcosa da dire, ed e' muta sui cloni VM/linux-pc,
+        # dove il lab non esiste (riassunto() esce vuota se la inbox non e' una directory).
+        try:
+            lab = lab_inbox.riassunto()
+        except Exception as exc:  # una vista non puo' abbattere il boot
+            lab = f"   ⚠ lab inbox non leggibile: {exc}"
+        if lab:
+            print("\n" + lab)
         print()
         sys.argv = (["status_dashboard"]
                     + ([] if args.net else ["--no-net"])

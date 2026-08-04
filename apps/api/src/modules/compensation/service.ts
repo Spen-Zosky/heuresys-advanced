@@ -6,6 +6,18 @@
 
 import { pool } from "../../db/client.js";
 import { isPlatform, type ActorContext } from "../../lib/actor.js";
+import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
+
+/**
+ * #124 — what goes when a compensation row is read under the platform mandate.
+ *
+ * `amountEur` is the obvious one. `narrative` goes because it is free text
+ * written about the amount. `payload` goes WHOLE because it is an untyped
+ * record that demonstrably carries pay data (measured 2026-08-04: every one of
+ * the 116 rows holds `legacy.increase_percent`), and a partial mask over an
+ * open record cannot be verified.
+ */
+const COMPENSATION_MONEY_FIELDS = ["amountEur", "narrative", "payload"] as const;
 
 export type { ActorContext };
 import { NotFoundError, ForbiddenError } from "../../errors/index.js";
@@ -154,9 +166,31 @@ export const compensationService = {
     return repo.listVariablePay(pool, { ...(await orgFilter(actor)), query });
   },
 
-  /** Org-gated per-person compensation recommendations (I18). */
+  /**
+   * Org-gated per-person compensation recommendations (I18), then field-masked
+   * for the platform mandate (#124).
+   *
+   * The two gates answer different questions and both have to run. The org gate
+   * decides WHICH rows the actor may see at all; the mask decides which FIELDS
+   * of a row they may read. A technical administrator keeps the first — they
+   * must be able to see that a recommendation exists for July — and loses the
+   * second, which is Enzo's decision of 2026-08-04.
+   *
+   * Masking happens HERE and not in the repository because the repository does
+   * not know the actor, and not in the route because the route has already
+   * handed the object to Zod. This is the last point where the true value is
+   * still in hand and the response has not been serialized.
+   */
   async listRecommendations(actor: ActorContext, query: CompensationRecommendationListQuery) {
-    return repo.listRecommendations(pool, { ...(await orgFilter(actor)), query });
+    const page = await repo.listRecommendations(pool, { ...(await orgFilter(actor)), query });
+    return {
+      ...page,
+      items: page.items.map((rec) =>
+        masksUnderPlatformMandate(actor, "COMPENSATION", rec.userId)
+          ? maskFields(rec, COMPENSATION_MONEY_FIELDS)
+          : rec,
+      ),
+    };
   },
 
   /**

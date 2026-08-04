@@ -164,6 +164,12 @@ export const COMPENSATION_RECOMMENDATION_SIGNALS = [
 ] as const;
 export const CompensationRecommendationSignalSchema = z.enum(COMPENSATION_RECOMMENDATION_SIGNALS);
 
+/**
+ * The WRITE-side record (POST /v1/compensation/recommendations). Deliberately
+ * NOT masked (#124): the only amount an actor sees here is the one they just
+ * submitted. Masking applies to reads of other people's rows —
+ * `CompensationRecommendationRowSchema` in ./compensation-read.ts.
+ */
 export const CompensationRecommendationSchema = z.object({
   compensationRecommendationId: z.uuid(),
   tenantId: z.uuid(),

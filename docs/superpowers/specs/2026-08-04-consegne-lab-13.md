@@ -34,8 +34,8 @@ stanno 17.000 e 19.000 € sotto. **Decisione di Enzo: applicare entrambi come p
 
 | id | consegna | chi | fatto quando | stato |
 |---|---|---|---|---|
-| **#116** | atterraggio derivato dal permesso, non dall'elenco di ruoli | io | nessuno atterra dove non ha il permesso + test che fallisce se si ricabla la lista | da fare |
-| **#124** | mascheratura nel contratto dati (strato 1: `IDENTITY_PRO`/`IDENTITY_PRIV`) | io | risposta HTTP reale con importo assente e campo `masked` che lo dichiara | da fare |
+| **#116** | atterraggio derivato dal permesso, non dall'elenco di ruoli | io | nessuno atterra dove non ha il permesso + test che fallisce se si ricabla la lista | ✅ **FATTO** — `0f619e85` |
+| **#124** | mascheratura nel contratto dati | io | risposta HTTP reale con importo assente e campo `masked` che lo dichiara | ⏸ **INTERROTTA** — meccanismo fatto e provato (`ADR-0032`), resta applicarlo a `EVALUATION` + aggregati + strato 1 |
 | **#118** | dieci responsabili a `QD3` + `martina.gentile` registrata | io | `verifica_incrociata.py --famiglia X1 --famiglia X2`, X2a/X2b a zero | da fare |
 | **#120** | dieci posizioni a `MG-2` + collocazione retributiva | io | `X3a` a zero su universo ≠ zero; nessuno sotto 65.000 € | da fare |
 | **#119** | `UI_ADMIN_ROLES` e i tre `return "TEAM"` derivati dai domini | io | `CEO` vede le sezioni senza comparire in alcuna lista | da fare |

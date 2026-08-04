@@ -96,6 +96,20 @@ export type VariablePayCalculationListResponse = z.infer<
 // resolved subject name and models amountEur as a string; the READ row adds
 // subjectUserName and maps amounts to numbers → a distinct schema.
 
+/**
+ * #124 — the money-bearing fields are OPTIONAL, not nullable-with-a-placeholder.
+ *
+ * When the caller reads this row under the platform mandate alone, the fields
+ * are ABSENT and their names appear in `masked`. Absence is the contract: `0`
+ * or `null` would be indistinguishable from "the database has no value", and
+ * the client must be able to render «nascosto per il tuo profilo» rather than a
+ * zero that reads as a fact. See `apps/api/src/lib/scope/mask.ts`.
+ *
+ * `payload` is masked WHOLE rather than field-by-field: it is an untyped record
+ * and it demonstrably carries pay data (measured 2026-08-04: all 116 rows hold
+ * `legacy.increase_percent`). A partial mask over an open record cannot be
+ * verified, and an unverifiable mask is the cosmetic kind.
+ */
 export const CompensationRecommendationRowSchema = z.object({
   compensationRecommendationId: z.uuid(),
   tenantId: z.uuid(),
@@ -107,11 +121,13 @@ export const CompensationRecommendationRowSchema = z.object({
   periodEnd: z.string(),
   // free string (never 500 a read on a future DB value — deterministic-seed lesson)
   signal: z.string(),
-  amountEur: z.number().nullable(),
-  narrative: z.string().nullable(),
-  payload: z.record(z.string(), z.unknown()),
+  amountEur: z.number().nullable().optional(),
+  narrative: z.string().nullable().optional(),
+  payload: z.record(z.string(), z.unknown()).optional(),
   computedAt: z.iso.datetime(),
   createdAt: z.iso.datetime(),
+  /** Names of the fields withheld from THIS row. Absent when nothing was withheld. */
+  masked: z.array(z.string()).optional(),
 });
 export type CompensationRecommendationRow = z.infer<typeof CompensationRecommendationRowSchema>;
 

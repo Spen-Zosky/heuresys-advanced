@@ -8,6 +8,20 @@ name: i18n parity (it/en)
 # is sized for that setup cost, not the check — aligned with the other
 # install+check jobs (lint/shell-tests/state-lint = 5), which held on the same
 # push where a 3-min cap cancelled this one (S1012).
+#
+# [S1045] 5 -> 10. Il cap a 5 ha ucciso il job per SEI SECONDI (306s su 300),
+# tre volte di fila, e GitHub segna il timeout come «cancelled» — che si legge
+# come un'interruzione esterna e manda a cercare la causa sbagliata (contesa fra
+# workflow: misurata, non era quella; l'ultimo tentativo e' morto uguale a coda
+# libera).
+#
+# Misurato sul job, step per step: Setup Node 245s · Install 38s · il check che
+# da' il nome al workflow 1s, ESITO SUCCESS. Il lavoro utile e' 39 secondi su un
+# budget di 300, e l'80% se ne va a preparare Node prima di toccare il repo.
+# Un cap tarato sul lavoro invece che sul setup non misura la parita' delle
+# traduzioni: misura quanto e' in forma il runner quel giorno, e produce un
+# rosso che non indica alcun difetto — il tipo peggiore, perche' insegna a non
+# guardarlo. Allineato a lint/typecheck (10), che sullo stesso runner reggono.
 
 on:
   push:
@@ -35,7 +49,7 @@ jobs:
     # runner churn — DEBT_REGISTER D-09). Push events have no PR context → run.
     if: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && !contains(github.event.pull_request.labels.*.name, 'defer-major') }}
     runs-on: [self-hosted, oci-vm]
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7

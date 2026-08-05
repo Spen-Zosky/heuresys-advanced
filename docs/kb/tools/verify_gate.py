@@ -48,6 +48,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import time
@@ -217,8 +218,103 @@ def route(files: list[str]) -> list[str]:
 
 # --- Layer 2: il collector ----------------------------------------------
 
+LOGS = REPO / ".zp" / "verify-logs"
+
+# Le sequenze di colore vanno tolte PRIMA di cercare i fallimenti: `tsc` colora
+# anche il riepilogo, e un pattern che non ne tiene conto non aggancia niente
+# proprio sulla suite che e' fallita.
+ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+# Le righe con cui le suite di questo repo dichiarano CHE COSA e' caduto.
+FALLIMENTI = (
+    re.compile(r"^\s*FAIL\s+(\S+)", re.M),                     # vitest
+    re.compile(r"Found \d+ errors? in (\S+)", re.M),           # tsc, riepilogo
+    re.compile(r"^(\S+\.tsx?)\(\d+,\d+\): error TS", re.M),    # tsc, forma per-file
+)
+
+
+def estrai_falliti(uscita: str) -> list[str]:
+    """I nomi di cio' che e' caduto, dentro il verdetto stesso.
+
+    E' questo che evita la rilettura del log — e soprattutto la RIESECUZIONE della
+    suite — a chi deve solo sapere dove guardare. Costo misurato del non averlo
+    (2026-08-05): gate rosso alle 03:03, e per riavere i nomi di 4 file falliti la
+    suite intera e' ripartita per altri 36 minuti, con quei nomi che il processo
+    aveva avuto in memoria e buttato.
+    """
+    pulito = ANSI.sub("", uscita)
+    fuori: list[str] = []
+    for rx in FALLIMENTI:
+        for grezzo in rx.findall(pulito):
+            v = grezzo.strip()
+            if v and v not in fuori:
+                fuori.append(v)
+    return fuori[:50]
+
+
+def scrivi_log(nome: str, uscita: str) -> str:
+    """L'output intero su file. Ritorna il path relativo, o la ragione per cui non
+    e' stato scritto: un log mancante va dichiarato, non taciuto.
+
+    `.zp/*` e' gitignorato, quindi i log non compaiono in `git status`, non entrano
+    nei commit e non passano ai cloni.
+    """
+    try:
+        LOGS.mkdir(parents=True, exist_ok=True)
+        p = LOGS / f"{nome}.log"
+        p.write_text(uscita, encoding="utf-8", errors="replace", newline="\n")
+        return str(p.relative_to(REPO)).replace("\\", "/")
+    except OSError as exc:
+        return f"(non scritto: {exc})"
+
+
+SUITE_LOCK = REPO / ".zp" / "suite.lock"
+
+
+def chi_occupa_il_db() -> str | None:
+    """Descrizione di chi sta gia' eseguendo la suite, o None se il campo e' libero.
+
+    Il cancello CONTROLLA il lucchetto ma non lo PRENDE: a prenderlo e' la suite
+    stessa (`apps/api/test/helpers/suite-lock.ts`). Se lo prendesse anche qui, il
+    cancello si bloccherebbe da solo lanciando vitest.
+
+    Serve a fallire in un secondo invece che dopo ~40 minuti di rossi che non sono
+    difetti: due suite sullo stesso PostgreSQL si contendono lock e connessioni
+    (misurato 2026-08-05 — 14 file falliti in concorrenza contro 4 su DB libero,
+    con ZERO test falliti in entrambi i casi).
+    """
+    try:
+        d = json.loads(SUITE_LOCK.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    pid = d.get("pid")
+    if not isinstance(pid, int):
+        return None
+    # Lock stantio (processo morto) = campo libero: altrimenti un Ctrl-C lascerebbe
+    # un blocco permanente.
+    try:
+        out = subprocess.run(["tasklist", "/FI", f"PID eq {pid}"] if sys.platform == "win32"
+                             else ["ps", "-p", str(pid)],
+                             capture_output=True, text=True, check=False,
+                             encoding="utf-8", errors="replace").stdout or ""
+    except OSError:
+        return None
+    if str(pid) not in out:
+        return None
+    return f"PID {pid}, avviata {d.get('avviato', '?')} — {d.get('comando', '?')}"
+
+
 def run_suites(names: list[str], with_e2e: bool, files: list[str],
                keep: list[dict] | None = None) -> dict:
+    # Le suite che toccano il database non partono se un'altra e' gia' in corso.
+    if any(n in ("test-api", "migrate-idempotent") for n in names):
+        occupante = chi_occupa_il_db()
+        if occupante:
+            print(f"  [BLOCCO] la suite e' gia' in esecuzione: {occupante}")
+            print("           due run sullo stesso database producono rossi che non sono difetti.")
+            print("           Aspetta che finisca, oppure SUITE_LOCK=0 se sai quello che fai.")
+            raise SystemExit(2)
+
     results = list(keep or [])
     plan = [(n, *SUITES[n]) for n in names]
     if with_e2e:
@@ -238,15 +334,22 @@ def run_suites(names: list[str], with_e2e: bool, files: list[str],
         # cancello con un TypeError invece di riportare la suite come fallita.
         # Un cancello che CRASHA non dice «rosso», non dice niente — ed e' il modo
         # peggiore di fallire per uno strumento il cui mestiere e' dare un verdetto.
-        tail = ((proc.stdout or "") + (proc.stderr or "")).strip().splitlines()[-15:]
+        uscita = (proc.stdout or "") + (proc.stderr or "")
+        tail = uscita.strip().splitlines()[-15:]
         if not tail and proc.returncode != 0:
             tail = [f"(nessun output catturato; il processo e' uscito con {proc.returncode})"]
+        # L'output INTERO su file, e i nomi dei falliti DENTRO il verdetto: 15 righe
+        # di coda bastano a dire «rosso», non a dire «dove».
+        log_rel = scrivi_log(name, uscita)
         results.append({
             "suite": name,
             "level": level,
             "cmd": cmd,
             "exit": proc.returncode,
             "duration_s": round(time.time() - t0, 1),
+            "log": log_rel,
+            "righe": len(uscita.splitlines()),
+            "falliti": estrai_falliti(uscita) if proc.returncode != 0 else [],
             # L'impronta dei file che instradano questa suite, presa DOPO l'esecuzione:
             # se qualcuno modifica quei file mentre la suite gira, l'impronta registrata
             # e' quella finale e al giro dopo risultera' scaduta. Sbagliare per eccesso

@@ -34,7 +34,8 @@ verifica e review adversarial; le decisioni tecniche sono di Claude.
   `docs/superpowers/specs/2026-08-05-perimetri-test-esecuzione.md`.
 - **13 consegne del lab**: chiuse `#116` `#118` `#119` `#120` `#122`; a metà `#124`; da fare
   `#117` `#121` `#123` `#125` `#126` `#127` `#128`.
-- **11 consegne lab nuove** ingerite come `#129`→`#139`.
+- **11 consegne lab nuove** ingerite come `#129`→`#139`; chiuse subito `#130` (il cancello
+  conserva l'output delle suite) e `#138` (lucchetto contro due suite sullo stesso database).
 - **#92 ciclo di valutazione**: passi **2 su 7** chiusi.
 
 ## ⚠ Top priorities (next session)

@@ -72,5 +72,10 @@ export default defineConfig({
     maxWorkers: 1,
     minWorkers: 1,
     setupFiles: ["./test/helpers/setup.ts"],
+    // Un lucchetto per RUN (globalSetup gira una volta, non per file): due suite
+    // sullo stesso PostgreSQL si contendono lock e connessioni e producono rossi che
+    // non sono difetti — misurato il 2026-08-05, 14 file falliti in concorrenza
+    // contro 4 su database libero, con ZERO test falliti in entrambi i casi.
+    globalSetup: ["./test/helpers/suite-lock.ts"],
   },
 });

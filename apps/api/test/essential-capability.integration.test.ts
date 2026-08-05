@@ -18,7 +18,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
-import { closePool } from "../src/db/client.js";
+import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { ESSENTIAL_CAPABILITY_WEIGHTS as W } from "@heuresys/shared";
 
@@ -103,6 +103,58 @@ describe("#55 F1 — Essential Capability Ranker", () => {
   it("is ordered by investment priority, highest first", async () => {
     const pr = ((await ranking(tenantAdmin)).json() as Ranking).items.map((i) => i.investmentPriority);
     expect(pr).toEqual([...pr].sort((a, b) => b - a));
+  });
+
+  // D-81: maturity used to be normalised by the literal 5 while the proficiency scale
+  // reaches 6, and `service.ts` already divided the same quantity by 6 for the VRIO depth.
+  // Both sides of this assertion are read from the live DB — nothing about the scale, the
+  // holdings or the expected value is written here (regola no-hardcoded-test-data).
+  it("maturity is normalised by the proficiency SCALE, not by the highest rank observed", async () => {
+    const scale = await pool.query<{ scale_max: string; observed_max: string }>(
+      `SELECT (SELECT max(skill_proficiency_level_rank) FROM sys.sys_skill_proficiency_levels)::text AS scale_max,
+              (SELECT max(pl.skill_proficiency_level_rank)
+                 FROM sys.sys_user_skills us
+                 JOIN sys.sys_skill_proficiency_levels pl
+                   ON pl.skill_proficiency_level_code = us.user_skill_proficiency)::text AS observed_max`,
+    );
+    const scaleMax = Number(scale.rows[0]?.scale_max);
+    const observedMax = Number(scale.rows[0]?.observed_max);
+    expect(scaleMax).toBeGreaterThan(0);
+
+    const held = await pool.query<{ skill_id: string; avg_rank: string }>(
+      `SELECT us.user_skill_skill_id AS skill_id, avg(pl.skill_proficiency_level_rank)::text AS avg_rank
+         FROM sys.sys_user_skills us
+         LEFT JOIN sys.sys_skill_proficiency_levels pl
+                ON pl.skill_proficiency_level_code = us.user_skill_proficiency
+        GROUP BY us.user_skill_skill_id`,
+    );
+    const avgBySkill = new Map(held.rows.map((r) => [r.skill_id, Number(r.avg_rank)]));
+
+    const b = (await ranking(tenantAdmin)).json() as Ranking;
+    let checked = 0;
+    for (const it of b.items) {
+      const avg = avgBySkill.get(it.skillId);
+      if (avg === undefined || Number.isNaN(avg)) continue; // skill with no holders → maturity 0
+      expect(it.maturity).toBeCloseTo(Math.min(1, avg / scaleMax), 4);
+      checked++;
+    }
+    expect(checked).toBeGreaterThan(0); // an empty loop would assert nothing
+
+    // The half that makes this falsifiable: while the scale is wider than what the data
+    // uses, dividing by the observed maximum gives a DIFFERENT number — so this suite goes
+    // red if the old literal comes back. If one day a MASTER is recorded the two collapse
+    // into one and the guard below stands down on its own, by design.
+    if (observedMax > 0 && observedMax !== scaleMax) {
+      const withHolders = b.items.filter((i) => {
+        const a = avgBySkill.get(i.skillId);
+        return a !== undefined && !Number.isNaN(a) && a > 0;
+      });
+      expect(withHolders.length).toBeGreaterThan(0);
+      for (const it of withHolders) {
+        const avg = avgBySkill.get(it.skillId) as number;
+        expect(it.maturity).not.toBeCloseTo(Math.min(1, avg / observedMax), 4);
+      }
+    }
   });
 
   it("is deterministic: two calls give the same ordered scores", async () => {

@@ -11,6 +11,7 @@
  */
 import type { Pool, PoolClient } from "pg";
 import { pool } from "../../db/client.js";
+import { VRIO_MAX_PROFICIENCY_RANK } from "@heuresys/shared";
 import type { CapabilitySubjectType } from "@heuresys/shared";
 
 type Queryable = Pool | PoolClient;
@@ -344,7 +345,13 @@ export interface EssentialRankRow {
  *     features);
  *   - critShare: share of requiring positions weighted by criticality;
  *   - scarcity: 1 - clamp(holders / positions_requiring, 0, 1) — under-supply vs demand;
- *   - maturity: avg held proficiency rank of the holders / 5 (MASTER=6 unused by the data).
+ *   - maturity: avg held proficiency rank of the holders / VRIO_MAX_PROFICIENCY_RANK.
+ *     D-81: this used to divide by the literal 5 "because MASTER=6 is unused by the data".
+ *     The data part is still true (measured: 1.355 holdings, none above EXPERT=5), but the
+ *     denominator is the SCALE, not the observed maximum — dividing by 5 called an EXPERT-only
+ *     skill fully mature, and `service.ts` already normalised the same quantity by 6 for the
+ *     VRIO `depth`. Two divisors for one quantity was the real defect; the clipping the debt
+ *     described was only its latent half, waiting for the first MASTER to be assigned.
  */
 export async function loadEssentialRankInputs(
   tenantId: string | null,
@@ -424,7 +431,7 @@ export async function loadEssentialRankInputs(
       econPercentile: econPercentile(avgEcon),
       critShare: Math.min(1, Math.max(0, Number(r.crit_share))),
       scarcity: 1 - coverage,
-      maturity: avgRank === null ? 0 : Math.min(1, avgRank / 5),
+      maturity: avgRank === null ? 0 : Math.min(1, avgRank / VRIO_MAX_PROFICIENCY_RANK),
       holders,
     };
   });

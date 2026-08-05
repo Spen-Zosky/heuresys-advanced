@@ -64,7 +64,14 @@ ROUTES: list[tuple[str, list[str]]] = [
     ("packages/shared/", ["typecheck", "test-api"]),
     ("apps/web/",        ["typecheck", "lint"]),
     ("apps/showcase/",   ["typecheck", "lint"]),
-    ("db/migrations/",   ["migrate-idempotent", "db-health", "no-contamination"]),
+    # `handoff-lint` c'e' perche' verifica anche il CONTEGGIO delle migrazioni sul
+    # disco contro la headline di SOT_STATE (check D3). Legarlo ai soli file di
+    # stato era un buco: aggiungere una migrazione cambia cio' che quel lint
+    # misura, ma non i file che lo instradavano — cosi' il cancello locale restava
+    # verde e il rosso compariva solo in CI, a push fatto. Misurato in S1045 con la
+    # 000273: headline a 000272, disco a 000273, gate locale verde, `state-lint`
+    # rosso e deploy bloccato dal suo stesso cancello.
+    ("db/migrations/",   ["migrate-idempotent", "db-health", "no-contamination", "handoff-lint"]),
     ("db/",              ["typecheck", "db-health", "no-contamination"]),
     ("scripts/",         ["shell-tests"]),
     # solo i file di stato governati dall'handoff, non i tool sotto docs/kb/tools/

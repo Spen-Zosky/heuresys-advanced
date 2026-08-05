@@ -36,6 +36,18 @@
 #   POLL_INTERVAL  seconds between status polls     (default 15)
 #   POLL_MAX       max seconds to watch before detaching (default 2400 = 40 min)
 #
+#   CI_GATE_WAIT / CI_GATE_POLL / CI_GATE_KEY_WORKFLOWS / DEPLOY_REQUIRE_CI
+#                  read by ci-gate.sh ON THE REMOTE HOST, forwarded from this client.
+#                  See D-79 below.
+#
+# D-79: the deploy runs REMOTELY, so an env var set on the client never reaches
+# ci-gate.sh — `CI_GATE_WAIT=2100 align-clones … --deploy` silently kept the gate's
+# own 900s default and aborted two consecutive deploys on a CI that was still
+# legitimately running. The gate was right to refuse; the knob to give it more time
+# simply did nothing, and whoever used it believed otherwise. These vars are
+# per-INVOCATION, so they do NOT belong in DEPLOY_ENV (per-HOST config: ports, user)
+# — they are forwarded here instead.
+#
 # Dependency-free (bash + ssh + coreutils on both ends). set -u, no -e: a failed
 # poll ssh must not abort the watcher (transient drops are expected and retried).
 set -uo pipefail
@@ -45,6 +57,31 @@ set -uo pipefail
 # remote command breaks. Disable it (no-op on Linux, where align-clones' VM leg
 # also runs). See memory reference_remote_ssh_deploy_ops.
 export MSYS_NO_PATHCONV=1
+
+# Forward the CI-gate knobs to the remote deploy (D-79). Only the ones the caller
+# actually set: `${!v+set}` distinguishes "unset" from "set to empty", and emitting
+# `CI_GATE_WAIT=` would override the remote default WITH THE EMPTY STRING — worse
+# than the bug being fixed. Values are wrapped in double quotes because
+# CI_GATE_KEY_WORKFLOWS is a space-separated list; a value carrying a quote,
+# backslash, `$` or backtick would break out of the remote `bash -c '…'` payload,
+# so it is refused LOUDLY rather than forwarded mangled.
+gate_env() {
+  local out="" v val
+  for v in CI_GATE_WAIT CI_GATE_POLL CI_GATE_KEY_WORKFLOWS DEPLOY_REQUIRE_CI; do
+    [ -n "${!v+set}" ] || continue
+    val="${!v}"
+    [ -n "$val" ] || continue
+    case "$val" in
+      *[\'\"\\\$\`]*) echo "[vm-deploy-remote] WARNING: $v not forwarded (unsafe characters)" >&2; continue ;;
+    esac
+    out="$out $v=\"$val\""
+  done
+  printf '%s' "$out"
+}
+
+# Self-test hook for the shell-test gate: prints what WOULD be forwarded, then exits.
+# Keeps the D-79 fixture honest without needing a reachable host.
+if [ "${1:-}" = "--print-gate-env" ]; then gate_env; echo; exit 0; fi
 
 HOST="${1:?usage: vm-deploy-remote.sh <ssh-host>}"
 # REQUIRED, no default: a per-host absolute path baked in here would be wrong on
@@ -71,7 +108,7 @@ launch() {
 set -u
 rm -f "$LOG" "$ST"
 cd "$REMOTE_REPO" 2>/dev/null || { echo 127 > "$ST"; echo "cd-failed: $REMOTE_REPO"; exit 0; }
-setsid nohup bash -c 'env REPO_DIR="$REMOTE_REPO" $DEPLOY_ENV $DEPLOY_CMD > "$LOG" 2>&1; echo \$? > "$ST"' </dev/null >/dev/null 2>&1 &
+setsid nohup bash -c 'env REPO_DIR="$REMOTE_REPO"$(gate_env) $DEPLOY_ENV $DEPLOY_CMD > "$LOG" 2>&1; echo \$? > "$ST"' </dev/null >/dev/null 2>&1 &
 echo "launched pid \$!"
 EOF
 }

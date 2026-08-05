@@ -203,6 +203,23 @@ if [ -f "$VDR" ]; then
      && ! grep -qE 'ssh .*bash scripts/vm-deploy\.sh' scripts/align-clones.sh; then
     ok "align-clones deploys via vm-deploy-remote.sh (no foreground ssh vm-deploy)"
   else fail "align-clones still uses a foreground ssh vm-deploy.sh"; fi
+  # G5 (D-79): the CI-gate knobs are per-INVOCATION and the gate runs on the REMOTE
+  #     host, so they must be forwarded explicitly. These exercise the composer, not
+  #     a grep: a regression makes them fail with the wrong string, not a missing one.
+  ge() { env -u CI_GATE_WAIT -u CI_GATE_POLL -u CI_GATE_KEY_WORKFLOWS -u DEPLOY_REQUIRE_CI \
+           "$@" bash "$VDR" --print-gate-env; }
+  [ "$(ge CI_GATE_WAIT=2100)" = ' CI_GATE_WAIT="2100"' ] \
+    && ok "forwards CI_GATE_WAIT to the remote gate (D-79)" || fail "CI_GATE_WAIT not forwarded"
+  [ "$(ge CI_GATE_KEY_WORKFLOWS='a.yml b.yml')" = ' CI_GATE_KEY_WORKFLOWS="a.yml b.yml"' ] \
+    && ok "forwards a space-separated list intact (quoted)" || fail "list value not quoted"
+  # The trap this guards: emitting `CI_GATE_WAIT=` would override the REMOTE default
+  # with the empty string — a worse failure than the one D-79 describes.
+  [ -z "$(ge CI_GATE_WAIT=)" ] \
+    && ok "an empty value is NOT forwarded (remote default survives)" || fail "empty value forwarded"
+  [ -z "$(ge 2>/dev/null)" ] \
+    && ok "nothing forwarded when the caller set nothing" || fail "forwarded something unset"
+  [ -z "$(ge CI_GATE_WAIT='9"; id; echo "' 2>/dev/null)" ] \
+    && ok "refuses a value that would break out of the remote payload" || fail "unsafe value forwarded"
 else
   fail "$VDR missing"
 fi

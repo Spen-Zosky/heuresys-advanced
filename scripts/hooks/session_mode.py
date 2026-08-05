@@ -527,14 +527,20 @@ def cmd_stop_gate() -> int:
     if not gate.is_file():
         return 0
     try:
+        # BYTE, non testo: `text=True` decodifica con locale.getpreferredencoding(),
+        # che su Windows e' cp1252 — il verdetto del gate viaggia in UTF-8 e ogni
+        # trattino lungo tornava come "â€”". Il wrapper deve restituire il verdetto
+        # VERBATIM (e' cio' che il test di equivalenza in run-shell-tests.sh esige),
+        # quindi non si decodifica affatto: si inoltrano i byte cosi' come sono.
         proc = subprocess.run(
             [sys.executable, str(gate), "check", "--hook"],
-            cwd=str(REPO), capture_output=True, text=True, timeout=25,
+            cwd=str(REPO), capture_output=True, timeout=25,
         )
     except (OSError, subprocess.SubprocessError):
         return 0
     if proc.stdout:
-        sys.stdout.write(proc.stdout)
+        sys.stdout.buffer.write(proc.stdout)
+        sys.stdout.buffer.flush()
     return 0
 
 

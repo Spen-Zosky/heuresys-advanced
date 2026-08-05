@@ -28,9 +28,12 @@ test.describe.configure({ retries: 1, timeout: 90_000 });
  * oggi dirige la Filiale di Varese.
  *
  * Misurato sul dato reale, non dedotto:
- *   · `dashboard` esige `dashboard:view`, che tommaso NON ha (e' TEAM_LEADER +
- *     TEAM_MEMBER + USER; il permesso sta su MANAGER, TENANT_ADMIN, HRMS_MANAGER,
- *     PLATFORM_ADMIN, BLUEPRINT_MANAGER, PROCESS_OWNER) -> NON deve vederla.
+ *   · `dashboard` esige `dashboard:view`. Fino alla mig 000271 il menu lo offriva
+ *     anche a chi non l'aveva — difetto chiuso. Dalla mig 000272 tommaso lo ha
+ *     davvero, come `BRANCH_MANAGER`: regge la Filiale di Varese, cioe' un
+ *     sotto-albero gerarchico. Chi guida solo una SQUADRA non lo prende: una
+ *     squadra ha uno scopo funzionale e il suo capo puo' essere gerarchicamente
+ *     sotto un membro. Il caso «cruscotto negato» resta coperto da `outsider`.
  *   · `users` esige `user:read`, che il ruolo `USER` concede a TUTTI, piu' un
  *     dominio attivo — e tommaso ne ha uno perche' guida una squadra -> la vede,
  *     ed e' la scelta di prodotto confermata da Enzo (2026-08-05): l'elenco dei
@@ -75,11 +78,14 @@ const PERSONAS: Persona[] = [
     extraPages: ["/gaps", "/me"],
   },
   {
-    // tommaso.fiore — capo della Filiale di Varese: rubrica si', cruscotto no.
+    // tommaso.fiore — capo della Filiale di Varese. Dalla mig 000272 e' anche
+    // BRANCH_MANAGER: regge un sotto-albero gerarchico vero, quindi il cruscotto
+    // gli spetta. Chi guida solo una SQUADRA (uno scopo funzionale) non lo prende
+    // — la distinzione e' protetta dalla guardia della migrazione, non da qui.
     key: "employee",
     landing: "/me",
-    navMustSee: ["nav-users"],
-    navMustNotSee: ["nav-dashboard"],
+    navMustSee: ["nav-users", "nav-dashboard"],
+    navMustNotSee: [],
     extraPages: ["/me/profile", "/me/learning/catalogue"],
   },
   {

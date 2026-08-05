@@ -43,7 +43,26 @@ export default defineConfig({
     // trasforma la lentezza in rossi intermittenti — e un rosso che non indica un
     // difetto e' peggio di nessun rosso, perche' insegna a non guardarlo.
     testTimeout: 40_000,
-    hookTimeout: 60_000,
+    // [S1045] SECONDA taratura della stessa giornata, e va detto: 30s -> 60s non e'
+    // bastato. Con `assessments` il conto e' esplicito — da solo: 5 test verdi in
+    // 19s totali, di cui 7s di test veri e un `beforeAll` con TRE login. In suite
+    // intera lo stesso hook supera i 60s: oltre OTTO VOLTE piu' lento.
+    //
+    // Non e' il file a essere lento, e' il PostgreSQL remoto sotto il carico degli
+    // altri 231 file (la suite dura ~40 minuti, di cui 549s solo di import). 120s
+    // copre il degrado misurato con margine.
+    //
+    // Perche' non maschera un difetto: un hook che si blocca davvero non finisce
+    // nemmeno in due minuti, quindi il limite continua a intercettarlo. Cio' che
+    // smette di intercettare e' la lentezza — che non e' mai stata un difetto e
+    // produceva rossi su un file DIVERSO a ogni esecuzione (gdpr, poi
+    // user-career-plans, poi assessments): la firma inconfondibile del tempo, non
+    // della logica.
+    //
+    // La causa strutturale resta aperta: ogni file rifa' i login da zero e Argon2id
+    // e' lento per costruzione. Condividere le sessioni fra file e' il lavoro che
+    // toglierebbe la necessita' di questi limiti, e non e' una taratura.
+    hookTimeout: 120_000,
     // Integration tests share a single DB pool — serial avoids
     // refresh-rotation race conditions across tests.
     // Vitest 4 migration (2026-05-26): poolOptions removed; use top-level

@@ -12,9 +12,18 @@ const count = async (sql: string): Promise<number> => {
 };
 
 describe('reconciliation S970 KPI bridge', () => {
-  it('position_kpi_requirements POPULATED at the measured coverage (172 rows / 43 positions / 1 tenant)', async () => {
-    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_position_kpi_requirements`)).toBe(172);
-    expect(await count(`SELECT count(DISTINCT position_id)::int AS n FROM sys.sys_position_kpi_requirements`)).toBe(43);
+  // [S1045] Erano 172 righe su 43 posizioni. La 000273 ha archiviato i 4 KPI
+  // appesi a una posizione RITIRATA dalla ricostruzione dell'organigramma: 168 su
+  // 42. Non e' copertura persa — quella posizione non ha titolare e non esiste
+  // piu' nell'organigramma, quindi i suoi attesi non erano piu' esigibili da
+  // nessuno. Le righe restano leggibili in `audit.position_requirements_stale_archive`.
+  //
+  // I numeri restano fissi apposta: questo test sorveglia che il ponte S970 non
+  // perda righe in silenzio, ed e' un compito che un conteggio derivato dal DB non
+  // potrebbe svolgere (si adeguerebbe alla perdita invece di segnalarla).
+  it('position_kpi_requirements POPULATED at the measured coverage (168 rows / 42 positions / 1 tenant)', async () => {
+    expect(await count(`SELECT count(*)::int AS n FROM sys.sys_position_kpi_requirements`)).toBe(168);
+    expect(await count(`SELECT count(DISTINCT position_id)::int AS n FROM sys.sys_position_kpi_requirements`)).toBe(42);
     expect(await count(`SELECT count(DISTINCT position_kpi_requirement_tenant_id)::int AS n FROM sys.sys_position_kpi_requirements`)).toBe(1);
     expect(await count(`SELECT count(*)::int AS n FROM sys.v_reconciliation_status
       WHERE table_name='sys_position_kpi_requirements' AND resolved_status='POPULATED'`)).toBe(1);

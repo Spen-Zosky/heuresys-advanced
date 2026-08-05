@@ -52,6 +52,19 @@
 
 BEGIN;
 
+-- [S1045] Il totale di partenza, catturato PRIMA di toccare qualsiasi cosa.
+--
+-- La verifica in fondo dichiara «qui si sposta, non si crea» ma lo controllava
+-- contro il numero fisso 172 — il totale del giorno in cui fu scritta. Cosi' non
+-- misurava l'invarianza di QUESTA migrazione: misurava che il mondo intero fosse
+-- rimasto fermo. La 000273, archiviando 12 profili appesi a posizioni ritirate,
+-- l'ha fatta fallire pur non avendo spostato nulla di cio' che questa tocca.
+--
+-- Ora il confronto e' prima-vs-dopo dentro la stessa transazione: dice davvero
+-- cio' che dichiara, e non invecchia al prossimo cambio legittimo del totale.
+CREATE TEMP TABLE _profili_prima_000261 ON COMMIT DROP AS
+SELECT count(*) AS n FROM sys.sys_position_compensation_profiles;
+
 -- ───────────────────────────────────────────────────────────────────────────────
 -- A. I PROFILI RETRIBUTIVI SEGUONO LA PERSONA
 -- ───────────────────────────────────────────────────────────────────────────────
@@ -118,8 +131,10 @@ DECLARE
   n_attivi int; n_tot int; n_gemelli int; n_dup int; n_ex1 int; n_attive_ass int;
 BEGIN
   SELECT count(*) INTO n_tot FROM sys.sys_position_compensation_profiles;
-  IF n_tot <> 172 THEN
-    RAISE EXCEPTION 'Profili retributivi: attesi 172 invariati, trovati % — qui si sposta, non si crea', n_tot;
+  IF n_tot <> (SELECT n FROM _profili_prima_000261) THEN
+    RAISE EXCEPTION
+      'Profili retributivi: erano %, ora sono % — qui si sposta, non si crea',
+      (SELECT n FROM _profili_prima_000261), n_tot;
   END IF;
 
   SELECT count(*) INTO n_attivi FROM sys.sys_position_compensation_profiles pc

@@ -30,11 +30,21 @@ describe('reconciliation F3 imports', () => {
   });
 
   describe('position_learning_requirements (#2) — job_title->role->position 1:N', () => {
-    it('imported 1791 fan-out rows across 158 positions, all resolving a learning_path', async () => {
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_position_learning_requirements`)).toBe(1791);
+    // [S1045] Erano 1791 righe su 158 posizioni. La 000273 ha archiviato i 58
+    // requisiti formativi appesi a 5 posizioni RITIRATE dalla ricostruzione
+    // dell'organigramma: 1733 su 153. Non e' import perso — quelle posizioni non
+    // hanno titolare, non hanno una viva che le sostituisca, e portavano i titoli
+    // inglesi del vecchio organigramma. Le righe restano leggibili e re-inseribili
+    // in `audit.position_requirements_stale_archive`.
+    //
+    // I numeri restano fissi apposta: questo test sorveglia che l'import F3 non
+    // perda righe in silenzio, e un conteggio derivato dal DB si adeguerebbe alla
+    // perdita invece di segnalarla.
+    it('imported 1733 fan-out rows across 153 positions, all resolving a learning_path', async () => {
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_position_learning_requirements`)).toBe(1733);
       expect(await count(
         `SELECT count(DISTINCT position_id)::int AS n FROM sys.sys_position_learning_requirements`,
-      )).toBe(158);
+      )).toBe(153);
       // every row resolves a real learning_path (FK integrity beyond the constraint)
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_position_learning_requirements plr

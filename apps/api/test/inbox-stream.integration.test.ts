@@ -127,8 +127,22 @@ afterAll(async () => {
 describe("#38 B6 — la posta in arrivo arriva da sola", () => {
   it("una notifica scritta ora raggiunge una scheda già aperta in pochi secondi", async () => {
     const waiting = waitForEvent(15_000);
-    // Lascia aprire il flusso e registrare la sottoscrizione prima di scrivere.
-    await new Promise((r) => setTimeout(r, 500));
+    // [S1045] Si ASPETTA LA CONDIZIONE, non un tempo fisso.
+    //
+    // Prima erano 500ms secchi seguiti dall'asserzione. Con la suite intera addosso
+    // la sottoscrizione non era ancora registrata e il test cadeva su
+    // «expected 0 to be greater than 0» — un rosso che non descriveva alcun difetto:
+    // il flusso funzionava, ci metteva solo piu' di mezzo secondo ad aprirsi.
+    //
+    // Un'attesa a tempo fisso e' una scommessa sulla macchina; un'attesa sulla
+    // CONDIZIONE misura cio' che interessa e resta veloce quando la macchina e'
+    // scarica (esce al primo controllo utile). Il tetto a 10s conserva il potere di
+    // fallire: se la sottoscrizione non si registra affatto, il test cade — ed e'
+    // esattamente il difetto che questa riga sorveglia.
+    const apertura = Date.now();
+    while (subscriberCount(userId) === 0 && Date.now() - apertura < 10_000) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
     expect(subscriberCount(userId)).toBeGreaterThan(0);
 
     const t0 = Date.now();

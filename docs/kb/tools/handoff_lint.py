@@ -46,6 +46,7 @@ BACKLOG_MD = os.path.join(REPO, "docs", "kb", "SOT_BACKLOG.md")
 MAX_STATE_LINES = 70  # STATE.md is the rapid view — keep it short (design §3 says <60; +slack)
 STALE_TTL = 3         # a "(non ri-derivato)" count older than this many sessions → FAIL (P9/§11.9)
 VALID_STATES = {"ACTIVE", "GATED", "WAIT-INPUT", "HOLD", "INTERRUPTED", "DONE", "FATTO", "WON'T-DO"}
+TERMINAL_STATES = {"DONE", "FATTO", "WON'T-DO"}   # never expected in the menu (S3)
 HOLD_REQUIRED = ("hold-reason", "decided-by", "hold-since", "reactivation-trigger")
 WAIT_REQUIRED = ("input-richiesto", "perche-solo-tuo")
 DEFER_WORDS = ("differit", "sospes", "rimandat", "sessione dedicata", "DEFER ")
@@ -283,14 +284,21 @@ def parse_register_items(md):
     return items
 
 
+def is_register_heading(h):
+    """The sections build_menu.py reads. Single definition — S3 below compares against
+    exactly the same predicate the menu uses, so the two can never disagree."""
+    h = h.lower()
+    return ("action register" in h or "hold register" in h
+            or "wait-input" in h or "registro hold" in h)
+
+
 def check_register(md):
-    """S2 (closed vocabulary), H1 (HOLD/WAIT-INPUT metadata integrity)."""
+    """S2 (closed vocabulary), H1 (HOLD/WAIT-INPUT metadata integrity), S3 (items outside)."""
     if md is None:
         fail("H1", f"{BACKLOG_MD} missing")
         return
     secs = split_sections(md)
-    reg = [b for h, b in secs if "action register" in h.lower() or "hold register" in h.lower()
-           or "wait-input" in h.lower() or "registro hold" in h.lower()]
+    reg = [b for h, b in secs if is_register_heading(h)]
     if not reg:
         warn("H1", "SOT_BACKLOG has no tagged Action/HOLD register section "
                    "(design §3.4 / §7 — menu items should live there, structured)")
@@ -312,6 +320,22 @@ def check_register(md):
                                                         for f in it["fields"])]
             if miss:
                 warn("H1", f"WAIT-INPUT item {it['title']!r} should carry {WAIT_REQUIRED}")
+    # S3 — a structured item written OUTSIDE the tagged register is INVISIBLE to the session
+    # menu: build_menu.py reads only these sections. Such an item passes every other check,
+    # sits in the file looking recorded, and never reaches the menu. That is precisely how
+    # #140..#143 — the top priority STATE.md declared — missed the S1045 boot menu, while
+    # handoff-lint reported "0 fail". Terminal statuses are exempt: a DONE item living in a
+    # historical section is archive, not a menu entry.
+    orphans = [it for h, b in secs if not is_register_heading(h)
+               for it in parse_register_items(b)
+               if it["status"] in VALID_STATES - TERMINAL_STATES]
+    if orphans:
+        names = ", ".join(o["title"][:60] for o in orphans[:6])
+        fail("S3", f"{len(orphans)} non-terminal register item(s) live OUTSIDE the tagged "
+                   f"Action/HOLD register and are therefore invisible to the session menu "
+                   f"(build_menu.py reads only those sections): {names}"
+                   f"{' …' if len(orphans) > 6 else ''} — move the block(s) into the register")
+
     def _n(st): return sum(1 for i in items if i["status"] == st)
     print(f"  [register] {len(items)} item(s): {_n('ACTIVE')} ACTIVE, {_n('GATED')} GATED, "
           f"{_n('WAIT-INPUT')} WAIT-INPUT, {_n('HOLD')} HOLD, {_n('INTERRUPTED')} INTERRUPTED")

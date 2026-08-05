@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-04T21:08:30Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2848**
+**Generato**: 2026-08-05T18:04:37Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2853**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 267 |
+| db-migration | 271 |
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 147 |
-| doc-canonical | 539 |
+| doc-canonical | 540 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 351 |
 | ux-design-archive | 80 |
 | web-source | 232 |
-| **TOTALE** | **2848** |
+| **TOTALE** | **2853** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2290 |
+| live | 2295 |
 
 ## File per categoria
 
@@ -1270,6 +1270,10 @@
 - `D:\heuresys-advanced\db\migrations\000267_hs_prod_becomes_a_division.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000268_heuresys_gets_a_real_team.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000269_rtl_teams_get_their_own_names.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000270_tenant_admin_allowlist_extend_review_cycle.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000271_dashboard_interface_declares_its_permission.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000272_branch_manager_role_and_dashboard.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000273_archive_requirements_on_retired_positions.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1992,6 +1996,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-04-consegne-lab-13.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-04-esecuzione-lab-inbox-e-organigramma.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-04-perimetri-test-dopo-ricostruzione.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-08-05-perimetri-test-esecuzione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked

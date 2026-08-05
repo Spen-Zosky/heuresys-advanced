@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-04T21:08:30Z da docs/kb/tools/build_index.py
+# generato: 2026-08-05T18:04:37Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-04T21:08:30Z"
-  total_files: 2848
+  generated_at: "2026-08-05T18:04:37Z"
+  total_files: 2853
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 267
+    db-migration: 271
     db-other: 8
     db-script: 44
     db-seed: 147
-    doc-canonical: 539
+    doc-canonical: 540
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2290
+    live: 2295
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -7190,6 +7190,30 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000270_tenant_admin_allowlist_extend_review_cycle.sql'
+    root: repo
+    rel: 'db/migrations/000270_tenant_admin_allowlist_extend_review_cycle.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000271_dashboard_interface_declares_its_permission.sql'
+    root: repo
+    rel: 'db/migrations/000271_dashboard_interface_declares_its_permission.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000272_branch_manager_role_and_dashboard.sql'
+    root: repo
+    rel: 'db/migrations/000272_branch_manager_role_and_dashboard.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000273_archive_requirements_on_retired_positions.sql'
+    root: repo
+    rel: 'db/migrations/000273_archive_requirements_on_retired_positions.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -11447,6 +11471,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-04-perimetri-test-dopo-ricostruzione.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-08-04-perimetri-test-dopo-ricostruzione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-05-perimetri-test-esecuzione.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-08-05-perimetri-test-esecuzione.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

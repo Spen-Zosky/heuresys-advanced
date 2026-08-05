@@ -6,8 +6,9 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
-import { closePool } from "../src/db/client.js";
+import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { unManagerConPosizioniAttive, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 
@@ -31,8 +32,16 @@ describe("GET /v1/dashboard/widgets integration", () => {
     suite = await buildTestApp();
     platformS = await login(suite, "admin@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
-    managerS = await login(suite, "paolo.caputo@rtl-bank.org");
-    employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
+    // [S1045] Il manager si sceglie per CARATTERISTICA: deve possedere almeno una
+    // posizione ATTIVA, perche' e' da li' che il cruscotto ricava lo scope TEAM.
+    // `paolo.caputo`, nominato prima, dopo la ricostruzione ne possiede 5 tutte
+    // disattivate: il suo cruscotto e' legittimamente vuoto e il test non misurava
+    // piu' lo scope di squadra. Il dipendente e' un suo estraneo senza mandato, che
+    // e' tutto cio' che serve per il 403.
+    const manager = await unManagerConPosizioniAttive(pool);
+    managerS = await login(suite, manager.email);
+    const dipendente = await unEstraneoOrganizzativo(pool, manager.userId);
+    employeeS = await login(suite, dipendente.email);
   });
 
   afterAll(async () => {

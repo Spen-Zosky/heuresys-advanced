@@ -12,13 +12,25 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { orgSubtreeUserIds } from "../src/lib/scope/org.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import {
+  unSottopostoOrganizzativo,
+  unEstraneoOrganizzativo,
+  preparaUnRiportoSotto,
+} from "./helpers/org-actors.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const PLATFORM_EMAIL = "admin@heuresys.com";
 const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
 const MANAGER_EMAIL = "paolo.caputo@rtl-bank.org";
-const EMPLOYEE_EMAIL = "tommaso.fiore@rtl-bank.org";
-const OUTSIDER_EMAIL = "antonio.parisi@rtl-bank.org";
+/**
+ * [S1045] Il dipendente e l'estraneo non hanno piu' un nome fisso: erano
+ * `tommaso.fiore` e `antonio.parisi`, e la ricostruzione dell'organigramma ha
+ * INVERTITO i due ruoli (tommaso dirige un'altra filiale, antonio e' finito dentro
+ * la divisione di paolo). Ora li sceglie l'albero delle unita' — struttura
+ * indipendente da quella che il resolver percorre — e vengono riempiti in beforeAll.
+ */
+let EMPLOYEE_EMAIL: string;
+let OUTSIDER_EMAIL: string;
 
 const SUITE_PREFIX = `IT_USR_${randomUUID().slice(0, 8).toUpperCase()}`;
 
@@ -56,10 +68,21 @@ describe("/v1/users/* integration (4-tier scope)", () => {
     platformS = await login(suite, PLATFORM_EMAIL);
     tenantS = await login(suite, TENANT_ADMIN_EMAIL);
     managerS = await login(suite, MANAGER_EMAIL);
+
+    const dipendente = await unSottopostoOrganizzativo(pool, managerS.userId);
+    const estraneo = await unEstraneoOrganizzativo(pool, managerS.userId);
+    EMPLOYEE_EMAIL = dipendente.email;
+    OUTSIDER_EMAIL = estraneo.email;
+
     employeeS = await login(suite, EMPLOYEE_EMAIL);
     outsiderS = await login(suite, OUTSIDER_EMAIL);
     employeeId = employeeS.userId;
     outsiderId = outsiderS.userId;
+
+    // Il vincolo F1 si prova solo su chi HA riporti senza avere un mandato. Nel dato
+    // reale, dopo la ricostruzione, quel profilo non esiste piu' (zero persone su
+    // 163): si prepara. D-52 lo annulla a fine file.
+    await preparaUnRiportoSotto(pool, employeeId);
   });
 
   afterAll(async () => {

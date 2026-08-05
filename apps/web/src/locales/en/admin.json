@@ -1026,6 +1026,7 @@
     "handoffRecords": "Payroll handoff records",
     "empty": "No records.",
     "error": "Failed to load.",
+    "masked": "withheld for your profile",
     "cols": {
       "employee": "Employee",
       "period": "Period",

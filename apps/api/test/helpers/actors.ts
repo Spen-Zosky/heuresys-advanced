@@ -287,7 +287,30 @@ export async function hierarchyChain(): Promise<{ top: Actor; middle: Actor; bot
           SELECT 1 FROM sys.sys_positions dc
             JOIN sys.sys_positions dp ON dc.position_reports_to_position_id = dp.position_id
            WHERE dp.position_owner_user_id = tu.user_id AND dc.position_owner_user_id = bu.user_id)
-      ORDER BY tu.user_email, mu.user_email, bu.user_email`,
+        -- [S1045] CHI STA IN CIMA DEVE ESSERE MANAGERIALE, altrimenti la catena non
+        -- prova quello che dice. Il vincolo F1 di ADR-0027 nega il sotto-albero a chi
+        -- ha riporti sulla carta ma nessun mandato: senza questa condizione la catena
+        -- restituiva un vertice qualunque, che leggendo il subordinato riceveva un
+        -- 404 corretto — e il test lo leggeva come un difetto del prodotto.
+        AND (EXISTS (SELECT 1 FROM sys.sys_user_auth_roles ur
+                       JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+                      WHERE ur.user_auth_role_user_id = tu.user_id
+                        AND ur.user_auth_role_revoked_at IS NULL
+                        AND r.auth_role_code IN ('MANAGER','CEO'))
+          OR EXISTS (SELECT 1 FROM sys.sys_organization_units ou
+                      WHERE ou.organization_unit_manager_user_id = tu.user_id
+                        AND ou.organization_unit_is_active))
+      -- A parita' di tutto, si preferisce un vertice SENZA mandato HR: con il mandato
+      -- la lettura passerebbe comunque, e il test proverebbe il mandato invece della
+      -- gerarchia. Oggi il dato non offre alcuna catena di tre livelli con un vertice
+      -- manageriale e non HR (misurato), quindi ricade sul mandato; il giorno in cui
+      -- ne esistera' una, questa preferenza la sceglie da se'.
+      ORDER BY (EXISTS (SELECT 1 FROM sys.sys_user_auth_roles ur
+                          JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+                         WHERE ur.user_auth_role_user_id = tu.user_id
+                           AND ur.user_auth_role_revoked_at IS NULL
+                           AND r.auth_role_code IN ('TENANT_ADMIN','HRMS_MANAGER','PLATFORM_ADMIN'))),
+               tu.user_email, mu.user_email, bu.user_email`,
   );
   const chain = rows.find(
     (r) => !isRealPerson(r.t_email) && !isRealPerson(r.m_email) && !isRealPerson(r.b_email),

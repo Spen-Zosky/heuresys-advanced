@@ -40,11 +40,32 @@ describe('SDBI Option-B — perf reviews + feedback360', () => {
     // Scoped to SDBI-import provenance: the storia36 backfill (natural keys
     // STORIA36::*) legitimately grows these tables — asserting bare totals
     // would re-introduce the banned photograph-count anti-pattern.
-    // 159 (era 161): 2 review cross-tenant (subject HEURESYS in tenant RTL),
-    // violazione I5, fuori dalla popolazione RTL-resolvable per definizione
-    // (PR_IMPORT clausola 2) — eliminate dal repair storia36 C2 del 2026-07-28.
+    // [S1045] L'ATTESO NON E' PIU' UN NUMERO SCRITTO QUI.
+    //
+    // Era 159, ed e' diventato 157 quando la mig 000263 ha tolto due gusci vuoti.
+    // Un numero fisso in questa riga e' una fotografia: ogni decisione legittima sul
+    // dato la fa scadere, e il rosso che ne esce parla del test, non del prodotto.
+    //
+    // L'atteso si deriva ora dal REGISTRO DI PROVENIENZA: la popolazione «import» e'
+    // per definizione l'insieme delle righe che hanno una riga di lineage. E' la
+    // stessa fonte da cui l'import e' nato, quindi non e' un secondo elenco che puo'
+    // divergere — e resta falsificabile: se una riga d'import comparisse senza
+    // provenienza, o una riga con provenienza sparisse, i due conteggi divergono.
+    const conProvenienza = await count(
+      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews p
+        WHERE EXISTS (SELECT 1 FROM sys.sys_source_lineage_records l
+                       WHERE l.source_lineage_target_table_name = 'sys_performance_reviews'
+                         AND l.source_lineage_target_record_id = p.review_id)`);
     expect(await count(
-      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews p WHERE ${PR_IMPORT}`)).toBe(159);
+      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews p WHERE ${PR_IMPORT}`)).toBe(conProvenienza);
+    // e nessuna riga d'import senza provenienza: e' l'altra meta' dell'uguaglianza,
+    // quella che impedisce ai due conteggi di combaciare per compensazione.
+    expect(await count(
+      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews p
+        WHERE ${PR_IMPORT}
+          AND NOT EXISTS (SELECT 1 FROM sys.sys_source_lineage_records l
+                           WHERE l.source_lineage_target_table_name = 'sys_performance_reviews'
+                             AND l.source_lineage_target_record_id = p.review_id)`)).toBe(0);
     // the I5-coherence clause may only ever exclude LEGACY import rows: the
     // storia36 backfill never writes a cross-tenant subject. Without this the
     // clause could silently swallow a real defect introduced by the backfill.
@@ -125,13 +146,45 @@ describe('SDBI Option-B — perf reviews + feedback360', () => {
                  AND NOT EXISTS (SELECT 1 FROM sys.sys_goals g WHERE g.goal_id = c.feedback_related_goal_id))`)).toBe(0);
   });
 
-  it('I14 — unresolved employee rows are kept (NULL FK + legacy id in metadata), never dropped', async () => {
-    // 2 PR subjects + 1 cf author dropped in the S950 collapse: FK NULL, metadata carries the legacy id.
+  it('I14 — nessuna riga di origine perde la propria traccia (provenienza conservata)', async () => {
+    // [S1045] QUESTO TEST DICEVA UNA COSA CHE NON E' PIU' VERA, E UNA CHE LO E' ANCORA.
+    //
+    // Diceva: «due valutazioni senza soggetto restano, con l'id legacy nei metadati».
+    // La mig 000263 le ha rimosse — deliberatamente, motivandolo: erano due GUSCI
+    // vuoti, senza soggetto E senza valutatore, senza una sola riga che li
+    // referenziasse (zero discussioni di calibrazione, zero valutazioni di competenza,
+    // zero risposte 360). Non e' una riscrittura silenziosa della storia: e' una
+    // decisione scritta, e questo test non deve ridiscuterla.
+    //
+    // Cio' che I14 protegge davvero — che di una riga legacy non si perda la TRACCIA —
+    // resta vero e va verificato dove vive: nel registro di proveninenza. Le righe di
+    // lineage delle due valutazioni rimosse ci sono ancora, con l'id legacy: si sa
+    // ancora che quelle valutazioni sono esistite.
+    //
+    // Il quattro non e' una fotografia di un conteggio che cresce da solo: e' la
+    // GUARDIA DI DUE DECISIONI, ciascuna documentata. 2 valutazioni cross-tenant
+    // (violazione I5) tolte dal repair storia36 C2 del 2026-07-28, e 2 gusci vuoti
+    // tolti dalla mig 000263. Se un giorno diventasse cinque, qualcuno avrebbe tolto
+    // una riga senza dichiararlo — ed e' esattamente il momento in cui questo test
+    // deve diventare rosso.
     expect(await count(
-      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews WHERE review_subject_user_id IS NULL`)).toBe(2);
+      `SELECT count(*)::int AS n FROM sys.sys_source_lineage_records l
+        WHERE l.source_lineage_target_table_name = 'sys_performance_reviews'
+          AND NOT EXISTS (SELECT 1 FROM sys.sys_performance_reviews p
+                           WHERE p.review_id = l.source_lineage_target_record_id)`)).toBe(4);
+    // e di ognuna si sa ancora da quale riga legacy veniva
     expect(await count(
-      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews
-        WHERE review_subject_user_id IS NULL AND review_metadata ? 'unresolved_employee'`)).toBe(2);
+      `SELECT count(*)::int AS n FROM sys.sys_source_lineage_records l
+        WHERE l.source_lineage_target_table_name = 'sys_performance_reviews'
+          AND (l.source_lineage_source_record_id IS NULL OR l.source_lineage_source_table IS NULL)`)).toBe(0);
+    // Dopo la 000263 nessuna valutazione resta senza soggetto: e' l'altra faccia della
+    // stessa decisione, e la migrazione la asserisce a sua volta.
+    expect(await count(
+      `SELECT count(*)::int AS n FROM sys.sys_performance_reviews WHERE review_subject_user_id IS NULL`)).toBe(0);
+
+    // Il feedback continuo NON e' stato toccato: la sua riga irrisolta e' ancora li',
+    // con il marcatore. E' il caso vivo che dimostra che il meccanismo di I14 esiste
+    // davvero e non e' solo una dichiarazione.
     expect(await count(
       `SELECT count(*)::int AS n FROM sys.sys_continuous_feedback WHERE feedback_from_user_id IS NULL`)).toBe(1);
     expect(await count(

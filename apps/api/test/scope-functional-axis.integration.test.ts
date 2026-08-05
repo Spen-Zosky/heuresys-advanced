@@ -30,15 +30,24 @@ import type { ActorContext } from "../src/lib/actor.js";
 import { functionalScopeUserIds, isFunctionalLeader, isInFunctionalScope } from "../src/lib/scope/functional.js";
 import { orgSubtreeUserIds, isInOrgSubtree } from "../src/lib/scope/org.js";
 import { resolveActivityScope, resolveOrgReadScope } from "../src/lib/scope/resolver.js";
+import { unMembroDiSquadra, unEstraneoAEntrambiGliAssi } from "./helpers/org-actors.js";
 
+/**
+ * [S1045] Restano nominati solo i due che il test usa per il RUOLO ISTITUZIONALE:
+ * un capo funzionale con squadre (`paolo`) e un mandato HR (`federica`). Gli altri
+ * due erano caratteristiche travestite da nomi — «un membro della sua squadra», «uno
+ * fuori da entrambi gli assi» — e la ricostruzione dell'organigramma piu' la fusione
+ * delle squadre duplicate (S1044) hanno spostato `antonio.parisi` DENTRO l'asse
+ * funzionale di paolo: la fixture del processo non misurava piu' niente, perche' la
+ * risposta era gia' «sì» prima di crearla.
+ */
 const EMAILS = {
   paolo: "paolo.caputo@rtl-bank.org",
-  tommaso: "tommaso.fiore@rtl-bank.org",
-  antonio: "antonio.parisi@rtl-bank.org",
   federica: "federica.marchetti@rtl-bank.org",
 } as const;
 
-const ids: Record<keyof typeof EMAILS, string> = {} as never;
+type Attori = keyof typeof EMAILS | "tommaso" | "antonio";
+const ids: Record<Attori, string> = {} as never;
 let rtlTenantId: string;
 
 async function userIdFor(email: string): Promise<{ userId: string; tenantId: string }> {
@@ -61,9 +70,15 @@ describe("ADR-0027 F4 — functional (team/process) axis", () => {
   beforeAll(async () => {
     for (const [key, email] of Object.entries(EMAILS)) {
       const { userId, tenantId } = await userIdFor(email);
-      ids[key as keyof typeof EMAILS] = userId;
+      ids[key as Attori] = userId;
       rtlTenantId = tenantId;
     }
+    // `tommaso` = un membro vero di una squadra guidata da paolo (asse funzionale).
+    // `antonio` = uno fuori da ENTRAMBI gli assi: non nelle sue unita', non nelle sue
+    // squadre, non nei suoi processi, e non capo funzionale a sua volta. Senza queste
+    // esclusioni la fixture del processo partirebbe da uno scope gia' concesso.
+    ids.tommaso = (await unMembroDiSquadra(pool, ids.paolo)).userId;
+    ids.antonio = (await unEstraneoAEntrambiGliAssi(pool, ids.paolo)).userId;
   });
 
   afterAll(async () => {

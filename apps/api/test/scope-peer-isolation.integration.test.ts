@@ -15,6 +15,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { pool } from "../src/db/client.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../src/lib/scope/resolver.js";
 import { orgSubtreeUserIds } from "../src/lib/scope/org.js";
+import { duePariOrganizzativi } from "./helpers/org-actors.js";
 import type { ActorContext } from "../src/lib/actor.js";
 import type { RoleCode } from "../src/config/constants.js";
 
@@ -47,10 +48,17 @@ describe("scope/peer-isolation — I19/I20 on two real disjoint managers (F5, AD
   let claudiaReport: string; // a member of claudia's sub-tree, ≠ claudia
 
   beforeAll(async () => {
-    [paolo, claudia] = await Promise.all([
-      actorFor("paolo.caputo@rtl-bank.org"),
-      actorFor("claudia.serra@rtl-bank.org"),
-    ]);
+    // [S1045] La coppia NON e' piu' due nomi. `paolo.caputo` e `claudia.serra` erano
+    // pari quando questo file fu scritto; oggi non lo sono: la ricostruzione ha messo
+    // claudia DENTRO il sotto-albero di paolo (intersezione misurata: 10 persone). Una
+    // coppia scelta a mano decade insieme all'organigramma.
+    //
+    // La coppia si sceglie ora sull'albero delle UNITA' (disgiunzione fra unita'
+    // dirette) e il test la verifica sull'albero delle POSIZIONI: due strutture
+    // diverse, quindi l'asserzione di disgiunzione puo' cadere davvero — ed e' cio'
+    // che e' successo, e che il test doveva dire.
+    const pari = await duePariOrganizzativi(pool);
+    [paolo, claudia] = await Promise.all([actorFor(pari.a.email), actorFor(pari.b.email)]);
     [paoloSub, claudiaSub] = await Promise.all([
       orgSubtreeUserIds(pool, paolo.userId),
       orgSubtreeUserIds(pool, claudia.userId),

@@ -1026,6 +1026,7 @@
     "handoffRecords": "Record di handoff payroll",
     "empty": "Nessun record.",
     "error": "Errore di caricamento.",
+    "masked": "nascosto per il tuo profilo",
     "cols": {
       "employee": "Dipendente",
       "period": "Periodo",

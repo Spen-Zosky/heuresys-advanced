@@ -26,8 +26,16 @@ const MIGRATIONS_DIR = join(import.meta.dirname, "..", "..", "..", "db", "migrat
 const ALLOWLIST_FILE = "000210_tenant_admin_permission_allowlist.sql";
 const EXTEND_MARKER = "TENANT_ADMIN-ALLOWLIST-EXTEND";
 /** `    ('permission:code'),` — the VALUES row format of 000210 and its
- *  extensions (the last row closes the statement with `;`). */
-const CODE_ROW = /^\s*\('([a-z0-9_:]+)'\)[,;]?\s*$/;
+ *  extensions (the last row closes the statement with `;`).
+ *
+ *  [S1045] Il TRATTINO fa parte della classe. Mancava, e finche' nessun codice
+ *  ne conteneva uno il difetto era invisibile; la 000256 ha introdotto i primi
+ *  tre (`performance-review:read/write`, `review-cycle:manage`) e il parser li
+ *  scartava in silenzio. Effetto: un permesso col trattino messo in allowlist
+ *  restava fuori dall'atteso e veniva segnalato per sempre come «assorbito»,
+ *  e uno tolto live non sarebbe mai risultato «mancante». La guardia ignorava
+ *  esattamente i codici che doveva sorvegliare. */
+const CODE_ROW = /^\s*\('([a-z0-9_:-]+)'\)[,;]?\s*$/;
 
 function codesFromValuesRows(text: string): string[] {
   const out: string[] = [];

@@ -14,6 +14,7 @@ import {
   drainScopeAuditCapture,
   type ScopeAccessEvent,
 } from "../src/lib/scope/audit.js";
+import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 import type { ActorContext } from "../src/lib/actor.js";
 import type { RoleCode } from "../src/config/constants.js";
 
@@ -51,13 +52,18 @@ describe("scope/audit — the authorizing axis is recorded (F6, ADR-0027)", () =
   let antonio: ActorContext;
 
   beforeAll(async () => {
-    [admin, federica, paolo, tommaso, antonio] = await Promise.all([
+    [admin, federica, paolo] = await Promise.all([
       actorFor("admin@heuresys.com"),
       actorFor("federica.marchetti@rtl-bank.org"),
       actorFor("paolo.caputo@rtl-bank.org"),
-      actorFor("tommaso.fiore@rtl-bank.org"),
-      actorFor("antonio.parisi@rtl-bank.org"),
     ]);
+    // [S1045] Riporto ed estraneo derivati dall'albero delle unita': i due nomi fissi
+    // di prima descrivevano l'organigramma precedente alla ricostruzione, dove i loro
+    // ruoli erano invertiti. Qui conta che uno stia DENTRO il sotto-albero di paolo e
+    // l'altro FUORI — la caratteristica, non l'identita'.
+    const sottoposto = await unSottopostoOrganizzativo(pool, paolo.userId);
+    const estraneo = await unEstraneoOrganizzativo(pool, paolo.userId);
+    [tommaso, antonio] = await Promise.all([actorFor(sottoposto.email), actorFor(estraneo.email)]);
   });
 
   it("resolve records platform / hr_mandate / org_subtree / self", async () => {

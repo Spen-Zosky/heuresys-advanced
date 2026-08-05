@@ -14,6 +14,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { unSottopostoOrganizzativo, unEstraneoOrganizzativo, idDi } from "./helpers/org-actors.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const PFX = `IT_KM_${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -41,13 +42,17 @@ describe("#31 KPI metrology", () => {
     suite = await buildTestApp();
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
     paolo = await login(suite, "paolo.caputo@rtl-bank.org");
-    const u = await pool.query<{ user_id: string; user_email: string; user_tenant_id: string }>(
-      `SELECT user_id, user_email, user_tenant_id FROM sys.sys_users WHERE user_email = ANY($1)`,
-      [["tommaso.fiore@rtl-bank.org", "antonio.parisi@rtl-bank.org"]]);
-    for (const row of u.rows) {
-      if (row.user_email.startsWith("tommaso")) { tommasoId = row.user_id; rtlTenantId = row.user_tenant_id; }
-      else antonioId = row.user_id;
-    }
+    // [S1045] I due soggetti delle misure sono «uno dentro il sotto-albero di paolo»
+    // e «uno fuori»: caratteristiche, non nomi. La ricostruzione dell'organigramma
+    // aveva invertito i ruoli di `tommaso.fiore` e `antonio.parisi`, quindi il gate
+    // I19 misurato qui dava il risultato opposto a quello atteso.
+    const paoloId = await idDi(pool, "paolo.caputo@rtl-bank.org");
+    const dentro = await unSottopostoOrganizzativo(pool, paoloId);
+    const fuori = await unEstraneoOrganizzativo(pool, paoloId);
+    tommasoId = dentro.userId;
+    antonioId = fuori.userId;
+    rtlTenantId = (await pool.query<{ t: string }>(
+      `SELECT user_tenant_id AS t FROM sys.sys_users WHERE user_id = $1`, [tommasoId])).rows[0]!.t;
 
     // Fixture KPI (tenant-scoped, via real API) + 3 measurements: tommaso / antonio / org-level(NULL).
     const created = await suite.app.inject({

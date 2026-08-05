@@ -49,6 +49,33 @@ async function ouIdByCode(code: string): Promise<string> {
   if (!r.rows[0]) throw new Error(`RTL OU ${code} not found`);
   return r.rows[0].id;
 }
+/**
+ * [S1045] L'unita' RTL che il seme dichiara INFORMED su un processo, letta dal vivo.
+ * Lancia se non ne esiste nessuna: una verifica senza soggetto non va contata fra
+ * quelle superate (stessa regola di `helpers/org-actors.ts`).
+ */
+async function ouInformataSu(processCode: string): Promise<{ id: string; code: string }> {
+  const r = await pool.query<{ id: string; code: string }>(
+    `SELECT ou.organization_unit_id AS id, ou.organization_unit_code AS code
+       FROM sys.sys_organization_unit_processes p
+       JOIN sys.sys_organization_units ou
+         ON ou.organization_unit_id = p.org_unit_process_org_unit_id
+        AND ou.organization_unit_is_active
+       JOIN sys.sys_blueprint_process_registry r
+         ON r.blueprint_process_id = p.org_unit_process_blueprint_process_id
+      WHERE p.org_unit_process_tenant_id = $1
+        AND p.org_unit_process_metadata->>'item' = $2
+        AND r.blueprint_process_code = $3
+        AND p.org_unit_process_role = 'INFORMED'
+      ORDER BY ou.organization_unit_code
+      LIMIT 1`,
+    [RTL, SEED_ITEM, processCode],
+  );
+  const a = r.rows[0];
+  if (!a) throw new Error(`nessuna unita' attiva INFORMED sul processo ${processCode}: verifica cieca`);
+  return a;
+}
+
 async function processIdByCode(code: string): Promise<string> {
   const r = await pool.query<{ id: string }>(
     `SELECT blueprint_process_id AS id FROM sys.sys_blueprint_process_registry WHERE blueprint_process_code=$1`,
@@ -65,16 +92,57 @@ beforeAll(async () => {
   suite = await buildTestApp();
   author = await login(suite, "federica.marchetti@rtl-bank.org");
 
-  // Precondition: the production seed must be applied (105 RTL rows tagged S1002-#5/#11).
-  const seeded = await pool.query<{ n: string }>(
-    `SELECT count(*) AS n FROM sys.sys_organization_unit_processes
-      WHERE org_unit_process_tenant_id=$1 AND org_unit_process_metadata->>'item'=$2`,
+  // [S1045] PRECONDIZIONE STRUTTURALE, NON UN CONTEGGIO.
+  //
+  // Prima si esigevano >=100 righe ("105 di produzione"). Quel numero descriveva
+  // l'organigramma del 21 giugno: la ricostruzione (S1043, mig 000244->000258) ha
+  // DISATTIVATO due unita' — DIR-CORP e DIV-RISK — e le loro 9 assegnazioni sono
+  // sparite con loro (105 -> 96). Non e' il seme che manca: e' l'azienda che e'
+  // cambiata, ed e' esattamente il difetto che #115 ha corretto altrove — un
+  // atteso fisso che duplica una fonte di verita' viva.
+  //
+  // Cio' che DEVE valere non e' quante righe ci sono, ma che la matrice regga:
+  // ogni processo coperto ha uno e un solo responsabile, e nessuna responsabilita'
+  // pende da un reparto chiuso. Se domani si chiude un altro reparto il test resta
+  // verde; se un processo resta senza responsabile diventa rosso — che e' il caso
+  // che vale la pena sorvegliare.
+  const stato = await pool.query<{
+    processi: string; owner: string; processi_con_owner: string; su_unita_spente: string;
+  }>(
+    `WITH seme AS (
+       SELECT p.org_unit_process_blueprint_process_id AS processo,
+              p.org_unit_process_role                 AS ruolo,
+              ou.organization_unit_is_active          AS attiva
+         FROM sys.sys_organization_unit_processes p
+         JOIN sys.sys_organization_units ou
+           ON ou.organization_unit_id = p.org_unit_process_org_unit_id
+        WHERE p.org_unit_process_tenant_id = $1
+          AND p.org_unit_process_metadata->>'item' = $2)
+     SELECT count(DISTINCT processo)                              AS processi,
+            count(*) FILTER (WHERE ruolo = 'OWNER')               AS owner,
+            count(DISTINCT processo) FILTER (WHERE ruolo='OWNER') AS processi_con_owner,
+            count(*) FILTER (WHERE NOT attiva)                    AS su_unita_spente
+       FROM seme`,
     [RTL, SEED_ITEM],
   );
-  if (Number(seeded.rows[0]!.n) < 100) {
+  const s = stato.rows[0]!;
+  // >12 distingue il seme di PRODUZIONE dalla vecchia demo S994 (12 righe, altro tag).
+  if (Number(s.processi) <= 12) {
     throw new Error(
-      `RACI production seed missing (${seeded.rows[0]!.n}/105). Apply ` +
-        "db/seeds/reconciliation/54_raci_demo_rtl_s994.sql first.",
+      `RACI production seed missing (solo ${s.processi} processi coperti col tag ${SEED_ITEM}). ` +
+        "Applica db/seeds/reconciliation/54_raci_demo_rtl_s994.sql.",
+    );
+  }
+  if (s.processi !== s.processi_con_owner || s.owner !== s.processi) {
+    throw new Error(
+      `matrice RACI incoerente: ${s.processi} processi coperti, ${s.processi_con_owner} con un ` +
+        `responsabile, ${s.owner} responsabili in tutto — atteso uno e uno solo per processo`,
+    );
+  }
+  if (Number(s.su_unita_spente) > 0) {
+    throw new Error(
+      `${s.su_unita_spente} responsabilita' RACI pendono da unita' disattivate: ` +
+        "vanno riassegnate a un'unita' viva, non lasciate su un reparto chiuso",
     );
   }
 });
@@ -84,9 +152,15 @@ afterAll(async () => {
 });
 
 describe("RACI OU<->process PRODUCTION seed — live read-back via real API (S1002 #5/#11)", () => {
-  it("by-ou: DIV-RISK is INFORMED on '02 KYC / AML' (production seed, served live)", async () => {
-    const ou = await ouIdByCode("DIV-RISK");
-    const r = await suite.app.inject({ method: "GET", url: `/v1/organization-unit-processes/by-ou/${ou}`, headers: { cookie: ch(author.cookies) } });
+  it("by-ou: the unit INFORMED on '02 KYC / AML' is served as INFORMED through the API", async () => {
+    // [S1045] L'unita' non e' piu' scritta a mano. Era `DIV-RISK`, che la
+    // ricostruzione dell'organigramma ha DISATTIVATO: il test cadeva su un reparto
+    // chiuso, senza misurare niente sull'API. Si chiede al dato chi e' informato
+    // oggi (e' `RTL`, la capogruppo) e poi si verifica che l'API serva QUEL ruolo.
+    // Non e' tautologico: il confronto e' fra il DB e il percorso rotta->servizio->
+    // repository->RBAC, che e' l'oggetto del test.
+    const atteso = await ouInformataSu("02");
+    const r = await suite.app.inject({ method: "GET", url: `/v1/organization-unit-processes/by-ou/${atteso.id}`, headers: { cookie: ch(author.cookies) } });
     expect(r.statusCode).toBe(200);
     const items = (r.json() as { items: { blueprintProcessCode: string; blueprintProcessName: string; role: string }[] }).items;
     const aml = items.find((i) => i.blueprintProcessCode === "02");

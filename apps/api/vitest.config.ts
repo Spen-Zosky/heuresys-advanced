@@ -31,8 +31,19 @@ export default defineConfig({
     // (vitest.unit.config.ts, no DB/setup) — esclusi qui per non girare due volte.
     exclude: ["test/unit/**", "**/node_modules/**"],
     environment: "node",
-    testTimeout: 20_000,
-    hookTimeout: 30_000,
+    // [S1045] Alzati da 20s/30s dopo due run interi della suite che hanno prodotto
+    // rossi DIVERSI per la stessa ragione: `gdpr` oltre i 20s di test nel primo,
+    // `user-career-plans-scope` oltre i 30s di hook nel secondo. Entrambi passano da
+    // soli (user-career-plans: 7/7 in 37s) — a cadere non era la logica ma il tempo.
+    //
+    // Perche' non e' un cerotto: la suite gira SERIALE contro il PostgreSQL della VM
+    // via tunnel SSH e dura ~37 minuti; un `beforeAll` che fa cinque login reali
+    // (Argon2id, lento per costruzione) e' legittimamente lento quando il DB e' sotto
+    // il carico degli altri 231 file. Un limite tarato sull'esecuzione isolata
+    // trasforma la lentezza in rossi intermittenti — e un rosso che non indica un
+    // difetto e' peggio di nessun rosso, perche' insegna a non guardarlo.
+    testTimeout: 40_000,
+    hookTimeout: 60_000,
     // Integration tests share a single DB pool — serial avoids
     // refresh-rotation race conditions across tests.
     // Vitest 4 migration (2026-05-26): poolOptions removed; use top-level

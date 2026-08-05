@@ -11,6 +11,11 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { pool } from "../src/db/client.js";
 import { resolveOrgReadScope, canReadOrgTarget } from "../src/lib/scope/resolver.js";
 import { orgSubtreeUserIds } from "../src/lib/scope/org.js";
+import {
+  unSottopostoOrganizzativo,
+  unEstraneoOrganizzativo,
+  preparaUnRiportoSotto,
+} from "./helpers/org-actors.js";
 import type { ActorContext } from "../src/lib/actor.js";
 import type { RoleCode } from "../src/config/constants.js";
 
@@ -42,13 +47,24 @@ describe("scope/resolver — org read scope + managerial constraint (F1, ADR-002
   let antonio: ActorContext;
 
   beforeAll(async () => {
-    [admin, federica, paolo, tommaso, antonio] = await Promise.all([
+    [admin, federica, paolo] = await Promise.all([
       actorFor("admin@heuresys.com"),
       actorFor("federica.marchetti@rtl-bank.org"),
       actorFor("paolo.caputo@rtl-bank.org"),
-      actorFor("tommaso.fiore@rtl-bank.org"),
-      actorFor("antonio.parisi@rtl-bank.org"),
     ]);
+
+    // [S1045] Il riporto e l'estraneo li sceglie l'albero delle UNITA', non due nomi
+    // scritti a mano: la ricostruzione dell'organigramma aveva invertito i ruoli di
+    // `tommaso.fiore` e `antonio.parisi`, e i test descrivevano l'azienda di ieri.
+    const sottoposto = await unSottopostoOrganizzativo(pool, paolo.userId);
+    const estraneo = await unEstraneoOrganizzativo(pool, paolo.userId);
+    [tommaso, antonio] = await Promise.all([actorFor(sottoposto.email), actorFor(estraneo.email)]);
+
+    // Il vincolo F1 vive su un profilo che il dato reale non offre piu': non
+    // manageriale MA con riporti (misurato: zero persone su 163 dopo la
+    // ricostruzione). Si prepara, come si fa per i fattori MFA in helpers/actors.ts;
+    // D-52 annulla la fixture a fine file.
+    await preparaUnRiportoSotto(pool, tommaso.userId);
   });
 
   it("PLATFORM_ADMIN → all (cross-tenant)", async () => {

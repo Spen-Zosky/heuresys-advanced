@@ -64,6 +64,16 @@ function money(v: number | null): string {
   return v === null ? "—" : v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+/**
+ * #124 / ADR-0032 — a withheld field is ABSENT from the row and named in `masked`.
+ * Rendering it as "—" would read as «the database has no value», which is exactly
+ * the confusion the contract avoids by choosing absence over a placeholder
+ * (see `CompensationRecommendationRowSchema`). So the cell says it is withheld.
+ */
+function MaskedCell({ t }: { t: TFunction }) {
+  return <span className="text-xs italic text-muted-foreground">{t("compReward.masked")}</span>;
+}
+
 function buildVariablePayColumns(
   t: TFunction,
   onEvaluate: (id: string) => void,
@@ -208,8 +218,16 @@ function buildRecommendationColumns(t: TFunction): DataColumn<CompensationRecomm
     { header: t("compReward.cols.employee"), cell: (r) => <span>{r.subjectUserName ?? "—"}</span> },
     { header: t("compReward.cols.period"), cell: (r) => <span className="tabular-nums text-xs">{r.periodStart} → {r.periodEnd}</span> },
     { header: t("compReward.cols.signal"), cell: (r) => <StatusBadge value={r.signal} /> },
-    { header: t("compReward.cols.amount"), align: "right", cell: (r) => <span className="tabular-nums">{money(r.amountEur)}</span> },
-    { header: t("compReward.cols.narrative"), cell: (r) => <span className="text-xs text-muted-foreground">{r.narrative ?? "—"}</span> },
+    { header: t("compReward.cols.amount"), align: "right", cell: (r) => (
+      r.masked?.includes("amountEur")
+        ? <MaskedCell t={t} />
+        : <span className="tabular-nums">{money(r.amountEur ?? null)}</span>
+    ) },
+    { header: t("compReward.cols.narrative"), cell: (r) => (
+      r.masked?.includes("narrative")
+        ? <MaskedCell t={t} />
+        : <span className="text-xs text-muted-foreground">{r.narrative ?? "—"}</span>
+    ) },
   ];
 }
 

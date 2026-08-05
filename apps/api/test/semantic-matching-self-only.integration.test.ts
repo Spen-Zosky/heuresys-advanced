@@ -26,18 +26,41 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { pool } from "../src/db/client.js";
 import { semanticMatchingService } from "../src/modules/semantic-matching/service.js";
-import { canReadOrgTarget } from "../src/lib/scope/resolver.js";
+import { canReadOrgTarget, MANAGERIAL_ROLES, HR_MANDATED_ROLES } from "../src/lib/scope/resolver.js";
 import type { ActorContext } from "../src/lib/actor.js";
 import type { RoleCode } from "../src/config/constants.js";
 import { NotFoundError } from "../src/errors/index.js";
 
 /**
- * La lista RIMOSSA dal service, replicata qui di proposito: e' il predicato del BUG, non quello del
- * modello. Serve a selezionare esattamente gli attori che il codice pre-Z-203 bloccava — inclusi
- * quelli SENZA alcun ruolo, perche' `[].some(...)` valeva `false` e quindi erano self-only anche loro.
+ * [S1045] IL PREDICATO ERA UNA FOTOGRAFIA, ED E' SCADUTA.
+ *
+ * La stesura precedente ricopiava qui la lista rimossa dal service — `USER`,
+ * `TEAM_MEMBER`, `READ_ONLY` — per selezionare gli attori che il codice pre-Z-203
+ * bloccava. Dopo la ricostruzione dell'organigramma **nessuno** la soddisfa piu': ogni
+ * responsabile di unita' ha ricevuto `TEAM_LEADER`, che in quella lista non c'era, e
+ * il fixture restava vuoto. Nove test su nove rossi, e nessuno stava misurando un
+ * difetto: misuravano una lista di tre nomi invecchiata.
+ *
+ * La proprieta' DUREVOLE — quella che rende il caso probante — non e' l'appartenenza a
+ * quella lista: e' la **divergenza fra i due segnali di managerialita'** che il
+ * resolver combina. Un responsabile di unita' che NON ha un ruolo manageriale RBAC e'
+ * manageriale per DATO e non per RUOLO: e' esattamente l'attore che una scala di ruoli
+ * locale sbaglia. I ruoli non si ricopiano, si importano da `resolver.ts`.
  */
-const LISTA_RIMOSSA: ReadonlySet<string> = new Set(["USER", "TEAM_MEMBER", "READ_ONLY"]);
-const bloccatoDallaListaRimossa = (roles: string[]): boolean => !roles.some((r) => !LISTA_RIMOSSA.has(r));
+const managerialeSoloPerDato = (roles: string[]): boolean =>
+  !roles.some((r) => MANAGERIAL_ROLES.has(r as RoleCode));
+
+/**
+ * L'attore self-only: nessun ruolo manageriale, nessun mandato HR, non amministratore
+ * di piattaforma. La lista rimossa escludeva questi tre casi per costruzione (erano
+ * tutti fuori dai suoi tre nomi); sostituendola con la sola divergenza manageriale la
+ * garanzia si perdeva, e un TENANT_ADMIN finiva scelto come «attore senza
+ * managerialita'» — leggendo il peer per mandato, non per difetto.
+ */
+const senzaAlcunMandato = (roles: string[]): boolean =>
+  managerialeSoloPerDato(roles) &&
+  !roles.some((r) => HR_MANDATED_ROLES.has(r as RoleCode)) &&
+  !roles.includes("PLATFORM_ADMIN");
 
 /** I tre metodi per-bersaglio da cui il fast-path e' stato rimosso: vanno coperti tutti. */
 const METODI = [
@@ -101,7 +124,7 @@ beforeAll(async () => {
   );
   for (const r of responsabili) {
     const roles = await ruoliDi(r.uid);
-    if (!bloccatoDallaListaRimossa(roles)) continue; // il pre-fix lo lasciava gia' passare: non prova nulla
+    if (!managerialeSoloPerDato(roles)) continue; // ha gia' un ruolo manageriale: non prova nulla
     const rip = await unRiporto(r.uid);
     if (!rip) continue; // senza riporti il diniego era inerte: non osservabile
     casoDivergente = { attore: { userId: r.uid, tenantId: r.tenant, roles: roles as RoleCode[] }, email: r.email, bersaglio: rip };
@@ -118,7 +141,7 @@ beforeAll(async () => {
   );
   for (const c of altri) {
     const roles = await ruoliDi(c.uid);
-    if (roles.length === 0 || !bloccatoDallaListaRimossa(roles)) continue;
+    if (roles.length === 0 || !senzaAlcunMandato(roles)) continue;
     const bersaglio = casoDivergente?.attore.userId;
     if (!bersaglio || bersaglio === c.uid) continue;
     casoSelfOnly = { attore: { userId: c.uid, tenantId: c.tenant, roles: roles as RoleCode[] }, email: c.email, bersaglio };
@@ -128,9 +151,13 @@ beforeAll(async () => {
 
 describe("Z-203 — l'accesso al peer lo decide il resolver, non una lista di ruoli nel modulo", () => {
   it("il caso divergente esiste sul dato reale ed e' quello giusto", () => {
-    expect(casoDivergente, "nessun responsabile di OU bloccato dalla lista rimossa e con riporti").not.toBeNull();
-    // il predicato del BUG, non quello del modello: e' cio' che rende il caso probante
-    expect(bloccatoDallaListaRimossa(casoDivergente!.attore.roles)).toBe(true);
+    expect(
+      casoDivergente,
+      "nessun responsabile di unita' privo di ruolo manageriale e con riporti: il caso in cui " +
+        "i due segnali di managerialita' divergono non esiste piu' nel dato",
+    ).not.toBeNull();
+    // La divergenza e' cio' che rende il caso probante: manageriale per DATO, non per RUOLO.
+    expect(managerialeSoloPerDato(casoDivergente!.attore.roles)).toBe(true);
     expect(casoDivergente!.bersaglio).not.toEqual(casoDivergente!.attore.userId);
   });
 

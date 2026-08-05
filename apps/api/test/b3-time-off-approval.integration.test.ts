@@ -73,8 +73,60 @@ describe("#34 B3 — time-off request → manager approval → applied effect", 
 
   beforeAll(async () => {
     suite = await buildTestApp();
-    tommaso = await login("tommaso.fiore@rtl-bank.org");
-    paolo = await login("paolo.caputo@rtl-bank.org");
+
+    // [S1045] La coppia non e' piu' due nomi. `tommaso.fiore` riportava a
+    // `paolo.caputo` quando questo file fu scritto; la ricostruzione
+    // dell'organigramma li ha separati (tommaso dirige un'altra filiale), e il flusso
+    // si fermava alla prima riga perche' l'approvatore risolto non era piu' paolo.
+    //
+    // Le tre caratteristiche che il flusso richiede davvero, tutte interrogate sul
+    // dato: chi chiede ha un capo diretto, ha un saldo FERIE dell'anno in corso con
+    // giorni disponibili, ed entrambi possono autenticarsi. La coppia viene ordinata
+    // per email, quindi la scelta e' deterministica e non dipende dal planner.
+    const coppia = await pool.query<{ richiedente: string; approvatore: string }>(
+      `SELECT ru.user_email AS richiedente, mu.user_email AS approvatore
+         FROM sys.sys_user_position_assignments upa
+         JOIN sys.sys_positions p ON p.position_id = upa.user_position_assignment_position_id
+         JOIN sys.sys_user_position_assignments mgr
+           ON mgr.user_position_assignment_position_id = p.position_reports_to_position_id
+          AND mgr.user_position_assignment_status = 'ACTIVE'
+         JOIN sys.sys_users ru ON ru.user_id = upa.user_position_assignment_user_id
+         JOIN sys.sys_users mu ON mu.user_id = mgr.user_position_assignment_user_id
+         JOIN sys.sys_time_off_balances b
+           ON b.balance_subject_user_id = ru.user_id AND b.balance_leave_type = 'VACATION'
+          AND b.balance_year = EXTRACT(year FROM CURRENT_DATE)
+        WHERE upa.user_position_assignment_status = 'ACTIVE'
+          AND upa.user_position_assignment_kind = 'PRIMARY'
+          AND mgr.user_position_assignment_user_id <> upa.user_position_assignment_user_id
+          AND (b.balance_total_days + b.balance_carryover_days
+               + b.balance_adjustment_days - b.balance_used_days) >= 2
+          AND EXISTS (SELECT 1 FROM sys.sys_auth_mfa_factors f
+                       WHERE f.auth_mfa_factor_user_id = ru.user_id)
+          AND EXISTS (SELECT 1 FROM sys.sys_auth_mfa_factors f
+                       WHERE f.auth_mfa_factor_user_id = mu.user_id)
+          -- e il capo deve poter APPLICARE la richiesta: il passo finale del flusso
+          -- chiede 'approval:create'. Il permesso si interroga sulla mappa RBAC viva,
+          -- non si deduce da un ruolo scritto qui: se domani cambiasse la platea, la
+          -- coppia scelta seguirebbe da se'.
+          AND EXISTS (
+            SELECT 1 FROM sys.sys_user_auth_roles ur
+              JOIN sys.sys_auth_role_permissions rp ON rp.auth_role_id = ur.user_auth_role_role_id
+              JOIN sys.sys_auth_permissions perm ON perm.auth_permission_id = rp.auth_permission_id
+             WHERE ur.user_auth_role_user_id = mu.user_id
+               AND ur.user_auth_role_revoked_at IS NULL
+               AND perm.auth_permission_code = 'approval:create')
+        ORDER BY ru.user_email
+        LIMIT 1`,
+    );
+    const scelta = coppia.rows[0];
+    if (!scelta) {
+      throw new Error(
+        "nessuna coppia richiedente/capo con saldo FERIE dell'anno: il flusso B3 non e' " +
+          "verificabile su questo dato — indagare i saldi, non adeguare il test",
+      );
+    }
+    tommaso = await login(scelta.richiedente);
+    paolo = await login(scelta.approvatore);
   }, 60_000);
 
   afterAll(async () => {

@@ -43,6 +43,7 @@ import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
 import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
+import { unSottopostoOrganizzativo, unEstraneoOrganizzativo } from "./helpers/org-actors.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
 const SUITE_PREFIX = `IT_GOALSCOPE_${randomUUID().slice(0, 8).toUpperCase()}`;
@@ -105,8 +106,14 @@ describe("/v1/goals — F3 org-axis isolation (ADR-0027, D-50)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
     paolo = await login(suite, "paolo.caputo@rtl-bank.org");
-    tommaso = await login(suite, "tommaso.fiore@rtl-bank.org");
-    antonio = await login(suite, "antonio.parisi@rtl-bank.org");
+    // [S1045] Il sottoposto e l'estraneo non sono piu' due nomi scritti a mano:
+    // li sceglie l'albero delle unita' di oggi (helpers/org-actors.ts). La
+    // ricostruzione aveva INVERTITO i due ruoli, e i nomi fissi descrivevano
+    // l'azienda di ieri.
+    const sottoposto = await unSottopostoOrganizzativo(pool, paolo.userId);
+    const estraneo = await unEstraneoOrganizzativo(pool, paolo.userId);
+    tommaso = await login(suite, sottoposto.email);
+    antonio = await login(suite, estraneo.email);
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
     admin = await login(suite, "admin@heuresys.com");
 

@@ -61,13 +61,23 @@ fi
 
 echo "[clone-vm-db] sanity row-counts (local vs VM):"
 mismatch=0
+unmeasured=0
+ERRLOG="$(mktemp)"
+trap 'rm -f "$ERRLOG"' EXIT
 for t in sys.sys_users sys.sys_positions sys.sys_attendance; do
-  loc="$(psql -h 127.0.0.1 -p "$PORT" -U "$DBUSER" -d "$DB_NAME" -tAc "SELECT count(*) FROM $t" 2>/dev/null || echo '?')"
-  vm="$(ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres psql -d '$DB_NAME' -tAc \"SELECT count(*) FROM $t\"" 2>/dev/null || echo '?')"
+  # D-78: lo stderr di psql NON si butta piu' via. Buttarlo ha nascosto per settimane la
+  # ragione vera di un FATAL ricorrente sul gemello: l'unit systemd dichiarava
+  # `Environment=PGOPTIONS=-c lock_timeout=30s` SENZA virgolette, e in `Environment=` lo
+  # spazio separa due assegnazioni — il server riceveva un `-c` monco e RIFIUTAVA ogni
+  # connessione locale. Lo script leggeva '?' su tutte le tabelle e annunciava un clone
+  # divergente, mentre il clone era allineato riga per riga: falliva la MISURA, non il dato.
+  # Con l'errore in chiaro la diagnosi e' immediata invece che archeologica.
+  loc="$(psql -h 127.0.0.1 -p "$PORT" -U "$DBUSER" -d "$DB_NAME" -tAc "SELECT count(*) FROM $t" 2>>"$ERRLOG" || echo '?')"
+  vm="$(ssh "${SSH_OPTS[@]}" "$VM_HOST" "sudo -u postgres psql -d '$DB_NAME' -tAc \"SELECT count(*) FROM $t\"" 2>>"$ERRLOG" || echo '?')"
   # '?' = la query e' fallita. Confrontare due '?' dava "OK": il fallimento di ENTRAMBI i
   # lati si presentava come successo perfetto. Ora un '?' e' sempre un errore.
   if [ "$loc" = '?' ] || [ "$vm" = '?' ]; then
-    status=ERR; mismatch=1
+    status=ERR; mismatch=1; unmeasured=1
   elif [ "$loc" = "$vm" ]; then
     status=OK
   else
@@ -77,8 +87,20 @@ for t in sys.sys_users sys.sys_positions sys.sys_attendance; do
 done
 
 if [ "$mismatch" -ne 0 ]; then
-  echo "[clone-vm-db] FATAL: il clone NON corrisponde alla VM (o il confronto non e' stato" >&2
-  echo "[clone-vm-db] possibile). Uscita non-zero: cosi' systemd marca il service failed e" >&2
+  # Il gate resta invariato: si esce non-zero in ENTRAMBI i casi, perche' un clone non
+  # verificato non e' un clone verificato (un falso via libera su un DB mutilato e' la
+  # ragione per cui questo controllo esiste — S1030 Z-022). Cambia solo la DIAGNOSI:
+  # "non sono riuscito a misurare" e "i numeri non combaciano" sono due guasti diversi e
+  # ora lo dicono, invece di presentarsi con la stessa frase.
+  if [ "$unmeasured" -ne 0 ]; then
+    echo "[clone-vm-db] FATAL: il confronto NON e' stato possibile — almeno una conta e'" >&2
+    echo "[clone-vm-db] fallita ('?'). Questo NON dice che il clone sia divergente: dice che" >&2
+    echo "[clone-vm-db] non e' stato verificato. Errori riportati dai client:" >&2
+    sed 's/^/    | /' "$ERRLOG" >&2
+  else
+    echo "[clone-vm-db] FATAL: il clone NON corrisponde alla VM — le conte differiscono." >&2
+  fi
+  echo "[clone-vm-db] Uscita non-zero: cosi' systemd marca il service failed e" >&2
   echo "[clone-vm-db] OnFailure=heuresys-unit-failure@ scrive nel registro degli alert." >&2
   exit 1
 fi

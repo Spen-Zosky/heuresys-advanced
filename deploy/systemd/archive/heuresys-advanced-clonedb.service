@@ -55,7 +55,16 @@ Environment=HEURESYS_REPO_ROOT=@@REPO_DIR@@
 ExecStartPre=/usr/bin/sudo -n /usr/bin/systemctl stop heuresys-advanced-web.service heuresys-advanced-api.service
 # lock_timeout: se malgrado tutto un lock e' conteso, si fallisce in 30s invece di restare
 # appesi fino al timeout dell'unit.
-Environment=PGOPTIONS=-c lock_timeout=30s
+#
+# LE VIRGOLETTE NON SONO ORNAMENTALI (D-78). In `Environment=` lo SPAZIO separa due
+# assegnazioni: senza quotare, systemd non impostava `PGOPTIONS=-c lock_timeout=30s` ma
+# `PGOPTIONS=-c` (monco) piu' una variabile `lock_timeout=30s` per conto suo. Ogni
+# connessione locale del sanity check veniva allora RIFIUTATA dal server con
+# «argomento della riga di comando non valido per il processo server: -c», lo script
+# leggeva `?` su tutte e tre le tabelle e dichiarava FATAL — su un clone perfettamente
+# allineato. Il restore non se ne accorgeva perche' gira come `postgres` via sudo e non
+# eredita l'ambiente di enzo: falliva solo la MISURA, mai il dato.
+Environment="PGOPTIONS=-c lock_timeout=30s"
 ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/clone-vm-db.sh
 # QUI il trattino serve: ExecStopPost deve girare SEMPRE, anche quando il clone fallisce —
 # un refresh andato male non deve lasciare spento il gemello.

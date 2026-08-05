@@ -83,7 +83,7 @@ const PERSONAS: Persona[] = [
     // gli spetta. Chi guida solo una SQUADRA (uno scopo funzionale) non lo prende
     // — la distinzione e' protetta dalla guardia della migrazione, non da qui.
     key: "employee",
-    landing: "/me",
+    landing: "/dashboard",
     navMustSee: ["nav-users", "nav-dashboard"],
     navMustNotSee: [],
     extraPages: ["/me/profile", "/me/learning/catalogue"],

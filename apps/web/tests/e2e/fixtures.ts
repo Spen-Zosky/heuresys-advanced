@@ -94,21 +94,26 @@ export const PERSONAS = {
     email: "paolo.caputo@rtl-bank.org",
     expectedLandingPath: "/dashboard",
   },
-  // S1044 (#116): `tommaso.fiore` TORNA su /me. La riga S1043 che lo mandava sul
-  // cruscotto descriveva il difetto, non una scelta: `landingForRoles` mandava li'
-  // chiunque avesse un ruolo fuori dal set self-service SENZA verificare che quel
-  // ruolo potesse vedere la pagina. Misurato sul DB: lui ha TEAM_LEADER+TEAM_MEMBER
-  // +USER, e nessuno dei tre concede `dashboard:view` — atterrava su una pagina che
-  // gli e' negata. Ora l'atterraggio si deriva dal permesso, quindi va su /me.
+  // S1044 (#116): `tommaso.fiore` era tornato su /me. La riga S1043 che lo mandava
+  // sul cruscotto descriveva il difetto, non una scelta: `landingForRoles` mandava
+  // li' chiunque avesse un ruolo fuori dal set self-service SENZA verificare che
+  // quel ruolo potesse vedere la pagina. Da allora l'atterraggio si deriva dal
+  // PERMESSO, e quel commento chiudeva cosi': «se si decide che un capo filiale
+  // debba vedere il cruscotto, la correzione e' dargli `dashboard:view` nella mappa
+  // RBAC: questa riga seguira' da sola».
   //
-  // Se si decide che un capo filiale DEBBA vedere il cruscotto, la correzione e'
-  // dargli `dashboard:view` nella mappa RBAC: questa riga seguira' da sola.
+  // [S1045] La decisione e' arrivata (Enzo, 2026-08-05) e la riga ha seguito. La
+  // mig 000272 gli ha dato `BRANCH_MANAGER` — regge la Filiale di Varese, cioe' un
+  // sotto-albero gerarchico vero — quindi ha `dashboard:view` e atterra su
+  // /dashboard. Chi guida solo una SQUADRA non lo prende e resta su /me.
   //
-  // NON e' stato sostituito con un'altra persona: 34 spec lo nominano e dipendono
-  // dai suoi dati seminati (carriera, My HR, embedding del profilo).
+  // La chiave si chiama ancora `employee` ma la persona e' un capo filiale: NON e'
+  // stata sostituita perche' 34 spec la nominano e dipendono dai suoi dati seminati
+  // (carriera, My HR, embedding del profilo). Il caso «utente senza deleghe» e'
+  // coperto da `outsider`.
   employee: {
     email: "tommaso.fiore@rtl-bank.org",
-    expectedLandingPath: "/me",
+    expectedLandingPath: "/dashboard",
   },
   outsider: {
     email: "antonio.parisi@rtl-bank.org",

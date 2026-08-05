@@ -57,12 +57,17 @@ test.describe("MVP-2a /login pilot — live data", () => {
     expect(csrf!.httpOnly).toBe(false);
   });
 
-  test("USER (employee_test) login lands on /me", async ({ page }) => {
+  // [S1045] L'atterraggio NON è più scritto qui: si legge dal fixture, che è la sola
+  // fonte. Era cablato `**/me` e la mig 000272 lo ha smentito — `tommaso.fiore` è
+  // `BRANCH_MANAGER`, ha `dashboard:view` e atterra sul cruscotto. L'atterraggio
+  // segue il PERMESSO (S1044 #116), quindi un percorso scritto a mano qui è destinato
+  // a mentire alla prossima decisione: questa riga ora la segue da sé.
+  test("il login della persona `employee` atterra dove il fixture dichiara", async ({ page }) => {
     await page.goto("/login");
     await fillLoginForm(page, PERSONAS.employee.email, passwordFor(PERSONAS.employee.email));
     await page.getByTestId("login-submit").click();
     await completeMfaIfChallenged(page, PERSONAS.employee.email);
-    await page.waitForURL("**/me");
+    await page.waitForURL(`**${PERSONAS.employee.expectedLandingPath}`);
   });
 
   test("wrong password shows error message, stays on /login", async ({ page }) => {

@@ -21,10 +21,34 @@ import { storageStateFor, type PersonaKey } from "./fixtures";
 // warm chunks) and bump per-test timeout to 90s.
 test.describe.configure({ retries: 1, timeout: 90_000 });
 
+/**
+ * [S1045] `expectAdminNav` era UN interruttore per TUTTE le voci riservate, e non
+ * regge piu': dopo la ricostruzione dell'organigramma le voci rispondono a regole
+ * DIVERSE, e `tommaso.fiore` — la persona che questo file chiama «impiegato» —
+ * oggi dirige la Filiale di Varese.
+ *
+ * Misurato sul dato reale, non dedotto:
+ *   · `dashboard` esige `dashboard:view`, che tommaso NON ha (e' TEAM_LEADER +
+ *     TEAM_MEMBER + USER; il permesso sta su MANAGER, TENANT_ADMIN, HRMS_MANAGER,
+ *     PLATFORM_ADMIN, BLUEPRINT_MANAGER, PROCESS_OWNER) -> NON deve vederla.
+ *   · `users` esige `user:read`, che il ruolo `USER` concede a TUTTI, piu' un
+ *     dominio attivo — e tommaso ne ha uno perche' guida una squadra -> la vede,
+ *     ed e' la scelta di prodotto confermata da Enzo (2026-08-05): l'elenco dei
+ *     colleghi e' una rubrica aziendale, non una pagina da amministratore.
+ *   · `antonio.parisi` (outsider) ha `user:read` ma NESSUN dominio -> non vede
+ *     ne' l'una ne' l'altra. E' il caso che tiene onesta la coppia sopra.
+ *
+ * Due elenchi per persona invece di un booleano: cosi' il test dice QUALE voce si
+ * aspetta e perche', e un cambio di permesso rompe la riga giusta invece di
+ * spostare un rosso da una voce all'altra.
+ */
 type Persona = {
   key: PersonaKey;
   landing: string;
-  expectAdminNav: boolean;
+  /** Voci che DEVONO comparire nel menu di questa persona. */
+  navMustSee: string[];
+  /** Voci che NON devono comparire: il menu non offre cio' che e' negato. */
+  navMustNotSee: string[];
   extraPages: [string, string];
 };
 
@@ -32,31 +56,38 @@ const PERSONAS: Persona[] = [
   {
     key: "platformAdmin",
     landing: "/dashboard",
-    expectAdminNav: true,
+    navMustSee: ["nav-dashboard"],
+    navMustNotSee: [],
     extraPages: ["/tenants", "/admin/roles"],
   },
   {
     key: "tenantAdmin",
     landing: "/dashboard",
-    expectAdminNav: true,
+    navMustSee: ["nav-dashboard"],
+    navMustNotSee: [],
     extraPages: ["/users", "/positions"],
   },
   {
     key: "manager",
     landing: "/dashboard",
-    expectAdminNav: true,
+    navMustSee: ["nav-dashboard"],
+    navMustNotSee: [],
     extraPages: ["/gaps", "/me"],
   },
   {
+    // tommaso.fiore — capo della Filiale di Varese: rubrica si', cruscotto no.
     key: "employee",
     landing: "/me",
-    expectAdminNav: false,
+    navMustSee: ["nav-users"],
+    navMustNotSee: ["nav-dashboard"],
     extraPages: ["/me/profile", "/me/learning/catalogue"],
   },
   {
+    // antonio.parisi — nessun dominio: niente voci riservate, `user:read` o meno.
     key: "outsider",
     landing: "/me",
-    expectAdminNav: false,
+    navMustSee: [],
+    navMustNotSee: ["nav-dashboard", "nav-users"],
     extraPages: ["/me/inbox", "/me/career"],
   },
 ];
@@ -80,12 +111,13 @@ for (const persona of PERSONAS) {
 
       // 2. Nav role-gated
       await expect(page.getByTestId("nav-me")).toBeVisible({ timeout: 15_000 });
-      if (persona.expectAdminNav) {
-        await expect(page.getByTestId("nav-dashboard")).toBeVisible();
-      } else {
-        // Pure USER must NOT see admin links.
-        await expect(page.getByTestId("nav-dashboard")).toHaveCount(0);
-        await expect(page.getByTestId("nav-users")).toHaveCount(0);
+      for (const testId of persona.navMustSee) {
+        await expect(page.getByTestId(testId)).toBeVisible();
+      }
+      // Il menu non offre cio' che e' negato: e' l'asserzione che nel 2026-08-05
+      // ha scoperto il cruscotto visibile a chi non puo' aprirlo (mig 000271).
+      for (const testId of persona.navMustNotSee) {
+        await expect(page.getByTestId(testId)).toHaveCount(0);
       }
 
       // 3. Extra pages

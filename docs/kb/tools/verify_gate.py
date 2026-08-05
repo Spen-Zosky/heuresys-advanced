@@ -98,10 +98,28 @@ E2E = ("L3", "cd apps/web && pnpm test:e2e:prod:node22")
 
 
 def git(*args: str) -> str:
+    """Output di un comando git, sempre come stringa.
+
+    `encoding`/`errors` espliciti: senza, su Windows `text=True` decodifica con
+    il codec di sistema (cp1252) e un solo byte fuori tabella nel diff fa
+    esplodere il thread lettore di subprocess. L'effetto non e' un errore
+    parlante ma una PERDITA: `stdout` resta None e chi lo usa muore con un
+    oscuro «NoneType has no attribute encode».
+
+    Misurato in S1045: `run` ha eseguito e superato tutte e quattro le suite
+    instradate, poi e' morto proprio mentre scriveva il verdetto — 6 minuti di
+    verifiche vere buttati sull'ultima riga. La stessa lezione era gia' scritta
+    dieci righe piu' sotto per l'esecuzione delle suite, ma questa funzione era
+    rimasta indietro: una correzione applicata a una sola delle due strade.
+
+    `or ""` chiude anche il caso residuo (processo ucciso, pipe chiusa): un
+    output mancante deve dare stringa vuota, non None.
+    """
     return subprocess.run(
         ["git", "-C", str(REPO), *args],
         capture_output=True, text=True, check=False,
-    ).stdout
+        encoding="utf-8", errors="replace",
+    ).stdout or ""
 
 
 def changed_files() -> list[str]:

@@ -98,3 +98,34 @@ migrazione — **non** spegnere il presidio.
 - `000273` archivia con `INSERT … SELECT` **senza deduplica**: non è solo un problema di
   ri-esecuzione, è che una migrazione precedente **ricrea** i cataloghi su posizioni disattivate
   che la `000273` poi ri-archivia. Il ciclo ha due estremi, e questo piano ne chiude uno solo.
+
+## Conseguenza per il Tenant Builder P1 (`#131`) — segnalata da Enzo, verificata
+
+`#131` prevede di **togliere tre permessi a `TENANT_ADMIN`** in produzione
+(`blueprint:activate`, `blueprint:override`, `blueprint:delete` — decisione E9, 2026-08-05).
+È il fenomeno (1) di `#140` **al contrario**, e merita di essere scritto prima che qualcuno ci
+inciampi.
+
+**Misurato**: tutti e tre sono nell'allowlist della `000210`, e `TENANT_ADMIN` li detiene oggi
+in produzione.
+
+**La strada spontanea non regge.** Una `DELETE` in una migrazione a valle sembra sufficiente,
+perché l'ordine di catena la mette dopo la `000210`. Ma la `000210` **riconcede** ogni codice
+in allowlist a ogni esecuzione, e la catena gira per intero a ogni deploy. Effetto: il permesso
+viene concesso e revocato a ogni giro — con uno stato transitorio in cui `TENANT_ADMIN` ce l'ha —
+e soprattutto la guardia `rbac-tenant-admin-allowlist.test.ts` **diventa rossa**, perché asserisce
+`audience live == allowlist ∪ estensioni marcate` mentre l'audience reale sarebbe l'allowlist
+**meno tre**.
+
+**La revoca si fa nell'allowlist**: si tolgono i tre codici dalla `VALUES` della `000210`. Il suo
+passo deny-by-default li rimuove da sé al primo giro, la post-condizione torna a quadrare e la
+guardia pure. La migrazione dedicata che il fascicolo prescrive resta utile — ma per la
+**tracciabilità della decisione**, non per l'effetto.
+
+Istruzioni operative scritte nella **testata della `000210`**, che è il punto in cui chi tocca
+l'allowlist le trova senza doverle cercare, e ripetute nell'item `#131` del register.
+
+**Lacuna di simmetria rimasta aperta** (non chiusa qui): la policy della `000210` prevede il
+marker `TENANT_ADMIN-ALLOWLIST-EXTEND` per le concessioni e **niente** per le revoche. Finché è
+così, una revoca resta una modifica a mano della `VALUES` invece di una dichiarazione tracciabile
+come lo è l'estensione.

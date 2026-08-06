@@ -24,6 +24,27 @@
 --     effettivo lo fa la migration stessa (dopo 000210 nell'ordine), e il test
 --     di guardia riconosce l'estensione parsando il marker.
 --
+-- COME SI TOGLIE UN PERMESSO A TENANT_ADMIN (S1045, #140 — leggere PRIMA di provarci)
+--   Il caso simmetrico NON e' coperto dal marker EXTEND, e la strada che verrebbe
+--   spontanea non funziona. Una `DELETE` in una migrazione successiva sembra bastare
+--   perche' l'ordine di catena la mette dopo questa — ma il passo 1 qui sotto
+--   RICONCEDE ogni codice in allowlist a OGNI esecuzione, e la catena viene
+--   ri-applicata per intero a ogni deploy. Effetto: il permesso viene concesso e
+--   revocato a ogni giro (stato transitorio in cui TENANT_ADMIN ce l'ha), e
+--   soprattutto `rbac-tenant-admin-allowlist.test.ts` DIVENTA ROSSO, perche'
+--   asserisce `audience live == allowlist ∪ estensioni marcate` e l'audience live
+--   sarebbe l'allowlist MENO i codici revocati.
+--
+--   La revoca si fa QUI: si toglie il codice dalla VALUES di questa migrazione. Il
+--   passo 2 (deny-by-default) lo rimuove da solo al primo giro, la post-condizione
+--   del passo 3 torna a quadrare e la guardia pure. La migrazione dedicata che
+--   documenta la decisione resta utile — ma per la TRACCIABILITA', non per l'effetto.
+--
+--   Caso concreto gia' in arrivo: il Tenant Builder P1 (#131) toglie a TENANT_ADMIN
+--   `blueprint:activate`, `blueprint:override`, `blueprint:delete` (decisione E9,
+--   Enzo 2026-08-05). Tutti e tre sono in questa allowlist e oggi TENANT_ADMIN li
+--   detiene in produzione: verificato.
+--
 -- IDEMPOTENTE + twice-run safe. Authored: 2026-07-22 (S1027).
 -- ============================================================================
 

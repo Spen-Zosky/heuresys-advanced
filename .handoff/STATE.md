@@ -39,20 +39,34 @@ che spetta a Enzo).
   invece che «a posto». · **Sicurezza MFA**: nessun fattore di prova in produzione, nessun residuo
   dopo una corsa completa della suite. · **Debiti**: resta `D-56` (decisione d'ambiente).
 
-## ⚠ Pendenza aperta alla chiusura di S1047 (`#154`)
+## ⚠ Pendenza aperta alla chiusura di S1047 (`#154`) — decisa da Enzo: si lascia così
 
 **linux-pc serve ancora il codice della sessione precedente.** GitHub Actions era in disservizio
 grave (incidente 2026-08-06T15:22Z): il cancello CI di `vm-deploy` ha letto rosso e **ha bloccato il
-deploy sul gemello, correttamente**. Il bypass non è stato usato. **PROD (VM) è deployata e verde.**
+deploy sul gemello, correttamente**. Il bypass non è stato usato — decisione confermata da Enzo nel
+giorno in cui il cancello ha dimostrato di servire. **PROD (VM) è deployata e verde.**
 Quando la CI torna verde: `bash scripts/vm-deploy.sh linuxpc`.
+
+## La custodia della storia RTL: due anelli chiusi, il terzo è `#155` (P1)
+
+Falliva **dal 2026-08-03 in silenzio**, tre corse settimanali. Scesa la catena: (1) un **difetto di
+prodotto** — creare una versione di un organigramma non copiava gli stili, e una persona reale si è
+ritrovata 158 nodi senza aspetto: corretto alla radice, dato riparato, versione **non** cancellata;
+(2) un **autocontrollo fragile** che cercava un dato sporco come cavia e moriva su un errore di
+vincolo invece che con un check rosso — ecco perché l'allarme non diceva nulla di utile.
+**(3) Resta aperto e serio**: la ricostruzione dell'organigramma ha lasciato indietro i percorsi di
+carriera — **207 su 252 puntano a posizioni morte, 130 persone hanno un obiettivo irraggiungibile**.
+Non è meccanico: serve dire quale posizione nuova corrisponde a ciascuna vecchia.
 
 ## ⚠ Top priorities (next session)
 
-1. **`#125`** — pagine autenticate irraggiungibili dal menu ed etichette senza traduzione: è la
+1. **`#155`** — i percorsi di carriera rimasti indietro dalla ricostruzione: **130 persone vedono un
+   obiettivo di carriera che nessun percorso raggiunge**. ~1 sessione, lavoro di dominio.
+2. **`#125`** — pagine autenticate irraggiungibili dal menu ed etichette senza traduzione: è la
    superficie che un cliente vede per prima. ~2-3h · `<lab>/artefatti/pagine-orfane.txt`.
-2. **`#131` Tenant Builder P1** — ~2 sessioni. **Vale la regola qui sopra**: tre correzioni
+3. **`#131` Tenant Builder P1** — ~2 sessioni. **Vale la regola qui sopra**: tre correzioni
    sostanziali nella sua consegna.
-3. **`#127` + `#123`** — stabilizzazione post-ricostruzione e `organigramma-bis.html`: insieme,
+4. **`#127` + `#123`** — stabilizzazione post-ricostruzione e `organigramma-bis.html`: insieme,
    perché la seconda assorbe la prima per dichiarazione propria. ~1 sessione.
 
 ## Open questions (autorità *cosa* = Enzo)

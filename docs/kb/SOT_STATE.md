@@ -9,6 +9,47 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1046 (2026-08-06) — la chiusura smette di agire nel dubbio, e tiene un diario
+
+- **Dottrina del dubbio, una sola per la catena** (commit `f8928e35`). Con il marcatore
+  `.session-align.marker` assente (consumato da `align-clones.sh:170`, ricreato *create-if-absent*
+  solo al boot successivo di `session-boot.ps1`), i due script rispondevano all'opposto sulla stessa
+  informazione mancante: `align-clones.sh` cadeva nel ramo `else` di `--auto-deploy` e faceva
+  `DEPLOY=1` («conservative: deploy») — deploy in PROD **anche senza un commit su
+  `DEPLOY_PATHS_RE`**, cioè proprio quando la protezione su cui contavamo smetteva di applicarsi —
+  mentre `close-propagate.sh` teneva `need_clone=0` e stampava *«no db/migrations|seeds change this
+  session»*, un fatto che in quel ramo non può conoscere. Ora: azione a costo basso ⟹ si esegue;
+  azione cara o irreversibile (deploy PROD, clone DB) ⟹ **non si esegue, si dichiara `IGNOTO`**, e
+  si stampa come forzare. `--deploy` esplicito resta incondizionato.
+- **Prova falsificabile** — stesso blocco estratto *as-shipped* da `HEAD~1` e da `HEAD`, valutato
+  sugli stessi input: marcatore assente dava `DEPLOY=1 (nessuna ragione registrata)`, ora dà
+  `DEPLOY=0 IGNOTO: nessun delta affidabile`; finestra reale che tocca `scripts/` dà
+  `DEPLOY=1 misurato`. Custodito da 11 test nuovi in `scripts/test/run-shell-tests.sh` (**115 ok,
+  0 failed**).
+- **`scripts/close-log.sh`** — rendiconto append-only in `.handoff/close-log.ndjson` (per-macchina,
+  gitignored), scritto **dagli script stessi**, quindi non dipende dalla memoria del modello.
+  È **rendiconto, non stato**: nessuna decisione lo legge. La distinzione è deliberata — l'analisi
+  d'origine proponeva un registro `propagated_head` da cui far dipendere le decisioni, che avrebbe
+  duplicato un fatto già misurabile (`ssh <host> git rev-parse HEAD`), contro la regola SoT di
+  `CLAUDE.md`, e si sarebbe auto-avvelenato se versionato (`align-clones.sh:57` rifiuta HEAD avanti
+  a origin).
+- **Skill `handoff` v5.1+** — coperti i casi *nothing to commit* / *nothing to push* (Step 4), prima
+  non nominati da nessuna riga; Step 5 impone che un passo saltato sia visibile quanto uno eseguito.
+- **Due item di sicurezza recuperati dall'invisibilità**: `Z-261` (7 fattori MFA `e2e-fixture`
+  ancora attivi in produzione, repo pubblico) e `Z-262` erano scritti come `### Z-NNN`, formato che
+  `parse_register_items` **non** riconosce (vuole `- **#id …** · status:`) — invisibili al menu da
+  S1032. Riformattati `#146`/`#147`; menu da 35 a 38 voci. Variante del difetto di S1045 (là la
+  sezione sbagliata, qui il formato del blocco).
+- **Bug latente nel test harness**: la sezione N di `run-shell-tests.sh` riusava `T`, il tempdir
+  globale di riga 39, così il `trap 'rm -rf "$T"' EXIT` eseguiva `rm -rf Bash` **relativo alla root
+  del repo** e il vero tempdir non veniva mai ripulito. Invisibile finché nessun test *dopo* quella
+  sezione usava `$T`. Rinominato `TOOLN`.
+- **Rinviata di proposito** la riscrittura della chiusura in quattro verbi (`registra · verifica ·
+  pubblica · propaga`): la statistica che la giustificava mescola ritocchi a un minuto (`S954`) e
+  riprese a diciotto ore (`S1041`, `S1045`), quindi la dimensione del problema è ignota. Si decide
+  dal rendiconto, dal 2026-08-20 → `#148`. Referto adversarial (7 rilievi) nel design-lab.
+- Migrazioni invariate (**271 file, max `000273`**); HEAD `37b025da`; tag `v1.0.0`; API test file 232.
+
 ### Delta S1045 (2026-08-05) — perimetri verdi, cancello per-suite, menu coerente col permesso
 
 - **#115 CHIUSO**: suite intera **1620/1620 verdi** su 232 file (commit `93b9bbfc`). I 24 file di

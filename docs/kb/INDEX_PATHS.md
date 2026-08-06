@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-06T11:19:25Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2856**
+**Generato**: 2026-08-06T12:32:19Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2858**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,7 +13,7 @@
 | api-module | 336 |
 | ci | 17 |
 | claude-config | 36 |
-| config | 127 |
+| config | 128 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 147 |
-| doc-canonical | 542 |
+| doc-canonical | 543 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 352 |
 | ux-design-archive | 80 |
 | web-source | 232 |
-| **TOTALE** | **2856** |
+| **TOTALE** | **2858** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2298 |
+| live | 2300 |
 
 ## File per categoria
 
@@ -607,6 +607,7 @@
 - `D:\heuresys-advanced\scripts\ci-gate.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\clean.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\clone-vm-db.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\close-log.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\close-propagate.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\db-health-graph.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\dev-bootstrap.ps1` · *live* · git-tracked
@@ -1999,6 +2000,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-05-debiti-aperti-S1045.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-05-perimetri-test-esecuzione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-catena-migrazioni-stabile-S1045.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-chiusura-dottrina-dubbio-e-diario.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked

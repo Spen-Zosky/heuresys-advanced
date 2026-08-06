@@ -434,17 +434,18 @@
   - priority: P1 · effort: ~4h · doc: docs/kb/SOT_STATE.md §"Delta S1009"
   - note: ✅ DONE S1009 — richiesta diretta Enzo. 3 prospettive PET → **5 sezioni** collassabili (Panoramica/Governance/Forza lavoro/Intelligence/Area personale, mig **000163**); **Dashboard prima** (req 1); **lingua IT/EN nell'header** persistita su `sys_user_preferences`, ereditabile come il tema (req 2); **selettore prospettiva ritirato** (req 3, stato gruppi in localStorage); **6 voci-merge con TabNav** (`section-tabs.tsx`, 9 pagine `is_active=false` route-vive) — merge=navigazione per decisione Enzo; rinomine (Analisi Organizzativa/Skill/Obiettivi/OKR) + `/content`→Intelligence. Gate typecheck 5/5 + me-interfaces 5/5 + a11y E2E 40 + **CI 7/7** + deploy VM verde + **verifica LIVE www** (login `admin@`: 5 sezioni in ordine, dashboard prima, lingua persiste it→en, TabNav 6 tab). Intoppo CHECK-idempotenza-chain risolto → **D-46**.
 
-### Z-261 · esposizione MFA in repository pubblico
-- status: ACTIVE
-- priorita: P1
-- note: **S1032** — il repo e' PUBBLICO e pubblicava 7 segreti TOTP corrispondenti ad altrettanti fattori ATTIVI in produzione (PLATFORM_ADMIN, TENANT_ADMIN/CEO, custode whistleblowing). I segreti sono usciti dai due file `mfa-fixture-secrets.ts` (ora derivano dalla chiave madre gitignored) e il parity test fallisce se qualcuno li reintroduce. **Ma i 7 fattori `e2e-fixture` sono ANCORA ATTIVI**: non eliminabili finche' `mfa-enroll-confirm.integration.test.ts` resta rosso. Backup in `.secrets/backup-fattori-e2e-fixture-20260726.txt`.
-- chiuso-quando: zero fattori con label `e2e-fixture` in produzione e suite auth verde
-
-### Z-262 · accesso derivato per tutti gli utenti
-- status: ACTIVE
-- priorita: P2
-- note: **S1032 passi 1-4 ESEGUITI** — 158 utenti su 158 con identita', password e secondo fattore derivati da `.secrets/dev-access-master.key`; login reale provato col caso negativo; `pnpm dev:whoami` + `pnpm db:provision-access`; `.secrets/accessi.csv`. **Residuo**: `mfa-enroll-confirm` rosso · chiave madre da propagare a VM e linux-pc (senza, la CI non parte) · ritiro delle costanti-persona a favore di interrogazioni al DB.
-- chiuso-quando: suite auth verde, chiave madre presente su VM e linux-pc, nessuna costante-persona nei test di scope
+- **#146 (ex Z-261) Esposizione MFA in repository pubblico: 7 fattori `e2e-fixture` ancora attivi in produzione** · status: ACTIVE
+  - priority: P1 · effort: ~2h · doc: `.secrets/backup-fattori-e2e-fixture-20260726.txt`
+  - note: **S1032** — il repo e' PUBBLICO e pubblicava 7 segreti TOTP corrispondenti ad altrettanti fattori ATTIVI in produzione (PLATFORM_ADMIN, TENANT_ADMIN/CEO, custode whistleblowing). I segreti sono usciti dai due file `mfa-fixture-secrets.ts` (ora derivano dalla chiave madre gitignored) e il parity test fallisce se qualcuno li reintroduce. **Ma i 7 fattori `e2e-fixture` sono ANCORA ATTIVI**: non eliminabili finche' `mfa-enroll-confirm.integration.test.ts` resta rosso. **S1046**: riformattato — il blocco era `### Z-261` e il parser del menu legge solo `- **#id ...** · status:`, quindi questo item di sicurezza P1 era **invisibile al menu da S1032**.
+  - chiuso-quando: zero fattori con label `e2e-fixture` in produzione e suite auth verde
+- **#147 (ex Z-262) Accesso derivato per tutti gli utenti: chiave madre non propagata a VM e linux-pc** · status: ACTIVE
+  - priority: P2 · effort: ~1-2h · doc: `.secrets/accessi.csv`
+  - note: **S1032 passi 1-4 ESEGUITI** — 158 utenti su 158 con identita', password e secondo fattore derivati da `.secrets/dev-access-master.key`; login reale provato col caso negativo; `pnpm dev:whoami` + `pnpm db:provision-access`. **Residuo**: `mfa-enroll-confirm` rosso · chiave madre da propagare a VM e linux-pc (senza, la CI non parte) · ritiro delle costanti-persona a favore di interrogazioni al DB. **S1046**: riformattato come `#146` — era invisibile al menu.
+  - chiuso-quando: suite auth verde, chiave madre presente su VM e linux-pc, nessuna costante-persona nei test di scope
+- **#148 Rileggere il rendiconto delle chiusure e decidere se la chiusura va riscritta in quattro verbi** · status: ACTIVE
+  - priority: P2 · effort: ~1h di lettura + la decisione · doc: docs/superpowers/specs/2026-08-06-chiusura-dottrina-dubbio-e-diario.md
+  - note: **S1046** — la riscrittura in `registra · verifica · pubblica · propaga` e' stata **rinviata di proposito**: la statistica che la giustificava non regge (148 commit «handoff S» su 108 sessioni mescolano fixup a 1 minuto — `S954` — e riprese a 18 ore — `S1041`, `S1045`), quindi nessuno sa quante ri-chiusure siano davvero inutili. Il diario `.handoff/close-log.ndjson` ora lo misura. **Dal 2026-08-20**: `bash scripts/close-log.sh report`, contare le chiusure con passi tutti «saltato», e decidere sui numeri veri invece che sul `git log`. Referto adversarial completo (7 rilievi sull'analisi d'origine): `<padre del repo>/heuresys-design-lab/2026-08-06--referto-adversarial-procedura-chiusura.md`.
+  - chiuso-quando: il rendiconto e' stato letto e la decisione (riscrivere / non riscrivere) e' registrata qui
 
 
 ### Serie A+B (S1016 — selezione Enzo "procedi con B + A", dossier `docs/product/DEVELOPMENT_LINES_{A,B}_*.md`)

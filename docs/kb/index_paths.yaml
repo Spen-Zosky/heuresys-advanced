@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-06T11:19:25Z da docs/kb/tools/build_index.py
+# generato: 2026-08-06T12:32:19Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-06T11:19:25Z"
-  total_files: 2856
+  generated_at: "2026-08-06T12:32:19Z"
+  total_files: 2858
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,7 +13,7 @@ meta:
     api-module: 336
     ci: 17
     claude-config: 36
-    config: 127
+    config: 128
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
@@ -22,7 +22,7 @@ meta:
     db-other: 8
     db-script: 44
     db-seed: 147
-    doc-canonical: 542
+    doc-canonical: 543
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2298
+    live: 2300
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3299,6 +3299,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\clone-vm-db.sh'
     root: repo
     rel: 'scripts/clone-vm-db.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\close-log.sh'
+    root: repo
+    rel: 'scripts/close-log.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -11489,6 +11495,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-catena-migrazioni-stabile-S1045.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-08-06-catena-migrazioni-stabile-S1045.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-chiusura-dottrina-dubbio-e-diario.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-08-06-chiusura-dottrina-dubbio-e-diario.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

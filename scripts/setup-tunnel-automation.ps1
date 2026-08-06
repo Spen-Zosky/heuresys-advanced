@@ -136,16 +136,45 @@ if ([string]::IsNullOrEmpty($pgPass)) {
     Info 'pgpass written (~/.pgpass + %APPDATA%\postgresql\pgpass.conf), ACL restricted'
 }
 
-# --- 5. Scheduled task (At-Logon, supervised tunnel) ----------------------------
-Step "5. Scheduled task '$TaskName' (At-Logon)"
+# --- 5. Scheduled task (At-Logon + ri-presidio periodico) -----------------------
+#
+# Il keepalive rialza il TUNNEL quando cade — lo fa, e il suo log lo dimostra.
+# Ma nulla rialzava il KEEPALIVE. Misurato il 2026-08-06: un solo trigger
+# `AtLogOn`, `Repetition` assente, `RestartCount` 0, `NextRunTime` nessuna. Se
+# quel processo terminava — chiusura sbagliata, aggiornamento, errore non
+# gestito — il presidio spariva in silenzio e restava giu' **fino al logon
+# successivo**, cioe' potenzialmente per giorni: la macchina resta accesa, e
+# nessuno rifa' il login solo perche' il database non risponde.
+#
+# Due rimedi, che coprono guasti diversi e per questo stanno insieme:
+#   · ripetizione ogni 15 minuti — se il keepalive non c'e' piu', torna da solo;
+#     `MultipleInstances IgnoreNew` (gia' presente) garantisce che una corsa
+#     nuova NON affianchi quella viva, quindi ripetere non moltiplica i processi;
+#   · riavvio su fallimento (3 tentativi, 1 minuto) — copre l'uscita con errore,
+#     che la ripetizione da sola tratterebbe come normale attesa.
+#
+# NON si aggiunge un trigger `AtStartup`: il principal e' `LogonType Interactive`
+# e un task interattivo non parte prima che qualcuno abbia fatto l'accesso —
+# sarebbe un presidio dichiarato e inerte, che e' peggio di nessun presidio.
+Step "5. Scheduled task '$TaskName' (At-Logon + ripetizione 15m)"
 $keepalive = Join-Path $ProjectRoot 'scripts\tunnel-keepalive.ps1'
 $action = New-ScheduledTaskAction -Execute 'powershell.exe' `
     -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$keepalive`""
-$trigger = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERNAME"
+$trigLogon  = New-ScheduledTaskTrigger -AtLogOn -User "$env:USERNAME"
+# Il secondo trigger porta la ripetizione: su `-AtLogOn` la proprieta' Repetition
+# non e' impostabile in PowerShell 5.1, mentre su `-Once` si dichiara nativamente.
+$trigRepeat = New-ScheduledTaskTrigger -Once -At (Get-Date).AddMinutes(1) `
+    -RepetitionInterval (New-TimeSpan -Minutes 15) `
+    -RepetitionDuration (New-TimeSpan -Days 3650)
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
-    -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Seconds 0)
+    -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Seconds 0) `
+    -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
 $principal = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType Interactive -RunLevel Limited
-Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Force | Out-Null
-Info "registered/refreshed task '$TaskName'"
+Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger @($trigLogon, $trigRepeat) -Settings $settings -Principal $principal -Force | Out-Null
+Info "registered/refreshed task '$TaskName' (logon + ripetizione 15m + 3 riavvii su fallimento)"
+# Ri-registrare FERMA una corsa in esecuzione: senza questo il tunnel resterebbe
+# giu' fino alla prima ripetizione. Si riavvia subito e si verifica sotto.
+Start-ScheduledTask -TaskName $TaskName
+Info "task riavviato dopo la ri-registrazione"
 
 Write-Host "`n=== done. Start now with: Start-ScheduledTask -TaskName $TaskName ===" -ForegroundColor Green

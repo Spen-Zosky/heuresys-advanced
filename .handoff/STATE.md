@@ -39,6 +39,13 @@ che spetta a Enzo).
   invece che «a posto». · **Sicurezza MFA**: nessun fattore di prova in produzione, nessun residuo
   dopo una corsa completa della suite. · **Debiti**: resta `D-56` (decisione d'ambiente).
 
+## ⚠ Pendenza aperta alla chiusura di S1047 (`#154`)
+
+**linux-pc serve ancora il codice della sessione precedente.** GitHub Actions era in disservizio
+grave (incidente 2026-08-06T15:22Z): il cancello CI di `vm-deploy` ha letto rosso e **ha bloccato il
+deploy sul gemello, correttamente**. Il bypass non è stato usato. **PROD (VM) è deployata e verde.**
+Quando la CI torna verde: `bash scripts/vm-deploy.sh linuxpc`.
+
 ## ⚠ Top priorities (next session)
 
 1. **`#125`** — pagine autenticate irraggiungibili dal menu ed etichette senza traduzione: è la

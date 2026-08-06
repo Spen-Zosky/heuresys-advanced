@@ -138,7 +138,11 @@ flusso() {
     fname=$(basename "$f")
     sha="${SHA[$fname]}"
     if [[ -n "${SKIP[$fname]:-}" ]]; then
-      printf '%s\n' "\echo [migrate] SALTATA $fname (una-tantum, gia' applicata con la stessa impronta)"
+      # NIENTE APOSTROFI in questa riga: il testo finisce nello stdin di psql, che
+      # legge `\echo` come meta-comando e su un apostrofo apre una stringa che non
+      # chiude mai — "unterminated quoted string" a ogni salto. Colto dalla prova
+      # dei due giri consecutivi, non da una rilettura del codice.
+      printf '%s\n' "\echo [migrate] SALTATA $fname (una-tantum, con la stessa impronta del registro)"
       continue
     fi
     # `\echo` va nell'ARGOMENTO e non nel formato: printf interpreterebbe `\e`

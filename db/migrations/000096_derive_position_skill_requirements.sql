@@ -85,6 +85,12 @@ derived AS (  -- fan role+tenant requirements out to each position of that role+
   FROM qualified q
   JOIN sys.sys_positions p
     ON p.position_job_role_id = q.role_id AND p.position_tenant_id = q.tenant_id
+   -- #140: SOLO posizioni vive. Senza questo filtro la derivazione ricreava 52 requisiti
+   -- su posizioni DISATTIVATE a ogni esecuzione della catena, e la `000273` li archiviava
+   -- di nuovo: da qui l'archivio a 388 righe invece delle 232 archiviate una volta sola.
+   -- Il ciclo aveva due estremi e questo e' quello a monte — la posizione e' spenta, un
+   -- catalogo di competenze richieste per ricoprirla non ha piu' significato.
+   AND p.position_is_active
 )
 INSERT INTO sys.sys_position_skill_requirements
   (position_skill_requirement_id, position_id, position_skill_requirement_tenant_id, skill_id,

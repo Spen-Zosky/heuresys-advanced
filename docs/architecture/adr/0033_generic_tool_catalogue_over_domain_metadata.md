@@ -103,12 +103,36 @@ uno alla volta con la misura davanti, non per simmetria.
 
 ## §5 — Open problems — dichiarati, non risolti con scorciatoie
 
-**§5.1 — L'atlante non conosce i parametri.** Conosce metodo, path, permesso; **non**
-lo schema dei parametri (query string, corpo). `hrx_concept_describe` può dire
-«`GET /v1/positions` esiste», non «accetta `?tenantId=&limit=`». Senza questo, l'agente
-indovina — e indovinare su una scrittura è inaccettabile. La sede naturale del rimedio
-sono gli schemi Zod di `@heuresys/shared`, già per-modulo: andrebbero derivati
-nell'atlante. **Non è risolto in questo ADR.**
+**§5.1 — L'atlante non conosce i parametri** — ✅ **RISOLTO il 2026-08-07.**
+
+L'atlante porta ora, per ogni route, la **forma** di `querystring`, `params` e `body`:
+nome dello schema, campi, tipo, opzionalità, `format` (es. `uuid`) e **valori ammessi
+degli enum** — quest'ultimo è ciò che impedisce all'agente di inventare uno stato che il
+server rifiuterebbe. Esempio reale su `GET /v1/positions`: `criticality` con
+`CRITICAL|HIGH|MEDIUM|LOW`, `organizationUnitId` string/uuid, `limit` e `offset`.
+
+**Estratto a runtime, non con una regex** (`docs/kb/tools/dump_route_schemas.ts`, invocato
+da `build_atlas.py`): gli schemi compongono — `.optional()`, `.extend()`, riferimenti
+incrociati, `z.coerce` — e una regex li leggerebbe male proprio nei casi che contano.
+L'autorità sulla forma è Zod, quindi ciò che l'atlante dichiara è ciò che il server
+accetterà davvero. Degrada come `--no-db`: se `tsx` manca, l'atlante esce senza i
+parametri anziché non uscire (`--no-schemas` per saltarlo di proposito).
+
+**Copertura misurata**: 569 route, **478 dichiarano parametri (84%)** — le altre non ne
+hanno; **555 blocchi parametro, 555 risolti (100%), 0 irrisolti**.
+
+Due casi limite sono rappresentati per quello che sono, invece di essere nascosti sotto
+«irrisolto»: uno schema **vuoto** (`z.strictObject({})`, due route MFA) esce come
+`fields: []`, che dice *«non mandare nulla»* — l'opposto di *«non so cosa mandare»*; e le
+**tre route** che dichiarano lo schema **inline** (`params: z.object({ id: z.uuid() })`)
+escono come `schema: (inline)` con la dichiarazione grezza accanto, perché fingere di
+averla risolta sarebbe peggio che dichiararla.
+
+L'idempotenza dello strumento — proprietà su cui l'atlante si regge — è stata **ri-provata
+dopo la modifica**: due esecuzioni consecutive producono file identici.
+
+**Resta fuori**: la forma della **risposta**. Sapere cosa torna aiuterebbe l'agente, ma
+§5.1 riguarda ciò che il chiamante deve **mandare**; allargarlo qui sarebbe scope creep.
 
 **§5.2 — Il gate HITL classifica per NOME dello strumento.** `mcp-tool-names.ts`
 distingue lettura e scrittura per elenco di nomi. Con un solo `hrx_entity_query`
@@ -174,12 +198,14 @@ Questo ADR è `PROPOSED` e **si chiude solo con una misura**, non con un'opinion
    **Conseguenza per l'architettura**: `hrx_concepts_search` è adeguato a **instradare
    verso il dominio**. Non è adeguato, da solo, a rispondere a domande di aggregazione, e
    l'ADR non deve promettere che lo sia.
-2. **§5.1 risolto**: l'atlante espone i parametri, o `hrx_entity_query` resta limitato
-   alle sole letture senza parametri.
+2. **§5.1 risolto** — ✅ **fatto il 2026-08-07**: l'atlante espone i parametri di tutte
+   le 478 route che ne hanno, 555 blocchi su 555 risolti.
 3. **§5.2 risolto**: il gate classifica scrittura/lettura per metodo risolto, con test
-   che lo dimostrano su un'operazione di scrittura.
+   che lo dimostrano su un'operazione di scrittura. **APERTO.**
 
-Finché 2 e 3 sono aperti, **nessuno strumento generico viene collegato al gateway**.
+Finché **3** è aperto, **nessuno strumento generico viene collegato al gateway**. È
+rimasto l'unico sbarramento, ed è quello giusto: riguarda l'applicazione dei permessi,
+non la comodità dell'agente.
 
 ---
 

@@ -110,9 +110,60 @@ def parse_routes_file(text):
         ogm = re.search(r"orgGate:\s*[\"']([^\"']+)[\"']", opts)
         if ogm:
             og = ogm.group(1)
+        # ADR-0033 §5.1 — quali schemi Zod governano i PARAMETRI di questa route.
+        # Qui si prende solo il NOME: la forma la conosce Zod, e la si risolve dopo
+        # (vedi load_schema_shapes). `response` resta fuori di proposito: descrive
+        # cio' che torna, non cio' che il chiamante deve mandare.
+        params = OrderedDict()
+        for chiave in ("querystring", "params", "body"):
+            # Tre route dichiarano lo schema INLINE (`params: z.object({...})`)
+            # invece che per nome. Catturarne il nome darebbe "z", che non e' uno
+            # schema: si conserva la dichiarazione grezza e si marca `inline`,
+            # perche' fingere di averla risolta sarebbe peggio che dichiararla.
+            im = re.search(rf"\b{chiave}:\s*(z\.[a-zA-Z]+\([^\n]*)", opts)
+            if im:
+                params[chiave] = ("__inline__", im.group(1).rstrip(", ").strip())
+                continue
+            sm = re.search(rf"\b{chiave}:\s*([A-Z]\w+)", opts)
+            if sm:
+                params[chiave] = (sm.group(1), None)
         routes.append(OrderedDict(method=method, path=path or "/", permission=perm,
-                                  csrf=csrf, orgGate=og))
+                                  csrf=csrf, orgGate=og,
+                                  **({"schemas_in": params} if params else {})))
     return routes
+
+
+def load_schema_shapes():
+    """Forma dei parametri per nome di schema, chiesta a Zod (ADR-0033 §5.1).
+
+    Si invoca `dump_route_schemas.ts` con tsx perche' gli schemi COMPONGONO
+    (`.optional()`, `.extend()`, riferimenti incrociati, `z.coerce`): una regex
+    li leggerebbe male proprio nei casi che contano, e questo strumento ha gia'
+    tre limiti-da-regex dichiarati in testa. L'autorita' sulla forma e' Zod.
+
+    Degrada come `--no-db`: se tsx non c'e' o fallisce, l'atlante esce senza i
+    parametri invece di non uscire. Un atlante parziale e' utile; nessun atlante no.
+    """
+    script = os.path.join(OUT_DIR, "..", "tools", "dump_route_schemas.ts")
+    script = os.path.normpath(script)
+    try:
+        res = subprocess.run(
+            ["pnpm", "--filter", "@heuresys/api", "exec", "tsx", script],
+            cwd=REPO, capture_output=True, text=True, timeout=300,
+            encoding="utf-8", errors="replace", shell=(os.name == "nt"))
+    except (OSError, subprocess.TimeoutExpired) as e:
+        print(f"[atlas] forme dei parametri NON estratte ({e}); l'atlante esce senza.", file=sys.stderr)
+        return {}
+    if res.returncode != 0 or not res.stdout.strip():
+        print(f"[atlas] forme dei parametri NON estratte (exit {res.returncode}); l'atlante esce senza.",
+              file=sys.stderr)
+        return {}
+    import json as _json
+    try:
+        return _json.loads(res.stdout)
+    except ValueError as e:
+        print(f"[atlas] forme dei parametri illeggibili ({e}); l'atlante esce senza.", file=sys.stderr)
+        return {}
 
 
 def build_symbol_map():
@@ -128,7 +179,8 @@ def build_symbol_map():
     return sym
 
 
-def scan_api(symbol_map):
+def scan_api(symbol_map, shapes=None):
+    shapes = shapes or {}
     app_text = read(API_APP)
     prefixes = {}  # pluginVar -> prefix
     for m in RE_REGISTER.finditer(app_text):
@@ -163,6 +215,28 @@ def scan_api(symbol_map):
                         n = n.strip()
                         if n and n in symbol_map:
                             schemas.add(symbol_map[n])
+        # ADR-0033 §5.1 — dal NOME dello schema alla sua FORMA. Uno schema che
+        # non si risolve resta dichiarato per nome invece di sparire: e' la
+        # differenza fra «questa route non ha parametri» e «non so quali siano»,
+        # e per chi deve comporre una chiamata sono cose opposte.
+        for r in routes:
+            nomi = r.pop("schemas_in", None)
+            if not nomi:
+                continue
+            risolti = OrderedDict()
+            for dove, (nome, grezzo) in nomi.items():
+                if nome == "__inline__":
+                    risolti[dove] = OrderedDict(schema="(inline)", inline=grezzo, fields=None)
+                    continue
+                campi = shapes.get(nome)
+                if campi is None:
+                    risolti[dove] = OrderedDict(schema=nome, fields=None, unresolved=True)
+                else:
+                    # `fields: []` e' un esito legittimo: lo schema esiste e non
+                    # vuole nulla. Diverso da `unresolved`, che vuol dire non so.
+                    risolti[dove] = OrderedDict(schema=nome, fields=campi)
+            r["params"] = risolti
+
         # test file per modulo: match sul nome modulo (con e senza plurale semplice)
         stem = mod
         tests = sorted(t for t in test_files if stem in t)
@@ -389,6 +463,8 @@ def yaml_scalar(v):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--no-db", action="store_true", help="salta la sezione DB live")
+    ap.add_argument("--no-schemas", action="store_true",
+                    help="salta la forma dei parametri (non invoca tsx): piu' veloce, atlante parziale")
     args = ap.parse_args()
 
     head = run(["git", "log", "-1", "--format=%h %cI"]).split()
@@ -403,7 +479,8 @@ def main():
     )
 
     symbol_map = build_symbol_map()
-    api = scan_api(symbol_map)
+    shapes = {} if args.no_schemas else load_schema_shapes()
+    api = scan_api(symbol_map, shapes)
     web = scan_web()
     shared = scan_shared()
     db = None

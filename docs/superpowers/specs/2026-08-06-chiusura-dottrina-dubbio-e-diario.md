@@ -78,6 +78,56 @@ chiusure singole con due commit — `S954`, 1 minuto — e sessioni riprese il g
 
 ---
 
+---
+
+## Evidenza live (2026-08-06, commit `f8928e35`)
+
+**Prova falsificabile — stesso input, versione prima e dopo.** Il blocco di decisione è estratto
+*as-shipped* da `align-clones.sh` a `HEAD~1` e a `HEAD` e valutato sugli stessi valori. Se la
+modifica non facesse nulla, le due righe sarebbero identiche.
+
+```
+CASO A — marcatore assente (seconda chiusura nella stessa sessione)
+  PRIMA (HEAD~1) : DEPLOY=1  (nessuna ragione registrata)
+  DOPO  (HEAD)   : DEPLOY=0  IGNOTO: nessun delta affidabile (marcatore assente) — deploy NON
+                             eseguito nel dubbio; forza con --deploy
+
+CASO B — modalità full, nessuna finestra da misurare
+  PRIMA (HEAD~1) : DEPLOY=1  (nessuna ragione registrata)
+  DOPO  (HEAD)   : DEPLOY=0  IGNOTO: nessun delta affidabile (modalità full) — ...
+
+CASO C — finestra REALE di questa sessione (31d98f9e..HEAD, che tocca scripts/)
+  DOPO  (HEAD)   : DEPLOY=1  misurato: i commit 31d98f9e..HEAD toccano path di deploy
+```
+
+**Clone-DB, `--dry-run` reale** con il marcatore vero della sessione:
+
+```
+PLAN mode=delta deploy=--auto-deploy clone-db=auto need_clone=0
+PLAN clone-db-why: misurato: nessun cambiamento in db/migrations|seeds da 31d98f9e
+```
+
+**Diario**, righe reali di S1046 lette con `bash scripts/close-log.sh report`:
+
+```
+S1046  (3 passi, 2026-08-06T14:21:37+0200 -> 2026-08-06T14:21:39+0200)
+    verifica   eseguito  run-shell-tests.sh: 115 ok, 0 failed
+    pubblica   eseguito  commit f8928e35 — dottrina del dubbio + diario
+    propaga    saltato   non richiesta in questo turno
+```
+
+**Test**: `bash scripts/test/run-shell-tests.sh` → **115 ok, 0 failed** (11 nuovi, sezione I).
+
+### Difetto trovato eseguendo, corretto nello stesso commit
+
+Non era in piano e non allunga la lista — si annota perché era **silenzioso e distruttivo**.
+`run-shell-tests.sh` sezione N riusava `T` come variabile di ciclo, clobberando il tempdir globale
+di riga 39: il `trap 'rm -rf "$T"' EXIT` finiva per eseguire `rm -rf Bash` **relativo alla root del
+repo**, e il vero tempdir non veniva mai ripulito. Latente finché nessun test *dopo* quella sezione
+usava `$T` — i primi sono stati quelli di questo ciclo. Rinominata in `TOOLN`.
+
+---
+
 ## Cosa NON entra in questo ciclo
 
 - La riscrittura in quattro verbi (`registra · verifica · pubblica · propaga`) — **si decide fra due

@@ -33,7 +33,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { storageStateFor } from "./fixtures";
+import { API_BASE, storageStateFor } from "./fixtures";
 
 test.use({ storageState: storageStateFor("employee") });
 
@@ -94,10 +94,14 @@ test.describe("MVP-3 Tappa E-UI /me/security — TOTP enrollment flow", () => {
     // un conteggio globale mescolerebbe i residui lasciati da corse precedenti
     // (26 al 2026-08-06) e renderebbe questo test rosso per colpa d'altri —
     // oppure verde per caso, il giorno in cui qualcuno li ripulisce a mano.
+    // L'elenco si chiede all'API con l'indirizzo ASSOLUTO (`API_BASE`): un path
+    // relativo lo servirebbe il frontend, che per `/v1/*` risponde con l'HTML
+    // del proprio 404 — e il test morirebbe con «Unexpected token '<'» invece
+    // di dire la verità sul fattore. Preso sul fatto in S1047.
     const { factorId } = (await enrollResp.json()) as { factorId: string };
     await expect
       .poll(async () => {
-        const res = await page.request.get("/v1/auth/mfa/factors");
+        const res = await page.request.get(`${API_BASE}/v1/auth/mfa/factors`);
         const body = (await res.json()) as { items: { factorId: string }[] };
         return body.items.some((f) => f.factorId === factorId);
       })

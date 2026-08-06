@@ -13,7 +13,7 @@
  */
 
 import { test, expect } from "@playwright/test";
-import { storageStateFor } from "./fixtures";
+import { API_BASE, storageStateFor } from "./fixtures";
 
 // /me/security is a heavy route (MFA + QR + passkey + sessions); allow for the
 // dev-mode cold-compile on first hit.
@@ -81,13 +81,22 @@ test.describe("MVP-4 §2.5 WebAuthn passkey enroll — live data", () => {
    * l'intera suite, quindi il filtro sul tipo è la guardia.
    */
   test.afterEach(async ({ page }) => {
-    const list = await page.request.get("/v1/auth/mfa/factors");
+    // Indirizzo ASSOLUTO dell'API: un path relativo lo servirebbe il frontend,
+    // che per `/v1/*` risponde con l'HTML del proprio 404 — la pulizia
+    // fallirebbe in silenzio credendo di aver letto un elenco vuoto.
+    const list = await page.request.get(`${API_BASE}/v1/auth/mfa/factors`);
     if (!list.ok()) return;
     const { items } = (await list.json()) as {
       items: { factorId: string; kind: string }[];
     };
+    // La DELETE passa dal doppio-invio CSRF (`preHandler: [app.verifyCsrf]`):
+    // senza l'intestazione tornerebbe 403 e il residuo resterebbe.
+    const csrf = (await page.context().cookies()).find((c) => c.name === "hrx_csrf")?.value;
+    if (!csrf) return;
     for (const f of items.filter((i) => i.kind === "WEBAUTHN")) {
-      await page.request.delete(`/v1/auth/mfa/factors/${f.factorId}`);
+      await page.request.delete(`${API_BASE}/v1/auth/mfa/factors/${f.factorId}`, {
+        headers: { "x-csrf-token": csrf },
+      });
     }
   });
 });

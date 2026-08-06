@@ -130,6 +130,29 @@ export default function MeSecurityPage() {
     },
   });
 
+  /**
+   * Annullare un arruolamento CANCELLA il fattore pendente sul server.
+   *
+   * Prima l'annulla era solo di facciata (`setPendingFactor(null)` e basta): la
+   * riga restava, e chi annullava si ritrovava in lista un fattore «in attesa
+   * di verifica» che credeva di non aver mai creato. Misurato in S1047 (#152):
+   * 26 fattori TOTP mai verificati accumulati in produzione, uno strato per
+   * ogni corsa degli E2E — che premono esattamente questo pulsante.
+   *
+   * Silenziosa di proposito: `remove` esiste già ma annuncia «fattore rimosso»,
+   * che qui sarebbe fuori luogo — l'utente sta annullando, non rimuovendo. E un
+   * fallimento non deve bloccare la chiusura del riquadro: chi ha chiesto di
+   * annullare ha diritto di vederlo chiuso, e un fattore non verificato non
+   * concede alcun accesso.
+   */
+  const cancelPending = useMutation({
+    mutationFn: (factorId: string) =>
+      apiFetch<void>(`/v1/auth/mfa/factors/${factorId}`, { method: "DELETE" }),
+    onSettled: () => {
+      void qc.invalidateQueries({ queryKey: ["me", "mfa", "factors"] });
+    },
+  });
+
   // --- EMAIL_OTP enrollment ---
   const enrollEmail = useMutation({
     mutationFn: () =>
@@ -550,6 +573,7 @@ export default function MeSecurityPage() {
                   variant="ghost"
                   data-testid="me-security-enroll-cancel"
                   onClick={() => {
+                    if (pendingFactor) cancelPending.mutate(pendingFactor.factorId);
                     setPendingFactor(null);
                     form.reset();
                   }}
@@ -614,6 +638,7 @@ export default function MeSecurityPage() {
                   variant="ghost"
                   data-testid="me-security-emailotp-cancel"
                   onClick={() => {
+                    cancelPending.mutate(pendingEmailOtp.factorId);
                     setPendingEmailOtp(null);
                     emailForm.reset();
                   }}

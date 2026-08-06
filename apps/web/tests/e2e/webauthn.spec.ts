@@ -65,4 +65,29 @@ test.describe("MVP-4 §2.5 WebAuthn passkey enroll — live data", () => {
     ]);
     expect(delResp.status()).toBe(204);
   });
+
+  /**
+   * Rete di sicurezza (#152). La pulizia qui sopra è l'ultima riga del test:
+   * se il test fallisce PRIMA — e con `retries: 1` un tentativo fallito è
+   * previsto — il passkey appena registrato resta in produzione. È così che si
+   * erano accumulati 6 fattori WEBAUTHN verificati su `admin@heuresys.com`
+   * fra il 22/07 e il 01/08, misurati in S1047.
+   *
+   * Questo gancio gira **anche quando il test fallisce**, e toglie il residuo.
+   *
+   * Cancella SOLO i fattori di tipo WEBAUTHN. Il vincolo non è cosmetico: lo
+   * stesso utente possiede un TOTP `derived-access` da cui dipende ogni login
+   * dei test (Z-262). Una pulizia "tutti i fattori dell'utente" spegnerebbe
+   * l'intera suite, quindi il filtro sul tipo è la guardia.
+   */
+  test.afterEach(async ({ page }) => {
+    const list = await page.request.get("/v1/auth/mfa/factors");
+    if (!list.ok()) return;
+    const { items } = (await list.json()) as {
+      items: { factorId: string; kind: string }[];
+    };
+    for (const f of items.filter((i) => i.kind === "WEBAUTHN")) {
+      await page.request.delete(`/v1/auth/mfa/factors/${f.factorId}`);
+    }
+  });
 });

@@ -13,11 +13,23 @@
  *   1. Empty-state factors list rendered for a fresh-enrolled persona.
  *   2. Enroll TOTP button triggers POST /v1/auth/mfa/enroll → QR + secret + verify form visible.
  *   3. Cancel button restores the empty state.
- *   4. After enroll, the factor appears in the list as "in attesa di verifica" (pending verify).
+ *   4. Cancel DELETES the pending factor server-side — nothing is left behind.
  *
- * NOTE: cancel does NOT delete the pending factor server-side — the backend
- * leaves the unverified row until either verify-setup succeeds or it ages out.
- * The list reflects this (factor visible with `verified=false`) by design.
+ * S1047 (#152) — questo blocco diceva l'opposto: «cancel does NOT delete the
+ * pending factor server-side — the backend leaves the unverified row until
+ * either verify-setup succeeds or it ages out», e lo chiamava "by design".
+ * Due parti su tre erano false, misurate:
+ *   - l'age-out NON esiste. Nel codice auth non c'è alcuna scadenza dei
+ *     FATTORI: `expires_at` e lo sweep vivono su `sys_auth_mfa_otp_challenges`,
+ *     cioè sulle sfide OTP, non sulle righe di `sys_auth_mfa_factors`. Le righe
+ *     restavano per sempre;
+ *   - non era un design, era una perdita. Ogni corsa lasciava 2 fattori TOTP
+ *     mai verificati in produzione: 26 accumulati fra il 22/07 e il 01/08.
+ * Il difetto non era solo dei test: anche una persona reale che premeva
+ * «annulla» si ritrovava in lista un fattore che credeva di non aver creato.
+ * Corretto alla radice — il pulsante ora chiama DELETE /v1/auth/mfa/factors/:id
+ * (l'endpoint esisteva già) — e le asserzioni qui sotto sono state ribaltate di
+ * conseguenza: prima pretendevano che il residuo ci fosse.
  */
 
 import { test, expect } from "@playwright/test";
@@ -62,18 +74,34 @@ test.describe("MVP-3 Tappa E-UI /me/security — TOTP enrollment flow", () => {
     const secret = await page.getByTestId("me-security-enroll-secret").textContent();
     expect(secret?.trim().length ?? 0).toBeGreaterThanOrEqual(16);
 
-    // Cancel restores the empty/initial state.
-    await page.getByTestId("me-security-enroll-cancel").click();
+    // Cancel restores the empty/initial state AND deletes the pending factor
+    // server-side (#152). Prima il DELETE non partiva e la riga restava.
+    const [deleteResp] = await Promise.all([
+      page.waitForResponse(
+        (r) =>
+          /\/v1\/auth\/mfa\/factors\/[0-9a-f-]+$/i.test(new URL(r.url()).pathname) &&
+          r.request().method() === "DELETE",
+      ),
+      page.getByTestId("me-security-enroll-cancel").click(),
+    ]);
+    expect(deleteResp.status()).toBe(204);
+
     await expect(page.getByTestId("me-security-enroll-pending-card")).toHaveCount(0);
     await expect(page.getByTestId("me-security-enroll-button")).toBeVisible();
 
-    // The factor was created server-side (we got 201 back) → it should now
-    // appear in the list as pending. The empty-state element should be gone
-    // and at least one factor row should exist with the TOTP kind.
-    await expect(page.getByTestId("me-security-factors-empty")).toHaveCount(0);
-    const rows = page.getByTestId("me-security-factor-row");
-    await expect(rows.first()).toBeVisible();
-    await expect(rows.first().getByTestId("me-security-factor-kind")).toContainText("TOTP");
+    // Il fattore annullato NON deve sopravvivere. Si asserisce sul factorId
+    // creato DA QUESTO test, non sul totale dei TOTP non verificati dell'utente:
+    // un conteggio globale mescolerebbe i residui lasciati da corse precedenti
+    // (26 al 2026-08-06) e renderebbe questo test rosso per colpa d'altri —
+    // oppure verde per caso, il giorno in cui qualcuno li ripulisce a mano.
+    const { factorId } = (await enrollResp.json()) as { factorId: string };
+    await expect
+      .poll(async () => {
+        const res = await page.request.get("/v1/auth/mfa/factors");
+        const body = (await res.json()) as { items: { factorId: string }[] };
+        return body.items.some((f) => f.factorId === factorId);
+      })
+      .toBe(false);
   });
 
   test("EMAIL_OTP enroll shows email-code form + resend, cancel restores state", async ({ page }) => {
@@ -163,8 +191,8 @@ test.describe("MVP-3 Tappa E-UI /me/security — TOTP enrollment flow", () => {
     await page.getByTestId("me-security-verify-submit").click();
     expect(await sawPost).toBe(false);
 
-    // Cleanup: cancel pending enroll so subsequent runs aren't blocked
-    // by leftover state.
+    // Cleanup: annullare ora cancella davvero il fattore sul server (#152),
+    // quindi questa riga e' pulizia reale e non piu' solo apparente.
     await page.getByTestId("me-security-enroll-cancel").click();
   });
 });

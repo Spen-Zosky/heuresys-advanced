@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-05T18:04:37Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2853**
+**Generato**: 2026-08-06T11:19:25Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2856**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -22,7 +22,7 @@
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 147 |
-| doc-canonical | 540 |
+| doc-canonical | 542 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -30,10 +30,10 @@
 | shared-pkg | 4 |
 | shared-schema | 104 |
 | showcase-source | 14 |
-| test | 351 |
+| test | 352 |
 | ux-design-archive | 80 |
 | web-source | 232 |
-| **TOTALE** | **2853** |
+| **TOTALE** | **2856** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2295 |
+| live | 2298 |
 
 ## File per categoria
 
@@ -1996,7 +1996,9 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-04-consegne-lab-13.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-04-esecuzione-lab-inbox-e-organigramma.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-04-perimetri-test-dopo-ricostruzione.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-08-05-debiti-aperti-S1045.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-05-perimetri-test-esecuzione.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-catena-migrazioni-stabile-S1045.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked
@@ -2383,6 +2385,7 @@
 - `D:\heuresys-advanced\apps\api\test\helpers\org-actors.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\personas.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\setup.ts` · *live* · git-tracked
+- `D:\heuresys-advanced\apps\api\test\helpers\suite-lock.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\helpers\tx-isolation.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\hrms-plenipotentiary.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\inbox-consistency.integration.test.ts` · *live* · git-tracked

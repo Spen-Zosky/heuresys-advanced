@@ -34,18 +34,55 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
   buchi propri: `git()` perdeva l'output su Windows (cp1252) uccidendo il verdetto **dopo** aver
   eseguito le suite, e `handoff-lint` non era instradato da `db/migrations/` pur verificandone il
   conteggio.
-- **Reperto aperto `#140`**: la catena di migrazioni **non è stabile sotto ri-applicazione** — il
-  deploy ha revocato 4 permessi in produzione (ripristinati dalla `000270` auto-riparante), ha
-  riportato `HS-PROD` a tipo `TEAM` (→ `#141`) e ha rigenerato cataloghi poi ri-archiviati (388
-  righe in archivio a fronte di 232 archiviate una volta).
+- **`#140` CHIUSO (S1045, 2026-08-06)** — era: «la catena di migrazioni non è stabile sotto
+  ri-applicazione». **Causa radice**: `000096` distribuiva i requisiti di competenza a *ogni*
+  posizione del ruolo, comprese le **disattivate** (52 righe a ogni giro), e `000273` le
+  ri-archiviava — i timestamp dell'archivio lo mostrano (232 + 52 + 52 + 52 = 388). Corretta a
+  monte. **Prova**: conteggio esatto delle **227 tabelle** di `sys`+`audit` prima e dopo un giro
+  completo → **nessuna differenza** (618.497 = 618.497), più le impronte del contenuto di cinque
+  tabelle chiave identiche. Riverificato **dopo un deploy reale**. `#141` chiuso di conseguenza
+  (`HS-PROD` = `DIVISION`, unità attive di tipo `TEAM` = 0, misurato dopo il giro di catena).
+- **Migrazioni una-tantum (S1045)**: un file può dichiarare `-- @migrate: once` e viene saltato solo
+  se **anche l'impronta** corrisponde al registro; senza dichiarazione **nulla cambia**, perché
+  **166 dei 271 file** portano post-condizioni che verificano invarianti a ogni deploy — il 61%
+  della catena non trasforma il database, lo **controlla**. `MIGRATE_FORCE_ALL=1` riapplica tutto,
+  `MIGRATE_DRY_RUN=1` ispeziona senza toccare. `migrate.ps1` allineato allo stesso contratto.
+- **Revocare un permesso a `TENANT_ADMIN`** non si fa con una `DELETE` a valle: la `000210`
+  riconcede l'allowlist a ogni giro, quindi si toglie il codice dalla sua `VALUES`. Rilevante per
+  `#131` (Tenant Builder P1), istruzioni nella testata della `000210`.
 - **Direzioni registrate da Enzo**: `#142` cruscotti focalizzati per tipologia di utilizzatore
   (Azienda/Processi/Organizzazione/Filiale/HR/Platform/Tenant/Self-Service, ciascuno con requisiti
   propri incluso il divieto e la granularità) e `#143` la squadra come **progetto**, con il capo
   progetto che ha autorità sullo scopo e non sulle persone.
 
+## Delta S1045 (2026-08-05 → 06) — la catena smette di disfare; i debiti da cinque a uno
+
+HEAD **`4339a3d6`** (7 commit, tutti pushati e deployati). Counts **ri-derivati live**:
+**271 file migration** `000001..000273` = **271 applicate** · utenti **163** · posizioni **314** ·
+OU **45** · tenant ACTIVE **2** · ruoli **14** · permessi **211** · mapping RBAC **957** ·
+skill **14.039**.
+
+**Debiti: 5 aperti → 1.** `D-79` (il budget del cancello CI non attraversava l'SSH: provato live
+sulla VM, `2100` arriva, controllo negativo esce 1) · `D-78` (il controllo del clone dichiarava
+FATAL su un clone integro — causa: `Environment=PGOPTIONS=-c lock_timeout=30s` **senza virgolette**
+nell'unit, e in `Environment=` lo spazio separa due assegnazioni: il server rifiutava ogni
+connessione locale; falliva la *misura*, mai il dato) · `D-80` (era già chiuso in codice, mancava
+solo nel registro) · `D-81` ex-`D-72` (due denominatori per una sola grandezza: 51 skill su 62
+cambiano posizione, 0 fuori dal rapporto atteso). Resta **`D-56`**, che aspetta una decisione
+d'ambiente. Corretto anche un identificativo usato **due volte** su debiti diversi.
+
+**Sicurezza**: 7 avvisi pubblicati il 3 agosto, tutti chiusi alzando cinque minimi
+(`brace-expansion` ×2, `fast-uri`, `ip-address`, `hono`). Le linee restano **separate per major** —
+unificarle rompe ESLint, già misurato in S1038.
+
+**Difetto di presidio**: quattro item `ACTIVE` (`#140`-`#143`) erano **invisibili al menu** perché
+scritti fuori dalla sezione che `build_menu.py` legge, e `handoff-lint` non aveva un controllo che
+guardasse *dove* vive un item. Rimessi nel registro (21 → 25 ACTIVE) e aggiunto il check **S3**,
+bloccante, che usa lo stesso predicato di sezione del generatore.
+
 ## Delta S1044 (2026-08-04) — le 13 consegne del lab: l'atterraggio si deriva, la maschera esiste, dieci responsabili diventano quadri
 
-HEAD **`21b1ebc6`** (S1045). Counts ri-derivati live: **163 utenti** (162 attivi) · 161 posizioni attive · 43 OU attive · **26 team** · 2 tenant ACTIVE · RBAC **14 ruoli / 211 permessi / 957 mappature** · **271 file migration** `000001..000273`.
+HEAD **`21b1ebc6`** (S1044). Counts ri-derivati live: **163 utenti** (162 attivi) · 161 posizioni attive · 43 OU attive · **26 team** · 2 tenant ACTIVE · RBAC **14 ruoli / 211 permessi / 957 mappature** · **271 file migration** `000001..000273`.
 
 Piano di ciclo: `docs/superpowers/specs/2026-08-04-consegne-lab-13.md` (13 righe, stato per riga).
 

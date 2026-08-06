@@ -55,10 +55,50 @@ if ($files.Count -eq 0) {
     exit 0
 }
 
+# ---------------------------------------------------------------------------
+# MIGRAZIONI UNA-TANTUM (#140) — stesso contratto di migrate.sh.
+#
+# Un file marcato in testata con `-- @migrate: once` viene saltato se il registro
+# lo riporta con la STESSA impronta. Senza marcatore nulla cambia: le 166
+# post-condizioni della catena continuano a girare a ogni esecuzione.
+# MIGRATE_FORCE_ALL=1 riapplica tutto.
+#
+# Questo gemello DEVE restare allineato a migrate.sh: `pnpm db:migrate` chiama
+# questo, il deploy chiama quello. Se solo uno filtrasse, la stessa catena si
+# comporterebbe in due modi diversi a seconda di chi la lancia — che e' peggio
+# del difetto che stiamo correggendo.
+# ---------------------------------------------------------------------------
+$ForceAll = ($env:MIGRATE_FORCE_ALL -eq '1')
+$Ledger = @{}
+if (-not $ForceAll) {
+    # Su un database nuovo la tabella non esiste ancora: non e' un errore, il
+    # registro resta vuoto e nulla viene saltato.
+    $rows = & $Psql -h $env:POSTGRES_HOST -p $env:POSTGRES_PORT -U $env:POSTGRES_USER `
+                    -d $env:POSTGRES_DB -tA -F '|' `
+                    -c "SELECT file_name, sha256 FROM sys.sys_schema_migrations" 2>$null
+    foreach ($r in $rows) {
+        $parts = $r -split '\|'
+        if ($parts.Count -ge 2 -and $parts[0]) { $Ledger[$parts[0].Trim()] = $parts[1].Trim() }
+    }
+}
+if ($ForceAll) { Write-Host "[migrate] MIGRATE_FORCE_ALL=1 - riapplico TUTTO, marcatori ignorati." }
+
 $applied = 0
+$skipped = 0
 foreach ($f in $files) {
     $start = Get-Date
     $sha = (Get-FileHash -Algorithm SHA256 $f.FullName).Hash.ToLower()
+
+    # Il marcatore si cerca solo nella TESTATA: piu' avanti sarebbe prosa, e una
+    # migrazione che PARLA di `@migrate: once` non deve auto-marcarsi.
+    $head = Get-Content -LiteralPath $f.FullName -TotalCount 20
+    $isOnce = [bool]($head | Where-Object { $_ -match '^--\s*@migrate:\s*once\s*$' })
+    if ((-not $ForceAll) -and $isOnce -and $Ledger.ContainsKey($f.Name) -and $Ledger[$f.Name] -eq $sha) {
+        Write-Host "[migrate] SALTATA $($f.Name) (una-tantum, gia' applicata con la stessa impronta)"
+        $skipped++
+        continue
+    }
+
     Write-Host "[migrate] applying $($f.Name) (sha256=$($sha.Substring(0,12)))"
 
     & $Psql -h $env:POSTGRES_HOST -p $env:POSTGRES_PORT -U $env:POSTGRES_USER -d $env:POSTGRES_DB -v ON_ERROR_STOP=1 -1 -f $f.FullName
@@ -95,4 +135,9 @@ END
 }
 
 Write-Host ""
-Write-Host "OK: $applied migrations applied."
+if ($skipped -gt 0) {
+    Write-Host "OK: $applied migrations applied, $skipped skipped (una-tantum gia' applicate)."
+    Write-Host "[migrate] per rifarle comunque: `$env:MIGRATE_FORCE_ALL='1'"
+} else {
+    Write-Host "OK: $applied migrations applied."
+}

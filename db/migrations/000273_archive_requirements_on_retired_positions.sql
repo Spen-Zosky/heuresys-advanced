@@ -1,6 +1,16 @@
+-- @migrate: once
 -- ============================================================================
 -- 000273 — I cataloghi delle posizioni ritirate vanno in archivio, non restano
 --          appesi a posizioni che non esistono piu'.
+--
+-- PERCHE' `@migrate: once` (#140, S1045)
+--   Questa migrazione descrive un PASSAGGIO — «porta in archivio cio' che oggi e'
+--   residuo» — non uno stato desiderato. L'INSERT nell'archivio non ha deduplica,
+--   quindi ogni ri-esecuzione ri-archivia cio' che nel frattempo e' tornato ad
+--   apparire: misurato, l'archivio contiene 388 righe a fronte delle 232 archiviate
+--   una volta sola. Eseguita una volta fa il suo lavoro; rieseguita gonfia l'archivio
+--   e non aggiunge nulla. Da qui in avanti viene saltata se il registro la riporta
+--   con la stessa impronta. Per rifarla davvero: MIGRATE_FORCE_ALL=1.
 --
 -- IL REPERTO
 --   `db_health` segnala 232 righe di catalogo agganciate a posizioni DISATTIVATE,
@@ -60,25 +70,41 @@ INSERT INTO audit.position_requirements_stale_archive (catalogo, position_id, po
 SELECT 'skill_requirements', r.position_id, p.position_code, p.position_title, to_jsonb(r)
   FROM sys.sys_position_skill_requirements r
   JOIN sys.sys_positions p ON p.position_id = r.position_id
- WHERE NOT p.position_is_active;
+ WHERE NOT p.position_is_active
+   AND NOT EXISTS (SELECT 1 FROM audit.position_requirements_stale_archive a
+                   WHERE a.catalogo = 'skill_requirements'
+                     AND a.position_id = r.position_id
+                     AND a.payload = to_jsonb(r));
 
 INSERT INTO audit.position_requirements_stale_archive (catalogo, position_id, position_code, position_title, payload)
 SELECT 'learning_requirements', r.position_id, p.position_code, p.position_title, to_jsonb(r)
   FROM sys.sys_position_learning_requirements r
   JOIN sys.sys_positions p ON p.position_id = r.position_id
- WHERE NOT p.position_is_active;
+ WHERE NOT p.position_is_active
+   AND NOT EXISTS (SELECT 1 FROM audit.position_requirements_stale_archive a
+                   WHERE a.catalogo = 'learning_requirements'
+                     AND a.position_id = r.position_id
+                     AND a.payload = to_jsonb(r));
 
 INSERT INTO audit.position_requirements_stale_archive (catalogo, position_id, position_code, position_title, payload)
 SELECT 'kpi_requirements', r.position_id, p.position_code, p.position_title, to_jsonb(r)
   FROM sys.sys_position_kpi_requirements r
   JOIN sys.sys_positions p ON p.position_id = r.position_id
- WHERE NOT p.position_is_active;
+ WHERE NOT p.position_is_active
+   AND NOT EXISTS (SELECT 1 FROM audit.position_requirements_stale_archive a
+                   WHERE a.catalogo = 'kpi_requirements'
+                     AND a.position_id = r.position_id
+                     AND a.payload = to_jsonb(r));
 
 INSERT INTO audit.position_requirements_stale_archive (catalogo, position_id, position_code, position_title, payload)
 SELECT 'compensation_profiles', r.position_id, p.position_code, p.position_title, to_jsonb(r)
   FROM sys.sys_position_compensation_profiles r
   JOIN sys.sys_positions p ON p.position_id = r.position_id
- WHERE NOT p.position_is_active;
+ WHERE NOT p.position_is_active
+   AND NOT EXISTS (SELECT 1 FROM audit.position_requirements_stale_archive a
+                   WHERE a.catalogo = 'compensation_profiles'
+                     AND a.position_id = r.position_id
+                     AND a.payload = to_jsonb(r));
 
 -- 2. Distacco dal vivo. Le condizioni sono IDENTICHE a quelle dell'archivio: cio'
 --    che si cancella e' esattamente cio' che e' stato appena conservato.

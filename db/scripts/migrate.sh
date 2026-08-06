@@ -59,13 +59,88 @@ fi
 # dopo), non dall'orologio della shell: e' il tempo vero di esecuzione, senza la
 # latenza di rete che prima ci finiva dentro.
 # ─────────────────────────────────────────────────────────────────────────────
-applied=${#files[@]}
+# ─────────────────────────────────────────────────────────────────────────────
+# MIGRAZIONI UNA-TANTUM (#140)
+#
+# La catena viene ri-applicata INTERAMENTE a ogni deploy, e questo e' voluto: 166
+# dei 271 file portano una post-condizione che verifica un invariante e fa fallire
+# il deploy se e' violato. Quel 61% non trasforma il database, lo CONTROLLA, e
+# spegnerlo per "non rieseguire le migrazioni gia' fatte" sarebbe stato un pessimo
+# affare: e' proprio una di quelle verifiche ad aver fatto scoprire #140.
+#
+# Il guasto e' un altro: alcune migrazioni descrivono un PASSAGGIO, non uno stato
+# desiderato — archiviano righe, ri-tipizzano un'unita', revocano un insieme. Farle
+# rigirare le fa disfare o duplicare cio' che le migrazioni successive hanno fatto.
+#
+# Un file dichiara di essere di quella natura con, in testa:
+#     -- @migrate: once
+#
+# e viene saltato solo se DUE fatti sono veri insieme: e' marcato once, ED e' gia'
+# registrato con la STESSA impronta. Un file modificato dopo l'applicazione torna
+# a essere applicato da se'. Senza marcatore non cambia nulla: e' il comportamento
+# di sempre, quindi le 166 verifiche restano.
+#
+# MIGRATE_FORCE_ALL=1 riesegue tutto, marcatori inclusi: e' la "richiesta esplicita
+# e motivata" per rifare una catena da capo. Su un database nuovo il registro e'
+# vuoto e nulla viene mai saltato — CI e cloni freschi non sono toccati.
+#
+# Il registro si legge in UNA query prima del ciclo: sul tunnel una connessione
+# costa ~1,12 s (misura S1043 qui sopra), 271 interrogazioni sarebbero 5 minuti di
+# sola apertura di canale.
+# ─────────────────────────────────────────────────────────────────────────────
+FORCE_ALL="${MIGRATE_FORCE_ALL:-0}"
+declare -A LEDGER=()
+if [[ "$FORCE_ALL" != "1" ]]; then
+  # `|| true`: su un database nuovo la tabella non esiste ancora e non e' un errore.
+  while IFS='|' read -r l_file l_sha; do
+    [[ -n "$l_file" ]] && LEDGER["$l_file"]="$l_sha"
+  done < <("${PSQL[@]}" -tA -F'|' -c \
+      "SELECT file_name, sha256 FROM sys.sys_schema_migrations" 2>/dev/null | tr -d '\r' || true)
+fi
+
+# La decisione si prende QUI, fuori dalla pipe: `flusso | psql` mette la funzione in
+# una subshell, e un contatore incrementato li' dentro non sopravvive al `|`. Il
+# ciclo che segue legge soltanto.
+declare -A SHA=() SKIP=()
+for f in "${files[@]}"; do
+  fname=$(basename "$f")
+  SHA["$fname"]=$(sha256sum "$f" | awk '{print $1}')
+  # Il marcatore si cerca solo nella TESTATA: piu' avanti sarebbe prosa, e una
+  # migrazione che PARLA di `@migrate: once` non deve auto-marcarsi.
+  if [[ "$FORCE_ALL" != "1" ]] \
+     && head -20 "$f" | grep -qE '^--[[:space:]]*@migrate:[[:space:]]*once[[:space:]]*$' \
+     && [[ "${LEDGER[$fname]:-}" == "${SHA[$fname]}" ]]; then
+    SKIP["$fname"]=1
+  fi
+done
+skipped=${#SKIP[@]}
+applied=$(( ${#files[@]} - skipped ))
+
+if (( skipped > 0 )); then
+  echo "[migrate] $skipped migrazione/i una-tantum gia' applicate: saltate."
+  for fname in "${!SKIP[@]}"; do echo "           - $fname"; done | sort
+  echo "[migrate] per rifarle comunque: MIGRATE_FORCE_ALL=1"
+fi
+[[ "$FORCE_ALL" == "1" ]] && echo "[migrate] MIGRATE_FORCE_ALL=1 — riapplico TUTTO, marcatori ignorati."
+
+# MIGRATE_DRY_RUN=1: dice cosa farebbe e si ferma. Esiste perche' la decisione di
+# saltare va poter essere ISPEZIONATA senza applicare 271 file a un database vero —
+# ed e' cio' che rende verificabile il meccanismo invece che solo dichiarato.
+if [[ "${MIGRATE_DRY_RUN:-0}" == "1" ]]; then
+  echo "[migrate] DRY-RUN — nessuna modifica al database."
+  echo "[migrate] applicherebbe $applied file, salterebbe $skipped."
+  exit 0
+fi
 
 flusso() {
   local f fname sha
   for f in "${files[@]}"; do
     fname=$(basename "$f")
-    sha=$(sha256sum "$f" | awk '{print $1}')
+    sha="${SHA[$fname]}"
+    if [[ -n "${SKIP[$fname]:-}" ]]; then
+      printf '%s\n' "\echo [migrate] SALTATA $fname (una-tantum, gia' applicata con la stessa impronta)"
+      continue
+    fi
     # `\echo` va nell'ARGOMENTO e non nel formato: printf interpreterebbe `\e`
     # come carattere di escape e la riga arriverebbe storpiata.
     printf '%s
@@ -101,4 +176,8 @@ LEDGER
 
 flusso | "${PSQL[@]}" -f -
 echo ""
-echo "OK: $applied migrations applied."
+if (( skipped > 0 )); then
+  echo "OK: $applied migrations applied, $skipped skipped (una-tantum gia' applicate)."
+else
+  echo "OK: $applied migrations applied."
+fi

@@ -47,9 +47,9 @@ verifica e review adversarial; le decisioni tecniche sono di Claude.
 
 ## Open questions (autorità *cosa* = Enzo)
 
-- **claude-mem riacceso** (2026-08-06, richiesta di Enzo): boot pulito, aggancio sulle letture ora
-  asincrono e incapace di bloccare. Riserva: potrebbe essere acceso ma **inerte**. Spegnimento in
-  `claude_service_workspace/[Scripts]/disattiva-claude-mem.sh`.
+- **claude-mem riacceso e ATTIVO** (2026-08-06, richiesta di Enzo): boot pulito, aggancio sulle
+  letture asincrono e incapace di bloccare; la riserva «potrebbe essere inerte» è **caduta**, i suoi
+  strumenti si sono presentati. Spegnimento: `[Scripts]/disattiva-claude-mem.sh`.
 - **Le epiche `#142` cruscotti focalizzati e `#143` squadra=progetto** sono direzioni dichiarate,
   non pianificate: quando entrano, e in che ordine rispetto a `#99` (domini)?
 - **Due responsabili di direzione senza posizione di comando** (`alice.costa`, `pietro.gallo`):

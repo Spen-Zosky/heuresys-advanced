@@ -123,8 +123,19 @@ in memoria e ricostruirsi all'avvio, oppure in tabella. La scelta dipende dall'e
 §6 e non si anticipa.
 
 **§5.4 — La lingua del corpus.** I testi dei concetti sono derivati da nomi di moduli e
-tabelle, che sono **in inglese**; le domande degli utenti sono in italiano. Il modello è
-multilingue, ma il divario è reale e §6 lo misura invece di assumerlo risolto.
+tabelle, che sono **in inglese**; le domande degli utenti sono in italiano.
+**Misurato (§6): non è il collo di bottiglia.** Il modello multilingue attraversa il
+divario — `whistleblowing` esce a **0.4911** su *«segnalazioni anonime»* e
+`training-initiatives` a **0.4322** su *«corsi di formazione»*, senza che una sola parola
+italiana compaia nei loro testi. Resta però la ragione per cui i punteggi assoluti sono
+bassi in valore (0.27-0.49): sono utili come **ordinamento**, non come soglia. Un
+eventuale filtro «sotto X non rispondere» non va tarato su questi numeri.
+
+**§5.5 — Le domande di aggregazione non hanno un concetto** *(emerso dalla misura)*.
+«Quante persone lavorano nella direzione crediti» non ha un modulo che la nomini: è una
+**interrogazione**, non un dominio. Servirà uno strato che, scelto il concetto, sappia
+comporre il calcolo — ed è lo stesso strato che §5.1 richiede per i parametri. Finché non
+esiste, il catalogo generico sa dire *dove guardare*, non *quanto fa*.
 
 ---
 
@@ -132,9 +143,37 @@ multilingue, ma il divario è reale e §6 lo misura invece di assumerlo risolto.
 
 Questo ADR è `PROPOSED` e **si chiude solo con una misura**, non con un'opinione:
 
-1. **Recupero**: su 10 domande italiane reali, non costruite sul corpus, il concetto
-   giusto compare fra i primi 3 in una quota che regga un'architettura. Se il recupero
-   è mediocre, l'ADR va **respinto** o ristretto: un no misurato oggi vale settimane.
+1. **Recupero** — ✅ **MISURATO il 2026-08-07: passa, con due mancati istruttivi.**
+   Dieci domande italiane da direttore del personale, scritte guardando il mestiere e
+   **non** il corpus, con l'atteso dichiarato **prima** di vedere i risultati.
+
+   **Metro grezzo: 6/10 nei primi 3** (7/10 nei primi 5).
+   **Metro corretto: 8/10**, e la correzione va spiegata perché è avvenuta *dopo* aver
+   visto i risultati: otto dei nomi che avevo dichiarato attesi — `skill-gaps`,
+   `learning`, `okr`, `attendance`, `evaluations`, `inbox`, … — **non esistono come
+   moduli**. Non è stato cambiato il criterio («il concetto giusto è nei primi 3?»), è
+   stato corretto un errore di fatto nel metro. Entrambi i numeri restano agli atti.
+
+   Due domande dove **il recupero ha battuto il mio atteso**:
+   - *«chi può sostituire il responsabile della filiale di Brescia»* → ha restituito
+     `successor-readiness` **0.4075**, `successor-candidates` 0.3945, `succession-pools`
+     0.3749. Io mi aspettavo `career-paths`. I suoi sono migliori.
+   - *«quali corsi di formazione deve fare chi lavora in filiale»* → `training-initiatives`
+     **0.4322** al primo posto, che è esattamente il modulo dei corsi. Il mio atteso
+     nominava un modulo `learning` che non esiste.
+
+   **I due mancati veri hanno la stessa natura, e conta più del punteggio**:
+   *«quali competenze mancano di più in azienda»* (`skills` fuori dai primi 5) e
+   *«quante persone lavorano nella direzione crediti»* (`organization-units`, `positions`
+   e `users` tutti fuori). Entrambe chiedono un **calcolo su dati**, non
+   l'identificazione di un dominio. La ricerca sui metadati recupera **il dominio**, non
+   **l'aggregazione**: i testi dei concetti descrivono *di cosa si occupa un modulo*, non
+   *quali domande sa rispondere*. Nessun aggiustamento del corpus è stato tentato — il
+   corpus resta quello derivato meccanicamente.
+
+   **Conseguenza per l'architettura**: `hrx_concepts_search` è adeguato a **instradare
+   verso il dominio**. Non è adeguato, da solo, a rispondere a domande di aggregazione, e
+   l'ADR non deve promettere che lo sia.
 2. **§5.1 risolto**: l'atlante espone i parametri, o `hrx_entity_query` resta limitato
    alle sole letture senza parametri.
 3. **§5.2 risolto**: il gate classifica scrittura/lettura per metodo risolto, con test

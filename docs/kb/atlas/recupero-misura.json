@@ -1,0 +1,328 @@
+[
+  {
+    "q": "chi può sostituire il responsabile della filiale di Brescia",
+    "atteso": [
+      "user-target-positions",
+      "career-paths",
+      "positions",
+      "talent-review"
+    ],
+    "top5": [
+      {
+        "id": "successor-readiness",
+        "s": 0.40749854970777893
+      },
+      {
+        "id": "successor-candidates",
+        "s": 0.39452949216361655
+      },
+      {
+        "id": "succession-pools",
+        "s": 0.37491879627743285
+      },
+      {
+        "id": "advisor",
+        "s": 0.36031624145658164
+      },
+      {
+        "id": "position-succession-relevance",
+        "s": 0.3531656359208483
+      }
+    ],
+    "posizione": -1,
+    "ok3": false
+  },
+  {
+    "q": "quali competenze mancano di più in azienda",
+    "atteso": [
+      "skills",
+      "skill-gaps",
+      "analytics",
+      "user-skill-evidence"
+    ],
+    "top5": [
+      {
+        "id": "capability-maturity",
+        "s": 0.4337465933186371
+      },
+      {
+        "id": "capability-composition",
+        "s": 0.4135960801347882
+      },
+      {
+        "id": "talent-review",
+        "s": 0.37677735969659726
+      },
+      {
+        "id": "successor-readiness",
+        "s": 0.3734167086740083
+      },
+      {
+        "id": "learning-gaps",
+        "s": 0.35829367484851404
+      }
+    ],
+    "posizione": -1,
+    "ok3": false
+  },
+  {
+    "q": "quali obiettivi sono in ritardo",
+    "atteso": [
+      "goals",
+      "okr",
+      "kpi-definitions",
+      "analytics"
+    ],
+    "top5": [
+      {
+        "id": "goals",
+        "s": 0.3622436332381146
+      },
+      {
+        "id": "okrs",
+        "s": 0.2976692709023129
+      },
+      {
+        "id": "org-health",
+        "s": 0.28903534371267386
+      },
+      {
+        "id": "learning-gaps",
+        "s": 0.28051235422893483
+      },
+      {
+        "id": "user-target-positions",
+        "s": 0.27299176791012697
+      }
+    ],
+    "posizione": 0,
+    "ok3": true
+  },
+  {
+    "q": "quante ferie ha ancora da prendere Marco Rinaldi",
+    "atteso": [
+      "time-off",
+      "me",
+      "attendance"
+    ],
+    "top5": [
+      {
+        "id": "time-off",
+        "s": 0.3226062978077586
+      },
+      {
+        "id": "public-stats",
+        "s": 0.22189711458016986
+      },
+      {
+        "id": "org-health",
+        "s": 0.2142688859029883
+      },
+      {
+        "id": "analytics",
+        "s": 0.2047838885439398
+      },
+      {
+        "id": "me",
+        "s": 0.20030729430248892
+      }
+    ],
+    "posizione": 0,
+    "ok3": true
+  },
+  {
+    "q": "chi guadagna più della fascia prevista per il suo ruolo",
+    "atteso": [
+      "compensation",
+      "job-roles",
+      "analytics"
+    ],
+    "top5": [
+      {
+        "id": "compensation",
+        "s": 0.3504481185327601
+      },
+      {
+        "id": "public-stats",
+        "s": 0.3040107721048112
+      },
+      {
+        "id": "analytics",
+        "s": 0.2961324783071786
+      },
+      {
+        "id": "capability-composition",
+        "s": 0.2954787245396289
+      },
+      {
+        "id": "insights",
+        "s": 0.27180352900531474
+      }
+    ],
+    "posizione": 0,
+    "ok3": true
+  },
+  {
+    "q": "quali corsi di formazione deve fare chi lavora in filiale",
+    "atteso": [
+      "learning",
+      "content",
+      "position-learning-requirements",
+      "learning-paths"
+    ],
+    "top5": [
+      {
+        "id": "training-initiatives",
+        "s": 0.43216441367332503
+      },
+      {
+        "id": "positions",
+        "s": 0.3924897609058651
+      },
+      {
+        "id": "career-path-steps",
+        "s": 0.38824708120159235
+      },
+      {
+        "id": "career-paths",
+        "s": 0.38414805887566245
+      },
+      {
+        "id": "position-career-paths",
+        "s": 0.3757474931522547
+      }
+    ],
+    "posizione": -1,
+    "ok3": false
+  },
+  {
+    "q": "come è andata l'ultima valutazione dei quadri direttivi",
+    "atteso": [
+      "assessment-results",
+      "assessments",
+      "talent-review",
+      "evaluations"
+    ],
+    "top5": [
+      {
+        "id": "evidence",
+        "s": 0.29398708015324854
+      },
+      {
+        "id": "org-health",
+        "s": 0.28311597174869174
+      },
+      {
+        "id": "assessment-results",
+        "s": 0.27972087298751763
+      },
+      {
+        "id": "assessments",
+        "s": 0.27875114296616893
+      },
+      {
+        "id": "talent-review",
+        "s": 0.26880328386482377
+      }
+    ],
+    "posizione": 2,
+    "ok3": true
+  },
+  {
+    "q": "quante persone lavorano nella direzione crediti",
+    "atteso": [
+      "organization-units",
+      "positions",
+      "users",
+      "org-health"
+    ],
+    "top5": [
+      {
+        "id": "advisor",
+        "s": 0.36728328657782905
+      },
+      {
+        "id": "capability-composition",
+        "s": 0.36299726111683417
+      },
+      {
+        "id": "talent-review",
+        "s": 0.35900558432016777
+      },
+      {
+        "id": "org-health",
+        "s": 0.3520701816282852
+      },
+      {
+        "id": "capability-maturity",
+        "s": 0.3488585422753352
+      }
+    ],
+    "posizione": 3,
+    "ok3": false
+  },
+  {
+    "q": "ci sono segnalazioni anonime aperte da gestire",
+    "atteso": [
+      "whistleblowing",
+      "approvals",
+      "inbox"
+    ],
+    "top5": [
+      {
+        "id": "whistleblowing",
+        "s": 0.4911173391465361
+      },
+      {
+        "id": "notifications",
+        "s": 0.3903538507125954
+      },
+      {
+        "id": "observability",
+        "s": 0.3507187854022583
+      },
+      {
+        "id": "public-stats",
+        "s": 0.3494392359057279
+      },
+      {
+        "id": "surveys",
+        "s": 0.3456793624398048
+      }
+    ],
+    "posizione": 0,
+    "ok3": true
+  },
+  {
+    "q": "chi è assente oggi nella rete commerciale",
+    "atteso": [
+      "attendance",
+      "time-off",
+      "organization-units"
+    ],
+    "top5": [
+      {
+        "id": "time-off",
+        "s": 0.3288639725921936
+      },
+      {
+        "id": "org-health",
+        "s": 0.2617600947746174
+      },
+      {
+        "id": "analytics",
+        "s": 0.2519014035506568
+      },
+      {
+        "id": "public-stats",
+        "s": 0.24552520060248306
+      },
+      {
+        "id": "operating-models",
+        "s": 0.23739981949639402
+      }
+    ],
+    "posizione": 0,
+    "ok3": true
+  }
+]

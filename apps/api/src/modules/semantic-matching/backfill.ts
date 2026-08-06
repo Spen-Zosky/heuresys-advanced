@@ -10,6 +10,7 @@ import { createHash } from "node:crypto";
 import { pool } from "../../db/client.js";
 import { makeEmbedder, type Embedder } from "./voyage-client.js";
 import * as repo from "./repository.js";
+import type { EmbeddingFingerprint } from "./repository.js";
 
 export const textHash = (s: string): string => createHash("sha256").update(s).digest("hex");
 
@@ -19,17 +20,30 @@ export interface BackfillStats { embedded: number; skipped: number }
  * Embed a corpus with hash-skip, in batches, calling `upsert` per item.
  * Pure orchestration: `embedder` and `upsert` are injected so this is unit-testable
  * with no network and no DB.
+ *
+ * Si salta un elemento solo quando coincidono **testo E modello**. Il modello si
+ * legge da `embedder.modelId`, che è già iniettato: nessun parametro nuovo,
+ * nessuna rete e nessun database, quindi la funzione resta provabile in memoria
+ * com'era. Confrontare il solo testo — com'era prima — significa che al cambio
+ * di modello di embedding ogni riga viene saltata e il corpus resta misto:
+ * vettori vecchi e nuovi mescolati, in spazi diversi, con somiglianze sbagliate
+ * e **nessun errore** a segnalarlo. Un `modelId` sconosciuto (`null`) non è
+ * "uguale": si ri-embedda, perché non poter dimostrare che è lo stesso modello
+ * è una ragione per rifare, non per fidarsi.
  */
 export async function backfillCorpus(
   embedder: Embedder,
   items: { id: string; text: string }[],
-  existing: Map<string, string>,
+  existing: Map<string, EmbeddingFingerprint>,
   upsert: (id: string, vec: number[], hash: string) => Promise<void>,
   onBatch?: (done: number, total: number) => void,
 ): Promise<BackfillStats> {
   const stats: BackfillStats = { embedded: 0, skipped: 0 };
   const pending = items.filter((it) => {
-    if (existing.get(it.id) === textHash(it.text)) { stats.skipped++; return false; }
+    const prev = existing.get(it.id);
+    if (prev && prev.hash === textHash(it.text) && prev.modelId === embedder.modelId) {
+      stats.skipped++; return false;
+    }
     return true;
   });
   const BATCH = 500;

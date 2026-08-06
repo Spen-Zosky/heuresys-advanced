@@ -51,20 +51,35 @@ export async function readOccupationCorpus(q: DbConnector): Promise<OccCorpusIte
 }
 
 // ── Existing-hash reads (for hash-skip idempotency) ──
-export async function readSkillHashes(q: DbConnector): Promise<Map<string, string>> {
-  const r = await q.query<{ skill_id: string; source_text_hash: string | null }>(
-    `SELECT skill_id, source_text_hash FROM sys.sys_skill_embeddings`);
-  return new Map(r.rows.map((x) => [x.skill_id, x.source_text_hash ?? ""]));
+//
+// Si legge la COPPIA (hash del testo, modello), non il solo hash. Il modello è
+// parte dell'identità di un vettore quanto il testo: due embedding dello stesso
+// testo prodotti da modelli diversi non vivono nello stesso spazio e non sono
+// confrontabili fra loro. Confrontando il solo hash, il giorno in cui si cambia
+// modello ogni riga risulterebbe "già a posto" e verrebbe saltata: il corpus
+// resterebbe misto, vecchi vettori mescolati ai nuovi, e le somiglianze
+// sarebbero sbagliate **in silenzio** — nessun errore, nessuna riga rossa, solo
+// risultati che non tornano.
+export interface EmbeddingFingerprint {
+  hash: string;
+  /** `null` quando la riga esiste ma non dichiara il modello: sconosciuto ≠ uguale, quindi si ri-embedda. */
+  modelId: string | null;
 }
-export async function readJobRoleHashes(q: DbConnector): Promise<Map<string, string>> {
-  const r = await q.query<{ job_role_id: string; source_text_hash: string | null }>(
-    `SELECT job_role_id, source_text_hash FROM sys.sys_job_role_embeddings`);
-  return new Map(r.rows.map((x) => [x.job_role_id, x.source_text_hash ?? ""]));
+
+export async function readSkillHashes(q: DbConnector): Promise<Map<string, EmbeddingFingerprint>> {
+  const r = await q.query<{ skill_id: string; source_text_hash: string | null; model_id: string | null }>(
+    `SELECT skill_id, source_text_hash, model_id FROM sys.sys_skill_embeddings`);
+  return new Map(r.rows.map((x) => [x.skill_id, { hash: x.source_text_hash ?? "", modelId: x.model_id }]));
 }
-export async function readOccupationHashes(q: DbConnector): Promise<Map<string, string>> {
-  const r = await q.query<{ esco_uri: string; source_text_hash: string | null }>(
-    `SELECT esco_uri, source_text_hash FROM sys.sys_esco_occupation_embeddings`);
-  return new Map(r.rows.map((x) => [x.esco_uri, x.source_text_hash ?? ""]));
+export async function readJobRoleHashes(q: DbConnector): Promise<Map<string, EmbeddingFingerprint>> {
+  const r = await q.query<{ job_role_id: string; source_text_hash: string | null; model_id: string | null }>(
+    `SELECT job_role_id, source_text_hash, model_id FROM sys.sys_job_role_embeddings`);
+  return new Map(r.rows.map((x) => [x.job_role_id, { hash: x.source_text_hash ?? "", modelId: x.model_id }]));
+}
+export async function readOccupationHashes(q: DbConnector): Promise<Map<string, EmbeddingFingerprint>> {
+  const r = await q.query<{ esco_uri: string; source_text_hash: string | null; model_id: string | null }>(
+    `SELECT esco_uri, source_text_hash, model_id FROM sys.sys_esco_occupation_embeddings`);
+  return new Map(r.rows.map((x) => [x.esco_uri, { hash: x.source_text_hash ?? "", modelId: x.model_id }]));
 }
 
 // ── Upserts (1:1 on the natural key; re-embed = clean overwrite) ──

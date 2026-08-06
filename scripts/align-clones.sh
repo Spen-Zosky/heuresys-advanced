@@ -44,7 +44,7 @@ done
 
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
 SCRIPTS="$ROOT/scripts"
-MARKER="$ROOT/.session-align.marker"
+MARKER="${HEURESYS_MARKER:-$ROOT/.session-align.marker}"   # env override: solo per i test (default invariato)
 LOCAL_MEM="${LOCAL_MEM:-$HOME/.claude/projects/D--heuresys-advanced/memory}"
 DEPLOY_PATHS_RE='^(apps|packages|db/migrations|db/scripts|scripts|deploy)/'
 LEAN_EXCLUDE='(^|/)pg_dump_snapshots/|(^|/)legacy_data/|(^|/)extracted/|(^|/)graphify-(db-input|out)/|^qa_artifacts/|(^|/)_inspection_artifacts/|(^|/)db_snapshots/|\.(dump|backup|log)$|^\.claude/|^cowork_(code_exchange|reserved)/|^sessioni/|(^|/)\.auth/'
@@ -77,21 +77,43 @@ if [ "$DELTA" = 1 ]; then
     DATA_CHANGED=0
     [ -n "$(find .secrets .apify apps/showcase/src/app/showcase -type f -newer "$MARKER" 2>/dev/null | head -1)" ] && DATA_CHANGED=1
   else
-    warn "delta requested but no marker ($MARKER) — full sync + conservative deploy"
+    # S1046: il deploy NON è più "conservative" in questo ramo — vedi la dottrina del dubbio sotto.
+    warn "delta requested but no marker ($MARKER) — full sync; il deploy resta IGNOTO (non eseguito)"
   fi
 fi
 
-# --- deploy decision ---
+# --- deploy decision (DOTTRINA DEL DUBBIO, S1046) -------------------------------------------
+# Una sola regola per tutta la catena di chiusura quando un predicato NON è misurabile:
+#   • azione a costo basso e reversibile (sync repo, sync memorie) → esegui;
+#   • azione a costo alto o irreversibile (deploy in PROD, clone del DB) → NON eseguire,
+#     dichiara `IGNOTO`, e stampa come forzare.
+# Prima di S1046 il ramo `else` faceva l'opposto (`DEPLOY=1`, commento «conservative: deploy»):
+# alla SECONDA chiusura di una stessa sessione il marcatore era già stato consumato (vedi in fondo),
+# quindi HAVE_MARKER=0, quindi si deployava in produzione ANCHE senza una riga di codice toccata —
+# e la condizione protettiva DEPLOY_PATHS_RE, quella su cui contavamo, era proprio ciò che smetteva
+# di applicarsi. Nello stesso caso close-propagate.sh decideva all'OPPOSTO (non clonare): due script
+# della stessa catena, due default contrari sulla stessa informazione mancante, nessuno dichiarato.
+# `--deploy` esplicito resta incondizionato: chi sa, comanda; è il dubbio che non agisce.
+DEPLOY_WHY=""
 case "$DEPLOY_FLAG" in
-  on)  DEPLOY=1 ;;
-  off) DEPLOY=0 ;;
+  on)  DEPLOY=1; DEPLOY_WHY="--deploy esplicito" ;;
+  off) DEPLOY=0; DEPLOY_WHY="--no-deploy" ;;
   auto)
     if [ "$DELTA" = 1 ] && [ "$HAVE_MARKER" = 1 ] && [ -n "$START_HEAD" ]; then
-      if [ -n "$(git diff --name-only "$START_HEAD"..HEAD 2>/dev/null | grep -E "$DEPLOY_PATHS_RE" || true)" ]; then DEPLOY=1; else DEPLOY=0; fi
+      if [ -n "$(git diff --name-only "$START_HEAD"..HEAD 2>/dev/null | grep -E "$DEPLOY_PATHS_RE" || true)" ]; then
+        DEPLOY=1; DEPLOY_WHY="misurato: i commit ${START_HEAD:0:8}..HEAD toccano path di deploy"
+      else
+        DEPLOY=0; DEPLOY_WHY="misurato: nessun commit su path di deploy in ${START_HEAD:0:8}..HEAD"
+      fi
     else
-      DEPLOY=1   # no reliable delta → conservative: deploy
+      DEPLOY=0
+      DEPLOY_WHY="IGNOTO: nessun delta affidabile ($([ "$DELTA" = 1 ] && echo 'marcatore assente' || echo 'modalità full')) — deploy NON eseguito nel dubbio; forza con --deploy"
+      warn "deploy in PROD non eseguito — $DEPLOY_WHY"
     fi ;;
 esac
+[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step deploy \
+  "$([ "$DEPLOY" = 1 ] && echo eseguito || { case "$DEPLOY_WHY" in IGNOTO*) echo ignoto ;; *) echo saltato ;; esac; })" \
+  "$DEPLOY_WHY" >/dev/null 2>&1 || true
 
 # DEPLOY_ENV: extra env prepended to vm-deploy.sh per host. The VM uses vm-deploy's defaults
 # (PUBLIC_HOST=80.225.82.207, SERVICE_USER=ubuntu); linux-pc is the LAN PROD twin running as
@@ -150,7 +172,9 @@ align_one() {
     log "[$kind] PROD deploy (detached + poll — survives a client-SSH timeout, D-49)"
     REMOTE_REPO="$REPO" DEPLOY_ENV="$DEPLOY_ENV" KIND="$kind" bash "$SCRIPTS/vm-deploy-remote.sh" "$HOST"
   elif [ "$kind" = vm ] || [ "$kind" = linuxpc ]; then
-    log "[$kind] deploy skipped (no code change / --no-deploy)"
+    # Il messaggio riporta la RAGIONE misurata, non un elenco di cause possibili: «no code change /
+    # --no-deploy» era vero come disgiunzione e inutile come informazione (S1046).
+    log "[$kind] deploy non eseguito — ${DEPLOY_WHY:-ragione non registrata}"
   fi
 
   log "[$kind] DONE"

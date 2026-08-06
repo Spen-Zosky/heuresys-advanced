@@ -28,7 +28,7 @@ set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"; cd "$ROOT"
 SCRIPTS="$ROOT/scripts"
-MARKER="$ROOT/.session-align.marker"
+MARKER="${HEURESYS_MARKER:-$ROOT/.session-align.marker}"   # env override: solo per i test (default invariato)
 LINUXPC_REPO="${LINUXPC_REPO:-/home/enzo/heuresys-advanced}"
 
 MODE="--delta"; DEPLOY="--auto-deploy"; CLONE_DB="auto"; DRYRUN="${CLOSE_PROPAGATE_DRYRUN:-}"
@@ -70,17 +70,29 @@ die()  { printf '\033[31m[FATAL]\033[0m %s\n' "$*" >&2; exit 1; }
 FAILED=""
 
 # --- clone-db decision (policy §12.3-B: conditional) — computed up-front so --dry-run shows it
-need_clone=0
+# DOTTRINA DEL DUBBIO (S1046, gemella di quella in align-clones.sh): il COMPORTAMENTO qui era già
+# corretto — azione cara, stato ignoto ⟹ non agire. A essere sbagliato era il MESSAGGIO: quando il
+# marcatore manca (consumato dalla propagazione precedente) il vecchio testo dichiarava «no
+# db/migrations|seeds change this session», cioè affermava un fatto che in quel ramo il sistema non
+# è più in grado di conoscere. Ora i tre stati sono distinti e ciascuno dice su cosa si basa:
+# misurato-sì / misurato-no / IGNOTO. Una risposta sbagliata detta con la faccia di una giusta
+# costa più di una ripetizione.
+need_clone=0; clone_why=""
 case "$CLONE_DB" in
-  force) need_clone=1 ;;
-  skip)  need_clone=0 ;;
+  force) need_clone=1; clone_why="--clone-db esplicito" ;;
+  skip)  need_clone=0; clone_why="--no-clone-db" ;;
   auto)
-    if [ -f "$MARKER" ]; then
+    if [ -f "$MARKER" ] && [ -n "$(head -1 "$MARKER" | tr -d '\r')" ]; then
       start_head="$(head -1 "$MARKER" | tr -d '\r')"
-      if [ -n "$start_head" ] && \
-         [ -n "$(git diff --name-only "$start_head"..HEAD 2>/dev/null | grep -E '^db/(migrations|seeds)/' || true)" ]; then
-        need_clone=1
+      if [ -n "$(git diff --name-only "$start_head"..HEAD 2>/dev/null | grep -E '^db/(migrations|seeds)/' || true)" ]; then
+        need_clone=1; clone_why="misurato: db/migrations|seeds cambiati in ${start_head:0:8}..HEAD"
+      else
+        need_clone=0; clone_why="misurato: nessun cambiamento in db/migrations|seeds da ${start_head:0:8}"
       fi
+    else
+      need_clone=0
+      clone_why="IGNOTO: marcatore assente o vuoto — la finestra di sessione non è più misurabile; clone NON eseguito, forza con --clone-db"
+      warn "clone-db: $clone_why"
     fi ;;
 esac
 
@@ -89,6 +101,7 @@ esac
 if [ -n "$DRYRUN" ]; then
   mode_label="$([ -n "$MODE" ] && echo delta || echo full)"
   echo "PLAN mode=$mode_label deploy=$DEPLOY clone-db=$CLONE_DB need_clone=$need_clone"
+  echo "PLAN clone-db-why: $clone_why"
   exit 0
 fi
 
@@ -112,18 +125,29 @@ else
 fi
 
 # --- linux-pc bare-metal DB refresh (policy §12.3-B: conditional; need_clone computed above) -
+clone_outcome="saltato"
 if [ "$need_clone" = 1 ]; then
-  log "clone-db — linux-pc DB refresh (VM data changed this session / forced)"
+  log "clone-db — linux-pc DB refresh ($clone_why)"
   if MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes -o ConnectTimeout=8 linux-pc 'exit 0' 2>/dev/null; then
-    if ! MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes linux-pc "cd '$LINUXPC_REPO' && bash scripts/clone-vm-db.sh"; then
-      FAILED="$FAILED clone-vm-db"
+    if MSYS_NO_PATHCONV=1 ssh -o BatchMode=yes linux-pc "cd '$LINUXPC_REPO' && bash scripts/clone-vm-db.sh"; then
+      clone_outcome="eseguito"
+    else
+      FAILED="$FAILED clone-vm-db"; clone_outcome="fallito"
+      clone_why="$clone_why — MA clone-vm-db.sh è uscito in errore su linux-pc"
     fi
   else
     warn "linux-pc unreachable — clone-db skipped (run scripts/clone-vm-db.sh there when up)"
+    clone_outcome="ignoto"
+    clone_why="$clone_why — MA linux-pc irraggiungibile: eseguire scripts/clone-vm-db.sh là quando torna su"
   fi
 else
-  log "clone-db — skipped (no db/migrations|seeds change this session; pass --clone-db to force)"
+  log "clone-db — non eseguito: $clone_why"
+  case "$clone_why" in IGNOTO*) clone_outcome="ignoto" ;; esac
 fi
+[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step clone-db "$clone_outcome" "$clone_why" >/dev/null 2>&1 || true
+[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step propaga \
+  "$([ -n "$FAILED" ] && echo fallito || echo eseguito)" \
+  "canali: align-clones + align-claude-ecosystem (mode=${MODE:-full}, deploy=$DEPLOY)${FAILED:+ — falliti:$FAILED}" >/dev/null 2>&1 || true
 
 # --- fail-loud on any reachable-host channel failure ---------------------------------------
 if [ -n "$FAILED" ]; then

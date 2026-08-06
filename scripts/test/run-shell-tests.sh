@@ -299,8 +299,12 @@ if [ -f "$HK" ]; then
     'Bash {"command":"pnpm status"}' \
     'Bash {"command":"ssh linux-pc systemctl is-active heuresys-api"}' \
     'Bash {"command":"cat apps/api/package.json"}' ; do
-    T="${R%% *}"; I="${R#* }"
-    printf '%s' "$(pay "$SL" "$T" "$I")" | sh "$HK" lab-guard >/dev/null 2>&1 \
+    # NON usare `T`: è il tempdir globale (riga 39) e il trap EXIT ci fa `rm -rf`. Clobberarlo
+    # qui lasciava T="Bash" ⟹ il trap cancellava una cartella `Bash` relativa alla root del repo
+    # e il vero tempdir non veniva mai ripulito. Latente finché nessun test DOPO questa sezione
+    # usava $T (S1046: i primi sono stati quelli della dottrina del dubbio).
+    TOOLN="${R%% *}"; I="${R#* }"
+    printf '%s' "$(pay "$SL" "$TOOLN" "$I")" | sh "$HK" lab-guard >/dev/null 2>&1 \
       || GUARD_READ_FAIL=$((GUARD_READ_FAIL+1))
   done
   [ "$GUARD_READ_FAIL" = 0 ] \
@@ -337,6 +341,102 @@ if [ -f "$HK" ]; then
         "$MDIR/__shelltest_prompt__.json" "$MDIR/__selftest__.json" 2>/dev/null
 else
   fail "$HK missing"
+fi
+
+# ------------------- I. dottrina del dubbio — deploy + clone-db + diario (S1046)
+# Regressione custodita: quando il marcatore non è misurabile, la catena di chiusura NON deve
+# agire sulle azioni care (deploy in PROD, clone del DB) e DEVE dire perché. Prima di S1046
+# align-clones deployava (`conservative: deploy`) e close-propagate non clonava dichiarando un
+# fatto falso — due default opposti sulla stessa informazione mancante.
+section "dottrina del dubbio — nel dubbio non si agisce, e si dichiara"
+AC="scripts/align-clones.sh"
+DEPLOY_BLOCK="$(sed -n '/^case "\$DEPLOY_FLAG" in/,/^esac/p' "$AC")"
+RE_LINE2="$(grep -m1 '^DEPLOY_PATHS_RE=' "$AC")"
+if [ -n "$DEPLOY_BLOCK" ] && [ -n "$RE_LINE2" ]; then
+  # Valuta la decisione AS SHIPPED (nessuna copia che possa driftare — stesso principio del test D).
+  decide() {  # $1=DEPLOY_FLAG $2=DELTA $3=HAVE_MARKER $4=START_HEAD  ->  "DEPLOY|WHY"
+    ( set +eu
+      warn() { :; }
+      eval "$RE_LINE2"
+      DEPLOY_FLAG="$1"; DELTA="$2"; HAVE_MARKER="$3"; START_HEAD="$4"; DEPLOY=""; DEPLOY_WHY=""
+      eval "$DEPLOY_BLOCK"
+      printf '%s|%s' "$DEPLOY" "$DEPLOY_WHY" )
+  }
+  # I1 — IL caso che ha causato il difetto: seconda chiusura, marcatore già consumato.
+  r="$(decide auto 1 0 '')"
+  case "$r" in 0\|IGNOTO*) ok "marcatore assente + --auto-deploy ⟹ NIENTE deploy, ragione IGNOTO" ;;
+    *) fail "marcatore assente doveva dare 0|IGNOTO*, ha dato '$r'" ;; esac
+  # I2 — modalità full: nessuna finestra su cui misurare ⟹ stessa risposta.
+  r="$(decide auto 0 0 '')"
+  case "$r" in 0\|IGNOTO*) ok "modalità full + --auto-deploy ⟹ NIENTE deploy, ragione IGNOTO" ;;
+    *) fail "full mode doveva dare 0|IGNOTO*, ha dato '$r'" ;; esac
+  # I3 — chi sa, comanda: il flag esplicito resta incondizionato.
+  r="$(decide on 0 0 '')"
+  case "$r" in 1\|*) ok "--deploy esplicito resta incondizionato (il dubbio non lo tocca)" ;;
+    *) fail "--deploy esplicito doveva dare 1|*, ha dato '$r'" ;; esac
+  # I4 — misurato-NO: finestra valida, nessun commit su path di deploy.
+  r="$(decide auto 1 1 "$(git rev-parse HEAD)")"
+  case "$r" in 0\|misurato*) ok "finestra valida senza commit di codice ⟹ 'misurato', non 'IGNOTO'" ;;
+    *) fail "atteso 0|misurato*, ha dato '$r'" ;; esac
+  # I5 — misurato-SÌ: finestra che contiene un commit su scripts/ (path di deploy).
+  SH_CODE="$(git log -1 --format=%H -- scripts/ 2>/dev/null || true)"
+  SH_PAR="$(git rev-parse "${SH_CODE}^" 2>/dev/null || true)"
+  if [ -n "$SH_PAR" ]; then
+    r="$(decide auto 1 1 "$SH_PAR")"
+    case "$r" in 1\|misurato*) ok "finestra che tocca scripts/ ⟹ deploy 'misurato' ed eseguito" ;;
+      *) fail "atteso 1|misurato*, ha dato '$r'" ;; esac
+  else ok "I5 saltato (nessun commit su scripts/ con parent — repo troppo giovane)"; fi
+else
+  fail "blocco di decisione del deploy non estraibile da $AC"
+fi
+
+# I6-I8 — close-propagate: i tre stati del clone-DB, su un marcatore FINTO (HEURESYS_MARKER),
+# così il marcatore reale della sessione in corso non viene mai toccato dai test.
+FAKE_M="$T/fake-marker"
+rm -f "$FAKE_M"
+out="$(HEURESYS_MARKER="$FAKE_M" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" 2>&1)"
+if printf '%s' "$out" | grep -q 'need_clone=0' && printf '%s' "$out" | grep -q 'clone-db-why: IGNOTO'; then
+  ok "clone-db: marcatore assente ⟹ need_clone=0 dichiarato IGNOTO (mai 'no change this session')"
+else fail "clone-db marcatore assente ($out)"; fi
+printf '%s\n' "$(git rev-parse HEAD)" > "$FAKE_M"
+out="$(HEURESYS_MARKER="$FAKE_M" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" 2>&1)"
+if printf '%s' "$out" | grep -q 'need_clone=0' && printf '%s' "$out" | grep -q 'clone-db-why: misurato'; then
+  ok "clone-db: finestra valida senza migrazioni ⟹ 'misurato', non 'IGNOTO'"
+else fail "clone-db misurato-no ($out)"; fi
+SH_DB="$(git log -1 --format=%H -- db/migrations/ 2>/dev/null || true)"
+SH_DBP="$(git rev-parse "${SH_DB}^" 2>/dev/null || true)"
+if [ -n "$SH_DBP" ]; then
+  printf '%s\n' "$SH_DBP" > "$FAKE_M"
+  out="$(HEURESYS_MARKER="$FAKE_M" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" 2>&1)"
+  if printf '%s' "$out" | grep -q 'need_clone=1'; then
+    ok "clone-db: finestra che tocca db/migrations ⟹ need_clone=1"
+  else fail "clone-db misurato-si ($out)"; fi
+else ok "I8 saltato (nessun commit su db/migrations con parent)"; fi
+
+# I9 — il diario: scrive una riga per passo e la rilegge. Su un log FINTO
+# (HEURESYS_CLOSE_LOG), altrimenti i test inquinerebbero la misura reale.
+CL="scripts/close-log.sh"
+FAKE_L="$T/fake-close-log.ndjson"
+if [ -f "$CL" ]; then
+  HEURESYS_CLOSE_LOG="$FAKE_L" HEURESYS_SESSION=STEST bash "$CL" step pubblica saltato \
+    'niente da committare: stato già allineato a HEAD' >/dev/null 2>&1
+  HEURESYS_CLOSE_LOG="$FAKE_L" HEURESYS_SESSION=STEST bash "$CL" step deploy ignoto \
+    'IGNOTO: marcatore assente' >/dev/null 2>&1
+  if [ "$(wc -l < "$FAKE_L" | tr -d ' ')" = 2 ] \
+     && grep -q '"step":"pubblica","outcome":"saltato"' "$FAKE_L" \
+     && grep -q '"session":"STEST"' "$FAKE_L"; then
+    ok "close-log: una riga per passo, con sessione ed esito"
+  else fail "close-log non ha scritto le righe attese ($(cat "$FAKE_L" 2>/dev/null))"; fi
+  rep="$(HEURESYS_CLOSE_LOG="$FAKE_L" bash "$CL" report 2>&1 || true)"
+  if printf '%s' "$rep" | grep -q 'STEST' && printf '%s' "$rep" | grep -q 'saltato'; then
+    ok "close-log report: aggrega i passi per sessione"
+  else fail "close-log report ($rep)"; fi
+  # Il diario è un OSSERVATORE: non deve mai far fallire ciò che osserva.
+  if HEURESYS_CLOSE_LOG="/dev/null/impossibile/log.ndjson" bash "$CL" step x y z >/dev/null 2>&1; then
+    ok "close-log su path impossibile: non rompe (uscita 0)"
+  else ok "close-log su path impossibile: esce non-zero, ma i chiamanti lo invocano con '|| true'"; fi
+else
+  fail "$CL missing"
 fi
 
 # ---------------------------------------------------------------- summary

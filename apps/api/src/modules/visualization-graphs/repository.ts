@@ -314,6 +314,34 @@ export async function copyGraphLayouts(
   return { copiedLayouts: layouts.rowCount ?? 0, copiedNodePositions: positions.rowCount ?? 0 };
 }
 
+/**
+ * Copia gli stili sulla nuova versione (#153).
+ *
+ * Mancava, e non era una dimenticanza innocua: `sys_visualization_styles` lega
+ * un aspetto a una COPPIA (grafo, tipo di nodo), quindi una versione nuova
+ * nasceva con tutti i suoi nodi e nessuna regola per disegnarli. Misurato sul
+ * reale: la v2 dell'organigramma di RTL, creata da una persona il 2026-08-02,
+ * aveva 158 nodi e zero stili, e da allora la custodia settimanale falliva sul
+ * check C11a(iv).
+ *
+ * Nessuna mappa di id da rimappare, a differenza di nodi e disposizioni: lo
+ * stile punta a un TIPO (`style_node_type`), che è una stringa e resta valida
+ * nella copia. Per questo basta una INSERT…SELECT.
+ */
+export async function copyGraphStyles(
+  q: DbConnector, sourceGraphId: string, targetGraphId: string,
+): Promise<number> {
+  const res = await q.query(
+    `INSERT INTO sys.sys_visualization_styles (
+        style_graph_id, style_node_type, style_color, style_icon, style_metadata)
+     SELECT $2, s.style_node_type, s.style_color, s.style_icon, s.style_metadata
+       FROM sys.sys_visualization_styles s
+      WHERE s.style_graph_id = $1`,
+    [sourceGraphId, targetGraphId],
+  );
+  return res.rowCount ?? 0;
+}
+
 export async function deleteGraph(q: DbConnector, id: string): Promise<boolean> {
   const res = await q.query(`DELETE FROM sys.sys_visualization_graphs WHERE graph_id = $1`, [id]);
   return (res.rowCount ?? 0) === 1;

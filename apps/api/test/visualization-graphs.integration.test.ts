@@ -198,6 +198,57 @@ describe("/v1/visualization-graphs/* integration", () => {
       expect(r2.nodes.map((n) => n.label).sort()).toEqual(["Figlia", "Radice"]);
     });
 
+    it("carries the styles over, so the new version is still drawable", async () => {
+      // #153 — la custodia storia36 e' rossa dal 2026-08-03 per questo difetto:
+      // `createVersion` copiava nodi, archi e disposizioni ma NON gli stili. Una
+      // persona reale (federica.marchetti) ha creato la v2 dell'organigramma di
+      // RTL il 2026-08-02 e si e' ritrovata 158 nodi senza alcun aspetto
+      // definito; il check C11a(iv) lo ha visto il giorno dopo e da allora il
+      // timer settimanale fallisce. Un grafo senza stili non e' disegnabile:
+      // copiarli non e' una rifinitura, e' parte del contenuto.
+      const src = await post("/v1/visualization-graphs", {
+        code: `${SUITE_PREFIX}_VER_STYLE`, type: "ORG_CHART", name: "Grafo con stili",
+      });
+      const srcId = (src.json() as { graphId: string }).graphId;
+      createdGraphIds.push(srcId);
+      await post("/v1/visualization-nodes", {
+        graphId: srcId, sourceEntityType: "UNIT", label: "Capo", type: "ROOT",
+      });
+      await post("/v1/visualization-styles", {
+        graphId: srcId, nodeType: "ROOT", color: "#00AA55", icon: "crown",
+      });
+
+      const r = await post(`/v1/visualization-graphs/${srcId}/versions`, {});
+      expect(r.statusCode).toBe(201);
+      const body = r.json() as {
+        graph: { graphId: string }; copiedStyles: number;
+      };
+      createdGraphIds.push(body.graph.graphId);
+      expect(body.copiedStyles).toBe(1);
+
+      // Si asserisce sugli stili DELLA v2 letti dall'API, non sul contatore
+      // restituito: un contatore puo' dire 1 anche se la riga e' finita sul
+      // grafo sbagliato.
+      const styles = await suite.app.inject({
+        method: "GET", url: `/v1/visualization-styles?graphId=${body.graph.graphId}`,
+        headers: { cookie: ch(tenantS.cookies) },
+      });
+      const list = styles.json() as {
+        items: Array<{ graphId: string; nodeType: string | null; color: string | null }>;
+      };
+      expect(list.items).toHaveLength(1);
+      expect(list.items[0]!.graphId).toBe(body.graph.graphId);
+      expect(list.items[0]!.nodeType).toBe("ROOT");
+      expect(list.items[0]!.color).toBe("#00AA55");
+
+      // E la v1 conserva il suo: la copia non deve spostare l'originale.
+      const srcStyles = await suite.app.inject({
+        method: "GET", url: `/v1/visualization-styles?graphId=${srcId}`,
+        headers: { cookie: ch(tenantS.cookies) },
+      });
+      expect((srcStyles.json() as { items: unknown[] }).items).toHaveLength(1);
+    });
+
     it("the source version is left untouched", async () => {
       const render = await suite.app.inject({
         method: "GET", url: `/v1/visualization-graphs/${graphId}/render`,

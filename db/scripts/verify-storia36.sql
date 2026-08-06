@@ -3674,6 +3674,7 @@ DECLARE
   v_end date := current_setting('storia36.window_end')::date;
   v_fired boolean;
   v_u     uuid;    -- soggetto scelto per le iniezioni puntuali (C4)
+  v_esca_module_id uuid;  -- modulo-esca creato da ST-C4d (#153), rimosso dal rollback
 BEGIN
   -- ST-G1: una presenza spostata oltre la finestra deve far scattare G1
   v_fired := false;
@@ -4116,16 +4117,32 @@ BEGIN
   RAISE NOTICE '[OK] SELFTEST C4c (violazione iniettata rilevata, rollback)';
 
   -- ST-C4d: puntare un'iniziativa a un modulo non mappato ad alcuna competenza
+  --
+  -- L'esca se la CREA il selftest (2026-08-06, #153). Prima la cercava fra i
+  -- moduli esistenti — `il primo senza mappatura verso una competenza` — e
+  -- quindi dipendeva dall'esistenza di un dato sporco. Quando il catalogo è
+  -- stato ripulito quel dato è sparito: oggi tutti e 92 i moduli hanno la loro
+  -- mappatura, la sottoquery tornava NULL, e l'UPDATE sbatteva contro il NOT
+  -- NULL della colonna. La batteria moriva lì con un errore di vincolo — non
+  -- con un check rosso — e il timer settimanale della custodia falliva senza
+  -- che il messaggio dicesse perché.
+  --
+  -- Il fatto era MIGLIORATO, non rotto: è il selftest che era fragile perché
+  -- fotografava uno stato invece di costruirsi le proprie condizioni. Un
+  -- selftest che ha bisogno di sporcizia preesistente smette di provare
+  -- qualcosa il giorno in cui si fa pulizia — cioè quando servirebbe di più.
+  -- Tutto dentro il blocco, e il rollback esterno lo porta via.
   v_fired := false;
   BEGIN
+    INSERT INTO sys.sys_learning_modules (
+      learning_module_code, learning_module_title, learning_module_kind,
+      learning_module_delivery, learning_module_is_global, learning_module_metadata)
+    VALUES ('ST-C4D-ESCA', 'Selftest C4d — modulo senza competenze mappate',
+            'COURSE', 'SELF_PACED', true, '{"selftest":"C4d"}'::jsonb)
+    RETURNING learning_module_id INTO v_esca_module_id;
+
     UPDATE sys.sys_training_initiatives
-       SET training_initiative_module_id = (
-             SELECT m.learning_module_id FROM sys.sys_learning_modules m
-              WHERE NOT EXISTS (SELECT 1 FROM sys.sys_skill_learning_mappings sm
-                                 WHERE sm.skill_learning_mapping_module_id = m.learning_module_id)
-                AND (m.learning_module_is_global OR m.learning_module_tenant_id
-                     = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0')
-              LIMIT 1)
+       SET training_initiative_module_id = v_esca_module_id
      WHERE ctid = (SELECT ti.ctid FROM sys.sys_training_initiatives ti LIMIT 1);
     PERFORM staging.storia36_check_c4d(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';

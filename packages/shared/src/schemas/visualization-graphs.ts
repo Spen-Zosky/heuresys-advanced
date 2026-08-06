@@ -110,6 +110,9 @@ export const VizGraphVersionResponseSchema = z.object({
   copiedEdges: z.number().int().min(0),
   copiedLayouts: z.number().int().min(0),
   copiedNodePositions: z.number().int().min(0),
+  /** #153 — gli stili seguono il contenuto: senza, la versione nuova ha i nodi
+   *  ma nessuna regola per disegnarli, e il grafo non è disegnabile. */
+  copiedStyles: z.number().int().min(0),
 });
 export type VizGraphVersionResponse = z.infer<typeof VizGraphVersionResponseSchema>;
 

@@ -103,12 +103,19 @@ export const visualizationGraphsService = {
       );
 
       if (!body.copyContent) {
-        return { graph, copiedNodes: 0, copiedEdges: 0, copiedLayouts: 0, copiedNodePositions: 0 };
+        return {
+          graph, copiedNodes: 0, copiedEdges: 0,
+          copiedLayouts: 0, copiedNodePositions: 0, copiedStyles: 0,
+        };
       }
       const content = await repo.copyGraphContent(client, source.graphId, graph.graphId);
       const layouts = body.copyLayouts
         ? await repo.copyGraphLayouts(client, source.graphId, graph.graphId, content.nodeIdMap)
         : { copiedLayouts: 0, copiedNodePositions: 0 };
+      // Gli stili seguono il contenuto, non le disposizioni (#153): senza, la
+      // versione nuova ha i nodi ma nessuna regola per disegnarli — ed è cosí
+      // che l'organigramma di RTL è finito con 158 nodi senza aspetto.
+      const copiedStyles = await repo.copyGraphStyles(client, source.graphId, graph.graphId);
 
       return {
         graph,
@@ -116,6 +123,7 @@ export const visualizationGraphsService = {
         copiedEdges: content.copiedEdges,
         copiedLayouts: layouts.copiedLayouts,
         copiedNodePositions: layouts.copiedNodePositions,
+        copiedStyles,
       };
     });
   },

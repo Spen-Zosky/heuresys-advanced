@@ -64,10 +64,10 @@ stessa**: ha trovato due errori in due file che dichiaravano di essere stati ver
 | id | cosa | chi | cosa significa fatto | stato |
 |---|---|---|---|---|
 | **V1** | Analisi avversariale delle due consegne in attesa | io | 13 affermazioni portanti misurate col comando accanto | ✅ **FATTO** |
-| **V2** | Annotare nei due file di consegna ciò che è stato rifiutato e corretto | io | i due file in `inbox/` portano la sezione di ritrattazione con le 2 smentite e la precisazione | ⬜ |
-| **V3** | Ingerire le due consegne nel registro con i blocchi **corretti** | io | `lab_inbox.py --ingest` eseguito, `handoff_lint.py` verde, commit | ⬜ |
+| **V2** | Annotare nei due file di consegna ciò che è stato rifiutato e corretto | io | i due file in `inbox/` portano la sezione di ritrattazione con le 2 smentite e la precisazione | ✅ **FATTO** |
+| **V3** | Ingerire le due consegne nel registro con i blocchi **corretti** | io | `lab_inbox.py --ingest` eseguito, `handoff_lint.py` verde, commit | ✅ **FATTO** — `#149` e `#150`, lint 0 fail, commit `70e28b8c`. Collisione di sottostringa (`#129`) **verificata assente** prima di ingerire, non assunta |
 | **V4** | Parte B di L2 — triage delle 27 voci eseguite sui 4 criteri di rischio | io | lista breve: quali delle 27 rientrano nei casi 1-4 e se lo stato lasciato è corretto, **ognuna con la verifica accanto** | ✅ **FATTO** (§V4) |
-| **V5** | `#146` — i 7 secondi fattori `e2e-fixture` attivi in produzione | io | i fattori di prova non sono più attivi in produzione, dimostrato live sul DB | ⬜ |
+| **V5** | `#146` — i 7 secondi fattori `e2e-fixture` attivi in produzione | io | i fattori di prova non sono più attivi in produzione, dimostrato live sul DB | ✅ **FATTO** (§V5-esito) — era già risolta, dimostrato |
 
 **Fuori da questo ciclo** (registro separato, presentato una volta sola a fine sessione): la Parte A
 di L2 non è un'esecuzione ma una **regola** — «rileggere il file di consegna quando si prende in
@@ -210,3 +210,65 @@ non sono «a posto», sono **non misurate**.
 - **Guardia**: prima di toccare qualunque riga di `sys_auth_mfa_*`, snapshot delle righe interessate.
   Un guard che passa su zero righe non è un guard: la verifica di chiusura deve contare **quante**
   righe sono cambiate e confrontarle con quante ne erano attese.
+
+---
+
+## V5 — `#146`, esito · **FATTO — era già risolta, e nessuno l'aveva ri-misurata**
+
+**Non ho corretto niente. Ho dimostrato che entrambi i criteri di chiusura che la voce stessa
+dichiara erano già soddisfatti.** La voce era stale: descriveva lo stato di S1032 (2026-07-26), e
+S1046 l'ha riformattata per renderla visibile al menu **senza ri-misurarla**. È esattamente il modo
+di sbagliare che la dottrina di oggi — verificare invece di credere — esiste per cogliere: la voce
+era in cima al menu come P1 di sicurezza, e la sua premessa era falsa.
+
+### La premessa falsa
+
+La voce dice: *«i 7 fattori `e2e-fixture` sono ANCORA ATTIVI: non eliminabili finché
+`mfa-enroll-confirm.integration.test.ts` resta rosso»*. Quel test **non è rosso**: rieseguito da
+solo, passa **3/3 in 53s**. Il blocco che la voce descrive non esiste più.
+
+### Criterio 1 — «zero fattori con label `e2e-fixture` in produzione»
+
+| misura | risultato |
+|---|---|
+| fattori con `e2e` **o** `fixture` in qualunque punto del metadata | **0** |
+| chiavi presenti nel metadata di tutta la tabella | **una sola: `label`** → la ricerca sopra è esaustiva, non parziale |
+| inventario reale di `sys.sys_auth_mfa_factors` | 158 TOTP `derived-access` verificati (creati 2026-07-26) + **32 senza etichetta** |
+
+**Come e quando sono spariti**: la sostituzione è avvenuta il 2026-07-26 con Z-262.
+`apps/api/test/helpers/mfa-fixture-secrets.ts` — che **è tracciato da git, su un repository
+pubblico** — non contiene più alcun valore letterale: li deriva da `.secrets/dev-access-master.key`,
+gitignored (`.gitignore:53`). Il file dichiara esso stesso
+`E2E_FIXTURE_LABEL = "derived-access"` come **sostituto** di `e2e-fixture`. La guardia
+anti-reintroduzione (`mfa-fixture-parity.test.ts`) è verde.
+
+### Criterio 2 — «suite auth verde»
+
+**15 file, 96 test, tutti passati**: `auth`, `auth-mfa`, `auth-mfa-enforcement-switch`,
+`auth-mfa-exemption`, `auth-mfa-mandatory`, `auth-refresh-cookie`, `mfa`, `mfa-email-otp-gating`,
+`mfa-enroll-confirm`, `mfa-fixture-parity`, `mfa-policy`, `mfa-recovery-codes`, `mfa-secret-crypto`,
+`mfa-sms`, `webauthn`.
+
+### Rischio residuo, dichiarato e non azionabile qui
+
+I 7 segreti restano **nella storia git** di un repository pubblico. Sono però **inerti**: i fattori
+a cui corrispondevano non esistono più, e sostituirli era il rimedio corretto per un segreto esposto
+(riscrivere la storia di un repo pubblico non lo sarebbe stato). Nessun segreto è stato letto,
+stampato o messo nel contesto durante questa verifica: tutte le query hanno selezionato tipo,
+etichetta, conteggi e date, **mai** `auth_mfa_factor_secret`. Il file di backup citato nel campo
+`doc:` della voce **non esiste più sul disco**.
+
+### Reperto nuovo — fuori scope, registrato come `#152`
+
+I 32 fattori senza etichetta sono **26 TOTP non verificati** di `tommaso.fiore@rtl-bank.org` e
+**6 WebAuthn verificati** di `admin@heuresys.com`, creati fra il 2026-07-22 e il 2026-08-01: non
+sono i fattori di `#146`, sono **residui di enrollment che le suite lasciano in produzione**, uno
+strato per corsa.
+
+I 6 WebAuthn sono i più delicati — sono `verified = true` su un account amministrativo.
+
+Un dato scagiona i test API: la corsa di oggi (2026-08-06) **non ha aggiunto righe** — il
+`max(created_at)` resta 2026-08-01 — quindi l'isolamento transazionale (D-52) regge e la sorgente è
+altrove, verosimilmente gli E2E Playwright, che non girano in transazione. **Non l'ho corretto**:
+è fuori dallo scope approvato (L1+L2, poi `#146`), e ripulire 32 righe senza chiudere la falla a
+monte sarebbe lavoro da rifare.

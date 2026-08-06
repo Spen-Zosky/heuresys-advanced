@@ -50,8 +50,9 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
   dal rendiconto, dal 2026-08-20 → `#148`. Referto adversarial (7 rilievi) nel design-lab.
 - Migrazioni **273 file, max `000275`** (S1047: `000274` — la sentinella dell'organigramma ignora
   le unità ritirate, `#151`; `000275` — purga dei 32 fattori MFA residui, `#152`, `@migrate: once`,
-  eseguita col ripristino pronto e **collaudato** in `.secrets/`); HEAD `c5255c65`; tag `v1.0.0`;
-  API test file 232.
+  eseguita col ripristino pronto e **collaudato** in `.secrets/`); HEAD `5559ae4c`; tag `v1.0.0`;
+  API test file 232. Counts ri-derivati live a fine S1047: **163 utenti · 314 posizioni · 43 OU
+  attive · 158 fattori MFA · 273 migrazioni applicate** (= 273 file `.sql` sul disco).
 - **Fattori MFA, inventario reale post-purga**: **158 TOTP `derived-access`** e nient'altro. Le 32
   righe senza etichetta (26 TOTP mai verificati + 6 WebAuthn verificati su `admin@heuresys.com`)
   sono state rimosse; nessun utente è rimasto senza secondo fattore verificato (misurato).

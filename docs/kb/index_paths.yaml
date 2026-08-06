@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-06T12:32:19Z da docs/kb/tools/build_index.py
+# generato: 2026-08-06T17:35:05Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-06T12:32:19Z"
-  total_files: 2858
+  generated_at: "2026-08-06T17:35:05Z"
+  total_files: 2861
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 271
+    db-migration: 273
     db-other: 8
     db-script: 44
     db-seed: 147
-    doc-canonical: 543
+    doc-canonical: 544
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2300
+    live: 2303
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -7220,6 +7220,18 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000274_org_integrity_view_ignores_retired_units.sql'
+    root: repo
+    rel: 'db/migrations/000274_org_integrity_view_ignores_retired_units.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000275_purge_orphan_test_mfa_factors.sql'
+    root: repo
+    rel: 'db/migrations/000275_purge_orphan_test_mfa_factors.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -11501,6 +11513,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-chiusura-dottrina-dubbio-e-diario.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-08-06-chiusura-dottrina-dubbio-e-diario.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

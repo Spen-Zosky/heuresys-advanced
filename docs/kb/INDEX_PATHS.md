@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-06T12:32:19Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2858**
+**Generato**: 2026-08-06T17:35:05Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2861**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 271 |
+| db-migration | 273 |
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 147 |
-| doc-canonical | 543 |
+| doc-canonical | 544 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 352 |
 | ux-design-archive | 80 |
 | web-source | 232 |
-| **TOTALE** | **2858** |
+| **TOTALE** | **2861** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2300 |
+| live | 2303 |
 
 ## File per categoria
 
@@ -1275,6 +1275,8 @@
 - `D:\heuresys-advanced\db\migrations\000271_dashboard_interface_declares_its_permission.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000272_branch_manager_role_and_dashboard.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000273_archive_requirements_on_retired_positions.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000274_org_integrity_view_ignores_retired_units.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000275_purge_orphan_test_mfa_factors.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -2001,6 +2003,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-05-perimetri-test-esecuzione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-catena-migrazioni-stabile-S1045.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-chiusura-dottrina-dubbio-e-diario.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked

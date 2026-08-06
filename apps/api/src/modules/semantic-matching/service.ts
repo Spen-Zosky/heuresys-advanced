@@ -15,6 +15,7 @@ import * as repo from "./repository.js";
 import { canReadOrgTarget } from "../../lib/scope/resolver.js";
 import { runBackfill, type BackfillSummary } from "./backfill.js";
 import { makeEmbedder, type Embedder } from "./voyage-client.js";
+import { withQueryCache } from "./query-embedding-cache.js";
 
 const isPlatform = (a: ActorContext): boolean => a.roles.includes("PLATFORM_ADMIN");
 // A non-platform actor with no tenant sees only global skills → match no real tenant.
@@ -58,7 +59,13 @@ export interface SemanticMatchingDeps {
   /** Builds the request-time embedder for free-text. Defaults to the real (Voyage) embedder. */
   makeEmbedder: () => Embedder;
 }
-export const defaultDeps: SemanticMatchingDeps = { backfill: runBackfill, makeEmbedder };
+// L'embedder di produzione passa dalla cache di query: `makeEmbedder()` viene
+// invocato A OGNI richiesta, quindi una cache interna all'embedder si perderebbe
+// ogni volta — la sede e' l'istanza condivisa di processo, non l'oggetto usa-e-getta.
+export const defaultDeps: SemanticMatchingDeps = {
+  backfill: runBackfill,
+  makeEmbedder: () => withQueryCache(makeEmbedder()),
+};
 
 export const semanticMatchingService = {
   /** Caller's own person-profile → top-N ESCO occupations. */

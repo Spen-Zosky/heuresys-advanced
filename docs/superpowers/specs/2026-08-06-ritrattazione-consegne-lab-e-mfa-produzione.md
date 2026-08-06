@@ -272,3 +272,60 @@ Un dato scagiona i test API: la corsa di oggi (2026-08-06) **non ha aggiunto rig
 altrove, verosimilmente gli E2E Playwright, che non girano in transazione. **Non l'ho corretto**:
 è fuori dallo scope approvato (L1+L2, poi `#146`), e ripulire 32 righe senza chiudere la falla a
 monte sarebbe lavoro da rifare.
+
+---
+
+# Ciclo 2 — le due scoperte, ammesse da Enzo al giro successivo
+
+**Mandato**: «sì, mettile entrambe nel prossimo ciclo» (2026-08-06).
+
+| id | cosa | chi | cosa significa fatto | stato |
+|---|---|---|---|---|
+| **V6a** | `#152` — chiudere la sorgente dei 26 TOTP | io | «annulla» cancella il fattore sul server; asserzioni E2E ribaltate | ✅ **FATTO** — commit `c5255c65` |
+| **V6b** | `#152` — chiudere la sorgente dei 6 WebAuthn | io | la pulizia gira anche quando il test fallisce | ✅ **FATTO** — commit `c5255c65` |
+| **V6c** | `#152` — rimuovere l'arretrato di 32 righe | **Enzo decide** | migrazione applicata, zero fattori senza etichetta | ⏸ **scritta, non eseguita** — distruttiva su produzione |
+| **V7** | `#151` — la sentinella ignora le unità ritirate | io | falsi positivi a zero, segnali veri intatti | ✅ **FATTO** — mig `000274`, provata live |
+
+## V6 — cosa ho trovato aprendo `#152`
+
+**Il difetto non era dei test: era di prodotto.** Il pulsante «annulla» dell'arruolamento faceva solo
+`setPendingFactor(null)` e `form.reset()`. Nessuna chiamata al server. Quindi non erano solo gli E2E
+a lasciare rifiuti — **qualunque persona reale** che avesse aperto l'arruolamento e premuto annulla si
+sarebbe ritrovata in lista un fattore «in attesa di verifica» che credeva di non aver mai creato.
+
+Il commento del test lo dichiarava *«by design»* e prometteva che la riga sarebbe scaduta da sé
+(*«until either verify-setup succeeds or it ages out»*). **L'age-out non esiste**: `expires_at` e lo
+sweep vivono su `sys_auth_mfa_otp_challenges`, cioè sulle *sfide* OTP, non sulle righe di
+`sys_auth_mfa_factors`. Le righe restavano per sempre — ed è per questo che se ne contavano 26.
+
+Il rimedio non ha richiesto codice nuovo: `DELETE /v1/auth/mfa/factors/:factorId` esisteva già, e la
+pagina aveva già una mutazione `remove`. Ho aggiunto una mutazione dedicata e **silenziosa** perché
+`remove` annuncia «fattore rimosso», che per chi sta annullando sarebbe fuori luogo; e che **non
+blocca** la chiusura del riquadro se fallisce, perché chi ha chiesto di annullare ha diritto di
+vederlo chiuso e un fattore non verificato non concede nulla.
+
+**Le asserzioni del test codificavano il difetto** — pretendevano che dopo il cancel il fattore
+*fosse ancora* in lista. Ribaltate. La nuova asserzione guarda **il `factorId` creato da quel test**,
+non il totale dei TOTP non verificati dell'utente: un conteggio globale sarebbe rosso per colpa dei
+residui altrui, o verde per caso il giorno in cui qualcuno li ripulisse a mano.
+
+**I 6 WebAuthn hanno una causa diversa**, e la prima ipotesi era sbagliata: il cleanup *c'era già*.
+Solo che è l'ultima riga del test, e `webauthn.spec.ts` gira con `retries: 1` — un tentativo fallito
+non ci arriva mai e lascia il passkey. Il gancio nuovo gira **anche sul fallimento** e cancella
+**solo** i `WEBAUTHN`: lo stesso utente possiede il TOTP `derived-access` da cui dipende ogni login
+della suite, e una pulizia indiscriminata avrebbe spento tutti i test.
+
+## V6c — perché mi fermo qui
+
+Le 32 righe arretrate restano. `db/migrations/000275_purge_orphan_test_mfa_factors.sql` è scritta e
+porta quattro guardie — `@migrate: once` (senza il marcatore la catena la rieseguirebbe a ogni deploy
+e «ogni fattore senza etichetta muore» diventerebbe una regola permanente, che non è ciò che si
+vuole), una soglia temporale, il vincolo sulle sole righe senza etichetta, e un `RAISE EXCEPTION` che
+aborta l'intera operazione se anche **un solo** utente restasse senza fattore verificato.
+
+Quella guardia è scritta per fallire davvero: interroga `NOT EXISTS` su un utente qualsiasi che
+resterebbe scoperto, non un conteggio complessivo che passerebbe anche con una persona chiusa fuori.
+Misurata prima di scriverla: entrambi gli utenti conservano un `derived-access` verificato.
+
+**Non l'ho eseguita.** Cancella righe in produzione, ed è irreversibile — i segreti di quelle righe
+non esistono altrove. Serve il via libera di Enzo.

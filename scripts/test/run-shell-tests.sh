@@ -349,6 +349,19 @@ fi
 # align-clones deployava (`conservative: deploy`) e close-propagate non clonava dichiarando un
 # fatto falso — due default opposti sulla stessa informazione mancante.
 section "dottrina del dubbio — nel dubbio non si agisce, e si dichiara"
+# Fixture git deterministica: tre commit noti (base → tocca scripts/ → tocca db/migrations/).
+# Serve perché i rami "misurato-SÌ" hanno bisogno di una finestra che contenga davvero quei path,
+# e la storia del repo reale non è disponibile sotto checkout shallow (CI).
+FIXT="$T/fixture-repo"; FIXT_BASE=""
+if mkdir -p "$FIXT/scripts" "$FIXT/db/migrations" 2>/dev/null \
+   && git -C "$FIXT" init -q 2>/dev/null; then
+  gitf() { git -C "$FIXT" -c user.email=t@t -c user.name=t -c commit.gpgsign=false "$@"; }
+  echo base > "$FIXT/README.md";                 gitf add -A; gitf commit -qm base
+  FIXT_BASE="$(git -C "$FIXT" rev-parse HEAD)"
+  echo x    > "$FIXT/scripts/deploy-thing.sh";   gitf add -A; gitf commit -qm code
+  FIXT_CODE="$(git -C "$FIXT" rev-parse HEAD)"
+  echo y    > "$FIXT/db/migrations/000999_x.sql"; gitf add -A; gitf commit -qm mig
+fi
 AC="scripts/align-clones.sh"
 DEPLOY_BLOCK="$(sed -n '/^case "\$DEPLOY_FLAG" in/,/^esac/p' "$AC")"
 RE_LINE2="$(grep -m1 '^DEPLOY_PATHS_RE=' "$AC")"
@@ -378,14 +391,16 @@ if [ -n "$DEPLOY_BLOCK" ] && [ -n "$RE_LINE2" ]; then
   r="$(decide auto 1 1 "$(git rev-parse HEAD)")"
   case "$r" in 0\|misurato*) ok "finestra valida senza commit di codice ⟹ 'misurato', non 'IGNOTO'" ;;
     *) fail "atteso 0|misurato*, ha dato '$r'" ;; esac
-  # I5 — misurato-SÌ: finestra che contiene un commit su scripts/ (path di deploy).
-  SH_CODE="$(git log -1 --format=%H -- scripts/ 2>/dev/null || true)"
-  SH_PAR="$(git rev-parse "${SH_CODE}^" 2>/dev/null || true)"
-  if [ -n "$SH_PAR" ]; then
-    r="$(decide auto 1 1 "$SH_PAR")"
+  # I5 — misurato-SÌ: finestra che CONTIENE un commit su scripts/.
+  # La premessa si COSTRUISCE, non si cerca nella storia del repo: in CI il checkout è shallow,
+  # quindi `git log -- scripts/` e `rev-parse <sha>^` non vedono ciò che vedono in locale. Un test
+  # la cui premessa dipende da una storia che non controlla è verde a casa e rosso in CI — che è
+  # esattamente com'è fallito al primo giro (37b025da).
+  if [ -n "$FIXT_BASE" ]; then
+    r="$( cd "$FIXT" && decide auto 1 1 "$FIXT_BASE" )"
     case "$r" in 1\|misurato*) ok "finestra che tocca scripts/ ⟹ deploy 'misurato' ed eseguito" ;;
       *) fail "atteso 1|misurato*, ha dato '$r'" ;; esac
-  else ok "I5 saltato (nessun commit su scripts/ con parent — repo troppo giovane)"; fi
+  else fail "fixture git non creata: impossibile provare il ramo misurato-SÌ"; fi
 else
   fail "blocco di decisione del deploy non estraibile da $AC"
 fi
@@ -403,15 +418,16 @@ out="$(HEURESYS_MARKER="$FAKE_M" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" 2>&1)"
 if printf '%s' "$out" | grep -q 'need_clone=0' && printf '%s' "$out" | grep -q 'clone-db-why: misurato'; then
   ok "clone-db: finestra valida senza migrazioni ⟹ 'misurato', non 'IGNOTO'"
 else fail "clone-db misurato-no ($out)"; fi
-SH_DB="$(git log -1 --format=%H -- db/migrations/ 2>/dev/null || true)"
-SH_DBP="$(git rev-parse "${SH_DB}^" 2>/dev/null || true)"
-if [ -n "$SH_DBP" ]; then
-  printf '%s\n' "$SH_DBP" > "$FAKE_M"
-  out="$(HEURESYS_MARKER="$FAKE_M" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" 2>&1)"
+# I8 — misurato-SÌ sulla fixture (stessa ragione di I5: la storia reale non è affidabile in CI).
+# `--dry-run` esce prima di toccare qualunque canale, quindi girare dentro la fixture è sicuro:
+# legge solo ROOT (dal git della cwd), il marcatore e `git diff`.
+if [ -n "$FIXT_BASE" ]; then
+  printf '%s\n' "$FIXT_CODE" > "$FAKE_M"   # finestra CODE..HEAD ⟹ contiene il commit di migrazione
+  out="$( cd "$FIXT" && HEURESYS_MARKER="$FAKE_M" CLOSE_PROPAGATE_DRYRUN=1 bash "$ROOT/$CP" 2>&1 )"
   if printf '%s' "$out" | grep -q 'need_clone=1'; then
     ok "clone-db: finestra che tocca db/migrations ⟹ need_clone=1"
   else fail "clone-db misurato-si ($out)"; fi
-else ok "I8 saltato (nessun commit su db/migrations con parent)"; fi
+else fail "fixture git non creata: impossibile provare il ramo clone-db misurato-SÌ"; fi
 
 # I9 — il diario: scrive una riga per passo e la rilegge. Su un log FINTO
 # (HEURESYS_CLOSE_LOG), altrimenti i test inquinerebbero la misura reale.

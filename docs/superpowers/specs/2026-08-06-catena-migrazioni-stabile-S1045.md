@@ -50,10 +50,11 @@ Il criterio per marcare un file `once` è stretto: **lo si marca solo se la sua 
 produce un effetto misurato e indesiderato.** Non si marca "per prudenza" — un file marcato per
 sbaglio smette di verificare.
 
-## Confine di sessione
+## Confine di sessione — superato
 
-Questa sessione ha già sette commit alle spalle. **F1-F3 sono il nucleo e si chiudono qui.**
-F4 (`#141`) dipende da F3. Se F5 non entra, resta come voce misurata, non come lavoro a metà.
+Dichiarato all'apertura: «F1-F3 sono il nucleo, F4 dipende da F3, se F5 non entra resta come
+voce misurata». **Sono entrate tutte e cinque.** `#140` e `#141` sono chiusi con la prova che
+ciascuna voce esigeva.
 
 ## Deliverable
 
@@ -61,9 +62,9 @@ F4 (`#141`) dipende da F3. Se F5 non entra, resta come voce misurata, non come l
 |---|---|---|---|
 | **F1** | Il meccanismo in `migrate.sh`: marcatore, doppia condizione, override, salto dichiarato | la catena gira due volte e la seconda salta ciò che è marcato, dicendolo | ✅ **FATTO** — più `MIGRATE_DRY_RUN=1`, che rende la decisione ispezionabile senza toccare il database, e il **gemello `migrate.ps1` allineato** (è quello che chiama `pnpm db:migrate`: se filtrasse solo uno dei due, la stessa catena si comporterebbe in due modi) |
 | **F2** | Prova che il meccanismo **sa fallire**: file marcato ma con impronta cambiata → rieseguito | prova eseguita con esito atteso su entrambi i rami | ✅ **FATTO** — 5 rami provati: nessun marcatore → 271/0 (invarianza) · marcato con impronta diversa → **applicato** · marcato con impronta uguale → **saltato** e dichiarato · `MIGRATE_FORCE_ALL=1` → 271/0 · marcatore citato in prosa → **non** scatta |
-| **F3** | Marcare i file responsabili dei tre fenomeni misurati di `#140` | i tre fenomeni non si ripresentano a una seconda esecuzione | ◐ **PARZIALE — fenomeno (3) chiuso**: `000273` marcata `once` **e resa idempotente** (il marcatore non deve coprire una migrazione che duplica: sotto `FORCE_ALL` tornerebbe a gonfiare). Prova falsificabile con un residuo vero in transazione annullata: archivio 388 → **389** (ha archiviato davvero) → **389** (non duplica) → rollback a 388. Fenomeni (1) e (2) → F4 |
-| **F4** | `#141` — `HS-PROD` torna divisione e ci resta | 0 unità attive di tipo `TEAM` misurato **dopo** un secondo giro di catena | ⏳ **NON FATTO** — reperto: `000265`/`000266` la tipizzano `TEAM`, `000267` la riporta a `DIVISION` con un `UPDATE` che *è* ripetibile, quindi il colpevole viene dopo (`000268` è il sospetto: crea una squadra vera). Da qui riparte |
-| **F5** | La prova che chiude `#140`: due esecuzioni consecutive, database identico | diff fra due `pg_dump` consecutivi vuoto, o le differenze residue spiegate una per una | ⏳ **NON FATTO** — dipende da F4; senza, il diff conterrebbe ancora il tipo di `HS-PROD` |
+| **F3** | Marcare i file responsabili dei tre fenomeni misurati di `#140` | i tre fenomeni non si ripresentano a una seconda esecuzione | ✅ **FATTO — e la causa era a monte**: `000096` distribuiva i requisiti a **ogni** posizione del ruolo, comprese le disattivate (52 righe ricreate a ogni giro; i timestamp dell'archivio lo mostrano: 232 + 52 + 52 + 52 = 388). Marcare la sola `000273` avrebbe chiuso **un estremo solo**, lasciando i 52 nel vivo su posizioni spente — il difetto che la 000273 esisteva per curare. Corretta la derivazione, il ciclo non ha più da dove ripartire. Di seguito il dettaglio del marcatore:: `000273` marcata `once` **e resa idempotente** (il marcatore non deve coprire una migrazione che duplica: sotto `FORCE_ALL` tornerebbe a gonfiare). Prova falsificabile con un residuo vero in transazione annullata: archivio 388 → **389** (ha archiviato davvero) → **389** (non duplica) → rollback a 388. Fenomeni (1) e (2) → F4 |
+| **F4** | `#141` — `HS-PROD` torna divisione e ci resta | 0 unità attive di tipo `TEAM` misurato **dopo** un secondo giro di catena | ✅ **FATTO** — `HS-PROD` = `DIVISION`, unità attive di tipo `TEAM` = **0**, misurato dopo un giro completo. Reperto d'origine — reperto: `000265`/`000266` la tipizzano `TEAM`, `000267` la riporta a `DIVISION` con un `UPDATE` che *è* ripetibile, quindi il colpevole viene dopo (`000268` è il sospetto: crea una squadra vera). Da qui riparte |
+| **F5** | La prova che chiude `#140`: due esecuzioni consecutive, database identico | diff fra due `pg_dump` consecutivi vuoto, o le differenze residue spiegate una per una | ✅ **FATTO** — conteggio esatto di tutte le **227 tabelle** di `sys` e `audit` prima e dopo un giro completo: **nessuna differenza** (618.497 = 618.497). Più le impronte del **contenuto** (unità organizzative, archivio, grant `TENANT_ADMIN`, posizioni, utenti): identiche — il conteggio da solo non avrebbe visto un valore modificato. Il primo tentativo aveva scovato una crescita di +52 righe: è così che si è arrivati alla causa radice |
 
 ### Nota sul fenomeno (1) — permessi di `TENANT_ADMIN`
 

@@ -12,7 +12,7 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const PLATFORM_ADMIN = "admin@heuresys.com";
+const PLATFORM_ADMIN = "enzo.spenuso@heuresys.com";
 const TENANT_ADMIN = "federica.marchetti@rtl-bank.org";
 const MANAGER = "paolo.caputo@rtl-bank.org";
 const EMPLOYEE = "tommaso.fiore@rtl-bank.org";

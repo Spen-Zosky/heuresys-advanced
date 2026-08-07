@@ -42,7 +42,7 @@ const createdTemplateIds: string[] = [];
 describe(`${BASE}/* integration`, () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
 
     // Discover a real (unitId, kpiId) pair that is upsertable: the KPI must be

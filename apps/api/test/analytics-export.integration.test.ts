@@ -36,7 +36,7 @@ let employeeS: S;
 describe("GET /v1/analytics/:view/export integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     employeeS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });
 

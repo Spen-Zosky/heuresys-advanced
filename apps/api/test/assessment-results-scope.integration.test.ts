@@ -28,7 +28,7 @@
  *   - tommaso.fiore@rtl-bank.org      USER         → IN paolo's sub-tree (report)
  *   - antonio.parisi@rtl-bank.org     USER         → OUTSIDER (peer, I19 — not in the sub-tree)
  *   - federica.marchetti@rtl-bank.org TENANT_ADMIN → HR-mandated, tenant-wide (I20)
- *   - admin@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
+ *   - enzo.spenuso@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
  *
  * `assessment:read` is held by CEO / HRMS_MANAGER / MANAGER / PLATFORM_ADMIN / TENANT_ADMIN.
  * A plain USER (tommaso/antonio) has NO assessment:read at all — the strongest possible
@@ -117,7 +117,7 @@ describe("/v1/assessment-results — F3 org-axis isolation (ADR-0027, D-50)", ()
     tommaso = await login(suite, sottoposto.email);
     antonio = await login(suite, estraneo.email);
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
-    admin = await login(suite, "admin@heuresys.com");
+    admin = await login(suite, "enzo.spenuso@heuresys.com");
 
     // Deterministic fixtures (self-contained; do not rely on pre-existing seed rows).
     tommasoFx = await seedResult(tommaso.userId);

@@ -43,7 +43,7 @@ let paoloSubtree: string[];
 describe("#29 A/L3 talent-review 9-box read", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    admin = await login(suite, "admin@heuresys.com");
+    admin = await login(suite, "enzo.spenuso@heuresys.com");
     federica = await login(suite, "federica.marchetti@rtl-bank.org"); // TENANT_ADMIN (HR mandate)
     paolo = await login(suite, "paolo.caputo@rtl-bank.org"); // MANAGER
     tommaso = await login(suite, "tommaso.fiore@rtl-bank.org"); // USER (paolo's report, no talent:read)

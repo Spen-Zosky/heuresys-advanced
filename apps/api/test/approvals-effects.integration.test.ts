@@ -8,7 +8,7 @@ import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 // registered handler that MUTATES the real subject, atomically with markApplied).
 // The first real handler is TENANT_ACTIVATION: it flips the subject tenant
 // sys_tenancies.tenant_status PENDING_ACTIVATION → ACTIVE (a real, pre-existing schema
-// transition). Real login (admin@heuresys.com, PLATFORM_ADMIN) + live DB. Every write
+// transition). Real login (enzo.spenuso@heuresys.com, PLATFORM_ADMIN) + live DB. Every write
 // touches only throwaway [TEST] FX tenants; afterAll purges all of them. NEVER touches
 // the real RTL_BANK / HEURESYS tenants.
 
@@ -94,8 +94,8 @@ async function createAndApprove(opts: { title: string; resourceType?: string; re
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  admin = await login(suite, "admin@heuresys.com");
-  const ids = await pool.query<{ user_id: string }>(`SELECT user_id FROM sys.sys_users WHERE user_email = $1`, ["admin@heuresys.com"]);
+  admin = await login(suite, "enzo.spenuso@heuresys.com");
+  const ids = await pool.query<{ user_id: string }>(`SELECT user_id FROM sys.sys_users WHERE user_email = $1`, ["enzo.spenuso@heuresys.com"]);
   adminId = ids.rows[0]!.user_id;
   // Clean any leftovers from a crashed prior run (TEST-FX-* codes are deterministic per run → would collide).
   await pool.query(`DELETE FROM sys.sys_approval_requests WHERE approval_request_title LIKE $1`, [`${TITLE_PREFIX}%`]);

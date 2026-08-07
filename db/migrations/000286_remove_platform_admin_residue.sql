@@ -94,7 +94,11 @@ BEGIN
 
   -- POST-CONDIZIONE 3 — le persone vere di HEURESYS sono ancora tutte li'. E' la
   -- verifica che conta: prova che la cancellazione ha colpito il residuo e nient'altro.
-  FOREACH v_stato IN ARRAY ARRAY['admin@heuresys.com','enzo.spenuso@heuresys.com',
+  -- ⚠️ EMENDATO S1049 (#139): l'elenco conteneva anche `admin@heuresys.com`, che pero'
+  -- NON era una persona — era l'utenza tecnica, rimossa dalla `000295`. Elencarla fra
+  -- «le persone vere» era un errore mio del mattino, e si e' visto solo quando
+  -- l'account e' sparito davvero. Restano le tre persone che Enzo ha dichiarato.
+  FOREACH v_stato IN ARRAY ARRAY['enzo.spenuso@heuresys.com',
                                  'andrea.spenuso@heuresys.com','chiara.spenuso@heuresys.com'] LOOP
     IF NOT EXISTS (SELECT 1 FROM sys.sys_users WHERE user_email = v_stato) THEN
       RAISE EXCEPTION '000286: % e sparito — la cancellazione ha colpito oltre il residuo', v_stato;

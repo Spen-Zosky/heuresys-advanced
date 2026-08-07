@@ -44,7 +44,7 @@ export function totpSecretFor(email: string): string {
  * dipendente, un estraneo alla linea gerarchica).
  */
 export const FIXTURE_PERSONA_EMAILS = [
-  "admin@heuresys.com",
+  "enzo.spenuso@heuresys.com",
   "federica.marchetti@rtl-bank.org",
   "paolo.caputo@rtl-bank.org",
   "tommaso.fiore@rtl-bank.org",

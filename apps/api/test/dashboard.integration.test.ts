@@ -30,7 +30,7 @@ let employeeS: S;
 describe("GET /v1/dashboard/widgets integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
     // [S1045] Il manager si sceglie per CARATTERISTICA: deve possedere almeno una
     // posizione ATTIVA, perche' e' da li' che il cruscotto ricava lo scope TEAM.

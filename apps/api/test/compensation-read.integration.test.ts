@@ -84,7 +84,7 @@ describe("#32 A/L7 compensation & reward read", () => {
     await revokeCeoFromPaolo(PAOLO_EMAIL);
     await grantCeoToPaolo(PAOLO_EMAIL);
 
-    admin = await login(suite, "admin@heuresys.com");
+    admin = await login(suite, "enzo.spenuso@heuresys.com");
     federica = await login(suite, "federica.marchetti@rtl-bank.org"); // TENANT_ADMIN (HR mandate)
     paolo = await login(suite, PAOLO_EMAIL); // MANAGER (+CEO granted) → org sub-tree
     tommaso = await login(suite, "tommaso.fiore@rtl-bank.org"); // USER (no compensation_intelligence:read)

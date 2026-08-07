@@ -39,7 +39,7 @@
  *   - tommaso.fiore@rtl-bank.org      USER           → IN paolo's sub-tree (report); self-only role
  *   - antonio.parisi@rtl-bank.org     USER           → OUTSIDER (peer, I19 — NOT in the sub-tree)
  *   - federica.marchetti@rtl-bank.org TENANT_ADMIN   → HR-mandated, tenant-wide (I20)
- *   - admin@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
+ *   - enzo.spenuso@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
  *
  * `matching:read` is held by plain USERs too (a self-only USER hitting a peer gets 404, not 403 —
  * the route permission passes, the service self-only ladder blocks), so the self-floor below is a
@@ -103,7 +103,7 @@ describe("/v1/matching — F3 org-axis isolation (ADR-0027, D-50)", () => {
     tommaso = await login(suite, sottoposto.email);
     antonio = await login(suite, estraneo.email);
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
-    admin = await login(suite, "admin@heuresys.com");
+    admin = await login(suite, "enzo.spenuso@heuresys.com");
   });
 
   afterAll(async () => {

@@ -7,7 +7,7 @@
  * The headline profile count + the scope badge are asserted against the SAME
  * live GET /v1/analytics/compensation payload the page fetches at runtime.
  *
- * Persona: platformAdmin (admin@heuresys.com → PLATFORM scope). `analytics:view`
+ * Persona: platformAdmin (enzo.spenuso@heuresys.com → PLATFORM scope). `analytics:view`
  * is granted to the admin roles by migration 000057.
  */
 

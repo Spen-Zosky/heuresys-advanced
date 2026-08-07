@@ -43,8 +43,14 @@ export const MASTER_PATH = join(REPO, ".secrets", "dev-access-master.key");
  *  stesso dominio ma NON e' una persona — e' l'account di servizio da cui
  *  passano 133 file fra test e script. Escluderlo lo lascerebbe senza secondo
  *  fattore nel momento in cui si rimuovono quelli con i segreti pubblicati. */
+// Z-262 + #139 (Enzo, 2026-08-08). La regola non cambia: la password di una persona la
+// sceglie lei, e i test non la sintetizzano. Cambia CHI ne e' coperto. Il PROPRIETARIO
+// della piattaforma ha deciso che l'amministrazione e' sua e che l'account tecnico
+// `admin@heuresys.com` non deve esistere — quindi `enzo.spenuso@heuresys.com` E'
+// l'amministratore, e i test entrano come lui. E' una deroga DICHIARATA da chi ne subisce
+// l'effetto sul proprio account, non un allentamento della regola: Chiara e Andrea
+// restano protette e nessun test le impersona.
 export const REAL_PERSON_EMAILS = [
-  "enzo.spenuso@heuresys.com",
   "chiara.spenuso@heuresys.com",
   "andrea.spenuso@heuresys.com",
 ];

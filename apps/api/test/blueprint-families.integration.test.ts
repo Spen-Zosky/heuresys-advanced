@@ -63,7 +63,7 @@ const createdFamilyIds: string[] = [];
 describe("/v1/blueprint-families/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
     managerS = await login(suite, "paolo.caputo@rtl-bank.org");
   });

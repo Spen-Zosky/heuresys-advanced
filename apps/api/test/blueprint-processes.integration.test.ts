@@ -76,7 +76,7 @@ const createdProcessIds: string[] = [];
 describe("/v1/blueprint-processes/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
 
     const fam = await suite.app.inject({

@@ -24,7 +24,7 @@ const createdGoalIds: string[] = [];
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  admin = await login(suite, "admin@heuresys.com");
+  admin = await login(suite, "enzo.spenuso@heuresys.com");
   tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
   plainUser = await login(suite, "tommaso.fiore@rtl-bank.org");
   const t = await pool.query<{ id: string }>("SELECT tenant_id AS id FROM sys.sys_tenancies WHERE tenant_code = 'RTL_BANK'");

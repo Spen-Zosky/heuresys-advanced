@@ -12,7 +12,7 @@
  *   ┌───────────────┬─────────────────────────────────┬──────────────────────────────┐
  *   │ persona       │ real user                       │ role / scope                  │
  *   ├───────────────┼─────────────────────────────────┼──────────────────────────────┤
- *   │ platformAdmin │ admin@heuresys.com              │ PLATFORM_ADMIN (native)       │
+ *   │ platformAdmin │ enzo.spenuso@heuresys.com              │ PLATFORM_ADMIN (native)       │
  *   │ tenantAdmin   │ federica.marchetti@rtl-bank.org │ TENANT_ADMIN  (RTL_BANK)      │
  *   │ manager       │ paolo.caputo@rtl-bank.org       │ MANAGER (manages tommaso)     │
  *   │ employee      │ tommaso.fiore@rtl-bank.org      │ USER (paolo's subordinate)    │
@@ -52,7 +52,7 @@ dotenvConfig({ path: resolve(repoRoot, ".env") });
  *  marco.rinaldi (TEAM_LEADER, r1b) joined the fixture set in S983 WS-E —
  *  the mandatory-MFA total coverage gates every login-capable persona. */
 const PERSONA_EMAILS: readonly string[] = [
-  "admin@heuresys.com",
+  "enzo.spenuso@heuresys.com",
   "federica.marchetti@rtl-bank.org",
   "paolo.caputo@rtl-bank.org",
   "tommaso.fiore@rtl-bank.org",

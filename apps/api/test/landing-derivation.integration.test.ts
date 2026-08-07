@@ -24,7 +24,7 @@ import { loginRaw } from "./helpers/login.js";
 import { userPermissionCodes } from "../src/middleware/rbac.js";
 import { pool, closePool } from "../src/db/client.js";
 
-const ADMIN_EMAIL = "admin@heuresys.com";
+const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
 
 interface RoleRow {
   role_code: string;

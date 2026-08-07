@@ -70,7 +70,7 @@ test.describe("MVP-4 §2.5 WebAuthn passkey enroll — live data", () => {
    * Rete di sicurezza (#152). La pulizia qui sopra è l'ultima riga del test:
    * se il test fallisce PRIMA — e con `retries: 1` un tentativo fallito è
    * previsto — il passkey appena registrato resta in produzione. È così che si
-   * erano accumulati 6 fattori WEBAUTHN verificati su `admin@heuresys.com`
+   * erano accumulati 6 fattori WEBAUTHN verificati su `enzo.spenuso@heuresys.com`
    * fra il 22/07 e il 01/08, misurati in S1047.
    *
    * Questo gancio gira **anche quando il test fallisce**, e toglie il residuo.

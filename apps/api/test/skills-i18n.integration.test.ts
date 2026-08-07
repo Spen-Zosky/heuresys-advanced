@@ -33,13 +33,13 @@ const EN_DESC = `english test description ${TAG}`;
 describe("/v1/skills i18n overlay (ADR-0029)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    const r = await loginRaw(suite.app, "admin@heuresys.com", TEST_PERSONA_PASSWORD);
+    const r = await loginRaw(suite.app, "enzo.spenuso@heuresys.com", TEST_PERSONA_PASSWORD);
     cookies = new Map<string, string>();
     for (const c of r.cookies) cookies.set(c.name, c.value);
 
     // Fixture: a GLOBAL skill (IT canonical in-row) + its EN translations.
     const admin = await pool.query<{ user_id: string }>(
-      `SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com'`,
+      `SELECT user_id FROM sys.sys_users WHERE user_email = 'enzo.spenuso@heuresys.com'`,
     );
     const createdBy = admin.rows[0]!.user_id;
     const ins = await pool.query<{ skill_id: string }>(

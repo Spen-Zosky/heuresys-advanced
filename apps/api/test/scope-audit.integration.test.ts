@@ -53,7 +53,7 @@ describe("scope/audit — the authorizing axis is recorded (F6, ADR-0027)", () =
 
   beforeAll(async () => {
     [admin, federica, paolo] = await Promise.all([
-      actorFor("admin@heuresys.com"),
+      actorFor("enzo.spenuso@heuresys.com"),
       actorFor("federica.marchetti@rtl-bank.org"),
       actorFor("paolo.caputo@rtl-bank.org"),
     ]);

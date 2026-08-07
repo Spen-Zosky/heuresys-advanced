@@ -43,14 +43,14 @@ interface OperatingModelDto {
 interface ErrEnvelope { error: { code: string; message: string } }
 
 let suite: TestApp;
-let platformS: S;   // admin@heuresys.com           — PLATFORM_ADMIN
+let platformS: S;   // enzo.spenuso@heuresys.com           — PLATFORM_ADMIN
 let userS: S;       // antonio.parisi@rtl-bank.org   — plain USER (lacks enterprise_typing perms)
 const createdIds: string[] = [];
 
 describe("/v1/operating-models/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     userS = await login(suite, "antonio.parisi@rtl-bank.org");
   });
 

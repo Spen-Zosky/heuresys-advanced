@@ -40,13 +40,13 @@ async function login(t: TestApp, email: string): Promise<S> {
 const BASE = "/v1/visualization-node-layouts";
 
 let suite: TestApp;
-let platformS: S; // admin@heuresys.com — PLATFORM_ADMIN (has read + update_layout)
+let platformS: S; // enzo.spenuso@heuresys.com — PLATFORM_ADMIN (has read + update_layout)
 let userS: S;     // tommaso.fiore@rtl-bank.org — USER (has visualization:read, NOT update_layout)
 
 describe(`${BASE}/* integration`, () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });
 

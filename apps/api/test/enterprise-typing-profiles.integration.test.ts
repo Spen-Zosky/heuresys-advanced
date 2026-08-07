@@ -55,7 +55,7 @@ let createdProfileId: string | null = null;
 describe("/v1/enterprise-typing-profiles/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
 
     const t = await pool.query<{ tenant_id: string }>(

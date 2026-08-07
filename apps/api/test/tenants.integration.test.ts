@@ -13,7 +13,7 @@ import { pool, closePool } from "../src/db/client.js";
 import { tenantsService } from "../src/modules/tenants/service.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const ADMIN_EMAIL = "admin@heuresys.com";
+const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
 const ADMIN_PASSWORD = TEST_PERSONA_PASSWORD;
 
 // Per-suite prefix so concurrent or repeated runs produce unique codes.

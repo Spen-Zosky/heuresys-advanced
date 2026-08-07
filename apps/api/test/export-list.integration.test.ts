@@ -23,7 +23,7 @@ let adminCookies: Map<string, string>;
 describe("GET /v1/users — generic ?format export hook (3.5)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    const r = await loginRaw(suite.app, "admin@heuresys.com", PWD);
+    const r = await loginRaw(suite.app, "enzo.spenuso@heuresys.com", PWD);
     adminCookies = new Map<string, string>();
     for (const c of r.cookies) adminCookies.set(c.name, c.value);
   });

@@ -610,7 +610,7 @@ END $fn$;
 -- C2c — il reviewer è il manager gerarchico reale del soggetto (catena
 -- assignment PRIMARY ACTIVE → position → reports_to → assignment PRIMARY
 -- ACTIVE); per il vertice senza manager il fallback legittimo è il service
--- account admin@heuresys.com. («alla data» arriverà con la history di C6.)
+-- account enzo.spenuso@heuresys.com. («alla data» arriverà con la history di C6.)
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION staging.storia36_check_c2c()
 RETURNS void LANGUAGE plpgsql AS $fn$
@@ -639,7 +639,7 @@ BEGIN
     AND r.review_subject_user_id IS NOT NULL
     AND r.review_reviewer_user_id IS DISTINCT FROM COALESCE(
           NULLIF(m.mgr, r.review_subject_user_id),
-          (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com'));
+          (SELECT user_id FROM sys.sys_users WHERE user_email = 'enzo.spenuso@heuresys.com'));
   IF v_cnt > 0 THEN
     RAISE EXCEPTION 'C2c: % review con reviewer diverso dal manager gerarchico (es. %)', v_cnt, v_sample;
   END IF;

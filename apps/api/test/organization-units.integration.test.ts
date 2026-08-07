@@ -258,7 +258,7 @@ describe("/v1/organization-units/* integration", () => {
     });
 
     it("PLATFORM_ADMIN gets a diagnostic 409, not a masked 404", async () => {
-      const platformS = await login(suite, "admin@heuresys.com");
+      const platformS = await login(suite, "enzo.spenuso@heuresys.com");
       const own = await suite.app.inject({
         method: "POST", url: "/v1/organization-units",
         headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },

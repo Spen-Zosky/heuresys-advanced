@@ -8,7 +8,7 @@
  * live GET /v1/analytics/skills payload the page fetches at runtime. This is a
  * COVERAGE view (evidence distribution), not a held-vs-required gap.
  *
- * Persona: platformAdmin (admin@heuresys.com → PLATFORM scope). `analytics:view`
+ * Persona: platformAdmin (enzo.spenuso@heuresys.com → PLATFORM scope). `analytics:view`
  * is granted to the admin roles by migration 000057.
  */
 

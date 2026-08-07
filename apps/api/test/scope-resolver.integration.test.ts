@@ -48,7 +48,7 @@ describe("scope/resolver — org read scope + managerial constraint (F1, ADR-002
 
   beforeAll(async () => {
     [admin, federica, paolo] = await Promise.all([
-      actorFor("admin@heuresys.com"),
+      actorFor("enzo.spenuso@heuresys.com"),
       actorFor("federica.marchetti@rtl-bank.org"),
       actorFor("paolo.caputo@rtl-bank.org"),
     ]);

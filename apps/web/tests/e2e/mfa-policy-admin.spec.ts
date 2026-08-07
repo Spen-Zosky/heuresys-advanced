@@ -15,7 +15,7 @@ test.use({ storageState: storageStateFor("platformAdmin") });
 /** API-context login (dual-mode S983 WS-E): cookie-bound context + csrf. */
 async function apiLogin() {
   const ctx = await pwRequest.newContext({ baseURL: API_BASE });
-  const { csrfToken } = await completeApiLogin(ctx, "admin@heuresys.com");
+  const { csrfToken } = await completeApiLogin(ctx, "enzo.spenuso@heuresys.com");
   return { ctx, csrfToken };
 }
 

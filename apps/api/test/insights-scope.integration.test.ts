@@ -37,7 +37,7 @@
  *   - tommaso.fiore@rtl-bank.org      USER          → IN paolo's sub-tree (report); no insights:view
  *   - antonio.parisi@rtl-bank.org     USER          → OUTSIDER (peer, I19 — not in the sub-tree)
  *   - federica.marchetti@rtl-bank.org TENANT_ADMIN  → HR-mandated, tenant-wide (I20)
- *   - admin@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
+ *   - enzo.spenuso@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
  *
  * insights:view is admin/manager-only (D-6, no ESS self-view). A plain USER (tommaso/antonio)
  * has NO insights:view at all — the strongest self-floor: no cross-user read surface exists for
@@ -157,7 +157,7 @@ describe("/v1/insights — F3 org-axis isolation (ADR-0027, D-50)", () => {
     tommaso = await login(suite, sottoposto.email);
     antonio = await login(suite, estraneo.email);
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
-    admin = await login(suite, "admin@heuresys.com");
+    admin = await login(suite, "enzo.spenuso@heuresys.com");
 
     // Guarantee derived rows exist for the whole active population (tommaso + antonio incl.)
     // so the positive/anti-leak assertions have real subjects. Flight-risk is the primary

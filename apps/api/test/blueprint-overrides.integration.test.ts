@@ -54,7 +54,7 @@ interface ErrEnvelope {
 }
 
 let suite: TestApp;
-let platformS: S; // admin@heuresys.com  — PLATFORM_ADMIN (holds blueprint:override)
+let platformS: S; // enzo.spenuso@heuresys.com  — PLATFORM_ADMIN (holds blueprint:override)
 let managerS: S; // paolo.caputo@rtl-bank.org — MANAGER (blueprint:read only, NO override)
 let userS: S; // tommaso.fiore@rtl-bank.org — USER (blueprint:read only, NO override)
 
@@ -65,7 +65,7 @@ const createdOverrideIds: string[] = [];
 describe("/v1/blueprint-overrides/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     managerS = await login(suite, "paolo.caputo@rtl-bank.org");
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });

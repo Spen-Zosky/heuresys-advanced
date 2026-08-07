@@ -152,7 +152,7 @@ async function emailSenzaDeleghe(): Promise<string> {
 describe("/v1/me/interfaces", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    adminC = await login(suite, "admin@heuresys.com");
+    adminC = await login(suite, "enzo.spenuso@heuresys.com");
     managerC = await login(suite, "paolo.caputo@rtl-bank.org");
     userEmail = await emailSenzaDeleghe();
     userC = await login(suite, userEmail);
@@ -173,7 +173,7 @@ describe("/v1/me/interfaces", () => {
     // passed only because the gate never evaluated that permission. Now the expectation is
     // derived from the permissions the role actually holds — which also makes this test the
     // guard for "the platform admin cannot read the whistleblowing reports either".
-    const adminPerms = await permsForEmail("admin@heuresys.com");
+    const adminPerms = await permsForEmail("enzo.spenuso@heuresys.com");
     const atteso = registry.filter((r) => r.reqPair === null || adminPerms.has(r.reqPair));
     expect(allCodes(b).sort()).toEqual(atteso.map((r) => r.code).sort());
     // e il caso che rende la verifica non cieca: c'e' almeno una voce che l'admin NON vede

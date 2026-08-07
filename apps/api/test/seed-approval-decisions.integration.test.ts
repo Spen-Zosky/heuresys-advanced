@@ -59,7 +59,7 @@ const createdDecisionIds: string[] = [];
 describe("/v1/seed-approval-decisions/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     managerS = await login(suite, "paolo.caputo@rtl-bank.org");
 
     // Pick any existing tenant to satisfy the FK chain (PLATFORM_ADMIN bypasses scoping on create).

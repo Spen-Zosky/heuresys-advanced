@@ -61,7 +61,7 @@ test.afterAll(async ({ request }) => {
       "i18n-en locale restore FAILED — platformAdmin may be stuck on locale=en and " +
         "every IT-asserting spec would fail until recovered. Recover with: " +
         "UPDATE sys.sys_user_preferences SET user_preference_locale='it' WHERE user_preference_user_id = " +
-        "(SELECT user_id FROM sys.sys_users WHERE user_email='admin@heuresys.com'); — " +
+        "(SELECT user_id FROM sys.sys_users WHERE user_email='enzo.spenuso@heuresys.com'); — " +
         String(err),
     );
   }

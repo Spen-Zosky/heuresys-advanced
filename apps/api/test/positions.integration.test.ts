@@ -11,7 +11,7 @@ import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
-const PLATFORM_EMAIL = "admin@heuresys.com";
+const PLATFORM_EMAIL = "enzo.spenuso@heuresys.com";
 const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
 const MANAGER_EMAIL = "paolo.caputo@rtl-bank.org";
 const EMPLOYEE_EMAIL = "tommaso.fiore@rtl-bank.org";

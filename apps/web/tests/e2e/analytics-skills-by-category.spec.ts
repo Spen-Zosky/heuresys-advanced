@@ -8,7 +8,7 @@
  * live GET /v1/analytics/skills-by-category payload the page fetches at runtime.
  * Same COVERAGE distribution as /analytics/skills, re-pivoted on skill_category.
  *
- * Persona: platformAdmin (admin@heuresys.com → PLATFORM scope). `analytics:view`
+ * Persona: platformAdmin (enzo.spenuso@heuresys.com → PLATFORM scope). `analytics:view`
  * is granted to the admin roles by migration 000057.
  */
 

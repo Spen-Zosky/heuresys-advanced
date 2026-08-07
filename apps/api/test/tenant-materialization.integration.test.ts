@@ -147,7 +147,7 @@ const SKIPPED_FIRST = () =>
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  admin = await login(suite, "admin@heuresys.com");
+  admin = await login(suite, "enzo.spenuso@heuresys.com");
   federica = await login(suite, "federica.marchetti@rtl-bank.org");
   await purgeRbr(RTL);
   await purgeRbr(HEU);

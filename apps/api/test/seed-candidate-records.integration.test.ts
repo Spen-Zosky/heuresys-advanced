@@ -47,13 +47,13 @@ interface ListResponse { items: SeedCandidateRecord[]; total: number }
 interface ErrorBody { error: { code: string; message: string; requestId?: string } }
 
 let suite: TestApp;
-let platformS: S;     // admin@heuresys.com — PLATFORM_ADMIN (has seed_acquisition:read)
+let platformS: S;     // enzo.spenuso@heuresys.com — PLATFORM_ADMIN (has seed_acquisition:read)
 let deniedS: S;       // tommaso.fiore@rtl-bank.org — USER (lacks seed_acquisition:read)
 
 describe("/v1/seed-candidate-records/* integration (read-only)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     deniedS = await login(suite, "tommaso.fiore@rtl-bank.org");
   });
 

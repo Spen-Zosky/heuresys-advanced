@@ -271,7 +271,7 @@ describe("#34 B3 — time-off request → manager approval → applied effect", 
   });
 
   it("a platform actor without tenant context cannot submit (403)", async () => {
-    const admin = await login("admin@heuresys.com"); // PLATFORM_ADMIN JWT carries a null tenant
+    const admin = await login("enzo.spenuso@heuresys.com"); // PLATFORM_ADMIN JWT carries a null tenant
     const r = await suite.app.inject({
       method: "POST", url: "/v1/me/time-off/requests", headers: headers(admin),
       payload: { leaveType: "VACATION", startDate: range.start, endDate: range.end },

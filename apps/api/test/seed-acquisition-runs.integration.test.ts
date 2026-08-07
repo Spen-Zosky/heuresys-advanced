@@ -54,7 +54,7 @@ const createdRunIds: string[] = [];
 describe("/v1/seed-acquisition-runs/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     // TENANT_ADMIN persona — has seed_acquisition:trigger AND a non-null tenantId,
     // so trigger() derives the tenant from actor.tenantId (no body.tenantId needed).
     tenantAdminS = await login(suite, "federica.marchetti@rtl-bank.org");

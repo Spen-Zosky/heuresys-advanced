@@ -33,7 +33,7 @@ async function login(t: TestApp, email: string): Promise<S> {
 }
 
 let suite: TestApp;
-let platformS: S;     // admin@heuresys.com — PLATFORM_ADMIN
+let platformS: S;     // enzo.spenuso@heuresys.com — PLATFORM_ADMIN
 let tenantS: S;       // federica.marchetti@rtl-bank.org — TENANT_ADMIN (has bpm_process:update but NOT platform)
 let userS: S;         // tommaso.fiore@rtl-bank.org — USER (read-only on bpm_process)
 
@@ -46,7 +46,7 @@ const createdTemplateIds: string[] = [];
 describe("/v1/process-kpi-templates/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
 

@@ -36,7 +36,7 @@ const PWD = TEST_PERSONA_PASSWORD;
 const FIXTURE_MODEL_VERSION = "f3-scope-fixture"; // marker → precise afterAll cleanup
 
 const EMAILS = {
-  admin: "admin@heuresys.com",
+  admin: "enzo.spenuso@heuresys.com",
   federica: "federica.marchetti@rtl-bank.org",
   paolo: "paolo.caputo@rtl-bank.org",
   tommaso: "tommaso.fiore@rtl-bank.org",

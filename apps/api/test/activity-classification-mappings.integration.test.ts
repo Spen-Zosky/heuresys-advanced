@@ -46,7 +46,7 @@ const createdMappingIds: string[] = [];
 describe(`${BASE}/* integration`, () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
     // Pull two distinct existing classification ids so the create happy path can
     // satisfy the acExists() FK checks in the service. If the table has < 2 rows

@@ -9,7 +9,7 @@
  * authenticator and is covered by a separate Playwright E2E — we do NOT forge a
  * full attestation blob here.
  *
- * Live DB: assumes seeded admin (admin@heuresys.com / <TEST_ADMIN_PASSWORD>). Each
+ * Live DB: assumes seeded admin (enzo.spenuso@heuresys.com / <TEST_ADMIN_PASSWORD>). Each
  * test cleans the user's MFA factors so re-runs are deterministic; the
  * credential rows cascade via the FK ON DELETE CASCADE.
  */
@@ -21,7 +21,7 @@ import { E2E_FIXTURE_LABEL } from "./helpers/mfa-fixture-secrets.js";
 import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const ADMIN_EMAIL = "admin@heuresys.com";
+const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
 const ADMIN_PASSWORD = TEST_PERSONA_PASSWORD;
 
 interface Bundle {

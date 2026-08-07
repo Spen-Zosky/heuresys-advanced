@@ -83,7 +83,7 @@ export function storageStateFor(persona: PersonaKey): string {
 
 export const PERSONAS = {
   platformAdmin: {
-    email: "admin@heuresys.com",
+    email: "enzo.spenuso@heuresys.com",
     expectedLandingPath: "/dashboard",
   },
   tenantAdmin: {

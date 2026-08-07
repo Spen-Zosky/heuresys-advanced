@@ -37,7 +37,7 @@ const SYNTH = [
 ];
 
 let suite: TestApp;
-let admin: S;        // admin@heuresys.com (PLATFORM_ADMIN) — sees all
+let admin: S;        // enzo.spenuso@heuresys.com (PLATFORM_ADMIN) — sees all
 let tenantAdmin: S;  // federica (RTL TENANT_ADMIN) — elevated, RTL scope
 let manager: S;      // paolo.caputo (RTL MANAGER) — elevated
 let plainUser: S;    // antonio.parisi (RTL TEAM_MEMBER+USER) — self-only
@@ -53,18 +53,18 @@ const JR_CODES = ["IT_MATCH_JR_NEAR", "IT_MATCH_JR_XT"];
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  admin = await login(suite, "admin@heuresys.com");
+  admin = await login(suite, "enzo.spenuso@heuresys.com");
   tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
   plainUser = await login(suite, "antonio.parisi@rtl-bank.org");
 
   const ids = await pool.query<{ user_id: string; user_tenant_id: string; user_email: string }>(
     `SELECT user_id, user_tenant_id, user_email FROM sys.sys_users
-     WHERE user_email IN ('paolo.caputo@rtl-bank.org','antonio.parisi@rtl-bank.org','admin@heuresys.com')`);
+     WHERE user_email IN ('paolo.caputo@rtl-bank.org','antonio.parisi@rtl-bank.org','enzo.spenuso@heuresys.com')`);
   const by = (e: string) => ids.rows.find((r) => r.user_email === e)!;
   antonioId = by("antonio.parisi@rtl-bank.org").user_id;
   const rtlTenant = by("paolo.caputo@rtl-bank.org").user_tenant_id;
-  const heuTenant = by("admin@heuresys.com").user_tenant_id;
+  const heuTenant = by("enzo.spenuso@heuresys.com").user_tenant_id;
 
   // Defensive pre-clean (in case a prior run crashed before afterAll).
   await pool.query(`DELETE FROM sys.sys_users WHERE user_email = ANY($1)`, [SYNTH]);

@@ -91,7 +91,7 @@ beforeAll(async () => {
       escoSkillUriSource: async () => [GROUPED_URI, UNGROUPED_URI],
     },
   });
-  admin = await login(suite, "admin@heuresys.com");
+  admin = await login(suite, "enzo.spenuso@heuresys.com");
   await pool.query(DELETE_SKILLS, [`${SKILL_PREFIX}%`]);
   await pool.query(INSERT_SKILLS, [GROUPED_URI, UNGROUPED_URI]);
   await pool.query(RESET_WATERMARK);

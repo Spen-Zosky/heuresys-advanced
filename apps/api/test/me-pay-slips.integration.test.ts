@@ -24,7 +24,7 @@ function get(t: TestApp, c: string, url: string) {
 
 let suite: TestApp;
 let withSlips: string;    // antonio.parisi — imported pay-slips
-let noSlips: string;      // admin@heuresys.com — platform account, never has slips
+let noSlips: string;      // enzo.spenuso@heuresys.com — platform account, never has slips
 
 describe("/v1/me/pay-slips — F4 cedolini", () => {
   beforeAll(async () => {
@@ -35,10 +35,10 @@ describe("/v1/me/pay-slips — F4 cedolini", () => {
     const { rows } = await pool.query<{ n: string }>(
       `SELECT count(*)::text AS n FROM sys.sys_user_pay_slips s
         JOIN sys.sys_users u ON u.user_id = s.user_pay_slip_user_id
-       WHERE u.user_email = 'admin@heuresys.com'`,
+       WHERE u.user_email = 'enzo.spenuso@heuresys.com'`,
     );
-    expect(Number(rows[0]?.n ?? -1), "admin@heuresys.com deve essere senza cedolini").toBe(0);
-    noSlips = await cookie(suite, "admin@heuresys.com");
+    expect(Number(rows[0]?.n ?? -1), "enzo.spenuso@heuresys.com deve essere senza cedolini").toBe(0);
+    noSlips = await cookie(suite, "enzo.spenuso@heuresys.com");
   });
   afterAll(async () => { await suite.app.close(); await closePool(); });
 

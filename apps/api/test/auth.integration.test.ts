@@ -3,7 +3,7 @@
  * Integration tests for the /v1/auth/* module. Uses Fastify's app.inject()
  * (no socket) so tests run fast and deterministically.
  *
- * Live DB dependency: tests assume the test-admin (admin@heuresys.com /
+ * Live DB dependency: tests assume the test-admin (enzo.spenuso@heuresys.com /
  * <TEST_ADMIN_PASSWORD>) has been seeded via `pnpm db:seed-test-admin`.
  */
 
@@ -25,7 +25,7 @@ function sha256(value: string): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
-const ADMIN_EMAIL = "admin@heuresys.com";
+const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
 const ADMIN_PASSWORD = passwordFor(ADMIN_EMAIL);
 
 interface LoginBundle {
@@ -458,7 +458,7 @@ describe("/v1/auth/* integration", () => {
     const adminRow = await pool.query<{ user_id: string; user_tenant_id: string }>(
       `SELECT user_id, user_tenant_id FROM sys.sys_users
         WHERE user_email = $1 LIMIT 1`,
-      ["admin@heuresys.com"],
+      ["enzo.spenuso@heuresys.com"],
     );
     expect(adminRow.rows.length).toBe(1);
     const target = adminRow.rows[0]!;

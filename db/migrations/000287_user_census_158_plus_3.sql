@@ -92,9 +92,16 @@ DECLARE
   v_tipo text;
   v_det  text;
 BEGIN
+  -- ⚠️ EMENDATO S1049 (#139): la verifica e' CONDIZIONATA all'esistenza dell'account.
+  -- Quando questa migrazione fu scritta, `admin@heuresys.com` esisteva e il rimedio era
+  -- tipizzarlo SERVICE per toglierlo dal conteggio delle persone. Il 2026-08-08 Enzo ha
+  -- deciso che quell'account non deve esistere affatto, e la `000295` lo rimuove
+  -- ri-attribuendone la paternita'. Da allora la verifica pretendeva un tipo su una riga
+  -- assente. La proprieta' vera non e' mai stata «esiste ed e' SERVICE»: e' «non conta
+  -- come persona», e un account che non c'e' la soddisfa nel modo piu' pieno.
   SELECT user_type INTO v_tipo FROM sys.sys_users WHERE user_email = 'admin@heuresys.com';
-  IF v_tipo IS DISTINCT FROM 'SERVICE' THEN
-    RAISE EXCEPTION '000287: admin@heuresys.com risulta % invece di SERVICE', COALESCE(v_tipo,'(assente)');
+  IF v_tipo IS NOT NULL AND v_tipo <> 'SERVICE' THEN
+    RAISE EXCEPTION '000287: admin@heuresys.com esiste e risulta % invece di SERVICE', v_tipo;
   END IF;
 
   SELECT count(*), string_agg(tenant_code||': attese '||persone_attese||', reali '||persone_reali||' ('||motivo||')', ' · ')

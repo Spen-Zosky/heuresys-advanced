@@ -32,7 +32,7 @@ const createdSkillIds: string[] = [];
 describe("/v1/skill-taxonomy-edges/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
     // Two global skills as endpoints for edges.
     const sp = await suite.app.inject({

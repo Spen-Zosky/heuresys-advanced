@@ -12,7 +12,7 @@
  *   - logout clears the refresh cookie on BOTH the live path ("/") and the
  *     legacy "/v1/auth" path (pre-D-26 cookies in the wild).
  *
- * Live DB dependency: admin@heuresys.com seeded via `pnpm db:seed-test-admin`.
+ * Live DB dependency: enzo.spenuso@heuresys.com seeded via `pnpm db:seed-test-admin`.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -26,7 +26,7 @@ import {
 import { closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 
-const ADMIN_EMAIL = "admin@heuresys.com";
+const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
 const ADMIN_PASSWORD = TEST_PERSONA_PASSWORD;
 
 /** light-my-request parsed Set-Cookie entry (attributes included). */

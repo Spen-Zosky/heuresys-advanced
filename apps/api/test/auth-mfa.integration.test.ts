@@ -84,7 +84,7 @@ describe("/v1/auth/login MFA gating (X20)", () => {
     // Repurposed from "no-MFA account logs in directly": with the e2e-fixture
     // TOTP factor live there IS no factor-less admin — the invariant under
     // test is that the login always completes to a FULL session.
-    const resp = await loginRaw(app.app, "admin@heuresys.com");
+    const resp = await loginRaw(app.app, "enzo.spenuso@heuresys.com");
     expect(resp.statusCode).toBe(200);
     const json = resp.json();
     expect(json.status).toBe("success");

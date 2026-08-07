@@ -9,7 +9,7 @@
  * page itself uses at runtime), so the UI value is verified against the live
  * API response — not a constant baked into the test.
  *
- * Persona: platformAdmin (admin@heuresys.com → PLATFORM scope). The
+ * Persona: platformAdmin (enzo.spenuso@heuresys.com → PLATFORM scope). The
  * `analytics:view` permission is granted to the admin roles by migration
  * 000057. Auth is the persisted storageState produced once by auth.setup.ts;
  * this spec performs no inline login (canonical fixtures pattern).

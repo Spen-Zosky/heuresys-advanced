@@ -22,8 +22,8 @@
 -- COSA SI CORREGGE. Il revisore di ogni valutazione diventa il responsabile
 -- gerarchico del soggetto (catena `reports_to` sull'assegnazione PRIMARY/ACTIVE) —
 -- cioè esattamente la proprietà che `C2c` dichiara. Al vertice la catena non ha un
--- sopra: le 3 valutazioni di `federica.marchetti` (CEO) restano firmate da
--- `admin@heuresys.com`, che è la deroga già prevista dal controllo e l'unico caso di
+-- sopra: le 3 valutazioni di `federica.marchetti` (CEO) restano firmate dal
+-- proprietario della piattaforma, che è la deroga già prevista dal controllo e l'unico caso di
 -- revisore fuori dal tenant.
 --
 -- QUALE GERARCHIA, E PERCHÉ QUESTA. Si usa quella di **oggi**, anche per le
@@ -62,9 +62,14 @@ DECLARE
   v_dopo  bigint;
   v_upd   bigint;
 BEGIN
-  SELECT user_id INTO v_admin FROM sys.sys_users WHERE user_email = 'admin@heuresys.com';
+  -- ⚠️ EMENDATO S1049 (#139): la deroga per il vertice era `admin@heuresys.com`, l'utenza
+  -- tecnica. Il 2026-08-08 Enzo ha deciso che quell'account non deve esistere e che le sue
+  -- funzioni sono sue: il revisore del vertice diventa il PROPRIETARIO della piattaforma,
+  -- che e' anche piu' vero di prima — la CEO la valuta chi possiede l'azienda, non un
+  -- account di servizio. Lo stesso indirizzo e' gia' la deroga usata dal check `C2c`.
+  SELECT user_id INTO v_admin FROM sys.sys_users WHERE user_email = 'enzo.spenuso@heuresys.com';
   IF v_admin IS NULL THEN
-    RAISE EXCEPTION '000288: manca il revisore di deroga per il vertice (admin@heuresys.com)';
+    RAISE EXCEPTION '000288: manca il revisore di deroga per il vertice (enzo.spenuso@heuresys.com)';
   END IF;
 
   -- Il bersaglio, calcolato una volta: e' LA STESSA espressione che usa C2c, per

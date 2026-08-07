@@ -86,19 +86,19 @@ async function inboxCount(stepId: string): Promise<number> {
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  admin = await login(suite, "admin@heuresys.com");
+  admin = await login(suite, "enzo.spenuso@heuresys.com");
   federica = await login(suite, "federica.marchetti@rtl-bank.org");
   paolo = await login(suite, "paolo.caputo@rtl-bank.org");
   tommaso = await login(suite, "tommaso.fiore@rtl-bank.org");
 
   const ids = await pool.query<{ user_id: string; user_email: string }>(
     `SELECT user_id, user_email FROM sys.sys_users WHERE user_email = ANY($1)`,
-    [["federica.marchetti@rtl-bank.org", "paolo.caputo@rtl-bank.org", "tommaso.fiore@rtl-bank.org", "admin@heuresys.com"]],
+    [["federica.marchetti@rtl-bank.org", "paolo.caputo@rtl-bank.org", "tommaso.fiore@rtl-bank.org", "enzo.spenuso@heuresys.com"]],
   );
   const byEmail = new Map(ids.rows.map((r) => [r.user_email, r.user_id]));
   federicaId = byEmail.get("federica.marchetti@rtl-bank.org")!;
   paoloId = byEmail.get("paolo.caputo@rtl-bank.org")!;
-  adminId = byEmail.get("admin@heuresys.com")!;
+  adminId = byEmail.get("enzo.spenuso@heuresys.com")!;
 
   // A tenant that is NOT RTL (for the I5 no-leak proof). admin (HEURESYS) belongs to it.
   const heu = await pool.query<{ user_tenant_id: string }>(`SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1`, [adminId]);

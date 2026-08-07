@@ -33,7 +33,7 @@ async function login(t: TestApp, email: string): Promise<S> {
 }
 
 let suite: TestApp;
-let platformS: S;   // admin@heuresys.com           = PLATFORM_ADMIN
+let platformS: S;   // enzo.spenuso@heuresys.com           = PLATFORM_ADMIN
 let tenantS: S;     // federica.marchetti@rtl-bank  = TENANT_ADMIN (not platform -> mutation 403)
 let userS: S;       // tommaso.fiore@rtl-bank       = USER (no blueprint:override -> mutation 403)
 let familyId: string;
@@ -42,7 +42,7 @@ const createdVariantIds: string[] = [];
 describe("/v1/blueprint-variants/* integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
     userS = await login(suite, "tommaso.fiore@rtl-bank.org");
     // Seed a real parent blueprint family (FK target) as PLATFORM_ADMIN, mirroring the

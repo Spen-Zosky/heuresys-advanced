@@ -396,28 +396,32 @@ BEGIN
     RAISE EXCEPTION 'Esistono unita attive senza nessuna persona';
   END IF;
 
-  -- 4. IL VERDETTO: le sei regole strutturali a zero violazioni.
-  --    La settima riga della funzione — «persone attive senza posizione» — non e' una
-  --    regola dell'organigramma ma una misura, e alla prima applicazione reale (S1043)
-  --    valeva 1: admin@heuresys.com, un'UTENZA DI SERVIZIO del tenant Heuresys, che una
-  --    posizione non deve averla perche' non e' una persona dell'organigramma. La sua
-  --    sorte e' gia' una domanda aperta a se' stante (le sue funzioni dovevano passare a
-  --    enzo.spenuso@heuresys.com). Qui non si allarga la soglia: si pretende ESATTAMENTE
-  --    quell'utenza e nessun'altra, cosi' se domani a restare senza posizione fosse una
-  --    persona vera il conteggio salirebbe a 2 e questa verifica cadrebbe.
+  -- 4. IL VERDETTO: TUTTE le regole strutturali a zero violazioni, «persone attive
+  --    senza posizione» compresa.
+  --    ⚠️ EMENDATO S1049 (#139), e la domanda che questo commento lasciava aperta ha
+  --    avuto risposta. Alla prima applicazione (S1043) la misura valeva 1:
+  --    admin@heuresys.com, un'utenza di servizio del tenant Heuresys — e qui era scritto
+  --    che «le sue funzioni dovevano passare a enzo.spenuso@heuresys.com». Il 2026-08-08
+  --    Enzo ha deciso: quell'account non deve esistere, le sue funzioni sono sue. La
+  --    `000295` gli trasferisce il mandato PLATFORM_ADMIN e rimuove l'account.
+  --    L'attesa NON e' un numero fisso: e' «zero persone senza posizione, piu' l'utenza
+  --    di servizio SE esiste ancora». Serve perche' questo file gira PRIMA della `000295`
+  --    che la rimuove: alla prima applicazione della catena l'account c'e' ancora e le
+  --    violazioni sono 1, dalla seconda in poi sono 0. Un numero fisso sarebbe giusto in
+  --    uno dei due mondi e sbagliato nell'altro; una soglia larga (`<= 1`) sarebbe la
+  --    tolleranza che l'autore aveva esplicitamente rifiutato. La forma corretta e'
+  --    dedurre l'attesa dallo stato, e pretendere che chi manca sia ESATTAMENTE quello.
+  SELECT count(*) INTO n_senza_pos FROM sys.sys_users u
+   WHERE u.user_status = 'ACTIVE' AND u.user_email = 'admin@heuresys.com'
+     AND NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
+                      WHERE a.user_position_assignment_user_id = u.user_id
+                        AND a.user_position_assignment_status = 'ACTIVE');
+
   FOR r IN SELECT * FROM sys.fn_organization_integrity_violations() LOOP
     IF r.regola = 'persone attive senza posizione' THEN
-      IF r.violazioni <> 1 THEN
-        RAISE EXCEPTION 'Persone attive senza posizione: attesa 1 (la sola utenza di servizio), trovate %',
-                        r.violazioni;
-      END IF;
-      IF NOT EXISTS (
-        SELECT 1 FROM sys.sys_users u
-         WHERE u.user_status = 'ACTIVE' AND u.user_email = 'admin@heuresys.com'
-           AND NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
-                            WHERE a.user_position_assignment_user_id = u.user_id
-                              AND a.user_position_assignment_status = 'ACTIVE')) THEN
-        RAISE EXCEPTION 'Senza posizione c e qualcuno che non e l utenza di servizio attesa';
+      IF r.violazioni <> n_senza_pos THEN
+        RAISE EXCEPTION 'Persone attive senza posizione: attese % (l utenza di servizio, se esiste), trovate %',
+                        n_senza_pos, r.violazioni;
       END IF;
     ELSIF r.violazioni <> 0 THEN
       RAISE EXCEPTION 'Regola non soddisfatta: «%» con % violazioni', r.regola, r.violazioni;

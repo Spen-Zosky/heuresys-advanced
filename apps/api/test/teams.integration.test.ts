@@ -10,7 +10,7 @@
  *
  * Read-only: no inserts → no cleanup. Personas (seeded, real RTL_BANK users):
  *   federica.marchetti (TENANT_ADMIN) · marco.rinaldi (TEAM_LEADER of DIV-CFO, member of DIR-INFRA)
- *   · antonio.parisi (TEAM_MEMBER of DIV-CFO) · admin@heuresys.com (PLATFORM_ADMIN).
+ *   · antonio.parisi (TEAM_MEMBER of DIV-CFO) · enzo.spenuso@heuresys.com (PLATFORM_ADMIN).
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { buildTestApp, type TestApp } from "./helpers/build-test-app.js";
@@ -52,7 +52,7 @@ let leaderTeamCodes: string[]; // tutte quelle che guida o a cui appartiene, ord
 describe("/v1/teams/* + /v1/me/team integration (WS-4 R1b)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    adminS = await login(suite, "admin@heuresys.com");
+    adminS = await login(suite, "enzo.spenuso@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
     leaderS = await login(suite, "marco.rinaldi@rtl-bank.org");
     memberS = await login(suite, "antonio.parisi@rtl-bank.org");

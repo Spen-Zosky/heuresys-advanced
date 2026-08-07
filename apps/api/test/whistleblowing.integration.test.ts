@@ -34,7 +34,7 @@ async function login(t: TestApp, email: string): Promise<S> {
 
 let suite: TestApp;
 let custodian: S; // antonio.parisi, granted WHISTLEBLOWING_CUSTODIAN in beforeAll
-let platformAdmin: S; // admin@heuresys.com — must NOT see reports
+let platformAdmin: S; // enzo.spenuso@heuresys.com — must NOT see reports
 let tenantAdmin: S; // federica — must NOT see reports
 
 describe("#51 E1 — whistleblowing (D.Lgs 24/2023)", () => {
@@ -55,7 +55,7 @@ describe("#51 E1 — whistleblowing (D.Lgs 24/2023)", () => {
     );
 
     custodian = await login(suite, "antonio.parisi@rtl-bank.org");
-    platformAdmin = await login(suite, "admin@heuresys.com");
+    platformAdmin = await login(suite, "enzo.spenuso@heuresys.com");
     tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
   }, 60_000);
 

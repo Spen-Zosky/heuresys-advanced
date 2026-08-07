@@ -17,7 +17,7 @@ let adminCsrf: string;
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  const r = await loginRaw(suite.app, "admin@heuresys.com", PWD);
+  const r = await loginRaw(suite.app, "enzo.spenuso@heuresys.com", PWD);
   adminCookies = cookieHeader(r.cookies);
   adminCsrf = (r.json() as { csrfToken: string }).csrfToken;
   await pool.query(`DELETE FROM sys.sys_leads WHERE lead_email LIKE $1`, [`%${E2E_DOMAIN}`]);

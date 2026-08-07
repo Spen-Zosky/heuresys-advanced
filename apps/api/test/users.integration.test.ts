@@ -19,7 +19,7 @@ import {
 } from "./helpers/org-actors.js";
 
 const PWD = TEST_PERSONA_PASSWORD;
-const PLATFORM_EMAIL = "admin@heuresys.com";
+const PLATFORM_EMAIL = "enzo.spenuso@heuresys.com";
 const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
 const MANAGER_EMAIL = "paolo.caputo@rtl-bank.org";
 /**

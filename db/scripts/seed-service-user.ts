@@ -20,7 +20,7 @@
  *   AGENT_SERVICE_USER_EMAIL        (required to provision)
  *   AGENT_SERVICE_USER_PASSWORD     (required to provision; secret, never logged)
  *   AGENT_SERVICE_USER_DISPLAY_NAME (optional, default "Agent SDK Service")
- *   AGENT_SERVICE_USER_TENANT_CODE  (optional; default = the tenant of admin@heuresys.com)
+ *   AGENT_SERVICE_USER_TENANT_CODE  (optional; default = the tenant of enzo.spenuso@heuresys.com)
  *   AGENT_SERVICE_USER_RESET_PASSWORD=1  (optional; rotate the credential)
  *
  * Run: pnpm tsx db/scripts/seed-service-user.ts   (or add a package.json script)
@@ -56,13 +56,13 @@ async function resolveTenantId(client: Client, code: string | undefined): Promis
     if (!r.rows[0]) throw new Error(`AGENT_SERVICE_USER_TENANT_CODE='${code}' not found in sys.sys_tenancies`);
     return r.rows[0].tenant_id;
   }
-  // Default: co-locate with the native platform admin (admin@heuresys.com).
+  // Default: co-locate with the native platform admin (enzo.spenuso@heuresys.com).
   const r = await client.query<{ user_tenant_id: string }>(
     `SELECT user_tenant_id FROM sys.sys_users WHERE lower(user_email) = lower($1)`,
-    ["admin@heuresys.com"],
+    ["enzo.spenuso@heuresys.com"],
   );
   if (!r.rows[0]) {
-    throw new Error("Cannot derive a tenant: admin@heuresys.com absent — set AGENT_SERVICE_USER_TENANT_CODE.");
+    throw new Error("Cannot derive a tenant: enzo.spenuso@heuresys.com absent — set AGENT_SERVICE_USER_TENANT_CODE.");
   }
   return r.rows[0].user_tenant_id;
 }

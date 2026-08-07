@@ -55,7 +55,7 @@ interface ListBody { items: Band[]; total: number }
 interface ErrBody { error: { code: string; message: string } }
 
 let suite: TestApp;
-let platformS: S;   // admin@heuresys.com — PLATFORM_ADMIN
+let platformS: S;   // enzo.spenuso@heuresys.com — PLATFORM_ADMIN
 let tenantS: S;     // federica.marchetti@rtl-bank.org — TENANT_ADMIN (lacks enterprise_typing:update / not platform)
 
 /** Snapshot of one seeded band, captured before any write so afterAll can restore it verbatim. */
@@ -78,7 +78,7 @@ function upsertPayload(b: Band) {
 describe("/v1/enterprise-size-bands integration", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    platformS = await login(suite, "admin@heuresys.com");
+    platformS = await login(suite, "enzo.spenuso@heuresys.com");
     tenantS = await login(suite, "federica.marchetti@rtl-bank.org");
   });
 

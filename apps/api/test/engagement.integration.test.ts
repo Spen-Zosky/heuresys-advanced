@@ -27,7 +27,7 @@ const get = (url: string, s: S) => suite.app.inject({ method: "GET", url, header
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  admin = await login("admin@heuresys.com");
+  admin = await login("enzo.spenuso@heuresys.com");
   tenantAdmin = await login("federica.marchetti@rtl-bank.org");
   user = await login("tommaso.fiore@rtl-bank.org");
 });

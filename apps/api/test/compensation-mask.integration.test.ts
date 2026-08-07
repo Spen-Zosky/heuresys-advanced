@@ -23,7 +23,7 @@ import { loginRaw } from "./helpers/login.js";
 import { pool, closePool } from "../src/db/client.js";
 import { passwordFor } from "./helpers/personas.js";
 
-const PLATFORM_EMAIL = "admin@heuresys.com";
+const PLATFORM_EMAIL = "enzo.spenuso@heuresys.com";
 const HR_MANDATE_EMAIL = "federica.marchetti@rtl-bank.org"; // TENANT_ADMIN — keeps access by I20
 
 interface Session {

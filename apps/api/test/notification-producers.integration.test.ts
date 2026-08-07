@@ -52,7 +52,7 @@ describe("3.4 notification producers (live)", () => {
   beforeAll(async () => {
     const u = await pool.query<{ user_id: string }>(
       `SELECT user_id FROM sys.sys_users WHERE user_email = $1`,
-      ["admin@heuresys.com"],
+      ["enzo.spenuso@heuresys.com"],
     );
     adminId = u.rows[0]!.user_id;
   });

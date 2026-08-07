@@ -28,7 +28,7 @@ let plainUser: S;   // USER — no content perms
 
 beforeAll(async () => {
   suite = await buildTestApp();
-  admin = await login(suite, "admin@heuresys.com");
+  admin = await login(suite, "enzo.spenuso@heuresys.com");
   author = await login(suite, "federica.marchetti@rtl-bank.org");
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
   plainUser = await login(suite, "tommaso.fiore@rtl-bank.org");
@@ -89,7 +89,7 @@ describe("content API (cap④ CMS)", () => {
   });
 
   it("PLATFORM_ADMIN without a tenant context → 403 TENANT_ID_REQUIRED (never a 500)", async () => {
-    // admin@heuresys.com is PLATFORM_ADMIN: its JWT carries a NULL tenant (cross-tenant
+    // enzo.spenuso@heuresys.com is PLATFORM_ADMIN: its JWT carries a NULL tenant (cross-tenant
     // read scope). Content is tenant-scoped (I5) so an admin author has no tenant to
     // write into → a clean 403, NEVER an unhandled not-null 500. Regression guard for the
     // missing resolveWriteTenant (the create path used to insert NULL tenant → 500).

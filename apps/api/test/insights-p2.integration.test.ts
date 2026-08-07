@@ -39,7 +39,7 @@ function list(s: S, slice: "succession-readiness" | "skill-gap") {
 describe("insights API P2 (cap③ succession-readiness + skill-gap)", () => {
   beforeAll(async () => {
     suite = await buildTestApp();
-    admin = await login(suite, "admin@heuresys.com");
+    admin = await login(suite, "enzo.spenuso@heuresys.com");
     tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
     manager = await login(suite, "paolo.caputo@rtl-bank.org");
     plainUser = await login(suite, "tommaso.fiore@rtl-bank.org");

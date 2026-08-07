@@ -8,7 +8,7 @@
  * live GET /v1/analytics/overtime payload the page itself fetches at runtime, so
  * the UI values are verified against the real API response, not constants.
  *
- * Persona: platformAdmin (admin@heuresys.com → PLATFORM scope). `analytics:view`
+ * Persona: platformAdmin (enzo.spenuso@heuresys.com → PLATFORM scope). `analytics:view`
  * is granted to the admin roles by migration 000057. Auth is the persisted
  * storageState from auth.setup.ts (no inline login).
  */

@@ -64,7 +64,7 @@ beforeAll(async () => {
       escoSkillUriSource: async () => [],
     },
   });
-  admin = await login(suite, "admin@heuresys.com");
+  admin = await login(suite, "enzo.spenuso@heuresys.com");
   tenantAdmin = await login(suite, "federica.marchetti@rtl-bank.org");
   manager = await login(suite, "paolo.caputo@rtl-bank.org");
   await pool.query("DELETE FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_esco_uri LIKE $1", [`${TEST_PREFIX}%`]);
@@ -217,7 +217,7 @@ describe("reference-sync API (cap⑤ ATECO_2025, 2nd source)", () => {
     atecoSuite = await buildTestApp({
       referenceSyncDeps: { atecoFetcher: new FixtureAtecoFetcher(ATECO_FIXTURE) },
     });
-    atecoAdmin = await login(atecoSuite, "admin@heuresys.com");
+    atecoAdmin = await login(atecoSuite, "enzo.spenuso@heuresys.com");
     await pool.query(DELETE_ATECO_ROWS);
     await pool.query(RESET_ATECO_WATERMARK);
   }, 60_000); // D-37: per-hook headroom (DB/login latency under full-suite load)
@@ -310,7 +310,7 @@ describe("reference-sync API (cap⑤ ESCO) — P2 FAILED path (HWM not advanced)
 
   beforeAll(async () => {
     failSuite = await buildTestApp({ referenceSyncDeps: { escoFetcher: new FailingEscoFetcher() } });
-    failAdmin = await login(failSuite, "admin@heuresys.com");
+    failAdmin = await login(failSuite, "enzo.spenuso@heuresys.com");
     // Simulate a prior SUCCESSFUL ingest so we can prove the failure does NOT advance the HWM.
     await pool.query(
       `UPDATE brownfield.source_watermarks

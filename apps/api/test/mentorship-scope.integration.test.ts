@@ -32,7 +32,7 @@
  *   - tommaso.fiore@rtl-bank.org      USER          → IN paolo's sub-tree (report)
  *   - antonio.parisi@rtl-bank.org     USER          → OUTSIDER (peer, I19 — not in the sub-tree)
  *   - federica.marchetti@rtl-bank.org TENANT_ADMIN  → HR-mandated, tenant-wide (I20)
- *   - admin@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
+ *   - enzo.spenuso@heuresys.com              PLATFORM_ADMIN → cross-tenant (sanity)
  *
  * `mentorship:read` is held by BLUEPRINT_MANAGER / HRMS_MANAGER / MANAGER / PLATFORM_ADMIN /
  * PROCESS_OWNER / TENANT_ADMIN. A plain USER (tommaso/antonio) holds none — the strongest
@@ -148,7 +148,7 @@ describe("/v1/mentorship — F3 org-axis isolation (ADR-0027, D-50)", () => {
     tommaso = await login(suite, sottoposto.email);
     antonio = await login(suite, estraneo.email);
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
-    admin = await login(suite, "admin@heuresys.com");
+    admin = await login(suite, "enzo.spenuso@heuresys.com");
 
     const t = await pool.query<{ user_tenant_id: string }>(
       `SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1`,

@@ -15,7 +15,7 @@ import { pool, closePool } from "../src/db/client.js";
 import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 import { env } from "../src/config/env.js";
 
-const ADMIN_EMAIL = "admin@heuresys.com";
+const ADMIN_EMAIL = "enzo.spenuso@heuresys.com";
 const TENANT_ADMIN_EMAIL = "federica.marchetti@rtl-bank.org";
 const SUITE_PREFIX = `PROV_${randomUUID().slice(0, 8).toUpperCase()}`;
 const NEW_ADMIN_PW = "Prov1sion#Pass!";

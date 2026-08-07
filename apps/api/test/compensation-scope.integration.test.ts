@@ -41,7 +41,7 @@
  *   - tommaso.fiore@rtl-bank.org     USER    → IN paolo's sub-tree (report)
  *   - antonio.parisi@rtl-bank.org    USER    → OUTSIDER (peer, I19 — not in the sub-tree)
  *   - federica.marchetti@rtl-bank.org TENANT_ADMIN → HR-mandated, tenant-wide (I20)
- *   - admin@heuresys.com             PLATFORM_ADMIN → cross-tenant (sanity)
+ *   - enzo.spenuso@heuresys.com             PLATFORM_ADMIN → cross-tenant (sanity)
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -144,7 +144,7 @@ describe("/v1/compensation/reward-gates — F3 org-axis isolation (ADR-0027, D-5
     tommaso = await login(suite, sottoposto.email);
     antonio = await login(suite, estraneo.email);
     federica = await login(suite, "federica.marchetti@rtl-bank.org");
-    admin = await login(suite, "admin@heuresys.com");
+    admin = await login(suite, "enzo.spenuso@heuresys.com");
 
     // Reuse any existing reward-gate catalog (FK target); avoids the blueprint FK chain.
     const cat = await pool.query<{ reward_gate_catalog_id: string }>(

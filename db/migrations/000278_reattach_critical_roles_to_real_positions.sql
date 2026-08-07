@@ -1,30 +1,3 @@
--- ⚠️ NON È UNA MIGRAZIONE ATTIVA — VIVE FUORI DA db/migrations/ DI PROPOSITO.
---
--- Scritta e COLLAUDATA in S1048 (2026-08-07), poi NON applicata. Sta qui e non
--- nella catena perché `migrate.sh` la eseguirebbe al primo deploy su VM o
--- linux-pc, e da sola lascia le posizioni critiche SENZA candidati: `C5b`
--- diventerebbe rosso su tutte e tre le macchine.
---
--- Cosa le manca per essere applicabile: il passo successivo previsto è
--- `db/seeds/storia36/05_career.sql`, che dovrebbe ricreare bacini e candidati.
--- Ma quel seed NON è più a delta zero (→ item #162): rieseguito oggi scrive 92
--- obiettivi di carriera, 22 incarichi precedenti e 23 ridatati, e introduce
--- `C5k(ii)` con 31 incarichi sovrapposti. **Misurato che il difetto è anteriore**
--- alla 000277: tornando indietro con `staging.storia36_155_rollback()` il seed
--- scriveva già 19 obiettivi e gli stessi 45 incarichi — la 000277 ha portato i 19
--- a 92 perché ora più posizioni attuali stanno dentro un percorso, che è
--- l'effetto voluto della riparazione, non un suo difetto.
---
--- Cosa È già provato di questo file: il riaggancio deciso da Enzo, l'allineamento
--- delle TRE tabelle che dichiarano la criticità (registro, anagrafica, rilevanza
--- di successione — `C5f` le pretende concordi in quattro versi), e il **rollback
--- integrale**, collaudato per impronta md5 riga-per-riga su 4 tabelle: tutte
--- tornate identiche (critiche 8, bacini 17, candidati 28, prontezze 79).
---
--- Per riprendere: risolvere #162, poi rimettere questo file in db/migrations/ col
--- numero libero successivo, ri-collaudare, applicare, eseguire il seed, custodia.
--- ═══════════════════════════════════════════════════════════════════════════════
-
 -- @migrate: once
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- 000278_reattach_critical_roles_to_real_positions.sql
@@ -97,6 +70,12 @@
 --
 -- Rieseguibile: agisce solo su ciò che è ancora agganciato male. Marcata `once`
 -- perché rimuove righe.
+--
+-- STATO (S1048): APPLICATA. Il blocco era `#162` — il seed su cui poggia il passo
+-- successivo produceva 31 incarichi sovrapposti. Risolto: il blocco della mobilità
+-- interna ora salta chi ha già un incarico chiuso, perché quella mobilità è VERA e
+-- non va inventata sopra. Collaudo congiunto migrazione+seed con tutti i check
+-- attivi: C5g, C5k, C5c e C5f passano; seconda corsa del seed a delta 0.
 -- Prerequisiti: 000277 applicata.
 -- ═══════════════════════════════════════════════════════════════════════════════
 

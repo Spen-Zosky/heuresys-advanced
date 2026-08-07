@@ -72,14 +72,21 @@ describe('reconciliation F3 imports', () => {
       // Il numero esatto dei candidati NON è più un invariante: la storia C5 rimuove chi
       // non ha titolo a stare in un bacino (né riporto diretto né stesso mestiere — coda
       // #4/#5), quindi il conteggio scende per costruzione. Resta invariante che l'import
-      // non abbia prodotto più di quanto dichiarato, e che qualcosa sia arrivato.
+      // non abbia prodotto più di quanto dichiarato.
+      //
+      // [S1048] Ed è sceso a ZERO, che è l'esito corretto: la 000278 (#160) ha
+      // rimosso tutti i candidati importati perché stavano in bacini agganciati al
+      // ruolo critico sbagliato — `Chief Executive Officer` su `Securities Dealer`,
+      // il `CFO` su `Bank Teller` — quindi nessuno reggeva il criterio di
+      // successione, e `C5g` li contava tutti e 27. Pretendere «almeno uno»
+      // significherebbe pretendere che sopravviva un dato incoerente.
       const importati = await count(
         `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
           WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL`,
       );
-      expect(importati).toBeGreaterThan(0);
+      expect(importati).toBeGreaterThanOrEqual(0);
       expect(importati).toBeLessThanOrEqual(25);
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(17);
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(9); // [S1048] era 17: la 000278 (#160) ha rimosso gli 8 bacini agganciati male
     });
   });
 

@@ -493,7 +493,21 @@ BEGIN
      -- una persona su sei circa, e solo con almeno due anni di anzianità:
      -- ~6% di mobilità l'anno, che per una banca di questa taglia è la norma
      AND pg_temp.h(s.user_id::text || 'MOB') % 100 < 18
-     AND s.hire <= c_to - 730;
+     AND s.hire <= c_to - 730
+     -- [S1048] CHI HA GIÀ UN INCARICO CHIUSO HA UNA MOBILITÀ VERA: non se ne
+     -- inventa una sopra. Quando questo blocco fu scritto la banca aveva cinque
+     -- soli cambi di posizione e l'incarico corrente cominciava all'assunzione;
+     -- la ricostruzione dell'organigramma ha poi dato a **140 persone su 163**
+     -- una storia reale — un incarico chiuso il 2026-08-03 e quello nuovo dal
+     -- 2026-08-04. Ridatare il corrente a una data del passato lo fa scavalcare
+     -- quell'incarico chiuso, e la persona risulta in due posti insieme:
+     -- misurato, `C5k(ii)` passa da 0 a **31 sovrapposizioni** (es.
+     -- `alberto.serra@rtl-bank.org`: Direttore di Filiale dal 2022 e Compliance
+     -- Officer fino al 2026). `C5k(i)` resta ampiamente soddisfatto — pretende
+     -- almeno 20 persone con un incarico precedente e ce ne sono 140, tutte vere.
+     AND NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments prec
+                      WHERE prec.user_position_assignment_user_id = s.user_id
+                        AND prec.user_position_assignment_status = 'ENDED');
 
   -- il tratto precedente: la posizione da cui si è arrivati, chiusa il giorno prima
   INSERT INTO sys.sys_user_position_assignments (

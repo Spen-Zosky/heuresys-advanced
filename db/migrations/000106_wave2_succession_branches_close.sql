@@ -135,7 +135,14 @@ BEGIN
   -- Conditional data asserts: hard only when the seeds have run (live DB);
   -- on a fresh rebuild (migrations run before seeds) emit a WARNING instead.
   SELECT count(*) INTO v_branches FROM sys.sys_branches;
-  SELECT count(*) INTO v_pools    FROM sys.sys_succession_pools;
+  -- [S1048] I bacini IMPORTATI, non tutti quelli presenti — stesso ragionamento
+  -- già applicato qui sotto ai candidati, esteso perché lo stato è cambiato di
+  -- nuovo. La 000278 (#160) ha rimosso i bacini agganciati a posizioni sbagliate
+  -- o disattivate, e un conteggio totale fotograferebbe di nuovo uno stato invece
+  -- di verificare l'import. Quelli importati dal Wave-2 si riconoscono
+  -- dall'`anchor` nei metadati, che solo il seed 49 scrive.
+  SELECT count(*) INTO v_pools    FROM sys.sys_succession_pools
+   WHERE succession_pool_metadata ? 'anchor';
   -- I candidati IMPORTATI, non tutti quelli presenti: la storia ne aggiunge
   -- (scelti col criterio di successione) e ne toglie (quelli senza criterio),
   -- e un conteggio totale qui fotograferebbe uno stato invece di verificare
@@ -145,10 +152,20 @@ BEGIN
   IF v_branches = 0 AND v_pools = 0 AND v_cands = 0 THEN
     RAISE WARNING 'WAVE2 close: targets empty — fresh rebuild detected; run db/seeds/reconciliation/49 + 50 after migrations.';
   ELSE
-    -- l'import ha portato 25 candidati; la storia può averne rimossi alcuni
-    -- (quelli che non erano né il riporto diretto della posizione né qualcuno
-    -- che ne fa il mestiere altrove), mai aggiunti con quella provenienza
-    IF v_branches <> 6 OR v_pools <> 17 OR v_cands > 25 OR v_cands = 0 THEN
+    -- L'import ha portato 25 candidati e 17 bacini; la storia può averne rimossi
+    -- — mai aggiunti con quella provenienza, ed è questo che si verifica: il
+    -- limite è verso l'ALTO, perché superarlo significherebbe che qualcuno sta
+    -- scrivendo righe spacciandole per import.
+    --
+    -- [S1048] Il minimo di 1 candidato è stato tolto, e i bacini scendono a 7.
+    -- La 000278 (#160) ha rimosso TUTTI i candidati importati, e non è una
+    -- perdita: erano appesi a bacini agganciati a posizioni che non c'entravano
+    -- col ruolo critico dichiarato (`Chief Executive Officer` su `Securities
+    -- Dealer`, `CFO` su `Bank Teller`), quindi nessuno di loro reggeva il
+    -- criterio di successione — `C5g` li contava tutti. Zero importati superstiti
+    -- è l'esito corretto di quella riparazione, non un import perso: le righe
+    -- sono in `staging.storia36_160_undo` e il rollback le rimette.
+    IF v_branches <> 6 OR v_pools <> 7 OR v_cands > 25 THEN
       RAISE EXCEPTION 'WAVE2 assert: imported counts wrong branches=% pools=% candidates=% (exp 6/17/1..25)', v_branches, v_pools, v_cands;
     END IF;
     SELECT count(*) INTO v_populated3

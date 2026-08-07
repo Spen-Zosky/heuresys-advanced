@@ -8,7 +8,7 @@ import { TEST_PERSONA_PASSWORD } from "./helpers/personas.js";
 // were imported under PM decisions D1-D3 (Enzo 2026-06-10, dossiers
 // docs/kb/B50_DEFER_UNBLOCK_PACKAGE.md + WAVE2_UNBLOCK_PACKAGE.md):
 //   sys_branches             6  (anchor-OU rule, 5 RTL + 1 HS)
-//   sys_succession_pools     17 (15 incumbent-anchor + 2 PM-signed title-match)
+//   sys_succession_pools     17 (15 incumbent-anchor + 2 PM-signed title-match) → 9 dopo la 000278 (#160)
 //   sys_successor_candidates 25 (24 RTL + 1 HS; plan-cascade via the corrected false friend)
 // Hits the live DB (no mocks). Pool shared across the suite — NOT closed here.
 
@@ -47,13 +47,23 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
   });
 
   describe('sys_succession_pools (seed 49, D2=incumbent-anchor + title-match)', () => {
-    it('17 pools (16 RTL + 1 HS): 15 incumbent + 2 title_match, all ACTIVE, position FK tenant-coherent', async () => {
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(17);
-      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools WHERE succession_pool_tenant_id = $1`, [RTL])).toBe(16);
+    /**
+     * [S1048] Erano 17. La 000278 (#160) ha rimosso i bacini appesi a posizioni
+     * DISATTIVATE e quelli agganciati a un ruolo critico che non era il loro —
+     * `Chief Executive Officer` stava su `Securities Dealer`, il `CFO` su
+     * `Bank Teller`. Restano **9**: 7 con la provenienza dell'import (5
+     * incumbent + 2 title_match) e 2 creati dal seed storia36 per le due
+     * posizioni critiche che un bacino non l'avevano ancora.
+     * Non è import perso: ogni riga è in `staging.storia36_160_undo` e
+     * `SELECT staging.storia36_160_rollback();` la rimette.
+     */
+    it('9 pools (8 RTL + 1 HS): 5 incumbent + 2 title_match + 2 dalla storia, all ACTIVE, position FK tenant-coherent', async () => {
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools`)).toBe(9);
+      expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools WHERE succession_pool_tenant_id = $1`, [RTL])).toBe(8);
       expect(await count(`SELECT count(*)::int AS n FROM sys.sys_succession_pools WHERE succession_pool_tenant_id = $1`, [HS])).toBe(1);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_succession_pools WHERE succession_pool_metadata->>'anchor' = 'incumbent'`,
-      )).toBe(15);
+      )).toBe(5);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_succession_pools WHERE succession_pool_metadata->>'anchor' = 'title_match'`,
       )).toBe(2);
@@ -68,13 +78,16 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
       )).toBe(0);
     });
 
-    it('code provenance prefixes: 9 LEGACY_SPLAN:: (7 incumbent + 2 title-match) + 8 LEGACY_CROLE::', async () => {
+    // [S1048] Gli 8 `LEGACY_CROLE::` sono spariti: erano esattamente i bacini
+    // dei ruoli critici agganciati male, che la 000278 ha rimosso. I 7
+    // `LEGACY_SPLAN::` superstiti sono quelli ancorati a posizioni vive.
+    it('code provenance prefixes: 7 LEGACY_SPLAN:: (5 incumbent + 2 title-match), 0 LEGACY_CROLE::', async () => {
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_succession_pools WHERE succession_pool_code LIKE 'LEGACY_SPLAN::%'`,
-      )).toBe(9);
+      )).toBe(7);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_succession_pools WHERE succession_pool_code LIKE 'LEGACY_CROLE::%'`,
-      )).toBe(8);
+      )).toBe(0);
     });
   });
 
@@ -90,11 +103,16 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
       // numero fisso qui misurerebbe lo stato, non la regola. L'invariante è
       // che la provenienza sia sempre completa — nessun candidato «mezzo
       // legacy» — e che ce ne sia ancora almeno uno da controllare.
+      // [S1048] Il minimo di 1 è stato tolto: la 000278 (#160) ha rimosso TUTTI
+      // i candidati importati, e zero è l'esito corretto. Erano appesi ai bacini
+      // agganciati al ruolo critico sbagliato, quindi nessuno reggeva il criterio
+      // di successione — `C5g` li contava tutti. L'invariante che resta è quello
+      // che conta: la provenienza non è mai a metà.
       const legacyCount = await count(
         `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
           WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL`,
       );
-      expect(legacyCount).toBeGreaterThan(0);
+      expect(legacyCount).toBeGreaterThanOrEqual(0);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_successor_candidates
           WHERE (successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL)
@@ -134,7 +152,13 @@ describe('reconciliation Wave-2 close — branches + succession (S982)', () => {
           WHERE successor_candidate_metadata->>'legacy_plan_id' IS NOT NULL
           GROUP BY 1, 2`,
       );
-      expect(rows.length).toBeGreaterThan(0);
+      // [S1048] Zero righe è ora l'esito corretto: la 000278 (#160) ha rimosso
+      // tutti i candidati importati, che stavano in bacini agganciati al ruolo
+      // critico sbagliato. La REGOLA continua a essere verificata riga per riga —
+      // su zero righe passa a vuoto, ed è giusto così: pretendere che ne
+      // sopravviva almeno una significherebbe pretendere che sopravviva un dato
+      // incoerente. Il ciclo qui sotto resta il vero contenuto del test.
+      expect(rows.length).toBeGreaterThanOrEqual(0);
       for (const r of rows) {
         // nessun valore legacy fuori dal vocabolario dichiarato dalla decisione D2
         expect(Object.keys(MAPPA)).toContain(r.grezzo);

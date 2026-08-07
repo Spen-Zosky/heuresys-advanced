@@ -272,9 +272,15 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
   // 25 imported ones (measured 2026-07-28: PROD 49 total = 25 import + 24 C5; heuresys_ci 25).
   // Constraining the count to the import provenance restores the original meaning in both.
   it('the 3 Wave-2 tables carry exactly their imported counts (provenance-constrained)', async () => {
+    // [S1048] I bacini scendono da 17 a 7. La 000278 (#160) ha rimosso quelli
+    // agganciati a un ruolo critico che non era il loro (`Chief Executive Officer`
+    // stava su `Securities Dealer`, il `CFO` su `Bank Teller`) e quelli appesi a
+    // posizioni disattivate. Non è import eroso in silenzio — che è ciò che questo
+    // censimento sorveglia: le righe sono in `staging.storia36_160_undo` e
+    // `SELECT staging.storia36_160_rollback();` le rimette.
     const expectedImported: Record<string, number> = {
       sys_branches: 6,
-      sys_succession_pools: 17,
+      sys_succession_pools: 7,
     };
     for (const [t, n] of Object.entries(expectedImported)) {
       expect(await countAuthored(t, false), `sys.${t}: attese ${n} righe d'import`).toBe(n);
@@ -284,9 +290,15 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
     // lo fa già altrove (coda #4/#5). Un conteggio fisso qui misurerebbe lo stato e
     // cadrebbe a ogni ripulitura; il vincolo di provenienza da solo non basta più, perché
     // la rimozione tocca proprio le righe importate. Resta l'invariante: l'import non ha
-    // prodotto più di quanto dichiarato, e qualcosa è arrivato.
+    // prodotto più di quanto dichiarato.
+    //
+    // [S1048] Ed è arrivato a zero: la 000278 (#160) ha rimosso TUTTI i candidati
+    // importati, perché stavano nei bacini agganciati al ruolo critico sbagliato e
+    // nessuno reggeva il criterio di successione (`C5g` li contava tutti e 27).
+    // Pretendere «almeno uno» significherebbe pretendere la sopravvivenza di un
+    // dato incoerente.
     const candidatiImportati = await countAuthored('sys_successor_candidates', false);
-    expect(candidatiImportati).toBeGreaterThan(0);
+    expect(candidatiImportati).toBeGreaterThanOrEqual(0);
     expect(candidatiImportati).toBeLessThanOrEqual(25);
   });
 

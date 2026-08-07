@@ -544,10 +544,17 @@ export async function loadMyCareerPaths(q: DbConnector, userId: string): Promise
           ORDER BY s.career_path_step_path_id, s.career_path_step_ordinal`, [pathIds])
     : { rows: [] as Array<{ path_id: string; ordinal: number; origin_title: string | null; target_title: string | null; duration: number | null }> };
 
-  const plansRes = await q.query<{ status: string | null; target_title: string | null; horizon_months: number | null }>(
-    `SELECT pl.user_career_plan_status AS status, pt.position_title AS target_title,
+  // #161 — il piano dichiara un PERCORSO, ed è l'unico dei tre campi che possiede
+  // davvero: misurato sui 113 piani reali, `path_id` è valorizzato su 113/113
+  // mentre bersaglio e orizzonte sono NULL su tutti (il legacy di provenienza non
+  // porta un bersaglio). Senza questo join la pagina mostrava «piano ACTIVE» e una
+  // colonna vuota accanto.
+  const plansRes = await q.query<{ status: string | null; path_name: string | null; target_title: string | null; horizon_months: number | null }>(
+    `SELECT pl.user_career_plan_status AS status, cp.career_path_name AS path_name,
+            pt.position_title AS target_title,
             pl.user_career_plan_horizon_months AS horizon_months
        FROM sys.sys_user_career_plans pl
+       LEFT JOIN sys.sys_career_paths cp ON cp.career_path_id = pl.user_career_plan_path_id
        LEFT JOIN sys.sys_positions pt ON pt.position_id = pl.user_career_plan_target_position_id
       WHERE pl.user_career_plan_user_id = $1
       ORDER BY pl.created_at DESC`, [userId],
@@ -565,7 +572,8 @@ export async function loadMyCareerPaths(q: DbConnector, userId: string): Promise
         })),
     })),
     plans: plansRes.rows.map((pl) => ({
-      status: pl.status, targetPositionTitle: pl.target_title, horizonMonths: pl.horizon_months,
+      status: pl.status, pathName: pl.path_name,
+      targetPositionTitle: pl.target_title, horizonMonths: pl.horizon_months,
     })),
   };
 }

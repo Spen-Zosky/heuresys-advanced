@@ -57,9 +57,20 @@ export function PathsTab() {
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2" data-testid="career-plans">
             {plans.map((pl, i) => (
-              <ProfileSection key={`plan-${i}`} title={pl.targetPositionTitle ?? t("career.paths.planTarget")}>
+              // #161 — il piano dichiara il PERCORSO che si sta seguendo, ed è il solo
+              // dei tre campi valorizzato su tutti i 113 piani reali. Prima il titolo
+              // ricadeva su un'etichetta generica e accanto restava una riga vuota,
+              // perché il bersaglio puntuale il piano non ce l'ha (vive in
+              // sys_user_target_positions, che è un'altra cosa). Il bersaglio si mostra
+              // solo se un giorno ci sarà.
+              <ProfileSection key={`plan-${i}`} title={pl.pathName ?? pl.targetPositionTitle ?? t("career.paths.planTarget")}>
                 <Field label={t("career.paths.planStatus")} value={enumLabel("careerPlanStatus", pl.status)} />
-                <Field label={t("career.paths.planHorizon")} value={pl.horizonMonths != null ? t("career.paths.months", { n: pl.horizonMonths }) : null} />
+                {pl.targetPositionTitle ? (
+                  <Field label={t("career.paths.planTarget")} value={pl.targetPositionTitle} />
+                ) : null}
+                {pl.horizonMonths != null ? (
+                  <Field label={t("career.paths.planHorizon")} value={t("career.paths.months", { n: pl.horizonMonths })} />
+                ) : null}
               </ProfileSection>
             ))}
           </div>

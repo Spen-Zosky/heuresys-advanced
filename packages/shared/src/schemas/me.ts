@@ -613,8 +613,24 @@ export const MeCareerPathSchema = z.object({
   kind: z.string().nullable(),
   steps: z.array(MeCareerPathStepSchema),
 });
+/**
+ * #161/S1048 — un piano di carriera dichiara un PERCORSO, non una posizione.
+ *
+ * Misurato sui 113 piani reali: `user_career_plan_path_id` è valorizzato su
+ * 113/113, mentre `target_position_id` e `horizon_months` sono NULL su tutti.
+ * Non è dato mancante: il legacy da cui provengono non porta affatto un bersaglio
+ * (le sue chiavi sono source_id, notes, target_completion, status, started_at) —
+ * il piano dice «sto seguendo il Risk Management Track», e il traguardo puntuale
+ * vive semmai in `sys_user_target_positions`, che è un'altra cosa.
+ *
+ * `pathName` è quindi il campo che il piano possiede davvero. Gli altri due
+ * restano nel contratto perché il modello li ammette e un piano futuro potrà
+ * valorizzarli, ma la pagina non deve promettere una colonna che oggi è vuota
+ * per costruzione.
+ */
 export const MeCareerPlanSchema = z.object({
   status: z.string().nullable(),
+  pathName: z.string().nullable(),
   targetPositionTitle: z.string().nullable(),
   horizonMonths: z.number().int().nullable(),
 });

@@ -147,6 +147,29 @@ describe("/v1/me/{goals,risk,career-paths} — F3b career sub-tabs", () => {
     expect(viva.rows[0]!.n).toBeGreaterThan(0);
   });
 
+  /**
+   * #161/S1048 — il piano di carriera dice quale PERCORSO si sta seguendo.
+   *
+   * Misurato sui 113 piani reali: `path_id` valorizzato su 113/113, bersaglio e
+   * orizzonte NULL su tutti — il legacy di provenienza non porta un bersaglio.
+   * La pagina mostrava «piano ACTIVE» e una colonna vuota accanto.
+   */
+  it("GET /v1/me/career-paths names the career path each plan follows", async () => {
+    const atteso = await pool.query<{ n_piani: number; n_con_percorso: number }>(
+      `SELECT count(*)::int AS n_piani,
+              count(pl.user_career_plan_path_id)::int AS n_con_percorso
+         FROM sys.sys_user_career_plans pl
+        WHERE pl.user_career_plan_user_id = $1`, [employeeId],
+    );
+    const { n_piani, n_con_percorso } = atteso.rows[0]!;
+    const body = (await get(suite, employee, "/v1/me/career-paths")).json() as MeCareerPathsResponse;
+    expect(body.plans).toHaveLength(n_piani);
+    // ogni piano che DICHIARA un percorso deve esporne il nome: se il contratto
+    // non lo porta, la pagina non ha nulla da mostrare e ricade su un'etichetta
+    // generica — che è il difetto misurato.
+    expect(body.plans.filter((p) => p.pathName != null)).toHaveLength(n_con_percorso);
+  });
+
   it("is self-scoped: a different persona gets their own data, never another user's", async () => {
     const mine = (await get(suite, employee, "/v1/me/goals")).json() as MeGoalsResponse;
     const theirs = (await get(suite, outsider, "/v1/me/goals")).json() as MeGoalsResponse;

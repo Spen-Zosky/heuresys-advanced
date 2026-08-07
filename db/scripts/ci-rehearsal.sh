@@ -181,6 +181,29 @@ bash "$MIGRATE_SH" "$ENV_TMP" 2>&1 | tail -40 || chain_rc=${PIPESTATUS[0]}
 t1=$(date +%s)
 say "durata catena: $((t1 - t0))s"
 
+# --- SECONDA PASSATA -------------------------------------------------------------------
+# UNA PASSATA NON BASTA, e il progetto l'ha imparato a proprie spese (S1049).
+# La catena e' ordinata: se il file N crea un oggetto, il file M<N lo vede solo al giro
+# DOPO. La 000284 ha creato una tabella nuova, e la 000062 — che verifica «zero tabelle non
+# classificate» e gira molto prima — e' passata comunque alla prima passata, perche' quando
+# e' stata valutata la tabella non esisteva ancora. Questa prova generale era VERDE, e la
+# catena e' caduta al giro successivo, in produzione: esattamente il difetto che lo
+# strumento doveva impedire.
+# La seconda passata e' anche la verifica di IDEMPOTENZA, che per questa catena non e'
+# opzionale: 166 file su 278 portano una post-condizione e vengono ri-applicati a ogni
+# deploy. Costa pochi secondi — la prima passata ha gia' scaldato la cache.
+if [ "$chain_rc" = 0 ]; then
+  log "seconda passata (una catena si applica due volte, o non si applica)"
+  t2=$(date +%s)
+  bash "$MIGRATE_SH" "$ENV_TMP" 2>&1 | tail -25 || chain_rc=${PIPESTATUS[0]}
+  say "durata seconda passata: $(( $(date +%s) - t2 ))s"
+  if [ "$chain_rc" != 0 ]; then
+    say "ROTTA ALLA SECONDA PASSATA — quasi sempre significa che un file ha creato un oggetto"
+    say "che un file di numero MINORE deve conoscere (registro di riconciliazione, mappa GDPR,"
+    say "allowlist). Il rimedio e' emendare QUEL file, non aggiungerne uno dopo."
+  fi
+fi
+
 if [ "$chain_rc" != 0 ]; then
   if [ "$MODE" = "like-ci" ]; then
     log "ESITO: ROSSO — la catena non passa sul database della CI"

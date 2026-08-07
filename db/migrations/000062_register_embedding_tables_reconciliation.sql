@@ -70,7 +70,9 @@ VALUES
   ('sys_calibration_discussions', 'A', 'IMPORT', 'calibration_discussions (60 nel legacy; 40 importate = RTL Bank)',
    '[S1043] Discussioni di calibrazione con voto prima/dopo, importate dalla mig 000257.'),
   ('sys_auth_password_reset_tokens', 'D', 'EXCLUDE', NULL,
-   '[S1043] Token di reimpostazione password: dato di runtime generato dall''applicazione, a vita breve, senza alcuna sorgente legacy. Era UNCLASSIFIED da sempre e non si vedeva perche'' sul clone di CI i residui dei test la lasciavano POPULATED — la stessa cecita'' descritta sopra per sys_auth_mfa_factors.')
+   '[S1043] Token di reimpostazione password: dato di runtime generato dall''applicazione, a vita breve, senza alcuna sorgente legacy. Era UNCLASSIFIED da sempre e non si vedeva perche'' sul clone di CI i residui dei test la lasciavano POPULATED — la stessa cecita'' descritta sopra per sys_auth_mfa_factors.'),
+  ('sys_auth_mfa_exemption_eligible_users', 'D', 'EXCLUDE', NULL,
+   '[S1049] Elenco nominativo degli account che possono ricevere un''esenzione MFA (mig 000284, #139). Nasce e resta VUOTO finche'' non esiste un account headless legittimo: nessuna sorgente legacy, nessun bersaglio di riconciliazione. Registrata QUI e non dopo la 000284 per la ragione gia'' scritta sopra per sys_auth_mfa_factors e sys_user_timeline_events — questo controllo gira PRIMA di qualunque file di numero superiore, quindi una tabella nuova non registrata in questo file fa fallire la catena alla PASSATA SUCCESSIVA, non alla prima. E'' esattamente cosi'' che si e'' manifestata: la prova generale su clone di CI era verde (alla sua unica passata la tabella non esisteva ancora quando la 000062 e'' stata valutata), e la catena e'' caduta al giro dopo, in produzione.')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

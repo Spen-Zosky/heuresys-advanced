@@ -87,7 +87,29 @@ describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", ()
     ).rejects.toThrow();
   });
 
-  it("M-8b: a SERVICE account IS exemptable", async () => {
+  // #139 — dal 000284 l'eleggibilita' e' una CONGIUNZIONE: essere un account di
+  // servizio non basta piu', serve anche l'iscrizione nominativa. Nasce dalla
+  // risposta di Enzo del 2026-08-07 («i due account amministrativi devono poter
+  // accedere senza secondo fattore? NO»): finche' `user_type` rispondeva a due
+  // domande diverse — «e' una persona?» e «puo' saltare l'MFA?» — marcare SERVICE
+  // un account tecnico gli apriva l'eleggibilita' per effetto collaterale.
+  // Le due prove che seguono vanno lette INSIEME: la prima da sola direbbe solo che
+  // il secondo lucchetto e' chiuso, la seconda che si apre. Servono entrambe.
+  it("#139: a SERVICE account NOT on the allowlist is NOT exemptable", async () => {
+    await expect(
+      pool.query(
+        `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled) VALUES ($1, $2, true)`,
+        [svcUserId, "must be rejected by 000284 — not listed"],
+      ),
+    ).rejects.toThrow();
+  });
+
+  it("M-8b + #139: a SERVICE account ON the allowlist IS exemptable", async () => {
+    await pool.query(
+      `INSERT INTO sys.sys_auth_mfa_exemption_eligible_users (auth_mfa_eligible_user_id, auth_mfa_eligible_reason)
+       VALUES ($1, $2) ON CONFLICT (auth_mfa_eligible_user_id) DO NOTHING`,
+      [svcUserId, "wi-a service account — headless Agent SDK"],
+    );
     await expect(
       pool.query(
         `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason, auth_mfa_exemption_enabled) VALUES ($1, $2, true)`,

@@ -47,6 +47,13 @@ affermazioni portanti** — il registro conserva il blocco, non il file, e i fil
 
 ## ⚠ Top priorities (next session)
 
+0. **`#164` — DA AVVIARE ALL'APERTURA, decisione di Enzo del 2026-08-07.** Igienizzare il database
+   dal legacy: **ritirare** la pagina `/brownfield-adaptation` e i 14 endpoint, **conservare** la
+   tracciabilità. ~2 sessioni, 4 fasi a ordine obbligato — Enzo ha deciso che si fa **in una
+   sessione fresca**, non in coda ad altro. Analisi, misure e piano sono già nel blocco del
+   registro: **non ri-misurare, non ri-decidere**, si parte da F1.
+   ⚠️ `staging` **non è solo legacy**: ospita l'infrastruttura viva della storia RTL e i giornali di
+   rollback di `#155`/`#160` — rimozione per **elenco esplicito**, mai per schema.
 1. **`#163`** — la storia di un'unità si ferma a un nome che non porta più, e il modello ammette
    **un solo riordino**: la ricostruzione del 2026 non è contemplata. Serve **la tua decisione** su
    cosa il prodotto considera «riorganizzazione». ~1h + la scelta. *È l'ultimo rosso della custodia.*

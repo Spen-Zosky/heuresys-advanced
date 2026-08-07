@@ -327,26 +327,6 @@
       "heuresys-source": "./src/schemas/organization-unit-kpi-templates.ts",
       "default": "./dist/schemas/organization-unit-kpi-templates.js"
     },
-    "./schemas/brownfield-source-exports": {
-      "types": "./dist/schemas/brownfield-source-exports.d.ts",
-      "heuresys-source": "./src/schemas/brownfield-source-exports.ts",
-      "default": "./dist/schemas/brownfield-source-exports.js"
-    },
-    "./schemas/brownfield-import-runs": {
-      "types": "./dist/schemas/brownfield-import-runs.d.ts",
-      "heuresys-source": "./src/schemas/brownfield-import-runs.ts",
-      "default": "./dist/schemas/brownfield-import-runs.js"
-    },
-    "./schemas/brownfield-table-mappings": {
-      "types": "./dist/schemas/brownfield-table-mappings.d.ts",
-      "heuresys-source": "./src/schemas/brownfield-table-mappings.ts",
-      "default": "./dist/schemas/brownfield-table-mappings.js"
-    },
-    "./schemas/brownfield-wave-executor": {
-      "types": "./dist/schemas/brownfield-wave-executor.d.ts",
-      "heuresys-source": "./src/schemas/brownfield-wave-executor.ts",
-      "default": "./dist/schemas/brownfield-wave-executor.js"
-    },
     "./schemas/seed-acquisition-runs": {
       "types": "./dist/schemas/seed-acquisition-runs.d.ts",
       "heuresys-source": "./src/schemas/seed-acquisition-runs.ts",

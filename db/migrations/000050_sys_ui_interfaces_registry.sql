@@ -53,6 +53,10 @@ INSERT INTO sys.sys_ui_interfaces
    ui_interface_sidebar_group, ui_interface_perspective,
    ui_interface_required_resource, ui_interface_required_action, ui_interface_requires_admin, ui_interface_order)
 VALUES
+  -- #164 F3 (S1049): la voce 'brownfield' -> /brownfield-adaptation E' STATA TOLTA DA QUI,
+  -- non cancellata da una migrazione successiva. La catena si ri-applica a ogni deploy:
+  -- una DELETE a valle sarebbe stata disfatta al giro dopo. Si ritira una riga emendando
+  -- il file che la crea — stessa dottrina dell'emendamento alla 000062.
   -- Overview (admin reach, no dedicated permission)
   ('dashboard',         'Dashboard',               '/dashboard',                'LayoutDashboard', 'overview',     'OVERVIEW', NULL,                        NULL,    true,  0),
   -- ESS / Me (always visible to an authenticated user)
@@ -70,7 +74,6 @@ VALUES
   -- Operations (PROCESS)
   ('blueprints',        'Blueprint',               '/blueprints',               'FileText',        'operations',   'GOVERNANCE',    'blueprint',                 'read',  true,  20),
   ('processes',         'Processi',                '/processes',                'GitBranch',       'operations',   'GOVERNANCE',    'bpm_process',               'read',  true,  21),
-  ('brownfield',        'Brownfield',              '/brownfield-adaptation',    'Database',        'operations',   'OVERVIEW',    'brownfield_adaptation',     'read',  true,  22),
   ('seeds',             'Seed acquisition',        '/seed-acquisition/runs',    'Sprout',          'operations',   'OVERVIEW',    'seed_acquisition',          'read',  true,  23),
   -- Intelligence (ENTERPRISE)
   ('kpis',              'KPI',                     '/kpis',                     'Gauge',           'intelligence', 'WORKFORCE', 'kpi',                       'read',  true,  30),

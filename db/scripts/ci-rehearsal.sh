@@ -109,6 +109,11 @@ cleanup() {
   case "$DB" in heuresys_rehearsal_*) sudo -u postgres dropdb --force --if-exists -p "$PGPORT_LOCAL" "$DB" >/dev/null 2>&1 || true ;; esac
   rm -f "${ENV_TMP:-}" 2>/dev/null || true
   [ -n "${MIG_TMP:-}" ] && rm -rf "$MIG_TMP"
+  # `return 0` OBBLIGATORIO: in un trap EXIT l'esito dell'ULTIMO comando diventa il codice
+  # d'uscita dello script. La riga qui sopra esce 1 quando MIG_TMP e' vuoto (il caso
+  # normale), quindi la prova generale usciva 1 pur dichiarando VERDE. Un cancello che
+  # sbaglia il proprio esito e' rotto tanto quanto uno che sbaglia la misura.
+  return 0
 }
 trap cleanup EXIT
 

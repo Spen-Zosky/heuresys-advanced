@@ -90,10 +90,6 @@ import { blueprintActivationsRoutes } from "./modules/blueprint-activations/rout
 import { blueprintOverridesRoutes } from "./modules/blueprint-overrides/routes.js";
 import { processKpiTemplatesRoutes } from "./modules/process-kpi-templates/routes.js";
 import { organizationUnitKpiTemplatesRoutes } from "./modules/organization-unit-kpi-templates/routes.js";
-import { brownfieldSourceExportsRoutes } from "./modules/brownfield-source-exports/routes.js";
-import { brownfieldImportRunsRoutes } from "./modules/brownfield-import-runs/routes.js";
-import { brownfieldTableMappingsRoutes } from "./modules/brownfield-table-mappings/routes.js";
-import { brownfieldWaveExecutorRoutes } from "./modules/brownfield-wave-executor/routes.js";
 import { seedAcquisitionRunsRoutes } from "./modules/seed-acquisition-runs/routes.js";
 import { seedCandidateRecordsRoutes } from "./modules/seed-candidate-records/routes.js";
 import { seedApprovalDecisionsRoutes } from "./modules/seed-approval-decisions/routes.js";
@@ -444,17 +440,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(blueprintOverridesRoutes, { prefix: "/v1/blueprint-overrides" });
   await app.register(processKpiTemplatesRoutes, { prefix: "/v1/process-kpi-templates" });
   await app.register(organizationUnitKpiTemplatesRoutes, { prefix: "/v1/organization-unit-kpi-templates" });
-  // D-11: the brownfield ETL engine is FROZEN in PROD (ingestion completed,
-  // ADR-0023) — the 4 ETL surfaces register only when the flag is on (dev/
-  // test/CI default). docs/brownfield/ENGINE_STATUS.md.
-  if (env.BROWNFIELD_ENGINE_ENABLED) {
-    await app.register(brownfieldSourceExportsRoutes, { prefix: "/v1/brownfield-source-exports" });
-    await app.register(brownfieldImportRunsRoutes, { prefix: "/v1/brownfield-import-runs" });
-    await app.register(brownfieldTableMappingsRoutes, { prefix: "/v1/brownfield-table-mappings" });
-    await app.register(brownfieldWaveExecutorRoutes, { prefix: "/v1/brownfield/wave-executor" });
-  } else {
-    app.log.warn("brownfield engine FROZEN (BROWNFIELD_ENGINE_ENABLED=false) — 4 ETL surfaces not registered");
-  }
+  // #164 F3 — le 4 superfici ETL brownfield sono RITIRATE (non piu' congelate).
+  // Misurato prima di rimuoverle: rispondevano 404 in produzione, quindi il ritiro
+  // non ha tolto nulla a nessuno. ADR-0023 resta la dottrina sulla PROVENIENZA dei
+  // dati; qui se ne va lo strumento che li portava, che aveva finito il suo lavoro.
   await app.register(seedAcquisitionRunsRoutes, { prefix: "/v1/seed-acquisition-runs" });
   await app.register(seedCandidateRecordsRoutes, { prefix: "/v1/seed-candidate-records" });
   await app.register(seedApprovalDecisionsRoutes, { prefix: "/v1/seed-approval-decisions" });

@@ -250,7 +250,18 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
       [WAVE2_IMPORTED as unknown as string[]],
     );
     expect(rows.map((r) => r.table_name).sort()).toEqual([...WAVE2_IMPORTED].sort());
-    expect(rows.every((r) => r.resolved_status === 'POPULATED')).toBe(true);
+    // [S1048] `sys_successor_candidates` può NON essere POPULATED, e non è una
+    // regressione dell'import: la 000278 (#160) ha rimosso i candidati appesi a
+    // bacini agganciati a un ruolo critico che non era il loro, e su un clone di
+    // CI — dove i seed della storia RTL non girano e quindi non ne arrivano di
+    // nuovi — la tabella resta vuota. La vista risolve POPULATED da `has_rows`,
+    // quindi segue il dato: è il comportamento corretto, non un difetto.
+    // Le altre due restano popolate, e il registro continua a dichiararle IMPORT
+    // (verificato dal test successivo, che è la sentinella della DICHIARAZIONE).
+    const perTabella = new Map(rows.map((r) => [r.table_name, r.resolved_status]));
+    expect(perTabella.get('sys_branches')).toBe('POPULATED');
+    expect(perTabella.get('sys_succession_pools')).toBe('POPULATED');
+    expect(['POPULATED', 'IMPORT']).toContain(perTabella.get('sys_successor_candidates'));
   });
 
   it('the 3 Wave-2 tables carry declared_status IMPORT + a WAVE2 CLOSE rationale', async () => {

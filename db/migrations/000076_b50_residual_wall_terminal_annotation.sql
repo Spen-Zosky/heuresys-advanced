@@ -142,11 +142,21 @@ BEGIN
      -- fermava qui).
      AND resolved_status IN ('NO_SOURCE', 'POPULATED');
 
-  -- 3 defer tables: valid in BOTH worlds (NEEDS_DECISION pre-Wave-2, POPULATED post-S982)
+  -- 3 defer tables: valid in ALL worlds.
+  --   NEEDS_DECISION  pre-Wave-2
+  --   POPULATED       post-S982 (l'import ha portato righe)
+  --   IMPORT          [S1048] post-000278 su un clone SENZA i seed della storia RTL:
+  --                   la 000278 (#160) rimuove i candidati appesi a bacini agganciati a
+  --                   un ruolo critico che non era il loro, e dove i seed non girano non
+  --                   ne arrivano di nuovi — la tabella resta vuota e la vista, che
+  --                   risolve da `has_rows`, ricade sul declared_status. È il
+  --                   comportamento corretto: la DICHIARAZIONE resta IMPORT, cambia solo
+  --                   il fatto che al momento non ci siano righe. Misurato: senza questo
+  --                   terzo stato l'assert leggeva 2 su 3 e abortiva la catena in CI.
   SELECT count(*) INTO v_defer_closed
     FROM sys.v_reconciliation_status
    WHERE table_name IN ('sys_branches','sys_succession_pools','sys_successor_candidates')
-     AND resolved_status IN ('NEEDS_DECISION', 'POPULATED')
+     AND resolved_status IN ('NEEDS_DECISION', 'POPULATED', 'IMPORT')
      AND coalesce(length(trim(rationale)), 0) > 0;
 
   SELECT count(*) INTO v_defer_still_nd

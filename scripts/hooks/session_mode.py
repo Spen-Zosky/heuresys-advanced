@@ -246,6 +246,56 @@ SQL_WRITE_RE = re.compile(
     re.IGNORECASE,
 )
 
+# #134 — I VERBI SI CERCANO NEL CODICE, NON DENTRO LE STRINGHE.
+# Caso minimo che falliva: `psql -c "select 'tenant:create' as prova"` veniva rifiutato
+# come scrittura perche' la parola `create` sta DENTRO gli apici. Conseguenza pratica: in
+# lab non si poteva interrogare il permesso `tenant:create`, ne' nessun `*:create`,
+# `*:update`, `*:delete` — cioe' buona parte del modello RBAC diventava non ispezionabile
+# proprio nella modalita' nata per ispezionare.
+# Rimedio: si tolgono letterali e commenti PRIMA di cercare i verbi. Sostituiti con uno
+# spazio e non con nulla, cosi' `select'create'from` non puo' saldarsi in una parola nuova.
+SQL_LETTERALI_RE = re.compile(
+    r"--[^\n]*"                 # commento di riga
+    r"|/\*.*?\*/"               # commento a blocco
+    r"|\$\w*\$.*?\$\w*\$"       # dollar-quoting ($$ ... $$, $tag$ ... $tag$)
+    r"|'(?:[^']|'')*'"          # letterale fra apici singoli, '' incluso
+    r'|"(?:[^"]|"")*"',         # identificatore fra virgolette doppie
+    re.DOTALL,
+)
+
+
+def _sql_senza_letterali(sql: str) -> str:
+    """Il testo SQL con letterali e commenti sostituiti da spazi.
+
+    NON e' un parser: e' una potatura deliberatamente grossolana, e sbaglia dalla parte
+    giusta. Un corpo `DO $$ ... create table ... $$` viene svuotato, ma `DO` resta fuori
+    dagli apici ed e' gia' nell'elenco dei verbi che scrivono: la scrittura viene vista
+    lo stesso.
+    """
+    return SQL_LETTERALI_RE.sub(" ", sql)
+
+
+# #134 (secondo caso) — SI DECIDE SUL VERBO, NON SUL PERCORSO.
+# `ls db/scripts/` veniva rifiutato come «script che scrivono»: la regola guardava se il
+# percorso COMPARIVA nel comando, non se veniva ESEGUITO. Elencare o leggere uno script e'
+# esattamente cio' che una sessione di analisi deve poter fare — ed e' la stessa dottrina
+# gia' scritta nel commento di DEPLOY_RE: si vietano i verbi che mutano, non i comandi interi.
+SCRIPT_MUTANTI_RE = re.compile(r"(db/scripts/|storia36\.sh)", re.IGNORECASE)
+INTERPRETI = {"bash", "sh", "zsh", "ksh", "dash", "python", "python3", "py",
+              "pwsh", "powershell", "source", "."}
+
+
+def _esegue_script_mutante(toks: list[str]) -> bool:
+    """Vero solo se uno script mutante viene ESEGUITO, non semplicemente nominato."""
+    if not toks:
+        return False
+    if SCRIPT_MUTANTI_RE.search(toks[0]):
+        return True                                   # ./db/scripts/x.sh — e' il comando
+    primo = os.path.basename(toks[0].replace("\\", "/")).lower()
+    if primo in INTERPRETI:
+        return any(SCRIPT_MUTANTI_RE.search(t) for t in toks[1:])
+    return False
+
 # Attenzione: qui il rischio e' la guardia TROPPO LARGA. `systemctl is-active` e
 # `docker ps` sono letture legittime e devono passare: si vietano i verbi che
 # mutano, non i comandi interi.
@@ -255,10 +305,13 @@ DEPLOY_RE = re.compile(
     r"daemon-reload|set-property|kill)\b|"
     r"service\s+\w+\s+(start|stop|restart|reload)\b|"
     r"pm2\s+(start|stop|restart|reload|delete)\b|"
-    r"docker\s+(run|exec|rm|rmi|stop|start|restart|build|compose|kill|prune|cp)\b|"
-    r"db/scripts/|storia36\.sh)",
+    r"docker\s+(run|exec|rm|rmi|stop|start|restart|build|compose|kill|prune|cp)\b)",
     re.IGNORECASE,
 )
+# `db/scripts/` e `storia36.sh` NON stanno piu' qui (#134): erano gli unici due termini
+# che parlavano di un PERCORSO invece che di un verbo, e per questo `ls db/scripts/`
+# veniva rifiutato. Ora li governa _esegue_script_mutante(), che guarda se lo script
+# viene eseguito. La stessa dottrina del commento qui sopra, applicata anche a loro.
 
 PS_WRITE_CMDLETS = re.compile(
     r"\b(Set-Content|Out-File|Add-Content|New-Item|Remove-Item|Move-Item|"
@@ -363,7 +416,7 @@ def _check_command(cmd: str):
                 return r
 
         # --- deploy, servizi, script mutanti
-        if DEPLOY_RE.search(seg):
+        if DEPLOY_RE.search(seg) or _esegue_script_mutante(toks):
             return ("modalita' lab: il comando avvia deploy, allineamento cloni, "
                     "servizi o script che scrivono. Vietato.")
 
@@ -415,7 +468,7 @@ def _check_psql(seg: str, toks: list[str]):
         return ("modalita' lab: psql senza -c non e' ispezionabile. "
                 "Usa `psql ... -c \"SELECT ...\"`.")
     for sql in sql_parts:
-        if SQL_WRITE_RE.search(sql):
+        if SQL_WRITE_RE.search(_sql_senza_letterali(sql)):
             return ("modalita' lab: la query scrive o modifica lo schema. "
                     "In lab il database e' in sola lettura: solo SELECT.")
     return None
@@ -584,6 +637,21 @@ def _cases():
         ("git status", "Bash", {"command": 'git -C "%s" status --short' % repo}, True),
         ("git diff", "Bash", {"command": "git diff HEAD -- apps/api"}, True),
         ("psql SELECT", "Bash", {"command": 'psql -h localhost -p 5433 -U heuresys -d heuresys_advanced -c "SELECT count(*) FROM sys.sys_users;"'}, True),
+        # #134 — i verbi si cercano nel codice, non dentro le stringhe. Le due righe
+        # vanno LETTE INSIEME: la prima da sola proverebbe solo che la guardia e' stata
+        # aperta, la seconda che e' rimasta chiusa. Servono entrambe per dire «corretta».
+        ("psql SELECT con 'create' dentro gli apici", "Bash", {"command": "psql -c \"select 'tenant:create' as prova\""}, True),
+        ("psql SELECT con un permesso *:delete fra apici", "Bash", {"command": "psql -c \"SELECT * FROM sys.sys_permissions WHERE code = 'user:delete'\""}, True),
+        ("psql con un commento che nomina drop", "Bash", {"command": 'psql -c "SELECT 1 -- drop table x"'}, True),
+        ("psql CREATE TABLE vero", "Bash", {"command": 'psql -c "create table x (a int)"'}, False),
+        ("psql DELETE vero", "Bash", {"command": 'psql -c "delete from sys.sys_users where 1=0"'}, False),
+        ("psql DO con create dentro il corpo", "Bash", {"command": 'psql -c "DO $$ BEGIN create table x(a int); END $$"'}, False),
+        # #134 (secondo caso) — si decide sul verbo, non sul percorso.
+        ("elenco di db/scripts", "Bash", {"command": "ls db/scripts/"}, True),
+        ("lettura di uno script di db/scripts", "Bash", {"command": "cat db/scripts/migrate.sh"}, True),
+        ("grep dentro db/scripts", "Bash", {"command": "grep -n POSTGRES db/scripts/migrate.sh"}, True),
+        ("esecuzione di uno script di db/scripts", "Bash", {"command": "bash db/scripts/migrate.sh .env"}, False),
+        ("esecuzione della custodia storia36", "Bash", {"command": "bash db/scripts/storia36.sh custodia"}, False),
         ("pnpm status (dashboard)", "Bash", {"command": "pnpm status"}, True),
         ("scrittura nella cartella lab", "Write", {"file_path": f"{lab}/nota.md"}, True),
         ("chrome MCP", "mcp__claude-in-chrome__navigate", {"url": "https://example.org"}, True),

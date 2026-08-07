@@ -166,7 +166,21 @@ times` — cioè la `DELETE` passava **senza che alcun umano fosse interpellato*
 
 **§5.3 — Dove vivono i vettori dei concetti.** Il corpus è piccolo (95 voci): può stare
 in memoria e ricostruirsi all'avvio, oppure in tabella. La scelta dipende dall'esito di
-§6 e non si anticipa.
+§6 e non si anticipa. **Deciso intanto cosa NON sono**: artefatto di misura, non stato —
+`concepts-vectors.json` (~1,2 MB di float illeggibili in diff) è **gitignored**, mentre
+il corpus (49 KB) e il referto della misura (6 KB) restano versionati perché si leggono e
+si confrontano.
+
+**Riproducibilità della catena** — chiusa il 2026-08-07, era un debito:
+```
+python docs/kb/tools/build_atlas.py                        # atlante dal codice + DB vivo
+python docs/kb/tools/build_concepts.py                     # corpus dall'atlante (--check: cancello anti-stale)
+node   docs/kb/tools/measure_concept_retrieval.mjs <root>  # vettori + misura — COSTA (2 chiamate Voyage)
+```
+I primi due sono gratuiti e ripetibili; il terzo si esegue quando il corpus cambia in
+modo sostanziale. `build_concepts.py --check` esce **1** se il corpus su disco non
+combacia più con l'atlante: è ciò che impedisce al dizionario di invecchiare in silenzio
+mentre il dominio cambia sotto.
 
 **§5.4 — La lingua del corpus.** I testi dei concetti sono derivati da nomi di moduli e
 tabelle, che sono **in inglese**; le domande degli utenti sono in italiano.

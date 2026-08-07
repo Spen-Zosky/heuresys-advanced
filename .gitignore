@@ -217,3 +217,10 @@ db/data/esco/*.csv
 # verification gate (W10)
 .zp/verify-verdict.json
 .zp/verify-off
+
+# Vettori dei concetti di dominio (ADR-0033): artefatto di MISURA, non stato.
+# ~1,2 MB di float illeggibili in diff, rigenerabili con una chiamata Voyage da
+# docs/kb/atlas/concepts-corpus.jsonl. Restano versionati il corpus (49 KB, si
+# legge e si confronta) e il referto della misura (6 KB, e' l'evidenza del
+# verdetto): quelli dicono qualcosa a chi apre il repo, i vettori no.
+docs/kb/atlas/concepts-vectors.json

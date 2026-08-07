@@ -1,0 +1,37 @@
+# Template — placeholders (@@...@@) are rendered by scripts/vm-deploy.sh (sed at :163-176).
+# Do NOT install this file directly; run the deploy script instead.
+#
+# #165: il deploy si sgancia dalla chiusura di sessione. Prima, il cancello CI stava
+# dentro il deploy e il deploy dentro la chiusura, quindi la sessione restava aperta a
+# guardare la CI: misurato in S1048, un giro completo vale 20-30 minuti su una sola
+# macchina self-hosted. Adesso l'attesa la fa questo one-shot, e la sessione si chiude
+# quando stato, commit e push sono fatti.
+#
+# Deploya solo cio' che la chiusura ha ARMATO (origin/prod == origin/main) e solo a CI
+# verde; «CI ancora in volo» esce 0 e riprova al tick successivo. Vedi la testata di
+# scripts/deploy-watch.sh per il perche' dell'armamento (preserva il veto S1030).
+[Unit]
+Description=Heuresys Advanced — deploy in PROD dello sha armato, quando la CI diventa verde (#165)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+# S1029: senza questo, un fallimento resta invisibile finche' qualcuno non guarda
+# `systemctl --failed` per caso. Qui vale doppio: e' l'unica unit che tocca la PROD
+# senza che nessuno stia guardando.
+OnFailure=heuresys-unit-failure@%n.service
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=@@REPO_DIR@@
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=REPO_DIR=@@REPO_DIR@@
+Environment=PUBLIC_HOST=@@PUBLIC_HOST@@
+Environment=API_PORT=@@API_PORT@@
+Environment=WEB_PORT=@@WEB_PORT@@
+ExecStart=/usr/bin/env bash @@REPO_DIR@@/scripts/deploy-watch.sh
+# Un deploy vero e' pnpm install + build di shared/api/web: sulla VM free-tier sono
+# minuti, non secondi. Il timeout deve coprire il caso lento, non quello tipico —
+# un deploy ucciso a meta' build lascia la macchina in uno stato peggiore di prima.
+TimeoutStartSec=3600

@@ -17,10 +17,23 @@
 # this script exit non-zero (fail-loud — the close is not clean). The skill `handoff` Step 4b calls
 # this; on a red exit it must investigate, never bypass.
 #
+# #165 — IL DEPLOY NON SI ASPETTA PIU'. Fino a S1048 `--auto-deploy` deployava QUI, in linea,
+# e vm-deploy.sh chiamava ci-gate.sh, che polla fino a 900s aspettando che la CI diventi verde:
+# la sessione restava aperta a guardare un controllo che non richiede nessuno che guardi
+# (misura S1048: un giro completo di CI vale 20-30 minuti su una sola macchina self-hosted).
+# Adesso la chiusura ARMA e basta — spinge `refs/heads/prod` sullo sha appena pushato — e il
+# deploy lo esegue heuresys-advanced-deploy-watch.timer sui due host quando la CI passa al verde.
+# L'armamento e' un push: costa un secondo. Chi vuole ancora il deploy sincrono usa `--deploy-now`.
+#
 # Usage (from the Windows PC, Git Bash):
-#   bash scripts/close-propagate.sh [--full|--delta] [--deploy|--auto-deploy|--no-deploy]
+#   bash scripts/close-propagate.sh [--full|--delta]
+#                                   [--deploy|--auto-deploy|--no-deploy|--deploy-now]
 #                                   [--clone-db|--no-clone-db]
 #   defaults: --delta --auto-deploy   clone-db=auto (refresh iff db/migrations|db/seeds changed)
+#     --auto-deploy : arma SE i commit di sessione toccano path di deploy (default)
+#     --deploy      : arma comunque (chi sa, comanda)
+#     --deploy-now  : deploy SINCRONO come prima di #165 — aspetta la CI. Scappatoia.
+#     --no-deploy   : ne' arma ne' deploya
 set -euo pipefail
 # NOTE: do NOT globally export MSYS_NO_PATHCONV=1 — align-claude-ecosystem.sh manages
 # it per-ssh-call (rssh) and its local jq calls on staging-dir POSIX paths need MSYS
@@ -39,6 +52,7 @@ for a in "$@"; do
     --deploy)      DEPLOY="--deploy" ;;
     --auto-deploy) DEPLOY="--auto-deploy" ;;
     --no-deploy)   DEPLOY="--no-deploy" ;;
+    --deploy-now)  DEPLOY="--deploy-now" ;;   # #165: comportamento pre-sgancio (sincrono)
     --resilient)   : ;;                  # accepted for compat; resilience is always on here
     --clone-db)    CLONE_DB="force" ;;
     --no-clone-db) CLONE_DB="skip" ;;
@@ -96,18 +110,55 @@ case "$CLONE_DB" in
     fi ;;
 esac
 
+# --- decisione di ARMAMENTO (#165) ----------------------------------------------------------
+# Stesso predicato che align-clones.sh:101-113 usava per decidere il deploy, calcolato QUI e
+# PRIMA di chiamarlo: align-clones consuma il marcatore alla fine (riga 194), quindi leggerlo
+# dopo sarebbe una corsa. La regex e' la stessa di align-clones.sh:49 — se una delle due cambia
+# senza l'altra, si arma su un criterio e si deploya su un altro.
+ARM_PATHS_RE='^(apps|packages|db/migrations|db/scripts|scripts|deploy)/'
+ARM_REF="${DEPLOY_ARM_REF:-prod}"
+do_arm=0; arm_why=""; align_deploy_flag="--no-deploy"
+case "$DEPLOY" in
+  --no-deploy)  do_arm=0; arm_why="--no-deploy (o veto HEURESYS_CLOSE_NODEPLOY)" ;;
+  --deploy-now) do_arm=0; arm_why="--deploy-now: deploy SINCRONO in linea (comportamento pre-#165)"
+                align_deploy_flag="--deploy" ;;
+  --deploy)     do_arm=1; arm_why="--deploy esplicito" ;;
+  --auto-deploy)
+    if [ -n "$MODE" ] && [ -f "$MARKER" ] && [ -n "$(head -1 "$MARKER" | tr -d '\r')" ]; then
+      arm_head="$(head -1 "$MARKER" | tr -d '\r')"
+      if [ -n "$(git diff --name-only "$arm_head"..HEAD 2>/dev/null | grep -E "$ARM_PATHS_RE" || true)" ]; then
+        do_arm=1; arm_why="misurato: i commit ${arm_head:0:8}..HEAD toccano path di deploy"
+      else
+        do_arm=0; arm_why="misurato: nessun commit su path di deploy da ${arm_head:0:8}"
+      fi
+    else
+      # Dottrina del dubbio, gemella di align-clones.sh:108-111: armare fa partire un deploy in
+      # PROD senza nessuno che guardi, quindi e' azione cara e nel dubbio NON si esegue.
+      do_arm=0
+      arm_why="IGNOTO: marcatore assente o modalita' full — non armo nel dubbio; forza con --deploy"
+      warn "armamento non eseguito — $arm_why"
+    fi ;;
+esac
+
 # --dry-run / CLOSE_PROPAGATE_DRYRUN: print the resolved plan and exit BEFORE touching any channel
 # (used by scripts/test/run-shell-tests.sh — flag parsing + clone-db conditional decision, §12.5).
 if [ -n "$DRYRUN" ]; then
   mode_label="$([ -n "$MODE" ] && echo delta || echo full)"
+  case "$DEPLOY" in
+    --deploy-now) arm_label="deploy-now" ;;
+    --no-deploy)  arm_label="$([ "${HEURESYS_CLOSE_NODEPLOY:-0}" = "1" ] && echo veto || echo no)" ;;
+    *)            arm_label="$([ "$do_arm" = 1 ] && echo arma || echo no)" ;;
+  esac
   echo "PLAN mode=$mode_label deploy=$DEPLOY clone-db=$CLONE_DB need_clone=$need_clone"
   echo "PLAN clone-db-why: $clone_why"
+  echo "PLAN arm=$arm_label ref=$ARM_REF align-deploy-flag=$align_deploy_flag"
+  echo "PLAN arm-why: $arm_why"
   exit 0
 fi
 
 # --- channel 1: repo + payload + memories + deploy -----------------------------------------
-log "channel 1/2 — align-clones (repo + payload + memories + PROD deploy)"
-if ! bash "$SCRIPTS/align-clones.sh" all $MODE --resilient $DEPLOY; then
+log "channel 1/2 — align-clones (repo + payload + memories${align_deploy_flag:+ + deploy=$align_deploy_flag})"
+if ! bash "$SCRIPTS/align-clones.sh" all $MODE --resilient $align_deploy_flag; then
   FAILED="$FAILED align-clones"
 fi
 
@@ -144,6 +195,33 @@ else
   log "clone-db — non eseguito: $clone_why"
   case "$clone_why" in IGNOTO*) clone_outcome="ignoto" ;; esac
 fi
+# --- ARMAMENTO (#165) — l'ultimo atto della chiusura, e dura un secondo -----------------------
+# Si arma SOLO se i canali sono puliti: mandare in produzione sopra un allineamento fallito
+# significherebbe deployare una macchina che non sappiamo in che stato sia.
+arm_outcome="saltato"
+if [ "$do_arm" = 1 ] && [ -z "$FAILED" ]; then
+  log "arma — origin/$ARM_REF -> $(git rev-parse --short HEAD) ($arm_why)"
+  if git push --quiet origin "HEAD:refs/heads/$ARM_REF"; then
+    arm_outcome="eseguito"
+    echo "  armato $(git rev-parse --short HEAD) — il deploy parte da se' entro ~5 minuti dal verde della CI"
+    echo "  (sorvegliante: heuresys-advanced-deploy-watch.timer su VM e linux-pc)"
+  else
+    # Non-fast-forward: succede solo se la punta e' stata riportata indietro (revert duro,
+    # reset). Non si forza in automatico — una force-push su una ref di produzione e' una
+    # decisione, non un dettaglio di implementazione.
+    FAILED="$FAILED arma"; arm_outcome="fallito"
+    warn "armamento RIFIUTATO da origin (non fast-forward?). Se e' voluto, esplicitamente:"
+    warn "    git push --force origin HEAD:refs/heads/$ARM_REF"
+  fi
+elif [ "$do_arm" = 1 ]; then
+  arm_outcome="saltato"; arm_why="$arm_why — MA i canali sono falliti:$FAILED, non armo sopra un allineamento rotto"
+  warn "$arm_why"
+else
+  log "arma — non eseguito: $arm_why"
+  case "$arm_why" in IGNOTO*) arm_outcome="ignoto" ;; esac
+fi
+[ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step arma "$arm_outcome" "$arm_why" >/dev/null 2>&1 || true
+
 [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step clone-db "$clone_outcome" "$clone_why" >/dev/null 2>&1 || true
 [ -f "$SCRIPTS/close-log.sh" ] && bash "$SCRIPTS/close-log.sh" step propaga \
   "$([ -n "$FAILED" ] && echo fallito || echo eseguito)" \
@@ -153,4 +231,4 @@ fi
 if [ -n "$FAILED" ]; then
   die "close-propagate: channel(s) failed on a reachable host:$FAILED — investigate (close NOT clean)"
 fi
-log "close-propagate complete (mode=${MODE:-full} deploy=$DEPLOY clone-db=$CLONE_DB)"
+log "close-propagate complete (mode=${MODE:-full} deploy=$DEPLOY arma=$arm_outcome clone-db=$CLONE_DB)"

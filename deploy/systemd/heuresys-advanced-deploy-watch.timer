@@ -1,0 +1,26 @@
+# Static unit (no placeholders) — installed verbatim by scripts/vm-deploy.sh.
+#
+# #165: ogni 5 minuti chiede «c'e' uno sha armato, verde e non ancora in produzione?».
+# Quasi sempre la risposta e' no e il one-shot esce in meno di un secondo: il costo del
+# tick e' una `git fetch` e, solo quando c'e' qualcosa di armato, due chiamate all'API
+# pubblica di GitHub.
+#
+# Cinque minuti e' il ritardo massimo fra «la CI diventa verde» e «la PROD e' aggiornata».
+# Prima di #165 quel ritardo era zero ma lo pagava Enzo, tenendo aperta la sessione per
+# 20-30 minuti; adesso lo paga una macchina, e nessuno lo aspetta.
+[Unit]
+Description=Heuresys Advanced — tick del sorvegliante di deploy (#165)
+Documentation=https://github.com/Spen-Zosky/heuresys-advanced
+
+[Timer]
+OnCalendar=*-*-* *:00/5:00
+# Piccolo, non i 120s degli altri timer: qui il ritardo casuale si somma direttamente
+# al tempo che intercorre fra CI verde e produzione aggiornata.
+RandomizedDelaySec=20
+# Recupera l'occorrenza persa dopo uno spegnimento: un deploy armato non deve restare
+# armato per sempre solo perche' la macchina era giu' al momento del tick.
+Persistent=true
+Unit=heuresys-advanced-deploy-watch.service
+
+[Install]
+WantedBy=timers.target

@@ -16,6 +16,15 @@
 #     workflow on main must be success — the deployed code content equals the
 #     last code-bearing sha, and a standing red anywhere blocks (R3).
 #
+# CI_GATE_NONBLOCKING=1 (#165): PENDING returns immediately with exit 75
+# (EX_TEMPFAIL) instead of sleeping to WAIT_SECS. It exists for scripts/deploy-watch.sh,
+# which is invoked by a systemd timer every few minutes: a watcher must NEVER sleep
+# holding a one-shot unit open, and "CI still running" is not a failure — it is
+# "ask again later". 75 is deliberately distinct from BOTH 0 and 1: collapsing it
+# onto 0 would deploy an unverified sha (the one hole that must not exist), and
+# collapsing it onto 1 would light up `systemctl --failed` every few minutes while
+# CI is merely doing its job.
+#
 # Bypass: DEPLOY_REQUIRE_CI=0 (emergency/bootstrap only — logged loudly).
 # Fail-CLOSED on API errors (a gate that fails open is not a gate).
 #
@@ -56,7 +65,14 @@ if [ "${DEPLOY_REQUIRE_CI:-1}" = "0" ]; then
   exit 0
 fi
 
-fetch() { curl -fsS -m 15 -H 'Accept: application/vnd.github+json' "$1"; }
+# CI_GATE_FIXTURE (test seam, #165): serve a canned runs-JSON instead of calling
+# GitHub, so the RED/PENDING/GREEN *decisions* — not just classify() in isolation —
+# are exercised offline by scripts/test/run-shell-tests.sh. Without it the exit-75
+# branch added below could only be asserted by reading the code, which is not a test.
+fetch() {
+  if [ -n "${CI_GATE_FIXTURE:-}" ]; then cat "$CI_GATE_FIXTURE"; return; fi
+  curl -fsS -m 15 -H 'Accept: application/vnd.github+json' "$1"
+}
 
 deadline=$(( $(date +%s) + WAIT_SECS ))
 while :; do
@@ -71,7 +87,11 @@ while :; do
     RED:*)     echo "[ci-gate] RED — failing workflows on $SHA: ${STATE#RED:}" >&2
                echo "[ci-gate] Fix CI first (R3). Emergency bypass: DEPLOY_REQUIRE_CI=0." >&2
                exit 1 ;;
-    PENDING:*) if [ "$(date +%s)" -ge "$deadline" ]; then
+    PENDING:*) if [ "${CI_GATE_NONBLOCKING:-0}" = "1" ]; then
+                 echo "[ci-gate] PENDING — ${STATE#PENDING:} run(s) in flight for $SHA; non-blocking → exit 75 (retry later)"
+                 exit 75
+               fi
+               if [ "$(date +%s)" -ge "$deadline" ]; then
                  echo "[ci-gate] TIMEOUT — CI still running for $SHA after ${WAIT_SECS}s (raise CI_GATE_WAIT or wait)" >&2
                  exit 1
                fi

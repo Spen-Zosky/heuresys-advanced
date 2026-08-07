@@ -250,6 +250,119 @@ else
   fail "$CG missing"
 fi
 
+# ------------------------------- N0. #165 — il deploy sganciato dalla chiusura
+# Tre cose devono restare vere insieme, e sono indipendenti:
+#   1. «CI in volo» non e' ne' verde ne' rossa — ci-gate esce 75, un codice suo;
+#   2. il sorvegliante non deploya MAI cio' che non e' armato, verde e arretrato;
+#   3. la chiusura arma invece di aspettare, e il veto S1030 disarma.
+# Tutto offline: ci-gate legge un fixture (CI_GATE_FIXTURE) e il sorvegliante gira
+# su un repo finto con un `origin` bare locale. Un test che avesse bisogno della rete
+# non girerebbe mai dove serve — cioe' prima del push.
+section "#165 — ci-gate non bloccante (75) + deploy-watch armato"
+CG=scripts/ci-gate.sh; DW=scripts/deploy-watch.sh
+if [ -f "$CG" ] && [ -f "$DW" ]; then
+  F="$(mktemp -d)"
+  printf '%s' '{"workflow_runs":[{"name":"a","status":"in_progress","conclusion":null}]}'          > "$F/pending.json"
+  printf '%s' '{"workflow_runs":[{"name":"a","status":"completed","conclusion":"success"}]}'       > "$F/green.json"
+  printf '%s' '{"workflow_runs":[{"name":"a","status":"completed","conclusion":"failure"}]}'       > "$F/red.json"
+
+  # --- 1. i tre esiti del cancello, con e senza modo non bloccante
+  CI_GATE_FIXTURE="$F/pending.json" CI_GATE_NONBLOCKING=1 bash "$CG" deadbeef >/dev/null 2>&1
+  [ "$?" = 75 ] && ok "ci-gate: CI in volo + non bloccante => 75 (ne' 0 ne' 1)" || fail "ci-gate PENDING non ha dato 75"
+  CI_GATE_FIXTURE="$F/green.json" CI_GATE_NONBLOCKING=1 bash "$CG" deadbeef >/dev/null 2>&1
+  [ "$?" = 0 ]  && ok "ci-gate: verde => 0 anche in modo non bloccante" || fail "ci-gate GREEN non ha dato 0"
+  CI_GATE_FIXTURE="$F/red.json" CI_GATE_NONBLOCKING=1 bash "$CG" deadbeef >/dev/null 2>&1
+  [ "$?" = 1 ]  && ok "ci-gate: rossa => 1 (il non bloccante non ammorbidisce il rosso)" || fail "ci-gate RED non ha dato 1"
+  # Il 75 deve esistere SOLO su richiesta: in modo normale una CI in volo che scade resta un 1.
+  CI_GATE_FIXTURE="$F/pending.json" CI_GATE_WAIT=0 bash "$CG" deadbeef >/dev/null 2>&1
+  [ "$?" = 1 ]  && ok "ci-gate: senza il flag, PENDING scaduto resta 1 (nessun cambio di contratto)" || fail "ci-gate PENDING bloccante non ha dato 1"
+
+  # --- 2. il sorvegliante, su un repo finto con origin bare locale (offline)
+  B="$F/origin.git"; W="$F/box"
+  git init -q --bare "$B"
+  git init -q "$W"
+  git -C "$W" config user.email t@t; git -C "$W" config user.name t
+  git -C "$W" config commit.gpgsign false
+  mkdir -p "$W/scripts" "$W/pg_dump_snapshots"
+  cp "$CG" "$DW" "$W/scripts/"
+  echo x > "$W/f"; git -C "$W" add -A >/dev/null; git -C "$W" commit -qm c1
+  git -C "$W" remote add origin "$B"; git -C "$W" push -q origin HEAD:refs/heads/main
+  SHA1="$(git -C "$W" rev-parse HEAD)"
+  dw() { DEPLOY_WATCH_DRYRUN=1 REPO_DIR="$W" bash "$W/scripts/deploy-watch.sh" 2>&1; }
+
+  out="$(dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'nessun deploy armato'; } \
+    && ok "deploy-watch: niente armato => non fa nulla, esce 0" || fail "deploy-watch senza arma ($rc: $out)"
+
+  git -C "$W" push -q origin HEAD:refs/heads/prod            # armato, ma LAST_GOOD assente
+  out="$(dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'IGNOTO' && ! printf '%s' "$out" | grep -q 'partirebbe'; } \
+    && ok "deploy-watch: LAST_GOOD assente => IGNOTO, NON deploya (dottrina del dubbio)" || fail "deploy-watch IGNOTO ($rc: $out)"
+
+  printf 'non-uno-sha\n' > "$W/pg_dump_snapshots/LAST_GOOD_SHA"
+  out="$(dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'IGNOTO'; } \
+    && ok "deploy-watch: LAST_GOOD che non e' uno sha => IGNOTO (il guard non si accontenta dell'esistenza)" \
+    || fail "deploy-watch LAST_GOOD malformato ($rc: $out)"
+
+  printf '%s\n' "$SHA1" > "$W/pg_dump_snapshots/LAST_GOOD_SHA"
+  out="$(dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'gia'; } \
+    && ok "deploy-watch: armato == in produzione => non fa nulla" || fail "deploy-watch idempotenza ($rc: $out)"
+
+  # la punta avanza SENZA riarmare: e' il caso che protegge dal deploy non autorizzato
+  echo y >> "$W/f"; git -C "$W" commit -qam c2; git -C "$W" push -q origin HEAD:refs/heads/main
+  out="$(dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'non e. piu. quella autorizzata'; } \
+    && ok "deploy-watch: main oltre prod => NON deploya (nessun deploy non autorizzato)" || fail "deploy-watch main>prod ($rc: $out)"
+
+  # armato, arretrato, e la CI dice le tre cose
+  git -C "$W" push -qf origin HEAD:refs/heads/prod
+  out="$(CI_GATE_FIXTURE="$F/pending.json" dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'ancora in volo'; } \
+    && ok "deploy-watch: CI in volo => esce 0 zitto (non accende systemctl --failed)" || fail "deploy-watch PENDING ($rc: $out)"
+  out="$(CI_GATE_FIXTURE="$F/red.json" dw)"; rc=$?
+  { [ "$rc" = 1 ] && printf '%s' "$out" | grep -q 'NON VERDE'; } \
+    && ok "deploy-watch: CI rossa => esce 1 (OnFailure registra)" || fail "deploy-watch RED ($rc: $out)"
+  out="$(CI_GATE_FIXTURE="$F/red.json" dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'gia. segnalato'; } \
+    && ok "deploy-watch: stessa CI rossa al tick dopo => zitto (un allarme ripetuto non e' un allarme)" || fail "deploy-watch RED ripetuto ($rc: $out)"
+  out="$(CI_GATE_FIXTURE="$F/green.json" dw)"; rc=$?
+  { [ "$rc" = 0 ] && printf '%s' "$out" | grep -q 'partirebbe'; } \
+    && ok "deploy-watch: armato + arretrato + verde => deploya" || fail "deploy-watch GREEN ($rc: $out)"
+  rm -rf "$F"
+else
+  fail "$CG o $DW mancante"
+fi
+
+section "#165 — close-propagate arma invece di aspettare la CI"
+CP=scripts/close-propagate.sh
+if [ -f "$CP" ]; then
+  MK="$(mktemp -d)/marker"
+  plan() { HEURESYS_MARKER="$MK" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" "$@" 2>/dev/null | grep '^PLAN arm='; }
+  # marcatore su una finestra che tocca path di deploy (scripts/ e' sempre nel diff se
+  # questo file esiste da piu' di un commit; si usa il commit che ha introdotto il file)
+  git log --format=%H -- "$CP" | tail -1 > "$MK"
+  p="$(plan --delta --auto-deploy)"
+  printf '%s' "$p" | grep -q 'arm=arma' && ok "close-propagate: sessione con codice => ARMA (non aspetta la CI)" || fail "arm=arma atteso ($p)"
+  printf '%s' "$p" | grep -q 'align-deploy-flag=--no-deploy' \
+    && ok "close-propagate: ad align-clones passa --no-deploy (il deploy NON e' piu' in linea)" || fail "align-deploy-flag ($p)"
+  # senza marcatore: nel dubbio non si arma
+  MK2="$(mktemp -d)/assente"
+  p="$(HEURESYS_MARKER="$MK2" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta --auto-deploy 2>/dev/null | grep '^PLAN arm=')"
+  printf '%s' "$p" | grep -q 'arm=no' && ok "close-propagate: marcatore assente => non arma nel dubbio" || fail "arm=no atteso ($p)"
+  # il veto S1030 deve continuare a valere: e' la ragione per cui l'armamento esiste
+  p="$(HEURESYS_MARKER="$MK" HEURESYS_CLOSE_NODEPLOY=1 CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta --auto-deploy 2>/dev/null | grep '^PLAN arm=')"
+  printf '%s' "$p" | grep -q 'arm=veto' \
+    && ok "close-propagate: HEURESYS_CLOSE_NODEPLOY=1 => veto, il ciclo non presidiato non arma (S1030 preservato)" || fail "arm=veto atteso ($p)"
+  # la scappatoia sincrona resta disponibile
+  p="$(plan --delta --deploy-now)"
+  { printf '%s' "$p" | grep -q 'arm=deploy-now' && printf '%s' "$p" | grep -q 'align-deploy-flag=--deploy'; } \
+    && ok "close-propagate: --deploy-now conserva il deploy sincrono di prima di #165" || fail "deploy-now ($p)"
+else
+  fail "$CP missing"
+fi
+
 # -------------------------------------------- N. session modes (canonical|lab)
 # Two sessions can run on this working tree at once: one developing, one doing
 # read-only analysis. The mode is state on disk keyed by session_id, so the

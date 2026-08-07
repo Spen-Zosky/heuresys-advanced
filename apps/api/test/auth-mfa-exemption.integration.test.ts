@@ -10,7 +10,7 @@
  * (sys.sys_auth_mfa_exemption_audit). The login gate §3b still bypasses MFA for an
  * ACTIVE exemption (this is how the service user logs in headless). Invariant I7.
  *
- * Subjects: admin@heuresys.com (human PLATFORM_ADMIN -> rejected) + a throwaway
+ * Subjects: una PERSONA di RTL (non-SERVICE -> rifiutata dal primo lucchetto) + a throwaway
  * SERVICE user created here (eligible + loginable for the bypass proof). Strict cleanup.
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -20,7 +20,17 @@ import { pool } from "../src/db/client.js";
 import { COOKIES } from "../src/config/constants.js";
 import { passwordFor } from "./helpers/personas.js";
 
-const ADMIN = "admin@heuresys.com"; // human PLATFORM_ADMIN -> NOT exemptable (M-8b)
+// L'ATTORE TECNICO e L'ATTORE UMANO sono due cose diverse, e dal 000287 il test deve
+// distinguerle. `admin@heuresys.com` e' un'utenza di SERVIZIO (user_type='SERVICE'):
+// serve per accedere e costruire la sessione, ma NON puo' piu' fare da esempio di
+// «persona», perche' passerebbe il primo lucchetto e verrebbe respinto dal secondo —
+// il test resterebbe verde provando qualcos'altro.
+// Per il caso «una persona non e' esentabile» serve un utente non-SERVICE, e si prende
+// dalla popolazione RTL: le tre persone di Heuresys (Enzo, Chiara, Andrea) NON sono
+// impersonabili per principio (Z-262, `isRealPerson`) — la loro password la scelgono
+// loro. Qui non si accede come lei, si legge soltanto il suo identificativo.
+const ADMIN = "admin@heuresys.com";            // utenza tecnica: accede e apre la sessione
+const HUMAN = "federica.marchetti@rtl-bank.org"; // persona (non-SERVICE) -> NOT exemptable
 const PASSWORD = passwordFor(ADMIN);
 const SVC_EMAIL = "wi-a-svc-test@heuresys.local"; // throwaway SERVICE -> exemptable
 
@@ -29,6 +39,7 @@ const ARGON2 = { type: argon2.argon2id, memoryCost: 65536, timeCost: 3, parallel
 describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", () => {
   let app: TestApp;
   let adminUserId: string;
+  let humanUserId: string;
   let svcUserId: string;
 
   async function login(payload: Record<string, unknown>) {
@@ -46,6 +57,10 @@ describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", ()
     );
     if (!a.rows[0]) throw new Error(`persona not seeded: ${ADMIN}`);
     adminUserId = a.rows[0].user_id;
+    const h = await pool.query<{ user_id: string }>(
+      `SELECT user_id FROM sys.sys_users WHERE lower(user_email) = lower($1)`, [HUMAN]);
+    if (!h.rows[0]) throw new Error(`persona not seeded: ${HUMAN}`);
+    humanUserId = h.rows[0].user_id;
     const tenantId = a.rows[0].user_tenant_id;
 
     // throwaway SERVICE user (loginable) in admin's tenant
@@ -73,16 +88,16 @@ describe("/v1/auth/login MFA exemption — M-8 + M-8b (mfaEnforcement=true)", ()
   afterAll(async () => {
     await exemptionDelete(adminUserId);
     await exemptionDelete(svcUserId);
-    await pool.query(`DELETE FROM sys.sys_auth_mfa_exemption_audit WHERE auth_mfa_exemption_audit_user_id = ANY($1::uuid[])`, [[adminUserId, svcUserId]]);
+    await pool.query(`DELETE FROM sys.sys_auth_mfa_exemption_audit WHERE auth_mfa_exemption_audit_user_id = ANY($1::uuid[])`, [[adminUserId, humanUserId, svcUserId]]);
     await pool.query(`DELETE FROM sys.sys_users WHERE user_id = $1`, [svcUserId]); // cascades identity+credential
     await app.app.close();
   });
 
-  it("M-8b: a HUMAN PLATFORM_ADMIN is NOT exemptable (trigger rejects)", async () => {
+  it("M-8b: a HUMAN account is NOT exemptable (trigger rejects on user_type)", async () => {
     await expect(
       pool.query(
         `INSERT INTO sys.sys_auth_mfa_exemptions (auth_mfa_exemption_user_id, auth_mfa_exemption_reason) VALUES ($1, $2)`,
-        [adminUserId, "must be rejected by 000118"],
+        [humanUserId, "must be rejected by 000118"],
       ),
     ).rejects.toThrow();
   });

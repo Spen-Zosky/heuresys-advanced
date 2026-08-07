@@ -164,7 +164,14 @@ Suite: agent-gateway **51 → 65** test, nessuna regressione. Atlante: idempoten
 
 - **`deriveUserProfiles` riscrive sempre tutti i 156 profili**: l'unico corpus senza
   salto, quindi un backfill «a vuoto» a vuoto non è.
-- **`ADR_INDEX.md` è fermo a 0020** mentre sul disco si arriva a 0033: stale da tredici.
+- **`ADR_INDEX.md` è fermo a 0020** mentre sul disco si arriva a 0033. Misurato il
+  2026-08-07 con un filtro che cerca qualsiasi numero, non un formato: mancano **12** ADR
+  (`0021`, `0023`-`0033`; `0019` e `0022` sono buchi di numerazione, non omissioni), e
+  l'indice non è toccato **dal 26 maggio**. In più cita un **`ADR-0000` che sul disco non
+  esiste**: non è solo indietro, è anche disallineato in avanti. Fra i mancanti ci sono
+  `0026` (ambiente unico, due tenant), `0027` (autorizzazione bi-assiale) e `0032` (il
+  mandato tecnico non apre stipendi e valutazioni) — decisioni che `CLAUDE.md` cita come
+  invarianti, e che chi cercasse la mappa dall'indice non troverebbe.
 - **8 commit non pushati** e **`#154`** (deploy su linux-pc) ancora sospeso dal
   disservizio GitHub.
 

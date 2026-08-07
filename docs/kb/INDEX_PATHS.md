@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-07T11:25:47Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2884**
+**Generato**: 2026-08-07T22:48:47Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2865**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -8,32 +8,32 @@
 
 | Categoria | File |
 |---|---|
-| ADR | 32 |
+| ADR | 34 |
 | api-core | 32 |
-| api-module | 337 |
+| api-module | 317 |
 | ci | 17 |
 | claude-config | 36 |
-| config | 128 |
+| config | 131 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 277 |
+| db-migration | 291 |
 | db-other | 8 |
-| db-script | 44 |
-| db-seed | 147 |
-| doc-canonical | 560 |
+| db-script | 46 |
+| db-seed | 148 |
+| doc-canonical | 562 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
 | session | 12 |
 | shared-pkg | 4 |
-| shared-schema | 104 |
+| shared-schema | 100 |
 | showcase-source | 14 |
-| test | 353 |
+| test | 336 |
 | ux-design-archive | 80 |
-| web-source | 232 |
-| **TOTALE** | **2884** |
+| web-source | 230 |
+| **TOTALE** | **2865** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2326 |
+| live | 2307 |
 
 ## File per categoria
 
@@ -80,6 +80,8 @@
 - `D:\heuresys-advanced\docs\architecture\adr\0031_ess_self_view_computed_intelligence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0032_platform_mandate_masks_pay_and_evaluation.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\architecture\adr\0033_generic_tool_catalogue_over_domain_metadata.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0034_migration_chain_is_schema_over_a_data_baseline.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\architecture\adr\0035_retirement_amends_the_source_never_deletes_downstream.md` · *live* · git-tracked
 
 ### api-core
 
@@ -183,26 +185,6 @@
 - `D:\heuresys-advanced\apps\api\src\modules\blueprint-variants\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\blueprint-variants\routes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\blueprint-variants\service.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-import-runs\repository.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-import-runs\routes.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-import-runs\service.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-source-exports\repository.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-source-exports\routes.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-source-exports\service.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-table-mappings\repository.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-table-mappings\routes.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-table-mappings\service.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\audit-rule-codes.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\engine.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\loader.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\repository.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\routes.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\run-logger.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\service.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\state.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\transform-compiler.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\transforms.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\upsert-sql.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\capability-composition\recompute-cli.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\capability-composition\repository.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\src\modules\capability-composition\routes.ts` · *live* · git-tracked
@@ -580,6 +562,8 @@
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-auth-housekeeping.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-backup.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-backup.timer` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-deploy-watch.service` · *live* · git-tracked
+- `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-deploy-watch.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-dr-drill.service` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-dr-drill.timer` · *live* · git-tracked
 - `D:\heuresys-advanced\deploy\systemd\heuresys-advanced-gdpr-retention.service` · *live* · git-tracked
@@ -612,6 +596,7 @@
 - `D:\heuresys-advanced\scripts\close-log.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\close-propagate.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\db-health-graph.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\deploy-watch.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\dev-bootstrap.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\dev-bootstrap.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\dev-whoami.ps1` · *live* · git-tracked
@@ -1283,6 +1268,20 @@
 - `D:\heuresys-advanced\db\migrations\000277_realign_career_paths_and_targets.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000278_reattach_critical_roles_to_real_positions.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000279_mark_provenance_of_relevance_rows.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000280_register_august_2026_reorganization_events.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000281_lineage_independent_from_brownfield.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000282_heuresys_ateco_70_20_management_consulting.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000283_retire_rtl_rebuild_staging_tables.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000284_mfa_exemption_explicit_allowlist.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000285_platform_admin_false_legacy_origin.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000286_remove_platform_admin_residue.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000287_user_census_158_plus_3.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000288_reviews_reviewer_is_the_line_manager.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000289_contracts_in_force_and_ccnl_floor.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000290_variable_pay_at_current_level_and_paid_in_june.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000291_preposti_safety_training_for_new_supervisors.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000292_emergency_team_coverage_per_branch.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000293_remove_brownfield_menu_entry.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1305,6 +1304,8 @@
 - `D:\heuresys-advanced\db\scripts\audit-storia36-semantic.py` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\brownfield-wave-1-preflight.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\brownfield-wave-1-preflight.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\ci-rehearsal-census.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\ci-rehearsal.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\create_local_database.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\create_local_database.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\encrypt-totp-secrets.ts` · *live* · git-tracked
@@ -1452,6 +1453,7 @@
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\15_user_contracts.generated.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\16_user_pay_slips.generated.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl-rebuild\README.md` · *live* · git-tracked
+- `D:\heuresys-advanced\db\seeds\rtl-rebuild\RETIRED.md` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\rtl_positions_hierarchy.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\sdbi\_template\01_temp_sdbi_ddl.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\seeds\sdbi\_template\02_phase3_temp_sdbi_seed.sql` · *live* · git-tracked
@@ -1980,6 +1982,8 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-07-26-z261-mfa-fixture-secret-rotation.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-07-26-z262-accesso-derivato-tutti-gli-utenti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-07-27-rtl-storia-36-mesi.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-07-165-sganciare-il-deploy-e-provare-la-catena-in-locale.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-08-164-F4-migrazione-pronta-non-applicata.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-substrato-semantico-verifica-e-correzioni.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked
@@ -2224,10 +2228,6 @@
 - `D:\heuresys-advanced\packages\shared\src\schemas\blueprint-overrides.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\blueprint-processes.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\blueprint-variants.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\packages\shared\src\schemas\brownfield-import-runs.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\packages\shared\src\schemas\brownfield-source-exports.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\packages\shared\src\schemas\brownfield-table-mappings.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\packages\shared\src\schemas\brownfield-wave-executor.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\capability-composition.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\capability-maturity.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\packages\shared\src\schemas\career-path-steps.ts` · *live* · git-tracked
@@ -2364,12 +2364,6 @@
 - `D:\heuresys-advanced\apps\api\test\blueprint-variants.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\blueprints.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\bpm-kpi-templates.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\brownfield-engine-freeze.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\brownfield-import-runs.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\brownfield-source-exports.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\brownfield-table-mappings.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\brownfield-wave-executor.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\brownfield.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\capability-composition-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\capability-composition.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\capability-maturity-rubric.test.ts` · *live* · git-tracked
@@ -2507,7 +2501,6 @@
 - `D:\heuresys-advanced\apps\api\test\reference-sync-esco-skill-hierarchy.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\reference-sync.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\result-cap.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\run-logger.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\scope-audit.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\scope-data-classes.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\scope-functional-axis.integration.test.ts` · *live* · git-tracked
@@ -2546,9 +2539,6 @@
 - `D:\heuresys-advanced\apps\api\test\tenants.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\time-off.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\training-initiatives.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\transform-compiler.cast-enum.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\transform-compiler.lookup-fk-2hop.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\transform-compiler.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\trust-proxy.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\two-axis-f4-crosstree.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\date-only.unit.test.ts` · *live* · git-tracked
@@ -2561,10 +2551,6 @@
 - `D:\heuresys-advanced\apps\api\test\unit\slow-queries-degradation.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\trust-proxy.unit.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\unit\with-transaction-retry.unit.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b34-nullable-nk.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b60-a-silent-skip.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\upsert-sql-type-coerce.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\upsert-sql.cw-b49-coalesce-conflict.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\user-career-plans-scope.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\user-career-plans.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\user-dossier.integration.test.ts` · *live* · git-tracked
@@ -2580,9 +2566,6 @@
 - `D:\heuresys-advanced\apps\api\test\visualization-styles.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\visualizations.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\vrio-scorecard.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\wave1-cw-b60-tractable-targets.integration.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\wave1-debug-scale-v4.test.ts` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\api\test\wave1-idempotency.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\webauthn.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\api\test\whistleblowing.integration.test.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\tests\e2e\a11y.spec.ts` · *live* · git-tracked
@@ -2812,8 +2795,6 @@
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\approvals\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\blueprints\[variantId]\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\blueprints\page.tsx` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\brownfield-adaptation\layout.tsx` · *live* · git-tracked
-- `D:\heuresys-advanced\apps\web\src\app\(authenticated)\brownfield-adaptation\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\career-succession\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\compensation-intelligence\page.tsx` · *live* · git-tracked
 - `D:\heuresys-advanced\apps\web\src\app\(authenticated)\content\[id]\page.tsx` · *live* · git-tracked

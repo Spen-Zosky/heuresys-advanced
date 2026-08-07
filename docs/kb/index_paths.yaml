@@ -1,42 +1,42 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-07T11:25:47Z da docs/kb/tools/build_index.py
+# generato: 2026-08-07T22:48:47Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-07T11:25:47Z"
-  total_files: 2884
+  generated_at: "2026-08-07T22:48:47Z"
+  total_files: 2865
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 32
+    ADR: 34
     api-core: 32
-    api-module: 337
+    api-module: 317
     ci: 17
     claude-config: 36
-    config: 128
+    config: 131
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 277
+    db-migration: 291
     db-other: 8
-    db-script: 44
-    db-seed: 147
-    doc-canonical: 560
+    db-script: 46
+    db-seed: 148
+    doc-canonical: 562
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 104
+    shared-schema: 100
     showcase-source: 14
-    test: 353
+    test: 336
     ux-design-archive: 80
-    web-source: 232
+    web-source: 230
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2326
+    live: 2307
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -227,6 +227,18 @@ files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\0033_generic_tool_catalogue_over_domain_metadata.md'
     root: repo
     rel: 'docs/architecture/adr/0033_generic_tool_catalogue_over_domain_metadata.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0034_migration_chain_is_schema_over_a_data_baseline.md'
+    root: repo
+    rel: 'docs/architecture/adr/0034_migration_chain_is_schema_over_a_data_baseline.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0035_retirement_amends_the_source_never_deletes_downstream.md'
+    root: repo
+    rel: 'docs/architecture/adr/0035_retirement_amends_the_source_never_deletes_downstream.md'
     category: ADR
     status: live
     provenance: git-tracked
@@ -809,126 +821,6 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\blueprint-variants\service.ts'
     root: repo
     rel: 'apps/api/src/modules/blueprint-variants/service.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-import-runs\repository.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-import-runs/repository.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-import-runs\routes.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-import-runs/routes.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-import-runs\service.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-import-runs/service.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-source-exports\repository.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-source-exports/repository.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-source-exports\routes.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-source-exports/routes.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-source-exports\service.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-source-exports/service.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-table-mappings\repository.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-table-mappings/repository.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-table-mappings\routes.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-table-mappings/routes.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-table-mappings\service.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-table-mappings/service.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\audit-rule-codes.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/audit-rule-codes.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\engine.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/engine.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\loader.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/loader.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\repository.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/repository.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\routes.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/routes.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\run-logger.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/run-logger.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\service.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/service.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\state.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/state.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\transform-compiler.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/transform-compiler.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\transforms.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/transforms.ts'
-    category: api-module
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\src\modules\brownfield-wave-executor\upsert-sql.ts'
-    root: repo
-    rel: 'apps/api/src/modules/brownfield-wave-executor/upsert-sql.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -3140,6 +3032,18 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-deploy-watch.service'
+    root: repo
+    rel: 'deploy/systemd/heuresys-advanced-deploy-watch.service'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-deploy-watch.timer'
+    root: repo
+    rel: 'deploy/systemd/heuresys-advanced-deploy-watch.timer'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\deploy\systemd\heuresys-advanced-dr-drill.service'
     root: repo
     rel: 'deploy/systemd/heuresys-advanced-dr-drill.service'
@@ -3329,6 +3233,12 @@ files:
   - path: 'D:\heuresys-advanced\scripts\db-health-graph.sh'
     root: repo
     rel: 'scripts/db-health-graph.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\deploy-watch.sh'
+    root: repo
+    rel: 'scripts/deploy-watch.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -7268,6 +7178,90 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000280_register_august_2026_reorganization_events.sql'
+    root: repo
+    rel: 'db/migrations/000280_register_august_2026_reorganization_events.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000281_lineage_independent_from_brownfield.sql'
+    root: repo
+    rel: 'db/migrations/000281_lineage_independent_from_brownfield.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000282_heuresys_ateco_70_20_management_consulting.sql'
+    root: repo
+    rel: 'db/migrations/000282_heuresys_ateco_70_20_management_consulting.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000283_retire_rtl_rebuild_staging_tables.sql'
+    root: repo
+    rel: 'db/migrations/000283_retire_rtl_rebuild_staging_tables.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000284_mfa_exemption_explicit_allowlist.sql'
+    root: repo
+    rel: 'db/migrations/000284_mfa_exemption_explicit_allowlist.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000285_platform_admin_false_legacy_origin.sql'
+    root: repo
+    rel: 'db/migrations/000285_platform_admin_false_legacy_origin.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000286_remove_platform_admin_residue.sql'
+    root: repo
+    rel: 'db/migrations/000286_remove_platform_admin_residue.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000287_user_census_158_plus_3.sql'
+    root: repo
+    rel: 'db/migrations/000287_user_census_158_plus_3.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000288_reviews_reviewer_is_the_line_manager.sql'
+    root: repo
+    rel: 'db/migrations/000288_reviews_reviewer_is_the_line_manager.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000289_contracts_in_force_and_ccnl_floor.sql'
+    root: repo
+    rel: 'db/migrations/000289_contracts_in_force_and_ccnl_floor.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000290_variable_pay_at_current_level_and_paid_in_june.sql'
+    root: repo
+    rel: 'db/migrations/000290_variable_pay_at_current_level_and_paid_in_june.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000291_preposti_safety_training_for_new_supervisors.sql'
+    root: repo
+    rel: 'db/migrations/000291_preposti_safety_training_for_new_supervisors.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000292_emergency_team_coverage_per_branch.sql'
+    root: repo
+    rel: 'db/migrations/000292_emergency_team_coverage_per_branch.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000293_remove_brownfield_menu_entry.sql'
+    root: repo
+    rel: 'db/migrations/000293_remove_brownfield_menu_entry.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -7361,6 +7355,18 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\brownfield-wave-1-preflight.sh'
     root: repo
     rel: 'db/scripts/brownfield-wave-1-preflight.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\ci-rehearsal-census.sh'
+    root: repo
+    rel: 'db/scripts/ci-rehearsal-census.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\ci-rehearsal.sh'
+    root: repo
+    rel: 'db/scripts/ci-rehearsal.sh'
     category: db-script
     status: live
     provenance: git-tracked
@@ -8225,6 +8231,12 @@ files:
   - path: 'D:\heuresys-advanced\db\seeds\rtl-rebuild\README.md'
     root: repo
     rel: 'db/seeds/rtl-rebuild/README.md'
+    category: db-seed
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\seeds\rtl-rebuild\RETIRED.md'
+    root: repo
+    rel: 'db/seeds/rtl-rebuild/RETIRED.md'
     category: db-seed
     status: live
     provenance: git-tracked
@@ -11378,6 +11390,18 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-07-165-sganciare-il-deploy-e-provare-la-catena-in-locale.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-07-165-sganciare-il-deploy-e-provare-la-catena-in-locale.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-08-164-F4-migrazione-pronta-non-applicata.sql'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-08-164-F4-migrazione-pronta-non-applicata.sql'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md'
     root: repo
     rel: 'docs/superpowers/prompts/2026-08-06-catalogo-generico-corpus-concetti.md'
@@ -12734,30 +12758,6 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\brownfield-import-runs.ts'
-    root: repo
-    rel: 'packages/shared/src/schemas/brownfield-import-runs.ts'
-    category: shared-schema
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\brownfield-source-exports.ts'
-    root: repo
-    rel: 'packages/shared/src/schemas/brownfield-source-exports.ts'
-    category: shared-schema
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\brownfield-table-mappings.ts'
-    root: repo
-    rel: 'packages/shared/src/schemas/brownfield-table-mappings.ts'
-    category: shared-schema
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\brownfield-wave-executor.ts'
-    root: repo
-    rel: 'packages/shared/src/schemas/brownfield-wave-executor.ts'
-    category: shared-schema
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\capability-composition.ts'
     root: repo
     rel: 'packages/shared/src/schemas/capability-composition.ts'
@@ -13535,42 +13535,6 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\bpm-kpi-templates.integration.test.ts'
     root: repo
     rel: 'apps/api/test/bpm-kpi-templates.integration.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\brownfield-engine-freeze.integration.test.ts'
-    root: repo
-    rel: 'apps/api/test/brownfield-engine-freeze.integration.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\brownfield-import-runs.integration.test.ts'
-    root: repo
-    rel: 'apps/api/test/brownfield-import-runs.integration.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\brownfield-source-exports.integration.test.ts'
-    root: repo
-    rel: 'apps/api/test/brownfield-source-exports.integration.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\brownfield-table-mappings.integration.test.ts'
-    root: repo
-    rel: 'apps/api/test/brownfield-table-mappings.integration.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\brownfield-wave-executor.integration.test.ts'
-    root: repo
-    rel: 'apps/api/test/brownfield-wave-executor.integration.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\brownfield.integration.test.ts'
-    root: repo
-    rel: 'apps/api/test/brownfield.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -14396,12 +14360,6 @@ files:
     category: test
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\run-logger.test.ts'
-    root: repo
-    rel: 'apps/api/test/run-logger.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\scope-audit.integration.test.ts'
     root: repo
     rel: 'apps/api/test/scope-audit.integration.test.ts'
@@ -14630,24 +14588,6 @@ files:
     category: test
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\transform-compiler.cast-enum.test.ts'
-    root: repo
-    rel: 'apps/api/test/transform-compiler.cast-enum.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\transform-compiler.lookup-fk-2hop.test.ts'
-    root: repo
-    rel: 'apps/api/test/transform-compiler.lookup-fk-2hop.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\transform-compiler.test.ts'
-    root: repo
-    rel: 'apps/api/test/transform-compiler.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\trust-proxy.test.ts'
     root: repo
     rel: 'apps/api/test/trust-proxy.test.ts'
@@ -14717,30 +14657,6 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\unit\with-transaction-retry.unit.test.ts'
     root: repo
     rel: 'apps/api/test/unit/with-transaction-retry.unit.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b34-nullable-nk.test.ts'
-    root: repo
-    rel: 'apps/api/test/upsert-sql-cw-b34-nullable-nk.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\upsert-sql-cw-b60-a-silent-skip.test.ts'
-    root: repo
-    rel: 'apps/api/test/upsert-sql-cw-b60-a-silent-skip.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\upsert-sql-type-coerce.test.ts'
-    root: repo
-    rel: 'apps/api/test/upsert-sql-type-coerce.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\upsert-sql.cw-b49-coalesce-conflict.test.ts'
-    root: repo
-    rel: 'apps/api/test/upsert-sql.cw-b49-coalesce-conflict.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -14831,24 +14747,6 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\vrio-scorecard.integration.test.ts'
     root: repo
     rel: 'apps/api/test/vrio-scorecard.integration.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\wave1-cw-b60-tractable-targets.integration.test.ts'
-    root: repo
-    rel: 'apps/api/test/wave1-cw-b60-tractable-targets.integration.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\wave1-debug-scale-v4.test.ts'
-    root: repo
-    rel: 'apps/api/test/wave1-debug-scale-v4.test.ts'
-    category: test
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\api\test\wave1-idempotency.test.ts'
-    root: repo
-    rel: 'apps/api/test/wave1-idempotency.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -16187,18 +16085,6 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\blueprints\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/blueprints/page.tsx'
-    category: web-source
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\brownfield-adaptation\layout.tsx'
-    root: repo
-    rel: 'apps/web/src/app/(authenticated)/brownfield-adaptation/layout.tsx'
-    category: web-source
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\brownfield-adaptation\page.tsx'
-    root: repo
-    rel: 'apps/web/src/app/(authenticated)/brownfield-adaptation/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked

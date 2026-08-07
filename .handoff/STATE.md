@@ -97,9 +97,8 @@ tre correzioni sostanziali) e **`#127`+`#123`** insieme, perché la seconda asso
 - **`#156` — quale superficie aprire per prima all'agente?** Un modulo, in sola lettura. I criteri
   dell'ADR-0033 misurano la fattibilità, non scelgono cosa esporre: quella è una decisione di
   prodotto e di rischio.
-- **`#157` — il catalogo generico deve rispondere alle domande di aggregazione?** La strada che
-  consiglio non richiede codice nuovo: l'agente instrada, il calcolo lo fanno gli endpoint analitici
-  che esistono già.
+  *(`#157` non è più una domanda: **deciso** il 2026-08-07 via `COWORK_INBOX` — le aggregazioni
+  restano fuori dallo scopo, il calcolo lo fanno gli endpoint analitici che già esistono.)*
 - WAIT-INPUT: **#8** Outlook · **#16** SuccessFactors · **#52** SSO IdP · **#85** `AGENTS.md` · **#86** `claude login`.
 
 ## Verification (next session)

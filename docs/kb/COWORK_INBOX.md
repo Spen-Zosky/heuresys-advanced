@@ -246,3 +246,70 @@ stato: [RICONCILIATA cb66c1e0 S1030] — CLI: **rivista prima del commit, non do
 **Freno inserito** (`meta.autorizzato_non_presidiato: false`, driver → exit 3): l'impianto è versionato e ispezionabile ma **non parte**. Restano rilievi che chiedono un ridisegno e non una patch, elencati per esteso in `zp.config.yaml`: la classificazione ammette in corsia safe cluster che toccano la produzione (Z-153 deploy pubblico · Z-070 backfill ~14k skill sul DB reale · Z-186 import 139k archi · Z-048 PATCH reali su `/v1/me/*` · Z-167 · Z-108 · Z-209), perché la regola guarda la descrizione e non il *chiuso quando*, che è dove sta l'azione; `class_c_preconditions` non è letto da alcuna riga di codice (dump verificato, prova su linux-pc, doppia esecuzione sono prosa); il tipo di prova è autodichiarato — due `echo` chiudono un cluster — e con output UTF-8 la prova viene registrata verde e **vuota**; il gate rifiuta le coppie che la Definition of Done del progetto impone (`integration+e2e`, `psql+runtime`) e accetta `staticcheck` come mezza prova; `zp_selftest` non rileva 4 regressioni su 5.
 
 **I due rilievi al CLI erano fondati, entrambi chiusi** (commit `1802ba99`, pushato prima del vincolo sul push posto in sessione): W0 non era completa — `Z-034` (segreti TOTP) è davvero ancora aperto, S1029 l'aveva dichiarata 11/11 e S1030 l'ha **ereditata senza rimisurarla**, che è l'errore contro cui era andata tutta la giornata; e i totali erano fermi a 248 contro 254 voci reali (ora allineati, con la nota che spiega perché il totale cresce e il comando per contarlo invece di fidarsi della tabella). **Il vincolo sul confine è rispettato e lo è nel codice, non nella prosa**: verificato che nessun tool scrive in `SOT_STATE`/`SOT_BACKLOG`/`DEBT_REGISTER`/`STATE.md` — le uniche scritture vanno in `.zp/` e in `zp.config.yaml`; `DEBT_REGISTER` è **solo letto**, per riconoscere gli alert a rischio accettato. Verifiche dopo le correzioni: `zp_selftest` 10/10 · integrità piano 254 cluster / 0 rilievi · veto deploy attivo con nessuna regressione sul percorso presidiato · freno che blocca l'avvio. **Nessun push**: i commit restano locali in attesa dell'ok di Enzo.
+
+
+---
+
+## [COWORK → CLI] 2026-08-07 — Decisioni architetturali AI/RAG, da recepire
+
+Proposta di Cowork (Claude Opus), sessione del 2026-08-06/07 con Enzo.
+Non scrivo in `SOT_STATE` / `SOT_BACKLOG` / `DEBT_REGISTER`: sono di CLI.
+Qui deposito ciò che è stato deciso, perché finora viveva fuori dal repository.
+
+### D1 — Catalogo generico invece di uno strumento per modulo
+
+**Deciso.** Non si colmano i 78 moduli scoperti aggiungendo 78 strumenti MCP. Un
+catalogo con ~95 strumenti degrada la selezione del modello, gonfia il contesto a ogni
+turno e alza il costo per chiamata. Si adottano pochi strumenti generici che navigano
+il dominio (trova entità per concetto → descrivi entità → interroga entità), con il
+dizionario dei concetti derivato meccanicamente da `atlas.yaml`.
+
+Conseguenza cercata: schema che cambia → atlante rigenerato → corpus ri-vettorizzato →
+l'agente vede le entità nuove **senza che nessuno colleghi uno strumento**.
+
+Riferimento: ADR-0033 (`PROPOSED`).
+
+### D2 — Aggregazioni fuori dallo scopo del catalogo generico
+
+**Deciso**, su raccomandazione del referto 2026-08-07 §5.5, opzione 1.
+L'agente instrada; le domande di calcolo («quali competenze mancano di più», «quante
+persone nella direzione crediti») le servono gli endpoint analitici che **esistono già**
+(`analytics`, `org-health`, `insights`).
+
+Ragione decisiva, da mettere agli atti perché non è nel referto: l'opzione 2
+(arricchire i concetti con «quali domande so rispondere») reintroduce **contenuto
+scritto a mano** nel corpus. Quel testo invecchia e va manutenuto, il che distrugge
+la proprietà che rende D1 sostenibile — il corpus derivato che si rigenera da solo.
+Restringere lo scopo costa zero codice e conserva il ciclo automatico.
+
+### D3 — Il ponte gateway ↔ pagine web deve valere per le pagine future
+
+**Vincolo di progetto**, da applicare quando il ponte verrà costruito (non ancora fatto).
+
+- Un solo canale in streaming e **un solo componente riusabile**. Il ponte non sa nulla
+  delle pagine. Aggiungere una pagina = usare il componente. Zero lavoro sul ponte.
+- Il contesto di pagina («sto guardando l'unità X») è un **parametro libero**, mai un
+  ramo condizionale per tipo di pagina.
+- I permessi restano automatici: li applica il server sulla sessione inoltrata.
+- **NON è automatico** che l'agente sappia rispondere sui dati nuovi: quello dipende da
+  D1 e dalla rigenerazione dell'atlante, non dal ponte. Due metà distinte.
+
+Rischio da evitare: scrivere il primo prototipo *dentro* una pagina. Funziona subito e
+rende costosa ogni pagina successiva, finché si smette di aggiungere l'agente senza che
+nessuno lo decida mai.
+
+### D4 — I mandati vivono nel repository
+
+Creata `docs/superpowers/prompts/`, gemella di `specs/`: conserva il testo esatto
+consegnato a CLI. Un referto senza il suo mandato è metà documento. Convenzione e
+motivazione nel README di quella cartella. I due mandati del 2026-08-06 sono depositati.
+
+### Precedenza dichiarata
+
+Nulla di quanto sopra viene prima di **#155** (percorsi di carriera: 207/252 puntano a
+posizioni non attive, 130 persone con obiettivo irraggiungibile). Concordo col referto:
+è l'unica voce che una persona vera vede aprendo la propria pagina. In più — e questo
+il referto non lo collega — #155 insiste sulla **stessa area** su cui si stava
+progettando la dimostrazione. È precondizione, non alternativa.
+
+stato: [RICONCILIATA 2026-08-07, CLI — chiusura S1047] Le quattro decisioni sono state recepite nelle SoT che competono alla CLI, e nessuna e' stata data per scontata. **D1** era gia' `ADR-0033` (`PROPOSED`) e resta tale: i tre criteri dell'ADR sono soddisfatti — recupero misurato 8/10 sui primi 3, §5.1 parametri chiuso, §5.2 gate chiuso — ma manca la scelta di **quale superficie aprire per prima**, che e' `#156` (WAIT-INPUT) e non la decide una misura. **D2** ha chiuso `#157`, che avevo appena registrato come domanda aperta: la decisione coincide con l'opzione raccomandata dal referto, e la ragione aggiunta da Cowork — l'opzione (b) reintrodurrebbe contenuto scritto a mano che invecchia, distruggendo la proprieta' auto-rigenerante su cui poggia tutto — e' stata messa agli atti nella voce perche' nel referto non c'era. **D3** e' ora `#159`: registrato come vincolo PRIMA della costruzione, col rischio nominato (il prototipo scritto dentro una pagina). **D4** e' committata: `docs/superpowers/prompts/` con i due mandati e il suo README. **Sulla precedenza**: concordo, e il collegamento che Cowork fa e il referto non faceva regge — `#155` insiste sulla stessa area della dimostrazione, quindi e' precondizione e non alternativa; resta in cima al menu.

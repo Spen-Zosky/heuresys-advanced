@@ -336,29 +336,64 @@ else
 fi
 
 section "#165 — close-propagate arma invece di aspettare la CI"
+# NIENTE STORIA GIT QUI. La CI fa `actions/checkout` con fetch-depth: 1, quindi
+# `git log -- <file> | tail -1` restituisce la PUNTA e ogni diff «da li' a HEAD» e'
+# vuoto: la prima stesura di questi test era verde in locale e rossa in CI proprio
+# per questo (S1049 — e il repo l'aveva gia' imparato in S1046, commit «fixture git
+# deterministica, non la storia del repo»). Il predicato si prova COM'E' SPEDITO,
+# come gia' fa il gate DEPLOY_PATHS_RE di align-clones qui sopra.
 CP=scripts/close-propagate.sh
 if [ -f "$CP" ]; then
-  MK="$(mktemp -d)/marker"
-  plan() { HEURESYS_MARKER="$MK" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" "$@" 2>/dev/null | grep '^PLAN arm='; }
-  # marcatore su una finestra che tocca path di deploy (scripts/ e' sempre nel diff se
-  # questo file esiste da piu' di un commit; si usa il commit che ha introdotto il file)
-  git log --format=%H -- "$CP" | tail -1 > "$MK"
-  p="$(plan --delta --auto-deploy)"
-  printf '%s' "$p" | grep -q 'arm=arma' && ok "close-propagate: sessione con codice => ARMA (non aspetta la CI)" || fail "arm=arma atteso ($p)"
-  printf '%s' "$p" | grep -q 'align-deploy-flag=--no-deploy' \
-    && ok "close-propagate: ad align-clones passa --no-deploy (il deploy NON e' piu' in linea)" || fail "align-deploy-flag ($p)"
-  # senza marcatore: nel dubbio non si arma
-  MK2="$(mktemp -d)/assente"
-  p="$(HEURESYS_MARKER="$MK2" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta --auto-deploy 2>/dev/null | grep '^PLAN arm=')"
-  printf '%s' "$p" | grep -q 'arm=no' && ok "close-propagate: marcatore assente => non arma nel dubbio" || fail "arm=no atteso ($p)"
+  MKD="$(mktemp -d)"; MK="$MKD/marker"
+  plan() { local m="$1"; shift; HEURESYS_MARKER="$m" CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" "$@" 2>/dev/null | grep '^PLAN arm='; }
+
+  # --- il criterio di armamento DEVE essere lo stesso con cui align-clones deciderebbe
+  #     il deploy. Se i due divergono si arma su un criterio e si deploya su un altro:
+  #     e' il difetto piu' grave possibile qui, e nessuno lo vedrebbe a occhio.
+  ARM_LINE="$(grep -m1 '^ARM_PATHS_RE=' "$CP")"
+  DEP_LINE="$(grep -m1 '^DEPLOY_PATHS_RE=' scripts/align-clones.sh)"
+  if [ -n "$ARM_LINE" ] && [ "${ARM_LINE#ARM_PATHS_RE=}" = "${DEP_LINE#DEPLOY_PATHS_RE=}" ]; then
+    ok "close-propagate: criterio di armamento IDENTICO al criterio di deploy di align-clones"
+  else fail "ARM_PATHS_RE diverge da DEPLOY_PATHS_RE ($ARM_LINE | $DEP_LINE)"; fi
+
+  if [ -n "$ARM_LINE" ]; then
+    eval "$ARM_LINE"   # il predicato come spedito — nessuna copia che possa derivare
+    for p in scripts/deploy-watch.sh db/migrations/000300_x.sql apps/api/src/server.ts deploy/systemd/x.timer; do
+      if printf '%s\n' "$p" | grep -qE "$ARM_PATHS_RE"; then ok "arma su: $p"; else fail "doveva armare su $p"; fi
+    done
+    for p in docs/kb/SOT_STATE.md .handoff/STATE.md README.md qa_artifacts/r.md; do
+      if printf '%s\n' "$p" | grep -qE "$ARM_PATHS_RE"; then fail "NON doveva armare su $p"; else ok "non arma su: $p"; fi
+    done
+  fi
+
+  # --- le etichette del piano. Nessuna di queste consulta la storia: `--deploy` e
+  #     `--deploy-now` decidono per flag, il marcatore assente decide per assenza, e
+  #     il ramo «misurato» si prova col caso deterministico marcatore==HEAD (finestra
+  #     vuota => non armare), che vale identico su un clone shallow e su uno completo.
+  printf 'deadbeef\n' > "$MK"
+  p="$(plan "$MK" --delta --deploy)"
+  { printf '%s' "$p" | grep -q 'arm=arma' && printf '%s' "$p" | grep -q 'align-deploy-flag=--no-deploy'; } \
+    && ok "close-propagate: arma, e ad align-clones passa --no-deploy (il deploy NON e' piu' in linea)" \
+    || fail "arm=arma + align-deploy-flag=--no-deploy attesi ($p)"
+
+  git rev-parse HEAD > "$MK"
+  p="$(plan "$MK" --delta --auto-deploy)"
+  printf '%s' "$p" | grep -q 'arm=no' \
+    && ok "close-propagate: finestra di sessione vuota => misura, e non arma" || fail "arm=no atteso su finestra vuota ($p)"
+
+  p="$(plan "$MKD/assente" --delta --auto-deploy)"
+  printf '%s' "$p" | grep -q 'arm=no' \
+    && ok "close-propagate: marcatore assente => non arma nel dubbio" || fail "arm=no atteso ($p)"
+
   # il veto S1030 deve continuare a valere: e' la ragione per cui l'armamento esiste
-  p="$(HEURESYS_MARKER="$MK" HEURESYS_CLOSE_NODEPLOY=1 CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta --auto-deploy 2>/dev/null | grep '^PLAN arm=')"
+  p="$(HEURESYS_MARKER="$MK" HEURESYS_CLOSE_NODEPLOY=1 CLOSE_PROPAGATE_DRYRUN=1 bash "$CP" --delta --deploy 2>/dev/null | grep '^PLAN arm=')"
   printf '%s' "$p" | grep -q 'arm=veto' \
-    && ok "close-propagate: HEURESYS_CLOSE_NODEPLOY=1 => veto, il ciclo non presidiato non arma (S1030 preservato)" || fail "arm=veto atteso ($p)"
-  # la scappatoia sincrona resta disponibile
-  p="$(plan --delta --deploy-now)"
+    && ok "close-propagate: HEURESYS_CLOSE_NODEPLOY=1 => veto, vince sul flag esplicito (S1030 preservato)" || fail "arm=veto atteso ($p)"
+
+  p="$(plan "$MK" --delta --deploy-now)"
   { printf '%s' "$p" | grep -q 'arm=deploy-now' && printf '%s' "$p" | grep -q 'align-deploy-flag=--deploy'; } \
     && ok "close-propagate: --deploy-now conserva il deploy sincrono di prima di #165" || fail "deploy-now ($p)"
+  rm -rf "$MKD"
 else
   fail "$CP missing"
 fi

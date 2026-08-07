@@ -27,3 +27,24 @@ questo il suo successore. Quel protocollo prevedeva cinque passi su file
 (PROMPT/PLAN/EXEC/REPORT/REVIEW) perche' CLI lavorava in autonomia e serviva un freno
 su file. Oggi CLI lavora in sessione interattiva e il freno e' Enzo, che approva il
 piano a voce. Qui si conserva solo il mandato: nessun protocollo, nessuna cerimonia.
+
+## Regola sui riferimenti — introdotta 2026-08-07
+
+Un mandato puo' rimandare **solo a file gia' presenti nel repository al momento della
+consegna**. CLI non vede le cartelle di lavoro locali di Cowork: un riferimento a un
+percorso fuori dal repository e' un riferimento morto.
+
+Se un mandato ha bisogno di fatti prodotti da Cowork, ci sono due modi leciti:
+
+1. **Depositare prima, citare poi**: il documento va in `../analysis/`, e il mandato lo
+   cita col path relativo.
+2. **Incollare i fatti nel mandato**, dichiarando come sono stati misurati e con quale
+   confidenza, cosi' che CLI possa segnalare le divergenze invece di fidarsi.
+
+I due mandati del 2026-08-06 hanno usato la seconda via **per necessita'**: l'inventario
+che li fondava viveva fuori dal repository. Ha funzionato perche' CLI ha verificato e
+segnalato due divergenze reali. Non e' un metodo che regge su molti cicli: un numero
+senza origine consultabile non e' verificabile da chi legge dopo.
+
+L'inventario e' stato poi depositato in
+`../analysis/2026-08-06-inventario-substrato-ai-rag.md`.

@@ -13,14 +13,26 @@ const count = async (sql: string): Promise<number> => {
 
 describe('reconciliation F3 imports', () => {
   describe('position_career_paths (#1) — employee bridge', () => {
-    it('imported 40 rows, tenant-coherent, all FKs resolved', async () => {
-      // I 40 sono il risultato dell'IMPORT. Il cluster storia36 C5 ha poi
+    it('imported 38 rows, tenant-coherent, all FKs resolved', async () => {
+      // I 40 erano il risultato dell'IMPORT. Il cluster storia36 C5 ha poi
       // ricostruito la giunzione per famiglia professionale (177 posizioni):
       // qui si verifica l'import, quindi si guarda la sua provenienza.
+      //
+      // [S1048] Sono 38. La 000277 (#155) ha rimosso le 2 righe d'import appese a
+      // posizioni DISATTIVATE — una `Compliance Officer`, una `Securities Dealer` —
+      // insieme alle altre 19 orfane marcate storia36. Quelle posizioni erano già
+      // vacanti prima della ricostruzione dell'organigramma, quindi non hanno una
+      // viva che le sostituisca e la mappa non le copre. Non è import perso: ogni
+      // riga è in `staging.storia36_155_undo` con la sua versione integrale, e
+      // `SELECT staging.storia36_155_rollback();` la rimette dov'era.
+      //
+      // Il numero resta FISSO apposta, come per i requisiti formativi qui sotto:
+      // derivarlo dal database renderebbe il test tautologico — conterebbe se
+      // stesso invece di sorvegliare che l'import non si eroda in silenzio.
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_position_career_paths
           WHERE position_career_path_metadata->>'storia36' IS NULL`,
-      )).toBe(40);
+      )).toBe(38);
       expect(await count(
         `SELECT count(*)::int AS n FROM sys.sys_position_career_paths pcp
            JOIN sys.sys_positions p ON p.position_id = pcp.position_id

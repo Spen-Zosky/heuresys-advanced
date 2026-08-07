@@ -30,6 +30,60 @@ export function isWriteTool(name: string): boolean {
   return WRITE_VERBS.test(bareToolName(name));
 }
 
+/* ── Strumenti PARAMETRICI: la natura sta nell'input, non nel nome (ADR-0033 §5.2) ──
+ *
+ * `isWriteTool` decide dal NOME. Va bene finché un nome dice cosa fa: `..._upsert`
+ * scrive, `..._list` legge. Smette di andare bene con uno strumento generico:
+ * `hrx_entity_query` non contiene alcun verbo, quindi la regex lo direbbe LETTURA e
+ * il gate lo auto-approverebbe — **anche quando l'operazione risolta è una DELETE**.
+ * Un solo strumento del genere basterebbe ad aggirare l'approvazione umana su ogni
+ * scrittura, cioè a svuotare il controllo che questo file esiste per applicare.
+ *
+ * Per questi strumenti la classificazione si fa sul **metodo HTTP dell'operazione
+ * risolta**, e la risoluzione passa da un `OperationResolver` costruito sull'atlante.
+ *
+ * DUE REGOLE NON NEGOZIABILI, entrambe fail-closed:
+ *   · il metodo NON si prende dall'input. Se l'agente potesse dichiarare «method:
+ *     GET» mentre chiede una DELETE, la guardia sarebbe una formalità: il metodo lo
+ *     dice la mappa, che deriva dal codice, non chi chiama;
+ *   · se l'operazione non si risolve — resolver assente, concetto ignoto, operazione
+ *     ignota — l'esito è **negare**, non «trattare come lettura». Non sapere cosa fa
+ *     una chiamata è una ragione per fermarla, mai per lasciarla passare.
+ */
+const PARAMETRIC_TOOLS = new Set(["hrx_entity_query"]);
+
+export function isParametricTool(name: string): boolean {
+  return PARAMETRIC_TOOLS.has(bareToolName(name));
+}
+
+/** Metodo HTTP di un'operazione dichiarata dall'atlante. Iniettato, mai dedotto. */
+export interface OperationResolver {
+  /** Il metodo, oppure `undefined` se la coppia non esiste: l'ignoto non è una lettura. */
+  methodOf(conceptId: string, operationId: string): string | undefined;
+}
+
+const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+export type CallClass = "read" | "write" | "unresolved";
+
+/**
+ * Classifica una chiamata. Per gli strumenti col verbo nel nome il comportamento è
+ * quello di sempre; per i parametrici si risolve l'operazione e si guarda il metodo.
+ */
+export function classifyCall(
+  name: string, input: unknown, resolver?: OperationResolver,
+): CallClass {
+  if (!isParametricTool(name)) return isWriteTool(name) ? "write" : "read";
+
+  const a = (input ?? {}) as { conceptId?: unknown; operationId?: unknown };
+  if (typeof a.conceptId !== "string" || typeof a.operationId !== "string") return "unresolved";
+  if (!resolver) return "unresolved";
+
+  const metodo = resolver.methodOf(a.conceptId, a.operationId);
+  if (!metodo) return "unresolved";
+  return WRITE_METHODS.has(metodo.toUpperCase()) ? "write" : "read";
+}
+
 export type ApprovalRequest = { tool: string; input: unknown };
 export type ApproveFn = (req: ApprovalRequest) => Promise<boolean>;
 
@@ -59,10 +113,21 @@ export interface GateOptions {
   allowlist?: ReadonlySet<string>;
   /** Principal context for the audit record. Defaults to the unknown principal. */
   principal?: GatePrincipal;
+  /**
+   * Risolutore delle operazioni per gli strumenti PARAMETRICI (ADR-0033 §5.2).
+   *
+   * Assente di proposito nella configurazione attuale: nessuno strumento generico
+   * è collegato, e senza risolutore una chiamata parametrica viene **negata**, non
+   * lasciata passare. È il default sicuro — la guardia esiste prima dello strumento
+   * che dovrà sorvegliare, non dopo.
+   */
+  operations?: OperationResolver;
 }
 
 const DENY_NOT_APPROVED = "write not approved (compliance gate)";
 const DENY_NOT_ALLOWLISTED = "tool not in allowlist (defense-in-depth)";
+const DENY_UNRESOLVED_OPERATION =
+  "operation could not be resolved to an HTTP method (ADR-0033 §5.2 fail-closed)";
 
 async function withTimeout<T>(p: Promise<T>, ms: number, onTimeout: T): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -115,8 +180,23 @@ export function makeCanUseTool(approve: ApproveFn, opts: GateOptions = {}) {
       return d;
     }
 
-    // 2. Allowlisted read → auto-allow.
-    if (!isWriteTool(name)) {
+    // 2. Classificazione. Per gli strumenti col verbo nel nome è la stessa di
+    //    sempre; per i parametrici (ADR-0033 §5.2) si risolve l'operazione e si
+    //    guarda il METODO — perché il nome, lì, non dice più cosa fa la chiamata.
+    const classe = classifyCall(name, input, opts.operations);
+
+    // 2a. Operazione non risolta → si NEGA. Non è pedanteria: l'alternativa è
+    //     trattare come lettura ciò che non si è riusciti a leggere, cioè
+    //     auto-approvare l'ignoto. Questo ramo è la ragione per cui uno strumento
+    //     generico può esistere senza aprire un buco.
+    if (classe === "unresolved") {
+      const d: ToolDecision = { behavior: "deny", message: DENY_UNRESOLVED_OPERATION };
+      auditDecision(name, input, d, "OPERATION_UNRESOLVED");
+      return d;
+    }
+
+    // 2b. Lettura → auto-allow.
+    if (classe === "read") {
       const d: ToolDecision = { behavior: "allow", updatedInput: input as Record<string, unknown> };
       auditDecision(name, input, d, "READ_AUTO_ALLOW");
       return d;

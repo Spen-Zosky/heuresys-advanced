@@ -134,13 +134,35 @@ dopo la modifica**: due esecuzioni consecutive producono file identici.
 **Resta fuori**: la forma della **risposta**. Sapere cosa torna aiuterebbe l'agente, ma
 §5.1 riguarda ciò che il chiamante deve **mandare**; allargarlo qui sarebbe scope creep.
 
-**§5.2 — Il gate HITL classifica per NOME dello strumento.** `mcp-tool-names.ts`
-distingue lettura e scrittura per elenco di nomi. Con un solo `hrx_entity_query`
-generico quel criterio **smette di funzionare**: il nome non dice più se l'operazione
-scrive. Il gate dovrà decidere sul **metodo HTTP dell'operazione risolta**, il che
-sposta la classificazione da statica a dinamica — cioè tocca il punto più delicato
-dell'impianto di sicurezza. Va progettato a parte, con i suoi test, prima che un solo
-strumento generico venga collegato.
+**§5.2 — Il gate HITL classificava per NOME dello strumento** — ✅ **RISOLTO il 2026-08-07.**
+
+Il difetto era reale e misurato: `isWriteTool` decide con una regex sui verbi del nome
+(`_upsert`, `_delete`, …). `hrx_entity_query` non ne contiene **nessuno**, quindi sarebbe
+stato classificato **lettura e auto-approvato — anche chiedendo una `DELETE`**. Un solo
+strumento generico sarebbe bastato ad aggirare l'approvazione umana su ogni scrittura,
+cioè a svuotare il controllo che il gate esiste per applicare (GDPR Art. 22).
+
+**Rimedio**: `classifyCall(name, input, resolver)` restituisce `read | write | unresolved`.
+Per gli strumenti col verbo nel nome il comportamento è **invariato**; per quelli
+**parametrici** si risolve l'operazione e si guarda il **metodo HTTP**.
+
+Due regole, entrambe fail-closed:
+- **il metodo non si prende dall'input.** Se l'agente potesse dichiarare `method: GET`
+  mentre chiede una `DELETE`, la guardia sarebbe una formalità: il metodo lo dice la
+  mappa derivata dall'atlante, non chi chiama. C'è un test che tenta esattamente questo
+  raggiro e verifica che fallisca;
+- **operazione non risolta ⇒ `deny`**, mai «trattala come lettura». Resolver assente,
+  concetto ignoto, operazione ignota, input malformato: tutti negati. Non sapere cosa fa
+  una chiamata è una ragione per fermarla, mai per lasciarla passare.
+
+**La guardia esiste prima dello strumento che dovrà sorvegliare.** Nella configurazione
+odierna `operations` non è iniettato e nessuno strumento generico è in allowlist: una
+chiamata parametrica verrebbe negata due volte, dall'allowlist e dal fail-closed.
+
+**Provato eseguendo, non dedotto.** 14 test nuovi (suite 51 → **65**, nessuna
+regressione), e sono stati **visti fallire**: rimessa la vecchia classificazione, quattro
+diventano rossi e il più eloquente dice `expected "vi.fn()" to be called once, but got 0
+times` — cioè la `DELETE` passava **senza che alcun umano fosse interpellato**.
 
 **§5.3 — Dove vivono i vettori dei concetti.** Il corpus è piccolo (95 voci): può stare
 in memoria e ricostruirsi all'avvio, oppure in tabella. La scelta dipende dall'esito di
@@ -200,12 +222,20 @@ Questo ADR è `PROPOSED` e **si chiude solo con una misura**, non con un'opinion
    l'ADR non deve promettere che lo sia.
 2. **§5.1 risolto** — ✅ **fatto il 2026-08-07**: l'atlante espone i parametri di tutte
    le 478 route che ne hanno, 555 blocchi su 555 risolti.
-3. **§5.2 risolto**: il gate classifica scrittura/lettura per metodo risolto, con test
-   che lo dimostrano su un'operazione di scrittura. **APERTO.**
+3. **§5.2 risolto** — ✅ **fatto il 2026-08-07**: il gate classifica per metodo risolto,
+   nega ciò che non risolve, e 14 test lo dimostrano su `DELETE`, `POST`, `PATCH`, `GET`,
+   operazione ignota, risolutore assente e tentativo di dichiarare un metodo mite.
 
-Finché **3** è aperto, **nessuno strumento generico viene collegato al gateway**. È
-rimasto l'unico sbarramento, ed è quello giusto: riguarda l'applicazione dei permessi,
-non la comodità dell'agente.
+**Tutti e tre i criteri sono soddisfatti.** Restano aperti `§5.3` (dove vivono i vettori
+dei concetti — decisione minore) e `§5.5` (le domande di aggregazione non hanno un
+concetto), che **non sono sbarramenti di sicurezza** ma limiti di capacità già dichiarati.
+
+Prima di collegare uno strumento generico servono ancora tre cose che questo ADR non
+copre e che non vanno date per scontate: il `resolver` costruito **dall'atlante** e non a
+mano, l'ingresso di `hrx_entity_query` nell'allowlist (oggi assente **di proposito**), e
+una decisione esplicita di Enzo su quale superficie aprire per prima. L'ADR resta
+`PROPOSED` finché quella decisione non c'è: i criteri misurano la fattibilità, non
+sostituiscono la scelta.
 
 ---
 

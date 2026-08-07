@@ -4,7 +4,10 @@
  * against a mock approver, and the audit trail (M-4 — redacted, no raw PII).
  */
 import { describe, it, expect, vi } from "vitest";
-import { isWriteTool, makeCanUseTool, type GatePrincipal } from "../src/write-gate.js";
+import {
+  isWriteTool, isParametricTool, classifyCall, makeCanUseTool,
+  type GatePrincipal, type OperationResolver,
+} from "../src/write-gate.js";
 import { MemoryAuditSink } from "../src/audit-sink.js";
 import { REDACTED } from "../src/redact.js";
 
@@ -161,5 +164,140 @@ describe("M-4 audit trail (every decision, redacted)", () => {
     expect(audit.entries).toHaveLength(2);
     expect(audit.entries[0]!.argsHash).toBe(audit.entries[1]!.argsHash);
     expect(audit.entries.every((e) => e.decision === "deny")).toBe(true);
+  });
+});
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * ADR-0033 §5.2 — strumenti PARAMETRICI: la natura sta nell'input, non nel nome.
+ *
+ * Il difetto che questi test chiudono: `isWriteTool` decide con una regex sui
+ * verbi del nome. `hrx_entity_query` non ne contiene, quindi sarebbe stato
+ * classificato LETTURA e auto-approvato — anche chiedendo una DELETE. Un solo
+ * strumento generico sarebbe bastato ad aggirare l'approvazione umana.
+ * ──────────────────────────────────────────────────────────────────────────── */
+
+/** Risolutore di prova: la mappa che in produzione deriva dall'atlante. */
+const resolver: OperationResolver = {
+  methodOf(conceptId, operationId) {
+    const m: Record<string, string> = {
+      "positions:list": "GET",
+      "positions:create": "POST",
+      "positions:delete": "DELETE",
+      "positions:update": "PATCH",
+    };
+    return m[`${conceptId}:${operationId}`];
+  },
+};
+
+const PARAM_TOOL = "hrx_entity_query";
+/** L'allowlist di produzione non contiene lo strumento generico: qui lo si ammette
+ *  di proposito, per poter esercitare i rami OLTRE il primo sbarramento. */
+const allowlist = new Set([PARAM_TOOL]);
+
+describe("classifyCall — strumenti parametrici (ADR-0033 §5.2)", () => {
+  it("il nome da solo NON basta piu': entity_query non ha verbi di scrittura", () => {
+    // La vecchia classificazione lo direbbe lettura. E' esattamente il buco.
+    expect(isWriteTool(PARAM_TOOL)).toBe(false);
+    expect(isParametricTool(PARAM_TOOL)).toBe(true);
+  });
+
+  it("una DELETE risolta e' una SCRITTURA, malgrado il nome innocuo", () => {
+    expect(classifyCall(PARAM_TOOL, { conceptId: "positions", operationId: "delete" }, resolver))
+      .toBe("write");
+  });
+
+  it("una GET risolta e' una lettura", () => {
+    expect(classifyCall(PARAM_TOOL, { conceptId: "positions", operationId: "list" }, resolver))
+      .toBe("read");
+  });
+
+  it("POST e PATCH sono scritture", () => {
+    for (const op of ["create", "update"]) {
+      expect(classifyCall(PARAM_TOOL, { conceptId: "positions", operationId: op }, resolver))
+        .toBe("write");
+    }
+  });
+
+  it("operazione ignota => 'unresolved', MAI 'read'", () => {
+    expect(classifyCall(PARAM_TOOL, { conceptId: "positions", operationId: "inventata" }, resolver))
+      .toBe("unresolved");
+    expect(classifyCall(PARAM_TOOL, { conceptId: "ignoto", operationId: "list" }, resolver))
+      .toBe("unresolved");
+  });
+
+  it("senza risolutore => 'unresolved': la guardia non si fida di nessuno", () => {
+    expect(classifyCall(PARAM_TOOL, { conceptId: "positions", operationId: "delete" }))
+      .toBe("unresolved");
+  });
+
+  it("input malformato => 'unresolved'", () => {
+    for (const bad of [{}, { conceptId: "positions" }, { operationId: "list" }, null, "stringa", 42]) {
+      expect(classifyCall(PARAM_TOOL, bad, resolver)).toBe("unresolved");
+    }
+  });
+
+  it("il METODO NON si prende dall'input: dichiararlo GET non declassa una DELETE", () => {
+    // Il tentativo di raggiro piu' ovvio: l'agente dichiara un metodo mite.
+    // Il gate ignora cio' che gli viene detto e guarda la mappa.
+    const esito = classifyCall(
+      PARAM_TOOL,
+      { conceptId: "positions", operationId: "delete", method: "GET", readOnly: true },
+      resolver,
+    );
+    expect(esito).toBe("write");
+  });
+});
+
+describe("canUseTool — il gate applica la classificazione parametrica", () => {
+  it("una DELETE parametrica richiede l'approvazione umana", async () => {
+    const approve = vi.fn().mockResolvedValue(true);
+    const { canUseTool, audit } = gate(approve, { allowlist, operations: resolver });
+    const d = await canUseTool(PARAM_TOOL, { conceptId: "positions", operationId: "delete" });
+    expect(d.behavior).toBe("allow");
+    expect(approve).toHaveBeenCalledOnce(); // <- il punto: l'umano E' stato interpellato
+    expect(audit.entries.at(-1)?.reason).toBe("WRITE_HUMAN_APPROVED");
+  });
+
+  it("una DELETE parametrica NON approvata viene negata", async () => {
+    const approve = vi.fn().mockResolvedValue(false);
+    const { canUseTool } = gate(approve, { allowlist, operations: resolver });
+    const d = await canUseTool(PARAM_TOOL, { conceptId: "positions", operationId: "delete" });
+    expect(d.behavior).toBe("deny");
+  });
+
+  it("una GET parametrica passa senza disturbare nessuno", async () => {
+    const approve = vi.fn().mockResolvedValue(true);
+    const { canUseTool, audit } = gate(approve, { allowlist, operations: resolver });
+    const d = await canUseTool(PARAM_TOOL, { conceptId: "positions", operationId: "list" });
+    expect(d.behavior).toBe("allow");
+    expect(approve).not.toHaveBeenCalled();
+    expect(audit.entries.at(-1)?.reason).toBe("READ_AUTO_ALLOW");
+  });
+
+  it("operazione non risolta => DENY e traccia, senza chiedere a nessuno", async () => {
+    const approve = vi.fn().mockResolvedValue(true);
+    const { canUseTool, audit } = gate(approve, { allowlist, operations: resolver });
+    const d = await canUseTool(PARAM_TOOL, { conceptId: "positions", operationId: "inventata" });
+    expect(d.behavior).toBe("deny");
+    expect(approve).not.toHaveBeenCalled();
+    expect(audit.entries.at(-1)?.reason).toBe("OPERATION_UNRESOLVED");
+  });
+
+  it("senza risolutore, lo strumento parametrico e' negato — configurazione ODIERNA", async () => {
+    const approve = vi.fn().mockResolvedValue(true);
+    const { canUseTool } = gate(approve, { allowlist }); // nessun `operations`
+    const d = await canUseTool(PARAM_TOOL, { conceptId: "positions", operationId: "list" });
+    expect(d.behavior).toBe("deny");
+  });
+
+  it("gli strumenti col verbo nel nome NON cambiano comportamento", async () => {
+    const approve = vi.fn().mockResolvedValue(true);
+    const { canUseTool } = gate(approve, { operations: resolver });
+    const lettura = await canUseTool("mcp__heuresys__hrx_positions_list", {});
+    expect(lettura.behavior).toBe("allow");
+    expect(approve).not.toHaveBeenCalled();
+    const scrittura = await canUseTool("mcp__heuresys__hrx_positions_upsert", { payload: {} });
+    expect(scrittura.behavior).toBe("allow");
+    expect(approve).toHaveBeenCalledOnce();
   });
 });

@@ -173,12 +173,20 @@ BEGIN
     IF v_branches <> 6 OR v_pools > 17 OR v_cands > 25 THEN
       RAISE EXCEPTION 'WAVE2 assert: imported counts wrong branches=% pools=% candidates=% (exp 6 / pools<=17 / cands<=25)', v_branches, v_pools, v_cands;
     END IF;
+    -- [S1048] Anche qui vale il terzo mondo, come nella 000076: dopo la 000278
+    -- (#160) `sys_successor_candidates` può essere VUOTA su un clone dove i seed
+    -- della storia RTL non girano — i candidati importati stavano tutti in bacini
+    -- agganciati a un ruolo critico che non era il loro, e lì non ne arrivano di
+    -- nuovi. La vista risolve da `has_rows` e ricade sul declared_status
+    -- ('IMPORT'), che è il comportamento corretto: la DICHIARAZIONE regge, cambia
+    -- solo che al momento non ci sono righe. Ciò che va davvero preteso è che
+    -- nessuna delle tre torni a NEEDS_DECISION — sarebbe la regressione vera.
     SELECT count(*) INTO v_populated3
       FROM sys.v_reconciliation_status
      WHERE table_name IN ('sys_branches','sys_succession_pools','sys_successor_candidates')
-       AND resolved_status = 'POPULATED';
+       AND resolved_status IN ('POPULATED', 'IMPORT');
     IF v_populated3 <> 3 THEN
-      RAISE EXCEPTION 'WAVE2 assert: expected the 3 targets POPULATED in view, got %', v_populated3;
+      RAISE EXCEPTION 'WAVE2 assert: expected the 3 targets POPULATED-or-IMPORT in view, got %', v_populated3;
     END IF;
   END IF;
 END $$;

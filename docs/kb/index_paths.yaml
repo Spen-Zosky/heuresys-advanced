@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-07T00:38:40Z da docs/kb/tools/build_index.py
+# generato: 2026-08-07T11:25:47Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-07T00:38:40Z"
-  total_files: 2874
+  generated_at: "2026-08-07T11:25:47Z"
+  total_files: 2884
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 274
+    db-migration: 277
     db-other: 8
     db-script: 44
     db-seed: 147
-    doc-canonical: 553
+    doc-canonical: 560
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2316
+    live: 2326
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -7250,6 +7250,24 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000277_realign_career_paths_and_targets.sql'
+    root: repo
+    rel: 'db/migrations/000277_realign_career_paths_and_targets.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000278_reattach_critical_roles_to_real_positions.sql'
+    root: repo
+    rel: 'db/migrations/000278_reattach_critical_roles_to_real_positions.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000279_mark_provenance_of_relevance_rows.sql'
+    root: repo
+    rel: 'db/migrations/000279_mark_provenance_of_relevance_rows.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -11246,6 +11264,18 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\analysis\2026-08-06-inventario-substrato-ai-rag.md'
+    root: repo
+    rel: 'docs/superpowers/analysis/2026-08-06-inventario-substrato-ai-rag.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\analysis\README.md'
+    root: repo
+    rel: 'docs/superpowers/analysis/README.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-05-28-cross-os-bootstrap.md'
     root: repo
     rel: 'docs/superpowers/plans/2026-05-28-cross-os-bootstrap.md'
@@ -11345,6 +11375,30 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-07-27-rtl-storia-36-mesi.md'
     root: repo
     rel: 'docs/superpowers/plans/2026-07-27-rtl-storia-36-mesi.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md'
+    root: repo
+    rel: 'docs/superpowers/prompts/2026-08-06-catalogo-generico-corpus-concetti.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-substrato-semantico-verifica-e-correzioni.md'
+    root: repo
+    rel: 'docs/superpowers/prompts/2026-08-06-substrato-semantico-verifica-e-correzioni.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\prompts\2026-08-07-percorsi-carriera-155.md'
+    root: repo
+    rel: 'docs/superpowers/prompts/2026-08-07-percorsi-carriera-155.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\prompts\README.md'
+    root: repo
+    rel: 'docs/superpowers/prompts/README.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11591,6 +11645,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-07-catalogo-generico-referto-di-programma.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-08-07-catalogo-generico-referto-di-programma.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-07-percorsi-carriera-155.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-08-07-percorsi-carriera-155.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

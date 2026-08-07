@@ -53,10 +53,13 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
   eseguita col ripristino pronto e **collaudato** in `.secrets/`; S1048: `000277` riallinea percorsi
   di carriera e obiettivi alla ricostruzione dell'organigramma (`#155`), `@migrate: once`, con
   **rollback integrale versionato** — `staging.storia36_155_rollback()`, collaudato per impronta
-  md5 riga-per-riga prima di applicare); tag `v1.0.0`;
+  md5 riga-per-riga prima di applicare · `000278` riaggancia gli 8 ruoli critici legacy alle
+  posizioni reali (`#160`, aggancio deciso da Enzo; allinea le TRE tabelle che dichiarano la
+  criticità, con `staging.storia36_160_rollback()`) · `000279` marca la provenienza delle righe di
+  rilevanza create dalla 000278, così la sentinella dell'import torna a vedere solo l'import); tag `v1.0.0`;
   API test file 232. Counts ri-derivati live in S1048: **163 utenti · 314 posizioni · 43 OU
   attive · 158 fattori MFA · 275 migrazioni applicate** (= 275 file `.sql` sul disco);
-  percorsi di carriera **231**, obiettivi di carriera **161**, entrambi a **zero** righe su
+  percorsi di carriera **231**, obiettivi di carriera **253**, entrambi a **zero** righe su
   posizioni non attive.
 - **Fattori MFA, inventario reale post-purga**: **158 TOTP `derived-access`** e nient'altro. Le 32
   righe senza etichetta (26 TOTP mai verificati + 6 WebAuthn verificati su `admin@heuresys.com`)
@@ -474,7 +477,7 @@ stessa mezz'ora a codice invariato.
 
 ## Delta S1036 (2026-07-29/30) — l'audit di merito su tutte le tabelle, e le date che tornano a raccontare la verità
 
-**Stato ri-derivato**: 206 tabelle `sys.*` · 163 utenti · 181 posizioni · 28 OU · 26 team · 2 tenant ACTIVE · RBAC 13 ruoli / 204 permessi / 908 mapping · 14.041 skill · 218 file migration (max `000220`) = 218 applicate · 6 viste strutturali a 0 violazioni · coverage i18n dati 0 gap · HEAD `26535ec8` · tag `v1.0.0`.
+**Stato ri-derivato**: 206 tabelle `sys.*` · 163 utenti · 181 posizioni · 28 OU · 26 team · 2 tenant ACTIVE · RBAC 13 ruoli / 204 permessi / 908 mapping · 14.041 skill · 218 file migration (max `000220`) = 218 applicate · 6 viste strutturali a 0 violazioni · coverage i18n dati 0 gap · HEAD `598e8768` · tag `v1.0.0`.
 
 **#80 storia36 C12 — Step 12.1→12.5b CHIUSI** (restano 12.6 gated + 12.7).
 

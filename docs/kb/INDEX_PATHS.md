@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-07T00:38:40Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2874**
+**Generato**: 2026-08-07T11:25:47Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2884**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,11 +18,11 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 274 |
+| db-migration | 277 |
 | db-other | 8 |
 | db-script | 44 |
 | db-seed | 147 |
-| doc-canonical | 553 |
+| doc-canonical | 560 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 353 |
 | ux-design-archive | 80 |
 | web-source | 232 |
-| **TOTALE** | **2874** |
+| **TOTALE** | **2884** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2316 |
+| live | 2326 |
 
 ## File per categoria
 
@@ -1280,6 +1280,9 @@
 - `D:\heuresys-advanced\db\migrations\000274_org_integrity_view_ignores_retired_units.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000275_purge_orphan_test_mfa_factors.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000276_backfill_graph_version_styles.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000277_realign_career_paths_and_targets.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000278_reattach_critical_roles_to_real_positions.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000279_mark_provenance_of_relevance_rows.sql` · *live* · git-tracked
 
 ### db-other
 
@@ -1958,6 +1961,8 @@
 - `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U06_Workforce_Intelligence_Gap_Analysis.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U07_Career_Talent_Succession_Model.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\source_bundle\extracted_bootstrap\universal_hrms_framework\U08_Compensation_Intelligence_Model.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\analysis\2026-08-06-inventario-substrato-ai-rag.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\analysis\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-05-28-cross-os-bootstrap.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-05-28-zod4-ftpz6-migration.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-05-29-brand-fidelity-migration.md` · *live* · git-tracked
@@ -1975,6 +1980,10 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-07-26-z261-mfa-fixture-secret-rotation.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-07-26-z262-accesso-derivato-tutti-gli-utenti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-07-27-rtl-storia-36-mesi.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-substrato-semantico-verifica-e-correzioni.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\prompts\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-28-cross-os-bootstrap-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-30-rtl-tenant-rebuild-import-design.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-05-30-rtl-tenant-rebuild.md` · *live* · git-tracked
@@ -2016,6 +2025,7 @@
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-substrato-semantico-verifica-e-correzioni.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\specs\2026-08-07-catalogo-generico-referto-di-programma.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\specs\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\03-localai.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\11-heuresys-evidence.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\wargames\12-heuresys-goals-okr.md` · *live* · git-tracked

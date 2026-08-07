@@ -71,6 +71,57 @@ Prerequisites:
 | `migrate.ps1` / `.sh` | Apply `db/migrations/*.sql` in lexical order; audit each apply in `sys.sys_schema_migrations` | A, B | ✓ | ✗ |
 | `reset_local_database.ps1` / `.sh` | DROP DB + recreate empty (Model A only); prompts for confirmation | A | n/a | ✓ (DB‑local) |
 | `validate_database.ps1` / `.sh` | Run all `sys.v_*` validation views (expect 0 rows) + twice‑run `pg_dump` diff | A, B | ✓ | ✗ |
+| `setup-ci-database.sh` | (Re)provision the isolated CI database `heuresys_ci` as a clone of PROD | on the runner | ✓ | ✓ (CI DB only) |
+| `ci-rehearsal.sh` | **Prova generale della CI, prima del push** — vedi sotto | on the runner | ✓ | ✗ |
+
+---
+
+## `ci-rehearsal.sh` — provare la catena senza aspettare la CI
+
+**Il problema che risolve.** `heuresys_ci` è un clone di produzione *congelato al provisioning*:
+ha lo schema completo ma **non** i dati che arrivano da uno script di import. Una tabella creata
+da migrazione e popolata da script è quindi **presente e vuota** su CI. Ogni post-condizione che
+conta righe vede un numero in locale e uno zero là — verde qui, rossa in CI. In S1048 sono serviti
+**tre giri di CI** (~25 minuti l'uno) per scoprire otto assert della stessa classe, due alla volta.
+
+**Cosa fa.** Copia `heuresys_ci` con `createdb --template` (copia di file: 595 MB in ~3 s),
+riapplica l'**intera** catena `db/migrations/*.sql` e interroga le sentinelle via
+`docs/kb/tools/db_health.py`. È lo stesso passo *«Apply migrations (brings the clone to HEAD)»*
+di `.github/workflows/test-integration.yml`, con lo stesso database e lo stesso ruolo non-superuser
+— senza la coda dietro le altre cinque workflow. **L'originale non viene mai toccato**: la CI può
+girare mentre la prova gira (e se `heuresys_ci` ha connessioni aperte, la prova si rifiuta di
+partire invece di terminarle).
+
+Ri-applicare una catena già applicata trova qualcosa perché **166 dei 277 file non trasformano il
+database, lo controllano**: le post-condizioni rigirano tutte a ogni passata.
+
+```bash
+# dal PC Windows, in una riga
+ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh'
+
+bash db/scripts/ci-rehearsal.sh --migrations-from 61f582b6^   # la catena com'era a quel commit
+bash db/scripts/ci-rehearsal.sh --from-zero                   # modo severo, database vergine
+bash db/scripts/ci-rehearsal.sh --keep                        # non distruggere il db di prova
+```
+
+**Misure reali (2026-08-07, linux-pc)** — catena a HEAD: **VERDE in 25,6 s**. Catena a
+`f5d91b6a^`: **ROSSA in 7,5 s** con `B-50 assert: expected 3 defer tables … got 2`. Catena a
+`61f582b6^`: **ROSSA in 7,5 s** con `WAVE2 assert: expected the 3 targets POPULATED … got 2`.
+Sono esattamente i due difetti che in S1048 sono costati due giri di CI.
+
+**Dove gira**: solo dove vive `heuresys_ci`, cioè `linux-pc` — che è anche la macchina su cui gira
+la CI. Servono PostgreSQL 16, l'estensione `vector` e `sudo -u postgres` non interattivo. Su
+Windows non gira: manca una credenziale superuser locale.
+
+**Limite dichiarato**: `migrate.sh` usa `ON_ERROR_STOP`, quindi la prova mostra **il primo** assert
+rotto, non tutti insieme. Non è un problema in pratica — un giro costa 7-26 s, quindi otto difetti
+si scoprono in un paio di minuti invece che in tre giri di CI.
+
+**`--from-zero`, e cosa ha rivelato**: su un database *vergine* la catena **non si applica** — si
+ferma alla `000049_r2_assign_holderless_functional_roles.sql`, che pretende dati che nessuna
+migrazione crea (`R2: expected >=4 active grants on the 4 holderless roles, got 0`). Cioè
+l'ambiente non è ricostruibile dalle sole migrazioni. È un fatto architetturale misurato il
+2026-08-07, non un difetto di questo script, e sta fuori dal mandato di #165.
 
 ---
 

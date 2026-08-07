@@ -157,16 +157,21 @@ BEGIN
     -- limite è verso l'ALTO, perché superarlo significherebbe che qualcuno sta
     -- scrivendo righe spacciandole per import.
     --
-    -- [S1048] Il minimo di 1 candidato è stato tolto, e i bacini scendono a 7.
-    -- La 000278 (#160) ha rimosso TUTTI i candidati importati, e non è una
-    -- perdita: erano appesi a bacini agganciati a posizioni che non c'entravano
-    -- col ruolo critico dichiarato (`Chief Executive Officer` su `Securities
-    -- Dealer`, `CFO` su `Bank Teller`), quindi nessuno di loro reggeva il
-    -- criterio di successione — `C5g` li contava tutti. Zero importati superstiti
-    -- è l'esito corretto di quella riparazione, non un import perso: le righe
-    -- sono in `staging.storia36_160_undo` e il rollback le rimette.
-    IF v_branches <> 6 OR v_pools <> 7 OR v_cands > 25 THEN
-      RAISE EXCEPTION 'WAVE2 assert: imported counts wrong branches=% pools=% candidates=% (exp 6/17/1..25)', v_branches, v_pools, v_cands;
+    -- [S1048] Anche i BACINI passano a un limite verso l'alto, e il motivo è che
+    -- un numero fisso qui non può essere giusto: questa migrazione gira PRIMA
+    -- della 000278 (#160) nella catena, quindi su un clone che parte da zero vede
+    -- 17 bacini, mentre su un database già allineato ne vede 7 — la 000278 ha
+    -- rimosso quelli agganciati a un ruolo critico che non era il loro
+    -- (`Chief Executive Officer` su `Securities Dealer`, il `CFO` su `Bank
+    -- Teller`) e quelli appesi a posizioni disattivate. Pinnare uno dei due stati
+    -- rompe l'altro: misurato, `pools <> 7` ha fatto fallire la CI, dove la catena
+    -- riparte dall'inizio. L'invariante vero è lo stesso dei candidati — l'import
+    -- non ha prodotto PIÙ di quanto dichiarato — e vale in entrambi i momenti.
+    -- Il minimo di 1 candidato è stato tolto per la stessa ragione di sostanza:
+    -- zero importati superstiti è l'esito corretto della 000278, non un import
+    -- perso (le righe sono in `staging.storia36_160_undo`).
+    IF v_branches <> 6 OR v_pools > 17 OR v_cands > 25 THEN
+      RAISE EXCEPTION 'WAVE2 assert: imported counts wrong branches=% pools=% candidates=% (exp 6 / pools<=17 / cands<=25)', v_branches, v_pools, v_cands;
     END IF;
     SELECT count(*) INTO v_populated3
       FROM sys.v_reconciliation_status

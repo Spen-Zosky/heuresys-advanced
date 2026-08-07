@@ -151,6 +151,19 @@ Gli MVP sono **shipped**, ma la dottrina vincola **ogni nuovo lavoro frontend**:
 
 Dottrina completa (audit-first / TDD ordering, loop pagina per pagina): `docs/archive/NEXT_SESSION_MVP_2A.md`.
 
+## Metodo di bonifica (S1049, Enzo — VINCOLANTE)
+
+> **«Siamo noi a governare la piattaforma, non il contrario.»** Il database e il codice portano gli strati di due anni di costruzione — import legacy, ricostruzioni, correzioni, ritiri. **Il residuo è lo stato normale, e va bonificato.** Il fallimento da evitare non è «ho rotto qualcosa»: è **«non l'ho toccato perché non avevo lo strumento»** o **«l'ho dichiarato immutabile»**. Devo sempre avere strumenti per modificare in profondità dati, codice e ogni altro oggetto del repo — con prudenza e possibilità di rollback.
+
+Sei regole. **Ognuna nasce da un errore reale**, non da teoria:
+
+1. **Misura prima, sul vivo.** Il piano, il registro e le consegne sono **ipotesi**; il database e il sistema che gira sono la verità. In S1049 la misura ha smentito il piano **quattro volte** — tabelle «vuote e inerti» che erano l'ingresso di uno strumento vivo; una pulizia da 30 minuti che era una decisione di sicurezza; 490 valutazioni la cui causa non era quella che avevo scritto io; tre tabelle «residuo» che erano la casa di una funzionalità attiva. **Verifica anche le affermazioni positive**, non solo quelle negative.
+2. **Prova generale prima della produzione.** Ogni tocco a `db/**` passa da `bash db/scripts/ci-rehearsal.sh` (copia di `heuresys_ci`, **due passate**, ~26 s). Ha già intercettato quattro difetti che sarebbero stati CI rossa 25 minuti dopo il push — e uno che aveva già rotto la produzione.
+3. **Ritirare non è cancellare** → **ADR-0035**. La catena si ri-applica per intero a ogni deploy: una `DELETE` a valle viene disfatta al giro dopo. Si emenda **il file che crea** l'oggetto (o lo si marca `-- @migrate: once`), e solo *in aggiunta* si rimuove l'esemplare esistente. Il costo di un ritiro si misura **in file da emendare**, e va stimato prima di iniziare.
+4. **Ogni scrittura di massa porta quattro cose**: (a) la misura **prima**; (b) una **guardia** che ri-verifica la precondizione *al momento dell'esecuzione*, mai ereditata; (c) una **post-condizione che protegge ciò che NON doveva cambiare**, non solo ciò che doveva; (d) un **rollback dichiarato** — un giornale `staging.*_undo` con la funzione che lo applica, oppure la ragione scritta per cui non esiste. Elenco esplicito, **mai un carattere jolly**, quando si cancella.
+5. **Le prove devono poter fallire.** Un controllo che non si è mai visto rosso non è una prova. In S1049 tre miei strumenti hanno prodotto **falsi verdi** (una variabile occupata dal `.env`, un esito letto dai messaggi invece che dal codice d'uscita, un `trap` che restituiva 1 su un verde): ogni volta lo strumento misurava sé stesso.
+6. **Una batteria che si ferma al primo rosso nasconde tutti gli altri** — **sei** occorrenze in due sessioni, una perfino dentro la stessa funzione. Quando ne correggi uno, **rilancia**: quasi sempre ne compare un altro che era lì da mesi.
+
 ## Working conventions
 
 - **TS strict quirks**: `tsconfig.base.json` ha `noUncheckedIndexedAccess: true` più `noUnusedLocals` / `noUnusedParameters`. L'accesso per indice e `Map.get()` ritornano `T | undefined` — restringi esplicitamente. I parametri inutilizzati vanno prefissati `_`. `exactOptionalPropertyTypes` è intenzionalmente **off** per non rovinare l'ergonomia dei tipi inferiti da Zod.

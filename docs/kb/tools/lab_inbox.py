@@ -101,13 +101,32 @@ def consegne() -> list[dict]:
     return out
 
 
+def citato(lab_id: str, testo: str) -> bool:
+    """Vero se `testo` cita ESATTAMENTE questo lab-id (#129).
+
+    Prima si cercava la sottostringa `lab-id: <id>`, e un id che e' PREFISSO di un
+    altro veniva scambiato per il suo omonimo piu' lungo. Due danni misurati in
+    direzioni opposte, entrambi eseguiti e non dedotti: una consegna nuova risultava
+    gia' ingerita e spariva dal canale (boot, `--ingest` e il controllo L1 falliscono
+    insieme, perche' condividono questo stesso predicato), e in L2 una voce risultava
+    gemellata a quella sbagliata, rompendo la traccia.
+
+    Il confronto e' ancorato a inizio e fine riga. Il trattino iniziale resta
+    OPZIONALE: nel registro la riga e' `  - lab-id: X`, nel frontmatter del file di
+    consegna e' `lab-id: X` senza trattino — pretenderlo renderebbe orfani tutti i
+    gemelli, che e' il difetto opposto e altrettanto grave.
+    """
+    return re.search(rf"^[ \t]*-?[ \t]*lab-id:[ \t]*{re.escape(lab_id)}[ \t]*$",
+                     testo, re.M) is not None
+
+
 def stato_nel_registro(lab_id: str, registro: str) -> str | None:
     """None = mai ingerita; altrimenti lo status del blocco che la contiene."""
-    if f"lab-id: {lab_id}" not in registro:
+    if not citato(lab_id, registro):
         return None
     blocchi = re.split(r"(?=^- \*\*#)", registro, flags=re.M)
     for b in blocchi:
-        if f"lab-id: {lab_id}" in b:
+        if citato(lab_id, b):
             m = re.search(r"· status: ([A-Z'-]+)", b)
             return m.group(1) if m else "?"
     return "?"

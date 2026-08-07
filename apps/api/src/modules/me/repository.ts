@@ -242,6 +242,9 @@ export async function loadProfileFull(q: DbConnector, userId: string, roles: str
          LEFT JOIN sys.sys_users mu ON mu.user_id = mp.position_owner_user_id
         WHERE a.user_position_assignment_user_id = $1
           AND a.user_position_assignment_kind = 'PRIMARY'
+          -- come sopra: l'ordinamento da solo non basta, un incarico chiuso di
+          -- recente vincerebbe su quello in corso.
+          AND a.user_position_assignment_status = 'ACTIVE'
         ORDER BY a.user_position_assignment_start_date DESC NULLS LAST
         LIMIT 1`, [userId]),
   ]);
@@ -504,7 +507,17 @@ export async function loadMyCareerPaths(q: DbConnector, userId: string): Promise
     `SELECT a.user_position_assignment_position_id AS position_id, p.position_title
        FROM sys.sys_user_position_assignments a
        JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
-      WHERE a.user_position_assignment_user_id = $1 AND a.user_position_assignment_kind = 'PRIMARY'
+      WHERE a.user_position_assignment_user_id = $1
+        AND a.user_position_assignment_kind = 'PRIMARY'
+        -- Senza il filtro di stato, un LIMIT 1 senza ordinamento restituisce
+        -- un'assegnazione QUALSIASI fra quelle mai avute, chiuse comprese: misurato
+        -- su alberto.colombo, che si vedeva come «Securities Dealer» (incarico
+        -- chiuso nel 2020) invece che nella posizione attuale, e quindi senza alcun
+        -- percorso. Restava invisibile finché le posizioni disattivate avevano
+        -- ancora percorsi attaccati; il riallineamento di #155 (mig 000277) li ha
+        -- tolti, e la pagina è diventata vuota. Riguarda 140 persone su 163.
+        AND a.user_position_assignment_status = 'ACTIVE'
+      ORDER BY a.user_position_assignment_start_date DESC NULLS LAST
       LIMIT 1`, [userId],
   );
   const primary = prim.rows[0] ?? null;

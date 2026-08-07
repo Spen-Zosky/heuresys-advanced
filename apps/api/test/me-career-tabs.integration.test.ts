@@ -98,6 +98,55 @@ describe("/v1/me/{goals,risk,career-paths} — F3b career sub-tabs", () => {
     expect(Array.isArray(body.plans)).toBe(true);
   });
 
+  /**
+   * #155/S1048 — la posizione di partenza è quella IN CORSO, mai un incarico chiuso.
+   *
+   * La query filtrava `kind = 'PRIMARY'` ma non lo stato, con un `LIMIT 1` privo di
+   * ordinamento: restituiva un'assegnazione qualsiasi fra quelle mai avute. Misurato
+   * live su PROD prima del fix: `alberto.colombo@rtl-bank.org` si vedeva come
+   * «Securities Dealer», incarico chiuso nel 2020, e quindi senza alcun percorso.
+   * Riguarda **140 persone su 163**, cioè chiunque abbia cambiato posizione.
+   *
+   * Restava invisibile perché le posizioni disattivate avevano ancora percorsi
+   * attaccati; il riallineamento di #155 (mig 000277) li ha tolti e la pagina è
+   * diventata vuota — il difetto c'era da prima, il dato lo mascherava.
+   *
+   * L'atteso è DERIVATO dal DB (S1012): tommaso ha 1 incarico attivo e 1 chiuso,
+   * quindi il test distingue davvero fra i due.
+   */
+  it("GET /v1/me/career-paths starts from the ACTIVE assignment, never a closed one", async () => {
+    const atteso = await pool.query<{ position_title: string | null; n_chiuse: number }>(
+      `SELECT p.position_title,
+              (SELECT count(*)::int FROM sys.sys_user_position_assignments c
+                WHERE c.user_position_assignment_user_id = $1
+                  AND c.user_position_assignment_kind = 'PRIMARY'
+                  AND c.user_position_assignment_status <> 'ACTIVE') AS n_chiuse
+         FROM sys.sys_user_position_assignments a
+         JOIN sys.sys_positions p ON p.position_id = a.user_position_assignment_position_id
+        WHERE a.user_position_assignment_user_id = $1
+          AND a.user_position_assignment_kind = 'PRIMARY'
+          AND a.user_position_assignment_status = 'ACTIVE'
+        ORDER BY a.user_position_assignment_start_date DESC NULLS LAST
+        LIMIT 1`, [employeeId],
+    );
+    const row = atteso.rows[0]!;
+    // Se la persona non avesse incarichi chiusi, il test passerebbe anche col difetto:
+    // senza questa guardia sarebbe una prova che non può fallire.
+    expect(row.n_chiuse).toBeGreaterThan(0);
+
+    const r = await get(suite, employee, "/v1/me/career-paths");
+    expect(r.statusCode).toBe(200);
+    const body = r.json() as MeCareerPathsResponse;
+    expect(body.fromPositionTitle).toBe(row.position_title);
+
+    // e la posizione di partenza dev'essere viva: una posizione spenta non ha percorsi
+    const viva = await pool.query<{ n: number }>(
+      `SELECT count(*)::int AS n FROM sys.sys_positions
+        WHERE position_title = $1 AND position_is_active`, [body.fromPositionTitle],
+    );
+    expect(viva.rows[0]!.n).toBeGreaterThan(0);
+  });
+
   it("is self-scoped: a different persona gets their own data, never another user's", async () => {
     const mine = (await get(suite, employee, "/v1/me/goals")).json() as MeGoalsResponse;
     const theirs = (await get(suite, outsider, "/v1/me/goals")).json() as MeGoalsResponse;

@@ -287,7 +287,56 @@ riportarlo separatamente e non allargare il lavoro: → **item nuovo nel registe
 
 ---
 
-## 7. Cosa resta vero e va ricordato
+## 7. La verifica LIVE ha trovato un difetto che i test verdi non vedevano
+
+La Definition of Done del progetto (ADR-0026) vieta di chiudere su un test verde e pretende una
+dimostrazione live con una persona reale. Fatta — e ha pagato.
+
+**Login reale su PROD come `alberto.colombo@rtl-bank.org`**, `GET /v1/me/career-paths`:
+
+```
+fromPositionTitle: "Securities Dealer"      ← incarico CHIUSO nel 2020
+paths: []                                    ← nessun percorso
+```
+
+La sua posizione attuale è `Specialista Sviluppo Commerciale`. **La query dell'endpoint filtrava
+`kind = 'PRIMARY'` ma non lo stato, con un `LIMIT 1` privo di `ORDER BY`**: restituiva
+un'assegnazione qualsiasi fra quelle mai avute, chiuse comprese
+(`apps/api/src/modules/me/repository.ts`, due punti: `loadMyCareerPaths` e la query del profilo).
+
+**Difetto preesistente, che il riallineamento ha smascherato**: finché le posizioni disattivate
+avevano ancora percorsi attaccati, la pagina mostrava *qualcosa* e nessuno se ne accorgeva; tolti
+quei percorsi, è rimasta vuota. **Riguarda 140 persone su 163** — chiunque abbia cambiato posizione.
+Gli altri moduli (`analytics`, `insights`, `dashboard`, `org-health`, `capability-composition`)
+filtrano correttamente: verificato, il difetto è isolato in `me`.
+
+**Test visto fallire prima del fix** (`me-career-tabs.integration.test.ts`):
+`AssertionError: expected 'Securities Dealer' to be 'Direttore di Filiale'`. Il test include la
+guardia che lo rende falsificabile — pretende che la persona abbia almeno un incarico chiuso,
+altrimenti passerebbe anche col difetto.
+
+**Dimostrazione live dopo il fix**, login reale in due passi (password + TOTP) sull'API collegata al
+database di produzione:
+
+```
+passo 1 — mfa_required
+passo 2 — success | ruoli: ['USER', 'TEAM_MEMBER']
+=== GET /v1/me/career-paths ===
+  parte da : Specialista Sviluppo Commerciale     ← la posizione VERA
+  percorsi : 1
+     - Corporate Banking Track (VERTICAL) | tappe: 5
+```
+
+`Corporate Banking Track` è esattamente il percorso in cui vive `Head of Treasury`, il suo obiettivo:
+il traguardo che il prodotto gli mostrava come irraggiungibile ora è raggiungibile, **e si vede dalla
+sua pagina**.
+
+⚠️ **Il fix dell'endpoint NON è in produzione**: il mandato vieta il push, quindi il commit resta
+locale e PROD continua a servire il codice precedente finché non autorizzi il deploy.
+
+---
+
+## 8. Cosa resta vero e va ricordato
 
 - **Due percorsi hanno perso il gradino d'ingresso**: nessun `Cassiere`/`Bank Teller` è più tappa di
   `Banking Operations Track`, e `Compliance & Legal Track` resta con una sola tappa viva. È

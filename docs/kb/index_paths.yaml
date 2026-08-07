@@ -1,16 +1,16 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-06T17:35:05Z da docs/kb/tools/build_index.py
+# generato: 2026-08-07T00:38:40Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-06T17:35:05Z"
-  total_files: 2861
+  generated_at: "2026-08-07T00:38:40Z"
+  total_files: 2874
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 31
+    ADR: 32
     api-core: 32
-    api-module: 336
+    api-module: 337
     ci: 17
     claude-config: 36
     config: 128
@@ -18,11 +18,11 @@ meta:
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 273
+    db-migration: 274
     db-other: 8
     db-script: 44
     db-seed: 147
-    doc-canonical: 544
+    doc-canonical: 553
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -30,13 +30,13 @@ meta:
     shared-pkg: 4
     shared-schema: 104
     showcase-source: 14
-    test: 352
+    test: 353
     ux-design-archive: 80
     web-source: 232
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2303
+    live: 2316
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -221,6 +221,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\0032_platform_mandate_masks_pay_and_evaluation.md'
     root: repo
     rel: 'docs/architecture/adr/0032_platform_mandate_masks_pay_and_evaluation.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0033_generic_tool_catalogue_over_domain_metadata.md'
+    root: repo
+    rel: 'docs/architecture/adr/0033_generic_tool_catalogue_over_domain_metadata.md'
     category: ADR
     status: live
     provenance: git-tracked
@@ -1883,6 +1889,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\semantic-matching\backfill.ts'
     root: repo
     rel: 'apps/api/src/modules/semantic-matching/backfill.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\semantic-matching\query-embedding-cache.ts'
+    root: repo
+    rel: 'apps/api/src/modules/semantic-matching/query-embedding-cache.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -7232,6 +7244,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000276_backfill_graph_version_styles.sql'
+    root: repo
+    rel: 'db/migrations/000276_backfill_graph_version_styles.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -9410,6 +9428,18 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\atlas\concepts-corpus.jsonl'
+    root: repo
+    rel: 'docs/kb/atlas/concepts-corpus.jsonl'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\atlas\recupero-misura.json'
+    root: repo
+    rel: 'docs/kb/atlas/recupero-misura.json'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\db-forensics\F2_DB_CENSUS_2026-07-21.md'
     root: repo
     rel: 'docs/kb/db-forensics/F2_DB_CENSUS_2026-07-21.md'
@@ -9872,9 +9902,21 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\build_adr_index.py'
+    root: repo
+    rel: 'docs/kb/tools/build_adr_index.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\build_atlas.py'
     root: repo
     rel: 'docs/kb/tools/build_atlas.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\build_concepts.py'
+    root: repo
+    rel: 'docs/kb/tools/build_concepts.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -9908,6 +9950,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\check_embedding_coverage.py'
+    root: repo
+    rel: 'docs/kb/tools/check_embedding_coverage.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\check_exposure.py'
     root: repo
     rel: 'docs/kb/tools/check_exposure.py'
@@ -9935,6 +9983,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\dead_columns.py'
     root: repo
     rel: 'docs/kb/tools/dead_columns.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\dump_route_schemas.ts'
+    root: repo
+    rel: 'docs/kb/tools/dump_route_schemas.ts'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -9971,6 +10025,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\lab_inbox.py'
     root: repo
     rel: 'docs/kb/tools/lab_inbox.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\measure_concept_retrieval.mjs'
+    root: repo
+    rel: 'docs/kb/tools/measure_concept_retrieval.mjs'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11519,6 +11579,18 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md'
     root: repo
     rel: 'docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-06-substrato-semantico-verifica-e-correzioni.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-08-06-substrato-semantico-verifica-e-correzioni.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\specs\2026-08-07-catalogo-generico-referto-di-programma.md'
+    root: repo
+    rel: 'docs/superpowers/specs/2026-08-07-catalogo-generico-referto-di-programma.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -14159,6 +14231,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\public-stats.integration.test.ts'
     root: repo
     rel: 'apps/api/test/public-stats.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\query-embedding-cache.test.ts'
+    root: repo
+    rel: 'apps/api/test/query-embedding-cache.test.ts'
     category: test
     status: live
     provenance: git-tracked

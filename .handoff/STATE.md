@@ -1,25 +1,40 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-06 (S1047 — verificare invece di credere: due voci di sicurezza cadono alla prova, un difetto di prodotto emerge da un residuo di test).
+**Updated**: 2026-08-07 (S1047 — verificare invece di credere; poi due cicli sul substrato semantico e sul catalogo generico dell'agente).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md` · pattern di dati → `docs/kb/DATA_PATTERNS.md`.
 
-## Last session brief (S1047)
+## Last session brief (S1047 — seconda parte: substrato semantico e catalogo generico)
 
-**Le consegne del lab chiedevano di essere verificate prima di essere eseguite, e la regola è stata
-applicata a loro stesse**: undici affermazioni portanti su tredici hanno retto, due sono cadute.
+**Il substrato è sano, ma per dirlo sono serviti due difetti corretti**: un salto-per-hash
+**cieco al modello** di embedding — al cambio modello avrebbe lasciato un corpus misto,
+in silenzio — e i vettori mancanti, colmati. Ogni corpus è ora coperto per intero.
 
-**La voce di sicurezza in cima al menu era già risolta e nessuno l'aveva ri-misurata**: diceva che i
-fattori di prova erano attivi perché un test restava rosso — quel test passa, e quei fattori non
-esistevano da dieci giorni. Chiusa per misura, non per intervento: **riformattare una voce non è
-ri-misurarla.**
+**Il catalogo dell'agente vede una frazione dei moduli.** La strada per allargarlo —
+pochi strumenti generici che navigano il dominio — è stata progettata (`ADR-0033`),
+**misurata** e messa in sicurezza, ma **non percorsa**: l'ADR resta `PROPOSED` perché
+l'ultima decisione è di Enzo, non tecnica (`#156`).
 
-**Il triage delle voci già eseguite non ha trovato stati sbagliati**, ma ha scoperto due difetti: una
-sentinella che segnalava come errore ogni unità organizzativa chiusa, e quella che sembrava sporcizia
-dei test ed era **un difetto di prodotto** — «annulla» non annullava niente, e chi ci ripensava si
-ritrovava in elenco un fattore mai voluto. Quei residui **rompevano anche i test** senza che si
-sapesse; rimossi col ripristino collaudato *prima* di cancellare.
+**Due sbarramenti di sicurezza chiusi.** L'atlante ora conosce i **parametri** di ogni
+route, letti da Zod a runtime invece che indovinati; e il gate, che classificava
+lettura/scrittura dal **nome** dello strumento, avrebbe **auto-approvato una `DELETE`**
+chiesta da uno strumento generico — ora guarda il metodo dell'operazione risolta e nega
+ciò che non risolve.
 
-Piano e prove: `docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md`.
+**Il limite trovato vale più dei numeri verdi**: la ricerca sui metadati sa dire *dove
+guardare*, **non** *quanto fa*. Le domande di aggregazione non hanno un concetto (`#157`).
+
+Referto completo: `docs/superpowers/specs/2026-08-07-catalogo-generico-referto-di-programma.md`.
+
+## Prima parte della sessione (S1047) — in sintesi
+
+**Verificare invece di credere.** Le consegne del lab chiedevano un'analisi avversariale prima
+dell'esecuzione: applicata a loro stesse, undici affermazioni portanti su tredici hanno retto.
+La voce di sicurezza in cima al menu **era già risolta da dieci giorni** e nessuno l'aveva
+ri-misurata — *riformattare una voce non è ri-misurarla*. Il triage delle voci eseguite non ha
+trovato stati sbagliati ma ha scoperto **due difetti di prodotto**: «annulla» che non annullava, e
+una versione di organigramma creata da una persona reale senza stili. Entrambi corretti alla radice.
+
+Prove: `docs/superpowers/specs/2026-08-06-ritrattazione-consegne-lab-e-mfa-produzione.md`.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
@@ -39,35 +54,33 @@ che spetta a Enzo).
   invece che «a posto». · **Sicurezza MFA**: nessun fattore di prova in produzione, nessun residuo
   dopo una corsa completa della suite. · **Debiti**: resta `D-56` (decisione d'ambiente).
 
-## ⚠ Pendenza aperta alla chiusura di S1047 (`#154`) — decisa da Enzo: si lascia così
+## ⚠ Pendenza aperta (`#154`) — Enzo: «lo faremo in un'altra sessione»
 
-**linux-pc serve ancora il codice della sessione precedente.** GitHub Actions era in disservizio
-grave (incidente 2026-08-06T15:22Z): il cancello CI di `vm-deploy` ha letto rosso e **ha bloccato il
-deploy sul gemello, correttamente**. Il bypass non è stato usato — decisione confermata da Enzo nel
-giorno in cui il cancello ha dimostrato di servire. **PROD (VM) è deployata e verde.**
+**linux-pc serve ancora codice più vecchio del `main`.** GitHub Actions era in disservizio grave
+(incidente 2026-08-06T15:22Z): il cancello CI di `vm-deploy` ha letto rosso e **ha bloccato il
+deploy sul gemello, correttamente**. Il bypass non è stato usato, e il rinvio è una **decisione
+esplicita di Enzo**, non una dimenticanza. **PROD (VM) è deployata e verde.**
 Quando la CI torna verde: `bash scripts/vm-deploy.sh linuxpc`.
 
-## La custodia della storia RTL: due anelli chiusi, il terzo è `#155` (P1)
+## La custodia della storia RTL: due anelli chiusi, il terzo è `#155`
 
-Falliva **dal 2026-08-03 in silenzio**, tre corse settimanali. Scesa la catena: (1) un **difetto di
-prodotto** — creare una versione di un organigramma non copiava gli stili, e una persona reale si è
-ritrovata 158 nodi senza aspetto: corretto alla radice, dato riparato, versione **non** cancellata;
-(2) un **autocontrollo fragile** che cercava un dato sporco come cavia e moriva su un errore di
-vincolo invece che con un check rosso — ecco perché l'allarme non diceva nulla di utile.
-**(3) Resta aperto e serio**: la ricostruzione dell'organigramma ha lasciato indietro i percorsi di
-carriera — **207 su 252 puntano a posizioni morte, 130 persone hanno un obiettivo irraggiungibile**.
-Non è meccanico: serve dire quale posizione nuova corrisponde a ciascuna vecchia.
+Falliva **in silenzio da tre corse settimanali**. Due anelli chiusi (un difetto di prodotto sugli
+stili dei grafi, un autocontrollo fragile che moriva su un errore di vincolo invece di dare un check
+rosso — ecco perché l'allarme non diceva nulla di utile). **Il terzo è `#155`**, ed è il più serio:
+dettaglio nel registro.
 
 ## ⚠ Top priorities (next session)
 
 1. **`#155`** — i percorsi di carriera rimasti indietro dalla ricostruzione: **130 persone vedono un
    obiettivo di carriera che nessun percorso raggiunge**. ~1 sessione, lavoro di dominio.
-2. **`#125`** — pagine autenticate irraggiungibili dal menu ed etichette senza traduzione: è la
+   *È l'unica voce di questo elenco che una persona vera vede aprendo la propria pagina.*
+2. **`#156`** — catalogo generico: serve **la tua scelta** su quale superficie aprire per prima,
+   poi il resolver dall'atlante. Tutto il resto è pronto e provato.
+3. **`#125`** — pagine autenticate irraggiungibili dal menu ed etichette senza traduzione: è la
    superficie che un cliente vede per prima. ~2-3h · `<lab>/artefatti/pagine-orfane.txt`.
-3. **`#131` Tenant Builder P1** — ~2 sessioni. **Vale la regola qui sopra**: tre correzioni
-   sostanziali nella sua consegna.
-4. **`#127` + `#123`** — stabilizzazione post-ricostruzione e `organigramma-bis.html`: insieme,
-   perché la seconda assorbe la prima per dichiarazione propria. ~1 sessione.
+
+*Subito dietro, se le prime tre cadono*: **`#131`** Tenant Builder P1 (rileggendo la consegna, ha
+tre correzioni sostanziali) e **`#127`+`#123`** insieme, perché la seconda assorbe la prima.
 
 ## Open questions (autorità *cosa* = Enzo)
 
@@ -81,6 +94,12 @@ Non è meccanico: serve dire quale posizione nuova corrisponde a ciascuna vecchi
   **due cataloghi tacciono** (requisiti formativi e indicatori) · **quattro OKR nominano un reparto
   inesistente**, fra cui `Supply Chain` in una banca (tocca I21).
 - **Allowlist di `TENANT_ADMIN` asimmetrica**: si può estendere, non revocare. Serve prima di `#131`.
+- **`#156` — quale superficie aprire per prima all'agente?** Un modulo, in sola lettura. I criteri
+  dell'ADR-0033 misurano la fattibilità, non scelgono cosa esporre: quella è una decisione di
+  prodotto e di rischio.
+- **`#157` — il catalogo generico deve rispondere alle domande di aggregazione?** La strada che
+  consiglio non richiede codice nuovo: l'agente instrada, il calcolo lo fanno gli endpoint analitici
+  che esistono già.
 - WAIT-INPUT: **#8** Outlook · **#16** SuccessFactors · **#52** SSO IdP · **#85** `AGENTS.md` · **#86** `claude login`.
 
 ## Verification (next session)

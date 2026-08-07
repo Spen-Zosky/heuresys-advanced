@@ -2462,7 +2462,27 @@ END $fn$;
 -- L'organigramma risultava esistere da sempre, identico a sé stesso: la
 -- discontinuità del marzo 2025 non aveva prodotto una sola riga di storia.
 -- ----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION staging.storia36_check_c6a(p_reorg date)
+-- IL REGISTRO DEI RIORDINI AUTORIZZATI (#163, decisione di Enzo 2026-08-07).
+-- Prima, C6a(ii) prendeva UNA data e pretendeva che ogni evento cadesse li': il modello
+-- ammetteva una sola riorganizzazione nella vita dell'azienda. La ricostruzione
+-- dell'organigramma del 2026-08-04 non era contemplata, e registrarne gli eventi faceva
+-- scattare il check — cioe' il controllo puniva proprio il comportamento corretto.
+-- Enzo ha deciso: «e' stata una riorganizzazione vera», e con essa la regola durevole
+-- *le riorganizzazioni si autorizzano, ma una volta autorizzate si implementano E SI
+-- REGISTRANO*. Quindi il vincolo non e' «un solo giorno», e' «solo giorni autorizzati»:
+-- un evento organizzativo fuori da questo elenco resta un difetto, perche' significa che
+-- qualcuno ha riorganizzato senza che nessuno lo autorizzasse.
+-- Aggiungere un riordino QUI e' l'atto di registrazione. Una riga sola, in un posto solo.
+CREATE OR REPLACE FUNCTION staging.storia36_riordini()
+RETURNS date[] LANGUAGE sql IMMUTABLE AS $fn$
+  SELECT ARRAY[
+    DATE '2025-03-01',   -- il riordino raccontato dalla storia 36 mesi (6 eventi)
+    DATE '2026-08-04'    -- la ricostruzione dell'organigramma, migrazioni 000244-000246
+  ];
+$fn$;
+
+DROP FUNCTION IF EXISTS staging.storia36_check_c6a(date);
+CREATE OR REPLACE FUNCTION staging.storia36_check_c6a()
 RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
@@ -2482,9 +2502,10 @@ BEGIN
   FROM sys.sys_organization_unit_history h
   JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
   WHERE h.organization_unit_history_tenant_id = c_rtl
-    AND h.organization_unit_history_effective_at::date <> p_reorg;
+    AND h.organization_unit_history_effective_at::date <> ALL (staging.storia36_riordini());
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6a(ii): % eventi datati fuori dal giorno del riordino (es. %)', v_cnt, v_sample;
+    RAISE EXCEPTION 'C6a(ii): % eventi datati fuori da un riordino registrato (es. %) — riordini registrati: %',
+      v_cnt, v_sample, staging.storia36_riordini();
   END IF;
 
   SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
@@ -2582,29 +2603,48 @@ DECLARE
   v_cnt bigint;
   v_sample text;
 BEGIN
-  SELECT count(*), min(o.organization_unit_code || ': storia «' ||
-                       (h.organization_unit_history_new_value->>'name') || '» ≠ oggi «' ||
-                       o.organization_unit_name || '»')
+  -- #163 — L'ULTIMO EVENTO, NON OGNI EVENTO.
+  -- La stesura precedente confrontava OGNI esito col nome di oggi. Era giusta finche'
+  -- un'unita veniva rinominata al massimo una volta: con due riordini registrati (2025 e
+  -- 2026) il primo esito e' legittimamente diverso da oggi — e' proprio quello che
+  -- significa avere una storia. Pretendere il contrario obbligherebbe a cancellare il
+  -- passato per far tornare i conti, cioe' a distruggere il dato che il check protegge.
+  -- La proprieta' vera e': l'ULTIMO esito dichiarato porta al presente.
+  SELECT count(*), min(u.codice || ': storia «' || u.esito || '» ≠ oggi «' || u.oggi || '»')
     INTO v_cnt, v_sample
-  FROM sys.sys_organization_unit_history h
-  JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
-  WHERE h.organization_unit_history_tenant_id = c_rtl
-    AND h.organization_unit_history_new_value ? 'name'
-    AND (h.organization_unit_history_new_value->>'name') IS DISTINCT FROM o.organization_unit_name;
+  FROM (SELECT DISTINCT ON (h.organization_unit_history_unit_id)
+               o.organization_unit_code AS codice,
+               h.organization_unit_history_new_value->>'name' AS esito,
+               o.organization_unit_name AS oggi
+          FROM sys.sys_organization_unit_history h
+          JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
+         WHERE h.organization_unit_history_tenant_id = c_rtl
+           AND h.organization_unit_history_new_value ? 'name'
+         ORDER BY h.organization_unit_history_unit_id,
+                  h.organization_unit_history_effective_at DESC, h.created_at DESC) u
+  WHERE u.esito IS DISTINCT FROM u.oggi;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6c: % eventi il cui esito non è il nome che l''unità porta oggi (es. %)', v_cnt, v_sample;
+    RAISE EXCEPTION 'C6c: % unità il cui ULTIMO esito di storia non è il nome che portano oggi (es. %)', v_cnt, v_sample;
   END IF;
 
-  SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
-  FROM sys.sys_organization_unit_history h
-  JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
-  LEFT JOIN sys.sys_organization_units par ON par.organization_unit_id = o.organization_unit_parent_id
-  WHERE h.organization_unit_history_tenant_id = c_rtl
-    AND h.organization_unit_history_new_value ? 'parent_name'
-    AND (h.organization_unit_history_new_value->>'parent_name')
-        IS DISTINCT FROM par.organization_unit_name;
+  -- Stessa correzione per gli spostamenti: e' l'ultimo che deve finire dove l'unita sta
+  -- oggi. Un'unita spostata due volte ha un primo approdo che non e' quello attuale, e
+  -- non e' un difetto: e' il racconto.
+  SELECT count(*), min(u.codice) INTO v_cnt, v_sample
+  FROM (SELECT DISTINCT ON (h.organization_unit_history_unit_id)
+               o.organization_unit_code AS codice,
+               h.organization_unit_history_new_value->>'parent_name' AS approdo,
+               par.organization_unit_name AS padre_oggi
+          FROM sys.sys_organization_unit_history h
+          JOIN sys.sys_organization_units o ON o.organization_unit_id = h.organization_unit_history_unit_id
+          LEFT JOIN sys.sys_organization_units par ON par.organization_unit_id = o.organization_unit_parent_id
+         WHERE h.organization_unit_history_tenant_id = c_rtl
+           AND h.organization_unit_history_new_value ? 'parent_name'
+         ORDER BY h.organization_unit_history_unit_id,
+                  h.organization_unit_history_effective_at DESC, h.created_at DESC) u
+  WHERE u.approdo IS DISTINCT FROM u.padre_oggi;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6c(ii): % spostamenti che non finiscono dove l''unità sta oggi (es. %)', v_cnt, v_sample;
+    RAISE EXCEPTION 'C6c(ii): % unità il cui ULTIMO spostamento non finisce dove stanno oggi (es. %)', v_cnt, v_sample;
   END IF;
 
   SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
@@ -4981,7 +5021,7 @@ BEGIN
   BEGIN
     DELETE FROM sys.sys_organization_unit_history
      WHERE organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
-    PERFORM staging.storia36_check_c6a(DATE '2025-03-01');
+    PERFORM staging.storia36_check_c6a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM LIKE 'C6a:%' THEN v_fired := true;
@@ -4998,7 +5038,7 @@ BEGIN
        SET organization_unit_history_effective_at = organization_unit_history_effective_at + interval '200 days'
      WHERE ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
                     WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
-    PERFORM staging.storia36_check_c6a(DATE '2025-03-01');
+    PERFORM staging.storia36_check_c6a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM LIKE 'C6a(ii)%' THEN v_fired := true;
@@ -5006,7 +5046,27 @@ BEGIN
     END IF;
   END;
   IF NOT v_fired THEN RAISE EXCEPTION 'SELFTEST C6a(ii) FALLITO: violazione iniettata non rilevata'; END IF;
-  RAISE NOTICE '[OK] SELFTEST C6a(ii) (evento fuori dal giorno del riordino, rollback)';
+  RAISE NOTICE '[OK] SELFTEST C6a(ii) (evento fuori da ogni riordino registrato, rollback)';
+
+  -- ST-C6a(ii-bis): IL SECONDO RIORDINO E' AMMESSO (#163).
+  -- Il gemello del test qui sopra, e serve esattamente quanto lui: quello prova che un
+  -- evento non autorizzato viene visto, questo prova che un evento AUTORIZZATO non viene
+  -- punito. Senza, «allargare il modello» sarebbe una dichiarazione: si potrebbe togliere
+  -- il secondo riordino dal registro e la batteria resterebbe verde lo stesso.
+  -- Si spostano TUTTI gli eventi del tenant sul secondo riordino registrato: cambia solo
+  -- la data, quindi le altre sotto-verifiche di C6a (conteggio, autore, prima<>dopo) e i
+  -- check sui nomi restano indifferenti, e l'unica cosa in gioco e' C6a(ii).
+  v_fired := false;
+  BEGIN
+    UPDATE sys.sys_organization_unit_history
+       SET organization_unit_history_effective_at = (staging.storia36_riordini())[2]::timestamptz
+     WHERE organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
+    PERFORM staging.storia36_check_c6a();
+  EXCEPTION WHEN OTHERS THEN
+    v_fired := true;
+    RAISE EXCEPTION 'SELFTEST C6a(ii-bis) FALLITO: un riordino REGISTRATO viene rifiutato (%)', SQLERRM;
+  END;
+  RAISE NOTICE '[OK] SELFTEST C6a(ii-bis) (il secondo riordino registrato e'' ammesso, rollback)';
 
   -- ST-C6a(iii): togliere l'autore a un evento organizzativo
   v_fired := false;
@@ -5015,7 +5075,7 @@ BEGIN
        SET organization_unit_history_actor_user_id = NULL
      WHERE ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
                     WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0' LIMIT 1);
-    PERFORM staging.storia36_check_c6a(DATE '2025-03-01');
+    PERFORM staging.storia36_check_c6a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM LIKE 'C6a(iii)%' THEN v_fired := true;
@@ -5033,7 +5093,7 @@ BEGIN
      WHERE ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
                     WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
                       AND h2.organization_unit_history_old_value IS NOT NULL LIMIT 1);
-    PERFORM staging.storia36_check_c6a(DATE '2025-03-01');
+    PERFORM staging.storia36_check_c6a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
     IF SQLERRM LIKE 'C6a(iv)%' THEN v_fired := true;
@@ -5106,9 +5166,13 @@ BEGIN
   BEGIN
     UPDATE sys.sys_organization_unit_history
        SET organization_unit_history_new_value = jsonb_build_object('name', 'Divisione Che Non Esiste')
+     -- #163: si colpisce l'evento PIU' RECENTE, non uno qualsiasi. Da quando C6c guarda
+     -- l'ultimo esito e non ognuno, sporcare un evento vecchio non e' piu' una violazione
+     -- — e' storia. Un selftest che iniettasse quello proverebbe che il check NON scatta.
      WHERE ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
                     WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
-                      AND h2.organization_unit_history_new_value ? 'name' LIMIT 1);
+                      AND h2.organization_unit_history_new_value ? 'name'
+                    ORDER BY h2.organization_unit_history_effective_at DESC, h2.created_at DESC LIMIT 1);
     PERFORM staging.storia36_check_c6c();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
@@ -5124,9 +5188,12 @@ BEGIN
   BEGIN
     UPDATE sys.sys_organization_unit_history
        SET organization_unit_history_new_value = jsonb_build_object('parent_name', 'Divisione Marketing')
+     -- #163: come sopra, l'evento PIU' RECENTE — e' l'ultimo approdo che deve coincidere
+     -- con il genitore di oggi, quindi e' l'unico che puo' costituire violazione.
      WHERE ctid = (SELECT h2.ctid FROM sys.sys_organization_unit_history h2
                     WHERE h2.organization_unit_history_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
-                      AND h2.organization_unit_history_change_type = 'MOVED' LIMIT 1);
+                      AND h2.organization_unit_history_change_type = 'MOVED'
+                    ORDER BY h2.organization_unit_history_effective_at DESC, h2.created_at DESC LIMIT 1);
     PERFORM staging.storia36_check_c6c();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
@@ -6360,7 +6427,7 @@ BEGIN
   END;
 
   BEGIN
-    PERFORM staging.storia36_check_c6a(DATE '2025-03-01');
+    PERFORM staging.storia36_check_c6a();
     RAISE NOTICE '[OK] C6a la riorganizzazione ha lasciato traccia, datata e attribuita';
   EXCEPTION WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT;

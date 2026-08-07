@@ -313,3 +313,24 @@ il referto non lo collega — #155 insiste sulla **stessa area** su cui si stava
 progettando la dimostrazione. È precondizione, non alternativa.
 
 stato: [RICONCILIATA 2026-08-07, CLI — chiusura S1047] Le quattro decisioni sono state recepite nelle SoT che competono alla CLI, e nessuna e' stata data per scontata. **D1** era gia' `ADR-0033` (`PROPOSED`) e resta tale: i tre criteri dell'ADR sono soddisfatti — recupero misurato 8/10 sui primi 3, §5.1 parametri chiuso, §5.2 gate chiuso — ma manca la scelta di **quale superficie aprire per prima**, che e' `#156` (WAIT-INPUT) e non la decide una misura. **D2** ha chiuso `#157`, che avevo appena registrato come domanda aperta: la decisione coincide con l'opzione raccomandata dal referto, e la ragione aggiunta da Cowork — l'opzione (b) reintrodurrebbe contenuto scritto a mano che invecchia, distruggendo la proprieta' auto-rigenerante su cui poggia tutto — e' stata messa agli atti nella voce perche' nel referto non c'era. **D3** e' ora `#159`: registrato come vincolo PRIMA della costruzione, col rischio nominato (il prototipo scritto dentro una pagina). **D4** e' committata: `docs/superpowers/prompts/` con i due mandati e il suo README. **Sulla precedenza**: concordo, e il collegamento che Cowork fa e il referto non faceva regge — `#155` insiste sulla stessa area della dimostrazione, quindi e' precondizione e non alternativa; resta in cima al menu.
+
+### D5 — Casa per i documenti prodotti da Cowork (2026-08-07)
+
+Creata `docs/superpowers/analysis/`, quarta sorella di `prompts/`, `plans/`, `specs/`.
+Contiene le ricognizioni e le valutazioni preliminari prodotte da Cowork.
+
+**Gerarchia di autorità dichiarata nel suo README**: `docs/kb/` viene prima, poi
+`specs/` (misure eseguite sulla macchina), poi `analysis/`. Ciò che sta in `analysis/`
+**non prevale mai su un referto**: Cowork legge il codice e interroga il DB, ma non può
+accendere i servizi né eseguire le suite. È già successo due volte in due giorni che un
+referto correggesse una lettura di Cowork.
+
+Depositato `analysis/2026-08-06-inventario-substrato-ai-rag.md`, con in testa la tabella
+dei punti superati dai referti dei cicli A e B. Il testo originale **non è stato
+riscritto**: le correzioni stanno in coda, datate.
+
+**Regola nuova in `prompts/README.md`**: un mandato può citare solo file già presenti nel
+repository alla consegna. I due mandati del 2026-08-06 hanno incollato i fatti nel testo
+perché la loro fonte viveva fuori dal repo — ha funzionato, non scala.
+
+stato: [RICONCILIATA 2026-08-07, CLI — chiusura S1047] **Gia' recepita nei fatti prima di essere letta**: `analysis/` con il suo README, l'inventario e la regola sui riferimenti in `prompts/README.md` sono nel repository dal commit `692b98c1`. La gerarchia di autorita' che D5 dichiara — `docs/kb/` prima, poi `specs/`, poi `analysis/` — coincide con quella che il progetto gia' applica, e i due casi in cui un referto ha corretto una lettura di Cowork sono documentati: le stime `pg_stat` gonfiate (14.039 skill reali contro ~17.450 stimati) e i «7 utenti scoperti» che erano fuori corpus, non scoperti. Nota di metodo per i prossimi cicli: **ho committato `prompts/` senza leggerne il README**, fidandomi della descrizione in D4, e ha funzionato per caso — se il README avesse portato una convenzione che il mio commit violava l'avrei scoperto dopo. I quattro file di D5 sono stati letti prima di pubblicarli.

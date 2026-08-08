@@ -113,6 +113,30 @@ export default async function globalTeardown(): Promise<void> {
     console.warn("[e2e teardown] C3 activation cleanup skipped:", (err as Error).message);
   }
 
+  // #131 T6: tenant-blueprints.spec.ts apre un fascicolo per corsa, con un codice
+  // che porta il timestamp. Senza questa pulizia la produzione accumulerebbe un
+  // fascicolo a ogni giro (misurati 4 residui alla prima esecuzione). Il filtro
+  // sul prefisso non puo' toccare `RTL-BANK-CONFIG`, che e' il fascicolo vero.
+  // Le versioni e le decisioni scendono in cascata; le fotografie no (ON DELETE
+  // RESTRICT, sono immutabili per disegno), quindi un fascicolo gia' firmato
+  // resterebbe — ed e' giusto che si noti invece di sparire in silenzio.
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH d AS (DELETE FROM sys.sys_tenant_blueprints WHERE tenant_blueprint_code LIKE 'E2E-FASCICOLO-%' RETURNING 1) SELECT count(*) FROM d",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] T6: deleted ${out} E2E tenant-blueprint(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] T6 dossier cleanup skipped:", (err as Error).message);
+  }
+
   // #45 C3: tenants-editing.spec.ts crea un'azienda cliente per corsa e la archivia.
   // L'archiviazione dal prodotto è volutamente soft (stato ARCHIVED), quindi la riga
   // resterebbe: qui si rimuove davvero. Il filtro sul prefisso non può toccare le due

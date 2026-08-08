@@ -33,6 +33,14 @@ test.describe("fascicolo di configurazione", () => {
     await page.getByTestId("tenant-blueprint-name").fill("Fascicolo di prova E2E");
     await page.getByTestId("tenant-blueprint-create").click();
 
+    // Si ASPETTA che la mutazione sia conclusa prima di ricaricare. Il campo si
+    // svuota nel `onSuccess`, quindi vuoto = la POST ha risposto. Senza questa
+    // attesa il `reload()` interrompe la richiesta in volo: il fascicolo nasce
+    // lo stesso — verificato sul database — ma dopo il ricaricamento, e la
+    // pagina non lo mostra piu'. E' il difetto che ha fatto fallire questa
+    // prova la prima volta, ed era della prova, non del prodotto.
+    await expect(page.getByTestId("tenant-blueprint-code")).toHaveValue("");
+
     // Re-fetch: si ricarica e si cerca la riga, invece di credere alla risposta.
     await page.reload();
     const riga = page.getByTestId("tenant-blueprints-row").filter({ hasText: CODICE });
@@ -46,8 +54,25 @@ test.describe("fascicolo di configurazione", () => {
     await page.getByTestId("identita-ateco-ricerca").fill("64.19");
     const ateco = page.getByTestId("identita-ateco");
     await expect(ateco).toBeVisible();
-    await ateco.selectOption({ label: /^64\.19/ });
-    await page.getByTestId("identita-fascia").selectOption({ label: /^M/ });
+    // `selectOption` vuole una STRINGA per `label`, non un'espressione regolare
+    // (fallisce con «expected string, got object»). Il valore e' un uuid che non
+    // si puo' scrivere qui, quindi si legge dall'opzione: si sceglie per cio'
+    // che l'utente vede, e si seleziona per cio' che il DOM porta.
+    //
+    // L'ancoraggio a INIZIO stringa non e' pignoleria: cercando "64.19" il
+    // catalogo restituisce anche `46.64.19` (commercio all'ingrosso), che
+    // contiene quella sequenza e viene prima in ordine. Selezionandolo, la
+    // pagina rispondeva — correttamente — «nessuna famiglia copre questo
+    // settore», e la prova falliva accusando il prodotto di un difetto che era
+    // suo. Il codice si sceglie per intero, non per sottostringa.
+    const atecoOpt = ateco.locator("option").filter({ hasText: /^64\.19 — / }).first();
+    await expect(atecoOpt).toHaveCount(1);
+    await ateco.selectOption((await atecoOpt.getAttribute("value"))!);
+
+    const fascia = page.getByTestId("identita-fascia");
+    const fasciaOpt = fascia.locator("option").filter({ hasText: /^M — / }).first();
+    await expect(fasciaOpt).toHaveCount(1);
+    await fascia.selectOption((await fasciaOpt.getAttribute("value"))!);
     await page.getByTestId("identita-vigilanza").selectOption("HIGH");
     await page.getByTestId("identita-paese").fill("IT");
     await page.getByTestId("identita-salva").click();

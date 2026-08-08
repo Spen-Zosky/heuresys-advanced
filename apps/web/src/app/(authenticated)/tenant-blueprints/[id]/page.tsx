@@ -110,7 +110,7 @@ export default function TenantBlueprintDetailPage({
 
       <PassoProcessi base={base} versione={versione} modificabile={modificabile} />
 
-      {modificabile ? <Sottometti base={base} blueprintId={id} /> : null}
+      <Sottometti base={base} blueprintId={id} versione={versione} modificabile={modificabile} />
     </div>
   );
 }
@@ -566,7 +566,17 @@ function RigaProcesso({
 
 /* ----------------------------------------------------------------- la firma */
 
-function Sottometti({ base, blueprintId }: { base: string; blueprintId: string }) {
+function Sottometti({
+  base,
+  blueprintId,
+  versione,
+  modificabile,
+}: {
+  base: string;
+  blueprintId: string;
+  versione: TenantBlueprintVersion;
+  modificabile: boolean;
+}) {
   const { t } = useTranslation("blueprints");
   const qc = useQueryClient();
   const [errore, setErrore] = useState<string | null>(null);
@@ -580,11 +590,22 @@ function Sottometti({ base, blueprintId }: { base: string; blueprintId: string }
     onError: (e: unknown) => setErrore(e instanceof Error ? e.message : String(e)),
   });
 
+  // La sezione resta MONTATA anche dopo la sottomissione. Prima spariva insieme
+  // al pulsante — appena la versione smette di essere una bozza `modificabile`
+  // diventa falso — e con lei spariva la conferma: chi firmava non vedeva mai
+  // che era andata a buon fine. Trovato dalla prova di navigazione, che e'
+  // esattamente cio' per cui esiste.
   return (
     <section className="rounded-lg border border-border bg-card p-4">
-      <Button onClick={() => invia.mutate()} disabled={invia.isPending} data-testid="fascicolo-sottometti">
-        {t("dossier.submit.action")}
-      </Button>
+      {modificabile ? (
+        <Button onClick={() => invia.mutate()} disabled={invia.isPending} data-testid="fascicolo-sottometti">
+          {t("dossier.submit.action")}
+        </Button>
+      ) : (
+        <p className="text-sm text-muted-foreground" data-testid="fascicolo-stato">
+          {versione.status}
+        </p>
+      )}
       {invia.isSuccess ? (
         <p className="mt-2 text-sm text-success" role="status" data-testid="fascicolo-sottomesso">
           {t("dossier.submit.done")}

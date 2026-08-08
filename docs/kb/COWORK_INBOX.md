@@ -346,11 +346,12 @@ stato: [RICONCILIATA 2026-08-07, CLI — chiusura S1047] **Gia' recepita nei fat
 > collassa su `canonical` ogni valore diverso da `lab`, e il driver ha un lock globale
 > deliberato che vieta due istanze. Non serve rileggere questa consegna: il registro basta.
 >
-> **L'addendum sulla plancia NON è stato committato**, ed è corretto così: `scripts/plancia.py`,
-> `scripts/sessioni_panel.py` e `scripts/sessioni-panel/` **non sono tracciati da git** — sono
-> strumenti locali, mai entrati nel repo. Il cambio `conclusa` → `silenzio` vive quindi solo
-> sulla macchina di Enzo. Se quegli strumenti devono entrare nel repo è una decisione a sé,
-> che non passa da questa consegna.
+> **L'addendum sulla plancia: risolto lo stesso giorno.** Quando la consegna è arrivata, quei
+> file **non erano tracciati da git** — mai aggiunti, mai esclusi — quindi non c'era un archivio
+> in cui committarli, e la correzione `conclusa` → `silenzio` viveva solo sulla macchina di Enzo.
+> Enzo ha deciso di portarli nel repo: fatto (`16f26a15`), insieme alle tre librerie che la
+> pagina richiede e con `.panel/` (chiave d'accesso e stato) lasciato fuori. La correzione di
+> Cowork è dentro quel commit.
 
 Proposta di Cowork, sessione del 2026-08-08 con Enzo. Non scrivo in `SOT_STATE` /
 `SOT_BACKLOG` / `DEBT_REGISTER`: sono di CLI.

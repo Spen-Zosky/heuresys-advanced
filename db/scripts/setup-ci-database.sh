@@ -23,6 +23,12 @@ RUNTIME_ROLE="${RUNTIME_ROLE:-heuresys}"
 
 pg() { sudo -u postgres psql "$@"; }
 
+# Gli schemi ausiliari sono `staging`, `reference_sync`, `audit` — NON piu'
+# `brownfield`, ritirato dalla migrazione 000297 (#164 F4). Finche' questo script
+# lo nominava, il blocco dei GRANT moriva sulla prima riga con «lo schema
+# "brownfield" non esiste» e il ruolo della CI restava senza permessi: il clone
+# risultava completo (parity OK) e inservibile.
+
 echo "[setup-ci-db] target=$CI_DB  source=$SRC_DB  host=$PGHOST:$PGPORT  role=$RUNTIME_ROLE"
 
 # Guard: never let SRC and CI be the same (would nuke PROD).
@@ -74,7 +80,7 @@ rm -f "$DUMP_TMP" "$TOC_TMP"
 # 2c. Structural parity gate: the clone must have exactly the source's tables
 #     and extensions. A mismatch is FATAL (a partial CI DB gives green-but-
 #     meaningless or mysteriously-red CI).
-count_tables() { pg -d "$1" -tAc "SELECT count(*) FROM pg_tables WHERE schemaname IN ('sys','staging','brownfield','audit')"; }
+count_tables() { pg -d "$1" -tAc "SELECT count(*) FROM pg_tables WHERE schemaname IN ('sys','staging','reference_sync','audit')"; }
 count_ext()    { pg -d "$1" -tAc "SELECT count(*) FROM pg_extension"; }
 SRC_T=$(count_tables "$SRC_DB"); CI_T=$(count_tables "$CI_DB")
 SRC_E=$(count_ext "$SRC_DB");    CI_E=$(count_ext "$CI_DB")
@@ -86,9 +92,9 @@ echo "[setup-ci-db] parity OK — $CI_T tables, $CI_E extensions (source-identic
 
 # 3. Make sure the runtime role can use everything (belt-and-suspenders after --no-owner).
 pg -d "$CI_DB" -v ON_ERROR_STOP=1 <<SQL
-GRANT ALL ON SCHEMA sys, staging, brownfield, audit TO ${RUNTIME_ROLE};
-GRANT ALL ON ALL TABLES    IN SCHEMA sys, staging, brownfield, audit TO ${RUNTIME_ROLE};
-GRANT ALL ON ALL SEQUENCES IN SCHEMA sys, staging, brownfield, audit TO ${RUNTIME_ROLE};
+GRANT ALL ON SCHEMA sys, staging, reference_sync, audit TO ${RUNTIME_ROLE};
+GRANT ALL ON ALL TABLES    IN SCHEMA sys, staging, reference_sync, audit TO ${RUNTIME_ROLE};
+GRANT ALL ON ALL SEQUENCES IN SCHEMA sys, staging, reference_sync, audit TO ${RUNTIME_ROLE};
 SQL
 
 # 4. Smoke: the runtime role can read a core table.

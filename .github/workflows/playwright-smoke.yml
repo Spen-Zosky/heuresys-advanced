@@ -145,7 +145,7 @@ jobs:
       - name: Verify test admin + personas seeded
         run: |
           psql -h localhost -p 5432 -U $POSTGRES_USER -d $POSTGRES_DATABASE \
-            -c "SELECT user_email FROM sys.sys_users WHERE user_email IN ('admin@heuresys.com','federica.marchetti@rtl-bank.org','paolo.caputo@rtl-bank.org','tommaso.fiore@rtl-bank.org','antonio.parisi@rtl-bank.org','marco.rinaldi@rtl-bank.org','andrea.martino@rtl-bank.org')" \
+            -c "SELECT user_email FROM sys.sys_users WHERE user_email IN ('enzo.spenuso@heuresys.com','federica.marchetti@rtl-bank.org','paolo.caputo@rtl-bank.org','tommaso.fiore@rtl-bank.org','antonio.parisi@rtl-bank.org','marco.rinaldi@rtl-bank.org','andrea.martino@rtl-bank.org')" \
             -tA | sort > /tmp/seeded.txt
           test $(wc -l < /tmp/seeded.txt) -eq 7 || \
             { echo "test personas not seeded — pnpm db:seed-test-admin failed?"; exit 1; }

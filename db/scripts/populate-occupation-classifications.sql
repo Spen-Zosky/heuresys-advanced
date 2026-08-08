@@ -76,7 +76,7 @@ ON CONFLICT (entity_table, entity_id, field, locale)
 -- 3. Watermark sorgenti (pattern reference-sync; il seed è il deliverable
 --    2026-07-22 — ESCO API IT + Istat/INAIL + EN ILO/ESCO/LLM)
 -- ---------------------------------------------------------------------------
-INSERT INTO brownfield.source_watermarks
+INSERT INTO reference_sync.source_watermarks
   (source_watermark_source_key, source_watermark_status, source_watermark_cursor,
    source_watermark_last_fetched_at, source_watermark_last_succeeded_at, source_watermark_metadata)
 VALUES

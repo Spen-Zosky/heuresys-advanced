@@ -206,6 +206,7 @@
 - **Risolti 2026-05-28**: D-01 (doc-drift), D-04 (root cleanup → docs/archive/).
 
 
+| **D-81** | 🟢 bassa | **`BLUEPRINT_FIELD_LOCKED` è nel contratto della specifica ma non nel codice, e non può esserlo ancora** — la §4.8 dell'epica Tenant Builder classifica i campi del fascicolo in bloccanti (settore, fascia, modello ancorato) e rivedibili, e prevede che il tentativo di cambiare un campo bloccante venga rifiutato dicendo *quale* campo e *perché*. In P1 l'unico attore che tocca il fascicolo è `PLATFORM_ADMIN`, che può cambiare qualunque campo: **nessun test può far scattare quella guardia**, e scriverla adesso significherebbe consegnare codice non provato. | S1051 (2026-08-08), T5 del `#131`: i tre permessi `tenant_blueprint:*` sono concessi al solo `PLATFORM_ADMIN` (mig. `000300`, che lo verifica sulla riga intera). Nessun altro ruolo può raggiungere le 15 rotte — provato dal nono caso di `apps/api/test/tenant-blueprints.integration.test.ts`, che li percorre tutti con un amministratore di tenant e pretende 403 su ognuno. | Implementare la guardia **in P2**, insieme all'attore che può violarla (il cliente che rivede i campi che gli competono). Il codice d'errore e la classificazione dei campi restano nella specifica come contratto già scritto: non vanno riprogettati, vanno applicati. | **aperto** — dipendenza dichiarata di P2, non un difetto di P1 |
 
 > Nessun debito scartato. Ogni riga ha owner (CLI) e remediation. R3: il codebase va lasciato in stato migliore.
 

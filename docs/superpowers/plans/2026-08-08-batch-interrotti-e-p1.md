@@ -28,10 +28,10 @@ reali** (ADR-0026): niente si chiude su test verde.
 | id | cosa | chi | fatto significa | stato |
 |---|---|---|---|---|
 | **A0** | La mappa settore→famiglia di modelli (prerequisito emerso misurando: non esiste) | Claude | migrazione applicata + prova generale verde + `64.19` risale a `FIN_BANKING` sul vivo | **FATTO** |
-| **A1** | `#131` T5 — il modulo API `tenant-blueprints` (15 rotte) | Claude | 9 test verdi, typecheck+lint, commit unico, 15 rotte vive in produzione | in corso |
-| **A2** | `#131` T6 — frontend: elenco, cascata, confronto | Claude | 3 pagine + i18n it/en in parità + voce di menu + Playwright verde con login reale | da fare |
-| **A3** | `#131` T7 — il fascicolo vero di RTL Bank (la prova che conta) | Claude | 23/23 processi esprimibili, 7/7 decisioni registrate, sul database di produzione | da fare |
-| **A4** | `#131` T8 — controllo di scostamento sull'identità | Claude | la sentinella esiste, gira, e **si è vista rossa** almeno una volta | da fare |
+| **A1** | `#131` T5 — il modulo API `tenant-blueprints` (15 rotte) | Claude | 9 test verdi, typecheck+lint, commit unico, 15 rotte vive in produzione | codice fatto · 9/9 verdi · typecheck+lint verdi · **attende la regressione completa prima del commit** |
+| **A2** | `#131` T6 — frontend: elenco, cascata, confronto | Claude | 3 pagine + i18n it/en in parità + voce di menu + Playwright verde con login reale | 3 pagine + i18n (parità 2987×2 verde) + mig. `000302` (prova generale verde) + spec E2E scritti · **manca l'esecuzione E2E** |
+| **A3** | `#131` T7 — il fascicolo vero di RTL Bank (la prova che conta) | Claude | 23/23 processi esprimibili, 7/7 decisioni registrate, sul database di produzione | script scritto · **non ancora eseguito** (scrive in produzione: si esegue a regressione verde) |
+| **A4** | `#131` T8 — controllo di scostamento sull'identità | Claude | la sentinella esiste, gira, e **si è vista rossa** almeno una volta | **FATTO** — `check_identita_azienda.py` gira sul vivo; `--autoprova` costruisce un guasto in transazione annullata e lo vede (provato) |
 | **B1** | `#124` strato 1 — spaccare `IDENTITY` in `IDENTITY_PRO` / `IDENTITY_PRIV` | Claude | 6 celle su 8 chiuse; prova HTTP live sulla stessa riga letta da due attori | da fare |
 | **B2** | `#124` vincolo 5 — gli aggregati (`/v1/compensation/distribution`) | Claude | la media su classe mascherata non è più una fuga; prova live | da fare |
 | **B3** | `#124` gli altri endpoint delle due classi (12 rotte) | Claude | ogni rotta elencata porta `masked`; prova live per famiglia | da fare |
@@ -119,6 +119,11 @@ bloccano la chiusura.
   va registrato come dipendenza dichiarata di P2 nel registro dei debiti, non implementato.
 - `sys_activity_classification_mappings` esiste, è vuota da sempre e nessuna API la espone.
   Candidata al cancello di esposizione (`#79`).
+- **`CLAUDE.md` cita `PERMISSION_DENIED` fra i «codici esistenti da imitare»**, ma sul codice reale
+  non lo emette nessuno: `requirePermission` risponde `FORBIDDEN` su **520 rotte su 532**, e le 12
+  eccezioni portano codici `*_ADMIN_ONLY`. La riga del CLAUDE.md induce in errore chi scrive un
+  modulo nuovo — è successo qui. Correzione di una riga, ma tocca un file di regole che è di Enzo:
+  la propongo invece di applicarla.
 - ~~I permessi `blueprint:activate|override|delete` in mano a `TENANT_ADMIN`~~ — **falso allarme,
   già chiuso**: la decisione E9 è stata applicata dal Task 3 (mig. `000300`, che toglie i codici
   dalla `VALUES` dell'allowlist `000210` e poi verifica la revoca). Misurato live: quei tre permessi
@@ -138,3 +143,23 @@ bloccano la chiusura.
 Le due righe che valgono la prova sono quelle **vuote**: `65.11` non risale, e per arrivarci è
 bastato mappare `64` invece di `L`. Prova generale su linux-pc: verde in due passate; la guardia
 nuova è stata fatta scattare di proposito prima di fidarsi.
+
+---
+
+## Scoperte che hanno cambiato il piano (misurate, non dedotte)
+
+1. **La derivazione ATECO→famiglia non esisteva** — il T5 la dava per fatta. Ha prodotto la voce
+   `A0` e la migrazione `000301`.
+2. **`PERMISSION_DENIED` non è il codice della piattaforma**: `requirePermission` risponde
+   `FORBIDDEN` su 520 rotte su 532. Il test è stato allineato alla piattaforma.
+3. **`loginAs` non esiste** — l'helper reale è `loginRaw`, e restituisce la risposta di login, non
+   gli header. Le chiamate del piano sono state adattate all'helper.
+4. **`content-type: application/json` su richieste senza corpo** fa rispondere 400 a Fastify prima
+   dei `preHandler`: il caso dei 15 endpoint stava misurando la validazione invece del permesso.
+   Corretto, e rafforzato con la verifica che la POST negata non abbia scritto nulla.
+5. **`RegulatoryIntensity` era già definito** in `enterprise-typing-profiles`: importato invece che
+   ridichiarato, per non avere due scale della stessa cosa.
+6. **Il caso noto del T8 non esiste più** — Heuresys ha ATECO `70.20`, coerente con
+   `MGMT_CONSULTING`: riparato da `#144` (mig. `000282`). Il registro lo aveva previsto, e infatti
+   la prova di falsificabilità è stata **costruita ad arte** (`--autoprova`), non attesa dal dato.
+7. **La revoca E9 era già in produzione** dal T3: nessun lavoro da fare.

@@ -132,5 +132,87 @@
     "empty": "Nessuna attivazione registrata.",
     "loadError": "Non è stato possibile leggere le attivazioni.",
     "caption": "Le attivazioni registrate per questa azienda."
+  },
+  "dossier": {
+    "title": "Fascicoli di configurazione",
+    "description": "Il documento che descrive come un'azienda è configurata: identità, modello di settore e decisioni sui processi.",
+    "new": "Nuovo fascicolo",
+    "code": "Codice",
+    "name": "Nome",
+    "company": "Azienda",
+    "negotiation": "Trattativa",
+    "status": "Stato",
+    "version": "Versione",
+    "model": "Modello ancorato",
+    "none": "—",
+    "emptyTitle": "Nessun fascicolo",
+    "emptyDescription": "Non è ancora stato composto nessun fascicolo di configurazione.",
+    "error": "Non è stato possibile leggere i fascicoli.",
+    "caption": "Elenco dei fascicoli di configurazione",
+    "back": "Torna ai fascicoli",
+    "notFound": "Fascicolo non trovato.",
+    "createTitle": "Apri un fascicolo",
+    "createHint": "Un fascicolo può nascere prima dell'azienda: durante una trattativa si lascia vuota l'azienda.",
+    "create": "Crea",
+    "steps": {
+      "identity": "1 · Carta d'identità",
+      "model": "2 · Modello di settore",
+      "processes": "3 · Processi e decisioni"
+    },
+    "identity": {
+      "industry": "Settore di attività (ATECO)",
+      "industrySearch": "Cerca per codice o descrizione",
+      "sizeBand": "Fascia dimensionale",
+      "operatingModel": "Modello operativo",
+      "regulatory": "Intensità di vigilanza",
+      "country": "Paese",
+      "employees": "Dipendenti",
+      "revenue": "Ricavi (EUR)",
+      "save": "Salva la carta d'identità",
+      "saved": "Carta d'identità aggiornata.",
+      "incomplete": "Compila settore e fascia per ricevere una proposta di modello."
+    },
+    "proposal": {
+      "title": "Modello proposto",
+      "confirm": "Ancora questo modello",
+      "confirmed": "Modello ancorato.",
+      "processCount": "{{count}} processi",
+      "unavailable": "Nessun modello per questa combinazione",
+      "availableTitle": "Combinazioni che esistono oggi",
+      "noFallback": "Non viene proposto un modello simile: sarebbe una risposta falsa."
+    },
+    "decisions": {
+      "inclusion": "Decisione",
+      "in": "Dentro",
+      "partial": "Parziale",
+      "out": "Fuori",
+      "fromModel": "Come dice il modello",
+      "rationale": "Motivazione",
+      "rationaleRequired": "Una decisione senza motivazione non è una decisione.",
+      "save": "Registra la decisione",
+      "clear": "Torna al modello",
+      "saved": "Decisione registrata.",
+      "cleared": "La decisione è stata tolta: vale il modello.",
+      "empty": "Ancora nessun modello ancorato: non c'è niente su cui decidere."
+    },
+    "submit": {
+      "action": "Sottoponi alla firma",
+      "done": "Versione sottoposta: è stata aperta la richiesta di approvazione.",
+      "blocked": "La versione non è sottoponibile."
+    },
+    "diff": {
+      "title": "Confronto",
+      "model": "Cos'è cambiato nel modello",
+      "decisions": "Cosa ho cambiato io",
+      "impact": "Conseguenze sull'azienda",
+      "notComputable": "Non calcolabile in questa parte",
+      "changed": "Il modello si è mosso",
+      "unchanged": "Il modello non si è mosso",
+      "added": "Aggiunti",
+      "removed": "Rimossi",
+      "renamed": "Rinominati",
+      "identityChanged": "Identità modificata",
+      "none": "Nessuna differenza"
+    }
   }
 }

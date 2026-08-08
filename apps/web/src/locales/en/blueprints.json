@@ -132,5 +132,87 @@
     "empty": "No activation recorded.",
     "loadError": "The activations could not be loaded.",
     "caption": "Activations recorded for this company."
+  },
+  "dossier": {
+    "title": "Configuration dossiers",
+    "description": "The document describing how a company is configured: identity, industry model and process decisions.",
+    "new": "New dossier",
+    "code": "Code",
+    "name": "Name",
+    "company": "Company",
+    "negotiation": "Prospect",
+    "status": "Status",
+    "version": "Version",
+    "model": "Pinned model",
+    "none": "—",
+    "emptyTitle": "No dossier",
+    "emptyDescription": "No configuration dossier has been composed yet.",
+    "error": "The dossiers could not be loaded.",
+    "caption": "List of configuration dossiers",
+    "back": "Back to dossiers",
+    "notFound": "Dossier not found.",
+    "createTitle": "Open a dossier",
+    "createHint": "A dossier may exist before the company: during a negotiation the company is left empty.",
+    "create": "Create",
+    "steps": {
+      "identity": "1 · Identity",
+      "model": "2 · Industry model",
+      "processes": "3 · Processes and decisions"
+    },
+    "identity": {
+      "industry": "Business activity (NACE/ATECO)",
+      "industrySearch": "Search by code or description",
+      "sizeBand": "Size band",
+      "operatingModel": "Operating model",
+      "regulatory": "Regulatory intensity",
+      "country": "Country",
+      "employees": "Employees",
+      "revenue": "Revenue (EUR)",
+      "save": "Save identity",
+      "saved": "Identity updated.",
+      "incomplete": "Fill in activity and size band to receive a model proposal."
+    },
+    "proposal": {
+      "title": "Proposed model",
+      "confirm": "Pin this model",
+      "confirmed": "Model pinned.",
+      "processCount": "{{count}} processes",
+      "unavailable": "No model for this combination",
+      "availableTitle": "Combinations that exist today",
+      "noFallback": "No similar model is proposed: it would be a false answer."
+    },
+    "decisions": {
+      "inclusion": "Decision",
+      "in": "In",
+      "partial": "Partial",
+      "out": "Out",
+      "fromModel": "As the model says",
+      "rationale": "Rationale",
+      "rationaleRequired": "A decision without a rationale is not a decision.",
+      "save": "Record the decision",
+      "clear": "Back to the model",
+      "saved": "Decision recorded.",
+      "cleared": "The decision was removed: the model applies.",
+      "empty": "No model pinned yet: there is nothing to decide on."
+    },
+    "submit": {
+      "action": "Submit for signature",
+      "done": "Version submitted: an approval request was opened.",
+      "blocked": "The version cannot be submitted."
+    },
+    "diff": {
+      "title": "Comparison",
+      "model": "What changed in the model",
+      "decisions": "What I changed",
+      "impact": "Consequences for the company",
+      "notComputable": "Not computable in this part",
+      "changed": "The model moved",
+      "unchanged": "The model did not move",
+      "added": "Added",
+      "removed": "Removed",
+      "renamed": "Renamed",
+      "identityChanged": "Identity changed",
+      "none": "No difference"
+    }
   }
 }

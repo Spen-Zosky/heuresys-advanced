@@ -98,8 +98,21 @@ avanzamento() {
   # possiede la regola (tutti idempotenti — sui fatti vecchi scrivono 0 righe).
   # Regola anti-drift AP-01: una regola, un posto solo.
   #   01 → i saldi ferie seguono le presenze nuove
+  #   04 → la maturita' di una lacuna si misura sulla FRONTIERA, non
+  #        sull'orologio: spostandola, lacune che erano recenti diventano mature
+  #        e le loro azioni non possono restare «proposte» (check C4f). La
+  #        regola che le fa evolvere vive nel C4 e legge la frontiera da se'
+  #        (`staging.storia36_c4_frontier()`), quindi si ri-esegue il seed
+  #        invece di duplicarne la regola qui. Aggiunto il 2026-08-08: senza,
+  #        ogni avanzamento lasciava C4f rosso e la custodia falliva.
   #   07 → le approvazioni nascono dalle richieste nuove
-  local derived=("$REPO_ROOT/db/seeds/storia36/01_attendance_timeoff.sql" "$appr")
+  # L'ordine conta: 04 prima di 07, perche' le approvazioni delle edizioni
+  # formative derivano dalle edizioni che il 04 puo' aver appena creato.
+  local derived=(
+    "$REPO_ROOT/db/seeds/storia36/01_attendance_timeoff.sql"
+    "$REPO_ROOT/db/seeds/storia36/04_learning.sql"
+    "$appr"
+  )
   for d in "${derived[@]}"; do
     [[ -f "$d" ]] || continue
     log "avanzamento: ri-derivo da $(basename "$d")"

@@ -288,8 +288,12 @@ BEGIN
   WITH gerarchia AS (
     SELECT o.overtime_id,
            COALESCE(mgr.mgr_user_id,
-                    (SELECT user_id FROM sys.sys_users
-                      WHERE user_email = 'admin@heuresys.com' LIMIT 1)) AS approver
+                    (SELECT u.user_id FROM sys.sys_users u
+                        JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                         AND ur.user_auth_role_revoked_at IS NULL
+                        JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+                       WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+                       ORDER BY u.user_email LIMIT 1)) AS approver
     FROM sys.sys_overtime o
     LEFT JOIN LATERAL (
       SELECT a2.user_position_assignment_user_id AS mgr_user_id
@@ -354,7 +358,12 @@ BEGIN
                     WHERE e.user_learning_evidence_user_id = g.learning_gap_user_id
                       AND e.user_learning_evidence_completed_at > g.learning_gap_detected_at) AS ha_formazione,
            COALESCE(mgr.mgr_user_id,
-                    (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com' LIMIT 1)) AS owner_id
+                    (SELECT u.user_id FROM sys.sys_users u
+                        JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                         AND ur.user_auth_role_revoked_at IS NULL
+                        JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+                       WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+                       ORDER BY u.user_email LIMIT 1)) AS owner_id
     FROM sys.sys_gap_closure_actions a
     JOIN sys.sys_learning_gaps g ON g.learning_gap_id = a.gap_closure_action_gap_id
     LEFT JOIN LATERAL (

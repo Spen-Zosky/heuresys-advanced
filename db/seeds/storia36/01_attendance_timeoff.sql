@@ -55,7 +55,23 @@ DECLARE
   v_bad    bigint;
   v_share  numeric;
 BEGIN
-  SELECT user_id INTO STRICT v_admin FROM sys.sys_users WHERE user_email = 'admin@heuresys.com';
+  -- L'attore di fallback NON si nomina: si DERIVA dal ruolo. Fino al 2026-08-08
+  -- questa riga cercava `admin@heuresys.com`, l'account tecnico rimosso dalla
+  -- migrazione 000295 (`#139`): con `INTO STRICT` su zero righe l'avanzamento
+  -- moriva con «query returned no rows», ed e' la causa per cui la custodia
+  -- settimanale falliva da giorni (`#153`). Stessa lezione degli attori dei
+  -- test (S1033): si sceglie per CARATTERISTICA, mai per nome proprio.
+  SELECT u.user_id INTO v_admin
+    FROM sys.sys_users u
+    JOIN sys.sys_user_auth_roles ur
+      ON ur.user_auth_role_user_id = u.user_id AND ur.user_auth_role_revoked_at IS NULL
+    JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+   WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+   ORDER BY u.user_email
+   LIMIT 1;
+  IF v_admin IS NULL THEN
+    RAISE EXCEPTION 'storia36: nessun PLATFORM_ADMIN attivo da usare come approvatore di riserva — senza un attore non si puo'' approvare nulla';
+  END IF;
 
   -- --------------------------------------------------------------------------
   -- 1. Scope: utenti RTL attivi, inquadramento, esenzione, manager, no_badge

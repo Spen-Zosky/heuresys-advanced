@@ -59,7 +59,16 @@ SOGLIE = {
     "tuple_morte_pct": 20.0,
     "righe_minime_per_bloat": 1000,
     "tabelle_mai_analizzate": 0,
+    # La freschezza si misura con il metro della CADENZA del dato, non con uno
+    # solo per tutti. Le presenze sono giornaliere: sette giorni di silenzio
+    # sono un ritardo vero. Le buste paga sono MENSILI, e quella del mese in
+    # corso non puo' esistere finche' il mese non e' finito: con la soglia a 7
+    # questo controllo sarebbe rosso circa tre settimane su quattro, ogni mese —
+    # e un controllo quasi sempre rosso smette di segnalare qualcosa. Misurato
+    # il 2026-08-08: buste all'ultimo periodo chiuso (31 luglio), storia
+    # avanzata a ieri, nessun ritardo reale.
     "giorni_senza_dato_fresco": 7,
+    "giorni_senza_dato_fresco_mensile": 40,
     # Misurato dopo il ri-aggancio dei QUATTRO cataloghi (mig 000260 e 000261, S1043):
     # 226 righe restano su posizioni disattivate, e sono spiegate — appartengono alle 20
     # posizioni gia' vacanti PRIMA della ricostruzione (nessuno le occupava, quindi non
@@ -260,9 +269,12 @@ def sonde() -> list[tuple[str, str, bool]]:
     fresco = q("""SELECT 'presenze', CURRENT_DATE - max(attendance_date) FROM sys.sys_attendance
                   UNION ALL SELECT 'buste paga', CURRENT_DATE - max(user_pay_slip_period_end)
                   FROM sys.sys_user_pay_slips""")
+    # Un dato a cadenza mensile porta la sua soglia: vedi la nota su SOGLIE.
+    CADENZA_MENSILE = {"buste paga"}
     for nome, giorni in fresco:
-        out.append((f"giorni dall'ultimo dato: {nome}", giorni,
-                    int(giorni) - SOGLIE["giorni_senza_dato_fresco"] > 0))
+        soglia = SOGLIE["giorni_senza_dato_fresco_mensile" if nome in CADENZA_MENSILE
+                        else "giorni_senza_dato_fresco"]
+        out.append((f"giorni dall'ultimo dato: {nome}", giorni, int(giorni) - soglia > 0))
 
     cop = q("""SELECT round(100.0*count(DISTINCT a.user_position_assignment_user_id)/
                             GREATEST((SELECT count(*) FROM sys.sys_users),1),1)

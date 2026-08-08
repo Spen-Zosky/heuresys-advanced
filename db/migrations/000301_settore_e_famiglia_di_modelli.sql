@@ -241,3 +241,7 @@ BEGIN
 END $$;
 
 COMMIT;
+
+-- Vedi la nota gemella nella 000298: la tabella nasce qui, si popola qui, e qui
+-- si analizza. Fuori dalla transazione, perche' ANALYZE non sta in un BEGIN.
+ANALYZE sys.sys_blueprint_family_activity_classes;

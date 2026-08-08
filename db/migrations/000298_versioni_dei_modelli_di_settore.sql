@@ -195,3 +195,10 @@ BEGIN
 END $$;
 
 COMMIT;
+
+-- Una tabella appena creata e popolata non ha statistiche, e il cruscotto di
+-- salute la segnala come «popolata mai analizzata» — a ragione: senza
+-- statistiche il pianificatore sceglie al buio. L'ANALYZE sta QUI e non in un
+-- comando a mano, cosi' ogni host che applica la catena la analizza da se'.
+-- Fuori dalla transazione: ANALYZE non si esegue dentro un blocco esplicito.
+ANALYZE sys.sys_blueprint_variant_versions;

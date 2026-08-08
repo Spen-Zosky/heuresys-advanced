@@ -79,6 +79,7 @@ BEGIN
     ('sys_activity_classification_mappings'),  -- crosswalk fra schemi di classificazione attività (satellite catalogo; popolamento C11)
     ('sys_auth_permissions'),                  -- catalogo permessi RBAC platform-global (I7, enforcement plane)
     ('sys_auth_role_permissions'),             -- mapping ruolo×permesso platform-global (cache RBAC all'avvio API)
+    ('sys_blueprint_family_activity_classes'), -- crosswalk famiglia-modelli↔classificazione ATECO (#131 T5): due FK USCENTI verso cataloghi, nessuna entrante da dati di business — la derivazione non puo' catturarla, come per gli altri crosswalk qui elencati
     ('sys_esco_occupation_embeddings'),        -- cache embedding (pgvector) del piano occupazioni ESCO
     ('sys_esco_occupation_mappings'),          -- crosswalk ESCO↔job_roles (satellite catalogo; C11)
     ('sys_gdpr_data_map'),                     -- registro governance dati (metadato di piattaforma, non dato tenant)

@@ -72,7 +72,20 @@ VALUES
   ('sys_auth_password_reset_tokens', 'D', 'EXCLUDE', NULL,
    '[S1043] Token di reimpostazione password: dato di runtime generato dall''applicazione, a vita breve, senza alcuna sorgente legacy. Era UNCLASSIFIED da sempre e non si vedeva perche'' sul clone di CI i residui dei test la lasciavano POPULATED — la stessa cecita'' descritta sopra per sys_auth_mfa_factors.'),
   ('sys_auth_mfa_exemption_eligible_users', 'D', 'EXCLUDE', NULL,
-   '[S1049] Elenco nominativo degli account che possono ricevere un''esenzione MFA (mig 000284, #139). Nasce e resta VUOTO finche'' non esiste un account headless legittimo: nessuna sorgente legacy, nessun bersaglio di riconciliazione. Registrata QUI e non dopo la 000284 per la ragione gia'' scritta sopra per sys_auth_mfa_factors e sys_user_timeline_events — questo controllo gira PRIMA di qualunque file di numero superiore, quindi una tabella nuova non registrata in questo file fa fallire la catena alla PASSATA SUCCESSIVA, non alla prima. E'' esattamente cosi'' che si e'' manifestata: la prova generale su clone di CI era verde (alla sua unica passata la tabella non esisteva ancora quando la 000062 e'' stata valutata), e la catena e'' caduta al giro dopo, in produzione.')
+   '[S1049] Elenco nominativo degli account che possono ricevere un''esenzione MFA (mig 000284, #139). Nasce e resta VUOTO finche'' non esiste un account headless legittimo: nessuna sorgente legacy, nessun bersaglio di riconciliazione. Registrata QUI e non dopo la 000284 per la ragione gia'' scritta sopra per sys_auth_mfa_factors e sys_user_timeline_events — questo controllo gira PRIMA di qualunque file di numero superiore, quindi una tabella nuova non registrata in questo file fa fallire la catena alla PASSATA SUCCESSIVA, non alla prima. E'' esattamente cosi'' che si e'' manifestata: la prova generale su clone di CI era verde (alla sua unica passata la tabella non esisteva ancora quando la 000062 e'' stata valutata), e la catena e'' caduta al giro dopo, in produzione.'),
+  -- [S1050] Le quattro tabelle del FASCICOLO di configurazione (#131 Tenant
+  -- Builder P1, mig 000299). Stessa ragione di tutte le righe qui sopra: il
+  -- controllo che pretende 0 UNCLASSIFIED gira in QUESTO file, quindi una
+  -- tabella nuova va registrata qui e non dopo la migrazione che la crea.
+  -- Intercettate dalla prova generale prima del push, non dalla CI dopo.
+  ('sys_tenant_blueprints', 'D', 'EXCLUDE', NULL,
+   '[S1050] Il fascicolo di configurazione di un''azienda (#131, mig 000299): identita'' del fascicolo, tenant facoltativo (un fascicolo puo'' esistere PRIMA dell''azienda, durante una trattativa). Configurazione decisa dalla piattaforma, nessuna sorgente legacy: il legacy heuresys-evo non ha alcuna nozione di fascicolo di configurazione.'),
+  ('sys_tenant_blueprint_versions', 'D', 'EXCLUDE', NULL,
+   '[S1050] Le versioni del fascicolo (#131, mig 000299), con la carta d''identita'' dell''azienda e il ciclo DRAFT -> IN_APPROVAL -> APPROVED -> APPLIED. Dato generato dalla piattaforma, nessuna sorgente legacy.'),
+  ('sys_tenant_blueprint_process_decisions', 'D', 'EXCLUDE', NULL,
+   '[S1050] Le decisioni ESPLICITE su ciascun processo del modello (#131, mig 000299): solo gli scostamenti, perche'' il silenzio significa «come dice il modello». Dato generato dalla piattaforma, nessuna sorgente legacy.'),
+  ('sys_tenant_blueprint_snapshots', 'D', 'EXCLUDE', NULL,
+   '[S1050] La fotografia immutabile scattata all''approvazione di una versione del fascicolo (#131, mig 000299). E'' una PROVA, protetta da un trigger che rifiuta UPDATE e DELETE. Dato generato dalla piattaforma, nessuna sorgente legacy.')
 ON CONFLICT (reconciliation_registry_table_name) DO NOTHING;
 
 DO $$

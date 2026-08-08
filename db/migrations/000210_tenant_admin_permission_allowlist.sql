@@ -61,9 +61,14 @@ INSERT INTO _ta_allowlist(code) VALUES
     ('assessment:update'),
     ('auth:revoke_user'),
     ('auth:sessions_read'),
-    ('blueprint:activate'),
-    ('blueprint:delete'),
-    ('blueprint:override'),
+    -- [S1050 · #131 E9] `blueprint:activate`, `:delete` e `:override` sono stati TOLTI
+    -- da questo elenco il 2026-08-08. Dopo la firma i dati sono del cliente, ma il
+    -- lavoro di composizione del fascicolo condotto PRIMA della firma non si
+    -- riscrive. La revoca si fa QUI e non con una DELETE a valle: il passo 1 di
+    -- questo file riconcede i codici in elenco a ogni ri-applicazione della catena,
+    -- quindi una DELETE altrove oscillerebbe a ogni deploy. Per ripristinare:
+    -- rimettere le tre righe qui. `blueprint:read` RESTA — il cliente vede il
+    -- proprio fascicolo, semplicemente non lo riscrive.
     ('blueprint:read'),
     ('bpm_process:delete'),
     ('bpm_process:read'),

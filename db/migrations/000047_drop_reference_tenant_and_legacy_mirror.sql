@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — cancella righe da brownfield.tenant_id_mappings. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- 000047_drop_reference_tenant_and_legacy_mirror.sql
 -- Case-study scope cleanup (S954, 2026-06-01). Product decision (Enzo): the case study
 -- is RTL Bank; the ONLY accepted business tenants are HEURESYS (system) + RTL_BANK

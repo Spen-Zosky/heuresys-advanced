@@ -1,3 +1,7 @@
+-- @migrate: once
+-- #164 F4 — questo file CREA oggetti dello schema `brownfield`, ritirato dalla
+-- 000297. Senza il marcatore la catena lo ricreerebbe a ogni deploy e il ritiro
+-- oscillerebbe (ADR-0035). Su un database nuovo gira comunque: il registro e' vuoto.
 -- =============================================================================
 -- 000029_brownfield_table_mapping_wave.sql
 -- Heuresys Advanced — Brownfield: wave assignment on table_mappings (ADR-0012).

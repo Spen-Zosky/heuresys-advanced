@@ -2,7 +2,7 @@
  * @heuresys/shared — reference-sync (cap⑤ scraping) schemas.
  * Backs /v1/reference-sync/* — inbound refresh of OFFICIAL reference taxonomies
  * (ESCO first) via their published API into the global sys.* reference tables,
- * reusing the brownfield lineage backbone (source_exports / import_runs).
+ * reusing the reference_sync lineage backbone (source_exports / import_runs).
  *
  * P1 = ESCO occupation catalog refresh (idempotent natural-key upsert into
  * sys_esco_occupation_mappings; NEVER delete). Watermark/scheduler = P2.
@@ -15,7 +15,7 @@ export type ReferenceSyncSourceKey = z.infer<typeof ReferenceSyncSourceKeyEnum>;
 
 export const ReferenceSyncRunStatusEnum = z.enum(["RUNNING", "COMPLETED", "FAILED", "CANCELLED"]);
 
-/** One sync run (run-level lineage from brownfield.import_runs + source_exports). */
+/** One sync run (run-level lineage from reference_sync.import_runs + source_exports). */
 export const ReferenceSyncRunSchema = z.object({
   runId: z.uuid(),
   source: z.string(),
@@ -35,7 +35,7 @@ export const ReferenceSyncRunListResponseSchema = z.object({
 });
 export type ReferenceSyncRunListResponse = z.infer<typeof ReferenceSyncRunListResponseSchema>;
 
-/** Per-source delta/HWM state (brownfield.source_watermarks, P2). */
+/** Per-source delta/HWM state (reference_sync.source_watermarks, P2). */
 export const SourceWatermarkStatusEnum = z.enum(["IDLE", "FETCHING", "STAGED", "FAILED", "UNCHANGED"]);
 export type SourceWatermarkStatus = z.infer<typeof SourceWatermarkStatusEnum>;
 

@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — crea una tabella con chiave esterna verso brownfield.import_runs. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- =============================================================================
 -- 000034_add_wave1_job_families_staging.sql
 -- Heuresys Advanced — Batch X1 Class B fix: bootstrap sys_job_families cascade root.

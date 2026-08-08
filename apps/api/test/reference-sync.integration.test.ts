@@ -46,7 +46,7 @@ let manager: S;     // MANAGER — also denied (never in the 000005 catch-all).
 // Resetting the watermark (content_hash/last_succeeded_at → NULL) guarantees the first
 // trigger is a genuine INSERT (not a watermark UNCHANGED skip from a prior run).
 const RESET_WATERMARK = `
-  UPDATE brownfield.source_watermarks
+  UPDATE reference_sync.source_watermarks
      SET source_watermark_content_hash = NULL, source_watermark_last_succeeded_at = NULL,
          source_watermark_last_fetched_at = NULL, source_watermark_last_import_run_id = NULL,
          source_watermark_status = 'IDLE'
@@ -313,7 +313,7 @@ describe("reference-sync API (cap⑤ ESCO) — P2 FAILED path (HWM not advanced)
     failAdmin = await login(failSuite, "enzo.spenuso@heuresys.com");
     // Simulate a prior SUCCESSFUL ingest so we can prove the failure does NOT advance the HWM.
     await pool.query(
-      `UPDATE brownfield.source_watermarks
+      `UPDATE reference_sync.source_watermarks
           SET source_watermark_status = 'STAGED', source_watermark_content_hash = $1,
               source_watermark_last_succeeded_at = now() - interval '1 day',
               source_watermark_last_fetched_at = now() - interval '1 day'
@@ -329,7 +329,7 @@ describe("reference-sync API (cap⑤ ESCO) — P2 FAILED path (HWM not advanced)
 
   it("a failing fetch → FAILED watermark; content_hash + last_succeeded preserved; no partial stage", async () => {
     const wmBefore = await pool.query<{ succ: Date | null }>(
-      `SELECT source_watermark_last_succeeded_at AS succ FROM brownfield.source_watermarks WHERE source_watermark_source_key = 'ESCO'`,
+      `SELECT source_watermark_last_succeeded_at AS succ FROM reference_sync.source_watermarks WHERE source_watermark_source_key = 'ESCO'`,
     );
     const countBefore = await pool.query<{ n: string }>(
       "SELECT count(*)::text AS n FROM sys.sys_esco_occupation_mappings WHERE esco_occupation_mapping_job_role_id IS NULL",
@@ -344,7 +344,7 @@ describe("reference-sync API (cap⑤ ESCO) — P2 FAILED path (HWM not advanced)
 
     const wmAfter = await pool.query<{ status: string; hash: string | null; succ: Date | null }>(
       `SELECT source_watermark_status AS status, source_watermark_content_hash AS hash, source_watermark_last_succeeded_at AS succ
-         FROM brownfield.source_watermarks WHERE source_watermark_source_key = 'ESCO'`,
+         FROM reference_sync.source_watermarks WHERE source_watermark_source_key = 'ESCO'`,
     );
     expect(wmAfter.rows[0]!.status).toBe("FAILED");                 // lock released as FAILED
     expect(wmAfter.rows[0]!.hash).toBe(PRIOR_HASH);                 // content_hash NOT advanced

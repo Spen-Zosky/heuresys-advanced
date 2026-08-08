@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — crea le tabelle audit.import_* dell ETL ritirato. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- =============================================================================
 -- 000026_brownfield_import_validation.sql
 -- Heuresys Advanced — brownfield validation + approval (audit schema)

@@ -69,7 +69,7 @@ const INSERT_SKILLS = `
 const DELETE_SKILLS = `DELETE FROM sys.sys_skills WHERE skill_esco_uri LIKE $1`;
 
 const RESET_WATERMARK = `
-  UPDATE brownfield.source_watermarks
+  UPDATE reference_sync.source_watermarks
      SET source_watermark_content_hash = NULL, source_watermark_last_succeeded_at = NULL,
          source_watermark_last_fetched_at = NULL, source_watermark_last_import_run_id = NULL,
          source_watermark_status = 'IDLE'

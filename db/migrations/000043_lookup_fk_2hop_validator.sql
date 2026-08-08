@@ -1,3 +1,7 @@
+-- @migrate: once
+-- #164 F4 — questo file CREA oggetti dello schema `brownfield`, ritirato dalla
+-- 000297. Senza il marcatore la catena lo ricreerebbe a ogni deploy e il ritiro
+-- oscillerebbe (ADR-0035). Su un database nuovo gira comunque: il registro e' vuoto.
 -- =============================================================================
 -- 000043_lookup_fk_2hop_validator.sql
 -- ADR-0017 (Cowork C9.2, SR_X9) — LOOKUP_FK_2HOP transform validator function

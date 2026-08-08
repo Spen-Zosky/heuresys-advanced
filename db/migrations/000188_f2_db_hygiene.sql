@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — altera audit.import_validation_results. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- ============================================================================
 -- Migration 000188 — Forense F2 (mandato S1023, census db-forensics S1024):
 -- igiene DB misurata sul campo. Fonte: docs/kb/db-forensics/F2_DB_CENSUS_2026-07-21.md

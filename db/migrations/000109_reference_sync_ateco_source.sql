@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — registra la sorgente ATECO nelle filigrane — l effetto TRASLOCA con la tabella. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- Migration 000109 — cap⑤ P2: seed the ATECO_2025 source watermark (ISTAT 2nd source)
 -- ----------------------------------------------------------------------------
 -- S983 WS-C: the reference-sync capability gains its second official source —

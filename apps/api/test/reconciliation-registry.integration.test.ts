@@ -151,10 +151,15 @@ describe('reconciliation registry — B-50 residual-wall terminal close (S972) +
   });
 
   // The terminal declaration must survive both states. When the table is EMPTY the view has
-  // to fall back to the registry's NO_SOURCE — this is NOT tautological: the fallback chain
-  // consults brownfield.table_mappings FIRST, so an IMPORT/REFERENCE_ONLY mapping silently
-  // added for one of these tables would shadow the terminal verdict and turn this red.
-  // When the table is POPULATED it must resolve POPULATED and nothing else.
+  // to fall back to the registry's NO_SOURCE; when POPULATED it must resolve POPULATED and
+  // nothing else.
+  //
+  // #164 F4 (2026-08-08) — questo test era motivato dal fatto che la catena consultava
+  // `brownfield.table_mappings` PRIMA del registro, quindi una carta `IMPORT`/`REFERENCE_ONLY`
+  // aggiunta di soppiatto poteva oscurare il verdetto terminale. Quella fonte non esiste piu':
+  // il registro e' l'unica autorita' (`000058` emendata). Il test resta valido e utile — ora
+  // sorveglia che il verdetto terminale segua `has_rows` — ma non protegge piu' da un
+  // oscuramento che non puo' piu' accadere.
   it('the 4 terminal tables resolve coherently with has_rows and never lose the NO_SOURCE fallback', async () => {
     const { rows } = await pool.query<{
       table_name: string;

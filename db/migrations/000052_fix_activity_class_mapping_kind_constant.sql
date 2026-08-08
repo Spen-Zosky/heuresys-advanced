@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — aggiorna brownfield.column_mappings. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- 000052_fix_activity_class_mapping_kind_constant.sql
 -- WS-3 (v1.0.0 CW-B60-A silent-skip remediation, 2026-06-01): correct the
 -- brownfield CONSTANT mapping value for sys_activity_classification_mappings.activity_class_mapping_kind.

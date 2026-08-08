@@ -48,13 +48,37 @@ DO $trg$ BEGIN
   END IF;
 END $trg$;
 
--- Status resolver: live EXISTS (cheap, stops at first row) + card classification + registry.
+-- Status resolver: live EXISTS (cheap, stops at first row) + registry.
 -- STABLE (reads tables). One row per sys base table (relkind='r').
+--
+-- #164 F4 (2026-08-08) — LA CARTA ETL NON E' PIU' UNA FONTE DI CLASSIFICAZIONE.
+-- Questa funzione consultava `brownfield.table_mappings` come seconda opinione sullo
+-- stato di una tabella. Quello schema e' ritirato dalla 000297, quindi il file va
+-- EMENDATO e non spento: porta una guardia viva (`v_reconciliation_status`, letta da
+-- almeno cinque migrazioni successive) che deve continuare a rigirare a ogni deploy.
+--
+-- Misurato PRIMA di togliere la fonte, sul database di produzione:
+--   · tabelle che dipendono SOLO dalla carta: **0** — nessuna perde la classificazione;
+--   · tabelle che diverrebbero UNCLASSIFIED: **0** — le guardie a valle restano verdi;
+--   · una sola tabella cambia esito: `sys_activity_classification_mappings`, da
+--     `REFERENCE_ONLY` (carta ETL) a `NO_SOURCE` (registro). Il registro vince a
+--     ragione: la sua motivazione e' `[VERIFIED]` con rilettura del DDL e un
+--     accertamento decisivo, mentre la carta e' la vecchia classificazione dell'ETL.
+--     Togliere la seconda opinione non perde informazione: toglie un dissenso stantio.
+-- Nessuna guardia asserisce su `REFERENCE_ONLY`; asseriscono su `UNCLASSIFIED` e
+-- `NEEDS_DECISION`, entrambi invariati. Verificato che nessun altro legge la colonna
+-- `card_classification` (due soli riscontri, entrambi commenti, in 000076).
+--
+-- La firma cambia (la colonna `card_classification` sparisce), e `CREATE OR REPLACE`
+-- non puo' cambiare il tipo di ritorno di una funzione esistente: servono le DROP qui
+-- sotto, altrimenti su un database gia' migrato questo file fallisce.
+DROP VIEW IF EXISTS sys.v_reconciliation_status;
+DROP FUNCTION IF EXISTS sys.fn_reconciliation_status();
+
 CREATE OR REPLACE FUNCTION sys.fn_reconciliation_status()
 RETURNS TABLE (
   table_name           text,
   has_rows             boolean,
-  card_classification  text,
   declared_status      text,
   resolved_status      text,
   bucket               text,
@@ -62,7 +86,7 @@ RETURNS TABLE (
   wall                 text,
   rationale            text
 ) LANGUAGE plpgsql STABLE AS $fn$
-DECLARE r record; v_has boolean; v_card text; v_decl text; v_bucket text; v_src text; v_wall text; v_rat text;
+DECLARE r record; v_has boolean; v_decl text; v_bucket text; v_src text; v_wall text; v_rat text;
 BEGIN
   FOR r IN
     SELECT c.relname AS tname
@@ -72,23 +96,16 @@ BEGIN
     ORDER BY c.relname
   LOOP
     EXECUTE format('SELECT EXISTS (SELECT 1 FROM sys.%I LIMIT 1)', r.tname) INTO v_has;
-    SELECT tm.table_mapping_classification INTO v_card
-    FROM brownfield.table_mappings tm
-    WHERE tm.table_mapping_target_schema = 'sys' AND tm.table_mapping_target_table = r.tname
-    ORDER BY CASE tm.table_mapping_classification
-               WHEN 'IMPORT' THEN 1 WHEN 'EXCLUDE' THEN 2 WHEN 'REFERENCE_ONLY' THEN 3 ELSE 4 END
-    LIMIT 1;
     SELECT rr.reconciliation_registry_declared_status, rr.reconciliation_registry_bucket,
            rr.reconciliation_registry_legacy_source, rr.reconciliation_registry_wall,
            rr.reconciliation_registry_rationale
       INTO v_decl, v_bucket, v_src, v_wall, v_rat
     FROM sys.sys_reconciliation_registry rr
     WHERE rr.reconciliation_registry_table_name = r.tname;
-    table_name := r.tname; has_rows := v_has; card_classification := v_card;
+    table_name := r.tname; has_rows := v_has;
     declared_status := v_decl; bucket := v_bucket; legacy_source := v_src; wall := v_wall; rationale := v_rat;
     resolved_status := CASE
       WHEN v_has THEN 'POPULATED'
-      WHEN v_card IS NOT NULL THEN v_card
       WHEN v_decl IS NOT NULL THEN v_decl
       ELSE 'UNCLASSIFIED' END;
     RETURN NEXT;

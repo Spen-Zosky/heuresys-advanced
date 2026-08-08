@@ -1,3 +1,7 @@
+-- @migrate: once
+-- #164 F4 — questo file CREA oggetti dello schema `brownfield`, ritirato dalla
+-- 000297. Senza il marcatore la catena lo ricreerebbe a ogni deploy e il ritiro
+-- oscillerebbe (ADR-0035). Su un database nuovo gira comunque: il registro e' vuoto.
 -- =============================================================================
 -- 000033_brownfield_tenant_id_mappings_and_validate_lookup_fk.sql
 -- Heuresys Advanced — Goal 003 Items D + M (CP-v2-1 file structure: 2 Parts)

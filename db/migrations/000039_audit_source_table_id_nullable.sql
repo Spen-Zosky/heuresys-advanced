@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — altera audit.import_validation_results. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- =============================================================================
 -- 000039_audit_source_table_id_nullable.sql
 -- CW-B27 mitigation — Cross-Workflow Schema Coupling fix

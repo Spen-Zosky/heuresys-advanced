@@ -8,7 +8,7 @@
  *     key, so a refresh is an idempotent label/ISCO/metadata update — NEVER a delete
  *     (scraping spec §3.3). Insert-vs-update counted via the `xmax = 0` trick.
  *   recordSyncRun / readRuns / readLatestRun — run-level lineage reusing the
- *     brownfield backbone (source_exports + import_runs, scope 'reference_sync').
+ *     reference_sync backbone (source_exports + import_runs, scope 'reference_sync').
  */
 import type { PoolClient } from "pg";
 import { pool } from "../../db/client.js";
@@ -178,7 +178,7 @@ export interface RecordRunArgs {
   skipped?: boolean;
 }
 
-/** Record the run in the brownfield lineage backbone (source_exports + import_runs). */
+/** Record the run in the reference_sync lineage backbone (source_exports + import_runs). */
 export async function recordSyncRun(
   client: PoolClient,
   args: RecordRunArgs,
@@ -186,7 +186,7 @@ export async function recordSyncRun(
   // source_exports is keyed UNIQUE by name (one row per source identity, refreshed
   // each fetch) — upsert it. import_runs below is the per-run append (history).
   const exp = await client.query<{ id: string }>(
-    `INSERT INTO brownfield.source_exports
+    `INSERT INTO reference_sync.source_exports
        (source_export_name, source_export_file_hash, source_export_retrieved_at,
         source_export_size_bytes, source_export_status, source_export_metadata)
      VALUES ($1, $2, now(), $3, 'INGESTED', $4::jsonb)
@@ -201,7 +201,7 @@ export async function recordSyncRun(
   );
   const exportId = exp.rows[0]!.id;
   const run = await client.query<{ id: string }>(
-    `INSERT INTO brownfield.import_runs
+    `INSERT INTO reference_sync.import_runs
        (import_run_export_id, import_run_wave, import_run_classification_scope,
         import_run_started_at, import_run_finished_at, import_run_status,
         import_run_initiated_by, import_run_metadata)
@@ -240,8 +240,8 @@ const RUN_SELECT = `
          COALESCE((ir.import_run_metadata->>'total')::int, 0) AS total,
          COALESCE((ir.import_run_metadata->>'inserted')::int, 0) AS inserted,
          COALESCE((ir.import_run_metadata->>'updated')::int, 0) AS updated
-  FROM brownfield.import_runs ir
-  LEFT JOIN brownfield.source_exports se ON se.source_export_id = ir.import_run_export_id
+  FROM reference_sync.import_runs ir
+  LEFT JOIN reference_sync.source_exports se ON se.source_export_id = ir.import_run_export_id
   WHERE ir.import_run_classification_scope = '${REFERENCE_SYNC_SCOPE}'
 `;
 
@@ -323,7 +323,7 @@ export async function persistSync(args: {
   });
 }
 
-/* ── cap⑤ P2: delta / HWM layer (brownfield.source_watermarks) ───────────── */
+/* ── cap⑤ P2: delta / HWM layer (reference_sync.source_watermarks) ───────────── */
 
 export interface WatermarkRow {
   sourceKey: string;
@@ -345,7 +345,7 @@ export async function readWatermark(sourceKey: string): Promise<WatermarkRow | n
             source_watermark_last_fetched_at AS last_fetched_at,
             source_watermark_last_succeeded_at AS last_succeeded_at,
             source_watermark_last_import_run_id AS last_import_run_id
-       FROM brownfield.source_watermarks
+       FROM reference_sync.source_watermarks
       WHERE source_watermark_source_key = $1`,
     [sourceKey],
   );
@@ -376,7 +376,7 @@ async function advanceWatermark(
   args: { sourceKey: string; contentHash: string; status: "STAGED" | "UNCHANGED"; runId: string },
 ): Promise<void> {
   await client.query(
-    `INSERT INTO brownfield.source_watermarks
+    `INSERT INTO reference_sync.source_watermarks
        (source_watermark_source_key, source_watermark_content_hash, source_watermark_status,
         source_watermark_last_fetched_at, source_watermark_last_succeeded_at,
         source_watermark_last_import_run_id, updated_at)
@@ -403,7 +403,7 @@ async function advanceWatermark(
  */
 export async function markWatermarkFailed(sourceKey: string): Promise<void> {
   await pool.query(
-    `UPDATE brownfield.source_watermarks
+    `UPDATE reference_sync.source_watermarks
         SET source_watermark_status = 'FAILED', source_watermark_last_fetched_at = now(), updated_at = now()
       WHERE source_watermark_source_key = $1 AND source_watermark_status = 'FETCHING'`,
     [sourceKey],
@@ -426,7 +426,7 @@ export async function acquireLock(
   sourceKey: string,
 ): Promise<{ contentHash: string | null; lastSucceededAt: string | null } | null> {
   const res = await pool.query(
-    `INSERT INTO brownfield.source_watermarks
+    `INSERT INTO reference_sync.source_watermarks
        (source_watermark_source_key, source_watermark_status, source_watermark_last_fetched_at)
      VALUES ($1, 'FETCHING', now())
      ON CONFLICT (source_watermark_source_key) DO UPDATE SET

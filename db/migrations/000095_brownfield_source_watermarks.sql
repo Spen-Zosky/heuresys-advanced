@@ -1,3 +1,7 @@
+-- @migrate: once
+-- #164 F4 — questo file CREA oggetti dello schema `brownfield`, ritirato dalla
+-- 000297. Senza il marcatore la catena lo ricreerebbe a ogni deploy e il ritiro
+-- oscillerebbe (ADR-0035). Su un database nuovo gira comunque: il registro e' vuoto.
 -- ============================================================================
 -- Migration 000095 — cap⑤ scraping P2: brownfield.source_watermarks (delta/HWM layer)
 -- ----------------------------------------------------------------------------

@@ -103,7 +103,7 @@ Least privilege is **verified, not asserted** (measured S1034, 2026-07-28; re-ch
 These are enforced architecturally and cannot be revisited without a new ADR / decision-log entry. They override "common patterns" you may want to apply from other projects.
 
 - **I1 Position-centric** model, not Employee-centric. Position owner ≠ Incumbent.
-- **I3/I4 Schema discipline**: business tables live in `sys.sys_<plural>`. Aux schemas are `staging`, `brownfield`, `audit`. **Never** `usr_*` / `br_*` / etc.
+- **I3/I4 Schema discipline**: business tables live in `sys.sys_<plural>`. Aux schemas are `staging`, `reference_sync`, `audit`. **Never** `usr_*` / `br_*` / etc. (`brownfield` **ritirato** da #164 F4, mig. `000297`: le tre tabelle vive — `source_exports`, `import_runs`, `source_watermarks` — sono traslocate in `reference_sync`, che è la casa della sincronizzazione ISTAT/ATECO/ESCO; il 90% delle corse era già sua.)
 - **I5 Tenant isolation = FK + API middleware filter. NEVER RLS.** Postgres RLS is not used anywhere.
 - **I7 Auth is separate from `sys.sys_users`** — 11 dedicated `sys.sys_auth_*` tables.
 - **I9 PIP** (Position Intelligence Profile) is a **VIEW / MATERIALIZED VIEW**, never a JSONB blob (ADR-0008).

@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — aggiorna brownfield.tenant_id_mappings. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- 000110_fix_heuresys_tenant_mapping.sql
 -- #8 Wave-3 L1 (S987) — correct the stale Heuresys System tenant mapping.
 --

@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — archivia audit.import_validation_results. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- ============================================================================
 -- 000213 — #60 G/G1: retention & storage
 --

@@ -1,13 +1,5 @@
--- ✅ APPLICATA — S1050, 2026-08-08. Questo file non e' piu' un parcheggio.
--- Il contenuto vive ora in `db/migrations/000297_reference_sync_gets_its_own_schema.sql`
--- (rinumerata: la 000294 era gia' occupata). Resta qui come referto di come il pezzo
--- e' stato preparato e misurato prima di entrare in catena.
--- Cosa e' servito OLTRE a questo file, misurato e non previsto dalla ricetta: i file che
--- toccano `brownfield` erano 28, non i 20 nominati; 19 sono stati marcati `@migrate: once`
--- e la 000058 EMENDATA (portava una guardia viva).
-
 -- ═══════════════════════════════════════════════════════════════════════════════
--- 000294_reference_sync_gets_its_own_schema.sql
+-- 000297_reference_sync_gets_its_own_schema.sql
 --
 -- #164 FASE 4 — LO SCHEMA `brownfield` SPARISCE; LA SINCRONIZZAZIONE HA CASA PROPRIA.
 --
@@ -125,19 +117,19 @@ BEGIN
              WHERE n.nspname='brownfield')
       INTO v_res;
     IF v_res > 0 THEN
-      RAISE EXCEPTION '000294: lo schema brownfield contiene ancora % oggetti — non lo lascio cadere alla cieca', v_res;
+      RAISE EXCEPTION '000297: lo schema brownfield contiene ancora % oggetti — non lo lascio cadere alla cieca', v_res;
     END IF;
     DROP SCHEMA brownfield RESTRICT;
   END IF;
 
   -- ── POST-CONDIZIONI ─────────────────────────────────────────────────────────
   IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname='brownfield') THEN
-    RAISE EXCEPTION '000294: lo schema brownfield esiste ancora';
+    RAISE EXCEPTION '000297: lo schema brownfield esiste ancora';
   END IF;
 
   FOREACH v_t IN ARRAY c_mov LOOP
     IF NOT EXISTS (SELECT 1 FROM pg_tables WHERE schemaname='reference_sync' AND tablename=v_t) THEN
-      RAISE EXCEPTION '000294: % non e arrivata in reference_sync', v_t;
+      RAISE EXCEPTION '000297: % non e arrivata in reference_sync', v_t;
     END IF;
   END LOOP;
 
@@ -145,17 +137,17 @@ BEGIN
   -- e non ricreato.
   EXECUTE 'SELECT count(*) FROM reference_sync.import_runs' INTO v_res;
   IF v_res <> v_corse THEN
-    RAISE EXCEPTION '000294: le corse erano % e ora sono % — il trasloco ha perso righe', v_corse, v_res;
+    RAISE EXCEPTION '000297: le corse erano % e ora sono % — il trasloco ha perso righe', v_corse, v_res;
   END IF;
 
   -- E soprattutto: la PROVENIENZA dei dati non e' stata toccata. E' la domanda a cui
   -- tutto questo schema serviva a non rispondere da solo.
   SELECT count(*) INTO v_lin FROM sys.sys_source_lineage_records;
   IF v_lin < 70000 THEN
-    RAISE EXCEPTION '000294: la tracciabilita e scesa a % righe', v_lin;
+    RAISE EXCEPTION '000297: la tracciabilita e scesa a % righe', v_lin;
   END IF;
 
-  RAISE NOTICE '000294 done: schema brownfield RITIRATO; % corse traslocate in reference_sync; provenienza intatta (% righe)',
+  RAISE NOTICE '000297 done: schema brownfield RITIRATO; % corse traslocate in reference_sync; provenienza intatta (% righe)',
     v_res, v_lin;
 END $mig$;
 
@@ -168,30 +160,3 @@ COMMIT;
 -- l'istantanea pg_dump pre-deploy in pg_dump_snapshots/pre-deploy/.
 -- ═══════════════════════════════════════════════════════════════════════════════
 
--- ═══════════════════════════════════════════════════════════════════════════════
--- ⚠️ QUESTO FILE È FUORI DA `db/migrations/` DI PROPOSITO — NON È APPLICATO.
---
--- Stesso schema di `#160` (S1048): in catena verrebbe eseguito al primo deploy, e da
--- solo NON basta. La prova generale (due passate) lo ha dimostrato: il ritiro riesce,
--- ma alla passata successiva le migrazioni che creano e usano lo schema `brownfield`
--- lo ripopolano o falliscono. È ADR-0035 applicato a un intero schema.
---
--- COSA MANCA, MISURATO (S1049) — non da ri-scoprire:
---   · **6 file dedicati** creano gli oggetti e vanno marcati `-- @migrate: once`:
---     000024, 000025, 000029, 000033, 000043, 000095. **Già provato: funziona.**
---   · **restano da classificare 12 file** che USANO le tabelle e cadrebbero:
---     000026 (il primo a cadere nella prova), 000030, 000034, 000039, 000044, 000047,
---     000052, 000056, 000109, 000110, 000124, 000215.
---   · **ATTENZIONE, due NON vanno marcati**: `000058_reconciliation_registry.sql` e
---     `000062_register_embedding_tables_reconciliation.sql` portano guardie VIVE che
---     devono continuare a rigirare a ogni deploy. Vanno **emendati**, non spenti.
---   · il codice va ripuntato: 9 riferimenti in
---     `apps/api/src/modules/reference-sync/repository.ts` e 2 in
---     `packages/shared/src/schemas/reference-sync.ts` (`brownfield.` → `reference_sync.`).
---     Provato: typecheck verde su 5 workspace.
---   · `CLAUDE.md` invariante **I3/I4** elenca gli schemi ausiliari: `brownfield` esce,
---     `reference_sync` entra.
---
--- STATO DELLA PRODUZIONE AL PARCHEGGIO: intatta e verificata — schema `brownfield`
--- presente, 8 tabelle, 1.194 corse, nessuno schema `reference_sync`. Nulla applicato.
--- ═══════════════════════════════════════════════════════════════════════════════

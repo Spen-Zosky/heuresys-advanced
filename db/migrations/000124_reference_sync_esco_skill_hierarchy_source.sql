@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — registra la sorgente ESCO_SKILL_HIERARCHY — l effetto TRASLOCA con la tabella. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- Migration 000124 — cap⑤ T1.1: seed the ESCO_SKILL_HIERARCHY source watermark
 -- ----------------------------------------------------------------------------
 -- T1.1 (spec docs/integrations/..._03_esco_population_spec_2026-06-15.md §1): the

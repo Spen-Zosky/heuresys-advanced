@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — crea audit.import_validation_rule_codes. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- 000063_sdbi_infra.sql
 -- SDBI Phase-1 infrastructure (the prerequisite PROMPT 027 §4 / dossier §5 W4 Option-C never closed).
 -- Two DB-side items (the docs/template items 3+4 ship as files, not in this migration):

@@ -1,3 +1,8 @@
+-- @migrate: once
+-- #164 F4 — staging wave1 costruito sopra brownfield.column_mappings. Lo schema `brownfield` e le tabelle `audit.import_*`
+-- sono ritirati dalla 000297; senza il marcatore questo file cadrebbe (o li
+-- ricreerebbe) a ogni deploy. Su un database nuovo gira comunque: il registro
+-- e' vuoto e nulla viene saltato.
 -- =============================================================================
 -- 000030_brownfield_wave1_staging.sql
 -- Heuresys Advanced — Brownfield Wave 1 staging buffer tables (MVP-3 Tappa D).

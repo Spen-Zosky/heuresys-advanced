@@ -141,6 +141,74 @@ UPDATE sys.sys_user_contracts c
    AND c.user_contract_status = 'ACTIVE'
    AND c.user_contract_ccnl_level IS DISTINCT FROM 'QD3';
 
+-- ───────────────────────────────────────────────────────────────────────────────
+-- D. LA PROMOZIONE ARRIVA ANCHE DOVE LA PERSONA LA LEGGE  (emendamento S1050)
+--
+--    Difetto misurato il 2026-08-08: A e C aggiornavano il CONTRATTO e si
+--    fermavano li'. Ma lo stipendio e l'inquadramento vivono anche in
+--    `sys.sys_user_employment`, che e' la scheda esposta da `/v1/me/profile/full`
+--    — cioe' esattamente cio' che i dieci vedono aprendo il PROPRIO portale.
+--    Risultato: promossi e aumentati sul contratto, ancora 3A3L/3A4L e vecchio
+--    stipendio nella pagina che li riguarda. Dieci righe su 160.
+--
+--    Il seed `seed_user_role_coherence.sql` (E2) sincronizza gia' impiego←contratto
+--    e ha perfino una post-condizione che esplode sui disallineati: non l'ha
+--    intercettato perche' ha girato il 2026-07-21, PRIMA di questa migrazione.
+--    Ecco perche' la riparazione sta QUI e non a valle (ADR-0035): la catena si
+--    ri-applica per intero a ogni deploy, quindi una correzione a valle verrebbe
+--    disfatta dal giro dopo in cui questa migrazione rialza il contratto da sola.
+--
+--    ⚠ LE BUSTE PAGA NON SI TOCCANO, ed e' una scelta misurata, non una omissione.
+--    L'aumento decorre dal 2026-08-04; l'ultima busta chiude il 2026-07-31. La
+--    busta di agosto non esiste ancora. Riscrivere le buste passate significherebbe
+--    falsificare cio' che e' stato realmente pagato. La verifica 6 qui sotto
+--    protegge proprio questo.
+-- ───────────────────────────────────────────────────────────────────────────────
+
+-- Rollback dichiarato (regola 4d del metodo di bonifica): lo stato PRECEDENTE,
+-- salvato prima di scrivere. `DO NOTHING` perche' la migrazione si ri-applica a
+-- ogni deploy e il giornale deve conservare il PRIMO stato, non quello di ieri.
+CREATE TABLE IF NOT EXISTS staging.mig264_employment_undo (
+  user_employment_user_id uuid PRIMARY KEY,
+  salario_precedente      numeric(15,2),
+  livello_precedente      varchar(32),
+  salvato_il              timestamptz NOT NULL DEFAULT now()
+);
+
+INSERT INTO staging.mig264_employment_undo
+       (user_employment_user_id, salario_precedente, livello_precedente)
+SELECT e.user_employment_user_id, e.user_employment_salary, e.user_employment_pay_scale_level
+  FROM sys.sys_user_employment e
+  JOIN sys.sys_users u ON u.user_id = e.user_employment_user_id
+  JOIN decisione d ON lower(u.user_email) = lower(d.email)
+ON CONFLICT (user_employment_user_id) DO NOTHING;
+
+CREATE OR REPLACE FUNCTION staging.mig264_employment_undo_apply()
+RETURNS int LANGUAGE plpgsql AS $undo$
+DECLARE n int;
+BEGIN
+  UPDATE sys.sys_user_employment e
+     SET user_employment_salary         = j.salario_precedente,
+         user_employment_pay_scale_level = j.livello_precedente,
+         updated_at = now()
+    FROM staging.mig264_employment_undo j
+   WHERE j.user_employment_user_id = e.user_employment_user_id;
+  GET DIAGNOSTICS n = ROW_COUNT;
+  RETURN n;
+END $undo$;
+
+UPDATE sys.sys_user_employment e
+   SET user_employment_salary          = c.user_contract_gross_annual_salary,
+       user_employment_pay_scale_level = c.user_contract_ccnl_level,
+       updated_at = now()
+  FROM sys.sys_user_contracts c, sys.sys_users u, decisione d
+ WHERE c.user_contract_user_id = e.user_employment_user_id
+   AND u.user_id = e.user_employment_user_id
+   AND lower(u.user_email) = lower(d.email)
+   AND c.user_contract_status = 'ACTIVE'
+   AND (e.user_employment_salary          IS DISTINCT FROM c.user_contract_gross_annual_salary
+     OR e.user_employment_pay_scale_level IS DISTINCT FROM c.user_contract_ccnl_level);
+
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- AUTO-VERIFICHE — principi, non conteggi congelati.
 -- ═══════════════════════════════════════════════════════════════════════════════
@@ -150,6 +218,9 @@ DECLARE
   n_sotto_minimo int;
   n_fuori_fascia int;
   n_universo     int;
+  n_impiego      int;
+  n_buste_rotte  int;
+  n_buste_univ   int;
   med_qd3        numeric;
   med_3a4l       numeric;
 BEGIN
@@ -216,8 +287,50 @@ BEGIN
                     med_qd3, med_3a4l;
   END IF;
 
-  RAISE NOTICE 'OK — dieci responsabili a QD3; nessuno sotto il minimo di MG-2; X3a a zero su universo %; mediana QD3 % > mediana 3A4L %.',
-               n_universo, med_qd3, med_3a4l;
+  -- 5. La promozione e' arrivata dove la persona la legge: la scheda d'impiego
+  --    dei dieci rispecchia il contratto. Si misura su TUTTI, non solo sui dieci:
+  --    se un altro seed la disallineasse, va visto qui.
+  SELECT count(*) INTO n_impiego
+    FROM sys.sys_user_employment e
+    JOIN sys.sys_user_contracts c ON c.user_contract_user_id = e.user_employment_user_id
+   WHERE e.user_employment_salary          IS DISTINCT FROM c.user_contract_gross_annual_salary
+      OR e.user_employment_pay_scale_level IS DISTINCT FROM c.user_contract_ccnl_level;
+  IF n_impiego <> 0 THEN
+    RAISE EXCEPTION '% schede d''impiego non rispecchiano il contratto (stipendio o inquadramento)', n_impiego;
+  END IF;
+
+  -- 6. PROTEGGE CIO' CHE NON DOVEVA CAMBIARE: le buste paga.
+  --    Uno scarto fra l'ultima busta (x13, la tredicesima e' in dicembre) e la
+  --    retribuzione contrattuale e' AMMESSO solo se il contratto e' stato toccato
+  --    DOPO la chiusura di quella busta — cioe' l'aumento e' piu' recente della
+  --    paga, che e' esattamente il caso dei dieci. Uno scarto senza quella
+  --    spiegazione significa che qualcuno ha riscritto la storia delle paghe.
+  --    L'universo dev'essere non vuoto, altrimenti lo zero non dimostra nulla.
+  WITH ultima AS (
+    SELECT DISTINCT ON (user_pay_slip_user_id)
+           user_pay_slip_user_id AS uid, user_pay_slip_gross_pay AS lordo,
+           user_pay_slip_period_end AS fine
+      FROM sys.sys_user_pay_slips
+     WHERE user_pay_slip_period ~ '^[0-9]{4}-[0-9]{2}$'
+     ORDER BY user_pay_slip_user_id, user_pay_slip_period DESC
+  )
+  SELECT count(*) FILTER (WHERE abs(u.lordo * 13 - c.user_contract_gross_annual_salary) > 0.50
+                            AND c.updated_at::date <= u.fine),
+         count(*)
+    INTO n_buste_rotte, n_buste_univ
+    FROM ultima u
+    JOIN sys.sys_user_contracts c ON c.user_contract_user_id = u.uid
+   WHERE c.user_contract_gross_annual_salary IS NOT NULL;
+  IF n_buste_univ = 0 THEN
+    RAISE EXCEPTION 'La verifica sulle buste misura su un universo vuoto: lo zero non dimostrerebbe nulla';
+  END IF;
+  IF n_buste_rotte <> 0 THEN
+    RAISE EXCEPTION '% persone hanno uno scarto busta/contratto NON spiegato da un contratto piu'' recente (universo %)',
+                    n_buste_rotte, n_buste_univ;
+  END IF;
+
+  RAISE NOTICE 'OK — dieci responsabili a QD3; nessuno sotto il minimo di MG-2; X3a a zero su universo %; mediana QD3 % > mediana 3A4L %; schede d''impiego allineate; buste intatte (universo %).',
+               n_universo, med_qd3, med_3a4l, n_buste_univ;
 END $$;
 
 COMMIT;

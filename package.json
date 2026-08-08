@@ -35,7 +35,10 @@
     "db:provision-access": "pnpm --filter @heuresys/api exec tsx ../../db/scripts/provision-derived-access.ts",
     "embeddings:backfill": "pnpm --filter @heuresys/api exec tsx src/modules/semantic-matching/backfill.ts",
     "i18n:check": "pnpm --filter @heuresys/web run i18n:check",
-    "status": "python docs/kb/tools/status_dashboard.py"
+    "status": "python docs/kb/tools/status_dashboard.py",
+    "plancia": "python scripts/plancia.py",
+    "plancia:sessioni": "python scripts/sessioni_panel.py",
+    "plancia:zp": "python scripts/zp_panel.py"
   },
   "dependencies": {
     "@heuresys/ui": "^0.1.9"

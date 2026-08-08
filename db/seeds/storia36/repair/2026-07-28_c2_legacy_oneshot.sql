@@ -29,7 +29,21 @@ DECLARE
   v_tot bigint := 0;
   v_bad bigint;
 BEGIN
-  SELECT user_id INTO STRICT v_admin FROM sys.sys_users WHERE user_email = 'admin@heuresys.com';
+  -- L'attore si DERIVA dal ruolo: fino al 2026-08-08 questa riga cercava
+  -- `admin@heuresys.com`, rimosso dalla migrazione 000295 (`#139`), e con
+  -- `INTO STRICT` su zero righe questo file di riparazione moriva appena
+  -- qualcuno lo rilanciava.
+  SELECT u.user_id INTO v_admin
+    FROM sys.sys_users u
+    JOIN sys.sys_user_auth_roles ur
+      ON ur.user_auth_role_user_id = u.user_id AND ur.user_auth_role_revoked_at IS NULL
+    JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+   WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+   ORDER BY u.user_email
+   LIMIT 1;
+  IF v_admin IS NULL THEN
+    RAISE EXCEPTION 'nessun PLATFORM_ADMIN attivo da usare come attore';
+  END IF;
 
   -- P1: subject dei check-in = soggetto del goal (mai il creatore cross-tenant)
   UPDATE sys.sys_goal_check_ins c

@@ -24,12 +24,17 @@ BEGIN;
 -- ----------------------------------------------------------------------------
 CREATE TEMP TABLE _cfg ON COMMIT DROP AS
 SELECT '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'::uuid AS tenant_id,
-       (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com') AS admin_id;
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1) AS admin_id;
 
 DO $$
 BEGIN
   IF (SELECT admin_id FROM _cfg) IS NULL THEN
-    RAISE EXCEPTION 'created_by actor admin@heuresys.com not found';
+    RAISE EXCEPTION 'nessun PLATFORM_ADMIN attivo da usare come autore: senza un attore non si puo'' attribuire cio'' che si scrive';
   END IF;
 END $$;
 

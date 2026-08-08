@@ -111,7 +111,12 @@ SELECT uuid_generate_v5(uuid_ns_url(), 'heu-assign:POS-00000003:chiara.spenuso@h
        :'heu'::uuid, u.user_id, p.position_id, 'PRIMARY', 1.00,
        DATE '2026-07-22', 'ACTIVE',
        'audit coerenza S1025: Head of Product era senza posizione',
-       (SELECT user_id FROM sys.sys_users WHERE user_email='admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM sys.sys_users u, sys.sys_positions p
 WHERE u.user_email = 'chiara.spenuso@heuresys.com'
   AND p.position_code = 'POS-00000003' AND p.position_tenant_id = :'heu'::uuid
@@ -144,7 +149,12 @@ SELECT uuid_generate_v5(uuid_ns_url(), 'heu-assign:POS-00000001:enzo.spenuso@heu
        :'heu'::uuid, u.user_id, p.position_id, 'PRIMARY', 1.00,
        DATE '2026-07-22', 'ACTIVE',
        'audit coerenza S1025: fondatore reale sulla posizione CEO & Founder',
-       (SELECT user_id FROM sys.sys_users WHERE user_email='admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM sys.sys_users u, sys.sys_positions p
 WHERE u.user_email = 'enzo.spenuso@heuresys.com'
   AND p.position_code = 'POS-00000001' AND p.position_tenant_id = :'heu'::uuid

@@ -113,7 +113,12 @@ SELECT uuid_generate_v5(uuid_ns_url(), 'rtl-assign:' || r.pos_code || ':' || r.e
        :'rtl'::uuid, r.user_id, r.position_id, 'PRIMARY', 1.00,
        DATE '2026-07-22', 'ACTIVE',
        '#70 key-roles coverage (S1025): promozione interna',
-       (SELECT user_id FROM sys.sys_users WHERE user_email='admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM _resolved r
 WHERE NOT EXISTS (SELECT 1 FROM sys.sys_user_position_assignments a
                    WHERE a.user_position_assignment_user_id = r.user_id
@@ -145,7 +150,12 @@ SELECT uuid_generate_v5(uuid_ns_url(), 'rtl-pcp:' || r.pos_code),
          WHERE compensation_band_code = 'MG-1'
            AND compensation_band_tenant_id = :'rtl'::uuid),
        1.00,
-       (SELECT user_id FROM sys.sys_users WHERE user_email='admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM _resolved r
 WHERE r.pos_code IN ('POS-TREAS-HEAD','POS-AUDIT-HEAD','POS-LEGAL-HEAD','POS-MKT-HEAD')
   AND NOT EXISTS (SELECT 1 FROM sys.sys_position_compensation_profiles pcp
@@ -209,7 +219,12 @@ SELECT uuid_generate_v5(uuid_ns_url(), 'rtl-tm:' || tm.team_code || ':' || tm.em
        t.team_id, tm.user_id,
        CASE WHEN tm.email = 'alberto.colombo@rtl-bank.org' THEN 'MEMBER' ELSE 'LEAD' END,
        true,
-       (SELECT user_id FROM sys.sys_users WHERE user_email='admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM _team_map tm
 JOIN sys.sys_teams t ON t.team_code = tm.team_code AND t.team_tenant_id = :'rtl'::uuid
 WHERE NOT EXISTS (SELECT 1 FROM sys.sys_team_members m

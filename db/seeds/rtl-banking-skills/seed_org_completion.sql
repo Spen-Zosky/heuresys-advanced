@@ -72,7 +72,12 @@ END $$;
 -- created_by actor (soft: NULL if the platform admin is absent)
 CREATE TEMP TABLE _cfg ON COMMIT DROP AS
 SELECT :'rtl'::uuid AS tenant_id,
-       (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com') AS admin_id,
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1) AS admin_id,
        (SELECT organization_unit_type_id FROM sys.sys_organization_unit_types
           WHERE organization_unit_type_code = 'DIVISION') AS division_type_id;
 

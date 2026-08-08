@@ -204,7 +204,12 @@ SELECT uuid_generate_v5(uuid_ns_url(), 'edu-cov:' || m.email),
        u.user_id, u.user_tenant_id, 'MSC', m.inst, m.field,
        make_date(extract(year FROM d.user_demographics_birth_date)::int + 19, 10, 1),
        make_date(extract(year FROM d.user_demographics_birth_date)::int + 24, 7, 15),
-       (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM (VALUES
   ('chiara.spenuso@heuresys.com', 'Informatica',             'Università di Bologna'),
   ('giuseppe.ferri@rtl-bank.org', 'Economia',                'Università di Milano'),
@@ -291,7 +296,12 @@ SELECT uuid_generate_v5(uuid_ns_url(), 'kpi-target-2026:' || rk.kpi_code || ':' 
        :'rtl'::uuid, k.kpi_definition_id, u.user_id,
        DATE '2026-01-01', DATE '2026-12-31',
        rk.tgt, rk.min_v, rk.stretch, rk.unit,
-       (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM sys.sys_users u
 JOIN sys.sys_user_position_assignments a
      ON a.user_position_assignment_user_id = u.user_id
@@ -424,7 +434,12 @@ INSERT INTO sys.sys_user_addresses
 SELECT uuid_generate_v5(uuid_ns_url(), 'addr-cov:' || m.email),
        u.user_id, u.user_tenant_id, 'PERMANENT',
        m.street, m.city, m.cap, 'IT', m.region, true,
-       (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM (VALUES
   ('giuseppe.ferri@rtl-bank.org', 'Via Manzoni, 24', 'Milano', '20124', 'Lombardia'),
   ('maria.colombo@rtl-bank.org',  'Via Cavour, 12',  'Monza',  '20900', 'Lombardia')
@@ -444,7 +459,12 @@ SELECT uuid_generate_v5(uuid_ns_url(), 'iddoc-cov:' || m.email),
             || chr(65 + pg_temp.h(m.email || ':cie-a') % 26)
             || chr(65 + pg_temp.h(m.email || ':cie-b') % 26),
        DATE '2032-01-01' + (pg_temp.h(m.email || ':exp') % 1000),
-       (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM (VALUES
   ('giuseppe.ferri@rtl-bank.org'),
   ('maria.colombo@rtl-bank.org'),
@@ -476,7 +496,12 @@ SELECT uuid_generate_v5(uuid_ns_url(), 'rtl-pos:POS-RISKM-HEAD'),
          WHERE position_code = 'POS-00000396' AND position_tenant_id = :'rtl'::uuid),
        (SELECT user_id FROM sys.sys_users WHERE user_email = 'federica.marchetti@rtl-bank.org'),
        'HIGH', true, DATE '2026-07-23',
-       (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM sys.sys_organization_units ou
 WHERE ou.organization_unit_code = 'DIR-RISKM'
   AND NOT EXISTS (SELECT 1 FROM sys.sys_positions p
@@ -508,7 +533,12 @@ SELECT uuid_generate_v5(uuid_ns_url(), 'rtl-assign:POS-RISKM-HEAD:martina.gentil
        :'rtl'::uuid, u.user_id, p.position_id, 'PRIMARY', 1.00,
        DATE '2026-07-23', 'ACTIVE',
        '#72 (S1028): promozione interna a Risk Manager — più senior della direzione (20 anni)',
-       (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM sys.sys_users u, sys.sys_positions p
 WHERE u.user_email = 'martina.gentile@rtl-bank.org'
   AND p.position_code = 'POS-RISKM-HEAD' AND p.position_tenant_id = :'rtl'::uuid
@@ -571,7 +601,12 @@ INSERT INTO sys.sys_team_members
    team_member_is_active, created_by)
 SELECT uuid_generate_v5(uuid_ns_url(), 'rtl-tm:DIR-RISKM:martina.gentile@rtl-bank.org'),
        t.team_id, u.user_id, 'LEAD', true,
-       (SELECT user_id FROM sys.sys_users WHERE user_email = 'admin@heuresys.com')
+       (SELECT u.user_id FROM sys.sys_users u
+               JOIN sys.sys_user_auth_roles ur ON ur.user_auth_role_user_id = u.user_id
+                AND ur.user_auth_role_revoked_at IS NULL
+               JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+              WHERE r.auth_role_code = 'PLATFORM_ADMIN' AND u.user_status = 'ACTIVE'
+              ORDER BY u.user_email LIMIT 1)
 FROM sys.sys_teams t, sys.sys_users u
 WHERE t.team_code = 'DIR-RISKM' AND t.team_tenant_id = :'rtl'::uuid
   AND u.user_email = 'martina.gentile@rtl-bank.org'
@@ -690,8 +725,16 @@ BEGIN
       AND a.user_position_assignment_kind = 'PRIMARY'
       AND a.user_position_assignment_status = 'ACTIVE'
   WHERE u.user_status = 'ACTIVE'
-    AND u.user_email NOT IN ('admin@heuresys.com','platform.admin@heuresys.com',
-                             'enzo.spenuso@heuresys.com')
+    -- Si escludono gli amministratori di piattaforma, non tre indirizzi scritti a
+    -- mano: due di quei tre non esistono piu' (rimossi dalle migrazioni 000286 e
+    -- 000295) e il terzo e' un nome proprio che un giorno cambiera'. La proprieta'
+    -- da escludere e' «non e' una persona da anagrafare», e la porta il RUOLO.
+    AND NOT EXISTS (
+          SELECT 1 FROM sys.sys_user_auth_roles ur
+            JOIN sys.sys_auth_roles r ON r.auth_role_id = ur.user_auth_role_role_id
+           WHERE ur.user_auth_role_user_id = u.user_id
+             AND ur.user_auth_role_revoked_at IS NULL
+             AND r.auth_role_code = 'PLATFORM_ADMIN')
     AND ( NOT EXISTS (SELECT 1 FROM sys.sys_user_education_records x
                        WHERE x.user_education_record_user_id = u.user_id)
        OR NOT EXISTS (SELECT 1 FROM sys.sys_user_addresses x

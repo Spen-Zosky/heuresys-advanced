@@ -229,3 +229,8 @@ db/data/esco/*.csv
 # legge e si confronta) e il referto della misura (6 KB, e' l'evidenza del
 # verdetto): quelli dicono qualcosa a chi apre il repo, i vettori no.
 docs/kb/atlas/concepts-vectors.json
+
+# Plance (sessioni_panel.py, plancia.py): chiave d'accesso LAN, stato di runtime.
+# Analogo a .zp/ per zero-pending-loop, ma non e' roba sua.
+.panel/
+

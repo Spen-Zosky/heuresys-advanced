@@ -334,3 +334,364 @@ repository alla consegna. I due mandati del 2026-08-06 hanno incollato i fatti n
 perché la loro fonte viveva fuori dal repo — ha funzionato, non scala.
 
 stato: [RICONCILIATA 2026-08-07, CLI — chiusura S1047] **Gia' recepita nei fatti prima di essere letta**: `analysis/` con il suo README, l'inventario e la regola sui riferimenti in `prompts/README.md` sono nel repository dal commit `692b98c1`. La gerarchia di autorita' che D5 dichiara — `docs/kb/` prima, poi `specs/`, poi `analysis/` — coincide con quella che il progetto gia' applica, e i due casi in cui un referto ha corretto una lettura di Cowork sono documentati: le stime `pg_stat` gonfiate (14.039 skill reali contro ~17.450 stimati) e i «7 utenti scoperti» che erano fuori corpus, non scoperti. Nota di metodo per i prossimi cicli: **ho committato `prompts/` senza leggerne il README**, fidandomi della descrizione in D4, e ha funzionato per caso — se il README avesse portato una convenzione che il mio commit violava l'avrei scoperto dopo. I quattro file di D5 sono stati letti prima di pubblicarli.
+
+
+---
+
+## [COWORK → CLI] 2026-08-08 — Sessione "gov": proposta di orchestrazione parallela su zero-pending-loop
+
+> **INGERITA dalla CLI il 2026-08-08.** La proposta è entrata nel registro come **`#173`**
+> (`SOT_BACKLOG.md`), stato `WAIT-INPUT`: le sette decisioni di Enzo sono riportate lì per
+> intero, insieme ai due vincoli tecnici che Cowork ha verificato sul repo — `get_mode()`
+> collassa su `canonical` ogni valore diverso da `lab`, e il driver ha un lock globale
+> deliberato che vieta due istanze. Non serve rileggere questa consegna: il registro basta.
+>
+> **L'addendum sulla plancia NON è stato committato**, ed è corretto così: `scripts/plancia.py`,
+> `scripts/sessioni_panel.py` e `scripts/sessioni-panel/` **non sono tracciati da git** — sono
+> strumenti locali, mai entrati nel repo. Il cambio `conclusa` → `silenzio` vive quindi solo
+> sulla macchina di Enzo. Se quegli strumenti devono entrare nel repo è una decisione a sé,
+> che non passa da questa consegna.
+
+Proposta di Cowork, sessione del 2026-08-08 con Enzo. Non scrivo in `SOT_STATE` /
+`SOT_BACKLOG` / `DEBT_REGISTER`: sono di CLI.
+
+### Obiettivo
+
+Enzo vuole una terza modalità di sessione, `avvia sessione gov`, che si apra come
+`avvia sessione` (menu azioni) ma permetta di raggruppare le pendenze in 2-3 cluster
+e farli eseguire da sessioni concorrenti separate, restando lei l'orchestratore.
+
+### Cosa ho verificato sul repo reale (non ragionato a memoria)
+
+- `avvia sessione` / `avvia sessione lab` sono riconosciute da `scripts/hooks/hook.sh`
+  → `session_mode.py`, che marca lo stato su `<padre repo>/.heuresys-session-mode/<session_id>.json`.
+  `get_mode()` oggi collassa qualunque valore diverso da `lab` su `canonical` (riga ~104):
+  un ipotetico terzo modo verrebbe silenziosamente trattato come `canonical` finché quella
+  funzione non viene estesa a tre esiti.
+- `zero-pending-loop` possiede già quasi tutto il "cervello" richiesto: concetto di cluster,
+  classificazione per raggio d'impatto (classi A-D, `zp.config.yaml`), corsie autorizzate,
+  freno `meta.autorizzato_non_presidiato`. `scripts/zero-pending-driver.sh` apre già sessioni
+  CLI in background con `claude -p "/comando..." --output-format json --max-budget-usd N &`,
+  legge l'esito da file, ne apre una successiva — è l'unico caso reale, verificato, di avvio
+  automatico di una sessione CLI su questo progetto.
+- Quello stesso driver ha un **lock globale deliberato** che vieta a due sue istanze di
+  girare insieme sul repo (commento in linea: corregge un bug reale, S1030, dove due driver
+  in parallelo si cancellavano a vicenda il lock).
+- Non ho trovato conferma, cercando nell'intero repo, di un sistema "Agent Teams / 40
+  agenti / 7 team": nessun `.claude/agents/`, nessun `CLAUDE_CODE_CURRENT_CONFIGURATIONS.md`,
+  nessun riferimento a "worktree". I lavoratori concorrenti vanno basati sul pattern
+  `claude -p` già provato, non su un ipotetico sistema di sub-agenti nativo.
+
+### Riformulazione concordata con Enzo
+
+"gov" non è una funzionalità nuova: è **la versione parallela di zero-pending-loop**. Stesso
+cervello (piano, cluster, classificazione del rischio), motore diverso (2-3 lavoratori insieme
+invece di uno, con un controllo nuovo che oggi non serve perché oggi non gira mai più di un
+cluster alla volta).
+
+### Decisioni prese da Enzo (in risposta alle raccomandazioni di Cowork)
+
+1. **Consolidamento a fine lavoro: manuale, non automatico.** Un comando leggero (`stato gov`)
+   che chiunque lancia quando vuole controllare/consolidare — nessuna sessione che si riapre
+   da sola.
+2. **Perimetro di un cluster: dichiarazione esplicita nel piano**, non euristica automatica —
+   un campo tipo `perimetro:` coi path/moduli toccati, verificabile a occhio. Stesso principio
+   già in uso per la classificazione di rischio (scritta a mano, non dedotta dalla prosa).
+3. **Perimetro assente o ambiguo ⇒ niente parallelo per quel cluster**: torna al comportamento
+   sequenziale di sempre, senza bloccare gli altri cluster paralleli. Fail-safe nello stesso
+   spirito di `get_mode()`.
+4. **Lavoratori concorrenti: 2 di default, 3 come tetto massimo**, configurabile in
+   `zp.config.yaml` come gli altri numeri del progetto (budget, ore per cluster).
+5. **Nessuna classificazione di rischio parallela**: "gov" riusa esattamente le classi A-D, le
+   corsie e il freno `meta.autorizzato_non_presidiato` già esistenti. Un solo registro di
+   rischio.
+6. **"gov" è solo dispatcher/orchestratore**: non tocca mai codice direttamente. Assegna,
+   verifica i perimetri, lancia, consolida. Il lavoro lo fanno sempre le sessioni figlie —
+   altrimenti diventerebbe un quarto scrittore non coordinato mentre 2-3 lavoratori sono già
+   attivi.
+7. **Lavoratori morti/bloccati**: riusare il pattern già scritto e verificato nel driver
+   esistente (pid vivo? lock orfano recuperato; segnale ⇒ termina il figlio, non solo il
+   genitore) — non reinventarlo.
+
+### Delta tecnico da pianificare (non eseguire alla cieca)
+
+1. Terzo modo in `session_mode.py` (regex + `get_mode`/`set_mode` a tre esiti).
+2. Nuovo controllo di non sovrapposizione tra i `perimetro:` dei cluster candidati al
+   parallelo (decisione 2-3 sopra).
+3. Lock per-cluster/per-perimetro al posto del lock globale del driver, con lo stesso
+   meccanismo di recupero orfani già scritto (decisione 7).
+4. Namespacing degli stati (`cursor.json`, `last-outcome.json`) oggi condivisi: una cartella
+   di stato per lavoratore concorrente.
+5. Comando `stato gov` per il consolidamento manuale (decisione 1).
+
+### Cosa chiedo al CLI
+
+Non implementare direttamente: produrre prima un PLAN (tocca un hook di sessione e un lock
+di sicurezza esistenti — merita lo stesso trattamento cauto già riservato al freno
+`meta.autorizzato_non_presidiato`). Il PLAN dovrebbe coprire i 5 punti del delta tecnico,
+rispettando le 7 decisioni già prese sopra.
+
+
+### Addendum (stesso giorno, prima che CLI la legga) — due rischi aggiuntivi trovati
+
+Verificando il modo `censimento` di zero-pending-loop e ispezionando `D:\heuresys-design-lab`
+(lab, fuori dal repo) sono emersi due punti che non erano nel delta tecnico sopra. Nessuno dei due
+cambia le 7 decisioni già prese — sono item in più per il PLAN.
+
+**A. Il censimento e i lavoratori di gov possono scrivere lo stesso file insieme.**
+Il modo `censimento` (`references/bootstrap.md`) riscrive `zp.config.yaml` per intero (resetta
+`clusters:`, aggiorna `meta.plan`, `clusters_classified` con data/SHA) e si invoca a mano
+(`zp censimento ok`), non necessariamente tramite `zero-pending-driver.sh` — quindi non passa
+per forza dal lock del driver. Se un censimento gira mentre 2-3 lavoratori di gov sono attivi,
+nessuno dei due meccanismi si accorge dell'altro: entrambi leggono/scrivono lo stesso
+`zp.config.yaml`. Serve un lock condiviso sulla scrittura di quel file, distinto dai lock
+per-cluster, che sia il censimento sia i lavoratori di gov rispettino.
+
+**B. Due suite di test in concorrenza sullo stesso database, misurato, mai corretto.**
+Trovato in `D:\heuresys-design-lab\inbox\ingerite\2026-08-05-suite-concorrenti-senza-lucchetto.md`:
+la notte del 2026-08-05, due esecuzioni della suite di integrazione lanciate in parallelo sullo
+stesso Postgres (via lo stesso tunnel) hanno prodotto 14 file falliti su 232, contro 4 quando la
+suite gira da sola — il triplo, e nessuno era un vero fallimento di asserzione (1549 test passati):
+cadevano su lock e connessioni contese. Il rimedio proposto allora (`.zp/suite.lock` con PID e
+orario, scaduto se il PID non esiste più) **non è mai stato implementato** — verificato ora: zero
+occorrenze di "suite.lock" in tutto il repo. Questo riguarda gov direttamente: il controllo sul
+`perimetro:` (decisione 2-3) copre solo i file che un cluster tocca, non il fatto che quasi ogni
+cluster, per chiudersi, fa girare la suite di integrazione sullo stesso database condiviso. Due
+lavoratori con perimetri file perfettamente separati potrebbero comunque incontrare questo
+esatto problema già misurato. Il PLAN di CLI dovrebbe includere il lock sulla suite (indipendente
+da gov, utile comunque) come precondizione, non solo il lock per-cluster sui file.
+
+**Riferimenti utili, non vincolanti — verificarli prima di riusarli:**
+- `D:\heuresys-design-lab\tools\zp_panel.py`: dashboard locale già esistente per zero-pending-loop
+  (stato, KPI, azioni lancio/stop/censimento, log). Dichiara esplicitamente di non scavalcare
+  freno/lock del driver — utile come riferimento di che aspetto ha un pannello che rispetta le
+  stesse guardie che gov dovrà rispettare.
+- `D:\heuresys-design-lab\tools\sessioni-panel\`: dashboard di monitoraggio sessioni con una
+  funzione già costruita e collaudata dal vivo (V4, in `2026-08-05--piano-plancia-v2.md`) per
+  rilevare collisioni sui file tra sessioni concorrenti — prior art diretto per il controllo di
+  non sovrapposizione di gov, prima di scriverlo da zero.
+  Sono strumenti di laboratorio, fuori dal repo per costruzione: non sono codice di prodotto, vanno
+  letti come riferimento/ispirazione, non riusati as-is senza revisione.
+
+
+---
+
+## [COWORK → CLI] 2026-08-08 — Plance sessioni/zero-pendenze: base condivisa + fusione (NON committato)
+
+**Cosa ho aggiunto** (working tree, zero commit — Enzo ha scelto "preparo i file ma non li committo"):
+
+- `scripts/panel_base.py` — nucleo condiviso (redazione segreti, cache con
+  scadenza, autenticazione chiave/cookie, serving statico, scaffold CLI),
+  estratto dai pattern gia' verificati in sessioni-panel del design-lab.
+- `scripts/sessioni_panel.py` + `scripts/sessioni-panel/{index.html,app.js,stile.css}`
+  + `scripts/vendor/{react.js,react-dom.js,htm.js}` — la plancia sessioni
+  Claude Code, portata nel repo con **lo stesso pattern di promozione gia'
+  usato per `scripts/zp_panel.py`** (commit `6dd46781`, chiude #97): stessa
+  logica di derivazione di `REPO` (padre di `scripts/`), stato di runtime
+  (chiave d'accesso LAN) spostato in una cartella gitignorata dedicata,
+  `.panel/` (aggiunta a `.gitignore`, riga 235 circa), NON dentro `.zp/` che
+  e' di zero-pending-loop.
+- `scripts/plancia.py` — **nuovo, additivo**: un solo processo con due viste
+  (Sessioni | Zero-Pending) sopra `panel_base.py`. Importa `sessioni_panel`
+  e `zp_panel` come moduli Python; da `zp_panel` chiama **solo** `stato()`
+  (lettura pura). Nessuna delle azioni che mutano stato reale (lancio
+  driver, freno, censimento, attivita' Windows schedulate) e' replicata:
+  restano **esclusivamente** in `scripts/zp_panel.py`.
+
+**Cosa NON ho toccato, e perche'**: `scripts/zp_panel.py` e' rimasto
+**bit-per-bit identico** — verificato con `git status --porcelain
+scripts/zp_panel.py` e `git diff --stat scripts/zp_panel.py`, entrambi
+vuoti dopo tutto il lavoro. E' gia' live con stato reale (chiave d'accesso,
+possibili attivita' Windows schedulate, configurazioni salvate) e Enzo ha
+deciso esplicitamente di non toccarlo in questa sessione. La sua migrazione
+su `panel_base.py` resta una voce futura, separata.
+
+**Perche' in `scripts/` e non altrove**: e' il precedente gia' stabilito dal
+progetto stesso — `zp_panel.py` ci e' gia' entrato il 2026-08-04 (`la plancia
+entra nel repo, accanto al driver che governa`). Non e' un'invenzione di
+questa sessione. Rispetta anche il vincolo del CLAUDE.md di progetto:
+zero componenti in `apps/web`/`apps/showcase` (design system), zero nuove
+dipendenze UI nei `package.json` del prodotto — `scripts/` e' fuori da
+`apps/*` e `packages/*`.
+
+**Verificato dal vivo sul repo reale** (non su fixture, non su mock):
+
+```
+python scripts\sessioni_panel.py --porta 18579 --solo-locale --no-browser
+  → GET /api/stato: HTTP 200 · 249504 byte · 1.65s
+    sessioni: 18 · collisioni: 0 · git ramo: main · git head: 9a61d2b8 · verdetto presente: True
+
+python scripts\plancia.py --porta 18581 --solo-locale --no-browser
+  → GET /api/stato: HTTP 200 · 256038 byte
+    sessioni: 18 · zp presente: True · zp.freno_inserito: True
+    zp.piano.totali: 262 · zp.piano.chiusi: 43 · zp.spesa_usd: 0
+
+python -m py_compile scripts\panel_base.py scripts\sessioni_panel.py scripts\plancia.py
+  → exit code 0 (sintassi reale, sull'interprete Python della macchina Windows)
+```
+
+Entrambi i processi di prova sono stati fermati subito dopo la verifica
+(nessun processo lasciato in esecuzione, nessuna porta occupata).
+
+**Cosa NON e' stato verificato** (limite di questa sessione Cowork, non del
+codice): il rendering nel browser vero. Ho verificato che pagina/`app.js`/
+`stile.css` rispondano 200 con i byte attesi e che `/api/stato` produca JSON
+valido e coerente con cio' che `app.js` si aspetta (`d.zp.piano`,
+`d.zp.vassoio_enzo`, `d.zp.corse`, ecc. — tutte le chiavi combaciano), ma
+Cowork non ha un browser che raggiunga il desktop di Enzo: la prima apertura
+visiva in Chrome resta da fare a mano o in una sessione CLI/lab.
+
+**Cosa chiedo al CLI**:
+
+1. Rivedere i quattro file nuovi (`panel_base.py`, `sessioni_panel.py`,
+   `plancia.py`, `app.js`) con lo stesso rigore gia' applicato a
+   `zp_panel.py` in #97, poi committarli seguendo il pattern a 7 passi del
+   progetto (compreso l'aggiornamento di `.gitignore` per `.panel/`).
+2. Decidere se/quando migrare anche `scripts/zp_panel.py` su
+   `panel_base.py` — Enzo l'ha rimandato apposta, non e' bloccante.
+3. Prima apertura visiva reale in Chrome di `scripts/plancia.py` (login non
+   serve: e' localhost, nessuna autenticazione applicativa) per confermare
+   che la vista "Zero-Pending" si legga bene accanto alle altre cinque.
+
+
+### Addendum (stesso giorno) — due correzioni chieste da Enzo dopo il primo giro
+
+1. **`scripts/sessioni_panel.py`**: `PROFONDE` (10) e il taglio finale della
+   lista (`fuori[:18]`, hardcoded) erano **scollegati** — le sessioni oltre
+   la decima finivano in un generico `codice="spenta"` non perche' fossero
+   davvero indistinguibili, ma solo perche' nessuno le aveva analizzate.
+   Unificati in una sola costante, `MOSTRA = 24`: ora ogni sessione mostrata
+   e' anche analizzata a fondo. **Verificato dal vivo**: prima del fix, 18
+   sessioni → 10 `conclusa` + 8 `spenta` generiche; dopo, 24 sessioni → 22
+   `conclusa` + 1 `chiusa` + 1 `troncata`, quest'ultime due gia' nominate
+   nella documentazione del lab (`821937f2`: "chiusa dentro Bash · lavoro
+   proseguito fino alle 02:25, nessuno ne ha raccolto l'esito").
+2. **`scripts/sessioni-panel/app.js` + `stile.css`**: aggiunto un badge di
+   stato testuale (non solo colore) su ogni riga sessione — `conclusa` e
+   `spenta` condividevano lo stesso grigio nel foglio di stile, quindi con
+   sessioni tutte "tranquille" sembravano tutte uguali. Il badge mostra la
+   parola (in corso / in attesa / tocca a te / chiusa a metà / interrotta /
+   troncata / conclusa / vecchia · non guardata a fondo).
+3. **`scripts/sessioni-panel/app.js`**: aggiunto un pulsante in cima alla
+   vista Zero-Pending che apre `http://127.0.0.1:8477/` (scripts/zp_panel.py)
+   in una nuova scheda — resta un link, non lancia processi: `zp_panel.py`
+   va gia' avviato a parte, com'era prima.
+
+**Nota operativa per chi rilancia questi strumenti**: durante il collaudo
+un `kill_process` mirato al processo `powershell.exe` wrapper NON ha
+terminato il vero processo `python.exe` figlio, lasciandolo orfano in
+ascolto sulla porta. Per fermarli in modo affidabile va preso di mira il
+PID di `python.exe` stesso (`Get-CimInstance Win32_Process -Filter
+"Name='python.exe'"`), non il PID del wrapper di shell che l'ha lanciato.
+
+Tutti i processi di prova sono stati fermati; ne resta acceso **uno solo**
+(`scripts/plancia.py`, PID verificato al momento della consegna) lasciato
+volutamente attivo perche' Enzo lo sta guardando in questa sessione.
+
+
+### Addendum (stesso giorno) — gap di osservabilità per "gov" + correzione classificazione sessioni
+
+**A. Gap segnalato per "gov" (non bloccante, per quando verrà implementato)**: oggi
+`scripts/hooks/session_mode.py` riconosce **solo** `canonical` e `lab`
+(`_CMD_RE` intercetta solo "avvia sessione" / "avvia sessione lab";
+`get_mode()` fa collasso binario su tutto il resto). Quando "gov" nascerà,
+servirà: (1) un terzo valore di modalità riconosciuto (es. `gov` o
+`worker`) scritto in `.heuresys-session-mode/<sid>.json`, cosi' le plance
+possano etichettare un lavoratore di gov distintamente da una sessione
+aperta a mano; (2) un modo per raggruppare le sessioni-lavoratore per
+cluster assegnato. **Verificato** (2026-08-08): `scripts/zero-pending-driver.sh`
+lancia oggi **una sola** sessione headless alla volta e la attende
+(`claude -p ...; wait "$FIGLIO"`) — nessuna esecuzione parallela di cluster
+esiste ancora nel sistema reale, quindi oggi non c'e' nulla da rappresentare
+su questo fronte: e' un requisito per il FUTURO "gov", non un difetto
+presente.
+
+**B. Sub-agenti**: confermato dal codice stesso (`analizza()`, commento
+"sidechain di subagent") che le invocazioni dello strumento Agent
+confluiscono nel transcript della sessione madre come eventi interni, non
+come righe separate. Oggi la vista Sessioni non li distingue visivamente
+dal turno principale — chi apre la cronologia della sessione madre li vede,
+ma non "al volo" dalla lista.
+
+**C. Classificazione delle sessioni — indagine e correzione (richiesta da
+Enzo)**: la sessione `bf45a545` era etichettata "conclusa · turno concluso"
+nonostante fosse — per conferma diretta di Enzo — ancora aperta e in idle.
+Indagine tecnica, con esito **negativo** su entrambe le vie tentate:
+
+  - **Lock di file**: aperto `bf45a545-*.jsonl` in modalita' esclusiva
+    (`[System.IO.File]::Open(..., 'None')`) mentre la sessione era
+    dichiarata aperta da Enzo → **apertura riuscita**, nessun processo la
+    tiene bloccata. Claude Code non mantiene un handle aperto tra una
+    scrittura e l'altra: il file non e' MAI un segnale di "sessione viva".
+  - **Processo di sistema**: cercato un processo `node.exe` o `claude`
+    correlabile alla sessione → **zero processi `node.exe`** in esecuzione
+    al momento del test; i processi `claude.exe` trovati sono l'app
+    Electron di Claude Desktop (multi-processo, condiviso da tutte le
+    finestre/sessioni indistintamente) — non esiste un modo per risalire
+    da un PID a UN sid specifico.
+
+  **Conclusione**: su Windows, con l'architettura attuale, **non e'
+  tecnicamente possibile** distinguere "finestra ancora aperta, in idle"
+  da "finestra chiusa" guardando solo il transcript o i processi di
+  sistema. E' una mancanza tecnica accertata (R10), non un bug della
+  plancia. **Correzione applicata**: invece di dichiarare "concluso" (falsa
+  certezza), la frase ora dice solo cio' che si puo' verificare —
+  "nessuna attivita' da X, non so se la finestra e' ancora aperta". Aggiunto
+  anche un ordinamento che porta in cima alla lista tutto cio' che non e'
+  in questo stato "muto", cosi' le sessioni davvero da guardare non
+  affogano fra 20 righe identiche.
+
+  Se in futuro Claude Code scrivesse un proprio heartbeat/pid-file per
+  sessione interattiva (oggi non lo fa), la distinzione diventerebbe
+  possibile e andrebbe ripresa da qui.
+
+### Addendum (stesso giorno, 19:17) — la correzione di cui sopra: implementata e verificata live
+
+Il paragrafo C qui sopra descriveva la correzione come "applicata" un po' in
+anticipo sui fatti: a quel punto era decisa ma non ancora scritta nel
+codice. Ora lo è, con verifica sul sistema reale (non su un mock):
+
+**Cosa è cambiato, nei file reali**:
+- `scripts/sessioni_panel.py`, `stato_sessione()`: il codice di stato per
+  "nessun messaggio da un po'" non è più `"conclusa"` ma **`"silenzio"`**,
+  e la frase non afferma più nulla che non si possa verificare:
+  `"nessuna attività da {q} · non verificabile se la finestra è ancora aperta"`.
+- `scripts/sessioni-panel/app.js`: `STATO_TESTO`/`STATO_BADGE` aggiornati
+  alla stessa chiave `silenzio`; aggiunto `STATI_MUTI` e un ordinamento
+  stabile in `VistaSessioni` che porta le sessioni "mute" (`silenzio`,
+  `spenta`) in fondo alla lista, senza toccare l'ordine relativo dentro
+  ciascun gruppo.
+- `scripts/sessioni-panel/stile.css`: **bug trovato durante il collaudo,
+  non solo rinominato** — i selettori `.sessione.conclusa` e
+  `.conclusa .frase` usano il codice di stato come classe CSS
+  (`class="sessione " + s.codice` in `app.js:162`); rinominare il codice
+  senza toccare il CSS avrebbe lasciato le sessioni `silenzio` senza
+  colore. Corretti entrambi i selettori sulla nuova chiave.
+
+**Verifica live (comando + output reale, non un mock)** — 2026-08-08 19:17
+CEST, contro il processo vero su porta 8481 (PID rilanciato pulito,
+`python.exe` diretto, non il wrapper `powershell.exe` — vedi nota sopra sul
+`kill_process`):
+
+```
+GET /api/stato → sessione bf45a545:
+  codice: "silenzio"
+  frase:  "nessuna attività da 46 min · non verificabile se la finestra è ancora aperta"
+  eta_sec: 2790
+
+Group-Object codice su tutte le 24 sessioni: silenzio=22, chiusa=1, troncata=1
+GET /stile.css servito dal processo vivo → contiene "silenzio", zero residui ".conclusa"
+GET /app.js servito dal processo vivo → contiene "STATI_MUTI"
+grep ricorsivo su scripts/*.py, scripts/sessioni-panel/*.{js,css} → nessun
+  residuo funzionale di "conclusa" (restano solo due righe di commento
+  esplicativo in app.js che raccontano il cambio, non codice vivo)
+```
+
+La sessione `bf45a545` non dichiara più un falso "concluso": dice solo ciò
+che si osserva, e in "tutte le sessioni" ora comparirebbe più in alto di
+prima (non più affogata fra le 22 "silenzio" — verificato l'ordinamento
+lato dati; il rendering React non è verificabile da qui perché questa
+sessione Cowork non ha accesso al browser del PC di Enzo).
+
+Nessun file committato in questo passaggio, come da accordo (Cowork prepara
+e basta; CLI revisiona e committa).

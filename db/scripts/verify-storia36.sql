@@ -401,6 +401,8 @@ DECLARE
   v_i bigint;
   v_ii bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   WITH frontier AS (
     SELECT max(attendance_date) AS fd FROM sys.sys_attendance
@@ -425,7 +427,12 @@ BEGIN
               WHEN 'UNPAID' THEN 'UNPAID_LEAVE'
               ELSE 'PAID_LEAVE' END);
   IF v_i > 0 THEN
-    RAISE EXCEPTION 'C1c(i): % workday di richieste APPROVED senza attendance coerente (es. %)', v_i, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C1c(i): % workday di richieste APPROVED senza attendance coerente (es. %)', v_i, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(b.balance_natural_key)
@@ -444,7 +451,12 @@ BEGIN
               WHEN 'SICK' THEN 'SICK'
               ELSE 'PAID_LEAVE' END);
   IF v_ii > 0 THEN
-    RAISE EXCEPTION 'C1c(ii): % balance con used_days diverso dal derivato attendance (es. %)', v_ii, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C1c(ii): % balance con used_days diverso dal derivato attendance (es. %)', v_ii, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (iii) mai goduto oltre il maturato (check INDIPENDENTE dal derivato del
@@ -455,7 +467,12 @@ BEGIN
   WHERE b.balance_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
     AND b.balance_used_days > b.balance_total_days + b.balance_carryover_days + b.balance_adjustment_days;
   IF v_ii > 0 THEN
-    RAISE EXCEPTION 'C1c(iii): % balance con goduto oltre maturato+riporto+rettifica (es. %)', v_ii, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C1c(iii): % balance con goduto oltre maturato+riporto+rettifica (es. %)', v_ii, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (iv) days_requested = workday coperti (semantica workday adottata da C1)
@@ -469,8 +486,19 @@ BEGIN
       WHERE c.cal_date BETWEEN r.request_start_date AND r.request_end_date
         AND c.is_workday);
   IF v_ii > 0 THEN
-    RAISE EXCEPTION 'C1c(iv): % richieste APPROVED con days_requested diverso dai workday coperti (es. %)', v_ii, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C1c(iv): % richieste APPROVED con days_requested diverso dai workday coperti (es. %)', v_ii, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -676,6 +704,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_share numeric;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*) INTO v_cnt
   FROM sys.sys_goals g
@@ -689,7 +719,12 @@ BEGIN
     AND g.goal_status NOT IN ('COMPLETED','CANCELLED')
     AND g.goal_progress_percent IS DISTINCT FROM lc.np;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C2e: % goal non terminali con progress diverso dall''ultimo check-in', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C2e: % goal non terminali con progress diverso dall''ultimo check-in', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*) INTO v_cnt
@@ -697,7 +732,12 @@ BEGIN
   WHERE goal_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
     AND goal_status = 'COMPLETED' AND goal_progress_percent <> 100;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C2e: % goal COMPLETED con progress diverso da 100', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C2e: % goal COMPLETED con progress diverso da 100', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT avg((review_performance_box = 1)::int) INTO v_share
@@ -705,8 +745,19 @@ BEGIN
   WHERE review_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
     AND review_status = 'COMPLETED' AND review_performance_box IS NOT NULL;
   IF v_share > 0.25 THEN
-    RAISE EXCEPTION 'C2e: quota box-basso % oltre il 25%% (curva 10/70/20 violata)', round(v_share, 3);
+    BEGIN
+      RAISE EXCEPTION 'C2e: quota box-basso % oltre il 25%% (curva 10/70/20 violata)', round(v_share, 3);
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -909,6 +960,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(u.user_email || ' FY' || extract(year FROM v.variable_pay_calculation_period_start))
     INTO v_cnt, v_sample
@@ -930,7 +983,12 @@ BEGIN
             AND r.reward_gate_result_status IN ('PASSED','WARNING','OVERRIDDEN_WITH_REASON')) < 7
     );
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C3d: % variable-pay senza i 7 gates superati o fuori cap 30%% RAL (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C3d: % variable-pay senza i 7 gates superati o fuori cap 30%% RAL (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (iv) le righe storia36: amount = curva(attainment) ±1€ (payout ∈ curva)
@@ -951,7 +1009,12 @@ BEGIN
           staging.storia36_ral_at(c.user_contract_gross_annual_salary, c.user_contract_ccnl_level,
             make_date(extract(year FROM v.variable_pay_calculation_period_start)::int, 12, 1)) * 0.30), 2)) > 1;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C3d(iv): % variable-pay storia36 con amount fuori dalla curva ±1€ (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C3d(iv): % variable-pay storia36 con amount fuori dalla curva ±1€ (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (v) aggregato per (utente, esercizio) <= 100%% della RAL (vigilanza BdI:
@@ -970,8 +1033,19 @@ BEGIN
   JOIN sys.sys_user_contracts c ON c.user_contract_user_id = agg.uid
   WHERE agg.tot > c.user_contract_gross_annual_salary;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C3d(v): % aggregati (utente, esercizio) oltre il 100%% della RAL (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C3d(v): % aggregati (utente, esercizio) oltre il 100%% della RAL (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -1186,6 +1260,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   WITH ore AS (
     SELECT u.user_email,
@@ -1202,7 +1278,12 @@ BEGIN
     INTO v_cnt, v_sample
     FROM ore WHERE floor_h > 0 AND h < floor_h - 0.01;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4a: % anni-utente sotto il pavimento di monte-ore CCNL/IVASS (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4a: % anni-utente sotto il pavimento di monte-ore CCNL/IVASS (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   WITH ore AS (
@@ -1222,7 +1303,12 @@ BEGIN
     INTO v_cnt, v_sample
     FROM agg WHERE media < media_floor OR media > 5 * media_floor;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4a(ii): % anni con media aziendale fuori banda (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4a(ii): % anni con media aziendale fuori banda (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (iii) COPERTURA DI CONTENUTO — le ore non bastano: l'antiriciclaggio è
@@ -1257,8 +1343,19 @@ BEGIN
   SELECT count(*), min(user_email || ' ' || y || ': manca ' || argomento)
     INTO v_cnt, v_sample FROM mancanti;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4a(iii): % anni-utente senza la formazione obbligatoria di contenuto (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4a(iii): % anni-utente senza la formazione obbligatoria di contenuto (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -1274,6 +1371,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   -- la storia si valuta alla PROPRIA frontiera, non all'orologio: senza questo
   -- allineamento il check diventa rosso da solo al passare dei giorni.
@@ -1292,7 +1391,12 @@ BEGIN
   ) x
   WHERE x.ultima_scadenza < p_end;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4b: % certificazioni abilitanti scadute e mai rinnovate su utenti attivi (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4b: % certificazioni abilitanti scadute e mai rinnovate su utenti attivi (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email || ' — ' || ch.nome || ': rinnovo del ' || ch.d_iss ||
@@ -1311,7 +1415,12 @@ BEGIN
   JOIN sys.sys_users u ON u.user_id = ch.uid
   WHERE ch.prev_exp IS NOT NULL AND ch.d_exp < ch.prev_exp;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4b(ii): % rinnovi che scadono prima del titolo sostituito (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4b(ii): % rinnovi che scadono prima del titolo sostituito (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email || ' — ' || c.user_certification_name)
@@ -1323,7 +1432,12 @@ BEGIN
     AND c.user_certification_expires_date IS NOT NULL
     AND c.user_certification_expires_date < c.user_certification_issued_date;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4b(iii): % certificazioni che scadono prima di essere rilasciate (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4b(iii): % certificazioni che scadono prima di essere rilasciate (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (iv) CONTINUITÀ della catena: uno schema abilitante non ammette scoperture.
@@ -1347,8 +1461,19 @@ BEGIN
   JOIN sys.sys_users u ON u.user_id = ch.uid
   WHERE ch.prev_exp IS NOT NULL AND ch.d_iss > ch.prev_exp;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4b(iv): % rinnovi ottenuti DOPO la scadenza del titolo precedente (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4b(iv): % rinnovi ottenuti DOPO la scadenza del titolo precedente (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -1362,6 +1487,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   -- la storia si valuta alla PROPRIA frontiera, non all'orologio: senza questo
   -- allineamento il check diventa rosso da solo al passare dei giorni.
@@ -1380,7 +1507,12 @@ BEGIN
        WHERE ti.training_initiative_code = e.user_learning_evidence_metadata->>'initiative'
          AND ti.training_initiative_tenant_id = e.user_learning_evidence_tenant_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4c(0): % evidenze d''aula il cui codice iniziativa non risolve (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4c(0): % evidenze d''aula il cui codice iniziativa non risolve (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email || ' — ' || ti.training_initiative_code || ' il ' ||
@@ -1396,7 +1528,12 @@ BEGIN
       OR e.user_learning_evidence_completed_at::date
          > COALESCE(ti.training_initiative_end_date, p_end));
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4c: % evidenze d''aula fuori dal periodo della loro iniziativa (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4c: % evidenze d''aula fuori dal periodo della loro iniziativa (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email || ' — ' || ti.training_initiative_code)
@@ -1414,7 +1551,12 @@ BEGIN
      WHERE a.user_learning_assignment_user_id = d.uid
        AND a.user_learning_assignment_initiative_id = ti.training_initiative_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4c(ii): % frequenze d''aula senza iscrizione all''iniziativa (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4c(ii): % frequenze d''aula senza iscrizione all''iniziativa (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(ti.training_initiative_code || ': ' || x.n || ' partecipanti > capienza ' ||
@@ -1429,7 +1571,12 @@ BEGIN
     AND ti.training_initiative_capacity IS NOT NULL
     AND x.n > ti.training_initiative_capacity;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4c(iii): % iniziative con più partecipanti della capienza (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4c(iii): % iniziative con più partecipanti della capienza (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (iv) si è frequentato IL corso di quell'edizione, non un altro: il modulo
@@ -1444,8 +1591,19 @@ BEGIN
   WHERE e.user_learning_evidence_metadata->>'kind' = 'AULA'
     AND e.user_learning_evidence_module_id IS DISTINCT FROM ti.training_initiative_module_id;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4c(iv): % evidenze d''aula su un corso diverso da quello della loro edizione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4c(iv): % evidenze d''aula su un corso diverso da quello della loro edizione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -1462,6 +1620,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   -- la storia si valuta alla PROPRIA frontiera, non all'orologio: senza questo
   -- allineamento il check diventa rosso da solo al passare dei giorni.
@@ -1472,7 +1632,12 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_skill_learning_mappings sm
                      WHERE sm.skill_learning_mapping_module_id = ti.training_initiative_module_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4d: % iniziative su moduli non mappati ad alcuna competenza (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4d: % iniziative su moduli non mappati ad alcuna competenza (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(ti.training_initiative_code) INTO v_cnt, v_sample
@@ -1482,7 +1647,12 @@ BEGIN
     AND m.learning_module_is_global IS NOT TRUE
     AND m.learning_module_tenant_id IS DISTINCT FROM ti.training_initiative_tenant_id;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4d(ii): % iniziative su moduli di un altro tenant (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4d(ii): % iniziative su moduli di un altro tenant (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(ti.training_initiative_code) INTO v_cnt, v_sample
@@ -1491,7 +1661,12 @@ BEGIN
   WHERE ti.training_initiative_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
     AND f.user_tenant_id IS DISTINCT FROM ti.training_initiative_tenant_id;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4d(iii): % iniziative con docente di un altro tenant (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4d(iii): % iniziative con docente di un altro tenant (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(ti.training_initiative_code || ' → ' || m.learning_module_code ||
@@ -1503,7 +1678,12 @@ BEGIN
     AND ti.training_initiative_facilitator_user_id IS NOT NULL
     AND m.learning_module_delivery = 'SELF_PACED';
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4d(iv): % iniziative con docente su moduli in autoapprendimento (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4d(iv): % iniziative con docente su moduli in autoapprendimento (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (v) periodo e stato: fine dopo inizio; COMPLETED esige una fine avvenuta;
@@ -1524,8 +1704,19 @@ BEGIN
           AND ti.training_initiative_end_date IS NOT NULL
           AND ti.training_initiative_end_date < p_end));
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4d(v): % iniziative con periodo o stato incoerenti (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4d(v): % iniziative con periodo o stato incoerenti (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -1572,6 +1763,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(u.user_email || ' — lacuna del ' || g.learning_gap_detected_at::date)
     INTO v_cnt, v_sample
@@ -1586,7 +1779,12 @@ BEGIN
     AND g.learning_gap_detected_at::date
         <= LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end)) - 90;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4f: % azioni formative ancora «proposte» su lacune mature (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4f: % azioni formative ancora «proposte» su lacune mature (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email || ' — lacuna del ' || g.learning_gap_detected_at::date)
@@ -1602,7 +1800,12 @@ BEGIN
        WHERE e.user_learning_evidence_user_id = g.learning_gap_user_id
          AND e.user_learning_evidence_completed_at > g.learning_gap_detected_at);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4f(ii): % azioni chiuse senza formazione successiva alla rilevazione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4f(ii): % azioni chiuse senza formazione successiva alla rilevazione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(a.gap_closure_action_id::text || ' [' || a.gap_closure_action_status || ']')
@@ -1612,7 +1815,12 @@ BEGIN
     AND a.gap_closure_action_status <> 'PROPOSED'
     AND (a.gap_closure_action_due_date IS NULL OR a.gap_closure_action_owner_user_id IS NULL);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4f(iii): % azioni avviate senza responsabile o senza scadenza (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4f(iii): % azioni avviate senza responsabile o senza scadenza (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(p.gap_closure_plan_id::text || ' [' || p.gap_closure_plan_status || ']')
@@ -1622,8 +1830,19 @@ BEGIN
     AND p.gap_closure_plan_status IN ('ACTIVE','COMPLETED')
     AND p.gap_closure_plan_target_completion_date IS NULL;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4f(iv): % piani di chiusura attivi senza data obiettivo (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4f(iv): % piani di chiusura attivi senza data obiettivo (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -1641,6 +1860,8 @@ DECLARE
   v_cnt bigint;
   v_sample text;
   v_tot bigint;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(u.user_email || ' il ' || a.attendance_date || ': corso chiuso alle ' ||
                        to_char(e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome', 'HH24:MI') ||
@@ -1656,7 +1877,12 @@ BEGIN
     AND a.attendance_clock_out IS NOT NULL
     AND (e.user_learning_evidence_completed_at AT TIME ZONE 'Europe/Rome')::time > a.attendance_clock_out;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4g: % completamenti registrati dopo l''uscita timbrata dello stesso giorno (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4g: % completamenti registrati dopo l''uscita timbrata dello stesso giorno (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*) INTO v_tot FROM sys.sys_user_learning_evidence
@@ -1671,7 +1897,12 @@ BEGIN
          AND e.user_learning_evidence_metadata->>'kind' = 'SELF_PACED'
          AND extract(month FROM e.user_learning_evidence_completed_at) = g.mm);
     IF v_cnt > 0 THEN
-      RAISE EXCEPTION 'C4g(ii): % mesi dell''anno senza un solo corso a distanza su % righe (es. %)', v_cnt, v_tot, v_sample;
+      BEGIN
+        RAISE EXCEPTION 'C4g(ii): % mesi dell''anno senza un solo corso a distanza su % righe (es. %)', v_cnt, v_tot, v_sample;
+      EXCEPTION WHEN OTHERS THEN
+        GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+        v_guasti := array_append(v_guasti, v_g);
+      END;
     END IF;
   END IF;
 
@@ -1694,8 +1925,19 @@ BEGIN
   JOIN sys.sys_learning_modules m ON m.learning_module_id = x.mid
   WHERE x.n > 3;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4g(iii): % ore con più di 3 persone che chiudono lo stesso corso in autoapprendimento (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4g(iii): % ore con più di 3 persone che chiudono lo stesso corso in autoapprendimento (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -1745,6 +1987,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   p_end := LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end));
 
@@ -1759,7 +2003,12 @@ BEGIN
          AND c.user_certification_name ILIKE '%Sicurezza Base%'
          AND c.user_certification_expires_date >= p_end);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4h: % lavoratori attivi senza formazione sicurezza valida (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4h: % lavoratori attivi senza formazione sicurezza valida (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (ii) preposti: chi ha riporti diretti nell'organigramma
@@ -1779,7 +2028,12 @@ BEGIN
          AND c.user_certification_name ILIKE '%preposti%'
          AND c.user_certification_expires_date >= p_end);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4h(ii): % preposti senza aggiornamento valido (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4h(ii): % preposti senza aggiornamento valido (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (iii) dirigenti per la sicurezza: l'inquadramento contrattuale li identifica
@@ -1795,7 +2049,12 @@ BEGIN
          AND c.user_certification_name ILIKE '%dirigenti per la sicurezza%'
          AND c.user_certification_expires_date >= p_end);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4h(iii): % dirigenti senza formazione sicurezza valida (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4h(iii): % dirigenti senza formazione sicurezza valida (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (iv) datore di lavoro: chi occupa la posizione al vertice dell'organigramma
@@ -1815,7 +2074,12 @@ BEGIN
          AND c.user_certification_name ILIKE '%datore di lavoro%'
          AND c.user_certification_expires_date >= p_end);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4h(iv): % al vertice senza formazione da datore di lavoro (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4h(iv): % al vertice senza formazione da datore di lavoro (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (v) squadre di emergenza: ogni sede con personale ha almeno un addetto
@@ -1834,8 +2098,19 @@ BEGIN
      GROUP BY 1, 2
   ) x;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C4h(v): % sedi senza squadra di emergenza in regola (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C4h(v): % sedi senza squadra di emergenza in regola (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ############################################################################
@@ -1880,6 +2155,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(u.user_email || ': ' || x.user_prof_exp_start_date ||
                        ' prima di ' || staging.storia36_c5_inizio_carriera(x.user_prof_exp_user_id))
@@ -1889,7 +2166,12 @@ BEGIN
   WHERE x.user_prof_exp_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
     AND x.user_prof_exp_start_date < staging.storia36_c5_inizio_carriera(x.user_prof_exp_user_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5a: % esperienze iniziate prima che la persona potesse lavorare (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5a: % esperienze iniziate prima che la persona potesse lavorare (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -1900,7 +2182,12 @@ BEGIN
     AND (x.user_prof_exp_end_date IS NULL
       OR x.user_prof_exp_end_date > em.user_employment_hire_date);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5a(ii): % esperienze precedenti che non finiscono prima dell''ingresso in RTL (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5a(ii): % esperienze precedenti che non finiscono prima dell''ingresso in RTL (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -1914,7 +2201,12 @@ BEGIN
   JOIN sys.sys_users u ON u.user_id = c.uid
   WHERE c.prec_fine IS NOT NULL AND (c.d_ini < c.prec_fine OR c.d_ini - c.prec_fine > 548);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5a(iii): % esperienze sovrapposte o separate da oltre 18 mesi (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5a(iii): % esperienze sovrapposte o separate da oltre 18 mesi (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -1923,8 +2215,19 @@ BEGIN
   WHERE x.user_prof_exp_end_date IS NOT NULL
     AND x.user_prof_exp_end_date < x.user_prof_exp_start_date;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5a(iv): % esperienze che finiscono prima di iniziare (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5a(iv): % esperienze che finiscono prima di iniziare (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -1938,6 +2241,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(COALESCE(p.position_title, cp.critical_position_id::text))
     INTO v_cnt, v_sample
@@ -1949,7 +2254,12 @@ BEGIN
        JOIN sys.sys_successor_candidates sc ON sc.successor_candidate_pool_id = sp.succession_pool_id
       WHERE sp.succession_pool_position_id = cp.critical_position_position_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5b: % posizioni critiche senza alcun successore individuato (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5b: % posizioni critiche senza alcun successore individuato (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -1960,7 +2270,12 @@ BEGIN
       SELECT 1 FROM sys.sys_successor_readiness r
        WHERE r.successor_readiness_candidate_id = sc.successor_candidate_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5b(ii): % successori senza alcuna valutazione di prontezza (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5b(ii): % successori senza alcuna valutazione di prontezza (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email || ': dichiarato ' || sc.successor_candidate_readiness_level ||
@@ -1976,8 +2291,19 @@ BEGIN
   WHERE sc.successor_candidate_tenant_id = '86ba7a65-217f-48ba-8ce5-5c09b40a66b0'
     AND ult.successor_readiness_horizon IS DISTINCT FROM sc.successor_candidate_readiness_level;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5b(iii): % successori il cui livello dichiarato non corrisponde all''ultima valutazione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5b(iii): % successori il cui livello dichiarato non corrisponde all''ultima valutazione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -1990,6 +2316,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
   FROM sys.sys_user_target_positions t
@@ -1999,7 +2327,12 @@ BEGIN
     AND (p.position_tenant_id IS DISTINCT FROM t.user_target_position_tenant_id
       OR u.user_tenant_id IS DISTINCT FROM t.user_target_position_tenant_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5c: % obiettivi di carriera fuori dal perimetro del tenant (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5c: % obiettivi di carriera fuori dal perimetro del tenant (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -2013,7 +2346,12 @@ BEGIN
          AND a.user_position_assignment_status = 'ACTIVE'
          AND a.user_position_assignment_position_id = t.user_target_position_position_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5c(ii): % persone che hanno come obiettivo la posizione che già occupano (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5c(ii): % persone che hanno come obiettivo la posizione che già occupano (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -2034,7 +2372,12 @@ BEGIN
          AND a.user_position_assignment_kind = 'PRIMARY'
          AND a.user_position_assignment_status = 'ACTIVE');
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5c(iii): % obiettivi non raggiungibili da alcun percorso di carriera (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5c(iii): % obiettivi non raggiungibili da alcun percorso di carriera (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (iv) L'obiettivo e' una CRESCITA, e questo e' il predicato che mancava: la
@@ -2076,8 +2419,19 @@ BEGIN
                       WHERE a2.user_position_assignment_position_id = p_meta.position_id
                         AND a2.user_position_assignment_status = 'ACTIVE'));
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5c(iv): % obiettivi che non sono una crescita (stesso livello o piu'' in basso, stesso mestiere, o posizione senza titolari) (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5c(iv): % obiettivi che non sono una crescita (stesso livello o piu'' in basso, stesso mestiere, o posizione senza titolari) (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2091,6 +2445,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   p_end := LEAST(p_end, COALESCE(staging.storia36_c4_frontier(), p_end));
 
@@ -2103,7 +2459,12 @@ BEGIN
          IS NOT DISTINCT FROM h.position_skill_requirement_history_old_proficiency
       OR h.position_skill_requirement_history_effective_at::date NOT BETWEEN p_start AND p_end);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5d: % variazioni di requisito orfane, nulle o fuori finestra (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5d: % variazioni di requisito orfane, nulle o fuori finestra (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(h.position_skill_requirement_history_id::text) INTO v_cnt, v_sample
@@ -2113,8 +2474,19 @@ BEGIN
     AND (u.user_id IS NULL
       OR u.user_tenant_id IS DISTINCT FROM h.position_skill_requirement_history_tenant_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5d(ii): % variazioni senza un autore del tenant (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5d(ii): % variazioni senza un autore del tenant (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2154,6 +2526,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(p.position_title) INTO v_cnt, v_sample
   FROM sys.sys_critical_positions cp
@@ -2161,7 +2535,12 @@ BEGIN
   WHERE cp.critical_position_tenant_id = c_rtl
     AND p.position_criticality IS DISTINCT FROM 'CRITICAL';
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5f: % posizioni nel registro delle critiche che l''anagrafica non dice critiche (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5f: % posizioni nel registro delle critiche che l''anagrafica non dice critiche (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(p.position_title) INTO v_cnt, v_sample
@@ -2172,7 +2551,12 @@ BEGIN
                      WHERE cp.critical_position_position_id = p.position_id
                        AND cp.critical_position_tenant_id = c_rtl);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5f(ii): % posizioni dette critiche in anagrafica ma assenti dal registro (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5f(ii): % posizioni dette critiche in anagrafica ma assenti dal registro (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(p.position_title) INTO v_cnt, v_sample
@@ -2184,7 +2568,12 @@ BEGIN
                        AND r.position_succession_relevance_tenant_id = c_rtl
                        AND r.is_critical);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5f(iii): % posizioni critiche che la vista successione non segnala (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5f(iii): % posizioni critiche che la vista successione non segnala (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(p.position_title) INTO v_cnt, v_sample
@@ -2196,7 +2585,12 @@ BEGIN
                      WHERE cp.critical_position_position_id = r.position_id
                        AND cp.critical_position_tenant_id = c_rtl);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5f(iv): % posizioni segnalate critiche dalla successione ma assenti dal registro (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5f(iv): % posizioni segnalate critiche dalla successione ma assenti dal registro (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- l'orizzonte di copertura è un derivato del bacino: se il bacino ha
@@ -2211,8 +2605,19 @@ BEGIN
                    ON sc.successor_candidate_pool_id = sp.succession_pool_id
                 WHERE sp.succession_pool_position_id = r.position_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5f(v): % posizioni con un bacino popolato e nessun orizzonte di copertura (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5f(v): % posizioni con un bacino popolato e nessun orizzonte di copertura (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2227,6 +2632,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(u.user_email || ' → ' || COALESCE(pp.position_title, '?')) INTO v_cnt, v_sample
   FROM sys.sys_successor_candidates sc
@@ -2250,7 +2657,12 @@ BEGIN
          AND (cpz.position_reports_to_position_id = sp.succession_pool_position_id
            OR (cpz.position_title = pp.position_title AND cpz.position_id <> pp.position_id)));
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5g: % successori che non riportano alla posizione né ne fanno il mestiere altrove (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5g: % successori che non riportano alla posizione né ne fanno il mestiere altrove (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -2263,8 +2675,19 @@ BEGIN
                    AND a.user_position_assignment_status = 'ACTIVE'
                    AND a.user_position_assignment_position_id = sp.succession_pool_position_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5g(ii): % persone candidate a succedere a se stesse (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5g(ii): % persone candidate a succedere a se stesse (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2278,6 +2701,8 @@ RETURNS void LANGUAGE plpgsql AS $fn$
 DECLARE
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(cp.career_path_name || ' passo ' || s.career_path_step_ordinal)
     INTO v_cnt, v_sample
@@ -2285,7 +2710,12 @@ BEGIN
   JOIN sys.sys_career_paths cp ON cp.career_path_id = s.career_path_step_path_id
   WHERE s.career_path_step_target_position_id IS NULL;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5h: % passi di carriera che non portano a nessuna posizione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5h: % passi di carriera che non portano a nessuna posizione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(cp.career_path_name || ' passo ' || s.career_path_step_ordinal)
@@ -2295,7 +2725,12 @@ BEGIN
   WHERE s.career_path_step_ordinal > 1
     AND s.career_path_step_origin_position_id IS NULL;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5h(ii): % passi oltre il primo che non partono da nessuna posizione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5h(ii): % passi oltre il primo che non partono da nessuna posizione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- la catena è continua: si riparte da dove si è arrivati
@@ -2309,7 +2744,12 @@ BEGIN
   WHERE s.career_path_step_origin_position_id
         IS DISTINCT FROM prec.career_path_step_target_position_id;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5h(iii): % passi che non ripartono da dove finisce il precedente (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5h(iii): % passi che non ripartono da dove finisce il precedente (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(cp.career_path_name || ' passo ' || s.career_path_step_ordinal)
@@ -2318,8 +2758,19 @@ BEGIN
   JOIN sys.sys_career_paths cp ON cp.career_path_id = s.career_path_step_path_id
   WHERE s.career_path_step_origin_position_id = s.career_path_step_target_position_id;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5h(iv): % passi che partono e arrivano alla stessa posizione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5h(iv): % passi che partono e arrivano alla stessa posizione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2361,6 +2812,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_pct numeric;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT max(pct), min(etichetta) INTO v_pct, v_sample FROM (
     SELECT round(100.0 * count(*) / sum(count(*)) OVER (), 1) AS pct,
@@ -2370,7 +2823,12 @@ BEGIN
      GROUP BY extract(day FROM user_prof_exp_start_date)) x
    WHERE pct > 15;
   IF v_pct IS NOT NULL THEN
-    RAISE EXCEPTION 'C5j: un solo giorno del mese concentra il %%% delle date d''inizio (%)', v_pct, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5j: un solo giorno del mese concentra il %%% delle date d''inizio (%)', v_pct, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT max(pct), min(etichetta) INTO v_pct, v_sample FROM (
@@ -2381,8 +2839,19 @@ BEGIN
      GROUP BY extract(month FROM user_prof_exp_start_date)) x
    WHERE pct > 20;
   IF v_pct IS NOT NULL THEN
-    RAISE EXCEPTION 'C5j(ii): un solo mese concentra il %%% delle date d''inizio (%)', v_pct, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5j(ii): un solo mese concentra il %%% delle date d''inizio (%)', v_pct, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2397,13 +2866,20 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(DISTINCT user_position_assignment_user_id) INTO v_cnt
   FROM sys.sys_user_position_assignments
   WHERE user_position_assignment_tenant_id = c_rtl
     AND user_position_assignment_status = 'ENDED';
   IF v_cnt < 20 THEN
-    RAISE EXCEPTION 'C5k: solo % persone hanno un incarico precedente in tre anni: la mobilità interna non è rappresentata', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C5k: solo % persone hanno un incarico precedente in tre anni: la mobilità interna non è rappresentata', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -2416,7 +2892,12 @@ BEGIN
     AND prec.user_position_assignment_status = 'ENDED'
     AND prec.user_position_assignment_end_date >= att.user_position_assignment_start_date;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5k(ii): % incarichi precedenti che si sovrappongono a quello in corso (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5k(ii): % incarichi precedenti che si sovrappongono a quello in corso (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -2428,8 +2909,19 @@ BEGIN
       SELECT min(em.user_employment_hire_date) FROM sys.sys_user_employment em
        WHERE em.user_employment_user_id = a.user_position_assignment_user_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C5k(iii): % incarichi che cominciano prima dell''assunzione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C5k(iii): % incarichi che cominciano prima dell''assunzione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2488,12 +2980,19 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*) INTO v_cnt
   FROM sys.sys_organization_unit_history h
   WHERE h.organization_unit_history_tenant_id = c_rtl;
   IF v_cnt < 5 THEN
-    RAISE EXCEPTION 'C6a: solo % eventi di storia organizzativa: la riorganizzazione non è raccontata', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C6a: solo % eventi di storia organizzativa: la riorganizzazione non è raccontata', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(o.organization_unit_code || ' @ ' ||
@@ -2504,8 +3003,13 @@ BEGIN
   WHERE h.organization_unit_history_tenant_id = c_rtl
     AND h.organization_unit_history_effective_at::date <> ALL (staging.storia36_riordini());
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6a(ii): % eventi datati fuori da un riordino registrato (es. %) — riordini registrati: %',
-      v_cnt, v_sample, staging.storia36_riordini();
+    BEGIN
+      RAISE EXCEPTION 'C6a(ii): % eventi datati fuori da un riordino registrato (es. %) — riordini registrati: %',
+        v_cnt, v_sample, staging.storia36_riordini();
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
@@ -2515,7 +3019,12 @@ BEGIN
   WHERE h.organization_unit_history_tenant_id = c_rtl
     AND (u.user_id IS NULL OR u.user_tenant_id IS DISTINCT FROM h.organization_unit_history_tenant_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6a(iii): % eventi organizzativi senza un autore del tenant (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C6a(iii): % eventi organizzativi senza un autore del tenant (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- un «cambiamento» che non cambia nulla è rumore, non storia
@@ -2526,8 +3035,19 @@ BEGIN
     AND h.organization_unit_history_old_value IS NOT NULL
     AND h.organization_unit_history_old_value = h.organization_unit_history_new_value;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6a(iv): % eventi in cui il prima e il dopo coincidono (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C6a(iv): % eventi in cui il prima e il dopo coincidono (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2546,6 +3066,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
   FROM sys.sys_user_position_assignments a
@@ -2555,7 +3077,12 @@ BEGIN
     AND a.user_position_assignment_status = 'ACTIVE'
     AND p.position_tenant_id IS DISTINCT FROM a.user_position_assignment_tenant_id;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6b: % persone assegnate a una posizione di un altro tenant (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C6b: % persone assegnate a una posizione di un altro tenant (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- il genitore esiste (FK), ma nulla impedisce che l'albero si chiuda su sé
@@ -2575,7 +3102,12 @@ BEGIN
   JOIN sys.sys_organization_units o ON o.organization_unit_id = r.partenza
   WHERE r.corrente = r.partenza;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6b(ii): % unità che risalendo la gerarchia tornano su sé stesse (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C6b(ii): % unità che risalendo la gerarchia tornano su sé stesse (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- e ogni unità del tenant appartiene a un genitore dello STESSO tenant
@@ -2585,8 +3117,19 @@ BEGIN
   WHERE o.organization_unit_tenant_id = c_rtl
     AND p.organization_unit_tenant_id IS DISTINCT FROM o.organization_unit_tenant_id;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6b(iii): % unità appese a un genitore di un altro tenant (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C6b(iii): % unità appese a un genitore di un altro tenant (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2602,6 +3145,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   -- #163 — L'ULTIMO EVENTO, NON OGNI EVENTO.
   -- La stesura precedente confrontava OGNI esito col nome di oggi. Era giusta finche'
@@ -2624,7 +3169,12 @@ BEGIN
                   h.organization_unit_history_effective_at DESC, h.created_at DESC) u
   WHERE u.esito IS DISTINCT FROM u.oggi;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6c: % unità il cui ULTIMO esito di storia non è il nome che portano oggi (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C6c: % unità il cui ULTIMO esito di storia non è il nome che portano oggi (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- Stessa correzione per gli spostamenti: e' l'ultimo che deve finire dove l'unita sta
@@ -2644,7 +3194,12 @@ BEGIN
                   h.organization_unit_history_effective_at DESC, h.created_at DESC) u
   WHERE u.approdo IS DISTINCT FROM u.padre_oggi;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6c(ii): % unità il cui ULTIMO spostamento non finisce dove stanno oggi (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C6c(ii): % unità il cui ULTIMO spostamento non finisce dove stanno oggi (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(o.organization_unit_code) INTO v_cnt, v_sample
@@ -2655,8 +3210,19 @@ BEGIN
     AND (h.organization_unit_history_old_value->>'parent_name')
         IS NOT DISTINCT FROM (h.organization_unit_history_new_value->>'parent_name');
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6c(iii): % spostamenti che partono e arrivano sotto lo stesso genitore (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C6c(iii): % spostamenti che partono e arrivano sotto lo stesso genitore (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2670,11 +3236,18 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*) INTO v_cnt FROM sys.sys_blueprint_activations
   WHERE blueprint_activation_tenant_id = c_rtl AND blueprint_activation_status = 'ACTIVE';
   IF v_cnt = 0 THEN
-    RAISE EXCEPTION 'C6d: nessun blueprint attivo: il modello organizzativo non è adottato';
+    BEGIN
+      RAISE EXCEPTION 'C6d: nessun blueprint attivo: il modello organizzativo non è adottato';
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(a.blueprint_activation_id::text) INTO v_cnt, v_sample
@@ -2684,7 +3257,12 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_blueprint_overrides o
                      WHERE o.blueprint_override_activation_id = a.blueprint_activation_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6d(ii): % attivazioni senza una sola deroga: il modello è adottato in blocco (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C6d(ii): % attivazioni senza una sola deroga: il modello è adottato in blocco (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(r.blueprint_process_code) INTO v_cnt, v_sample
@@ -2696,7 +3274,12 @@ BEGIN
       OR o.blueprint_override_rationale IS NULL
       OR length(trim(o.blueprint_override_rationale)) < 10);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6d(iii): % deroghe orfane o senza motivazione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C6d(iii): % deroghe orfane o senza motivazione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*) INTO v_cnt FROM (
@@ -2706,8 +3289,19 @@ BEGIN
      WHERE a.blueprint_activation_tenant_id = c_rtl
      GROUP BY 1, 2 HAVING count(*) > 1) x;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C6d(iv): % processi con più di una deroga sulla stessa attivazione', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C6d(iv): % processi con più di una deroga sulla stessa attivazione', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2723,6 +3317,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   -- una richiesta chiusa non lascia passi indecisi al livello che l'ha chiusa
   SELECT count(*), min(r.approval_request_title) INTO v_cnt, v_sample
@@ -2733,7 +3329,12 @@ BEGIN
                  WHERE s.approval_step_request_id = r.approval_request_id
                    AND s.approval_step_status = 'PENDING');
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C7a: % richieste approvate con passi ancora in attesa (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C7a: % richieste approvate con passi ancora in attesa (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- una richiesta respinta porta il rifiuto che l'ha causata
@@ -2745,7 +3346,12 @@ BEGIN
                      WHERE s.approval_step_request_id = r.approval_request_id
                        AND s.approval_step_status = 'REJECTED');
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C7a(ii): % richieste respinte senza un passo di rifiuto (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C7a(ii): % richieste respinte senza un passo di rifiuto (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- ogni decisione ha un autore e una data, e non precede la richiesta
@@ -2758,7 +3364,12 @@ BEGIN
       OR s.approval_step_decided_by IS NULL
       OR s.approval_step_decided_at < r.created_at);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C7a(iii): % decisioni senza autore, senza data o anteriori alla richiesta (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C7a(iii): % decisioni senza autore, senza data o anteriori alla richiesta (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- una richiesta ancora aperta ha qualcosa da decidere
@@ -2770,7 +3381,12 @@ BEGIN
                      WHERE s.approval_step_request_id = r.approval_request_id
                        AND s.approval_step_status = 'PENDING');
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C7a(iv): % richieste in attesa senza un solo passo da decidere (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C7a(iv): % richieste in attesa senza un solo passo da decidere (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- ogni richiesta ha almeno un passo: un'approvazione senza approvatori non
@@ -2781,7 +3397,12 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_approval_steps s
                      WHERE s.approval_step_request_id = r.approval_request_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C7a(v): % richieste senza alcun approvatore (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C7a(v): % richieste senza alcun approvatore (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- i livelli sono una catena: 1, 2, 3… senza buchi. Il motore materializza
@@ -2800,8 +3421,19 @@ BEGIN
     AND g.livelli > 0
     AND (g.primo <> 1 OR g.ultimo <> g.livelli);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C7a(vi): % richieste con i livelli non consecutivi da 1 (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C7a(vi): % richieste con i livelli non consecutivi da 1 (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2815,6 +3447,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(r.approval_request_resource_type || ' ' || r.approval_request_resource_id)
     INTO v_cnt, v_sample
@@ -2832,7 +3466,12 @@ BEGIN
                         WHERE i.training_initiative_id = r.approval_request_resource_id))
     );
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C7b: % approvazioni che puntano a una risorsa inesistente (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C7b: % approvazioni che puntano a una risorsa inesistente (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- per le assenze, chi ha firmato nel registro è chi risulta averle approvate:
@@ -2845,7 +3484,12 @@ BEGIN
     AND r.approval_request_resource_type = 'TIME_OFF_REQUEST'
     AND s.approval_step_approver_user_id IS DISTINCT FROM t.request_approver_user_id;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C7b(ii): % approvazioni di assenza firmate da chi non risulta averle approvate (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C7b(ii): % approvazioni di assenza firmate da chi non risulta averle approvate (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- e lo stato concorda: un''assenza approvata non può avere una richiesta respinta
@@ -2857,8 +3501,19 @@ BEGIN
     AND ((t.request_status = 'APPROVED' AND r.approval_request_status NOT IN ('APPROVED', 'APPLIED'))
       OR (t.request_status = 'PENDING'  AND r.approval_request_status <> 'PENDING'));
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C7b(iii): % approvazioni il cui esito contraddice lo stato dell''assenza (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C7b(iii): % approvazioni il cui esito contraddice lo stato dell''assenza (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -2922,6 +3577,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   -- un ciclo chiuso senza domande non si è svolto: o è archiviato, o mente
   SELECT count(*), min(s.survey_title) INTO v_cnt, v_sample
@@ -2931,7 +3588,12 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_survey_questions q
                      WHERE q.survey_question_survey_id = s.survey_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C8a: % rilevazioni chiuse senza una sola domanda (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C8a: % rilevazioni chiuse senza una sola domanda (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- e nessuno resta «in corso» quando la sua finestra è chiusa da un mese
@@ -2942,7 +3604,12 @@ BEGIN
     AND s.survey_end_date IS NOT NULL
     AND s.survey_end_date::date < p_end - 30;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C8a(ii): % rilevazioni ancora aperte oltre la loro scadenza (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C8a(ii): % rilevazioni ancora aperte oltre la loro scadenza (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- nessun ciclo può avere più rispondenti che invitati: è impossibile, e
@@ -2959,7 +3626,12 @@ BEGIN
   ) x
   WHERE x.tasso > 100;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C8a(iii): % rilevazioni con più rispondenti che invitati (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C8a(iii): % rilevazioni con più rispondenti che invitati (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- il tasso di risposta è quello di un'azienda vera: fra il 55% e il 90%
@@ -2976,7 +3648,12 @@ BEGIN
   ) x
   WHERE x.tasso IS NULL OR x.tasso < 55 OR x.tasso > 90;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C8a(iv): % rilevazioni con un tasso di risposta fuori dal credibile 55-90%% (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C8a(iv): % rilevazioni con un tasso di risposta fuori dal credibile 55-90%% (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- si ascolta almeno due volte l'anno
@@ -2991,8 +3668,19 @@ BEGIN
   ) x
   WHERE x.cicli < 2;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C8a(v): % anni con meno di due rilevazioni (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C8a(v): % anni con meno di due rilevazioni (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3008,6 +3696,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(g.graph_code) INTO v_cnt, v_sample
   FROM sys.sys_visualization_graphs g
@@ -3015,7 +3705,12 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_visualization_layouts l
                      WHERE l.layout_graph_id = g.graph_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C11a: % grafi attivi senza una disposizione salvata (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C11a: % grafi attivi senza una disposizione salvata (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(g.graph_code) INTO v_cnt, v_sample
@@ -3026,7 +3721,12 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_visualization_node_layouts nl
                      WHERE nl.layout_id = l.layout_id AND nl.node_id = n.node_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C11a(ii): % nodi senza posizione nella disposizione predefinita (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C11a(ii): % nodi senza posizione nella disposizione predefinita (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(n.node_label) INTO v_cnt, v_sample
@@ -3034,7 +3734,12 @@ BEGIN
   JOIN sys.sys_visualization_graphs g ON g.graph_id = n.node_graph_id
   WHERE g.graph_tenant_id = c_rtl AND n.node_type IS NULL;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C11a(iii): % nodi senza tipo: nessuno stile può applicarsi (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C11a(iii): % nodi senza tipo: nessuno stile può applicarsi (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(DISTINCT n.node_type) INTO v_cnt
@@ -3044,8 +3749,19 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_visualization_styles s
                      WHERE s.style_graph_id = g.graph_id AND s.style_node_type = n.node_type);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C11a(iv): % tipi di nodo senza uno stile definito', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C11a(iv): % tipi di nodo senza uno stile definito', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3061,11 +3777,18 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*) INTO v_cnt FROM sys.sys_seed_acquisition_runs
   WHERE seed_acquisition_run_tenant_id = c_rtl;
   IF v_cnt < 5 THEN
-    RAISE EXCEPTION 'C11b: solo % corse di acquisizione registrate: la pipeline non documenta il programma', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C11b: solo % corse di acquisizione registrate: la pipeline non documenta il programma', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(r.seed_acquisition_run_code) INTO v_cnt, v_sample
@@ -3074,7 +3797,12 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_seed_candidate_records c
                      WHERE c.seed_candidate_record_run_id = r.seed_acquisition_run_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C11b(ii): % corse senza un solo record candidato (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C11b(ii): % corse senza un solo record candidato (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(c.seed_candidate_record_natural_key) INTO v_cnt, v_sample
@@ -3083,7 +3811,12 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_seed_validation_results v
                      WHERE v.seed_validation_result_candidate_id = c.seed_candidate_record_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C11b(iii): % record candidati senza una sola validazione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C11b(iii): % record candidati senza una sola validazione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(c.seed_candidate_record_natural_key) INTO v_cnt, v_sample
@@ -3094,7 +3827,12 @@ BEGIN
                      WHERE d.seed_approval_decision_candidate_id = c.seed_candidate_record_id
                        AND d.seed_approval_decision_status = 'APPROVED');
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C11b(iv): % record applicati senza approvazione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C11b(iv): % record applicati senza approvazione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- e ogni corsa dichiara la fonte da cui i dati vengono
@@ -3104,8 +3842,19 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_seed_source_evidence e
                      WHERE e.seed_source_evidence_candidate_id = c.seed_candidate_record_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C11b(v): % record senza la fonte da cui vengono (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C11b(v): % record senza la fonte da cui vengono (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3179,6 +3928,8 @@ DECLARE
   v_day   text;
   v_bad   bigint;
   v_smpl  text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   -- (i) nessun giorno domina le registrazioni
   FOR v_i IN 1 .. array_length(c_reg, 1) LOOP
@@ -3195,8 +3946,13 @@ BEGIN
       v_tab, v_col, v_col, v_col, v_tab, v_col) INTO v_top, v_day;
 
     IF v_n >= 30 AND v_top::numeric / v_n > 0.40 THEN
-      RAISE EXCEPTION 'C12a: %.% concentra % delle % registrazioni in un solo giorno (%): e'' la data del popolamento, non quella del fatto',
-        v_tab, v_col, round(v_top::numeric / v_n * 100) || '%', v_n, v_day;
+      BEGIN
+        RAISE EXCEPTION 'C12a: %.% concentra % delle % registrazioni in un solo giorno (%): e'' la data del popolamento, non quella del fatto',
+          v_tab, v_col, round(v_top::numeric / v_n * 100) || '%', v_n, v_day;
+      EXCEPTION WHEN OTHERS THEN
+        GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+        v_guasti := array_append(v_guasti, v_g);
+      END;
     END IF;
 
     -- la registrazione non puo' precedere di piu' di un anno il fatto che segue
@@ -3206,8 +3962,13 @@ BEGIN
            AND %I < (%I::timestamptz - interval ''1 year'')',
         v_tab, v_col, v_fact, v_col, v_fact) INTO v_bad;
       IF v_bad > 0 THEN
-        RAISE EXCEPTION 'C12a(ii): %.%: % righe registrate piu'' di un anno PRIMA del fatto (%)',
-          v_tab, v_col, v_bad, v_fact;
+        BEGIN
+          RAISE EXCEPTION 'C12a(ii): %.%: % righe registrate piu'' di un anno PRIMA del fatto (%)',
+            v_tab, v_col, v_bad, v_fact;
+        EXCEPTION WHEN OTHERS THEN
+          GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+          v_guasti := array_append(v_guasti, v_g);
+        END;
       END IF;
     END IF;
   END LOOP;
@@ -3231,9 +3992,20 @@ BEGIN
           query_to_xml(format('SELECT count(*) AS n FROM sys.%I', c.table_name),
                        false, true, '')))[1]::text::bigint >= 30;
   IF v_bad > 0 THEN
-    RAISE EXCEPTION 'C12a(iii): % colonne di registrazione fuori dal perimetro del check (es. %): vanno sorvegliate o esentate con motivo',
-      v_bad, v_smpl;
+    BEGIN
+      RAISE EXCEPTION 'C12a(iii): % colonne di registrazione fuori dal perimetro del check (es. %): vanno sorvegliate o esentate con motivo',
+        v_bad, v_smpl;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3256,6 +4028,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_old text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(overtime_date)::text INTO v_cnt, v_old
   FROM sys.sys_overtime
@@ -3263,8 +4037,13 @@ BEGIN
     AND overtime_status = 'PENDING'
     AND overtime_date < (current_date - 60);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C12b: % straordinari in attesa da oltre 60 giorni (il piu'' vecchio del %): la coda non e'' mai stata lavorata',
-      v_cnt, v_old;
+    BEGIN
+      RAISE EXCEPTION 'C12b: % straordinari in attesa da oltre 60 giorni (il piu'' vecchio del %): la coda non e'' mai stata lavorata',
+        v_cnt, v_old;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*) INTO v_cnt
@@ -3272,8 +4051,19 @@ BEGIN
   WHERE overtime_tenant_id = c_rtl
     AND overtime_approved_by_user_id = overtime_subject_user_id;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C12b(ii): % straordinari autorizzati dalla persona stessa', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C12b(ii): % straordinari autorizzati dalla persona stessa', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3293,17 +4083,29 @@ DECLARE
   v_min date;
   v_max date;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(cal_date), max(cal_date) INTO v_cnt, v_min, v_max
     FROM staging.storia36_calendar;
 
   -- (i) copertura e densità: proprietà, non fotografia (il massimo può crescere)
   IF v_min <> DATE '2023-08-01' OR v_max < DATE '2026-07-31' THEN
-    RAISE EXCEPTION 'C12c(i): il calendario non copre la finestra di costruzione (min=%, max=%)', v_min, v_max;
+    BEGIN
+      RAISE EXCEPTION 'C12c(i): il calendario non copre la finestra di costruzione (min=%, max=%)', v_min, v_max;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
   IF v_cnt <> (v_max - v_min) + 1 THEN
-    RAISE EXCEPTION 'C12c(i): calendario con buchi — % giorni presenti su % fra % e %',
-      v_cnt, (v_max - v_min) + 1, v_min, v_max;
+    BEGIN
+      RAISE EXCEPTION 'C12c(i): calendario con buchi — % giorni presenti su % fra % e %',
+        v_cnt, (v_max - v_min) + 1, v_min, v_max;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (ii) il calcolo delle festività coincide con la lista scritta a mano su
@@ -3316,7 +4118,12 @@ BEGIN
    WHERE c.cal_date BETWEEN DATE '2023-08-01' AND DATE '2026-07-31'
      AND c.holiday_name IS DISTINCT FROM staging.storia36_holiday_it(c.cal_date);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C12c(ii): % giorni in cui la festività calcolata non coincide con quella scritta (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C12c(ii): % giorni in cui la festività calcolata non coincide con quella scritta (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- (iii) coerenza is_workday su TUTTO il calendario, estensione compresa
@@ -3325,8 +4132,19 @@ BEGIN
    WHERE is_workday
      AND (extract(isodow FROM cal_date) IN (6, 7) OR holiday_name IS NOT NULL);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C12c(iii): % giorni marcati lavorativi che sono weekend o festivi (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C12c(iii): % giorni marcati lavorativi che sono weekend o festivi (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3341,6 +4159,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
   FROM sys.sys_users u
@@ -3348,7 +4168,12 @@ BEGIN
     AND (SELECT count(DISTINCT c.consent_purpose) FROM sys.sys_user_consents c
           WHERE c.consent_user_id = u.user_id) < 4;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C10a: % persone che non hanno espresso una scelta su tutti e quattro i trattamenti (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C10a: % persone che non hanno espresso una scelta su tutti e quattro i trattamenti (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -3359,7 +4184,12 @@ BEGIN
       SELECT min(e.user_employment_hire_date) FROM sys.sys_user_employment e
        WHERE e.user_employment_user_id = c.consent_user_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C10a(ii): % scelte espresse prima dell''ingresso in azienda (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C10a(ii): % scelte espresse prima dell''ingresso in azienda (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
@@ -3373,8 +4203,19 @@ BEGIN
                        AND c2.consent_action = 'GRANT'
                        AND c2.consent_occurred_at < c.consent_occurred_at);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C10a(iii): % revoche di un consenso che non era mai stato dato (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C10a(iii): % revoche di un consenso che non era mai stato dato (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3388,11 +4229,18 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*) INTO v_cnt FROM sys.sys_gdpr_requests
   WHERE gdpr_request_tenant_id = c_rtl;
   IF v_cnt = 0 THEN
-    RAISE EXCEPTION 'C10b: nessuna richiesta dell''interessato in tre anni: il canale non è mai stato usato';
+    BEGIN
+      RAISE EXCEPTION 'C10b: nessuna richiesta dell''interessato in tre anni: il canale non è mai stato usato';
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(g.gdpr_request_id::text) INTO v_cnt, v_sample
@@ -3401,7 +4249,12 @@ BEGIN
     AND g.gdpr_request_report->>'giorni_impiegati' IS NOT NULL
     AND (g.gdpr_request_report->>'giorni_impiegati')::int > 30;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C10b(ii): % richieste chiuse oltre i trenta giorni di legge (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C10b(ii): % richieste chiuse oltre i trenta giorni di legge (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(g.gdpr_request_id::text) INTO v_cnt, v_sample
@@ -3410,8 +4263,19 @@ BEGIN
   WHERE g.gdpr_request_tenant_id = c_rtl
     AND (u.user_id IS NULL OR u.user_tenant_id IS DISTINCT FROM g.gdpr_request_tenant_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C10b(iii): % richieste su una persona che non appartiene al tenant (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C10b(iii): % richieste su una persona che non appartiene al tenant (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3426,6 +4290,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(w.whistleblowing_report_tracking_code) INTO v_cnt, v_sample
   FROM sys.sys_whistleblowing_reports w
@@ -3436,7 +4302,12 @@ BEGIN
       WHERE ur.user_auth_role_user_id = w.whistleblowing_report_assignee_user_id
         AND r.auth_role_code = 'WHISTLEBLOWING_CUSTODIAN');
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C10c: % segnalazioni affidate a chi non è il custode (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C10c: % segnalazioni affidate a chi non è il custode (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(w.whistleblowing_report_tracking_code) INTO v_cnt, v_sample
@@ -3446,7 +4317,12 @@ BEGIN
     AND (w.whistleblowing_report_public_message IS NULL
       OR length(trim(w.whistleblowing_report_public_message)) < 20);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C10c(ii): % segnalazioni chiuse senza un riscontro a chi le ha fatte (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C10c(ii): % segnalazioni chiuse senza un riscontro a chi le ha fatte (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*) INTO v_cnt FROM (
@@ -3459,8 +4335,19 @@ BEGIN
      WHERE whistleblowing_report_tenant_id = c_rtl
      GROUP BY 1 HAVING count(*) > 1) x;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C10c(iii): % segnalazioni con codice di riscontro assente o ripetuto', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C10c(iii): % segnalazioni con codice di riscontro assente o ripetuto', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3474,6 +4361,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(u.user_email) INTO v_cnt, v_sample
   FROM sys.sys_auth_login_events le
@@ -3483,7 +4372,12 @@ BEGIN
       SELECT min(e.user_employment_hire_date) FROM sys.sys_user_employment e
        WHERE e.user_employment_user_id = le.auth_login_event_user_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C10d: % accessi registrati prima dell''assunzione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C10d: % accessi registrati prima dell''assunzione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(DISTINCT le.auth_login_event_user_id) INTO v_cnt
@@ -3491,8 +4385,19 @@ BEGIN
   JOIN sys.sys_users u ON u.user_id = le.auth_login_event_user_id
   WHERE u.user_tenant_id = c_rtl AND u.user_status = 'ACTIVE';
   IF v_cnt < 100 THEN
-    RAISE EXCEPTION 'C10d(ii): solo % persone risultano avere mai usato il sistema', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C10d(ii): solo % persone risultano avere mai usato il sistema', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3508,12 +4413,19 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*) INTO v_cnt
   FROM sys.sys_content_documents d
   WHERE d.document_tenant_id = c_rtl AND d.document_status = 'published';
   IF v_cnt < 5 THEN
-    RAISE EXCEPTION 'C9a: solo % documenti pubblicati: il manuale del dipendente è vuoto', v_cnt;
+    BEGIN
+      RAISE EXCEPTION 'C9a: solo % documenti pubblicati: il manuale del dipendente è vuoto', v_cnt;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- ogni documento pubblicato ha almeno una versione
@@ -3523,7 +4435,12 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_content_versions v
                      WHERE v.version_document_id = d.document_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C9a(ii): % documenti pubblicati senza una sola versione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C9a(ii): % documenti pubblicati senza una sola versione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- i numeri di versione sono consecutivi da 1 e le date crescono con loro
@@ -3543,7 +4460,12 @@ BEGIN
     AND g.quante > 0
     AND (g.primo <> 1 OR g.ultimo <> g.quante OR COALESCE(g.fuori_ordine, false));
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C9a(iii): % documenti con versioni non consecutive o con date che tornano indietro (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C9a(iii): % documenti con versioni non consecutive o con date che tornano indietro (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- ogni revisione dice che cosa è cambiato
@@ -3557,7 +4479,12 @@ BEGIN
     AND d.document_status = 'published'
     AND (v.version_change_note IS NULL OR length(trim(v.version_change_note)) < 10);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C9a(iv): % revisioni che non dicono che cosa è cambiato (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C9a(iv): % revisioni che non dicono che cosa è cambiato (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- e il documento è allineato alla sua ultima revisione
@@ -3571,8 +4498,19 @@ BEGIN
     AND (d.document_current_version_id IS DISTINCT FROM ult.version_id
       OR d.document_effective_date IS DISTINCT FROM ult.created_at::date);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C9a(v): % documenti che non puntano alla loro ultima revisione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C9a(v): % documenti che non puntano alla loro ultima revisione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3586,11 +4524,18 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*) INTO v_cnt FROM sys.sys_content_categories
   WHERE category_tenant_id = c_rtl;
   IF v_cnt = 0 THEN
-    RAISE EXCEPTION 'C9b: nessuna categoria di contenuto: i documenti non hanno dove stare';
+    BEGIN
+      RAISE EXCEPTION 'C9b: nessuna categoria di contenuto: i documenti non hanno dove stare';
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   SELECT count(*), min(d.document_title) INTO v_cnt, v_sample
@@ -3598,7 +4543,12 @@ BEGIN
   WHERE d.document_tenant_id = c_rtl AND d.document_status = 'published'
     AND d.document_category_id IS NULL;
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C9b(ii): % documenti pubblicati senza categoria (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C9b(ii): % documenti pubblicati senza categoria (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- una categoria che non contiene niente non serve a nessuno
@@ -3609,8 +4559,19 @@ BEGIN
     AND NOT EXISTS (SELECT 1 FROM sys.sys_content_documents d
                      WHERE d.document_category_id = c.category_id);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C9b(iii): % categorie senza un solo documento (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C9b(iii): % categorie senza un solo documento (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3627,6 +4588,8 @@ DECLARE
   v_prima numeric;
   v_dopo  numeric;
   v_fine  numeric;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT round(avg(r.survey_response_rating_value), 2) INTO v_prima
   FROM sys.sys_survey_responses r
@@ -3645,17 +4608,38 @@ BEGIN
   WHERE s.survey_tenant_id = c_rtl AND s.survey_start_date::date >= DATE '2026-01-01';
 
   IF v_prima IS NULL OR v_dopo IS NULL OR v_fine IS NULL THEN
-    RAISE EXCEPTION 'C8b: manca la misura del clima prima (%), subito dopo (%) o a distanza (%) dalla riorganizzazione',
-      v_prima, v_dopo, v_fine;
+    BEGIN
+      RAISE EXCEPTION 'C8b: manca la misura del clima prima (%), subito dopo (%) o a distanza (%) dalla riorganizzazione',
+        v_prima, v_dopo, v_fine;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
   IF v_prima - v_dopo < 0.30 THEN
-    RAISE EXCEPTION 'C8b(ii): il clima non registra la riorganizzazione: prima %, subito dopo % (flessione attesa >= 0,30)',
-      v_prima, v_dopo;
+    BEGIN
+      RAISE EXCEPTION 'C8b(ii): il clima non registra la riorganizzazione: prima %, subito dopo % (flessione attesa >= 0,30)',
+        v_prima, v_dopo;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
   IF v_fine - v_dopo < 0.30 THEN
-    RAISE EXCEPTION 'C8b(iii): dopo la flessione non c''è recupero: subito dopo %, a distanza % (ripresa attesa >= 0,30)',
-      v_dopo, v_fine;
+    BEGIN
+      RAISE EXCEPTION 'C8b(iii): dopo la flessione non c''è recupero: subito dopo %, a distanza % (ripresa attesa >= 0,30)',
+        v_dopo, v_fine;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ----------------------------------------------------------------------------
@@ -3670,6 +4654,8 @@ DECLARE
   c_rtl constant uuid := '86ba7a65-217f-48ba-8ce5-5c09b40a66b0';
   v_cnt bigint;
   v_sample text;
+  v_guasti text[] := '{}';
+  v_g      text;
 BEGIN
   SELECT count(*), min(x.titolo) INTO v_cnt, v_sample
   FROM (
@@ -3685,7 +4671,12 @@ BEGIN
                      WHERE p.action_plan_source_id = x.survey_id
                        AND p.action_plan_tenant_id = c_rtl);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C8c: % rilevazioni sotto soglia senza un solo piano d''azione (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C8c: % rilevazioni sotto soglia senza un solo piano d''azione (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
 
   -- e un piano senza responsabile o senza scadenza non è un piano
@@ -3694,8 +4685,19 @@ BEGIN
   WHERE p.action_plan_tenant_id = c_rtl
     AND (p.action_plan_owner_user_id IS NULL OR p.action_plan_due_date IS NULL);
   IF v_cnt > 0 THEN
-    RAISE EXCEPTION 'C8c(ii): % piani d''azione senza responsabile o senza scadenza (es. %)', v_cnt, v_sample;
+    BEGIN
+      RAISE EXCEPTION 'C8c(ii): % piani d''azione senza responsabile o senza scadenza (es. %)', v_cnt, v_sample;
+    EXCEPTION WHEN OTHERS THEN
+      GET STACKED DIAGNOSTICS v_g = MESSAGE_TEXT;
+      v_guasti := array_append(v_guasti, v_g);
+    END;
   END IF;
+  -- Un solo verdetto, con TUTTI i guasti: fermarsi al primo ne
+  -- nasconderebbe gli altri fino alla corsa successiva.
+  IF array_length(v_guasti, 1) > 0 THEN
+    RAISE EXCEPTION '%', array_to_string(v_guasti, ' | ');
+  END IF;
+
 END $fn$;
 
 -- ============================================================================
@@ -3724,7 +4726,7 @@ BEGIN
     PERFORM staging.storia36_check_g1(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'G1:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%G1:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3741,7 +4743,7 @@ BEGIN
     PERFORM staging.storia36_check_g2();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'G2:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%G2:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3759,7 +4761,7 @@ BEGIN
     PERFORM staging.storia36_check_g4();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'G4:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%G4:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3777,7 +4779,7 @@ BEGIN
     PERFORM staging.storia36_check_g6();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'G6:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%G6:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3799,7 +4801,7 @@ BEGIN
     PERFORM staging.storia36_check_c1a(current_setting('storia36.window_start')::date);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C1a:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C1a:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3817,7 +4819,7 @@ BEGIN
     PERFORM staging.storia36_check_c1b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C1b:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C1b:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3836,7 +4838,7 @@ BEGIN
     PERFORM staging.storia36_check_c1c(current_setting('storia36.window_start')::date);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C1c%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C1c%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3853,7 +4855,7 @@ BEGIN
     PERFORM staging.storia36_check_c1d();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C1d:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C1d:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3873,7 +4875,7 @@ BEGIN
     PERFORM staging.storia36_check_c2a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C2a:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C2a:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3892,7 +4894,7 @@ BEGIN
     PERFORM staging.storia36_check_c2c();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C2c:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C2c:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3911,7 +4913,7 @@ BEGIN
     PERFORM staging.storia36_check_c2d();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C2d:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C2d:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3934,7 +4936,7 @@ BEGIN
     PERFORM staging.storia36_check_c2b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C2b:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C2b:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3954,7 +4956,7 @@ BEGIN
     PERFORM staging.storia36_check_c2e();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C2e:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C2e:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3974,7 +4976,7 @@ BEGIN
     PERFORM staging.storia36_check_c2f();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C2f:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C2f:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -3991,7 +4993,7 @@ BEGIN
     PERFORM staging.storia36_check_c2g();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C2g:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C2g:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4008,7 +5010,7 @@ BEGIN
     PERFORM staging.storia36_check_c3b(current_setting('storia36.window_start')::date);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C3b:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C3b:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4027,7 +5029,7 @@ BEGIN
     PERFORM staging.storia36_check_c3c(current_setting('storia36.window_start')::date);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C3c:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C3c:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4045,7 +5047,7 @@ BEGIN
     PERFORM staging.storia36_check_c3d();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C3d:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C3d:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4062,7 +5064,7 @@ BEGIN
     PERFORM staging.storia36_check_c3a(current_setting('storia36.window_start')::date);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C3a:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C3a:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4085,7 +5087,7 @@ BEGIN
     PERFORM staging.storia36_check_c3e();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C3e:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C3e:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4107,7 +5109,7 @@ BEGIN
     PERFORM staging.storia36_check_c4a(current_setting('storia36.window_start')::date, v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4a%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4a%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4128,7 +5130,7 @@ BEGIN
     PERFORM staging.storia36_check_c4b(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4b%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4b%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4147,7 +5149,7 @@ BEGIN
     PERFORM staging.storia36_check_c4c(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4c%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4c%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4187,7 +5189,7 @@ BEGIN
     PERFORM staging.storia36_check_c4d(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4d%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4d%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4214,7 +5216,7 @@ BEGIN
     PERFORM staging.storia36_check_c4e();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4e%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4e%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4234,7 +5236,7 @@ BEGIN
     PERFORM staging.storia36_check_c4f(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4f%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4f%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4254,7 +5256,7 @@ BEGIN
     PERFORM staging.storia36_check_c4d(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4d%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4d%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4274,7 +5276,7 @@ BEGIN
     PERFORM staging.storia36_check_c4c(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4c%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4c%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4294,7 +5296,7 @@ BEGIN
     PERFORM staging.storia36_check_c4b(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4b%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4b%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4319,7 +5321,7 @@ BEGIN
     PERFORM staging.storia36_check_c4g();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4g%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4g%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4344,7 +5346,7 @@ BEGIN
     PERFORM staging.storia36_check_c4a(current_setting('storia36.window_start')::date, v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4a%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4a%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4365,7 +5367,7 @@ BEGIN
     PERFORM staging.storia36_check_c4h(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4h%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4h%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4385,7 +5387,7 @@ BEGIN
     PERFORM staging.storia36_check_c4h(v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C4h%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C4h%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4403,7 +5405,7 @@ BEGIN
     PERFORM staging.storia36_check_c5a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5a%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5a%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4421,7 +5423,7 @@ BEGIN
     PERFORM staging.storia36_check_c5b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5b%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5b%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4442,7 +5444,7 @@ BEGIN
     PERFORM staging.storia36_check_c5c();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5c%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5c%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4459,7 +5461,7 @@ BEGIN
     PERFORM staging.storia36_check_c5d(current_setting('storia36.window_start')::date, v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5d%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5d%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4478,7 +5480,7 @@ BEGIN
     PERFORM staging.storia36_check_c5e();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5e%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5e%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4507,7 +5509,7 @@ BEGIN
     PERFORM staging.storia36_check_c5a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5a(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5a(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4526,7 +5528,7 @@ BEGIN
     PERFORM staging.storia36_check_c5a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5a(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5a(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4544,7 +5546,7 @@ BEGIN
     PERFORM staging.storia36_check_c5a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5a(iv)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5a(iv)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4561,7 +5563,7 @@ BEGIN
     PERFORM staging.storia36_check_c5b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5b(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5b(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4583,7 +5585,7 @@ BEGIN
     PERFORM staging.storia36_check_c5b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5b(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5b(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4603,7 +5605,7 @@ BEGIN
     PERFORM staging.storia36_check_c5c();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5c:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5c:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4621,7 +5623,7 @@ BEGIN
     PERFORM staging.storia36_check_c5c();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5c(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5c(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4650,7 +5652,7 @@ BEGIN
     PERFORM staging.storia36_check_c5c();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5c(iv)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5c(iv)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4666,7 +5668,7 @@ BEGIN
     PERFORM staging.storia36_check_c5d(current_setting('storia36.window_start')::date, v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5d(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5d(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4686,7 +5688,7 @@ BEGIN
     PERFORM staging.storia36_check_c5f();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5f:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5f:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4705,7 +5707,7 @@ BEGIN
     PERFORM staging.storia36_check_c5f();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5f(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5f(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4721,7 +5723,7 @@ BEGIN
     PERFORM staging.storia36_check_c5f();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5f(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5f(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4738,7 +5740,7 @@ BEGIN
     PERFORM staging.storia36_check_c5f();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5f(iv)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5f(iv)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4754,7 +5756,7 @@ BEGIN
     PERFORM staging.storia36_check_c5f();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5f(v)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5f(v)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4784,7 +5786,7 @@ BEGIN
     PERFORM staging.storia36_check_c5g();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5g:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5g:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4811,7 +5813,7 @@ BEGIN
     PERFORM staging.storia36_check_c5g();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5g(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5g(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4826,7 +5828,7 @@ BEGIN
     PERFORM staging.storia36_check_c5h();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5h:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5h:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4842,7 +5844,7 @@ BEGIN
     PERFORM staging.storia36_check_c5h();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5h(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5h(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4863,7 +5865,7 @@ BEGIN
     PERFORM staging.storia36_check_c5h();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5h(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5h(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4880,7 +5882,7 @@ BEGIN
     PERFORM staging.storia36_check_c5h();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5h(iv)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5h(iv)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4901,7 +5903,7 @@ BEGIN
     PERFORM staging.storia36_check_c5i();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5i:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5i:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4918,7 +5920,7 @@ BEGIN
     PERFORM staging.storia36_check_c5j();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5j:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5j:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4936,7 +5938,7 @@ BEGIN
     PERFORM staging.storia36_check_c5j();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5j(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5j(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4952,7 +5954,7 @@ BEGIN
     PERFORM staging.storia36_check_c5k();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5k:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5k:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4969,7 +5971,7 @@ BEGIN
     PERFORM staging.storia36_check_c5k();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5k(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5k(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -4987,7 +5989,7 @@ BEGIN
     PERFORM staging.storia36_check_c5k();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5k(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5k(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5004,7 +6006,7 @@ BEGIN
     PERFORM staging.storia36_check_c5l();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C5l:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C5l:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5024,7 +6026,7 @@ BEGIN
     PERFORM staging.storia36_check_c6a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6a:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6a:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5041,7 +6043,7 @@ BEGIN
     PERFORM staging.storia36_check_c6a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6a(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6a(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5078,7 +6080,7 @@ BEGIN
     PERFORM staging.storia36_check_c6a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6a(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6a(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5096,7 +6098,7 @@ BEGIN
     PERFORM staging.storia36_check_c6a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6a(iv)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6a(iv)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5116,7 +6118,7 @@ BEGIN
     PERFORM staging.storia36_check_c6b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6b:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6b:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5134,7 +6136,7 @@ BEGIN
     PERFORM staging.storia36_check_c6b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6b(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6b(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5154,7 +6156,7 @@ BEGIN
     PERFORM staging.storia36_check_c6b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6b(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6b(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5176,7 +6178,7 @@ BEGIN
     PERFORM staging.storia36_check_c6c();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6c:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6c:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5197,7 +6199,7 @@ BEGIN
     PERFORM staging.storia36_check_c6c();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6c(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6c(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5215,7 +6217,7 @@ BEGIN
     PERFORM staging.storia36_check_c6c();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6c(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6c(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5230,7 +6232,7 @@ BEGIN
     PERFORM staging.storia36_check_c6d();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6d:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6d:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5247,7 +6249,7 @@ BEGIN
     PERFORM staging.storia36_check_c6d();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6d(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6d(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5262,7 +6264,7 @@ BEGIN
     PERFORM staging.storia36_check_c6d();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C6d(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C6d(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5284,7 +6286,7 @@ BEGIN
     PERFORM staging.storia36_check_c7a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7a:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7a:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5301,7 +6303,7 @@ BEGIN
     PERFORM staging.storia36_check_c7a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7a(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7a(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5318,7 +6320,7 @@ BEGIN
     PERFORM staging.storia36_check_c7a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7a(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7a(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5335,7 +6337,7 @@ BEGIN
     PERFORM staging.storia36_check_c7a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7a(iv)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7a(iv)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5352,7 +6354,7 @@ BEGIN
     PERFORM staging.storia36_check_c7a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7a(v)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7a(v)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5372,7 +6374,7 @@ BEGIN
     PERFORM staging.storia36_check_c7a();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7a(vi)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7a(vi)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5390,7 +6392,7 @@ BEGIN
     PERFORM staging.storia36_check_c7b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7b:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7b:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5411,7 +6413,7 @@ BEGIN
     PERFORM staging.storia36_check_c7b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7b(ii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7b(ii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5430,7 +6432,7 @@ BEGIN
     PERFORM staging.storia36_check_c7b();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7b(iii)%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7b(iii)%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5446,7 +6448,7 @@ BEGIN
     PERFORM staging.storia36_check_c7c(current_setting('storia36.window_start')::date, v_end);
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7c:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7c:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5463,7 +6465,7 @@ BEGIN
     PERFORM staging.storia36_check_c7d();
     RAISE EXCEPTION 'ST_NOT_FIRED';
   EXCEPTION WHEN OTHERS THEN
-    IF SQLERRM LIKE 'C7d:%' THEN v_fired := true;
+    IF SQLERRM LIKE '%C7d:%' THEN v_fired := true;
     ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
     END IF;
   END;
@@ -5485,7 +6487,7 @@ BEGIN
       PERFORM staging.storia36_check_c8a(v_end);
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C8a:%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C8a:%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5502,7 +6504,7 @@ BEGIN
       PERFORM staging.storia36_check_c8a(v_end);
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C8a(ii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C8a(ii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5519,7 +6521,7 @@ BEGIN
       PERFORM staging.storia36_check_c8a(v_end);
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C8a(iii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C8a(iii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5536,7 +6538,7 @@ BEGIN
       PERFORM staging.storia36_check_c8a(v_end);
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C8a(iv)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C8a(iv)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5554,7 +6556,7 @@ BEGIN
       PERFORM staging.storia36_check_c8b();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C8b(ii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C8b(ii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5572,7 +6574,7 @@ BEGIN
       PERFORM staging.storia36_check_c8b();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C8b(iii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C8b(iii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5586,7 +6588,7 @@ BEGIN
       PERFORM staging.storia36_check_c8c();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C8c:%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C8c:%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5601,7 +6603,7 @@ BEGIN
       PERFORM staging.storia36_check_c8c();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C8c(ii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C8c(ii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5620,7 +6622,7 @@ BEGIN
       PERFORM staging.storia36_check_c9a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C9a:%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C9a:%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5646,7 +6648,7 @@ BEGIN
       PERFORM staging.storia36_check_c9a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C9a(iii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C9a(iii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5663,7 +6665,7 @@ BEGIN
       PERFORM staging.storia36_check_c9a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C9a(iv)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C9a(iv)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5679,7 +6681,7 @@ BEGIN
       PERFORM staging.storia36_check_c9a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C9a(v)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C9a(v)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5695,7 +6697,7 @@ BEGIN
       PERFORM staging.storia36_check_c9b();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C9b(ii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C9b(ii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5712,7 +6714,7 @@ BEGIN
       PERFORM staging.storia36_check_c9b();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C9b(iii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C9b(iii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5731,7 +6733,7 @@ BEGIN
       PERFORM staging.storia36_check_c10a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C10a:%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C10a:%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5746,7 +6748,7 @@ BEGIN
       PERFORM staging.storia36_check_c10a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C10a(ii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C10a(ii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5762,7 +6764,7 @@ BEGIN
       PERFORM staging.storia36_check_c10a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C10a(iii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C10a(iii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5779,7 +6781,7 @@ BEGIN
       PERFORM staging.storia36_check_c10b(v_end);
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C10b(ii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C10b(ii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5797,7 +6799,7 @@ BEGIN
       PERFORM staging.storia36_check_c10c();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C10c:%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C10c:%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5812,7 +6814,7 @@ BEGIN
       PERFORM staging.storia36_check_c10c();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C10c(ii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C10c(ii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5828,7 +6830,7 @@ BEGIN
       PERFORM staging.storia36_check_c10d();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C10d:%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C10d:%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5843,7 +6845,7 @@ BEGIN
       PERFORM staging.storia36_check_c10d();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C10d(ii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C10d(ii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5863,7 +6865,7 @@ BEGIN
       PERFORM staging.storia36_check_c11a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C11a:%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C11a:%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5878,7 +6880,7 @@ BEGIN
       PERFORM staging.storia36_check_c11a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C11a(ii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C11a(ii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5894,7 +6896,7 @@ BEGIN
       PERFORM staging.storia36_check_c11a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C11a(iii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C11a(iii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5910,7 +6912,7 @@ BEGIN
       PERFORM staging.storia36_check_c11a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C11a(iv)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C11a(iv)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5925,7 +6927,7 @@ BEGIN
       PERFORM staging.storia36_check_c11b();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C11b:%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C11b:%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5939,7 +6941,7 @@ BEGIN
       PERFORM staging.storia36_check_c11b();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C11b(iii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C11b(iii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5953,7 +6955,7 @@ BEGIN
       PERFORM staging.storia36_check_c11b();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C11b(iv)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C11b(iv)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5967,7 +6969,7 @@ BEGIN
       PERFORM staging.storia36_check_c11b();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C11b(v)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C11b(v)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5982,7 +6984,7 @@ BEGIN
       PERFORM staging.storia36_check_c12a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C12a:%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C12a:%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -5998,7 +7000,7 @@ BEGIN
       PERFORM staging.storia36_check_c12a();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C12a(iii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C12a(iii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -6013,7 +7015,7 @@ BEGIN
       PERFORM staging.storia36_check_c12b();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C12b:%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C12b:%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -6027,7 +7029,7 @@ BEGIN
       PERFORM staging.storia36_check_c12c();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C12c(i)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C12c(i)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -6044,7 +7046,7 @@ BEGIN
       PERFORM staging.storia36_check_c12c();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C12c(ii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C12c(ii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;
@@ -6058,7 +7060,7 @@ BEGIN
       PERFORM staging.storia36_check_c12c();
       RAISE EXCEPTION 'ST_NOT_FIRED';
     EXCEPTION WHEN OTHERS THEN
-      IF SQLERRM LIKE 'C12c(iii)%' THEN v_fired := true;
+      IF SQLERRM LIKE '%C12c(iii)%' THEN v_fired := true;
       ELSIF SQLERRM <> 'ST_NOT_FIRED' THEN RAISE;
       END IF;
     END;

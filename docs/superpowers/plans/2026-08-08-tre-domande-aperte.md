@@ -27,9 +27,24 @@ metodo di bonifica applicata: il registro e il piano sono ipotesi, il database �
 | **C2** | Guardia permanente: nessun segreto authenticator può stare in chiaro | Claude | vista sentinella creata, `db_health` la interroga, verde | ✅ `sys.v_mfa_secrets_in_cleartext`, selftest di accensione verde |
 | **B1** | Propagare la promozione dei 10 a `sys_user_employment` — **alla fonte** (mig. 000264), non a valle | Claude | `employment.salary = contract.RAL` su **158/158**; prova generale CI verde | ✅ **0 disallineati** (erano 10). Prova LIVE su PROD: Tommaso Fiore e Roberta Caputo vedono QD3 / 73.000 e 73.200 nel proprio portale |
 | **B2** | Sentinella: uno scarto busta↔contratto è ammesso **solo** se il contratto è più recente della busta | Claude | vista sentinella a **0**, e sa diventare rossa (selftest) | ✅ `sys.v_payslip_contract_mismatch` a 0; selftest riscritto dopo che il trigger `set_updated_at` l'aveva reso cieco |
-| **A1** | Le 39 funzioni multi-parte dichiarano **tutti** i loro guasti, non il primo | Claude | 0 funzioni con `RAISE EXCEPTION` di check non accumulato | ⬜ |
-| **A2** | I 125 selftest reggono al messaggio combinato (`LIKE 'X%'` → `LIKE '%X%'`) | Claude | `storia36.sh custodia` verde, tutti i selftest passano | ⬜ |
+| **A1** | Le 39 funzioni multi-parte dichiarano **tutti** i loro guasti, non il primo | Claude | 0 funzioni con `RAISE EXCEPTION` di check non accumulato | ✅ 39 funzioni, **99 sotto-verifiche** rese visibili. Prova: due guasti iniettati in C4h escono **insieme** in un messaggio solo |
+| **A2** | I 125 selftest reggono al messaggio combinato (`LIKE 'X%'` → `LIKE '%X%'`) | Claude | `storia36.sh custodia` verde, tutti i selftest passano | ✅ **256 selftest passati, 0 falliti**, custodia VERDE |
 | **D1** | Registrare «separare i due segreti» come voce, agganciata a #147 | Claude | blocco nel register, `handoff_lint` verde | ⬜ |
+
+### Cosa ha trovato A1 nel momento stesso in cui è entrato in funzione
+
+Alla prima corsa dopo la trasformazione la batteria è diventata **rossa su `C7a(v)`: 3 richieste
+di ferie senza alcun approvatore**. Il referto di ieri era verde, quindi non era un rosso nascosto:
+era comparso **stanotte**.
+
+**Causa**: `sys_approval_step_approver_fk` è `ON DELETE CASCADE`. Quando la migrazione `000295`
+ha rimosso l'account tecnico `admin@heuresys.com` (all'01:00 di stanotte), **ogni passo di
+approvazione in cui figurava come approvatore è stato cancellato a cascata, in silenzio**. Tre
+richieste di ferie del 2023, 2024 e 2025 — tutte in stato `APPLIED`, cioè approvate e godute —
+sono rimaste senza traccia di chi le avesse approvate.
+
+**Riparato** ri-eseguendo `db/seeds/storia36/07_approvals.sql`, il seed che *deriva* le
+approvazioni dai fatti: 748 → 751 passi, richieste senza passi 3 → 0. La custodia è tornata verde.
 
 **Confine di sessione dichiarato adesso**: C1·C2·B1·B2·D1 sono chiudibili in questa sessione.
 **A1 è la voce a rischio** — 39 funzioni su 6.610 righe. Se non chiude, si dichiara non chiusa.

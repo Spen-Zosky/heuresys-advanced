@@ -507,6 +507,11 @@
       "heuresys-source": "./src/schemas/content-blueprint-links.ts",
       "default": "./dist/schemas/content-blueprint-links.js"
     },
+    "./schemas/tenant-blueprints": {
+      "types": "./dist/schemas/tenant-blueprints.d.ts",
+      "heuresys-source": "./src/schemas/tenant-blueprints.ts",
+      "default": "./dist/schemas/tenant-blueprints.js"
+    },
     "./schemas/organization-unit-processes": {
       "types": "./dist/schemas/organization-unit-processes.d.ts",
       "heuresys-source": "./src/schemas/organization-unit-processes.ts",

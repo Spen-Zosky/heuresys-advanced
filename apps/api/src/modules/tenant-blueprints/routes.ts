@@ -1,0 +1,234 @@
+/**
+ * apps/api/src/modules/tenant-blueprints/routes.ts
+ * #131 Tenant Builder P1, T5 — le quindici rotte del fascicolo (§7).
+ *
+ * Ogni rotta porta `requirePermission`; ogni mutazione porta anche
+ * `app.verifyCsrf`. L'ordine nel `preHandler` non e' indifferente: il CSRF
+ * prima, il permesso dopo, come in tutti gli altri moduli.
+ */
+import { z } from "zod";
+import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import { actorFromRequest as actor } from "../../lib/actor.js";
+import { requirePermission } from "../../middleware/rbac.js";
+import {
+  TenantBlueprintSchema,
+  TenantBlueprintDetailSchema,
+  TenantBlueprintVersionSchema,
+  TenantBlueprintListQuerySchema,
+  TenantBlueprintListResponseSchema,
+  CreateTenantBlueprintBodySchema,
+  UpdateTenantBlueprintBodySchema,
+  LinkTenantBodySchema,
+  PatchIdentityBodySchema,
+  PinModelBodySchema,
+  PutProcessDecisionBodySchema,
+  ProcessDecisionListResponseSchema,
+  ModelProposalResponseSchema,
+  BlueprintDiffResponseSchema,
+  SubmitVersionResponseSchema,
+  TenantBlueprintIdParamSchema,
+  VersionParamSchema,
+  ProcessParamSchema,
+  DiffQuerySchema,
+} from "@heuresys/shared";
+import { tenantBlueprintsService as svc } from "./service.js";
+
+const READ = "tenant_blueprint:read";
+const WRITE = "tenant_blueprint:write";
+
+export const tenantBlueprintsRoutes: FastifyPluginAsyncZod = async (app) => {
+  app.get(
+    "/",
+    {
+      preHandler: [requirePermission(READ)],
+      schema: {
+        querystring: TenantBlueprintListQuerySchema,
+        response: { 200: TenantBlueprintListResponseSchema },
+      },
+    },
+    async (req) => svc.list(actor(req), req.query),
+  );
+
+  app.post(
+    "/",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: {
+        body: CreateTenantBlueprintBodySchema,
+        response: { 201: TenantBlueprintSchema },
+      },
+    },
+    async (req, reply) => {
+      const b = await svc.create(actor(req), req.body);
+      reply.code(201).send(b);
+    },
+  );
+
+  app.get(
+    "/:id",
+    {
+      preHandler: [requirePermission(READ)],
+      schema: {
+        params: TenantBlueprintIdParamSchema,
+        response: { 200: TenantBlueprintDetailSchema },
+      },
+    },
+    async (req) => svc.getById(actor(req), req.params.id),
+  );
+
+  app.patch(
+    "/:id",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: {
+        params: TenantBlueprintIdParamSchema,
+        body: UpdateTenantBlueprintBodySchema,
+        response: { 200: TenantBlueprintSchema },
+      },
+    },
+    async (req) => svc.update(actor(req), req.params.id, req.body),
+  );
+
+  app.post(
+    "/:id/link-tenant",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: {
+        params: TenantBlueprintIdParamSchema,
+        body: LinkTenantBodySchema,
+        response: { 200: TenantBlueprintSchema },
+      },
+    },
+    async (req) => svc.linkTenant(actor(req), req.params.id, req.body.tenantId),
+  );
+
+  app.get(
+    "/:id/versions/:number",
+    {
+      preHandler: [requirePermission(READ)],
+      schema: { params: VersionParamSchema, response: { 200: TenantBlueprintVersionSchema } },
+    },
+    async (req) => svc.getVersion(actor(req), req.params.id, req.params.number),
+  );
+
+  app.post(
+    "/:id/versions",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: {
+        params: TenantBlueprintIdParamSchema,
+        response: { 201: TenantBlueprintVersionSchema },
+      },
+    },
+    async (req, reply) => {
+      const v = await svc.openVersion(actor(req), req.params.id);
+      reply.code(201).send(v);
+    },
+  );
+
+  app.patch(
+    "/:id/versions/:number/identity",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: {
+        params: VersionParamSchema,
+        body: PatchIdentityBodySchema,
+        response: { 200: TenantBlueprintVersionSchema },
+      },
+    },
+    async (req) => svc.patchIdentity(actor(req), req.params.id, req.params.number, req.body),
+  );
+
+  app.get(
+    "/:id/versions/:number/model-proposal",
+    {
+      preHandler: [requirePermission(READ)],
+      schema: { params: VersionParamSchema, response: { 200: ModelProposalResponseSchema } },
+    },
+    async (req) => svc.modelProposal(actor(req), req.params.id, req.params.number),
+  );
+
+  app.put(
+    "/:id/versions/:number/model",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: {
+        params: VersionParamSchema,
+        body: PinModelBodySchema,
+        response: { 200: TenantBlueprintVersionSchema },
+      },
+    },
+    async (req) =>
+      svc.pinModel(actor(req), req.params.id, req.params.number, req.body.variantVersionId),
+  );
+
+  app.get(
+    "/:id/versions/:number/processes",
+    {
+      preHandler: [requirePermission(READ)],
+      schema: { params: VersionParamSchema, response: { 200: ProcessDecisionListResponseSchema } },
+    },
+    async (req) => svc.listProcesses(actor(req), req.params.id, req.params.number),
+  );
+
+  app.put(
+    "/:id/versions/:number/processes/:processId",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: {
+        params: ProcessParamSchema,
+        body: PutProcessDecisionBodySchema,
+        response: { 204: z.null() },
+      },
+    },
+    async (req, reply) => {
+      await svc.putDecision(
+        actor(req),
+        req.params.id,
+        req.params.number,
+        req.params.processId,
+        req.body,
+      );
+      reply.code(204).send(null);
+    },
+  );
+
+  app.delete(
+    "/:id/versions/:number/processes/:processId",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: { params: ProcessParamSchema, response: { 204: z.null() } },
+    },
+    async (req, reply) => {
+      await svc.deleteDecision(
+        actor(req),
+        req.params.id,
+        req.params.number,
+        req.params.processId,
+      );
+      reply.code(204).send(null);
+    },
+  );
+
+  app.post(
+    "/:id/versions/:number/submit",
+    {
+      preHandler: [app.verifyCsrf, requirePermission(WRITE)],
+      schema: { params: VersionParamSchema, response: { 200: SubmitVersionResponseSchema } },
+    },
+    async (req) => svc.submit(actor(req), req.params.id, req.params.number),
+  );
+
+  app.get(
+    "/:id/versions/:number/diff",
+    {
+      preHandler: [requirePermission(READ)],
+      schema: {
+        params: VersionParamSchema,
+        querystring: DiffQuerySchema,
+        response: { 200: BlueprintDiffResponseSchema },
+      },
+    },
+    async (req) => svc.diff(actor(req), req.params.id, req.params.number, req.query.against),
+  );
+};

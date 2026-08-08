@@ -85,6 +85,7 @@ import { operatingModelsRoutes } from "./modules/operating-models/routes.js";
 import { enterpriseTypingProfilesRoutes } from "./modules/enterprise-typing-profiles/routes.js";
 import { blueprintFamiliesRoutes } from "./modules/blueprint-families/routes.js";
 import { blueprintVariantsRoutes } from "./modules/blueprint-variants/routes.js";
+import { tenantBlueprintsRoutes } from "./modules/tenant-blueprints/routes.js";
 import { blueprintProcessesRoutes } from "./modules/blueprint-processes/routes.js";
 import { blueprintActivationsRoutes } from "./modules/blueprint-activations/routes.js";
 import { blueprintOverridesRoutes } from "./modules/blueprint-overrides/routes.js";
@@ -438,6 +439,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(blueprintProcessesRoutes, { prefix: "/v1/blueprint-processes" });
   await app.register(blueprintActivationsRoutes, { prefix: "/v1/blueprint-activations" });
   await app.register(blueprintOverridesRoutes, { prefix: "/v1/blueprint-overrides" });
+  await app.register(tenantBlueprintsRoutes, { prefix: "/v1/tenant-blueprints" });
   await app.register(processKpiTemplatesRoutes, { prefix: "/v1/process-kpi-templates" });
   await app.register(organizationUnitKpiTemplatesRoutes, { prefix: "/v1/organization-unit-kpi-templates" });
   // #164 F3 — le 4 superfici ETL brownfield sono RITIRATE (non piu' congelate).

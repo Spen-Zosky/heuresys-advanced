@@ -28,10 +28,10 @@ reali** (ADR-0026): niente si chiude su test verde.
 | id | cosa | chi | fatto significa | stato |
 |---|---|---|---|---|
 | **A0** | La mappa settore→famiglia di modelli (prerequisito emerso misurando: non esiste) | Claude | migrazione applicata + prova generale verde + `64.19` risale a `FIN_BANKING` sul vivo | **FATTO** |
-| **A1** | `#131` T5 — il modulo API `tenant-blueprints` (15 rotte) | Claude | 9 test verdi, typecheck+lint, commit unico, 15 rotte vive in produzione | codice fatto · 9/9 verdi · typecheck+lint verdi · **attende la regressione completa prima del commit** |
-| **A2** | `#131` T6 — frontend: elenco, cascata, confronto | Claude | 3 pagine + i18n it/en in parità + voce di menu + Playwright verde con login reale | 3 pagine + i18n (parità 2987×2 verde) + mig. `000302` (prova generale verde) + spec E2E scritti · **manca l'esecuzione E2E** |
-| **A3** | `#131` T7 — il fascicolo vero di RTL Bank (la prova che conta) | Claude | 23/23 processi esprimibili, 7/7 decisioni registrate, sul database di produzione | script scritto · **non ancora eseguito** (scrive in produzione: si esegue a regressione verde) |
-| **A4** | `#131` T8 — controllo di scostamento sull'identità | Claude | la sentinella esiste, gira, e **si è vista rossa** almeno una volta | **FATTO** — `check_identita_azienda.py` gira sul vivo; `--autoprova` costruisce un guasto in transazione annullata e lo vede (provato) |
+| **A1** | `#131` T5 — il modulo API `tenant-blueprints` (15 rotte) | Claude | 9 test verdi, typecheck+lint, commit unico, 15 rotte vive in produzione | **FATTO** — 9/9 verdi, regressione API completa verde (2188s), commit `2d74377c` |
+| **A2** | `#131` T6 — frontend: elenco, cascata, confronto | Claude | 3 pagine + i18n it/en in parità + voce di menu + Playwright verde con login reale | **FATTO** — 3 pagine, i18n in parità, voce di menu (`000302`), **98/98 prove di navigazione verdi** con login reale; 3 difetti trovati e corretti provando |
+| **A3** | `#131` T7 — il fascicolo vero di RTL Bank (la prova che conta) | Claude | 23/23 processi esprimibili, 7/7 decisioni registrate, sul database di produzione | **FATTO** — `23/23 processi, 7/7 decisioni, 0 differenze`; poi sottomesso e firmato dal vivo via API con login reale → `APPROVED` con fotografia `ba19f72d…` |
+| **A4** | `#131` T8 — controllo di scostamento sull'identità | Claude | la sentinella esiste, gira, e **si è vista rossa** almeno una volta | **FATTO** — `check_identita_azienda.py`; `--autoprova` costruisce un guasto in transazione annullata e lo vede (provato). Dopo A3: RTL **coerente**, Heuresys *non ancora descritta* |
 | **B1** | `#124` strato 1 — spaccare `IDENTITY` in `IDENTITY_PRO` / `IDENTITY_PRIV` | Claude | 6 celle su 8 chiuse; prova HTTP live sulla stessa riga letta da due attori | da fare |
 | **B2** | `#124` vincolo 5 — gli aggregati (`/v1/compensation/distribution`) | Claude | la media su classe mascherata non è più una fuga; prova live | da fare |
 | **B3** | `#124` gli altri endpoint delle due classi (12 rotte) | Claude | ogni rotta elencata porta `masked`; prova live per famiglia | da fare |
@@ -163,3 +163,36 @@ nuova è stata fatta scattare di proposito prima di fidarsi.
    `MGMT_CONSULTING`: riparato da `#144` (mig. `000282`). Il registro lo aveva previsto, e infatti
    la prova di falsificabilità è stata **costruita ad arte** (`--autoprova`), non attesa dal dato.
 7. **La revoca E9 era già in produzione** dal T3: nessun lavoro da fare.
+
+---
+
+## A3 — dimostrazione live (ADR-0026)
+
+**2026-08-08 17:19, database di produzione via tunnel :5433.**
+
+```
+  login .................. enzo.spenuso@heuresys.com
+  fascicolo .............. Configurazione di RTL Bank (RTL-BANK-CONFIG), azienda legata
+  versione ............... 1 in stato DRAFT
+  processi ............... 23, di cui decisi 7
+  sottomissione .......... OK, richiesta ccc21170-…, stato IN_APPROVAL
+  passo di approvazione .. 92ee0f03-… (PENDING)
+  decisione .............. APPROVED
+  applicazione ........... 200 APPLIED
+```
+
+```
+ tenant_blueprint_code | versione |  stato   | ha_fotografia |     impronta     |        firmata_da
+-----------------------+----------+----------+---------------+------------------+---------------------------
+ RTL-BANK-CONFIG       |        1 | APPROVED | t             | ba19f72d41278580 | enzo.spenuso@heuresys.com
+```
+
+Non è passato dal database: ogni passo è una chiamata HTTP reale sulle rotte del
+modulo, con la sessione di una persona che ha fatto login con il proprio secondo
+fattore.
+
+**Un difetto trovato provando, e non era del prodotto**: lo script di prova
+dichiarava `content-type: application/json` anche sulle POST senza corpo, e
+Fastify rispondeva 400 prima di ogni altra cosa. Verificato che il client del
+prodotto NON abbia lo stesso difetto — `apiFetch` imposta l'intestazione solo
+quando un corpo esiste — quindi la pagina di sottomissione è corretta.

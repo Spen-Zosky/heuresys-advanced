@@ -1,84 +1,68 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-08 (S1049 — la chiusura non aspetta più la CI, e ritirare non è cancellare).
+**Updated**: 2026-08-08 (S1050 — le tre domande aperte hanno una risposta, e due erano la domanda sbagliata).
 > **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md` · pattern di dati → `docs/kb/DATA_PATTERNS.md`.
 
-## Last session brief (S1049)
+## Last session brief (S1050)
 
-**La chiusura di sessione non aspetta più la CI.** Prima restava aperta 20-30 minuti a
-guardare un controllo automatico; ora *arma* il deploy e una sentinella sulle due macchine
-lo esegue da sola quando la CI diventa verde. Il cancello di sicurezza è lo stesso, spostato
-fuori dalla sessione. **Provato dal vivo tre volte**: le macchine si sono aggiornate senza
-che nessuno lanciasse un comando.
+**Misurare ha smentito il piano sei volte.** Delle tre domande lasciate aperte da S1049, due
+cambiavano forma appena si guardava il database invece del registro. La batteria di custodia non
+«si fermava al primo rosso»: raccoglieva già, e il punto cieco stava **dentro** i controlli — 39
+funzioni su 65 contenevano più verifiche in fila, e **99 sotto-verifiche** non venivano nemmeno
+eseguite. E lo scarto fra stipendio contrattuale e buste paga non era un disaccordo: era il
+confronto fra dodici mesi di storia e lo stipendio di oggi.
 
-**Una prova generale che costa mezzo minuto invece di mezz'ora.** Copia il database vero
-della CI e riapplica tutta la catena, **due volte**. Ha già intercettato difetti che
-sarebbero stati CI rossa mezz'ora dopo — e uno che aveva già rotto la produzione.
+**Il guasto vero era altrove, e riguardava dieci persone.** Una promozione decisa il 4 agosto
+aveva alzato il contratto senza propagare nulla alla scheda che quelle persone vedono nel
+**proprio** portale. Riparato alla fonte; provato dal vivo su produzione con il loro accesso.
+Le buste **non** sono state toccate, ed è una scelta misurata: l'aumento decorre da agosto e la
+busta di agosto non esiste ancora.
 
-**La lezione più importante ha un nome: ritirare non è cancellare** (ADR-0035). La catena si
-ri-applica per intero a ogni deploy, quindi ciò che cancelli a valle torna al giro dopo.
-Scoperto sbagliando tre volte nello stesso pomeriggio. Va emendato il file che crea
-l'oggetto — e il costo di un ritiro si misura **in file da emendare**, non in righe.
+**La prova generale ha fermato nove difetti prima del push** — nove CI rosse evitate. Fra questi
+un mio selftest che *non poteva accendersi* perché combatteva contro un trigger, e una rete di
+sicurezza che ne salvava un terzo avendo l'aspetto di una completa.
 
-**La custodia della storia RTL è verde per la prima volta.** Cinque controlli rossi, e
-quattro avevano **una sola radice**: una promozione aveva cambiato il livello contrattuale
-senza propagare nulla a paga, premio ed evidenza in busta.
+**Chiuso `#164` F4**: lo schema `brownfield` non esiste più; la sincronizzazione ISTAT/ATECO/ESCO
+ha casa propria in `reference_sync`, con tutte le 1.194 corse e la provenienza intatta.
 
-**Il metodo è ora scritto, non solo praticato**: `CLAUDE.md` §*Metodo di bonifica* + ADR-0034
-e ADR-0035. Sei regole, ognuna nata da un errore reale di questa sessione.
-
-**In coda, la bonifica dell'identità**: l'amministratore di piattaforma era un account che
-non corrisponde a nessuno, mentre il proprietario non poteva amministrare. Ora il mandato è
-di Enzo, l'account tecnico non esiste più e le **34.551 righe** di cui risultava autore sono
-ri-attribuite a chi quelle azioni le ha compiute davvero. Il censimento è **161 righe = 161
-persone**, senza utenze di servizio. Rimuoverlo ha fatto cadere **cinque** migrazioni che ne
-asserivano l'esistenza: tutte emendate **alla fonte**, che è ADR-0035 messo alla prova il
-giorno stesso in cui è stato scritto.
-
-Referti: ADR-0034, ADR-0035, `db/scripts/README.md` §ci-rehearsal.
+**`#131` Tenant Builder a 4 task su 8**, tutti in produzione. Fermato prima del Task 5 di
+proposito: è un modulo API e la regola di progetto vieta di spezzarlo su più commit.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
 **Fresh session senza pendenze**: zero debiti, task incompleti, errori aperti. Doppia verifica e
 review adversarial; le decisioni tecniche sono di Claude.
 
-## Regola su ogni lavoro che tocca il database (S1049 — nuova)
+## Regola su ogni lavoro che tocca il database (S1049, confermata da S1050)
 
 **Prima di applicare**: `ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh'`.
-**Per ritirare qualcosa**: si emenda il file che lo crea (ADR-0035), mai una `DELETE` a valle
-da sola. **Ogni scrittura di massa** porta misura, guardia, post-condizione che protegge ciò
-che NON doveva cambiare, e rollback dichiarato.
-
-## Regola su ogni lavoro che nasce dal lab (`#149`, `#150`)
-
-Prima di eseguire una voce con `lab-id`: **rileggere il file di consegna e verificarne le
-affermazioni portanti**. In S1049 ha fermato **due** lavori che avrebbero fatto danno.
+In S1050 ha intercettato **nove** difetti. **Lanciala dopo OGNI migrazione, non a fine lavoro**:
+quasi tutti i difetti nascevano alla *seconda* passata, cioè al deploy successivo.
+**Per ritirare qualcosa**: si emenda il file che lo crea (ADR-0035), mai una `DELETE` a valle.
 
 ## Top priorities (prossima sessione)
 
-1. **`#164` F4 — ritiro dello schema `brownfield`** (~1 sessione). La migrazione è **scritta e
-   provata** ma parcheggiata fuori catena: `docs/superpowers/plans/2026-08-08-164-F4-migrazione-pronta-non-applicata.sql`.
-   Dentro c'è la ricetta già misurata, inclusi i file da NON marcare perché portano guardie
-   vive. **Non ri-misurare: leggere il file e partire.**
-2. **`#124` mascheratura dei dati sensibili** (INTERRUPTED, ~1-2 sessioni) — resta lo strato 1:
-   spaccare l'anagrafica in professionale e privata, che chiude 6 celle su 8.
-3. **`#150` parte B applicata**: la serie organigramma (11 voci) merita un riesame, e la
-   verifica non è rileggere — è **eseguire la batteria di custodia** e triagare ciò che accende.
+1. **`#131` Task 5 — il modulo `tenant-blueprints`** (INTERRUPTED, ~1 sessione). T1-T4 sono in
+   produzione. Il piano ha il codice: `<lab>/2026-08-05--piano-implementazione-p1-fascicolo.md`
+   riga 886. **Un solo commit**, poi T6 frontend, T7 il fascicolo vero di RTL, T8 scostamento.
+2. **`#168` cancellare una persona cancella la storia delle sue approvazioni** (~2-3h). Le tre
+   righe perse sono state ri-derivate, **la causa no**: serve il censimento dei vincoli `CASCADE`
+   verso `sys_users` e una decisione per famiglia.
+3. **`#170` gli script dell'ingestione ritirata nominano uno schema che non esiste** (~1-2h) —
+   fallirebbero se qualcuno li lanciasse. Ritirarli o ripuntarli: serve la tua parola sul ritiro.
 
 ## Open questions
 
-- **La batteria di custodia va fatta raccogliere invece di abortire?** Sei volte in due
-  sessioni un rosso ne ha nascosto un altro. Parte dei check già raccoglie; `C4h`/`C6c` no.
-- **RAL e buste non coincidono per 152 persone su 158** (scarto sistematico ~1,5%): è una
-  differenza di derivazione, non un errore di pagamento — ma sono due verità sullo stesso fatto.
-- **La password del proprietario è ora quella derivata** dalla chiave madre (`pnpm dev:whoami`),
-  perché i test entrano come lui. Chiara e Andrea restano protette da `isRealPerson`. Va bene
-  così o serve un'altra strada per l'autenticazione dei test?
+- **`#169`**: password e secondo fattore nascono dalla stessa chiave madre, quindi per chi ha
+  quella chiave l'MFA non è un secondo fattore. Non urgente finché la chiave sta solo qui;
+  lo diventa quando arriverà su VM e linux-pc (`#147`).
+- **`#170`**: gli attrezzi dell'ETL legacy si ritirano o si conservano ripuntati? Cancellare file
+  richiede la tua conferma.
 
 ## Verification
 
 ```bash
 python docs/kb/tools/session_start.py                                   # menu + salute, un giro
-ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh' # prova generale, ~26s
-bash db/scripts/storia36.sh custodia                                    # custodia RTL (verde da S1049)
+ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh' # prova generale, ~13s
+bash db/scripts/storia36.sh custodia                                    # custodia RTL (verde, 256 selftest)
 ```

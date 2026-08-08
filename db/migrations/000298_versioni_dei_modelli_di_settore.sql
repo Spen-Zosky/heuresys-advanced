@@ -63,6 +63,37 @@ DO $trg$ BEGIN
   END IF;
 END $trg$;
 
+-- ── UNA VARIANTE NON PUO' NASCERE SENZA LA SUA VERSIONE ─────────────────────
+-- Trovato dalla CI (5 file di test rossi, 2026-08-08): la prima stesura
+-- riempiva la versione dei processi solo se la variante ne AVEVA una, e
+-- creava le versioni solo per le varianti gia' esistenti al momento della
+-- migrazione. Una variante creata DOPO — per esempio dall'API, come fanno i
+-- test di `blueprint-processes` — nasceva senza versione, il riempimento non
+-- trovava nulla e il primo processo su quella variante finiva in 500.
+--
+-- La toppa sarebbe stata allentare il vincolo. La correzione e' l'opposto:
+-- rendere l'invariante VERO PER COSTRUZIONE. Cosi' la post-condizione «ogni
+-- variante ha la sua versione 1» smette di essere un controllo una-tantum e
+-- diventa una proprieta' che si mantiene da se'.
+CREATE OR REPLACE FUNCTION sys.sys_blueprint_variant_ensure_version()
+RETURNS trigger LANGUAGE plpgsql AS $ensure$
+BEGIN
+  INSERT INTO sys.sys_blueprint_variant_versions
+    (blueprint_variant_version_variant_id, blueprint_variant_version_number,
+     blueprint_variant_version_status, blueprint_variant_version_published_at,
+     blueprint_variant_version_notes)
+  VALUES (NEW.blueprint_variant_id, 1, 'PUBLISHED', now(),
+          'Versione 1 creata alla nascita della variante.')
+  ON CONFLICT (blueprint_variant_version_variant_id, blueprint_variant_version_number)
+    DO NOTHING;
+  RETURN NEW;
+END $ensure$;
+
+DROP TRIGGER IF EXISTS sys_blueprint_variant_ensure_version ON sys.sys_blueprint_variants;
+CREATE TRIGGER sys_blueprint_variant_ensure_version
+  AFTER INSERT ON sys.sys_blueprint_variants
+  FOR EACH ROW EXECUTE FUNCTION sys.sys_blueprint_variant_ensure_version();
+
 ALTER TABLE sys.sys_blueprint_process_registry
   ADD COLUMN IF NOT EXISTS blueprint_process_variant_version_id uuid;
 

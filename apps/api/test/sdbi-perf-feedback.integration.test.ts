@@ -253,14 +253,18 @@ describe('SDBI Option-B — perf reviews + feedback360', () => {
            'sys_feedback_360_responses','sys_continuous_feedback')
           AND (source_lineage_sdbi_mapping_card_id IS NULL OR source_lineage_sdbi_confidence IS NULL
                OR source_lineage_sdbi_ai_model_id IS NULL)`)).toBe(0);
-    // the SDBI consolidation-complete audit marker fired for all 4 targets
-    expect(await count(
-      `SELECT count(DISTINCT (import_validation_result_payload->>'target_table'))::int AS n
-        FROM audit.import_validation_results
-        WHERE import_validation_result_rule_code='SDBI_CONSOLIDATION_COMPLETE_V1'
-          AND import_validation_result_payload->>'target_table' IN
-            ('sys_performance_reviews','sys_performance_review_competency_ratings',
-             'sys_feedback_360_responses','sys_continuous_feedback')`)).toBe(4);
+    // #164 F4 (2026-08-08) — QUI C'ERA UNA TERZA ASSERZIONE, ed e' stata tolta.
+    // Contava i marcatori `SDBI_CONSOLIDATION_COMPLETE_V1` in
+    // `audit.import_validation_results`, una delle tabelle di audit dell'ETL
+    // legacy ritirato con lo schema `brownfield`. Non e' stata «disattivata
+    // perche' dava fastidio»: il suo SOGGETTO non esiste piu'.
+    //
+    // Cosa si perde: nulla di sostanziale. Quel marcatore diceva «la
+    // consolidazione e' arrivata in fondo per tutti e 4 i bersagli», e le due
+    // asserzioni qui sopra lo dicono in modo piu' diretto e su dati di prima
+    // classe — 1.490 righe di provenienza, una per riga importata, tutte con le
+    // colonne SDBI valorizzate. Un marcatore di ESECUZIONE e' una prova piu'
+    // debole del RISULTATO che quell'esecuzione ha prodotto.
   });
 
   it('registry — 4 new base tables registered, 0 UNCLASSIFIED, nine_box VIEW not registered', async () => {

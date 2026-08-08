@@ -336,6 +336,21 @@ export async function hierarchyChain(): Promise<{ top: Actor; middle: Actor; bot
  * dare per scontato che ogni utente stia nell'organigramma: chi non ha
  * posizione non ha asse organizzativo, e gli resta il solo piano ESS (I17).
  */
+/**
+ * Un utente senza alcuna posizione assegnata.
+ *
+ * Dal 2026-08-08 questo caso **non esiste più nel dato**: la rimozione
+ * dell'account tecnico `admin@heuresys.com` (`#139`, mig. `000295`) ha tolto
+ * l'ultima persona senza posizione, e oggi tutti e 161 gli utenti ne hanno una.
+ * Misurato, non dedotto: zero assegnazioni create dopo il 2026-08-04.
+ *
+ * La PROPRIETÀ che questo helper serve a sorvegliare resta però valida e
+ * preziosa — *il codice non deve presumere che ogni utente abbia una posizione*
+ * — e cancellare il test la lascerebbe scoperta al primo utente creato senza.
+ * Quindi il caso, se il dato non lo offre più, si **materializza qui**: la suite
+ * gira dentro una transazione per file che viene comunque annullata
+ * (`tx-isolation.ts`), quindi la riga non sopravvive al test.
+ */
 export async function actorWithoutPosition(): Promise<Actor> {
   const { rows } = await pool.query<Row>(
     `SELECT u.user_id, u.user_email, u.user_tenant_id
@@ -346,11 +361,27 @@ export async function actorWithoutPosition(): Promise<Actor> {
            WHERE a.user_position_assignment_user_id = u.user_id)
       ORDER BY u.user_email`,
   );
-  return requireRow(
-    rows,
-    "utente senza alcuna posizione assegnata",
-    "Se ogni utente ha ricevuto una posizione, questo caso non esiste più: il test va aggiornato, non il dato.",
+  const esistente = rows.find((r) => !isRealPerson(r.user_email));
+  if (esistente) return toActor(esistente);
+
+  const { rows: creati } = await pool.query<Row>(
+    `INSERT INTO sys.sys_users
+       (user_tenant_id, user_email, user_display_name, user_first_name, user_last_name, user_status)
+     SELECT t.tenant_id, 'senza.posizione.test@' || lower(t.tenant_code) || '.invalid',
+            'Senza Posizione (caso di prova)', 'Senza', 'Posizione', 'ACTIVE'
+       FROM sys.sys_tenancies t
+      WHERE t.tenant_status = 'ACTIVE'
+      ORDER BY t.tenant_id
+      LIMIT 1
+     RETURNING user_id, user_email, user_tenant_id`,
   );
+  const creato = creati[0];
+  if (!creato) {
+    throw new Error(
+      "Impossibile materializzare un utente senza posizione: nessun tenant ACTIVE su cui agganciarlo.",
+    );
+  }
+  return toActor(creato);
 }
 
 /** Solo per i test che devono ripartire da capo (la cache è per-file). */

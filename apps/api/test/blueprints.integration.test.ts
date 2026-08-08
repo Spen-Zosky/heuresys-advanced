@@ -100,28 +100,47 @@ describe("/v1/blueprint-* pipeline", () => {
     expect((r.json() as { error: { code: string } }).error.code).toBe("BLUEPRINT_FAMILY_CODE_CONFLICT");
   });
 
-  it("TENANT_ADMIN activates blueprint and only one ACTIVE allowed", async () => {
+  // #131 E9 (2026-08-08) — `blueprint:activate`, `:override` e `:delete` NON sono
+  // piu' di TENANT_ADMIN: dopo la firma i dati sono del cliente, ma il modello
+  // deciso PRIMA della firma non si riscrive. Questi tre test descrivevano il
+  // comportamento precedente e ora usano la sessione della piattaforma; il
+  // rifiuto al cliente e' verificato dal test dedicato in fondo al file, che
+  // prima non esisteva — senza quello la revoca non avrebbe una guardia.
+  it("PLATFORM_ADMIN activates blueprint and only one ACTIVE allowed", async () => {
+    // L'azienda per cui si attiva si DERIVA dall'utente cliente, non si scrive a
+    // mano: l'identificativo del tenant e' una fonte di verita' del database.
+    const {
+      rows: [azienda],
+    } = await pool.query<{ tenant_id: string }>(
+      `SELECT user_tenant_id AS tenant_id FROM sys.sys_users WHERE user_id = $1`,
+      [tenantS.userId],
+    );
+    const tenantId = azienda!.tenant_id;
+
     // First check whether tenant already has an ACTIVE activation from prior runs.
     const existing = await pool.query<{ blueprint_activation_id: string }>(
       `SELECT blueprint_activation_id FROM sys.sys_blueprint_activations
-        WHERE blueprint_activation_tenant_id = (SELECT user_tenant_id FROM sys.sys_users WHERE user_id = $1)
+        WHERE blueprint_activation_tenant_id = $1
           AND blueprint_activation_status = 'ACTIVE'
         LIMIT 1`,
-      [tenantS.userId],
+      [tenantId],
     );
     const tenantHasActive = existing.rows.length > 0;
 
+    // Chi attiva dalla piattaforma DEVE dire per quale azienda: il servizio
+    // rifiuta con TENANT_ID_REQUIRED, ed e' giusto — un amministratore di
+    // piattaforma non ha un'azienda propria da presumere.
     const a1 = await suite.app.inject({
       method: "POST", url: "/v1/blueprint-activations",
-      headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
-      payload: { variantId, status: "PROPOSED", effectiveFrom: "2026-06-01" },
+      headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },
+      payload: { variantId, tenantId, status: "PROPOSED", effectiveFrom: "2026-06-01" },
     });
     expect(a1.statusCode).toBe(201);
     activationId = (a1.json() as { blueprintActivationId: string }).blueprintActivationId;
 
     const promote = await suite.app.inject({
       method: "PATCH", url: `/v1/blueprint-activations/${activationId}`,
-      headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+      headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },
       payload: { status: "ACTIVE" },
     });
     if (tenantHasActive) {
@@ -136,7 +155,7 @@ describe("/v1/blueprint-* pipeline", () => {
   it("PUT override is idempotent on (activation, process)", async () => {
     const o1 = await suite.app.inject({
       method: "PUT", url: "/v1/blueprint-overrides",
-      headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+      headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },
       payload: { activationId, processId: procBId, inclusion: "OUT", rationale: "Not needed" },
     });
     expect(o1.statusCode).toBe(200);
@@ -146,7 +165,7 @@ describe("/v1/blueprint-* pipeline", () => {
 
     const o2 = await suite.app.inject({
       method: "PUT", url: "/v1/blueprint-overrides",
-      headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+      headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },
       payload: { activationId, processId: procBId, inclusion: "PARTIAL" },
     });
     expect(o2.statusCode).toBe(200);
@@ -176,12 +195,46 @@ describe("/v1/blueprint-* pipeline", () => {
 
     const bad = await suite.app.inject({
       method: "PUT", url: "/v1/blueprint-overrides",
-      headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+      headers: { cookie: ch(platformS.cookies), "x-csrf-token": platformS.csrfToken, "content-type": "application/json" },
       payload: { activationId, processId: otherPId, inclusion: "IN" },
     });
     expect(bad.statusCode).toBe(403);
     expect((bad.json() as { error: { code: string } }).error.code).toBe("OVERRIDE_PROCESS_VARIANT_MISMATCH");
 
     await pool.query(`DELETE FROM sys.sys_blueprint_families WHERE blueprint_family_id = $1`, [fam2Id]);
+  });
+
+  // #131 E9 — LA GUARDIA CHE MANCAVA ALLA DECISIONE.
+  // Spostare i tre test qui sopra sulla sessione della piattaforma li fa tornare
+  // verdi, ma da solo non dimostra NIENTE sulla revoca: sarebbero verdi anche se
+  // TENANT_ADMIN avesse ancora tutti i permessi. Serve il rifiuto, dichiarato.
+  it("#131 E9 — TENANT_ADMIN non attiva e non sovrascrive piu' il modello → 403", async () => {
+    const attiva = await suite.app.inject({
+      method: "POST",
+      url: "/v1/blueprint-activations",
+      headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+      payload: { variantId, status: "PROPOSED", effectiveFrom: "2026-06-01" },
+    });
+    expect(attiva.statusCode, "TENANT_ADMIN non deve poter attivare un modello").toBe(403);
+
+    const sovrascrivi = await suite.app.inject({
+      method: "PUT",
+      url: "/v1/blueprint-overrides",
+      headers: { cookie: ch(tenantS.cookies), "x-csrf-token": tenantS.csrfToken, "content-type": "application/json" },
+      payload: { activationId, processId: procBId, inclusion: "OUT", rationale: "non deve passare" },
+    });
+    expect(sovrascrivi.statusCode, "TENANT_ADMIN non deve poter sovrascrivere un processo").toBe(403);
+  });
+
+  // Cio' che la decisione NON toglie: il cliente continua a VEDERE il proprio
+  // modello. Se questo diventasse rosso, la revoca avrebbe travolto anche la
+  // lettura — un effetto collaterale, non la decisione.
+  it("#131 E9 — TENANT_ADMIN continua a leggere il proprio modello", async () => {
+    const r = await suite.app.inject({
+      method: "GET",
+      url: "/v1/blueprint-families",
+      headers: { cookie: ch(tenantS.cookies) },
+    });
+    expect(r.statusCode).toBe(200);
   });
 });

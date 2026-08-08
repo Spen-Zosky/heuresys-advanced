@@ -1,42 +1,42 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-08T12:42:46Z da docs/kb/tools/build_index.py
+# generato: 2026-08-08T21:47:04Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-08T12:42:46Z"
-  total_files: 2875
+  generated_at: "2026-08-08T21:47:04Z"
+  total_files: 2900
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
     ADR: 34
     api-core: 32
-    api-module: 318
+    api-module: 323
     ci: 17
     claude-config: 36
-    config: 131
+    config: 140
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 298
+    db-migration: 300
     db-other: 8
-    db-script: 46
+    db-script: 47
     db-seed: 148
-    doc-canonical: 563
+    doc-canonical: 565
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 100
+    shared-schema: 101
     showcase-source: 14
-    test: 337
+    test: 339
     ux-design-archive: 80
-    web-source: 230
+    web-source: 233
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2317
+    live: 2342
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -2036,6 +2036,36 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\derivation.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-blueprints/derivation.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\diff.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-blueprints/diff.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-blueprints/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-blueprints/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-blueprints\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/tenant-blueprints/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\tenant-materialization\blueprints.ts'
     root: repo
     rel: 'apps/api/src/modules/tenant-materialization/blueprints.ts'
@@ -3320,6 +3350,18 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\panel_base.py'
+    root: repo
+    rel: 'scripts/panel_base.py'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\plancia.py'
+    root: repo
+    rel: 'scripts/plancia.py'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\scripts\propagate-secret-rotation.sh'
     root: repo
     rel: 'scripts/propagate-secret-rotation.sh'
@@ -3362,6 +3404,30 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\sessioni-panel\app.js'
+    root: repo
+    rel: 'scripts/sessioni-panel/app.js'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\sessioni-panel\index.html'
+    root: repo
+    rel: 'scripts/sessioni-panel/index.html'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\sessioni-panel\stile.css'
+    root: repo
+    rel: 'scripts/sessioni-panel/stile.css'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\sessioni_panel.py'
+    root: repo
+    rel: 'scripts/sessioni_panel.py'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\scripts\setup-local-pg.sh'
     root: repo
     rel: 'scripts/setup-local-pg.sh'
@@ -3401,6 +3467,24 @@ files:
   - path: 'D:\heuresys-advanced\scripts\tunnel-keepalive.ps1'
     root: repo
     rel: 'scripts/tunnel-keepalive.ps1'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\vendor\htm.js'
+    root: repo
+    rel: 'scripts/vendor/htm.js'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\vendor\react-dom.js'
+    root: repo
+    rel: 'scripts/vendor/react-dom.js'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\vendor\react.js'
+    root: repo
+    rel: 'scripts/vendor/react.js'
     category: config
     status: live
     provenance: git-tracked
@@ -7310,6 +7394,18 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000301_settore_e_famiglia_di_modelli.sql'
+    root: repo
+    rel: 'db/migrations/000301_settore_e_famiglia_di_modelli.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000302_voce_di_menu_del_fascicolo.sql'
+    root: repo
+    rel: 'db/migrations/000302_voce_di_menu_del_fascicolo.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -7559,6 +7655,12 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\reset_local_database.sh'
     root: repo
     rel: 'db/scripts/reset_local_database.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\ricostruisci-fascicolo-rtl.ts'
+    root: repo
+    rel: 'db/scripts/ricostruisci-fascicolo-rtl.ts'
     category: db-script
     status: live
     provenance: git-tracked
@@ -10040,6 +10142,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\check_identita_azienda.py'
+    root: repo
+    rel: 'docs/kb/tools/check_identita_azienda.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\check_module_test_coverage.py'
     root: repo
     rel: 'docs/kb/tools/check_module_test_coverage.py'
@@ -11447,6 +11555,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-08-164-F4-migrazione-pronta-non-applicata.sql'
     root: repo
     rel: 'docs/superpowers/plans/2026-08-08-164-F4-migrazione-pronta-non-applicata.sql'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-08-batch-interrotti-e-p1.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-08-batch-interrotti-e-p1.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -13214,6 +13328,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\tenant-blueprints.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/tenant-blueprints.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\tenant-materialization.ts'
     root: repo
     rel: 'packages/shared/src/schemas/tenant-materialization.ts'
@@ -14624,6 +14744,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\tenant-blueprints.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/tenant-blueprints.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\tenant-materialization.integration.test.ts'
     root: repo
     rel: 'apps/api/test/tenant-materialization.integration.test.ts'
@@ -15365,6 +15491,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\tests\e2e\talent-review.spec.ts'
     root: repo
     rel: 'apps/web/tests/e2e/talent-review.spec.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\tests\e2e\tenant-blueprints.spec.ts'
+    root: repo
+    rel: 'apps/web/tests/e2e/tenant-blueprints.spec.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -16685,6 +16817,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\talent-review\page.tsx'
     root: repo
     rel: 'apps/web/src/app/(authenticated)/talent-review/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\tenant-blueprints\[id]\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/tenant-blueprints/[id]/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\tenant-blueprints\[id]\versions\[n]\diff\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/tenant-blueprints/[id]/versions/[n]/diff/page.tsx'
+    category: web-source
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\web\src\app\(authenticated)\tenant-blueprints\page.tsx'
+    root: repo
+    rel: 'apps/web/src/app/(authenticated)/tenant-blueprints/page.tsx'
     category: web-source
     status: live
     provenance: git-tracked

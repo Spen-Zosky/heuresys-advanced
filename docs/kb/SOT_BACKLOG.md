@@ -12,6 +12,13 @@
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
 
+- **#172 Il clone del database su linux-pc accumula residui: il `DROP SCHEMA staging` fallisce a ogni giro** · status: ACTIVE
+  - priority: P2 · effort: ~30min · doc: `scripts/clone-vm-db.sh` (o il passo `clone-db` di `close-propagate.sh`)
+  - misurato-S1050: alla chiusura, `pg_restore` ha ignorato **2 errori** — `non e' possibile eliminare schema staging perche' altri oggetti dipendono da esso` (le funzioni `storia36_*`) seguito da `lo schema "staging" esiste gia'`. Il ripristino prosegue e i controlli di riga passano, quindi **sembra benigno**; non lo e': lo schema non viene ricreato da zero e **cio' che in produzione e' stato rimosso sopravvive sul clone**
+  - prova: dopo il clone, funzioni in `staging` — PROD **88**, clone **89**. La differenza era `staging.storia36_check_c6a(date)`, una vecchia firma sostituita in produzione da `storia36_check_c6a()`. Se una batteria la invocasse con un argomento, sul gemello girerebbe **l'implementazione vecchia** e il verde varrebbe per il codice sbagliato. Rimossa a mano: 88 = 88
+  - da-fare: `DROP SCHEMA IF EXISTS staging CASCADE` prima del ripristino (o `--clean --if-exists` sul `pg_restore`), e una **post-condizione che confronti il conteggio degli oggetti fra clone e sorgente** invece dei soli conteggi di riga: contare le righe di tre tabelle non vede una funzione di troppo
+  - perche-conta: linux-pc e' il gemello di produzione **e** la macchina della CI. Un residuo li' e' un «verde in locale, rosso in CI» al contrario — peggio, perche' non si accende affatto
+
 - **#171 Otto vulnerabilita' aperte che nessuna voce registrava** · status: DONE
   - priority: P1 · effort: ~1h · doc: `package.json` §`pnpm.overrides`
   - chiuso-il: 2026-08-08 (S1050)

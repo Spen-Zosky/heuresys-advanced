@@ -27,6 +27,14 @@ senza propagare nulla a paga, premio ed evidenza in busta.
 **Il metodo è ora scritto, non solo praticato**: `CLAUDE.md` §*Metodo di bonifica* + ADR-0034
 e ADR-0035. Sei regole, ognuna nata da un errore reale di questa sessione.
 
+**In coda, la bonifica dell'identità**: l'amministratore di piattaforma era un account che
+non corrisponde a nessuno, mentre il proprietario non poteva amministrare. Ora il mandato è
+di Enzo, l'account tecnico non esiste più e le **34.551 righe** di cui risultava autore sono
+ri-attribuite a chi quelle azioni le ha compiute davvero. Il censimento è **161 righe = 161
+persone**, senza utenze di servizio. Rimuoverlo ha fatto cadere **cinque** migrazioni che ne
+asserivano l'esistenza: tutte emendate **alla fonte**, che è ADR-0035 messo alla prova il
+giorno stesso in cui è stato scritto.
+
 Referti: ADR-0034, ADR-0035, `db/scripts/README.md` §ci-rehearsal.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
@@ -59,12 +67,13 @@ affermazioni portanti**. In S1049 ha fermato **due** lavori che avrebbero fatto 
 
 ## Open questions
 
-- **`POS-e1000001 «Tenant Owner»`** resta inattiva e **senza titolari**: è lo stesso residuo
-  dell'account rimosso, ma è un oggetto dell'organigramma. Si rimuove?
 - **La batteria di custodia va fatta raccogliere invece di abortire?** Sei volte in due
   sessioni un rosso ne ha nascosto un altro. Parte dei check già raccoglie; `C4h`/`C6c` no.
 - **RAL e buste non coincidono per 152 persone su 158** (scarto sistematico ~1,5%): è una
   differenza di derivazione, non un errore di pagamento — ma sono due verità sullo stesso fatto.
+- **La password del proprietario è ora quella derivata** dalla chiave madre (`pnpm dev:whoami`),
+  perché i test entrano come lui. Chiara e Andrea restano protette da `isRealPerson`. Va bene
+  così o serve un'altra strada per l'autenticazione dei test?
 
 ## Verification
 

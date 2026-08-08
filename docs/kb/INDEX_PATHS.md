@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-07T22:48:47Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2865**
+**Generato**: 2026-08-08T00:02:47Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2867**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -18,7 +18,7 @@
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
-| db-migration | 291 |
+| db-migration | 293 |
 | db-other | 8 |
 | db-script | 46 |
 | db-seed | 148 |
@@ -33,7 +33,7 @@
 | test | 336 |
 | ux-design-archive | 80 |
 | web-source | 230 |
-| **TOTALE** | **2865** |
+| **TOTALE** | **2867** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2307 |
+| live | 2309 |
 
 ## File per categoria
 
@@ -1282,6 +1282,8 @@
 - `D:\heuresys-advanced\db\migrations\000291_preposti_safety_training_for_new_supervisors.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000292_emergency_team_coverage_per_branch.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\db\migrations\000293_remove_brownfield_menu_entry.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000294_remove_orphan_tenant_owner_position.sql` · *live* · git-tracked
+- `D:\heuresys-advanced\db\migrations\000295_platform_admin_is_the_owner.sql` · *live* · git-tracked
 
 ### db-other
 

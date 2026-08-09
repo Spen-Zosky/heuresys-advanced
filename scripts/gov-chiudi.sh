@@ -82,7 +82,13 @@ fi
 # --- 2. il diario: cosa e' successo davvero ----------------------------------
 DIARIO="$ALBERO/.zp/diario.ndjson"
 if [[ -f "$DIARIO" ]]; then
-  RIFIUTI="$(grep -c '"azione": "rifiutata"' "$DIARIO" 2>/dev/null || echo 0)"
+  # `grep -c` stampa gia' `0` quando non trova nulla, MA esce 1: il vecchio
+  # `|| echo 0` ne aggiungeva un secondo, la variabile diventava "0\n0" e la riga 89
+  # moriva con «arithmetic syntax error». Non si era mai visto perche' il lavoratore 1
+  # aveva un rifiuto nel diario; e' bastato istruire il lavoratore 2, che ne ha zero.
+  # `|| true` tiene l'uscita non-zero senza aggiungere output.
+  RIFIUTI="$(grep -c '"azione": "rifiutata"' "$DIARIO" 2>/dev/null || true)"
+  RIFIUTI="${RIFIUTI:-0}"
   log "  diario: $(wc -l < "$DIARIO") azioni, $RIFIUTI rifiutate dal recinto"
   # Un rifiuto non e' di per se' una colpa — puo' essere un tentativo legittimo
   # fermato da un perimetro troppo stretto. Ma va LETTO, non ignorato.

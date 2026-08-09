@@ -34,6 +34,8 @@ discute e si estende meglio quando non e' annegato nella logica che lo applica.
 """
 from __future__ import annotations
 
+import os
+import posixpath
 import re
 
 # Ogni voce: (espressione, spiegazione). La spiegazione arriva al lavoratore, quindi
@@ -184,6 +186,23 @@ def divieto_assoluto(comando: str):
     return None
 
 
+# Un `cd` all'inizio del comando cambia il significato di OGNI percorso relativo che
+# segue. Senza tenerne conto, `cd apps/api && cat > test/x.ts` veniva letto come una
+# scrittura in `test/x.ts` alla radice — fuori dal perimetro `apps/api/test` — e
+# RIFIUTATO, mentre il lavoratore stava scrivendo esattamente dentro il proprio recinto.
+# Misurato sulla prima corsa presidiata vera: 2 rifiuti su 4 erano falsi, entrambi per
+# questa ragione. Un recinto che ferma il lavoro legittimo non e' severo, e' rotto: chi
+# lo subisce impara ad aggirarlo, ed e' il modo piu' rapido di rendere inutile una guardia.
+CAMBIO_DIR = re.compile(r"""^\s*cd\s+(?:--\s+)?("[^"]+"|'[^']+'|[^\s;|&]+)""")
+
+
+def _componi(base: str, percorso: str) -> str:
+    """Il bersaglio come lo vedrebbe la shell dopo i `cd` gia' incontrati."""
+    if not base or os.path.isabs(percorso) or re.match(r"^[A-Za-z]:[\\/]", percorso):
+        return percorso
+    return posixpath.normpath(posixpath.join(base.replace("\\", "/"), percorso.replace("\\", "/")))
+
+
 def bersagli_di_scrittura(comando: str) -> list[str]:
     """I percorsi che questo comando andrebbe a scrivere o cancellare.
 
@@ -191,17 +210,27 @@ def bersagli_di_scrittura(comando: str) -> list[str]:
     qui e non e' nel perimetro, si blocca. Preferisco un rifiuto in piu' su un
     comando innocuo che una scrittura in meno vista fuori recinto — un lavoratore
     che riceve un rifiuto puo' dirlo; una scrittura non vista, no.
+
+    Grossolano NON vuol dire impreciso sul punto che decide: i `cd` si seguono, perche'
+    ignorarli non produce rifiuti «in piu'» a caso — produce rifiuti sistematici proprio
+    sul lavoro dentro il perimetro, che e' l'unico che deve passare.
     """
     fuori: list[str] = []
+    base = ""
     for segmento in SEPARATORE.split(senza_letterali(comando)):
         seg = segmento.strip()
         if not seg:
+            continue
+        m_cd = CAMBIO_DIR.match(seg)
+        if m_cd:
+            d = m_cd.group(1).strip("\"'")
+            base = d if (os.path.isabs(d) or re.match(r"^[A-Za-z]:[\\/]", d)) else _componi(base, d)
             continue
         for espressione in (REDIREZIONE, SED_IN_LOCO, COPIA_VERSO, RIMOZIONE):
             for m in espressione.finditer(seg):
                 bersaglio = m.group(1).strip("\"'")
                 if bersaglio and not bersaglio.startswith("-"):
-                    fuori.append(bersaglio)
+                    fuori.append(_componi(base, bersaglio))
     return fuori
 
 

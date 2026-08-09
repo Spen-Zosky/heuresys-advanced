@@ -230,9 +230,12 @@ Cluster da ≤2h e disallineamenti documentali. Massimo rapporto chiusure/ora: t
   - ✅ **CHIUSO S1029** — snapshot GitHub rigenerato (dichiarava 88 commit, 0 workflow, 0 tag)
   - *chiuso quando*: il file e' rigenerato via gh api e i suoi valori coincidono con gh repo view / gh workflow list / gh release list
   - *assorbe*: `gapfill:GAP1-45`
-- [ ] **Z-230** (0.8h) — Doc di triage Dependabot stale (zod/next superati, script mai implementato, riferimento a un file inesistente)
+- [x] **Z-230** (0.8h) — Doc di triage Dependabot stale (zod/next superati, script mai implementato, riferimento a un file inesistente)
   - *chiuso quando*: il doc riporta l'ultimo triage reale con data e le righe defer-major coincidono con gh pr list; i riferimenti a file inesistenti sono rimossi
   - *assorbe*: `gapfill:GAP1-46`
+  - ✅ **CHIUSO S1052** — primo cluster lavorato dal processo `gov`. Lavorato dal lavoratore 1 nel suo albero (commit `b55dcabf` su `gov/w1`, 68 righe aggiunte e 78 tolte su un solo file, perimetro rispettato), istruito da gov con **verdetto VERDE** (`.zp/verdetti/w1-Z-230-20260809-185312.json`, zero rilievi: typecheck + lint + 218 file / 1509 test di integrazione), e portato in main col merge `551dd8d0`.
+  - **Evidenza del criterio, ri-misurata al momento della chiusura** (non ereditata dal lavoratore): `gh pr list --state open --label dependencies` restituisce **5** PR (#58 #60 #61 #62 #67) e **tutte e cinque** compaiono nel documento; dei file citati dal documento **4 su 4 esistono** (`.github/dependabot.yml`, `.github/workflows/codeql.yml`, `docs/github/branch-protection.md`, `docs/kb/DEBT_REGISTER.md`) — nessun riferimento morto, che era il difetto originale.
+  - ⚠️ **Anello mancante del processo, trovato qui**: dopo il merge nessun passo di gov spuntava il cluster nel piano. La casella e' rimasta `[ ]` con il lavoro gia' in main, e il primo dry-run presidiato ha riproposto Z-230 come **primo candidato**: la prima corsa avrebbe rifatto lavoro gia' fatto.
 - [x] **Z-234** (0.8h) — Metadati e doc del repo upstream stale su 5 fronti (reactflow rimosso ma elencato, README con lo scope di heuresys-evo, marker TODO, descrizione GitHub con link:, SETUP con npm)
   - ✅ **CHIUSO S1030** — 5 fronti chiusi + lockfile committato; i due «TODO» erano lavoro vero (Z-152/Z-153), annotati non cancellati
   - *chiuso quando*: grep reactflow su MANIFEST.md e SETUP.md = 0, il README cita i consumer attuali e la descrizione GitHub non menziona il protocollo link:

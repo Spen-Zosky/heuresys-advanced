@@ -65,6 +65,18 @@ meta:
 lanes:
   safe: [A, B]
   full: [A, B, C]
+  # `full-presidiata` — la corsa SORVEGLIATA, con Enzo presente.
+  #
+  # [S1052] Esisteva gia' nel driver (riga «if CORSIA != full-presidiata»), dove decide
+  # se il deploy di produzione e' permesso, ma NON era definita qui: `classi_ammesse`
+  # l'avrebbe respinta con «corsia sconosciuta», quindi era un valore morto e quel
+  # controllo risultava sempre vero. Definita ora, perche' e' la corsia che rompe un
+  # blocco circolare misurato: il freno pretendeva Z-250 chiuso, Z-250 pretendeva una
+  # corsa presidiata, e la corsa pretendeva il freno tolto.
+  #
+  # Stesse classi di `full`: il presidio e' una garanzia sul COME si corre, non un
+  # permesso in piu' sul COSA si tocca. D ed E restano fuori anche qui.
+  full-presidiata: [A, B, C]
   # D ed E non appaiono in nessuna corsia: non e' una dimenticanza.
   # D richiede autorizzazione per lotto, E richiede un input di Enzo.
 

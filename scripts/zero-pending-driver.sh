@@ -174,13 +174,34 @@ fi
 
 [[ -f "$STOP" ]] && { log "il freno e' tirato ($STOP). Togli il file e rilancia."; exit 0; }
 
+# IL FRENO GOVERNA IL NON PRESIDIATO — ed e' cio' che il suo nome dice.
+#
+# [S1052, decisione di Enzo] Fino a oggi `meta.autorizzato_non_presidiato` fermava OGNI
+# corsa, anche una sorvegliata. Ne nasceva un blocco circolare, misurato: il freno
+# pretendeva `Z-250` chiuso · `Z-250` si chiude solo con «una corsa presidiata conclusa»
+# registrata in `runs.ndjson` · quella corsa la fa questo driver · questo driver era
+# fermato dal freno. La condizione pretendeva l'effetto prima della causa, quindi non
+# proteggeva: bloccava e basta.
+#
+# Ora una corsa in corsia `full-presidiata` non passa da questo cancello. NON e' un
+# aggiramento: il non presidiato resta bloccato esattamente come prima, e il presidio e'
+# la garanzia che il nome del freno gia' presupponeva. Gli altri guard-rail — cluster
+# classificati, strumenti presenti, repo pulito, lock, STOP — restano in vigore per
+# tutti, questa corsia compresa.
+PRESIDIATA=0
+[[ "$CORSIA" == "full-presidiata" ]] && PRESIDIATA=1
+
 AUTORIZZATO="$(cfg meta.autorizzato_non_presidiato)"
-if [[ "$AUTORIZZATO" != "True" && "$AUTORIZZATO" != "true" ]]; then
+if [[ "$PRESIDIATA" == "1" ]]; then
+  log "corsia PRESIDIATA: il freno 'autorizzato_non_presidiato' non si applica (governa il non presidiato)."
+  log "  il freno resta INSERITO per ogni altra corsia; gli altri guard-rail valgono anche qui."
+elif [[ "$AUTORIZZATO" != "True" && "$AUTORIZZATO" != "true" ]]; then
   log "freno di sicurezza inserito (meta.autorizzato_non_presidiato: false)."
   log "La review CLI del 2026-07-25 ha lasciato aperti rilievi che rendono l'esecuzione"
   log "non presidiata rischiosa: classificazione che ammette cluster di produzione in"
   log "corsia safe, prove autodichiarate, self-test che non vede le regressioni."
   log "L'elenco e la condizione per togliere il freno sono in zp.config.yaml (meta)."
+  log "Per una corsa SORVEGLIATA: --lane full-presidiata (non tocca il freno)."
   exit 3
 fi
 

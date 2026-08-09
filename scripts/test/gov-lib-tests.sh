@@ -195,6 +195,22 @@ fi
 
 unset ZP_CLAUDE_CMD
 
+# Guardia di regressione sulla forma della difesa MSYS. Questa prova guarda il
+# SORGENTE, non il comportamento, e va detto: il difetto vero (l'hook della sessione
+# figlia che non trova i suoi file) si riproduce solo con una sessione vera, e la sua
+# evidenza sta nel commit. Qui si impedisce solo che la forma sbagliata torni.
+if grep -q 'MSYS_NO_PATHCONV' "$REPO/scripts/gov-lib.sh"; then
+  FALLITI=$((FALLITI+1))
+  echo "[FALLISCE] e' tornato MSYS_NO_PATHCONV: spegne la traduzione per TUTTO e rompe gli hook del figlio"
+else
+  PASSATI=$((PASSATI+1)); echo "[PASSA   ] la difesa MSYS e' mirata al solo comando slash"
+fi
+if grep -q 'MSYS2_ARG_CONV_EXCL="/zero-pending-loop"' "$REPO/scripts/gov-lib.sh"; then
+  PASSATI=$((PASSATI+1)); echo "[PASSA   ] e la difesa c'e' (senza, il comando arriva tradotto)"
+else
+  FALLITI=$((FALLITI+1)); echo "[FALLISCE] manca la difesa: il comando arriverebbe come C:/Git/zero-pending-loop"
+fi
+
 echo
 echo "── cartella di lavoro ──"
 

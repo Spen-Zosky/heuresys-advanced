@@ -189,13 +189,21 @@ gov_avvia_lavoratore() {     # <dir> <cluster> <modo> <corsia> <ore> <budget> <p
   # stderr su FILE e non mescolato allo stdout: con `2>&1` una riga di warning
   # rompe il JSON, il costo torna 0 e il tetto di spesa non scatta mai (misurato
   # nel driver, rilievo B3 — qui vale identico).
+  # PERCHE' `MSYS2_ARG_CONV_EXCL` E NON `MSYS_NO_PATHCONV`. Git Bash traduce gli
+  # argomenti che sembrano percorsi Unix quando lancia un eseguibile Windows: senza
+  # difese, `/zero-pending-loop ...` arriva a claude come `C:/Git/zero-pending-loop`
+  # e la skill non viene mai invocata. Ma `MSYS_NO_PATHCONV=1` spegne la traduzione
+  # per TUTTO e resta nell'ambiente della sessione figlia — dove gli hook del
+  # progetto ricevono `/d/...` non convertito e non trovano piu' i propri file:
+  # misurato, la sessione moriva a zero turni con «can't open file D:\d\...».
+  # Questa forma esclude il SOLO comando slash e lascia intatto il resto.
   # La durata la misura il lavoratore stesso. Il driver aspetta i figli in ordine,
   # quindi un solo cronometro sul giro darebbe a tutti il tempo del piu' lento — e
   # proprio il numero che serve per sapere se il parallelo conviene sarebbe finto.
   rm -f "$dir/.zp/durata-s"
   ( cd "$dir"
     _t0=$(date +%s)
-    MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL="*" "${ZP_CLAUDE_CMD:-claude}" -p "$comando" --output-format json --max-budget-usd "$budget" --permission-mode "$permessi" > ".zp/last-response.json" 2> ".zp/last-stderr.log"
+    MSYS2_ARG_CONV_EXCL="/zero-pending-loop" "${ZP_CLAUDE_CMD:-claude}" -p "$comando" --output-format json --max-budget-usd "$budget" --permission-mode "$permessi" > ".zp/last-response.json" 2> ".zp/last-stderr.log"
     echo $(( $(date +%s) - _t0 )) > ".zp/durata-s"
   ) &
   # Il pid si consegna in una VARIABILE, non su stdout. Con `$( )` la funzione gira

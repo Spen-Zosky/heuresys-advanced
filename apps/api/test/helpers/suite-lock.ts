@@ -36,7 +36,13 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "..", "..");
-const LOCK = join(REPO, ".zp", "suite.lock");
+
+// Il lucchetto protegge UN DATABASE, non una cartella. Derivandolo solo dal file
+// sorgente, due copie del repo (i worktree dei lavoratori di gov, #173) ne
+// otterrebbero uno per cartella: due lucchetti diversi, nessuna protezione, e si
+// tornerebbe esattamente al caso misurato il 2026-08-05. Chi apre piu' cartelle di
+// lavoro sullo stesso PostgreSQL impone il percorso con SUITE_LOCK_FILE.
+const LOCK = process.env["SUITE_LOCK_FILE"] || join(REPO, ".zp", "suite.lock");
 
 interface Occupante {
   pid: number;

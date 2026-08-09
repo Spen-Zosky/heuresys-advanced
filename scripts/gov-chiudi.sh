@@ -120,6 +120,32 @@ fi
 # non erano difetti. Trovato guardando girare la prima istruttoria completa.
 export SUITE_LOCK_FILE="$REPO/.zp/suite.lock"
 
+# L'IDENTITA' CON CUI SI GIUDICA
+# ------------------------------
+# I test di integrazione SCRIVONO: creano fixture, fanno login veri, fanno INSERT.
+# L'albero di un lavoratore parla al database come `gov_worker`, che e' in sola
+# lettura per costruzione — ed e' giusto che lo sia, e' il recinto di sicurezza.
+# Ma il cancello `test`, girando li', era impossibile da superare per QUALUNQUE
+# lavoro: misurato, `cannot execute INSERT in a read-only transaction`. Un cancello
+# che nessuno puo' passare non giudica niente, e il suo rosso non dice nulla.
+#
+# L'istruttoria la esegue GOV, che ha l'identita' piena. Si impone qui, per la sola
+# durata dei cancelli, senza toccare il .env dell'albero: dotenv/Vite non sovrascrive
+# le variabili gia' presenti nell'ambiente. Verificato prima di scriverlo:
+# `actors-profile` passa 9/9 con questa identita', 6/9 senza.
+if [[ -f "$REPO/.env" ]]; then
+  IDENT_USER="$(grep -E '^POSTGRES_USER=' "$REPO/.env" | head -1 | cut -d= -f2-)"
+  IDENT_PASS="$(grep -E '^POSTGRES_PASSWORD=' "$REPO/.env" | head -1 | cut -d= -f2-)"
+  if [[ -n "$IDENT_USER" && -n "$IDENT_PASS" ]]; then
+    export POSTGRES_USER="$IDENT_USER" POSTGRES_PASSWORD="$IDENT_PASS"
+    log "  identita' di giudizio: $IDENT_USER (i cancelli scrivono; il lavoratore resta in sola lettura)"
+  else
+    rilievo "in $REPO/.env manca POSTGRES_USER o POSTGRES_PASSWORD: il cancello test sarebbe rosso per costruzione, non per difetto"
+  fi
+else
+  rilievo "manca $REPO/.env: senza identita' piena il cancello test e' rosso per costruzione, non per difetto"
+fi
+
 # L'output dei cancelli si CONSERVA. La prima istruttoria completa ha dichiarato
 # «test e' rosso» e buttato via l'output: il verdetto diceva CHE era rosso ma non
 # QUALE test lo fosse, ne' se il rosso venisse dal lavoratore o fosse gia' sul ramo.
@@ -141,9 +167,13 @@ if [[ "$VELOCE" == "1" ]]; then
   log "  --veloce: i cancelli non girano. L'istruttoria e' PARZIALE e il verdetto lo dira'."
   LOG_CANCELLI=""
 else
-  cancello "typecheck"  pnpm -s typecheck
-  cancello "lint"       pnpm -s lint
-  cancello "test"       pnpm -s test
+  # NIENTE `-s`: misurato, `pnpm -s run` sopprime l'output degli script figli (0 byte
+  # contro 4.690 a parita' di comando), ed e' il motivo per cui il primo verdetto ha
+  # saputo dire «test e' rosso» ma non quali test. `pnpm -s exec` invece lo lascia
+  # passare — la differenza sta in `run`, ed e' costata due ipotesi sbagliate.
+  cancello "typecheck"  pnpm typecheck
+  cancello "lint"       pnpm lint
+  cancello "test"       pnpm test
 fi
 
 # --- 5. le evidenze devono poter fallire -------------------------------------

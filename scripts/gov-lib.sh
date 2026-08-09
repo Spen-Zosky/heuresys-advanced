@@ -239,6 +239,13 @@ import json;print(json.load(open('.zp/last-outcome.json',encoding='utf-8')).get(
   printf '%s|%s|%s|%s\n' "${esito:-troncato}" "${costo:-0}" "${prossimo:-}" "$durata"
 }
 
+# SCRITTURA BINARIA, non print(). Su Windows print() chiude le righe con CRLF, e quel
+# ritorno a capo entra nel nome del cluster: finisce nel file di lucchetto, nel prompt
+# del lavoratore e dentro il giornale di spesa, che diventa JSON non valido. Il driver
+# scarta ogni riga illeggibile IN SILENZIO, quindi il tetto di spesa smette di vedere
+# qualunque costo e non scatta mai. Misurato il 2026-08-09: un lavoratore costato 2,20
+# dollari e un totale che diceva 0,00. Lo stesso difetto che la review di luglio aveva
+# gia chiuso una volta, tornato per una strada diversa.
 gov_assegna() {              # <repo> <corsia> <lavoratori> [budget_ore] -> id, uno per riga
   local repo="$1"
   local corsia="$2"
@@ -252,8 +259,7 @@ gov_assegna() {              # <repo> <corsia> <lavoratori> [budget_ore] -> id, 
 import json,sys
 try: d = json.load(sys.stdin)
 except Exception: sys.exit(0)
-for c in d.get('parallelo', []):
-    print(c['id'])"
+sys.stdout.buffer.write(str().join(c[str(chr(39)+chr(105)+chr(100)+chr(39))[1:-1]] + chr(10) for c in d.get(chr(112)+chr(97)+chr(114)+chr(97)+chr(108)+chr(108)+chr(101)+chr(108)+chr(111), [])).encode())"
 }
 
 # --- la configurazione non si riscrive mentre qualcuno lavora ---------------

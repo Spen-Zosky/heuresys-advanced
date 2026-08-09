@@ -96,6 +96,14 @@ DISTINTI="$(echo "$ASSEGNATI" | sort -u | grep -c . || true)"
 prova_uguale "$N_ASSEGNATI" "$DISTINTI" "i cluster assegnati sono TUTTI DIVERSI"
 prova_uguale "3" "$(gov_assegna "$REPO" safe 9 4 | grep -c . || true)" \
              "chiedendone 9 se ne assegnano 3 (il tetto)"
+# Il difetto piu insidioso della prima corsa vera: un ritorno a capo Windows dentro
+# lidentificativo. Non si vede leggendo, e rende il giornale di spesa JSON non valido:
+# il driver scarta ogni riga in silenzio e il tetto di spesa non scatta mai.
+if gov_assegna "$REPO" safe 2 4 | od -c | grep -q "\r"; then
+  FALLITI=$((FALLITI+1)); echo "[FALLISCE] gli id assegnati hanno un ritorno a capo (rompe il giornale di spesa)"
+else
+  PASSATI=$((PASSATI+1)); echo "[PASSA   ] gli id assegnati sono puliti"
+fi
 
 echo
 echo "── avvio e raccolta dei lavoratori ──"

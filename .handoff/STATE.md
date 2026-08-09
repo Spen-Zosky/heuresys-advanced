@@ -1,70 +1,69 @@
 # heuresys-advanced — STATE (vista rapida)
 
-**Updated**: 2026-08-09 (S1052 — il processo gov ha imparato a dire di no, e poi ha detto di sì).
-> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md` · pattern di dati → `docs/kb/DATA_PATTERNS.md`. Stato del PROCESSO gov (non del progetto) → `.zp/GOV-DA-FARE.md`.
+**Updated**: 2026-08-10 (S1052 — la prima corsa presidiata è avvenuta, e ha rotto cinque cose che nessuno vedeva).
+> **Vista rapida** (priorità · open questions). Snapshot granulare → `docs/kb/SOT_STATE.md`. Backlog → `docs/kb/SOT_BACKLOG.md` · debiti → `docs/kb/DEBT_REGISTER.md`. Stato del PROCESSO gov → `.zp/GOV-DA-FARE.md`.
 
 ## Last session brief (S1052)
 
-**Il lavoro di un lavoratore è entrato in main dopo un verdetto verde sull'intera suite** —
-il primo trasferimento che gov abbia mai autorizzato. Ci sono volute tre corse, e la lezione
-sta lì: **il lavoratore aveva ragione dall'inizio, mentivano gli strumenti**. Il cancello dei
-test chiedeva a un lavoratore in sola lettura di far girare test che scrivono; il verdetto era
-muto perché `pnpm -s` sopprime l'output; e non veniva nemmeno scritto.
+**Due lavoratori hanno lavorato in parallelo per la prima volta**, su due cluster di classe
+A con perimetri disgiunti, con un guadagno misurato di **1,83×** sul lavoro in fila. Prima
+però il freno andava sbloccato da un cerchio che si chiudeva su sé stesso — pretendeva
+l'effetto prima della causa. Deciso da Enzo: il freno si chiama `autorizzato_non_presidiato`
+e ora governa esattamente quello.
 
-**La plancia è diventata la console di volo di gov**, sette voci su sette: due ritmi, cinque
-viste, i lavoratori coi loro diari in diretta, la composizione dei cluster, e la
-configurazione modificabile con guardie, coerenza e rollback provato su un caso vero.
+**Il valore della corsa non sono i cluster chiusi — sono zero — ma i cinque difetti
+strutturali che ha fatto emergere**, invisibili a ogni batteria: il driver si bloccava con
+il rapporto che scrive lui, il recinto fermava il lavoro *dentro* il perimetro, il rientro
+era diventato cieco, la batteria della guardia era rossa, l'istruttoria accusava di «nessun
+diario» chi ne aveva 135 righe. Tutti corretti e provati.
 
-**I tre lavori minori sono chiusi, e nessuno era ciò che il registro diceva.** Il cancello
-delle evidenze non era «poco severo»: era **cieco**, puntato su due posti sbagliati.
-E il registro delle corse **aveva 16 righe e ne venivano lette 4** — dodici spezzate a
-metà scrittura e scartate in silenzio, con una spesa mostrata che era quella di un quarto
-dei dati e sembrava vera.
+**Il processo ha giudicato invece di cedere**: entrambi i lavoratori hanno preso ROSSO per
+ragioni vere (prove insufficienti · lavoro non committato), e uno si è rifiutato di
+dichiarare chiuso un lavoro completo perché non aveva potuto far girare i revisori.
 
-**Il freno resta inserito**: Enzo ha autorizzato di toglierlo, lo strumento ha rifiutato
-perché `Z-250` è aperto (i test che servono non risultano eseguiti). La strada è obbligata e nell'ordine giusto.
+**Prima della corsa la documentazione è stata riallineata**: diceva due modalità di sessione
+mentre il codice ne ha tre, prescriveva uno schema ritirato, un conteggio fermo dove il
+database dice altro, e una persona di prova che non esiste più.
 
 ## Obiettivo permanente (mandato Enzo, S1029)
 
 **Fresh session senza pendenze**: zero debiti o task incompleti; doppia verifica e review
 adversarial; le decisioni tecniche sono di Claude.
 
-## Regola su ogni lavoro che tocca il database (S1049-S1052)
+## Regole che questa sessione ha pagato care
 
-Prova generale su linux-pc prima di applicare · si emenda il file che crea (ADR-0035), mai
-una `DELETE` a valle · un seed si prova su una copia usa-e-getta (porta `COMMIT` propri).
-
-## Regola nuova (S1052) — una prova che non può fallire non è una prova
-
-Tre cancelli erano **verdi per costruzione**: passavano sempre, e tacevano. Un controllo
-mai visto rosso va **provato rompendolo di proposito**. E un conteggio che scarta in
-silenzio ciò che non sa leggere è peggio di uno assente: sembra vero.
+**Si modifica con gli strumenti di edit, mai con script Python dentro heredoc Bash**: due
+livelli di escape annidati hanno rotto le stringhe tre volte (`AUTONOMY_R23_PROJECT.md`).
+**Una prova che non può fallire non è una prova**: tre cancelli erano verdi per costruzione.
+**Un conteggio che scarta in silenzio ciò che non sa leggere** è peggio di uno assente.
+**L'esito si legge dal codice d'uscita**, mai da `head`/`tail` in coda a una pipe.
 
 ## Top priorities (prossima sessione)
 
-1. **`Z-250` — la corsa presidiata che esegue i test mancanti** (~1 sessione): bootstrap,
-   freno a metà lavoro, troncamento da budget, frontiere della description. **Sblocca il
-   freno**, oggi l'unica cosa che separa dalla corsa vera a due lavoratori (`#173`).
+1. **Chiudere `Z-112`** (~30min): il lavoro è completo, committato e valido (perimetro
+   rispettato, cancelli verdi). Manca **la seconda prova** su un livello diverso (ADR-0026).
+   Registrata quella, `bash scripts/gov-chiudi.sh 1` e il cluster chiude — **e con lui
+   `Z-250`**, che aspetta solo un cluster chiuso con il suo commit.
 2. **`#124` mascheratura, strato 1** (~1 sessione): spaccare `IDENTITY` in `IDENTITY_PRO` /
    `IDENTITY_PRIV` chiude **6 celle su 8** senza alcun meccanismo nuovo.
-3. **`#168` cancellare una persona cancella la storia delle sue approvazioni** (~2-3h):
-   le tre righe perse sono ri-derivate, **la causa no**. Serve il censimento dei `CASCADE`.
+3. **`Z-251`** (~2h): la suite non regge la contesa sul DB condiviso — un file è caduto per
+   `connect timeout` e da solo passa. Rende ambiguo ogni verdetto.
 
 ## Open questions
 
-- **Il verdetto verde di `w1` è stato dato con il cancello evidenze cieco.** Ora che
-  funziona, quel lavoro avrebbe un rilievo: ha **una** prova, ne servono **due** su livelli
-  diversi. È già su main. Lo ri-istruiamo (`bash scripts/gov-chiudi.sh 1`) o lo si accetta?
-- **`.zp/GOV-DA-FARE.md` non è versionato** e **esiste in una sola copia su questa
-  macchina**: contiene le tue regole d'ingaggio gov (`#176`). Va spostato nel repo?
-- **`#169`**: password e secondo fattore nascono dalla stessa chiave madre. Non urgente
-  finché la chiave sta solo qui; lo diventa quando arriverà su VM e linux-pc (`#147`).
+- **Il freno resta INSERITO per il non presidiato.** Ora che la corsa sorvegliata ha
+  funzionato, vuoi che il loop giri anche non presidiato? Decisione tua, senza scadenza.
+- **`.zp/GOV-DA-FARE.md` non è versionato** ed esiste in una sola copia su questa macchina:
+  contiene le tue regole d'ingaggio gov (`#176`).
+- **`#175`**: il verdetto verde di `Z-230` fu dato con il cancello evidenze cieco. Il lavoro
+  è già su main. Si ri-istruisce o si accetta?
 
 ## Verification
 
 ```bash
-python docs/kb/tools/session_start.py                                    # menu + salute, un giro
-python docs/kb/tools/gov_rientro.py                                      # stato del processo gov
-pnpm plancia:zp                                                          # :8477 — cockpit gov
-ssh linux-pc 'cd ~/heuresys-advanced && bash db/scripts/ci-rehearsal.sh' # prova generale
+python docs/kb/tools/session_start.py                       # menu + salute, un giro
+python docs/kb/tools/gov_rientro.py                         # stato del processo gov
+bash scripts/test/gov-worker-guard-tests.sh                 # recinto e diario
+python docs/kb/tools/zp_selftest.py                         # impianto zp
+bash scripts/zero-pending-driver.sh --lane full-presidiata --dry-run   # corsa sorvegliata
 ```

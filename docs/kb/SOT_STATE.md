@@ -9,59 +9,74 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
-### Delta S1052 (2026-08-09) — il processo gov impara a dire di no, poi dice di si'
+### Delta S1052 (2026-08-09/10) — la prima corsa presidiata, e i cinque difetti che ha fatto emergere
 
-**Numeri ri-derivati**: utenti **161** · RBAC map **957** · skill **14039** · migration su
-disco **300** (max `000302`) · HEAD `2dd0f545` · tag `v1.0.0`.
+**Numeri ri-derivati**: utenti **161** · RBAC map **957** · ruoli **14** · skill **14039** ·
+migration su disco **300** (max `000302`) · tag `v1.0.0`.
 
-**Primo trasferimento autorizzato da gov.** `gov/w1` (cluster `Z-230`) entra in main col
-merge `551dd8d0` dopo verdetto **VERDE** — `typecheck` + `lint` + **218 file / 1509 test di
-integrazione** in 39 minuti. Verdetto scritto in `.zp/verdetti/w1-Z-230-20260809-185312.json`,
-output conservato (1,5 MB). Gli altri rami restano dove sono: `gov/w2` non ha commit,
-`gov/w1-recuperato` e `gov/w2-recuperato` non hanno mai avuto un'istruttoria.
+**LA CORSA A PIU' LAVORATORI ESISTE.** `--lane full-presidiata`, 2026-08-09 22:40→23:09:
+due lavoratori in parallelo su due cluster di classe A con perimetri disgiunti (`Z-112` a
+w1, `Z-221` a w2), **1728 s contro i 3162 s che sarebbero serviti in fila = guadagno
+1,83x** (il piano stimava 1,4-1,6x). Costo 16,24 $.
 
-**Tre difetti degli strumenti, non del lavoro** — sono serviti tre giri per capirlo:
-1. il verdetto **non veniva scritto** (lo script moriva se modificato mentre girava);
-2. il verdetto era **muto**: `pnpm -s run` sopprime l'output degli script figli (**0 byte
-   contro 4.690** a parita' di comando; `pnpm -s exec` invece lo lascia passare);
-3. il cancello dei test era **impossibile da superare**: girava nell'albero del lavoratore,
-   dove il DB e' in sola lettura (`gov_worker`), mentre i test di integrazione scrivono
-   (`cannot execute INSERT in a read-only transaction`). Ora l'identita' piena si impone
-   per la sola durata dei cancelli.
+**Sbloccata da una decisione di Enzo su un cerchio chiuso su se' stesso**: il freno
+pretendeva `Z-250` chiuso · `Z-250` pretende una corsa presidiata conclusa · la corsa la fa
+il driver · il driver era fermato dal freno. Il freno si chiama
+`meta.autorizzato_non_presidiato` e ora governa esattamente quello: la corsia
+`full-presidiata` non passa da quel cancello, ogni altra si' (provato nelle due direzioni).
+`full-presidiata` **esisteva gia' nel driver ma era un valore morto**: non era fra le
+`lanes`, quindi `classi_ammesse` l'avrebbe respinta.
 
-**Falso indizio da non riscoprire**: con il lucchetto occupato, vitest stampa «No test
-files found, exiting with code 1» e solo DOPO l'errore vero. I file ci sono tutti.
+**I 4 test `[a mano]` di Z-250**: bootstrap che non ri-censisce **superato** · freno tirato
+a meta' lavoro **superato in entrambe le meta'** (STOP a lavoro avviato: i lavoratori hanno
+FINITO invece di essere uccisi; al rilancio il driver si e' fermato) · troncamento da budget
+**NON PROBANTE** (il tetto ha contenuto la spesa in tutte e tre le corse, ma il taglio a
+meta' lavoro non e' stato osservato) · frontiere della description **superato 8/8** con 3
+controlli negativi.
 
-**La plancia diventa la console di volo di gov** (7 voci, piano
-`docs/superpowers/plans/2026-08-09-plancia-gov.md`, commit `3b185b05` `51ac3eb7` `3e034f2f`):
-due ritmi (`/api/volo` **0,008 s** contro `/api/stato` **1,18 s**; prima erano 2 `schtasks`
-+ 1 `git status` ogni 5 secondi solo per guardare), 5 viste, i lavoratori con diari in
-diretta, la composizione dei cluster, la fascia «in volo adesso», e la configurazione:
-10 campi modificabili (elenco esplicito), 4 dichiarati intoccabili, **una riga per volta**,
-con verifica del piano **e** coerenza fra campi, e **rollback provato su un caso vero**.
+**Z-250 RESTA APERTO**, e il motivo e' dichiarato: pretende «un cluster chiuso e il suo
+commit», e nessuno dei due ha chiuso. `Z-112` ha preso ROSSO dall'istruttoria per **1 prova
+su 2** (ADR-0026) — lavoro completo e valido, cancelli verdi — e `Z-221` ha lasciato un file
+non committato. **Entrambi i rossi sono giusti: il processo ha giudicato, non ha ceduto.**
 
-**I tre lavori minori chiusi — e nessuno era cio' che il registro diceva**:
-- **B1**: il diario esce dall'albero del sorvegliato (`<padre>/heuresys-gov-diari/`), con
-  ripiego dentro se quel disco non e' scrivibile, e lettura che trova anche gli storici;
-- **B4**: non era «severita' non calibrata». Il cancello cercava le prove in
-  `last-outcome.json` invece che in `.zp/prove/<cluster>.json`, **e** `zp_evidence`
-  derivava la radice dal proprio file (da qui **`ZP_ROOT`** in `zp_state.py`). Era
-  **cieco**: passava sempre. Conseguenza: con il cancello funzionante `w1` avrebbe un
-  rilievo — ha **1** prova, ne servono **2** su livelli diversi;
-- **D**: `runs.ndjson` aveva **16 righe e ne venivano lette 4**; dodici spezzate a meta'
-  scrittura e scartate in silenzio, con la spesa mostrata pari a un quarto dei dati. Causa
-  corretta nel driver (campi non sanificati); lettore reso onesto; budget **derivato dal
-  dato**: **27,52 $/h** mediano su 4 corse (sotto i 5 campioni indica ma non fonda), contro
-  un tetto fisso di **12 $** — un cluster da 1h vale ~40 $, quindi il tetto **tronca**, ed
-  e' esattamente cio' che dice l'unica corsa leggibile (`"esito": "troncato"`).
+**CINQUE DIFETTI STRUTTURALI emersi correndo**, nessuno visibile a una batteria:
+1. il driver si bloccava con il rapporto che scrive lui (`.zp/PROGRESS.md` e' tracciato e
+   riscritto a ogni giro ⟹ **due corse consecutive erano impossibili** senza un commit a
+   mano; spiega la frase che stava gia' nel codice: «finora nessuna corsa era mai partita»);
+2. il recinto **fermava il lavoro DENTRO il perimetro**: non seguiva i `cd`, quindi
+   `cd apps/api && cat > test/x.ts` veniva letto come scrittura alla radice. 2 rifiuti su 4
+   erano falsi;
+3. il rientro contava **zero azioni** su lavoratori con 135 e 133 azioni (B1 aveva spostato
+   il diario e `gov_rientro` guardava ancora dentro l'albero);
+4. la batteria della guardia era **rossa** (44/5): cinque controlli guardavano il diario nel
+   posto vecchio. Ora 50/0, con un test nuovo che fallisce se il diario tornasse dentro;
+5. l'istruttoria accusava di **«nessun diario»** chi ne aveva 135 righe, e il rilievo falso
+   finiva nel verdetto accanto a quelli veri.
+   In piu': i diari si **accumulavano** fra corse diverse (ora si archiviano).
 
-**Il freno resta INSERITO.** Enzo ha autorizzato di toglierlo per una corsa sola; lo
-strumento ha rifiutato perche' **`Z-250` e' aperto**: i 4 test che richiedono una sessione
-viva non risultano eseguiti. Non si forza — prima la corsa presidiata, poi il freno.
+**Il rosso sui test era ambientale, verificato non assunto**: 1509 test passati, zero
+falliti, **un solo file caduto** (`seed-acquisition`) con `Connection terminated due to
+connection timeout` in `pool.connect()`; rieseguito da solo **5/5 verde**. E' la firma di
+`Z-251` (contesa sul DB condiviso), non un difetto del lavoro.
 
-**Regola nuova**: una prova che non puo' fallire non e' una prova. Tre cancelli su tre
-erano verdi per costruzione. E un conteggio che scarta in silenzio cio' che non sa leggere
-e' peggio di un conteggio assente: sembra vero.
+**Prima cosa lavorata da gov e portata in main**: `Z-230` (`b55dcabf` su `gov/w1`, merge
+`551dd8d0`) dopo verdetto VERDE su 218 file / 1509 test. Chiudendolo e' emerso un **anello
+mancante**: dopo il merge nessun passo di gov spuntava il cluster nel piano, e il primo
+dry-run presidiato lo riproponeva come primo candidato.
+
+**Tre difetti degli strumenti d'istruttoria**, corretti prima della corsa: il verdetto non
+veniva scritto · era muto (`pnpm -s run` sopprime l'output dei figli: **0 byte contro
+4.690**) · il cancello dei test era **impossibile da superare**, perche' girava nell'albero
+del lavoratore dove il DB e' in sola lettura mentre i test di integrazione scrivono.
+E il cancello delle **evidenze era CIECO**: cercava le prove nel file sbagliato e
+`zp_evidence` derivava la radice dal proprio file (da qui **`ZP_ROOT`**).
+
+**Documentazione riallineata al reale** (5 scostamenti misurati): `SESSION_MODES.md` e
+`CLAUDE.md` dichiaravano **due** modalita' mentre il codice ne ha **tre** (`gov` compariva
+zero volte) · `db-migrations.md` prescriveva lo schema `brownfield`, ritirato · 11 ruoli
+contro i 14 del database · `admin@heuresys.com` citato come persona di prova ma **rimosso**
+dalla mig. `000295` · `db_health.py` esentava una regola dell'organigramma per via di
+quell'account: l'esenzione era diventata un **punto cieco**, ora si sorvegliano tutte e otto.
 
 ### Delta S1046 (2026-08-06) — la chiusura smette di agire nel dubbio, e tiene un diario
 

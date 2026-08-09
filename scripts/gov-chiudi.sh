@@ -113,18 +113,33 @@ fi
 
 # --- 4. i cancelli, gli stessi di una sessione canonica ----------------------
 # Girano NELL'ALBERO, non nel repo: si giudica il ramo, non il posto da cui si guarda.
+# Il lucchetto della suite e' UNO SOLO, condiviso: protegge il database, non la
+# cartella. Senza questa riga l'istruttoria userebbe il lucchetto locale dell'albero
+# e potrebbe far girare la suite mentre un'altra gira altrove — lo stesso caso
+# misurato il 2026-08-05, dove due suite in parallelo hanno prodotto 14 rossi che
+# non erano difetti. Trovato guardando girare la prima istruttoria completa.
+export SUITE_LOCK_FILE="$REPO/.zp/suite.lock"
+
+# L'output dei cancelli si CONSERVA. La prima istruttoria completa ha dichiarato
+# «test e' rosso» e buttato via l'output: il verdetto diceva CHE era rosso ma non
+# QUALE test lo fosse, ne' se il rosso venisse dal lavoratore o fosse gia' sul ramo.
+# Un verdetto che non si puo' istruire a sua volta non serve a chi lo legge.
+LOG_CANCELLI="$VERDETTI/w$N-cancelli-$(date +%Y%m%d-%H%M%S).log"
+
 cancello() {                  # cancello <etichetta> <comando...>
   local etichetta="$1"; shift
   log "  cancello: $etichetta"
-  if ( cd "$ALBERO" && "$@" >/dev/null 2>&1 ); then
+  printf '\n===== %s =====\n' "$etichetta" >> "$LOG_CANCELLI"
+  if ( cd "$ALBERO" && "$@" >>"$LOG_CANCELLI" 2>&1 ); then
     log "           verde"
   else
-    rilievo "$etichetta e' rosso"
+    rilievo "$etichetta e' rosso (output: $LOG_CANCELLI)"
   fi
 }
 
 if [[ "$VELOCE" == "1" ]]; then
   log "  --veloce: i cancelli non girano. L'istruttoria e' PARZIALE e il verdetto lo dira'."
+  LOG_CANCELLI=""
 else
   cancello "typecheck"  pnpm -s typecheck
   cancello "lint"       pnpm -s lint
@@ -151,14 +166,15 @@ else
   ESITO="rosso"; CODICE=1
 fi
 
-"$PY" - "$FILE" "$ESITO" "$N" "${CLUSTER:-}" "$ESITO_PROPOSTO" "$QUANDO" "$VELOCE" "${RILIEVI[@]:-}" <<'PYEOF'
+"$PY" - "$FILE" "$ESITO" "$N" "${CLUSTER:-}" "$ESITO_PROPOSTO" "$QUANDO" "$VELOCE" "${LOG_CANCELLI:-}" "${RILIEVI[@]:-}" <<'PYEOF'
 import json, sys
-file, esito, n, cluster, proposto, quando, veloce, *rilievi = sys.argv[1:]
+file, esito, n, cluster, proposto, quando, veloce, log_cancelli, *rilievi = sys.argv[1:]
 rilievi = [r for r in rilievi if r]
 json.dump({
     "verdetto": esito, "lavoratore": int(n), "cluster": cluster,
     "esito_proposto_dal_lavoratore": proposto, "quando": quando,
     "istruttoria_parziale": veloce == "1",
+    "output_cancelli": log_cancelli or None,
     "rilievi": rilievi,
     "nota": ("verde non significa «portalo su main»: significa «non ho trovato ragioni "
              "per non farlo». Il trasferimento resta un atto separato e presidiato."),

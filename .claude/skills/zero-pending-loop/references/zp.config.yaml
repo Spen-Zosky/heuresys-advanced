@@ -60,7 +60,7 @@ meta:
   # vanno fatti in una prima corsa presidiata.
   #
   # Referto completo: nell'entry di riconciliazione in docs/kb/COWORK_INBOX.md.
-  autorizzato_non_presidiato: true
+  autorizzato_non_presidiato: false
 
 lanes:
   safe: [A, B]

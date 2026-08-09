@@ -106,7 +106,22 @@ gov_worktree_prepara() {     # <repo> <n> [ref] -> stampa il percorso; 1 se fall
   dir="$base/w$n"
 
   if [[ -e "$dir/.git" ]]; then
-    echo "$dir"                                 # gia' pronto: si riusa
+    # Un albero riusato resta al commit di quando fu creato: senza questo, un
+    # lavoratore lavorerebbe su codice vecchio e i suoi commit divergerebbero da
+    # main senza che nessuno lo dica. Si riallinea SOLO se non ha niente in ballo:
+    # se ha lavoro non salvato non si tocca — meglio un albero indietro che lavoro
+    # perso.
+    if [[ -z "$(git -C "$dir" status --porcelain)" ]]; then
+      # Il ref si risolve NEL REPO PRINCIPALE: dentro l'albero «HEAD» e' il commit
+      # dell'albero stesso, quindi un reset su HEAD non lo muove di un millimetro —
+      # e sembra funzionare. Misurato: w1 restava indietro di 4 commit senza dirlo.
+      local dove
+      dove="$(git -C "$repo" rev-parse "$ref" 2>/dev/null)"
+      [[ -n "$dove" ]] && git -C "$dir" reset --hard "$dove" >/dev/null 2>&1 || true
+    else
+      echo "albero $dir: ha lavoro non salvato, lo lascio com'e'" >&2
+    fi
+    echo "$dir"
     return 0
   fi
 

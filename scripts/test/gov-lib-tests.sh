@@ -130,9 +130,20 @@ L1="$TMP/lav1"; L2="$TMP/lav2"; mkdir -p "$L1" "$L2"
 
 # Due lavoratori insieme, con esiti e costi DIVERSI: se lo stato fosse condiviso,
 # il secondo sovrascriverebbe il primo e i due risultati sarebbero uguali.
-P1="$(FINTO_ESITO=cluster-closed     FINTO_COSTO=2.25 gov_avvia_lavoratore "$L1" Z-230 resume safe 4 12 acceptEdits)"
-P2="$(FINTO_ESITO=cluster-interrotto FINTO_COSTO=0.75 gov_avvia_lavoratore "$L2" Z-112 resume safe 4 12 acceptEdits)"
-wait "$P1" 2>/dev/null; wait "$P2" 2>/dev/null
+FINTO_ESITO=cluster-closed     FINTO_COSTO=2.25 gov_avvia_lavoratore "$L1" Z-230 resume safe 4 12 acceptEdits
+P1="$GOV_ULTIMO_PID"
+FINTO_ESITO=cluster-interrotto FINTO_COSTO=0.75 gov_avvia_lavoratore "$L2" Z-112 resume safe 4 12 acceptEdits
+P2="$GOV_ULTIMO_PID"
+# Il `wait` si VERIFICA. Prima finiva in /dev/null: falliva con 127 («non e' un
+# figlio di questa shell») e nessuno lo vedeva, perche' il finto claude era gia'
+# finito comunque. E' il difetto che ha rovinato la prima corsa vera.
+wait "$P1"; E1=$?
+wait "$P2"; E2=$?
+prova_uguale "0" "$E1" "il driver puo' davvero attendere il primo lavoratore"
+prova_uguale "0" "$E2" "e anche il secondo"
+# Il prompt deve arrivare INTATTO: Git Bash traduce un argomento che inizia con «/»
+# in un percorso Windows, e la skill non veniva invocata affatto.
+prova 0 "il comando arriva come /zero-pending-loop, non tradotto"         grep -q "^/zero-pending-loop" "$L1/.zp/comando-ricevuto.txt"
 
 R1="$(gov_raccogli_lavoratore "$L1" | cut -d"|" -f1-3)"
 R2="$(gov_raccogli_lavoratore "$L2" | cut -d"|" -f1-3)"
@@ -145,15 +156,15 @@ prova 1 "i due non si sono scambiati il cluster"     grep -q "Z-112" "$L1/.zp/co
 
 # Una sessione troncata non scrive l'esito: va letta come troncata, non come chiusa.
 L3="$TMP/lav3"; mkdir -p "$L3"
-P3="$(FINTO_MUTO=1 FINTO_COSTO=9.99 gov_avvia_lavoratore "$L3" Z-999 resume safe 4 12 acceptEdits)"
-wait "$P3" 2>/dev/null
+FINTO_MUTO=1 FINTO_COSTO=9.99 gov_avvia_lavoratore "$L3" Z-999 resume safe 4 12 acceptEdits
+wait "$GOV_ULTIMO_PID"
 prova_uguale "troncato|9.99|recover" "$(gov_raccogli_lavoratore "$L3" | cut -d"|" -f1-3)" \
              "senza esito scritto si legge «troncato», e il costo si legge lo stesso"
 
 # E il giro dopo non deve ereditare l'esito del giro prima: e' il modo silenzioso
 # in cui un troncamento diventerebbe un «chiuso bene».
-P4="$(FINTO_MUTO=1 FINTO_COSTO=0.10 gov_avvia_lavoratore "$L1" Z-230 resume safe 4 12 acceptEdits)"
-wait "$P4" 2>/dev/null
+FINTO_MUTO=1 FINTO_COSTO=0.10 gov_avvia_lavoratore "$L1" Z-230 resume safe 4 12 acceptEdits
+wait "$GOV_ULTIMO_PID"
 prova_uguale "troncato|0.1|recover" "$(gov_raccogli_lavoratore "$L1" | cut -d"|" -f1-3)" \
              "l'esito del giro precedente non sopravvive al giro nuovo"
 
@@ -171,8 +182,8 @@ printf %s
 printf %s > .zp/last-outcome.json "{\\"outcome\\":\\"cluster-closed\\",\\"next\\":\\"continue\\"}"
 ' > "$FINTO_LENTO"
 chmod +x "$FINTO_LENTO"
-P5="$(ZP_CLAUDE_CMD="$FINTO_LENTO" gov_avvia_lavoratore "$L4" Z-500 resume safe 4 12 acceptEdits)"
-wait "$P5" 2>/dev/null
+ZP_CLAUDE_CMD="$FINTO_LENTO" gov_avvia_lavoratore "$L4" Z-500 resume safe 4 12 acceptEdits
+wait "$GOV_ULTIMO_PID"
 DUR="$(gov_raccogli_lavoratore "$L4" | cut -d'|' -f4)"
 if [[ "$DUR" -ge 2 ]] 2>/dev/null; then
   PASSATI=$((PASSATI+1)); printf '[PASSA   ] %s

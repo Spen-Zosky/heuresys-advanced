@@ -390,8 +390,13 @@ while (( GIRO < MAX_ITER )); do
   INIZIO=$(date +%s)
   FIGLI=()
   for _i in "${!DIRS[@]}"; do
-    FIGLI+=("$(gov_avvia_lavoratore "${DIRS[$_i]}" "${CLUSTERS[$_i]}" "$MODO" \
-                                    "$CORSIA" "$ORE_MAX" "$BUDGET_GIRO" "$PERMESSI")")
+    # SENZA $( ): la sostituzione di comando crea una sottoshell, e il figlio
+    # lanciato li' dentro non e' figlio del driver — `wait` risponde «non e' un mio
+    # figlio» (127), il driver crede di aver aspettato e legge «troncato» su sessioni
+    # ancora vive. Misurato nella prima corsa vera, 2026-08-09.
+    gov_avvia_lavoratore "${DIRS[$_i]}" "${CLUSTERS[$_i]}" "$MODO" \
+                         "$CORSIA" "$ORE_MAX" "$BUDGET_GIRO" "$PERMESSI"
+    FIGLI+=("$GOV_ULTIMO_PID")
     [[ -n "${CLUSTERS[$_i]}" ]] && log "  lavoratore $((_i + 1)) -> ${CLUSTERS[$_i]}  (${DIRS[$_i]})"
   done
   CODICE=0

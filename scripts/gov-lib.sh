@@ -180,10 +180,14 @@ gov_avvia_lavoratore() {     # <dir> <cluster> <modo> <corsia> <ore> <budget> <p
   rm -f "$dir/.zp/durata-s"
   ( cd "$dir"
     _t0=$(date +%s)
-    "${ZP_CLAUDE_CMD:-claude}" -p "$comando" --output-format json --max-budget-usd "$budget" --permission-mode "$permessi" > ".zp/last-response.json" 2> ".zp/last-stderr.log"
+    MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL="*" "${ZP_CLAUDE_CMD:-claude}" -p "$comando" --output-format json --max-budget-usd "$budget" --permission-mode "$permessi" > ".zp/last-response.json" 2> ".zp/last-stderr.log"
     echo $(( $(date +%s) - _t0 )) > ".zp/durata-s"
   ) &
-  echo $!
+  # Il pid si consegna in una VARIABILE, non su stdout. Con `$( )` la funzione gira
+  # in una sottoshell: il figlio e' suo, non del driver, e `wait` risponde «pid non
+  # e' un figlio di questa shell» (exit 127). Il driver credeva di aver aspettato,
+  # raccoglieva subito e leggeva «troncato» su sessioni ancora vive.
+  GOV_ULTIMO_PID=$!
 }
 
 gov_raccogli_lavoratore() {  # <dir> -> "esito|costo|prossimo|durata_s"

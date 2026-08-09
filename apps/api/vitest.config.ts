@@ -76,6 +76,10 @@ export default defineConfig({
     // sullo stesso PostgreSQL si contendono lock e connessioni e producono rossi che
     // non sono difetti — misurato il 2026-08-05, 14 file falliti in concorrenza
     // contro 4 su database libero, con ZERO test falliti in entrambi i casi.
-    globalSetup: ["./test/helpers/suite-lock.ts"],
+    // I teardown di globalSetup girano in ordine INVERSO all'array: `drift-check` sta
+    // dopo il lucchetto proprio per questo — il censimento finale avviene mentre la
+    // suite tiene ancora il lucchetto, quindi nessun'altra corsa puo' scrivere righe che
+    // finirebbero attribuite a questa (Z-112).
+    globalSetup: ["./test/helpers/suite-lock.ts", "./test/helpers/drift-check.ts"],
   },
 });

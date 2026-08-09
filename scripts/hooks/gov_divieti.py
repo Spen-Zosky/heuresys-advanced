@@ -89,10 +89,6 @@ VIETATI: list[tuple[re.Pattern, str]] = [
                 re.I),
      "i servizi di produzione non si toccano da un lavoratore."),
 
-    (re.compile(r"\bssh\b[^;|&]*\b(?:oracle-vm|linux-pc)\b[^;|&]*"
-                r"(?:systemctl|rm |psql|docker|git )", re.I),
-     "agire sulle macchine remote e' un atto presidiato."),
-
     # ---- autoprotezione: il sorvegliato non riscrive la sorveglianza ----
     (re.compile(r"\b(?:sed|perl|awk)\b[^;|&]*-i[^;|&]*"
                 r"(?:\.claude|scripts[/\\]hooks|settings\.local)", re.I),
@@ -103,6 +99,18 @@ VIETATI: list[tuple[re.Pattern, str]] = [
 
     (re.compile(r"\brm\b[^;|&]*(?:\.zp[/\\](?:diario|incarico)|scripts[/\\]hooks)", re.I),
      "il diario e l'incarico non si cancellano: sono la prova di cosa e' successo."),
+
+    # ---- il database e i servizi: vietati solo se ESEGUITI (vedi in fondo) ----
+    (re.compile(r"\b(?:drop|truncate)\s+(?:table|schema|database)\b", re.I),
+     "DROP e TRUNCATE non si eseguono da una sessione non presidiata. Se il lavoro li "
+     "richiede, SCRIVILI nel tuo esito: li eseguira' gov."),
+
+    (re.compile(r"\b(?:delete\s+from|update)\s+\w*\.?sys_\w+", re.I),
+     "le scritture sulle tabelle di sistema non sono di un lavoratore: la tua identita' "
+     "di database e' in sola lettura. Proponile nel tuo esito."),
+
+    (re.compile(r"\bsystemctl\s+(?:--\S+\s+)*(?:start|stop|restart|reload|enable|disable)\b", re.I),
+     "i servizi non si toccano da un lavoratore, ne' in locale ne' via ssh. Proponilo a gov."),
 
     # ---- cancellazioni larghe ----
     (re.compile(r"\brm\s+(?:-\w*[rR]\w*f|-\w*f\w*[rR])\b", re.I),
@@ -148,13 +156,6 @@ def senza_letterali(comando: str) -> str:
 # vedrei mai. Quindi due liste, e non e' pignoleria: cercare tutto ripulito rende
 # invisibile il pericolo peggiore, cercare tutto grezzo fa rifiutare un `echo` che
 # NOMINA un comando vietato. Sono i due errori opposti, e ne ho fatti entrambi oggi.
-VIETATI_NEL_CONTENUTO: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\b(?:drop|truncate)\s+(?:table|schema|database)\b", re.I),
-     "DROP e TRUNCATE non si eseguono da una sessione non presidiata."),
-    (re.compile(r"\b(?:delete\s+from|update)\s+\w*\.?sys_\w+", re.I),
-     "le scritture sulle tabelle di sistema non appartengono a un lavoratore: "
-     "la tua identita' di database e' in sola lettura, e questa e' la ragione."),
-]
 
 
 def divieto_assoluto(comando: str):
@@ -169,13 +170,17 @@ def divieto_assoluto(comando: str):
         seg = segmento.strip()
         if not seg:
             continue
-        pulito = senza_letterali(seg)
-        for espressione, spiegazione in VIETATI:
-            if espressione.search(pulito):
-                return espressione.pattern, spiegazione
-        for espressione, spiegazione in VIETATI_NEL_CONTENUTO:
-            if espressione.search(seg):
-                return espressione.pattern, spiegazione
+        # Il segmento si guarda in due modi: ripulito dai letterali (cio' che il
+        # lavoratore esegue in prima persona) e — solo se c'e' un esecutore — anche
+        # grezzo, perche' li' i letterali sono codice che sta per girare.
+        da_guardare = [senza_letterali(seg)]
+        codice = _codice_eseguito(seg)
+        if codice:
+            da_guardare.append(codice)
+        for testo in da_guardare:
+            for espressione, spiegazione in VIETATI:
+                if espressione.search(testo):
+                    return espressione.pattern, spiegazione
     return None
 
 
@@ -198,3 +203,39 @@ def bersagli_di_scrittura(comando: str) -> list[str]:
                 if bersaglio and not bersaglio.startswith("-"):
                     fuori.append(bersaglio)
     return fuori
+
+
+# --- ESEGUIRE contro PROGRAMMARE --------------------------------------------
+#
+# Distinzione concettuale posta da Enzo il 2026-08-09, e sostituisce quella
+# sbagliata che avevo scritto prima (dentro/fuori le virgolette):
+#
+#   «runner e worker producono risultati che non devono essere eseguiti direttamente
+#    ma che passeranno alla sessione gov chiamante per l'implementazione effettiva.
+#    Pertanto e' possibile che un worker PROGRAMMI attivita' che per lui sarebbero
+#    vietate ma che la sessione gov sara' poi tenuta a eseguire. I controlli non
+#    devono allarmarsi se trovano verbi che fanno riferimento ad attivita' vietate:
+#    devono assicurare che il worker non provi a farle DIRETTAMENTE.»
+#
+# Quindi un lavoratore DEVE poter scrivere «gov dovra' fare merge su main» in un
+# piano, in un messaggio di commit, in un esito. Cio' che non deve poter fare e'
+# eseguirlo. Il criterio non e' la posizione del testo: e' se quel testo sta per
+# essere ESEGUITO.
+#
+# Un letterale e' codice quando lo consegna un ESECUTORE — `ssh host '...'`,
+# `psql -c "..."`, `bash -c '...'`. E' dato in tutti gli altri casi: `echo`,
+# `git commit -m`, il corpo di un file.
+
+ESECUTORI = re.compile(
+    r"\b(?:ssh|psql|bash|sh|zsh|python3?|py|node|pwsh|powershell|docker\s+exec|"
+    r"gh\s+api|eval|xargs)\b", re.I)
+
+
+def _codice_eseguito(segmento: str) -> str:
+    """Il testo che questo segmento fara' ESEGUIRE, o stringa vuota.
+
+    Se c'e' un esecutore, i suoi letterali sono codice e vanno guardati. Se non c'e',
+    quei letterali sono dato: un lavoratore che scrive «poi gov fara' git push» in un
+    piano sta facendo il suo mestiere, non violando un divieto.
+    """
+    return segmento if ESECUTORI.search(segmento) else ""

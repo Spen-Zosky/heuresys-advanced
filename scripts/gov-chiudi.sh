@@ -80,7 +80,14 @@ else
 fi
 
 # --- 2. il diario: cosa e' successo davvero ----------------------------------
+# [S1052] Il diario vive FUORI dall'albero (B1: il sorvegliato non custodisce il proprio
+# registro). Cercandolo solo dentro, l'istruttoria emetteva il rilievo «nessun diario:
+# non c'e' modo di verificare cosa ha fatto» su lavoratori che ne avevano uno pieno —
+# 135 azioni per w1. Un verdetto con dentro un rilievo inventato non vale: chi lo legge
+# non sa piu' quali degli altri credere.
+DIARIO_FUORI="${GOV_DIARI:-$(dirname "$ALBERO")/../heuresys-gov-diari}/$(basename "$ALBERO").ndjson"
 DIARIO="$ALBERO/.zp/diario.ndjson"
+[[ -f "$DIARIO_FUORI" ]] && DIARIO="$DIARIO_FUORI"
 if [[ -f "$DIARIO" ]]; then
   # `grep -c` stampa gia' `0` quando non trova nulla, MA esce 1: il vecchio
   # `|| echo 0` ne aggiungeva un secondo, la variabile diventava "0\n0" e la riga 89

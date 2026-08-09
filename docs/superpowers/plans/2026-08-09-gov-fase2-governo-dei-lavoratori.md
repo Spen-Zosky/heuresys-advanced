@@ -2,7 +2,8 @@
 
 **Origine**: analisi di processo di Enzo, 2026-08-09, dopo la quarta corsa presidiata.
 **Fase 1** (costruzione e prime corse): `docs/superpowers/plans/2026-08-09-modalita-gov.md`.
-**Stato**: piano scritto. Esecuzione in corso.
+**Stato**: F1 e F2 fatti ma **parziali** — l'analisi di sicurezza che è seguita ha trovato
+che entrambi hanno un buco. Vedi `2026-08-09-gov-analisi-sicurezza-e-remediation.md`.
 
 > **Cosa ci interessa in questa fase** (Enzo): *analizzare e perfezionare il processo*, non
 > chiudere cluster. Il lavoro prodotto è materiale di prova, non produzione.
@@ -31,8 +32,8 @@ Il perimetro e il registro delle azioni devono diventare la stessa cosa: **hook*
 
 | id | cosa | chiude | cosa significa fatto | stato |
 |---|---|---|---|---|
-| **F1** | **Recinto**: hook `PreToolUse` nell'albero del lavoratore che **rifiuta** le scritture fuori dal perimetro assegnato | R1 R3 R4 | un lavoratore che prova a scrivere fuori perimetro riceve un rifiuto motivato; provato iniettando il tentativo | da fare |
-| **F2** | **Diario**: hook `PostToolUse` che scrive **ogni** azione in un giornale append-only nell'albero | R1 R2 | dopo la corsa, `stato-gov --diario <n>` elenca ogni comando e ogni scrittura, con orario; il lavoratore non può disattivarlo | da fare |
+| **F1** | **Recinto**: hook `PreToolUse` nell'albero del lavoratore che **rifiuta** le scritture fuori dal perimetro assegnato | R1 R3 R4 | un lavoratore che prova a scrivere fuori perimetro riceve un rifiuto motivato; provato iniettando il tentativo | ◐ **PARZIALE** `a1995790` — ferma `Write`/`Edit`, **NON i comandi**: `sed -i`, `cat >`, `rm -rf` passano. Vedi **V3** nell'analisi di sicurezza |
+| **F2** | **Diario**: hook `PostToolUse` che scrive **ogni** azione in un giornale append-only nell'albero | R1 R2 | dopo la corsa si elenca ogni comando e ogni scrittura, con orario | ◐ **PARZIALE** `a1995790` — annota tutto, ma **vive nell'albero e il lavoratore può cancellarlo**. Vedi **V6** |
 | **F3** | **Consuntivo**: a fine giro il driver confronta i file toccati col perimetro e **lo dichiara** | R2 R4 | una violazione compare nel log del giro e nel giornale, anche se il recinto l'avesse mancata | da fare |
 | **F4** | **Storico dei costi**: ogni corsa registra costo reale ↔ effort dichiarato, e `zp_state` ne deriva una stima per il prossimo | R5 | `zp_state costo Z-nnn` risponde con una stima basata su misure, o dice «non ho dati» | da fare |
 | **F5** | **Budget dal dato, non dal numero fisso**: il tetto per cluster deriva dalla stima di F4 | R5 | un cluster da 1h non parte più con un tetto che lo tronca a metà | da fare |

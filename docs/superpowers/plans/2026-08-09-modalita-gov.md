@@ -2,7 +2,7 @@
 
 **Item**: `#173` (`SOT_BACKLOG.md`, era `WAIT-INPUT`) · **Piano scritto**: S1052, 2026-08-09
 **Origine**: consegna Cowork del 2026-08-08 in `docs/kb/COWORK_INBOX.md` (§ "Sessione gov")
-**Stato del piano**: **sessioni A e B chiuse** (G1-G4, 2026-08-09). Resta **C** (G5+G6+G7).
+**Stato del piano**: **G1-G6 fatti** (2026-08-09). Resta **solo G7**, che ha bisogno di una parola di Enzo — §10.
 
 > **Cinque cose che si sono viste solo montando i pezzi** (S1052). Nessuna era nel piano.
 > (1) Il **lucchetto della suite** era calcolato dalla cartella del sorgente: in due alberi
@@ -105,9 +105,9 @@ Una riga per deliverable. Lo stato si legge da qui, non dalla memoria.
 | **G2** | Campo `perimetro:` in `zp.config.yaml` + controllo di non sovrapposizione | Claude | `zp_state.py perimetri --corsia safe` elenca i gruppi parallelizzabili; due cluster che condividono un path non finiscono mai nello stesso gruppo; cluster senza perimetro → gruppo sequenziale | ✅ **FATTO** `6fb00aee` |
 | **G3** | Isolamento per worktree + lock per-cluster al posto del lock globale | Claude | 2 lavoratori girano insieme su due worktree; il driver singolo continua a funzionare **identico** quando `--lavoratori 1` | ✅ **FATTO** `6c64c729` + `806c3b9f` |
 | **G4** | Stato separato per lavoratore | Claude | ogni lavoratore ha il suo stato; il giornale di spesa resta unico e cumulativo | ✅ **FATTO** `806c3b9f` — **risolta diversamente**: non `.zp/w1/`, ma `<albero>/.zp/`. Con un albero per lavoratore il nome dei file non serve cambiarlo: due lavoratori non si vedono perché hanno due alberi. Zero modifiche a `verify_gate`, `zp_gate`, `zp_selftest` |
-| **G5** | Comando `stato gov` (consolidamento manuale, decisione 1) | Claude | un comando stampa: chi sta girando, su che cluster, da quanto, spesa per lavoratore e totale, esiti raccolti | da fare |
-| **G6** | Lock condiviso su `zp.config.yaml` (censimento ↔ lavoratori) | Claude | un censimento lanciato mentre 2 lavoratori girano **si ferma dicendo chi**; e viceversa | da fare |
-| **G7** | Prima corsa presidiata a 2 lavoratori, con misura del guadagno reale | Claude + Enzo (guarda) | due cluster chiusi in parallelo con evidenza live; tempo a 1 lavoratore vs 2 lavoratori misurato e scritto | da fare |
+| **G5** | Comando `stato gov` (consolidamento manuale, decisione 1) | Claude | un comando stampa: chi sta girando, su che cluster, da quanto, spesa per lavoratore e totale, esiti raccolti | ✅ **FATTO** `497bfa13` — `zp_state.py stato-gov` |
+| **G6** | Lock condiviso su `zp.config.yaml` (censimento ↔ lavoratori) | Claude | un censimento lanciato mentre 2 lavoratori girano **si ferma dicendo chi**; e viceversa | ✅ **FATTO** `497bfa13` |
+| **G7** | Prima corsa presidiata a 2 lavoratori, con misura del guadagno reale | Claude + **Enzo** | due cluster chiusi in parallelo con evidenza live; tempo a 1 lavoratore vs 2 lavoratori misurato e scritto | ⏳ **WAIT-INPUT** — vedi §10 |
 
 **Fuori dal piano, dichiarato**: il freno `meta.autorizzato_non_presidiato: false` **resta
 inserito**. `gov` non lo tocca e non lo aggira: è una decisione di Enzo, separata da questa.
@@ -269,3 +269,36 @@ Presentate **una volta sola**. Non entrano in «cosa resta», non bloccano nulla
 2. La consegna di Cowork riportava «zero occorrenze di `suite.lock`» quando il file esisteva
    già da tre giorni. Vale come conferma della regola `#149`: **ogni consegna va verificata**,
    anche quando è precisa e circostanziata.
+
+
+---
+
+## 10. G7 — perché si ferma qui, e cosa serve
+
+Tutto il resto è costruito e provato. G7 è **la corsa vera**: due lavoratori che aprono
+due sessioni Claude e chiudono due cluster in parallelo. È l'unica voce che non posso
+eseguire da solo, e la ragione è precisa.
+
+**Il driver, col freno inserito, esce `3` e non apre nulla** — verificato oggi. Il freno è
+`meta.autorizzato_non_presidiato: false`, e la sua riga di configurazione dice che *«non si
+toglie da solo: è una decisione di Enzo, non tecnica»*. Non lo tocco, nemmeno per una prova.
+
+**Il nodo è che il freno non distingue i due casi.** Nasce per vietare il lavoro *non
+presidiato* — di notte, senza nessuno che guarda. Una corsa **presidiata**, con Enzo
+davanti, `--max-iterations 1` e due cluster di classe A/B, è esattamente la «prima corsa
+presidiata» che la configurazione stessa indica come passo mancante. Ma il driver non ha
+modo di sapere che qualcuno sta guardando, quindi rifiuta comunque.
+
+**Le due strade**, entrambe di Enzo:
+
+1. **Togliere il freno per una corsa sola**, guardandola, e rimetterlo subito. È il percorso
+   che la configurazione prevede già; la plancia ha un bottone che rifiuta se le condizioni
+   non ci sono.
+2. **Distinguere presidiato e non presidiato** nel driver — per esempio un flag che
+   richiede una conferma battuta a mano, come già fa il censimento con la sua frase
+   rituale. Costa poco, ma **aggiunge una via che aggira un freno di sicurezza**, e una
+   scelta del genere non la prendo io.
+
+**Prima della corsa serve comunque un passo pagato**: `--prepara-alberi 2` installa le
+dipendenze in due cartelle di lavoro (qualche minuto, ~1 GB di disco l'una). Va fatto
+guardando, ed è per questo che è un comando a sé.

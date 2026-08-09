@@ -341,6 +341,34 @@ def _prima_riga(argomenti: list, quando_fallisce: str) -> str:
     return testo.splitlines()[0].strip()
 
 
+def rientro_gov() -> str:
+    """Dove eravamo rimasti, consegnato all'apertura.
+
+    Enzo, 2026-08-09: una sessione canonica ha il suo rientro (`handoff`), ma quello
+    governa lo stato del PROGETTO. Una sessione gov ha bisogno di sapere altro —
+    quali lavoratori esistono, cosa hanno prodotto, quale verdetto e' pendente, e
+    soprattutto qual e' il PROSSIMO COMANDO. Senza, chi si apre da zero deve
+    ricostruirlo, ed e' li' che si perde tempo o si sbaglia.
+
+    Come per la diagnosi: non si CHIEDE alla sessione di andarselo a leggere, glielo
+    si consegna gia' fatto.
+    """
+    strumento = REPO / "docs" / "kb" / "tools" / "gov_rientro.py"
+    dafare = REPO / ".zp" / "GOV-DA-FARE.md"
+    if not strumento.is_file():
+        return ""
+    if not dafare.is_file():
+        return ("\n[RIENTRO GOV]\n"
+                "  `.zp/GOV-DA-FARE.md` non esiste: nessuno ha lasciato scritto a che punto\n"
+                "  eravamo. NON iniziare a lavorare — chiedi a Enzo da dove riprendere.\n")
+    testo = _prima_riga([str(strumento)], "")
+    return ("\n[RIENTRO GOV — dove eravamo rimasti]\n"
+            "  Il quadro completo, gia' misurato:  python docs/kb/tools/gov_rientro.py\n"
+            "  Le voci aperte e il prossimo comando: .zp/GOV-DA-FARE.md\n"
+            "  LEGGILI PRIMA di proporre qualunque cosa: una sessione gov che riparte\n"
+            "  senza sapere cosa e' stato interrotto rifa' lavoro gia' fatto, o peggio.\n")
+
+
 def diagnosi_gov() -> str:
     """Il piano su cui gov sta per lavorare regge ancora? Due righe, gia' misurate."""
     strumenti = REPO / "docs" / "kb" / "tools"
@@ -750,6 +778,7 @@ def cmd_prompt_hook() -> int:
         # Se la diagnosi esplode, la sessione si apre lo stesso: il briefing e'
         # gia' stato scritto sopra, e qui non si aggiunge altro.
         try:
+            sys.stdout.write(rientro_gov())
             sys.stdout.write(diagnosi_gov())
         except Exception:
             pass

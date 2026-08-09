@@ -192,8 +192,14 @@ def verdetto(t: dict) -> str:
 
 def come_markdown(t: dict) -> str:
     eta = t['eta']
+    # L'intestazione e' un CONTRATTO, non un titolo: `zp_panel` ne estrae data e HEAD
+    # con un'espressione regolare. Riscrivendola nella revisione del 2026-08-09 avevo
+    # tolto la parola «generato», e la plancia mostrava «generato ? su HEAD ?» pur
+    # avendo davanti un report giusto. Il lettore ora tollera entrambe le forme, ma
+    # chi produce resta sulla forma attesa: e' gratis, e vale per i lettori vecchi.
     righe = [
-        f"# Triage dei cluster zero-pendenze — {datetime.date.today()} su HEAD {eta['head']}",
+        f"# Triage dei cluster zero-pendenze — generato {datetime.date.today()} "
+        f"su HEAD {eta['head']}",
         '',
         f"**{verdetto(t)}**",
         '',

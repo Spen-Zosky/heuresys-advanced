@@ -26,6 +26,7 @@ import datetime
 import json
 import os
 import re
+import socket
 import subprocess
 import sys
 import webbrowser
@@ -173,7 +174,7 @@ def triage_sintesi() -> dict:
     except OSError:
         return {"presente": False}
     classi = dict(re.findall(r"^## ([A-Z?-]+) — (\d+)", testo, re.M))
-    m = re.search(r"generato ([\d-]+) su HEAD (\w+)", testo)
+    m = re.search(r"(?:generato\s+)?(\d{4}-\d{2}-\d{2})\s+su HEAD\s+(\w+)", testo)
     return {"presente": True, "classi": classi,
             "generato": m.group(1) if m else "?", "head": m.group(2) if m else "?"}
 
@@ -1050,6 +1051,21 @@ def main() -> int:
     ACCESSO_LAN = (f"http://{ip}:{PORTA}/" if APERTA else f"http://{ip}:{PORTA}/?k={CHIAVE}") if ip else ""
     if APERTA and ip:
         print("⚠ LAN APERTA SENZA CHIAVE: chiunque sulla rete puo' comandare la plancia.")
+    # La porta si CONTROLLA prima di prenderla. Su Windows due processi possono
+    # restare in ascolto sulla stessa porta senza che nessuno dei due protesti, e
+    # chi risponde al browser diventa indeterminato. Misurato il 2026-08-09: una
+    # istanza rimasta accesa dalla sera prima serviva la pagina al posto di quella
+    # appena avviata, quindi il bottone del triage continuava a eseguire il CODICE
+    # VECCHIO — una correzione applicata e committata sembrava non aver funzionato.
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sonda:
+        sonda.settimeout(0.4)
+        if sonda.connect_ex(("127.0.0.1", PORTA)) == 0:
+            print(f"c'e' gia' qualcosa in ascolto su {PORTA}: non parto, altrimenti")
+            print("saremmo in due a rispondere e non si saprebbe chi. Chiudi l'altra")
+            print("istanza (il PID di python.exe, non il terminale che l'ha lanciata)")
+            print(f"oppure usa --porta con un numero diverso.")
+            return 4
+
     srv = ThreadingHTTPServer((bind, PORTA), Handler)
     print(f"zp dashboard su http://127.0.0.1:{PORTA}")
     if ACCESSO_LAN:

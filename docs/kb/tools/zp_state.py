@@ -721,6 +721,9 @@ def main() -> int:
 
     sub.add_parser('stato-gov', help='chi sta lavorando a cosa, da quanto, e quanto si e speso')
 
+    pj = sub.add_parser('perimetro-json', help='il perimetro di UN cluster, come lista JSON')
+    pj.add_argument('cluster')
+
     pm = sub.add_parser('perimetri', help='chi puo girare insieme, chi resta in coda, e perche')
     pm.add_argument('--lane', default='safe')
     pm.add_argument('--lavoratori', type=int, default=None)
@@ -842,6 +845,15 @@ def main() -> int:
     if a.cmd == 'progress':
         dest = scrivi_progress(clusters, cfg, a.lane)
         print(f'scritto {dest}')
+        return 0
+
+    if a.cmd == 'perimetro-json':
+        # Serve al driver per scrivere l'incarico del lavoratore. Scrittura BINARIA
+        # per la ragione gia' pagata una volta: print() su Windows aggiunge un
+        # ritorno a capo che finisce dentro il dato.
+        voce = (cfg.get('clusters') or {}).get(a.cluster) or {}
+        sys.stdout.buffer.write(
+            json.dumps(_normalizza_perimetro(voce.get('perimetro')), ensure_ascii=False).encode())
         return 0
 
     if a.cmd == 'stato-gov':

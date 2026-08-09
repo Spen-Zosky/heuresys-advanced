@@ -183,6 +183,23 @@ gov_avvia_lavoratore() {     # <dir> <cluster> <modo> <corsia> <ore> <budget> <p
   # troncato verrebbe letto come uno che ha chiuso bene.
   rm -f "$dir/.zp/last-outcome.json"
 
+  # L'INCARICO. E' cio' che rende il perimetro un recinto invece di una frase: gli
+  # hook nell'albero lo leggono e rifiutano le scritture fuori. Si scrive PRIMA di
+  # aprire la sessione, e il diario delle azioni riparte pulito a ogni giro.
+  # SOLO se un cluster e' stato assegnato, cioe' solo in parallelo. Con un lavoratore
+  # solo la sessione gira nel repo principale e non ha un perimetro: scrivergli un
+  # incarico con perimetro vuoto significherebbe bloccarle OGNI scrittura — il recinto
+  # farebbe fuori la modalita' di sempre. Un incarico vecchio va comunque rimosso, o
+  # resterebbe a recintare chi non c'entra.
+  rm -f "$dir/.zp/incarico.json" "$dir/.zp/diario.ndjson"
+  if [[ -n "$cluster" ]]; then
+    local perim
+    perim="$("${ZP_PYTHON:-python}" docs/kb/tools/zp_state.py perimetro-json "$cluster" 2>/dev/null)"
+    [[ -z "$perim" ]] && perim="[]"
+    printf '{"cluster": "%s", "perimetro": %s}
+' "$cluster" "$perim" > "$dir/.zp/incarico.json"
+  fi
+
   local comando="/zero-pending-loop $modo --lane $corsia --budget-ore $ore"
   [[ -n "$cluster" ]] && comando="$comando --cluster $cluster"
 

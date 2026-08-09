@@ -21,7 +21,15 @@ REPO=$(CDPATH= cd -- "$DIR/../.." && pwd) || exit 0
 PARENT=$(dirname "$REPO")
 STORE="$PARENT/.heuresys-session-mode"
 CACHE="$STORE/.python"
-IMPL="$DIR/session_mode.py"
+# Due impianti diversi dietro lo stesso lanciatore: la modalita' di sessione, e il
+# governo dei lavoratori di gov. Il lanciatore resta uno solo perche' il problema che
+# risolve — trovare un interprete Python che RISPONDA, su Windows come su Linux — e'
+# identico per entrambi.
+case "${1:-}" in
+  gov-recinto) IMPL="$DIR/gov_worker_guard.py"; set -- recinto ;;
+  gov-diario)  IMPL="$DIR/gov_worker_guard.py"; set -- diario ;;
+  *)           IMPL="$DIR/session_mode.py" ;;
+esac
 
 [ -f "$IMPL" ] || exit 0
 

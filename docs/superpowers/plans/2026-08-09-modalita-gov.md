@@ -2,7 +2,21 @@
 
 **Item**: `#173` (`SOT_BACKLOG.md`, era `WAIT-INPUT`) · **Piano scritto**: S1052, 2026-08-09
 **Origine**: consegna Cowork del 2026-08-08 in `docs/kb/COWORK_INBOX.md` (§ "Sessione gov")
-**Stato del piano**: **sessione A chiusa** (G1+G2, 2026-08-09). Restano B (G3+G4) e C (G5+G6+G7).
+**Stato del piano**: **sessioni A e B chiuse** (G1-G4, 2026-08-09). Resta **C** (G5+G6+G7).
+
+> **Cinque cose che si sono viste solo montando i pezzi** (S1052). Nessuna era nel piano.
+> (1) Il **lucchetto della suite** era calcolato dalla cartella del sorgente: in due alberi
+> sarebbero diventati due lucchetti, cioè nessuna protezione. Ora si impone con
+> `SUITE_LOCK_FILE` — protegge un *database*, non una cartella.
+> (2) La **skill non sapeva ricevere un cluster assegnato**: con N lavoratori avrebbero
+> scelto tutti lo stesso, perché quella selezione è deterministica.
+> (3) Il **«modo iniziale»** guardava l'ultimo esito nel repo principale, che in parallelo
+> non si aggiorna più: dopo un giorno il driver sarebbe rientrato da bootstrap a ogni corsa.
+> Ora guarda il giornale.
+> (4) Ci si fermava appena **uno** dei lavoratori diceva di aver finito, lasciando gli altri
+> a metà. Ora serve che lo dicano tutti.
+> (5) L'**installazione delle dipendenze** di un albero è cara: è un comando a sé
+> (`--prepara-alberi N`), non un effetto collaterale di una corsa.
 
 > **Emendamento a G1, deciso eseguendo** (S1052). Il piano diceva che `gov` sarebbe stata
 > «un'etichetta, non un permesso», e questo resta vero per il cancello di verifica. Ma la
@@ -89,8 +103,8 @@ Una riga per deliverable. Lo stato si legge da qui, non dalla memoria.
 |---|---|---|---|---|
 | **G1** | Terzo e quarto modo di sessione (`gov`, `worker`) in `session_mode.py` | Claude | `avvia sessione gov` → `hook.sh mode <sid>` stampa `gov`; il selftest cresce di 8 casi e **fallisce** se il collasso binario torna | ✅ **FATTO** `53979bbb` |
 | **G2** | Campo `perimetro:` in `zp.config.yaml` + controllo di non sovrapposizione | Claude | `zp_state.py perimetri --corsia safe` elenca i gruppi parallelizzabili; due cluster che condividono un path non finiscono mai nello stesso gruppo; cluster senza perimetro → gruppo sequenziale | ✅ **FATTO** `6fb00aee` |
-| **G3** | Isolamento per worktree + lock per-cluster al posto del lock globale | Claude | 2 lavoratori girano insieme su due worktree; il driver singolo continua a funzionare **identico** quando `--lavoratori 1` | da fare |
-| **G4** | Namespacing dello stato `.zp/` per lavoratore | Claude | `.zp/w1/`, `.zp/w2/` con `cursor.json`, `last-outcome.json`, `last-response.json`, `last-stderr.log`; `.zp/` resta la casa dello stato condiviso | da fare |
+| **G3** | Isolamento per worktree + lock per-cluster al posto del lock globale | Claude | 2 lavoratori girano insieme su due worktree; il driver singolo continua a funzionare **identico** quando `--lavoratori 1` | ✅ **FATTO** `6c64c729` + `806c3b9f` |
+| **G4** | Stato separato per lavoratore | Claude | ogni lavoratore ha il suo stato; il giornale di spesa resta unico e cumulativo | ✅ **FATTO** `806c3b9f` — **risolta diversamente**: non `.zp/w1/`, ma `<albero>/.zp/`. Con un albero per lavoratore il nome dei file non serve cambiarlo: due lavoratori non si vedono perché hanno due alberi. Zero modifiche a `verify_gate`, `zp_gate`, `zp_selftest` |
 | **G5** | Comando `stato gov` (consolidamento manuale, decisione 1) | Claude | un comando stampa: chi sta girando, su che cluster, da quanto, spesa per lavoratore e totale, esiti raccolti | da fare |
 | **G6** | Lock condiviso su `zp.config.yaml` (censimento ↔ lavoratori) | Claude | un censimento lanciato mentre 2 lavoratori girano **si ferma dicendo chi**; e viceversa | da fare |
 | **G7** | Prima corsa presidiata a 2 lavoratori, con misura del guadagno reale | Claude + Enzo (guarda) | due cluster chiusi in parallelo con evidenza live; tempo a 1 lavoratore vs 2 lavoratori misurato e scritto | da fare |
@@ -235,7 +249,7 @@ G7 gira **presidiata**, cioè con il freno ancora giù e l'autorizzazione data a
 | sessione | voci | perché insieme |
 |---|---|---|
 | A ✅ | **G1 + G2** | Non toccano il driver. Chiudono da sole, con selftest verde. ~2-3h. **Chiusa il 2026-08-09** (S1052), commit `53979bbb` + `6fb00aee`. |
-| B | **G3 + G4** | Sono lo stesso intervento visto da due lati (isolamento e stato). Separarle lascia il driver a metà. ~3-4h. |
+| B ✅ | **G3 + G4** | Sono lo stesso intervento visto da due lati (isolamento e stato). Separarle lascia il driver a metà. ~3-4h. **Chiusa il 2026-08-09** (S1052), commit `6c64c729` + `806c3b9f`. |
 | C | **G5 + G6 + G7** | Consolidamento, lock del censimento, e la corsa vera che li prova tutti. ~2-3h + la corsa. |
 
 ## 8. Cosa questo piano NON fa — detto adesso, non alla fine

@@ -186,6 +186,53 @@ def configs_salvate() -> dict:
         return {}
 
 
+def gov_stato() -> dict:
+    """Il mondo gov, letto da chi lo sa gia' fare.
+
+    `docs/kb/tools/gov_rientro.py` calcola alberi, rami, verdetti e freno, ed e' gia'
+    provato sul campo: la plancia lo IMPORTA invece di rifarne il lavoro, come
+    `plancia.py` importa la funzione di lettura di questo file. Una sola definizione di
+    «chi sono i lavoratori», in un posto solo.
+
+    Costa git (conta i commit), quindi vive sul giro lento, mai sul battito.
+    """
+    try:
+        strumenti = os.path.join(REPO, "docs", "kb", "tools")
+        if strumenti not in sys.path:
+            sys.path.insert(0, strumenti)
+        import gov_rientro
+        return {"lavoratori": gov_rientro.lavoratori(),
+                "rami": gov_rientro.rami_con_lavoro(),
+                "verdetti": gov_rientro.verdetti(),
+                "freno": gov_rientro.freno()}
+    except Exception as e:                      # noqa: BLE001 — la plancia non deve morire
+        return {"errore": f"{type(e).__name__}: {e}",
+                "lavoratori": [], "rami": [], "verdetti": [], "freno": "?"}
+
+
+def stato_veloce() -> dict:
+    """Il ritmo del cockpit: SOLO letture di file, nessun processo esterno.
+
+    Gira ogni paio di secondi, quindi non puo' permettersi cio' che costa: `stato()`
+    esegue due `schtasks` e un `git status` a ogni chiamata, e con un aggiornamento
+    ogni 5 secondi erano tre processi Windows ogni 5 secondi solo per stare a guardare.
+    Qui restano le cose che cambiano davvero mentre si guarda — chi ha il lock, se c'e'
+    uno STOP, l'ultimo esito, la coda del log — e sono tutte letture di file.
+    """
+    ultimo = {}
+    try:
+        ultimo = json.load(open(os.path.join(ZP, "last-outcome.json"), encoding="utf-8"))
+    except (OSError, ValueError):
+        pass
+    giri = corse()
+    return {"lock": lock_stato(),
+            "stop_presente": os.path.exists(os.path.join(ZP, "STOP")),
+            "ultimo_esito": ultimo,
+            "spesa_usd": round(sum(float(g.get("costo_usd") or 0) for g in giri), 2),
+            "corse": giri[-20:],
+            "log": coda(LOG)}
+
+
 def stato() -> dict:
     ultimo = {}
     try:
@@ -537,6 +584,13 @@ button:hover{filter:brightness(1.12)}
 .nota{color:var(--muto);font-size:12px;margin:2px 0 0}
 pre{background:var(--piano);border:1px solid var(--griglia);border-radius:9px;padding:12px;
  overflow:auto;font-size:12px;max-height:280px;white-space:pre-wrap;color:var(--sec)}
+nav#viste{display:flex;gap:4px}
+nav#viste button{margin:0;padding:6px 13px;border-radius:8px;background:transparent;
+ color:var(--muto);font-weight:600;font-size:13px;border:1px solid transparent}
+nav#viste button:hover{color:var(--sec)}
+nav#viste button.attiva{background:var(--sup);color:var(--inchiostro);border-color:var(--bordo)}
+/* una riga che resta con una sola scheda visibile non deve lasciare meta' schermo vuoto */
+.riga.mono{grid-template-columns:1fr !important}
 .tab{display:inline-block;margin:0 12px 8px 0;color:var(--muto);cursor:pointer;font-size:12px;
  padding-bottom:2px}
 .tab.attivo{color:var(--inchiostro);border-bottom:2px solid var(--accento)}
@@ -563,20 +617,32 @@ pre{background:var(--piano);border:1px solid var(--griglia);border-radius:9px;pa
 .salvata b{color:var(--inchiostro);font-weight:600}
 .salvata button{margin:0;padding:3px 9px;font-size:11px}
 </style></head><body>
-<header><h1>Zero-pendenze — dashboard</h1><span id="fresco"></span><span class="sp"></span>
+<header><h1>Zero-pendenze</h1><nav id="viste"></nav><span id="fresco"></span><span class="sp"></span>
  <button class="b-primo" style="margin:0" onclick="apriModale()">⚙ Imposta prossima sessione</button>
  <button class="b-fantasma" style="margin:0 0 0 8px" onclick="spegni()">Spegni plancia</button></header>
 <main>
- <section class="card"><h2>Stato macchina</h2><div class="stati" id="stati"></div></section>
- <section class="card"><h2>Il piano in numeri</h2><div class="kpi" id="kpi"></div></section>
+ <section class="card" data-vista="volo"><h2>Stato macchina</h2><div class="stati" id="stati"></div></section>
+<section class="card" data-vista="lavoratori"><h2>I lavoratori, adesso</h2>
+  <div id="gov-lav"></div>
+  <p class="nota">Fonte: <code>gov_rientro.py</code> — alberi, rami e verdetti reali.
+   Un lavoratore committa SOLO sul suo ramo: portare il lavoro su main resta un atto
+   separato e presidiato, che gov compie dopo aver letto il verdetto.</p></section>
+ <div class="riga c2" data-vista="lavoratori">
+  <section class="card"><h2>Verdetti</h2><div id="gov-verdetti"></div></section>
+  <section class="card"><h2>Rami con lavoro non ancora su main</h2>
+   <div id="gov-rami"></div>
+   <p class="nota">Non ci arrivano da soli: nessun passo di gov fa merge, per costruzione.</p>
+  </section>
+ </div>
+ <section class="card" data-vista="piano"><h2>Il piano in numeri</h2><div class="kpi" id="kpi"></div></section>
  <div class="riga c3">
-  <section class="card"><h2>Aperti autonomi per ondata</h2><div id="ondate"></div>
+  <section class="card" data-vista="piano"><h2>Aperti autonomi per ondata</h2><div id="ondate"></div>
    <p class="nota">Fonte: <code>zp_state.py piano</code> — una barra = cluster aperti; le ore accanto.</p></section>
-  <section class="card"><h2>Spesa vs tetto</h2><div id="spesa"></div>
+  <section class="card" data-vista="volo"><h2>Spesa vs tetto</h2><div id="spesa"></div>
    <div class="vinc" id="vincoli"></div></section>
  </div>
  <div class="riga c2">
-  <section class="card"><h2>Lancio rapido</h2>
+  <section class="card" data-vista="volo"><h2>Lancio rapido</h2>
    <p class="nota">Per la configurazione completa (profili, salvataggi, frase presidiata) usa
    «Imposta prossima sessione» in alto.</p>
    <label>Corsia</label><select id="corsia">
@@ -586,7 +652,7 @@ pre{background:var(--piano);border:1px solid var(--griglia);border-radius:9px;pa
    <label>Finestra (HH:MM-HH:MM, vuota = nessuna)</label><input id="finestra" placeholder="23:00-06:30">
    <button class="b-primo" onclick="lancia()">Lancia adesso</button>
    <div class="esito" id="e-lancia"></div><p class="nota" id="n-lancia"></p></section>
-  <section class="card"><h2>Fermare</h2>
+  <section class="card" data-vista="volo"><h2>Fermare</h2>
    <p class="nota">Gentile = file STOP: il giro in volo finisce, il prossimo non parte.<br>
       Duro = TERM al driver: chiude anche la sessione in volo e molla il lock.</p>
    <button class="b-primo" onclick="azione('stop-gentile','e-stop')">STOP gentile</button>
@@ -599,20 +665,20 @@ pre{background:var(--piano);border:1px solid var(--griglia);border-radius:9px;pa
    <button class="b-fantasma" onclick="rimuoviTask('heuresys-zp-una-tantum')">Rimuovi una-tantum</button>
    <div class="esito" id="e-task"></div></section>
  </div>
- <section class="card"><h2>Vassoio «aspetta te» — cluster bloccati su Enzo</h2>
+ <section class="card" data-vista="piano"><h2>Vassoio «aspetta te» — cluster bloccati su Enzo</h2>
   <div id="vassoio"></div></section>
  <div class="riga c2">
-  <section class="card"><h2>Triage anti-stale</h2><div id="triage"></div>
+  <section class="card" data-vista="piano"><h2>Triage anti-stale</h2><div id="triage"></div>
    <button class="b-fantasma" onclick="azione('triage','e-triage')">Rigenera adesso</button>
    <div class="esito" id="e-triage"></div></section>
-  <section class="card"><h2>Censimento — rifare il piano</h2>
+  <section class="card" data-vista="piano"><h2>Censimento — rifare il piano</h2>
    <p class="nota">Mai automatico. La frase per esteso è la tua firma; apre una sessione headless (costo reale).</p>
    <label>Conferma</label><input id="c-frase" placeholder="zp censimento ok">
    <button class="b-primo" onclick="cens()">Avvia censimento</button>
    <div class="esito" id="e-cens"></div></section>
  </div>
- <section class="card"><h2>Storico corse</h2><div id="corse"></div></section>
- <section class="card"><h2>Log</h2>
+ <section class="card" data-vista="storico"><h2>Storico corse</h2><div id="corse"></div></section>
+ <section class="card" data-vista="storico"><h2>Log</h2>
   <span class="tab attivo" id="tab-n" onclick="scheda('n')">notte</span>
   <span class="tab" id="tab-c" onclick="scheda('c')">censimento</span>
   <pre id="log"></pre></section>
@@ -733,6 +799,54 @@ function statoHtml(cl,ic,nome,desc){return '<div class="stato s-'+cl+'"><span cl
 function tile(v,unita,l){return '<div class="tile"><div class="v">'+v+
  (unita?' <small>'+unita+'</small>':'')+'</div><div class="l">'+l+'</div></div>'}
 
+const VISTE=[['volo','Volo'],['lavoratori','Lavoratori'],['piano','Piano'],['storico','Storico']];
+let vista=localStorage.getItem('zp-vista')||'volo';
+if(!VISTE.some(v=>v[0]===vista)) vista='volo';
+function costruisciNav(){
+ $('viste').innerHTML=VISTE.map(v=>'<button data-v="'+v[0]+'" onclick="mostraVista(this.dataset.v)">'
+  +v[1]+'</button>').join('');
+}
+function mostraVista(v){
+ vista=v; localStorage.setItem('zp-vista',v);
+ document.querySelectorAll('[data-vista]').forEach(el=>{
+  el.style.display = el.dataset.vista===v ? '' : 'none'; });
+ /* Le righe SENZA vista propria contengono schede di viste diverse: restano visibili
+    se almeno una scheda lo e', e passano a colonna unica se ne resta una sola —
+    altrimenti mezzo schermo resterebbe vuoto. Le righe con vista propria le ha gia'
+    sistemate il ciclo sopra: rimetterci mano le riaccenderebbe. */
+ document.querySelectorAll('.riga:not([data-vista])').forEach(r=>{
+  const vivi=[...r.children].filter(c=>c.style.display!=='none');
+  r.style.display = vivi.length? '' : 'none';
+  r.classList.toggle('mono', vivi.length===1); });
+ document.querySelectorAll('#viste button').forEach(b=>
+  b.classList.toggle('attiva', b.dataset.v===v));
+}
+function renderGov(){
+ if(!G){return}
+ if(G.errore){$('gov-lav').innerHTML='<p class="vuoto">gov non leggibile: '+G.errore+'</p>';return}
+ const L=G.lavoratori||[];
+ $('gov-lav').innerHTML = L.length ?
+  '<table><tr><th>albero</th><th>ramo</th><th>cluster</th><th>azioni</th><th>commit</th>'+
+  '<th>non committati</th><th>propone</th></tr>'+L.map(w=>
+   '<tr><td><b>'+w.albero+'</b></td><td><span class="chip">'+w.ramo+'</span></td>'+
+   '<td>'+(w.cluster||'—')+'</td><td class="num">'+w.azioni_registrate+'</td>'+
+   '<td class="num">'+w.commit_propri+'</td>'+
+   '<td class="num">'+(w.file_non_committati? '<b style="color:var(--avviso)">'+
+     w.file_non_committati+'</b>' : '0')+'</td>'+
+   '<td>'+(w.esito_proposto||'<span style="color:var(--muto)">nessun esito</span>')+
+   '</td></tr>').join('')+'</table>'
+  : '<p class="vuoto">Nessun lavoratore in volo.</p>';
+ const V=G.verdetti||[];
+ $('gov-verdetti').innerHTML = V.length ? V.map(t=>{
+   const rosso=t.indexOf('ROSSO')>=0;
+   return '<div class="stato s-'+(rosso?'critico':'buono')+'"><span class="ic">'+
+    (rosso?'✕':'✓')+'</span><span><small>'+t+'</small></span></div>'}).join('')
+  : '<p class="vuoto">Nessun verdetto scritto.</p>';
+ const R=G.rami||[];
+ $('gov-rami').innerHTML = R.length ? '<ul style="margin:0;padding-left:18px;color:var(--sec)">'+
+  R.map(t=>'<li>'+t+'</li>').join('')+'</ul>'
+  : '<p class="vuoto">Nessun ramo con lavoro in attesa.</p>';
+}
 function render(){
  const s=S,p=s.piano;let h='';
  h+= s.freno_inserito
@@ -813,6 +927,7 @@ function render(){
   : '<div class="vuoto">nessuna corsa registrata — il driver non è mai partito</div>';
 
  $('log').textContent=schedaLog==='n'? s.log : s.log_censimento;
+ renderGov();
  $('fresco').textContent='aggiornato '+new Date().toLocaleTimeString('it-IT');
  renderSalvate();
 }
@@ -930,7 +1045,23 @@ async function eliminaConf(nome){$('e-conf').textContent=await post('/api/config
  {azione:'elimina',nome:nome});aggiorna()}
 
 /* ---------------- azioni base ---------------- */
-async function aggiorna(){S=await (await fetch(api('/api/stato'))).json();render()}
+let G=null;
+async function aggiorna(){
+ S=await (await fetch(api('/api/stato'))).json(); S._fermo=0;
+ try{ G=await (await fetch(api('/api/gov'))).json() }catch(e){ /* si tiene il precedente */ }
+ render(); mostraVista(vista);
+}
+/* Il battito del cockpit: solo cio' che cambia mentre guardi (lock, STOP, ultimo
+   esito, spesa, log) — tutte letture di file, nessun processo. Lo stato pesante
+   (schtasks, git, piano) resta sul giro lento.
+   Se il battito non risponde la pagina NON si svuota: tiene l'ultimo valore buono e
+   lo dichiara. Un cockpit che mostra zero quando non sa e' peggio di uno fermo. */
+async function battito(){
+ if(!S) return;
+ try{ const v=await (await fetch(api('/api/volo'))).json(); Object.assign(S,v); S._fermo=0; render() }
+ catch(e){ S._fermo=(S._fermo||0)+1;
+  if(S._fermo>=2) $('fresco').textContent='⚠ dati fermi da '+(S._fermo*2)+'s — la plancia non risponde' }
+}
 function scheda(x){schedaLog=x;$('tab-n').classList.toggle('attivo',x==='n');
  $('tab-c').classList.toggle('attivo',x==='c');render()}
 async function lancia(){$('e-lancia').textContent=await post('/api/lancia',
@@ -943,7 +1074,8 @@ async function cens(){$('e-cens').textContent=await post('/api/censimento',
  {conferma:$('c-frase').value})}
 async function spegni(){await post('/api/spegni');document.body.innerHTML=
  '<p style="padding:40px;color:#898781">plancia spenta — chiudi pure la scheda.</p>'}
-aggiorna(); setInterval(aggiorna, 5000);
+costruisciNav(); mostraVista(vista);
+aggiorna(); setInterval(aggiorna, 20000); setInterval(battito, 2000);
 </script></body></html>"""
 
 
@@ -985,6 +1117,10 @@ class Handler(BaseHTTPRequestHandler):
             return
         if self._percorso() == "/api/stato":
             return self._json(stato())
+        if self._percorso() == "/api/volo":
+            return self._json(stato_veloce())
+        if self._percorso() == "/api/gov":
+            return self._json(gov_stato())
         dati = PAGINA.encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -1060,14 +1196,21 @@ def ip_lan() -> str:
 
 
 def main() -> int:
-    global CHIAVE, ACCESSO_LAN
+    global CHIAVE, ACCESSO_LAN, PORTA
     p = argparse.ArgumentParser()
     p.add_argument("--no-browser", action="store_true")
     p.add_argument("--solo-locale", action="store_true",
                    help="ascolta solo su 127.0.0.1 (niente telefono/tablet)")
     p.add_argument("--senza-chiave", action="store_true",
                    help="LAN aperta senza chiave: chiunque sulla rete puo' comandare la plancia")
+    # C'era gia' un messaggio che diceva «oppure usa --porta con un numero diverso»,
+    # ma l'opzione non esisteva: il consiglio mandava dritti a un errore di argomenti.
+    # Serve davvero — e' l'unico modo di provare una versione nuova senza spegnere
+    # quella che sta girando.
+    p.add_argument("--porta", type=int, default=PORTA,
+                   help=f"porta di ascolto (default {PORTA})")
     a = p.parse_args()
+    PORTA = a.porta
     global APERTA
     APERTA = a.senza_chiave
 

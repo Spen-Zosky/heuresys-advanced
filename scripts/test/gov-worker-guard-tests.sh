@@ -174,10 +174,18 @@ EOF
 
 echo "── il diario ──"
 
+# [S1052] Il diario NON vive piu' nell'albero: il sorvegliato non custodisce il proprio
+# registro (B1). Questi cinque controlli guardavano dentro `$ALBERO/.zp/` e sono diventati
+# rossi nel momento in cui il diario e' uscito — trovati eseguendo la batteria, non
+# ipotizzati. `GOV_DIARI` sposta la cartella dentro l'area temporanea del test: senza,
+# il test scriverebbe accanto agli alberi VERI e sporcherebbe il disco di lavoro.
+export GOV_DIARI="$TMP/diari"
+DIARIO_ATTESO="$GOV_DIARI/$(basename "$ALBERO").ndjson"
+
 cat > "$ALBERO/.zp/incarico.json" <<EOF
 {"cluster":"Z-112","lavoratore":2,"perimetro":["apps/api/test"]}
 EOF
-rm -f "$ALBERO/.zp/diario.ndjson"
+rm -f "$DIARIO_ATTESO" "$ALBERO/.zp/diario.ndjson"
 
 annota_una() {               # annota_una <json>
   printf '%s' "$1" | CLAUDE_PROJECT_DIR="$ALBERO" "$PY" "$GUARDIA" diario >/dev/null 2>&1
@@ -188,26 +196,33 @@ annota_una '{"tool_name":"Read","tool_input":{"file_path":"'"$ALBERO_N"'/README.
 printf '%s' '{"tool_name":"Write","tool_input":{"file_path":"'"$ALBERO_N"'/apps/web/x.tsx"}}' \
   | CLAUDE_PROJECT_DIR="$ALBERO" "$PY" "$GUARDIA" recinto >/dev/null 2>&1
 
-RIGHE=$(wc -l < "$ALBERO/.zp/diario.ndjson" 2>/dev/null || echo 0)
+RIGHE=$(wc -l < "$DIARIO_ATTESO" 2>/dev/null || echo 0)
 verifica() { if [[ "$1" == "$2" ]]; then PASSATI=$((PASSATI+1)); printf '[PASSA   ] %s\n' "$3"
              else FALLITI=$((FALLITI+1)); printf '[FALLISCE] %s (atteso «%s», ottenuto «%s»)\n' "$3" "$1" "$2"; fi }
 
 verifica "4" "$RIGHE" "ogni azione lascia una riga (3 eseguite + 1 rifiutata)"
-verifica "1" "$(grep -c '"azione": "rifiutata"' "$ALBERO/.zp/diario.ndjson")" "il rifiuto e' annotato, non solo negato"
-verifica "1" "$(grep -c 'pnpm test' "$ALBERO/.zp/diario.ndjson")" "i comandi eseguiti si ritrovano nel diario"
-if grep -q '"quando"' "$ALBERO/.zp/diario.ndjson"; then
+verifica "1" "$(grep -c '"azione": "rifiutata"' "$DIARIO_ATTESO" 2>/dev/null || true)" "il rifiuto e' annotato, non solo negato"
+verifica "1" "$(grep -c 'pnpm test' "$DIARIO_ATTESO" 2>/dev/null || true)" "i comandi eseguiti si ritrovano nel diario"
+if grep -q '"quando"' "$DIARIO_ATTESO" 2>/dev/null; then
   PASSATI=$((PASSATI+1)); echo "[PASSA   ] ogni riga porta l'orario"
 else FALLITI=$((FALLITI+1)); echo "[FALLISCE] manca l'orario"; fi
 
+# IL PUNTO DI B1: il diario sta FUORI dall'albero, cioe' fuori dalla portata di chi
+# viene sorvegliato. Se un giorno tornasse dentro, questo controllo lo dice.
+if [[ -f "$ALBERO/.zp/diario.ndjson" ]]; then
+  FALLITI=$((FALLITI+1)); echo "[FALLISCE] il diario e' tornato DENTRO l'albero del sorvegliato"
+else PASSATI=$((PASSATI+1)); echo "[PASSA   ] il diario vive fuori dall'albero del sorvegliato"; fi
+
 # Il diario e' APPEND: una seconda azione non riscrive la prima.
 annota_una '{"tool_name":"Bash","tool_input":{"command":"git status"}}'
-verifica "5" "$(wc -l < "$ALBERO/.zp/diario.ndjson")" "il diario si accoda, non si riscrive"
+verifica "5" "$(wc -l < "$DIARIO_ATTESO")" "il diario si accoda, non si riscrive"
 
 # E una sessione normale non lo alimenta.
-rm -f "$NORMALE/.zp/diario.ndjson" 2>/dev/null
+NORMALE_DIARIO="$GOV_DIARI/$(basename "$NORMALE").ndjson"
+rm -f "$NORMALE_DIARIO" "$NORMALE/.zp/diario.ndjson" 2>/dev/null
 printf '%s' '{"tool_name":"Bash","tool_input":{"command":"ls"}}' \
   | CLAUDE_PROJECT_DIR="$NORMALE" "$PY" "$GUARDIA" diario >/dev/null 2>&1
-if [[ -f "$NORMALE/.zp/diario.ndjson" ]]; then
+if [[ -f "$NORMALE_DIARIO" || -f "$NORMALE/.zp/diario.ndjson" ]]; then
   FALLITI=$((FALLITI+1)); echo "[FALLISCE] una sessione senza incarico non deve scrivere un diario"
 else PASSATI=$((PASSATI+1)); echo "[PASSA   ] una sessione senza incarico non lascia diario"; fi
 

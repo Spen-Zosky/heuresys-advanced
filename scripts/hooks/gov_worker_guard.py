@@ -53,6 +53,13 @@ import time
 from pathlib import Path
 
 SCRITTURE = {"Write", "Edit", "NotebookEdit", "MultiEdit"}
+COMANDI = {"Bash", "PowerShell"}
+
+# I divieti stanno in un modulo a parte (`gov_divieti.py`): un elenco di regole si
+# legge, si discute e si estende meglio quando non e' annegato nella logica che lo
+# applica.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gov_divieti import bersagli_di_scrittura, divieto_assoluto  # noqa: E402
 
 
 def radice() -> Path:
@@ -108,6 +115,21 @@ def normalizza(voci) -> list[str]:
     return fuori
 
 
+def assoluto(percorso: str) -> str:
+    """Un percorso relativo si risolve sull'albero del lavoratore, MAI sulla cartella
+    corrente del processo.
+
+    `os.path.realpath` di un percorso relativo usa la cwd, che per un hook non e'
+    garantita: `sed -i ... apps/api/test/x.ts` finiva risolto altrove e un file
+    DENTRO il perimetro veniva rifiutato. Un falso rifiuto e' meno grave di una
+    scrittura non vista, ma resta un difetto — e un recinto che rifiuta a caso viene
+    aggirato in fretta da chi lo subisce.
+    """
+    if not percorso:
+        return ""
+    return percorso if os.path.isabs(percorso) else str(REPO / percorso)
+
+
 def dentro_perimetro(percorso: str, perimetro: list[str]) -> bool:
     """Vero se il percorso cade dentro uno dei rami dichiarati.
 
@@ -118,7 +140,7 @@ def dentro_perimetro(percorso: str, perimetro: list[str]) -> bool:
     if not perimetro:
         return False
     try:
-        rel = os.path.relpath(os.path.realpath(percorso), os.path.realpath(REPO))
+        rel = os.path.relpath(os.path.realpath(assoluto(percorso)), os.path.realpath(REPO))
     except (OSError, ValueError):
         return False
     rel = rel.replace("\\", "/")
@@ -137,7 +159,7 @@ SEMPRE_CONCESSI = (".zp/", ".handoff/session-journal.ndjson")
 
 def concesso_comunque(percorso: str) -> bool:
     try:
-        rel = os.path.relpath(os.path.realpath(percorso), os.path.realpath(REPO)).replace("\\", "/")
+        rel = os.path.relpath(os.path.realpath(assoluto(percorso)), os.path.realpath(REPO)).replace("\\", "/")
     except (OSError, ValueError):
         return False
     return any(rel.startswith(p) for p in SEMPRE_CONCESSI)
@@ -173,6 +195,37 @@ def cmd_recinto() -> int:
             return 2
         return 0
 
+    perimetro = normalizza(inc.get("perimetro"))
+    cluster = inc.get("cluster") or "?"
+
+    # --- I COMANDI. Fino al 2026-08-09 il recinto guardava solo gli strumenti di
+    # scrittura, e `sed -i`, `cat >`, `echo >`, `git checkout -- .` e `rm -rf`
+    # passavano tutti e cinque, provati: fermava il modo educato di uscire dal
+    # perimetro, non quello efficace. Prima i divieti che non dipendono dal
+    # perimetro (pubblicare, toccare main, distruggere), poi i bersagli fuori recinto.
+    if strumento in COMANDI:
+        comando = ingresso.get("command") or ""
+        colpo = divieto_assoluto(comando)
+        if colpo:
+            sys.stderr.write("recinto gov: " + colpo[1] + "\n")
+            annota({"azione": "rifiutata", "strumento": strumento,
+                    "comando": comando[:300], "cluster": cluster,
+                    "perche": "divieto assoluto"})
+            return 2
+        for bersaglio in bersagli_di_scrittura(comando):
+            if concesso_comunque(bersaglio) or dentro_perimetro(bersaglio, perimetro):
+                continue
+            sys.stderr.write(
+                "recinto gov: il comando scriverebbe su «" + bersaglio + "», fuori dal "
+                "perimetro di " + cluster + " (" + (", ".join(perimetro) or "vuoto") + ").\n"
+                "Vale per i comandi come per gli strumenti di scrittura: il perimetro e' "
+                "cio' su cui il driver ha deciso che potevi girare insieme a un altro.\n")
+            annota({"azione": "rifiutata", "strumento": strumento,
+                    "comando": comando[:300], "bersaglio": bersaglio,
+                    "cluster": cluster, "perche": "scrittura fuori perimetro"})
+            return 2
+        return 0
+
     if strumento not in SCRITTURE:
         return 0
 
@@ -182,11 +235,9 @@ def cmd_recinto() -> int:
     if concesso_comunque(percorso):
         return 0
 
-    perimetro = normalizza(inc.get("perimetro"))
     if dentro_perimetro(percorso, perimetro):
         return 0
 
-    cluster = inc.get("cluster") or "?"
     sys.stderr.write(
         f"recinto gov: «{percorso}» e' fuori dal perimetro dichiarato per {cluster}.\n"
         f"Perimetro: {', '.join(perimetro) if perimetro else '(vuoto)'}\n"

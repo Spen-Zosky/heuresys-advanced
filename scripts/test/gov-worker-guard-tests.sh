@@ -83,6 +83,95 @@ esito_atteso 2 "perimetro vuoto non autorizza niente" \
   '{"tool_name":"Write","tool_input":{"file_path":"'"$ALBERO_N"'/apps/api/test/x.ts"}}'
 
 echo
+
+echo
+echo "── i divieti assoluti (regola di Enzo, 2026-08-09) ──"
+#
+# «un worker committa nel suo ramo ma non ha facolta di trasferire su main e di fare
+# operazioni sul repo github. Tutte le attivita di controllo finale e di effettiva
+# chiusura sono responsabilita della sessione gov.»
+
+cat > "$ALBERO/.zp/incarico.json" <<EOF
+{"cluster":"Z-112","perimetro":["apps/api/test"]}
+EOF
+
+cmd_atteso() {               # cmd_atteso <exit atteso> <comando> <descrizione>
+  local atteso="$1" comando="$2" desc="$3"
+  local corpo; corpo="$("$PY" -c "import json,sys;print(json.dumps({'tool_name':'Bash','tool_input':{'command':sys.argv[1]}}))" "$comando")"
+  printf '%s' "$corpo" | (cd "$ALBERO" && CLAUDE_PROJECT_DIR="$ALBERO" "$PY" "$GUARDIA" recinto >/dev/null 2>&1)
+  local e=$?
+  if [[ "$e" == "$atteso" ]]; then PASSATI=$((PASSATI+1)); printf '[PASSA   ] %s
+' "$desc"
+  else FALLITI=$((FALLITI+1)); printf '[FALLISCE] %s  (atteso %s, ottenuto %s) :: %s
+' "$desc" "$atteso" "$e" "$comando"; fi
+}
+
+# --- non pubblica, non tocca main, non agisce su GitHub
+cmd_atteso 2 "git push" "non pubblica"
+cmd_atteso 2 "git push origin gov/w1:main" "non pubblica NEMMENO il proprio ramo su main"
+cmd_atteso 2 "git push --force origin main" "tanto meno con la forza"
+cmd_atteso 2 "gh pr merge 60 --squash" "non fa merge su GitHub"
+cmd_atteso 2 "gh pr create --title x --body y" "non apre PR"
+cmd_atteso 2 "git checkout main" "non passa su main"
+cmd_atteso 2 "git merge main" "non fonde main"
+cmd_atteso 2 "git branch -D gov/w1" "non cancella rami"
+
+# --- non distrugge
+cmd_atteso 2 "git reset --hard HEAD~3" "non riscrive la storia con la forza"
+cmd_atteso 2 "git checkout -- ." "non butta via tutte le modifiche"
+cmd_atteso 2 "git clean -fdx" "non ripulisce i non tracciati (ci sono i segreti)"
+cmd_atteso 2 "rm -rf apps" "niente rm -rf"
+
+# --- non tocca produzione e servizi
+cmd_atteso 2 "pnpm db:reset" "non azzera il database"
+cmd_atteso 2 "psql -c 'DROP TABLE sys.sys_users'" "non fa DROP"
+cmd_atteso 2 "bash scripts/close-propagate.sh --auto-deploy" "non fa deploy"
+cmd_atteso 2 "ssh linux-pc 'systemctl restart heuresys-api'" "non tocca i servizi remoti"
+
+# --- non riscrive la sorveglianza che lo governa
+cmd_atteso 2 "sed -i 's/x/y/' .claude/settings.local.json" "non riscrive la configurazione"
+cmd_atteso 2 "echo '{}' > .claude/settings.local.json" "nemmeno per redirezione"
+cmd_atteso 2 "rm -f .zp/diario.ndjson" "non cancella il proprio diario"
+
+# --- ma il suo mestiere lo fa
+cmd_atteso 0 "git add -A && git commit -m 'Z-112: lavoro'" "COMMITTA sul proprio ramo"
+cmd_atteso 0 "git status --porcelain" "guarda lo stato"
+cmd_atteso 0 "pnpm test" "fa girare i test"
+cmd_atteso 0 "gh pr list --state open" "LEGGE da GitHub"
+cmd_atteso 0 "psql -c 'SELECT count(*) FROM sys.sys_users'" "interroga il database"
+cmd_atteso 0 "sed -i 's/a/b/' apps/api/test/x.ts" "modifica DENTRO il perimetro"
+cmd_atteso 0 "echo x > apps/api/test/y.ts" "scrive dentro il perimetro per redirezione"
+
+# --- e non esce dal recinto per vie traverse
+cmd_atteso 2 "sed -i 's/a/b/' apps/web/x.tsx" "sed fuori perimetro"
+cmd_atteso 2 "echo ciao > apps/web/z.tsx" "redirezione fuori perimetro"
+cmd_atteso 2 "cp /tmp/a apps/web/b.tsx" "copia fuori perimetro"
+cmd_atteso 2 "git status && rm -rf apps/web" "un divieto nascosto dietro un comando innocuo"
+
+# Questi due ISOLANO una difesa sola. Servono perche le altre prove sono coperte da
+# DUE difese (divieto assoluto + bersaglio fuori perimetro): togliendone una restano
+# verdi, e una prova che resta verde quando il codice peggiora non e una prova.
+
+# Isola lo split sui separatori: COPIA_VERSO ancora la fine del segmento, quindi senza
+# split il bersaglio nel PRIMO comando non si vede affatto.
+# NOTA ONESTA: questa prova NON isola lo split come speravo — con o senza, il caso
+# resta verde, perche i bersagli si cercano con espressioni ancorate a fine segmento
+# e un `&&` le ferma comunque. Resta utile come caso di comportamento; lo split ha
+# una sua ragione (i divieti si cercano segmento per segmento) che qui non si vede.
+cmd_atteso 2 "cp /tmp/a apps/web/x.tsx && echo fatto" "un bersaglio fuori recinto nel primo di due comandi"
+
+# Isola lautoprotezione: qui .claude E DENTRO il perimetro, quindi solo il divieto
+# esplicito puo fermarlo. Se lautoprotezione sparisce, questo passa.
+cat > "$ALBERO/.zp/incarico.json" <<EOF
+{"cluster":"Z-999","perimetro":["apps/api/test",".claude"]}
+EOF
+mkdir -p "$ALBERO/.claude"
+cmd_atteso 2 "echo '{}' > .claude/settings.local.json" "la sorveglianza non si riscrive NEMMENO se .claude e nel perimetro"
+cmd_atteso 2 "sed -i s/a/b/ .claude/settings.local.json" "idem per sed"
+cat > "$ALBERO/.zp/incarico.json" <<EOF
+{"cluster":"Z-112","perimetro":["apps/api/test"]}
+EOF
+
 echo "── il diario ──"
 
 cat > "$ALBERO/.zp/incarico.json" <<EOF

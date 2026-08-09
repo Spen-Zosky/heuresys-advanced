@@ -11,29 +11,19 @@
  * swallowed so it never fails the run (the rows are harmless and a11y-neutral
  * since @heuresys/ui@0.1.6 made the table region keyboard-focusable regardless
  * of row count — see D-27).
+ *
+ * Z-112: le pulizie restano best-effort — una DELETE che fallisce non deve far
+ * cadere una suite verde a meta' notte — ma NON sono piu' l'ultima parola. In
+ * fondo gira `assertNoResidue()`, che conta le righe rimaste e fa fallire la corsa
+ * se ne trova: cosi' una pulizia che non parte si vede, invece di sparire in un
+ * `console.warn`. Il manifesto dei marcatori sta in `e2e-residue.ts`, che e' anche
+ * la casa della connessione Postgres condivisa fra i due file.
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync, existsSync } from "node:fs";
-import { resolve } from "node:path";
-
-/** Read ONLY the non-secret Postgres connection keys from the repo-root .env. */
-function readPgEnv(): Record<string, string> {
-  const envPath = resolve(process.cwd(), "..", "..", ".env");
-  const out: Record<string, string> = {};
-  if (!existsSync(envPath)) return out;
-  for (const line of readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const m = /^(POSTGRES_(?:HOST|PORT|DB|USER))=(.*)$/.exec(line.trim());
-    if (m) out[m[1]!] = m[2]!;
-  }
-  return out;
-}
+import { assertNoResidue, pgConnection } from "./e2e-residue";
 
 export default async function globalTeardown(): Promise<void> {
-  const env = readPgEnv();
-  const host = process.env.PGHOST ?? env.POSTGRES_HOST ?? "localhost";
-  const port = process.env.PGPORT ?? env.POSTGRES_PORT ?? "5433";
-  const db = process.env.PGDATABASE ?? env.POSTGRES_DB ?? "heuresys_advanced";
-  const user = process.env.PGUSER ?? env.POSTGRES_USER ?? "heuresys";
+  const { host, port, db, user } = pgConnection();
   try {
     const out = execFileSync(
       "psql",
@@ -297,4 +287,30 @@ export default async function globalTeardown(): Promise<void> {
   } catch (err) {
     console.warn("[e2e teardown] survey cleanup skipped:", (err as Error).message);
   }
+
+  // Z-112: content.spec.ts, content-workflow.spec.ts e content-search.spec.ts creano
+  // documenti `E2E <cosa> <marca>`. Le spec li archiviano in fondo, ma una corsa
+  // interrotta a meta' non ci arriva — e nessuno se ne accorgeva: al 2026-08-09 il DB
+  // ne portava 6, fermi dal 10-11 giugno. Versioni, collegamenti ai blueprint e media
+  // scendono in cascata (tutte e tre le FK sono ON DELETE CASCADE).
+  try {
+    const out = execFileSync(
+      "psql",
+      [
+        "-h", host, "-p", port, "-U", user, "-d", db,
+        "-v", "ON_ERROR_STOP=1", "-tAc",
+        "WITH d AS (DELETE FROM sys.sys_content_documents WHERE document_title LIKE 'E2E %' RETURNING 1) SELECT count(*) FROM d",
+      ],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    )
+      .toString()
+      .trim();
+    console.log(`[e2e teardown] Z-112: deleted ${out} E2E content document(s)`);
+  } catch (err) {
+    console.warn("[e2e teardown] content cleanup skipped:", (err as Error).message);
+  }
+
+  // Z-112 — l'assert di drift. Da qui in poi non si inghiotte piu' niente: se resta
+  // una riga, o se non si riesce nemmeno a contarle, la corsa fallisce.
+  assertNoResidue();
 }

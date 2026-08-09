@@ -77,7 +77,13 @@ def lavoratori() -> list[dict]:
         n = albero.name
         inc = albero / ".zp" / "incarico.json"
         esito = albero / ".zp" / "last-outcome.json"
-        diario = albero / ".zp" / "diario.ndjson"
+        # [S1052] Il diario e' USCITO dall'albero (B1: il sorvegliato non custodisce il
+        # proprio registro). Si guarda prima fuori, poi dentro per i lavoratori che hanno
+        # girato prima dello spostamento. Senza questa riga il rientro contava ZERO azioni
+        # su lavoratori pieni di lavoro — misurato sulla prima corsa presidiata vera, dove
+        # w1 e w2 avevano diari da 3.937 e 2.956 byte e la tabella diceva 0.
+        diario_fuori = Path(os.environ.get("GOV_DIARI") or (ALBERI.parent / "heuresys-gov-diari")) / f"{n}.ndjson"
+        diario = diario_fuori if diario_fuori.is_file() else albero / ".zp" / "diario.ndjson"
         voce = {"albero": n, "percorso": str(albero)}
         try:
             voce["cluster"] = json.loads(inc.read_text(encoding="utf-8")).get("cluster")

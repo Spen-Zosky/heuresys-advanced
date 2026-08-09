@@ -56,4 +56,4 @@ Piano: `2026-07-25-zero-pending-plan.md` del 2026-08-09
 
 ## Spesa
 
-6 giri, circa 46.13 dollari su un tetto di 120.
+7 giri, circa 47.07 dollari su un tetto di 120.

@@ -186,6 +186,157 @@ def configs_salvate() -> dict:
         return {}
 
 
+# I campi che la plancia puo' cambiare. ELENCO ESPLICITO, mai un jolly: una webapp
+# che puo' riscrivere qualunque chiave di zp.config.yaml puo' anche disarmare le
+# guardie. Chiave -> (etichetta, minimo, massimo).
+CAMPI_CONFIG = {
+    "lavoratori_default":           ("Lavoratori per corsa", 1, 8),
+    "lavoratori_max":               ("Lavoratori: tetto", 1, 8),
+    "clusters_per_iteration":       ("Cluster per iterazione", 1, 5),
+    "max_effort_hours_per_cluster": ("Ore massime per cluster", 1, 24),
+    "max_budget_usd_per_iteration": ("$ per iterazione", 1, 60),
+    "max_iterations_default":       ("Iterazioni: tetto del driver", 1, 40),
+    "hard_stop_usd_total":          ("$ tetto cumulato", 10, 1000),
+    "goal_turn_bound":              ("Turni massimi per obiettivo", 5, 100),
+    "reviewers":                    ("Revisori per cluster", 1, 5),
+    "majority_to_dismiss":          ("Voti per archiviare un rilievo", 1, 5),
+}
+
+# Cio' che la plancia NON tocca, e il motivo. Si MOSTRA in pagina: un campo assente
+# senza spiegazione sembra una dimenticanza, e prima o poi qualcuno lo aggiunge.
+CAMPI_INTOCCABILI = {
+    "autorizzato_non_presidiato": "e' il freno: ha gia' il suo percorso, con verifiche e commit",
+    "clusters_classified": "guardia di sicurezza dell'intero impianto: senza classificazione nessuna corsia e' autorizzata",
+    "modalita_lavoratore": "permessi di esecuzione di un lavoratore",
+    "allow_force": "tocca la produzione",
+}
+
+_RX_CAMPO = r"^(?P<pre>\s*{k}:\s*)(?P<val>[^\s#]+)(?P<post>\s*(?:#.*)?)$"
+
+
+def config_campi() -> dict:
+    """Valore corrente di ogni campo modificabile, letto dal file vero."""
+    import re
+    fuori = {"campi": [], "intoccabili": [{"chiave": k, "perche": v}
+                                          for k, v in CAMPI_INTOCCABILI.items()]}
+    try:
+        righe = open(CFG, encoding="utf-8").read().splitlines()
+    except OSError as e:
+        fuori["errore"] = str(e)
+        return fuori
+    for chiave, (etichetta, minimo, massimo) in CAMPI_CONFIG.items():
+        rx = re.compile(_RX_CAMPO.format(k=re.escape(chiave)))
+        trovate = [(i, m) for i, r in enumerate(righe) if (m := rx.match(r))]
+        voce = {"chiave": chiave, "etichetta": etichetta, "min": minimo, "max": massimo}
+        if len(trovate) == 1:
+            voce["valore"] = trovate[0][1].group("val")
+            voce["riga"] = trovate[0][0] + 1
+        else:
+            voce["valore"] = None
+            voce["nota"] = f"{len(trovate)} righe corrispondono: non e' modificabile alla cieca"
+        fuori["campi"].append(voce)
+    return fuori
+
+
+COERENZE = [
+    ("majority_to_dismiss", "reviewers",
+     "servirebbero {a} voti su {b} revisori: una maggioranza irraggiungibile"),
+    ("lavoratori_default", "lavoratori_max",
+     "{a} lavoratori di default contro un tetto di {b}"),
+    ("max_budget_usd_per_iteration", "hard_stop_usd_total",
+     "{a}$ per iterazione contro un tetto cumulato di {b}$"),
+]
+
+
+def config_incoerenze() -> list[str]:
+    """Relazioni che devono valere FRA i campi, lette dal file com'e' adesso."""
+    valori = {c["chiave"]: c["valore"] for c in config_campi().get("campi", [])}
+    fuori = []
+    for minore, maggiore, testo in COERENZE:
+        try:
+            a, b = int(valori[minore]), int(valori[maggiore])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if a > b:
+            fuori.append(f"{minore} ({a}) > {maggiore} ({b}): " + testo.format(a=a, b=b))
+    return fuori
+
+
+def config_scrivi(chiave: str, valore: str) -> str:
+    """Cambia UN campo, e solo se il piano regge ancora dopo.
+
+    Le quattro cose che ogni scrittura porta con se':
+      (a) la misura prima  — si rilegge il file adesso, non ci si fida di cio' che la
+          pagina mostrava (poteva essere vecchio di venti secondi);
+      (b) la guardia       — chiave nell'elenco esplicito, valore intero nel suo range,
+          ed ESATTAMENTE una riga corrispondente: zero o due, e si rifiuta;
+      (c) la post-condizione che protegge cio' che NON doveva cambiare — stesso numero
+          di righe, e ogni altra riga identica al carattere. I commenti di questo file
+          raccontano perche' il freno esiste: valgono piu' del campo che si sta
+          cambiando, e un dump YAML li cancellerebbe tutti;
+      (d) il rollback dichiarato — l'originale resta in memoria e viene RIMESSO se
+          `zp_state.py verifica` dice di no. La verifica puo' dire di no: e' il punto.
+    """
+    import re
+    etichetta = CAMPI_CONFIG.get(chiave)
+    if not etichetta:
+        return f"«{chiave}» non e' fra i campi modificabili dalla plancia"
+    if chiave in CAMPI_INTOCCABILI:
+        return f"«{chiave}» non si tocca da qui: {CAMPI_INTOCCABILI[chiave]}"
+    _, minimo, massimo = etichetta
+    try:
+        n = int(str(valore).strip())
+    except (TypeError, ValueError):
+        return f"«{valore}» non e' un numero intero"
+    if not (minimo <= n <= massimo):
+        return f"fuori intervallo: {chiave} ammette da {minimo} a {massimo}, ricevuto {n}"
+
+    try:
+        originale = open(CFG, encoding="utf-8").read()
+    except OSError as e:
+        return f"config illeggibile: {e}"
+    righe = originale.splitlines(keepends=True)
+    rx = re.compile(_RX_CAMPO.format(k=re.escape(chiave)))
+    trovate = [i for i, r in enumerate(righe) if rx.match(r.rstrip("\r\n"))]
+    if len(trovate) != 1:
+        return f"trovate {len(trovate)} righe per «{chiave}»: non si modifica alla cieca"
+
+    i = trovate[0]
+    fine = righe[i][len(righe[i].rstrip("\r\n")):]      # il terminatore, qualunque sia
+    m = rx.match(righe[i].rstrip("\r\n"))
+    prima = m.group("val")
+    if prima == str(n):
+        return f"{chiave} era gia' {n}: non ho toccato niente"
+    nuove = list(righe)
+    nuove[i] = f"{m.group('pre')}{n}{m.group('post')}{fine}"
+
+    # (c) post-condizione, PRIMA di scrivere: nient'altro e' cambiato
+    if len(nuove) != len(righe):
+        return "rifiutato: la modifica cambierebbe il numero di righe"
+    diverse = [j for j in range(len(righe)) if nuove[j] != righe[j]]
+    if diverse != [i]:
+        return f"rifiutato: sarebbero cambiate {len(diverse)} righe invece di una"
+
+    with open(CFG, "w", encoding="utf-8", newline="") as f:
+        f.write("".join(nuove))
+
+    incoerenze = config_incoerenze()
+    if incoerenze:
+        with open(CFG, "w", encoding="utf-8", newline="") as f:
+            f.write(originale)                              # (d) rollback
+        return f"RIFIUTATO e rimesso com'era: {incoerenze[0]}"
+
+    rc, out = comando([sys.executable, os.path.join("docs", "kb", "tools", "zp_state.py"), "verifica"],
+                      cwd=REPO, timeout=90)
+    if rc != 0:
+        with open(CFG, "w", encoding="utf-8", newline="") as f:
+            f.write(originale)                              # (d) rollback
+        motivo = (out or "").strip().splitlines()
+        return (f"RIFIUTATO e rimesso com'era: con {chiave}={n} il piano non regge piu'. "
+                + (motivo[-1] if motivo else "verifica rossa"))
+    return f"{chiave}: {prima} -> {n} (riga {i + 1}); verifica del piano verde"
+
+
 def gov_diari(quante: int = 14) -> dict:
     """Le ultime azioni di ogni lavoratore, dal suo diario.
 
@@ -678,6 +829,16 @@ nav#viste button.attiva{background:var(--sup);color:var(--inchiostro);border-col
    lavoratore gira. <b>rifiutata</b> = il recinto ha fermato l'azione: va letta, non
    ignorata — puo' essere un tentativo legittimo fermato da un perimetro troppo stretto.</p>
  </section>
+ <section class="card" data-vista="config"><h2>Configurazione del loop</h2>
+  <div id="cfg-campi"></div>
+  <div class="esito" id="e-cfg"></div>
+  <p class="nota">Ogni modifica tocca <b>una sola riga</b> di <code>zp.config.yaml</code>
+   e passa da <code>zp_state.py verifica</code>: se il piano non regge piu', il file
+   viene <b>rimesso com'era</b> e qui compare il motivo. I commenti del file non si
+   toccano — raccontano perche' il freno esiste, e valgono piu' del campo che stai
+   cambiando.</p>
+  <h2 style="margin-top:20px">Cio' che da qui non si tocca</h2>
+  <div id="cfg-no"></div></section>
  <section class="card" data-vista="piano"><h2>Composizione dei cluster</h2>
   <pre id="gov-perimetri" style="max-height:340px"></pre>
   <p class="nota">Fonte: <code>zp_state.py perimetri</code> — quali cluster possono
@@ -847,7 +1008,7 @@ function statoHtml(cl,ic,nome,desc){return '<div class="stato s-'+cl+'"><span cl
 function tile(v,unita,l){return '<div class="tile"><div class="v">'+v+
  (unita?' <small>'+unita+'</small>':'')+'</div><div class="l">'+l+'</div></div>'}
 
-const VISTE=[['volo','Volo'],['lavoratori','Lavoratori'],['piano','Piano'],['storico','Storico']];
+const VISTE=[['volo','Volo'],['lavoratori','Lavoratori'],['piano','Piano'],['config','Config'],['storico','Storico']];
 let vista=localStorage.getItem('zp-vista')||'volo';
 if(!VISTE.some(v=>v[0]===vista)) vista='volo';
 function costruisciNav(){
@@ -906,6 +1067,34 @@ function durata(sec){
  if(sec<60) return sec+'s fa';
  if(sec<3600) return Math.floor(sec/60)+'m '+(sec%60)+'s fa';
  return Math.floor(sec/3600)+'h '+Math.floor((sec%3600)/60)+'m fa';
+}
+let CFG=null;
+async function caricaConfig(){
+ try{ CFG=await (await fetch(api('/api/config'))).json(); renderConfig() }catch(e){}
+}
+function renderConfig(){
+ if(!CFG) return;
+ if(CFG.errore){$('cfg-campi').innerHTML='<p class="vuoto">config illeggibile: '+CFG.errore+'</p>';return}
+ $('cfg-campi').innerHTML='<table><tr><th>campo</th><th>valore</th><th>ammesso</th><th></th></tr>'+
+  (CFG.campi||[]).map(c=> '<tr><td>'+c.etichetta+'<br><span class="chip">'+c.chiave+'</span></td>'+
+   '<td style="width:120px">'+(c.valore===null
+     ? '<span style="color:var(--avviso)">'+(c.nota||'non trovato')+'</span>'
+     : '<input id="cfg-'+c.chiave+'" type="number" value="'+c.valore+'" min="'+c.min+
+       '" max="'+c.max+'">')+'</td>'+
+   '<td class="num" style="color:var(--muto);width:90px">'+c.min+'–'+c.max+'</td>'+
+   '<td style="width:110px">'+(c.valore===null? ''
+     : '<button class="b-fantasma" style="margin:0" onclick="salvaCampo(this,&quot;'+c.chiave+
+       '&quot;)">Applica</button>')+'</td></tr>').join('')+'</table>';
+ $('cfg-no').innerHTML=(CFG.intoccabili||[]).map(x=>
+  '<div class="stato s-neutro"><span class="ic">🔒</span><span><b>'+x.chiave+
+  '</b><small>'+x.perche+'</small></span></div>').join('');
+}
+async function salvaCampo(btn,chiave){
+ const v=$('cfg-'+chiave).value;
+ btn.disabled=true; $('e-cfg').textContent='scrivo e verifico il piano…';
+ $('e-cfg').textContent=await post('/api/config-scrivi',{chiave:chiave,valore:v});
+ btn.disabled=false;
+ await caricaConfig();          /* si rilegge dal FILE: se c'e' stato rollback si vede */
 }
 function renderVolo(){
  if(!S) return;
@@ -1187,7 +1376,7 @@ async function cens(){$('e-cens').textContent=await post('/api/censimento',
  {conferma:$('c-frase').value})}
 async function spegni(){await post('/api/spegni');document.body.innerHTML=
  '<p style="padding:40px;color:#898781">plancia spenta — chiudi pure la scheda.</p>'}
-costruisciNav(); mostraVista(vista);
+costruisciNav(); mostraVista(vista); caricaConfig();
 aggiorna(); setInterval(aggiorna, 20000); setInterval(battito, 2000);
 </script></body></html>"""
 
@@ -1234,6 +1423,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(stato_veloce())
         if self._percorso() == "/api/gov":
             return self._json(gov_stato())
+        if self._percorso() == "/api/config":
+            return self._json(config_campi())
         dati = PAGINA.encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -1284,6 +1475,8 @@ class Handler(BaseHTTPRequestHandler):
             esito = censimento(corpo.get("conferma", ""))
         elif percorso == "/api/triage":
             esito = rigenera_triage()
+        elif percorso == "/api/config-scrivi":
+            esito = config_scrivi(corpo.get("chiave", ""), corpo.get("valore", ""))
         elif percorso == "/api/freno":
             esito = freno(corpo.get("azione", ""))
         elif percorso == "/api/spegni":

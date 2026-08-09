@@ -75,6 +75,30 @@ lanes:
 # ridotto a `lavoratori_max`, come gia' fa il driver con i due flag di spesa.
 # Nessuna classificazione di rischio nuova (decisione 5): valgono le classi A-D
 # e le corsie qui sopra, immutate.
+# PERMESSI DELLE SESSIONI LAVORATRICI — concesso da Enzo il 2026-08-09.
+#
+# Perche' serve, misurato e non supposto: nella terza corsa presidiata i due
+# lavoratori hanno lavorato 5 e 21 minuti e si sono fermati DA SOLI, scrivendo il
+# motivo invece di fingere — «gh pr list negato dal sistema permessi (5 tentativi)»
+# e «gli strumenti di gate non sono eseguibili, le scritture su file sono negate».
+# Con `acceptEdits` una sessione puo' modificare file ma non ESEGUIRE comandi: non
+# puo' far girare i test, interrogare il database, usare gh. Cioe' non puo' chiudere
+# un cluster, che e' l'unica cosa per cui esiste.
+#
+# Cosa comporta, detto per intero: `bypassPermissions` da' alla sessione il diritto
+# di eseguire qualunque comando senza chiedere. Le difese che RESTANO e che questa
+# riga non tocca:
+#   · il freno `autorizzato_non_presidiato` — nessuna corsa parte senza toglierlo;
+#   · la corsia (safe = solo classi A e B): niente produzione, niente schema, niente
+#     segreti;
+#   · il veto sul deploy, imposto da close-propagate fuori dalla corsia presidiata;
+#   · il tetto di spesa per giro e cumulato;
+#   · l'albero di lavoro separato: un lavoratore non tocca il repo principale.
+#
+# Si revoca rimettendo `acceptEdits`, e il driver torna com'era.
+permessi:
+  modalita_lavoratore: bypassPermissions
+
 gov:
   lavoratori_default: 2
   lavoratori_max: 3

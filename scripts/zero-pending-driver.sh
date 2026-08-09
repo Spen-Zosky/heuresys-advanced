@@ -79,6 +79,9 @@ muori(){ log "STOP: $*"; rm -f "$LOCK"; exit "${2:-1}"; }
 [[ -z "$MAX_ITER" ]] && MAX_ITER="$(cfg budget.max_iterations_default)"
 [[ -z "$MAX_ITER" ]] && MAX_ITER=12
 [[ -z "$FINESTRA" ]] && FINESTRA="$(cfg interrupt_resume.window)"
+# I permessi vengono dalla CONFIG, non da un valore scritto qui: e' una decisione
+# di sicurezza e deve stare dove si legge e si revoca, accanto alle altre.
+[[ -z "$PERMESSI" ]] && PERMESSI="$(cfg permessi.modalita_lavoratore)"
 [[ -z "$PERMESSI" ]] && PERMESSI="acceptEdits"
 BUDGET_GIRO="$(cfg budget.max_budget_usd_per_iteration)"; [[ -z "$BUDGET_GIRO" ]] && BUDGET_GIRO=12
 TETTO_TOT="$(cfg budget.hard_stop_usd_total)";            [[ -z "$TETTO_TOT" ]] && TETTO_TOT=120

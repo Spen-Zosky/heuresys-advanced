@@ -2,7 +2,7 @@
 
 **Item**: `#173` (`SOT_BACKLOG.md`, era `WAIT-INPUT`) · **Piano scritto**: S1052, 2026-08-09
 **Origine**: consegna Cowork del 2026-08-08 in `docs/kb/COWORK_INBOX.md` (§ "Sessione gov")
-**Stato del piano**: **G1-G6 e G8 fatti** (2026-08-09). Resta **solo G7**, che ha bisogno di una parola di Enzo — §10.
+**Stato del piano**: **G1-G6 e G8 fatti**; **G7 a metà** (2026-08-09). Tre corse presidiate, otto difetti trovati e chiusi, guadagno misurato. Resta una decisione di Enzo sui permessi — §11.
 
 > **G8 non era nel piano.** È nata perché Enzo ha letto il codice invece di fidarsi del
 > piano, e ha trovato che *niente* controllava la validità dei cluster che `gov` assegna:
@@ -115,7 +115,7 @@ Una riga per deliverable. Lo stato si legge da qui, non dalla memoria.
 | **G4** | Stato separato per lavoratore | Claude | ogni lavoratore ha il suo stato; il giornale di spesa resta unico e cumulativo | ✅ **FATTO** `806c3b9f` — **risolta diversamente**: non `.zp/w1/`, ma `<albero>/.zp/`. Con un albero per lavoratore il nome dei file non serve cambiarlo: due lavoratori non si vedono perché hanno due alberi. Zero modifiche a `verify_gate`, `zp_gate`, `zp_selftest` |
 | **G5** | Comando `stato gov` (consolidamento manuale, decisione 1) | Claude | un comando stampa: chi sta girando, su che cluster, da quanto, spesa per lavoratore e totale, esiti raccolti | ✅ **FATTO** `497bfa13` — `zp_state.py stato-gov` |
 | **G6** | Lock condiviso su `zp.config.yaml` (censimento ↔ lavoratori) | Claude | un censimento lanciato mentre 2 lavoratori girano **si ferma dicendo chi**; e viceversa | ✅ **FATTO** `497bfa13` |
-| **G7** | Prima corsa presidiata a 2 lavoratori, con misura del guadagno reale | Claude + **Enzo** | due cluster chiusi in parallelo con evidenza live; tempo a 1 lavoratore vs 2 lavoratori misurato e scritto | ⏳ **WAIT-INPUT** — vedi §10 |
+| **G7** | Prima corsa presidiata a 2 lavoratori, con misura del guadagno reale | Claude + **Enzo** | due cluster chiusi in parallelo con evidenza live; tempo a 1 lavoratore vs 2 lavoratori misurato e scritto | ◐ **META'** — guadagno **misurato: 1,25×**; i due cluster NON chiusi (permessi). Vedi §11 |
 | **G8** | Una sessione `gov` apre sapendo se il piano regge ancora | Claude | l'hook **esegue** verifica strutturale + età del censimento e consegna l'esito nel briefing; se gli strumenti mancano, la sessione si apre lo stesso | ✅ **FATTO** `12d17408` — **voce nata fuori dal piano**, da una lettura del codice di Enzo (2026-08-09) |
 
 **Fuori dal piano, dichiarato**: il freno `meta.autorizzato_non_presidiato: false` **resta
@@ -311,3 +311,45 @@ modo di sapere che qualcuno sta guardando, quindi rifiuta comunque.
 **Prima della corsa serve comunque un passo pagato**: `--prepara-alberi 2` installa le
 dipendenze in due cartelle di lavoro (qualche minuto, ~1 GB di disco l'una). Va fatto
 guardando, ed è per questo che è un comando a sé.
+
+
+---
+
+## 11. G7 — le tre corse, e cosa hanno prodotto
+
+Tre corse presidiate, freno tolto e rimesso ogni volta. **Otto difetti trovati**, tutti
+invisibili alle 38 prove: si vedono solo aprendo sessioni vere.
+
+| # | Difetto | Come si manifestava |
+|---|---|---|
+| 1 | Il comando veniva tradotto (`/zero-pending-loop` → `C:/Git/zero-pending-loop`) | la skill non veniva mai invocata |
+| 2 | `wait` su un figlio non proprio (sottoshell) | il driver «aspettava» in 0s e leggeva troncato su sessioni vive |
+| 3 | Gli alberi restavano al commit di quando erano nati | i lavoratori avrebbero lavorato su codice vecchio |
+| 4 | Il driver rifiutava l'albero per i file non tracciati di Codex | non sarebbe partito su nessuna macchina dove Codex lavora |
+| 5 | La difesa MSYS troppo larga | uccideva l'hook della sessione figlia: zero turni, zero costo, **nessun errore** |
+| 6 | Un ritorno a capo Windows dentro l'id del cluster | giornale di spesa illeggibile → **tetto di spesa inerte** |
+| 7 | La guardia di regressione accusava il commento che la giustifica | batteria rossa su codice corretto |
+| 8 | `--permission-mode acceptEdits` non basta per lavorare | ⬅ **aperto, vedi sotto** |
+
+### Il numero che cercavamo
+
+**Guadagno reale: 1,25×.** Il giro è durato 1251 s; i due lavoratori, in fila, ne avrebbero
+richiesti 1570. La stima nel piano (§4b) diceva 1,4–1,6×: **era ottimistica**, e ora c'è un
+numero misurato al suo posto. Costo reale di un lavoratore che lavora 320 s: **$2,20**.
+
+### L'ottavo difetto, che è una decisione
+
+Entrambi i lavoratori hanno lavorato (5 e 21 minuti) e si sono fermati **da soli**, scrivendo
+una ragione precisa invece di fingere:
+
+- `Z-230`: *«criterio di chiusura non eseguibile: `gh pr list` negato dal sistema permessi
+  (5 tentativi)»*
+- `Z-112`: *«gli strumenti di gate non sono eseguibili e le scritture su file sono negate»*
+
+Il driver apre le sessioni con `--permission-mode acceptEdits`, che consente di modificare
+file ma **non di eseguire comandi**. Un lavoratore che deve far girare i test, interrogare
+il database e usare `gh` non può lavorare così.
+
+L'alternativa è `bypassPermissions`, che **dà a una sessione non presidiata il permesso di
+eseguire qualunque comando**. È una scelta di sicurezza, non tecnica, e appartiene a Enzo —
+esattamente come il freno.

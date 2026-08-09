@@ -2,7 +2,15 @@
 
 **Item**: `#173` (`SOT_BACKLOG.md`, era `WAIT-INPUT`) · **Piano scritto**: S1052, 2026-08-09
 **Origine**: consegna Cowork del 2026-08-08 in `docs/kb/COWORK_INBOX.md` (§ "Sessione gov")
-**Stato del piano**: **G1-G6 fatti** (2026-08-09). Resta **solo G7**, che ha bisogno di una parola di Enzo — §10.
+**Stato del piano**: **G1-G6 e G8 fatti** (2026-08-09). Resta **solo G7**, che ha bisogno di una parola di Enzo — §10.
+
+> **G8 non era nel piano.** È nata perché Enzo ha letto il codice invece di fidarsi del
+> piano, e ha trovato che *niente* controllava la validità dei cluster che `gov` assegna:
+> né il briefing, né `zp_state perimetri`, né i documenti della skill. Il piano descriveva
+> un meccanismo che assegnava lavoro da una lista del 25 luglio senza mai chiedersi se
+> fosse ancora vera. La misura ha anche smentito un aggettivo che circolava da giorni: il
+> triage «pesante» costa **0,63 s**, meno di un secondo — quindi gira anche lui, non solo
+> la verifica strutturale.
 
 > **Cinque cose che si sono viste solo montando i pezzi** (S1052). Nessuna era nel piano.
 > (1) Il **lucchetto della suite** era calcolato dalla cartella del sorgente: in due alberi
@@ -108,6 +116,7 @@ Una riga per deliverable. Lo stato si legge da qui, non dalla memoria.
 | **G5** | Comando `stato gov` (consolidamento manuale, decisione 1) | Claude | un comando stampa: chi sta girando, su che cluster, da quanto, spesa per lavoratore e totale, esiti raccolti | ✅ **FATTO** `497bfa13` — `zp_state.py stato-gov` |
 | **G6** | Lock condiviso su `zp.config.yaml` (censimento ↔ lavoratori) | Claude | un censimento lanciato mentre 2 lavoratori girano **si ferma dicendo chi**; e viceversa | ✅ **FATTO** `497bfa13` |
 | **G7** | Prima corsa presidiata a 2 lavoratori, con misura del guadagno reale | Claude + **Enzo** | due cluster chiusi in parallelo con evidenza live; tempo a 1 lavoratore vs 2 lavoratori misurato e scritto | ⏳ **WAIT-INPUT** — vedi §10 |
+| **G8** | Una sessione `gov` apre sapendo se il piano regge ancora | Claude | l'hook **esegue** verifica strutturale + età del censimento e consegna l'esito nel briefing; se gli strumenti mancano, la sessione si apre lo stesso | ✅ **FATTO** `12d17408` — **voce nata fuori dal piano**, da una lettura del codice di Enzo (2026-08-09) |
 
 **Fuori dal piano, dichiarato**: il freno `meta.autorizzato_non_presidiato: false` **resta
 inserito**. `gov` non lo tocca e non lo aggira: è una decisione di Enzo, separata da questa.

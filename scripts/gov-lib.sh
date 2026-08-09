@@ -92,6 +92,60 @@ gov_lock_rilascia_tutti() {  # <dir> -> rilascia solo i propri
 # Gli alberi stanno FUORI dal repo, come gia' fa il registro delle modalita': sono
 # stato di macchina, non sorgente, e non devono comparire in `git status`.
 
+# --- l'identita' di database di un lavoratore --------------------------------
+#
+# V2 dell'analisi di sicurezza: l'albero isola i FILE, non i DATI. Copiando il `.env`
+# del repo, un lavoratore ereditava le credenziali di produzione — 162 utenti veri,
+# 5.641 buste paga. Un errore dentro un'operazione legittima sarebbe stato
+# irreversibile, e nessun hook lo avrebbe distinto da un'operazione giusta.
+#
+# Qui la garanzia non e' un divieto che si aggira: e' un'identita' che il DBMS
+# stesso impedisce di usare per scrivere (`default_transaction_read_only=on` sul
+# ruolo). Provato: SELECT passa, UPDATE/DELETE/DROP falliscono nel database.
+#
+# Conseguenza di processo, dichiarata: un cluster che per chiudersi deve SCRIVERE
+# sul database non appartiene alla corsia non presidiata. Non e' un limite dello
+# strumento, e' la definizione della corsia.
+
+gov_declassa_credenziali_db() {   # <repo> <albero>
+  local repo="$1"
+  local dir="$2"
+  local segreto="$repo/.secrets/gov-worker.pass"
+  local env="$dir/.env"
+
+  [[ -f "$env" ]] || return 0
+  if [[ ! -s "$segreto" ]]; then
+    echo "albero $dir: manca .secrets/gov-worker.pass — lancia prima" >&2
+    echo "  bash db/scripts/crea-ruolo-gov-worker.sh" >&2
+    return 1
+  fi
+
+  local pw
+  pw="$(cat "$segreto")"
+  # Si riscrivono le sole due righe che contano. Il resto del `.env` serve, e
+  # toccarlo a caso romperebbe il lavoratore per ragioni che non c'entrano.
+  "${ZP_PYTHON:-python}" - "$env" "$pw" <<'PYEOF'
+import sys, re, pathlib
+env, pw = pathlib.Path(sys.argv[1]), sys.argv[2]
+testo = env.read_text(encoding="utf-8")
+testo = re.sub(r"(?m)^POSTGRES_USER=.*$", "POSTGRES_USER=gov_worker", testo)
+testo = re.sub(r"(?m)^POSTGRES_PASSWORD=.*$", "POSTGRES_PASSWORD=" + pw, testo)
+# Le credenziali di superutente non hanno alcun mestiere in un albero di lavoro.
+testo = re.sub(r"(?m)^POSTGRES_SUPERUSER(_PASSWORD)?=.*$", "", testo)
+env.write_text(testo, encoding="utf-8")
+PYEOF
+  return 0
+}
+
+gov_credenziali_declassate() {    # <albero> -> 0 se l'albero NON ha le credenziali di produzione
+  local env="$1/.env"
+  [[ -f "$env" ]] || return 1
+  grep -qE '^POSTGRES_USER=gov_worker$' "$env" || return 1
+  grep -qE '^POSTGRES_SUPERUSER' "$env" && return 1
+  return 0
+}
+
+
 gov_worktree_base() {        # <repo> -> il percorso base, fuori dal repo
   local repo="$1"
   echo "${GOV_WORKTREE_BASE:-$(dirname "$repo")/heuresys-gov-workers}"
@@ -121,6 +175,9 @@ gov_worktree_prepara() {     # <repo> <n> [ref] -> stampa il percorso; 1 se fall
     else
       echo "albero $dir: ha lavoro non salvato, lo lascio com'e'" >&2
     fi
+    # Anche un albero RIUSATO va declassato: quelli creati prima di V2 hanno ancora
+    # le credenziali di produzione nel loro .env, e il riuso salterebbe il passaggio.
+    gov_declassa_credenziali_db "$repo" "$dir" || return 1
     echo "$dir"
     return 0
   fi
@@ -141,6 +198,8 @@ gov_worktree_prepara() {     # <repo> <n> [ref] -> stampa il percorso; 1 se fall
     [[ -f "$repo/$f" ]] && cp "$repo/$f" "$dir/$f"
   done
   [[ -d "$repo/.secrets" ]] && cp -r "$repo/.secrets" "$dir/.secrets"
+
+  gov_declassa_credenziali_db "$repo" "$dir"
 
   echo "$dir"
   return 0

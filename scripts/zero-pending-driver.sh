@@ -376,6 +376,15 @@ while (( GIRO < MAX_ITER )); do
           gov_lock_rilascia "$LOCKS" "$_c"
           continue
         fi
+        # V2: nessun lavoratore parte con le credenziali di produzione in mano. La
+        # verifica e' QUI, al momento di lanciarlo, non ereditata dalla preparazione:
+        # una guardia che si fida di un passaggio precedente non e' una guardia.
+        if ! gov_credenziali_declassate "$_d"; then
+          log "  albero $((_i + 1)): ha ancora le credenziali di produzione. NON lo lancio."
+          log "  rimedio: bash db/scripts/crea-ruolo-gov-worker.sh, poi --prepara-alberi"
+          gov_lock_rilascia "$LOCKS" "$_c"
+          continue
+        fi
         DIRS+=("$_d"); CLUSTERS+=("$_c")
       done
     fi

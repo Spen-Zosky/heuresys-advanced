@@ -307,6 +307,68 @@ Poi presenta il menu e chiedi da dove partire. Il piano della modalita' e'
 docs/superpowers/plans/2026-08-09-modalita-gov.md.
 """
 
+# --- diagnosi del piano all'apertura di una sessione gov -------------------
+#
+# PERCHE' ESISTE (Enzo, 2026-08-09, dopo aver letto il codice invece del piano).
+# `gov` assegna cluster presi da `zp.config.yaml`, cioe' da un censimento del
+# 2026-07-25 aggiornato a mano da allora. Niente, in tutta la catena, controllava
+# che quel piano fosse ancora valido: non il briefing, non `zp_state perimetri`
+# (che raggruppa la lista cosi' come la trova), non i documenti della skill —
+# dove la parola «triage» non compare in nessun .md.
+#
+# Quindi la diagnosi non si CHIEDE alla sessione: si ESEGUE qui e le si consegna
+# gia' fatta. E' la stessa dottrina della modalita': non una promessa del modello,
+# un fatto su disco. Misurato prima di deciderlo: 0,46 s la verifica strutturale e
+# 0,63 s il triage — il triage «pesante» pesa quanto l'altro, quindi girano
+# entrambi.
+#
+# Fallimento sicuro: se un comando manca, sfora il tempo o esplode, la sessione si
+# apre lo stesso e il blocco lo dice. Una diagnosi che non parte non deve MAI
+# impedire di lavorare.
+
+DIAGNOSI_TIMEOUT_S = 20
+
+
+def _prima_riga(argomenti: list, quando_fallisce: str) -> str:
+    try:
+        p = subprocess.run([sys.executable, *argomenti], cwd=str(REPO),
+                           capture_output=True, timeout=DIAGNOSI_TIMEOUT_S)
+    except (OSError, subprocess.SubprocessError):
+        return quando_fallisce
+    testo = (p.stdout or b"").decode("utf-8", "replace").strip()
+    if not testo:
+        return quando_fallisce
+    return testo.splitlines()[0].strip()
+
+
+def diagnosi_gov() -> str:
+    """Il piano su cui gov sta per lavorare regge ancora? Due righe, gia' misurate."""
+    strumenti = REPO / "docs" / "kb" / "tools"
+    if not (strumenti / "zp_state.py").is_file():
+        return ""
+    integrita = _prima_riga(
+        [str(strumenti / "zp_state.py"), "verifica"],
+        "non misurabile adesso (zp_state non ha risposto)")
+    eta = ""
+    if (strumenti / "zp_triage.py").is_file():
+        eta = _prima_riga(
+            [str(strumenti / "zp_triage.py")],
+            "non misurabile adesso (zp_triage non ha risposto)")
+    righe = [
+        "",
+        "[il piano su cui stai per assegnare — misurato adesso, non a memoria]",
+        f"  struttura : {integrita}",
+    ]
+    if eta:
+        righe.append(f"  eta'      : {eta}")
+    righe += [
+        "  I cluster che assegnerai vengono da questa lista. Se qui sopra c'e' un",
+        "  rilievo, dillo a Enzo PRIMA di assegnare: il quadro per cluster si legge",
+        "  con `python docs/kb/tools/zp_triage.py --md .zp/zp_triage.md`.",
+        "",
+    ]
+    return "\n".join(righe)
+
 
 # --- la guardia: decisione pura, testabile -------------------------------
 
@@ -684,6 +746,13 @@ def cmd_prompt_hook() -> int:
     set_mode(sid, mode)
     gc()
     sys.stdout.write({LAB: LAB_BRIEF, GOV: GOV_BRIEF}.get(mode, CANONICAL_BRIEF))
+    if mode == GOV:
+        # Se la diagnosi esplode, la sessione si apre lo stesso: il briefing e'
+        # gia' stato scritto sopra, e qui non si aggiunge altro.
+        try:
+            sys.stdout.write(diagnosi_gov())
+        except Exception:
+            pass
     return 0
 
 
@@ -933,6 +1002,41 @@ def cmd_selftest() -> int:
         else:
             bad += 1
             failures.append((f"parse {text!r}", expected, got, "parser"))
+
+    # La diagnosi che gov riceve all'apertura. Il caso che conta non e' «funziona»,
+    # e' «non impedisce di lavorare quando non funziona»: una sessione che non si
+    # apre per colpa di una diagnosi sarebbe un rimedio peggiore del male.
+    global REPO
+    _repo_vero = REPO
+    try:
+        d = diagnosi_gov()
+        for etichetta, condizione in [
+            ("la diagnosi di gov produce testo", bool(d)),
+            ("dice com'e' messa la struttura del piano", "struttura" in d),
+            ("nomina lo strumento per il dettaglio", "zp_triage.py" in d),
+        ]:
+            if condizione:
+                ok += 1
+            else:
+                bad += 1
+                failures.append((etichetta, True, False, "diagnosi gov"))
+
+        # Strumenti assenti: si degrada in silenzio, non si esplode.
+        import tempfile
+        with tempfile.TemporaryDirectory() as vuota:
+            REPO = Path(vuota)
+            muta = diagnosi_gov()
+        if muta == "":
+            ok += 1
+        else:
+            bad += 1
+            failures.append(("senza strumenti la diagnosi tace", "", muta[:40], "diagnosi gov"))
+    except Exception as exc:                      # noqa: BLE001 — e' esattamente il caso da coprire
+        bad += 1
+        failures.append(("la diagnosi non deve mai sollevare", "nessuna eccezione",
+                         type(exc).__name__, str(exc)[:60]))
+    finally:
+        REPO = _repo_vero
 
     for desc, exp, got, reason in failures:
         print(f"  FALLITO  {desc}: atteso={exp} ottenuto={got} :: {reason}")

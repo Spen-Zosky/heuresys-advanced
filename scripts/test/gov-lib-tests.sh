@@ -199,7 +199,10 @@ unset ZP_CLAUDE_CMD
 # SORGENTE, non il comportamento, e va detto: il difetto vero (l'hook della sessione
 # figlia che non trova i suoi file) si riproduce solo con una sessione vera, e la sua
 # evidenza sta nel commit. Qui si impedisce solo che la forma sbagliata torni.
-if grep -q 'MSYS_NO_PATHCONV' "$REPO/scripts/gov-lib.sh"; then
+# Si guarda il CODICE, non i commenti: la spiegazione del perche' non si usa
+# quella forma nomina la forma stessa, e una guardia che legge anche i commenti
+# accusa il commento che la giustifica. (Successo davvero, un minuto fa.)
+if grep -v "^[[:space:]]*#" "$REPO/scripts/gov-lib.sh" | grep -q 'MSYS_NO_PATHCONV'; then
   FALLITI=$((FALLITI+1))
   echo "[FALLISCE] e' tornato MSYS_NO_PATHCONV: spegne la traduzione per TUTTO e rompe gli hook del figlio"
 else

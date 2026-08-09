@@ -309,7 +309,12 @@ def censimento(conferma: str) -> str:
 
 
 def rigenera_triage() -> str:
-    rc, out = comando([sys.executable, os.path.join(QUI, "zp_triage.py"),
+    # Il triage vive con gli altri strumenti del piano (docs/kb/tools/), non qui
+    # accanto al pannello: usa zp_state come parser, come zp_gate e zp_zero_check.
+    # Fino al 2026-08-09 questo bottone cercava `scripts/zp_triage.py`, che non e'
+    # mai esistito nel repo — chi lo premeva otteneva un FileNotFoundError.
+    rc, out = comando([sys.executable,
+                       os.path.join(REPO, "docs", "kb", "tools", "zp_triage.py"),
                        "--md", TRIAGE_MD], timeout=120)
     return out.splitlines()[0] if rc == 0 and out else (out or "errore nel triage")
 

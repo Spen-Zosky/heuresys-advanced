@@ -195,6 +195,38 @@ def prove_perimetri() -> list:
     return esiti
 
 
+def prove_triage() -> list:
+    """22-26 — il verdetto sull'eta' del censimento sa dire cose DIVERSE.
+
+    Un verdetto che dicesse sempre la stessa frase sembrerebbe funzionare per
+    mesi: e' il caso in cui uno strumento misura se stesso. Qui le quattro
+    situazioni sono costruite a mano, con le soglie messe alla prova ai bordi.
+    """
+    from zp_triage import verdetto            # noqa: E402
+    esiti = []
+
+    def situazione(sha_ok: bool, commit: int, quota: float) -> str:
+        n = round(quota * 219 / 100)
+        return verdetto({
+            'aperti': 219,
+            'eta': {'sha_raggiungibile': sha_ok, 'commit_dopo': commit},
+            'classi': {'GIA-RISOLTO': [0] * n, 'PREMESSA-MUTATA': [],
+                       'RISOLTO-A-REGISTRO?': [], 'LAVORATO-DOPO': [],
+                       'VALIDO-CONDIZIONALE': [], 'VALIDO-PROVVISORIO': []},
+        })
+
+    casi = [
+        ('22 sha sparito -> censimento da rifare', situazione(False, 349, 4), 'non esiste piu'),
+        ('23 molti stale -> superato', situazione(True, 50, 30), 'SUPERATO'),
+        ('24 molti commit -> superato', situazione(True, 600, 4), 'SUPERATO'),
+        ('25 pochi stale, molti commit -> invecchiato', situazione(True, 349, 4), 'INVECCHIATO'),
+        ('26 poco di tutto -> regge', situazione(True, 20, 1), 'REGGE'),
+    ]
+    for nome, ottenuto, atteso in casi:
+        esiti.append((nome, atteso in ottenuto, f'«{ottenuto[:64]}…»'))
+    return esiti
+
+
 def main() -> int:
     cfg = carica_config()
     clusters = carica_piano(cfg)
@@ -303,6 +335,10 @@ def main() -> int:
 
     # 15-21 - i perimetri della modalita' gov (#173), anch'essi su piano finto
     for nome, esito, dett in prove_perimetri():
+        ESITI.append((nome, esito, dett))
+
+    # 22-26 - il verdetto sull'eta' del censimento (zp_triage)
+    for nome, esito, dett in prove_triage():
         ESITI.append((nome, esito, dett))
 
     da_fare_a_mano('bootstrap non ri-censisce', 'serve una sessione viva: /zero-pending-loop bootstrap')

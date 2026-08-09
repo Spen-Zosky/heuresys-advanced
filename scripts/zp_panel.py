@@ -186,6 +186,37 @@ def configs_salvate() -> dict:
         return {}
 
 
+def gov_diari(quante: int = 14) -> dict:
+    """Le ultime azioni di ogni lavoratore, dal suo diario.
+
+    Sta nel BATTITO, non nel giro lento: e' l'unica cosa che si muove davvero mentre
+    guardi un lavoratore lavorare, e sono solo letture di file (nessun git, nessun
+    processo). I diari sono piccoli — 123 righe il piu' lungo — quindi si rilegge la
+    coda a ogni battito senza pagare niente.
+    """
+    fuori = {}
+    base = os.environ.get("GOV_WORKTREE_BASE") or os.path.join(
+        os.path.dirname(REPO), "heuresys-gov-workers")
+    if not os.path.isdir(base):
+        return fuori
+    try:
+        for nome in sorted(os.listdir(base)):
+            d = os.path.join(base, nome, ".zp", "diario.ndjson")
+            if not os.path.isfile(d):
+                continue
+            righe = []
+            with open(d, encoding="utf-8") as f:
+                for riga in f.read().splitlines()[-quante:]:
+                    try:
+                        righe.append(json.loads(riga))
+                    except ValueError:
+                        pass
+            fuori[nome] = righe
+    except OSError:
+        pass
+    return fuori
+
+
 def gov_stato() -> dict:
     """Il mondo gov, letto da chi lo sa gia' fare.
 
@@ -201,7 +232,8 @@ def gov_stato() -> dict:
         if strumenti not in sys.path:
             sys.path.insert(0, strumenti)
         import gov_rientro
-        return {"lavoratori": gov_rientro.lavoratori(),
+        return {"perimetri": zp_state("perimetri"),
+                "lavoratori": gov_rientro.lavoratori(),
                 "rami": gov_rientro.rami_con_lavoro(),
                 "verdetti": gov_rientro.verdetti(),
                 "freno": gov_rientro.freno()}
@@ -225,7 +257,8 @@ def stato_veloce() -> dict:
     except (OSError, ValueError):
         pass
     giri = corse()
-    return {"lock": lock_stato(),
+    return {"diari": gov_diari(),
+            "lock": lock_stato(),
             "stop_presente": os.path.exists(os.path.join(ZP, "STOP")),
             "ultimo_esito": ultimo,
             "spesa_usd": round(sum(float(g.get("costo_usd") or 0) for g in giri), 2),
@@ -621,6 +654,11 @@ nav#viste button.attiva{background:var(--sup);color:var(--inchiostro);border-col
  <button class="b-primo" style="margin:0" onclick="apriModale()">⚙ Imposta prossima sessione</button>
  <button class="b-fantasma" style="margin:0 0 0 8px" onclick="spegni()">Spegni plancia</button></header>
 <main>
+ <section class="card" data-vista="volo"><h2>In volo adesso</h2>
+  <div id="volo-ora"></div>
+  <p class="nota">Si aggiorna ogni 2 secondi. Se il tempo dall'ultima azione cresce e
+   non torna a zero, non si sta muovendo piu' niente — ed e' l'unica cosa che una
+   console di volo deve saper dire a colpo d'occhio.</p></section>
  <section class="card" data-vista="volo"><h2>Stato macchina</h2><div class="stati" id="stati"></div></section>
 <section class="card" data-vista="lavoratori"><h2>I lavoratori, adesso</h2>
   <div id="gov-lav"></div>
@@ -634,6 +672,16 @@ nav#viste button.attiva{background:var(--sup);color:var(--inchiostro);border-col
    <p class="nota">Non ci arrivano da soli: nessun passo di gov fa merge, per costruzione.</p>
   </section>
  </div>
+ <section class="card" data-vista="lavoratori"><h2>Che cosa stanno facendo</h2>
+  <div id="gov-diari"></div>
+  <p class="nota">Le ultime azioni registrate, aggiornate ogni 2 secondi mentre un
+   lavoratore gira. <b>rifiutata</b> = il recinto ha fermato l'azione: va letta, non
+   ignorata — puo' essere un tentativo legittimo fermato da un perimetro troppo stretto.</p>
+ </section>
+ <section class="card" data-vista="piano"><h2>Composizione dei cluster</h2>
+  <pre id="gov-perimetri" style="max-height:340px"></pre>
+  <p class="nota">Fonte: <code>zp_state.py perimetri</code> — quali cluster possono
+   girare insieme, e su quali file ognuno ha diritto di scrivere.</p></section>
  <section class="card" data-vista="piano"><h2>Il piano in numeri</h2><div class="kpi" id="kpi"></div></section>
  <div class="riga c3">
   <section class="card" data-vista="piano"><h2>Aperti autonomi per ondata</h2><div id="ondate"></div>
@@ -847,6 +895,71 @@ function renderGov(){
   R.map(t=>'<li>'+t+'</li>').join('')+'</ul>'
   : '<p class="vuoto">Nessun ramo con lavoro in attesa.</p>';
 }
+function daQuando(iso){
+ if(!iso) return null;
+ const t=new Date(iso.replace(' ','T')).getTime();
+ if(isNaN(t)) return null;
+ return Math.max(0, Math.round((Date.now()-t)/1000));
+}
+function durata(sec){
+ if(sec===null||sec===undefined) return '—';
+ if(sec<60) return sec+'s fa';
+ if(sec<3600) return Math.floor(sec/60)+'m '+(sec%60)+'s fa';
+ return Math.floor(sec/3600)+'h '+Math.floor((sec%3600)/60)+'m fa';
+}
+function renderVolo(){
+ if(!S) return;
+ /* L'ultima azione fra TUTTI i diari: e' l'indicatore che dice se qualcosa si muove.
+    Il lock dice se un driver esiste, non se sta facendo qualcosa: un driver bloccato
+    ha il lock vivo e il diario fermo, ed e' proprio il caso che va visto subito. */
+ let ultima=null, diChi=null;
+ const D=S.diari||{};
+ for(const n of Object.keys(D)){
+  for(const r of (D[n]||[])){
+   if(!ultima || (r.quando||'')>(ultima.quando||'')){ ultima=r; diChi=n }
+  }
+ }
+ const eta=ultima? daQuando(ultima.quando) : null;
+ const fermo = eta===null || eta>180;
+ const L=S.lock||{};
+ let h='';
+ h+= L.presente&&L.vivo
+  ? statoHtml('buono','●','Driver vivo','pid '+L.pid)
+  : (L.presente? statoHtml('serio','◐','Lock orfano','il driver e morto senza chiudere')
+               : statoHtml('neutro','○','Nessun driver','nessuna corsa in questo momento'));
+ h+= ultima
+  ? statoHtml(fermo?'avviso':'buono', fermo?'⏸':'▶',
+      'Ultima azione '+durata(eta),
+      diChi+' · '+String(ultima.comando||ultima.oggetto||ultima.bersaglio||'').slice(0,70))
+  : statoHtml('neutro','○','Nessuna azione registrata','nessun lavoratore ha ancora agito');
+ const lav=Object.keys(D).length;
+ h+= statoHtml(lav?'buono':'neutro', lav?'◉':'○',
+      lav+(lav===1?' lavoratore':' lavoratori')+' con diario',
+      lav? 'i dettagli nella vista Lavoratori' : 'nessun albero di lavoro sul disco');
+ $('volo-ora').innerHTML=h;
+}
+function renderDiari(){
+ const D=(S&&S.diari)||{}; const nomi=Object.keys(D);
+ if(!nomi.length){$('gov-diari').innerHTML='<p class="vuoto">Nessun diario: nessun lavoratore ha ancora agito.</p>';return}
+ $('gov-diari').innerHTML=nomi.map(n=>{
+  const righe=D[n]||[];
+  return '<div class="gruppo"><h3>'+n+' — ultime '+righe.length+' azioni</h3>'+
+   (righe.length? '<table>'+righe.slice().reverse().map(r=>{
+     const rif=r.azione==='rifiutata';
+     const q=(r.quando||'').slice(11,19);
+     return '<tr><td class="num" style="color:var(--muto);width:64px">'+q+'</td>'+
+      '<td style="width:88px">'+(rif? '<b style="color:var(--critico)">rifiutata</b>'
+        : '<span style="color:var(--muto)">'+(r.azione||'')+'</span>')+'</td>'+
+      '<td style="color:var(--sec);word-break:break-all">'+
+        '<span class="chip" style="margin-right:6px">'+(r.strumento||'?')+'</span>'+
+        (r.comando||r.oggetto||r.bersaglio||'(senza dettaglio)').slice(0,150)+
+        (rif&&r.perche? ' <span class="chip">'+r.perche+'</span>':'')+'</td></tr>'}).join('')+'</table>'
+    : '<p class="vuoto">diario vuoto</p>')+'</div>'}).join('');
+}
+function renderPerimetri(){
+ const t=(G&&G.perimetri)||'';
+ $('gov-perimetri').textContent = t || 'non disponibile';
+}
 function render(){
  const s=S,p=s.piano;let h='';
  h+= s.freno_inserito
@@ -927,7 +1040,7 @@ function render(){
   : '<div class="vuoto">nessuna corsa registrata — il driver non è mai partito</div>';
 
  $('log').textContent=schedaLog==='n'? s.log : s.log_censimento;
- renderGov();
+ renderVolo(); renderGov(); renderDiari(); renderPerimetri();
  $('fresco').textContent='aggiornato '+new Date().toLocaleTimeString('it-IT');
  renderSalvate();
 }

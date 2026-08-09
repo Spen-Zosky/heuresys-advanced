@@ -34,7 +34,13 @@ except ImportError:
     print('serve pyyaml: pip install pyyaml', file=sys.stderr)
     raise SystemExit(2)
 
-RADICE = Path(__file__).resolve().parents[3]
+# La radice si puo' IMPORRE. Derivandola solo da dove sta questo file, uno strumento
+# lanciato dal repo principale cerca le prove di un lavoratore in `<repo>/.zp/prove/`,
+# mentre il lavoratore le ha scritte nel PROPRIO albero: misurato il 2026-08-09,
+# `zp_evidence valida Z-230` diceva «nessuna prova registrata» con il file di prove
+# presente e valido, e l'istruttoria di gov non poteva vederle. Senza ZP_ROOT nulla
+# cambia: e' lo stesso rimedio gia' applicato al lucchetto della suite.
+RADICE = Path(os.environ.get("ZP_ROOT") or Path(__file__).resolve().parents[3])
 CONFIG = RADICE / '.claude' / 'skills' / 'zero-pending-loop' / 'references' / 'zp.config.yaml'
 ZPDIR = RADICE / '.zp'
 

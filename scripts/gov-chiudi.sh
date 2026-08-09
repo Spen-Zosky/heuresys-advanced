@@ -179,12 +179,24 @@ fi
 # --- 5. le evidenze devono poter fallire -------------------------------------
 # Si riusa `zp_evidence`, che rifiuta gia' `echo`/`printf`/`true` come prova e
 # pretende due livelli diversi: una prova che non puo' dire di no non e' una prova.
-if [[ -f "$REPO/docs/kb/tools/zp_evidence.py" && -f "$ALBERO/.zp/last-outcome.json" ]]; then
-  if "$PY" docs/kb/tools/zp_evidence.py --file "$ALBERO/.zp/last-outcome.json" >/dev/null 2>&1; then
-    log "  evidenze: ammesse"
+# DUE difetti corretti qui, non uno (misurati il 2026-08-09):
+#   1. si cercavano le prove dentro `last-outcome.json`. Il lavoratore le scrive in
+#      `.zp/prove/<cluster>.json`, e `zp_evidence` si interroga per CLUSTER;
+#   2. `zp_evidence` derivava la radice da dove sta il proprio file: lanciato dal repo
+#      principale guardava `<repo>/.zp/prove/` e diceva «nessuna prova registrata» con
+#      il file di prove presente e valido nell'albero. Da qui `ZP_ROOT`.
+# Il risultato era un cancello CIECO: passava sempre, e taceva. Ora un lavoro che ha
+# PRODOTTO qualcosa senza portare prove valide riceve un RILIEVO, cioe' un rosso.
+if [[ -f "$REPO/docs/kb/tools/zp_evidence.py" && -n "$CLUSTER" ]]; then
+  if EV="$(ZP_ROOT="$ALBERO" "$PY" docs/kb/tools/zp_evidence.py valida "$CLUSTER" 2>&1)"; then
+    log "  evidenze: ammesse ($CLUSTER)"
+  elif [[ "${COMMIT:-0}" != "0" || "${SPORCO:-0}" != "0" ]]; then
+    rilievo "evidenze insufficienti per $CLUSTER: $(echo "$EV" | head -1)"
   else
-    log "  evidenze: non verificabili con zp_evidence (l'esito potrebbe non portarne)"
+    log "  evidenze: $(echo "$EV" | head -1) — nessuna produzione da sostenere, non e' un rilievo"
   fi
+elif [[ -z "$CLUSTER" ]]; then
+  log "  evidenze: nessun cluster dichiarato, niente da validare"
 fi
 
 # --- il verdetto -------------------------------------------------------------

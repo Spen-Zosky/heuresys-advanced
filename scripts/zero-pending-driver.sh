@@ -433,8 +433,16 @@ while (( GIRO < MAX_ITER )); do
       [[ -s "${DIRS[$_i]}/.zp/last-stderr.log" ]] &&
         log "  stderr: $(tail -1 "${DIRS[$_i]}/.zp/last-stderr.log" | cut -c1-120)"
     fi
+    # I campi stringa si RIPULISCONO prima di finire in JSON. Un a capo o una
+    # virgoletta dentro un valore spezzano la riga a meta', e chi legge la scarta in
+    # silenzio: misurato il 2026-08-09, 12 righe su 16 di `runs.ndjson` erano tronche
+    # (la prima finiva a `"cluster":"Z-230` piu' un a capo), quindi il registro aveva perso
+    # il 75% dei dati e la spesa mostrata era sottostimata senza dirlo.
+    _json_ok() { printf '%s' "${1//[$'\r\n\"']/}"; }
+    _num_ok()  { case "${1:-}" in ''|*[!0-9.]*) printf '0' ;; *) printf '%s' "$1" ;; esac; }
     printf '{"giro":%d,"modo":"%s","lavoratore":%d,"cluster":"%s","esito":"%s","costo_usd":%s,"durata_s":%d,"exit":%d}\n' \
-      "$GIRO" "$MODO" "$((_i + 1))" "${CLUSTERS[$_i]}" "$_out" "${_costo:-0}" "$_dur" "$CODICE" >> "$GIRI"
+      "$GIRO" "$(_json_ok "$MODO")" "$((_i + 1))" "$(_json_ok "${CLUSTERS[$_i]}")" \
+      "$(_json_ok "$_out")" "$(_num_ok "${_costo:-0}")" "$_dur" "$CODICE" >> "$GIRI"
     log "esito=$_out  costo=\$$_costo  durata=${_dur}s${CLUSTERS[$_i]:+  (${CLUSTERS[$_i]})}"
     [[ -n "${CLUSTERS[$_i]}" ]] && gov_lock_rilascia "$LOCKS" "${CLUSTERS[$_i]}"
     SOMMA_DURATE=$(( SOMMA_DURATE + _dur ))

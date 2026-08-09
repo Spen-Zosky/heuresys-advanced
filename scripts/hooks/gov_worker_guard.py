@@ -71,7 +71,27 @@ def radice() -> Path:
 
 REPO = radice()
 INCARICO = REPO / ".zp" / "incarico.json"
-DIARIO = REPO / ".zp" / "diario.ndjson"
+
+# IL DIARIO NON VIVE NELL'ALBERO DEL SORVEGLIATO
+# ----------------------------------------------
+# Finche' stava in `<albero>/.zp/diario.ndjson`, il giornale delle azioni era custodito
+# da chi quelle azioni le compie. Non e' mai stato cancellabile per comando — il recinto
+# lo impedisce, ed e' provato — ma un registro tenuto dal sorvegliato resta una sua
+# dichiarazione, non una prova. Ora vive ACCANTO agli alberi, in una cartella che nessun
+# perimetro di lavoratore contiene.
+#
+# `DIARIO_VECCHIO` resta noto in sola lettura: i diari gia' scritti non si perdono, e
+# l'istruttoria di un lavoratore che ha girato prima di oggi continua a leggerli.
+DIARIO_VECCHIO = REPO / ".zp" / "diario.ndjson"
+
+
+def diario_percorso() -> Path:
+    fuori = os.environ.get("GOV_DIARI")
+    base = Path(fuori) if fuori else REPO.parent.parent / "heuresys-gov-diari"
+    return base / f"{REPO.name}.ndjson"
+
+
+DIARIO = diario_percorso()
 
 
 def payload() -> dict:
@@ -166,14 +186,23 @@ def concesso_comunque(percorso: str) -> bool:
 
 
 def annota(voce: dict) -> None:
-    """Scrive nel giornale. Append puro, una riga per azione, mai riscritto."""
-    try:
-        DIARIO.parent.mkdir(parents=True, exist_ok=True)
-        voce["quando"] = time.strftime("%Y-%m-%dT%H:%M:%S")
-        with DIARIO.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(voce, ensure_ascii=False) + "\n")
-    except OSError:
-        pass                              # il diario non deve mai fermare il lavoro
+    """Scrive nel giornale. Append puro, una riga per azione, mai riscritto.
+
+    Si prova prima FUORI dall'albero (il posto giusto: il sorvegliato non custodisce
+    il proprio registro). Se quel disco non e' scrivibile si ripiega DENTRO, perche'
+    un diario nel posto sbagliato vale piu' di nessun diario: lo spostamento non deve
+    poter far sparire la registrazione in silenzio.
+    """
+    voce["quando"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+    riga = json.dumps(voce, ensure_ascii=False) + "\n"
+    for dove in (DIARIO, DIARIO_VECCHIO):
+        try:
+            dove.parent.mkdir(parents=True, exist_ok=True)
+            with dove.open("a", encoding="utf-8") as f:
+                f.write(riga)
+            return
+        except OSError:
+            continue                      # il diario non deve mai fermare il lavoro
 
 
 def cmd_recinto() -> int:
@@ -275,7 +304,13 @@ def cmd_diario() -> int:
 def cmd_leggi(argv) -> int:
     percorso = Path(argv[0]) if argv else DIARIO
     if percorso.is_dir():
-        percorso = percorso / ".zp" / "diario.ndjson"
+        # Un albero passato per nome: si cerca PRIMA il diario esterno (quello di oggi),
+        # poi quello interno (i lavoratori che hanno girato prima dello spostamento).
+        albero = percorso
+        fuori = os.environ.get("GOV_DIARI")
+        base = Path(fuori) if fuori else albero.parent.parent / "heuresys-gov-diari"
+        esterno = base / f"{albero.name}.ndjson"
+        percorso = esterno if esterno.is_file() else albero / ".zp" / "diario.ndjson"
     if not percorso.is_file():
         print(f"nessun diario in {percorso}")
         return 1

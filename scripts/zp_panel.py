@@ -119,16 +119,30 @@ def lock_stato() -> dict:
     return {"presente": True, "pid": pid, "vivo": rc == 0}
 
 
+SCARTATE = {"n": 0, "totali": 0}
+
+
 def corse() -> list[dict]:
+    """Le corse leggibili — e SI CONTA quante non lo sono.
+
+    Le righe rotte venivano saltate in silenzio: il 2026-08-09 il file ne aveva 16 e
+    la plancia ne mostrava 4, dichiarando una spesa che era quella di un quarto dei
+    dati. Un conteggio che tace cio' che non sa e' peggio di un conteggio assente,
+    perche' sembra vero. La causa (scrittura non sanificata nel driver) e' corretta a
+    monte; questo resta per le righe gia' scritte e per qualunque rottura futura.
+    """
     out = []
     try:
+        rotte = tot = 0
         for r in open(os.path.join(ZP, "runs.ndjson"), encoding="utf-8"):
             r = r.strip()
             if r:
+                tot += 1
                 try:
                     out.append(json.loads(r))
                 except ValueError:
-                    pass
+                    rotte += 1
+        SCARTATE["n"], SCARTATE["totali"] = rotte, tot
     except OSError:
         pass
     return out
@@ -352,7 +366,12 @@ def gov_diari(quante: int = 14) -> dict:
         return fuori
     try:
         for nome in sorted(os.listdir(base)):
-            d = os.path.join(base, nome, ".zp", "diario.ndjson")
+            # Il diario di oggi vive FUORI dall'albero (il sorvegliato non custodisce
+            # il proprio registro); quelli scritti prima dello spostamento sono ancora
+            # dentro. Si guarda prima fuori, poi dentro.
+            fuori_d = os.path.join(os.path.dirname(base), "heuresys-gov-diari", nome + ".ndjson")
+            dentro_d = os.path.join(base, nome, ".zp", "diario.ndjson")
+            d = fuori_d if os.path.isfile(fuori_d) else dentro_d
             if not os.path.isfile(d):
                 continue
             righe = []
@@ -391,6 +410,26 @@ def gov_stato() -> dict:
     except Exception as e:                      # noqa: BLE001 — la plancia non deve morire
         return {"errore": f"{type(e).__name__}: {e}",
                 "lavoratori": [], "rami": [], "verdetti": [], "freno": "?"}
+
+
+def budget_dal_dato() -> dict:
+    """Quanto costa DAVVERO un'ora di lavoro, misurato sulle corse riuscite.
+
+    Il tetto di 12$/iterazione e' un numero fisso per qualunque cluster: su uno da 4
+    ore dichiarate tronca il lavoro invece di proteggerlo, e il troncamento si e' gia'
+    visto negli esiti. Qui il tetto si DERIVA: tasso misurato x ore dichiarate, con un
+    margine. Se le corse leggibili sono poche lo dice, invece di dare un numero che
+    sembra fondato.
+    """
+    giri = [g for g in corse() if float(g.get("costo_usd") or 0) > 0 and int(g.get("durata_s") or 0) > 0]
+    if not giri:
+        return {"tasso_orario": None, "campioni": 0, "scartate": SCARTATE["n"]}
+    tassi = sorted(float(g["costo_usd"]) / (int(g["durata_s"]) / 3600.0) for g in giri)
+    mediano = tassi[len(tassi) // 2]
+    massimo = tassi[-1]
+    return {"tasso_orario": round(mediano, 2), "tasso_massimo": round(massimo, 2),
+            "campioni": len(tassi), "scartate": SCARTATE["n"], "totali": SCARTATE["totali"],
+            "affidabile": len(tassi) >= 5}
 
 
 def stato_veloce() -> dict:
@@ -440,6 +479,8 @@ def stato() -> dict:
             "corse": giri[-20:],
             "task_daily": rc_d == 0, "task_once": rc_o == 0,
             "repo_sporco": bool(sporco.strip()) if rc_git == 0 else None,
+            "budget_dal_dato": budget_dal_dato(),
+            "corse_scartate": SCARTATE["n"], "corse_totali": SCARTATE["totali"],
             "vassoio_enzo": vassoio_enzo(), "triage": triage_sintesi(),
             "configs": configs_salvate(),
             "auth": {"api_key_utente": "ANTHROPIC_API_KEY" in os.environ,
@@ -829,6 +870,8 @@ nav#viste button.attiva{background:var(--sup);color:var(--inchiostro);border-col
    lavoratore gira. <b>rifiutata</b> = il recinto ha fermato l'azione: va letta, non
    ignorata — puo' essere un tentativo legittimo fermato da un perimetro troppo stretto.</p>
  </section>
+ <section class="card" data-vista="config"><h2>Il budget, misurato sulle corse vere</h2>
+  <div id="cfg-budget"></div></section>
  <section class="card" data-vista="config"><h2>Configurazione del loop</h2>
   <div id="cfg-campi"></div>
   <div class="esito" id="e-cfg"></div>
@@ -1072,6 +1115,29 @@ let CFG=null;
 async function caricaConfig(){
  try{ CFG=await (await fetch(api('/api/config'))).json(); renderConfig() }catch(e){}
 }
+function renderBudget(){
+ const b=(S&&S.budget_dal_dato)||null;
+ if(!b){$('cfg-budget').innerHTML='<p class="vuoto">nessuna corsa registrata</p>';return}
+ let h='';
+ if(b.scartate>0) h+=statoHtml('avviso','!','Registro incompleto: '+b.scartate+' righe su '+
+  b.totali+' illeggibili','righe spezzate a meta scrittura. La causa e corretta nel driver: le corse nuove non si rompono piu');
+ if(b.tasso_orario===null){ $('cfg-budget').innerHTML=h+'<p class="vuoto">nessuna corsa con costo e durata</p>'; return }
+ h+=statoHtml(b.affidabile?'buono':'avviso', b.affidabile?'ok':'~',
+   'Costo misurato: '+b.tasso_orario+' $/ora (mediano), '+b.tasso_massimo+' $/ora (massimo)',
+   b.campioni+' corse leggibili'+(b.affidabile?'':' - sotto le 5, il numero indica ma non fonda'));
+ const tetto=S.budget_giro? parseFloat(S.budget_giro):null;
+ h+='<table style="margin-top:12px"><tr><th>cluster dichiarato</th><th>tetto derivato</th>'+
+  '<th>tetto di oggi</th><th></th></tr>'+
+  [0.8,1,2,4].map(function(o){ const d=Math.round(b.tasso_massimo*o*1.3*100)/100;
+   const tronca = tetto!==null && d>tetto;
+   return '<tr><td>'+o+' h</td><td class="num"><b>'+d+' $</b></td><td class="num">'+
+    (tetto===null?'-':tetto)+' $</td><td>'+
+    (tronca? '<span style="color:var(--critico)">il tetto di oggi tronca</span>':'')+'</td></tr>'}).join('')+
+  '</table><p class="nota">Tasso massimo osservato x ore dichiarate x 1,3 di margine. '+
+  'Il tetto fisso non guarda quanto e grande il lavoro: su un cluster lungo lo interrompe '+
+  'invece di proteggerlo, e il troncamento si e gia visto negli esiti registrati.</p>';
+ $('cfg-budget').innerHTML=h;
+}
 function renderConfig(){
  if(!CFG) return;
  if(CFG.errore){$('cfg-campi').innerHTML='<p class="vuoto">config illeggibile: '+CFG.errore+'</p>';return}
@@ -1229,7 +1295,7 @@ function render(){
   : '<div class="vuoto">nessuna corsa registrata — il driver non è mai partito</div>';
 
  $('log').textContent=schedaLog==='n'? s.log : s.log_censimento;
- renderVolo(); renderGov(); renderDiari(); renderPerimetri();
+ renderVolo(); renderGov(); renderDiari(); renderPerimetri(); renderBudget();
  $('fresco').textContent='aggiornato '+new Date().toLocaleTimeString('it-IT');
  renderSalvate();
 }

@@ -165,7 +165,15 @@ gov_worktree_prepara() {     # <repo> <n> [ref] -> stampa il percorso; 1 se fall
     # main senza che nessuno lo dica. Si riallinea SOLO se non ha niente in ballo:
     # se ha lavoro non salvato non si tocca — meglio un albero indietro che lavoro
     # perso.
-    if [[ -z "$(git -C "$dir" status --porcelain)" ]]; then
+    # DUE condizioni, non una. La prima versione guardava solo i file non committati:
+    # un lavoratore che aveva COMMITTATO il suo lavoro sul proprio ramo lasciava
+    # l'albero «pulito», e il reset --hard glielo portava via. Successo davvero il
+    # 2026-08-09 con il commit f059a057 (5 file, +317 righe): recuperato solo perche'
+    # git non aveva ancora raccolto l'oggetto. Un albero e' riallineabile solo se non
+    # ha NULLA da perdere — ne' in lavoro non salvato, ne' in commit propri.
+    local suoi
+    suoi="$(git -C "$dir" rev-list --count "$(git -C "$repo" rev-parse main)"..HEAD 2>/dev/null || echo 0)"
+    if [[ -z "$(git -C "$dir" status --porcelain)" && "${suoi:-0}" == "0" ]]; then
       # Il ref si risolve NEL REPO PRINCIPALE: dentro l'albero «HEAD» e' il commit
       # dell'albero stesso, quindi un reset su HEAD non lo muove di un millimetro —
       # e sembra funzionare. Misurato: w1 restava indietro di 4 commit senza dirlo.
@@ -173,7 +181,7 @@ gov_worktree_prepara() {     # <repo> <n> [ref] -> stampa il percorso; 1 se fall
       dove="$(git -C "$repo" rev-parse "$ref" 2>/dev/null)"
       [[ -n "$dove" ]] && git -C "$dir" reset --hard "$dove" >/dev/null 2>&1 || true
     else
-      echo "albero $dir: ha lavoro non salvato, lo lascio com'e'" >&2
+      echo "albero $dir: ha lavoro da perdere (non salvato o commit propri), lo lascio com'e'" >&2
     fi
     # Anche un albero RIUSATO va declassato: quelli creati prima di V2 hanno ancora
     # le credenziali di produzione nel loro .env, e il riuso salterebbe il passaggio.
@@ -322,6 +330,48 @@ import json;print(json.load(open('.zp/last-outcome.json',encoding='utf-8')).get(
 # qualunque costo e non scatta mai. Misurato il 2026-08-09: un lavoratore costato 2,20
 # dollari e un totale che diceva 0,00. Lo stesso difetto che la review di luglio aveva
 # gia chiuso una volta, tornato per una strada diversa.
+# --- il consuntivo: cio' che il lavoratore ha DAVVERO toccato ----------------
+#
+# B2 della fase 2. Il recinto rifiuta le uscite dal perimetro mentre accadono, ma una
+# difesa sola non basta per una cosa che Enzo ha definito «non accettabile»: se il
+# recinto manca un caso, senza questo NESSUNO se ne accorge. Qui si guarda il
+# risultato, non l'intenzione — `git diff` contro il perimetro dichiarato.
+#
+# E' anche il primo pezzo della regola di Enzo del 2026-08-09: «tutte le attivita' di
+# controllo finale e di effettiva chiusura sono responsabilita' della sessione gov».
+# L'esito che il lavoratore scrive e' una PROPOSTA; questo e' il primo controllo che
+# la sessione gov gli fa, e che puo' respingerla.
+
+gov_fuori_perimetro() {      # <repo> <albero> <cluster> -> stampa i file fuori, se ce ne sono
+  local repo="$1"
+  local dir="$2"
+  local cluster="$3"
+  local py="${ZP_PYTHON:-python}"
+  [[ -n "$cluster" ]] || return 0
+
+  local perim
+  perim="$( cd "$repo" && "$py" docs/kb/tools/zp_state.py perimetro-json "$cluster" 2>/dev/null )"
+  [[ -z "$perim" ]] && perim="[]"
+
+  # Tutto cio' che il ramo ha prodotto: i commit rispetto a main E cio' che resta non
+  # committato. Un lavoratore che lascia il lavoro non committato non e' per questo
+  # fuori dai controlli.
+  { git -C "$dir" diff --name-only "$(git -C "$repo" rev-parse main)"...HEAD 2>/dev/null
+    git -C "$dir" status --porcelain 2>/dev/null | sed -E 's/^.{3}//'
+  } | sort -u | "$py" -c "
+import json,sys
+perim = json.loads(sys.argv[1])
+concessi = ('.zp/', '.handoff/')
+fuori = []
+for riga in sys.stdin:
+    f = riga.strip().strip('\"')
+    if not f or f.startswith(concessi):
+        continue
+    if not any(f == p or f.startswith(p.rstrip('/') + '/') for p in perim):
+        fuori.append(f)
+sys.stdout.buffer.write(''.join(x + chr(10) for x in fuori).encode())" "$perim"
+}
+
 gov_assegna() {              # <repo> <corsia> <lavoratori> [budget_ore] -> id, uno per riga
   local repo="$1"
   local corsia="$2"

@@ -9,6 +9,60 @@ Monorepo pnpm HRMS/BPM **a baseline GA v1.0.0** (S957): API Fastify 5 con **80 m
 > ℹ️ **Doc note**: `CLAUDE.md` + `README.md` allineati a **v1.0.0 GA** (S958, 2026-06-02 — D-01 risolto). I conteggi headline nei file di progetto sono snapshot di milestone; la verità viva resta questo SOT_STATE. Vedi `DEBT_REGISTER.md` D-01 (risolto).
 
 
+### Delta S1052 (2026-08-09) — il processo gov impara a dire di no, poi dice di si'
+
+**Numeri ri-derivati**: utenti **161** · RBAC map **957** · skill **14039** · migration su
+disco **300** (max `000302`) · HEAD `2dd0f545` · tag `v1.0.0`.
+
+**Primo trasferimento autorizzato da gov.** `gov/w1` (cluster `Z-230`) entra in main col
+merge `551dd8d0` dopo verdetto **VERDE** — `typecheck` + `lint` + **218 file / 1509 test di
+integrazione** in 39 minuti. Verdetto scritto in `.zp/verdetti/w1-Z-230-20260809-185312.json`,
+output conservato (1,5 MB). Gli altri rami restano dove sono: `gov/w2` non ha commit,
+`gov/w1-recuperato` e `gov/w2-recuperato` non hanno mai avuto un'istruttoria.
+
+**Tre difetti degli strumenti, non del lavoro** — sono serviti tre giri per capirlo:
+1. il verdetto **non veniva scritto** (lo script moriva se modificato mentre girava);
+2. il verdetto era **muto**: `pnpm -s run` sopprime l'output degli script figli (**0 byte
+   contro 4.690** a parita' di comando; `pnpm -s exec` invece lo lascia passare);
+3. il cancello dei test era **impossibile da superare**: girava nell'albero del lavoratore,
+   dove il DB e' in sola lettura (`gov_worker`), mentre i test di integrazione scrivono
+   (`cannot execute INSERT in a read-only transaction`). Ora l'identita' piena si impone
+   per la sola durata dei cancelli.
+
+**Falso indizio da non riscoprire**: con il lucchetto occupato, vitest stampa «No test
+files found, exiting with code 1» e solo DOPO l'errore vero. I file ci sono tutti.
+
+**La plancia diventa la console di volo di gov** (7 voci, piano
+`docs/superpowers/plans/2026-08-09-plancia-gov.md`, commit `3b185b05` `51ac3eb7` `3e034f2f`):
+due ritmi (`/api/volo` **0,008 s** contro `/api/stato` **1,18 s**; prima erano 2 `schtasks`
++ 1 `git status` ogni 5 secondi solo per guardare), 5 viste, i lavoratori con diari in
+diretta, la composizione dei cluster, la fascia «in volo adesso», e la configurazione:
+10 campi modificabili (elenco esplicito), 4 dichiarati intoccabili, **una riga per volta**,
+con verifica del piano **e** coerenza fra campi, e **rollback provato su un caso vero**.
+
+**I tre lavori minori chiusi — e nessuno era cio' che il registro diceva**:
+- **B1**: il diario esce dall'albero del sorvegliato (`<padre>/heuresys-gov-diari/`), con
+  ripiego dentro se quel disco non e' scrivibile, e lettura che trova anche gli storici;
+- **B4**: non era «severita' non calibrata». Il cancello cercava le prove in
+  `last-outcome.json` invece che in `.zp/prove/<cluster>.json`, **e** `zp_evidence`
+  derivava la radice dal proprio file (da qui **`ZP_ROOT`** in `zp_state.py`). Era
+  **cieco**: passava sempre. Conseguenza: con il cancello funzionante `w1` avrebbe un
+  rilievo — ha **1** prova, ne servono **2** su livelli diversi;
+- **D**: `runs.ndjson` aveva **16 righe e ne venivano lette 4**; dodici spezzate a meta'
+  scrittura e scartate in silenzio, con la spesa mostrata pari a un quarto dei dati. Causa
+  corretta nel driver (campi non sanificati); lettore reso onesto; budget **derivato dal
+  dato**: **27,52 $/h** mediano su 4 corse (sotto i 5 campioni indica ma non fonda), contro
+  un tetto fisso di **12 $** — un cluster da 1h vale ~40 $, quindi il tetto **tronca**, ed
+  e' esattamente cio' che dice l'unica corsa leggibile (`"esito": "troncato"`).
+
+**Il freno resta INSERITO.** Enzo ha autorizzato di toglierlo per una corsa sola; lo
+strumento ha rifiutato perche' **`Z-250` e' aperto**: i 4 test che richiedono una sessione
+viva non risultano eseguiti. Non si forza — prima la corsa presidiata, poi il freno.
+
+**Regola nuova**: una prova che non puo' fallire non e' una prova. Tre cancelli su tre
+erano verdi per costruzione. E un conteggio che scarta in silenzio cio' che non sa leggere
+e' peggio di un conteggio assente: sembra vero.
+
 ### Delta S1046 (2026-08-06) — la chiusura smette di agire nel dubbio, e tiene un diario
 
 - **Dottrina del dubbio, una sola per la catena** (commit `f8928e35`). Con il marcatore

@@ -1,6 +1,6 @@
 # INDEX_PATHS — Indice percorsi dominio heuresys-advanced
 
-**Generato**: 2026-08-08T21:47:04Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2900**
+**Generato**: 2026-08-09T19:15:22Z · **Tool**: `docs/kb/tools/build_index.py` · **Totale file dominio**: **2914**
 
 > SoT CLI-owned. "Tutti e solo i file dominio, senza esclusioni". Esclusi solo: generated/secrets/PII (repo, via .gitignore) e file non-dominio nelle aree condivise Claude Desktop (vedi appendice). Gemello machine-readable: `index_paths.yaml`.
 
@@ -13,16 +13,16 @@
 | api-module | 323 |
 | ci | 17 |
 | claude-config | 36 |
-| config | 140 |
+| config | 146 |
 | cowork-archive | 14 |
 | cowork-exchange | 205 |
 | cowork-reserved | 119 |
 | cowork-snapshot | 8 |
 | db-migration | 300 |
 | db-other | 8 |
-| db-script | 47 |
+| db-script | 48 |
 | db-seed | 148 |
-| doc-canonical | 565 |
+| doc-canonical | 572 |
 | handoff-state | 1 |
 | qa-artifact | 114 |
 | script | 6 |
@@ -33,7 +33,7 @@
 | test | 339 |
 | ux-design-archive | 80 |
 | web-source | 233 |
-| **TOTALE** | **2900** |
+| **TOTALE** | **2914** |
 
 ## Conteggi per status
 
@@ -41,7 +41,7 @@
 |---|---|
 | archive | 508 |
 | external-archive | 50 |
-| live | 2342 |
+| live | 2356 |
 
 ## File per categoria
 
@@ -612,6 +612,10 @@
 - `D:\heuresys-advanced\scripts\gdpr-retention-sweep.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\generate_wave1_column_mappings.mjs` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\generate_wave1_seeds.mjs` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\gov-chiudi.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\gov-lib.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\hooks\gov_divieti.py` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\hooks\gov_worker_guard.py` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\hooks\hook.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\hooks\session_mode.py` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\journal-append.sh` · *live* · git-tracked
@@ -633,6 +637,8 @@
 - `D:\heuresys-advanced\scripts\sync-gitignored-to-vm.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\sync-memory-tree.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\sync-showcase.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\test\gov-lib-tests.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\scripts\test\gov-worker-guard-tests.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\test\run-shell-tests.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\tunnel-keepalive.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\scripts\vendor\htm.js` · *live* · git-tracked
@@ -1330,6 +1336,7 @@
 - `D:\heuresys-advanced\db\scripts\brownfield-wave-1-preflight.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\ci-rehearsal-census.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\ci-rehearsal.sh` · *live* · git-tracked
+- `D:\heuresys-advanced\db\scripts\crea-ruolo-gov-worker.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\create_local_database.ps1` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\create_local_database.sh` · *live* · git-tracked
 - `D:\heuresys-advanced\db\scripts\encrypt-totp-secrets.ts` · *live* · git-tracked
@@ -1530,6 +1537,7 @@
 - `D:\heuresys-advanced\.storia36\analysis\conventions.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\date-columns.md` · *live* · git-tracked
 - `D:\heuresys-advanced\.storia36\analysis\shapes-g2-g4.md` · *live* · git-tracked
+- `D:\heuresys-advanced\.zp\PROGRESS.md` · *live* · git-tracked
 - `D:\heuresys-advanced\CLAUDE.md` · *live* · git-tracked
 - `D:\heuresys-advanced\README.md` · *live* · git-tracked
 - `D:\heuresys-advanced\START_HERE.md` · *live* · git-tracked
@@ -1781,6 +1789,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\dead_columns.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\dump_route_schemas.ts` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\exposure_columns.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\gov_rientro.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\handoff_lint.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-commit` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\hooks\post-merge` · *live* · git-tracked
@@ -1799,6 +1808,7 @@
 - `D:\heuresys-advanced\docs\kb\tools\zp_gate.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\zp_selftest.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\zp_state.py` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\kb\tools\zp_triage.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\tools\zp_zero_check.py` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\AUTONOMY_R23_PROJECT.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\kb\xtras\B50_DEFER_UNBLOCK_PACKAGE.md` · *live* · git-tracked
@@ -2012,6 +2022,10 @@
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-08-164-F4-migrazione-pronta-non-applicata.sql` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-08-batch-interrotti-e-p1.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\plans\2026-08-08-tre-domande-aperte.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-gov-analisi-sicurezza-e-remediation.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-gov-fase2-governo-dei-lavoratori.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-modalita-gov.md` · *live* · git-tracked
+- `D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-plancia-gov.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-catalogo-generico-corpus-concetti.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-06-substrato-semantico-verifica-e-correzioni.md` · *live* · git-tracked
 - `D:\heuresys-advanced\docs\superpowers\prompts\2026-08-07-percorsi-carriera-155.md` · *live* · git-tracked

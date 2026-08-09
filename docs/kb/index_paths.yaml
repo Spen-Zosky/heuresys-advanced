@@ -1,9 +1,9 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-08T21:47:04Z da docs/kb/tools/build_index.py
+# generato: 2026-08-09T19:15:22Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-08T21:47:04Z"
-  total_files: 2900
+  generated_at: "2026-08-09T19:15:22Z"
+  total_files: 2914
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
@@ -13,16 +13,16 @@ meta:
     api-module: 323
     ci: 17
     claude-config: 36
-    config: 140
+    config: 146
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
     db-migration: 300
     db-other: 8
-    db-script: 47
+    db-script: 48
     db-seed: 148
-    doc-canonical: 565
+    doc-canonical: 572
     handoff-state: 1
     qa-artifact: 114
     script: 6
@@ -36,7 +36,7 @@ meta:
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2342
+    live: 2356
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -3332,6 +3332,30 @@ files:
     category: config
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\gov-chiudi.sh'
+    root: repo
+    rel: 'scripts/gov-chiudi.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\gov-lib.sh'
+    root: repo
+    rel: 'scripts/gov-lib.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\hooks\gov_divieti.py'
+    root: repo
+    rel: 'scripts/hooks/gov_divieti.py'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\hooks\gov_worker_guard.py'
+    root: repo
+    rel: 'scripts/hooks/gov_worker_guard.py'
+    category: config
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\scripts\hooks\hook.sh'
     root: repo
     rel: 'scripts/hooks/hook.sh'
@@ -3455,6 +3479,18 @@ files:
   - path: 'D:\heuresys-advanced\scripts\sync-showcase.sh'
     root: repo
     rel: 'scripts/sync-showcase.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\test\gov-lib-tests.sh'
+    root: repo
+    rel: 'scripts/test/gov-lib-tests.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\test\gov-worker-guard-tests.sh'
+    root: repo
+    rel: 'scripts/test/gov-worker-guard-tests.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -7514,6 +7550,12 @@ files:
     category: db-script
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\scripts\crea-ruolo-gov-worker.sh'
+    root: repo
+    rel: 'db/scripts/crea-ruolo-gov-worker.sh'
+    category: db-script
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\scripts\create_local_database.ps1'
     root: repo
     rel: 'db/scripts/create_local_database.ps1'
@@ -8675,6 +8717,12 @@ files:
   - path: 'D:\heuresys-advanced\.storia36\analysis\shapes-g2-g4.md'
     root: repo
     rel: '.storia36/analysis/shapes-g2-g4.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\.zp\PROGRESS.md'
+    root: repo
+    rel: '.zp/PROGRESS.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10184,6 +10232,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\gov_rientro.py'
+    root: repo
+    rel: 'docs/kb/tools/gov_rientro.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\handoff_lint.py'
     root: repo
     rel: 'docs/kb/tools/handoff_lint.py'
@@ -10289,6 +10343,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\zp_state.py'
     root: repo
     rel: 'docs/kb/tools/zp_state.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\zp_triage.py'
+    root: repo
+    rel: 'docs/kb/tools/zp_triage.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11567,6 +11627,30 @@ files:
   - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-08-tre-domande-aperte.md'
     root: repo
     rel: 'docs/superpowers/plans/2026-08-08-tre-domande-aperte.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-gov-analisi-sicurezza-e-remediation.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-09-gov-analisi-sicurezza-e-remediation.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-gov-fase2-governo-dei-lavoratori.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-09-gov-fase2-governo-dei-lavoratori.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-modalita-gov.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-09-modalita-gov.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-plancia-gov.md'
+    root: repo
+    rel: 'docs/superpowers/plans/2026-08-09-plancia-gov.md'
     category: doc-canonical
     status: live
     provenance: git-tracked

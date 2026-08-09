@@ -82,9 +82,6 @@ VIETATI: list[tuple[re.Pattern, str]] = [
     (re.compile(r"\b(?:pnpm|npm|yarn)\s+(?:run\s+)?db:(?:reset|drop|nuke)\b", re.I),
      "azzerare il database non appartiene a nessuna corsia non presidiata."),
 
-    (re.compile(r"\b(?:drop|truncate)\s+(?:table|schema|database)\b", re.I),
-     "DROP e TRUNCATE non si eseguono da una sessione non presidiata."),
-
     (re.compile(r"\b(?:close-propagate|vm-deploy|align-clones|align-claude-ecosystem)\b", re.I),
      "deploy e allineamento dei cloni sono atti presidiati, e sono di gov."),
 
@@ -129,13 +126,54 @@ RIMOZIONE = re.compile(r"\brm\b(?:\s+-\S+)*\s+([^\s;|&]+)")
 SEPARATORE = re.compile(r"\|\||&&|[;\n|]")
 
 
+# I LETTERALI SI TOLGONO PRIMA DI CERCARE. E' la stessa lezione che questo progetto
+# ha gia' pagato in `lab-guard` (#134): li' un `create` dentro gli apici faceva
+# rifiutare una SELECT; qui una freccia `->` dentro un `echo "IDENTICI -> il file..."`
+# e' stata scambiata per una redirezione, e il recinto ha rifiutato un `diff` — un
+# comando che non scrive nulla. Misurato nella corsa del 2026-08-09.
+#
+# Sostituiti con uno SPAZIO e non con nulla, cosi' due parole separate da un
+# letterale non si saldano in una terza che non esisteva.
+LETTERALI = re.compile(r"'(?:[^']|'')*'" r'|"(?:[^"\\]|\\.)*"', re.DOTALL)
+
+
+def senza_letterali(comando: str) -> str:
+    return LETTERALI.sub(" ", comando or "")
+
+
+# --- i divieti che vivono DENTRO le virgolette -------------------------------
+#
+# `DROP TABLE` non e' un comando di shell: e' il contenuto di `psql -c "..."`, cioe'
+# sta per definizione dentro un letterale. Se lo cercassi nel testo ripulito non lo
+# vedrei mai. Quindi due liste, e non e' pignoleria: cercare tutto ripulito rende
+# invisibile il pericolo peggiore, cercare tutto grezzo fa rifiutare un `echo` che
+# NOMINA un comando vietato. Sono i due errori opposti, e ne ho fatti entrambi oggi.
+VIETATI_NEL_CONTENUTO: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"\b(?:drop|truncate)\s+(?:table|schema|database)\b", re.I),
+     "DROP e TRUNCATE non si eseguono da una sessione non presidiata."),
+    (re.compile(r"\b(?:delete\s+from|update)\s+\w*\.?sys_\w+", re.I),
+     "le scritture sulle tabelle di sistema non appartengono a un lavoratore: "
+     "la tua identita' di database e' in sola lettura, e questa e' la ragione."),
+]
+
+
 def divieto_assoluto(comando: str):
-    """La prima regola violata, o None. Guarda ogni segmento separatamente."""
+    """La prima regola violata, o None.
+
+    I divieti sui COMANDI si cercano nel testo ripulito dai letterali — altrimenti
+    `echo "non fare git push"` verrebbe rifiutato come se fosse un push. I divieti
+    sul CONTENUTO si cercano nel testo grezzo, perche' li' il pericolo vive proprio
+    dentro le virgolette.
+    """
     for segmento in SEPARATORE.split(comando or ""):
         seg = segmento.strip()
         if not seg:
             continue
+        pulito = senza_letterali(seg)
         for espressione, spiegazione in VIETATI:
+            if espressione.search(pulito):
+                return espressione.pattern, spiegazione
+        for espressione, spiegazione in VIETATI_NEL_CONTENUTO:
             if espressione.search(seg):
                 return espressione.pattern, spiegazione
     return None
@@ -150,7 +188,7 @@ def bersagli_di_scrittura(comando: str) -> list[str]:
     che riceve un rifiuto puo' dirlo; una scrittura non vista, no.
     """
     fuori: list[str] = []
-    for segmento in SEPARATORE.split(comando or ""):
+    for segmento in SEPARATORE.split(senza_letterali(comando)):
         seg = segmento.strip()
         if not seg:
             continue

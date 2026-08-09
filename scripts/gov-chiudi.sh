@@ -96,9 +96,16 @@ COMMIT="$(git -C "$ALBERO" rev-list --count "$(git rev-parse main)"..HEAD 2>/dev
 SPORCO="$(git -C "$ALBERO" status --porcelain | grep -c . || true)"
 log "  produzione: $COMMIT commit sul ramo, $SPORCO file non committati"
 if [[ "${COMMIT:-0}" == "0" && "${SPORCO:-0}" == "0" ]]; then
-  log "  nessun lavoro da giudicare: l'istruttoria si ferma qui"
-  [[ "$ESITO_PROPOSTO" == "cluster-closed" ]] && \
-    rilievo "propone «cluster-closed» ma non ha prodotto nulla"
+  # Un lavoro che non esiste non puo ricevere un verdetto VERDE. Nella corsa di
+  # collaudo il lavoratore 2 non ha prodotto nulla e ha ottenuto verde, perche il
+  # controllo guardava solo chi proponeva «cluster-closed». Ma verde significa «non ho
+  # trovato ragioni per non portarlo su main»: su cosa, se non ce niente? Qualunque
+  # esito proposto, senza produzione listruttoria non puo chiudersi in verde.
+  if [[ "$ESITO_PROPOSTO" == "cluster-closed" ]]; then
+    rilievo "propone «cluster-closed» ma non ha prodotto nulla: nessun commit, nessun file"
+  else
+    rilievo "nessun lavoro da giudicare (0 commit, 0 file): esito proposto «${ESITO_PROPOSTO:-nessuno}», e unistruttoria senza oggetto non chiude in verde"
+  fi
 fi
 if [[ "${SPORCO:-0}" -gt 0 ]]; then
   rilievo "$SPORCO file non committati: un lavoro non committato non e' verificabile ne' trasferibile"

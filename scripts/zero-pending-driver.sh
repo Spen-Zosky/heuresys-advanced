@@ -191,7 +191,22 @@ for t in zp_state zp_gate zp_evidence zp_zero_check; do
   [[ -f "$REPO/docs/kb/tools/$t.py" ]] || { log "manca docs/kb/tools/$t.py"; exit 3; }
 done
 
-SPORCO="$(git status --porcelain | grep -v '^?? \.zp/' || true)"
+# Cio' che il progetto dichiara legittimamente NON TRACCIATO non e' sporcizia.
+# `.codex/`, `.codex-review/` e il root `AGENTS.md` sono il canale di sola lettura di
+# Codex, e il CLAUDE.md dice a chiare lettere che «non sono file da ripulire e non sono
+# di Claude». Il filtro guardava solo `.zp/`, quindi il driver si sarebbe rifiutato di
+# partire su QUALUNQUE macchina dove Codex ha lavorato — e nessuno se ne era accorto
+# perche' finora nessuna corsa e' mai partita. Si escludono solo i NON TRACCIATI di
+# quei percorsi: una modifica a un file tracciato resta sporco, come deve.
+# Cio' che il progetto dichiara legittimamente NON TRACCIATO non e' sporcizia.
+# `.codex/`, `.codex-review/` e il root `AGENTS.md` sono il canale di sola lettura di
+# Codex, e il CLAUDE.md dice a chiare lettere che «non sono file da ripulire e non sono
+# di Claude». Il filtro guardava solo `.zp/`, quindi il driver si sarebbe rifiutato di
+# partire su QUALUNQUE macchina dove Codex ha lavorato — e non se n'era accorto nessuno
+# perche' finora nessuna corsa era mai partita. Si escludono solo i NON TRACCIATI di
+# quei percorsi: una modifica a un file tracciato resta sporco, come deve.
+IGNORABILI='^\?\? (\.zp/|\.codex/|\.codex-review/|\.agents/|AGENTS\.md$)'
+SPORCO="$(git status --porcelain | grep -Ev "$IGNORABILI" || true)"
 if [[ -n "$SPORCO" && $DRY -eq 0 ]]; then
   log "il repo ha modifiche non salvate: non parto sopra il lavoro di qualcun altro."
   echo "$SPORCO" | head -10
@@ -391,20 +406,21 @@ while (( GIRO < MAX_ITER )); do
   # Una riga di giornale PER LAVORATORE, tutte nello stesso file: il tetto di spesa e'
   # cumulativo sulla corsa, non per lavoratore. Con un giornale a testa, due lavoratori
   # spenderebbero due volte il tetto senza che nessuno se ne accorga.
-  OUT=""; PROSSIMO=""; TUTTI_FERMI=1
+  OUT=""; PROSSIMO=""; TUTTI_FERMI=1; SOMMA_DURATE=0
   for _i in "${!DIRS[@]}"; do
     RACCOLTO="$(gov_raccogli_lavoratore "${DIRS[$_i]}")"
-    _out="${RACCOLTO%%|*}"; _resto="${RACCOLTO#*|}"
-    _costo="${_resto%%|*}"; _pross="${_resto##*|}"
+    IFS='|' read -r _out _costo _pross _dur <<< "$RACCOLTO"
+    [[ -z "${_dur:-}" || "$_dur" == "0" ]] && _dur="$DURATA"   # nessuna misura propria: il giro
     if [[ "$_costo" == "0" || -z "$_costo" ]]; then
       log "ATTENZIONE: costo non estratto — il tetto di spesa non e' affidabile in questo giro"
       [[ -s "${DIRS[$_i]}/.zp/last-stderr.log" ]] &&
         log "  stderr: $(tail -1 "${DIRS[$_i]}/.zp/last-stderr.log" | cut -c1-120)"
     fi
     printf '{"giro":%d,"modo":"%s","lavoratore":%d,"cluster":"%s","esito":"%s","costo_usd":%s,"durata_s":%d,"exit":%d}\n' \
-      "$GIRO" "$MODO" "$((_i + 1))" "${CLUSTERS[$_i]}" "$_out" "${_costo:-0}" "$DURATA" "$CODICE" >> "$GIRI"
-    log "esito=$_out  costo=\$$_costo  durata=${DURATA}s${CLUSTERS[$_i]:+  (${CLUSTERS[$_i]})}"
+      "$GIRO" "$MODO" "$((_i + 1))" "${CLUSTERS[$_i]}" "$_out" "${_costo:-0}" "$_dur" "$CODICE" >> "$GIRI"
+    log "esito=$_out  costo=\$$_costo  durata=${_dur}s${CLUSTERS[$_i]:+  (${CLUSTERS[$_i]})}"
     [[ -n "${CLUSTERS[$_i]}" ]] && gov_lock_rilascia "$LOCKS" "${CLUSTERS[$_i]}"
+    SOMMA_DURATE=$(( SOMMA_DURATE + _dur ))
     case "$_out" in nothing-to-do|blocked) ;; *) TUTTI_FERMI=0 ;; esac
     OUT="$_out"; PROSSIMO="$_pross"
   done
@@ -412,6 +428,12 @@ while (( GIRO < MAX_ITER )); do
   # uno finisse il suo per chiudere la corsa lasciando gli altri a meta'.
   if (( ${#DIRS[@]} > 1 )); then
     if (( TUTTI_FERMI == 1 )); then OUT="nothing-to-do"; else OUT="cluster-closed"; PROSSIMO=""; fi
+    # Il guadagno si MISURA: la somma delle durate e' quanto sarebbe costato in fila,
+    # il tempo del giro e' quanto e' costato davvero. Nessuna promessa, un rapporto.
+    log "giro in ${DURATA}s; in fila sarebbero stati ${SOMMA_DURATE}s -> guadagno $(awk -v a="$SOMMA_DURATE" -v b="$DURATA" 'BEGIN{if(b>0) printf "%.2f", a/b; else print "n/d"}')x"
+    for _i in "${!DIRS[@]}"; do
+      log "  il lavoro del lavoratore $((_i + 1)) e' sul ramo gov/w$((_i + 1)) (${DIRS[$_i]})"
+    done
   fi
   "$PY" docs/kb/tools/zp_state.py progress --lane "$CORSIA" >/dev/null 2>&1
 

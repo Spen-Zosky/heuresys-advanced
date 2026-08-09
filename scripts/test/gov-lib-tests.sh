@@ -134,8 +134,8 @@ P1="$(FINTO_ESITO=cluster-closed     FINTO_COSTO=2.25 gov_avvia_lavoratore "$L1"
 P2="$(FINTO_ESITO=cluster-interrotto FINTO_COSTO=0.75 gov_avvia_lavoratore "$L2" Z-112 resume safe 4 12 acceptEdits)"
 wait "$P1" 2>/dev/null; wait "$P2" 2>/dev/null
 
-R1="$(gov_raccogli_lavoratore "$L1")"
-R2="$(gov_raccogli_lavoratore "$L2")"
+R1="$(gov_raccogli_lavoratore "$L1" | cut -d"|" -f1-3)"
+R2="$(gov_raccogli_lavoratore "$L2" | cut -d"|" -f1-3)"
 prova_uguale "cluster-closed|2.25|continue"     "$R1" "il primo lavoratore riporta il PROPRIO esito"
 prova_uguale "cluster-interrotto|0.75|continue" "$R2" "il secondo riporta il suo, diverso dal primo"
 
@@ -147,15 +147,40 @@ prova 1 "i due non si sono scambiati il cluster"     grep -q "Z-112" "$L1/.zp/co
 L3="$TMP/lav3"; mkdir -p "$L3"
 P3="$(FINTO_MUTO=1 FINTO_COSTO=9.99 gov_avvia_lavoratore "$L3" Z-999 resume safe 4 12 acceptEdits)"
 wait "$P3" 2>/dev/null
-prova_uguale "troncato|9.99|recover" "$(gov_raccogli_lavoratore "$L3")" \
+prova_uguale "troncato|9.99|recover" "$(gov_raccogli_lavoratore "$L3" | cut -d"|" -f1-3)" \
              "senza esito scritto si legge «troncato», e il costo si legge lo stesso"
 
 # E il giro dopo non deve ereditare l'esito del giro prima: e' il modo silenzioso
 # in cui un troncamento diventerebbe un «chiuso bene».
 P4="$(FINTO_MUTO=1 FINTO_COSTO=0.10 gov_avvia_lavoratore "$L1" Z-230 resume safe 4 12 acceptEdits)"
 wait "$P4" 2>/dev/null
-prova_uguale "troncato|0.1|recover" "$(gov_raccogli_lavoratore "$L1")" \
+prova_uguale "troncato|0.1|recover" "$(gov_raccogli_lavoratore "$L1" | cut -d"|" -f1-3)" \
              "l'esito del giro precedente non sopravvive al giro nuovo"
+
+# La durata la misura il lavoratore, non chi aspetta: e' il numero da cui si capisce
+# se il parallelo conviene, quindi non puo' essere il tempo del piu' lento dato a tutti.
+L4="$TMP/lav4"; mkdir -p "$L4"
+FINTO_LENTO="$TMP/finto-lento.sh"
+sed 's|^printf .{"total_cost_usd|sleep 2
+&|' "$FINTO" > "$FINTO_LENTO" 2>/dev/null || cp "$FINTO" "$FINTO_LENTO"
+printf '#!/usr/bin/env bash
+sleep 2
+mkdir -p .zp
+printf %s
+ "{\\"total_cost_usd\\": 1}"
+printf %s > .zp/last-outcome.json "{\\"outcome\\":\\"cluster-closed\\",\\"next\\":\\"continue\\"}"
+' > "$FINTO_LENTO"
+chmod +x "$FINTO_LENTO"
+P5="$(ZP_CLAUDE_CMD="$FINTO_LENTO" gov_avvia_lavoratore "$L4" Z-500 resume safe 4 12 acceptEdits)"
+wait "$P5" 2>/dev/null
+DUR="$(gov_raccogli_lavoratore "$L4" | cut -d'|' -f4)"
+if [[ "$DUR" -ge 2 ]] 2>/dev/null; then
+  PASSATI=$((PASSATI+1)); printf '[PASSA   ] %s
+' "la durata la misura chi lavora (${DUR}s per 2s di lavoro)"
+else
+  FALLITI=$((FALLITI+1)); printf '[FALLISCE] la durata la misura chi lavora  (attesa >=2, ottenuta «%s»)
+' "$DUR"
+fi
 
 unset ZP_CLAUDE_CMD
 

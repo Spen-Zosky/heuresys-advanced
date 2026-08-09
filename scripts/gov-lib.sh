@@ -111,7 +111,12 @@ gov_worktree_prepara() {     # <repo> <n> [ref] -> stampa il percorso; 1 se fall
   fi
 
   mkdir -p "$base" 2>/dev/null || return 1
-  git -C "$repo" worktree add --detach "$dir" "$ref" >&2 || return 1
+  # UN RAMO PER LAVORATORE, non un HEAD staccato. Con `--detach` i commit di una
+  # sessione sarebbero nati orfani: nessun ramo li tiene, `git log` di main non li
+  # vede, e il lavoro di un'intera corsa sarebbe recuperabile solo a mano dal
+  # reflog. Con un ramo, a fine corsa si vede cosa ha prodotto ciascuno e lo si
+  # porta su main con un merge — che e' una decisione, non un automatismo.
+  git -C "$repo" worktree add -B "gov/w$n" "$dir" "$ref" >&2 || return 1
 
   # Cio' che `git worktree` NON porta, ed e' esattamente cio' che serve per lavorare:
   # i file ignorati. Senza, il lavoratore nasce senza credenziali e fallisce al primo
@@ -169,15 +174,19 @@ gov_avvia_lavoratore() {     # <dir> <cluster> <modo> <corsia> <ore> <budget> <p
   # stderr su FILE e non mescolato allo stdout: con `2>&1` una riga di warning
   # rompe il JSON, il costo torna 0 e il tetto di spesa non scatta mai (misurato
   # nel driver, rilievo B3 — qui vale identico).
-  ( cd "$dir" && "${ZP_CLAUDE_CMD:-claude}" -p "$comando" \
-      --output-format json \
-      --max-budget-usd "$budget" \
-      --permission-mode "$permessi" \
-      > ".zp/last-response.json" 2> ".zp/last-stderr.log" ) &
+  # La durata la misura il lavoratore stesso. Il driver aspetta i figli in ordine,
+  # quindi un solo cronometro sul giro darebbe a tutti il tempo del piu' lento — e
+  # proprio il numero che serve per sapere se il parallelo conviene sarebbe finto.
+  rm -f "$dir/.zp/durata-s"
+  ( cd "$dir"
+    _t0=$(date +%s)
+    "${ZP_CLAUDE_CMD:-claude}" -p "$comando" --output-format json --max-budget-usd "$budget" --permission-mode "$permessi" > ".zp/last-response.json" 2> ".zp/last-stderr.log"
+    echo $(( $(date +%s) - _t0 )) > ".zp/durata-s"
+  ) &
   echo $!
 }
 
-gov_raccogli_lavoratore() {  # <dir> -> "esito|costo|prossimo"
+gov_raccogli_lavoratore() {  # <dir> -> "esito|costo|prossimo|durata_s"
   local dir="$1"
   local py="${ZP_PYTHON:-python}"
   local costo esito prossimo
@@ -197,7 +206,10 @@ import json;print(json.load(open('.zp/last-outcome.json',encoding='utf-8')).get(
   else
     esito="troncato"; prossimo="recover"
   fi
-  printf '%s|%s|%s\n' "${esito:-troncato}" "${costo:-0}" "${prossimo:-}"
+  local durata
+  durata="$(cat "$dir/.zp/durata-s" 2>/dev/null || echo 0)"
+  case "$durata" in ''|*[!0-9]*) durata=0 ;; esac
+  printf '%s|%s|%s|%s\n' "${esito:-troncato}" "${costo:-0}" "${prossimo:-}" "$durata"
 }
 
 gov_assegna() {              # <repo> <corsia> <lavoratori> [budget_ore] -> id, uno per riga

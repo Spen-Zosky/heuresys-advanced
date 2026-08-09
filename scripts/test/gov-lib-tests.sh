@@ -68,6 +68,25 @@ prova 2 "senza cluster non si prende nulla"           gov_lock_prendi "$LOCKS" "
 prova 2 "senza cartella non si prende nulla"          gov_lock_prendi "" Z-005
 
 echo
+echo "── lucchetto sulla configurazione ──"
+#
+# Il censimento riscrive zp.config.yaml per intero. Se gira mentre dei lavoratori
+# leggono classi e perimetri, gli sposta il pavimento sotto i piedi.
+
+CFGL="$TMP/cfglock"
+prova 1 "a riposo la configurazione non risulta occupata" gov_config_occupata "$CFGL"
+prova 0 "il censimento la prende"                          gov_config_prendi "$CFGL" "censimento"
+prova 0 "e adesso risulta occupata"                        gov_config_occupata "$CFGL"
+prova 1 "un secondo censimento non parte"                  gov_config_prendi "$CFGL" "secondo"
+gov_config_rilascia "$CFGL"
+prova 1 "rilasciata, torna libera"                         gov_config_occupata "$CFGL"
+# Un censimento morto a metà non deve bloccare per sempre chi viene dopo.
+printf '999997\n2020-01-01T00:00:00\nmorto\n' > "$CFGL/config.lock"
+prova 1 "un censimento morto non blocca nessuno"           gov_config_occupata "$CFGL"
+prova 0 "e il suo lucchetto si recupera"                   gov_config_prendi "$CFGL" "dopo il morto"
+gov_config_rilascia "$CFGL"
+
+echo
 echo "── assegnazione ──"
 
 ASSEGNATI="$(gov_assegna "$REPO" safe 2 4)"

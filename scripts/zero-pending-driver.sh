@@ -300,6 +300,11 @@ log "corsia=$CORSIA  giri max=$MAX_ITER  budget/giro=\$$BUDGET_GIRO  tetto=\$$TE
 GIRO=0
 while (( GIRO < MAX_ITER )); do
   [[ -f "$STOP" ]] && { log "freno tirato: mi fermo dopo questo controllo"; break; }
+  if gov_config_occupata "$ZP"; then
+    log "la configurazione e' in riscrittura (censimento in corso, pid $(gov_lock_chi "$ZP" config)):"
+    log "non apro lavoratori sopra un piano che sta cambiando. Mi fermo."
+    break
+  fi
   nella_finestra || { log "fuori dalla finestra $FINESTRA: chiudo qui"; break; }
 
   SPESA="$(spesa_totale)"

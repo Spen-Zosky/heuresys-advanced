@@ -538,6 +538,84 @@ def verifica(clusters: list, cfg: dict) -> list:
     return rilievi
 
 
+# ---------------------------------------------------------------- stato gov
+
+def alberi_lavoratori(cfg: dict) -> list:
+    """Le cartelle di lavoro dei lavoratori, se esistono. Fuori dal repo."""
+    base = os.environ.get('GOV_WORKTREE_BASE') or str(RADICE.parent / 'heuresys-gov-workers')
+    b = Path(base)
+    if not b.is_dir():
+        return []
+    return sorted(d for d in b.iterdir() if d.is_dir() and (d / '.git').exists())
+
+
+def stato_gov(cfg: dict) -> dict:
+    """Chi sta lavorando a cosa, da quanto, e quanto si e' speso.
+
+    E' il consolidamento MANUALE della decisione 1 di Enzo: si guarda quando si
+    vuole, e non riapre niente. Sola lettura.
+
+    Un lavoratore si dice vivo dal PID, non dalla freschezza di un file: la
+    plancia ha gia' imparato che un file scritto di recente non prova che una
+    sessione sia ancora aperta."""
+    fuori = {'lavoratori': [], 'spesa_usd': 0.0, 'giri': 0,
+             'config_bloccata_da': None, 'freno_inserito': None}
+
+    meta = cfg.get('meta') or {}
+    aut = meta.get('autorizzato_non_presidiato')
+    fuori['freno_inserito'] = not (aut is True or str(aut).lower() == 'true')
+
+    lockati = cluster_lockati()
+    conf = ZPDIR / 'config.lock'
+    if conf.is_file():
+        try:
+            pid = int(conf.read_text(encoding='utf-8').splitlines()[0].strip())
+            os.kill(pid, 0)
+            fuori['config_bloccata_da'] = pid
+        except (OSError, ValueError, IndexError):
+            pass
+
+    for albero in alberi_lavoratori(cfg):
+        esito = albero / '.zp' / 'last-outcome.json'
+        voce = {'albero': albero.name, 'percorso': str(albero),
+                'cluster': None, 'esito': None, 'quando': None}
+        for cid, pid in lockati.items():
+            voce.setdefault('pid', None)
+            if voce['cluster'] is None:
+                voce['cluster'], voce['pid'] = cid, pid
+                break
+        if esito.is_file():
+            try:
+                d = json.loads(esito.read_text(encoding='utf-8'))
+                voce['esito'] = d.get('outcome')
+            except (OSError, ValueError):
+                voce['esito'] = 'illeggibile'
+            voce['quando'] = _quando(esito)
+        fuori['lavoratori'].append(voce)
+
+    giornale = ZPDIR / 'runs.ndjson'
+    if giornale.is_file():
+        for riga in giornale.read_text(encoding='utf-8').splitlines():
+            if not riga.strip():
+                continue
+            try:
+                fuori['spesa_usd'] += float(json.loads(riga).get('costo_usd') or 0)
+                fuori['giri'] += 1
+            except (ValueError, TypeError):
+                continue
+    fuori['spesa_usd'] = round(fuori['spesa_usd'], 2)
+    fuori['in_mano'] = lockati
+    return fuori
+
+
+def _quando(p: Path) -> str:
+    import datetime
+    try:
+        return datetime.datetime.fromtimestamp(p.stat().st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+    except OSError:
+        return ''
+
+
 # ---------------------------------------------------------------- rapporto
 
 def scrivi_progress(clusters: list, cfg: dict, corsia: str = 'safe') -> Path:
@@ -640,6 +718,8 @@ def main() -> int:
 
     pp = sub.add_parser('progress')
     pp.add_argument('--lane', default='safe')
+
+    sub.add_parser('stato-gov', help='chi sta lavorando a cosa, da quanto, e quanto si e speso')
 
     pm = sub.add_parser('perimetri', help='chi puo girare insieme, chi resta in coda, e perche')
     pm.add_argument('--lane', default='safe')
@@ -762,6 +842,26 @@ def main() -> int:
     if a.cmd == 'progress':
         dest = scrivi_progress(clusters, cfg, a.lane)
         print(f'scritto {dest}')
+        return 0
+
+    if a.cmd == 'stato-gov':
+        st = stato_gov(cfg)
+        print(f"freno {'INSERITO' if st['freno_inserito'] else 'tolto'} · "
+              f"{st['giri']} giri registrati · spesa ${st['spesa_usd']}")
+        if st['config_bloccata_da']:
+            print(f"  ATTENZIONE: la configurazione e' in scrittura (pid {st['config_bloccata_da']}): "
+                  f"un censimento sta girando, non lanciare lavoratori adesso")
+        if not st['lavoratori']:
+            print('  nessuna cartella di lavoro: nessun lavoratore e mai partito '
+                  '(si preparano con --prepara-alberi N)')
+        for l in st['lavoratori']:
+            in_mano = l.get('cluster') or '-'
+            print(f"  {l['albero']:6s} cluster {in_mano:8s} "
+                  f"ultimo esito {l['esito'] or '-':20s} {l['quando'] or ''}")
+        if st['in_mano']:
+            print('  in mano adesso: ' + ', '.join(f'{k} (pid {v})' for k, v in st['in_mano'].items()))
+        else:
+            print('  nessun cluster in mano a nessuno')
         return 0
 
     if a.cmd == 'perimetri':

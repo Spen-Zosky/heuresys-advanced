@@ -298,14 +298,51 @@ def rimuovi_task(nome: str) -> str:
     return f"attivita' «{nome}» rimossa" if rc == 0 else out
 
 
+CONFIG_LOCK = os.path.join(ZP, "config.lock")
+
+
+def chi_riscrive_la_config() -> int | None:
+    """Il pid del censimento in corso, se ce n'e' uno vivo. Un lock di un processo
+    morto e' un orfano e non conta — altrimenti un censimento interrotto bloccherebbe
+    per sempre chi viene dopo."""
+    try:
+        pid = int(open(CONFIG_LOCK, encoding="utf-8").read().splitlines()[0])
+    except (OSError, ValueError, IndexError):
+        return None
+    try:
+        os.kill(pid, 0)
+        return pid
+    except OSError:
+        return None
+
+
 def censimento(conferma: str) -> str:
     if conferma.strip().lower() != "zp censimento ok":
         return "conferma rituale mancante: scrivi esattamente «zp censimento ok»"
-    subprocess.Popen([percorso_claude(), "-p", "zp censimento ok"], cwd=REPO,
-                     creationflags=DETACHED, env=ambiente_pulito(),
-                     stdin=subprocess.DEVNULL,
-                     stdout=open(LOG_CENS, "a", encoding="utf-8"),
-                     stderr=subprocess.STDOUT, close_fds=True)
+
+    # Il censimento riscrive zp.config.yaml PER INTERO. Se parte mentre dei
+    # lavoratori girano, gli sposta il pavimento sotto i piedi: leggono classi e
+    # perimetri di un piano che non esiste piu'. Il lucchetto e' lo stesso che
+    # gov usa per i cluster, con un nome riservato — e lo porta il PID del
+    # censimento, non quello della plancia, che resta viva per ore.
+    vivo = chi_riscrive_la_config()
+    if vivo:
+        return f"c'e' gia' un censimento in corso (pid {vivo}): non ne parte un secondo"
+    in_mano = [f for f in os.listdir(os.path.join(ZP, "locks"))] if os.path.isdir(
+        os.path.join(ZP, "locks")) else []
+    if in_mano:
+        return ("ci sono lavoratori con dei cluster in mano ("
+                + ", ".join(f.replace(".lock", "") for f in in_mano)
+                + "): il censimento riscriverebbe il piano sotto di loro. Aspetta che finiscano.")
+
+    p = subprocess.Popen([percorso_claude(), "-p", "zp censimento ok"], cwd=REPO,
+                         creationflags=DETACHED, env=ambiente_pulito(),
+                         stdin=subprocess.DEVNULL,
+                         stdout=open(LOG_CENS, "a", encoding="utf-8"),
+                         stderr=subprocess.STDOUT, close_fds=True)
+    os.makedirs(ZP, exist_ok=True)
+    with open(CONFIG_LOCK, "w", encoding="utf-8") as f:
+        f.write(f"{p.pid}\n{datetime.datetime.now().isoformat(timespec='seconds')}\ncensimento\n")
     return "censimento avviato in sessione headless (costo reale). Log nella scheda dedicata."
 
 

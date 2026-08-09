@@ -216,3 +216,21 @@ except Exception: sys.exit(0)
 for c in d.get('parallelo', []):
     print(c['id'])"
 }
+
+# --- la configurazione non si riscrive mentre qualcuno lavora ---------------
+#
+# Il modo `censimento` riscrive zp.config.yaml PER INTERO (azzera `clusters:`,
+# aggiorna meta.plan, rimette clusters_classified) e si invoca a mano, quindi non
+# passa dal lock del driver. Se gira mentre 2-3 lavoratori sono attivi, gli si
+# sposta il pavimento sotto i piedi: leggono classi e perimetri di un piano che
+# non esiste piu'.
+#
+# Il lucchetto e' lo STESSO dei cluster, con un nome riservato: nessun meccanismo
+# nuovo da imparare, e il recupero degli orfani vale gia'.
+
+gov_config_prendi()   { gov_lock_prendi "$1" config "${2:-}"; }
+gov_config_rilascia() { gov_lock_rilascia "$1" config; }
+
+gov_config_occupata() {      # <dir> -> 0 se qualcuno la sta riscrivendo
+  [[ -n "$(gov_lock_chi "$1" config)" ]]
+}

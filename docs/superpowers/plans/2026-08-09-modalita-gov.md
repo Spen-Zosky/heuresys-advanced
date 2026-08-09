@@ -2,7 +2,7 @@
 
 **Item**: `#173` (`SOT_BACKLOG.md`, era `WAIT-INPUT`) · **Piano scritto**: S1052, 2026-08-09
 **Origine**: consegna Cowork del 2026-08-08 in `docs/kb/COWORK_INBOX.md` (§ "Sessione gov")
-**Stato del piano**: **G1-G6 e G8 fatti**; **G7 a metà** (2026-08-09). Tre corse presidiate, otto difetti trovati e chiusi, guadagno misurato. Resta una decisione di Enzo sui permessi — §11.
+**Stato del piano**: **tutte le voci fatte** (2026-08-09). Quattro corse presidiate, **nove difetti** trovati e chiusi, guadagno misurato **1,97×**. Il lavoro prodotto è sui rami `gov/w1` e `gov/w2` e attende una decisione di Enzo — §11.
 
 > **G8 non era nel piano.** È nata perché Enzo ha letto il codice invece di fidarsi del
 > piano, e ha trovato che *niente* controllava la validità dei cluster che `gov` assegna:
@@ -115,7 +115,7 @@ Una riga per deliverable. Lo stato si legge da qui, non dalla memoria.
 | **G4** | Stato separato per lavoratore | Claude | ogni lavoratore ha il suo stato; il giornale di spesa resta unico e cumulativo | ✅ **FATTO** `806c3b9f` — **risolta diversamente**: non `.zp/w1/`, ma `<albero>/.zp/`. Con un albero per lavoratore il nome dei file non serve cambiarlo: due lavoratori non si vedono perché hanno due alberi. Zero modifiche a `verify_gate`, `zp_gate`, `zp_selftest` |
 | **G5** | Comando `stato gov` (consolidamento manuale, decisione 1) | Claude | un comando stampa: chi sta girando, su che cluster, da quanto, spesa per lavoratore e totale, esiti raccolti | ✅ **FATTO** `497bfa13` — `zp_state.py stato-gov` |
 | **G6** | Lock condiviso su `zp.config.yaml` (censimento ↔ lavoratori) | Claude | un censimento lanciato mentre 2 lavoratori girano **si ferma dicendo chi**; e viceversa | ✅ **FATTO** `497bfa13` |
-| **G7** | Prima corsa presidiata a 2 lavoratori, con misura del guadagno reale | Claude + **Enzo** | due cluster chiusi in parallelo con evidenza live; tempo a 1 lavoratore vs 2 lavoratori misurato e scritto | ◐ **META'** — guadagno **misurato: 1,25×**; i due cluster NON chiusi (permessi). Vedi §11 |
+| **G7** | Prima corsa presidiata a 2 lavoratori, con misura del guadagno reale | Claude + **Enzo** | due cluster chiusi in parallelo con evidenza live; tempo a 1 lavoratore vs 2 lavoratori misurato e scritto | ✅ **RIUSCITA** (4ª corsa) — guadagno **1,97×**, spesa **$16,33**, lavoro vero sui rami. I cluster non sono *chiusi* (budget esaurito), ma il meccanismo ha prodotto. Vedi §11 |
 | **G8** | Una sessione `gov` apre sapendo se il piano regge ancora | Claude | l'hook **esegue** verifica strutturale + età del censimento e consegna l'esito nel briefing; se gli strumenti mancano, la sessione si apre lo stesso | ✅ **FATTO** `12d17408` — **voce nata fuori dal piano**, da una lettura del codice di Enzo (2026-08-09) |
 
 **Fuori dal piano, dichiarato**: il freno `meta.autorizzato_non_presidiato: false` **resta
@@ -353,3 +353,44 @@ il database e usare `gh` non può lavorare così.
 L'alternativa è `bypassPermissions`, che **dà a una sessione non presidiata il permesso di
 eseguire qualunque comando**. È una scelta di sicurezza, non tecnica, e appartiene a Enzo —
 esattamente come il freno.
+
+
+### La quarta corsa — quella che ha prodotto
+
+Concessi i permessi (`bypassPermissions`, scritto in `zp.config.yaml` accanto al freno,
+con l'elenco di ciò che **non** tocca), i due lavoratori hanno lavorato **24 minuti**.
+
+| | Z-230 (w1) | Z-112 (w2) |
+|---|---|---|
+| esito | `troncato` (budget) | `cluster-interrupted` |
+| costo | **$5,15** | **$11,17** |
+| durata | 1419 s | 1462 s |
+| prodotto | 1 file modificato | **1 commit, 5 file, +317 righe** |
+
+**Guadagno reale: 1,97×** — il giro è durato 1462 s contro i 2881 s che sarebbero serviti
+in fila. È quasi il doppio secco, molto meglio sia della stima iniziale (1,4–1,6×) sia della
+misura della terza corsa (1,25×): con lavori più lunghi la coda sulla verifica pesa meno.
+
+E il **tetto di spesa ora vede i costi**: $16,33 letti correttamente, dove prima il giornale
+era illeggibile e il totale diceva $0,00.
+
+### Nono difetto — il perimetro è una dichiarazione, non un recinto
+
+Il perimetro di `Z-112` diceva `apps/api/test/**` e `apps/api/vitest.config.ts`. Il suo
+commit tocca **quattro file in `apps/web/`**. Nessuno impedisce a un lavoratore di uscire dal
+perimetro che ha dichiarato.
+
+Qui non è successo nulla perché l'altro lavoratore stava in `docs/`, ma **è stata fortuna,
+non una garanzia**: la decisione «questi due possono correre insieme» si basa su
+un'informazione che nessuno verifica. Due rimedi possibili, in ordine di costo:
+
+1. **verifica a posteriori** — a fine giro il driver confronta i file toccati col perimetro e
+   lo dice ad alta voce (minimo indispensabile: almeno si sa);
+2. **recinto vero** — un hook `PreToolUse` dentro l'albero del lavoratore che rifiuta le
+   scritture fuori perimetro. È la soluzione, e costa di più.
+
+### Il lavoro prodotto, e cosa farne
+
+Sta sui rami `gov/w1` (1 file non committato) e `gov/w2` (1 commit, 5 file). **Non è su
+main**, per costruzione: portarlo è una decisione, non un automatismo — e va guardato prima,
+perché nessuno dei due cluster è stato chiuso col protocollo completo.

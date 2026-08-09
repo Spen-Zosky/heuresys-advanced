@@ -230,7 +230,16 @@ done
 # perche' finora nessuna corsa era mai partita. Si escludono solo i NON TRACCIATI di
 # quei percorsi: una modifica a un file tracciato resta sporco, come deve.
 IGNORABILI='^\?\? (\.zp/|\.codex/|\.codex-review/|\.agents/|AGENTS\.md$)'
-SPORCO="$(git status --porcelain | grep -Ev "$IGNORABILI" || true)"
+# [S1052] E il RAPPORTO CHE IL DRIVER SCRIVE DA SE'. `.zp/PROGRESS.md` e' tracciato e
+# viene riscritto a ogni giro (`zp_state.py progress`): finita una corsa, il file
+# risulta modificato e la corsa SUCCESSIVA si rifiutava di partire — il driver
+# produceva da solo la condizione che gli impediva di ripartire, e due corse
+# consecutive erano impossibili senza un commit a mano. Misurato lanciando la seconda
+# corsa presidiata: exit 4 con « M .zp/PROGRESS.md» come unico motivo.
+# Si esclude SOLO questo file, e solo se modificato: qualunque altro file tracciato
+# resta sporco, come deve.
+IGNORABILI_PROPRI='^ ?M+ +\.zp/PROGRESS\.md$'
+SPORCO="$(git status --porcelain | grep -Ev "$IGNORABILI" | grep -Ev "$IGNORABILI_PROPRI" || true)"
 if [[ -n "$SPORCO" && $DRY -eq 0 ]]; then
   log "il repo ha modifiche non salvate: non parto sopra il lavoro di qualcun altro."
   echo "$SPORCO" | head -10

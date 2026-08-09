@@ -1,13 +1,13 @@
 # zero-pending — a che punto siamo
 
-Piano: `2026-07-25-zero-pending-plan.md` del 2026-07-26
+Piano: `2026-07-25-zero-pending-plan.md` del 2026-08-09
 
-**43 chiusi su 262.** Restano 189 pezzi che posso fare da solo e 30 che aspettano te.
+**44 chiusi su 262.** Restano 188 pezzi che posso fare da solo e 30 che aspettano te.
 
 ## Cosa resta, per ondata
 
 - **W0** — 1 pezzi, circa 2 ore
-- **W1** — 56 pezzi, circa 108 ore
+- **W1** — 55 pezzi, circa 107 ore
 - **W2** — 37 pezzi, circa 203 ore
 - **W3** — 36 pezzi, circa 168 ore
 - **W4** — 39 pezzi, circa 213 ore
@@ -48,12 +48,12 @@ Piano: `2026-07-25-zero-pending-plan.md` del 2026-07-26
 
 ## I prossimi cinque
 
-- **Z-230** (W1, 0.8h, classe B) — Doc di triage Dependabot stale (zod/next superati, script mai implementato, riferimento a un file in
 - **Z-032** (W1, 1.0h, classe B) — claude-mem disabilitato con stub bun-runner: retest sulla 13.12.2 o fail-open permanente dell'hook
 - **Z-112** (W1, 1.0h, classe A) — Nessun assert di drift post-suite (residui E2E% sul DB condiviso)
 - **Z-123** (W1, 1.0h, classe B) — Nessun test asserisce che il boot usi loadRolePermissionCacheWithRetry (i test iniettano un loader f
 - **Z-239** (W1, 1.0h, classe A) — Ecosistema Claude: MEMORY.md non re-indicizzato (55 nodi su disco vs 53 link), nodi session-state da
+- **Z-152** (W1, 1.5h, classe B) — Brand v1: 5 refinement del social media kit (SK-1..SK-5)
 
 ## Spesa
 
-4 giri, circa 29.89 dollari su un tetto di 120.
+6 giri, circa 46.13 dollari su un tetto di 120.

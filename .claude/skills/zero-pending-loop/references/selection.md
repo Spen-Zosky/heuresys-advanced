@@ -19,6 +19,19 @@ Questo e' anche cio' che rende il loop robusto a interruzioni brutali: corrente 
 
 `.zp/` e' gitignored per i file di runtime, con un'eccezione voluta: `PROGRESS.md` viene committato a ogni chiusura di sessione, cosi' Enzo lo legge su GitHub dal telefono senza accendere il PC. Non e' uno state file nuovo nel senso vietato da `CLAUDE.md` — e' una vista derivata, e i conteggi che contiene puntano alle fonti, non le sostituiscono.
 
+## Se il cluster te l'hanno ASSEGNATO, non si sceglie
+
+Quando l'invocazione porta `--cluster Z-nnn`, quel cluster **e' il tuo, e non ne scegli un altro**. Arriva dal driver in modalita' `gov` (#173), che con piu' lavoratori in parallelo assegna prima di aprire le sessioni e ha gia' preso il lucchetto su quel cluster.
+
+Non e' una preferenza: senza questo, N lavoratori applicherebbero l'ordine qui sotto — che e' **deterministico** — e otterrebbero **tutti lo stesso cluster**, lavorando lo stesso lavoro N volte, ciascuno nel proprio albero, con N chiusure in conflitto alla fine.
+
+Cosa resta valido anche col cluster assegnato:
+
+- il **gradino 0** si applica lo stesso: se il criterio e' gia' soddisfatto, lo chiudi come «risolto per altra via» e scrivi `{"outcome": "cluster-closed", ...}`. Non passi al successivo di tua iniziativa — la scelta del prossimo e' del driver;
+- se il cluster assegnato **non e' eleggibile** (bloccato su Enzo, dipendenze aperte, gia' chiuso), non ne sostituisci un altro: scrivi `{"outcome": "blocked", "cluster": "Z-nnn", "reason": "..."}` e chiudi. Sara' il driver a riassegnare, perche' e' l'unico che sa cosa stanno facendo gli altri lavoratori.
+
+Senza `--cluster`, vale l'ordine di sempre.
+
 ## Ordine di selezione — deterministico, non a intuito
 
 Applica i filtri in quest'ordine e prendi il primo cluster che sopravvive. L'ordine non e' arbitrario: ogni gradino evita un modo specifico di sprecare lavoro.

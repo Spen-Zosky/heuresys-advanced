@@ -79,6 +79,68 @@ prova_uguale "3" "$(gov_assegna "$REPO" safe 9 4 | grep -c . || true)" \
              "chiedendone 9 se ne assegnano 3 (il tetto)"
 
 echo
+echo "── avvio e raccolta dei lavoratori ──"
+#
+# Con un finto `claude`: l'orchestrazione si prova senza aprire sessioni vere e
+# senza toccare il freno di sicurezza. Il finto registra il comando che riceve,
+# cosi' si vede se il cluster assegnato ci arriva davvero.
+
+FINTO="$TMP/finto-claude.sh"
+cat > "$FINTO" <<'FINTO_EOF'
+#!/usr/bin/env bash
+# Finto `claude`: scrive cio' che scriverebbe una sessione, poi muore.
+#   FINTO_ESITO=<outcome>  FINTO_COSTO=<usd>  FINTO_MUTO=1 (non scrive l'esito)
+comando=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -p) comando="$2"; shift 2 ;;
+    *)  shift ;;
+  esac
+done
+mkdir -p .zp
+printf '%s\n' "$comando" > .zp/comando-ricevuto.txt
+printf '{"total_cost_usd": %s, "result": "finto"}\n' "${FINTO_COSTO:-1.5}"
+[[ "${FINTO_MUTO:-0}" == "1" ]] && exit 0
+printf '{"outcome": "%s", "next": "continue"}\n' "${FINTO_ESITO:-cluster-closed}" > .zp/last-outcome.json
+exit 0
+FINTO_EOF
+chmod +x "$FINTO"
+export ZP_CLAUDE_CMD="$FINTO"
+
+L1="$TMP/lav1"; L2="$TMP/lav2"; mkdir -p "$L1" "$L2"
+
+# Due lavoratori insieme, con esiti e costi DIVERSI: se lo stato fosse condiviso,
+# il secondo sovrascriverebbe il primo e i due risultati sarebbero uguali.
+P1="$(FINTO_ESITO=cluster-closed     FINTO_COSTO=2.25 gov_avvia_lavoratore "$L1" Z-230 resume safe 4 12 acceptEdits)"
+P2="$(FINTO_ESITO=cluster-interrotto FINTO_COSTO=0.75 gov_avvia_lavoratore "$L2" Z-112 resume safe 4 12 acceptEdits)"
+wait "$P1" 2>/dev/null; wait "$P2" 2>/dev/null
+
+R1="$(gov_raccogli_lavoratore "$L1")"
+R2="$(gov_raccogli_lavoratore "$L2")"
+prova_uguale "cluster-closed|2.25|continue"     "$R1" "il primo lavoratore riporta il PROPRIO esito"
+prova_uguale "cluster-interrotto|0.75|continue" "$R2" "il secondo riporta il suo, diverso dal primo"
+
+prova 0 "al lavoratore arriva il cluster assegnato" grep -q "\-\-cluster Z-230" "$L1/.zp/comando-ricevuto.txt"
+prova 0 "e a ciascuno il SUO, non quello dell'altro" grep -q "\-\-cluster Z-112" "$L2/.zp/comando-ricevuto.txt"
+prova 1 "i due non si sono scambiati il cluster"     grep -q "Z-112" "$L1/.zp/comando-ricevuto.txt"
+
+# Una sessione troncata non scrive l'esito: va letta come troncata, non come chiusa.
+L3="$TMP/lav3"; mkdir -p "$L3"
+P3="$(FINTO_MUTO=1 FINTO_COSTO=9.99 gov_avvia_lavoratore "$L3" Z-999 resume safe 4 12 acceptEdits)"
+wait "$P3" 2>/dev/null
+prova_uguale "troncato|9.99|recover" "$(gov_raccogli_lavoratore "$L3")" \
+             "senza esito scritto si legge «troncato», e il costo si legge lo stesso"
+
+# E il giro dopo non deve ereditare l'esito del giro prima: e' il modo silenzioso
+# in cui un troncamento diventerebbe un «chiuso bene».
+P4="$(FINTO_MUTO=1 FINTO_COSTO=0.10 gov_avvia_lavoratore "$L1" Z-230 resume safe 4 12 acceptEdits)"
+wait "$P4" 2>/dev/null
+prova_uguale "troncato|0.1|recover" "$(gov_raccogli_lavoratore "$L1")" \
+             "l'esito del giro precedente non sopravvive al giro nuovo"
+
+unset ZP_CLAUDE_CMD
+
+echo
 echo "── cartella di lavoro ──"
 
 BASE="$(gov_worktree_base "$REPO")"

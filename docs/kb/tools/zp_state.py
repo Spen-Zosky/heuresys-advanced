@@ -311,6 +311,35 @@ def leggi_interrotti() -> dict:
     return _leggi_json(ZPDIR / 'interrupted.json', {})
 
 
+def cluster_lockati() -> dict:
+    """I cluster che un lavoratore vivo ha in mano -> {id: pid}.
+
+    RETE DI SICUREZZA della modalita' gov (#173). Il driver assegna e prende i
+    lucchetti prima di aprire le sessioni, ma se una sessione ignorasse la sua
+    assegnazione e chiedesse «qual e' il prossimo» si riprenderebbe il lavoro di
+    un altro. Qui i lucchetti vivi escono direttamente dall'universo dei candidati.
+
+    Un lucchetto di un processo MORTO non conta: e' un orfano, e ignorarlo
+    trasformerebbe il primo crollo in un blocco permanente."""
+    fuori = {}
+    dir_lock = ZPDIR / 'locks'
+    if not dir_lock.is_dir():
+        return fuori
+    for f in dir_lock.glob('*.lock'):
+        try:
+            pid = int(f.read_text(encoding='utf-8').splitlines()[0].strip())
+        except (OSError, ValueError, IndexError):
+            continue
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            continue                      # morto: orfano, non blocca nessuno
+        except Exception:
+            pass
+        fuori[f.stem] = pid
+    return fuori
+
+
 def leggi_autorizzazioni() -> set:
     """ID di classe D autorizzati a voce singola da `zp lotto ok N`."""
     f = ZPDIR / 'autorizzazioni.txt'
@@ -409,6 +438,7 @@ def candidati(clusters: list, cfg: dict, corsia: str, budget_ore: float | None =
     ammesse = classi_ammesse(cfg, corsia)
     autorizzati = leggi_autorizzazioni()
     interrotti = leggi_interrotti()
+    lockati = cluster_lockati()
     max_fall = ((cfg.get('interrupt_resume') or {}).get('max_failures_per_cluster')) or 2
     # Un id e' «chiuso» solo se lo sono TUTTE le sue occorrenze. Con un id duplicato — una
     # riga spuntata e una no — il set costruito sui soli chiusi sbloccava le dipendenze di
@@ -426,6 +456,8 @@ def candidati(clusters: list, cfg: dict, corsia: str, budget_ore: float | None =
     def ammesso(c: Cluster) -> tuple[bool, str]:
         if c.chiuso:
             return False, 'gia chiuso'
+        if c.id in lockati:
+            return False, f'in mano a un altro lavoratore (pid {lockati[c.id]})'
         if not c.eseguibile_da_solo:
             return False, f'bloccato su Enzo: {c.bloccato_su_enzo}'
         if not c.classe:

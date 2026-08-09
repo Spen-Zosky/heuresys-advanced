@@ -10,6 +10,8 @@
 #
 # Opzioni
 #   --lane <corsia>        quale corsia di lavoro
+#   --lavoratori <n>       quanti cluster in parallelo (1 = comportamento di sempre)
+#   --prepara-alberi <n>   prepara n alberi di lavoro e esce (passo presidiato)
 #   --max-iterations <n>   quanti giri al massimo
 #   --window <finestra>    finestra oraria in cui e' ammesso lavorare
 #   --permission-mode <m>  modalita' permessi di claude -p
@@ -26,8 +28,14 @@ set -uo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO" || exit 1
 
+# I pezzi della modalita' gov (#173) stanno in un file a parte, sorgibile e quindi
+# provabile senza far partire il driver — che all'avvio si ferma sui guard-rail.
+# shellcheck source=/dev/null
+. "$REPO/scripts/gov-lib.sh"
+
 ZP="$REPO/.zp"
 LOCK="$ZP/driver.lock"
+LOCKS="$ZP/locks"
 STOP="$ZP/STOP"
 CURSORE="$ZP/cursor.json"
 ESITO="$ZP/last-outcome.json"
@@ -35,7 +43,7 @@ GIRI="$ZP/runs.ndjson"
 CFG="$REPO/.claude/skills/zero-pending-loop/references/zp.config.yaml"
 PY="${ZP_PYTHON:-python}"
 
-CORSIA="safe"; MAX_ITER=""; FINESTRA=""; DRY=0; PERMESSI=""
+CORSIA="safe"; MAX_ITER=""; FINESTRA=""; DRY=0; PERMESSI=""; LAVORATORI=""; PREPARA=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -45,6 +53,8 @@ while [[ $# -gt 0 ]]; do
     --permission-mode) PERMESSI="$2"; shift 2 ;;
     --budget-usd)      BUDGET_CHIESTO="$2"; shift 2 ;;
     --tetto-usd)       TETTO_CHIESTO="$2"; shift 2 ;;
+    --lavoratori)      LAVORATORI="$2"; shift 2 ;;
+    --prepara-alberi)  PREPARA="$2"; shift 2 ;;
     --dry-run)         DRY=1; shift ;;
     -h|--help)         sed -n '2,23p' "$0"; exit 0 ;;
     *) echo "opzione sconosciuta: $1" >&2; exit 2 ;;
@@ -105,6 +115,16 @@ clamp_usd() {                     # clamp_usd <chiesto> <soffitto> <etichetta> -
 # comparivano solo nella riga di riepilogo, che con il freno inserito non si raggiunge.
 [[ -n "${BUDGET_CHIESTO:-}${TETTO_CHIESTO:-}" ]] &&
   log "spesa concessa a questa corsa: \$$BUDGET_GIRO per giro, \$$TETTO_TOT di tetto"
+LAV_MAX="$(cfg gov.lavoratori_max)";     [[ -z "$LAV_MAX" ]] && LAV_MAX=3
+[[ -z "$LAVORATORI" ]] && LAVORATORI="$(cfg gov.lavoratori_default)"
+[[ -z "$LAVORATORI" ]] && LAVORATORI=1
+case "$LAVORATORI" in ''|*[!0-9]*) log "«$LAVORATORI» non e' un numero di lavoratori: uso 1"; LAVORATORI=1 ;; esac
+if (( LAVORATORI > LAV_MAX )); then
+  log "richiesti $LAVORATORI lavoratori, la config ne ammette $LAV_MAX: uso $LAV_MAX"
+  LAVORATORI=$LAV_MAX
+fi
+(( LAVORATORI < 1 )) && LAVORATORI=1
+
 STALE_H="$(cfg interrupt_resume.resume_stale_after_hours)"; [[ -z "$STALE_H" ]] && STALE_H=24
 ORE_MAX="$(cfg budget.max_effort_hours_per_cluster)"; [[ -z "$ORE_MAX" ]] && ORE_MAX=4
 CLASSIFICATI="$(cfg meta.clusters_classified)"
@@ -125,6 +145,26 @@ mkdir -p "$ZP"
 if [[ -n "${ANTHROPIC_API_KEY:-}" ]]; then
   log "trovata ANTHROPIC_API_KEY nell'ambiente: la tolgo per questa corsa (scavalca il login ad abbonamento)"
   unset ANTHROPIC_API_KEY
+fi
+
+# --- preparazione degli alberi di lavoro (passo presidiato, non una corsa) ------------
+# Sta PRIMA dei guard-rail perche' non apre nessuna sessione e non tocca il repo: crea
+# cartelle fuori da esso e finisce. L'installazione delle dipendenze e' cara e va vista
+# succedere, per questo e' un comando a se' e non un effetto collaterale di una corsa.
+if [[ -n "$PREPARA" ]]; then
+  case "$PREPARA" in ''|*[!0-9]*) log "«$PREPARA» non e' un numero di alberi"; exit 2 ;; esac
+  for n in $(seq 1 "$PREPARA"); do
+    D="$(gov_worktree_prepara "$REPO" "$n")" || { log "albero $n: non riesco a crearlo"; exit 1; }
+    log "albero $n: $D"
+    if gov_worktree_pronto "$D"; then
+      log "  dipendenze gia' presenti"
+    else
+      log "  installo le dipendenze (una tantum, puo' volerci qualche minuto)"
+      ( cd "$D" && pnpm install --frozen-lockfile ) || { log "  installazione fallita"; exit 1; }
+    fi
+  done
+  log "alberi pronti. Ora: bash scripts/zero-pending-driver.sh --lavoratori $PREPARA ..."
+  exit 0
 fi
 
 # ---------------------------------------------------------------- guard-rail
@@ -189,8 +229,9 @@ mio_lock() { [[ "$(head -1 "$LOCK" 2>/dev/null || echo 0)" == "$$" ]]; }
 # e chi aveva provato a fermarlo, vedendolo ancora in giro, ne lanciava un secondo.
 # Il tentativo di fermarlo era ciò che apriva la concorrenza (rilievo B2 della review).
 # Ora il segnale uccide il figlio in volo e termina davvero.
-trap 'mio_lock && rm -f "$LOCK"' EXIT
-trap 'log "segnale ricevuto: fermo la sessione in volo"; [[ -n "${FIGLIO:-}" ]] && kill -TERM "$FIGLIO" 2>/dev/null; mio_lock && rm -f "$LOCK"; exit 143' INT TERM
+FIGLI=()
+trap 'gov_lock_rilascia_tutti "$LOCKS"; mio_lock && rm -f "$LOCK"' EXIT
+trap 'log "segnale ricevuto: fermo le sessioni in volo"; for _p in ${FIGLI[@]+"${FIGLI[@]}"}; do kill -TERM "$_p" 2>/dev/null; done; gov_lock_rilascia_tutti "$LOCKS"; mio_lock && rm -f "$LOCK"; exit 143' INT TERM
 
 # VETO SUL DEPLOY (rilievo B4). Il filtro per classe di rischio governa la scelta del
 # cluster, non il rito di chiusura: la skill chiude ogni ciclo con `close-propagate
@@ -209,8 +250,14 @@ MODO="resume"
 if [[ "${RECUPERO:-0}" == "1" && -f "$CURSORE" ]]; then
   MODO="recover"
   log "sessione precedente morta senza chiudere: primo giro in recupero"
-elif [[ -f "$ESITO" ]]; then
-  ULTIMA=$(( ( $(date +%s) - $(stat -c %Y "$ESITO" 2>/dev/null || echo 0) ) / 3600 ))
+elif [[ -f "$GIRI" || -f "$ESITO" ]]; then
+  # Si guarda il GIORNALE, non l'ultimo esito. Con i lavoratori in parallelo l'esito
+  # lo scrive ciascuno nel proprio albero, e quello del repo principale resta fermo
+  # per sempre: dopo un giorno il driver sarebbe rientrato da bootstrap a ogni corsa,
+  # per un file che nessuno aggiornava piu'. Il giornale invece cresce in entrambi i
+  # modi, perche' lo scrive il driver.
+  RIFERIMENTO="$GIRI"; [[ -f "$RIFERIMENTO" ]] || RIFERIMENTO="$ESITO"
+  ULTIMA=$(( ( $(date +%s) - $(stat -c %Y "$RIFERIMENTO" 2>/dev/null || echo 0) ) / 3600 ))
   if (( ULTIMA >= STALE_H )); then
     MODO="bootstrap"
     log "ultima chiusura $ULTIMA ore fa (soglia $STALE_H): rientro da bootstrap, il piano puo' essersi mosso"
@@ -281,47 +328,86 @@ while (( GIRO < MAX_ITER )); do
     break
   fi
 
-  rm -f "$ESITO"
+  # --- chi lavora, e su cosa -----------------------------------------------------
+  # Il driver ASSEGNA. Senza, N lavoratori chiamerebbero tutti `zp_state prossimo` e
+  # otterrebbero lo stesso cluster: la selezione e' deterministica.
+  DIRS=(); CLUSTERS=()
+  if (( LAVORATORI > 1 )); then
+    ASSEGNATI=()
+    while IFS= read -r _z; do [[ -n "$_z" ]] && ASSEGNATI+=("$_z"); done < <(
+      gov_assegna "$REPO" "$CORSIA" "$LAVORATORI" "$ORE_MAX")
+    if (( ${#ASSEGNATI[@]} < 2 )); then
+      # Decisione 3 di Enzo: senza perimetri dichiarati non si va in parallelo, si
+      # torna al comportamento di sempre. Non e' un errore e non ferma la corsa.
+      log "meno di due cluster con perimetro dichiarato: questo giro va a un lavoratore solo"
+    else
+      for _i in "${!ASSEGNATI[@]}"; do
+        _c="${ASSEGNATI[$_i]}"
+        if ! gov_lock_prendi "$LOCKS" "$_c" "driver $$ giro $GIRO"; then
+          log "  $_c e' gia' in mano a un altro (pid $(gov_lock_chi "$LOCKS" "$_c")): lo salto"
+          continue
+        fi
+        _d="$(gov_worktree_prepara "$REPO" $((_i + 1)))"
+        if [[ -z "$_d" ]] || ! gov_worktree_pronto "$_d"; then
+          log "  albero $((_i + 1)) non pronto: lancia prima --prepara-alberi $LAVORATORI"
+          gov_lock_rilascia "$LOCKS" "$_c"
+          continue
+        fi
+        DIRS+=("$_d"); CLUSTERS+=("$_c")
+      done
+    fi
+  fi
+  if (( ${#DIRS[@]} == 0 )); then
+    DIRS=("$REPO"); CLUSTERS=("")           # un lavoratore: il repo stesso, come sempre
+  fi
+
+  # --- si aprono le sessioni ------------------------------------------------------
+  # Il lucchetto della suite e' UNO SOLO per tutti: protegge il database, non la
+  # cartella. Senza questa riga ogni albero avrebbe il suo, cioe' nessuna protezione,
+  # e si tornerebbe al caso misurato il 2026-08-05 (14 rossi su 232, nessuno vero).
+  export SUITE_LOCK_FILE="$ZP/suite.lock"
+
   INIZIO=$(date +%s)
-  # stderr su FILE, non mescolato allo stdout (rilievo B3). Con `2>&1` una sola riga di
-  # warning rompeva il JSON, il costo finiva a 0 e il tetto di spesa non scattava mai:
-  # misurato, due sessioni da $11.87 contabilizzate $0.00. Il prompt porta anche la
-  # CORSIA, che prima non arrivava alla sessione (B5): la sessione sceglieva da sola il
-  # default `safe` — una speranza, non una garanzia.
-  claude -p "/zero-pending-loop $MODO --lane $CORSIA --budget-ore $ORE_MAX" \
-      --output-format json \
-      --max-budget-usd "$BUDGET_GIRO" \
-      --permission-mode "$PERMESSI" \
-      > "$ZP/last-response.json" 2> "$ZP/last-stderr.log" &
-  FIGLIO=$!
-  wait "$FIGLIO"; CODICE=$?
-  FIGLIO=""
+  FIGLI=()
+  for _i in "${!DIRS[@]}"; do
+    FIGLI+=("$(gov_avvia_lavoratore "${DIRS[$_i]}" "${CLUSTERS[$_i]}" "$MODO" \
+                                    "$CORSIA" "$ORE_MAX" "$BUDGET_GIRO" "$PERMESSI")")
+    [[ -n "${CLUSTERS[$_i]}" ]] && log "  lavoratore $((_i + 1)) -> ${CLUSTERS[$_i]}  (${DIRS[$_i]})"
+  done
+  CODICE=0
+  for _p in "${FIGLI[@]}"; do
+    wait "$_p"; _e=$?
+    (( _e > CODICE )) && CODICE=$_e
+  done
+  FIGLI=()
   DURATA=$(( $(date +%s) - INIZIO ))
 
-  # parsing via STDIN, non via argv: la riga di comando di Windows si ferma a ~32.767
-  # caratteri e una risposta di sessione la supera senza sforzo (misurato: 32.625 passa,
-  # 32.687 no). Oltre quel limite il comando falliva e il costo tornava 0, cioe' lo stesso
-  # effetto del JSON rotto: tetto di spesa decorativo.
-  COSTO="$("$PY" -c "
-import json,sys
-try: print(json.load(sys.stdin).get('total_cost_usd') or 0)
-except Exception: print(0)" < "$ZP/last-response.json" 2>/dev/null || echo 0)"
-  if [[ "$COSTO" == "0" || -z "$COSTO" ]]; then
-    log "ATTENZIONE: costo non estratto dalla risposta — il tetto di spesa non e' affidabile in questo giro"
-    [[ -s "$ZP/last-stderr.log" ]] && log "  stderr: $(tail -1 "$ZP/last-stderr.log" | cut -c1-120)"
+  # --- si raccoglie ---------------------------------------------------------------
+  # Una riga di giornale PER LAVORATORE, tutte nello stesso file: il tetto di spesa e'
+  # cumulativo sulla corsa, non per lavoratore. Con un giornale a testa, due lavoratori
+  # spenderebbero due volte il tetto senza che nessuno se ne accorga.
+  OUT=""; PROSSIMO=""; TUTTI_FERMI=1
+  for _i in "${!DIRS[@]}"; do
+    RACCOLTO="$(gov_raccogli_lavoratore "${DIRS[$_i]}")"
+    _out="${RACCOLTO%%|*}"; _resto="${RACCOLTO#*|}"
+    _costo="${_resto%%|*}"; _pross="${_resto##*|}"
+    if [[ "$_costo" == "0" || -z "$_costo" ]]; then
+      log "ATTENZIONE: costo non estratto — il tetto di spesa non e' affidabile in questo giro"
+      [[ -s "${DIRS[$_i]}/.zp/last-stderr.log" ]] &&
+        log "  stderr: $(tail -1 "${DIRS[$_i]}/.zp/last-stderr.log" | cut -c1-120)"
+    fi
+    printf '{"giro":%d,"modo":"%s","lavoratore":%d,"cluster":"%s","esito":"%s","costo_usd":%s,"durata_s":%d,"exit":%d}\n' \
+      "$GIRO" "$MODO" "$((_i + 1))" "${CLUSTERS[$_i]}" "$_out" "${_costo:-0}" "$DURATA" "$CODICE" >> "$GIRI"
+    log "esito=$_out  costo=\$$_costo  durata=${DURATA}s${CLUSTERS[$_i]:+  (${CLUSTERS[$_i]})}"
+    [[ -n "${CLUSTERS[$_i]}" ]] && gov_lock_rilascia "$LOCKS" "${CLUSTERS[$_i]}"
+    case "$_out" in nothing-to-do|blocked) ;; *) TUTTI_FERMI=0 ;; esac
+    OUT="$_out"; PROSSIMO="$_pross"
+  done
+  # Con piu' lavoratori ci si ferma solo se lo dicono TUTTI: altrimenti basterebbe che
+  # uno finisse il suo per chiudere la corsa lasciando gli altri a meta'.
+  if (( ${#DIRS[@]} > 1 )); then
+    if (( TUTTI_FERMI == 1 )); then OUT="nothing-to-do"; else OUT="cluster-closed"; PROSSIMO=""; fi
   fi
-
-  if [[ -f "$ESITO" ]]; then
-    OUT="$("$PY" -c "import json;print(json.load(open('.zp/last-outcome.json',encoding='utf-8')).get('outcome',''))" 2>/dev/null)"
-    PROSSIMO="$("$PY" -c "import json;print(json.load(open('.zp/last-outcome.json',encoding='utf-8')).get('next',''))" 2>/dev/null)"
-  else
-    OUT="troncato"; PROSSIMO="recover"
-  fi
-
-  printf '{"giro":%d,"modo":"%s","esito":"%s","costo_usd":%s,"durata_s":%d,"exit":%d}\n' \
-    "$GIRO" "$MODO" "$OUT" "${COSTO:-0}" "$DURATA" "$CODICE" >> "$GIRI"
-
-  log "esito=$OUT  costo=\$$COSTO  durata=${DURATA}s"
   "$PY" docs/kb/tools/zp_state.py progress --lane "$CORSIA" >/dev/null 2>&1
 
   case "$OUT" in

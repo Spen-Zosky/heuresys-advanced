@@ -2,7 +2,16 @@
 
 **Item**: `#173` (`SOT_BACKLOG.md`, era `WAIT-INPUT`) · **Piano scritto**: S1052, 2026-08-09
 **Origine**: consegna Cowork del 2026-08-08 in `docs/kb/COWORK_INBOX.md` (§ "Sessione gov")
-**Stato del piano**: scritto, **non eseguito** — attende il via di Enzo sull'esecuzione.
+**Stato del piano**: **sessione A chiusa** (G1+G2, 2026-08-09). Restano B (G3+G4) e C (G5+G6+G7).
+
+> **Emendamento a G1, deciso eseguendo** (S1052). Il piano diceva che `gov` sarebbe stata
+> «un'etichetta, non un permesso», e questo resta vero per il cancello di verifica. Ma la
+> decisione 6 di Enzo — *gov non tocca mai codice* — sarebbe rimasta **prosa**: e questo
+> progetto ha già scritto, nel commento in testa a `session_mode.py`, che «la modalità non
+> è una promessa del modello, è uno stato su disco». Quindi `gov` ha una guardia propria e
+> vieta **una cosa sola**: scrivere in `apps/`, `packages/`, `db/`. Divieto minimo e non
+> lista di permessi — `#121` ha misurato che una guardia larga rifiuta lavoro legittimo,
+> in silenzio.
 
 ---
 
@@ -78,8 +87,8 @@ Una riga per deliverable. Lo stato si legge da qui, non dalla memoria.
 
 | id | cosa | chi | cosa significa fatto | stato |
 |---|---|---|---|---|
-| **G1** | Terzo e quarto modo di sessione (`gov`, `worker`) in `session_mode.py` | Claude | `avvia sessione gov` → `hook.sh mode <sid>` stampa `gov`; il selftest cresce di 8 casi e **fallisce** se il collasso binario torna | da fare |
-| **G2** | Campo `perimetro:` in `zp.config.yaml` + controllo di non sovrapposizione | Claude | `zp_state.py perimetri --corsia safe` elenca i gruppi parallelizzabili; due cluster che condividono un path non finiscono mai nello stesso gruppo; cluster senza perimetro → gruppo sequenziale | da fare |
+| **G1** | Terzo e quarto modo di sessione (`gov`, `worker`) in `session_mode.py` | Claude | `avvia sessione gov` → `hook.sh mode <sid>` stampa `gov`; il selftest cresce di 8 casi e **fallisce** se il collasso binario torna | ✅ **FATTO** `53979bbb` |
+| **G2** | Campo `perimetro:` in `zp.config.yaml` + controllo di non sovrapposizione | Claude | `zp_state.py perimetri --corsia safe` elenca i gruppi parallelizzabili; due cluster che condividono un path non finiscono mai nello stesso gruppo; cluster senza perimetro → gruppo sequenziale | ✅ **FATTO** `6fb00aee` |
 | **G3** | Isolamento per worktree + lock per-cluster al posto del lock globale | Claude | 2 lavoratori girano insieme su due worktree; il driver singolo continua a funzionare **identico** quando `--lavoratori 1` | da fare |
 | **G4** | Namespacing dello stato `.zp/` per lavoratore | Claude | `.zp/w1/`, `.zp/w2/` con `cursor.json`, `last-outcome.json`, `last-response.json`, `last-stderr.log`; `.zp/` resta la casa dello stato condiviso | da fare |
 | **G5** | Comando `stato gov` (consolidamento manuale, decisione 1) | Claude | un comando stampa: chi sta girando, su che cluster, da quanto, spesa per lavoratore e totale, esiti raccolti | da fare |
@@ -225,7 +234,7 @@ G7 gira **presidiata**, cioè con il freno ancora giù e l'autorizzazione data a
 
 | sessione | voci | perché insieme |
 |---|---|---|
-| A | **G1 + G2** | Non toccano il driver. Chiudono da sole, con selftest verde. ~2-3h. |
+| A ✅ | **G1 + G2** | Non toccano il driver. Chiudono da sole, con selftest verde. ~2-3h. **Chiusa il 2026-08-09** (S1052), commit `53979bbb` + `6fb00aee`. |
 | B | **G3 + G4** | Sono lo stesso intervento visto da due lati (isolamento e stato). Separarle lascia il driver a metà. ~3-4h. |
 | C | **G5 + G6 + G7** | Consolidamento, lock del censimento, e la corsa vera che li prova tutti. ~2-3h + la corsa. |
 

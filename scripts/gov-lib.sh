@@ -259,6 +259,19 @@ gov_avvia_lavoratore() {     # <dir> <cluster> <modo> <corsia> <ore> <budget> <p
   # farebbe fuori la modalita' di sempre. Un incarico vecchio va comunque rimosso, o
   # resterebbe a recintare chi non c'entra.
   rm -f "$dir/.zp/incarico.json" "$dir/.zp/diario.ndjson"
+
+  # [S1052] Il diario ora vive FUORI dall'albero (B1: il sorvegliato non custodisce il
+  # proprio registro), quindi la riga sopra non lo raggiunge piu' e il giornale si
+  # accumulava fra corse diverse: l'istruttoria di un lavoro avrebbe contato le azioni
+  # di cluster precedenti. Qui si ARCHIVIA invece di cancellare — il registro di una
+  # corsa e' una prova e non si butta, ma quella nuova deve partire pulita.
+  local diari="${GOV_DIARI:-$(dirname "$dir")/../heuresys-gov-diari}"
+  local diario_att="$diari/$(basename "$dir").ndjson"
+  if [[ -s "$diario_att" ]]; then
+    mkdir -p "$diari/archivio" 2>/dev/null &&
+      mv "$diario_att" "$diari/archivio/$(basename "$dir")-$(date +%Y%m%d-%H%M%S).ndjson" 2>/dev/null || true
+  fi
+
   if [[ -n "$cluster" ]]; then
     local perim
     perim="$("${ZP_PYTHON:-python}" docs/kb/tools/zp_state.py perimetro-json "$cluster" 2>/dev/null)"

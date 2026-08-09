@@ -11,6 +11,7 @@ Sottocomandi
     cursore      legge o scrive .zp/cursor.json
     interrotto   registra o elenca i cluster interrotti
     progress     rigenera .zp/PROGRESS.md
+    perimetri    quali cluster possono girare INSIEME (modalita' gov, #173)
 
 Uso tipico dal driver e dalla skill:
     python docs/kb/tools/zp_state.py prossimo --lane safe --json
@@ -73,10 +74,113 @@ class Cluster:
     nota_chiusura: str = ''
     riga: int = 0
     classe: str = ''                # assegnata dalla config, non dal piano
+    perimetro: list = field(default_factory=list)   # idem: si dichiara, non si deduce
 
     @property
     def eseguibile_da_solo(self) -> bool:
         return not self.bloccato_su_enzo
+
+    @property
+    def parallelizzabile(self) -> bool:
+        """Senza perimetro dichiarato un cluster non entra MAI in parallelo.
+
+        Decisione 3 di Enzo (#173): perimetro assente o ambiguo => quel cluster
+        torna sequenziale, senza bloccare gli altri. Il fail-safe e' lo stesso di
+        `get_mode`: nel dubbio, il comportamento di sempre."""
+        return bool(_normalizza_perimetro(self.perimetro))
+
+
+# --- perimetri: quali cluster possono girare insieme ----------------------
+#
+# Il perimetro si DICHIARA in zp.config.yaml, accanto alla classe di rischio e per
+# la stessa ragione: dedurlo dalla prosa della descrizione e' esattamente l'errore
+# che la classificazione a mano ha gia' evitato una volta.
+#
+#   Z-004: {classe: B, perche: "...", perimetro: [apps/api/src/modules/x/**]}
+
+
+def _normalizza_perimetro(voci) -> list:
+    """Da ['apps/api/src/x/**', 'db/'] a ['apps/api/src/x', 'db'].
+
+    Toglie i jolly finali e le barre di contorno, cosi' il confronto e' fra
+    percorsi e non fra glob. `**` e `/` diventano stringa vuota, cioe' LA RADICE:
+    e' il caso limite che deve risultare in conflitto con chiunque, non in
+    «nessuna sovrapposizione»."""
+    fuori = []
+    for v in voci or []:
+        s = str(v).replace('\\', '/').strip()
+        if not s:
+            continue
+        s = re.sub(r'/?\*+$', '', s)          # /** e /* finali
+        s = s.strip('/')
+        fuori.append(s)
+    return fuori
+
+
+def _si_sovrappongono(a: str, b: str) -> bool:
+    """Vero se due percorsi normalizzati si toccano.
+
+    Il confronto e' per SEGMENTO, non per prefisso di stringa: `apps/api` e
+    `apps/api2` sono due cose diverse, e un `startswith` nudo li direbbe in
+    conflitto bloccando lavoro che poteva girare in parallelo."""
+    if a == '' or b == '':
+        return True                            # la radice tocca tutto
+    if a == b:
+        return True
+    return a.startswith(b + '/') or b.startswith(a + '/')
+
+
+def in_conflitto(c1, c2) -> list:
+    """Le coppie di percorsi che mettono due cluster in conflitto. Vuota = disgiunti."""
+    p1, p2 = _normalizza_perimetro(c1.perimetro), _normalizza_perimetro(c2.perimetro)
+    return [(a, b) for a in p1 for b in p2 if _si_sovrappongono(a, b)]
+
+
+def gruppo_parallelo(clusters: list, cfg: dict, corsia: str, lavoratori: int | None = None,
+                     budget_ore: float | None = None, offline: bool = True) -> dict:
+    """Chi puo' girare INSIEME, chi resta in coda, e perche'.
+
+    Selezione golosa sull'ordine dei candidati, che e' gia' quello di priorita':
+    si prende il primo, e ogni successivo entra solo se disgiunto da TUTTI quelli
+    gia' presi. Deterministica — a parita' di piano dà sempre lo stesso esito.
+    """
+    conf_gov = (cfg.get('gov') or {})
+    massimo = conf_gov.get('lavoratori_max') or 3
+    if lavoratori is None:
+        lavoratori = conf_gov.get('lavoratori_default') or 2
+    lavoratori = max(1, min(int(lavoratori), int(massimo)))
+
+    in_corsa = candidati(clusters, cfg, corsia, budget_ore=budget_ore, offline=offline)
+    scelti, sequenziali, scartati = [], [], []
+    for c in in_corsa:
+        if not c.parallelizzabile:
+            sequenziali.append({'id': c.id, 'perche': 'nessun perimetro dichiarato'})
+            continue
+        if len(scelti) >= lavoratori:
+            scartati.append({'id': c.id, 'perche': f'i {lavoratori} posti sono gia occupati'})
+            continue
+        collisioni = [(altro.id, in_conflitto(c, altro)) for altro in scelti
+                      if in_conflitto(c, altro)]
+        if collisioni:
+            scartati.append({
+                'id': c.id,
+                'perche': 'perimetro sovrapposto',
+                'con': [{'id': i, 'percorsi': [f'{a} ~ {b}' for a, b in cp]}
+                        for i, cp in collisioni],
+            })
+            continue
+        scelti.append(c)
+
+    return {
+        'corsia': corsia,
+        'lavoratori': lavoratori,
+        'lavoratori_max': massimo,
+        'parallelo': [{'id': c.id, 'classe': c.classe, 'effort': c.effort,
+                       'perimetro': _normalizza_perimetro(c.perimetro),
+                       'descrizione': c.descrizione} for c in scelti],
+        'sequenziali': sequenziali,
+        'scartati': scartati,
+    }
 
 
 def carica_config(percorso: Path = CONFIG) -> dict:
@@ -145,6 +249,7 @@ def carica_piano(cfg: dict | None = None) -> list[Cluster]:
                 descrizione=mc.group('desc').strip(),
                 riga=n,
                 classe=(voce.get('classe') or '').upper(),
+                perimetro=list(voce.get('perimetro') or []),
             ))
             continue
         if clusters:
@@ -504,6 +609,12 @@ def main() -> int:
     pp = sub.add_parser('progress')
     pp.add_argument('--lane', default='safe')
 
+    pm = sub.add_parser('perimetri', help='chi puo girare insieme, chi resta in coda, e perche')
+    pm.add_argument('--lane', default='safe')
+    pm.add_argument('--lavoratori', type=int, default=None)
+    pm.add_argument('--budget-ore', type=float, default=None)
+    pm.add_argument('--json', action='store_true')
+
     a = ap.parse_args()
     cfg = carica_config()
 
@@ -619,6 +730,34 @@ def main() -> int:
     if a.cmd == 'progress':
         dest = scrivi_progress(clusters, cfg, a.lane)
         print(f'scritto {dest}')
+        return 0
+
+    if a.cmd == 'perimetri':
+        esito = gruppo_parallelo(clusters, cfg, a.lane, a.lavoratori, a.budget_ore)
+        if a.json:
+            print(json.dumps(esito, ensure_ascii=False, indent=2))
+            return 0
+        print(f"corsia {esito['corsia']} · {esito['lavoratori']} lavoratori "
+              f"(tetto {esito['lavoratori_max']})")
+        if not esito['parallelo']:
+            print('\nIN PARALLELO: nessuno.')
+        else:
+            print(f"\nIN PARALLELO ({len(esito['parallelo'])}):")
+            for c in esito['parallelo']:
+                print(f"  {c['id']}  [{c['classe']}] {c['effort']}h  {c['descrizione'][:56]}")
+                print(f"      perimetro: {', '.join(c['perimetro'])}")
+        if esito['scartati']:
+            print(f"\nFUORI da questo giro ({len(esito['scartati'])}):")
+            for s in esito['scartati'][:10]:
+                riga = f"  {s['id']}  {s['perche']}"
+                for c in s.get('con', []):
+                    riga += f" con {c['id']} ({'; '.join(c['percorsi'])})"
+                print(riga)
+        if esito['sequenziali']:
+            print(f"\nSEQUENZIALI ({len(esito['sequenziali'])}) — nessun perimetro "
+                  f"dichiarato, girano da soli come sempre:")
+            print('  ' + ', '.join(s['id'] for s in esito['sequenziali'][:20])
+                  + (' ...' if len(esito['sequenziali']) > 20 else ''))
         return 0
 
     return 2

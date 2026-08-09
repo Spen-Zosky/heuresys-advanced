@@ -68,6 +68,29 @@ lanes:
   # D ed E non appaiono in nessuna corsia: non e' una dimenticanza.
   # D richiede autorizzazione per lotto, E richiede un input di Enzo.
 
+# MODALITA' GOV (#173) — il loop con piu' lavoratori invece di uno.
+# Piano: docs/superpowers/plans/2026-08-09-modalita-gov.md
+#
+# Il numero e' un TETTO, non un obiettivo: `--lavoratori 5` viene accettato e
+# ridotto a `lavoratori_max`, come gia' fa il driver con i due flag di spesa.
+# Nessuna classificazione di rischio nuova (decisione 5): valgono le classi A-D
+# e le corsie qui sopra, immutate.
+gov:
+  lavoratori_default: 2
+  lavoratori_max: 3
+  # Un cluster entra in parallelo SOLO se ha un `perimetro:` dichiarato nella sua
+  # voce sotto `clusters:`. Senza, torna sequenziale e non blocca gli altri
+  # (decisione 3). Il perimetro si scrive a mano come la classe, e per la stessa
+  # ragione: dedurlo dalla prosa e' l'errore che la classificazione ha gia' evitato.
+  #
+  #   Z-004: {classe: B, perche: "...", perimetro: [apps/api/src/modules/x/**]}
+  #
+  # ATTENZIONE, misurato S1052: il perimetro governa la collisione FRA FILE, che
+  # non e' l'unica. Tre guardie del loop ragionano sull'intero albero di lavoro
+  # («non parto su repo sporco», l'impronta del cancello di verifica, i controlli
+  # dovuti per file toccato): per questo ogni lavoratore vuole il PROPRIO albero
+  # di lavoro, non solo un perimetro disgiunto. E' la voce G3 del piano.
+
 budget:
   # Il contesto residuo NON e' misurabile dall'interno di una sessione (nessun contatore
   # accessibile al modello, /context non invocabile in headless, hook senza dati di token,
@@ -284,7 +307,7 @@ clusters:
   Z-108: {classe: C, perche: "C per azione (il criterio installa o provisiona software di sistema); il testo suggeriva B"}
   Z-109: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-111: {classe: B, perche: "codice: api, apps/api, vitest"}
-  Z-112: {classe: A, perche: "inerte: DEBT_REGISTER"}
+  Z-112: {classe: A, perche: "inerte: DEBT_REGISTER", perimetro: [apps/api/test/**, apps/api/vitest.config.ts]}
   Z-113: {classe: B, perche: "rivisto a mano: spec E2E mancanti: codice di test"}
   Z-114: {classe: B, perche: "codice: Playwright, route"}
   Z-115: {classe: A, perche: "inerte: docs/"}
@@ -295,7 +318,7 @@ clusters:
   Z-120: {classe: B, perche: "codice: test"}
   Z-121: {classe: B, perche: "codice: test"}
   Z-122: {classe: B, perche: "codice: API, test"}
-  Z-123: {classe: B, perche: "codice: test"}
+  Z-123: {classe: B, perche: "codice: test", perimetro: [apps/api/test/**, apps/api/src/server.ts]}
   Z-124: {classe: C, perche: "nessun segnale riconosciuto - alzata per prudenza", rivisto: false}
   Z-126: {classe: C, perche: "schema e dati: tabella"}
   Z-127: {classe: B, perche: "codice: CI, component, test"}
@@ -381,10 +404,10 @@ clusters:
   Z-218: {classe: B, perche: "codice: CI, test"}
   Z-219: {classe: C, perche: "schema e dati: tabelle", rivisto: false}
   Z-220: {classe: A, perche: "inerte: SOT_BACKLOG"}
-  Z-221: {classe: A, perche: "inerte: docs/"}
+  Z-221: {classe: A, perche: "inerte: docs/", perimetro: [docs/MVP_4_ROADMAP.md]}
   Z-222: {classe: E, perche: "bloccato su Enzo: decisione-business"}
   Z-223: {classe: A, perche: "inerte: ADR"}
-  Z-230: {classe: B, perche: "codice: zod"}
+  Z-230: {classe: B, perche: "codice: zod", perimetro: [docs/github/dependabot-triage-2026-05-26.md]}
   Z-231: {classe: B, perche: "codice: CI, api, apps/api"}
   Z-233: {classe: A, perche: "inerte: ADR"}
   Z-237: {classe: B, perche: "codice: test"}

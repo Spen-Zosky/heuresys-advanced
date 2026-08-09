@@ -35,11 +35,14 @@ Historical records live in `docs/archive/` and are **not** SoT. When state chang
 
 ## Session start
 
-**Two modes, declared by the user's first message** (`docs/kb/xtras/SESSION_MODES.md`):
+**Three modes, declared by the user's first message** (`docs/kb/xtras/SESSION_MODES.md`):
 
 - **`avvia sessione`** → `canonical`. Everything below applies unchanged.
 - **`avvia sessione lab`** → `lab`. Read-only analysis session, meant to run **in parallel** to a development one: verify gate skipped for that session alone, writes blocked at the tool layer, artifacts go to `<parent of repo>/heuresys-design-lab/`. Reading is unrestricted — a blocked read is a guard defect. Authenticated browsing is allowed (Chrome first). **Do not present the action menu**: it is not a development session.
+- **`avvia sessione gov`** → `gov` (#173). Orchestration: assigns clusters to worker sessions, verifies perimeters, instructs and consolidates. **Does not write product code** (`apps/`, `packages/`, `db/`) — everything else (`.zp/` state, plans, loop config, consolidation commits) is its own. Reading is unrestricted. **The verify gate applies exactly as in `canonical`**: `gov` is a label, not a permission. The brake `meta.autorizzato_non_presidiato` is never touched from here.
 - Anything else → `canonical`. Fail-safe: forgetting the command never opens a hole.
+
+⚠️ **`lab` and `gov` have DIFFERENT perimeters and neither implies the other**: `lab` does not write the repo; `gov` does not write *product code*. Only `lab` relaxes the verify gate.
 
 The mode is state on disk keyed by `session_id`, written by a `UserPromptSubmit` hook before the model sees the message — it does not depend on remembering to activate it.
 

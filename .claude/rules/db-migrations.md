@@ -41,7 +41,7 @@ Tre forme, in ordine:
 
 Dagli invarianti non negoziabili del `CLAUDE.md`:
 
-- **I3/I4** — le tabelle business vivono in `sys.sys_<plural>`. Gli schemi ausiliari sono `staging`, `brownfield`, `audit`. **Mai** `usr_*` / `br_*`.
+- **I3/I4** — le tabelle business vivono in `sys.sys_<plural>`. Gli schemi ausiliari sono `staging`, `reference_sync`, `audit`. **Mai** `usr_*` / `br_*`. ⚠️ `brownfield` è **RITIRATO** (#164 F4, mig. `000297`): le tre tabelle vive sono traslocate in `reference_sync`. Misurato S1052: `brownfield` **non esiste più** nel database (0 schemi), `reference_sync` sì.
 - **I5** — l'isolamento tenant è FK più filtro nel middleware API. **Mai RLS**: Postgres RLS non è usato da nessuna parte.
 - **I7** — l'auth è separata da `sys.sys_users`: 11 tabelle dedicate `sys.sys_auth_*`.
 - **I9** — il PIP (Position Intelligence Profile) è una VIEW o MATERIALIZED VIEW, mai un blob JSONB (ADR-0008).

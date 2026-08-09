@@ -16,9 +16,13 @@ paths:
 
 ## Ruoli
 
-11 ruoli: `PLATFORM_ADMIN`, `TENANT_ADMIN`, `BLUEPRINT_MANAGER`, `HRMS_MANAGER`, `PROCESS_OWNER`, `MANAGER`, `USER`, `READ_ONLY`, più i 3 ruoli funzionali senza holder aggiunti nell'epica S953/R2 (migrazione 000049): `CEO`, `TEAM_LEADER`, `TEAM_MEMBER`.
+**Il conteggio non si cita a memoria da qui**: sta in `docs/kb/SOT_STATE.md` e si ri-deriva con
+`SELECT count(*) FROM sys.sys_auth_roles`. Questa riga diceva «11 ruoli» mentre il database ne aveva
+**14** (misurato S1052) — un numero fermo in un documento che nessuno ri-deriva è un numero che mente.
 
-Il conteggio delle mappature ruolo×permesso sta in `docs/kb/SOT_STATE.md` — verifica live: `SELECT count(*) FROM sys.sys_auth_role_permissions`.
+Gli 11 storici: `PLATFORM_ADMIN`, `TENANT_ADMIN`, `BLUEPRINT_MANAGER`, `HRMS_MANAGER`, `PROCESS_OWNER`, `MANAGER`, `USER`, `READ_ONLY`, più i 3 funzionali senza holder dell'epica S953/R2 (migrazione 000049): `CEO`, `TEAM_LEADER`, `TEAM_MEMBER`. Per l'elenco corrente: `SELECT role_code FROM sys.sys_auth_roles ORDER BY 1`.
+
+Le mappature ruolo×permesso: `SELECT count(*) FROM sys.sys_auth_role_permissions`.
 
 ## Personas di test
 
@@ -26,11 +30,16 @@ Dopo il rebuild RTL di S950 sono **utenti RTL_BANK reali**, non i vecchi account
 
 | Persona | Ruolo |
 |---|---|
-| `admin@heuresys.com` | PLATFORM_ADMIN |
 | `federica.marchetti@rtl-bank.org` | TENANT_ADMIN |
 | `paolo.caputo@rtl-bank.org` | MANAGER |
 | `tommaso.fiore@rtl-bank.org` | USER, report di paolo |
 | `antonio.parisi@rtl-bank.org` | USER, outsider |
+
+⚠️ **`admin@heuresys.com` NON esiste più** — rimosso dalla migrazione `000295`, verificato S1052 con
+`SELECT ... WHERE user_email LIKE 'admin@heuresys%'` → **0 righe** (le altre quattro ci sono tutte).
+Era ancora citato qui e in `.claude/rules/tests.md`, e ha già fatto fallire la custodia della storia
+RTL per giorni (`#153`). Chi serve un `PLATFORM_ADMIN` deriva l'attore **dal ruolo**, non da un
+indirizzo scritto a mano.
 
 L'arco manager→employee reports-to è una relazione organizzativa reale. Autorità della mappatura: `db/scripts/seed-test-admin.ts`.
 

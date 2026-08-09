@@ -38,4 +38,6 @@ cd apps/api && pnpm typecheck:test                                    # usa tsco
 
 ⚠️ **Su host con Node ≥23** (es. Windows con Node 24) Playwright 1.61 crasha all'import (D-36). Usa `pnpm test:e2e:prod:node22` / `test:e2e:node22`: il wrapper esegue Playwright sotto un Node 22 portable ed è passthrough su Node ≤22, quindi CI, Mac e VM non sono toccati.
 
-Gli E2E fanno **login reale** (persona seminata o `admin@heuresys.com` con la password dalla env `TEST_ADMIN_PASSWORD`), navigano e asseriscono su dati seminati; le mutazioni si verificano con un re-fetch.
+Gli E2E fanno **login reale** con una persona vera del tenant (es. `federica.marchetti@rtl-bank.org`, `paolo.caputo@rtl-bank.org`), navigano e asseriscono su dati seminati; le mutazioni si verificano con un re-fetch.
+
+⚠️ `admin@heuresys.com` **non esiste più** (rimosso dalla mig. `000295`, misurato S1052: 0 righe). Era citato qui e in `security-auth.md`, e ha già rotto la custodia della storia RTL per giorni (`#153`). La password non è un valore unico da `TEST_ADMIN_PASSWORD`: è **derivata per-email** (memoria `persona_login_derived_password`).

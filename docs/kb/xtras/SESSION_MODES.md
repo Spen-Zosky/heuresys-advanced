@@ -1,4 +1,4 @@
-# Session modes — `canonical` and `lab`
+# Session modes — `canonical`, `lab` and `gov`
 
 Two sessions can run on this working tree **at the same time**: one developing, one doing
 read-only analysis. Before this existed, the end-of-turn verify gate read the whole shared tree and
@@ -10,7 +10,23 @@ A session now **declares itself** with its first message:
 |---|---|---|
 | `avvia sessione` | `canonical` | development as always: action menu, verify gate active, code + commits allowed |
 | `avvia sessione lab` | `lab` | analysis: verify gate skipped **for this session only**, writes blocked at the tool layer |
+| `avvia sessione gov` | `gov` | orchestration (#173): **does not write product code** (`apps/`, `packages/`, `db/`), verify gate active as in `canonical` |
 | anything else | `canonical` | **fail-safe** — forgetting the command never opens a hole |
+
+> **This document lagged behind the code** (found S1052, measured): `session_mode.py` had recognised
+> `gov` since G1 (`53979bbb`), and the word appeared **zero times** here and in `CLAUDE.md`. A session
+> reading the documentation concluded there were two modes. Fixed — and worth remembering: the guard
+> being right does not help if the page people read is wrong.
+
+## The three modes are not three permission levels
+
+`gov` and `worker` are **labels, not permissions** (`session_mode.py`, §"le etichette nuove rendono
+facile sbagliare"). Only `lab` relaxes the verify gate, because it is the only mode that does not
+write to the repo. `gov` goes through the gate exactly like `canonical`; it is *stricter* than
+`canonical` on one thing only — it must not write product code — and that restriction has its own
+guard (`_decide_gov`), separate from the `lab` one. Confusing the two perimeters is the mistake the
+code comments explicitly warn about: **`lab` does not write the repo, `gov` does not write product
+code.** They are different, and neither implies the other.
 
 ## How it works
 

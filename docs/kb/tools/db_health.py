@@ -201,18 +201,20 @@ def sonde() -> list[tuple[str, str, bool]]:
                     int(n) != SOGLIE["duplicati_chiave_naturale"]))
 
     # L'organigramma. La funzione la crea la migrazione 000251 e restituisce una riga
-    # per regola col numero di violazioni aperte. Sei regole sono strutturali e devono
-    # stare a zero; la settima — «persone attive senza posizione» — e' una misura, e vale
-    # 1 perche' admin@heuresys.com e' un'utenza di servizio, non una persona
-    # dell'organigramma. Qui si sorveglia il gruppo strutturale: se una sola di quelle
-    # sei si accende, l'organigramma ha ricominciato a derivare.
+    # per regola col numero di violazioni aperte.
+    #
+    # [S1052] L'esenzione e' STATA TOLTA. «persone attive senza posizione» era esclusa dal
+    # conteggio perche' valeva 1 per via di `admin@heuresys.com`, utenza di servizio e non
+    # persona dell'organigramma. Quell'account e' stato rimosso dalla migrazione `000295`
+    # (`#139`) e la regola ora vale **0**, misurato — quindi l'esenzione era diventata un
+    # punto cieco: nessuno guardava piu' quella regola, e una persona lasciata senza
+    # posizione sarebbe passata inosservata. Ora si sorvegliano tutte e otto.
     if uno("""SELECT count(*) FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
               WHERE n.nspname='sys' AND p.proname='fn_organization_integrity_violations'""") != "0":
         strutt = q("""SELECT coalesce(sum(violazioni),0)
-                        FROM sys.fn_organization_integrity_violations()
-                       WHERE regola <> 'persone attive senza posizione'""")
+                        FROM sys.fn_organization_integrity_violations()""")
         n_strutt = strutt[0][0] if strutt and strutt[0] else "0"
-        out.append(("violazioni strutturali dell'organigramma", n_strutt, int(n_strutt) != 0))
+        out.append(("violazioni dell'organigramma (tutte e 8 le regole)", n_strutt, int(n_strutt) != 0))
     else:
         out.append(("violazioni strutturali dell'organigramma", "n/d (funzione assente)", False))
 

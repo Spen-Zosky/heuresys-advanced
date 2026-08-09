@@ -1,8 +1,20 @@
 #!/usr/bin/env python3
-"""session_mode.py — due modalita' di sessione per heuresys-advanced.
+"""session_mode.py — le modalita' di sessione di heuresys-advanced.
 
     avvia sessione        -> modalita' `canonical`  (sviluppo, comportamento storico)
     avvia sessione lab    -> modalita' `lab`        (analisi, sola lettura sul prodotto)
+    avvia sessione gov    -> modalita' `gov`        (orchestrazione, #173)
+
+Una quarta esiste ma NON si digita: `worker`, l'etichetta che il driver mette
+addosso alle sessioni-lavoratore che apre, insieme al cluster assegnato. Se fosse
+digitabile, una sessione umana potrebbe presentarsi come lavoratore di un cluster
+che nessuno le ha dato.
+
+`gov` e `worker` NON sono permessi: sono etichette. Solo `lab` allenta il cancello
+di verifica, perche' e' l'unica che non scrive nel repo. `gov` ha una guardia
+propria e piu' stretta di `canonical` su una cosa sola — non scrive codice di
+prodotto (apps/, packages/, db/), perche' quello e' nelle mani dei lavoratori
+mentre girano.
 
 Principio: la modalita' non e' una promessa del modello, e' uno STATO su disco
 marcato sul `session_id`. Gli hook la leggono, quindi due sessioni concorrenti
@@ -43,6 +55,9 @@ from pathlib import Path
 
 CANONICAL = "canonical"
 LAB = "lab"
+GOV = "gov"          # orchestratore di #173: assegna, verifica, lancia, consolida
+WORKER = "worker"    # sessione-lavoratore aperta dal driver, non digitabile a mano
+MODI = (CANONICAL, LAB, GOV, WORKER)
 MAX_MARKER_AGE_S = 14 * 24 * 3600
 
 # --- percorsi -------------------------------------------------------------
@@ -101,23 +116,65 @@ def get_mode(session_id: str) -> str:
     except (OSError, ValueError):
         return CANONICAL
     mode = data.get("mode")
-    return LAB if mode == LAB else CANONICAL
+    # Elenco esplicito, non un ternario: finche' la funzione diceva «lab o
+    # canonical», una modalita' nuova veniva trattata in silenzio come canonica
+    # e nessuno se ne accorgeva. Un valore ignoto resta canonical — il fallimento
+    # sicuro non cambia: e' il comportamento piu' severo.
+    return mode if mode in MODI else CANONICAL
 
 
-def set_mode(session_id: str, mode: str) -> None:
+def leggi_marcatore(session_id: str) -> dict:
+    """Il payload del marcatore, o {} se assente/illeggibile.
+
+    Serve alle plance: `get_mode` risponde «che modalita'», questa risponde
+    «e con quale incarico» — quale cluster sta lavorando un lavoratore, e da quando."""
+    if not session_id:
+        return {}
+    try:
+        data = json.loads(marker(session_id).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def set_mode(session_id: str, mode: str, cluster: str | None = None,
+             lavoratore: int | None = None) -> None:
     STORE.mkdir(parents=True, exist_ok=True)
+    payload_marcatore = {
+        "mode": mode,
+        "session_id": session_id,
+        "repo": str(REPO),
+        "set_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+    }
+    # Solo per i lavoratori: senza questi due campi le plance vedono N sessioni
+    # identiche e non sanno dire chi sta facendo cosa (gap segnalato da Cowork).
+    if cluster:
+        payload_marcatore["cluster"] = cluster
+    if lavoratore is not None:
+        payload_marcatore["lavoratore"] = lavoratore
     marker(session_id).write_text(
-        json.dumps(
-            {
-                "mode": mode,
-                "session_id": session_id,
-                "repo": str(REPO),
-                "set_at": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
-            },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
+        json.dumps(payload_marcatore, indent=2), encoding="utf-8")
+
+
+# --- che cosa comporta una modalita' -------------------------------------
+#
+# DUE PREDICATI, NON UNA CATENA DI `if` SPARSI. Sono la risposta a una domanda che
+# le etichette nuove rendono facile sbagliare: `gov` e `worker` NON sono permessi.
+# Solo `lab` e' esente dal cancello di verifica, perche' e' l'unica modalita' che
+# non scrive nel repo. Tutte le altre ci passano, `gov` compresa.
+
+
+def guardia_si_applica(mode: str) -> bool:
+    """Vero se la guardia sulle chiamate va consultata in questa modalita'.
+
+    `lab` e `gov` hanno perimetri DIVERSI e non vanno confusi: `lab` non scrive
+    nel repo, `gov` non scrive **codice di prodotto**. Vedi `_decide_gov`."""
+    return mode in (LAB, GOV)
+
+
+def cancello_di_verifica_si_applica(mode: str) -> bool:
+    """Vero se il cancello di verifica deve girare a fine turno."""
+    return mode != LAB
 
 
 def gc() -> int:
@@ -174,19 +231,24 @@ def record_shape(event: str, data: dict) -> None:
 
 # --- riconoscimento dei comandi di avvio ---------------------------------
 
-_CMD_RE = re.compile(r"^\s*avvia\s+sessione(?:\s+(lab))?\s*[.!:]?\s*$", re.IGNORECASE)
+# `worker` non compare qui apposta: e' un'etichetta che il driver assegna ai figli
+# che apre, non un comando che si digita. Se fosse digitabile, una sessione umana
+# potrebbe presentarsi come lavoratore di un cluster che nessuno le ha assegnato.
+_CMD_RE = re.compile(r"^\s*avvia\s+sessione(?:\s+(lab|gov))?\s*[.!:]?\s*$", re.IGNORECASE)
 
 
 def parse_start_command(prompt: str):
-    """-> 'lab' | 'canonical' | None. Riconosce il comando anche come prima
-    riga di un messaggio piu' lungo."""
+    """-> 'lab' | 'gov' | 'canonical' | None. Riconosce il comando anche come
+    prima riga di un messaggio piu' lungo."""
     if not prompt:
         return None
     first = prompt.strip().splitlines()[0] if prompt.strip() else ""
     for candidate in (prompt, first):
         m = _CMD_RE.match(candidate)
         if m:
-            return LAB if m.group(1) else CANONICAL
+            if not m.group(1):
+                return CANONICAL
+            return LAB if m.group(1).lower() == LAB else GOV
     return None
 
 
@@ -222,6 +284,27 @@ Vincoli attivi, imposti anche da una guardia automatica:
 Contratto completo: <padre del repo>/heuresys-design-lab/README.md
 Apri leggendo quel README e lo STATO.md accanto, poi chiedi da dove partire.
 Non presentare il menu delle azioni di sviluppo: non e' una sessione di sviluppo.
+"""
+
+
+GOV_BRIEF = """\
+[modalita' sessione: GOV — orchestrazione del loop zero-pendenze]
+
+Sei l'ORCHESTRATORE, non un lavoratore. Assegni, verifichi i perimetri, lanci,
+consolidi. Il codice lo scrivono le sessioni-lavoratore che apri.
+
+Vincoli attivi, imposti anche da una guardia automatica:
+  · NON scrivi in apps/, packages/, db/ — e' codice di prodotto, ed e' nelle mani
+    dei lavoratori mentre girano. Tutto il resto (stato .zp/, piani, config del
+    loop, commit di consolidamento) e' tuo.
+  · LETTURA senza limiti, come sempre.
+  · Il cancello di verifica si applica: `gov` e' un'etichetta, non un permesso.
+  · Il freno `meta.autorizzato_non_presidiato` NON si tocca da qui.
+
+Adesso, in un solo giro:
+  python docs/kb/tools/session_start.py
+Poi presenta il menu e chiedi da dove partire. Il piano della modalita' e'
+docs/superpowers/plans/2026-08-09-modalita-gov.md.
 """
 
 
@@ -509,13 +592,47 @@ def _check_redirect(seg: str):
     return None
 
 
-def decide(tool_name: str, tool_input: dict):
-    """Decisione della guardia in modalita' lab.
+# In `gov` si vieta UNA cosa sola: scrivere codice di prodotto. E' la decisione 6
+# di Enzo (#173) resa esecutiva invece che promessa — «gov assegna, verifica,
+# lancia, consolida», altrimenti diventa un quarto scrittore mentre 2-3 lavoratori
+# hanno le mani sugli stessi file.
+#
+# Divieto minimo, non lista di permessi: #121 ha misurato che una guardia larga
+# rifiuta lavoro legittimo, e lo fa in silenzio. Qui l'orchestratore deve poter
+# scrivere il suo stato, i piani, la config del loop, e committare il consolidamento.
+GOV_VIETATI = ("apps/", "packages/", "db/")
+
+
+def _decide_gov(tool_name: str, tool_input: dict):
+    if tool_name not in {"Write", "Edit", "NotebookEdit", "MultiEdit"}:
+        return True, ""
+    fp = tool_input.get("file_path") or tool_input.get("notebook_path") or ""
+    if not fp:
+        return True, ""
+    try:
+        rel = os.path.relpath(norm(fp), norm(REPO)).replace("\\", "/")
+    except ValueError:
+        return True, ""                      # altro volume: fuori dal repo
+    if rel.startswith(".."):
+        return True, ""                      # fuori dal repo
+    if rel.startswith(GOV_VIETATI):
+        return False, (
+            f"modalita' gov: `{rel}` e' codice di prodotto. L'orchestratore assegna, "
+            "verifica, lancia e consolida — il codice lo scrivono i lavoratori, "
+            "altrimenti sono due mani sullo stesso file (#173, decisione 6).")
+    return True, ""
+
+
+def decide(tool_name: str, tool_input: dict, mode: str = LAB):
+    """Decisione della guardia.
     -> (True, "") se permesso, (False, motivo) se vietato.
 
     Impostazione: LISTA DI DIVIETI. Tutto cio' che non e' esplicitamente
     vietato passa, perche' il perimetro di lettura e' totale."""
     tool_input = tool_input or {}
+
+    if mode == GOV:
+        return _decide_gov(tool_name, tool_input)
 
     if tool_name in {"Write", "Edit", "NotebookEdit", "MultiEdit"}:
         fp = tool_input.get("file_path") or tool_input.get("notebook_path") or ""
@@ -566,7 +683,7 @@ def cmd_prompt_hook() -> int:
         return 0
     set_mode(sid, mode)
     gc()
-    sys.stdout.write(LAB_BRIEF if mode == LAB else CANONICAL_BRIEF)
+    sys.stdout.write({LAB: LAB_BRIEF, GOV: GOV_BRIEF}.get(mode, CANONICAL_BRIEF))
     return 0
 
 
@@ -574,7 +691,7 @@ def cmd_stop_gate() -> int:
     data = payload()
     record_shape(data.get("hook_event_name") or "Stop", data)
     sid = data.get("session_id") or ""
-    if get_mode(sid) == LAB:
+    if not cancello_di_verifica_si_applica(get_mode(sid)):
         return 0                      # nessun output = nessun blocco
     gate = REPO / "docs" / "kb" / "tools" / "verify_gate.py"
     if not gate.is_file():
@@ -601,9 +718,10 @@ def cmd_lab_guard() -> int:
     data = payload()
     record_shape("PreToolUse", data)
     sid = data.get("session_id") or ""
-    if get_mode(sid) != LAB:
+    modalita = get_mode(sid)
+    if not guardia_si_applica(modalita):
         return 0
-    ok, reason = decide(data.get("tool_name") or "", data.get("tool_input") or {})
+    ok, reason = decide(data.get("tool_name") or "", data.get("tool_input") or {}, modalita)
     if ok:
         return 0
     sys.stderr.write(reason + "\n")
@@ -698,6 +816,31 @@ def _cases():
     ]
 
 
+def _casi_gov():
+    """Casi della guardia in modalita' `gov` (#173, decisione 6 di Enzo).
+
+    Il divieto e' UNO SOLO — scrivere codice di prodotto — e la lista dei
+    permessi non esiste apposta: #121 ha mostrato che una guardia larga
+    rifiuta lavoro legittimo, e lo fa in silenzio."""
+    repo = str(REPO)
+    return [
+        ("gov: scrittura in apps/", "Write", {"file_path": f"{repo}/apps/api/src/x.ts"}, False),
+        ("gov: modifica in apps/web", "Edit", {"file_path": f"{repo}/apps/web/src/app/page.tsx"}, False),
+        ("gov: scrittura in packages/", "Write", {"file_path": f"{repo}/packages/shared/src/i.ts"}, False),
+        ("gov: migrazione in db/", "Write", {"file_path": f"{repo}/db/migrations/000303_x.sql"}, False),
+        ("gov: scrittura in .zp/", "Write", {"file_path": f"{repo}/.zp/w1/cursor.json"}, True),
+        ("gov: scrittura di un piano", "Write", {"file_path": f"{repo}/docs/superpowers/plans/x.md"}, True),
+        ("gov: aggiorna la config del loop", "Write",
+         {"file_path": f"{repo}/.claude/skills/zero-pending-loop/references/zp.config.yaml"}, True),
+        ("gov: lancio del driver", "Bash",
+         {"command": "bash scripts/zero-pending-driver.sh --lavoratori 2 --dry-run"}, True),
+        ("gov: consolidamento", "Bash", {"command": "python docs/kb/tools/zp_state.py stato-gov"}, True),
+        ("gov: commit", "Bash", {"command": 'git commit -m "chore(zp): consolidamento"'}, True),
+        ("gov: lettura del codice di prodotto", "Read", {"file_path": f"{repo}/apps/api/src/server.ts"}, True),
+        ("gov: psql in lettura", "Bash", {"command": 'psql -c "SELECT count(*) FROM sys.sys_users"'}, True),
+    ]
+
+
 def cmd_selftest() -> int:
     ok = bad = 0
     failures = []
@@ -709,12 +852,48 @@ def cmd_selftest() -> int:
             bad += 1
             failures.append((desc, expected, allowed, reason))
 
+    for desc, tool, inp, expected in _casi_gov():
+        allowed, reason = decide(tool, inp, GOV)
+        if allowed == expected:
+            ok += 1
+        else:
+            bad += 1
+            failures.append((desc, expected, allowed, reason))
+
+    # Le etichette non sono permessi. Questa tabella e' il punto in cui
+    # `gov` puo' essere scambiata per una modalita' piu' permissiva: se
+    # qualcuno la esentasse dal cancello, qui diventa rosso.
+    for mode, guardia, cancello in [
+        (LAB, True, False),
+        (CANONICAL, False, True),
+        (GOV, True, True),
+        (WORKER, False, True),
+    ]:
+        for etichetta, atteso, ottenuto in [
+            (f"guardia in {mode}", guardia, guardia_si_applica(mode)),
+            (f"cancello di verifica in {mode}", cancello, cancello_di_verifica_si_applica(mode)),
+        ]:
+            if atteso == ottenuto:
+                ok += 1
+            else:
+                bad += 1
+                failures.append((etichetta, atteso, ottenuto, "predicato di modalita'"))
+
     # casi sul registro
     probe_sid = "__selftest__"
     checks = []
     try:
         set_mode(probe_sid, LAB)
         checks.append(("marcatore lab riletto", get_mode(probe_sid) == LAB))
+        set_mode(probe_sid, GOV)
+        checks.append(("marcatore gov riletto", get_mode(probe_sid) == GOV))
+        set_mode(probe_sid, WORKER, cluster="Z-004", lavoratore=2)
+        checks.append(("marcatore worker riletto", get_mode(probe_sid) == WORKER))
+        checks.append(("il lavoratore porta il cluster assegnato",
+                       leggi_marcatore(probe_sid).get("cluster") == "Z-004"))
+        marker(probe_sid).write_text(
+            json.dumps({"mode": "pippo", "session_id": probe_sid}), encoding="utf-8")
+        checks.append(("modo ignoto -> canonical", get_mode(probe_sid) == CANONICAL))
         marker(probe_sid).write_text("{ non json", encoding="utf-8")
         checks.append(("marcatore corrotto -> canonical", get_mode(probe_sid) == CANONICAL))
         marker(probe_sid).unlink()
@@ -738,6 +917,15 @@ def cmd_selftest() -> int:
         ("avvia sessione lab\nvoglio analizzare il DB", LAB),
         ("avviamo la sessione", None),
         ("parliamo di avvia sessione lab domani", None),
+        ("avvia sessione gov", GOV),
+        ("Avvia Sessione Gov", GOV),
+        ("  avvia sessione gov  ", GOV),
+        ("avvia sessione gov\nraggruppa le pendenze in due cluster", GOV),
+        # frontiere: una parola che COMINCIA per gov non e' il comando
+        ("avvia sessione govern", None),
+        ("avvia sessione governance", None),
+        # `worker` lo assegna il driver, non si digita: come comando non esiste
+        ("avvia sessione worker", None),
     ]:
         got = parse_start_command(text)
         if got == expected:
@@ -767,9 +955,22 @@ def main(argv: list[str]) -> int:
         return cmd_mode(rest)
     if cmd == "set":
         if len(rest) < 2:
-            print("uso: set <session_id> <canonical|lab>", file=sys.stderr)
+            print(f"uso: set <session_id> <{'|'.join(MODI)}> [cluster] [lavoratore]",
+                  file=sys.stderr)
             return 1
-        set_mode(rest[0], LAB if rest[1] == LAB else CANONICAL)
+        if rest[1] not in MODI:
+            print(f"modalita' sconosciuta: {rest[1]} (ammesse: {', '.join(MODI)})",
+                  file=sys.stderr)
+            return 1
+        lavoratore = None
+        if len(rest) > 3:
+            try:
+                lavoratore = int(rest[3])
+            except ValueError:
+                print(f"il numero del lavoratore non e' un numero: {rest[3]}", file=sys.stderr)
+                return 1
+        set_mode(rest[0], rest[1], cluster=(rest[2] if len(rest) > 2 else None),
+                 lavoratore=lavoratore)
         print(get_mode(rest[0]))
         return 0
     if cmd == "gc":

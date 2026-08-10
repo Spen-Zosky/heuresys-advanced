@@ -1,42 +1,42 @@
 # index_paths.yaml — indice percorsi dominio heuresys-advanced (CLI-owned SoT)
-# generato: 2026-08-10T07:04:04Z da docs/kb/tools/build_index.py
+# generato: 2026-08-10T17:42:37Z da docs/kb/tools/build_index.py
 # 'tutti e solo i file dominio, senza esclusioni' (escl. solo generated/secrets/PII + non-dominio Claude Desktop)
 meta:
-  generated_at: "2026-08-10T07:04:04Z"
-  total_files: 2916
+  generated_at: "2026-08-10T17:42:37Z"
+  total_files: 2935
   roots:
     repo: 'D:\heuresys-advanced'
     claude_desktop: 'C:\Users\enzospenuso\Claude Desktop'
   category_counts:
-    ADR: 34
+    ADR: 35
     api-core: 32
-    api-module: 323
+    api-module: 332
     ci: 17
     claude-config: 36
-    config: 146
+    config: 142
     cowork-archive: 14
     cowork-exchange: 205
     cowork-reserved: 119
     cowork-snapshot: 8
-    db-migration: 300
+    db-migration: 301
     db-other: 8
-    db-script: 48
+    db-script: 47
     db-seed: 148
-    doc-canonical: 572
+    doc-canonical: 576
     handoff-state: 1
     qa-artifact: 114
     script: 6
     session: 12
     shared-pkg: 4
-    shared-schema: 101
+    shared-schema: 104
     showcase-source: 14
-    test: 341
+    test: 347
     ux-design-archive: 80
     web-source: 233
   status_counts:
     archive: 508
     external-archive: 50
-    live: 2358
+    live: 2377
 files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\.keep'
     root: repo
@@ -239,6 +239,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\architecture\adr\0035_retirement_amends_the_source_never_deletes_downstream.md'
     root: repo
     rel: 'docs/architecture/adr/0035_retirement_amends_the_source_never_deletes_downstream.md'
+    category: ADR
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\architecture\adr\0036_hierarchical_and_functional_domains.md'
+    root: repo
+    rel: 'docs/architecture/adr/0036_hierarchical_and_functional_domains.md'
     category: ADR
     status: live
     provenance: git-tracked
@@ -827,6 +833,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\blueprint-variants\service.ts'
     root: repo
     rel: 'apps/api/src/modules/blueprint-variants/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\calibration-sessions\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/calibration-sessions/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\calibration-sessions\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/calibration-sessions/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\calibration-sessions\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/calibration-sessions/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -1568,6 +1592,24 @@ files:
     category: api-module
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\performance-reviews\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/performance-reviews/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\performance-reviews\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/performance-reviews/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\performance-reviews\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/performance-reviews/service.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\src\modules\position-career-paths\repository.ts'
     root: repo
     rel: 'apps/api/src/modules/position-career-paths/repository.ts'
@@ -1727,6 +1769,24 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\src\modules\reference-sync\sync-cli.ts'
     root: repo
     rel: 'apps/api/src/modules/reference-sync/sync-cli.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\review-cycles\repository.ts'
+    root: repo
+    rel: 'apps/api/src/modules/review-cycles/repository.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\review-cycles\routes.ts'
+    root: repo
+    rel: 'apps/api/src/modules/review-cycles/routes.ts'
+    category: api-module
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\src\modules\review-cycles\service.ts'
+    root: repo
+    rel: 'apps/api/src/modules/review-cycles/service.ts'
     category: api-module
     status: live
     provenance: git-tracked
@@ -3332,30 +3392,6 @@ files:
     category: config
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\gov-chiudi.sh'
-    root: repo
-    rel: 'scripts/gov-chiudi.sh'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\gov-lib.sh'
-    root: repo
-    rel: 'scripts/gov-lib.sh'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\hooks\gov_divieti.py'
-    root: repo
-    rel: 'scripts/hooks/gov_divieti.py'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\hooks\gov_worker_guard.py'
-    root: repo
-    rel: 'scripts/hooks/gov_worker_guard.py'
-    category: config
-    status: live
-    provenance: git-tracked
   - path: 'D:\heuresys-advanced\scripts\hooks\hook.sh'
     root: repo
     rel: 'scripts/hooks/hook.sh'
@@ -3482,21 +3518,21 @@ files:
     category: config
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\test\gov-lib-tests.sh'
+  - path: 'D:\heuresys-advanced\scripts\test\drift-check-rilascia-il-lucchetto.sh'
     root: repo
-    rel: 'scripts/test/gov-lib-tests.sh'
-    category: config
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\scripts\test\gov-worker-guard-tests.sh'
-    root: repo
-    rel: 'scripts/test/gov-worker-guard-tests.sh'
+    rel: 'scripts/test/drift-check-rilascia-il-lucchetto.sh'
     category: config
     status: live
     provenance: git-tracked
   - path: 'D:\heuresys-advanced\scripts\test\run-shell-tests.sh'
     root: repo
     rel: 'scripts/test/run-shell-tests.sh'
+    category: config
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\scripts\test\zp-review-tests.sh'
+    root: repo
+    rel: 'scripts/test/zp-review-tests.sh'
     category: config
     status: live
     provenance: git-tracked
@@ -7442,6 +7478,12 @@ files:
     category: db-migration
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\db\migrations\000303_approval_history_survives_user_deletion.sql'
+    root: repo
+    rel: 'db/migrations/000303_approval_history_survives_user_deletion.sql'
+    category: db-migration
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\db\data\esco\README.md'
     root: repo
     rel: 'db/data/esco/README.md'
@@ -7547,12 +7589,6 @@ files:
   - path: 'D:\heuresys-advanced\db\scripts\ci-rehearsal.sh'
     root: repo
     rel: 'db/scripts/ci-rehearsal.sh'
-    category: db-script
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\db\scripts\crea-ruolo-gov-worker.sh'
-    root: repo
-    rel: 'db/scripts/crea-ruolo-gov-worker.sh'
     category: db-script
     status: live
     provenance: git-tracked
@@ -9002,6 +9038,42 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-analisi-sicurezza-e-remediation.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-gov-analisi-sicurezza-e-remediation.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-gov-fase2-governo-dei-lavoratori.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-gov-fase2-governo-dei-lavoratori.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-modalita-gov.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-modalita-gov.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-09-plancia-gov.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-09-plancia-gov.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-corsa-181-sequenza-prevista.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-10-corsa-181-sequenza-prevista.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\archive\modalita-gov-ritirata\2026-08-10-ritiro-modalita-gov.md'
+    root: repo
+    rel: 'docs/archive/modalita-gov-ritirata/2026-08-10-ritiro-modalita-gov.md'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\archive\scripts-exhausted\README.md'
     root: repo
     rel: 'docs/archive/scripts-exhausted/README.md'
@@ -10208,6 +10280,12 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\chiudi_leggero.py'
+    root: repo
+    rel: 'docs/kb/tools/chiudi_leggero.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\docs\kb\tools\db_health.py'
     root: repo
     rel: 'docs/kb/tools/db_health.py'
@@ -10229,12 +10307,6 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\exposure_columns.py'
     root: repo
     rel: 'docs/kb/tools/exposure_columns.py'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\kb\tools\gov_rientro.py'
-    root: repo
-    rel: 'docs/kb/tools/gov_rientro.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -10331,6 +10403,12 @@ files:
   - path: 'D:\heuresys-advanced\docs\kb\tools\zp_gate.py'
     root: repo
     rel: 'docs/kb/tools/zp_gate.py'
+    category: doc-canonical
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\docs\kb\tools\zp_review.py'
+    root: repo
+    rel: 'docs/kb/tools/zp_review.py'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -11630,27 +11708,9 @@ files:
     category: doc-canonical
     status: live
     provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-gov-analisi-sicurezza-e-remediation.md'
+  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-10-batch-p1-s1053.md'
     root: repo
-    rel: 'docs/superpowers/plans/2026-08-09-gov-analisi-sicurezza-e-remediation.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-gov-fase2-governo-dei-lavoratori.md'
-    root: repo
-    rel: 'docs/superpowers/plans/2026-08-09-gov-fase2-governo-dei-lavoratori.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-modalita-gov.md'
-    root: repo
-    rel: 'docs/superpowers/plans/2026-08-09-modalita-gov.md'
-    category: doc-canonical
-    status: live
-    provenance: git-tracked
-  - path: 'D:\heuresys-advanced\docs\superpowers\plans\2026-08-09-plancia-gov.md'
-    root: repo
-    rel: 'docs/superpowers/plans/2026-08-09-plancia-gov.md'
+    rel: 'docs/superpowers/plans/2026-08-10-batch-p1-s1053.md'
     category: doc-canonical
     status: live
     provenance: git-tracked
@@ -13010,6 +13070,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\calibration.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/calibration.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\capability-composition.ts'
     root: repo
     rel: 'packages/shared/src/schemas/capability-composition.ts'
@@ -13256,6 +13322,12 @@ files:
     category: shared-schema
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\performance-reviews.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/performance-reviews.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\position-career-paths.ts'
     root: repo
     rel: 'packages/shared/src/schemas/position-career-paths.ts'
@@ -13307,6 +13379,12 @@ files:
   - path: 'D:\heuresys-advanced\packages\shared\src\schemas\reference-sync.ts'
     root: repo
     rel: 'packages/shared/src/schemas/reference-sync.ts'
+    category: shared-schema
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\packages\shared\src\schemas\review-cycles.ts'
+    root: repo
+    rel: 'packages/shared/src/schemas/review-cycles.ts'
     category: shared-schema
     status: live
     provenance: git-tracked
@@ -13796,6 +13874,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\calibration-sessions.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/calibration-sessions.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\capability-composition-scope.integration.test.ts'
     root: repo
     rel: 'apps/api/test/capability-composition-scope.integration.test.ts'
@@ -13841,6 +13925,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\compensation-read.integration.test.ts'
     root: repo
     rel: 'apps/api/test/compensation-read.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\compensation-residual-mask.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/compensation-residual-mask.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -14456,6 +14546,12 @@ files:
     category: test
     status: live
     provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\performance-reviews.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/performance-reviews.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
   - path: 'D:\heuresys-advanced\apps\api\test\pg-pool-resilience.test.ts'
     root: repo
     rel: 'apps/api/test/pg-pool-resilience.test.ts'
@@ -14627,6 +14723,12 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\result-cap.test.ts'
     root: repo
     rel: 'apps/api/test/result-cap.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\review-cycles.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/review-cycles.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked
@@ -14951,6 +15053,18 @@ files:
   - path: 'D:\heuresys-advanced\apps\api\test\user-career-plans.integration.test.ts'
     root: repo
     rel: 'apps/api/test/user-career-plans.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\user-dossier-mask.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/user-dossier-mask.integration.test.ts'
+    category: test
+    status: live
+    provenance: git-tracked
+  - path: 'D:\heuresys-advanced\apps\api\test\user-dossier-sections.integration.test.ts'
+    root: repo
+    rel: 'apps/api/test/user-dossier-sections.integration.test.ts'
     category: test
     status: live
     provenance: git-tracked

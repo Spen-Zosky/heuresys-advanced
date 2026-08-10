@@ -4,7 +4,7 @@ db_health.py — cruscotto di salute del DBMS, con esito binario.
 
 Perche' esiste
 --------------
-Lo schema `sys` contiene gia' 14 viste sentinella `v_*` che segnalano anomalie
+Lo schema `sys` contiene viste sentinella `v_*` (scoperte DINAMICAMENTE da pg_views, mai contate a mano qui) che segnalano anomalie
 strutturali (sconfinamenti di tenant, assegnazioni orfane, doppi primari...).
 Misurato in sessione lab il 2026-08-03: sono tutte a zero, e **nessuno strumento
 del progetto le interroga** — non compaiono in session_start.py ne' in

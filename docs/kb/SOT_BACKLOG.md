@@ -1,7 +1,7 @@
 # SOT_BACKLOG — Azioni da riprendere (CLI-owned)
 
 > Pendings + azioni nuove/programmate da cui il CLI riprende il consolidamento e lo sviluppo, in autonomia. Sintesi da: handover Cowork S937, `STATE.md`, `MVP_4_ROADMAP.md`, ricognizione forense S939. Debiti tecnici in `DEBT_REGISTER.md`; stato in `.handoff/STATE.md`.
-> **Aggiornato**: 2026-07-16 (S1018 — batch full-scope: serie C-G convertite in register (#42-#63), riattivate #4-deferrals/#24/#9-11, #40 sbloccato — Voyage autorizzato da Enzo).
+> **Aggiornato**: 2026-08-10 (S1053 — batch P1 chiuso 8/8: #168+#177 DONE, #124 D1-D3, ADR-0036, #92 a 3/7; nuovo #183 su mandato Enzo) · storico: 2026-07-16 (S1018 — batch full-scope: serie C-G convertite in register (#42-#63), riattivate #4-deferrals/#24/#9-11, #40 sbloccato — Voyage autorizzato da Enzo).
 
 ## 🗂 Action register — item strutturati del menu (corsie ACTIVE/GATED/WAIT-INPUT/HOLD/INTERRUPTED)
 
@@ -11,6 +11,12 @@
 >   - <campo>: <valore> · <campo>: <valore>
 > ```
 > **Corsie** (design §3.1): **ACTIVE** push (`priority` P1/P2/P3 + `effort` + `doc`) · **GATED** push (`blocker` + `unblock-trigger`) · **WAIT-INPUT** vassoio "aspetta te" (`input-richiesto` + `perche-solo-tuo`) · **HOLD** pull, fuori dal menu, solo conteggio (`hold-reason` + `decided-by` + `hold-since` + `reactivation-trigger`) · **INTERRUPTED** in cima (`resume-from` + `interrupted-since`). I `reactivation-trigger`/`unblock-trigger` ammettono forma valutabile (P3): `{kind: manual}` (decisione Enzo), `{kind: query, sql: "…", expect: ">0"}`, `{kind: file-exists, path: "…"}`. Integrità verificata da `handoff_lint.py` (S2/H1); il menu è generato da `docs/kb/tools/build_menu.py` (P2). Stato post-Gap#1-DONE (S999).
+
+- **#183 Policy di cancellazione utente: la disattivazione esiste, la cancellazione no** · status: ACTIVE
+  - priority: P1 · effort: ~1 sessione (censimento gia' fatto; policy + implementazione + prova) · doc: `docs/superpowers/plans/2026-08-10-batch-p1-s1053.md` (scoperte fuori ciclo) + mig `000303` (censimento delle 262 FK)
+  - mandato-Enzo (2026-08-10, S1053): «la voglio nel prossimo ciclo». Contesto misurato: anche dopo #168 (approvazioni SET NULL + tombstone), **9 FK RESTRICT + 1 NO ACTION** (presenze, ferie, saldi, assegnazioni posizione, audit self-service, audit MFA) bloccano la hard-DELETE di chiunque abbia storia operativa — `admin@heuresys.com` (mig 000295) e' passato solo perche' non ne aveva. La disattivazione (`sys_users` deactivated) esiste gia'
+  - da-decidere (tecniche, Claude): la forma — soft-delete come via canonica + hard-delete ammessa solo senza storia? il rapporto con la GDPR-erasure (`sys_gdpr_requests`) vs cancellazione amministrativa; per le famiglie RESTRICT, quali passano a SET NULL+tombstone (pattern `000303`) e quali DEVONO continuare a bloccare
+  - chiuso-quando: la policy e' scritta (ADR o emendamento a 0036), il percorso canonico e' implementato, e una prova con utente sintetico copre i due casi (con storia → percorso soft; senza storia → hard ammessa), custodia verde
 
 - **#174 I seed di `rtl-banking-skills` non sono ri-eseguibili: violano i vincoli al secondo giro** · status: ACTIVE
   - priority: P3 · effort: ~2h (capire se devono essere idempotenti o dichiararsi one-shot) · doc: `db/seeds/rtl-banking-skills/`

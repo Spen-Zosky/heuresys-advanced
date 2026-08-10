@@ -40,16 +40,42 @@ livelli di escape annidati: stringhe rotte tre volte) · **una prova che non pu�
 è una prova** · **un conteggio che scarta in silenzio è peggio di uno assente** · **l'esito
 si legge dal codice d'uscita**, mai da `head`/`tail` in coda a una pipe.
 
+## ⚠ COSA E' IN VOLO IN QUESTO MOMENTO (leggi PRIMA di agire)
+
+**Il cancello di verifica sta rieseguendo `test-api`** (lanciato 12:38, ~43 min attesi).
+Il verdetto in `.zp/verify-verdict.json` e' ancora quello VECCHIO e ROSSO: si aggiorna da
+solo quando la corsa chiude. **Prima cosa da fare in sessione nuova**:
+
+```bash
+python -c "import json;d=json.load(open('.zp/verify-verdict.json'));print(d['verdict'], d['generated_at'])"
+```
+
+Se `generated_at` e' **dopo le 13:20 del 2026-08-10**, e' il verdetto nuovo: leggilo.
+Se e' precedente, la corsa non aveva ancora chiuso — rilancia
+`python docs/kb/tools/verify_gate.py run`.
+
+**Il rosso NON e' una regressione**, e ci sono tre misure indipendenti:
+- 00:54 — 1509 test passati, **1 solo file** caduto (`seed-acquisition`), verde da solo;
+- 11:13 — 1511 passati, **1 solo file** caduto (`webauthn`, DIVERSO), verde da solo;
+- 11:19 — corsa **interrotta dalla rete**: colta mentre accadeva (processo a 0 CPU, log
+  fermo, transazione `idle in transaction` da 345s che bloccava due UPDATE, poi
+  `Connection refused` sul DB e `Connection timed out` verso la VM). Esito: 58 file
+  caduti in blocco, 549 test mai eseguiti, 78 minuti invece di 43.
+
+Un difetto vero colpisce sempre lo stesso punto; questo cambia bersaglio a ogni corsa e
+segue lo stato dell'infrastruttura. E' **`Z-251`**, registrato nel backlog con le misure.
+
 ## Top priorities (prossima sessione)
 
-1. **`#177` i revisori adversarial vivono in un workflow orfano** (~2-3h): due corse su due
-   il lavoratore non ha potuto chiudere da solo, perché i verdetti stanno in un workflow che
-   sopravvive alla sessione e la successiva non li ritrova. È un blocco **strutturale**, non
-   di budget — finché resta, il loop dipende da un presidio, che è l'opposto del suo scopo.
-2. **`#124` mascheratura, strato 1** (~1 sessione): spaccare `IDENTITY` in `IDENTITY_PRO` /
+1. **`Z-251`** (~2h, **P1**): la suite non regge la contesa sul DB condiviso. È la voce che
+   rende ambiguo **ogni** verdetto e che oggi ha imposto tre riesecuzioni da 43 minuti. La
+   causa è dichiarata nel `vitest.config.ts` — «ogni file rifà i login da zero e Argon2id è
+   lento» — e la cura è condividere le sessioni fra file. **Tocca `apps/api`: da assegnare a
+   un lavoratore, non da fare in gov.**
+2. **Provare `#177` sul campo**: `zp_review.py` è corretto e ha 13 prove, ma **nessun
+   lavoratore l'ha ancora usato** — serve una corsa che arrivi davvero al passo dei revisori.
+3. **`#124` mascheratura, strato 1** (~1 sessione): spaccare `IDENTITY` in `IDENTITY_PRO` /
    `IDENTITY_PRIV` chiude **6 celle su 8** senza alcun meccanismo nuovo.
-3. **`Z-251`** (~2h): la suite non regge la contesa sul DB condiviso — un file è caduto per
-   `connect timeout` e da solo passa. Rende ambiguo ogni verdetto.
 
 ## Open questions
 

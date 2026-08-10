@@ -35,9 +35,31 @@ export const UserDossierParamSchema = z.object({
 });
 export type UserDossierParam = z.infer<typeof UserDossierParamSchema>;
 
+/**
+ * #124 D2 (S1053) — strato 1: l'anagrafica si spacca per SEZIONE in
+ * professionale e privata. Le sezioni della sfera privata sono optional
+ * perché per il manager di linea (cella line_management/IDENTITY = mask
+ * della matrice dei domini) il dossier le RIMUOVE e le dichiara in
+ * `maskedSections`. Self (I17), mandato HR (I20) e mandato piattaforma
+ * (IDENTITY = read) le ricevono sempre. Solo qui: `MeProfileFullSchema`
+ * su /v1/me/profile/full resta a contratto pieno.
+ */
+export const DOSSIER_PRIV_SECTIONS = [
+  "addresses", "banking", "contacts", "documents",
+  "education", "emergency", "family", "identity",
+] as const;
+
+export const UserDossierProfileSchema = MeProfileFullSchema.partial({
+  addresses: true, banking: true, contacts: true, documents: true,
+  education: true, emergency: true, family: true, identity: true,
+}).extend({
+  maskedSections: z.array(z.string()).optional(),
+});
+export type UserDossierProfile = z.infer<typeof UserDossierProfileSchema>;
+
 export const UserDossierSchema = z.object({
-  /** Chi è: anagrafica, organizzazione, rapporto di lavoro. */
-  profile: MeProfileFullSchema,
+  /** Chi è: anagrafica (professionale sempre; privata solo a self/HR/platform), organizzazione, rapporto. */
+  profile: UserDossierProfileSchema,
   /** Dove sta nell'organizzazione, oggi e prima. */
   positions: z.array(MePositionAssignmentSchema),
   /** Il rapporto di lavoro nel tempo (inquadramento, tipo, decorrenze). */

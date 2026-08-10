@@ -32,8 +32,10 @@ import * as repo from "./repository.js";
 // per ogni dimensione, cosi' la vista di se' e quella di chi ha titolo non
 // possono divergere.
 import * as meRepo from "../me/repository.js";
-import { resolveOrgReadScope, canReadOrgTarget } from "../../lib/scope/resolver.js";
+import { resolveOrgReadScope, canReadOrgTarget, HR_MANDATED_ROLES } from "../../lib/scope/resolver.js";
 import { masksUnderPlatformMandate, maskFields } from "../../lib/scope/mask.js";
+import { isPlatform } from "../../lib/actor.js";
+import { DOSSIER_PRIV_SECTIONS, type UserDossierProfile } from "@heuresys/shared";
 
 const NON_PRIVILEGED_FIELDS = new Set<string>(NON_PRIVILEGED_UPDATABLE_FIELDS);
 
@@ -184,10 +186,27 @@ export const usersService = {
     const masksComp = masksUnderPlatformMandate(actor, "COMPENSATION", id);
     const masksEval = masksUnderPlatformMandate(actor, "EVALUATION", id);
 
+    // #124 D2 — strato 1: la sfera PRIVATA dell'anagrafica (matrice dei domini,
+    // cella line_management/IDENTITY = mask) va a self, mandato HR e mandato
+    // piattaforma; il manager di linea riceve il professionale + la
+    // dichiarazione di cosa è stato trattenuto.
+    const readsPriv =
+      actor.userId === id ||
+      actor.roles.some((r) => HR_MANDATED_ROLES.has(r)) ||
+      isPlatform(actor);
+    let outProfile: UserDossierProfile = profile;
+    if (!readsPriv) {
+      const { addresses: _a, banking: _b, contacts: _c, documents: _d,
+              education: _e, emergency: _g, family: _f, identity: _i,
+              ...pro } = profile;
+      outProfile = { ...pro, maskedSections: [...DOSSIER_PRIV_SECTIONS] };
+    }
+    if (masksComp && outProfile.employment) {
+      outProfile = { ...outProfile, employment: maskFields(outProfile.employment, EMPLOYMENT_PAY_FIELDS) };
+    }
+
     return {
-      profile: masksComp && profile.employment
-        ? { ...profile, employment: maskFields(profile.employment, EMPLOYMENT_PAY_FIELDS) }
-        : profile,
+      profile: outProfile,
       positions,
       contracts: masksComp ? contracts.map((c) => maskFields(c, CONTRACT_MONEY_FIELDS)) : contracts,
       paySlips: masksComp ? paySlips.map((p) => maskFields(p, PAY_SLIP_MONEY_FIELDS)) : paySlips,
